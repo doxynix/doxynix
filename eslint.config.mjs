@@ -14,7 +14,6 @@ import prettierPlugin from "eslint-plugin-prettier";
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
-  // eslint-config-prettier — отключает конфликтующие правила ESLint
   prettierConfig,
 
   {
@@ -68,10 +67,8 @@ export default defineConfig([
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/strict-boolean-expressions": "warn",
-      "@typescript-eslint/explicit-function-return-type": "warn",
+      "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/no-floating-promises": "error",
-      "next/no-img-element": "warn",
-      "next/no-document-import-in-page": "error",
     },
   },
 
