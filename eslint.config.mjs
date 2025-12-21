@@ -48,7 +48,6 @@ export default defineConfig([
         },
       ],
 
-      // показываем нарушения Prettier как предупреждения; настройки берутся из .prettierrc
       "prettier/prettier": "warn",
     },
   },
@@ -68,6 +67,11 @@ export default defineConfig([
     rules: {
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/strict-boolean-expressions": "warn",
+      "@typescript-eslint/explicit-function-return-type": "warn",
+      "@typescript-eslint/no-floating-promises": "error",
+      "next/no-img-element": "warn",
+      "next/no-document-import-in-page": "error",
     },
   },
 
