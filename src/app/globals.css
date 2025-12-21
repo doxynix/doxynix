@@ -20,6 +20,15 @@ kbd {
   font-family: var(--font-mono);
 }
 
+.italic {
+  font-family: var(--font-inter-italic);
+}
+
+code.italic,
+pre.italic {
+  font-family: var(--font-mono-italic);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
