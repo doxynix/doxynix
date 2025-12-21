@@ -15,7 +15,11 @@
     "start": "next start",
     "lint": "eslint .",
     "prepare": "husky install",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "analyze": "cross-env ANALYZE=true next build",
+    "format": "prettier --write .",
+    "lint:fix": "eslint . --fix",
+    "dev:analyze": "cross-env ANALYZE=true next dev"
   },
   "dependencies": {
     "@octokit/rest": "^22.0.1",
@@ -49,12 +53,14 @@
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",
     "@commitlint/config-conventional": "^20.2.0",
+    "@next/bundle-analyzer": "^16.1.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.50.0",
     "@typescript-eslint/parser": "^8.50.0",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "eslint-config-next": "16.1.0",
     "eslint-config-prettier": "^10.1.8",
