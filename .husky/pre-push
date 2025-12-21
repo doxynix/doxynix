@@ -1,0 +1,1 @@
+pnpm lint-staged && pnpm tsc --noEmit && pnpm build
