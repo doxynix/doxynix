@@ -1,3 +1,5 @@
+ваще стек такой
+
 ФРОНТЕНД 
 Next.js (App Router) + React + TypeScript 
 Tailwind CSS + shadcn/ui 
@@ -8,13 +10,13 @@ FSD архитектура (тока упрощенная)
 БЭКЕНД 
 tRPC
 Prisma + PostgreSQL (Neon)
-QStash
+Upstash QStash (очереди)
+ 
 NextAuth + GitHub OAuth
 GitHub API (REST + GraphQL (но хз не пробовал GraphQL))
 
 ИНФРАСТРУКТУРА 
 pnpm (монорепка)
-Render
+Vercel 
 Neon Postgres (БД)
-Upstash QStash (очереди)
 QStash Dashboard
