@@ -2,17 +2,20 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
-
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 import importPlugin from "eslint-plugin-import";
 import unusedImportsPlugin from "eslint-plugin-unused-imports";
 import tsParser from "@typescript-eslint/parser";
+import prettierConfig from "eslint-config-prettier";
+import prettierPlugin from "eslint-plugin-prettier";
 
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
+  // eslint-config-prettier — отключает конфликтующие правила ESLint
+  prettierConfig,
 
   {
     plugins: {
@@ -21,6 +24,7 @@ export default defineConfig([
       "@typescript-eslint": tsPlugin,
       import: importPlugin,
       "unused-imports": unusedImportsPlugin,
+      prettier: prettierPlugin,
     },
 
     languageOptions: {
@@ -43,6 +47,9 @@ export default defineConfig([
           "newlines-between": "always",
         },
       ],
+
+      // показываем нарушения Prettier как предупреждения; настройки берутся из .prettierrc
+      "prettier/prettier": "warn",
     },
   },
 
