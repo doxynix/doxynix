@@ -1,0 +1,16 @@
+name: Block main → develop merge
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  forbid-main-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR source branch
+        run: |
+          if [ "${{ github.head_ref }}" = "main" ]; then
+            echo "Merging from main to develop is forbidden!"
+            exit 1
+          fi
