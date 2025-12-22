@@ -15,7 +15,13 @@ export default defineConfig([
   ...nextVitals,
   ...nextTs,
   prettierConfig,
-
+  {
+    files: ["src/components/ui/**"],
+    rules: {
+      "react-hooks/purity": "off",
+      "@typescript-eslint/strict-boolean-expressions": "off",
+    },
+  },
   {
     plugins: {
       react: reactPlugin,
