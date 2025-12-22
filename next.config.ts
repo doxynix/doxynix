@@ -6,7 +6,13 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   typescript: { ignoreBuildErrors: false },
   images: {
-    domains: ["sun1-26.userapi.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "sun1-26.userapi.com",
+        pathname: "/**",
+      },
+    ],
   },
 };
 
