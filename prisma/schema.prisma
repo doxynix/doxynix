@@ -12,3 +12,90 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id         Int        @id @default(autoincrement())
+  email      String     @unique
+  name       String
+  role       USER_ROLES @default(user)
+  github_id  String?    @unique
+  avatar_url String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  repos Repo[]
+}
+
+model Repo {
+  id         Int        @id @default(autoincrement())
+  owner      String
+  name       String
+  url        String
+  visibility VISIBILITY
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  analyses  Analysis[]
+  documents Document[]
+
+  @@unique([owner, name])
+}
+
+model Analysis {
+  id           Int    @id @default(autoincrement())
+  status       STATUS
+  metrics_json Json
+  commit_sha   String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  repo   Repo @relation(fields: [repoId], references: [id], onDelete: Cascade)
+  repoId Int
+
+  @@index([repoId, created_at])
+}
+
+model Document {
+  id      Int      @id @default(autoincrement())
+  version String
+  type    DOC_TYPE
+  content String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  repo   Repo @relation(fields: [repoId], references: [id], onDelete: Cascade)
+  repoId Int
+
+  @@unique([repoId, version, type])
+}
+
+enum USER_ROLES {
+  user
+  admin
+}
+
+enum VISIBILITY {
+  public
+  private
+}
+
+enum STATUS {
+  pending
+  done
+  failed
+}
+
+enum DOC_TYPE {
+  README
+  API
+  USER_GUIDE
+  CHANGELOG
+  CODE_DOC
+}
