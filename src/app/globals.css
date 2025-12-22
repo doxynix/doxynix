@@ -12,6 +12,11 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 code,
@@ -145,7 +150,31 @@ pre.italic {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+:root {
+  /* Light */
+  --color-bg: #ffffff;
+  --color-bg-sidebar: #f9fafb;
+  --color-text: #27272a;
+  --color-text-secondary: #6b7280;
+  --color-accent: #6366f1;
+  --color-hover: #e5e7eb;
+  --color-success: #34d399;
+  --color-error: #f87171;
+}
+
+.dark {
+  --color-bg: #18181b;
+  --color-bg-sidebar: #111111;
+  --color-text: #e5e7eb;
+  --color-text-secondary: #a1a1aa;
+  --color-accent: #818cf8;
+  --color-hover: #27272a;
+  --color-success: #34d399;
+  --color-error: #f87171;
 }
