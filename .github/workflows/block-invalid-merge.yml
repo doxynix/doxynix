@@ -1,0 +1,25 @@
+name: Block forbidden merges
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  forbid-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR source and target branches
+        run: |
+          SRC="${{ github.head_ref }}"
+          TARGET="${{ github.base_ref }}"
+          
+          if [[ "$SRC" == "main" && "$TARGET" == "develop" ]]; then
+            echo "Merging from main to develop is forbidden!"
+            exit 1
+          fi
+          
+          if [[ "$SRC" == "develop" && "$TARGET" == "main" ]]; then
+            echo "Merging from develop to main is forbidden! Use release branch."
+            exit 1
+          fi
