@@ -1,4 +1,12 @@
 📝 Trello + GitFlow Mini Cheat Sheet
+
+# Правила ветвления
+- Flow: feature/* -> develop -> main
+- Перед созданием PR: `git rebase origin/develop` для feature, затем `git push --force-with-lease`.
+- При мердже выбираем **Squash and merge** или **Rebase and merge**.
+- Нельзя делать merge main -> develop без причины.
+- Force-push разрешён только для личных feature-веток (`--force-with-lease`).
+
 1️⃣ Branch Naming
 <type>/<TASK_NUMBER>-short-description
 
