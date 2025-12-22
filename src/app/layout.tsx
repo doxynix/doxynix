@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -8,21 +9,9 @@ const inter = localFont({
   display: "swap",
 });
 
-const interItalic = localFont({
-  src: "./fonts/Inter-Italic.woff2",
-  variable: "--font-inter-italic",
-  display: "swap",
-});
-
 const mono = localFont({
   src: "./fonts/IntelOneMono-Light.woff2",
   variable: "--font-mono",
-  display: "swap",
-});
-
-const monoItalic = localFont({
-  src: "./fonts/IntelOneMono-LightItalic.woff2",
-  variable: "--font-mono-italic",
   display: "swap",
 });
 
@@ -40,8 +29,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${mono.variable} antialiased`}>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${mono.variable} antialiased`}>
+        <ThemeProvider attribute="class" defaultTheme="system" storageKey="theme" enableSystem>
+          <div className="relative min-h-screen">{children}</div>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
