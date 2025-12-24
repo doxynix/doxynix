@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
 
 import "./globals.css";
-import { Providers } from "@/app/providers";
 
 import { Providers } from "@/app/providers";
 
