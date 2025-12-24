@@ -12,6 +12,11 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 .italic {
@@ -200,3 +205,4 @@ pre.italic {
   --color-success: #34d399;
   --color-error: #f87171;
 }
+
