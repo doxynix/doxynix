@@ -2,36 +2,42 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Cache Next.js build
-        uses: actions/cache@v3
         with:
-          path: |
-            .next/cache
-            node_modules/.cache/turbopack
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-
+          fetch-depth: 0
 
-      - uses: pnpm/action-setup@v2
+      - uses: actions/cache@v4
+        id: pnpm-cache
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - uses: pnpm/action-setup@v4
         with:
           version: 10
 
-      - run: pnpm install
-      - run: pnpm lint
-      - run: pnpm tsc --noEmit
-      - run: pnpm build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: TypeScript Check
+        run: pnpm tsc --noEmit
+
+      - name: Build
+        run: pnpm build
