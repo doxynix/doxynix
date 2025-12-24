@@ -14,17 +14,62 @@ datasource db {
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  email      String     @unique
-  name       String
-  role       USER_ROLES @default(user)
-  github_id  String?    @unique
-  avatar_url String?
+  id            Int       @id @default(autoincrement())
+  email         String?   @unique
+  name          String?
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  role          UserRole  @default(USER)
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  repos Repo[]
+  accounts Account[]
+  sessions Session[]
+  repos    Repo[]
+
+  @@map("users")
+}
+
+model Account {
+  id                Int     @id @default(autoincrement())
+  userId            Int     @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id") 
+
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  sessionToken String   @unique @map("session_token")
+  userId       Int      @map("user_id")
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
 model Repo {
@@ -32,67 +77,70 @@ model Repo {
   owner      String
   name       String
   url        String
-  visibility VISIBILITY
+  visibility Visibility
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
+  userId Int  @map("user_id")
   user   User @relation(fields: [userId], references: [id])
-  userId Int
 
   analyses  Analysis[]
   documents Document[]
 
   @@unique([owner, name])
+  @@map("repos")
 }
 
 model Analysis {
-  id           Int    @id @default(autoincrement())
-  status       STATUS
-  metrics_json Json
-  commit_sha   String
+  id          Int    @id @default(autoincrement())
+  status      Status
+  metricsJson Json   @map("metrics_json")
+  commitSha   String @map("commit_sha")
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
+  repoId Int  @map("repo_id")
   repo   Repo @relation(fields: [repoId], references: [id], onDelete: Cascade)
-  repoId Int
 
-  @@index([repoId, created_at])
+  @@index([repoId, createdAt])
+  @@map("analyses")
 }
 
 model Document {
-  id      Int      @id @default(autoincrement())
+  id      Int     @id @default(autoincrement())
   version String
-  type    DOC_TYPE
-  content String
+  type    DocType
+  content String  @db.Text
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
+  repoId Int  @map("repo_id")
   repo   Repo @relation(fields: [repoId], references: [id], onDelete: Cascade)
-  repoId Int
 
   @@unique([repoId, version, type])
+  @@map("documents")
 }
 
-enum USER_ROLES {
-  user
-  admin
+enum UserRole {
+  USER
+  ADMIN
 }
 
-enum VISIBILITY {
-  public
-  private
+enum Visibility {
+  PUBLIC
+  PRIVATE
 }
 
-enum STATUS {
-  pending
-  done
-  failed
+enum Status {
+  PENDING
+  DONE
+  FAILED
 }
 
-enum DOC_TYPE {
+enum DocType {
   README
   API
   USER_GUIDE
