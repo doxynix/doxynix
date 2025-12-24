@@ -1,8 +1,8 @@
 export default function Loading() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background text-foreground transition-colors duration-300">
+    <div className="bg-background text-foreground flex min-h-screen items-center justify-center transition-colors duration-300">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-16 h-16 border-4 border-t-accent border-gray-200 rounded-full animate-spin"></div>
+        <div className="border-t-accent h-16 w-16 animate-spin rounded-full border-4 border-gray-200"></div>
         <span className="text-lg font-medium">Загрузка...</span>
       </div>
     </div>

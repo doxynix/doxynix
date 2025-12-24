@@ -1,13 +1,13 @@
 "use client";
 
-import { useTheme } from "next-themes";
-import { Sun, Moon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
-import { Button } from "@/shared/ui/button";
-import { AppTooltip } from "@/shared/ui/AppTooltip";
-import { ThemeToggleProps } from "@/shared/ui/ThemeToggle/types";
 import { cn } from "@/shared/lib/utils";
+import { AppTooltip } from "@/shared/ui/AppTooltip";
+import { Button } from "@/shared/ui/button";
+import { ThemeToggleProps } from "@/shared/ui/ThemeToggle/types";
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
   const { theme, resolvedTheme, setTheme } = useTheme();

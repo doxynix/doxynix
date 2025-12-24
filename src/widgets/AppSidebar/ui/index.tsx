@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 
+import { cn } from "@/shared/lib/utils";
+import { Logo } from "@/shared/ui/Logo/ui";
 import {
   Sidebar,
   SidebarContent,
@@ -14,10 +16,8 @@ import {
   useSidebar,
 } from "@/shared/ui/sidebar";
 import { ThemeToggle } from "@/shared/ui/ThemeToggle";
-import { SidebarLink } from "@/widgets/AppSidebar/ui/SidebarLink";
-import { Logo } from "@/shared/ui/Logo/ui";
-import { cn } from "@/shared/lib/utils";
 import { menu } from "@/widgets/AppSidebar/menu";
+import { SidebarLink } from "@/widgets/AppSidebar/ui/SidebarLink";
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -26,8 +26,8 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" variant="sidebar">
       <SidebarContent className="overflow-hidden">
         <SidebarGroup className="flex flex-col items-center justify-center">
-          <SidebarHeader className="w-full flex items-center justify-center">
-            <div className={cn("overflow-hidden h-8", state === "expanded" ? "w-full" : "w-6")}>
+          <SidebarHeader className="flex w-full items-center justify-center">
+            <div className={cn("h-8 overflow-hidden", state === "expanded" ? "w-full" : "w-6")}>
               <Logo collapsed={state === "collapsed"} />
             </div>
           </SidebarHeader>
@@ -55,7 +55,7 @@ export function AppSidebar() {
             Логин
           </p>
         </div>
-        <ThemeToggle className="max-w-8 max-h-8" />
+        <ThemeToggle className="max-h-8 max-w-8" />
       </SidebarFooter>
     </Sidebar>
   );

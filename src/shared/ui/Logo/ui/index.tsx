@@ -8,7 +8,7 @@ export function Logo({ collapsed, ...props }: LogoProps) {
 
 function CollapsedLogo(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <Link href="/" className="hover:text-logo-hover hover:cursor-pointer w-full">
+    <Link href="/" className="hover:text-logo-hover w-full hover:cursor-pointer">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="100%"
@@ -28,7 +28,7 @@ function CollapsedLogo(props: React.SVGProps<SVGSVGElement>) {
 
 function ExpandedLogo(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <Link href="/" className="hover:text-logo-hover hover:cursor-pointer w-full">
+    <Link href="/" className="hover:text-logo-hover w-full hover:cursor-pointer">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="100%"

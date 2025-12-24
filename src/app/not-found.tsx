@@ -2,9 +2,9 @@ import BackButton from "@/shared/ui/BackButton/ui";
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-center justify-center h-screen gap-4">
+    <div className="flex h-screen flex-col items-center justify-center gap-4">
       <h1 className="text-4xl font-bold">404 — Страница не найдена</h1>
-      <p className="text-lg text-muted-foreground">К сожалению, такой страницы не существует.</p>
+      <p className="text-muted-foreground text-lg">К сожалению, такой страницы не существует.</p>
       <BackButton />
     </div>
   );

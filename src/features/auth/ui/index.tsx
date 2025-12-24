@@ -1,11 +1,11 @@
 "use client";
 
-import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import { signIn, signOut, useSession } from "next-auth/react";
 
+import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
 
 export function AuthCard() {
   const { data: session, status } = useSession();
@@ -27,22 +27,22 @@ export function AuthCard() {
           {session ? "Добро пожаловать!" : "Добро пожаловать в Doxynix!"}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4 items-center">
+      <CardContent className="flex flex-col items-center gap-4">
         {session ? (
           <>
             {avatar != null && avatar !== "" && (
-              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-border mx-auto">
+              <div className="border-border mx-auto h-20 w-20 overflow-hidden rounded-full border-2">
                 <Image src={avatar} alt={session?.user?.name ?? "Avatar"} width={80} height={80} />
               </div>
             )}
 
-            <div className="text-center space-y-1">
+            <div className="space-y-1 text-center">
               <p className="font-semibold">{session?.user?.name}</p>
-              <p className="text-sm text-muted-foreground">{session?.user?.email}</p>
+              <p className="text-muted-foreground text-sm">{session?.user?.email}</p>
               {role != null && role !== "" && <Badge variant="secondary">{role}</Badge>}
             </div>
 
-            <div className="flex gap-2 w-full">
+            <div className="flex w-full gap-2">
               <Button variant="outline" className="flex-1">
                 Мои репозитории
               </Button>
@@ -53,7 +53,7 @@ export function AuthCard() {
           </>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-2 w-full">
+            <div className="grid w-full grid-cols-1 gap-2">
               <Button onClick={() => signIn("github")}>GitHub</Button>
               <Button onClick={() => signIn("google")}>Google</Button>
               {/* <Button onClick={() => signIn("gitlab")}>GitLab</Button> */}
