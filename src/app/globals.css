@@ -6,7 +6,7 @@
 html,
 body {
   font-family:
-    var(--font-inter),
+    var(--font-inter-regular),
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -21,7 +21,7 @@ body {
 code,
 pre,
 kbd {
-  font-family: var(--font-mono);
+  font-family: var(--font-mono-light);
 }
 
 code.italic,
@@ -91,9 +91,9 @@ pre.italic {
   --color-error: var(--color-error);
 
   /* my fonts */
-  --font-ui: var(--font-inter);
+  --font-ui: var(--font-inter-regular);
   --font-ui-italic: var(--font-inter-italic);
-  --font-code: var(--font-mono);
+  --font-code: var(--font-mono-light);
   --font-code-italic: var(--font-mono-italic)
 }
 

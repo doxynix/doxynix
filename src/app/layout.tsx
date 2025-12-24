@@ -21,7 +21,7 @@ const interItalic = localFont({
 // Моно
 const mono = localFont({
   src: "./fonts/IntelOneMono-Light.woff2",
-  variable: "--font-mono",
+  variable: "--font-mono-light",
   display: "swap",
 });
 
