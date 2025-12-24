@@ -1,5 +1,5 @@
 import { TooltipProps } from "@/shared/ui/AppTooltip/types";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip";
 
 export function AppTooltip({ children, content, delay = 0 }: TooltipProps) {
   return (

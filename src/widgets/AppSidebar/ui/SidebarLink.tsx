@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { SidebarMenuButton } from "@/components/ui/sidebar";
+import { SidebarMenuButton } from "@/shared/ui/sidebar";
 
-import { MenuItem } from "@/components/AppSidebar/types";
-import { cn } from "@/lib/utils";
+import { MenuItem } from "@/widgets/AppSidebar/types";
+import { cn } from "@/shared/lib/utils";
 
 export function SidebarLink({ href, title, icon: Icon }: MenuItem) {
   const pathname = usePathname();

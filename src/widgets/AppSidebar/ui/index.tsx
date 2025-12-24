@@ -12,13 +12,13 @@ import {
   SidebarMenu,
   SidebarSeparator,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@/shared/ui/sidebar";
 import { ThemeToggle } from "@/shared/ui/ThemeToggle";
-import { SidebarLink } from "@/components/AppSidebar/ui/SidebarLink";
+import { SidebarLink } from "@/widgets/AppSidebar/ui/SidebarLink";
 import { Logo } from "@/shared/ui/Logo/ui";
 
-import { cn } from "@/lib/utils";
-import { menu } from "@/components/AppSidebar/entities";
+import { cn } from "@/shared/lib/utils";
+import { menu } from "@/widgets/AppSidebar/menu";
 
 export function AppSidebar() {
   const { state } = useSidebar();

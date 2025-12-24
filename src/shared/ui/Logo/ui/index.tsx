@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { LogoProps } from "@/shared/ui/Logo/type";
+import { LogoProps } from "@/shared/ui/Logo/types";
 
 export function Logo({ collapsed, ...props }: LogoProps) {
   return collapsed ? <CollapsedLogo {...props} /> : <ExpandedLogo {...props} />;

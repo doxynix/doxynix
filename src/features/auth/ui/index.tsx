@@ -3,9 +3,9 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Badge } from "@/shared/ui/badge";
 
 export function AuthCard() {
   const { data: session, status } = useSession();
