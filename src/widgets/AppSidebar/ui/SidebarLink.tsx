@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { SidebarMenuButton } from "@/shared/ui/sidebar";
-
 import { MenuItem } from "@/widgets/AppSidebar/types";
 import { cn } from "@/shared/lib/utils";
 

@@ -20,7 +20,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 
   if (!mounted) return null;
 
-  const currentTheme = resolvedTheme || theme;
+  const currentTheme = resolvedTheme ?? theme ?? "light";
 
   return (
     <AppTooltip

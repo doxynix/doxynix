@@ -16,7 +16,6 @@ import {
 import { ThemeToggle } from "@/shared/ui/ThemeToggle";
 import { SidebarLink } from "@/widgets/AppSidebar/ui/SidebarLink";
 import { Logo } from "@/shared/ui/Logo/ui";
-
 import { cn } from "@/shared/lib/utils";
 import { menu } from "@/widgets/AppSidebar/menu";
 

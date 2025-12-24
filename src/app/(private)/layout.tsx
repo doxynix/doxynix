@@ -1,6 +1,5 @@
 import { SidebarToggle } from "@/widgets/AppSidebar/ui/SidebarToggle";
 import { SidebarInset, SidebarProvider } from "@/shared/ui/sidebar";
-
 import { AppSidebar } from "@/widgets/AppSidebar";
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {

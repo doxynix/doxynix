@@ -13,11 +13,6 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET,
 
-  session: {
-    strategy: "jwt",
-    maxAge: TOKEN_MAX_AGE,
-  },
-
   providers: [
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID!,
@@ -42,16 +37,8 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-      }
-      return token;
-    },
-
     async session({ session, user }) {
-      if (session.user) {
+      if (session?.user) {
         session.user.id = user.id;
         session.user.role = user.role;
       }
@@ -64,18 +51,6 @@ export const authOptions: NextAuthOptions = {
     signOut: "/",
     error: "/auth/error",
     newUser: "/welcome",
-  },
-
-  cookies: {
-    sessionToken: {
-      name: `__Secure-authjs.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      },
-    },
   },
 
   debug: process.env.NODE_ENV === "development",

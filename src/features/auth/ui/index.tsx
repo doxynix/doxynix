@@ -9,6 +9,7 @@ import { Badge } from "@/shared/ui/badge";
 
 export function AuthCard() {
   const { data: session, status } = useSession();
+  const avatar = session?.user?.image ?? "/avatar-placeholder.png";
 
   if (status === "loading") {
     return (
@@ -28,21 +29,16 @@ export function AuthCard() {
       <CardContent className="flex flex-col gap-4 items-center">
         {session ? (
           <>
-            {session.user?.image && (
+            {session?.user?.image && (
               <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-border mx-auto">
-                <Image
-                  src={session.user.image}
-                  alt={session.user.name || "Avatar"}
-                  width={80}
-                  height={80}
-                />
+                <Image src={avatar} alt={session?.user?.name ?? "Avatar"} width={80} height={80} />
               </div>
             )}
 
             <div className="text-center space-y-1">
-              <p className="font-semibold">{session.user?.name}</p>
-              <p className="text-sm text-muted-foreground">{session.user?.email}</p>
-              <Badge variant="secondary">{session.user?.role}</Badge>
+              <p className="font-semibold">{session?.user?.name}</p>
+              <p className="text-sm text-muted-foreground">{session?.user?.email}</p>
+              <Badge variant="secondary">{session?.user?.role}</Badge>
             </div>
 
             <div className="flex gap-2 w-full">
