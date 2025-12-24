@@ -10,6 +10,7 @@ import { Badge } from "@/shared/ui/badge";
 export function AuthCard() {
   const { data: session, status } = useSession();
   const avatar = session?.user?.image ?? "/avatar-placeholder.png";
+  const role = session?.user?.role;
 
   if (status === "loading") {
     return (
@@ -29,7 +30,7 @@ export function AuthCard() {
       <CardContent className="flex flex-col gap-4 items-center">
         {session ? (
           <>
-            {session?.user?.image && (
+            {avatar != null && avatar !== "" && (
               <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-border mx-auto">
                 <Image src={avatar} alt={session?.user?.name ?? "Avatar"} width={80} height={80} />
               </div>
@@ -38,7 +39,7 @@ export function AuthCard() {
             <div className="text-center space-y-1">
               <p className="font-semibold">{session?.user?.name}</p>
               <p className="text-sm text-muted-foreground">{session?.user?.email}</p>
-              <Badge variant="secondary">{session?.user?.role}</Badge>
+              {role != null && role !== "" && <Badge variant="secondary">{role}</Badge>}
             </div>
 
             <div className="flex gap-2 w-full">
@@ -55,7 +56,7 @@ export function AuthCard() {
             <div className="grid grid-cols-1 gap-2 w-full">
               <Button onClick={() => signIn("github")}>GitHub</Button>
               <Button onClick={() => signIn("google")}>Google</Button>
-              <Button onClick={() => signIn("gitlab")}>GitLab</Button>
+              {/* <Button onClick={() => signIn("gitlab")}>GitLab</Button> */}
               <Button onClick={() => signIn("yandex")}>Yandex</Button>
             </div>
           </>

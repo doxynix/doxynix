@@ -15,7 +15,7 @@ export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
 
 const isAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
+  if (ctx.session == null || ctx.session.user == null) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Вы не авторизованы" });
   }
 
@@ -29,9 +29,10 @@ const isAuthed = t.middleware(({ ctx, next }) => {
 export const protectedProcedure = t.procedure.use(isAuthed);
 
 const isAdmin = t.middleware(({ ctx, next }) => {
-  if (!ctx.session?.user || ctx.session.user.role !== "ADMIN") {
+  if (ctx.session?.user == null || ctx.session.user.role !== "ADMIN") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Нужны права админа" });
   }
+
   return next({ ctx });
 });
 
