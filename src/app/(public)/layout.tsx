@@ -1,13 +1,3 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: {
-    template: "%s | Diploma App",
-    default: "Diploma App",
-  },
-  description: "Diploma project",
-};
-
 export default function PublicLayout({
   children,
 }: Readonly<{

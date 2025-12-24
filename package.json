@@ -14,7 +14,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "prepare": "husky install",
+    "prepare": "husky",
     "typecheck": "tsc --noEmit",
     "analyze": "cross-env ANALYZE=true next build",
     "format": "prettier --write .",

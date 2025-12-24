@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import localFont from "next/font/local";
 
-import { Providers } from "./providers";
 import "./globals.css";
+import { Providers } from "@/app/providers";
 
 // Интер
 const interRegular = localFont({
@@ -33,10 +33,11 @@ const monoItalic = localFont({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Diploma App",
-    default: "Diploma App",
+    template: "Doxynix | %s",
+    default: "Doxynix",
   },
-  description: "Diploma project",
+  description: "Doxynix",
+  icons: [{ url: "/favicon.ico", type: "image/x-icon" }],
 };
 
 export default function RootLayout({
