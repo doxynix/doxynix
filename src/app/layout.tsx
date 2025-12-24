@@ -1,17 +1,33 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import localFont from "next/font/local";
+
+import { Providers } from "./providers";
 import "./globals.css";
 
-const inter = localFont({
+// Интер
+const interRegular = localFont({
   src: "./fonts/Inter-Regular.woff2",
-  variable: "--font-inter",
+  variable: "--font-inter-regular",
   display: "swap",
 });
 
+const interItalic = localFont({
+  src: "./fonts/Inter-Italic.woff2",
+  variable: "--font-inter-italic",
+  display: "swap",
+});
+
+// Моно
 const mono = localFont({
   src: "./fonts/IntelOneMono-Light.woff2",
   variable: "--font-mono",
+  display: "swap",
+});
+
+const monoItalic = localFont({
+  src: "./fonts/IntelOneMono-LightItalic.woff2",
+  variable: "--font-mono-italic",
   display: "swap",
 });
 
@@ -30,9 +46,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${mono.variable} antialiased`}>
+      <body
+        className={`${interRegular.variable} ${interItalic.variable} ${mono.variable} ${monoItalic.variable} antialiased`}
+      >
         <ThemeProvider attribute="class" defaultTheme="system" storageKey="theme" enableSystem>
-          <div className="relative min-h-screen">{children}</div>
+          <Providers>
+            <div className="relative">{children}</div>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

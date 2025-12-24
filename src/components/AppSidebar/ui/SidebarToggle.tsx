@@ -1,6 +1,6 @@
 "use client";
 
-import { AppTooltip } from "@/shared/AppTooltip";
+import { AppTooltip } from "@/shared/ui/AppTooltip";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 
 export function SidebarToggle() {
@@ -8,7 +8,7 @@ export function SidebarToggle() {
 
   return (
     <AppTooltip content={state === "expanded" ? "Свернуть" : "Развернуть"}>
-      <SidebarTrigger />
+      <SidebarTrigger variant="default" />
     </AppTooltip>
   );
 }

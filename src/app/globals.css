@@ -12,21 +12,16 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  transition:
-    background-color 0.2s,
-    color 0.2s;
+}
+
+.italic {
+  font-family: var(--font-inter-italic);
 }
 
 code,
 pre,
 kbd {
   font-family: var(--font-mono);
-}
-
-.italic {
-  font-family: var(--font-inter-italic);
 }
 
 code.italic,
@@ -75,6 +70,31 @@ pre.italic {
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+}
+
+@theme {
+  /* my colors */
+  --color-bg: var(--color-bg);
+
+  --color-bg-sidebar: var(--color-bg-sidebar);
+
+  --color-text: var(--color-text);
+
+  --color-text-secondary: var(--color-text-secondary);
+
+  --color-accent: var(--color-accent);
+
+  --color-hover: var(--color-hover);
+
+  --color-logo-hover: var(--color-logo-hover);
+  --color-success: var(--color-success);
+  --color-error: var(--color-error);
+
+  /* my fonts */
+  --font-ui: var(--font-inter);
+  --font-ui-italic: var(--font-inter-italic);
+  --font-code: var(--font-mono);
+  --font-code-italic: var(--font-mono-italic)
 }
 
 :root {
@@ -157,13 +177,14 @@ pre.italic {
 }
 
 :root {
-  /* Light */
+  /* light */
   --color-bg: #ffffff;
   --color-bg-sidebar: #f9fafb;
   --color-text: #27272a;
   --color-text-secondary: #6b7280;
   --color-accent: #6366f1;
   --color-hover: #e5e7eb;
+  --color-logo-hover: #0003c2;
   --color-success: #34d399;
   --color-error: #f87171;
 }
@@ -175,6 +196,7 @@ pre.italic {
   --color-text-secondary: #a1a1aa;
   --color-accent: #818cf8;
   --color-hover: #27272a;
+  --color-logo-hover: #0003c2;
   --color-success: #34d399;
   --color-error: #f87171;
 }

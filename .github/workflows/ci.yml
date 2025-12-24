@@ -13,9 +13,19 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }} 
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - name: Cache Next.js build
         uses: actions/cache@v3
@@ -29,9 +39,12 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-          version: 10
+          version: latest
 
-      - run: pnpm install
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm prisma generate
+
       - run: pnpm lint
       - run: pnpm tsc --noEmit
       - run: pnpm build

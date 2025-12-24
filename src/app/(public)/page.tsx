@@ -1,6 +1,8 @@
-export default function Landing() {
+export default async function Landing() {
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex items-center justify-center min-h-screen">
       <div>Здесь будет landing</div>
     </div>
   );

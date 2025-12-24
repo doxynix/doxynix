@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
         hostname: "sun1-26.userapi.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        pathname: "/**",
+      },
     ],
   },
 };
