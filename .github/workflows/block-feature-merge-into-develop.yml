@@ -1,0 +1,16 @@
+name: Block develop → feature merge
+on:
+  pull_request:
+    branches:
+      - 'feature/*'
+
+jobs:
+  forbid-develop-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR source branch
+        run: |
+          if [ "${{ github.head_ref }}" = "develop" ]; then
+            echo "Merging from develop to feature branches is forbidden!"
+            exit 1
+          fi
