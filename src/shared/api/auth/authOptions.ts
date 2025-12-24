@@ -8,6 +8,7 @@ import { NextAuthOptions } from "next-auth";
 import { prisma } from "@/shared/api/db/db";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60;
+const SESSION_UPDATE_AGE = 24 * 60 * 60;
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -15,6 +16,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "database",
     maxAge: SESSION_MAX_AGE,
+    updateAge: SESSION_UPDATE_AGE,
   },
   providers: [
     GitHubProvider({
@@ -62,8 +64,14 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       console.log(`[${account?.provider}] ${user.email} signed in`);
     },
+    async signOut({ session, token }) {
+      console.log(`[${session?.user}] ${token.name} signed out`);
+    },
     async createUser({ user }) {
       console.log(`New user created: ${user.email}`);
+    },
+    async updateUser({ user }) {
+      console.log(`Update user: ${user.email}`);
     },
     async linkAccount({ user, account }) {
       console.log(`${account.provider} linked to ${user.email}`);

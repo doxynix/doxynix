@@ -1,6 +1,6 @@
-# Diploma Project
+# Doxynix
 
-Full-stack web application built as a diploma project.
+Full-stack web application built as a doxynix project.
 
 ## Tech Stack
 
