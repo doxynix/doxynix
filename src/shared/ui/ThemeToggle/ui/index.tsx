@@ -5,8 +5,8 @@ import { Sun, Moon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { AppTooltip } from "@/shared/AppTooltip";
-import { ThemeToggleProps } from "@/shared/ThemeToggle/types";
+import { AppTooltip } from "@/shared/ui/AppTooltip";
+import { ThemeToggleProps } from "@/shared/ui/ThemeToggle/types";
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
@@ -23,7 +23,9 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
   const currentTheme = resolvedTheme || theme;
 
   return (
-    <AppTooltip content="Переключить тему">
+    <AppTooltip
+      content={cn(currentTheme === "dark" ? "Сменить тему на светлую" : "Сменить тему на темную")}
+    >
       <Button
         className={cn(className, "hover:cursor-pointer")}
         onClick={() => setTheme(currentTheme === "dark" ? "light" : "dark")}
