@@ -10,28 +10,46 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/cache@v4
-        id: pnpm-cache
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        id: pnpm-store
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
-          
-      - run: corepack enable
 
-      - run: corepack prepare pnpm@latest --activate
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 'latest'
 
-      - run: pnpm install --frozen-lockfile
+      - name: Debug environment
+        run: |
+          echo "=== ENV INFO ==="
+          echo "USER: $(whoami)"
+          echo "PATH=$PATH"
+          echo "--- versions ---"
+          node -v || true
+          npm -v || true
+          pnpm -v || echo "pnpm not found"
+          which pnpm || echo "which pnpm returned nothing"
+          if which pnpm >/dev/null 2>&1; then ls -l "$(which pnpm)"; fi
+          echo "=== END ENV INFO ==="
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
         run: pnpm lint
