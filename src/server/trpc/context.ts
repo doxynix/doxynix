@@ -1,5 +1,4 @@
 import { CreateContextOptions } from "@/server/trpc/types";
-
 import { prisma } from "@/shared/api/db/db";
 
 export async function createContext({ req }: CreateContextOptions) {
