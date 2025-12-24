@@ -26,7 +26,11 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
+          
       - run: corepack enable
+
+      - run: corepack prepare pnpm@latest --activate
+
       - run: pnpm install --frozen-lockfile
 
       - name: Lint
