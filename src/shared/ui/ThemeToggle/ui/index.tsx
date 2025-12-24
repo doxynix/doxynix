@@ -4,17 +4,10 @@ import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-<<<<<<< release/1.0.4
 import { Button } from "@/shared/ui/button";
 import { AppTooltip } from "@/shared/ui/AppTooltip";
 import { ThemeToggleProps } from "@/shared/ui/ThemeToggle/types";
 import { cn } from "@/shared/lib/utils";
-=======
-import { Button } from "@/components/ui/button";
-import { AppTooltip } from "@/shared/ui/AppTooltip";
-import { ThemeToggleProps } from "@/shared/ui/ThemeToggle/types";
-import { cn } from "@/lib/utils";
->>>>>>> main
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
   const { theme, resolvedTheme, setTheme } = useTheme();
@@ -27,11 +20,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 
   if (!mounted) return null;
 
-<<<<<<< release/1.0.4
   const currentTheme = resolvedTheme ?? theme ?? "light";
-=======
-  const currentTheme = resolvedTheme || theme;
->>>>>>> main
 
   return (
     <AppTooltip
@@ -39,10 +28,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     >
       <Button
         className={cn(className, "hover:cursor-pointer")}
-<<<<<<< release/1.0.4
         variant="default"
-=======
->>>>>>> main
         onClick={() => setTheme(currentTheme === "dark" ? "light" : "dark")}
       >
         {currentTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
