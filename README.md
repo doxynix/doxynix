@@ -1,10 +1,3 @@
-- name: Summary
-  if: always()
-  uses: actions/github-script@v7
-  with:
-    script: |
-      console.log('✅ CI passed!')
-
 # Diploma Project
 
 Full-stack web application built as a diploma project.
