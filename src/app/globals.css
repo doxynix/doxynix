@@ -94,7 +94,7 @@ pre.italic {
   --font-ui: var(--font-inter-regular);
   --font-ui-italic: var(--font-inter-italic);
   --font-code: var(--font-mono-light);
-  --font-code-italic: var(--font-mono-italic)
+  --font-code-italic: var(--font-mono-italic);
 }
 
 :root {

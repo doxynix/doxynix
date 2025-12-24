@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function AuthPage() {
   return (
-    <div className="flex items-center justify-center bg-background">
+    <div className="bg-background flex items-center justify-center">
       <AuthCard />
     </div>
   );
