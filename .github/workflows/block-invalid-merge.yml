@@ -1,7 +1,7 @@
 name: Block forbidden merges
 
 on:
-  pull_request:  
+  pull_request:
 
 jobs:
   forbid-merge:
@@ -15,7 +15,6 @@ jobs:
           echo "Source branch: $SRC"
           echo "Target branch: $TARGET"
 
-          # Запретить любые слияния из main в другие ветки
           if [[ "$SRC" == "main" && "$TARGET" != "main" ]]; then
             echo "Merging from main to any branch other than main is forbidden!"
             exit 1
