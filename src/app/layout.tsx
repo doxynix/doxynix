@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { ThemeProvider } from "next-themes";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import "./globals.css";
 
@@ -35,7 +36,7 @@ const monoItalic = localFont({
 export const metadata: Metadata = {
   title: {
     template: "Doxynix | %s",
-    default: "Doxynix",
+    default: "App",
   },
   description: "Doxynix",
   icons: [{ url: "/favicon.ico", type: "image/x-icon" }],
@@ -51,11 +52,11 @@ export default function RootLayout({
       <body
         className={`${interRegular.variable} ${interItalic.variable} ${mono.variable} ${monoItalic.variable} antialiased`}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" storageKey="theme" enableSystem>
-          <Providers>
-            <div className="relative">{children}</div>
-          </Providers>
-        </ThemeProvider>
+        <Providers>
+          <main className="relative">
+            {children} <Analytics /> <SpeedInsights />
+          </main>
+        </Providers>
       </body>
     </html>
   );
