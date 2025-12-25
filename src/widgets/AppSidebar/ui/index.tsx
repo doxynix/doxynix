@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { CircleUserRound } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 import { cn } from "@/shared/lib/utils";
 import { Logo } from "@/shared/ui/Logo/ui";
@@ -21,6 +23,11 @@ import { SidebarLink } from "@/widgets/AppSidebar/ui/SidebarLink";
 
 export function AppSidebar() {
   const { state } = useSidebar();
+
+  const { data: session } = useSession();
+  const user = session?.user;
+  const name = user?.name ?? "user";
+  const avatar = user?.image;
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
@@ -43,16 +50,25 @@ export function AppSidebar() {
 
       <SidebarFooter className="flex flex-row flex-wrap items-end justify-between gap-4">
         <SidebarSeparator className="m-0" />
-        <div className="flex items-center gap-4">
-          <Image
-            className={cn("rounded-full", state === "collapsed" && "order-0")}
-            width={32}
-            height={32}
-            src="https://sun1-26.userapi.com/s/v1/ig2/s6o9ulfsYBU0tKW5hrlPyb8gvf7FUwQjIVKRJQ19FPJuPFC78S0ejWOpqmAeg-0ZxfcfZDvoy3-7BQGNovgFemHF.jpg?quality=95&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x479,540x539,640x639,720x719,800x799&from=bu&cs=800x0"
-            alt="Фото профиля"
-          />
-          <p className={cn("duration-100", state === "collapsed" ? "opacity-0" : "opacity-100")}>
-            Логин
+        <div className="flex items-center justify-center gap-4">
+          {avatar !== null ? (
+            <Image
+              src={avatar ?? "/avatar-placeholder.png"}
+              alt={name || "User"}
+              width={36}
+              height={36}
+              className={cn("rounded-full object-cover", state === "collapsed" && "order-0")}
+            />
+          ) : (
+            <CircleUserRound size={36} />
+          )}
+          <p
+            className={cn(
+              "truncate duration-100",
+              state === "collapsed" ? "opacity-0" : "opacity-100"
+            )}
+          >
+            {user?.name}
           </p>
         </div>
         <ThemeToggle className="max-h-8 max-w-8" />
