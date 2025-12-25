@@ -13,6 +13,14 @@ generator zod {
   output   = "../src/generated/zod"
 }
 
+generator jsonSchema {
+  provider = "prisma-json-schema-generator"
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
 datasource db {
   provider = "postgresql"
 }
