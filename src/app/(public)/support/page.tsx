@@ -4,10 +4,10 @@ export const metadata: Metadata = {
   title: "Поддержка",
 };
 
-export default function Contact() {
+export default function Support() {
   return (
     <div className="flex items-center justify-center">
-      <div>Здесь будет contact</div>
+      <div>Здесь будет support</div>
     </div>
   );
 }
