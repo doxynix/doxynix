@@ -45,3 +45,5 @@ next-env.d.ts
 
 # gen
 /src/generated/**
+/prisma/dbml
+/prisma/json-schema
