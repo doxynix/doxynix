@@ -15,7 +15,7 @@ const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 дней
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // сутки
 const MAGIC_LINK_MAX_AGE = 10 * 60; // 10 минут
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+const resend = process.env.RESEND_API_KEY != null ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -44,6 +44,10 @@ export const authOptions: NextAuthOptions = {
         };
 
         try {
+          if (!resend) {
+            console.warn("Resend disabled (no API key)");
+            return;
+          }
           await resend.emails.send(template);
         } catch (error) {
           console.error("Resend error:", error);
