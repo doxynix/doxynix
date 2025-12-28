@@ -28,7 +28,7 @@ export const authOptions: NextAuthOptions = {
   providers: [
     EmailProvider({
       maxAge: MAGIC_LINK_MAX_AGE,
-      from: "no-reply@doxynix.space",
+      from: "Doxynix Auth <auth@mail.doxynix.space>",
       sendVerificationRequest: async ({ identifier, url, provider }) => {
         const user = await prisma.user.findUnique({
           where: { email: identifier },

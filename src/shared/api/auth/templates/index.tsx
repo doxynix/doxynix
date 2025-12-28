@@ -1,4 +1,4 @@
-import { Body, Button, Container, Head, Html, Img, Section, Text } from "@react-email/components";
+import { Body, Button, Container, Head, Html, Section, Text } from "@react-email/components";
 
 import type { EmailProps } from "@/shared/api/auth/templates/types";
 
@@ -21,13 +21,12 @@ export function AuthEmail({ url, host }: EmailProps) {
               color: "#111111",
             }}
           >
-            <Img
-              src="https://doxynix.space/logo_large.png
-              "
+            {/* <Img
+              src="https://postimg.cc/HcKhq62P" // logo_large.png
               alt="Doxynix"
               width={120}
               style={{ display: "block", margin: "0 auto 20px" }}
-            />
+            /> */}
             <Text style={{ fontSize: 20, margin: "0 0 14px", fontWeight: 600, lineHeight: "1.4" }}>
               Подтверждение входа
             </Text>
