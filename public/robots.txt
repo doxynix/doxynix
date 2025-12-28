@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://doxynix.space
+
+# Sitemaps
+Sitemap: https://doxynix.space/sitemap.xml
