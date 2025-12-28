@@ -22,8 +22,8 @@ export function AuthEmail({ url, host }: EmailProps) {
             }}
           >
             <Img
-              src="https://doxynix.space/logo_large.svg"
-              srcSet="https://doxynix.space/logo_large.png"
+              src="https://doxynix.space/logo_large.png
+              "
               alt="Doxynix"
               width={120}
               style={{ display: "block", margin: "0 auto 20px" }}
