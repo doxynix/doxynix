@@ -2,6 +2,14 @@
 module.exports = {
   siteUrl: "https://doxynix.space",
   generateRobotsTxt: true,
-  changefreq: "",
-  priority: 0.7,
+  exclude: ["/dashboard/*", "/profile/*", "/repo/*", "/api/*"],
+  robotsTxtOptions: {
+    policies: [
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: ["/dashboard", "/profile", "/repo", "/api"],
+      },
+    ],
+  },
 };

@@ -11,8 +11,9 @@
   },
   "scripts": {
     "dev": "next dev",
+    "prebuild": "next-sitemap",
     "build": "next build",
-    "postbuild": "next-sitemap",
+    "postbuild": "echo Sitemap generated",
     "start": "next start",
     "lint": "eslint .",
     "prepare": "husky",
