@@ -71,12 +71,6 @@ export const metadata: Metadata = {
     creator: "@doxynix",
   },
 
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
-  },
-
   robots: {
     index: true,
     follow: true,
