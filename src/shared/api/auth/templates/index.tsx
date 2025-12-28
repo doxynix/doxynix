@@ -7,6 +7,9 @@ export function AuthEmail({ url, host }: EmailProps) {
     <Html>
       <Head />
       <Body style={{ background: "#ffffff", padding: "24px 0" }}>
+        <Text style={{ display: "none", color: "transparent", height: 0, overflow: "hidden" }}>
+          Ссылка для входа в Doxynix. Действует 10 минут.
+        </Text>
         <Section>
           <Container
             style={{
@@ -36,7 +39,7 @@ export function AuthEmail({ url, host }: EmailProps) {
             </Text>
 
             <Text style={{ fontSize: 15, margin: "0 0 22px", lineHeight: "1.6" }}>
-              Нажмите кнопку ниже, чтобы завершить вход. Ссылка действует ограниченное время.
+              Нажмите кнопку ниже, чтобы завершить вход. Ссылка действует <strong>10 минут</strong>.
             </Text>
 
             <Button
@@ -67,7 +70,9 @@ export function AuthEmail({ url, host }: EmailProps) {
             </Text>
           </Container>
 
-          <Text style={{ color: "#888888", fontSize: 12, margin: "14px 0 0" }}>© {host}</Text>
+          <Text style={{ color: "#888888", fontSize: 12, margin: "14px 0 0" }}>
+            © 2025 Doxynix · {host}
+          </Text>
         </Section>
       </Body>
     </Html>
