@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "tailwind-scrollbar";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -41,19 +43,19 @@ pre.italic {
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
+  --color-sidebar: var(--color-bg-sidebar);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
+  --color-ring: var(--color-ring);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--color-accent);
+  --color-muted-foreground: var(--color-text-muted);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
@@ -74,20 +76,17 @@ pre.italic {
 
 @theme {
   /* my colors */
-  --color-bg: var(--color-bg);
-
+  --color-bg: var(--background);
   --color-bg-sidebar: var(--color-bg-sidebar);
-
   --color-text: var(--color-text);
-
   --color-text-secondary: var(--color-text-secondary);
-
+  --color-danger: var(--color-danger);
+  --color-blue: var(--color-blue);
   --color-accent: var(--color-accent);
-
   --color-hover: var(--color-hover);
-
   --color-logo-hover: var(--color-logo-hover);
   --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
   --color-error: var(--color-error);
 
   /* my fonts */
@@ -99,14 +98,14 @@ pre.italic {
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: #fff;
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
+  --primary: #fafafa;
+  --primary-foreground: #171717;
   --secondary: oklch(0.968 0.007 247.896);
   --secondary-foreground: oklch(0.208 0.042 265.755);
   --muted: oklch(0.968 0.007 247.896);
@@ -130,20 +129,32 @@ pre.italic {
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+  --color-bg-sidebar: #f9fafb;
+  --color-text: #27272a;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #737373;
+  --color-accent: #fcfcfc;
+  --color-hover: #e5e7eb;
+  --color-ring: #2e2e2e;
+  --color-blue: #2530cb;
+  --color-danger: #cb252d;
+  --color-success: #34d399;
+  --color-warning: #d3d034;
+  --color-error: #f87171;
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
+  --background: #0a0a0a;
   --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
+  --card: #0a0a0a;
   --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
+  --popover: #0a0a0a;
   --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
+  --primary: #262626;
+  --primary-foreground: #fafafa;
   --secondary: oklch(0.279 0.041 260.031);
   --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
+  --muted: #262626;
   --muted-foreground: oklch(0.704 0.04 256.788);
   --accent: oklch(0.279 0.041 260.031);
   --accent-foreground: oklch(0.984 0.003 247.858);
@@ -157,13 +168,25 @@ pre.italic {
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-foreground: #a1a1a1;
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
   --sidebar-accent: oklch(0.279 0.041 260.031);
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  --color-bg-sidebar: #121212;
+  --color-text: #e5e7eb;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #a1a1a1;
+  --color-accent: #181818;
+  --color-hover: #27272a;
+  --color-ring: #2e2e2e;
+  --color-danger: #cb252d;
+  --color-blue: #2530cb;
+  --color-warning: #d3d034;
+  --color-success: #34d399;
+  --color-error: #f87171;
 }
 
 @layer base {
@@ -174,29 +197,70 @@ pre.italic {
   body {
     @apply bg-background text-foreground;
   }
+
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--foreground) / 0.3 transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--foreground);
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #a1a1a1;
+  }
 }
 
-:root {
-  /* light */
-  --color-bg: #ffffff;
-  --color-bg-sidebar: #f9fafb;
-  --color-text: #27272a;
-  --color-text-secondary: #6b7280;
-  --color-accent: #6366f1;
-  --color-hover: #e5e7eb;
-  --color-logo-hover: #0003c2;
-  --color-success: #34d399;
-  --color-error: #f87171;
+@theme {
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+      transform: translateY(-6px);
+    }
+
+    to {
+      opacity: 0;
+      transform: translateY(0);
+    }
+  }
+
+  --animate-fade-in: fade-in 0.35s ease-out forwards;
+  --animate-fade-out: fade-out 0.35s ease-out forwards;
 }
 
-.dark {
-  --color-bg: #18181b;
-  --color-bg-sidebar: #111111;
-  --color-text: #e5e7eb;
-  --color-text-secondary: #a1a1aa;
-  --color-accent: #818cf8;
-  --color-hover: #27272a;
-  --color-logo-hover: #0003c2;
-  --color-success: #34d399;
-  --color-error: #f87171;
+@layer utilities {
+  .animate-fade-in {
+    animation: var(--animate-fade-in);
+  }
+
+  .animate-fade-out {
+    animation: var(--animate-fade-out);
+  }
 }
