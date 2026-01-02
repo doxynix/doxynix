@@ -27,6 +27,7 @@ datasource db {
 
 model User {
   id            Int       @id @default(autoincrement())
+  publicId      String    @unique @default(uuid()) @map("public_id")
   email         String?   @unique
   name          String?
   emailVerified DateTime? @map("email_verified")
@@ -39,6 +40,7 @@ model User {
   accounts Account[]
   sessions Session[]
   repos    Repo[]
+  apiKeys  ApiKey[]
 
   @@map("users")
 }
@@ -84,15 +86,44 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-model Repo {
-  id         Int        @id @default(autoincrement())
-  owner      String
-  name       String
-  url        String
-  visibility Visibility
+model ApiKey {
+  id        String    @id @default(cuid())
+  prefix    String
+  hashedKey String    @unique
+  name      String
+  userId    Int
+  createdAt DateTime  @default(now())
+  lastUsed  DateTime?
+  revoked   Boolean   @default(false)
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+model Repo {
+  id             Int        @id @default(autoincrement())
+  publicId       String     @unique @default(uuid()) @map("public_id")
+  githubId       Int        @map("github_id")
+  owner          String
+  name           String
+  description    String?    @db.Text
+  url            String
+  language       String?
+  license        String?
+  topics         String[]
+  stars          Int        @default(0) @map("stargazers_count")
+  forks          Int        @default(0) @map("forks_count")
+  defaultBranch  String     @default("main") @map("default_branch")
+  ownerAvatarUrl String?    @map("owner_avatar_url")
+  openIssues     Int        @default(0) @map("open_issues_count")
+  size           Int        @default(0)
+  visibility     Visibility
+
+  pushedAt        DateTime? @map("pushed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  githubCreatedAt DateTime? @map("github_created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   userId Int  @map("user_id")
   user   User @relation(fields: [userId], references: [id])
@@ -100,13 +131,18 @@ model Repo {
   analyses  Analysis[]
   documents Document[]
 
-  @@unique([owner, name])
+  @@unique([owner, name, userId])
+  @@unique([githubId, userId])
+  @@index([userId, updatedAt(sort: Desc)])
+  @@index([userId, visibility])
   @@map("repos")
 }
 
 model Analysis {
   id          Int    @id @default(autoincrement())
+  publicId    String @unique @default(uuid()) @map("public_id")
   status      Status
+  score       Int?
   metricsJson Json   @map("metrics_json")
   commitSha   String @map("commit_sha")
 
@@ -121,10 +157,11 @@ model Analysis {
 }
 
 model Document {
-  id      Int     @id @default(autoincrement())
-  version String
-  type    DocType
-  content String  @db.Text
+  id       Int     @id @default(autoincrement())
+  publicId String  @unique @default(uuid()) @map("public_id")
+  version  String
+  type     DocType
+  content  String  @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -150,6 +187,7 @@ enum Status {
   PENDING
   DONE
   FAILED
+  NEW
 }
 
 enum DocType {
