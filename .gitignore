@@ -54,3 +54,6 @@ robots.txt
 /cli/dist/
 /cli/node_modules
 *.tgz
+# временно!
+/cli/
+
