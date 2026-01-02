@@ -1,1 +1,1 @@
-export * from "./ui";
+export { PublicHeader } from "./ui/PublicHeader";

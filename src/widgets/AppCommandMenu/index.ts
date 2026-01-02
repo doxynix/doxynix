@@ -1,1 +1,1 @@
-export * from "./ui";
+export { AppCommandMenu } from "./ui/AppCommandMenu";

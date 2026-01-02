@@ -1,11 +1,9 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { CreateRepoButton } from "@/features/repo/ui/CreateRepoButton";
-import { RepoCardSkeleton } from "@/features/repo/ui/RepoCard/ui/RepoCardSkeleton";
-import { RepoListContainer } from "@/features/repo/ui/RepoListContainer/ui";
-import { StatCard } from "@/features/repo/ui/StatCard/ui";
-import { StatCardSkeleton } from "@/features/repo/ui/StatCard/ui/StatCardSkeleton";
+import { CreateRepoButton, RepoListContainer, StatCard, StatCardSkeleton } from "@/features/repo";
+
+import { RepoCardSkeleton } from "@/entities/repo";
 
 export const metadata: Metadata = {
   title: "Панель управления",

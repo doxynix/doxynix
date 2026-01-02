@@ -8,7 +8,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/shared/ui/empty";
-import { CreateRepoEmptyButton } from "@/features/repo/ui/CreateRepoEmptyButton";
+import { CreateRepoEmptyButton } from "@/features/repo";
 
 export function RepoEmpty() {
   return (

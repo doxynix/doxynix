@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import BackButton from "@/shared/ui/BackButton/ui";
+import BackButton from "@/shared/ui/BackButton";
 
 export const metadata: Metadata = {
   title: "404",

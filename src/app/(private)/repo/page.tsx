@@ -1,11 +1,10 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { AppSearch } from "@/shared/ui/AppSearch/ui";
-import { CreateRepoButton } from "@/features/repo/ui/CreateRepoButton";
-import { RepoCardSkeleton } from "@/features/repo/ui/RepoCard/ui/RepoCardSkeleton";
-import { RepoFilters } from "@/features/repo/ui/RepoFilters";
-import { RepoListContainer } from "@/features/repo/ui/RepoListContainer/ui";
+import { AppSearch } from "@/shared/ui/AppSearch";
+import { CreateRepoButton, RepoFilters, RepoListContainer } from "@/features/repo";
+
+import { RepoCardSkeleton } from "@/entities/repo";
 
 export const metadata: Metadata = {
   title: "Репозитории",

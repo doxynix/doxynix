@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { getServerAuthSession } from "@/shared/api/auth/authOptions";
-import { AuthCard } from "@/features/auth/ui";
+import { AuthForm } from "@/features/auth";
 
 export const metadata: Metadata = {
   title: "Авторизация",
@@ -13,5 +13,5 @@ export default async function AuthPage() {
 
   if (session) redirect("/dashboard");
 
-  return <AuthCard />;
+  return <AuthForm />;
 }

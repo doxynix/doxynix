@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { httpBatchLink } from "@trpc/client";
@@ -10,7 +10,9 @@ import superjson from "superjson";
 
 import { trpc } from "@/shared/api/trpc";
 
-import type { ProvidersProps } from "./types";
+type ProvidersProps = {
+  children: ReactNode;
+};
 
 export function Providers({ children }: ProvidersProps) {
   const [queryClient] = useState(

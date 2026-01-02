@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 
 import { getServerAuthSession } from "@/shared/api/auth/authOptions";
 import { SidebarProvider } from "@/shared/ui/sidebar";
-import { CreateRepoDialog } from "@/features/repo/ui/CreateRepoDialog";
-import { AppFooter } from "@/widgets/AppFooter/ui";
+import { CreateRepoDialog } from "@/features/repo";
+import { AppFooter } from "@/widgets/AppFooter";
 import { AppHeader } from "@/widgets/AppHeader";
 import { AppSidebar } from "@/widgets/AppSidebar";
 
