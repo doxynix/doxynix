@@ -70,7 +70,7 @@ export function AuthEmail({ url, host }: EmailProps) {
             </Text>
           </Container>
 
-          <Text style={{ color: "#888888", fontSize: 12, margin: "14px 0 0" }}>
+          <Text style={{ color: "#888888", fontSize: 12, margin: "14px 0 0", textAlign: "center" }}>
             © 2025 Doxynix · {host}
           </Text>
         </Section>

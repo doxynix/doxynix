@@ -8,7 +8,7 @@ import GoogleProvider from "next-auth/providers/google";
 import YandexProvider from "next-auth/providers/yandex";
 import { Resend } from "resend";
 
-import { AuthEmail } from "@/shared/api/auth/templates";
+import { AuthEmail } from "@/shared/api/auth/templates/AuthEmail";
 import { prisma } from "@/shared/api/db/db";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 дней
