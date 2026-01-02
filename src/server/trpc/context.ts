@@ -6,8 +6,41 @@ import { prisma } from "@/shared/api/db/db";
 import { CreateContextOptions } from "@/server/trpc/types";
 
 export async function createContext({ req }: CreateContextOptions) {
-  const session = await getServerSession(authOptions);
+  const authHeader = req.headers.get("authorization");
 
+  if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.split(" ")[1];
+
+    const keyRecord = await prisma.apiKey.findUnique({
+      where: { hashedKey: token },
+      include: { user: true },
+    });
+
+    if (keyRecord !== null && keyRecord.revoked !== null && keyRecord.user !== null) {
+      prisma.apiKey
+        .update({
+          where: { id: keyRecord.id },
+          data: { lastUsed: new Date() },
+        })
+        .catch(console.error);
+
+      console.log(`>>> [API KEY] Auth success: ${keyRecord.user.email}`);
+
+      return {
+        req,
+        prisma,
+        session: {
+          user: keyRecord.user,
+          expires: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+        },
+      };
+    }
+  }
+
+  const session = await getServerSession(authOptions);
+  if (session) {
+    console.log(`>>> [SESSION] Auth success: ${session.user?.email}`);
+  }
   return {
     req,
     prisma,

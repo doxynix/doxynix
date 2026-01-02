@@ -1,17 +1,27 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
+import { OpenApiMeta } from "trpc-to-openapi";
 
 import { Context } from "@/server/trpc/context";
 
-export const t = initTRPC.context<Context>().create({
-  transformer: superjson,
-  errorFormatter({ shape }) {
-    return shape;
-  },
-});
+export const t = initTRPC
+  .context<Context>()
+  .meta<OpenApiMeta>()
+  .create({
+    transformer: superjson,
+    errorFormatter({ shape, error }) {
+      return {
+        ...shape,
+        data: {
+          ...shape.data,
+          zodError: error.code === "BAD_REQUEST" ? error.cause : null,
+        },
+      };
+    },
+  });
 
 export const createTRPCRouter = t.router;
-
+export const createCallerFactory = t.createCallerFactory;
 export const publicProcedure = t.procedure;
 
 const isAuthed = t.middleware(({ ctx, next }) => {
