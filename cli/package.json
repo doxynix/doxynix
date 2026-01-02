@@ -1,0 +1,44 @@
+{
+  "name": "@doxynix/cli",
+  "version": "1.0.3",
+  "description": "Official CLI for Doxynix",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "dxnx": "./dist/index.js",
+    "doxynix": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "postbuild": "node ./scripts/fix-shebang.js",
+    "publish:patch": "pnpm run build && pnpm pack && npm version patch && npm publish --access public",
+    "publish:minor": "pnpm run build && pnpm pack && npm version minor && npm publish --access public",
+    "publish:major": "pnpm run build && pnpm pack && npm version major && npm publish --access public",
+    "prepublishOnly": "pnpm build",
+    "dev": "tsc -w",
+    "start": "node dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "cli",
+    "doxynix",
+    "api",
+    "github",
+    "openapi"
+  ],
+  "author": "Doxynix <hello@mail.doxynix.space>",
+  "license": "MIT",
+  "packageManager": "pnpm@10.26.2",
+  "dependencies": {
+    "@doxynix/cli": "^1.0.0",
+    "axios": "^1.13.2",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

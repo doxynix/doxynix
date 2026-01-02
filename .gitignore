@@ -49,3 +49,8 @@ next-env.d.ts
 /prisma/json-schema
 sitemap*.xml
 robots.txt
+
+# cli
+/cli/dist/
+/cli/node_modules
+*.tgz
