@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: "О нас",
 };
 
-export default function About() {
+export default async function About() {
   return (
     <div className="flex items-center justify-center">
       <div>Здесь будет about</div>

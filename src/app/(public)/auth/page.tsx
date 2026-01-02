@@ -13,9 +13,5 @@ export default async function AuthPage() {
 
   if (session) redirect("/dashboard");
 
-  return (
-    <div className="bg-background flex items-center justify-center">
-      <AuthCard />
-    </div>
-  );
+  return <AuthCard />;
 }

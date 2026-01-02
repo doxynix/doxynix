@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: "Поддержка",
 };
 
-export default function Support() {
+export default async function Support() {
   return (
     <div className="flex items-center justify-center">
       <div>Здесь будет support</div>

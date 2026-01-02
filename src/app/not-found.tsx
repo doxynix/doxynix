@@ -1,4 +1,10 @@
+import { Metadata } from "next";
+
 import BackButton from "@/shared/ui/BackButton/ui";
+
+export const metadata: Metadata = {
+  title: "404",
+};
 
 export default function NotFound() {
   return (

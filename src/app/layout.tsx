@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import NextTopLoader from "nextjs-toploader";
 
 import "./globals.css";
 
@@ -41,7 +42,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL! || "https://doxynix.space"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL!),
 
   title: {
     template: "%s | Doxynix",
@@ -90,12 +91,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html className="h-full" lang="ru" suppressHydrationWarning>
       <body
-        className={`${interRegular.variable} ${interItalic.variable} ${mono.variable} ${monoItalic.variable} antialiased`}
+        className={`h-full ${interRegular.variable} ${interItalic.variable} ${mono.variable} ${monoItalic.variable} antialiased`}
       >
+        <NextTopLoader color="#2563eb" showSpinner={false} />
         <Providers>
-          <main className="relative h-screen">{children}</main>
+          {children}
           <Toaster position="top-center" richColors duration={4000} gap={8} />
           <Analytics />
           <SpeedInsights />

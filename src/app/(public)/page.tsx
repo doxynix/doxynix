@@ -5,10 +5,8 @@ export const metadata: Metadata = {
 };
 
 export default async function Landing() {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
   return (
-    <div className="flex items-center justify-center">
+    <div>
       <div>Здесь будет landing</div>
     </div>
   );
