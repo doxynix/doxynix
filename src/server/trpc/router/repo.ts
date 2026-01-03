@@ -21,7 +21,6 @@ export const repoRouter = createTRPCRouter({
         summary: "Add a new repository",
         description:
           "Creates a new repository entry for the authenticated user. Requires repository owner and name information. Only accessible to logged-in users.",
-
         protect: true,
         errorResponses: OpenApiErrorResponses,
       },
@@ -165,6 +164,53 @@ export const repoRouter = createTRPCRouter({
       }
 
       return { success: true, message: "Репозиторий удален" };
+    }),
+
+  getByName: protectedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/repos/{owner}/{name}",
+        tags: ["repositories"],
+        summary: "Get repository by owner and name",
+        protect: true,
+      },
+    })
+    .input(
+      z.object({
+        owner: z.string(),
+        name: z.string(),
+      })
+    )
+    .output(
+      PublicRepoSchema.extend({
+        status: z.enum(Status).nullish(),
+      }).nullable()
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = Number(ctx.session.user.id);
+
+      const repo = await ctx.prisma.repo.findFirst({
+        where: {
+          userId,
+          owner: { equals: input.owner, mode: "insensitive" },
+          name: { equals: input.name, mode: "insensitive" },
+        },
+        include: {
+          analyses: {
+            take: 1,
+            orderBy: { createdAt: "desc" },
+          },
+        },
+      });
+
+      if (!repo) return null;
+
+      return {
+        ...repo,
+        id: repo.publicId,
+        status: repo.analyses[0]?.status ?? Status.NEW,
+      };
     }),
 
   getAll: protectedProcedure
