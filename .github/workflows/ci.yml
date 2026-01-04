@@ -2,20 +2,38 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: ["main", "develop"]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: ["main", "develop"]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+
+      RESEND_API_KEY: "re_123456789"
+      NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
+      NEXTAUTH_URL: "http://localhost:3000"
+
+      SKIP_ENV_VALIDATION: 1
+
       NEXT_TELEMETRY_DISABLED: 1
       HUSKY: 0
 
@@ -37,15 +55,18 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
+            ${{ runner.os }}-nextjs-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Prisma Generate
         run: pnpm prisma generate
+
+      # - name: Prisma Migrate (Check Schema)
+      #   run: pnpm prisma migrate deploy
 
       - name: Linting
         run: pnpm lint
