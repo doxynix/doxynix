@@ -1,6 +1,9 @@
 import { Body, Button, Container, Head, Html, Section, Text } from "@react-email/components";
 
-import type { EmailProps } from "@/shared/api/auth/templates/types";
+type EmailProps = {
+  url: string;
+  host: string;
+};
 
 export function AuthEmail({ url, host }: EmailProps) {
   return (

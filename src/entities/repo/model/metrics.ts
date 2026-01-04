@@ -1,29 +1,20 @@
+import { ComponentType } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
-import {
-  CircleDot,
-  GitBranch,
-  GitFork,
-  HardDrive,
-  History,
-  LucideIcon,
-  Scale,
-  Tag,
-} from "lucide-react";
+import { CircleDot, GitBranch, GitFork, HardDrive, History, Scale, Tag } from "lucide-react";
 import { FaStar } from "react-icons/fa";
-import { IconType } from "react-icons/lib";
 
 import { RepoTableItem } from "@/entities/repo/model/types";
 
-export type MetricsProps = {
-  icon: LucideIcon | IconType;
+type Props = {
+  icon?: ComponentType<{ className?: string }>;
   label: string | number | null;
   tooltip?: string;
   color?: string;
   className?: string;
 };
 
-export function getMetrics(repo: RepoTableItem): MetricsProps[] {
+export function getMetrics(repo: RepoTableItem): Props[] {
   const items = [
     { icon: FaStar, label: repo.stars, tooltip: "Звезды", color: "gold" },
     { icon: GitFork, label: repo.forks, tooltip: "Форки", color: "green" },
@@ -60,7 +51,7 @@ export function getMetrics(repo: RepoTableItem): MetricsProps[] {
       tooltip: "Последний пуш",
       color: "white",
     },
-  ] satisfies MetricsProps[];
+  ] satisfies Props[];
 
   return items.filter((m) => m.label != null);
 }

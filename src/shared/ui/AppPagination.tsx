@@ -14,13 +14,13 @@ import {
 } from "@/shared/ui/pagination";
 import { Spinner } from "@/shared/ui/spinner";
 
-interface AppPaginationProps {
+type Props = {
   className?: string;
   currentPage: number;
   totalPages: number;
-}
+};
 
-export function AppPagination({ className, currentPage, totalPages }: AppPaginationProps) {
+export function AppPagination({ className, currentPage, totalPages }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

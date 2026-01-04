@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: "Репозитории",
 };
 
-type RepoPageProps = {
+type Props = {
   searchParams: Promise<{
     page?: string;
     search?: string;
@@ -21,7 +21,7 @@ type RepoPageProps = {
   }>;
 };
 
-export default async function RepoPage({ searchParams }: RepoPageProps) {
+export default async function RepoPage({ searchParams }: Props) {
   const params = await searchParams;
   const suspenseKey = JSON.stringify(params);
 

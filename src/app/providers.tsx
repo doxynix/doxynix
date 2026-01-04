@@ -10,11 +10,11 @@ import superjson from "superjson";
 
 import { trpc } from "@/shared/api/trpc";
 
-type ProvidersProps = {
+type Props = {
   children: ReactNode;
 };
 
-export function Providers({ children }: ProvidersProps) {
+export function Providers({ children }: Props) {
   const [queryClient] = useState(
     () =>
       new QueryClient({

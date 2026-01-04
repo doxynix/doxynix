@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
-import { Button } from "@/shared/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -18,23 +17,21 @@ import {
 import GitHubIcon from "@/shared/ui/github-icon";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
-import { Spinner } from "@/shared/ui/spinner";
+import { LoadingButton } from "@/shared/ui/LoadingButton";
 import { useCreateRepoDialogStore } from "@/features/repo/model/create-repo-dialog.store";
 
 export function CreateRepoDialog() {
   const { open, closeDialog } = useCreateRepoDialogStore();
   const [url, setUrl] = useState("");
   const router = useRouter();
-  const utils = trpc.useUtils();
 
   const createRepo = trpc.repo.create.useMutation({
-    onSuccess: async () => {
+    onSuccess: () => {
       toast.success("Репозиторий успешно добавлен!");
       closeDialog();
       setUrl("");
 
       router.refresh();
-      await utils.repo.getAll.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -74,13 +71,14 @@ export function CreateRepoDialog() {
               </div>
             </div>
             <DialogFooter>
-              <Button
-                type="submit"
-                disabled={createRepo.isPending || !url}
+              <LoadingButton
                 className="cursor-pointer"
+                isLoading={createRepo.isPending}
+                loadingText="Добавление..."
+                disabled={createRepo.isPending || !url}
               >
-                {createRepo.isPending ? <Spinner className="w-17" /> : "Добавить"}
-              </Button>
+                Добавить
+              </LoadingButton>
             </DialogFooter>
           </form>
         </DialogContent>

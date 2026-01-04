@@ -3,16 +3,18 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/shared/api/auth/authOptions";
 import { prisma } from "@/shared/api/db/db";
 
-import { CreateContextOptions } from "@/server/trpc/types";
+type Props = {
+  req: Request;
+};
 
-export async function createContext({ req }: CreateContextOptions) {
+export async function createContext({ req }: Props) {
   const authHeader = req.headers.get("authorization");
 
   if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
     const token = authHeader.split(" ")[1];
 
     const keyRecord = await prisma.apiKey.findUnique({
-      where: { hashedKey: token },
+      where: { hashedKey: token }, // тут поменять ибо чистый токен с хешом сравнить не выйдет
       include: { user: true },
     });
 
@@ -24,7 +26,7 @@ export async function createContext({ req }: CreateContextOptions) {
         })
         .catch(console.error);
 
-      console.log(`>>> [API KEY] Auth success: ${keyRecord.user.email}`);
+      // console.log(`>>> [API KEY] Auth success: ${keyRecord.user.email}`);
 
       return {
         req,
@@ -38,9 +40,9 @@ export async function createContext({ req }: CreateContextOptions) {
   }
 
   const session = await getServerSession(authOptions);
-  if (session) {
-    console.log(`>>> [SESSION] Auth success: ${session.user?.email}`);
-  }
+  // if (session) {
+  //   console.log(`>>> [SESSION] Auth success: ${session.user?.email}`);
+  // }
   return {
     req,
     prisma,

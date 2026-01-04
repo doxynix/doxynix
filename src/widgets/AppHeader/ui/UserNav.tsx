@@ -26,8 +26,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
+import { LoadingButton } from "@/shared/ui/LoadingButton";
 import { Skeleton } from "@/shared/ui/skeleton";
-import { Spinner } from "@/shared/ui/spinner";
 
 export function UserNav() {
   const { data: session, status } = useSession();
@@ -106,9 +106,16 @@ export function UserNav() {
                       Отмена
                     </Button>
                   </DialogClose>
-                  <Button variant="destructive" disabled={loading} onClick={handleSignOut}>
-                    {loading ? <Spinner className="w-full" /> : "Выйти"}
-                  </Button>
+                  <LoadingButton
+                    variant="destructive"
+                    disabled={loading}
+                    className="cursor-pointer"
+                    onClick={handleSignOut}
+                    isLoading={loading}
+                    loadingText="Выход..."
+                  >
+                    Выйти
+                  </LoadingButton>
                 </div>
               </div>
             </DialogContent>

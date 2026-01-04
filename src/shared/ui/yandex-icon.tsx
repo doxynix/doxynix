@@ -1,6 +1,11 @@
-export function YandexIcon() {
+type Props = {
+  className?: string;
+};
+
+export function YandexIcon({ className }: Props) {
   return (
     <svg
+      className={className}
       stroke="currentColor"
       fill="currentColor"
       strokeWidth="0"

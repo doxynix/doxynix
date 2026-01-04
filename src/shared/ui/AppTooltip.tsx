@@ -2,13 +2,13 @@ import { ReactNode } from "react";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip";
 
-export interface TooltipProps {
+type Props = {
   children: ReactNode;
   content: ReactNode;
   delay?: number;
-}
+};
 
-export function AppTooltip({ children, content, delay = 0 }: TooltipProps) {
+export function AppTooltip({ children, content, delay = 0 }: Props) {
   return (
     <TooltipProvider delayDuration={delay}>
       <Tooltip>

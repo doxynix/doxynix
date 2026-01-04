@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import Link from "next/link";
 
 type LogoProps = React.SVGProps<SVGSVGElement> & {
@@ -87,13 +88,9 @@ function ExpandedLogo({ isInteractive, ...props }: InnerLogoProps) {
   );
 }
 
-function LogoLink({
-  isInteractive,
-  children,
-}: {
-  isInteractive?: boolean;
-  children: React.ReactNode;
-}) {
+type Props = { isInteractive?: boolean; children: ReactNode };
+
+function LogoLink({ isInteractive, children }: Props) {
   if (!isInteractive) {
     return <>{children}</>;
   }

@@ -6,6 +6,8 @@ import NextTopLoader from "nextjs-toploader";
 
 import "./globals.css";
 
+import { ReactNode } from "react";
+
 import { Toaster } from "@/shared/ui/sonner";
 import { Providers } from "@/app/providers";
 
@@ -88,14 +90,14 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html className="h-full" lang="ru" suppressHydrationWarning>
       <body
-        className={`h-full ${interRegular.variable} ${interItalic.variable} ${mono.variable} ${monoItalic.variable} antialiased`}
+        className={`flex h-full flex-col ${interRegular.variable} ${interItalic.variable} ${mono.variable} ${monoItalic.variable} antialiased`}
       >
-        <NextTopLoader color="#2563eb" showSpinner={false} />
+        <NextTopLoader color="#0400ff" showSpinner={false} zIndex={9999} />
         <Providers>
           {children}
           <Toaster position="top-center" richColors duration={4000} gap={8} />

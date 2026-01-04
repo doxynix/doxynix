@@ -1,11 +1,11 @@
 import { Card, CardContent } from "@/shared/ui/card";
 import { Skeleton } from "@/shared/ui/skeleton";
 
-type RepoCardSkeletonProps = {
+type Props = {
   count?: number;
 };
 
-export function RepoCardSkeleton({ count }: RepoCardSkeletonProps) {
+export function RepoCardSkeleton({ count }: Props) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count ?? 4 }).map((_, i) => (

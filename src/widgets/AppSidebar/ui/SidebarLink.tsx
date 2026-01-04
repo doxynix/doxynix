@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { SquareArrowOutUpRight } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
+import { MenuItem } from "@/shared/types/menuItem";
 import { SidebarMenuButton } from "@/shared/ui/sidebar";
-import { MenuItem } from "@/widgets/AppSidebar/types";
 
 export function SidebarLink({ href, title, icon: Icon, isBlank }: MenuItem) {
   const pathname = usePathname();

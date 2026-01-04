@@ -20,11 +20,11 @@ import { repoStatusConfig } from "@/entities/repo/model/repo-status";
 import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";
 import { RepoTableItem } from "@/entities/repo/model/types";
 
-export type RepoCardProps = {
+type Props = {
   repo: RepoTableItem;
 };
 
-export function RepoCard({ repo }: RepoCardProps) {
+export function RepoCard({ repo }: Props) {
   const [copied, setCopied] = useState(false);
 
   const visibility = repoVisibilityConfig[repo.visibility];

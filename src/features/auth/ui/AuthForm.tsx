@@ -15,8 +15,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import GithubIcon from "@/shared/ui/github-icon";
 import { GoogleIcon } from "@/shared/ui/google-icon";
 import { Input } from "@/shared/ui/input";
+import { LoadingButton } from "@/shared/ui/LoadingButton";
 import { Logo } from "@/shared/ui/Logo";
-import { Spinner } from "@/shared/ui/spinner";
 import { YandexIcon } from "@/shared/ui/yandex-icon";
 
 const MagicLinkSchema = z.object({
@@ -82,46 +82,36 @@ export function AuthForm() {
         )}
       >
         <Logo />
-        <div className="mt-16 grid grid-cols-3 items-center justify-center gap-4">
-          <Button
+        <div className="mt-16 flex gap-4">
+          <LoadingButton
             className="cursor-pointer"
+            isLoading={loadingProvider === "github"}
+            loadingText="Вход..."
             disabled={disabled}
             onClick={() => handleSignIn("github")}
           >
-            {loadingProvider === "github" ? (
-              <Spinner />
-            ) : (
-              <>
-                <GithubIcon /> GitHub
-              </>
-            )}
-          </Button>
-          <Button
+            <GithubIcon className="mr-2" /> GitHub
+          </LoadingButton>
+
+          <LoadingButton
             className="cursor-pointer"
+            isLoading={loadingProvider === "google"}
+            loadingText="Вход..."
             disabled={disabled}
             onClick={() => handleSignIn("google")}
           >
-            {loadingProvider === "google" ? (
-              <Spinner />
-            ) : (
-              <>
-                <GoogleIcon /> Google
-              </>
-            )}
-          </Button>
-          <Button
+            <GoogleIcon className="mr-2" /> Google
+          </LoadingButton>
+
+          <LoadingButton
             className="cursor-pointer"
+            isLoading={loadingProvider === "yandex"}
+            loadingText="Вход..."
             disabled={disabled}
             onClick={() => handleSignIn("yandex")}
           >
-            {loadingProvider === "yandex" ? (
-              <Spinner />
-            ) : (
-              <>
-                <YandexIcon /> Yandex
-              </>
-            )}
-          </Button>
+            <YandexIcon className="mr-2" /> Yandex
+          </LoadingButton>
         </div>
         <div className="relative w-full">
           <div className="absolute inset-0 flex items-center">
@@ -152,9 +142,15 @@ export function AuthForm() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full cursor-pointer" disabled={disabled}>
-                {loadingProvider === "email" ? <Spinner /> : "Войти по Email"}
-              </Button>
+              <LoadingButton
+                type="submit"
+                className="cursor-pointer"
+                isLoading={loadingProvider === "email"}
+                loadingText="Вход..."
+                disabled={disabled}
+              >
+                Войти
+              </LoadingButton>
             </form>
           </Form>
           <p className="text-muted-foreground text-center text-xs">

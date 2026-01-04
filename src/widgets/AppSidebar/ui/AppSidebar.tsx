@@ -5,8 +5,8 @@ import { BookText, ChevronDown, CircleQuestionMark } from "lucide-react";
 
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/utils";
-import { Button } from "@/shared/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/collapsible";
+import { LoadingButton } from "@/shared/ui/LoadingButton";
 import {
   Sidebar,
   SidebarContent,
@@ -21,9 +21,8 @@ import {
   useSidebar,
 } from "@/shared/ui/sidebar";
 import { Skeleton } from "@/shared/ui/skeleton";
-import { Spinner } from "@/shared/ui/spinner";
 import { SidebarLink } from "@/widgets/AppSidebar";
-import { menu } from "@/widgets/AppSidebar/menu";
+import { menu } from "@/widgets/AppSidebar/model/menu";
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -96,20 +95,16 @@ export function AppSidebar() {
                   )}
                   {hasNextPage && state !== "collapsed" && (
                     <SidebarMenuItem>
-                      <Button
+                      <LoadingButton
                         variant="ghost"
-                        size="sm"
-                        className="text-muted-foreground h-8 w-full justify-start pl-2 text-xs"
-                        onClick={() => fetchNextPage()}
+                        className="text-muted-foreground h-8 w-full cursor-pointer justify-start pl-2 text-xs"
                         disabled={isFetchingNextPage}
+                        onClick={() => fetchNextPage()}
+                        isLoading={isFetchingNextPage}
+                        loadingText="Загрузка..."
                       >
-                        {isFetchingNextPage ? (
-                          <Spinner className="mr-2 h-3 w-3" />
-                        ) : (
-                          <ChevronDown className="mr-2 h-3 w-3" />
-                        )}
-                        {isFetchingNextPage ? "Загрузка..." : "Показать еще"}
-                      </Button>
+                        <ChevronDown className="mr-2 h-3 w-3" /> Показать еще
+                      </LoadingButton>
                     </SidebarMenuItem>
                   )}
                 </SidebarMenu>
@@ -121,7 +116,7 @@ export function AppSidebar() {
       <SidebarSeparator className="m-0" />
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarLink title="Помощь" href="/help" icon={CircleQuestionMark} />
+          <SidebarLink title="Помощь" href="/support" icon={CircleQuestionMark} />
           <SidebarLink
             title="Документация"
             href="https://docs.doxynix.space"

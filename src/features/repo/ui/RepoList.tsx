@@ -5,12 +5,12 @@ import { RepoEmpty } from "@/features/repo";
 import { RepoCard } from "@/entities/repo";
 import { RepoMeta, RepoTableItem } from "@/entities/repo/model/types";
 
-interface RepoListProps {
+type Props = {
   repos: RepoTableItem[];
   meta?: RepoMeta;
-}
+};
 
-export function RepoList({ repos, meta }: RepoListProps) {
+export function RepoList({ repos, meta }: Props) {
   if (!meta || meta.totalCount === 0) {
     return <RepoEmpty />;
   }

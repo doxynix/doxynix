@@ -7,11 +7,11 @@ import { Search } from "lucide-react";
 import { Input } from "@/shared/ui/input";
 import { Spinner } from "@/shared/ui/spinner";
 
-interface AppSearchProps {
+type Props = {
   placeholder: string;
-}
+};
 
-export function AppSearch({ placeholder }: AppSearchProps) {
+export function AppSearch({ placeholder }: Props) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();

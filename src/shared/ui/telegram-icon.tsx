@@ -1,8 +1,8 @@
-interface IconProps {
+type Props = {
   className?: string;
-}
+};
 
-export function TelegramIcon({ className }: IconProps) {
+export function TelegramIcon({ className }: Props) {
   return (
     <svg
       className={className}

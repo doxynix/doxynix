@@ -1,8 +1,8 @@
-interface IconProps {
+type Props = {
   className?: string;
-}
+};
 
-export default function GitHubIcon({ className }: IconProps) {
+export default function GitHubIcon({ className }: Props) {
   return (
     <svg
       className={className}

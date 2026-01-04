@@ -9,11 +9,11 @@ import { AppTooltip } from "@/shared/ui/AppTooltip";
 import { Button } from "@/shared/ui/button";
 import { Skeleton } from "@/shared/ui/skeleton";
 
-interface ThemeToggleProps {
+type Props = {
   className?: string;
-}
+};
 
-export function ThemeToggle({ className }: ThemeToggleProps) {
+export function ThemeToggle({ className }: Props) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
