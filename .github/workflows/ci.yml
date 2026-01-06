@@ -1,13 +1,13 @@
 name: CI
 
-permissions:
-  contents: read
-
 on:
   push:
     branches: ["main", "develop"]
   pull_request:
     branches: ["main", "develop"]
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
@@ -34,9 +34,11 @@ jobs:
       RESEND_API_KEY: "re_123456789"
       NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
       NEXTAUTH_URL: "http://localhost:3000"
+      
+      UPLOADTHING_TOKEN: "eyJdummy.token.for.build"
 
       SKIP_ENV_VALIDATION: 1
-
+      
       NEXT_TELEMETRY_DISABLED: 1
       HUSKY: 0
 
@@ -68,8 +70,8 @@ jobs:
       - name: Prisma Generate
         run: pnpm prisma generate
 
-      # - name: Prisma Migrate (Check Schema)
-      #   run: pnpm prisma migrate deploy
+      - name: Verify Database Schema
+        run: pnpm prisma db push
 
       - name: Linting
         run: pnpm lint
