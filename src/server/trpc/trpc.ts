@@ -3,6 +3,7 @@ import superjson from "superjson";
 import { OpenApiMeta } from "trpc-to-openapi";
 
 import { Context } from "@/server/trpc/context";
+import { requestContext } from "@/server/utils/requestContext";
 
 export const t = initTRPC
   .context<Context>()
@@ -20,9 +21,13 @@ export const t = initTRPC
     },
   });
 
+const contextMiddleware = t.middleware(async ({ ctx, next }) => {
+  return requestContext.run(ctx.requestInfo, () => next({ ctx }));
+});
+
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
-export const publicProcedure = t.procedure;
+export const publicProcedure = t.procedure.use(contextMiddleware);
 
 const isAuthed = t.middleware(({ ctx, next }) => {
   if (ctx.session == null || ctx.session.user == null) {
@@ -36,7 +41,7 @@ const isAuthed = t.middleware(({ ctx, next }) => {
   });
 });
 
-export const protectedProcedure = t.procedure.use(isAuthed);
+export const protectedProcedure = publicProcedure.use(isAuthed);
 
 const isAdmin = t.middleware(({ ctx, next }) => {
   if (ctx.session?.user == null || ctx.session.user.role !== "ADMIN") {

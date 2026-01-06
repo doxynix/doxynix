@@ -18,7 +18,8 @@ const MAGIC_LINK_MAX_AGE = 10 * 60; // 10 минут
 const resend = process.env.RESEND_API_KEY != null ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  adapter: PrismaAdapter(prisma as any),
   secret: process.env.NEXTAUTH_SECRET!,
   session: {
     strategy: "database",
@@ -94,6 +95,7 @@ export const authOptions: NextAuthOptions = {
     signOut: "/",
     error: "/auth/error", // реализовать страницу /auth/error
     newUser: "/welcome", // реализовать страницу /welcome
+    verifyRequest: "/auth",
   },
 
   debug: process.env.NODE_ENV === "development",
