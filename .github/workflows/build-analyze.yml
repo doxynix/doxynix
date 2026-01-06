@@ -3,15 +3,17 @@ name: Next.js Bundle Analysis
 on:
   pull_request:
     branches: [main, develop]
+  push:
+    branches: [main, develop] 
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
 
 jobs:
   analyze:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-      actions: read
-
     steps:
       - uses: actions/checkout@v4
 
@@ -33,9 +35,39 @@ jobs:
           path: .next/cache
           key: ${{ runner.os }}-next-cache-${{ hashFiles('**/pnpm-lock.yaml') }}
 
+      - name: Build next.js app
+        run: pnpm build
+
       - name: Analyze bundle
-        uses: hashicorp/nextjs-bundle-analysis@v0.5.0
+        run: npx -p nextjs-bundle-analysis report
+
+      - name: Upload analysis artifact
+        uses: actions/upload-artifact@v4
         with:
-          build-status: ${{ job.status }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          build-script: pnpm build
+          name: bundle-analysis
+          path: .next/analyze/__bundle_analysis.json
+
+      - name: Get comment body
+        if: github.event_name == 'pull_request'
+        id: get-comment-body
+        run: |
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$(cat .next/analyze/__bundle_analysis_comment.txt)" >> $GITHUB_OUTPUT
+          echo EOF >> $GITHUB_OUTPUT
+
+      - name: Find Comment
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/find-comment@v3
+        id: fc
+        with:
+          issue-number: ${{ github.event.number }}
+          body-includes: '<!-- __NEXTJS_BUNDLE_ANALYSIS__ -->'
+
+      - name: Create or Update Comment
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.number }}
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          edit-mode: replace
+          body: ${{ steps.get-comment-body.outputs.body }}
