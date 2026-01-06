@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
   },
   reactCompiler: true, // аккуратно фича еще в бете
   experimental: { typedEnv: true },
-  typedRoutes: true, 
+  typedRoutes: true,
   typescript: { ignoreBuildErrors: false },
   images: {
     remotePatterns: [
