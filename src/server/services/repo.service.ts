@@ -1,0 +1,123 @@
+import { Prisma, Status, Visibility } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
+
+import { prisma } from "@/shared/api/db/db";
+
+import { handlePrismaError } from "@/server/utils/handlePrismaError";
+import { githubService } from "./github.service";
+
+interface OctokitError {
+  status: number;
+  message: string;
+}
+
+function isOctokitError(error: unknown): error is OctokitError {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    typeof (error as Record<string, unknown>).status === "number"
+  );
+}
+
+export const repoService = {
+  async createRepo(userId: number, url: string) {
+    let repoInfo;
+    try {
+      repoInfo = githubService.parseUrl(url);
+    } catch {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Некорректная ссылка. Используйте формат 'owner/name' или 'https://github.com/...",
+      });
+    }
+
+    const { owner, name } = repoInfo;
+
+    let githubData;
+    try {
+      githubData = await githubService.getRepoInfo(userId, owner, name);
+    } catch (error) {
+      if (isOctokitError(error)) {
+        if (error.status === 404)
+          throw new TRPCError({ code: "NOT_FOUND", message: "Репозиторий не найден на GitHub" });
+        if (error.status === 403)
+          throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Лимит API GitHub исчерпан" });
+      }
+      throw error;
+    }
+
+    try {
+      return await prisma.repo.create({
+        data: {
+          githubId: githubData.id,
+          owner: githubData.owner.login,
+          name: githubData.name,
+          description: githubData.description,
+          url: githubData.html_url,
+          language: githubData.language,
+          license: githubData.license?.name,
+          topics: githubData.topics ?? [],
+          stars: githubData.stargazers_count,
+          forks: githubData.forks_count,
+          openIssues: githubData.open_issues_count,
+          size: githubData.size,
+          pushedAt: new Date(githubData.pushed_at),
+          githubCreatedAt: new Date(githubData.created_at),
+          defaultBranch: githubData.default_branch,
+          ownerAvatarUrl: githubData.owner.avatar_url,
+          visibility: githubData.private ? Visibility.PRIVATE : Visibility.PUBLIC,
+          userId,
+        },
+      });
+    } catch (error) {
+      handlePrismaError(error, {
+        uniqueConstraint: {
+          githubId: "Этот репозиторий уже добавлен",
+          url: "Репозиторий с таким URL уже существует",
+        },
+        defaultConflict: "Вы уже добавили этот репозиторий",
+      });
+    }
+  },
+
+  buildWhereClause(
+    userId: number,
+    filters: {
+      search?: string;
+      visibility?: Visibility;
+      status?: Status;
+    }
+  ): Prisma.RepoWhereInput {
+    const { search, visibility, status } = filters;
+    const searchTerms = search != null ? search.trim().split(/\s+/) : [];
+
+    return {
+      userId,
+      ...(visibility && { visibility }),
+
+      ...(searchTerms.length > 0 && {
+        AND: searchTerms.map((term) => ({
+          OR: [
+            { name: { contains: term, mode: "insensitive" } },
+            { owner: { contains: term, mode: "insensitive" } },
+          ],
+        })),
+      }),
+
+      ...(status && {
+        ...(status === Status.NEW
+          ? {
+              OR: [{ analyses: { none: {} } }, { analyses: { some: { status: Status.NEW } } }],
+            }
+          : {
+              analyses: {
+                some: {
+                  status: status,
+                },
+              },
+            }),
+      }),
+    };
+  },
+};
