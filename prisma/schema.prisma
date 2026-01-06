@@ -27,11 +27,12 @@ datasource db {
 
 model User {
   id            Int       @id @default(autoincrement())
-  publicId      String    @unique @default(uuid()) @map("public_id")
+  publicId      String    @unique @default(uuid(7)) @map("public_id") @db.Uuid
   email         String?   @unique
   name          String?
   emailVerified DateTime? @map("email_verified")
   image         String?
+  imageKey      String?   @map("image_key")
   role          UserRole  @default(USER)
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -87,23 +88,25 @@ model VerificationToken {
 }
 
 model ApiKey {
-  id        String    @id @default(cuid())
-  prefix    String
-  hashedKey String    @unique
-  name      String
-  userId    Int
-  createdAt DateTime  @default(now())
-  lastUsed  DateTime?
-  revoked   Boolean   @default(false)
+  id          String    @id @default(uuid(7)) @db.Uuid
+  prefix      String
+  hashedKey   String    @unique @map("hashed_key")
+  name        String
+  description String?   @db.Text
+  userId      Int
+  createdAt   DateTime  @default(now()) @map("created_at")
+  lastUsed    DateTime? @map("last_used")
+  revoked     Boolean   @default(false)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("api_keys")
 }
 
 model Repo {
   id             Int        @id @default(autoincrement())
-  publicId       String     @unique @default(uuid()) @map("public_id")
+  publicId       String     @unique @default(uuid(7)) @map("public_id") @db.Uuid
   githubId       Int        @map("github_id")
   owner          String
   name           String
@@ -135,12 +138,13 @@ model Repo {
   @@unique([githubId, userId])
   @@index([userId, updatedAt(sort: Desc)])
   @@index([userId, visibility])
+  @@index([githubId])
   @@map("repos")
 }
 
 model Analysis {
   id          Int    @id @default(autoincrement())
-  publicId    String @unique @default(uuid()) @map("public_id")
+  publicId    String @unique @default(uuid(7)) @map("public_id") @db.Uuid
   status      Status
   score       Int?
   metricsJson Json   @map("metrics_json")
@@ -152,13 +156,14 @@ model Analysis {
   repoId Int  @map("repo_id")
   repo   Repo @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
-  @@index([repoId, createdAt])
+  @@index([repoId, status])
+  @@index([repoId, createdAt(sort: Desc)])
   @@map("analyses")
 }
 
 model Document {
   id       Int     @id @default(autoincrement())
-  publicId String  @unique @default(uuid()) @map("public_id")
+  publicId String  @unique @default(uuid(7)) @map("public_id") @db.Uuid
   version  String
   type     DocType
   content  String  @db.Text
@@ -170,7 +175,24 @@ model Document {
   repo   Repo @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
   @@unique([repoId, version, type])
+  @@index([repoId])
   @@map("documents")
+}
+
+model AuditLog {
+  id        String  @id @default(uuid(7)) @db.Uuid
+  model     String
+  operation String
+  payload   Json
+  userId    Int?    @map("user_id")
+  ip        String?
+  userAgent String? @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("audit_logs")
 }
 
 enum UserRole {
