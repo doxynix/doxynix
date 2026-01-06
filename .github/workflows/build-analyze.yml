@@ -8,7 +8,10 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
+      actions: read
+
     steps:
       - uses: actions/checkout@v4
 
@@ -31,10 +34,8 @@ jobs:
           key: ${{ runner.os }}-next-cache-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Analyze bundle
-        run: pnpm analyze
-
-      - name: Upload analysis
-        uses: sidharthv96/next-bundle-analysis@v4
+        uses: hashicorp/nextjs-bundle-analysis@v0.5.0
         with:
           build-status: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          build-script: pnpm build
