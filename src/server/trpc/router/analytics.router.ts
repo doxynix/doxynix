@@ -17,6 +17,7 @@ export const analyticsRouter = createTRPCRouter({
         errorResponses: OpenApiErrorResponses,
       },
     })
+    .input(z.void())
     .output(
       z.object({
         repoCount: z.number().int(),
@@ -29,33 +30,40 @@ export const analyticsRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       const userId = Number(ctx.session.user.id);
 
-      const [repoCount, docsCount, totalAnalyses, failedAnalyses, pendingAnalyses] =
-        await Promise.all([
-          ctx.prisma.repo.count({
-            where: { userId },
-          }),
-          ctx.prisma.document.count({
-            where: { repo: { userId } },
-          }),
-          ctx.prisma.analysis.count({
-            where: { repo: { userId } },
-          }),
-          ctx.prisma.analysis.count({
-            where: {
-              repo: { userId },
-              status: "FAILED",
-            },
-          }),
-          ctx.prisma.analysis.count({
-            where: {
-              repo: { userId },
-              status: "PENDING",
-            },
-          }),
-        ]);
+      const userRepos = await ctx.prisma.repo.findMany({
+        where: { userId },
+        select: { id: true },
+      });
+
+      const repoIds = userRepos.map((r) => r.id);
+
+      if (repoIds.length === 0) {
+        return {
+          repoCount: 0,
+          docsCount: 0,
+          analysisCount: 0,
+          failedAnalyses: 0,
+          pendingAnalyses: 0,
+        };
+      }
+
+      const [docsCount, totalAnalyses, failedAnalyses, pendingAnalyses] = await Promise.all([
+        ctx.prisma.document.count({
+          where: { repoId: { in: repoIds } },
+        }),
+        ctx.prisma.analysis.count({
+          where: { repoId: { in: repoIds } },
+        }),
+        ctx.prisma.analysis.count({
+          where: { repoId: { in: repoIds }, status: "FAILED" },
+        }),
+        ctx.prisma.analysis.count({
+          where: { repoId: { in: repoIds }, status: "PENDING" },
+        }),
+      ]);
 
       return {
-        repoCount,
+        repoCount: repoIds.length,
         docsCount,
         analysisCount: totalAnalyses,
         failedAnalyses,

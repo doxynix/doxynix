@@ -1,8 +1,8 @@
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { OpenApiErrorResponses } from "@/server/trpc/shared";
 import { createTRPCRouter, publicProcedure } from "@/server/trpc/trpc";
+import { handlePrismaError } from "@/server/utils/handlePrismaError";
 
 export const healthRouter = createTRPCRouter({
   check: publicProcedure
@@ -17,6 +17,7 @@ export const healthRouter = createTRPCRouter({
         errorResponses: OpenApiErrorResponses,
       },
     })
+    .input(z.void())
     .output(
       z.object({
         status: z.string(),
@@ -27,10 +28,8 @@ export const healthRouter = createTRPCRouter({
         await ctx.prisma.$queryRaw`SELECT 1`;
         return { status: "ok" };
       } catch (error) {
-        console.error("Health check failed:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Database unavailable",
+        handlePrismaError(error, {
+          defaultConflict: "Сервис временно недоступен",
         });
       }
     }),
