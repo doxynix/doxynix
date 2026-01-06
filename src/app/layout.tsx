@@ -1,15 +1,25 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import NextTopLoader from "nextjs-toploader";
 
 import "./globals.css";
 
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
+import { connection } from "next/server";
+import { extractRouterConfig } from "uploadthing/server";
 
+import { cn } from "@/shared/lib/utils";
 import { Toaster } from "@/shared/ui/sonner";
+import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { Providers } from "@/app/providers";
+
+async function UTSSR() {
+  await connection();
+  return <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />;
+}
 
 // Интер
 const interRegular = localFont({
@@ -95,15 +105,25 @@ export default function RootLayout({
   return (
     <html className="h-full" lang="ru" suppressHydrationWarning>
       <body
-        className={`flex h-full flex-col ${interRegular.variable} ${interItalic.variable} ${mono.variable} ${monoItalic.variable} antialiased`}
+        className={cn(
+          "flex h-full flex-col",
+          interRegular.variable,
+          interItalic.variable,
+          mono.variable,
+          monoItalic.variable,
+          "antialiased"
+        )}
       >
         <NextTopLoader color="#0400ff" showSpinner={false} zIndex={9999} />
+        <Suspense>
+          <UTSSR />
+        </Suspense>
         <Providers>
           {children}
           <Toaster position="top-center" richColors duration={4000} gap={8} />
-          <Analytics />
-          <SpeedInsights />
         </Providers>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
