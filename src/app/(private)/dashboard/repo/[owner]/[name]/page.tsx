@@ -1,15 +1,14 @@
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { api } from "@/server/trpc/server";
 
 type Props = {
-  params: Promise<{
-    owner: string;
-    name: string;
-  }>;
+  params: Promise<{ owner: string; name: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { owner, name } = await params;
 
   return {

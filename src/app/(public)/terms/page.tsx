@@ -8,9 +8,7 @@ export default function TermsPage() {
   return (
     <div className="animate-fade-in container mx-auto max-w-2xl py-12">
       <h1 className="mb-6 text-3xl font-bold">Пользовательское соглашение</h1>
-      <p className="text-muted-foreground mb-8 text-sm">
-        Последнее обновление: {new Date().toLocaleDateString()}
-      </p>
+      <p className="text-muted-foreground mb-8 text-sm">Последнее обновление: 19.11.2025</p>
       <div className="prose dark:prose-invert space-y-6">
         <section>
           <h2 className="mb-2 text-xl font-semibold">1. Принятие условий</h2>

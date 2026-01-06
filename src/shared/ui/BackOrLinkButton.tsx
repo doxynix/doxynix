@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/shared/ui/button";
@@ -10,7 +11,7 @@ export default function BackOrLinkButton({ href, text }: Props) {
   const router = useRouter();
   const handleClick = () => {
     if (href) {
-      router.push(href);
+      router.push(href as Route);
     } else {
       router.back();
     }

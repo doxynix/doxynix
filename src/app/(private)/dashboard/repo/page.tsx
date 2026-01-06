@@ -26,7 +26,7 @@ export default async function RepoPage({ searchParams }: Props) {
   const suspenseKey = JSON.stringify(params);
 
   return (
-    <div className="mx-auto flex h-full w-full flex-col space-y-6">
+    <div className="mx-auto flex h-full w-full flex-col">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Репозитории</h1>
         <CreateRepoButton />
