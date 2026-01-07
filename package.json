@@ -29,6 +29,7 @@
     "secretlint:check": "secretlint \"**/*\"",
     "typecheck:coverage": "type-coverage --threshold 90",
     "knip": "knip --no-exit-code",
+    "spellcheck": "cspell \"**/*\" --no-progress --show-suggestions",
     "release": "standard-version && git push --follow-tags origin HEAD"
   },
   "dependencies": {

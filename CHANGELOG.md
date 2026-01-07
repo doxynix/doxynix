@@ -28,7 +28,7 @@ All notable changes to this project will be documented in this file. See [standa
 * **ui:** добавлены новые компоненты shadcn ([#98](https://github.com/Kramarich0/diploma-proj/issues/98)) ([22206db](https://github.com/Kramarich0/diploma-proj/commit/22206dbfe0f8c13bc6dd99da561392fa18681cf8))
 * **user:** добавлена возможность загрузки аватара пользователя ([#126](https://github.com/Kramarich0/diploma-proj/issues/126)) ([cdf9091](https://github.com/Kramarich0/diploma-proj/commit/cdf9091e7681825fea4bb7068d45377900cd06e9))
 * **widgets:** добавлены новые виджеты ([#100](https://github.com/Kramarich0/diploma-proj/issues/100)) ([0221441](https://github.com/Kramarich0/diploma-proj/commit/0221441aff4da82560059959a4f6398b7802bd6f))
-* **workflow:** полностью обновлен worklow ([#134](https://github.com/Kramarich0/diploma-proj/issues/134)) ([ebb958a](https://github.com/Kramarich0/diploma-proj/commit/ebb958a85c82c3691f06598f43d4033cc800c568))
+* **workflow:** полностью обновлен workflow ([#134](https://github.com/Kramarich0/diploma-proj/issues/134)) ([ebb958a](https://github.com/Kramarich0/diploma-proj/commit/ebb958a85c82c3691f06598f43d4033cc800c568))
 
 
 ### Bug Fixes
