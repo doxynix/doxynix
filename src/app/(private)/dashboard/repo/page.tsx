@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 
 import { AppSearch } from "@/shared/ui/AppSearch";
+import { Skeleton } from "@/shared/ui/skeleton";
 import { CreateRepoButton, RepoFilters, RepoListContainer } from "@/features/repo";
 
 import { RepoCardSkeleton } from "@/entities/repo";
@@ -37,7 +38,15 @@ export default async function RepoPage({ searchParams }: Props) {
           <RepoFilters />
         </div>
       </div>
-      <Suspense key={suspenseKey} fallback={<RepoCardSkeleton count={5} />}>
+      <Suspense
+        key={suspenseKey}
+        fallback={
+          <>
+            <Skeleton className="my-4 ml-auto h-5 w-24 text-sm" />
+            <RepoCardSkeleton count={5} />
+          </>
+        }
+      >
         <RepoListContainer searchParams={params} />
       </Suspense>
     </div>
