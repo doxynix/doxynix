@@ -1,6 +1,7 @@
 name: "Labeler"
 on:
-- pull_request_target
+  pull_request:         
+    types: [opened, reopened, synchronize, ready_for_review]
 
 jobs:
   label:
@@ -9,6 +10,12 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/labeler@v5
-      with:
-        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run labeler
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
