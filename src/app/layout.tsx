@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -21,29 +21,15 @@ async function UTSSR() {
   return <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />;
 }
 
-// Интер
-const interRegular = localFont({
-  src: "./fonts/Inter-Regular.woff2",
-  variable: "--font-inter-regular",
+const fontSans = Inter({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-sans",
   display: "swap",
 });
 
-const interItalic = localFont({
-  src: "./fonts/Inter-Italic.woff2",
-  variable: "--font-inter-italic",
-  display: "swap",
-});
-
-// Моно
-const mono = localFont({
-  src: "./fonts/IntelOneMono-Light.woff2",
-  variable: "--font-mono-light",
-  display: "swap",
-});
-
-const monoItalic = localFont({
-  src: "./fonts/IntelOneMono-LightItalic.woff2",
-  variable: "--font-mono-italic",
+const fontMono = JetBrains_Mono({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -51,10 +37,11 @@ export const viewport: Viewport = {
   themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL! || "https://doxynix.space"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL! ?? "https://doxynix.space"),
 
   title: {
     template: "%s | Doxynix",
@@ -65,8 +52,8 @@ export const metadata: Metadata = {
 
   keywords: ["code analysis", "documentation generator", "metrics", "github analysis", "doxynix"],
 
-  authors: [{ name: "Doxynix Team", url: "https://doxynix.space" }],
-  creator: "Doxynix",
+  authors: [{ name: "Kramarich", url: "https://github.com/Kramarich0" }],
+  creator: "Doxynix Team",
 
   openGraph: {
     type: "website",
@@ -105,14 +92,7 @@ export default function RootLayout({
   return (
     <html className="h-full" lang="ru" suppressHydrationWarning>
       <body
-        className={cn(
-          "flex h-full flex-col",
-          interRegular.variable,
-          interItalic.variable,
-          mono.variable,
-          monoItalic.variable,
-          "antialiased"
-        )}
+        className={cn("flex h-full flex-col", fontSans.variable, fontMono.variable, "antialiased")}
       >
         <NextTopLoader color="#0400ff" showSpinner={false} zIndex={9999} />
         <Suspense>
