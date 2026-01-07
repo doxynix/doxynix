@@ -1,26 +1,49 @@
 app-layer:
-  - 'src/app/**/*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/app/**/*'
+
 widgets-layer:
-  - 'src/widgets/**/*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/widgets/**/*'
+
 features-layer:
-  - 'src/features/**/*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/features/**/*'
+
 entities-layer:
-  - 'src/entities/**/*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/entities/**/*'
+
 shared-layer:
-  - 'src/shared/**/*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/shared/**/*'
 
 backend:
-  - 'src/server/**/*'
-  - 'src/app/api/**/*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/server/**/*'
+      - 'src/app/api/**/*'
+
 database:
-  - 'prisma/**/*'
-  - 'src/shared/api/db/**/*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'prisma/**/*'
+      - 'src/shared/api/db/**/*'
 
 generated:
-  - 'src/generated/**/*'
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/generated/**/*'
 
 configs:
-  - '*.json'
-  - '*.config.ts'
-  - '.github/**/*'
-  - 'pnpm-lock.yaml'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '*.json'
+      - '*.config.ts'
+      - '.github/**/*'
+      - 'pnpm-lock.yaml'
