@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, develop]
   push:
-    branches: [main, develop] 
+    branches: [main, develop]
 
 permissions:
   contents: read
@@ -28,6 +28,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Prisma Generate
+        run: pnpm prisma generate
 
       - name: Restore next cache
         uses: actions/cache@v4

@@ -9,8 +9,10 @@ generator client {
 }
 
 generator zod {
-  provider = "zod-prisma-types"
-  output   = "../src/generated/zod"
+  provider           = "zod-prisma-types"
+  output             = "../src/generated/zod"
+  useMultipleFiles   = true
+  createSharedSchema = true
 }
 
 generator jsonSchema {

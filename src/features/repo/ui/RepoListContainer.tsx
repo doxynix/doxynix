@@ -1,4 +1,4 @@
-import { Status, Visibility } from "@prisma/client";
+import type { Status, Visibility } from "@prisma/client";
 
 import { AppPagination } from "@/shared/ui/AppPagination";
 import { RepoList } from "@/features/repo";

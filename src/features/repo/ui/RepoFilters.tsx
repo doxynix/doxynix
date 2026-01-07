@@ -2,11 +2,12 @@
 
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Status, Visibility } from "@prisma/client";
 import { X } from "lucide-react";
 
 import { Button } from "@/shared/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+
+import { StatusSchema, VisibilitySchema } from "@/generated/zod";
 
 export function RepoFilters() {
   const router = useRouter();
@@ -49,10 +50,10 @@ export function RepoFilters() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Все статусы</SelectItem>
-            <SelectItem value={Status.DONE}>Готово</SelectItem>
-            <SelectItem value={Status.PENDING}>В работе</SelectItem>
-            <SelectItem value={Status.FAILED}>Ошибка</SelectItem>
-            <SelectItem value={Status.NEW}>Новый</SelectItem>
+            <SelectItem value={StatusSchema.enum.DONE}>Готово</SelectItem>
+            <SelectItem value={StatusSchema.enum.PENDING}>В работе</SelectItem>
+            <SelectItem value={StatusSchema.enum.FAILED}>Ошибка</SelectItem>
+            <SelectItem value={StatusSchema.enum.NEW}>Новый</SelectItem>
           </SelectContent>
         </Select>
 
@@ -65,8 +66,8 @@ export function RepoFilters() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Весь доступ</SelectItem>
-            <SelectItem value={Visibility.PUBLIC}>Публичный</SelectItem>
-            <SelectItem value={Visibility.PRIVATE}>Приватный</SelectItem>
+            <SelectItem value={VisibilitySchema.enum.PUBLIC}>Публичный</SelectItem>
+            <SelectItem value={VisibilitySchema.enum.PRIVATE}>Приватный</SelectItem>
           </SelectContent>
         </Select>
 
