@@ -61,7 +61,12 @@
     "нотифаи",
     "Elipssis",
     "nums",
-    "utapi"
+    "utapi",
+    "роутов",
+    "мердж",
+    "фавиконки",
+    "билда",
+    "линтинг"
   ],
 
   "import": ["@cspell/dict-ru_ru/cspell-ext.json"]

@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "postchangelog": "git add CHANGELOG.md"
+  }
+}

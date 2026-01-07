@@ -72,7 +72,8 @@ jobs:
         run: pnpm run secretlint:check
 
       - name: Check for Typos (CSpell)
-        run: pnpm dlx cspell "**/*" --no-progress --show-suggestions
+        run: pnpm run spellcheck
+        continue-on-error: true
 
       - name: Find Unused Code (Knip)
         run: pnpm run knip

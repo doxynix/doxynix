@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "license": "MIT",
   "private": true,
   "lint-staged": {
@@ -29,7 +29,8 @@
     "secretlint:check": "secretlint \"**/*\"",
     "typecheck:coverage": "type-coverage --threshold 90",
     "knip": "knip --no-exit-code",
-    "release": "standard-version"
+    "spellcheck": "cspell \"**/*\" --no-progress --show-suggestions",
+    "release": "standard-version && git push --follow-tags origin HEAD"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
