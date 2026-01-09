@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { PrismaClient, UserRole } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
