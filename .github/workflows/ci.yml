@@ -57,6 +57,9 @@ jobs:
   # ------------------------------------------------------------------
   types:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+      
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
