@@ -14,7 +14,11 @@ const C = {
 const TEST_DIR = path.join(process.cwd(), "prisma/tests");
 
 function run(cmd: string, args: string[]) {
-  execFileSync(cmd, args, { stdio: "inherit" });
+  const isWindows = process.platform === "win32";
+
+  const command = isWindows && cmd === "pnpm" ? "pnpm.cmd" : cmd;
+
+  execFileSync(command, args, { stdio: "inherit", shell: true });
 }
 
 function getNumberedTests(): string[] {
@@ -50,8 +54,9 @@ async function main() {
     console.log(`\n${C.green}🎉 ВСЕ ТЕСТЫ УСПЕШНО ПРОЙДЕНЫ${C.reset}`);
     console.log(`${C.green}🛡️  DATA-SECURITY: ENTERPRISE READY${C.reset}\n`);
     process.exit(0);
-  } catch {
+  } catch (e) {
     console.error(`\n${C.red}💥 ПРОВАЛ ТЕСТОВ${C.reset}`);
+    console.error(e);
     process.exit(1);
   }
 }
