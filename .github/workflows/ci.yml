@@ -292,6 +292,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Prisma Generate
+        run: pnpm db:generate
+
       - name: Restore Next.js cache
         uses: actions/cache@v4
         with:
