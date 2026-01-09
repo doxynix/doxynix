@@ -1,0 +1,10 @@
+{
+  "$schema": "https://schema.stryker-mutator.io/stryker-config.schema.json",
+  "mutate": ["src/shared/api/db/**/*.ts"],
+  "testRunner": "command",
+  "commandRunner": { "command": "pnpm tsx prisma/tests/run-all-tests.ts" },
+  "reporters": ["progress", "clear-text", "html"],
+  "concurrency": 2,
+  "dryRunTimeoutMS": 600000,
+  "timeoutMS": 60000
+}

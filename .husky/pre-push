@@ -1,3 +1,3 @@
 echo "Running type check before push..."
-pnpm zgenerate && pnpm tsc --noEmit
+pnpm db:generate && pnpm tsc --noEmit
 echo "Done!"

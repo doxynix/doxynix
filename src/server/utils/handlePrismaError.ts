@@ -31,6 +31,11 @@ const prismaErrorMap: Record<string, PrismaErrorMeta> = {
     defaultMessage: "Связанная запись не найдена (неверный ID)",
     mapKey: "custom",
   },
+  P2004: {
+    code: "FORBIDDEN",
+    defaultMessage: "Доступ к ресурсу запрещен политикой безопасности",
+    mapKey: "custom",
+  },
   P2006: {
     code: "CONFLICT",
     defaultMessage: "Данные были изменены другим пользователем",

@@ -1,6 +1,5 @@
 packages:
-  - 'web'
-  # - 'web/cli'
+  - web
 
 ignoredBuiltDependencies:
   - '@prisma/client'
@@ -10,8 +9,10 @@ ignoredBuiltDependencies:
   - unrs-resolver
 
 onlyBuiltDependencies:
+  - esbuild
   - msgpackr-extract
   - nexus-prisma
+  - puppeteer
   - zenstack
 
 overrides:

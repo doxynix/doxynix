@@ -15,48 +15,36 @@ const baseClient = new PrismaClient({
   log: process.env.NODE_ENV === "development" ? ["error", "warn", "info", "query"] : ["error"],
 });
 
-export const prisma = baseClient.$extends({
+const softDeleteClient = baseClient.$extends({
+  query: {
+    apiKey: {
+      async delete({ args }) {
+        return baseClient.apiKey.update({
+          where: args.where,
+          data: { revoked: true },
+        });
+      },
+      async deleteMany({ args }) {
+        return baseClient.apiKey.updateMany({
+          where: args.where,
+          data: { revoked: true },
+        });
+      },
+    },
+  },
+});
+
+export const prisma = softDeleteClient.$extends({
   query: {
     $allModels: {
       async $allOperations({ model, operation, args, query }) {
         const start = performance.now();
         const ctx = requestContext.getStore();
 
-        const softDeleteModels = ["ApiKey"];
-        const finalArgs = args as any;
-
-        if (softDeleteModels.includes(model)) {
-          if (["findFirst", "findUnique", "findMany", "count", "aggregate"].includes(operation)) {
-            const hasRevokedInWhere =
-              finalArgs.where &&
-              (Object.prototype.hasOwnProperty.call(finalArgs.where, "revoked") ||
-                (finalArgs.where.OR &&
-                  finalArgs.where.OR.some((o: any) =>
-                    Object.prototype.hasOwnProperty.call(o, "revoked")
-                  )));
-            if (!hasRevokedInWhere) {
-              finalArgs.where = { ...finalArgs.where, revoked: false };
-            }
-          }
-
-          if (operation === "delete" || operation === "deleteMany") {
-            return (baseClient as any)[model].update({
-              where: finalArgs.where,
-              data: { revoked: true },
-            });
-          }
-        }
-
-        const result = await query(finalArgs);
-
-        const duration = performance.now() - start;
-        if (duration > 100) {
-          console.warn(`[Prisma Slow Query] ${model}.${operation} took ${duration.toFixed(2)}ms`);
-        }
-
         const mutationOps = ["create", "update", "updateMany", "upsert", "delete", "deleteMany"];
 
         if (mutationOps.includes(operation) && model !== "AuditLog") {
+          const finalArgs = args as any;
           const rawUserId = finalArgs?.data?.userId ?? finalArgs?.where?.userId;
           const auditUserId = typeof rawUserId === "number" ? rawUserId : null;
 
@@ -129,6 +117,13 @@ export const prisma = baseClient.$extends({
               },
             })
             .catch((err: any) => console.error("Audit Log Failed:", err));
+        }
+
+        const result = await query(args);
+
+        const duration = performance.now() - start;
+        if (duration > 200) {
+          console.warn(`[Prisma Slow Query] ${model}.${operation} took ${duration.toFixed(2)}ms`);
         }
 
         return result;

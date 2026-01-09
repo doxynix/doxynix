@@ -1,10 +1,5 @@
 import { Octokit } from "@octokit/rest";
-
-// NOTE: используется глобальный prisma,
-// потому что он расширен (soft delete, audit log, context).
-// Если появятся транзакции/тесты - можно передавать клиент аргументом.
-
-import { prisma } from "@/shared/api/db/db";
+import { PrismaClient } from "@prisma/client";
 
 export const githubService = {
   parseUrl(input: string) {
@@ -20,7 +15,7 @@ export const githubService = {
     return { owner: parts[0], name: parts[1] };
   },
 
-  async getClientForUser(userId: number) {
+  async getClientForUser(prisma: PrismaClient, userId: number) {
     const account = await prisma.account.findFirst({
       where: { userId, provider: "github" },
     });
@@ -31,8 +26,8 @@ export const githubService = {
     return new Octokit({ auth: token });
   },
 
-  async getRepoInfo(userId: number, owner: string, name: string) {
-    const octokit = await this.getClientForUser(userId);
+  async getRepoInfo(prisma: PrismaClient, userId: number, owner: string, name: string) {
+    const octokit = await this.getClientForUser(prisma, userId);
     const { data } = await octokit.repos.get({ owner, repo: name });
 
     return data;

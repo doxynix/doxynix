@@ -28,44 +28,19 @@ export const analyticsRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx }) => {
-      const userId = Number(ctx.session.user.id);
-
-      const userRepos = await ctx.prisma.repo.findMany({
-        where: { userId },
-        select: { id: true },
-      });
-
-      const repoIds = userRepos.map((r) => r.id);
-
-      if (repoIds.length === 0) {
-        return {
-          repoCount: 0,
-          docsCount: 0,
-          analysisCount: 0,
-          failedAnalyses: 0,
-          pendingAnalyses: 0,
-        };
-      }
-
-      const [docsCount, totalAnalyses, failedAnalyses, pendingAnalyses] = await Promise.all([
-        ctx.prisma.document.count({
-          where: { repoId: { in: repoIds } },
-        }),
-        ctx.prisma.analysis.count({
-          where: { repoId: { in: repoIds } },
-        }),
-        ctx.prisma.analysis.count({
-          where: { repoId: { in: repoIds }, status: "FAILED" },
-        }),
-        ctx.prisma.analysis.count({
-          where: { repoId: { in: repoIds }, status: "PENDING" },
-        }),
-      ]);
+      const [repoCount, docsCount, analysisCount, failedAnalyses, pendingAnalyses] =
+        await Promise.all([
+          ctx.db.repo.count(),
+          ctx.db.document.count(),
+          ctx.db.analysis.count(),
+          ctx.db.analysis.count({ where: { status: "FAILED" } }),
+          ctx.db.analysis.count({ where: { status: "PENDING" } }),
+        ]);
 
       return {
-        repoCount: repoIds.length,
+        repoCount,
         docsCount,
-        analysisCount: totalAnalyses,
+        analysisCount,
         failedAnalyses,
         pendingAnalyses,
       };

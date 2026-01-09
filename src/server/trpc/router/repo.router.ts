@@ -1,5 +1,4 @@
 import { Status } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { RepoSchema } from "@/generated/zod";
@@ -39,9 +38,7 @@ export const repoRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
-
-      const newRepo = await repoService.createRepo(userId, input.url);
+      const newRepo = await repoService.createRepo(ctx.db, Number(ctx.session.user.id), input.url);
 
       return {
         success: true,
@@ -67,16 +64,13 @@ export const repoRouter = createTRPCRouter({
     .output(z.object({ success: z.boolean(), message: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        const result = await ctx.prisma.repo.deleteMany({
-          where: { publicId: input.id, userId: Number(ctx.session.user.id) },
+        await ctx.db.repo.delete({
+          where: { publicId: input.id },
         });
 
-        if (result.count === 0) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Репозиторий не найден" });
-        }
         return { success: true, message: "Репозиторий удален" };
       } catch (error) {
-        handlePrismaError(error);
+        handlePrismaError(error, { notFound: "Репозиторий не найден" });
       }
     }),
 
@@ -101,11 +95,8 @@ export const repoRouter = createTRPCRouter({
     )
     .output(PublicRepoSchema.extend({ status: z.enum(Status).nullish() }).nullable())
     .query(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
-
-      const repo = await ctx.prisma.repo.findFirst({
+      const repo = await ctx.db.repo.findFirst({
         where: {
-          userId,
           owner: { equals: input.owner, mode: "insensitive" },
           name: { equals: input.name, mode: "insensitive" },
         },
@@ -157,14 +148,13 @@ export const repoRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
       const { limit, search, cursor, status, visibility, sortBy, sortOrder } = input;
       const page = Math.min(Math.max(1, cursor ?? 1), 1000000);
 
-      const where = repoService.buildWhereClause(userId, { search, visibility, status });
+      const where = repoService.buildWhereClause({ search, visibility, status });
 
       const [items, totalCount, filteredCount] = await Promise.all([
-        ctx.prisma.repo.findMany({
+        ctx.db.repo.findMany({
           where,
           take: limit,
           skip: (page - 1) * limit,
@@ -173,8 +163,8 @@ export const repoRouter = createTRPCRouter({
             analyses: { take: 1, orderBy: { createdAt: "desc" } },
           },
         }),
-        ctx.prisma.repo.count({ where: { userId } }),
-        ctx.prisma.repo.count({ where }),
+        ctx.db.repo.count(),
+        ctx.db.repo.count({ where }),
       ]);
 
       const totalPages = Math.ceil(filteredCount / limit);

@@ -4,12 +4,14 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pg_trgm, unaccent, fuzzystrmatch, btree_gin, pg_stat_statements, uuidOssp(map: "uuid-ossp")]
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres", "relationJoins", "postgresqlExtensions"]
 }
 
 generator zod {
@@ -88,13 +90,13 @@ model Repo {
   ownerAvatarUrl  String?    @map("owner_avatar_url")
   openIssues      Int        @default(0) @map("open_issues_count")
   size            Int        @default(0)
-  visibility      Visibility
+  visibility      Visibility @default(PRIVATE)
   pushedAt        DateTime?  @map("pushed_at")
   createdAt       DateTime   @default(now()) @map("created_at")
   githubCreatedAt DateTime?  @map("github_created_at")
   updatedAt       DateTime   @updatedAt() @map("updated_at")
   userId          Int        @map("user_id")
-  user            User       @relation(fields: [userId], references: [id])
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   analyses        Analysis[]
   documents       Document[]
 
@@ -111,8 +113,10 @@ model Analysis {
   publicId    String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   status      Status
   score       Int?
-  metricsJson Json     @map("metrics_json")
+  metricsJson Json?    @map("metrics_json")
   commitSha   String   @map("commit_sha")
+  logs        String?  @db.Text()
+  error       String?  @db.Text()
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt() @map("updated_at")
   repoId      Int      @map("repo_id")

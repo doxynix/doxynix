@@ -1,10 +1,11 @@
 import { Prisma, Status, Visibility } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
-import { prisma } from "@/shared/api/db/db";
-
 import { handlePrismaError } from "@/server/utils/handlePrismaError";
 import { githubService } from "./github.service";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DbClient = any;
 
 interface OctokitError {
   status: number;
@@ -21,7 +22,7 @@ function isOctokitError(error: unknown): error is OctokitError {
 }
 
 export const repoService = {
-  async createRepo(userId: number, url: string) {
+  async createRepo(db: DbClient, userId: number, url: string) {
     let repoInfo;
     try {
       repoInfo = githubService.parseUrl(url);
@@ -36,7 +37,7 @@ export const repoService = {
 
     let githubData;
     try {
-      githubData = await githubService.getRepoInfo(userId, owner, name);
+      githubData = await githubService.getRepoInfo(db, userId, owner, name);
     } catch (error) {
       if (isOctokitError(error)) {
         if (error.status === 404)
@@ -48,7 +49,7 @@ export const repoService = {
     }
 
     try {
-      return await prisma.repo.create({
+      return await db.repo.create({
         data: {
           githubId: githubData.id,
           owner: githubData.owner.login,
@@ -81,43 +82,39 @@ export const repoService = {
     }
   },
 
-  buildWhereClause(
-    userId: number,
-    filters: {
-      search?: string;
-      visibility?: Visibility;
-      status?: Status;
-    }
-  ): Prisma.RepoWhereInput {
+  buildWhereClause(filters: {
+    search?: string;
+    visibility?: Visibility;
+    status?: Status;
+  }): Prisma.RepoWhereInput {
     const { search, visibility, status } = filters;
     const searchTerms = search != null ? search.trim().split(/\s+/) : [];
 
+    const statusFilter: Prisma.RepoWhereInput = status
+      ? status === Status.NEW
+        ? { OR: [{ analyses: { none: {} } }, { analyses: { some: { status: Status.NEW } } }] }
+        : { analyses: { some: { status } } }
+      : {};
+
+    const visibilityFilter = visibility ? { visibility } : {};
+
+    const searchFilter: Prisma.RepoWhereInput =
+      searchTerms.length > 0
+        ? {
+            AND: searchTerms.map((term) => ({
+              OR: [
+                { name: { contains: term, mode: "insensitive" } },
+                { owner: { contains: term, mode: "insensitive" } },
+                { description: { contains: term, mode: "insensitive" } },
+              ],
+            })),
+          }
+        : {};
+
     return {
-      userId,
-      ...(visibility && { visibility }),
-
-      ...(searchTerms.length > 0 && {
-        AND: searchTerms.map((term) => ({
-          OR: [
-            { name: { contains: term, mode: "insensitive" } },
-            { owner: { contains: term, mode: "insensitive" } },
-          ],
-        })),
-      }),
-
-      ...(status && {
-        ...(status === Status.NEW
-          ? {
-              OR: [{ analyses: { none: {} } }, { analyses: { some: { status: Status.NEW } } }],
-            }
-          : {
-              analyses: {
-                some: {
-                  status: status,
-                },
-              },
-            }),
-      }),
+      ...visibilityFilter,
+      ...statusFilter,
+      ...searchFilter,
     };
   },
 };

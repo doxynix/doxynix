@@ -1,5 +1,4 @@
 import crypto from "crypto";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { ApiKeySchema } from "@/generated/zod";
@@ -47,7 +46,7 @@ export const apiKeyRouter = createTRPCRouter({
       const hashedKey = crypto.createHash("sha256").update(fullKey).digest("hex");
 
       try {
-        await ctx.prisma.apiKey.create({
+        await ctx.db.apiKey.create({
           data: {
             userId,
             name: input.name,
@@ -90,11 +89,8 @@ export const apiKeyRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx }) => {
-      const userId = Number(ctx.session.user.id);
-
-      const allKeys = await ctx.prisma.apiKey.findMany({
+      const allKeys = await ctx.db.apiKey.findMany({
         where: {
-          userId,
           OR: [{ revoked: true }, { revoked: false }],
         },
         select: {
@@ -141,22 +137,17 @@ export const apiKeyRouter = createTRPCRouter({
     )
     .output(z.object({ success: z.boolean(), message: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const userId = Number(ctx.session.user.id);
       try {
-        const result = await ctx.prisma.apiKey.updateMany({
-          where: { id: input.id, userId },
+        await ctx.db.apiKey.updateMany({
+          where: { id: input.id },
           data: { name: input.name, description: input.description },
         });
-
-        if (result.count === 0) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "API-ключ не найден или был отозван" });
-        }
 
         return { success: true, message: "Имя API-ключа обновлено" };
       } catch (error) {
         handlePrismaError(error, {
           uniqueConstraint: { name: "Это имя уже занято другим ключом" },
-          notFound: "Ключ не найден",
+          notFound: "Ключ не найден или доступ запрещен",
           defaultConflict: "API-ключ с таким именем уже существует",
         });
       }
@@ -178,20 +169,14 @@ export const apiKeyRouter = createTRPCRouter({
     .input(z.object({ id: z.uuid() }))
     .output(z.object({ success: z.boolean(), message: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const userId = Number(ctx.session.user.id);
       try {
-        const result = await ctx.prisma.apiKey.updateMany({
-          where: { id: input.id, userId },
-          data: { revoked: true },
+        await ctx.db.apiKey.delete({
+          where: { id: input.id },
         });
-
-        if (result.count === 0) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Ключ не найден или уже отозван" });
-        }
 
         return { success: true, message: "API-ключ отозван" };
       } catch (error) {
-        handlePrismaError(error);
+        handlePrismaError(error, { notFound: "Ключ не найден" });
       }
     }),
 
@@ -211,12 +196,11 @@ export const apiKeyRouter = createTRPCRouter({
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ input, ctx }) => {
       try {
-        const result = await ctx.prisma.apiKey.updateMany({
-          where: { id: input.id, userId: Number(ctx.session.user.id) },
+        await ctx.db.apiKey.updateMany({
+          where: { id: input.id },
           data: { lastUsed: new Date() },
         });
-        if (result.count === 0)
-          throw new TRPCError({ code: "NOT_FOUND", message: "Ключ не найден" });
+
         return { success: true };
       } catch (error) {
         handlePrismaError(error);

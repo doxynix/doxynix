@@ -21,7 +21,7 @@ export const userRouter = createTRPCRouter({
       openapi: {
         method: "GET",
         path: "/users/whoami",
-        tags: ["user"],
+        tags: ["users"],
         summary: "Get current user information",
         description:
           "Returns the authenticated user's profile information, including public ID, email, name, role, and other relevant account details. Accessible only to logged-in users.",
@@ -34,7 +34,7 @@ export const userRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       const id = Number(ctx.session.user.id);
 
-      const user = await ctx.prisma.user.findFirst({
+      const user = await ctx.db.user.findFirst({
         where: { id },
       });
 
@@ -54,17 +54,34 @@ export const userRouter = createTRPCRouter({
         },
       };
     }),
-  updateAvatar: protectedProcedure // опиши мету и output для trpc-to-openapi
+  updateAvatar: protectedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/users/avatar",
+        tags: ["users"],
+        summary: "Update avatar",
+        description: "Update user avatar",
+        protect: true,
+        errorResponses: OpenApiErrorResponses,
+      },
+    })
     .input(
       z.object({
         url: z.string(),
         key: z.string(),
       })
     )
+    .output(
+      z.object({
+        image: z.string().nullable(),
+        imageKey: z.string().nullable(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = Number(ctx.session.user.id);
 
-      const currentUser = await ctx.prisma.user.findUnique({
+      const currentUser = await ctx.db.user.findUnique({
         where: { id: userId },
         select: { imageKey: true },
       });
@@ -77,11 +94,15 @@ export const userRouter = createTRPCRouter({
         }
       }
 
-      return await ctx.prisma.user.update({
+      return await ctx.db.user.update({
         where: { id: userId },
         data: {
           image: input.url,
           imageKey: input.key,
+        },
+        select: {
+          image: true,
+          imageKey: true,
         },
       });
     }),
