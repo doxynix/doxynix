@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, UserRole } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
@@ -24,11 +24,17 @@ export const t = initTRPC
   });
 
 const withZenStack = t.middleware(async ({ ctx, next }) => {
-  const sessionId = ctx.session?.user?.id;
-  const userId = sessionId !== undefined && sessionId !== null ? Number(sessionId) : undefined;
+  const sessionUser = ctx.session?.user;
+  const userId =
+    sessionUser?.id !== undefined && sessionUser.id !== null ? Number(sessionUser.id) : undefined;
+
+  const userRole =
+    sessionUser?.role !== undefined && sessionUser?.role
+      ? (sessionUser.role as UserRole)
+      : undefined;
 
   const protectedDb = enhance(ctx.prisma, {
-    user: userId !== undefined ? { id: userId } : undefined,
+    user: userId !== undefined ? { id: userId, role: userRole } : undefined,
   }) as unknown as PrismaClient;
 
   return next({
