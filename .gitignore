@@ -60,4 +60,5 @@ robots.txt
 /cli/
 
 # tests
-.stryker-tmp
+.stryker-tmp/
+reports/

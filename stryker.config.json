@@ -2,9 +2,13 @@
   "$schema": "https://schema.stryker-mutator.io/stryker-config.schema.json",
   "mutate": ["src/shared/api/db/**/*.ts"],
   "testRunner": "command",
-  "commandRunner": { "command": "pnpm tsx prisma/tests/run-all-tests.ts" },
+  "commandRunner": {
+    "command": "pnpm tsx prisma/tests/run-all-tests.ts"
+  },
   "reporters": ["progress", "clear-text", "html"],
-  "concurrency": 2,
+  "concurrency": 1,
+  "ignorePatterns": [".next", "node_modules", "dist"],
   "dryRunTimeoutMS": 600000,
-  "timeoutMS": 60000
+  "timeoutMS": 60000,
+  "tempDirName": ".stryker-tmp"
 }
