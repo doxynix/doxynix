@@ -10,35 +10,16 @@ permissions:
   contents: read
   pull-requests: write
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  quality-and-build:
+  # ------------------------------------------------------------------
+  # 1. КАЧЕСТВО КОДА (LINT, FORMATTING, DUPLICATION)
+  # ------------------------------------------------------------------
+  quality:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: test_db
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    env:
-      DATABASE_URL: postgresql://user:password@localhost:5432/test_db
-      RESEND_API_KEY: "re_123456789"
-      NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
-      NEXTAUTH_URL: "http://localhost:3000"
-      UPLOADTHING_TOKEN: "eyJdummy.token.for.build"
-      SKIP_ENV_VALIDATION: 1
-      NEXT_TELEMETRY_DISABLED: 1
-      HUSKY: 0
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -61,13 +42,6 @@ jobs:
       - name: Linting
         run: pnpm lint
 
-      - name: Prisma Generate
-        run: pnpm prisma generate
-
-
-      - name: Type Checking
-        run: pnpm tsc --noEmit
-
       - name: Run Secretlint
         run: pnpm run secretlint:check
 
@@ -75,22 +49,157 @@ jobs:
         run: pnpm run spellcheck
         continue-on-error: true
 
+      - name: Check Code Duplication (JSCPD)
+        run: pnpm run dup
+
+  # ------------------------------------------------------------------
+  # 2. ТИПИЗАЦИЯ (TYPESCRIPT, KNIP)
+  # ------------------------------------------------------------------
+  types:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma Generate
+        run: pnpm db:generate
+
+      - name: Type Checking
+        run: pnpm tsc --noEmit
+
       - name: Find Unused Code (Knip)
         run: pnpm run knip
         env:
-          DATABASE_URL: ${{ env.DATABASE_URL }}
-
-      - name: Security audit
-        run: pnpm audit --audit-level=high
-
-      - name: Check Code Duplication (JSCPD)
-        run: pnpm run dup
+          DATABASE_URL: postgresql://user:password@localhost:5432/test_db # Dummy URL for types
 
       - name: Check Type Coverage
         run: pnpm run typecheck:coverage
 
+  # ------------------------------------------------------------------
+  # 3. БЕЗОПАСНОСТЬ (AUDIT, SNYK)
+  # ------------------------------------------------------------------
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Security audit
+        run: pnpm audit --audit-level=high
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  # ------------------------------------------------------------------
+  # 4. ИНТЕГРАЦИОННЫЕ ТЕСТЫ
+  # ------------------------------------------------------------------
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+      RESEND_API_KEY: "re_123456789"
+      NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
+      NEXTAUTH_URL: "http://localhost:3000"
+      UPLOADTHING_TOKEN: "eyJdummy.token.for.build"
+      SKIP_ENV_VALIDATION: 1
+      NEXT_TELEMETRY_DISABLED: 1
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma Generate
+        run: pnpm db:generate
+
       - name: Verify Database Schema
         run: pnpm prisma db push
+
+      - name: Run Security Integration Tests
+        run: pnpm tsx prisma/tests/run-all-tests.ts
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+  # ------------------------------------------------------------------
+  # 5. СБОРКА (BUILD)
+  # ------------------------------------------------------------------
+  build:
+    needs: [quality, types, security, tests]
+    runs-on: ubuntu-latest
+    env:
+      SKIP_ENV_VALIDATION: 1
+      NEXT_TELEMETRY_DISABLED: 1
+      DATABASE_URL: postgresql://user:password@localhost:5432/test_db # Dummy for build
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma Generate
+        run: pnpm db:generate
 
       - name: Cache Next.js build
         uses: actions/cache@v4
@@ -103,6 +212,20 @@ jobs:
       - name: Build
         run: pnpm build
 
+  # ------------------------------------------------------------------
+  # 6. УВЕДОМЛЕНИЯ (NOTIFY)
+  # ------------------------------------------------------------------
+  notify:
+    needs: [build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Python скрипт для сбора метаданных
       - name: Collect CI metadata (PR, branch, commit, duration)
         env:
           BRANCH_NAME: ${{ github.ref_name }}
@@ -176,9 +299,10 @@ jobs:
           print("CI metadata saved to GITHUB_ENV")
           PY
 
+      # Уведомление об УСПЕХЕ (только если билд прошел)
       - name: Notify Telegram on Success
         uses: appleboy/telegram-action@master
-        if: success()
+        if: needs.build.result == 'success'
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
@@ -198,9 +322,10 @@ jobs:
 
             🚀 Все системы в норме!
 
+      # Уведомление о ПРОВАЛЕ (если билд или любая проверка упали)
       - name: Notify Telegram on Failure
         uses: appleboy/telegram-action@master
-        if: failure()
+        if: needs.build.result != 'success'
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
