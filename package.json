@@ -13,7 +13,7 @@
     ]
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "pnpm db:generate && next dev",
     "build": "next build",
     "sitemap": "next-sitemap",
     "start": "next start",
