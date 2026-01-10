@@ -22,9 +22,23 @@ defaults:
 
 jobs:
   # ------------------------------------------------------------------
-  # 0. Определение изменений
+  # 0. Замер времени
+  # ------------------------------------------------------------------
+  init:
+    name: Init CI metadata
+    runs-on: ubuntu-latest
+    outputs:
+      started_at: ${{ steps.time.outputs.started_at }}
+    steps:
+      - name: Save CI start time
+        id: time
+        run: echo "started_at=$(date -u +%s)" >> $GITHUB_OUTPUT
+
+  # ------------------------------------------------------------------
+  # 1. Определение изменений
   # ------------------------------------------------------------------
   changes:
+    needs: [init]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -40,17 +54,20 @@ jobs:
         with:
           filters: |
             backend:
-              - 'prisma/**'
-              - 'server/**'
-              - 'shared/api/db/**'
-              - 'app/api/**'
               - 'package.json'
               - 'pnpm-lock.yaml'
+              - 'vitest.config.ts'
+              - 'prisma/**'
+              - 'src/server/**'
+              - 'src/app/api/**'
+              - 'src/shared/**'
+              - 'src/tests/**'
 
   # ------------------------------------------------------------------
-  # 1. КАЧЕСТВО КОДА (LINT, FORMATTING, DUPLICATION)
+  # 2. КАЧЕСТВО КОДА (LINT, FORMATTING, DUPLICATION)
   # ------------------------------------------------------------------
   quality:
+    needs: [init]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -86,9 +103,10 @@ jobs:
         run: pnpm run dup
 
   # ------------------------------------------------------------------
-  # 2. ТИПИЗАЦИЯ (TYPESCRIPT, KNIP)
+  # 3. ТИПИЗАЦИЯ (TYPESCRIPT, KNIP)
   # ------------------------------------------------------------------
   types:
+    needs: [init]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -125,9 +143,10 @@ jobs:
         run: pnpm run typecheck:coverage
 
   # ------------------------------------------------------------------
-  # 3. БЕЗОПАСНОСТЬ (AUDIT, SNYK)
+  # 4. БЕЗОПАСНОСТЬ (AUDIT, SNYK)
   # ------------------------------------------------------------------
   security:
+    needs: [init]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -159,10 +178,10 @@ jobs:
 
 
   # ------------------------------------------------------------------
-  # 4. ИНТЕГРАЦИОННЫЕ ТЕСТЫ
+  # 5. ИНТЕГРАЦИОННЫЕ и ЮНИТ ТЕСТЫ
   # ------------------------------------------------------------------
   tests:
-    needs: [changes]
+    needs: [changes, init]
     if: |
       github.ref == 'refs/heads/main' ||
       github.ref == 'refs/heads/develop' ||
@@ -170,6 +189,11 @@ jobs:
       github.event_name == 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+
+    permissions:
+      contents: read
+      pull-requests: write
+
     services:
       postgres:
         image: postgres:15
@@ -215,16 +239,23 @@ jobs:
       - name: Verify Database Schema
         run: pnpm prisma db push
 
-      - name: Run Security Integration Tests
-        run: pnpm tsx prisma/tests/run-all-tests.ts
+      - name: Run Tests with Coverage
+        run: pnpm test:coverage
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
+      - name: Report Coverage
+        if: github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          json-summary-path: './coverage/coverage-summary.json'
+          json-final-path: './coverage/coverage-final.json'
+
   # ------------------------------------------------------------------
-  # 5. СБОРКА (BUILD)
+  # 6. СБОРКА (BUILD)
   # ------------------------------------------------------------------
   build:
-    needs: [quality, types, security, tests, changes]
+    needs: [quality, types, security, tests, changes, init]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     if: |
@@ -270,10 +301,10 @@ jobs:
         run: pnpm build
 
   # ------------------------------------------------------------------
-  # 6. LIGHTHOUSE CI (PERFORMANCE)
+  # 7. LIGHTHOUSE CI (PERFORMANCE)
   # ------------------------------------------------------------------
   lighthouse:
-    needs: [build]
+    needs: [build, init]
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -284,13 +315,21 @@ jobs:
           POSTGRES_DB: test_db
         ports:
           - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     timeout-minutes: 60
     if: needs.build.result == 'success'
     env:
       SKIP_ENV_VALIDATION: 1
       DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+      NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
+      NEXTAUTH_URL: "http://localhost:3000"
       LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -305,6 +344,9 @@ jobs:
       - name: Prisma Generate
         run: pnpm db:generate
 
+      - name: Setup DB Schema
+        run: pnpm prisma db push
+
       - name: Restore Next.js cache
         uses: actions/cache@v4
         with:
@@ -318,10 +360,10 @@ jobs:
         run: pnpm exec lhci autorun
 
   # ------------------------------------------------------------------
-  # 7. УВЕДОМЛЕНИЯ (NOTIFY)
+  # 8. УВЕДОМЛЕНИЯ (NOTIFY)
   # ------------------------------------------------------------------
   notify:
-    needs: [build, lighthouse]
+    needs: [build, lighthouse, init]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -333,14 +375,19 @@ jobs:
 
       # Python скрипт для сбора метаданных
       - name: Collect CI metadata (PR, branch, commit, duration)
+        id: collect
         env:
+          TZ: Europe/Moscow
+          CI_STARTED_AT: ${{ needs.init.outputs.started_at }}
           BRANCH_NAME: ${{ github.ref_name }}
           REPO: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
           GITHUB_SHA: ${{ github.sha }}
+          GITHUB_ACTOR: ${{ github.actor }}
         run: |
           python3 - <<'PY'
-          import os, json, subprocess
+          import os, json, subprocess, time, datetime
+          # Read envs
           event_path = os.environ.get("GITHUB_EVENT_PATH", "")
           pr_url = "не PR"
           pr_user = "—"
@@ -360,21 +407,24 @@ jobs:
             except Exception:
               pass
 
-          # commit author (fallback to GITHUB_ACTOR)
           commit = os.environ.get("GITHUB_SHA", "")
           author = os.environ.get("GITHUB_ACTOR", "—")
           try:
+            # Friendly author from git if available
             author = subprocess.check_output(["git","show","-s","--format=%an", commit]).decode().strip() or author
           except Exception:
             pass
 
-          # start time & duration
-          start_time = os.environ.get("GITHUB_RUN_STARTED_AT", "")
+          # CI_STARTED_AT is epoch seconds string (from init job)
+          start_epoch = os.environ.get("CI_STARTED_AT", "")
+          run_started_human = "—"
           duration = "—"
           try:
-            if start_time:
-              start_ts = int(subprocess.check_output(["date","-d", start_time, "+%s"]).decode().strip())
-              now_ts = int(subprocess.check_output(["date","+%s"]).decode().strip())
+            if start_epoch:
+              start_ts = int(start_epoch)
+              # human readable in Moscow
+              run_started_human = datetime.datetime.fromtimestamp(start_ts, datetime.timezone.utc).astimezone(datetime.timezone(datetime.timedelta(hours=3))).strftime("%Y-%m-%d %H:%M:%S MSK")
+              now_ts = int(time.time())
               diff = max(0, now_ts - start_ts)
               hh = diff // 3600
               mm = (diff % 3600) // 60
@@ -388,22 +438,38 @@ jobs:
           commit_url = f"https://github.com/{repo}/commit/{commit}" if repo and commit else "—"
           branch_url = f"https://github.com/{repo}/tree/{branch}" if repo and branch else "—"
 
-          # записываем в GITHUB_ENV
-          env_path = os.environ.get("GITHUB_ENV")
-          if env_path:
-            with open(env_path, "a") as f:
-              f.write(f"PR_URL={pr_url}\n")
-              f.write(f"PR_USER={pr_user}\n")
-              f.write(f"PR_ADDITIONS={additions}\n")
-              f.write(f"PR_DELETIONS={deletions}\n")
-              f.write(f"PR_CHANGED_FILES={changed_files}\n")
-              f.write(f"BRANCH_URL={branch_url}\n")
-              f.write(f"COMMIT_URL={commit_url}\n")
-              f.write(f"COMMIT_AUTHOR={author}\n")
-              f.write(f"RUN_STARTED_AT={start_time}\n")
-              f.write(f"RUN_DURATION={duration}\n")
-          print("CI metadata saved to GITHUB_ENV")
+          # Build markdown message (one for success; we'll reuse same field for failure too)
+          message = (
+            f"✅ **CI Report**\n\n"
+            f"Project **{repo}**\n\n"
+            f"**Branch:** [{branch}]({branch_url})\n"
+            f"**Commit:** [`{commit}`]({commit_url}) — author: `{author}`\n"
+            f"**PR:** {pr_url}\n"
+            f"**PR Author:** `{pr_user}` • Files: `{changed_files}` • `+{additions} / -{deletions}`\n"
+            f"**Start:** `{run_started_human}`\n"
+            f"**Duration:** `{duration}`\n\n"
+            f"[Open workflow run](https://github.com/{repo}/actions/runs/{os.environ.get('RUN_ID','')})"
+          )
+
+          # Export outputs using GITHUB_OUTPUT
+          github_output = os.environ.get("GITHUB_OUTPUT")
+          if github_output:
+            with open(github_output, "a") as out:
+              out.write(f"message<<EOF\n{message}\nEOF\n")
+              out.write(f"run_started_human={run_started_human}\n")
+              out.write(f"run_duration={duration}\n")
+              out.write(f"pr_url={pr_url}\n")
+              out.write(f"pr_user={pr_user}\n")
+              out.write(f"changed_files={changed_files}\n")
+              out.write(f"additions={additions}\n")
+              out.write(f"deletions={deletions}\n")
+              out.write(f"commit_url={commit_url}\n")
+              out.write(f"branch_url={branch_url}\n")
+          else:
+            print("GITHUB_OUTPUT not found; can't write step outputs")
+          print("Collected CI metadata")
           PY
+
 
       # Уведомление об УСПЕХЕ
       - name: Notify Telegram on Success
@@ -413,20 +479,8 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
-          message: |
-            ✅ **CI Success!**
-            Проект **${{ github.repository }}** успешно прошёл все проверки и собран.
+          message: ${{ steps.collect.outputs.message }}
 
-            **Ветка:** [${{ github.ref_name }}](${{ env.BRANCH_URL }})
-            **Коммит:** [`${{ github.sha }}`](${{ env.COMMIT_URL }}) — автор: `${{ env.COMMIT_AUTHOR }}`
-            **PR:** ${{ env.PR_URL }}
-            **PR Автор:** `${{ env.PR_USER }}`  •  **Файлы:** `${{ env.PR_CHANGED_FILES }}`  •  `+${{ env.PR_ADDITIONS }} / -${{ env.PR_DELETIONS }}`
-            **Начало CI:** `${{ env.RUN_STARTED_AT }}`
-            **Длительность:** `${{ env.RUN_DURATION }}`
-
-            [Посмотреть Workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-
-            🚀 Все системы в норме!
 
       # Уведомление о ПРОВАЛЕ
       - name: Notify Telegram on Failure
@@ -437,14 +491,6 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message: |
-            ❌ **CI Failed!**
-            В проекте **${{ github.repository }}** что-то пошло не так.
+            ❌ **CI Failed**
+            ${{ steps.collect.outputs.message }}
 
-            **Ветка:** [${{ github.ref_name }}](${{ env.BRANCH_URL }})
-            **Коммит:** [`${{ github.sha }}`](${{ env.COMMIT_URL }}) — автор: `${{ env.COMMIT_AUTHOR }}`
-            **PR:** ${{ env.PR_URL }}
-            **PR Автор:** `${{ env.PR_USER }}`  •  **Файлы:** `${{ env.PR_CHANGED_FILES }}`  •  `+${{ env.PR_ADDITIONS }} / -${{ env.PR_DELETIONS }}`
-            **Начало CI:** `${{ env.RUN_STARTED_AT }}`
-            **Длительность:** `${{ env.RUN_DURATION }}`
-
-            [Посмотреть Workflow и логи](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})

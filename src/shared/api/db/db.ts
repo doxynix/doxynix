@@ -12,9 +12,14 @@ const pool = new pg.Pool({
 });
 const adapter = new PrismaPg(pool);
 
+const isTest = process.env.NODE_ENV === "test";
+
 const baseClient = new PrismaClient({
   adapter,
-  log: process.env.NODE_ENV === "development" ? ["error", "warn", "info", "query"] : ["error"],
+  log:
+    process.env.NODE_ENV === "development" && !isTest
+      ? ["error", "warn", "info", "query"]
+      : ["error"],
 });
 
 const softDeleteClient = baseClient.$extends({
@@ -22,13 +27,13 @@ const softDeleteClient = baseClient.$extends({
     apiKey: {
       async delete({ args }) {
         return baseClient.apiKey.update({
-          where: args.where,
+          ...args,
           data: { revoked: true },
         });
       },
       async deleteMany({ args }) {
         return baseClient.apiKey.updateMany({
-          where: args.where,
+          ...args,
           data: { revoked: true },
         });
       },
@@ -119,13 +124,15 @@ export const prisma = softDeleteClient.$extends({
             logger.error({ msg: "AUDIT WRITE FAILED", error: auditErr });
           }
 
-          logger.info({
-            msg: `DB Write: ${model}.${operation}`,
-            type: "db.write",
-            model,
-            operation,
-            durationMs: duration.toFixed(2),
-          });
+          if (!isTest) {
+            logger.info({
+              msg: `DB Write: ${model}.${operation}`,
+              type: "db.write",
+              model,
+              operation,
+              durationMs: duration.toFixed(2),
+            });
+          }
         } else if (duration > 200) {
           logger.warn({
             msg: "Slow DB Query",

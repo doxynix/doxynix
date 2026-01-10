@@ -11,7 +11,18 @@ import { defineConfig } from "eslint/config";
 
 export default defineConfig([
   {
-    ignores: [".next/**", "out/**", "build/**", "dist/**", "next-env.d.ts", "src/generated/**"],
+    ignores: [
+      ".next/**",
+      "out/**",
+      "build/**",
+      "dist/**",
+      "next-env.d.ts",
+      "src/generated/**",
+      "vitest.config.ts",
+      "eslint.config.mjs",
+      "postcss.config.mjs",
+      "next.config.mjs",
+    ],
   },
 
   ...nextVitals,
@@ -67,7 +78,12 @@ export default defineConfig([
   },
 
   {
-    files: ["src/components/ui/**/*.{ts,tsx}", "src/shared/ui/**/*.{ts,tsx}"],
+    files: [
+      "src/shared/ui/**/*.{ts,tsx}",
+      "src/**/*.test.ts",
+      "src/**/*.test.tsx",
+      "src/tests/**/*.{ts,tsx}",
+    ],
     rules: {
       "react-hooks/exhaustive-deps": "off",
       "@typescript-eslint/strict-boolean-expressions": "off",
