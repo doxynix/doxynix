@@ -39,6 +39,14 @@ const axiomLogger = new Logger();
 
 const withContext = (obj: LogPayload) => {
   const store = requestContext.getStore();
+  if (obj.error instanceof Error) {
+    obj.error = {
+      message: obj.error.message,
+      stack: obj.error.stack,
+      kind: obj.error.name,
+    };
+  }
+
   return {
     ...store,
     ...obj,

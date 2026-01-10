@@ -62,3 +62,5 @@ robots.txt
 # tests
 .stryker-tmp/
 reports/
+/src/tests/e2e/playwright-report
+/src/tests/e2e/test-results

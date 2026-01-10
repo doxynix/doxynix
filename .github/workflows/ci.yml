@@ -360,10 +360,83 @@ jobs:
         run: pnpm exec lhci autorun
 
   # ------------------------------------------------------------------
-  # 8. УВЕДОМЛЕНИЯ (NOTIFY)
+  # 8 E2E ТЕСТЫ (PLAYWRIGHT)
+  # ------------------------------------------------------------------
+  e2e:
+    needs: [build, init, changes]
+    if: |
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/develop' ||
+      needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Prisma Generate
+        run: pnpm db:generate
+
+      - name: Setup DB Schema
+        run: pnpm prisma db push
+
+      - name: Restore Next.js cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Build app
+        run: pnpm build
+
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+          NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
+          NEXTAUTH_URL: "http://localhost:3000"
+          SKIP_ENV_VALIDATION: 1
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: src/tests/e2e/playwright-report/
+          retention-days: 7
+
+  # ------------------------------------------------------------------
+  # 9. УВЕДОМЛЕНИЯ (NOTIFY)
   # ------------------------------------------------------------------
   notify:
-    needs: [build, lighthouse, init]
+    needs: [build, lighthouse, e2e, init]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -379,6 +452,7 @@ jobs:
           TZ: Europe/Moscow
           BUILD_RESULT: ${{ needs.build.result }}
           LH_RESULT: ${{ needs.lighthouse.result }}
+          E2E_RESULT: ${{ needs.e2e.result }}
           CI_STARTED_AT: ${{ needs.init.outputs.started_at }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
           REPO: ${{ github.repository }}
@@ -391,7 +465,8 @@ jobs:
 
           build_res = os.environ.get("BUILD_RESULT", "failure")
           lh_res = os.environ.get("LH_RESULT", "success")
-          is_success = build_res == "success" and lh_res in ["success", "skipped"]
+          e2e_res = os.environ.get("E2E_RESULT", "success")
+          is_success = build_res == "success" and lh_res in ["success", "skipped"] and e2e_res == "success"
 
           status_emoji = "✅" if is_success else "❌"
           status_text = "Success" if is_success else "Failed"
