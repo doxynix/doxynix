@@ -1,8 +1,11 @@
+import crypto from "crypto";
 import { PrismaClient, UserRole } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
 import { OpenApiMeta } from "trpc-to-openapi";
+
+import { logger } from "@/shared/lib/logger";
 
 import { Context } from "@/server/trpc/context";
 import { requestContext } from "@/server/utils/requestContext";
@@ -45,13 +48,59 @@ const withZenStack = t.middleware(async ({ ctx, next }) => {
   });
 });
 
-const contextMiddleware = t.middleware(async ({ ctx, next }) => {
-  return requestContext.run(ctx.requestInfo, () => next({ ctx }));
+const contextMiddleware = t.middleware(async ({ ctx, next, path, type }) => {
+  const requestId = crypto.randomUUID();
+  const sessionUser = ctx.session?.user;
+
+  return requestContext.run(
+    {
+      requestId,
+      userId:
+        sessionUser?.id !== undefined && sessionUser?.id !== null
+          ? Number(sessionUser.id)
+          : undefined,
+      userRole: sessionUser?.role,
+      ip: ctx.requestInfo.ip,
+      userAgent: ctx.requestInfo.userAgent,
+      referer: ctx.req.headers.get("referer") ?? undefined,
+      origin: ctx.req.headers.get("origin") ?? undefined,
+      path,
+      method: type,
+    },
+    () => next({ ctx })
+  );
+});
+
+const loggerMiddleware = t.middleware(async ({ path, type, next }) => {
+  const start = performance.now();
+  const result = await next();
+  const durationMs = Number((performance.now() - start).toFixed(2));
+
+  const meta = { path, type, durationMs };
+
+  if (result.ok) {
+    logger.info({ ...meta, msg: `tRPC [${type}] ok: ${path}` });
+  } else {
+    logger.error({
+      ...meta,
+      msg: `tRPC [${type}] error: ${path}`,
+      code: result.error.code,
+      message: result.error.message,
+      stack: result.error.code === "INTERNAL_SERVER_ERROR" ? result.error.stack : undefined,
+    });
+    if (process.env.NODE_ENV === "production") {
+      await logger.flush();
+    }
+  }
+  return result;
 });
 
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
-export const publicProcedure = t.procedure.use(contextMiddleware).use(withZenStack);
+export const publicProcedure = t.procedure
+  .use(contextMiddleware)
+  .use(loggerMiddleware)
+  .use(withZenStack);
 
 const isAuthed = t.middleware(({ ctx, next }) => {
   if (ctx.session == null || ctx.session.user == null) {

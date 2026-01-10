@@ -10,6 +10,7 @@ import { Resend } from "resend";
 
 import { AuthEmail } from "@/shared/api/auth/templates/AuthEmail";
 import { prisma } from "@/shared/api/db/db";
+import { logger } from "@/shared/lib/logger";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 дней
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // сутки
@@ -46,12 +47,26 @@ export const authOptions: NextAuthOptions = {
 
         try {
           if (!resend) {
-            console.warn("Resend disabled (no API key)");
+            logger.warn({
+              msg: "Resend disabled (no API key)",
+              type: "auth.email_warn",
+            });
             return;
           }
           await resend.emails.send(template);
+
+          logger.info({
+            msg: "Verification email sent",
+            type: "auth.email_sent",
+            email: identifier,
+          });
         } catch (error) {
-          console.error("Resend error:", error);
+          logger.error({
+            msg: "Failed to send verification email",
+            type: "auth.email_error",
+            error: error instanceof Error ? error.message : String(error),
+            email: identifier,
+          });
           throw new Error("Failed to send verification email");
         }
       },
@@ -104,10 +119,21 @@ export const authOptions: NextAuthOptions = {
 
   events: {
     async signIn({ user, account }) {
-      console.log(`[${account?.provider}] ${user.email} signed in`);
+      logger.info({
+        msg: "User signed in",
+        type: "auth.signin",
+        email: user.email,
+        provider: account?.provider,
+        userId: user.id,
+      });
     },
     async signOut({ session }) {
-      console.log(`User ${session?.user?.email} signed out`);
+      logger.info({
+        msg: "User signed out",
+        type: "auth.signout",
+        email: session?.user?.email,
+        userId: session?.user?.id,
+      });
     },
     async createUser({ user }) {
       if (user.name == null && user.email != null) {
@@ -118,14 +144,31 @@ export const authOptions: NextAuthOptions = {
           where: { id: Number(user.id) },
           data: { name: finalName },
         });
-        console.log(`New user created: ${user.email} with name ${finalName}`);
+        logger.info({
+          msg: "New user created",
+          type: "auth.register",
+          email: user.email,
+          name: finalName,
+          userId: user.id,
+        });
       }
     },
     async updateUser({ user }) {
-      console.log(`Update user: ${user.email}`);
+      logger.info({
+        msg: "User profile updated",
+        type: "auth.user_update",
+        email: user.email,
+        userId: user.id,
+      });
     },
     async linkAccount({ user, account }) {
-      console.log(`${account.provider} linked to ${user.email}`);
+      logger.info({
+        msg: "External account linked",
+        type: "auth.link_account",
+        email: user.email,
+        provider: account.provider,
+        userId: user.id,
+      });
     },
   },
 };

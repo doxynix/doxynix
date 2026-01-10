@@ -238,6 +238,7 @@ model VerificationToken {
 
 model AuditLog {
   id        String   @id @default(uuid(7)) @db.Uuid
+  requestId String?  @map("request_id")
   model     String
   operation String
   payload   Json
@@ -251,6 +252,7 @@ model AuditLog {
   @@allow('update,delete', auth().role == 'ADMIN')
 
   @@index([userId])
+  @@index([requestId])
   @@index([createdAt(sort: Desc)])
   @@map("audit_logs")
 }
