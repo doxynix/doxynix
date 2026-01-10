@@ -440,7 +440,6 @@ jobs:
 
           # Build markdown message (one for success; we'll reuse same field for failure too)
           message = (
-            f"✅ **CI Report**\n\n"
             f"Project **{repo}**\n\n"
             f"**Branch:** [{branch}]({branch_url})\n"
             f"**Commit:** [`{commit}`]({commit_url}) — author: `{author}`\n"
