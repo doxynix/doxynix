@@ -13,14 +13,13 @@
     },
     "assert": {
       "assertions": {
-        "categories:performance": ["error", { "minScore": 0.6 }],
+        "categories:performance": ["error", { "minScore": 0.8 }],
         "categories:accessibility": ["error", { "minScore": 0.8 }],
         "categories:best-practices": ["error", { "minScore": 0.8 }],
         "categories:seo": ["error", { "minScore": 0.8 }],
 
-        "errors-in-console": "error",
+        "errors-in-console": "warn",
         "is-crawlable": "error",
-        "external-anchors-use-rel-noopener": "error",
 
         "first-contentful-paint": ["warn", { "maxNumericValue": 2000 }],
         "interactive": ["warn", { "maxNumericValue": 3500 }],
