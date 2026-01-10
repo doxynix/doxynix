@@ -373,11 +373,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Python скрипт для сбора метаданных
-      - name: Collect CI metadata (PR, branch, commit, duration)
+      - name: Collect CI metadata
         id: collect
         env:
           TZ: Europe/Moscow
+          BUILD_RESULT: ${{ needs.build.result }}
+          LH_RESULT: ${{ needs.lighthouse.result }}
           CI_STARTED_AT: ${{ needs.init.outputs.started_at }}
           BRANCH_NAME: ${{ github.ref_name }}
           REPO: ${{ github.repository }}
@@ -387,13 +388,16 @@ jobs:
         run: |
           python3 - <<'PY'
           import os, json, subprocess, time, datetime
-          # Read envs
+
+          build_res = os.environ.get("BUILD_RESULT", "failure")
+          lh_res = os.environ.get("LH_RESULT", "success")
+          is_success = build_res == "success" and lh_res in ["success", "skipped"]
+
+          status_emoji = "✅" if is_success else "❌"
+          status_text = "Success" if is_success else "Failed"
+
           event_path = os.environ.get("GITHUB_EVENT_PATH", "")
-          pr_url = "не PR"
-          pr_user = "—"
-          additions = "0"
-          deletions = "0"
-          changed_files = "0"
+          pr_url, pr_user, changed_files, additions, deletions = "не PR", "—", "0", "0", "0"
           if event_path and os.path.exists(event_path):
             try:
               e = json.load(open(event_path))
@@ -404,42 +408,29 @@ jobs:
                 additions = str(pr.get("additions", 0))
                 deletions = str(pr.get("deletions", 0))
                 changed_files = str(pr.get("changed_files", 0))
-            except Exception:
-              pass
+            except: pass
 
           commit = os.environ.get("GITHUB_SHA", "")
           author = os.environ.get("GITHUB_ACTOR", "—")
           try:
-            # Friendly author from git if available
             author = subprocess.check_output(["git","show","-s","--format=%an", commit]).decode().strip() or author
-          except Exception:
-            pass
+          except: pass
 
-          # CI_STARTED_AT is epoch seconds string (from init job)
           start_epoch = os.environ.get("CI_STARTED_AT", "")
-          run_started_human = "—"
-          duration = "—"
-          try:
-            if start_epoch:
-              start_ts = int(start_epoch)
-              # human readable in Moscow
-              run_started_human = datetime.datetime.fromtimestamp(start_ts, datetime.timezone.utc).astimezone(datetime.timezone(datetime.timedelta(hours=3))).strftime("%Y-%m-%d %H:%M:%S MSK")
-              now_ts = int(time.time())
-              diff = max(0, now_ts - start_ts)
-              hh = diff // 3600
-              mm = (diff % 3600) // 60
-              ss = diff % 60
-              duration = f"{hh:02d}:{mm:02d}:{ss:02d}"
-          except Exception:
-            pass
+          run_started_human, duration = "—", "—"
+          if start_epoch:
+            start_ts = int(start_epoch)
+            run_started_human = datetime.datetime.fromtimestamp(start_ts, datetime.timezone.utc).astimezone(datetime.timezone(datetime.timedelta(hours=3))).strftime("%Y-%m-%d %H:%M:%S MSK")
+            diff = max(0, int(time.time()) - start_ts)
+            duration = f"{diff // 3600:02d}:{(diff % 3600) // 60:02d}:{diff % 60:02d}"
 
-          branch = os.environ.get("BRANCH_NAME", "")
           repo = os.environ.get("REPO", "")
-          commit_url = f"https://github.com/{repo}/commit/{commit}" if repo and commit else "—"
-          branch_url = f"https://github.com/{repo}/tree/{branch}" if repo and branch else "—"
+          branch = os.environ.get("BRANCH_NAME", "")
+          commit_url = f"https://github.com/{repo}/commit/{commit}"
+          branch_url = f"https://github.com/{repo}/tree/{branch}"
 
-          # Build markdown message (one for success; we'll reuse same field for failure too)
           message = (
+            f"{status_emoji} **CI {status_text}**\n\n"
             f"Project **{repo}**\n\n"
             f"**Branch:** [{branch}]({branch_url})\n"
             f"**Commit:** [`{commit}`]({commit_url}) — author: `{author}`\n"
@@ -450,7 +441,6 @@ jobs:
             f"[Open workflow run](https://github.com/{repo}/actions/runs/{os.environ.get('RUN_ID','')})"
           )
 
-          # Export outputs using GITHUB_OUTPUT
           github_output = os.environ.get("GITHUB_OUTPUT")
           if github_output:
             with open(github_output, "a") as out:
@@ -462,34 +452,13 @@ jobs:
               out.write(f"changed_files={changed_files}\n")
               out.write(f"additions={additions}\n")
               out.write(f"deletions={deletions}\n")
-              out.write(f"commit_url={commit_url}\n")
-              out.write(f"branch_url={branch_url}\n")
-          else:
-            print("GITHUB_OUTPUT not found; can't write step outputs")
-          print("Collected CI metadata")
+              out.write(f"is_success={'true' if is_success else 'false'}\n")
           PY
 
-
-      # Уведомление об УСПЕХЕ
-      - name: Notify Telegram on Success
+      - name: Notify Telegram
         uses: appleboy/telegram-action@master
-        if: needs.build.result == 'success' && (needs.lighthouse.result == 'success' || needs.lighthouse.result == 'skipped')
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message: ${{ steps.collect.outputs.message }}
-
-
-      # Уведомление о ПРОВАЛЕ
-      - name: Notify Telegram on Failure
-        uses: appleboy/telegram-action@master
-        if: needs.build.result != 'success' || needs.lighthouse.result == 'failure'
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          format: markdown
-          message: |
-            ❌ **CI Failed**
-            ${{ steps.collect.outputs.message }}
-
