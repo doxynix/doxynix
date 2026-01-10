@@ -129,6 +129,7 @@
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.50.0",
     "@typescript-eslint/parser": "^8.50.0",
+    "@vitejs/plugin-react": "^5.1.2",
     "@zenstackhq/sdk": "^3.1.1",
     "@zenstackhq/trpc": "^2.22.1",
     "babel-plugin-react-compiler": "^1.0.0",
@@ -167,6 +168,8 @@
     "type-coverage": "^2.29.7",
     "typedoc": "^0.28.15",
     "typescript": "^5.9.3",
+    "vite-tsconfig-paths": "^6.0.4",
+    "vitest": "^4.0.16",
     "zenstack": "2.22.1",
     "zod-prisma-types": "^3.3.10"
   },

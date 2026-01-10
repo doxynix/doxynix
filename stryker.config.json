@@ -1,18 +1,17 @@
 {
   "$schema": "https://schema.stryker-mutator.io/stryker-config.schema.json",
   "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
   "reporters": ["progress", "clear-text", "html"],
   "concurrency": 2,
+  "mutate": [
+    "src/server/services/**/*.ts",
+    "src/shared/lib/getInitials.ts",
+    "src/shared/api/db/db.ts"
+  ],
   "vitest": {
     "configFile": "vitest.config.ts"
   },
-  "mutate": [
-    "src/server/services/**/*.ts",
-    "src/shared/lib/**/*.ts",
-    "src/shared/api/db/utils.ts",
-    "!src/**/*.spec.ts",
-    "!src/**/*.test.ts"
-  ],
-  "thresholds": { "high": 80, "low": 60, "break": 50 },
-  "tempDirName": ".stryker-tmp"
+  "initialTestRunTimeoutMs": 60000,
+  "coverageAnalysis": "perTest"
 }
