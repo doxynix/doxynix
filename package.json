@@ -38,8 +38,11 @@
     "db:push": "prisma db push",
     "db:reset": "prisma migrate reset",
     "db:studio": "prisma studio",
-    "db:test": "pnpm tsx prisma/tests/run-all-tests.ts",
-    "db:stryker": "pnpm stryker run",
+    "test:stryker": "pnpm stryker run",
+    "test": "vitest run --config vitest.config.ts --no-file-parallelism",
+    "test:int": "vitest run src/tests/integration --config vitest.config.ts --no-file-parallelism",
+    "test:unit": "vitest run src/tests/unit --config vitest.config.ts",
+    "test:coverage": "vitest run --coverage --config vitest.config.ts --no-file-parallelism",
     "release": "standard-version && git push --follow-tags origin HEAD"
   },
   "dependencies": {
@@ -130,6 +133,7 @@
     "@typescript-eslint/eslint-plugin": "^8.50.0",
     "@typescript-eslint/parser": "^8.50.0",
     "@vitejs/plugin-react": "^5.1.2",
+    "@vitest/coverage-v8": "^4.0.16",
     "@zenstackhq/sdk": "^3.1.1",
     "@zenstackhq/trpc": "^2.22.1",
     "babel-plugin-react-compiler": "^1.0.0",

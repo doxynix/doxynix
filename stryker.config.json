@@ -6,8 +6,11 @@
   "concurrency": 2,
   "mutate": [
     "src/server/services/**/*.ts",
-    "src/shared/lib/getInitials.ts",
-    "src/shared/api/db/db.ts"
+    "src/server/utils/**/*.ts",
+    "src/shared/lib/**/*.ts",
+    "!src/shared/lib/logger.ts",
+    "!src/shared/lib/uploadthing.ts",
+    "!src/server/utils/requestContext.ts"
   ],
   "vitest": {
     "configFile": "vitest.config.ts"
