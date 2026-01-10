@@ -22,7 +22,7 @@ export function RepoAvatar({ src, alt }: { src: string | null; alt: string }) {
           "rounded-md object-cover transition-opacity duration-300",
           loaded ? "opacity-100" : "opacity-0"
         )}
-        onLoadingComplete={() => {
+        onLoad={() => {
           loadedAvatars.set(imageSrc, true);
           setLoaded(true);
         }}

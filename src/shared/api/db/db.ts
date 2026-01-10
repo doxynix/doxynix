@@ -20,6 +20,10 @@ const baseClient = new PrismaClient({
     process.env.NODE_ENV === "development" && !isTest
       ? ["error", "warn", "info", "query"]
       : ["error"],
+  transactionOptions: {
+    maxWait: 20000,
+    timeout: 30000,
+  },
 });
 
 const softDeleteClient = baseClient.$extends({

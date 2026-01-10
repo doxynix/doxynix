@@ -20,9 +20,8 @@ export const apiKeyRouter = createTRPCRouter({
         method: "POST",
         path: "/api-keys",
         tags: ["api-keys"],
-        summary: "Create a new API Key",
-        description:
-          "Generates a new API key for the authenticated user. WARNING: The full key is returned only once in this response. We only store the hash.",
+        summary: "Create API Key",
+        description: "Generates a new API Key. The full key is shown only once.",
         protect: true,
         errorResponses: OpenApiErrorResponses,
       },
@@ -74,9 +73,8 @@ export const apiKeyRouter = createTRPCRouter({
         method: "GET",
         path: "/api-keys",
         tags: ["api-keys"],
-        summary: "List all API Keys",
-        description:
-          "Retrieves a list of all API keys created by the user, including revoked ones.",
+        summary: "List API Keys",
+        description: "Returns all active and revoked API keys for the current user.",
         protect: true,
         errorResponses: OpenApiErrorResponses,
       },
@@ -117,9 +115,8 @@ export const apiKeyRouter = createTRPCRouter({
         method: "PATCH",
         path: "/api-keys/{id}",
         tags: ["api-keys"],
-        summary: "Rename an API Key",
-        description:
-          "Updates the display name of an existing API key. This operation does not change the key value itself or its permissions.",
+        summary: "Update API Key",
+        description: "Updates the name or description of an existing API key.",
         protect: true,
         errorResponses: OpenApiErrorResponses,
       },
@@ -159,9 +156,8 @@ export const apiKeyRouter = createTRPCRouter({
         method: "DELETE",
         path: "/api-keys/{id}",
         tags: ["api-keys"],
-        summary: "Revoke an API Key",
-        description:
-          "Revokes the API key immediately. Applications using this key will no longer be able to access the API.",
+        summary: "Revoke API Key",
+        description: "Permanently revokes an API key. It can no longer be used for authentication.",
         protect: true,
         errorResponses: OpenApiErrorResponses,
       },
@@ -183,11 +179,11 @@ export const apiKeyRouter = createTRPCRouter({
   touch: protectedProcedure
     .meta({
       openapi: {
-        method: "POST",
+        method: "PATCH",
         path: "/api-keys/{id}/touch",
         tags: ["api-keys"],
-        summary: "Update last used timestamp",
-        description: "Manually updates the 'last used' date for a key.",
+        summary: "Touch API Key",
+        description: "Updates the lastUsed timestamp for the specified API key.",
         protect: true,
         errorResponses: OpenApiErrorResponses,
       },

@@ -10,9 +10,9 @@ export const analyticsRouter = createTRPCRouter({
         method: "GET",
         path: "/analytics",
         tags: ["analytics"],
-        summary: "Retrieve dashboard statistics",
+        summary: "Get dashboard statistics",
         description:
-          "Fetches aggregated analytics data used on the dashboard, including repository metrics, user activity, and other performance indicators. Accessible only to authenticated users.",
+          "Returns aggregated metrics for the current user including repositories, documents, and analysis statuses.",
         protect: true,
         errorResponses: OpenApiErrorResponses,
       },

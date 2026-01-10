@@ -18,7 +18,7 @@ export default function Settings() {
   const session = useSession();
   const updateAvatar = trpc.user.updateAvatar.useMutation({
     onSuccess: async () => {
-      toast.success("Аватарка сохранена в базе данных!");
+      toast.success("Фото профиля обновлено");
       await session.update();
     },
     onError: (err) => {

@@ -1,5 +1,6 @@
 import { Logger } from "next-axiom";
 import pino from "pino";
+import pretty from "pino-pretty";
 
 import { requestContext } from "@/server/utils/requestContext";
 
@@ -11,13 +12,28 @@ type LogPayload = {
   [key: string]: any;
 };
 
-const pinoLogger = pino({
-  level: "debug",
-  transport: {
-    target: "pino-pretty",
-    options: { colorize: true, translateTime: "HH:MM:ss", ignore: "pid,hostname" },
-  },
-});
+const createPinoLogger = () => {
+  if (isProd) {
+    return pino({ level: "info" });
+  }
+
+  const stream = pretty({
+    colorize: true,
+    translateTime: "HH:MM:ss",
+    ignore: "pid,hostname",
+    messageKey: "msg",
+  });
+
+  return pino(
+    {
+      level: "debug",
+      base: undefined,
+    },
+    stream
+  );
+};
+
+const pinoLogger = createPinoLogger();
 
 const axiomLogger = new Logger();
 
@@ -28,37 +44,42 @@ const withContext = (obj: LogPayload) => {
     ...obj,
   };
 };
+
 export const logger = {
-  info: (obj: LogPayload) => {
-    const payload = withContext(obj);
+  info: (payload: LogPayload) => {
+    const data = withContext(payload);
     if (isProd) {
-      axiomLogger.info(payload.msg, payload);
+      axiomLogger.info(data.msg, data);
     } else {
-      pinoLogger.info(payload);
+      const { msg, ...rest } = data;
+      pinoLogger.info(rest, msg);
     }
   },
-  error: (obj: LogPayload) => {
-    const payload = withContext(obj);
+  error: (payload: LogPayload) => {
+    const data = withContext(payload);
     if (isProd) {
-      axiomLogger.error(payload.msg, payload);
+      axiomLogger.error(data.msg, data);
     } else {
-      pinoLogger.error(payload);
+      const { msg, ...rest } = data;
+      pinoLogger.error(rest, msg);
     }
   },
-  warn: (obj: LogPayload) => {
-    const payload = withContext(obj);
+  warn: (payload: LogPayload) => {
+    const data = withContext(payload);
     if (isProd) {
-      axiomLogger.warn(payload.msg, payload);
+      axiomLogger.warn(data.msg, data);
     } else {
-      pinoLogger.warn(payload);
+      const { msg, ...rest } = data;
+      pinoLogger.warn(rest, msg);
     }
   },
-  debug: (obj: LogPayload) => {
-    const payload = withContext(obj);
+  debug: (payload: LogPayload) => {
+    const data = withContext(payload);
     if (isProd) {
-      axiomLogger.debug(payload.msg, payload);
+      axiomLogger.debug(data.msg, data);
     } else {
-      pinoLogger.debug(payload);
+      const { msg, ...rest } = data;
+      pinoLogger.debug(rest, msg);
     }
   },
   flush: async () => {
