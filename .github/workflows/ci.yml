@@ -538,3 +538,11 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message: ${{ steps.collect.outputs.message }}
+
+      - name: 'notify vercel'
+        uses: 'vercel/repository-dispatch/actions/status@v1'
+        with:
+          name: 'Vercel - doxynix: notify vercel'
+          status: ${{ steps.collect.outputs.is_success == 'true' && 'success' || 'failure' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
