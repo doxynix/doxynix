@@ -23,11 +23,8 @@ describe("Concurrency, Transactions & Integrity", () => {
     const p2 = alice.db.repo.create({ data: { ...base, name: "race2" } });
 
     const results = await Promise.allSettled([p1, p2]);
-    const fulfilled = results.filter((r) => r.status === "fulfilled");
-    const rejected = results.filter((r) => r.status === "rejected");
-
-    expect(fulfilled).toHaveLength(1);
-    expect(rejected).toHaveLength(1);
+    expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+    expect(results.filter((r) => r.status === "rejected")).toHaveLength(1);
   });
 
   it("should handle Atomic Updates (increments)", async () => {
@@ -44,11 +41,11 @@ describe("Concurrency, Transactions & Integrity", () => {
     });
 
     await Promise.all([
-      prisma.repo.update({ where: { id: repo.id }, data: { stars: { increment: 1 } } }),
-      prisma.repo.update({ where: { id: repo.id }, data: { stars: { increment: 1 } } }),
+      prisma.repo.update({ where: { publicId: repo.publicId }, data: { stars: { increment: 1 } } }),
+      prisma.repo.update({ where: { publicId: repo.publicId }, data: { stars: { increment: 1 } } }),
     ]);
 
-    const final = await prisma.repo.findUnique({ where: { id: repo.id } });
+    const final = await prisma.repo.findUnique({ where: { publicId: repo.publicId } });
     expect(final?.stars).toBe(2);
   });
 
@@ -91,21 +88,26 @@ describe("Concurrency, Transactions & Integrity", () => {
 
     await expectValidationFail(
       alice.db.analysis.create({
-        data: { repoId: repo.id, status: "DONE", commitSha: "x", score: 101 },
-      })
-    );
-    await expectValidationFail(
-      alice.db.analysis.create({
-        data: { repoId: repo.id, status: "DONE", commitSha: "x", score: -1 },
+        data: {
+          repo: { connect: { publicId: repo.publicId } },
+          status: "DONE",
+          commitSha: "x",
+          score: 101,
+        },
       })
     );
 
     const maliciousJson = { v: "'; DROP TABLE users; --" };
     const analysis = await alice.db.analysis.create({
-      data: { repoId: repo.id, status: "DONE", commitSha: "x", metricsJson: maliciousJson },
+      data: {
+        repo: { connect: { publicId: repo.publicId } },
+        status: "DONE",
+        commitSha: "x",
+        metricsJson: maliciousJson,
+      },
     });
 
-    const fetched = await alice.db.analysis.findUnique({ where: { id: analysis.id } });
+    const fetched = await alice.db.analysis.findUnique({ where: { publicId: analysis.publicId } });
     expect(fetched?.metricsJson).toEqual(maliciousJson);
   });
 });

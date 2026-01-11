@@ -76,7 +76,6 @@ export const userRouter = createTRPCRouter({
     .output(
       z.object({
         image: z.string().nullish(),
-        imageKey: z.string().nullish(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -95,10 +94,6 @@ export const userRouter = createTRPCRouter({
           image: input.url,
           imageKey: input.key,
         },
-        select: {
-          image: true,
-          imageKey: true,
-        },
       });
 
       if (oldKey !== undefined && oldKey !== null) {
@@ -113,8 +108,42 @@ export const userRouter = createTRPCRouter({
 
       return {
         image: updatedUser?.image ?? null,
-        imageKey: updatedUser?.imageKey ?? null,
       };
+    }),
+  removeAvatar: protectedProcedure
+    .meta({
+      openapi: {
+        method: "DELETE",
+        path: "/users/me/avatar",
+        tags: ["users"],
+        summary: "Remove avatar",
+        description: "Deletes the avatar image and remove from UT.",
+        protect: true,
+      },
+    })
+    .input(z.void())
+    .output(z.object({ success: z.boolean() }))
+    .mutation(async ({ ctx }) => {
+      const userId = Number(ctx.session.user.id);
+
+      const user = await ctx.db.user.findUnique({
+        where: { id: userId },
+        select: { imageKey: true },
+      });
+
+      if (user?.imageKey !== null && user?.imageKey !== undefined) {
+        await utapi.deleteFiles(user.imageKey);
+      }
+
+      await ctx.db.user.update({
+        where: { id: userId },
+        data: {
+          image: null,
+          imageKey: null,
+        },
+      });
+
+      return { success: true };
     }),
   updateUser: protectedProcedure
     .meta({

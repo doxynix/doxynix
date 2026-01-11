@@ -47,7 +47,7 @@ generator dbml {
 // }
 
 model User {
-  id            Int       @id @default(autoincrement())
+  id            Int       @id @default(autoincrement()) @omit
   publicId      String    @unique @default(uuid(7)) @map("public_id") @db.Uuid
   email         String?   @unique @email(message: "Некорректный email")
   name          String?   @length(min: 1, max: 50, message: "Имя должно быть от 1 до 50 символов")
@@ -76,7 +76,7 @@ model User {
 }
 
 model Repo {
-  id              Int        @id @default(autoincrement())
+  id              Int        @id @default(autoincrement()) @omit
   publicId        String     @unique @default(uuid(7)) @map("public_id") @db.Uuid
   githubId        Int        @map("github_id")
   owner           String
@@ -99,16 +99,15 @@ model Repo {
   githubCreatedAt DateTime?  @map("github_created_at")
   updatedAt       DateTime   @updatedAt @map("updated_at")
 
-  userId          Int        @map("user_id")
+  userId          Int        @map("user_id") @omit
   user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   analyses        Analysis[]
   documents       Document[]
 
-  @@allow('read', auth() == user || auth().role == 'ADMIN')
+  @@allow('read,delete', auth() == user || auth().role == 'ADMIN')
   @@allow('create', auth() != null && userId == auth().id)
   @@allow('update', (auth() == user && future().userId == userId) || auth().role == 'ADMIN')
-  @@allow('delete', auth() == user || auth().role == 'ADMIN')
 
   @@unique([owner, name, userId])
   @@unique([githubId, userId])
@@ -119,7 +118,7 @@ model Repo {
 }
 
 model Analysis {
-  id          Int      @id @default(autoincrement())
+  id          Int      @id @default(autoincrement()) @omit
   publicId    String   @unique @default(uuid(7)) @map("public_id") @db.Uuid
   status      Status
   score       Int?     @gte(0) @lte(100)
@@ -132,13 +131,10 @@ model Analysis {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  repoId      Int      @map("repo_id")
+  repoId      Int      @map("repo_id") @omit
   repo        Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
-  @@allow('read', repo.user == auth())
   @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
-  @@allow('create', repo.user == auth())
-  @@allow('update,delete', repo.user == auth() || auth().role == 'ADMIN')
 
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
@@ -146,7 +142,7 @@ model Analysis {
 }
 
 model Document {
-  id        Int      @id @default(autoincrement())
+  id        Int      @id @default(autoincrement()) @omit
   publicId  String   @unique @default(uuid(7)) @map("public_id") @db.Uuid
   version   String
   type      DocType
@@ -155,13 +151,10 @@ model Document {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  repoId    Int      @map("repo_id")
+  repoId    Int      @map("repo_id") @omit
   repo      Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
-  @@allow('read', repo.user == auth())
   @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
-  @@allow('create', repo.user == auth())
-  @@allow('update,delete', repo.user == auth() || auth().role == 'ADMIN')
 
   @@unique([repoId, version, type])
   @@index([repoId])
@@ -174,19 +167,17 @@ model ApiKey {
   hashedKey   String    @unique @map("hashed_key") @omit
   name        String    @length(min: 1, max: 50, message: "Название должно быть от 1 до 50 символов")
   description String?   @db.Text @length(max: 1000, message: "Описание должно быть менее 1000 символов")
-  userId      Int
+  userId      Int       @omit
   createdAt   DateTime  @default(now()) @map("created_at")
   lastUsed    DateTime? @map("last_used")
   revoked     Boolean   @default(false)
 
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@allow('create', auth() != null && userId == auth().id)
-  @@allow('read', (auth() == user && !revoked) || auth().role == 'ADMIN')
+  @@allow('create', auth() == user && userId == auth().id && !revoked)
+  @@allow('read', auth() == user || auth().role == 'ADMIN')
   @@allow('update', (auth() == user && future().userId == userId) || auth().role == 'ADMIN')
-  @@allow('delete', auth() == user || auth().role == 'ADMIN')
-
-  @@deny('read', revoked && auth().role != 'ADMIN')
+  @@allow('delete', (auth() == user && !revoked) || auth().role == 'ADMIN')
 
   @@index([userId])
   @@map("api_keys")
@@ -194,8 +185,9 @@ model ApiKey {
 
 
 model Account {
-  id                Int     @id @default(autoincrement())
-  userId            Int     @map("user_id")
+  id                Int     @id @default(autoincrement()) @omit
+  publicId          String  @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  userId            Int     @map("user_id") @omit
   type              String
   provider          String
   providerAccountId String  @map("provider_account_id")
@@ -209,20 +201,23 @@ model Account {
 
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@allow('all', auth() == user || auth().role == 'ADMIN')
+  @@allow('read,delete', auth() == user || auth().role == 'ADMIN')
+  @@allow('create', (auth() != null && userId == auth().id) || auth().role == 'ADMIN')
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
 
 model Session {
-  id           Int      @id @default(autoincrement())
+  id           Int      @id @default(autoincrement()) @omit
+  publicId     String   @unique @default(uuid(7)) @map("public_id") @db.Uuid
   sessionToken String   @unique @map("session_token") @omit
-  userId       Int      @map("user_id")
+  userId       Int      @map("user_id") @omit
   expires      DateTime
 
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@allow('all', auth() == user || auth().role == 'ADMIN')
+  @@allow('read,delete', auth() == user || auth().role == 'ADMIN')
+  @@allow('create', (auth() != null && userId == auth().id) || auth().role == 'ADMIN')
   @@map("sessions")
 }
 
@@ -242,7 +237,7 @@ model AuditLog {
   model     String
   operation String
   payload   Json
-  userId    Int?     @map("user_id")
+  userId    Int?     @map("user_id") @omit
   ip        String?
   userAgent String?  @map("user_agent")
   createdAt DateTime @default(now()) @map("created_at")

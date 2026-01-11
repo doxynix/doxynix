@@ -22,7 +22,7 @@ describe("Business Logic & Integrity Constraints", () => {
 
     await alice.db.document.create({
       data: {
-        repoId: repo.id,
+        repo: { connect: { publicId: repo.publicId } },
         version: "v1",
         type: "README",
         content: "Original Content",
@@ -32,7 +32,7 @@ describe("Business Logic & Integrity Constraints", () => {
     await expectValidationFail(
       alice.db.document.create({
         data: {
-          repoId: repo.id,
+          repo: { connect: { publicId: repo.publicId } },
           version: "v1",
           type: "README",
           content: "Duplicate Content",
@@ -43,18 +43,17 @@ describe("Business Logic & Integrity Constraints", () => {
     await expect(
       alice.db.document.create({
         data: {
-          repoId: repo.id,
+          repo: { connect: { publicId: repo.publicId } },
           version: "v2",
           type: "README",
           content: "New Version",
         },
       })
     ).resolves.toBeDefined();
-
     await expect(
       alice.db.document.create({
         data: {
-          repoId: repo.id,
+          repo: { connect: { publicId: repo.publicId } },
           version: "v1",
           type: "API",
           content: "API Docs",
@@ -73,7 +72,6 @@ describe("Business Logic & Integrity Constraints", () => {
         type: "oauth",
         provider: "github",
         providerAccountId: "gh_alice_123",
-        access_token: "token_a",
       },
     });
 
@@ -83,17 +81,16 @@ describe("Business Logic & Integrity Constraints", () => {
         type: "oauth",
         provider: "google",
         providerAccountId: "go_bob_456",
-        access_token: "token_b",
       },
     });
 
-    await expectDenied(alice.db.account.delete({ where: { id: bobAccount.id } }));
+    await expectDenied(alice.db.account.delete({ where: { publicId: bobAccount.publicId } }));
 
     await expect(
-      alice.db.account.delete({ where: { id: aliceAccount.id } })
+      alice.db.account.delete({ where: { publicId: aliceAccount.publicId } })
     ).resolves.toBeDefined();
 
-    const checkBob = await bob.db.account.findUnique({ where: { id: bobAccount.id } });
+    const checkBob = await bob.db.account.findUnique({ where: { publicId: bobAccount.publicId } });
     expect(checkBob).toBeDefined();
   });
 
@@ -134,7 +131,7 @@ describe("Business Logic & Integrity Constraints", () => {
       },
     });
 
-    await expectDenied(bob.db.session.findUniqueOrThrow({ where: { id: session.id } }));
+    await expectDenied(bob.db.session.findUniqueOrThrow({ where: { publicId: session.publicId } }));
 
     const stolenSession = await bob.db.session.findUnique({
       where: { sessionToken: "secret_token_123" },

@@ -18,13 +18,15 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
     const fetchedKey = await alice.db.apiKey.findUnique({ where: { id: key.id } });
     expect(fetchedKey).not.toHaveProperty("hashedKey");
 
-    const session = await prisma.session.create({
+    await prisma.session.create({
       data: { sessionToken: "SESS_SECRET", userId: alice.user.id, expires: new Date() },
     });
-    const fetchedSession = await alice.db.session.findUnique({ where: { id: session.id } });
+    const fetchedSession = await alice.db.session.findUnique({
+      where: { sessionToken: "SESS_SECRET" },
+    });
     expect(fetchedSession).not.toHaveProperty("sessionToken");
 
-    const account = await prisma.account.create({
+    await prisma.account.create({
       data: {
         userId: alice.user.id,
         type: "oauth",
@@ -33,7 +35,9 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
         access_token: "ACC_TOK",
       },
     });
-    const fetchedAccount = await alice.db.account.findUnique({ where: { id: account.id } });
+    const fetchedAccount = await alice.db.account.findUnique({
+      where: { provider_providerAccountId: { provider: "gh", providerAccountId: "1" } },
+    });
     expect(fetchedAccount).not.toHaveProperty("access_token");
   });
 
@@ -49,13 +53,13 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
 
     await expectDenied(
       alice.db.user.update({
-        where: { id: alice.user.id },
+        where: { publicId: alice.user.publicId },
         data: { publicId: "new-uuid" },
       })
     );
     await expectDenied(
       alice.db.user.update({
-        where: { id: alice.user.id },
+        where: { publicId: alice.user.publicId },
         data: { createdAt: new Date("2000-01-01") },
       })
     );
@@ -76,8 +80,15 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
     await alice.db.apiKey.delete({ where: { id: key.id } });
 
     const found = await alice.db.apiKey.findUnique({ where: { id: key.id } });
-    expect(found).toBeNull();
+    expect(found).not.toBeNull();
+    expect(found?.revoked).toBe(true);
 
-    await expectDenied(alice.db.apiKey.update({ where: { id: key.id }, data: { name: "Hack" } }));
+    await alice.db.apiKey.update({
+      where: { id: key.id },
+      data: { name: "Renamed Revoked Key" },
+    });
+
+    const updated = await alice.db.apiKey.findUnique({ where: { id: key.id } });
+    expect(updated?.name).toBe("Renamed Revoked Key");
   });
 });

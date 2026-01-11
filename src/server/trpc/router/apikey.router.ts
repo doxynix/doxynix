@@ -91,15 +91,6 @@ export const apiKeyRouter = createTRPCRouter({
         where: {
           OR: [{ revoked: true }, { revoked: false }],
         },
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          prefix: true,
-          revoked: true,
-          lastUsed: true,
-          createdAt: true,
-        },
         orderBy: { createdAt: "desc" },
       });
 

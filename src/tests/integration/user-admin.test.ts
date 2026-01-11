@@ -16,21 +16,24 @@ describe("Users, Admin & Audit Flows", () => {
 
     await expect(
       alice.db.user.update({
-        where: { id: alice.user.id },
+        where: { publicId: alice.user.publicId },
         data: { name: "Alice Wonderland" },
       })
     ).resolves.toMatchObject({ name: "Alice Wonderland" });
 
     await expectDenied(
-      bob.db.user.update({ where: { id: alice.user.id }, data: { name: "HACKED" } })
+      bob.db.user.update({ where: { publicId: alice.user.publicId }, data: { name: "HACKED" } })
     );
-    await expectDenied(alice.db.user.delete({ where: { id: bob.user.id } }));
+    await expectDenied(alice.db.user.delete({ where: { publicId: bob.user.publicId } }));
 
     await expectValidationFail(
-      alice.db.user.update({ where: { id: alice.user.id }, data: { email: "bad-email" } })
+      alice.db.user.update({
+        where: { publicId: alice.user.publicId },
+        data: { email: "bad-email" },
+      })
     );
     await expectValidationFail(
-      alice.db.user.update({ where: { id: alice.user.id }, data: { name: "" } })
+      alice.db.user.update({ where: { publicId: alice.user.publicId }, data: { name: "" } })
     );
   });
 
@@ -40,16 +43,16 @@ describe("Users, Admin & Audit Flows", () => {
     const bob = await createTestUser("Bob", "USER");
 
     await expectDenied(
-      alice.db.user.update({ where: { id: alice.user.id }, data: { role: "ADMIN" } })
+      alice.db.user.update({ where: { publicId: alice.user.publicId }, data: { role: "ADMIN" } })
     );
 
     await expect(
-      admin.db.user.update({ where: { id: alice.user.id }, data: { role: "ADMIN" } })
+      admin.db.user.update({ where: { publicId: alice.user.publicId }, data: { role: "ADMIN" } })
     ).resolves.toBeDefined();
 
     const aliceAdminDb = enhance(prisma, { user: { id: alice.user.id, role: "ADMIN" } });
     await expect(
-      aliceAdminDb.user.update({ where: { id: bob.user.id }, data: { role: "ADMIN" } })
+      aliceAdminDb.user.update({ where: { publicId: bob.user.publicId }, data: { role: "ADMIN" } })
     ).resolves.toBeDefined();
   });
 
@@ -94,10 +97,10 @@ describe("Users, Admin & Audit Flows", () => {
       data: { name: "k", prefix: "p", hashedKey: "h", userId: alice.user.id },
     });
     await alice.db.analysis.create({
-      data: { repoId: repo.id, status: "NEW", commitSha: "x" },
+      data: { repo: { connect: { publicId: repo.publicId } }, status: "NEW", commitSha: "x" },
     });
 
-    await alice.db.user.delete({ where: { id: alice.user.id } });
+    await alice.db.user.delete({ where: { publicId: alice.user.publicId } });
 
     const counts = await Promise.all([
       prisma.repo.count(),

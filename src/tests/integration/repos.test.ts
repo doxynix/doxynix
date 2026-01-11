@@ -32,12 +32,15 @@ describe("Repositories & Data Visibility", () => {
       },
     });
 
-    await expectDenied(bob.db.repo.findUniqueOrThrow({ where: { id: privateRepo.id } }));
-
-    await expectDenied(bob.db.repo.findUniqueOrThrow({ where: { id: publicRepo.id } }));
+    await expectDenied(
+      bob.db.repo.findUniqueOrThrow({
+        where: { publicId: privateRepo.publicId },
+      })
+    );
+    await expectDenied(bob.db.repo.findUniqueOrThrow({ where: { publicId: publicRepo.publicId } }));
 
     await expect(
-      alice.db.repo.findUniqueOrThrow({ where: { id: publicRepo.id } })
+      alice.db.repo.findUniqueOrThrow({ where: { publicId: publicRepo.publicId } })
     ).resolves.toBeDefined();
   });
 
@@ -56,12 +59,19 @@ describe("Repositories & Data Visibility", () => {
       },
     });
     const analysis = await alice.db.analysis.create({
-      data: { repoId: repo.id, status: "DONE", commitSha: "s", score: 100 },
+      data: {
+        repo: { connect: { publicId: repo.publicId } },
+        status: "DONE",
+        commitSha: "s",
+        score: 100,
+      },
     });
 
-    await expectDenied(bob.db.analysis.findUniqueOrThrow({ where: { id: analysis.id } }));
+    await expectDenied(
+      bob.db.analysis.findUniqueOrThrow({ where: { publicId: analysis.publicId } })
+    );
     await expect(
-      alice.db.analysis.findUniqueOrThrow({ where: { id: analysis.id } })
+      alice.db.analysis.findUniqueOrThrow({ where: { publicId: analysis.publicId } })
     ).resolves.toBeDefined();
   });
 
@@ -123,25 +133,25 @@ describe("Repositories & Data Visibility", () => {
     const alice = await createTestUser("Alice");
     const hugeContent = "X".repeat(100 * 1024);
 
+    const repo = await alice.db.repo.create({
+      data: {
+        name: "big",
+        url: "https://github.com/alice/big",
+        owner: "a",
+        githubId: 6,
+        userId: alice.user.id,
+      },
+    });
+
     const doc = await alice.db.document.create({
       data: {
-        repoId: (
-          await alice.db.repo.create({
-            data: {
-              name: "big",
-              url: "https://github.com/alice/big",
-              owner: "a",
-              githubId: 6,
-              userId: alice.user.id,
-            },
-          })
-        ).id,
+        repo: { connect: { publicId: repo.publicId } },
         version: "v1",
         type: "README",
         content: hugeContent,
       },
     });
-    expect(doc.id).toBeDefined();
+    expect(doc.publicId).toBeDefined();
   });
   it("should handle Complex Filter + Sort combinations without leaking", async () => {
     const alice = await createTestUser("Alice");

@@ -7,7 +7,7 @@ import { prisma } from "@/shared/api/db/db";
 
 import { cleanupDatabase } from "../helpers";
 
-const NUM_RUNS = process.env.CI! ? 20 : 50;
+const NUM_RUNS = process.env.CI ? 20 : 50;
 
 describe("Property-Based Security Tests (Fast-Check)", () => {
   beforeEach(async () => {
@@ -48,11 +48,10 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
         async (targetRole, newName) => {
           try {
             await db.user.update({
-              where: { id: user.id },
+              where: { publicId: user.publicId },
               data: { role: targetRole as UserRole, name: newName },
             });
             const updated = await prisma.user.findUnique({ where: { id: user.id } });
-
             return updated?.role !== "ADMIN" || targetRole === "USER";
           } catch {
             return true;
@@ -70,21 +69,17 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
     const db = enhance(prisma, { user: { id: user.id, role: "USER" } });
 
     await fc.assert(
-      fc.asyncProperty(
-        fc.uuid(),
-        fc.date({ min: new Date("2000-01-01"), max: new Date("2030-01-01") }),
-        async (fakeUuid, fakeDate) => {
-          try {
-            await db.user.update({
-              where: { id: user.id },
-              data: { publicId: fakeUuid, createdAt: fakeDate },
-            });
-            return false;
-          } catch {
-            return true;
-          }
+      fc.asyncProperty(fc.uuid(), fc.date(), async (fakeUuid, fakeDate) => {
+        try {
+          await db.user.update({
+            where: { publicId: user.publicId },
+            data: { publicId: fakeUuid, createdAt: fakeDate },
+          });
+          return false;
+        } catch {
+          return true;
         }
-      ),
+      }),
       { numRuns: NUM_RUNS }
     );
   });

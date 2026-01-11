@@ -33,7 +33,7 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
           owner: "a",
           githubId: 2,
           visibility: "PRIVATE",
-          user: { connect: { id: bob.user.id } },
+          user: { connect: { publicId: bob.user.publicId } },
         },
       })
     );
@@ -51,7 +51,7 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
     await expectDenied(
       bob.db.analysis.create({
         data: {
-          repo: { connect: { id: aliceRepo.id } },
+          repo: { connect: { publicId: aliceRepo.publicId } },
           status: "NEW",
           commitSha: "x",
         },
@@ -103,17 +103,17 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
 
     await expectDenied(
       alice.db.repo.update({
-        where: { id: repo.id },
+        where: { publicId: repo.publicId },
         data: { userId: bob.user.id },
       })
     );
 
-    const refetched = await prisma.repo.findUnique({ where: { id: repo.id } });
+    const refetched = await prisma.repo.findUnique({ where: { publicId: repo.publicId } });
     expect(refetched?.userId).toBe(alice.user.id);
 
     try {
       await admin.db.repo.update({
-        where: { id: repo.id },
+        where: { publicId: repo.publicId },
         data: { userId: bob.user.id },
       });
     } catch (e: unknown) {
@@ -124,7 +124,7 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
       throw e;
     }
 
-    const final = await prisma.repo.findUnique({ where: { id: repo.id } });
+    const final = await prisma.repo.findUnique({ where: { publicId: repo.publicId } });
     expect(final?.userId).toBe(bob.user.id);
   });
 });
