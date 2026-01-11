@@ -438,7 +438,7 @@ jobs:
   # 9. УВЕДОМЛЕНИЯ (NOTIFY)
   # ------------------------------------------------------------------
   notify:
-    needs: [build, lighthouse, e2e, init]
+    needs: [init, quality, types, security, tests, build, lighthouse, e2e]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -452,6 +452,10 @@ jobs:
         id: collect
         env:
           TZ: Europe/Moscow
+          QUALITY_RESULT: ${{ needs.quality.result }}
+          TYPES_RESULT: ${{ needs.types.result }}
+          SECURITY_RESULT: ${{ needs.security.result }}
+          TESTS_RESULT: ${{ needs.tests.result }}
           BUILD_RESULT: ${{ needs.build.result }}
           LH_RESULT: ${{ needs.lighthouse.result }}
           E2E_RESULT: ${{ needs.e2e.result }}
@@ -464,17 +468,25 @@ jobs:
         run: |
           python3 - <<'PY'
           import os, json, subprocess, time, datetime
+          def get_res(name):
+              return os.environ.get(name, "skipped")
 
+          q_res = get_res("QUALITY_RESULT")
+          t_res = get_res("TYPES_RESULT")
+          s_res = get_res("SECURITY_RESULT")
+          tests_res = get_res("TESTS_RESULT")
           build_res = os.environ.get("BUILD_RESULT", "failure")
           lh_res = os.environ.get("LH_RESULT", "success")
           e2e_res = os.environ.get("E2E_RESULT", "success")
-          is_success = build_res == "success" and lh_res in ["success", "skipped"] and e2e_res == "success"
+          mandatory_ok = all(r == "success" for r in [q_res, t_res, s_res, build_res])
+          optional_ok = all(r in ["success", "skipped"] for r in [tests_res, lh_res, e2e_res])
+          is_success = mandatory_ok and optional_ok
 
           status_emoji = "✅" if is_success else "❌"
           status_text = "Success" if is_success else "Failed"
 
           event_path = os.environ.get("GITHUB_EVENT_PATH", "")
-          pr_url, pr_user, changed_files, additions, deletions = "не PR", "—", "0", "0", "0"
+          pr_url, pr_user, changed_files, additions, deletions = "no", "—", "0", "0", "0"
           if event_path and os.path.exists(event_path):
             try:
               e = json.load(open(event_path))
