@@ -105,7 +105,7 @@ model Repo {
   analyses        Analysis[]
   documents       Document[]
 
-  @@allow('read', auth() == user || visibility == 'PUBLIC')
+  @@allow('read', auth() == user || auth().role == 'ADMIN')
   @@allow('create', auth() != null && userId == auth().id)
   @@allow('update', (auth() == user && future().userId == userId) || auth().role == 'ADMIN')
   @@allow('delete', auth() == user || auth().role == 'ADMIN')
@@ -135,7 +135,7 @@ model Analysis {
   repoId      Int      @map("repo_id")
   repo        Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
-  @@allow('read', repo.user == auth() || repo.visibility == 'PUBLIC')
+  @@allow('read', repo.user == auth())
   @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
   @@allow('create', repo.user == auth())
   @@allow('update,delete', repo.user == auth() || auth().role == 'ADMIN')
@@ -158,7 +158,7 @@ model Document {
   repoId    Int      @map("repo_id")
   repo      Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
-  @@allow('read', repo.user == auth() || repo.visibility == 'PUBLIC')
+  @@allow('read', repo.user == auth())
   @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
   @@allow('create', repo.user == auth())
   @@allow('update,delete', repo.user == auth() || auth().role == 'ADMIN')

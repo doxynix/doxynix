@@ -34,21 +34,11 @@ describe("Repositories & Data Visibility", () => {
 
     await expectDenied(bob.db.repo.findUniqueOrThrow({ where: { id: privateRepo.id } }));
 
-    await expect(
-      bob.db.repo.findUniqueOrThrow({ where: { id: publicRepo.id } })
-    ).resolves.toBeDefined();
+    await expectDenied(bob.db.repo.findUniqueOrThrow({ where: { id: publicRepo.id } }));
 
-    await expectDenied(
-      alice.db.repo.create({
-        data: {
-          name: "priv-dup",
-          url: "https://github.com/alice/dup",
-          owner: "alice",
-          githubId: 1,
-          userId: alice.user.id,
-        },
-      })
-    );
+    await expect(
+      alice.db.repo.findUniqueOrThrow({ where: { id: publicRepo.id } })
+    ).resolves.toBeDefined();
   });
 
   it("should inherit permissions for child resources (Analysis/Docs)", async () => {
@@ -118,10 +108,15 @@ describe("Repositories & Data Visibility", () => {
       },
     });
 
-    const res = await bob.db.repo.findMany({
+    const bobRes = await bob.db.repo.findMany({
       where: { name: { contains: "fast", mode: "insensitive" } },
     });
-    expect(res).toHaveLength(1);
+    expect(bobRes).toHaveLength(0);
+
+    const aliceRes = await alice.db.repo.findMany({
+      where: { name: { contains: "fast", mode: "insensitive" } },
+    });
+    expect(aliceRes).toHaveLength(1);
   });
 
   it("should handle huge payloads (limits check)", async () => {
@@ -186,15 +181,22 @@ describe("Repositories & Data Visibility", () => {
       },
     });
 
-    const results = await bob.db.repo.findMany({
+    const bobResults = await bob.db.repo.findMany({
+      where: { name: { contains: "react", mode: "insensitive" } },
+      orderBy: { stars: "desc" },
+    });
+    expect(bobResults).toHaveLength(0);
+
+    const aliceResults = await alice.db.repo.findMany({
       where: {
         name: { contains: "react", mode: "insensitive" },
       },
       orderBy: { stars: "desc" },
     });
 
-    expect(results).toHaveLength(2);
-    expect(results[0].name).toBe("react-ui");
-    expect(results[1].name).toBe("react-core");
+    expect(aliceResults).toHaveLength(3);
+    expect(aliceResults[0].name).toBe("react-secret");
+    expect(aliceResults[1].name).toBe("react-ui");
+    expect(aliceResults[2].name).toBe("react-core");
   });
 });
