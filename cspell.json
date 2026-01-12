@@ -66,7 +66,20 @@
     "мердж",
     "фавиконки",
     "билда",
-    "линтинг"
+    "линтинг",
+    "crawlable",
+    "contentful",
+    "Kramarich",
+    "zenstackhq",
+    "zenstackhq",
+    "tablenames",
+    "trgm",
+    "refetched",
+    "SESS",
+    "Elon",
+    "dxnx",
+    "dxnxconfig",
+    "дашборда"
   ],
 
   "import": ["@cspell/dict-ru_ru/cspell-ext.json"]
