@@ -204,7 +204,7 @@ export const userRouter = createTRPCRouter({
         select: { imageKey: true },
       });
 
-      if (!user) {
+      if (user === null) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Пользователь не найден" });
       }
 

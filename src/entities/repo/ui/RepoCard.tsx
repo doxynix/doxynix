@@ -143,7 +143,7 @@ export function RepoCard({ repo }: Props) {
             <span className="font-medium">{status.label}</span>
           </div>
           <div className="text-muted-foreground">
-            {repo.lastAnalysisDate ? (
+            {repo.lastAnalysisDate !== null && repo.lastAnalysisDate !== undefined ? (
               <AppTooltip
                 content={`Дата последнего анализа: ${formatFullDate(repo.lastAnalysisDate)}`}
               >

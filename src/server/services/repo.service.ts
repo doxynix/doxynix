@@ -90,11 +90,12 @@ export const repoService = {
     const { search, visibility, status } = filters;
     const searchTerms = search != null ? search.trim().split(/\s+/) : [];
 
-    const statusFilter: Prisma.RepoWhereInput = status
-      ? status === Status.NEW
-        ? { OR: [{ analyses: { none: {} } }, { analyses: { some: { status: Status.NEW } } }] }
-        : { analyses: { some: { status } } }
-      : {};
+    const statusFilter: Prisma.RepoWhereInput =
+      status !== undefined
+        ? status === Status.NEW
+          ? { OR: [{ analyses: { none: {} } }, { analyses: { some: { status: Status.NEW } } }] }
+          : { analyses: { some: { status } } }
+        : {};
 
     const visibilityFilter = visibility ? { visibility } : {};
 

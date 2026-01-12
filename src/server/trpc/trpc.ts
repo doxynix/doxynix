@@ -32,7 +32,7 @@ const withZenStack = t.middleware(async ({ ctx, next }) => {
     sessionUser?.id !== undefined && sessionUser.id !== null ? Number(sessionUser.id) : undefined;
 
   const userRole =
-    sessionUser?.role !== undefined && sessionUser?.role
+    sessionUser?.role !== undefined && sessionUser?.role !== null
       ? (sessionUser.role as UserRole)
       : undefined;
 
