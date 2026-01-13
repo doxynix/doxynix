@@ -151,7 +151,7 @@
     "eslint-plugin-unused-imports": "^4.3.0",
     "fast-check": "^4.5.3",
     "husky": "^9.1.7",
-    "jscpd": "^4.0.5",
+    "jscpd": "^4.0.7",
     "knip": "^5.80.0",
     "lint-staged": "^16.2.7",
     "next-sitemap": "^4.2.3",
