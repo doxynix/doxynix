@@ -7,7 +7,6 @@ const NAV_MAP: Record<string, string> = {
   "alt+KeyR": "/dashboard/repo",
   "alt+KeyS": "/dashboard/settings/profile",
   "alt+KeyP": "/dashboard/settings/profile",
-  "alt+KeyB": "/dashboard/settings/billing",
   "alt+KeyA": "/dashboard/settings/api-keys",
 };
 

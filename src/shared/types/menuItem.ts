@@ -1,11 +1,13 @@
-import { ComponentType, ReactNode } from "react";
+import { ComponentType } from "react";
 
 export type MenuItem = {
+  label: string;
   href: string;
-  title: ReactNode;
   icon?: ComponentType<{ className?: string }>;
   isBlank?: boolean;
+  shortcut?: string;
   exact?: boolean;
+  variant?: "default" | "destructive";
 };
 
 export type MenuItems = MenuItem[];

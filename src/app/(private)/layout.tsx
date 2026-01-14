@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getServerAuthSession } from "@/shared/api/auth/authOptions";
+import { ScrollArea } from "@/shared/ui/scroll-area";
 import { SidebarProvider } from "@/shared/ui/sidebar";
 import { CreateRepoDialog } from "@/features/repo";
 import { AppFooter } from "@/widgets/AppFooter";
@@ -23,13 +24,15 @@ export default async function PrivateLayout({ children }: { children: ReactNode 
         className="flex h-screen w-full flex-col overflow-hidden"
       >
         <div className="z-50 w-full shrink-0 border-b">
-          <AppHeader />
+          <AppHeader user={session.user} />
         </div>
 
         <div className="flex flex-1 overflow-hidden">
           <AppSidebar />
-          <div className="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-            <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col p-4">{children}</main>
+          <div className="relative flex flex-1 flex-col overflow-hidden">
+            <ScrollArea className="flex-1">
+              <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col p-4">{children}</main>
+            </ScrollArea>
             <AppFooter />
           </div>
         </div>

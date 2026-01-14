@@ -1,8 +1,9 @@
 import { ReactNode } from "react";
 
 import { cn } from "@/shared/lib/utils";
-import { Button } from "@/shared/ui/button";
-import { Spinner } from "@/shared/ui/spinner";
+
+import { Button } from "./button";
+import { Spinner } from "./spinner";
 
 type Props = {
   isLoading: boolean;
@@ -22,10 +23,10 @@ export function LoadingButton({
     <Button {...props} disabled={isLoading || disabled} className={cn("relative", className)}>
       <span className="px-3 opacity-0">{loadingText}</span>
 
-      <span className="absolute inset-0 flex items-center justify-center p-2">
+      <span className="absolute inset-0 flex items-center justify-center gap-2 p-2">
         {isLoading ? (
           <>
-            <Spinner className="mr-2 h-4 w-4" />
+            <Spinner className="h-4 w-4" />
             {loadingText}
           </>
         ) : (

@@ -10,7 +10,7 @@ const pool = new pg.Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-const MY_EMAIL = "ipepela1@mail.ru";
+const MY_EMAIL = "karen.avakov2@gmail.com";
 
 async function main() {
   console.log("Начинаем посев данных...");

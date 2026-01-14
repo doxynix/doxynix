@@ -118,7 +118,7 @@ export function AuthForm() {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background text-muted-foreground px-2">или</span>
+            <span className="text-muted-foreground px-2">или</span>
           </div>
         </div>
         <div className="bg-muted-foreground/5 flex flex-col gap-4 rounded-xl p-6">
