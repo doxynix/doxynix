@@ -3,9 +3,13 @@
 import { Book, BookText, ChevronDown, CircleQuestionMark } from "lucide-react";
 
 import { trpc } from "@/shared/api/trpc";
+import { sidebarMenu } from "@/shared/constants/navigation";
 import { cn } from "@/shared/lib/utils";
+import { AppTooltip } from "@/shared/ui/AppTooltip";
+import { Button } from "@/shared/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/collapsible";
 import { LoadingButton } from "@/shared/ui/LoadingButton";
+import { ScrollArea } from "@/shared/ui/scroll-area";
 import {
   Sidebar,
   SidebarContent,
@@ -20,8 +24,9 @@ import {
   useSidebar,
 } from "@/shared/ui/sidebar";
 import { Skeleton } from "@/shared/ui/skeleton";
-import { SidebarLink } from "@/widgets/AppSidebar";
-import { sidebarMenu } from "@/widgets/AppSidebar/model/sidebarMenu";
+import { Spinner } from "@/shared/ui/spinner";
+
+import { SidebarLink } from "./SidebarLink";
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -41,84 +46,113 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           {sidebarMenu.map((item) => (
-            <SidebarLink
-              key={item.href}
-              href={item.href}
-              icon={item.icon}
-              title={item.title}
-              exact={item.exact}
-            />
+            <SidebarLink key={item.href} {...item} />
           ))}
         </SidebarMenu>
       </SidebarHeader>
       <SidebarSeparator className="m-0" />
-      <SidebarContent className="max-h-[calc(100vh-HeaderHeight-FooterHeight)] overflow-y-auto">
-        <Collapsible defaultOpen className="group/collapsible">
-          <SidebarGroup>
-            <SidebarGroupLabel className="truncate" asChild>
-              <CollapsibleTrigger className="flex cursor-pointer justify-between hover:underline">
-                <span>Недавние репозитории</span>
-                <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-180" />{" "}
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent
-                className={cn(
-                  "transition-opacity",
-                  state === "expanded" ? "opacity-100" : "opacity-0"
-                )}
-              >
-                <SidebarMenu>
-                  {isLoading && (
-                    <div className="flex flex-col gap-2">
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                    </div>
-                  )}
 
-                  {data?.pages.map((page) =>
-                    page.items.map((repo) => (
-                      <SidebarMenuItem key={repo.id}>
-                        <SidebarLink
-                          icon={Book}
-                          title={`${repo.owner}/${repo.name}`}
-                          href={`/dashboard/repo/${repo.owner}/${repo.name}`}
-                        />
-                      </SidebarMenuItem>
-                    ))
+      <SidebarContent className="max-h-[calc(100vh-HeaderHeight-FooterHeight)] overflow-hidden">
+        <ScrollArea className="h-full">
+          <Collapsible defaultOpen className="group/collapsible">
+            <SidebarGroup>
+              <SidebarGroupLabel className="truncate" asChild>
+                <CollapsibleTrigger
+                  className={cn(
+                    "flex cursor-pointer justify-between hover:underline",
+                    state === "collapsed" && "pointer-events-none"
                   )}
-                  {!isLoading && data?.pages[0]?.items.length === 0 && (
-                    <div className="text-muted-foreground px-4 py-2 text-xs">Нет репозиториев</div>
-                  )}
-                  {hasNextPage && state !== "collapsed" && (
-                    <SidebarMenuItem>
-                      <LoadingButton
-                        variant="ghost"
-                        className="text-muted-foreground h-8 w-full cursor-pointer justify-start pl-2 text-xs"
-                        disabled={isFetchingNextPage}
-                        onClick={() => fetchNextPage()}
-                        isLoading={isFetchingNextPage}
-                        loadingText="Загрузка..."
+                >
+                  {state === "expanded" && <span>Недавние репозитории</span>}
+                  <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-180" />
+                </CollapsibleTrigger>
+              </SidebarGroupLabel>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {isLoading && state === "expanded" && (
+                      <div className="flex flex-col gap-2">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <div key={i} className="flex items-center justify-center gap-2 p-2">
+                            <Skeleton className="h-4 w-4" />
+                            <Skeleton className="h-4 w-full" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {isLoading && state === "collapsed" && (
+                      <div className="flex flex-col gap-2">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <div key={i} className="flex items-center justify-center gap-2 p-2">
+                            <Skeleton className="h-4 w-full" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {data?.pages.map((page) =>
+                      page.items.map((repo) => (
+                        <SidebarMenuItem className="max-w-60" key={repo.id}>
+                          <SidebarLink
+                            icon={Book}
+                            label={`${repo.owner}/${repo.name}`}
+                            href={`/dashboard/repo/${repo.owner}/${repo.name}`}
+                          />
+                        </SidebarMenuItem>
+                      ))
+                    )}
+                    {!isLoading && data?.pages[0]?.items.length === 0 && state === "expanded" && (
+                      <div className="text-muted-foreground truncate px-4 py-2 text-xs">
+                        Нет репозиториев
+                      </div>
+                    )}
+                    {hasNextPage && (
+                      <AppTooltip
+                        side="right"
+                        content="Показать еще"
+                        hidden={state !== "collapsed"}
                       >
-                        <ChevronDown className="mr-2 h-3 w-3" /> Показать еще
-                      </LoadingButton>
-                    </SidebarMenuItem>
-                  )}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+                        <SidebarMenuItem className="truncate">
+                          {state === "expanded" ? (
+                            <LoadingButton
+                              variant="ghost"
+                              className="text-muted-foreground hover:text-foreground hover:bg-primary/90 flex h-8 w-full cursor-pointer items-center justify-start text-xs"
+                              disabled={isFetchingNextPage}
+                              onClick={() => fetchNextPage()}
+                              isLoading={isFetchingNextPage}
+                              loadingText=""
+                            >
+                              <ChevronDown /> <>Показать еще</>
+                            </LoadingButton>
+                          ) : (
+                            <Button
+                              onClick={() => fetchNextPage()}
+                              variant="ghost"
+                              className="text-muted-foreground hover:text-foreground hover:bg-primary/90 flex h-8 w-full cursor-pointer items-center justify-center p-1"
+                            >
+                              {isFetchingNextPage ? (
+                                <Spinner className="text-muted-foreground h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="flex h-4 w-4 cursor-pointer items-center justify-center text-xs" />
+                              )}
+                            </Button>
+                          )}
+                        </SidebarMenuItem>
+                      </AppTooltip>
+                    )}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+        </ScrollArea>
       </SidebarContent>
       <SidebarSeparator className="m-0" />
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarLink title="Помощь" href="/support" icon={CircleQuestionMark} />
+          <SidebarLink label="Помощь" href="/support" icon={CircleQuestionMark} />
           <SidebarLink
-            title="Документация"
+            label="Документация"
             href="https://docs.doxynix.space"
             icon={BookText}
             isBlank

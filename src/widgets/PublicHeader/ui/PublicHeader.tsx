@@ -1,10 +1,10 @@
 import type { Route } from "next";
 import Link from "next/link";
 
+import { publicHeaderMenu } from "@/shared/constants/navigation";
 import { Button } from "@/shared/ui/button";
 import { Logo } from "@/shared/ui/Logo";
 import { ThemeToggle } from "@/shared/ui/ThemeToggle";
-import { publicHeaderMenu } from "@/widgets/PublicHeader/model/publicHeaderMenu";
 
 export function PublicHeader() {
   return (
@@ -17,7 +17,7 @@ export function PublicHeader() {
           <Button key={item.href} variant="ghost" asChild>
             <Link href={item.href as Route} className="flex items-center gap-2">
               {item.icon && <item.icon />}
-              {item.title}
+              {item.label}
             </Link>
           </Button>
         ))}
