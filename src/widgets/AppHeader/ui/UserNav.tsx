@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { Route } from "next";
 import Link from "next/link";
-import { LogOut, Settings, User } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
+import { LogOut } from "lucide-react";
+import { User } from "next-auth";
+import { signOut } from "next-auth/react";
 
+import { userNavMenu } from "@/shared/constants/navigation";
 import { getInitials } from "@/shared/lib/getInititals";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
@@ -24,14 +27,16 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import { LoadingButton } from "@/shared/ui/LoadingButton";
-import { Skeleton } from "@/shared/ui/skeleton";
 
-export function UserNav() {
-  const { data: session, status } = useSession();
-  const user = session?.user;
+type Props = {
+  user: User;
+};
+
+export function UserNav({ user }: Props) {
   const avatar = user?.image;
   const name = user?.name;
   const email = user?.email;
@@ -44,10 +49,6 @@ export function UserNav() {
     } finally {
       setLoading(false);
     }
-  }
-
-  if (status === "loading") {
-    return <Skeleton className="h-9 w-9 rounded-full" />;
   }
 
   return (
@@ -63,22 +64,25 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm leading-none font-medium">{name}</p>
-            <p className="text-muted-foreground text-xs leading-none">{email}</p>
+            <p className="truncate text-sm leading-none font-medium">{name}</p>
+            <p className="text-muted-foreground truncate text-xs leading-none">{email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="cursor-pointer" asChild>
-            <Link href="/dashboard/settings/profile">
-              <User className="mr-2" /> Профиль
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer" asChild>
-            <Link href="/dashboard/settings/profile">
-              <Settings className="mr-2" /> Настройки
-            </Link>
-          </DropdownMenuItem>
+          {userNavMenu
+            .filter((item) => item.label !== "Опасная зона")
+            .map((item) => (
+              <DropdownMenuItem key={item.href} asChild>
+                <Link href={item.href as Route} className="flex cursor-pointer items-center">
+                  {item.icon && <item.icon />}
+                  <span>{item.label}</span>
+                  {item.shortcut !== null && (
+                    <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
+                  )}
+                </Link>
+              </DropdownMenuItem>
+            ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
 
@@ -86,10 +90,10 @@ export function UserNav() {
           <Dialog>
             <DialogTrigger asChild>
               <DropdownMenuItem
-                className="text-danger focus:bg-danger/20 focus:text-danger cursor-pointer"
+                className="text-destructive focus:bg-destructive/20 focus:text-destructive cursor-pointer"
                 onSelect={(e) => e.preventDefault()}
               >
-                <LogOut className="text-danger mr-2" />
+                <LogOut className="text-destructive mr-2" />
                 Выйти
               </DropdownMenuItem>
             </DialogTrigger>

@@ -8,6 +8,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
+import { dashboardMenu, settingsMenu } from "@/shared/constants/navigation";
 import { useNavigationHotkeys } from "@/shared/hooks/use-navigation-hotkeys";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
@@ -22,7 +23,6 @@ import {
   CommandShortcut,
 } from "@/shared/ui/command";
 import { Spinner } from "@/shared/ui/spinner";
-import { navMenu, settingsMenu } from "@/widgets/AppCommandMenu/model/menu";
 
 export function AppCommandMenu() {
   const [open, setOpen] = useState(false);
@@ -101,13 +101,13 @@ export function AppCommandMenu() {
     command();
   }, []);
 
-  const filterItems = (items: typeof navMenu) => {
+  const filterItems = (items: typeof dashboardMenu) => {
     if (!search) return items;
     const lowerSearch = search.toLowerCase();
     return items.filter((item) => item.label.toLowerCase().includes(lowerSearch));
   };
 
-  const filteredNav = filterItems(navMenu);
+  const filteredNav = filterItems(dashboardMenu);
   const filteredSettings = filterItems(settingsMenu);
 
   return (
@@ -142,13 +142,13 @@ export function AppCommandMenu() {
             <CommandGroup heading="Навигация">
               {filteredNav.map((item) => (
                 <CommandItem
-                  key={item.path}
+                  key={item.href}
                   value={item.label}
-                  onSelect={() => runCommand(() => router.push(item.path as Route))}
+                  onSelect={() => runCommand(() => router.push(item.href as Route))}
                 >
-                  <item.icon className="mr-2 h-4 w-4" />
+                  {item.icon && <item.icon />}
                   <span>{item.label}</span>
-                  {item.shortcut && <CommandShortcut>{item.shortcut}</CommandShortcut>}
+                  {item.shortcut !== null && <CommandShortcut>{item.shortcut}</CommandShortcut>}
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -158,17 +158,24 @@ export function AppCommandMenu() {
 
           {filteredSettings.length > 0 && (
             <CommandGroup heading="Прочее">
-              {filteredSettings.map((item) => (
-                <CommandItem
-                  key={item.path}
-                  value={item.label}
-                  onSelect={() => runCommand(() => router.push(item.path as Route))}
-                >
-                  <item.icon className="mr-2 h-4 w-4" />
-                  <span>{item.label}</span>
-                  {item.shortcut && <CommandShortcut>{item.shortcut}</CommandShortcut>}
-                </CommandItem>
-              ))}
+              {filteredSettings.map((item) => {
+                const isDestructive = item.variant === "destructive";
+                return (
+                  <CommandItem
+                    key={item.href}
+                    className={cn(
+                      isDestructive &&
+                        "text-destructive data-[selected=true]:bg-destructive/10 data-[selected=true]:text-destructive"
+                    )}
+                    value={item.label}
+                    onSelect={() => runCommand(() => router.push(item.href as Route))}
+                  >
+                    {item.icon && <item.icon />}
+                    <span>{item.label}</span>
+                    {item.shortcut !== null && <CommandShortcut>{item.shortcut}</CommandShortcut>}
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           )}
 

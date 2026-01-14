@@ -3,7 +3,8 @@ import Link from "next/link";
 import { DateComp } from "@/shared/ui/DateComp";
 import GitHubIcon from "@/shared/ui/github-icon";
 import { TelegramIcon } from "@/shared/ui/telegram-icon";
-import { SystemStatus } from "@/widgets/AppFooter";
+
+import { SystemStatus } from "./SystemStatus";
 
 export function AppFooter() {
   return (

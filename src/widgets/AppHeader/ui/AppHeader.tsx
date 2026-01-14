@@ -4,6 +4,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SlashIcon } from "lucide-react";
+import { User } from "next-auth";
 
 import { cn } from "@/shared/lib/utils";
 import { AppTooltip } from "@/shared/ui/AppTooltip";
@@ -19,10 +20,16 @@ import { Logo } from "@/shared/ui/Logo";
 import { useSidebar } from "@/shared/ui/sidebar";
 import { ThemeToggle } from "@/shared/ui/ThemeToggle";
 import { AppCommandMenu } from "@/widgets/AppCommandMenu";
-import { NotificationsNav, UserNav } from "@/widgets/AppHeader";
 import { SidebarToggle } from "@/widgets/AppSidebar";
 
-export function AppHeader() {
+import { NotificationsNav } from "./NotificationsNav";
+import { UserNav } from "./UserNav";
+
+type Props = {
+  user: User;
+};
+
+export function AppHeader({ user }: Props) {
   const { state } = useSidebar();
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
@@ -70,10 +77,9 @@ export function AppHeader() {
 
       <div className="flex items-center gap-4">
         <AppCommandMenu />
-
         <ThemeToggle className="text-muted-foreground" />
         <NotificationsNav />
-        <UserNav />
+        <UserNav user={user} />
       </div>
     </header>
   );
