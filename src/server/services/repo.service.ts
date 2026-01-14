@@ -40,6 +40,12 @@ export const repoService = {
       githubData = await githubService.getRepoInfo(db, userId, owner, name);
     } catch (error) {
       if (isOctokitError(error)) {
+        if (error.status === 401) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Время жизни токена GitHub истекло",
+          });
+        }
         if (error.status === 404)
           throw new TRPCError({ code: "NOT_FOUND", message: "Репозиторий не найден на GitHub" });
         if (error.status === 403)

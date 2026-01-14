@@ -3,9 +3,12 @@
 import { useState } from "react";
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Star } from "lucide-react";
 import { toast } from "sonner";
+import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
+import { Button } from "@/shared/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -17,9 +20,10 @@ import {
 } from "@/shared/ui/dialog";
 import GitHubIcon from "@/shared/ui/github-icon";
 import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
 import { LoadingButton } from "@/shared/ui/LoadingButton";
-import { useCreateRepoDialogStore } from "@/features/repo/model/create-repo-dialog.store";
+import { Spinner } from "@/shared/ui/spinner";
+
+import { useCreateRepoDialogStore } from "../model/create-repo-dialog.store";
 
 export function CreateRepoDialog() {
   const { open, closeDialog } = useCreateRepoDialogStore();
@@ -28,10 +32,24 @@ export function CreateRepoDialog() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const utils = trpc.useUtils();
+  const [debouncedValue] = useDebounce(url, 300);
+
+  const isUrl = url.includes("github.com") || url.includes("/");
+  const { data: suggestions, isFetching } = trpc.repo.searchGithub.useQuery(
+    { query: debouncedValue },
+    {
+      enabled: debouncedValue.length >= 2 && !isUrl,
+      staleTime: 1000 * 60 * 5,
+    }
+  );
+  // подумать как отрисовать и стоит ли вообще список репозиториев юзера
+  const { data: myRepos } = trpc.repo.getMyGithubRepos.useQuery(undefined, {
+    enabled: open && url.length === 0,
+  });
 
   const createRepo = trpc.repo.create.useMutation({
     onSuccess: async () => {
-      toast.success("Репозиторий успешно добавлен!");
+      toast.success("Репозиторий успешно добавлен");
       closeDialog();
       setUrl("");
       await utils.repo.getAll.invalidate();
@@ -56,18 +74,21 @@ export function CreateRepoDialog() {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && closeDialog()}>
       <DialogPortal>
-        <DialogContent className="sm:max-w-106.25">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Добавление репозитория</DialogTitle>
             <DialogDescription>
-              Введите url репозитория или его имя для добавления
+              Начните вводить имя репозитория или введите url репозитория или его имя для добавления
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="grid gap-4 py-4">
             <div className="flex flex-col gap-3">
-              <Label>Ссылка на репозиторий или его имя</Label>
               <div className="relative">
-                <GitHubIcon className="absolute top-2.5 left-2.5" />
+                {isFetching ? (
+                  <Spinner className="absolute top-2.5 left-2.5" />
+                ) : (
+                  <GitHubIcon className="absolute top-2.5 left-2.5" />
+                )}
                 <Input
                   id="repo-url"
                   className="pl-8"
@@ -75,7 +96,29 @@ export function CreateRepoDialog() {
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   disabled={createRepo.isPending}
+                  autoComplete="off"
                 />
+                {suggestions && suggestions.length > 0 && (
+                  <div className="bg-popover absolute top-full right-0 left-0 z-20 mt-1">
+                    {suggestions.map((repo) => (
+                      <Button key={repo.fullName} variant="ghost" className="h-auto w-full">
+                        <div
+                          className="flex w-full cursor-pointer flex-col items-start gap-1"
+                          onClick={() => setUrl(repo.fullName)}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">{repo.fullName}</span>
+                            <Star className="h-3 w-3 fill-current text-yellow-500" />{" "}
+                            {repo.stars.toLocaleString("ru-RU")}
+                          </div>
+                          <span className="text-muted-foreground max-w-110 truncate text-xs">
+                            {repo.description}
+                          </span>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             <DialogFooter>

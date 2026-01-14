@@ -1,9 +1,9 @@
 import type { Status, Visibility } from "@prisma/client";
 
 import { AppPagination } from "@/shared/ui/AppPagination";
-import { RepoList } from "@/features/repo";
 
 import { api } from "@/server/trpc/server";
+import { RepoList } from "./RepoList";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 

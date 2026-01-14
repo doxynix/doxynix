@@ -1,45 +1,28 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { Check, Copy } from "lucide-react";
-import { toast } from "sonner";
 
 import { cn, formatFullDate, formatRelativeTime } from "@/shared/lib/utils";
 import { AppTooltip } from "@/shared/ui/AppTooltip";
-import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
+import { CopyButton } from "@/shared/ui/CopyButton";
 import GitHubIcon from "@/shared/ui/github-icon";
 
-import { RepoAvatar, RepoMetric } from "@/entities/repo";
-import { getLanguageColor } from "@/entities/repo/model/language-colors";
-import { getMetrics } from "@/entities/repo/model/metrics";
-import { repoStatusConfig } from "@/entities/repo/model/repo-status";
-import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";
-import { RepoTableItem } from "@/entities/repo/model/types";
+import { getLanguageColor } from "../model/language-colors";
+import { getMetrics } from "../model/metrics";
+import { repoStatusConfig } from "../model/repo-status";
+import { repoVisibilityConfig } from "../model/repo-visibility";
+import { RepoTableItem } from "../model/types";
+import { RepoAvatar } from "./RepoAvatar";
+import { RepoMetric } from "./RepoMetric";
 
 type Props = {
   repo: RepoTableItem;
 };
 
 export function RepoCard({ repo }: Props) {
-  const [copied, setCopied] = useState(false);
-
   const visibility = repoVisibilityConfig[repo.visibility];
   const status = repoStatusConfig[repo.status];
   const metrics = getMetrics(repo);
   const langColor = getLanguageColor(repo.language);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(repo.id);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-      toast.error("Ошибка при копировании ID");
-    }
-  };
 
   return (
     <Card className="group relative flex overflow-hidden p-4">
@@ -70,35 +53,15 @@ export function RepoCard({ repo }: Props) {
                 </AppTooltip>
               )}
               <div
-                className={cn(
-                  "flex shrink-0 items-center gap-1 transition-opacity duration-200",
-                  copied ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                )}
+                className={cn("flex shrink-0 items-center gap-1 transition-opacity duration-200")}
               >
-                <AppTooltip
-                  content={copied ? "Скопировано!" : "Копировать ID"}
-                  open={copied ? true : undefined}
-                >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleCopy}
-                    className={cn(
-                      "h-6 w-6 transition-all",
-                      copied
-                        ? "text-success hover:text-success"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  </Button>
-                </AppTooltip>
+                <CopyButton value={repo.id} />
                 <AppTooltip content="Открыть на GitHub">
                   <a
                     href={repo.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:bg-muted text-muted-foreground hover:text-foreground flex h-6 w-6 items-center justify-center rounded"
+                    className="hover:bg-muted text-muted-foreground hover:text-foreground flex h-6 w-6 items-center justify-center rounded opacity-0 transition-opacity group-hover:opacity-100"
                   >
                     <GitHubIcon className="h-4 w-4" />
                   </a>

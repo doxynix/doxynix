@@ -10,7 +10,7 @@ export function RepoCardSkeleton({ count }: Props) {
     <div className="space-y-3">
       {Array.from({ length: count ?? 4 }).map((_, i) => (
         <Card key={i} className="relative overflow-hidden p-4">
-          <div className="absolute top-4 right-4 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="absolute top-4 right-4 flex gap-2 opacity-100 transition-opacity">
             <Skeleton className="h-6 w-6 rounded" />
             <Skeleton className="h-6 w-6 rounded" />
           </div>

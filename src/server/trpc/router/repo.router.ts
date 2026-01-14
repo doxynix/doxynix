@@ -2,6 +2,7 @@ import { Status } from "@prisma/client";
 import { z } from "zod";
 
 import { RepoSchema } from "@/generated/zod";
+import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
 import { OpenApiErrorResponses, RepoFilterSchema } from "@/server/trpc/shared";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
@@ -46,6 +47,14 @@ export const repoRouter = createTRPCRouter({
         message: "Репозиторий добавлен",
       };
     }),
+  searchGithub: protectedProcedure
+    .input(z.object({ query: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await githubService.searchRepos(ctx.db, Number(ctx.session.user.id), input.query);
+    }),
+  getMyGithubRepos: protectedProcedure.query(async ({ ctx }) => {
+    return await githubService.getMyRepos(ctx.db, Number(ctx.session.user.id));
+  }),
 
   delete: protectedProcedure
     .meta({
@@ -93,7 +102,9 @@ export const repoRouter = createTRPCRouter({
         name: z.string().trim().min(1),
       })
     )
-    .output(PublicRepoSchema.extend({ status: z.enum(Status).nullish() }).nullable())
+    .output(
+      PublicRepoSchema.extend({ status: z.enum(Status).nullish(), message: z.string() }).nullable()
+    )
     .query(async ({ ctx, input }) => {
       const repo = await ctx.db.repo.findFirst({
         where: {
@@ -111,6 +122,7 @@ export const repoRouter = createTRPCRouter({
         ...repo,
         id: repo.publicId,
         status: repo.analyses[0]?.status ?? Status.NEW,
+        message: "Репозиторий найден",
       };
     }),
 
@@ -186,5 +198,32 @@ export const repoRouter = createTRPCRouter({
           searchQuery: search,
         },
       };
+    }),
+  deleteAll: protectedProcedure
+    .meta({
+      openapi: {
+        method: "DELETE",
+        path: "/repos",
+        tags: ["repositories"],
+        summary: "Remove all repositories",
+        description:
+          "Deletes the all repositories from the system along with its associated analytics and history. This does not affect the original GitHub repository.",
+        protect: true,
+        errorResponses: OpenApiErrorResponses,
+      },
+    })
+    .input(z.void())
+    .output(z.object({ success: z.boolean(), message: z.string() }))
+    .mutation(async ({ ctx }) => {
+      try {
+        const deletedRepoCount = await ctx.db.repo.deleteMany();
+        if (deletedRepoCount.count === 0) {
+          return { success: false, message: "Репозитории отсутствуют" };
+        }
+
+        return { success: true, message: "Все репозитории были удалены" };
+      } catch (error) {
+        handlePrismaError(error, { notFound: "Репозитории не найдены" });
+      }
     }),
 });
