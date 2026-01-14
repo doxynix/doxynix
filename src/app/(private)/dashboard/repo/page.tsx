@@ -30,12 +30,14 @@ export default async function RepoPage({ searchParams }: Props) {
     <div className="mx-auto flex h-full w-full flex-col">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Репозитории</h1>
-        <CreateRepoButton />
       </div>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <AppSearch placeholder="Найти репозиторий..." />
-          <RepoFilters />
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center gap-4">
+            <AppSearch placeholder="Найти репозиторий..." />
+            <RepoFilters />
+          </div>
+          <CreateRepoButton />
         </div>
       </div>
       <Suspense
