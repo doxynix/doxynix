@@ -1,6 +1,8 @@
 import crypto from "crypto";
 import { z } from "zod";
 
+import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
+
 import { ApiKeySchema } from "@/generated/zod";
 import { OpenApiErrorResponses } from "@/server/trpc/shared";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
@@ -26,22 +28,13 @@ export const apiKeyRouter = createTRPCRouter({
         errorResponses: OpenApiErrorResponses,
       },
     })
-    .input(
-      z.object({
-        name: z
-          .string()
-          .trim()
-          .min(1, "Слишком короткое имя (мин 1 символ)")
-          .max(50, "Слишком длинное название (макс 50)"),
-        description: z.string().trim().max(1000, "Слишком длинное описание").optional(),
-      })
-    )
+    .input(CreateApiKeySchema)
     .output(z.object({ key: z.string(), message: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const userId = Number(ctx.session.user.id);
       const randomPart = crypto.randomBytes(32).toString("hex");
       const fullKey = `${BRAND_PREFIX}${randomPart}`;
-      const displayPrefix = randomPart.slice(0, 6);
+      const displayPrefix = `${BRAND_PREFIX}${randomPart.slice(0, 6)}`;
       const hashedKey = crypto.createHash("sha256").update(fullKey).digest("hex");
 
       try {
@@ -113,25 +106,23 @@ export const apiKeyRouter = createTRPCRouter({
       },
     })
     .input(
-      z.object({
+      CreateApiKeySchema.extend({
         id: z.uuid(),
-        name: z
-          .string()
-          .trim()
-          .min(1, "Слишком короткое имя (мин 1 символ)")
-          .max(50, "Слишком длинное имя (макс 50)"),
-        description: z.string().trim().max(1000, "Слишком длинное описание").optional(),
       })
     )
     .output(z.object({ success: z.boolean(), message: z.string() }))
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.db.apiKey.updateMany({
+        const data = await ctx.db.apiKey.updateMany({
           where: { id: input.id },
           data: { name: input.name, description: input.description },
         });
 
-        return { success: true, message: "Имя API-ключа обновлено" };
+        if (data.count === 0) {
+          throw new Error("Ключ не найден или доступ запрещен");
+        }
+
+        return { success: true, message: "Данные API-ключа обновлены" };
       } catch (error) {
         handlePrismaError(error, {
           uniqueConstraint: { name: "Это имя уже занято другим ключом" },
