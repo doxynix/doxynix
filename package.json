@@ -46,9 +46,17 @@
     "test:coverage": "vitest run --coverage --config vitest.config.ts --no-file-parallelism",
     "release": "standard-version && git push --follow-tags origin HEAD"
   },
+  "pnpm": {
+    "overrides": {
+      "h3": ">=1.15.5"
+    }
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@next-auth/prisma-adapter": "^1.0.7",
+    "@octokit/plugin-paginate-rest": "^14.0.0",
+    "@octokit/plugin-retry": "^8.0.3",
+    "@octokit/plugin-throttling": "^11.0.3",
     "@octokit/rest": "^22.0.1",
     "@prisma/adapter-pg": "^6.19.1",
     "@prisma/client": "6.19.1",
