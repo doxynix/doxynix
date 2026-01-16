@@ -23,17 +23,18 @@ export function ProfileSkeleton() {
       <Card>
         <CardHeader>
           <CardTitle>Личная информация</CardTitle>
-          <div className="text-muted-foreground text-sm">Обновите свое имя или почту.</div>
+          {/* <div className="text-muted-foreground text-sm">Обновите свое имя или почту.</div> */}
+          <div className="text-muted-foreground text-sm">Обновите свое имя.</div>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-0.5">
             <div className="text-muted-foreground text-sm">Отображаемое имя</div>
             <Skeleton className="h-9 w-full" />
           </div>
-          <div className="flex flex-col gap-0.5">
+          {/* <div className="flex flex-col gap-0.5">
             <div className="text-muted-foreground text-sm">Email</div>
             <Skeleton className="h-9 w-full" />
-          </div>
+          </div> */}
           <div className="flex justify-end">
             <Skeleton className="h-9 w-36" />
           </div>

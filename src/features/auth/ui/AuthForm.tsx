@@ -90,7 +90,7 @@ export function AuthForm() {
             disabled={disabled}
             onClick={() => handleSignIn("github")}
           >
-            <GithubIcon className="mr-2" /> GitHub
+            <GithubIcon /> GitHub
           </LoadingButton>
 
           <LoadingButton
@@ -100,7 +100,7 @@ export function AuthForm() {
             disabled={disabled}
             onClick={() => handleSignIn("google")}
           >
-            <GoogleIcon className="mr-2" /> Google
+            <GoogleIcon /> Google
           </LoadingButton>
 
           <LoadingButton
@@ -110,7 +110,7 @@ export function AuthForm() {
             disabled={disabled}
             onClick={() => handleSignIn("yandex")}
           >
-            <YandexIcon className="mr-2" /> Yandex
+            <YandexIcon /> Yandex
           </LoadingButton>
         </div>
         <div className="relative w-full">
@@ -118,7 +118,7 @@ export function AuthForm() {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="text-muted-foreground px-2">или</span>
+            <span className="text-muted-foreground bg-background px-2">или</span>
           </div>
         </div>
         <div className="bg-muted-foreground/5 flex flex-col gap-4 rounded-xl p-6">

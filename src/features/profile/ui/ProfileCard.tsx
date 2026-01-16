@@ -171,7 +171,8 @@ export function ProfileCard({ user }: Props) {
       <Card>
         <CardHeader>
           <CardTitle>Личная информация</CardTitle>
-          <CardDescription>Обновите свое имя или почту.</CardDescription>
+          <CardDescription>Обновите свое имя.</CardDescription>
+          {/* <CardDescription>Обновите свое имя или почту.</CardDescription> */}
         </CardHeader>
         <CardContent className="space-y-4">
           <Form {...form}>
@@ -190,7 +191,7 @@ export function ProfileCard({ user }: Props) {
                 )}
               />
 
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
@@ -203,7 +204,7 @@ export function ProfileCard({ user }: Props) {
                     </FormControl>
                   </FormItem>
                 )}
-              />
+              /> */}
               <div className="flex justify-end">
                 <LoadingButton
                   loadingText="Сохранение..."

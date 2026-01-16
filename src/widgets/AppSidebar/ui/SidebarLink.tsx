@@ -23,8 +23,8 @@ export function SidebarLink({ href, label: title, icon: Icon, isBlank, exact }: 
       className={cn(
         "flex transition-colors",
         isActive
-          ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground font-bold"
-          : "hover:bg-primary text-muted-foreground hover:text-primary-foreground active:bg-primary active:text-primary-foreground"
+          ? "bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground font-bold"
+          : "hover:bg-sidebar-accent text-muted-foreground hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground"
       )}
       asChild
     >

@@ -31,7 +31,7 @@ export default function Error({
         <span className="bg-muted mx-auto mt-2 inline-block max-w-180 rounded p-2 font-mono text-xs">
           Код ошибки: {error?.digest ?? "Unknown error"}
         </span>
-        {process.env.NODE_ENV !== "development" && (
+        {process.env.NODE_ENV === "development" && (
           <span className="bg-muted mx-auto mt-2 inline-block max-w-180 rounded p-2 font-mono text-xs">
             Error: {error.message}
           </span>

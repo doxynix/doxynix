@@ -36,3 +36,29 @@ export function formatRelativeTime(
 export function formatFullDate(date: Date | string | number): string {
   return format(new Date(date), "d MMMM yyyy, HH:mm", { locale: ru });
 }
+
+export function isGitHubUrl(input: string): boolean {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  if (!/^https?:\/\//i.test(trimmed) && trimmed.includes("/")) {
+    try {
+      const normalized = `https://github.com/${trimmed.replace(/^\/+/, "")}`;
+      const parsed = new URL(normalized);
+      const hostname = parsed.hostname.toLowerCase();
+      return hostname === "github.com" || hostname.endsWith(".github.com");
+    } catch {
+      return false;
+    }
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    const hostname = parsed.hostname.toLowerCase();
+    return hostname === "github.com" || hostname.endsWith(".github.com");
+  } catch {
+    return false;
+  }
+}

@@ -8,7 +8,6 @@ export function SystemStatus() {
     staleTime: 60000,
     refetchInterval: 60000,
     retry: false,
-    refetchOnWindowFocus: false,
   });
 
   const isHealthy = data?.status === "ok";

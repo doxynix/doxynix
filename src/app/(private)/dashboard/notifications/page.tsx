@@ -4,6 +4,6 @@ export const metadata: Metadata = {
   title: "Уведомления",
 };
 
-export default function Notifications() {
+export default function NotificationsPage() {
   return <div className="">тут будут нотифаи</div>;
 }

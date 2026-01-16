@@ -50,10 +50,29 @@ export const repoRouter = createTRPCRouter({
   searchGithub: protectedProcedure
     .input(z.object({ query: z.string() }))
     .query(async ({ ctx, input }) => {
-      return await githubService.searchRepos(ctx.db, Number(ctx.session.user.id), input.query);
+      return await githubService.searchRepos(ctx.db, Number(ctx.session.user.id), input.query, 10);
     }),
   getMyGithubRepos: protectedProcedure.query(async ({ ctx }) => {
-    return await githubService.getMyRepos(ctx.db, Number(ctx.session.user.id));
+    const account = await ctx.db.account.findFirst({
+      where: {
+        userId: Number(ctx.session.user.id),
+        provider: "github",
+      },
+    });
+
+    if (!account) {
+      return {
+        isConnected: false,
+        items: [],
+      };
+    }
+
+    const repos = await githubService.getMyRepos(ctx.prisma, Number(ctx.session.user.id));
+
+    return {
+      isConnected: true,
+      items: repos,
+    };
   }),
 
   delete: protectedProcedure
@@ -126,6 +145,24 @@ export const repoRouter = createTRPCRouter({
       };
     }),
 
+  deleteByOwner: protectedProcedure
+    .input(z.object({ owner: z.string() }))
+    .output(z.object({ success: z.boolean(), count: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.db.repo.deleteMany({
+        where: {
+          owner: { equals: input.owner, mode: "insensitive" },
+          userId: Number(ctx.session.user.id),
+        },
+      });
+
+      return {
+        success: true,
+        count: result.count,
+        message: `Удалено ${result.count} репозиториев организации ${input.owner}`,
+      };
+    }),
+
   getAll: protectedProcedure
     .meta({
       openapi: {
@@ -160,10 +197,13 @@ export const repoRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const { limit, search, cursor, status, visibility, sortBy, sortOrder } = input;
+      const { limit, search, cursor, status, visibility, sortBy, sortOrder, owner } = input;
       const page = Math.min(Math.max(1, cursor ?? 1), 1000000);
 
-      const where = repoService.buildWhereClause({ search, visibility, status });
+      const where = repoService.buildWhereClause({ search, visibility, status, owner });
+
+      const contextWhere: typeof where =
+        owner !== undefined ? { owner: { equals: owner, mode: "insensitive" } } : {};
 
       const [items, totalCount, filteredCount] = await Promise.all([
         ctx.db.repo.findMany({
@@ -175,7 +215,7 @@ export const repoRouter = createTRPCRouter({
             analyses: { take: 1, orderBy: { createdAt: "desc" } },
           },
         }),
-        ctx.db.repo.count(),
+        ctx.db.repo.count({ where: contextWhere }),
         ctx.db.repo.count({ where }),
       ]);
 

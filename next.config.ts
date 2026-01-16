@@ -52,6 +52,20 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/dashboard/settings",
+        destination: "/dashboard/settings/profile",
+        permanent: true,
+      },
+      // {
+      //   source: "/me", // если юзер введет /me его кинет на то что написано в destination
+      //   destination: "/dashboard/settings/profile",
+      //   permanent: false,
+      // },
+    ];
+  },
 };
 
 export default withAxiom(bundleAnalyzer(nextConfig));

@@ -5,6 +5,6 @@ export const metadata: Metadata = {
   title: "Настройки",
 };
 
-export default function Settings() {
+export default function SettingsPage() {
   redirect("/dashboard/settings/profile");
 }

@@ -1,4 +1,4 @@
-export default async function Credits() {
+export default function CreditsPage() {
   return (
     <div className="p-8">
       <h1>Кредиты и авторы</h1>

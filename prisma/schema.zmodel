@@ -111,6 +111,7 @@ model Repo {
 
   @@unique([owner, name, userId])
   @@unique([githubId, userId])
+  @@index([userId, owner])
   @@index([userId, updatedAt(sort: Desc)])
   @@index([userId, visibility])
   @@index([githubId])

@@ -6,7 +6,6 @@ import { githubService } from "./github.service";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DbClient = any;
-
 interface OctokitError {
   status: number;
   message: string;
@@ -92,8 +91,9 @@ export const repoService = {
     search?: string;
     visibility?: Visibility;
     status?: Status;
+    owner?: string;
   }): Prisma.RepoWhereInput {
-    const { search, visibility, status } = filters;
+    const { search, visibility, status, owner } = filters;
     const searchTerms = search != null ? search.trim().split(/\s+/) : [];
 
     const statusFilter: Prisma.RepoWhereInput =
@@ -104,6 +104,9 @@ export const repoService = {
         : {};
 
     const visibilityFilter = visibility ? { visibility } : {};
+
+    const ownerFilter: Prisma.RepoWhereInput =
+      owner !== undefined ? { owner: { equals: owner, mode: "insensitive" } } : {};
 
     const searchFilter: Prisma.RepoWhereInput =
       searchTerms.length > 0
@@ -121,6 +124,7 @@ export const repoService = {
     return {
       ...visibilityFilter,
       ...statusFilter,
+      ...ownerFilter,
       ...searchFilter,
     };
   },

@@ -74,9 +74,9 @@ export function CreateApiKeyDialog() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className="cursor-pointer">
+        <Button variant="outline" className="cursor-pointer">
           <Plus className="mr-2 h-4 w-4" />
-          Создать новый ключ
+          Создать API-ключ
         </Button>
       </DialogTrigger>
 

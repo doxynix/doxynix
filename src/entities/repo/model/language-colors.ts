@@ -21,6 +21,7 @@ export const languageColors: Record<string, string> = {
   Boo: "#d4bec1",
   Brainfuck: "#2F2530",
   "C Sharp": "#178600",
+  "C#": "#178600",
   C: "#555555",
   Chapel: "#8dc63f",
   Cirru: "#ccccff",
@@ -200,6 +201,6 @@ export const languageColors: Record<string, string> = {
 };
 
 export const getLanguageColor = (lang: string | null): string => {
-  if (lang === null) return "#8b949e";
-  return languageColors[lang] ?? "#8b949e";
+  if (lang === null) return "";
+  return languageColors[lang] ?? "";
 };

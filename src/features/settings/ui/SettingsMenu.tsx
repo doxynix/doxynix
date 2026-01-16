@@ -12,7 +12,7 @@ export function SettingsMenu() {
   const pathname = usePathname();
 
   return (
-    <div className="sticky top-2 flex flex-col gap-4">
+    <div className="sticky top-2 flex flex-col gap-2">
       {settingsMenu.map((item) => {
         const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
         const isDestructive = item.variant === "destructive";
@@ -32,7 +32,7 @@ export function SettingsMenu() {
 
               !isDestructive &&
                 isActive &&
-                "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground font-bold",
+                "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground font-bold",
 
               !isDestructive &&
                 !isActive &&

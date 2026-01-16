@@ -2,16 +2,17 @@ import { Status, Visibility } from "@prisma/client";
 import { z } from "zod";
 
 export const PaginationSchema = z.object({
-  cursor: z.number().min(1).max(1000000).nullish(),
-  limit: z.number().min(1).max(100).default(10),
+  cursor: z.coerce.number().min(1).max(1000000).nullish().catch(null),
+  limit: z.coerce.number().min(1).max(100).default(10).catch(10),
   search: z.string().optional(),
 });
 
 export const RepoFilterSchema = PaginationSchema.extend({
-  status: z.enum(Status).optional(),
-  visibility: z.enum(Visibility).optional(),
-  sortBy: z.enum(["name", "updatedAt", "createdAt"]).default("updatedAt"),
-  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  owner: z.string().optional().catch(undefined),
+  status: z.enum(Status).optional().catch(undefined),
+  visibility: z.enum(Visibility).optional().catch(undefined),
+  sortBy: z.enum(["name", "updatedAt", "createdAt"]).default("updatedAt").catch("updatedAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc").catch("desc"),
 });
 
 export const OpenApiErrorResponses = {

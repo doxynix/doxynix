@@ -46,6 +46,9 @@ export async function RepoListContainer({ searchParams, config }: Props) {
     : params.visibility;
   const visibility = visibilityParam as Visibility | undefined;
 
+  const ownerParam = Array.isArray(params.owner) ? params.owner[0] : params.owner;
+  const owner = ownerParam ?? undefined;
+
   const { items, meta } = await (
     await api()
   ).repo.getAll({
@@ -56,6 +59,7 @@ export async function RepoListContainer({ searchParams, config }: Props) {
     visibility,
     sortBy,
     sortOrder,
+    owner,
   });
 
   return (

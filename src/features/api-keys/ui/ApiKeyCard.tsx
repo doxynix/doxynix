@@ -15,18 +15,20 @@ export function ApiKeyCard({ active }: { active: UiApiKey }) {
           <CardDescription className="flex flex-col gap-2 text-xs">
             <p>Создан: {formatRelativeTime(active.createdAt)}</p>
             <p>Последнее использование: {formatRelativeTime(active.lastUsed)}</p>
+            {active.description !== null && (
+              <p className="text-muted-foreground line-clamp-4 leading-relaxed">
+                {active.description}
+              </p>
+            )}
           </CardDescription>
         </div>
-        <div className="flex items-center">
+        <div className="flex shrink-0 flex-col items-center gap-1">
           <CopyButton value={active.id} className="h-9 w-9" />
           <UpdateApiKeyDialog apiKey={active} />
           <RevokeApiKeyDialog apiKey={active} />
         </div>
       </CardHeader>
       <CardContent>
-        {active.description !== null && (
-          <p className="text-muted-foreground mb-2 truncate text-sm">{active.description}</p>
-        )}
         <div className="bg-muted text-muted-foreground truncate rounded-md p-2 font-mono text-xs">
           {active.prefix
             ? `${active.prefix}••••••••••••••••••••••••••••••••••••••••••••••••••••`
