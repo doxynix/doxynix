@@ -166,14 +166,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Security audit
+      - name: Security audit (critical)
+        run: pnpm audit --audit-level=critical
+
+      - name: Security audit (high)
         run: pnpm audit --audit-level=high
 
       - name: Run Snyk to check for vulnerabilities
         if: github.ref == 'refs/heads/main'
         uses: snyk/actions/node@master
         with:
-          args: --all-projects
+          args: --all-projects --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
