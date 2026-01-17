@@ -4,7 +4,6 @@ const ONE_MB = 1024 * 1024;
 
 export function proxy(request: NextRequest) {
   const requestId = crypto.randomUUID();
-  console.log("🚀 Middleware сработал для:", request.nextUrl.pathname);
   const { pathname } = request.nextUrl;
 
   if (
