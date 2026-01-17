@@ -8,11 +8,11 @@ export const PaginationSchema = z.object({
 });
 
 export const RepoFilterSchema = PaginationSchema.extend({
-  owner: z.string().optional().catch(undefined),
-  status: z.enum(Status).optional().catch(undefined),
-  visibility: z.enum(Visibility).optional().catch(undefined),
-  sortBy: z.enum(["name", "updatedAt", "createdAt"]).default("updatedAt").catch("updatedAt"),
-  sortOrder: z.enum(["asc", "desc"]).default("desc").catch("desc"),
+  owner: z.string().optional(),
+  status: z.enum(Status).optional(),
+  visibility: z.enum(Visibility).optional(),
+  sortBy: z.enum(["name", "updatedAt", "createdAt"]).default("updatedAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
 
 export const OpenApiErrorResponses = {
