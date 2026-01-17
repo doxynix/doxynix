@@ -20,7 +20,9 @@ import { Logo } from "@/shared/ui/Logo";
 import { YandexIcon } from "@/shared/ui/yandex-icon";
 
 const MagicLinkSchema = z.object({
-  email: z.email({ message: "Введите корректный email" }),
+  email: z
+    .email({ message: "Введите корректный email" })
+    .max(254, "Адрес электронной почты не может быть длиннее 254 символов"),
 });
 
 export function AuthForm() {

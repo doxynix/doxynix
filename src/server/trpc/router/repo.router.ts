@@ -1,6 +1,8 @@
 import { Status } from "@prisma/client";
 import { z } from "zod";
 
+import { CreateRepoSchema, GitHubQuerySchema } from "@/shared/api/schemas/repo";
+
 import { RepoSchema } from "@/generated/zod";
 import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
@@ -26,11 +28,7 @@ export const repoRouter = createTRPCRouter({
         errorResponses: OpenApiErrorResponses,
       },
     })
-    .input(
-      z.object({
-        url: z.string().trim().min(1, "Ссылка не может быть пустой"),
-      })
-    )
+    .input(CreateRepoSchema)
     .output(
       z.object({
         success: z.boolean(),
@@ -47,11 +45,9 @@ export const repoRouter = createTRPCRouter({
         message: "Репозиторий добавлен",
       };
     }),
-  searchGithub: protectedProcedure
-    .input(z.object({ query: z.string() }))
-    .query(async ({ ctx, input }) => {
-      return await githubService.searchRepos(ctx.db, Number(ctx.session.user.id), input.query, 10);
-    }),
+  searchGithub: protectedProcedure.input(GitHubQuerySchema).query(async ({ ctx, input }) => {
+    return await githubService.searchRepos(ctx.db, Number(ctx.session.user.id), input.query, 10);
+  }),
   getMyGithubRepos: protectedProcedure.query(async ({ ctx }) => {
     const account = await ctx.db.account.findFirst({
       where: {

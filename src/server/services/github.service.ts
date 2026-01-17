@@ -4,8 +4,8 @@ import { throttling } from "@octokit/plugin-throttling";
 import { Octokit, RestEndpointMethodTypes } from "@octokit/rest";
 import { PrismaClient, Visibility } from "@prisma/client";
 
-import { RepoItemSchema } from "@/shared/api/schemas/repo";
 import { logger } from "@/shared/lib/logger";
+import { RepoItemFields } from "@/shared/types/repoItem";
 
 const MyOctokit = Octokit.plugin(retry, throttling, paginateRest);
 type SearchRepoItem =
@@ -42,8 +42,8 @@ export const githubService = {
     userId: number,
     query: string,
     limit: number | undefined
-  ): Promise<RepoItemSchema[]> {
-    if (query.length < 2) return [];
+  ): Promise<RepoItemFields[]> {
+    if (query.length < 2 || query.length > 256) return [];
 
     const octokit = await this.getClientForUser(prisma, userId);
 
@@ -67,7 +67,7 @@ export const githubService = {
     }
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getMyRepos(prisma: any, userId: number, limit?: number): Promise<RepoItemSchema[]> {
+  async getMyRepos(prisma: any, userId: number, limit?: number): Promise<RepoItemFields[]> {
     try {
       const octokit = await this.getClientForUser(prisma, userId);
 
@@ -95,7 +95,7 @@ export const githubService = {
     }
   },
 
-  mapRepos(data: GitHubRepoResponse[]): RepoItemSchema[] {
+  mapRepos(data: GitHubRepoResponse[]): RepoItemFields[] {
     return data.map((repo) => ({
       fullName: repo.full_name,
       stars: repo.stargazers_count ?? 0,

@@ -1,7 +1,7 @@
 import { Star } from "lucide-react";
 
-import { RepoItemSchema } from "@/shared/api/schemas/repo";
 import { cn, formatFullDate, formatRelativeTime } from "@/shared/lib/utils";
+import { RepoItemFields } from "@/shared/types/repoItem";
 import { AppTooltip } from "@/shared/ui/AppTooltip";
 import { Button } from "@/shared/ui/button";
 
@@ -13,7 +13,7 @@ export function RepoItem({
   onClick,
   disabled,
 }: {
-  repo: RepoItemSchema;
+  repo: RepoItemFields;
   onClick: () => void;
   disabled?: boolean;
 }) {

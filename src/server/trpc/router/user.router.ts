@@ -71,8 +71,8 @@ export const userRouter = createTRPCRouter({
     })
     .input(
       z.object({
-        url: z.url(),
-        key: z.string().min(1),
+        url: z.url().max(500),
+        key: z.string().min(1).max(100),
       })
     )
     .output(

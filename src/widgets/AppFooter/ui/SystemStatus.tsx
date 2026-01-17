@@ -16,7 +16,7 @@ export function SystemStatus() {
 
   return (
     <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium">
-      <Button variant="outline" asChild>
+      <Button variant="outline" asChild size="sm">
         <a
           href="https://status.doxynix.space"
           rel="noopener noreferrer"
@@ -41,7 +41,7 @@ export function SystemStatus() {
                 isHealthy && "bg-success",
                 hasIssue && "bg-error"
               )}
-            ></span>
+            />
           </span>
           {isLoading ? "Проверка..." : hasIssue ? "Сбой системы" : "Все системы в норме"}
         </a>

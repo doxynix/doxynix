@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, Copy, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -11,8 +11,8 @@ import { z } from "zod";
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 import { trpc } from "@/shared/api/trpc";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
-import { AppTooltip } from "@/shared/ui/AppTooltip";
 import { Button } from "@/shared/ui/button";
+import { CopyButton } from "@/shared/ui/CopyButton";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +31,6 @@ export function CreateApiKeyDialog() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [createdKey, setCreatedKey] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const form = useForm<z.infer<typeof CreateApiKeySchema>>({
     resolver: zodResolver(CreateApiKeySchema),
@@ -58,16 +57,7 @@ export function CreateApiKeyDialog() {
       setTimeout(() => {
         setCreatedKey(null);
         form.reset();
-        setCopied(false);
       }, 300);
-    }
-  };
-
-  const copyToClipboard = async () => {
-    if (createdKey !== null) {
-      await navigator.clipboard.writeText(createdKey);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
     }
   };
 
@@ -101,9 +91,9 @@ export function CreateApiKeyDialog() {
                     <FormLabel className="text-muted-foreground">Название</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         placeholder="Например: Prod Server"
                         disabled={createMutation.isPending}
-                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -119,10 +109,10 @@ export function CreateApiKeyDialog() {
                     <FormLabel className="text-muted-foreground">Описание (опционально)</FormLabel>
                     <FormControl>
                       <Textarea
+                        {...field}
                         disabled={createMutation.isPending}
                         placeholder="Для чего используется этот ключ..."
                         className="min-h-25 resize-none"
-                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -166,19 +156,7 @@ export function CreateApiKeyDialog() {
               <div className="grid flex-1 gap-2">
                 <Input readOnly value={createdKey} disabled={createMutation.isPending} />
               </div>
-              <AppTooltip
-                content={copied && "Скопировано!"}
-                open={copied ? true : undefined}
-                hidden={copied ? false : true}
-              >
-                <Button className="cursor-pointer" size="icon" onClick={copyToClipboard}>
-                  {copied ? (
-                    <Check className="text-success h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
-              </AppTooltip>
+              <CopyButton tooltipText="Скопировать" value={createdKey} className="opacity-100" />
             </div>
 
             <DialogFooter>
