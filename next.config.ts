@@ -90,6 +90,7 @@ const nextConfig: NextConfig = {
                 https://avatars.yandex.net;
               font-src 'self' data:;
               connect-src 'self'
+                https://cdn.jsdelivr.net
                 https://ufs.sh
                 https://utfs.io
                 https://uploadthing.com

@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Status, Visibility } from "@prisma/client";
 import { X } from "lucide-react";
 
+import { parseRepoSearchParams, REPO_DEFAULTS } from "@/shared/lib/search-params";
 import { Button } from "@/shared/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 
@@ -12,38 +13,35 @@ export function RepoFilters() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentParams = new URLSearchParams(searchParams.toString());
 
-  if (currentParams.get("page") === "1") {
-    currentParams.delete("page");
-  }
+  const paramsObject = Object.fromEntries(searchParams.entries());
 
-  const hasFilters = currentParams.toString().length > 0;
+  const filters = parseRepoSearchParams(paramsObject);
+
+  const hasFilters = searchParams.toString().length > 0;
 
   const updateQuery = (name: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (value === "all" || (name === "sortBy" && value === "updatedAt")) {
-      params.delete(name);
+    const newParams = new URLSearchParams(searchParams.toString());
+
+    if (value === "all" || (name === "sortBy" && value === REPO_DEFAULTS.SORT_BY)) {
+      newParams.delete(name);
     } else {
-      params.set(name, value);
+      newParams.set(name, value);
     }
-    params.delete("page");
-    router.push(`${pathname}?${params.toString()}` as Route);
+
+    newParams.delete("page");
+    router.push(`${pathname}?${newParams.toString()}` as Route);
   };
 
   const handleReset = () => {
-    if (!hasFilters && searchParams.get("page") !== "1") return;
-
+    if (!hasFilters && filters.page === 1) return;
     router.push(pathname as Route);
   };
 
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <Select
-          value={searchParams.get("status") ?? "all"}
-          onValueChange={(v) => updateQuery("status", v)}
-        >
+        <Select value={filters.status ?? "all"} onValueChange={(v) => updateQuery("status", v)}>
           <SelectTrigger className="w-35">
             <SelectValue placeholder="Статус" />
           </SelectTrigger>
@@ -57,7 +55,7 @@ export function RepoFilters() {
         </Select>
 
         <Select
-          value={searchParams.get("visibility") ?? "all"}
+          value={filters.visibility ?? "all"}
           onValueChange={(v) => updateQuery("visibility", v)}
         >
           <SelectTrigger className="w-32.5">
@@ -70,10 +68,7 @@ export function RepoFilters() {
           </SelectContent>
         </Select>
 
-        <Select
-          value={searchParams.get("sortBy") ?? "updatedAt"}
-          onValueChange={(v) => updateQuery("sortBy", v)}
-        >
+        <Select value={filters.sortBy} onValueChange={(v) => updateQuery("sortBy", v)}>
           <SelectTrigger className="w-37.5">
             <SelectValue placeholder="Сортировка" />
           </SelectTrigger>
