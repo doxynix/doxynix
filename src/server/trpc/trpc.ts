@@ -15,11 +15,12 @@ export const t = initTRPC
   .meta<OpenApiMeta>()
   .create({
     transformer: superjson,
-    errorFormatter({ shape, error }) {
+    errorFormatter({ shape, error, ctx }) {
       return {
         ...shape,
         data: {
           ...shape.data,
+          requestId: requestContext.getStore()?.requestId ?? ctx?.req.headers.get("x-request-id"),
           zodError: error.code === "BAD_REQUEST" ? error.cause : null,
         },
       };
@@ -49,7 +50,7 @@ const withZenStack = t.middleware(async ({ ctx, next }) => {
 });
 
 const contextMiddleware = t.middleware(async ({ ctx, next, path, type }) => {
-  const requestId = crypto.randomUUID();
+  const requestId = ctx.req.headers.get("x-request-id") ?? crypto.randomUUID();
   const sessionUser = ctx.session?.user;
 
   return requestContext.run(

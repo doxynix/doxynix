@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import React, { useState } from "react";
 import { ServerCrash } from "lucide-react";
 
 import BackOrLinkButton from "@/shared/ui/BackOrLinkButton";
 import { Button } from "@/shared/ui/button";
+import { CopyButton } from "@/shared/ui/CopyButton";
 
 export default function Error({
   error,
@@ -13,44 +14,71 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    console.error(error);
+  const [requestId, setRequestId] = useState<string>("");
+
+  React.useEffect(() => {
+    const getCookie = (name: string) => {
+      if (typeof document === "undefined") return;
+      const value = document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
+      return value ? value.pop() : null;
+    };
+
+    const rid = getCookie("last_request_id");
+    if (rid !== null && rid !== undefined) {
+      setRequestId(rid);
+    }
   }, [error]);
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
+    <div className="flex flex-1 flex-col items-center justify-center px-4">
       <div className="bg-destructive/10 text-destructive flex size-20 items-center justify-center rounded-full">
         <ServerCrash className="animate-pulse" size={35} />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <h1 className="text-4xl font-bold">500 — Ошибка сервера</h1>
-        <p className="text-muted-foreground text-lg">
-          Произошла критическая ошибка при обработке запроса.
+      <div className="w-full max-w-md space-y-4 text-center">
+        <h1 className="text-3xl font-bold tracking-tight">Ошибка сервера</h1>
+        <p className="text-muted-foreground text-base">
+          Произошло что-то непредвиденное. Мы уже получили уведомление об ошибке и разбираемся.
         </p>
-        <span className="bg-muted mx-auto mt-2 inline-block max-w-180 rounded p-2 font-mono text-xs">
-          Код ошибки: {error?.digest ?? "Unknown error"}
-        </span>
-        {process.env.NODE_ENV === "development" && (
-          <span className="bg-muted mx-auto mt-2 inline-block max-w-180 rounded p-2 font-mono text-xs">
-            Error: {error.message}
-          </span>
-        )}
+        <p className="text-muted-foreground text-left text-xs font-semibold tracking-wider uppercase">
+          Идентификатор запроса
+        </p>
+        <div className="bg-muted/50 border-border space-y-3 rounded-xl border p-2 text-left">
+          <div className="group flex items-center justify-between">
+            <code className="text-xs break-all">
+              {requestId ?? error.digest ?? "Системный сбой"}
+            </code>
+            <CopyButton
+              tooltipText="Скопировать ID запроса"
+              className="opacity-100"
+              value={requestId ?? error.digest ?? ""}
+            />
+          </div>
+
+          {process.env.NODE_ENV === "development" && (
+            <div className="border-border/50 border-t pt-2">
+              <p className="text-destructive/70 text-[10px] font-semibold uppercase">
+                Debug Error:
+              </p>
+              <p className="text-destructive truncate font-mono text-xs">{error.message}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col items-center justify-center gap-3 pt-4 sm:flex-row">
+          <Button onClick={reset} className="cursor-pointer">
+            Попробовать снова
+          </Button>
+          <BackOrLinkButton text="Вернуться назад" />
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Button onClick={reset} variant="default" className="cursor-pointer">
-          Попробовать снова
-        </Button>
-
-        <BackOrLinkButton text="На главную" />
-      </div>
-      <p className="text-muted-foreground mt-4 text-sm">
-        Если ошибка не исчезает, обратитесь по адресу:{" "}
-        <a href="mailto:support@doxynix.space" className="text-text hover:underline">
+      <footer className="mt-12 text-sm">
+        Нужна помощь?{" "}
+        <a href="mailto:support@doxynix.space" className="underline hover:no-underline">
           support@doxynix.space
         </a>
-      </p>
+      </footer>
     </div>
   );
 }
