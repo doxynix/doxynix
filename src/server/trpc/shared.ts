@@ -2,9 +2,9 @@ import { Status, Visibility } from "@prisma/client";
 import { z } from "zod";
 
 export const PaginationSchema = z.object({
-  cursor: z.coerce.number().min(1).max(1000000).nullish().catch(null),
-  limit: z.coerce.number().min(1).max(100).default(10).catch(10),
-  search: z.string().optional(),
+  cursor: z.coerce.number().min(1).max(1000000).nullish(),
+  limit: z.coerce.number().min(1).max(100).default(10),
+  search: z.string().max(1000).optional(),
 });
 
 export const RepoFilterSchema = PaginationSchema.extend({
