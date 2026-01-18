@@ -63,15 +63,27 @@ export function DeleteAllReposDialog({ meta }: { meta: RepoMeta }) {
           </div>
         </DialogHeader>
 
-        <div className="text-muted-foreground text-sm"></div>
+        <Alert variant="success" className="border-success/10 text-success bg-success/5">
+          <AlertTitle className="text-[16px] font-bold">Безопасно для исходного кода</AlertTitle>
+          <AlertDescription>
+            <span>
+              Это действие <strong>не удалит</strong> ваши репозитории на GitHub/GitLab. Они просто
+              перестанут перестанут отображаться в этом сервисе.
+            </span>
+          </AlertDescription>
+        </Alert>
+
         <Alert
           variant="destructive"
           className="border-destructive/10 bg-destructive/5 text-destructive"
         >
           <AlertTitle className="text-[16px] font-bold">Внимание</AlertTitle>
           <AlertDescription>
-            Это действие необратимо. Удаление всех репозиториев влечет за собой полное удаление всех
-            сгенерированных документаций, а также рассчитанных метрик.
+            <span>
+              Это действие <strong>необратимо</strong>. Удаление всех репозиториев влечет за собой
+              полное полное удаление удаление всех сгенерированных документаций, а также рассч
+              итанных метрик.
+            </span>
           </AlertDescription>
         </Alert>
 

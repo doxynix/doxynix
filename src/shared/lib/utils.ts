@@ -62,3 +62,46 @@ export function isGitHubUrl(input: string): boolean {
     return false;
   }
 }
+
+const SENSITIVE_FIELDS = new Set([
+  "password",
+  "newPassword",
+  "passwordHash",
+  "hash",
+  "salt",
+  "token",
+  "sessionToken",
+  "verificationToken",
+  "identifier",
+  "access_token",
+  "refresh_token",
+  "id_token",
+  "hashedKey",
+  "secret",
+  "clientSecret",
+  "cvv",
+  "creditCard",
+  "iban",
+]);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const sanitizePayload = (obj: any): any => {
+  if (obj === null || typeof obj !== "object") return obj;
+
+  if (Array.isArray(obj)) {
+    return obj.map(sanitizePayload);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const newObj: any = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (SENSITIVE_FIELDS.has(key)) {
+        newObj[key] = "***REDACTED***";
+      } else {
+        newObj[key] = sanitizePayload(obj[key]);
+      }
+    }
+  }
+  return newObj;
+};

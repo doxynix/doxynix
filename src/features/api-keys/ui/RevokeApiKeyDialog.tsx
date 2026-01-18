@@ -65,8 +65,9 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
               <DialogTitle>Отозвать ключ?</DialogTitle>
-              <DialogDescription className="truncate">
-                Вы собираетесь удалить ключ <b>{apiKey.name}</b>.
+              <DialogDescription className="flex max-w-75 flex-col gap-1">
+                <span>Вы собираетесь удалить ключ </span>
+                <span className="text-foreground truncate font-bold">{apiKey.name}</span>
               </DialogDescription>
             </div>
           </div>

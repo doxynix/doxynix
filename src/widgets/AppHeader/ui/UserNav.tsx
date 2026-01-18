@@ -70,19 +70,17 @@ export function UserNav({ user }: Props) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {userNavMenu
-            .filter((item) => item.label !== "Опасная зона")
-            .map((item) => (
-              <DropdownMenuItem key={item.href} asChild>
-                <Link href={item.href as Route} className="flex cursor-pointer items-center">
-                  {item.icon && <item.icon />}
-                  <span>{item.label}</span>
-                  {item.shortcut !== null && (
-                    <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
-                  )}
-                </Link>
-              </DropdownMenuItem>
-            ))}
+          {userNavMenu.map((item) => (
+            <DropdownMenuItem key={item.href} asChild>
+              <Link href={item.href as Route} className="flex cursor-pointer items-center">
+                {item.icon && <item.icon />}
+                <span>{item.label}</span>
+                {item.shortcut !== null && (
+                  <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
+                )}
+              </Link>
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
 

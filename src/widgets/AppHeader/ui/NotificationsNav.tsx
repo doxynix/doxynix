@@ -36,7 +36,7 @@ export function NotificationsNav() {
           >
             <Bell />
             {hasUnread && (
-              <span className="bg-primary absolute top-2 right-2 h-2 w-2 rounded-full" />
+              <span className="bg-foreground absolute top-2 right-2 h-2 w-2 rounded-full" />
             )}
           </Button>
         </DropdownMenuTrigger>
@@ -67,7 +67,7 @@ export function NotificationsNav() {
                     {note.repos} · {note.time}
                   </div>
                 </div>
-                {!note.read && <span className="bg-primary h-2 w-2 rounded-full" />}
+                {!note.read && <span className="bg-foreground h-2 w-2 rounded-full" />}
               </DropdownMenuItem>
             ))
           )}

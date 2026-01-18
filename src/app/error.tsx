@@ -15,6 +15,30 @@ export default function Error({
   reset: () => void;
 }) {
   const [requestId, setRequestId] = useState<string>("");
+  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+  const userAgent = typeof window !== "undefined" ? window.navigator.userAgent : "";
+  const screenSize =
+    typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : "N/A";
+  const timestamp = new Date().toISOString();
+  const finalId = requestId ?? error.digest ?? "No-ID";
+
+  const emailSubject = `[Bug Report] Doxynix - Error ${finalId}`;
+
+  const emailBody = `
+    Опишите, что вы делали перед ошибкой (по желанию):
+    >>> НАПИШИТЕ ЗДЕСЬ <<<
+
+    ------------------------------------------------
+    Technical Information (Please, do not edit):
+    ------------------------------------------------
+    Error ID: ${finalId}
+    Page: ${currentUrl}
+    Screen: ${screenSize}
+    Time: ${timestamp}
+    User Agent: ${userAgent}
+  `.trim();
+
+  const mailtoLink = `mailto:support@doxynix.space?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
   React.useEffect(() => {
     const getCookie = (name: string) => {
@@ -36,7 +60,7 @@ export default function Error({
       </div>
 
       <div className="w-full max-w-md space-y-4 text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Ошибка сервера</h1>
+        <h1 className="text-3xl font-bold tracking-tight">500 — Ошибка сервера</h1>
         <p className="text-muted-foreground text-base">
           Произошло что-то непредвиденное. Мы уже получили уведомление об ошибке и разбираемся.
         </p>
@@ -57,7 +81,7 @@ export default function Error({
 
           {process.env.NODE_ENV === "development" && (
             <div className="border-border/50 border-t pt-2">
-              <p className="text-destructive/70 text-[10px] font-semibold uppercase">
+              <p className="text-destructive/70 text-[12px] font-semibold uppercase">
                 Debug Error:
               </p>
               <p className="text-destructive truncate font-mono text-xs">{error.message}</p>
@@ -74,8 +98,8 @@ export default function Error({
       </div>
 
       <footer className="mt-12 text-sm">
-        Нужна помощь?{" "}
-        <a href="mailto:support@doxynix.space" className="underline hover:no-underline">
+        Если ошибка повторяется, напишите нам:{" "}
+        <a href={mailtoLink} className="underline hover:no-underline">
           support@doxynix.space
         </a>
       </footer>

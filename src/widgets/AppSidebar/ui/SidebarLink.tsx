@@ -10,12 +10,25 @@ import { MenuItem } from "@/shared/types/menuItem";
 import { SidebarMenuButton } from "@/shared/ui/sidebar";
 
 export function SidebarLink({ href, label: title, icon: Icon, isBlank, exact }: MenuItem) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const blank = isBlank === true;
-  const isActive =
-    exact === true
-      ? pathname === href
-      : !blank && (pathname === href || (href !== "/dashboard" && pathname?.startsWith(href)));
+  const isActive = (() => {
+    if (blank) return false;
+
+    if (exact === true) return pathname === href;
+
+    const cleanPath = pathname.replace(/\/$/, "");
+    const cleanHref = href.replace(/\/$/, "");
+
+    if (!cleanPath.startsWith(cleanHref)) return false;
+
+    const pathSegments = cleanPath.split("/").filter(Boolean);
+    const hrefSegments = cleanHref.split("/").filter(Boolean);
+
+    const depthDelta = pathSegments.length - hrefSegments.length;
+
+    return depthDelta <= 1;
+  })();
 
   return (
     <SidebarMenuButton

@@ -8,7 +8,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
-import { dashboardMenu, settingsMenu } from "@/shared/constants/navigation";
+import { commandMenuItems } from "@/shared/constants/navigation";
 import { useNavigationHotkeys } from "@/shared/hooks/use-navigation-hotkeys";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
@@ -96,19 +96,23 @@ export function AppCommandMenu() {
     router.push(path as Route);
   };
 
-  const runCommand = useCallback((command: () => unknown) => {
-    setOpen(false);
-    command();
-  }, []);
+  const runCommand = useCallback(
+    (path: string) => {
+      setOpen(false);
+      router.push(path as Route);
+    },
+    [router]
+  );
 
-  const filterItems = (items: typeof dashboardMenu) => {
-    if (!search) return items;
-    const lowerSearch = search.toLowerCase();
-    return items.filter((item) => item.label.toLowerCase().includes(lowerSearch));
-  };
+  const filteredCommands = React.useMemo(() => {
+    const s = search.toLowerCase();
+    if (!s) return commandMenuItems;
 
-  const filteredNav = filterItems(dashboardMenu);
-  const filteredSettings = filterItems(settingsMenu);
+    return commandMenuItems.filter(
+      (item) =>
+        (item.label.toLowerCase().includes(s) || item.url?.toLowerCase().includes(s)) ?? false
+    );
+  }, [search]);
 
   return (
     <>
@@ -134,58 +138,52 @@ export function AppCommandMenu() {
           placeholder="Введите команду или название репозитория..."
         />
         <CommandList>
-          {filteredNav.length === 0 && filteredSettings.length === 0 && (
-            <CommandEmpty>Ничего не найдено.</CommandEmpty>
-          )}
+          {filteredCommands.length === 0 && <CommandEmpty>Ничего не найдено.</CommandEmpty>}
 
-          {filteredNav.length > 0 && (
-            <CommandGroup heading="Навигация">
-              {filteredNav.map((item) => (
-                <CommandItem
-                  key={item.href}
-                  value={item.label}
-                  onSelect={() => runCommand(() => router.push(item.href as Route))}
-                >
-                  {item.icon && <item.icon />}
-                  <span>{item.label}</span>
-                  {item.shortcut !== null && <CommandShortcut>{item.shortcut}</CommandShortcut>}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-
-          <CommandSeparator />
-
-          {filteredSettings.length > 0 && (
-            <CommandGroup heading="Прочее">
-              {filteredSettings.map((item) => {
+          {filteredCommands.length > 0 && (
+            <CommandGroup heading="Команды и навигация">
+              {filteredCommands.map((item) => {
                 const isDestructive = item.variant === "destructive";
                 return (
                   <CommandItem
-                    key={item.href}
+                    key={item.url}
+                    value={item.label}
+                    onSelect={() => runCommand(item.href)}
                     className={cn(
                       isDestructive &&
-                        "text-destructive data-[selected=true]:bg-destructive/10 data-[selected=true]:text-destructive"
+                        "text-destructive data-[selected=true]:bg-destructive/10 data-[selected=true]:text-destructive",
+                      "flex items-center justify-between"
                     )}
-                    value={item.label}
-                    onSelect={() => runCommand(() => router.push(item.href as Route))}
                   >
-                    {item.icon && <item.icon />}
-                    <span>{item.label}</span>
-                    {item.shortcut !== null && <CommandShortcut>{item.shortcut}</CommandShortcut>}
+                    <div className="flex items-center gap-2">
+                      {item.icon && <item.icon />}
+                      <span>{item.label}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {item.url !== null && (
+                        <span className="text-muted-foreground bg-muted rounded border px-1.5 py-0.5 font-mono text-xs">
+                          {item.url}
+                        </span>
+                      )}
+                      {item.shortcut !== null && (
+                        <CommandShortcut className="text-xs">{item.shortcut}</CommandShortcut>
+                      )}
+                    </div>
                   </CommandItem>
                 );
               })}
             </CommandGroup>
           )}
 
+          <CommandSeparator />
+
           <CommandGroup
             heading={
               <div className="flex w-full items-center justify-between">
                 <span>Быстрый переход к репозиторию</span>
                 <Button
-                  className="text-muted-foreground! cursor-pointer bg-transparent! hover:underline"
                   variant="ghost"
+                  className="text-muted-foreground! cursor-pointer bg-transparent! hover:underline"
                   size="sm"
                   onClick={(e) => {
                     e.preventDefault();
@@ -194,11 +192,7 @@ export function AppCommandMenu() {
                   }}
                 >
                   {isReposExpanded ? "Свернуть" : "Развернуть"}
-                  <ChevronDown
-                    className={cn(
-                      isReposExpanded && "rotate-180 transition-transform duration-300"
-                    )}
-                  />
+                  <ChevronDown className={cn(isReposExpanded && "rotate-180")} />
                 </Button>
               </div>
             }

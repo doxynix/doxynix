@@ -180,7 +180,8 @@ export function AuthForm() {
         </div>
         <h2 className="text-xl font-bold">Проверьте почту</h2>
         <p className="text-muted-foreground">
-          Мы отправили ссылку на <b className="italic">{form.getValues("email")}</b>
+          Мы отправили ссылку на{" "}
+          <span className="text-foreground font-bold italic">{form.getValues("email")}</span>
         </p>
         <Button className="cursor-pointer" variant="outline" onClick={() => setIsSent(false)}>
           Ввести другой Email

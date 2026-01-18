@@ -90,7 +90,8 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
             <DialogHeader>
               <DialogTitle>Редактирование ключа</DialogTitle>
               <DialogDescription>
-                Измените название или описание для ключа <b>{apiKey.prefix}...</b>
+                Измените название или описание для ключа{" "}
+                <span className="text-foreground font-bold">{apiKey.prefix}...</span>
               </DialogDescription>
             </DialogHeader>
 

@@ -38,11 +38,13 @@ export function AuthEmail({ url, host }: EmailProps) {
             </Text>
 
             <Text style={{ fontSize: 15, margin: "0 0 14px", lineHeight: "1.6" }}>
-              На этот адрес был отправлен запрос на авторизацию в <strong>{host}</strong>.
+              На этот адрес был отправлен запрос на авторизацию в{" "}
+              <span style={{ fontWeight: 600, color: "#000000" }}>{host}</span>.
             </Text>
 
             <Text style={{ fontSize: 15, margin: "0 0 22px", lineHeight: "1.6" }}>
-              Нажмите кнопку ниже, чтобы завершить вход. Ссылка действует <strong>10 минут</strong>.
+              Нажмите кнопку ниже, чтобы завершить вход. Ссылка действует{" "}
+              <span style={{ fontWeight: 700, color: "#000000" }}>10 минут</span>.
             </Text>
 
             <Button
@@ -74,7 +76,7 @@ export function AuthEmail({ url, host }: EmailProps) {
           </Container>
 
           <Text style={{ color: "#888888", fontSize: 12, margin: "14px 0 0", textAlign: "center" }}>
-            © 2025 Doxynix · {host}
+            © 2026 Doxynix · {host}
           </Text>
         </Section>
       </Body>

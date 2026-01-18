@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import pg from "pg";
 
 import { logger } from "@/shared/lib/logger";
+import { sanitizePayload } from "@/shared/lib/utils";
 
 import { requestContext } from "@/server/utils/requestContext";
 
@@ -16,10 +17,7 @@ const isTest = process.env.NODE_ENV === "test";
 
 const baseClient = new PrismaClient({
   adapter,
-  log:
-    process.env.NODE_ENV === "development" && !isTest
-      ? ["error", "warn", "info", "query"]
-      : ["error"],
+  log: process.env.NODE_ENV === "development" && !isTest ? ["error", "warn"] : ["error"],
   transactionOptions: {
     maxWait: 20000,
     timeout: 30000,
@@ -44,47 +42,6 @@ const softDeleteClient = baseClient.$extends({
     },
   },
 });
-
-const SENSITIVE_FIELDS = new Set([
-  "password",
-  "newPassword",
-  "passwordHash",
-  "hash",
-  "salt",
-  "token",
-  "sessionToken",
-  "verificationToken",
-  "identifier",
-  "access_token",
-  "refresh_token",
-  "id_token",
-  "hashedKey",
-  "secret",
-  "clientSecret",
-  "cvv",
-  "creditCard",
-  "iban",
-]);
-
-const sanitizePayload = (obj: any): any => {
-  if (!obj || typeof obj !== "object") return obj;
-
-  if (Array.isArray(obj)) {
-    return obj.map(sanitizePayload);
-  }
-
-  const newObj: any = {};
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      if (SENSITIVE_FIELDS.has(key)) {
-        newObj[key] = "***REDACTED***";
-      } else {
-        newObj[key] = sanitizePayload(obj[key]);
-      }
-    }
-  }
-  return newObj;
-};
 
 export const prisma = softDeleteClient.$extends({
   query: {

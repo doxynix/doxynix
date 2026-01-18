@@ -41,7 +41,7 @@ export function AppHeader({ user }: Props) {
           <SidebarToggle />
         </AppTooltip>
 
-        <Logo className="w-20" />
+        <Logo className="mt-1 w-20" />
 
         <Breadcrumb>
           <BreadcrumbList>
@@ -51,6 +51,12 @@ export function AppHeader({ user }: Props) {
 
               const decodedSegment = decodeURIComponent(segment);
 
+              const textClasses = "truncate lowercase";
+
+              const widthClasses = isLast
+                ? "max-w-[150px] md:max-w-[300px]"
+                : "max-w-[80px] md:max-w-[120px]";
+
               return (
                 <div key={href} className="flex items-center gap-1.5">
                   <BreadcrumbSeparator>
@@ -59,10 +65,12 @@ export function AppHeader({ user }: Props) {
 
                   <BreadcrumbItem>
                     {isLast ? (
-                      <BreadcrumbPage className="lowercase">{decodedSegment}</BreadcrumbPage>
+                      <BreadcrumbPage className={cn(textClasses, widthClasses)}>
+                        {decodedSegment}
+                      </BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink asChild>
-                        <Link href={href as Route} className="lowercase">
+                        <Link href={href as Route} className={cn(textClasses, widthClasses)}>
                           {decodedSegment}
                         </Link>
                       </BreadcrumbLink>

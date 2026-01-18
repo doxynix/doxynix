@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { describe, expect, it } from "vitest";
 
 import { getInitials } from "@/shared/lib/getInititals";
-import { cn, formatRelativeTime } from "@/shared/lib/utils";
+import { cn, formatRelativeTime, sanitizePayload } from "@/shared/lib/utils";
 
 import { handlePrismaError } from "@/server/utils/handlePrismaError";
 
@@ -76,5 +76,102 @@ describe("Server Utils: handlePrismaError", () => {
     } catch (e: any) {
       expect(e.code).toBe("INTERNAL_SERVER_ERROR");
     }
+  });
+
+  describe("Shared Utils: sanitizePayload", () => {
+    it("should redact sensitive fields on root level", () => {
+      const input = {
+        email: "test@mail.com",
+        password: "123456",
+        token: "abc",
+      };
+
+      const result = sanitizePayload(input);
+
+      expect(result).toEqual({
+        email: "test@mail.com",
+        password: "***REDACTED***",
+        token: "***REDACTED***",
+      });
+    });
+
+    it("should redact nested sensitive fields", () => {
+      const input = {
+        user: {
+          name: "Elon",
+          credentials: {
+            passwordHash: "hash123",
+          },
+        },
+      };
+
+      const result = sanitizePayload(input);
+
+      expect(result).toEqual({
+        user: {
+          name: "Elon",
+          credentials: {
+            passwordHash: "***REDACTED***",
+          },
+        },
+      });
+    });
+
+    it("should sanitize arrays", () => {
+      const input = [{ token: "abc" }, { value: 42 }];
+
+      const result = sanitizePayload(input);
+
+      expect(result).toEqual([{ token: "***REDACTED***" }, { value: 42 }]);
+    });
+
+    it("should not mutate original object", () => {
+      const input = {
+        password: "secret",
+      };
+
+      const result = sanitizePayload(input);
+
+      expect(input.password).toBe("secret");
+      expect(result.password).toBe("***REDACTED***");
+    });
+
+    it("should return primitives as is", () => {
+      expect(sanitizePayload(null)).toBe(null);
+      expect(sanitizePayload("text")).toBe("text");
+      expect(sanitizePayload(123)).toBe(123);
+    });
+
+    it("should handle deep mixed structures", () => {
+      const input = {
+        users: [
+          {
+            email: "a@mail.com",
+            refresh_token: "r1",
+          },
+        ],
+        meta: {
+          count: 1,
+        },
+      };
+
+      const result = sanitizePayload(input);
+
+      expect(result).toEqual({
+        users: [
+          {
+            email: "a@mail.com",
+            refresh_token: "***REDACTED***",
+          },
+        ],
+        meta: {
+          count: 1,
+        },
+      });
+    });
+    it("should handle empty objects and arrays", () => {
+      expect(sanitizePayload({})).toEqual({});
+      expect(sanitizePayload([])).toEqual([]);
+    });
   });
 });

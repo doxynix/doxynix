@@ -15,7 +15,6 @@ export default async function PrivateLayout({ children }: { children: ReactNode 
 
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
-
   return (
     <>
       <SidebarProvider

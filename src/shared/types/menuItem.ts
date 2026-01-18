@@ -6,6 +6,7 @@ export type MenuItem = {
   icon?: ComponentType<{ className?: string }>;
   isBlank?: boolean;
   shortcut?: string;
+  url?: string;
   exact?: boolean;
   variant?: "default" | "destructive";
 };

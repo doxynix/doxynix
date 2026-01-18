@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight, History } from "lucide-react";
+import { ChevronDown, History } from "lucide-react";
 
-import { formatRelativeTime } from "@/shared/lib/utils";
+import { cn, formatRelativeTime } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/collapsible";
@@ -17,6 +17,7 @@ type Props = {
 
 export function ApiKeyArchivedTable({ archived }: Props) {
   const [isArchivedOpen, setIsArchivedOpen] = useState(false);
+
   return (
     <Collapsible
       open={isArchivedOpen}
@@ -27,16 +28,17 @@ export function ApiKeyArchivedTable({ archived }: Props) {
         <div className="flex items-center gap-2">
           <History className="text-muted-foreground h-4 w-4" />
           <h3 className="text-sm font-medium">История (Отозванные)</h3>
-          <Badge className="ml-1 px-1.5 text-[10px]">{archived.length}</Badge>
+          <Badge className="ml-1 text-[10px]">{archived.length}</Badge>
         </div>
 
         <CollapsibleTrigger asChild>
           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            {isArchivedOpen !== false ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
+            <ChevronDown
+              className={cn(
+                "-rotate-90 transition-transform duration-300",
+                isArchivedOpen && "rotate-0"
+              )}
+            />
           </Button>
         </CollapsibleTrigger>
       </div>
