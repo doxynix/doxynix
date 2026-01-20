@@ -52,7 +52,7 @@ describe("Server Utils: handlePrismaError", () => {
     } catch (e: any) {
       expect(e).toBeInstanceOf(TRPCError);
       expect(e.code).toBe("CONFLICT");
-      expect(e.message).toContain("Already exists");
+      expect(e.message).toContain("Record with this data already exists");
     }
   });
 
