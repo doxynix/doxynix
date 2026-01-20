@@ -28,7 +28,7 @@ export const repoService = {
     } catch {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Некорректная ссылка. Используйте формат 'owner/name' или 'https://github.com/...",
+        message: "Invalid URL. Use 'owner/repo' format or 'https://github.com/...",
       });
     }
 
@@ -42,13 +42,13 @@ export const repoService = {
         if (error.status === 401) {
           throw new TRPCError({
             code: "UNAUTHORIZED",
-            message: "Время жизни токена GitHub истекло",
+            message: "GitHub token expired",
           });
         }
         if (error.status === 404)
-          throw new TRPCError({ code: "NOT_FOUND", message: "Репозиторий не найден на GitHub" });
+          throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found on GitHub" });
         if (error.status === 403)
-          throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Лимит API GitHub исчерпан" });
+          throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "GitHub API limit exceeded" });
       }
       throw error;
     }
@@ -79,10 +79,10 @@ export const repoService = {
     } catch (error) {
       handlePrismaError(error, {
         uniqueConstraint: {
-          githubId: "Этот репозиторий уже добавлен",
-          url: "Репозиторий с таким URL уже существует",
+          githubId: "This repository is already added",
+          url: "Repository with this URL already exists",
         },
-        defaultConflict: "Вы уже добавили этот репозиторий",
+        defaultConflict: "You have already added this repository",
       });
     }
   },

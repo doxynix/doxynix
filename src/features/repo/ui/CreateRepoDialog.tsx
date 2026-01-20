@@ -35,7 +35,7 @@ import { Spinner } from "@/shared/ui/spinner";
 import { useCreateRepoDialogStore } from "../model/create-repo-dialog.store";
 import { RepoItem } from "./RepoItem";
 
-const STALE_TIME = 1000 * 60 * 5; // 5 минут
+const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут
 
 export function CreateRepoDialog() {
   const { open, closeDialog } = useCreateRepoDialogStore();
@@ -87,7 +87,7 @@ export function CreateRepoDialog() {
 
   const createRepo = trpc.repo.create.useMutation({
     onSuccess: async () => {
-      toast.success("Репозиторий успешно добавлен");
+      toast.success("Repository added successfully");
       closeDialog();
       form.reset();
       await utils.repo.getAll.invalidate();
@@ -123,10 +123,8 @@ export function CreateRepoDialog() {
       <DialogPortal>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Добавление репозитория</DialogTitle>
-            <DialogDescription>
-              Начните вводить имя репозитория или введите url репозитория или его имя для добавления
-            </DialogDescription>
+            <DialogTitle>Add Repository</DialogTitle>
+            <DialogDescription>Start typing repo name or enter URL to add </DialogDescription>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
@@ -145,8 +143,8 @@ export function CreateRepoDialog() {
                           )}
                           <Input
                             {...field}
-                            className="pl-8"
-                            placeholder="owner/repo или https://github.com/..."
+                            className="pl-8 text-sm"
+                            placeholder="owner/repo or https://github.com/..."
                             autoComplete="off"
                             disabled={createRepo.isPending}
                             maxLength={500}
@@ -161,7 +159,7 @@ export function CreateRepoDialog() {
                       </FormControl>
                       <FormMessage />
                       {showSuggestions && suggestions && suggestions.length > 0 && (
-                        <div className="bg-popover text-popover-foreground absolute top-full right-0 left-0 z-20 mt-1 h-80 overflow-y-auto rounded-md border shadow-md">
+                        <div className="bg-popover text-popover-foreground absolute top-full right-0 left-0 z-20 mt-1 h-80 overflow-y-auto rounded-xl border shadow-md">
                           {suggestions.map((repo) => (
                             <RepoItem
                               key={repo.fullName}
@@ -178,12 +176,12 @@ export function CreateRepoDialog() {
 
               <div className="space-y-2">
                 <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium tracking-wider uppercase">
-                  <BookOpen className="h-3 w-3" /> Ваши репозитории
+                  <BookOpen className="h-3 w-3" /> Your Repositories
                 </div>
 
                 <div className="space-y-0.5">
                   {isFetchingMyRepos ? (
-                    <div className="h-70 rounded-md border p-1">
+                    <div className="h-70 rounded-xl border p-1">
                       {Array.from({ length: 3 }).map((_, i) => (
                         <div key={i} className="flex flex-col gap-1 p-3">
                           <div className="flex items-center justify-between">
@@ -196,25 +194,25 @@ export function CreateRepoDialog() {
                       ))}
                     </div>
                   ) : myGithubData?.isConnected === false ? (
-                    <div className="h-70 rounded-md border p-1">
-                      <div className="flex h-full flex-col items-center justify-center px-4 py-8 text-center">
+                    <div className="h-70 rounded-xl border p-1">
+                      <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
                         <p className="text-muted-foreground mb-3 text-sm">
-                          Чтобы увидеть список своих репозиториев, подключите GitHub аккаунт
+                          To see your repositories list, connect GitHub account{" "}
                         </p>
                         <LoadingButton
                           className="cursor-pointer"
                           variant="outline"
                           isLoading={loading}
-                          loadingText="Подключение..."
+                          loadingText="Connecting..."
                           disabled={loading}
                           onClick={() => handleConnectGithub()}
                         >
-                          <GithubIcon /> Подключить
+                          <GithubIcon /> Connect
                         </LoadingButton>
                       </div>
                     </div>
                   ) : (
-                    <ScrollArea type="always" className="h-70 rounded-md border p-1">
+                    <ScrollArea type="always" className="h-70 rounded-xl border p-1">
                       {myGithubData?.items.map((myRepo) => (
                         <RepoItem
                           key={myRepo.fullName}
@@ -231,10 +229,10 @@ export function CreateRepoDialog() {
                 <LoadingButton
                   className="cursor-pointer"
                   isLoading={createRepo.isPending}
-                  loadingText="Добавление..."
+                  loadingText="Adding..."
                   disabled={createRepo.isPending || !form.formState.isValid || !urlValue}
                 >
-                  Добавить
+                  Add
                 </LoadingButton>
               </DialogFooter>
             </form>{" "}

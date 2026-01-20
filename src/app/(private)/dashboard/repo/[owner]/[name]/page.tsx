@@ -39,7 +39,7 @@ export default async function RepoOwnerNamePage({ params }: Props) {
 
       <div>
         ID: {repo.id} <br />
-        Статус: {repo.status}
+        Status: {repo.status}
       </div>
     </div>
   );

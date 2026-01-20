@@ -11,7 +11,7 @@ export function CreateRepoButton() {
 
   return (
     <Button className="cursor-pointer" variant="outline" onClick={openDialog}>
-      <Plus /> Добавить репозиторий
+      <Plus /> Add Repository
     </Button>
   );
 }

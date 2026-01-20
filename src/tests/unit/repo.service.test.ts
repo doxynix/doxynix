@@ -42,7 +42,6 @@ describe("Repo Service", () => {
         private: false,
         created_at: "2023-01-01",
         pushed_at: "2023-01-02",
-        // ... остальные поля по необходимости
       } as any);
 
       mockDb.repo.create.mockResolvedValue({ id: 1, name: "repo" });
@@ -74,7 +73,7 @@ describe("Repo Service", () => {
       vi.mocked(githubService.getRepoInfo).mockRejectedValue({ status: 404 });
 
       await expect(repoService.createRepo(mockDb, 1, "a/b")).rejects.toThrow(
-        "Репозиторий не найден"
+        "Repository not found"
       );
     });
   });

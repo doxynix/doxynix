@@ -50,14 +50,14 @@ export const apiKeyRouter = createTRPCRouter({
       } catch (error) {
         handlePrismaError(error, {
           uniqueConstraint: {
-            name: "API-ключ с таким именем уже существует",
-            hashedKey: "Невероятно, но сгенерировался дубликат ключа. Попробуйте снова.",
+            name: "API Key with this name already exists",
+            hashedKey: "Incredible, but a duplicate key was generated. Try again.",
           },
-          defaultConflict: "API-ключ с таким именем уже существует",
+          defaultConflict: "API Key with this name already exists",
         });
       }
 
-      return { key: fullKey, message: "API-ключ создан" };
+      return { key: fullKey, message: "API Key created" };
     }),
 
   list: protectedProcedure
@@ -119,15 +119,15 @@ export const apiKeyRouter = createTRPCRouter({
         });
 
         if (data.count === 0) {
-          throw new Error("Ключ не найден или доступ запрещен");
+          throw new Error("Key not found or access denied");
         }
 
-        return { success: true, message: "Данные API-ключа обновлены" };
+        return { success: true, message: "API Key data updated" };
       } catch (error) {
         handlePrismaError(error, {
-          uniqueConstraint: { name: "Это имя уже занято другим ключом" },
-          notFound: "Ключ не найден или доступ запрещен",
-          defaultConflict: "API-ключ с таким именем уже существует",
+          uniqueConstraint: { name: "Name already taken" },
+          notFound: "Key not found or access denied",
+          defaultConflict: "API Key with this name already exists",
         });
       }
     }),
@@ -152,9 +152,9 @@ export const apiKeyRouter = createTRPCRouter({
           where: { id: input.id },
         });
 
-        return { success: true, message: "API-ключ отозван" };
+        return { success: true, message: "API Key revoked" };
       } catch (error) {
-        handlePrismaError(error, { notFound: "Ключ не найден" });
+        handlePrismaError(error, { notFound: "Key not found" });
       }
     }),
 

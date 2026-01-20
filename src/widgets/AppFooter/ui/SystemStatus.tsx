@@ -43,7 +43,7 @@ export function SystemStatus() {
               )}
             />
           </span>
-          {isLoading ? "Проверка..." : hasIssue ? "Сбой системы" : "Все системы в норме"}
+          {isLoading ? "Checking..." : hasIssue ? "System Outage" : "All Systems Operational"}
         </a>
       </Button>
     </div>

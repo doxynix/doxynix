@@ -40,8 +40,7 @@ export const userRouter = createTRPCRouter({
         where: { id: userId },
       });
 
-      if (user === null)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Пользователь не найден" });
+      if (user === null) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
 
       return {
         user: {
@@ -54,7 +53,7 @@ export const userRouter = createTRPCRouter({
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         },
-        message: "Пользователь найден",
+        message: "User found",
       };
     }),
   updateAvatar: protectedProcedure
@@ -84,7 +83,7 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = Number(ctx.session.user.id);
 
-      // внимание используется чистая призма
+      // NOTE: используется чистая призма
       const currentUser = await ctx.prisma.user.findUnique({
         where: { id: userId },
         select: { imageKey: true },
@@ -103,7 +102,7 @@ export const userRouter = createTRPCRouter({
       if (oldKey !== undefined && oldKey !== null && oldKey !== input.key) {
         utapi.deleteFiles(oldKey).catch((e) => {
           logger.error({
-            msg: "Не удалось удалить старый файл из UT",
+            msg: "Failed to delete old file from UploadThing",
             error: e instanceof Error ? e.message : String(e),
             oldKey,
           });
@@ -112,7 +111,7 @@ export const userRouter = createTRPCRouter({
 
       return {
         image: updatedUser?.image ?? null,
-        message: "Фото профиля обновлено",
+        message: "Profile Picture updated",
       };
     }),
   removeAvatar: protectedProcedure
@@ -131,7 +130,7 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx }) => {
       const userId = Number(ctx.session.user.id);
 
-      // внимание используется чистая призма
+      // NOTE: используется чистая призма
       const user = await ctx.prisma.user.findUnique({
         where: { id: userId },
         select: { imageKey: true },
@@ -151,7 +150,7 @@ export const userRouter = createTRPCRouter({
         });
       }
 
-      return { success: true, message: "Фото профиля удалено" };
+      return { success: true, message: "Profile Picture removed" };
     }),
   updateUser: protectedProcedure
     .meta({
@@ -182,7 +181,7 @@ export const userRouter = createTRPCRouter({
           ...updatedUser,
           id: updatedUser.publicId,
         },
-        message: "Учетные данные обновлены",
+        message: "Credentials updated",
       };
     }),
 
@@ -202,14 +201,14 @@ export const userRouter = createTRPCRouter({
     .output(z.object({ success: z.boolean(), message: z.string() }))
     .mutation(async ({ ctx }) => {
       const userId = Number(ctx.session.user.id);
-      // внимание используется чистая призма
+      // NOTE: используется чистая призма
       const user = await ctx.prisma.user.findUnique({
         where: { id: userId },
         select: { imageKey: true },
       });
 
       if (user === null) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Пользователь не найден" });
+        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
       }
 
       await ctx.db.user.delete({
@@ -224,7 +223,7 @@ export const userRouter = createTRPCRouter({
 
       return {
         success: true,
-        message: "Ваш аккаунт и все связанные данные были безвозвратно удалены",
+        message: "Your account and all associated data have been permanently deleted",
       };
     }),
 });

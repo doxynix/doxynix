@@ -8,7 +8,7 @@ import { CreateRepoButton, RepoFilters, RepoListContainer } from "@/features/rep
 import { RepoCardSkeleton } from "@/entities/repo";
 
 export const metadata: Metadata = {
-  title: "Репозитории",
+  title: "Repositories",
 };
 
 type Props = {
@@ -28,17 +28,15 @@ export default async function RepoPage({ searchParams }: Props) {
 
   return (
     <div className="mx-auto flex h-full w-full flex-col">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Репозитории</h1>
+      <div className="mb-4 flex items-center not-sm:justify-center">
+        <h1 className="text-2xl font-bold">Repositories</h1>
       </div>
-      <div className="flex items-center justify-between">
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center gap-4">
-            <AppSearch placeholder="Найти репозиторий..." />
-            <RepoFilters />
-          </div>
-          <CreateRepoButton />
+      <div className="flex w-full flex-wrap items-center justify-center gap-2 xl:justify-between">
+        <div className="flex flex-col items-center gap-4 xl:flex-row">
+          <AppSearch placeholder="Search repository..." />
+          <RepoFilters />
         </div>
+        <CreateRepoButton />
       </div>
       <Suspense
         key={suspenseKey}

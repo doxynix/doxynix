@@ -16,7 +16,7 @@ export function useCopyToClipboard(timeout = 2000) {
         setTimeout(() => setIsCopied(false), timeout);
       } catch (err) {
         console.error("Failed to copy:", err);
-        toast.error("Ошибка при копировании");
+        toast.error("Copy failed");
         setIsCopied(false);
       }
     },

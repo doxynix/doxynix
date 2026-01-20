@@ -29,7 +29,7 @@ export const healthRouter = createTRPCRouter({
         return { status: "ok" };
       } catch (error) {
         handlePrismaError(error, {
-          defaultConflict: "Сервис временно недоступен",
+          defaultConflict: "Service temporarily unavailable",
         });
       }
     }),

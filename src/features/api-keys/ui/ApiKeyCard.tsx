@@ -13,8 +13,8 @@ export function ApiKeyCard({ active }: { active: UiApiKey }) {
         <div className="space-y-1 overflow-hidden">
           <CardTitle className="truncate text-base font-semibold">{active.name}</CardTitle>
           <CardDescription className="flex flex-col gap-2 text-xs">
-            <p>Создан: {formatRelativeTime(active.createdAt)}</p>
-            <p>Последнее использование: {formatRelativeTime(active.lastUsed)}</p>
+            <p>Created: {formatRelativeTime(active.createdAt)}</p>
+            <p>Last used: {formatRelativeTime(active.lastUsed)}</p>
             {active.description !== null && (
               <p className="text-muted-foreground line-clamp-4 leading-relaxed">
                 {active.description}
@@ -29,7 +29,7 @@ export function ApiKeyCard({ active }: { active: UiApiKey }) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="bg-muted text-muted-foreground truncate rounded-md p-2 font-mono text-xs">
+        <div className="bg-muted text-muted-foreground truncate rounded-xl p-2 font-mono text-xs">
           {active.prefix
             ? `${active.prefix}••••••••••••••••••••••••••••••••••••••••••••••••••••`
             : "dxnx_••••••••••••••••••••••••••••••••••••••••••••••••••••"}

@@ -11,7 +11,7 @@ export function AuthEmail({ url, host }: EmailProps) {
       <Head />
       <Body style={{ background: "#ffffff", padding: "24px 0" }}>
         <Text style={{ display: "none", color: "transparent", height: 0, overflow: "hidden" }}>
-          Ссылка для входа в Doxynix. Действует 10 минут.
+          Login link for Doxynix. Valid for 10 minutes.
         </Text>
         <Section>
           <Container
@@ -34,17 +34,17 @@ export function AuthEmail({ url, host }: EmailProps) {
               style={{ display: "block", margin: "0 auto 20px" }}
             /> */}
             <Text style={{ fontSize: 20, margin: "0 0 14px", fontWeight: 600, lineHeight: "1.4" }}>
-              Подтверждение входа
+              Confirm Sign In
             </Text>
 
             <Text style={{ fontSize: 15, margin: "0 0 14px", lineHeight: "1.6" }}>
-              На этот адрес был отправлен запрос на авторизацию в{" "}
+              A login request was sent to this email{" "}
               <span style={{ fontWeight: 600, color: "#000000" }}>{host}</span>.
             </Text>
 
             <Text style={{ fontSize: 15, margin: "0 0 22px", lineHeight: "1.6" }}>
-              Нажмите кнопку ниже, чтобы завершить вход. Ссылка действует{" "}
-              <span style={{ fontWeight: 700, color: "#000000" }}>10 минут</span>.
+              Click the button below to complete your login. Link expires in{" "}
+              <span style={{ fontWeight: 700, color: "#000000" }}>10 minutes</span>.
             </Text>
 
             <Button
@@ -59,19 +59,19 @@ export function AuthEmail({ url, host }: EmailProps) {
                 display: "inline-block",
               }}
             >
-              Войти
+              Log in
             </Button>
 
             <Text
               style={{ fontSize: 13, color: "#555555", margin: "22px 0 10px", lineHeight: "1.6" }}
             >
-              Если кнопка не работает, скопируйте ссылку и вставьте в адресную строку браузера:
+              If the button doesn&apos;t work, copy and paste this link into your browser:
             </Text>
 
             <Text style={{ wordBreak: "break-all", fontSize: 13, margin: "0 0 24px" }}>{url}</Text>
 
             <Text style={{ fontSize: 12, color: "#888888", margin: 0, lineHeight: "1.6" }}>
-              Если вы не запрашивали вход — просто проигнорируйте это письмо.
+              If you didn&apos;t request this, you can safely ignore this email.
             </Text>
           </Container>
 

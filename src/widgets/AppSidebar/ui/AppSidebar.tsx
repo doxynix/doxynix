@@ -4,6 +4,7 @@ import { Book, BookText, ChevronDown, CircleQuestionMark } from "lucide-react";
 
 import { trpc } from "@/shared/api/trpc";
 import { sidebarMenu } from "@/shared/constants/navigation";
+import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { cn } from "@/shared/lib/utils";
 import { AppTooltip } from "@/shared/ui/AppTooltip";
 import { Button } from "@/shared/ui/button";
@@ -29,6 +30,7 @@ import { Spinner } from "@/shared/ui/spinner";
 import { SidebarLink } from "./SidebarLink";
 
 export function AppSidebar() {
+  const isMobile = useIsMobile();
   const { state } = useSidebar();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     trpc.repo.getAll.useInfiniteQuery(
@@ -63,7 +65,7 @@ export function AppSidebar() {
                     state === "collapsed" && "pointer-events-none"
                   )}
                 >
-                  {state === "expanded" && <span>Недавние репозитории</span>}
+                  {(state === "expanded" || isMobile === true) && <span>Recent Repositories</span>}
                   <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-180" />
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
@@ -103,15 +105,11 @@ export function AppSidebar() {
                     )}
                     {!isLoading && data?.pages[0]?.items.length === 0 && state === "expanded" && (
                       <div className="text-muted-foreground truncate px-4 py-2 text-xs">
-                        Нет репозиториев
+                        No repositories
                       </div>
                     )}
                     {hasNextPage && (
-                      <AppTooltip
-                        side="right"
-                        content="Показать еще"
-                        hidden={state !== "collapsed"}
-                      >
+                      <AppTooltip side="right" content="Show more" hidden={state !== "collapsed"}>
                         <SidebarMenuItem className="truncate">
                           {state === "expanded" ? (
                             <LoadingButton
@@ -122,7 +120,7 @@ export function AppSidebar() {
                               isLoading={isFetchingNextPage}
                               loadingText=""
                             >
-                              <ChevronDown /> <>Показать еще</>
+                              <ChevronDown /> <>Show more</>
                             </LoadingButton>
                           ) : (
                             <Button
@@ -150,9 +148,9 @@ export function AppSidebar() {
       <SidebarSeparator className="m-0" />
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarLink label="Помощь" href="/support" icon={CircleQuestionMark} />
+          <SidebarLink label="Help" href="/support" icon={CircleQuestionMark} />
           <SidebarLink
-            label="Документация"
+            label="Documentation"
             href="https://docs.doxynix.space"
             icon={BookText}
             isBlank

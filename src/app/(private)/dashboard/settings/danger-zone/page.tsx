@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { DeleteAccountCard, DeleteAllReposCard } from "@/features/danger-zone";
 
 export const metadata: Metadata = {
-  title: "Опасная зона",
+  title: "Danger Zone",
 };
 
 export default function DangerZonePage() {
@@ -11,8 +11,8 @@ export default function DangerZonePage() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex justify-between">
         <div className="flex flex-col gap-2">
-          <h2 className="text-destructive text-2xl font-bold tracking-tight">Опасная зона</h2>
-          <p className="text-muted-foreground text-sm">Необратимые и разрушительные действия</p>
+          <h2 className="text-destructive text-2xl font-bold tracking-tight">Danger Zone</h2>
+          <p className="text-muted-foreground text-sm">Irreversible and destructive actions</p>
         </div>
       </div>
       <DeleteAllReposCard />

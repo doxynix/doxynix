@@ -9,7 +9,7 @@ export function CreateRepoEmptyButton() {
 
   return (
     <Button className="cursor-pointer" onClick={openDialog}>
-      Добавить
+      Add
     </Button>
   );
 }

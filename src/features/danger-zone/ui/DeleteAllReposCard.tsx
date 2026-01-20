@@ -17,10 +17,10 @@ export async function DeleteAllReposCard() {
   return (
     <Card className="border-destructive">
       <CardHeader>
-        <CardTitle>Удалить все репозитории</CardTitle>
+        <CardTitle>Delete All Repositories</CardTitle>
         <CardDescription className="muted-foreground mb-4 flex flex-col">
-          <span>Полностью удалить все репозитории и связанные данные.</span>
-          <span>Ваши исходные коды на GitHub затронуты не будут.</span>
+          <span>Permanently delete all repositories and associated data.</span>
+          <span>Your GitHub source codes will not be affected.</span>
         </CardDescription>
         <DeleteAllReposDialog meta={meta} />
       </CardHeader>

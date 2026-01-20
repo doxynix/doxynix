@@ -6,9 +6,9 @@ export function ProfileSkeleton() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Фото профиля</CardTitle>
+          <CardTitle>Profile Picture</CardTitle>
           <div className="text-muted-foreground text-sm">
-            Это изображение будет отображаться в вашей учетной записи.
+            This image will be displayed on your profile.
           </div>
         </CardHeader>
         <CardContent className="flex items-center gap-6">
@@ -22,13 +22,13 @@ export function ProfileSkeleton() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Личная информация</CardTitle>
-          {/* <div className="text-muted-foreground text-sm">Обновите свое имя или почту.</div> */}
-          <div className="text-muted-foreground text-sm">Обновите свое имя.</div>
+          <CardTitle>Personal Information</CardTitle>
+          {/* <div className="text-muted-foreground text-sm">Update your name or email.</div> */}
+          <div className="text-muted-foreground text-sm">Update your name.</div>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-0.5">
-            <div className="text-muted-foreground text-sm">Отображаемое имя</div>
+            <div className="text-muted-foreground text-sm">Display Name</div>
             <Skeleton className="h-9 w-full" />
           </div>
           {/* <div className="flex flex-col gap-0.5">

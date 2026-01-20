@@ -20,12 +20,12 @@ export function ApiKeyCardSkeleton({ count }: Props) {
               </div>
             </div>
 
-            <Skeleton className="h-9 w-9 rounded-md" />
+            <Skeleton className="h-9 w-9 rounded-xl" />
           </CardHeader>
 
           <CardContent>
             <Skeleton className="mb-2 h-5 w-3/4" />
-            <Skeleton className="h-8 w-full rounded-md" />
+            <Skeleton className="h-8 w-full rounded-xl" />
           </CardContent>
         </Card>
       ))}

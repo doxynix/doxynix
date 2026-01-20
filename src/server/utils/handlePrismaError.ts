@@ -18,43 +18,43 @@ type PrismaErrorMeta = {
 const prismaErrorMap: Record<string, PrismaErrorMeta> = {
   P2000: {
     code: "BAD_REQUEST",
-    defaultMessage: "Значение поля слишком длинное для базы данных",
+    defaultMessage: "Field value too long for database",
     mapKey: "custom",
   },
   P2002: {
     code: "CONFLICT",
-    defaultMessage: "Запись с такими данными уже существует",
+    defaultMessage: "Record with this data already exists",
     mapKey: "uniqueConstraint",
   },
   P2003: {
     code: "BAD_REQUEST",
-    defaultMessage: "Связанная запись не найдена (неверный ID)",
+    defaultMessage: "Related record not found (invalid ID)",
     mapKey: "custom",
   },
   P2004: {
     code: "FORBIDDEN",
-    defaultMessage: "Доступ к ресурсу запрещен политикой безопасности",
+    defaultMessage: "Access denied by security policy",
     mapKey: "custom",
   },
   P2006: {
     code: "CONFLICT",
-    defaultMessage: "Данные были изменены другим пользователем",
+    defaultMessage: "Data was modified by another user",
     mapKey: "custom",
   },
   P2007: {
     code: "BAD_REQUEST",
-    defaultMessage: "Обязательное поле не заполнено",
+    defaultMessage: "Required field is missing",
     mapKey: "notNull",
   },
-  P2010: { code: "NOT_FOUND", defaultMessage: "Запись не найдена", mapKey: "notFound" },
-  P2016: { code: "NOT_FOUND", defaultMessage: "Запись не найдена", mapKey: "notFound" },
-  P2025: { code: "NOT_FOUND", defaultMessage: "Запись не найдена", mapKey: "notFound" },
+  P2010: { code: "NOT_FOUND", defaultMessage: "Record not found", mapKey: "notFound" },
+  P2016: { code: "NOT_FOUND", defaultMessage: "Record not found", mapKey: "notFound" },
+  P2025: { code: "NOT_FOUND", defaultMessage: "Record not found", mapKey: "notFound" },
   P2030: {
     code: "BAD_REQUEST",
-    defaultMessage: "Ошибка проверки связанной записи",
+    defaultMessage: "Foreign key constraint failed",
     mapKey: "custom",
   },
-  P2034: { code: "BAD_REQUEST", defaultMessage: "Ошибка ограничения данных", mapKey: "custom" },
+  P2034: { code: "BAD_REQUEST", defaultMessage: "Data constraint error", mapKey: "custom" },
 };
 
 export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
@@ -97,13 +97,13 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
     console.error("Unknown Prisma Error:", error);
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: "Произошла внутренняя ошибка базы данных",
+      message: "Internal database error",
     });
   }
 
   console.error("Unknown Error:", error);
   throw new TRPCError({
     code: "INTERNAL_SERVER_ERROR",
-    message: "Произошла внутренняя ошибка сервера",
+    message: "Internal server error",
   });
 }

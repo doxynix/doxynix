@@ -43,8 +43,8 @@ export async function RepoListContainer({ searchParams, config }: Props) {
     <>
       {config?.showTotalCount !== false && (
         <div className="text-muted-foreground my-4 text-sm">
-          <div className="text-right">
-            Показано: {meta.filteredCount} из {meta.totalCount}
+          <div className="xs:text-right text-center">
+            Showing: {meta.filteredCount} of {meta.totalCount}
           </div>
         </div>
       )}

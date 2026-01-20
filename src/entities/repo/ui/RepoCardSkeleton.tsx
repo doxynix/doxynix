@@ -29,7 +29,7 @@ export function RepoCardSkeleton({ count }: Props) {
           </div>
 
           <CardContent className="flex gap-2">
-            <Skeleton className="h-19.5 w-19.5 rounded-md" />
+            <Skeleton className="h-19.5 w-19.5 rounded-xl" />
 
             <div className="flex w-full flex-col justify-between">
               <div className="flex items-center justify-between gap-2">

@@ -18,8 +18,8 @@ export function RepoEmpty() {
         <EmptyMedia variant="icon">
           <CircleOff />
         </EmptyMedia>
-        <EmptyTitle>Нет репозиториев</EmptyTitle>
-        <EmptyDescription>Добавьте свой первый проект для анализа</EmptyDescription>
+        <EmptyTitle>No repositories</EmptyTitle>
+        <EmptyDescription>Add your first project for analysis</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <CreateRepoEmptyButton />

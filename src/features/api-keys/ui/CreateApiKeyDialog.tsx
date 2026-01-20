@@ -40,7 +40,7 @@ export function CreateApiKeyDialog() {
   const createMutation = trpc.apikey.create.useMutation({
     onSuccess: async (data) => {
       setCreatedKey(data.key);
-      toast.success("API-ключ успешно создан");
+      toast.success("API Key created successfully");
       router.refresh();
     },
     onError: (err) => toast.error(err.message),
@@ -66,7 +66,7 @@ export function CreateApiKeyDialog() {
       <DialogTrigger asChild>
         <Button variant="outline" className="cursor-pointer">
           <Plus className="mr-2 h-4 w-4" />
-          Создать API-ключ
+          Create API Key
         </Button>
       </DialogTrigger>
 
@@ -79,8 +79,8 @@ export function CreateApiKeyDialog() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <DialogHeader>
-                <DialogTitle>Создание API-ключа</DialogTitle>
-                <DialogDescription>Задайте название для ключа.</DialogDescription>
+                <DialogTitle>Create API Key</DialogTitle>
+                <DialogDescription>Name your key</DialogDescription>
               </DialogHeader>
 
               <FormField
@@ -88,11 +88,11 @@ export function CreateApiKeyDialog() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-muted-foreground">Название</FormLabel>
+                    <FormLabel className="text-muted-foreground">Name</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="Например: Prod Server"
+                        placeholder="e.g., Prod Server"
                         disabled={createMutation.isPending}
                       />
                     </FormControl>
@@ -106,12 +106,12 @@ export function CreateApiKeyDialog() {
                 name="description"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel className="text-muted-foreground">Описание (опционально)</FormLabel>
+                    <FormLabel className="text-muted-foreground">Description (optional)</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
                         disabled={createMutation.isPending}
-                        placeholder="Для чего используется этот ключ..."
+                        placeholder="What is this key used for?..."
                         className="min-h-25 resize-none"
                       />
                     </FormControl>
@@ -125,10 +125,10 @@ export function CreateApiKeyDialog() {
                   type="submit"
                   className="cursor-pointer"
                   disabled={!form.formState.isValid || createMutation.isPending}
-                  loadingText="Создание..."
+                  loadingText="Saving..."
                   isLoading={createMutation.isPending}
                 >
-                  Создать
+                  Create
                 </LoadingButton>
               </DialogFooter>
             </form>
@@ -136,9 +136,9 @@ export function CreateApiKeyDialog() {
         ) : (
           <div className="space-y-4">
             <DialogHeader>
-              <DialogTitle>Сохраните ваш API-ключ</DialogTitle>
+              <DialogTitle>Save your API Key</DialogTitle>
               <DialogDescription>
-                Пожалуйста, скопируйте ключ сейчас. Мы не сможем показать его снова.
+                Please copy the key now. We won&apos;t be able to show it again.{" "}
               </DialogDescription>
             </DialogHeader>
 
@@ -146,9 +146,9 @@ export function CreateApiKeyDialog() {
               variant="destructive"
               className="border-destructive/10 bg-destructive/5 text-destructive"
             >
-              <AlertTitle className="text-[16px] font-bold">Внимание</AlertTitle>
+              <AlertTitle className="text-base font-bold">Warning</AlertTitle>
               <AlertDescription>
-                Этот ключ виден только один раз. Если вы потеряете его, придется создавать новый.
+                This key is visible only once. If you lose it, you will have to create a new one.
               </AlertDescription>
             </Alert>
 
@@ -156,12 +156,12 @@ export function CreateApiKeyDialog() {
               <div className="grid flex-1 gap-2">
                 <Input readOnly value={createdKey} disabled={createMutation.isPending} />
               </div>
-              <CopyButton tooltipText="Скопировать" value={createdKey} className="opacity-100" />
+              <CopyButton tooltipText="Copy" value={createdKey} className="opacity-100" />
             </div>
 
             <DialogFooter>
               <Button className="w-full cursor-pointer" onClick={() => handleOpenChange(false)}>
-                Готово
+                Done
               </Button>
             </DialogFooter>
           </div>

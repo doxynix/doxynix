@@ -15,7 +15,7 @@ export function proxy(request: NextRequest) {
       return new NextResponse(
         JSON.stringify({
           error: "Payload Too Large",
-          message: "Запрос слишком большой",
+          message: "Request entity too large",
           requestId,
         }),
         { status: 413, headers: { "content-type": "application/json" } }

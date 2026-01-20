@@ -26,23 +26,24 @@ export function RepoCard({ repo }: Props) {
 
   return (
     <Card className="group relative flex overflow-hidden p-4">
-      <CardContent className="flex flex-wrap items-end justify-between">
-        <div className="flex flex-wrap gap-2 sm:flex-nowrap">
+      <CardContent className="flex flex-wrap items-end justify-center gap-4 md:justify-between">
+        <div className="flex min-w-0 flex-wrap gap-2 not-md:justify-center sm:flex-nowrap">
           <RepoAvatar src={repo.ownerAvatarUrl ?? "/avatar-placeholder.png"} alt={repo.owner} />
-          <div className="flex flex-col justify-between">
-            <div className="flex min-w-0 items-center gap-2 truncate">
-              <div>
+          <div className="flex min-w-0 flex-col justify-between gap-1 not-md:items-center">
+            <div className="flex w-full min-w-0 flex-wrap items-center gap-2 not-sm:justify-center">
+              <div className="flex flex-wrap items-center justify-center gap-0.5 truncate text-sm">
                 <Link
                   href={`/dashboard/repo/${repo.owner}`}
-                  className="truncate font-bold hover:underline"
+                  className="text-muted-foreground truncate font-bold hover:underline"
                 >
-                  <span className="text-muted-foreground">{repo.owner}/</span>
+                  {repo.owner}
                 </Link>
+                <span className="text-muted-foreground">/</span>
                 <Link
                   href={`/dashboard/repo/${repo.owner}/${repo.name}`}
                   className="truncate font-bold hover:underline"
                 >
-                  <span>{repo.name}</span>
+                  {repo.name}
                 </Link>
               </div>
               {visibility !== null && (
@@ -56,12 +57,12 @@ export function RepoCard({ repo }: Props) {
                 className={cn("flex shrink-0 items-center gap-1 transition-opacity duration-200")}
               >
                 <CopyButton value={repo.id} />
-                <AppTooltip content="Открыть на GitHub">
+                <AppTooltip content="Open on GitHub">
                   <a
                     href={repo.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:bg-muted text-muted-foreground hover:text-foreground flex h-6 w-6 items-center justify-center rounded opacity-0 transition-opacity group-hover:opacity-100"
+                    className="hover:bg-muted text-muted-foreground hover:text-foreground flex h-6 w-6 items-center justify-center rounded transition-opacity not-md:opacity-100 group-hover:opacity-100 md:opacity-0"
                   >
                     <GitHubIcon className="h-4 w-4" />
                   </a>
@@ -69,16 +70,16 @@ export function RepoCard({ repo }: Props) {
               </div>
             </div>
 
-            <p className="text-muted-foreground max-w-230 truncate text-sm">
-              {repo.description ?? "Нет описания"}
+            <p className="text-muted-foreground line-clamp-2 text-sm wrap-break-word not-sm:text-center">
+              {repo.description ?? "No description"}
             </p>
 
-            <div className="mt-1 flex flex-wrap items-center gap-3">
+            <div className="mt-1 flex flex-wrap items-center gap-3 not-md:justify-center">
               <div className="flex items-center gap-1">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: langColor }} />
                 {repo.language !== null && (
-                  <AppTooltip content="Основной язык">
-                    <div className="text-muted-foreground hover:text-foreground flex cursor-help items-center gap-1 text-xs">
+                  <AppTooltip content="Primary Language">
+                    <div className="text-muted-foreground hover:text-foreground flex cursor-help items-center gap-1 text-xs transition-colors">
                       {repo.language}
                     </div>
                   </AppTooltip>
@@ -92,7 +93,7 @@ export function RepoCard({ repo }: Props) {
                   tooltip={m.tooltip}
                   color={m.color}
                   className={cn(
-                    "text-muted-foreground/80 hover:text-foreground text-xs transition-colors",
+                    "text-muted-foreground hover:text-foreground text-xs transition-colors",
                     m.className
                   )}
                 />
@@ -100,22 +101,18 @@ export function RepoCard({ repo }: Props) {
             </div>
           </div>
         </div>
-        <div className="flex flex-col text-xs sm:items-end">
+        <div className="flex flex-wrap items-center justify-center text-xs not-sm:gap-2 sm:flex-col md:items-end">
           <div className="flex items-center gap-1 rounded">
             <span className={cn("h-2 w-2 rounded-full", status.color)} />
             <span className="font-medium">{status.label}</span>
           </div>
-          <div className="text-muted-foreground">
-            {repo.lastAnalysisDate !== null && repo.lastAnalysisDate !== undefined ? (
-              <AppTooltip
-                content={`Дата последнего анализа: ${formatFullDate(repo.lastAnalysisDate)}`}
-              >
-                <span>{formatRelativeTime(repo.lastAnalysisDate)}</span>
-              </AppTooltip>
-            ) : (
-              <span className="opacity-40">—</span>
-            )}
-          </div>
+          {repo.lastAnalysisDate !== null && repo.lastAnalysisDate !== undefined && (
+            <AppTooltip content={`Last analyzed: ${formatFullDate(repo.lastAnalysisDate)}`}>
+              <span className="text-muted-foreground hover:text-foreground cursor-help transition-colors">
+                {formatRelativeTime(repo.lastAnalysisDate)}
+              </span>
+            </AppTooltip>
+          )}
         </div>
       </CardContent>
     </Card>

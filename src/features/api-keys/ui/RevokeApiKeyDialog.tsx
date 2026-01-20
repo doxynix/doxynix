@@ -32,7 +32,7 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
 
   const revokeMutation = trpc.apikey.revoke.useMutation({
     onSuccess: async () => {
-      toast.success("Ключ успешно отозван");
+      toast.success("API Key revoked");
       setOpen(false);
       router.refresh();
     },
@@ -45,7 +45,7 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <AppTooltip content="Отозвать ключ">
+      <AppTooltip content="Revoke Key">
         <DialogTrigger asChild>
           <Button
             variant="ghost"
@@ -64,9 +64,9 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
               <AlertTriangle className="text-destructive h-5 w-5" />
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
-              <DialogTitle>Отозвать ключ?</DialogTitle>
+              <DialogTitle>Revoke Key?</DialogTitle>
               <DialogDescription className="flex max-w-75 flex-col gap-1">
-                <span>Вы собираетесь удалить ключ </span>
+                <span>You are about to revoke key</span>
                 <span className="text-foreground truncate font-bold">{apiKey.name}</span>
               </DialogDescription>
             </div>
@@ -74,14 +74,14 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
         </DialogHeader>
 
         <div className="text-muted-foreground text-sm">
-          Это действие необратимо. Любые приложения, использующие этот ключ, перестанут работать
-          немедленно.
+          This action cannot be undone. Any applications using this key will stop working
+          immediately.
         </div>
 
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" className="cursor-pointer">
-              Отмена
+              Cancel
             </Button>
           </DialogClose>
           <LoadingButton
@@ -89,9 +89,9 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
             className="cursor-pointer"
             onClick={handleRevoke}
             isLoading={revokeMutation.isPending}
-            loadingText="Удаление..."
+            loadingText="Revoking..."
           >
-            Да, отозвать
+            Yes, revoke
           </LoadingButton>
         </DialogFooter>
       </DialogContent>

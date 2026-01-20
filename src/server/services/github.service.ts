@@ -17,7 +17,7 @@ type GitHubRepoResponse = SearchRepoItem | ListRepoItem;
 
 export const githubService = {
   parseUrl(input: string) {
-    if (!input) throw new Error("Поле не может быть пустым");
+    if (!input) throw new Error("Field cannot be empty");
 
     const clean = input
       .trim()
@@ -32,7 +32,7 @@ export const githubService = {
     const name = parts[1]?.trim();
 
     if (!owner || !name) {
-      throw new Error("Неверный формат. Введите 'owner/name' или ссылку на репозиторий");
+      throw new Error("Invalid format. Enter 'owner/repo' or repository URL");
     }
 
     return { owner, name };
@@ -62,7 +62,7 @@ export const githubService = {
         updatedAt: repo.updated_at,
       }));
     } catch (error) {
-      logger.error({ msg: "Ошибка поиска в GitHub", error });
+      logger.error({ msg: "GitHub search error", error });
       return [];
     }
   },
@@ -90,7 +90,7 @@ export const githubService = {
 
       return this.mapRepos(repos);
     } catch (error) {
-      logger.error({ msg: "Ошибка получения репозиториев", userId, error });
+      logger.error({ msg: "Error fetching repositories", userId, error });
       return [];
     }
   },
@@ -114,7 +114,7 @@ export const githubService = {
     const token = account?.access_token;
 
     // if (token === null || token === undefined) {
-    //   logger.error({ msg: "КРИТИЧЕСКАЯ ОШИБКА: Токен не найден в БД!", userId });
+    //   logger.error({ msg: "Token not found in DB", userId });
     //   throw new Error("TOKEN_MISSING");
     // }
     return new MyOctokit({

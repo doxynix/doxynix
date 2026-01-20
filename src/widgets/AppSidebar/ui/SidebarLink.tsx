@@ -46,7 +46,7 @@ export function SidebarLink({ href, label: title, icon: Icon, isBlank, exact }: 
         target={blank ? "_blank" : undefined}
         rel={blank ? "noopener noreferrer" : undefined}
       >
-        {Icon && <Icon />}
+        <Icon />
         {<span className="truncate">{title}</span>}
         {blank && <SquareArrowOutUpRight className="ml-auto" />}
       </Link>

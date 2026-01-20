@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Поддержка",
+  title: "Support",
 };
 
 export default function SupportPage() {
   return (
     <div className="flex items-center justify-center">
-      <div>Здесь будет support</div>
+      <div>Support page placeholder</div>
     </div>
   );
 }

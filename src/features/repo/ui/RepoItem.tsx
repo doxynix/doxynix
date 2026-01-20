@@ -54,7 +54,7 @@ export function RepoItem({
             {repo.description}
           </span>
         )}
-        <AppTooltip content={`Последнее обновление: ${formatFullDate(repo.updatedAt)}`}>
+        <AppTooltip content={`Last updated: ${formatFullDate(repo.updatedAt)}`}>
           <span className="text-muted-foreground w-fit text-xs">
             {formatRelativeTime(repo.updatedAt)}
           </span>
