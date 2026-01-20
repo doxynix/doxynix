@@ -7,8 +7,8 @@ export const repoStatusConfig: Record<
     color: string;
   }
 > = {
-  DONE: { label: "Готово", color: "bg-success" },
-  PENDING: { label: "В работе", color: "bg-warning" },
-  FAILED: { label: "Ошибка", color: "bg-error" },
-  NEW: { label: "Новый", color: "bg-blue" },
+  DONE: { label: "Done", color: "bg-success" },
+  PENDING: { label: "In Progress", color: "bg-warning" },
+  FAILED: { label: "Failed", color: "bg-error" },
+  NEW: { label: "New", color: "bg-blue" },
 };

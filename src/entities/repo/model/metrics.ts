@@ -15,12 +15,12 @@ type Props = {
 
 export function getMetrics(repo: RepoTableItem): Props[] {
   const items = [
-    { icon: Star, label: repo.stars, tooltip: "Звезды", color: "text-yellow-500 fill-current" },
-    { icon: GitFork, label: repo.forks, tooltip: "Форки", color: "text-green-700" },
+    { icon: Star, label: repo.stars, tooltip: "Stars", color: "text-yellow-500 fill-current" },
+    { icon: GitFork, label: repo.forks, tooltip: "Forks", color: "text-green-700" },
     {
       icon: GitBranch,
       label: repo.defaultBranch,
-      tooltip: "Ветка",
+      tooltip: "Branch",
       color: "text-blue-700",
     },
     {
@@ -29,23 +29,23 @@ export function getMetrics(repo: RepoTableItem): Props[] {
       tooltip: "Open Issues",
       color: "text-red-700",
     },
-    { icon: Scale, label: repo.license, tooltip: "Лицензия", color: "text-muted-foreground" },
+    { icon: Scale, label: repo.license, tooltip: "License", color: "text-muted-foreground" },
     {
       icon: Tag,
       label: repo.topics?.slice(0, 2).join(", "),
-      tooltip: `Теги: ${repo.topics?.join(", ")}`,
+      tooltip: `Tags: ${repo.topics?.join(", ")}`,
       color: "text-blue-300",
     },
     {
       icon: HardDrive,
       label: repo.size > 1024 ? `${(repo.size / 1024).toFixed(1)} MB` : `${repo.size} KB`,
-      tooltip: "Размер",
+      tooltip: "Size",
       color: "text-muted-foreground",
     },
     {
       icon: History,
       label: formatRelativeTime(repo.pushedAt),
-      tooltip: "Последний пуш",
+      tooltip: "Last push",
       color: "text-muted-foreground",
     },
   ] satisfies Props[];

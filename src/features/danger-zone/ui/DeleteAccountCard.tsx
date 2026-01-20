@@ -6,9 +6,9 @@ export function DeleteAccountCard() {
   return (
     <Card className="border-destructive">
       <CardHeader>
-        <CardTitle>Удалить аккаунт</CardTitle>
+        <CardTitle>Delete Account</CardTitle>
         <CardDescription className="mb-4">
-          Полностью удалить аккаунт и все связанные данные
+          Permanently delete account and all associated data{" "}
         </CardDescription>
         <DeleteAccountDialog />
       </CardHeader>

@@ -21,15 +21,14 @@ export function RepoList({ repos, meta }: Props) {
         <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
           <SearchX className="text-muted-foreground h-6 w-6" />
         </div>
-        <h3 className="mt-4 text-lg font-semibold">Ничего не найдено</h3>
+        <h3 className="mt-4 text-lg font-semibold">No results found</h3>
         <div className="text-muted-foreground mt-2 mb-4 text-sm">
           {meta.searchQuery !== "" && meta.searchQuery !== null ? (
             <span>
-              По запросу <span className="italic">{`"${meta.searchQuery}"`}</span> ничего не
-              нашлось.
+              No results found for <span className="italic">{`"${meta.searchQuery}"`}</span>
             </span>
           ) : (
-            <span>Попробуйте изменить параметры фильтра.</span>
+            <span>Try changing filter parameters.</span>
           )}
         </div>
       </div>

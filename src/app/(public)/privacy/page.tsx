@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { MoveLeft } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Политика конфиденциальности",
-  description: "Как мы собираем, используем и защищаем ваши данные.",
+  title: "Privacy Policy",
+  description: "How we collect, use, and protect your data.",
 };
 
 const SECTION_TITLE = "mb-3 text-lg font-bold text-foreground flex items-center gap-2";
 const LIST_STYLES = "list-disc space-y-2 pl-5 marker:text-foreground";
 const STRONG_TEXT = "font-medium text-foreground";
+const LI_STYLES = "flex flex-col";
+const SPAN_STYLES = "text-sm";
 
 export default function PrivacyPage() {
   return (
@@ -18,137 +20,133 @@ export default function PrivacyPage() {
         href="/"
         className="text-muted-foreground hover:text-foreground mb-8 inline-flex items-center text-sm transition-colors"
       >
-        <ArrowLeft size={16} className="mr-2" />
-        На главную
+        <MoveLeft size={16} className="mr-2" />
+        Back to Home
       </Link>
 
       <header className="mb-10 border-b pb-6">
-        <h1 className="mb-3 text-3xl font-bold tracking-tight md:text-4xl">
-          Политика конфиденциальности
-        </h1>
+        <h1 className="mb-3 text-3xl font-bold tracking-tight md:text-4xl">Privacy Policy</h1>
         <div className="text-muted-foreground flex items-center gap-2 text-sm">
-          <span>Действует с 26 января 2025</span>
+          <span>Effective date: January 26, 2025</span>
         </div>
       </header>
 
       <div className="prose prose-neutral dark:prose-invert max-w-none space-y-8 text-sm md:text-base">
         <section>
-          <h2 className={SECTION_TITLE}>1. Введение</h2>
+          <h2 className={SECTION_TITLE}>1. Introduction</h2>
           <p className="leading-relaxed">
-            Добро пожаловать в Doxynix («мы», «наш» или «нас»). Мы уважаем вашу конфиденциальность и
-            серьезно относимся к защите ваших личных данных. Этот документ объясняет, какие данные
-            мы собираем и как их используем при работе с сервисом doxynix.space.
+            Welcome to Doxynix (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). We respect your
+            privacy and are committed to protecting your personal data. This document explains what
+            data we collect and how we use it when you use doxynix.space.
           </p>
         </section>
 
         <section>
-          <h2 className={SECTION_TITLE}>2. Какие данные мы собираем</h2>
+          <h2 className={SECTION_TITLE}>2. Data We Collect</h2>
           <ul className={LIST_STYLES}>
             <li>
-              <span className={STRONG_TEXT}>Аккаунт:</span> Имя, Email и Аватар. Мы получаем эти
-              данные автоматически при входе через GitHub, Google, Yandex или Magic Link.
+              <span className={STRONG_TEXT}>Account:</span> Name, Email, and Avatar. We receive this
+              data automatically when you sign in via GitHub, Google, Yandex, or Magic Link.
             </li>
             <li>
-              <span className={STRONG_TEXT}>Технические данные:</span> IP-адрес, тип устройства,
-              данные браузера и файлы Cookie (используются исключительно для аутентификации и
-              аналитики, без передачи третьим лицам в рекламных целях).
+              <span className={STRONG_TEXT}>Technical Data:</span> IP address, device type, browser
+              data, and Cookies (used solely for authentication and analytics, without sharing with
+              third parties for advertising purposes).
             </li>
             <li>
               <p>
-                <span className={STRONG_TEXT}>Исходный код:</span> Мы получаем доступ к вашим
-                репозиториям в режиме <u>Read-Only</u> (только чтение) и исключительно в момент
-                генерации документации.
+                <span className={STRONG_TEXT}>Source Code:</span> We access your repositories in{" "}
+                <u>Read-Only</u> mode and only during documentation generation.
               </p>
             </li>
           </ul>
           <p>
-            <span className="text-destructive font-medium">Важно:</span> Мы{" "}
-            <strong>не сохраняем</strong> ваш код в нашей базе данных. Он обрабатывается в
-            оперативной памяти и удаляется сразу после завершения анализа.{" "}
+            <span className="text-destructive font-medium">Important:</span> We{" "}
+            <strong>do not store</strong> your code in our database. It is processed in RAM and
+            deleted immediately after analysis.{" "}
           </p>
         </section>
 
         <section>
-          <h2 className={SECTION_TITLE}>3. Как мы используем ваши данные</h2>
+          <h2 className={SECTION_TITLE}>3. How We Use Your Data</h2>
           <ul className={LIST_STYLES}>
-            <li>Для генерации документации, диаграмм и метрик кода.</li>
-            <li>Для авторизации и сохранения истории ваших отчетов.</li>
-            <li>Для отправки важных уведомлений (например, об изменениях в API).</li>
+            <li>To generate documentation, diagrams, and code metrics.</li>
+            <li>For authorization and saving your report history.</li>
+            <li>To send important notifications (e.g., API changes).</li>
           </ul>
         </section>
 
         <section>
-          <h2 className={SECTION_TITLE}>4. Сторонние сервисы (Субпроцессоры)</h2>
+          <h2 className={SECTION_TITLE}>4. Third-Party Services (Subprocessors)</h2>
           <p className="mb-3">
-            Для работы сервиса мы используем проверенных партнеров. Мы передаем им только те данные,
-            которые необходимы для выполнения конкретных технических задач:
+            We use trusted partners to operate the service. We transfer only the data necessary to
+            perform specific technical tasks:
           </p>
           <div className="bg-muted/50 rounded-xl border p-4">
             <ul className="grid gap-3 sm:grid-cols-2">
-              <li className="flex flex-col">
+              <li className={LI_STYLES}>
                 <span className={STRONG_TEXT}>Vercel</span>
-                <span className="text-sm">
-                  Хостинг, Edge Network и аналитика производительности.
+                <span className={SPAN_STYLES}>
+                  Hosting, Edge Network, and performance analytics.
                 </span>
               </li>
 
-              <li className="flex flex-col">
+              <li className={LI_STYLES}>
                 <span className={STRONG_TEXT}>Neon (PostgreSQL)</span>
-                <span className="text-sm">Основное зашифрованное хранилище данных.</span>
+                <span className={SPAN_STYLES}>Primary encrypted data storage.</span>
               </li>
 
-              <li className="flex flex-col">
+              <li className={LI_STYLES}>
                 <span className={STRONG_TEXT}>Resend</span>
-                <span className="text-sm">Отправка писем для входа</span>{" "}
+                <span className={SPAN_STYLES}>Transactional emails for login.</span>{" "}
               </li>
 
-              <li className="flex flex-col">
-                <span className={STRONG_TEXT}>OAuth Провайдеры</span>
-                <span className="text-sm">GitHub, Google, Yandex</span>
+              <li className={LI_STYLES}>
+                <span className={STRONG_TEXT}>OAuth Providers</span>
+                <span className={SPAN_STYLES}>GitHub, Google, Yandex</span>
               </li>
 
-              <li className="flex flex-col">
+              <li className={LI_STYLES}>
                 <span className={STRONG_TEXT}>Upstash / Redis</span>
-                <span className="text-sm">Кэширование и управление очередями задач.</span>
+                <span className={SPAN_STYLES}>Caching and task queue management.</span>
               </li>
-              <li className="flex flex-col">
+              <li className={LI_STYLES}>
                 <span className={STRONG_TEXT}>Axiom</span>
-                <span className="text-sm">
-                  Логирование системных ошибок и диагностика (хранятся до 30 дней).
+                <span className={SPAN_STYLES}>
+                  System error logging and diagnostics (retained for 30 days).
                 </span>
               </li>
-              <li className="flex flex-col">
+              <li className={LI_STYLES}>
                 <span className={STRONG_TEXT}>UploadThing</span>
-                <span className="text-sm">Хранение пользовательских файлов и аватаров.</span>
+                <span className={SPAN_STYLES}>Storage for user files and avatars.</span>
               </li>
-              <li className="flex flex-col">
+              <li className={LI_STYLES}>
                 <span className={STRONG_TEXT}>Pusher</span>
-                <span className="text-sm">Обеспечение работы WebSockets (реальное время).</span>
+                <span className={SPAN_STYLES}>WebSocket support (real-time updates).</span>
               </li>
             </ul>
           </div>
           <p className="text-muted-foreground mt-4 text-sm italic">
-            Все указанные провайдеры являются признанными лидерами индустрии и обеспечивают защиту
-            данных в соответствии с международными стандартами (GDPR, SOC2), регламентируемую их
-            условиями использования.
+            All listed providers are industry leaders and ensure data protection in accordance with
+            international standards (GDPR, SOC2) as governed by their terms of use.
           </p>
         </section>
 
         <section>
-          <h2 className={SECTION_TITLE}>5. Ваши права</h2>
+          <h2 className={SECTION_TITLE}>5. Your Rights</h2>
           <p>
-            Вы имеете право в любой момент запросить удаление всех ваших данных. Для этого напишите
-            нам на почту или воспользуйтесь кнопкой «Удалить аккаунт» в настройках профиля. Удаление
-            происходит необратимо.
+            You have the right to request deletion of all your data at any time. To do this, email
+            us or use the &quot;Delete Account&quot; button in profile settings. Deletion is
+            irreversible.
           </p>
         </section>
 
-        <section className="border-t">
-          <h2 className={SECTION_TITLE}>6. Контакты</h2>
-          <p>Если у вас остались вопросы, напишите нам.</p>
+        <section>
+          <h2 className={SECTION_TITLE}>6. Contact</h2>
+          <p>If you have any questions, please contact us.</p>
           <div className="mt-4">
             <a
-              href="mailto:support@doxynix.space?subject=Вопрос по Privacy Policy"
+              href="mailto:support@doxynix.space?subject=Privacy Policy Question"
               className="hover:no-underline"
             >
               support@doxynix.space

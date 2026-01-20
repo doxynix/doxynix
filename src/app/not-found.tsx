@@ -15,17 +15,15 @@ export default function NotFound() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <h1 className="text-4xl font-bold">404 — Страница не найдена</h1>
-        <p className="text-muted-foreground text-lg">К сожалению, такой страницы не существует.</p>
+        <h1 className="text-4xl font-bold">404 — Page Not Found</h1>
+        <p className="text-muted-foreground text-lg">Sorry, this page does not exist.</p>
       </div>
 
       <div className="flex items-center gap-4">
-        <BackOrLinkButton text="Назад" />
-        <BackOrLinkButton text="На главную" href="/" />
+        <BackOrLinkButton text="Back" />
+        <BackOrLinkButton text="Home" href="/" />
       </div>
-      <p className="text-muted-foreground text-sm">
-        Попробуйте проверить адрес или вернуться на главную.
-      </p>
+      <p className="text-muted-foreground text-sm">Check the URL or return to the homepage.</p>
     </div>
   );
 }

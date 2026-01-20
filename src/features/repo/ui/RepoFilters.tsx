@@ -40,17 +40,17 @@ export function RepoFilters() {
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-center gap-2">
         <Select value={filters.status ?? "all"} onValueChange={(v) => updateQuery("status", v)}>
           <SelectTrigger className="w-35">
-            <SelectValue placeholder="Статус" />
+            <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Все статусы</SelectItem>
-            <SelectItem value={Status.DONE}>Готово</SelectItem>
-            <SelectItem value={Status.PENDING}>В работе</SelectItem>
-            <SelectItem value={Status.FAILED}>Ошибка</SelectItem>
-            <SelectItem value={Status.NEW}>Новый</SelectItem>
+            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value={Status.DONE}>Done</SelectItem>
+            <SelectItem value={Status.PENDING}>In progress</SelectItem>
+            <SelectItem value={Status.FAILED}>Failed</SelectItem>
+            <SelectItem value={Status.NEW}>New</SelectItem>
           </SelectContent>
         </Select>
 
@@ -59,28 +59,28 @@ export function RepoFilters() {
           onValueChange={(v) => updateQuery("visibility", v)}
         >
           <SelectTrigger className="w-32.5">
-            <SelectValue placeholder="Доступ" />
+            <SelectValue placeholder="Visibility" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Весь доступ</SelectItem>
-            <SelectItem value={Visibility.PUBLIC}>Публичный</SelectItem>
-            <SelectItem value={Visibility.PRIVATE}>Приватный</SelectItem>
+            <SelectItem value="all">All visibility</SelectItem>
+            <SelectItem value={Visibility.PUBLIC}>Public</SelectItem>
+            <SelectItem value={Visibility.PRIVATE}>Private</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={filters.sortBy} onValueChange={(v) => updateQuery("sortBy", v)}>
           <SelectTrigger className="w-37.5">
-            <SelectValue placeholder="Сортировка" />
+            <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="updatedAt">Обновлен</SelectItem>
-            <SelectItem value="createdAt">Добавлен</SelectItem>
-            <SelectItem value="name">По имени</SelectItem>
+            <SelectItem value="updatedAt">Updated</SelectItem>
+            <SelectItem value="createdAt">Created</SelectItem>
+            <SelectItem value="name">Name</SelectItem>
           </SelectContent>
         </Select>
 
         <Button disabled={!hasFilters} variant="outline" onClick={handleReset} className="px-2">
-          Сбросить
+          Reset
           <X className="h-4 w-4" />
         </Button>
       </div>

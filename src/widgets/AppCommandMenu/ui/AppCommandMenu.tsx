@@ -119,13 +119,13 @@ export function AppCommandMenu() {
       <Button
         variant="outline"
         className={cn(
-          "bg-muted/50 text-muted-foreground relative h-9 w-full justify-start rounded-xl text-sm font-normal shadow-none sm:pr-12 md:w-40 lg:w-64"
+          "lg:bg-muted/50 text-muted-foreground relative h-9 w-9 justify-start rounded-xl text-sm font-normal shadow-none not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12"
         )}
         onClick={() => setOpen(true)}
       >
-        <Search className="absolute top-2.25 left-2" />
-        <span className="inline-flex pl-4">Поиск по сайту...</span>
-        <kbd className="bg-muted absolute top-[0.4rem] right-[0.3rem] flex h-5 items-center rounded border px-1.5">
+        <Search className="absolute top-2.25 left-2.25" />
+        <span className="hidden lg:inline-flex lg:pl-4">Search site...</span>
+        <kbd className="bg-muted absolute top-[0.4rem] right-[0.3rem] hidden h-5 items-center rounded border px-1.5 lg:flex">
           <span className="text-xs">Ctrl+K</span>
         </kbd>
       </Button>
@@ -135,13 +135,13 @@ export function AppCommandMenu() {
           value={search}
           onValueChange={setSearch}
           isLoading={isLoading}
-          placeholder="Введите команду или название репозитория..."
+          placeholder="Type a command or repository name..."
         />
         <CommandList>
-          {filteredCommands.length === 0 && <CommandEmpty>Ничего не найдено.</CommandEmpty>}
+          {filteredCommands.length === 0 && <CommandEmpty>No results found.</CommandEmpty>}
 
           {filteredCommands.length > 0 && (
-            <CommandGroup heading="Команды и навигация">
+            <CommandGroup heading="Commands and Navigation">
               {filteredCommands.map((item) => {
                 const isDestructive = item.variant === "destructive";
                 return (
@@ -156,7 +156,7 @@ export function AppCommandMenu() {
                     )}
                   >
                     <div className="flex items-center gap-2">
-                      {item.icon && <item.icon />}
+                      <item.icon />
                       <span>{item.label}</span>
                     </div>
                     <div className="flex items-center gap-1">
@@ -166,7 +166,9 @@ export function AppCommandMenu() {
                         </span>
                       )}
                       {item.shortcut !== null && (
-                        <CommandShortcut className="text-xs">{item.shortcut}</CommandShortcut>
+                        <CommandShortcut className="hidden text-xs md:flex">
+                          {item.shortcut}
+                        </CommandShortcut>
                       )}
                     </div>
                   </CommandItem>
@@ -180,7 +182,7 @@ export function AppCommandMenu() {
           <CommandGroup
             heading={
               <div className="flex w-full items-center justify-between">
-                <span>Быстрый переход к репозиторию</span>
+                <span>Quick jump to repository</span>
                 <Button
                   variant="ghost"
                   className="text-muted-foreground! cursor-pointer bg-transparent! hover:underline"
@@ -191,8 +193,13 @@ export function AppCommandMenu() {
                     setIsReposExpanded(!isReposExpanded);
                   }}
                 >
-                  {isReposExpanded ? "Свернуть" : "Развернуть"}
-                  <ChevronDown className={cn(isReposExpanded && "rotate-180")} />
+                  {isReposExpanded ? "Collapse" : "Expand"}
+                  <ChevronDown
+                    className={cn(
+                      "transition-transform duration-300",
+                      isReposExpanded && "rotate-180"
+                    )}
+                  />
                 </Button>
               </div>
             }
@@ -208,9 +215,13 @@ export function AppCommandMenu() {
                       onSelect={() => navigate(`/dashboard/repo/${repo.owner}/${repo.name}`)}
                     >
                       <Book />
-                      <span>
-                        {repo.owner}/{repo.name}
-                      </span>
+                      <div className="line-clamp-1 flex">
+                        <span className="text-muted-foreground truncate font-bold">
+                          {repo.owner}
+                        </span>
+                        <span className="text-muted-foreground">/</span>
+                        <span className="truncate font-bold">{repo.name}</span>
+                      </div>
                     </CommandItem>
                   ))}
                 {hasNextPage && (
@@ -223,7 +234,7 @@ export function AppCommandMenu() {
           </CommandGroup>
 
           {!isLoading && data?.pages[0]?.meta.totalCount === 0 && (
-            <div className="text-muted-foreground p-4 text-center text-xs">Нет репозиториев</div>
+            <div className="text-muted-foreground p-4 text-center text-xs">No repositories</div>
           )}
         </CommandList>
       </CommandDialog>

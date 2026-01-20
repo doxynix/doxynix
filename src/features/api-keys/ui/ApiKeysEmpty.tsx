@@ -9,8 +9,8 @@ export function ApiKeysEmpty() {
         <EmptyMedia variant="icon">
           <CircleOff />
         </EmptyMedia>
-        <EmptyTitle>Нет активных API-ключей</EmptyTitle>
-        <EmptyDescription>Добавьте свой первый API-ключ</EmptyDescription>
+        <EmptyTitle>No active API keys</EmptyTitle>
+        <EmptyDescription>Add your first API key</EmptyDescription>
       </EmptyHeader>
     </Empty>
   );

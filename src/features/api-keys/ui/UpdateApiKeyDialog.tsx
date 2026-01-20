@@ -46,7 +46,7 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
 
   const updateMutation = trpc.apikey.update.useMutation({
     onSuccess: async () => {
-      toast.success("API-ключ обновлен");
+      toast.success("API Key updated");
       setOpen(false);
       router.refresh();
     },
@@ -72,7 +72,7 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <AppTooltip content="Редактировать">
+      <AppTooltip content="Edit">
         <DialogTrigger asChild>
           <Button
             variant="ghost"
@@ -88,9 +88,9 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>Редактирование ключа</DialogTitle>
+              <DialogTitle>Edit Key</DialogTitle>
               <DialogDescription>
-                Измените название или описание для ключа{" "}
+                Change name or description for key{" "}
                 <span className="text-foreground font-bold">{apiKey.prefix}...</span>
               </DialogDescription>
             </DialogHeader>
@@ -100,9 +100,9 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-muted-foreground">Название</FormLabel>
+                  <FormLabel className="text-muted-foreground">Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Например: Prod Server" {...field} />
+                    <Input placeholder="e.g., Prod Server" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -114,11 +114,11 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-muted-foreground">Описание (опционально)</FormLabel>
+                  <FormLabel className="text-muted-foreground">Description (optional)</FormLabel>
                   <FormControl>
                     <Textarea
                       className="min-h-25 resize-none"
-                      placeholder="Для чего используется этот ключ..."
+                      placeholder="What is this key used for?..."
                       {...field}
                     />
                   </FormControl>
@@ -134,10 +134,10 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
                 disabled={
                   !form.formState.isDirty || !form.formState.isValid || updateMutation.isPending
                 }
-                loadingText="Создание..."
+                loadingText="Saving..."
                 isLoading={updateMutation.isPending}
               >
-                Обновить
+                Update
               </LoadingButton>
             </DialogFooter>
           </form>

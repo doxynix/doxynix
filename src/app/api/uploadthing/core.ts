@@ -22,15 +22,15 @@ export const ourFileRouter = {
     })
     .onUploadError(async ({ error, fileKey }) => {
       logger.error({
-        msg: "Ошибка загрузки UploadThing",
+        msg: "UploadThing upload error",
         error: error.message,
         code: error.code,
         key: fileKey,
       });
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      logger.info({ msg: `Загрузка завершена для: ${metadata.userId}` });
-      logger.info({ msg: `"URL файла:" ${file.ufsUrl}` });
+      logger.info({ msg: `Upload completed for: ${metadata.userId}` });
+      logger.info({ msg: `"File URL:" ${file.ufsUrl}` });
 
       try {
         await prisma.user.update({
@@ -40,8 +40,8 @@ export const ourFileRouter = {
           },
         });
       } catch (err) {
-        logger.error({ msg: "Ошибка обновления пользователя в БД", error: err });
-        throw new UploadThingError("Не удалось обновить профиль после загрузки");
+        logger.error({ msg: "DB user update error", error: err });
+        throw new UploadThingError("Failed to update avatar");
       }
 
       return { uploadedBy: metadata.userId };

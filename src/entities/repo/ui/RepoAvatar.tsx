@@ -11,7 +11,7 @@ export function RepoAvatar({ src, alt }: { src: string | null; alt: string }) {
   const [loaded, setLoaded] = useState(loadedAvatars.get(imageSrc) ?? false);
 
   return (
-    <div className="bg-muted relative h-20 w-20 shrink-0 overflow-hidden rounded-md border">
+    <div className="bg-muted relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border">
       {!loaded && <Skeleton className="absolute inset-0" />}
       <Image
         src={imageSrc}
@@ -19,7 +19,7 @@ export function RepoAvatar({ src, alt }: { src: string | null; alt: string }) {
         priority
         fill
         className={cn(
-          "rounded-md object-cover transition-opacity duration-300",
+          "rounded-xl object-cover transition-opacity duration-300",
           loaded ? "opacity-100" : "opacity-0"
         )}
         onLoad={() => {

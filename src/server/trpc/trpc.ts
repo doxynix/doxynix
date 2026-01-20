@@ -105,7 +105,7 @@ export const publicProcedure = t.procedure
 
 const isAuthed = t.middleware(({ ctx, next }) => {
   if (ctx.session == null || ctx.session.user == null) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "Вы не авторизованы" });
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "You are not logged in" });
   }
 
   return next({
@@ -119,7 +119,7 @@ export const protectedProcedure = publicProcedure.use(isAuthed);
 
 const isAdmin = t.middleware(({ ctx, next }) => {
   if (ctx.session?.user == null || ctx.session.user.role !== "ADMIN") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Нужны права админа" });
+    throw new TRPCError({ code: "FORBIDDEN", message: "Admin rights required" });
   }
 
   return next({ ctx });

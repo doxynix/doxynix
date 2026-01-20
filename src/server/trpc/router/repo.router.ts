@@ -42,7 +42,7 @@ export const repoRouter = createTRPCRouter({
       return {
         success: true,
         repo: { ...newRepo, id: newRepo.publicId },
-        message: "Репозиторий добавлен",
+        message: "Repository added",
       };
     }),
   searchGithub: protectedProcedure.input(GitHubQuerySchema).query(async ({ ctx, input }) => {
@@ -92,9 +92,9 @@ export const repoRouter = createTRPCRouter({
           where: { publicId: input.id },
         });
 
-        return { success: true, message: "Репозиторий удален" };
+        return { success: true, message: "Repository deleted" };
       } catch (error) {
-        handlePrismaError(error, { notFound: "Репозиторий не найден" });
+        handlePrismaError(error, { notFound: "Repository not found" });
       }
     }),
 
@@ -137,7 +137,7 @@ export const repoRouter = createTRPCRouter({
         ...repo,
         id: repo.publicId,
         status: repo.analyses[0]?.status ?? Status.NEW,
-        message: "Репозиторий найден",
+        message: "Repository found",
       };
     }),
 
@@ -155,7 +155,7 @@ export const repoRouter = createTRPCRouter({
       return {
         success: true,
         count: result.count,
-        message: `Удалено ${result.count} репозиториев организации ${input.owner}`,
+        message: `Deleted ${result.count} repositories for ${input.owner}`,
       };
     }),
 
@@ -254,12 +254,12 @@ export const repoRouter = createTRPCRouter({
       try {
         const deletedRepoCount = await ctx.db.repo.deleteMany();
         if (deletedRepoCount.count === 0) {
-          return { success: false, message: "Репозитории отсутствуют" };
+          return { success: false, message: "No repositories found" };
         }
 
-        return { success: true, message: "Все репозитории были удалены" };
+        return { success: true, message: "All repositories have been deleted" };
       } catch (error) {
-        handlePrismaError(error, { notFound: "Репозитории не найдены" });
+        handlePrismaError(error, { notFound: "Repositories not found" });
       }
     }),
 });

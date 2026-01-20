@@ -27,8 +27,8 @@ export function ApiKeyArchivedTable({ archived }: Props) {
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <History className="text-muted-foreground h-4 w-4" />
-          <h3 className="text-sm font-medium">История (Отозванные)</h3>
-          <Badge className="ml-1 text-[10px]">{archived.length}</Badge>
+          <h3 className="text-sm font-medium">History (Revoked)</h3>
+          <Badge className="ml-1 text-xs">{archived.length}</Badge>
         </div>
 
         <CollapsibleTrigger asChild>
@@ -48,10 +48,10 @@ export function ApiKeyArchivedTable({ archived }: Props) {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead>Название</TableHead>
-                <TableHead>Префикс</TableHead>
-                <TableHead>Создан</TableHead>
-                <TableHead>Последнее использование</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Prefix</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead>Last used</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

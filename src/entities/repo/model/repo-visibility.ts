@@ -9,6 +9,6 @@ export const repoVisibilityConfig: Record<
     color: string;
   }
 > = {
-  PRIVATE: { label: "Приватный", icon: Lock, color: "text-error" },
-  PUBLIC: { label: "Публичный", icon: Unlock, color: "text-success" },
+  PRIVATE: { label: "Private", icon: Lock, color: "text-error" },
+  PUBLIC: { label: "Public", icon: Unlock, color: "text-success" },
 };

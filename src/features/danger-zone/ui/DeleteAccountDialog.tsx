@@ -27,7 +27,7 @@ export function DeleteAccountDialog() {
 
   const deleteMutation = trpc.user.deleteAccount.useMutation({
     onSuccess: async () => {
-      toast.success("Аккаунт успешно удален");
+      toast.success("Account successfully deleted");
       setOpen(false);
       router.refresh();
       await signOut({ callbackUrl: "/auth" });
@@ -43,7 +43,7 @@ export function DeleteAccountDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="destructive" className="w-fit cursor-pointer">
-          Удалить аккаунт <Trash2 className="h-4 w-4" />
+          Delete account <Trash2 className="h-4 w-4" />
         </Button>
       </DialogTrigger>
 
@@ -54,8 +54,8 @@ export function DeleteAccountDialog() {
               <AlertTriangle className="text-destructive h-5 w-5" />
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
-              <DialogTitle>Удалить аккаунт?</DialogTitle>
-              <DialogDescription>Вы собираетесь удалить аккаунт!</DialogDescription>
+              <DialogTitle>Delete account?</DialogTitle>
+              <DialogDescription>You are about to delete your account!</DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -65,17 +65,17 @@ export function DeleteAccountDialog() {
           variant="destructive"
           className="border-destructive/10 bg-destructive/5 text-destructive"
         >
-          <AlertTitle className="text-[16px] font-bold">Внимание</AlertTitle>
+          <AlertTitle className="text-base font-bold">Warning</AlertTitle>
           <AlertDescription>
-            Это действие необратимо. Удаление аккаунта влечет за собой полное удаление сохраненных
-            учетных данных. Также произойдет мгновенный выход из аккаунта со всех устройств
+            This action is irreversible. Deleting your account entails the complete removal of saved
+            credentials. You will also be immediately logged out from all devices.
           </AlertDescription>
         </Alert>
 
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" className="cursor-pointer">
-              Отмена
+              Cancel
             </Button>
           </DialogClose>
           <LoadingButton
@@ -83,9 +83,9 @@ export function DeleteAccountDialog() {
             className="cursor-pointer"
             onClick={handleDelete}
             isLoading={deleteMutation.isPending}
-            loadingText="Удаление..."
+            loadingText="Deleting..."
           >
-            Да, удалить
+            Yes, delete
           </LoadingButton>
         </DialogFooter>
       </DialogContent>

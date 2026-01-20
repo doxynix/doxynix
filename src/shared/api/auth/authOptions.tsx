@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { render } from "@react-email/render";
 import { getServerSession, type NextAuthOptions } from "next-auth";
@@ -12,9 +13,9 @@ import { AuthEmail } from "@/shared/api/auth/templates/AuthEmail";
 import { prisma } from "@/shared/api/db/db";
 import { logger } from "@/shared/lib/logger";
 
-const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 дней
-const SESSION_UPDATE_AGE = 24 * 60 * 60; // сутки
-const MAGIC_LINK_MAX_AGE = 10 * 60; // 10 минут
+const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 дней
+const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: сутки
+const MAGIC_LINK_MAX_AGE = 10 * 60; // TIME: 10 минут
 
 const resend = process.env.RESEND_API_KEY != null ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -41,7 +42,7 @@ export const authOptions: NextAuthOptions = {
         const template = {
           to: identifier,
           from: provider.from,
-          subject: user?.emailVerified ? "Doxynix | Вход" : "Doxynix | Активация аккаунта",
+          subject: user?.emailVerified ? "Doxynix | Login" : "Doxynix | Account Activation",
           html,
         };
 
@@ -113,8 +114,8 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth",
     signOut: "/",
-    error: "/auth/error", // реализовать страницу /auth/error
-    newUser: "/welcome", // реализовать страницу /welcome
+    error: "/auth/error", // NOTE: реализовать страницу /auth/error
+    newUser: "/welcome", // NOTE: реализовать страницу /welcome
     verifyRequest: "/auth",
   },
 
@@ -178,4 +179,4 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-export const getServerAuthSession = () => getServerSession(authOptions);
+export const getServerAuthSession = cache(() => getServerSession(authOptions));

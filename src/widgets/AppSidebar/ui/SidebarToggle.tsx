@@ -7,7 +7,7 @@ export function SidebarToggle() {
   const { state } = useSidebar();
 
   return (
-    <AppTooltip content={state === "expanded" ? "Свернуть" : "Развернуть"}>
+    <AppTooltip content={state === "expanded" ? "Collapse" : "Expand"}>
       <SidebarTrigger className="text-muted-foreground hover:cursor-pointer" variant="ghost" />
     </AppTooltip>
   );

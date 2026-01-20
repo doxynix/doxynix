@@ -35,7 +35,7 @@ export function ProfileCard({ user }: Props) {
 
   const updateAvatar = trpc.user.updateAvatar.useMutation({
     onSuccess: async () => {
-      toast.success("Фото профиля обновлено");
+      toast.success("Profile Picture updated");
       await update();
       router.refresh();
     },
@@ -46,7 +46,7 @@ export function ProfileCard({ user }: Props) {
     onSuccess: async () => {
       setAvatarUrl("");
       if (fileInputRef.current) fileInputRef.current.value = "";
-      toast.success("Фото удалено");
+      toast.success("Photo removed");
       await update();
       router.refresh();
     },
@@ -60,13 +60,13 @@ export function ProfileCard({ user }: Props) {
       updateAvatar.mutate({ url: file.ufsUrl, key: file.key });
     },
     onUploadError: (error: Error) => {
-      let message = "Произошла ошибка при загрузке";
+      let message = "Error uploading file";
       if (error.message.includes("FileSizeMismatch")) {
-        message = "Файл слишком большой (макс. 4МБ)";
+        message = "File too large (max 4MB)";
       } else if (error.message.includes("InvalidFileType")) {
-        message = "Неверный формат файла (доступные: .png, .jpg, .gif)";
+        message = "Invalid file format (allowed: .png, .jpg, .gif)";
       } else if (error.message.includes("Unauthorized")) {
-        message = "Вы не авторизованы";
+        message = "You are not logged in";
       }
       toast.error(`${message}`);
     },
@@ -74,7 +74,7 @@ export function ProfileCard({ user }: Props) {
 
   const updateProfile = trpc.user.updateUser.useMutation({
     onSuccess: async () => {
-      toast.success("Данные обновлены");
+      toast.success("Data updated");
       await update();
       form.reset({
         name: form.getValues("name"),
@@ -114,10 +114,8 @@ export function ProfileCard({ user }: Props) {
     <div className="flex w-full flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Фото профиля</CardTitle>
-          <CardDescription>
-            Это изображение будет отображаться в вашей учетной записи.
-          </CardDescription>
+          <CardTitle>Profile Picture</CardTitle>
+          <CardDescription>This image will be displayed on your profile.</CardDescription>
         </CardHeader>
         <CardContent className="flex items-center gap-6">
           <div className="relative">
@@ -154,25 +152,23 @@ export function ProfileCard({ user }: Props) {
             <LoadingButton
               className="cursor-pointer"
               variant="outline"
-              loadingText="Загрузка фото..."
+              loadingText="Loading..."
               isLoading={isUploading}
               onClick={() => fileInputRef.current?.click()}
             >
-              Загрузить фото
+              Upload photo
             </LoadingButton>
 
-            <p className="text-muted-foreground text-center text-xs">
-              Макс. 4MB (.jpg, .png, .gif)
-            </p>
+            <p className="text-muted-foreground text-center text-xs">Max. 4MB (.jpg, .png, .gif)</p>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Личная информация</CardTitle>
-          <CardDescription>Обновите свое имя.</CardDescription>
-          {/* <CardDescription>Обновите свое имя или почту.</CardDescription> */}
+          <CardTitle>Personal Information</CardTitle>
+          <CardDescription>Update your name.</CardDescription>
+          {/* <CardDescription>Update your name or email.</CardDescription> */}
         </CardHeader>
         <CardContent className="space-y-4">
           <Form {...form}>
@@ -182,9 +178,9 @@ export function ProfileCard({ user }: Props) {
                 name="name"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel className="text-muted-foreground">Отображаемое имя</FormLabel>
+                    <FormLabel className="text-muted-foreground">Display Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ваше имя" {...field} />
+                      <Input placeholder="Your name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -199,7 +195,7 @@ export function ProfileCard({ user }: Props) {
                     <FormLabel className="text-muted-foreground">Email</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input {...field} placeholder="Ваша почта" />
+                        <Input {...field} placeholder="Your email" />
                       </div>
                     </FormControl>
                   </FormItem>
@@ -207,14 +203,14 @@ export function ProfileCard({ user }: Props) {
               /> */}
               <div className="flex justify-end">
                 <LoadingButton
-                  loadingText="Сохранение..."
+                  loadingText="Saving..."
                   isLoading={updateProfile.isPending}
                   disabled={
                     !form.formState.isDirty || !form.formState.isValid || updateProfile.isPending
                   }
                   className="cursor-pointer"
                 >
-                  Сохранить
+                  Save
                 </LoadingButton>
               </div>
             </form>

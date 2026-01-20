@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { owner } = await params;
   return {
     title: owner,
-    description: `Обзор репозиториев организации ${owner}`,
+    description: `Repository overview for ${owner}`,
   };
 }
 
@@ -53,18 +53,16 @@ export default async function OwnerPage({ params, searchParams }: Props) {
 
   return (
     <div className="mx-auto flex h-full w-full flex-col">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="not-xs:justify-center mb-4 flex items-center">
         <h1 className="text-2xl font-bold">{owner}</h1>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center gap-4">
-            <AppSearch placeholder={`Поиск в ${owner}...`} />
-            <RepoFilters />
-          </div>
-          <CreateRepoButton />
+      <div className="flex w-full flex-wrap items-center justify-center gap-2 xl:justify-between">
+        <div className="flex flex-col items-center gap-4 xl:flex-row">
+          <AppSearch placeholder="Search repository..." />
+          <RepoFilters />
         </div>
+        <CreateRepoButton />
       </div>
 
       <Suspense

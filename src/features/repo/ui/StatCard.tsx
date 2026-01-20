@@ -10,31 +10,31 @@ export async function StatCard() {
 
   const stats = [
     {
-      label: "Репозиториев",
+      label: "Repositories",
       value: data.repoCount,
       icon: FolderGit2,
       className: "text-blue",
     },
     {
-      label: "Документаций",
+      label: "Documentations",
       value: data.docsCount,
       icon: FileText,
       className: "text-success",
     },
     {
-      label: "Требуют внимания",
+      label: "Needs Attention",
       value: data.failedAnalyses,
       icon: AlertCircle,
       className: "text-error",
     },
     {
-      label: "В обработке",
+      label: "In Progress",
       value: data.pendingAnalyses,
       icon: Loader2,
       className: `text-warning ${data.pendingAnalyses > 0 && "animate-spin"}`,
     },
     {
-      label: "Всего анализов",
+      label: "Total analyses",
       value: data.analysisCount,
       icon: Activity,
       className: "text-muted-foreground",
@@ -42,12 +42,12 @@ export async function StatCard() {
   ];
 
   return (
-    <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="xs:grid-cols-2 mb-8 grid grid-cols-1 gap-4 lg:grid-cols-5">
       {stats.map((stat) => (
         <Card key={stat.label} className="bg-card">
-          <CardContent className="p-4">
+          <CardContent className="xs:p-4">
             <div className="flex items-center gap-3">
-              <div className="bg-muted rounded-md p-2">
+              <div className="bg-muted rounded-xl p-2">
                 <stat.icon className={cn("h-4 w-4", stat.className)} />
               </div>
               <div>

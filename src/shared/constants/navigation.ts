@@ -6,7 +6,6 @@ import {
   Home,
   KeyRound,
   LayoutGrid,
-  Link,
   Settings,
   SquareTerminal,
   User,
@@ -17,7 +16,7 @@ import { MenuItem, MenuItems } from "@/shared/types/menuItem";
 
 const DASHBOARD_BASE: MenuItem[] = [
   {
-    label: "Обзор",
+    label: "Dashboard",
     icon: LayoutGrid,
     href: "/dashboard",
     shortcut: "Alt+O",
@@ -25,14 +24,14 @@ const DASHBOARD_BASE: MenuItem[] = [
     url: "/o",
   },
   {
-    label: "Репозитории",
+    label: "Repositories",
     icon: FolderGit2,
     href: "/dashboard/repo",
     shortcut: "Alt+R",
     url: "/r",
   },
   {
-    label: "Настройки",
+    label: "Settings",
     icon: Settings,
     href: "/dashboard/settings",
     shortcut: "Alt+S",
@@ -42,21 +41,21 @@ const DASHBOARD_BASE: MenuItem[] = [
 
 const SETTINGS_PAGES: MenuItems = [
   {
-    label: "Профиль",
+    label: "Profile",
     icon: User,
     href: "/dashboard/settings/profile",
     shortcut: "Alt+P",
     url: "/me",
   },
   {
-    label: "API ключи",
+    label: "API Keys",
     icon: KeyRound,
     href: "/dashboard/settings/api-keys",
     shortcut: "Alt+A",
     url: "/k",
   },
   {
-    label: "Опасная зона",
+    label: "Danger Zone",
     icon: AlertTriangle,
     href: "/dashboard/settings/danger-zone",
     shortcut: "Alt+D",
@@ -67,18 +66,18 @@ const SETTINGS_PAGES: MenuItems = [
 
 const GLOBAL_FEATURES: MenuItems = [
   {
-    label: "Уведомления",
+    label: "Notifications",
     icon: Bell,
     href: "/dashboard/notifications",
     shortcut: "Alt+N",
     url: "/n",
   },
-  { label: "Поддержка", icon: Headset, href: "/support", shortcut: "Alt+H", url: "/h" },
+  { label: "Support", icon: Headset, href: "/support", shortcut: "Alt+H", url: "/h" },
 ];
 
 export const actionsMenu: MenuItems = [
   {
-    label: "Создать репозиторий",
+    label: "Create Repository",
     icon: SquareTerminal,
     href: "/dashboard/repo/new",
     shortcut: "Alt+N",
@@ -100,8 +99,7 @@ export const commandMenuItems: MenuItems = [
 ];
 
 export const publicHeaderMenu: MenuItems = [
-  { icon: Home, label: "Главная", href: "/" },
-  { icon: Users2, label: "О нас", href: "/about" },
-  { icon: Headset, label: "Помощь", href: "/support" },
-  { icon: Link, label: "Ресурсы", href: "/credits" },
+  { icon: Home, label: "Home", href: "/" },
+  { icon: Users2, label: "About", href: "/about" },
+  { icon: Headset, label: "Help", href: "/support" },
 ];
