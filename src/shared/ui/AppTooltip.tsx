@@ -15,7 +15,7 @@ export function AppTooltip({ children, content, delay = 300, open, hidden, side 
   return (
     <Tooltip delayDuration={delay} open={open}>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent hidden={hidden} side={side}>
+      <TooltipContent className="hidden [@media(hover:hover)]:block" hidden={hidden} side={side}>
         {content}
       </TooltipContent>
     </Tooltip>

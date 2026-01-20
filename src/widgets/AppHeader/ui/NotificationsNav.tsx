@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 
-// Заглушка! Потом заменишь на пропс или запрос
+// NOTE: Заглушка! Потом заменишь на пропс или запрос
 const notifications = [
   { id: 1, title: "Analysis completed", repos: "vercel/next.js", time: "2 hours ago", read: false },
   { id: 2, title: "New docs available", repos: "my-org/api", time: "1 day ago", read: true },
@@ -27,7 +27,7 @@ export function NotificationsNav() {
 
   return (
     <DropdownMenu>
-      <AppTooltip content="Уведомления">
+      <AppTooltip content="Notifications">
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
@@ -43,14 +43,14 @@ export function NotificationsNav() {
       </AppTooltip>
       <DropdownMenuContent className="w-80">
         <div className="flex items-center justify-between p-2">
-          <p>Уведомления</p>
-          <p className="cursor-pointer text-xs hover:underline">Отметить все</p>
+          <p>Notifications</p>
+          <p className="cursor-pointer text-xs hover:underline">Mark all as read</p>
         </div>
         <DropdownMenuSeparator />
         <div className="flex flex-col gap-1 py-1">
           {notifications.length === 0 ? (
             <div className="text-muted-foreground py-4 text-center text-sm">
-              Нет новых уведомлений
+              No new notifications
             </div>
           ) : (
             notifications.slice(0, 5).map((note) => (
@@ -78,7 +78,7 @@ export function NotificationsNav() {
             className="flex w-full items-center justify-center group-hover:underline"
             href="/dashboard/notifications"
           >
-            Показать все
+            Show all
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>

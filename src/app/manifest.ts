@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Doxynix",
     short_name: "Doxynix",
-    description: "Инструмент для анализа кода и документации",
+    description: "Code analysis and documentation tool",
     start_url: "/dashboard",
     display: "standalone",
     background_color: "#09090b",

@@ -45,7 +45,7 @@ export function UserNav({ user }: Props) {
   async function handleSignOut() {
     try {
       setLoading(true);
-      await signOut();
+      await signOut({ callbackUrl: "/auth" });
     } finally {
       setLoading(false);
     }
@@ -64,8 +64,8 @@ export function UserNav({ user }: Props) {
       <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="truncate text-sm leading-none font-medium">{name}</p>
-            <p className="text-muted-foreground truncate text-xs leading-none">{email}</p>
+            <p className="truncate text-sm font-medium">{name}</p>
+            <p className="text-muted-foreground truncate text-xs">{email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -73,7 +73,7 @@ export function UserNav({ user }: Props) {
           {userNavMenu.map((item) => (
             <DropdownMenuItem key={item.href} asChild>
               <Link href={item.href as Route} className="flex cursor-pointer items-center">
-                {item.icon && <item.icon />}
+                <item.icon />
                 <span>{item.label}</span>
                 {item.shortcut !== null && (
                   <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
@@ -92,20 +92,20 @@ export function UserNav({ user }: Props) {
                 onSelect={(e) => e.preventDefault()}
               >
                 <LogOut className="text-destructive mr-2" />
-                Выйти
+                Log out
               </DropdownMenuItem>
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-105">
               <DialogHeader>
-                <DialogTitle>Выход из аккаунта</DialogTitle>
-                <DialogDescription>Вы уверены что хотите выйти из аккаунта?</DialogDescription>
+                <DialogTitle> Sign out</DialogTitle>
+                <DialogDescription>Are you sure you want to log out??</DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="flex justify-end gap-2">
                   <DialogClose asChild>
                     <Button className="cursor-pointer" variant="outline" disabled={loading}>
-                      Отмена
+                      Cancel
                     </Button>
                   </DialogClose>
                   <LoadingButton
@@ -114,9 +114,9 @@ export function UserNav({ user }: Props) {
                     className="cursor-pointer"
                     onClick={handleSignOut}
                     isLoading={loading}
-                    loadingText="Выход..."
+                    loadingText="Logout..."
                   >
-                    Выйти
+                    Log out
                   </LoadingButton>
                 </div>
               </div>

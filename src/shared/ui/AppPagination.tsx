@@ -76,7 +76,7 @@ export function AppPagination({ className, currentPage, totalPages }: Props) {
             ) : (
               <ChevronLeft className="h-4 w-4" />
             )}
-            <span className="ml-1">Назад</span>
+            <span className="ml-1">Back</span>
           </PaginationLink>
         </PaginationItem>
 
@@ -121,7 +121,7 @@ export function AppPagination({ className, currentPage, totalPages }: Props) {
             )}
             aria-disabled={currentPage >= totalPages}
           >
-            <span className="mr-1">Далее</span>
+            <span className="mr-1">Next</span>
             {isNextLoading ? (
               <Spinner className="h-4 w-4 animate-spin" />
             ) : (

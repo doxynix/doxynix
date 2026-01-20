@@ -23,19 +23,19 @@ export function ThemeToggle({ className }: Props) {
   }, []);
 
   if (!mounted) {
-    return <Skeleton className="h-9 w-9 rounded-md" />;
+    return <Skeleton className="h-9 w-9 rounded-xl" />;
   }
 
   const isDark = resolvedTheme === "dark";
 
   return (
-    <AppTooltip content={isDark ? "Светлая тема" : "Темная тема"}>
+    <AppTooltip content={isDark ? "Light mode" : "Dark mode"}>
       <Button
         className={cn(className)}
         variant="ghost"
         size="icon"
         onClick={() => setTheme(isDark ? "light" : "dark")}
-        aria-label={isDark ? "Переключить на светлую тему" : "Переключить на темную тему"}
+        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       >
         {isDark ? <Moon className="h-4.5" /> : <Sun className="h-4.5" />}
       </Button>

@@ -8,9 +8,13 @@ import { Search } from "lucide-react";
 import { Input } from "@/shared/ui/input";
 import { Spinner } from "@/shared/ui/spinner";
 
+import { cn } from "../lib/utils";
+
 type Props = {
   placeholder: string;
 };
+
+const ICON_STYLES = "text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4";
 
 export function AppSearch({ placeholder }: Props) {
   const searchParams = useSearchParams();
@@ -57,16 +61,16 @@ export function AppSearch({ placeholder }: Props) {
   }, [term, pathname, replace]);
 
   return (
-    <div className="relative">
+    <div className="relative shrink-0">
       {isPending ? (
-        <Spinner className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4 animate-spin" />
+        <Spinner className={cn(ICON_STYLES, "animate-spin")} />
       ) : (
-        <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+        <Search className={ICON_STYLES} />
       )}
       <Input
         type="search"
         placeholder={placeholder}
-        className="focus-visible:bg-background h-9 border-none pl-8"
+        className="focus-visible:bg-background h-9 border-none pl-8 text-sm"
         value={term}
         onChange={(e) => {
           isResetting.current = false;

@@ -11,24 +11,24 @@ const nextConfig: NextConfig = {
     maxInactiveAge: 15 * 1000,
     pagesBufferLength: 2,
   },
-  cacheComponents: true, // если будут баги выключить
+  // cacheComponents: true, // если будут баги выключить (// NOTE: обнаружен баг №418 с гидратацией выяснено что приходится оборачивать каждый чих в suspense так еще и юзать везде 'use cache' директиву ибо теперь кеширование руками надо делать слишком много переписывать пока PPR отложен на неопределенный срок)
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,
   compiler: {
-    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
+    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "info"] } : false,
   },
   logging: {
     fetches: {
       fullUrl: true,
     },
   },
-  reactCompiler: true, // аккуратно фича еще в бете
+  reactCompiler: true, // аккуратно фича еще в бете (пока багов не обнаружено - 20.01.2026)
   experimental: {
     typedEnv: true,
     taint: true,
     serverComponentsHmrCache: true,
-    useLightningcss: true,
+    // useLightningcss: true, // отключен так-как ломает анализатор размера бандла
     authInterrupts: true,
     optimizePackageImports: [
       "lucide-react",

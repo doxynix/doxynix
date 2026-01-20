@@ -17,8 +17,8 @@ type CopyButtonProps = {
 
 export function CopyButton({
   value,
-  tooltipText = "Копировать ID",
-  successText = "Скопировано!",
+  tooltipText = "Copy ID",
+  successText = "Copied!!",
   className,
 }: CopyButtonProps) {
   const { isCopied, copy } = useCopyToClipboard();
@@ -30,7 +30,7 @@ export function CopyButton({
         size="icon"
         onClick={() => copy(value)}
         className={cn(
-          "h-6 w-6 transition-all",
+          "h-6 w-6 transition-all not-md:opacity-100",
           isCopied
             ? "text-success hover:text-success opacity-100"
             : "text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100",

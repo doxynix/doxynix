@@ -16,7 +16,7 @@ const Command = React.forwardRef<
   <CommandPrimitive
     ref={ref}
     className={cn(
-      "bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md",
+      "bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-xl",
       className
     )}
     {...props}
@@ -32,8 +32,8 @@ const CommandDialog = ({ children, shouldFilter, ...props }: CommandDialogProps)
   return (
     <Dialog {...props}>
       <DialogContent className="overflow-hidden p-0">
-        <DialogTitle className="sr-only">Командное меню</DialogTitle>
-        <DialogDescription className="sr-only">Поиск команд и навигация по сайту</DialogDescription>
+        <DialogTitle className="sr-only">Command Menu</DialogTitle>
+        <DialogDescription className="sr-only">Search commands and navigate</DialogDescription>
         <Command
           shouldFilter={shouldFilter}
           className="**:[[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group]]:px-2 **:[[cmdk-input]]:h-12 **:[[cmdk-item]]:px-2 **:[[cmdk-item]]:py-3"
@@ -62,7 +62,7 @@ const CommandInput = React.forwardRef<
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        "placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 pr-8 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50",
+        "placeholder:text-muted-foreground flex h-10 w-full rounded-xl bg-transparent py-3 pr-8 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}

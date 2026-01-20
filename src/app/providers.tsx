@@ -57,9 +57,10 @@ export function Providers({ children }: Props) {
         <SessionProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="system" // THEME: пока на время светлая тема удалена
             storageKey="doxynix-theme"
-            enableSystem
+            enableSystem={false} // THEME: пока на время светлая тема удалена
+            forcedTheme="dark" // THEME: пока на время светлая тема удалена
             disableTransitionOnChange
           >
             <TooltipProvider>{children}</TooltipProvider>

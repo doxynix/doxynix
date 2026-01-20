@@ -12,6 +12,7 @@ import { connection } from "next/server";
 import { extractRouterConfig } from "uploadthing/server";
 
 import { cn } from "@/shared/lib/utils";
+import { ConsoleEasterEgg } from "@/shared/ui/ConsoleEasterEgg";
 import { Toaster } from "@/shared/ui/sonner";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { Providers } from "@/app/providers";
@@ -49,7 +50,7 @@ export const metadata: Metadata = {
     default: "Doxynix",
   },
   description:
-    "Автоматический анализ репозиториев, метрики качества кода и генерация документации в один клик.",
+    "Automated repository analysis, code metrics, and documentation generation in one click.",
 
   keywords: ["code analysis", "documentation generator", "metrics", "github analysis", "doxynix"],
 
@@ -61,14 +62,14 @@ export const metadata: Metadata = {
     locale: "ru_RU",
     url: "https://doxynix.space",
     siteName: "Doxynix",
-    title: "Doxynix — Анализ кода и документация",
-    description: "Превратите свой код в понятную аналитику и документацию.",
+    title: "Doxynix — Code Analysis & Documentation",
+    description: "Turn your code into clear analytics and documentation.",
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "Doxynix — Анализ кода",
-    description: "Метрики и документация для ваших проектов.",
+    title: "Doxynix — Code Analysis",
+    description: "Metrics and documentation for your projects.",
     creator: "@doxynix",
   },
 
@@ -95,16 +96,23 @@ export default function RootLayout({
       <body
         className={cn("flex h-full flex-col", fontSans.variable, fontMono.variable, "antialiased")}
       >
-        <NextTopLoader color="#0400ff" showSpinner={false} zIndex={9999} />
+        <NextTopLoader color="#ffffff" showSpinner={false} zIndex={9999} />
         <Suspense>
           <UTSSR />
         </Suspense>
         <Providers>
           {children}
-          <Toaster position="top-center" richColors duration={4000} gap={8} />
+          <Toaster
+            theme="dark" // THEME: пока так будет форс
+            position="top-center"
+            richColors
+            duration={4000}
+            gap={8}
+          />
         </Providers>
         <Analytics />
         <SpeedInsights />
+        <ConsoleEasterEgg />
       </body>
     </html>
   );

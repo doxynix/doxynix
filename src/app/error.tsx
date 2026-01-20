@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Cookies from "js-cookie";
 import { ServerCrash } from "lucide-react";
 
 import BackOrLinkButton from "@/shared/ui/BackOrLinkButton";
@@ -25,8 +26,8 @@ export default function Error({
   const emailSubject = `[Bug Report] Doxynix - Error ${finalId}`;
 
   const emailBody = `
-    Опишите, что вы делали перед ошибкой (по желанию):
-    >>> НАПИШИТЕ ЗДЕСЬ <<<
+    Describe what you were doing before the error (optional):
+    >>> WRITE HERE <<<
 
     ------------------------------------------------
     Technical Information (Please, do not edit):
@@ -41,13 +42,7 @@ export default function Error({
   const mailtoLink = `mailto:support@doxynix.space?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
   React.useEffect(() => {
-    const getCookie = (name: string) => {
-      if (typeof document === "undefined") return;
-      const value = document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
-      return value ? value.pop() : null;
-    };
-
-    const rid = getCookie("last_request_id");
+    const rid = Cookies.get("last_request_id");
     if (rid !== null && rid !== undefined) {
       setRequestId(rid);
     }
@@ -60,20 +55,20 @@ export default function Error({
       </div>
 
       <div className="w-full max-w-md space-y-4 text-center">
-        <h1 className="text-3xl font-bold tracking-tight">500 — Ошибка сервера</h1>
+        <h1 className="text-3xl font-bold tracking-tight">500 — Server Error</h1>
         <p className="text-muted-foreground text-base">
-          Произошло что-то непредвиденное. Мы уже получили уведомление об ошибке и разбираемся.
+          Something unexpected happened. We&apos;ve been notified and are looking into it.
         </p>
         <p className="text-muted-foreground text-left text-xs font-semibold tracking-wider uppercase">
-          Идентификатор запроса
+          Request ID
         </p>
         <div className="bg-muted/50 border-border space-y-3 rounded-xl border p-2 text-left">
           <div className="group flex items-center justify-between">
             <code className="text-xs break-all">
-              {requestId ?? error.digest ?? "Системный сбой"}
+              {requestId ?? error.digest ?? "System Failure"}
             </code>
             <CopyButton
-              tooltipText="Скопировать ID запроса"
+              tooltipText="Copy Request ID"
               className="opacity-100"
               value={requestId ?? error.digest ?? ""}
             />
@@ -81,9 +76,7 @@ export default function Error({
 
           {process.env.NODE_ENV === "development" && (
             <div className="border-border/50 border-t pt-2">
-              <p className="text-destructive/70 text-[12px] font-semibold uppercase">
-                Debug Error:
-              </p>
+              <p className="text-destructive/70 text-xs font-semibold uppercase">Debug Error:</p>
               <p className="text-destructive truncate font-mono text-xs">{error.message}</p>
             </div>
           )}
@@ -91,14 +84,14 @@ export default function Error({
 
         <div className="flex flex-col items-center justify-center gap-3 pt-4 sm:flex-row">
           <Button onClick={reset} className="cursor-pointer">
-            Попробовать снова
+            Try again
           </Button>
-          <BackOrLinkButton text="Вернуться назад" />
+          <BackOrLinkButton text="Go back" />
         </div>
       </div>
 
       <footer className="mt-12 text-sm">
-        Если ошибка повторяется, напишите нам:{" "}
+        If the error persists, contact us:{" "}
         <a href={mailtoLink} className="underline hover:no-underline">
           support@doxynix.space
         </a>

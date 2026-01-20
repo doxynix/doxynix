@@ -56,7 +56,7 @@ robots.txt
 /cli/dist/
 /cli/node_modules
 *.tgz
-# временно!
+# NOTE: временно!
 /cli/
 
 # tests
@@ -65,3 +65,5 @@ reports/
 /src/tests/e2e/playwright-report
 /src/tests/e2e/test-results
 /report
+
+.trigger

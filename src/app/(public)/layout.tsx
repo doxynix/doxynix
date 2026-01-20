@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 
+import { DotPattern } from "@/shared/ui/dot-pattern";
 import { AppFooter } from "@/widgets/AppFooter";
 import { PublicHeader } from "@/widgets/PublicHeader";
 
@@ -9,8 +10,18 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       <div className="sticky top-0 z-50 w-full shrink-0 border-b">
         <PublicHeader />
       </div>
-      <main className="flex w-full flex-1 flex-col">{children}</main>
-      <AppFooter />
+      <DotPattern
+        width={20}
+        height={20}
+        cx={1}
+        cy={1}
+        cr={1}
+        className="stroke-primary/50 fixed inset-0 z-1 h-full w-full mask-[radial-gradient(circle_at_center,white,transparent)]"
+      />
+      <main className="mx-auto flex w-full flex-1 flex-col">{children}</main>
+      <div className="z-50 w-full shrink-0 border-t">
+        <AppFooter />
+      </div>
     </div>
   );
 }

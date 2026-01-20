@@ -18,7 +18,6 @@ import {
 } from "@/shared/ui/breadcrumb";
 import { Logo } from "@/shared/ui/Logo";
 import { useSidebar } from "@/shared/ui/sidebar";
-import { ThemeToggle } from "@/shared/ui/ThemeToggle";
 import { AppCommandMenu } from "@/widgets/AppCommandMenu";
 import { SidebarToggle } from "@/widgets/AppSidebar";
 
@@ -37,13 +36,13 @@ export function AppHeader({ user }: Props) {
   return (
     <header className="bg-background flex h-full items-center justify-between p-4">
       <div className="flex items-center gap-2">
-        <AppTooltip content={cn(state === "expanded" ? "Скрыть" : "Раскрыть")}>
+        <AppTooltip content={cn(state === "expanded" ? "Hide" : "Show")}>
           <SidebarToggle />
         </AppTooltip>
 
         <Logo className="mt-1 w-20" />
 
-        <Breadcrumb>
+        <Breadcrumb className="hidden md:block">
           <BreadcrumbList>
             {segments.map((segment, index) => {
               const href = `/${segments.slice(0, index + 1).join("/")}`;
@@ -54,8 +53,8 @@ export function AppHeader({ user }: Props) {
               const textClasses = "truncate lowercase";
 
               const widthClasses = isLast
-                ? "max-w-[150px] md:max-w-[300px]"
-                : "max-w-[80px] md:max-w-[120px]";
+                ? "max-w-[140px] xl:max-w-[300px]"
+                : "max-w-[70px] xl:max-w-[120px]";
 
               return (
                 <div key={href} className="flex items-center gap-1.5">
@@ -83,9 +82,9 @@ export function AppHeader({ user }: Props) {
         </Breadcrumb>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
         <AppCommandMenu />
-        <ThemeToggle className="text-muted-foreground" />
+        {/* <ThemeToggle className="text-muted-foreground" /> // THEME: на время!*/}
         <NotificationsNav />
         <UserNav user={user} />
       </div>

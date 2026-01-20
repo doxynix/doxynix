@@ -5,7 +5,7 @@ import { getServerAuthSession } from "@/shared/api/auth/authOptions";
 import { AuthForm } from "@/features/auth";
 
 export const metadata: Metadata = {
-  title: "Авторизация",
+  title: "Authorization",
 };
 
 export default async function AuthPage() {

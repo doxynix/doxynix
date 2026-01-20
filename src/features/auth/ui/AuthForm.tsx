@@ -21,8 +21,8 @@ import { YandexIcon } from "@/shared/ui/yandex-icon";
 
 const MagicLinkSchema = z.object({
   email: z
-    .email({ message: "Введите корректный email" })
-    .max(254, "Адрес электронной почты не может быть длиннее 254 символов"),
+    .email({ message: "Please enter a valid email address" })
+    .max(254, "Email address cannot exceed 254 characters"),
 });
 
 export function AuthForm() {
@@ -55,9 +55,9 @@ export function AuthForm() {
 
       if ((res?.ok ?? false) && res?.error == null) {
         setIsSent(true);
-        toast.success("Письмо отправлено");
+        toast.success("Email sent");
       } else {
-        setErrorMessage("Ошибка отправки письма. Попробуйте ещё раз.");
+        setErrorMessage("Error sending email. Please try again.");
       }
     } finally {
       setLoadingProvider(null);
@@ -83,12 +83,12 @@ export function AuthForm() {
             : "relative scale-100 opacity-100"
         )}
       >
-        <Logo />
-        <div className="mt-16 flex gap-4">
+        <Logo isInteractive={false} />
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-4 sm:mt-16">
           <LoadingButton
             className="cursor-pointer"
             isLoading={loadingProvider === "github"}
-            loadingText="Вход..."
+            loadingText="Login..."
             disabled={disabled}
             onClick={() => handleSignIn("github")}
           >
@@ -98,7 +98,7 @@ export function AuthForm() {
           <LoadingButton
             className="cursor-pointer"
             isLoading={loadingProvider === "google"}
-            loadingText="Вход..."
+            loadingText="Login..."
             disabled={disabled}
             onClick={() => handleSignIn("google")}
           >
@@ -108,7 +108,7 @@ export function AuthForm() {
           <LoadingButton
             className="cursor-pointer"
             isLoading={loadingProvider === "yandex"}
-            loadingText="Вход..."
+            loadingText="Login..."
             disabled={disabled}
             onClick={() => handleSignIn("yandex")}
           >
@@ -120,7 +120,7 @@ export function AuthForm() {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="text-muted-foreground bg-background px-2">или</span>
+            <span className="text-muted-foreground bg-background px-2">or</span>
           </div>
         </div>
         <div className="bg-muted-foreground/5 flex flex-col gap-4 rounded-xl p-6">
@@ -148,21 +148,21 @@ export function AuthForm() {
                 type="submit"
                 className="cursor-pointer"
                 isLoading={loadingProvider === "email"}
-                loadingText="Вход..."
+                loadingText="Login..."
                 disabled={disabled}
               >
-                Войти
+                Log in
               </LoadingButton>
             </form>
           </Form>
           <p className="text-muted-foreground text-center text-xs">
-            Создавая аккаунт, вы принимаете{" "}
+            By creating an account, you agree to our{" "}
             <Link className="underline hover:no-underline" href="/terms">
-              Пользовательское соглашение
+              Terms of Service
             </Link>{" "}
-            и{" "}
+            and{" "}
             <Link className="underline hover:no-underline" href="/privacy">
-              Политику конфиденциальности
+              Privacy Policy
             </Link>
           </p>
         </div>
@@ -178,13 +178,13 @@ export function AuthForm() {
         <div className="bg-muted-foreground/10 mb-4 flex size-24 items-center justify-center rounded-full">
           <Mail className="text-muted-foreground size-12" />
         </div>
-        <h2 className="text-xl font-bold">Проверьте почту</h2>
+        <h2 className="text-xl font-bold">Check your email</h2>
         <p className="text-muted-foreground">
-          Мы отправили ссылку на{" "}
+          We sent a login link to{" "}
           <span className="text-foreground font-bold italic">{form.getValues("email")}</span>
         </p>
         <Button className="cursor-pointer" variant="outline" onClick={() => setIsSent(false)}>
-          Ввести другой Email
+          Enter different Email{" "}
         </Button>
       </div>
     </div>

@@ -13,7 +13,7 @@ const prisma = new PrismaClient({ adapter });
 const MY_EMAIL = "karen.avakov2@gmail.com";
 
 async function main() {
-  console.log("Начинаем посев данных...");
+  console.log("Seeding data...");
 
   const user = await prisma.user.upsert({
     where: { email: MY_EMAIL },
@@ -26,7 +26,7 @@ async function main() {
     },
   });
 
-  console.log(`Юзер готов: ${user.email} (ID: ${user.id})`);
+  console.log(`User ready: ${user.email} (ID: ${user.id})`);
 
   for (let i = 0; i < 12; i++) {
     const isReady = i < 6;
@@ -69,7 +69,7 @@ async function main() {
                 {
                   version: "v1.0",
                   type: DocType.README,
-                  content: "# Readme \n\n Это сгенерированный файл...",
+                  content: "# Readme \n\n This is a generated file...",
                 },
                 {
                   version: "v1.0",
@@ -82,10 +82,10 @@ async function main() {
       },
     });
 
-    console.log(`Создан репо: ${repo.owner}/${repo.name}`);
+    console.log(`Created repo: ${repo.owner}/${repo.name}`);
   }
 
-  console.log("Посев завершен!");
+  console.log("Seeding completed!");
 }
 
 main()

@@ -1,32 +1,77 @@
+import { Suspense } from "react";
 import type { Route } from "next";
 import Link from "next/link";
+import { Menu } from "lucide-react";
 
 import { publicHeaderMenu } from "@/shared/constants/navigation";
 import { Button } from "@/shared/ui/button";
 import { Logo } from "@/shared/ui/Logo";
-import { ThemeToggle } from "@/shared/ui/ThemeToggle";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/shared/ui/sheet";
+import { Skeleton } from "@/shared/ui/skeleton";
 
-export function PublicHeader() {
+import { HeaderAuthButton } from "./HeaderAuthButton";
+
+export async function PublicHeader() {
   return (
-    <header className="bg-background flex h-full flex-wrap items-center justify-between p-4">
-      <div className="flex items-center gap-2">
-        <Logo className="w-20" />
-      </div>
-      <nav className="flex gap-4">
-        {publicHeaderMenu.map((item) => (
-          <Button key={item.href} variant="ghost" asChild>
-            <Link href={item.href as Route} className="flex items-center gap-2">
-              {item.icon && <item.icon />}
-              {item.label}
-            </Link>
-          </Button>
-        ))}
-      </nav>
-      <div className="flex items-center gap-4">
-        <Button variant="outline" asChild>
-          <Link href="/auth">Начать</Link>
-        </Button>
-        <ThemeToggle className="text-muted-foreground" />
+    <header className="border-border/40 bg-background/80 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur-md">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="flex items-center gap-2">
+          <Logo className="w-20" />
+        </div>
+
+        <nav className="hidden gap-4 md:flex">
+          {publicHeaderMenu.map((item) => (
+            <Button key={item.href} variant="ghost" asChild>
+              <Link href={item.href as Route} className="flex items-center gap-2">
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            </Button>
+          ))}
+        </nav>
+        <div className="flex items-center gap-4">
+          <Suspense fallback={<Skeleton className="h-9 w-31" />}>
+            <HeaderAuthButton />
+          </Suspense>
+          {/* <ThemeToggle className="text-muted-foreground" /> // THEME: на время!*/}
+          <div className="flex items-center gap-2 md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right">
+                <SheetHeader>
+                  <SheetTitle className="text-left">Menu</SheetTitle>
+                </SheetHeader>
+
+                <div className="mt-8 flex flex-col gap-4">
+                  <nav className="flex flex-col gap-2">
+                    {publicHeaderMenu.map((item) => (
+                      <SheetClose asChild key={item.href}>
+                        <Button variant="ghost" className="justify-start" asChild>
+                          <Link href={item.href as Route} className="flex items-center gap-2">
+                            <item.icon className="h-4 w-4" />
+                            {item.label}
+                          </Link>
+                        </Button>
+                      </SheetClose>
+                    ))}
+                  </nav>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>{" "}
+        </div>
       </div>
     </header>
   );

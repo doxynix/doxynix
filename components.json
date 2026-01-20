@@ -13,10 +13,13 @@
   "iconLibrary": "lucide",
   "aliases": {
     "components": "@/shared",
-    "ui": "@/shared/ui",
     "utils": "@/shared/lib/utils",
+    "ui": "@/shared/ui",
     "lib": "@/shared/lib",
     "hooks": "@/shared/hooks"
   },
-  "registries": {}
+  "registries": {
+    "@magicui": "https://magicui.design/r/{name}",
+    "@aceternity": "https://ui.aceternity.com/registry/{name}.json"
+  }
 }
