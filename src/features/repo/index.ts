@@ -1,7 +1,6 @@
-export { CreateRepoButton } from "./ui/CreateRepoButton";
-export { CreateRepoDialog } from "./ui/CreateRepoDialog";
-export { RepoFilters } from "./ui/RepoFilters";
-export { RepoListContainer } from "./ui/RepoListContainer";
-export { RepoEmpty } from "./ui/RepoEmpty";
-export { StatCard } from "./ui/StatCard";
-export { StatCardSkeleton } from "./ui/StatCardSkeleton";
+export { CreateRepoButton } from "./ui/create-repo-button";
+export { CreateRepoDialog } from "./ui/create-repo-dialog";
+export { RepoFilters } from "./ui/repo-filters";
+export { RepoListContainer } from "./ui/repo-list-container";
+export { StatCard } from "./ui/stat-card";
+export { StatCardSkeleton } from "./ui/stat-card-skeleton";

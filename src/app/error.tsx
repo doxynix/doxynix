@@ -5,8 +5,8 @@ import Cookies from "js-cookie";
 import { ServerCrash } from "lucide-react";
 
 import { Button } from "@/shared/ui/core/button";
-import BackOrLinkButton from "@/shared/ui/kit/BackOrLinkButton";
-import { CopyButton } from "@/shared/ui/kit/CopyButton";
+import BackOrLinkButton from "@/shared/ui/kit/back-or-link-button";
+import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 export default function Error({
   error,

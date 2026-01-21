@@ -6,7 +6,7 @@ import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 import { ApiKeySchema } from "@/generated/zod";
 import { OpenApiErrorResponses } from "@/server/trpc/shared";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
-import { handlePrismaError } from "@/server/utils/handlePrismaError";
+import { handlePrismaError } from "@/server/utils/handle-prisma-error";
 
 export const PublicApiKeySchema = ApiKeySchema.omit({
   userId: true,

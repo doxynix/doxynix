@@ -6,7 +6,7 @@ import pg from "pg";
 import { logger } from "@/shared/lib/logger";
 import { sanitizePayload } from "@/shared/lib/utils";
 
-import { requestContext } from "@/server/utils/requestContext";
+import { requestContext } from "@/server/utils/request-context";
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,

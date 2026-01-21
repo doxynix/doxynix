@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
 
 import { DotPattern } from "@/shared/ui/visuals/dot-pattern";
-import { AppFooter } from "@/widgets/AppFooter";
-import { PublicHeader } from "@/widgets/PublicHeader";
+import { AppFooter } from "@/widgets/app-footer";
+import { PublicHeader } from "@/widgets/public-header";
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
   return (

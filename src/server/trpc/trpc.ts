@@ -8,7 +8,7 @@ import { OpenApiMeta } from "trpc-to-openapi";
 import { logger } from "@/shared/lib/logger";
 
 import { Context } from "@/server/trpc/context";
-import { requestContext } from "@/server/utils/requestContext";
+import { requestContext } from "@/server/utils/request-context";
 
 export const t = initTRPC
   .context<Context>()

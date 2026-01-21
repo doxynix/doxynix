@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { getServerAuthSession } from "@/shared/api/auth/authOptions";
+import { getServerAuthSession } from "@/shared/api/auth/auth-options";
 import { AuthForm } from "@/features/auth";
 
 export const metadata: Metadata = {

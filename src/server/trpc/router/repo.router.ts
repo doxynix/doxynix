@@ -8,7 +8,7 @@ import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
 import { OpenApiErrorResponses, RepoFilterSchema } from "@/server/trpc/shared";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
-import { handlePrismaError } from "@/server/utils/handlePrismaError";
+import { handlePrismaError } from "@/server/utils/handle-prisma-error";
 
 export const PublicRepoSchema = RepoSchema.extend({
   id: z.string(),

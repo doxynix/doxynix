@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { ComponentPropsWithoutRef, useEffect, useRef, useState } from "react";

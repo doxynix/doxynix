@@ -2,9 +2,9 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { SearchParams } from "@/shared/types/searchParams";
+import { SearchParams } from "@/shared/types/search-params";
 import { Skeleton } from "@/shared/ui/core/skeleton";
-import { AppSearch } from "@/shared/ui/kit/AppSearch";
+import { AppSearch } from "@/shared/ui/kit/app-search";
 import { CreateRepoButton, RepoFilters, RepoListContainer } from "@/features/repo";
 
 import { RepoCardSkeleton } from "@/entities/repo";

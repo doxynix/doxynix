@@ -1,2 +1,2 @@
-export { ProfileDataLoader } from "./ui/ProfileDataLoader";
-export { ProfileSkeleton } from "./ui/ProfileSkeleton";
+export { ProfileDataLoader } from "./ui/profile-data-loader";
+export { ProfileSkeleton } from "./ui/profile-skeleton";

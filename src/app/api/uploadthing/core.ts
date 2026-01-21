@@ -1,7 +1,7 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 
-import { getServerAuthSession } from "@/shared/api/auth/authOptions";
+import { getServerAuthSession } from "@/shared/api/auth/auth-options";
 import { prisma } from "@/shared/api/db/db";
 import { logger } from "@/shared/lib/logger";
 

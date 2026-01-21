@@ -2,12 +2,12 @@ import { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { getServerAuthSession } from "@/shared/api/auth/authOptions";
+import { getServerAuthSession } from "@/shared/api/auth/auth-options";
 import { SidebarProvider } from "@/shared/ui/core/sidebar";
 import { CreateRepoDialog } from "@/features/repo";
-import { AppFooter } from "@/widgets/AppFooter";
-import { AppHeader } from "@/widgets/AppHeader";
-import { AppSidebar } from "@/widgets/AppSidebar";
+import { AppFooter } from "@/widgets/app-footer";
+import { AppHeader } from "@/widgets/app-header";
+import { AppSidebar } from "@/widgets/app-sidebar";
 
 export default async function PrivateLayout({ children }: { children: ReactNode }) {
   const session = await getServerAuthSession();

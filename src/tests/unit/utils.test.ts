@@ -2,10 +2,10 @@ import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { describe, expect, it } from "vitest";
 
-import { getInitials } from "@/shared/lib/getInititals";
+import { getInitials } from "@/shared/lib/get-initials";
 import { cn, formatRelativeTime, sanitizePayload } from "@/shared/lib/utils";
 
-import { handlePrismaError } from "@/server/utils/handlePrismaError";
+import { handlePrismaError } from "@/server/utils/handle-prisma-error";
 
 describe("Shared Utils", () => {
   describe("getInitials", () => {

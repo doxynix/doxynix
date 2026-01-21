@@ -13,7 +13,7 @@ import { extractRouterConfig } from "uploadthing/server";
 
 import { cn } from "@/shared/lib/utils";
 import { Toaster } from "@/shared/ui/core/sonner";
-import { ConsoleEasterEgg } from "@/shared/ui/kit/ConsoleEasterEgg";
+import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { Providers } from "@/app/providers";
 

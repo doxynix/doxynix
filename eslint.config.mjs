@@ -6,6 +6,7 @@ import prettierConfig from "eslint-config-prettier";
 import prettierPlugin from "eslint-plugin-prettier";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
+import unicorn from "eslint-plugin-unicorn";
 import unusedImportsPlugin from "eslint-plugin-unused-imports";
 import { defineConfig } from "eslint/config";
 
@@ -22,6 +23,9 @@ export default defineConfig([
       "eslint.config.mjs",
       "postcss.config.mjs",
       "next.config.mjs",
+      "coverage/**",
+      "report/**",
+      ".trigger/**",
     ],
   },
 
@@ -36,6 +40,7 @@ export default defineConfig([
       "@typescript-eslint": tsPlugin,
       "unused-imports": unusedImportsPlugin,
       prettier: prettierPlugin,
+      unicorn,
     },
 
     languageOptions: {
@@ -68,6 +73,13 @@ export default defineConfig([
           varsIgnorePattern: "^_",
         },
       ],
+      "unicorn/filename-case": [
+        "error",
+        {
+          case: "kebabCase",
+          ignore: ["README.md"],
+        },
+      ],
 
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/strict-boolean-expressions": "warn",
@@ -85,7 +97,7 @@ export default defineConfig([
       "src/tests/**/*.{ts,tsx}",
     ],
     rules: {
-      "react-hooks/exhaustive-deps": "off",
+      "react-hooks/exhaustive-deps": "warn",
       "@typescript-eslint/strict-boolean-expressions": "off",
       "@typescript-eslint/no-explicit-any": "off",
     },

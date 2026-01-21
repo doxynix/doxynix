@@ -1,7 +1,7 @@
 import { Prisma, Status, Visibility } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
-import { handlePrismaError } from "@/server/utils/handlePrismaError";
+import { handlePrismaError } from "@/server/utils/handle-prisma-error";
 import { githubService } from "./github.service";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

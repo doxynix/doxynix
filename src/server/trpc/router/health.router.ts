@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { OpenApiErrorResponses } from "@/server/trpc/shared";
 import { createTRPCRouter, publicProcedure } from "@/server/trpc/trpc";
-import { handlePrismaError } from "@/server/utils/handlePrismaError";
+import { handlePrismaError } from "@/server/utils/handle-prisma-error";
 
 export const healthRouter = createTRPCRouter({
   check: publicProcedure

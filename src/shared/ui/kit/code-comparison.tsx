@@ -1,4 +1,4 @@
-import { CodeWindow } from "@/features/landing/ui/CodeWindow";
+import { CodeWindow } from "@/features/landing/ui/code-window";
 
 interface CodeComparisonProps {
   beforeHtmlDark: string;

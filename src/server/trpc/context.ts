@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/shared/api/auth/authOptions";
+import { authOptions } from "@/shared/api/auth/auth-options";
 import { prisma } from "@/shared/api/db/db";
 
 type Props = {

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { SearchX } from "lucide-react";
 
-import BackOrLinkButton from "@/shared/ui/kit/BackOrLinkButton";
+import BackOrLinkButton from "@/shared/ui/kit/back-or-link-button";
 
 export const metadata: Metadata = {
   title: "404",

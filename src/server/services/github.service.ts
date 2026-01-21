@@ -5,7 +5,7 @@ import { Octokit, RestEndpointMethodTypes } from "@octokit/rest";
 import { PrismaClient, Visibility } from "@prisma/client";
 
 import { logger } from "@/shared/lib/logger";
-import { RepoItemFields } from "@/shared/types/repoItem";
+import { RepoItemFields } from "@/shared/types/repo-item";
 
 const MyOctokit = Octokit.plugin(retry, throttling, paginateRest);
 type SearchRepoItem =

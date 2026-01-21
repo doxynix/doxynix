@@ -7,13 +7,15 @@ export const metadata: Metadata = {
   description: "How we collect, use, and protect your data.",
 };
 
+type Props = { name: string; desc: string };
+
 const SECTION_TITLE = "mb-3 text-lg font-bold text-foreground flex items-center gap-2";
 const LIST_STYLES = "list-disc space-y-2 pl-5 marker:text-foreground";
 const STRONG_TEXT = "font-medium text-foreground";
 const LI_STYLES = "flex flex-col";
 const SPAN_STYLES = "text-sm";
 
-const BRANDS = [
+const BRANDS: Props[] = [
   { name: "Vercel", desc: "Primary encrypted data storage." },
   { name: "Neon (PostgreSQL)", desc: "Database engine." },
   { name: "Resend", desc: "Transactional emails for login." },
@@ -24,7 +26,7 @@ const BRANDS = [
   { name: "Pusher", desc: "WebSocket support (real-time updates)." },
 ] as const;
 
-function PrivacyListItem({ name, desc }: { name: string; desc: string }) {
+function PrivacyListItem({ name, desc }: Props) {
   return (
     <li className={LI_STYLES}>
       <span className={STRONG_TEXT}>{name}</span>
@@ -105,7 +107,7 @@ export default function PrivacyPage() {
           <div className="bg-muted/50 rounded-xl border p-4">
             <ul className="grid gap-3 sm:grid-cols-2">
               {BRANDS.map((item) => (
-                <PrivacyListItem key={item.name} name={item.name} desc={item.desc} />
+                <PrivacyListItem key={item.name} {...item} />
               ))}
             </ul>
           </div>
