@@ -1,4 +1,5 @@
 import { ComponentPropsWithoutRef, ReactNode } from "react";
+import Link from "next/link";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 
 import { cn } from "@/shared/lib/utils";
@@ -52,9 +53,9 @@ const BentoCard = ({
     <div>{background}</div>
     <div className="p-4">
       <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 transition-all duration-300 lg:group-hover:-translate-y-10">
-        <Icon className="h-12 w-12 origin-left transform-gpu text-neutral-700 transition-all duration-300 ease-in-out group-hover:scale-75" />
-        <h3 className="text-xl font-semibold text-neutral-700 dark:text-neutral-300">{name}</h3>
-        <p className="max-w-lg text-neutral-400">{description}</p>
+        <Icon className="h-12 w-12 origin-left transform-gpu transition-all duration-300 ease-in-out group-hover:scale-75" />
+        <h3 className="text-xl font-semibold">{name}</h3>
+        <p className="text-muted-foreground max-w-lg">{description}</p>
       </div>
 
       <div
@@ -63,10 +64,10 @@ const BentoCard = ({
         )}
       >
         <Button variant="link" asChild size="sm" className="pointer-events-auto p-0">
-          <a href={href}>
-            {cta}
-            <ArrowRightIcon className="ms-2 h-4 w-4 rtl:rotate-180" />
-          </a>
+          <Link href={href}>
+            <span className="text-foreground">{cta}</span>
+            <ArrowRightIcon className="text-foreground ms-2 h-4 w-4 rtl:rotate-180" />
+          </Link>
         </Button>
       </div>
     </div>
@@ -77,10 +78,10 @@ const BentoCard = ({
       )}
     >
       <Button variant="link" asChild size="sm" className="pointer-events-auto p-0">
-        <a href={href}>
-          {cta}
-          <ArrowRightIcon className="ms-2 h-4 w-4 rtl:rotate-180" />
-        </a>
+        <Link href={href}>
+          <span className="text-foreground">{cta}</span>
+          <ArrowRightIcon className="text-foreground ms-2 h-4 w-4 rtl:rotate-180" />
+        </Link>
       </Button>
     </div>
 

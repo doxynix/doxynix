@@ -202,7 +202,7 @@ export function ProfileCard({ user }: Props) {
                     <FormLabel className="text-muted-foreground">Email</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input {...field} placeholder="Your email" />
+                        <Input {...field} className="text-sm sm:text-base" placeholder="Your email" />
                       </div>
                     </FormControl>
                   </FormItem>

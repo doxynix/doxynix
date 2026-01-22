@@ -1,4 +1,8 @@
-export function UploadThingIcon({ className }: { className?: string }) {
+type Props = {
+  className?: string;
+};
+
+export function UploadThingIcon({ className }: Props) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

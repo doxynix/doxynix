@@ -1,4 +1,8 @@
-export function NextJSIcon() {
+type Props = {
+  className?: string;
+};
+
+export function NextJSIcon({ className }: Props) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -6,6 +10,7 @@ export function NextJSIcon() {
       height="100%"
       viewBox="0 0 394 80"
       fill="none"
+      className={className}
     >
       <path
         d="M261.919 0.0330722H330.547V12.7H303.323V79.339H289.71V12.7H261.919V0.0330722Z"

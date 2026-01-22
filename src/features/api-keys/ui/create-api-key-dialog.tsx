@@ -117,9 +117,9 @@ export function CreateApiKeyDialog() {
                     <FormControl>
                       <Textarea
                         {...field}
+                        className="min-h-25 resize-none text-sm sm:text-base"
                         disabled={createMutation.isPending}
                         placeholder="What is this key used for?..."
-                        className="min-h-25 resize-none"
                       />
                     </FormControl>
                     <FormMessage />

@@ -14,7 +14,7 @@ type Props = {
 export function LoadingButton({
   isLoading,
   children,
-  loadingText = "Loading......",
+  loadingText = "Loading...",
   disabled,
   className,
   ...props

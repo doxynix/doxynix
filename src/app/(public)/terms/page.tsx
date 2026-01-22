@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { MoveLeft } from "lucide-react";
+
+import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
 export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: "Doxynix Terms of Service.",
+  title: "Terms of Service & Usage Rules",
+  description:
+    "Read the Terms of Service for Doxynix. Understand your rights, usage limits, and our responsibilities regarding code analysis.",
 };
 
 const SECTION_TITLE = "mb-3 text-lg font-bold text-foreground flex items-center gap-2";
@@ -13,16 +14,10 @@ const STRONG_TEXT = "font-medium text-foreground";
 
 export default function TermsPage() {
   return (
-    <div className="animate-fade-in container mx-auto max-w-3xl px-4 py-12">
-      <Link
-        href="/"
-        className="text-muted-foreground hover:text-foreground mb-8 inline-flex items-center text-sm transition-colors"
-      >
-        <MoveLeft size={16} className="mr-2" />
-        Back to Home
-      </Link>
+    <div className="animate-fade-in container mx-auto max-w-3xl px-4 py-12 pt-24">
+      <BackOrLinkButton className="cursor-pointer" showIcon={true} variant="link" label="Back" />
 
-      <header className="mb-10 border-b pb-6">
+      <header className="mb-10 border-b py-6">
         <h1 className="mb-3 text-3xl font-bold tracking-tight md:text-4xl">Terms of Service</h1>
         <div className="text-muted-foreground flex items-center gap-2 text-sm">
           <span>Last updated: January 26, 2025</span>

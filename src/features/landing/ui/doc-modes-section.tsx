@@ -65,7 +65,7 @@ function TabsContentItem({ html, value, title, code }: TabsContentItemProps) {
       value={value}
       className="animate-in fade-in slide-in-from-right-4 mt-0 duration-500"
     >
-      <CodeWindow title={title} codeHtml={html} code={code} />
+      <CodeWindow codeClassName="text-sm sm:text-base" title={title} codeHtml={html} code={code} />
     </TabsContent>
   );
 }
@@ -91,7 +91,7 @@ export async function DocModesSection() {
   ];
 
   return (
-    <section className="relative z-10 container mx-auto px-4 py-24">
+    <section className="container mx-auto px-4 py-24">
       <div className="mb-16 text-center">
         <h2 className="text-3xl font-bold md:text-5xl">
           Complete <span className="text-muted-foreground">Documentation Suite</span>
@@ -102,17 +102,13 @@ export async function DocModesSection() {
         </p>
       </div>
 
-      <Tabs
-        defaultValue="readme"
-        className="mx-auto flex min-h-125 w-full max-w-6xl flex-col gap-8 lg:flex-row"
-      >
-        <TabsList className="flex h-auto w-full flex-col items-stretch justify-start gap-2 bg-transparent p-0 lg:w-1/3">
+      <Tabs defaultValue="readme" className="mx-auto flex min-h-140 items-center gap-8">
+        <TabsList className="flex h-auto flex-wrap items-center justify-start gap-2 bg-transparent">
           {DOCS.map((item) => (
             <TabsTriggerItem key={item.title} {...item} />
           ))}
         </TabsList>
-
-        <div className="w-full lg:w-2/3">
+        <div className="w-full max-w-3xl">
           {TABS.map((item) => (
             <TabsContentItem key={item.title} {...item} />
           ))}
@@ -132,11 +128,10 @@ This project uses Next.js 14 and Neon DB.
 - Docker (for local redis)
 
 ## Quick Setup
-\`\`\`bash
 $ pnpm install
 $ cp .env.example .env.local
 $ pnpm dev
-\`\`\``;
+`;
 
 const API_CODE = `{
   "path": "/v1/users/subscribe",

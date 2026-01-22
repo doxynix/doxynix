@@ -15,25 +15,28 @@ import {
 } from "@/features/landing";
 
 export const metadata: Metadata = {
-  title: "Turn Code into Documentation",
-  description: "AI-powered documentation generator for modern engineering teams.",
+  title: "Turn Code into Documentation - AI Analysis Tool",
+  description:
+    "Automate technical documentation for your engineering team. Doxynix analyzes legacy code, generates architecture maps, and tracks complexity metrics in real-time.",
 };
 
 export default async function LandingPage() {
   return (
-    <div className="bg-landing-bg-dark relative min-h-screen w-full overflow-hidden">
+    <>
       {/* <Particles className="fixed inset-0 h-full w-full" /> */}
       <HeroSection />
       <BrandsSection />
+      <CodeComparisonSection />
       <HowItWorksSection />
       <FeaturesSection />
       <AnalyticsSection />
-      <CodeComparisonSection />
       <DocModesSection />
       <ConfigSection />
+      {/* ОБЯЗАТЕЛЬНО: Социальное доказательство (когда-нибудь можно marquee пустить в 2 стороны примерно как у BrandsSection только там одно а тут можно и 2 сделать) */}
+      {/* <TestimonialsSection /> */}
       <PricingSection />
       <FAQSection />
       <CTASection />
-    </div>
+    </>
   );
 }

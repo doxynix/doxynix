@@ -46,7 +46,7 @@ function AccordionListItem({ value, q, a }: Props) {
 
 export function FAQSection() {
   return (
-    <section className="relative z-10 container mx-auto max-w-3xl px-4 py-24">
+    <section className="container mx-auto max-w-3xl px-4 py-24">
       <h2 className="mb-12 text-center text-3xl font-bold md:text-5xl">FAQ</h2>
       <Accordion type="single" collapsible className="w-full">
         {FAQ.map((item) => (

@@ -10,7 +10,7 @@ export function DateComp({ isYear = false, value }: Props) {
 
   return (
     <span suppressHydrationWarning>
-      {isYear ? targetDate.getFullYear() : targetDate.toLocaleDateString("ru-RU")}
+      {isYear ? targetDate.getFullYear() : targetDate.toLocaleDateString("en-US")}
     </span>
   );
 }

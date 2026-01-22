@@ -1,4 +1,8 @@
-export function OpenAiLogo() {
+type Props = {
+  className?: string;
+};
+
+export function OpenAiLogo({ className }: Props) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -6,6 +10,7 @@ export function OpenAiLogo() {
       height="100%"
       viewBox="0 0 1604 719"
       fill="none"
+      className={className}
     >
       <g clipPath="url(#clip0_1637_3573)">
         <path

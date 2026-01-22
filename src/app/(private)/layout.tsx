@@ -19,7 +19,7 @@ export default async function PrivateLayout({ children }: { children: ReactNode 
     <>
       <SidebarProvider
         defaultOpen={defaultOpen}
-        className="flex h-screen w-full flex-col overflow-hidden"
+        className="flex h-dvh w-full flex-col overflow-hidden"
       >
         <div className="z-50 w-full shrink-0 border-b">
           <AppHeader user={session.user} />
@@ -31,7 +31,9 @@ export default async function PrivateLayout({ children }: { children: ReactNode 
             {/* <ScrollArea className="flex-1"> */}
             <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col p-4">{children}</main>
             {/* </ScrollArea> */}
-            <AppFooter />
+            <div className="z-50 w-full shrink-0 border-t">
+              <AppFooter />
+            </div>
           </div>
         </div>
       </SidebarProvider>

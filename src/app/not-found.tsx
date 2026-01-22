@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { SearchX } from "lucide-react";
 
-import BackOrLinkButton from "@/shared/ui/kit/back-or-link-button";
+import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
 export const metadata: Metadata = {
   title: "404",
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
+    <div className="flex flex-1 flex-col items-center justify-center gap-6 p-4 text-center">
       <div className="bg-warning/10 text-warning flex size-20 items-center justify-center rounded-full">
         <SearchX className="animate-pulse" size={35} />
       </div>
@@ -20,8 +20,8 @@ export default function NotFound() {
       </div>
 
       <div className="flex items-center gap-4">
-        <BackOrLinkButton text="Back" />
-        <BackOrLinkButton text="Home" href="/" />
+        <BackOrLinkButton className="cursor-pointer" label="Back" />
+        <BackOrLinkButton label="Home" href="/" />
       </div>
       <p className="text-muted-foreground text-sm">Check the URL or return to the homepage.</p>
     </div>

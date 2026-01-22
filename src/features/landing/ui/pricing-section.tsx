@@ -48,7 +48,7 @@ const PLANS = [
 
 export function PricingSection() {
   return (
-    <section className="bg-landing-bg-light/20 relative z-10 border-y border-zinc-900/20 py-24">
+    <section className="bg-landing-bg-light/20 border-y border-zinc-900/20 py-24">
       <div className="container mx-auto px-4">
         <h2 className="mb-16 text-center text-3xl font-bold md:text-5xl">
           Simple <span className="text-muted-foreground">Pricing</span>
@@ -57,7 +57,12 @@ export function PricingSection() {
           {PLANS.map((plan) => (
             <div
               key={plan.name}
-              className={`relative flex flex-col rounded-2xl border p-8 ${plan.popular ? "border-foreground/50 bg-foreground/10" : "border-primary bg-landing-bg-light/40"}`}
+              className={cn(
+                "relative flex flex-col rounded-2xl border p-8",
+                plan.popular
+                  ? "border-foreground/50 bg-foreground/10"
+                  : "border-primary bg-landing-bg-light/40"
+              )}
             >
               {plan.popular && (
                 <div className="text-background bg-foreground absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-xs font-bold tracking-wide uppercase">

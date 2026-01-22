@@ -1,4 +1,8 @@
-export function VercelIcon({ className }: { className?: string }) {
+type Props = {
+  className?: string;
+};
+
+export function VercelIcon({ className }: Props) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

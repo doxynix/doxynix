@@ -18,11 +18,13 @@ export interface AnimatedBeamProps {
   gradientStartColor?: string;
   gradientStopColor?: string;
   delay?: number;
+  repeatDelay?: number;
   duration?: number;
   startXOffset?: number;
   startYOffset?: number;
   endXOffset?: number;
   endYOffset?: number;
+  isActive?: boolean;
 }
 
 export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
@@ -34,6 +36,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
   reverse = false, // Include the reverse prop
   duration = Math.random() * 3 + 4,
   delay = 0,
+  repeatDelay = 0,
   pathColor = "gray",
   pathWidth = 2,
   pathOpacity = 0.2,
@@ -43,6 +46,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
   startYOffset = 0,
   endXOffset = 0,
   endYOffset = 0,
+  isActive = true,
 }) => {
   const id = useId();
   const [pathD, setPathD] = useState("");
@@ -138,18 +142,22 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
             y1: "0%",
             y2: "0%",
           }}
-          animate={{
-            x1: gradientCoordinates.x1,
-            x2: gradientCoordinates.x2,
-            y1: gradientCoordinates.y1,
-            y2: gradientCoordinates.y2,
-          }}
+          animate={
+            isActive
+              ? {
+                  x1: gradientCoordinates.x1,
+                  x2: gradientCoordinates.x2,
+                  y1: gradientCoordinates.y1,
+                  y2: gradientCoordinates.y2,
+                }
+              : undefined
+          }
           transition={{
             delay,
             duration,
             ease: "linear",
             repeat: Infinity,
-            repeatDelay: 0,
+            repeatDelay,
           }}
         >
           <stop stopColor={gradientStartColor} stopOpacity="0"></stop>

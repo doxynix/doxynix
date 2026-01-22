@@ -32,7 +32,7 @@ const chartConfig = {
 
 export function AnalyticsSection() {
   return (
-    <section className="relative z-10 container mx-auto px-4 py-24">
+    <section className="relative container mx-auto px-4 py-24">
       <div className="mb-12 text-center">
         <h2 className="text-3xl font-bold md:text-5xl">
           Not just Text. <span className="text-muted-foreground">Actionable Metrics.</span>

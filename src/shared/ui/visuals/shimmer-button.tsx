@@ -6,6 +6,7 @@ import { cn } from "@/shared/lib/utils";
 import { Button } from "../core/button";
 
 export interface ShimmerButtonProps extends ComponentPropsWithoutRef<"button"> {
+  href: string;
   shimmerColor?: string;
   shimmerSize?: string;
   borderRadius?: string;
@@ -18,6 +19,7 @@ export interface ShimmerButtonProps extends ComponentPropsWithoutRef<"button"> {
 export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
   (
     {
+      href,
       shimmerColor = "#ffffff",
       shimmerSize = "0.05em",
       shimmerDuration = "3s",
@@ -50,7 +52,7 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
         {...props}
         asChild
       >
-        <Link href="/auth">
+        <Link href={href}>
           {/* spark container */}
           <div
             className={cn(

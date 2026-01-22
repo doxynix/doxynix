@@ -19,14 +19,14 @@ export async function ConfigSection() {
   const html = await highlightCode(CONFIG_CODE, "json", "dark");
 
   return (
-    <section className="relative z-10 container mx-auto px-4 py-24">
+    <section className="container mx-auto px-4 py-24">
       <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
         <div>
-          <h2 className="mb-6 text-3xl font-bold md:text-5xl">
+          <h2 className="mb-6 text-3xl font-bold not-md:text-center md:text-5xl">
             Configured in <span className="text-muted-foreground">JSON</span>,<br />
             executed in cloud.
           </h2>
-          <p className="text-muted-foreground mb-8 text-lg">
+          <p className="text-muted-foreground mb-8 text-lg not-md:text-center">
             Drop a simple config file in your root. We handle parsing, token limits, and prompt
             engineering automatically.
           </p>
@@ -37,7 +37,12 @@ export async function ConfigSection() {
           </ul>
         </div>
 
-        <CodeWindow title="doxynix.json" code={CONFIG_CODE} codeHtml={html} />
+        <CodeWindow
+          codeClassName="text-sm sm:text-base"
+          title="doxynix.json"
+          code={CONFIG_CODE}
+          codeHtml={html}
+        />
       </div>
     </section>
   );

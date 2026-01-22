@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import GitHubIcon from "@/shared/ui/icons/github-icon";
+import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { TelegramIcon } from "@/shared/ui/icons/telegram-icon";
 import { DateComp } from "@/shared/ui/kit/date-comp";
 
@@ -8,7 +8,7 @@ import { SystemStatus } from "./system-status";
 
 export function AppFooter() {
   return (
-    <footer className="bg-background flex items-center justify-center p-3">
+    <footer className="bg-background flex items-center justify-center p-2">
       <div className="container grid grid-cols-1 flex-col items-center justify-between justify-items-center gap-4 lg:flex lg:flex-row">
         <div className="order-1 flex flex-wrap items-center justify-center gap-4 lg:order-0">
           <p className="text-muted-foreground order-1 text-center text-xs lg:order-0">
@@ -39,7 +39,7 @@ export function AppFooter() {
               className="hover:text-foreground transition-colors"
             >
               <GitHubIcon className="hidden h-4 w-4 md:block" />
-              <span className="text-xs md:hidden">Github</span>
+              <span className="text-xs md:hidden">GitHub</span>
               <span className="sr-only">GitHub</span>
             </a>
             <a

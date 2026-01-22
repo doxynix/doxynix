@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 import { ServerCrash } from "lucide-react";
 
 import { Button } from "@/shared/ui/core/button";
-import BackOrLinkButton from "@/shared/ui/kit/back-or-link-button";
+import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 export default function Error({
@@ -83,10 +83,10 @@ export default function Error({
         </div>
 
         <div className="flex flex-col items-center justify-center gap-3 pt-4 sm:flex-row">
+          <BackOrLinkButton label="Go back" className="cursor-pointer" />
           <Button onClick={reset} className="cursor-pointer">
-            Try again
+            Try to Recover
           </Button>
-          <BackOrLinkButton text="Go back" />
         </div>
       </div>
 
