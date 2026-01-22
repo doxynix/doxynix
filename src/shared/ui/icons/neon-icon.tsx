@@ -1,4 +1,8 @@
-export function NeonIcon() {
+type Props = {
+  className?: string;
+};
+
+export function NeonIcon({ className }: Props) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -6,6 +10,7 @@ export function NeonIcon() {
       height="100%"
       viewBox="0 0 157 45"
       fill="none"
+      className={className}
     >
       <path
         d="M43.9842 0.0123174V44L26.9844 29.2514V44H0.416626V0L43.9842 0.0123174ZM5.75712 38.6595H21.6439V17.5326L38.644 32.5729V5.35124L5.75712 5.34181V38.6595Z"

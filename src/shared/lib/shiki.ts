@@ -1,37 +1,48 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
-import { createHighlighterCore } from "shiki/core";
-import { createOnigurumaEngine } from "shiki/engine/oniguruma";
+import { createHighlighter } from "shiki";
+import langConsole from "shiki/langs/console.mjs";
 import langJSON from "shiki/langs/json.mjs";
 import langMarkdown from "shiki/langs/markdown.mjs";
 import langTs from "shiki/langs/typescript.mjs";
 import themeDark from "shiki/themes/github-dark-dimmed.mjs";
 
-let highlighter: Awaited<ReturnType<typeof createHighlighterCore>> | null = null;
+let highlighter: Awaited<ReturnType<typeof createHighlighter>> | null = null;
 
-async function getHighlightedCode(code: string, lang: string, theme: "dark" | "light") {
+async function getHighlighter() {
   if (!highlighter) {
-    highlighter = await createHighlighterCore({
+    highlighter = await createHighlighter({
       themes: [themeDark],
-      langs: [langTs, langJSON, langMarkdown],
-      engine: createOnigurumaEngine(() => import("shiki/wasm")),
+      langs: [langTs, langJSON, langMarkdown, langConsole],
     });
   }
+  return highlighter;
+}
 
-  return highlighter.codeToHtml(code, {
-    lang: lang,
+async function highlight(code: string, lang: string, theme: "dark" | "light") {
+  const hl = await getHighlighter();
+
+  return hl.codeToHtml(code, {
+    lang,
     theme: theme === "dark" ? "github-dark-dimmed" : "github-dark-dimmed",
     transformers: [],
   });
 }
 
-export const highlightCode = unstable_cache(
-  async (code: string, lang: string = "typescript", theme: "dark" | "light" = "dark") => {
-    return getHighlightedCode(code, lang, theme);
-  },
-  ["shiki-code-highlight"],
-  {
-    revalidate: false,
-  }
-);
+export const highlightCode = async (
+  code: string,
+  lang: string = "typescript",
+  theme: "dark" | "light" = "dark"
+) => {
+  const hash = Buffer.from(code).toString("base64").slice(0, 32);
+
+  return unstable_cache(
+    async () => highlight(code, lang, theme),
+    ["shiki-highlight", hash, lang, theme],
+    {
+      revalidate: false,
+      tags: ["shiki"],
+    }
+  )();
+};

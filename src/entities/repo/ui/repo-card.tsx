@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { cn, formatFullDate, formatRelativeTime } from "@/shared/lib/utils";
 import { Card, CardContent } from "@/shared/ui/core/card";
-import GitHubIcon from "@/shared/ui/icons/github-icon";
+import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
@@ -62,7 +62,7 @@ export function RepoCard({ repo }: Props) {
                     href={repo.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:bg-muted text-muted-foreground hover:text-foreground flex h-6 w-6 items-center justify-center rounded transition-opacity not-md:opacity-100 group-hover:opacity-100 md:opacity-0"
+                    className="hover:bg-muted text-muted-foreground hover:text-foreground flex h-6 w-6 items-center justify-center rounded opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
                   >
                     <GitHubIcon className="h-4 w-4" />
                   </a>

@@ -28,8 +28,7 @@ import { Input } from "@/shared/ui/core/input";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
-import GitHubIcon from "@/shared/ui/icons/github-icon";
-import GithubIcon from "@/shared/ui/icons/github-icon";
+import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { useCreateRepoDialogStore } from "../model/create-repo-dialog.store";
@@ -139,7 +138,7 @@ export function CreateRepoDialog() {
                           {isFetching ? (
                             <Spinner className="absolute top-2.5 left-2.5" />
                           ) : (
-                            <GitHubIcon className="absolute top-2.5 left-2.5" />
+                            <GitHubIcon className="absolute top-2.5 left-2.5 h-4 w-4" />
                           )}
                           <Input
                             {...field}
@@ -159,7 +158,7 @@ export function CreateRepoDialog() {
                       </FormControl>
                       <FormMessage />
                       {showSuggestions && suggestions && suggestions.length > 0 && (
-                        <div className="bg-popover text-popover-foreground absolute top-full right-0 left-0 z-20 mt-1 h-80 overflow-y-auto rounded-xl border shadow-md">
+                        <div className="bg-popover text-popover-foreground absolute top-full right-0 left-0 z-10 mt-1 h-80 overflow-y-auto rounded-xl border shadow-md">
                           {suggestions.map((repo) => (
                             <RepoItem
                               key={repo.fullName}
@@ -207,7 +206,7 @@ export function CreateRepoDialog() {
                           disabled={loading}
                           onClick={() => handleConnectGithub()}
                         >
-                          <GithubIcon /> Connect
+                          <GitHubIcon /> Connect
                         </LoadingButton>
                       </div>
                     </div>

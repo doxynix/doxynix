@@ -9,7 +9,7 @@ export async function CodeComparisonSection() {
     highlightCode(GOOD_CODE, "typescript", "light"),
   ]);
   return (
-    <section className="bg-landing-bg-light/20 relative z-10 border-y border-white/5 py-32">
+    <section className="bg-landing-bg-light/20 z-10 border-y border-white/5 py-32">
       <div className="container mx-auto px-4">
         <h2 className="mb-16 text-center text-3xl font-bold md:text-5xl">
           See the <span className="text-muted-foreground">Difference</span>

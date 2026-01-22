@@ -84,7 +84,7 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
           <Button
             variant="ghost"
             size="icon"
-            className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+            className="text-muted-foreground opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
           >
             <Pencil className="h-4 w-4" />
           </Button>

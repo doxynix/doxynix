@@ -1,27 +1,53 @@
 "use client";
 
 import type { Route } from "next";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { MoveLeft } from "lucide-react";
 
-import { Button } from "@/shared/ui/core/button";
+import { cn } from "@/shared/lib/utils";
+import { Button, type ButtonProps } from "@/shared/ui/core/button";
 
-type Props = { href?: string; text: string };
+interface BackOrLinkButtonProps extends ButtonProps {
+  href?: Route;
+  label?: string;
+  showIcon?: boolean;
+}
 
-export default function BackOrLinkButton({ href, text }: Props) {
+export function BackOrLinkButton({
+  href,
+  label,
+  showIcon = false,
+  className,
+  children,
+  variant = "outline",
+  ...props
+}: BackOrLinkButtonProps) {
   const router = useRouter();
-  const handleClick = () => {
-    if (href) {
-      router.push(href as Route);
-    } else {
-      router.back();
-    }
-  };
+
+  const content = (
+    <>
+      {showIcon && <MoveLeft className="mr-2 h-4 w-4" />}
+      {label || children}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Button variant={variant} className={cn("w-fit", className)} asChild {...props}>
+        <Link href={href}>{content}</Link>
+      </Button>
+    );
+  }
 
   return (
-    <div className="flex gap-4">
-      <Button className="cursor-pointer" onClick={() => handleClick()}>
-        {text}
-      </Button>
-    </div>
+    <Button
+      variant={variant}
+      className={cn("w-fit", className)}
+      onClick={() => router.back()}
+      {...props}
+    >
+      {content}
+    </Button>
   );
 }

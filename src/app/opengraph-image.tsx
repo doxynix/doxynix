@@ -123,6 +123,22 @@ export default async function Image() {
           <span>Automated documentation, quality metrics &</span>
           <span>security insights for your repositories.</span>
         </div>
+        <div
+          style={{
+            marginTop: 40,
+            background: "rgba(10, 10, 10, 0.6)",
+            color: "white",
+            padding: "16px 48px",
+            borderRadius: "16px",
+            fontSize: 26,
+            fontWeight: 600,
+            display: "flex",
+            alignItems: "center",
+            boxShadow: "0 0 40px -10px rgba(255, 255, 255, 0.4)",
+          }}
+        >
+          Analyze Repository
+        </div>
       </div>
     </div>,
     {

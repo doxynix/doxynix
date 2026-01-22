@@ -28,7 +28,7 @@ export function CodeComparison({
   return (
     <div className="mx-auto w-full">
       <div className="group border-border relative w-full overflow-hidden rounded-xl border">
-        <div className="relative grid md:grid-cols-2">
+        <div className="relative grid gap-4 md:grid-cols-2 md:gap-0">
           <CodeWindow
             title={filename}
             codeClassName="text-xs p-2"
@@ -43,7 +43,7 @@ export function CodeComparison({
           />
         </div>
 
-        <div className="text-muted-foreground border-primary bg-landing-bg-dark absolute top-1/2 left-1/2 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl border text-xs font-bold md:flex">
+        <div className="text-muted-foreground border-primary bg-landing-bg-dark absolute top-1/2 left-1/2 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-xs font-bold md:flex">
           VS
         </div>
       </div>

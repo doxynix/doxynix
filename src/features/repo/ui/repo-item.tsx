@@ -41,7 +41,7 @@ export function RepoItem({
           </div>
           <div className={cn("text-muted-foreground flex shrink-0 items-center gap-1 text-xs")}>
             <Star className="h-3 w-3 fill-current text-yellow-500" />
-            {repo.stars.toLocaleString("ru-RU")}
+            {repo.stars.toLocaleString("en-US")}
             {langColor !== "" && (
               <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: langColor }} />
             )}

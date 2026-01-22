@@ -3,13 +3,21 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 type Props = {
   title: string;
-  code: string;
+  code?: string;
   codeClassName?: string;
   codeHtml: string;
   className?: string;
+  copyButtonVisible?: boolean;
 };
 
-export function CodeWindow({ title, code, codeClassName, codeHtml, className }: Props) {
+export function CodeWindow({
+  title,
+  code,
+  codeClassName,
+  codeHtml,
+  className,
+  copyButtonVisible = true,
+}: Props) {
   return (
     <div
       className={cn(
@@ -28,7 +36,9 @@ export function CodeWindow({ title, code, codeClassName, codeHtml, className }: 
             <span>{title}</span>
           </div>
         </div>
-        <CopyButton tooltipText="Copy code" className="opacity-100" value={code} />
+        {copyButtonVisible && (
+          <CopyButton tooltipText="Copy code" className="opacity-100" value={code ?? ""} />
+        )}
       </div>
       <div
         className={cn(

@@ -1,4 +1,8 @@
-export function TriggerIcon() {
+type Props = {
+  className?: string;
+};
+
+export function TriggerIcon({ className }: Props) {
   return (
     <svg
       width="100%"
@@ -6,6 +10,7 @@ export function TriggerIcon() {
       viewBox="0 0 750 130"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      className={className}
     >
       <path
         d="M194.576 16.2676H134.999H137.353V32.5096H157.412V102.4H174.394V32.5096H194.576V16.2676Z"

@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/shared/ui/core/form";
 import { Input } from "@/shared/ui/core/input";
-import GithubIcon from "@/shared/ui/icons/github-icon";
+import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { GoogleIcon } from "@/shared/ui/icons/google-icon";
 import { Logo } from "@/shared/ui/icons/logo";
 import { YandexIcon } from "@/shared/ui/icons/yandex-icon";
@@ -99,7 +99,7 @@ export function AuthForm() {
             disabled={disabled}
             onClick={() => handleSignIn("github")}
           >
-            <GithubIcon /> GitHub
+            <GitHubIcon /> GitHub
           </LoadingButton>
 
           <LoadingButton

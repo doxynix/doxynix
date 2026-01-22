@@ -1,4 +1,8 @@
-export function UpstashIcon() {
+type Props = {
+  className?: string;
+};
+
+export function UpstashIcon({ className }: Props) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -6,6 +10,7 @@ export function UpstashIcon() {
       height="100%"
       viewBox="0 0 1631 472"
       fill="none"
+      className={className}
     >
       <g clipPath="url(#upstash_dark_bg)">
         <path

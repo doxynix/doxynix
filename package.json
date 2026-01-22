@@ -126,7 +126,6 @@
     "react-dom": "19.2.3",
     "react-hook-form": "^7.69.0",
     "react-hotkeys-hook": "^5.2.1",
-    "react-scroll": "^1.9.3",
     "recharts": "2.15.4",
     "resend": "^6.8.0",
     "server-only": "^0.0.1",

@@ -45,31 +45,55 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL! ?? "https://doxynix.space"),
 
+  alternates: {
+    canonical: "./",
+  },
+
   title: {
     template: "%s | Doxynix",
-    default: "Doxynix",
+    default: "Doxynix - AI Code Analysis & Documentation Generator",
   },
-  description:
-    "Automated repository analysis, code metrics, and documentation generation in one click.",
 
-  keywords: ["code analysis", "documentation generator", "metrics", "github analysis", "doxynix"],
+  description:
+    "Stop writing docs manually. Doxynix analyzes your codebase to generate onboarding guides, architecture diagrams, and real-time complexity metrics instantly.",
+
+  keywords: [
+    "code analysis",
+    "documentation generator",
+    "metrics",
+    "github analysis",
+    "doxynix",
+    "technical debt",
+    "static analysis",
+    "developer tools",
+  ],
 
   authors: [{ name: "Kramarich", url: "https://github.com/Kramarich0" }],
   creator: "Doxynix Team",
 
   openGraph: {
     type: "website",
-    locale: "ru_RU",
+    locale: "en_US",
     url: "https://doxynix.space",
     siteName: "Doxynix",
-    title: "Doxynix — Code Analysis & Documentation",
-    description: "Turn your code into clear analytics and documentation.",
+    title: "Doxynix: Turn Legacy Code into Clear Documentation",
+    description:
+      "Automate your engineering documentation. Get instant architecture maps, bus factor analysis, and onboarding guides for your repositories.",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Doxynix Dashboard Preview",
+      },
+    ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "Doxynix — Code Analysis",
-    description: "Metrics and documentation for your projects.",
+    title: "Doxynix - AI Powered Code Documentation",
+    description:
+      "Generate comprehensive documentation and code metrics in one click. Perfect for managing technical debt and onboarding new developers.",
     creator: "@doxynix",
   },
 
@@ -92,9 +116,14 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html className="h-full" lang="ru" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={cn("flex h-full flex-col", fontSans.variable, fontMono.variable, "antialiased")}
+        className={cn(
+          "flex min-h-dvh flex-col",
+          fontSans.variable,
+          fontMono.variable,
+          "antialiased"
+        )}
       >
         <NextTopLoader color="#ffffff" showSpinner={false} zIndex={9999} />
         <Suspense>

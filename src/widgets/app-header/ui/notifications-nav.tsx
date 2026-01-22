@@ -73,7 +73,7 @@ export function NotificationsNav() {
           )}
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="group flex cursor-pointer items-center justify-center">
+        <DropdownMenuItem asChild className="group flex cursor-pointer items-center justify-center">
           <Link
             className="flex w-full items-center justify-center group-hover:underline"
             href="/dashboard/notifications"

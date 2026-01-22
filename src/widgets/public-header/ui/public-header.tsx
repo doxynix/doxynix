@@ -16,11 +16,11 @@ import {
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Logo } from "@/shared/ui/icons/logo";
 
-import { HeaderAuthButton } from "./header-auth-button";
+import { HeaderAuthButton } from "./public-header-auth-button";
 
-export async function PublicHeader() {
+export function PublicHeader() {
   return (
-    <header className="border-border/40 bg-background/80 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur-md">
+    <header className="w-full">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <Logo className="w-20" />
@@ -49,7 +49,7 @@ export async function PublicHeader() {
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right">
+              <SheetContent side="right" className="w-1/2">
                 <SheetHeader>
                   <SheetTitle className="text-left">Menu</SheetTitle>
                 </SheetHeader>
@@ -70,7 +70,7 @@ export async function PublicHeader() {
                 </div>
               </SheetContent>
             </Sheet>
-          </div>{" "}
+          </div>
         </div>
       </div>
     </header>

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { MoveLeft } from "lucide-react";
+
+import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "How we collect, use, and protect your data.",
+  title: "Privacy Policy & Data Protection",
+  description:
+    "We value your privacy. Learn how Doxynix processes your code (in-memory only), secures your data, and complies with GDPR/security standards.",
 };
 
 type Props = { name: string; desc: string };
@@ -37,21 +38,15 @@ function PrivacyListItem({ name, desc }: Props) {
 
 export default function PrivacyPage() {
   return (
-    <div className="animate-fade-in container mx-auto max-w-3xl px-4 py-12">
-      <Link
-        href="/"
-        className="text-muted-foreground hover:text-foreground mb-8 inline-flex items-center text-sm transition-colors"
-      >
-        <MoveLeft size={16} className="mr-2" />
-        Back to Home
-      </Link>
+    <div className="animate-fade-in container mx-auto max-w-3xl px-4 py-12 pt-24">
+      <BackOrLinkButton className="cursor-pointer" showIcon={true} variant="link" label="Back" />
 
-      <header className="mb-10 border-b pb-6">
+      <div className="mb-10 border-b py-6">
         <h1 className="mb-3 text-3xl font-bold tracking-tight md:text-4xl">Privacy Policy</h1>
         <div className="text-muted-foreground flex items-center gap-2 text-sm">
           <span>Effective date: January 26, 2025</span>
         </div>
-      </header>
+      </div>
 
       <div className="prose prose-neutral dark:prose-invert max-w-none space-y-8 text-sm md:text-base">
         <section>

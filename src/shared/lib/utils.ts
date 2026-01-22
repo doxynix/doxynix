@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
-import { ru } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -23,7 +23,7 @@ export function formatRelativeTime(
 
     const result = formatDistanceToNow(d, {
       addSuffix: true,
-      locale: ru,
+      locale: enUS,
     });
 
     return result.toLowerCase();
@@ -34,7 +34,7 @@ export function formatRelativeTime(
 }
 
 export function formatFullDate(date: Date | string | number): string {
-  return format(new Date(date), "d MMMM yyyy, HH:mm", { locale: ru });
+  return format(new Date(date), "d MMMM yyyy, HH:mm", { locale: enUS });
 }
 
 export function isGitHubUrl(input: string): boolean {
