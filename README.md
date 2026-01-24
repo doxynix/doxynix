@@ -160,4 +160,3 @@ Distributed under the MIT License. See [LICENSE.md](LICENSE.md) for more informa
 <div align="center">
   <p>Built with ❤️ by <a href="https://github.com/doxynix">Doxynix Team</a></p>
 </div>
-```
