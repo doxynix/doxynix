@@ -1,4 +1,5 @@
 import { Activity, AlertCircle, FileText, FolderGit2, Loader2 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { cn } from "@/shared/lib/utils";
 import { Card, CardContent } from "@/shared/ui/core/card";
@@ -7,34 +8,35 @@ import { api } from "@/server/trpc/server";
 
 export async function StatCard() {
   const data = await (await api()).analytics.getDashboardStats();
+  const t = await getTranslations("Dashboard");
 
   const stats = [
     {
-      label: "Repositories",
+      label: t("repo_repositories"),
       value: data.repoCount,
       icon: FolderGit2,
       className: "text-blue",
     },
     {
-      label: "Documentations",
+      label: t("repo_documentations"),
       value: data.docsCount,
       icon: FileText,
       className: "text-success",
     },
     {
-      label: "Needs Attention",
+      label: t("repo_needs_attention"),
       value: data.failedAnalyses,
       icon: AlertCircle,
       className: "text-error",
     },
     {
-      label: "In Progress",
+      label: t("repo_in_progress"),
       value: data.pendingAnalyses,
       icon: Loader2,
-      className: `text-warning ${data.pendingAnalyses > 0 && "animate-spin"}`,
+      className: cn("text-warning", data.pendingAnalyses > 0 && "animate-spin"),
     },
     {
-      label: "Total analyses",
+      label: t("repo_total_analyses"),
       value: data.analysisCount,
       icon: Activity,
       className: "text-muted-foreground",

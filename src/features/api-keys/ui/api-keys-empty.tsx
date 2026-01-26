@@ -1,4 +1,5 @@
 import { CircleOff } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import {
   Empty,
@@ -8,15 +9,16 @@ import {
   EmptyTitle,
 } from "@/shared/ui/core/empty";
 
-export function ApiKeysEmpty() {
+export async function ApiKeysEmpty() {
+  const t = await getTranslations("Dashboard");
   return (
     <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <CircleOff />
         </EmptyMedia>
-        <EmptyTitle>No active API keys</EmptyTitle>
-        <EmptyDescription>Add your first API key</EmptyDescription>
+        <EmptyTitle>{t("settings_api_keys_empty_title")}</EmptyTitle>
+        <EmptyDescription>{t("settings_api_keys_empty_desc")}</EmptyDescription>
       </EmptyHeader>
     </Empty>
   );

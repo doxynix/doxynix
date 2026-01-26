@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { useInView } from "motion/react";
+import { useTranslations } from "next-intl";
 
 export const TerminalWindow = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -21,6 +22,8 @@ export const TerminalWindow = ({ children }: { children: React.ReactNode }) => {
 };
 
 export function SimulationTerminal() {
+  const t = useTranslations("Landing");
+
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.5 });
 
@@ -79,43 +82,43 @@ export function SimulationTerminal() {
         <div className="mt-2 space-y-1">
           {step >= 3 && (
             <div className="animate-in fade-in slide-in-from-left-2 text-muted-foreground duration-300">
-              Analyzed 142 files in 0.8s
+              {t("section_terminal_step_analyzed")}
             </div>
           )}
 
           {step >= 4 && (
             <div className="animate-in fade-in slide-in-from-left-2 flex items-center gap-2 duration-300">
               <Check className="text-success h-3 w-3" />
-              <span>Parsing AST structure...</span>
+              <span>{t("section_terminal_step_parsing")}</span>
             </div>
           )}
 
           {step >= 5 && (
             <div className="animate-in fade-in slide-in-from-left-2 flex items-center gap-2 duration-300">
               <Check className="text-success h-3 w-3" />
-              <span>Identifying relationships...</span>
+              <span>{t("section_terminal_step_relationships")}</span>
             </div>
           )}
 
           {step >= 6 && (
             <div className="animate-in fade-in slide-in-from-left-2 flex items-center gap-2 duration-300">
               <Check className="text-success h-3 w-3" />
-              <span>Generating docs with LLM...</span>
+              <span>{t("section_terminal_step_generating")}</span>
             </div>
           )}
         </div>
 
         {step >= 7 && (
           <div className="animate-in fade-in slide-in-from-left-2 bg-success/10 border-success/20 text-success mt-4 rounded border p-2 duration-500">
-            ✨ Documentation generated at{" "}
+            {t("section_terminal_step_success_prefix")}{" "}
             <span className="underline underline-offset-4">/docs/README.md</span>
           </div>
         )}
 
         {step >= 8 && (
           <div className="animate-in fade-in slide-in-from-left-2 text-muted-foreground mt-4 flex items-start gap-2 duration-500">
-            <span className="text-blue">Wait</span>
-            <span>for file changes...</span>
+            <span className="text-blue">{t("section_terminal_step_wait_prefix")}</span>
+            <span>{t("section_terminal_step_wait_suffix")}</span>
             <span className="animate-blink-cursor bg-blue inline-block h-4 w-2" />
           </div>
         )}

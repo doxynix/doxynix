@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -34,10 +34,15 @@ import { Textarea } from "@/shared/ui/core/textarea";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import { useRouter } from "@/i18n/routing";
+
 export function CreateApiKeyDialog() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [createdKey, setCreatedKey] = useState<string | null>(null);
+
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
 
   const form = useForm<z.infer<typeof CreateApiKeySchema>>({
     resolver: zodResolver(CreateApiKeySchema),
@@ -47,7 +52,7 @@ export function CreateApiKeyDialog() {
   const createMutation = trpc.apikey.create.useMutation({
     onSuccess: async (data) => {
       setCreatedKey(data.key);
-      toast.success("API Key created successfully");
+      toast.success(t("settings_api_keys_created_toast_success"));
       router.refresh();
     },
     onError: (err) => toast.error(err.message),
@@ -73,7 +78,7 @@ export function CreateApiKeyDialog() {
       <DialogTrigger asChild>
         <Button variant="outline" className="cursor-pointer">
           <Plus className="mr-2 h-4 w-4" />
-          Create API Key
+          {t("settings_api_keys_create_api_key")}
         </Button>
       </DialogTrigger>
 
@@ -86,8 +91,8 @@ export function CreateApiKeyDialog() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <DialogHeader>
-                <DialogTitle>Create API Key</DialogTitle>
-                <DialogDescription>Name your key</DialogDescription>
+                <DialogTitle> {t("settings_api_keys_create_api_key")}</DialogTitle>
+                <DialogDescription>{t("settings_api_keys_name")}</DialogDescription>
               </DialogHeader>
 
               <FormField
@@ -95,11 +100,11 @@ export function CreateApiKeyDialog() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-muted-foreground">Name</FormLabel>
+                    <FormLabel className="text-muted-foreground">{tCommon("name")}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="e.g., Prod Server"
+                        placeholder={t("settings_api_keys_name_placeholder")}
                         disabled={createMutation.isPending}
                       />
                     </FormControl>
@@ -113,13 +118,15 @@ export function CreateApiKeyDialog() {
                 name="description"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel className="text-muted-foreground">Description (optional)</FormLabel>
+                    <FormLabel className="text-muted-foreground">
+                      {t("settings_api_keys_label")}
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
                         className="min-h-25 resize-none text-sm sm:text-base"
                         disabled={createMutation.isPending}
-                        placeholder="What is this key used for?..."
+                        placeholder={t("settings_api_keys_desc_placeholder")}
                       />
                     </FormControl>
                     <FormMessage />
@@ -135,7 +142,7 @@ export function CreateApiKeyDialog() {
                   loadingText="Saving..."
                   isLoading={createMutation.isPending}
                 >
-                  Create
+                  {tCommon("create")}
                 </LoadingButton>
               </DialogFooter>
             </form>
@@ -143,32 +150,32 @@ export function CreateApiKeyDialog() {
         ) : (
           <div className="space-y-4">
             <DialogHeader>
-              <DialogTitle>Save your API Key</DialogTitle>
-              <DialogDescription>
-                Please copy the key now. We won&apos;t be able to show it again.{" "}
-              </DialogDescription>
+              <DialogTitle>{t("settings_api_keys_save_api_key")}</DialogTitle>
+              <DialogDescription>{t("settings_api_keys_save_api_key_desc")} </DialogDescription>
             </DialogHeader>
 
             <Alert
               variant="destructive"
               className="border-destructive/10 bg-destructive/5 text-destructive"
             >
-              <AlertTitle className="text-base font-bold">Warning</AlertTitle>
-              <AlertDescription>
-                This key is visible only once. If you lose it, you will have to create a new one.
-              </AlertDescription>
+              <AlertTitle className="text-base font-bold">{tCommon("warning")}</AlertTitle>
+              <AlertDescription>{t("settings_api_keys_alert_desc")}</AlertDescription>
             </Alert>
 
             <div className="flex items-center space-x-2">
               <div className="grid flex-1 gap-2">
                 <Input readOnly value={createdKey} disabled={createMutation.isPending} />
               </div>
-              <CopyButton tooltipText="Copy" value={createdKey} className="opacity-100" />
+              <CopyButton
+                tooltipText={tCommon("copy")}
+                value={createdKey}
+                className="opacity-100"
+              />
             </div>
 
             <DialogFooter>
               <Button className="w-full cursor-pointer" onClick={() => handleOpenChange(false)}>
-                Done
+                {tCommon("done")}
               </Button>
             </DialogFooter>
           </div>

@@ -1,8 +1,18 @@
 import { clsx, type ClassValue } from "clsx";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
-import { enUS } from "date-fns/locale";
+import { de, enUS, es, fr, ptBR, ru, zhCN } from "date-fns/locale";
 import { twMerge } from "tailwind-merge";
+
+const dateFnsLocales = {
+  en: enUS,
+  ru: ru,
+  de: de,
+  es: es,
+  zhCN: zhCN,
+  pt: ptBR,
+  fr: fr,
+};
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -12,6 +22,7 @@ export const loadedAvatars = new Map<string, boolean>();
 
 export function formatRelativeTime(
   date: Date | string | number | null,
+  localeStr: string = "en",
   defaultValue: string = "—"
 ): string {
   if (date === null) return defaultValue;
@@ -21,9 +32,11 @@ export function formatRelativeTime(
 
     if (isNaN(d.getTime())) return defaultValue;
 
+    const locale = dateFnsLocales[localeStr as keyof typeof dateFnsLocales] ?? enUS;
+
     const result = formatDistanceToNow(d, {
       addSuffix: true,
-      locale: enUS,
+      locale: locale,
     });
 
     return result.toLowerCase();
@@ -33,8 +46,10 @@ export function formatRelativeTime(
   }
 }
 
-export function formatFullDate(date: Date | string | number): string {
-  return format(new Date(date), "d MMMM yyyy, HH:mm", { locale: enUS });
+export function formatFullDate(date: Date | string | number, localeStr: string = "en"): string {
+  const locale = dateFnsLocales[localeStr as keyof typeof dateFnsLocales] ?? enUS;
+
+  return format(new Date(date), "d MMMM yyyy, HH:mm", { locale: locale });
 }
 
 export function isGitHubUrl(input: string): boolean {

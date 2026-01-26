@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -34,6 +34,7 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { UiApiKey } from "@/entities/api-keys";
+import { useRouter } from "@/i18n/routing";
 
 type Props = {
   apiKey: UiApiKey;
@@ -42,6 +43,9 @@ type Props = {
 export function UpdateApiKeyDialog({ apiKey }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
 
   const form = useForm<z.infer<typeof CreateApiKeySchema>>({
     resolver: zodResolver(CreateApiKeySchema),
@@ -53,7 +57,7 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
 
   const updateMutation = trpc.apikey.update.useMutation({
     onSuccess: async () => {
-      toast.success("API Key updated");
+      toast.success(t("settings_api_keys_updated_toast_success"));
       setOpen(false);
       router.refresh();
     },
@@ -79,7 +83,7 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <AppTooltip content="Edit">
+      <AppTooltip content={tCommon("edit")}>
         <DialogTrigger asChild>
           <Button
             variant="ghost"
@@ -95,9 +99,9 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>Edit Key</DialogTitle>
+              <DialogTitle>{t("settings_api_keys_edit_title")}</DialogTitle>
               <DialogDescription>
-                Change name or description for key{" "}
+                {t("settings_api_keys_update_key_desc")}{" "}
                 <span className="text-foreground font-bold">{apiKey.prefix}...</span>
               </DialogDescription>
             </DialogHeader>
@@ -107,9 +111,9 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-muted-foreground">Name</FormLabel>
+                  <FormLabel className="text-muted-foreground">{tCommon("name")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Prod Server" {...field} />
+                    <Input placeholder={t("settings_api_keys_name_placeholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -121,11 +125,13 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-muted-foreground">Description (optional)</FormLabel>
+                  <FormLabel className="text-muted-foreground">
+                    {t("settings_api_keys_label")}
+                  </FormLabel>
                   <FormControl>
                     <Textarea
                       className="min-h-25 resize-none"
-                      placeholder="What is this key used for?..."
+                      placeholder={t("settings_api_keys_desc_placeholder")}
                       {...field}
                     />
                   </FormControl>
@@ -144,7 +150,7 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
                 loadingText="Saving..."
                 isLoading={updateMutation.isPending}
               >
-                Update
+                {tCommon("update")}
               </LoadingButton>
             </DialogFooter>
           </form>

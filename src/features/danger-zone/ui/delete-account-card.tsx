@@ -1,14 +1,18 @@
+import { getTranslations } from "next-intl/server";
+
 import { Card, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 
 import { DeleteAccountDialog } from "./delete-account-dialog";
 
-export function DeleteAccountCard() {
+export async function DeleteAccountCard() {
+  const t = await getTranslations("Dashboard");
+
   return (
     <Card className="border-destructive">
       <CardHeader>
-        <CardTitle>Delete Account</CardTitle>
+        <CardTitle>{t("settings_danger_delete_account_title")}</CardTitle>
         <CardDescription className="mb-4">
-          Permanently delete account and all associated data{" "}
+          {t("settings_danger_delete_account_desc")}{" "}
         </CardDescription>
         <DeleteAccountDialog />
       </CardHeader>

@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { MoveLeft } from "lucide-react";
 
 import { getServerAuthSession } from "@/shared/api/auth/auth-options";
 import { Button } from "@/shared/ui/core/button";
+
+import { Link } from "@/i18n/routing";
 
 export async function HeaderAuthButton() {
   const session = await getServerAuthSession();

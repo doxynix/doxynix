@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import type { Route } from "next";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 
 import { Input } from "@/shared/ui/core/input";
 import { Spinner } from "@/shared/ui/core/spinner";
 
+import { usePathname, useRouter } from "@/i18n/routing";
 import { cn } from "../../lib/utils";
 
 type Props = {

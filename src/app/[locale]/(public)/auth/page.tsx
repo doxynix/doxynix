@@ -1,0 +1,18 @@
+import { getLocale } from "next-intl/server";
+
+import { getServerAuthSession } from "@/shared/api/auth/auth-options";
+import { createMetadata } from "@/shared/lib/metadata";
+import { AuthForm } from "@/features/auth";
+
+import { redirect } from "@/i18n/routing";
+
+export const generateMetadata = createMetadata("sign_in_title", "sign_in_desc");
+
+export default async function AuthPage() {
+  const session = await getServerAuthSession();
+  const locale = await getLocale();
+
+  if (session) redirect({ href: "/dashboard", locale });
+
+  return <AuthForm />;
+}

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { AlertTriangle, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
@@ -21,6 +21,7 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { UiApiKey } from "@/entities/api-keys";
+import { useRouter } from "@/i18n/routing";
 
 type Props = {
   apiKey: UiApiKey;
@@ -30,9 +31,12 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
+
   const revokeMutation = trpc.apikey.revoke.useMutation({
     onSuccess: async () => {
-      toast.success("API Key revoked");
+      toast.success(t("settings_api_keys_revoked_toast_success"));
       setOpen(false);
       router.refresh();
     },
@@ -45,7 +49,7 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <AppTooltip content="Revoke Key">
+      <AppTooltip content={t("settings_api_keys_revoke_key")}>
         <DialogTrigger asChild>
           <Button
             variant="ghost"
@@ -64,24 +68,21 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
               <AlertTriangle className="text-destructive h-5 w-5" />
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
-              <DialogTitle>Revoke Key?</DialogTitle>
+              <DialogTitle>{t("settings_api_keys_revoke_key")}?</DialogTitle>
               <DialogDescription className="flex max-w-75 flex-col gap-1">
-                <span>You are about to revoke key</span>
+                <span>{t("settings_api_keys_revoke_key_desc")}</span>
                 <span className="text-foreground truncate font-bold">{apiKey.name}</span>
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="text-muted-foreground text-sm">
-          This action cannot be undone. Any applications using this key will stop working
-          immediately.
-        </div>
+        <p className="text-muted-foreground text-sm">{t("settings_api_keys_revoke_note")}</p>
 
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" className="cursor-pointer">
-              Cancel
+              {tCommon("cancel")}
             </Button>
           </DialogClose>
           <LoadingButton
@@ -91,7 +92,7 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
             isLoading={revokeMutation.isPending}
             loadingText="Revoking..."
           >
-            Yes, revoke
+            {t("settings_api_keys_confirm_revoke")}
           </LoadingButton>
         </DialogFooter>
       </DialogContent>

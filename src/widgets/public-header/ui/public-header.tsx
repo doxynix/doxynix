@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Route } from "next";
-import Link from "next/link";
 import { Menu } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { publicHeaderMenu } from "@/shared/constants/navigation";
 import { Button } from "@/shared/ui/core/button";
@@ -16,9 +16,12 @@ import {
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Logo } from "@/shared/ui/icons/logo";
 
+import { Link } from "@/i18n/routing";
 import { HeaderAuthButton } from "./public-header-auth-button";
 
 export function PublicHeader() {
+  const t = useTranslations("Common");
+
   return (
     <header className="w-full">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -46,12 +49,12 @@ export function PublicHeader() {
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Menu className="h-5 w-5" />
-                  <span className="sr-only">Open menu</span>
+                  <span className="sr-only">{t("open_menu")}</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-1/2">
                 <SheetHeader>
-                  <SheetTitle className="text-left">Menu</SheetTitle>
+                  <SheetTitle className="text-left">{t("menu")}</SheetTitle>
                 </SheetHeader>
 
                 <div className="mt-8 flex flex-col gap-4">

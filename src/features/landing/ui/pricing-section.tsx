@@ -1,57 +1,66 @@
-import Link from "next/link";
 import { Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
 
-const PLANS = [
-  {
-    name: "Hobby",
-    href: "/auth",
-    price: "$0",
-    desc: "For open-source & side projects",
-    features: ["Public Repositories", "1 Project", "Basic Markdown Export", "Community Support"],
-    cta: "Start Free",
-    popular: false,
-  },
-  {
-    name: "Pro",
-    href: "/auth",
-    price: "$9",
-    desc: "For professional developers",
-    features: [
-      "Private Repositories",
-      "5 Projects",
-      "GitHub Actions Integration",
-      "Priority Support",
-      "Bus Factor Analysis",
-    ],
-    cta: "Go Pro",
-    popular: true,
-  },
-  {
-    name: "Team",
-    href: "/auth",
-    price: "Custom",
-    desc: "For engineering teams",
-    features: [
-      "Unlimited Projects",
-      "SSO & SAML",
-      "On-premise Deployment",
-      "Custom LLM Context",
-      "Audit Logs",
-    ],
-    cta: "Contact Sales",
-    popular: false,
-  },
-];
+import { Link } from "@/i18n/routing";
 
 export function PricingSection() {
+  const t = useTranslations("Landing");
+
+  const PLANS = [
+    {
+      name: t("section_pricing_plan_hobby_name"),
+      href: "/auth",
+      price: "$0",
+      desc: t("section_pricing_plan_hobby_desc"),
+      features: [
+        t("section_pricing_plan_hobby_f1"),
+        t("section_pricing_plan_hobby_f2"),
+        t("section_pricing_plan_hobby_f3"),
+        t("section_pricing_plan_hobby_f4"),
+      ],
+      cta: t("section_pricing_plan_hobby_cta"),
+      popular: false,
+    },
+    {
+      name: t("section_pricing_plan_pro_name"),
+      href: "/auth",
+      price: "$9",
+      desc: t("section_pricing_plan_pro_desc"),
+      features: [
+        t("section_pricing_plan_pro_f1"),
+        t("section_pricing_plan_pro_f2"),
+        t("section_pricing_plan_pro_f3"),
+        t("section_pricing_plan_pro_f4"),
+        t("section_pricing_plan_pro_f5"),
+      ],
+      cta: t("section_pricing_plan_pro_cta"),
+      popular: true,
+    },
+    {
+      name: t("section_pricing_plan_team_name"),
+      href: "/auth",
+      price: "Custom",
+      desc: t("section_pricing_plan_team_desc"),
+      features: [
+        t("section_pricing_plan_team_f1"),
+        t("section_pricing_plan_team_f2"),
+        t("section_pricing_plan_team_f3"),
+        t("section_pricing_plan_team_f4"),
+        t("section_pricing_plan_team_f5"),
+      ],
+      cta: t("section_pricing_plan_team_cta"),
+      popular: false,
+    },
+  ];
   return (
     <section className="bg-landing-bg-light/20 border-y border-zinc-900/20 py-24">
       <div className="container mx-auto px-4">
         <h2 className="mb-16 text-center text-3xl font-bold md:text-5xl">
-          Simple <span className="text-muted-foreground">Pricing</span>
+          {t("section_pricing_title_prefix")}{" "}
+          <span className="text-muted-foreground">{t("section_pricing_title_highlight")}</span>
         </h2>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
           {PLANS.map((plan) => (
@@ -66,13 +75,15 @@ export function PricingSection() {
             >
               {plan.popular && (
                 <div className="text-background bg-foreground absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-xs font-bold tracking-wide uppercase">
-                  Most Popular
+                  {t("section_pricing_badge_popular")}
                 </div>
               )}
               <h3 className="mb-2 text-xl font-bold">{plan.name}</h3>
               <div className="mb-2 flex items-baseline gap-1">
                 <span className="text-4xl font-bold">{plan.price}</span>
-                <span className="text-muted-foreground">/mo</span>
+                <span className="text-muted-foreground">
+                  {plan.price !== "Custom" ? t("section_pricing_interval") : ""}
+                </span>
               </div>
               <p className="text-muted-foreground mb-6 text-sm">{plan.desc}</p>
               <Button

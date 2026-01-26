@@ -3,6 +3,7 @@
 import React, { forwardRef, useRef } from "react";
 import { Brain, FileText, User } from "lucide-react";
 import { useInView } from "motion/react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/utils";
 import { AblyIcon } from "@/shared/ui/icons/ably-icon";
@@ -54,6 +55,8 @@ const REPEAT_DELAY = TOTAL_CYCLE - STEP_DURATION;
 Circle.displayName = "Circle";
 // TODO
 export function HowItWorksSection() {
+  const t = useTranslations("Landing");
+
   const containerRef = useRef<HTMLDivElement>(null);
   const clientRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -126,11 +129,10 @@ export function HowItWorksSection() {
     <section className="mx-auto flex w-full max-w-7xl flex-col items-center justify-center overflow-hidden px-4 py-24">
       <div className="mb-12 text-center">
         <h2 className="mb-4 text-3xl font-bold md:text-5xl">
-          Under the <span className="text-muted-foreground">Hood</span>
+          {t("section_how_title_prefix")}{" "}
+          <span className="text-muted-foreground">{t("section_how_title_highlight")}</span>
         </h2>
-        <p className="text-muted-foreground text-lg">
-          We handle the heavy lifting asynchronously. You just get the result instantly.
-        </p>
+        <p className="text-muted-foreground text-lg">{t("section_how_desc")}</p>
       </div>
 
       <div
@@ -143,7 +145,7 @@ export function HowItWorksSection() {
               <User />
             </Circle>
             <span className="text-muted-foreground text-xs font-semibold sm:text-sm">
-              You (Client)
+              {t("section_how_node_client")}
             </span>
           </div>
         </div>
@@ -154,7 +156,10 @@ export function HowItWorksSection() {
               <TriggerIcon />
             </Circle>
             <div className="flex flex-col items-center">
-              <span className="text-muted-foreground text-xs sm:text-sm">Orchestrator</span>
+              <span className="text-muted-foreground text-xs sm:text-sm">
+                {" "}
+                {t("section_how_node_orchestrator")}
+              </span>
             </div>
           </div>
         </div>
@@ -164,21 +169,28 @@ export function HowItWorksSection() {
             <Circle ref={llmRef} className="border-purple-500/40">
               <Brain className="text-purple-500" />
             </Circle>
-            <span className="text-muted-foreground text-xs sm:text-sm">AI Processing</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">
+              {" "}
+              {t("section_how_node_ai")}
+            </span>
           </div>
 
           <div className="flex flex-col items-center gap-2">
             <Circle ref={dbRef} className="border-[#34D59A]/40">
               <NeonIcon />
             </Circle>
-            <span className="text-muted-foreground text-xs sm:text-sm">Neon DB</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">
+              {t("section_how_node_db")}
+            </span>
           </div>
 
           <div className="flex flex-col items-center gap-2">
             <Circle ref={ablyRef} className="border-[#FF5115]/40">
               <AblyIcon />
             </Circle>
-            <span className="text-muted-foreground text-xs sm:text-sm">Ably Realtime</span>
+            <span className="text-muted-foreground text-xs sm:text-sm">
+              {t("section_how_node_ably")}
+            </span>
           </div>
         </div>
         {PATHS.map((path) => (
@@ -200,9 +212,7 @@ export function HowItWorksSection() {
       </div>
       <div className="bg-background/50 mt-8 flex items-center gap-2 rounded-full border px-4 py-1 backdrop-blur-sm">
         <FileText className="text-success h-4 w-4" />
-        <span className="text-muted-foreground text-xs">
-          Documentation is generated automatically in background
-        </span>
+        <span className="text-muted-foreground text-xs">{t("section_how_status_msg")}</span>
       </div>
     </section>
   );

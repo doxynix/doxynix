@@ -2,10 +2,11 @@
 
 import { useRef, useState } from "react";
 import type { Route } from "next";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BookOpen } from "lucide-react";
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
@@ -31,12 +32,16 @@ import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import { usePathname, useRouter } from "@/i18n/routing";
 import { useCreateRepoDialogStore } from "../model/create-repo-dialog.store";
 import { RepoItem } from "./repo-item";
 
 const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут
 
 export function CreateRepoDialog() {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
+
   const { open, closeDialog } = useCreateRepoDialogStore();
   const router = useRouter();
   const pathname = usePathname();
@@ -86,7 +91,7 @@ export function CreateRepoDialog() {
 
   const createRepo = trpc.repo.create.useMutation({
     onSuccess: async () => {
-      toast.success("Repository added successfully");
+      toast.success(t("repo_added_toast_success"));
       closeDialog();
       form.reset();
       await utils.repo.getAll.invalidate();
@@ -122,8 +127,8 @@ export function CreateRepoDialog() {
       <DialogPortal>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Repository</DialogTitle>
-            <DialogDescription>Start typing repo name or enter URL to add </DialogDescription>
+            <DialogTitle>{t("repo_add_repository")}</DialogTitle>
+            <DialogDescription>{t("repo_create_desc")} </DialogDescription>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
@@ -143,7 +148,7 @@ export function CreateRepoDialog() {
                           <Input
                             {...field}
                             className="pl-8 text-sm"
-                            placeholder="owner/repo or https://github.com/..."
+                            placeholder={t("repo_create_placeholder")}
                             autoComplete="off"
                             disabled={createRepo.isPending}
                             maxLength={500}
@@ -175,7 +180,7 @@ export function CreateRepoDialog() {
 
               <div className="space-y-2">
                 <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium tracking-wider uppercase">
-                  <BookOpen className="h-3 w-3" /> Your Repositories
+                  <BookOpen className="h-3 w-3" /> {t("repo_your_repos")}
                 </div>
 
                 <div className="space-y-0.5">
@@ -196,7 +201,7 @@ export function CreateRepoDialog() {
                     <div className="h-70 rounded-xl border p-1">
                       <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
                         <p className="text-muted-foreground mb-3 text-sm">
-                          To see your repositories list, connect GitHub account{" "}
+                          {t("repo_connect_git_account")}{" "}
                         </p>
                         <LoadingButton
                           className="cursor-pointer"
@@ -206,7 +211,7 @@ export function CreateRepoDialog() {
                           disabled={loading}
                           onClick={() => handleConnectGithub()}
                         >
-                          <GitHubIcon /> Connect
+                          <GitHubIcon /> {tCommon("connect")}
                         </LoadingButton>
                       </div>
                     </div>
@@ -231,7 +236,7 @@ export function CreateRepoDialog() {
                   loadingText="Adding..."
                   disabled={createRepo.isPending || !form.formState.isValid || !urlValue}
                 >
-                  Add
+                  {tCommon("add")}
                 </LoadingButton>
               </DialogFooter>
             </form>{" "}

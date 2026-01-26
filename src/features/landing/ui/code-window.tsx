@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import { cn } from "@/shared/lib/utils";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
@@ -18,6 +20,8 @@ export function CodeWindow({
   className,
   copyButtonVisible = true,
 }: Props) {
+  const t = useTranslations("Common");
+
   return (
     <div
       className={cn(
@@ -37,7 +41,7 @@ export function CodeWindow({
           </div>
         </div>
         {copyButtonVisible && (
-          <CopyButton tooltipText="Copy code" className="opacity-100" value={code ?? ""} />
+          <CopyButton tooltipText={t("copy_code")} className="opacity-100" value={code ?? ""} />
         )}
       </div>
       <div

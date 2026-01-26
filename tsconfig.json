@@ -14,6 +14,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "allowArbitraryExtensions": true,
     "plugins": [
       {
         "name": "next"
@@ -29,7 +30,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "trigger.config.ts"
+    "trigger.config.ts",
+    "src/global.d.ts",
+    "messages/*.json"
   ],
   "exclude": [
     "node_modules",

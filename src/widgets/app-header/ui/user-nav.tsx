@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Route } from "next";
-import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { User } from "next-auth";
 import { signOut } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 import { userNavMenu } from "@/shared/constants/navigation";
 import { getInitials } from "@/shared/lib/get-initials";
@@ -32,11 +32,16 @@ import {
 } from "@/shared/ui/core/dropdown-menu";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import { Link } from "@/i18n/routing";
+
 type Props = {
   user: User;
 };
 
 export function UserNav({ user }: Props) {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Auth");
+
   const avatar = user?.image;
   const name = user?.name;
   const email = user?.email;
@@ -92,20 +97,20 @@ export function UserNav({ user }: Props) {
                 onSelect={(e) => e.preventDefault()}
               >
                 <LogOut className="text-destructive mr-2" />
-                Log out
+                {t("logout")}
               </DropdownMenuItem>
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-105">
               <DialogHeader>
-                <DialogTitle> Sign out</DialogTitle>
-                <DialogDescription>Are you sure you want to log out?</DialogDescription>
+                <DialogTitle>{t("logout_title")}</DialogTitle>
+                <DialogDescription>{t("logout_confirmation_desc")}</DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="flex justify-end gap-2">
                   <DialogClose asChild>
                     <Button className="cursor-pointer" variant="outline" disabled={loading}>
-                      Cancel
+                      {tCommon("cancel")}
                     </Button>
                   </DialogClose>
                   <LoadingButton
@@ -116,7 +121,7 @@ export function UserNav({ user }: Props) {
                     isLoading={loading}
                     loadingText="Logout..."
                   >
-                    Log out
+                    {t("logout")}
                   </LoadingButton>
                 </div>
               </div>
