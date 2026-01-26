@@ -1,19 +1,21 @@
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { TelegramIcon } from "@/shared/ui/icons/telegram-icon";
 import { DateComp } from "@/shared/ui/kit/date-comp";
 
+import { Link } from "@/i18n/routing";
 import { SystemStatus } from "./system-status";
 
 export function AppFooter() {
+  const tFooter = useTranslations("Footer");
+
   return (
     <footer className="bg-background flex items-center justify-center p-2">
       <div className="container grid grid-cols-1 flex-col items-center justify-between justify-items-center gap-4 lg:flex lg:flex-row">
         <div className="order-1 flex flex-wrap items-center justify-center gap-4 lg:order-0">
           <p className="text-muted-foreground order-1 text-center text-xs lg:order-0">
-            &copy; <DateComp isYear={true} /> Doxynix. All rights reserved. Built by developers for
-            developers.
+            &copy; <DateComp isYear={true} /> Doxynix™. {tFooter("all_rights_reserved")}
           </p>
           <SystemStatus />
         </div>

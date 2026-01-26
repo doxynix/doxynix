@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
@@ -19,37 +20,35 @@ const chartData = [
   { month: "Jun", complexity: 214, docs: 140 },
 ];
 
-const chartConfig = {
-  complexity: {
-    label: "Complexity",
-    color: "var(--chart-1)",
-  },
-  docs: {
-    label: "Docs Coverage",
-    color: "var(--chart-2)",
-  },
-} satisfies ChartConfig;
-
 export function AnalyticsSection() {
+  const t = useTranslations("Landing");
+
+  const chartConfig = {
+    complexity: {
+      label: t("section_analytics_complexity_label"),
+      color: "var(--chart-1)",
+    },
+    docs: {
+      label: t("section_analytics_docs_coverage"),
+      color: "var(--chart-2)",
+    },
+  } satisfies ChartConfig;
+
   return (
     <section className="relative container mx-auto px-4 py-24">
       <div className="mb-12 text-center">
         <h2 className="text-3xl font-bold md:text-5xl">
-          Not just Text. <span className="text-muted-foreground">Actionable Metrics.</span>
+          {t("section_analytics_title_prefix")}{" "}
+          <span className="text-muted-foreground">{t("section_analytics_title_highlight")}</span>
         </h2>
-        <p className="text-muted-foreground mt-4 text-lg">
-          Track technical debt, identify &quot;Bus Factor&quot; risks, and visualize codebase
-          complexity over time.
-        </p>
+        <p className="text-muted-foreground mt-4 text-lg">{t("section_analytics_subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         <Card className="border-primary bg-landing-bg-light/50 col-span-1 md:col-span-2">
           <CardHeader>
-            <CardTitle>Complexity vs. Documentation</CardTitle>
-            <CardDescription>
-              Real-time analysis of your repository health over the last 6 months.
-            </CardDescription>
+            <CardTitle>{t("section_analytics_card_title")}</CardTitle>
+            <CardDescription>{t("section_analytics_card_desc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="max-h-75 w-full">
@@ -102,20 +101,20 @@ export function AnalyticsSection() {
 
         <div className="flex flex-col gap-4">
           <Card className="border-primary bg-landing-bg-light/50 flex flex-1 flex-col justify-center p-6">
-            <div className="text-muted-foreground text-sm tracking-widest uppercase">
-              Bus Factor
-            </div>
-            <div className="text-destructive mt-2 text-5xl font-bold">1.2</div>
-            <div className="text-muted-foreground mt-2 text-xs">
-              Critical Risk: module `auth/core`
-            </div>
+            <p className="text-muted-foreground text-sm tracking-widest uppercase">
+              {t("section_analytics_bus_factor")}
+            </p>
+            <span className="text-destructive mt-2 text-5xl font-bold">1.2</span>
+            <p className="text-muted-foreground mt-2 text-xs">{t("section_analytics_review")}</p>
           </Card>
           <Card className="border-primary bg-landing-bg-light/50 flex flex-1 flex-col justify-center p-6">
-            <div className="text-muted-foreground text-sm tracking-widest uppercase">
-              Maintainability
+            <p className="text-muted-foreground text-sm tracking-widest uppercase">
+              {t("section_analytics_maintain")}
+            </p>
+            <span className="text-success mt-2 text-5xl font-bold">A+</span>
+            <div className="text-muted-foreground mt-2 text-xs">
+              {t("section_analytics_improve")}
             </div>
-            <div className="text-success mt-2 text-5xl font-bold">A+</div>
-            <div className="text-muted-foreground mt-2 text-xs">Improved by 15% this month</div>
           </Card>
         </div>
       </div>

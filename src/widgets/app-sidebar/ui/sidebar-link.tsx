@@ -1,13 +1,13 @@
 "use client";
 
 import type { Route } from "next";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { SquareArrowOutUpRight } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
 import { MenuItem } from "@/shared/types/menu-item";
 import { SidebarMenuButton } from "@/shared/ui/core/sidebar";
+
+import { Link, usePathname } from "@/i18n/routing";
 
 export function SidebarLink({ href, label: title, icon: Icon, isBlank, exact }: MenuItem) {
   const pathname = usePathname() ?? "";

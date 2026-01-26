@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server";
+
 import { highlightCode } from "@/shared/lib/shiki";
 
 import { CodeWindow } from "./code-window";
@@ -16,6 +18,7 @@ const CONFIG_CODE = `{
 }`;
 
 export async function ConfigSection() {
+  const t = await getTranslations("Landing");
   const html = await highlightCode(CONFIG_CODE, "json", "dark");
 
   return (
@@ -23,17 +26,18 @@ export async function ConfigSection() {
       <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
         <div>
           <h2 className="mb-6 text-3xl font-bold not-md:text-center md:text-5xl">
-            Configured in <span className="text-muted-foreground">JSON</span>,<br />
-            executed in cloud.
+            {t("section_config_title_prefix")}{" "}
+            <span className="text-muted-foreground">{t("section_config_title_highlight")}</span>
+            {t("section_config_title_suffix")}
+            <br />
           </h2>
           <p className="text-muted-foreground mb-8 text-lg not-md:text-center">
-            Drop a simple config file in your root. We handle parsing, token limits, and prompt
-            engineering automatically.
+            {t("section_config_desc")}
           </p>
           <ul className="marker:bg-foreground marker:text-foreground flex list-disc flex-col gap-4 pl-5">
-            <li>Auto-detects frameworks (Next.js, Nest)</li>
-            <li>Ignores tests & build artifacts</li>
-            <li>Custom output templates</li>
+            <li>{t("section_config_list_1")}</li>
+            <li>{t("section_config_list_2")}</li>
+            <li>{t("section_config_list_3")}</li>
           </ul>
         </div>
 

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { cn, formatFullDate, formatRelativeTime } from "@/shared/lib/utils";
 import { Card, CardContent } from "@/shared/ui/core/card";
@@ -6,6 +6,7 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
+import { Link } from "@/i18n/routing";
 import { getLanguageColor } from "../model/language-colors";
 import { getMetrics } from "../model/metrics";
 import { repoStatusConfig } from "../model/repo-status";
@@ -18,7 +19,9 @@ type Props = {
   repo: RepoTableItem;
 };
 
-export function RepoCard({ repo }: Props) {
+export async function RepoCard({ repo }: Props) {
+  const t = await getTranslations("Dashboard");
+  const locale = await getLocale();
   const visibility = repoVisibilityConfig[repo.visibility];
   const status = repoStatusConfig[repo.status];
   const metrics = getMetrics(repo);
@@ -57,7 +60,7 @@ export function RepoCard({ repo }: Props) {
                 className={cn("flex shrink-0 items-center gap-1 transition-opacity duration-200")}
               >
                 <CopyButton value={repo.id} />
-                <AppTooltip content="Open on GitHub">
+                <AppTooltip content={t("repo_open_on_github_tooltip")}>
                   <a
                     href={repo.url}
                     target="_blank"
@@ -71,14 +74,14 @@ export function RepoCard({ repo }: Props) {
             </div>
 
             <p className="text-muted-foreground line-clamp-2 text-sm wrap-break-word not-sm:text-center">
-              {repo.description ?? "No description"}
+              {repo.description ?? t("repo_empty_desc")}
             </p>
 
             <div className="mt-1 flex flex-wrap items-center gap-3 not-md:justify-center">
               <div className="flex items-center gap-1">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: langColor }} />
                 {repo.language !== null && (
-                  <AppTooltip content="Primary Language">
+                  <AppTooltip content={t("repo_primary_language_tooltip")}>
                     <div className="text-muted-foreground hover:text-foreground flex cursor-help items-center gap-1 text-xs transition-colors">
                       {repo.language}
                     </div>
@@ -107,9 +110,13 @@ export function RepoCard({ repo }: Props) {
             <span className="font-medium">{status.label}</span>
           </div>
           {repo.lastAnalysisDate !== null && repo.lastAnalysisDate !== undefined && (
-            <AppTooltip content={`Last analyzed: ${formatFullDate(repo.lastAnalysisDate)}`}>
+            <AppTooltip
+              content={t("repo_last_analyzed", {
+                dateTime: formatFullDate(repo.lastAnalysisDate, locale),
+              })}
+            >
               <span className="text-muted-foreground hover:text-foreground cursor-help transition-colors">
-                {formatRelativeTime(repo.lastAnalysisDate)}
+                {formatRelativeTime(repo.lastAnalysisDate, locale)}
               </span>
             </AppTooltip>
           )}

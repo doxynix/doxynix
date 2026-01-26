@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { cn, formatFullDate, formatRelativeTime } from "@/shared/lib/utils";
 import { RepoItemFields } from "@/shared/types/repo-item";
@@ -7,17 +8,13 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { getLanguageColor, repoVisibilityConfig } from "@/entities/repo";
 
-export function RepoItem({
-  repo,
-  onClick,
-  disabled,
-}: {
-  repo: RepoItemFields;
-  onClick: () => void;
-  disabled?: boolean;
-}) {
+type Props = { repo: RepoItemFields; onClick: () => void; disabled?: boolean };
+
+export function RepoItem({ repo, onClick, disabled }: Props) {
   const langColor = getLanguageColor(repo.language);
   const visibility = repoVisibilityConfig[repo.visibility];
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
 
   return (
     <Button
@@ -53,7 +50,11 @@ export function RepoItem({
             {repo.description}
           </span>
         )}
-        <AppTooltip content={`Last updated: ${formatFullDate(repo.updatedAt)}`}>
+        <AppTooltip
+          content={t("repo_last_updated", {
+            dateTime: formatFullDate(repo.updatedAt, locale),
+          })}
+        >
           <span className="text-muted-foreground w-fit text-xs">
             {formatRelativeTime(repo.updatedAt)}
           </span>

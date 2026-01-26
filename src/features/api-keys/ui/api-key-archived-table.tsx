@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, History } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn, formatRelativeTime } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/core/badge";
@@ -24,6 +25,8 @@ type Props = {
 
 export function ApiKeyArchivedTable({ archived }: Props) {
   const [isArchivedOpen, setIsArchivedOpen] = useState(false);
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
 
   return (
     <Collapsible
@@ -34,7 +37,7 @@ export function ApiKeyArchivedTable({ archived }: Props) {
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <History className="text-muted-foreground h-4 w-4" />
-          <h3 className="text-sm font-medium">History (Revoked)</h3>
+          <h3 className="text-sm font-medium">{t("settings_api_keys_history_revoked")}</h3>
           <Badge className="ml-1 text-xs">{archived.length}</Badge>
         </div>
 
@@ -55,10 +58,10 @@ export function ApiKeyArchivedTable({ archived }: Props) {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead>Title</TableHead>
-                <TableHead>Prefix</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Last used</TableHead>
+                <TableHead>{tCommon("title")}</TableHead>
+                <TableHead>{t("settings_api_keys_prefix")}</TableHead>
+                <TableHead>{tCommon("created")}</TableHead>
+                <TableHead>{t("settings_api_keys_last_used")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -1,12 +1,12 @@
 "use client";
 
 import type { Route } from "next";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { MoveLeft } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
 import { Button, type ButtonProps } from "@/shared/ui/core/button";
+
+import { Link, useRouter } from "@/i18n/routing";
 
 interface BackOrLinkButtonProps extends ButtonProps {
   href?: Route;

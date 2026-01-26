@@ -1,4 +1,5 @@
 import { Status } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 
 import { parseRepoSearchParams } from "@/shared/lib/search-params";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
@@ -24,6 +25,7 @@ type Props = {
 
 export async function RepoListContainer({ searchParams, config }: Props) {
   const rawParams = (await searchParams) ?? {};
+  const t = await getTranslations("Dashboard");
 
   const params = parseRepoSearchParams(rawParams);
 
@@ -44,7 +46,10 @@ export async function RepoListContainer({ searchParams, config }: Props) {
       {config?.showTotalCount !== false && (
         <div className="text-muted-foreground my-4 text-sm">
           <div className="xs:text-right text-center">
-            Showing: {meta.filteredCount} of {meta.totalCount}
+            {t("repo_total_count", {
+              filteredCount: meta.filteredCount,
+              totalCount: meta.totalCount,
+            })}
           </div>
         </div>
       )}

@@ -51,6 +51,7 @@ next-env.d.ts
 /prisma/json-schema
 sitemap*.xml
 robots.txt
+messages/*.d.json.ts
 
 # cli
 /cli/dist/

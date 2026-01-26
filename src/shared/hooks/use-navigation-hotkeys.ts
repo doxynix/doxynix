@@ -1,6 +1,7 @@
 import type { Route } from "next";
-import { useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
+
+import { useRouter } from "@/i18n/routing";
 
 const NAV_MAP: Record<string, string> = {
   "alt+KeyO": "/dashboard",

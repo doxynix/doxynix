@@ -1,7 +1,11 @@
+import { getTranslations } from "next-intl/server";
+
 import { highlightCode } from "@/shared/lib/shiki";
 import { CodeComparison } from "@/shared/ui/kit/code-comparison";
 
 export async function CodeComparisonSection() {
+  const t = await getTranslations("Landing");
+
   const [badDark, badLight, goodDark, goodLight] = await Promise.all([
     highlightCode(BAD_CODE, "typescript", "dark"),
     highlightCode(BAD_CODE, "typescript", "light"),
@@ -12,7 +16,8 @@ export async function CodeComparisonSection() {
     <section className="bg-landing-bg-light/20 z-10 border-y border-white/5 py-32">
       <div className="container mx-auto px-4">
         <h2 className="mb-16 text-center text-3xl font-bold md:text-5xl">
-          See the <span className="text-muted-foreground">Difference</span>
+          {t("section_code_title_prefix")}{" "}
+          <span className="text-muted-foreground">{t("section_code_title_highlight")}</span>
         </h2>
         <div className="border-primary mx-auto max-w-6xl overflow-hidden rounded-xl border shadow-2xl">
           <CodeComparison

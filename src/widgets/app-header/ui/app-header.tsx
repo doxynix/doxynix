@@ -1,8 +1,6 @@
 "use client";
 
 import type { Route } from "next";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { SlashIcon } from "lucide-react";
 import { User } from "next-auth";
 
@@ -20,6 +18,7 @@ import { Logo } from "@/shared/ui/icons/logo";
 import { AppCommandMenu } from "@/shared/ui/kit/app-command-menu";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
+import { Link, usePathname } from "@/i18n/routing";
 import { NotificationsNav } from "./notifications-nav";
 import { SidebarToggle } from "./sidebar-toggle";
 import { UserNav } from "./user-nav";

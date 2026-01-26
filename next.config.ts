@@ -1,9 +1,16 @@
 import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 import { withAxiom } from "next-axiom";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
+});
+
+const withNextIntl = createNextIntlPlugin({
+  experimental: {
+    createMessagesDeclaration: "./messages/en.json",
+  },
 });
 
 const nextConfig: NextConfig = {
@@ -172,4 +179,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withAxiom(bundleAnalyzer(nextConfig));
+export default withAxiom(bundleAnalyzer(withNextIntl(nextConfig)));

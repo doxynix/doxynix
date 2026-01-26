@@ -1,5 +1,6 @@
 import { ComponentType } from "react";
 import { BookOpen, FileCode, FileDiff, GitGraph } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { highlightCode } from "@/shared/lib/shiki";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
@@ -19,28 +20,6 @@ type TabsContentItemProps = {
   title: string;
   code: string;
 };
-
-const DOCS: TabsTriggerItemProps[] = [
-  {
-    icon: BookOpen,
-    value: "readme",
-    title: "Onboarding & Guides",
-    subTitle: "README.md, User Guides",
-  },
-  { icon: FileCode, value: "api", title: "API Reference", subTitle: "Swagger/OpenAPI specs" },
-  {
-    icon: GitGraph,
-    value: "architecture",
-    title: "Architecture Deep Dive",
-    subTitle: "Code logic & DB schemas",
-  },
-  {
-    icon: FileDiff,
-    value: "changelog",
-    title: "Smart Changelog",
-    subTitle: "Automated diff analysis",
-  },
-] as const;
 
 function TabsTriggerItem({ icon: Icon, value, title, subTitle }: TabsTriggerItemProps) {
   return (
@@ -71,12 +50,41 @@ function TabsContentItem({ html, value, title, code }: TabsContentItemProps) {
 }
 
 export async function DocModesSection() {
+  const t = await getTranslations("Landing");
+
   const [readmeHtml, apiHtml, archHtml, changelogHtml] = await Promise.all([
     highlightCode(README_CODE, "markdown", "dark"),
     highlightCode(API_CODE, "json", "dark"),
     highlightCode(ARCH_CODE, "markdown", "dark"),
     highlightCode(CHANGELOG_CODE, "markdown", "dark"),
   ]);
+
+  const DOCS: TabsTriggerItemProps[] = [
+    {
+      icon: BookOpen,
+      value: "readme",
+      title: t("section_docs_tab_readme_title"),
+      subTitle: t("section_docs_tab_readme_subtitle"),
+    },
+    {
+      icon: FileCode,
+      value: "api",
+      title: t("section_docs_tab_api_title"),
+      subTitle: t("section_docs_tab_api_subtitle"),
+    },
+    {
+      icon: GitGraph,
+      value: "architecture",
+      title: t("section_docs_tab_arch_title"),
+      subTitle: t("section_docs_tab_arch_subtitle"),
+    },
+    {
+      icon: FileDiff,
+      value: "changelog",
+      title: t("section_docs_tab_changelog_title"),
+      subTitle: t("section_docs_tab_changelog_subtitle"),
+    },
+  ];
 
   const TABS = [
     { value: "readme", html: readmeHtml, title: "README.md", code: README_CODE },
@@ -94,12 +102,10 @@ export async function DocModesSection() {
     <section className="container mx-auto px-4 py-24">
       <div className="mb-16 text-center">
         <h2 className="text-3xl font-bold md:text-5xl">
-          Complete <span className="text-muted-foreground">Documentation Suite</span>
+          {t("section_docs_title_prefix")}{" "}
+          <span className="text-muted-foreground">{t("section_docs_title_highlight")}</span>
         </h2>
-        <p className="text-muted-foreground mt-4 text-lg">
-          From high-level overview to low-level byte manipulation. We generate every format your
-          team needs.
-        </p>
+        <p className="text-muted-foreground mt-4 text-lg">{t("section_docs_desc")}</p>
       </div>
 
       <Tabs defaultValue="readme" className="mx-auto flex min-h-140 items-center gap-8">

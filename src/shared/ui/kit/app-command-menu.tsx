@@ -2,8 +2,8 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { Route } from "next";
-import { useRouter } from "next/navigation";
 import { Book, ChevronDown, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useDebounce } from "use-debounce";
 
@@ -24,7 +24,10 @@ import {
 } from "@/shared/ui/core/command";
 import { Spinner } from "@/shared/ui/core/spinner";
 
+import { useRouter } from "@/i18n/routing";
+
 export function AppCommandMenu() {
+  const t = useTranslations("Dashboard");
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 300);
@@ -124,7 +127,7 @@ export function AppCommandMenu() {
         onClick={() => setOpen(true)}
       >
         <Search className="absolute top-2.25 left-2.25" />
-        <span className="hidden lg:inline-flex lg:pl-4">Search site...</span>
+        <span className="hidden lg:inline-flex lg:pl-4">{t("command_search")}</span>
         <kbd className="bg-muted absolute top-[0.4rem] right-[0.3rem] hidden h-5 items-center rounded border px-1.5 lg:flex">
           <span className="text-xs">Ctrl+K</span>
         </kbd>
@@ -135,13 +138,15 @@ export function AppCommandMenu() {
           value={search}
           onValueChange={setSearch}
           isLoading={isLoading}
-          placeholder="Type a command or repository name..."
+          placeholder={t("command_placeholder")}
         />
         <CommandList>
-          {filteredCommands.length === 0 && <CommandEmpty>No results found.</CommandEmpty>}
+          {filteredCommands.length === 0 && (
+            <CommandEmpty>{t("command_empty_results")}</CommandEmpty>
+          )}
 
           {filteredCommands.length > 0 && (
-            <CommandGroup heading="Commands and Navigation">
+            <CommandGroup heading={t("command_menu_label_1")}>
               {filteredCommands.map((item) => {
                 const isDestructive = item.variant === "destructive";
                 return (
@@ -182,7 +187,7 @@ export function AppCommandMenu() {
           <CommandGroup
             heading={
               <div className="flex w-full items-center justify-between">
-                <span>Quick jump to repository</span>
+                <span>{t("command_menu_label_2")}</span>
                 <Button
                   variant="ghost"
                   className="text-muted-foreground! cursor-pointer bg-transparent! hover:underline"
@@ -193,7 +198,7 @@ export function AppCommandMenu() {
                     setIsReposExpanded(!isReposExpanded);
                   }}
                 >
-                  {isReposExpanded ? "Collapse" : "Expand"}
+                  {isReposExpanded ? t("command_collapse") : t("command_expand")}
                   <ChevronDown
                     className={cn(
                       "transition-transform duration-300",
@@ -234,7 +239,9 @@ export function AppCommandMenu() {
           </CommandGroup>
 
           {!isLoading && data?.pages[0]?.meta.totalCount === 0 && (
-            <div className="text-muted-foreground p-4 text-center text-xs">No repositories</div>
+            <div className="text-muted-foreground p-4 text-center text-xs">
+              {t("repo_empty_title")}
+            </div>
           )}
         </CommandList>
       </CommandDialog>

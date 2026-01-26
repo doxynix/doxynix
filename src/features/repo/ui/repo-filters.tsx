@@ -1,9 +1,10 @@
 "use client";
 
 import type { Route } from "next";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Status, Visibility } from "@prisma/client";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { parseRepoSearchParams, REPO_DEFAULTS } from "@/shared/lib/search-params";
 import { Button } from "@/shared/ui/core/button";
@@ -15,7 +16,11 @@ import {
   SelectValue,
 } from "@/shared/ui/core/select";
 
+import { usePathname, useRouter } from "@/i18n/routing";
+
 export function RepoFilters() {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -49,14 +54,14 @@ export function RepoFilters() {
       <div className="flex flex-wrap items-center justify-center gap-2">
         <Select value={filters.status ?? "all"} onValueChange={(v) => updateQuery("status", v)}>
           <SelectTrigger className="w-35">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={tCommon("status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value={Status.DONE}>Done</SelectItem>
-            <SelectItem value={Status.PENDING}>In progress</SelectItem>
-            <SelectItem value={Status.FAILED}>Failed</SelectItem>
-            <SelectItem value={Status.NEW}>New</SelectItem>
+            <SelectItem value="all">{t("repo_status_all")}</SelectItem>
+            <SelectItem value={Status.DONE}>{tCommon("done")}</SelectItem>
+            <SelectItem value={Status.PENDING}>{t("repo_in_progress")}</SelectItem>
+            <SelectItem value={Status.FAILED}>{tCommon("failed")}</SelectItem>
+            <SelectItem value={Status.NEW}>{tCommon("new")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -65,28 +70,28 @@ export function RepoFilters() {
           onValueChange={(v) => updateQuery("visibility", v)}
         >
           <SelectTrigger className="w-32.5">
-            <SelectValue placeholder="Visibility" />
+            <SelectValue placeholder={tCommon("visibility")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All visibility</SelectItem>
-            <SelectItem value={Visibility.PUBLIC}>Public</SelectItem>
-            <SelectItem value={Visibility.PRIVATE}>Private</SelectItem>
+            <SelectItem value="all">{t("repo_visibility_all")}</SelectItem>
+            <SelectItem value={Visibility.PUBLIC}>{tCommon("public")}</SelectItem>
+            <SelectItem value={Visibility.PRIVATE}>{tCommon("private")}</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={filters.sortBy} onValueChange={(v) => updateQuery("sortBy", v)}>
           <SelectTrigger className="w-37.5">
-            <SelectValue placeholder="Sort by" />
+            <SelectValue placeholder={t("repo_sort_by")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="updatedAt">Updated</SelectItem>
-            <SelectItem value="createdAt">Created</SelectItem>
-            <SelectItem value="name">Name</SelectItem>
+            <SelectItem value="updatedAt">{tCommon("updated")}</SelectItem>
+            <SelectItem value="createdAt">{tCommon("created")}</SelectItem>
+            <SelectItem value="name">{tCommon("name")}</SelectItem>
           </SelectContent>
         </Select>
 
         <Button disabled={!hasFilters} variant="outline" onClick={handleReset} className="px-2">
-          Reset
+          {tCommon("reset")}
           <X className="h-4 w-4" />
         </Button>
       </div>

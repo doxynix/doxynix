@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
@@ -21,13 +21,17 @@ import {
 } from "@/shared/ui/core/dialog";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import { useRouter } from "@/i18n/routing";
+
 export function DeleteAccountDialog() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
 
   const deleteMutation = trpc.user.deleteAccount.useMutation({
     onSuccess: async () => {
-      toast.success("Account successfully deleted");
+      toast.success(t("settings_danger_delete_account_toast_success"));
       setOpen(false);
       router.refresh();
       await signOut({ callbackUrl: "/auth" });
@@ -43,7 +47,7 @@ export function DeleteAccountDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="destructive" className="w-fit cursor-pointer">
-          Delete account <Trash2 className="h-4 w-4" />
+          {t("settings_danger_delete_account_title")} <Trash2 className="h-4 w-4" />
         </Button>
       </DialogTrigger>
 
@@ -54,8 +58,10 @@ export function DeleteAccountDialog() {
               <AlertTriangle className="text-destructive h-5 w-5" />
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
-              <DialogTitle>Delete account?</DialogTitle>
-              <DialogDescription>You are about to delete your account!</DialogDescription>
+              <DialogTitle>{t("settings_danger_delete_account_dialog_title")}</DialogTitle>
+              <DialogDescription>
+                {t("settings_danger_delete_account_dialog_desc")}
+              </DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -65,17 +71,14 @@ export function DeleteAccountDialog() {
           variant="destructive"
           className="border-destructive/10 bg-destructive/5 text-destructive"
         >
-          <AlertTitle className="text-base font-bold">Warning</AlertTitle>
-          <AlertDescription>
-            This action is irreversible. Deleting your account entails the complete removal of saved
-            credentials. You will also be immediately logged out from all devices.
-          </AlertDescription>
+          <AlertTitle className="text-base font-bold">{tCommon("warning")}</AlertTitle>
+          <AlertDescription>{t("settings_danger_delete_account_alert_desc")}</AlertDescription>
         </Alert>
 
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" className="cursor-pointer">
-              Cancel
+              {tCommon("cancel")}
             </Button>
           </DialogClose>
           <LoadingButton
@@ -85,7 +88,7 @@ export function DeleteAccountDialog() {
             isLoading={deleteMutation.isPending}
             loadingText="Deleting..."
           >
-            Yes, delete
+            {t("settings_danger_delete_confirmation")}
           </LoadingButton>
         </DialogFooter>
       </DialogContent>

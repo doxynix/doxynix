@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
 import { User } from "next-auth";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -27,6 +27,8 @@ import {
 import { Input } from "@/shared/ui/core/input";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import { useRouter } from "@/i18n/routing";
+
 type Props = {
   user: User;
 };
@@ -34,6 +36,8 @@ type Props = {
 type ProfileFormValues = z.infer<typeof UpdateProfileSchema>;
 
 export function ProfileCard({ user }: Props) {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   const { update } = useSession();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -42,7 +46,7 @@ export function ProfileCard({ user }: Props) {
 
   const updateAvatar = trpc.user.updateAvatar.useMutation({
     onSuccess: async () => {
-      toast.success("Profile Picture updated");
+      toast.success(t("settings_profile_update_avatar_toast_success"));
       await update();
       router.refresh();
     },
@@ -53,7 +57,7 @@ export function ProfileCard({ user }: Props) {
     onSuccess: async () => {
       setAvatarUrl("");
       if (fileInputRef.current) fileInputRef.current.value = "";
-      toast.success("Photo removed");
+      toast.success(t("settings_profile_remove_avatar_toast_success"));
       await update();
       router.refresh();
     },
@@ -67,13 +71,13 @@ export function ProfileCard({ user }: Props) {
       updateAvatar.mutate({ url: file.ufsUrl, key: file.key });
     },
     onUploadError: (error: Error) => {
-      let message = "Error uploading file";
+      let message = t("settings_profile_error_uploading_file");
       if (error.message.includes("FileSizeMismatch")) {
-        message = "File too large (max 4MB)";
+        message = t("settings_profile_file_too_large");
       } else if (error.message.includes("InvalidFileType")) {
-        message = "Invalid file format (allowed: .png, .jpg, .gif)";
-      } else if (error.message.includes("Unauthorized")) {
-        message = "You are not logged in";
+        message = t("settings_profile_invalid_file_format");
+      } else if (error.message.includes(t("settings_profile_unauthorized"))) {
+        message = t("settings_profile_not_logged_in");
       }
       toast.error(`${message}`);
     },
@@ -81,7 +85,7 @@ export function ProfileCard({ user }: Props) {
 
   const updateProfile = trpc.user.updateUser.useMutation({
     onSuccess: async () => {
-      toast.success("Data updated");
+      toast.success(t("settings_profile_update_profile_toast_success"));
       await update();
       form.reset({
         name: form.getValues("name"),
@@ -121,8 +125,8 @@ export function ProfileCard({ user }: Props) {
     <div className="flex w-full flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Profile Picture</CardTitle>
-          <CardDescription>This image will be displayed on your profile.</CardDescription>
+          <CardTitle>{t("settings_profile_picture_title")}</CardTitle>
+          <CardDescription>{t("settings_profile_picture_desc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex items-center gap-6">
           <div className="relative">
@@ -163,18 +167,20 @@ export function ProfileCard({ user }: Props) {
               isLoading={isUploading}
               onClick={() => fileInputRef.current?.click()}
             >
-              Upload photo
+              {t("settings_profile_upload_photo_button")}
             </LoadingButton>
 
-            <p className="text-muted-foreground text-center text-xs">Max. 4MB (.jpg, .png, .gif)</p>
+            <p className="text-muted-foreground text-center text-xs">
+              {t("settings_profile_avatar_requirements")}
+            </p>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
-          <CardDescription>Update your name.</CardDescription>
+          <CardTitle>{t("settings_profile_personal_information_title")}</CardTitle>
+          <CardDescription>{t("settings_profile_personal_information_desc")}</CardDescription>
           {/* <CardDescription>Update your name or email.</CardDescription> */}
         </CardHeader>
         <CardContent className="space-y-4">
@@ -185,9 +191,14 @@ export function ProfileCard({ user }: Props) {
                 name="name"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel className="text-muted-foreground">Display Name</FormLabel>
+                    <FormLabel className="text-muted-foreground">
+                      {t("settings_profile_personal_information_label")}
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="Your name" {...field} />
+                      <Input
+                        placeholder={t("settings_profile_personal_information_placeholder")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -217,7 +228,7 @@ export function ProfileCard({ user }: Props) {
                   }
                   className="cursor-pointer"
                 >
-                  Save
+                  {tCommon("save")}
                 </LoadingButton>
               </div>
             </form>

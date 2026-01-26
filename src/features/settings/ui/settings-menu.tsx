@@ -1,12 +1,12 @@
 "use client";
 
 import { Route } from "next";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 import { settingsMenu } from "@/shared/constants/navigation";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
+
+import { Link, usePathname } from "@/i18n/routing";
 
 export function SettingsMenu() {
   const pathname = usePathname();

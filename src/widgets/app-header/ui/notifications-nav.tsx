@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { Bell } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
@@ -14,6 +14,8 @@ import {
 } from "@/shared/ui/core/dropdown-menu";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
+import { Link } from "@/i18n/routing";
+
 // NOTE: Заглушка! Потом заменишь на пропс или запрос
 const notifications = [
   { id: 1, title: "Analysis completed", repos: "vercel/next.js", time: "2 hours ago", read: false },
@@ -22,12 +24,13 @@ const notifications = [
 ];
 
 export function NotificationsNav() {
+  const t = useTranslations("Dashboard");
   const unreadCount = notifications.filter((n) => !n.read).length;
   const hasUnread = unreadCount > 0;
 
   return (
     <DropdownMenu>
-      <AppTooltip content="Notifications">
+      <AppTooltip content={t("notifications_title")}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
@@ -43,14 +46,14 @@ export function NotificationsNav() {
       </AppTooltip>
       <DropdownMenuContent className="w-80">
         <div className="flex items-center justify-between p-2">
-          <p>Notifications</p>
-          <p className="cursor-pointer text-xs hover:underline">Mark all as read</p>
+          <p>{t("notifications_title")}</p>
+          <p className="cursor-pointer text-xs hover:underline">{t("notifications_mark_read")}</p>
         </div>
         <DropdownMenuSeparator />
         <div className="flex flex-col gap-1 py-1">
           {notifications.length === 0 ? (
             <div className="text-muted-foreground py-4 text-center text-sm">
-              No new notifications
+              {t("notifications_empty")}
             </div>
           ) : (
             notifications.slice(0, 5).map((note) => (
@@ -78,7 +81,7 @@ export function NotificationsNav() {
             className="flex w-full items-center justify-center group-hover:underline"
             href="/dashboard/notifications"
           >
-            Show all
+            {t("notifications_show_all")}
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -1,4 +1,5 @@
 import { ComponentType } from "react";
+import { getTranslations } from "next-intl/server";
 
 import { AblyIcon } from "@/shared/ui/icons/ably-icon";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
@@ -26,7 +27,9 @@ const BRANDS: Props[] = [
   { name: "Neon", icon: NeonIcon },
 ];
 
-export function BrandsSection() {
+export async function BrandsSection() {
+  const t = await getTranslations("Landing");
+
   return (
     <section
       id="brands"
@@ -34,7 +37,7 @@ export function BrandsSection() {
     >
       <div className="mx-auto">
         <p className="text-muted-foreground mb-8 text-center text-sm font-medium tracking-widest uppercase">
-          Document projects built with
+          {t("section_brands_title")}
         </p>
         <div className="relative flex w-full flex-col items-center justify-center overflow-hidden mask-[linear-gradient(to_right,transparent,white_20%,white_80%,transparent)]">
           <Marquee pauseOnHover className="max-h-12 [--duration:20s] sm:max-h-36">

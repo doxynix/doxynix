@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from "react";
 import type { Route } from "next";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/utils";
 import {
@@ -15,6 +16,8 @@ import {
 } from "@/shared/ui/core/pagination";
 import { Spinner } from "@/shared/ui/core/spinner";
 
+import { usePathname, useRouter } from "@/i18n/routing";
+
 type Props = {
   className?: string;
   currentPage: number;
@@ -22,6 +25,8 @@ type Props = {
 };
 
 export function AppPagination({ className, currentPage, totalPages }: Props) {
+  const t = useTranslations("Common");
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -76,7 +81,7 @@ export function AppPagination({ className, currentPage, totalPages }: Props) {
             ) : (
               <ChevronLeft className="h-4 w-4" />
             )}
-            <span className="ml-1">Back</span>
+            <span className="ml-1">{t("back")}</span>
           </PaginationLink>
         </PaginationItem>
 
@@ -121,7 +126,7 @@ export function AppPagination({ className, currentPage, totalPages }: Props) {
             )}
             aria-disabled={currentPage >= totalPages}
           >
-            <span className="mr-1">Next</span>
+            <span className="mr-1">{t("next")}</span>
             {isNextLoading ? (
               <Spinner className="h-4 w-4 animate-spin" />
             ) : (

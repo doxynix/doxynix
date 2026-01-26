@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail } from "lucide-react";
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -26,6 +26,8 @@ import { Logo } from "@/shared/ui/icons/logo";
 import { YandexIcon } from "@/shared/ui/icons/yandex-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import { Link } from "@/i18n/routing";
+
 const MagicLinkSchema = z.object({
   email: z
     .email({ message: "Please enter a valid email address" })
@@ -33,6 +35,9 @@ const MagicLinkSchema = z.object({
 });
 
 export function AuthForm() {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Auth");
+
   const [isSent, setIsSent] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
@@ -62,9 +67,9 @@ export function AuthForm() {
 
       if ((res?.ok ?? false) && res?.error == null) {
         setIsSent(true);
-        toast.success("Email sent");
+        toast.success(t("sent_toast_success"));
       } else {
-        setErrorMessage("Error sending email. Please try again.");
+        setErrorMessage(t("sent_toast_error"));
       }
     } finally {
       setLoadingProvider(null);
@@ -95,7 +100,7 @@ export function AuthForm() {
           <LoadingButton
             className="cursor-pointer"
             isLoading={loadingProvider === "github"}
-            loadingText="Login..."
+            loadingText={t("login_loading")}
             disabled={disabled}
             onClick={() => handleSignIn("github")}
           >
@@ -105,7 +110,7 @@ export function AuthForm() {
           <LoadingButton
             className="cursor-pointer"
             isLoading={loadingProvider === "google"}
-            loadingText="Login..."
+            loadingText={t("login_loading")}
             disabled={disabled}
             onClick={() => handleSignIn("google")}
           >
@@ -115,7 +120,7 @@ export function AuthForm() {
           <LoadingButton
             className="cursor-pointer"
             isLoading={loadingProvider === "yandex"}
-            loadingText="Login..."
+            loadingText={t("login_loading")}
             disabled={disabled}
             onClick={() => handleSignIn("yandex")}
           >
@@ -127,7 +132,7 @@ export function AuthForm() {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="text-muted-foreground bg-background px-2">or</span>
+            <span className="text-muted-foreground bg-background px-2">{t("or_divider")}</span>
           </div>
         </div>
         <div className="bg-muted-foreground/5 flex flex-col gap-4 rounded-xl p-6">
@@ -155,21 +160,21 @@ export function AuthForm() {
                 type="submit"
                 className="cursor-pointer"
                 isLoading={loadingProvider === "email"}
-                loadingText="Login..."
+                loadingText={t("login_loading")}
                 disabled={disabled}
               >
-                Log in
+                {t("login_btn")}
               </LoadingButton>
             </form>
           </Form>
           <p className="text-muted-foreground text-center text-xs">
-            By creating an account, you agree to our{" "}
+            {t("terms_agreement")}{" "}
             <Link className="underline hover:no-underline" href="/terms">
-              Terms of Service
+              {tCommon("terms_of_service")}
             </Link>{" "}
-            and{" "}
+            {tCommon("and")}{" "}
             <Link className="underline hover:no-underline" href="/privacy">
-              Privacy Policy
+              {tCommon("privacy_policy")}
             </Link>
           </p>
         </div>
@@ -185,13 +190,13 @@ export function AuthForm() {
         <div className="bg-muted-foreground/10 mb-4 flex size-24 items-center justify-center rounded-full">
           <Mail className="text-muted-foreground size-12" />
         </div>
-        <h2 className="text-xl font-bold">Check your email</h2>
+        <h2 className="text-xl font-bold">{t("check_email_title")}</h2>
         <p className="text-muted-foreground">
-          We sent a login link to{" "}
+          {t("check_email_desc")}{" "}
           <span className="text-foreground font-bold italic">{form.getValues("email")}</span>
         </p>
         <Button className="cursor-pointer" variant="outline" onClick={() => setIsSent(false)}>
-          Enter different Email{" "}
+          {t("enter_different_email")}
         </Button>
       </div>
     </div>
