@@ -172,7 +172,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/react-scroll": "^1.8.10",
     "@typescript-eslint/eslint-plugin": "^8.50.0",
-    "@typescript-eslint/parser": "^8.50.0",
+    "@typescript-eslint/parser": "^8.54.0",
     "@vitejs/plugin-react": "^5.1.2",
     "@vitest/coverage-v8": "^4.0.16",
     "@zenstackhq/sdk": "^3.1.1",
