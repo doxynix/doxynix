@@ -29,7 +29,10 @@ export function RepoFilters() {
 
   const filters = parseRepoSearchParams(paramsObject);
 
-  const hasFilters = searchParams.toString().length > 0;
+  const hasFilters =
+    (filters.status && (filters.status as string) !== "all") ||
+    (filters.visibility && (filters.visibility as string) !== "all") ||
+    (filters.sortBy && filters.sortBy !== REPO_DEFAULTS.SORT_BY);
 
   const updateQuery = (name: string, value: string) => {
     const newParams = new URLSearchParams(searchParams.toString());
@@ -45,8 +48,17 @@ export function RepoFilters() {
   };
 
   const handleReset = () => {
-    if (!hasFilters && filters.page === 1) return;
-    router.push(pathname as Route);
+    const newParams = new URLSearchParams(searchParams.toString());
+
+    const searchValue = newParams.get("search");
+
+    newParams.forEach((_, key) => {
+      if (key !== "search") newParams.delete(key);
+    });
+
+    if (searchValue !== null) newParams.set("search", searchValue);
+
+    router.push(`${pathname}?${newParams.toString()}` as Route);
   };
 
   return (

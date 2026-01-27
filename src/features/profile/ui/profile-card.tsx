@@ -3,7 +3,6 @@
 import React, { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
-import { User } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
@@ -27,28 +26,21 @@ import {
 import { Input } from "@/shared/ui/core/input";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { useRouter } from "@/i18n/routing";
-
-type Props = {
-  user: User;
-};
-
 type ProfileFormValues = z.infer<typeof UpdateProfileSchema>;
 
-export function ProfileCard({ user }: Props) {
+export function ProfileCard() {
+  const { data: session, update } = useSession();
+  const user = session?.user;
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const { update } = useSession();
-  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [avatarUrl, setAvatarUrl] = useState(user.image ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(user?.image ?? "");
 
   const updateAvatar = trpc.user.updateAvatar.useMutation({
     onSuccess: async () => {
       toast.success(t("settings_profile_update_avatar_toast_success"));
       await update();
-      router.refresh();
     },
     onError: (err) => toast.error(err.message),
   });
@@ -59,7 +51,6 @@ export function ProfileCard({ user }: Props) {
       if (fileInputRef.current) fileInputRef.current.value = "";
       toast.success(t("settings_profile_remove_avatar_toast_success"));
       await update();
-      router.refresh();
     },
     onError: (err) => toast.error(err.message),
   });
@@ -91,17 +82,16 @@ export function ProfileCard({ user }: Props) {
         name: form.getValues("name"),
         email: form.getValues("email"),
       });
-      router.refresh();
     },
     onError: (error) => toast.error(error.message),
   });
 
-  React.useEffect(() => {
-    updateProfile.reset();
-    updateAvatar.reset();
-    removeAvatar.reset();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // React.useEffect(() => {
+  //   updateProfile.reset();
+  //   updateAvatar.reset();
+  //   removeAvatar.reset();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -112,8 +102,8 @@ export function ProfileCard({ user }: Props) {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(UpdateProfileSchema),
     values: {
-      name: user.name ?? "",
-      email: user.email ?? "",
+      name: user?.name ?? "",
+      email: user?.email ?? "",
     },
   });
 
@@ -133,7 +123,7 @@ export function ProfileCard({ user }: Props) {
             <Avatar className="border-border h-24 w-24 border-2">
               <AvatarImage src={avatarUrl || undefined} className="object-cover" />
               <AvatarFallback className="text-2xl">
-                {getInitials(user.name, user.email)}
+                {getInitials(user?.name, user?.email)}
               </AvatarFallback>
             </Avatar>
             {avatarUrl && !updateAvatar.isPending && (

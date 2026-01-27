@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -17,8 +17,7 @@ export function ThemeToggle({ className }: Props) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+  React.useEffect(() => {
     setMounted(true);
   }, []);
 

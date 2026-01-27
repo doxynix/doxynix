@@ -55,6 +55,7 @@ const languageColors: Record<string, string> = {
   EmberScript: "#FFF4F3",
   Erlang: "#B83998",
   "F#": "#b845fc",
+  "C++": "#b845fc",
   Factor: "#636746",
   Fancy: "#7b9db4",
   Fantom: "#dbded5",

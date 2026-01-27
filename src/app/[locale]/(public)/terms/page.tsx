@@ -70,8 +70,8 @@ export default async function TermsPage() {
           <h2 className={SECTION_TITLE}>{t("section_disclaimer_title")}</h2>
           <p className="mb-2 italic">{t("section_disclaimer_note")}</p>
           <div className="border-muted-foreground border-l-2 pl-4">
-            <p className="mb-4">{tsRich("disclaimer.content1")}</p>
-            <p>{tsRich("disclaimer.content2")}</p>
+            <p className="mb-4">{tsRich("disclaimer.content_1")}</p>
+            <p>{tsRich("disclaimer.content_2")}</p>
           </div>
         </section>
 

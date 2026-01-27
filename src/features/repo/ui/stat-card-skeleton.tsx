@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/shared/ui/core/card";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 
-export async function StatCardSkeleton() {
+export function StatCardSkeleton() {
   return (
     <div className="xs:grid-cols-2 mb-8 grid grid-cols-1 gap-4 lg:grid-cols-5">
       {Array.from({ length: 5 }).map((_, i) => (

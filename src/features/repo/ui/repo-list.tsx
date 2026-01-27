@@ -1,5 +1,7 @@
+"use client";
+
 import { SearchX } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 
 import { RepoCard } from "@/entities/repo";
 import { RepoMeta, RepoTableItem } from "@/entities/repo/model/types";
@@ -10,8 +12,8 @@ type Props = {
   meta?: RepoMeta;
 };
 
-export async function RepoList({ repos, meta }: Props) {
-  const t = await getTranslations("Dashboard");
+export function RepoList({ repos, meta }: Props) {
+  const t = useTranslations("Dashboard");
 
   if (!meta || meta.totalCount === 0) {
     return <RepoEmpty />;

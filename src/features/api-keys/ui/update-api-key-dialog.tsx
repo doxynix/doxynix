@@ -34,14 +34,13 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { UiApiKey } from "@/entities/api-keys";
-import { useRouter } from "@/i18n/routing";
 
 type Props = {
   apiKey: UiApiKey;
 };
 
 export function UpdateApiKeyDialog({ apiKey }: Props) {
-  const router = useRouter();
+  const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
 
   const tCommon = useTranslations("Common");
@@ -59,7 +58,7 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
     onSuccess: async () => {
       toast.success(t("settings_api_keys_updated_toast_success"));
       setOpen(false);
-      router.refresh();
+      await utils.apikey.list.invalidate();
     },
     onError: (err) => toast.error(err.message),
   });

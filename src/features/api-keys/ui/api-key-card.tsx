@@ -1,4 +1,6 @@
-import { getLocale, getTranslations } from "next-intl/server";
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
 
 import { formatRelativeTime } from "@/shared/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
@@ -8,10 +10,10 @@ import { UiApiKey } from "@/entities/api-keys";
 import { RevokeApiKeyDialog } from "./revoke-api-key-dialog";
 import { UpdateApiKeyDialog } from "./update-api-key-dialog";
 
-export async function ApiKeyCard({ active }: { active: UiApiKey }) {
-  const tCommon = await getTranslations("Common");
-  const t = await getTranslations("Dashboard");
-  const locale = await getLocale();
+export function ApiKeyCard({ active }: { active: UiApiKey }) {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
 
   return (
     <Card className="group justify-between">

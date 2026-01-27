@@ -2,7 +2,6 @@
 
 import type { Route } from "next";
 import { SlashIcon } from "lucide-react";
-import { User } from "next-auth";
 
 import { cn } from "@/shared/lib/utils";
 import {
@@ -23,11 +22,7 @@ import { NotificationsNav } from "./notifications-nav";
 import { SidebarToggle } from "./sidebar-toggle";
 import { UserNav } from "./user-nav";
 
-type Props = {
-  user: User;
-};
-
-export function AppHeader({ user }: Props) {
+export function AppHeader() {
   const { state } = useSidebar();
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
@@ -85,7 +80,7 @@ export function AppHeader({ user }: Props) {
         <AppCommandMenu />
         {/* <ThemeToggle className="text-muted-foreground" /> // THEME: на время!*/}
         <NotificationsNav />
-        <UserNav user={user} />
+        <UserNav />
       </div>
     </header>
   );

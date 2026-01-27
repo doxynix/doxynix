@@ -1,3 +1,5 @@
+"use client";
+
 import { UiApiKey } from "@/entities/api-keys";
 import { ApiKeyArchivedTable } from "./api-key-archived-table";
 import { ApiKeyCard } from "./api-key-card";

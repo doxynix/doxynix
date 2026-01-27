@@ -21,7 +21,6 @@ import {
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { RepoMeta } from "@/entities/repo/model/types";
-import { useRouter } from "@/i18n/routing";
 
 const richStyles = {
   strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
@@ -29,7 +28,6 @@ const richStyles = {
 
 export function DeleteAllReposDialog({ meta }: { meta: RepoMeta }) {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
   const utils = trpc.useUtils();
   const hasRepos = (meta?.totalCount ?? 0) > 0;
   const tCommon = useTranslations("Common");
@@ -40,7 +38,6 @@ export function DeleteAllReposDialog({ meta }: { meta: RepoMeta }) {
     onSuccess: async () => {
       toast.success(t("settings_danger_delete_all_repos_toast_success"));
       setOpen(false);
-      router.refresh();
       await utils.repo.getAll.invalidate();
     },
     onError: (err) => toast.error(err.message),

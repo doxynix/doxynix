@@ -1,10 +1,7 @@
-import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
-import { CreateRepoButton, RepoListContainer, StatCard, StatCardSkeleton } from "@/features/repo";
-
-import { RepoCardSkeleton } from "@/entities/repo";
+import { CreateRepoButton, RepoListContainer, StatCard } from "@/features/repo";
 
 export const generateMetadata = createMetadata("dashboard_title", "dashboard_desc");
 
@@ -15,27 +12,23 @@ export default async function DashboardPage() {
     <div className="mx-auto h-full w-full">
       <div className="flex flex-col gap-6">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <Suspense fallback={<StatCardSkeleton />}>
-          <StatCard />
-        </Suspense>
+        <StatCard />
       </div>
       <div className="xs:justify-between mb-4 flex flex-wrap items-center justify-center gap-3">
         <p className="xs:order-0 xs:text-base order-1 text-sm">{t("recent_repositories")}</p>
         <CreateRepoButton />
       </div>
-      <Suspense fallback={<RepoCardSkeleton count={4} />}>
-        <RepoListContainer
-          config={{
-            limit: 4,
-            showPagination: false,
-            showTotalCount: false,
-            forcedFilters: {
-              sortBy: "updatedAt",
-              sortOrder: "desc",
-            },
-          }}
-        />
-      </Suspense>
+      <RepoListContainer
+        config={{
+          limit: 4,
+          showPagination: false,
+          showTotalCount: false,
+          forcedFilters: {
+            sortBy: "updatedAt",
+            sortOrder: "desc",
+          },
+        }}
+      />
     </div>
   );
 }
