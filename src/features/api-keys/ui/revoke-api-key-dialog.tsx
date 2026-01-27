@@ -21,7 +21,6 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { UiApiKey } from "@/entities/api-keys";
-import { useRouter } from "@/i18n/routing";
 
 type Props = {
   apiKey: UiApiKey;
@@ -29,7 +28,7 @@ type Props = {
 
 export function RevokeApiKeyDialog({ apiKey }: Props) {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
+  const utils = trpc.useUtils();
 
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
@@ -38,7 +37,7 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
     onSuccess: async () => {
       toast.success(t("settings_api_keys_revoked_toast_success"));
       setOpen(false);
-      router.refresh();
+      await utils.apikey.list.invalidate();
     },
     onError: (err) => toast.error(err.message),
   });

@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { Route } from "next";
 import { LogOut } from "lucide-react";
-import { User } from "next-auth";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 import { userNavMenu } from "@/shared/constants/navigation";
@@ -30,15 +29,14 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/shared/ui/core/dropdown-menu";
+import { Skeleton } from "@/shared/ui/core/skeleton";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { Link } from "@/i18n/routing";
 
-type Props = {
-  user: User;
-};
-
-export function UserNav({ user }: Props) {
+export function UserNav() {
+  const { data: session, status } = useSession();
+  const user = session?.user;
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
 
@@ -54,6 +52,10 @@ export function UserNav({ user }: Props) {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (status === "loading") {
+    return <Skeleton className="h-9 w-9 rounded-full" />;
   }
 
   return (

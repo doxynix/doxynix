@@ -1,16 +1,18 @@
-import { Status } from "@prisma/client";
-import { getTranslations } from "next-intl/server";
+"use client";
 
+import { useSearchParams } from "next/navigation";
+import { Status } from "@prisma/client";
+import { useTranslations } from "next-intl";
+
+import { trpc } from "@/shared/api/trpc";
 import { parseRepoSearchParams } from "@/shared/lib/search-params";
+import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
-import { api } from "@/server/trpc/server";
+import { RepoCardSkeleton } from "@/entities/repo";
 import { RepoList } from "./repo-list";
 
-type SearchParams = { [key: string]: string | string[] | undefined };
-
 type Props = {
-  searchParams?: Promise<SearchParams> | SearchParams;
   config?: {
     limit?: number;
     showPagination?: boolean;
@@ -19,14 +21,16 @@ type Props = {
       sortBy?: "updatedAt" | "createdAt" | "name";
       sortOrder?: "asc" | "desc";
       status?: Status;
+      owner?: string;
     };
   };
 };
 
-export async function RepoListContainer({ searchParams, config }: Props) {
-  const rawParams = (await searchParams) ?? {};
-  const t = await getTranslations("Dashboard");
+export function RepoListContainer({ config }: Props) {
+  const searchParams = useSearchParams();
+  const t = useTranslations("Dashboard");
 
+  const rawParams = Object.fromEntries(searchParams.entries());
   const params = parseRepoSearchParams(rawParams);
 
   const limit = config?.limit ?? 5;
@@ -39,18 +43,31 @@ export async function RepoListContainer({ searchParams, config }: Props) {
     cursor: page,
   };
 
-  const { items, meta } = await (await api()).repo.getAll(filters);
+  const { data, isLoading } = trpc.repo.getAll.useQuery(filters, {
+    placeholderData: (previousData) => previousData,
+  });
+
+  if (isLoading || !data) {
+    return (
+      <>
+        {config?.showTotalCount !== false && <Skeleton className="mb-4 ml-auto h-5 w-24 text-sm" />}
+        <RepoCardSkeleton count={limit} />
+      </>
+    );
+  }
+
+  const { items, meta } = data;
 
   return (
     <>
       {config?.showTotalCount !== false && (
-        <div className="text-muted-foreground my-4 text-sm">
-          <div className="xs:text-right text-center">
+        <div className="text-muted-foreground mb-4 text-sm">
+          <p className="xs:text-right text-center">
             {t("repo_total_count", {
               filteredCount: meta.filteredCount,
               totalCount: meta.totalCount,
             })}
-          </div>
+          </p>
         </div>
       )}
       <RepoList repos={items} meta={meta} />

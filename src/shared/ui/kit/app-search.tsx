@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 
+import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui/core/input";
 import { Spinner } from "@/shared/ui/core/spinner";
 
 import { usePathname, useRouter } from "@/i18n/routing";
-import { cn } from "../../lib/utils";
 
 type Props = {
   placeholder: string;
@@ -24,42 +24,40 @@ export function AppSearch({ placeholder }: Props) {
 
   const urlSearch = searchParams.get("search") || "";
   const [term, setTerm] = useState(urlSearch);
+  const [debouncedTerm, setDebouncedTerm] = useState(term);
   const [isPending, startTransition] = useTransition();
 
-  const isResetting = useRef(false);
-
-  useEffect(() => {
+  React.useEffect(() => {
     if (urlSearch !== term) {
-      isResetting.current = true;
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTerm(urlSearch);
     }
-  }, [urlSearch, searchParams, term]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlSearch]);
 
   useEffect(() => {
-    if (isResetting.current) {
-      isResetting.current = false;
-      return;
+    const handler = setTimeout(() => {
+      setDebouncedTerm(term);
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [term]);
+
+  useEffect(() => {
+    if (debouncedTerm === urlSearch) return;
+
+    const params = new URLSearchParams(searchParams);
+    params.delete("page");
+
+    if (debouncedTerm) {
+      params.set("search", debouncedTerm);
+    } else {
+      params.delete("search");
     }
 
-    if (term === urlSearch) return;
-
-    const handler = setTimeout(() => {
-      const params = new URLSearchParams(searchParams);
-      params.delete("page");
-
-      if (term) {
-        params.set("search", term);
-      } else {
-        params.delete("search");
-      }
-
-      startTransition(() => {
-        replace(`${pathname}?${params.toString()}` as Route, { scroll: false });
-      });
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [term, pathname, replace, urlSearch, searchParams]);
+    startTransition(() => {
+      replace(`${pathname}?${params.toString()}` as Route, { scroll: false });
+    });
+  }, [debouncedTerm, pathname, replace, searchParams, urlSearch]);
 
   return (
     <div className="relative shrink-0">
@@ -74,7 +72,6 @@ export function AppSearch({ placeholder }: Props) {
         className="focus-visible:bg-background h-9 border-none pl-8 text-sm"
         value={term}
         onChange={(e) => {
-          isResetting.current = false;
           setTerm(e.target.value);
         }}
       />

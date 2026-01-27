@@ -1,6 +1,9 @@
-import { CircleOff } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+"use client";
 
+import { CircleOff } from "lucide-react";
+import { useTranslations } from "next-intl";
+
+import { Button } from "@/shared/ui/core/button";
 import {
   Empty,
   EmptyContent,
@@ -10,10 +13,12 @@ import {
   EmptyTitle,
 } from "@/shared/ui/core/empty";
 
-import { CreateRepoEmptyButton } from "./create-repo-empty-button";
+import { useCreateRepoDialogStore } from "../model/create-repo-dialog.store";
 
-export async function RepoEmpty() {
-  const t = await getTranslations("Dashboard");
+export function RepoEmpty() {
+  const openDialog = useCreateRepoDialogStore((s) => s.openDialog);
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
   return (
     <Empty>
       <EmptyHeader>
@@ -24,7 +29,9 @@ export async function RepoEmpty() {
         <EmptyDescription>{t("repo_empty_repos_desc")}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <CreateRepoEmptyButton />
+        <Button className="cursor-pointer" onClick={openDialog}>
+          {tCommon("add")}
+        </Button>
       </EmptyContent>
     </Empty>
   );

@@ -21,11 +21,8 @@ import {
 } from "@/shared/ui/core/dialog";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { useRouter } from "@/i18n/routing";
-
 export function DeleteAccountDialog() {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
 
@@ -33,7 +30,6 @@ export function DeleteAccountDialog() {
     onSuccess: async () => {
       toast.success(t("settings_danger_delete_account_toast_success"));
       setOpen(false);
-      router.refresh();
       await signOut({ callbackUrl: "/auth" });
     },
     onError: (err) => toast.error(err.message),

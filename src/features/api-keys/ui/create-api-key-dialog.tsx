@@ -34,10 +34,8 @@ import { Textarea } from "@/shared/ui/core/textarea";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { useRouter } from "@/i18n/routing";
-
 export function CreateApiKeyDialog() {
-  const router = useRouter();
+  const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
   const [createdKey, setCreatedKey] = useState<string | null>(null);
 
@@ -53,7 +51,7 @@ export function CreateApiKeyDialog() {
     onSuccess: async (data) => {
       setCreatedKey(data.key);
       toast.success(t("settings_api_keys_created_toast_success"));
-      router.refresh();
+      await utils.apikey.list.invalidate();
     },
     onError: (err) => toast.error(err.message),
   });

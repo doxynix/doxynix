@@ -1,5 +1,7 @@
+"use client";
+
 import { CircleOff } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 
 import {
   Empty,
@@ -9,8 +11,8 @@ import {
   EmptyTitle,
 } from "@/shared/ui/core/empty";
 
-export async function ApiKeysEmpty() {
-  const t = await getTranslations("Dashboard");
+export function ApiKeysEmpty() {
+  const t = useTranslations("Dashboard");
   return (
     <Empty>
       <EmptyHeader>

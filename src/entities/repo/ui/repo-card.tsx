@@ -1,4 +1,6 @@
-import { getLocale, getTranslations } from "next-intl/server";
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
 
 import { cn, formatFullDate, formatRelativeTime } from "@/shared/lib/utils";
 import { Card, CardContent } from "@/shared/ui/core/card";
@@ -19,9 +21,9 @@ type Props = {
   repo: RepoTableItem;
 };
 
-export async function RepoCard({ repo }: Props) {
-  const t = await getTranslations("Dashboard");
-  const locale = await getLocale();
+export function RepoCard({ repo }: Props) {
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
   const visibility = repoVisibilityConfig[repo.visibility];
   const status = repoStatusConfig[repo.status];
   const metrics = getMetrics(repo);

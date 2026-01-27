@@ -1,9 +1,8 @@
-import { Suspense } from "react";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
-import { ApiKeyCardSkeleton, ApiKeysListContainer, CreateApiKeyDialog } from "@/features/api-keys";
+import { ApiKeysListContainer, CreateApiKeyDialog } from "@/features/api-keys";
 
 export const generateMetadata = createMetadata("api_keys_title", "api_keys_desc");
 
@@ -31,9 +30,7 @@ export default async function ApiKeysPage() {
         <h3 className="text-lg font-medium">{t("settings_api_keys_active_keys")}</h3>
         <CreateApiKeyDialog />
       </div>
-      <Suspense fallback={<ApiKeyCardSkeleton />}>
-        <ApiKeysListContainer />
-      </Suspense>
+      <ApiKeysListContainer />
     </div>
   );
 }

@@ -29,7 +29,7 @@ export default async function PrivateLayout({ children }: { children: ReactNode 
         className="flex h-dvh w-full flex-col overflow-hidden"
       >
         <div className="z-50 w-full shrink-0 border-b">
-          <AppHeader user={session.user} />
+          <AppHeader />
         </div>
 
         <div className="flex flex-1 overflow-hidden">

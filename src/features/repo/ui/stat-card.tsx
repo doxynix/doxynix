@@ -1,14 +1,21 @@
-import { Activity, AlertCircle, FileText, FolderGit2, Loader2 } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+"use client";
 
+import { Activity, AlertCircle, FileText, FolderGit2, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+
+import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/utils";
 import { Card, CardContent } from "@/shared/ui/core/card";
 
-import { api } from "@/server/trpc/server";
+import { StatCardSkeleton } from "./stat-card-skeleton";
 
-export async function StatCard() {
-  const data = await (await api()).analytics.getDashboardStats();
-  const t = await getTranslations("Dashboard");
+export function StatCard() {
+  const { data, isLoading } = trpc.analytics.getDashboardStats.useQuery();
+  const t = useTranslations("Dashboard");
+
+  if (isLoading || !data) {
+    return <StatCardSkeleton />;
+  }
 
   const stats = [
     {
