@@ -1,353 +1,441 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { RepoTabs } from "../repo-tabs"
+import type { Page, ActiveRepo } from "@/app/page"
 import {
-  ChevronDown,
+  ExternalLink,
   ChevronRight,
+  ChevronDown,
+  FileText,
+  Code,
+  BookOpen,
+  History,
   Download,
+  Share2,
   RefreshCw,
-  ChevronLeft,
-  ChevronRightIcon,
-  FileCode,
+  Copy,
+  Check,
   Folder,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { RepoTabs } from "../repo-tabs"
 import { cn } from "@/lib/utils"
-import type { Page, ActiveRepo } from "@/app/page"
-
-const docTree = [
-  {
-    title: "Getting Started",
-    icon: Folder,
-    items: ["Overview", "Installation", "Quick Start"],
-  },
-  {
-    title: "API",
-    icon: Folder,
-    items: ["Routes", "Middleware", "Auth"],
-  },
-  {
-    title: "Components",
-    icon: Folder,
-    items: ["Button", "Card", "Modal", "Form"],
-  },
-  {
-    title: "Utilities",
-    icon: Folder,
-    items: ["Helpers", "Hooks", "Types"],
-  },
-]
-
-const docContent: Record<string, { title: string; content: React.ReactNode }> = {
-  Overview: {
-    title: "Getting Started",
-    content: (
-      <>
-        <p>
-          Next.js is a React framework for building full-stack web applications. You use React Components to build user
-          interfaces, and Next.js for additional features and optimizations.
-        </p>
-        <h2>Why Next.js?</h2>
-        <ul>
-          <li>Built-in optimizations for images, fonts, and scripts</li>
-          <li>Server-side rendering and static generation</li>
-          <li>File-based routing with dynamic routes</li>
-          <li>API routes for backend functionality</li>
-        </ul>
-      </>
-    ),
-  },
-  Installation: {
-    title: "Installation",
-    content: (
-      <>
-        <p>To create a new Next.js project, run the following command:</p>
-        <div className="bg-muted rounded-lg p-4 font-mono text-sm my-4">npx create-next-app@latest</div>
-        <p>This will prompt you to configure your project. After installation, you can start the development server:</p>
-        <div className="bg-muted rounded-lg p-4 font-mono text-sm my-4">npm run dev</div>
-      </>
-    ),
-  },
-  "Quick Start": {
-    title: "Quick Start",
-    content: (
-      <>
-        <h2>Project Structure</h2>
-        <p>The generated project includes:</p>
-        <ul>
-          <li>
-            <code>/app</code> - App Router pages
-          </li>
-          <li>
-            <code>/public</code> - Static assets
-          </li>
-          <li>
-            <code>/components</code> - React components
-          </li>
-        </ul>
-        <h2>Creating Your First Page</h2>
-        <p>
-          Create a file at <code>app/page.tsx</code> to define your home page.
-        </p>
-      </>
-    ),
-  },
-  Routes: {
-    title: "API Routes",
-    content: (
-      <>
-        <p>API Routes allow you to create API endpoints inside your Next.js application.</p>
-        <h2>Creating an API Route</h2>
-        <p>
-          Create a file at <code>app/api/hello/route.ts</code>:
-        </p>
-        <div className="bg-muted rounded-lg p-4 font-mono text-sm my-4">
-          {`export async function GET() {
-  return Response.json({ message: 'Hello World' })
-}`}
-        </div>
-      </>
-    ),
-  },
-  Middleware: {
-    title: "Middleware",
-    content: (
-      <>
-        <p>Middleware allows you to run code before a request is completed.</p>
-        <h2>Creating Middleware</h2>
-        <p>
-          Create a <code>middleware.ts</code> file in your project root.
-        </p>
-      </>
-    ),
-  },
-  Auth: {
-    title: "Authentication",
-    content: (
-      <>
-        <p>Implement authentication in your Next.js application.</p>
-        <h2>Options</h2>
-        <ul>
-          <li>NextAuth.js - Complete authentication solution</li>
-          <li>Clerk - Drop-in authentication</li>
-          <li>Custom JWT implementation</li>
-        </ul>
-      </>
-    ),
-  },
-  Button: {
-    title: "Button Component",
-    content: (
-      <>
-        <p>A versatile button component with multiple variants.</p>
-        <h2>Usage</h2>
-        <div className="bg-muted rounded-lg p-4 font-mono text-sm my-4">{`<Button variant="primary">Click me</Button>`}</div>
-        <h2>Props</h2>
-        <ul>
-          <li>
-            <code>variant</code> - primary, secondary, outline, ghost
-          </li>
-          <li>
-            <code>size</code> - sm, md, lg
-          </li>
-          <li>
-            <code>disabled</code> - boolean
-          </li>
-        </ul>
-      </>
-    ),
-  },
-  Card: {
-    title: "Card Component",
-    content: (
-      <>
-        <p>A container component for grouping related content.</p>
-        <h2>Usage</h2>
-        <div className="bg-muted rounded-lg p-4 font-mono text-sm my-4">{`<Card>
-  <CardHeader>Title</CardHeader>
-  <CardContent>Content here</CardContent>
-</Card>`}</div>
-      </>
-    ),
-  },
-  Modal: {
-    title: "Modal Component",
-    content: (
-      <>
-        <p>A dialog component for displaying content in an overlay.</p>
-        <h2>Usage</h2>
-        <div className="bg-muted rounded-lg p-4 font-mono text-sm my-4">{`<Modal open={isOpen} onClose={handleClose}>
-  <ModalContent>Your content</ModalContent>
-</Modal>`}</div>
-      </>
-    ),
-  },
-  Form: {
-    title: "Form Component",
-    content: (
-      <>
-        <p>Form components with built-in validation.</p>
-        <h2>Features</h2>
-        <ul>
-          <li>Zod schema validation</li>
-          <li>React Hook Form integration</li>
-          <li>Accessible error messages</li>
-        </ul>
-      </>
-    ),
-  },
-  Helpers: {
-    title: "Helper Functions",
-    content: (
-      <>
-        <p>Utility functions used throughout the application.</p>
-        <h2>cn()</h2>
-        <p>A utility for conditionally joining class names.</p>
-        <div className="bg-muted rounded-lg p-4 font-mono text-sm my-4">{`import { cn } from '@/lib/utils'
-
-cn('base-class', isActive && 'active-class')`}</div>
-      </>
-    ),
-  },
-  Hooks: {
-    title: "Custom Hooks",
-    content: (
-      <>
-        <p>Reusable React hooks for common functionality.</p>
-        <h2>useDebounce</h2>
-        <p>Debounces a value with a specified delay.</p>
-        <h2>useLocalStorage</h2>
-        <p>Persists state to localStorage.</p>
-      </>
-    ),
-  },
-  Types: {
-    title: "TypeScript Types",
-    content: (
-      <>
-        <p>Type definitions used in the project.</p>
-        <h2>Common Types</h2>
-        <div className="bg-muted rounded-lg p-4 font-mono text-sm my-4">{`type User = {
-  id: string
-  name: string
-  email: string
-}`}</div>
-      </>
-    ),
-  },
-}
 
 interface RepoDocsPageProps {
   repo: ActiveRepo
   onNavigate: (page: Page) => void
 }
 
+const docTypes = [
+  { id: "readme", label: "README", icon: FileText },
+  { id: "api", label: "API Docs", icon: Code },
+  { id: "guide", label: "User Guide", icon: BookOpen },
+  { id: "changelog", label: "Changelog", icon: History },
+  { id: "code", label: "Code Docs", icon: Code },
+]
+
+const versions = [
+  { id: "v2.1", label: "v2.1 (latest)", date: "Jan 27, 2026" },
+  { id: "v2.0", label: "v2.0", date: "Jan 15, 2026" },
+  { id: "v1.9", label: "v1.9", date: "Dec 28, 2025" },
+  { id: "v1.8", label: "v1.8", date: "Dec 10, 2025" },
+]
+
+const docNavigation = [
+  {
+    title: "Getting Started",
+    icon: Folder,
+    items: [
+      { id: "overview", label: "Overview" },
+      { id: "installation", label: "Installation" },
+      { id: "quick-start", label: "Quick Start" },
+    ],
+  },
+  {
+    title: "Core Concepts",
+    icon: Folder,
+    items: [
+      { id: "components", label: "Components" },
+      { id: "jsx", label: "JSX" },
+      { id: "props", label: "Props" },
+      { id: "state", label: "State" },
+    ],
+  },
+  {
+    title: "Hooks",
+    icon: Folder,
+    items: [
+      { id: "usestate", label: "useState" },
+      { id: "useeffect", label: "useEffect" },
+      { id: "usecontext", label: "useContext" },
+      { id: "custom-hooks", label: "Custom Hooks" },
+    ],
+  },
+  {
+    title: "Advanced",
+    icon: Folder,
+    items: [
+      { id: "performance", label: "Performance" },
+      { id: "testing", label: "Testing" },
+      { id: "ssr", label: "Server-Side Rendering" },
+    ],
+  },
+]
+
+const docContents: Record<string, { title: string; body: string }> = {
+  overview: {
+    title: "Overview",
+    body: `React is a JavaScript library for building user interfaces.
+
+React lets you build user interfaces out of individual pieces called components. Create your own React components like Thumbnail, LikeButton, and Video. Then combine them into entire screens, pages, and apps.
+
+Key Features:
+• Component-Based - Build encapsulated components that manage their own state
+• Declarative - Design simple views for each state in your application
+• Learn Once, Write Anywhere - Develop new features without rewriting existing code
+
+Whether you work on your own or with thousands of other developers, using React feels the same.`,
+  },
+  installation: {
+    title: "Installation",
+    body: `You can install React using npm, yarn, or pnpm.
+
+Using npm:
+npm install react react-dom
+
+Using yarn:
+yarn add react react-dom
+
+Using pnpm:
+pnpm add react react-dom
+
+Requirements:
+• Node.js 18.17 or later
+• macOS, Windows (including WSL), and Linux are supported
+
+TypeScript Support:
+React has built-in TypeScript support. Install the types:
+npm install @types/react @types/react-dom`,
+  },
+  "quick-start": {
+    title: "Quick Start",
+    body: `Welcome to the React documentation! This page will give you an introduction to the 80% of React concepts that you will use on a daily basis.
+
+Creating a Component:
+React components are JavaScript functions that return markup:
+
+function MyButton() {
+  return (
+    <button>I'm a button</button>
+  );
+}
+
+Now that you've declared MyButton, you can nest it into another component:
+
+export default function MyApp() {
+  return (
+    <div>
+      <h1>Welcome to my app</h1>
+      <MyButton />
+    </div>
+  );
+}
+
+Adding Styles:
+In React, you specify a CSS class with className:
+<img className="avatar" />`,
+  },
+  components: {
+    title: "Components",
+    body: `Components are the building blocks of React applications. A component is a piece of the UI that has its own logic and appearance.
+
+Function Components:
+The simplest way to define a component is to write a JavaScript function:
+
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}
+
+Component Composition:
+Components can refer to other components in their output. This lets us use the same component abstraction for any level of detail.
+
+Best Practices:
+• Keep components small and focused
+• Use meaningful names
+• Extract reusable logic into custom hooks`,
+  },
+  jsx: {
+    title: "JSX",
+    body: `JSX is a syntax extension for JavaScript that lets you write HTML-like markup inside a JavaScript file.
+
+Why JSX?
+React embraces the fact that rendering logic is inherently coupled with other UI logic: how events are handled, how the state changes over time, and how the data is prepared for display.
+
+JSX Rules:
+1. Return a single root element
+2. Close all tags
+3. Use camelCase for most attributes
+
+Embedding Expressions:
+You can embed any JavaScript expression in JSX by wrapping it in curly braces:
+
+const name = 'Josh Perez';
+const element = <h1>Hello, {name}</h1>;`,
+  },
+}
+
 export function RepoDocsPage({ repo, onNavigate }: RepoDocsPageProps) {
-  const [expandedSections, setExpandedSections] = useState<string[]>(["Getting Started"])
-  const [activeItem, setActiveItem] = useState("Overview")
+  const [selectedDocType, setSelectedDocType] = useState("readme")
+  const [selectedVersion, setSelectedVersion] = useState("v2.1")
+  const [selectedSection, setSelectedSection] = useState("overview")
+  const [expandedSections, setExpandedSections] = useState<string[]>(["Getting Started", "Core Concepts", "Hooks"])
+  const [showVersionDropdown, setShowVersionDropdown] = useState(false)
+  const [showDocTypeDropdown, setShowDocTypeDropdown] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   if (!repo) return null
 
   const toggleSection = (title: string) => {
-    setExpandedSections((prev) => (prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]))
+    setExpandedSections((prev) =>
+      prev.includes(title) ? prev.filter((s) => s !== title) : [...prev, title]
+    )
   }
 
-  const allItems = docTree.flatMap((section) => section.items)
-  const currentIndex = allItems.indexOf(activeItem)
-  const prevItem = currentIndex > 0 ? allItems[currentIndex - 1] : null
-  const nextItem = currentIndex < allItems.length - 1 ? allItems[currentIndex + 1] : null
-
-  const currentContent = docContent[activeItem] || {
-    title: activeItem,
-    content: <p>Documentation for {activeItem}.</p>,
+  const handleCopy = () => {
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
+
+  const allItems = docNavigation.flatMap((s) => s.items)
+  const currentIndex = allItems.findIndex((i) => i.id === selectedSection)
+  const currentContent = docContents[selectedSection] || docContents.overview
 
   return (
-    <div className="p-6 max-w-6xl">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-        <span>{repo.owner}</span>
-        <span>/</span>
-        <span className="text-foreground font-medium">{repo.name}</span>
+    <div className="p-6 max-w-7xl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>{repo.owner}</span>
+          <span>/</span>
+          <span className="text-foreground font-semibold text-lg">{repo.name}</span>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="bg-transparent"
+          onClick={() => window.open(`https://github.com/${repo.owner}/${repo.name}`, "_blank")}
+        >
+          <ExternalLink className="w-4 h-4 mr-2" />
+          Open on GitHub
+        </Button>
       </div>
+      <p className="text-muted-foreground text-sm mb-4">The library for web and native user interfaces</p>
 
       {/* Tabs */}
       <RepoTabs currentTab="docs" onNavigate={onNavigate} />
 
-      {/* Docs Layout */}
-      <div className="flex gap-6 mt-6">
-        {/* Doc Sidebar */}
-        <aside className="w-56 flex-shrink-0">
-          <nav className="space-y-1">
-            {docTree.map((section) => (
-              <div key={section.title}>
+      {/* Doc Type and Version Selectors */}
+      <div className="flex flex-wrap items-center gap-3 mt-6 pb-4 border-b border-border">
+        {/* Doc Type Selector */}
+        <div className="relative">
+          <Button
+            variant="outline"
+            className="bg-transparent"
+            onClick={() => {
+              setShowDocTypeDropdown(!showDocTypeDropdown)
+              setShowVersionDropdown(false)
+            }}
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            {docTypes.find((d) => d.id === selectedDocType)?.label || "README"}
+            <ChevronDown className="w-4 h-4 ml-2" />
+          </Button>
+          {showDocTypeDropdown && (
+            <Card className="absolute top-full left-0 mt-1 w-48 p-1 z-10">
+              {docTypes.map((doc) => {
+                const Icon = doc.icon
+                return (
+                  <button
+                    key={doc.id}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-muted transition-colors"
+                    onClick={() => {
+                      setSelectedDocType(doc.id)
+                      setShowDocTypeDropdown(false)
+                    }}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {doc.label}
+                  </button>
+                )
+              })}
+            </Card>
+          )}
+        </div>
+
+        {/* Version Selector */}
+        <div className="relative">
+          <Button
+            variant="outline"
+            className="bg-transparent"
+            onClick={() => {
+              setShowVersionDropdown(!showVersionDropdown)
+              setShowDocTypeDropdown(false)
+            }}
+          >
+            <History className="w-4 h-4 mr-2" />
+            {versions.find((v) => v.id === selectedVersion)?.label || "v2.1 (latest)"}
+            <ChevronDown className="w-4 h-4 ml-2" />
+          </Button>
+          {showVersionDropdown && (
+            <Card className="absolute top-full left-0 mt-1 w-56 p-1 z-10">
+              {versions.map((version) => (
                 <button
-                  onClick={() => toggleSection(section.title)}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium hover:bg-accent/50 rounded-md"
+                  key={version.id}
+                  className="w-full flex items-center justify-between px-3 py-2 text-sm rounded hover:bg-muted transition-colors"
+                  onClick={() => {
+                    setSelectedVersion(version.id)
+                    setShowVersionDropdown(false)
+                  }}
                 >
-                  {expandedSections.includes(section.title) ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronRight className="w-4 h-4" />
-                  )}
-                  <section.icon className="w-4 h-4 text-muted-foreground" />
-                  {section.title}
+                  <span>{version.label}</span>
+                  <span className="text-muted-foreground text-xs">{version.date}</span>
                 </button>
-                {expandedSections.includes(section.title) && (
-                  <div className="ml-4 space-y-0.5">
-                    {section.items.map((item) => (
-                      <button
-                        key={item}
-                        onClick={() => setActiveItem(item)}
-                        className={cn(
-                          "w-full text-left px-3 py-1.5 text-sm rounded-md transition-colors flex items-center gap-2",
-                          activeItem === item
-                            ? "bg-accent text-accent-foreground font-medium"
-                            : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-                        )}
-                      >
-                        <FileCode className="w-3 h-3" />
-                        {item}
-                      </button>
-                    ))}
+              ))}
+            </Card>
+          )}
+        </div>
+
+        <div className="flex-1" />
+
+        {/* Actions */}
+        <Button variant="outline" size="sm" className="bg-transparent">
+          <Download className="w-4 h-4 mr-2" />
+          Export
+        </Button>
+        <Button variant="outline" size="sm" className="bg-transparent">
+          <Share2 className="w-4 h-4 mr-2" />
+          Share
+        </Button>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex gap-6 mt-6">
+        {/* Sidebar Navigation */}
+        <div className="w-64 flex-shrink-0">
+          <Card className="p-4 sticky top-24">
+            <nav className="space-y-2">
+              {docNavigation.map((section) => {
+                const Icon = section.icon
+                return (
+                  <div key={section.title}>
+                    <button
+                      className="w-full flex items-center gap-2 text-sm font-medium py-1.5 hover:text-foreground transition-colors"
+                      onClick={() => toggleSection(section.title)}
+                    >
+                      {expandedSections.includes(section.title) ? (
+                        <ChevronDown className="w-4 h-4" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
+                      <Icon className="w-4 h-4 text-muted-foreground" />
+                      <span>{section.title}</span>
+                    </button>
+                    {expandedSections.includes(section.title) && (
+                      <div className="space-y-0.5 ml-6 mt-1 border-l border-border pl-3">
+                        {section.items.map((item) => (
+                          <button
+                            key={item.id}
+                            className={cn(
+                              "w-full text-left text-sm py-1.5 px-2 rounded transition-colors",
+                              selectedSection === item.id
+                                ? "bg-accent text-accent-foreground font-medium"
+                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                            )}
+                            onClick={() => setSelectedSection(item.id)}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            ))}
-          </nav>
+                )
+              })}
+            </nav>
 
-          <div className="border-t border-border mt-6 pt-4 space-y-2">
-            <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
-            <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </Button>
-          </div>
-        </aside>
+            <div className="border-t border-border mt-4 pt-4 space-y-2">
+              <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
+                <Download className="w-4 h-4 mr-2" />
+                Export All
+              </Button>
+              <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Regenerate
+              </Button>
+            </div>
+          </Card>
+        </div>
 
-        {/* Doc Content */}
+        {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="prose prose-neutral dark:prose-invert max-w-none">
-            <h1>{currentContent.title}</h1>
-            {currentContent.content}
-          </div>
+          <Card className="p-6">
+            {/* Copy button */}
+            <div className="flex justify-end mb-4">
+              <Button variant="ghost" size="sm" onClick={handleCopy}>
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 mr-2 text-green-500" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy
+                  </>
+                )}
+              </Button>
+            </div>
 
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
-            <Button variant="outline" disabled={!prevItem} onClick={() => prevItem && setActiveItem(prevItem)}>
-              <ChevronLeft className="w-4 h-4 mr-2" />
-              {prevItem || "Previous"}
-            </Button>
-            <Button variant="outline" disabled={!nextItem} onClick={() => nextItem && setActiveItem(nextItem)}>
-              {nextItem || "Next"}
-              <ChevronRightIcon className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
+            {/* Content */}
+            <div className="prose prose-neutral dark:prose-invert max-w-none">
+              <h1 className="text-2xl font-bold mb-6">{currentContent.title}</h1>
+              <div className="space-y-4 text-muted-foreground leading-relaxed whitespace-pre-line">
+                {currentContent.body}
+              </div>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-8 pt-4 border-t border-border">
+              <Button
+                variant="outline"
+                className="bg-transparent"
+                disabled={currentIndex === 0}
+                onClick={() => {
+                  if (currentIndex > 0) {
+                    setSelectedSection(allItems[currentIndex - 1].id)
+                  }
+                }}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Generated: 2h ago | {selectedVersion} | 48 pages
+              </span>
+              <Button
+                variant="outline"
+                className="bg-transparent"
+                disabled={currentIndex === allItems.length - 1}
+                onClick={() => {
+                  if (currentIndex < allItems.length - 1) {
+                    setSelectedSection(allItems[currentIndex + 1].id)
+                  }
+                }}
+              >
+                Next
+              </Button>
+            </div>
+          </Card>
         </div>
       </div>
     </div>

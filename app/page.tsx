@@ -7,10 +7,12 @@ import { DashboardPage } from "@/components/prototype/pages/dashboard"
 import { ReposPage } from "@/components/prototype/pages/repos"
 import { RepoOverviewPage } from "@/components/prototype/pages/repo-overview"
 import { RepoDocsPage } from "@/components/prototype/pages/repo-docs"
-import { RepoAnalysisPage } from "@/components/prototype/pages/repo-analysis"
+import { RepoMetricsPage } from "@/components/prototype/pages/repo-metrics"
+import { RepoHistoryPage } from "@/components/prototype/pages/repo-history"
 import { RepoSettingsPage } from "@/components/prototype/pages/repo-settings"
 import { SettingsPage } from "@/components/prototype/pages/settings"
 import { RepoSetupPage } from "@/components/prototype/pages/repo-setup"
+import { NotificationsPage } from "@/components/prototype/pages/notifications"
 import { AddRepoModal } from "@/components/prototype/add-repo-modal"
 
 export type Page =
@@ -18,10 +20,12 @@ export type Page =
   | "repos"
   | "repo-overview"
   | "repo-docs"
-  | "repo-analysis"
+  | "repo-metrics"
+  | "repo-history"
   | "repo-settings"
   | "repo-setup"
   | "settings"
+  | "notifications"
 
 export type ActiveRepo = {
   owner: string
@@ -66,12 +70,16 @@ export default function DoxynixPrototype() {
         return <RepoOverviewPage repo={activeRepo} onNavigate={setCurrentPage} />
       case "repo-docs":
         return <RepoDocsPage repo={activeRepo} onNavigate={setCurrentPage} />
-      case "repo-analysis":
-        return <RepoAnalysisPage repo={activeRepo} onNavigate={setCurrentPage} />
+      case "repo-metrics":
+        return <RepoMetricsPage repo={activeRepo} onNavigate={setCurrentPage} />
+      case "repo-history":
+        return <RepoHistoryPage repo={activeRepo} onNavigate={setCurrentPage} />
       case "repo-settings":
         return <RepoSettingsPage repo={activeRepo} onNavigate={setCurrentPage} />
       case "settings":
         return <SettingsPage />
+      case "notifications":
+        return <NotificationsPage onNavigate={setCurrentPage} onRepoClick={navigateToRepo} />
       default:
         return <DashboardPage onRepoClick={navigateToRepo} onAddRepo={() => setShowAddModal(true)} />
     }

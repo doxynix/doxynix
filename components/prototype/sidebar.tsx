@@ -10,6 +10,7 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  Bell,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -64,6 +65,14 @@ export function Sidebar({
             active={currentPage === "repos"}
             onClick={() => onNavigate("repos")}
             collapsed={collapsed}
+          />
+          <SidebarItem
+            icon={Bell}
+            label="Notifications"
+            active={currentPage === "notifications"}
+            onClick={() => onNavigate("notifications")}
+            collapsed={collapsed}
+            badge={3}
           />
         </nav>
 
@@ -152,18 +161,20 @@ function SidebarItem({
   active,
   onClick,
   collapsed,
+  badge,
 }: {
   icon: React.ElementType
   label: string
   active?: boolean
   onClick?: () => void
   collapsed: boolean
+  badge?: number
 }) {
   return (
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors",
+        "w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors relative",
         active
           ? "bg-accent text-accent-foreground font-medium"
           : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
@@ -172,6 +183,14 @@ function SidebarItem({
     >
       <Icon className="w-4 h-4 flex-shrink-0" />
       {!collapsed && <span>{label}</span>}
+      {badge && badge > 0 && (
+        <span className={cn(
+          "px-1.5 py-0.5 text-xs bg-blue-500 text-white rounded-full",
+          collapsed ? "absolute -top-1 -right-1 text-[10px] px-1" : "ml-auto"
+        )}>
+          {badge}
+        </span>
+      )}
     </button>
   )
 }
