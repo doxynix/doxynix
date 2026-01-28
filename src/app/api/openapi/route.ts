@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { generateOpenApiDocument } from "trpc-to-openapi";
 
+import { getCookieName } from "@/shared/lib/utils";
+
 import { appRouter } from "@/server/trpc/router";
 
 const getBaseUrl = () => {
@@ -8,13 +10,6 @@ const getBaseUrl = () => {
     return "http://localhost:3000";
   }
   return process.env.NEXT_PUBLIC_APP_URL ?? "https://doxynix.space";
-};
-
-const getCookieName = () => {
-  if (process.env.NODE_ENV === "production") {
-    return "__Secure-next-auth.session-token";
-  }
-  return "next-auth.session-token";
 };
 
 export const GET = () => {

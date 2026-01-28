@@ -1,17 +1,12 @@
 import { ApiReference } from "@scalar/nextjs-api-reference";
 
+import { getCookieName } from "@/shared/lib/utils";
+
 const getBaseUrl = () => {
   if (process.env.NODE_ENV === "development") {
     return "http://localhost:3000";
   }
   return process.env.NEXT_PUBLIC_APP_URL ?? "https://doxynix.space";
-};
-
-const getCookieName = () => {
-  if (process.env.NODE_ENV === "production") {
-    return "__Secure-next-auth.session-token";
-  }
-  return "next-auth.session-token";
 };
 
 export const GET = ApiReference({

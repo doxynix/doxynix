@@ -153,3 +153,10 @@ export const smoothScrollTo = (targetId: string, offset: number = 80, duration: 
 
   requestAnimationFrame(animation);
 };
+
+export const getCookieName = () => {
+  if (process.env.NODE_ENV === "production") {
+    return "__Secure-next-auth.session-token";
+  }
+  return "next-auth.session-token";
+};
