@@ -163,8 +163,8 @@ const nextConfig: NextConfig = {
                 https://uploadthing.com
                 https://*.uploadthing.com
                 https://vitals.vercel-insights.com
-                https://axiom.co;
-                https://challenges.cloudflare.com
+                https://axiom.co
+                https://challenges.cloudflare.com;
               frame-ancestors 'none';
               upgrade-insecure-requests;
             `
