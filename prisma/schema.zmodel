@@ -245,7 +245,7 @@ model AuditLog {
 
   @@allow('create', true)
   @@allow('read', auth().role == 'ADMIN' || (userId != null && auth().id == userId))
-  @@allow('update,delete', auth().role == 'ADMIN')
+  @@allow('update,delete', false)
 
   @@index([userId])
   @@index([requestId])

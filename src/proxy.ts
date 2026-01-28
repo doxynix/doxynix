@@ -42,6 +42,46 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.startsWith("/api") || pathname.startsWith("/trpc")) {
     if (!pathname.includes("/uploadthing") && !pathname.includes("/webhooks")) {
+      if (pathname === "/api/auth/signin/email" && request.method === "POST") {
+        const token = request.cookies.get("cf-turnstile-response")?.value;
+        const secretKey = process.env.TURNSTILE_SECRET_KEY;
+
+        if (
+          token === null ||
+          token === undefined ||
+          secretKey === null ||
+          secretKey === undefined
+        ) {
+          return new NextResponse(JSON.stringify({ error: "Missing captcha" }), { status: 403 });
+        }
+
+        const formData = new FormData();
+        formData.append("secret", secretKey);
+        formData.append("response", token);
+        formData.append("remoteip", ip);
+
+        try {
+          const cfRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+            method: "POST",
+            body: formData,
+          });
+
+          const cfData = await cfRes.json();
+
+          if (cfData.success === false) {
+            console.error("Cloudflare verification failed:", cfData["error-codes"]);
+            return new NextResponse(JSON.stringify({ error: "Captcha failed" }), { status: 403 });
+          }
+        } catch (error) {
+          console.error("Cloudflare network error:", error);
+          return new NextResponse(
+            JSON.stringify({ error: "Security check error. Please try again." }),
+            {
+              status: 403,
+            }
+          );
+        }
+      }
       const contentLength = request.headers.get("content-length");
       if (contentLength !== null && Number(contentLength) > ONE_MB) {
         return new NextResponse(JSON.stringify({ error: "Payload Too Large", requestId }), {

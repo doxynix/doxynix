@@ -144,7 +144,8 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: `
               default-src 'self';
-              script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com https://cdn.jsdelivr.net;
+              script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com https://cdn.jsdelivr.net https://challenges.cloudflare.com;
+              frame-src 'self' https://challenges.cloudflare.com;
               style-src 'self' 'unsafe-inline';
               img-src 'self' blob: data:
                 https://sun1-26.userapi.com
@@ -163,6 +164,7 @@ const nextConfig: NextConfig = {
                 https://*.uploadthing.com
                 https://vitals.vercel-insights.com
                 https://axiom.co;
+                https://challenges.cloudflare.com
               frame-ancestors 'none';
               upgrade-insecure-requests;
             `

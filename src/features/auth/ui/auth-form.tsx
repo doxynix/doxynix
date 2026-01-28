@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Mail } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
@@ -34,9 +35,17 @@ const MagicLinkSchema = z.object({
     .max(254, "Email address cannot exceed 254 characters"),
 });
 
+const BUTTONS = [
+  { provider: "github", icon: GitHubIcon, text: "Github" },
+  { provider: "google", icon: GoogleIcon, text: "Google" },
+  { provider: "yandex", icon: YandexIcon, text: "Yandex" },
+];
+
 export function AuthForm() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
+  const turnstileRef = useRef<TurnstileInstance>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const [isSent, setIsSent] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -58,6 +67,16 @@ export function AuthForm() {
   const onSubmit = async (values: z.infer<typeof MagicLinkSchema>) => {
     setErrorMessage(null);
     setLoadingProvider("email");
+    const token = turnstileToken;
+    if (token === null) {
+      turnstileRef.current?.reset();
+      toast.error("Security check failed. Please try again.");
+      setLoadingProvider(null);
+      return;
+    }
+
+    document.cookie = `cf-turnstile-response=${token}; path=/; max-age=120`;
+
     try {
       const res = await signIn("email", {
         email: values.email,
@@ -69,7 +88,13 @@ export function AuthForm() {
         setIsSent(true);
         toast.success(t("sent_toast_success"));
       } else {
-        setErrorMessage(t("sent_toast_error"));
+        if (res?.status === 403) {
+          setErrorMessage("Captcha validation failed. Are you a robot?");
+        } else {
+          setErrorMessage(t("sent_toast_error"));
+        }
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
       }
     } finally {
       setLoadingProvider(null);
@@ -87,6 +112,19 @@ export function AuthForm() {
 
   return (
     <div className="relative flex w-full max-w-lg items-center justify-center overflow-hidden">
+      <div className="fixed -top-10 left-0">
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+          options={{
+            action: "auth",
+            size: "invisible",
+          }}
+          onSuccess={(token) => setTurnstileToken(token)}
+          onError={() => setTurnstileToken(null)}
+          onExpire={() => setTurnstileToken(null)}
+        />
+      </div>
       <div
         className={cn(
           "flex max-w-lg flex-col items-center justify-center gap-6 transition-all ease-out",
@@ -97,35 +135,18 @@ export function AuthForm() {
       >
         <Logo isInteractive={false} />
         <div className="mt-2 flex flex-wrap items-center justify-center gap-4 sm:mt-16">
-          <LoadingButton
-            className="cursor-pointer"
-            isLoading={loadingProvider === "github"}
-            loadingText={t("login_loading")}
-            disabled={disabled}
-            onClick={() => handleSignIn("github")}
-          >
-            <GitHubIcon /> GitHub
-          </LoadingButton>
-
-          <LoadingButton
-            className="cursor-pointer"
-            isLoading={loadingProvider === "google"}
-            loadingText={t("login_loading")}
-            disabled={disabled}
-            onClick={() => handleSignIn("google")}
-          >
-            <GoogleIcon /> Google
-          </LoadingButton>
-
-          <LoadingButton
-            className="cursor-pointer"
-            isLoading={loadingProvider === "yandex"}
-            loadingText={t("login_loading")}
-            disabled={disabled}
-            onClick={() => handleSignIn("yandex")}
-          >
-            <YandexIcon /> Yandex
-          </LoadingButton>
+          {BUTTONS.map((item) => (
+            <LoadingButton
+              key={item.provider}
+              className="cursor-pointer"
+              isLoading={loadingProvider === item.provider}
+              loadingText={t("login_loading")}
+              disabled={disabled}
+              onClick={() => handleSignIn(item.provider)}
+            >
+              <item.icon /> {item.text}
+            </LoadingButton>
+          ))}
         </div>
         <div className="relative w-full">
           <div className="absolute inset-0 flex items-center">
