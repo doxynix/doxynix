@@ -13,7 +13,7 @@ type Props = {
   className?: string;
 };
 
-export function getMetrics(repo: RepoTableItem): Props[] {
+export function getMetrics(repo: RepoTableItem, locale: string): Props[] {
   const items = [
     { icon: Star, label: repo.stars, tooltip: "Stars", color: "text-yellow-500 fill-current" },
     { icon: GitFork, label: repo.forks, tooltip: "Forks", color: "text-green-700" },
@@ -44,11 +44,11 @@ export function getMetrics(repo: RepoTableItem): Props[] {
     },
     {
       icon: History,
-      label: formatRelativeTime(repo.pushedAt),
+      label: formatRelativeTime(repo.pushedAt, locale),
       tooltip: "Last push",
       color: "text-muted-foreground",
     },
-  ] satisfies Props[];
+  ];
 
   return items.filter((m) => m.label != null);
 }

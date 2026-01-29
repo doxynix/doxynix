@@ -22,7 +22,7 @@ export function ApiKeyCard({ active }: { active: UiApiKey }) {
           <CardTitle className="truncate text-base font-semibold">{active.name}</CardTitle>
           <CardDescription className="flex flex-col gap-2 text-xs">
             <p>
-              {tCommon("created")}: {formatRelativeTime(active.createdAt)}
+              {tCommon("created")}: {formatRelativeTime(active.createdAt, locale)}
             </p>
             <p>
               {t("settings_api_keys_last_used")}: {formatRelativeTime(active.lastUsed, locale)}

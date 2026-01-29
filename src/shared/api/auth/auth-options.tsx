@@ -10,19 +10,25 @@ import YandexProvider from "next-auth/providers/yandex";
 import { Resend } from "resend";
 
 import { AuthEmail } from "@/shared/api/auth/templates/auth-email";
-import { prisma } from "@/shared/api/db/db";
+import { baseClient, prisma } from "@/shared/api/db/db";
+import {
+  AUTH_PROVIDERS,
+  isDev,
+  isProd,
+  NEXTAUTH_SECRET,
+  RESEND_API_KEY,
+} from "@/shared/constants/env";
 import { logger } from "@/shared/lib/logger";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 дней
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: сутки
 const MAGIC_LINK_MAX_AGE = 10 * 60; // TIME: 10 минут
 
-const resend = process.env.RESEND_API_KEY != null ? new Resend(process.env.RESEND_API_KEY) : null;
+const resend = RESEND_API_KEY != null ? new Resend(RESEND_API_KEY) : null;
 
 export const authOptions: NextAuthOptions = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  adapter: PrismaAdapter(prisma as any),
-  secret: process.env.NEXTAUTH_SECRET!,
+  adapter: PrismaAdapter(baseClient),
+  secret: NEXTAUTH_SECRET,
   session: {
     strategy: "database",
     maxAge: SESSION_MAX_AGE,
@@ -31,7 +37,7 @@ export const authOptions: NextAuthOptions = {
   providers: [
     EmailProvider({
       maxAge: MAGIC_LINK_MAX_AGE,
-      from: "Doxynix Auth <auth@mail.doxynix.space>",
+      from: "Doxynix Auth <auth@doxynix.space>",
       sendVerificationRequest: async ({ identifier, url, provider }) => {
         const user = await prisma.user.findUnique({
           where: { email: identifier },
@@ -43,6 +49,14 @@ export const authOptions: NextAuthOptions = {
           to: identifier,
           from: provider.from,
           subject: user?.emailVerified ? "Doxynix | Login" : "Doxynix | Account Activation",
+          reply_to: "support@doxynix.space",
+          tags: [
+            {
+              name: "category",
+              value: "authentication",
+            },
+          ],
+
           html,
         };
 
@@ -71,12 +85,12 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Failed to send verification email");
         }
       },
-      secret: process.env.NEXTAUTH_SECRET!,
+      secret: NEXTAUTH_SECRET,
     }),
 
     GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      clientId: AUTH_PROVIDERS.github.id,
+      clientSecret: AUTH_PROVIDERS.github.secret,
       allowDangerousEmailAccountLinking: true,
       authorization: {
         params: {
@@ -85,18 +99,18 @@ export const authOptions: NextAuthOptions = {
       },
     }),
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: AUTH_PROVIDERS.google.id,
+      clientSecret: AUTH_PROVIDERS.google.secret,
       allowDangerousEmailAccountLinking: true,
     }),
     GitLabProvider({
-      clientId: process.env.GITLAB_CLIENT_ID!,
-      clientSecret: process.env.GITLAB_CLIENT_SECRET!,
+      clientId: AUTH_PROVIDERS.gitlab.id,
+      clientSecret: AUTH_PROVIDERS.gitlab.secret,
       allowDangerousEmailAccountLinking: true,
     }),
     YandexProvider({
-      clientId: process.env.YANDEX_CLIENT_ID!,
-      clientSecret: process.env.YANDEX_CLIENT_SECRET!,
+      clientId: AUTH_PROVIDERS.yandex.id,
+      clientSecret: AUTH_PROVIDERS.yandex.secret,
       allowDangerousEmailAccountLinking: true,
     }),
   ],
@@ -119,9 +133,9 @@ export const authOptions: NextAuthOptions = {
     verifyRequest: "/auth",
   },
 
-  debug: process.env.NODE_ENV === "development",
+  debug: isDev,
 
-  useSecureCookies: process.env.NODE_ENV !== "development",
+  useSecureCookies: isProd,
 
   events: {
     async signIn({ user, account }) {

@@ -1,23 +1,21 @@
-/* eslint-disable */
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import pg from "pg";
 
+import { DATABASE_URL, isDev, isTest } from "@/shared/constants/env";
 import { logger } from "@/shared/lib/logger";
 import { sanitizePayload } from "@/shared/lib/utils";
 
 import { requestContext } from "@/server/utils/request-context";
 
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: DATABASE_URL,
 });
 const adapter = new PrismaPg(pool);
 
-const isTest = process.env.NODE_ENV === "test";
-
-const baseClient = new PrismaClient({
+export const baseClient = new PrismaClient({
   adapter,
-  log: process.env.NODE_ENV === "development" && !isTest ? ["error", "warn"] : ["error"],
+  log: isDev && !isTest ? ["error", "warn"] : ["error"],
   transactionOptions: {
     maxWait: 20000,
     timeout: 30000,
@@ -70,7 +68,7 @@ export const prisma = softDeleteClient.$extends({
           const userId = ctxStore?.userId ?? null;
 
           try {
-            await (baseClient as any).auditLog.create({
+            await (baseClient as PrismaClient).auditLog.create({
               data: {
                 model,
                 operation,
@@ -114,6 +112,6 @@ export type PrismaClientExtended = typeof prisma;
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClientExtended };
 
-if (process.env.NODE_ENV !== "production") {
+if (isDev) {
   globalForPrisma.prisma = prisma;
 }

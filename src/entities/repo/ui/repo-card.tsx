@@ -26,7 +26,7 @@ export function RepoCard({ repo }: Props) {
   const locale = useLocale();
   const visibility = repoVisibilityConfig[repo.visibility];
   const status = repoStatusConfig[repo.status];
-  const metrics = getMetrics(repo);
+  const metrics = getMetrics(repo, locale);
   const langColor = getLanguageColor(repo.language);
 
   return (

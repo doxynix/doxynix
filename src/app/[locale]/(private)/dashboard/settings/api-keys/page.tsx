@@ -1,6 +1,7 @@
 import { SquareArrowOutUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
+import { APP_URL } from "@/shared/constants/env";
 import { createMetadata } from "@/shared/lib/metadata";
 import { ApiKeysListContainer, CreateApiKeyDialog } from "@/features/api-keys";
 
@@ -19,7 +20,7 @@ export default async function ApiKeysPage() {
         <a
           rel="noopener noreferrer"
           target="_blank"
-          href="https://doxynix.space/api/docs"
+          href={`${APP_URL}/api/docs`}
           className="flex items-center gap-4 underline hover:no-underline"
         >
           {t("settings_api_keys_api_documentation")}

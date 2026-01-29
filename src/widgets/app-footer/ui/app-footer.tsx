@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 
+import { CrunchbaseIcon } from "@/shared/ui/icons/crunchbase-icon";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
-import { TelegramIcon } from "@/shared/ui/icons/telegram-icon";
 import { DateComp } from "@/shared/ui/kit/date-comp";
 
 import { Link } from "@/i18n/routing";
@@ -45,6 +45,17 @@ export function AppFooter() {
               <span className="sr-only">GitHub</span>
             </a>
             <a
+              href="https://www.crunchbase.com/organization/doxynix"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors"
+            >
+              <CrunchbaseIcon className="hidden h-4 w-4 md:block" />
+              <span className="text-xs md:hidden">Crunchbase</span>
+              <span className="sr-only">Crunchbase</span>
+            </a>
+
+            {/* <a
               href="https://t.me/Float_inf"
               target="_blank"
               rel="noopener noreferrer"
@@ -53,7 +64,7 @@ export function AppFooter() {
               <TelegramIcon className="hidden h-4 w-4 md:block" />
               <span className="text-xs md:hidden">Telegram</span>
               <span className="sr-only">Telegram</span>
-            </a>
+            </a> */}
           </div>
         </div>
       </div>

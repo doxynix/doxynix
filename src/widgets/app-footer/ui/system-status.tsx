@@ -1,51 +1,95 @@
 "use client";
 
-import { trpc } from "@/shared/api/trpc";
+import { useQuery } from "@tanstack/react-query";
+
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
+import { Skeleton } from "@/shared/ui/core/skeleton";
 
-export function SystemStatus() {
-  const { data, isError, isLoading } = trpc.health.check.useQuery(undefined, {
-    staleTime: 60000,
-    refetchInterval: 60000,
+type StatusType = "up" | "down" | "maintenance" | "unknown";
+
+type StatusResponse = {
+  status: StatusType;
+};
+
+const config = {
+  up: {
+    label: "All Systems Operational",
+    dotColor: "bg-success",
+    textColor: "text-muted-foreground",
+    hasPing: true,
+  },
+  down: {
+    label: "System Outage",
+    dotColor: "bg-error",
+    textColor: "text-error",
+    hasPing: true,
+  },
+  maintenance: {
+    label: "Maintenance",
+    dotColor: "bg-warning",
+    textColor: "text-warning",
+    hasPing: false,
+  },
+  unknown: {
+    label: "Status Unknown",
+    dotColor: "bg-muted-foreground",
+    textColor: "text-muted-foreground",
+    hasPing: false,
+  },
+};
+
+const fetchSystemStatus = async (): Promise<StatusType> => {
+  const res = await fetch("/api/status");
+  if (!res.ok) throw new Error("Network error");
+  const data = (await res.json()) as StatusResponse;
+  return data.status;
+};
+
+const STALE_TIME = 4 * 60 * 1000; // TIME: 4 minutes
+const REFETCH_INTERVAL = 5 * 60 * 1000; // TIME: 5 minutes
+
+export function SystemStatus({ className }: { className?: string }) {
+  const { data: status = "unknown", isLoading } = useQuery({
+    queryKey: ["system-status"],
+    queryFn: fetchSystemStatus,
+    refetchInterval: REFETCH_INTERVAL,
+    staleTime: STALE_TIME,
+    refetchOnWindowFocus: true,
+    refetchIntervalInBackground: false,
     retry: false,
   });
 
-  const isHealthy = data?.status === "ok";
-  const hasIssue = isError || (data && data.status !== "ok") || false;
+  const current = config[status] ?? config.unknown;
 
   return (
-    <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium">
-      <Button variant="outline" asChild size="sm">
-        <a
-          href="https://status.doxynix.space"
-          rel="noopener noreferrer"
-          target="_blank"
-          className={cn(hasIssue && "text-error")}
-        >
-          <span className="relative flex h-2 w-2">
-            {(isHealthy || hasIssue) && (
-              <span
-                className={cn(
-                  "absolute inline-flex h-full w-full animate-ping rounded-full opacity-75",
-                  isHealthy && "bg-success",
-                  hasIssue && "bg-error"
-                )}
-              />
-            )}
-
-            <span
-              className={cn(
-                "relative inline-flex h-2 w-2 rounded-full",
-                isLoading && "bg-gray-400",
-                isHealthy && "bg-success",
-                hasIssue && "bg-error"
+    <div className={cn("flex items-center gap-2 text-xs font-medium", className)}>
+      {isLoading ? (
+        <Skeleton className="h-8 w-45" />
+      ) : (
+        <Button variant="outline" size="sm" asChild className="cursor-pointer">
+          <a
+            href="https://status.doxynix.space"
+            rel="noopener noreferrer"
+            target="_blank"
+            className={cn("flex items-center gap-2", current.textColor)}
+          >
+            <span className="relative flex size-2">
+              {current.hasPing && (
+                <span
+                  className={cn(
+                    "absolute inline-flex h-full w-full animate-ping rounded-full opacity-75",
+                    current.dotColor
+                  )}
+                />
               )}
-            />
-          </span>
-          {isLoading ? "Checking..." : hasIssue ? "System Outage" : "All Systems Operational"}
-        </a>
-      </Button>
+              <span className={cn("relative inline-flex size-2 rounded-full", current.dotColor)} />
+            </span>
+
+            {current.label}
+          </a>
+        </Button>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useLocale } from "next-intl";
 import * as RechartsPrimitive from "recharts";
 
 import { cn } from "@/shared/lib/utils";
@@ -124,6 +125,7 @@ const ChartTooltipContent = React.forwardRef<
     ref
   ) => {
     const { config } = useChart();
+    const locale = useLocale();
 
     const tooltipLabel = React.useMemo(() => {
       if (hideLabel || !payload?.length) {
@@ -224,7 +226,7 @@ const ChartTooltipContent = React.forwardRef<
                         </div>
                         {item.value && (
                           <span className="text-foreground font-mono font-medium tabular-nums">
-                            {item.value.toLocaleString()}
+                            {item.value.toLocaleString(locale)}
                           </span>
                         )}
                       </div>

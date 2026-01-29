@@ -2,6 +2,7 @@
 
 import { ComponentPropsWithoutRef, useEffect, useRef } from "react";
 import { useInView, useMotionValue, useSpring } from "motion/react";
+import { useLocale } from "next-intl";
 
 import { cn } from "@/shared/lib/utils";
 
@@ -29,6 +30,7 @@ export function NumberTicker({
     stiffness: 100,
   });
   const isInView = useInView(ref, { once: true, margin: "0px" });
+  const locale = useLocale();
 
   useEffect(() => {
     if (isInView) {
@@ -39,18 +41,22 @@ export function NumberTicker({
     }
   }, [motionValue, isInView, delay, value, direction, startValue]);
 
-  useEffect(
-    () =>
-      springValue.on("change", (latest) => {
-        if (ref.current) {
-          ref.current.textContent = Intl.NumberFormat("en-US", {
-            minimumFractionDigits: decimalPlaces,
-            maximumFractionDigits: decimalPlaces,
-          }).format(Number(latest.toFixed(decimalPlaces)));
-        }
-      }),
-    [springValue, decimalPlaces]
-  );
+  useEffect(() => {
+    const updateText = (latest: number) => {
+      if (ref.current) {
+        ref.current.textContent = Intl.NumberFormat(locale, {
+          minimumFractionDigits: decimalPlaces,
+          maximumFractionDigits: decimalPlaces,
+        }).format(Number(latest.toFixed(decimalPlaces)));
+      }
+    };
+
+    const unsubscribe = springValue.on("change", updateText);
+
+    updateText(springValue.get());
+
+    return () => unsubscribe();
+  }, [springValue, decimalPlaces, locale]);
 
   return (
     <span

@@ -3,6 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { createMetadata } from "@/shared/lib/metadata";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
+// export const runtime = "edge"; // DOCS: изучить как эта вещь работает а то ошибки какое-то не понятно...
+
 export const generateMetadata = createMetadata("terms_title", "terms_desc");
 
 const SECTION_TITLE = "mb-3 text-lg font-bold text-foreground flex items-center gap-2";
@@ -85,10 +87,10 @@ export default async function TermsPage() {
           <p>{t("section_contact_content")}</p>
           <div className="mt-4">
             <a
-              href="mailto:support@doxynix.space?subject=Terms of Service Inquiry"
+              href="mailto:legal@doxynix.space?subject=Terms of Service Inquiry"
               className="hover:no-underline"
             >
-              support@doxynix.space
+              legal@doxynix.space
             </a>
           </div>
         </section>

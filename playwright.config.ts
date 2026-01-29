@@ -1,5 +1,7 @@
 import { defineConfig } from "@playwright/test";
 
+import { isCI } from "@/shared/constants/env";
+
 export default defineConfig({
   testDir: "src/tests/e2e",
   timeout: 30_000,
@@ -15,7 +17,7 @@ export default defineConfig({
   webServer: {
     command: "pnpm build && pnpm start",
     url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI!,
+    reuseExistingServer: !isCI,
     stdout: "pipe",
     stderr: "pipe",
     timeout: 300 * 1000,

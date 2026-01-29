@@ -1,18 +1,18 @@
 import { MetadataRoute } from "next";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://doxynix.space";
-  const locales = ["en", "ru", "de", "es", "zh-CN", "pt-BR", "fr"];
+import { APP_URL } from "@/shared/constants/env";
+import { DEFAULT_LOCALE, LOCALES } from "@/shared/constants/locales";
 
+export default function sitemap(): MetadataRoute.Sitemap {
   const paths = ["", "about", "auth", "privacy", "terms", "support"];
 
   const sitemapEntries: MetadataRoute.Sitemap = [];
 
   paths.forEach((path) => {
-    locales.forEach((locale) => {
-      let url = `${baseUrl}`;
+    LOCALES.forEach((locale) => {
+      let url = `${APP_URL}`;
 
-      if (locale === "en") {
+      if (locale === DEFAULT_LOCALE) {
         url += path ? `/${path}` : "";
       } else {
         url += `/${locale}${path ? `/${path}` : ""}`;

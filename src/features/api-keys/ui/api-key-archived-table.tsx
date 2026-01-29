@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, History } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { cn, formatRelativeTime } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/core/badge";
@@ -24,6 +24,7 @@ type Props = {
 };
 
 export function ApiKeyArchivedTable({ archived }: Props) {
+  const locale = useLocale();
   const [isArchivedOpen, setIsArchivedOpen] = useState(false);
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
@@ -72,10 +73,10 @@ export function ApiKeyArchivedTable({ archived }: Props) {
                     {key.prefix ? `${key.prefix}...` : "..."}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    {formatRelativeTime(key.createdAt)}
+                    {formatRelativeTime(key.createdAt, locale)}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    {formatRelativeTime(key.lastUsed)}
+                    {formatRelativeTime(key.lastUsed, locale)}
                   </TableCell>
                 </TableRow>
               ))}
