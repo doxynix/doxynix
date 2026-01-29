@@ -23,7 +23,7 @@ If you have discovered a security vulnerability in Doxynix, we appreciate your h
 
 ### How to report:
 
-1.  **Email us:** Send a detailed description of the vulnerability to **[security@mail.doxynix.space]**.
+1.  **Email us:** Send a detailed description of the vulnerability to [security@doxynix.space](mailto:security@doxynix.space).
 2.  **Include details:** Please include as much information as possible:
     *   Type of vulnerability (e.g., XSS, SQLi, IDOR).
     *   Steps to reproduce the issue (POC).

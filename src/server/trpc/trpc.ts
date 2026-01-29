@@ -5,6 +5,7 @@ import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
 import { OpenApiMeta } from "trpc-to-openapi";
 
+import { isProd } from "@/shared/constants/env";
 import { logger } from "@/shared/lib/logger";
 
 import { Context } from "@/server/trpc/context";
@@ -89,7 +90,7 @@ const loggerMiddleware = t.middleware(async ({ path, type, next }) => {
       message: result.error.message,
       stack: result.error.code === "INTERNAL_SERVER_ERROR" ? result.error.stack : undefined,
     });
-    if (process.env.NODE_ENV === "production") {
+    if (isProd) {
       await logger.flush();
     }
   }

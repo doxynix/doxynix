@@ -94,6 +94,7 @@ export function CreateRepoDialog() {
       closeDialog();
       form.reset();
       await utils.repo.getAll.invalidate();
+      await utils.analytics.getDashboardStats.invalidate();
       const params = new URLSearchParams(searchParams.toString());
 
       params.delete("page");

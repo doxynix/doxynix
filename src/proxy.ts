@@ -4,18 +4,22 @@ import { Redis } from "@upstash/redis";
 import createMiddleware from "next-intl/middleware";
 
 import { routing } from "./i18n/routing";
+import { TURNSTILE_SECRET_KEY } from "./shared/constants/env";
+import { LOCALE_REGEX_STR } from "./shared/constants/locales";
 import { getCookieName } from "./shared/lib/utils";
 
 const ONE_MB = 1024 * 1024;
 
-const redis = Redis.fromEnv();
-
-const ratelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(20, "10 s"),
-  analytics: true,
-  prefix: "@upstash/ratelimit",
-});
+let ratelimit: Ratelimit | null = null;
+if (process.env.NODE_ENV !== "development") {
+  const redis = Redis.fromEnv();
+  ratelimit = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(20, "10 s"),
+    analytics: false,
+    prefix: "@upstash/ratelimit",
+  });
+}
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -42,46 +46,6 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.startsWith("/api") || pathname.startsWith("/trpc")) {
     if (!pathname.includes("/uploadthing") && !pathname.includes("/webhooks")) {
-      if (pathname === "/api/auth/signin/email" && request.method === "POST") {
-        const token = request.cookies.get("cf-turnstile-response")?.value;
-        const secretKey = process.env.TURNSTILE_SECRET_KEY;
-
-        if (
-          token === null ||
-          token === undefined ||
-          secretKey === null ||
-          secretKey === undefined
-        ) {
-          return new NextResponse(JSON.stringify({ error: "Missing captcha" }), { status: 403 });
-        }
-
-        const formData = new FormData();
-        formData.append("secret", secretKey);
-        formData.append("response", token);
-        formData.append("remoteip", ip);
-
-        try {
-          const cfRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-            method: "POST",
-            body: formData,
-          });
-
-          const cfData = await cfRes.json();
-
-          if (cfData.success === false) {
-            console.error("Cloudflare verification failed:", cfData["error-codes"]);
-            return new NextResponse(JSON.stringify({ error: "Captcha failed" }), { status: 403 });
-          }
-        } catch (error) {
-          console.error("Cloudflare network error:", error);
-          return new NextResponse(
-            JSON.stringify({ error: "Security check error. Please try again." }),
-            {
-              status: 403,
-            }
-          );
-        }
-      }
       const contentLength = request.headers.get("content-length");
       if (contentLength !== null && Number(contentLength) > ONE_MB) {
         return new NextResponse(JSON.stringify({ error: "Payload Too Large", requestId }), {
@@ -90,14 +54,22 @@ export async function proxy(request: NextRequest) {
         });
       }
 
-      const token = request.cookies.get(cookieName)?.value;
+      let success = true;
+      let limit = 0;
+      let reset = 0;
+      let remaining = 0;
 
-      let identifier = ip;
-      if (token !== null && token !== undefined) {
-        identifier = await hashToken(token);
+      if (ratelimit) {
+        const token = request.cookies.get(cookieName)?.value;
+        let identifier = ip;
+        if (token !== null && token !== undefined) identifier = await hashToken(token);
+
+        const result = await ratelimit.limit(identifier);
+        success = result.success;
+        limit = result.limit;
+        reset = result.reset;
+        remaining = result.remaining;
       }
-
-      const { success, limit, reset, remaining } = await ratelimit.limit(identifier);
 
       if (!success) {
         return new NextResponse(
@@ -118,12 +90,53 @@ export async function proxy(request: NextRequest) {
       }
     }
 
+    if (pathname === "/api/auth/signin/email" && request.method === "POST") {
+      const token = request.cookies.get("cf-turnstile-response")?.value;
+      const secretKey = TURNSTILE_SECRET_KEY;
+
+      if (token === null || token === undefined || secretKey === null || secretKey === undefined) {
+        return new NextResponse(JSON.stringify({ error: "Missing captcha" }), { status: 403 });
+      }
+
+      const formData = new FormData();
+      formData.append("secret", secretKey);
+      formData.append("response", token);
+      formData.append("remoteip", ip);
+
+      try {
+        const cfRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+          method: "POST",
+          body: formData,
+        });
+
+        const cfData = await cfRes.json();
+
+        if (cfData.success === false || cfData.action !== "auth") {
+          console.error("Cloudflare verification failed:", cfData["error-codes"]);
+          return new NextResponse(JSON.stringify({ error: "Captcha failed" }), { status: 403 });
+        }
+        const response = NextResponse.next();
+        response.cookies.delete("cf-turnstile-response");
+        return response;
+      } catch (error) {
+        console.error("Cloudflare network error:", error);
+        return new NextResponse(
+          JSON.stringify({ error: "Security check error. Please try again." }),
+          {
+            status: 403,
+          }
+        );
+      }
+    }
+
     const response = NextResponse.next();
     response.headers.set("x-request-id", requestId);
     return response;
   }
 
-  const pathWithoutLocale = pathname.replace(/^\/(ru|en|de|es|zh-CN|pt-BR|fr)/, "") || "/";
+  const localeRegex = new RegExp(`^/(${LOCALE_REGEX_STR})`);
+
+  const pathWithoutLocale = pathname.replace(localeRegex, "") || "/";
 
   const isProtectedRoute = protectedRoutes.some((route) => pathWithoutLocale.startsWith(route));
   const isAuthRoute = authRoutes.some((route) => pathWithoutLocale.startsWith(route));

@@ -13,6 +13,8 @@ import {
   PricingSection,
 } from "@/features/landing";
 
+// export const runtime = "edge";
+
 export const generateMetadata = createMetadata("landing_title", "landing_desc");
 
 export default async function LandingPage() {

@@ -1,13 +1,7 @@
 import { ApiReference } from "@scalar/nextjs-api-reference";
 
+import { API_PREFIX, APP_URL } from "@/shared/constants/env";
 import { getCookieName } from "@/shared/lib/utils";
-
-const getBaseUrl = () => {
-  if (process.env.NODE_ENV === "development") {
-    return "http://localhost:3000";
-  }
-  return process.env.NEXT_PUBLIC_APP_URL ?? "https://doxynix.space";
-};
 
 export const GET = ApiReference({
   url: "/api/openapi",
@@ -20,7 +14,7 @@ export const GET = ApiReference({
     title: "Doxynix API Documentation",
     description: "Official Doxynix API documentation",
   },
-  baseServerURL: `${getBaseUrl()}/api/v1`,
+  baseServerURL: `${APP_URL}${API_PREFIX}`,
 
   showSidebar: true,
   hideSearch: false,

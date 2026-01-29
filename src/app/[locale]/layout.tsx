@@ -13,13 +13,15 @@ import { extractRouterConfig } from "uploadthing/server";
 
 import "../globals.css";
 
+import { APP_URL, isProd } from "@/shared/constants/env";
+import { Locale } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/utils";
 import { Toaster } from "@/shared/ui/core/sonner";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { Providers } from "@/app/providers";
 
-import { Locale, routing } from "@/i18n/routing";
+import { routing } from "@/i18n/routing";
 
 async function UTSSR() {
   await connection();
@@ -47,7 +49,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL! ?? "https://doxynix.space"),
+  metadataBase: new URL(APP_URL),
 
   alternates: {
     canonical: "./",
@@ -78,7 +80,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://doxynix.space",
+    url: APP_URL,
     siteName: "Doxynix",
     title: "Doxynix: Turn Legacy Code into Clear Documentation",
     description:
@@ -139,7 +141,7 @@ export default async function LocaleLayout({
           "antialiased"
         )}
       >
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider messages={messages} locale={locale}>
           <NextTopLoader color="#ffffff" showSpinner={false} zIndex={9999} />
           <Suspense>
             <UTSSR />
@@ -154,8 +156,12 @@ export default async function LocaleLayout({
               gap={8}
             />
           </Providers>
-          <Analytics />
-          <SpeedInsights />
+          {isProd && (
+            <>
+              <Analytics />
+              <SpeedInsights />
+            </>
+          )}
           <ConsoleEasterEgg />
         </NextIntlClientProvider>
       </body>

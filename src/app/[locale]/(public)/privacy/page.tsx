@@ -3,6 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { createMetadata } from "@/shared/lib/metadata";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
+// export const runtime = "edge";
+
 export const generateMetadata = createMetadata("privacy_title", "privacy_desc");
 
 type Props = { name: string; descKey: string };
@@ -115,10 +117,10 @@ export default async function PrivacyPage() {
           <p>{t("section_contact_desc")}</p>
           <div className="mt-4">
             <a
-              href="mailto:support@doxynix.space?subject=Privacy Policy Question"
+              href="mailto:legal@doxynix.space?subject=Privacy Policy Question"
               className="hover:no-underline"
             >
-              support@doxynix.space
+              legal@doxynix.space
             </a>
           </div>
         </section>

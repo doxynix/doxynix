@@ -3,8 +3,7 @@ import pino from "pino";
 import pretty from "pino-pretty";
 
 import { requestContext } from "@/server/utils/request-context";
-
-const isProd = process.env.NODE_ENV === "production";
+import { isProd } from "../constants/env";
 
 type LogPayload = {
   msg: string;

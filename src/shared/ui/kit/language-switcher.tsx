@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { Locale, LOCALES } from "@/shared/constants/locales";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import {
   Select,
@@ -12,10 +13,8 @@ import {
   SelectValue,
 } from "@/shared/ui/core/select";
 
-import { Locale, usePathname, useRouter } from "@/i18n/routing";
+import { usePathname, useRouter } from "@/i18n/routing";
 import { Spinner } from "../core/spinner";
-
-type Language = { label: string; language: string };
 
 export function LanguageSwitcher() {
   const t = useTranslations("Dashboard");
@@ -29,16 +28,9 @@ export function LanguageSwitcher() {
       router.replace(pathname, { locale: nextLocale as Locale });
     });
   };
-
-  const LOCALES: Language[] = [
-    { label: "en", language: t("settings_language_en") },
-    { label: "ru", language: t("settings_language_ru") },
-    { label: "de", language: t("settings_language_de") },
-    { label: "es", language: t("settings_language_es") },
-    { label: "zh-CN", language: t("settings_language_zh_cn") },
-    { label: "pt-BR", language: t("settings_language_pt_br") },
-    { label: "fr", language: t("settings_language_fr") },
-  ];
+  const translationKeys = LOCALES.map(
+    (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const
+  );
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -53,11 +45,13 @@ export function LanguageSwitcher() {
               <SelectValue placeholder={t("settings_language_select_placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              {LOCALES.map((item) => (
-                <SelectItem value={item.label} key={item.label}>
+              {LOCALES.map((l, i) => (
+                <SelectItem value={l} key={l}>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] uppercase">{item.label}</span>
-                    <span>{item.language}</span>
+                    <span className="text-muted-foreground text-[10px] font-bold uppercase">
+                      {l}
+                    </span>
+                    <span>{t(translationKeys[i])}</span>
                   </div>
                 </SelectItem>
               ))}

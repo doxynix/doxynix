@@ -2,6 +2,8 @@ import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
 
+// export const runtime = "edge";
+
 export const generateMetadata = createMetadata("about_title", "about_desc");
 
 export default async function AboutPage() {

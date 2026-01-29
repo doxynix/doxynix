@@ -24,7 +24,7 @@ export function ConsoleEasterEgg() {
     console.info("%c👋 Welcome to Doxynix, colleague!", titleStyle);
 
     console.info(
-      "%c We see you like to look under the hood. \nDoxynix was created by developers for developers.\n\nLike the project? Have any ideas? \nWrite to us! support@doxynix.space",
+      "%c We see you like to look under the hood. \nDoxynix was created by developers for developers.\n\nLike the project? Have any ideas? \nWrite to us! hello@doxynix.space",
       textStyle
     );
 

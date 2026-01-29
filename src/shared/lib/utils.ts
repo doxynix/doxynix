@@ -1,16 +1,19 @@
 import { clsx, type ClassValue } from "clsx";
-import { format } from "date-fns";
+import { Locale as DateFnsLocale, format } from "date-fns";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { de, enUS, es, fr, ptBR, ru, zhCN } from "date-fns/locale";
 import { twMerge } from "tailwind-merge";
 
-const dateFnsLocales = {
+import { isProd } from "../constants/env";
+import { DEFAULT_LOCALE, Locale } from "../constants/locales";
+
+const dateFnsLocales: Record<Locale, DateFnsLocale> = {
   en: enUS,
   ru: ru,
   de: de,
   es: es,
-  zhCN: zhCN,
-  pt: ptBR,
+  "zh-CN": zhCN,
+  "pt-BR": ptBR,
   fr: fr,
 };
 
@@ -22,7 +25,7 @@ export const loadedAvatars = new Map<string, boolean>();
 
 export function formatRelativeTime(
   date: Date | string | number | null,
-  localeStr: string = "en",
+  localeStr: string = DEFAULT_LOCALE,
   defaultValue: string = "—"
 ): string {
   if (date === null) return defaultValue;
@@ -32,7 +35,7 @@ export function formatRelativeTime(
 
     if (isNaN(d.getTime())) return defaultValue;
 
-    const locale = dateFnsLocales[localeStr as keyof typeof dateFnsLocales] ?? enUS;
+    const locale = dateFnsLocales[localeStr as Locale] ?? enUS;
 
     const result = formatDistanceToNow(d, {
       addSuffix: true,
@@ -46,7 +49,10 @@ export function formatRelativeTime(
   }
 }
 
-export function formatFullDate(date: Date | string | number, localeStr: string = "en"): string {
+export function formatFullDate(
+  date: Date | string | number,
+  localeStr: string = DEFAULT_LOCALE
+): string {
   const locale = dateFnsLocales[localeStr as keyof typeof dateFnsLocales] ?? enUS;
 
   return format(new Date(date), "d MMMM yyyy, HH:mm", { locale: locale });
@@ -155,7 +161,7 @@ export const smoothScrollTo = (targetId: string, offset: number = 80, duration: 
 };
 
 export const getCookieName = () => {
-  if (process.env.NODE_ENV === "production") {
+  if (isProd) {
     return "__Secure-next-auth.session-token";
   }
   return "next-auth.session-token";

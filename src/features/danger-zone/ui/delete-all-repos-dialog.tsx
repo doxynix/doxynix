@@ -39,6 +39,7 @@ export function DeleteAllReposDialog({ meta }: { meta: RepoMeta }) {
       toast.success(t("settings_danger_delete_all_repos_toast_success"));
       setOpen(false);
       await utils.repo.getAll.invalidate();
+      await utils.analytics.getDashboardStats.invalidate();
     },
     onError: (err) => toast.error(err.message),
   });

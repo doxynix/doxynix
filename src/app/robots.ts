@@ -1,5 +1,7 @@
 import { MetadataRoute } from "next";
 
+import { APP_URL } from "@/shared/constants/env";
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
@@ -7,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/dashboard/", "/*/dashboard/", "/api/"],
     },
-    sitemap: "https://doxynix.space/sitemap.xml",
+    sitemap: `${APP_URL}/sitemap.xml`,
   };
 }

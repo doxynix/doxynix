@@ -3,8 +3,11 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
 
+import { isAnalyze, isProd } from "@/shared/constants/env";
+import { LOCALE_REGEX_STR } from "@/shared/constants/locales";
+
 const bundleAnalyzer = withBundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
+  enabled: isAnalyze,
 });
 
 const withNextIntl = createNextIntlPlugin({
@@ -23,7 +26,7 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   compiler: {
-    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "info"] } : false,
+    removeConsole: isProd ? { exclude: ["error", "info"] } : false,
   },
   logging: {
     fetches: {
@@ -88,48 +91,69 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
-    return [
-      {
-        source: "/dashboard/settings",
-        destination: "/dashboard/settings/profile",
-        permanent: true,
-      },
-      {
-        source: "/o",
-        destination: "/dashboard",
-        permanent: false,
-      },
-      {
-        source: "/r",
-        destination: "/dashboard/repo",
-        permanent: false,
-      },
-      {
-        source: "/s",
-        destination: "/dashboard/settings/profile",
-        permanent: false,
-      },
-      {
-        source: "/me",
-        destination: "/dashboard/settings/profile",
-        permanent: false,
-      },
-      {
-        source: "/k",
-        destination: "/dashboard/settings/api-keys",
-        permanent: false,
-      },
-      {
-        source: "/d",
-        destination: "/dashboard/settings/danger-zone",
-        permanent: false,
-      },
-      {
-        source: "/n",
-        destination: "/dashboard/notifications",
-        permanent: false,
-      },
+    const shortcuts = [
+      // --- CORE ---
+      { s: "/o", d: "/dashboard" },
+      { s: "/dash", d: "/dashboard" },
+      { s: "/home", d: "/dashboard" },
+
+      // --- REPOS ---
+      { s: "/r", d: "/dashboard/repo" },
+      { s: "/repos", d: "/dashboard/repo" },
+      { s: "/code", d: "/dashboard/repo" },
+
+      // --- SETTINGS & PROFILE ---
+      { s: "/s", d: "/dashboard/settings/profile" },
+      { s: "/settings", d: "/dashboard/settings/profile" },
+      { s: "/me", d: "/dashboard/settings/profile" },
+      { s: "/profile", d: "/dashboard/settings/profile" },
+
+      // --- API & DEVELOPER ---
+      { s: "/k", d: "/dashboard/settings/api-keys" },
+      { s: "/keys", d: "/dashboard/settings/api-keys" },
+      { s: "/token", d: "/dashboard/settings/api-keys" },
+      { s: "/api", d: "/dashboard/settings/api-keys" },
+
+      // --- NOTIFICATIONS ---
+      { s: "/n", d: "/dashboard/notifications" },
+      { s: "/notif", d: "/dashboard/notifications" },
+      { s: "/inbox", d: "/dashboard/notifications" },
+      { s: "/alerts", d: "/dashboard/notifications" },
+
+      // --- DANGER ZONE ---
+      { s: "/d", d: "/dashboard/settings/danger-zone" },
+      { s: "/danger", d: "/dashboard/settings/danger-zone" },
+      { s: "/rip", d: "/dashboard/settings/danger-zone" },
+
+      // --- AUTH / ONBOARDING ---
+      { s: "/in", d: "/auth" },
+      { s: "/login", d: "/auth" },
+      { s: "/join", d: "/auth" },
+
+      // --- EXTERNAL ---
+      { s: "/status", d: "https://status.doxynix.space" },
     ];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const results: any[] = [];
+
+    shortcuts.forEach(({ s, d }) => {
+      const isExternal = d.startsWith("http");
+
+      results.push({
+        source: s,
+        destination: d,
+        permanent: false,
+      });
+
+      results.push({
+        source: `/:locale(${LOCALE_REGEX_STR})${s}`,
+        destination: isExternal ? d : `/:locale${d}`,
+        permanent: false,
+      });
+    });
+
+    return results;
   },
   async headers() {
     return [
