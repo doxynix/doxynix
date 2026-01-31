@@ -14,8 +14,8 @@ import {
 } from "@/shared/ui/core/breadcrumb";
 import { useSidebar } from "@/shared/ui/core/sidebar";
 import { Logo } from "@/shared/ui/icons/logo";
-import { AppCommandMenu } from "@/shared/ui/kit/app-command-menu";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
+import { AppCommandMenu } from "@/widgets/app-header/ui/app-command-menu";
 
 import { Link, usePathname } from "@/i18n/routing";
 import { NotificationsNav } from "./notifications-nav";
@@ -77,6 +77,11 @@ export function AppHeader() {
       </div>
 
       <div className="flex items-center gap-2 md:gap-4">
+        <AppTooltip content="Work in Progress">
+          <span className="text-warning bg-warning/20 cursor-default rounded p-1 py-0.5 text-xs">
+            BETA
+          </span>
+        </AppTooltip>
         <AppCommandMenu />
         {/* <ThemeToggle className="text-muted-foreground" /> // THEME: на время!*/}
         <NotificationsNav />

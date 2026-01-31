@@ -72,13 +72,7 @@ export function RepoListContainer({ config }: Props) {
       )}
       <RepoList repos={items} meta={meta} />
 
-      {config?.showPagination !== false && (
-        <AppPagination
-          className="mt-auto"
-          currentPage={meta.currentPage}
-          totalPages={meta.totalPages}
-        />
-      )}
+      {config?.showPagination !== false && <AppPagination className="mt-auto" meta={meta} />}
     </>
   );
 }

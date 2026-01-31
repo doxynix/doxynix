@@ -9,8 +9,9 @@ import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/constants/navigation";
-import { useNavigationHotkeys } from "@/shared/hooks/use-navigation-hotkeys";
 import { cn } from "@/shared/lib/utils";
+import { useCreateRepoDialogStore } from "@/shared/model/create-repo-dialog.store";
+import { MenuItem } from "@/shared/types/menu-item";
 import { Button } from "@/shared/ui/core/button";
 import {
   CommandDialog,
@@ -32,6 +33,7 @@ export function AppCommandMenu() {
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 300);
   const [isReposExpanded, setIsReposExpanded] = useState(true);
+  const { openDialog: openCreateRepoDialog } = useCreateRepoDialogStore();
 
   const router = useRouter();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
@@ -83,8 +85,6 @@ export function AppCommandMenu() {
     }
   }, [open]);
 
-  useNavigationHotkeys(() => setOpen(false));
-
   useHotkeys(
     "mod+k",
     (e) => {
@@ -100,11 +100,25 @@ export function AppCommandMenu() {
   };
 
   const runCommand = useCallback(
-    (path: string) => {
+    (item: MenuItem) => {
       setOpen(false);
-      router.push(path as Route);
+
+      switch (item.commandType) {
+        case "dialog":
+          if (item.actionId === "createRepo") {
+            openCreateRepoDialog();
+          }
+          break;
+
+        case "navigation":
+        default:
+          if (item.href !== null) {
+            router.push(item.href as Route);
+          }
+          break;
+      }
     },
-    [router]
+    [router, openCreateRepoDialog]
   );
 
   const filteredCommands = React.useMemo(() => {
@@ -151,9 +165,9 @@ export function AppCommandMenu() {
                 const isDestructive = item.variant === "destructive";
                 return (
                   <CommandItem
-                    key={item.url}
+                    key={item.label}
                     value={item.label}
-                    onSelect={() => runCommand(item.href)}
+                    onSelect={() => runCommand(item)}
                     className={cn(
                       isDestructive &&
                         "text-destructive data-[selected=true]:bg-destructive/10 data-[selected=true]:text-destructive",
@@ -165,7 +179,7 @@ export function AppCommandMenu() {
                       <span>{item.label}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      {item.url !== null && (
+                      {item.url !== undefined && (
                         <span className="text-muted-foreground bg-muted rounded border px-1.5 py-0.5 font-mono text-xs">
                           {item.url}
                         </span>

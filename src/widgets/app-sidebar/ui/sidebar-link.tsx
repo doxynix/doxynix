@@ -12,6 +12,10 @@ import { Link, usePathname } from "@/i18n/routing";
 export function SidebarLink({ href, label: title, icon: Icon, isBlank, exact }: MenuItem) {
   const pathname = usePathname() ?? "";
   const blank = isBlank === true;
+  if (href === undefined) {
+    return null;
+  }
+
   const isActive = (() => {
     if (blank) return false;
 

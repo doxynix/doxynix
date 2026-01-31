@@ -2,8 +2,7 @@ import { ComponentType } from "react";
 import { CircleDot, GitBranch, GitFork, HardDrive, History, Scale, Star, Tag } from "lucide-react";
 
 import { formatRelativeTime } from "@/shared/lib/utils";
-
-import { RepoTableItem } from "@/entities/repo/model/types";
+import { RepoTableItem } from "@/shared/types/repo";
 
 type Props = {
   icon?: ComponentType<{ className?: string }>;

@@ -22,6 +22,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const loadedAvatars = new Map<string, boolean>();
+export const loadedFlags = new Map<string, boolean>();
 
 export function formatRelativeTime(
   date: Date | string | number | null,

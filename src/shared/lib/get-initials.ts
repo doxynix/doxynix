@@ -7,12 +7,12 @@ export function getInitials(name?: string | null, email?: string | null): string
     }
 
     if (parts.length === 1) {
-      return parts[0].substring(0, 2).toUpperCase();
+      return parts[0].substring(0, 1).toUpperCase();
     }
   }
 
   if (email != null) {
-    return email.substring(0, 2).toUpperCase();
+    return email.substring(0, 1).toUpperCase();
   }
 
   return "U";

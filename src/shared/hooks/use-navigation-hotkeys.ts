@@ -1,36 +1,75 @@
+import { useEffect, useState } from "react";
 import type { Route } from "next";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { useRouter } from "@/i18n/routing";
 
-const NAV_MAP: Record<string, string> = {
-  "alt+KeyO": "/dashboard",
-  "alt+KeyR": "/dashboard/repo",
-  "alt+KeyS": "/dashboard/settings/profile",
-  "alt+KeyP": "/dashboard/settings/profile",
-  "alt+KeyA": "/dashboard/settings/api-keys",
+const SEQUENTIAL_ROUTES: Record<string, Record<string, string>> = {
+  g: {
+    o: "/dashboard",
+    r: "/dashboard/repo",
+    s: "/dashboard/settings/profile",
+    p: "/dashboard/settings/profile",
+    k: "/dashboard/settings/api-keys",
+    d: "/dashboard/settings/danger-zone",
+    n: "/dashboard/notifications",
+    h: "/support",
+  },
 };
+
+const PREFIX_KEYS = Object.keys(SEQUENTIAL_ROUTES);
 
 export function useNavigationHotkeys(onAction?: () => void) {
   const router = useRouter();
+  const [prefix, setPrefix] = useState<string | null>(null);
 
-  const hotkeys = Object.keys(NAV_MAP).join(", ");
+  useEffect(() => {
+    if (prefix === null) return;
 
-  return useHotkeys(
-    hotkeys,
+    const timer = setTimeout(() => {
+      setPrefix(null);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [prefix]);
+
+  useHotkeys(
+    PREFIX_KEYS.join(","),
+    (e, handler) => {
+      e.preventDefault();
+      const pressedKey = handler.hotkey;
+      setPrefix(pressedKey);
+    },
+    { enableOnFormTags: false }
+  );
+
+  useHotkeys(
+    "*",
     (e) => {
-      const fullKey = `${e.altKey ? "alt+" : ""}${e.code}`;
-      const path = NAV_MAP[fullKey];
+      if (prefix === null) return;
+
+      const code = e.code;
+      let secondKey: string | null = null;
+
+      if (code.startsWith("Key")) {
+        secondKey = code.slice(3).toLowerCase();
+      }
+
+      if (secondKey === null) {
+        setPrefix(null);
+        return;
+      }
+
+      const path = SEQUENTIAL_ROUTES[prefix]?.[secondKey];
 
       if (path) {
         e.preventDefault();
         onAction?.();
         router.push(path as Route);
       }
+
+      setPrefix(null);
     },
-    {
-      enableOnFormTags: true,
-      preventDefault: true,
-    }
+    { enabled: prefix !== null, enableOnFormTags: false }
   );
 }

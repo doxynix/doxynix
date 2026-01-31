@@ -3,6 +3,7 @@
 import { CircleOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { useCreateRepoDialogStore } from "@/shared/model/create-repo-dialog.store";
 import { Button } from "@/shared/ui/core/button";
 import {
   Empty,
@@ -12,8 +13,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/shared/ui/core/empty";
-
-import { useCreateRepoDialogStore } from "../model/create-repo-dialog.store";
 
 export function RepoEmpty() {
   const openDialog = useCreateRepoDialogStore((s) => s.openDialog);

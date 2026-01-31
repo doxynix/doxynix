@@ -1,6 +1,5 @@
-import { Suspense } from "react";
 import type { Route } from "next";
-import { Menu } from "lucide-react";
+import { Menu, MoveLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { publicHeaderMenu } from "@/shared/constants/navigation";
@@ -13,11 +12,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/shared/ui/core/sheet";
-import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Logo } from "@/shared/ui/icons/logo";
+import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { Link } from "@/i18n/routing";
-import { HeaderAuthButton } from "./public-header-auth-button";
 
 export function PublicHeader() {
   const t = useTranslations("Common");
@@ -40,9 +38,15 @@ export function PublicHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-4">
-          <Suspense fallback={<Skeleton className="h-9 w-31" />}>
-            <HeaderAuthButton />
-          </Suspense>
+          <AppTooltip content="Work in Progress">
+            <span className="text-warning bg-warning/20 rounded p-1 py-0.5 text-xs">BETA</span>
+          </AppTooltip>
+          <Button variant="outline" asChild>
+            <Link href="/auth">
+              Get Started
+              <MoveLeft size={16} className="rotate-180" />
+            </Link>
+          </Button>
           {/* <ThemeToggle className="text-muted-foreground" /> // THEME: на время!*/}
           <div className="flex items-center gap-2 md:hidden">
             <Sheet>

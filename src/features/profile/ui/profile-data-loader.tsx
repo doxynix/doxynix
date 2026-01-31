@@ -14,5 +14,5 @@ export async function ProfileDataLoader() {
     return null;
   }
 
-  return <ProfileCard />;
+  return <ProfileCard user={session.user} />;
 }

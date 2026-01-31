@@ -3,9 +3,8 @@
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { useCreateRepoDialogStore } from "@/shared/model/create-repo-dialog.store";
 import { Button } from "@/shared/ui/core/button";
-
-import { useCreateRepoDialogStore } from "../model/create-repo-dialog.store";
 
 export function CreateRepoButton() {
   const openDialog = useCreateRepoDialogStore((s) => s.openDialog);

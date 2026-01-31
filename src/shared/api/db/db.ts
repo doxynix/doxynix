@@ -67,8 +67,8 @@ export const prisma = softDeleteClient.$extends({
           const ctxStore = requestContext.getStore();
           const userId = ctxStore?.userId ?? null;
 
-          try {
-            await (baseClient as PrismaClient).auditLog.create({
+          (baseClient as PrismaClient).auditLog
+            .create({
               data: {
                 model,
                 operation,
@@ -78,10 +78,10 @@ export const prisma = softDeleteClient.$extends({
                 userAgent: ctxStore?.userAgent ?? "internal",
                 requestId: ctxStore?.requestId ?? "unknown",
               },
+            })
+            .catch((auditErr) => {
+              logger.error({ msg: "AUDIT LOG WRITE FAILED", error: auditErr });
             });
-          } catch (auditErr) {
-            logger.error({ msg: "AUDIT WRITE FAILED", error: auditErr });
-          }
 
           if (!isTest) {
             logger.info({
