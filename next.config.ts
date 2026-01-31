@@ -140,7 +140,6 @@ const nextConfig: NextConfig = {
 
       // --- SUPPORT ---
       { s: "/h", d: "/support" },
-      { s: "/support", d: "/support" },
 
       // --- PRIVACY & TERMS ---
       { s: "/tos", d: "/terms" },
