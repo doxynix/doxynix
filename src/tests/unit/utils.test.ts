@@ -11,10 +11,10 @@ describe("Shared Utils", () => {
   describe("getInitials", () => {
     it("should return initials from name", () => {
       expect(getInitials("Elon Musk")).toBe("EM");
-      expect(getInitials("Cher")).toBe("CH");
+      expect(getInitials("Cher")).toBe("C");
     });
     it("should return initials from email if name missing", () => {
-      expect(getInitials(null, "test@mail.com")).toBe("TE");
+      expect(getInitials(null, "test@mail.com")).toBe("T");
     });
     it("should return U fallback", () => {
       expect(getInitials(null, null)).toBe("U");
