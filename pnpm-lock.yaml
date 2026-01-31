@@ -11,6 +11,7 @@ overrides:
   diff: '>=8.0.3'
   lodash: 4.17.23
   lodash-es: 4.17.23
+  fast-xml-parser: 5.3.4
 
 importers:
 
@@ -6311,8 +6312,8 @@ packages:
   fast-write-atomic@0.2.1:
     resolution: {integrity: sha512-WvJe06IfNYlr+6cO3uQkdKdy3Cb1LlCJSF8zRs2eT8yuhdbSlR9nIt+TgQ92RUxiRrQm+/S7RARnMfCs5iuAjw==}
 
-  fast-xml-parser@5.2.5:
-    resolution: {integrity: sha512-pfX9uG9Ki0yekDHx2SiuRIyFdyAr1kMIMitPvb0YBo8SUfKvia7w7FIyd/l6av85pFYRhZscS75MwMnbvY+hcQ==}
+  fast-xml-parser@5.3.4:
+    resolution: {integrity: sha512-EFd6afGmXlCx8H8WTZHhAoDaWaGyuIBoZJ2mknrNxug+aZKjkp0a0dlars9Izl+jF+7Gu1/5f/2h68cQpe0IiA==}
     hasBin: true
 
   fastestsmallesttextencoderdecoder@1.0.22:
@@ -10741,7 +10742,7 @@ snapshots:
   '@aws-sdk/xml-builder@3.965.0':
     dependencies:
       '@smithy/types': 4.12.0
-      fast-xml-parser: 5.2.5
+      fast-xml-parser: 5.3.4
       tslib: 2.8.1
     optional: true
 
@@ -17328,7 +17329,7 @@ snapshots:
 
   fast-write-atomic@0.2.1: {}
 
-  fast-xml-parser@5.2.5:
+  fast-xml-parser@5.3.4:
     dependencies:
       strnum: 2.1.2
     optional: true

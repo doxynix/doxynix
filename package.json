@@ -55,7 +55,8 @@
       "tmp": ">=0.2.4",
       "diff": ">=8.0.3",
       "lodash": "4.17.23",
-      "lodash-es": "4.17.23"
+      "lodash-es": "4.17.23",
+      "fast-xml-parser": "5.3.4"
     },
     "onlyBuiltDependencies": [
       "core-js",
