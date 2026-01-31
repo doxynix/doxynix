@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/shared/api/auth/auth-options";
 import { prisma } from "@/shared/api/db/db";
 
+import { redisClient } from "../redis";
+
 type Props = {
   req: Request;
 };
@@ -51,6 +53,7 @@ export async function createContext({ req }: Props) {
     prisma,
     session,
     requestInfo,
+    redis: redisClient,
   };
 }
 

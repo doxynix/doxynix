@@ -41,17 +41,24 @@ const nextConfig: NextConfig = {
     // useLightningcss: true, // отключен так-как ломает анализатор размера бандла
     authInterrupts: true,
     optimizePackageImports: [
-      "lucide-react",
-      "date-fns",
       "@radix-ui/react-avatar",
       "@radix-ui/react-dialog",
       "@radix-ui/react-dropdown-menu",
       "@radix-ui/react-select",
       "@radix-ui/react-tooltip",
       "@radix-ui/react-scroll-area",
-      "@headlessui/react",
-      "recharts",
+      "@radix-ui/react-accordion",
+      "@radix-ui/react-collapsible",
+      "@radix-ui/react-navigation-menu",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-progress",
+      "@radix-ui/react-icons",
       "framer-motion",
+      "motion",
+      "react-hook-form",
+      "@tanstack/react-query",
+      "cmdk",
+      "sonner",
     ],
   },
   typedRoutes: true,
@@ -96,6 +103,7 @@ const nextConfig: NextConfig = {
       { s: "/o", d: "/dashboard" },
       { s: "/dash", d: "/dashboard" },
       { s: "/home", d: "/dashboard" },
+      { s: "/dashboard/settings", d: "/dashboard/settings/profile" },
 
       // --- REPOS ---
       { s: "/r", d: "/dashboard/repo" },
@@ -129,6 +137,14 @@ const nextConfig: NextConfig = {
       { s: "/in", d: "/auth" },
       { s: "/login", d: "/auth" },
       { s: "/join", d: "/auth" },
+
+      // --- SUPPORT ---
+      { s: "/h", d: "/support" },
+      { s: "/support", d: "/support" },
+
+      // --- PRIVACY & TERMS ---
+      { s: "/tos", d: "/terms" },
+      { s: "/pp", d: "/privacy" },
 
       // --- EXTERNAL ---
       { s: "/status", d: "https://status.doxynix.space" },

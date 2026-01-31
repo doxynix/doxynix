@@ -142,8 +142,30 @@ export const repoRouter = createTRPCRouter({
     }),
 
   deleteByOwner: protectedProcedure
-    .input(z.object({ owner: z.string() }))
-    .output(z.object({ success: z.boolean(), count: z.number() }))
+    .meta({
+      openapi: {
+        method: "DELETE",
+        path: "/repos/owner/{owner}",
+        tags: ["repositories"],
+        summary: "Delete repositories by owner",
+        description:
+          "Deletes all repositories belonging to the specified GitHub owner from the system. This only removes stored data and does not affect the original GitHub repositories.",
+        protect: true,
+        errorResponses: OpenApiErrorResponses,
+      },
+    })
+    .input(
+      z.object({
+        owner: z.string().trim().min(1),
+      })
+    )
+    .output(
+      z.object({
+        success: z.boolean(),
+        count: z.number(),
+        message: z.string(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const result = await ctx.db.repo.deleteMany({
         where: {
