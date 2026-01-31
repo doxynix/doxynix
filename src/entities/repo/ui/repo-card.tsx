@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 
 import { cn, formatFullDate, formatRelativeTime } from "@/shared/lib/utils";
+import { RepoTableItem } from "@/shared/types/repo";
 import { Card, CardContent } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
@@ -13,7 +14,6 @@ import { getLanguageColor } from "../model/language-colors";
 import { getMetrics } from "../model/metrics";
 import { repoStatusConfig } from "../model/repo-status";
 import { repoVisibilityConfig } from "../model/repo-visibility";
-import { RepoTableItem } from "../model/types";
 import { RepoAvatar } from "./repo-avatar";
 import { RepoMetric } from "./repo-metric";
 

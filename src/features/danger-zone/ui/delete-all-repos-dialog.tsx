@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
+import { RepoMeta } from "@/shared/types/repo";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -19,8 +20,6 @@ import {
   DialogTrigger,
 } from "@/shared/ui/core/dialog";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
-
-import { RepoMeta } from "@/entities/repo/model/types";
 
 const richStyles = {
   strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,

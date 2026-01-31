@@ -15,6 +15,7 @@ import { CreateRepoInput, CreateRepoSchema } from "@/shared/api/schemas/repo";
 import { trpc } from "@/shared/api/trpc";
 import { useClickOutside } from "@/shared/hooks/use-click-outside";
 import { isGitHubUrl } from "@/shared/lib/utils";
+import { useCreateRepoDialogStore } from "@/shared/model/create-repo-dialog.store";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +33,6 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { usePathname, useRouter } from "@/i18n/routing";
-import { useCreateRepoDialogStore } from "../model/create-repo-dialog.store";
 import { RepoItem } from "./repo-item";
 
 const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут

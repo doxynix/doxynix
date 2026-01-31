@@ -3,6 +3,7 @@
 import React, { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
+import { User } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
@@ -28,13 +29,18 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 type ProfileFormValues = z.infer<typeof UpdateProfileSchema>;
 
-export function ProfileCard() {
-  const { data: session, update } = useSession();
-  const user = session?.user;
+type Props = {
+  user: User;
+};
+
+export function ProfileCard({ user }: Props) {
+  const { update } = useSession();
+
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [displayUser, setDisplayUser] = useState<User>(user);
   const [avatarUrl, setAvatarUrl] = useState(user?.image ?? "");
 
   const updateAvatar = trpc.user.updateAvatar.useMutation({
@@ -75,8 +81,13 @@ export function ProfileCard() {
   });
 
   const updateProfile = trpc.user.updateUser.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (_, variables) => {
       toast.success(t("settings_profile_update_profile_toast_success"));
+      setDisplayUser((prev) => ({
+        ...prev,
+        name: variables.name,
+        email: variables.email,
+      }));
       await update();
       form.reset({
         name: form.getValues("name"),
@@ -85,13 +96,6 @@ export function ProfileCard() {
     },
     onError: (error) => toast.error(error.message),
   });
-
-  // React.useEffect(() => {
-  //   updateProfile.reset();
-  //   updateAvatar.reset();
-  //   removeAvatar.reset();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -102,8 +106,8 @@ export function ProfileCard() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(UpdateProfileSchema),
     values: {
-      name: user?.name ?? "",
-      email: user?.email ?? "",
+      name: displayUser.name ?? "",
+      email: displayUser.email ?? "",
     },
   });
 
@@ -123,7 +127,7 @@ export function ProfileCard() {
             <Avatar className="border-border h-24 w-24 border-2">
               <AvatarImage src={avatarUrl || undefined} className="object-cover" />
               <AvatarFallback className="text-2xl">
-                {getInitials(user?.name, user?.email)}
+                {getInitials(displayUser.name, displayUser.email)}
               </AvatarFallback>
             </Avatar>
             {avatarUrl && !updateAvatar.isPending && (

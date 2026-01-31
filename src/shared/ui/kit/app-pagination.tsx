@@ -7,6 +7,7 @@ import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/utils";
+import { RepoMeta } from "@/shared/types/repo";
 import {
   Pagination,
   PaginationContent,
@@ -20,11 +21,10 @@ import { usePathname, useRouter } from "@/i18n/routing";
 
 type Props = {
   className?: string;
-  currentPage: number;
-  totalPages: number;
+  meta: RepoMeta;
 };
 
-export function AppPagination({ className, currentPage, totalPages }: Props) {
+export function AppPagination({ className, meta }: Props) {
   const t = useTranslations("Common");
 
   const router = useRouter();
@@ -63,18 +63,24 @@ export function AppPagination({ className, currentPage, totalPages }: Props) {
 
   return (
     <Pagination
-      className={cn(className, isPending && "pointer-events-none opacity-60 transition-opacity")}
+      className={cn(
+        className,
+        isPending && "pointer-events-none opacity-60 transition-opacity",
+        meta.totalCount === 0 && "hidden"
+      )}
     >
       <PaginationContent>
         <PaginationItem>
           <PaginationLink
-            href={createPageURL(currentPage - 1) as Route}
-            onClick={(e) => currentPage > 1 && handlePageClick(e, currentPage - 1, "prev")}
+            href={createPageURL(meta.currentPage - 1) as Route}
+            onClick={(e) =>
+              meta.currentPage > 1 && handlePageClick(e, meta.currentPage - 1, "prev")
+            }
             className={cn(
               navBtnClass,
-              currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
+              meta.currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
             )}
-            aria-disabled={currentPage <= 1}
+            aria-disabled={meta.currentPage <= 1}
           >
             {isPrevLoading ? (
               <Spinner className="h-4 w-4 animate-spin" />
@@ -85,14 +91,14 @@ export function AppPagination({ className, currentPage, totalPages }: Props) {
           </PaginationLink>
         </PaginationItem>
 
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+        {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((page) => {
           if (
-            totalPages > 7 &&
-            Math.abs(page - currentPage) > 1 &&
+            meta.totalPages > 7 &&
+            Math.abs(page - meta.currentPage) > 1 &&
             page !== 1 &&
-            page !== totalPages
+            page !== meta.totalPages
           ) {
-            if (Math.abs(page - currentPage) === 2)
+            if (Math.abs(page - meta.currentPage) === 2)
               return (
                 <PaginationItem key={page}>
                   <PaginationEllipsis />
@@ -105,9 +111,9 @@ export function AppPagination({ className, currentPage, totalPages }: Props) {
             <PaginationItem key={page}>
               <PaginationLink
                 href={createPageURL(page) as Route}
-                isActive={page === currentPage}
+                isActive={page === meta.currentPage}
                 onClick={(e) => handlePageClick(e, page, "page")}
-                className={cn("cursor-pointer", page === currentPage && "pointer-events-none")}
+                className={cn("cursor-pointer", page === meta.currentPage && "pointer-events-none")}
               >
                 {page}
               </PaginationLink>
@@ -117,14 +123,18 @@ export function AppPagination({ className, currentPage, totalPages }: Props) {
 
         <PaginationItem>
           <PaginationLink
-            href={createPageURL(currentPage + 1) as Route}
-            onClick={(e) => currentPage < totalPages && handlePageClick(e, currentPage + 1, "next")}
+            href={createPageURL(meta.currentPage + 1) as Route}
+            onClick={(e) =>
+              meta.currentPage < meta.totalPages && handlePageClick(e, meta.currentPage + 1, "next")
+            }
             className={cn(
               navBtnClass,
               "pr-2.5 pl-4",
-              currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"
+              meta.currentPage >= meta.totalPages
+                ? "pointer-events-none opacity-50"
+                : "cursor-pointer"
             )}
-            aria-disabled={currentPage >= totalPages}
+            aria-disabled={meta.currentPage >= meta.totalPages}
           >
             <span className="mr-1">{t("next")}</span>
             {isNextLoading ? (

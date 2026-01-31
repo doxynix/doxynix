@@ -3,8 +3,9 @@
 import { SearchX } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { RepoMeta, RepoTableItem } from "@/shared/types/repo";
+
 import { RepoCard } from "@/entities/repo";
-import { RepoMeta, RepoTableItem } from "@/entities/repo/model/types";
 import { RepoEmpty } from "./repo-empty";
 
 type Props = {

@@ -19,7 +19,7 @@ const DASHBOARD_BASE: MenuItem[] = [
     label: "Dashboard",
     icon: LayoutGrid,
     href: "/dashboard",
-    shortcut: "Alt+O",
+    shortcut: "G+O",
     exact: true,
     url: "/o",
   },
@@ -27,14 +27,14 @@ const DASHBOARD_BASE: MenuItem[] = [
     label: "Repositories",
     icon: FolderGit2,
     href: "/dashboard/repo",
-    shortcut: "Alt+R",
+    shortcut: "G+R",
     url: "/r",
   },
   {
     label: "Settings",
     icon: Settings,
     href: "/dashboard/settings",
-    shortcut: "Alt+S",
+    shortcut: "G+S",
     url: "/s",
   },
 ];
@@ -44,21 +44,21 @@ const SETTINGS_PAGES: MenuItems = [
     label: "Profile",
     icon: User,
     href: "/dashboard/settings/profile",
-    shortcut: "Alt+P",
+    shortcut: "G+P",
     url: "/me",
   },
   {
     label: "API Keys",
     icon: KeyRound,
     href: "/dashboard/settings/api-keys",
-    shortcut: "Alt+A",
+    shortcut: "G+K",
     url: "/k",
   },
   {
     label: "Danger Zone",
     icon: AlertTriangle,
     href: "/dashboard/settings/danger-zone",
-    shortcut: "Alt+D",
+    shortcut: "G+D",
     variant: "destructive",
     url: "/d",
   },
@@ -69,19 +69,19 @@ const GLOBAL_FEATURES: MenuItems = [
     label: "Notifications",
     icon: Bell,
     href: "/dashboard/notifications",
-    shortcut: "Alt+N",
+    shortcut: "G+N",
     url: "/n",
   },
-  { label: "Support", icon: Headset, href: "/support", shortcut: "Alt+H", url: "/h" },
+  { label: "Support", icon: Headset, href: "/support", shortcut: "G+H", url: "/h" },
 ];
 
 export const actionsMenu: MenuItems = [
   {
     label: "Create Repository",
     icon: SquareTerminal,
-    href: "/dashboard/repo/new",
-    shortcut: "Alt+N",
-    url: "/new",
+    shortcut: "C+N",
+    commandType: "dialog",
+    actionId: "createRepo",
   },
 ];
 
@@ -95,7 +95,7 @@ export const commandMenuItems: MenuItems = [
   ...DASHBOARD_BASE,
   ...SETTINGS_PAGES,
   ...GLOBAL_FEATURES,
-  // ...actionsMenu,
+  ...actionsMenu,
 ];
 
 export const publicHeaderMenu: MenuItems = [

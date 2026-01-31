@@ -1,9 +1,23 @@
 {
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
   "version": "0.2",
-  "language": "en,ru",
-  "dictionaries": ["en_US", "ru_RU", "typescript", "node", "html", "css", "bash", "misc"],
-
+  "language": "en,ru,de,es,fr,pt,zh",
+  "dictionaries": [
+    "en_US",
+    "en-gb",
+    "ru-ru",
+    "de-de",
+    "es-es",
+    "fr-fr",
+    "pt-br",
+    "pt-pt",
+    "typescript",
+    "node",
+    "html",
+    "css",
+    "bash",
+    "misc"
+  ],
   "ignorePaths": [
     "node_modules",
     ".next",
@@ -21,9 +35,11 @@
     "/prisma",
     "/package.json",
     "/src/entities/repo/model/language-colors.ts",
-    "/pnpm-workspace.yaml"
+    "/pnpm-workspace.yaml",
+    "coverage/",
+    "report/",
+    "src/tests"
   ],
-
   "words": [
     "reactquerydevtoolspanel",
     "opengraph",
@@ -81,6 +97,14 @@
     "dxnxconfig",
     "дашборда"
   ],
-
-  "import": ["@cspell/dict-ru_ru/cspell-ext.json"]
+  "import": [
+    "@cspell/dict-en_us/cspell-ext.json",
+    "@cspell/dict-en-gb/cspell-ext.json",
+    "@cspell/dict-ru_ru/cspell-ext.json",
+    "@cspell/dict-de-de/cspell-ext.json",
+    "@cspell/dict-es-es/cspell-ext.json",
+    "@cspell/dict-fr-fr/cspell-ext.json",
+    "@cspell/dict-pt-br/cspell-ext.json",
+    "@cspell/dict-pt-pt/cspell-ext.json"
+  ]
 }
