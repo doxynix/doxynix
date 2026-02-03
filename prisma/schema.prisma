@@ -54,23 +54,45 @@ enum DocType {
   CODE_DOC
 }
 
+enum NotifyType {
+  ERROR
+  WARNING
+  INFO
+  SUCCESS
+}
+
 model User {
-  id            Int       @id() @default(autoincrement())
-  publicId      String    @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  email         String?   @unique()
+  id            Int            @id() @default(autoincrement())
+  publicId      String         @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  email         String?        @unique()
   name          String?
-  emailVerified DateTime? @map("email_verified")
+  emailVerified DateTime?      @map("email_verified")
   image         String?
-  imageKey      String?   @map("image_key")
-  role          UserRole  @default(USER)
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt() @map("updated_at")
+  imageKey      String?        @map("image_key")
+  role          UserRole       @default(USER)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt() @map("updated_at")
   accounts      Account[]
   sessions      Session[]
   repos         Repo[]
   apiKeys       ApiKey[]
+  notifications Notification[]
 
   @@map("users")
+}
+
+model Notification {
+  id        Int        @id() @default(autoincrement())
+  publicId  String     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  createdAt DateTime   @default(now())
+  title     String
+  body      String
+  type      NotifyType @default(INFO)
+  isRead    Boolean    @default(false)
+  userId    Int
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }
 
 model Repo {
