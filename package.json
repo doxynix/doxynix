@@ -127,7 +127,7 @@
     "nextjs-toploader": "^3.9.17",
     "nodemailer": "^7.0.12",
     "pg": "^8.17.2",
-    "pino": "^10.1.1",
+    "pino": "^10.3.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
