@@ -130,7 +130,7 @@
     "pino": "^10.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-hook-form": "^7.69.0",
+    "react-hook-form": "^7.71.1",
     "react-hotkeys-hook": "^5.2.1",
     "recharts": "2.15.4",
     "resend": "^6.8.0",
