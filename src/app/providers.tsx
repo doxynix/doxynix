@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import React, { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { httpBatchLink, loggerLink } from "@trpc/client";
@@ -11,6 +11,7 @@ import superjson from "superjson";
 import { trpc } from "@/shared/api/trpc";
 import { APP_URL, isDev } from "@/shared/constants/env";
 import { TooltipProvider } from "@/shared/ui/core/tooltip";
+import { RealtimeProvider } from "@/features/notifications/realtime-provider";
 
 type Props = {
   children: ReactNode;
@@ -53,19 +54,25 @@ export function Providers({ children }: Props) {
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         <SessionProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark" // THEME: пока на время светлая тема удалена
-            storageKey="doxynix-theme"
-            enableSystem={false} // THEME: пока на время светлая тема удалена
-            forcedTheme="dark" // THEME: пока на время светлая тема удалена
-            disableTransitionOnChange
-          >
-            <TooltipProvider>{children}</TooltipProvider>
-          </ThemeProvider>
+          <RealtimeProvider>
+            <InnerProviders>{children}</InnerProviders>
+          </RealtimeProvider>
         </SessionProvider>
         {isDev && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </trpc.Provider>
   );
 }
+
+const InnerProviders = ({ children }: { children: ReactNode }) => (
+  <ThemeProvider
+    attribute="class"
+    defaultTheme="dark" // THEME: пока на время светлая тема удалена
+    storageKey="doxynix-theme"
+    enableSystem={false} // THEME: пока на время светлая тема удалена
+    forcedTheme="dark" // THEME: пока на время светлая тема удалена
+    disableTransitionOnChange
+  >
+    <TooltipProvider>{children}</TooltipProvider>
+  </ThemeProvider>
+);

@@ -112,6 +112,9 @@ jobs:
     timeout-minutes: 60
     env:
       DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+      ABLY_API_KEY: "placeholder.id:placeholder-secret"
+      UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
+      UPSTASH_REDIS_REST_TOKEN: "dummy-token"
 
     steps:
       - name: Checkout repo
@@ -218,6 +221,9 @@ jobs:
       NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
       NEXTAUTH_URL: "http://localhost:3000"
       UPLOADTHING_TOKEN: "eyJdummy.token.for.build"
+      ABLY_API_KEY: "placeholder.id:placeholder-secret"
+      UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
+      UPSTASH_REDIS_REST_TOKEN: "dummy-token"
       SKIP_ENV_VALIDATION: 1
       NEXT_TELEMETRY_DISABLED: 1
 
@@ -273,6 +279,9 @@ jobs:
       SKIP_ENV_VALIDATION: 1
       NEXT_TELEMETRY_DISABLED: 1
       DATABASE_URL: postgresql://user:password@localhost:5432/test_db # Dummy for build
+      ABLY_API_KEY: "placeholder.id:placeholder-secret"
+      UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
+      UPSTASH_REDIS_REST_TOKEN: "dummy-token"
 
     steps:
       - name: Checkout repo
@@ -333,6 +342,9 @@ jobs:
       NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
       NEXTAUTH_URL: "http://localhost:3000"
       LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+      ABLY_API_KEY: "placeholder.id:placeholder-secret"
+      UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
+      UPSTASH_REDIS_REST_TOKEN: "dummy-token"
 
     steps:
       - uses: actions/checkout@v4
@@ -394,6 +406,9 @@ jobs:
       DATABASE_URL: postgresql://user:password@localhost:5432/test_db
       NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
       NEXTAUTH_URL: "http://localhost:3000"
+      ABLY_API_KEY: "placeholder.id:placeholder-secret"
+      UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
+      UPSTASH_REDIS_REST_TOKEN: "dummy-token"
       SKIP_ENV_VALIDATION: 1
       NEXT_TELEMETRY_DISABLED: 1
 

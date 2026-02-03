@@ -47,22 +47,23 @@ generator dbml {
 // }
 
 model User {
-  id            Int       @id @default(autoincrement()) @omit
-  publicId      String    @unique @default(uuid(7)) @map("public_id") @db.Uuid
-  email         String?   @unique @email(message: "Некорректный email")
-  name          String?   @length(min: 1, max: 50, message: "Имя должно быть от 1 до 50 символов")
-  emailVerified DateTime? @map("email_verified")
-  image         String?   @url(message: "Некорректная ссылка на аватар")
-  imageKey      String?   @map("image_key") @omit
-  role          UserRole  @default(USER)
+  id            Int            @id @default(autoincrement()) @omit
+  publicId      String         @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  email         String?        @unique @email(message: "Некорректный email")
+  name          String?        @length(min: 1, max: 50, message: "Имя должно быть от 1 до 50 символов")
+  emailVerified DateTime?      @map("email_verified")
+  image         String?        @url(message: "Некорректная ссылка на аватар")
+  imageKey      String?        @map("image_key") @omit
+  role          UserRole       @default(USER)
 
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
 
   accounts      Account[]
   sessions      Session[]
   repos         Repo[]
   apiKeys       ApiKey[]
+  notifications Notification[]
 
   @@allow('create', true)
   @@allow('read,delete', auth() == this || auth().role == 'ADMIN')
@@ -73,6 +74,23 @@ model User {
   )
 
   @@map("users")
+}
+
+model Notification {
+  id        Int        @id @default(autoincrement()) @omit
+  publicId  String     @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  createdAt DateTime   @default(now())
+  title     String
+  body      String
+  type      NotifyType @default(INFO)
+  isRead    Boolean    @default(false)
+
+  userId    Int
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@allow('all', auth() == user || auth().role == "ADMIN")
+
+  @@map("notifications")
 }
 
 model Repo {
@@ -276,4 +294,11 @@ enum DocType {
   USER_GUIDE
   CHANGELOG
   CODE_DOC
+}
+
+enum NotifyType {
+  ERROR
+  WARNING
+  INFO
+  SUCCESS
 }

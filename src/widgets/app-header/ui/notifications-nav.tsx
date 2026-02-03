@@ -1,8 +1,10 @@
 "use client";
 
 import { Bell } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
+import { trpc } from "@/shared/api/trpc";
+import { useNotificationActions } from "@/shared/hooks/use-notification-actions";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -13,20 +15,19 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/core/dropdown-menu";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
+import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import { Link } from "@/i18n/routing";
 
-// NOTE: Заглушка! Потом заменишь на пропс или запрос
-const notifications = [
-  { id: 1, title: "Analysis completed", repos: "vercel/next.js", time: "2 hours ago", read: false },
-  { id: 2, title: "New docs available", repos: "my-org/api", time: "1 day ago", read: true },
-  { id: 3, title: "Deployment failed", repos: "doxynix/web", time: "2 days ago", read: true },
-];
-
 export function NotificationsNav() {
   const t = useTranslations("Dashboard");
-  const unreadCount = notifications.filter((n) => !n.read).length;
-  const hasUnread = unreadCount > 0;
+  const locale = useLocale();
+
+  const { markRead, markAllRead } = useNotificationActions();
+
+  const { data: notifications = [] } = trpc.notification.getAll.useQuery({ count: 5 });
+  const { data: unreadData } = trpc.notification.getUnreadCount.useQuery();
+  const unreadCount = unreadData?.count ?? 0;
 
   return (
     <DropdownMenu>
@@ -38,7 +39,7 @@ export function NotificationsNav() {
             className="text-muted-foreground relative cursor-pointer"
           >
             <Bell />
-            {hasUnread && (
+            {unreadCount > 0 && (
               <span className="bg-foreground absolute top-2 right-2 h-2 w-2 rounded-full" />
             )}
           </Button>
@@ -46,31 +47,40 @@ export function NotificationsNav() {
       </AppTooltip>
       <DropdownMenuContent className="w-80">
         <div className="flex items-center justify-between p-2">
-          <p>{t("notifications_title")}</p>
-          <p className="cursor-pointer text-xs hover:underline">{t("notifications_mark_read")}</p>
+          <h2>{t("notifications_title")}</h2>
+          <Button
+            variant="link"
+            className="cursor-pointer text-xs"
+            disabled={markAllRead.isPending || unreadCount === 0}
+            onClick={() => markAllRead.mutate()}
+          >
+            {t("notifications_mark_read")}
+          </Button>
         </div>
         <DropdownMenuSeparator />
         <div className="flex flex-col gap-1 py-1">
           {notifications.length === 0 ? (
-            <div className="text-muted-foreground py-4 text-center text-sm">
-              {t("notifications_empty")}
-            </div>
+            <div className="text-muted-foreground p-4 text-center text-sm">Нет уведомлений</div>
           ) : (
-            notifications.slice(0, 5).map((note) => (
+            notifications.map((note) => (
               <DropdownMenuItem
                 key={note.id}
                 className={cn(
-                  "flex cursor-pointer flex-row items-center justify-between gap-1 p-3",
-                  note.read && "text-muted-foreground"
+                  "flex cursor-pointer flex-col items-start gap-1 p-3",
+                  note.isRead === false && "bg-accent/50"
                 )}
+                onClick={() => !note.isRead && markRead.mutate(note.id)}
               >
-                <div>
-                  <div className="font-medium">{note.title}</div>
-                  <div className="text-muted-foreground text-xs">
-                    {note.repos} · {note.time}
+                <div className="flex w-full items-center justify-between gap-2">
+                  <div className="flex flex-col">
+                    <p className="mb-1 font-bold">{note.title}</p>
+                    <p className="text-muted-foreground text-xs">{note.body}</p>
+                    <TimeAgo date={note.createdAt} locale={locale} />
                   </div>
+                  {note.isRead === false && (
+                    <span className="bg-muted-foreground mt-1 h-2 w-2 shrink-0 rounded-full" />
+                  )}
                 </div>
-                {!note.read && <span className="bg-foreground h-2 w-2 rounded-full" />}
               </DropdownMenuItem>
             ))
           )}
