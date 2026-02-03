@@ -7,7 +7,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 import { userNavMenu } from "@/shared/constants/navigation";
-import { getInitials } from "@/shared/lib/get-initials";
+import { getInitials } from "@/shared/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/core/avatar";
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -78,12 +78,14 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           {userNavMenu.map((item) => (
-            <DropdownMenuItem key={item.href} asChild>
-              <Link href={item.href as Route} className="flex cursor-pointer items-center">
+            <DropdownMenuItem className="group" key={item.href} asChild>
+              <Link href={item.href as Route} className="flex items-center">
                 <item.icon />
                 <span>{item.label}</span>
                 {item.shortcut !== null && (
-                  <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>
+                  <DropdownMenuShortcut className="opacity-0 transition-opacity group-hover:opacity-100">
+                    {item.shortcut}
+                  </DropdownMenuShortcut>
                 )}
               </Link>
             </DropdownMenuItem>
@@ -91,45 +93,43 @@ export function UserNav() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
 
-        <div className="">
-          <Dialog>
-            <DialogTrigger asChild>
-              <DropdownMenuItem
-                className="text-destructive focus:bg-destructive/20 focus:text-destructive cursor-pointer"
-                onSelect={(e) => e.preventDefault()}
-              >
-                <LogOut className="text-destructive mr-2" />
-                {t("logout")}
-              </DropdownMenuItem>
-            </DialogTrigger>
+        <Dialog>
+          <DialogTrigger asChild>
+            <DropdownMenuItem
+              className="text-destructive focus:bg-destructive/20 focus:text-destructive"
+              onSelect={(e) => e.preventDefault()}
+            >
+              <LogOut className="text-destructive mr-2" />
+              {t("logout")}
+            </DropdownMenuItem>
+          </DialogTrigger>
 
-            <DialogContent className="sm:max-w-105">
-              <DialogHeader>
-                <DialogTitle>{t("logout_title")}</DialogTitle>
-                <DialogDescription>{t("logout_confirmation_desc")}</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="flex justify-end gap-2">
-                  <DialogClose asChild>
-                    <Button className="cursor-pointer" variant="outline" disabled={loading}>
-                      {tCommon("cancel")}
-                    </Button>
-                  </DialogClose>
-                  <LoadingButton
-                    variant="destructive"
-                    disabled={loading}
-                    className="cursor-pointer"
-                    onClick={handleSignOut}
-                    isLoading={loading}
-                    loadingText="Logout..."
-                  >
-                    {t("logout")}
-                  </LoadingButton>
-                </div>
+          <DialogContent className="sm:max-w-105">
+            <DialogHeader>
+              <DialogTitle>{t("logout_title")}</DialogTitle>
+              <DialogDescription>{t("logout_confirmation_desc")}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex justify-end gap-2">
+                <DialogClose asChild>
+                  <Button className="cursor-pointer" variant="outline" disabled={loading}>
+                    {tCommon("cancel")}
+                  </Button>
+                </DialogClose>
+                <LoadingButton
+                  variant="destructive"
+                  disabled={loading}
+                  className="cursor-pointer"
+                  onClick={handleSignOut}
+                  isLoading={loading}
+                  loadingText="Logout..."
+                >
+                  {t("logout")}
+                </LoadingButton>
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -4,7 +4,6 @@ import { getLocale } from "next-intl/server";
 
 import { getServerAuthSession } from "@/shared/api/auth/auth-options";
 import { SidebarProvider } from "@/shared/ui/core/sidebar";
-import { HotkeyListeners } from "@/shared/ui/kit/hotkey-listeners";
 import { CreateRepoDialog } from "@/features/repo";
 import { AppFooter } from "@/widgets/app-footer";
 import { AppHeader } from "@/widgets/app-header";
@@ -45,7 +44,6 @@ export default async function PrivateLayout({ children }: { children: ReactNode 
           </div>
         </div>
       </SidebarProvider>
-      <HotkeyListeners />
       <CreateRepoDialog />
     </>
   );

@@ -142,9 +142,9 @@ export function AppCommandMenu() {
       >
         <Search className="absolute top-2.25 left-2.25" />
         <span className="hidden lg:inline-flex lg:pl-4">{t("command_search")}</span>
-        <kbd className="bg-muted absolute top-[0.4rem] right-[0.3rem] hidden h-5 items-center rounded border px-1.5 lg:flex">
-          <span className="text-xs">Ctrl+K</span>
-        </kbd>
+        <CommandShortcut className="absolute top-1.5 right-3 hidden text-xs lg:flex">
+          Ctrl+K
+        </CommandShortcut>
       </Button>
 
       <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>

@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { useApiKeyActions } from "@/shared/hooks/use-api-key-actions";
 import { Button } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -28,22 +27,18 @@ type Props = {
 
 export function RevokeApiKeyDialog({ apiKey }: Props) {
   const [open, setOpen] = useState(false);
-  const utils = trpc.useUtils();
+  const { revoke } = useApiKeyActions();
 
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
 
-  const revokeMutation = trpc.apikey.revoke.useMutation({
-    onSuccess: async () => {
-      toast.success(t("settings_api_keys_revoked_toast_success"));
-      setOpen(false);
-      await utils.apikey.list.invalidate();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
   const handleRevoke = () => {
-    revokeMutation.mutate({ id: apiKey.id });
+    revoke.mutate(
+      { id: apiKey.id },
+      {
+        onSuccess: () => setOpen(false),
+      }
+    );
   };
 
   return (
@@ -88,7 +83,7 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
             variant="destructive"
             className="cursor-pointer"
             onClick={handleRevoke}
-            isLoading={revokeMutation.isPending}
+            isLoading={revoke.isPending}
             loadingText="Revoking..."
           >
             {t("settings_api_keys_confirm_revoke")}

@@ -668,6 +668,16 @@ function SidebarMenuSubButton({
   );
 }
 
+function SidebarMenuShortcut({ className, ...props }: React.ComponentProps<"kbd">) {
+  return (
+    <kbd
+      data-slot="sidebar-menu-shortcut"
+      className={cn("text-muted-foreground ml-auto text-xs tracking-widest", className)}
+      {...props}
+    />
+  );
+}
+
 export {
   Sidebar,
   SidebarContent,
@@ -692,5 +702,6 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
+  SidebarMenuShortcut,
   useSidebar,
 };

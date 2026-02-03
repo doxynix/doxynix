@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { useRepoActions } from "@/shared/hooks/use-repo-actions";
 import { RepoMeta } from "@/shared/types/repo";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { Button } from "@/shared/ui/core/button";
@@ -27,24 +26,16 @@ const richStyles = {
 
 export function DeleteAllReposDialog({ meta }: { meta: RepoMeta }) {
   const [open, setOpen] = useState(false);
-  const utils = trpc.useUtils();
   const hasRepos = (meta?.totalCount ?? 0) > 0;
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const tsRich = (key: string) => t.rich(key, richStyles);
-
-  const deleteMutation = trpc.repo.deleteAll.useMutation({
-    onSuccess: async () => {
-      toast.success(t("settings_danger_delete_all_repos_toast_success"));
-      setOpen(false);
-      await utils.repo.getAll.invalidate();
-      await utils.analytics.getDashboardStats.invalidate();
-    },
-    onError: (err) => toast.error(err.message),
-  });
+  const { deleteAll } = useRepoActions();
 
   const handleDelete = () => {
-    deleteMutation.mutate();
+    deleteAll.mutate(undefined, {
+      onSuccess: () => setOpen(false),
+    });
   };
 
   return (
@@ -95,7 +86,7 @@ export function DeleteAllReposDialog({ meta }: { meta: RepoMeta }) {
             variant="destructive"
             className="cursor-pointer"
             onClick={handleDelete}
-            isLoading={deleteMutation.isPending}
+            isLoading={deleteAll.isPending}
             loadingText="Deleting..."
           >
             {t("settings_danger_delete_confirmation")}

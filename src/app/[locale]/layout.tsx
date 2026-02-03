@@ -18,6 +18,7 @@ import { Locale } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/utils";
 import { Toaster } from "@/shared/ui/core/sonner";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
+import { HotkeyListeners } from "@/shared/ui/kit/hotkey-listeners";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { Providers } from "@/app/providers";
 
@@ -142,20 +143,18 @@ export default async function LocaleLayout({
         )}
       >
         <NextIntlClientProvider messages={messages} locale={locale}>
+          <Toaster
+            theme="dark" // THEME: пока так будет форс
+            position="top-center"
+            richColors
+            duration={4000}
+            gap={8}
+          />
           <NextTopLoader color="#ffffff" showSpinner={false} zIndex={9999} />
           <Suspense>
             <UTSSR />
           </Suspense>
-          <Providers>
-            {children}
-            <Toaster
-              theme="dark" // THEME: пока так будет форс
-              position="top-center"
-              richColors
-              duration={4000}
-              gap={8}
-            />
-          </Providers>
+          <Providers>{children}</Providers>
           {isProd && (
             <>
               <Analytics />
@@ -163,6 +162,7 @@ export default async function LocaleLayout({
             </>
           )}
           <ConsoleEasterEgg />
+          <HotkeyListeners />
         </NextIntlClientProvider>
       </body>
     </html>

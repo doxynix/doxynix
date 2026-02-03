@@ -1,0 +1,32 @@
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+
+import { trpc } from "@/shared/api/trpc";
+
+export function useRepoActions() {
+  const utils = trpc.useUtils();
+  const t = useTranslations("Dashboard");
+
+  const invalidate = async () => {
+    await utils.repo.getAll.invalidate();
+    await utils.analytics.getDashboardStats.invalidate();
+  };
+
+  const create = trpc.repo.create.useMutation({
+    onSuccess: async () => {
+      toast.success(t("repo_added_toast_success"));
+      void invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const deleteAll = trpc.repo.deleteAll.useMutation({
+    onSuccess: async () => {
+      toast.success(t("settings_danger_delete_all_repos_toast_success"));
+      void invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  return { create, deleteAll };
+}
