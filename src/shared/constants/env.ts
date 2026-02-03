@@ -15,6 +15,7 @@ export const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 export const DATABASE_URL = process.env.DATABASE_URL;
 export const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY;
 export const RESEND_API_KEY = process.env.RESEND_API_KEY;
+export const ABLY_API_KEY = process.env.ABLY_API_KEY;
 
 export const AUTH_PROVIDERS = {
   github: {
