@@ -176,7 +176,7 @@
     "@trigger.dev/build": "4.3.2",
     "@types/js-cookie": "^3.0.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.2.0",
     "@types/nodemailer": "^7.0.9",
     "@types/pg": "^8.16.0",
     "@types/react": "^19.2.7",
