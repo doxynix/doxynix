@@ -3,7 +3,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import createMiddleware from "next-intl/middleware";
 
 import { routing } from "./i18n/routing";
-import { redisClient } from "./server/redis";
+import { redisClient } from "./server/lib/redis";
 import { isProd, TURNSTILE_SECRET_KEY } from "./shared/constants/env";
 import { LOCALE_REGEX_STR } from "./shared/constants/locales";
 import { logger } from "./shared/lib/logger";
@@ -16,7 +16,6 @@ const cookieName = getCookieName();
 
 let ratelimit: Ratelimit | null = null;
 if (isProd) {
-  console.log("privet");
   ratelimit = new Ratelimit({
     redis: redisClient,
     limiter: Ratelimit.slidingWindow(20, "10 s"),
@@ -55,7 +54,15 @@ function getUa(request: NextRequest): string {
 }
 
 function getCountry(request: NextRequest): string {
-  return (request as VercelNextRequest).geo?.country ?? "X";
+  const geoCountry = (request as VercelNextRequest).geo?.country;
+  if (geoCountry !== null && geoCountry !== undefined) return geoCountry;
+
+  const vercelHeader = request.headers.get("x-vercel-ip-country");
+  if (vercelHeader !== null && geoCountry !== undefined) return vercelHeader.toUpperCase();
+
+  if (!isProd) return "LOCAL";
+
+  return "UNKNOWN";
 }
 
 function logTraffic(

@@ -5,11 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
-import { trpc } from "@/shared/api/trpc";
+import { useApiKeyActions } from "@/shared/hooks/use-api-key-actions";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -35,9 +34,9 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 export function CreateApiKeyDialog() {
-  const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
   const [createdKey, setCreatedKey] = useState<string | null>(null);
+  const { create } = useApiKeyActions();
 
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
@@ -47,17 +46,12 @@ export function CreateApiKeyDialog() {
     defaultValues: { name: "", description: "" },
   });
 
-  const createMutation = trpc.apikey.create.useMutation({
-    onSuccess: async (data) => {
-      setCreatedKey(data.key);
-      toast.success(t("settings_api_keys_created_toast_success"));
-      await utils.apikey.list.invalidate();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
   const onSubmit = (values: z.infer<typeof CreateApiKeySchema>) => {
-    createMutation.mutate(values);
+    create.mutate(values, {
+      onSuccess: (data) => {
+        setCreatedKey(data.key);
+      },
+    });
   };
 
   const handleOpenChange = (value: boolean) => {
@@ -103,7 +97,7 @@ export function CreateApiKeyDialog() {
                       <Input
                         {...field}
                         placeholder={t("settings_api_keys_name_placeholder")}
-                        disabled={createMutation.isPending}
+                        disabled={create.isPending}
                       />
                     </FormControl>
                     <FormMessage />
@@ -123,7 +117,7 @@ export function CreateApiKeyDialog() {
                       <Textarea
                         {...field}
                         className="min-h-25 resize-none text-sm sm:text-base"
-                        disabled={createMutation.isPending}
+                        disabled={create.isPending}
                         placeholder={t("settings_api_keys_desc_placeholder")}
                       />
                     </FormControl>
@@ -136,9 +130,9 @@ export function CreateApiKeyDialog() {
                 <LoadingButton
                   type="submit"
                   className="cursor-pointer"
-                  disabled={!form.formState.isValid || createMutation.isPending}
+                  disabled={!form.formState.isValid || create.isPending}
                   loadingText="Saving..."
-                  isLoading={createMutation.isPending}
+                  isLoading={create.isPending}
                 >
                   {tCommon("create")}
                 </LoadingButton>
@@ -162,7 +156,7 @@ export function CreateApiKeyDialog() {
 
             <div className="flex items-center space-x-2">
               <div className="grid flex-1 gap-2">
-                <Input readOnly value={createdKey} disabled={createMutation.isPending} />
+                <Input readOnly value={createdKey} disabled={create.isPending} />
               </div>
               <CopyButton
                 tooltipText={tCommon("copy")}

@@ -5,11 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
-import { trpc } from "@/shared/api/trpc";
+import { useApiKeyActions } from "@/shared/hooks/use-api-key-actions";
 import { Button } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -40,8 +39,8 @@ type Props = {
 };
 
 export function UpdateApiKeyDialog({ apiKey }: Props) {
-  const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
+  const { update } = useApiKeyActions();
 
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
@@ -54,20 +53,13 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
     },
   });
 
-  const updateMutation = trpc.apikey.update.useMutation({
-    onSuccess: async () => {
-      toast.success(t("settings_api_keys_updated_toast_success"));
-      setOpen(false);
-      await utils.apikey.list.invalidate();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
   const onSubmit = (values: z.infer<typeof CreateApiKeySchema>) => {
-    updateMutation.mutate({
-      id: apiKey.id,
-      ...values,
-    });
+    update.mutate(
+      { id: apiKey.id, ...values },
+      {
+        onSuccess: () => setOpen(false),
+      }
+    );
   };
 
   const handleOpenChange = (value: boolean) => {
@@ -143,11 +135,9 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
               <LoadingButton
                 type="submit"
                 className="cursor-pointer"
-                disabled={
-                  !form.formState.isDirty || !form.formState.isValid || updateMutation.isPending
-                }
+                disabled={!form.formState.isDirty || !form.formState.isValid || update.isPending}
                 loadingText="Saving..."
-                isLoading={updateMutation.isPending}
+                isLoading={update.isPending}
               >
                 {tCommon("update")}
               </LoadingButton>

@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/shared/api/auth/auth-options";
 import { prisma } from "@/shared/api/db/db";
 
-import { redisClient } from "../redis";
+import { redisClient } from "../lib/redis";
 
 type Props = {
   req: Request;

@@ -1,14 +1,13 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { Route } from "next";
+import { Route } from "next";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BookOpen } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
 
 import { CreateRepoInput, CreateRepoSchema } from "@/shared/api/schemas/repo";
@@ -33,6 +32,7 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { usePathname, useRouter } from "@/i18n/routing";
+import { useRepoActions } from "../../../shared/hooks/use-repo-actions";
 import { RepoItem } from "./repo-item";
 
 const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут
@@ -42,12 +42,12 @@ export function CreateRepoDialog() {
   const t = useTranslations("Dashboard");
 
   const { open, closeDialog } = useCreateRepoDialogStore();
-  const router = useRouter();
-  const utils = trpc.useUtils();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const { create } = useRepoActions();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -88,25 +88,16 @@ export function CreateRepoDialog() {
     }
   );
 
-  const createRepo = trpc.repo.create.useMutation({
-    onSuccess: async () => {
-      toast.success(t("repo_added_toast_success"));
-      closeDialog();
-      form.reset();
-      await utils.repo.getAll.invalidate();
-      await utils.analytics.getDashboardStats.invalidate();
-      const params = new URLSearchParams(searchParams.toString());
-
-      params.delete("page");
-      router.push(`${pathname}?${params.toString()}` as Route);
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
   const onSubmit = (values: CreateRepoInput) => {
-    createRepo.mutate(values);
+    create.mutate(values, {
+      onSuccess: () => {
+        closeDialog();
+        form.reset();
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("page");
+        router.push(`${pathname}?${params.toString()}` as Route);
+      },
+    });
   };
 
   const handleSelectRepo = (repoUrl: string) => {
@@ -148,7 +139,7 @@ export function CreateRepoDialog() {
                           className="pl-8 text-sm"
                           placeholder={t("repo_create_placeholder")}
                           autoComplete="off"
-                          disabled={createRepo.isPending}
+                          disabled={create.isPending}
                           maxLength={500}
                           onChange={(e) => {
                             field.onChange(e);
@@ -218,7 +209,7 @@ export function CreateRepoDialog() {
                     {myGithubData?.items.map((myRepo) => (
                       <RepoItem
                         key={myRepo.fullName}
-                        disabled={createRepo.isPending}
+                        disabled={create.isPending}
                         repo={myRepo}
                         onClick={() => handleSelectRepo(myRepo.fullName)}
                       />
@@ -230,9 +221,9 @@ export function CreateRepoDialog() {
             <DialogFooter>
               <LoadingButton
                 className="cursor-pointer"
-                isLoading={createRepo.isPending}
+                isLoading={create.isPending}
                 loadingText="Adding..."
-                disabled={createRepo.isPending || !form.formState.isValid || !urlValue}
+                disabled={create.isPending || !form.formState.isValid || !urlValue}
               >
                 {tCommon("add")}
               </LoadingButton>

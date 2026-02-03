@@ -4,16 +4,13 @@ import React, { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
 import { User } from "next-auth";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import z from "zod";
 
 import { UpdateProfileSchema } from "@/shared/api/schemas/user";
-import { trpc } from "@/shared/api/trpc";
-import { getInitials } from "@/shared/lib/get-initials";
-import { useUploadThing } from "@/shared/lib/uploadthing";
+import { useProfileActions } from "@/shared/hooks/use-profile-actions";
+import { getInitials } from "@/shared/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/core/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import {
@@ -34,8 +31,6 @@ type Props = {
 };
 
 export function ProfileCard({ user }: Props) {
-  const { update } = useSession();
-
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,76 +38,45 @@ export function ProfileCard({ user }: Props) {
   const [displayUser, setDisplayUser] = useState<User>(user);
   const [avatarUrl, setAvatarUrl] = useState(user?.image ?? "");
 
-  const updateAvatar = trpc.user.updateAvatar.useMutation({
-    onSuccess: async () => {
-      toast.success(t("settings_profile_update_avatar_toast_success"));
-      await update();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
-  const removeAvatar = trpc.user.removeAvatar.useMutation({
-    onSuccess: async () => {
-      setAvatarUrl("");
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      toast.success(t("settings_profile_remove_avatar_toast_success"));
-      await update();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
-  const { startUpload, isUploading } = useUploadThing("avatarUploader", {
-    onClientUploadComplete: (res) => {
-      const file = res[0];
-      setAvatarUrl(file.ufsUrl);
-      updateAvatar.mutate({ url: file.ufsUrl, key: file.key });
-    },
-    onUploadError: (error: Error) => {
-      let message = t("settings_profile_error_uploading_file");
-      if (error.message.includes("FileSizeMismatch")) {
-        message = t("settings_profile_file_too_large");
-      } else if (error.message.includes("InvalidFileType")) {
-        message = t("settings_profile_invalid_file_format");
-      } else if (error.message.includes(t("settings_profile_unauthorized"))) {
-        message = t("settings_profile_not_logged_in");
-      }
-      toast.error(`${message}`);
-    },
-  });
-
-  const updateProfile = trpc.user.updateUser.useMutation({
-    onSuccess: async (_, variables) => {
-      toast.success(t("settings_profile_update_profile_toast_success"));
-      setDisplayUser((prev) => ({
-        ...prev,
-        name: variables.name,
-        email: variables.email,
-      }));
-      await update();
-      form.reset({
-        name: form.getValues("name"),
-        email: form.getValues("email"),
-      });
-    },
-    onError: (error) => toast.error(error.message),
-  });
-
-  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    await startUpload([file]);
-  };
-
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(UpdateProfileSchema),
-    values: {
+    defaultValues: {
       name: displayUser.name ?? "",
       email: displayUser.email ?? "",
     },
   });
 
+  const { isUploading, removeAvatar, updateAvatar, updateProfile, uploadAvatar } =
+    useProfileActions({
+      onProfileUpdateSuccess: (data) => {
+        setDisplayUser((prev) => ({
+          ...prev,
+          name: data.name,
+          email: data.email,
+        }));
+
+        form.reset({
+          name: data.name ?? "",
+          email: data.email ?? "",
+        });
+      },
+      onAvatarUpdateSuccess: (url) => {
+        setAvatarUrl(url);
+      },
+      onAvatarRemoveSuccess: () => {
+        setAvatarUrl("");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      },
+    });
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadAvatar([file]);
+  };
+
   const onSubmit = (values: ProfileFormValues) => {
-    updateProfile.mutate({ name: values.name, email: values.email });
+    updateProfile.mutate(values);
   };
 
   return (
@@ -190,6 +154,7 @@ export function ProfileCard({ user }: Props) {
                     </FormLabel>
                     <FormControl>
                       <Input
+                        disabled={updateProfile.isPending}
                         placeholder={t("settings_profile_personal_information_placeholder")}
                         {...field}
                       />

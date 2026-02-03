@@ -27,7 +27,7 @@ export function RepoItem({ repo, onClick, disabled }: Props) {
       <div className="flex w-full flex-col gap-1 overflow-hidden">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1">
-            <span className="truncate text-sm leading-none font-medium">{repo.fullName}</span>
+            <span className="truncate text-sm font-medium">{repo.fullName}</span>
             {visibility !== null && (
               <AppTooltip content={cn(visibility.label)}>
                 <div className="flex shrink-0 items-center gap-1.5 text-xs">
