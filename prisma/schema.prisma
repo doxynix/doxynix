@@ -49,9 +49,10 @@ enum Status {
 enum DocType {
   README
   API
-  USER_GUIDE
+  CONTRIBUTING
   CHANGELOG
   CODE_DOC
+  ARCHITECTURE
 }
 
 enum NotifyType {
@@ -132,18 +133,26 @@ model Repo {
 }
 
 model Analysis {
-  id          Int      @id() @default(autoincrement())
-  publicId    String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  status      Status
-  score       Int?
-  metricsJson Json?    @map("metrics_json")
-  commitSha   String   @map("commit_sha")
-  logs        String?  @db.Text()
-  error       String?  @db.Text()
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt() @map("updated_at")
-  repoId      Int      @map("repo_id")
-  repo        Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
+  id              Int      @id() @default(autoincrement())
+  publicId        String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  status          Status   @default(NEW)
+  progress        Int      @default(0)
+  message         String?  @db.Text()
+  score           Int?
+  securityScore   Int?     @map("security_score")
+  complexityScore Int?     @map("complexity_score")
+  techDebtScore   Int?     @map("tech_debt_score")
+  onboardingScore Int?     @map("onboarding_score")
+  metricsJson     Json?    @map("metrics_json")
+  resultJson      Json?    @map("result_json")
+  commitSha       String?  @map("commit_sha")
+  jobId           String?
+  logs            String?  @db.Text()
+  error           String?  @db.Text()
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt() @map("updated_at")
+  repoId          Int      @map("repo_id")
+  repo            Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])

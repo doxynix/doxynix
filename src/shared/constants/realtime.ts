@@ -10,6 +10,7 @@ export const REALTIME_CONFIG = {
     },
     user: {
       notification: "notification",
+      analysisProgress: "analysis-progress",
     },
   },
 } as const;
