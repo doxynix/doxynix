@@ -23,15 +23,15 @@ export default defineConfig({
       {
         name: "zenstack-generate",
         onBuildStart: async () => {
-          console.log("🛠 Generating Prisma and ZenStack/Zod files...");
+          console.log("🛠 ZenStack generating...");
           try {
             execSync("npx zenstack generate --schema prisma/schema.zmodel", {
               stdio: "inherit",
             });
-            console.log("✅ Generation successful!");
-          } catch (error) {
-            console.error("❌ Generation failed:", error);
-            throw error;
+            console.log("✅ ZenStack generation successful!");
+          } catch (e) {
+            console.error("❌ ZenStack generation failed", e);
+            throw e;
           }
         },
       },
