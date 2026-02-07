@@ -2,5 +2,23 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
-  ]
+  ],
+  "dependencyDashboard": true,
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Группируем все минорные и патч обновления в один PR",
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Группируем обновления типов",
+      "matchPackageNames": ["@types/**"],
+      "groupName": "all @types"
+    }
+  ],
+  "separateMajorMinor": true,
+  "prHourlyLimit": 2,
+  "prConcurrentLimit": 5
 }
