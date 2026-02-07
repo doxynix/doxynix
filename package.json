@@ -81,7 +81,7 @@
     "@octokit/plugin-throttling": "^11.0.3",
     "@octokit/rest": "^22.0.1",
     "@prisma/adapter-pg": "^6.19.1",
-    "@prisma/client": "6.19.1",
+    "@prisma/client": "6.19.2",
     "@prisma/extension-accelerate": "^3.0.1",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.11",
@@ -127,7 +127,7 @@
     "linguist-languages": "^9.3.1",
     "lucide-react": "^0.563.0",
     "motion": "^12.27.0",
-    "next": "16.1.5",
+    "next": "16.1.6",
     "next-auth": "^4.24.13",
     "next-axiom": "^1.10.0",
     "next-intl": "^4.7.0",
@@ -137,8 +137,8 @@
     "parse-github-url": "^1.0.3",
     "pg": "^8.17.2",
     "pino": "^10.3.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
     "react-hook-form": "^7.71.1",
     "react-hotkeys-hook": "^5.2.1",
     "recharts": "2.15.4",
@@ -206,7 +206,7 @@
     "cspell": "^9.6.0",
     "dotenv": "^17.2.4",
     "eslint": "^9.39.2",
-    "eslint-config-next": "16.1.1",
+    "eslint-config-next": "16.1.6",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.5",
@@ -244,5 +244,5 @@
     "zenstack": "2.22.1",
     "zod-prisma-types": "^3.3.10"
   },
-  "packageManager": "pnpm@10.26.2+sha512.0e308ff2005fc7410366f154f625f6631ab2b16b1d2e70238444dd6ae9d630a8482d92a451144debc492416896ed16f7b114a86ec68b8404b2443869e68ffda6"
+  "packageManager": "pnpm@10.28.2+sha512.41872f037ad22f7348e3b1debbaf7e867cfd448f2726d9cf74c08f19507c31d2c8e7a11525b983febc2df640b5438dee6023ebb1f84ed43cc2d654d2bc326264"
 }
