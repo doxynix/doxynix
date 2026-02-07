@@ -9,7 +9,7 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v10
         with:
           stale-pr-message: 'Этот PR не обновлялся 30 дней. Он будет закрыт через 7 дней, если не появится новой активности.'
           close-pr-message: 'PR закрыт из-за неактивности.'
