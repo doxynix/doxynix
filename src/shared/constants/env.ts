@@ -16,6 +16,8 @@ export const DATABASE_URL = process.env.DATABASE_URL;
 export const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY;
 export const RESEND_API_KEY = process.env.RESEND_API_KEY;
 export const ABLY_API_KEY = process.env.ABLY_API_KEY;
+export const SYSTEM_TOKEN = process.env.GITHUB_SYSTEM_TOKEN;
+export const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 export const AUTH_PROVIDERS = {
   github: {

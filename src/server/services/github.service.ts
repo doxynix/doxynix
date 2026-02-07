@@ -3,9 +3,13 @@ import { retry } from "@octokit/plugin-retry";
 import { throttling } from "@octokit/plugin-throttling";
 import { Octokit, RestEndpointMethodTypes } from "@octokit/rest";
 import { PrismaClient, Visibility } from "@prisma/client";
+import parseGithubUrl from "parse-github-url";
 
+import { SYSTEM_TOKEN } from "@/shared/constants/env";
 import { logger } from "@/shared/lib/logger";
 import { RepoItemFields } from "@/shared/types/repo-item";
+
+import { FileClassifier } from "../utils/file-classifier";
 
 const MyOctokit = Octokit.plugin(retry, throttling, paginateRest);
 type SearchRepoItem =
@@ -17,26 +21,23 @@ type GitHubRepoResponse = SearchRepoItem | ListRepoItem;
 
 export const githubService = {
   parseUrl(input: string) {
-    if (!input) throw new Error("Field cannot be empty");
+    if (!input?.trim()) throw new Error("Field cannot be empty");
 
-    const clean = input
-      .trim()
-      .replace(/^git@github\.com:/, "")
-      .replace(/^(https?:\/\/)?(www\.)?github\.com\//, "")
-      .replace(/\.git$/, "")
-      .replace(/^\/+|\/+$/g, "");
+    const parsed = parseGithubUrl(input);
 
-    const parts = clean.split("/");
-
-    const owner = parts[0]?.trim();
-    const name = parts[1]?.trim();
-
-    if (!owner || !name) {
+    if (
+      parsed == null ||
+      parsed.owner == null ||
+      parsed.owner.trim().length === 0 ||
+      parsed.name == null ||
+      parsed.name.trim().length === 0
+    ) {
       throw new Error("Invalid format. Enter 'owner/repo' or repository URL");
     }
 
-    return { owner, name };
+    return { owner: parsed.owner, name: parsed.name };
   },
+
   async searchRepos(
     prisma: PrismaClient,
     userId: number,
@@ -66,6 +67,7 @@ export const githubService = {
       return [];
     }
   },
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async getMyRepos(prisma: any, userId: number, limit?: number): Promise<RepoItemFields[]> {
     try {
@@ -106,19 +108,20 @@ export const githubService = {
     }));
   },
 
-  async getClientForUser(prisma: PrismaClient, userId: number) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async getClientForUser(prisma: any, userId: number) {
     const account = await prisma.account.findFirst({
       where: { userId, provider: "github" },
     });
 
-    const token = account?.access_token;
+    const token = account?.access_token ?? SYSTEM_TOKEN;
 
     // if (token === null || token === undefined) {
     //   logger.error({ msg: "Token not found in DB", userId });
     //   throw new Error("TOKEN_MISSING");
     // }
     return new MyOctokit({
-      auth: token,
+      auth: token ?? undefined,
       userAgent: "Doxynix/1.0.0",
 
       log: {
@@ -154,5 +157,37 @@ export const githubService = {
     const { data } = await octokit.repos.get({ owner, repo: name });
 
     return data;
+  },
+  async getRepoTree(
+    prisma: PrismaClient,
+    userId: number,
+    owner: string,
+    name: string,
+    branch?: string
+  ) {
+    const octokit = await this.getClientForUser(prisma, userId);
+
+    const { data: repoData } = await octokit.repos.get({ owner, repo: name });
+    const treeSha = branch ?? repoData.default_branch;
+
+    const { data } = await octokit.git.getTree({
+      owner,
+      repo: name,
+      tree_sha: treeSha,
+      recursive: "1",
+    });
+
+    return data.tree
+      .filter((item) => {
+        if (!item.path) return false;
+        if (item.type !== "blob") return false;
+
+        return !FileClassifier.isIgnored(item.path);
+      })
+      .map((item) => ({
+        path: item.path!,
+        type: item.type,
+        sha: item.sha,
+      }));
   },
 };

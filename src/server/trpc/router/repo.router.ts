@@ -1,4 +1,6 @@
-import { Status } from "@prisma/client";
+import { DocType, Status } from "@prisma/client";
+import { tasks } from "@trigger.dev/sdk";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { CreateRepoSchema, GitHubQuerySchema } from "@/shared/api/schemas/repo";
@@ -8,6 +10,7 @@ import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
 import { OpenApiErrorResponses, RepoFilterSchema } from "@/server/trpc/shared";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
+import { FileClassifier } from "@/server/utils/file-classifier";
 import { handlePrismaError } from "@/server/utils/handle-prisma-error";
 
 export const PublicRepoSchema = RepoSchema.extend({
@@ -56,7 +59,7 @@ export const repoRouter = createTRPCRouter({
       },
     });
 
-    if (!account) {
+    if (account === null) {
       return {
         isConnected: false,
         items: [],
@@ -283,5 +286,91 @@ export const repoRouter = createTRPCRouter({
       } catch (error) {
         handlePrismaError(error, { notFound: "Repositories not found" });
       }
+    }),
+  getRepoFiles: protectedProcedure
+    .input(
+      z.object({
+        owner: z.string(),
+        name: z.string(),
+        branch: z.string().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const tree = await githubService.getRepoTree(
+        ctx.db,
+        Number(ctx.session.user.id),
+        input.owner,
+        input.name,
+        input.branch
+      );
+
+      return tree.map((file) => ({
+        ...file,
+        recommended: FileClassifier.getScore(file.path) > 40,
+      }));
+    }),
+  analyze: protectedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/repos/analyze",
+        tags: ["repositories"],
+        summary: "Analyze your repository",
+        protect: true,
+        errorResponses: OpenApiErrorResponses,
+      },
+    })
+    .input(
+      z.object({
+        repoId: z.uuid(),
+        files: z.array(z.string()),
+        instructions: z.string().optional(),
+        docTypes: z.array(z.enum(DocType)),
+        language: z.string(),
+      })
+    )
+    .output(z.object({ status: z.string(), jobId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const repo = await ctx.db.repo.findUnique({
+        where: { publicId: input.repoId },
+      });
+
+      if (repo === null)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
+
+      const analysis = await ctx.db.analysis.create({
+        data: {
+          status: "PENDING",
+          repo: {
+            connect: {
+              publicId: input.repoId,
+            },
+          },
+        },
+      });
+
+      const handle = await tasks.trigger(
+        "analyze-repo",
+        {
+          analysisId: analysis.publicId,
+          userId: Number(ctx.session.user.id),
+          selectedFiles: input.files,
+          instructions: input.instructions,
+          docTypes: input.docTypes,
+          language: input.language,
+        },
+        {
+          concurrencyKey: `user-${ctx.session.user.id}`,
+          idempotencyKey: `analysis-${analysis.publicId}`,
+          ttl: "30m",
+        }
+      );
+
+      await ctx.db.analysis.update({
+        where: { publicId: analysis.publicId },
+        data: { jobId: handle.id },
+      });
+
+      return { status: "QUEUED", jobId: analysis.publicId };
     }),
 });

@@ -6,10 +6,10 @@ import { githubService } from "./github.service";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DbClient = any;
-interface OctokitError {
+type OctokitError = {
   status: number;
   message: string;
-}
+};
 
 function isOctokitError(error: unknown): error is OctokitError {
   return (

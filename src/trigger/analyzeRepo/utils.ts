@@ -1,0 +1,83 @@
+import { existsSync } from "fs";
+import fs from "fs/promises";
+import path from "path";
+import { Status } from "@prisma/client";
+import { isBinaryFile } from "isbinaryfile";
+
+import { prisma } from "@/shared/api/db/db";
+import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { logger } from "@/shared/lib/logger";
+
+import { realtimeServer } from "@/server/lib/realtime";
+
+export async function handleError(
+  error: unknown,
+  analysisId: string,
+  channelName: string,
+  tempPath: string
+) {
+  const message = error instanceof Error ? error.message : "Unknown error";
+  logger.error({
+    msg: "TASK_ERROR",
+    analysisId,
+    error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error),
+  });
+
+  await cleanup(tempPath);
+
+  await prisma.analysis.update({
+    where: { publicId: analysisId },
+    data: {
+      status: Status.FAILED,
+      error: message,
+      message: "Analysis failed",
+    },
+  });
+
+  void realtimeServer.channels
+    .get(channelName)
+    ?.publish(REALTIME_CONFIG.events.user.analysisProgress, {
+      analysisId,
+      status: "FAILED",
+      message: message,
+    });
+}
+
+export async function cleanup(path: string) {
+  if (existsSync(path)) {
+    logger.info({ msg: "Removing temp clone path", path });
+    await fs.rm(path, { recursive: true, force: true });
+  } else {
+    logger.debug({ msg: "Temp clone path not present", path });
+  }
+}
+
+export async function readAndFilterFiles(basePath: string, selectedFiles: string[]) {
+  const filePromises = selectedFiles.map(async (filePath) => {
+    const fullPath = path.join(basePath, filePath);
+    try {
+      const stat = await fs.stat(fullPath);
+      if (!stat.isFile()) return null;
+
+      const buffer = await fs.readFile(fullPath);
+      const isBin = await isBinaryFile(buffer, { size: stat.size });
+      if (isBin) return null;
+
+      return { path: filePath, content: buffer.toString("utf-8") };
+    } catch (e) {
+      logger.warn({
+        msg: "Failed to read file",
+        filePath,
+        error: e instanceof Error ? { message: e.message, stack: e.stack } : String(e),
+      });
+      return null;
+    }
+  });
+
+  const validFiles = (await Promise.all(filePromises)).filter(
+    (f): f is { path: string; content: string } => f !== null
+  );
+
+  if (validFiles.length === 0) throw new Error("No valid text files found to analyze");
+  return validFiles;
+}

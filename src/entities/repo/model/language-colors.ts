@@ -182,6 +182,8 @@ const languageColors: Record<string, string> = {
   TeX: "#3D6117",
   Turing: "#45f715",
   TypeScript: "#2b7489",
+  TS: "#2b7489",
+  TSX: "#3178c6",
   "Unified Parallel C": "#4e3617",
   "Unity3D Asset": "#ab69a1",
   UnrealScript: "#a54c4d",
