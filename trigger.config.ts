@@ -27,6 +27,10 @@ export default defineConfig({
           try {
             execSync("npx zenstack generate --schema prisma/schema.zmodel", {
               stdio: "inherit",
+              env: {
+                ...process.env,
+                DATABASE_URL: process.env.DATABASE_URL!,
+              },
             });
             console.log("✅ ZenStack generation successful!");
           } catch (e) {
