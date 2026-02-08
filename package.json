@@ -161,7 +161,7 @@
     "@commitlint/cli": "^20.4.1",
     "@commitlint/config-conventional": "^20.2.0",
     "@cspell/dict-de-de": "^4.1.2",
-    "@cspell/dict-en-gb": "^5.0.21",
+    "@cspell/dict-en-gb": "^5.0.23",
     "@cspell/dict-en_us": "^4.4.29",
     "@cspell/dict-es-es": "^3.0.8",
     "@cspell/dict-fr-fr": "^2.3.2",
