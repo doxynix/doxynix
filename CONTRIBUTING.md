@@ -1,6 +1,6 @@
 # Contributing Guide
 
-We are delighted that you are interested in contributing to the **[PROJECT NAME]** project! Your participation is vital for us.
+We are delighted that you are interested in contributing to the **Doxynix** project! Your participation is vital for us.
 
 Please take a moment to review these guidelines.
 
@@ -14,7 +14,7 @@ We use **Linear** for issue tracking. All issues must be created in Linear.
 
 1.  **Check Existing Issues:** Before creating a new Issue, please check the [Issue tracker] (in Linear) to see if the bug has already been reported.
 2.  **Create a New Issue:** If not, create a new one in Linear.
-3.  **Provide Details:** Clearly describe the bug, including steps to reproduce it, expected and actual behavior, and information about your environment (OS, **[PROJECT NAME]** version, etc.).
+3.  **Provide Details:** Clearly describe the bug, including steps to reproduce it, expected and actual behavior, and information about your environment (OS, **Doxynix** version, etc.).
 4.  **Issue ID:** After creation in Linear, the Issue will be assigned a unique ID with the prefix **`DXNX-`** (e.g., `DXNX-123`). This ID **must** be used in your branch names and commit messages.
 
 ## ✨ How to Suggest a Feature
@@ -36,8 +36,8 @@ We welcome Pull Requests! Our workflow relies on **Conventional Commits** and **
 ### Development
 
 1.  **Create a Branch:** Your branch name **must** include the Linear Issue ID.
-    *   **Format:** `<type>/DXNX-ID-<short-description>`
-    *   **Example:** `feat/DXNX-420-add-user-auth` or `fix/DXNX-123-crash-on-login`
+    *   **Format:** `<type>/dxnx-ID-<short-description>`
+    *   **Example:** `feat/dxnx-420-add-user-auth` or `fix/dxnx-123-crash-on-login`
     *   *Note: The `<type>` must follow the Conventional Commits specification (see below).*
 2.  **Code:** Make your changes. Please adhere to the existing coding style.
 3.  **Tests:** Ensure all existing tests pass, and add new tests for your changes where necessary.
