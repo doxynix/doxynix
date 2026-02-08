@@ -348,7 +348,6 @@ export const repoRouter = createTRPCRouter({
           },
         },
       });
-      console.log("FOFOFOFOOFOFOFO: ", analysis);
       const handle = await tasks.trigger(
         "analyze-repo",
         {
@@ -371,6 +370,6 @@ export const repoRouter = createTRPCRouter({
         data: { jobId: handle.id },
       });
 
-      return { status: "QUEUED", jobId: analysis.publicId };
+      return { status: "QUEUED", jobId: handle.id };
     }),
 });
