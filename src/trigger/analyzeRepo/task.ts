@@ -1,12 +1,13 @@
 import os from "os";
 import path from "path";
-import { DocType, Status } from "@prisma/client";
 import { task } from "@trigger.dev/sdk/v3";
 
 import { prisma } from "@/shared/api/db/db";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { logger } from "@/shared/lib/logger";
 
+import { DocTypeType } from "@/generated/zod/inputTypeSchemas/DocTypeSchema";
+import StatusSchema, { StatusType } from "@/generated/zod/inputTypeSchemas/StatusSchema";
 import { realtimeServer } from "@/server/lib/realtime";
 import { generateDeepDocs, runAiPipeline } from "./ai-pipeline";
 import { cloneRepository, getAnalysisContext } from "./git";
@@ -18,12 +19,12 @@ type TaskPayload = {
   userId: number;
   selectedFiles: string[];
   instructions?: string;
-  docTypes: DocType[];
+  docTypes: DocTypeType[];
   forceRefresh?: boolean;
   language: string;
 };
 
-type StatusUpdater = (msg: string, percent: number, status?: Status) => Promise<void>;
+type StatusUpdater = (msg: string, percent: number, status?: StatusType) => Promise<void>;
 
 export const analyzeRepoTask = task({
   id: "analyze-repo",
@@ -50,7 +51,11 @@ export const analyzeRepoTask = task({
     const tempClonePath = path.join(os.tmpdir(), `doxynix-clone-${analysisId}`);
     const channelName = REALTIME_CONFIG.channels.user(userId);
 
-    const updateStatus: StatusUpdater = async (msg, percent, status = Status.PENDING) => {
+    const updateStatus: StatusUpdater = async (
+      msg,
+      percent,
+      status = StatusSchema.enum.PENDING
+    ) => {
       const timestamp = new Date().toLocaleTimeString();
       const logLine = `[${timestamp}] ${msg}\n`;
       currentLogs += logLine;
@@ -88,7 +93,7 @@ export const analyzeRepoTask = task({
       );
 
       if (!repo) {
-        await updateStatus("No changes detected. Skipping...", 100, Status.DONE);
+        await updateStatus("No changes detected. Skipping...", 100, StatusSchema.enum.DONE);
         return { skipped: true, reason: "SHA_MATCH" };
       }
 
@@ -132,7 +137,7 @@ export const analyzeRepoTask = task({
       });
 
       await cleanup(tempClonePath);
-      await updateStatus("Analysis Complete", 100, Status.DONE);
+      await updateStatus("Analysis Complete", 100, StatusSchema.enum.DONE);
     } catch (error: unknown) {
       await handleError(error, analysisId, channelName, tempClonePath);
       throw error;

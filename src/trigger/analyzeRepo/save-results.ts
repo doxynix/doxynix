@@ -1,9 +1,11 @@
-import { DocType, Prisma, Repo, Status } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/shared/api/db/db";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { logger } from "@/shared/lib/logger";
 
+import { Repo, StatusSchema } from "@/generated/zod";
+import DocTypeSchema, { DocTypeType } from "@/generated/zod/inputTypeSchemas/DocTypeSchema";
 import { AIResult } from "@/server/ai/schemas";
 import { RepoMetrics } from "@/server/ai/types";
 import { realtimeServer } from "@/server/lib/realtime";
@@ -96,7 +98,7 @@ export async function saveResults(params: {
     await tx.analysis.update({
       where: { publicId: analysisId },
       data: {
-        status: Status.DONE,
+        status: StatusSchema.enum.DONE,
         progress: 100,
         message: "Completed successfully",
 
@@ -114,7 +116,7 @@ export async function saveResults(params: {
       },
     });
 
-    const saveDoc = async (type: DocType, content: string | undefined) => {
+    const saveDoc = async (type: DocTypeType, content: string | undefined) => {
       if (content === null || content === undefined) return;
       await tx.document.upsert({
         where: {
@@ -126,11 +128,11 @@ export async function saveResults(params: {
     };
 
     await Promise.all([
-      saveDoc(DocType.README, aiResult.generatedReadme),
-      saveDoc(DocType.API, aiResult.generatedApiMarkdown),
-      saveDoc(DocType.CONTRIBUTING, aiResult.generatedContributing),
-      saveDoc(DocType.CHANGELOG, aiResult.generatedChangelog),
-      saveDoc(DocType.ARCHITECTURE, aiResult.generatedArchitecture),
+      saveDoc(DocTypeSchema.enum.README, aiResult.generatedReadme),
+      saveDoc(DocTypeSchema.enum.API, aiResult.generatedApiMarkdown),
+      saveDoc(DocTypeSchema.enum.CONTRIBUTING, aiResult.generatedContributing),
+      saveDoc(DocTypeSchema.enum.CHANGELOG, aiResult.generatedChangelog),
+      saveDoc(DocTypeSchema.enum.ARCHITECTURE, aiResult.generatedArchitecture),
     ]);
 
     const note = await tx.notification.create({

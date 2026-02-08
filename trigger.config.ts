@@ -1,21 +1,16 @@
 import { execSync } from "child_process";
+import fs from "fs";
+import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
 import { defineConfig } from "@trigger.dev/sdk/v3";
+
+if (!process.env.DATABASE_URL!) {
+  process.env.DATABASE_URL = "postgresql://postgres:password@localhost:5432/db";
+}
 
 export default defineConfig({
   project: "proj_whmkduzdqfzcgoyuhdyp",
   runtime: "node",
   logLevel: "log",
-  maxDuration: 3600,
-  retries: {
-    enabledInDev: true,
-    default: {
-      maxAttempts: 3,
-      minTimeoutInMs: 1000,
-      maxTimeoutInMs: 10000,
-      factor: 2,
-      randomize: true,
-    },
-  },
   dirs: ["./src/trigger"],
 
   build: {
@@ -27,19 +22,30 @@ export default defineConfig({
           try {
             execSync("npx zenstack generate --schema prisma/schema.zmodel", {
               stdio: "inherit",
-              env: {
-                ...process.env,
-                DATABASE_URL: process.env.DATABASE_URL!,
-              },
+              env: { ...process.env },
             });
-            console.log("✅ ZenStack generation successful!");
+
+            const schemaPath = "prisma/schema.prisma";
+            if (fs.existsSync(schemaPath)) {
+              console.log("🧹 Stripping extra generators from schema.prisma...");
+              let content = fs.readFileSync(schemaPath, "utf-8");
+
+              content = content.replace(/generator\s+(?!client)\w+\s+\{[^}]+\}/g, "");
+
+              fs.writeFileSync(schemaPath, content);
+              console.log("✅ Schema cleaned up for cloud build");
+            }
           } catch (e) {
             console.error("❌ ZenStack generation failed", e);
             throw e;
           }
         },
       },
+      prismaExtension({
+        schema: "prisma/schema.prisma",
+        mode: "legacy",
+      }),
     ],
-    external: ["@prisma/client", ".prisma/client"],
   },
+  maxDuration: 1000000,
 });

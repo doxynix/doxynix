@@ -1,8 +1,9 @@
-import { DocType, Repo, Status } from "@prisma/client";
-
 import { prisma } from "@/shared/api/db/db";
 import { logger } from "@/shared/lib/logger";
 
+import { Repo } from "@/generated/zod";
+import DocTypeSchema, { DocTypeType } from "@/generated/zod/inputTypeSchemas/DocTypeSchema";
+import { StatusType } from "@/generated/zod/inputTypeSchemas/StatusSchema";
 import { AI_MODELS, SAFETY_SETTINGS } from "@/server/ai/constants";
 import { prepareSmartContext } from "@/server/ai/context-manager";
 import {
@@ -36,7 +37,7 @@ import { callWithFallback } from "@/server/utils/call";
 import { FileClassifier } from "@/server/utils/file-classifier";
 import { cleanCodeForAi, unwrapAiText } from "@/server/utils/optimizers";
 
-type StatusUpdater = (msg: string, percent: number, status?: Status) => Promise<void>;
+type StatusUpdater = (msg: string, percent: number, status?: StatusType) => Promise<void>;
 
 export async function runAiPipeline(
   validFiles: { path: string; content: string }[],
@@ -125,7 +126,7 @@ export async function generateDeepDocs(
   files: { path: string; content: string }[],
   analysisResult: AIResult,
   analysisId: string,
-  requestedDocs: DocType[],
+  requestedDocs: DocTypeType[],
   repo: Repo,
   userId: number,
   language: string
@@ -145,7 +146,7 @@ export async function generateDeepDocs(
   const taskMap: Record<string, number> = {};
 
   // 1. README
-  if (requestedDocs.includes(DocType.README)) {
+  if (requestedDocs.includes(DocTypeSchema.enum.README)) {
     taskMap["README"] = tasks.length;
     tasks.push(
       callWithFallback<string>({
@@ -165,7 +166,7 @@ export async function generateDeepDocs(
   }
 
   // 2. API DOCS
-  if (requestedDocs.includes(DocType.API)) {
+  if (requestedDocs.includes(DocTypeSchema.enum.API)) {
     taskMap["API"] = tasks.length;
     tasks.push(
       callWithFallback<string>({
@@ -180,7 +181,7 @@ export async function generateDeepDocs(
   }
 
   // 3. CONTRIBUTING
-  if (requestedDocs.includes(DocType.CONTRIBUTING)) {
+  if (requestedDocs.includes(DocTypeSchema.enum.CONTRIBUTING)) {
     taskMap["CONTRIBUTING"] = tasks.length;
     tasks.push(
       callWithFallback<string>({
@@ -198,7 +199,7 @@ export async function generateDeepDocs(
   }
 
   // 4. CHANGELOG
-  if (requestedDocs.includes(DocType.CHANGELOG)) {
+  if (requestedDocs.includes(DocTypeSchema.enum.CHANGELOG)) {
     taskMap["CHANGELOG"] = tasks.length;
     tasks.push(
       (async () => {
@@ -231,7 +232,7 @@ export async function generateDeepDocs(
   }
 
   // 5. ARCHITECTURE
-  if (requestedDocs.includes(DocType.ARCHITECTURE)) {
+  if (requestedDocs.includes(DocTypeSchema.enum.ARCHITECTURE)) {
     taskMap["ARCHITECTURE"] = tasks.length;
     tasks.push(
       callWithFallback<string>({

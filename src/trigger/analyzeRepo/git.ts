@@ -1,12 +1,11 @@
 import { existsSync } from "fs";
 import fs from "fs/promises";
-import { Repo, Status } from "@prisma/client";
 import simpleGit from "simple-git";
 
 import { prisma } from "@/shared/api/db/db";
 import { SYSTEM_TOKEN } from "@/shared/constants/env";
 
-import { VisibilitySchema } from "@/generated/zod";
+import { Repo, StatusSchema, VisibilitySchema } from "@/generated/zod";
 import { githubService } from "@/server/services/github.service";
 
 export async function getAnalysisContext(
@@ -20,7 +19,7 @@ export async function getAnalysisContext(
       repo: {
         include: {
           analyses: {
-            where: { status: Status.DONE },
+            where: { status: StatusSchema.enum.DONE },
             orderBy: { createdAt: "desc" },
             take: 1,
           },
