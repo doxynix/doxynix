@@ -1,6 +1,7 @@
 import { DocType, Status } from "@prisma/client";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
+import { v7 as uuidv7 } from "uuid";
 import { z } from "zod";
 
 import { CreateRepoSchema, GitHubQuerySchema } from "@/shared/api/schemas/repo";
@@ -338,8 +339,11 @@ export const repoRouter = createTRPCRouter({
       if (repo === null)
         throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
 
-      const analysis = await ctx.db.analysis.create({
+      const newAnalysisId = uuidv7();
+
+      await ctx.db.analysis.create({
         data: {
+          publicId: newAnalysisId,
           status: "PENDING",
           repo: {
             connect: {
@@ -352,7 +356,7 @@ export const repoRouter = createTRPCRouter({
       const handle = await tasks.trigger(
         "analyze-repo",
         {
-          analysisId: analysis.publicId,
+          analysisId: newAnalysisId,
           userId: Number(ctx.session.user.id),
           selectedFiles: input.files,
           instructions: input.instructions,
@@ -361,16 +365,16 @@ export const repoRouter = createTRPCRouter({
         },
         {
           concurrencyKey: `user-${ctx.session.user.id}`,
-          idempotencyKey: `analysis-${analysis.publicId}`,
+          idempotencyKey: `analysis-${newAnalysisId}`,
           ttl: "30m",
         }
       );
 
       await ctx.db.analysis.update({
-        where: { publicId: analysis.publicId },
+        where: { publicId: newAnalysisId },
         data: { jobId: handle.id },
       });
 
-      return { status: "QUEUED", jobId: analysis.publicId };
+      return { status: "QUEUED", jobId: newAnalysisId };
     }),
 });
