@@ -1,13 +1,13 @@
 import { existsSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
-import { Status } from "@prisma/client";
 import { isBinaryFile } from "isbinaryfile";
 
 import { prisma } from "@/shared/api/db/db";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { logger } from "@/shared/lib/logger";
 
+import { StatusSchema } from "@/generated/zod";
 import { realtimeServer } from "@/server/lib/realtime";
 
 export async function handleError(
@@ -28,7 +28,7 @@ export async function handleError(
   await prisma.analysis.update({
     where: { publicId: analysisId },
     data: {
-      status: Status.FAILED,
+      status: StatusSchema.enum.FAILED,
       error: message,
       message: "Analysis failed",
     },

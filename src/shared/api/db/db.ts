@@ -1,5 +1,5 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
+import pkg, { type PrismaClient as PrismaClientType } from "@prisma/client";
 import pg from "pg";
 
 import { DATABASE_URL, isDev, isTest } from "@/shared/constants/env";
@@ -8,6 +8,7 @@ import { sanitizePayload } from "@/shared/lib/utils";
 
 import { requestContext } from "@/server/utils/request-context";
 
+const { PrismaClient } = pkg;
 const pool = new pg.Pool({
   connectionString: DATABASE_URL,
 });
@@ -67,7 +68,7 @@ export const prisma = softDeleteClient.$extends({
           const ctxStore = requestContext.getStore();
           const userId = ctxStore?.userId ?? null;
 
-          (baseClient as PrismaClient).auditLog
+          (baseClient as PrismaClientType).auditLog
             .create({
               data: {
                 model,

@@ -1,5 +1,5 @@
 import { DocType, Status } from "@prisma/client";
-import { tasks } from "@trigger.dev/sdk";
+import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
