@@ -15,11 +15,20 @@ generator client {
   binaryTargets   = ["native", "debian-openssl-3.0.x"]
 }
 
+generator zod {
+  provider           = "zod-prisma-types"
+  output             = "../src/generated/zod"
+  useMultipleFiles   = true
+  createSharedSchema = true
+}
 
+generator jsonSchema {
+  provider = "prisma-json-schema-generator"
+}
 
-
-
-
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
 
 enum UserRole {
   USER
