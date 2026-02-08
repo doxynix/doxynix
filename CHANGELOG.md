@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/doxynix/doxynix/compare/v1.2.2...v1.3.0) (2026-02-08)
+
+
+### Features
+
+* **db:** добавлены новые индексы для ускорения работы с бд ([#275](https://github.com/doxynix/doxynix/issues/275)) ([31293d2](https://github.com/doxynix/doxynix/commit/31293d2c43271ec033151a70d6889f95bb7b046b))
+
 ## [1.2.2](https://github.com/doxynix/doxynix/compare/v1.2.1...v1.2.2) (2026-02-08)
 
 
