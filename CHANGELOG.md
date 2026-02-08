@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.1](https://github.com/doxynix/doxynix/compare/v1.2.0...v1.2.1) (2026-02-08)
+
+
+### Bug Fixes
+
+* **trigger:** попытка починить trigger.dev ([#264](https://github.com/doxynix/doxynix/issues/264)) ([6361c84](https://github.com/doxynix/doxynix/commit/6361c84f1ae276d7fe6df0cc495c4c25eeea794e))
+
 ## [1.2.0](https://github.com/doxynix/doxynix/compare/v1.1.0...v1.2.0) (2026-02-08)
 
 
