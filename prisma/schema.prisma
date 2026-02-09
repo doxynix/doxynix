@@ -94,6 +94,8 @@ model Notification {
   userId    Int
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, isRead])
+  @@index([userId, createdAt(sort: Desc)])
   @@map("notifications")
 }
 
@@ -130,6 +132,7 @@ model Repo {
   @@index([userId, updatedAt(sort: Desc)])
   @@index([userId, visibility])
   @@index([githubId])
+  @@index([name, description])
   @@map("repos")
 }
 
@@ -157,6 +160,8 @@ model Analysis {
 
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
+  @@index([jobId])
+  @@index([status])
   @@map("analyses")
 }
 
@@ -246,5 +251,6 @@ model AuditLog {
   @@index([userId])
   @@index([requestId])
   @@index([createdAt(sort: Desc)])
+  @@index([userId, operation])
   @@map("audit_logs")
 }
