@@ -3,6 +3,7 @@
   "extends": ["config:recommended"],
   "dependencyDashboard": true,
   "labels": ["dependencies"],
+  "ignoreDeps": ["zod-prisma-types"],
   "packageRules": [
     {
       "description": "Группируем все минорные и патч обновления npm",
