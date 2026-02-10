@@ -48,8 +48,8 @@ importers:
         specifier: ^22.0.1
         version: 22.0.1
       '@prisma/adapter-pg':
-        specifier: ^6.19.1
-        version: 6.19.2
+        specifier: ^7.3.0
+        version: 7.3.0
       '@prisma/client':
         specifier: 6.19.2
         version: 6.19.2(prisma@6.19.2(typescript@5.9.3))(typescript@5.9.3)
@@ -2519,8 +2519,8 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@prisma/adapter-pg@6.19.2':
-    resolution: {integrity: sha512-t80uX4u4+V/F/OO220LVFY2nsXRGvt8x7PDDveQJJUrGAq4yKHiHiwxOb/PusUSioKkJrgLZjzLwGrpPYG4arw==}
+  '@prisma/adapter-pg@7.3.0':
+    resolution: {integrity: sha512-iuYQMbIPO6i9O45Fv8TB7vWu00BXhCaNAShenqF7gLExGDbnGp5BfFB4yz1K59zQ59jF6tQ9YHrg0P6/J3OoLg==}
 
   '@prisma/client@6.19.2':
     resolution: {integrity: sha512-gR2EMvfK/aTxsuooaDA32D8v+us/8AAet+C3J1cc04SW35FPdZYgLF+iN4NDLUgAaUGTKdAB0CYenu1TAgGdMg==}
@@ -2557,6 +2557,9 @@ packages:
 
   '@prisma/driver-adapter-utils@6.19.2':
     resolution: {integrity: sha512-tkHsL3jhx81eXg2oqtJH/1IEs8uEeUb1RpqHtwYqdNb176u9D0mnHRZM1/cKca/XhLpq49Nnd9XDxdMfWcKAYA==}
+
+  '@prisma/driver-adapter-utils@7.3.0':
+    resolution: {integrity: sha512-Wdlezh1ck0Rq2dDINkfSkwbR53q53//Eo1vVqVLwtiZ0I6fuWDGNPxwq+SNAIHnsU+FD/m3aIJKevH3vF13U3w==}
 
   '@prisma/engines-version@5.8.1-1.78caf6feeaed953168c64e15a249c3e9a033ebe2':
     resolution: {integrity: sha512-f5C3JM3l9yhGr3cr4FMqWloFaSCpNpMi58Om22rjD2DOz3owci2mFdFXMgnAGazFPKrCbbEhcxdsRfspEYRoFQ==}
@@ -12994,9 +12997,9 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@prisma/adapter-pg@6.19.2':
+  '@prisma/adapter-pg@7.3.0':
     dependencies:
-      '@prisma/driver-adapter-utils': 6.19.2
+      '@prisma/driver-adapter-utils': 7.3.0
       pg: 8.18.0
       postgres-array: 3.0.4
     transitivePeerDependencies:
@@ -13037,6 +13040,10 @@ snapshots:
   '@prisma/driver-adapter-utils@6.19.2':
     dependencies:
       '@prisma/debug': 6.19.2
+
+  '@prisma/driver-adapter-utils@7.3.0':
+    dependencies:
+      '@prisma/debug': 7.3.0
 
   '@prisma/engines-version@5.8.1-1.78caf6feeaed953168c64e15a249c3e9a033ebe2': {}
 
