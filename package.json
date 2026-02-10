@@ -141,7 +141,7 @@
     "react-dom": "19.2.4",
     "react-hook-form": "^7.71.1",
     "react-hotkeys-hook": "^5.2.1",
-    "recharts": "2.15.4",
+    "recharts": "3.7.0",
     "resend": "^6.8.0",
     "server-only": "^0.0.1",
     "shiki": "^3.21.0",
