@@ -15,7 +15,7 @@ All notable changes to this project will be documented in this file. See [standa
 ### Bug Fixes
 
 * **trigger:** исправление всех ошибок и правильный сетап trigger.dev … ([#271](https://github.com/doxynix/doxynix/issues/271)) ([7d11eaa](https://github.com/doxynix/doxynix/commit/7d11eaa9709724ba44dab34f73e237645980dfe1))
-* **trigger:** я надеюсь сейчас он заработает... ([#273](https://github.com/doxynix/doxynix/issues/273)) ([d8ce4d0](https://github.com/doxynix/doxynix/commit/d8ce4d0283d3752d4276285b5b9afd18a86e6073))
+* **trigger:** дополнительная настройка и исправление работы trigger.dev ([#273](https://github.com/doxynix/doxynix/issues/273)) ([d8ce4d0](https://github.com/doxynix/doxynix/commit/d8ce4d0283d3752d4276285b5b9afd18a86e6073))
 
 ## [1.2.1](https://github.com/doxynix/doxynix/compare/v1.2.0...v1.2.1) (2026-02-08)
 
