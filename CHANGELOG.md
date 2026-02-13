@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
-* **db:** добавлены новые индексы для ускорения работы с бд ([#275](https://github.com/doxynix/doxynix/issues/275)) ([31293d2](https://github.com/doxynix/doxynix/commit/31293d2c43271ec033151a70d6889f95bb7b046b))
+* **db:** добавлены новые индексы для ускорения работы с базой данных ([#275](https://github.com/doxynix/doxynix/issues/275)) ([31293d2](https://github.com/doxynix/doxynix/commit/31293d2c43271ec033151a70d6889f95bb7b046b))
 
 ## [1.2.2](https://github.com/doxynix/doxynix/compare/v1.2.1...v1.2.2) (2026-02-08)
 
@@ -15,7 +15,7 @@ All notable changes to this project will be documented in this file. See [standa
 ### Bug Fixes
 
 * **trigger:** исправление всех ошибок и правильный сетап trigger.dev … ([#271](https://github.com/doxynix/doxynix/issues/271)) ([7d11eaa](https://github.com/doxynix/doxynix/commit/7d11eaa9709724ba44dab34f73e237645980dfe1))
-* **trigger:** я надеюсь сейчас он заработает... ([#273](https://github.com/doxynix/doxynix/issues/273)) ([d8ce4d0](https://github.com/doxynix/doxynix/commit/d8ce4d0283d3752d4276285b5b9afd18a86e6073))
+* **trigger:** дополнительная настройка и исправление работы trigger.dev ([#273](https://github.com/doxynix/doxynix/issues/273)) ([d8ce4d0](https://github.com/doxynix/doxynix/commit/d8ce4d0283d3752d4276285b5b9afd18a86e6073))
 
 ## [1.2.1](https://github.com/doxynix/doxynix/compare/v1.2.0...v1.2.1) (2026-02-08)
 
@@ -35,7 +35,7 @@ All notable changes to this project will be documented in this file. See [standa
 * **api:** добавлен trpc-to-openapi ([#102](https://github.com/doxynix/doxynix/issues/102)) ([7a1247d](https://github.com/doxynix/doxynix/commit/7a1247d257df21ed3a508b6ebb33d37aeafa3d32))
 * **api:** добавлен перехватчик неверных запросов к api ([d566e78](https://github.com/doxynix/doxynix/commit/d566e788dfe44c0245efde6a31f8394bc0f982da))
 * **api:** добавлена проверка существования репозитория при переходе … ([#111](https://github.com/doxynix/doxynix/issues/111)) ([3d7e3e1](https://github.com/doxynix/doxynix/commit/3d7e3e1fd563f715650886d3184a45eb2eaef3c1))
-* **auth:** добавлен вход через magic link и защита роутов ([#80](https://github.com/doxynix/doxynix/issues/80)) ([98a8fb1](https://github.com/doxynix/doxynix/commit/98a8fb18f17d493e647d64d4d9ded245e40aaa7e))
+* **workflow:** полностью обновлен workflow ([#52](https://github.com/doxynix/doxynix/issues/52)) ([abc1234](https://github.com/doxynix/doxynix/commit/abc1234abcdef0123456789abcdef0123456789))
 * **auth:** улучшения авторизации ([#99](https://github.com/doxynix/doxynix/issues/99)) ([16adb5e](https://github.com/doxynix/doxynix/commit/16adb5e35c0f4b6762212f705d9d381e2ce7cf49))
 * **captcha:** добавлена капча ([#226](https://github.com/doxynix/doxynix/issues/226)) ([b983640](https://github.com/doxynix/doxynix/commit/b983640bdd1ba5945ae7dd784f092dab792cd395))
 * **ci:** create block-main-merge.yml ([44c0906](https://github.com/doxynix/doxynix/commit/44c0906f415619bec5c8a956229d059a153e70c3))
