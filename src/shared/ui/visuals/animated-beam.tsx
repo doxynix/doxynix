@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 
 import { cn } from "@/shared/lib/utils";
 
-export interface AnimatedBeamProps {
+export type AnimatedBeamProps = {
   className?: string;
   containerRef: RefObject<HTMLElement | null>; // Container ref
   fromRef: RefObject<HTMLElement | null>;
@@ -25,7 +25,7 @@ export interface AnimatedBeamProps {
   endXOffset?: number;
   endYOffset?: number;
   isActive?: boolean;
-}
+};
 
 export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
   className,

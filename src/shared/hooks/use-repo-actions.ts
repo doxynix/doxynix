@@ -7,9 +7,9 @@ export function useRepoActions() {
   const utils = trpc.useUtils();
   const t = useTranslations("Dashboard");
 
-  const invalidate = async () => {
-    await utils.repo.getAll.invalidate();
-    await utils.analytics.getDashboardStats.invalidate();
+  const invalidate = () => {
+    void utils.repo.getAll.invalidate();
+    void utils.analytics.getDashboardStats.invalidate();
   };
 
   const create = trpc.repo.create.useMutation({
@@ -28,5 +28,5 @@ export function useRepoActions() {
     onError: (err) => toast.error(err.message),
   });
 
-  return { create, deleteAll };
+  return { create, deleteAll, invalidate };
 }

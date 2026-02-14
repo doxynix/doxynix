@@ -1,6 +1,6 @@
 import sloc, { Extension } from "sloc";
 
-import { getLanguageColor } from "@/entities/repo";
+import { getLanguageColor, normalizeLanguageName } from "@/entities/repo";
 import { Repo } from "@/generated/zod";
 import { LanguageMetric, RepoMetrics } from "../ai/types";
 
@@ -48,29 +48,31 @@ export function calculateCodeMetrics(files: { path: string; content: string }[])
     totalSize += f.content.length;
     const ext = f.path.split(".").pop()?.toLowerCase() ?? "txt";
 
+    const prettyName = normalizeLanguageName(ext);
+
     try {
       if (sloc.extensions.includes(ext as Extension)) {
         const stats = sloc(f.content, ext as Extension);
         totalSource += stats.source;
         totalComments += stats.comment;
-        langStats[ext] = (langStats[ext] || 0) + stats.source;
+        langStats[prettyName] = (langStats[prettyName] || 0) + stats.source;
       } else {
         const lines = f.content.split("\n").length;
         totalSource += lines;
-        langStats["other"] = (langStats["other"] || 0) + lines;
+        langStats[prettyName] = (langStats[prettyName] || 0) + lines;
       }
     } catch {
       const lines = f.content.split("\n").length;
       totalSource += lines;
-      langStats[ext] = (langStats[ext] || 0) + lines;
+      langStats[prettyName] = (langStats[prettyName] || 0) + lines;
     }
   });
 
   const languages: LanguageMetric[] = Object.entries(langStats)
-    .map(([ext, lines]) => ({
-      name: ext.toUpperCase(),
+    .map(([name, lines]) => ({
+      name: name,
       lines,
-      color: getLanguageColor(ext) || "#cccccc",
+      color: getLanguageColor(name) || "#cccccc",
     }))
     .sort((a, b) => b.lines - a.lines)
     .slice(0, 6);

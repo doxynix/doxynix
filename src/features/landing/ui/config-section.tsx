@@ -1,8 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { highlightCode } from "@/shared/lib/shiki";
-
-import { CodeWindow } from "./code-window";
+import { CodeWindow } from "@/shared/ui/kit/code-window";
 
 const CONFIG_CODE = `{
   "project": "my-awesome-saas",

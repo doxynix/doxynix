@@ -95,6 +95,14 @@ export async function saveResults(params: {
   });
 
   await prisma.$transaction(async (tx) => {
+    const cleanResultJson = { ...aiResult };
+
+    delete cleanResultJson.generatedReadme;
+    delete cleanResultJson.generatedApiMarkdown;
+    delete cleanResultJson.generatedContributing;
+    delete cleanResultJson.generatedChangelog;
+    delete cleanResultJson.generatedArchitecture;
+
     await tx.analysis.update({
       where: { publicId: analysisId },
       data: {
@@ -110,7 +118,7 @@ export async function saveResults(params: {
 
         metricsJson: metrics as unknown as Prisma.InputJsonValue,
 
-        resultJson: aiResult as unknown as Prisma.InputJsonValue,
+        resultJson: cleanResultJson as Prisma.InputJsonValue,
 
         commitSha: currentSha,
       },

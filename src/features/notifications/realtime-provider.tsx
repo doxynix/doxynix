@@ -1,14 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { Status } from "@prisma/client";
 import * as Ably from "ably";
 import { AblyProvider } from "ably/react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
+import { trpc } from "@/shared/api/trpc";
 import { isProd } from "@/shared/constants/env";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { useNotificationActions } from "@/shared/hooks/use-notification-actions";
+import { useRepoActions } from "@/shared/hooks/use-repo-actions";
 
 type Props = { children: React.ReactNode };
 
@@ -17,6 +20,8 @@ export const RealtimeProvider = ({ children }: Props) => {
   const userId = session?.user?.id;
 
   const { invalidateAll } = useNotificationActions();
+  const { invalidate } = useRepoActions();
+  const utils = trpc.useUtils();
 
   const [client, setClient] = useState<Ably.Realtime | null>(null);
 
@@ -58,8 +63,33 @@ export const RealtimeProvider = ({ children }: Props) => {
     const handleUserMsg = (msg: Ably.InboundMessage) => {
       if (msg.name === REALTIME_CONFIG.events.user.notification) {
         const data = msg.data as { title: string; body: string };
-        toast(data.title, { description: data.body });
+        toast.success(data.title, { description: data.body });
         invalidateAll();
+      }
+      if (msg.name === REALTIME_CONFIG.events.user.analysisProgress) {
+        const payload = msg.data as {
+          analysisId: string;
+          status: Status;
+          progress: number;
+          message: string;
+        };
+
+        utils.analytics.getDashboardStats.setData(undefined, (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            recentActivity: oldData.recentActivity.map((activity) =>
+              activity.id === payload.analysisId
+                ? { ...activity, status: payload.status, progress: payload.progress }
+                : activity
+            ),
+          };
+        });
+
+        if (payload.status === Status.DONE || payload.status === Status.FAILED) {
+          invalidate();
+        }
       }
     };
 
@@ -73,7 +103,7 @@ export const RealtimeProvider = ({ children }: Props) => {
       // systemChannel.detach();
       // userChannel.detach();
     };
-  }, [client, userId, invalidateAll]);
+  }, [client, userId, invalidateAll, invalidate, utils.analytics.getDashboardStats]);
 
   if (!client) return <>{children}</>;
 

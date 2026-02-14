@@ -1,53 +1,37 @@
-import { ComponentType } from "react";
-import { CircleDot, GitBranch, GitFork, HardDrive, History, Scale, Star, Tag } from "lucide-react";
-
-import { formatRelativeTime } from "@/shared/lib/utils";
 import { RepoTableItem } from "@/shared/types/repo";
 
-type Props = {
-  icon?: ComponentType<{ className?: string }>;
-  label: string | number | null;
-  tooltip?: string;
-  color?: string;
-  className?: string;
+export type Props = {
+  id: string;
+  label: string;
+  score: number | null | undefined;
 };
 
-export function getMetrics(repo: RepoTableItem, locale: string): Props[] {
-  const items = [
-    { icon: Star, label: repo.stars, tooltip: "Stars", color: "text-yellow-500 fill-current" },
-    { icon: GitFork, label: repo.forks, tooltip: "Forks", color: "text-green-700" },
+export function getMetrics(repo: RepoTableItem): Props[] {
+  return [
     {
-      icon: GitBranch,
-      label: repo.defaultBranch,
-      tooltip: "Branch",
-      color: "text-blue-700",
+      id: "health",
+      label: "Health",
+      score: repo.healthScore,
     },
     {
-      icon: CircleDot,
-      label: repo.openIssues,
-      tooltip: "Open Issues",
-      color: "text-red-700",
-    },
-    { icon: Scale, label: repo.license, tooltip: "License", color: "text-muted-foreground" },
-    {
-      icon: Tag,
-      label: repo.topics?.slice(0, 2).join(", "),
-      tooltip: `Tags: ${repo.topics?.join(", ")}`,
-      color: "text-blue-300",
+      id: "security",
+      label: "Security",
+      score: repo.securityScore,
     },
     {
-      icon: HardDrive,
-      label: repo.size > 1024 ? `${(repo.size / 1024).toFixed(1)} MB` : `${repo.size} KB`,
-      tooltip: "Size",
-      color: "text-muted-foreground",
+      id: "techDebt",
+      label: "Tech Debt",
+      score: repo.techDebtScore,
     },
     {
-      icon: History,
-      label: formatRelativeTime(repo.pushedAt, locale),
-      tooltip: "Last push",
-      color: "text-muted-foreground",
+      id: "complexity",
+      label: "Complexity",
+      score: repo.complexityScore,
+    },
+    {
+      id: "onboarding",
+      label: "Onboarding",
+      score: repo.onboardingScore,
     },
   ];
-
-  return items.filter((m) => m.label != null);
 }
