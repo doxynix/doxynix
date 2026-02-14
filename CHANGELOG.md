@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/doxynix/doxynix/compare/v1.3.1...v1.4.0) (2026-02-14)
+
+
+### Features
+
+* **dashboard:** изменения страницы /dashboard ([#298](https://github.com/doxynix/doxynix/issues/298)) ([01de3f7](https://github.com/doxynix/doxynix/commit/01de3f78fc825b25c4e7fcd29f00e27f3ae64f13))
+
 ## [1.3.1](https://github.com/doxynix/doxynix/compare/v1.3.0...v1.3.1) (2026-02-13)
 
 
