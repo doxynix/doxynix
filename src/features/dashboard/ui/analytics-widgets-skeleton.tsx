@@ -1,3 +1,5 @@
+"use client";
+
 import { Clock, FileCode2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
