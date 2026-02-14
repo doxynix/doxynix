@@ -4,7 +4,7 @@ import { motion, MotionStyle, Transition } from "motion/react";
 
 import { cn } from "@/shared/lib/utils";
 
-interface BorderBeamProps {
+type BorderBeamProps = {
   /**
    * The size of the border beam.
    */
@@ -49,7 +49,7 @@ interface BorderBeamProps {
    * The border width of the beam.
    */
   borderWidth?: number;
-}
+};
 
 export const BorderBeam = ({
   className,

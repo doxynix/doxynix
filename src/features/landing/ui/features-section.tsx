@@ -6,7 +6,7 @@ import { BentoCard, BentoGrid } from "@/shared/ui/visuals/bento-grid";
 
 import { SimulationTerminal } from "./simulation-terminal";
 
-interface BentoFeature {
+type BentoFeature = {
   name: string;
   className: string;
   background: ReactNode;
@@ -14,7 +14,7 @@ interface BentoFeature {
   description: string;
   href: string;
   cta: string;
-}
+};
 
 const MockGraph = () => (
   <div className="absolute inset-x-4 bottom-0 flex h-60 items-end justify-between gap-1 opacity-50 sm:h-120">

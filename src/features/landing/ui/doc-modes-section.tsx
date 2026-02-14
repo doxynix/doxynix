@@ -4,8 +4,7 @@ import { getTranslations } from "next-intl/server";
 
 import { highlightCode } from "@/shared/lib/shiki";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
-
-import { CodeWindow } from "./code-window";
+import { CodeWindow } from "@/shared/ui/kit/code-window";
 
 type TabsTriggerItemProps = {
   icon?: ComponentType<{ className?: string }>;

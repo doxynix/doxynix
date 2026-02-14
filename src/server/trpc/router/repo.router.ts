@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { CreateRepoSchema, GitHubQuerySchema } from "@/shared/api/schemas/repo";
 
-import { RepoSchema } from "@/generated/zod";
+import { DocTypeSchema, RepoSchema } from "@/generated/zod";
 import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
 import { OpenApiErrorResponses, RepoFilterSchema } from "@/server/trpc/shared";
@@ -204,6 +204,11 @@ export const repoRouter = createTRPCRouter({
           PublicRepoSchema.extend({
             status: z.enum(Status),
             lastAnalysisDate: z.date().nullish(),
+            healthScore: z.number().nullish(),
+            securityScore: z.number().nullish(),
+            complexityScore: z.number().nullish(),
+            techDebtScore: z.number().nullish(),
+            onboardingScore: z.number().nullish(),
           })
         ),
         meta: z.object({
@@ -233,7 +238,19 @@ export const repoRouter = createTRPCRouter({
           skip: (page - 1) * limit,
           orderBy: { [sortBy]: sortOrder },
           include: {
-            analyses: { take: 1, orderBy: { createdAt: "desc" } },
+            analyses: {
+              take: 1,
+              orderBy: { createdAt: "desc" },
+              select: {
+                status: true,
+                createdAt: true,
+                score: true,
+                securityScore: true,
+                complexityScore: true,
+                techDebtScore: true,
+                onboardingScore: true,
+              },
+            },
           },
         }),
         ctx.db.repo.count({ where: contextWhere }),
@@ -248,6 +265,11 @@ export const repoRouter = createTRPCRouter({
           id: repo.publicId,
           status: repo.analyses[0]?.status ?? Status.NEW,
           lastAnalysisDate: repo.analyses[0]?.createdAt ?? null,
+          healthScore: repo.analyses[0]?.score ?? null,
+          securityScore: repo.analyses[0]?.securityScore ?? null,
+          complexityScore: repo.analyses[0]?.complexityScore ?? null,
+          techDebtScore: repo.analyses[0]?.techDebtScore ?? null,
+          onboardingScore: repo.analyses[0]?.onboardingScore ?? null,
         })),
         meta: {
           totalCount,
@@ -371,5 +393,49 @@ export const repoRouter = createTRPCRouter({
       });
 
       return { status: "QUEUED", jobId: handle.id };
+    }),
+
+  getDocument: protectedProcedure
+    .input(
+      z.object({
+        repoId: z.string(),
+        type: DocTypeSchema,
+      })
+    )
+    .output(z.object({ content: z.string().nullable(), version: z.string().nullable() }))
+    .query(async ({ ctx, input }) => {
+      const repo = await ctx.db.repo.findUnique({
+        where: { publicId: input.repoId },
+        include: {
+          analyses: {
+            take: 1,
+            orderBy: { createdAt: "desc" },
+            where: { status: "DONE" },
+            select: { commitSha: true },
+          },
+        },
+      });
+
+      if (!repo || repo.analyses[0]?.commitSha == null) {
+        return { content: null, version: null };
+      }
+
+      const version = repo.analyses[0].commitSha.substring(0, 7);
+
+      const doc = await ctx.db.document.findUnique({
+        where: {
+          repoId_version_type: {
+            repoId: repo.id,
+            version: version,
+            type: input.type as DocType,
+          },
+        },
+        select: { content: true },
+      });
+
+      return {
+        content: doc?.content ?? null,
+        version,
+      };
     }),
 });

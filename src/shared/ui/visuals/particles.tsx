@@ -5,10 +5,10 @@ import React, { ComponentPropsWithoutRef, useEffect, useRef, useState } from "re
 
 import { cn } from "@/shared/lib/utils";
 
-interface MousePosition {
+type MousePosition = {
   x: number;
   y: number;
-}
+};
 
 function MousePosition(): MousePosition {
   const [mousePosition, setMousePosition] = useState<MousePosition>({

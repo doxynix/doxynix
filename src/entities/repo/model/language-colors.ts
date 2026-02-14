@@ -1,4 +1,4 @@
-const languageColors: Record<string, string> = {
+const LANGUAGE_COLORS: Record<string, string> = {
   ABAP: "#E8274B",
   ActionScript: "#882B0F",
   Ada: "#02f88c",
@@ -203,7 +203,120 @@ const languageColors: Record<string, string> = {
   Zephir: "#118f9e",
 };
 
+const EXTENSION_MAP: Record<string, string> = {
+  ts: "TypeScript",
+  tsx: "TypeScript",
+  js: "JavaScript",
+  jsx: "JavaScript",
+  cjs: "JavaScript",
+  mjs: "JavaScript",
+  html: "HTML",
+  htm: "HTML",
+  css: "CSS",
+  scss: "CSS",
+  sass: "CSS",
+  less: "CSS",
+  vue: "Vue",
+  php: "PHP",
+
+  c: "C",
+  h: "C",
+  cpp: "cpp",
+  hpp: "cpp",
+  cc: "cpp",
+  cxx: "cpp",
+  hh: "cpp",
+  "c++": "cpp",
+  cs: "C#",
+  java: "Java",
+  kt: "Kotlin",
+  kts: "Kotlin",
+  rs: "Rust",
+  go: "Go",
+  swift: "Swift",
+  m: "Objective-C",
+  mm: "Objective-C++",
+  scala: "Scala",
+  sc: "Scala",
+  dart: "Dart",
+  lua: "Lua",
+
+  py: "Python",
+  rb: "Ruby",
+  sh: "Shell",
+  bash: "Shell",
+  zsh: "Shell",
+  ps1: "Shell",
+  pl: "Perl",
+  pm: "Perl",
+  t: "Perl",
+  ex: "Elixir",
+  exs: "Elixir",
+  erl: "Erlang",
+  hrl: "Erlang",
+  clj: "Clojure",
+  cljs: "Clojure",
+  cljc: "Clojure",
+  edn: "edn",
+
+  hs: "Haskell",
+  lhs: "Haskell",
+  ml: "OCaml",
+  mli: "OCaml",
+  elm: "Elm",
+  fs: "F#",
+  fsi: "F#",
+  fsx: "F#",
+  jl: "Julia",
+  r: "R",
+  R: "R",
+  cr: "Crystal",
+  nim: "Nimrod",
+  d: "D",
+  pas: "Pascal",
+  pp: "Pascal",
+  vb: "Visual Basic",
+  vbs: "Visual Basic",
+  tcl: "Tcl",
+
+  asm: "Assembly",
+  s: "Assembly",
+  v: "Verilog",
+  sv: "SystemVerilog",
+  vhd: "VHDL",
+  vhdl: "VHDL",
+  ino: "Arduino",
+
+  json: "JavaScript",
+  yaml: "YAML",
+  yml: "YAML",
+  md: "Markdown",
+  sql: "PLSQL",
+  plsql: "PLSQL",
+  pks: "PLSQL",
+  pkb: "PLSQL",
+  tex: "TeX",
+
+  makefile: "Makefile",
+  mk: "Makefile",
+  dockerfile: "Shell",
+  cmake: "cpp",
+};
+
 export const getLanguageColor = (lang: string | null): string => {
-  if (lang === null) return "";
-  return languageColors[lang] ?? "";
+  if (lang === null) return "#cccccc";
+
+  if (LANGUAGE_COLORS[lang]) return LANGUAGE_COLORS[lang];
+
+  const normalized = EXTENSION_MAP[lang.toLowerCase()];
+  if (normalized && LANGUAGE_COLORS[normalized]) return LANGUAGE_COLORS[normalized];
+
+  const lowerLang = lang.toLowerCase();
+  const foundKey = Object.keys(LANGUAGE_COLORS).find((k) => k.toLowerCase() === lowerLang);
+
+  return foundKey !== null && foundKey !== undefined ? LANGUAGE_COLORS[foundKey] : "#cccccc";
+};
+
+export const normalizeLanguageName = (ext: string): string => {
+  return EXTENSION_MAP[ext.toLowerCase()] ?? ext.toUpperCase();
 };

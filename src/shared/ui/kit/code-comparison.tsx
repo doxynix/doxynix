@@ -1,6 +1,6 @@
-import { CodeWindow } from "@/features/landing/ui/code-window";
+import { CodeWindow } from "./code-window";
 
-interface CodeComparisonProps {
+type Props = {
   beforeHtmlDark: string;
   beforeHtmlLight: string;
   afterHtmlDark: string;
@@ -8,7 +8,7 @@ interface CodeComparisonProps {
   filename: string;
   badCode: string;
   goodCode: string;
-}
+};
 
 export function CodeComparison({
   beforeHtmlDark,
@@ -18,7 +18,7 @@ export function CodeComparison({
   filename,
   badCode,
   goodCode,
-}: CodeComparisonProps) {
+}: Props) {
   const currentTheme = "dark"; // THEME: если вернется светлая тема сменить на хук useTheme и поставить вначале файла "use client"
   const isDark = currentTheme === "dark";
 
