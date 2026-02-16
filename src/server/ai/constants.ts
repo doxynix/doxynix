@@ -26,7 +26,7 @@ export const groq = createOpenAI({
 export const AI_MODELS = {
   CARTOGRAPHER: ["gemini-flash-latest", "gemini-flash-lite-latest"],
   ARCHITECT: ["gemini-3-flash-preview", "gemini-flash-latest"],
-  SENTINEL: ["gemini-2.0-flash-001", "gemini-flash-latest"],
+  SENTINEL: ["gemini-flash-latest"],
   POWERFUL: ["gemini-3-flash-preview", "gemini-2.5-flash-lite", "gemini-flash-latest"],
   WRITER: ["gemini-3-flash-preview", "gemini-2.5-flash-lite", "gemini-flash-latest"],
   FALLBACK: ["gemini-flash-latest"],

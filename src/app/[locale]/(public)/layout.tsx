@@ -2,8 +2,7 @@ import { ReactNode } from "react";
 
 import { DotPattern } from "@/shared/ui/visuals/dot-pattern";
 import { AppFooter } from "@/widgets/app-footer";
-import { PublicHeader } from "@/widgets/public-header";
-import { PublicHeaderWrapper } from "@/widgets/public-header/ui/public-header-wrapper";
+import { PublicHeader, PublicHeaderWrapper } from "@/widgets/public-header";
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
   return (

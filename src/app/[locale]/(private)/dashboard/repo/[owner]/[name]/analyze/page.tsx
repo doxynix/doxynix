@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Status } from "@prisma/client";
 
 import { RepoSetup } from "@/features/repo-setup";
 
@@ -15,11 +14,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { owner, name } = await params;
 
   return {
-    title: `${owner}/${name}`,
+    title: `Setup analyze for ${owner}/${name}`,
   };
 }
 
-export default async function RepoOwnerNamePage({ params }: Props) {
+export default async function AnalyzePage({ params }: Props) {
   const { owner, name } = await params;
 
   const repo = await (
@@ -33,5 +32,9 @@ export default async function RepoOwnerNamePage({ params }: Props) {
     notFound();
   }
 
-  return <>{repo.status === Status.NEW && <RepoSetup repo={repo} />}</>;
+  return (
+    <>
+      <RepoSetup repo={repo} />
+    </>
+  );
 }

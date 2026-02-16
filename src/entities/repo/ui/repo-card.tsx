@@ -20,6 +20,7 @@ import { repoStatusConfig } from "../model/repo-status";
 import { repoVisibilityConfig } from "../model/repo-visibility";
 import { RepoAvatar } from "./repo-avatar";
 import { RepoGitMetric } from "./repo-git-metric";
+import { RepoTopics } from "./repo-topics";
 
 type Props = {
   repo: RepoTableItem;
@@ -65,11 +66,9 @@ export function RepoCard({ repo }: Props) {
                   </Link>
                 </div>
                 {visibility !== null && (
-                  <AppTooltip content={cn(visibility.label)}>
-                    <div className="flex shrink-0 items-center gap-1.5 text-xs">
-                      <visibility.icon className={cn("h-3.5 w-3.5", visibility.color)} />
-                    </div>
-                  </AppTooltip>
+                  <Badge variant="outline" className={cn(visibility.color)}>
+                    {visibility.label}
+                  </Badge>
                 )}
                 <div
                   className={cn("flex shrink-0 items-center gap-1 transition-opacity duration-200")}
@@ -86,7 +85,7 @@ export function RepoCard({ repo }: Props) {
                     </a>
                   </AppTooltip>
                   <Link
-                    href={`/dashboard/${repo.owner}/${repo.name}/settings`}
+                    href={`/dashboard/repo/${repo.owner}/${repo.name}/settings`}
                     className="text-muted-foreground hover:text-foreground flex h-6 w-6 items-center justify-center opacity-0 transition-all not-md:opacity-100 group-hover:opacity-100"
                   >
                     <Settings className="h-4 w-4" />
@@ -98,18 +97,8 @@ export function RepoCard({ repo }: Props) {
             <p className="text-muted-foreground line-clamp-2 text-sm wrap-break-word not-sm:text-center">
               {repo.description ?? t("repo_empty_desc")}
             </p>
-            {repo.topics !== null && repo.topics.length > 0 && (
-              <div className="mt-1 flex flex-wrap gap-1 not-sm:justify-center">
-                {repo.topics.slice(0, 10).map((topic) => (
-                  <Badge key={topic}>{topic}</Badge>
-                ))}
-                {repo.topics.length > 10 && (
-                  <span className="text-muted-foreground self-center text-[10px]">
-                    +{repo.topics.length - 10}
-                  </span>
-                )}
-              </div>
-            )}
+
+            <RepoTopics repoTopics={repo.topics} />
 
             <div className="mt-1 flex flex-wrap items-center gap-3 not-md:justify-center">
               {gitMetrics.map((m) => (

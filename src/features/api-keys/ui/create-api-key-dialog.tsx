@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
-import { useApiKeyActions } from "@/shared/hooks/use-api-key-actions";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -32,6 +31,8 @@ import { Input } from "@/shared/ui/core/input";
 import { Textarea } from "@/shared/ui/core/textarea";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
+
+import { useApiKeyActions } from "../model/use-api-key-actions";
 
 export function CreateApiKeyDialog() {
   const [open, setOpen] = useState(false);

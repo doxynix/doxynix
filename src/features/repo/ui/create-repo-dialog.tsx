@@ -31,8 +31,8 @@ import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import { useRepoActions } from "@/entities/repo";
 import { usePathname, useRouter } from "@/i18n/routing";
-import { useRepoActions } from "../../../shared/hooks/use-repo-actions";
 import { RepoItem } from "./repo-item";
 
 const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут

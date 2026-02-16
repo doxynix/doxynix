@@ -4,7 +4,6 @@ import { useState } from "react";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { useRepoActions } from "@/shared/hooks/use-repo-actions";
 import { RepoMeta } from "@/shared/types/repo";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { Button } from "@/shared/ui/core/button";
@@ -19,6 +18,8 @@ import {
   DialogTrigger,
 } from "@/shared/ui/core/dialog";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
+
+import { useRepoActions } from "@/entities/repo";
 
 const richStyles = {
   strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,

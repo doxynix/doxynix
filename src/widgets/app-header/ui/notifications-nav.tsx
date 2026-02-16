@@ -4,7 +4,6 @@ import { Bell } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
-import { useNotificationActions } from "@/shared/hooks/use-notification-actions";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -16,6 +15,7 @@ import {
 } from "@/shared/ui/core/dropdown-menu";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
+import { useNotificationActions } from "@/features/notifications";
 
 import { Link } from "@/i18n/routing";
 

@@ -18,7 +18,7 @@ import {
 import { usePathname, useRouter } from "@/i18n/routing";
 import { Spinner } from "../core/spinner";
 
-const FLAGS: Record<Locale, string> = {
+export const FLAGS: Record<Locale, string> = {
   en: "/icons/flags/us.svg",
   "zh-CN": "/icons/flags/cn.svg",
   "pt-BR": "/icons/flags/br.svg",
@@ -28,7 +28,7 @@ const FLAGS: Record<Locale, string> = {
   fr: "/icons/flags/fr.svg",
 };
 
-function Flag({ src, alt }: { src: string; alt: string }) {
+export function Flag({ src, alt }: { src: string; alt: string }) {
   const [loaded, setLoaded] = useState(loadedFlags.get(src) ?? false);
 
   return (

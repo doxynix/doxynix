@@ -17,7 +17,7 @@ type Props = {
 export function RepoGitMetric({ icon: Icon, label, tooltip, color, className }: Props) {
   const locale = useLocale();
   if (label == null || label === "") return null;
-  const isCssValue = color?.startsWith("#") || color?.startsWith("var(");
+  const isCssValue = (color?.startsWith("#") ?? false) || color?.startsWith("var(");
 
   return (
     <AppTooltip content={tooltip}>
@@ -35,7 +35,7 @@ export function RepoGitMetric({ icon: Icon, label, tooltip, color, className }: 
             }
           />
         )}
-        <span>{label.toLocaleString(locale)}</span>
+        <span className="leading-tight">{label.toLocaleString(locale)}</span>
       </div>
     </AppTooltip>
   );
