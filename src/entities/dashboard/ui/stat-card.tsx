@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/shared/lib/utils";
 import { StatItem } from "@/shared/types/stat-item";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";

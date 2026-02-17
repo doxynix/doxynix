@@ -10,8 +10,9 @@ import { toast } from "sonner";
 import { trpc } from "@/shared/api/trpc";
 import { isProd } from "@/shared/constants/env";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
-import { useNotificationActions } from "@/shared/hooks/use-notification-actions";
-import { useRepoActions } from "@/shared/hooks/use-repo-actions";
+
+import { useRepoActions } from "@/entities/repo";
+import { useNotificationActions } from "./model/use-notification-actions";
 
 type Props = { children: React.ReactNode };
 

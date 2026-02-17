@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
-import { useApiKeyActions } from "@/shared/hooks/use-api-key-actions";
 import { Button } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -33,6 +32,7 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { UiApiKey } from "@/entities/api-keys";
+import { useApiKeyActions } from "../model/use-api-key-actions";
 
 type Props = {
   apiKey: UiApiKey;

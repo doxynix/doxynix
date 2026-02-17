@@ -61,7 +61,8 @@ export async function getAnalysisContext(
 export async function cloneRepository(
   repo: Repo,
   token: string | undefined | null,
-  targetPath: string
+  targetPath: string,
+  selectedBranch?: string
 ) {
   if (existsSync(targetPath)) {
     await fs.rm(targetPath, { recursive: true, force: true });
@@ -69,10 +70,11 @@ export async function cloneRepository(
   await fs.mkdir(targetPath, { recursive: true });
 
   const git = simpleGit();
+  const branchToClone = selectedBranch ?? repo.defaultBranch;
 
   const repoUrl = `https://github.com/${repo.owner}/${repo.name}.git`;
 
-  const options = ["--depth", "1", "--branch", repo.defaultBranch];
+  const options = ["--depth", "1", "--branch", branchToClone];
 
   if (token !== null) {
     const base64Auth = Buffer.from(`x-access-token:${token}`).toString("base64");

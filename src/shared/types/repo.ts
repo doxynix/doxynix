@@ -6,3 +6,16 @@ type RepoGetAllOutput = inferRouterOutputs<AppRouter>["repo"]["getAll"];
 
 export type RepoTableItem = RepoGetAllOutput["items"][number];
 export type RepoMeta = RepoGetAllOutput["meta"];
+
+type RouterOutput = inferRouterOutputs<AppRouter>;
+export type RepoDetailed = NonNullable<RouterOutput["repo"]["getByName"]>;
+
+export type FileNode = {
+  id: string;
+  name: string;
+  children?: FileNode[];
+  path: string;
+  type: string;
+  recommended?: boolean;
+  sha: string;
+};

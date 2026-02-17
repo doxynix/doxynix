@@ -9,7 +9,6 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 
 import { UpdateProfileSchema } from "@/shared/api/schemas/user";
-import { useProfileActions } from "@/shared/hooks/use-profile-actions";
 import { getInitials } from "@/shared/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/core/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
@@ -23,6 +22,8 @@ import {
 } from "@/shared/ui/core/form";
 import { Input } from "@/shared/ui/core/input";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
+
+import { useProfileActions } from "../model/use-profile-actions";
 
 type ProfileFormValues = z.infer<typeof UpdateProfileSchema>;
 

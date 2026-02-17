@@ -120,9 +120,7 @@ export const repoRouter = createTRPCRouter({
         name: z.string().trim().min(1),
       })
     )
-    .output(
-      PublicRepoSchema.extend({ status: z.enum(Status).nullish(), message: z.string() }).nullable()
-    )
+    .output(PublicRepoSchema.extend({ status: z.enum(Status), message: z.string() }).nullable())
     .query(async ({ ctx, input }) => {
       const repo = await ctx.db.repo.findFirst({
         where: {
@@ -326,10 +324,12 @@ export const repoRouter = createTRPCRouter({
         input.branch
       );
 
-      return tree.map((file) => ({
-        ...file,
-        recommended: FileClassifier.getScore(file.path) > 40,
-      }));
+      return tree.map((file) => [
+        file.path,
+        file.type === "blob" ? 1 : 0,
+        file.sha.substring(0, 7),
+        FileClassifier.getScore(file.path) > 40 ? 1 : 0,
+      ]);
     }),
   analyze: protectedProcedure
     .meta({
@@ -346,6 +346,7 @@ export const repoRouter = createTRPCRouter({
       z.object({
         repoId: z.uuid(),
         files: z.array(z.string()),
+        branch: z.string().optional(),
         instructions: z.string().optional(),
         docTypes: z.array(z.enum(DocType)),
         language: z.string(),
@@ -376,6 +377,7 @@ export const repoRouter = createTRPCRouter({
           analysisId: analysis.publicId,
           userId: Number(ctx.session.user.id),
           selectedFiles: input.files,
+          selectedBranch: input.branch,
           instructions: input.instructions,
           docTypes: input.docTypes,
           language: input.language,
@@ -393,6 +395,19 @@ export const repoRouter = createTRPCRouter({
       });
 
       return { status: "QUEUED", jobId: handle.id };
+    }),
+  getBranches: protectedProcedure
+    .input(z.object({ owner: z.string(), name: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const octokit = await githubService.getClientForUser(ctx.db, Number(ctx.session.user.id));
+
+      const branches = await octokit.paginate(octokit.repos.listBranches, {
+        owner: input.owner,
+        repo: input.name,
+        per_page: 100,
+      });
+
+      return branches.map((b) => b.name);
     }),
 
   getDocument: protectedProcedure

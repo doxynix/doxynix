@@ -18,6 +18,7 @@ type TaskPayload = {
   analysisId: string;
   userId: number;
   selectedFiles: string[];
+  selectedBranch?: string;
   instructions?: string;
   docTypes: DocTypeType[];
   forceRefresh?: boolean;
@@ -44,8 +45,16 @@ export const analyzeRepoTask = task({
   maxDuration: 60 * 20,
 
   run: async (payload: TaskPayload) => {
-    const { analysisId, userId, selectedFiles, instructions, forceRefresh, docTypes, language } =
-      payload;
+    const {
+      analysisId,
+      userId,
+      selectedFiles,
+      instructions,
+      forceRefresh,
+      docTypes,
+      language,
+      selectedBranch,
+    } = payload;
 
     let currentLogs = "";
     const tempClonePath = path.join(os.tmpdir(), `doxynix-clone-${analysisId}`);
@@ -101,7 +110,7 @@ export const analyzeRepoTask = task({
       const busFactor = await calculateBusFactor(repo, userId);
 
       await updateStatus("Cloning repository...", 20);
-      await cloneRepository(repo, token, tempClonePath);
+      await cloneRepository(repo, token, tempClonePath, selectedBranch);
 
       await updateStatus(`Reading ${selectedFiles.length} files...`, 35);
       const validFiles = await readAndFilterFiles(tempClonePath, selectedFiles);

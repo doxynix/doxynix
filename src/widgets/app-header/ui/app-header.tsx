@@ -15,9 +15,9 @@ import {
 import { useSidebar } from "@/shared/ui/core/sidebar";
 import { Logo } from "@/shared/ui/icons/logo";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
-import { AppCommandMenu } from "@/widgets/app-header/ui/app-command-menu";
 
 import { Link, usePathname } from "@/i18n/routing";
+import { AppCommandMenu } from "./app-command-menu";
 import { NotificationsNav } from "./notifications-nav";
 import { SidebarToggle } from "./sidebar-toggle";
 import { UserNav } from "./user-nav";

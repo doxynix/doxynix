@@ -207,7 +207,7 @@ export async function generateDeepDocs(
         const { data: commitsData } = await octokit.repos.listCommits({
           owner: repo.owner,
           repo: repo.name,
-          per_page: 50,
+          per_page: 50, // NOTE: тут возможно стоит придумать другую логику
         });
 
         const simpleCommits = commitsData.map((c) => ({
