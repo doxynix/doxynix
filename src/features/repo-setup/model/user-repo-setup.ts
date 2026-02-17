@@ -66,7 +66,7 @@ export function useRepoSetup(repo: RepoDetailed) {
             path: currentPath,
             type: isLast ? (type === 1 ? "blob" : "tree") : "tree",
             recommended: isLast ? recommended === 1 : false,
-            sha,
+            sha: isLast ? sha : "",
             children: isLast ? undefined : [],
           };
           map.set(currentPath, newNode);
