@@ -63,7 +63,7 @@ export function useRepoSetup(repo: RepoDetailed) {
           const newNode: FileNode = {
             id: currentPath,
             name: part,
-            path: path,
+            path: currentPath,
             type: isLast ? (type === 1 ? "blob" : "tree") : "tree",
             recommended: isLast ? recommended === 1 : false,
             sha,
