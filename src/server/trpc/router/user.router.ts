@@ -83,6 +83,21 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = Number(ctx.session.user.id);
 
+      const existingKeyOwner = await ctx.prisma.user.findFirst({
+        where: {
+          imageKey: input.key,
+          NOT: { id: userId },
+        },
+        select: { id: true },
+      });
+
+      if (existingKeyOwner) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This file key is already in use by another user",
+        });
+      }
+
       // NOTE: используется чистая призма
       const currentUser = await ctx.prisma.user.findUnique({
         where: { id: userId },
@@ -103,6 +118,7 @@ export const userRouter = createTRPCRouter({
         utapi.deleteFiles(oldKey).catch((e) => {
           logger.error({
             msg: "Failed to delete old file from UploadThing",
+            userId,
             error: e instanceof Error ? e.message : String(e),
             oldKey,
           });
@@ -136,6 +152,8 @@ export const userRouter = createTRPCRouter({
         select: { imageKey: true },
       });
 
+      const keyToDelete = user?.imageKey;
+
       await ctx.db.user.update({
         where: { id: userId },
         data: {
@@ -144,9 +162,14 @@ export const userRouter = createTRPCRouter({
         },
       });
 
-      if (user?.imageKey !== null && user?.imageKey !== undefined) {
-        utapi.deleteFiles(user.imageKey).catch((e) => {
-          logger.error({ msg: "Failed to delete avatar from UT", error: e });
+      if (keyToDelete !== null && keyToDelete !== undefined) {
+        utapi.deleteFiles(keyToDelete).catch((error) => {
+          logger.error({
+            msg: "Failed to delete avatar from UT during removal",
+            userId,
+            keyToDelete,
+            error: error instanceof Error ? error.message : String(error),
+          });
         });
       }
 
