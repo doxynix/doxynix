@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/doxynix/doxynix/compare/v1.4.0...v1.5.0) (2026-02-17)
+
+
+### Features
+
+* **repo-setup:** реализован флоу анализа репозитория ([#303](https://github.com/doxynix/doxynix/issues/303)) ([7dcb7a1](https://github.com/doxynix/doxynix/commit/7dcb7a125f4b5141795a9ed87e0e7f3c07580af3))
+
+
+### Bug Fixes
+
+* **deps:** update dependency lucide-react to ^0.568.0 ([#305](https://github.com/doxynix/doxynix/issues/305)) ([ec0bb9a](https://github.com/doxynix/doxynix/commit/ec0bb9afda34d6824d0b6f8a49840efbf83bad21))
+
 ## [1.4.0](https://github.com/doxynix/doxynix/compare/v1.3.1...v1.4.0) (2026-02-14)
 
 
