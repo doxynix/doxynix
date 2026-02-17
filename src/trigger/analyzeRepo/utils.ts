@@ -53,13 +53,32 @@ export async function cleanup(path: string) {
 }
 
 export async function readAndFilterFiles(basePath: string, selectedFiles: string[]) {
-  const filePromises = selectedFiles.map(async (filePath) => {
-    const fullPath = path.join(basePath, filePath);
-    try {
-      const stat = await fs.stat(fullPath);
-      if (!stat.isFile()) return null;
+  const resolvedBase = await fs.realpath(basePath);
 
-      const buffer = await fs.readFile(fullPath);
+  const filePromises = selectedFiles.map(async (filePath) => {
+    const fullPath = path.resolve(basePath, filePath);
+
+    try {
+      const realPath = await fs.realpath(fullPath);
+
+      const relative = path.relative(resolvedBase, realPath);
+      const isOutside = relative.startsWith("..") || path.isAbsolute(relative);
+
+      if (isOutside) {
+        logger.warn({
+          msg: "Security: attempt to read file outside of basePath",
+          filePath,
+          resolvedPath: realPath,
+        });
+        return null;
+      }
+
+      const stat = await fs.lstat(realPath);
+      if (!stat.isFile()) {
+        return null;
+      }
+
+      const buffer = await fs.readFile(realPath);
       const isBin = await isBinaryFile(buffer, { size: stat.size });
       if (isBin) return null;
 
