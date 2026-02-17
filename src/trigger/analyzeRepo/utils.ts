@@ -68,7 +68,7 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
         logger.warn({
           msg: "Security: attempt to read file outside of basePath",
           filePath,
-          resolvedPath: fullPath,
+          resolvedPath: realPath,
         });
         return null;
       }
@@ -78,7 +78,7 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
         return null;
       }
 
-      const buffer = await fs.readFile(fullPath);
+      const buffer = await fs.readFile(realPath);
       const isBin = await isBinaryFile(buffer, { size: stat.size });
       if (isBin) return null;
 
