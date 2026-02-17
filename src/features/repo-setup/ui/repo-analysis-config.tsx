@@ -16,7 +16,6 @@ import { useTranslations } from "next-intl";
 
 import { LOCALES } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/utils";
-import { ActionsType, StateType } from "@/shared/types/repo-setup";
 import { Button } from "@/shared/ui/core/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Checkbox } from "@/shared/ui/core/checkbox";
@@ -30,6 +29,8 @@ import {
 } from "@/shared/ui/core/select";
 import { Textarea } from "@/shared/ui/core/textarea";
 import { Flag, FLAGS } from "@/shared/ui/kit/language-switcher";
+
+import { ActionsType, StateType } from "../model/user-repo-setup";
 
 const DOC_OPTIONS = [
   { id: DocType.README, label: "README", icon: BookOpen, desc: "Project overview & setup" },
