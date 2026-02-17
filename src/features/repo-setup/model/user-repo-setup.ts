@@ -122,9 +122,13 @@ export function useRepoSetup(repo: RepoDetailed) {
   }, [apiFiles]);
 
   const handleStartAnalysis = () => {
+  if (!apiFiles) return;
+  const leafFilePaths = new Set(
+    (apiFiles as FileTuple[]).filter((f) => f[1] === 1).map((f) => f[0])
+  );
     analyzeMutation.mutate({
       repoId: repo.id,
-      files: Array.from(selectedIds).filter((id) => treeApi?.get(id)?.isLeaf ?? false),
+      files: Array.from(selectedIds).filter((id) => leafFilePaths.has(id)),
       branch: selectedBranch,
       language: analysisLocale,
       instructions,
