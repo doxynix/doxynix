@@ -58,7 +58,10 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
   const filePromises = selectedFiles.map(async (filePath) => {
     const fullPath = path.resolve(basePath, filePath);
 
-    if (!fullPath.startsWith(resolvedBase)) {
+    const relative = path.relative(resolvedBase, fullPath);
+    const isOutside = relative.startsWith("..") || path.isAbsolute(relative);
+
+    if (isOutside) {
       logger.warn({
         msg: "Security: attempt to read file outside of basePath",
         filePath,
@@ -68,8 +71,10 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
     }
 
     try {
-      const stat = await fs.stat(fullPath);
-      if (!stat.isFile()) return null;
+      const stat = await fs.lstat(fullPath);
+      if (stat.isSymbolicLink() || !stat.isFile()) {
+        return null;
+      }
 
       const buffer = await fs.readFile(fullPath);
       const isBin = await isBinaryFile(buffer, { size: stat.size });
