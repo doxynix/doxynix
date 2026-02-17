@@ -53,8 +53,20 @@ export async function cleanup(path: string) {
 }
 
 export async function readAndFilterFiles(basePath: string, selectedFiles: string[]) {
+  const resolvedBase = path.resolve(basePath);
+
   const filePromises = selectedFiles.map(async (filePath) => {
-    const fullPath = path.join(basePath, filePath);
+    const fullPath = path.resolve(basePath, filePath);
+
+    if (!fullPath.startsWith(resolvedBase)) {
+      logger.warn({
+        msg: "Security: attempt to read file outside of basePath",
+        filePath,
+        resolvedPath: fullPath,
+      });
+      return null;
+    }
+
     try {
       const stat = await fs.stat(fullPath);
       if (!stat.isFile()) return null;
