@@ -99,7 +99,16 @@ export function RepoAnalysisConfig({ state, actions, disabled }: Props) {
               return (
                 <div
                   key={opt.id}
+                  role="checkbox"
+                  aria-checked={isSelected}
+                  tabIndex={0}
                   onClick={() => actions.toggleDocType(opt.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      actions.toggleDocType(opt.id);
+                    }
+                  }}
                   className={cn(
                     "relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3 transition-all",
                     "hover:bg-muted/50",
