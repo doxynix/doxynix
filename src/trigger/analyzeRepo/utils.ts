@@ -53,7 +53,7 @@ export async function cleanup(path: string) {
 }
 
 export async function readAndFilterFiles(basePath: string, selectedFiles: string[]) {
-  const resolvedBase = path.resolve(basePath);
+  const resolvedBase = await fs.realpath(basePath);
 
   const filePromises = selectedFiles.map(async (filePath) => {
     const fullPath = path.resolve(basePath, filePath);
