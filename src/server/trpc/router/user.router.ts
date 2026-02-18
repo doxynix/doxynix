@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { UTApi } from "uploadthing/server";
 import z from "zod";
@@ -91,28 +92,39 @@ export const userRouter = createTRPCRouter({
 
       const oldKey = currentUser?.imageKey;
 
-      const updatedUser = await ctx.db.user.update({
-        where: { id: userId },
-        data: {
-          image: input.url,
-          imageKey: input.key,
-        },
-      });
-
-      if (oldKey !== undefined && oldKey !== null && oldKey !== input.key) {
-        utapi.deleteFiles(oldKey).catch((e) => {
-          logger.error({
-            msg: "Failed to delete old file from UploadThing",
-            error: e instanceof Error ? e.message : String(e),
-            oldKey,
-          });
+      try {
+        const updatedUser = await ctx.db.user.update({
+          where: { id: userId },
+          data: {
+            image: input.url,
+            imageKey: input.key,
+          },
         });
-      }
 
-      return {
-        image: updatedUser?.image ?? null,
-        message: "Profile Picture updated",
-      };
+        if (oldKey !== undefined && oldKey !== null && oldKey !== input.key) {
+          utapi.deleteFiles(oldKey).catch((e) => {
+            logger.error({
+              msg: "Failed to delete old file from UploadThing",
+              userId,
+              error: e instanceof Error ? e.message : String(e),
+              oldKey,
+            });
+          });
+        }
+
+        return {
+          image: updatedUser?.image ?? null,
+          message: "Profile Picture updated",
+        };
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Critical error: this file key was claimed by another request",
+          });
+        }
+        throw error;
+      }
     }),
   removeAvatar: protectedProcedure
     .meta({
@@ -136,6 +148,8 @@ export const userRouter = createTRPCRouter({
         select: { imageKey: true },
       });
 
+      const keyToDelete = user?.imageKey;
+
       await ctx.db.user.update({
         where: { id: userId },
         data: {
@@ -144,9 +158,14 @@ export const userRouter = createTRPCRouter({
         },
       });
 
-      if (user?.imageKey !== null && user?.imageKey !== undefined) {
-        utapi.deleteFiles(user.imageKey).catch((e) => {
-          logger.error({ msg: "Failed to delete avatar from UT", error: e });
+      if (keyToDelete !== null && keyToDelete !== undefined) {
+        utapi.deleteFiles(keyToDelete).catch((error) => {
+          logger.error({
+            msg: "Failed to delete avatar from UT during removal",
+            userId,
+            keyToDelete,
+            error: error instanceof Error ? error.message : String(error),
+          });
         });
       }
 

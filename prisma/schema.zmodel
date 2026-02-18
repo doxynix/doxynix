@@ -54,7 +54,7 @@ model User {
   name          String?        @length(min: 1, max: 50, message: "Имя должно быть от 1 до 50 символов")
   emailVerified DateTime?      @map("email_verified")
   image         String?        @url(message: "Некорректная ссылка на аватар")
-  imageKey      String?        @map("image_key") @omit
+  imageKey      String?        @map("image_key") @omit @unique
   role          UserRole       @default(USER)
 
   createdAt     DateTime       @default(now()) @map("created_at")
