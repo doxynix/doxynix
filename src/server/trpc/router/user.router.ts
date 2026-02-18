@@ -120,7 +120,7 @@ export const userRouter = createTRPCRouter({
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
           throw new TRPCError({
             code: "CONFLICT",
-            message: "Критическая ошибка: этот ключ файла был занят другим запросом",
+            message: "Critical error: this file key was claimed by another request",
           });
         }
         throw error;
