@@ -69,8 +69,10 @@ export default defineConfig([
         { type: "features", pattern: "src/features/*" },
         { type: "entities", pattern: "src/entities/*" },
         { type: "shared", pattern: "src/shared/*" },
+        { type: "generated", pattern: "src/generated/*" },
+        { type: "server", pattern: "src/server/*" },
+        { type: "trigger", pattern: "src/trigger/*" },
       ],
-    },
 
     rules: {
       "prettier/prettier": "warn",
