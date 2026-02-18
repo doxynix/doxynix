@@ -73,6 +73,7 @@ export default defineConfig([
         { type: "server", pattern: "src/server/*" },
         { type: "trigger", pattern: "src/trigger/*" },
       ],
+    },
 
     rules: {
       "prettier/prettier": "warn",
