@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.4](https://github.com/doxynix/doxynix/compare/v1.5.3...v1.5.4) (2026-02-17)
+
+
+### Bug Fixes
+
+* **security:** исправлена уязвимость обхода путей (path traversal)  ([#313](https://github.com/doxynix/doxynix/issues/313)) ([a65cd87](https://github.com/doxynix/doxynix/commit/a65cd8776f645efe06ffd866c7b4852bb37a3705))
+
 ## [1.5.3](https://github.com/doxynix/doxynix/compare/v1.5.2...v1.5.3) (2026-02-17)
 
 
