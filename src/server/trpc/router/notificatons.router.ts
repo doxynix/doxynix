@@ -1,9 +1,6 @@
 import { z } from "zod";
 
-import { REALTIME_CONFIG } from "@/shared/constants/realtime";
-
 import { NotificationSchema } from "@/generated/zod";
-import { realtimeServer } from "@/server/lib/realtime";
 import { handlePrismaError } from "@/server/utils/handle-prisma-error";
 import { OpenApiErrorResponses } from "../shared";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -135,48 +132,5 @@ export const notificationRouter = createTRPCRouter({
       } catch (error) {
         handlePrismaError(error);
       }
-    }),
-
-  sendTest: protectedProcedure
-    .meta({
-      openapi: {
-        method: "POST",
-        path: "/notifications/test",
-        tags: ["notifications"],
-        summary: "TEST",
-        protect: true,
-        errorResponses: OpenApiErrorResponses,
-      },
-    })
-    .input(z.object({ title: z.string().min(1) }))
-    .output(
-      z.object({
-        success: z.boolean(),
-        message: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
-
-      const newNote = await ctx.db.notification.create({
-        data: {
-          userId,
-          title: input.title,
-          body: "Test notification",
-        },
-      });
-
-      setTimeout(async () => {
-        const channelName = REALTIME_CONFIG.channels.user(userId);
-        const eventName = REALTIME_CONFIG.events.user.notification;
-
-        await realtimeServer.channels.get(channelName).publish(eventName, {
-          id: newNote.publicId,
-          title: newNote.title,
-          body: newNote.body,
-        });
-      }, 5000);
-
-      return { success: true, message: "Test notification scheduled" };
     }),
 });

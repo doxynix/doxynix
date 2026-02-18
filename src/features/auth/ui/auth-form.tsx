@@ -176,7 +176,7 @@ export function AuthForm() {
                 isLoading={loadingProvider === item.provider}
                 loadingText={t("login_loading")}
                 disabled={disabled}
-                onClick={() => handleSignIn(item.provider)}
+                onClick={() => void handleSignIn(item.provider)}
               >
                 <item.icon /> {item.text}
               </LoadingButton>
@@ -192,7 +192,10 @@ export function AuthForm() {
           </div>
           <div className="bg-muted-foreground/5 flex flex-col gap-4 rounded-xl p-6">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
+              <form
+                onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+                className="flex w-full flex-col gap-4"
+              >
                 <FormField
                   control={form.control}
                   name="email"

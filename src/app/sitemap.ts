@@ -23,7 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: new Date(),
         changeFrequency: "weekly",
         priority: path === "" ? 1 : 0.8,
-        // Опционально: alternate refs (next-intl это любит, но для простого sitemap можно и так)
+        // NOTE: alternate refs (next-intl это любит, но для простого sitemap можно и так)
       });
     });
   });

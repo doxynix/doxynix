@@ -120,7 +120,7 @@ export function CreateRepoDialog() {
           <DialogDescription>{t("repo_create_desc")} </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="grid gap-4 py-4">
             <div className="flex flex-col gap-3" ref={containerRef}>
               <FormField
                 control={form.control}
@@ -198,7 +198,7 @@ export function CreateRepoDialog() {
                         isLoading={loading}
                         loadingText="Connecting..."
                         disabled={loading}
-                        onClick={() => handleConnectGithub()}
+                        onClick={() => void handleConnectGithub()}
                       >
                         <GitHubIcon /> {tCommon("connect")}
                       </LoadingButton>

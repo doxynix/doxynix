@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/purity */
 "use client";
 
 import React from "react";
@@ -105,12 +104,15 @@ export const BackgroundBeams = React.memo(({ className }: { className?: string }
                 x1: ["0%", "100%"],
                 x2: ["0%", "95%"],
                 y1: ["0%", "100%"],
+                // eslint-disable-next-line react-hooks/purity
                 y2: ["0%", `${93 + Math.random() * 8}%`],
               }}
               transition={{
+                // eslint-disable-next-line react-hooks/purity
                 duration: Math.random() * 10 + 10,
                 ease: "easeInOut",
                 repeat: Infinity,
+                // eslint-disable-next-line react-hooks/purity
                 delay: Math.random() * 10,
               }}
             >

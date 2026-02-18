@@ -28,7 +28,18 @@ export function ConsoleEasterEgg() {
       textStyle
     );
 
-    // console.log(`%c (ASCII ART HERE) `, "color: #3b82f6");
+    const asciiStyle = "color: #ffffff; font-weight: bold; font-family: monospace;";
+
+    const asciiArt = `
+    ██████╗  ██████╗ ██╗  ██╗██╗   ██╗███╗   ██╗██╗██╗  ██╗
+    ██╔══██╗██╔═══██╗╚██╗██╔╝╚██╗ ██╔╝████╗  ██║██║╚██╗██╔╝
+    ██║  ██║██║   ██║ ╚███╔╝  ╚████╔╝ ██╔██╗ ██║██║ ╚███╔╝
+    ██║  ██║██║   ██║ ██╔██╗   ╚██╔╝  ██║╚██╗██║██║ ██╔██╗
+    ██████╔╝╚██████╔╝██╔╝ ██╗   ██║   ██║ ╚████║██║██╔╝ ██╗
+    ╚═════╝  ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝
+    `;
+
+    console.info(`%c${asciiArt}`, asciiStyle);
   }, []);
 
   return null;

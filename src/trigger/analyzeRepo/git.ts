@@ -35,8 +35,10 @@ export async function getAnalysisContext(
 
   const account = await prisma.account.findFirst({ where: { userId, provider: "github" } });
   const userToken = account?.access_token;
-
-  if (repo.visibility === VisibilitySchema.enum.PRIVATE && userToken === null) {
+  if (
+    repo.visibility === VisibilitySchema.enum.PRIVATE &&
+    (userToken === null || userToken === undefined)
+  ) {
     throw new Error("This is a private repository. Please connect your GitHub account.");
   }
 

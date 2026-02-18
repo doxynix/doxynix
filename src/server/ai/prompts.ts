@@ -54,11 +54,11 @@ Return ONLY a JSON object matching this structure EXACTLY:
   "overview": "Brief architectural summary (1-2 sentences)",
   "language_breakdown": { "primary": "Language", "frameworks": ["List"] },
   "modules": [
-    { 
-      "path": "path/to/module_or_file", 
+    {
+      "path": "path/to/module_or_file",
       "type": "CORE | API | DB | UI | UTIL | CONFIG",
       "responsibility": "Brief description",
-      "dependencies": ["List of imported internal modules"] 
+      "dependencies": ["List of imported internal modules"]
     }
   ],
   "mermaid_graph": "graph TD; \\n  A[Start] --> B[Module]; ..."
@@ -101,7 +101,7 @@ Return ONLY valid JSON matching this schema:
   "sections": {
     "data_flow": "How data moves from entry to storage",
     "security_audit": {
-        "score": 1-10, 
+        "score": 1-10,
         "risks": ["Specific risk 1", "Specific risk 2"]
     },
     "tech_debt": ["List of specific complexity/maintainability issues"],
@@ -113,9 +113,9 @@ Return ONLY valid JSON matching this schema:
     "setup_steps": ["Step 1", "Step 2"]
   },
   "refactoring_targets": [
-    { 
-      "file": "path/to/file", 
-      "priority": "HIGH", 
+    {
+      "file": "path/to/file",
+      "priority": "HIGH",
       "description": "What to fix and why",
       "original_code": "The bad code snippet",
       "improved_code": "The fixed code snippet"
@@ -168,7 +168,7 @@ Generate a Markdown API Reference AND a valid OpenAPI 3.0 YAML.
 
 # OUTPUT
 1. **API Reference**: A human-readable Markdown summary.
-2. **OpenAPI 3.0 YAML**: A valid specification block. 
+2. **OpenAPI 3.0 YAML**: A valid specification block.
    - If the code is not HTTP-based (e.g., a CLI tool or Library), generate a "Public Interface Definition" in Markdown instead of OpenAPI.
 
 # OUTPUT FORMAT (STRICT)
@@ -219,7 +219,7 @@ Write a strictly professional yet engaging \`README.md\`.
 1. **Badge Generation**: Add shields.io badges for the detected stack.
 2. **One-Liner**: A powerful value proposition.
 3. **Key Features**: Bullet points derived from the summary.
-4. **Quick Start**: 
+4. **Quick Start**:
    - Analyze \`package.json\`, \`Makefile\`, \`requirements.txt\`, or \`Cargo.toml\`, etc.
    - infer the *exact* run commands (e.g., \`npm run dev\` vs \`yarn start\` vs \`pnpm run dev\`).
    - If Docker is present, prefer Docker commands.
@@ -236,7 +236,7 @@ export const README_WRITER_USER_PROMPT = (
 # INPUT ANALYSIS
 - **Summary**: ${summary}
 - **Detected Stack**: ${techStack.join(", ")}
-- **Configs**: 
+- **Configs**:
 <configs>
 ${configFilesContext}
 </configs>

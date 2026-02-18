@@ -28,7 +28,7 @@ export function CopyButton({
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => copy(value)}
+        onClick={() => void copy(value)}
         className={cn(
           "h-6 w-6 transition-all not-md:opacity-100",
           isCopied

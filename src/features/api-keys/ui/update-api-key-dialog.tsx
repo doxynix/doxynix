@@ -88,7 +88,7 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
 
       <DialogContent className="sm:max-w-md">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="space-y-4">
             <DialogHeader>
               <DialogTitle>{t("settings_api_keys_edit_title")}</DialogTitle>
               <DialogDescription>
