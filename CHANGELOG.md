@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.5](https://github.com/doxynix/doxynix/compare/v1.5.4...v1.5.5) (2026-02-18)
+
+
+### Bug Fixes
+
+* **security:** защита от подмены ключей файлов ([#316](https://github.com/doxynix/doxynix/issues/316)) ([7954a9c](https://github.com/doxynix/doxynix/commit/7954a9c52169e36ca828aa1b1f52faa74a1b20c6))
+
 ## [1.5.4](https://github.com/doxynix/doxynix/compare/v1.5.3...v1.5.4) (2026-02-17)
 
 
