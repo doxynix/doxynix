@@ -84,21 +84,6 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = Number(ctx.session.user.id);
 
-      const existingKeyOwner = await ctx.prisma.user.findFirst({
-        where: {
-          imageKey: input.key,
-          NOT: { id: userId },
-        },
-        select: { id: true },
-      });
-
-      if (existingKeyOwner) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "This file key is already in use by another user",
-        });
-      }
-
       // NOTE: используется чистая призма
       const currentUser = await ctx.prisma.user.findUnique({
         where: { id: userId },
