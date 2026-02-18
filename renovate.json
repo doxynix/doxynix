@@ -1,40 +1,25 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
+  "extends": ["config:recommended"],
   "dependencyDashboard": true,
-  "labels": [
-    "dependencies"
-  ],
-  "ignoreDeps": [
-    "zod-prisma-types"
-  ],
+  "labels": ["dependencies"],
+  "ignoreDeps": ["zod-prisma-types"],
   "packageRules": [
     {
       "description": "Группируем все минорные и патч обновления npm",
-      "matchManagers": [
-        "npm"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch"
     },
     {
       "description": "Группируем ВСЕ обновления GitHub Actions",
-      "matchManagers": [
-        "github-actions"
-      ],
+      "matchManagers": ["github-actions"],
       "groupName": "github-actions updates",
       "groupSlug": "all-actions"
     },
     {
-      "matchPackageNames": [
-        "@types/**"
-      ],
+      "matchPackageNames": ["@types/**"],
       "groupName": "all @types"
     }
   ],
