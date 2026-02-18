@@ -92,7 +92,7 @@ export const userRouter = createTRPCRouter({
         select: { id: true },
       });
 
-      if (existingKeyOwner) {
+      if (existingKeyOwner !== null) {
         throw new TRPCError({
           code: "CONFLICT",
           message: "This file key is already in use by another user",
