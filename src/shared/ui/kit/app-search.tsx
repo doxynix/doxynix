@@ -28,10 +28,7 @@ export function AppSearch({ placeholder }: Props) {
   const [isPending, startTransition] = useTransition();
 
   React.useEffect(() => {
-    if (urlSearch !== term) {
-      setTerm(urlSearch);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setTerm(urlSearch);
   }, [urlSearch]);
 
   useEffect(() => {

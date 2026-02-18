@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -155,7 +153,7 @@ const CollisionMechanism = React.forwardRef<
     const animationInterval = setInterval(checkCollision, 50);
 
     return () => clearInterval(animationInterval);
-  }, [cycleCollisionDetected, containerRef]);
+  }, [cycleCollisionDetected, containerRef, parentRef]);
 
   useEffect(() => {
     if (collision.detected && collision.coordinates) {
@@ -225,7 +223,9 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
     id: index,
     initialX: 0,
     initialY: 0,
+    // eslint-disable-next-line react-hooks/purity
     directionX: Math.floor(Math.random() * 80 - 40),
+    // eslint-disable-next-line react-hooks/purity
     directionY: Math.floor(Math.random() * -50 - 10),
   }));
 
@@ -247,6 +247,7 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
             y: span.directionY,
             opacity: 0,
           }}
+          // eslint-disable-next-line react-hooks/purity
           transition={{ duration: Math.random() * 1.5 + 0.5, ease: "easeOut" }}
           className="to-primary absolute h-1 w-1 rounded-full bg-linear-to-b from-white"
         />

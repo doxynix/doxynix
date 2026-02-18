@@ -82,7 +82,7 @@ export function CreateApiKeyDialog() {
       >
         {createdKey === null ? (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="space-y-4">
               <DialogHeader>
                 <DialogTitle> {t("settings_api_keys_create_api_key")}</DialogTitle>
                 <DialogDescription>{t("settings_api_keys_name")}</DialogDescription>

@@ -53,7 +53,7 @@ const TOTAL_CYCLE = 14;
 const REPEAT_DELAY = TOTAL_CYCLE - STEP_DURATION;
 
 Circle.displayName = "Circle";
-// TODO
+
 export function HowItWorksSection() {
   const t = useTranslations("Landing");
 

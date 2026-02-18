@@ -52,7 +52,7 @@ export function RepoFileTree({ repo, state, actions, treeApi }: Props) {
     <div className="space-y-4">
       <div className="flex items-end gap-4">
         <div className="flex flex-1 flex-col gap-2">
-          <label className="text-sm font-medium">Select Branch</label>
+          <span className="text-sm font-medium">Select Branch</span>
           <RepoBranchSelector
             branches={state.branches}
             selectedBranch={state.selectedBranch}

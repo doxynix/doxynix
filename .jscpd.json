@@ -1,7 +1,10 @@
 {
   "mode": "strict",
   "threshold": 5,
-  "reporters": ["console", "html"],
+  "reporters": [
+    "console",
+    "html"
+  ],
   "ignore": [
     "**/generated/**",
     "**/node_modules/**",
@@ -10,6 +13,9 @@
     "**/*.d.ts",
     "**/*.test.ts"
   ],
-  "format": ["typescript", "tsx"],
+  "format": [
+    "typescript",
+    "tsx"
+  ],
   "pattern": "**/*.{ts,tsx}"
 }

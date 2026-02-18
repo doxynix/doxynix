@@ -1,8 +1,14 @@
 {
   "$schema": "https://schema.stryker-mutator.io/stryker-config.schema.json",
   "testRunner": "vitest",
-  "plugins": ["@stryker-mutator/vitest-runner"],
-  "reporters": ["progress", "clear-text", "html"],
+  "plugins": [
+    "@stryker-mutator/vitest-runner"
+  ],
+  "reporters": [
+    "progress",
+    "clear-text",
+    "html"
+  ],
   "concurrency": 2,
   "mutate": [
     "src/server/services/**/*.ts",

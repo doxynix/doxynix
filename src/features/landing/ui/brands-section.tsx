@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { AblyIcon } from "@/shared/ui/icons/ably-icon";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { NeonIcon } from "@/shared/ui/icons/neon-icon";
-import { NextJSIcon } from "@/shared/ui/icons/next-js-icon";
+import { NextJSIcon } from "@/shared/ui/icons/nextjs-icon";
 import { ResendIcon } from "@/shared/ui/icons/resend-icon";
 import { TriggerIcon } from "@/shared/ui/icons/trigger-icon";
 import { UploadThingIcon } from "@/shared/ui/icons/uploadthing-icon";

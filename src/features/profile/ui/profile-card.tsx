@@ -115,7 +115,7 @@ export function ProfileCard({ user }: Props) {
               className="hidden"
               ref={fileInputRef}
               accept=".jpg, .jpeg, .png, .gif"
-              onChange={handleImageSelect}
+              onChange={(e) => void handleImageSelect(e)}
               disabled={isUploading}
             />
 
@@ -144,7 +144,10 @@ export function ProfileCard({ user }: Props) {
         </CardHeader>
         <CardContent className="space-y-4">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full flex-col gap-4">
+            <form
+              onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+              className="flex w-full flex-col gap-4"
+            >
               <FormField
                 control={form.control}
                 name="name"

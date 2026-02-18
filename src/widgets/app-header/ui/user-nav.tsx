@@ -120,7 +120,7 @@ export function UserNav() {
                   variant="destructive"
                   disabled={loading}
                   className="cursor-pointer"
-                  onClick={handleSignOut}
+                  onClick={() => void handleSignOut()}
                   isLoading={loading}
                   loadingText="Logout..."
                 >

@@ -36,6 +36,8 @@ export function RepoFileNode({ node, style, mySelectedIds, onMyToggle }: RepoFil
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       style={style}
       className={cn(
         "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1 transition-colors outline-none",
@@ -62,9 +64,18 @@ export function RepoFileNode({ node, style, mySelectedIds, onMyToggle }: RepoFil
       <div className="flex h-4 w-4 shrink-0 items-center justify-center">
         {isFolder && (
           <div
+            role="button"
+            tabIndex={0}
             onClick={(e) => {
               e.stopPropagation();
               node.toggle();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                e.stopPropagation();
+                node.toggle();
+              }
             }}
             className="hover:bg-muted rounded p-0.5 transition-colors"
           >

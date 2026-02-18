@@ -1,9 +1,13 @@
+import tanstackQuery from "@tanstack/eslint-plugin-query";
 import tsParser from "@typescript-eslint/parser";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettierConfig from "eslint-config-prettier";
+import boundaries from "eslint-plugin-boundaries";
+import jsxA11y from "eslint-plugin-jsx-a11y";
 import prettierPlugin from "eslint-plugin-prettier";
 import reactPlugin from "eslint-plugin-react";
+import reactCompiler from "eslint-plugin-react-compiler";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import unicorn from "eslint-plugin-unicorn";
 import unusedImportsPlugin from "eslint-plugin-unused-imports";
@@ -37,6 +41,9 @@ export default defineConfig([
       react: reactPlugin,
       "react-hooks": reactHooksPlugin,
       "unused-imports": unusedImportsPlugin,
+      "react-compiler": reactCompiler,
+      "@tanstack/query": tanstackQuery,
+      boundaries: boundaries,
       prettier: prettierPlugin,
       unicorn,
     },
@@ -56,6 +63,13 @@ export default defineConfig([
       react: {
         version: "detect",
       },
+      "boundaries/elements": [
+        { type: "app", pattern: "src/app/*" },
+        { type: "widgets", pattern: "src/widgets/*" },
+        { type: "features", pattern: "src/features/*" },
+        { type: "entities", pattern: "src/entities/*" },
+        { type: "shared", pattern: "src/shared/*" },
+      ],
     },
 
     rules: {
@@ -63,6 +77,50 @@ export default defineConfig([
 
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
+      "react-compiler/react-compiler": "error",
+
+      "@tanstack/query/exhaustive-deps": "error",
+      "@tanstack/query/no-rest-destructuring": "warn",
+      "@tanstack/query/stable-query-client": "error",
+
+      "boundaries/element-types": [
+        "error",
+        {
+          default: "allow",
+          rules: [
+            {
+              from: ["shared", "generated"],
+              disallow: ["app", "trigger", "server", "widgets", "features", "entities"],
+              message: "Shared/Generated module must not import from upper layers",
+            },
+            {
+              from: ["entities"],
+              disallow: ["app", "trigger", "server", "widgets", "features"],
+              message: "Entity must not import from upper layers (Features, Widgets, etc.)",
+            },
+            {
+              from: ["features"],
+              disallow: ["app", "trigger", "server", "widgets"],
+              message: "Feature must not import from upper layers (Widgets, App)",
+            },
+            {
+              from: ["widgets"],
+              disallow: ["app", "trigger", "server"],
+              message: "Widget must not import from App layer",
+            },
+            {
+              from: ["shared", "entities", "features", "widgets"],
+              disallow: ["server"],
+              message:
+                "Client-side layers cannot import direct server code (use API/Actions instead)",
+            },
+            {
+              from: ["app"],
+              disallow: ["trigger"],
+            },
+          ],
+        },
+      ],
 
       "unused-imports/no-unused-imports": "warn",
       "@typescript-eslint/no-unused-vars": [
@@ -85,6 +143,9 @@ export default defineConfig([
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/await-thenable": "error",
+      "@typescript-eslint/no-misused-promises": "error",
+
+      ...jsxA11y.configs.recommended.rules,
     },
   },
 
