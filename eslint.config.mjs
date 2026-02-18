@@ -93,12 +93,12 @@ export default defineConfig([
           rules: [
             {
               from: ["shared", "generated"],
-              disallow: ["app", "trigger", "server", "widgets", "features", "entities"],
+              disallow: ["app", "trigger", "widgets", "features", "entities"],
               message: "Shared/Generated module must not import from upper layers",
             },
             {
               from: ["entities"],
-              disallow: ["app", "trigger", "server", "widgets", "features"],
+              disallow: ["app", "trigger", "widgets", "features"],
               message: "Entity must not import from upper layers (Features, Widgets, etc.)",
             },
             {
@@ -112,10 +112,10 @@ export default defineConfig([
               message: "Widget must not import from App layer",
             },
             {
-              from: ["shared", "entities", "features", "widgets"],
+              from: ["features", "widgets"],
               disallow: ["server"],
               message:
-                "Client-side layers cannot import direct server code (use API/Actions instead)",
+                "UI-focused layers (Features/Widgets) cannot import direct server code. Use shared/api instead.",
             },
             {
               from: ["app"],
