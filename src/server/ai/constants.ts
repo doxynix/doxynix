@@ -16,7 +16,7 @@
 
 import { createOpenAI } from "@ai-sdk/openai";
 
-import { GROQ_API_KEY } from "@/shared/constants/env";
+import { GROQ_API_KEY } from "@/shared/constants/env.server";
 
 export const groq = createOpenAI({
   baseURL: "https://api.groq.com/openai/v1",

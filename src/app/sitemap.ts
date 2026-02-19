@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 
-import { APP_URL } from "@/shared/constants/env";
+import { APP_URL } from "@/shared/constants/env.client";
 import { DEFAULT_LOCALE, LOCALES } from "@/shared/constants/locales";
 
 export default function sitemap(): MetadataRoute.Sitemap {
