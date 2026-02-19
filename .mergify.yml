@@ -1,0 +1,80 @@
+queue_rules:
+  - name: default
+    queue_conditions:
+      - -conflict
+    merge_conditions:
+      - "check-success ~= ^CI / tests"
+      - "check-success ~= ^CI / types"
+      - "check-success ~= ^CI / quality"
+      - "check-success ~= ^CI / security"
+      - "check-success = GitGuardian Security Checks"
+      - "check-success ~= ^CodeQL - Code Quality"
+      - "check-success ~= ^Vercel"
+      - "check-success ~= ^Trigger\\.dev deployment"
+
+      - "check-success-or-neutral ~= ^CI / build"
+      - "check-success-or-neutral ~= ^CI / e2e"
+      - "check-success-or-neutral ~= ^CI / lighthouse"
+      - "check-success-or-neutral ~= ^dependency-review"
+    merge_method: squash
+    commit_message_template: |
+      {{ title }} (#{{ number }})
+
+      {{ body }}
+
+pull_request_rules:
+  - name: automatic merge for Kramarich0 when CI is green and CodeRabbit approves
+    conditions:
+      - author = Kramarich0
+      - -draft
+      - approved-reviews-by = coderabbitai[bot]
+      - "#approved-reviews-by >= 1"
+      - -conflict
+
+      - "check-success ~= ^CI / tests"
+      - "check-success ~= ^CI / types"
+      - "check-success ~= ^CI / quality"
+      - "check-success ~= ^CI / security"
+      - "check-success = GitGuardian Security Checks"
+      - "check-success ~= ^CodeQL - Code Quality"
+      - "check-success ~= ^Vercel"
+      - "check-success ~= ^Trigger\\.dev deployment"
+
+      - "check-success-or-neutral ~= ^CI / build"
+      - "check-success-or-neutral ~= ^CI / e2e"
+      - "check-success-or-neutral ~= ^CI / lighthouse"
+      - "check-success-or-neutral ~= ^dependency-review"
+    actions:
+      queue:
+        name: default
+
+  - name: automatic merge for dependencies updates
+    conditions:
+      - or:
+        - author = renovate[bot]
+        - author = dependabot[bot]
+      - -draft
+      - "check-success ~= ^CI / tests"
+      - "check-success ~= ^CI / types"
+      - "check-success ~= ^CI / quality"
+      - -conflict
+    actions:
+      queue:
+        name: default
+
+  - name: delete head branch after merge
+    conditions:
+      - merged
+    actions:
+      delete_head_branch: {}
+
+  - name: label on conflicts
+    conditions:
+      - conflict
+      - -closed
+    actions:
+      label:
+        add:
+        - "conflict"
+      comment:
+        message: "Упс, @{{author}}, тут конфликт. Роботы бессильны, поправь руками! 🛠️"
