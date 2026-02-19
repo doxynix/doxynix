@@ -62,7 +62,8 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
 
   const uploadThing = useUploadThing("avatarUploader", {
     onClientUploadComplete: async (res) => {
-      const file = res[0];
+      const file = res?.[0];
+      if (file == null) return;
       toast.success(t("settings_profile_update_avatar_toast_success"));
 
       propsRef.current.onAvatarUpdateSuccess?.(file.ufsUrl);

@@ -2,6 +2,9 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 export const env = createEnv({
+  skipValidation:
+    process.env.SKIP_ENV_VALIDATION === "development" ||
+    (process.env.CI != null && process.env.CI !== ""),
   server: {
     JWT_SECRET: z.string().min(1),
     NEXTAUTH_SECRET: z.string().min(1),

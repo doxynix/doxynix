@@ -31,6 +31,10 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       const userId = Number(metadata.userId);
+      if (isNaN(userId)) {
+        logger.error({ msg: "Invalid userId in upload metadata", userId: metadata.userId });
+        throw new UploadThingError("Unauthorized");
+      }
       logger.info({ msg: `Upload completed for: ${metadata.userId}` });
       logger.info({ msg: `"File URL:" ${file.ufsUrl}` });
 
