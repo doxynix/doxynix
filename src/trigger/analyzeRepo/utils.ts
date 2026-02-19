@@ -39,16 +39,16 @@ export async function handleError(
     ?.publish(REALTIME_CONFIG.events.user.analysisProgress, {
       analysisId,
       status: "FAILED",
-      message: message,
+      message,
     });
 }
 
-export async function cleanup(path: string) {
-  if (existsSync(path)) {
-    logger.info({ msg: "Removing temp clone path", path });
-    await fs.rm(path, { recursive: true, force: true });
+export async function cleanup(dirPath: string) {
+  if (existsSync(dirPath)) {
+    logger.info({ msg: "Removing temp clone path", path: dirPath });
+    await fs.rm(dirPath, { recursive: true, force: true });
   } else {
-    logger.debug({ msg: "Temp clone path not present", path });
+    logger.debug({ msg: "Temp clone path not present", path: dirPath });
   }
 }
 
@@ -79,8 +79,8 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
       }
 
       const buffer = await fs.readFile(realPath);
-      const isBin = await isBinaryFile(buffer, { size: stat.size });
-      if (isBin) return null;
+      const isBinary = await isBinaryFile(buffer, { size: stat.size });
+      if (isBinary) return null;
 
       return { path: filePath, content: buffer.toString("utf-8") };
     } catch (e) {
