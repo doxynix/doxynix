@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.6](https://github.com/doxynix/doxynix/compare/v1.5.5...v1.5.6) (2026-02-19)
+
+
+### Bug Fixes
+
+* **security:** исправление redos в пакете minimatch ([#324](https://github.com/doxynix/doxynix/issues/324)) ([0c56c2d](https://github.com/doxynix/doxynix/commit/0c56c2d25de4cb4341ebb2fa6bf7f48a1b7c2666))
+
 ## [1.5.5](https://github.com/doxynix/doxynix/compare/v1.5.4...v1.5.5) (2026-02-18)
 
 
