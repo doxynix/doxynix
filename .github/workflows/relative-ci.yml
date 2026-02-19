@@ -9,6 +9,9 @@ on:
 jobs:
   send-stats:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Send bundle stats and build information to RelativeCI
