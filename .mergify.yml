@@ -1,7 +1,7 @@
 queue_rules:
   - name: default
     queue_conditions:
-      - conflict = false
+      - -conflict
     merge_conditions:
       - "check-success ~= ^CI / tests"
       - "check-success ~= ^CI / types"
@@ -18,10 +18,10 @@ pull_request_rules:
   - name: automatic merge for Kramarich0 when CI is green and CodeRabbit approves
     conditions:
       - author = Kramarich0
-      - draft = false
+      - -draft
       - approved-reviews-by = coderabbitai[bot]
       - "#approved-reviews-by >= 1"
-      - conflict = false
+      - -conflict
 
       - "check-success ~= ^CI / tests"
       - "check-success ~= ^CI / types"
@@ -45,11 +45,11 @@ pull_request_rules:
       - or:
         - author = renovate[bot]
         - author = dependabot[bot]
-      - draft = false
+      - -draft
       - "check-success ~= ^CI / tests"
       - "check-success ~= ^CI / types"
       - "check-success ~= ^CI / quality"
-      - conflict = false
+      - -conflict
     actions:
       queue:
         name: default
@@ -62,8 +62,8 @@ pull_request_rules:
 
   - name: label on conflicts
     conditions:
-      - conflict = true
-      - closed = false
+      - conflict
+      - -closed
     actions:
       label:
         add:
