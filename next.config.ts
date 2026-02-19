@@ -1,3 +1,4 @@
+import path from "path";
 import type { NextConfig } from "next";
 import filterWebpackStats from "@bundle-stats/plugin-webpack-filter";
 import withBundleAnalyzer from "@next/bundle-analyzer";
@@ -40,7 +41,7 @@ const nextConfig: NextConfig = {
     if (!dev && !isServer) {
       config.plugins.push(
         new StatsWriterPlugin({
-          filename: "../webpack-stats.json",
+          filename: path.join(process.cwd(), ".next", "webpack-stats.json"),
           stats: {
             assets: true,
             chunks: true,
