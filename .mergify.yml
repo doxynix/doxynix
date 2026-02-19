@@ -19,7 +19,7 @@ pull_request_rules:
     conditions:
       - author = Kramarich0
       - draft = false
-      - approved-reviews-by = coderabbitai
+      - approved-reviews-by = coderabbitai[bot]
       - "#approved-reviews-by >= 1"
       - conflict = false
 
@@ -43,8 +43,8 @@ pull_request_rules:
   - name: automatic merge for dependencies updates
     conditions:
       - or:
-        - author = renovate
-        - author = dependabot
+        - author = renovate[bot]
+        - author = dependabot[bot]
       - draft = false
       - "check-success ~= ^CI / tests"
       - "check-success ~= ^CI / types"
