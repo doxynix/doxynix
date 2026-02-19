@@ -39,7 +39,7 @@ export async function handleError(
     ?.publish(REALTIME_CONFIG.events.user.analysisProgress, {
       analysisId,
       status: "FAILED",
-      message: message,
+      message,
     });
 }
 
