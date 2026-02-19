@@ -43,12 +43,12 @@ export async function handleError(
     });
 }
 
-export async function cleanup(path: string) {
-  if (existsSync(path)) {
-    logger.info({ msg: "Removing temp clone path", path });
-    await fs.rm(path, { recursive: true, force: true });
+export async function cleanup(dirPath: string) {
+  if (existsSync(dirPath)) {
+    logger.info({ msg: "Removing temp clone path", path: dirPath });
+    await fs.rm(dirPath, { recursive: true, force: true });
   } else {
-    logger.debug({ msg: "Temp clone path not present", path });
+    logger.debug({ msg: "Temp clone path not present", path: dirPath });
   }
 }
 
