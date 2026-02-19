@@ -79,8 +79,8 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
       }
 
       const buffer = await fs.readFile(realPath);
-      const isBin = await isBinaryFile(buffer, { size: stat.size });
-      if (isBin) return null;
+      const isBinary = await isBinaryFile(buffer, { size: stat.size });
+      if (isBinary) return null;
 
       return { path: filePath, content: buffer.toString("utf-8") };
     } catch (e) {
