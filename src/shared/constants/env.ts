@@ -8,7 +8,7 @@ export const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL! || (isDev ? "http://localhost:3000" : "https://doxynix.space");
 export const API_PREFIX = process.env.API_PREFIX;
 export const PORT = process.env.PORT;
-export const JWT_SECRET = process.env.JWT_SECRET ?? "my-awesome-secret";
+export const JWT_SECRET = process.env.JWT_SECRET;
 export const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET;
 export const BETTERSTACK_TOKEN = process.env.BETTERSTACK_API_TOKEN;
 export const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;

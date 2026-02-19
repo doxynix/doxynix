@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
+import filterWebpackStats from "@bundle-stats/plugin-webpack-filter";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
+import { StatsWriterPlugin } from "webpack-stats-plugin";
 
 import { isAnalyze, isProd } from "@/shared/constants/env";
 import { LOCALE_REGEX_STR } from "@/shared/constants/locales";
@@ -34,6 +36,25 @@ const nextConfig: NextConfig = {
     },
   },
   reactCompiler: true, // аккуратно фича еще в бете (пока багов не обнаружено - 20.01.2026)
+  webpack: (config, { isServer, dev }) => {
+    if (!dev && !isServer) {
+      config.plugins.push(
+        new StatsWriterPlugin({
+          filename: "../webpack-stats.json",
+          stats: {
+            assets: true,
+            chunks: true,
+            modules: true,
+          },
+          transform: (data) => {
+            const filtered = filterWebpackStats(data);
+            return JSON.stringify(filtered);
+          },
+        })
+      );
+    }
+    return config;
+  },
   experimental: {
     typedEnv: true,
     taint: true,
