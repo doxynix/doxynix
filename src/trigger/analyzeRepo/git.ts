@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import simpleGit from "simple-git";
 
 import { prisma } from "@/shared/api/db/db";
-import { SYSTEM_TOKEN } from "@/shared/constants/env";
+import { SYSTEM_TOKEN } from "@/shared/constants/env.server";
 
 import { Repo, StatusSchema, VisibilitySchema } from "@/generated/zod";
 import { githubService } from "@/server/services/github.service";
@@ -35,10 +35,7 @@ export async function getAnalysisContext(
 
   const account = await prisma.account.findFirst({ where: { userId, provider: "github" } });
   const userToken = account?.access_token;
-  if (
-    repo.visibility === VisibilitySchema.enum.PRIVATE &&
-    (userToken === null || userToken === undefined)
-  ) {
+  if (repo.visibility === VisibilitySchema.enum.PRIVATE && userToken == null) {
     throw new Error("This is a private repository. Please connect your GitHub account.");
   }
 

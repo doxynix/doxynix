@@ -15,7 +15,7 @@ export function AppFooter() {
       <div className="container grid grid-cols-1 flex-col items-center justify-between justify-items-center gap-4 lg:flex lg:flex-row">
         <div className="order-1 flex flex-wrap items-center justify-center gap-4 lg:order-0">
           <p className="text-muted-foreground order-1 text-center text-xs lg:order-0">
-            &copy; <DateComp isYear={true} /> Doxynix™. {tFooter("all_rights_reserved")}
+            &copy; <DateComp isYear /> Doxynix™. {tFooter("all_rights_reserved")}
           </p>
           <SystemStatus />
         </div>

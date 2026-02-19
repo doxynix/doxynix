@@ -4,7 +4,7 @@ import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { de, enUS, es, fr, ptBR, ru, zhCN } from "date-fns/locale";
 import { twMerge } from "tailwind-merge";
 
-import { isProd } from "../constants/env";
+import { IS_PROD } from "../constants/env.client";
 import { DEFAULT_LOCALE, Locale } from "../constants/locales";
 
 const dateFnsLocales: Record<Locale, DateFnsLocale> = {
@@ -162,7 +162,7 @@ export const smoothScrollTo = (targetId: string, offset: number = 80, duration: 
 };
 
 export const getCookieName = () => {
-  if (isProd) {
+  if (IS_PROD) {
     return "__Secure-next-auth.session-token";
   }
   return "next-auth.session-token";

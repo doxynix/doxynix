@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { BETTERSTACK_TOKEN } from "@/shared/constants/env";
+import { BETTERSTACK_TOKEN } from "@/shared/constants/env.server";
 
 export const runtime = "edge";
 

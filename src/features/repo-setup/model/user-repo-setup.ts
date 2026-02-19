@@ -5,9 +5,8 @@ import { TreeApi } from "react-arborist";
 
 import { trpc } from "@/shared/api/trpc";
 import { FileNode, RepoDetailed } from "@/shared/types/repo";
+import { FileTuple } from "@/shared/types/repo-setup";
 import { collectAllIds, getFolderSelectionState, sortNodes } from "@/features/repo-setup";
-
-import { FileTuple } from "../../../shared/types/repo-setup";
 
 export type RepoSetupReturn = ReturnType<typeof useRepoSetup>;
 

@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 import { ServerCrash } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { isDev } from "@/shared/constants/env";
+import { IS_DEV } from "@/shared/constants/env.client";
 import { Button } from "@/shared/ui/core/button";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
@@ -77,7 +77,7 @@ export default function Error({
             />
           </div>
 
-          {isDev && (
+          {IS_DEV && (
             <div className="border-border/50 border-t pt-2">
               <p className="text-destructive/70 text-xs font-semibold uppercase">Debug Error:</p>
               <p className="text-destructive truncate font-mono text-xs">{error.message}</p>

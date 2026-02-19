@@ -156,6 +156,17 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Secret Scanning (TruffleHog)
+        # v3.93.4
+        uses: trufflesecurity/trufflehog@7c0734f987ad0bb30ee8da210773b800ee2016d3
+        with:
+          path: ./
+          base: ${{ github.ref_name }}
+          head: HEAD
+          extra_args: --only-verified
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

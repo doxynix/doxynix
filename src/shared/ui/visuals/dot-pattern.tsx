@@ -46,7 +46,7 @@ interface DotPatternProps extends React.SVGProps<SVGSVGElement> {
  * <DotPattern
  *   width={20}
  *   height={20}
- *   glow={true}
+ *   glow
  *   className="opacity-50"
  * />
  *

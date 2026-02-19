@@ -29,7 +29,7 @@ export default async function RepoOwnerNamePage({ params }: Props) {
     name,
   });
 
-  if (repo === null || repo === undefined) {
+  if (repo == null) {
     notFound();
   }
 

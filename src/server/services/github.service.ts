@@ -5,7 +5,7 @@ import { Octokit, RestEndpointMethodTypes } from "@octokit/rest";
 import { PrismaClient, Visibility } from "@prisma/client";
 import parseGithubUrl from "parse-github-url";
 
-import { SYSTEM_TOKEN } from "@/shared/constants/env";
+import { SYSTEM_TOKEN } from "@/shared/constants/env.server";
 import { logger } from "@/shared/lib/logger";
 import { RepoItemFields } from "@/shared/types/repo-item";
 
@@ -116,7 +116,7 @@ export const githubService = {
 
     const token = account?.access_token ?? SYSTEM_TOKEN;
 
-    // if (token === null || token === undefined) {
+    // if (token == null) {
     //   logger.error({ msg: "Token not found in DB", userId });
     //   throw new Error("TOKEN_MISSING");
     // }

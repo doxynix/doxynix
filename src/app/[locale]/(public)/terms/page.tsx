@@ -26,7 +26,7 @@ export default async function TermsPage() {
     <div className="animate-fade-in container mx-auto max-w-3xl px-4 py-12 pt-24">
       <BackOrLinkButton
         className="cursor-pointer"
-        showIcon={true}
+        showIcon
         variant="link"
         label={tCommon("back")}
       />

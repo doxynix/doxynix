@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateOpenApiDocument } from "trpc-to-openapi";
 
-import { API_PREFIX, APP_URL } from "@/shared/constants/env";
+import { API_PREFIX, APP_URL } from "@/shared/constants/env.client";
 import { getCookieName } from "@/shared/lib/utils";
 
 import { appRouter } from "@/server/trpc/router";

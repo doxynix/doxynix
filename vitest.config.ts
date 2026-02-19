@@ -4,6 +4,11 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
+  resolve: {
+    alias: {
+      "server-only": "node:events",
+    },
+  },
   test: {
     environment: "node",
     globals: true,

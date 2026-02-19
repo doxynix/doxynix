@@ -6,11 +6,11 @@ import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
 import { StatsWriterPlugin } from "webpack-stats-plugin";
 
-import { isAnalyze, isProd } from "@/shared/constants/env";
+import { IS_ANALYZE, IS_PROD } from "@/shared/constants/env.client";
 import { LOCALE_REGEX_STR } from "@/shared/constants/locales";
 
 const bundleAnalyzer = withBundleAnalyzer({
-  enabled: isAnalyze,
+  enabled: IS_ANALYZE,
 });
 
 const withNextIntl = createNextIntlPlugin({
@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   compiler: {
-    removeConsole: isProd ? { exclude: ["error", "info"] } : false,
+    removeConsole: IS_PROD ? { exclude: ["error", "info"] } : false,
   },
   logging: {
     fetches: {

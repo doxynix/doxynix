@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
-import { isProd } from "@/shared/constants/env";
+import { IS_PROD } from "@/shared/constants/env.client";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { useRepoActions } from "@/entities/repo";
@@ -27,15 +27,15 @@ export const RealtimeProvider = ({ children }: Props) => {
   const [client, setClient] = useState<Ably.Realtime | null>(null);
 
   React.useEffect(() => {
-    if (userId === null || userId === undefined) return;
+    if (userId == null) return;
 
     const realtime = new Ably.Realtime({
       authUrl: "/api/realtime/auth",
       autoConnect: true,
-      logLevel: isProd ? 0 : 1,
+      logLevel: IS_PROD ? 0 : 1,
     });
 
-    if (!isProd) {
+    if (!IS_PROD) {
       realtime.connection.on((state) => {
         console.log("Realtime connection:", state.current);
       });
@@ -50,7 +50,7 @@ export const RealtimeProvider = ({ children }: Props) => {
   }, [userId]);
 
   useEffect(() => {
-    if (!client || userId === null || userId === undefined) return;
+    if (!client || userId == null) return;
 
     const systemChannel = client.channels.get(REALTIME_CONFIG.channels.system);
     const userChannel = client.channels.get(REALTIME_CONFIG.channels.user(userId));

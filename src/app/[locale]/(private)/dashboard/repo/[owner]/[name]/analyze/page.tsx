@@ -28,7 +28,7 @@ export default async function AnalyzePage({ params }: Props) {
     name,
   });
 
-  if (repo === null || repo === undefined) {
+  if (repo == null) {
     notFound();
   }
 

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { createOpenApiFetchHandler } from "trpc-to-openapi";
 
-import { isDev } from "@/shared/constants/env";
+import { IS_DEV } from "@/shared/constants/env.client";
 
 import { createContext } from "@/server/trpc/context";
 import { appRouter } from "@/server/trpc/router";
@@ -13,7 +13,7 @@ const handler = (req: NextRequest) => {
     router: appRouter,
     createContext: () => createContext({ req }),
     onError: ({ error }) => {
-      if (isDev) {
+      if (IS_DEV) {
         console.error("OpenAPI Error:", error);
       }
     },

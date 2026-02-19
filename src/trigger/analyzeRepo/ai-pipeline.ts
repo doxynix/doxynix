@@ -91,9 +91,7 @@ export async function runAiPipeline(
     projectMapSummary: Object.keys(projectMap.modules ?? {}).length ?? null,
   });
 
-  console.log("=== Project Map Debug ===");
   console.log(JSON.stringify(projectMap, null, 2));
-  console.log("========================");
 
   await updateStatus("Deep Analysis & Swagger Gen (Step 2/3)...", 70);
 
