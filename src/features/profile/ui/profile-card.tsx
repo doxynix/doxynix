@@ -47,28 +47,27 @@ export function ProfileCard({ user }: Props) {
     },
   });
 
-  const { isUploading, removeAvatar, updateAvatar, updateProfile, uploadAvatar } =
-    useProfileActions({
-      onProfileUpdateSuccess: (data) => {
-        setDisplayUser((prev) => ({
-          ...prev,
-          name: data.name,
-          email: data.email,
-        }));
+  const { isUploading, removeAvatar, updateProfile, uploadAvatar } = useProfileActions({
+    onProfileUpdateSuccess: (data) => {
+      setDisplayUser((prev) => ({
+        ...prev,
+        name: data.name,
+        email: data.email,
+      }));
 
-        form.reset({
-          name: data.name ?? "",
-          email: data.email ?? "",
-        });
-      },
-      onAvatarUpdateSuccess: (url) => {
-        setAvatarUrl(url);
-      },
-      onAvatarRemoveSuccess: () => {
-        setAvatarUrl("");
-        if (fileInputRef.current) fileInputRef.current.value = "";
-      },
-    });
+      form.reset({
+        name: data.name ?? "",
+        email: data.email ?? "",
+      });
+    },
+    onAvatarUpdateSuccess: (url) => {
+      setAvatarUrl(url);
+    },
+    onAvatarRemoveSuccess: () => {
+      setAvatarUrl("");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    },
+  });
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -95,7 +94,7 @@ export function ProfileCard({ user }: Props) {
                 {getInitials(displayUser.name, displayUser.email)}
               </AvatarFallback>
             </Avatar>
-            {avatarUrl && !updateAvatar.isPending && (
+            {avatarUrl && (
               <LoadingButton
                 size="icon"
                 variant="destructive"

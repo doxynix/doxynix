@@ -3,7 +3,7 @@ import pino from "pino";
 import pretty from "pino-pretty";
 
 import { requestContext } from "@/server/utils/request-context";
-import { isProd } from "../constants/env";
+import { IS_PROD } from "../constants/env.client";
 
 type LogPayload = {
   msg: string;
@@ -12,7 +12,7 @@ type LogPayload = {
 };
 
 const createPinoLogger = () => {
-  if (isProd) {
+  if (IS_PROD) {
     return pino({ level: "info" });
   }
 
@@ -34,7 +34,7 @@ const createPinoLogger = () => {
 
 const pinoLogger = createPinoLogger();
 
-const axiomLogger = isProd ? new Logger() : null;
+const axiomLogger = IS_PROD ? new Logger() : null;
 
 const withContext = (obj: LogPayload) => {
   const store = requestContext.getStore();
@@ -55,7 +55,7 @@ const withContext = (obj: LogPayload) => {
 export const logger = {
   info: (payload: LogPayload) => {
     const data = withContext(payload);
-    if (isProd && axiomLogger) {
+    if (IS_PROD && axiomLogger) {
       axiomLogger.info(data.msg, data);
     } else {
       const { msg, ...rest } = data;
@@ -64,7 +64,7 @@ export const logger = {
   },
   error: (payload: LogPayload) => {
     const data = withContext(payload);
-    if (isProd && axiomLogger) {
+    if (IS_PROD && axiomLogger) {
       axiomLogger.error(data.msg, data);
     } else {
       const { msg, ...rest } = data;
@@ -73,7 +73,7 @@ export const logger = {
   },
   warn: (payload: LogPayload) => {
     const data = withContext(payload);
-    if (isProd && axiomLogger) {
+    if (IS_PROD && axiomLogger) {
       axiomLogger.warn(data.msg, data);
     } else {
       const { msg, ...rest } = data;
@@ -82,7 +82,7 @@ export const logger = {
   },
   debug: (payload: LogPayload) => {
     const data = withContext(payload);
-    if (isProd && axiomLogger) {
+    if (IS_PROD && axiomLogger) {
       axiomLogger.debug(data.msg, data);
     } else {
       const { msg, ...rest } = data;
@@ -90,6 +90,6 @@ export const logger = {
     }
   },
   flush: async () => {
-    if (isProd && axiomLogger) await axiomLogger.flush();
+    if (IS_PROD && axiomLogger) await axiomLogger.flush();
   },
 };

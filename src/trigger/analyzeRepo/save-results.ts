@@ -125,7 +125,7 @@ export async function saveResults(params: {
     });
 
     const saveDoc = async (type: DocTypeType, content: string | undefined) => {
-      if (content === null || content === undefined) return;
+      if (content == null) return;
       await tx.document.upsert({
         where: {
           repoId_version_type: { repoId: repo.id, version: currentSha.substring(0, 7), type },

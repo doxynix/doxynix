@@ -1,6 +1,6 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-import { isDev } from "@/shared/constants/env";
+import { IS_DEV } from "@/shared/constants/env.client";
 
 import { createContext } from "@/server/trpc/context";
 import { appRouter } from "@/server/trpc/router";
@@ -11,7 +11,7 @@ const handler = (req: Request) =>
     req,
     router: appRouter,
     createContext: () => createContext({ req }),
-    onError: isDev
+    onError: IS_DEV
       ? ({ path, error }) => {
           console.error(`tRPC failed on ${path ?? "<no-path>"}: ${error.message}`);
         }

@@ -1,6 +1,7 @@
 import Ably from "ably";
 
-import { ABLY_API_KEY, isProd } from "@/shared/constants/env";
+import { IS_PROD } from "@/shared/constants/env.client";
+import { ABLY_API_KEY } from "@/shared/constants/env.server";
 
 const globalForAbly = globalThis as unknown as { ably: Ably.Rest };
 
@@ -10,4 +11,4 @@ export const realtimeServer =
     key: ABLY_API_KEY,
   });
 
-if (!isProd) globalForAbly.ably = realtimeServer;
+if (!IS_PROD) globalForAbly.ably = realtimeServer;

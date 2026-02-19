@@ -4,7 +4,8 @@ import createMiddleware from "next-intl/middleware";
 
 import { routing } from "./i18n/routing";
 import { redisClient } from "./server/lib/redis";
-import { isProd, TURNSTILE_SECRET_KEY } from "./shared/constants/env";
+import { IS_PROD } from "./shared/constants/env.client";
+import { TURNSTILE_SECRET_KEY } from "./shared/constants/env.server";
 import { LOCALE_REGEX_STR } from "./shared/constants/locales";
 import { logger } from "./shared/lib/logger";
 import { getCookieName } from "./shared/lib/utils";
@@ -15,7 +16,7 @@ const authRoutes = ["/auth"];
 const cookieName = getCookieName();
 
 let ratelimit: Ratelimit | null = null;
-if (isProd) {
+if (IS_PROD) {
   ratelimit = new Ratelimit({
     redis: redisClient,
     limiter: Ratelimit.slidingWindow(20, "10 s"),
@@ -60,7 +61,7 @@ function getCountry(request: NextRequest): string {
   const vercelHeader = request.headers.get("x-vercel-ip-country");
   if (vercelHeader !== null && geoCountry !== undefined) return vercelHeader.toUpperCase();
 
-  if (!isProd) return "LOCAL";
+  if (!IS_PROD) return "LOCAL";
 
   return "UNKNOWN";
 }
@@ -150,7 +151,7 @@ async function handleTurnstile(request: NextRequest, ip: string): Promise<NextRe
   const token = request.cookies.get("cf-turnstile-response")?.value;
   const secretKey = TURNSTILE_SECRET_KEY;
 
-  if (token === null || token === undefined || secretKey === null || secretKey === undefined) {
+  if (token == null || secretKey == null) {
     return new NextResponse(JSON.stringify({ error: "Missing captcha" }), { status: 403 });
   }
 

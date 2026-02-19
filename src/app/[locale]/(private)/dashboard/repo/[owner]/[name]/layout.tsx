@@ -30,7 +30,7 @@ export default async function RepoDetailsLayout({ params, children }: Props) {
     name,
   });
 
-  if (repo === null || repo === undefined) {
+  if (repo == null) {
     notFound();
   }
 

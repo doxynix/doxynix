@@ -1,10 +1,11 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { UploadThingError } from "uploadthing/server";
+import { UploadThingError, UTApi } from "uploadthing/server";
 
 import { getServerAuthSession } from "@/shared/api/auth/auth-options";
 import { prisma } from "@/shared/api/db/db";
 import { logger } from "@/shared/lib/logger";
 
+const utapi = new UTApi();
 const f = createUploadthing();
 
 export const ourFileRouter = {
@@ -16,7 +17,7 @@ export const ourFileRouter = {
     .middleware(async () => {
       const session = await getServerAuthSession();
 
-      if (!session?.user) throw new Error("Unauthorized");
+      if (!session?.user) throw new UploadThingError("Unauthorized");
 
       return { userId: session.user.id };
     })
@@ -29,22 +30,35 @@ export const ourFileRouter = {
       });
     })
     .onUploadComplete(async ({ metadata, file }) => {
+      const userId = Number(metadata.userId);
       logger.info({ msg: `Upload completed for: ${metadata.userId}` });
       logger.info({ msg: `"File URL:" ${file.ufsUrl}` });
 
       try {
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { imageKey: true },
+        });
+
+        const oldKey = user?.imageKey;
+
         await prisma.user.update({
-          where: { id: Number(metadata.userId) },
+          where: { id: userId },
           data: {
             image: file.ufsUrl,
+            imageKey: file.key,
           },
         });
+        if (oldKey !== null && oldKey !== undefined && oldKey !== file.key) {
+          utapi.deleteFiles(oldKey).catch((e) => {
+            logger.error({ msg: "Failed to delete old avatar", error: e });
+          });
+        }
+        return { url: file.ufsUrl };
       } catch (err) {
         logger.error({ msg: "DB user update error", error: err });
         throw new UploadThingError("Failed to update avatar");
       }
-
-      return { uploadedBy: metadata.userId };
     }),
 } satisfies FileRouter;
 

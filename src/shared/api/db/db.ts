@@ -2,7 +2,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import pkg, { type PrismaClient as PrismaClientType } from "@prisma/client";
 import pg from "pg";
 
-import { DATABASE_URL, isDev, isTest } from "@/shared/constants/env";
+import { IS_DEV, IS_TEST } from "@/shared/constants/env.client";
+import { DATABASE_URL } from "@/shared/constants/env.server";
 import { logger } from "@/shared/lib/logger";
 import { sanitizePayload } from "@/shared/lib/utils";
 
@@ -16,7 +17,7 @@ const adapter = new PrismaPg(pool);
 
 export const baseClient = new PrismaClient({
   adapter,
-  log: isDev && !isTest ? ["error", "warn"] : ["error"],
+  log: IS_DEV && !IS_TEST ? ["error", "warn"] : ["error"],
   transactionOptions: {
     maxWait: 20000,
     timeout: 30000,
@@ -84,7 +85,7 @@ export const prisma = softDeleteClient.$extends({
               logger.error({ msg: "AUDIT LOG WRITE FAILED", error: auditErr });
             });
 
-          if (!isTest) {
+          if (!IS_TEST) {
             logger.info({
               msg: `DB Write: ${model}.${operation}`,
               type: "db.write",
@@ -113,6 +114,6 @@ export type PrismaClientExtended = typeof prisma;
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClientExtended };
 
-if (isDev) {
+if (IS_DEV) {
   globalForPrisma.prisma = prisma;
 }

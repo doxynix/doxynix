@@ -9,7 +9,7 @@ import { ThemeProvider } from "next-themes";
 import superjson from "superjson";
 
 import { trpc } from "@/shared/api/trpc";
-import { APP_URL, isDev } from "@/shared/constants/env";
+import { APP_URL, IS_DEV } from "@/shared/constants/env.client";
 import { TooltipProvider } from "@/shared/ui/core/tooltip";
 import { RealtimeProvider } from "@/features/notifications/realtime-provider";
 
@@ -40,7 +40,7 @@ export function Providers({ children }: Props) {
     trpc.createClient({
       links: [
         loggerLink({
-          enabled: (opts) => isDev || (opts.direction === "down" && opts.result instanceof Error),
+          enabled: (opts) => IS_DEV || (opts.direction === "down" && opts.result instanceof Error),
         }),
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
@@ -58,7 +58,7 @@ export function Providers({ children }: Props) {
             <InnerProviders>{children}</InnerProviders>
           </RealtimeProvider>
         </SessionProvider>
-        {isDev && <ReactQueryDevtools initialIsOpen={false} />}
+        {IS_DEV && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </trpc.Provider>
   );

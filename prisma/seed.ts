@@ -4,7 +4,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { DocType, PrismaClient, Status, Visibility } from "@prisma/client";
 import pg from "pg";
 
-import { DATABASE_URL } from "@/shared/constants/env";
+import { DATABASE_URL } from "@/shared/constants/env.server";
 
 const connectionString = DATABASE_URL;
 

@@ -514,7 +514,7 @@ function SidebarMenuButton({
   }
 
   return (
-    <Tooltip disableHoverableContent={true} delayDuration={300}>
+    <Tooltip disableHoverableContent delayDuration={300}>
       <TooltipTrigger asChild>{button}</TooltipTrigger>
       <TooltipContent
         className="hidden [@media(hover:hover)]:block"

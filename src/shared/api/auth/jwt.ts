@@ -1,17 +1,17 @@
 import jwt from "jsonwebtoken";
 
-import { JWT_SECRET } from "@/shared/constants/env";
+import { JWT_SECRET } from "@/shared/constants/env.server";
 
 const ACCESS_EXPIRES = "10m";
 const REFRESH_EXPIRES = "30d";
 
 export const generateTokens = (userId: string) => {
-  const accessToken = jwt.sign({ userId }, JWT_SECRET!, {
+  const accessToken = jwt.sign({ userId }, JWT_SECRET, {
     expiresIn: ACCESS_EXPIRES,
     subject: userId,
   });
 
-  const refreshToken = jwt.sign({ userId }, JWT_SECRET!, {
+  const refreshToken = jwt.sign({ userId }, JWT_SECRET, {
     expiresIn: REFRESH_EXPIRES,
     subject: userId,
   });
@@ -19,6 +19,6 @@ export const generateTokens = (userId: string) => {
   return { accessToken, refreshToken };
 };
 
-export const verifyAccessToken = (token: string) => jwt.verify(token, JWT_SECRET!);
+export const verifyAccessToken = (token: string) => jwt.verify(token, JWT_SECRET);
 
-export const verifyRefreshToken = (token: string) => jwt.verify(token, JWT_SECRET!);
+export const verifyRefreshToken = (token: string) => jwt.verify(token, JWT_SECRET);

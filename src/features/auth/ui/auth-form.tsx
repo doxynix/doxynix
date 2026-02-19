@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { isProd, TURNSTILE_SITE_KEY } from "@/shared/constants/env";
+import { IS_PROD, TURNSTILE_SITE_KEY } from "@/shared/constants/env.client";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -74,7 +74,7 @@ export function AuthForm() {
 
       document.cookie =
         `cf-turnstile-response=${token}; path=/; max-age=120; SameSite=Lax` +
-        (isProd ? "; Secure" : "");
+        (IS_PROD ? "; Secure" : "");
 
       try {
         const res = await signIn("email", {
@@ -261,7 +261,7 @@ export function AuthForm() {
       <Turnstile
         className={cn("mx-auto mt-2", isSent && "hidden")}
         ref={turnstileRef}
-        siteKey={TURNSTILE_SITE_KEY!}
+        siteKey={TURNSTILE_SITE_KEY}
         options={turnstileOptions}
         onSuccess={onTurnstileSuccess}
         onError={onTurnstileError}

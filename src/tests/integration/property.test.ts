@@ -4,11 +4,11 @@ import * as fc from "fast-check";
 import { afterAll, beforeAll, beforeEach, describe, it, vi } from "vitest";
 
 import { prisma } from "@/shared/api/db/db";
-import { isCI } from "@/shared/constants/env";
+import { IS_CI } from "@/shared/constants/env.client";
 
 import { cleanupDatabase } from "../helpers";
 
-const NUM_RUNS = isCI ? 20 : 50;
+const NUM_RUNS = IS_CI ? 20 : 50;
 
 describe("Property-Based Security Tests (Fast-Check)", () => {
   beforeEach(async () => {

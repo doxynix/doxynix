@@ -13,7 +13,7 @@ import { extractRouterConfig } from "uploadthing/server";
 
 import "../globals.css";
 
-import { APP_URL, isProd } from "@/shared/constants/env";
+import { APP_URL, IS_PROD } from "@/shared/constants/env.client";
 import { Locale } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/utils";
 import { Toaster } from "@/shared/ui/core/sonner";
@@ -155,7 +155,7 @@ export default async function LocaleLayout({
             <UTSSR />
           </Suspense>
           <Providers>{children}</Providers>
-          {isProd && (
+          {IS_PROD && (
             <>
               <Analytics />
               <SpeedInsights />

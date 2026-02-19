@@ -48,19 +48,6 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
     onError: (err) => toast.error(err.message),
   });
 
-  const updateAvatar = trpc.user.updateAvatar.useMutation({
-    onSuccess: async (data) => {
-      toast.success(t("settings_profile_update_avatar_toast_success"));
-
-      propsRef.current.onAvatarUpdateSuccess?.(data.image ?? "");
-
-      await updateSession({ image: data.image });
-
-      await utils.user.me.invalidate();
-    },
-    onError: (err) => toast.error(err.message),
-  });
-
   const removeAvatar = trpc.user.removeAvatar.useMutation({
     onSuccess: async () => {
       toast.success(t("settings_profile_remove_avatar_toast_success"));
@@ -74,9 +61,14 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
   });
 
   const uploadThing = useUploadThing("avatarUploader", {
-    onClientUploadComplete: (res) => {
+    onClientUploadComplete: async (res) => {
       const file = res[0];
-      updateAvatar.mutate({ url: file.ufsUrl, key: file.key });
+      toast.success(t("settings_profile_update_avatar_toast_success"));
+
+      propsRef.current.onAvatarUpdateSuccess?.(file.ufsUrl);
+
+      await updateSession({ image: file.ufsUrl });
+      await utils.user.me.invalidate();
     },
     onUploadError: (error) => {
       let message = t("settings_profile_error_uploading_file");
@@ -94,9 +86,8 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
   return {
     updateProfile,
     removeAvatar,
-    updateAvatar,
     uploadAvatar: uploadThing.startUpload,
     isUploading: uploadThing.isUploading,
-    isPending: updateProfile.isPending || updateAvatar.isPending || removeAvatar.isPending,
+    isPending: updateProfile.isPending || removeAvatar.isPending || uploadThing.isUploading,
   };
 }

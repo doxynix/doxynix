@@ -85,7 +85,7 @@ export function TrendsWidget() {
                 <stop offset="95%" stopColor={techDebtColor} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={true} strokeDasharray="3 3" strokeOpacity={1} />
+            <CartesianGrid vertical strokeDasharray="3 3" strokeOpacity={1} />
             <XAxis
               dataKey="date"
               tickLine={false}
