@@ -7,7 +7,15 @@ queue_rules:
       - "check-success ~= ^CI / types"
       - "check-success ~= ^CI / quality"
       - "check-success ~= ^CI / security"
+      - "check-success = GitGuardian Security Checks"
+      - "check-success ~= ^CodeQL - Code Quality"
       - "check-success ~= ^Vercel"
+      - "check-success ~= ^Trigger\\.dev deployment"
+
+      - "check-success-or-neutral ~= ^CI / build"
+      - "check-success-or-neutral ~= ^CI / e2e"
+      - "check-success-or-neutral ~= ^CI / lighthouse"
+      - "check-success-or-neutral ~= ^dependency-review"
     merge_method: squash
     commit_message_template: |
       {{ title }} (#{{ number }})
