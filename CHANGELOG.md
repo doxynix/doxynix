@@ -145,7 +145,7 @@ All notable changes to this project will be documented in this file. See [standa
 * **ui:** мелкие изменения в ui ([#60](https://github.com/doxynix/doxynix/issues/60)) ([613be15](https://github.com/doxynix/doxynix/commit/613be150d235aef3b4bc4cd038c46f438ed9978d))
 * **user:** добавлена возможность загрузки аватара пользователя ([#126](https://github.com/doxynix/doxynix/issues/126)) ([cdf9091](https://github.com/doxynix/doxynix/commit/cdf9091e7681825fea4bb7068d45377900cd06e9))
 * **widgets:** добавлены новые виджеты ([#100](https://github.com/doxynix/doxynix/issues/100)) ([0221441](https://github.com/doxynix/doxynix/commit/0221441aff4da82560059959a4f6398b7802bd6f))
-* **workflow:** полностью обновлен worklow ([#134](https://github.com/doxynix/doxynix/issues/134)) ([ebb958a](https://github.com/doxynix/doxynix/commit/ebb958a85c82c3691f06598f43d4033cc800c568))
+* **workflow:** полностью обновлен workflow ([#134](https://github.com/doxynix/doxynix/issues/134)) ([ebb958a](https://github.com/doxynix/doxynix/commit/ebb958a85c82c3691f06598f43d4033cc800c568))
 
 
 ### Bug Fixes
@@ -229,7 +229,7 @@ All notable changes to this project will be documented in this file. See [standa
 * **ui:** добавлены новые компоненты shadcn ([#98](https://github.com/doxynix/doxynix/issues/98)) ([22206db](https://github.com/doxynix/doxynix/commit/22206dbfe0f8c13bc6dd99da561392fa18681cf8))
 * **user:** добавлена возможность загрузки аватара пользователя ([#126](https://github.com/doxynix/doxynix/issues/126)) ([cdf9091](https://github.com/doxynix/doxynix/commit/cdf9091e7681825fea4bb7068d45377900cd06e9))
 * **widgets:** добавлены новые виджеты ([#100](https://github.com/doxynix/doxynix/issues/100)) ([0221441](https://github.com/doxynix/doxynix/commit/0221441aff4da82560059959a4f6398b7802bd6f))
-* **workflow:** полностью обновлен worklow ([#134](https://github.com/doxynix/doxynix/issues/134)) ([ebb958a](https://github.com/doxynix/doxynix/commit/ebb958a85c82c3691f06598f43d4033cc800c568))
+* **workflow:** полностью обновлен workflow ([#134](https://github.com/doxynix/doxynix/issues/134)) ([ebb958a](https://github.com/doxynix/doxynix/commit/ebb958a85c82c3691f06598f43d4033cc800c568))
 
 
 ### Bug Fixes
