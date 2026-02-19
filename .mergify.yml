@@ -1,0 +1,55 @@
+pull_request_rules:
+  - name: automatic merge for Kramarich0 when CI is green and CodeRabbit approves
+    conditions:
+      - author = Kramarich0
+      - "#approved-reviews-by >= 1"
+      - approved-reviews-by = coderabbitai[bot]
+      - conflict = false
+
+      - "check-success-regexp = ^CI / tests"
+      - "check-success-regexp = ^CI / types"
+      - "check-success-regexp = ^CI / quality"
+      - "check-success-regexp = ^CI / build"
+      - "check-success-regexp = ^CI / security"
+      - "check-success-regexp = ^CI / e2e"
+      - "check-success-regexp = ^CI / lighthouse"
+      - "check-success-regexp = dependency-review"
+
+      - "check-success = GitGuardian Security Checks"
+      - "check-success-regexp = ^CodeQL - Code Quality"
+
+      - "check-success-regexp = ^Vercel"
+
+      - "check-success-regexp = ^Trigger\\.dev deployment"
+
+    actions:
+      merge:
+        method: squash
+        commit_message_template: |
+          {{ title }} (#{{ number }})
+
+          {{ body }}
+
+  - name: automatic merge for dependencies updates
+    conditions:
+      - author ~= ^(renovate\[bot\]|dependabot\[bot\])$
+      - "check-success-regexp = ^CI / tests"
+      - "check-success-regexp = ^CI / types"
+      - "check-success-regexp = ^CI / quality"
+      - conflict = false
+    actions:
+      merge:
+        method: squash
+
+  - name: delete head branch after merge
+    conditions:
+      - merged
+    actions:
+      delete_head_branch: {}
+
+  - name: label on failed tests
+    conditions:
+      - "check-failure-regexp = ^CI / tests"
+    actions:
+      label:
+        add: ["needs-fix"]
