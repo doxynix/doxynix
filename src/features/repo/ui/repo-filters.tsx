@@ -30,9 +30,9 @@ export function RepoFilters() {
   const filters = parseRepoSearchParams(paramsObject);
 
   const hasFilters =
-    (filters.status && (filters.status as string) !== "all") ||
-    (filters.visibility && (filters.visibility as string) !== "all") ||
-    (filters.sortBy && filters.sortBy !== REPO_DEFAULTS.SORT_BY);
+    (filters.status != null && (filters.status as string) !== "all") ||
+    (filters.visibility != null && (filters.visibility as string) !== "all") ||
+    (filters.sortBy != null && filters.sortBy !== REPO_DEFAULTS.SORT_BY);
 
   const updateQuery = (name: string, value: string) => {
     const newParams = new URLSearchParams(searchParams.toString());

@@ -103,7 +103,7 @@ export const repoService = {
           : { analyses: { some: { status } } }
         : {};
 
-    const visibilityFilter = visibility ? { visibility } : {};
+    const visibilityFilter = visibility != null ? { visibility } : {};
 
     const ownerFilter: Prisma.RepoWhereInput =
       owner !== undefined ? { owner: { equals: owner, mode: "insensitive" } } : {};

@@ -431,7 +431,7 @@ export const repoRouter = createTRPCRouter({
         },
       });
 
-      if (!repo || repo.analyses[0]?.commitSha == null) {
+      if (repo == null || repo.analyses[0]?.commitSha == null) {
         return { content: null, version: null };
       }
 

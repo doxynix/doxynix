@@ -212,7 +212,8 @@ export const analyticsRouter = createTRPCRouter({
           mostCritical: worstRepo
             ? { name: worstRepo.repo.name, score: worstRepo.score ?? 0 }
             : null,
-          topPerformer: bestRepo ? { name: bestRepo.repo.name, score: bestRepo.score ?? 0 } : null,
+          topPerformer:
+            bestRepo != null ? { name: bestRepo.repo.name, score: bestRepo.score ?? 0 } : null,
         },
       };
     }),
