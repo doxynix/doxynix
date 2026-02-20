@@ -209,9 +209,8 @@ export const analyticsRouter = createTRPCRouter({
           createdAt: a.createdAt,
         })),
         highlights: {
-          mostCritical: worstRepo
-            ? { name: worstRepo.repo.name, score: worstRepo.score ?? 0 }
-            : null,
+          mostCritical:
+            worstRepo != null ? { name: worstRepo.repo.name, score: worstRepo.score ?? 0 } : null,
           topPerformer:
             bestRepo != null ? { name: bestRepo.repo.name, score: bestRepo.score ?? 0 } : null,
         },

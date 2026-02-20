@@ -43,7 +43,7 @@ export const authOptions: NextAuthOptions = {
         const template = {
           to: identifier,
           from: provider.from,
-          subject: user?.emailVerified ? "Doxynix | Login" : "Doxynix | Account Activation",
+          subject: user?.emailVerified != null ? "Doxynix | Login" : "Doxynix | Account Activation",
           reply_to: "support@doxynix.space",
           tags: [
             {

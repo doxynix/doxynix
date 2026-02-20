@@ -69,7 +69,9 @@ export function NotificationsNav() {
                   "flex cursor-pointer flex-col items-start gap-1 p-3",
                   note.isRead === false && "bg-accent/50"
                 )}
-                onClick={() => !note.isRead && markRead.mutate(note.id)}
+                onClick={() => {
+                  if (note.isRead === false) markRead.mutate(note.id);
+                }}
               >
                 <div className="flex w-full items-center justify-between gap-2">
                   <div className="flex flex-col">

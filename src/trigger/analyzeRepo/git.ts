@@ -28,7 +28,7 @@ export async function getAnalysisContext(
     },
   });
 
-  if (!analysis) throw new Error("Analysis not found");
+  if (analysis == null) throw new Error("Analysis not found");
 
   const repo = analysis.repo;
   const lastSuccessfulAnalysis = repo.analyses[0];

@@ -101,7 +101,7 @@ export const analyzeRepoTask = task({
         forceRefresh
       );
 
-      if (!repo) {
+      if (repo == null) {
         await updateStatus("No changes detected. Skipping...", 100, StatusSchema.enum.DONE);
         return { skipped: true, reason: "SHA_MATCH" };
       }
