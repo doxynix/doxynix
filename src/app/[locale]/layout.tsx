@@ -124,9 +124,6 @@ export default async function LocaleLayout({
   children: ReactNode;
   params: Promise<{ locale: string }>;
 }>) {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("BOOM! Testing Global Error Page");
-  }
   const { locale } = await params;
 
   if (!routing.locales.includes(locale as Locale)) {
