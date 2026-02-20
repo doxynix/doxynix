@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/doxynix/doxynix/compare/v1.5.7...v1.6.0) (2026-02-20)
+
+
+### Features
+
+* **tooling:** внедрение sentry и продвинутой обработки ошибок ([#344](https://github.com/doxynix/doxynix/issues/344)) ([15aed36](https://github.com/doxynix/doxynix/commit/15aed360e022c75cdccce6611baff5f12d700d48))
+
 ## [1.5.7](https://github.com/doxynix/doxynix/compare/v1.5.6...v1.5.7) (2026-02-20)
 
 
