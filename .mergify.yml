@@ -52,6 +52,10 @@ queue_rules:
         - "check-success ~= ^dependency-review"
         - "check-neutral ~= ^dependency-review"
         - "check-skipped ~= ^dependency-review"
+      - or:
+        - "check-success ~= ^relative-ci"
+        - "check-neutral ~= ^relative-ci"
+        - "check-skipped ~= ^relative-ci"
 
     merge_method: squash
     commit_message_template: |
