@@ -58,7 +58,7 @@ export function SidebarLink({
         rel={blank ? "noopener noreferrer" : undefined}
       >
         <Icon />
-        {<span className="truncate">{title}</span>}
+        <span className="truncate">{title}</span>
         {shortcut != null && (
           <SidebarMenuShortcut className="opacity-0 transition-opacity group-hover/link:opacity-100">
             {shortcut}

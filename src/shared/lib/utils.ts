@@ -131,7 +131,7 @@ export const sanitizePayload = (obj: any): any => {
 export const smoothScrollTo = (targetId: string, offset: number = 80, duration: number = 800) => {
   const targetElement = document.getElementById(targetId);
   if (!targetElement) {
-    console.warn(`Element with id #^{targetId} not found`);
+    console.warn(`Element with id #${targetId} not found`);
     return;
   }
 
