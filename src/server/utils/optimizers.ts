@@ -82,6 +82,9 @@ export function unwrapAiText(value: unknown): string {
     const candidate = value.text ?? value.content ?? value.output;
     return typeof candidate === "string" ? candidate : JSON.stringify(value);
   }
+  if (typeof value === "object" && !Array.isArray(value)) {
+    return JSON.stringify(value);
+  }
   if (Array.isArray(value)) return value.join("\n");
   return String(value);
 }
