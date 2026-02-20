@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { UTApi } from "uploadthing/server";
 import z from "zod";
@@ -57,75 +56,7 @@ export const userRouter = createTRPCRouter({
         message: "User found",
       };
     }),
-  updateAvatar: protectedProcedure
-    .meta({
-      openapi: {
-        method: "PATCH",
-        path: "/users/me/avatar",
-        tags: ["users"],
-        summary: "Update avatar",
-        description: "Updates the avatar image URL and storage key for the current user.",
-        protect: true,
-        errorResponses: OpenApiErrorResponses,
-      },
-    })
-    .input(
-      z.object({
-        url: z.url().max(500),
-        key: z.string().min(1).max(100),
-      })
-    )
-    .output(
-      z.object({
-        image: z.string().nullish(),
-        message: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
 
-      // NOTE: используется чистая призма
-      const currentUser = await ctx.prisma.user.findUnique({
-        where: { id: userId },
-        select: { imageKey: true },
-      });
-
-      const oldKey = currentUser?.imageKey;
-
-      try {
-        const updatedUser = await ctx.db.user.update({
-          where: { id: userId },
-          data: {
-            image: input.url,
-            imageKey: input.key,
-          },
-        });
-
-        if (oldKey != null && oldKey !== input.key) {
-          utapi.deleteFiles(oldKey).catch((e) => {
-            logger.error({
-              msg: "Failed to delete old file from UploadThing",
-              userId,
-              error: e instanceof Error ? e.message : String(e),
-              oldKey,
-            });
-          });
-        }
-
-        return {
-          image: updatedUser?.image ?? null,
-          message: "Profile Picture updated",
-        };
-      } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "Critical error: this file key was claimed by another request",
-          });
-        }
-        throw error;
-      }
-    }),
   removeAvatar: protectedProcedure
     .meta({
       openapi: {
