@@ -1,6 +1,6 @@
 import { getRequestConfig } from "next-intl/server";
 
-import { Locale } from "@/shared/constants/locales";
+import type { Locale } from "@/shared/constants/locales";
 
 import { routing } from "./routing";
 

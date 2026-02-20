@@ -18,7 +18,7 @@ import {
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { UiApiKey } from "@/entities/api-keys";
+import type { UiApiKey } from "@/entities/api-keys";
 import { useApiKeyActions } from "../model/use-api-key-actions";
 
 type Props = {

@@ -1,4 +1,4 @@
-import { ReactNode, Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
@@ -14,7 +14,7 @@ import { extractRouterConfig } from "uploadthing/server";
 import "../globals.css";
 
 import { APP_URL, IS_PROD } from "@/shared/constants/env.client";
-import { Locale } from "@/shared/constants/locales";
+import type { Locale } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/utils";
 import { Toaster } from "@/shared/ui/core/sonner";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";

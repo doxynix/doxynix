@@ -2,7 +2,7 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
-import { ButtonProps, buttonVariants } from "@/shared/ui/core/button";
+import { buttonVariants, type ButtonProps } from "@/shared/ui/core/button";
 
 import { Link } from "@/i18n/routing";
 

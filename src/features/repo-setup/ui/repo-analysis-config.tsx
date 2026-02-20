@@ -30,7 +30,7 @@ import {
 import { Textarea } from "@/shared/ui/core/textarea";
 import { Flag, FLAGS } from "@/shared/ui/kit/language-switcher";
 
-import { ActionsType, StateType } from "../model/user-repo-setup";
+import type { ActionsType, StateType } from "../model/user-repo-setup";
 
 const DOC_OPTIONS = [
   { id: DocType.README, label: "README", icon: BookOpen, desc: "Project overview & setup" },

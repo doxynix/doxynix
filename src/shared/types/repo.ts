@@ -1,6 +1,6 @@
-import { inferRouterOutputs } from "@trpc/server";
+import type { inferRouterOutputs } from "@trpc/server";
 
-import { AppRouter } from "@/server/trpc/router";
+import type { AppRouter } from "@/server/trpc/router";
 
 type RepoGetAllOutput = inferRouterOutputs<AppRouter>["repo"]["getAll"];
 

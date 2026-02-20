@@ -1,4 +1,4 @@
-import { RepoTableItem } from "@/shared/types/repo";
+import type { RepoTableItem } from "@/shared/types/repo";
 
 export type Props = {
   id: string;

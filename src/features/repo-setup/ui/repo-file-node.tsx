@@ -7,10 +7,10 @@ import {
   File as LucideFile,
   Sparkles,
 } from "lucide-react";
-import { NodeRendererProps } from "react-arborist";
+import type { NodeRendererProps } from "react-arborist";
 
 import { cn } from "@/shared/lib/utils";
-import { FileNode } from "@/shared/types/repo";
+import type { FileNode } from "@/shared/types/repo";
 import { Checkbox } from "@/shared/ui/core/checkbox";
 
 import { getFolderSelectionState } from "../model/utils";

@@ -11,7 +11,7 @@ import { trpc } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/constants/navigation";
 import { cn } from "@/shared/lib/utils";
 import { useCreateRepoDialogStore } from "@/shared/model/create-repo-dialog.store";
-import { MenuItem } from "@/shared/types/menu-item";
+import type { MenuItem } from "@/shared/types/menu-item";
 import { Button } from "@/shared/ui/core/button";
 import {
   CommandDialog,

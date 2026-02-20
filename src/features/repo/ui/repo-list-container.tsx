@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Status } from "@prisma/client";
+import type { Status } from "@prisma/client";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";

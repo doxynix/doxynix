@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import type { z } from "zod";
 
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";

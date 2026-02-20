@@ -1,8 +1,8 @@
-import sloc, { Extension } from "sloc";
+import sloc, { type Extension } from "sloc";
 
 import { getLanguageColor, normalizeLanguageName } from "@/entities/repo";
-import { Repo } from "@/generated/zod";
-import { LanguageMetric, RepoMetrics } from "../ai/types";
+import type { Repo } from "@/generated/zod";
+import type { LanguageMetric, RepoMetrics } from "../ai/types";
 
 function calculateDocDensity(source: number, comment: number): number {
   if (source === 0) return 0;

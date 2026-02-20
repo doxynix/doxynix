@@ -7,7 +7,7 @@ import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/utils";
-import { RepoMeta } from "@/shared/types/repo";
+import type { RepoMeta } from "@/shared/types/repo";
 import {
   Pagination,
   PaginationContent,

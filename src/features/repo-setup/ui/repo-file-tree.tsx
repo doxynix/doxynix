@@ -1,14 +1,14 @@
 import React, { useMemo } from "react";
 import { Check, Folder, FolderOpen, Search, Sparkles, X } from "lucide-react";
-import { Tree, TreeApi } from "react-arborist";
+import { Tree, type TreeApi } from "react-arborist";
 
 import { cn } from "@/shared/lib/utils";
-import { FileNode, RepoDetailed } from "@/shared/types/repo";
+import type { FileNode, RepoDetailed } from "@/shared/types/repo";
 import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
-import { ActionsType, StateType } from "../model/user-repo-setup";
+import type { ActionsType, StateType } from "../model/user-repo-setup";
 import { RepoBranchSelector } from "./repo-branch-selector";
 import { RepoFileNode } from "./repo-file-node";
 import { RepoSetupSkeleton } from "./repo-setup-skeleton";

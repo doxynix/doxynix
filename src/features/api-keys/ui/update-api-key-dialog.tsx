@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import type { z } from "zod";
 
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 import { Button } from "@/shared/ui/core/button";
@@ -31,7 +31,7 @@ import { Textarea } from "@/shared/ui/core/textarea";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { UiApiKey } from "@/entities/api-keys";
+import type { UiApiKey } from "@/entities/api-keys";
 import { useApiKeyActions } from "../model/use-api-key-actions";
 
 type Props = {

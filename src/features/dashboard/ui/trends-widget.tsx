@@ -7,10 +7,10 @@ import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { trpc } from "@/shared/api/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  type ChartConfig,
 } from "@/shared/ui/core/chart";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 

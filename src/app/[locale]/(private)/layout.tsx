@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DocType } from "@prisma/client";
 import { useLocale } from "next-intl";
-import { TreeApi } from "react-arborist";
+import type { TreeApi } from "react-arborist";
 
 import { trpc } from "@/shared/api/trpc";
-import { FileNode, RepoDetailed } from "@/shared/types/repo";
-import { FileTuple } from "@/shared/types/repo-setup";
+import type { FileNode, RepoDetailed } from "@/shared/types/repo";
+import type { FileTuple } from "@/shared/types/repo-setup";
 import { collectAllIds, getFolderSelectionState, sortNodes } from "@/features/repo-setup";
 
 export type RepoSetupReturn = ReturnType<typeof useRepoSetup>;

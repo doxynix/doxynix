@@ -4,7 +4,7 @@ import { Play, Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { cn, formatFullDate, formatRelativeTime } from "@/shared/lib/utils";
-import { RepoTableItem } from "@/shared/types/repo";
+import type { RepoTableItem } from "@/shared/types/repo";
 import { AnimatedCircularProgressBar } from "@/shared/ui/core/animated-circular-progress-bar";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";

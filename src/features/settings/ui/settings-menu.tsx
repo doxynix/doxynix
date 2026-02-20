@@ -1,6 +1,6 @@
 "use client";
 
-import { Route } from "next";
+import type { Route } from "next";
 
 import { settingsMenu } from "@/shared/constants/navigation";
 import { cn } from "@/shared/lib/utils";

@@ -4,10 +4,10 @@ import { prisma } from "@/shared/api/db/db";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { logger } from "@/shared/lib/logger";
 
-import { Repo, StatusSchema } from "@/generated/zod";
-import DocTypeSchema, { DocTypeType } from "@/generated/zod/inputTypeSchemas/DocTypeSchema";
-import { AIResult } from "@/server/ai/schemas";
-import { RepoMetrics } from "@/server/ai/types";
+import { StatusSchema, type Repo } from "@/generated/zod";
+import DocTypeSchema, { type DocTypeType } from "@/generated/zod/inputTypeSchemas/DocTypeSchema";
+import type { AIResult } from "@/server/ai/schemas";
+import type { RepoMetrics } from "@/server/ai/types";
 import { realtimeServer } from "@/server/lib/realtime";
 import { githubService } from "@/server/services/github.service";
 import { calculateCodeMetrics, calculateHealthScore } from "@/server/utils/metrics";

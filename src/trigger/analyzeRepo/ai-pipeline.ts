@@ -1,9 +1,9 @@
 import { prisma } from "@/shared/api/db/db";
 import { logger } from "@/shared/lib/logger";
 
-import { Repo } from "@/generated/zod";
-import DocTypeSchema, { DocTypeType } from "@/generated/zod/inputTypeSchemas/DocTypeSchema";
-import { StatusType } from "@/generated/zod/inputTypeSchemas/StatusSchema";
+import type { Repo } from "@/generated/zod";
+import DocTypeSchema, { type DocTypeType } from "@/generated/zod/inputTypeSchemas/DocTypeSchema";
+import type { StatusType } from "@/generated/zod/inputTypeSchemas/StatusSchema";
 import { AI_MODELS, SAFETY_SETTINGS } from "@/server/ai/constants";
 import { prepareSmartContext } from "@/server/ai/context-manager";
 import {
@@ -25,12 +25,12 @@ import {
   SENTINEL_USER_PROMPT,
 } from "@/server/ai/prompts";
 import {
-  AIResult,
   aiSchema,
-  ProjectMap,
   projectMapSchema,
-  SentinelResult,
   sentinelSchema,
+  type AIResult,
+  type ProjectMap,
+  type SentinelResult,
 } from "@/server/ai/schemas";
 import { githubService } from "@/server/services/github.service";
 import { callWithFallback } from "@/server/utils/call";

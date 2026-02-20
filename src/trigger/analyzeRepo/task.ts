@@ -1,13 +1,13 @@
-import os from "os";
-import path from "path";
+import os from "node:os";
+import path from "node:path";
 import { task } from "@trigger.dev/sdk/v3";
 
 import { prisma } from "@/shared/api/db/db";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { logger } from "@/shared/lib/logger";
 
-import { DocTypeType } from "@/generated/zod/inputTypeSchemas/DocTypeSchema";
-import StatusSchema, { StatusType } from "@/generated/zod/inputTypeSchemas/StatusSchema";
+import type { DocTypeType } from "@/generated/zod/inputTypeSchemas/DocTypeSchema";
+import StatusSchema, { type StatusType } from "@/generated/zod/inputTypeSchemas/StatusSchema";
 import { realtimeServer } from "@/server/lib/realtime";
 import { generateDeepDocs, runAiPipeline } from "./ai-pipeline";
 import { cloneRepository, getAnalysisContext } from "./git";

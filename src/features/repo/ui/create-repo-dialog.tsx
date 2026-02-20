@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Route } from "next";
+import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BookOpen } from "lucide-react";
@@ -10,7 +10,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { useDebounce } from "use-debounce";
 
-import { CreateRepoInput, CreateRepoSchema } from "@/shared/api/schemas/repo";
+import { CreateRepoSchema, type CreateRepoInput } from "@/shared/api/schemas/repo";
 import { trpc } from "@/shared/api/trpc";
 import { useClickOutside } from "@/shared/hooks/use-click-outside";
 import { isGitHubUrl } from "@/shared/lib/utils";

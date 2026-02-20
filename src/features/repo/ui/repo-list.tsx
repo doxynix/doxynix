@@ -3,7 +3,7 @@
 import { SearchX } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { RepoMeta, RepoTableItem } from "@/shared/types/repo";
+import type { RepoMeta, RepoTableItem } from "@/shared/types/repo";
 
 import { RepoCard } from "@/entities/repo";
 import { RepoEmpty } from "./repo-empty";

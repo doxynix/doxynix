@@ -1,11 +1,11 @@
 import { clsx, type ClassValue } from "clsx";
-import { Locale as DateFnsLocale, format } from "date-fns";
+import { format, type Locale as DateFnsLocale } from "date-fns";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { de, enUS, es, fr, ptBR, ru, zhCN } from "date-fns/locale";
 import { twMerge } from "tailwind-merge";
 
 import { IS_PROD } from "../constants/env.client";
-import { DEFAULT_LOCALE, Locale } from "../constants/locales";
+import { DEFAULT_LOCALE, type Locale } from "../constants/locales";
 
 const dateFnsLocales: Record<Locale, DateFnsLocale> = {
   en: enUS,

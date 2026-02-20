@@ -4,7 +4,7 @@ import type { Route } from "next";
 import { SquareArrowOutUpRight } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
-import { MenuItem } from "@/shared/types/menu-item";
+import type { MenuItem } from "@/shared/types/menu-item";
 import { SidebarMenuButton, SidebarMenuShortcut } from "@/shared/ui/core/sidebar";
 
 import { Link, usePathname } from "@/i18n/routing";

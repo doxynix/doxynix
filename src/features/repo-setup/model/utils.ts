@@ -1,4 +1,4 @@
-import { FileNode } from "@/shared/types/repo";
+import type { FileNode } from "@/shared/types/repo";
 
 export const sortNodes = (nodes: FileNode[]): FileNode[] => {
   return nodes
