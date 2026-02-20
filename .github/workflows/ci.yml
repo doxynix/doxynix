@@ -383,12 +383,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v6
 
-      - name: Download Build
-        uses: actions/download-artifact@v6
-        with:
-          name: next-build
-          path: .
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -406,6 +400,9 @@ jobs:
 
       - name: Setup DB Schema
         run: pnpm prisma db push
+
+      - name: Build app
+        run: pnpm build
 
       - name: Run Lighthouse CI
         run: pnpm exec lhci autorun
