@@ -26,7 +26,7 @@ export async function createContext({ req }: Props) {
         include: { user: true },
       });
 
-      if (keyRecord && keyRecord.revoked === false && keyRecord.user !== null) {
+      if (keyRecord != null && keyRecord.revoked === false && keyRecord.user !== null) {
         prisma.apiKey
           .update({
             where: { id: keyRecord.id },

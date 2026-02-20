@@ -42,7 +42,7 @@ export function ApiKeyCard({ active }: { active: UiApiKey }) {
       </CardHeader>
       <CardContent>
         <div className="bg-muted text-muted-foreground truncate rounded-xl p-2 font-mono text-xs">
-          {active.prefix
+          {active.prefix != null && active.prefix !== ""
             ? `${active.prefix}••••••••••••••••••••••••••••••••••••••••••••••••••••`
             : "dxnx_••••••••••••••••••••••••••••••••••••••••••••••••••••"}
         </div>

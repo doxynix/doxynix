@@ -18,7 +18,7 @@ function calculateModularity(totalLoc: number, fileCount: number): number {
 export function calculateHealthScore(repo: Repo, busFactor: number, docDensity: number): number {
   let score = 50;
 
-  const lastPushDate = repo.pushedAt ? new Date(repo.pushedAt) : new Date();
+  const lastPushDate = repo.pushedAt != null ? new Date(repo.pushedAt) : new Date();
   const monthsSincePush = (Date.now() - lastPushDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
   if (monthsSincePush < 1) score += 20;
   else if (monthsSincePush > 6) score -= 30;
