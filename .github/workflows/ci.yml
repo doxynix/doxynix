@@ -194,6 +194,21 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
+      - name: Snyk Open Source (SCA)
+        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04 # v1.0.0
+        with:
+          args: --all-projects --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@9adf32b1121593767fc3c057af55b55db032dc04 # v1.0.0
+
+      - name: Run Snyk Code scan
+        run: snyk code test . --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
 
   # ------------------------------------------------------------------
   # 5. ИНТЕГРАЦИОННЫЕ и ЮНИТ ТЕСТЫ
@@ -322,7 +337,18 @@ jobs:
             ${{ runner.os }}-nextjs-
 
       - name: Build
-        run: pnpm build
+        run: pnpm next build --webpack
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: next-build
+          path: |
+            .next
+            public
+            package.json
+            pnpm-lock.yaml
+          retention-days: 1
 
       - name: Upload webpack stats artifact
         uses: relative-ci/agent-upload-artifact-action@v2
@@ -364,6 +390,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+      - name: Download Build
+        uses: actions/download-artifact@v6
+        with:
+          name: next-build
+
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v6
         with:
@@ -379,15 +410,6 @@ jobs:
       - name: Setup DB Schema
         run: pnpm prisma db push
 
-      - name: Restore Next.js cache
-        uses: actions/cache@v5
-        with:
-          path: ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Build app (Fast with cache)
-        run: pnpm build
-
       - name: Run Lighthouse CI
         run: pnpm exec lhci autorun
 
@@ -397,9 +419,10 @@ jobs:
   e2e:
     needs: [build, init, changes]
     if: |
-      github.ref == 'refs/heads/main' ||
+      needs.build.result == 'success' &&
+      (github.ref == 'refs/heads/main' ||
       github.ref == 'refs/heads/develop' ||
-      needs.changes.outputs.backend == 'true'
+      needs.changes.outputs.backend == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -430,6 +453,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+      - name: Download Build
+        uses: actions/download-artifact@v6
+        with:
+          name: next-build
+
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v6
         with:
@@ -447,15 +475,6 @@ jobs:
 
       - name: Setup DB Schema
         run: pnpm prisma db push
-
-      - name: Restore Next.js cache
-        uses: actions/cache@v5
-        with:
-          path: ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Build app
-        run: pnpm build
 
       - name: Run Playwright tests
         run: pnpm exec playwright test

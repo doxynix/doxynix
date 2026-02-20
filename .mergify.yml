@@ -2,20 +2,61 @@ queue_rules:
   - name: default
     queue_conditions:
       - -conflict
+      - -draft
     merge_conditions:
-      - "check-success ~= ^CI / tests"
-      - "check-success ~= ^CI / types"
-      - "check-success ~= ^CI / quality"
-      - "check-success ~= ^CI / security"
-      - "check-success = GitGuardian Security Checks"
-      - "check-success ~= ^CodeQL - Code Quality"
-      - "check-success ~= ^Vercel"
-      - "check-success ~= ^Trigger\\.dev deployment"
+      - or:
+        - "check-success ~= ^CI / tests"
+        - "check-neutral ~= ^CI / tests"
+        - "check-skipped ~= ^CI / tests"
+      - or:
+        - "check-success ~= ^CI / types"
+        - "check-neutral ~= ^CI / types"
+        - "check-skipped ~= ^CI / types"
+      - or:
+        - "check-success ~= ^CI / quality"
+        - "check-neutral ~= ^CI / quality"
+        - "check-skipped ~= ^CI / quality"
+      - or:
+        - "check-success ~= ^CI / security"
+        - "check-neutral ~= ^CI / security"
+        - "check-skipped ~= ^CI / security"
+      - or:
+        - "check-success ~= GitGuardian Security Checks"
+        - "check-neutral ~= GitGuardian Security Checks"
+        - "check-skipped ~= GitGuardian Security Checks"
+      - or:
+        - "check-success ~= ^CodeQL - Code Quality"
+        - "check-neutral ~= ^CodeQL - Code Quality"
+        - "check-skipped ~= ^CodeQL - Code Quality"
+      - or:
+        - "check-success ~= ^Vercel"
+        - "check-neutral ~= ^Vercel"
+        - "check-skipped ~= ^Vercel"
+      - or:
+        - "check-success ~= ^Trigger\\.dev deployment"
+        - "check-neutral ~= ^Trigger\\.dev deployment"
+        - "check-skipped ~= ^Trigger\\.dev deployment"
+      - or:
+        - "check-success ~= ^CI / build"
+        - "check-neutral ~= ^CI / build"
+        - "check-skipped ~= ^CI / build"
+      - or:
+        - "check-success ~= ^CI / e2e"
+        - "check-neutral ~= ^CI / e2e"
+        - "check-skipped ~= ^CI / e2e"
+      - or:
+        - "check-success ~= ^CI / lighthouse"
+        - "check-neutral ~= ^CI / lighthouse"
+        - "check-skipped ~= ^CI / lighthouse"
+      - or:
+        - "check-success ~= ^dependency-review"
+        - "check-neutral ~= ^dependency-review"
+        - "check-skipped ~= ^dependency-review"
+      - or:
+        - "check-success ~= ^relative-ci"
+        - "check-neutral ~= ^relative-ci"
+        - "check-skipped ~= ^relative-ci"
 
-      - "check-success-or-neutral ~= ^CI / build"
-      - "check-success-or-neutral ~= ^CI / e2e"
-      - "check-success-or-neutral ~= ^CI / lighthouse"
-      - "check-success-or-neutral ~= ^dependency-review"
     merge_method: squash
     commit_message_template: |
       {{ title }} (#{{ number }})
@@ -31,19 +72,58 @@ pull_request_rules:
       - "#approved-reviews-by >= 1"
       - -conflict
 
-      - "check-success ~= ^CI / tests"
-      - "check-success ~= ^CI / types"
-      - "check-success ~= ^CI / quality"
-      - "check-success ~= ^CI / security"
-      - "check-success = GitGuardian Security Checks"
-      - "check-success ~= ^CodeQL - Code Quality"
-      - "check-success ~= ^Vercel"
-      - "check-success ~= ^Trigger\\.dev deployment"
-
-      - "check-success-or-neutral ~= ^CI / build"
-      - "check-success-or-neutral ~= ^CI / e2e"
-      - "check-success-or-neutral ~= ^CI / lighthouse"
-      - "check-success-or-neutral ~= ^dependency-review"
+      - or:
+        - "check-success ~= ^CI / tests"
+        - "check-neutral ~= ^CI / tests"
+        - "check-skipped ~= ^CI / tests"
+      - or:
+        - "check-success ~= ^CI / types"
+        - "check-neutral ~= ^CI / types"
+        - "check-skipped ~= ^CI / types"
+      - or:
+        - "check-success ~= ^CI / quality"
+        - "check-neutral ~= ^CI / quality"
+        - "check-skipped ~= ^CI / quality"
+      - or:
+        - "check-success ~= ^CI / security"
+        - "check-neutral ~= ^CI / security"
+        - "check-skipped ~= ^CI / security"
+      - or:
+        - "check-success ~= GitGuardian Security Checks"
+        - "check-neutral ~= GitGuardian Security Checks"
+        - "check-skipped ~= GitGuardian Security Checks"
+      - or:
+        - "check-success ~= ^CodeQL - Code Quality"
+        - "check-neutral ~= ^CodeQL - Code Quality"
+        - "check-skipped ~= ^CodeQL - Code Quality"
+      - or:
+        - "check-success ~= ^Vercel"
+        - "check-neutral ~= ^Vercel"
+        - "check-skipped ~= ^Vercel"
+      - or:
+        - "check-success ~= ^Trigger\\.dev deployment"
+        - "check-neutral ~= ^Trigger\\.dev deployment"
+        - "check-skipped ~= ^Trigger\\.dev deployment"
+      - or:
+        - "check-success ~= ^CI / build"
+        - "check-neutral ~= ^CI / build"
+        - "check-skipped ~= ^CI / build"
+      - or:
+        - "check-success ~= ^CI / e2e"
+        - "check-neutral ~= ^CI / e2e"
+        - "check-skipped ~= ^CI / e2e"
+      - or:
+        - "check-success ~= ^CI / lighthouse"
+        - "check-neutral ~= ^CI / lighthouse"
+        - "check-skipped ~= ^CI / lighthouse"
+      - or:
+        - "check-success ~= ^dependency-review"
+        - "check-neutral ~= ^dependency-review"
+        - "check-skipped ~= ^dependency-review"
+      - or:
+        - "check-success ~= ^relative-ci"
+        - "check-neutral ~= ^relative-ci"
+        - "check-skipped ~= ^relative-ci"
     actions:
       queue:
         name: default
@@ -54,9 +134,18 @@ pull_request_rules:
         - author = renovate[bot]
         - author = dependabot[bot]
       - -draft
-      - "check-success ~= ^CI / tests"
-      - "check-success ~= ^CI / types"
-      - "check-success ~= ^CI / quality"
+      - or:
+        - "check-success ~= ^CI / tests"
+        - "check-neutral ~= ^CI / tests"
+        - "check-skipped ~= ^CI / tests"
+      - or:
+        - "check-success ~= ^CI / types"
+        - "check-neutral ~= ^CI / types"
+        - "check-skipped ~= ^CI / types"
+      - or:
+        - "check-success ~= ^CI / quality"
+        - "check-neutral ~= ^CI / quality"
+        - "check-skipped ~= ^CI / quality"
       - -conflict
     actions:
       queue:
@@ -75,6 +164,6 @@ pull_request_rules:
     actions:
       label:
         add:
-        - "conflict"
+          - "conflict"
       comment:
         message: "Упс, @{{author}}, тут конфликт. Роботы бессильны, поправь руками! 🛠️"
