@@ -7,9 +7,7 @@ type AiTextLike = {
 };
 
 function isAiTextLike(v: unknown): v is AiTextLike {
-  if (v == null) return false;
-
-  if (typeof v !== "object" || Array.isArray(v)) return false;
+  if (!(v instanceof Object) || Array.isArray(v)) return false;
 
   if (v instanceof Date || v instanceof RegExp) return false;
 
