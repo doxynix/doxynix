@@ -99,8 +99,6 @@ export async function runAiPipeline(
 
   const architectContext = prepareSmartContext(validFiles, SMART_CONTEXT_LIMIT);
 
-  const lastAiError = "";
-
   const aiResult = await callWithFallback<AIResult>({
     models: [...AI_MODELS.POWERFUL, ...AI_MODELS.ARCHITECT, ...AI_MODELS.FALLBACK],
     system: ANALYSIS_SYSTEM_PROMPT(language),
@@ -116,7 +114,7 @@ export async function runAiPipeline(
     attemptMetadata: { phase: "architect", analysisId },
   });
 
-  if (aiResult == null) throw new Error(`AI model failed. Error: ${lastAiError}`);
+  if (aiResult == null) throw new Error("AI model failed.");
   return aiResult;
 }
 

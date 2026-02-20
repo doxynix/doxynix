@@ -123,8 +123,8 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth",
     signOut: "/",
-    error: "/auth/error", // NOTE: реализовать страницу /auth/error
-    newUser: "/welcome", // NOTE: реализовать страницу /welcome
+    error: "/auth/error", // TODO: Реализовать /auth/error page
+    newUser: "/welcome", // TODO: Реализовать /welcome page
     verifyRequest: "/auth",
   },
 
