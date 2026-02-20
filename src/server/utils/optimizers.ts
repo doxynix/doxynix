@@ -7,7 +7,12 @@ type AiTextLike = {
 };
 
 function isAiTextLike(v: unknown): v is AiTextLike {
-  return typeof v === "object" && v !== null && !Array.isArray(v);
+  if (!(v instanceof Object) || Array.isArray(v)) return false;
+
+  if (v instanceof Date || v instanceof RegExp) return false;
+
+  const obj = v as Record<string, unknown>;
+  return obj.text != null || obj.content != null || obj.output != null;
 }
 
 const REMOVED_MSG = "/* ...content truncated... */";
@@ -76,6 +81,9 @@ export function unwrapAiText(value: unknown): string {
   if (isAiTextLike(value)) {
     const candidate = value.text ?? value.content ?? value.output;
     return typeof candidate === "string" ? candidate : JSON.stringify(value);
+  }
+  if (typeof value === "object" && !Array.isArray(value)) {
+    return JSON.stringify(value);
   }
   if (Array.isArray(value)) return value.join("\n");
   return String(value);

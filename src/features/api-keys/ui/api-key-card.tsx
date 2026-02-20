@@ -27,7 +27,7 @@ export function ApiKeyCard({ active }: { active: UiApiKey }) {
             <p>
               {t("settings_api_keys_last_used")}: {formatRelativeTime(active.lastUsed, locale)}
             </p>
-            {active.description !== null && (
+            {active.description != null && (
               <p className="text-muted-foreground line-clamp-4 leading-relaxed">
                 {active.description}
               </p>

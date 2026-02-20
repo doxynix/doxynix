@@ -29,7 +29,7 @@ export function formatRelativeTime(
   localeStr: string = DEFAULT_LOCALE,
   defaultValue: string = "—"
 ): string {
-  if (date === null) return defaultValue;
+  if (date == null) return defaultValue;
 
   try {
     const d = new Date(date);
@@ -108,7 +108,7 @@ const SENSITIVE_FIELDS = new Set([
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sanitizePayload = (obj: any): any => {
-  if (obj === null || typeof obj !== "object") return obj;
+  if (obj == null || typeof obj !== "object") return obj;
 
   if (Array.isArray(obj)) {
     return obj.map(sanitizePayload);
@@ -145,7 +145,7 @@ export const smoothScrollTo = (targetId: string, offset: number = 80, duration: 
   };
 
   const animation = (currentTime: number) => {
-    if (startTime === null) startTime = currentTime;
+    if (startTime == null) startTime = currentTime;
     const timeElapsed = currentTime - startTime;
     const progress = Math.min(timeElapsed / duration, 1);
 

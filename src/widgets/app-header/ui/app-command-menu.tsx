@@ -112,7 +112,7 @@ export function AppCommandMenu() {
 
         case "navigation":
         default:
-          if (item.href !== null) {
+          if (item.href != null) {
             router.push(item.href as Route);
           }
           break;
@@ -179,12 +179,12 @@ export function AppCommandMenu() {
                       <span>{item.label}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      {item.url !== undefined && (
+                      {item.url != null && (
                         <span className="text-muted-foreground bg-muted rounded border px-1.5 py-0.5 font-mono text-xs">
                           {item.url}
                         </span>
                       )}
-                      {item.shortcut !== null && (
+                      {item.shortcut != null && (
                         <CommandShortcut className="hidden text-xs md:flex">
                           {item.shortcut}
                         </CommandShortcut>

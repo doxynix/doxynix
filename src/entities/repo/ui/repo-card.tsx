@@ -40,7 +40,7 @@ export function RepoCard({ repo }: Props) {
   const gitMetrics = getGitMetrics(repo, locale);
   const analysisMetrics = getMetrics(repo);
 
-  const hasAnalysis = repo.healthScore !== null && repo.healthScore !== undefined;
+  const hasAnalysis = repo.healthScore != null;
 
   return (
     <Card className="group hover:bg-muted/50 relative flex overflow-hidden p-4 transition-colors">
@@ -65,7 +65,7 @@ export function RepoCard({ repo }: Props) {
                     {repo.name}
                   </Link>
                 </div>
-                {visibility !== null && (
+                {visibility != null && (
                   <Badge variant="outline" className={cn(visibility.color)}>
                     {visibility.label}
                   </Badge>
@@ -140,7 +140,7 @@ export function RepoCard({ repo }: Props) {
               <span className={cn("h-2 w-2 rounded-full", status.color)} />
               <span className="font-medium">{status.label}</span>
             </div>
-            {repo.lastAnalysisDate !== null && repo.lastAnalysisDate !== undefined && (
+            {repo.lastAnalysisDate != null && (
               <AppTooltip
                 content={t("repo_last_analyzed", {
                   dateTime: formatFullDate(repo.lastAnalysisDate, locale),

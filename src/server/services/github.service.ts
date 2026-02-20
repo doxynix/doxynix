@@ -73,7 +73,7 @@ export const githubService = {
     try {
       const octokit = await this.getClientForUser(prisma, userId);
 
-      if (limit !== undefined) {
+      if (limit != null) {
         const { data } = await octokit.rest.repos.listForAuthenticatedUser({
           sort: "updated",
           direction: "desc",

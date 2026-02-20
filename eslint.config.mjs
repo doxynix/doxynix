@@ -89,6 +89,8 @@ export default defineConfig([
       eqeqeq: ["error", "always", { null: "ignore" }],
       "unicorn/prefer-node-protocol": "error",
 
+      "no-unneeded-ternary": "error",
+
       "@typescript-eslint/consistent-type-imports": [
         "error",
         {

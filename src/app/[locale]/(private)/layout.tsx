@@ -15,7 +15,7 @@ export default async function PrivateLayout({ children }: { children: ReactNode 
   const session = await getServerAuthSession();
   const locale = await getLocale();
 
-  if (!session || session.user === null) {
+  if (!session || session.user == null) {
     redirect({ href: "/auth", locale });
     return null;
   }

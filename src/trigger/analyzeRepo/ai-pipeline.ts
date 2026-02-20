@@ -49,7 +49,7 @@ export async function runAiPipeline(
   await updateStatus("Scanning input for threats...", 40);
   let sentinelStatus: "SAFE" | "UNSAFE" = "SAFE";
 
-  if (instructions !== null && instructions !== undefined && instructions.length > 5) {
+  if (instructions != null && instructions.length > 5) {
     try {
       const sentinelOut = await callWithFallback<SentinelResult>({
         models: AI_MODELS.SENTINEL,
@@ -116,7 +116,7 @@ export async function runAiPipeline(
     attemptMetadata: { phase: "architect", analysisId },
   });
 
-  if (aiResult === null) throw new Error(`AI model failed. Error: ${lastAiError}`);
+  if (aiResult == null) throw new Error(`AI model failed. Error: ${lastAiError}`);
   return aiResult;
 }
 
@@ -256,11 +256,11 @@ export async function generateDeepDocs(
   let changelog = undefined;
   let architecture = undefined;
 
-  if (taskMap["README"] !== undefined) {
+  if (taskMap["README"] != null) {
     readme = results[taskMap["README"]];
   }
 
-  if (taskMap["API"] !== undefined) {
+  if (taskMap["API"] != null) {
     const apiOutput = results[taskMap["API"]];
     const yamlMatch = apiOutput.match(/```yaml([\s\S]*?)```/);
     if (yamlMatch) {
@@ -271,15 +271,15 @@ export async function generateDeepDocs(
     }
   }
 
-  if (taskMap["CONTRIBUTING"] !== undefined) {
+  if (taskMap["CONTRIBUTING"] != null) {
     contributing = results[taskMap["CONTRIBUTING"]];
   }
 
-  if (taskMap["CHANGELOG"] !== undefined) {
+  if (taskMap["CHANGELOG"] != null) {
     changelog = results[taskMap["CHANGELOG"]];
   }
 
-  if (taskMap["ARCHITECTURE"] !== undefined) {
+  if (taskMap["ARCHITECTURE"] != null) {
     architecture = results[taskMap["ARCHITECTURE"]];
   }
 

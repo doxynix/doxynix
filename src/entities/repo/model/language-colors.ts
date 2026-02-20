@@ -304,7 +304,7 @@ const EXTENSION_MAP: Record<string, string> = {
 };
 
 export const getLanguageColor = (lang: string | null): string => {
-  if (lang === null) return "#cccccc";
+  if (lang == null) return "#cccccc";
 
   if (LANGUAGE_COLORS[lang]) return LANGUAGE_COLORS[lang];
 
@@ -314,7 +314,7 @@ export const getLanguageColor = (lang: string | null): string => {
   const lowerLang = lang.toLowerCase();
   const foundKey = Object.keys(LANGUAGE_COLORS).find((k) => k.toLowerCase() === lowerLang);
 
-  return foundKey !== null && foundKey !== undefined ? LANGUAGE_COLORS[foundKey] : "#cccccc";
+  return foundKey != null ? LANGUAGE_COLORS[foundKey] : "#cccccc";
 };
 
 export const normalizeLanguageName = (ext: string): string => {

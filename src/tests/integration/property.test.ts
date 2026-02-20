@@ -30,7 +30,7 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
         const repo = await anonDb.repo.findFirst({
           where: { OR: [{ publicId: randomUuid }, { name: randomName }] },
         });
-        return repo === null;
+        return repo == null;
       }),
       { numRuns: NUM_RUNS }
     );

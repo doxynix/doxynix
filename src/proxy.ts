@@ -56,10 +56,10 @@ function getUa(request: NextRequest): string {
 
 function getCountry(request: NextRequest): string {
   const geoCountry = (request as VercelNextRequest).geo?.country;
-  if (geoCountry !== null && geoCountry !== undefined) return geoCountry;
+  if (geoCountry != null) return geoCountry;
 
   const vercelHeader = request.headers.get("x-vercel-ip-country");
-  if (vercelHeader !== null && geoCountry !== undefined) return vercelHeader.toUpperCase();
+  if (vercelHeader != null) return vercelHeader.toUpperCase();
 
   if (!IS_PROD) return "LOCAL";
 
@@ -102,7 +102,7 @@ async function handleRateLimitAndSize(
   }
 
   const contentLength = request.headers.get("content-length");
-  if (contentLength !== null && Number(contentLength) > ONE_MB) {
+  if (contentLength != null && Number(contentLength) > ONE_MB) {
     return new NextResponse(JSON.stringify({ error: "Payload Too Large", requestId }), {
       status: 413,
       headers: { "content-type": "application/json" },
@@ -117,7 +117,7 @@ async function handleRateLimitAndSize(
   if (ratelimit) {
     const token = request.cookies.get(cookieName)?.value;
     let identifier = ip;
-    if (token !== null && token !== undefined) identifier = await hashToken(token);
+    if (token != null) identifier = await hashToken(token);
 
     const result = await ratelimit.limit(identifier);
     success = result.success;

@@ -11,13 +11,13 @@ const ONE_HOUR = 3600000;
 export async function GET() {
   const session = await getServerAuthSession();
   const userId = session?.user?.id;
-  const clientId = userId !== null && userId !== undefined ? String(userId) : "anonymous";
+  const clientId = userId != null ? String(userId) : "anonymous";
 
   const capability: Record<string, AblyCapability[]> = {
     [REALTIME_CONFIG.channels.news]: ["subscribe"],
   };
 
-  if (userId !== null && userId !== undefined) {
+  if (userId != null) {
     capability[REALTIME_CONFIG.channels.user(userId)] = ["subscribe", "presence"];
     capability[REALTIME_CONFIG.channels.system] = ["subscribe"];
   }

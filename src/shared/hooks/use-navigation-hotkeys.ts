@@ -24,7 +24,7 @@ export function useNavigationHotkeys(onAction?: () => void) {
   const [prefix, setPrefix] = useState<string | null>(null);
 
   useEffect(() => {
-    if (prefix === null) return;
+    if (prefix == null) return;
 
     const timer = setTimeout(() => {
       setPrefix(null);
@@ -46,7 +46,7 @@ export function useNavigationHotkeys(onAction?: () => void) {
   useHotkeys(
     "*",
     (e) => {
-      if (prefix === null) return;
+      if (prefix == null) return;
 
       const code = e.code;
       let secondKey: string | null = null;
@@ -55,7 +55,7 @@ export function useNavigationHotkeys(onAction?: () => void) {
         secondKey = code.slice(3).toLowerCase();
       }
 
-      if (secondKey === null) {
+      if (secondKey == null) {
         setPrefix(null);
         return;
       }
@@ -70,6 +70,6 @@ export function useNavigationHotkeys(onAction?: () => void) {
 
       setPrefix(null);
     },
-    { enabled: prefix !== null, enableOnFormTags: false }
+    { enabled: prefix != null, enableOnFormTags: false }
   );
 }

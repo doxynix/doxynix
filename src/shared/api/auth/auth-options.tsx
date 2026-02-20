@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
         };
 
         try {
-          if (resend === null) {
+          if (resend == null) {
             logger.warn({
               msg: "Resend disabled (no API key)",
               type: "auth.email_warn",

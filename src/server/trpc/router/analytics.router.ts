@@ -155,7 +155,7 @@ export const analyticsRouter = createTRPCRouter({
 
       reposWithMetrics.forEach((repo) => {
         const metrics = repo.analyses[0]?.metricsJson;
-        if (metrics === null) return;
+        if (metrics == null) return;
 
         const parsed = MetricsJsonSchema.safeParse(metrics);
         if (parsed.success) {

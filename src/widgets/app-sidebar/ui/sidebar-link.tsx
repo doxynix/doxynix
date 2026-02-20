@@ -19,7 +19,7 @@ export function SidebarLink({
 }: MenuItem) {
   const pathname = usePathname() ?? "";
   const blank = isBlank === true;
-  if (href === undefined) {
+  if (href == null) {
     return null;
   }
 
@@ -59,7 +59,7 @@ export function SidebarLink({
       >
         <Icon />
         {<span className="truncate">{title}</span>}
-        {shortcut !== undefined && (
+        {shortcut != null && (
           <SidebarMenuShortcut className="opacity-0 transition-opacity group-hover/link:opacity-100">
             {shortcut}
           </SidebarMenuShortcut>

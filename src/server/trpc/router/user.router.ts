@@ -41,7 +41,7 @@ export const userRouter = createTRPCRouter({
         where: { id: userId },
       });
 
-      if (user === null) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      if (user == null) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
 
       return {
         user: {
@@ -101,7 +101,7 @@ export const userRouter = createTRPCRouter({
           },
         });
 
-        if (oldKey !== undefined && oldKey !== null && oldKey !== input.key) {
+        if (oldKey != null && oldKey !== input.key) {
           utapi.deleteFiles(oldKey).catch((e) => {
             logger.error({
               msg: "Failed to delete old file from UploadThing",
@@ -158,7 +158,7 @@ export const userRouter = createTRPCRouter({
         },
       });
 
-      if (keyToDelete !== null && keyToDelete !== undefined) {
+      if (keyToDelete != null) {
         utapi.deleteFiles(keyToDelete).catch((error) => {
           logger.error({
             msg: "Failed to delete avatar from UT during removal",
@@ -226,7 +226,7 @@ export const userRouter = createTRPCRouter({
         select: { imageKey: true },
       });
 
-      if (user === null) {
+      if (user == null) {
         throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
       }
 
@@ -234,7 +234,7 @@ export const userRouter = createTRPCRouter({
         where: { id: userId },
       });
 
-      if (user.imageKey !== undefined && user.imageKey !== null) {
+      if (user.imageKey != null) {
         utapi.deleteFiles(user.imageKey).catch((e) => {
           logger.error({ msg: "Failed to delete avatar on account deletion", error: e });
         });

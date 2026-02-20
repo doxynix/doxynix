@@ -82,7 +82,7 @@ export function UserNav() {
               <Link href={item.href as Route} className="flex items-center">
                 <item.icon />
                 <span>{item.label}</span>
-                {item.shortcut !== null && (
+                {item.shortcut != null && (
                   <DropdownMenuShortcut className="opacity-0 transition-opacity group-hover:opacity-100">
                     {item.shortcut}
                   </DropdownMenuShortcut>

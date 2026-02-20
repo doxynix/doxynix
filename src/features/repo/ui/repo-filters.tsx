@@ -56,7 +56,7 @@ export function RepoFilters() {
       if (key !== "search") newParams.delete(key);
     });
 
-    if (searchValue !== null) newParams.set("search", searchValue);
+    if (searchValue != null) newParams.set("search", searchValue);
 
     router.push(`${pathname}?${newParams.toString()}` as Route);
   };
