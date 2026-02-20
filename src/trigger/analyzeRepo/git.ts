@@ -1,11 +1,11 @@
-import { existsSync } from "fs";
-import fs from "fs/promises";
+import { existsSync } from "node:fs";
+import fs from "node:fs/promises";
 import simpleGit from "simple-git";
 
 import { prisma } from "@/shared/api/db/db";
 import { SYSTEM_TOKEN } from "@/shared/constants/env.server";
 
-import { Repo, StatusSchema, VisibilitySchema } from "@/generated/zod";
+import { StatusSchema, VisibilitySchema, type Repo } from "@/generated/zod";
 import { githubService } from "@/server/services/github.service";
 
 export async function getAnalysisContext(

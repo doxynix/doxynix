@@ -1,6 +1,6 @@
 "use client";
 
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";

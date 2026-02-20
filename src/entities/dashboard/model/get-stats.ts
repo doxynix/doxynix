@@ -1,4 +1,4 @@
-import { inferRouterOutputs } from "@trpc/server";
+import type { inferRouterOutputs } from "@trpc/server";
 import {
   BookOpenCheck,
   Brain,
@@ -12,7 +12,7 @@ import {
 
 import { cn } from "@/shared/lib/utils";
 
-import { AppRouter } from "@/server/trpc/router";
+import type { AppRouter } from "@/server/trpc/router";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 type DashboardStatsOutput = RouterOutput["analytics"]["getDashboardStats"];

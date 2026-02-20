@@ -1,13 +1,13 @@
 import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { retry } from "@octokit/plugin-retry";
 import { throttling } from "@octokit/plugin-throttling";
-import { Octokit, RestEndpointMethodTypes } from "@octokit/rest";
-import { PrismaClient, Visibility } from "@prisma/client";
+import { Octokit, type RestEndpointMethodTypes } from "@octokit/rest";
+import { Visibility, type PrismaClient } from "@prisma/client";
 import parseGithubUrl from "parse-github-url";
 
 import { SYSTEM_TOKEN } from "@/shared/constants/env.server";
 import { logger } from "@/shared/lib/logger";
-import { RepoItemFields } from "@/shared/types/repo-item";
+import type { RepoItemFields } from "@/shared/types/repo-item";
 
 import { FileClassifier } from "../utils/file-classifier";
 

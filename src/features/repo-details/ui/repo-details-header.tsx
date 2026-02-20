@@ -3,7 +3,7 @@
 import { useLocale } from "next-intl";
 
 import { cn } from "@/shared/lib/utils";
-import { RepoDetailed } from "@/shared/types/repo";
+import type { RepoDetailed } from "@/shared/types/repo";
 import { Badge } from "@/shared/ui/core/badge";
 
 import {

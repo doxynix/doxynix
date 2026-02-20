@@ -1,6 +1,6 @@
 import { google } from "@ai-sdk/google";
 import { generateText, Output } from "ai";
-import z from "zod";
+import type z from "zod";
 
 import { logger } from "@/shared/lib/logger";
 

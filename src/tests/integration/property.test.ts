@@ -1,4 +1,4 @@
-import { UserRole } from "@prisma/client";
+import type { UserRole } from "@prisma/client";
 import { enhance } from "@zenstackhq/runtime";
 import * as fc from "fast-check";
 import { afterAll, beforeAll, beforeEach, describe, it, vi } from "vitest";

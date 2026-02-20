@@ -1,6 +1,6 @@
 "use client";
 
-import { RepoDetailed } from "@/shared/types/repo";
+import type { RepoDetailed } from "@/shared/types/repo";
 
 import { useRepoSetup } from "../model/user-repo-setup";
 import { RepoAnalysisConfig } from "./repo-analysis-config";

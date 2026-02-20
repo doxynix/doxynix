@@ -3,10 +3,10 @@
 import React, { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
-import { User } from "next-auth";
+import type { User } from "next-auth";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import z from "zod";
+import type z from "zod";
 
 import { UpdateProfileSchema } from "@/shared/api/schemas/user";
 import { getInitials } from "@/shared/lib/utils";

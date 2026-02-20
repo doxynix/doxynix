@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 
-import { Locale, LOCALES } from "@/shared/constants/locales";
+import { LOCALES, type Locale } from "@/shared/constants/locales";
 import { cn, loadedFlags } from "@/shared/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import {

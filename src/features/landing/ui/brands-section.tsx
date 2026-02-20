@@ -1,4 +1,4 @@
-import { ComponentType } from "react";
+import type { ComponentType } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { AblyIcon } from "@/shared/ui/icons/ably-icon";

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { RepoMeta } from "@/shared/types/repo";
+import type { RepoMeta } from "@/shared/types/repo";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { Button } from "@/shared/ui/core/button";
 import {

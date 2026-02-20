@@ -1,6 +1,6 @@
 import z from "zod";
 
-import StatusSchema, { StatusType } from "@/generated/zod/inputTypeSchemas/StatusSchema";
+import StatusSchema, { type StatusType } from "@/generated/zod/inputTypeSchemas/StatusSchema";
 import { OpenApiErrorResponses } from "@/server/trpc/shared";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 

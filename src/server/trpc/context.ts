@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/shared/api/auth/auth-options";

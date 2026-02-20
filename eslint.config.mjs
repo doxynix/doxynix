@@ -76,7 +76,7 @@ export default defineConfig([
     },
 
     rules: {
-      "prettier/prettier": "warn",
+      "prettier/prettier": "error",
 
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
@@ -85,6 +85,17 @@ export default defineConfig([
       "@tanstack/query/exhaustive-deps": "error",
       "@tanstack/query/no-rest-destructuring": "warn",
       "@tanstack/query/stable-query-client": "error",
+
+      eqeqeq: ["error", "always", { null: "ignore" }],
+      "unicorn/prefer-node-protocol": "error",
+
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        {
+          prefer: "type-imports",
+          fixStyle: "separate-type-imports",
+        },
+      ],
 
       "boundaries/element-types": [
         "error",
@@ -125,7 +136,7 @@ export default defineConfig([
         },
       ],
 
-      "unused-imports/no-unused-imports": "warn",
+      "unused-imports/no-unused-imports": "error",
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
@@ -142,7 +153,7 @@ export default defineConfig([
       ],
 
       "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/strict-boolean-expressions": "warn",
+      "@typescript-eslint/strict-boolean-expressions": "error",
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/await-thenable": "error",

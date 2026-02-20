@@ -1,4 +1,4 @@
-import { Visibility } from "@prisma/client";
+import type { Visibility } from "@prisma/client";
 
 export type RepoItemFields = {
   fullName: string;

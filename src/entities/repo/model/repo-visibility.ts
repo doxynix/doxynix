@@ -1,5 +1,5 @@
-import { Visibility } from "@prisma/client";
-import { Lock, LucideIcon, Unlock } from "lucide-react";
+import type { Visibility } from "@prisma/client";
+import { Lock, Unlock, type LucideIcon } from "lucide-react";
 
 export const repoVisibilityConfig: Record<
   Visibility,

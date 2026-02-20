@@ -1,4 +1,4 @@
-import { ComponentType } from "react";
+import type { ComponentType } from "react";
 import { BookOpen, FileCode, FileDiff, GitGraph } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 

@@ -1,4 +1,4 @@
-import { ComponentType } from "react";
+import type { ComponentType } from "react";
 import {
   Circle,
   CircleDot,
@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { formatRelativeTime } from "@/shared/lib/utils";
-import { RepoTableItem } from "@/shared/types/repo";
+import type { RepoTableItem } from "@/shared/types/repo";
 
 import { getLanguageColor } from "./language-colors";
 

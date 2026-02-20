@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Activity, Code2, Cpu, FileJson, Lock, Share2, Terminal } from "lucide-react";
 import { useTranslations } from "next-intl";
 

@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@/shared/ui/core/table";
 
-import { UiApiKey } from "@/entities/api-keys";
+import type { UiApiKey } from "@/entities/api-keys";
 
 type Props = {
   archived: UiApiKey[];

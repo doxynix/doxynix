@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/static-components */
 "use client";
 
-import { ElementType, memo } from "react";
-import { AnimatePresence, motion, MotionProps, Variants } from "motion/react";
+import { memo, type ElementType } from "react";
+import { AnimatePresence, motion, type MotionProps, type Variants } from "motion/react";
 
 import { cn } from "@/shared/lib/utils";
 

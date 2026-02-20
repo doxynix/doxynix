@@ -1,4 +1,4 @@
-import { Prisma, Status, Visibility } from "@prisma/client";
+import { Status, Visibility, type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
 import { handlePrismaError } from "@/server/utils/handle-prisma-error";
