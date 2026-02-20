@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.7](https://github.com/doxynix/doxynix/compare/v1.5.6...v1.5.7) (2026-02-20)
+
+
+### Bug Fixes
+
+* **security:** исправление ошибки trufflehog, также убрана дублирующая проверка sca ([#333](https://github.com/doxynix/doxynix/issues/333)) ([1fc71f7](https://github.com/doxynix/doxynix/commit/1fc71f7295001a86bb36064a67a26c794995854a))
+
 ## [1.5.6](https://github.com/doxynix/doxynix/compare/v1.5.5...v1.5.6) (2026-02-19)
 
 
