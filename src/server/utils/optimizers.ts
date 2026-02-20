@@ -7,9 +7,11 @@ type AiTextLike = {
 };
 
 function isAiTextLike(v: unknown): v is AiTextLike {
-  if (typeof v !== "object" || v == null) return false;
+  if (v == null) return false;
 
-  if (Array.isArray(v) || v instanceof Date || v instanceof RegExp) return false;
+  if (typeof v !== "object" || Array.isArray(v)) return false;
+
+  if (v instanceof Date || v instanceof RegExp) return false;
 
   const obj = v as Record<string, unknown>;
   return obj.text != null || obj.content != null || obj.output != null;
