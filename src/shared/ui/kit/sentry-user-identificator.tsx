@@ -22,6 +22,10 @@ export function SentryUserIdentificator({ user }: Props) {
     if (requestId) {
       Sentry.setTag("request_id", requestId);
     }
+
+    return () => {
+      Sentry.setUser(null);
+    };
   }, [user]);
 
   return null;

@@ -10,7 +10,7 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const [requestId, setRequestId] = useState<string>("");
+  const [requestId, setRequestId] = useState<string | null>(null);
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
   const userAgent = typeof window !== "undefined" ? window.navigator.userAgent : "";
   const screenSize =

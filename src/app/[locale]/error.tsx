@@ -21,7 +21,7 @@ export default function Error({
   const tCommon = useTranslations("Common");
   const t = useTranslations("Error");
 
-  const [requestId, setRequestId] = useState<string>("");
+  const [requestId, setRequestId] = useState<string | null>(null);
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
   const userAgent = typeof window !== "undefined" ? window.navigator.userAgent : "";
   const screenSize =
