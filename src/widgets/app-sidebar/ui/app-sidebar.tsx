@@ -67,9 +67,7 @@ export function AppSidebar() {
                     state === "collapsed" && "pointer-events-none"
                   )}
                 >
-                  {(state === "expanded" || isMobile === true) && (
-                    <span>{t("recent_repositories")}</span>
-                  )}
+                  {(state === "expanded" || isMobile) && <span>{t("recent_repositories")}</span>}
                   <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-180" />
                 </CollapsibleTrigger>
               </SidebarGroupLabel>

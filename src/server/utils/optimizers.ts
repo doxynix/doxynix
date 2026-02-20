@@ -7,7 +7,12 @@ type AiTextLike = {
 };
 
 function isAiTextLike(v: unknown): v is AiTextLike {
-  return typeof v === "object" && v != null && !Array.isArray(v);
+  if (typeof v !== "object" || v == null) return false;
+
+  if (Array.isArray(v) || v instanceof Date || v instanceof RegExp) return false;
+
+  const obj = v as Record<string, unknown>;
+  return obj.text != null || obj.content != null || obj.output != null;
 }
 
 const REMOVED_MSG = "/* ...content truncated... */";

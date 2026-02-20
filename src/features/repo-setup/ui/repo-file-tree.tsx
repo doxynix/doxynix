@@ -105,7 +105,7 @@ export function RepoFileTree({ repo, state, actions, treeApi }: Props) {
                   {action.label}
                 </Button>
               );
-              return action.tooltip != null ? (
+              return action.tooltip != null && action.tooltip !== "" ? (
                 <AppTooltip key={action.label} content={action.tooltip}>
                   {ButtonElement}
                 </AppTooltip>
