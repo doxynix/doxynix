@@ -70,3 +70,4 @@ reports/
 .trigger
 .VsCodeCounter/
 dist
+.secrets
