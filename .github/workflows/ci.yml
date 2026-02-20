@@ -17,6 +17,34 @@ permissions:
   pull-requests: write
   statuses: write
 
+env:
+  NODE_ENV: test
+  CI: "true"
+  SKIP_ENV_VALIDATION: "true"
+  NEXT_TELEMETRY_DISABLED: 1
+  DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+  NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
+  NEXTAUTH_URL: "http://localhost:3000"
+  JWT_SECRET: "dummy-jwt-secret"
+  TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA"
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: "1x00000000000000000000AA"
+  NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+  RESEND_API_KEY: "re_dummy_123"
+  ABLY_API_KEY: "dummy:key"
+  GITHUB_SYSTEM_TOKEN: "ghp_dummy"
+  GROQ_API_KEY: "gsk_dummy"
+  UPLOADTHING_TOKEN: "eyJdummy.token"
+  UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
+  UPSTASH_REDIS_REST_TOKEN: "dummy-token"
+  GITHUB_CLIENT_ID: "dummy"
+  GITHUB_CLIENT_SECRET: "dummy"
+  GOOGLE_CLIENT_ID: "dummy"
+  GOOGLE_CLIENT_SECRET: "dummy"
+  GITLAB_CLIENT_ID: "dummy"
+  GITLAB_CLIENT_SECRET: "dummy"
+  YANDEX_CLIENT_ID: "dummy"
+  YANDEX_CLIENT_SECRET: "dummy"
+
 defaults:
   run:
     shell: bash
@@ -111,11 +139,6 @@ jobs:
     needs: [init]
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    env:
-      DATABASE_URL: postgresql://user:password@localhost:5432/test_db
-      ABLY_API_KEY: "placeholder.id:placeholder-secret"
-      UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
-      UPSTASH_REDIS_REST_TOKEN: "dummy-token"
 
     steps:
       - name: Checkout repo
@@ -141,8 +164,6 @@ jobs:
 
       - name: Find Unused Code (Knip)
         run: pnpm run knip
-        env:
-          DATABASE_URL: postgresql://user:password@localhost:5432/test_db # Dummy URL for types
 
       - name: Check Type Coverage
         run: pnpm run typecheck:coverage
@@ -232,17 +253,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    env:
-      DATABASE_URL: postgresql://user:password@localhost:5432/test_db
-      RESEND_API_KEY: "re_123456789"
-      NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
-      NEXTAUTH_URL: "http://localhost:3000"
-      UPLOADTHING_TOKEN: "eyJdummy.token.for.build"
-      ABLY_API_KEY: "placeholder.id:placeholder-secret"
-      UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
-      UPSTASH_REDIS_REST_TOKEN: "dummy-token"
-      SKIP_ENV_VALIDATION: 1
-      NEXT_TELEMETRY_DISABLED: 1
 
     steps:
       - name: Checkout repo
@@ -268,8 +278,6 @@ jobs:
 
       - name: Run Tests with Coverage
         run: pnpm test:coverage
-        env:
-          DATABASE_URL: ${{ env.DATABASE_URL }}
 
       - name: Report Coverage
         if: github.event_name == 'pull_request'
@@ -291,14 +299,6 @@ jobs:
       needs.types.result == 'success' &&
       needs.security.result == 'success' &&
       (needs.tests.result == 'success' || needs.tests.result == 'skipped')
-
-    env:
-      SKIP_ENV_VALIDATION: 1
-      NEXT_TELEMETRY_DISABLED: 1
-      DATABASE_URL: postgresql://user:password@localhost:5432/test_db # Dummy for build
-      ABLY_API_KEY: "placeholder.id:placeholder-secret"
-      UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
-      UPSTASH_REDIS_REST_TOKEN: "dummy-token"
 
     steps:
       - name: Checkout repo
@@ -370,14 +370,7 @@ jobs:
     timeout-minutes: 60
     if: needs.build.result == 'success'
     env:
-      SKIP_ENV_VALIDATION: 1
-      DATABASE_URL: postgresql://user:password@localhost:5432/test_db
-      NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
-      NEXTAUTH_URL: "http://localhost:3000"
       LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-      ABLY_API_KEY: "placeholder.id:placeholder-secret"
-      UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
-      UPSTASH_REDIS_REST_TOKEN: "dummy-token"
 
     steps:
       - name: Checkout repo
@@ -434,16 +427,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
-    env:
-      DATABASE_URL: postgresql://user:password@localhost:5432/test_db
-      NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
-      NEXTAUTH_URL: "http://localhost:3000"
-      ABLY_API_KEY: "placeholder.id:placeholder-secret"
-      UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
-      UPSTASH_REDIS_REST_TOKEN: "dummy-token"
-      SKIP_ENV_VALIDATION: 1
-      NEXT_TELEMETRY_DISABLED: 1
 
     steps:
       - name: Checkout repo
