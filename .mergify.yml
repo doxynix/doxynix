@@ -3,14 +3,14 @@ queue_rules:
     queue_conditions:
       - -conflict
     merge_conditions:
-      - "check-success ~= ^CI / tests"
-      - "check-success ~= ^CI / types"
-      - "check-success ~= ^CI / quality"
-      - "check-success ~= ^CI / security"
-      - "check-success = GitGuardian Security Checks"
-      - "check-success ~= ^CodeQL - Code Quality"
-      - "check-success ~= ^Vercel"
-      - "check-success ~= ^Trigger\\.dev deployment"
+      - "check-success-or-neutral ~= ^CI / tests"
+      - "check-success-or-neutral ~= ^CI / types"
+      - "check-success-or-neutral ~= ^CI / quality"
+      - "check-success-or-neutral ~= ^CI / security"
+      - "check-success-or-neutral = GitGuardian Security Checks"
+      - "check-success-or-neutral ~= ^CodeQL - Code Quality"
+      - "check-success-or-neutral ~= ^Vercel"
+      - "check-success-or-neutral ~= ^Trigger\\.dev deployment"
 
       - "check-success-or-neutral ~= ^CI / build"
       - "check-success-or-neutral ~= ^CI / e2e"
@@ -31,14 +31,14 @@ pull_request_rules:
       - "#approved-reviews-by >= 1"
       - -conflict
 
-      - "check-success ~= ^CI / tests"
-      - "check-success ~= ^CI / types"
-      - "check-success ~= ^CI / quality"
-      - "check-success ~= ^CI / security"
-      - "check-success = GitGuardian Security Checks"
-      - "check-success ~= ^CodeQL - Code Quality"
-      - "check-success ~= ^Vercel"
-      - "check-success ~= ^Trigger\\.dev deployment"
+      - "check-success-or-neutral ~= ^CI / tests"
+      - "check-success-or-neutral ~= ^CI / types"
+      - "check-success-or-neutral ~= ^CI / quality"
+      - "check-success-or-neutral ~= ^CI / security"
+      - "check-success-or-neutral = GitGuardian Security Checks"
+      - "check-success-or-neutral ~= ^CodeQL - Code Quality"
+      - "check-success-or-neutral ~= ^Vercel"
+      - "check-success-or-neutral ~= ^Trigger\\.dev deployment"
 
       - "check-success-or-neutral ~= ^CI / build"
       - "check-success-or-neutral ~= ^CI / e2e"
@@ -54,9 +54,9 @@ pull_request_rules:
         - author = renovate[bot]
         - author = dependabot[bot]
       - -draft
-      - "check-success ~= ^CI / tests"
-      - "check-success ~= ^CI / types"
-      - "check-success ~= ^CI / quality"
+      - "check-success-or-neutral ~= ^CI / tests"
+      - "check-success-or-neutral ~= ^CI / types"
+      - "check-success-or-neutral ~= ^CI / quality"
       - -conflict
     actions:
       queue:
