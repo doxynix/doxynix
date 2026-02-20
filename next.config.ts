@@ -2,6 +2,7 @@ import path from "node:path";
 import type { NextConfig } from "next";
 import filterWebpackStats from "@bundle-stats/plugin-webpack-filter";
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { withSentryConfig } from "@sentry/nextjs";
 import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
 import { StatsWriterPlugin } from "webpack-stats-plugin";
@@ -252,4 +253,24 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withAxiom(bundleAnalyzer(withNextIntl(nextConfig)));
+const sentryOptions = {
+  org: "doxynix",
+
+  project: "doxynix",
+
+  silent: process.env.CI == null,
+
+  widenClientFileUpload: true,
+
+  tunnelRoute: "/monitoring",
+
+  webpack: {
+    automaticVercelMonitors: true,
+
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
+};
+
+export default withSentryConfig(withAxiom(bundleAnalyzer(withNextIntl(nextConfig))), sentryOptions);

@@ -1,3 +1,5 @@
+echo "Checking for secrets..."
+gitleaks protect --staged --verbose
 echo "Running lint-staged..."
 pnpm lint-staged
 echo "Done!"

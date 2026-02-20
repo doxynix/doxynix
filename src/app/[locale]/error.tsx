@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Cookies from "js-cookie";
 import { ServerCrash } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -20,7 +21,7 @@ export default function Error({
   const tCommon = useTranslations("Common");
   const t = useTranslations("Error");
 
-  const [requestId, setRequestId] = useState<string>("");
+  const [requestId, setRequestId] = useState<string | null>(null);
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
   const userAgent = typeof window !== "undefined" ? window.navigator.userAgent : "";
   const screenSize =
@@ -47,6 +48,8 @@ export default function Error({
   const mailtoLink = `mailto:support@doxynix.space?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
   React.useEffect(() => {
+    Sentry.captureException(error);
+
     const rid = Cookies.get("last_request_id");
     if (rid != null) {
       setRequestId(rid);

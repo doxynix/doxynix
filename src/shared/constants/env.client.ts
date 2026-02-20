@@ -13,3 +13,5 @@ export const IS_ANALYZE = env.ANALYZE === "true";
 
 export const APP_URL =
   env.NEXT_PUBLIC_APP_URL ?? (IS_DEV ? "http://localhost:3000" : "https://doxynix.space");
+
+export const SENTRY_DSN = env.NEXT_PUBLIC_SENTRY_DSN;
