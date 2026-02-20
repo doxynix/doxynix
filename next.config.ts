@@ -39,9 +39,15 @@ const nextConfig: NextConfig = {
   reactCompiler: true, // аккуратно фича еще в бете (пока багов не обнаружено - 20.01.2026)
   webpack: (config, { isServer, dev }) => {
     if (!dev && !isServer) {
+      const outputPath = config.output?.path ?? path.join(process.cwd(), ".next");
+
+      const targetPath = path.join(process.cwd(), ".next", "webpack-stats.json");
+
+      const relativeStatsPath = path.relative(outputPath, targetPath);
+
       config.plugins.push(
         new StatsWriterPlugin({
-          filename: path.join(process.cwd(), ".next", "webpack-stats.json"),
+          filename: relativeStatsPath,
           stats: {
             assets: true,
             chunks: true,
