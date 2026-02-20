@@ -184,7 +184,7 @@ const ChartTooltipContent = React.forwardRef<
                     indicator === "dot" && "items-center"
                   )}
                 >
-                  {formatter && item?.value !== undefined && item.name ? (
+                  {formatter && item?.value != null && item.name ? (
                     formatter(item.value, item.name, item, index, item.payload)
                   ) : (
                     <>
@@ -301,12 +301,12 @@ ChartLegendContent.displayName = "ChartLegend";
 
 // Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key: string) {
-  if (typeof payload !== "object" || payload === null) {
+  if (typeof payload !== "object" || payload == null) {
     return undefined;
   }
 
   const payloadPayload =
-    "payload" in payload && typeof payload.payload === "object" && payload.payload !== null
+    "payload" in payload && typeof payload.payload === "object" && payload.payload != null
       ? payload.payload
       : undefined;
 

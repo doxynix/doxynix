@@ -63,10 +63,10 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     const meta = prismaErrorMap[error.code];
 
-    if (meta !== undefined) {
+    if (meta != null) {
       let message: string = meta.defaultMessage;
 
-      if (meta.mapKey !== undefined) {
+      if (meta.mapKey != null) {
         const mapValue = map?.[meta.mapKey];
 
         if (meta.mapKey === "uniqueConstraint") {
@@ -78,12 +78,12 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
               : [];
 
           const field = target.find(
-            (f): f is string => f !== undefined && map?.uniqueConstraint?.[f] !== undefined
+            (f): f is string => f != null && map?.uniqueConstraint?.[f] != null
           );
 
-          if (field !== undefined && map?.uniqueConstraint?.[field] !== undefined) {
+          if (field != null && map?.uniqueConstraint?.[field] != null) {
             message = map.uniqueConstraint[field];
-          } else if (map?.defaultConflict !== undefined) {
+          } else if (map?.defaultConflict != null) {
             message = map.defaultConflict;
           }
         } else if (typeof mapValue === "string" && mapValue.length > 0) {

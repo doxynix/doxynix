@@ -22,7 +22,7 @@ export function useActionsHotkeys() {
       const actionKey = handler.hotkey;
       const action = hotkeyActions[actionKey];
 
-      if (action !== null) {
+      if (action != null) {
         e.preventDefault();
         action();
       }

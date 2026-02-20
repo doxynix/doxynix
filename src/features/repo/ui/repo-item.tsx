@@ -28,7 +28,7 @@ export function RepoItem({ repo, onClick, disabled }: Props) {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1">
             <span className="truncate text-sm font-medium">{repo.fullName}</span>
-            {visibility !== null && (
+            {visibility != null && (
               <AppTooltip content={cn(visibility.label)}>
                 <div className="flex shrink-0 items-center gap-1.5 text-xs">
                   <visibility.icon className={cn("h-3.5 w-3.5", visibility.color)} />
@@ -45,7 +45,7 @@ export function RepoItem({ repo, onClick, disabled }: Props) {
             <div className="flex items-center gap-1 text-xs">{repo.language}</div>
           </div>
         </div>
-        {repo.description !== null && (
+        {repo.description != null && (
           <span className="text-muted-foreground truncate text-xs font-normal opacity-80">
             {repo.description}
           </span>

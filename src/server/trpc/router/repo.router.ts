@@ -59,7 +59,7 @@ export const repoRouter = createTRPCRouter({
       },
     });
 
-    if (account === null) {
+    if (account == null) {
       return {
         isConnected: false,
         items: [],
@@ -132,7 +132,7 @@ export const repoRouter = createTRPCRouter({
         },
       });
 
-      if (repo === null) return null;
+      if (repo == null) return null;
 
       return {
         ...repo,
@@ -227,7 +227,7 @@ export const repoRouter = createTRPCRouter({
       const where = repoService.buildWhereClause({ search, visibility, status, owner });
 
       const contextWhere: typeof where =
-        owner !== undefined ? { owner: { equals: owner, mode: "insensitive" } } : {};
+        owner != null ? { owner: { equals: owner, mode: "insensitive" } } : {};
 
       const [items, totalCount, filteredCount] = await Promise.all([
         ctx.db.repo.findMany({
@@ -358,8 +358,7 @@ export const repoRouter = createTRPCRouter({
         where: { publicId: input.repoId },
       });
 
-      if (repo === null)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
+      if (repo == null) throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
 
       const analysis = await ctx.db.analysis.create({
         data: {

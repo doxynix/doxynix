@@ -77,10 +77,10 @@ export function CreateApiKeyDialog() {
 
       <DialogContent
         className="sm:max-w-md"
-        onPointerDownOutside={(e) => createdKey !== null && e.preventDefault()}
-        onEscapeKeyDown={(e) => createdKey !== null && e.preventDefault()}
+        onPointerDownOutside={(e) => createdKey != null && e.preventDefault()}
+        onEscapeKeyDown={(e) => createdKey != null && e.preventDefault()}
       >
-        {createdKey === null ? (
+        {createdKey == null ? (
           <Form {...form}>
             <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="space-y-4">
               <DialogHeader>

@@ -30,16 +30,12 @@ export const t = initTRPC
 
 const withZenStack = t.middleware(async ({ ctx, next }) => {
   const sessionUser = ctx.session?.user;
-  const userId =
-    sessionUser?.id !== undefined && sessionUser.id !== null ? Number(sessionUser.id) : undefined;
+  const userId = sessionUser != null ? Number(sessionUser.id) : undefined;
 
-  const userRole =
-    sessionUser?.role !== undefined && sessionUser?.role !== null
-      ? (sessionUser.role as UserRole)
-      : undefined;
+  const userRole = sessionUser?.role != null ? (sessionUser.role as UserRole) : undefined;
 
   const protectedDb = enhance(ctx.prisma, {
-    user: userId !== undefined ? { id: userId, role: userRole } : undefined,
+    user: userId != null ? { id: userId, role: userRole } : undefined,
   }) as unknown as PrismaClient;
 
   return next({
@@ -57,10 +53,7 @@ const contextMiddleware = t.middleware(async ({ ctx, next, path, type }) => {
   return requestContext.run(
     {
       requestId,
-      userId:
-        sessionUser?.id !== undefined && sessionUser?.id !== null
-          ? Number(sessionUser.id)
-          : undefined,
+      userId: sessionUser?.id != null ? Number(sessionUser.id) : undefined,
       userRole: sessionUser?.role,
       ip: ctx.requestInfo.ip,
       userAgent: ctx.requestInfo.userAgent,

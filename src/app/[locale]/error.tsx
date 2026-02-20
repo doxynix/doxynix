@@ -48,7 +48,7 @@ export default function Error({
 
   React.useEffect(() => {
     const rid = Cookies.get("last_request_id");
-    if (rid !== null && rid !== undefined) {
+    if (rid != null) {
       setRequestId(rid);
     }
   }, [error]);

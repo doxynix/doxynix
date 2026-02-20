@@ -28,7 +28,7 @@ export function RepoList({ repos, meta }: Props) {
         </div>
         <h3 className="mt-4 text-lg font-semibold">{t("repo_no_results_found")}</h3>
         <div className="text-muted-foreground mt-2 mb-4 text-sm">
-          {meta.searchQuery !== "" && meta.searchQuery !== null ? (
+          {meta.searchQuery !== "" && meta.searchQuery != null ? (
             <span>
               {t("repo_no_results_found_for")}{" "}
               <span className="italic">{`"${meta.searchQuery}"`}</span>

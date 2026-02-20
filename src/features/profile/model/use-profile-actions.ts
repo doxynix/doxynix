@@ -31,7 +31,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
     onSuccess: async (data) => {
       toast.success(t("settings_profile_update_profile_toast_success"));
 
-      if (data.user !== null) {
+      if (data.user != null) {
         propsRef.current.onProfileUpdateSuccess?.({
           name: data.user.name ?? null,
           email: data.user.email ?? null,

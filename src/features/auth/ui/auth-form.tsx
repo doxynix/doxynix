@@ -59,7 +59,7 @@ export function AuthForm() {
     defaultValues: { email: "" },
   });
 
-  const disabled = loadingProvider !== null || isVerifying;
+  const disabled = loadingProvider != null || isVerifying;
 
   useEffect(() => {
     if (errorMessage != null) {
@@ -109,7 +109,7 @@ export function AuthForm() {
   const onSubmit = async (values: z.infer<typeof MagicLinkSchema>) => {
     setErrorMessage(null);
 
-    if (turnstileToken !== null) {
+    if (turnstileToken != null) {
       await proceedWithSignIn(values, turnstileToken);
       return;
     }
@@ -130,7 +130,7 @@ export function AuthForm() {
   }
 
   useEffect(() => {
-    if (isVerifying && pendingData && turnstileToken !== null) {
+    if (isVerifying && pendingData && turnstileToken != null) {
       void proceedWithSignIn(pendingData, turnstileToken);
     }
   }, [isVerifying, pendingData, turnstileToken, proceedWithSignIn]);

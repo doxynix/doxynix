@@ -37,7 +37,7 @@ export async function callWithFallback<T>({
   stopSequences,
   attemptMetadata = {},
 }: CallWithFallbackProps<T>): Promise<T> {
-  if (models === null || models.length === 0) {
+  if (models == null || models.length === 0) {
     throw new Error("No models configured for fallback.");
   }
 
@@ -67,15 +67,15 @@ export async function callWithFallback<T>({
         system,
       };
 
-      if (outputSchema !== null) {
+      if (outputSchema != null) {
         options.output = Output.object({ schema: outputSchema });
       }
 
       const result = await generateText(options);
 
-      const finalValue = outputSchema !== null ? result.output : result.text;
+      const finalValue = outputSchema != null ? result.output : result.text;
 
-      if (finalValue !== null && finalValue !== undefined) {
+      if (finalValue != null) {
         logger.info({
           msg: "Model returned output",
           model: modelName,

@@ -42,7 +42,7 @@ export function TimeAgo({ date, locale }: Props) {
 
     const tick = () => {
       const delay = updateTime();
-      if (delay !== null) {
+      if (delay != null) {
         timerId = setTimeout(tick, delay);
       }
     };

@@ -53,7 +53,7 @@ export const ourFileRouter = {
             imageKey: file.key,
           },
         });
-        if (oldKey !== null && oldKey !== undefined && oldKey !== file.key) {
+        if (oldKey != null && oldKey !== file.key) {
           utapi.deleteFiles(oldKey).catch((e) => {
             logger.error({ msg: "Failed to delete old avatar", error: e });
           });

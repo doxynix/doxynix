@@ -7,7 +7,7 @@ type AiTextLike = {
 };
 
 function isAiTextLike(v: unknown): v is AiTextLike {
-  return typeof v === "object" && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v != null && !Array.isArray(v);
 }
 
 const REMOVED_MSG = "/* ...content truncated... */";

@@ -75,7 +75,7 @@ export async function cloneRepository(
 
   const options = ["--depth", "1", "--branch", branchToClone];
 
-  if (token !== null) {
+  if (token != null) {
     const base64Auth = Buffer.from(`x-access-token:${token}`).toString("base64");
 
     options.push("-c", `http.extraheader=AUTHORIZATION: basic ${base64Auth}`);

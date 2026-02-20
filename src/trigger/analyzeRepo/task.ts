@@ -126,12 +126,12 @@ export const analyzeRepoTask = task({
       const { readme, apiDoc, swaggerYaml, contributing, changelog, architecture } =
         await generateDeepDocs(validFiles, aiResult, analysisId, docTypes, repo, userId, language);
 
-      if (readme !== null) aiResult.generatedReadme = readme;
-      if (apiDoc !== null) aiResult.generatedApiMarkdown = apiDoc;
-      if (contributing !== null) aiResult.generatedContributing = contributing;
-      if (swaggerYaml !== null) aiResult.swaggerYaml = swaggerYaml;
-      if (changelog !== null) aiResult.generatedChangelog = changelog;
-      if (architecture !== null) aiResult.generatedArchitecture = architecture;
+      if (readme != null) aiResult.generatedReadme = readme;
+      if (apiDoc != null) aiResult.generatedApiMarkdown = apiDoc;
+      if (contributing != null) aiResult.generatedContributing = contributing;
+      if (swaggerYaml != null) aiResult.swaggerYaml = swaggerYaml;
+      if (changelog != null) aiResult.generatedChangelog = changelog;
+      if (architecture != null) aiResult.generatedArchitecture = architecture;
 
       await updateStatus("Finalizing and saving results...", 90);
       await saveResults({

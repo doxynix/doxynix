@@ -75,7 +75,7 @@ export const prisma = softDeleteClient.$extends({
                 model,
                 operation,
                 payload: sanitizePayload(args),
-                userId: userId !== null ? Number(userId) : null,
+                userId: userId != null ? Number(userId) : null,
                 ip: ctxStore?.ip ?? "system",
                 userAgent: ctxStore?.userAgent ?? "internal",
                 requestId: ctxStore?.requestId ?? "unknown",
