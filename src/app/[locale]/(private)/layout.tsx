@@ -1,9 +1,10 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 
 import { getServerAuthSession } from "@/shared/api/auth/auth-options";
 import { SidebarProvider } from "@/shared/ui/core/sidebar";
+import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificator";
 import { CreateRepoDialog } from "@/features/repo";
 import { AppFooter } from "@/widgets/app-footer";
 import { AppHeader } from "@/widgets/app-header";
@@ -24,6 +25,7 @@ export default async function PrivateLayout({ children }: { children: ReactNode 
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
   return (
     <>
+      <SentryUserIdentificator user={session.user} />
       <SidebarProvider
         defaultOpen={defaultOpen}
         className="flex h-dvh w-full flex-col overflow-hidden"

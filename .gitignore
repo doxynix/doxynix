@@ -71,3 +71,6 @@ reports/
 .VsCodeCounter/
 dist
 .secrets
+
+# Sentry Config File
+.env.sentry-build-plugin
