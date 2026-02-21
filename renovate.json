@@ -6,6 +6,16 @@
   "ignoreDeps": ["zod-prisma-types"],
   "packageRules": [
     {
+      "description": "Запрещаем мажорный апдейт cookie (v1 ломает совместимость с auth/sockets)",
+      "matchPackageNames": ["cookie"],
+      "allowedVersions": "<1.0.0"
+    },
+    {
+      "description": "Запрещаем мажорный апдейт eslint (v10 ломает плагины React)",
+      "matchPackageNames": ["eslint"],
+      "allowedVersions": "<10.0.0"
+    },
+    {
       "description": "Группируем все минорные и патч обновления npm",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
