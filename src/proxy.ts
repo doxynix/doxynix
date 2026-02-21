@@ -269,5 +269,5 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|_vercel|.*\\..*).*)"],
+  matcher: ["/((?!_next|_vercel|monitoring|.*\\..*).*)"],
 };
