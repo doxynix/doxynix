@@ -234,6 +234,7 @@ const nextConfig: NextConfig = {
                 https://lh3.googleusercontent.com
                 https://avatars.yandex.net;
               font-src 'self' data:;
+              media-src 'self';
               connect-src 'self'
                 https://cdn.jsdelivr.net
                 https://ufs.sh
