@@ -8,7 +8,7 @@ import { appRouter } from "@/server/trpc/router";
 
 const handler = (req: NextRequest) => {
   return createOpenApiFetchHandler({
-    endpoint: API_PREFIX as `/${string}`,
+    endpoint: API_PREFIX,
     req,
     router: appRouter,
     createContext: () => createContext({ req }),

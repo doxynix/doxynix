@@ -12,7 +12,10 @@ Sentry.init({
           blockAllMedia: true,
         }),
         Sentry.httpClientIntegration({
-          failedRequestTargets: [TRPC_PREFIX, API_PREFIX],
+          failedRequestTargets: [
+            new RegExp(`^${TRPC_PREFIX.replace(/\//g, "\\/")}`),
+            new RegExp(`^${API_PREFIX.replace(/\//g, "\\/")}`),
+          ],
         }),
         Sentry.reportingObserverIntegration({
           types: ["crash", "deprecation", "intervention"],
