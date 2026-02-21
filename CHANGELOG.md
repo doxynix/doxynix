@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/doxynix/doxynix/compare/v1.7.0...v1.8.0) (2026-02-21)
+
+
+### Features
+
+* **security:** дальнейшее усиление безопасности заголовков и кук ([#352](https://github.com/doxynix/doxynix/issues/352)) ([7c4316b](https://github.com/doxynix/doxynix/commit/7c4316bad93ca0fe87d2a06bc8fa2a3fcb879d78))
+
 ## [1.7.0](https://github.com/doxynix/doxynix/compare/v1.6.1...v1.7.0) (2026-02-21)
 
 
