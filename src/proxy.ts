@@ -237,6 +237,7 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
     maxAge: 60,
     httpOnly: false,
     sameSite: "lax",
+    secure: IS_PROD,
   });
 
   return response;
