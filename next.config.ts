@@ -218,8 +218,12 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: `
               default-src 'self';
-              script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com https://cdn.jsdelivr.net https://challenges.cloudflare.com;
-              frame-src 'self' https://challenges.cloudflare.com;
+              script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://vercel.live https://va.vercel-scripts.com https://cdn.jsdelivr.net https://challenges.cloudflare.com;
+              frame-src 'self' https://vercel.live https://challenges.cloudflare.com;
+              worker-src 'self' blob:;
+              base-uri 'none';
+              form-action 'self';
+              object-src 'none';
               style-src 'self' 'unsafe-inline';
               img-src 'self' blob: data:
                 https://sun1-26.userapi.com
@@ -249,10 +253,16 @@ const nextConfig: NextConfig = {
               .replace(/\s{2,}/g, " ")
               .trim(),
           },
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          {
+            key: "Permissions-Policy",
+            value:
+              "camera=(), microphone=(), geolocation=(), payment=(), usb=(), screen-wake-lock=()",
+          },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          { key: "Cross-Origin-Resource-Policy", value: "same-site" },
         ],
       },
     ];
