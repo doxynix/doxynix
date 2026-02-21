@@ -31,13 +31,20 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_URL: z.url().optional(),
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1),
     NEXT_PUBLIC_SENTRY_DSN: z.url(),
+    NEXT_PUBLIC_API_PREFIX: z
+      .string()
+      .startsWith("/")
+      .regex(/^\/[\w\-\/]*$/, "Invalid prefix format"),
+    NEXT_PUBLIC_TRPC_PREFIX: z
+      .string()
+      .startsWith("/")
+      .regex(/^\/[\w\-\/]*$/, "Invalid prefix format"),
   },
 
   shared: {
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     CI: z.enum(["true", "false"]).optional().default("false"),
     ANALYZE: z.enum(["true", "false"]).optional().default("false"),
-    API_PREFIX: z.string().optional(),
     PORT: z.string().optional().default("3000"),
   },
 
@@ -46,7 +53,11 @@ export const env = createEnv({
     PORT: process.env.PORT,
     CI: process.env.CI,
     ANALYZE: process.env.ANALYZE,
-    API_PREFIX: process.env.API_PREFIX,
+    NEXT_PUBLIC_API_PREFIX: process.env.NEXT_PUBLIC_API_PREFIX,
+    NEXT_PUBLIC_TRPC_PREFIX: process.env.NEXT_PUBLIC_TRPC_PREFIX,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     JWT_SECRET: process.env.JWT_SECRET,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
@@ -64,9 +75,6 @@ export const env = createEnv({
     GITLAB_CLIENT_SECRET: process.env.GITLAB_CLIENT_SECRET,
     YANDEX_CLIENT_ID: process.env.YANDEX_CLIENT_ID,
     YANDEX_CLIENT_SECRET: process.env.YANDEX_CLIENT_SECRET,
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-    NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
   },
 
   emptyStringAsUndefined: true,

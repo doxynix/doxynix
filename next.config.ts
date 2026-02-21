@@ -88,6 +88,12 @@ const nextConfig: NextConfig = {
       "@tanstack/react-query",
       "cmdk",
       "sonner",
+      "@sentry/nextjs",
+      "@sentry/react",
+      "@sentry/browser",
+      "@sentry/core",
+      "@sentry-internal/replay",
+      "@sentry-internal/browser-utils",
     ],
   },
   typedRoutes: true,
@@ -263,6 +269,12 @@ const sentryOptions = {
   widenClientFileUpload: true,
 
   tunnelRoute: "/monitoring",
+
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+    excludeReplayIframe: true,
+    excludeReplayShadowDom: true,
+  },
 
   webpack: {
     automaticVercelMonitors: true,

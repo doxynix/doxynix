@@ -1,14 +1,14 @@
 import type { NextRequest } from "next/server";
 import { createOpenApiFetchHandler } from "trpc-to-openapi";
 
-import { IS_DEV } from "@/shared/constants/env.client";
+import { API_PREFIX, IS_DEV } from "@/shared/constants/env.client";
 
 import { createContext } from "@/server/trpc/context";
 import { appRouter } from "@/server/trpc/router";
 
 const handler = (req: NextRequest) => {
   return createOpenApiFetchHandler({
-    endpoint: "/api/v1",
+    endpoint: API_PREFIX,
     req,
     router: appRouter,
     createContext: () => createContext({ req }),

@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { headers } from "next/headers";
 
-import { IS_DEV } from "@/shared/constants/env.client";
+import { IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
 
 import { createContext } from "@/server/trpc/context";
 import { appRouter } from "@/server/trpc/router";
@@ -19,7 +19,7 @@ export const api = cache(async () => {
   const host = heads.get("host") ?? "localhost:3000";
 
   const ctx = await createContext({
-    req: new Request(`${protocol}://${host}/api/trpc`, { headers: heads }),
+    req: new Request(`${protocol}://${host}${TRPC_PREFIX}`, { headers: heads }),
   });
 
   return caller(ctx);
