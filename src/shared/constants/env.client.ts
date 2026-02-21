@@ -2,7 +2,8 @@ import { env } from "./env";
 
 export const NODE_ENV = env.NODE_ENV;
 export const PORT = env.PORT;
-export const API_PREFIX = env.API_PREFIX;
+export const API_PREFIX = env.NEXT_PUBLIC_API_PREFIX;
+export const TRPC_PREFIX = env.NEXT_PUBLIC_TRPC_PREFIX;
 export const TURNSTILE_SITE_KEY = env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export const IS_DEV = env.NODE_ENV === "development";

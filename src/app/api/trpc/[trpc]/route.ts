@@ -1,13 +1,13 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-import { IS_DEV } from "@/shared/constants/env.client";
+import { IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
 
 import { createContext } from "@/server/trpc/context";
 import { appRouter } from "@/server/trpc/router";
 
 const handler = (req: Request) =>
   fetchRequestHandler({
-    endpoint: "/api/trpc",
+    endpoint: TRPC_PREFIX,
     req,
     router: appRouter,
     createContext: () => createContext({ req }),

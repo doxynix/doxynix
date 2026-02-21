@@ -9,7 +9,7 @@ import { ThemeProvider } from "next-themes";
 import superjson from "superjson";
 
 import { trpc } from "@/shared/api/trpc";
-import { APP_URL, IS_DEV } from "@/shared/constants/env.client";
+import { APP_URL, IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
 import { TooltipProvider } from "@/shared/ui/core/tooltip";
 import { RealtimeProvider } from "@/features/notifications/realtime-provider";
 
@@ -43,7 +43,7 @@ export function Providers({ children }: Props) {
           enabled: (opts) => IS_DEV || (opts.direction === "down" && opts.result instanceof Error),
         }),
         httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,
+          url: `${getBaseUrl()}${TRPC_PREFIX}`,
           transformer: superjson,
         }),
       ],
