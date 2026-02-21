@@ -217,7 +217,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value: `
-              default-src 'self';
+              default-src 'none';
               script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://vercel.live https://va.vercel-scripts.com https://cdn.jsdelivr.net https://challenges.cloudflare.com;
               frame-src 'self' https://vercel.live https://challenges.cloudflare.com;
               worker-src 'self' blob:;
@@ -248,6 +248,7 @@ const nextConfig: NextConfig = {
                 wss://*.ably-realtime.com
                 wss://*.realtime.ably.net;
               frame-ancestors 'none';
+              manifest-src 'self';
               upgrade-insecure-requests;
             `
               .replace(/\s{2,}/g, " ")
@@ -256,6 +257,7 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
           {
             key: "Permissions-Policy",
             value:

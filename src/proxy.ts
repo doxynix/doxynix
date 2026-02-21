@@ -25,7 +25,14 @@ if (IS_PROD) {
   });
 }
 
-const intlMiddleware = createMiddleware(routing);
+const intlMiddleware = createMiddleware({
+  ...routing,
+  localeCookie: {
+    secure: IS_PROD,
+    sameSite: "lax",
+    path: "/",
+  },
+});
 
 type VercelNextRequest = NextRequest & {
   ip?: string;
