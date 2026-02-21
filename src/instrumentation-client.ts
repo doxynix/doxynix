@@ -2,6 +2,10 @@ import * as Sentry from "@sentry/nextjs";
 
 import { API_PREFIX, IS_PROD, SENTRY_DSN, TRPC_PREFIX } from "./shared/constants/env.client";
 
+function escapeRegExp(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 Sentry.init({
   dsn: SENTRY_DSN,
 
@@ -13,8 +17,8 @@ Sentry.init({
         }),
         Sentry.httpClientIntegration({
           failedRequestTargets: [
-            new RegExp(`^${TRPC_PREFIX.replace(/\//g, "\\/")}`),
-            new RegExp(`^${API_PREFIX.replace(/\//g, "\\/")}`),
+            new RegExp(`^${escapeRegExp(TRPC_PREFIX)}`),
+            new RegExp(`^${escapeRegExp(API_PREFIX)}`),
           ],
         }),
         Sentry.reportingObserverIntegration({
