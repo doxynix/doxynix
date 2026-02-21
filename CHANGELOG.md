@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.1](https://github.com/doxynix/doxynix/compare/v1.6.0...v1.6.1) (2026-02-21)
+
+
+### Bug Fixes
+
+* **tooling:** исправление ошибки мониторинга обновлен матчер ([#348](https://github.com/doxynix/doxynix/issues/348)) ([aa6a545](https://github.com/doxynix/doxynix/commit/aa6a545e72a36c3e46c1836560822292eefbf831))
+
 ## [1.6.0](https://github.com/doxynix/doxynix/compare/v1.5.7...v1.6.0) (2026-02-20)
 
 
