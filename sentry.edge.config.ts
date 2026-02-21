@@ -7,11 +7,5 @@ Sentry.init({
 
   tracesSampleRate: IS_PROD ? 0.1 : 1.0,
 
-  enableLogs: true,
-
   sendDefaultPii: false,
-
-  replaysSessionSampleRate: 0.1,
-
-  replaysOnErrorSampleRate: 1.0,
 });

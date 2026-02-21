@@ -264,6 +264,12 @@ const sentryOptions = {
 
   tunnelRoute: "/monitoring",
 
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+    excludeReplayIframe: true,
+    excludeReplayShadowDom: true,
+  },
+
   webpack: {
     automaticVercelMonitors: true,
 

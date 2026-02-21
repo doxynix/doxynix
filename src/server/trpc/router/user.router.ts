@@ -66,6 +66,7 @@ export const userRouter = createTRPCRouter({
         summary: "Remove avatar",
         description: "Deletes the avatar image and remove from UT.",
         protect: true,
+        errorResponses: OpenApiErrorResponses,
       },
     })
     .input(z.void())
