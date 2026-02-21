@@ -31,8 +31,14 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_URL: z.url().optional(),
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1),
     NEXT_PUBLIC_SENTRY_DSN: z.url(),
-    NEXT_PUBLIC_API_PREFIX: z.string().startsWith("/"),
-    NEXT_PUBLIC_TRPC_PREFIX: z.string().startsWith("/"),
+    NEXT_PUBLIC_API_PREFIX: z
+      .string()
+      .startsWith("/")
+      .regex(/^\/[\w\-\/]*$/, "Invalid prefix format"),
+    NEXT_PUBLIC_TRPC_PREFIX: z
+      .string()
+      .startsWith("/")
+      .regex(/^\/[\w\-\/]*$/, "Invalid prefix format"),
   },
 
   shared: {
