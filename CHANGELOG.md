@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/doxynix/doxynix/compare/v1.6.1...v1.7.0) (2026-02-21)
+
+
+### Features
+
+* **tooling:** настройка политик csp и защита сессионных кук ([#350](https://github.com/doxynix/doxynix/issues/350)) ([64b1f10](https://github.com/doxynix/doxynix/commit/64b1f10358d114f0853dec8b888c73c06f6842fb))
+
 ## [1.6.1](https://github.com/doxynix/doxynix/compare/v1.6.0...v1.6.1) (2026-02-21)
 
 
