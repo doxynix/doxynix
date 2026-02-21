@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.1](https://github.com/doxynix/doxynix/compare/v1.8.0...v1.8.1) (2026-02-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency nodemailer to v8 ([#360](https://github.com/doxynix/doxynix/issues/360)) ([686232b](https://github.com/doxynix/doxynix/commit/686232b90eb6e59dbc3d5823925e044d49005e6a))
+
 ## [1.8.0](https://github.com/doxynix/doxynix/compare/v1.7.0...v1.8.0) (2026-02-21)
 
 
