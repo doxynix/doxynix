@@ -1,7 +1,11 @@
 import { env } from "./env";
 
-const normalizePrefix = (value: string): `/${string}` =>
-  (value.startsWith("/") ? value : `/${value}`) as `/${string}`;
+const normalizePrefix = (value: string | undefined): `/${string}` => {
+  if (value == null) {
+    return "/" as `/${string}`;
+  }
+  return (value.startsWith("/") ? value : `/${value}`) as `/${string}`;
+};
 
 export const NODE_ENV = env.NODE_ENV;
 export const PORT = env.PORT;
