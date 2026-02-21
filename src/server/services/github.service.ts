@@ -147,7 +147,7 @@ export const githubService = {
       },
 
       retry: {
-        doNotRetry: ["429"],
+        doNotRetry: [429],
       },
     });
   },
