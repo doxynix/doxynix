@@ -13,13 +13,13 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
     const alice = await createTestUser("Alice");
 
     const key = await alice.db.apiKey.create({
-      data: { name: "k", prefix: "p", hashedKey: "SECRET_HASH", userId: alice.user.id },
+      data: { hashedKey: "SECRET_HASH", name: "k", prefix: "p", userId: alice.user.id },
     });
     const fetchedKey = await alice.db.apiKey.findUnique({ where: { id: key.id } });
     expect(fetchedKey).not.toHaveProperty("hashedKey");
 
     await prisma.session.create({
-      data: { sessionToken: "SESS_SECRET", userId: alice.user.id, expires: new Date() },
+      data: { expires: new Date(), sessionToken: "SESS_SECRET", userId: alice.user.id },
     });
     const fetchedSession = await alice.db.session.findUnique({
       where: { sessionToken: "SESS_SECRET" },
@@ -28,11 +28,11 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
 
     await prisma.account.create({
       data: {
-        userId: alice.user.id,
-        type: "oauth",
+        access_token: "ACC_TOK",
         provider: "gh",
         providerAccountId: "1",
-        access_token: "ACC_TOK",
+        type: "oauth",
+        userId: alice.user.id,
       },
     });
     const fetchedAccount = await alice.db.account.findUnique({
@@ -47,26 +47,26 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
 
     await expectDenied(
       anon.db.user.create({
-        data: { name: "Evil", email: "evil@test.com", role: "ADMIN" },
+        data: { email: "evil@test.com", name: "Evil", role: "ADMIN" },
       })
     );
 
     await expectDenied(
       alice.db.user.update({
-        where: { publicId: alice.user.publicId },
         data: { publicId: "new-uuid" },
+        where: { publicId: alice.user.publicId },
       })
     );
     await expectDenied(
       alice.db.user.update({
-        where: { publicId: alice.user.publicId },
         data: { createdAt: new Date("2000-01-01") },
+        where: { publicId: alice.user.publicId },
       })
     );
 
     await expectDenied(
       alice.db.apiKey.create({
-        data: { name: "bad", prefix: "x", hashedKey: "x", userId: alice.user.id, revoked: true },
+        data: { hashedKey: "x", name: "bad", prefix: "x", revoked: true, userId: alice.user.id },
       })
     );
   });
@@ -74,7 +74,7 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
   it("should ensure logical separation for Soft Deleted items (Revoked)", async () => {
     const alice = await createTestUser("Alice");
     const key = await alice.db.apiKey.create({
-      data: { name: "k", prefix: "p", hashedKey: "h", userId: alice.user.id },
+      data: { hashedKey: "h", name: "k", prefix: "p", userId: alice.user.id },
     });
 
     await alice.db.apiKey.delete({ where: { id: key.id } });
@@ -84,8 +84,8 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
     expect(found?.revoked).toBe(true);
 
     await alice.db.apiKey.update({
-      where: { id: key.id },
       data: { name: "Renamed Revoked Key" },
+      where: { id: key.id },
     });
 
     const updated = await alice.db.apiKey.findUnique({ where: { id: key.id } });

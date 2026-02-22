@@ -16,24 +16,24 @@ describe("Users, Admin & Audit Flows", () => {
 
     await expect(
       alice.db.user.update({
-        where: { publicId: alice.user.publicId },
         data: { name: "Alice Wonderland" },
+        where: { publicId: alice.user.publicId },
       })
     ).resolves.toMatchObject({ name: "Alice Wonderland" });
 
     await expectDenied(
-      bob.db.user.update({ where: { publicId: alice.user.publicId }, data: { name: "HACKED" } })
+      bob.db.user.update({ data: { name: "HACKED" }, where: { publicId: alice.user.publicId } })
     );
     await expectDenied(alice.db.user.delete({ where: { publicId: bob.user.publicId } }));
 
     await expectValidationFail(
       alice.db.user.update({
-        where: { publicId: alice.user.publicId },
         data: { email: "bad-email" },
+        where: { publicId: alice.user.publicId },
       })
     );
     await expectValidationFail(
-      alice.db.user.update({ where: { publicId: alice.user.publicId }, data: { name: "" } })
+      alice.db.user.update({ data: { name: "" }, where: { publicId: alice.user.publicId } })
     );
   });
 
@@ -43,16 +43,16 @@ describe("Users, Admin & Audit Flows", () => {
     const bob = await createTestUser("Bob", "USER");
 
     await expectDenied(
-      alice.db.user.update({ where: { publicId: alice.user.publicId }, data: { role: "ADMIN" } })
+      alice.db.user.update({ data: { role: "ADMIN" }, where: { publicId: alice.user.publicId } })
     );
 
     await expect(
-      admin.db.user.update({ where: { publicId: alice.user.publicId }, data: { role: "ADMIN" } })
+      admin.db.user.update({ data: { role: "ADMIN" }, where: { publicId: alice.user.publicId } })
     ).resolves.toBeDefined();
 
     const aliceAdminDb = enhance(prisma, { user: { id: alice.user.id, role: "ADMIN" } });
     await expect(
-      aliceAdminDb.user.update({ where: { publicId: bob.user.publicId }, data: { role: "ADMIN" } })
+      aliceAdminDb.user.update({ data: { role: "ADMIN" }, where: { publicId: bob.user.publicId } })
     ).resolves.toBeDefined();
   });
 
@@ -72,7 +72,7 @@ describe("Users, Admin & Audit Flows", () => {
     await expectDenied(bob.db.auditLog.findUniqueOrThrow({ where: { id: log.id } }));
 
     await expectDenied(
-      alice.db.auditLog.update({ where: { id: log.id }, data: { payload: { tampered: true } } })
+      alice.db.auditLog.update({ data: { payload: { tampered: true } }, where: { id: log.id } })
     );
     await expectDenied(alice.db.auditLog.delete({ where: { id: log.id } }));
 
@@ -86,18 +86,18 @@ describe("Users, Admin & Audit Flows", () => {
 
     const repo = await alice.db.repo.create({
       data: {
-        name: "cascade",
-        url: "https://github.com/alice/cascade",
-        owner: "a",
         githubId: 1,
+        name: "cascade",
+        owner: "a",
+        url: "https://github.com/alice/cascade",
         userId: alice.user.id,
       },
     });
     await alice.db.apiKey.create({
-      data: { name: "k", prefix: "p", hashedKey: "h", userId: alice.user.id },
+      data: { hashedKey: "h", name: "k", prefix: "p", userId: alice.user.id },
     });
     await alice.db.analysis.create({
-      data: { repo: { connect: { publicId: repo.publicId } }, status: "NEW", commitSha: "x" },
+      data: { commitSha: "x", repo: { connect: { publicId: repo.publicId } }, status: "NEW" },
     });
 
     await alice.db.user.delete({ where: { publicId: alice.user.publicId } });
@@ -121,11 +121,11 @@ describe("Users, Admin & Audit Flows", () => {
 
     await prisma.auditLog.createMany({ data: batch });
 
-    const page1 = await alice.db.auditLog.findMany({ where: { userId: alice.user.id }, take: 50 });
+    const page1 = await alice.db.auditLog.findMany({ take: 50, where: { userId: alice.user.id } });
     const page2 = await alice.db.auditLog.findMany({
-      where: { userId: alice.user.id },
       skip: 50,
       take: 50,
+      where: { userId: alice.user.id },
     });
 
     expect(page1).toHaveLength(50);

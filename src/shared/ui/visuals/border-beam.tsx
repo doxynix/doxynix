@@ -6,17 +6,13 @@ import { cn } from "@/shared/lib/utils";
 
 type BorderBeamProps = {
   /**
-   * The size of the border beam.
+   * The border width of the beam.
    */
-  size?: number;
+  borderWidth?: number;
   /**
-   * The duration of the border beam.
+   * The class name of the border beam.
    */
-  duration?: number;
-  /**
-   * The delay of the border beam.
-   */
-  delay?: number;
+  className?: string;
   /**
    * The color of the border beam from.
    */
@@ -26,43 +22,47 @@ type BorderBeamProps = {
    */
   colorTo?: string;
   /**
-   * The motion transition of the border beam.
+   * The delay of the border beam.
    */
-  transition?: Transition;
+  delay?: number;
   /**
-   * The class name of the border beam.
+   * The duration of the border beam.
    */
-  className?: string;
-  /**
-   * The style of the border beam.
-   */
-  style?: React.CSSProperties;
-  /**
-   * Whether to reverse the animation direction.
-   */
-  reverse?: boolean;
+  duration?: number;
   /**
    * The initial offset position (0-100).
    */
   initialOffset?: number;
   /**
-   * The border width of the beam.
+   * Whether to reverse the animation direction.
    */
-  borderWidth?: number;
+  reverse?: boolean;
+  /**
+   * The size of the border beam.
+   */
+  size?: number;
+  /**
+   * The style of the border beam.
+   */
+  style?: React.CSSProperties;
+  /**
+   * The motion transition of the border beam.
+   */
+  transition?: Transition;
 };
 
 export const BorderBeam = ({
+  borderWidth = 1,
   className,
-  size = 50,
-  delay = 0,
-  duration = 6,
   colorFrom = "#ffaa40",
   colorTo = "#9c40ff",
-  transition,
-  style,
-  reverse = false,
+  delay = 0,
+  duration = 6,
   initialOffset = 0,
-  borderWidth = 1,
+  reverse = false,
+  size = 50,
+  style,
+  transition,
 }: BorderBeamProps) => {
   return (
     <div
@@ -74,6 +74,19 @@ export const BorderBeam = ({
       }
     >
       <motion.div
+        animate={{
+          offsetDistance: reverse
+            ? [`${100 - initialOffset}%`, `${-initialOffset}%`]
+            : [`${initialOffset}%`, `${100 + initialOffset}%`],
+        }}
+        initial={{ offsetDistance: `${initialOffset}%` }}
+        transition={{
+          delay: -delay,
+          duration,
+          ease: "linear",
+          repeat: Infinity,
+          ...transition,
+        }}
         className={cn(
           "absolute aspect-square",
           "bg-linear-to-l from-(--color-from) via-(--color-to) to-transparent",
@@ -81,26 +94,13 @@ export const BorderBeam = ({
         )}
         style={
           {
-            width: size,
-            offsetPath: `rect(0 auto auto 0 round ${size}px)`,
             "--color-from": colorFrom,
             "--color-to": colorTo,
+            offsetPath: `rect(0 auto auto 0 round ${size}px)`,
+            width: size,
             ...style,
           } as MotionStyle
         }
-        initial={{ offsetDistance: `${initialOffset}%` }}
-        animate={{
-          offsetDistance: reverse
-            ? [`${100 - initialOffset}%`, `${-initialOffset}%`]
-            : [`${initialOffset}%`, `${100 + initialOffset}%`],
-        }}
-        transition={{
-          repeat: Infinity,
-          ease: "linear",
-          duration,
-          delay: -delay,
-          ...transition,
-        }}
       />
     </div>
   );

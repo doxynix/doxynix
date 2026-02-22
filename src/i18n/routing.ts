@@ -5,14 +5,14 @@ import { IS_PROD } from "@/shared/constants/env.client";
 import { DEFAULT_LOCALE, LOCALES } from "@/shared/constants/locales";
 
 export const routing = defineRouting({
-  locales: LOCALES,
   defaultLocale: DEFAULT_LOCALE,
-  localePrefix: "as-needed",
   localeCookie: {
-    secure: IS_PROD,
-    sameSite: "lax",
     path: "/",
+    sameSite: "lax",
+    secure: IS_PROD,
   },
+  localePrefix: "as-needed",
+  locales: LOCALES,
 });
 
 export const { Link, redirect, usePathname, useRouter } = createNavigation(routing);

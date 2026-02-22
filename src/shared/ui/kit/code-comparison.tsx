@@ -1,24 +1,24 @@
 import { CodeWindow } from "./code-window";
 
 type Props = {
-  beforeHtmlDark: string;
-  beforeHtmlLight: string;
   afterHtmlDark: string;
   afterHtmlLight: string;
-  filename: string;
   badCode: string;
+  beforeHtmlDark: string;
+  beforeHtmlLight: string;
+  filename: string;
   goodCode: string;
 };
 
 export function CodeComparison({
-  beforeHtmlDark,
-  beforeHtmlLight,
   afterHtmlDark,
   afterHtmlLight,
-  filename,
   badCode,
+  beforeHtmlDark,
+  beforeHtmlLight,
+  filename,
   goodCode,
-}: Props) {
+}: Readonly<Props>) {
   const currentTheme = "dark"; // THEME: если вернется светлая тема сменить на хук useTheme и поставить вначале файла "use client"
   const isDark = currentTheme === "dark";
 
@@ -30,16 +30,16 @@ export function CodeComparison({
       <div className="group border-border relative w-full overflow-hidden rounded-xl border">
         <div className="relative grid gap-4 md:grid-cols-2 md:gap-0">
           <CodeWindow
-            title={filename}
-            codeClassName="text-xs p-2"
             code={badCode}
+            codeClassName="text-xs p-2"
             codeHtml={beforeHtml}
+            title={filename}
           />
           <CodeWindow
-            title={filename}
-            codeClassName="text-xs p-2"
             code={goodCode}
+            codeClassName="text-xs p-2"
             codeHtml={afterHtml}
+            title={filename}
           />
         </div>
 

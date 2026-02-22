@@ -9,11 +9,11 @@ import { RepoCard } from "@/entities/repo";
 import { RepoEmpty } from "./repo-empty";
 
 type Props = {
-  repos: RepoTableItem[];
   meta?: RepoMeta;
+  repos: RepoTableItem[];
 };
 
-export function RepoList({ repos, meta }: Props) {
+export function RepoList({ meta, repos }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
 
   if (!meta || meta.totalCount === 0) {

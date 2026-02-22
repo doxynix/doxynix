@@ -2,9 +2,9 @@ type Props = {
   className?: string;
 };
 
-export function GoogleIcon({ className }: Props) {
+export function GoogleIcon({ className }: Readonly<Props>) {
   return (
-    <svg className={className} viewBox="0 0 533.5 544.3" width="24" height="24">
+    <svg height="24" viewBox="0 0 533.5 544.3" width="24" className={className}>
       <path
         d="M533.5 278.4c0-17.4-1.5-34.1-4.3-50.3H272v95h147.2c-6.4 34.7-25.8 64.2-54.9 84v69h88.5c51.7-47.6 81.7-118 81.7-197.7z"
         fill="#4285F4"

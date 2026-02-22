@@ -9,25 +9,25 @@ import { Button } from "../core/button";
 import { AppTooltip } from "./app-tooltip";
 
 type CopyButtonProps = {
-  value: string;
-  tooltipText?: string;
-  successText?: string;
   className?: string;
+  successText?: string;
+  tooltipText?: string;
+  value: string;
 };
 
 export function CopyButton({
-  value,
-  tooltipText = "Copy ID",
-  successText = "Copied!",
   className,
-}: CopyButtonProps) {
-  const { isCopied, copy } = useCopyToClipboard();
+  successText = "Copied!",
+  tooltipText = "Copy ID",
+  value,
+}: Readonly<CopyButtonProps>) {
+  const { copy, isCopied } = useCopyToClipboard();
 
   return (
     <AppTooltip content={isCopied ? successText : tooltipText} open={isCopied ? true : undefined}>
       <Button
-        variant="ghost"
         size="icon"
+        variant="ghost"
         onClick={() => void copy(value)}
         className={cn(
           "h-6 w-6 transition-all not-md:opacity-100",

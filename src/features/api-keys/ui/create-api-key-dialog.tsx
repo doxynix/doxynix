@@ -43,8 +43,8 @@ export function CreateApiKeyDialog() {
   const t = useTranslations("Dashboard");
 
   const form = useForm<z.infer<typeof CreateApiKeySchema>>({
+    defaultValues: { description: "", name: "" },
     resolver: zodResolver(CreateApiKeySchema),
-    defaultValues: { name: "", description: "" },
   });
 
   const onSubmit = (values: z.infer<typeof CreateApiKeySchema>) => {
@@ -76,9 +76,9 @@ export function CreateApiKeyDialog() {
       </DialogTrigger>
 
       <DialogContent
-        className="sm:max-w-md"
-        onPointerDownOutside={(e) => createdKey != null && e.preventDefault()}
         onEscapeKeyDown={(e) => createdKey != null && e.preventDefault()}
+        onPointerDownOutside={(e) => createdKey != null && e.preventDefault()}
+        className="sm:max-w-md"
       >
         {createdKey == null ? (
           <Form {...form}>
@@ -89,16 +89,16 @@ export function CreateApiKeyDialog() {
               </DialogHeader>
 
               <FormField
-                control={form.control}
                 name="name"
+                control={form.control}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-muted-foreground">{tCommon("name")}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder={t("settings_api_keys_name_placeholder")}
                         disabled={create.isPending}
+                        placeholder={t("settings_api_keys_name_placeholder")}
                       />
                     </FormControl>
                     <FormMessage />
@@ -107,8 +107,8 @@ export function CreateApiKeyDialog() {
               />
 
               <FormField
-                control={form.control}
                 name="description"
+                control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel className="text-muted-foreground">
@@ -117,9 +117,9 @@ export function CreateApiKeyDialog() {
                     <FormControl>
                       <Textarea
                         {...field}
-                        className="min-h-25 resize-none text-sm sm:text-base"
                         disabled={create.isPending}
                         placeholder={t("settings_api_keys_desc_placeholder")}
+                        className="min-h-25 resize-none text-sm sm:text-base"
                       />
                     </FormControl>
                     <FormMessage />
@@ -130,10 +130,10 @@ export function CreateApiKeyDialog() {
               <DialogFooter>
                 <LoadingButton
                   type="submit"
-                  className="cursor-pointer"
                   disabled={!form.formState.isValid || create.isPending}
-                  loadingText="Saving..."
                   isLoading={create.isPending}
+                  loadingText="Saving..."
+                  className="cursor-pointer"
                 >
                   {tCommon("create")}
                 </LoadingButton>
@@ -157,17 +157,17 @@ export function CreateApiKeyDialog() {
 
             <div className="flex items-center space-x-2">
               <div className="grid flex-1 gap-2">
-                <Input readOnly value={createdKey} disabled={create.isPending} />
+                <Input value={createdKey} readOnly disabled={create.isPending} />
               </div>
               <CopyButton
-                tooltipText={tCommon("copy")}
                 value={createdKey}
+                tooltipText={tCommon("copy")}
                 className="opacity-100"
               />
             </div>
 
             <DialogFooter>
-              <Button className="w-full cursor-pointer" onClick={() => handleOpenChange(false)}>
+              <Button onClick={() => handleOpenChange(false)} className="w-full cursor-pointer">
                 {tCommon("done")}
               </Button>
             </DialogFooter>

@@ -3,14 +3,15 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { cn, formatFullDate, formatRelativeTime } from "@/shared/lib/utils";
 import type { RepoItemFields } from "@/shared/types/repo-item";
+import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { getLanguageColor, repoVisibilityConfig } from "@/entities/repo";
 
-type Props = { repo: RepoItemFields; onClick: () => void; disabled?: boolean };
+type Props = { disabled?: boolean; onClick: () => void; repo: RepoItemFields };
 
-export function RepoItem({ repo, onClick, disabled }: Props) {
+export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
   const langColor = getLanguageColor(repo.language);
   const visibility = repoVisibilityConfig[repo.visibility];
   const t = useTranslations("Dashboard");
@@ -20,8 +21,8 @@ export function RepoItem({ repo, onClick, disabled }: Props) {
     <Button
       type="button"
       disabled={disabled}
-      onClick={onClick}
       variant="ghost"
+      onClick={onClick}
       className="h-auto w-full max-w-md cursor-pointer justify-start px-3 py-2 text-left"
     >
       <div className="flex w-full flex-col gap-1 overflow-hidden">
@@ -29,11 +30,11 @@ export function RepoItem({ repo, onClick, disabled }: Props) {
           <div className="flex items-center gap-1">
             <span className="truncate text-sm font-medium">{repo.fullName}</span>
             {visibility != null && (
-              <AppTooltip content={cn(visibility.label)}>
-                <div className="flex shrink-0 items-center gap-1.5 text-xs">
-                  <visibility.icon className={cn("h-3.5 w-3.5", visibility.color)} />
-                </div>
-              </AppTooltip>
+              <div className="flex shrink-0 items-center gap-1.5 text-xs">
+                <Badge variant="outline" className={cn(visibility.color)}>
+                  {visibility.label}
+                </Badge>
+              </div>
             )}
           </div>
           <div className={cn("text-muted-foreground flex shrink-0 items-center gap-1 text-xs")}>

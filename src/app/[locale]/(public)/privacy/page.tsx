@@ -7,7 +7,7 @@ import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
 export const generateMetadata = createMetadata("privacy_title", "privacy_desc");
 
-type Props = { name: string; descKey: string };
+type Props = { descKey: string; name: string };
 
 const SECTION_TITLE = "mb-3 text-lg font-bold text-foreground flex items-center gap-2";
 const LIST_STYLES = "list-disc space-y-2 pl-5 marker:text-foreground";
@@ -16,17 +16,17 @@ const LI_STYLES = "flex flex-col";
 const SPAN_STYLES = "text-sm";
 
 const BRANDS: Props[] = [
-  { name: "Vercel", descKey: "brands_vercel_desc" },
-  { name: "Neon (PostgreSQL)", descKey: "brands_neon_desc" },
-  { name: "Resend", descKey: "brands_resend_desc" },
-  { name: "OAuth Providers", descKey: "brands_oauth_desc" },
-  { name: "Upstash / Redis", descKey: "brands_upstash_desc" },
-  { name: "Axiom", descKey: "brands_axiom_desc" },
-  { name: "UploadThing", descKey: "brands_uploadthing_desc" },
-  { name: "Ably", descKey: "brands_ably_desc" },
+  { descKey: "brands_vercel_desc", name: "Vercel" },
+  { descKey: "brands_neon_desc", name: "Neon (PostgreSQL)" },
+  { descKey: "brands_resend_desc", name: "Resend" },
+  { descKey: "brands_oauth_desc", name: "OAuth Providers" },
+  { descKey: "brands_upstash_desc", name: "Upstash / Redis" },
+  { descKey: "brands_axiom_desc", name: "Axiom" },
+  { descKey: "brands_uploadthing_desc", name: "UploadThing" },
+  { descKey: "brands_ably_desc", name: "Ably" },
 ] as const;
 
-function PrivacyListItem({ name, descKey }: Props) {
+function PrivacyListItem({ descKey, name }: Readonly<Props>) {
   return (
     <li className={LI_STYLES}>
       <span className={STRONG_TEXT}>{name}</span>
@@ -36,11 +36,11 @@ function PrivacyListItem({ name, descKey }: Props) {
 }
 
 const richStyles = {
-  strong: (chunks: React.ReactNode) => <span className={STRONG_TEXT}>{chunks}</span>,
-  u: (chunks: React.ReactNode) => <u>{chunks}</u>,
   important: (chunks: React.ReactNode) => (
     <span className="text-destructive font-medium">{chunks}</span>
   ),
+  strong: (chunks: React.ReactNode) => <span className={STRONG_TEXT}>{chunks}</span>,
+  u: (chunks: React.ReactNode) => <u>{chunks}</u>,
 };
 
 export default async function PrivacyPage() {
@@ -52,10 +52,10 @@ export default async function PrivacyPage() {
   return (
     <div className="animate-fade-in container mx-auto max-w-3xl px-4 py-12 pt-24">
       <BackOrLinkButton
-        className="cursor-pointer"
         showIcon
-        variant="link"
         label={tCommon("back")}
+        variant="link"
+        className="cursor-pointer"
       />
 
       <div className="mb-10 border-b py-6">

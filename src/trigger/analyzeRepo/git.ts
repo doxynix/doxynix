@@ -14,18 +14,18 @@ export async function getAnalysisContext(
   forceRefresh?: boolean
 ) {
   const analysis = await prisma.analysis.findUnique({
-    where: { publicId: analysisId },
     include: {
       repo: {
         include: {
           analyses: {
-            where: { status: StatusSchema.enum.DONE },
             orderBy: { createdAt: "desc" },
             take: 1,
+            where: { status: StatusSchema.enum.DONE },
           },
         },
       },
     },
+    where: { publicId: analysisId },
   });
 
   if (analysis == null) throw new Error("Analysis not found");
@@ -33,7 +33,7 @@ export async function getAnalysisContext(
   const repo = analysis.repo;
   const lastSuccessfulAnalysis = repo.analyses[0];
 
-  const account = await prisma.account.findFirst({ where: { userId, provider: "github" } });
+  const account = await prisma.account.findFirst({ where: { provider: "github", userId } });
   const userToken = account?.access_token;
   if (repo.visibility === VisibilitySchema.enum.PRIVATE && userToken == null) {
     throw new Error("This is a private repository. Please connect your GitHub account.");
@@ -44,17 +44,17 @@ export async function getAnalysisContext(
 
   const { data: refData } = await octokit.git.getRef({
     owner: repo.owner,
-    repo: repo.name,
     ref: `heads/${repo.defaultBranch}`,
+    repo: repo.name,
   });
 
   const currentSha = refData.object.sha;
 
   if (forceRefresh === false && lastSuccessfulAnalysis?.commitSha === currentSha) {
-    return { repo: null, token, currentSha };
+    return { currentSha, repo: null, token };
   }
 
-  return { repo, token, currentSha };
+  return { currentSha, repo, token };
 }
 
 export async function cloneRepository(
@@ -64,7 +64,7 @@ export async function cloneRepository(
   selectedBranch?: string
 ) {
   if (existsSync(targetPath)) {
-    await fs.rm(targetPath, { recursive: true, force: true });
+    await fs.rm(targetPath, { force: true, recursive: true });
   }
   await fs.mkdir(targetPath, { recursive: true });
 

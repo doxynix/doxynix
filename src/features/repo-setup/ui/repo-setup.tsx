@@ -10,16 +10,16 @@ type Props = {
   repo: RepoDetailed;
 };
 
-export function RepoSetup({ repo }: Props) {
-  const { state, actions, refs } = useRepoSetup(repo);
+export function RepoSetup({ repo }: Readonly<Props>) {
+  const { actions, refs, state } = useRepoSetup(repo);
 
   const isAnalysisDisabled = state.selectedFilesCount === 0 || state.selectedDocs.length === 0;
 
   return (
     <div className="flex justify-center gap-4">
-      <RepoFileTree repo={repo} state={state} actions={actions} treeApi={refs.treeApi} />
+      <RepoFileTree actions={actions} repo={repo} state={state} treeApi={refs.treeApi} />
 
-      <RepoAnalysisConfig state={state} actions={actions} disabled={isAnalysisDisabled} />
+      <RepoAnalysisConfig actions={actions} disabled={isAnalysisDisabled} state={state} />
     </div>
   );
 }

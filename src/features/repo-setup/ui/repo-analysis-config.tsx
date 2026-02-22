@@ -33,20 +33,20 @@ import { Flag, FLAGS } from "@/shared/ui/kit/language-switcher";
 import type { ActionsType, StateType } from "../model/user-repo-setup";
 
 const DOC_OPTIONS = [
-  { id: DocType.README, label: "README", icon: BookOpen, desc: "Project overview & setup" },
-  { id: DocType.API, label: "API Reference", icon: Code2, desc: "Endpoints & schemas" },
-  { id: DocType.ARCHITECTURE, label: "Architecture", icon: GitGraph, desc: "Deep system logic" },
-  { id: DocType.CONTRIBUTING, label: "Contributing", icon: Users, desc: "Guide for developers" },
-  { id: DocType.CHANGELOG, label: "Changelog", icon: HistoryIcon, desc: "Release history" },
+  { desc: "Project overview & setup", icon: BookOpen, id: DocType.README, label: "README" },
+  { desc: "Endpoints & schemas", icon: Code2, id: DocType.API, label: "API Reference" },
+  { desc: "Deep system logic", icon: GitGraph, id: DocType.ARCHITECTURE, label: "Architecture" },
+  { desc: "Guide for developers", icon: Users, id: DocType.CONTRIBUTING, label: "Contributing" },
+  { desc: "Release history", icon: HistoryIcon, id: DocType.CHANGELOG, label: "Changelog" },
 ] as const;
 
 type Props = {
-  state: StateType;
   actions: ActionsType;
   disabled: boolean;
+  state: StateType;
 };
 
-export function RepoAnalysisConfig({ state, actions, disabled }: Props) {
+export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
   const translationKeys = LOCALES.map(
     (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const
@@ -76,9 +76,9 @@ export function RepoAnalysisConfig({ state, actions, disabled }: Props) {
               </SelectTrigger>
               <SelectContent>
                 {LOCALES.map((l, i) => (
-                  <SelectItem value={l} key={l}>
+                  <SelectItem key={l} value={l}>
                     <div className="flex items-center gap-3">
-                      <Flag src={FLAGS[l] || FLAGS.en} alt={l} />
+                      <Flag alt={l} src={FLAGS[l] || FLAGS.en} />
                       <span>{t(translationKeys[i])}</span>
                     </div>
                   </SelectItem>
@@ -100,8 +100,8 @@ export function RepoAnalysisConfig({ state, actions, disabled }: Props) {
                 <div
                   key={opt.id}
                   role="checkbox"
-                  aria-checked={isSelected}
                   tabIndex={0}
+                  aria-checked={isSelected}
                   onClick={() => actions.toggleDocType(opt.id)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -142,18 +142,18 @@ export function RepoAnalysisConfig({ state, actions, disabled }: Props) {
             Custom Instructions (optional)
           </Label>
           <Textarea
-            placeholder="e.g. 'Use technical tone', 'Highlight security risks', 'Add code examples'..."
-            className="h-35 resize-none"
             value={state.instructions}
+            placeholder="e.g. 'Use technical tone', 'Highlight security risks', 'Add code examples'..."
             onChange={(e) => actions.setInstructions(e.target.value)}
+            className="h-35 resize-none"
           />
         </div>
 
         <div className="flex justify-end">
           <Button
-            className="w-fit cursor-pointer gap-2"
-            onClick={actions.handleStartAnalysis}
             disabled={disabled}
+            onClick={actions.handleStartAnalysis}
+            className="w-fit cursor-pointer gap-2"
           >
             <Play className="h-4 w-4" />
             Start Analysis

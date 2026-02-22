@@ -17,12 +17,12 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { owner } = await params;
   return {
-    title: owner,
     description: `Repository overview for ${owner}`,
+    title: owner,
   };
 }
 
-export default async function OwnerPage({ params }: Props) {
+export default async function OwnerPage({ params }: Readonly<Props>) {
   const t = await getTranslations("Dashboard");
   const { owner } = await params;
 
@@ -42,7 +42,7 @@ export default async function OwnerPage({ params }: Props) {
   return (
     <div className="mx-auto flex h-full w-full flex-col">
       <div className="not-xs:justify-center mb-4 flex items-center gap-4">
-        <RepoAvatar src={avatarUrl ?? "/avatar-placeholder.png"} alt={owner} />
+        <RepoAvatar alt={owner} src={avatarUrl ?? "/avatar-placeholder.png"} />
         <h1 className="text-2xl font-bold">{owner}</h1>
       </div>
 

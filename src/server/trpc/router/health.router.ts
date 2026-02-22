@@ -8,13 +8,13 @@ export const healthRouter = createTRPCRouter({
   check: publicProcedure
     .meta({
       openapi: {
-        method: "GET",
-        path: "/health",
-        tags: ["health"],
-        summary: "Service health check",
         description:
           "Checks the current status and availability of the service. Returns basic operational information to confirm that the service is running correctly.",
         errorResponses: OpenApiErrorResponses,
+        method: "GET",
+        path: "/health",
+        summary: "Service health check",
+        tags: ["health"],
       },
     })
     .input(z.void())

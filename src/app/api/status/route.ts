@@ -5,11 +5,11 @@ import { BETTERSTACK_TOKEN } from "@/shared/constants/env.server";
 export const runtime = "edge";
 
 type Monitor = {
-  id: string;
   attributes: {
-    status: "up" | "down" | "paused" | "pending" | "maintenance";
     paused: boolean;
+    status: "up" | "down" | "paused" | "pending" | "maintenance";
   };
+  id: string;
 };
 
 type MonitorListResponse = {

@@ -4,11 +4,11 @@ import { TRPCError } from "@trpc/server";
 import { logger } from "@/shared/lib/logger";
 
 type ErrorMapping = {
-  uniqueConstraint?: Record<string, string>;
+  [key: string]: string | Record<string, string> | undefined;
   defaultConflict?: string;
   notFound?: string;
   notNull?: string;
-  [key: string]: string | Record<string, string> | undefined;
+  uniqueConstraint?: Record<string, string>;
 };
 
 type PrismaErrorMeta = {
@@ -96,14 +96,14 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
       throw new TRPCError({ code: meta.code, message });
     }
 
-    logger.error({ msg: "Unknown Prisma Error:", error });
+    logger.error({ error, msg: "Unknown Prisma Error:" });
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Internal database error",
     });
   }
 
-  logger.error({ msg: "Unknown Error:", error });
+  logger.error({ error, msg: "Unknown Error:" });
   throw new TRPCError({
     code: "INTERNAL_SERVER_ERROR",
     message: "Internal server error",

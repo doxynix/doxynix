@@ -40,7 +40,7 @@ import { cleanCodeForAi, unwrapAiText } from "@/server/utils/optimizers";
 type StatusUpdater = (msg: string, percent: number, status?: StatusType) => Promise<void>;
 
 export async function runAiPipeline(
-  validFiles: { path: string; content: string }[],
+  validFiles: { content: string; path: string }[],
   instructions: string | undefined,
   updateStatus: StatusUpdater,
   analysisId: string,
@@ -52,17 +52,17 @@ export async function runAiPipeline(
   if (instructions != null && instructions.length > 5) {
     try {
       const sentinelOut = await callWithFallback<SentinelResult>({
+        attemptMetadata: { analysisId, phase: "sentinel" },
         models: AI_MODELS.SENTINEL,
-        system: SENTINEL_SYSTEM_PROMPT,
-        prompt: SENTINEL_USER_PROMPT(instructions!),
         outputSchema: sentinelSchema,
-        providerOptions: { google: { safetySettings: SAFETY_SETTINGS, codeExecution: true } },
+        prompt: SENTINEL_USER_PROMPT(instructions!),
+        providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
+        system: SENTINEL_SYSTEM_PROMPT,
         temperature: 0.0,
-        attemptMetadata: { phase: "sentinel", analysisId },
       });
       sentinelStatus = sentinelOut.status;
     } catch (e) {
-      logger.warn({ msg: "Sentinel unavailable, defaulting to SAFE", analysisId, error: e });
+      logger.warn({ analysisId, error: e, msg: "Sentinel unavailable, defaulting to SAFE" });
       sentinelStatus = "SAFE";
     }
   }
@@ -76,18 +76,18 @@ export async function runAiPipeline(
     .slice(0, MAX_FLASH_CHARS);
 
   const projectMap = await callWithFallback<ProjectMap>({
+    attemptMetadata: { analysisId, phase: "mapper" },
     models: AI_MODELS.CARTOGRAPHER,
-    system: MAPPER_SYSTEM_PROMPT,
-    prompt: MAPPER_USER_PROMPT(mapContext),
     outputSchema: projectMapSchema,
-    providerOptions: { google: { safetySettings: SAFETY_SETTINGS, codeExecution: true } },
+    prompt: MAPPER_USER_PROMPT(mapContext),
+    providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
+    system: MAPPER_SYSTEM_PROMPT,
     temperature: 0.05,
-    attemptMetadata: { phase: "mapper", analysisId },
   });
 
   logger.debug({
-    msg: "Project map generated",
     analysisId,
+    msg: "Project map generated",
     projectMapSummary: Object.keys(projectMap.modules ?? {}).length ?? null,
   });
 
@@ -100,18 +100,18 @@ export async function runAiPipeline(
   const architectContext = prepareSmartContext(validFiles, SMART_CONTEXT_LIMIT);
 
   const aiResult = await callWithFallback<AIResult>({
+    attemptMetadata: { analysisId, phase: "architect" },
     models: [...AI_MODELS.POWERFUL, ...AI_MODELS.ARCHITECT, ...AI_MODELS.FALLBACK],
-    system: ANALYSIS_SYSTEM_PROMPT(language),
+    outputSchema: aiSchema,
     prompt: ANALYSIS_USER_PROMPT(
       architectContext,
       JSON.stringify(projectMap),
       instructions ?? "Focus on critical business logic and security.",
       sentinelStatus
     ),
-    outputSchema: aiSchema,
-    providerOptions: { google: { safetySettings: SAFETY_SETTINGS, codeExecution: true } },
+    providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
+    system: ANALYSIS_SYSTEM_PROMPT(language),
     temperature: 0.1,
-    attemptMetadata: { phase: "architect", analysisId },
   });
 
   if (aiResult == null) throw new Error("AI model failed.");
@@ -119,7 +119,7 @@ export async function runAiPipeline(
 }
 
 export async function generateDeepDocs(
-  files: { path: string; content: string }[],
+  files: { content: string; path: string }[],
   analysisResult: AIResult,
   analysisId: string,
   requestedDocs: DocTypeType[],
@@ -146,16 +146,16 @@ export async function generateDeepDocs(
     taskMap["README"] = tasks.length;
     tasks.push(
       callWithFallback<string>({
+        attemptMetadata: { analysisId, phase: "writer_readme" },
         models: AI_MODELS.WRITER,
-        system: README_WRITER_SYSTEM_PROMPT(language),
+        outputSchema: null,
         prompt: README_WRITER_USER_PROMPT(
           analysisResult.executive_summary.purpose,
           analysisResult.executive_summary.stack_details,
           configContext
         ),
-        providerOptions: { google: { safetySettings: SAFETY_SETTINGS, codeExecution: true } },
-        outputSchema: null,
-        attemptMetadata: { phase: "writer_readme", analysisId },
+        providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
+        system: README_WRITER_SYSTEM_PROMPT(language),
         temperature: 0.2,
       }).then(unwrapAiText)
     );
@@ -166,11 +166,11 @@ export async function generateDeepDocs(
     taskMap["API"] = tasks.length;
     tasks.push(
       callWithFallback<string>({
+        attemptMetadata: { analysisId, phase: "writer_api" },
         models: AI_MODELS.WRITER,
-        system: API_WRITER_SYSTEM_PROMPT(language),
-        prompt: API_WRITER_USER_PROMPT(apiContext),
         outputSchema: null,
-        attemptMetadata: { phase: "writer_api", analysisId },
+        prompt: API_WRITER_USER_PROMPT(apiContext),
+        system: API_WRITER_SYSTEM_PROMPT(language),
         temperature: 0.1,
       }).then(unwrapAiText)
     );
@@ -181,14 +181,14 @@ export async function generateDeepDocs(
     taskMap["CONTRIBUTING"] = tasks.length;
     tasks.push(
       callWithFallback<string>({
+        attemptMetadata: { analysisId, phase: "writer_contributing" },
         models: AI_MODELS.WRITER,
-        system: CONTRIBUTING_WRITER_SYSTEM_PROMPT(language),
+        outputSchema: null,
         prompt: CONTRIBUTING_WRITER_USER_PROMPT(
           analysisResult.executive_summary.stack_details,
           configContext
         ),
-        outputSchema: null,
-        attemptMetadata: { phase: "writer_contributing", analysisId },
+        system: CONTRIBUTING_WRITER_SYSTEM_PROMPT(language),
         temperature: 0.2,
       }).then(unwrapAiText)
     );
@@ -202,25 +202,25 @@ export async function generateDeepDocs(
         const octokit = await githubService.getClientForUser(prisma, userId);
         const { data: commitsData } = await octokit.repos.listCommits({
           owner: repo.owner,
-          repo: repo.name,
           per_page: 50, // NOTE: тут возможно стоит придумать другую логику
+          repo: repo.name,
         });
 
         const simpleCommits = commitsData.map((c) => ({
-          message: c.commit.message,
           author: c.commit.author?.name,
           date: c.commit.author?.date,
+          message: c.commit.message,
         }));
 
         return callWithFallback<string>({
+          attemptMetadata: { analysisId, phase: "writer_changelog" },
           models: AI_MODELS.WRITER,
-          system: CHANGELOG_WRITER_SYSTEM_PROMPT(language),
+          outputSchema: null,
           prompt: CHANGELOG_WRITER_USER_PROMPT(
             JSON.stringify(simpleCommits, null, 2),
             analysisResult.executive_summary.stack_details
           ),
-          outputSchema: null,
-          attemptMetadata: { phase: "writer_changelog", analysisId },
+          system: CHANGELOG_WRITER_SYSTEM_PROMPT(language),
           temperature: 0.2,
         }).then(unwrapAiText);
       })()
@@ -232,14 +232,14 @@ export async function generateDeepDocs(
     taskMap["ARCHITECTURE"] = tasks.length;
     tasks.push(
       callWithFallback<string>({
+        attemptMetadata: { analysisId, phase: "writer_architecture" },
         models: AI_MODELS.WRITER,
-        system: ARCHITECTURE_WRITER_SYSTEM_PROMPT(language),
+        outputSchema: null,
         prompt: ARCHITECTURE_WRITER_USER_PROMPT(
           JSON.stringify(analysisResult.sections),
           JSON.stringify(analysisResult.executive_summary)
         ),
-        outputSchema: null,
-        attemptMetadata: { phase: "writer_architecture", analysisId },
+        system: ARCHITECTURE_WRITER_SYSTEM_PROMPT(language),
         temperature: 0.2,
       }).then(unwrapAiText)
     );
@@ -260,7 +260,7 @@ export async function generateDeepDocs(
 
   if (taskMap["API"] != null) {
     const apiOutput = results[taskMap["API"]];
-    const yamlMatch = apiOutput.match(/```yaml([\s\S]*?)```/);
+    const yamlMatch = RegExp(/```yaml([\s\S]*?)```/).exec(apiOutput);
     if (yamlMatch) {
       swaggerYaml = yamlMatch[1].trim();
       apiDoc = apiOutput.replace(/# OpenAPI Specification[\s\S]*/, "").trim();
@@ -281,5 +281,5 @@ export async function generateDeepDocs(
     architecture = results[taskMap["ARCHITECTURE"]];
   }
 
-  return { readme, apiDoc, swaggerYaml, contributing, changelog, architecture };
+  return { apiDoc, architecture, changelog, contributing, readme, swaggerYaml };
 }

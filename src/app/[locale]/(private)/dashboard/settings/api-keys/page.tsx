@@ -18,9 +18,9 @@ export default async function ApiKeysPage() {
           <p className="text-muted-foreground text-sm">{t("settings_api_keys_desc")}</p>
         </div>
         <a
+          href={`${APP_URL}/api/docs`}
           rel="noopener noreferrer"
           target="_blank"
-          href={`${APP_URL}/api/docs`}
           className="flex items-center gap-4 underline hover:no-underline"
         >
           {t("settings_api_keys_api_documentation")}

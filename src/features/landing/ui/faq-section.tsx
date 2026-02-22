@@ -7,9 +7,9 @@ import {
   AccordionTrigger,
 } from "@/shared/ui/core/accordion";
 
-type Props = { value: string; q: string; a: string };
+type Props = { a: string; q: string; value: string };
 
-function AccordionListItem({ value, q, a }: Props) {
+function AccordionListItem({ a, q, value }: Readonly<Props>) {
   return (
     <AccordionItem value={value}>
       <AccordionTrigger>{q}</AccordionTrigger>
@@ -23,28 +23,28 @@ export function FAQSection() {
 
   const FAQ: Props[] = [
     {
-      q: t("section_faq_q1"),
       a: t("section_faq_a1"),
+      q: t("section_faq_q1"),
       value: "item-1",
     },
     {
-      q: t("section_faq_q2"),
       a: t("section_faq_a2"),
+      q: t("section_faq_q2"),
       value: "item-2",
     },
     {
-      q: t("section_faq_q3"),
       a: t("section_faq_a3"),
+      q: t("section_faq_q3"),
       value: "item-3",
     },
     {
-      q: t("section_faq_q4"),
       a: t("section_faq_a4"),
+      q: t("section_faq_q4"),
       value: "item-4",
     },
     {
-      q: t("section_faq_q5"),
       a: t("section_faq_a5"),
+      q: t("section_faq_q5"),
       value: "item-5",
     },
   ];

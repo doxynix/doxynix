@@ -10,7 +10,7 @@ export function HeroSection() {
   const t = useTranslations("Landing");
 
   return (
-    <section className="flex min-h-dvh flex-col items-center justify-center p-4 pt-16" id="hero">
+    <section id="hero" className="flex min-h-dvh flex-col items-center justify-center p-4 pt-16">
       {/* <Spotlight className="fill-primary fixed -top-75 transform opacity-100" /> */}
       {/* <Spotlight className="fill-primary fixed -top-75 -rotate-70 transform opacity-100" /> */}
 
@@ -24,19 +24,19 @@ export function HeroSection() {
 
         <TextAnimate
           as="h1"
-          startOnView={false}
-          duration={1}
           animation="blurIn"
+          duration={1}
+          startOnView={false}
           className="text-4xl font-bold tracking-tighter not-md:hidden sm:text-5xl md:text-7xl lg:text-8xl"
         >
           {t("section_hero_title")}
         </TextAnimate>
 
         <TextAnimate
-          duration={1}
           as="p"
-          startOnView={false}
           animation="slideRight"
+          duration={1}
+          startOnView={false}
           className="text-muted-foreground max-w-xl text-base not-md:hidden sm:text-lg md:text-xl"
         >
           {t("section_hero_desc")}
@@ -56,10 +56,10 @@ export function HeroSection() {
           </ShimmerButton>
         </div>
         <ScrollButton
-          targetId="brands"
           arrowClassName="rotate-90"
-          offset={0}
           buttonClassName="animate-float"
+          offset={0}
+          targetId="brands"
         />
       </div>
     </section>

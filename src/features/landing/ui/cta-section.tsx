@@ -15,15 +15,15 @@ export function CTASection() {
             {t("section_cta_title_1")} <br /> {t("section_cta_title_2")}
           </h2>
           <p className="text-muted-foreground mx-auto">{t("section_cta_desc")}</p>
-          <ShimmerButton className="h-12 px-8 text-lg" href="/auth">
+          <ShimmerButton href="/auth" className="h-12 px-8 text-lg">
             <span className="text-sm font-medium lg:text-lg">{t("section_cta_btn")}</span>
           </ShimmerButton>
         </div>
       </BackgroundBeamsWithCollision>
       <ScrollButton
-        targetId="hero"
         arrowClassName="-rotate-90"
         buttonClassName="animate-float absolute bottom-0"
+        targetId="hero"
       />
     </section>
   );

@@ -20,7 +20,7 @@ type RepoFileNodeProps = NodeRendererProps<FileNode> & {
   onMyToggle: (id: string, data: FileNode) => void;
 };
 
-export function RepoFileNode({ node, style, mySelectedIds, onMyToggle }: RepoFileNodeProps) {
+export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFileNodeProps) {
   const isFolder = !node.isLeaf;
   const isRecommended = node.data.recommended;
 
@@ -38,19 +38,19 @@ export function RepoFileNode({ node, style, mySelectedIds, onMyToggle }: RepoFil
     <div
       role="button"
       tabIndex={0}
-      style={style}
-      className={cn(
-        "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1 transition-colors outline-none",
-        "hover:bg-accent/50",
-        mySelectedIds.has(node.id) && "bg-accent/30",
-        node.isFocused && "ring-ring inset-0 ring-1"
-      )}
       onClick={handleAction}
       onKeyDown={(e) => {
         if (e.key === " " || e.key === "Enter") {
           handleAction(e);
         }
       }}
+      className={cn(
+        "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1 transition-colors outline-none",
+        "hover:bg-accent/50",
+        mySelectedIds.has(node.id) && "bg-accent/30",
+        node.isFocused && "ring-ring inset-0 ring-1"
+      )}
+      style={style}
     >
       <div className="flex items-center">
         <Checkbox

@@ -2,14 +2,14 @@ type Props = {
   className?: string;
 };
 
-export function OpenAiLogo({ className }: Props) {
+export function OpenAiLogo({ className }: Readonly<Props>) {
   return (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="100%"
+      fill="none"
       height="100%"
       viewBox="0 0 1604 719"
-      fill="none"
+      width="100%"
+      xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
       <g clipPath="url(#clip0_1637_3573)">
@@ -37,7 +37,7 @@ export function OpenAiLogo({ className }: Props) {
       </g>
       <defs>
         <clipPath id="clip0_1637_3573">
-          <rect width="1603.2" height="717.6" fill="white" transform="translate(0 0.899902)" />
+          <rect fill="white" height="717.6" transform="translate(0 0.899902)" width="1603.2" />
         </clipPath>
       </defs>
     </svg>

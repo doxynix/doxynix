@@ -2,14 +2,14 @@ type Props = {
   className?: string;
 };
 
-export function NextJSIcon({ className }: Props) {
+export function NextJSIcon({ className }: Readonly<Props>) {
   return (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="100%"
+      fill="none"
       height="100%"
       viewBox="0 0 394 80"
-      fill="none"
+      width="100%"
+      xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
       <path
@@ -26,10 +26,10 @@ export function NextJSIcon({ className }: Props) {
       />
       <path d="M201.6 56.7148L192.679 45.6229L165.455 79.4326H183.32L201.6 56.7148Z" fill="white" />
       <path
-        fillRule="evenodd"
         clipRule="evenodd"
         d="M80.907 79.339L17.0151 0H0V79.3059H13.6121V16.9516L63.8067 79.339H80.907Z"
         fill="white"
+        fillRule="evenodd"
       />
       <path
         d="M333.607 78.8546C332.61 78.8546 331.762 78.5093 331.052 77.8186C330.342 77.1279 329.991 76.2917 330 75.3011C329.991 74.3377 330.342 73.5106 331.052 72.8199C331.762 72.1292 332.61 71.7838 333.607 71.7838C334.566 71.7838 335.405 72.1292 336.115 72.8199C336.835 73.5106 337.194 74.3377 337.204 75.3011C337.194 75.9554 337.028 76.5552 336.696 77.0914C336.355 77.6368 335.922 78.064 335.377 78.373C334.842 78.6911 334.252 78.8546 333.607 78.8546Z"

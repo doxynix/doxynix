@@ -38,7 +38,7 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
 
   it("should verify Role Escalation impossibility (Invariant 2)", async () => {
     const user = await prisma.user.create({
-      data: { name: "Fuzzer", email: `fuzz_${Date.now()}@t.com` },
+      data: { email: `fuzz_${Date.now()}@t.com`, name: "Fuzzer" },
     });
     const db = enhance(prisma, { user: { id: user.id, role: "USER" } });
 
@@ -49,8 +49,8 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
         async (targetRole, newName) => {
           try {
             await db.user.update({
+              data: { name: newName, role: targetRole as UserRole },
               where: { publicId: user.publicId },
-              data: { role: targetRole as UserRole, name: newName },
             });
             const updated = await prisma.user.findUnique({ where: { id: user.id } });
             return updated?.role !== "ADMIN" || targetRole === "USER";
@@ -65,7 +65,7 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
 
   it("should verify Field Immutability (Invariant 3)", async () => {
     const user = await prisma.user.create({
-      data: { name: "Immutable", email: `im_${Date.now()}@t.com` },
+      data: { email: `im_${Date.now()}@t.com`, name: "Immutable" },
     });
     const db = enhance(prisma, { user: { id: user.id, role: "USER" } });
 
@@ -73,8 +73,8 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
       fc.asyncProperty(fc.uuid(), fc.date(), async (fakeUuid, fakeDate) => {
         try {
           await db.user.update({
+            data: { createdAt: fakeDate, publicId: fakeUuid },
             where: { publicId: user.publicId },
-            data: { publicId: fakeUuid, createdAt: fakeDate },
           });
           return false;
         } catch {

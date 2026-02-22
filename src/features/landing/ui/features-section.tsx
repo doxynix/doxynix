@@ -7,13 +7,13 @@ import { BentoCard, BentoGrid } from "@/shared/ui/visuals/bento-grid";
 import { SimulationTerminal } from "./simulation-terminal";
 
 type BentoFeature = {
-  name: string;
-  className: string;
   background: ReactNode;
-  Icon: typeof Activity;
+  className: string;
+  cta: string;
   description: string;
   href: string;
-  cta: string;
+  Icon: typeof Activity;
+  name: string;
 };
 
 const MockGraph = () => (
@@ -33,21 +33,19 @@ export function FeaturesSection() {
 
   const FEATURES: BentoFeature[] = [
     {
-      name: t("section_features_cli_name"),
-      className: "lg:col-span-2 lg:row-span-2",
       background: (
         <div className="absolute inset-0 flex items-center justify-center p-4 pt-10 sm:p-8 sm:pt-14">
           <SimulationTerminal />
         </div>
       ),
-      Icon: Terminal,
+      className: "lg:col-span-2 lg:row-span-2",
+      cta: t("section_features_cli_cta"),
       description: t("section_features_cli_desc"),
       href: "/docs/cli",
-      cta: t("section_features_cli_cta"),
+      Icon: Terminal,
+      name: t("section_features_cli_name"),
     },
     {
-      name: t("section_features_health_name"),
-      className: "lg:col-span-1 lg:row-span-2",
       background: (
         <div className="itemend flex flex-col justify-end overflow-hidden p-8 text-right">
           <div className="top-10 right-10 text-4xl font-bold">98%</div>
@@ -58,49 +56,51 @@ export function FeaturesSection() {
           <MockGraph />
         </div>
       ),
-      Icon: Activity,
+      className: "lg:col-span-1 lg:row-span-2",
+      cta: t("section_features_health_cta"),
       description: t("section_features_health_desc"),
       href: "/features/analytics",
-      cta: t("section_features_health_cta"),
+      Icon: Activity,
+      name: t("section_features_health_name"),
     },
     {
-      name: t("section_features_ast_name"),
-      className: "lg:col-span-1 lg:row-span-1",
       background: (
         <div className="flex justify-end p-4 text-right opacity-30 transition-opacity group-hover:opacity-50">
           <Code2 className="text-muted-foreground h-24 w-24 -rotate-12" />
         </div>
       ),
-      Icon: Cpu,
+      className: "lg:col-span-1 lg:row-span-1",
+      cta: t("section_features_ast_cta"),
       description: t("section_features_ast_desc"),
       href: "/features/engine",
-      cta: t("section_features_ast_cta"),
+      Icon: Cpu,
+      name: t("section_features_ast_name"),
     },
     {
-      name: t("section_features_security_name"),
-      className: "lg:col-span-1 lg:row-span-1",
       background: (
         <div className="flex justify-end p-4 text-right opacity-30 transition-opacity group-hover:opacity-50">
           <Lock className="text-muted-foreground h-24 w-24 -rotate-12" />
         </div>
       ),
-      Icon: Lock,
+      className: "lg:col-span-1 lg:row-span-1",
+      cta: t("section_features_security_cta"),
       description: t("section_features_security_desc"),
       href: "/security",
-      cta: t("section_features_security_cta"),
+      Icon: Lock,
+      name: t("section_features_security_name"),
     },
     {
-      name: t("section_features_export_name"),
-      className: "lg:col-span-1 lg:row-span-1",
       background: (
         <div className="flex justify-end p-4 text-right opacity-30 transition-opacity group-hover:opacity-50">
           <FileJson className="text-muted-foreground h-24 w-24 -rotate-12" />
         </div>
       ),
-      Icon: Share2,
+      className: "lg:col-span-1 lg:row-span-1",
+      cta: t("section_features_export_cta"),
       description: t("section_features_export_desc"),
       href: "/features/exports",
-      cta: t("section_features_export_cta"),
+      Icon: Share2,
+      name: t("section_features_export_name"),
     },
   ];
 

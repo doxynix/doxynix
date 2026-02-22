@@ -12,9 +12,9 @@ describe("Concurrency, Transactions & Integrity", () => {
   it("should handle Race Conditions on Unique Constraints", async () => {
     const alice = await createTestUser("Alice");
     const base = {
-      url: "https://github.com/alice/race",
-      owner: "a",
       githubId: 999,
+      owner: "a",
+      url: "https://github.com/alice/race",
       userId: alice.user.id,
       visibility: "PRIVATE" as const,
     };
@@ -31,18 +31,18 @@ describe("Concurrency, Transactions & Integrity", () => {
     const alice = await createTestUser("Alice");
     const repo = await alice.db.repo.create({
       data: {
-        name: "inc",
-        url: "https://github.com/alice/inc",
-        owner: "a",
         githubId: 1,
-        userId: alice.user.id,
+        name: "inc",
+        owner: "a",
         stars: 0,
+        url: "https://github.com/alice/inc",
+        userId: alice.user.id,
       },
     });
 
     await Promise.all([
-      prisma.repo.update({ where: { publicId: repo.publicId }, data: { stars: { increment: 1 } } }),
-      prisma.repo.update({ where: { publicId: repo.publicId }, data: { stars: { increment: 1 } } }),
+      prisma.repo.update({ data: { stars: { increment: 1 } }, where: { publicId: repo.publicId } }),
+      prisma.repo.update({ data: { stars: { increment: 1 } }, where: { publicId: repo.publicId } }),
     ]);
 
     const final = await prisma.repo.findUnique({ where: { publicId: repo.publicId } });
@@ -57,10 +57,10 @@ describe("Concurrency, Transactions & Integrity", () => {
       await prisma.$transaction(async (tx) => {
         await tx.repo.create({
           data: {
-            name: repoName,
-            url: "https://github.com/alice/rollback",
-            owner: "a",
             githubId: 500,
+            name: repoName,
+            owner: "a",
+            url: "https://github.com/alice/rollback",
             userId: alice.user.id,
           },
         });
@@ -78,10 +78,10 @@ describe("Concurrency, Transactions & Integrity", () => {
     const alice = await createTestUser("Alice");
     const repo = await alice.db.repo.create({
       data: {
-        name: "b",
-        url: "https://github.com/alice/b",
-        owner: "a",
         githubId: 2,
+        name: "b",
+        owner: "a",
+        url: "https://github.com/alice/b",
         userId: alice.user.id,
       },
     });
@@ -89,10 +89,10 @@ describe("Concurrency, Transactions & Integrity", () => {
     await expectValidationFail(
       alice.db.analysis.create({
         data: {
-          repo: { connect: { publicId: repo.publicId } },
-          status: "DONE",
           commitSha: "x",
+          repo: { connect: { publicId: repo.publicId } },
           score: 101,
+          status: "DONE",
         },
       })
     );
@@ -100,10 +100,10 @@ describe("Concurrency, Transactions & Integrity", () => {
     const maliciousJson = { v: "'; DROP TABLE users; --" };
     const analysis = await alice.db.analysis.create({
       data: {
-        repo: { connect: { publicId: repo.publicId } },
-        status: "DONE",
         commitSha: "x",
         metricsJson: maliciousJson,
+        repo: { connect: { publicId: repo.publicId } },
+        status: "DONE",
       },
     });
 

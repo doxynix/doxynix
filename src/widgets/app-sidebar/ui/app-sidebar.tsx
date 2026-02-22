@@ -46,7 +46,7 @@ export function AppSidebar() {
     );
 
   return (
-    <Sidebar className="top-16 h-[calc(100vh-4rem)]" collapsible="icon" variant="sidebar">
+    <Sidebar collapsible="icon" variant="sidebar" className="top-16 h-[calc(100vh-4rem)]">
       <SidebarHeader>
         <SidebarMenu>
           {sidebarMenu.map((item) => (
@@ -60,7 +60,7 @@ export function AppSidebar() {
         <ScrollArea className="h-full">
           <Collapsible defaultOpen className="group/collapsible">
             <SidebarGroup>
-              <SidebarGroupLabel className="truncate" asChild>
+              <SidebarGroupLabel asChild className="truncate">
                 <CollapsibleTrigger
                   className={cn(
                     "flex cursor-pointer justify-between hover:underline",
@@ -96,11 +96,11 @@ export function AppSidebar() {
 
                     {data?.pages.map((page) =>
                       page.items.map((repo) => (
-                        <SidebarMenuItem className="max-w-60" key={repo.id}>
+                        <SidebarMenuItem key={repo.id} className="max-w-60">
                           <SidebarLink
+                            href={`/dashboard/repo/${repo.owner}/${repo.name}`}
                             icon={Book}
                             label={`${repo.owner}/${repo.name}`}
-                            href={`/dashboard/repo/${repo.owner}/${repo.name}`}
                           />
                         </SidebarMenuItem>
                       ))
@@ -112,26 +112,26 @@ export function AppSidebar() {
                     )}
                     {hasNextPage && (
                       <AppTooltip
-                        side="right"
                         content={t("sidebar_show_more")}
                         hidden={state !== "collapsed"}
+                        side="right"
                       >
                         <SidebarMenuItem className="truncate">
                           {state === "expanded" ? (
                             <LoadingButton
-                              variant="ghost"
-                              className="text-muted-foreground hover:text-foreground hover:bg-primary/90 flex h-8 w-full cursor-pointer items-center justify-start text-xs"
                               disabled={isFetchingNextPage}
-                              onClick={() => void fetchNextPage()}
                               isLoading={isFetchingNextPage}
                               loadingText=""
+                              variant="ghost"
+                              onClick={() => void fetchNextPage()}
+                              className="text-muted-foreground hover:text-foreground hover:bg-primary/90 flex h-8 w-full cursor-pointer items-center justify-start text-xs"
                             >
                               <ChevronDown /> <>{t("sidebar_show_more")}</>
                             </LoadingButton>
                           ) : (
                             <Button
-                              onClick={() => void fetchNextPage()}
                               variant="ghost"
+                              onClick={() => void fetchNextPage()}
                               className="text-muted-foreground hover:text-foreground hover:bg-primary/90 flex h-8 w-full cursor-pointer items-center justify-center p-1"
                             >
                               {isFetchingNextPage ? (
@@ -154,12 +154,12 @@ export function AppSidebar() {
       <SidebarSeparator className="m-0" />
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarLink label={t("sidebar_help")} href="/support" icon={CircleQuestionMark} />
+          <SidebarLink href="/support" icon={CircleQuestionMark} label={t("sidebar_help")} />
           <SidebarLink
-            label={t("sidebar_documentation")}
             href="https://docs.doxynix.space"
-            icon={BookText}
             isBlank
+            icon={BookText}
+            label={t("sidebar_documentation")}
           />
         </SidebarMenu>
       </SidebarFooter>

@@ -4,22 +4,22 @@ import { cn } from "@/shared/lib/utils";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 type Props = {
-  title: string;
+  className?: string;
   code?: string;
   codeClassName?: string;
   codeHtml: string;
-  className?: string;
   copyButtonVisible?: boolean;
+  title: string;
 };
 
 export function CodeWindow({
-  title,
+  className,
   code,
   codeClassName,
   codeHtml,
-  className,
   copyButtonVisible = true,
-}: Props) {
+  title,
+}: Readonly<Props>) {
   const t = useTranslations("Common");
 
   return (
@@ -41,15 +41,15 @@ export function CodeWindow({
           </div>
         </div>
         {copyButtonVisible && (
-          <CopyButton tooltipText={t("copy_code")} className="opacity-100" value={code ?? ""} />
+          <CopyButton value={code ?? ""} tooltipText={t("copy_code")} className="opacity-100" />
         )}
       </div>
       <div
+        dangerouslySetInnerHTML={{ __html: codeHtml }}
         className={cn(
           "overflow-x-auto p-6 font-mono leading-relaxed [&>pre]:bg-transparent! [&>pre]:p-0!",
           codeClassName
         )}
-        dangerouslySetInnerHTML={{ __html: codeHtml }}
       />
     </div>
   );

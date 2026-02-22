@@ -2,29 +2,29 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Doxynix",
-    short_name: "Doxynix",
-    description: "Code analysis and documentation tool",
-    start_url: "/dashboard",
-    display: "standalone",
     background_color: "#09090b",
-    theme_color: "#22c55e",
+    description: "Code analysis and documentation tool",
+    display: "standalone",
     icons: [
       {
-        src: "/favicon.ico",
         sizes: "any",
+        src: "/favicon.ico",
         type: "image/x-icon",
       },
       {
-        src: "/icons/icon-192x192.png",
         sizes: "192x192",
+        src: "/icons/icon-192x192.png",
         type: "image/png",
       },
       {
-        src: "/icons/icon-512x512.png",
         sizes: "512x512",
+        src: "/icons/icon-512x512.png",
         type: "image/png",
       },
     ],
+    name: "Doxynix",
+    short_name: "Doxynix",
+    start_url: "/dashboard",
+    theme_color: "#22c55e",
   };
 }

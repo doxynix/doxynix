@@ -2,10 +2,11 @@ import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { retry } from "@octokit/plugin-retry";
 import { throttling } from "@octokit/plugin-throttling";
 import { Octokit, type RestEndpointMethodTypes } from "@octokit/rest";
-import { Visibility, type PrismaClient } from "@prisma/client";
+import { Visibility } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import parseGithubUrl from "parse-github-url";
 
+import type { DbClient } from "@/shared/api/db/db";
 import { SYSTEM_TOKEN } from "@/shared/constants/env.server";
 import { logger } from "@/shared/lib/logger";
 import type { RepoItemFields } from "@/shared/types/repo-item";
@@ -21,98 +22,10 @@ type ListRepoItem =
 type GitHubRepoResponse = SearchRepoItem | ListRepoItem;
 
 export const githubService = {
-  parseUrl(input: string) {
-    if (!input?.trim()) throw new Error("Field cannot be empty");
-
-    const parsed = parseGithubUrl(input);
-
-    if (
-      parsed == null ||
-      parsed.owner == null ||
-      parsed.owner.trim().length === 0 ||
-      parsed.name == null ||
-      parsed.name.trim().length === 0
-    ) {
-      throw new Error("Invalid format. Enter 'owner/repo' or repository URL");
-    }
-
-    return { owner: parsed.owner, name: parsed.name };
-  },
-
-  async searchRepos(
-    prisma: PrismaClient,
-    userId: number,
-    query: string,
-    limit: number | undefined
-  ): Promise<RepoItemFields[]> {
-    if (query.length < 2 || query.length > 256) return [];
-
-    const octokit = await this.getClientForUser(prisma, userId);
-
-    try {
-      const { data } = await octokit.search.repos({
-        q: query,
-        per_page: limit ?? 10,
-      });
-
-      return data.items.map((repo) => ({
-        fullName: repo.full_name,
-        stars: repo.stargazers_count,
-        visibility: repo.private ? Visibility.PRIVATE : Visibility.PUBLIC,
-        description: repo.description,
-        language: repo.language,
-        updatedAt: repo.updated_at,
-      }));
-    } catch (error) {
-      logger.error({ msg: "GitHub search error", error });
-      return [];
-    }
-  },
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getMyRepos(prisma: any, userId: number, limit?: number): Promise<RepoItemFields[]> {
-    try {
-      const octokit = await this.getClientForUser(prisma, userId);
-
-      if (limit != null) {
-        const { data } = await octokit.rest.repos.listForAuthenticatedUser({
-          sort: "updated",
-          direction: "desc",
-          per_page: limit,
-          visibility: "all",
-        });
-        return this.mapRepos(data);
-      }
-
-      const repos = await octokit.paginate(octokit.rest.repos.listForAuthenticatedUser, {
-        sort: "updated",
-        direction: "desc",
-        per_page: 100,
-        visibility: "all",
-      });
-
-      return this.mapRepos(repos);
-    } catch (error) {
-      logger.error({ msg: "Error fetching repositories", userId, error });
-      return [];
-    }
-  },
-
-  mapRepos(data: GitHubRepoResponse[]): RepoItemFields[] {
-    return data.map((repo) => ({
-      fullName: repo.full_name,
-      stars: repo.stargazers_count ?? 0,
-      visibility: repo.private === true ? Visibility.PRIVATE : Visibility.PUBLIC,
-      description: repo.description ?? null,
-      language: repo.language ?? null,
-      updatedAt: repo.updated_at ?? new Date().toISOString(),
-    }));
-  },
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async getClientForUser(prisma: any, userId: number) {
     const account = await prisma.account.findFirst({
-      where: { userId, provider: "github" },
+      where: { provider: "github", userId },
     });
 
     const token = account?.access_token ?? SYSTEM_TOKEN;
@@ -127,13 +40,15 @@ export const githubService = {
 
     return new MyOctokit({
       auth: token,
-      userAgent: "Doxynix/1.0.0",
-
       log: {
         debug: (msg) => logger.debug({ msg }),
+        error: (msg) => logger.error({ msg }),
         info: (msg) => logger.info({ msg }),
         warn: (msg) => logger.warn({ msg }),
-        error: (msg) => logger.error({ msg }),
+      },
+
+      retry: {
+        doNotRetry: [429],
       },
 
       throttle: {
@@ -151,20 +66,47 @@ export const githubService = {
         },
       },
 
-      retry: {
-        doNotRetry: [429],
-      },
+      userAgent: "Doxynix/1.0.0",
     });
   },
 
-  async getRepoInfo(prisma: PrismaClient, userId: number, owner: string, name: string) {
+  async getMyRepos(prisma: DbClient, userId: number, limit?: number): Promise<RepoItemFields[]> {
+    try {
+      const octokit = await this.getClientForUser(prisma, userId);
+
+      if (limit != null) {
+        const { data } = await octokit.rest.repos.listForAuthenticatedUser({
+          direction: "desc",
+          per_page: limit,
+          sort: "updated",
+          visibility: "all",
+        });
+        return this.mapRepos(data);
+      }
+
+      const repos = await octokit.paginate(octokit.rest.repos.listForAuthenticatedUser, {
+        direction: "desc",
+        per_page: 100,
+        sort: "updated",
+        visibility: "all",
+      });
+
+      return this.mapRepos(repos);
+    } catch (error) {
+      logger.error({ error, msg: "Error fetching repositories", userId });
+      return [];
+    }
+  },
+
+  async getRepoInfo(prisma: DbClient, userId: number, owner: string, name: string) {
     const octokit = await this.getClientForUser(prisma, userId);
     const { data } = await octokit.repos.get({ owner, repo: name });
 
     return data;
   },
+
   async getRepoTree(
-    prisma: PrismaClient,
+    prisma: DbClient,
     userId: number,
     owner: string,
     name: string,
@@ -177,9 +119,9 @@ export const githubService = {
 
     const { data } = await octokit.git.getTree({
       owner,
+      recursive: "1",
       repo: name,
       tree_sha: treeSha,
-      recursive: "1",
     });
 
     return data.tree
@@ -191,8 +133,66 @@ export const githubService = {
       })
       .map((item) => ({
         path: item.path!,
-        type: item.type,
         sha: item.sha,
+        type: item.type,
       }));
+  },
+
+  mapRepos(data: GitHubRepoResponse[]): RepoItemFields[] {
+    return data.map((repo) => ({
+      description: repo.description ?? null,
+      fullName: repo.full_name,
+      language: repo.language ?? null,
+      stars: repo.stargazers_count ?? 0,
+      updatedAt: repo.updated_at ?? new Date().toISOString(),
+      visibility: repo.private === true ? Visibility.PRIVATE : Visibility.PUBLIC,
+    }));
+  },
+
+  parseUrl(input: string) {
+    if (!input?.trim()) throw new Error("Field cannot be empty");
+
+    const parsed = parseGithubUrl(input);
+
+    if (
+      parsed == null ||
+      parsed.owner == null ||
+      parsed.owner.trim().length === 0 ||
+      parsed.name == null ||
+      parsed.name.trim().length === 0
+    ) {
+      throw new Error("Invalid format. Enter 'owner/repo' or repository URL");
+    }
+
+    return { name: parsed.name, owner: parsed.owner };
+  },
+  async searchRepos(
+    prisma: DbClient,
+    userId: number,
+    query: string,
+    limit: number | undefined
+  ): Promise<RepoItemFields[]> {
+    if (query.length < 2 || query.length > 256) return [];
+
+    const octokit = await this.getClientForUser(prisma, userId);
+
+    try {
+      const { data } = await octokit.search.repos({
+        per_page: limit ?? 10,
+        q: query,
+      });
+
+      return data.items.map((repo) => ({
+        description: repo.description,
+        fullName: repo.full_name,
+        language: repo.language,
+        stars: repo.stargazers_count,
+        updatedAt: repo.updated_at,
+        visibility: repo.private ? Visibility.PRIVATE : Visibility.PUBLIC,
+      }));
+    } catch (error) {
+      logger.error({ error, msg: "GitHub search error" });
+      return [];
+    }
   },
 };

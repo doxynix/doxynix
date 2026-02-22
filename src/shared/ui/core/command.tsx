@@ -53,7 +53,7 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   CommandInputProps
 >(({ className, isLoading, ...props }, ref) => (
-  <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+  <div cmdk-input-wrapper="" className="flex items-center border-b px-3">
     {isLoading ? (
       <Spinner className="mr-2 h-4 w-4 shrink-0 opacity-50" />
     ) : (

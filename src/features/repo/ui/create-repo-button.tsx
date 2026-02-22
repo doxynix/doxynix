@@ -11,7 +11,7 @@ export function CreateRepoButton() {
   const t = useTranslations("Dashboard");
 
   return (
-    <Button className="cursor-pointer" variant="outline" onClick={openDialog}>
+    <Button variant="outline" onClick={openDialog} className="cursor-pointer">
       <Plus /> {t("repo_add_repository")}
     </Button>
   );

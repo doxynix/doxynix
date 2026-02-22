@@ -5,7 +5,7 @@ type Props = {
   value?: string | Date;
 };
 
-export function DateComp({ isYear = false, value }: Props) {
+export function DateComp({ isYear = false, value }: Readonly<Props>) {
   const targetDate = value ? new Date(value) : new Date();
 
   return (

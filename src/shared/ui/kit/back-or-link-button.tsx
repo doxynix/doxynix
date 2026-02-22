@@ -15,14 +15,14 @@ interface BackOrLinkButtonProps extends ButtonProps {
 }
 
 export function BackOrLinkButton({
+  children,
+  className,
   href,
   label,
   showIcon = false,
-  className,
-  children,
   variant = "outline",
   ...props
-}: BackOrLinkButtonProps) {
+}: Readonly<BackOrLinkButtonProps>) {
   const router = useRouter();
 
   const content = (
@@ -34,7 +34,7 @@ export function BackOrLinkButton({
 
   if (href) {
     return (
-      <Button variant={variant} className={cn("w-fit", className)} asChild {...props}>
+      <Button asChild variant={variant} className={cn("w-fit", className)} {...props}>
         <Link href={href}>{content}</Link>
       </Button>
     );
@@ -43,8 +43,8 @@ export function BackOrLinkButton({
   return (
     <Button
       variant={variant}
-      className={cn("w-fit", className)}
       onClick={() => router.back()}
+      className={cn("w-fit", className)}
       {...props}
     >
       {content}

@@ -32,7 +32,7 @@ export function calculateHealthScore(repo: Repo, busFactor: number, docDensity: 
   return Math.max(0, Math.min(100, score));
 }
 
-export function calculateCodeMetrics(files: { path: string; content: string }[]): Omit<
+export function calculateCodeMetrics(files: { content: string; path: string }[]): Omit<
   RepoMetrics,
   "busFactor" | "healthScore" | "onboardingScore" | "maintenanceStatus"
 > & {
@@ -70,9 +70,9 @@ export function calculateCodeMetrics(files: { path: string; content: string }[])
 
   const languages: LanguageMetric[] = Object.entries(langStats)
     .map(([name, lines]) => ({
-      name: name,
-      lines,
       color: getLanguageColor(name) || "#cccccc",
+      lines,
+      name: name,
     }))
     .sort((a, b) => b.lines - a.lines)
     .slice(0, 6);
@@ -81,19 +81,19 @@ export function calculateCodeMetrics(files: { path: string; content: string }[])
   const modularityIndex = calculateModularity(totalSource, files.length);
 
   return {
-    totalLoc: totalSource + totalComments,
-    fileCount: files.length,
-    totalSizeKb: Math.round(totalSize / 1024),
-    languages,
-    docDensity,
-    modularityIndex,
-    techDebtScore: 0,
     complexityScore: 0,
+    docDensity,
+    fileCount: files.length,
+    languages,
+    modularityIndex,
     mostComplexFiles: [],
+    techDebtScore: 0,
+    totalLoc: totalSource + totalComments,
+    totalSizeKb: Math.round(totalSize / 1024),
   };
 }
 
-export function calculateTeamRoles(contributors: { login: string; contributions: number }[]) {
+export function calculateTeamRoles(contributors: { contributions: number; login: string }[]) {
   const total = contributors.reduce((acc, c) => acc + c.contributions, 0);
 
   return contributors
@@ -107,8 +107,8 @@ export function calculateTeamRoles(contributors: { login: string; contributions:
 
       return {
         login: c.login,
-        share: Math.round(share),
         role,
+        share: Math.round(share),
       };
     })
     .slice(0, 5);

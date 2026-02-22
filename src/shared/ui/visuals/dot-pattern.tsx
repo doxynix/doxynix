@@ -16,16 +16,16 @@ import { cn } from "@/shared/lib/utils";
  * @param {boolean} [glow=false] - Whether dots should have a glowing animation effect
  */
 interface DotPatternProps extends React.SVGProps<SVGSVGElement> {
-  width?: number;
-  height?: number;
-  x?: number;
-  y?: number;
+  [key: string]: unknown;
+  className?: string;
+  cr?: number;
   cx?: number;
   cy?: number;
-  cr?: number;
-  className?: string;
   glow?: boolean;
-  [key: string]: unknown;
+  height?: number;
+  width?: number;
+  x?: number;
+  y?: number;
 }
 
 /**
@@ -59,16 +59,16 @@ interface DotPatternProps extends React.SVGProps<SVGSVGElement> {
  */
 
 export function DotPattern({
-  width = 16,
-  height = 16,
-  x = 0,
-  y = 0,
+  className,
+  cr = 1,
   cx = 1,
   cy = 1,
-  cr = 1,
-  className,
+  height = 16,
+  width = 16,
+  x = 0,
+  y = 0,
   ...props
-}: DotPatternProps) {
+}: Readonly<DotPatternProps>) {
   const id = useId();
 
   return (
@@ -83,17 +83,17 @@ export function DotPattern({
       <defs>
         <pattern
           id={id}
-          width={width}
           height={height}
-          patternUnits="userSpaceOnUse"
           patternContentUnits="userSpaceOnUse"
+          patternUnits="userSpaceOnUse"
+          width={width}
           x={x}
           y={y}
         >
           <circle id="pattern-circle" cx={cx} cy={cy} r={cr} />
         </pattern>
       </defs>
-      <rect width="100%" height="100%" strokeWidth={0} fill={`url(#${id})`} />
+      <rect fill={`url(#${id})`} height="100%" strokeWidth={0} width="100%" />
     </svg>
   );
 }

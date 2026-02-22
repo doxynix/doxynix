@@ -23,5 +23,5 @@ export function useCopyToClipboard(timeout = 2000) {
     [timeout]
   );
 
-  return { isCopied, copy };
+  return { copy, isCopied };
 }

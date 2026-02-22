@@ -32,7 +32,7 @@ const getHealthColor = (score: number) => {
   return "var(--color-success)";
 };
 
-export function RepoCard({ repo }: Props) {
+export function RepoCard({ repo }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
   const locale = useLocale();
   const visibility = repoVisibilityConfig[repo.visibility];
@@ -46,7 +46,7 @@ export function RepoCard({ repo }: Props) {
     <Card className="group hover:bg-muted/50 relative flex overflow-hidden p-4 transition-colors">
       <CardContent className="flex justify-center gap-4 md:justify-between">
         <div className="flex min-w-0 flex-wrap gap-2 not-md:justify-center sm:flex-nowrap">
-          <RepoAvatar src={repo.ownerAvatarUrl ?? "/avatar-placeholder.png"} alt={repo.owner} />
+          <RepoAvatar alt={repo.owner} src={repo.ownerAvatarUrl ?? "/avatar-placeholder.png"} />
           <div className="flex min-w-0 flex-col justify-between gap-1 not-md:items-center">
             <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center justify-center gap-1 truncate text-sm">
@@ -77,8 +77,8 @@ export function RepoCard({ repo }: Props) {
                   <AppTooltip content={t("repo_open_on_github_tooltip")}>
                     <a
                       href={repo.url}
-                      target="_blank"
                       rel="noopener noreferrer"
+                      target="_blank"
                       className="text-muted-foreground hover:text-foreground flex h-6 w-6 items-center justify-center rounded opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
                     >
                       <GitHubIcon className="h-4 w-4" />
@@ -104,10 +104,10 @@ export function RepoCard({ repo }: Props) {
               {gitMetrics.map((m) => (
                 <RepoGitMetric
                   key={m.id}
+                  color={m.color}
                   icon={m.icon}
                   label={m.label}
                   tooltip={m.tooltip}
-                  color={m.color}
                   className={cn(
                     "text-muted-foreground hover:text-foreground text-xs transition-colors",
                     m.className
@@ -154,12 +154,12 @@ export function RepoCard({ repo }: Props) {
             {!hasAnalysis && (
               <Button
                 size="sm"
-                className="mt-2 cursor-pointer"
                 variant="outline"
                 onClick={(e) => {
                   e.preventDefault();
                   console.log("Analyze clicked", repo.id);
                 }}
+                className="mt-2 cursor-pointer"
               >
                 <Play className="h-3 w-3" />
                 Run Analysis

@@ -16,10 +16,10 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
     await expectDenied(
       alice.db.repo.create({
         data: {
-          name: "evil",
-          url: "https://github.com/alice/evil",
-          owner: "a",
           githubId: 1,
+          name: "evil",
+          owner: "a",
+          url: "https://github.com/alice/evil",
           userId: bob.user.id,
         },
       })
@@ -28,22 +28,22 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
     await expectDenied(
       alice.db.repo.create({
         data: {
-          name: "evil-conn",
-          url: "https://github.com/alice/evil-conn",
-          owner: "a",
           githubId: 2,
-          visibility: "PRIVATE",
+          name: "evil-conn",
+          owner: "a",
+          url: "https://github.com/alice/evil-conn",
           user: { connect: { publicId: bob.user.publicId } },
+          visibility: "PRIVATE",
         },
       })
     );
 
     const aliceRepo = await alice.db.repo.create({
       data: {
-        name: "ok",
-        url: "https://github.com/alice/ok",
-        owner: "a",
         githubId: 3,
+        name: "ok",
+        owner: "a",
+        url: "https://github.com/alice/ok",
         userId: alice.user.id,
       },
     });
@@ -51,9 +51,9 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
     await expectDenied(
       bob.db.analysis.create({
         data: {
+          commitSha: "x",
           repo: { connect: { publicId: aliceRepo.publicId } },
           status: "NEW",
-          commitSha: "x",
         },
       })
     );
@@ -66,10 +66,10 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
 
     await alice.db.repo.create({
       data: {
-        name: "target",
-        url: "https://github.com/alice/target",
-        owner: "a",
         githubId: 10,
+        name: "target",
+        owner: "a",
+        url: "https://github.com/alice/target",
         userId: alice.user.id,
       },
     });
@@ -93,18 +93,18 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
 
     const repo = await alice.db.repo.create({
       data: {
-        name: "my-precious",
-        url: "https://github.com/alice/precious",
-        owner: "a",
         githubId: 777,
+        name: "my-precious",
+        owner: "a",
+        url: "https://github.com/alice/precious",
         userId: alice.user.id,
       },
     });
 
     await expectDenied(
       alice.db.repo.update({
-        where: { publicId: repo.publicId },
         data: { userId: bob.user.id },
+        where: { publicId: repo.publicId },
       })
     );
 
@@ -113,8 +113,8 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
 
     try {
       await admin.db.repo.update({
-        where: { publicId: repo.publicId },
         data: { userId: bob.user.id },
+        where: { publicId: repo.publicId },
       });
     } catch (e: unknown) {
       if (e instanceof Error && e.message.includes("result is not allowed to be read back")) {

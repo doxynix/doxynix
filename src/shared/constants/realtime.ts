@@ -1,7 +1,7 @@
 export const REALTIME_CONFIG = {
   channels: {
-    system: "system-broadcast",
     news: "public-news",
+    system: "system-broadcast",
     user: (userId: string | number) => `user:${userId}`,
   },
   events: {
@@ -9,8 +9,8 @@ export const REALTIME_CONFIG = {
       maintenance: "maintenance",
     },
     user: {
-      notification: "notification",
       analysisProgress: "analysis-progress",
+      notification: "notification",
     },
   },
 } as const;

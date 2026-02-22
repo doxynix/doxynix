@@ -7,12 +7,12 @@ import { userRouter } from "@/server/trpc/router/user.router";
 import { createTRPCRouter } from "@/server/trpc/trpc";
 
 export const appRouter = createTRPCRouter({
-  health: healthRouter,
   analytics: analyticsRouter,
+  apikey: apiKeyRouter,
+  health: healthRouter,
+  notification: notificationRouter,
   repo: repoRouter,
   user: userRouter,
-  apikey: apiKeyRouter,
-  notification: notificationRouter,
 });
 
 export type AppRouter = typeof appRouter;

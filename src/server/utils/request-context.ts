@@ -1,17 +1,17 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
 export interface RequestStore {
-  requestId: string;
-  userId?: number;
-  userRole?: string;
-
   ip: string;
-  userAgent: string;
-  referer?: string;
+  method: string;
   origin?: string;
 
   path: string;
-  method: string;
+  referer?: string;
+  requestId: string;
+  userAgent: string;
+
+  userId?: number;
+  userRole?: string;
 
   // appVersion?: string;
 }

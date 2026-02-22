@@ -1,6 +1,6 @@
 import { cleanCodeForAi } from "@/server/utils/optimizers";
 
-type FileEntry = { path: string; content: string };
+type FileEntry = { content: string; path: string };
 
 const CRITICAL_FILES = [
   "package.json",
@@ -79,8 +79,8 @@ function getGenericFileScore(filePath: string): number {
 export function prepareSmartContext(files: FileEntry[], maxChars: number = 1000000): string {
   const scoredFiles = files.map((f) => ({
     ...f,
-    score: getGenericFileScore(f.path),
     cleanContent: cleanCodeForAi(f.content),
+    score: getGenericFileScore(f.path),
   }));
 
   scoredFiles.sort((a, b) => {

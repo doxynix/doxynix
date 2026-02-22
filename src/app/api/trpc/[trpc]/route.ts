@@ -7,15 +7,15 @@ import { appRouter } from "@/server/trpc/router";
 
 const handler = (req: Request) =>
   fetchRequestHandler({
-    endpoint: TRPC_PREFIX,
-    req,
-    router: appRouter,
     createContext: () => createContext({ req }),
+    endpoint: TRPC_PREFIX,
     onError: IS_DEV
-      ? ({ path, error }) => {
+      ? ({ error, path }) => {
           console.error(`tRPC failed on ${path ?? "<no-path>"}: ${error.message}`);
         }
       : undefined,
+    req,
+    router: appRouter,
   });
 
 export { handler as GET, handler as POST };

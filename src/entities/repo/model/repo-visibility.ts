@@ -4,11 +4,11 @@ import { Lock, Unlock, type LucideIcon } from "lucide-react";
 export const repoVisibilityConfig: Record<
   Visibility,
   {
-    label: string;
-    icon: LucideIcon;
     color: string;
+    icon: LucideIcon;
+    label: string;
   }
 > = {
-  PRIVATE: { label: "Private", icon: Lock, color: "text-error" },
-  PUBLIC: { label: "Public", icon: Unlock, color: "text-success" },
+  PRIVATE: { color: "text-error", icon: Lock, label: "Private" },
+  PUBLIC: { color: "text-success", icon: Unlock, label: "Public" },
 };

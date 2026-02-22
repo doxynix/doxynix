@@ -1,22 +1,22 @@
 import { cn } from "@/shared/lib/utils";
 
 type AnimatedCircularProgressBarProps = {
+  className?: string;
+  gaugePrimaryColor: string;
+  gaugeSecondaryColor: string;
   max?: number;
   min?: number;
   value: number;
-  gaugePrimaryColor: string;
-  gaugeSecondaryColor: string;
-  className?: string;
 };
 
 export function AnimatedCircularProgressBar({
+  className,
+  gaugePrimaryColor,
+  gaugeSecondaryColor,
   max = 100,
   min = 0,
   value = 0,
-  gaugePrimaryColor,
-  gaugeSecondaryColor,
-  className,
-}: AnimatedCircularProgressBarProps) {
+}: Readonly<AnimatedCircularProgressBarProps>) {
   const circumference = 2 * Math.PI * 45;
   const percentPx = circumference / 100;
   const currentPercent = Math.round(((value - min) / (max - min)) * 100);
@@ -28,39 +28,39 @@ export function AnimatedCircularProgressBar({
         {
           "--circle-size": "100px",
           "--circumference": circumference,
-          "--percent-to-px": `${percentPx}px`,
+          "--delay": "0s",
           "--gap-percent": "5",
           "--offset-factor": "0",
+          "--percent-to-deg": "3.6deg",
+          "--percent-to-px": `${percentPx}px`,
           "--transition-length": "1s",
           "--transition-step": "200ms",
-          "--delay": "0s",
-          "--percent-to-deg": "3.6deg",
           transform: "translateZ(0)",
         } as React.CSSProperties
       }
     >
-      <svg fill="none" className="size-full" strokeWidth="2" viewBox="0 0 100 100">
+      <svg fill="none" strokeWidth="2" viewBox="0 0 100 100" className="size-full">
         {currentPercent <= 90 && currentPercent >= 0 && (
           <circle
             cx="50"
             cy="50"
             r="45"
-            strokeWidth="10"
             strokeDashoffset="0"
             strokeLinecap="round"
             strokeLinejoin="round"
+            strokeWidth="10"
             className="opacity-100"
             style={
               {
-                stroke: gaugeSecondaryColor,
-                "--stroke-percent": 90 - currentPercent,
                 "--offset-factor-secondary": "calc(1 - var(--offset-factor))",
+                "--stroke-percent": 90 - currentPercent,
+                stroke: gaugeSecondaryColor,
                 strokeDasharray:
                   "calc(var(--stroke-percent) * var(--percent-to-px)) var(--circumference)",
                 transform:
                   "rotate(calc(1turn - 90deg - (var(--gap-percent) * var(--percent-to-deg) * var(--offset-factor-secondary)))) scaleY(-1)",
-                transition: "all var(--transition-length) ease var(--delay)",
                 transformOrigin: "calc(var(--circle-size) / 2) calc(var(--circle-size) / 2)",
+                transition: "all var(--transition-length) ease var(--delay)",
               } as React.CSSProperties
             }
           />
@@ -69,23 +69,23 @@ export function AnimatedCircularProgressBar({
           cx="50"
           cy="50"
           r="45"
-          strokeWidth="10"
           strokeDashoffset="0"
           strokeLinecap="round"
           strokeLinejoin="round"
+          strokeWidth="10"
           className="opacity-100"
           style={
             {
-              stroke: gaugePrimaryColor,
               "--stroke-percent": currentPercent,
+              stroke: gaugePrimaryColor,
               strokeDasharray:
                 "calc(var(--stroke-percent) * var(--percent-to-px)) var(--circumference)",
-              transition:
-                "var(--transition-length) ease var(--delay),stroke var(--transition-length) ease var(--delay)",
-              transitionProperty: "stroke-dasharray,transform",
               transform:
                 "rotate(calc(-90deg + var(--gap-percent) * var(--offset-factor) * var(--percent-to-deg)))",
               transformOrigin: "calc(var(--circle-size) / 2) calc(var(--circle-size) / 2)",
+              transition:
+                "var(--transition-length) ease var(--delay),stroke var(--transition-length) ease var(--delay)",
+              transitionProperty: "stroke-dasharray,transform",
             } as React.CSSProperties
           }
         />

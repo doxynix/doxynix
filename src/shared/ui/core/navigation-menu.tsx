@@ -6,8 +6,8 @@ import { ChevronDownIcon } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 function NavigationMenu({
-  className,
   children,
+  className,
   viewport = true,
   ...props
 }: React.ComponentProps<typeof NavigationMenuPrimitive.Root> & {
@@ -60,8 +60,8 @@ const navigationMenuTriggerStyle = cva(
 );
 
 function NavigationMenuTrigger({
-  className,
   children,
+  className,
   ...props
 }: React.ComponentProps<typeof NavigationMenuPrimitive.Trigger>) {
   return (
@@ -72,8 +72,8 @@ function NavigationMenuTrigger({
     >
       {children}{" "}
       <ChevronDownIcon
-        className="relative top-px ml-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
         aria-hidden="true"
+        className="relative top-px ml-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
       />
     </NavigationMenuPrimitive.Trigger>
   );

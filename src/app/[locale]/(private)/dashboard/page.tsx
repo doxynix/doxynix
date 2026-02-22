@@ -25,13 +25,13 @@ export default async function DashboardPage() {
 
           <RepoListContainer
             config={{
-              limit: 5,
-              showPagination: false,
-              showTotalCount: false,
               forcedFilters: {
                 sortBy: "updatedAt",
                 sortOrder: "desc",
               },
+              limit: 5,
+              showPagination: false,
+              showTotalCount: false,
             }}
           />
         </div>

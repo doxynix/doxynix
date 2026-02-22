@@ -30,36 +30,33 @@ async function UTSSR() {
 }
 
 const fontSans = Inter({
+  display: "swap",
   subsets: ["latin", "cyrillic"],
   variable: "--font-sans",
-  display: "swap",
 });
 
 const fontMono = JetBrains_Mono({
+  display: "swap",
   subsets: ["latin", "cyrillic"],
   variable: "--font-mono",
-  display: "swap",
 });
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
-  width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  themeColor: "#000000",
   userScalable: true,
+  width: "device-width",
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(APP_URL),
-
   alternates: {
     canonical: "./",
   },
 
-  title: {
-    template: "%s | Doxynix",
-    default: "Doxynix - AI Code Analysis & Documentation Generator",
-  },
+  authors: [{ name: "Kramarich", url: "https://github.com/Kramarich0" }],
+
+  creator: "Doxynix Team",
 
   description:
     "Stop writing docs manually. Doxynix analyzes your codebase to generate onboarding guides, architecture diagrams, and real-time complexity metrics instantly.",
@@ -75,45 +72,48 @@ export const metadata: Metadata = {
     "developer tools",
   ],
 
-  authors: [{ name: "Kramarich", url: "https://github.com/Kramarich0" }],
-  creator: "Doxynix Team",
-
+  metadataBase: new URL(APP_URL),
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: APP_URL,
-    siteName: "Doxynix",
-    title: "Doxynix: Turn Legacy Code into Clear Documentation",
     description:
       "Automate your engineering documentation. Get instant architecture maps, bus factor analysis, and onboarding guides for your repositories.",
     images: [
       {
+        alt: "Doxynix Dashboard Preview",
+        height: 630,
         url: "/opengraph-image.png",
         width: 1200,
-        height: 630,
-        alt: "Doxynix Dashboard Preview",
       },
     ],
+    locale: "en_US",
+    siteName: "Doxynix",
+    title: "Doxynix: Turn Legacy Code into Clear Documentation",
+    type: "website",
+    url: APP_URL,
+  },
+
+  robots: {
+    follow: true,
+    googleBot: {
+      follow: true,
+      index: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+    index: true,
+  },
+
+  title: {
+    default: "Doxynix - AI Code Analysis & Documentation Generator",
+    template: "%s | Doxynix",
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "Doxynix - AI Powered Code Documentation",
+    creator: "@doxynix",
     description:
       "Generate comprehensive documentation and code metrics in one click. Perfect for managing technical debt and onboarding new developers.",
-    creator: "@doxynix",
-  },
-
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
+    title: "Doxynix - AI Powered Code Documentation",
   },
 };
 
@@ -133,7 +133,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html suppressHydrationWarning lang={locale}>
       <body
         className={cn(
           "flex min-h-dvh flex-col",
@@ -142,13 +142,13 @@ export default async function LocaleLayout({
           "antialiased"
         )}
       >
-        <NextIntlClientProvider messages={messages} locale={locale}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <Toaster
-            theme="dark" // THEME: пока так будет форс
-            position="top-center"
             richColors
             duration={4000}
             gap={8}
+            position="top-center"
+            theme="dark" // THEME: пока так будет форс
           />
           <NextTopLoader color="#ffffff" showSpinner={false} zIndex={9999} />
           <Suspense>

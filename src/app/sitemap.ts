@@ -19,10 +19,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       }
 
       sitemapEntries.push({
-        url,
-        lastModified: new Date(),
         changeFrequency: "weekly",
+        lastModified: new Date(),
         priority: path === "" ? 1 : 0.8,
+        url,
         // NOTE: alternate refs (next-intl это любит, но для простого sitemap можно и так)
       });
     });

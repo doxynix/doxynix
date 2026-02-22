@@ -13,16 +13,16 @@ import { githubService } from "@/server/services/github.service";
 import { calculateCodeMetrics, calculateHealthScore } from "@/server/utils/metrics";
 
 export async function saveResults(params: {
+  aiResult: AIResult;
   analysisId: string;
+  busFactor: number;
+  channelName: string;
+  currentSha: string;
   repo: Repo;
   userId: number;
-  validFiles: { path: string; content: string }[];
-  aiResult: AIResult;
-  busFactor: number;
-  currentSha: string;
-  channelName: string;
+  validFiles: { content: string; path: string }[];
 }) {
-  const { analysisId, repo, userId, validFiles, aiResult, busFactor, currentSha, channelName } =
+  const { aiResult, analysisId, busFactor, channelName, currentSha, repo, userId, validFiles } =
     params;
 
   const baseMetrics = calculateCodeMetrics(validFiles);
@@ -62,36 +62,36 @@ export async function saveResults(params: {
   aiResult.mainBottlenecks = aiResult.sections.performance;
 
   aiResult.vulnerabilities = aiResult.sections.security_audit.risks.map((risk) => ({
+    description: risk,
     file: "See Audit Section",
     risk: "HIGH",
-    description: risk,
     suggestion: "Check Security Audit details",
   }));
 
   const metrics: RepoMetrics = {
     ...baseMetrics,
     busFactor,
-    healthScore: finalHealthScore,
-    onboardingScore,
-    techDebtScore,
     complexityScore,
-    mostComplexFiles: aiResult.mostComplexFiles,
+    healthScore: finalHealthScore,
     maintenanceStatus:
       (Date.now() - new Date(repo.pushedAt!).getTime()) / (1000 * 60 * 60 * 24 * 30) > 6
         ? "stale"
         : "active",
+    mostComplexFiles: aiResult.mostComplexFiles,
+    onboardingScore,
+    techDebtScore,
   };
 
   logger.info({
-    msg: "Metrics computed, saving results",
     analysisId,
-    repoId: repo.id,
     finalHealthScore,
     metricsSummary: {
-      totalLoc: metrics.totalLoc,
       fileCount: metrics.fileCount,
       mostComplexFiles: metrics.mostComplexFiles.slice(0, 3),
+      totalLoc: metrics.totalLoc,
     },
+    msg: "Metrics computed, saving results",
+    repoId: repo.id,
   });
 
   await prisma.$transaction(async (tx) => {
@@ -104,34 +104,34 @@ export async function saveResults(params: {
     delete cleanResultJson.generatedArchitecture;
 
     await tx.analysis.update({
-      where: { publicId: analysisId },
       data: {
-        status: StatusSchema.enum.DONE,
-        progress: 100,
+        commitSha: currentSha,
+        complexityScore: complexityScore,
         message: "Completed successfully",
 
-        score: finalHealthScore,
-        securityScore: securityScore,
-        complexityScore: complexityScore,
-        techDebtScore: techDebtScore,
-        onboardingScore: onboardingScore,
-
         metricsJson: metrics as unknown as Prisma.InputJsonValue,
-
+        onboardingScore: onboardingScore,
+        progress: 100,
         resultJson: cleanResultJson as Prisma.InputJsonValue,
+        score: finalHealthScore,
 
-        commitSha: currentSha,
+        securityScore: securityScore,
+
+        status: StatusSchema.enum.DONE,
+
+        techDebtScore: techDebtScore,
       },
+      where: { publicId: analysisId },
     });
 
     const saveDoc = async (type: DocTypeType, content: string | undefined) => {
       if (content == null) return;
       await tx.document.upsert({
-        where: {
-          repoId_version_type: { repoId: repo.id, version: currentSha.substring(0, 7), type },
-        },
-        create: { repoId: repo.id, version: currentSha.substring(0, 7), type, content },
+        create: { content, repoId: repo.id, type, version: currentSha.substring(0, 7) },
         update: { content },
+        where: {
+          repoId_version_type: { repoId: repo.id, type, version: currentSha.substring(0, 7) },
+        },
       });
     };
 
@@ -145,10 +145,10 @@ export async function saveResults(params: {
 
     const note = await tx.notification.create({
       data: {
-        userId,
-        title: `Analysis for ${repo.name} ready`,
         body: `Health Score: ${finalHealthScore}/100`,
+        title: `Analysis for ${repo.name} ready`,
         type: "SUCCESS",
+        userId,
       },
     });
 
@@ -159,7 +159,7 @@ export async function saveResults(params: {
         title: note.title,
       });
   });
-  logger.info({ msg: "Results saved", analysisId, repoId: repo.id, commitSha: currentSha });
+  logger.info({ analysisId, commitSha: currentSha, msg: "Results saved", repoId: repo.id });
 
   return finalHealthScore;
 }
@@ -168,8 +168,8 @@ export async function calculateBusFactor(repo: Repo, userId: number): Promise<nu
   const octokit = await githubService.getClientForUser(prisma, userId);
   const { data: contributors } = await octokit.repos.listContributors({
     owner: repo.owner,
-    repo: repo.name,
     per_page: 100,
+    repo: repo.name,
   });
 
   const totalCommits = contributors.reduce((acc, c) => acc + (c.contributions || 0), 0);

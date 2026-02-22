@@ -14,19 +14,19 @@ import { RepoList } from "./repo-list";
 
 type Props = {
   config?: {
-    limit?: number;
-    showPagination?: boolean;
-    showTotalCount?: boolean;
     forcedFilters?: {
+      owner?: string;
       sortBy?: "updatedAt" | "createdAt" | "name";
       sortOrder?: "asc" | "desc";
       status?: Status;
-      owner?: string;
     };
+    limit?: number;
+    showPagination?: boolean;
+    showTotalCount?: boolean;
   };
 };
 
-export function RepoListContainer({ config }: Props) {
+export function RepoListContainer({ config }: Readonly<Props>) {
   const searchParams = useSearchParams();
   const t = useTranslations("Dashboard");
 
@@ -39,8 +39,8 @@ export function RepoListContainer({ config }: Props) {
   const filters = {
     ...params,
     ...config?.forcedFilters,
-    limit,
     cursor: page,
+    limit,
   };
 
   const { data, isLoading } = trpc.repo.getAll.useQuery(filters, {
@@ -70,9 +70,9 @@ export function RepoListContainer({ config }: Props) {
           </p>
         </div>
       )}
-      <RepoList repos={items} meta={meta} />
+      <RepoList meta={meta} repos={items} />
 
-      {config?.showPagination !== false && <AppPagination className="mt-auto" meta={meta} />}
+      {config?.showPagination !== false && <AppPagination meta={meta} className="mt-auto" />}
     </>
   );
 }

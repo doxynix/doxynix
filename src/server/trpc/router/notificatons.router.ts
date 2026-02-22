@@ -13,14 +13,14 @@ export const notificationRouter = createTRPCRouter({
   getAll: protectedProcedure
     .meta({
       openapi: {
-        method: "GET",
-        path: "/notifications",
-        tags: ["notifications"],
-        summary: "Get latest notifications",
         description:
           "Returns the latest notifications for the authenticated user ordered by creation date.",
-        protect: true,
         errorResponses: OpenApiErrorResponses,
+        method: "GET",
+        path: "/notifications",
+        protect: true,
+        summary: "Get latest notifications",
+        tags: ["notifications"],
       },
     })
     .input(z.object({ count: z.number().int().min(1).max(10000) }))
@@ -29,9 +29,9 @@ export const notificationRouter = createTRPCRouter({
       const userId = Number(ctx.session.user.id);
 
       const notifications = await ctx.db.notification.findMany({
-        where: { userId },
         orderBy: { createdAt: "desc" },
         take: input.count,
+        where: { userId },
       });
 
       return notifications.map((n) => ({
@@ -43,13 +43,13 @@ export const notificationRouter = createTRPCRouter({
   getUnreadCount: protectedProcedure
     .meta({
       openapi: {
+        description: "Returns the number of unread notifications for the authenticated user.",
+        errorResponses: OpenApiErrorResponses,
         method: "GET",
         path: "/notifications/unread-count",
-        tags: ["notifications"],
-        summary: "Get unread notifications count",
-        description: "Returns the number of unread notifications for the authenticated user.",
         protect: true,
-        errorResponses: OpenApiErrorResponses,
+        summary: "Get unread notifications count",
+        tags: ["notifications"],
       },
     })
     .input(z.void())
@@ -58,56 +58,30 @@ export const notificationRouter = createTRPCRouter({
       const userId = Number(ctx.session.user.id);
 
       const count = await ctx.db.notification.count({
-        where: { userId, isRead: false },
+        where: { isRead: false, userId },
       });
 
       return { count };
     }),
 
-  markAsRead: protectedProcedure
-    .meta({
-      openapi: {
-        method: "PATCH",
-        path: "/notifications/{id}/read",
-        tags: ["notifications"],
-        summary: "Mark notification as read",
-        description: "Marks a specific notification as read using its public identifier.",
-        protect: true,
-        errorResponses: OpenApiErrorResponses,
-      },
-    })
-    .input(z.object({ id: z.uuid() }))
-    .output(z.object({ success: z.boolean(), message: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.db.notification.update({
-          where: { publicId: input.id },
-          data: { isRead: true },
-        });
-        return { success: true, message: "Marked as read" };
-      } catch (error) {
-        handlePrismaError(error, { notFound: "Notification not found" });
-      }
-    }),
-
   markAllAsRead: protectedProcedure
     .meta({
       openapi: {
+        description: "Marks all unread notifications for the authenticated user as read.",
+        errorResponses: OpenApiErrorResponses,
         method: "PATCH",
         path: "/notifications/read-all",
-        tags: ["notifications"],
-        summary: "Mark all notifications as read",
-        description: "Marks all unread notifications for the authenticated user as read.",
         protect: true,
-        errorResponses: OpenApiErrorResponses,
+        summary: "Mark all notifications as read",
+        tags: ["notifications"],
       },
     })
     .input(z.void())
     .output(
       z.object({
+        message: z.string(),
         success: z.boolean(),
         updatedCount: z.number().int(),
-        message: z.string(),
       })
     )
     .mutation(async ({ ctx }) => {
@@ -115,22 +89,48 @@ export const notificationRouter = createTRPCRouter({
 
       try {
         const result = await ctx.db.notification.updateMany({
-          where: {
-            userId,
-            isRead: false,
-          },
           data: {
             isRead: true,
+          },
+          where: {
+            isRead: false,
+            userId,
           },
         });
 
         return {
+          message: `Marked ${result.count} notifications as read`,
           success: true,
           updatedCount: result.count,
-          message: `Marked ${result.count} notifications as read`,
         };
       } catch (error) {
         handlePrismaError(error);
+      }
+    }),
+
+  markAsRead: protectedProcedure
+    .meta({
+      openapi: {
+        description: "Marks a specific notification as read using its public identifier.",
+        errorResponses: OpenApiErrorResponses,
+        method: "PATCH",
+        path: "/notifications/{id}/read",
+        protect: true,
+        summary: "Mark notification as read",
+        tags: ["notifications"],
+      },
+    })
+    .input(z.object({ id: z.uuid() }))
+    .output(z.object({ message: z.string(), success: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.db.notification.update({
+          data: { isRead: true },
+          where: { publicId: input.id },
+        });
+        return { message: "Marked as read", success: true };
+      } catch (error) {
+        handlePrismaError(error, { notFound: "Notification not found" });
       }
     }),
 });

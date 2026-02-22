@@ -24,7 +24,7 @@ type Props = {
   meta: RepoMeta;
 };
 
-export function AppPagination({ className, meta }: Props) {
+export function AppPagination({ className, meta }: Readonly<Props>) {
   const t = useTranslations("Common");
 
   const router = useRouter();
@@ -73,6 +73,7 @@ export function AppPagination({ className, meta }: Props) {
         <PaginationItem>
           <PaginationLink
             href={createPageURL(meta.currentPage - 1) as Route}
+            aria-disabled={meta.currentPage <= 1}
             onClick={(e) =>
               meta.currentPage > 1 && handlePageClick(e, meta.currentPage - 1, "prev")
             }
@@ -80,7 +81,6 @@ export function AppPagination({ className, meta }: Props) {
               navBtnClass,
               meta.currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
             )}
-            aria-disabled={meta.currentPage <= 1}
           >
             {isPrevLoading ? (
               <Spinner className="h-4 w-4 animate-spin" />
@@ -124,6 +124,7 @@ export function AppPagination({ className, meta }: Props) {
         <PaginationItem>
           <PaginationLink
             href={createPageURL(meta.currentPage + 1) as Route}
+            aria-disabled={meta.currentPage >= meta.totalPages}
             onClick={(e) =>
               meta.currentPage < meta.totalPages && handlePageClick(e, meta.currentPage + 1, "next")
             }
@@ -134,7 +135,6 @@ export function AppPagination({ className, meta }: Props) {
                 ? "pointer-events-none opacity-50"
                 : "cursor-pointer"
             )}
-            aria-disabled={meta.currentPage >= meta.totalPages}
           >
             <span className="mr-1">{t("next")}</span>
             {isNextLoading ? (

@@ -63,16 +63,16 @@ export const RealtimeProvider = ({ children }: Props) => {
 
     const handleUserMsg = (msg: Ably.InboundMessage) => {
       if (msg.name === REALTIME_CONFIG.events.user.notification) {
-        const data = msg.data as { title: string; body: string };
+        const data = msg.data as { body: string; title: string };
         toast.success(data.title, { description: data.body });
         invalidateAll();
       }
       if (msg.name === REALTIME_CONFIG.events.user.analysisProgress) {
         const payload = msg.data as {
           analysisId: string;
-          status: Status;
-          progress: number;
           message: string;
+          progress: number;
+          status: Status;
         };
 
         utils.analytics.getDashboardStats.setData(undefined, (oldData) => {
@@ -82,7 +82,7 @@ export const RealtimeProvider = ({ children }: Props) => {
             ...oldData,
             recentActivity: oldData.recentActivity.map((activity) =>
               activity.id === payload.analysisId
-                ? { ...activity, status: payload.status, progress: payload.progress }
+                ? { ...activity, progress: payload.progress, status: payload.status }
                 : activity
             ),
           };

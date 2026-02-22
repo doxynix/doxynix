@@ -6,39 +6,39 @@ import { motion, useInView, type MotionProps } from "motion/react";
 import { cn } from "@/shared/lib/utils";
 
 interface TypingAnimationProps extends MotionProps {
-  children?: string;
-  words?: string[];
-  className?: string;
-  duration?: number;
-  typeSpeed?: number;
-  deleteSpeed?: number;
-  delay?: number;
-  pauseDelay?: number;
-  loop?: boolean;
   as?: React.ElementType;
-  startOnView?: boolean;
-  showCursor?: boolean;
   blinkCursor?: boolean;
+  children?: string;
+  className?: string;
   cursorStyle?: "line" | "block" | "underscore";
+  delay?: number;
+  deleteSpeed?: number;
+  duration?: number;
+  loop?: boolean;
+  pauseDelay?: number;
+  showCursor?: boolean;
+  startOnView?: boolean;
+  typeSpeed?: number;
+  words?: string[];
 }
 
 export function TypingAnimation({
-  children,
-  words,
-  className,
-  duration = 100,
-  typeSpeed,
-  deleteSpeed,
-  delay = 0,
-  pauseDelay = 1000,
-  loop = false,
   as: Component = "span",
-  startOnView = true,
-  showCursor = true,
   blinkCursor = true,
+  children,
+  className,
   cursorStyle = "line",
+  delay = 0,
+  deleteSpeed,
+  duration = 100,
+  loop = false,
+  pauseDelay = 1000,
+  showCursor = true,
+  startOnView = true,
+  typeSpeed,
+  words,
   ...props
-}: TypingAnimationProps) {
+}: Readonly<TypingAnimationProps>) {
   const MotionComponent = motion.create(Component, {
     forwardMotionProps: true,
   });

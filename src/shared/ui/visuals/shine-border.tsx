@@ -29,14 +29,18 @@ interface ShineBorderProps extends React.HTMLAttributes<HTMLDivElement> {
  */
 export function ShineBorder({
   borderWidth = 1,
+  className,
   duration = 14,
   shineColor = "#000000",
-  className,
   style,
   ...props
-}: ShineBorderProps) {
+}: Readonly<ShineBorderProps>) {
   return (
     <div
+      className={cn(
+        "motion-safe:animate-shine pointer-events-none absolute inset-0 size-full rounded-[inherit] will-change-[background-position]",
+        className
+      )}
       style={
         {
           "--border-width": `${borderWidth}px`,
@@ -46,17 +50,13 @@ export function ShineBorder({
           },transparent,transparent)`,
           backgroundSize: "300% 300%",
           mask: `linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)`,
-          WebkitMask: `linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)`,
-          WebkitMaskComposite: "xor",
           maskComposite: "exclude",
           padding: "var(--border-width)",
+          WebkitMask: `linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)`,
+          WebkitMaskComposite: "xor",
           ...style,
         } as React.CSSProperties
       }
-      className={cn(
-        "motion-safe:animate-shine pointer-events-none absolute inset-0 size-full rounded-[inherit] will-change-[background-position]",
-        className
-      )}
       {...props}
     />
   );

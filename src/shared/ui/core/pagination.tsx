@@ -28,18 +28,18 @@ const PaginationItem = React.forwardRef<HTMLLIElement, React.ComponentProps<"li"
 );
 PaginationItem.displayName = "PaginationItem";
 
-type PaginationLinkProps = {
-  isActive?: boolean;
-} & Pick<ButtonProps, "size"> &
-  React.ComponentProps<typeof Link>;
+type PaginationLinkProps = Pick<ButtonProps, "size"> &
+  React.ComponentProps<typeof Link> & {
+    isActive?: boolean;
+  };
 
 const PaginationLink = ({ className, isActive, size = "icon", ...props }: PaginationLinkProps) => (
   <Link
     aria-current={isActive ? "page" : undefined}
     className={cn(
       buttonVariants({
-        variant: isActive ? "outline" : "ghost",
         size,
+        variant: isActive ? "outline" : "ghost",
       }),
       className
     )}
@@ -53,8 +53,8 @@ const PaginationPrevious = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label="Go to previous page"
     size="default"
+    aria-label="Go to previous page"
     className={cn("gap-1 pl-2.5", className)}
     {...props}
   >
@@ -66,8 +66,8 @@ PaginationPrevious.displayName = "PaginationPrevious";
 
 const PaginationNext = ({ className, ...props }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label="Go to next page"
     size="default"
+    aria-label="Go to next page"
     className={cn("gap-1 pr-2.5", className)}
     {...props}
   >

@@ -3,12 +3,12 @@ import type { Status } from "@prisma/client";
 export const repoStatusConfig: Record<
   Status,
   {
-    label: string;
     color: string;
+    label: string;
   }
 > = {
-  DONE: { label: "Done", color: "bg-success" },
-  PENDING: { label: "In Progress", color: "bg-warning" },
-  FAILED: { label: "Failed", color: "bg-error" },
-  NEW: { label: "New", color: "bg-blue" },
+  DONE: { color: "bg-success", label: "Done" },
+  FAILED: { color: "bg-error", label: "Failed" },
+  NEW: { color: "bg-blue", label: "New" },
+  PENDING: { color: "bg-warning", label: "In Progress" },
 };

@@ -19,17 +19,17 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { GROQ_API_KEY } from "@/shared/constants/env.server";
 
 export const groq = createOpenAI({
-  baseURL: "https://api.groq.com/openai/v1",
   apiKey: GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
 });
 
 export const AI_MODELS = {
-  CARTOGRAPHER: ["gemini-flash-latest", "gemini-flash-lite-latest"],
   ARCHITECT: ["gemini-3-flash-preview", "gemini-flash-latest"],
-  SENTINEL: ["gemini-flash-latest"],
-  POWERFUL: ["gemini-3-flash-preview", "gemini-2.5-flash-lite", "gemini-flash-latest"],
-  WRITER: ["gemini-3-flash-preview", "gemini-2.5-flash-lite", "gemini-flash-latest"],
+  CARTOGRAPHER: ["gemini-flash-latest", "gemini-flash-lite-latest"],
   FALLBACK: ["gemini-flash-latest"],
+  POWERFUL: ["gemini-3-flash-preview", "gemini-2.5-flash-lite", "gemini-flash-latest"],
+  SENTINEL: ["gemini-flash-latest"],
+  WRITER: ["gemini-3-flash-preview", "gemini-2.5-flash-lite", "gemini-flash-latest"],
 };
 
 export const SAFETY_SETTINGS = [

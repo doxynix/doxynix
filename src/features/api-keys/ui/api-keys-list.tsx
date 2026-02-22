@@ -10,7 +10,7 @@ type Props = {
   archived: UiApiKey[];
 };
 
-export function ApiKeysList({ active, archived }: Props) {
+export function ApiKeysList({ active, archived }: Readonly<Props>) {
   return (
     <div className="flex w-full flex-col gap-6">
       {active.length === 0 ? (

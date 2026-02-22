@@ -1,9 +1,11 @@
+/* eslint-disable sonarjs/slow-regex */
+/* eslint-disable sonarjs/regex-complexity */
 import { isBinaryFile } from "isbinaryfile";
 
 type AiTextLike = {
-  text?: unknown;
   content?: unknown;
   output?: unknown;
+  text?: unknown;
 };
 
 function isAiTextLike(v: unknown): v is AiTextLike {
@@ -18,6 +20,13 @@ function isAiTextLike(v: unknown): v is AiTextLike {
 const REMOVED_MSG = "/* ...content truncated... */";
 
 export const CodeOptimizer = {
+  basicClean(code: string): string {
+    return code
+      .replaceAll(/^\s*[\r\n]/gm, "")
+      .replaceAll(/[ \t]+$/gm, "")
+      .trim();
+  },
+
   optimize(code: string, fileName: string): string {
     let processed = code;
 
@@ -34,40 +43,33 @@ export const CodeOptimizer = {
     return this.basicClean(processed);
   },
 
-  basicClean(code: string): string {
+  redactSecrets(code: string): string {
     return code
-      .replace(/^\s*[\r\n]/gm, "")
-      .replace(/[ \t]+$/gm, "")
-      .trim();
+      .replaceAll(/[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,}/g, "<REDACTED_EMAIL>")
+      .replaceAll(
+        /(?<!\d)(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?!\d)/g,
+        "<REDACTED_IP>"
+      )
+      .replaceAll(/(['"])eyJ[\w-]*\.[\w-]*\.[\w-]*(['"])/g, "$1<REDACTED_JWT>$2");
   },
 
   removeLicenseHeaders(code: string): string {
     return code.replace(/^\s*\/\*[\s\S]*?(?:license|copyright)[\s\S]*?\*\//i, "");
   },
 
-  redactSecrets(code: string): string {
-    return code
-      .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "<REDACTED_EMAIL>")
-      .replace(
-        /(?<!\d)(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?!\d)/g,
-        "<REDACTED_IP>"
-      )
-      .replace(
-        /(['"])(eyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,})(['"])/g,
-        "$1<REDACTED_JWT>$3"
-      );
+  truncateLargeDataStructures(code: string): string {
+    return code.replaceAll(/\[\s*([\d\s,.-]{500,})\s*\]/g, `[ /* large data array truncated */ ]`);
   },
 
   truncateLargeLiterals(code: string): string {
-    let newCode = code.replace(/(d\s*=\s*["'])([\s\S]{150,})(["'])/g, `$1${REMOVED_MSG}$3`);
+    let newCode = code.replaceAll(/(d\s*=\s*["'])([^"']{150,})(["'])/g, `$1${REMOVED_MSG}$3`);
 
-    newCode = newCode.replace(/(['"]data:[^;]+;base64,)([^'"]{50,})(['"])/g, `$1${REMOVED_MSG}$3`);
+    newCode = newCode.replaceAll(
+      /(['"]data:[^;]+;base64,)([^'"]{50,})(['"])/g,
+      `$1${REMOVED_MSG}$3`
+    );
 
     return newCode;
-  },
-
-  truncateLargeDataStructures(code: string): string {
-    return code.replace(/\[\s*([\d\s,.-]{500,})\s*\]/g, `[ /* large data array truncated */ ]`);
   },
 };
 

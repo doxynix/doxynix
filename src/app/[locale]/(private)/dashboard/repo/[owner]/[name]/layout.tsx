@@ -7,27 +7,27 @@ import { RepoDetailsHeader } from "@/features/repo-details";
 import { api } from "@/server/trpc/server";
 
 type Props = {
-  params: Promise<{ owner: string; name: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
   children: ReactNode;
+  params: Promise<{ name: string; owner: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { owner, name } = await params;
+  const { name, owner } = await params;
 
   return {
     title: `Setup analyze for ${owner}/${name}`,
   };
 }
 
-export default async function RepoDetailsLayout({ params, children }: Props) {
-  const { owner, name } = await params;
+export default async function RepoDetailsLayout({ children, params }: Readonly<Props>) {
+  const { name, owner } = await params;
 
   const repo = await (
     await api()
   ).repo.getByName({
-    owner,
     name,
+    owner,
   });
 
   if (repo == null) {

@@ -8,15 +8,15 @@ import { appRouter } from "@/server/trpc/router";
 
 const handler = (req: NextRequest) => {
   return createOpenApiFetchHandler({
-    endpoint: API_PREFIX,
-    req,
-    router: appRouter,
     createContext: () => createContext({ req }),
+    endpoint: API_PREFIX,
     onError: ({ error }) => {
       if (IS_DEV) {
         console.error("OpenAPI Error:", error);
       }
     },
+    req,
+    router: appRouter,
   });
 };
 

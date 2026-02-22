@@ -30,9 +30,9 @@ export function TrendsWidgetsSkeleton() {
 
           <div className="ml-10 h-full overflow-hidden">
             <svg
-              className="h-full w-full animate-pulse"
               preserveAspectRatio="none"
               viewBox="0 0 400 100"
+              className="h-full w-full animate-pulse"
             >
               <path
                 d="M0 20 Q 100 15, 200 25 T 400 30 L 400 100 L 0 100 Z"
@@ -46,31 +46,31 @@ export function TrendsWidgetsSkeleton() {
               />
 
               <line
+                stroke="currentColor"
+                strokeWidth="0.5"
                 x1="0"
+                x2="400"
                 y1="25"
-                x2="400"
                 y2="25"
-                stroke="currentColor"
                 className="text-muted/20"
-                strokeWidth="0.5"
               />
               <line
+                stroke="currentColor"
+                strokeWidth="0.5"
                 x1="0"
+                x2="400"
                 y1="50"
-                x2="400"
                 y2="50"
-                stroke="currentColor"
                 className="text-muted/20"
-                strokeWidth="0.5"
               />
               <line
-                x1="0"
-                y1="75"
-                x2="400"
-                y2="75"
                 stroke="currentColor"
-                className="text-muted/20"
                 strokeWidth="0.5"
+                x1="0"
+                x2="400"
+                y1="75"
+                y2="75"
+                className="text-muted/20"
               />
             </svg>
           </div>

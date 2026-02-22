@@ -25,7 +25,7 @@ type Props = {
   apiKey: UiApiKey;
 };
 
-export function RevokeApiKeyDialog({ apiKey }: Props) {
+export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
   const { revoke } = useApiKeyActions();
 
@@ -46,8 +46,8 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
       <AppTooltip content={t("settings_api_keys_revoke_key")}>
         <DialogTrigger asChild>
           <Button
-            variant="ghost"
             size="icon"
+            variant="ghost"
             className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
           >
             <Trash2 className="h-4 w-4" />
@@ -80,11 +80,11 @@ export function RevokeApiKeyDialog({ apiKey }: Props) {
             </Button>
           </DialogClose>
           <LoadingButton
-            variant="destructive"
-            className="cursor-pointer"
-            onClick={handleRevoke}
             isLoading={revoke.isPending}
             loadingText="Revoking..."
+            variant="destructive"
+            onClick={handleRevoke}
+            className="cursor-pointer"
           >
             {t("settings_api_keys_confirm_revoke")}
           </LoadingButton>

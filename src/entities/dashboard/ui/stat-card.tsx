@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card"
 
 type Props = { item: StatItem };
 
-export function StatCard({ item }: Props) {
+export function StatCard({ item }: Readonly<Props>) {
   return (
     <Card className="hover:bg-muted/50 transition-colors">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

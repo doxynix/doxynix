@@ -23,13 +23,13 @@ export function useRepoSetup(repo: RepoDetailed) {
   const [instructions, setInstructions] = useState("");
   const [selectedDocs, setSelectedDocs] = useState<DocType[]>([DocType.README]);
 
-  const { owner, name } = repo;
+  const { name, owner } = repo;
 
-  const { data: branches } = trpc.repo.getBranches.useQuery({ owner, name });
+  const { data: branches } = trpc.repo.getBranches.useQuery({ name, owner });
   const { data: apiFiles, isLoading } = trpc.repo.getRepoFiles.useQuery({
-    owner,
-    name,
     branch: selectedBranch,
+    name,
+    owner,
   });
 
   const analyzeMutation = trpc.repo.analyze.useMutation();
@@ -60,13 +60,13 @@ export function useRepoSetup(repo: RepoDetailed) {
 
         if (!map.has(currentPath)) {
           const newNode: FileNode = {
+            children: isLast ? undefined : [],
             id: currentPath,
             name: part,
             path: currentPath,
-            type: isLast ? (type === 1 ? "blob" : "tree") : "tree",
             recommended: isLast ? recommended === 1 : false,
             sha: isLast ? sha : "",
-            children: isLast ? undefined : [],
+            type: isLast ? (type === 1 ? "blob" : "tree") : "tree",
           };
           map.set(currentPath, newNode);
           if (index === 0) root.push(newNode);
@@ -126,12 +126,12 @@ export function useRepoSetup(repo: RepoDetailed) {
       (apiFiles as FileTuple[]).filter((f) => f[1] === 1).map((f) => f[0])
     );
     analyzeMutation.mutate({
-      repoId: repo.id,
-      files: Array.from(selectedIds).filter((id) => leafFilePaths.has(id)),
       branch: selectedBranch,
-      language: analysisLocale,
-      instructions,
       docTypes: selectedDocs,
+      files: Array.from(selectedIds).filter((id) => leafFilePaths.has(id)),
+      instructions,
+      language: analysisLocale,
+      repoId: repo.id,
     });
   };
 
@@ -154,33 +154,33 @@ export function useRepoSetup(repo: RepoDetailed) {
   };
 
   return {
-    state: {
-      selectedBranch,
-      searchTerm,
-      treeData,
-      selectedIds,
-      analysisLocale,
-      instructions,
-      selectedDocs,
-      selectedFilesCount,
-      isLoading,
-      branches,
-    },
     actions: {
-      setSelectedBranch,
-      setSearchTerm,
-      setTreeApi,
-      setAnalysisLocale,
-      setInstructions,
-      toggleDocType,
-      handleToggleSelection,
-      handleSelectAll,
       handleClearAll,
+      handleSelectAll,
       handleSelectRecommended,
       handleStartAnalysis,
+      handleToggleSelection,
+      setAnalysisLocale,
+      setInstructions,
+      setSearchTerm,
+      setSelectedBranch,
+      setTreeApi,
+      toggleDocType,
     },
     refs: {
       treeApi,
+    },
+    state: {
+      analysisLocale,
+      branches,
+      instructions,
+      isLoading,
+      searchTerm,
+      selectedBranch,
+      selectedDocs,
+      selectedFilesCount,
+      selectedIds,
+      treeData,
     },
   };
 }

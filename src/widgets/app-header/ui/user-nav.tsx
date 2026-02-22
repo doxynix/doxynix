@@ -63,12 +63,12 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <div className="flex cursor-pointer items-center gap-3">
           <Avatar className="h-9 w-9">
-            <AvatarImage src={avatar ?? undefined} alt={name ?? "User"} className="object-cover" />
+            <AvatarImage alt={name ?? "User"} src={avatar ?? undefined} className="object-cover" />
             <AvatarFallback className="text-xs">{getInitials(name, email)}</AvatarFallback>
           </Avatar>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end">
+      <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="truncate text-sm font-medium">{name}</p>
@@ -78,7 +78,7 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           {userNavMenu.map((item) => (
-            <DropdownMenuItem className="group" key={item.href} asChild>
+            <DropdownMenuItem key={item.href} asChild className="group">
               <Link href={item.href as Route} className="flex items-center">
                 <item.icon />
                 <span>{item.label}</span>
@@ -96,8 +96,8 @@ export function UserNav() {
         <Dialog>
           <DialogTrigger asChild>
             <DropdownMenuItem
-              className="text-destructive focus:bg-destructive/20 focus:text-destructive"
               onSelect={(e) => e.preventDefault()}
+              className="text-destructive focus:bg-destructive/20 focus:text-destructive"
             >
               <LogOut className="text-destructive mr-2" />
               {t("logout")}
@@ -112,17 +112,17 @@ export function UserNav() {
             <div className="space-y-4">
               <div className="flex justify-end gap-2">
                 <DialogClose asChild>
-                  <Button className="cursor-pointer" variant="outline" disabled={loading}>
+                  <Button disabled={loading} variant="outline" className="cursor-pointer">
                     {tCommon("cancel")}
                   </Button>
                 </DialogClose>
                 <LoadingButton
-                  variant="destructive"
                   disabled={loading}
-                  className="cursor-pointer"
-                  onClick={() => void handleSignOut()}
                   isLoading={loading}
                   loadingText="Logout..."
+                  variant="destructive"
+                  onClick={() => void handleSignOut()}
+                  className="cursor-pointer"
                 >
                   {t("logout")}
                 </LoadingButton>

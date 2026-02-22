@@ -5,18 +5,18 @@ import { cn } from "@/shared/lib/utils";
 import { Button } from "../core/button";
 import { Spinner } from "../core/spinner";
 
-type Props = {
-  isLoading: boolean;
+type Props = React.ComponentProps<typeof Button> & {
   children: ReactNode;
+  isLoading: boolean;
   loadingText?: string;
-} & React.ComponentProps<typeof Button>;
+};
 
 export function LoadingButton({
-  isLoading,
   children,
-  loadingText = "Loading...",
-  disabled,
   className,
+  disabled,
+  isLoading,
+  loadingText = "Loading...",
   ...props
 }: Props) {
   return (

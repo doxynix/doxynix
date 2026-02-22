@@ -9,27 +9,27 @@ export function useApiKeyActions() {
   const invalidate = () => void utils.apikey.list.invalidate();
 
   const create = trpc.apikey.create.useMutation({
+    onError: (err) => toast.error(err.message),
     onSuccess: () => {
       toast.success(t("settings_api_keys_created_toast_success"));
       invalidate();
     },
-    onError: (err) => toast.error(err.message),
   });
 
   const revoke = trpc.apikey.revoke.useMutation({
+    onError: (err) => toast.error(err.message),
     onSuccess: () => {
       toast.success(t("settings_api_keys_revoked_toast_success"));
       invalidate();
     },
-    onError: (err) => toast.error(err.message),
   });
 
   const update = trpc.apikey.update.useMutation({
+    onError: (err) => toast.error(err.message),
     onSuccess: () => {
       toast.success(t("settings_api_keys_updated_toast_success"));
       invalidate();
     },
-    onError: (err) => toast.error(err.message),
   });
 
   return { create, revoke, update };

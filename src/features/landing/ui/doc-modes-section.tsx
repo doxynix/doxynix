@@ -8,19 +8,19 @@ import { CodeWindow } from "@/shared/ui/kit/code-window";
 
 type TabsTriggerItemProps = {
   icon?: ComponentType<{ className?: string }>;
-  value: string;
-  title: string;
   subTitle: string;
+  title: string;
+  value: string;
 };
 
 type TabsContentItemProps = {
-  value: string;
+  code: string;
   html: string;
   title: string;
-  code: string;
+  value: string;
 };
 
-function TabsTriggerItem({ icon: Icon, value, title, subTitle }: TabsTriggerItemProps) {
+function TabsTriggerItem({ icon: Icon, subTitle, title, value }: Readonly<TabsTriggerItemProps>) {
   return (
     <TabsTrigger
       value={value}
@@ -37,13 +37,13 @@ function TabsTriggerItem({ icon: Icon, value, title, subTitle }: TabsTriggerItem
   );
 }
 
-function TabsContentItem({ html, value, title, code }: TabsContentItemProps) {
+function TabsContentItem({ code, html, title, value }: Readonly<TabsContentItemProps>) {
   return (
     <TabsContent
       value={value}
       className="animate-in fade-in slide-in-from-right-4 mt-0 duration-500"
     >
-      <CodeWindow codeClassName="text-sm sm:text-base" title={title} codeHtml={html} code={code} />
+      <CodeWindow code={code} codeClassName="text-sm sm:text-base" codeHtml={html} title={title} />
     </TabsContent>
   );
 }
@@ -61,40 +61,40 @@ export async function DocModesSection() {
   const DOCS: TabsTriggerItemProps[] = [
     {
       icon: BookOpen,
-      value: "readme",
-      title: t("section_docs_tab_readme_title"),
       subTitle: t("section_docs_tab_readme_subtitle"),
+      title: t("section_docs_tab_readme_title"),
+      value: "readme",
     },
     {
       icon: FileCode,
-      value: "api",
-      title: t("section_docs_tab_api_title"),
       subTitle: t("section_docs_tab_api_subtitle"),
+      title: t("section_docs_tab_api_title"),
+      value: "api",
     },
     {
       icon: GitGraph,
-      value: "architecture",
-      title: t("section_docs_tab_arch_title"),
       subTitle: t("section_docs_tab_arch_subtitle"),
+      title: t("section_docs_tab_arch_title"),
+      value: "architecture",
     },
     {
       icon: FileDiff,
-      value: "changelog",
-      title: t("section_docs_tab_changelog_title"),
       subTitle: t("section_docs_tab_changelog_subtitle"),
+      title: t("section_docs_tab_changelog_title"),
+      value: "changelog",
     },
   ];
 
   const TABS = [
-    { value: "readme", html: readmeHtml, title: "README.md", code: README_CODE },
-    { value: "api", html: apiHtml, title: "api-v1.json", code: API_CODE },
+    { code: README_CODE, html: readmeHtml, title: "README.md", value: "readme" },
+    { code: API_CODE, html: apiHtml, title: "api-v1.json", value: "api" },
     {
-      value: "architecture",
+      code: ARCH_CODE,
       html: archHtml,
       title: "docs/architecture/auth-flow.md",
-      code: ARCH_CODE,
+      value: "architecture",
     },
-    { value: "changelog", html: changelogHtml, title: "CHANGELOG.md", code: CHANGELOG_CODE },
+    { code: CHANGELOG_CODE, html: changelogHtml, title: "CHANGELOG.md", value: "changelog" },
   ];
 
   return (

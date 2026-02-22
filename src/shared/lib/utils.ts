@@ -8,13 +8,13 @@ import { IS_PROD } from "../constants/env.client";
 import { DEFAULT_LOCALE, type Locale } from "../constants/locales";
 
 const dateFnsLocales: Record<Locale, DateFnsLocale> = {
-  en: enUS,
-  ru: ru,
   de: de,
+  en: enUS,
   es: es,
-  "zh-CN": zhCN,
-  "pt-BR": ptBR,
   fr: fr,
+  "pt-BR": ptBR,
+  ru: ru,
+  "zh-CN": zhCN,
 };
 
 export function cn(...inputs: ClassValue[]) {

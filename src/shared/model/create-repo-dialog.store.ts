@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
 type CreateRepoDialogState = {
+  closeDialog: () => void;
   open: boolean;
   openDialog: () => void;
-  closeDialog: () => void;
 };
 
 export const useCreateRepoDialogStore = create<CreateRepoDialogState>((set) => ({
+  closeDialog: () => set({ open: false }),
   open: false,
   openDialog: () => set({ open: true }),
-  closeDialog: () => set({ open: false }),
 }));

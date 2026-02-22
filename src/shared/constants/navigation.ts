@@ -16,24 +16,24 @@ import type { MenuItem, MenuItems } from "@/shared/types/menu-item";
 
 const DASHBOARD_BASE: MenuItem[] = [
   {
-    label: "Dashboard",
-    icon: LayoutGrid,
-    href: "/dashboard",
-    shortcut: "G then O",
     exact: true,
+    href: "/dashboard",
+    icon: LayoutGrid,
+    label: "Dashboard",
+    shortcut: "G then O",
     url: "/o",
   },
   {
-    label: "Repositories",
-    icon: FolderGit2,
     href: "/dashboard/repo",
+    icon: FolderGit2,
+    label: "Repositories",
     shortcut: "G then R",
     url: "/r",
   },
   {
-    label: "Settings",
-    icon: Settings,
     href: "/dashboard/settings",
+    icon: Settings,
+    label: "Settings",
     shortcut: "G then S",
     url: "/s",
   },
@@ -41,47 +41,47 @@ const DASHBOARD_BASE: MenuItem[] = [
 
 const SETTINGS_PAGES: MenuItems = [
   {
-    label: "Profile",
-    icon: User,
     href: "/dashboard/settings/profile",
+    icon: User,
+    label: "Profile",
     shortcut: "G then P",
     url: "/me",
   },
   {
-    label: "API Keys",
-    icon: KeyRound,
     href: "/dashboard/settings/api-keys",
+    icon: KeyRound,
+    label: "API Keys",
     shortcut: "G then K",
     url: "/k",
   },
   {
-    label: "Danger Zone",
-    icon: AlertTriangle,
     href: "/dashboard/settings/danger-zone",
+    icon: AlertTriangle,
+    label: "Danger Zone",
     shortcut: "G then D",
-    variant: "destructive",
     url: "/d",
+    variant: "destructive",
   },
 ];
 
 const GLOBAL_FEATURES: MenuItems = [
   {
-    label: "Notifications",
-    icon: Bell,
     href: "/dashboard/notifications",
+    icon: Bell,
+    label: "Notifications",
     shortcut: "G then N",
     url: "/n",
   },
-  { label: "Support", icon: Headset, href: "/support", shortcut: "G then H", url: "/h" },
+  { href: "/support", icon: Headset, label: "Support", shortcut: "G then H", url: "/h" },
 ];
 
 export const actionsMenu: MenuItems = [
   {
-    label: "Create Repository",
-    icon: SquareTerminal,
-    shortcut: "C then N",
-    commandType: "dialog",
     actionId: "createRepo",
+    commandType: "dialog",
+    icon: SquareTerminal,
+    label: "Create Repository",
+    shortcut: "C then N",
   },
 ];
 
@@ -99,7 +99,7 @@ export const commandMenuItems: MenuItems = [
 ];
 
 export const publicHeaderMenu: MenuItems = [
-  { icon: Home, label: "Home", href: "/" },
-  { icon: Users2, label: "About", href: "/about" },
-  { icon: Headset, label: "Help", href: "/support" },
+  { href: "/", icon: Home, label: "Home" },
+  { href: "/about", icon: Users2, label: "About" },
+  { href: "/support", icon: Headset, label: "Help" },
 ];
