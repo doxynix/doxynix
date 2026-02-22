@@ -3,6 +3,7 @@ import { retry } from "@octokit/plugin-retry";
 import { throttling } from "@octokit/plugin-throttling";
 import { Octokit, type RestEndpointMethodTypes } from "@octokit/rest";
 import { Visibility, type PrismaClient } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import parseGithubUrl from "parse-github-url";
 
 import { SYSTEM_TOKEN } from "@/shared/constants/env.server";
@@ -118,7 +119,10 @@ export const githubService = {
 
     if (token == null) {
       logger.error({ msg: "Token not found in DB and no system token configured", userId });
-      throw new Error("TOKEN_MISSING");
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "GitHub account not connected. Please link your GitHub account in settings.",
+      });
     }
 
     return new MyOctokit({
