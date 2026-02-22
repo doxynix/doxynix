@@ -152,7 +152,7 @@ All notable changes to this project will be documented in this file. See [standa
 * **api:** добавлен trpc-to-openapi ([#102](https://github.com/doxynix/doxynix/issues/102)) ([7a1247d](https://github.com/doxynix/doxynix/commit/7a1247d257df21ed3a508b6ebb33d37aeafa3d32))
 * **api:** добавлен перехватчик неверных запросов к api ([d566e78](https://github.com/doxynix/doxynix/commit/d566e788dfe44c0245efde6a31f8394bc0f982da))
 * **api:** добавлена проверка существования репозитория при переходе … ([#111](https://github.com/doxynix/doxynix/issues/111)) ([3d7e3e1](https://github.com/doxynix/doxynix/commit/3d7e3e1fd563f715650886d3184a45eb2eaef3c1))
-* **workflow:** полностью обновлен workflow ([#52](https://github.com/doxynix/doxynix/issues/52)) ([abc1234](https://github.com/doxynix/doxynix/commit/abc1234abcdef0123456789abcdef0123456789))
+* **workflow:** полностью обновлен workflow ([#134](https://github.com/doxynix/doxynix/issues/134)) ([ebb958a](https://github.com/doxynix/doxynix/commit/ebb958a85c82c3691f06598f43d4033cc800c568))
 * **auth:** улучшения авторизации ([#99](https://github.com/doxynix/doxynix/issues/99)) ([16adb5e](https://github.com/doxynix/doxynix/commit/16adb5e35c0f4b6762212f705d9d381e2ce7cf49))
 * **captcha:** добавлена капча ([#226](https://github.com/doxynix/doxynix/issues/226)) ([b983640](https://github.com/doxynix/doxynix/commit/b983640bdd1ba5945ae7dd784f092dab792cd395))
 * **ci:** create block-main-merge.yml ([44c0906](https://github.com/doxynix/doxynix/commit/44c0906f415619bec5c8a956229d059a153e70c3))
