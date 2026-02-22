@@ -1,10 +1,11 @@
 import crypto from "node:crypto";
-import type { PrismaClient, UserRole } from "@prisma/client";
+import type { UserRole } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-to-openapi";
 
+import type { DbClient } from "@/shared/api/db/db";
 import { IS_PROD } from "@/shared/constants/env.client";
 import { logger } from "@/shared/lib/logger";
 
@@ -36,7 +37,7 @@ const withZenStack = t.middleware(async ({ ctx, next }) => {
 
   const protectedDb = enhance(ctx.prisma, {
     user: userId != null ? { id: userId, role: userRole } : undefined,
-  }) as unknown as PrismaClient;
+  }) as unknown as DbClient;
 
   return next({
     ctx: {
