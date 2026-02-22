@@ -38,7 +38,7 @@ export default defineConfig([
 
   ...nextVitals,
   ...nextTs,
-   sonarjs.configs.recommended,
+  sonarjs.configs.recommended,
 
   {
     files: ["**/*.ts", "**/*.tsx", "**/*.js"],
@@ -107,7 +107,6 @@ export default defineConfig([
       "sonarjs/no-inverted-boolean-check": "error",
       "sonarjs/no-redundant-jump": "error",
       "sonarjs/no-nested-functions": ["off", { threshold: 4 }], // NOTE: пока выключен я пока не хочу рефакторить некоторый код
-
 
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/no-commented-code": "off",
@@ -216,7 +215,7 @@ export default defineConfig([
             { groupName: "aria", elementNamePattern: "^aria-" },
             { groupName: "data", elementNamePattern: "^data-" },
             { groupName: "callback", elementNamePattern: "^on[A-Z]" },
-            { groupName: "style", elementNamePattern: "^(className|style)$" }
+            { groupName: "style", elementNamePattern: "^(className|style)$" },
           ],
         },
       ],
