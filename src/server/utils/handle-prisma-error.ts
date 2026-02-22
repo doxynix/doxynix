@@ -1,6 +1,8 @@
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
+import { logger } from "@/shared/lib/logger";
+
 type ErrorMapping = {
   uniqueConstraint?: Record<string, string>;
   defaultConflict?: string;
@@ -94,14 +96,14 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
       throw new TRPCError({ code: meta.code, message });
     }
 
-    console.error("Unknown Prisma Error:", error);
+    logger.error({ msg: "Unknown Prisma Error:", error });
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Internal database error",
     });
   }
 
-  console.error("Unknown Error:", error);
+  logger.error({ msg: "Unknown Error:", error });
   throw new TRPCError({
     code: "INTERNAL_SERVER_ERROR",
     message: "Internal server error",

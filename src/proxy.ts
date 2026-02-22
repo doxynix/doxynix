@@ -169,14 +169,14 @@ async function handleTurnstile(request: NextRequest, ip: string): Promise<NextRe
     const cfData = await cfRes.json();
 
     if (cfData.success === false || cfData.action !== "auth") {
-      console.error("Cloudflare verification failed:", cfData["error-codes"]);
+      logger.error({ msg: "Cloudflare verification failed:", error: cfData["error-codes"] });
       return new NextResponse(JSON.stringify({ error: "Captcha failed" }), { status: 403 });
     }
     const response = NextResponse.next();
     response.cookies.delete("cf-turnstile-response");
     return response;
   } catch (error) {
-    console.error("Cloudflare network error:", error);
+    logger.error({ msg: "Cloudflare network error:", error });
     return new NextResponse(JSON.stringify({ error: "Security check error. Please try again." }), {
       status: 403,
     });

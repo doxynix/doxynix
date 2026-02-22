@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { generateOpenApiDocument } from "trpc-to-openapi";
 
 import { API_PREFIX, APP_URL } from "@/shared/constants/env.client";
+import { logger } from "@/shared/lib/logger";
 import { getCookieName } from "@/shared/lib/utils";
 
 import { appRouter } from "@/server/trpc/router";
@@ -33,7 +34,7 @@ export const GET = () => {
 
     return NextResponse.json(openApiDocument);
   } catch (error) {
-    console.error("OpenAPI Generation Error:", error);
+    logger.error({ msg: "OpenAPI Generation Error:", error });
     return NextResponse.json(
       {
         error: "Failed to generate OpenAPI document",
