@@ -52,8 +52,8 @@ importers:
         specifier: 22.0.1
         version: 22.0.1
       '@prisma/adapter-pg':
-        specifier: 6.19.1
-        version: 6.19.1
+        specifier: 6.19.2
+        version: 6.19.2
       '@prisma/client':
         specifier: 6.19.2
         version: 6.19.2(prisma@6.19.2(typescript@5.9.3))(typescript@5.9.3)
@@ -2798,8 +2798,8 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@prisma/adapter-pg@6.19.1':
-    resolution: {integrity: sha512-ty/DXF+DVU7AeawWKPMsmdWnzqovU3Pfex3rpG7HFnCQb7TKErAsh7SHMVeNCj9rl64cQgqjqD6OU5622XDQzA==}
+  '@prisma/adapter-pg@6.19.2':
+    resolution: {integrity: sha512-t80uX4u4+V/F/OO220LVFY2nsXRGvt8x7PDDveQJJUrGAq4yKHiHiwxOb/PusUSioKkJrgLZjzLwGrpPYG4arw==}
 
   '@prisma/client@6.19.2':
     resolution: {integrity: sha512-gR2EMvfK/aTxsuooaDA32D8v+us/8AAet+C3J1cc04SW35FPdZYgLF+iN4NDLUgAaUGTKdAB0CYenu1TAgGdMg==}
@@ -2822,9 +2822,6 @@ packages:
   '@prisma/debug@5.8.1':
     resolution: {integrity: sha512-tjuw7eA0Us3T42jx9AmAgL58rzwzpFGYc3R7Y4Ip75EBYrKMBA1YihuWMcBC92ILmjlQ/u3p8VxcIE0hr+fZfg==}
 
-  '@prisma/debug@6.19.1':
-    resolution: {integrity: sha512-h1JImhlAd/s5nhY/e9qkAzausWldbeT+e4nZF7A4zjDYBF4BZmKDt4y0jK7EZapqOm1kW7V0e9agV/iFDy3fWw==}
-
   '@prisma/debug@6.19.2':
     resolution: {integrity: sha512-lFnEZsLdFLmEVCVNdskLDCL8Uup41GDfU0LUfquw+ercJC8ODTuL0WNKgOKmYxCJVvFwf0OuZBzW99DuWmoH2A==}
 
@@ -2836,9 +2833,6 @@ packages:
 
   '@prisma/dmmf@7.3.0':
     resolution: {integrity: sha512-LkalLBNFCmxpmnIuWI63363fWZqCS0oQa0+Zjv+xUaJjBKvRDgrU6MgTbkMib7XNekilhPHTUl2qSBOWnPK5vA==}
-
-  '@prisma/driver-adapter-utils@6.19.1':
-    resolution: {integrity: sha512-W6Ds1lOZ2H6VGikchhOYs9dfKgPymfS/FJjtgYRqNTxJyHRyHsfTzGG+MOAupeLhZFHPWPA8eX12gNbgAGT8/g==}
 
   '@prisma/driver-adapter-utils@6.19.2':
     resolution: {integrity: sha512-tkHsL3jhx81eXg2oqtJH/1IEs8uEeUb1RpqHtwYqdNb176u9D0mnHRZM1/cKca/XhLpq49Nnd9XDxdMfWcKAYA==}
@@ -14318,9 +14312,9 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@prisma/adapter-pg@6.19.1':
+  '@prisma/adapter-pg@6.19.2':
     dependencies:
-      '@prisma/driver-adapter-utils': 6.19.1
+      '@prisma/driver-adapter-utils': 6.19.2
       pg: 8.17.2
       postgres-array: 3.0.4
     transitivePeerDependencies:
@@ -14350,8 +14344,6 @@ snapshots:
 
   '@prisma/debug@5.8.1': {}
 
-  '@prisma/debug@6.19.1': {}
-
   '@prisma/debug@6.19.2': {}
 
   '@prisma/debug@7.3.0': {}
@@ -14359,10 +14351,6 @@ snapshots:
   '@prisma/dmmf@6.19.2': {}
 
   '@prisma/dmmf@7.3.0': {}
-
-  '@prisma/driver-adapter-utils@6.19.1':
-    dependencies:
-      '@prisma/debug': 6.19.1
 
   '@prisma/driver-adapter-utils@6.19.2':
     dependencies:
