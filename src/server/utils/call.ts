@@ -7,7 +7,7 @@ import { logger } from "@/shared/lib/logger";
 type CallWithFallbackProps<T> = {
   attemptMetadata?: Record<string, unknown>;
   frequencyPenalty?: number;
-  maxTokens?: number;
+  maxOutputTokens?: number;
   models: string[];
   outputSchema: z.ZodSchema<T> | null;
   presencePenalty?: number;
@@ -24,7 +24,7 @@ type CallWithFallbackProps<T> = {
 export async function callWithFallback<T>({
   attemptMetadata = {},
   frequencyPenalty = 0.0,
-  maxTokens = 65536,
+  maxOutputTokens = 65536,
   models,
   outputSchema,
   presencePenalty = 0.0,
@@ -54,7 +54,7 @@ export async function callWithFallback<T>({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const options: any = {
         frequencyPenalty,
-        maxTokens,
+        maxOutputTokens,
         model: google(modelName),
         presencePenalty,
         prompt,

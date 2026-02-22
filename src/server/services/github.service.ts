@@ -22,8 +22,7 @@ type ListRepoItem =
 type GitHubRepoResponse = SearchRepoItem | ListRepoItem;
 
 export const githubService = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getClientForUser(prisma: any, userId: number) {
+  async getClientForUser(prisma: DbClient, userId: number) {
     const account = await prisma.account.findFirst({
       where: { provider: "github", userId },
     });

@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     background_color: "#09090b",
-    description: "Code analysis and documentation tool",
+    description: "AI Repo Analysis & Documentation Generator",
     display: "standalone",
     icons: [
       {
@@ -12,11 +12,13 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/x-icon",
       },
       {
+        purpose: "maskable",
         sizes: "192x192",
         src: "/icons/icon-192x192.png",
         type: "image/png",
       },
       {
+        purpose: "maskable",
         sizes: "512x512",
         src: "/icons/icon-512x512.png",
         type: "image/png",
@@ -25,6 +27,6 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Doxynix",
     short_name: "Doxynix",
     start_url: "/dashboard",
-    theme_color: "#22c55e",
+    theme_color: "#09090b",
   };
 }
