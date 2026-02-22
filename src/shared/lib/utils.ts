@@ -6,6 +6,7 @@ import { twMerge } from "tailwind-merge";
 
 import { IS_PROD } from "../constants/env.client";
 import { DEFAULT_LOCALE, type Locale } from "../constants/locales";
+import { logger } from "./logger";
 
 const dateFnsLocales: Record<Locale, DateFnsLocale> = {
   en: enUS,
@@ -45,7 +46,7 @@ export function formatRelativeTime(
 
     return result.toLowerCase();
   } catch (error) {
-    console.error("Date formatting error:", error);
+    logger.error({ msg: "Date formatting error:", error });
     return defaultValue;
   }
 }

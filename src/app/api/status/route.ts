@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { BETTERSTACK_TOKEN } from "@/shared/constants/env.server";
+import { logger } from "@/shared/lib/logger";
 
 export const runtime = "edge";
 
@@ -41,7 +42,7 @@ export async function GET() {
 
     return NextResponse.json({ status });
   } catch (error) {
-    console.error("Status check failed:", error);
+    logger.error({ msg: "Status check failed:", error });
     return NextResponse.json({ status: "unknown" }, { status: 200 });
   }
 }

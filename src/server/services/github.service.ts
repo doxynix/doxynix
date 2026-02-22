@@ -116,12 +116,13 @@ export const githubService = {
 
     const token = account?.access_token ?? SYSTEM_TOKEN;
 
-    // if (token == null) {
-    //   logger.error({ msg: "Token not found in DB", userId });
-    //   throw new Error("TOKEN_MISSING");
-    // }
+    if (token == null) {
+      logger.error({ msg: "Token not found in DB and no system token configured", userId });
+      throw new Error("TOKEN_MISSING");
+    }
+
     return new MyOctokit({
-      auth: token ?? undefined,
+      auth: token,
       userAgent: "Doxynix/1.0.0",
 
       log: {
