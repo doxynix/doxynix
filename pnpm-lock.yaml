@@ -143,7 +143,7 @@ importers:
         version: 11.10.0(typescript@5.9.3)
       '@uploadthing/react':
         specifier: 7.3.3
-        version: 7.3.3(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(uploadthing@7.7.4(express@4.22.1)(h3@1.15.5)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.0))
+        version: 7.3.3(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(uploadthing@7.7.4(express@4.22.1)(h3@1.15.5)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.1))
       '@upstash/qstash':
         specifier: 2.9.0
         version: 2.9.0
@@ -281,7 +281,7 @@ importers:
         version: 3.1.0(@trpc/server@11.10.0(typescript@5.9.3))(zod-openapi@5.4.6(zod@4.3.6))(zod@4.3.6)
       uploadthing:
         specifier: 7.7.4
-        version: 7.7.4(express@4.22.1)(h3@1.15.5)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.0)
+        version: 7.7.4(express@4.22.1)(h3@1.15.5)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.1)
       use-debounce:
         specifier: 10.1.0
         version: 10.1.0(react@19.2.4)
@@ -375,7 +375,7 @@ importers:
         version: 4.2.0
       '@tailwindcss/typography':
         specifier: 0.5.19
-        version: 0.5.19(tailwindcss@4.2.0)
+        version: 0.5.19(tailwindcss@4.2.1)
       '@tanstack/eslint-plugin-query':
         specifier: 5.91.4
         version: 5.91.4(eslint@9.39.3(jiti@1.21.7))(typescript@5.9.3)
@@ -546,10 +546,10 @@ importers:
         version: 11.3.1
       tailwind-scrollbar:
         specifier: 4.0.2
-        version: 4.0.2(react@19.2.4)(tailwindcss@4.2.0)
+        version: 4.0.2(react@19.2.4)(tailwindcss@4.2.1)
       tailwindcss:
-        specifier: 4.2.0
-        version: 4.2.0
+        specifier: 4.2.1
+        version: 4.2.1
       ts-node:
         specifier: 10.9.2
         version: 10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@25.3.0)(typescript@5.9.3)
@@ -10722,6 +10722,9 @@ packages:
   tailwindcss@4.2.0:
     resolution: {integrity: sha512-yYzTZ4++b7fNYxFfpnberEEKu43w44aqDMNM9MHMmcKuCH7lL8jJ4yJ7LGHv7rSwiqM0nkiobF9I6cLlpS2P7Q==}
 
+  tailwindcss@4.2.1:
+    resolution: {integrity: sha512-/tBrSQ36vCleJkAOsy9kbNTgaxvGbyOamC30PRePTQe/o1MFwEKHQk4Cn7BNGaPtjp+PuUrByJehM1hgxfq4sw==}
+
   tapable@2.3.0:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
     engines: {node: '>=6'}
@@ -15248,7 +15251,7 @@ snapshots:
     dependencies:
       '@react-email/text': 0.1.6(react@19.2.4)
       react: 19.2.4
-      tailwindcss: 4.2.0
+      tailwindcss: 4.2.1
     optionalDependencies:
       '@react-email/body': 0.2.1(react@19.2.4)
       '@react-email/button': 0.2.1(react@19.2.4)
@@ -16329,10 +16332,10 @@ snapshots:
       postcss: 8.5.6
       tailwindcss: 4.2.0
 
-  '@tailwindcss/typography@0.5.19(tailwindcss@4.2.0)':
+  '@tailwindcss/typography@0.5.19(tailwindcss@4.2.1)':
     dependencies:
       postcss-selector-parser: 6.0.10
-      tailwindcss: 4.2.0
+      tailwindcss: 4.2.1
 
   '@tanstack/eslint-plugin-query@5.91.4(eslint@9.39.3(jiti@1.21.7))(typescript@5.9.3)':
     dependencies:
@@ -17079,12 +17082,12 @@ snapshots:
 
   '@uploadthing/mime-types@0.3.6': {}
 
-  '@uploadthing/react@7.3.3(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(uploadthing@7.7.4(express@4.22.1)(h3@1.15.5)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.0))':
+  '@uploadthing/react@7.3.3(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(uploadthing@7.7.4(express@4.22.1)(h3@1.15.5)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.1))':
     dependencies:
       '@uploadthing/shared': 7.1.10
       file-selector: 0.6.0
       react: 19.2.4
-      uploadthing: 7.7.4(express@4.22.1)(h3@1.15.5)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.0)
+      uploadthing: 7.7.4(express@4.22.1)(h3@1.15.5)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.1)
     optionalDependencies:
       next: 16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
 
@@ -23289,10 +23292,10 @@ snapshots:
 
   tailwind-merge@3.5.0: {}
 
-  tailwind-scrollbar@4.0.2(react@19.2.4)(tailwindcss@4.2.0):
+  tailwind-scrollbar@4.0.2(react@19.2.4)(tailwindcss@4.2.1):
     dependencies:
       prism-react-renderer: 2.4.1(react@19.2.4)
-      tailwindcss: 4.2.0
+      tailwindcss: 4.2.1
     transitivePeerDependencies:
       - react
 
@@ -23325,6 +23328,8 @@ snapshots:
       - yaml
 
   tailwindcss@4.2.0: {}
+
+  tailwindcss@4.2.1: {}
 
   tapable@2.3.0: {}
 
@@ -23787,7 +23792,7 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
-  uploadthing@7.7.4(express@4.22.1)(h3@1.15.5)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.0):
+  uploadthing@7.7.4(express@4.22.1)(h3@1.15.5)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.1):
     dependencies:
       '@effect/platform': 0.90.3(effect@3.17.7)
       '@standard-schema/spec': 1.0.0-beta.4
@@ -23798,7 +23803,7 @@ snapshots:
       express: 4.22.1
       h3: 1.15.5
       next: 16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      tailwindcss: 4.2.0
+      tailwindcss: 4.2.1
 
   uri-js@4.4.1:
     dependencies:
