@@ -183,7 +183,7 @@ jobs:
 
       - name: Secret Scanning (TruffleHog)
         # v3.93.4
-        uses: trufflesecurity/trufflehog@ec1d9a6b4b7ce070eff34bd09e7cbd95ce1e2412
+        uses: trufflesecurity/trufflehog@e3cbb3afc66d364469632805d044f9d4743cfbec
         with:
           path: ./
           extra_args: --only-verified
