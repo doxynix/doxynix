@@ -28,8 +28,8 @@ importers:
         specifier: 3.0.24
         version: 3.0.24(zod@4.3.6)
       '@ai-sdk/openai':
-        specifier: 3.0.30
-        version: 3.0.30(zod@4.3.6)
+        specifier: 3.0.31
+        version: 3.0.31(zod@4.3.6)
       '@hookform/resolvers':
         specifier: 5.2.2
         version: 5.2.2(react-hook-form@7.71.2(react@19.2.4))
@@ -163,8 +163,8 @@ importers:
         specifier: 2.22.1
         version: 2.22.1(@prisma/client@6.19.2(prisma@6.19.2(typescript@5.9.3))(typescript@5.9.3))(zod@4.3.6)
       ably:
-        specifier: 2.17.1
-        version: 2.17.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: 2.18.0
+        version: 2.18.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       ai:
         specifier: 6.0.97
         version: 6.0.97(zod@4.3.6)
@@ -607,8 +607,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@3.0.30':
-    resolution: {integrity: sha512-YDht3t7TDyWKP+JYZp20VuYqSjyF2brHYh47GGFDUPf2wZiqNQ263ecL+quar2bP3GZ3BeQA8f0m2B7UwLPR+g==}
+  '@ai-sdk/openai@3.0.31':
+    resolution: {integrity: sha512-61DmKNdwi2S83YZO80tCUibcOq0nNKa+vF9m+3VlD0b6bZ8FSe7GrO0bCCZaBeucu79OxWPx7Q1u0v3hxb91mQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -5415,8 +5415,8 @@ packages:
     resolution: {integrity: sha512-y2s6F0urvcnzB/Rx5oPVLUn9zlq+cnwTMXAlEH46tdItQtqU8fTRYqrGGOuJVIKZcbZwgtpFzpSzzcC0YtjLqQ==}
     engines: {node: '>=20'}
 
-  ably@2.17.1:
-    resolution: {integrity: sha512-70yfXHoM7JtJD/8FCtPD1gkWW0f+AJqbJp0PsqDAqiyxFB8cPFY+FuKHgNTYb8eRHKXq8hT1xiDphUcY0+GHnA==}
+  ably@2.18.0:
+    resolution: {integrity: sha512-KVA9Y8GUaOyC6HTck3zzVkztdBKkHjIdsJB98eZ+sPmjbm3DQ6fgfqsTepiWudCaBC7984g1e/rHQ4q2thg9CQ==}
     engines: {node: '>=16'}
     peerDependencies:
       react: '>=16.8.0'
@@ -11758,7 +11758,7 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.15(zod@4.3.6)
       zod: 4.3.6
 
-  '@ai-sdk/openai@3.0.30(zod@4.3.6)':
+  '@ai-sdk/openai@3.0.31(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.15(zod@4.3.6)
@@ -17388,7 +17388,7 @@ snapshots:
       - tsx
       - yaml
 
-  ably@2.17.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  ably@2.18.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@ably/msgpack-js': 0.4.1
       dequal: 2.0.3
