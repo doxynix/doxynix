@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.4](https://github.com/doxynix/doxynix/compare/v1.8.3...v1.8.4) (2026-02-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency simple-git to v3.32.2 ([#375](https://github.com/doxynix/doxynix/issues/375)) ([03e7bf9](https://github.com/doxynix/doxynix/commit/03e7bf9644ac3229cc58b4ba3de72b9aada1b476))
+
 ## [1.8.3](https://github.com/doxynix/doxynix/compare/v1.8.2...v1.8.3) (2026-02-22)
 
 
