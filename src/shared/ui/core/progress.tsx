@@ -7,9 +7,9 @@ import { cn } from "@/shared/lib/utils";
 
 function Progress({
   className,
-  value,
   indicatorClassName,
   indicatorStyle,
+  value,
   ...props
 }: React.ComponentProps<typeof ProgressPrimitive.Root> & {
   indicatorClassName?: string;

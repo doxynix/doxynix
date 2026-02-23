@@ -22,11 +22,11 @@ export function TrendsWidget() {
   const [activeTab, setActiveTab] = useState("overview");
 
   const chartConfig = {
-    health: { label: "Health", color: "var(--chart-1)" },
-    security: { label: "Security", color: "var(--chart-2)" },
-    complexity: { label: "Complexity", color: "var(--chart-3)" },
-    onboarding: { label: "Onboarding", color: "var(--chart-4)" },
-    techDebt: { label: "Tech Debt", color: "var(--chart-5)" },
+    complexity: { color: "var(--chart-3)", label: "Complexity" },
+    health: { color: "var(--chart-1)", label: "Health" },
+    onboarding: { color: "var(--chart-4)", label: "Onboarding" },
+    security: { color: "var(--chart-2)", label: "Security" },
+    techDebt: { color: "var(--chart-5)", label: "Tech Debt" },
   } satisfies ChartConfig;
 
   if (isLoading || !data) {
@@ -62,44 +62,44 @@ export function TrendsWidget() {
 
       <CardContent className="pt-6">
         <ChartContainer config={chartConfig} className="h-75 w-full">
-          <AreaChart data={data} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
+          <AreaChart data={data} margin={{ bottom: 0, left: 0, right: 0, top: 10 }}>
             <defs>
-              <linearGradient id="fillHealth" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="fillHealth" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="5%" stopColor={healthColor} stopOpacity={0.4} />
                 <stop offset="95%" stopColor={healthColor} stopOpacity={0} />
               </linearGradient>
-              <linearGradient id="fillSecurity" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="fillSecurity" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="5%" stopColor={securityColor} stopOpacity={0.4} />
                 <stop offset="95%" stopColor={securityColor} stopOpacity={0} />
               </linearGradient>
-              <linearGradient id="fillComplexity" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="fillComplexity" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="5%" stopColor={complexityColor} stopOpacity={0.4} />
                 <stop offset="95%" stopColor={complexityColor} stopOpacity={0} />
               </linearGradient>
-              <linearGradient id="fillOnboarding" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="fillOnboarding" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="5%" stopColor={onBoardingColor} stopOpacity={0.4} />
                 <stop offset="95%" stopColor={onBoardingColor} stopOpacity={0} />
               </linearGradient>
-              <linearGradient id="fillTechDebt" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="fillTechDebt" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="5%" stopColor={techDebtColor} stopOpacity={0.4} />
                 <stop offset="95%" stopColor={techDebtColor} stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical strokeDasharray="3 3" strokeOpacity={1} />
             <XAxis
-              dataKey="date"
-              tickLine={false}
               axisLine={false}
-              tickMargin={8}
+              dataKey="date"
               tickFormatter={(value) => value}
+              tickLine={false}
+              tickMargin={8}
             />
             <YAxis domain={[0, 100]} />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+            <ChartTooltip content={<ChartTooltipContent indicator="dot" />} cursor={false} />
             {activeTab === "overview" && (
               <Area
                 key="health"
-                dataKey="health"
                 type="monotone"
+                dataKey="health"
                 fill="url(#fillHealth)"
                 stroke={healthColor}
               />
@@ -107,8 +107,8 @@ export function TrendsWidget() {
             {activeTab === "overview" && (
               <Area
                 key="security"
-                dataKey="security"
                 type="monotone"
+                dataKey="security"
                 fill="url(#fillSecurity)"
                 stroke={securityColor}
               />
@@ -117,8 +117,8 @@ export function TrendsWidget() {
             {activeTab === "engineering" && (
               <Area
                 key="complexity"
-                dataKey="complexity"
                 type="monotone"
+                dataKey="complexity"
                 fill="url(#fillComplexity)"
                 stroke={complexityColor}
               />
@@ -126,8 +126,8 @@ export function TrendsWidget() {
             {activeTab === "engineering" && (
               <Area
                 key="onboarding"
-                dataKey="onboarding"
                 type="monotone"
+                dataKey="onboarding"
                 fill="url(#fillOnboarding)"
                 stroke={onBoardingColor}
               />
@@ -135,8 +135,8 @@ export function TrendsWidget() {
             {activeTab === "engineering" && (
               <Area
                 key="techDebt"
-                dataKey="techDebt"
                 type="monotone"
+                dataKey="techDebt"
                 fill="url(#fillTechDebt)"
                 stroke={techDebtColor}
               />

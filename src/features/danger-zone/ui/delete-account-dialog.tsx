@@ -27,12 +27,12 @@ export function DeleteAccountDialog() {
   const t = useTranslations("Dashboard");
 
   const deleteMutation = trpc.user.deleteAccount.useMutation({
+    onError: (err) => toast.error(err.message),
     onSuccess: async () => {
       toast.success(t("settings_danger_delete_account_toast_success"));
       setOpen(false);
       await signOut({ callbackUrl: "/auth" });
     },
-    onError: (err) => toast.error(err.message),
   });
 
   const handleDelete = () => {
@@ -78,11 +78,11 @@ export function DeleteAccountDialog() {
             </Button>
           </DialogClose>
           <LoadingButton
-            variant="destructive"
-            className="cursor-pointer"
-            onClick={handleDelete}
             isLoading={deleteMutation.isPending}
             loadingText="Deleting..."
+            variant="destructive"
+            onClick={handleDelete}
+            className="cursor-pointer"
           >
             {t("settings_danger_delete_confirmation")}
           </LoadingButton>

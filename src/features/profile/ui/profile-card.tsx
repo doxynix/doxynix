@@ -31,7 +31,7 @@ type Props = {
   user: User;
 };
 
-export function ProfileCard({ user }: Props) {
+export function ProfileCard({ user }: Readonly<Props>) {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -40,32 +40,32 @@ export function ProfileCard({ user }: Props) {
   const [avatarUrl, setAvatarUrl] = useState(user?.image ?? "");
 
   const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(UpdateProfileSchema),
     defaultValues: {
-      name: displayUser.name ?? "",
       email: displayUser.email ?? "",
+      name: displayUser.name ?? "",
     },
+    resolver: zodResolver(UpdateProfileSchema),
   });
 
   const { isUploading, removeAvatar, updateProfile, uploadAvatar } = useProfileActions({
-    onProfileUpdateSuccess: (data) => {
-      setDisplayUser((prev) => ({
-        ...prev,
-        name: data.name,
-        email: data.email,
-      }));
-
-      form.reset({
-        name: data.name ?? "",
-        email: data.email ?? "",
-      });
+    onAvatarRemoveSuccess: () => {
+      setAvatarUrl("");
+      if (fileInputRef.current) fileInputRef.current.value = "";
     },
     onAvatarUpdateSuccess: (url) => {
       setAvatarUrl(url);
     },
-    onAvatarRemoveSuccess: () => {
-      setAvatarUrl("");
-      if (fileInputRef.current) fileInputRef.current.value = "";
+    onProfileUpdateSuccess: (data) => {
+      setDisplayUser((prev) => ({
+        ...prev,
+        email: data.email,
+        name: data.name,
+      }));
+
+      form.reset({
+        email: data.email ?? "",
+        name: data.name ?? "",
+      });
     },
   });
 
@@ -96,13 +96,13 @@ export function ProfileCard({ user }: Props) {
             </Avatar>
             {avatarUrl && (
               <LoadingButton
-                size="icon"
-                variant="destructive"
-                className="absolute right-0 bottom-0 cursor-pointer"
                 disabled={removeAvatar.isPending}
-                onClick={() => removeAvatar.mutate()}
                 isLoading={removeAvatar.isPending}
                 loadingText=""
+                size="icon"
+                variant="destructive"
+                onClick={() => removeAvatar.mutate()}
+                className="absolute right-0 bottom-0 cursor-pointer"
               >
                 <Trash2 className="h-4 w-4" />
               </LoadingButton>
@@ -110,20 +110,20 @@ export function ProfileCard({ user }: Props) {
           </div>
           <div className="flex flex-col gap-2">
             <input
-              type="file"
-              className="hidden"
               ref={fileInputRef}
+              type="file"
               accept=".jpg, .jpeg, .png, .gif"
-              onChange={(e) => void handleImageSelect(e)}
               disabled={isUploading}
+              onChange={(e) => void handleImageSelect(e)}
+              className="hidden"
             />
 
             <LoadingButton
-              className="cursor-pointer"
-              variant="outline"
-              loadingText="Loading..."
               isLoading={isUploading}
+              loadingText="Loading..."
+              variant="outline"
               onClick={() => fileInputRef.current?.click()}
+              className="cursor-pointer"
             >
               {t("settings_profile_upload_photo_button")}
             </LoadingButton>
@@ -148,8 +148,8 @@ export function ProfileCard({ user }: Props) {
               className="flex w-full flex-col gap-4"
             >
               <FormField
-                control={form.control}
                 name="name"
+                control={form.control}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel className="text-muted-foreground">
@@ -183,11 +183,11 @@ export function ProfileCard({ user }: Props) {
               /> */}
               <div className="flex justify-end">
                 <LoadingButton
-                  loadingText="Saving..."
-                  isLoading={updateProfile.isPending}
                   disabled={
                     !form.formState.isDirty || !form.formState.isValid || updateProfile.isPending
                   }
+                  isLoading={updateProfile.isPending}
+                  loadingText="Saving..."
                   className="cursor-pointer"
                 >
                   {tCommon("save")}

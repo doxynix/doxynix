@@ -17,14 +17,14 @@ export function useNotificationActions() {
   });
 
   return {
-    markRead: {
-      mutate: (id: string) => markRead.mutate({ id }),
-      isPending: markRead.isPending,
-    },
-    markAllRead: {
-      mutate: () => markAllRead.mutate(),
-      isPending: markAllRead.isPending,
-    },
     invalidateAll,
+    markAllRead: {
+      isPending: markAllRead.isPending,
+      mutate: () => markAllRead.mutate(),
+    },
+    markRead: {
+      isPending: markRead.isPending,
+      mutate: (id: string) => markRead.mutate({ id }),
+    },
   };
 }

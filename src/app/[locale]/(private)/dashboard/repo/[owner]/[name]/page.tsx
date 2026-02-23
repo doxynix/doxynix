@@ -7,26 +7,26 @@ import { RepoSetup } from "@/features/repo-setup";
 import { api } from "@/server/trpc/server";
 
 type Props = {
-  params: Promise<{ owner: string; name: string }>;
+  params: Promise<{ name: string; owner: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { owner, name } = await params;
+  const { name, owner } = await params;
 
   return {
     title: `${owner}/${name}`,
   };
 }
 
-export default async function RepoOwnerNamePage({ params }: Props) {
-  const { owner, name } = await params;
+export default async function RepoOwnerNamePage({ params }: Readonly<Props>) {
+  const { name, owner } = await params;
 
   const repo = await (
     await api()
   ).repo.getByName({
-    owner,
     name,
+    owner,
   });
 
   if (repo == null) {

@@ -37,9 +37,9 @@ const MagicLinkSchema = z.object({
 });
 
 const BUTTONS = [
-  { provider: "github", icon: GitHubIcon, text: "Github" },
-  { provider: "google", icon: GoogleIcon, text: "Google" },
-  { provider: "yandex", icon: YandexIcon, text: "Yandex" },
+  { icon: GitHubIcon, provider: "github", text: "Github" },
+  { icon: GoogleIcon, provider: "google", text: "Google" },
+  { icon: YandexIcon, provider: "yandex", text: "Yandex" },
 ];
 
 export function AuthForm() {
@@ -55,8 +55,8 @@ export function AuthForm() {
   const [pendingData, setPendingData] = useState<z.infer<typeof MagicLinkSchema> | null>(null);
 
   const form = useForm<z.infer<typeof MagicLinkSchema>>({
-    resolver: zodResolver(MagicLinkSchema),
     defaultValues: { email: "" },
+    resolver: zodResolver(MagicLinkSchema),
   });
 
   const disabled = loadingProvider != null || isVerifying;
@@ -78,9 +78,9 @@ export function AuthForm() {
 
       try {
         const res = await signIn("email", {
+          callbackUrl: "/dashboard",
           email: values.email,
           redirect: false,
-          callbackUrl: "/dashboard",
         });
 
         if ((res?.ok ?? false) && res?.error == null) {
@@ -172,11 +172,11 @@ export function AuthForm() {
             {BUTTONS.map((item) => (
               <LoadingButton
                 key={item.provider}
-                className="cursor-pointer"
+                disabled={disabled}
                 isLoading={loadingProvider === item.provider}
                 loadingText={t("login_loading")}
-                disabled={disabled}
                 onClick={() => void handleSignIn(item.provider)}
+                className="cursor-pointer"
               >
                 <item.icon /> {item.text}
               </LoadingButton>
@@ -197,16 +197,16 @@ export function AuthForm() {
                 className="flex w-full flex-col gap-4"
               >
                 <FormField
-                  control={form.control}
                   name="email"
+                  control={form.control}
                   render={({ field }) => (
                     <FormItem className="flex flex-col gap-2">
                       <FormLabel className="text-muted-foreground">Email</FormLabel>
                       <FormControl>
                         <Input
                           disabled={disabled}
-                          className="h-12"
                           placeholder="doxynix@example.com"
+                          className="h-12"
                           {...field}
                         />
                       </FormControl>
@@ -216,10 +216,10 @@ export function AuthForm() {
                 />
                 <LoadingButton
                   type="submit"
-                  className="cursor-pointer"
+                  disabled={disabled}
                   isLoading={loadingProvider === "email" || isVerifying}
                   loadingText={isVerifying ? "Security check..." : t("login_loading")}
-                  disabled={disabled}
+                  className="cursor-pointer"
                 >
                   {t("login_btn")}
                 </LoadingButton>
@@ -227,11 +227,11 @@ export function AuthForm() {
             </Form>
             <p className="text-muted-foreground text-center text-xs">
               {t("terms_agreement")}{" "}
-              <Link className="underline hover:no-underline" href="/terms">
+              <Link href="/terms" className="underline hover:no-underline">
                 {tCommon("terms_of_service")}
               </Link>{" "}
               {tCommon("and")}{" "}
-              <Link className="underline hover:no-underline" href="/privacy">
+              <Link href="/privacy" className="underline hover:no-underline">
                 {tCommon("privacy_policy")}
               </Link>
             </p>
@@ -253,19 +253,19 @@ export function AuthForm() {
             {t("check_email_desc")}{" "}
             <span className="text-foreground font-bold italic">{form.getValues("email")}</span>
           </p>
-          <Button className="cursor-pointer" variant="outline" onClick={() => setIsSent(false)}>
+          <Button variant="outline" onClick={() => setIsSent(false)} className="cursor-pointer">
             {t("enter_different_email")}
           </Button>
         </div>
       </div>
       <Turnstile
-        className={cn("mx-auto mt-2", isSent && "hidden")}
         ref={turnstileRef}
-        siteKey={TURNSTILE_SITE_KEY}
         options={turnstileOptions}
-        onSuccess={onTurnstileSuccess}
+        siteKey={TURNSTILE_SITE_KEY}
         onError={onTurnstileError}
         onExpire={onTurnstileExpire}
+        onSuccess={onTurnstileSuccess}
+        className={cn("mx-auto mt-2", isSent && "hidden")}
       />
     </>
   );

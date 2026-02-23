@@ -12,7 +12,7 @@ import { AppSidebar } from "@/widgets/app-sidebar";
 
 import { redirect } from "@/i18n/routing";
 
-export default async function PrivateLayout({ children }: { children: ReactNode }) {
+export default async function PrivateLayout({ children }: Readonly<{ children: ReactNode }>) {
   const session = await getServerAuthSession();
   const locale = await getLocale();
 

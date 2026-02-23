@@ -14,35 +14,35 @@ import { RepoFileNode } from "./repo-file-node";
 import { RepoSetupSkeleton } from "./repo-setup-skeleton";
 
 type Props = {
+  actions: ActionsType;
   repo: RepoDetailed;
   state: StateType;
-  actions: ActionsType;
   treeApi: TreeApi<FileNode> | null;
 };
 
-export function RepoFileTree({ repo, state, actions, treeApi }: Props) {
+export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>) {
   const treeActions = useMemo(
     () => [
-      { label: "Expand All", icon: FolderOpen, onClick: () => treeApi?.openAll() },
-      { label: "Collapse All", icon: Folder, onClick: () => treeApi?.closeAll() },
+      { icon: FolderOpen, label: "Expand All", onClick: () => treeApi?.openAll() },
+      { icon: Folder, label: "Collapse All", onClick: () => treeApi?.closeAll() },
     ],
     [treeApi]
   );
 
   const selectionActions = useMemo(
     () => [
-      { label: "Select All", icon: Check, onClick: actions.handleSelectAll },
+      { icon: Check, label: "Select All", onClick: actions.handleSelectAll },
       {
-        label: "Select Recommended",
         icon: Sparkles,
+        label: "Select Recommended",
         onClick: actions.handleSelectRecommended,
         tooltip: "Automatically select files for analysis",
       },
       {
-        label: "Clear",
-        icon: X,
-        onClick: actions.handleClearAll,
         className: "text-destructive hover:bg-destructive/10 hover:text-destructive",
+        icon: X,
+        label: "Clear",
+        onClick: actions.handleClearAll,
       },
     ],
     [actions]
@@ -55,8 +55,8 @@ export function RepoFileTree({ repo, state, actions, treeApi }: Props) {
           <span className="text-sm font-medium">Select Branch</span>
           <RepoBranchSelector
             branches={state.branches}
-            selectedBranch={state.selectedBranch}
             defaultBranch={repo.defaultBranch}
+            selectedBranch={state.selectedBranch}
             onSelect={actions.setSelectedBranch}
           />
         </div>
@@ -64,9 +64,9 @@ export function RepoFileTree({ repo, state, actions, treeApi }: Props) {
           <div className="relative">
             <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
             <Input
-              placeholder="Search files..."
               type="search"
               value={state.searchTerm}
+              placeholder="Search files..."
               onChange={(e) => actions.setSearchTerm(e.target.value)}
               className="pl-9"
             />
@@ -80,10 +80,10 @@ export function RepoFileTree({ repo, state, actions, treeApi }: Props) {
             {treeActions.map((action) => (
               <Button
                 key={action.label}
-                variant="ghost"
                 size="sm"
-                className="h-7 gap-1.5 px-2"
+                variant="ghost"
                 onClick={action.onClick}
+                className="h-7 gap-1.5 px-2"
               >
                 <action.icon className="h-4 w-4" />
                 {action.label}
@@ -96,10 +96,10 @@ export function RepoFileTree({ repo, state, actions, treeApi }: Props) {
               const ButtonElement = (
                 <Button
                   key={action.label}
-                  variant="ghost"
                   size="sm"
-                  className={cn("h-7 gap-1.5 px-2", action.className)}
+                  variant="ghost"
                   onClick={action.onClick}
+                  className={cn("h-7 gap-1.5 px-2", action.className)}
                 >
                   <action.icon className="h-4 w-4" />
                   {action.label}
@@ -122,32 +122,32 @@ export function RepoFileTree({ repo, state, actions, treeApi }: Props) {
       </div>
 
       <div
-        className="overflow-hidden rounded-lg border p-1"
-        onPointerDownCapture={(e) => e.target === e.currentTarget && e.stopPropagation()}
         onKeyDownCapture={(e) => e.key === " " && e.stopPropagation()}
+        onPointerDownCapture={(e) => e.target === e.currentTarget && e.stopPropagation()}
+        className="overflow-hidden rounded-lg border p-1"
       >
         {state.isLoading ? (
           <RepoSetupSkeleton />
         ) : (
           <Tree
             ref={(api) => actions.setTreeApi(api || null)}
-            data={state.treeData}
-            searchTerm={state.searchTerm}
-            searchMatch={(node, term) => node.data.name.toLowerCase().includes(term.toLowerCase())}
-            openByDefault={false}
-            width="100%"
-            height={580}
-            indent={20}
-            rowHeight={34}
             disableDrag
             disableDrop
             disableEdit
-            onRename={() => {}}
-            onDelete={() => {}}
-            onCreate={() => null}
-            onMove={() => {}}
+            data={state.treeData}
             disableMultiSelection={false}
+            height={580}
+            indent={20}
+            openByDefault={false}
+            rowHeight={34}
+            searchMatch={(node, term) => node.data.name.toLowerCase().includes(term.toLowerCase())}
+            searchTerm={state.searchTerm}
             selectionFollowsFocus={false}
+            width="100%"
+            onCreate={() => null}
+            onDelete={() => {}}
+            onMove={() => {}}
+            onRename={() => {}}
           >
             {(props) => (
               <RepoFileNode

@@ -7,14 +7,14 @@ import { cn } from "@/shared/lib/utils";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 type Props = {
+  className?: string;
+  color?: string;
   icon?: ComponentType<{ className?: string; style?: CSSProperties }>;
   label: string | number | null | undefined;
   tooltip?: string;
-  color?: string;
-  className?: string;
 };
 
-export function RepoGitMetric({ icon: Icon, label, tooltip, color, className }: Props) {
+export function RepoGitMetric({ className, color, icon: Icon, label, tooltip }: Readonly<Props>) {
   const locale = useLocale();
   if (label == null || label === "") return null;
   const isCssValue = (color?.startsWith("#") ?? false) || color?.startsWith("var(");

@@ -8,21 +8,21 @@ type Props = {
   children: ReactNode;
   content: ReactNode;
   delay?: number;
-  open?: boolean;
-  hidden?: boolean;
-  side?: "top" | "right" | "left" | "bottom";
   disableHoverableContent?: boolean;
+  hidden?: boolean;
+  open?: boolean;
+  side?: "top" | "right" | "left" | "bottom";
 };
 
 export function AppTooltip({
   children,
   content,
   delay = 300,
-  open: controlledOpen,
-  hidden,
-  side,
   disableHoverableContent = true,
-}: Props) {
+  hidden,
+  open: controlledOpen,
+  side,
+}: Readonly<Props>) {
   const [canHover, setCanHover] = useState(false);
 
   React.useEffect(() => {
@@ -40,8 +40,8 @@ export function AppTooltip({
 
   return (
     <Tooltip
-      disableHoverableContent={disableHoverableContent}
       delayDuration={delay}
+      disableHoverableContent={disableHoverableContent}
       open={controlledOpen}
     >
       <TooltipTrigger asChild>{children}</TooltipTrigger>

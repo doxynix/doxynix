@@ -12,13 +12,13 @@ interface BentoGridProps extends ComponentPropsWithoutRef<"div"> {
 }
 
 interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
-  name: string;
-  className: string;
   background: ReactNode;
-  Icon: React.ElementType;
+  className: string;
+  cta: string;
   description: string;
   href: string;
-  cta: string;
+  Icon: React.ElementType;
+  name: string;
 }
 
 const BentoGrid = ({ children, className, ...props }: BentoGridProps) => {
@@ -30,13 +30,13 @@ const BentoGrid = ({ children, className, ...props }: BentoGridProps) => {
 };
 
 const BentoCard = ({
-  name,
-  className,
   background,
-  Icon,
+  className,
+  cta,
   description,
   href,
-  cta,
+  Icon,
+  name,
   ...props
 }: BentoCardProps) => (
   <div
@@ -64,7 +64,7 @@ const BentoCard = ({
           "pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:hidden"
         )}
       >
-        <Button variant="link" asChild size="sm" className="pointer-events-auto p-0">
+        <Button asChild size="sm" variant="link" className="pointer-events-auto p-0">
           <Link href={href}>
             <span className="text-foreground">{cta}</span>
             <ArrowRightIcon className="text-foreground ms-2 h-4 w-4 rtl:rotate-180" />
@@ -78,7 +78,7 @@ const BentoCard = ({
         "pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:flex"
       )}
     >
-      <Button variant="link" asChild size="sm" className="pointer-events-auto p-0">
+      <Button asChild size="sm" variant="link" className="pointer-events-auto p-0">
         <Link href={href}>
           <span className="text-foreground">{cta}</span>
           <ArrowRightIcon className="text-foreground ms-2 h-4 w-4 rtl:rotate-180" />

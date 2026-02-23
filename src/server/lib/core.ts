@@ -10,9 +10,9 @@ const f = createUploadthing();
 
 export const ourFileRouter = {
   avatarUploader: f({
-    "image/jpeg": { maxFileSize: "4MB", maxFileCount: 1 },
-    "image/png": { maxFileSize: "4MB", maxFileCount: 1 },
-    "image/gif": { maxFileSize: "4MB", maxFileCount: 1 },
+    "image/gif": { maxFileCount: 1, maxFileSize: "4MB" },
+    "image/jpeg": { maxFileCount: 1, maxFileSize: "4MB" },
+    "image/png": { maxFileCount: 1, maxFileSize: "4MB" },
   })
     .middleware(async () => {
       const session = await getServerAuthSession();
@@ -23,13 +23,13 @@ export const ourFileRouter = {
     })
     .onUploadError(async ({ error, fileKey }) => {
       logger.error({
-        msg: "UploadThing upload error",
-        error: error.message,
         code: error.code,
+        error: error.message,
         key: fileKey,
+        msg: "UploadThing upload error",
       });
     })
-    .onUploadComplete(async ({ metadata, file }) => {
+    .onUploadComplete(async ({ file, metadata }) => {
       const userId = Number(metadata.userId);
       if (isNaN(userId)) {
         logger.error({ msg: "Invalid userId in upload metadata", userId: metadata.userId });
@@ -40,27 +40,27 @@ export const ourFileRouter = {
 
       try {
         const user = await prisma.user.findUnique({
-          where: { id: userId },
           select: { imageKey: true },
+          where: { id: userId },
         });
 
         const oldKey = user?.imageKey;
 
         await prisma.user.update({
-          where: { id: userId },
           data: {
             image: file.ufsUrl,
             imageKey: file.key,
           },
+          where: { id: userId },
         });
         if (oldKey != null && oldKey !== file.key) {
           utapi.deleteFiles(oldKey).catch((e) => {
-            logger.error({ msg: "Failed to delete old avatar", error: e });
+            logger.error({ error: e, msg: "Failed to delete old avatar" });
           });
         }
         return { url: file.ufsUrl };
       } catch (err) {
-        logger.error({ msg: "DB user update error", error: err });
+        logger.error({ error: err, msg: "DB user update error" });
         throw new UploadThingError("Failed to update avatar");
       }
     }),

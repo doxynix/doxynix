@@ -12,8 +12,8 @@ const LIST_STYLES = "list-disc space-y-2 pl-5 marker:text-foreground";
 const STRONG_TEXT = "font-medium text-foreground";
 
 const richStyles = {
-  strong: (chunks: React.ReactNode) => <span className={STRONG_TEXT}>{chunks}</span>,
   italic: (chunks: React.ReactNode) => <i className="italic">{chunks}</i>,
+  strong: (chunks: React.ReactNode) => <span className={STRONG_TEXT}>{chunks}</span>,
 };
 
 export default async function TermsPage() {
@@ -25,10 +25,10 @@ export default async function TermsPage() {
   return (
     <div className="animate-fade-in container mx-auto max-w-3xl px-4 py-12 pt-24">
       <BackOrLinkButton
-        className="cursor-pointer"
         showIcon
-        variant="link"
         label={tCommon("back")}
+        variant="link"
+        className="cursor-pointer"
       />
 
       <header className="mb-10 border-b py-6">

@@ -22,26 +22,26 @@ export async function createContext({ req }: Props) {
       const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
       const keyRecord = await prisma.apiKey.findUnique({
-        where: { hashedKey: hashedToken },
         include: { user: true },
+        where: { hashedKey: hashedToken },
       });
 
       if (keyRecord != null && keyRecord.revoked === false && keyRecord.user != null) {
         prisma.apiKey
           .update({
-            where: { id: keyRecord.id },
             data: { lastUsed: new Date() },
+            where: { id: keyRecord.id },
           })
           .catch(console.error);
 
         return {
-          req,
           prisma,
-          session: {
-            user: keyRecord.user,
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-          },
+          req,
           requestInfo,
+          session: {
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+            user: keyRecord.user,
+          },
         };
       }
     }
@@ -49,11 +49,11 @@ export async function createContext({ req }: Props) {
 
   const session = await getServerSession(authOptions);
   return {
-    req,
     prisma,
-    session,
-    requestInfo,
     redis: redisClient,
+    req,
+    requestInfo,
+    session,
   };
 }
 

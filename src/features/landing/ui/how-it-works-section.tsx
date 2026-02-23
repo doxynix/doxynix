@@ -12,20 +12,20 @@ import { TriggerIcon } from "@/shared/ui/icons/trigger-icon";
 import { AnimatedBeam } from "@/shared/ui/visuals/animated-beam";
 
 type PathTypes = {
-  name: string;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  curvature?: number;
+  delay?: number;
+  duration?: number;
   fromRef: React.RefObject<HTMLDivElement | null>;
-  toRef: React.RefObject<HTMLDivElement | null>;
   gradientStartColor: string;
   gradientStopColor: string;
-  curvature?: number;
+  name: string;
   reverse?: boolean;
-  duration?: number;
-  delay?: number;
+  toRef: React.RefObject<HTMLDivElement | null>;
 };
 
-const Circle = forwardRef<HTMLDivElement, { className?: string; children?: React.ReactNode }>(
-  ({ className, children }, ref) => {
+const Circle = forwardRef<HTMLDivElement, { children?: React.ReactNode; className?: string }>(
+  ({ children, className }, ref) => {
     return (
       <div
         ref={ref}
@@ -41,11 +41,11 @@ const Circle = forwardRef<HTMLDivElement, { className?: string; children?: React
 );
 
 const COLORS = {
-  client: "#ccc",
-  trigger: "#41FF54",
-  llm: "#ad46ff",
-  db: "#34D59A",
   ably: "#FF5115",
+  client: "#ccc",
+  db: "#34D59A",
+  llm: "#ad46ff",
+  trigger: "#41FF54",
 };
 
 const STEP_DURATION = 2;
@@ -64,64 +64,64 @@ export function HowItWorksSection() {
   const dbRef = useRef<HTMLDivElement>(null);
   const ablyRef = useRef<HTMLDivElement>(null);
 
-  const isInView = useInView(containerRef, { once: true, margin: "-200px" });
+  const isInView = useInView(containerRef, { margin: "-200px", once: true });
 
   const PATHS: PathTypes[] = [
     {
-      name: "req",
       containerRef: containerRef,
+      delay: 0,
       fromRef: clientRef,
-      toRef: triggerRef,
       gradientStartColor: COLORS.trigger,
       gradientStopColor: COLORS.client,
-      delay: 0,
+      name: "req",
+      toRef: triggerRef,
     },
     {
-      name: "ai-req",
       containerRef: containerRef,
+      delay: STEP_DURATION,
       fromRef: triggerRef,
-      toRef: llmRef,
       gradientStartColor: COLORS.llm,
       gradientStopColor: COLORS.trigger,
-      delay: STEP_DURATION,
+      name: "ai-req",
+      toRef: llmRef,
     },
     {
-      name: "ai-res",
       containerRef: containerRef,
+      delay: STEP_DURATION * 2,
       fromRef: llmRef,
-      toRef: triggerRef,
       gradientStartColor: COLORS.trigger,
       gradientStopColor: COLORS.llm,
+      name: "ai-res",
       reverse: true,
-      delay: STEP_DURATION * 2,
+      toRef: triggerRef,
     },
     {
-      name: "db-save",
       containerRef: containerRef,
+      delay: STEP_DURATION * 3,
       fromRef: triggerRef,
-      toRef: dbRef,
       gradientStartColor: COLORS.db,
       gradientStopColor: COLORS.trigger,
-      delay: STEP_DURATION * 3,
+      name: "db-save",
+      toRef: dbRef,
     },
     {
-      name: "realtime-push",
       containerRef: containerRef,
+      delay: STEP_DURATION * 4,
       fromRef: triggerRef,
-      toRef: ablyRef,
       gradientStartColor: COLORS.ably,
       gradientStopColor: COLORS.trigger,
-      delay: STEP_DURATION * 4,
+      name: "realtime-push",
+      toRef: ablyRef,
     },
     {
-      name: "notify-client",
       containerRef: containerRef,
+      delay: STEP_DURATION * 5,
       fromRef: ablyRef,
-      toRef: clientRef,
       gradientStartColor: COLORS.client,
       gradientStopColor: COLORS.ably,
-      delay: STEP_DURATION * 5,
+      name: "notify-client",
       reverse: true,
+      toRef: clientRef,
     },
   ];
 
@@ -197,16 +197,16 @@ export function HowItWorksSection() {
           <AnimatedBeam
             key={path.name}
             containerRef={containerRef}
+            curvature={path.curvature}
+            delay={path.delay}
+            duration={STEP_DURATION}
             fromRef={path.fromRef}
-            toRef={path.toRef}
             gradientStartColor={path.gradientStartColor}
             gradientStopColor={path.gradientStopColor}
-            curvature={path.curvature}
-            reverse={path.reverse}
-            duration={STEP_DURATION}
-            delay={path.delay}
-            repeatDelay={REPEAT_DELAY}
             isActive={isInView}
+            repeatDelay={REPEAT_DELAY}
+            reverse={path.reverse}
+            toRef={path.toRef}
           />
         ))}
       </div>

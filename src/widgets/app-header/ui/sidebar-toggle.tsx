@@ -8,7 +8,7 @@ export function SidebarToggle() {
 
   return (
     <AppTooltip content={state === "expanded" ? "Collapse" : "Expand"}>
-      <SidebarTrigger className="text-muted-foreground hover:cursor-pointer" variant="ghost" />
+      <SidebarTrigger variant="ghost" className="text-muted-foreground hover:cursor-pointer" />
     </AppTooltip>
   );
 }

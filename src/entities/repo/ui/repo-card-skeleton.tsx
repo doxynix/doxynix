@@ -5,7 +5,7 @@ type Props = {
   count?: number;
 };
 
-export function RepoCardSkeleton({ count }: Props) {
+export function RepoCardSkeleton({ count }: Readonly<Props>) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count ?? 4 }).map((_, i) => (

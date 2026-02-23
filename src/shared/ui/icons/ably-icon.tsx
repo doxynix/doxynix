@@ -2,14 +2,14 @@ type Props = {
   className?: string;
 };
 
-export function AblyIcon({ className }: Props) {
+export function AblyIcon({ className }: Readonly<Props>) {
   return (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="100%"
+      fill="none"
       height="100%"
       viewBox="0 0 205 64"
-      fill="none"
+      width="100%"
+      xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
       <path
@@ -27,11 +27,11 @@ export function AblyIcon({ className }: Props) {
       <defs>
         <linearGradient
           id="paint0_linear_991_544"
-          x1="11.8545"
-          y1="74.8439"
-          x2="65.8278"
-          y2="14.9005"
           gradientUnits="userSpaceOnUse"
+          x1="11.8545"
+          x2="65.8278"
+          y1="74.8439"
+          y2="14.9005"
         >
           <stop stopColor="#FF5416" />
           <stop offset="0.2535" stopColor="#FF5115" />
@@ -42,11 +42,11 @@ export function AblyIcon({ className }: Props) {
         </linearGradient>
         <linearGradient
           id="paint1_linear_991_544"
-          x1="22.324"
-          y1="78.7187"
-          x2="54.2238"
-          y2="43.2904"
           gradientUnits="userSpaceOnUse"
+          x1="22.324"
+          x2="54.2238"
+          y1="78.7187"
+          y2="43.2904"
         >
           <stop stopColor="#FF5416" />
           <stop offset="0.2535" stopColor="#FF5115" />

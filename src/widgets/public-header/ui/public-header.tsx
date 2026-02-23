@@ -29,7 +29,7 @@ export function PublicHeader() {
 
         <nav className="hidden gap-4 md:flex">
           {publicHeaderMenu.map((item) => (
-            <Button key={item.href} variant="ghost" asChild>
+            <Button key={item.href} asChild variant="ghost">
               <Link href={item.href as Route} className="flex items-center gap-2">
                 <item.icon className="h-4 w-4" />
                 {item.label}
@@ -41,7 +41,7 @@ export function PublicHeader() {
           <AppTooltip content="Work in Progress">
             <span className="text-warning bg-warning/20 rounded p-1 py-0.5 text-xs">BETA</span>
           </AppTooltip>
-          <Button variant="outline" asChild>
+          <Button asChild variant="outline">
             <Link href="/auth">
               Get Started
               <MoveLeft size={16} className="rotate-180" />
@@ -51,7 +51,7 @@ export function PublicHeader() {
           <div className="flex items-center gap-2 md:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button size="icon" variant="ghost">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">{t("open_menu")}</span>
                 </Button>
@@ -64,8 +64,8 @@ export function PublicHeader() {
                 <div className="mt-8 flex flex-col gap-4">
                   <nav className="flex flex-col gap-2">
                     {publicHeaderMenu.map((item) => (
-                      <SheetClose asChild key={item.href}>
-                        <Button variant="ghost" className="justify-start" asChild>
+                      <SheetClose key={item.href} asChild>
+                        <Button asChild variant="ghost" className="justify-start">
                           <Link href={item.href as Route} className="flex items-center gap-2">
                             <item.icon className="h-4 w-4" />
                             {item.label}

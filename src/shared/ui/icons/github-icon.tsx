@@ -2,14 +2,14 @@ type Props = {
   className?: string;
 };
 
-export function GitHubIcon({ className }: Props) {
+export function GitHubIcon({ className }: Readonly<Props>) {
   return (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="100%"
+      fill="none"
       height="100%"
       viewBox="0 0 98 96"
-      fill="none"
+      width="100%"
+      xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
       <g clipPath="url(#clip0_730_27126)">
@@ -20,7 +20,7 @@ export function GitHubIcon({ className }: Props) {
       </g>
       <defs>
         <clipPath id="clip0_730_27126">
-          <rect width="98" height="96" fill="white" />
+          <rect fill="white" height="96" width="98" />
         </clipPath>
       </defs>
     </svg>

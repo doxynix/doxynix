@@ -46,7 +46,7 @@ const softDeleteClient = baseClient.$extends({
 export const prisma = softDeleteClient.$extends({
   query: {
     $allModels: {
-      async $allOperations({ model, operation, args, query }) {
+      async $allOperations({ args, model, operation, query }) {
         const start = performance.now();
 
         let result;
@@ -54,10 +54,10 @@ export const prisma = softDeleteClient.$extends({
           result = await query(args);
         } catch (error) {
           logger.error({
-            msg: `DB Error: ${model}.${operation}`,
-            model,
-            operation,
             error: error instanceof Error ? error.message : String(error),
+            model,
+            msg: `DB Error: ${model}.${operation}`,
+            operation,
           });
           throw error;
         }
@@ -72,35 +72,35 @@ export const prisma = softDeleteClient.$extends({
           (baseClient as PrismaClientType).auditLog
             .create({
               data: {
+                ip: ctxStore?.ip ?? "system",
                 model,
                 operation,
                 payload: sanitizePayload(args),
-                userId: userId != null ? Number(userId) : null,
-                ip: ctxStore?.ip ?? "system",
-                userAgent: ctxStore?.userAgent ?? "internal",
                 requestId: ctxStore?.requestId ?? "unknown",
+                userAgent: ctxStore?.userAgent ?? "internal",
+                userId: userId != null ? Number(userId) : null,
               },
             })
             .catch((auditErr) => {
-              logger.error({ msg: "AUDIT LOG WRITE FAILED", error: auditErr });
+              logger.error({ error: auditErr, msg: "AUDIT LOG WRITE FAILED" });
             });
 
           if (!IS_TEST) {
             logger.info({
-              msg: `DB Write: ${model}.${operation}`,
-              type: "db.write",
-              model,
-              operation,
               durationMs: duration.toFixed(2),
+              model,
+              msg: `DB Write: ${model}.${operation}`,
+              operation,
+              type: "db.write",
             });
           }
         } else if (duration > 200) {
           logger.warn({
-            msg: "Slow DB Query",
-            type: "db.slow",
-            model,
-            operation,
             durationMs: duration.toFixed(2),
+            model,
+            msg: "Slow DB Query",
+            operation,
+            type: "db.slow",
           });
         }
 
@@ -111,6 +111,10 @@ export const prisma = softDeleteClient.$extends({
 });
 
 export type PrismaClientExtended = typeof prisma;
+
+export type TransactionClient = Parameters<Parameters<PrismaClientExtended["$transaction"]>[0]>[0];
+
+export type DbClient = PrismaClientExtended | TransactionClient;
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClientExtended };
 

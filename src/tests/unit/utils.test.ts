@@ -42,8 +42,8 @@ describe("Server Utils: handlePrismaError", () => {
 
   it("should map P2002 to CONFLICT", () => {
     const err = new Prisma.PrismaClientKnownRequestError("Unique constraint", {
-      code: "P2002",
       clientVersion: "5.0",
+      code: "P2002",
     });
 
     try {
@@ -57,8 +57,8 @@ describe("Server Utils: handlePrismaError", () => {
 
   it("should map P2025 to NOT_FOUND", () => {
     const err = new Prisma.PrismaClientKnownRequestError("Not found", {
-      code: "P2025",
       clientVersion: "5.0",
+      code: "P2025",
     });
 
     try {
@@ -97,10 +97,10 @@ describe("Server Utils: handlePrismaError", () => {
     it("should redact nested sensitive fields", () => {
       const input = {
         user: {
-          name: "Elon",
           credentials: {
             passwordHash: "hash123",
           },
+          name: "Elon",
         },
       };
 
@@ -108,10 +108,10 @@ describe("Server Utils: handlePrismaError", () => {
 
       expect(result).toEqual({
         user: {
-          name: "Elon",
           credentials: {
             passwordHash: "***REDACTED***",
           },
+          name: "Elon",
         },
       });
     });
@@ -143,29 +143,29 @@ describe("Server Utils: handlePrismaError", () => {
 
     it("should handle deep mixed structures", () => {
       const input = {
+        meta: {
+          count: 1,
+        },
         users: [
           {
             email: "a@mail.com",
             refresh_token: "r1",
           },
         ],
-        meta: {
-          count: 1,
-        },
       };
 
       const result = sanitizePayload(input);
 
       expect(result).toEqual({
+        meta: {
+          count: 1,
+        },
         users: [
           {
             email: "a@mail.com",
             refresh_token: "***REDACTED***",
           },
         ],
-        meta: {
-          count: 1,
-        },
       });
     });
     it("should handle empty objects and arrays", () => {

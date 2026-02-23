@@ -7,8 +7,8 @@ import { repoService } from "@/server/services/repo.service";
 
 vi.mock("@/server/services/github.service", () => ({
   githubService: {
-    parseUrl: vi.fn(),
     getRepoInfo: vi.fn(),
+    parseUrl: vi.fn(),
   },
 }));
 
@@ -31,17 +31,17 @@ describe("Repo Service", () => {
 
   describe("createRepo", () => {
     it("should successfully create a repo", async () => {
-      vi.mocked(githubService.parseUrl).mockReturnValue({ owner: "test", name: "repo" });
+      vi.mocked(githubService.parseUrl).mockReturnValue({ name: "repo", owner: "test" });
       vi.mocked(githubService.getRepoInfo).mockResolvedValue({
-        id: 100,
-        owner: { login: "test", avatar_url: "avatar.jpg" },
-        name: "repo",
-        description: "desc",
-        html_url: "http://github.com/test/repo",
-        stargazers_count: 10,
-        private: false,
         created_at: "2023-01-01",
+        description: "desc",
+        html_url: "https://github.com/test/repo",
+        id: 100,
+        name: "repo",
+        owner: { avatar_url: "avatar.jpg", login: "test" },
+        private: false,
         pushed_at: "2023-01-02",
+        stargazers_count: 10,
       } as any);
 
       mockDb.repo.create.mockResolvedValue({ id: 1, name: "repo" });
@@ -53,8 +53,8 @@ describe("Repo Service", () => {
         expect.objectContaining({
           data: expect.objectContaining({
             githubId: 100,
-            visibility: "PUBLIC",
             userId: 1,
+            visibility: "PUBLIC",
           }),
         })
       );
@@ -69,7 +69,7 @@ describe("Repo Service", () => {
     });
 
     it("should handle GitHub 404 error", async () => {
-      vi.mocked(githubService.parseUrl).mockReturnValue({ owner: "a", name: "b" });
+      vi.mocked(githubService.parseUrl).mockReturnValue({ name: "b", owner: "a" });
       vi.mocked(githubService.getRepoInfo).mockRejectedValue({ status: 404 });
 
       await expect(repoService.createRepo(mockDb, 1, "a/b")).rejects.toThrow(

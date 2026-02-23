@@ -43,9 +43,9 @@ export function AppCommandMenu() {
         search: debouncedSearch,
       },
       {
+        enabled: open,
         getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
         initialCursor: 1,
-        enabled: open,
       }
     );
 
@@ -135,10 +135,10 @@ export function AppCommandMenu() {
     <>
       <Button
         variant="outline"
+        onClick={() => setOpen(true)}
         className={cn(
           "lg:bg-muted/50 text-muted-foreground relative h-9 w-9 justify-start rounded-xl text-sm font-normal shadow-none not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12"
         )}
-        onClick={() => setOpen(true)}
       >
         <Search className="absolute top-2.25 left-2.25" />
         <span className="hidden lg:inline-flex lg:pl-4">{t("command_search")}</span>
@@ -147,12 +147,12 @@ export function AppCommandMenu() {
         </CommandShortcut>
       </Button>
 
-      <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
+      <CommandDialog open={open} shouldFilter={false} onOpenChange={setOpen}>
         <CommandInput
           value={search}
-          onValueChange={setSearch}
           isLoading={isLoading}
           placeholder={t("command_placeholder")}
+          onValueChange={setSearch}
         />
         <CommandList>
           {filteredCommands.length === 0 && (
@@ -203,14 +203,14 @@ export function AppCommandMenu() {
               <div className="flex w-full items-center justify-between">
                 <span>{t("command_menu_label_2")}</span>
                 <Button
-                  variant="ghost"
-                  className="text-muted-foreground! cursor-pointer bg-transparent! hover:underline"
                   size="sm"
+                  variant="ghost"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     setIsReposExpanded(!isReposExpanded);
                   }}
+                  className="text-muted-foreground! cursor-pointer bg-transparent! hover:underline"
                 >
                   {isReposExpanded ? t("command_collapse") : t("command_expand")}
                   <ChevronDown

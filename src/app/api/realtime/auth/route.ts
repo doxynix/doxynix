@@ -24,14 +24,14 @@ export async function GET() {
 
   try {
     const tokenRequest = await realtimeServer.auth.createTokenRequest({
-      clientId,
       capability: JSON.stringify(capability),
+      clientId,
       ttl: ONE_HOUR,
     });
 
     return NextResponse.json(tokenRequest);
   } catch (error) {
-    logger.error({ msg: "Realtime auth error", error });
+    logger.error({ error, msg: "Realtime auth error" });
     return NextResponse.json({ error: "Error requesting token" }, { status: 500 });
   }
 }

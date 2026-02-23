@@ -13,8 +13,8 @@ let highlighter: Awaited<ReturnType<typeof createHighlighter>> | null = null;
 async function getHighlighter() {
   if (!highlighter) {
     highlighter = await createHighlighter({
-      themes: [themeDark],
       langs: [langTs, langJSON, langMarkdown, langConsole],
+      themes: [themeDark],
     });
   }
   return highlighter;
@@ -25,7 +25,7 @@ async function highlight(code: string, lang: string, theme: "dark" | "light") {
 
   return hl.codeToHtml(code, {
     lang,
-    theme: theme === "dark" ? "github-dark-dimmed" : "github-dark-dimmed",
+    theme: theme === "dark" ? "github-dark-dimmed" : "github-light",
     transformers: [],
   });
 }

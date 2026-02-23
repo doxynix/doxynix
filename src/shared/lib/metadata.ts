@@ -12,8 +12,8 @@ export function createMetadata(titlekey: string, descriptionKey: string) {
     const t = await getTranslations({ locale, namespace: "Metadata" });
 
     return {
-      title: t(titlekey),
       description: t(`${descriptionKey}`),
+      title: t(titlekey),
     };
   };
 }

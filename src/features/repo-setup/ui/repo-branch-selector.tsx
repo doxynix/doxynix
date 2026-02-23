@@ -15,25 +15,25 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/core/popove
 
 type RepoBranchSelectorProps = {
   branches: string[] | undefined;
-  selectedBranch: string;
   defaultBranch: string;
   onSelect: (branch: string) => void;
+  selectedBranch: string;
 };
 
 export function RepoBranchSelector({
   branches,
-  selectedBranch,
   defaultBranch,
   onSelect,
-}: RepoBranchSelectorProps) {
+  selectedBranch,
+}: Readonly<RepoBranchSelectorProps>) {
   const [open, setOpen] = useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
           role="combobox"
+          variant="outline"
           aria-expanded={open}
           className="w-full justify-between font-normal"
         >
@@ -44,7 +44,7 @@ export function RepoBranchSelector({
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-75 p-0" align="start">
+      <PopoverContent align="start" className="w-75 p-0">
         <Command>
           <CommandInput placeholder="Search branch..." />
           <CommandList className="max-h-75">

@@ -25,7 +25,7 @@ const richStyles = {
   strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
 };
 
-export function DeleteAllReposDialog({ meta }: { meta: RepoMeta }) {
+export function DeleteAllReposDialog({ meta }: Readonly<{ meta: RepoMeta }>) {
   const [open, setOpen] = useState(false);
   const hasRepos = (meta?.totalCount ?? 0) > 0;
   const tCommon = useTranslations("Common");
@@ -42,7 +42,7 @@ export function DeleteAllReposDialog({ meta }: { meta: RepoMeta }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="destructive" disabled={!hasRepos} className="w-fit cursor-pointer">
+        <Button disabled={!hasRepos} variant="destructive" className="w-fit cursor-pointer">
           {t("settings_danger_delete_all_repos")} <Trash2 className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -84,11 +84,11 @@ export function DeleteAllReposDialog({ meta }: { meta: RepoMeta }) {
             </Button>
           </DialogClose>
           <LoadingButton
-            variant="destructive"
-            className="cursor-pointer"
-            onClick={handleDelete}
             isLoading={deleteAll.isPending}
             loadingText="Deleting..."
+            variant="destructive"
+            onClick={handleDelete}
+            className="cursor-pointer"
           >
             {t("settings_danger_delete_confirmation")}
           </LoadingButton>

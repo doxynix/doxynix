@@ -10,13 +10,13 @@ import { SidebarMenuButton, SidebarMenuShortcut } from "@/shared/ui/core/sidebar
 import { Link, usePathname } from "@/i18n/routing";
 
 export function SidebarLink({
+  exact,
   href,
-  label: title,
   icon: Icon,
   isBlank,
-  exact,
+  label: title,
   shortcut,
-}: MenuItem) {
+}: Readonly<MenuItem>) {
   const pathname = usePathname() ?? "";
   const blank = isBlank === true;
   if (href == null) {
@@ -43,6 +43,7 @@ export function SidebarLink({
 
   return (
     <SidebarMenuButton
+      asChild
       tooltip={`${title}`}
       className={cn(
         "group/link flex cursor-default transition-colors",
@@ -50,12 +51,11 @@ export function SidebarLink({
           ? "bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground font-bold"
           : "hover:bg-sidebar-accent text-muted-foreground hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground"
       )}
-      asChild
     >
       <Link
         href={href as Route}
-        target={blank ? "_blank" : undefined}
         rel={blank ? "noopener noreferrer" : undefined}
+        target={blank ? "_blank" : undefined}
       >
         <Icon />
         <span className="truncate">{title}</span>

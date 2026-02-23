@@ -18,22 +18,22 @@ const cookieName = getCookieName();
 let ratelimit: Ratelimit | null = null;
 if (IS_PROD) {
   ratelimit = new Ratelimit({
-    redis: redisClient,
-    limiter: Ratelimit.slidingWindow(20, "10 s"),
     analytics: false,
+    limiter: Ratelimit.slidingWindow(20, "10 s"),
     prefix: "@upstash/ratelimit",
+    redis: redisClient,
   });
 }
 
 const intlMiddleware = createMiddleware(routing);
 
 type VercelNextRequest = NextRequest & {
-  ip?: string;
   geo?: {
-    country?: string;
     city?: string;
+    country?: string;
     region?: string;
   };
+  ip?: string;
 };
 
 async function hashToken(token: string): Promise<string> {
@@ -78,14 +78,14 @@ function logTraffic(
   event: NextFetchEvent
 ) {
   logger.info({
-    msg,
-    method,
-    url,
-    path,
-    ip,
     country,
-    userAgent,
+    ip,
+    method,
+    msg,
+    path,
     requestId,
+    url,
+    userAgent,
   });
 
   event.waitUntil(logger.flush());
@@ -104,8 +104,8 @@ async function handleRateLimitAndSize(
   const contentLength = request.headers.get("content-length");
   if (contentLength != null && Number(contentLength) > ONE_MB) {
     return new NextResponse(JSON.stringify({ error: "Payload Too Large", requestId }), {
-      status: 413,
       headers: { "content-type": "application/json" },
+      status: 413,
     });
   }
 
@@ -133,13 +133,13 @@ async function handleRateLimitAndSize(
         message: "You're sending requests too often. Please wait.",
       }),
       {
-        status: 429,
         headers: {
           "Content-Type": "application/json",
           "X-RateLimit-Limit": limit.toString(),
           "X-RateLimit-Remaining": remaining.toString(),
           "X-RateLimit-Reset": reset.toString(),
         },
+        status: 429,
       }
     );
   }
@@ -162,21 +162,21 @@ async function handleTurnstile(request: NextRequest, ip: string): Promise<NextRe
 
   try {
     const cfRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
       body: formData,
+      method: "POST",
     });
 
     const cfData = await cfRes.json();
 
     if (cfData.success === false || cfData.action !== "auth") {
-      logger.error({ msg: "Cloudflare verification failed:", error: cfData["error-codes"] });
+      logger.error({ error: cfData["error-codes"], msg: "Cloudflare verification failed:" });
       return new NextResponse(JSON.stringify({ error: "Captcha failed" }), { status: 403 });
     }
     const response = NextResponse.next();
     response.cookies.delete("cf-turnstile-response");
     return response;
   } catch (error) {
-    logger.error({ msg: "Cloudflare network error:", error });
+    logger.error({ error, msg: "Cloudflare network error:" });
     return new NextResponse(JSON.stringify({ error: "Security check error. Please try again." }), {
       status: 403,
     });
@@ -233,9 +233,9 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
 
   response.headers.set("x-request-id", requestId);
   response.cookies.set("last_request_id", requestId, {
-    path: "/",
-    maxAge: 60,
     httpOnly: false,
+    maxAge: 60,
+    path: "/",
     sameSite: "lax",
     secure: IS_PROD,
   });

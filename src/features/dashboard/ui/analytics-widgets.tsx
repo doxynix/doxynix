@@ -96,8 +96,8 @@ export function AnalyticsWidgets() {
                     <div className="flex flex-col">
                       <span className="text-sm font-medium">
                         <Link
-                          className="hover:underline"
                           href={`/dashboard/repo/${activity.repoOwner}/${activity.repoName}`}
+                          className="hover:underline"
                         >
                           <span className="text-muted-foreground truncate font-bold">
                             {activity.repoOwner}
@@ -117,8 +117,8 @@ export function AnalyticsWidgets() {
                         <div className="mt-1 flex items-center gap-1">
                           <Progress
                             value={activity.progress}
-                            className="h-1"
                             indicatorStyle={{ backgroundColor: "var(--color-warning)" }}
+                            className="h-1"
                           />
                           <span className="text-warning text-[10px] font-bold">
                             {activity.progress}%

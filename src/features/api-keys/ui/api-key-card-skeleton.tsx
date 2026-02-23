@@ -5,7 +5,7 @@ type Props = {
   count?: number;
 };
 
-export function ApiKeyCardSkeleton({ count }: Props) {
+export function ApiKeyCardSkeleton({ count }: Readonly<Props>) {
   return (
     <div className="grid grid-cols-2 gap-2">
       {Array.from({ length: count ?? 4 }).map((_, i) => (

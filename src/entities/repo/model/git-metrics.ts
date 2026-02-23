@@ -16,12 +16,12 @@ import type { RepoTableItem } from "@/shared/types/repo";
 import { getLanguageColor } from "./language-colors";
 
 type Props = {
-  id: string;
+  className?: string;
+  color?: string;
   icon?: ComponentType<{ className?: string }>;
+  id: string;
   label: string | number | null;
   tooltip?: string;
-  color?: string;
-  className?: string;
 };
 
 export function getGitMetrics(repo: RepoTableItem, locale: string): Props[] {
@@ -29,54 +29,54 @@ export function getGitMetrics(repo: RepoTableItem, locale: string): Props[] {
 
   const items = [
     {
-      id: "Language",
+      color: langColor,
       icon: Circle,
+      id: "Language",
       label: repo.language,
       tooltip: "Primary Language",
-      color: langColor,
     },
     {
-      id: "Stars",
+      color: "text-warning fill-current",
       icon: Star,
+      id: "Stars",
       label: repo.stars,
       tooltip: "Stars",
-      color: "text-warning fill-current",
     },
-    { id: "Forks", icon: GitFork, label: repo.forks, tooltip: "Forks", color: "text-green-700" },
+    { color: "text-green-700", icon: GitFork, id: "Forks", label: repo.forks, tooltip: "Forks" },
     {
-      id: "Branch",
+      color: "text-blue",
       icon: GitBranch,
+      id: "Branch",
       label: repo.defaultBranch,
       tooltip: "Branch",
-      color: "text-blue",
     },
     {
-      id: "Open Issues",
+      color: "text-destructive",
       icon: CircleDot,
+      id: "Open Issues",
       label: repo.openIssues,
       tooltip: "Open Issues",
-      color: "text-destructive",
     },
     {
-      id: "License",
+      color: "text-muted-foreground",
       icon: Scale,
+      id: "License",
       label: repo.license,
       tooltip: "License",
-      color: "text-muted-foreground",
     },
     {
-      id: "Size",
+      color: "text-muted-foreground",
       icon: HardDrive,
+      id: "Size",
       label: repo.size > 1024 ? `${(repo.size / 1024).toFixed(1)} MB` : `${repo.size} KB`,
       tooltip: "Size",
-      color: "text-muted-foreground",
     },
     {
-      id: "Last push",
+      color: "text-muted-foreground",
       icon: History,
+      id: "Last push",
       label: formatRelativeTime(repo.pushedAt, locale),
       tooltip: "Last push",
-      color: "text-muted-foreground",
     },
   ];
 

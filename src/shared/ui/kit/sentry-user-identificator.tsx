@@ -11,10 +11,10 @@ export function SentryUserIdentificator({ user }: Props) {
   useEffect(() => {
     if (user) {
       Sentry.setUser({
-        id: user.id,
         email: user.email ?? undefined,
-        username: user.name ?? undefined,
+        id: user.id,
         role: user.role ?? undefined,
+        username: user.name ?? undefined,
       });
     }
 

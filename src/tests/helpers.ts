@@ -32,10 +32,10 @@ export async function cleanupDatabase() {
 export async function createTestUser(name: string, role: "USER" | "ADMIN" = "USER") {
   const email = `${name.toLowerCase()}_${Date.now()}_${Math.floor(Math.random() * 10000)}@test.com`;
   const user = await prisma.user.create({
-    data: { name, email, role },
+    data: { email, name, role },
   });
   const db = enhance(prisma, { user: { id: user.id, role: user.role } });
-  return { user, db, email };
+  return { db, email, user };
 }
 
 export function createAnon() {

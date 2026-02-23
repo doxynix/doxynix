@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { SettingsMenu } from "@/features/settings";
 
-export default async function SettingsLayout({ children }: { children: ReactNode }) {
+export default async function SettingsLayout({ children }: Readonly<{ children: ReactNode }>) {
   const t = await getTranslations("Dashboard");
 
   return (

@@ -4,52 +4,52 @@ import { cn } from "@/shared/lib/utils";
 
 interface MarqueeProps extends ComponentPropsWithoutRef<"div"> {
   /**
+   * Content to be displayed in the marquee
+   */
+  children: React.ReactNode;
+  /**
    * Optional CSS class name to apply custom styles
    */
   className?: string;
-  /**
-   * Whether to reverse the animation direction
-   * @default false
-   */
-  reverse?: boolean;
   /**
    * Whether to pause the animation on hover
    * @default false
    */
   pauseOnHover?: boolean;
   /**
-   * Content to be displayed in the marquee
+   * Number of times to repeat the content
+   * @default 4
    */
-  children: React.ReactNode;
+  repeat?: number;
+  /**
+   * Whether to reverse the animation direction
+   * @default false
+   */
+  reverse?: boolean;
   /**
    * Whether to animate vertically instead of horizontally
    * @default false
    */
   vertical?: boolean;
-  /**
-   * Number of times to repeat the content
-   * @default 4
-   */
-  repeat?: number;
 }
 
 export function Marquee({
-  className,
-  reverse = false,
-  pauseOnHover = false,
   children,
-  vertical = false,
+  className,
+  pauseOnHover = false,
   repeat = 4,
+  reverse = false,
+  vertical = false,
   ...props
-}: MarqueeProps) {
+}: Readonly<MarqueeProps>) {
   return (
     <div
       {...props}
       className={cn(
         "group flex gap-(--gap) overflow-hidden p-2 [--duration:40s] [--gap:1rem] sm:[--gap:5rem]",
         {
-          "flex-row": !vertical,
           "flex-col": vertical,
+          "flex-row": !vertical,
         },
         className
       )}
@@ -60,10 +60,10 @@ export function Marquee({
           <div
             key={i}
             className={cn("flex shrink-0 justify-around gap-(--gap)", {
-              "animate-marquee flex-row": !vertical,
               "animate-marquee-vertical flex-col": vertical,
-              "group-hover:paused": pauseOnHover,
+              "animate-marquee flex-row": !vertical,
               "direction-[reverse]": reverse,
+              "group-hover:paused": pauseOnHover,
             })}
           >
             {children}

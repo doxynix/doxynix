@@ -19,15 +19,10 @@ type DashboardStatsOutput = RouterOutput["analytics"]["getDashboardStats"];
 type TFunction = (key: string) => string;
 
 export function getStats(data: DashboardStatsOutput, t: TFunction, locale: string) {
-  const { overview, analysisStats } = data;
+  const { analysisStats, overview } = data;
 
   return [
     {
-      id: "health",
-      label: t("stat_health_score"),
-      value: `${overview.avgHealthScore}/100`,
-      description: "Code quality average",
-      icon: HeartPulse,
       className: cn(
         "text-success bg-success/10",
         overview.avgHealthScore < 50 && "text-destructive bg-destructive/10",
@@ -35,63 +30,68 @@ export function getStats(data: DashboardStatsOutput, t: TFunction, locale: strin
           overview.avgHealthScore < 80 &&
           "text-warning bg-warning/10"
       ),
+      description: "Code quality average",
+      icon: HeartPulse,
+      id: "health",
+      label: t("stat_health_score"),
+      value: `${overview.avgHealthScore}/100`,
     },
     {
+      className: "bg-white/10 text-white font-mono",
+      description: "Across all repositories",
+      icon: Code2,
       id: "loc",
       label: t("stat_total_loc"),
       value: overview.totalLoc.toLocaleString(locale),
-      description: "Across all repositories",
-      icon: Code2,
-      className: "bg-white/10 text-white font-mono",
     },
     {
+      className: "bg-blue-500/10 text-blue-500",
+      description: "Security audit score",
+      icon: ShieldCheck,
       id: "security",
       label: t("stat_security"),
       value: `${overview.avgSecurityScore}/100`,
-      description: "Security audit score",
-      icon: ShieldCheck,
-      className: "bg-blue-500/10 text-blue-500",
     },
     {
+      className: "bg-pink-500/10 text-pink-500",
+      description: "Cognitive complexity",
+      icon: Brain,
       id: "complexity",
       label: t("stat_complexity"),
       value: `${overview.avgComplexityScore}/100`,
-      description: "Cognitive complexity",
-      icon: Brain,
-      className: "bg-pink-500/10 text-pink-500",
     },
     {
+      className: "bg-cyan-500/10 text-cyan-500",
+      description: "Documentation quality",
+      icon: BookOpenCheck,
       id: "onboarding",
       label: t("stat_onboarding"),
       value: `${overview.avgOnboardingScore}/100`,
-      description: "Documentation quality",
-      icon: BookOpenCheck,
-      className: "bg-cyan-500/10 text-cyan-500",
     },
     {
+      className: "bg-orange-500/10 text-orange-500",
+      description: "Refactoring needed",
+      icon: Wrench,
       id: "techdebt",
       label: t("stat_tech_debt"),
       value: `${overview.avgTechDebtScore}/100`,
-      description: "Refactoring needed",
-      icon: Wrench,
-      className: "bg-orange-500/10 text-orange-500",
     },
     {
-      id: "queue",
-      label: t("stat_pending"),
-      value: analysisStats.pending,
+      className: "bg-warning/10 text-warning",
       description: "Analyses in queue",
       icon: Loader2,
       iconClass: analysisStats.pending > 0 ? "animate-spin" : undefined,
-      className: "bg-warning/10 text-warning",
+      id: "queue",
+      label: t("stat_pending"),
+      value: analysisStats.pending,
     },
     {
+      className: "bg-destructive/10 text-destructive",
+      description: "Needs Attention",
+      icon: TriangleAlert,
       id: "criticalRepoCount",
       label: t("stat_critical_repo_count"),
       value: `${overview.criticalRepoCount}`,
-      description: "Needs Attention",
-      icon: TriangleAlert,
-      className: "bg-destructive/10 text-destructive",
     },
   ];
 }

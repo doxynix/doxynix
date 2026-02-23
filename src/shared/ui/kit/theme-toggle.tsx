@@ -13,7 +13,7 @@ type Props = {
   className?: string;
 };
 
-export function ThemeToggle({ className }: Props) {
+export function ThemeToggle({ className }: Readonly<Props>) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -30,11 +30,11 @@ export function ThemeToggle({ className }: Props) {
   return (
     <AppTooltip content={isDark ? "Light mode" : "Dark mode"}>
       <Button
-        className={cn(className)}
-        variant="ghost"
         size="icon"
-        onClick={() => setTheme(isDark ? "light" : "dark")}
+        variant="ghost"
         aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+        onClick={() => setTheme(isDark ? "light" : "dark")}
+        className={cn(className)}
       >
         {isDark ? <Moon className="h-4.5" /> : <Sun className="h-4.5" />}
       </Button>

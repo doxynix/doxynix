@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { motion, useMotionValueEvent, useScroll } from "motion/react";
 
-export function PublicHeaderWrapper({ children }: { children: React.ReactNode }) {
+export function PublicHeaderWrapper({ children }: Readonly<{ children: React.ReactNode }>) {
   const [isHidden, setIsHidden] = useState(false);
 
   const { scrollY } = useScroll();
@@ -30,25 +30,25 @@ export function PublicHeaderWrapper({ children }: { children: React.ReactNode })
 
   return (
     <>
-      <div className="fixed inset-x-0 top-0 z-50 h-16" onMouseEnter={() => setIsHidden(false)} />
+      <div onMouseEnter={() => setIsHidden(false)} className="fixed inset-x-0 top-0 z-50 h-16" />
 
       <motion.div
-        variants={{
-          visible: {
-            y: 0,
-            opacity: 1,
-            pointerEvents: "auto",
-          },
-          hidden: {
-            y: "-100%",
-            opacity: 0,
-            pointerEvents: "none",
-          },
-        }}
         animate={isHidden ? "hidden" : "visible"}
         transition={{
           duration: 0.5,
           ease: [0.23, 1, 0.32, 1],
+        }}
+        variants={{
+          hidden: {
+            opacity: 0,
+            pointerEvents: "none",
+            y: "-100%",
+          },
+          visible: {
+            opacity: 1,
+            pointerEvents: "auto",
+            y: 0,
+          },
         }}
         onFocusCapture={() => setIsHidden(false)}
         className={

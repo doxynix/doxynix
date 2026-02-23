@@ -22,15 +22,15 @@ function getBaseUrl() {
   return APP_URL;
 }
 
-export function Providers({ children }: Props) {
+export function Providers({ children }: Readonly<Props>) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 30_000,
-            retry: 1,
             refetchOnWindowFocus: false,
+            retry: 1,
+            staleTime: 30_000,
           },
         },
       })
@@ -43,8 +43,8 @@ export function Providers({ children }: Props) {
           enabled: (opts) => IS_DEV || (opts.direction === "down" && opts.result instanceof Error),
         }),
         httpBatchLink({
-          url: `${getBaseUrl()}${TRPC_PREFIX}`,
           transformer: superjson,
+          url: `${getBaseUrl()}${TRPC_PREFIX}`,
         }),
       ],
     })
@@ -66,12 +66,12 @@ export function Providers({ children }: Props) {
 
 const InnerProviders = ({ children }: { children: ReactNode }) => (
   <ThemeProvider
+    disableTransitionOnChange
     attribute="class"
     defaultTheme="dark" // THEME: пока на время светлая тема удалена
-    storageKey="doxynix-theme"
     enableSystem={false} // THEME: пока на время светлая тема удалена
     forcedTheme="dark" // THEME: пока на время светлая тема удалена
-    disableTransitionOnChange
+    storageKey="doxynix-theme"
   >
     <TooltipProvider>{children}</TooltipProvider>
   </ThemeProvider>

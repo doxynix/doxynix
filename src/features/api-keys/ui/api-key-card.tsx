@@ -10,7 +10,7 @@ import type { UiApiKey } from "@/entities/api-keys";
 import { RevokeApiKeyDialog } from "./revoke-api-key-dialog";
 import { UpdateApiKeyDialog } from "./update-api-key-dialog";
 
-export function ApiKeyCard({ active }: { active: UiApiKey }) {
+export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const locale = useLocale();

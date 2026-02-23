@@ -1,19 +1,19 @@
 export type LanguageMetric = {
-  name: string;
-  lines: number;
   color: string;
+  lines: number;
+  name: string;
 };
 
 export type RepoMetrics = {
-  totalLoc: number;
-  fileCount: number;
-  totalSizeKb: number;
-  languages: LanguageMetric[];
-  techDebtScore: number;
-  complexityScore: number;
   busFactor: number;
+  complexityScore: number;
+  fileCount: number;
+  healthScore: number;
+  languages: LanguageMetric[];
+  maintenanceStatus: "active" | "stale" | "dead";
   mostComplexFiles: string[];
   onboardingScore: number;
-  maintenanceStatus: "active" | "stale" | "dead";
-  healthScore: number;
+  techDebtScore: number;
+  totalLoc: number;
+  totalSizeKb: number;
 };

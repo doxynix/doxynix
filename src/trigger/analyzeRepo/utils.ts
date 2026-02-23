@@ -18,35 +18,35 @@ export async function handleError(
 ) {
   const message = error instanceof Error ? error.message : "Unknown error";
   logger.error({
-    msg: "TASK_ERROR",
     analysisId,
     error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error),
+    msg: "TASK_ERROR",
   });
 
   await cleanup(tempPath);
 
   await prisma.analysis.update({
-    where: { publicId: analysisId },
     data: {
-      status: StatusSchema.enum.FAILED,
       error: message,
       message: "Analysis failed",
+      status: StatusSchema.enum.FAILED,
     },
+    where: { publicId: analysisId },
   });
 
   void realtimeServer.channels
     .get(channelName)
     ?.publish(REALTIME_CONFIG.events.user.analysisProgress, {
       analysisId,
-      status: "FAILED",
       message,
+      status: "FAILED",
     });
 }
 
 export async function cleanup(dirPath: string) {
   if (existsSync(dirPath)) {
     logger.info({ msg: "Removing temp clone path", path: dirPath });
-    await fs.rm(dirPath, { recursive: true, force: true });
+    await fs.rm(dirPath, { force: true, recursive: true });
   } else {
     logger.debug({ msg: "Temp clone path not present", path: dirPath });
   }
@@ -66,8 +66,8 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
 
       if (isOutside) {
         logger.warn({
-          msg: "Security: attempt to read file outside of basePath",
           filePath,
+          msg: "Security: attempt to read file outside of basePath",
           resolvedPath: realPath,
         });
         return null;
@@ -82,19 +82,19 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
       const isBinary = await isBinaryFile(buffer, { size: stat.size });
       if (isBinary) return null;
 
-      return { path: filePath, content: buffer.toString("utf-8") };
+      return { content: buffer.toString("utf-8"), path: filePath };
     } catch (e) {
       logger.warn({
-        msg: "Failed to read file",
-        filePath,
         error: e instanceof Error ? { message: e.message, stack: e.stack } : String(e),
+        filePath,
+        msg: "Failed to read file",
       });
       return null;
     }
   });
 
   const validFiles = (await Promise.all(filePromises)).filter(
-    (f): f is { path: string; content: string } => f != null
+    (f): f is { content: string; path: string } => f != null
   );
 
   if (validFiles.length === 0) throw new Error("No valid text files found to analyze");

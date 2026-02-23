@@ -9,11 +9,13 @@ function escapeRegExp(str: string) {
 Sentry.init({
   dsn: SENTRY_DSN,
 
+  enableLogs: !IS_PROD,
+
   integrations: IS_PROD
     ? [
         Sentry.replayIntegration({
-          maskAllText: true,
           blockAllMedia: true,
+          maskAllText: true,
         }),
         Sentry.httpClientIntegration({
           failedRequestTargets: [
@@ -26,15 +28,13 @@ Sentry.init({
         }),
       ]
     : [Sentry.browserTracingIntegration()],
-
-  tracesSampleRate: IS_PROD ? 0.1 : 1.0,
-  enableLogs: !IS_PROD,
+  replaysOnErrorSampleRate: IS_PROD ? 1.0 : 0.0,
 
   replaysSessionSampleRate: IS_PROD ? 0.01 : 0,
 
-  replaysOnErrorSampleRate: IS_PROD ? 1.0 : 0.0,
-
   sendDefaultPii: false,
+
+  tracesSampleRate: IS_PROD ? 0.1 : 1.0,
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

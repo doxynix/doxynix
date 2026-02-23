@@ -11,11 +11,11 @@ type RouterOutput = inferRouterOutputs<AppRouter>;
 export type RepoDetailed = NonNullable<RouterOutput["repo"]["getByName"]>;
 
 export type FileNode = {
+  children?: FileNode[];
   id: string;
   name: string;
-  children?: FileNode[];
   path: string;
-  type: string;
   recommended?: boolean;
   sha: string;
+  type: string;
 };

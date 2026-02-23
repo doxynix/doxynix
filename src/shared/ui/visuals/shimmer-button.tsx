@@ -6,49 +6,49 @@ import { Link } from "@/i18n/routing";
 import { Button } from "../core/button";
 
 export interface ShimmerButtonProps extends ComponentPropsWithoutRef<"button"> {
+  background?: string;
+  borderRadius?: string;
+  children?: React.ReactNode;
+  className?: string;
   href: string;
   shimmerColor?: string;
-  shimmerSize?: string;
-  borderRadius?: string;
   shimmerDuration?: string;
-  background?: string;
-  className?: string;
-  children?: React.ReactNode;
+  shimmerSize?: string;
 }
 
 export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
   (
     {
+      background = "#111111",
+      borderRadius = "100px",
+      children,
+      className,
       href,
       shimmerColor = "#ffffff",
-      shimmerSize = "0.05em",
       shimmerDuration = "3s",
-      borderRadius = "100px",
-      background = "#111111",
-      className,
-      children,
+      shimmerSize = "0.05em",
       ...props
     },
     ref
   ) => {
     return (
       <Button
-        style={
-          {
-            "--spread": "90deg",
-            "--shimmer-color": shimmerColor,
-            "--radius": borderRadius,
-            "--speed": shimmerDuration,
-            "--cut": shimmerSize,
-            "--bg": background,
-          } as CSSProperties
-        }
+        ref={ref}
         className={cn(
           "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-white/10 px-6 py-3 whitespace-nowrap text-white [background:var(--bg)]",
           "transform-gpu transition-transform duration-300 ease-in-out active:translate-y-px",
           className
         )}
-        ref={ref}
+        style={
+          {
+            "--bg": background,
+            "--cut": shimmerSize,
+            "--radius": borderRadius,
+            "--shimmer-color": shimmerColor,
+            "--speed": shimmerDuration,
+            "--spread": "90deg",
+          } as CSSProperties
+        }
         {...props}
         asChild
       >

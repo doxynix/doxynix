@@ -7,27 +7,27 @@ import { smoothScrollTo } from "@/shared/lib/utils";
 import { Button } from "../core/button";
 
 type Props = {
-  targetId: string;
-  offset?: number;
-  duration?: number;
-  buttonClassName?: string;
   arrowClassName?: string;
+  buttonClassName?: string;
+  duration?: number;
+  offset?: number;
+  targetId: string;
 };
 
 export function ScrollButton({
-  targetId,
-  offset = 80,
-  duration = 800,
-  buttonClassName,
   arrowClassName,
-}: Props) {
+  buttonClassName,
+  duration = 800,
+  offset = 80,
+  targetId,
+}: Readonly<Props>) {
   return (
     <Button
+      variant="ghost"
       onClick={() => {
         smoothScrollTo(targetId, offset, duration);
       }}
       className={buttonClassName}
-      variant="ghost"
     >
       <MoveRight size={12} className={arrowClassName} />
     </Button>

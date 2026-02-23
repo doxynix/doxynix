@@ -36,8 +36,8 @@ export function AppFooter() {
           <div className="border-border flex items-center gap-4 md:pl-6 xl:border-l">
             <a
               href="https://github.com/doxynix/doxynix"
-              target="_blank"
               rel="noopener noreferrer"
+              target="_blank"
               className="hover:text-foreground transition-colors"
             >
               <GitHubIcon className="hidden h-4 w-4 md:block" />
@@ -46,8 +46,8 @@ export function AppFooter() {
             </a>
             <a
               href="https://www.crunchbase.com/organization/doxynix"
-              target="_blank"
               rel="noopener noreferrer"
+              target="_blank"
               className="hover:text-foreground transition-colors"
             >
               <CrunchbaseIcon className="hidden h-4 w-4 md:block" />

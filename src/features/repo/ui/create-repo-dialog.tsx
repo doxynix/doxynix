@@ -41,7 +41,7 @@ export function CreateRepoDialog() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
 
-  const { open, closeDialog } = useCreateRepoDialogStore();
+  const { closeDialog, open } = useCreateRepoDialogStore();
   const { create } = useRepoActions();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -52,9 +52,9 @@ export function CreateRepoDialog() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<CreateRepoInput>({
-    resolver: zodResolver(CreateRepoSchema),
     defaultValues: { url: "" },
     mode: "onChange",
+    resolver: zodResolver(CreateRepoSchema),
   });
 
   const urlValue = form.watch("url");
@@ -121,10 +121,10 @@ export function CreateRepoDialog() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="grid gap-4 py-4">
-            <div className="flex flex-col gap-3" ref={containerRef}>
+            <div ref={containerRef} className="flex flex-col gap-3">
               <FormField
-                control={form.control}
                 name="url"
+                control={form.control}
                 render={({ field }) => (
                   <FormItem className="relative">
                     <FormControl>
@@ -136,17 +136,17 @@ export function CreateRepoDialog() {
                         )}
                         <Input
                           {...field}
-                          className="pl-8 text-sm"
-                          placeholder={t("repo_create_placeholder")}
                           autoComplete="off"
                           disabled={create.isPending}
                           maxLength={500}
+                          placeholder={t("repo_create_placeholder")}
                           onChange={(e) => {
                             field.onChange(e);
                             setShowSuggestions(true);
                           }}
-                          onFocus={() => setShowSuggestions(true)}
                           onClick={() => setShowSuggestions(true)}
+                          onFocus={() => setShowSuggestions(true)}
+                          className="pl-8 text-sm"
                         />
                       </div>
                     </FormControl>
@@ -193,12 +193,12 @@ export function CreateRepoDialog() {
                         {t("repo_connect_git_account")}{" "}
                       </p>
                       <LoadingButton
-                        className="cursor-pointer"
-                        variant="outline"
+                        disabled={loading}
                         isLoading={loading}
                         loadingText="Connecting..."
-                        disabled={loading}
+                        variant="outline"
                         onClick={() => void handleConnectGithub()}
+                        className="cursor-pointer"
                       >
                         <GitHubIcon /> {tCommon("connect")}
                       </LoadingButton>
@@ -220,10 +220,10 @@ export function CreateRepoDialog() {
             </div>
             <DialogFooter>
               <LoadingButton
-                className="cursor-pointer"
+                disabled={create.isPending || !form.formState.isValid || !urlValue}
                 isLoading={create.isPending}
                 loadingText="Adding..."
-                disabled={create.isPending || !form.formState.isValid || !urlValue}
+                className="cursor-pointer"
               >
                 {tCommon("add")}
               </LoadingButton>

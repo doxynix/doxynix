@@ -7,14 +7,14 @@ import { trpc } from "@/shared/api/trpc";
 import { useUploadThing } from "@/shared/lib/uploadthing";
 
 type ProfileData = {
-  name: string | null;
   email: string | null;
+  name: string | null;
 };
 
 type UseProfileActionsProps = {
-  onProfileUpdateSuccess?: (data: ProfileData) => void;
-  onAvatarUpdateSuccess?: (url: string) => void;
   onAvatarRemoveSuccess?: () => void;
+  onAvatarUpdateSuccess?: (url: string) => void;
+  onProfileUpdateSuccess?: (data: ProfileData) => void;
 };
 
 export function useProfileActions(props: UseProfileActionsProps = {}) {
@@ -28,27 +28,28 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
   });
 
   const updateProfile = trpc.user.updateUser.useMutation({
+    onError: (err) => toast.error(err.message),
     onSuccess: async (data) => {
       toast.success(t("settings_profile_update_profile_toast_success"));
 
       if (data.user != null) {
         propsRef.current.onProfileUpdateSuccess?.({
-          name: data.user.name ?? null,
           email: data.user.email ?? null,
+          name: data.user.name ?? null,
         });
       }
 
       await updateSession({
-        name: data.user.name,
         email: data.user.email,
+        name: data.user.name,
       });
 
       await utils.user.me.invalidate();
     },
-    onError: (err) => toast.error(err.message),
   });
 
   const removeAvatar = trpc.user.removeAvatar.useMutation({
+    onError: (err) => toast.error(err.message),
     onSuccess: async () => {
       toast.success(t("settings_profile_remove_avatar_toast_success"));
 
@@ -57,7 +58,6 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
       await updateSession({ image: null });
       await utils.user.me.invalidate();
     },
-    onError: (err) => toast.error(err.message),
   });
 
   const uploadThing = useUploadThing("avatarUploader", {
@@ -85,10 +85,10 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
   });
 
   return {
-    updateProfile,
-    removeAvatar,
-    uploadAvatar: uploadThing.startUpload,
-    isUploading: uploadThing.isUploading,
     isPending: updateProfile.isPending || removeAvatar.isPending || uploadThing.isUploading,
+    isUploading: uploadThing.isUploading,
+    removeAvatar,
+    updateProfile,
+    uploadAvatar: uploadThing.startUpload,
   };
 }

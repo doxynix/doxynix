@@ -9,10 +9,10 @@ export const PaginationSchema = z.object({
 
 export const RepoFilterSchema = PaginationSchema.extend({
   owner: z.string().optional(),
-  status: z.enum(Status).optional(),
-  visibility: z.enum(Visibility).optional(),
   sortBy: z.enum(["name", "updatedAt", "createdAt"]).default("updatedAt"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  status: z.enum(Status).optional(),
+  visibility: z.enum(Visibility).optional(),
 });
 
 export const OpenApiErrorResponses = {

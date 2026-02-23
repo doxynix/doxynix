@@ -4,24 +4,23 @@ import { API_PREFIX, APP_URL } from "@/shared/constants/env.client";
 import { getCookieName } from "@/shared/lib/utils";
 
 export const GET = ApiReference({
-  url: "/api/openapi",
-  title: "Doxynix API Documentation",
-  theme: "deepSpace",
-  layout: "modern",
-  darkMode: true,
-  withDefaultFonts: false,
-  metaData: {
-    title: "Doxynix API Documentation",
-    description: "Official Doxynix API documentation",
+  authentication: {
+    preferredSecurityScheme: "cookieAuth",
+    securitySchemes: {
+      bearerAuth: {
+        bearerFormat: "JWT",
+        description: "Use the API Key created in your profile settings.",
+        scheme: "bearer",
+        type: "http",
+      },
+      cookieAuth: {
+        in: "cookie",
+        name: getCookieName(),
+        type: "apiKey",
+      },
+    },
   },
   baseServerURL: `${APP_URL}${API_PREFIX}`,
-
-  showSidebar: true,
-  hideSearch: false,
-  searchHotKey: "k",
-
-  tagsSorter: "alpha",
-  operationsSorter: "method",
   customCss: `
     .scalar-powered-by { display: none !important; }
 
@@ -31,25 +30,26 @@ export const GET = ApiReference({
 
     /* .sidebar-footer { display: none !important; } */
   `,
-  hideModels: false,
+  darkMode: true,
   defaultOpenAllTags: true,
-  authentication: {
-    preferredSecurityScheme: "cookieAuth",
-    securitySchemes: {
-      cookieAuth: {
-        type: "apiKey",
-        in: "cookie",
-        name: getCookieName(),
-      },
-      bearerAuth: {
-        type: "http",
-        scheme: "bearer",
-        bearerFormat: "JWT",
-        description: "Use the API Key created in your profile settings.",
-      },
-    },
+  documentDownloadType: "both",
+  hideDownloadButton: false,
+  hideModels: false,
+
+  hideSearch: false,
+  layout: "modern",
+  metaData: {
+    description: "Official Doxynix API documentation",
+    title: "Doxynix API Documentation",
   },
 
-  hideDownloadButton: false,
-  documentDownloadType: "both",
+  operationsSorter: "method",
+  searchHotKey: "k",
+  showSidebar: true,
+  tagsSorter: "alpha",
+  theme: "deepSpace",
+  title: "Doxynix API Documentation",
+
+  url: "/api/openapi",
+  withDefaultFonts: false,
 });

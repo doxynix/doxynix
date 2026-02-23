@@ -21,52 +21,11 @@ const withNextIntl = createNextIntlPlugin({
 });
 
 const nextConfig: NextConfig = {
-  onDemandEntries: {
-    maxInactiveAge: 15 * 1000,
-    pagesBufferLength: 2,
-  },
-  // cacheComponents: true, // если будут баги выключить (// NOTE: обнаружен баг №418 с гидратацией выяснено что приходится оборачивать каждый чих в suspense так еще и юзать везде 'use cache' директиву ибо теперь кеширование руками надо делать слишком много переписывать пока PPR отложен на неопределенный срок)
-  reactStrictMode: true,
-  compress: true,
-  poweredByHeader: false,
   compiler: {
     removeConsole: IS_PROD ? { exclude: ["error", "info"] } : false,
   },
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
-  },
-  reactCompiler: true, // аккуратно фича еще в бете (пока багов не обнаружено - 20.01.2026)
-  webpack: (config, { isServer, dev }) => {
-    if (!dev && !isServer) {
-      const outputPath = config.output?.path ?? path.join(process.cwd(), ".next");
-
-      const targetPath = path.join(process.cwd(), ".next", "webpack-stats.json");
-
-      const relativeStatsPath = path.relative(outputPath, targetPath);
-
-      config.plugins.push(
-        new StatsWriterPlugin({
-          filename: relativeStatsPath,
-          stats: {
-            assets: true,
-            chunks: true,
-            modules: true,
-          },
-          transform: (data) => {
-            const filtered = filterWebpackStats(data);
-            return JSON.stringify(filtered);
-          },
-        })
-      );
-    }
-    return config;
-  },
+  compress: true,
   experimental: {
-    typedEnv: true,
-    taint: true,
-    serverComponentsHmrCache: true,
     // useLightningcss: true, // отключен так-как ломает анализатор размера бандла
     authInterrupts: true,
     optimizePackageImports: [
@@ -95,120 +54,13 @@ const nextConfig: NextConfig = {
       "@sentry-internal/replay",
       "@sentry-internal/browser-utils",
     ],
-  },
-  typedRoutes: true,
-  typescript: { ignoreBuildErrors: false },
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "sun1-26.userapi.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "avatars.yandex.net",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "utfs.io",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "ufs.sh",
-        pathname: "/**",
-      },
-    ],
-  },
-  async redirects() {
-    const shortcuts = [
-      // --- CORE ---
-      { s: "/o", d: "/dashboard" },
-      { s: "/dash", d: "/dashboard" },
-      { s: "/home", d: "/dashboard" },
-      { s: "/dashboard/settings", d: "/dashboard/settings/profile" },
-
-      // --- REPOS ---
-      { s: "/r", d: "/dashboard/repo" },
-      { s: "/repos", d: "/dashboard/repo" },
-      { s: "/code", d: "/dashboard/repo" },
-
-      // --- SETTINGS & PROFILE ---
-      { s: "/s", d: "/dashboard/settings/profile" },
-      { s: "/settings", d: "/dashboard/settings/profile" },
-      { s: "/me", d: "/dashboard/settings/profile" },
-      { s: "/profile", d: "/dashboard/settings/profile" },
-
-      // --- API & DEVELOPER ---
-      { s: "/k", d: "/dashboard/settings/api-keys" },
-      { s: "/keys", d: "/dashboard/settings/api-keys" },
-      { s: "/token", d: "/dashboard/settings/api-keys" },
-      { s: "/api", d: "/dashboard/settings/api-keys" },
-
-      // --- NOTIFICATIONS ---
-      { s: "/n", d: "/dashboard/notifications" },
-      { s: "/notif", d: "/dashboard/notifications" },
-      { s: "/inbox", d: "/dashboard/notifications" },
-      { s: "/alerts", d: "/dashboard/notifications" },
-
-      // --- DANGER ZONE ---
-      { s: "/d", d: "/dashboard/settings/danger-zone" },
-      { s: "/danger", d: "/dashboard/settings/danger-zone" },
-      { s: "/rip", d: "/dashboard/settings/danger-zone" },
-
-      // --- AUTH / ONBOARDING ---
-      { s: "/in", d: "/auth" },
-      { s: "/login", d: "/auth" },
-      { s: "/join", d: "/auth" },
-
-      // --- SUPPORT ---
-      { s: "/h", d: "/support" },
-
-      // --- PRIVACY & TERMS ---
-      { s: "/tos", d: "/terms" },
-      { s: "/pp", d: "/privacy" },
-
-      // --- EXTERNAL ---
-      { s: "/status", d: "https://status.doxynix.space" },
-    ];
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const results: any[] = [];
-
-    shortcuts.forEach(({ s, d }) => {
-      const isExternal = d.startsWith("http");
-
-      results.push({
-        source: s,
-        destination: d,
-        permanent: false,
-      });
-
-      results.push({
-        source: `/:locale(${LOCALE_REGEX_STR})${s}`,
-        destination: isExternal ? d : `/:locale${d}`,
-        permanent: false,
-      });
-    });
-
-    return results;
+    serverComponentsHmrCache: true,
+    taint: true,
+    typedEnv: true,
   },
   async headers() {
     return [
       {
-        source: "/:path*",
         headers: [
           {
             key: "Strict-Transport-Security",
@@ -274,27 +126,173 @@ const nextConfig: NextConfig = {
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
           { key: "Cross-Origin-Resource-Policy", value: "same-site" },
         ],
+        source: "/:path*",
       },
     ];
+  },
+  images: {
+    remotePatterns: [
+      {
+        hostname: "sun1-26.userapi.com",
+        pathname: "/**",
+        protocol: "https",
+      },
+      {
+        hostname: "avatars.githubusercontent.com",
+        pathname: "/**",
+        protocol: "https",
+      },
+      {
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
+        protocol: "https",
+      },
+      {
+        hostname: "avatars.yandex.net",
+        pathname: "/**",
+        protocol: "https",
+      },
+      {
+        hostname: "utfs.io",
+        pathname: "/**",
+        protocol: "https",
+      },
+      {
+        hostname: "ufs.sh",
+        pathname: "/**",
+        protocol: "https",
+      },
+    ],
+  },
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
+  onDemandEntries: {
+    maxInactiveAge: 15 * 1000,
+    pagesBufferLength: 2,
+  },
+  poweredByHeader: false,
+  reactCompiler: true, // аккуратно фича еще в бете (пока багов не обнаружено - 20.01.2026)
+  // cacheComponents: true, // если будут баги выключить (// NOTE: обнаружен баг №418 с гидратацией выяснено что приходится оборачивать каждый чих в suspense так еще и юзать везде 'use cache' директиву ибо теперь кеширование руками надо делать слишком много переписывать пока PPR отложен на неопределенный срок)
+  reactStrictMode: true,
+  async redirects() {
+    const shortcuts = [
+      // --- CORE ---
+      { d: "/dashboard", s: "/o" },
+      { d: "/dashboard", s: "/dash" },
+      { d: "/dashboard", s: "/home" },
+      { d: "/dashboard/settings/profile", s: "/dashboard/settings" },
+
+      // --- REPOS ---
+      { d: "/dashboard/repo", s: "/r" },
+      { d: "/dashboard/repo", s: "/repos" },
+      { d: "/dashboard/repo", s: "/code" },
+
+      // --- SETTINGS & PROFILE ---
+      { d: "/dashboard/settings/profile", s: "/s" },
+      { d: "/dashboard/settings/profile", s: "/settings" },
+      { d: "/dashboard/settings/profile", s: "/me" },
+      { d: "/dashboard/settings/profile", s: "/profile" },
+
+      // --- API & DEVELOPER ---
+      { d: "/dashboard/settings/api-keys", s: "/k" },
+      { d: "/dashboard/settings/api-keys", s: "/keys" },
+      { d: "/dashboard/settings/api-keys", s: "/token" },
+      { d: "/dashboard/settings/api-keys", s: "/api" },
+
+      // --- NOTIFICATIONS ---
+      { d: "/dashboard/notifications", s: "/n" },
+      { d: "/dashboard/notifications", s: "/notif" },
+      { d: "/dashboard/notifications", s: "/inbox" },
+      { d: "/dashboard/notifications", s: "/alerts" },
+
+      // --- DANGER ZONE ---
+      { d: "/dashboard/settings/danger-zone", s: "/d" },
+      { d: "/dashboard/settings/danger-zone", s: "/danger" },
+      { d: "/dashboard/settings/danger-zone", s: "/rip" },
+
+      // --- AUTH / ONBOARDING ---
+      { d: "/auth", s: "/in" },
+      { d: "/auth", s: "/login" },
+      { d: "/auth", s: "/join" },
+
+      // --- SUPPORT ---
+      { d: "/support", s: "/h" },
+
+      // --- PRIVACY & TERMS ---
+      { d: "/terms", s: "/tos" },
+      { d: "/privacy", s: "/pp" },
+
+      // --- EXTERNAL ---
+      { d: "https://status.doxynix.space", s: "/status" },
+    ];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const results: any[] = [];
+
+    shortcuts.forEach(({ d, s }) => {
+      const isExternal = d.startsWith("http");
+
+      results.push({
+        destination: d,
+        permanent: false,
+        source: s,
+      });
+
+      results.push({
+        destination: isExternal ? d : `/:locale${d}`,
+        permanent: false,
+        source: `/:locale(${LOCALE_REGEX_STR})${s}`,
+      });
+    });
+
+    return results;
+  },
+  typedRoutes: true,
+  typescript: { ignoreBuildErrors: false },
+  webpack: (config, { dev, isServer }) => {
+    if (!dev && !isServer) {
+      const outputPath = config.output?.path ?? path.join(process.cwd(), ".next");
+
+      const targetPath = path.join(process.cwd(), ".next", "webpack-stats.json");
+
+      const relativeStatsPath = path.relative(outputPath, targetPath);
+
+      config.plugins.push(
+        new StatsWriterPlugin({
+          filename: relativeStatsPath,
+          stats: {
+            assets: true,
+            chunks: true,
+            modules: true,
+          },
+          transform: (data) => {
+            const filtered = filterWebpackStats(data);
+            return JSON.stringify(filtered);
+          },
+        })
+      );
+    }
+    return config;
   },
 };
 
 const sentryOptions = {
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+    excludeReplayIframe: true,
+    excludeReplayShadowDom: true,
+  },
+
   org: "doxynix",
 
   project: "doxynix",
 
   silent: process.env.CI == null,
 
-  widenClientFileUpload: true,
-
   tunnelRoute: "/monitoring",
-
-  bundleSizeOptimizations: {
-    excludeDebugStatements: true,
-    excludeReplayIframe: true,
-    excludeReplayShadowDom: true,
-  },
 
   webpack: {
     automaticVercelMonitors: true,
@@ -303,6 +301,8 @@ const sentryOptions = {
       removeDebugLogging: true,
     },
   },
+
+  widenClientFileUpload: true,
 };
 
 export default withSentryConfig(withAxiom(bundleAnalyzer(withNextIntl(nextConfig))), sentryOptions);

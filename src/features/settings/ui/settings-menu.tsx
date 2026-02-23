@@ -20,6 +20,8 @@ export function SettingsMenu() {
         return (
           <Button
             key={item.href}
+            asChild
+            variant="ghost"
             className={cn(
               "justify-start transition-colors",
               isDestructive &&
@@ -38,8 +40,6 @@ export function SettingsMenu() {
                 !isActive &&
                 "text-muted-foreground hover:bg-accent hover:text-foreground"
             )}
-            variant="ghost"
-            asChild
           >
             <Link href={item.href as Route} className="flex w-full items-center gap-2">
               <item.icon />

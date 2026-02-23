@@ -23,9 +23,9 @@ vi.mock("@octokit/rest", () => {
 
     log = {
       debug: vi.fn(),
+      error: vi.fn(),
       info: vi.fn(),
       warn: vi.fn(),
-      error: vi.fn(),
     };
 
     constructor() {}
@@ -40,16 +40,16 @@ describe("GitHub Service", () => {
   describe("parseUrl", () => {
     it("should parse valid URLs", () => {
       expect(githubService.parseUrl("https://github.com/facebook/react")).toEqual({
-        owner: "facebook",
         name: "react",
+        owner: "facebook",
       });
       expect(githubService.parseUrl("facebook/react")).toEqual({
-        owner: "facebook",
         name: "react",
+        owner: "facebook",
       });
       expect(githubService.parseUrl("https://www.github.com/user/repo/")).toEqual({
-        owner: "user",
         name: "repo",
+        owner: "user",
       });
     });
 
@@ -75,7 +75,7 @@ describe("GitHub Service", () => {
       expect(client.repos.get).toBeDefined();
 
       expect(mockPrisma.account.findFirst).toHaveBeenCalledWith({
-        where: { userId: 1, provider: "github" },
+        where: { provider: "github", userId: 1 },
       });
     });
 

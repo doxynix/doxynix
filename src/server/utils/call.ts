@@ -5,37 +5,37 @@ import type z from "zod";
 import { logger } from "@/shared/lib/logger";
 
 type CallWithFallbackProps<T> = {
-  models: string[];
-  prompt: string;
-  system: string;
-  outputSchema: z.ZodSchema<T> | null;
-  providerOptions?: Record<string, unknown>;
-  temperature?: number;
-  topP?: number;
-  topK?: number;
-  maxTokens?: number;
-  useSearchGrounding?: boolean;
-  frequencyPenalty?: number;
-  presencePenalty?: number;
-  stopSequences?: string[];
   attemptMetadata?: Record<string, unknown>;
+  frequencyPenalty?: number;
+  maxOutputTokens?: number;
+  models: string[];
+  outputSchema: z.ZodSchema<T> | null;
+  presencePenalty?: number;
+  prompt: string;
+  providerOptions?: Record<string, unknown>;
+  stopSequences?: string[];
+  system: string;
+  temperature?: number;
+  topK?: number;
+  topP?: number;
+  useSearchGrounding?: boolean;
 };
 
 export async function callWithFallback<T>({
-  models,
-  prompt,
-  system,
-  outputSchema,
-  providerOptions,
-  useSearchGrounding = true,
-  temperature = 0.1,
-  maxTokens = 65536,
-  frequencyPenalty = 0.0,
-  presencePenalty = 0.0,
-  topP = 0.1,
-  topK = 1,
-  stopSequences,
   attemptMetadata = {},
+  frequencyPenalty = 0.0,
+  maxOutputTokens = 65536,
+  models,
+  outputSchema,
+  presencePenalty = 0.0,
+  prompt,
+  providerOptions,
+  stopSequences,
+  system,
+  temperature = 0.1,
+  topK = 1,
+  topP = 0.1,
+  useSearchGrounding = true,
 }: CallWithFallbackProps<T>): Promise<T> {
   if (models == null || models.length === 0) {
     throw new Error("No models configured for fallback.");
@@ -46,25 +46,25 @@ export async function callWithFallback<T>({
   for (const modelName of models) {
     try {
       logger.info({
-        msg: "Attempting model",
         model: modelName,
+        msg: "Attempting model",
         ...attemptMetadata,
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const options: any = {
-        model: google(modelName),
-        providerOptions,
-        useSearchGrounding,
-        temperature,
-        topP,
-        topK,
-        maxTokens,
         frequencyPenalty,
+        maxOutputTokens,
+        model: google(modelName),
         presencePenalty,
-        stopSequences,
         prompt,
+        providerOptions,
+        stopSequences,
         system,
+        temperature,
+        topK,
+        topP,
+        useSearchGrounding,
       };
 
       if (outputSchema != null) {
@@ -77,8 +77,8 @@ export async function callWithFallback<T>({
 
       if (finalValue != null) {
         logger.info({
-          msg: "Model returned output",
           model: modelName,
+          msg: "Model returned output",
           ...attemptMetadata,
         });
         return finalValue as T;
@@ -86,9 +86,9 @@ export async function callWithFallback<T>({
     } catch (err) {
       lastError = err;
       logger.warn({
-        msg: "Model call failed, trying next model",
-        model: modelName,
         error: err instanceof Error ? { message: err.message } : String(err),
+        model: modelName,
+        msg: "Model call failed, trying next model",
       });
     }
   }

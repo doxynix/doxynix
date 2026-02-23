@@ -1,10 +1,11 @@
 import crypto from "node:crypto";
-import type { PrismaClient, UserRole } from "@prisma/client";
+import type { UserRole } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-to-openapi";
 
+import type { DbClient } from "@/shared/api/db/db";
 import { IS_PROD } from "@/shared/constants/env.client";
 import { logger } from "@/shared/lib/logger";
 
@@ -15,8 +16,7 @@ export const t = initTRPC
   .context<Context>()
   .meta<OpenApiMeta>()
   .create({
-    transformer: superjson,
-    errorFormatter({ shape, error, ctx }) {
+    errorFormatter({ ctx, error, shape }) {
       return {
         ...shape,
         data: {
@@ -26,6 +26,7 @@ export const t = initTRPC
         },
       };
     },
+    transformer: superjson,
   });
 
 const withZenStack = t.middleware(async ({ ctx, next }) => {
@@ -36,7 +37,7 @@ const withZenStack = t.middleware(async ({ ctx, next }) => {
 
   const protectedDb = enhance(ctx.prisma, {
     user: userId != null ? { id: userId, role: userRole } : undefined,
-  }) as unknown as PrismaClient;
+  }) as unknown as DbClient;
 
   return next({
     ctx: {
@@ -52,35 +53,35 @@ const contextMiddleware = t.middleware(async ({ ctx, next, path, type }) => {
 
   return requestContext.run(
     {
-      requestId,
-      userId: sessionUser?.id != null ? Number(sessionUser.id) : undefined,
-      userRole: sessionUser?.role,
       ip: ctx.requestInfo.ip,
-      userAgent: ctx.requestInfo.userAgent,
-      referer: ctx.req.headers.get("referer") ?? undefined,
+      method: type,
       origin: ctx.req.headers.get("origin") ?? undefined,
       path,
-      method: type,
+      referer: ctx.req.headers.get("referer") ?? undefined,
+      requestId,
+      userAgent: ctx.requestInfo.userAgent,
+      userId: sessionUser?.id != null ? Number(sessionUser.id) : undefined,
+      userRole: sessionUser?.role,
     },
     () => next({ ctx })
   );
 });
 
-const loggerMiddleware = t.middleware(async ({ path, type, next }) => {
+const loggerMiddleware = t.middleware(async ({ next, path, type }) => {
   const start = performance.now();
   const result = await next();
   const durationMs = Number((performance.now() - start).toFixed(2));
 
-  const meta = { path, type, durationMs };
+  const meta = { durationMs, path, type };
 
   if (result.ok) {
     logger.info({ ...meta, msg: `tRPC [${type}] ok: ${path}` });
   } else {
     logger.error({
       ...meta,
-      msg: `tRPC [${type}] error: ${path}`,
       code: result.error.code,
       message: result.error.message,
+      msg: `tRPC [${type}] error: ${path}`,
       stack: result.error.code === "INTERNAL_SERVER_ERROR" ? result.error.stack : undefined,
     });
     if (IS_PROD) {

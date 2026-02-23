@@ -8,49 +8,49 @@ import { cn } from "@/shared/lib/utils";
 export type AnimatedBeamProps = {
   className?: string;
   containerRef: RefObject<HTMLElement | null>; // Container ref
-  fromRef: RefObject<HTMLElement | null>;
-  toRef: RefObject<HTMLElement | null>;
   curvature?: number;
-  reverse?: boolean;
-  pathColor?: string;
-  pathWidth?: number;
-  pathOpacity?: number;
-  gradientStartColor?: string;
-  gradientStopColor?: string;
   delay?: number;
-  repeatDelay?: number;
   duration?: number;
-  startXOffset?: number;
-  startYOffset?: number;
   endXOffset?: number;
   endYOffset?: number;
+  fromRef: RefObject<HTMLElement | null>;
+  gradientStartColor?: string;
+  gradientStopColor?: string;
   isActive?: boolean;
+  pathColor?: string;
+  pathOpacity?: number;
+  pathWidth?: number;
+  repeatDelay?: number;
+  reverse?: boolean;
+  startXOffset?: number;
+  startYOffset?: number;
+  toRef: RefObject<HTMLElement | null>;
 };
 
 export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
   className,
   containerRef,
-  fromRef,
-  toRef,
   curvature = 0,
-  reverse = false, // Include the reverse prop
-  duration = Math.random() * 3 + 4,
   delay = 0,
-  repeatDelay = 0,
-  pathColor = "gray",
-  pathWidth = 2,
-  pathOpacity = 0.2,
-  gradientStartColor = "#ffaa40",
-  gradientStopColor = "#9c40ff",
-  startXOffset = 0,
-  startYOffset = 0,
+  duration = Math.random() * 3 + 4,
   endXOffset = 0,
   endYOffset = 0,
+  fromRef,
+  gradientStartColor = "#ffaa40",
+  gradientStopColor = "#9c40ff",
   isActive = true,
+  pathColor = "gray",
+  pathOpacity = 0.2,
+  pathWidth = 2,
+  repeatDelay = 0,
+  reverse = false, // Include the reverse prop
+  startXOffset = 0,
+  startYOffset = 0,
+  toRef,
 }) => {
   const id = useId();
   const [pathD, setPathD] = useState("");
-  const [svgDimensions, setSvgDimensions] = useState({ width: 0, height: 0 });
+  const [svgDimensions, setSvgDimensions] = useState({ height: 0, width: 0 });
 
   // Calculate the gradient coordinates based on the reverse prop
   const gradientCoordinates = reverse
@@ -76,7 +76,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
 
         const svgWidth = containerRect.width;
         const svgHeight = containerRect.height;
-        setSvgDimensions({ width: svgWidth, height: svgHeight });
+        setSvgDimensions({ height: svgHeight, width: svgWidth });
 
         const startX = rectA.left - containerRect.left + rectA.width / 2 + startXOffset;
         const startY = rectA.top - containerRect.top + rectA.height / 2 + startYOffset;
@@ -111,37 +111,29 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
   return (
     <svg
       fill="none"
-      width={svgDimensions.width}
       height={svgDimensions.height}
+      viewBox={`0 0 ${svgDimensions.width} ${svgDimensions.height}`}
+      width={svgDimensions.width}
       xmlns="http://www.w3.org/2000/svg"
       className={cn("pointer-events-none absolute top-0 left-0 transform-gpu stroke-2", className)}
-      viewBox={`0 0 ${svgDimensions.width} ${svgDimensions.height}`}
     >
       <path
         d={pathD}
         stroke={pathColor}
-        strokeWidth={pathWidth}
-        strokeOpacity={pathOpacity}
         strokeLinecap="round"
+        strokeOpacity={pathOpacity}
+        strokeWidth={pathWidth}
       />
       <path
         d={pathD}
-        strokeWidth={pathWidth}
         stroke={`url(#${id})`}
-        strokeOpacity="1"
         strokeLinecap="round"
+        strokeOpacity="1"
+        strokeWidth={pathWidth}
       />
       <defs>
         <motion.linearGradient
-          className="transform-gpu"
           id={id}
-          gradientUnits="userSpaceOnUse"
-          initial={{
-            x1: "0%",
-            x2: "0%",
-            y1: "0%",
-            y2: "0%",
-          }}
           animate={
             isActive
               ? {
@@ -152,6 +144,13 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
                 }
               : undefined
           }
+          gradientUnits="userSpaceOnUse"
+          initial={{
+            x1: "0%",
+            x2: "0%",
+            y1: "0%",
+            y2: "0%",
+          }}
           transition={{
             delay,
             duration,
@@ -159,6 +158,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
             repeat: Infinity,
             repeatDelay,
           }}
+          className="transform-gpu"
         >
           <stop stopColor={gradientStartColor} stopOpacity="0"></stop>
           <stop stopColor={gradientStartColor}></stop>

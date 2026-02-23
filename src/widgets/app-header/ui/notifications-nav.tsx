@@ -23,7 +23,7 @@ export function NotificationsNav() {
   const t = useTranslations("Dashboard");
   const locale = useLocale();
 
-  const { markRead, markAllRead } = useNotificationActions();
+  const { markAllRead, markRead } = useNotificationActions();
 
   const { data: notifications = [] } = trpc.notification.getAll.useQuery({ count: 5 });
   const { data: unreadData } = trpc.notification.getUnreadCount.useQuery();
@@ -34,8 +34,8 @@ export function NotificationsNav() {
       <AppTooltip content={t("notifications_title")}>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
             size="icon"
+            variant="ghost"
             className="text-muted-foreground relative cursor-pointer"
           >
             <Bell />
@@ -49,10 +49,10 @@ export function NotificationsNav() {
         <div className="flex items-center justify-between p-2">
           <h2>{t("notifications_title")}</h2>
           <Button
-            variant="link"
-            className="cursor-pointer text-xs"
             disabled={markAllRead.isPending || unreadCount === 0}
+            variant="link"
             onClick={() => markAllRead.mutate()}
+            className="cursor-pointer text-xs"
           >
             {t("notifications_mark_read")}
           </Button>
@@ -65,13 +65,13 @@ export function NotificationsNav() {
             notifications.map((note) => (
               <DropdownMenuItem
                 key={note.id}
+                onClick={() => {
+                  if (note.isRead === false) markRead.mutate(note.id);
+                }}
                 className={cn(
                   "flex cursor-pointer flex-col items-start gap-1 p-3",
                   note.isRead === false && "bg-accent/50"
                 )}
-                onClick={() => {
-                  if (note.isRead === false) markRead.mutate(note.id);
-                }}
               >
                 <div className="flex w-full items-center justify-between gap-2">
                   <div className="flex flex-col">
@@ -90,8 +90,8 @@ export function NotificationsNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="group flex cursor-pointer items-center justify-center">
           <Link
-            className="flex w-full items-center justify-center group-hover:underline"
             href="/dashboard/notifications"
+            className="flex w-full items-center justify-center group-hover:underline"
           >
             {t("notifications_show_all")}
           </Link>

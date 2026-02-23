@@ -21,12 +21,12 @@ export async function CodeComparisonSection() {
         </h2>
         <div className="border-primary mx-auto max-w-6xl overflow-hidden rounded-xl border shadow-2xl">
           <CodeComparison
-            filename="services/billing.ts"
-            beforeHtmlDark={badDark}
-            beforeHtmlLight={badLight}
             afterHtmlDark={goodDark}
             afterHtmlLight={goodLight}
             badCode={BAD_CODE}
+            beforeHtmlDark={badDark}
+            beforeHtmlLight={badLight}
+            filename="services/billing.ts"
             goodCode={GOOD_CODE}
           />
         </div>

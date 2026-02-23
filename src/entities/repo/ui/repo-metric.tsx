@@ -6,13 +6,13 @@ import { cn } from "@/shared/lib/utils";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 type Props = {
+  colorClass?: string;
+  icon: LucideIcon;
   label: string;
   score: number | null | undefined;
-  icon: LucideIcon;
-  colorClass?: string;
 };
 
-export const RepoMetric = ({ label, score, icon: Icon, colorClass }: Props) => {
+export const RepoMetric = ({ colorClass, icon: Icon, label, score }: Props) => {
   const safeScore = score ?? 0;
 
   return (

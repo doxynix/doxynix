@@ -11,9 +11,7 @@ export function PricingSection() {
 
   const PLANS = [
     {
-      name: t("section_pricing_plan_hobby_name"),
-      href: "/auth",
-      price: "$0",
+      cta: t("section_pricing_plan_hobby_cta"),
       desc: t("section_pricing_plan_hobby_desc"),
       features: [
         t("section_pricing_plan_hobby_f1"),
@@ -21,13 +19,13 @@ export function PricingSection() {
         t("section_pricing_plan_hobby_f3"),
         t("section_pricing_plan_hobby_f4"),
       ],
-      cta: t("section_pricing_plan_hobby_cta"),
+      href: "/auth",
+      name: t("section_pricing_plan_hobby_name"),
       popular: false,
+      price: "$0",
     },
     {
-      name: t("section_pricing_plan_pro_name"),
-      href: "/auth",
-      price: "$9",
+      cta: t("section_pricing_plan_pro_cta"),
       desc: t("section_pricing_plan_pro_desc"),
       features: [
         t("section_pricing_plan_pro_f1"),
@@ -36,13 +34,13 @@ export function PricingSection() {
         t("section_pricing_plan_pro_f4"),
         t("section_pricing_plan_pro_f5"),
       ],
-      cta: t("section_pricing_plan_pro_cta"),
+      href: "/auth",
+      name: t("section_pricing_plan_pro_name"),
       popular: true,
+      price: "$9",
     },
     {
-      name: t("section_pricing_plan_team_name"),
-      href: "/auth",
-      price: "Custom",
+      cta: t("section_pricing_plan_team_cta"),
       desc: t("section_pricing_plan_team_desc"),
       features: [
         t("section_pricing_plan_team_f1"),
@@ -51,8 +49,10 @@ export function PricingSection() {
         t("section_pricing_plan_team_f4"),
         t("section_pricing_plan_team_f5"),
       ],
-      cta: t("section_pricing_plan_team_cta"),
+      href: "/auth",
+      name: t("section_pricing_plan_team_name"),
       popular: false,
+      price: "Custom",
     },
   ];
   return (

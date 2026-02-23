@@ -17,13 +17,13 @@ export const AUTH_PROVIDERS = {
     id: env.GITHUB_CLIENT_ID,
     secret: env.GITHUB_CLIENT_SECRET,
   },
-  google: {
-    id: env.GOOGLE_CLIENT_ID,
-    secret: env.GOOGLE_CLIENT_SECRET,
-  },
   gitlab: {
     id: env.GITLAB_CLIENT_ID,
     secret: env.GITLAB_CLIENT_SECRET,
+  },
+  google: {
+    id: env.GOOGLE_CLIENT_ID,
+    secret: env.GOOGLE_CLIENT_SECRET,
   },
   yandex: {
     id: env.YANDEX_CLIENT_ID,

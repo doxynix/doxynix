@@ -15,7 +15,7 @@ export default async function NotFound() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 p-4 text-center">
       <div className="bg-warning/10 text-warning flex size-20 items-center justify-center rounded-full">
-        <SearchX className="animate-pulse" size={35} />
+        <SearchX size={35} className="animate-pulse" />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -24,8 +24,8 @@ export default async function NotFound() {
       </div>
 
       <div className="flex items-center gap-4">
-        <BackOrLinkButton className="cursor-pointer" label={tCommon("back")} />
-        <BackOrLinkButton label={tCommon("home")} href="/" />
+        <BackOrLinkButton label={tCommon("back")} className="cursor-pointer" />
+        <BackOrLinkButton href="/" label={tCommon("home")} />
       </div>
       <p className="text-muted-foreground text-sm">{t("footer")}</p>
     </div>

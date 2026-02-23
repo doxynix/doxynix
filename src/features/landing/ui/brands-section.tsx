@@ -12,19 +12,19 @@ import { UpstashIcon } from "@/shared/ui/icons/upstash-icon";
 import { VercelIcon } from "@/shared/ui/icons/vercel-icon";
 import { Marquee } from "@/shared/ui/visuals/marquee";
 
-type Props = { name: string; icon: ComponentType<{ className?: string }> };
+type Props = { icon: ComponentType<{ className?: string }>; name: string };
 
 const BRANDS: Props[] = [
-  { name: "Vercel", icon: VercelIcon },
-  { name: "Next.js", icon: NextJSIcon },
-  { name: "Trigger.dev", icon: TriggerIcon },
+  { icon: VercelIcon, name: "Vercel" },
+  { icon: NextJSIcon, name: "Next.js" },
+  { icon: TriggerIcon, name: "Trigger.dev" },
   // { name: "OpenAI", icon: OpenAiLogo },
-  { name: "Resend", icon: ResendIcon },
-  { name: "Upstash", icon: UpstashIcon },
-  { name: "Ably", icon: AblyIcon },
-  { name: "Uploadthing", icon: UploadThingIcon },
-  { name: "GitHub", icon: GitHubIcon },
-  { name: "Neon", icon: NeonIcon },
+  { icon: ResendIcon, name: "Resend" },
+  { icon: UpstashIcon, name: "Upstash" },
+  { icon: AblyIcon, name: "Ably" },
+  { icon: UploadThingIcon, name: "Uploadthing" },
+  { icon: GitHubIcon, name: "GitHub" },
+  { icon: NeonIcon, name: "Neon" },
 ];
 
 export async function BrandsSection() {

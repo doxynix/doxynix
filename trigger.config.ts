@@ -8,11 +8,6 @@ if (!process.env.DATABASE_URL!) {
 }
 
 export default defineConfig({
-  project: "proj_whmkduzdqfzcgoyuhdyp",
-  runtime: "node",
-  logLevel: "log",
-  dirs: ["./src/trigger"],
-
   build: {
     extensions: [
       {
@@ -20,9 +15,10 @@ export default defineConfig({
         onBuildStart: async () => {
           console.log("🛠 ZenStack generating...");
           try {
+            // eslint-disable-next-line sonarjs/no-os-command-from-path
             execSync("npx zenstack generate --schema prisma/schema.zmodel", {
-              stdio: "inherit",
               env: { ...process.env },
+              stdio: "inherit",
             });
 
             const schemaPath = "prisma/schema.prisma";
@@ -42,10 +38,15 @@ export default defineConfig({
         },
       },
       prismaExtension({
-        schema: "prisma/schema.prisma",
         mode: "legacy",
+        schema: "prisma/schema.prisma",
       }),
     ],
   },
+  dirs: ["./src/trigger"],
+  logLevel: "log",
   maxDuration: 1000000,
+
+  project: "proj_whmkduzdqfzcgoyuhdyp",
+  runtime: "node",
 });

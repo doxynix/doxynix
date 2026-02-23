@@ -13,22 +13,22 @@ describe("Repositories & Data Visibility", () => {
 
     const privateRepo = await alice.db.repo.create({
       data: {
-        name: "priv",
-        url: "https://github.com/alice/priv",
-        owner: "alice",
         githubId: 1,
-        visibility: "PRIVATE",
+        name: "priv",
+        owner: "alice",
+        url: "https://github.com/alice/priv",
         userId: alice.user.id,
+        visibility: "PRIVATE",
       },
     });
     const publicRepo = await alice.db.repo.create({
       data: {
-        name: "pub",
-        url: "https://github.com/alice/pub",
-        owner: "alice",
         githubId: 2,
-        visibility: "PUBLIC",
+        name: "pub",
+        owner: "alice",
+        url: "https://github.com/alice/pub",
         userId: alice.user.id,
+        visibility: "PUBLIC",
       },
     });
 
@@ -50,20 +50,20 @@ describe("Repositories & Data Visibility", () => {
 
     const repo = await alice.db.repo.create({
       data: {
-        name: "n",
-        url: "https://github.com/alice/n",
-        owner: "a",
         githubId: 3,
-        visibility: "PRIVATE",
+        name: "n",
+        owner: "a",
+        url: "https://github.com/alice/n",
         userId: alice.user.id,
+        visibility: "PRIVATE",
       },
     });
     const analysis = await alice.db.analysis.create({
       data: {
-        repo: { connect: { publicId: repo.publicId } },
-        status: "DONE",
         commitSha: "s",
+        repo: { connect: { publicId: repo.publicId } },
         score: 100,
+        status: "DONE",
       },
     });
 
@@ -81,12 +81,12 @@ describe("Repositories & Data Visibility", () => {
 
     await alice.db.repo.create({
       data: {
-        name: "sec",
-        url: "https://github.com/alice/sec",
-        owner: "a",
         githubId: 4,
-        visibility: "PRIVATE",
+        name: "sec",
+        owner: "a",
+        url: "https://github.com/alice/sec",
         userId: alice.user.id,
+        visibility: "PRIVATE",
       },
     });
 
@@ -99,7 +99,7 @@ describe("Repositories & Data Visibility", () => {
     const agg = await bob.db.repo.aggregate({ _count: true });
     expect(agg._count).toBe(0);
 
-    const groups = await bob.db.repo.groupBy({ by: ["visibility"], _count: true });
+    const groups = await bob.db.repo.groupBy({ _count: true, by: ["visibility"] });
     expect(groups).toHaveLength(0);
   });
 
@@ -109,12 +109,12 @@ describe("Repositories & Data Visibility", () => {
 
     await alice.db.repo.create({
       data: {
-        name: "super-fast-engine",
-        url: "https://github.com/alice/super-fast",
-        owner: "a",
         githubId: 5,
-        visibility: "PUBLIC",
+        name: "super-fast-engine",
+        owner: "a",
+        url: "https://github.com/alice/super-fast",
         userId: alice.user.id,
+        visibility: "PUBLIC",
       },
     });
 
@@ -135,20 +135,20 @@ describe("Repositories & Data Visibility", () => {
 
     const repo = await alice.db.repo.create({
       data: {
-        name: "big",
-        url: "https://github.com/alice/big",
-        owner: "a",
         githubId: 6,
+        name: "big",
+        owner: "a",
+        url: "https://github.com/alice/big",
         userId: alice.user.id,
       },
     });
 
     const doc = await alice.db.document.create({
       data: {
-        repo: { connect: { publicId: repo.publicId } },
-        version: "v1",
-        type: "README",
         content: hugeContent,
+        repo: { connect: { publicId: repo.publicId } },
+        type: "README",
+        version: "v1",
       },
     });
     expect(doc.publicId).toBeDefined();
@@ -159,49 +159,49 @@ describe("Repositories & Data Visibility", () => {
 
     await alice.db.repo.create({
       data: {
-        name: "react-ui",
-        url: "https://github.com/alice/u",
-        owner: "a",
         githubId: 101,
-        visibility: "PUBLIC",
-        userId: alice.user.id,
+        name: "react-ui",
+        owner: "a",
         stars: 10,
-      },
-    });
-    await alice.db.repo.create({
-      data: {
-        name: "react-core",
-        url: "https://github.com/alice/q",
-        owner: "a",
-        githubId: 102,
+        url: "https://github.com/alice/u",
+        userId: alice.user.id,
         visibility: "PUBLIC",
-        userId: alice.user.id,
-        stars: 5,
       },
     });
     await alice.db.repo.create({
       data: {
-        name: "react-secret",
-        url: "https://github.com/alice/m",
+        githubId: 102,
+        name: "react-core",
         owner: "a",
-        githubId: 103,
-        visibility: "PRIVATE",
+        stars: 5,
+        url: "https://github.com/alice/q",
         userId: alice.user.id,
+        visibility: "PUBLIC",
+      },
+    });
+    await alice.db.repo.create({
+      data: {
+        githubId: 103,
+        name: "react-secret",
+        owner: "a",
         stars: 50,
+        url: "https://github.com/alice/m",
+        userId: alice.user.id,
+        visibility: "PRIVATE",
       },
     });
 
     const bobResults = await bob.db.repo.findMany({
-      where: { name: { contains: "react", mode: "insensitive" } },
       orderBy: { stars: "desc" },
+      where: { name: { contains: "react", mode: "insensitive" } },
     });
     expect(bobResults).toHaveLength(0);
 
     const aliceResults = await alice.db.repo.findMany({
+      orderBy: { stars: "desc" },
       where: {
         name: { contains: "react", mode: "insensitive" },
       },
-      orderBy: { stars: "desc" },
     });
 
     expect(aliceResults).toHaveLength(3);

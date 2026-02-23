@@ -1,4 +1,19 @@
 export const FILE_PATTERNS = {
+  API: [
+    "router",
+    "route",
+    "controller",
+    "handler",
+    "schema",
+    "dto",
+    "model",
+    "trpc",
+    "openapi",
+    "swagger",
+    "gql",
+    "graphql",
+  ],
+
   CONFIG: [
     "package.json",
     "package-lock.json",
@@ -26,21 +41,6 @@ export const FILE_PATTERNS = {
     "vite.config",
     "webpack.config",
     "tsconfig.json",
-  ],
-
-  API: [
-    "router",
-    "route",
-    "controller",
-    "handler",
-    "schema",
-    "dto",
-    "model",
-    "trpc",
-    "openapi",
-    "swagger",
-    "gql",
-    "graphql",
   ],
 
   IGNORE: [

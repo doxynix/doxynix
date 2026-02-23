@@ -13,29 +13,29 @@ type StatusResponse = {
 };
 
 const config = {
-  up: {
-    label: "All Systems Operational",
-    dotColor: "bg-success",
-    textColor: "text-muted-foreground",
-    hasPing: true,
-  },
   down: {
-    label: "System Outage",
     dotColor: "bg-error",
-    textColor: "text-error",
     hasPing: true,
+    label: "System Outage",
+    textColor: "text-error",
   },
   maintenance: {
-    label: "Maintenance",
     dotColor: "bg-warning",
-    textColor: "text-warning",
     hasPing: false,
+    label: "Maintenance",
+    textColor: "text-warning",
   },
   unknown: {
-    label: "Status Unknown",
     dotColor: "bg-muted-foreground",
-    textColor: "text-muted-foreground",
     hasPing: false,
+    label: "Status Unknown",
+    textColor: "text-muted-foreground",
+  },
+  up: {
+    dotColor: "bg-success",
+    hasPing: true,
+    label: "All Systems Operational",
+    textColor: "text-muted-foreground",
   },
 };
 
@@ -49,15 +49,15 @@ const fetchSystemStatus = async (): Promise<StatusType> => {
 const STALE_TIME = 4 * 60 * 1000; // TIME: 4 minutes
 const REFETCH_INTERVAL = 5 * 60 * 1000; // TIME: 5 minutes
 
-export function SystemStatus({ className }: { className?: string }) {
+export function SystemStatus({ className }: Readonly<{ className?: string }>) {
   const { data: status = "unknown", isLoading } = useQuery({
-    queryKey: ["system-status"],
     queryFn: fetchSystemStatus,
+    queryKey: ["system-status"],
     refetchInterval: REFETCH_INTERVAL,
-    staleTime: STALE_TIME,
-    refetchOnWindowFocus: true,
     refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
     retry: false,
+    staleTime: STALE_TIME,
   });
 
   const current = config[status] ?? config.unknown;
@@ -67,7 +67,7 @@ export function SystemStatus({ className }: { className?: string }) {
       {isLoading ? (
         <Skeleton className="h-8 w-45" />
       ) : (
-        <Button variant="outline" size="sm" asChild className="cursor-pointer">
+        <Button asChild size="sm" variant="outline" className="cursor-pointer">
           <a
             href="https://status.doxynix.space"
             rel="noopener noreferrer"

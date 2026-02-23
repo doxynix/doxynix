@@ -38,7 +38,7 @@ type Props = {
   apiKey: UiApiKey;
 };
 
-export function UpdateApiKeyDialog({ apiKey }: Props) {
+export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
   const { update } = useApiKeyActions();
 
@@ -46,11 +46,11 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
   const t = useTranslations("Dashboard");
 
   const form = useForm<z.infer<typeof CreateApiKeySchema>>({
-    resolver: zodResolver(CreateApiKeySchema),
     defaultValues: {
-      name: apiKey.name,
       description: apiKey.description ?? "",
+      name: apiKey.name,
     },
+    resolver: zodResolver(CreateApiKeySchema),
   });
 
   const onSubmit = (values: z.infer<typeof CreateApiKeySchema>) => {
@@ -65,8 +65,8 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
   const handleOpenChange = (value: boolean) => {
     if (value) {
       form.reset({
-        name: apiKey.name,
         description: apiKey.description ?? "",
+        name: apiKey.name,
       });
     }
     setOpen(value);
@@ -77,8 +77,8 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
       <AppTooltip content={tCommon("edit")}>
         <DialogTrigger asChild>
           <Button
-            variant="ghost"
             size="icon"
+            variant="ghost"
             className="text-muted-foreground opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
           >
             <Pencil className="h-4 w-4" />
@@ -98,8 +98,8 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
             </DialogHeader>
 
             <FormField
-              control={form.control}
               name="name"
+              control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-muted-foreground">{tCommon("name")}</FormLabel>
@@ -112,8 +112,8 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
             />
 
             <FormField
-              control={form.control}
               name="description"
+              control={form.control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-muted-foreground">
@@ -121,8 +121,8 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      className="min-h-25 resize-none"
                       placeholder={t("settings_api_keys_desc_placeholder")}
+                      className="min-h-25 resize-none"
                       {...field}
                     />
                   </FormControl>
@@ -134,10 +134,10 @@ export function UpdateApiKeyDialog({ apiKey }: Props) {
             <DialogFooter>
               <LoadingButton
                 type="submit"
-                className="cursor-pointer"
                 disabled={!form.formState.isDirty || !form.formState.isValid || update.isPending}
-                loadingText="Saving..."
                 isLoading={update.isPending}
+                loadingText="Saving..."
+                className="cursor-pointer"
               >
                 {tCommon("update")}
               </LoadingButton>

@@ -11,13 +11,13 @@ import { Button } from "@/shared/ui/core/button";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-export default function Error({
+export default function ErrorPage({
   error,
   reset,
-}: {
+}: Readonly<{
   error: Error & { digest?: string };
   reset: () => void;
-}) {
+}>) {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Error");
 
@@ -59,7 +59,7 @@ export default function Error({
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-4">
       <div className="bg-destructive/10 text-destructive flex size-20 items-center justify-center rounded-full">
-        <ServerCrash className="animate-pulse" size={35} />
+        <ServerCrash size={35} className="animate-pulse" />
       </div>
 
       <div className="w-full max-w-md space-y-4 text-center">
@@ -74,9 +74,9 @@ export default function Error({
               {requestId ?? error.digest ?? "System Failure"}
             </code>
             <CopyButton
+              value={requestId ?? error.digest ?? ""}
               tooltipText={tCommon("copy")}
               className="opacity-100"
-              value={requestId ?? error.digest ?? ""}
             />
           </div>
 

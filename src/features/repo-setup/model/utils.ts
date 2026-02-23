@@ -2,7 +2,7 @@ import type { FileNode } from "@/shared/types/repo";
 
 export const sortNodes = (nodes: FileNode[]): FileNode[] => {
   return nodes
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       const aIsFolder = !!a.children;
       const bIsFolder = !!b.children;
       if (aIsFolder && !bIsFolder) return -1;

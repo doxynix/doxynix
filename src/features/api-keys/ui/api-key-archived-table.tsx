@@ -23,7 +23,7 @@ type Props = {
   archived: UiApiKey[];
 };
 
-export function ApiKeyArchivedTable({ archived }: Props) {
+export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
   const locale = useLocale();
   const [isArchivedOpen, setIsArchivedOpen] = useState(false);
   const tCommon = useTranslations("Common");
@@ -43,7 +43,7 @@ export function ApiKeyArchivedTable({ archived }: Props) {
         </div>
 
         <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+          <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
             <ChevronDown
               className={cn(
                 "-rotate-90 transition-transform duration-300",

@@ -2,14 +2,14 @@ type Props = {
   className?: string;
 };
 
-export function NeonIcon({ className }: Props) {
+export function NeonIcon({ className }: Readonly<Props>) {
   return (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="100%"
+      fill="none"
       height="100%"
       viewBox="0 0 157 45"
-      fill="none"
+      width="100%"
+      xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
       <path

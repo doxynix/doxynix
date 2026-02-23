@@ -16,7 +16,7 @@ import {
 
 type Props = { repo: RepoDetailed };
 
-export function RepoDetailsHeader({ repo }: Props) {
+export function RepoDetailsHeader({ repo }: Readonly<Props>) {
   const locale = useLocale();
 
   const gitMetrics = getGitMetrics(repo, locale);
@@ -25,7 +25,7 @@ export function RepoDetailsHeader({ repo }: Props) {
   return (
     <div className="mx-auto w-full space-y-4">
       <div className="flex items-center gap-4">
-        <RepoAvatar src={repo.ownerAvatarUrl ?? "/avatar-placeholder.png"} alt={repo.owner} />
+        <RepoAvatar alt={repo.owner} src={repo.ownerAvatarUrl ?? "/avatar-placeholder.png"} />
         <h1 className="flex items-center text-2xl font-bold">
           {repo.owner} / {repo.name}
         </h1>
@@ -36,10 +36,10 @@ export function RepoDetailsHeader({ repo }: Props) {
           {gitMetrics.map((m) => (
             <RepoGitMetric
               key={m.id}
+              color={m.color}
               icon={m.icon}
               label={m.label}
               tooltip={m.tooltip}
-              color={m.color}
               className={cn(
                 "text-muted-foreground hover:text-foreground text-xs transition-colors",
                 m.className

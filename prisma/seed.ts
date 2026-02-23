@@ -18,14 +18,14 @@ async function main() {
   console.log("Seeding data...");
 
   const user = await prisma.user.upsert({
-    where: { email: MY_EMAIL },
-    update: {},
     create: {
       email: MY_EMAIL,
-      name: "Admin User",
-      image: faker.image.avatar(),
       emailVerified: new Date(),
+      image: faker.image.avatar(),
+      name: "Admin User",
     },
+    update: {},
+    where: { email: MY_EMAIL },
   });
 
   console.log(`User ready: ${user.email} (ID: ${user.id})`);
@@ -34,53 +34,53 @@ async function main() {
     const isReady = i < 6;
     const isPending = i >= 6 && i < 9;
 
-    const randomScore = faker.number.int({ min: 60, max: 100 });
-    const githubId = faker.number.int({ min: 1, max: 1000 });
+    const randomScore = faker.number.int({ max: 100, min: 60 });
+    const githubId = faker.number.int({ max: 1000, min: 1 });
     const owner = faker.internet.username();
     const repoName = faker.word.noun();
 
     const repo = await prisma.repo.create({
       data: {
-        userId: user.id,
-        githubId,
-        owner: owner,
-        name: repoName,
-        url: `https://github.com/${owner}/${repoName}`,
-        visibility: Math.random() > 0.5 ? Visibility.PUBLIC : Visibility.PRIVATE,
-
         analyses: {
           create: [
             {
-              status: isReady ? Status.DONE : isPending ? Status.PENDING : Status.FAILED,
               commitSha: faker.git.commitSha(),
-              score: isReady ? randomScore : null,
               metricsJson: isReady
                 ? {
+                    coverage: faker.number.int({ max: 99, min: 30 }),
+                    issues: faker.number.int({ max: 20, min: 0 }),
                     score: randomScore,
-                    issues: faker.number.int({ min: 0, max: 20 }),
-                    coverage: faker.number.int({ min: 30, max: 99 }),
                   }
                 : {},
+              score: isReady ? randomScore : null,
+              status: isReady ? Status.DONE : isPending ? Status.PENDING : Status.FAILED,
             },
           ],
         },
-
         documents: isReady
           ? {
               create: [
                 {
-                  version: "v1.0",
-                  type: DocType.README,
                   content: "# Readme \n\n This is a generated file...",
+                  type: DocType.README,
+                  version: "v1.0",
                 },
                 {
-                  version: "v1.0",
-                  type: DocType.API,
                   content: JSON.stringify({ endpoint: "/api/test", method: "GET" }, null, 2),
+                  type: DocType.API,
+                  version: "v1.0",
                 },
               ],
             }
           : undefined,
+        githubId,
+        name: repoName,
+        owner: owner,
+        url: `https://github.com/${owner}/${repoName}`,
+
+        userId: user.id,
+
+        visibility: Math.random() > 0.5 ? Visibility.PUBLIC : Visibility.PRIVATE,
       },
     });
 

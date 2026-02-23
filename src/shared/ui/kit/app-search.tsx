@@ -17,7 +17,7 @@ type Props = {
 
 const ICON_STYLES = "text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4";
 
-export function AppSearch({ placeholder }: Props) {
+export function AppSearch({ placeholder }: Readonly<Props>) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -65,12 +65,12 @@ export function AppSearch({ placeholder }: Props) {
       )}
       <Input
         type="search"
-        placeholder={placeholder}
-        className="focus-visible:bg-background h-9 border-none pl-8 text-sm"
         value={term}
+        placeholder={placeholder}
         onChange={(e) => {
           setTerm(e.target.value);
         }}
+        className="focus-visible:bg-background h-9 border-none pl-8 text-sm"
       />
     </div>
   );

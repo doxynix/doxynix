@@ -25,7 +25,7 @@ export function SimulationTerminal() {
   const t = useTranslations("Landing");
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(containerRef, { once: true, amount: 0.5 });
+  const isInView = useInView(containerRef, { amount: 0.5, once: true });
 
   const [step, setStep] = useState(0);
   const [typedCommand, setTypedCommand] = useState("");

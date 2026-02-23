@@ -14,7 +14,7 @@ const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-export function TimeAgo({ date, locale }: Props) {
+export function TimeAgo({ date, locale }: Readonly<Props>) {
   const [relativeTime, setRelativeTime] = useState(() => formatRelativeTime(date, locale));
 
   const updateTime = useCallback(() => {
@@ -30,8 +30,6 @@ export function TimeAgo({ date, locale }: Props) {
       nextDelay = MINUTE;
     } else if (diff < DAY) {
       nextDelay = HOUR;
-    } else {
-      nextDelay = null;
     }
 
     return nextDelay;
@@ -55,7 +53,7 @@ export function TimeAgo({ date, locale }: Props) {
   }, [updateTime]);
 
   return (
-    <span className="text-muted-foreground mt-1 text-xs" suppressHydrationWarning>
+    <span suppressHydrationWarning className="text-muted-foreground mt-1 text-xs">
       {relativeTime}
     </span>
   );
