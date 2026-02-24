@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { getServerAuthSession } from "@/shared/api/auth/auth-options";
 import { REALTIME_CONFIG, type AblyCapability } from "@/shared/constants/realtime";
 
+import { getServerAuthSession } from "@/server/auth/options";
 import { realtimeServer } from "@/server/lib/realtime";
 import { logger } from "@/server/logger/logger";
 
