@@ -115,7 +115,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Check Formatting
         run: pnpm prettier --check .
@@ -156,7 +156,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Prisma Generate
         run: pnpm db:generate
@@ -201,7 +201,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Security audit (critical)
         run: pnpm audit --audit-level=critical
@@ -210,14 +210,14 @@ jobs:
         run: pnpm audit --audit-level=high
 
       - name: Snyk Open Source (SCA)
-        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04 # v1.0.0
+        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04
         with:
           args: --all-projects --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Setup Snyk CLI
-        uses: snyk/actions/setup@9adf32b1121593767fc3c057af55b55db032dc04 # v1.0.0
+        uses: snyk/actions/setup@9adf32b1121593767fc3c057af55b55db032dc04
 
       - name: Run Snyk Code scan (SAST)
         run: snyk code test . --severity-threshold=high
@@ -271,7 +271,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Prisma Generate
         run: pnpm db:generate
@@ -317,7 +317,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Prisma Generate
         run: pnpm db:generate
@@ -393,7 +393,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Prisma Generate
         run: pnpm db:generate
@@ -458,10 +458,10 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps chromium --ignore-scripts
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Prisma Generate
         run: pnpm db:generate
@@ -594,6 +594,7 @@ jobs:
           PY
 
       - name: Notify Telegram
+        if: github.actor != 'ImgBotApp' && !contains(github.actor, '[bot]')
         uses: appleboy/telegram-action@221e6b684967abe813051ee4a37dd61770a83ad3
         with:
           to: ${{ secrets.TELEGRAM_TO }}

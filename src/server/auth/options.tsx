@@ -53,7 +53,6 @@ export const authOptions: NextAuthOptions = {
     },
     async linkAccount({ account, user }) {
       logger.info({
-        email: user.email,
         msg: "External account linked",
         provider: account.provider,
         type: "auth.link_account",
@@ -62,7 +61,6 @@ export const authOptions: NextAuthOptions = {
     },
     async signIn({ account, user }) {
       logger.info({
-        email: user.email,
         msg: "User signed in",
         provider: account?.provider,
         type: "auth.signin",
@@ -71,7 +69,6 @@ export const authOptions: NextAuthOptions = {
     },
     async signOut({ session }) {
       logger.info({
-        email: session.user.email,
         msg: "User signed out",
         type: "auth.signout",
         userId: session.user.id,
@@ -79,7 +76,6 @@ export const authOptions: NextAuthOptions = {
     },
     async updateUser({ user }) {
       logger.info({
-        email: user.email,
         msg: "User profile updated",
         type: "auth.user_update",
         userId: user.id,

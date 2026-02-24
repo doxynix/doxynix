@@ -69,7 +69,7 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
                 <TableRow key={key.id} className="opacity-70 hover:opacity-100">
                   <TableCell className="max-w-sm truncate font-medium">{key.name}</TableCell>
                   <TableCell className="text-muted-foreground font-mono text-xs">
-                    {key.prefix ? `${key.prefix}...` : "..."}
+                    {key.prefix.length > 0 ? `${key.prefix}...` : "..."}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
                     {formatRelativeTime(key.createdAt, locale)}

@@ -53,7 +53,7 @@ export async function runAiPipeline(
         attemptMetadata: { analysisId, phase: "sentinel" },
         models: AI_MODELS.SENTINEL,
         outputSchema: sentinelSchema,
-        prompt: SENTINEL_USER_PROMPT(instructions!),
+        prompt: SENTINEL_USER_PROMPT(instructions),
         providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
         system: SENTINEL_SYSTEM_PROMPT,
         temperature: 0.0,
@@ -249,22 +249,32 @@ export async function generateDeepDocs(
   let changelog = undefined;
   let architecture = undefined;
 
-  readme = results[taskMap["README"]];
-
-  const apiOutput = results[taskMap["API"]];
-  const yamlMatch = RegExp(/```yaml([\s\S]*?)```/).exec(apiOutput);
-  if (yamlMatch) {
-    swaggerYaml = yamlMatch[1].trim();
-    apiDoc = apiOutput.replace(/# OpenAPI Specification[\s\S]*/, "").trim();
-  } else {
-    apiDoc = apiOutput;
+  if ("README" in taskMap) {
+    readme = results[taskMap["README"]];
   }
 
-  contributing = results[taskMap["CONTRIBUTING"]];
+  if ("API" in taskMap) {
+    const apiOutput = results[taskMap["API"]];
+    const yamlMatch = RegExp(/```yaml([\s\S]*?)```/).exec(apiOutput);
+    if (yamlMatch) {
+      swaggerYaml = yamlMatch[1].trim();
+      apiDoc = apiOutput.replace(/# OpenAPI Specification[\s\S]*/, "").trim();
+    } else {
+      apiDoc = apiOutput;
+    }
+  }
 
-  changelog = results[taskMap["CHANGELOG"]];
+  if ("CONTRIBUTING" in taskMap) {
+    contributing = results[taskMap["CONTRIBUTING"]];
+  }
 
-  architecture = results[taskMap["ARCHITECTURE"]];
+  if ("CHANGELOG" in taskMap) {
+    changelog = results[taskMap["CHANGELOG"]];
+  }
+
+  if ("ARCHITECTURE" in taskMap) {
+    architecture = results[taskMap["ARCHITECTURE"]];
+  }
 
   return { apiDoc, architecture, changelog, contributing, readme, swaggerYaml };
 }

@@ -129,7 +129,13 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                     >
                       <opt.icon className="h-4 w-4" />
                     </div>
-                    <Checkbox checked={isSelected} className="h-4 w-4 rounded-full" />
+                    <Checkbox
+                      checked={isSelected}
+                      disabled={disabled}
+                      tabIndex={-1}
+                      aria-hidden="true"
+                      className="pointer-events-none h-4 w-4 rounded-full"
+                    />
                   </div>
                   <div>
                     <p className="text-sm font-bold">{opt.label}</p>

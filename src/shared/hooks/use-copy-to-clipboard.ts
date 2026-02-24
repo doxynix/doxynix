@@ -10,6 +10,13 @@ export function useCopyToClipboard(timeout = 2000) {
         return;
       }
 
+      const isClipboardAvailable = typeof navigator !== "undefined" && "clipboard" in navigator;
+
+      if (!isClipboardAvailable) {
+        toast.error("Clipboard API not available");
+        return;
+      }
+
       try {
         await navigator.clipboard.writeText(value);
         setIsCopied(true);

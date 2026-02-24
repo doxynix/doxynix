@@ -18,7 +18,7 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
   const session = await getServerAuthSession();
   const locale = await getLocale();
 
-  if (!session) {
+  if (!session?.user) {
     redirect({ href: "/auth", locale });
     return null;
   }

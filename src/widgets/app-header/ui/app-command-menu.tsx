@@ -109,17 +109,16 @@ export function AppCommandMenu() {
           }
           break;
 
+        case "action":
+          break;
+
         case "navigation":
-        case undefined: {
-          throw new Error("Not implemented yet: undefined case");
-        }
-        case "action": {
-          throw new Error('Not implemented yet: "action" case');
-        }
-        default:
+        case undefined:
           if (item.href != null) {
             router.push(item.href as Route);
           }
+          break;
+        default:
           break;
       }
     },

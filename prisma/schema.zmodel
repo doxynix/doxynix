@@ -148,7 +148,7 @@ model Repo {
   githubId        Int        @map("github_id")
   owner           String
   /// @zod.string.min(1).max(255)
-  name            String     @length(min: 1, max: 10000)
+  name            String     @length(min: 1, max: 255)
   /// @zod.string.max(1000)
   description     String?    @db.Text @length(max: 1000)
   /// @zod.string.url({ message: "Invalid repository URL" })

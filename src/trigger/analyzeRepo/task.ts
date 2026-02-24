@@ -3,7 +3,6 @@ import path from "node:path";
 import { Status, type DocType } from "@prisma/client";
 import { task } from "@trigger.dev/sdk/v3";
 
-import type { RepoStatus } from "@/shared/api/trpc";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { prisma } from "@/server/db/db";
@@ -26,7 +25,7 @@ type TaskPayload = {
   userId: number;
 };
 
-type StatusUpdater = (msg: string, percent: number, status?: RepoStatus) => Promise<void>;
+type StatusUpdater = (msg: string, percent: number, status?: Status) => Promise<void>;
 
 export const analyzeRepoTask = task({
   id: "analyze-repo",

@@ -17,7 +17,7 @@ type PrismaErrorMeta = {
   mapKey?: keyof ErrorMapping;
 };
 
-const prismaErrorMap: Record<string, PrismaErrorMeta> = {
+const prismaErrorMap: Record<string, PrismaErrorMeta | undefined> = {
   P2000: {
     code: "BAD_REQUEST",
     defaultMessage: "Field value too long for database",
@@ -64,6 +64,11 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
 
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     const meta = prismaErrorMap[error.code];
+
+    if (meta == null) {
+      logger.error({ error, msg: "Unhandled Prisma Error Code:" + error.code });
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database error" });
+    }
 
     let message: string = meta.defaultMessage;
 
