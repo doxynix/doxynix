@@ -18,13 +18,29 @@ export const t = initTRPC
   .meta<OpenApiMeta>()
   .create({
     errorFormatter({ ctx, error, shape }) {
+      const publicErrors = [
+        "BAD_REQUEST",
+        "CONFLICT",
+        "UNAUTHORIZED",
+        "FORBIDDEN",
+        "TOO_MANY_REQUESTS",
+        "NOT_FOUND",
+      ];
+
+      const isPublicError = publicErrors.includes(error.code);
+
       return {
         ...shape,
         data: {
           ...shape.data,
           requestId: requestContext.getStore()?.requestId ?? ctx?.req.headers.get("x-request-id"),
+          stack: IS_PROD ? undefined : error.stack,
           zodError: error.code === "BAD_REQUEST" ? error.cause : null,
         },
+        message:
+          IS_PROD && !isPublicError
+            ? "An unexpected error occurred, please try again later."
+            : error.message,
       };
     },
     transformer: superjson,

@@ -9,8 +9,9 @@ function escapeRegExp(str: string) {
 Sentry.init({
   dsn: SENTRY_DSN,
 
-  enableLogs: !IS_PROD,
+  enabled: IS_PROD,
 
+  enableLogs: !IS_PROD,
   integrations: IS_PROD
     ? [
         Sentry.replayIntegration({
@@ -26,15 +27,19 @@ Sentry.init({
         Sentry.reportingObserverIntegration({
           types: ["crash", "deprecation", "intervention"],
         }),
+        Sentry.browserTracingIntegration(),
       ]
     : [Sentry.browserTracingIntegration()],
-  replaysOnErrorSampleRate: IS_PROD ? 1.0 : 0.0,
 
-  replaysSessionSampleRate: IS_PROD ? 0.01 : 0,
+  replaysOnErrorSampleRate: 1.0,
+
+  replaysSessionSampleRate: 0.01,
 
   sendDefaultPii: false,
 
-  tracesSampleRate: IS_PROD ? 0.1 : 1.0,
+  tracesSampleRate: 0.1,
+
+  tunnel: "/api/v1/dxnx",
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
