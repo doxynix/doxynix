@@ -27,7 +27,6 @@ import { GoogleIcon } from "@/shared/ui/icons/google-icon";
 import { Logo } from "@/shared/ui/icons/logo";
 import { YandexIcon } from "@/shared/ui/icons/yandex-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
-
 import { Link } from "@/i18n/routing";
 
 const MagicLinkSchema = z.object({

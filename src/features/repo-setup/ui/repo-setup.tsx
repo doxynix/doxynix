@@ -1,13 +1,13 @@
 "use client";
 
-import type { RepoDetailed } from "@/shared/types/repo";
+import type { UiRepoDetailed } from "@/shared/api/trpc";
 
 import { useRepoSetup } from "../model/user-repo-setup";
 import { RepoAnalysisConfig } from "./repo-analysis-config";
 import { RepoFileTree } from "./repo-file-tree";
 
 type Props = {
-  repo: RepoDetailed;
+  repo: UiRepoDetailed;
 };
 
 export function RepoSetup({ repo }: Readonly<Props>) {

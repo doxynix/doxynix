@@ -1,13 +1,13 @@
 import { Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { cn, formatFullDate, formatRelativeTime } from "@/shared/lib/utils";
+import { cn, formatFullDate, formatRelativeTime, getLanguageColor } from "@/shared/lib/utils";
 import type { RepoItemFields } from "@/shared/types/repo-item";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
-import { getLanguageColor, repoVisibilityConfig } from "@/entities/repo";
+import { repoVisibilityConfig } from "@/entities/repo";
 
 type Props = { disabled?: boolean; onClick: () => void; repo: RepoItemFields };
 
@@ -29,13 +29,11 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1">
             <span className="truncate text-sm font-medium">{repo.fullName}</span>
-            {visibility != null && (
-              <div className="flex shrink-0 items-center gap-1.5 text-xs">
-                <Badge variant="outline" className={cn(visibility.color)}>
-                  {visibility.label}
-                </Badge>
-              </div>
-            )}
+            <div className="flex shrink-0 items-center gap-1.5 text-xs">
+              <Badge variant="outline" className={cn(visibility.color)}>
+                {visibility.label}
+              </Badge>
+            </div>
           </div>
           <div className={cn("text-muted-foreground flex shrink-0 items-center gap-1 text-xs")}>
             <Star className="text-warning h-3 w-3 fill-current" />

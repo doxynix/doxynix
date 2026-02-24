@@ -52,7 +52,7 @@ export const Spotlight = ({
         className="pointer-events-none absolute top-0 left-0 z-40 h-screen w-screen"
       >
         <div
-          className={`absolute top-0 left-0`}
+          className="absolute top-0 left-0"
           style={{
             background: gradientFirst,
             height: `${height}px`,
@@ -62,7 +62,7 @@ export const Spotlight = ({
         />
 
         <div
-          className={`absolute top-0 left-0 origin-top-left`}
+          className="absolute top-0 left-0 origin-top-left"
           style={{
             background: gradientSecond,
             height: `${height}px`,
@@ -72,7 +72,7 @@ export const Spotlight = ({
         />
 
         <div
-          className={`absolute top-0 left-0 origin-top-left`}
+          className="absolute top-0 left-0 origin-top-left"
           style={{
             background: gradientThird,
             height: `${height}px`,
@@ -95,7 +95,7 @@ export const Spotlight = ({
         className="pointer-events-none absolute top-0 right-0 z-40 h-screen w-screen"
       >
         <div
-          className={`absolute top-0 right-0`}
+          className="absolute top-0 right-0"
           style={{
             background: gradientFirst,
             height: `${height}px`,
@@ -105,7 +105,7 @@ export const Spotlight = ({
         />
 
         <div
-          className={`absolute top-0 right-0 origin-top-right`}
+          className="absolute top-0 right-0 origin-top-right"
           style={{
             background: gradientSecond,
             height: `${height}px`,
@@ -115,7 +115,7 @@ export const Spotlight = ({
         />
 
         <div
-          className={`absolute top-0 right-0 origin-top-right`}
+          className="absolute top-0 right-0 origin-top-right"
           style={{
             background: gradientThird,
             height: `${height}px`,

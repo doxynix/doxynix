@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { RepoMeta } from "@/shared/types/repo";
+import type { RepoMeta } from "@/shared/api/trpc";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -27,7 +27,7 @@ const richStyles = {
 
 export function DeleteAllReposDialog({ meta }: Readonly<{ meta: RepoMeta }>) {
   const [open, setOpen] = useState(false);
-  const hasRepos = (meta?.totalCount ?? 0) > 0;
+  const hasRepos = meta.totalCount > 0;
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const tsRich = (key: string) => t.rich(key, richStyles);

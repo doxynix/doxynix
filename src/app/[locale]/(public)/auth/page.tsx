@@ -1,10 +1,11 @@
 import { getLocale } from "next-intl/server";
 
-import { getServerAuthSession } from "@/shared/api/auth/auth-options";
 import { createMetadata } from "@/shared/lib/metadata";
+import { redirect } from "@/i18n/routing";
+
 import { AuthForm } from "@/features/auth";
 
-import { redirect } from "@/i18n/routing";
+import { getServerAuthSession } from "@/server/auth/options";
 
 export const generateMetadata = createMetadata("sign_in_title", "sign_in_desc");
 

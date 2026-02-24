@@ -60,7 +60,7 @@ export function SystemStatus({ className }: Readonly<{ className?: string }>) {
     staleTime: STALE_TIME,
   });
 
-  const current = config[status] ?? config.unknown;
+  const current = config[status];
 
   return (
     <div className={cn("flex items-center gap-2 text-xs font-medium", className)}>

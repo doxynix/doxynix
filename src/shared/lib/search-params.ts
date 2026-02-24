@@ -1,4 +1,6 @@
-import { Status, Visibility } from "@prisma/client";
+import { Status, Visibility } from "@prisma/client"; // TODO переделать под infer
+
+import type { ParamTypes } from "../types/search-params";
 
 export const REPO_DEFAULTS = {
   LIMIT: 5,
@@ -8,8 +10,6 @@ export const REPO_DEFAULTS = {
   STATUS: undefined,
   VISIBILITY: undefined,
 };
-
-type ParamTypes = string | string[] | undefined;
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;

@@ -1,11 +1,11 @@
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
+import type { Repo } from "@prisma/client";
 import simpleGit from "simple-git";
 
-import { prisma } from "@/shared/api/db/db";
 import { SYSTEM_TOKEN } from "@/shared/constants/env.server";
 
-import { StatusSchema, VisibilitySchema, type Repo } from "@/generated/zod";
+import { prisma } from "@/server/db/db";
 import { githubService } from "@/server/services/github.service";
 
 export async function getAnalysisContext(
@@ -20,7 +20,7 @@ export async function getAnalysisContext(
           analyses: {
             orderBy: { createdAt: "desc" },
             take: 1,
-            where: { status: StatusSchema.enum.DONE },
+            where: { status: "DONE" },
           },
         },
       },
@@ -35,7 +35,7 @@ export async function getAnalysisContext(
 
   const account = await prisma.account.findFirst({ where: { provider: "github", userId } });
   const userToken = account?.access_token;
-  if (repo.visibility === VisibilitySchema.enum.PRIVATE && userToken == null) {
+  if (repo.visibility === "PRIVATE" && userToken == null) {
     throw new Error("This is a private repository. Please connect your GitHub account.");
   }
 
@@ -50,7 +50,7 @@ export async function getAnalysisContext(
 
   const currentSha = refData.object.sha;
 
-  if (forceRefresh === false && lastSuccessfulAnalysis?.commitSha === currentSha) {
+  if (forceRefresh === false && lastSuccessfulAnalysis.commitSha === currentSha) {
     return { currentSha, repo: null, token };
   }
 

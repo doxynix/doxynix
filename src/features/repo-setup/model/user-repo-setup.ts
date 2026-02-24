@@ -1,19 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { DocType } from "@prisma/client";
 import { useLocale } from "next-intl";
 import type { TreeApi } from "react-arborist";
 
-import { trpc } from "@/shared/api/trpc";
-import type { FileNode, RepoDetailed } from "@/shared/types/repo";
+import { trpc, type DocType, type UiRepoDetailed } from "@/shared/api/trpc";
+import type { FileNode } from "@/shared/types/repo";
 import type { FileTuple } from "@/shared/types/repo-setup";
+
 import { collectAllIds, getFolderSelectionState, sortNodes } from "@/features/repo-setup";
+
+import { DocTypeSchema } from "@/generated/zod";
 
 export type RepoSetupReturn = ReturnType<typeof useRepoSetup>;
 
 export type StateType = RepoSetupReturn["state"];
 export type ActionsType = RepoSetupReturn["actions"];
 
-export function useRepoSetup(repo: RepoDetailed) {
+export function useRepoSetup(repo: UiRepoDetailed) {
   const locale = useLocale();
   const [selectedBranch, setSelectedBranch] = useState(repo.defaultBranch);
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,7 +23,7 @@ export function useRepoSetup(repo: RepoDetailed) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [analysisLocale, setAnalysisLocale] = useState(locale);
   const [instructions, setInstructions] = useState("");
-  const [selectedDocs, setSelectedDocs] = useState<DocType[]>([DocType.README]);
+  const [selectedDocs, setSelectedDocs] = useState<DocType[]>([DocTypeSchema.enum.README]);
 
   const { name, owner } = repo;
 
@@ -72,7 +74,7 @@ export function useRepoSetup(repo: RepoDetailed) {
           if (index === 0) root.push(newNode);
           else {
             const parent = map.get(parentPath);
-            if (parent && parent.children) parent.children.push(newNode);
+            if (parent?.children) parent.children.push(newNode);
           }
         }
       });

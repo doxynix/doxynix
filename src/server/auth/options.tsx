@@ -10,10 +10,11 @@ import YandexProvider from "next-auth/providers/yandex";
 import { Resend } from "resend";
 
 import { AuthEmail } from "@/shared/api/auth/templates/auth-email";
-import { baseClient, prisma } from "@/shared/api/db/db";
 import { IS_DEV, IS_PROD } from "@/shared/constants/env.client";
 import { AUTH_PROVIDERS, NEXTAUTH_SECRET, RESEND_API_KEY } from "@/shared/constants/env.server";
-import { logger } from "@/shared/lib/logger";
+
+import { baseClient, prisma } from "@/server/db/db";
+import { logger } from "@/server/logger/logger";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 дней
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: сутки
@@ -25,10 +26,8 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(baseClient),
   callbacks: {
     async session({ session, user }) {
-      if (session?.user != null) {
-        session.user.id = user.id;
-        session.user.role = user.role;
-      }
+      session.user.id = user.id;
+      session.user.role = user.role;
       return session;
     },
   },
@@ -54,7 +53,6 @@ export const authOptions: NextAuthOptions = {
     },
     async linkAccount({ account, user }) {
       logger.info({
-        email: user.email,
         msg: "External account linked",
         provider: account.provider,
         type: "auth.link_account",
@@ -63,7 +61,6 @@ export const authOptions: NextAuthOptions = {
     },
     async signIn({ account, user }) {
       logger.info({
-        email: user.email,
         msg: "User signed in",
         provider: account?.provider,
         type: "auth.signin",
@@ -72,15 +69,13 @@ export const authOptions: NextAuthOptions = {
     },
     async signOut({ session }) {
       logger.info({
-        email: session?.user?.email,
         msg: "User signed out",
         type: "auth.signout",
-        userId: session?.user?.id,
+        userId: session.user.id,
       });
     },
     async updateUser({ user }) {
       logger.info({
-        email: user.email,
         msg: "User profile updated",
         type: "auth.user_update",
         userId: user.id,
@@ -112,7 +107,7 @@ export const authOptions: NextAuthOptions = {
           from: provider.from,
           html,
           reply_to: "support@doxynix.space",
-          subject: user?.emailVerified != null ? "Doxynix | Login" : "Doxynix | Account Activation",
+          subject: user?.emailVerified == null ? "Doxynix | Account Activation" : "Doxynix | Login",
           tags: [
             {
               name: "category",

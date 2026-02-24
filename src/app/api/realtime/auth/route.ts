@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
 
-import { getServerAuthSession } from "@/shared/api/auth/auth-options";
 import { REALTIME_CONFIG, type AblyCapability } from "@/shared/constants/realtime";
-import { logger } from "@/shared/lib/logger";
 
+import { getServerAuthSession } from "@/server/auth/options";
 import { realtimeServer } from "@/server/lib/realtime";
+import { logger } from "@/server/logger/logger";
 
 const ONE_HOUR = 3600000;
 
 export async function GET() {
   const session = await getServerAuthSession();
-  const userId = session?.user?.id;
-  const clientId = userId != null ? String(userId) : "anonymous";
+  const userId = session?.user.id;
+  const clientId = userId == null ? "anonymous" : String(userId);
 
   const capability: Record<string, AblyCapability[]> = {
     [REALTIME_CONFIG.channels.news]: ["subscribe"],

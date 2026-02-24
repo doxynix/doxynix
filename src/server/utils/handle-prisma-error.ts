@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
-import { logger } from "@/shared/lib/logger";
+import { logger } from "@/server/logger/logger";
 
 type ErrorMapping = {
   [key: string]: string | Record<string, string> | undefined;
@@ -17,7 +17,7 @@ type PrismaErrorMeta = {
   mapKey?: keyof ErrorMapping;
 };
 
-const prismaErrorMap: Record<string, PrismaErrorMeta> = {
+const prismaErrorMap: Record<string, PrismaErrorMeta | undefined> = {
   P2000: {
     code: "BAD_REQUEST",
     defaultMessage: "Field value too long for database",
@@ -65,47 +65,42 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     const meta = prismaErrorMap[error.code];
 
-    if (meta != null) {
-      let message: string = meta.defaultMessage;
-
-      if (meta.mapKey != null) {
-        const mapValue = map?.[meta.mapKey];
-
-        if (meta.mapKey === "uniqueConstraint") {
-          const targetRaw = error.meta?.target;
-          const target: string[] = Array.isArray(targetRaw)
-            ? (targetRaw as string[])
-            : typeof targetRaw === "string"
-              ? targetRaw.split("_")
-              : [];
-
-          const field = target.find(
-            (f): f is string => f != null && map?.uniqueConstraint?.[f] != null
-          );
-
-          if (field != null && map?.uniqueConstraint?.[field] != null) {
-            message = map.uniqueConstraint[field];
-          } else if (map?.defaultConflict != null) {
-            message = map.defaultConflict;
-          }
-        } else if (typeof mapValue === "string" && mapValue.length > 0) {
-          message = mapValue;
-        }
-      }
-
-      throw new TRPCError({ code: meta.code, message });
+    if (meta == null) {
+      logger.error({ error, msg: "Unhandled Prisma Error Code:" + error.code });
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database error" });
     }
 
-    logger.error({ error, msg: "Unknown Prisma Error:" });
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Internal database error",
-    });
+    let message: string = meta.defaultMessage;
+
+    if (meta.mapKey != null) {
+      const mapValue = map?.[meta.mapKey];
+
+      if (meta.mapKey === "uniqueConstraint") {
+        const targetRaw = error.meta?.target;
+        const target: string[] = Array.isArray(targetRaw)
+          ? (targetRaw as string[])
+          : typeof targetRaw === "string"
+            ? [targetRaw]
+            : [];
+
+        const field = target.find((f): f is string => map?.uniqueConstraint?.[f] != null);
+
+        if (field != null && map?.uniqueConstraint?.[field] != null) {
+          message = map.uniqueConstraint[field];
+        } else if (map?.defaultConflict != null) {
+          message = map.defaultConflict;
+        }
+      } else if (typeof mapValue === "string" && mapValue.length > 0) {
+        message = mapValue;
+      }
+    }
+
+    throw new TRPCError({ code: meta.code, message });
   }
 
-  logger.error({ error, msg: "Unknown Error:" });
+  logger.error({ error, msg: "Unknown Prisma Error:" });
   throw new TRPCError({
     code: "INTERNAL_SERVER_ERROR",
-    message: "Internal server error",
+    message: "Internal database error",
   });
 }

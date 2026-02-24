@@ -1,4 +1,4 @@
-const LANGUAGE_COLORS: Record<string, string> = {
+export const LANGUAGE_COLORS: Record<string, string> = {
   ABAP: "#E8274B",
   ActionScript: "#882B0F",
   Ada: "#02f88c",
@@ -203,7 +203,7 @@ const LANGUAGE_COLORS: Record<string, string> = {
   Zephir: "#118f9e",
 };
 
-const EXTENSION_MAP: Record<string, string> = {
+export const EXTENSION_MAP: Record<string, string> = {
   asm: "Assembly",
   bash: "Shell",
   c: "C",
@@ -301,22 +301,4 @@ const EXTENSION_MAP: Record<string, string> = {
   yaml: "YAML",
   yml: "YAML",
   zsh: "Shell",
-};
-
-export const getLanguageColor = (lang: string | null): string => {
-  if (lang == null) return "#cccccc";
-
-  if (LANGUAGE_COLORS[lang]) return LANGUAGE_COLORS[lang];
-
-  const normalized = EXTENSION_MAP[lang.toLowerCase()];
-  if (normalized && LANGUAGE_COLORS[normalized]) return LANGUAGE_COLORS[normalized];
-
-  const lowerLang = lang.toLowerCase();
-  const foundKey = Object.keys(LANGUAGE_COLORS).find((k) => k.toLowerCase() === lowerLang);
-
-  return foundKey != null ? LANGUAGE_COLORS[foundKey] : "#cccccc";
-};
-
-export const normalizeLanguageName = (ext: string): string => {
-  return EXTENSION_MAP[ext.toLowerCase()] ?? ext.toUpperCase();
 };

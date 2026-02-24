@@ -1,9 +1,5 @@
-import { prisma } from "@/shared/api/db/db";
-import { logger } from "@/shared/lib/logger";
+import { DocType, type Repo, type Status } from "@prisma/client";
 
-import type { Repo } from "@/generated/zod";
-import DocTypeSchema, { type DocTypeType } from "@/generated/zod/inputTypeSchemas/DocTypeSchema";
-import type { StatusType } from "@/generated/zod/inputTypeSchemas/StatusSchema";
 import { AI_MODELS, SAFETY_SETTINGS } from "@/server/ai/constants";
 import { prepareSmartContext } from "@/server/ai/context-manager";
 import {
@@ -32,12 +28,14 @@ import {
   type ProjectMap,
   type SentinelResult,
 } from "@/server/ai/schemas";
+import { prisma } from "@/server/db/db";
+import { logger } from "@/server/logger/logger";
 import { githubService } from "@/server/services/github.service";
 import { callWithFallback } from "@/server/utils/call";
 import { FileClassifier } from "@/server/utils/file-classifier";
 import { cleanCodeForAi, unwrapAiText } from "@/server/utils/optimizers";
 
-type StatusUpdater = (msg: string, percent: number, status?: StatusType) => Promise<void>;
+type StatusUpdater = (msg: string, percent: number, status?: Status) => Promise<void>;
 
 export async function runAiPipeline(
   validFiles: { content: string; path: string }[],
@@ -55,7 +53,7 @@ export async function runAiPipeline(
         attemptMetadata: { analysisId, phase: "sentinel" },
         models: AI_MODELS.SENTINEL,
         outputSchema: sentinelSchema,
-        prompt: SENTINEL_USER_PROMPT(instructions!),
+        prompt: SENTINEL_USER_PROMPT(instructions),
         providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
         system: SENTINEL_SYSTEM_PROMPT,
         temperature: 0.0,
@@ -88,7 +86,7 @@ export async function runAiPipeline(
   logger.debug({
     analysisId,
     msg: "Project map generated",
-    projectMapSummary: Object.keys(projectMap.modules ?? {}).length ?? null,
+    projectMapSummary: Object.keys(projectMap.modules).length,
   });
 
   console.log(JSON.stringify(projectMap, null, 2));
@@ -99,7 +97,7 @@ export async function runAiPipeline(
 
   const architectContext = prepareSmartContext(validFiles, SMART_CONTEXT_LIMIT);
 
-  const aiResult = await callWithFallback<AIResult>({
+  return await callWithFallback<AIResult>({
     attemptMetadata: { analysisId, phase: "architect" },
     models: [...AI_MODELS.POWERFUL, ...AI_MODELS.ARCHITECT, ...AI_MODELS.FALLBACK],
     outputSchema: aiSchema,
@@ -113,16 +111,13 @@ export async function runAiPipeline(
     system: ANALYSIS_SYSTEM_PROMPT(language),
     temperature: 0.1,
   });
-
-  if (aiResult == null) throw new Error("AI model failed.");
-  return aiResult;
 }
 
 export async function generateDeepDocs(
   files: { content: string; path: string }[],
   analysisResult: AIResult,
   analysisId: string,
-  requestedDocs: DocTypeType[],
+  requestedDocs: DocType[],
   repo: Repo,
   userId: number,
   language: string
@@ -142,7 +137,7 @@ export async function generateDeepDocs(
   const taskMap: Record<string, number> = {};
 
   // 1. README
-  if (requestedDocs.includes(DocTypeSchema.enum.README)) {
+  if (requestedDocs.includes(DocType.README)) {
     taskMap["README"] = tasks.length;
     tasks.push(
       callWithFallback<string>({
@@ -162,7 +157,7 @@ export async function generateDeepDocs(
   }
 
   // 2. API DOCS
-  if (requestedDocs.includes(DocTypeSchema.enum.API)) {
+  if (requestedDocs.includes(DocType.API)) {
     taskMap["API"] = tasks.length;
     tasks.push(
       callWithFallback<string>({
@@ -177,7 +172,7 @@ export async function generateDeepDocs(
   }
 
   // 3. CONTRIBUTING
-  if (requestedDocs.includes(DocTypeSchema.enum.CONTRIBUTING)) {
+  if (requestedDocs.includes(DocType.CONTRIBUTING)) {
     taskMap["CONTRIBUTING"] = tasks.length;
     tasks.push(
       callWithFallback<string>({
@@ -195,7 +190,7 @@ export async function generateDeepDocs(
   }
 
   // 4. CHANGELOG
-  if (requestedDocs.includes(DocTypeSchema.enum.CHANGELOG)) {
+  if (requestedDocs.includes(DocType.CHANGELOG)) {
     taskMap["CHANGELOG"] = tasks.length;
     tasks.push(
       (async () => {
@@ -228,7 +223,7 @@ export async function generateDeepDocs(
   }
 
   // 5. ARCHITECTURE
-  if (requestedDocs.includes(DocTypeSchema.enum.ARCHITECTURE)) {
+  if (requestedDocs.includes(DocType.ARCHITECTURE)) {
     taskMap["ARCHITECTURE"] = tasks.length;
     tasks.push(
       callWithFallback<string>({
@@ -254,11 +249,11 @@ export async function generateDeepDocs(
   let changelog = undefined;
   let architecture = undefined;
 
-  if (taskMap["README"] != null) {
+  if ("README" in taskMap) {
     readme = results[taskMap["README"]];
   }
 
-  if (taskMap["API"] != null) {
+  if ("API" in taskMap) {
     const apiOutput = results[taskMap["API"]];
     const yamlMatch = RegExp(/```yaml([\s\S]*?)```/).exec(apiOutput);
     if (yamlMatch) {
@@ -269,15 +264,15 @@ export async function generateDeepDocs(
     }
   }
 
-  if (taskMap["CONTRIBUTING"] != null) {
+  if ("CONTRIBUTING" in taskMap) {
     contributing = results[taskMap["CONTRIBUTING"]];
   }
 
-  if (taskMap["CHANGELOG"] != null) {
+  if ("CHANGELOG" in taskMap) {
     changelog = results[taskMap["CHANGELOG"]];
   }
 
-  if (taskMap["ARCHITECTURE"] != null) {
+  if ("ARCHITECTURE" in taskMap) {
     architecture = results[taskMap["ARCHITECTURE"]];
   }
 

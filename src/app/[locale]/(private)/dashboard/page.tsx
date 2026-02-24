@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
+
 import { AnalyticsWidgets, StatCardContainer, TrendsWidget } from "@/features/dashboard";
 import { CreateRepoButton, RepoListContainer } from "@/features/repo";
 

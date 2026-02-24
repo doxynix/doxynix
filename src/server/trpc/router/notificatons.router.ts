@@ -1,13 +1,14 @@
 import { z } from "zod";
 
-import { NotificationSchema } from "@/generated/zod";
 import { handlePrismaError } from "@/server/utils/handle-prisma-error";
+import { NotificationSchema } from "@/generated/zod";
+
 import { OpenApiErrorResponses } from "../shared";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const NotificationsPublicSchema = NotificationSchema.extend({
   id: z.string(),
-}).omit({ publicId: true, userId: true });
+});
 
 export const notificationRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -26,12 +27,9 @@ export const notificationRouter = createTRPCRouter({
     .input(z.object({ count: z.number().int().min(1).max(10000) }))
     .output(z.array(NotificationsPublicSchema))
     .query(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
-
       const notifications = await ctx.db.notification.findMany({
         orderBy: { createdAt: "desc" },
         take: input.count,
-        where: { userId },
       });
 
       return notifications.map((n) => ({
@@ -55,10 +53,8 @@ export const notificationRouter = createTRPCRouter({
     .input(z.void())
     .output(z.object({ count: z.number().int() }))
     .query(async ({ ctx }) => {
-      const userId = Number(ctx.session.user.id);
-
       const count = await ctx.db.notification.count({
-        where: { isRead: false, userId },
+        where: { isRead: false },
       });
 
       return { count };
@@ -85,8 +81,6 @@ export const notificationRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx }) => {
-      const userId = Number(ctx.session.user.id);
-
       try {
         const result = await ctx.db.notification.updateMany({
           data: {
@@ -94,7 +88,6 @@ export const notificationRouter = createTRPCRouter({
           },
           where: {
             isRead: false,
-            userId,
           },
         });
 

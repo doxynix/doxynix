@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
+import type { UiApiKey } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -31,7 +32,6 @@ import { Textarea } from "@/shared/ui/core/textarea";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import type { UiApiKey } from "@/entities/api-keys";
 import { useApiKeyActions } from "../model/use-api-key-actions";
 
 type Props = {

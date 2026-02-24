@@ -3,14 +3,15 @@
 import { SearchX } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { RepoMeta, RepoTableItem } from "@/shared/types/repo";
+import type { RepoMeta, UiRepoListItem } from "@/shared/api/trpc";
 
 import { RepoCard } from "@/entities/repo";
+
 import { RepoEmpty } from "./repo-empty";
 
 type Props = {
   meta?: RepoMeta;
-  repos: RepoTableItem[];
+  repos: UiRepoListItem[];
 };
 
 export function RepoList({ meta, repos }: Readonly<Props>) {

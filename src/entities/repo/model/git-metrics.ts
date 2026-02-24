@@ -10,10 +10,8 @@ import {
   Star,
 } from "lucide-react";
 
-import { formatRelativeTime } from "@/shared/lib/utils";
-import type { RepoTableItem } from "@/shared/types/repo";
-
-import { getLanguageColor } from "./language-colors";
+import type { UiRepoListItem } from "@/shared/api/trpc";
+import { formatRelativeTime, getLanguageColor } from "@/shared/lib/utils";
 
 type Props = {
   className?: string;
@@ -24,7 +22,7 @@ type Props = {
   tooltip?: string;
 };
 
-export function getGitMetrics(repo: RepoTableItem, locale: string): Props[] {
+export function getGitMetrics(repo: UiRepoListItem, locale: string): Props[] {
   const langColor = getLanguageColor(repo.language);
 
   const items = [

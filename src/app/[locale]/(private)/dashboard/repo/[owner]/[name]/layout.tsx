@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import type { ParamTypes } from "@/shared/types/search-params";
+
 import { RepoDetailsHeader } from "@/features/repo-details";
 
 import { api } from "@/server/trpc/server";
@@ -9,7 +11,7 @@ import { api } from "@/server/trpc/server";
 type Props = {
   children: ReactNode;
   params: Promise<{ name: string; owner: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<{ [key: string]: ParamTypes }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

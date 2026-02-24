@@ -11,12 +11,10 @@ import themeDark from "shiki/themes/github-dark-dimmed.mjs";
 let highlighter: Awaited<ReturnType<typeof createHighlighter>> | null = null;
 
 async function getHighlighter() {
-  if (!highlighter) {
-    highlighter = await createHighlighter({
-      langs: [langTs, langJSON, langMarkdown, langConsole],
-      themes: [themeDark],
-    });
-  }
+  highlighter ??= await createHighlighter({
+    langs: [langTs, langJSON, langMarkdown, langConsole],
+    themes: [themeDark],
+  });
   return highlighter;
 }
 

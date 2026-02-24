@@ -3,8 +3,9 @@ import { enhance } from "@zenstackhq/runtime";
 import * as fc from "fast-check";
 import { afterAll, beforeAll, beforeEach, describe, it, vi } from "vitest";
 
-import { prisma } from "@/shared/api/db/db";
 import { IS_CI } from "@/shared/constants/env.client";
+
+import { prisma } from "@/server/db/db";
 
 import { cleanupDatabase } from "../helpers";
 

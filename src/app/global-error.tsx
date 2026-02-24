@@ -11,10 +11,13 @@ export default function GlobalError({
   reset: () => void;
 }>) {
   const [requestId, setRequestId] = useState<string | null>(null);
-  const currentUrl = typeof globalThis.window !== "undefined" ? globalThis.location.href : "";
-  const userAgent = typeof window !== "undefined" ? globalThis.navigator.userAgent : "";
-  const screenSize =
-    typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : "N/A";
+  const isClient = typeof window !== "undefined";
+  const currentUrl = isClient ? globalThis.location.href : "";
+  const userAgent = isClient ? globalThis.navigator.userAgent : "";
+  const screenSize = isClient
+    ? `${globalThis.window.innerWidth}x${globalThis.window.innerHeight}`
+    : "N/A";
+
   const timestamp = new Date().toISOString();
   const finalId = requestId ?? error.digest ?? "No-ID";
   const emailSubject = `[Bug Report] Doxynix - Error ${finalId}`;

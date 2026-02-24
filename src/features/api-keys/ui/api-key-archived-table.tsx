@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown, History } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+import type { UiApiKey } from "@/shared/api/trpc";
 import { cn, formatRelativeTime } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
@@ -16,8 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/ui/core/table";
-
-import type { UiApiKey } from "@/entities/api-keys";
 
 type Props = {
   archived: UiApiKey[];
@@ -70,7 +69,7 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
                 <TableRow key={key.id} className="opacity-70 hover:opacity-100">
                   <TableCell className="max-w-sm truncate font-medium">{key.name}</TableCell>
                   <TableCell className="text-muted-foreground font-mono text-xs">
-                    {key.prefix != null && key.prefix !== "" ? `${key.prefix}...` : "..."}
+                    {key.prefix.length > 0 ? `${key.prefix}...` : "..."}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
                     {formatRelativeTime(key.createdAt, locale)}

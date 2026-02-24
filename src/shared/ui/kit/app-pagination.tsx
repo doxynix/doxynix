@@ -6,8 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import type { RepoMeta } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/utils";
-import type { RepoMeta } from "@/shared/types/repo";
 import {
   Pagination,
   PaginationContent,
@@ -16,7 +16,6 @@ import {
   PaginationLink,
 } from "@/shared/ui/core/pagination";
 import { Spinner } from "@/shared/ui/core/spinner";
-
 import { usePathname, useRouter } from "@/i18n/routing";
 
 type Props = {

@@ -1,60 +1,64 @@
+import React from "react";
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
-
 import { Link } from "@/i18n/routing";
 
 export function PricingSection() {
   const t = useTranslations("Landing");
 
-  const PLANS = [
-    {
-      cta: t("section_pricing_plan_hobby_cta"),
-      desc: t("section_pricing_plan_hobby_desc"),
-      features: [
-        t("section_pricing_plan_hobby_f1"),
-        t("section_pricing_plan_hobby_f2"),
-        t("section_pricing_plan_hobby_f3"),
-        t("section_pricing_plan_hobby_f4"),
-      ],
-      href: "/auth",
-      name: t("section_pricing_plan_hobby_name"),
-      popular: false,
-      price: "$0",
-    },
-    {
-      cta: t("section_pricing_plan_pro_cta"),
-      desc: t("section_pricing_plan_pro_desc"),
-      features: [
-        t("section_pricing_plan_pro_f1"),
-        t("section_pricing_plan_pro_f2"),
-        t("section_pricing_plan_pro_f3"),
-        t("section_pricing_plan_pro_f4"),
-        t("section_pricing_plan_pro_f5"),
-      ],
-      href: "/auth",
-      name: t("section_pricing_plan_pro_name"),
-      popular: true,
-      price: "$9",
-    },
-    {
-      cta: t("section_pricing_plan_team_cta"),
-      desc: t("section_pricing_plan_team_desc"),
-      features: [
-        t("section_pricing_plan_team_f1"),
-        t("section_pricing_plan_team_f2"),
-        t("section_pricing_plan_team_f3"),
-        t("section_pricing_plan_team_f4"),
-        t("section_pricing_plan_team_f5"),
-      ],
-      href: "/auth",
-      name: t("section_pricing_plan_team_name"),
-      popular: false,
-      price: "Custom",
-    },
-  ];
+  const PLANS = React.useMemo(
+    () => [
+      {
+        cta: t("section_pricing_plan_hobby_cta"),
+        desc: t("section_pricing_plan_hobby_desc"),
+        features: [
+          t("section_pricing_plan_hobby_f1"),
+          t("section_pricing_plan_hobby_f2"),
+          t("section_pricing_plan_hobby_f3"),
+          t("section_pricing_plan_hobby_f4"),
+        ],
+        href: "/auth",
+        name: t("section_pricing_plan_hobby_name"),
+        popular: false,
+        price: "$0",
+      },
+      {
+        cta: t("section_pricing_plan_pro_cta"),
+        desc: t("section_pricing_plan_pro_desc"),
+        features: [
+          t("section_pricing_plan_pro_f1"),
+          t("section_pricing_plan_pro_f2"),
+          t("section_pricing_plan_pro_f3"),
+          t("section_pricing_plan_pro_f4"),
+          t("section_pricing_plan_pro_f5"),
+        ],
+        href: "/auth",
+        name: t("section_pricing_plan_pro_name"),
+        popular: true,
+        price: "$9",
+      },
+      {
+        cta: t("section_pricing_plan_team_cta"),
+        desc: t("section_pricing_plan_team_desc"),
+        features: [
+          t("section_pricing_plan_team_f1"),
+          t("section_pricing_plan_team_f2"),
+          t("section_pricing_plan_team_f3"),
+          t("section_pricing_plan_team_f4"),
+          t("section_pricing_plan_team_f5"),
+        ],
+        href: "/auth",
+        name: t("section_pricing_plan_team_name"),
+        popular: false,
+        price: "Custom",
+      },
+    ],
+    [t]
+  );
+
   return (
     <section className="bg-landing-bg-light/20 border-y border-zinc-900/20 py-24">
       <div className="container mx-auto px-4">
@@ -82,7 +86,7 @@ export function PricingSection() {
               <div className="mb-2 flex items-baseline gap-1">
                 <span className="text-4xl font-bold">{plan.price}</span>
                 <span className="text-muted-foreground">
-                  {plan.price !== "Custom" ? t("section_pricing_interval") : ""}
+                  {plan.price === "Custom" ? "" : t("section_pricing_interval")}
                 </span>
               </div>
               <p className="text-muted-foreground mb-6 text-sm">{plan.desc}</p>

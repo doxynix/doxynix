@@ -1,4 +1,3 @@
-import type { inferRouterOutputs } from "@trpc/server";
 import {
   BookOpenCheck,
   Brain,
@@ -10,15 +9,12 @@ import {
   Wrench,
 } from "lucide-react";
 
+import type { DashboardStats } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/utils";
 
-import type { AppRouter } from "@/server/trpc/router";
-
-type RouterOutput = inferRouterOutputs<AppRouter>;
-type DashboardStatsOutput = RouterOutput["analytics"]["getDashboardStats"];
 type TFunction = (key: string) => string;
 
-export function getStats(data: DashboardStatsOutput, t: TFunction, locale: string) {
+export function getStats(data: DashboardStats, t: TFunction, locale: string) {
   const { analysisStats, overview } = data;
 
   return [

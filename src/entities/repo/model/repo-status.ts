@@ -1,7 +1,7 @@
-import type { Status } from "@prisma/client";
+import type { RepoStatus } from "@/shared/api/trpc";
 
 export const repoStatusConfig: Record<
-  Status,
+  RepoStatus,
   {
     color: string;
     label: string;

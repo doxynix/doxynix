@@ -1,9 +1,10 @@
 import { getLocale } from "next-intl/server";
 
-import { getServerAuthSession } from "@/shared/api/auth/auth-options";
-
 import { redirect } from "@/i18n/routing";
-import { ProfileCard } from "./profile-card";
+
+import { ProfileCard } from "@/features/profile";
+
+import { getServerAuthSession } from "@/server/auth/options";
 
 export async function ProfileDataLoader() {
   const session = await getServerAuthSession();

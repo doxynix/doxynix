@@ -1,7 +1,8 @@
+import type { Repo } from "@prisma/client";
 import sloc, { type Extension } from "sloc";
 
-import { getLanguageColor, normalizeLanguageName } from "@/entities/repo";
-import type { Repo } from "@/generated/zod";
+import { getLanguageColor, normalizeLanguageName } from "@/shared/lib/utils";
+
 import type { LanguageMetric, RepoMetrics } from "../ai/types";
 
 function calculateDocDensity(source: number, comment: number): number {
@@ -18,7 +19,7 @@ function calculateModularity(totalLoc: number, fileCount: number): number {
 export function calculateHealthScore(repo: Repo, busFactor: number, docDensity: number): number {
   let score = 50;
 
-  const lastPushDate = repo.pushedAt != null ? new Date(repo.pushedAt) : new Date();
+  const lastPushDate = repo.pushedAt == null ? new Date() : new Date(repo.pushedAt);
   const monthsSincePush = (Date.now() - lastPushDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
   if (monthsSincePush < 1) score += 20;
   else if (monthsSincePush > 6) score -= 30;

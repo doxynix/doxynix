@@ -3,7 +3,8 @@ import pino from "pino";
 import pretty from "pino-pretty";
 
 import { requestContext } from "@/server/utils/request-context";
-import { IS_PROD } from "../constants/env.client";
+
+import { IS_PROD } from "../../shared/constants/env.client";
 
 type LogPayload = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -4,10 +4,10 @@ import pg from "pg";
 
 import { IS_DEV, IS_TEST } from "@/shared/constants/env.client";
 import { DATABASE_URL } from "@/shared/constants/env.server";
-import { logger } from "@/shared/lib/logger";
 import { sanitizePayload } from "@/shared/lib/utils";
 
-import { requestContext } from "@/server/utils/request-context";
+import { logger } from "../logger/logger";
+import { requestContext } from "../utils/request-context";
 
 const { PrismaClient } = pkg;
 const pool = new pg.Pool({
@@ -78,11 +78,11 @@ export const prisma = softDeleteClient.$extends({
                 payload: sanitizePayload(args),
                 requestId: ctxStore?.requestId ?? "unknown",
                 userAgent: ctxStore?.userAgent ?? "internal",
-                userId: userId != null ? Number(userId) : null,
+                userId: userId == null ? null : Number(userId),
               },
             })
-            .catch((auditErr) => {
-              logger.error({ error: auditErr, msg: "AUDIT LOG WRITE FAILED" });
+            .catch((error_) => {
+              logger.error({ error: error_, msg: "AUDIT LOG WRITE FAILED" });
             });
 
           if (!IS_TEST) {

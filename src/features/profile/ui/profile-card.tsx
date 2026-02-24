@@ -37,7 +37,7 @@ export function ProfileCard({ user }: Readonly<Props>) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [displayUser, setDisplayUser] = useState<User>(user);
-  const [avatarUrl, setAvatarUrl] = useState(user?.image ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(user.image ?? "");
 
   const form = useForm<ProfileFormValues>({
     defaultValues: {

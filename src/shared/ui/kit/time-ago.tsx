@@ -48,7 +48,7 @@ export function TimeAgo({ date, locale }: Readonly<Props>) {
     tick();
 
     return () => {
-      if (timerId) clearTimeout(timerId);
+      clearTimeout(timerId);
     };
   }, [updateTime]);
 

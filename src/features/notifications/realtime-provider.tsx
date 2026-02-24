@@ -1,24 +1,24 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Status } from "@prisma/client";
 import * as Ably from "ably";
 import { AblyProvider } from "ably/react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
-import { trpc } from "@/shared/api/trpc";
+import { trpc, type RepoStatus } from "@/shared/api/trpc";
 import { IS_PROD } from "@/shared/constants/env.client";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { useRepoActions } from "@/entities/repo";
+
 import { useNotificationActions } from "./model/use-notification-actions";
 
 type Props = { children: React.ReactNode };
 
 export const RealtimeProvider = ({ children }: Props) => {
   const { data: session } = useSession();
-  const userId = session?.user?.id;
+  const userId = session?.user.id;
 
   const { invalidateAll } = useNotificationActions();
   const { invalidate } = useRepoActions();
@@ -72,7 +72,7 @@ export const RealtimeProvider = ({ children }: Props) => {
           analysisId: string;
           message: string;
           progress: number;
-          status: Status;
+          status: RepoStatus;
         };
 
         utils.analytics.getDashboardStats.setData(undefined, (oldData) => {
@@ -88,7 +88,7 @@ export const RealtimeProvider = ({ children }: Props) => {
           };
         });
 
-        if (payload.status === Status.DONE || payload.status === Status.FAILED) {
+        if (payload.status === "DONE" || payload.status === "FAILED") {
           invalidate();
         }
       }

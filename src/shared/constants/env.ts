@@ -48,7 +48,7 @@ export const env = createEnv({
 
   server: {
     ABLY_API_KEY: z.string().min(1),
-    BETTERSTACK_API_TOKEN: z.string().optional(),
+    BETTERSTACK_API_TOKEN: z.string().min(1),
     DATABASE_URL: z.url(),
 
     GITHUB_CLIENT_ID: z.string().min(1),

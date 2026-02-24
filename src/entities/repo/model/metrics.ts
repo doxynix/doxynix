@@ -1,4 +1,4 @@
-import type { RepoTableItem } from "@/shared/types/repo";
+import type { UiRepoListItem } from "@/shared/api/trpc";
 
 export type Props = {
   id: string;
@@ -6,7 +6,7 @@ export type Props = {
   score: number | null | undefined;
 };
 
-export function getMetrics(repo: RepoTableItem): Props[] {
+export function getMetrics(repo: UiRepoListItem): Props[] {
   return [
     {
       id: "health",

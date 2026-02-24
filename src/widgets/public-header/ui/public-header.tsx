@@ -14,7 +14,6 @@ import {
 } from "@/shared/ui/core/sheet";
 import { Logo } from "@/shared/ui/icons/logo";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
-
 import { Link } from "@/i18n/routing";
 
 export function PublicHeader() {

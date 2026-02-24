@@ -1,9 +1,9 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError, UTApi } from "uploadthing/server";
 
-import { getServerAuthSession } from "@/shared/api/auth/auth-options";
-import { prisma } from "@/shared/api/db/db";
-import { logger } from "@/shared/lib/logger";
+import { getServerAuthSession } from "../auth/options";
+import { prisma } from "../db/db";
+import { logger } from "../logger/logger";
 
 const utapi = new UTApi();
 const f = createUploadthing();
@@ -31,7 +31,7 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ file, metadata }) => {
       const userId = Number(metadata.userId);
-      if (isNaN(userId)) {
+      if (Number.isNaN(userId)) {
         logger.error({ msg: "Invalid userId in upload metadata", userId: metadata.userId });
         throw new UploadThingError("Unauthorized");
       }

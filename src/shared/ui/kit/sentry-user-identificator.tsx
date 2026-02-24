@@ -9,14 +9,12 @@ type Props = { user: User };
 
 export function SentryUserIdentificator({ user }: Props) {
   useEffect(() => {
-    if (user) {
-      Sentry.setUser({
-        email: user.email ?? undefined,
-        id: user.id,
-        role: user.role ?? undefined,
-        username: user.name ?? undefined,
-      });
-    }
+    Sentry.setUser({
+      email: user.email ?? undefined,
+      id: user.id,
+      role: user.role,
+      username: user.name ?? undefined,
+    });
 
     const requestId = Cookies.get("last_request_id");
     if (requestId) {

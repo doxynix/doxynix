@@ -24,7 +24,6 @@ import {
   CommandShortcut,
 } from "@/shared/ui/core/command";
 import { Spinner } from "@/shared/ui/core/spinner";
-
 import { useRouter } from "@/i18n/routing";
 
 export function AppCommandMenu() {
@@ -110,11 +109,16 @@ export function AppCommandMenu() {
           }
           break;
 
+        case "action":
+          break;
+
         case "navigation":
-        default:
+        case undefined:
           if (item.href != null) {
             router.push(item.href as Route);
           }
+          break;
+        default:
           break;
       }
     },

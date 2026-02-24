@@ -2,8 +2,9 @@ import React, { useMemo } from "react";
 import { Check, Folder, FolderOpen, Search, Sparkles, X } from "lucide-react";
 import { Tree, type TreeApi } from "react-arborist";
 
+import type { UiRepoDetailed } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/utils";
-import type { FileNode, RepoDetailed } from "@/shared/types/repo";
+import type { FileNode } from "@/shared/types/repo";
 import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
@@ -15,7 +16,7 @@ import { RepoSetupSkeleton } from "./repo-setup-skeleton";
 
 type Props = {
   actions: ActionsType;
-  repo: RepoDetailed;
+  repo: UiRepoDetailed;
   state: StateType;
   treeApi: TreeApi<FileNode> | null;
 };

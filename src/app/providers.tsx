@@ -11,14 +11,15 @@ import superjson from "superjson";
 import { trpc } from "@/shared/api/trpc";
 import { APP_URL, IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
 import { TooltipProvider } from "@/shared/ui/core/tooltip";
-import { RealtimeProvider } from "@/features/notifications/realtime-provider";
+
+import { RealtimeProvider } from "@/features/notifications";
 
 type Props = {
   children: ReactNode;
 };
 
 function getBaseUrl() {
-  if (typeof window !== "undefined") return "";
+  if (typeof globalThis.window !== "undefined") return "";
   return APP_URL;
 }
 

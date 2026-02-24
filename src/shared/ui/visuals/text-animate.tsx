@@ -359,7 +359,8 @@ const TextAnimateBase = ({
         },
         item: variants,
       }
-    : animation
+    : // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      animation
       ? {
           container: {
             ...defaultItemAnimationVariants[animation].container,

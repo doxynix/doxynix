@@ -3,12 +3,11 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { isBinaryFile } from "isbinaryfile";
 
-import { prisma } from "@/shared/api/db/db";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
-import { logger } from "@/shared/lib/logger";
 
-import { StatusSchema } from "@/generated/zod";
+import { prisma } from "@/server/db/db";
 import { realtimeServer } from "@/server/lib/realtime";
+import { logger } from "@/server/logger/logger";
 
 export async function handleError(
   error: unknown,
@@ -29,14 +28,14 @@ export async function handleError(
     data: {
       error: message,
       message: "Analysis failed",
-      status: StatusSchema.enum.FAILED,
+      status: "FAILED",
     },
     where: { publicId: analysisId },
   });
 
   void realtimeServer.channels
     .get(channelName)
-    ?.publish(REALTIME_CONFIG.events.user.analysisProgress, {
+    .publish(REALTIME_CONFIG.events.user.analysisProgress, {
       analysisId,
       message,
       status: "FAILED",

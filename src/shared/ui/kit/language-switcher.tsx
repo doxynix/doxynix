@@ -14,8 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/core/select";
-
 import { usePathname, useRouter } from "@/i18n/routing";
+
 import { Spinner } from "../core/spinner";
 
 export const FLAGS: Record<Locale, string> = {

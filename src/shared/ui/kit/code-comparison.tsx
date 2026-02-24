@@ -20,6 +20,7 @@ export function CodeComparison({
   goodCode,
 }: Readonly<Props>) {
   const currentTheme = "dark"; // THEME: если вернется светлая тема сменить на хук useTheme и поставить вначале файла "use client"
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const isDark = currentTheme === "dark";
 
   const beforeHtml = isDark ? beforeHtmlDark : beforeHtmlLight;

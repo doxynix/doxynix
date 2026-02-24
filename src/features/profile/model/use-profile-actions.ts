@@ -32,12 +32,10 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
     onSuccess: async (data) => {
       toast.success(t("settings_profile_update_profile_toast_success"));
 
-      if (data.user != null) {
-        propsRef.current.onProfileUpdateSuccess?.({
-          email: data.user.email ?? null,
-          name: data.user.name ?? null,
-        });
-      }
+      propsRef.current.onProfileUpdateSuccess?.({
+        email: data.user.email ?? null,
+        name: data.user.name ?? null,
+      });
 
       await updateSession({
         email: data.user.email,
@@ -62,8 +60,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
 
   const uploadThing = useUploadThing("avatarUploader", {
     onClientUploadComplete: async (res) => {
-      const file = res?.[0];
-      if (file == null) return;
+      const file = res[0];
       toast.success(t("settings_profile_update_avatar_toast_success"));
 
       propsRef.current.onAvatarUpdateSuccess?.(file.ufsUrl);

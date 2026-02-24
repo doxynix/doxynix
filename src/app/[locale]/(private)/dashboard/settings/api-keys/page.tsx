@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { APP_URL } from "@/shared/constants/env.client";
 import { createMetadata } from "@/shared/lib/metadata";
+
 import { ApiKeysListContainer, CreateApiKeyDialog } from "@/features/api-keys";
 
 export const generateMetadata = createMetadata("api_keys_title", "api_keys_desc");

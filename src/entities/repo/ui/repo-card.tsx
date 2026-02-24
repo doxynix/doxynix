@@ -3,8 +3,8 @@
 import { Play, Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+import type { UiRepoListItem } from "@/shared/api/trpc";
 import { cn, formatFullDate, formatRelativeTime } from "@/shared/lib/utils";
-import type { RepoTableItem } from "@/shared/types/repo";
 import { AnimatedCircularProgressBar } from "@/shared/ui/core/animated-circular-progress-bar";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
@@ -12,8 +12,8 @@ import { Card, CardContent } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
-
 import { Link } from "@/i18n/routing";
+
 import { getGitMetrics } from "../model/git-metrics";
 import { getMetrics } from "../model/metrics";
 import { repoStatusConfig } from "../model/repo-status";
@@ -23,7 +23,7 @@ import { RepoGitMetric } from "./repo-git-metric";
 import { RepoTopics } from "./repo-topics";
 
 type Props = {
-  repo: RepoTableItem;
+  repo: UiRepoListItem;
 };
 
 const getHealthColor = (score: number) => {
@@ -65,11 +65,9 @@ export function RepoCard({ repo }: Readonly<Props>) {
                     {repo.name}
                   </Link>
                 </div>
-                {visibility != null && (
-                  <Badge variant="outline" className={cn(visibility.color)}>
-                    {visibility.label}
-                  </Badge>
-                )}
+                <Badge variant="outline" className={cn(visibility.color)}>
+                  {visibility.label}
+                </Badge>
                 <div
                   className={cn("flex shrink-0 items-center gap-1 transition-opacity duration-200")}
                 >

@@ -43,7 +43,7 @@ const ChartContainer = React.forwardRef<
   }
 >(({ children, className, config, id, ...props }, ref) => {
   const uniqueId = React.useId();
-  const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
+  const chartId = `chart-${id || uniqueId.replaceAll(":", "")}`;
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -133,11 +133,11 @@ const ChartTooltipContent = React.forwardRef<
       }
 
       const [item] = payload;
-      const key = `${labelKey || item?.dataKey || item?.name || "value"}`;
+      const key = `${labelKey || item.dataKey || item.name || "value"}`;
       const itemConfig = getPayloadConfigFromPayload(config, item, key);
       const value =
         !labelKey && typeof label === "string"
-          ? config[label as keyof typeof config]?.label || label
+          ? config[label as keyof typeof config].label || label
           : itemConfig?.label;
 
       if (labelFormatter) {
@@ -184,7 +184,7 @@ const ChartTooltipContent = React.forwardRef<
                     indicator === "dot" && "items-center"
                   )}
                 >
-                  {formatter && item?.value != null && item.name ? (
+                  {formatter && item.value != null && item.name ? (
                     formatter(item.value, item.name, item, index, item.payload)
                   ) : (
                     <>

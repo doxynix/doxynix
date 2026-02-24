@@ -1,6 +1,5 @@
 "use client";
 
-import { Status } from "@prisma/client";
 import { CheckCircle2, Clock, FileCode2, XCircle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -9,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card"
 import { Progress } from "@/shared/ui/core/progress";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-
 import { Link } from "@/i18n/routing";
+
 import { AnalyticsWidgetsSkeleton } from "./analytics-widgets-skeleton";
 
 export function AnalyticsWidgets() {
@@ -83,13 +82,13 @@ export function AnalyticsWidgets() {
                   className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
                 >
                   <div className="flex items-center gap-3">
-                    {activity.status === Status.DONE && (
+                    {activity.status === "DONE" && (
                       <CheckCircle2 className="text-success h-4 w-4" />
                     )}
-                    {activity.status === Status.FAILED && (
+                    {activity.status === "FAILED" && (
                       <XCircle className="text-destructive h-4 w-4" />
                     )}
-                    {(activity.status === Status.PENDING || activity.status === Status.NEW) && (
+                    {(activity.status === "PENDING" || activity.status === "NEW") && (
                       <Spinner className="text-warning h-4 w-4 animate-spin" />
                     )}
 
@@ -107,13 +106,13 @@ export function AnalyticsWidgets() {
                         </Link>
                       </span>
                       <span className="text-muted-foreground text-xs">
-                        {activity.status === Status.DONE && "Analysis completed"}
-                        {activity.status === Status.FAILED && "Analysis failed"}
-                        {activity.status === Status.PENDING && "Analysis started"}
+                        {activity.status === "DONE" && "Analysis completed"}
+                        {activity.status === "FAILED" && "Analysis failed"}
+                        {activity.status === "PENDING" && "Analysis started"}
                         {" • "}
                         <TimeAgo date={activity.createdAt} locale={locale} />
                       </span>
-                      {activity.status === Status.PENDING && (
+                      {activity.status === "PENDING" && (
                         <div className="mt-1 flex items-center gap-1">
                           <Progress
                             value={activity.progress}

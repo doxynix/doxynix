@@ -3,7 +3,6 @@ import { ArrowRightIcon } from "@radix-ui/react-icons";
 
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
-
 import { Link } from "@/i18n/routing";
 
 interface BentoGridProps extends ComponentPropsWithoutRef<"div"> {

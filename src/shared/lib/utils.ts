@@ -5,6 +5,7 @@ import { de, enUS, es, fr, ptBR, ru, zhCN } from "date-fns/locale";
 import { twMerge } from "tailwind-merge";
 
 import { IS_PROD } from "../constants/env.client";
+import { EXTENSION_MAP, LANGUAGE_COLORS } from "../constants/languages";
 import { DEFAULT_LOCALE, type Locale } from "../constants/locales";
 
 const dateFnsLocales: Record<Locale, DateFnsLocale> = {
@@ -34,9 +35,9 @@ export function formatRelativeTime(
   try {
     const d = new Date(date);
 
-    if (isNaN(d.getTime())) return defaultValue;
+    if (Number.isNaN(d.getTime())) return defaultValue;
 
-    const locale = dateFnsLocales[localeStr as Locale] ?? enUS;
+    const locale = dateFnsLocales[localeStr as Locale];
 
     const result = formatDistanceToNow(d, {
       addSuffix: true,
@@ -54,7 +55,7 @@ export function formatFullDate(
   date: Date | string | number,
   localeStr: string = DEFAULT_LOCALE
 ): string {
-  const locale = dateFnsLocales[localeStr as keyof typeof dateFnsLocales] ?? enUS;
+  const locale = dateFnsLocales[localeStr as keyof typeof dateFnsLocales];
 
   return format(new Date(date), "d MMMM yyyy, HH:mm", { locale: locale });
 }
@@ -145,7 +146,7 @@ export const smoothScrollTo = (targetId: string, offset: number = 80, duration: 
   };
 
   const animation = (currentTime: number) => {
-    if (startTime == null) startTime = currentTime;
+    startTime ??= currentTime;
     const timeElapsed = currentTime - startTime;
     const progress = Math.min(timeElapsed / duration, 1);
 
@@ -187,3 +188,21 @@ export function getInitials(name?: string | null, email?: string | null): string
 
   return "U";
 }
+
+export const getLanguageColor = (lang: string | null): string => {
+  if (lang == null) return "#cccccc";
+
+  if (LANGUAGE_COLORS[lang]) return LANGUAGE_COLORS[lang];
+
+  const normalized = EXTENSION_MAP[lang.toLowerCase()];
+  if (normalized && LANGUAGE_COLORS[normalized]) return LANGUAGE_COLORS[normalized];
+
+  const lowerLang = lang.toLowerCase();
+  const foundKey = Object.keys(LANGUAGE_COLORS).find((k) => k.toLowerCase() === lowerLang);
+
+  return foundKey != null ? LANGUAGE_COLORS[foundKey] : "#cccccc";
+};
+
+export const normalizeLanguageName = (ext: string): string => {
+  return EXTENSION_MAP[ext.toLowerCase()] ?? ext.toUpperCase();
+};

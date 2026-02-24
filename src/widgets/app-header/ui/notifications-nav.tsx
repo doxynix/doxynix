@@ -15,9 +15,9 @@ import {
 } from "@/shared/ui/core/dropdown-menu";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-import { useNotificationActions } from "@/features/notifications";
-
 import { Link } from "@/i18n/routing";
+
+import { useNotificationActions } from "@/features/notifications";
 
 export function NotificationsNav() {
   const t = useTranslations("Dashboard");
