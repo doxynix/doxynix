@@ -28,8 +28,8 @@ importers:
         specifier: 3.0.24
         version: 3.0.24(zod@4.3.6)
       '@ai-sdk/openai':
-        specifier: 3.0.32
-        version: 3.0.32(zod@4.3.6)
+        specifier: 3.0.33
+        version: 3.0.33(zod@4.3.6)
       '@hookform/resolvers':
         specifier: 5.2.2
         version: 5.2.2(react-hook-form@7.71.2(react@19.2.4))
@@ -625,8 +625,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@3.0.32':
-    resolution: {integrity: sha512-e6qqK9C+SCB1pHczRAGhVKpapzRbmKhZLip3zmwETvNBrKjDNfPugWTYb9B+cFq2+enaDRFs+9A+6R1POpv0GA==}
+  '@ai-sdk/openai@3.0.33':
+    resolution: {integrity: sha512-O/8SVKAiwFHkGAUfBnrLb7L2IjbpP9ySWbmOktOfa0KtzutZkmKNrJ5CtB5dj+lwuENbOuZeRsnsZdOjar7hig==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -11877,7 +11877,7 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.15(zod@4.3.6)
       zod: 4.3.6
 
-  '@ai-sdk/openai@3.0.32(zod@4.3.6)':
+  '@ai-sdk/openai@3.0.33(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.15(zod@4.3.6)
