@@ -196,7 +196,6 @@ export const repoRouter = createTRPCRouter({
       const result = await ctx.db.repo.deleteMany({
         where: {
           owner: { equals: input.owner, mode: "insensitive" },
-          userId: Number(ctx.session.user.id),
         },
       });
 
@@ -406,7 +405,6 @@ export const repoRouter = createTRPCRouter({
     const account = await ctx.db.account.findFirst({
       where: {
         provider: "github",
-        userId: Number(ctx.session.user.id),
       },
     });
 

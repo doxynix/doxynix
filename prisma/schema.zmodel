@@ -122,7 +122,7 @@ model Notification {
   id        Int        @id @default(autoincrement()) @omit
   /// @zod.custom.omit(["model"])
   publicId  String     @unique @default(uuid(7)) @map("public_id") @db.Uuid
-  createdAt DateTime   @default(now())
+  createdAt DateTime   @default(now()) @map("created_at")
   /// @zod.string.min(1, { message: "The title cannot be empty" })
   title     String
   /// @zod.string.min(1, { message: "The text of the notification is mandatory" })
@@ -130,7 +130,7 @@ model Notification {
   type      NotifyType @default(INFO)
   isRead    Boolean    @default(false)
   /// @zod.custom.omit(["model"])
-  userId    Int
+  userId    Int        @map("user_id") @omit
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@allow('all', auth() == user || auth().role == "ADMIN")
@@ -203,7 +203,7 @@ model Analysis {
 
   status          Status   @default(NEW)
   /// @zod.number.int().min(0).max(100)
-  progress        Int      @default(0)
+  progress        Int      @default(0) @gte(0) @lte(100)
   message         String?  @db.Text
   /// @zod.number.int().min(0).max(100)
   score           Int?     @gte(0) @lte(100)
@@ -275,7 +275,7 @@ model ApiKey {
   /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
   description String?   @db.Text @length(max: 1000, message: "The description must be less than 1000 characters")
   /// @zod.custom.omit(["model"])
-  userId      Int       @omit
+  userId      Int       @map("user_id") @omit
   createdAt   DateTime  @default(now()) @map("created_at")
   lastUsed    DateTime? @map("last_used")
   revoked     Boolean   @default(false)
