@@ -30,9 +30,10 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
+import { usePathname, useRouter } from "@/i18n/routing";
 
 import { useRepoActions } from "@/entities/repo";
-import { usePathname, useRouter } from "@/i18n/routing";
+
 import { RepoItem } from "./repo-item";
 
 const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут

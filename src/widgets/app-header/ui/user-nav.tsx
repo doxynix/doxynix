@@ -31,7 +31,6 @@ import {
 } from "@/shared/ui/core/dropdown-menu";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
-
 import { Link } from "@/i18n/routing";
 
 export function UserNav() {

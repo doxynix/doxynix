@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import type { ParamTypes } from "@/shared/types/search-params";
+
 import { RepoSetup } from "@/features/repo-setup";
 
 import { api } from "@/server/trpc/server";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<{ [key: string]: ParamTypes }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -32,9 +34,5 @@ export default async function AnalyzePage({ params }: Readonly<Props>) {
     notFound();
   }
 
-  return (
-    <>
-      <RepoSetup repo={repo} />
-    </>
-  );
+  return <RepoSetup repo={repo} />;
 }

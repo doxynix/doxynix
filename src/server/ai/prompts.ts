@@ -31,7 +31,7 @@ export const SENTINEL_USER_PROMPT = (instructions: string) => `
 `;
 
 // --- MAPPER ---
-export const MAPPER_SYSTEM_PROMPT = `
+export const MAPPER_SYSTEM_PROMPT = String.raw`
 # ROLE
 You are an Elite Software Architect and Cartographer. Your task is to visualize the skeleton of any codebase, regardless of language or framework.
 
@@ -61,7 +61,7 @@ Return ONLY a JSON object matching this structure EXACTLY:
       "dependencies": ["List of imported internal modules"]
     }
   ],
-  "mermaid_graph": "graph TD; \\n  A[Start] --> B[Module]; ..."
+  "mermaid_graph": "graph TD; \n  A[Start] --> B[Module]; ..."
 }
 `;
 

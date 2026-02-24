@@ -3,14 +3,13 @@ import { retry } from "@octokit/plugin-retry";
 import { throttling } from "@octokit/plugin-throttling";
 import { Octokit, type RestEndpointMethodTypes } from "@octokit/rest";
 import { Visibility } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
 import parseGithubUrl from "parse-github-url";
 
-import type { DbClient } from "@/shared/api/db/db";
 import { SYSTEM_TOKEN } from "@/shared/constants/env.server";
-import { logger } from "@/shared/lib/logger";
 import type { RepoItemFields } from "@/shared/types/repo-item";
 
+import type { DbClient } from "../db/db";
+import { logger } from "../logger/logger";
 import { FileClassifier } from "../utils/file-classifier";
 
 const MyOctokit = Octokit.plugin(retry, throttling, paginateRest);
@@ -29,13 +28,13 @@ export const githubService = {
 
     const token = account?.access_token ?? SYSTEM_TOKEN;
 
-    if (token == null) {
-      logger.error({ msg: "Token not found in DB and no system token configured", userId });
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "GitHub account not connected. Please link your GitHub account in settings.",
-      });
-    }
+    // if (token == null) {
+    //   logger.error({ msg: "Token not found in DB and no system token configured", userId });
+    //   throw new TRPCError({
+    //     code: "UNAUTHORIZED",
+    //     message: "GitHub account not connected. Please link your GitHub account in settings.",
+    //   });
+    // }
 
     return new MyOctokit({
       auth: token,
@@ -131,7 +130,7 @@ export const githubService = {
         return !FileClassifier.isIgnored(item.path);
       })
       .map((item) => ({
-        path: item.path!,
+        path: item.path,
         sha: item.sha,
         type: item.type,
       }));
@@ -142,20 +141,19 @@ export const githubService = {
       description: repo.description ?? null,
       fullName: repo.full_name,
       language: repo.language ?? null,
-      stars: repo.stargazers_count ?? 0,
+      stars: repo.stargazers_count,
       updatedAt: repo.updated_at ?? new Date().toISOString(),
-      visibility: repo.private === true ? Visibility.PRIVATE : Visibility.PUBLIC,
+      visibility: repo.private ? Visibility.PRIVATE : Visibility.PUBLIC,
     }));
   },
 
   parseUrl(input: string) {
-    if (!input?.trim()) throw new Error("Field cannot be empty");
+    if (!input.trim()) throw new Error("Field cannot be empty");
 
     const parsed = parseGithubUrl(input);
 
     if (
-      parsed == null ||
-      parsed.owner == null ||
+      parsed?.owner == null ||
       parsed.owner.trim().length === 0 ||
       parsed.name == null ||
       parsed.name.trim().length === 0

@@ -15,9 +15,9 @@ import {
 } from "@/shared/ui/core/dropdown-menu";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-import { useNotificationActions } from "@/features/notifications";
-
 import { Link } from "@/i18n/routing";
+
+import { useNotificationActions } from "@/features/notifications";
 
 export function NotificationsNav() {
   const t = useTranslations("Dashboard");
@@ -66,11 +66,11 @@ export function NotificationsNav() {
               <DropdownMenuItem
                 key={note.id}
                 onClick={() => {
-                  if (note.isRead === false) markRead.mutate(note.id);
+                  if (!note.isRead) markRead.mutate(note.id);
                 }}
                 className={cn(
                   "flex cursor-pointer flex-col items-start gap-1 p-3",
-                  note.isRead === false && "bg-accent/50"
+                  !note.isRead && "bg-accent/50"
                 )}
               >
                 <div className="flex w-full items-center justify-between gap-2">
@@ -79,7 +79,7 @@ export function NotificationsNav() {
                     <p className="text-muted-foreground text-xs">{note.body}</p>
                     <TimeAgo date={note.createdAt} locale={locale} />
                   </div>
-                  {note.isRead === false && (
+                  {!note.isRead && (
                     <span className="bg-muted-foreground mt-1 h-2 w-2 shrink-0 rounded-full" />
                   )}
                 </div>

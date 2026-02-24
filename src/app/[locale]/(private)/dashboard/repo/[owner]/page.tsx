@@ -4,9 +4,11 @@ import { getTranslations } from "next-intl/server";
 
 import type { SearchParams } from "@/shared/types/search-params";
 import { AppSearch } from "@/shared/ui/kit/app-search";
-import { CreateRepoButton, RepoFilters, RepoListContainer } from "@/features/repo";
 
 import { RepoAvatar } from "@/entities/repo";
+
+import { CreateRepoButton, RepoFilters, RepoListContainer } from "@/features/repo";
+
 import { api } from "@/server/trpc/server";
 
 type Props = {

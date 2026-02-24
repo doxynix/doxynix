@@ -24,7 +24,6 @@ import {
   CommandShortcut,
 } from "@/shared/ui/core/command";
 import { Spinner } from "@/shared/ui/core/spinner";
-
 import { useRouter } from "@/i18n/routing";
 
 export function AppCommandMenu() {
@@ -111,6 +110,12 @@ export function AppCommandMenu() {
           break;
 
         case "navigation":
+        case undefined: {
+          throw new Error("Not implemented yet: undefined case");
+        }
+        case "action": {
+          throw new Error('Not implemented yet: "action" case');
+        }
         default:
           if (item.href != null) {
             router.push(item.href as Route);

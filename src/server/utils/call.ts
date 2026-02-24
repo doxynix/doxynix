@@ -2,7 +2,7 @@ import { google } from "@ai-sdk/google";
 import { generateText, Output } from "ai";
 import type z from "zod";
 
-import { logger } from "@/shared/lib/logger";
+import { logger } from "@/server/logger/logger";
 
 type CallWithFallbackProps<T> = {
   attemptMetadata?: Record<string, unknown>;
@@ -23,11 +23,11 @@ type CallWithFallbackProps<T> = {
 
 export async function callWithFallback<T>({
   attemptMetadata = {},
-  frequencyPenalty = 0.0,
+  frequencyPenalty = 0,
   maxOutputTokens = 65536,
   models,
   outputSchema,
-  presencePenalty = 0.0,
+  presencePenalty = 0,
   prompt,
   providerOptions,
   stopSequences,
@@ -37,7 +37,7 @@ export async function callWithFallback<T>({
   topP = 0.1,
   useSearchGrounding = true,
 }: CallWithFallbackProps<T>): Promise<T> {
-  if (models == null || models.length === 0) {
+  if (models.length === 0) {
     throw new Error("No models configured for fallback.");
   }
 
@@ -73,16 +73,14 @@ export async function callWithFallback<T>({
 
       const result = await generateText(options);
 
-      const finalValue = outputSchema != null ? result.output : result.text;
+      const finalValue = outputSchema == null ? result.text : result.output;
 
-      if (finalValue != null) {
-        logger.info({
-          model: modelName,
-          msg: "Model returned output",
-          ...attemptMetadata,
-        });
-        return finalValue as T;
-      }
+      logger.info({
+        model: modelName,
+        msg: "Model returned output",
+        ...attemptMetadata,
+      });
+      return finalValue as T;
     } catch (err) {
       lastError = err;
       logger.warn({

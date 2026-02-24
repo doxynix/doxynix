@@ -1,14 +1,15 @@
 import os from "node:os";
 import path from "node:path";
+import { Status, type DocType } from "@prisma/client";
 import { task } from "@trigger.dev/sdk/v3";
 
-import { prisma } from "@/shared/api/db/db";
+import type { RepoStatus } from "@/shared/api/trpc";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
-import { logger } from "@/shared/lib/logger";
 
-import type { DocTypeType } from "@/generated/zod/inputTypeSchemas/DocTypeSchema";
-import StatusSchema, { type StatusType } from "@/generated/zod/inputTypeSchemas/StatusSchema";
+import { prisma } from "@/server/db/db";
 import { realtimeServer } from "@/server/lib/realtime";
+import { logger } from "@/server/logger/logger";
+
 import { generateDeepDocs, runAiPipeline } from "./ai-pipeline";
 import { cloneRepository, getAnalysisContext } from "./git";
 import { calculateBusFactor, saveResults } from "./save-results";
@@ -16,7 +17,7 @@ import { cleanup, handleError, readAndFilterFiles } from "./utils";
 
 type TaskPayload = {
   analysisId: string;
-  docTypes: DocTypeType[];
+  docTypes: DocType[];
   forceRefresh?: boolean;
   instructions?: string;
   language: string;
@@ -25,7 +26,7 @@ type TaskPayload = {
   userId: number;
 };
 
-type StatusUpdater = (msg: string, percent: number, status?: StatusType) => Promise<void>;
+type StatusUpdater = (msg: string, percent: number, status?: RepoStatus) => Promise<void>;
 
 export const analyzeRepoTask = task({
   id: "analyze-repo",
@@ -60,11 +61,7 @@ export const analyzeRepoTask = task({
     const tempClonePath = path.join(os.tmpdir(), `doxynix-clone-${analysisId}`);
     const channelName = REALTIME_CONFIG.channels.user(userId);
 
-    const updateStatus: StatusUpdater = async (
-      msg,
-      percent,
-      status = StatusSchema.enum.PENDING
-    ) => {
+    const updateStatus: StatusUpdater = async (msg, percent, status = Status.PENDING) => {
       const timestamp = new Date().toLocaleTimeString();
       const logLine = `[${timestamp}] ${msg}\n`;
       currentLogs += logLine;
@@ -83,7 +80,7 @@ export const analyzeRepoTask = task({
         }),
         realtimeServer.channels
           .get(channelName)
-          ?.publish(REALTIME_CONFIG.events.user.analysisProgress, {
+          .publish(REALTIME_CONFIG.events.user.analysisProgress, {
             analysisId,
             log: logLine,
             message: msg,
@@ -102,7 +99,7 @@ export const analyzeRepoTask = task({
       );
 
       if (repo == null) {
-        await updateStatus("No changes detected. Skipping...", 100, StatusSchema.enum.DONE);
+        await updateStatus("No changes detected. Skipping...", 100, Status.DONE);
         return { reason: "SHA_MATCH", skipped: true };
       }
 
@@ -126,12 +123,12 @@ export const analyzeRepoTask = task({
       const { apiDoc, architecture, changelog, contributing, readme, swaggerYaml } =
         await generateDeepDocs(validFiles, aiResult, analysisId, docTypes, repo, userId, language);
 
-      if (readme != null) aiResult.generatedReadme = readme;
-      if (apiDoc != null) aiResult.generatedApiMarkdown = apiDoc;
-      if (contributing != null) aiResult.generatedContributing = contributing;
-      if (swaggerYaml != null) aiResult.swaggerYaml = swaggerYaml;
-      if (changelog != null) aiResult.generatedChangelog = changelog;
-      if (architecture != null) aiResult.generatedArchitecture = architecture;
+      aiResult.generatedReadme = readme;
+      aiResult.generatedApiMarkdown = apiDoc;
+      aiResult.generatedContributing = contributing;
+      aiResult.swaggerYaml = swaggerYaml;
+      aiResult.generatedChangelog = changelog;
+      aiResult.generatedArchitecture = architecture;
 
       await updateStatus("Finalizing and saving results...", 90);
       await saveResults({
@@ -146,7 +143,7 @@ export const analyzeRepoTask = task({
       });
 
       await cleanup(tempClonePath);
-      await updateStatus("Analysis Complete", 100, StatusSchema.enum.DONE);
+      await updateStatus("Analysis Complete", 100, Status.DONE);
     } catch (error: unknown) {
       await handleError(error, analysisId, channelName, tempClonePath);
       throw error;

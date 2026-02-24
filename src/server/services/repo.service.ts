@@ -1,9 +1,9 @@
 import { Status, Visibility, type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
-import type { DbClient } from "@/shared/api/db/db";
-
+import type { DbClient } from "@/server/db/db";
 import { handlePrismaError } from "@/server/utils/handle-prisma-error";
+
 import { githubService } from "./github.service";
 
 type OctokitError = {
@@ -28,19 +28,19 @@ export const repoService = {
     visibility?: Visibility;
   }): Prisma.RepoWhereInput {
     const { owner, search, status, visibility } = filters;
-    const searchTerms = search != null ? search.trim().split(/\s+/) : [];
+    const searchTerms = search == null ? [] : search.trim().split(/\s+/);
 
     const statusFilter: Prisma.RepoWhereInput =
-      status != null
-        ? status === Status.NEW
+      status == null
+        ? {}
+        : status === Status.NEW
           ? { OR: [{ analyses: { none: {} } }, { analyses: { some: { status: Status.NEW } } }] }
-          : { analyses: { some: { status } } }
-        : {};
+          : { analyses: { some: { status } } };
 
-    const visibilityFilter = visibility != null ? { visibility } : {};
+    const visibilityFilter = visibility ? { visibility } : {};
 
     const ownerFilter: Prisma.RepoWhereInput =
-      owner != null ? { owner: { equals: owner, mode: "insensitive" } } : {};
+      owner == null ? {} : { owner: { equals: owner, mode: "insensitive" } };
 
     const searchFilter: Prisma.RepoWhereInput =
       searchTerms.length > 0

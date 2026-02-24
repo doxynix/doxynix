@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Status } from "@prisma/client";
+
+import type { ParamTypes } from "@/shared/types/search-params";
 
 import { RepoSetup } from "@/features/repo-setup";
 
@@ -8,7 +9,7 @@ import { api } from "@/server/trpc/server";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<{ [key: string]: ParamTypes }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -33,5 +34,5 @@ export default async function RepoOwnerNamePage({ params }: Readonly<Props>) {
     notFound();
   }
 
-  return <>{repo.status === Status.NEW && <RepoSetup repo={repo} />}</>;
+  return <>{repo.status === "NEW" && <RepoSetup repo={repo} />}</>;
 }

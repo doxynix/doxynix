@@ -4,8 +4,8 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettierConfig from "eslint-config-prettier";
 import boundaries from "eslint-plugin-boundaries";
-import jsxA11y from "eslint-plugin-jsx-a11y";
 import perfectionist from "eslint-plugin-perfectionist";
+import playwright from "eslint-plugin-playwright";
 import prettierPlugin from "eslint-plugin-prettier";
 import reactPlugin from "eslint-plugin-react";
 import reactCompiler from "eslint-plugin-react-compiler";
@@ -13,6 +13,8 @@ import reactHooksPlugin from "eslint-plugin-react-hooks";
 import sonarjs from "eslint-plugin-sonarjs";
 import unicorn from "eslint-plugin-unicorn";
 import unusedImportsPlugin from "eslint-plugin-unused-imports";
+import validateJsxNesting from "eslint-plugin-validate-jsx-nesting";
+import vitest from "eslint-plugin-vitest";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
@@ -52,6 +54,7 @@ export default defineConfig([
       prettier: prettierPlugin,
       unicorn,
       perfectionist,
+      "validate-jsx-nesting": validateJsxNesting,
     },
 
     languageOptions: {
@@ -78,6 +81,7 @@ export default defineConfig([
         { type: "generated", pattern: "src/generated/*" },
         { type: "server", pattern: "src/server/*" },
         { type: "trigger", pattern: "src/trigger/*" },
+        { type: "i18n", pattern: "src/i18n/*" },
       ],
     },
 
@@ -126,42 +130,123 @@ export default defineConfig([
         },
       ],
 
+      "validate-jsx-nesting/no-invalid-jsx-nesting": "error",
+
       "boundaries/element-types": [
         "error",
         {
           default: "allow",
           rules: [
             {
-              from: ["shared", "generated"],
-              disallow: ["app", "trigger", "widgets", "features", "entities"],
-              message: "Shared/Generated module must not import from upper layers",
+              from: ["shared", "generated", "i18n"],
+              disallow: ["app", "trigger", "widgets", "features", "entities", "server"],
+              message:
+                "FSD Violation: Shared, Generated and i18n layers must be pure and cannot depend on upper layers or server logic.",
             },
             {
               from: ["entities"],
-              disallow: ["app", "trigger", "widgets", "features"],
-              message: "Entity must not import from upper layers (Features, Widgets, etc.)",
+              disallow: ["app", "trigger", "widgets", "features", "server"],
+              message:
+                "FSD Violation: Entities should only depend on other Entities (check composition), Shared, or Generated. They cannot import Features, Widgets or direct Server code.",
             },
             {
               from: ["features"],
-              disallow: ["app", "trigger", "server", "widgets"],
-              message: "Feature must not import from upper layers (Widgets, App)",
+              disallow: ["app", "trigger", "widgets", "server"],
+              message:
+                "FSD Violation: Features can only depend on Entities or Shared. They cannot import Widgets, App, or direct Server code.",
             },
             {
               from: ["widgets"],
               disallow: ["app", "trigger", "server"],
-              message: "Widget must not import from App layer",
+              message:
+                "FSD Violation: Widgets can depend on Features, Entities, and Shared. They cannot import the App layer or direct Server code.",
             },
             {
-              from: ["features", "widgets"],
-              disallow: ["server"],
+              from: ["server"],
+              disallow: ["app", "trigger", "widgets", "features", "entities"],
               message:
-                "UI-focused layers (Features/Widgets) cannot import direct server code. Use shared/api instead.",
+                "Architectural Violation: The 'server' layer contains pure business logic and must not depend on UI layers (entities, features, etc.). Use shared/api for schemas.",
+            },
+            {
+              from: ["trigger"],
+              disallow: ["app", "widgets", "features", "entities"],
+              message:
+                "Architectural Violation: Trigger tasks should only depend on 'server' logic or 'shared' resources. Do not import UI components into background jobs.",
+            },
+            {
+              from: ["features"],
+              disallow: ["features"],
+              message:
+                "FSD Violation: Cross-import between Features is forbidden to prevent high coupling. Move shared logic to 'entities' or 'shared'.",
+            },
+            {
+              from: ["entities"],
+              disallow: ["entities"],
+              message:
+                "FSD Violation: Cross-import between Entities is forbidden. Use composition in 'features' or 'widgets' instead.",
+            },
+            {
+              from: ["widgets"],
+              disallow: ["widgets"],
+              message: "FSD Violation: Widgets should not import other Widgets.",
             },
             {
               from: ["app"],
               disallow: ["trigger"],
+              message:
+                "Safety Violation: Do not import 'trigger' background task definitions directly into the 'app' router.",
+            },
+            {
+              from: ["app"],
+              disallow: ["app"],
+              message:
+                "FSD Violation: App routes should not import other routes. Use 'widgets' or 'features' for shared UI logic.",
             },
           ],
+        },
+      ],
+
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "@/app/**/?*",
+                "@/widgets/**/?*",
+                "@/features/**/?*",
+                "@/entities/**/?*",
+
+                "!@/app/*",
+                "!@/widgets/*",
+                "!@/features/*",
+                "!@/entities/*",
+              ],
+              message:
+                "FSD Violation: Deep imports are forbidden. Import only from the Public API (index.ts) of the slice.",
+            },
+          ],
+        },
+      ],
+
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "ExportAllDeclaration",
+          message:
+            "Next.js Performance: Do not use 'export *'. Export modules explicitly to avoid huge barrel files and tree-shaking issues.",
+        },
+        {
+          selector:
+            "JSXAttribute[name.name='className'] > JSXExpressionContainer > TemplateLiteral",
+          message:
+            "Use cn() utility for conditional Tailwind classes instead of template literals.",
+        },
+        {
+          selector:
+            "JSXAttribute[name.name='className'] > JSXExpressionContainer > BinaryExpression[operator='+']",
+          message:
+            "Use cn() utility for conditional Tailwind classes instead of string concatenation.",
         },
       ],
 
@@ -187,6 +272,8 @@ export default defineConfig([
       "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/await-thenable": "error",
       "@typescript-eslint/no-misused-promises": "error",
+      "@typescript-eslint/no-unnecessary-condition": "error",
+      "@typescript-eslint/switch-exhaustiveness-check": "error",
 
       "perfectionist/sort-jsx-props": [
         "error",
@@ -223,8 +310,6 @@ export default defineConfig([
       "perfectionist/sort-interfaces": ["error", { type: "natural", order: "asc" }],
       "perfectionist/sort-object-types": ["error", { type: "natural", order: "asc" }],
       "perfectionist/sort-intersection-types": ["error", { type: "natural", order: "asc" }],
-
-      ...jsxA11y.configs.recommended.rules,
     },
   },
 
@@ -244,6 +329,32 @@ export default defineConfig([
       "sonarjs/deprecation": "off",
       "sonarjs/no-hardcoded-passwords": "off",
       "sonarjs/assertions-in-tests": "off",
+    },
+  },
+
+  {
+    files: ["src/**/*.test.ts"],
+    plugins: { vitest },
+    rules: {
+      ...vitest.configs.recommended.rules,
+      "vitest/prefer-expect-resolves": "error",
+      "vitest/no-focused-tests": "error",
+      "vitest/expect-expect": [
+        "error",
+        {
+          assertFunctionNames: ["expect", "expectDenied", "expectValidationFail", "fc.assert"],
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/tests/e2e/**/*.ts"],
+    plugins: { playwright },
+    rules: {
+      ...playwright.configs.recommended.rules,
+      "playwright/no-force-option": "error",
+      "playwright/no-focused-test": "error",
+      "playwright/require-soft-assertions": "warn",
     },
   },
 

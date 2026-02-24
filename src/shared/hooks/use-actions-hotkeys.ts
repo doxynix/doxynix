@@ -22,10 +22,8 @@ export function useActionsHotkeys() {
       const actionKey = handler.hotkey;
       const action = hotkeyActions[actionKey];
 
-      if (action != null) {
-        e.preventDefault();
-        action();
-      }
+      e.preventDefault();
+      action();
     },
     {
       enableOnFormTags: false,

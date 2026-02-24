@@ -1,21 +1,21 @@
-import { DocType, Status } from "@prisma/client";
+import { Status } from "@prisma/client";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { CreateRepoSchema, GitHubQuerySchema } from "@/shared/api/schemas/repo";
 
-import { DocTypeSchema, RepoSchema } from "@/generated/zod";
 import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
 import { OpenApiErrorResponses, RepoFilterSchema } from "@/server/trpc/shared";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 import { FileClassifier } from "@/server/utils/file-classifier";
 import { handlePrismaError } from "@/server/utils/handle-prisma-error";
+import { DocTypeSchema, RepoSchema, StatusSchema } from "@/generated/zod";
 
 export const PublicRepoSchema = RepoSchema.extend({
   id: z.string(),
-}).omit({ publicId: true, userId: true });
+});
 
 export const repoRouter = createTRPCRouter({
   analyze: protectedProcedure
@@ -32,7 +32,7 @@ export const repoRouter = createTRPCRouter({
     .input(
       z.object({
         branch: z.string().optional(),
-        docTypes: z.array(z.enum(DocType)),
+        docTypes: z.array(DocTypeSchema),
         files: z.array(z.string()),
         instructions: z.string().optional(),
         language: z.string(),
@@ -230,7 +230,7 @@ export const repoRouter = createTRPCRouter({
             lastAnalysisDate: z.date().nullish(),
             onboardingScore: z.number().nullish(),
             securityScore: z.number().nullish(),
-            status: z.enum(Status),
+            status: StatusSchema,
             techDebtScore: z.number().nullish(),
           })
         ),
@@ -252,7 +252,7 @@ export const repoRouter = createTRPCRouter({
       const where = repoService.buildWhereClause({ owner, search, status, visibility });
 
       const contextWhere: typeof where =
-        owner != null ? { owner: { equals: owner, mode: "insensitive" } } : {};
+        owner == null ? {} : { owner: { equals: owner, mode: "insensitive" } };
 
       const [items, totalCount, filteredCount] = await Promise.all([
         ctx.db.repo.findMany({
@@ -338,7 +338,7 @@ export const repoRouter = createTRPCRouter({
         owner: z.string().trim().min(1),
       })
     )
-    .output(PublicRepoSchema.extend({ message: z.string(), status: z.enum(Status) }).nullable())
+    .output(PublicRepoSchema.extend({ message: z.string(), status: StatusSchema }).nullable())
     .query(async ({ ctx, input }) => {
       const repo = await ctx.db.repo.findFirst({
         include: {
@@ -380,7 +380,7 @@ export const repoRouter = createTRPCRouter({
         where: { publicId: input.repoId },
       });
 
-      if (repo == null || repo.analyses[0]?.commitSha == null) {
+      if (repo?.analyses[0]?.commitSha == null) {
         return { content: null, version: null };
       }
 
@@ -391,7 +391,7 @@ export const repoRouter = createTRPCRouter({
         where: {
           repoId_version_type: {
             repoId: repo.id,
-            type: input.type as DocType,
+            type: input.type,
             version: version,
           },
         },

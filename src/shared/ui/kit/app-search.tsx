@@ -8,7 +8,6 @@ import { Search } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui/core/input";
 import { Spinner } from "@/shared/ui/core/spinner";
-
 import { usePathname, useRouter } from "@/i18n/routing";
 
 type Props = {

@@ -1,8 +1,8 @@
 import z from "zod";
 
-import StatusSchema, { type StatusType } from "@/generated/zod/inputTypeSchemas/StatusSchema";
 import { OpenApiErrorResponses } from "@/server/trpc/shared";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
+import { StatusSchema } from "@/generated/zod";
 
 const LanguageMetricSchema = z.object({
   color: z.string(),
@@ -190,9 +190,9 @@ export const analyticsRouter = createTRPCRouter({
         },
         highlights: {
           mostCritical:
-            worstRepo != null ? { name: worstRepo.repo.name, score: worstRepo.score ?? 0 } : null,
+            worstRepo == null ? null : { name: worstRepo.repo.name, score: worstRepo.score ?? 0 },
           topPerformer:
-            bestRepo != null ? { name: bestRepo.repo.name, score: bestRepo.score ?? 0 } : null,
+            bestRepo == null ? null : { name: bestRepo.repo.name, score: bestRepo.score ?? 0 },
         },
         languages: topLanguages,
         overview: {
@@ -212,7 +212,7 @@ export const analyticsRouter = createTRPCRouter({
           progress: a.progress,
           repoName: a.repo.name,
           repoOwner: a.repo.owner,
-          status: a.status as StatusType,
+          status: a.status,
         })),
       };
     }),

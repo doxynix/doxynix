@@ -19,9 +19,10 @@ import { cn } from "@/shared/lib/utils";
 import { Toaster } from "@/shared/ui/core/sonner";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
 import { HotkeyListeners } from "@/shared/ui/kit/hotkey-listeners";
+import { routing } from "@/i18n/routing";
+
 import { Providers } from "@/app/providers";
 
-import { routing } from "@/i18n/routing";
 import { ourFileRouter } from "@/server/lib/core";
 
 async function UTSSR() {

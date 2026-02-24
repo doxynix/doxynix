@@ -2,7 +2,6 @@
 
 import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
-import { Status, Visibility } from "@prisma/client";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -15,8 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/core/select";
-
 import { usePathname, useRouter } from "@/i18n/routing";
+
+import { StatusSchema, VisibilitySchema } from "@/generated/zod";
 
 export function RepoFilters() {
   const tCommon = useTranslations("Common");
@@ -32,7 +32,7 @@ export function RepoFilters() {
   const hasFilters =
     (filters.status != null && (filters.status as string) !== "all") ||
     (filters.visibility != null && (filters.visibility as string) !== "all") ||
-    (filters.sortBy != null && filters.sortBy !== REPO_DEFAULTS.SORT_BY);
+    filters.sortBy !== REPO_DEFAULTS.SORT_BY;
 
   const updateQuery = (name: string, value: string) => {
     const newParams = new URLSearchParams(searchParams.toString());
@@ -70,10 +70,10 @@ export function RepoFilters() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("repo_status_all")}</SelectItem>
-            <SelectItem value={Status.DONE}>{tCommon("done")}</SelectItem>
-            <SelectItem value={Status.PENDING}>{t("repo_in_progress")}</SelectItem>
-            <SelectItem value={Status.FAILED}>{tCommon("failed")}</SelectItem>
-            <SelectItem value={Status.NEW}>{tCommon("new")}</SelectItem>
+            <SelectItem value={StatusSchema.enum.DONE}>{tCommon("done")}</SelectItem>
+            <SelectItem value={StatusSchema.enum.PENDING}>{t("repo_in_progress")}</SelectItem>
+            <SelectItem value={StatusSchema.enum.FAILED}>{tCommon("failed")}</SelectItem>
+            <SelectItem value={StatusSchema.enum.NEW}>{tCommon("new")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -86,8 +86,8 @@ export function RepoFilters() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("repo_visibility_all")}</SelectItem>
-            <SelectItem value={Visibility.PUBLIC}>{tCommon("public")}</SelectItem>
-            <SelectItem value={Visibility.PRIVATE}>{tCommon("private")}</SelectItem>
+            <SelectItem value={VisibilitySchema.enum.PUBLIC}>{tCommon("public")}</SelectItem>
+            <SelectItem value={VisibilitySchema.enum.PRIVATE}>{tCommon("private")}</SelectItem>
           </SelectContent>
         </Select>
 

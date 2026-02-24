@@ -1,6 +1,7 @@
 "use client";
 
-import type { UiApiKey } from "@/entities/api-keys";
+import type { UiApiKey } from "@/shared/api/trpc";
+
 import { ApiKeyArchivedTable } from "./api-key-archived-table";
 import { ApiKeyCard } from "./api-key-card";
 import { ApiKeysEmpty } from "./api-keys-empty";

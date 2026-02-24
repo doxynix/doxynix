@@ -2,21 +2,23 @@ import { type ReactNode } from "react";
 import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
 
-import { getServerAuthSession } from "@/shared/api/auth/auth-options";
 import { SidebarProvider } from "@/shared/ui/core/sidebar";
 import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificator";
+import { redirect } from "@/i18n/routing";
+
 import { CreateRepoDialog } from "@/features/repo";
+
 import { AppFooter } from "@/widgets/app-footer";
 import { AppHeader } from "@/widgets/app-header";
 import { AppSidebar } from "@/widgets/app-sidebar";
 
-import { redirect } from "@/i18n/routing";
+import { getServerAuthSession } from "@/server/auth/options";
 
 export default async function PrivateLayout({ children }: Readonly<{ children: ReactNode }>) {
   const session = await getServerAuthSession();
   const locale = await getLocale();
 
-  if (!session || session.user == null) {
+  if (!session) {
     redirect({ href: "/auth", locale });
     return null;
   }

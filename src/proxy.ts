@@ -4,10 +4,10 @@ import createMiddleware from "next-intl/middleware";
 
 import { routing } from "./i18n/routing";
 import { redisClient } from "./server/lib/redis";
+import { logger } from "./server/logger/logger";
 import { IS_PROD } from "./shared/constants/env.client";
 import { TURNSTILE_SECRET_KEY } from "./shared/constants/env.server";
 import { LOCALE_REGEX_STR } from "./shared/constants/locales";
-import { logger } from "./shared/lib/logger";
 import { getCookieName } from "./shared/lib/utils";
 
 const ONE_MB = 1024 * 1024;
@@ -151,7 +151,7 @@ async function handleTurnstile(request: NextRequest, ip: string): Promise<NextRe
   const token = request.cookies.get("cf-turnstile-response")?.value;
   const secretKey = TURNSTILE_SECRET_KEY;
 
-  if (token == null || secretKey == null) {
+  if (token == null) {
     return new NextResponse(JSON.stringify({ error: "Missing captcha" }), { status: 403 });
   }
 

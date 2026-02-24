@@ -5,7 +5,6 @@ import type { Route } from "next";
 import { settingsMenu } from "@/shared/constants/navigation";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
-
 import { Link, usePathname } from "@/i18n/routing";
 
 export function SettingsMenu() {
@@ -14,7 +13,7 @@ export function SettingsMenu() {
   return (
     <div className="sticky top-2 flex flex-col gap-2">
       {settingsMenu.map((item) => {
-        const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const isDestructive = item.variant === "destructive";
 
         return (

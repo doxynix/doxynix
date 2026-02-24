@@ -16,10 +16,24 @@ generator client {
 }
 
 generator zod {
-  provider           = "zod-prisma-types"
-  output             = "../src/generated/zod"
-  useMultipleFiles   = true
-  createSharedSchema = true
+  provider                         = "zod-prisma-types"
+  output                           = "../src/generated/zod"
+  useMultipleFiles                 = true
+  writeBarrelFiles                 = true
+  createIndexType                  = true
+  createInputTypes                 = true
+  createModelTypes                 = true
+  createOptionalDefaultValuesTypes = true
+  createRelationValuesTypes        = true
+  createPartialTypes               = true
+  addInputTypeValidation           = true
+  coerceDate                       = true
+  writeNullishInInputTypes         = true
+  addIncludeType                   = true
+  addSelectType                    = true
+  useJsonParameters                = true
+  useTypeAssertions                = true
+  modelSuffix                      = "Schema"
 }
 
 generator jsonSchema {
@@ -64,12 +78,18 @@ enum NotifyType {
 }
 
 model User {
+  /// @zod.custom.omit(["model", "input"])
   id            Int            @id() @default(autoincrement())
+  /// @zod.custom.omit(["model", "input"])
   publicId      String         @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  /// @zod.string.email({ message: "Incorrect email" })
   email         String?        @unique()
+  /// @zod.string.trim().min(1, { message: "Name required" }).max(50, { message: "Name cannot exceed 50 characters" })
   name          String?
   emailVerified DateTime?      @map("email_verified")
+  /// @zod.string.url({ message: "Incorrect link to avatar" })
   image         String?
+  /// @zod.custom.omit(["model", "input"])
   imageKey      String?        @unique() @map("image_key")
   role          UserRole       @default(USER)
   createdAt     DateTime       @default(now()) @map("created_at")
@@ -84,13 +104,18 @@ model User {
 }
 
 model Notification {
+  /// @zod.custom.omit(["model", "input"])
   id        Int        @id() @default(autoincrement())
+  /// @zod.custom.omit(["model", "input"])
   publicId  String     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   createdAt DateTime   @default(now())
+  /// @zod.string.min(1, { message: "The title cannot be empty" })
   title     String
+  /// @zod.string.min(1, { message: "The text of the notification is mandatory" })
   body      String
   type      NotifyType @default(INFO)
   isRead    Boolean    @default(false)
+  /// @zod.custom.omit(["model", "input"])
   userId    Int
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -100,27 +125,38 @@ model Notification {
 }
 
 model Repo {
+  /// @zod.custom.omit(["model", "input"])
   id              Int        @id() @default(autoincrement())
+  /// @zod.custom.omit(["model", "input"])
   publicId        String     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   githubId        Int        @map("github_id")
   owner           String
+  /// @zod.string.min(1).max(255)
   name            String
+  /// @zod.string.max(1000)
   description     String?    @db.Text()
+  /// @zod.string.url({ message: "Invalid repository URL" })
   url             String
   language        String?
   license         String?
   topics          String[]
+  /// @zod.number.int().min(0)
   stars           Int        @default(0) @map("stargazers_count")
+  /// @zod.number.int().min(0)
   forks           Int        @default(0) @map("forks_count")
   defaultBranch   String     @default("main") @map("default_branch")
+  /// @zod.string.url()
   ownerAvatarUrl  String?    @map("owner_avatar_url")
+  /// @zod.number.int().min(0)
   openIssues      Int        @default(0) @map("open_issues_count")
+  /// @zod.number.int().min(0)
   size            Int        @default(0)
   visibility      Visibility @default(PRIVATE)
   pushedAt        DateTime?  @map("pushed_at")
   createdAt       DateTime   @default(now()) @map("created_at")
   githubCreatedAt DateTime?  @map("github_created_at")
   updatedAt       DateTime   @updatedAt() @map("updated_at")
+  /// @zod.custom.omit(["model", "input"])
   userId          Int        @map("user_id")
   user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   analyses        Analysis[]
@@ -137,15 +173,23 @@ model Repo {
 }
 
 model Analysis {
+  /// @zod.custom.omit(["model", "input"])
   id              Int      @id() @default(autoincrement())
+  /// @zod.custom.omit(["model", "input"])
   publicId        String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   status          Status   @default(NEW)
+  /// @zod.number.int().min(0).max(100)
   progress        Int      @default(0)
   message         String?  @db.Text()
+  /// @zod.number.int().min(0).max(100)
   score           Int?
+  /// @zod.number.int().min(0).max(100)
   securityScore   Int?     @map("security_score")
+  /// @zod.number.int().min(0).max(100)
   complexityScore Int?     @map("complexity_score")
+  /// @zod.number.int().min(0).max(100)
   techDebtScore   Int?     @map("tech_debt_score")
+  /// @zod.number.int().min(0).max(100)
   onboardingScore Int?     @map("onboarding_score")
   metricsJson     Json?    @map("metrics_json")
   resultJson      Json?    @map("result_json")
@@ -155,6 +199,7 @@ model Analysis {
   error           String?  @db.Text()
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt() @map("updated_at")
+  /// @zod.custom.omit(["model", "input"])
   repoId          Int      @map("repo_id")
   repo            Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
@@ -166,13 +211,17 @@ model Analysis {
 }
 
 model Document {
+  /// @zod.custom.omit(["model", "input"])
   id        Int      @id() @default(autoincrement())
+  /// @zod.custom.omit(["model", "input"])
   publicId  String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   version   String
   type      DocType
+  /// @zod.string.min(1, { message: "Content cannot be empty" })
   content   String   @db.Text()
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")
+  /// @zod.custom.omit(["model", "input"])
   repoId    Int      @map("repo_id")
   repo      Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
@@ -184,9 +233,13 @@ model Document {
 model ApiKey {
   id          String    @id() @default(uuid(7)) @db.Uuid()
   prefix      String
+  /// @zod.custom.omit(["model", "input"])
   hashedKey   String    @unique() @map("hashed_key")
+  /// @zod.string.trim().min(1, { message: "The name must be between 1 and 50 characters long" }).max(50)
   name        String
+  /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
   description String?   @db.Text()
+  /// @zod.custom.omit(["model", "input"])
   userId      Int
   createdAt   DateTime  @default(now()) @map("created_at")
   lastUsed    DateTime? @map("last_used")
@@ -198,17 +251,23 @@ model ApiKey {
 }
 
 model Account {
+  /// @zod.custom.omit(["model", "input"])
   id                Int     @id() @default(autoincrement())
+  /// @zod.custom.omit(["model", "input"])
   publicId          String  @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  /// @zod.custom.omit(["model", "input"])
   userId            Int     @map("user_id")
   type              String
   provider          String
   providerAccountId String  @map("provider_account_id")
+  /// @zod.custom.omit(["model", "input"])
   refresh_token     String? @db.Text()
+  /// @zod.custom.omit(["model", "input"])
   access_token      String? @db.Text()
   expires_at        Int?
   token_type        String?
   scope             String?
+  /// @zod.custom.omit(["model", "input"])
   id_token          String? @db.Text()
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -218,9 +277,13 @@ model Account {
 }
 
 model Session {
+  /// @zod.custom.omit(["model", "input"])
   id           Int      @id() @default(autoincrement())
+  /// @zod.custom.omit(["model", "input"])
   publicId     String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  /// @zod.custom.omit(["model", "input"])
   sessionToken String   @unique() @map("session_token")
+  /// @zod.custom.omit(["model", "input"])
   userId       Int      @map("user_id")
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -230,6 +293,7 @@ model Session {
 
 model VerificationToken {
   identifier String
+  /// @zod.custom.omit(["model", "input"])
   token      String   @unique()
   expires    DateTime
 
@@ -243,6 +307,7 @@ model AuditLog {
   model     String
   operation String
   payload   Json
+  /// @zod.custom.omit(["model", "input"])
   userId    Int?     @map("user_id")
   ip        String?
   userAgent String?  @map("user_agent")

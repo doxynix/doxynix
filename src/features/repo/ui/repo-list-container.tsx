@@ -1,15 +1,15 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import type { Status } from "@prisma/client";
 import { useTranslations } from "next-intl";
 
-import { trpc } from "@/shared/api/trpc";
+import { trpc, type RepoStatus } from "@/shared/api/trpc";
 import { parseRepoSearchParams } from "@/shared/lib/search-params";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
 import { RepoCardSkeleton } from "@/entities/repo";
+
 import { RepoList } from "./repo-list";
 
 type Props = {
@@ -18,7 +18,7 @@ type Props = {
       owner?: string;
       sortBy?: "updatedAt" | "createdAt" | "name";
       sortOrder?: "asc" | "desc";
-      status?: Status;
+      status?: RepoStatus;
     };
     limit?: number;
     showPagination?: boolean;

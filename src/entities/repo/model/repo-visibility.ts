@@ -1,8 +1,9 @@
-import type { Visibility } from "@prisma/client";
 import { Lock, Unlock, type LucideIcon } from "lucide-react";
 
+import type { RepoVisibility } from "@/shared/api/trpc";
+
 export const repoVisibilityConfig: Record<
-  Visibility,
+  RepoVisibility,
   {
     color: string;
     icon: LucideIcon;

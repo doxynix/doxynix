@@ -1,4 +1,5 @@
 import { createMetadata } from "@/shared/lib/metadata";
+
 import {
   AnalyticsSection,
   BrandsSection,

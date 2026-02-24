@@ -1,9 +1,9 @@
 import crypto from "node:crypto";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/shared/api/auth/auth-options";
-import { prisma } from "@/shared/api/db/db";
+import { prisma } from "@/server/db/db";
 
+import { authOptions } from "../auth/options";
 import { redisClient } from "../lib/redis";
 
 type Props = {
@@ -26,7 +26,7 @@ export async function createContext({ req }: Props) {
         where: { hashedKey: hashedToken },
       });
 
-      if (keyRecord != null && keyRecord.revoked === false && keyRecord.user != null) {
+      if (keyRecord?.revoked === false) {
         prisma.apiKey
           .update({
             data: { lastUsed: new Date() },

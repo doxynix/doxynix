@@ -5,12 +5,13 @@ import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-to-openapi";
 
-import type { DbClient } from "@/shared/api/db/db";
 import { IS_PROD } from "@/shared/constants/env.client";
-import { logger } from "@/shared/lib/logger";
 
 import type { Context } from "@/server/trpc/context";
 import { requestContext } from "@/server/utils/request-context";
+
+import type { DbClient } from "../db/db";
+import { logger } from "../logger/logger";
 
 export const t = initTRPC
   .context<Context>()
@@ -31,12 +32,12 @@ export const t = initTRPC
 
 const withZenStack = t.middleware(async ({ ctx, next }) => {
   const sessionUser = ctx.session?.user;
-  const userId = sessionUser != null ? Number(sessionUser.id) : undefined;
+  const userId = sessionUser == null ? undefined : Number(sessionUser.id);
 
-  const userRole = sessionUser?.role != null ? (sessionUser.role as UserRole) : undefined;
+  const userRole = sessionUser?.role == null ? undefined : (sessionUser.role as UserRole);
 
   const protectedDb = enhance(ctx.prisma, {
-    user: userId != null ? { id: userId, role: userRole } : undefined,
+    user: userId == null ? undefined : { id: userId, role: userRole },
   }) as unknown as DbClient;
 
   return next({
@@ -60,7 +61,7 @@ const contextMiddleware = t.middleware(async ({ ctx, next, path, type }) => {
       referer: ctx.req.headers.get("referer") ?? undefined,
       requestId,
       userAgent: ctx.requestInfo.userAgent,
-      userId: sessionUser?.id != null ? Number(sessionUser.id) : undefined,
+      userId: sessionUser?.id == null ? undefined : Number(sessionUser.id),
       userRole: sessionUser?.role,
     },
     () => next({ ctx })
@@ -99,7 +100,7 @@ export const publicProcedure = t.procedure
   .use(withZenStack);
 
 const isAuthed = t.middleware(({ ctx, next }) => {
-  if (ctx.session == null || ctx.session.user == null) {
+  if (ctx.session?.user == null) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "You are not logged in" });
   }
 
@@ -113,7 +114,7 @@ const isAuthed = t.middleware(({ ctx, next }) => {
 export const protectedProcedure = publicProcedure.use(isAuthed);
 
 const isAdmin = t.middleware(({ ctx, next }) => {
-  if (ctx.session?.user == null || ctx.session.user.role !== "ADMIN") {
+  if (ctx.session?.user.role !== "ADMIN") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Admin rights required" });
   }
 

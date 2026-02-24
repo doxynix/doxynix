@@ -2,8 +2,8 @@
 
 import { useLocale } from "next-intl";
 
+import type { UiRepoDetailed } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/utils";
-import type { RepoDetailed } from "@/shared/types/repo";
 import { Badge } from "@/shared/ui/core/badge";
 
 import {
@@ -14,7 +14,7 @@ import {
   repoVisibilityConfig,
 } from "@/entities/repo";
 
-type Props = { repo: RepoDetailed };
+type Props = { repo: UiRepoDetailed };
 
 export function RepoDetailsHeader({ repo }: Readonly<Props>) {
   const locale = useLocale();

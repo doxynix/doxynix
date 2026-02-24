@@ -3,7 +3,6 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
-
 import { Link } from "@/i18n/routing";
 
 export function PricingSection() {
@@ -82,7 +81,7 @@ export function PricingSection() {
               <div className="mb-2 flex items-baseline gap-1">
                 <span className="text-4xl font-bold">{plan.price}</span>
                 <span className="text-muted-foreground">
-                  {plan.price !== "Custom" ? t("section_pricing_interval") : ""}
+                  {plan.price === "Custom" ? "" : t("section_pricing_interval")}
                 </span>
               </div>
               <p className="text-muted-foreground mb-6 text-sm">{plan.desc}</p>

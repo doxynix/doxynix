@@ -1,5 +1,4 @@
-import React from "react";
-import { DocType } from "@prisma/client";
+import type { ComponentType } from "react";
 import {
   BookOpen,
   Code2,
@@ -14,6 +13,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import type { DocType } from "@/shared/api/trpc";
 import { LOCALES } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
@@ -32,12 +32,19 @@ import { Flag, FLAGS } from "@/shared/ui/kit/language-switcher";
 
 import type { ActionsType, StateType } from "../model/user-repo-setup";
 
-const DOC_OPTIONS = [
-  { desc: "Project overview & setup", icon: BookOpen, id: DocType.README, label: "README" },
-  { desc: "Endpoints & schemas", icon: Code2, id: DocType.API, label: "API Reference" },
-  { desc: "Deep system logic", icon: GitGraph, id: DocType.ARCHITECTURE, label: "Architecture" },
-  { desc: "Guide for developers", icon: Users, id: DocType.CONTRIBUTING, label: "Contributing" },
-  { desc: "Release history", icon: HistoryIcon, id: DocType.CHANGELOG, label: "Changelog" },
+type DocOption = {
+  desc: string;
+  icon: ComponentType<{ className?: string }>;
+  id: DocType;
+  label: string;
+};
+
+const DOC_OPTIONS: DocOption[] = [
+  { desc: "Project overview & setup", icon: BookOpen, id: "README", label: "README" },
+  { desc: "Endpoints & schemas", icon: Code2, id: "API", label: "API Reference" },
+  { desc: "Deep system logic", icon: GitGraph, id: "ARCHITECTURE", label: "Architecture" },
+  { desc: "Guide for developers", icon: Users, id: "CONTRIBUTING", label: "Contributing" },
+  { desc: "Release history", icon: HistoryIcon, id: "CHANGELOG", label: "Changelog" },
 ] as const;
 
 type Props = {
@@ -97,24 +104,22 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
             {DOC_OPTIONS.map((opt) => {
               const isSelected = state.selectedDocs.includes(opt.id);
               return (
-                <div
+                <label
                   key={opt.id}
-                  role="checkbox"
-                  tabIndex={0}
-                  aria-checked={isSelected}
-                  onClick={() => actions.toggleDocType(opt.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      actions.toggleDocType(opt.id);
-                    }
-                  }}
                   className={cn(
                     "relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3 transition-all",
-                    "hover:bg-muted/50",
-                    isSelected && "border-foreground"
+                    "hover:bg-muted/50 focus-within:ring-ring focus-within:ring-2 focus-within:ring-offset-2",
+                    isSelected ? "border-foreground bg-accent/50" : "border-border"
                   )}
                 >
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    disabled={disabled}
+                    onChange={() => actions.toggleDocType(opt.id)}
+                    className="sr-only"
+                  />
+
                   <div className="flex items-center justify-between">
                     <div
                       className={cn(
@@ -130,7 +135,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                     <p className="text-sm font-bold">{opt.label}</p>
                     <p className="text-muted-foreground mt-1 text-xs">{opt.desc}</p>
                   </div>
-                </div>
+                </label>
               );
             })}
           </div>

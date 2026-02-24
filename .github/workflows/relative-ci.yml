@@ -12,10 +12,15 @@ jobs:
     permissions:
       contents: read
       actions: read
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.actor.type != 'Bot' &&
+      github.event.workflow_run.actor.login != 'ImgBotApp' &&
+      !contains(github.event.workflow_run.actor.login, '[bot]')
     steps:
       - name: Send bundle stats and build information to RelativeCI
-        uses: relative-ci/agent-action@v3
+        uses: relative-ci/agent-action@3c681926017930047fc03acaa35cd6a44efcbfc3
         with:
           key: ${{ secrets.RELATIVE_CI_KEY }}
           token: ${{ secrets.GITHUB_TOKEN }}

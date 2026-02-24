@@ -3,15 +3,10 @@ import { z } from "zod";
 
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 
-import { ApiKeySchema } from "@/generated/zod";
 import { OpenApiErrorResponses } from "@/server/trpc/shared";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 import { handlePrismaError } from "@/server/utils/handle-prisma-error";
-
-export const PublicApiKeySchema = ApiKeySchema.omit({
-  hashedKey: true,
-  userId: true,
-});
+import { ApiKeySchema } from "@/generated/zod";
 
 const BRAND_PREFIX = "dxnx_";
 
@@ -75,8 +70,8 @@ export const apiKeyRouter = createTRPCRouter({
     .input(z.void())
     .output(
       z.object({
-        active: z.array(PublicApiKeySchema),
-        archived: z.array(PublicApiKeySchema),
+        active: z.array(ApiKeySchema),
+        archived: z.array(ApiKeySchema),
       })
     )
     .query(async ({ ctx }) => {
@@ -88,7 +83,7 @@ export const apiKeyRouter = createTRPCRouter({
       });
 
       return {
-        active: allKeys.filter((k) => k.revoked === false),
+        active: allKeys.filter((k) => !k.revoked),
         archived: allKeys.filter((k) => k.revoked),
       };
     }),

@@ -6,3 +6,5 @@ export type SearchParams = {
   status?: string;
   visibility?: string;
 };
+
+export type ParamTypes = string | string[] | undefined;

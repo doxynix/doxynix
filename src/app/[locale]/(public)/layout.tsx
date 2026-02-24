@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { DotPattern } from "@/shared/ui/visuals/dot-pattern";
+
 import { AppFooter } from "@/widgets/app-footer";
 import { PublicHeader, PublicHeaderWrapper } from "@/widgets/public-header";
 

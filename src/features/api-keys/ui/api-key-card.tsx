@@ -2,11 +2,11 @@
 
 import { useLocale, useTranslations } from "next-intl";
 
+import type { UiApiKey } from "@/shared/api/trpc";
 import { formatRelativeTime } from "@/shared/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import type { UiApiKey } from "@/entities/api-keys";
 import { RevokeApiKeyDialog } from "./revoke-api-key-dialog";
 import { UpdateApiKeyDialog } from "./update-api-key-dialog";
 
@@ -42,9 +42,9 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
       </CardHeader>
       <CardContent>
         <div className="bg-muted text-muted-foreground truncate rounded-xl p-2 font-mono text-xs">
-          {active.prefix != null && active.prefix !== ""
-            ? `${active.prefix}••••••••••••••••••••••••••••••••••••••••••••••••••••`
-            : "dxnx_••••••••••••••••••••••••••••••••••••••••••••••••••••"}
+          {active.prefix === ""
+            ? "dxnx_••••••••••••••••••••••••••••••••••••••••••••••••••••"
+            : `${active.prefix}••••••••••••••••••••••••••••••••••••••••••••••••••••`}
         </div>
       </CardContent>
     </Card>

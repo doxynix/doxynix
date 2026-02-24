@@ -28,8 +28,6 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
     "trigger.config.ts",
     "src/global.d.ts",
     "messages/*.json"

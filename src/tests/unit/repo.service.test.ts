@@ -62,7 +62,7 @@ describe("Repo Service", () => {
 
     it("should throw BAD_REQUEST on invalid URL", async () => {
       vi.mocked(githubService.parseUrl).mockImplementation(() => {
-        throw new Error();
+        throw new Error("Bad request");
       });
 
       await expect(repoService.createRepo(mockDb, 1, "bad-url")).rejects.toThrow(TRPCError);

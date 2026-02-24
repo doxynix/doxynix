@@ -1,14 +1,12 @@
-import type { Prisma } from "@prisma/client";
+import { DocType, Status, type Prisma, type Repo } from "@prisma/client";
 
-import { prisma } from "@/shared/api/db/db";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
-import { logger } from "@/shared/lib/logger";
 
-import { StatusSchema, type Repo } from "@/generated/zod";
-import DocTypeSchema, { type DocTypeType } from "@/generated/zod/inputTypeSchemas/DocTypeSchema";
 import type { AIResult } from "@/server/ai/schemas";
 import type { RepoMetrics } from "@/server/ai/types";
+import { prisma } from "@/server/db/db";
 import { realtimeServer } from "@/server/lib/realtime";
+import { logger } from "@/server/logger/logger";
 import { githubService } from "@/server/services/github.service";
 import { calculateCodeMetrics, calculateHealthScore } from "@/server/utils/metrics";
 
@@ -27,7 +25,7 @@ export async function saveResults(params: {
 
   const baseMetrics = calculateCodeMetrics(validFiles);
 
-  const securityScoreRaw = aiResult.sections.security_audit.score ?? 5;
+  const securityScoreRaw = aiResult.sections.security_audit.score;
   const securityScore = Math.round(securityScoreRaw * 10);
 
   const techDebtCount = aiResult.sections.tech_debt.length;
@@ -117,14 +115,14 @@ export async function saveResults(params: {
 
         securityScore: securityScore,
 
-        status: StatusSchema.enum.DONE,
+        status: Status.DONE,
 
         techDebtScore: techDebtScore,
       },
       where: { publicId: analysisId },
     });
 
-    const saveDoc = async (type: DocTypeType, content: string | undefined) => {
+    const saveDoc = async (type: DocType, content: string | undefined) => {
       if (content == null) return;
       await tx.document.upsert({
         create: { content, repoId: repo.id, type, version: currentSha.substring(0, 7) },
@@ -136,11 +134,11 @@ export async function saveResults(params: {
     };
 
     await Promise.all([
-      saveDoc(DocTypeSchema.enum.README, aiResult.generatedReadme),
-      saveDoc(DocTypeSchema.enum.API, aiResult.generatedApiMarkdown),
-      saveDoc(DocTypeSchema.enum.CONTRIBUTING, aiResult.generatedContributing),
-      saveDoc(DocTypeSchema.enum.CHANGELOG, aiResult.generatedChangelog),
-      saveDoc(DocTypeSchema.enum.ARCHITECTURE, aiResult.generatedArchitecture),
+      saveDoc(DocType.README, aiResult.generatedReadme),
+      saveDoc(DocType.API, aiResult.generatedApiMarkdown),
+      saveDoc(DocType.CONTRIBUTING, aiResult.generatedContributing),
+      saveDoc(DocType.CHANGELOG, aiResult.generatedChangelog),
+      saveDoc(DocType.ARCHITECTURE, aiResult.generatedArchitecture),
     ]);
 
     const note = await tx.notification.create({
@@ -154,7 +152,7 @@ export async function saveResults(params: {
 
     void realtimeServer.channels
       .get(channelName)
-      ?.publish(REALTIME_CONFIG.events.user.notification, {
+      .publish(REALTIME_CONFIG.events.user.notification, {
         id: note.publicId,
         title: note.title,
       });

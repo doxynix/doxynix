@@ -1,7 +1,6 @@
 import { getLocale } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
-
 import { redirect } from "@/i18n/routing";
 
 export const generateMetadata = createMetadata("settings_title", "settings_desc");

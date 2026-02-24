@@ -3,19 +3,16 @@ import { UTApi } from "uploadthing/server";
 import z from "zod";
 
 import { UpdateProfileSchema } from "@/shared/api/schemas/user";
-import { logger } from "@/shared/lib/logger";
 
-import { UserSchema } from "@/generated/zod";
+import { logger } from "@/server/logger/logger";
 import { OpenApiErrorResponses } from "@/server/trpc/shared";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
+import { UserSchema } from "@/generated/zod";
 
 const utapi = new UTApi();
 
 export const PublicUserSchema = UserSchema.extend({
   id: z.string(),
-}).omit({
-  imageKey: true,
-  publicId: true,
 });
 
 export const userRouter = createTRPCRouter({

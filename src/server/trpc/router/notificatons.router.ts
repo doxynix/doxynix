@@ -1,13 +1,14 @@
 import { z } from "zod";
 
-import { NotificationSchema } from "@/generated/zod";
 import { handlePrismaError } from "@/server/utils/handle-prisma-error";
+import { NotificationSchema } from "@/generated/zod";
+
 import { OpenApiErrorResponses } from "../shared";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const NotificationsPublicSchema = NotificationSchema.extend({
   id: z.string(),
-}).omit({ publicId: true, userId: true });
+});
 
 export const notificationRouter = createTRPCRouter({
   getAll: protectedProcedure

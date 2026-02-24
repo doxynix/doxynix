@@ -82,7 +82,7 @@ function SidebarProvider({
 
   // This sets the cookie to keep the sidebar state.
   React.useEffect(() => {
-    const secure = window.location.protocol === "https:" ? ";Secure" : "";
+    const secure = globalThis.location.protocol === "https:" ? ";Secure" : "";
     document.cookie = `${SIDEBAR_COOKIE_NAME}=${open}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}; SameSite=Lax${secure}`;
   }, [open]);
 
@@ -100,8 +100,8 @@ function SidebarProvider({
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    globalThis.addEventListener("keydown", handleKeyDown);
+    return () => globalThis.removeEventListener("keydown", handleKeyDown);
   }, [toggleSidebar]);
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
