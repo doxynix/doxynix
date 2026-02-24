@@ -80,7 +80,7 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
         const target: string[] = Array.isArray(targetRaw)
           ? (targetRaw as string[])
           : typeof targetRaw === "string"
-            ? targetRaw.split("_")
+            ? [targetRaw]
             : [];
 
         const field = target.find((f): f is string => map?.uniqueConstraint?.[f] != null);
