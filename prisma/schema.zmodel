@@ -58,7 +58,7 @@ generator zod {
   addSelectType     = true
   useJsonParameters = true
 
-  useTypeAssertions = true
+  useTypeAssertions = false // NOTE: если поставить 'true' будет падать 
   modelSuffix       = "Schema"
 }
 
