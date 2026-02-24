@@ -4,8 +4,9 @@ import { IS_PROD, SENTRY_DSN } from "@/shared/constants/env.client";
 
 Sentry.init({
   dsn: SENTRY_DSN,
+  enabled: IS_PROD,
 
   sendDefaultPii: false,
 
-  tracesSampleRate: IS_PROD ? 0.1 : 1.0,
+  tracesSampleRate: 0.1,
 });

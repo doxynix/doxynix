@@ -292,7 +292,7 @@ const sentryOptions = {
 
   silent: process.env.CI == null,
 
-  tunnelRoute: "/monitoring",
+  tunnelRoute: "/api/v1/dxnx",
 
   webpack: {
     automaticVercelMonitors: true,
