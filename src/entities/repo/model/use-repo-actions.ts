@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import posthog from "posthog-js";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
@@ -17,6 +18,7 @@ export function useRepoActions() {
     onSuccess: async () => {
       toast.success(t("repo_added_toast_success"));
       void invalidate();
+      posthog.capture("repo_added");
     },
   });
 
@@ -25,6 +27,7 @@ export function useRepoActions() {
     onSuccess: async () => {
       toast.success(t("settings_danger_delete_all_repos_toast_success"));
       void invalidate();
+      posthog.capture("all_repos_deleted");
     },
   });
 

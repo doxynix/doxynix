@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import posthog from "posthog-js";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
@@ -31,6 +32,7 @@ export function DeleteAccountDialog() {
     onSuccess: async () => {
       toast.success(t("settings_danger_delete_account_toast_success"));
       setOpen(false);
+      posthog.capture("account_deleted");
       await signOut({ callbackUrl: "/auth" });
     },
   });

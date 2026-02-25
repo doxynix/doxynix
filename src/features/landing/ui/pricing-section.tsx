@@ -1,6 +1,9 @@
+"use client";
+
 import React from "react";
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
+import posthog from "posthog-js";
 
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
@@ -92,6 +95,15 @@ export function PricingSection() {
               <p className="text-muted-foreground mb-6 text-sm">{plan.desc}</p>
               <Button
                 asChild
+                onClick={() =>
+                  posthog.capture("pricing_plan_clicked", {
+                    is_popular: plan.popular,
+                    plan_id: plan.href === "/auth" ? "auth_entry" : "unknown",
+                    plan_name_display: plan.name,
+                    plan_price_display: plan.price,
+                    plan_tier: plan.popular ? "pro" : "other",
+                  })
+                }
                 className={cn(
                   "mb-8 w-full cursor-pointer",
                   plan.popular && "bg-foreground hover:bg-accent-foreground text-background"

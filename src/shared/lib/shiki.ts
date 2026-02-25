@@ -18,12 +18,14 @@ async function getHighlighter() {
   return highlighter;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function highlight(code: string, lang: string, theme: "dark" | "light") {
+  // NOTE: временно! пока не вернется светлая тема!
   const hl = await getHighlighter();
 
   return hl.codeToHtml(code, {
     lang,
-    theme: theme === "dark" ? "github-dark-dimmed" : "github-light",
+    theme: "github-dark-dimmed",
     transformers: [],
   });
 }

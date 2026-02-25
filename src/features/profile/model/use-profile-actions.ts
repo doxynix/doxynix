@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import posthog from "posthog-js";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
@@ -18,7 +19,7 @@ type UseProfileActionsProps = {
 };
 
 export function useProfileActions(props: UseProfileActionsProps = {}) {
-  const { update: updateSession } = useSession();
+  const { data: session, update: updateSession } = useSession();
   const utils = trpc.useUtils();
   const t = useTranslations("Dashboard");
 
@@ -43,6 +44,11 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
       });
 
       await utils.user.me.invalidate();
+      posthog.capture("profile_updated", {
+        has_email_changed: (session?.user.email ?? null) !== (data.user.email ?? null),
+        has_name_changed: (session?.user.name ?? null) !== (data.user.name ?? null),
+        user_id: data.user.id,
+      });
     },
   });
 
