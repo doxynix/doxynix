@@ -236,8 +236,8 @@ importers:
         specifier: 10.3.1
         version: 10.3.1
       posthog-js:
-        specifier: 1.354.1
-        version: 1.354.1
+        specifier: 1.354.2
+        version: 1.354.2
       posthog-node:
         specifier: 5.26.0
         version: 5.26.0
@@ -2903,8 +2903,8 @@ packages:
   '@posthog/core@1.23.1':
     resolution: {integrity: sha512-GViD5mOv/mcbZcyzz3z9CS0R79JzxVaqEz4sP5Dsea178M/j3ZWe6gaHDZB9yuyGfcmIMQ/8K14yv+7QrK4sQQ==}
 
-  '@posthog/types@1.354.1':
-    resolution: {integrity: sha512-/d2ubZOcRbKJU5PWSkt8AwR3l/CCv5vPf4RDHIpGptI6ezDf5sTFWdqF088ziS7J3CB03Pax/ubAqsgJUfIy9A==}
+  '@posthog/types@1.354.2':
+    resolution: {integrity: sha512-UlPQkXcrCxWwuAtr6GAASYe7cBMBqxMVxev17BvA5cJnUbdCc4Gg4efeI5QwuqLVlwvFY5R1s1P3ctcLa46vnw==}
 
   '@prisma/adapter-pg@6.19.2':
     resolution: {integrity: sha512-t80uX4u4+V/F/OO220LVFY2nsXRGvt8x7PDDveQJJUrGAq4yKHiHiwxOb/PusUSioKkJrgLZjzLwGrpPYG4arw==}
@@ -3832,11 +3832,6 @@ packages:
     resolution: {integrity: sha512-hZ+Zxj3SySm4A/DylsDKZAeVg0mvi++0PYVceVyX7hemkw7OreKdCvW2oQ3T1FMZvCaQXqOTHb8qmBShoqk69Q==}
     cpu: [arm64]
     os: [android]
-
-  '@rollup/rollup-darwin-arm64@4.57.1':
-    resolution: {integrity: sha512-crNPrwJOrRxagUYeMn/DZwqN88SDmwaJ8Cvi/TN1HnWBU7GwknckyosC2gd0IqYRsHDEnXf328o9/HC6OkPgOg==}
-    cpu: [arm64]
-    os: [darwin]
 
   '@rollup/rollup-darwin-arm64@4.59.0':
     resolution: {integrity: sha512-W2Psnbh1J8ZJw0xKAd8zdNgF9HRLkdWwwdWqubSVk0pUuQkoHnv7rx4GiF9rT4t5DIZGAsConRE3AxCdJ4m8rg==}
@@ -9778,8 +9773,8 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  posthog-js@1.354.1:
-    resolution: {integrity: sha512-ncHYOOglHAsy5H9xogwmfBeqOF8bK58+b2VRv5SdnqiCfUBndo5pgAU9z2zS5MJuXuYbbpbBN0fGafHwmdr+5Q==}
+  posthog-js@1.354.2:
+    resolution: {integrity: sha512-6bfPjqxLmLoyXHDh0634Mx88Ub8mtekQoFazrQfpo4wrrf5+LSsfDnyR9adQhEnHtllbbBe3IFF2Zbdb5e+VCQ==}
 
   posthog-node@5.26.0:
     resolution: {integrity: sha512-DK1XF/RiunhvT57cFyPxW9OaliZzl5aREHFwY/AISL3MVOaDUb4wIccMn0G3ws3Ounen8iGH7xvzZQ0x2vEOEQ==}
@@ -13090,7 +13085,7 @@ snapshots:
     dependencies:
       '@microsoft/fetch-event-source': 2.0.1
     optionalDependencies:
-      '@rollup/rollup-darwin-arm64': 4.57.1
+      '@rollup/rollup-darwin-arm64': 4.59.0
 
   '@emnapi/core@1.8.1':
     dependencies:
@@ -14542,7 +14537,7 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
 
-  '@posthog/types@1.354.1': {}
+  '@posthog/types@1.354.2': {}
 
   '@prisma/adapter-pg@6.19.2':
     dependencies:
@@ -15590,9 +15585,6 @@ snapshots:
     optional: true
 
   '@rollup/rollup-android-arm64@4.59.0':
-    optional: true
-
-  '@rollup/rollup-darwin-arm64@4.57.1':
     optional: true
 
   '@rollup/rollup-darwin-arm64@4.59.0':
@@ -22325,7 +22317,7 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  posthog-js@1.354.1:
+  posthog-js@1.354.2:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.208.0
@@ -22333,7 +22325,7 @@ snapshots:
       '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-logs': 0.208.0(@opentelemetry/api@1.9.0)
       '@posthog/core': 1.23.1
-      '@posthog/types': 1.354.1
+      '@posthog/types': 1.354.2
       core-js: 3.48.0
       dompurify: 3.3.1
       fflate: 0.4.8
