@@ -111,7 +111,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@774c1d62961e73038a114d59c8847023c003194d
         with:
-          node-version: 24.13.1
+          node-version: 24.14.0
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -152,7 +152,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@774c1d62961e73038a114d59c8847023c003194d
         with:
-          node-version: 24.13.1
+          node-version: 24.14.0
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -197,7 +197,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@774c1d62961e73038a114d59c8847023c003194d
         with:
-          node-version: 24.13.1
+          node-version: 24.14.0
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -267,7 +267,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@774c1d62961e73038a114d59c8847023c003194d
         with:
-          node-version: 24.13.1
+          node-version: 24.14.0
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -313,7 +313,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@774c1d62961e73038a114d59c8847023c003194d
         with:
-          node-version: 24.13.1
+          node-version: 24.14.0
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -389,7 +389,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@774c1d62961e73038a114d59c8847023c003194d
         with:
-          node-version: 24.13.1
+          node-version: 24.14.0
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -454,7 +454,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@774c1d62961e73038a114d59c8847023c003194d
         with:
-          node-version: 24.13.1
+          node-version: 24.14.0
           cache: 'pnpm'
 
       - name: Install dependencies
