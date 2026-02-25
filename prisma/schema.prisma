@@ -114,7 +114,7 @@ model Notification {
   /// @zod.string.min(1, { message: "The text of the notification is mandatory" })
   body      String
   type      NotifyType @default(INFO)
-  isRead    Boolean    @default(false)
+  isRead    Boolean    @default(false) @map("is_read")
   /// @zod.custom.omit(["model"])
   userId    Int        @map("user_id")
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
