@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.2](https://github.com/doxynix/doxynix/compare/v1.9.1...v1.9.2) (2026-02-25)
+
+
+### Bug Fixes
+
+* **security:** исправление уязвимости в пакете rollup ([#403](https://github.com/doxynix/doxynix/issues/403)) ([54c7903](https://github.com/doxynix/doxynix/commit/54c7903db44c7702ae66b3cedd1388ce9ce6485f))
+
 ## [1.9.1](https://github.com/doxynix/doxynix/compare/v1.9.0...v1.9.1) (2026-02-25)
 
 
