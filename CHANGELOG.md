@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github.com/doxynix/doxynix/compare/v1.8.7...v1.9.0) (2026-02-25)
+
+
+### Features
+
+* **tooling:** внедрение posthog ([#398](https://github.com/doxynix/doxynix/issues/398)) ([0b8c4ac](https://github.com/doxynix/doxynix/commit/0b8c4ac11eb3eea39831fcafdaab807e8df04717))
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#392](https://github.com/doxynix/doxynix/issues/392)) ([b06e8c1](https://github.com/doxynix/doxynix/commit/b06e8c111bac7b96e559e5bf155e7341739daef7))
+* **deps:** update all non-major dependencies ([#400](https://github.com/doxynix/doxynix/issues/400)) ([27da6bf](https://github.com/doxynix/doxynix/commit/27da6bf3bd60b4d2f343a2bd341e5167b1cfe9d1))
+
 ## [1.8.7](https://github.com/doxynix/doxynix/compare/v1.8.6...v1.8.7) (2026-02-24)
 
 
