@@ -5,6 +5,7 @@ import {
   API_PREFIX,
   IS_DEV,
   IS_PROD,
+  NEXT_PUBLIC_POSTHOG_KEY,
   SENTRY_DSN,
   TRPC_PREFIX,
 } from "./shared/constants/env.client";
@@ -51,7 +52,7 @@ Sentry.init({
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
 
-posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+posthog.init(NEXT_PUBLIC_POSTHOG_KEY, {
   api_host: `${API_PREFIX}/dxnx/p`,
   capture_exceptions: false,
   debug: IS_DEV,

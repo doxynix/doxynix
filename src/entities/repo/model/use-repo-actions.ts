@@ -15,14 +15,10 @@ export function useRepoActions() {
 
   const create = trpc.repo.create.useMutation({
     onError: (err) => toast.error(err.message),
-    onSuccess: async (data) => {
+    onSuccess: async () => {
       toast.success(t("repo_added_toast_success"));
       void invalidate();
-      posthog.capture("repo_added", {
-        repo_name: data.repo.name,
-        repo_owner: data.repo.owner,
-        repo_url: data.repo.url,
-      });
+      posthog.capture("repo_added");
     },
   });
 

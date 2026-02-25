@@ -258,9 +258,8 @@ const nextConfig: NextConfig = {
         destination: "https://us-assets.i.posthog.com/static/:path*",
         source: `${API_PREFIX}/dxnx/p/static/:path*`,
       },
-      // `${API_PREFIX}/dxnx/s`
       {
-        destination: "https://us-assets.i.posthog.com/array/:path*",
+        destination: "https://us.i.posthog.com/array/:path*",
         source: `${API_PREFIX}/dxnx/p/array/:path*`,
       },
       {

@@ -1,15 +1,15 @@
 import { PostHog } from "posthog-node";
 
-import { NEXT_PUBLIC_POSTHOG_HOST, NEXT_PUBLIC_POSTHOG_KEY } from "@/shared/constants/env.client";
+import { env } from "@/shared/constants/env";
 
 let posthogClient: PostHog | null = null;
 
 export function getPostHogClient(): PostHog {
   if (posthogClient == null) {
-    posthogClient = new PostHog(NEXT_PUBLIC_POSTHOG_KEY, {
+    posthogClient = new PostHog(env.NEXT_PUBLIC_POSTHOG_KEY, {
       flushAt: 1,
       flushInterval: 0,
-      host: NEXT_PUBLIC_POSTHOG_HOST,
+      host: env.NEXT_PUBLIC_POSTHOG_HOST,
     });
   }
   return posthogClient;

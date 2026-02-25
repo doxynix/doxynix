@@ -67,7 +67,7 @@ export function CreateRepoDialog() {
   async function handleConnectGithub() {
     try {
       setLoading(true);
-      posthog.capture("github_connected");
+      posthog.capture("github_connect_started");
       await signIn("github");
     } finally {
       setLoading(false);

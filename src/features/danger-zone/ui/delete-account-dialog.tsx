@@ -33,7 +33,6 @@ export function DeleteAccountDialog() {
       toast.success(t("settings_danger_delete_account_toast_success"));
       setOpen(false);
       posthog.capture("account_deleted");
-      posthog.reset();
       await signOut({ callbackUrl: "/auth" });
     },
   });

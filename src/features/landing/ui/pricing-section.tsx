@@ -98,8 +98,10 @@ export function PricingSection() {
                 onClick={() =>
                   posthog.capture("pricing_plan_clicked", {
                     is_popular: plan.popular,
-                    plan_name: plan.name,
-                    plan_price: plan.price,
+                    plan_id: plan.href === "/auth" ? "auth_entry" : "unknown",
+                    plan_name_display: plan.name,
+                    plan_price_display: plan.price,
+                    plan_tier: plan.popular ? "pro" : "other",
                   })
                 }
                 className={cn(
