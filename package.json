@@ -61,7 +61,8 @@
       "ajv@^8": "8.18.0",
       "cookie": "0.7.2",
       "minimatch": "10.2.4",
-      "systeminformation": "5.31.1"
+      "systeminformation": "5.31.1",
+      "rollup": "^4.59.0"
     },
     "onlyBuiltDependencies": [
       "core-js",
