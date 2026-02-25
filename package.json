@@ -144,7 +144,7 @@
     "parse-github-url": "1.0.3",
     "pg": "8.19.0",
     "pino": "10.3.1",
-    "posthog-js": "1.354.0",
+    "posthog-js": "1.354.1",
     "posthog-node": "5.26.0",
     "react": "19.2.4",
     "react-arborist": "3.4.3",
