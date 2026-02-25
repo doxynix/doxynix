@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { BookOpen } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { useDebounce } from "use-debounce";
 
@@ -66,6 +67,7 @@ export function CreateRepoDialog() {
   async function handleConnectGithub() {
     try {
       setLoading(true);
+      posthog.capture("github_connected");
       await signIn("github");
     } finally {
       setLoading(false);

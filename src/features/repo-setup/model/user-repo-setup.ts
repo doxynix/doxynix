@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
+import posthog from "posthog-js";
 import type { TreeApi } from "react-arborist";
 
 import { trpc, type DocType, type UiRepoDetailed } from "@/shared/api/trpc";
@@ -127,13 +128,24 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     const leafFilePaths = new Set(
       (apiFiles as FileTuple[]).filter((f) => f[1] === 1).map((f) => f[0])
     );
+    const selectedFiles = Array.from(selectedIds).filter((id) => leafFilePaths.has(id));
     analyzeMutation.mutate({
       branch: selectedBranch,
       docTypes: selectedDocs,
-      files: Array.from(selectedIds).filter((id) => leafFilePaths.has(id)),
+      files: selectedFiles,
       instructions,
       language: analysisLocale,
       repoId: repo.id,
+    });
+    posthog.capture("repo_analysis_started", {
+      branch: selectedBranch,
+      doc_types: selectedDocs,
+      has_custom_instructions: instructions.length > 0,
+      language: analysisLocale,
+      repo_id: repo.id,
+      repo_name: repo.name,
+      repo_owner: repo.owner,
+      selected_files_count: selectedFiles.length,
     });
   };
 

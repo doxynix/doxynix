@@ -14,6 +14,8 @@ import { TooltipProvider } from "@/shared/ui/core/tooltip";
 
 import { RealtimeProvider } from "@/features/notifications";
 
+import { AnalyticsSync } from "./_components/analytics-sync";
+
 type Props = {
   children: ReactNode;
 };
@@ -74,6 +76,9 @@ const InnerProviders = ({ children }: { children: ReactNode }) => (
     forcedTheme="dark" // THEME: пока на время светлая тема удалена
     storageKey="doxynix-theme"
   >
-    <TooltipProvider>{children}</TooltipProvider>
+    <TooltipProvider>
+      <AnalyticsSync />
+      {children}
+    </TooltipProvider>
   </ThemeProvider>
 );

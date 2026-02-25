@@ -8,6 +8,8 @@ export const env = createEnv({
       .startsWith("/")
       .regex(/^\/[\w\-\/]*$/, "Invalid prefix format"),
     NEXT_PUBLIC_APP_URL: z.url().optional(),
+    NEXT_PUBLIC_POSTHOG_HOST: z.url().min(1),
+    NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1),
     NEXT_PUBLIC_SENTRY_DSN: z.url(),
     NEXT_PUBLIC_TRPC_PREFIX: z
       .string()
@@ -34,6 +36,8 @@ export const env = createEnv({
     JWT_SECRET: process.env.JWT_SECRET,
     NEXT_PUBLIC_API_PREFIX: process.env.NEXT_PUBLIC_API_PREFIX,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     NEXT_PUBLIC_TRPC_PREFIX: process.env.NEXT_PUBLIC_TRPC_PREFIX,
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,

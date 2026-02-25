@@ -7,7 +7,7 @@ import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
 import { StatsWriterPlugin } from "webpack-stats-plugin";
 
-import { IS_ANALYZE, IS_PROD } from "@/shared/constants/env.client";
+import { API_PREFIX, IS_ANALYZE, IS_PROD } from "@/shared/constants/env.client";
 import { LOCALE_REGEX_STR } from "@/shared/constants/locales";
 
 const bundleAnalyzer = withBundleAnalyzer({
@@ -106,7 +106,9 @@ const nextConfig: NextConfig = {
                 wss://*.ably.net
                 wss://*.realtime.ably.net
                 https://*.ingest.sentry.io
-                https://*.sentry.io;
+                https://*.sentry.io
+                https://us.i.posthog.com
+                https://us-assets.i.posthog.com;
               frame-ancestors 'none';
               manifest-src 'self';
               upgrade-insecure-requests;
@@ -250,6 +252,24 @@ const nextConfig: NextConfig = {
 
     return results;
   },
+  async rewrites() {
+    return [
+      {
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+        source: `${API_PREFIX}/dxnx/p/static/:path*`,
+      },
+      // `${API_PREFIX}/dxnx/s`
+      {
+        destination: "https://us-assets.i.posthog.com/array/:path*",
+        source: `${API_PREFIX}/dxnx/p/array/:path*`,
+      },
+      {
+        destination: "https://us.i.posthog.com/:path*",
+        source: `${API_PREFIX}/dxnx/p/:path*`,
+      },
+    ];
+  },
+  skipTrailingSlashRedirect: true,
   typedRoutes: true,
   typescript: { ignoreBuildErrors: false },
   webpack: (config, { dev, isServer }) => {
@@ -292,7 +312,7 @@ const sentryOptions = {
 
   silent: process.env.CI == null,
 
-  tunnelRoute: "/api/v1/dxnx",
+  tunnelRoute: `${API_PREFIX}/dxnx/s`,
 
   webpack: {
     automaticVercelMonitors: true,

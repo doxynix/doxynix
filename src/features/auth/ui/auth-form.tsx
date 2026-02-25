@@ -6,6 +6,7 @@ import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { Mail } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -85,6 +86,7 @@ export function AuthForm() {
         if ((res?.ok ?? false) && res?.error == null) {
           setIsSent(true);
           toast.success(t("sent_toast_success"));
+          posthog.capture("sign_in_email_sent", { provider: "email" });
         } else {
           if (res?.status === 403) {
             setErrorMessage("Captcha validation failed. Are you a robot?");
@@ -122,6 +124,7 @@ export function AuthForm() {
   async function handleSignIn(provider: string) {
     try {
       setLoadingProvider(provider);
+      posthog.capture("sign_in_attempted", { provider });
       await signIn(provider, { callbackUrl: "/dashboard" });
     } finally {
       setLoadingProvider(null);
