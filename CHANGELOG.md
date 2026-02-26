@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.5](https://github.com/doxynix/doxynix/compare/v1.9.4...v1.9.5) (2026-02-26)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#415](https://github.com/doxynix/doxynix/issues/415)) ([5d1f82a](https://github.com/doxynix/doxynix/commit/5d1f82ac287b0c7b7c0a7e3609bd92dd61b7d884))
+* **deps:** update dependency @ai-sdk/google to v3.0.33 ([#418](https://github.com/doxynix/doxynix/issues/418)) ([13e808c](https://github.com/doxynix/doxynix/commit/13e808c66120e3f40fb7908e061f4a0115c3ba58))
+
 ## [1.9.4](https://github.com/doxynix/doxynix/compare/v1.9.3...v1.9.4) (2026-02-26)
 
 
