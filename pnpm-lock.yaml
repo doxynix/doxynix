@@ -29,8 +29,8 @@ importers:
         specifier: 3.0.24
         version: 3.0.24(zod@4.3.6)
       '@ai-sdk/openai':
-        specifier: 3.0.33
-        version: 3.0.33(zod@4.3.6)
+        specifier: 3.0.34
+        version: 3.0.34(zod@4.3.6)
       '@hookform/resolvers':
         specifier: 5.2.2
         version: 5.2.2(react-hook-form@7.71.2(react@19.2.4))
@@ -132,7 +132,7 @@ importers:
         version: 5.90.21(react@19.2.4)
       '@trigger.dev/sdk':
         specifier: 4.4.1
-        version: 4.4.1(ai@6.0.100(zod@4.3.6))(typescript@5.9.3)(zod@4.3.6)
+        version: 4.4.1(ai@6.0.101(zod@4.3.6))(typescript@5.9.3)(zod@4.3.6)
       '@trpc/client':
         specifier: 11.10.0
         version: 11.10.0(@trpc/server@11.10.0(typescript@5.9.3))(typescript@5.9.3)
@@ -167,8 +167,8 @@ importers:
         specifier: 2.18.0
         version: 2.18.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       ai:
-        specifier: 6.0.100
-        version: 6.0.100(zod@4.3.6)
+        specifier: 6.0.101
+        version: 6.0.101(zod@4.3.6)
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -236,8 +236,8 @@ importers:
         specifier: 10.3.1
         version: 10.3.1
       posthog-js:
-        specifier: 1.354.2
-        version: 1.354.2
+        specifier: 1.354.4
+        version: 1.354.4
       posthog-node:
         specifier: 5.26.0
         version: 5.26.0
@@ -269,8 +269,8 @@ importers:
         specifier: 3.23.0
         version: 3.23.0
       simple-git:
-        specifier: 3.32.2
-        version: 3.32.2
+        specifier: 3.32.3
+        version: 3.32.3
       sloc:
         specifier: 0.3.2
         version: 0.3.2
@@ -632,8 +632,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@3.0.33':
-    resolution: {integrity: sha512-O/8SVKAiwFHkGAUfBnrLb7L2IjbpP9ySWbmOktOfa0KtzutZkmKNrJ5CtB5dj+lwuENbOuZeRsnsZdOjar7hig==}
+  '@ai-sdk/openai@3.0.34':
+    resolution: {integrity: sha512-rnSsjV7cqIUcYdHgTcXRvN+xn0+wv/DB/U1SCxCVOKDsD9xaNgDjQTuMeJ+dUTzpH4Gn+XS0dJQELCWVIFYQVg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -2903,8 +2903,8 @@ packages:
   '@posthog/core@1.23.1':
     resolution: {integrity: sha512-GViD5mOv/mcbZcyzz3z9CS0R79JzxVaqEz4sP5Dsea178M/j3ZWe6gaHDZB9yuyGfcmIMQ/8K14yv+7QrK4sQQ==}
 
-  '@posthog/types@1.354.2':
-    resolution: {integrity: sha512-UlPQkXcrCxWwuAtr6GAASYe7cBMBqxMVxev17BvA5cJnUbdCc4Gg4efeI5QwuqLVlwvFY5R1s1P3ctcLa46vnw==}
+  '@posthog/types@1.354.4':
+    resolution: {integrity: sha512-9zhKGfJwGshwfpjJISY84mgmDrYZk4/0BhJdy9AGcmazGn6uxxA0KhzcFNbDSMe0iWilPuBodpthakiPl+4qkw==}
 
   '@prisma/adapter-pg@6.19.2':
     resolution: {integrity: sha512-t80uX4u4+V/F/OO220LVFY2nsXRGvt8x7PDDveQJJUrGAq4yKHiHiwxOb/PusUSioKkJrgLZjzLwGrpPYG4arw==}
@@ -5626,8 +5626,8 @@ packages:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
 
-  ai@6.0.100:
-    resolution: {integrity: sha512-BIxhG7M7wvcWCF+IEnZi7WpkRLOM3jR2vJ0mMuohl2UB2i1R/ZUa1cHFel1xI8nWvyUpOoQXKqsM0BAH50EYSQ==}
+  ai@6.0.101:
+    resolution: {integrity: sha512-Ur/NgbgOp1rdhyDiKDk6EOpSgd1g5ADlbcD1cjQJtQsnmhEngz3Rf8nK5JetDh0vnbLy2aEBpaQeL+zvLRWuaA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -9773,8 +9773,8 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  posthog-js@1.354.2:
-    resolution: {integrity: sha512-6bfPjqxLmLoyXHDh0634Mx88Ub8mtekQoFazrQfpo4wrrf5+LSsfDnyR9adQhEnHtllbbBe3IFF2Zbdb5e+VCQ==}
+  posthog-js@1.354.4:
+    resolution: {integrity: sha512-CFaRtaO/zUTTpVZ+vRGLNpoz2UHunEZ22k/mOXf3crfxvydRQk4u0L5XSOzyMrG6j6COSJSGAoY/ZDHrYROKCg==}
 
   posthog-node@5.26.0:
     resolution: {integrity: sha512-DK1XF/RiunhvT57cFyPxW9OaliZzl5aREHFwY/AISL3MVOaDUb4wIccMn0G3ws3Ounen8iGH7xvzZQ0x2vEOEQ==}
@@ -10546,8 +10546,8 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
-  simple-git@3.32.2:
-    resolution: {integrity: sha512-n/jhNmvYh8dwyfR6idSfpXrFazuyd57jwNMzgjGnKZV/1lTh0HKvPq20v4AQ62rP+l19bWjjXPTCdGHMt0AdrQ==}
+  simple-git@3.32.3:
+    resolution: {integrity: sha512-56a5oxFdWlsGygOXHWrG+xjj5w9ZIt2uQbzqiIGdR/6i5iococ7WQ/bNPzWxCJdEUGUCmyMH0t9zMpRJTaKxmw==}
 
   sirv@2.0.4:
     resolution: {integrity: sha512-94Bdh3cC2PKrbgSOUqTiGPWVZeSiXfKOVZNJniWoqrWrRkB1CJzBU3NEbiTsPcYy1lDsANA/THzS+9WBiy5nfQ==}
@@ -11957,7 +11957,7 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.15(zod@4.3.6)
       zod: 4.3.6
 
-  '@ai-sdk/openai@3.0.33(zod@4.3.6)':
+  '@ai-sdk/openai@3.0.34(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.15(zod@4.3.6)
@@ -14537,7 +14537,7 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
 
-  '@posthog/types@1.354.2': {}
+  '@posthog/types@1.354.4': {}
 
   '@prisma/adapter-pg@6.19.2':
     dependencies:
@@ -16739,7 +16739,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@trigger.dev/sdk@4.4.1(ai@6.0.100(zod@4.3.6))(typescript@5.9.3)(zod@4.3.6)':
+  '@trigger.dev/sdk@4.4.1(ai@6.0.101(zod@4.3.6))(typescript@5.9.3)(zod@4.3.6)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.36.0
@@ -16755,7 +16755,7 @@ snapshots:
       ws: 8.19.0
       zod: 4.3.6
     optionalDependencies:
-      ai: 6.0.100(zod@4.3.6)
+      ai: 6.0.101(zod@4.3.6)
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -17788,7 +17788,7 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@6.0.100(zod@4.3.6):
+  ai@6.0.101(zod@4.3.6):
     dependencies:
       '@ai-sdk/gateway': 3.0.55(zod@4.3.6)
       '@ai-sdk/provider': 3.0.8
@@ -22317,7 +22317,7 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  posthog-js@1.354.2:
+  posthog-js@1.354.4:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.208.0
@@ -22325,7 +22325,7 @@ snapshots:
       '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-logs': 0.208.0(@opentelemetry/api@1.9.0)
       '@posthog/core': 1.23.1
-      '@posthog/types': 1.354.2
+      '@posthog/types': 1.354.4
       core-js: 3.48.0
       dompurify: 3.3.1
       fflate: 0.4.8
@@ -23277,7 +23277,7 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
-  simple-git@3.32.2:
+  simple-git@3.32.3:
     dependencies:
       '@kwsites/file-exists': 1.1.1
       '@kwsites/promise-deferred': 1.1.1
