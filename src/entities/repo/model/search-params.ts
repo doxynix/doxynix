@@ -13,14 +13,14 @@ export const REPO_DEFAULTS = {
 };
 
 export const parseRepoSearchParams = (params: { [key: string]: ParamTypes }) => {
+  const rawPage = Number(getSingleParam(params.page));
+  const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : REPO_DEFAULTS.PAGE;
+
   return {
     owner: getSingleParam(params.owner),
-    page: Number(getSingleParam(params.page)) || REPO_DEFAULTS.PAGE,
-
+    page,
     search: getSingleParam(params.search) ?? "",
-
     sortBy: parseStringUnion(params.sortBy, VALID_SORT_FIELDS, REPO_DEFAULTS.SORT_BY),
-
     sortOrder: parseStringUnion(params.sortOrder, ["asc", "desc"], REPO_DEFAULTS.SORT_ORDER),
     status: parseEnum(params.status, StatusSchema.enum),
     visibility: parseEnum(params.visibility, VisibilitySchema.enum),

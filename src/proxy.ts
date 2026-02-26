@@ -117,7 +117,7 @@ function validateRequestSize(request: NextRequest, requestId: string): NextRespo
   const header = request.headers.get("content-length");
   if (header != null) {
     const contentLength = Number.parseInt(header, 10);
-    if (!Number.isFinite(contentLength) || contentLength > ONE_MB) {
+    if (!Number.isFinite(contentLength) || contentLength < 0 || contentLength > ONE_MB) {
       return getPayloadTooLargeResponse(requestId);
     }
   }
@@ -130,7 +130,7 @@ async function handleRateLimitAndSize(
   ip: string,
   requestId: string
 ): Promise<NextResponse | null> {
-  if (pathname.includes("/uploadthing") || pathname.includes("/webhooks")) {
+  if (hasPathBoundary(pathname, "/webhooks")) {
     return null;
   }
 
