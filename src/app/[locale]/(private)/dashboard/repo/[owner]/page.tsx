@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
-import type { SearchParams } from "@/shared/types/search-params";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
-import { RepoAvatar } from "@/entities/repo";
+import { RepoAvatar, type SearchParams } from "@/entities/repo";
 
 import { CreateRepoButton, RepoFilters, RepoListContainer } from "@/features/repo";
 

@@ -1,8 +1,10 @@
 "use client";
 
 import type { Route } from "next";
+import { usePathname } from "next/navigation";
 import { SlashIcon } from "lucide-react";
 
+import { LOCALES, type Locale } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/utils";
 import {
   Breadcrumb,
@@ -15,16 +17,26 @@ import {
 import { useSidebar } from "@/shared/ui/core/sidebar";
 import { Logo } from "@/shared/ui/icons/logo";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
-import { Link, usePathname } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 
 import { AppCommandMenu } from "./app-command-menu";
 import { NotificationsNav } from "./notifications-nav";
 import { SidebarToggle } from "./sidebar-toggle";
 import { UserNav } from "./user-nav";
 
+function stripLocalePrefix(pathname: string) {
+  const segments = pathname.split("/").filter(Boolean);
+  const first = segments[0];
+  if (first && LOCALES.includes(first as Locale)) {
+    segments.shift();
+  }
+  return `/${segments.join("/")}`;
+}
+
 export function AppHeader() {
   const { state } = useSidebar();
-  const pathname = usePathname();
+  const rawPathname = usePathname();
+  const pathname = stripLocalePrefix(rawPathname);
   const segments = pathname.split("/").filter(Boolean);
 
   return (

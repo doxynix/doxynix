@@ -60,7 +60,7 @@ describe("GitHub Service", () => {
     });
   });
 
-  describe("getClientForUser", () => {
+  describe("getClientContext", () => {
     it("should return octokit instance with token from DB", async () => {
       const mockPrisma = {
         account: {
@@ -68,13 +68,16 @@ describe("GitHub Service", () => {
         },
       } as any;
 
-      const client = await githubService.getClientForUser(mockPrisma, 1);
+      const { octokit } = await githubService.getClientContext(mockPrisma, 1);
 
-      expect(client).toBeDefined();
-      expect(client.repos).toBeDefined();
-      expect(client.repos.get).toBeDefined();
+      expect(octokit).toBeDefined();
+      expect(octokit.repos).toBeDefined();
+      expect(octokit.repos.get).toBeDefined();
 
       expect(mockPrisma.account.findFirst).toHaveBeenCalledWith({
+        select: {
+          access_token: true,
+        },
         where: { provider: "github", userId: 1 },
       });
     });
@@ -88,9 +91,9 @@ describe("GitHub Service", () => {
 
       process.env.GITHUB_TOKEN = "env_token";
 
-      const client = await githubService.getClientForUser(mockPrisma, 1);
-      expect(client).toBeDefined();
-      expect(client.repos).toBeDefined();
+      const { octokit } = await githubService.getClientContext(mockPrisma, 1);
+      expect(octokit).toBeDefined();
+      expect(octokit.repos).toBeDefined();
     });
   });
 });

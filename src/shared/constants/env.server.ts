@@ -11,6 +11,7 @@ export const RESEND_API_KEY = env.RESEND_API_KEY;
 export const ABLY_API_KEY = env.ABLY_API_KEY;
 export const SYSTEM_TOKEN = env.GITHUB_SYSTEM_TOKEN;
 export const GROQ_API_KEY = env.GROQ_API_KEY;
+export const UPLOADTHING_TOKEN = env.UPLOADTHING_TOKEN;
 
 export const AUTH_PROVIDERS = {
   github: {

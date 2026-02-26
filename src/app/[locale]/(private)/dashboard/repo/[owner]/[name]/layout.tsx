@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import type { ParamTypes } from "@/shared/types/search-params";
+import type { ParamTypes } from "@/shared/types/app";
 
 import { RepoDetailsHeader } from "@/features/repo-details";
 

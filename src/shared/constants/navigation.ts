@@ -12,7 +12,7 @@ import {
   Users2,
 } from "lucide-react";
 
-import type { MenuItem, MenuItems } from "@/shared/types/menu-item";
+import type { MenuItem, MenuItems } from "../types/navigation";
 
 const DASHBOARD_BASE: MenuItem[] = [
   {

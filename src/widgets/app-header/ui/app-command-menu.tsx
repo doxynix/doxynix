@@ -10,8 +10,7 @@ import { useDebounce } from "use-debounce";
 import { trpc } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/constants/navigation";
 import { cn } from "@/shared/lib/utils";
-import { useCreateRepoDialogStore } from "@/shared/model/create-repo-dialog.store";
-import type { MenuItem } from "@/shared/types/menu-item";
+import type { MenuItem } from "@/shared/types/navigation";
 import { Button } from "@/shared/ui/core/button";
 import {
   CommandDialog,
@@ -25,6 +24,8 @@ import {
 } from "@/shared/ui/core/command";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { useRouter } from "@/i18n/routing";
+
+import { useCreateRepoDialogStore } from "@/features/repo";
 
 export function AppCommandMenu() {
   const t = useTranslations("Dashboard");

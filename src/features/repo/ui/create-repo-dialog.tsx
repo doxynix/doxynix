@@ -15,7 +15,6 @@ import { CreateRepoSchema, type CreateRepoInput } from "@/shared/api/schemas/rep
 import { trpc } from "@/shared/api/trpc";
 import { useClickOutside } from "@/shared/hooks/use-click-outside";
 import { isGitHubUrl } from "@/shared/lib/utils";
-import { useCreateRepoDialogStore } from "@/shared/model/create-repo-dialog.store";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +34,7 @@ import { usePathname, useRouter } from "@/i18n/routing";
 
 import { useRepoActions } from "@/entities/repo";
 
+import { useCreateRepoDialogStore } from "../model/create-repo-dialog.store";
 import { RepoItem } from "./repo-item";
 
 const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут

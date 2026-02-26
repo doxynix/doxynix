@@ -104,7 +104,11 @@ export const repoRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const newRepo = await repoService.createRepo(ctx.db, Number(ctx.session.user.id), input.url);
+      const newRepo = await repoService.createRepo(
+        ctx.prisma,
+        Number(ctx.session.user.id),
+        input.url
+      );
 
       return {
         message: "Repository added",
@@ -308,7 +312,10 @@ export const repoRouter = createTRPCRouter({
   getBranches: protectedProcedure
     .input(z.object({ name: z.string(), owner: z.string() }))
     .query(async ({ ctx, input }) => {
-      const octokit = await githubService.getClientForUser(ctx.db, Number(ctx.session.user.id));
+      const { octokit } = await githubService.getClientContext(
+        ctx.prisma,
+        Number(ctx.session.user.id)
+      );
 
       const branches = await octokit.paginate(octokit.repos.listBranches, {
         owner: input.owner,
@@ -432,7 +439,7 @@ export const repoRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const tree = await githubService.getRepoTree(
-        ctx.db,
+        ctx.prisma,
         Number(ctx.session.user.id),
         input.owner,
         input.name,
@@ -448,6 +455,11 @@ export const repoRouter = createTRPCRouter({
     }),
 
   searchGithub: protectedProcedure.input(GitHubQuerySchema).query(async ({ ctx, input }) => {
-    return await githubService.searchRepos(ctx.db, Number(ctx.session.user.id), input.query, 10);
+    return await githubService.searchRepos(
+      ctx.prisma,
+      Number(ctx.session.user.id),
+      input.query,
+      10
+    );
   }),
 });

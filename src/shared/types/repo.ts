@@ -1,9 +1,10 @@
-export type FileNode = {
-  children?: FileNode[];
-  id: string;
-  name: string;
-  path: string;
-  recommended?: boolean;
-  sha: string;
-  type: string;
+import type { RepoVisibility } from "../api/trpc";
+
+export type RepoItemFields = {
+  description: string | null;
+  fullName: string;
+  language: string | null;
+  stars: number;
+  updatedAt: string;
+  visibility: RepoVisibility;
 };

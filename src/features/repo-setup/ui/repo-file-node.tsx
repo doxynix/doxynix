@@ -10,8 +10,9 @@ import {
 import type { NodeRendererProps } from "react-arborist";
 
 import { cn } from "@/shared/lib/utils";
-import type { FileNode } from "@/shared/types/repo";
 import { Checkbox } from "@/shared/ui/core/checkbox";
+
+import type { FileNode } from "@/entities/repo";
 
 import { getFolderSelectionState } from "../model/utils";
 

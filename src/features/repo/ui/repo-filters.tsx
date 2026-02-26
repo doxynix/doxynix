@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { parseRepoSearchParams, REPO_DEFAULTS } from "@/shared/lib/search-params";
 import { Button } from "@/shared/ui/core/button";
 import {
   Select,
@@ -15,6 +14,8 @@ import {
   SelectValue,
 } from "@/shared/ui/core/select";
 import { usePathname, useRouter } from "@/i18n/routing";
+
+import { parseRepoSearchParams, REPO_DEFAULTS } from "@/entities/repo";
 
 import { StatusSchema, VisibilitySchema } from "@/generated/zod";
 

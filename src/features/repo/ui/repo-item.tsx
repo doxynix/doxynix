@@ -2,7 +2,7 @@ import { Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { cn, formatFullDate, formatRelativeTime, getLanguageColor } from "@/shared/lib/utils";
-import type { RepoItemFields } from "@/shared/types/repo-item";
+import type { RepoItemFields } from "@/shared/types/repo";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";

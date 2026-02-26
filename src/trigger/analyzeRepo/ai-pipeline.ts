@@ -89,8 +89,6 @@ export async function runAiPipeline(
     projectMapSummary: Object.keys(projectMap.modules).length,
   });
 
-  console.log(JSON.stringify(projectMap, null, 2));
-
   await updateStatus("Deep Analysis & Swagger Gen (Step 2/3)...", 70);
 
   const SMART_CONTEXT_LIMIT = 1500000;
@@ -194,7 +192,7 @@ export async function generateDeepDocs(
     taskMap["CHANGELOG"] = tasks.length;
     tasks.push(
       (async () => {
-        const octokit = await githubService.getClientForUser(prisma, userId);
+        const { octokit } = await githubService.getClientContext(prisma, userId);
         const { data: commitsData } = await octokit.repos.listCommits({
           owner: repo.owner,
           per_page: 50, // NOTE: тут возможно стоит придумать другую логику
