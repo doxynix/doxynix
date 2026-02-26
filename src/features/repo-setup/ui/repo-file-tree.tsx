@@ -4,10 +4,11 @@ import { Tree, type TreeApi } from "react-arborist";
 
 import type { UiRepoDetailed } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/utils";
-import type { FileNode } from "@/shared/types/repo";
 import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
+
+import type { FileNode } from "@/entities/repo";
 
 import type { ActionsType, StateType } from "../model/user-repo-setup";
 import { RepoBranchSelector } from "./repo-branch-selector";

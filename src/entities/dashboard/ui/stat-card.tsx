@@ -1,6 +1,7 @@
 import { cn } from "@/shared/lib/utils";
-import type { StatItem } from "@/shared/types/stat-item";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
+
+import type { StatItem } from "../model/stat-item.types";
 
 type Props = { item: StatItem };
 

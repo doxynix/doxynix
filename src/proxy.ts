@@ -5,7 +5,7 @@ import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { redisClient } from "./server/lib/redis";
 import { logger } from "./server/logger/logger";
-import { IS_PROD } from "./shared/constants/env.client";
+import { API_PREFIX, IS_PROD } from "./shared/constants/env.client";
 import { TURNSTILE_SECRET_KEY } from "./shared/constants/env.server";
 import { LOCALE_REGEX_STR } from "./shared/constants/locales";
 import { getCookieName } from "./shared/lib/utils";
@@ -14,6 +14,7 @@ const ONE_MB = 1024 * 1024;
 const protectedRoutes = ["/dashboard"];
 const authRoutes = ["/auth"];
 const cookieName = getCookieName();
+const ANALYTICS_TUNNELS = [`${API_PREFIX}/dxnx/p`, `${API_PREFIX}/dxnx/s`];
 
 let ratelimit: Ratelimit | null = null;
 if (IS_PROD) {
@@ -66,6 +67,14 @@ function getCountry(request: NextRequest): string {
   return "UNKNOWN";
 }
 
+function isAnalyticsTunnel(pathname: string): boolean {
+  return ANALYTICS_TUNNELS.some((prefix) => pathname.startsWith(prefix));
+}
+
+function isUploadThingPath(pathname: string): boolean {
+  return pathname.startsWith("/api/uploadthing");
+}
+
 function logTraffic(
   msg: string,
   method: string,
@@ -91,6 +100,22 @@ function logTraffic(
   event.waitUntil(logger.flush());
 }
 
+function getPayloadTooLargeResponse(requestId: string): NextResponse {
+  return new NextResponse(JSON.stringify({ error: "Payload Too Large", requestId }), {
+    headers: { "content-type": "application/json" },
+    status: 413,
+  });
+}
+
+function validateRequestSize(request: NextRequest, requestId: string): NextResponse | null {
+  const contentLength = request.headers.get("content-length");
+  if (contentLength != null && Number(contentLength) > ONE_MB) {
+    return getPayloadTooLargeResponse(requestId);
+  }
+
+  return null;
+}
+
 async function handleRateLimitAndSize(
   request: NextRequest,
   pathname: string,
@@ -101,13 +126,8 @@ async function handleRateLimitAndSize(
     return null;
   }
 
-  const contentLength = request.headers.get("content-length");
-  if (contentLength != null && Number(contentLength) > ONE_MB) {
-    return new NextResponse(JSON.stringify({ error: "Payload Too Large", requestId }), {
-      headers: { "content-type": "application/json" },
-      status: 413,
-    });
-  }
+  const payloadTooLargeResponse = validateRequestSize(request, requestId);
+  if (payloadTooLargeResponse != null) return payloadTooLargeResponse;
 
   let success = true;
   let limit = 0;
@@ -246,6 +266,27 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const requestId = crypto.randomUUID();
   const { pathname } = request.nextUrl;
+
+  if (isUploadThingPath(pathname)) {
+    return NextResponse.next();
+  }
+
+  if (isAnalyticsTunnel(pathname)) {
+    const payloadTooLargeResponse = validateRequestSize(request, requestId);
+    if (payloadTooLargeResponse != null) {
+      logger.error({
+        msg: "Analytics tunnel payload too large",
+        path: pathname,
+        requestId,
+        url: request.url,
+      });
+      event.waitUntil(logger.flush());
+      return payloadTooLargeResponse;
+    }
+
+    return NextResponse.next();
+  }
+
   const ip = getIp(request);
   const userAgent = getUa(request);
   const method = request.method;
@@ -270,5 +311,8 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|_vercel|monitoring|.*\\..*).*)"],
+  matcher: [
+    "/dashboard/repo/:path*",
+    "/((?!_next|_vercel|monitoring|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|xml|json|woff2?|ttf|otf)$).*)",
+  ],
 };

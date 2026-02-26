@@ -13,7 +13,7 @@ export default defineConfig({
       {
         name: "zenstack-generate",
         onBuildStart: async () => {
-          console.log("🛠 ZenStack generating...");
+          console.log("ZenStack generating...");
           try {
             // eslint-disable-next-line sonarjs/no-os-command-from-path
             execSync("npx zenstack generate --schema prisma/schema.zmodel", {
@@ -23,13 +23,13 @@ export default defineConfig({
 
             const schemaPath = "prisma/schema.prisma";
             if (fs.existsSync(schemaPath)) {
-              console.log("🧹 Stripping extra generators from schema.prisma...");
+              console.log("Stripping extra generators from schema.prisma...");
               let content = fs.readFileSync(schemaPath, "utf-8");
 
               content = content.replace(/generator\s+(?!client)\w+\s+\{[^}]+\}/g, "");
 
               fs.writeFileSync(schemaPath, content);
-              console.log("✅ Schema cleaned up for cloud build");
+              console.log("Schema cleaned up for cloud build");
             }
           } catch (e) {
             console.error("❌ ZenStack generation failed", e);

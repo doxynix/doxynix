@@ -18,8 +18,9 @@ import type { Locale } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/utils";
 import { Toaster } from "@/shared/ui/core/sonner";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
-import { HotkeyListeners } from "@/shared/ui/kit/hotkey-listeners";
 import { routing } from "@/i18n/routing";
+
+import { HotkeyListeners } from "@/widgets/hotkey-manager";
 
 import { Providers } from "@/app/providers";
 

@@ -4,8 +4,8 @@ import posthog from "posthog-js";
 import type { TreeApi } from "react-arborist";
 
 import { trpc, type DocType, type UiRepoDetailed } from "@/shared/api/trpc";
-import type { FileNode } from "@/shared/types/repo";
-import type { FileTuple } from "@/shared/types/repo-setup";
+
+import type { FileNode, FileTuple } from "@/entities/repo";
 
 import { collectAllIds, getFolderSelectionState, sortNodes } from "@/features/repo-setup";
 

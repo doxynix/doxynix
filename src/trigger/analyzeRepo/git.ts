@@ -40,7 +40,7 @@ export async function getAnalysisContext(
   }
 
   const token = userToken ?? SYSTEM_TOKEN;
-  const octokit = await githubService.getClientForUser(prisma, userId);
+  const { octokit } = await githubService.getClientContext(prisma, userId);
 
   const { data: refData } = await octokit.git.getRef({
     owner: repo.owner,

@@ -6,71 +6,85 @@ import { Visibility } from "@prisma/client";
 import parseGithubUrl from "parse-github-url";
 
 import { SYSTEM_TOKEN } from "@/shared/constants/env.server";
-import type { RepoItemFields } from "@/shared/types/repo-item";
+import type { RepoItemFields } from "@/shared/types/repo";
 
 import type { DbClient } from "../db/db";
 import { logger } from "../logger/logger";
 import { FileClassifier } from "../utils/file-classifier";
 
 const MyOctokit = Octokit.plugin(retry, throttling, paginateRest);
+type OctokitInstance = InstanceType<typeof MyOctokit>;
 type SearchRepoItem =
   RestEndpointMethodTypes["search"]["repos"]["response"]["data"]["items"][number];
 type ListRepoItem =
   RestEndpointMethodTypes["repos"]["listForAuthenticatedUser"]["response"]["data"][number];
 
 type GitHubRepoResponse = SearchRepoItem | ListRepoItem;
+type GitHubClientContext = {
+  hasUserToken: boolean;
+  octokit: OctokitInstance;
+};
+
+function createClient(token: string): OctokitInstance {
+  return new MyOctokit({
+    auth: token,
+    log: {
+      debug: (msg) => logger.debug({ msg }),
+      error: (msg) => logger.error({ msg }),
+      info: (msg) => logger.info({ msg }),
+      warn: (msg) => logger.warn({ msg }),
+    },
+
+    retry: {
+      doNotRetry: [429],
+    },
+
+    throttle: {
+      onRateLimit: (retryAfter, options, octokit, retryCount) => {
+        octokit.log.warn(
+          `Rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s.`
+        );
+        return retryCount < 2;
+      },
+      onSecondaryRateLimit: (retryAfter, options, octokit) => {
+        octokit.log.warn(
+          `Secondary rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s.`
+        );
+        return true;
+      },
+    },
+
+    userAgent: "Doxynix/1.0.0",
+  });
+}
 
 export const githubService = {
-  async getClientForUser(prisma: DbClient, userId: number) {
+  async getClientContext(prisma: DbClient, userId: number): Promise<GitHubClientContext> {
     const account = await prisma.account.findFirst({
+      select: { access_token: true },
       where: { provider: "github", userId },
     });
 
-    const token = account?.access_token ?? SYSTEM_TOKEN;
+    const userToken = account?.access_token ?? null;
+    const token = userToken ?? SYSTEM_TOKEN;
 
-    // if (token == null) {
-    //   logger.error({ msg: "Token not found in DB and no system token configured", userId });
-    //   throw new TRPCError({
-    //     code: "UNAUTHORIZED",
-    //     message: "GitHub account not connected. Please link your GitHub account in settings.",
-    //   });
-    // }
-
-    return new MyOctokit({
-      auth: token,
-      log: {
-        debug: (msg) => logger.debug({ msg }),
-        error: (msg) => logger.error({ msg }),
-        info: (msg) => logger.info({ msg }),
-        warn: (msg) => logger.warn({ msg }),
-      },
-
-      retry: {
-        doNotRetry: [429],
-      },
-
-      throttle: {
-        onRateLimit: (retryAfter, options, octokit, retryCount) => {
-          octokit.log.warn(
-            `Rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s.`
-          );
-          return retryCount < 2;
-        },
-        onSecondaryRateLimit: (retryAfter, options, octokit) => {
-          octokit.log.warn(
-            `Secondary rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s.`
-          );
-          return true;
-        },
-      },
-
-      userAgent: "Doxynix/1.0.0",
-    });
+    return {
+      hasUserToken: userToken != null,
+      octokit: createClient(token),
+    };
   },
 
   async getMyRepos(prisma: DbClient, userId: number, limit?: number): Promise<RepoItemFields[]> {
     try {
-      const octokit = await this.getClientForUser(prisma, userId);
+      const { hasUserToken, octokit } = await this.getClientContext(prisma, userId);
+
+      if (!hasUserToken) {
+        logger.warn({
+          msg: "GitHub account not linked. Skipping listForAuthenticatedUser call.",
+          userId,
+        });
+        return [];
+      }
 
       if (limit != null) {
         const { data } = await octokit.rest.repos.listForAuthenticatedUser({
@@ -97,7 +111,7 @@ export const githubService = {
   },
 
   async getRepoInfo(prisma: DbClient, userId: number, owner: string, name: string) {
-    const octokit = await this.getClientForUser(prisma, userId);
+    const { octokit } = await this.getClientContext(prisma, userId);
     const { data } = await octokit.repos.get({ owner, repo: name });
 
     return data;
@@ -110,7 +124,7 @@ export const githubService = {
     name: string,
     branch?: string
   ) {
-    const octokit = await this.getClientForUser(prisma, userId);
+    const { octokit } = await this.getClientContext(prisma, userId);
 
     const { data: repoData } = await octokit.repos.get({ owner, repo: name });
     const treeSha = branch ?? repoData.default_branch;
@@ -171,7 +185,7 @@ export const githubService = {
   ): Promise<RepoItemFields[]> {
     if (query.length < 2 || query.length > 256) return [];
 
-    const octokit = await this.getClientForUser(prisma, userId);
+    const { octokit } = await this.getClientContext(prisma, userId);
 
     try {
       const { data } = await octokit.search.repos({

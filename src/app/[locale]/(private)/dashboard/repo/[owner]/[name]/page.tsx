@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import type { ParamTypes } from "@/shared/types/search-params";
+import type { ParamTypes } from "@/entities/repo";
 
 import { RepoSetup } from "@/features/repo-setup";
 
