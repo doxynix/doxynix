@@ -7,8 +7,6 @@ export type SearchParams = {
   visibility?: string;
 };
 
-export type ParamTypes = string | string[] | undefined;
-
 export type FileTuple = [string, number, string, number];
 
 export type FileNode = {

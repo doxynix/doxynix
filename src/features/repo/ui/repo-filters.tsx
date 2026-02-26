@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { parseRepoSearchParams, REPO_DEFAULTS } from "@/shared/lib/search-params";
+import { parseRepoSearchParams, REPO_DEFAULTS } from "@/shared/lib/url-params";
 import { Button } from "@/shared/ui/core/button";
 import {
   Select,
