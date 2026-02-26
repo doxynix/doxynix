@@ -67,12 +67,18 @@ function getCountry(request: NextRequest): string {
   return "UNKNOWN";
 }
 
+function hasPathBoundary(pathname: string, prefix: string): boolean {
+  if (!pathname.startsWith(prefix)) return false;
+  const nextChar = pathname.charAt(prefix.length);
+  return nextChar === "" || nextChar === "/";
+}
+
 function isAnalyticsTunnel(pathname: string): boolean {
-  return ANALYTICS_TUNNELS.some((prefix) => pathname.startsWith(prefix));
+  return ANALYTICS_TUNNELS.some((prefix) => hasPathBoundary(pathname, prefix));
 }
 
 function isUploadThingPath(pathname: string): boolean {
-  return pathname.startsWith("/api/uploadthing");
+  return hasPathBoundary(pathname, "/api/uploadthing");
 }
 
 function logTraffic(
@@ -108,11 +114,13 @@ function getPayloadTooLargeResponse(requestId: string): NextResponse {
 }
 
 function validateRequestSize(request: NextRequest, requestId: string): NextResponse | null {
-  const contentLength = request.headers.get("content-length");
-  if (contentLength != null && Number(contentLength) > ONE_MB) {
-    return getPayloadTooLargeResponse(requestId);
+  const header = request.headers.get("content-length");
+  if (header != null) {
+    const contentLength = Number.parseInt(header, 10);
+    if (!Number.isFinite(contentLength) || contentLength > ONE_MB) {
+      return getPayloadTooLargeResponse(requestId);
+    }
   }
-
   return null;
 }
 

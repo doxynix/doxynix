@@ -1,4 +1,4 @@
-import type { Visibility } from "@prisma/client";
+import type { RepoVisibility } from "../api/trpc";
 
 export type RepoItemFields = {
   description: string | null;
@@ -6,5 +6,5 @@ export type RepoItemFields = {
   language: string | null;
   stars: number;
   updatedAt: string;
-  visibility: Visibility;
+  visibility: RepoVisibility;
 };
