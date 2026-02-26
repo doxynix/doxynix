@@ -75,6 +75,9 @@ describe("GitHub Service", () => {
       expect(octokit.repos.get).toBeDefined();
 
       expect(mockPrisma.account.findFirst).toHaveBeenCalledWith({
+        select: {
+          access_token: true,
+        },
         where: { provider: "github", userId: 1 },
       });
     });
