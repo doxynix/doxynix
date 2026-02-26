@@ -203,7 +203,7 @@
     "@trigger.dev/build": "4.4.1",
     "@types/js-cookie": "3.0.6",
     "@types/jsonwebtoken": "9.0.10",
-    "@types/node": "25.3.1",
+    "@types/node": "25.3.2",
     "@types/nodemailer": "7.0.11",
     "@types/parse-github-url": "1.0.3",
     "@types/pg": "8.16.0",
