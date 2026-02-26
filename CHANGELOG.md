@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.6](https://github.com/doxynix/doxynix/compare/v1.9.5...v1.9.6) (2026-02-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @scalar/nextjs-api-reference to v0.9.24 ([#420](https://github.com/doxynix/doxynix/issues/420)) ([e0e7131](https://github.com/doxynix/doxynix/commit/e0e7131c8ea148a04f75c9bdee7c5cf8be59bb77))
+
 ## [1.9.5](https://github.com/doxynix/doxynix/compare/v1.9.4...v1.9.5) (2026-02-26)
 
 
