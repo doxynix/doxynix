@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.4](https://github.com/doxynix/doxynix/compare/v1.9.3...v1.9.4) (2026-02-26)
+
+
+### Bug Fixes
+
+* **app:** исправления багов, перенос файлов в соответствии с архитектурой проекта ([#414](https://github.com/doxynix/doxynix/issues/414)) ([f370e16](https://github.com/doxynix/doxynix/commit/f370e16dc64f9352a5c2ac78c245d18509ef1ad8))
+* **deps:** update all non-major dependencies ([#411](https://github.com/doxynix/doxynix/issues/411)) ([b43d2aa](https://github.com/doxynix/doxynix/commit/b43d2aa69eb83c70b37977f606a6d1a750a67efa))
+
 ## [1.9.3](https://github.com/doxynix/doxynix/compare/v1.9.2...v1.9.3) (2026-02-26)
 
 
