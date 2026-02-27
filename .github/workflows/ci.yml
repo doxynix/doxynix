@@ -283,12 +283,13 @@ jobs:
       - name: Run Tests with Coverage
         run: pnpm test:coverage
 
-      - name: Report Coverage
-        if: github.event_name == 'pull_request'
-        uses: davelosert/vitest-coverage-report-action@2500dafcee7dd64f85ab689c0b83798a8359770e
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
         with:
-          json-summary-path: './coverage/coverage-summary.json'
-          json-final-path: './coverage/coverage-final.json'
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/coverage-final.json
+          flags: unit
+          fail_ci_if_error: false
 
   # ------------------------------------------------------------------
   # 6. СБОРКА (BUILD)
