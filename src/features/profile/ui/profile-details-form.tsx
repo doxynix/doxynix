@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { User } from "next-auth";
 import { useTranslations } from "next-intl";
@@ -48,6 +48,13 @@ export function ProfileDetailsForm({
     },
     resolver: zodResolver(UpdateProfileSchema),
   });
+
+  useEffect(() => {
+    form.reset({
+      email: user.email ?? "",
+      name: user.name ?? "",
+    });
+  }, [user, form]);
 
   const { updateProfile } = useProfileActions({
     onProfileUpdateSuccess: (data) => {
