@@ -1,5 +1,6 @@
 import tanstackQuery from "@tanstack/eslint-plugin-query";
 import tsParser from "@typescript-eslint/parser";
+import vitest from "@vitest/eslint-plugin";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettierConfig from "eslint-config-prettier";
@@ -14,7 +15,6 @@ import sonarjs from "eslint-plugin-sonarjs";
 import unicorn from "eslint-plugin-unicorn";
 import unusedImportsPlugin from "eslint-plugin-unused-imports";
 import validateJsxNesting from "eslint-plugin-validate-jsx-nesting";
-import vitest from "eslint-plugin-vitest";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
