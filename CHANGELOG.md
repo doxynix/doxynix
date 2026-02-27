@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.0](https://github.com/doxynix/doxynix/compare/v1.9.8...v1.10.0) (2026-02-27)
+
+
+### Features
+
+* **features:** добавлена страница /welcome, также чистка кода и исправление мелких багов ([#432](https://github.com/doxynix/doxynix/issues/432)) ([1596480](https://github.com/doxynix/doxynix/commit/1596480e2056d6d9583fb9c43d82ba3bbce2aa67))
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#434](https://github.com/doxynix/doxynix/issues/434)) ([3ee28c5](https://github.com/doxynix/doxynix/commit/3ee28c51f0da5a2fa8a12b4784acfa3afe0c24e7))
+* **deps:** update dependency @upstash/redis to v1.36.3 ([#431](https://github.com/doxynix/doxynix/issues/431)) ([c7cdf9a](https://github.com/doxynix/doxynix/commit/c7cdf9a64cdd37c5057fe039e19887f3825a5928))
+
 ## [1.9.8](https://github.com/doxynix/doxynix/compare/v1.9.7...v1.9.8) (2026-02-27)
 
 
