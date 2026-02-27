@@ -1,3 +1,5 @@
+// Trigger for CodeRabbit test generation
+
 import { clsx, type ClassValue } from "clsx";
 import { format, type Locale as DateFnsLocale } from "date-fns";
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
