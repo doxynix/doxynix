@@ -46,6 +46,7 @@ export function ProfileDetailsForm({
       email: user.email ?? "",
       name: user.name ?? "",
     },
+    mode: "onChange",
     resolver: zodResolver(UpdateProfileSchema),
   });
 
