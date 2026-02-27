@@ -14,7 +14,7 @@ import sonarjs from "eslint-plugin-sonarjs";
 import unicorn from "eslint-plugin-unicorn";
 import unusedImportsPlugin from "eslint-plugin-unused-imports";
 import validateJsxNesting from "eslint-plugin-validate-jsx-nesting";
-import vitest from "eslint-plugin-vitest";
+import vitest from "@vitest/eslint-plugin";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
