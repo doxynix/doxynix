@@ -31,6 +31,10 @@ describe("url-params helpers", () => {
     it("should return undefined for undefined param", () => {
       expect(getSingleParam(undefined)).toBeUndefined();
     });
+
+    it("should return undefined for empty array", () => {
+      expect(getSingleParam([])).toBeUndefined();
+    });
   });
 
   describe("parseEnum", () => {

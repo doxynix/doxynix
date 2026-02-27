@@ -68,24 +68,30 @@ export function isGitHubUrl(input: string): boolean {
     try {
       const url = new URL(trimmed);
       const protocol = url.protocol.toLowerCase();
-
       if (protocol !== "http:" && protocol !== "https:") return false;
 
       const host = url.hostname.toLowerCase();
-      return host === "github.com" || host.endsWith(".github.com");
+      const isGithubHost = host === "github.com" || host.endsWith(".github.com");
+      if (!isGithubHost) return false;
+
+      const pathParts = url.pathname.split("/").filter(Boolean);
+
+      return pathParts.length >= 2;
     } catch {
       return false;
     }
   }
 
   if (trimmed.startsWith("git@github.com:")) {
-    return true;
+    const pathContent = trimmed.slice("git@github.com:".length);
+    const parts = pathContent.split("/").filter(Boolean);
+
+    return parts.length === 2;
   }
 
-  const cleanPath = trimmed.replace(/^\/+/, "");
-  const parts = cleanPath.split("/");
+  const parts = trimmed.split("/").filter(Boolean);
 
-  return parts.length === 2 && !!parts[0] && !!parts[1];
+  return parts.length === 2;
 }
 
 const SENSITIVE_FIELDS = new Set([

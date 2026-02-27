@@ -299,6 +299,15 @@ describe("githubService", () => {
       expect(data).toEqual(repoPayload);
       expect(octokitState.getRepo).toHaveBeenCalledWith({ owner: "owner", repo: "repo" });
     });
+
+    it("should propagate error when octokit throws", async () => {
+      const { prisma } = createMockPrisma({ access_token: "token" });
+      octokitState.getRepo.mockRejectedValue(new Error("Not found"));
+
+      await expect(githubService.getRepoInfo(prisma, 1, "owner", "repo")).rejects.toThrow(
+        "Not found"
+      );
+    });
   });
 
   describe("getRepoTree", () => {

@@ -76,7 +76,7 @@ describe("highlightCode", () => {
     expect(shikiState.codeToHtml).toHaveBeenCalledTimes(2);
   });
 
-  it("should return highlighted html string and pass normalized dark theme to highlighter", async () => {
+  it("should return highlighted html string and normalize light theme to github-dark-dimmed for the highlighter", async () => {
     shikiState.codeToHtml.mockReturnValue("<pre>console</pre>");
     const { highlightCode } = await import("@/shared/lib/shiki");
 
