@@ -9,8 +9,7 @@
     "src/server/utils/**/*.ts",
     "src/shared/lib/**/*.ts",
     "!src/shared/lib/logger.ts",
-    "!src/shared/lib/uploadthing.ts",
-    "!src/server/utils/requestContext.ts"
+    "!src/shared/lib/uploadthing.ts"
   ],
   "vitest": {
     "configFile": "vitest.config.ts"

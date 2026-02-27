@@ -62,28 +62,36 @@ export function formatFullDate(
 
 export function isGitHubUrl(input: string): boolean {
   const trimmed = input.trim();
-  if (!trimmed) {
-    return false;
-  }
+  if (!trimmed) return false;
 
-  if (!/^https?:\/\//i.test(trimmed) && trimmed.includes("/")) {
+  if (trimmed.includes("://")) {
     try {
-      const normalized = `https://github.com/${trimmed.replace(/^\/+/, "")}`;
-      const parsed = new URL(normalized);
-      const hostname = parsed.hostname.toLowerCase();
-      return hostname === "github.com" || hostname.endsWith(".github.com");
+      const url = new URL(trimmed);
+      const protocol = url.protocol.toLowerCase();
+      if (protocol !== "http:" && protocol !== "https:") return false;
+
+      const host = url.hostname.toLowerCase();
+      const isGithubHost = host === "github.com" || host.endsWith(".github.com");
+      if (!isGithubHost) return false;
+
+      const pathParts = url.pathname.split("/").filter(Boolean);
+
+      return pathParts.length >= 2;
     } catch {
       return false;
     }
   }
 
-  try {
-    const parsed = new URL(trimmed);
-    const hostname = parsed.hostname.toLowerCase();
-    return hostname === "github.com" || hostname.endsWith(".github.com");
-  } catch {
-    return false;
+  if (trimmed.startsWith("git@github.com:")) {
+    const pathContent = trimmed.slice("git@github.com:".length);
+    const parts = pathContent.split("/").filter(Boolean);
+
+    return parts.length === 2;
   }
+
+  const parts = trimmed.split("/").filter(Boolean);
+
+  return parts.length === 2;
 }
 
 const SENSITIVE_FIELDS = new Set([
