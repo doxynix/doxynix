@@ -25,6 +25,12 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
 
   const [avatarUrl, setAvatarUrl] = useState(currentUser.image ?? "");
 
+  React.useEffect(() => {
+    if (currentUser.image != null) {
+      setAvatarUrl(currentUser.image);
+    }
+  }, [currentUser.image]);
+
   const { isUploading, removeAvatar, uploadAvatar } = useProfileActions({
     onAvatarRemoveSuccess: () => {
       setAvatarUrl("");

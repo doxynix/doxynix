@@ -150,16 +150,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
               </AppTooltip>
             )}
             {!hasAnalysis && (
-              <Button
-                asChild
-                size="sm"
-                variant="outline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  console.log("Analyze clicked", repo.id);
-                }}
-                className="mt-2 cursor-pointer"
-              >
+              <Button asChild size="sm" variant="outline" className="mt-2 cursor-pointer">
                 <Link href={`/dashboard/repo/${repo.owner}/${repo.name}/analyze`}>
                   <Play className="h-4 w-4" />
                   Run Analysis

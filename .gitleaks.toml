@@ -1,5 +1,8 @@
-[allowlist]
-description = "Ignore .env.example files"
-paths = [
-  '''\.env\.example$'''
-]
+[[allowlists]]
+  description = "Allow placeholder values in .env.example"
+  paths = ['''\.env\.example$''']
+  regexTarget = "match"
+  regexes = [
+    '''^(example|placeholder|test|xxx|your-|<.*>)''',
+    '''^$'''
+  ]

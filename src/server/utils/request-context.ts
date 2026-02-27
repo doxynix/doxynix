@@ -31,6 +31,7 @@ export function anonymizeIp(ip: string | undefined | null): string {
 
   if (ip.includes(":")) {
     const parts = ip.split(":");
+    if (parts.length < 4) return "unknown";
     return `${parts.slice(0, 4).join(":")}::`;
   }
 

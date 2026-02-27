@@ -4,8 +4,8 @@ import { cn, getInitials } from "@/shared/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/core/avatar";
 
 type Props = {
-  avatarClassName: string;
-  avatarFallbackClassName: string;
+  avatarClassName?: string;
+  avatarFallbackClassName?: string;
   avatarUrl?: string | null;
   user: User | null;
 };

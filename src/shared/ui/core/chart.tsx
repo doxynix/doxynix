@@ -139,7 +139,7 @@ const ChartTooltipContent = React.forwardRef<
       const value =
         !labelKey && typeof label === "string" && rawConfig in config
           ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            config[rawConfig]?.label || label
+            (config[rawConfig]?.label ?? label)
           : itemConfig?.label;
 
       if (labelFormatter) {
