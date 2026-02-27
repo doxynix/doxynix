@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.0](https://github.com/doxynix/doxynix/compare/v1.10.0...v1.11.0) (2026-02-27)
+
+
+### Features
+
+* **tooling:** добавлены исчерпывающие на данный момент юнит тесты с покрытием 98% ([#440](https://github.com/doxynix/doxynix/issues/440)) ([e0c89d9](https://github.com/doxynix/doxynix/commit/e0c89d9e081d6866673044340077627f7db189cf))
+
 ## [1.10.0](https://github.com/doxynix/doxynix/compare/v1.9.8...v1.10.0) (2026-02-27)
 
 
