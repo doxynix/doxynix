@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.8](https://github.com/doxynix/doxynix/compare/v1.9.7...v1.9.8) (2026-02-27)
+
+
+### Bug Fixes
+
+* **deps:** update shiki monorepo to v4 (major) ([#428](https://github.com/doxynix/doxynix/issues/428)) ([0cd5269](https://github.com/doxynix/doxynix/commit/0cd52697c2a3f3541c803425d947564f111ebe8d))
+
 ## [1.9.7](https://github.com/doxynix/doxynix/compare/v1.9.6...v1.9.7) (2026-02-27)
 
 
