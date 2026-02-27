@@ -62,28 +62,30 @@ export function formatFullDate(
 
 export function isGitHubUrl(input: string): boolean {
   const trimmed = input.trim();
-  if (!trimmed) {
-    return false;
-  }
+  if (!trimmed) return false;
 
-  if (!/^https?:\/\//i.test(trimmed) && trimmed.includes("/")) {
+  if (trimmed.includes("://")) {
     try {
-      const normalized = `https://github.com/${trimmed.replace(/^\/+/, "")}`;
-      const parsed = new URL(normalized);
-      const hostname = parsed.hostname.toLowerCase();
-      return hostname === "github.com" || hostname.endsWith(".github.com");
+      const url = new URL(trimmed);
+      const protocol = url.protocol.toLowerCase();
+
+      if (protocol !== "http:" && protocol !== "https:") return false;
+
+      const host = url.hostname.toLowerCase();
+      return host === "github.com" || host.endsWith(".github.com");
     } catch {
       return false;
     }
   }
 
-  try {
-    const parsed = new URL(trimmed);
-    const hostname = parsed.hostname.toLowerCase();
-    return hostname === "github.com" || hostname.endsWith(".github.com");
-  } catch {
-    return false;
+  if (trimmed.startsWith("git@github.com:")) {
+    return true;
   }
+
+  const cleanPath = trimmed.replace(/^\/+/, "");
+  const parts = cleanPath.split("/");
+
+  return parts.length === 2 && !!parts[0] && !!parts[1];
 }
 
 const SENSITIVE_FIELDS = new Set([

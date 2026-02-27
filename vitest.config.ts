@@ -39,7 +39,6 @@ export default defineConfig({
         "src/server/trpc/router/**/*",
         "src/shared/lib/logger.ts",
         "src/shared/lib/uploadthing.ts",
-        "src/server/utils/requestContext.ts",
       ],
     },
   },
