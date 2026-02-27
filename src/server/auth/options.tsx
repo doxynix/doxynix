@@ -85,7 +85,7 @@ export const authOptions: NextAuthOptions = {
 
   pages: {
     error: "/auth/error", // TODO: Реализовать /auth/error page
-    newUser: "/welcome", // TODO: Реализовать /welcome page
+    newUser: "/welcome",
     signIn: "/auth",
     signOut: "/",
     verifyRequest: "/auth",

@@ -135,9 +135,11 @@ const ChartTooltipContent = React.forwardRef<
       const [item] = payload;
       const key = `${labelKey || item.dataKey || item.name || "value"}`;
       const itemConfig = getPayloadConfigFromPayload(config, item, key);
+      const rawConfig = label as keyof typeof config;
       const value =
-        !labelKey && typeof label === "string"
-          ? config[label as keyof typeof config].label || label
+        !labelKey && typeof label === "string" && rawConfig in config
+          ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            config[rawConfig]?.label || label
           : itemConfig?.label;
 
       if (labelFormatter) {

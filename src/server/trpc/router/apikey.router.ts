@@ -1,12 +1,14 @@
 import crypto from "node:crypto";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 
-import { OpenApiErrorResponses } from "@/server/trpc/shared";
-import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 import { handlePrismaError } from "@/server/utils/handle-prisma-error";
 import { ApiKeySchema } from "@/generated/zod";
+
+import { OpenApiErrorResponses } from "../shared";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const BRAND_PREFIX = "dxnx_";
 
@@ -130,10 +132,17 @@ export const apiKeyRouter = createTRPCRouter({
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.db.apiKey.updateMany({
+        const result = await ctx.db.apiKey.updateMany({
           data: { lastUsed: new Date() },
           where: { id: input.id },
         });
+
+        if (result.count === 0) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "API Key not found or access denied",
+          });
+        }
 
         return { success: true };
       } catch (error) {
@@ -167,7 +176,10 @@ export const apiKeyRouter = createTRPCRouter({
         });
 
         if (data.count === 0) {
-          throw new Error("Key not found or access denied");
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Key not found or access denied",
+          });
         }
 
         return { message: "API Key data updated", success: true };

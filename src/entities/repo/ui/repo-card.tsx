@@ -151,6 +151,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
             )}
             {!hasAnalysis && (
               <Button
+                asChild
                 size="sm"
                 variant="outline"
                 onClick={(e) => {
@@ -159,8 +160,10 @@ export function RepoCard({ repo }: Readonly<Props>) {
                 }}
                 className="mt-2 cursor-pointer"
               >
-                <Play className="h-3 w-3" />
-                Run Analysis
+                <Link href={`/dashboard/repo/${repo.owner}/${repo.name}/analyze`}>
+                  <Play className="h-4 w-4" />
+                  Run Analysis
+                </Link>
               </Button>
             )}
           </div>

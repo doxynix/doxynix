@@ -7,8 +7,6 @@ import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 import { userNavMenu } from "@/shared/constants/navigation";
-import { getInitials } from "@/shared/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/core/avatar";
 import { Button } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -33,9 +31,11 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 import { Link } from "@/i18n/routing";
 
+import { ProfileAvatar } from "@/features/profile";
+
 export function UserNav() {
   const { data: session, status } = useSession();
-  const user = session?.user;
+  const user = session?.user ?? null;
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
 
@@ -61,10 +61,12 @@ export function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="flex cursor-pointer items-center gap-3">
-          <Avatar className="h-9 w-9">
-            <AvatarImage alt={name ?? "User"} src={avatar ?? undefined} className="object-cover" />
-            <AvatarFallback className="text-xs">{getInitials(name, email)}</AvatarFallback>
-          </Avatar>
+          <ProfileAvatar
+            avatarClassName="w-9 h-9"
+            avatarFallbackClassName="text-xs"
+            avatarUrl={avatar}
+            user={user}
+          />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">

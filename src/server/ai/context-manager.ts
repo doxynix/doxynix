@@ -1,4 +1,4 @@
-import { cleanCodeForAi } from "@/server/utils/optimizers";
+import { cleanCodeForAi } from "../utils/optimizers";
 
 type FileEntry = { content: string; path: string };
 

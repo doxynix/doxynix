@@ -5,9 +5,10 @@ import z from "zod";
 import { UpdateProfileSchema } from "@/shared/api/schemas/user";
 
 import { logger } from "@/server/logger/logger";
-import { OpenApiErrorResponses } from "@/server/trpc/shared";
-import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 import { UserSchema } from "@/generated/zod";
+
+import { OpenApiErrorResponses } from "../shared";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const utapi = new UTApi();
 

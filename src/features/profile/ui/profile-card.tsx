@@ -1,53 +1,31 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
 import type { User } from "next-auth";
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
-import type z from "zod";
 
-import { UpdateProfileSchema } from "@/shared/api/schemas/user";
-import { getInitials } from "@/shared/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/core/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/ui/core/form";
-import { Input } from "@/shared/ui/core/input";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { useProfileActions } from "../model/use-profile-actions";
-
-type ProfileFormValues = z.infer<typeof UpdateProfileSchema>;
+import { ProfileAvatar } from "./profile-avatar";
+import { ProfileDetailsForm } from "./profile-details-form";
 
 type Props = {
   user: User;
 };
 
-export function ProfileCard({ user }: Readonly<Props>) {
-  const tCommon = useTranslations("Common");
+export function ProfileCard({ user: initialUser }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
+  const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const currentUser = session?.user ?? initialUser;
 
-  const [displayUser, setDisplayUser] = useState<User>(user);
-  const [avatarUrl, setAvatarUrl] = useState(user.image ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(currentUser.image ?? "");
 
-  const form = useForm<ProfileFormValues>({
-    defaultValues: {
-      email: displayUser.email ?? "",
-      name: displayUser.name ?? "",
-    },
-    resolver: zodResolver(UpdateProfileSchema),
-  });
-
-  const { isUploading, removeAvatar, updateProfile, uploadAvatar } = useProfileActions({
+  const { isUploading, removeAvatar, uploadAvatar } = useProfileActions({
     onAvatarRemoveSuccess: () => {
       setAvatarUrl("");
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -55,28 +33,12 @@ export function ProfileCard({ user }: Readonly<Props>) {
     onAvatarUpdateSuccess: (url) => {
       setAvatarUrl(url);
     },
-    onProfileUpdateSuccess: (data) => {
-      setDisplayUser((prev) => ({
-        ...prev,
-        email: data.email,
-        name: data.name,
-      }));
-
-      form.reset({
-        email: data.email ?? "",
-        name: data.name ?? "",
-      });
-    },
   });
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     await uploadAvatar([file]);
-  };
-
-  const onSubmit = (values: ProfileFormValues) => {
-    updateProfile.mutate(values);
   };
 
   return (
@@ -88,12 +50,12 @@ export function ProfileCard({ user }: Readonly<Props>) {
         </CardHeader>
         <CardContent className="flex items-center gap-6">
           <div className="relative">
-            <Avatar className="border-border h-24 w-24 border-2">
-              <AvatarImage src={avatarUrl || undefined} className="object-cover" />
-              <AvatarFallback className="text-2xl">
-                {getInitials(displayUser.name, displayUser.email)}
-              </AvatarFallback>
-            </Avatar>
+            <ProfileAvatar
+              avatarClassName="border-border h-24 w-24 border-2"
+              avatarFallbackClassName="text-2xl"
+              avatarUrl={avatarUrl || undefined}
+              user={currentUser}
+            />
             {avatarUrl && (
               <LoadingButton
                 disabled={removeAvatar.isPending}
@@ -142,59 +104,7 @@ export function ProfileCard({ user }: Readonly<Props>) {
           {/* <CardDescription>Update your name or email.</CardDescription> */}
         </CardHeader>
         <CardContent className="space-y-4">
-          <Form {...form}>
-            <form
-              onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-              className="flex w-full flex-col gap-4"
-            >
-              <FormField
-                name="name"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel className="text-muted-foreground">
-                      {t("settings_profile_personal_information_label")}
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        disabled={updateProfile.isPending}
-                        placeholder={t("settings_profile_personal_information_placeholder")}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel className="text-muted-foreground">Email</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input {...field} className="text-sm sm:text-base" placeholder="Your email" />
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              /> */}
-              <div className="flex justify-end">
-                <LoadingButton
-                  disabled={
-                    !form.formState.isDirty || !form.formState.isValid || updateProfile.isPending
-                  }
-                  isLoading={updateProfile.isPending}
-                  loadingText="Saving..."
-                  className="cursor-pointer"
-                >
-                  {tCommon("save")}
-                </LoadingButton>
-              </div>
-            </form>
-          </Form>
+          <ProfileDetailsForm user={currentUser} />
         </CardContent>
       </Card>
     </div>

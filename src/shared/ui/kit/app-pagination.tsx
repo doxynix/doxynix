@@ -56,8 +56,12 @@ export function AppPagination({ className, meta }: Readonly<Props>) {
     return str ? `${pathname}?${str}` : pathname;
   };
 
+  const isPrevDisabled = meta.currentPage <= 1;
+  const isNextDisabled = meta.currentPage >= meta.totalPages;
+
   const isPrevLoading = isPending && clickedButton === "prev";
   const isNextLoading = isPending && clickedButton === "next";
+
   const navBtnClass = "gap-1 pl-2.5 pr-4 min-w-[100px] flex items-center justify-center";
 
   return (
@@ -72,13 +76,18 @@ export function AppPagination({ className, meta }: Readonly<Props>) {
         <PaginationItem>
           <PaginationLink
             href={createPageURL(meta.currentPage - 1) as Route}
-            aria-disabled={meta.currentPage <= 1}
-            onClick={(e) =>
-              meta.currentPage > 1 && handlePageClick(e, meta.currentPage - 1, "prev")
-            }
+            tabIndex={isPrevDisabled ? -1 : undefined}
+            aria-disabled={isPrevDisabled}
+            onClick={(e) => {
+              if (isPrevDisabled) {
+                e.preventDefault();
+                return;
+              }
+              handlePageClick(e, meta.currentPage - 1, "prev");
+            }}
             className={cn(
               navBtnClass,
-              meta.currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
+              isPrevDisabled ? "pointer-events-none opacity-50" : "cursor-pointer"
             )}
           >
             {isPrevLoading ? (
@@ -123,16 +132,19 @@ export function AppPagination({ className, meta }: Readonly<Props>) {
         <PaginationItem>
           <PaginationLink
             href={createPageURL(meta.currentPage + 1) as Route}
-            aria-disabled={meta.currentPage >= meta.totalPages}
-            onClick={(e) =>
-              meta.currentPage < meta.totalPages && handlePageClick(e, meta.currentPage + 1, "next")
-            }
+            tabIndex={isNextDisabled ? -1 : undefined}
+            aria-disabled={isNextDisabled}
+            onClick={(e) => {
+              if (isNextDisabled) {
+                e.preventDefault();
+                return;
+              }
+              handlePageClick(e, meta.currentPage + 1, "next");
+            }}
             className={cn(
               navBtnClass,
               "pr-2.5 pl-4",
-              meta.currentPage >= meta.totalPages
-                ? "pointer-events-none opacity-50"
-                : "cursor-pointer"
+              isNextDisabled ? "pointer-events-none opacity-50" : "cursor-pointer"
             )}
           >
             <span className="mr-1">{t("next")}</span>

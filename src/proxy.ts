@@ -5,6 +5,7 @@ import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { redisClient } from "./server/lib/redis";
 import { logger } from "./server/logger/logger";
+import { anonymizeIp, getCountry, getIp, getUa } from "./server/utils/request-context";
 import { API_PREFIX, IS_PROD } from "./shared/constants/env.client";
 import { TURNSTILE_SECRET_KEY } from "./shared/constants/env.server";
 import { LOCALE_REGEX_STR } from "./shared/constants/locales";
@@ -28,43 +29,10 @@ if (IS_PROD) {
 
 const intlMiddleware = createMiddleware(routing);
 
-type VercelNextRequest = NextRequest & {
-  geo?: {
-    city?: string;
-    country?: string;
-    region?: string;
-  };
-  ip?: string;
-};
-
 async function hashToken(token: string): Promise<string> {
   const data = new TextEncoder().encode(token);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   return Buffer.from(hashBuffer).toString("hex");
-}
-
-function getIp(request: NextRequest): string {
-  return (
-    (request as VercelNextRequest).ip ??
-    request.headers.get("x-forwarded-for")?.split(",")[0] ??
-    "127.0.0.1"
-  );
-}
-
-function getUa(request: NextRequest): string {
-  return request.headers.get("user-agent") ?? "unknown";
-}
-
-function getCountry(request: NextRequest): string {
-  const geoCountry = (request as VercelNextRequest).geo?.country;
-  if (geoCountry != null) return geoCountry;
-
-  const vercelHeader = request.headers.get("x-vercel-ip-country");
-  if (vercelHeader != null) return vercelHeader.toUpperCase();
-
-  if (!IS_PROD) return "LOCAL";
-
-  return "UNKNOWN";
 }
 
 function hasPathBoundary(pathname: string, prefix: string): boolean {
@@ -94,7 +62,7 @@ function logTraffic(
 ) {
   logger.info({
     country,
-    ip,
+    ip: anonymizeIp(ip),
     method,
     msg,
     path,

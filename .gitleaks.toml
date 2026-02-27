@@ -1,0 +1,5 @@
+[allowlist]
+description = "Ignore .env.example files"
+paths = [
+  '''\.env\.example$'''
+]

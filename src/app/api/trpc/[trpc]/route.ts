@@ -1,3 +1,4 @@
+import type { NextRequest } from "next/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 import { IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
@@ -5,7 +6,7 @@ import { IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
 import { createContext } from "@/server/trpc/context";
 import { appRouter } from "@/server/trpc/router";
 
-const handler = (req: Request) =>
+const handler = (req: NextRequest) =>
   fetchRequestHandler({
     createContext: () => createContext({ req }),
     endpoint: TRPC_PREFIX,
