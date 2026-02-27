@@ -1,8 +1,9 @@
 import z from "zod";
 
-import { OpenApiErrorResponses } from "@/server/trpc/shared";
-import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 import { StatusSchema } from "@/generated/zod";
+
+import { OpenApiErrorResponses } from "../shared";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const LanguageMetricSchema = z.object({
   color: z.string(),

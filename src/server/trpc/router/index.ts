@@ -1,10 +1,10 @@
-import { analyticsRouter } from "@/server/trpc/router/analytics.router";
-import { apiKeyRouter } from "@/server/trpc/router/apikey.router";
-import { healthRouter } from "@/server/trpc/router/health.router";
-import { notificationRouter } from "@/server/trpc/router/notificatons.router";
-import { repoRouter } from "@/server/trpc/router/repo.router";
-import { userRouter } from "@/server/trpc/router/user.router";
-import { createTRPCRouter } from "@/server/trpc/trpc";
+import { createTRPCRouter } from "../trpc";
+import { analyticsRouter } from "./analytics.router";
+import { apiKeyRouter } from "./apikey.router";
+import { healthRouter } from "./health.router";
+import { notificationRouter } from "./notificatons.router";
+import { repoRouter } from "./repo.router";
+import { userRouter } from "./user.router";
 
 export const appRouter = createTRPCRouter({
   analytics: analyticsRouter,

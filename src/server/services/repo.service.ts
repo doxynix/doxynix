@@ -1,9 +1,8 @@
 import { Status, Visibility, type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
-import type { DbClient } from "@/server/db/db";
-import { handlePrismaError } from "@/server/utils/handle-prisma-error";
-
+import type { DbClient } from "../db/db";
+import { handlePrismaError } from "../utils/handle-prisma-error";
 import { githubService } from "./github.service";
 
 type OctokitError = {

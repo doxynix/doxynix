@@ -1,18 +1,19 @@
 import crypto from "node:crypto";
+import type { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { prisma } from "@/server/db/db";
-
 import { authOptions } from "../auth/options";
+import { prisma } from "../db/db";
 import { redisClient } from "../lib/redis";
+import { getIp, getUa } from "../utils/request-context";
 
 type Props = {
-  req: Request;
+  req: NextRequest;
 };
 
 export async function createContext({ req }: Props) {
-  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
-  const userAgent = req.headers.get("user-agent") ?? "unknown";
+  const ip = getIp(req);
+  const userAgent = getUa(req);
   const requestInfo = { ip, userAgent };
 
   const authHeader = req.headers.get("authorization");

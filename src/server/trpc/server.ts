@@ -2,12 +2,13 @@ import "server-only";
 
 import { cache } from "react";
 import { headers } from "next/headers";
+import { NextRequest } from "next/server";
 
 import { IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
 
-import { createContext } from "@/server/trpc/context";
-import { appRouter } from "@/server/trpc/router";
-import { createCallerFactory } from "@/server/trpc/trpc";
+import { createContext } from "./context";
+import { appRouter } from "./router";
+import { createCallerFactory } from "./trpc";
 
 const caller = createCallerFactory(appRouter);
 
@@ -19,7 +20,7 @@ export const api = cache(async () => {
   const host = heads.get("host") ?? "localhost:3000";
 
   const ctx = await createContext({
-    req: new Request(`${protocol}://${host}${TRPC_PREFIX}`, { headers: heads }),
+    req: new NextRequest(`${protocol}://${host}${TRPC_PREFIX}`, { headers: heads }),
   });
 
   return caller(ctx);

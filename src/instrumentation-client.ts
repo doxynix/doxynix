@@ -52,11 +52,13 @@ Sentry.init({
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
 
-posthog.init(NEXT_PUBLIC_POSTHOG_KEY, {
-  api_host: `${API_PREFIX}/dxnx/p`,
-  capture_exceptions: false,
-  debug: IS_DEV,
-  defaults: "2026-01-30",
-  disable_session_recording: true,
-  ui_host: "https://us.posthog.com",
-});
+if (IS_PROD) {
+  posthog.init(NEXT_PUBLIC_POSTHOG_KEY, {
+    api_host: `${API_PREFIX}/dxnx/p`,
+    capture_exceptions: false,
+    debug: IS_DEV,
+    defaults: "2026-01-30",
+    disable_session_recording: true,
+    ui_host: "https://us.posthog.com",
+  });
+}

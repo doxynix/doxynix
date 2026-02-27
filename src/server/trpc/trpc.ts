@@ -7,11 +7,10 @@ import type { OpenApiMeta } from "trpc-to-openapi";
 
 import { IS_PROD } from "@/shared/constants/env.client";
 
-import type { Context } from "@/server/trpc/context";
-import { requestContext } from "@/server/utils/request-context";
-
 import type { DbClient } from "../db/db";
 import { logger } from "../logger/logger";
+import { anonymizeIp, requestContext } from "../utils/request-context";
+import type { Context } from "./context";
 
 export const t = initTRPC
   .context<Context>()
@@ -70,7 +69,7 @@ const contextMiddleware = t.middleware(async ({ ctx, next, path, type }) => {
 
   return requestContext.run(
     {
-      ip: ctx.requestInfo.ip,
+      ip: anonymizeIp(ctx.requestInfo.ip),
       method: type,
       origin: ctx.req.headers.get("origin") ?? undefined,
       path,

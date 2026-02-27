@@ -7,11 +7,12 @@ import { CreateRepoSchema, GitHubQuerySchema } from "@/shared/api/schemas/repo";
 
 import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
-import { OpenApiErrorResponses, RepoFilterSchema } from "@/server/trpc/shared";
-import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 import { FileClassifier } from "@/server/utils/file-classifier";
 import { handlePrismaError } from "@/server/utils/handle-prisma-error";
 import { DocTypeSchema, RepoSchema, StatusSchema } from "@/generated/zod";
+
+import { OpenApiErrorResponses, RepoFilterSchema } from "../shared";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const PublicRepoSchema = RepoSchema.extend({
   id: z.string(),
