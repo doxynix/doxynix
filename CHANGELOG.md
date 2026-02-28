@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.3](https://github.com/doxynix/doxynix/compare/v1.11.2...v1.11.3) (2026-02-28)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#444](https://github.com/doxynix/doxynix/issues/444)) ([7bdb505](https://github.com/doxynix/doxynix/commit/7bdb505ce5f7a090dec5f87ee75683634eb11978))
+
 ## [1.11.2](https://github.com/doxynix/doxynix/compare/v1.11.1...v1.11.2) (2026-02-28)
 
 
