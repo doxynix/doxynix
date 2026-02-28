@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.2](https://github.com/doxynix/doxynix/compare/v1.11.1...v1.11.2) (2026-02-28)
+
+
+### Bug Fixes
+
+* **security:** исправление rce-уязвимости в пакете serialize-javascript ([#446](https://github.com/doxynix/doxynix/issues/446)) ([96d2bbb](https://github.com/doxynix/doxynix/commit/96d2bbbe93c4e8297812ba01e8b404d234edcb9a))
+
 ## [1.11.1](https://github.com/doxynix/doxynix/compare/v1.11.0...v1.11.1) (2026-02-28)
 
 
