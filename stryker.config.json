@@ -8,11 +8,11 @@
     "src/server/services/**/*.ts",
     "src/server/utils/**/*.ts",
     "src/shared/lib/**/*.ts",
-    "!src/shared/lib/logger.ts",
+    "!src/server/logger/logger.ts",
     "!src/shared/lib/uploadthing.ts"
   ],
   "vitest": {
-    "configFile": "vitest.config.ts"
+    "configFile": "vitest.stryker.config.ts"
   },
   "coverageAnalysis": "perTest",
   "ignoreStatic": true,
