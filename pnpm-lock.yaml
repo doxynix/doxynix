@@ -201,8 +201,8 @@ importers:
         specifier: 9.3.1
         version: 9.3.1
       lucide-react:
-        specifier: 0.575.0
-        version: 0.575.0(react@19.2.4)
+        specifier: 0.576.0
+        version: 0.576.0(react@19.2.4)
       motion:
         specifier: 12.34.3
         version: 12.34.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -237,11 +237,11 @@ importers:
         specifier: 10.3.1
         version: 10.3.1
       posthog-js:
-        specifier: 1.356.1
-        version: 1.356.1
+        specifier: 1.356.2
+        version: 1.356.2
       posthog-node:
-        specifier: 5.26.0
-        version: 5.26.0
+        specifier: 5.26.1
+        version: 5.26.1
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -267,8 +267,8 @@ importers:
         specifier: 0.0.1
         version: 0.0.1
       shiki:
-        specifier: 4.0.0
-        version: 4.0.0
+        specifier: 4.0.1
+        version: 4.0.1
       simple-git:
         specifier: 3.32.3
         version: 3.32.3
@@ -370,8 +370,8 @@ importers:
         specifier: 11.3.1
         version: 11.3.1
       '@shikijs/transformers':
-        specifier: 4.0.0
-        version: 4.0.0
+        specifier: 4.0.1
+        version: 4.0.1
       '@stryker-mutator/core':
         specifier: 9.6.0
         version: 9.6.0(@types/node@25.3.3)
@@ -448,14 +448,14 @@ importers:
         specifier: 1.6.9
         version: 1.6.9(eslint@9.39.3(jiti@1.21.7))(typescript@5.9.3)(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.3.3)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       '@zenstackhq/sdk':
-        specifier: 3.4.1
-        version: 3.4.1
+        specifier: 3.4.2
+        version: 3.4.2
       '@zenstackhq/trpc':
         specifier: 2.22.1
         version: 2.22.1(@prisma/client@6.19.2(prisma@6.19.2(typescript@5.9.3))(typescript@5.9.3))(typescript@5.9.3)(zod@4.3.6)
       '@zenstackhq/zod':
-        specifier: 3.4.1
-        version: 3.4.1(zod@4.3.6)
+        specifier: 3.4.2
+        version: 3.4.2(zod@4.3.6)
       babel-plugin-react-compiler:
         specifier: 1.0.0
         version: 1.0.0
@@ -493,8 +493,8 @@ importers:
         specifier: 5.6.0
         version: 5.6.0(eslint@9.39.3(jiti@1.21.7))(typescript@5.9.3)
       eslint-plugin-playwright:
-        specifier: 2.8.0
-        version: 2.8.0(eslint@9.39.3(jiti@1.21.7))
+        specifier: 2.9.0
+        version: 2.9.0(eslint@9.39.3(jiti@1.21.7))
       eslint-plugin-prettier:
         specifier: 5.5.5
         version: 5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@9.39.3(jiti@1.21.7)))(eslint@9.39.3(jiti@1.21.7))(prettier@3.8.1)
@@ -2891,8 +2891,8 @@ packages:
   '@posthog/core@1.23.1':
     resolution: {integrity: sha512-GViD5mOv/mcbZcyzz3z9CS0R79JzxVaqEz4sP5Dsea178M/j3ZWe6gaHDZB9yuyGfcmIMQ/8K14yv+7QrK4sQQ==}
 
-  '@posthog/types@1.356.1':
-    resolution: {integrity: sha512-miIUjs4LiBDMOxKkC87HEJLIih0pNGMAjxx+mW4X7jLpN41n0PLMW7swRE6uuxcMV0z3H6MllRSCYmsokkyfuQ==}
+  '@posthog/types@1.356.2':
+    resolution: {integrity: sha512-KRrOv1c1rJpEh0rt7ZGZqIVGao72ONl0N2vkI3NwVzrazXRnEBp9PGx5/BCqayOaCC0hreMAA4Im0aYWpAw+sQ==}
 
   '@prisma/adapter-pg@6.19.2':
     resolution: {integrity: sha512-t80uX4u4+V/F/OO220LVFY2nsXRGvt8x7PDDveQJJUrGAq4yKHiHiwxOb/PusUSioKkJrgLZjzLwGrpPYG4arw==}
@@ -4208,48 +4208,48 @@ packages:
     peerDependencies:
       webpack: '>=5.0.0'
 
-  '@shikijs/core@4.0.0':
-    resolution: {integrity: sha512-tvV94Dwyz4qFZ8R0MUaFx5Yptgy8yrloa4dwynEJDGjKz+8vqO8Q6FmPZL9W1gSzFHOUMOGQzIHK62aGourFxA==}
+  '@shikijs/core@4.0.1':
+    resolution: {integrity: sha512-vWvqi9JNgz1dRL9Nvog5wtx7RuNkf7MEPl2mU/cyUUxJeH1CAr3t+81h8zO8zs7DK6cKLMoU9TvukWIDjP4Lzg==}
     engines: {node: '>=20'}
 
-  '@shikijs/engine-javascript@4.0.0':
-    resolution: {integrity: sha512-+PEyTS+JTz2lLy2C1Dwwx6hzoehIzqxQYh5MEjv9V4JtSabx+bIkRHfQT+6DnBmPAplGH0exBknWeiJSXC7w1w==}
+  '@shikijs/engine-javascript@4.0.1':
+    resolution: {integrity: sha512-DJK9NiwtGYqMuKCRO4Ip0FKNDQpmaiS+K5bFjJ7DWFn4zHueDWgaUG8kAofkrnXF6zPPYYQY7J5FYVW9MbZyBg==}
     engines: {node: '>=20'}
 
   '@shikijs/engine-oniguruma@3.23.0':
     resolution: {integrity: sha512-1nWINwKXxKKLqPibT5f4pAFLej9oZzQTsby8942OTlsJzOBZ0MWKiwzMsd+jhzu8YPCHAswGnnN1YtQfirL35g==}
 
-  '@shikijs/engine-oniguruma@4.0.0':
-    resolution: {integrity: sha512-KXmq4b6Xw16+4+rz5M4NZMoe/tzs5kTOMSJz8+LCyxSrwmxwTBAM/ab85iSO2Gw79E47HkW4B9HPHUXhrNOivw==}
+  '@shikijs/engine-oniguruma@4.0.1':
+    resolution: {integrity: sha512-oCWdCTDch3J8Kc0OZJ98KuUPC02O1VqIE3W/e2uvrHqTxYRR21RGEJMtchrgrxhsoJJCzmIciKsqG+q/yD+Cxg==}
     engines: {node: '>=20'}
 
   '@shikijs/langs@3.23.0':
     resolution: {integrity: sha512-2Ep4W3Re5aB1/62RSYQInK9mM3HsLeB91cHqznAJMuylqjzNVAVCMnNWRHFtcNHXsoNRayP9z1qj4Sq3nMqYXg==}
 
-  '@shikijs/langs@4.0.0':
-    resolution: {integrity: sha512-dSAT6fBcnOcYZQMWZO8+OmzUKKm+OO0As/qZ3TXLiSy0JsCTEYz1TaX7TDupnYLz7dr0oF2DOTEgPocx1D3aFw==}
+  '@shikijs/langs@4.0.1':
+    resolution: {integrity: sha512-v/mluaybWdnGJR4GqAR6zh8qAZohW9k+cGYT28Y7M8+jLbC0l4yG085O1A+WkseHTn+awd+P3UBymb2+MXFc8w==}
     engines: {node: '>=20'}
 
-  '@shikijs/primitive@4.0.0':
-    resolution: {integrity: sha512-6K2zD7JTgsyFc2vM1rqy8eRGC8D5Hius3qzVONjq2lHMrqfTSn1HcGeJZiFPYSV9m3DQuBHncBbA5xe0hKSOkQ==}
+  '@shikijs/primitive@4.0.1':
+    resolution: {integrity: sha512-ns0hHZc5eWZuvuIEJz2pTx3Qecz0aRVYumVQJ8JgWY2tq/dH8WxdcVM49Fc2NsHEILNIT6vfdW9MF26RANWiTA==}
     engines: {node: '>=20'}
 
   '@shikijs/themes@3.23.0':
     resolution: {integrity: sha512-5qySYa1ZgAT18HR/ypENL9cUSGOeI2x+4IvYJu4JgVJdizn6kG4ia5Q1jDEOi7gTbN4RbuYtmHh0W3eccOrjMA==}
 
-  '@shikijs/themes@4.0.0':
-    resolution: {integrity: sha512-xe42kvxOXan5ouXxULez6qwDNUJkoP6kicfg0wKuJBkeIaHLxZBZa2gEGYutL1q27DQZ5+XoR6caVX+E/aNR5A==}
+  '@shikijs/themes@4.0.1':
+    resolution: {integrity: sha512-FW41C/D6j/yKQkzVdjrRPiJCtgeDaYRJFEyCKFCINuRJRj9WcmubhP4KQHPZ4+9eT87jruSrYPyoblNRyDFzvA==}
     engines: {node: '>=20'}
 
-  '@shikijs/transformers@4.0.0':
-    resolution: {integrity: sha512-EreHG7BVel+oY2e6yzoH3Yqk3OkS71cZnjJ35eSWhYcHSDqCajBQaWYyjmPRK5QG8VgzuMBhTW8UW4/Js+/8eQ==}
+  '@shikijs/transformers@4.0.1':
+    resolution: {integrity: sha512-oE46W2eHpvD06+C0MBthd2YrDM6cktvJDFl764tOEXxfr3dAJhxMc0uNZ2tQXp+bkMgl4E7IL88Mj9RnSqiayw==}
     engines: {node: '>=20'}
 
   '@shikijs/types@3.23.0':
     resolution: {integrity: sha512-3JZ5HXOZfYjsYSk0yPwBrkupyYSLpAE26Qc0HLghhZNGTZg/SKxXIIgoxOpmmeQP0RRSDJTk1/vPfw9tbw+jSQ==}
 
-  '@shikijs/types@4.0.0':
-    resolution: {integrity: sha512-LCnfBTtQKNtJyc1qMShZr2dJt1uxNI6pI0/YTc2DSNET91aUvnMGHUHsucVCC5AJVcv5XyBqk2NgYRwd20EjbA==}
+  '@shikijs/types@4.0.1':
+    resolution: {integrity: sha512-EaygPEn57+jJ76mw+nTLvIpJMAcMPokFbrF8lufsZP7Ukk+ToJYEcswN1G0e49nUZAq7aCQtoeW219A8HK1ZOw==}
     engines: {node: '>=20'}
 
   '@shikijs/vscode-textmate@10.0.2':
@@ -5502,14 +5502,14 @@ packages:
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
 
-  '@zenstackhq/common-helpers@3.4.1':
-    resolution: {integrity: sha512-U3bmDA5dFWyRhtyPI5oLkwU7jYdJVG2/7tD/NnxCax2zl2mZtHZVT7BY4rCTJLNuBmTiUAJVcJ8dBO/nNH+cYw==}
+  '@zenstackhq/common-helpers@3.4.2':
+    resolution: {integrity: sha512-HTGbWJDS9qdWH4XdKuueA87Cdu+FOsUZXygWDs7c2No1I1XC0lT8Rea6cVjKbiTb6PFlqDx8d7ME/YScEQ07iQ==}
 
   '@zenstackhq/language@2.22.1':
     resolution: {integrity: sha512-VSCVV7aMXMcC/tBnURIehtdQrm04u7EtwbtFB391PPW3ZESp9tEIK4CskLzEiaR8tR/w+rMOQiX3dyXuhJVZOA==}
 
-  '@zenstackhq/language@3.4.1':
-    resolution: {integrity: sha512-Y91y9+ILjUerUPjwF6mWKdkp4PWX7pOLRnPc3y6edJ0WpkYsGgO76mdBreVzeM1JiqLWu+qcRe6hoggtnJEldw==}
+  '@zenstackhq/language@3.4.2':
+    resolution: {integrity: sha512-s3d34nYUtvtwfz3uJ1M2VPN8WnHIHKY6eAAkxrnOV9d06edNVACjIkWDW7+4o6VvaciiKYURv+DuIRBDiamDUA==}
 
   '@zenstackhq/runtime@2.22.1':
     resolution: {integrity: sha512-u12W7z0uQDtpvILPmKOHZ3AC/3uEPnfkNbhMGllGREKEgU1qoKY9PWfHFlR3ZKK1fIxOQEW8NFcO8OsW4fUXFg==}
@@ -5517,22 +5517,22 @@ packages:
       '@prisma/client': 5.0.0 - 7.x
       zod: ^3.25.0 || ^4.0.0
 
-  '@zenstackhq/schema@3.4.1':
-    resolution: {integrity: sha512-qMSRwNTKUXVdwmv6X7DRRf+BfyYmbgNghZofDbtHbL4JM34dkiD9zO7Aw+Im/QHfTimaaknjZernG8tHf0F1DA==}
+  '@zenstackhq/schema@3.4.2':
+    resolution: {integrity: sha512-/OGcbO8nBusjr10pSocVE3KUoiZmV9NBrJEnM3mnbX6j2g0xRWSF43A227UukgWo9Oy1BXGeMl0Df/8J3531MA==}
 
   '@zenstackhq/sdk@2.22.1':
     resolution: {integrity: sha512-N6FxqdzWWoQKxBVZzfgIui7ve5raolrGZAyCGM/9rwiMJcwCTbrRf/F98kvCoCtLasRfzQJjz7L9CBRjXOdgew==}
 
-  '@zenstackhq/sdk@3.4.1':
-    resolution: {integrity: sha512-fTkt9RnTr01xzKvolLiWGwlLBUk5shwJ33gpf0QCZyOvK5LNMccOyzduqzpKPvK0yEkEUTiqAbNRt6hQDk12lg==}
+  '@zenstackhq/sdk@3.4.2':
+    resolution: {integrity: sha512-YzEfhPMg8iBLG8VD7EzV9mXQfnoOGN1MLifMxTuJHGAmniMRP9ZeFy834O0YupWi0MhHbCX93uOcD4Xw6R2E5A==}
 
   '@zenstackhq/trpc@2.22.1':
     resolution: {integrity: sha512-Bbn1BINTfiIgGn9i0R48ma0KDI+Fzxh84NeYTJUZ3qbmf03RhLfYPtBVGQOkdD+0TJCbvKUzP1uFweJpquEXqg==}
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
 
-  '@zenstackhq/zod@3.4.1':
-    resolution: {integrity: sha512-CAN4jeUaNpvByGEEjkU2FBympFkTfzM51Uk1POQjsUBDDytELtQ0nOQOINbzga5PkUThwrLpbiaq+U6a1JivaQ==}
+  '@zenstackhq/zod@3.4.2':
+    resolution: {integrity: sha512-q3e9+JNBf7hV6FTXF2avzbpzNqqTJVPkh3aj7UXLGwoW3udjLH8rhFG8PC5pmUdO7kdP49UuAHRtMamqyPsgfQ==}
     peerDependencies:
       zod: ^4.0.0
 
@@ -7136,8 +7136,8 @@ packages:
     peerDependencies:
       eslint: ^8.45.0 || ^9.0.0 || ^10.0.0
 
-  eslint-plugin-playwright@2.8.0:
-    resolution: {integrity: sha512-BRCXbnX20l/ZPOOi1jEqNvqU/UjXpkZRJaghQxSM2kjAvsDph8+osn9u1iMmvoa9Cegbp9d0Skh7vro7242t+Q==}
+  eslint-plugin-playwright@2.9.0:
+    resolution: {integrity: sha512-k3xrG6YzrallWNFMoGUjMNeu3SFFKXN79KJQBD2PkM4PasJegqV2Up+mPY5od2UmPKQGT+MeIhCmWH8r5eYuQQ==}
     engines: {node: '>=16.9.0'}
     peerDependencies:
       eslint: '>=8.40.0'
@@ -8723,8 +8723,8 @@ packages:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
 
-  lucide-react@0.575.0:
-    resolution: {integrity: sha512-VuXgKZrk0uiDlWjGGXmKV6MSk9Yy4l10qgVvzGn2AWBx1Ylt0iBexKOAoA6I7JO3m+M9oeovJd3yYENfkUbOeg==}
+  lucide-react@0.576.0:
+    resolution: {integrity: sha512-koNxU14BXrxUfZQ9cUaP0ES1uyPZKYDjk31FQZB6dQ/x+tXk979sVAn9ppZ/pVeJJyOxVM8j1E+8QEuSc02Vug==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -9713,11 +9713,11 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  posthog-js@1.356.1:
-    resolution: {integrity: sha512-4EQliSyTp3j/xOaWpZmu7fk1b4S+J3qy4JOu5Xy3/MYFxv1SlAylgifRdCbXZxCQWb6PViaNvwRf4EmburgfWA==}
+  posthog-js@1.356.2:
+    resolution: {integrity: sha512-muaUpzGZuCPUSrr9ED5587T6ew27gnf2Y1qje0Ovw2XHgOnWkIynzdziIGqa8wz7wtuWYkm1/Q32MV7/1q1PyQ==}
 
-  posthog-node@5.26.0:
-    resolution: {integrity: sha512-DK1XF/RiunhvT57cFyPxW9OaliZzl5aREHFwY/AISL3MVOaDUb4wIccMn0G3ws3Ounen8iGH7xvzZQ0x2vEOEQ==}
+  posthog-node@5.26.1:
+    resolution: {integrity: sha512-UndYpR54PN0N8hFdRoUz2hQwg/iGZEtNnwL+RI1l0/76lIffnGYDSt2YyoCwmlN206q4angGvVze3oPCfJgiYA==}
     engines: {node: ^20.20.0 || >=22.22.0}
 
   preact-render-to-string@5.2.6:
@@ -10455,8 +10455,8 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
-  shiki@4.0.0:
-    resolution: {integrity: sha512-rjKoiw30ZaFsM0xnPPwxco/Jftz/XXqZkcQZBTX4LGheDw8gCDEH87jdgaKDEG3FZO2bFOK27+sR/sDHhbBXfg==}
+  shiki@4.0.1:
+    resolution: {integrity: sha512-EkAEhDTN5WhpoQFXFw79OHIrSAfHhlImeCdSyg4u4XvrpxKEmdo/9x/HWSowujAnUrFsGOwWiE58a6GVentMnQ==}
     engines: {node: '>=20'}
 
   side-channel-list@1.0.0:
@@ -14400,7 +14400,7 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
 
-  '@posthog/types@1.356.1': {}
+  '@posthog/types@1.356.2': {}
 
   '@prisma/adapter-pg@6.19.2':
     dependencies:
@@ -15869,17 +15869,17 @@ snapshots:
       - encoding
       - supports-color
 
-  '@shikijs/core@4.0.0':
+  '@shikijs/core@4.0.1':
     dependencies:
-      '@shikijs/primitive': 4.0.0
-      '@shikijs/types': 4.0.0
+      '@shikijs/primitive': 4.0.1
+      '@shikijs/types': 4.0.1
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.4
       hast-util-to-html: 9.0.5
 
-  '@shikijs/engine-javascript@4.0.0':
+  '@shikijs/engine-javascript@4.0.1':
     dependencies:
-      '@shikijs/types': 4.0.0
+      '@shikijs/types': 4.0.1
       '@shikijs/vscode-textmate': 10.0.2
       oniguruma-to-es: 4.3.4
 
@@ -15888,22 +15888,22 @@ snapshots:
       '@shikijs/types': 3.23.0
       '@shikijs/vscode-textmate': 10.0.2
 
-  '@shikijs/engine-oniguruma@4.0.0':
+  '@shikijs/engine-oniguruma@4.0.1':
     dependencies:
-      '@shikijs/types': 4.0.0
+      '@shikijs/types': 4.0.1
       '@shikijs/vscode-textmate': 10.0.2
 
   '@shikijs/langs@3.23.0':
     dependencies:
       '@shikijs/types': 3.23.0
 
-  '@shikijs/langs@4.0.0':
+  '@shikijs/langs@4.0.1':
     dependencies:
-      '@shikijs/types': 4.0.0
+      '@shikijs/types': 4.0.1
 
-  '@shikijs/primitive@4.0.0':
+  '@shikijs/primitive@4.0.1':
     dependencies:
-      '@shikijs/types': 4.0.0
+      '@shikijs/types': 4.0.1
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.4
 
@@ -15911,21 +15911,21 @@ snapshots:
     dependencies:
       '@shikijs/types': 3.23.0
 
-  '@shikijs/themes@4.0.0':
+  '@shikijs/themes@4.0.1':
     dependencies:
-      '@shikijs/types': 4.0.0
+      '@shikijs/types': 4.0.1
 
-  '@shikijs/transformers@4.0.0':
+  '@shikijs/transformers@4.0.1':
     dependencies:
-      '@shikijs/core': 4.0.0
-      '@shikijs/types': 4.0.0
+      '@shikijs/core': 4.0.1
+      '@shikijs/types': 4.0.1
 
   '@shikijs/types@3.23.0':
     dependencies:
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.4
 
-  '@shikijs/types@4.0.0':
+  '@shikijs/types@4.0.1':
     dependencies:
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.4
@@ -17456,15 +17456,15 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  '@zenstackhq/common-helpers@3.4.1': {}
+  '@zenstackhq/common-helpers@3.4.2': {}
 
   '@zenstackhq/language@2.22.1':
     dependencies:
       langium: 1.3.1
 
-  '@zenstackhq/language@3.4.1':
+  '@zenstackhq/language@3.4.2':
     dependencies:
-      '@zenstackhq/common-helpers': 3.4.1
+      '@zenstackhq/common-helpers': 3.4.2
       langium: 3.5.0
       pluralize: 8.0.0
       ts-pattern: 5.9.0
@@ -17488,7 +17488,7 @@ snapshots:
       zod: 4.3.6
       zod-validation-error: 4.0.2(zod@4.3.6)
 
-  '@zenstackhq/schema@3.4.1':
+  '@zenstackhq/schema@3.4.2':
     dependencies:
       decimal.js: 10.6.0
 
@@ -17508,10 +17508,10 @@ snapshots:
       - typescript
       - zod
 
-  '@zenstackhq/sdk@3.4.1':
+  '@zenstackhq/sdk@3.4.2':
     dependencies:
-      '@zenstackhq/common-helpers': 3.4.1
-      '@zenstackhq/language': 3.4.1
+      '@zenstackhq/common-helpers': 3.4.2
+      '@zenstackhq/language': 3.4.2
       langium: 3.5.0
       ts-pattern: 5.9.0
       typescript: 5.9.3
@@ -17528,9 +17528,9 @@ snapshots:
       - magicast
       - typescript
 
-  '@zenstackhq/zod@3.4.1(zod@4.3.6)':
+  '@zenstackhq/zod@3.4.2(zod@4.3.6)':
     dependencies:
-      '@zenstackhq/schema': 3.4.1
+      '@zenstackhq/schema': 3.4.2
       decimal.js: 10.6.0
       zod: 4.3.6
 
@@ -19385,7 +19385,7 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-playwright@2.8.0(eslint@9.39.3(jiti@1.21.7)):
+  eslint-plugin-playwright@2.9.0(eslint@9.39.3(jiti@1.21.7)):
     dependencies:
       eslint: 9.39.3(jiti@1.21.7)
       globals: 17.3.0
@@ -21136,7 +21136,7 @@ snapshots:
 
   lru-cache@7.18.3: {}
 
-  lucide-react@0.575.0(react@19.2.4):
+  lucide-react@0.576.0(react@19.2.4):
     dependencies:
       react: 19.2.4
 
@@ -22121,7 +22121,7 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  posthog-js@1.356.1:
+  posthog-js@1.356.2:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.208.0
@@ -22129,7 +22129,7 @@ snapshots:
       '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-logs': 0.208.0(@opentelemetry/api@1.9.0)
       '@posthog/core': 1.23.1
-      '@posthog/types': 1.356.1
+      '@posthog/types': 1.356.2
       core-js: 3.48.0
       dompurify: 3.3.1
       fflate: 0.4.8
@@ -22137,7 +22137,7 @@ snapshots:
       query-selector-shadow-dom: 1.0.1
       web-vitals: 5.1.0
 
-  posthog-node@5.26.0:
+  posthog-node@5.26.1:
     dependencies:
       '@posthog/core': 1.23.1
 
@@ -23030,14 +23030,14 @@ snapshots:
 
   shebang-regex@3.0.0: {}
 
-  shiki@4.0.0:
+  shiki@4.0.1:
     dependencies:
-      '@shikijs/core': 4.0.0
-      '@shikijs/engine-javascript': 4.0.0
-      '@shikijs/engine-oniguruma': 4.0.0
-      '@shikijs/langs': 4.0.0
-      '@shikijs/themes': 4.0.0
-      '@shikijs/types': 4.0.0
+      '@shikijs/core': 4.0.1
+      '@shikijs/engine-javascript': 4.0.1
+      '@shikijs/engine-oniguruma': 4.0.1
+      '@shikijs/langs': 4.0.1
+      '@shikijs/themes': 4.0.1
+      '@shikijs/types': 4.0.1
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.4
 
