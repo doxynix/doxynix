@@ -319,11 +319,11 @@ importers:
         specifier: 4.1.2
         version: 4.1.2
       '@cspell/dict-en-gb':
-        specifier: 5.0.23
-        version: 5.0.23
+        specifier: 5.0.24
+        version: 5.0.24
       '@cspell/dict-en_us':
-        specifier: 4.4.29
-        version: 4.4.29
+        specifier: 4.4.30
+        version: 4.4.30
       '@cspell/dict-es-es':
         specifier: 3.0.8
         version: 3.0.8
@@ -1207,11 +1207,11 @@ packages:
   '@cspell/dict-en-gb-mit@3.1.18':
     resolution: {integrity: sha512-AXaMzbaxhSc32MSzKX0cpwT+Thv1vPfxQz1nTly1VHw3wQcwPqVFSqrLOYwa8VNqAPR45583nnhD6iqJ9YESoQ==}
 
-  '@cspell/dict-en-gb@5.0.23':
-    resolution: {integrity: sha512-zIjpA66oUwcZHSDtYf+gEvy/EyuCLTeTMmadUD1Kd0c8lXGeTouMRsWhxUPWzkJ/+z9U/KFcz9DMrUtV5ZpLhw==}
+  '@cspell/dict-en-gb@5.0.24':
+    resolution: {integrity: sha512-5pobqtoKHrku70WB+ddENkzfSZ1aAEQFhkDLYorGLigkB6/j4DDHWw7uRK6OBAOKzMpplMog8B9PimYG8aX8sQ==}
 
-  '@cspell/dict-en_us@4.4.29':
-    resolution: {integrity: sha512-G3B27++9ziRdgbrY/G/QZdFAnMzzx17u8nCb2Xyd4q6luLpzViRM/CW3jA+Mb/cGT5zR/9N+Yz9SrGu1s0bq7g==}
+  '@cspell/dict-en_us@4.4.30':
+    resolution: {integrity: sha512-+eVO/VNw8IzQpDIL/SCj+ytd5WbzbHZdU+GAM8eUY2ZU1KTxRw6BoDO+hEFB4cGkD9x+BXm0OKVGSWHNCSGdVw==}
 
   '@cspell/dict-es-es@3.0.8':
     resolution: {integrity: sha512-tj4zYKYWtAFc+JWtJo0DxLAve7I0UJM5+6we3hvLyzQlhGCBF41cTihPa/cbLHUkTD6PkrVGf1hgOKuSR9hkMQ==}
@@ -12713,7 +12713,7 @@ snapshots:
       '@cspell/dict-elixir': 4.0.8
       '@cspell/dict-en-common-misspellings': 2.1.12
       '@cspell/dict-en-gb-mit': 3.1.18
-      '@cspell/dict-en_us': 4.4.29
+      '@cspell/dict-en_us': 4.4.30
       '@cspell/dict-filetypes': 3.0.15
       '@cspell/dict-flutter': 1.1.1
       '@cspell/dict-fonts': 4.0.5
@@ -12814,9 +12814,9 @@ snapshots:
 
   '@cspell/dict-en-gb-mit@3.1.18': {}
 
-  '@cspell/dict-en-gb@5.0.23': {}
+  '@cspell/dict-en-gb@5.0.24': {}
 
-  '@cspell/dict-en_us@4.4.29': {}
+  '@cspell/dict-en_us@4.4.30': {}
 
   '@cspell/dict-es-es@3.0.8': {}
 
