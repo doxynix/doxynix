@@ -30,7 +30,7 @@ jobs:
       - name: 'Checkout repository'
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
       - name: 'Dependency Review'
-        uses: actions/dependency-review-action@57a3d46a7be2c2e259fa3284ffc501296337f2ac
+        uses: actions/dependency-review-action@4038a34c4b30f7c11a7d45dc8dbea40e2211aa27
         # Commonly enabled options, see https://github.com/actions/dependency-review-action#configuration-options for all available options.
         with:
           comment-summary-in-pr: always
