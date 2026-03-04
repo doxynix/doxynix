@@ -61,7 +61,7 @@
       "ajv@^8": "8.18.0",
       "cookie": "0.7.2",
       "minimatch": "10.2.4",
-      "systeminformation": "5.31.2",
+      "systeminformation": "5.31.3",
       "rollup": "4.59.0",
       "serialize-javascript": "7.0.4"
     },
@@ -146,7 +146,7 @@
     "parse-github-url": "1.0.3",
     "pg": "8.19.0",
     "pino": "10.3.1",
-    "posthog-js": "1.358.0",
+    "posthog-js": "1.358.1",
     "posthog-node": "5.27.0",
     "react": "19.2.4",
     "react-arborist": "3.4.3",
