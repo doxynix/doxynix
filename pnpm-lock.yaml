@@ -133,7 +133,7 @@ importers:
         version: 5.90.21(react@19.2.4)
       '@trigger.dev/sdk':
         specifier: 4.4.2
-        version: 4.4.2(ai@6.0.112(zod@4.3.6))(zod@4.3.6)
+        version: 4.4.2(ai@6.0.113(zod@4.3.6))(zod@4.3.6)
       '@trpc/client':
         specifier: 11.11.0
         version: 11.11.0(@trpc/server@11.11.0(typescript@5.9.3))(typescript@5.9.3)
@@ -168,8 +168,8 @@ importers:
         specifier: 2.19.0
         version: 2.19.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       ai:
-        specifier: 6.0.112
-        version: 6.0.112(zod@4.3.6)
+        specifier: 6.0.113
+        version: 6.0.113(zod@4.3.6)
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -5311,8 +5311,8 @@ packages:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
 
-  ai@6.0.112:
-    resolution: {integrity: sha512-IRMUdKM0kA4uLwvDZzsKgEkXMC3MCGHkBVFiLQ4OOCk2nE/g+D4XLKAbixyt4qv5iE0dPkpeuh9DzxwECKnEOg==}
+  ai@6.0.113:
+    resolution: {integrity: sha512-25raUa4Jd+asFuN4/4TijtmntbIh7RVEQUi0rm/MkNj8zcRV5S3FFPgs1yYRhEk+eVN80uHxXl21+pne8mtU6g==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -15856,7 +15856,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/sdk@4.4.2(ai@6.0.112(zod@4.3.6))(zod@4.3.6)':
+  '@trigger.dev/sdk@4.4.2(ai@6.0.113(zod@4.3.6))(zod@4.3.6)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.36.0
@@ -15872,7 +15872,7 @@ snapshots:
       ws: 8.19.0
       zod: 4.3.6
     optionalDependencies:
-      ai: 6.0.112(zod@4.3.6)
+      ai: 6.0.113(zod@4.3.6)
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -16757,7 +16757,7 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@6.0.112(zod@4.3.6):
+  ai@6.0.113(zod@4.3.6):
     dependencies:
       '@ai-sdk/gateway': 3.0.64(zod@4.3.6)
       '@ai-sdk/provider': 3.0.8
