@@ -240,8 +240,8 @@ importers:
         specifier: 1.358.1
         version: 1.358.1
       posthog-node:
-        specifier: 5.27.1
-        version: 5.27.1
+        specifier: 5.28.0
+        version: 5.28.0(rxjs@7.8.2)
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -9432,9 +9432,14 @@ packages:
   posthog-js@1.358.1:
     resolution: {integrity: sha512-teipwLZtfErKDrURiUlLMnmpjgjGlni15JxyJ7oRaSlT3sX4E/mgvNatHIbWnp+7z1zYm3Jz5BYwGqwgyesRnw==}
 
-  posthog-node@5.27.1:
-    resolution: {integrity: sha512-cVlVQNKNYwqcdJ8W3HidAkcyCNnt+uuwr1YSZqPXjQ3OC1UMdGyXPrGCuxWjgl7EVIuzkdWBT812UMEzeHCvCw==}
+  posthog-node@5.28.0:
+    resolution: {integrity: sha512-EETYV0zA+7BLQmXzY+vGyDMoQK8uHf8f/1utbRjKncI41gPkw+4piGP7l4UT5Luld+4vQpJPOR1q1YrbXm7XjQ==}
     engines: {node: ^20.20.0 || >=22.22.0}
+    peerDependencies:
+      rxjs: ^7.0.0
+    peerDependenciesMeta:
+      rxjs:
+        optional: true
 
   preact-render-to-string@5.2.6:
     resolution: {integrity: sha512-JyhErpYOvBV1hEPwIxc/fHWXPfnEGdRKxc8gFdAZ7XV4tlzyzG847XAyEZqoDnynP88akM4eaHcSOzNcLWFguw==}
@@ -21289,9 +21294,11 @@ snapshots:
       query-selector-shadow-dom: 1.0.1
       web-vitals: 5.1.0
 
-  posthog-node@5.27.1:
+  posthog-node@5.28.0(rxjs@7.8.2):
     dependencies:
       '@posthog/core': 1.23.2
+    optionalDependencies:
+      rxjs: 7.8.2
 
   preact-render-to-string@5.2.6(preact@10.28.4):
     dependencies:
