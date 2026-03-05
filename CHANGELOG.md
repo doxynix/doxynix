@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.12.4](https://github.com/doxynix/doxynix/compare/v1.12.3...v1.12.4) (2026-03-05)
+
+
+### Bug Fixes
+
+* **deps:** update dependency posthog-node to v5.28.0 ([#486](https://github.com/doxynix/doxynix/issues/486)) ([4be57f6](https://github.com/doxynix/doxynix/commit/4be57f6aa9728c2ee847183da3082ac6daa6c7a3))
+
 ## [1.12.3](https://github.com/doxynix/doxynix/compare/v1.12.2...v1.12.3) (2026-03-05)
 
 
