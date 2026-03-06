@@ -97,7 +97,7 @@ export default function ErrorPage({
       </div>
 
       <footer className="mt-12 flex flex-col gap-4 text-sm">
-        <div className="">
+        <div>
           <span>{t("footer")} </span>
           <a href={mailtoLink} className="underline hover:no-underline">
             support@doxynix.space

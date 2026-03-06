@@ -62,7 +62,9 @@ export function NotificationsRepoFilter() {
         <Command>
           <CommandInput placeholder="Search repository..." />
           <CommandList>
-            <CommandEmpty>No repository found.</CommandEmpty>
+            <CommandEmpty>
+              {repos?.length === 0 || repos == null ? null : "No repository found."}
+            </CommandEmpty>
             <CommandGroup>
               <CommandItem onSelect={() => handleRepoSelect(null)} className="cursor-pointer">
                 <Check

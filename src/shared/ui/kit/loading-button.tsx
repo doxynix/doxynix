@@ -19,7 +19,7 @@ export function LoadingButton({
   loadingText,
   ...props
 }: Props) {
-  const reservedContent = isLoading ? (loadingText ?? children) : children;
+  const reservedContent = loadingText ?? (typeof children === "string" ? children : "Loading...");
 
   return (
     <Button {...props} disabled={isLoading || disabled} className={cn("relative", className)}>

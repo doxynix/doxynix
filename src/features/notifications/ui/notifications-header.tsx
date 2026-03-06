@@ -18,8 +18,8 @@ import { notificationsParsers } from "@/entities/notifications";
 
 import { NotifyTypeSchema } from "@/generated/zod";
 
+import { NotificationsBulkActions } from "./notifications-bulk-actions";
 import { NotificationsRepoFilter } from "./notifications-repo-filter";
-import { NotificationsBulkActions } from "./notitications-bulk-actions";
 
 type Props = {
   stats?: { read: number; total: number; unread: number };

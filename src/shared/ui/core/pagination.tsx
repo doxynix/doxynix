@@ -29,12 +29,14 @@ PaginationItem.displayName = "PaginationItem";
 
 type PaginationLinkProps = Omit<React.ComponentProps<typeof Link>, "href"> &
   Pick<ButtonProps, "size"> & {
+    disabled?: boolean;
     href?: string;
     isActive?: boolean;
   };
 
 const PaginationLink = ({
   className,
+  disabled,
   href,
   isActive,
   size = "icon",
@@ -49,13 +51,26 @@ const PaginationLink = ({
   );
 
   if (!href) {
+    const {
+      "aria-disabled": ariaDisabled,
+      "aria-label": ariaLabel,
+      children,
+      onClick,
+      tabIndex,
+    } = props as React.ButtonHTMLAttributes<HTMLButtonElement>;
     return (
       <button
         type="button"
+        disabled={disabled}
+        tabIndex={tabIndex}
         aria-current={isActive ? "page" : undefined}
+        aria-disabled={ariaDisabled}
+        aria-label={ariaLabel}
+        onClick={onClick}
         className={commonClassName}
-        {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
-      />
+      >
+        {children}
+      </button>
     );
   }
 

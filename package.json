@@ -38,7 +38,7 @@
     "db:push": "prisma db push",
     "db:reset": "prisma migrate reset",
     "db:studio": "prisma studio",
-    "db:seed": "prisma db seed",
+    "db:seed": "pnpm db:generate && prisma db seed",
     "test:stryker": "pnpm stryker run",
     "test": "cross-env TZ=UTC vitest run --config vitest.config.ts --no-file-parallelism",
     "test:int": "cross-env TZ=UTC vitest run src/tests/integration --config vitest.config.ts --no-file-parallelism",

@@ -55,7 +55,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
     },
   ];
 
-  const isSearchEmpty = state.searchTerm !== "" && state.hasSearchMatches == null;
+  const isSearchEmpty = state.searchTerm !== "" && state.hasSearchMatches === false;
 
   const isRepoEmpty = !state.isLoading && state.treeData.length === 0 && state.searchTerm === "";
 

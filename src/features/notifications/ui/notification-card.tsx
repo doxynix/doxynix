@@ -67,14 +67,14 @@ export function NotificationCard({ notification }: Readonly<Props>) {
             <NotificationActionButton
               disabled={isPending}
               icon={notification.isRead === true ? EyeOff : Eye}
-              isPending={markAs.isPending}
+              isPending={isPending && markAs.isPending}
               tooltip={notification.isRead === true ? "Mark as unread" : "Mark as read"}
               onClick={() => markAs.mutate(notification.id, notification.isRead === false)}
             />
             <NotificationActionButton
               disabled={isPending}
               icon={Trash2}
-              isPending={deleteOne.isPending}
+              isPending={isPending && deleteOne.isPending}
               tooltip="Delete notification"
               onClick={() => deleteOne.mutate(notification.id)}
               className="hover:text-destructive"

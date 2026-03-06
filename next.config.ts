@@ -331,8 +331,9 @@ const sentryOptions = {
   widenClientFileUpload: true,
 };
 
-const exportedConfig = IS_DEV
-  ? withNextIntl(nextConfig)
-  : withSentryConfig(withAxiom(bundleAnalyzer(withNextIntl(nextConfig))), sentryOptions);
+const exportedConfig =
+  IS_DEV && !IS_ANALYZE
+    ? withNextIntl(nextConfig)
+    : withSentryConfig(withAxiom(bundleAnalyzer(withNextIntl(nextConfig))), sentryOptions);
 
 export default exportedConfig;

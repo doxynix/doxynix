@@ -30,6 +30,7 @@ export function NotificationActionButton({
         isLoading={isPending}
         size="icon"
         variant="ghost"
+        aria-label={tooltip}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();

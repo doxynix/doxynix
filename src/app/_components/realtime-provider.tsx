@@ -65,7 +65,7 @@ export const RealtimeProvider = ({ children }: Props) => {
       if (msg.name === REALTIME_CONFIG.events.user.notification) {
         const data = msg.data as { body: string; title: string };
         toast.success(data.title, { description: data.body });
-        invalidateAll();
+        void invalidateAll();
       }
       if (msg.name === REALTIME_CONFIG.events.user.analysisProgress) {
         const payload = msg.data as {

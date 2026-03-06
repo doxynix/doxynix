@@ -100,7 +100,7 @@ export function NotificationsNav() {
                 <DropdownMenuItem
                   key={note.id}
                   asChild
-                  onClick={() => {
+                  onSelect={() => {
                     if (note.isRead === false) markAs.mutate(note.id, true);
                   }}
                   className={cn(note.isRead === false && "bg-accent/50")}

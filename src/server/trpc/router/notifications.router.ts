@@ -56,12 +56,11 @@ export const notificationRouter = createTRPCRouter({
         tags: ["notifications"],
       },
     })
-    .input(NotificationsFilterSchema.omit({ cursor: true, limit: true }).partial())
+    .input(NotificationsFilterSchema.omit({ cursor: true, isRead: true, limit: true }).partial())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      const { isRead, repoName, repoOwner, search, type } = input;
+      const { repoName, repoOwner, search, type } = input;
       const where = notificationsService.buildWhereClause({
-        isRead,
         repoName,
         repoOwner,
         search,
@@ -186,7 +185,7 @@ export const notificationRouter = createTRPCRouter({
         tags: ["notifications"],
       },
     })
-    .input(NotificationsFilterSchema.omit({ cursor: true, limit: true }).partial())
+    .input(NotificationsFilterSchema.omit({ cursor: true, isRead: true, limit: true }).partial())
     .output(
       z.object({
         message: z.string(),
@@ -195,9 +194,8 @@ export const notificationRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { isRead, repoName, repoOwner, search, type } = input;
+      const { repoName, repoOwner, search, type } = input;
       const where = notificationsService.buildWhereClause({
-        isRead,
         repoName,
         repoOwner,
         search,
@@ -228,12 +226,13 @@ export const notificationRouter = createTRPCRouter({
   markAs: protectedProcedure
     .meta({
       openapi: {
-        description: "Marks a specific notification as read using its public identifier.",
+        description:
+          "Updates the read state of a specific notification using its public identifier.",
         errorResponses: OpenApiErrorResponses,
         method: "PATCH",
         path: "/notifications/{id}",
         protect: true,
-        summary: "Mark notification as read",
+        summary: "Update notification read state",
         tags: ["notifications"],
       },
     })
@@ -245,7 +244,7 @@ export const notificationRouter = createTRPCRouter({
           data: { isRead: input.isRead },
           where: { publicId: input.id },
         });
-        return { message: "Marked as read", success: true };
+        return { message: input.isRead ? "Marked as read" : "Marked as unread", success: true };
       } catch (error) {
         handlePrismaError(error, { notFound: "Notification not found" });
       }

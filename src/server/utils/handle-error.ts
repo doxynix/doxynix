@@ -115,6 +115,8 @@ export function isOctokitError(error: unknown): error is OctokitError {
     typeof error === "object" &&
     error != null &&
     "status" in error &&
-    typeof (error as Record<string, unknown>).status === "number"
+    typeof (error as Record<string, unknown>).status === "number" &&
+    "message" in error &&
+    typeof (error as Record<string, unknown>).message === "string"
   );
 }

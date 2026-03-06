@@ -44,8 +44,8 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
     });
   };
 
-  const isPrevDisabled = meta.currentPage <= 1;
-  const isNextDisabled = meta.currentPage >= meta.totalPages;
+  const isPrevDisabled = isAnyLoading || meta.currentPage <= 1;
+  const isNextDisabled = isAnyLoading || meta.currentPage >= meta.totalPages;
 
   const isPrevLoading = isAnyLoading && clickedButton === "prev";
   const isNextLoading = isAnyLoading && clickedButton === "next";
@@ -56,13 +56,14 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
     <Pagination
       className={cn(
         className,
-        isAnyLoading && "pointer-events-none opacity-60 transition-opacity",
+        isAnyLoading && "opacity-60 transition-opacity",
         meta.totalCount === 0 && "hidden"
       )}
     >
       <PaginationContent>
         <PaginationItem>
           <PaginationLink
+            disabled={isPrevDisabled}
             tabIndex={isPrevDisabled ? -1 : undefined}
             aria-disabled={isPrevDisabled}
             onClick={() => !isPrevDisabled && handlePageChange(meta.currentPage - 1, "prev")}
@@ -97,11 +98,14 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
           }
 
           const isCurrentPageLoading = isAnyLoading && clickedButton === page;
+          const isPageDisabled = isAnyLoading || page === meta.currentPage;
 
           return (
             <PaginationItem key={page}>
               <PaginationLink
+                disabled={isPageDisabled}
                 isActive={page === meta.currentPage}
+                aria-disabled={isPageDisabled}
                 onClick={() => handlePageChange(page, page)}
                 className={cn("cursor-pointer", page === meta.currentPage && "pointer-events-none")}
               >
@@ -113,6 +117,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
 
         <PaginationItem>
           <PaginationLink
+            disabled={isNextDisabled}
             tabIndex={isNextDisabled ? -1 : undefined}
             aria-disabled={isNextDisabled}
             onClick={() => !isNextDisabled && handlePageChange(meta.currentPage + 1, "next")}

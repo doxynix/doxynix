@@ -5,15 +5,16 @@ import type { NotificationsParsersState } from "@/entities/notifications";
 export function useNotificationActions() {
   const utils = trpc.useUtils();
 
-  const invalidateAll = () => {
-    void utils.notification.getStats.invalidate();
-    void utils.notification.getAll.invalidate();
+  const invalidateAll = async () => {
+    await Promise.all([
+      utils.notification.getStats.invalidate(),
+      utils.notification.getAll.invalidate(),
+    ]);
   };
 
   const mapFiltersToInput = (filters?: NotificationsParsersState): MarkAllInput => {
     if (!filters) return {};
     return {
-      isRead: filters.isRead ?? undefined,
       repoName: filters.repo ?? undefined,
       repoOwner: filters.owner ?? undefined,
       search: filters.search || undefined,
