@@ -159,20 +159,24 @@ export const notificationRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx }) => {
-      const groups = await ctx.db.notification.groupBy({
-        _count: { _all: true },
-        by: ["isRead"],
-      });
+      try {
+        const groups = await ctx.db.notification.groupBy({
+          _count: { _all: true },
+          by: ["isRead"],
+        });
 
-      return groups.reduce(
-        (acc, group) => {
-          if (group.isRead === true) acc.read = group._count._all;
-          else acc.unread = group._count._all;
-          acc.total += group._count._all;
-          return acc;
-        },
-        { read: 0, total: 0, unread: 0 }
-      );
+        return groups.reduce(
+          (acc, group) => {
+            if (group.isRead === true) acc.read = group._count._all;
+            else acc.unread = group._count._all;
+            acc.total += group._count._all;
+            return acc;
+          },
+          { read: 0, total: 0, unread: 0 }
+        );
+      } catch (error) {
+        handlePrismaError(error);
+      }
     }),
 
   markAllAsRead: protectedProcedure
