@@ -60,11 +60,11 @@ const PaginationLink = ({
 
     return (
       <button
-        type="button"
         disabled={disabled}
         aria-current={isActive ? "page" : undefined}
         className={commonClassName}
         {...buttonProps}
+        type="button"
       />
     );
   }

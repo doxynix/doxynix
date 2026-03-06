@@ -130,6 +130,8 @@ export const notificationRouter = createTRPCRouter({
 
       const totalPages = Math.ceil(filteredCount / limit);
 
+      const safeCurrentPage = totalPages === 0 ? 1 : Math.min(page, totalPages);
+
       return {
         items: items.map((n) => ({
           ...n,
@@ -137,9 +139,9 @@ export const notificationRouter = createTRPCRouter({
           repo: n.repo != null ? { name: n.repo.name, owner: n.repo.owner } : null,
         })),
         meta: {
-          currentPage: page,
+          currentPage: safeCurrentPage,
           filteredCount,
-          nextCursor: page < totalPages ? page + 1 : undefined,
+          nextCursor: safeCurrentPage < totalPages ? safeCurrentPage + 1 : undefined,
           pageSize: limit,
           searchQuery: search,
           totalCount,
