@@ -21,7 +21,7 @@ export const notificationRouter = createTRPCRouter({
   deleteOne: protectedProcedure
     .meta({
       openapi: {
-        description: "Deleted one notification.",
+        description: "Deletes one notification.",
         errorResponses: OpenApiErrorResponses,
         method: "DELETE",
         path: "/notifications/{id}",
@@ -47,7 +47,7 @@ export const notificationRouter = createTRPCRouter({
   deleteRead: protectedProcedure
     .meta({
       openapi: {
-        description: "Deleted all read notifications.",
+        description: "Deletes all read notifications.",
         errorResponses: OpenApiErrorResponses,
         method: "DELETE",
         path: "/notifications",
@@ -107,7 +107,7 @@ export const notificationRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const { cursor, isRead, limit, repoName, repoOwner, search, type } = input;
-      const page = Math.min(Math.max(1, cursor ?? 1), 1000000);
+      const requestedPage = Math.min(Math.max(1, cursor ?? 1), 1000000);
       const where = notificationsService.buildWhereClause({
         isRead,
         repoName,
@@ -116,21 +116,21 @@ export const notificationRouter = createTRPCRouter({
         type,
       });
 
-      const [items, totalCount, filteredCount] = await Promise.all([
-        ctx.db.notification.findMany({
-          include: { repo: true },
-          orderBy: { createdAt: "desc" },
-          skip: (page - 1) * limit,
-          take: limit,
-          where,
-        }),
+      const [totalCount, filteredCount] = await Promise.all([
         ctx.db.notification.count(),
         ctx.db.notification.count({ where }),
       ]);
 
-      const totalPages = Math.ceil(filteredCount / limit);
+      const totalPages = Math.max(1, Math.ceil(filteredCount / limit));
+      const page = Math.min(requestedPage, totalPages);
 
-      const safeCurrentPage = totalPages === 0 ? 1 : Math.min(page, totalPages);
+      const items = await ctx.db.notification.findMany({
+        include: { repo: true },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+        where,
+      });
 
       return {
         items: items.map((n) => ({
@@ -139,9 +139,9 @@ export const notificationRouter = createTRPCRouter({
           repo: n.repo != null ? { name: n.repo.name, owner: n.repo.owner } : null,
         })),
         meta: {
-          currentPage: safeCurrentPage,
+          currentPage: page,
           filteredCount,
-          nextCursor: safeCurrentPage < totalPages ? safeCurrentPage + 1 : undefined,
+          nextCursor: page < totalPages ? page + 1 : undefined,
           pageSize: limit,
           searchQuery: search,
           totalCount,

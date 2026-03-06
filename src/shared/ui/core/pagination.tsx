@@ -69,10 +69,12 @@ const PaginationLink = ({
     );
   }
 
-  const { onClick, ...linkProps } = props as React.ComponentProps<typeof Link>;
+  const { href, onClick, ...linkProps } = props as React.ComponentProps<typeof Link>;
 
   return (
     <Link
+      {...linkProps}
+      href={href}
       tabIndex={disabled ? -1 : undefined}
       aria-current={isActive ? "page" : undefined}
       aria-disabled={disabled || undefined}
@@ -84,7 +86,6 @@ const PaginationLink = ({
         onClick?.(event);
       }}
       className={commonClassName}
-      {...linkProps}
     />
   );
 };
