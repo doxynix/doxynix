@@ -35,7 +35,9 @@ export function NotificationCard({ notification }: Readonly<Props>) {
         border
       )}
     >
-      {href != null && <Link href={href} className="absolute inset-0" />}
+      {href != null && (
+        <Link href={href} aria-label={notification.title} className="absolute inset-0" />
+      )}
 
       <CardContent className="flex items-center justify-between">
         <div className="flex gap-4">

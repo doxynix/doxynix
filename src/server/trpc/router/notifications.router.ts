@@ -71,7 +71,7 @@ export const notificationRouter = createTRPCRouter({
         await ctx.db.notification.deleteMany({
           where: { ...where, isRead: true },
         });
-        return { message: "All read notifications was deleted", success: true };
+        return { message: "All read notifications were deleted", success: true };
       } catch (error) {
         handlePrismaError(error, { notFound: "Notification not found" });
       }

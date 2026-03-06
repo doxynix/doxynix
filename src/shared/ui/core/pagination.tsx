@@ -27,17 +27,22 @@ const PaginationItem = React.forwardRef<HTMLLIElement, React.ComponentProps<"li"
 );
 PaginationItem.displayName = "PaginationItem";
 
-type PaginationLinkProps = Omit<React.ComponentProps<typeof Link>, "href"> &
-  Pick<ButtonProps, "size"> & {
-    disabled?: boolean;
-    href?: string;
-    isActive?: boolean;
-  };
+type BasePaginationLinkProps = Pick<ButtonProps, "size"> & {
+  children?: React.ReactNode;
+  className?: string;
+  disabled?: boolean;
+  isActive?: boolean;
+};
+
+type PaginationLinkProps = (
+  | (React.ComponentProps<"button"> & { href?: never })
+  | React.ComponentProps<typeof Link>
+) &
+  BasePaginationLinkProps;
 
 const PaginationLink = ({
   className,
   disabled,
-  href,
   isActive,
   size = "icon",
   ...props
@@ -50,36 +55,36 @@ const PaginationLink = ({
     className
   );
 
-  if (!href) {
-    const {
-      "aria-disabled": ariaDisabled,
-      "aria-label": ariaLabel,
-      children,
-      onClick,
-      tabIndex,
-    } = props as React.ButtonHTMLAttributes<HTMLButtonElement>;
+  if (!("href" in props) || props.href === undefined) {
+    const buttonProps = props as React.ComponentProps<"button">;
+
     return (
       <button
         type="button"
         disabled={disabled}
-        tabIndex={tabIndex}
         aria-current={isActive ? "page" : undefined}
-        aria-disabled={ariaDisabled}
-        aria-label={ariaLabel}
-        onClick={onClick}
         className={commonClassName}
-      >
-        {children}
-      </button>
+        {...buttonProps}
+      />
     );
   }
 
+  const { onClick, ...linkProps } = props as React.ComponentProps<typeof Link>;
+
   return (
     <Link
-      href={href}
+      tabIndex={disabled ? -1 : undefined}
       aria-current={isActive ? "page" : undefined}
+      aria-disabled={disabled || undefined}
+      onClick={(event) => {
+        if (disabled) {
+          event.preventDefault();
+          return;
+        }
+        onClick?.(event);
+      }}
       className={commonClassName}
-      {...props}
+      {...linkProps}
     />
   );
 };
