@@ -44,6 +44,11 @@ generator dbml {
   provider = "prisma-dbml-generator"
 }
 
+generator fakeData {
+  provider = "prisma-generator-fake-data"
+  output   = "../src/generated/fake-data.ts"
+}
+
 enum UserRole {
   USER
   ADMIN
@@ -118,49 +123,54 @@ model Notification {
   /// @zod.custom.omit(["model"])
   userId    Int        @map("user_id")
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// @zod.custom.omit(["model"])
+  repoId    Int?       @map("repo_id")
+  repo      Repo?      @relation(fields: [repoId], references: [id], onDelete: SetNull)
 
   @@index([userId, isRead])
   @@index([userId, createdAt(sort: Desc)])
+  @@index([repoId])
   @@map("notifications")
 }
 
 model Repo {
   /// @zod.custom.omit(["model"])
-  id              Int        @id() @default(autoincrement())
+  id              Int            @id() @default(autoincrement())
   /// @zod.custom.omit(["model"])
-  publicId        String     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  githubId        Int        @map("github_id")
+  publicId        String         @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  githubId        Int            @map("github_id")
   owner           String
   /// @zod.string.min(1).max(255)
   name            String
   /// @zod.string.max(1000)
-  description     String?    @db.Text()
+  description     String?        @db.Text()
   /// @zod.string.url({ message: "Invalid repository URL" })
   url             String
   language        String?
   license         String?
   topics          String[]
   /// @zod.number.int().min(0)
-  stars           Int        @default(0) @map("stargazers_count")
+  stars           Int            @default(0) @map("stargazers_count")
   /// @zod.number.int().min(0)
-  forks           Int        @default(0) @map("forks_count")
-  defaultBranch   String     @default("main") @map("default_branch")
+  forks           Int            @default(0) @map("forks_count")
+  defaultBranch   String         @default("main") @map("default_branch")
   /// @zod.string.url()
-  ownerAvatarUrl  String?    @map("owner_avatar_url")
+  ownerAvatarUrl  String?        @map("owner_avatar_url")
   /// @zod.number.int().min(0)
-  openIssues      Int        @default(0) @map("open_issues_count")
+  openIssues      Int            @default(0) @map("open_issues_count")
   /// @zod.number.int().min(0)
-  size            Int        @default(0)
-  visibility      Visibility @default(PRIVATE)
-  pushedAt        DateTime?  @map("pushed_at")
-  createdAt       DateTime   @default(now()) @map("created_at")
-  githubCreatedAt DateTime?  @map("github_created_at")
-  updatedAt       DateTime   @updatedAt() @map("updated_at")
+  size            Int            @default(0)
+  visibility      Visibility     @default(PRIVATE)
+  pushedAt        DateTime?      @map("pushed_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  githubCreatedAt DateTime?      @map("github_created_at")
+  updatedAt       DateTime       @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  userId          Int        @map("user_id")
-  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          Int            @map("user_id")
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   analyses        Analysis[]
   documents       Document[]
+  notifications   Notification[]
 
   @@unique([owner, name, userId])
   @@unique([githubId, userId])

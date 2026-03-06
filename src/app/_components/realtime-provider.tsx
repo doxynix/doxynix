@@ -12,7 +12,7 @@ import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { useRepoActions } from "@/entities/repo";
 
-import { useNotificationActions } from "./model/use-notification-actions";
+import { useNotificationActions } from "@/features/notifications";
 
 type Props = { children: React.ReactNode };
 
@@ -65,7 +65,7 @@ export const RealtimeProvider = ({ children }: Props) => {
       if (msg.name === REALTIME_CONFIG.events.user.notification) {
         const data = msg.data as { body: string; title: string };
         toast.success(data.title, { description: data.body });
-        invalidateAll();
+        void invalidateAll();
       }
       if (msg.name === REALTIME_CONFIG.events.user.analysisProgress) {
         const payload = msg.data as {

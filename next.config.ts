@@ -7,7 +7,7 @@ import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
 import { StatsWriterPlugin } from "webpack-stats-plugin";
 
-import { API_PREFIX, IS_ANALYZE, IS_PROD } from "@/shared/constants/env.client";
+import { API_PREFIX, IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/constants/env.client";
 import { LOCALE_REGEX_STR } from "@/shared/constants/locales";
 
 const bundleAnalyzer = withBundleAnalyzer({
@@ -25,8 +25,8 @@ const nextConfig: NextConfig = {
     removeConsole: IS_PROD ? { exclude: ["error", "info"] } : false,
   },
   compress: true,
+  enablePrerenderSourceMaps: false,
   experimental: {
-    // useLightningcss: true, // отключен так-как ломает анализатор размера бандла
     authInterrupts: true,
     optimizePackageImports: [
       "@radix-ui/react-avatar",
@@ -54,9 +54,14 @@ const nextConfig: NextConfig = {
       "@sentry-internal/replay",
       "@sentry-internal/browser-utils",
     ],
-    serverComponentsHmrCache: true,
+    preloadEntriesOnStart: false,
+    serverComponentsHmrCache: false,
+    serverSourceMaps: false,
     taint: true,
     typedEnv: true,
+    useLightningcss: IS_PROD,
+    webpackMemoryOptimizations: false,
+    workerThreads: false,
   },
   async headers() {
     return [
@@ -113,7 +118,7 @@ const nextConfig: NextConfig = {
               manifest-src 'self';
               upgrade-insecure-requests;
             `
-              .replace(/\s{2,}/g, " ")
+              .replaceAll(/\s{2,}/g, " ")
               .trim(),
           },
           { key: "X-Frame-Options", value: "DENY" },
@@ -176,7 +181,8 @@ const nextConfig: NextConfig = {
     pagesBufferLength: 2,
   },
   poweredByHeader: false,
-  reactCompiler: true, // аккуратно фича еще в бете (пока багов не обнаружено - 20.01.2026)
+  productionBrowserSourceMaps: false,
+  reactCompiler: IS_PROD, // аккуратно фича еще в бете (пока багов не обнаружено - 20.01.2026)
   // cacheComponents: true, // если будут баги выключить (// NOTE: обнаружен баг №418 с гидратацией выяснено что приходится оборачивать каждый чих в suspense так еще и юзать везде 'use cache' директиву ибо теперь кеширование руками надо делать слишком много переписывать пока PPR отложен на неопределенный срок)
   reactStrictMode: true,
   async redirects() {
@@ -237,17 +243,18 @@ const nextConfig: NextConfig = {
     shortcuts.forEach(({ d, s }) => {
       const isExternal = d.startsWith("http");
 
-      results.push({
-        destination: d,
-        permanent: false,
-        source: s,
-      });
-
-      results.push({
-        destination: isExternal ? d : `/:locale${d}`,
-        permanent: false,
-        source: `/:locale(${LOCALE_REGEX_STR})${s}`,
-      });
+      results.push(
+        {
+          destination: d,
+          permanent: false,
+          source: s,
+        },
+        {
+          destination: isExternal ? d : `/:locale${d}`,
+          permanent: false,
+          source: `/:locale(${LOCALE_REGEX_STR})${s}`,
+        }
+      );
     });
 
     return results;
@@ -269,7 +276,7 @@ const nextConfig: NextConfig = {
     ];
   },
   skipTrailingSlashRedirect: true,
-  typedRoutes: true,
+  typedRoutes: IS_PROD,
   typescript: { ignoreBuildErrors: false },
   webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {
@@ -324,4 +331,9 @@ const sentryOptions = {
   widenClientFileUpload: true,
 };
 
-export default withSentryConfig(withAxiom(bundleAnalyzer(withNextIntl(nextConfig))), sentryOptions);
+const exportedConfig =
+  IS_DEV && !IS_ANALYZE
+    ? withNextIntl(nextConfig)
+    : withSentryConfig(withAxiom(bundleAnalyzer(withNextIntl(nextConfig))), sentryOptions);
+
+export default exportedConfig;

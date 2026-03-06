@@ -25,7 +25,7 @@ import {
 import { Spinner } from "@/shared/ui/core/spinner";
 import { useRouter } from "@/i18n/routing";
 
-import { useCreateRepoDialogStore } from "@/features/repo";
+import { useCreateRepoDialogStore } from "@/entities/repo";
 
 export function AppCommandMenu() {
   const t = useTranslations("Dashboard");

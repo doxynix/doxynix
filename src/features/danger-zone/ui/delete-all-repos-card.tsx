@@ -10,7 +10,8 @@ import { DeleteAllReposDialog } from "./delete-all-repos-dialog";
 
 export function DeleteAllReposCard() {
   const t = useTranslations("Dashboard");
-  const { data, isLoading } = trpc.repo.getAll.useQuery({ limit: 1 });
+  const { data, isLoading } = trpc.repo.getSlim.useQuery({ limit: 1 });
+  const hasRepos = data != null && data.length > 0;
 
   if (isLoading || !data)
     return (
@@ -34,7 +35,7 @@ export function DeleteAllReposCard() {
           <span>{t("settings_danger_delete_all_repos_note_1")}</span>
           <span>{t("settings_danger_delete_all_repos_note_2")}</span>
         </CardDescription>
-        <DeleteAllReposDialog meta={data.meta} />
+        <DeleteAllReposDialog hasRepos={hasRepos} />
       </CardHeader>
     </Card>
   );

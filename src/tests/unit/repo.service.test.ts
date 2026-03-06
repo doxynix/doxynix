@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { DbClient } from "@/server/db/db";
 import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
-import { handlePrismaError } from "@/server/utils/handle-prisma-error";
+import { handlePrismaError } from "@/server/utils/handle-error";
 
 vi.mock("@/server/services/github.service", () => ({
   githubService: {
@@ -14,12 +14,15 @@ vi.mock("@/server/services/github.service", () => ({
   },
 }));
 
-vi.mock("@/server/utils/handle-prisma-error", () => ({
+vi.mock("@/server/utils/handle-error", () => ({
   handlePrismaError: vi.fn(() => {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Mocked prisma handler error",
     });
+  }),
+  isOctokitError: vi.fn((error: any): error is { status: number } => {
+    return error !== null && typeof error === "object" && "status" in error;
   }),
 }));
 

@@ -11,7 +11,7 @@ import {
 } from "./shared/constants/env.client";
 
 function escapeRegExp(str: string) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return str.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 Sentry.init({
@@ -39,7 +39,7 @@ Sentry.init({
       ]
     : [Sentry.browserTracingIntegration()],
 
-  replaysOnErrorSampleRate: 1.0,
+  replaysOnErrorSampleRate: 1,
 
   replaysSessionSampleRate: 0.01,
 

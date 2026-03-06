@@ -10,7 +10,7 @@ export default defineConfig({
   },
   migrations: {
     path: "prisma/migrations",
-    seed: 'ts-node --compiler-options {"module":"commonjs"} prisma/seed.ts',
+    seed: "tsx prisma/seed.ts",
   },
   schema: "prisma/schema.prisma",
 });

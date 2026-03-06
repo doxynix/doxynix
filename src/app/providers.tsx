@@ -6,15 +6,15 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { httpBatchLink, loggerLink } from "@trpc/client";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import superjson from "superjson";
 
 import { trpc } from "@/shared/api/trpc";
 import { APP_URL, IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
 import { TooltipProvider } from "@/shared/ui/core/tooltip";
 
-import { RealtimeProvider } from "@/features/notifications";
-
 import { AnalyticsSync } from "./_components/analytics-sync";
+import { RealtimeProvider } from "./_components/realtime-provider";
 
 type Props = {
   children: ReactNode;
@@ -78,7 +78,7 @@ const InnerProviders = ({ children }: { children: ReactNode }) => (
   >
     <TooltipProvider>
       <AnalyticsSync />
-      {children}
+      <NuqsAdapter>{children}</NuqsAdapter>
     </TooltipProvider>
   </ThemeProvider>
 );

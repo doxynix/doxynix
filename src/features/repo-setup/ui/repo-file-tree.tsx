@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { startTransition } from "react";
 import { Check, Folder, FolderOpen, Search, Sparkles, X } from "lucide-react";
 import { Tree, type TreeApi } from "react-arborist";
 
@@ -23,32 +23,41 @@ type Props = {
 };
 
 export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>) {
-  const treeActions = useMemo(
-    () => [
-      { icon: FolderOpen, label: "Expand All", onClick: () => treeApi?.openAll() },
-      { icon: Folder, label: "Collapse All", onClick: () => treeApi?.closeAll() },
-    ],
-    [treeApi]
-  );
+  const handleExpandAll = () => {
+    startTransition(() => {
+      treeApi?.openAll();
+    });
+  };
+  const handleCollapseAll = () => {
+    startTransition(() => {
+      treeApi?.closeAll();
+    });
+  };
 
-  const selectionActions = useMemo(
-    () => [
-      { icon: Check, label: "Select All", onClick: actions.handleSelectAll },
-      {
-        icon: Sparkles,
-        label: "Select Recommended",
-        onClick: actions.handleSelectRecommended,
-        tooltip: "Automatically select files for analysis",
-      },
-      {
-        className: "text-destructive hover:bg-destructive/10 hover:text-destructive",
-        icon: X,
-        label: "Clear",
-        onClick: actions.handleClearAll,
-      },
-    ],
-    [actions]
-  );
+  const treeActions = [
+    { icon: FolderOpen, label: "Expand All", onClick: handleExpandAll },
+    { icon: Folder, label: "Collapse All", onClick: handleCollapseAll },
+  ];
+
+  const selectionActions = [
+    { icon: Check, label: "Select All", onClick: actions.handleSelectAll },
+    {
+      icon: Sparkles,
+      label: "Select Recommended",
+      onClick: actions.handleSelectRecommended,
+      tooltip: "Automatically select files for analysis",
+    },
+    {
+      className: "text-destructive hover:bg-destructive/10 hover:text-destructive",
+      icon: X,
+      label: "Clear",
+      onClick: actions.handleClearAll,
+    },
+  ];
+
+  const isSearchEmpty = state.searchTerm !== "" && state.hasSearchMatches === false;
+
+  const isRepoEmpty = !state.isLoading && state.treeData.length === 0 && state.searchTerm === "";
 
   return (
     <div className="space-y-4">
@@ -117,7 +126,6 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
             })}
           </div>
         </div>
-
         <div className="flex items-center gap-2 font-medium">
           <span>Files selected: {state.selectedFilesCount}</span>
         </div>
@@ -126,8 +134,21 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
       <div
         onKeyDownCapture={(e) => e.key === " " && e.stopPropagation()}
         onPointerDownCapture={(e) => e.target === e.currentTarget && e.stopPropagation()}
-        className="overflow-hidden rounded-lg border p-1"
+        className="relative overflow-hidden rounded-lg border p-1"
       >
+        {isSearchEmpty && (
+          <p className="text-muted-foreground absolute inset-0 z-10 flex items-center justify-center truncate text-sm">
+            Nothing found for &quot;<span className="max-w-60 truncate">{state.searchTerm}</span>
+            &quot;
+          </p>
+        )}
+
+        {isRepoEmpty && (
+          <p className="text-muted-foreground absolute inset-0 z-10 flex items-center justify-center text-sm">
+            Repository is empty
+          </p>
+        )}
+
         {state.isLoading ? (
           <RepoSetupSkeleton />
         ) : (

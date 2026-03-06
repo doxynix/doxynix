@@ -161,6 +161,12 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     return count;
   }, [selectedIds, apiFiles]);
 
+  const hasSearchMatches = useMemo(() => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    return (apiFiles as FileTuple[] | undefined)?.some((f) => f[0].toLowerCase().includes(term));
+  }, [apiFiles, searchTerm]);
+
   const toggleDocType = (id: DocType) => {
     setSelectedDocs((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
@@ -187,6 +193,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     state: {
       analysisLocale,
       branches,
+      hasSearchMatches,
       instructions,
       isLoading,
       searchTerm,

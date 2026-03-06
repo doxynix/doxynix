@@ -37,6 +37,13 @@ const DASHBOARD_BASE: MenuItem[] = [
     shortcut: "G then S",
     url: "/s",
   },
+  {
+    href: "/dashboard/notifications",
+    icon: Bell,
+    label: "Notifications",
+    shortcut: "G then N",
+    url: "/n",
+  },
 ];
 
 const SETTINGS_PAGES: MenuItems = [
@@ -65,13 +72,6 @@ const SETTINGS_PAGES: MenuItems = [
 ];
 
 const GLOBAL_FEATURES: MenuItems = [
-  {
-    href: "/dashboard/notifications",
-    icon: Bell,
-    label: "Notifications",
-    shortcut: "G then N",
-    url: "/n",
-  },
   { href: "/support", icon: Headset, label: "Support", shortcut: "G then H", url: "/h" },
 ];
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Trash2 } from "lucide-react";
+import { CloudUpload, Trash2 } from "lucide-react";
 import type { User } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
@@ -64,7 +64,6 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
               <LoadingButton
                 disabled={removeAvatar.isPending}
                 isLoading={removeAvatar.isPending}
-                loadingText=""
                 size="icon"
                 variant="destructive"
                 onClick={() => removeAvatar.mutate()}
@@ -91,7 +90,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
               onClick={() => fileInputRef.current?.click()}
               className="cursor-pointer"
             >
-              {t("settings_profile_upload_photo_button")}
+              <CloudUpload className="h-4 w-4" /> {t("settings_profile_upload_photo_button")}
             </LoadingButton>
 
             <p className="text-muted-foreground text-center text-xs">

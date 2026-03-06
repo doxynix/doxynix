@@ -100,7 +100,7 @@ export function UserNav() {
               onSelect={(e) => e.preventDefault()}
               className="text-destructive focus:bg-destructive/20 focus:text-destructive"
             >
-              <LogOut className="text-destructive mr-2" />
+              <LogOut className="text-destructive" />
               {t("logout")}
             </DropdownMenuItem>
           </DialogTrigger>

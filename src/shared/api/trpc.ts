@@ -28,7 +28,9 @@ export type TrendItem = RouterOutput["analytics"]["getTrends"][number];
 
 export type UiApiKey = RouterOutput["apikey"]["list"]["active"][number];
 
-export type UiNotification = RouterOutput["notification"]["getAll"][number];
+export type UiNotification = RouterOutput["notification"]["getAll"]["items"][number];
+
+export type NotificationType = UiNotification["type"];
 
 export type RepoStatus = UiRepoDetailed["status"];
 
@@ -39,3 +41,5 @@ export type DocType = RouterInput["repo"]["getDocument"]["type"];
 export type RepoGetAll = RouterOutput["repo"]["getAll"];
 
 export type RepoMeta = RepoGetAll["meta"];
+
+export type MarkAllInput = RouterInput["notification"]["markAllAsRead"];

@@ -57,7 +57,7 @@ export default function ErrorPage({
   }, [error]);
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-4">
+    <div className="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center px-4">
       <div className="bg-destructive/10 text-destructive flex size-20 items-center justify-center rounded-full">
         <ServerCrash size={35} className="animate-pulse" />
       </div>
@@ -96,11 +96,23 @@ export default function ErrorPage({
         </div>
       </div>
 
-      <footer className="mt-12 text-sm">
-        {t("footer")}{" "}
-        <a href={mailtoLink} className="underline hover:no-underline">
-          support@doxynix.space
-        </a>
+      <footer className="mt-12 flex flex-col gap-4 text-sm">
+        <div>
+          <span>{t("footer")} </span>
+          <a href={mailtoLink} className="underline hover:no-underline">
+            support@doxynix.space
+          </a>
+        </div>
+        <Button asChild size="sm" variant="outline" className="mx-auto w-fit">
+          <a
+            href="https://status.doxynix.space"
+            rel="noopener noreferrer"
+            target="_blank"
+            className="flex items-center gap-2.5"
+          >
+            Check System Status
+          </a>
+        </Button>
       </footer>
     </div>
   );

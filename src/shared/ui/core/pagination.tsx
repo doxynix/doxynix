@@ -27,24 +27,69 @@ const PaginationItem = React.forwardRef<HTMLLIElement, React.ComponentProps<"li"
 );
 PaginationItem.displayName = "PaginationItem";
 
-type PaginationLinkProps = Pick<ButtonProps, "size"> &
-  React.ComponentProps<typeof Link> & {
-    isActive?: boolean;
-  };
+type BasePaginationLinkProps = Pick<ButtonProps, "size"> & {
+  children?: React.ReactNode;
+  className?: string;
+  disabled?: boolean;
+  isActive?: boolean;
+};
 
-const PaginationLink = ({ className, isActive, size = "icon", ...props }: PaginationLinkProps) => (
-  <Link
-    aria-current={isActive ? "page" : undefined}
-    className={cn(
-      buttonVariants({
-        size,
-        variant: isActive ? "outline" : "ghost",
-      }),
-      className
-    )}
-    {...props}
-  />
-);
+type PaginationLinkProps = (
+  | (React.ComponentProps<"button"> & { href?: never })
+  | React.ComponentProps<typeof Link>
+) &
+  BasePaginationLinkProps;
+
+const PaginationLink = ({
+  className,
+  disabled,
+  isActive,
+  size = "icon",
+  ...props
+}: PaginationLinkProps) => {
+  const commonClassName = cn(
+    buttonVariants({
+      size,
+      variant: isActive ? "outline" : "ghost",
+    }),
+    className
+  );
+
+  if (!("href" in props) || props.href === undefined) {
+    const buttonProps = props as React.ComponentProps<"button">;
+
+    return (
+      <button
+        disabled={disabled}
+        aria-current={isActive ? "page" : undefined}
+        className={commonClassName}
+        {...buttonProps}
+        type="button"
+      />
+    );
+  }
+
+  const { href, onClick, tabIndex, ...linkProps } = props as React.ComponentProps<typeof Link>;
+  const effectiveTabIndex = disabled ? -1 : tabIndex;
+
+  return (
+    <Link
+      {...linkProps}
+      href={href}
+      tabIndex={effectiveTabIndex}
+      aria-current={isActive ? "page" : undefined}
+      aria-disabled={disabled || undefined}
+      onClick={(event) => {
+        if (disabled) {
+          event.preventDefault();
+          return;
+        }
+        onClick?.(event);
+      }}
+      className={commonClassName}
+    />
+  );
+};
 PaginationLink.displayName = "PaginationLink";
 
 const PaginationPrevious = ({

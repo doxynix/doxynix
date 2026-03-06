@@ -2,22 +2,8 @@ import { Status, Visibility, type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
 import type { DbClient } from "../db/db";
-import { handlePrismaError } from "../utils/handle-prisma-error";
+import { handlePrismaError, isOctokitError } from "../utils/handle-error";
 import { githubService } from "./github.service";
-
-type OctokitError = {
-  message: string;
-  status: number;
-};
-
-function isOctokitError(error: unknown): error is OctokitError {
-  return (
-    typeof error === "object" &&
-    error != null &&
-    "status" in error &&
-    typeof (error as Record<string, unknown>).status === "number"
-  );
-}
 
 export const repoService = {
   buildWhereClause(filters: {
@@ -27,7 +13,8 @@ export const repoService = {
     visibility?: Visibility;
   }): Prisma.RepoWhereInput {
     const { owner, search, status, visibility } = filters;
-    const searchTerms = search == null ? [] : search.trim().split(/\s+/);
+    const normalizedSearch = search?.trim();
+    const searchTerms = normalizedSearch != null ? normalizedSearch.split(/\s+/) : [];
 
     const statusFilter: Prisma.RepoWhereInput =
       status == null

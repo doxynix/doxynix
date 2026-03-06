@@ -104,3 +104,19 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
     message: "Internal database error",
   });
 }
+
+type OctokitError = {
+  message: string;
+  status: number;
+};
+
+export function isOctokitError(error: unknown): error is OctokitError {
+  return (
+    typeof error === "object" &&
+    error != null &&
+    "status" in error &&
+    typeof (error as Record<string, unknown>).status === "number" &&
+    "message" in error &&
+    typeof (error as Record<string, unknown>).message === "string"
+  );
+}

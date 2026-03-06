@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 
-import { handlePrismaError } from "@/server/utils/handle-prisma-error";
+import { handlePrismaError } from "@/server/utils/handle-error";
 import { ApiKeySchema } from "@/generated/zod";
 
 import { OpenApiErrorResponses } from "../shared";

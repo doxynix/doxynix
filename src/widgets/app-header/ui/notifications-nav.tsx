@@ -17,17 +17,19 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 import { Link } from "@/i18n/routing";
 
-import { useNotificationActions } from "@/features/notifications";
+import { notificationTypeConfig, useNotificationActions } from "@/features/notifications";
 
 export function NotificationsNav() {
   const t = useTranslations("Dashboard");
   const locale = useLocale();
 
-  const { markAllRead, markRead } = useNotificationActions();
+  const { markAllAsRead, markAs } = useNotificationActions();
 
-  const { data: notifications = [] } = trpc.notification.getAll.useQuery({ count: 5 });
-  const { data: unreadData } = trpc.notification.getUnreadCount.useQuery();
-  const unreadCount = unreadData?.count ?? 0;
+  const { data, isLoading } = trpc.notification.getAll.useQuery({ limit: 5 });
+  const notifications = data?.items ?? [];
+
+  const { data: unreadData } = trpc.notification.getStats.useQuery();
+  const unreadCount = unreadData?.unread ?? 0;
 
   return (
     <DropdownMenu>
@@ -49,9 +51,9 @@ export function NotificationsNav() {
         <div className="flex items-center justify-between p-2">
           <h2>{t("notifications_title")}</h2>
           <Button
-            disabled={markAllRead.isPending || unreadCount === 0}
+            disabled={markAllAsRead.isPending || unreadCount === 0}
             variant="link"
-            onClick={() => markAllRead.mutate()}
+            onClick={() => markAllAsRead.mutate()}
             className="cursor-pointer text-xs"
           >
             {t("notifications_mark_read")}
@@ -59,32 +61,60 @@ export function NotificationsNav() {
         </div>
         <DropdownMenuSeparator />
         <div className="flex flex-col gap-1 py-1">
-          {notifications.length === 0 ? (
-            <div className="text-muted-foreground p-4 text-center text-sm">Нет уведомлений</div>
+          {notifications.length === 0 && !isLoading ? (
+            <p className="text-muted-foreground p-4 text-center text-sm">No notifications</p>
           ) : (
-            notifications.map((note) => (
-              <DropdownMenuItem
-                key={note.id}
-                onClick={() => {
-                  if (note.isRead === false) markRead.mutate(note.id);
-                }}
-                className={cn(
-                  "flex cursor-pointer flex-col items-start gap-1 p-3",
-                  note.isRead === false && "bg-accent/50"
-                )}
-              >
-                <div className="flex w-full items-center justify-between gap-2">
-                  <div className="flex flex-col">
-                    <p className="mb-1 font-bold">{note.title}</p>
-                    <p className="text-muted-foreground text-xs">{note.body}</p>
-                    <TimeAgo date={note.createdAt} locale={locale} />
+            notifications.map((note) => {
+              const href =
+                note.repo != null ? `/dashboard/repo/${note.repo.owner}/${note.repo.name}` : null;
+              const { color, icon: Icon } = notificationTypeConfig[note.type];
+
+              const innerContent = (
+                <>
+                  <Icon className={cn("h-5 w-5", color)} />
+                  <div className="flex w-full items-center justify-between gap-2">
+                    <div className="flex flex-col">
+                      <p
+                        className={cn(
+                          "mb-1 font-bold",
+                          note.isRead === true && "text-muted-foreground"
+                        )}
+                      >
+                        {note.title}
+                      </p>
+                      <p className="text-muted-foreground max-w-57.5 truncate text-xs">
+                        {note.body}
+                      </p>
+                      <TimeAgo date={note.createdAt} locale={locale} />
+                    </div>
+                    {note.isRead === false && (
+                      <span className="bg-muted-foreground mt-1 h-2 w-2 shrink-0 rounded-full" />
+                    )}
                   </div>
-                  {note.isRead === false && (
-                    <span className="bg-muted-foreground mt-1 h-2 w-2 shrink-0 rounded-full" />
+                </>
+              );
+
+              const commonClasses = "flex items-center gap-1 p-3 w-full";
+
+              return (
+                <DropdownMenuItem
+                  key={note.id}
+                  asChild
+                  onSelect={() => {
+                    if (note.isRead === false) markAs.mutate(note.id, true);
+                  }}
+                  className={cn(note.isRead === false && "bg-accent/50")}
+                >
+                  {href == null ? (
+                    <div className={cn(commonClasses, "cursor-default")}>{innerContent}</div>
+                  ) : (
+                    <Link href={href} className={cn(commonClasses, "cursor-pointer")}>
+                      {innerContent}
+                    </Link>
                   )}
-                </div>
-              </DropdownMenuItem>
-            ))
+                </DropdownMenuItem>
+              );
+            })
           )}
         </div>
         <DropdownMenuSeparator />
