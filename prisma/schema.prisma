@@ -123,7 +123,7 @@ model Notification {
   /// @zod.custom.omit(["model"])
   userId    Int        @map("user_id")
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  /// `@zod.custom.omit`(["model"])
+  /// @zod.custom.omit(["model"])
   repoId    Int?       @map("repo_id")
   repo      Repo?      @relation(fields: [repoId], references: [id], onDelete: SetNull)
 
