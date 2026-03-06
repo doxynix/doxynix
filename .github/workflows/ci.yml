@@ -109,7 +109,7 @@ jobs:
         uses: pnpm/action-setup@9b5745cdf0a2e8c2620f0746130f809adb911c19
 
       - name: Setup Node.js
-        uses: actions/setup-node@54045abd5dcd3b0fee9ca02fa24c57545834c9cc
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
           cache: 'pnpm'
@@ -150,7 +150,7 @@ jobs:
         uses: pnpm/action-setup@9b5745cdf0a2e8c2620f0746130f809adb911c19
 
       - name: Setup Node.js
-        uses: actions/setup-node@54045abd5dcd3b0fee9ca02fa24c57545834c9cc
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
           cache: 'pnpm'
@@ -186,7 +186,7 @@ jobs:
 
       - name: Secret Scanning (TruffleHog)
         # v3.93.4
-        uses: trufflesecurity/trufflehog@041f07e9df901a1038a528e5525b0226d04dd5ea
+        uses: trufflesecurity/trufflehog@c3e599b7163e8198a55467f3133db0e7b2a492cb
         with:
           path: ./
           extra_args: --only-verified
@@ -195,7 +195,7 @@ jobs:
         uses: pnpm/action-setup@9b5745cdf0a2e8c2620f0746130f809adb911c19
 
       - name: Setup Node.js
-        uses: actions/setup-node@54045abd5dcd3b0fee9ca02fa24c57545834c9cc
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
           cache: 'pnpm'
@@ -266,7 +266,7 @@ jobs:
         uses: pnpm/action-setup@9b5745cdf0a2e8c2620f0746130f809adb911c19
 
       - name: Setup Node.js
-        uses: actions/setup-node@54045abd5dcd3b0fee9ca02fa24c57545834c9cc
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
           cache: 'pnpm'
@@ -313,7 +313,7 @@ jobs:
         uses: pnpm/action-setup@9b5745cdf0a2e8c2620f0746130f809adb911c19
 
       - name: Setup Node.js
-        uses: actions/setup-node@54045abd5dcd3b0fee9ca02fa24c57545834c9cc
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
           cache: 'pnpm'
@@ -389,7 +389,7 @@ jobs:
         uses: pnpm/action-setup@9b5745cdf0a2e8c2620f0746130f809adb911c19
 
       - name: Setup Node.js
-        uses: actions/setup-node@54045abd5dcd3b0fee9ca02fa24c57545834c9cc
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
           cache: 'pnpm'
@@ -454,7 +454,7 @@ jobs:
         uses: pnpm/action-setup@9b5745cdf0a2e8c2620f0746130f809adb911c19
 
       - name: Setup Node.js
-        uses: actions/setup-node@54045abd5dcd3b0fee9ca02fa24c57545834c9cc
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
           cache: 'pnpm'
