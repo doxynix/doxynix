@@ -1,5 +1,4 @@
-import { parseAsInteger, parseAsString, parseAsStringLiteral } from "nuqs";
-import type z from "zod";
+import { parseAsInteger, parseAsString, parseAsStringLiteral, type inferParserType } from "nuqs";
 
 import { StatusSchema, VisibilitySchema } from "@/generated/zod";
 
@@ -18,4 +17,4 @@ export const repoParsers = {
   visibility: parseAsStringLiteral(VisibilitySchema.options),
 };
 
-export type repoParsersType = z.infer<typeof repoParsers>;
+export type repoParsersType = inferParserType<typeof repoParsers>;
