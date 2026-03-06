@@ -65,14 +65,12 @@ export function NotificationsNav() {
             <p className="text-muted-foreground p-4 text-center text-sm">No notifications</p>
           ) : (
             notifications.map((note) => {
-              const href = note.repo
-                ? `/dashboard/repo/${note.repo.owner}/${note.repo.name}`
-                : null;
+              const href =
+                note.repo != null ? `/dashboard/repo/${note.repo.owner}/${note.repo.name}` : null;
               const { color, icon: Icon } = notificationTypeConfig[note.type];
 
               const innerContent = (
                 <>
-                  {" "}
                   <Icon className={cn("h-5 w-5", color)} />
                   <div className="flex w-full items-center justify-between gap-2">
                     <div className="flex flex-col">

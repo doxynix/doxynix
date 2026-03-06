@@ -471,6 +471,9 @@ importers:
       cspell:
         specifier: 9.7.0
         version: 9.7.0
+      decimal.js:
+        specifier: 10.6.0
+        version: 10.6.0
       dotenv:
         specifier: 17.3.1
         version: 17.3.1

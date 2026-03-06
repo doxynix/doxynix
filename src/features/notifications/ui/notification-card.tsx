@@ -19,9 +19,10 @@ type Props = { notification: UiNotification };
 export function NotificationCard({ notification }: Readonly<Props>) {
   const { border, color, icon: Icon } = notificationTypeConfig[notification.type];
   const locale = useLocale();
-  const href = notification.repo
-    ? `/dashboard/repo/${notification.repo.owner}/${notification.repo.name}`
-    : null;
+  const href =
+    notification.repo != null
+      ? `/dashboard/repo/${notification.repo.owner}/${notification.repo.name}`
+      : null;
 
   const { deleteOne, markAs } = useNotificationActions();
 
@@ -63,10 +64,10 @@ export function NotificationCard({ notification }: Readonly<Props>) {
             <CopyButton value={notification.id} className="z-10" />
 
             <NotificationActionButton
-              icon={notification.isRead ? EyeOff : Eye}
+              icon={notification.isRead === true ? EyeOff : Eye}
               isPending={markAs.isPending}
-              tooltip={notification.isRead ? "Mark as unread" : "Mark as read"}
-              onClick={() => markAs.mutate(notification.id, !notification.isRead)}
+              tooltip={notification.isRead === true ? "Mark as unread" : "Mark as read"}
+              onClick={() => markAs.mutate(notification.id, notification.isRead === false)}
             />
             <NotificationActionButton
               icon={Trash2}

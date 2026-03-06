@@ -135,7 +135,7 @@ export const notificationRouter = createTRPCRouter({
         items: items.map((n) => ({
           ...n,
           id: n.publicId,
-          repo: n.repo ? { name: n.repo.name, owner: n.repo.owner } : null,
+          repo: n.repo != null ? { name: n.repo.name, owner: n.repo.owner } : null,
         })),
         meta: {
           currentPage: page,
@@ -165,7 +165,7 @@ export const notificationRouter = createTRPCRouter({
 
       return groups.reduce(
         (acc, group) => {
-          if (group.isRead) acc.read = group._count._all;
+          if (group.isRead === true) acc.read = group._count._all;
           else acc.unread = group._count._all;
           acc.total += group._count._all;
           return acc;
