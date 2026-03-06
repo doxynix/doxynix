@@ -14,7 +14,7 @@ vi.mock("@/server/services/github.service", () => ({
   },
 }));
 
-vi.mock("@/server/utils/handle-prisma-error", () => ({
+vi.mock("@/server/utils/handle-error", () => ({
   handlePrismaError: vi.fn(() => {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
