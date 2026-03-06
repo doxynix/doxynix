@@ -133,7 +133,7 @@ model Notification {
   userId    Int        @map("user_id") @omit
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// `@zod.custom.omit`(["model"])
-  repoId    Int?       @map("repo_id") @omit
+  repoId    Int?       @map("repo_id")
   repo      Repo?      @relation(fields: [repoId], references: [id], onDelete: SetNull)
 
   @@allow('all', auth() == user || auth().role == "ADMIN")
