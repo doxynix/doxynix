@@ -60,8 +60,8 @@ const nextConfig: NextConfig = {
     taint: true,
     typedEnv: true,
     useLightningcss: IS_PROD,
-    webpackMemoryOptimizations: true,
-    workerThreads: true,
+    webpackMemoryOptimizations: false,
+    workerThreads: false,
   },
   async headers() {
     return [
