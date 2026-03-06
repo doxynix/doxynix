@@ -2,7 +2,7 @@ import { createTRPCRouter } from "../trpc";
 import { analyticsRouter } from "./analytics.router";
 import { apiKeyRouter } from "./apikey.router";
 import { healthRouter } from "./health.router";
-import { notificationRouter } from "./notificatons.router";
+import { notificationRouter } from "./notifications.router";
 import { repoRouter } from "./repo.router";
 import { userRouter } from "./user.router";
 

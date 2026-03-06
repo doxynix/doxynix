@@ -1,4 +1,4 @@
-import { Status, Visibility } from "@prisma/client";
+import { NotifyType, Status, Visibility } from "@prisma/client";
 import { z } from "zod";
 
 export const PaginationSchema = z.object({
@@ -13,6 +13,13 @@ export const RepoFilterSchema = PaginationSchema.extend({
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
   status: z.enum(Status).optional(),
   visibility: z.enum(Visibility).optional(),
+});
+
+export const NotificationsFilterSchema = PaginationSchema.extend({
+  isRead: z.boolean().optional(),
+  repoName: z.string().optional(),
+  repoOwner: z.string().optional(),
+  type: z.enum(NotifyType).optional(),
 });
 
 export const OpenApiErrorResponses = {

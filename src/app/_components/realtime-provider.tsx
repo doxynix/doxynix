@@ -12,7 +12,7 @@ import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { useRepoActions } from "@/entities/repo";
 
-import { useNotificationActions } from "./model/use-notification-actions";
+import { useNotificationActions } from "@/features/notifications";
 
 type Props = { children: React.ReactNode };
 

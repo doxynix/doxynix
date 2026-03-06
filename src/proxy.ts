@@ -49,17 +49,29 @@ function isUploadThingPath(pathname: string): boolean {
   return hasPathBoundary(pathname, "/api/uploadthing");
 }
 
-function logTraffic(
-  msg: string,
-  method: string,
-  url: string,
-  path: string,
-  ip: string,
-  country: string,
-  userAgent: string,
-  requestId: string,
-  event: NextFetchEvent
-) {
+type LogTrafficParams = {
+  country: string;
+  event: NextFetchEvent;
+  ip: string;
+  method: string;
+  msg: string;
+  path: string;
+  requestId: string;
+  url: string;
+  userAgent: string;
+};
+
+function logTraffic({
+  country,
+  event,
+  ip,
+  method,
+  msg,
+  path,
+  requestId,
+  url,
+  userAgent,
+}: LogTrafficParams) {
   logger.info({
     country,
     ip: anonymizeIp(ip),
@@ -267,17 +279,17 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const userAgent = getUa(request);
   const method = request.method;
   const country = getCountry(request);
-  logTraffic(
-    "Incoming Traffic",
-    method,
-    request.url,
-    pathname,
-    ip,
+  logTraffic({
     country,
-    userAgent,
+    event,
+    ip,
+    method,
+    msg: "Incoming Traffic",
+    path: pathname,
     requestId,
-    event
-  );
+    url: request.url,
+    userAgent,
+  });
 
   if (pathname.startsWith("/api") || pathname.startsWith("/trpc")) {
     return handleApiRequest(request, requestId, ip);
@@ -289,6 +301,6 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
 export const config = {
   matcher: [
     "/dashboard/repo/:path*",
-    "/((?!_next|_vercel|monitoring|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|xml|json|woff2?|ttf|otf)$).*)",
+    String.raw`/((?!_next|_vercel|monitoring|.*\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|xml|json|woff2?|ttf|otf)$).*)`,
   ],
 };

@@ -23,12 +23,19 @@ export function CopyButton({
 }: Readonly<CopyButtonProps>) {
   const { copy, isCopied } = useCopyToClipboard();
 
+  const handleCopy = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    void copy(value);
+  };
+
   return (
     <AppTooltip content={isCopied ? successText : tooltipText} open={isCopied ? true : undefined}>
       <Button
+        type="button"
         size="icon"
         variant="ghost"
-        onClick={() => void copy(value)}
+        onClick={handleCopy}
         className={cn(
           "h-6 w-6 transition-all not-md:opacity-100",
           isCopied

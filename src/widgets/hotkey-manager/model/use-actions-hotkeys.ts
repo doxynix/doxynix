@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { useCreateRepoDialogStore } from "@/features/repo";
+import { useCreateRepoDialogStore } from "@/entities/repo";
 
 export function useActionsHotkeys() {
   const { openDialog: openCreateRepoDialog } = useCreateRepoDialogStore();

@@ -1,13 +1,14 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useQueryStates } from "nuqs";
+import { useDebounce } from "use-debounce";
 
 import { trpc, type RepoStatus } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
-import { parseRepoSearchParams, RepoCardSkeleton } from "@/entities/repo";
+import { RepoCardSkeleton, repoParsers } from "@/entities/repo";
 
 import { RepoList } from "./repo-list";
 
@@ -26,23 +27,25 @@ type Props = {
 };
 
 export function RepoListContainer({ config }: Readonly<Props>) {
-  const searchParams = useSearchParams();
   const t = useTranslations("Dashboard");
 
-  const rawParams = Object.fromEntries(searchParams.entries());
-  const params = parseRepoSearchParams(rawParams);
+  const [filters] = useQueryStates(repoParsers);
+
+  const [debouncedSearch] = useDebounce(filters.search, 500);
 
   const limit = config?.limit ?? 5;
-  const page = config?.showPagination === false ? 1 : params.page;
 
-  const filters = {
-    ...params,
-    ...config?.forcedFilters,
-    cursor: page,
+  const queryParams = {
+    cursor: filters.page,
     limit,
+    search: debouncedSearch || undefined,
+    sortBy: filters.sortBy,
+    status: filters.status ?? undefined,
+    visibility: filters.visibility ?? undefined,
+    ...config?.forcedFilters,
   };
 
-  const { data, isLoading } = trpc.repo.getAll.useQuery(filters, {
+  const { data, isFetching, isLoading } = trpc.repo.getAll.useQuery(queryParams, {
     placeholderData: (previousData) => previousData,
   });
 
@@ -69,7 +72,9 @@ export function RepoListContainer({ config }: Readonly<Props>) {
           </p>
         </div>
       )}
-      <RepoList meta={meta} repos={items} />
+      <div className={isFetching ? "opacity-50" : ""}>
+        <RepoList meta={meta} repos={items} />
+      </div>
 
       {config?.showPagination !== false && <AppPagination meta={meta} className="mt-auto" />}
     </>

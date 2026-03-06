@@ -146,7 +146,7 @@ export default async function LocaleLayout({
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Toaster
-            richColors
+            // richColors
             duration={4000}
             gap={8}
             position="top-center"

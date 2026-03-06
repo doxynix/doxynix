@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Check, ChevronDown, GitBranch } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
+import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import {
   Command,
@@ -63,11 +64,7 @@ export function RepoBranchSelector({
                     className={cn("h-4 w-4", selectedBranch === b ? "opacity-100" : "opacity-0")}
                   />
                   {b}
-                  {defaultBranch === b && (
-                    <span className="flex items-center gap-1 rounded-md border px-1 py-0.5 text-xs">
-                      default
-                    </span>
-                  )}
+                  {defaultBranch === b && <Badge variant="outline">default</Badge>}
                 </CommandItem>
               ))}
             </CommandGroup>

@@ -1,9 +1,8 @@
 "use client";
 
-import type { Route } from "next";
-import { useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useQueryStates } from "nuqs";
 
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -13,59 +12,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/core/select";
-import { usePathname, useRouter } from "@/i18n/routing";
 
-import { parseRepoSearchParams, REPO_DEFAULTS } from "@/entities/repo";
+import { repoParsers } from "@/entities/repo";
 
 import { StatusSchema, VisibilitySchema } from "@/generated/zod";
 
 export function RepoFilters() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
-  const paramsObject = Object.fromEntries(searchParams.entries());
-
-  const filters = parseRepoSearchParams(paramsObject);
+  const [filters, setFilters] = useQueryStates(repoParsers, {
+    shallow: true,
+  });
 
   const hasFilters =
-    (filters.status != null && (filters.status as string) !== "all") ||
-    (filters.visibility != null && (filters.visibility as string) !== "all") ||
-    filters.sortBy !== REPO_DEFAULTS.SORT_BY;
+    filters.status !== null || filters.visibility !== null || filters.sortBy !== "updatedAt";
 
-  const updateQuery = (name: string, value: string) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-
-    if (value === "all" || (name === "sortBy" && value === REPO_DEFAULTS.SORT_BY)) {
-      newParams.delete(name);
-    } else {
-      newParams.set(name, value);
-    }
-
-    newParams.delete("page");
-    router.push(`${pathname}?${newParams.toString()}` as Route);
+  const handleUpdate = (key: keyof typeof repoParsers, value: string | number | null) => {
+    void setFilters({
+      [key]: value,
+      page: null,
+    });
   };
 
   const handleReset = () => {
-    const newParams = new URLSearchParams(searchParams.toString());
-
-    const searchValue = newParams.get("search");
-
-    newParams.forEach((_, key) => {
-      if (key !== "search") newParams.delete(key);
+    void setFilters({
+      page: null,
+      sortBy: null,
+      status: null,
+      visibility: null,
     });
-
-    if (searchValue != null) newParams.set("search", searchValue);
-
-    router.push(`${pathname}?${newParams.toString()}` as Route);
   };
 
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-wrap items-center justify-center gap-2">
-        <Select value={filters.status ?? "all"} onValueChange={(v) => updateQuery("status", v)}>
+        <Select
+          value={filters.status ?? "all"}
+          onValueChange={(v) => handleUpdate("status", v === "all" ? null : v)}
+        >
           <SelectTrigger className="w-35">
             <SelectValue placeholder={tCommon("status")} />
           </SelectTrigger>
@@ -80,7 +65,7 @@ export function RepoFilters() {
 
         <Select
           value={filters.visibility ?? "all"}
-          onValueChange={(v) => updateQuery("visibility", v)}
+          onValueChange={(v) => handleUpdate("visibility", v === "all" ? null : v)}
         >
           <SelectTrigger className="w-32.5">
             <SelectValue placeholder={tCommon("visibility")} />
@@ -92,7 +77,7 @@ export function RepoFilters() {
           </SelectContent>
         </Select>
 
-        <Select value={filters.sortBy} onValueChange={(v) => updateQuery("sortBy", v)}>
+        <Select value={filters.sortBy} onValueChange={(v) => handleUpdate("sortBy", v)}>
           <SelectTrigger className="w-37.5">
             <SelectValue placeholder={t("repo_sort_by")} />
           </SelectTrigger>

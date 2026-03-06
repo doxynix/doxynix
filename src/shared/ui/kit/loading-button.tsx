@@ -16,7 +16,7 @@ export function LoadingButton({
   className,
   disabled,
   isLoading,
-  loadingText = "Loading...",
+  loadingText,
   ...props
 }: Props) {
   return (

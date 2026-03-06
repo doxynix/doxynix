@@ -11,6 +11,7 @@ import type { RepoItemFields } from "@/shared/types/repo";
 import type { DbClient } from "../db/db";
 import { logger } from "../logger/logger";
 import { FileClassifier } from "../utils/file-classifier";
+import { isOctokitError } from "./repo.service";
 
 const MyOctokit = Octokit.plugin(retry, throttling, paginateRest);
 type OctokitInstance = InstanceType<typeof MyOctokit>;
@@ -36,7 +37,7 @@ function createClient(token: string): OctokitInstance {
     },
 
     retry: {
-      doNotRetry: [429],
+      doNotRetry: [429, 409, 422],
     },
 
     throttle: {
@@ -124,30 +125,40 @@ export const githubService = {
     name: string,
     branch?: string
   ) {
-    const { octokit } = await this.getClientContext(prisma, userId);
+    try {
+      const { octokit } = await this.getClientContext(prisma, userId);
 
-    const { data: repoData } = await octokit.repos.get({ owner, repo: name });
-    const treeSha = branch ?? repoData.default_branch;
+      const { data: repoData } = await octokit.repos.get({ owner, repo: name });
+      const treeSha = branch ?? repoData.default_branch;
 
-    const { data } = await octokit.git.getTree({
-      owner,
-      recursive: "1",
-      repo: name,
-      tree_sha: treeSha,
-    });
+      const { data } = await octokit.git.getTree({
+        owner,
+        recursive: "1",
+        repo: name,
+        tree_sha: treeSha,
+      });
 
-    return data.tree
-      .filter((item) => {
-        if (!item.path) return false;
-        if (item.type !== "blob") return false;
+      return data.tree
+        .filter((item) => {
+          if (!item.path) return false;
+          if (item.type !== "blob") return false;
 
-        return !FileClassifier.isIgnored(item.path);
-      })
-      .map((item) => ({
-        path: item.path,
-        sha: item.sha,
-        type: item.type,
-      }));
+          return !FileClassifier.isIgnored(item.path);
+        })
+        .map((item) => ({
+          path: item.path,
+          sha: item.sha,
+          type: item.type,
+        }));
+    } catch (error) {
+      if (isOctokitError(error)) {
+        logger.info({ msg: "Repo empty or not found", status: error.status });
+        return [];
+      }
+
+      logger.error({ error, msg: "Error fetching repo tree" });
+      throw error;
+    }
   },
 
   mapRepos(data: GitHubRepoResponse[]): RepoItemFields[] {

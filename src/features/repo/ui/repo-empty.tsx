@@ -13,7 +13,7 @@ import {
   EmptyTitle,
 } from "@/shared/ui/core/empty";
 
-import { useCreateRepoDialogStore } from "../model/create-repo-dialog.store";
+import { useCreateRepoDialogStore } from "@/entities/repo";
 
 export function RepoEmpty() {
   const openDialog = useCreateRepoDialogStore((s) => s.openDialog);

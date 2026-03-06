@@ -144,7 +144,8 @@ export async function saveResults(params: {
     const note = await tx.notification.create({
       data: {
         body: `Health Score: ${finalHealthScore}/100`,
-        title: `Analysis for ${repo.name} ready`,
+        repoId: repo.id,
+        title: `Analysis for ${repo.owner}/${repo.name} ready`,
         type: "SUCCESS",
         userId,
       },

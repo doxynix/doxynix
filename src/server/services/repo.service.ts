@@ -10,7 +10,7 @@ type OctokitError = {
   status: number;
 };
 
-function isOctokitError(error: unknown): error is OctokitError {
+export function isOctokitError(error: unknown): error is OctokitError {
   return (
     typeof error === "object" &&
     error != null &&
@@ -27,7 +27,7 @@ export const repoService = {
     visibility?: Visibility;
   }): Prisma.RepoWhereInput {
     const { owner, search, status, visibility } = filters;
-    const searchTerms = search == null ? [] : search.trim().split(/\s+/);
+    const searchTerms = search?.trim().split(/\s+/) ?? [];
 
     const statusFilter: Prisma.RepoWhereInput =
       status == null

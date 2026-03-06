@@ -1,101 +1,118 @@
-// run: pnpm prisma db seed
+// run: pnpm db:seed
 import { faker } from "@faker-js/faker";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { DocType, PrismaClient, Status, Visibility } from "@prisma/client";
+import { PrismaClient, UserRole } from "@prisma/client";
 import pg from "pg";
 
-import { DATABASE_URL } from "@/shared/constants/env.server";
+import * as Fake from "../src/generated/fake-data";
 
-const connectionString = DATABASE_URL;
+const DATABASE_URL = process.env.DATABASE_URL;
 
-const pool = new pg.Pool({ connectionString });
+const pool = new pg.Pool({ connectionString: DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 const MY_EMAIL = "karen.avakov2@gmail.com";
 
 async function main() {
-  console.log("Seeding data...");
+  console.log("🚀 Starting seed with auto-generated fake data...");
 
-  const user = await prisma.user.upsert({
+  const admin = await prisma.user.upsert({
     create: {
+      ...Fake.fakeUser(),
       email: MY_EMAIL,
       emailVerified: new Date(),
       image: faker.image.avatar(),
-      name: "Admin User",
+      name: "Karen Avakov",
+      role: UserRole.ADMIN,
     },
     update: {},
     where: { email: MY_EMAIL },
   });
+  console.log(`✅ Admin ready: ${admin.email}`);
 
-  console.log(`User ready: ${user.email} (ID: ${user.id})`);
-
-  for (let i = 0; i < 12; i++) {
-    const isReady = i < 6;
-    const isPending = i >= 6 && i < 9;
-
-    const randomScore = faker.number.int({ max: 100, min: 60 });
-    const githubId = faker.number.int({ max: 1000, min: 1 });
-    const owner = faker.internet.username();
-    const repoName = faker.word.noun();
-
-    const repo = await prisma.repo.create({
+  console.log("👥 Creating more users...");
+  for (let i = 0; i < 5; i++) {
+    const user = await prisma.user.create({
       data: {
-        analyses: {
-          create: [
-            {
-              commitSha: faker.git.commitSha(),
-              metricsJson: isReady
-                ? {
-                    coverage: faker.number.int({ max: 99, min: 30 }),
-                    issues: faker.number.int({ max: 20, min: 0 }),
-                    score: randomScore,
-                  }
-                : {},
-              score: isReady ? randomScore : null,
-              status: isReady ? Status.DONE : isPending ? Status.PENDING : Status.FAILED,
-            },
-          ],
+        ...Fake.fakeUser(),
+        apiKeys: {
+          create: [Fake.fakeApiKey(), Fake.fakeApiKey()],
         },
-        documents: isReady
-          ? {
+        email: faker.internet.email(),
+        image: faker.image.avatar(),
+
+        name: faker.person.fullName(),
+
+        repos: {
+          create: Array.from({ length: 3 }).map(() => ({
+            ...Fake.fakeRepo(),
+            analyses: {
               create: [
                 {
-                  content: "# Readme \n\n This is a generated file...",
-                  type: DocType.README,
-                  version: "v1.0",
+                  ...Fake.fakeAnalysis(),
+                  progress: 100,
+                  score: faker.number.int({ max: 100, min: 1 }),
+                  status: "DONE",
                 },
                 {
-                  content: JSON.stringify({ endpoint: "/api/test", method: "GET" }, null, 2),
-                  type: DocType.API,
-                  version: "v1.0",
+                  ...Fake.fakeAnalysis(),
+                  progress: faker.number.int({ max: 99, min: 1 }),
+                  status: "PENDING",
                 },
               ],
-            }
-          : undefined,
-        githubId,
-        name: repoName,
-        owner: owner,
-        url: `https://github.com/${owner}/${repoName}`,
+            },
+            description: faker.lorem.sentence(),
+            documents: {
+              create: [Fake.fakeDocument(), Fake.fakeDocument()],
+            },
+            forks: faker.number.int({ max: 5000 }),
+            githubId: faker.number.int({ max: 100000000 }),
+            name: faker.word.noun() + "-" + faker.string.alphanumeric(4),
+            openIssues: faker.number.int({ max: 100 }),
+            size: faker.number.int({ max: 100000 }),
 
-        userId: user.id,
+            stars: faker.number.int({ max: 10000 }),
 
-        visibility: Math.random() > 0.5 ? Visibility.PUBLIC : Visibility.PRIVATE,
+            url: faker.internet.url(),
+          })),
+        },
       },
     });
-
-    console.log(`Created repo: ${repo.owner}/${repo.name}`);
+    console.log(`   - User created: ${user.name}`);
   }
 
-  console.log("Seeding completed!");
+  console.log("🔔 Creating notifications...");
+  await prisma.notification.createMany({
+    data: Array.from({ length: 10 }).map(() => ({
+      ...Fake.fakeNotification(),
+      isRead: faker.datatype.boolean(),
+      userId: admin.id,
+    })),
+  });
+
+  console.log("📝 Writing audit logs...");
+  await prisma.auditLog.createMany({
+    data: Array.from({ length: 20 }).map(() => ({
+      ...Fake.fakeAuditLog(),
+      ip: faker.internet.ip(),
+      model: "Repo",
+      operation: "CREATE",
+      userId: admin.id,
+    })),
+  });
+
+  console.log("✨ Seeding completed! Database is now full of life.");
 }
 
 main()
   .then(async () => {
     await prisma.$disconnect();
+    await pool.end();
   })
   .catch(async (e) => {
-    console.error(e);
+    console.error("❌ Seeding failed:", e);
     await prisma.$disconnect();
+    await pool.end();
     process.exit(1);
   });

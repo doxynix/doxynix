@@ -207,6 +207,7 @@ export function HowItWorksSection() {
             repeatDelay={REPEAT_DELAY}
             reverse={path.reverse}
             toRef={path.toRef}
+            className="-z-10"
           />
         ))}
       </div>

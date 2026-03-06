@@ -16,7 +16,7 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
   const locale = useLocale();
 
   return (
-    <Card className="group justify-between">
+    <Card className="group hover:bg-accent/50 justify-between">
       <CardHeader className="flex flex-row items-start justify-between pb-2">
         <div className="space-y-1 overflow-hidden">
           <CardTitle className="truncate text-base font-semibold">{active.name}</CardTitle>

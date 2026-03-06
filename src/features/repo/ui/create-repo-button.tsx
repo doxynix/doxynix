@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/shared/ui/core/button";
 
-import { useCreateRepoDialogStore } from "../model/create-repo-dialog.store";
+import { useCreateRepoDialogStore } from "@/entities/repo";
 
 export function CreateRepoButton() {
   const openDialog = useCreateRepoDialogStore((s) => s.openDialog);

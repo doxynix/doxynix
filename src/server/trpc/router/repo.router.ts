@@ -326,6 +326,7 @@ export const repoRouter = createTRPCRouter({
 
       return branches.map((b) => b.name);
     }),
+
   getByName: protectedProcedure
     .meta({
       openapi: {
@@ -366,6 +367,7 @@ export const repoRouter = createTRPCRouter({
         status: repo.analyses[0]?.status ?? Status.NEW,
       };
     }),
+
   getDocument: protectedProcedure
     .input(
       z.object({
@@ -453,6 +455,46 @@ export const repoRouter = createTRPCRouter({
         file.sha.substring(0, 7),
         FileClassifier.getScore(file.path) > 40 ? 1 : 0,
       ]);
+    }),
+  getSlim: protectedProcedure
+    .meta({
+      openapi: {
+        description: "Get a lightweight list of repositories for filters and selectors.",
+        errorResponses: OpenApiErrorResponses,
+        method: "GET",
+        path: "/repos/slim",
+        protect: true,
+        summary: "Retrieve slim repositories list",
+        tags: ["repositories"],
+      },
+    })
+
+    .input(z.object({ limit: z.coerce.number().min(1).max(100).optional().default(1) }))
+    .output(
+      z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          owner: z.string(),
+        })
+      )
+    )
+    .query(async ({ ctx, input }) => {
+      const repos = await ctx.db.repo.findMany({
+        orderBy: { name: "asc" },
+        select: {
+          name: true,
+          owner: true,
+          publicId: true,
+        },
+        take: input.limit,
+      });
+
+      return repos.map((r) => ({
+        id: r.publicId,
+        name: r.name,
+        owner: r.owner,
+      }));
     }),
 
   searchGithub: protectedProcedure.input(GitHubQuerySchema).query(async ({ ctx, input }) => {

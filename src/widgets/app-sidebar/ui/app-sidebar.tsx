@@ -121,7 +121,6 @@ export function AppSidebar() {
                             <LoadingButton
                               disabled={isFetchingNextPage}
                               isLoading={isFetchingNextPage}
-                              loadingText=""
                               variant="ghost"
                               onClick={() => void fetchNextPage()}
                               className="text-muted-foreground hover:text-foreground hover:bg-primary/90 flex h-8 w-full cursor-pointer items-center justify-start text-xs"

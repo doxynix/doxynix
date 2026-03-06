@@ -70,7 +70,7 @@ export function CreateApiKeyDialog() {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" className="cursor-pointer">
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="h-4 w-4" />
           {t("settings_api_keys_create_api_key")}
         </Button>
       </DialogTrigger>

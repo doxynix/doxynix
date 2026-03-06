@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import type { Route } from "next";
-import { useSearchParams } from "next/navigation";
+import { useIsFetching } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 import type { RepoMeta } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/utils";
@@ -16,7 +16,6 @@ import {
   PaginationLink,
 } from "@/shared/ui/core/pagination";
 import { Spinner } from "@/shared/ui/core/spinner";
-import { usePathname, useRouter } from "@/i18n/routing";
 
 type Props = {
   className?: string;
@@ -25,42 +24,32 @@ type Props = {
 
 export function AppPagination({ className, meta }: Readonly<Props>) {
   const t = useTranslations("Common");
+  const isFetching = useIsFetching();
 
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [page, setPage] = useQueryState(
+    "page",
+    parseAsInteger.withDefault(1).withOptions({ shallow: true })
+  );
 
   const [isPending, startTransition] = useTransition();
-  const [clickedButton, setClickedButton] = useState<"prev" | "next" | "page">("page");
+  const [clickedButton, setClickedButton] = useState<"prev" | "next" | number | null>(null);
 
-  const handlePageClick = (e: React.MouseEvent, page: number, btn: "prev" | "next" | "page") => {
-    e.preventDefault();
-    setClickedButton(btn);
+  const isLoading = isPending || isFetching > 0;
+
+  const handlePageChange = (targetPage: number, btnType: "prev" | "next" | number) => {
+    if (targetPage === page) return;
+
+    setClickedButton(btnType);
     startTransition(() => {
-      router.push(createPageURL(page) as Route, { scroll: false });
-      setClickedButton("page");
+      void setPage(targetPage <= 1 ? null : targetPage);
     });
-  };
-
-  const createPageURL = (pageNumber: number | string) => {
-    const params = new URLSearchParams(searchParams);
-    const targetPage = Number(pageNumber);
-
-    if (targetPage <= 1) {
-      params.delete("page");
-    } else {
-      params.set("page", targetPage.toString());
-    }
-
-    const str = params.toString();
-    return str ? `${pathname}?${str}` : pathname;
   };
 
   const isPrevDisabled = meta.currentPage <= 1;
   const isNextDisabled = meta.currentPage >= meta.totalPages;
 
-  const isPrevLoading = isPending && clickedButton === "prev";
-  const isNextLoading = isPending && clickedButton === "next";
+  const isPrevLoading = isLoading && clickedButton === "prev";
+  const isNextLoading = isLoading && clickedButton === "next";
 
   const navBtnClass = "gap-1 pl-2.5 pr-4 min-w-[100px] flex items-center justify-center";
 
@@ -75,16 +64,9 @@ export function AppPagination({ className, meta }: Readonly<Props>) {
       <PaginationContent>
         <PaginationItem>
           <PaginationLink
-            href={createPageURL(meta.currentPage - 1) as Route}
             tabIndex={isPrevDisabled ? -1 : undefined}
             aria-disabled={isPrevDisabled}
-            onClick={(e) => {
-              if (isPrevDisabled) {
-                e.preventDefault();
-                return;
-              }
-              handlePageClick(e, meta.currentPage - 1, "prev");
-            }}
+            onClick={() => !isPrevDisabled && handlePageChange(meta.currentPage - 1, "prev")}
             className={cn(
               navBtnClass,
               isPrevDisabled ? "pointer-events-none opacity-50" : "cursor-pointer"
@@ -115,15 +97,16 @@ export function AppPagination({ className, meta }: Readonly<Props>) {
             return null;
           }
 
+          const isCurrentPageLoading = isLoading && clickedButton === page;
+
           return (
             <PaginationItem key={page}>
               <PaginationLink
-                href={createPageURL(page) as Route}
                 isActive={page === meta.currentPage}
-                onClick={(e) => handlePageClick(e, page, "page")}
+                onClick={() => handlePageChange(page, page)}
                 className={cn("cursor-pointer", page === meta.currentPage && "pointer-events-none")}
               >
-                {page}
+                {isCurrentPageLoading ? <Spinner /> : page}
               </PaginationLink>
             </PaginationItem>
           );
@@ -131,16 +114,9 @@ export function AppPagination({ className, meta }: Readonly<Props>) {
 
         <PaginationItem>
           <PaginationLink
-            href={createPageURL(meta.currentPage + 1) as Route}
             tabIndex={isNextDisabled ? -1 : undefined}
             aria-disabled={isNextDisabled}
-            onClick={(e) => {
-              if (isNextDisabled) {
-                e.preventDefault();
-                return;
-              }
-              handlePageClick(e, meta.currentPage + 1, "next");
-            }}
+            onClick={() => !isNextDisabled && handlePageChange(meta.currentPage + 1, "next")}
             className={cn(
               navBtnClass,
               "pr-2.5 pl-4",
