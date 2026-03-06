@@ -4,7 +4,7 @@ import {
   parseAsString,
   parseAsStringLiteral,
   type inferParserType,
-} from "nuqs";
+} from "nuqs/server";
 
 import { NotifyTypeSchema } from "@/generated/zod";
 

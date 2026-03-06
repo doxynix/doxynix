@@ -1,4 +1,9 @@
-import { parseAsInteger, parseAsString, parseAsStringLiteral, type inferParserType } from "nuqs";
+import {
+  parseAsInteger,
+  parseAsString,
+  parseAsStringLiteral,
+  type inferParserType,
+} from "nuqs/server";
 
 import { StatusSchema, VisibilitySchema } from "@/generated/zod";
 
