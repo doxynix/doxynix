@@ -21,6 +21,9 @@ vi.mock("@/server/utils/handle-error", () => ({
       message: "Mocked prisma handler error",
     });
   }),
+  isOctokitError: vi.fn((error: any): error is { status: number } => {
+    return error !== null && typeof error === "object" && "status" in error;
+  }),
 }));
 
 const db = {
