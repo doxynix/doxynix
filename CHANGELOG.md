@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.13.0](https://github.com/doxynix/doxynix/compare/v1.12.4...v1.13.0) (2026-03-06)
+
+
+### Features
+
+* **features:** полностью реализована фича уведомлений, проведена чистка кода ([#493](https://github.com/doxynix/doxynix/issues/493)) ([8996999](https://github.com/doxynix/doxynix/commit/899699938f92cda3a0b63697de3befbe0ea66778))
+
 ## [1.12.4](https://github.com/doxynix/doxynix/compare/v1.12.3...v1.12.4) (2026-03-05)
 
 
