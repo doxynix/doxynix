@@ -26,7 +26,12 @@ async function main() {
       name: "Karen Avakov",
       role: UserRole.ADMIN,
     },
-    update: {},
+    update: {
+      emailVerified: new Date(),
+      image: faker.image.avatar(),
+      name: "Karen Avakov",
+      role: UserRole.ADMIN,
+    },
     where: { email: MY_EMAIL },
   });
   console.log(`✅ Admin ready: ${admin.email}`);

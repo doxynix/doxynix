@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useIsFetching } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { parseAsInteger, useQueryState } from "nuqs";
@@ -19,12 +18,12 @@ import { Spinner } from "@/shared/ui/core/spinner";
 
 type Props = {
   className?: string;
+  isLoading?: boolean;
   meta: RepoMeta;
 };
 
-export function AppPagination({ className, meta }: Readonly<Props>) {
+export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
   const t = useTranslations("Common");
-  const isFetching = useIsFetching();
 
   const [page, setPage] = useQueryState(
     "page",
@@ -34,7 +33,7 @@ export function AppPagination({ className, meta }: Readonly<Props>) {
   const [isPending, startTransition] = useTransition();
   const [clickedButton, setClickedButton] = useState<"prev" | "next" | number | null>(null);
 
-  const isLoading = isPending || isFetching > 0;
+  const isAnyLoading = isPending || (isLoading ?? false);
 
   const handlePageChange = (targetPage: number, btnType: "prev" | "next" | number) => {
     if (targetPage === page) return;
@@ -48,8 +47,8 @@ export function AppPagination({ className, meta }: Readonly<Props>) {
   const isPrevDisabled = meta.currentPage <= 1;
   const isNextDisabled = meta.currentPage >= meta.totalPages;
 
-  const isPrevLoading = isLoading && clickedButton === "prev";
-  const isNextLoading = isLoading && clickedButton === "next";
+  const isPrevLoading = isAnyLoading && clickedButton === "prev";
+  const isNextLoading = isAnyLoading && clickedButton === "next";
 
   const navBtnClass = "gap-1 pl-2.5 pr-4 min-w-[100px] flex items-center justify-center";
 
@@ -57,7 +56,7 @@ export function AppPagination({ className, meta }: Readonly<Props>) {
     <Pagination
       className={cn(
         className,
-        isPending && "pointer-events-none opacity-60 transition-opacity",
+        isAnyLoading && "pointer-events-none opacity-60 transition-opacity",
         meta.totalCount === 0 && "hidden"
       )}
     >
@@ -97,7 +96,7 @@ export function AppPagination({ className, meta }: Readonly<Props>) {
             return null;
           }
 
-          const isCurrentPageLoading = isLoading && clickedButton === page;
+          const isCurrentPageLoading = isAnyLoading && clickedButton === page;
 
           return (
             <PaginationItem key={page}>

@@ -25,6 +25,7 @@ export function NotificationCard({ notification }: Readonly<Props>) {
       : null;
 
   const { deleteOne, markAs } = useNotificationActions();
+  const isPending = markAs.isPending || deleteOne.isPending;
 
   return (
     <Card
@@ -64,12 +65,14 @@ export function NotificationCard({ notification }: Readonly<Props>) {
             <CopyButton value={notification.id} className="z-10" />
 
             <NotificationActionButton
+              disabled={isPending}
               icon={notification.isRead === true ? EyeOff : Eye}
               isPending={markAs.isPending}
               tooltip={notification.isRead === true ? "Mark as unread" : "Mark as read"}
               onClick={() => markAs.mutate(notification.id, notification.isRead === false)}
             />
             <NotificationActionButton
+              disabled={isPending}
               icon={Trash2}
               isPending={deleteOne.isPending}
               tooltip="Delete notification"

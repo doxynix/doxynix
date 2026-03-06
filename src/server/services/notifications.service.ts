@@ -9,7 +9,8 @@ export const notificationsService = {
     type?: NotifyType;
   }): Prisma.NotificationWhereInput {
     const { isRead, repoName, repoOwner, search, type } = filters;
-    const searchTerms = search?.trim().split(/\s+/) ?? [];
+    const normalizedSearch = search?.trim();
+    const searchTerms = normalizedSearch != null ? normalizedSearch.split(/\s+/) : [];
 
     const searchFilter: Prisma.NotificationWhereInput =
       searchTerms.length > 0

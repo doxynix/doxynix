@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { notificationsService } from "@/server/services/notifications.service";
-import { handlePrismaError } from "@/server/utils/handle-prisma-error";
+import { handlePrismaError } from "@/server/utils/handle-error";
 import { NotificationSchema } from "@/generated/zod";
 
 import { NotificationsFilterSchema, OpenApiErrorResponses } from "../shared";
@@ -72,7 +72,7 @@ export const notificationRouter = createTRPCRouter({
         await ctx.db.notification.deleteMany({
           where: { ...where, isRead: true },
         });
-        return { message: "All readed notifications was deleted", success: true };
+        return { message: "All read notifications was deleted", success: true };
       } catch (error) {
         handlePrismaError(error, { notFound: "Notification not found" });
       }

@@ -46,7 +46,7 @@ export function NotificationsListContainer() {
           <div className={isFetching ? "opacity-50" : ""}>
             <NotificationsList notifications={data.items} />
           </div>
-          <AppPagination meta={data.meta} className="mt-auto" />
+          <AppPagination isLoading={isFetching} meta={data.meta} className="mt-auto" />
         </>
       )}
     </div>

@@ -18,7 +18,7 @@ export function useRepoActions() {
 
   const create = trpc.repo.create.useMutation({
     onError: (err) => toast.error(err.message),
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       toast.success(t("repo_added_toast_success"), {
         action: {
           label: "View",
@@ -32,7 +32,7 @@ export function useRepoActions() {
 
   const deleteAll = trpc.repo.deleteAll.useMutation({
     onError: (err) => toast.error(err.message),
-    onSuccess: async () => {
+    onSuccess: () => {
       toast.success(t("settings_danger_delete_all_repos_toast_success"));
       invalidate();
       posthog.capture("all_repos_deleted");

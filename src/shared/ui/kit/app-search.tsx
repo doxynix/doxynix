@@ -1,7 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { parseAsString, throttle, useQueryState } from "nuqs";
+import { parseAsInteger, parseAsString, throttle, useQueryStates } from "nuqs";
 
 import { Input } from "@/shared/ui/core/input";
 
@@ -12,13 +12,13 @@ type Props = {
 const ICON_STYLES = "text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4";
 
 export function AppSearch({ placeholder }: Readonly<Props>) {
-  const [search, setSearch] = useQueryState(
-    "search",
-    parseAsString.withDefault("").withOptions({
+  const [{ search }, setParams] = useQueryStates({
+    page: parseAsInteger.withDefault(1).withOptions({ shallow: true }),
+    search: parseAsString.withDefault("").withOptions({
       limitUrlUpdates: throttle(100),
       shallow: true,
-    })
-  );
+    }),
+  });
 
   return (
     <div className="relative shrink-0">
@@ -28,7 +28,7 @@ export function AppSearch({ placeholder }: Readonly<Props>) {
         value={search}
         placeholder={placeholder}
         onChange={(e) => {
-          void setSearch(e.target.value || null);
+          void setParams({ page: null, search: e.target.value || null });
         }}
         className="h-9 border-none pl-8 text-sm"
       />

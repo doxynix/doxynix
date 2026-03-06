@@ -8,6 +8,7 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 type Props = {
   className?: string;
+  disabled: boolean;
   icon: ComponentType<{ className?: string }>;
   isPending: boolean;
   onClick: () => void;
@@ -16,6 +17,7 @@ type Props = {
 
 export function NotificationActionButton({
   className,
+  disabled,
   icon: Icon,
   isPending,
   onClick,
@@ -24,7 +26,7 @@ export function NotificationActionButton({
   return (
     <AppTooltip content={tooltip}>
       <LoadingButton
-        disabled={isPending}
+        disabled={disabled}
         isLoading={isPending}
         size="icon"
         variant="ghost"

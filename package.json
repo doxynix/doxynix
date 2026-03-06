@@ -13,7 +13,7 @@
     ]
   },
   "scripts": {
-    "dev": "pnpm db:generate && cross-env NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "dev": "pnpm db:generate && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" next dev",
     "build": "pnpm db:generate && next build",
     "sitemap": "next-sitemap",
     "start": "next start",

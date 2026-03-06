@@ -11,7 +11,7 @@ import type { RepoItemFields } from "@/shared/types/repo";
 import type { DbClient } from "../db/db";
 import { logger } from "../logger/logger";
 import { FileClassifier } from "../utils/file-classifier";
-import { isOctokitError } from "./repo.service";
+import { isOctokitError } from "../utils/handle-error";
 
 const MyOctokit = Octokit.plugin(retry, throttling, paginateRest);
 type OctokitInstance = InstanceType<typeof MyOctokit>;

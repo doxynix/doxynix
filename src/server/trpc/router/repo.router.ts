@@ -8,7 +8,7 @@ import { CreateRepoSchema, GitHubQuerySchema } from "@/shared/api/schemas/repo";
 import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
 import { FileClassifier } from "@/server/utils/file-classifier";
-import { handlePrismaError } from "@/server/utils/handle-prisma-error";
+import { handlePrismaError } from "@/server/utils/handle-error";
 import { DocTypeSchema, RepoSchema, StatusSchema } from "@/generated/zod";
 
 import { OpenApiErrorResponses, RepoFilterSchema } from "../shared";
@@ -469,7 +469,7 @@ export const repoRouter = createTRPCRouter({
       },
     })
 
-    .input(z.object({ limit: z.coerce.number().min(1).max(100).optional().default(1) }))
+    .input(z.object({ limit: z.coerce.number().min(1).max(100000).optional() }))
     .output(
       z.array(
         z.object({

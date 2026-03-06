@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { DbClient } from "@/server/db/db";
 import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
-import { handlePrismaError } from "@/server/utils/handle-prisma-error";
+import { handlePrismaError } from "@/server/utils/handle-error";
 
 vi.mock("@/server/services/github.service", () => ({
   githubService: {

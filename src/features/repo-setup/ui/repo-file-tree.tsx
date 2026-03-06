@@ -35,8 +35,8 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
   };
 
   const treeActions = [
-    { icon: FolderOpen, label: "Expand All", onClick: () => handleExpandAll() },
-    { icon: Folder, label: "Collapse All", onClick: () => handleCollapseAll() },
+    { icon: FolderOpen, label: "Expand All", onClick: handleExpandAll },
+    { icon: Folder, label: "Collapse All", onClick: handleCollapseAll },
   ];
 
   const selectionActions = [
@@ -138,8 +138,8 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
       >
         {isSearchEmpty && (
           <p className="text-muted-foreground absolute inset-0 z-10 flex items-center justify-center truncate text-sm">
-            Nothing found for &quot<span className="max-w-60 truncate">{state.searchTerm}</span>
-            &quot
+            Nothing found for &quot;<span className="max-w-60 truncate">{state.searchTerm}</span>
+            &quot;
           </p>
         )}
 
