@@ -183,12 +183,14 @@ export function AuthForm() {
     setTurnstileToken(null);
     setIsVerifying(false);
     setPendingData(null);
+    setErrorMessage("Verification service error. Please try again.");
   }, []);
 
   const onTurnstileExpire = useCallback(() => {
     setTurnstileToken(null);
     setIsVerifying(false);
     setPendingData(null);
+    setErrorMessage("Verification expired. Please try again.");
   }, []);
 
   const turnstileOptions = useMemo(
