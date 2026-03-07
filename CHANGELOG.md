@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.14.0](https://github.com/doxynix/doxynix/compare/v1.13.1...v1.14.0) (2026-03-07)
+
+
+### Features
+
+* **ui:** полностью переработана абсолютна вся палитра приложения, проведены оптимизации, возвращена светлая тема ([#500](https://github.com/doxynix/doxynix/issues/500)) ([45c3f60](https://github.com/doxynix/doxynix/commit/45c3f60905df27c92f7414ac7e1d876dea031227))
+
 ## [1.13.1](https://github.com/doxynix/doxynix/compare/v1.13.0...v1.13.1) (2026-03-06)
 
 
