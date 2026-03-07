@@ -77,7 +77,7 @@ export function RepoListContainer({ config }: Readonly<Props>) {
       </div>
 
       {config?.showPagination !== false && (
-        <AppPagination isLoading={isFetching} meta={meta} className="mt-auto" />
+        <AppPagination isLoading={isFetching} meta={meta} className="mt-4" />
       )}
     </>
   );

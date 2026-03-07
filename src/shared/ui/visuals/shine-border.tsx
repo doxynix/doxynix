@@ -17,7 +17,7 @@ interface ShineBorderProps extends React.HTMLAttributes<HTMLDivElement> {
   duration?: number;
   /**
    * Color of the border, can be a single color or an array of colors
-   * @default "#000000"
+   * @default "var(--foreground)"
    */
   shineColor?: string | string[];
 }
@@ -31,7 +31,7 @@ export function ShineBorder({
   borderWidth = 1,
   className,
   duration = 14,
-  shineColor = "#000000",
+  shineColor = "var(--foreground)",
   style,
   ...props
 }: Readonly<ShineBorderProps>) {

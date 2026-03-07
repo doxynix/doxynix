@@ -45,7 +45,7 @@ export function AnalyticsSection() {
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-        <Card className="border-primary bg-landing-bg-light/50 col-span-1 md:col-span-2">
+        <Card className="border-border bg-landing-bg-light/50 col-span-1 md:col-span-2">
           <CardHeader>
             <CardTitle>{t("section_analytics_card_title")}</CardTitle>
             <CardDescription>{t("section_analytics_card_desc")}</CardDescription>
@@ -100,14 +100,14 @@ export function AnalyticsSection() {
         </Card>
 
         <div className="flex flex-col gap-4">
-          <Card className="border-primary bg-landing-bg-light/50 flex flex-1 flex-col justify-center p-6">
+          <Card className="border-border bg-landing-bg-light/50 flex flex-1 flex-col justify-center p-6">
             <p className="text-muted-foreground text-sm tracking-widest uppercase">
               {t("section_analytics_bus_factor")}
             </p>
             <span className="text-destructive mt-2 text-5xl font-bold">1.2</span>
             <p className="text-muted-foreground mt-2 text-xs">{t("section_analytics_review")}</p>
           </Card>
-          <Card className="border-primary bg-landing-bg-light/50 flex flex-1 flex-col justify-center p-6">
+          <Card className="border-border bg-landing-bg-light/50 flex flex-1 flex-col justify-center p-6">
             <p className="text-muted-foreground text-sm tracking-widest uppercase">
               {t("section_analytics_maintain")}
             </p>

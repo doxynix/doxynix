@@ -27,6 +27,8 @@ type Props = {
 
 type NotificationsFilters = inferParserType<typeof notificationsParsers>;
 
+type TabItem = { count?: number; id: string; label: string; value: string };
+
 export function NotificationsHeader({ stats }: Readonly<Props>) {
   const [filters, setFilters] = useQueryStates(notificationsParsers, { shallow: true });
 
@@ -43,7 +45,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
     { count: stats?.total, id: "all", label: "All", value: "all" },
     { count: stats?.read, id: "read", label: "Read", value: "read" },
     { count: stats?.unread, id: "unread", label: "Unread", value: "unread" },
-  ];
+  ] satisfies TabItem[];
 
   const handleReset = () => {
     void setFilters({

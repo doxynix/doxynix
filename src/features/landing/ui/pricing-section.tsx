@@ -63,7 +63,7 @@ export function PricingSection() {
   );
 
   return (
-    <section className="bg-landing-bg-light/20 border-y border-zinc-900/20 py-24">
+    <section className="bg-landing-bg-light/20 border-border/70 border-y py-24">
       <div className="container mx-auto px-4">
         <h2 className="mb-16 text-center text-3xl font-bold md:text-5xl">
           {t("section_pricing_title_prefix")}{" "}
@@ -77,7 +77,7 @@ export function PricingSection() {
                 "relative flex flex-col rounded-2xl border p-8",
                 plan.popular
                   ? "border-foreground/50 bg-foreground/10"
-                  : "border-primary bg-landing-bg-light/40"
+                  : "border-border bg-landing-bg-light/40"
               )}
             >
               {plan.popular && (

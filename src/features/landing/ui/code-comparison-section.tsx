@@ -13,13 +13,13 @@ export async function CodeComparisonSection() {
     highlightCode(GOOD_CODE, "typescript", "light"),
   ]);
   return (
-    <section className="bg-landing-bg-light/20 border-y border-white/5 py-32">
+    <section className="bg-landing-bg-light/20 border-border/60 border-y py-32">
       <div className="container mx-auto px-4">
         <h2 className="mb-16 text-center text-3xl font-bold md:text-5xl">
           {t("section_code_title_prefix")}{" "}
           <span className="text-muted-foreground">{t("section_code_title_highlight")}</span>
         </h2>
-        <div className="border-primary mx-auto max-w-6xl overflow-hidden rounded-xl border shadow-2xl">
+        <div className="border-border mx-auto max-w-6xl overflow-hidden rounded-xl border">
           <CodeComparison
             afterHtmlDark={goodDark}
             afterHtmlLight={goodLight}

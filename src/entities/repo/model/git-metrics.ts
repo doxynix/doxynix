@@ -42,7 +42,7 @@ export function getGitMetrics(repo: UiRepoListItem, locale: string): Props[] {
     },
     { color: "text-green-700", icon: GitFork, id: "Forks", label: repo.forks, tooltip: "Forks" },
     {
-      color: "text-blue",
+      color: "text-foreground",
       icon: GitBranch,
       id: "Branch",
       label: repo.defaultBranch,

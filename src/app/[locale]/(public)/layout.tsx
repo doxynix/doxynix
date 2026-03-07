@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ThemeProvider } from "next-themes";
 
 import { DotPattern } from "@/shared/ui/visuals/dot-pattern";
 
@@ -7,7 +8,13 @@ import { PublicHeader, PublicHeaderWrapper } from "@/widgets/public-header";
 
 export default function PublicLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <>
+    <ThemeProvider
+      disableTransitionOnChange
+      attribute="class"
+      defaultTheme="dark"
+      forcedTheme="dark"
+      storageKey="doxynix-theme"
+    >
       <PublicHeaderWrapper>
         <PublicHeader />
       </PublicHeaderWrapper>
@@ -17,12 +24,12 @@ export default function PublicLayout({ children }: Readonly<{ children: ReactNod
         cy={1}
         height={20}
         width={20}
-        className="stroke-primary/50 fixed inset-0 -z-1 h-full w-full mask-[radial-gradient(circle_at_center,white,transparent)]"
+        className="stroke-border-strong/70 fixed inset-0 -z-1 h-full w-full mask-[radial-gradient(circle_at_center,white,transparent)]"
       />
       <main className="mx-auto flex w-full flex-1 flex-col">{children}</main>
       <div className="z-50 w-full shrink-0 border-t">
         <AppFooter />
       </div>
-    </>
+    </ThemeProvider>
   );
 }

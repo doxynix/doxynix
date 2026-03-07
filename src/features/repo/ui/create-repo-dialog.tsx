@@ -154,7 +154,7 @@ export function CreateRepoDialog() {
                     </FormControl>
                     <FormMessage />
                     {showSuggestions && suggestions && suggestions.length > 0 && (
-                      <div className="bg-popover text-popover-foreground absolute top-full right-0 left-0 z-10 mt-1 h-80 overflow-y-auto rounded-xl border shadow-md">
+                      <div className="bg-popover text-popover-foreground absolute top-full right-0 left-0 z-10 mt-1 h-80 overflow-y-auto rounded-xl border">
                         {suggestions.map((repo) => (
                           <RepoItem
                             key={repo.fullName}

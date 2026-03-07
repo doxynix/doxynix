@@ -47,8 +47,8 @@ export function SidebarLink({
       className={cn(
         "group/link flex cursor-default transition-colors",
         isActive
-          ? "bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground font-bold"
-          : "hover:bg-sidebar-accent text-muted-foreground hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground"
+          ? "bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent border-border-strong font-bold"
+          : "text-muted-foreground"
       )}
     >
       <Link

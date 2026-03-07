@@ -142,7 +142,7 @@ export function AppCommandMenu() {
         variant="outline"
         onClick={() => setOpen(true)}
         className={cn(
-          "lg:bg-muted/50 text-muted-foreground relative h-9 w-9 justify-start rounded-xl text-sm font-normal shadow-none not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12"
+          "text-muted-foreground lg:border-border/70 lg:bg-surface-hover/70 relative h-9 w-9 justify-start rounded-xl text-sm font-normal not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12"
         )}
       >
         <Search className="absolute top-2.25 left-2.25" />
@@ -215,12 +215,12 @@ export function AppCommandMenu() {
                     e.stopPropagation();
                     setIsReposExpanded(!isReposExpanded);
                   }}
-                  className="text-muted-foreground! cursor-pointer bg-transparent! hover:underline"
+                  className="text-muted-foreground cursor-pointer bg-transparent hover:underline"
                 >
                   {isReposExpanded ? t("command_collapse") : t("command_expand")}
                   <ChevronDown
                     className={cn(
-                      "transition-transform duration-300",
+                      "transition-standard transition-transform",
                       isReposExpanded && "rotate-180"
                     )}
                   />

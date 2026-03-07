@@ -141,10 +141,10 @@ describe("shared/lib/utils:formatRelativeTime", () => {
 
 describe("shared/lib/utils:cn", () => {
   it("should merge classes and keep last tailwind conflict", () => {
-    const className = cn("p-2", "text-sm", "p-4", "bg-blue-500");
+    const className = cn("p-2", "text-sm", "p-4", "bg-zinc-500");
 
     expect(className).toContain("p-4");
-    expect(className).toContain("bg-blue-500");
+    expect(className).toContain("bg-zinc-500");
     expect(className).not.toContain("p-2");
   });
 });

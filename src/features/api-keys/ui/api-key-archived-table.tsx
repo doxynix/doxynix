@@ -32,7 +32,7 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
     <Collapsible
       open={isArchivedOpen}
       onOpenChange={setIsArchivedOpen}
-      className="bg-card text-card-foreground rounded-lg border shadow-sm"
+      className="bg-card text-card-foreground rounded-lg border"
     >
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">

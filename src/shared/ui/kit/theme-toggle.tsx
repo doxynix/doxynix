@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
-import { cn } from "@/shared/lib/utils";
+import { cn, setClientCookie } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
-import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 type Props = {
@@ -14,29 +12,30 @@ type Props = {
 };
 
 export function ThemeToggle({ className }: Readonly<Props>) {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme, setTheme, forcedTheme } = useTheme();
 
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  if (forcedTheme) return null;
 
-  if (!mounted) {
-    return <Skeleton className="h-9 w-9 rounded-xl" />;
-  }
+  const toggleTheme = () => {
+    const newTheme = resolvedTheme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+
+    setClientCookie("doxynix-theme", newTheme, 31536000);
+  };
 
   const isDark = resolvedTheme === "dark";
 
   return (
-    <AppTooltip content={isDark ? "Light mode" : "Dark mode"}>
+    <AppTooltip content="Toggle theme">
       <Button
         size="icon"
         variant="ghost"
-        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-        onClick={() => setTheme(isDark ? "light" : "dark")}
+        aria-label="Switch theme"
+        onClick={toggleTheme}
         className={cn(className)}
       >
-        {isDark ? <Moon className="h-4.5" /> : <Sun className="h-4.5" />}
+        <Sun className="block h-4.5 w-4.5 dark:hidden" />
+        <Moon className="hidden h-4.5 w-4.5 dark:block" />
       </Button>
     </AppTooltip>
   );

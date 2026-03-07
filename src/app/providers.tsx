@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { httpBatchLink, loggerLink } from "@trpc/client";
 import { SessionProvider } from "next-auth/react";
-import { ThemeProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import superjson from "superjson";
 
@@ -68,17 +67,8 @@ export function Providers({ children }: Readonly<Props>) {
 }
 
 const InnerProviders = ({ children }: { children: ReactNode }) => (
-  <ThemeProvider
-    disableTransitionOnChange
-    attribute="class"
-    defaultTheme="dark" // THEME: пока на время светлая тема удалена
-    enableSystem={false} // THEME: пока на время светлая тема удалена
-    forcedTheme="dark" // THEME: пока на время светлая тема удалена
-    storageKey="doxynix-theme"
-  >
-    <TooltipProvider>
-      <AnalyticsSync />
-      <NuqsAdapter>{children}</NuqsAdapter>
-    </TooltipProvider>
-  </ThemeProvider>
+  <TooltipProvider>
+    <AnalyticsSync />
+    <NuqsAdapter>{children}</NuqsAdapter>
+  </TooltipProvider>
 );

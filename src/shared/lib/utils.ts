@@ -214,3 +214,10 @@ export const getLanguageColor = (lang: string | null): string => {
 export const normalizeLanguageName = (ext: string): string => {
   return EXTENSION_MAP[ext.toLowerCase()] ?? ext.toUpperCase();
 };
+
+export function setClientCookie(name: string, value: string | boolean, maxAge: number) {
+  if (typeof window === "undefined") return;
+
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
+}

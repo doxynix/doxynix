@@ -28,15 +28,15 @@ export default async function TermsPage() {
         showIcon
         label={tCommon("back")}
         variant="link"
-        className="cursor-pointer"
+        className="mb-4 cursor-pointer"
       />
 
-      <header className="mb-10 border-b py-6">
-        <h1 className="mb-3 text-3xl font-bold tracking-tight md:text-4xl"> {t("title")}</h1>
-        <div className="text-muted-foreground flex items-center gap-2 text-sm">
+      <div className="border-b-foreground mb-12 border-b py-6">
+        <h1 className="text-foreground mb-4 text-4xl font-bold md:text-5xl">{t("title")}</h1>
+        <div className="text-text-secondary flex items-center gap-2 text-sm">
           <span>{t("last_updated")}</span>
         </div>
-      </header>
+      </div>
 
       <div className="prose prose-neutral dark:prose-invert max-w-none space-y-8 text-sm md:text-base">
         <section>

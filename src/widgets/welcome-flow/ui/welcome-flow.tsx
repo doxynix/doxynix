@@ -15,9 +15,9 @@ type Props = {
   user: User;
 };
 
-type FeatureTypes = { desc: string; icon: ComponentType<{ className?: string }>; title: string };
+type FeatureCard  = { desc: string; icon: ComponentType<{ className?: string }>; title: string };
 
-const FEATURE_CARDS: FeatureTypes[] = [
+const FEATURE_CARDS = [
   {
     desc: "Generate comprehensive documentation for your repositories in seconds.",
     icon: Book,
@@ -33,7 +33,7 @@ const FEATURE_CARDS: FeatureTypes[] = [
     icon: GitHubIcon,
     title: "Seamless Integration",
   },
-];
+] as const satisfies readonly FeatureCard[];
 
 export function WelcomeFlow({ user }: Readonly<Props>) {
   const router = useRouter();
@@ -45,8 +45,8 @@ export function WelcomeFlow({ user }: Readonly<Props>) {
 
   return (
     <div className="flex w-full max-w-5xl flex-col items-center gap-12 sm:gap-16">
-      <div className="animate-in fade-in zoom-in-95 w-full max-w-md duration-500 ease-out">
-        <Card className="border-border/60 shadow-lg shadow-black/5">
+      <div className="animate-in fade-in zoom-in-95 w-full max-w-md duration-300 ease-out">
+        <Card className="border-border/70">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold tracking-tight">
               What should we call you?
@@ -67,7 +67,7 @@ export function WelcomeFlow({ user }: Readonly<Props>) {
         </Card>
       </div>
 
-      <div className="animate-in fade-in slide-in-from-bottom-8 flex items-center justify-center gap-4 duration-500">
+      <div className="animate-in fade-in slide-in-from-bottom-8 flex items-center justify-center gap-4 duration-300">
         {FEATURE_CARDS.map((item) => (
           <Card key={item.title} className={"bg-card/50 flex w-full flex-col"}>
             <CardHeader>

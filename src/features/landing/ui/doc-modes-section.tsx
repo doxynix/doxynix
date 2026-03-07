@@ -24,9 +24,9 @@ function TabsTriggerItem({ icon: Icon, subTitle, title, value }: Readonly<TabsTr
   return (
     <TabsTrigger
       value={value}
-      className="group data-[state=active]:bg-landing-bg-light flex items-center justify-start gap-3 rounded-lg border border-transparent px-4 py-4 text-left transition-all data-[state=active]:border-zinc-800"
+      className="transition-standard group data-[state=active]:bg-landing-bg-light flex items-center justify-start gap-3 rounded-xl px-4 py-4 text-left"
     >
-      <div className="text-muted-foreground group-data-[state=active]:bg-zinc-dark bg-landing-bg-light flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors group-data-[state=active]:text-white">
+      <div className="transition-standard text-muted-foreground bg-landing-bg-light flex size-10 shrink-0 items-center justify-center rounded-xl">
         {Icon && <Icon />}
       </div>
       <div>
@@ -41,7 +41,7 @@ function TabsContentItem({ code, html, title, value }: Readonly<TabsContentItemP
   return (
     <TabsContent
       value={value}
-      className="animate-in fade-in slide-in-from-right-4 mt-0 duration-500"
+      className="animate-in fade-in slide-in-from-right-4 mt-0 duration-300"
     >
       <CodeWindow code={code} codeClassName="text-sm sm:text-base" codeHtml={html} title={title} />
     </TabsContent>
@@ -58,7 +58,7 @@ export async function DocModesSection() {
     highlightCode(CHANGELOG_CODE, "markdown", "dark"),
   ]);
 
-  const DOCS: TabsTriggerItemProps[] = [
+  const DOCS = [
     {
       icon: BookOpen,
       subTitle: t("section_docs_tab_readme_subtitle"),
@@ -83,7 +83,7 @@ export async function DocModesSection() {
       title: t("section_docs_tab_changelog_title"),
       value: "changelog",
     },
-  ];
+  ] satisfies TabsTriggerItemProps[];
 
   const TABS = [
     { code: README_CODE, html: readmeHtml, title: "README.md", value: "readme" },

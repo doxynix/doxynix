@@ -1,5 +1,5 @@
 import type { Route } from "next";
-import { Menu, MoveLeft } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { publicHeaderMenu } from "@/shared/constants/navigation";
@@ -15,6 +15,8 @@ import {
 import { Logo } from "@/shared/ui/icons/logo";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { Link } from "@/i18n/routing";
+
+import { PublicHeaderCtaSlot } from "./public-header-cta-slot";
 
 export function PublicHeader() {
   const t = useTranslations("Common");
@@ -40,13 +42,7 @@ export function PublicHeader() {
           <AppTooltip content="Work in Progress">
             <span className="text-warning bg-warning/20 rounded p-1 py-0.5 text-xs">BETA</span>
           </AppTooltip>
-          <Button asChild variant="outline">
-            <Link href="/auth">
-              Get Started
-              <MoveLeft size={16} className="rotate-180" />
-            </Link>
-          </Button>
-          {/* <ThemeToggle className="text-muted-foreground" /> // THEME: на время!*/}
+          <PublicHeaderCtaSlot />
           <div className="flex items-center gap-2 md:hidden">
             <Sheet>
               <SheetTrigger asChild>
