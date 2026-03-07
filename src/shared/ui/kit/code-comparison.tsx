@@ -26,7 +26,6 @@ export function CodeComparison({
   goodCode,
 }: Readonly<Props>) {
   const { resolvedTheme } = useTheme();
-
   const [mounted, setMounted] = useState(false);
 
   React.useEffect(() => {
@@ -58,7 +57,8 @@ export function CodeComparison({
 
         <Badge
           variant="outline"
-          className="bg-landing-bg-dark absolute top-1/2 left-1/2 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-xs font-bold md:flex"
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 left-1/2 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-xs font-bold md:flex"
         >
           VS
         </Badge>

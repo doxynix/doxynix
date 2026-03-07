@@ -73,12 +73,12 @@ export function AnalyticsSection() {
 
                 <defs>
                   <linearGradient id="fillDocs" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-docs)" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="var(--color-docs)" stopOpacity={0.1} />
+                    <stop offset="5%" stopColor="var(--chart-2)" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="var(--chart-3)" stopOpacity={0.1} />
                   </linearGradient>
                   <linearGradient id="fillComplexity" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-complexity)" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="var(--color-complexity)" stopOpacity={0.1} />
+                    <stop offset="5%" stopColor="var(--chart-4)" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="var(--chart-5)" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
 
@@ -86,13 +86,13 @@ export function AnalyticsSection() {
                   type="natural"
                   dataKey="docs"
                   fill="url(#fillDocs)"
-                  stroke="var(--color-docs)"
+                  stroke="var(--color-border)"
                 />
                 <Area
                   type="natural"
                   dataKey="complexity"
                   fill="url(#fillComplexity)"
-                  stroke="var(--color-complexity)"
+                  stroke="var(--color-border)"
                 />
               </AreaChart>
             </ChartContainer>

@@ -132,6 +132,7 @@ export function AuthForm() {
       } finally {
         setLoadingProvider(null);
         setPendingData(null);
+        setTurnstileToken(null);
       }
     },
     [t]
@@ -148,7 +149,13 @@ export function AuthForm() {
     setIsVerifying(true);
     setPendingData(values);
 
-    turnstileRef.current?.reset();
+    if (turnstileRef.current == null) {
+      setIsVerifying(false);
+      setPendingData(null);
+      return;
+    }
+
+    turnstileRef.current.reset();
   };
 
   async function handleSignIn(provider: string) {
@@ -173,10 +180,14 @@ export function AuthForm() {
 
   const onTurnstileError = useCallback(() => {
     setTurnstileToken(null);
+    setIsVerifying(false);
+    setPendingData(null);
   }, []);
 
   const onTurnstileExpire = useCallback(() => {
     setTurnstileToken(null);
+    setIsVerifying(false);
+    setPendingData(null);
   }, []);
 
   const turnstileOptions = useMemo(
@@ -192,6 +203,7 @@ export function AuthForm() {
     <section className="relative container mx-auto flex min-h-[calc(100dvh-3rem)] items-center justify-center overflow-hidden px-4">
       <div className="flex w-full items-center justify-center gap-10">
         <div
+          inert={isSent ? true : undefined}
           className={cn(
             "hidden max-w-2xl flex-col gap-8 lg:flex",
             isSent
@@ -239,6 +251,7 @@ export function AuthForm() {
 
         <div className="animate-in fade-in slide-in-from-bottom-4 relative flex w-full max-w-lg items-center justify-center">
           <div
+            inert={isSent ? true : undefined}
             className={cn(
               "bg-card/80 border-border/80 relative flex w-full flex-col gap-6 rounded-[1.75rem] border p-6 transition-all ease-out sm:p-8",
               isSent
@@ -356,8 +369,9 @@ export function AuthForm() {
             </p>
           </div>
           <div
+            inert={!isSent ? true : undefined}
             className={cn(
-              "bg-card/82 border-border/80 relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border p-8 text-center transition-all ease-out",
+              "bg-card/80 border-border/80 relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border p-8 text-center transition-all ease-out",
               isSent
                 ? "relative scale-100 opacity-100"
                 : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
