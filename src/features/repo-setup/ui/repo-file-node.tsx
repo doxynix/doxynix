@@ -39,8 +39,8 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
     <div
       className={cn(
         "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1 transition-colors outline-none",
-        "hover:bg-accent/50",
-        mySelectedIds.has(node.id) && "bg-accent/30",
+        "hover:bg-surface-hover",
+        mySelectedIds.has(node.id) && "bg-surface-selected",
         node.isFocused && "ring-ring inset-0 ring-1"
       )}
       style={style}
@@ -70,7 +70,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
                 e.stopPropagation();
                 node.toggle();
               }}
-              className="hover:bg-muted focus-visible:ring-ring relative z-20 rounded p-0.5 transition-colors outline-none focus-visible:ring-1"
+              className="hover:bg-surface-hover focus-visible:ring-ring relative z-20 rounded p-0.5 transition-colors outline-none focus-visible:ring-1"
             >
               {node.isOpen ? (
                 <ChevronDown className="text-muted-foreground h-3 w-3" />
@@ -103,7 +103,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
         </span>
 
         {isRecommended === true && !isFolder && (
-          <div className="flex items-center gap-1 rounded-md border px-1 py-0.5 text-[10px] font-bold uppercase">
+          <div className="bg-accent text-accent-foreground border-border-accent flex items-center gap-1 rounded-md border px-1 py-0.5 text-[10px] font-bold uppercase">
             <Sparkles className="h-2.5 w-2.5" />
             Core
           </div>

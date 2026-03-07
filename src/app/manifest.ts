@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    background_color: "#09090b",
+    background_color: "#111318",
     description: "AI Repo Analysis & Documentation Generator",
     display: "standalone",
     icons: [
@@ -27,6 +27,6 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Doxynix",
     short_name: "Doxynix",
     start_url: "/dashboard",
-    theme_color: "#09090b",
+    theme_color: "#111318",
   };
 }

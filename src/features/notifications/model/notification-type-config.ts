@@ -16,7 +16,7 @@ export const notificationTypeConfig: Record<
     color: "text-destructive",
     icon: XCircle,
   },
-  INFO: { border: "border-l-blue/50", color: "text-blue", icon: Info },
+  INFO: { border: "border-l-border-strong", color: "text-foreground", icon: Info },
   SUCCESS: {
     border: "border-l-success/50",
     color: "text-success",

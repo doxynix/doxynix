@@ -19,12 +19,12 @@ export interface ShimmerButtonProps extends ComponentPropsWithoutRef<"button"> {
 export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
   (
     {
-      background = "#111111",
+      background = "var(--primary)",
       borderRadius = "100px",
       children,
       className,
       href,
-      shimmerColor = "#ffffff",
+      shimmerColor = "var(--primary-foreground)",
       shimmerDuration = "3s",
       shimmerSize = "0.05em",
       ...props
@@ -35,8 +35,8 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
       <Button
         ref={ref}
         className={cn(
-          "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-white/10 px-6 py-3 whitespace-nowrap text-white [background:var(--bg)]",
-          "transform-gpu transition-transform duration-300 ease-in-out active:translate-y-px",
+          "transition-standard group border-border/70 text-primary-foreground hover:border-border-accent hover:text-primary-foreground relative isolate flex cursor-pointer items-center justify-center overflow-hidden rounded-(--radius) border bg-transparent px-6 py-3 whitespace-nowrap shadow-sm hover:bg-transparent hover:[box-shadow:var(--shadow-md)]",
+          "active:translate-y-px",
           className
         )}
         style={
@@ -53,41 +53,33 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
         asChild
       >
         <Link href={href}>
-          {/* spark container */}
-          <div
-            className={cn(
-              "-z-30 blur-[2px]",
-              "@container-[size] absolute inset-0 overflow-visible"
-            )}
-          >
-            {/* spark */}
-            <div className="animate-shimmer-slide absolute inset-0 aspect-[1] h-[100cqh] rounded-none [mask:none]">
-              {/* spark before */}
-              <div className="animate-spin-around absolute -inset-full w-auto [translate:0_0] rotate-0 [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]" />
+          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-(--radius)">
+            <div className="@container-[size] absolute inset-0 overflow-visible blur-[2px]">
+              <div className="animate-shimmer-slide absolute inset-0 aspect-[1] h-[100cqh] rounded-none [mask:none]">
+                <div className="animate-spin-around absolute -inset-[220%] block aspect-square [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]" />
+              </div>
             </div>
           </div>
-          {children}
+
+          <div className="absolute inset-(--cut) z-10 rounded-[calc(var(--radius)-var(--cut))] [background:var(--bg)]" />
+
+          <span className="relative z-20 inline-flex items-center justify-center">{children}</span>
 
           {/* Highlight */}
           <div
             className={cn(
-              "absolute inset-0 size-full",
-
-              // "rounded-2xl px-4 py-1.5 text-sm font-medium shadow-[inset_0_-8px_10px_#ffffff1f]",
+              "absolute inset-0 z-20 size-full rounded-(--radius)",
 
               // transition
-              "transform-gpu transition-all duration-300 ease-in-out",
+              "transition-standard transform-gpu",
 
               // on hover
-              "group-hover:shadow-[inset_0_-6px_10px_#ffffff3f]",
+              "group-hover:[box-shadow:inset_0_-6px_10px_color-mix(in_oklab,var(--primary-foreground)_25%,transparent)]",
 
               // on click
-              "group-active:shadow-[inset_0_-10px_10px_#ffffff3f]"
+              "group-active:[box-shadow:inset_0_-10px_10px_color-mix(in_oklab,var(--primary-foreground)_25%,transparent)]"
             )}
           />
-
-          {/* backdrop */}
-          <div className={cn("absolute inset-(--cut) -z-20 rounded-lg [background:var(--bg)]")} />
         </Link>
       </Button>
     );

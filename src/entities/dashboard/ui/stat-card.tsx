@@ -7,7 +7,7 @@ type Props = { item: StatItem };
 
 export function StatCard({ item }: Readonly<Props>) {
   return (
-    <Card className="hover:bg-muted/50 transition-colors">
+    <Card className="hover:border-border-strong transition-colors">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{item.label}</CardTitle>
         <div className={cn("rounded-full p-2", item.className)}>

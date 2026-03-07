@@ -30,8 +30,8 @@ export function NotificationCard({ notification }: Readonly<Props>) {
   return (
     <Card
       className={cn(
-        "group hover:bg-accent/50 relative border-l-4",
-        notification.isRead === false && "bg-accent/50",
+        "group hover:border-border-strong relative border-l-4",
+        notification.isRead === false && "bg-surface-selected",
         border
       )}
     >
@@ -45,7 +45,7 @@ export function NotificationCard({ notification }: Readonly<Props>) {
             <Icon className={cn("h-5 w-5", color)} />
             <span
               className={cn(
-                "bg-muted-foreground h-2 w-2 shrink-0 rounded-full opacity-0",
+                "bg-foreground h-2 w-2 shrink-0 rounded-full opacity-0",
                 notification.isRead === false && "opacity-100"
               )}
             />

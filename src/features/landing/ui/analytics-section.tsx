@@ -25,7 +25,7 @@ export function AnalyticsSection() {
 
   const chartConfig = {
     complexity: {
-      color: "var(--chart-1)",
+      color: "var(--chart-4)",
       label: t("section_analytics_complexity_label"),
     },
     docs: {
@@ -45,7 +45,7 @@ export function AnalyticsSection() {
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-        <Card className="border-primary bg-landing-bg-light/50 col-span-1 md:col-span-2">
+        <Card className="border-border bg-landing-bg-light/50 col-span-1 md:col-span-2">
           <CardHeader>
             <CardTitle>{t("section_analytics_card_title")}</CardTitle>
             <CardDescription>{t("section_analytics_card_desc")}</CardDescription>
@@ -73,26 +73,21 @@ export function AnalyticsSection() {
 
                 <defs>
                   <linearGradient id="fillDocs" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-docs)" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="var(--color-docs)" stopOpacity={0.1} />
+                    <stop offset="5%" stopColor="var(--chart-2)" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="var(--chart-3)" stopOpacity={0.1} />
                   </linearGradient>
                   <linearGradient id="fillComplexity" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-complexity)" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="var(--color-complexity)" stopOpacity={0.1} />
+                    <stop offset="5%" stopColor="var(--chart-4)" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="var(--chart-5)" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
 
-                <Area
-                  type="natural"
-                  dataKey="docs"
-                  fill="url(#fillDocs)"
-                  stroke="var(--color-docs)"
-                />
+                <Area type="natural" dataKey="docs" fill="url(#fillDocs)" stroke="var(--chart-2)" />
                 <Area
                   type="natural"
                   dataKey="complexity"
                   fill="url(#fillComplexity)"
-                  stroke="var(--color-complexity)"
+                  stroke="var(--chart-4)"
                 />
               </AreaChart>
             </ChartContainer>
@@ -100,14 +95,14 @@ export function AnalyticsSection() {
         </Card>
 
         <div className="flex flex-col gap-4">
-          <Card className="border-primary bg-landing-bg-light/50 flex flex-1 flex-col justify-center p-6">
+          <Card className="border-border bg-landing-bg-light/50 flex flex-1 flex-col justify-center p-6">
             <p className="text-muted-foreground text-sm tracking-widest uppercase">
               {t("section_analytics_bus_factor")}
             </p>
             <span className="text-destructive mt-2 text-5xl font-bold">1.2</span>
             <p className="text-muted-foreground mt-2 text-xs">{t("section_analytics_review")}</p>
           </Card>
-          <Card className="border-primary bg-landing-bg-light/50 flex flex-1 flex-col justify-center p-6">
+          <Card className="border-border bg-landing-bg-light/50 flex flex-1 flex-col justify-center p-6">
             <p className="text-muted-foreground text-sm tracking-widest uppercase">
               {t("section_analytics_maintain")}
             </p>

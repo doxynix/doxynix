@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 import { cookies } from "next/headers";
 import { getLocale } from "next-intl/server";
+import { ThemeProvider } from "next-themes";
 
 import { SidebarProvider } from "@/shared/ui/core/sidebar";
 import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificator";
@@ -24,9 +25,17 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
   }
 
   const cookieStore = await cookies();
+  const themeCookie = cookieStore.get("doxynix-theme")?.value ?? "system";
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+
   return (
-    <>
+    <ThemeProvider
+      disableTransitionOnChange
+      enableSystem
+      attribute="class"
+      defaultTheme={themeCookie}
+      storageKey="doxynix-theme"
+    >
       <SentryUserIdentificator user={session.user} />
       <SidebarProvider
         defaultOpen={defaultOpen}
@@ -49,6 +58,6 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
         </div>
       </SidebarProvider>
       <CreateRepoDialog />
-    </>
+    </ThemeProvider>
   );
 }

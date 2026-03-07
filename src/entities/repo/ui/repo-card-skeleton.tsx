@@ -10,11 +10,6 @@ export function RepoCardSkeleton({ count }: Readonly<Props>) {
     <div className="space-y-3">
       {Array.from({ length: count ?? 4 }).map((_, i) => (
         <Card key={i} className="relative overflow-hidden p-4">
-          <div className="absolute top-4 right-4 flex gap-2 opacity-100 transition-opacity">
-            <Skeleton className="h-6 w-6 rounded" />
-            <Skeleton className="h-6 w-6 rounded" />
-          </div>
-
           <div className="absolute top-4 right-4 flex gap-1 text-xs">
             <Skeleton className="h-6 w-6" />
             <Skeleton className="h-6 w-6" />

@@ -1,3 +1,9 @@
+"use client";
+
+import React, { useState } from "react";
+import { useTheme } from "next-themes";
+
+import { Badge } from "../core/badge";
 import { CodeWindow } from "./code-window";
 
 type Props = {
@@ -19,9 +25,14 @@ export function CodeComparison({
   filename,
   goodCode,
 }: Readonly<Props>) {
-  const currentTheme = "dark"; // THEME: если вернется светлая тема сменить на хук useTheme и поставить вначале файла "use client"
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  const isDark = currentTheme === "dark";
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = !mounted || resolvedTheme === "dark";
 
   const beforeHtml = isDark ? beforeHtmlDark : beforeHtmlLight;
   const afterHtml = isDark ? afterHtmlDark : afterHtmlLight;
@@ -44,9 +55,13 @@ export function CodeComparison({
           />
         </div>
 
-        <div className="text-muted-foreground border-primary bg-landing-bg-dark absolute top-1/2 left-1/2 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-xs font-bold md:flex">
+        <Badge
+          variant="outline"
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 left-1/2 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-xs font-bold md:flex"
+        >
           VS
-        </div>
+        </Badge>
       </div>
     </div>
   );

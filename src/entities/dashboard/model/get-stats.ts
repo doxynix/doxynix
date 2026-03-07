@@ -33,7 +33,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
       value: `${overview.avgHealthScore}/100`,
     },
     {
-      className: "bg-white/10 text-white font-mono",
+      className: "bg-foreground/10 text-foreground font-mono",
       description: "Across all repositories",
       icon: Code2,
       id: "loc",
@@ -41,7 +41,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
       value: overview.totalLoc.toLocaleString(locale),
     },
     {
-      className: "bg-blue-500/10 text-blue-500",
+      className: "bg-surface-selected text-foreground",
       description: "Security audit score",
       icon: ShieldCheck,
       id: "security",
@@ -49,7 +49,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
       value: `${overview.avgSecurityScore}/100`,
     },
     {
-      className: "bg-pink-500/10 text-pink-500",
+      className: "bg-brand-ai/10 text-brand-ai",
       description: "Cognitive complexity",
       icon: Brain,
       id: "complexity",
@@ -57,7 +57,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
       value: `${overview.avgComplexityScore}/100`,
     },
     {
-      className: "bg-cyan-500/10 text-cyan-500",
+      className: "bg-brand-docs/10 text-brand-docs",
       description: "Documentation quality",
       icon: BookOpenCheck,
       id: "onboarding",
@@ -65,7 +65,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
       value: `${overview.avgOnboardingScore}/100`,
     },
     {
-      className: "bg-orange-500/10 text-orange-500",
+      className: "bg-brand-tech/10 text-brand-tech",
       description: "Refactoring needed",
       icon: Wrench,
       id: "techdebt",

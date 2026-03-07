@@ -54,8 +54,8 @@ type BorderBeamProps = {
 export const BorderBeam = ({
   borderWidth = 1,
   className,
-  colorFrom = "#ffaa40",
-  colorTo = "#9c40ff",
+  colorFrom = "var(--brand-tech)",
+  colorTo = "var(--brand-ai)",
   delay = 0,
   duration = 6,
   initialOffset = 0,

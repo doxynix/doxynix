@@ -7,8 +7,8 @@ import { useTranslations } from "next-intl";
 
 export const TerminalWindow = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="border-border pointer-events-none flex h-full w-full flex-col overflow-hidden rounded-xl border">
-      <div className="border-border/50 bg-muted/20 flex items-center gap-1.5 border-b p-3">
+    <div className="glass-panel border-border/80 bg-card/70 pointer-events-none flex h-full w-full flex-col overflow-hidden rounded-2xl border">
+      <div className="border-border/60 bg-muted/30 flex items-center gap-1.5 border-b p-3">
         <div className="bg-destructive/80 h-3 w-3 rounded-full" />
         <div className="bg-warning/80 h-3 w-3 rounded-full" />
         <div className="bg-success/80 h-3 w-3 rounded-full" />
@@ -72,7 +72,7 @@ export function SimulationTerminal() {
       <TerminalWindow>
         <div className="text-muted-foreground flex items-center">
           <span className="text-success mr-2">➜</span>
-          <span className="text-blue">~/project</span>
+          <span className="text-foreground font-medium">~/project</span>
           <span className="text-foreground ml-2">{typedCommand}</span>
           {step <= 1 && (
             <span className="animate-blink-cursor bg-muted-foreground ml-1 inline-block h-4 w-2 align-middle" />
@@ -81,27 +81,27 @@ export function SimulationTerminal() {
 
         <div className="mt-2 space-y-1">
           {step >= 3 && (
-            <div className="animate-in fade-in slide-in-from-left-2 text-muted-foreground duration-300">
+            <div className="animate-in fade-in slide-in-from-left-2 text-muted-foreground duration-200">
               {t("section_terminal_step_analyzed")}
             </div>
           )}
 
           {step >= 4 && (
-            <div className="animate-in fade-in slide-in-from-left-2 flex items-center gap-2 duration-300">
+            <div className="animate-in fade-in slide-in-from-left-2 flex items-center gap-2 duration-200">
               <Check className="text-success h-3 w-3" />
               <span>{t("section_terminal_step_parsing")}</span>
             </div>
           )}
 
           {step >= 5 && (
-            <div className="animate-in fade-in slide-in-from-left-2 flex items-center gap-2 duration-300">
+            <div className="animate-in fade-in slide-in-from-left-2 flex items-center gap-2 duration-200">
               <Check className="text-success h-3 w-3" />
               <span>{t("section_terminal_step_relationships")}</span>
             </div>
           )}
 
           {step >= 6 && (
-            <div className="animate-in fade-in slide-in-from-left-2 flex items-center gap-2 duration-300">
+            <div className="animate-in fade-in slide-in-from-left-2 flex items-center gap-2 duration-200">
               <Check className="text-success h-3 w-3" />
               <span>{t("section_terminal_step_generating")}</span>
             </div>
@@ -109,17 +109,17 @@ export function SimulationTerminal() {
         </div>
 
         {step >= 7 && (
-          <div className="animate-in fade-in slide-in-from-left-2 bg-success/10 border-success/20 text-success mt-4 rounded border p-2 duration-500">
+          <div className="animate-in fade-in slide-in-from-left-2 bg-success/10 border-success/20 text-success mt-4 rounded-xl border p-2.5 duration-300">
             {t("section_terminal_step_success_prefix")}{" "}
             <span className="underline underline-offset-4">/docs/README.md</span>
           </div>
         )}
 
         {step >= 8 && (
-          <div className="animate-in fade-in slide-in-from-left-2 text-muted-foreground mt-4 flex items-start gap-2 duration-500">
-            <span className="text-blue">{t("section_terminal_step_wait_prefix")}</span>
+          <div className="animate-in fade-in slide-in-from-left-2 text-muted-foreground mt-4 flex items-start gap-2 duration-300">
+            <span className="text-foreground">{t("section_terminal_step_wait_prefix")}</span>
             <span>{t("section_terminal_step_wait_suffix")}</span>
-            <span className="animate-blink-cursor bg-blue inline-block h-4 w-2" />
+            <span className="animate-blink-cursor bg-foreground inline-block h-4 w-2" />
           </div>
         )}
       </TerminalWindow>

@@ -113,7 +113,10 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
                 isActive={page === meta.currentPage}
                 aria-disabled={isPageDisabled}
                 onClick={() => handlePageChange(page, page)}
-                className={cn("cursor-pointer", page === meta.currentPage && "pointer-events-none")}
+                className={cn(
+                  "cursor-pointer",
+                  page === meta.currentPage && "pointer-events-none opacity-100!"
+                )}
               >
                 {isCurrentPageLoading ? <Spinner /> : page}
               </PaginationLink>

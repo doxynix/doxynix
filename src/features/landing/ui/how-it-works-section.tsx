@@ -6,6 +6,7 @@ import { useInView } from "motion/react";
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/utils";
+import { Badge } from "@/shared/ui/core/badge";
 import { AblyIcon } from "@/shared/ui/icons/ably-icon";
 import { NeonIcon } from "@/shared/ui/icons/neon-icon";
 import { TriggerIcon } from "@/shared/ui/icons/trigger-icon";
@@ -30,7 +31,7 @@ const Circle = forwardRef<HTMLDivElement, { children?: React.ReactNode; classNam
       <div
         ref={ref}
         className={cn(
-          "border-border bg-landing-bg-light flex size-12 items-center justify-center rounded-full border-2 p-3 shadow-[0_0_20px_-12px_rgba(0,0,0,0.8)] sm:size-20",
+          "border-border bg-landing-bg-light flex size-12 items-center justify-center rounded-full border-2 p-3 sm:size-20",
           className
         )}
       >
@@ -41,11 +42,11 @@ const Circle = forwardRef<HTMLDivElement, { children?: React.ReactNode; classNam
 );
 
 const COLORS = {
-  ably: "#FF5115",
-  client: "#ccc",
-  db: "#34D59A",
-  llm: "#ad46ff",
-  trigger: "#41FF54",
+  ably: "var(--brand-ably)",
+  client: "var(--brand-client)",
+  db: "var(--brand-db)",
+  llm: "var(--brand-ai)",
+  trigger: "var(--brand-trigger)",
 };
 
 const STEP_DURATION = 2;
@@ -141,7 +142,7 @@ export function HowItWorksSection() {
       >
         <div className="flex h-full flex-col justify-center">
           <div className="flex flex-col items-center gap-3">
-            <Circle ref={clientRef} className="border-zinc-800">
+            <Circle ref={clientRef} className="border-border-strong">
               <User />
             </Circle>
             <span className="text-muted-foreground text-xs font-semibold sm:text-sm">
@@ -152,7 +153,7 @@ export function HowItWorksSection() {
 
         <div className="flex h-full flex-col justify-center px-8 md:px-0">
           <div className="flex flex-col items-center gap-3">
-            <Circle ref={triggerRef} className="size-16 border-[#41FF54]/40 sm:size-24">
+            <Circle ref={triggerRef} className="border-brand-trigger/40 size-16 sm:size-24">
               <TriggerIcon />
             </Circle>
             <div className="flex flex-col items-center">
@@ -166,8 +167,8 @@ export function HowItWorksSection() {
 
         <div className="flex h-full flex-col justify-between gap-8">
           <div className="flex flex-col items-center gap-2">
-            <Circle ref={llmRef} className="border-purple-500/40">
-              <Brain className="text-purple-500" />
+            <Circle ref={llmRef} className="border-brand-ai/40">
+              <Brain className="text-brand-ai" />
             </Circle>
             <span className="text-muted-foreground text-xs sm:text-sm">
               {" "}
@@ -176,7 +177,7 @@ export function HowItWorksSection() {
           </div>
 
           <div className="flex flex-col items-center gap-2">
-            <Circle ref={dbRef} className="border-[#34D59A]/40">
+            <Circle ref={dbRef} className="border-brand-db/40">
               <NeonIcon />
             </Circle>
             <span className="text-muted-foreground text-xs sm:text-sm">
@@ -185,7 +186,7 @@ export function HowItWorksSection() {
           </div>
 
           <div className="flex flex-col items-center gap-2">
-            <Circle ref={ablyRef} className="border-[#FF5115]/40">
+            <Circle ref={ablyRef} className="border-brand-ably/40">
               <AblyIcon />
             </Circle>
             <span className="text-muted-foreground text-xs sm:text-sm">
@@ -211,10 +212,10 @@ export function HowItWorksSection() {
           />
         ))}
       </div>
-      <div className="bg-background/50 mt-8 flex items-center gap-2 rounded-full border px-4 py-1 backdrop-blur-sm">
+      <Badge variant="outline" className="px-4 py-1">
         <FileText className="text-success h-4 w-4" />
         <span className="text-muted-foreground text-xs">{t("section_how_status_msg")}</span>
-      </div>
+      </Badge>
     </section>
   );
 }

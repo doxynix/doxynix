@@ -81,7 +81,7 @@ export function AnalyticsWidgets() {
                   key={activity.id}
                   className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
                     {activity.status === "DONE" && (
                       <CheckCircle2 className="text-success h-4 w-4" />
                     )}
@@ -92,19 +92,17 @@ export function AnalyticsWidgets() {
                       <Spinner className="text-warning h-4 w-4 animate-spin" />
                     )}
 
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">
-                        <Link
-                          href={`/dashboard/repo/${activity.repoOwner}/${activity.repoName}`}
-                          className="hover:underline"
-                        >
-                          <span className="text-muted-foreground truncate font-bold">
-                            {activity.repoOwner}
-                          </span>
-                          <span className="text-muted-foreground">/</span>
-                          <span className="truncate font-bold">{activity.repoName}</span>
-                        </Link>
-                      </span>
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <Link
+                        href={`/dashboard/repo/${activity.repoOwner}/${activity.repoName}`}
+                        className="block w-full truncate text-sm font-medium hover:underline"
+                      >
+                        <span className="text-muted-foreground truncate font-bold">
+                          {activity.repoOwner}
+                        </span>
+                        <span className="text-muted-foreground">/</span>
+                        <span className="truncate font-bold">{activity.repoName}</span>
+                      </Link>
                       <span className="text-muted-foreground text-xs">
                         {activity.status === "DONE" && "Analysis completed"}
                         {activity.status === "FAILED" && "Analysis failed"}
@@ -116,8 +114,8 @@ export function AnalyticsWidgets() {
                         <div className="mt-1 flex items-center gap-1">
                           <Progress
                             value={activity.progress}
-                            indicatorStyle={{ backgroundColor: "var(--color-warning)" }}
-                            className="h-1"
+                            indicatorStyle={{ backgroundColor: "var(--status-warning)" }}
+                            className="h-1 flex-1"
                           />
                           <span className="text-warning text-[10px] font-bold">
                             {activity.progress}%

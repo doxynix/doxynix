@@ -9,6 +9,6 @@ export const repoStatusConfig: Record<
 > = {
   DONE: { color: "bg-success", label: "Done" },
   FAILED: { color: "bg-error", label: "Failed" },
-  NEW: { color: "bg-blue", label: "New" },
+  NEW: { color: "bg-foreground", label: "New" },
   PENDING: { color: "bg-warning", label: "In Progress" },
 };

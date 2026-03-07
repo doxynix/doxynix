@@ -22,6 +22,14 @@ type Props = {
   treeApi: TreeApi<FileNode> | null;
 };
 
+type ActionItem = {
+  className?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  onClick: () => void;
+  tooltip?: string;
+};
+
 export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>) {
   const handleExpandAll = () => {
     startTransition(() => {
@@ -37,7 +45,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
   const treeActions = [
     { icon: FolderOpen, label: "Expand All", onClick: handleExpandAll },
     { icon: Folder, label: "Collapse All", onClick: handleCollapseAll },
-  ];
+  ] satisfies ActionItem[];
 
   const selectionActions = [
     { icon: Check, label: "Select All", onClick: actions.handleSelectAll },
@@ -53,7 +61,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
       label: "Clear",
       onClick: actions.handleClearAll,
     },
-  ];
+  ] satisfies ActionItem[];
 
   const isSearchEmpty = state.searchTerm !== "" && state.hasSearchMatches === false;
 

@@ -5,6 +5,15 @@ import { AnimatePresence, motion } from "motion/react";
 
 import { cn } from "@/shared/lib/utils";
 
+type BeamConfig = {
+  className?: string;
+  delay?: number;
+  duration: number;
+  initialX: number;
+  repeatDelay?: number;
+  translateX: number;
+};
+
 export const BackgroundBeamsWithCollision = ({
   children,
   className,
@@ -66,7 +75,7 @@ export const BackgroundBeamsWithCollision = ({
       repeatDelay: 4,
       translateX: 1200,
     },
-  ];
+  ] as const satisfies readonly BeamConfig[];
 
   return (
     <div
@@ -88,10 +97,10 @@ export const BackgroundBeamsWithCollision = ({
       {children}
       <div
         ref={containerRef}
-        className="pointer-events-none absolute inset-x-0 bottom-0 w-full bg-neutral-100"
+        className="bg-background/95 pointer-events-none absolute inset-x-0 bottom-0 w-full"
         style={{
           boxShadow:
-            "0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset",
+            "var(--shadow-md), 0 0 0 1px var(--border), 0 0 12px color-mix(in oklab, var(--foreground) 6%, transparent), inset 0 1px 0 color-mix(in oklab, var(--foreground) 10%, transparent)",
         }}
       ></div>
     </div>
@@ -195,7 +204,7 @@ const CollisionMechanism = React.forwardRef<
           },
         }}
         className={cn(
-          "via-primary absolute top-20 left-0 m-auto h-14 w-px rounded-full bg-linear-to-t from-white to-transparent",
+          "via-primary from-foreground/95 absolute top-20 left-0 m-auto h-14 w-px rounded-full bg-linear-to-t to-transparent",
           beamOptions.className
         )}
       />
@@ -249,7 +258,7 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
           initial={{ opacity: 1, x: span.initialX, y: span.initialY }}
           // eslint-disable-next-line react-hooks/purity
           transition={{ duration: Math.random() * 1.5 + 0.5, ease: "easeOut" }}
-          className="to-primary absolute h-1 w-1 rounded-full bg-linear-to-b from-white"
+          className="to-primary from-foreground absolute h-1 w-1 rounded-full bg-linear-to-b"
         />
       ))}
     </div>
