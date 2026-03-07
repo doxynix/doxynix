@@ -15,7 +15,7 @@ type Props = {
   user: User;
 };
 
-type FeatureCard  = { desc: string; icon: ComponentType<{ className?: string }>; title: string };
+type FeatureCard = { desc: string; icon: ComponentType<{ className?: string }>; title: string };
 
 const FEATURE_CARDS = [
   {

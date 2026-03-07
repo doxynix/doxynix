@@ -26,12 +26,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
         },
       }}
       className="toaster group"
-      style={{
-        "--sonner-background": "var(--popover)",
-        "--sonner-border": "var(--border)",
-        "--sonner-text-primary": "var(--foreground)",
-        "--sonner-text-secondary": "var(--text-secondary)",
-      } as React.CSSProperties}
+      style={
+        {
+          "--sonner-background": "var(--popover)",
+          "--sonner-border": "var(--border)",
+          "--sonner-text-primary": "var(--foreground)",
+          "--sonner-text-secondary": "var(--text-secondary)",
+        } as React.CSSProperties
+      }
       {...props}
     />
   );

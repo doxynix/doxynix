@@ -14,10 +14,10 @@ export const generateMetadata = createMetadata("support_title", "support_desc");
 type SupportChannel = {
   action: string;
   description: string;
+  external?: boolean;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   title: string;
-  external?: boolean;
 };
 
 const supportChannels = [

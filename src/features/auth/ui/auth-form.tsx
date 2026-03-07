@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ComponentType, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
@@ -37,7 +37,11 @@ const MagicLinkSchema = z.object({
     .max(254, "Email address cannot exceed 254 characters"),
 });
 
-type AuthProvider = { icon: React.ComponentType<{className: string}>; provider: "github" | "google" | "yandex"; text: string };
+type AuthProvider = {
+  icon: React.ComponentType<{ className: string }>;
+  provider: "github" | "google" | "yandex";
+  text: string;
+};
 
 const BUTTONS = [
   { icon: GitHubIcon, provider: "github", text: "Continue with GitHub" },
@@ -45,7 +49,11 @@ const BUTTONS = [
   { icon: YandexIcon, provider: "yandex", text: "Continue with Yandex" },
 ] as const satisfies readonly AuthProvider[];
 
-type AuthBenefit = { desc: string; icon: React.ComponentType<{className: string}>; title: string };
+type AuthBenefit = {
+  desc: string;
+  icon: React.ComponentType<{ className: string }>;
+  title: string;
+};
 
 const AUTH_BENEFITS = [
   {
@@ -58,9 +66,13 @@ const AUTH_BENEFITS = [
     icon: ShieldCheck,
     title: "Enterprise Security",
   },
-]as const satisfies readonly AuthBenefit[];
+] as const satisfies readonly AuthBenefit[];
 
-const TRUST_POINTS = ["OAuth 2.0 Secure", "Non-custodial analysis", "Cloudflare Protected"] as const;
+const TRUST_POINTS = [
+  "OAuth 2.0 Secure",
+  "Non-custodial analysis",
+  "Cloudflare Protected",
+] as const;
 
 export function AuthForm() {
   const tCommon = useTranslations("Common");
@@ -178,11 +190,15 @@ export function AuthForm() {
 
   return (
     <section className="relative container mx-auto flex min-h-[calc(100dvh-3rem)] items-center justify-center overflow-hidden px-4">
-      <div className="flex justify-center items-center w-full gap-10">
-        <div className={cn("hidden max-w-2xl flex-col gap-8 lg:flex",
-        isSent
-                ? "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
-                : "relative scale-100 opacity-100")}>
+      <div className="flex w-full items-center justify-center gap-10">
+        <div
+          className={cn(
+            "hidden max-w-2xl flex-col gap-8 lg:flex",
+            isSent
+              ? "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
+              : "relative scale-100 opacity-100"
+          )}
+        >
           <div className="flex items-center gap-3">
             <Logo isInteractive={false} className="w-xl" />
           </div>
@@ -214,11 +230,7 @@ export function AuthForm() {
 
           <div className="flex flex-wrap gap-2">
             {TRUST_POINTS.map((item) => (
-              <Badge
-                key={item}
-                variant="outline"
-                className="text-muted-foreground"
-              >
+              <Badge key={item} variant="outline" className="text-muted-foreground">
                 {item}
               </Badge>
             ))}
@@ -242,7 +254,7 @@ export function AuthForm() {
               <div className="space-y-2">
                 <h2 className="text-2xl font-semibold">Welcome back</h2>
                 <p className="text-muted-foreground text-sm">
-Choose your preferred way to sign in.
+                  Choose your preferred way to sign in.
                 </p>
               </div>
             </div>
@@ -308,8 +320,8 @@ Choose your preferred way to sign in.
                           />
                         </FormControl>
                         <div className="min-h-5 px-1">
-                        <FormMessage className="text-xs animate-in fade-in slide-in-from-top-1" />
-                      </div>
+                          <FormMessage className="animate-in fade-in slide-in-from-top-1 text-xs" />
+                        </div>
                       </FormItem>
                     )}
                   />
@@ -343,7 +355,7 @@ Choose your preferred way to sign in.
               </Link>
             </p>
           </div>
-           <div
+          <div
             className={cn(
               "bg-card/82 border-border/80 relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border p-8 text-center transition-all ease-out",
               isSent

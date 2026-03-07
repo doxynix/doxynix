@@ -6,12 +6,12 @@ import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/shared/lib/utils";
 
 type BeamConfig = {
-  initialX: number;
-  translateX: number;
-  duration: number;
-  delay?: number;
-  repeatDelay?: number;
   className?: string;
+  delay?: number;
+  duration: number;
+  initialX: number;
+  repeatDelay?: number;
+  translateX: number;
 };
 
 export const BackgroundBeamsWithCollision = ({

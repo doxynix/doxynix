@@ -1,16 +1,20 @@
+import React from "react";
 import { ArrowRight, Network, Shield, Sparkles, Zap } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 import { Link } from "@/i18n/routing";
-import React from "react";
 
 // export const runtime = "edge";
 
 export const generateMetadata = createMetadata("about_title", "about_desc");
 
-type FeatureItem = { description: string; icon: React.ComponentType<{className: string}>; title: string };
+type FeatureItem = {
+  description: string;
+  icon: React.ComponentType<{ className: string }>;
+  title: string;
+};
 
 const features = [
   {
@@ -37,7 +41,7 @@ const features = [
     icon: Network,
     title: "Beautifully Formatted",
   },
-]as const satisfies readonly FeatureItem[];
+] as const satisfies readonly FeatureItem[];
 
 export default async function AboutPage() {
   const tCommon = await getTranslations("Common");

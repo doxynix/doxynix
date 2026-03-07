@@ -12,7 +12,7 @@ type Props = {
 };
 
 export function ThemeToggle({ className }: Readonly<Props>) {
-  const { resolvedTheme, setTheme, forcedTheme } = useTheme();
+  const { forcedTheme, resolvedTheme, setTheme } = useTheme();
 
   if (forcedTheme) return null;
 
@@ -22,8 +22,6 @@ export function ThemeToggle({ className }: Readonly<Props>) {
 
     setClientCookie("doxynix-theme", newTheme, 31536000);
   };
-
-  const isDark = resolvedTheme === "dark";
 
   return (
     <AppTooltip content="Toggle theme">

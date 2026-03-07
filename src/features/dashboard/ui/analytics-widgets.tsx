@@ -79,9 +79,9 @@ export function AnalyticsWidgets() {
               data.recentActivity.map((activity) => (
                 <div
                   key={activity.id}
-                  className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0 "
+                  className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex min-w-0 items-center gap-3">
                     {activity.status === "DONE" && (
                       <CheckCircle2 className="text-success h-4 w-4" />
                     )}
@@ -95,13 +95,13 @@ export function AnalyticsWidgets() {
                     <div className="flex min-w-0 flex-1 flex-col">
                       <Link
                         href={`/dashboard/repo/${activity.repoOwner}/${activity.repoName}`}
-                        className="block text-sm font-medium hover:underline w-full truncate"
+                        className="block w-full truncate text-sm font-medium hover:underline"
                       >
-                        <span className="text-muted-foreground font-bold truncate">
+                        <span className="text-muted-foreground truncate font-bold">
                           {activity.repoOwner}
                         </span>
                         <span className="text-muted-foreground">/</span>
-                        <span className="font-bold truncate">{activity.repoName}</span>
+                        <span className="truncate font-bold">{activity.repoName}</span>
                       </Link>
                       <span className="text-muted-foreground text-xs">
                         {activity.status === "DONE" && "Analysis completed"}

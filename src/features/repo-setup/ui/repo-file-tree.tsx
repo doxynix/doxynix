@@ -1,4 +1,4 @@
-import React, { ComponentType, startTransition } from "react";
+import React, { startTransition } from "react";
 import { Check, Folder, FolderOpen, Search, Sparkles, X } from "lucide-react";
 import { Tree, type TreeApi } from "react-arborist";
 
@@ -23,11 +23,11 @@ type Props = {
 };
 
 type ActionItem = {
-  icon: React.ComponentType<{className: string}>;
+  className?: string;
+  icon: React.ComponentType<{ className: string }>;
   label: string;
   onClick: () => void;
   tooltip?: string;
-  className?: string
 };
 
 export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>) {
