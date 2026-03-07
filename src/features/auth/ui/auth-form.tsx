@@ -152,6 +152,7 @@ export function AuthForm() {
     if (turnstileRef.current == null) {
       setIsVerifying(false);
       setPendingData(null);
+      setErrorMessage("Security widget is not available. Please refresh the page.");
       return;
     }
 
