@@ -29,10 +29,7 @@ export function RepoEmpty() {
         <EmptyDescription>{t("repo_empty_repos_desc")}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button
-          onClick={openDialog}
-          className="border-border bg-secondary text-secondary-foreground cursor-pointer"
-        >
+        <Button variant="secondary" onClick={openDialog} className="cursor-pointer">
           {tCommon("add")}
         </Button>
       </EmptyContent>

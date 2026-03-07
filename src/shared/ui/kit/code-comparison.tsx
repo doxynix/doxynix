@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import { useTheme } from "next-themes";
 
 import { Badge } from "../core/badge";
@@ -26,14 +27,21 @@ export function CodeComparison({
 }: Readonly<Props>) {
   const { resolvedTheme } = useTheme();
 
-  const isDark = resolvedTheme === "dark";
+  const [mounted, setMounted] = useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = !mounted || resolvedTheme === "dark";
+
   const beforeHtml = isDark ? beforeHtmlDark : beforeHtmlLight;
   const afterHtml = isDark ? afterHtmlDark : afterHtmlLight;
 
   return (
     <div className="mx-auto w-full">
       <div className="group border-border relative w-full overflow-hidden rounded-xl border">
-        <div className="relative grid gap-4 md:grid-cols-2 md:gap-0 dark:hidden">
+        <div className="relative grid gap-4 md:grid-cols-2 md:gap-0">
           <CodeWindow
             code={badCode}
             codeClassName="text-xs p-2"
@@ -44,21 +52,6 @@ export function CodeComparison({
             code={goodCode}
             codeClassName="text-xs p-2"
             codeHtml={afterHtml}
-            title={filename}
-          />
-        </div>
-
-        <div className="relative hidden gap-4 md:grid-cols-2 md:gap-0 dark:grid">
-          <CodeWindow
-            code={badCode}
-            codeClassName="text-xs p-2"
-            codeHtml={beforeHtmlDark}
-            title={filename}
-          />
-          <CodeWindow
-            code={goodCode}
-            codeClassName="text-xs p-2"
-            codeHtml={afterHtmlDark}
             title={filename}
           />
         </div>

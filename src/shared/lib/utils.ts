@@ -219,5 +219,5 @@ export function setClientCookie(name: string, value: string | boolean, maxAge: n
   if (typeof window === "undefined") return;
 
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
+  document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(String(value))}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
 }

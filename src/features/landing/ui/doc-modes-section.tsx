@@ -24,7 +24,7 @@ function TabsTriggerItem({ icon: Icon, subTitle, title, value }: Readonly<TabsTr
   return (
     <TabsTrigger
       value={value}
-      className="transition-standard group data-[state=active]:bg-landing-bg-light flex items-center justify-start gap-3 rounded-xl px-4 py-4 text-left"
+      className="transition-standard data-[state=active]:bg-landing-bg-light flex items-center justify-start gap-3 rounded-xl px-4 py-4 text-left"
     >
       <div className="transition-standard text-muted-foreground bg-landing-bg-light flex size-10 shrink-0 items-center justify-center rounded-xl">
         {Icon && <Icon />}

@@ -12,7 +12,7 @@ export const generateMetadata = createMetadata("about_title", "about_desc");
 
 type FeatureItem = {
   description: string;
-  icon: React.ComponentType<{ className: string }>;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
 };
 

@@ -38,7 +38,7 @@ const MagicLinkSchema = z.object({
 });
 
 type AuthProvider = {
-  icon: React.ComponentType<{ className: string }>;
+  icon: React.ComponentType<{ className?: string }>;
   provider: "github" | "google" | "yandex";
   text: string;
 };
@@ -51,7 +51,7 @@ const BUTTONS = [
 
 type AuthBenefit = {
   desc: string;
-  icon: React.ComponentType<{ className: string }>;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
 };
 

@@ -24,7 +24,7 @@ type Props = {
 
 type ActionItem = {
   className?: string;
-  icon: React.ComponentType<{ className: string }>;
+  icon: React.ComponentType<{ className?: string }>;
   label: string;
   onClick: () => void;
   tooltip?: string;

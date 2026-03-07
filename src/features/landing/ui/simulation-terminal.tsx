@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 
 export const TerminalWindow = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="glass-panel border-border/80 bg-card/72 pointer-events-none flex h-full w-full flex-col overflow-hidden rounded-2xl border">
+    <div className="glass-panel border-border/80 bg-card/70 pointer-events-none flex h-full w-full flex-col overflow-hidden rounded-2xl border">
       <div className="border-border/60 bg-muted/30 flex items-center gap-1.5 border-b p-3">
         <div className="bg-destructive/80 h-3 w-3 rounded-full" />
         <div className="bg-warning/80 h-3 w-3 rounded-full" />
@@ -109,7 +109,7 @@ export function SimulationTerminal() {
         </div>
 
         {step >= 7 && (
-          <div className="animate-in fade-in slide-in-from-left-2 bg-success/8 border-success/20 text-success mt-4 rounded-xl border p-2.5 duration-300">
+          <div className="animate-in fade-in slide-in-from-left-2 bg-success/10 border-success/20 text-success mt-4 rounded-xl border p-2.5 duration-300">
             {t("section_terminal_step_success_prefix")}{" "}
             <span className="underline underline-offset-4">/docs/README.md</span>
           </div>

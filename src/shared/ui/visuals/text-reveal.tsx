@@ -59,7 +59,9 @@ const Word: FC<WordProps> = ({ children, progress, range }) => {
   const opacity = useTransform(progress, range, [0, 1]);
   return (
     <span className="xl:lg-3 relative mx-1 lg:mx-1.5">
-      <span className="text-foreground/30 absolute">{children}</span>
+      <span aria-hidden="true" className="text-foreground/30 absolute">
+        {children}
+      </span>
       <motion.span className="text-foreground" style={{ opacity: opacity }}>
         {children}
       </motion.span>
