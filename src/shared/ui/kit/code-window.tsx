@@ -29,7 +29,7 @@ export function CodeWindow({
         className
       )}
     >
-      <div className="bg-landing-bg-light/50 flex items-center justify-between border-b border-zinc-800 p-3">
+      <div className="bg-landing-bg-light/50 border-border/80 flex items-center justify-between border-b p-3">
         <div className="flex items-center">
           <div className="flex gap-1.5">
             <div className="bg-destructive/80 h-3 w-3 rounded-full" />

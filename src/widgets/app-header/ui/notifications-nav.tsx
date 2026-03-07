@@ -88,7 +88,7 @@ export function NotificationsNav() {
                       <TimeAgo date={note.createdAt} locale={locale} />
                     </div>
                     {note.isRead === false && (
-                      <span className="bg-muted-foreground mt-1 h-2 w-2 shrink-0 rounded-full" />
+                      <span className="bg-foreground mt-1 h-2 w-2 shrink-0 rounded-full" />
                     )}
                   </div>
                 </>
@@ -103,7 +103,7 @@ export function NotificationsNav() {
                   onSelect={() => {
                     if (note.isRead === false) markAs.mutate(note.id, true);
                   }}
-                  className={cn(note.isRead === false && "bg-accent/50")}
+                  className={cn(note.isRead === false && "bg-surface-selected")}
                 >
                   {href == null ? (
                     <div className={cn(commonClasses, "cursor-default")}>{innerContent}</div>

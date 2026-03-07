@@ -57,17 +57,46 @@ export default function GlobalError({
     <html lang="en">
       <head>
         <style>{`
-          body { margin: 0; font-family: sans-serif; background: #09090b; color: #fafafa; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+          :root {
+            --surface-page: oklch(0.985 0.002 255);
+            --surface-panel: oklch(1 0 0);
+            --text-primary: oklch(0.145 0.004 255);
+            --text-muted: oklch(0.57 0.004 255);
+            --text-soft: oklch(0.43 0.006 255);
+            --primary: oklch(0.145 0.004 255);
+            --primary-foreground: oklch(0.985 0.002 255);
+            --status-error: oklch(0.6 0.18 25);
+            --status-error-bg: oklch(0.6 0.18 25 / 0.12);
+            --border-soft: oklch(0.922 0.004 255);
+            --border-strong: oklch(0.86 0.005 255);
+          }
+          @media (prefers-color-scheme: dark) {
+            :root {
+              --surface-page: oklch(0.145 0.004 255);
+              --surface-panel: oklch(0.205 0.004 255);
+              --text-primary: oklch(0.985 0.002 255);
+              --text-muted: oklch(0.58 0.004 255);
+              --text-soft: oklch(0.74 0.004 255);
+              --primary: oklch(0.985 0.002 255);
+              --primary-foreground: oklch(0.145 0.004 255);
+              --status-error: oklch(0.7 0.16 25);
+              --status-error-bg: oklch(0.7 0.16 25 / 0.12);
+              --border-soft: oklch(0.285 0.004 255);
+              --border-strong: oklch(0.36 0.004 255);
+            }
+          }
+          body { margin: 0; font-family: sans-serif; background: var(--surface-page); color: var(--text-primary); display: flex; align-items: center; justify-content: center; min-height: 100vh; }
           .container { max-width: 400px; padding: 24px; text-align: center; }
-          .icon-circle { width: 80px; height: 80px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+          .icon-circle { width: 80px; height: 80px; background: var(--status-error-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
           h1 { font-size: 30px; font-weight: 700; margin: 0 0 16px; letter-spacing: -0.025em; }
-          p { color: #a1a1aa; line-height: 1.6; margin-bottom: 24px; }
-          .digest-box { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 16px; text-align: left; margin-bottom: 32px; }
-          .digest-label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: #71717a; margin: 0 0 8px; }
-          code { font-family: monospace; font-size: 12px; color: #a1a1aa; word-break: break-all; opacity: 0.8; }
-          button { background: #fafafa; color: #09090b; border: none; border-radius: 6px; padding: 10px 24px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; }
-          button:hover { opacity: 0.9; }
-          footer { margin-top: 48px; font-size: 14px; color: #52525b; }
+          p { color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+          .digest-box { background: var(--surface-panel); border: 1px solid var(--border-soft); border-radius: 12px; padding: 16px; text-align: left; margin-bottom: 32px; }
+          .digest-label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--text-soft); margin: 0 0 8px; }
+          code { font-family: monospace; font-size: 12px; color: var(--text-muted); word-break: break-all; opacity: 0.8; }
+          button { background: var(--primary); color: var(--primary-foreground); border: 1px solid var(--border-strong); border-radius: 10px; padding: 10px 24px; font-weight: 500; cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s; }
+          button:hover { border-color: var(--border-strong); box-shadow: 0 4px 18px color-mix(in oklab, var(--text-primary) 14%, transparent); }
+          footer { margin-top: 48px; font-size: 14px; color: var(--text-soft); }
+          .error-icon { stroke: var(--status-error); }
         `}</style>
       </head>
       <body>
@@ -76,13 +105,13 @@ export default function GlobalError({
             <svg
               fill="none"
               height="35"
-              stroke="#ef4444"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
               viewBox="0 0 24 24"
               width="35"
               xmlns="http://www.w3.org/2000/svg"
+              className="error-icon"
             >
               <rect height="8" rx="2" ry="2" width="20" x="2" y="2" />
               <rect height="8" rx="2" ry="2" width="20" x="2" y="14" />

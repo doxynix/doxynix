@@ -16,7 +16,7 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
   const locale = useLocale();
 
   return (
-    <Card className="group hover:bg-accent/50 justify-between">
+    <Card className="group hover:border-border-strong justify-between">
       <CardHeader className="flex flex-row items-start justify-between pb-2">
         <div className="space-y-1 overflow-hidden">
           <CardTitle className="truncate text-base font-semibold">{active.name}</CardTitle>
@@ -41,7 +41,7 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="bg-muted text-muted-foreground truncate rounded-xl p-2 font-mono text-xs">
+        <div className="bg-surface-hover text-muted-foreground border-border/80 truncate rounded-xl border p-2 font-mono text-xs">
           {active.prefix === ""
             ? "dxnx_••••••••••••••••••••••••••••••••••••••••••••••••••••"
             : `${active.prefix}••••••••••••••••••••••••••••••••••••••••••••••••••••`}

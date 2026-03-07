@@ -21,7 +21,7 @@ const MockGraph = () => (
     {[40, 70, 50, 80, 60, 90, 75, 40, 70, 50, 80, 60].map((h, i) => (
       <div
         key={i}
-        className="w-full rounded-t bg-linear-to-t from-zinc-800 to-zinc-500/20 transition-all duration-500 hover:to-zinc-500/50"
+        className="transition-standard from-border-strong to-foreground/10 hover:to-foreground/20 w-full rounded-t bg-linear-to-t"
         style={{ height: `${h}%` }}
       />
     ))}
@@ -31,7 +31,7 @@ const MockGraph = () => (
 export function FeaturesSection() {
   const t = useTranslations("Landing");
 
-  const FEATURES: BentoFeature[] = [
+  const FEATURES = [
     {
       background: (
         <div className="absolute inset-0 flex items-center justify-center p-4 pt-10 sm:p-8 sm:pt-14">
@@ -102,7 +102,7 @@ export function FeaturesSection() {
       Icon: Share2,
       name: t("section_features_export_name"),
     },
-  ];
+  ] satisfies BentoFeature[];
 
   return (
     <section className="container mx-auto px-4 py-32">

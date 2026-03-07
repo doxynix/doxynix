@@ -17,6 +17,7 @@ import {
 import { useSidebar } from "@/shared/ui/core/sidebar";
 import { Logo } from "@/shared/ui/icons/logo";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
+import { ThemeToggle } from "@/shared/ui/kit/theme-toggle";
 import { Link } from "@/i18n/routing";
 
 import { AppCommandMenu } from "./app-command-menu";
@@ -95,7 +96,7 @@ export function AppHeader() {
           </span>
         </AppTooltip>
         <AppCommandMenu />
-        {/* <ThemeToggle className="text-muted-foreground" /> // THEME: на время!*/}
+        <ThemeToggle className="text-muted-foreground" />
         <NotificationsNav />
         <UserNav />
       </div>

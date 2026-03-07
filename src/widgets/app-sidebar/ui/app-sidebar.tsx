@@ -68,7 +68,7 @@ export function AppSidebar() {
                   )}
                 >
                   {(state === "expanded" || isMobile) && <span>{t("recent_repositories")}</span>}
-                  <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-300 group-data-[state=open]/collapsible:rotate-180" />
+                  <ChevronDown className="transition-standard ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
               <CollapsibleContent>
@@ -123,7 +123,7 @@ export function AppSidebar() {
                               isLoading={isFetchingNextPage}
                               variant="ghost"
                               onClick={() => void fetchNextPage()}
-                              className="text-muted-foreground hover:text-foreground hover:bg-primary/90 flex h-8 w-full cursor-pointer items-center justify-start text-xs"
+                              className="text-muted-foreground flex h-8 w-full cursor-pointer items-center justify-start text-xs"
                             >
                               <ChevronDown /> <>{t("sidebar_show_more")}</>
                             </LoadingButton>
@@ -131,7 +131,7 @@ export function AppSidebar() {
                             <Button
                               variant="ghost"
                               onClick={() => void fetchNextPage()}
-                              className="text-muted-foreground hover:text-foreground hover:bg-primary/90 flex h-8 w-full cursor-pointer items-center justify-center p-1"
+                              className="text-muted-foreground flex h-8 w-full cursor-pointer items-center justify-center p-1"
                             >
                               {isFetchingNextPage ? (
                                 <Spinner className="text-muted-foreground h-4 w-4" />

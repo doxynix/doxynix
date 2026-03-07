@@ -46,7 +46,10 @@ const fontMono = JetBrains_Mono({
 export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#000000",
+  themeColor: [
+    { color: "#f7f7f8", media: "(prefers-color-scheme: light)" },
+    { color: "#111318", media: "(prefers-color-scheme: dark)" },
+  ],
   userScalable: true,
   width: "device-width",
 };
@@ -150,9 +153,8 @@ export default async function LocaleLayout({
             duration={4000}
             gap={8}
             position="top-center"
-            theme="dark" // THEME: пока так будет форс
           />
-          <NextTopLoader color="#ffffff" showSpinner={false} zIndex={9999} />
+          <NextTopLoader color="var(--primary)" showSpinner={false} zIndex={9999} />
           <Suspense>
             <UTSSR />
           </Suspense>

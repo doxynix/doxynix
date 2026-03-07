@@ -108,8 +108,10 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                   key={opt.id}
                   className={cn(
                     "relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3 transition-all",
-                    "hover:bg-muted/50 focus-within:ring-ring focus-within:ring-2 focus-within:ring-offset-2",
-                    isSelected ? "border-foreground bg-accent/50" : "border-border"
+                    "hover:border-border-strong focus-within:ring-ring focus-within:ring-2 focus-within:ring-offset-2",
+                    isSelected
+                      ? "border-border-strong bg-surface-selected"
+                      : "border-border bg-card"
                   )}
                 >
                   <input
@@ -124,7 +126,9 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                     <div
                       className={cn(
                         "flex h-8 w-8 items-center justify-center rounded-lg border",
-                        !isSelected && "bg-muted text-muted-foreground"
+                        isSelected
+                          ? "bg-primary text-primary-foreground border-border-strong"
+                          : "bg-surface-hover text-muted-foreground border-border"
                       )}
                     >
                       <opt.icon className="h-4 w-4" />

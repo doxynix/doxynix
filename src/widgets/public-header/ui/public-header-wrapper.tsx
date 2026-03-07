@@ -35,8 +35,8 @@ export function PublicHeaderWrapper({ children }: Readonly<{ children: React.Rea
       <motion.div
         animate={isHidden ? "hidden" : "visible"}
         transition={{
-          duration: 0.5,
-          ease: [0.23, 1, 0.32, 1],
+          duration: 0.18,
+          ease: [0.4, 0, 0.2, 1],
         }}
         variants={{
           hidden: {
@@ -52,12 +52,10 @@ export function PublicHeaderWrapper({ children }: Readonly<{ children: React.Rea
         }}
         onFocusCapture={() => setIsHidden(false)}
         className={
-          "supports-backdrop-filter:bg-background/60 border-border bg-background/80 fixed top-0 z-50 w-full border-b backdrop-blur-sm transition-shadow duration-500"
+          "transition-standard supports-backdrop-filter:bg-background/64 glass-panel border-border/80 bg-background/76 fixed top-0 z-50 w-full border-b"
         }
       >
-        <div className="relative border-b border-transparent transition-colors duration-500">
-          {children}
-        </div>
+        <div className="transition-standard relative border-b border-transparent">{children}</div>
       </motion.div>
     </>
   );

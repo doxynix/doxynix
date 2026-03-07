@@ -64,6 +64,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
               <LoadingButton
                 disabled={removeAvatar.isPending}
                 isLoading={removeAvatar.isPending}
+                loadingText=""
                 size="icon"
                 variant="destructive"
                 onClick={() => removeAvatar.mutate()}

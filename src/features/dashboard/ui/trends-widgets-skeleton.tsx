@@ -9,7 +9,7 @@ export function TrendsWidgetsSkeleton() {
   const t = useTranslations("Dashboard");
 
   return (
-    <Card className="border-primary/20 bg-card/50">
+    <Card className="border-border/80 bg-card">
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
           <CardTitle className="text-xl">{t("trends_title")}</CardTitle>
@@ -37,12 +37,12 @@ export function TrendsWidgetsSkeleton() {
               <path
                 d="M0 20 Q 100 15, 200 25 T 400 30 L 400 100 L 0 100 Z"
                 fill="currentColor"
-                className="text-primary/10"
+                className="text-foreground/10"
               />
               <path
                 d="M0 50 Q 100 45, 200 55 T 400 50 L 400 100 L 0 100 Z"
                 fill="currentColor"
-                className="text-primary/20"
+                className="text-foreground/15"
               />
 
               <line

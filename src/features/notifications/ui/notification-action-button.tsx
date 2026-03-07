@@ -28,6 +28,7 @@ export function NotificationActionButton({
       <LoadingButton
         disabled={disabled}
         isLoading={isPending}
+        loadingText=""
         size="icon"
         variant="ghost"
         aria-label={tooltip}

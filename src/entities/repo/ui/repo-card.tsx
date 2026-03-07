@@ -27,9 +27,9 @@ type Props = {
 };
 
 const getHealthColor = (score: number) => {
-  if (score < 50) return "var(--color-destructive)";
-  if (score < 80) return "var(--color-warning)";
-  return "var(--color-success)";
+  if (score < 50) return "var(--destructive)";
+  if (score < 80) return "var(--status-warning)";
+  return "var(--status-success)";
 };
 
 export function RepoCard({ repo }: Readonly<Props>) {
@@ -43,7 +43,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
   const hasAnalysis = repo.healthScore != null;
 
   return (
-    <Card className="group hover:bg-muted/50 relative flex overflow-hidden p-4 transition-colors">
+    <Card className="group hover:border-border-strong relative flex overflow-hidden p-4 transition-colors">
       <CardContent className="flex justify-center gap-4 md:justify-between">
         <div className="flex min-w-0 flex-wrap gap-2 not-md:justify-center sm:flex-nowrap">
           <RepoAvatar alt={repo.owner} src={repo.ownerAvatarUrl ?? "/avatar-placeholder.png"} />
