@@ -104,7 +104,7 @@ export function AuthForm() {
       setIsVerifying(false);
       setLoadingProvider("email");
 
-      setClientCookie("cf-turnstile-response", token, 120);
+      setClientCookie("cf-turnstile-response", token, 300);
 
       try {
         const res = await signIn("email", {

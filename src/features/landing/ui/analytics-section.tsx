@@ -25,7 +25,7 @@ export function AnalyticsSection() {
 
   const chartConfig = {
     complexity: {
-      color: "var(--chart-1)",
+      color: "var(--chart-4)",
       label: t("section_analytics_complexity_label"),
     },
     docs: {
@@ -82,17 +82,12 @@ export function AnalyticsSection() {
                   </linearGradient>
                 </defs>
 
-                <Area
-                  type="natural"
-                  dataKey="docs"
-                  fill="url(#fillDocs)"
-                  stroke="var(--color-border)"
-                />
+                <Area type="natural" dataKey="docs" fill="url(#fillDocs)" stroke="var(--chart-2)" />
                 <Area
                   type="natural"
                   dataKey="complexity"
                   fill="url(#fillComplexity)"
-                  stroke="var(--color-border)"
+                  stroke="var(--chart-4)"
                 />
               </AreaChart>
             </ChartContainer>
