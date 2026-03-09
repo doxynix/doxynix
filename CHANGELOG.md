@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.14.3](https://github.com/doxynix/doxynix/compare/v1.14.2...v1.14.3) (2026-03-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @upstash/redis to v1.36.4 ([#509](https://github.com/doxynix/doxynix/issues/509)) ([5502056](https://github.com/doxynix/doxynix/commit/5502056e261f1a51be7ddc4e849f4a2e10693f40))
+
 ## [1.14.2](https://github.com/doxynix/doxynix/compare/v1.14.1...v1.14.2) (2026-03-09)
 
 
