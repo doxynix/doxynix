@@ -1,0 +1,72 @@
+language: ru-RU
+tone_instructions: "Будь профессиональным, но дружелюбным. Фокусируйся на архитектуре, безопасности и производительности. Не придирайся к мелким стилистическим вещам, если они не ломают логику."
+
+reviews:
+  profile: chill
+  request_changes_workflow: true
+  high_level_summary: true
+  sequence_diagrams: true
+  poem: false
+
+  path_filters:
+    - "!pnpm-lock.yaml"
+    - "!package-lock.json"
+    - "!.next/**"
+    - "!coverage/**"
+    - "!src/generated/**"
+    - "!*.svg"
+
+  path_instructions:
+    - path: "src/{shared,entities,features,widgets}/**/*.{ts,tsx}"
+      instructions: "Проект использует архитектуру Feature-Sliced Design (FSD). Строго следи за правилами импортов: слои могут импортировать только из нижележащих слоев (shared -> entities -> features -> widgets). Запрещены кросс-импорты между слайсами одного слоя!"
+
+    - path: "src/app/**/*.tsx"
+      instructions: "Это Next.js App Router. Проверяй правильное разделение на Server и Client Components. Убедись, что в серверных компонентах нет хуков (useState, useEffect), а клиентские компоненты имеют директиву 'use client'."
+
+    - path: "src/server/trpc/**/*.ts"
+      instructions: "Это tRPC роутеры. Проверяй строгую валидацию входных данных через Zod и правильный проброс ошибок через TRPCError."
+
+    - path: "src/trigger/**/*.ts"
+      instructions: "Это фоновые задачи Trigger.dev. Проверяй идемпотентность кода и правильную обработку потенциальных таймаутов."
+
+  auto_review:
+    enabled: true
+    drafts: false
+  tools:
+    eslint:
+      enabled: true
+    markdownlint:
+      enabled: true
+    actionlint:
+      enabled: true
+    yamllint:
+      enabled: true
+    trufflehog:
+      enabled: true
+    prismaLint:
+      enabled: true
+    biome:
+      enabled: false
+
+    phpstan: { enabled: false }
+    phpmd: { enabled: false }
+    phpcs: { enabled: false }
+    golangci-lint: { enabled: false }
+    swiftlint: { enabled: false }
+    rubocop: { enabled: false }
+    detekt: { enabled: false }
+    flake8: { enabled: false }
+    pylint: { enabled: false }
+    checkmake: { enabled: false }
+    psscriptanalyzer: { enabled: false }
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  web_search:
+    enabled: true
+
+code_generation:
+  docstrings:
+    language: en-US

@@ -1,62 +1,36 @@
+priority_rules:
+  - name: high_priority_hotfix
+    priority: 100
+    conditions:
+      - label = hotfix
+
 queue_rules:
+  - name: hotfix
+    update_method: rebase
+    queue_conditions:
+      - "#check-pending = 0"
+      - "#check-failure = 0"
+      - check-success = CI / notify
+      - label = hotfix
+    merge_conditions:
+      - "#check-pending = 0"
+      - "#check-failure = 0"
+      - check-success = CI / notify
+    merge_method: squash
+
   - name: default
+    update_method: rebase
     queue_conditions:
       - -conflict
       - -draft
+      - "#check-pending = 0"
+      - "#check-failure = 0"
+      - check-success = CI / notify
+      - "-title ~= (?i)(wip|draft|🚧)"
     merge_conditions:
-      - or:
-        - "check-success ~= ^CI / tests"
-        - "check-neutral ~= ^CI / tests"
-        - "check-skipped ~= ^CI / tests"
-      - or:
-        - "check-success ~= ^CI / types"
-        - "check-neutral ~= ^CI / types"
-        - "check-skipped ~= ^CI / types"
-      - or:
-        - "check-success ~= ^CI / quality"
-        - "check-neutral ~= ^CI / quality"
-        - "check-skipped ~= ^CI / quality"
-      - or:
-        - "check-success ~= ^CI / security"
-        - "check-neutral ~= ^CI / security"
-        - "check-skipped ~= ^CI / security"
-      - or:
-        - "check-success ~= GitGuardian Security Checks"
-        - "check-neutral ~= GitGuardian Security Checks"
-        - "check-skipped ~= GitGuardian Security Checks"
-      - or:
-        - "check-success ~= ^CodeQL - Code Quality"
-        - "check-neutral ~= ^CodeQL - Code Quality"
-        - "check-skipped ~= ^CodeQL - Code Quality"
-      - or:
-        - "check-success ~= ^Vercel"
-        - "check-neutral ~= ^Vercel"
-        - "check-skipped ~= ^Vercel"
-      - or:
-        - "check-success ~= ^Trigger\\.dev deployment"
-        - "check-neutral ~= ^Trigger\\.dev deployment"
-        - "check-skipped ~= ^Trigger\\.dev deployment"
-      - or:
-        - "check-success ~= ^CI / build"
-        - "check-neutral ~= ^CI / build"
-        - "check-skipped ~= ^CI / build"
-      - or:
-        - "check-success ~= ^CI / e2e"
-        - "check-neutral ~= ^CI / e2e"
-        - "check-skipped ~= ^CI / e2e"
-      - or:
-        - "check-success ~= ^CI / lighthouse"
-        - "check-neutral ~= ^CI / lighthouse"
-        - "check-skipped ~= ^CI / lighthouse"
-      - or:
-        - "check-success ~= ^dependency-review"
-        - "check-neutral ~= ^dependency-review"
-        - "check-skipped ~= ^dependency-review"
-      - or:
-        - "check-success ~= ^relative-ci"
-        - "check-neutral ~= ^relative-ci"
-        - "check-skipped ~= ^relative-ci"
-
+      - "#check-pending = 0"
+      - "#check-failure = 0"
+      - check-success = CI / notify
     merge_method: squash
     commit_message_template: |
       {{ title }} (#{{ number }})
@@ -64,92 +38,65 @@ queue_rules:
       {{ body }}
 
 pull_request_rules:
-  - name: automatic merge for Kramarich0 when CI is green and CodeRabbit approves
+  - name: automatic rebase when behind main
+    conditions:
+      - -draft
+      - -conflict
+      - base = main
+      - "#check-failure = 0"
+      - "#check-pending = 0"
+      - "#commits-behind > 0"
+    actions:
+      rebase: {}
+
+  - name: automatic merge for Kramarich0
     conditions:
       - author = Kramarich0
-      - -draft
       - approved-reviews-by = coderabbitai[bot]
-      - "#approved-reviews-by >= 1"
+      - -draft
       - -conflict
-
-      - or:
-        - "check-success ~= ^CI / tests"
-        - "check-neutral ~= ^CI / tests"
-        - "check-skipped ~= ^CI / tests"
-      - or:
-        - "check-success ~= ^CI / types"
-        - "check-neutral ~= ^CI / types"
-        - "check-skipped ~= ^CI / types"
-      - or:
-        - "check-success ~= ^CI / quality"
-        - "check-neutral ~= ^CI / quality"
-        - "check-skipped ~= ^CI / quality"
-      - or:
-        - "check-success ~= ^CI / security"
-        - "check-neutral ~= ^CI / security"
-        - "check-skipped ~= ^CI / security"
-      - or:
-        - "check-success ~= GitGuardian Security Checks"
-        - "check-neutral ~= GitGuardian Security Checks"
-        - "check-skipped ~= GitGuardian Security Checks"
-      - or:
-        - "check-success ~= ^CodeQL - Code Quality"
-        - "check-neutral ~= ^CodeQL - Code Quality"
-        - "check-skipped ~= ^CodeQL - Code Quality"
-      - or:
-        - "check-success ~= ^Vercel"
-        - "check-neutral ~= ^Vercel"
-        - "check-skipped ~= ^Vercel"
-      - or:
-        - "check-success ~= ^Trigger\\.dev deployment"
-        - "check-neutral ~= ^Trigger\\.dev deployment"
-        - "check-skipped ~= ^Trigger\\.dev deployment"
-      - or:
-        - "check-success ~= ^CI / build"
-        - "check-neutral ~= ^CI / build"
-        - "check-skipped ~= ^CI / build"
-      - or:
-        - "check-success ~= ^CI / e2e"
-        - "check-neutral ~= ^CI / e2e"
-        - "check-skipped ~= ^CI / e2e"
-      - or:
-        - "check-success ~= ^CI / lighthouse"
-        - "check-neutral ~= ^CI / lighthouse"
-        - "check-skipped ~= ^CI / lighthouse"
-      - or:
-        - "check-success ~= ^dependency-review"
-        - "check-neutral ~= ^dependency-review"
-        - "check-skipped ~= ^dependency-review"
-      - or:
-        - "check-success ~= ^relative-ci"
-        - "check-neutral ~= ^relative-ci"
-        - "check-skipped ~= ^relative-ci"
+      - "#check-pending = 0"
+      - "#check-failure = 0"
+      - check-success = CI / notify
+      - "-title ~= (?i)(wip|draft|🚧)"
     actions:
       queue:
         name: default
+      comment:
+        message: "@{{author}}, я мержу этот PR сейчас! 🚀"
 
-  - name: automatic merge for dependencies updates
+  - name: automatic merge for dependencies
     conditions:
       - or:
-        - author = renovate[bot]
-        - author = dependabot[bot]
+          - author = renovate[bot]
+          - author = dependabot[bot]
       - -draft
-      - or:
-        - "check-success ~= ^CI / tests"
-        - "check-neutral ~= ^CI / tests"
-        - "check-skipped ~= ^CI / tests"
-      - or:
-        - "check-success ~= ^CI / types"
-        - "check-neutral ~= ^CI / types"
-        - "check-skipped ~= ^CI / types"
-      - or:
-        - "check-success ~= ^CI / quality"
-        - "check-neutral ~= ^CI / quality"
-        - "check-skipped ~= ^CI / quality"
       - -conflict
+      - "#check-pending = 0"
+      - "#check-failure = 0"
+      - check-success = CI / notify
+      - "-title ~= to v[0-9]+"
     actions:
       queue:
         name: default
+      comment:
+        message: "Обновление зависимостей проверено и отправляется в main! 📦"
+
+  # - name: label small PRs // NOTE: возможно пригодится позже
+  #   conditions:
+  #     - "#files < 5"
+  #     - "changes < 50"
+  #   actions:
+  #     label:
+  #       add: ["size:S"]
+  # - name: label huge PRs
+  #   conditions:
+  #     - "changes > 500"
+  #   actions:
+  #     label:
+  #       add: ["size:XL"]
+  #     comment:
+  #       message: "Ого, @{{author}}, ну ты и настрочил! 🏋️‍♂️ Такой большой PR может проверяться дольше."
 
   - name: delete head branch after merge
     conditions:
@@ -163,7 +110,6 @@ pull_request_rules:
       - -closed
     actions:
       label:
-        add:
-          - "conflict"
+        add: ["conflict"]
       comment:
-        message: "Упс, @{{author}}, тут конфликт. Роботы бессильны, поправь руками! 🛠️"
+        message: "Упс, @{{author}}, тут конфликт. Поправь руками! 🛠️"
