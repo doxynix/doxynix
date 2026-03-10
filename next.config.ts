@@ -55,7 +55,7 @@ const nextConfig: NextConfig = {
       "@sentry-internal/browser-utils",
     ],
     preloadEntriesOnStart: false,
-    serverComponentsHmrCache: false,
+    serverComponentsHmrCache: true,
     serverSourceMaps: false,
     taint: true,
     typedEnv: true,

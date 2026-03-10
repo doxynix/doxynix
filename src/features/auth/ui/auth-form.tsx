@@ -187,11 +187,13 @@ export function AuthForm() {
   }, []);
 
   const onTurnstileExpire = useCallback(() => {
+    if (isSent || loadingProvider === "email") return;
+
     setTurnstileToken(null);
     setIsVerifying(false);
     setPendingData(null);
     setErrorMessage("Verification expired. Please try again.");
-  }, []);
+  }, [isSent, loadingProvider]);
 
   const turnstileOptions = useMemo(
     () => ({

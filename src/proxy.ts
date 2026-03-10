@@ -301,6 +301,6 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
 export const config = {
   matcher: [
     "/dashboard/repo/:path*",
-    "/((?!_next|_vercel|monitoring|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|xml|json|woff2?|ttf|otf)$).*)",
+    "/((?!_next|_vercel|monitoring|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|xml|json|woff2?|ttf|otf|webmanifest)$).*)",
   ],
 };

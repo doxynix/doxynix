@@ -7,25 +7,26 @@ import langJSON from "shiki/langs/json.mjs";
 import langMarkdown from "shiki/langs/markdown.mjs";
 import langTs from "shiki/langs/typescript.mjs";
 import themeDark from "shiki/themes/github-dark-dimmed.mjs";
+import themeLight from "shiki/themes/github-light.mjs";
 
 let highlighter: Awaited<ReturnType<typeof createHighlighter>> | null = null;
 
 async function getHighlighter() {
   highlighter ??= await createHighlighter({
     langs: [langTs, langJSON, langMarkdown, langConsole],
-    themes: [themeDark],
+    themes: [themeDark, themeLight],
   });
   return highlighter;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function highlight(code: string, lang: string, theme: "dark" | "light") {
-  // NOTE: временно! пока не вернется светлая тема!
   const hl = await getHighlighter();
+
+  const shikiTheme = theme === "dark" ? "github-dark-dimmed" : "github-light";
 
   return hl.codeToHtml(code, {
     lang,
-    theme: "github-dark-dimmed",
+    theme: shikiTheme,
     transformers: [],
   });
 }
