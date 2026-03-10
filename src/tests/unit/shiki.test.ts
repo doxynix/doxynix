@@ -3,16 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const shikiState = vi.hoisted(() => ({
   codeToHtml:
     vi.fn<
-      (
-        code: string,
-        options: { lang: string; theme: "github-dark-dimmed"; transformers: unknown[] }
-      ) => string
+      (code: string, options: { lang: string; theme: string; transformers: unknown[] }) => string
     >(),
   createHighlighter: vi.fn<
-    () => Promise<{
+    (options: any) => Promise<{
       codeToHtml: (
         code: string,
-        options: { lang: string; theme: "github-dark-dimmed"; transformers: unknown[] }
+        options: { lang: string; theme: string; transformers: unknown[] }
       ) => string;
     }>
   >(),
@@ -33,25 +30,13 @@ vi.mock("shiki", () => ({
   createHighlighter: shikiState.createHighlighter,
 }));
 
-vi.mock("shiki/langs/console.mjs", () => ({
-  default: { id: "console" },
-}));
+vi.mock("shiki/langs/console.mjs", () => ({ default: { id: "console" } }));
+vi.mock("shiki/langs/json.mjs", () => ({ default: { id: "json" } }));
+vi.mock("shiki/langs/markdown.mjs", () => ({ default: { id: "markdown" } }));
+vi.mock("shiki/langs/typescript.mjs", () => ({ default: { id: "typescript" } }));
 
-vi.mock("shiki/langs/json.mjs", () => ({
-  default: { id: "json" },
-}));
-
-vi.mock("shiki/langs/markdown.mjs", () => ({
-  default: { id: "markdown" },
-}));
-
-vi.mock("shiki/langs/typescript.mjs", () => ({
-  default: { id: "typescript" },
-}));
-
-vi.mock("shiki/themes/github-dark-dimmed.mjs", () => ({
-  default: { id: "github-dark-dimmed" },
-}));
+vi.mock("shiki/themes/github-dark-dimmed.mjs", () => ({ default: { id: "github-dark-dimmed" } }));
+vi.mock("shiki/themes/github-light.mjs", () => ({ default: { id: "github-light" } }));
 
 describe("highlightCode", () => {
   beforeEach(() => {
@@ -64,30 +49,53 @@ describe("highlightCode", () => {
     });
   });
 
-  it("should initialize highlighter only once and reuse singleton between calls", async () => {
+  it("should initialize highlighter only once with BOTH themes", async () => {
     const { highlightCode } = await import("@/shared/lib/shiki");
 
-    const first = await highlightCode("const a = 1;");
-    const second = await highlightCode("const b = 2;");
+    await highlightCode("const a = 1;");
+    await highlightCode("const b = 2;");
 
-    expect(first).toBe("<pre>highlighted</pre>");
-    expect(second).toBe("<pre>highlighted</pre>");
     expect(shikiState.createHighlighter).toHaveBeenCalledTimes(1);
-    expect(shikiState.codeToHtml).toHaveBeenCalledTimes(2);
+    const callArgs = shikiState.createHighlighter.mock.calls[0][0] as any;
+    expect(callArgs.themes).toContainEqual(expect.objectContaining({ id: "github-dark-dimmed" }));
+    expect(callArgs.themes).toContainEqual(expect.objectContaining({ id: "github-light" }));
   });
 
-  it("should return highlighted html string and normalize light theme to github-dark-dimmed for the highlighter", async () => {
-    shikiState.codeToHtml.mockReturnValue("<pre>console</pre>");
+  it("should use github-light when light theme is requested", async () => {
     const { highlightCode } = await import("@/shared/lib/shiki");
 
-    const html = await highlightCode("console.log('x')", "console", "light");
+    await highlightCode("const x = 1", "typescript", "light");
 
-    expect(html).toBe("<pre>console</pre>");
-    expect(shikiState.codeToHtml).toHaveBeenCalledWith("console.log('x')", {
-      lang: "console",
-      theme: "github-dark-dimmed",
-      transformers: [],
-    });
-    expect(unstableCacheMock).toHaveBeenCalledTimes(1);
+    expect(shikiState.codeToHtml).toHaveBeenCalledWith(
+      "const x = 1",
+      expect.objectContaining({
+        theme: "github-light",
+      })
+    );
+
+    expect(unstableCacheMock).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.arrayContaining(["light"]),
+      expect.any(Object)
+    );
+  });
+
+  it("should use github-dark-dimmed by default (dark mode)", async () => {
+    const { highlightCode } = await import("@/shared/lib/shiki");
+
+    await highlightCode("const x = 1");
+
+    expect(shikiState.codeToHtml).toHaveBeenCalledWith(
+      "const x = 1",
+      expect.objectContaining({
+        theme: "github-dark-dimmed",
+      })
+    );
+
+    expect(unstableCacheMock).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.arrayContaining(["dark"]),
+      expect.any(Object)
+    );
   });
 });
