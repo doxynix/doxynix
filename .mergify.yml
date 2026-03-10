@@ -8,10 +8,14 @@ queue_rules:
   - name: hotfix
     update_method: rebase
     queue_conditions:
+      - "#check-pending = 0"
       - "#check-failure = 0"
+      - check-success = CI / notify
       - label = hotfix
     merge_conditions:
+      - "#check-pending = 0"
       - "#check-failure = 0"
+      - check-success = CI / notify
     merge_method: squash
 
   - name: default
