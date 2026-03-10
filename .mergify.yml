@@ -44,6 +44,7 @@ pull_request_rules:
       - -conflict
       - base = main
       - "#check-failure = 0"
+      - "#check-pending = 0"
       - "#commits-behind > 0"
     actions:
       rebase: {}
