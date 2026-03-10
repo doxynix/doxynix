@@ -27,7 +27,7 @@ export function ConsoleEasterEgg() {
       "padding-top: 5px",
     ].join(";");
 
-    console.info("%cWelcome to Doxynix, colleague.", titleStyle);
+    console.info("%c👋 Welcome to Doxynix, colleague!", titleStyle);
 
     console.info(
       "%cWe see you like to look under the hood. \nDoxynix was created by developers for developers.\n\nLike the project? Have any ideas? \nWrite to us: hello@doxynix.space",
