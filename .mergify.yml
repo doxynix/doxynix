@@ -1,36 +1,33 @@
 priority_rules:
-  - name: high_priority_hotfix
-    priority: 100
+  - name: hotfix
+    priority: 3000
     conditions:
       - label = hotfix
+  - name: dependencies
+    priority: 500
+    conditions:
+      - author ~= ^(renovate|dependabot)\[bot\]$
 
 queue_rules:
-  - name: hotfix
-    update_method: rebase
-    queue_conditions:
-      - "#check-pending = 0"
-      - "#check-failure = 0"
-      - check-success ~= notify
-      - label = hotfix
-    merge_conditions:
-      - "#check-pending = 0"
-      - "#check-failure = 0"
-      - check-success ~= notify
-    merge_method: squash
-
   - name: default
     update_method: rebase
     queue_conditions:
-      - -conflict
-      - -draft
       - "#check-pending = 0"
       - "#check-failure = 0"
       - check-success ~= notify
+      - -conflict
+      - -draft
       - "-title ~= (?i)(wip|draft|🚧)"
+      - or:
+          - author ~= ^(renovate|dependabot|doxynix-release-bot)\[bot\]$
+          - approved-reviews-by = coderabbitai[bot]
     merge_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
       - check-success ~= notify
+      - or:
+          - author ~= ^(renovate|dependabot|doxynix-release-bot)\[bot\]$
+          - approved-reviews-by = coderabbitai[bot]
     merge_method: squash
     commit_message_template: |
       {{ title }} (#{{ number }})
@@ -38,16 +35,12 @@ queue_rules:
       {{ body }}
 
 pull_request_rules:
-  - name: automatic rebase when behind main
+  - name: label hotfixes automatically
     conditions:
-      - -draft
-      - -conflict
-      - base = main
-      - "#check-failure = 0"
-      - "#check-pending = 0"
-      - "#commits-behind > 0"
+      - head ~= ^hotfix/
     actions:
-      rebase: {}
+      label:
+        add: ["hotfix"]
 
   - name: automatic merge for Kramarich0
     conditions:
@@ -63,7 +56,7 @@ pull_request_rules:
       queue:
         name: default
       comment:
-        message: "@{{author}}, я мержу этот PR сейчас! 🚀"
+        message: "@Kramarich0! Все проверки пройдены. Встаю в очередь на слияние! 🚀"
 
   - name: automatic merge for release-please
     conditions:
@@ -92,7 +85,7 @@ pull_request_rules:
       queue:
         name: default
       comment:
-        message: "Обновление зависимостей проверено и отправляется в main! 📦"
+        message: "@Kramarich0! Зависимости обновлены и проверены. 📦"
 
   # - name: label small PRs // NOTE: возможно пригодится позже
   #   conditions:
@@ -124,4 +117,4 @@ pull_request_rules:
       label:
         add: ["conflict"]
       comment:
-        message: "Упс, @{{author}}, тут конфликт. Поправь руками! 🛠️"
+        message: "Упс, @Kramarich0, тут конфликт. Поправь руками! 🛠️"
