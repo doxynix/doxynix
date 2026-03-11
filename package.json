@@ -58,14 +58,14 @@
       "diff": "8.0.3",
       "lodash": "4.17.23",
       "lodash-es": "4.17.23",
-      "fast-xml-parser": "5.5.2",
+      "fast-xml-parser": "5.5.3",
       "ajv@^8": "8.18.0",
       "cookie": "0.7.2",
       "minimatch": "10.2.4",
       "systeminformation": "5.31.4",
       "rollup": "4.59.0",
       "serialize-javascript": "7.0.4",
-      "@react-email/body": "0.2.1"
+      "@react-email/body": "0.3.0"
     },
     "onlyBuiltDependencies": [
       "@swc/core",
