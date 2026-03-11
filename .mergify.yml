@@ -85,7 +85,7 @@ pull_request_rules:
       - "#check-pending = 0"
       - "#check-failure = 0"
       - check-success ~= ^CI / notify
-      - "-title ~= (?i)to v[2-9]+"
+      - "-title ~= (?i)to v([2-9]|[1-9][0-9]+)"
     actions:
       queue:
         name: default
