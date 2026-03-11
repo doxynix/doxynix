@@ -10,12 +10,12 @@ queue_rules:
     queue_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success = CI / notify
+      - check-success ~= notify
       - label = hotfix
     merge_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success = CI / notify
+      - check-success ~= notify
     merge_method: squash
 
   - name: default
@@ -25,12 +25,12 @@ queue_rules:
       - -draft
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success = CI / notify
+      - check-success ~= notify
       - "-title ~= (?i)(wip|draft|🚧)"
     merge_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success = CI / notify
+      - check-success ~= notify
     merge_method: squash
     commit_message_template: |
       {{ title }} (#{{ number }})
@@ -57,13 +57,25 @@ pull_request_rules:
       - -conflict
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success = CI / notify
+      - check-success ~= notify
       - "-title ~= (?i)(wip|draft|🚧)"
     actions:
       queue:
         name: default
       comment:
         message: "@{{author}}, я мержу этот PR сейчас! 🚀"
+
+  - name: automatic merge for release-please
+    conditions:
+      - author = doxynix-release-bot[bot]
+      - -draft
+      - -conflict
+      - "#check-pending = 0"
+      - "#check-failure = 0"
+      - check-success ~= notify
+    actions:
+      queue:
+        name: default
 
   - name: automatic merge for dependencies
     conditions:
@@ -74,8 +86,8 @@ pull_request_rules:
       - -conflict
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success = CI / notify
-      - "-title ~= to v[0-9]+"
+      - check-success ~= notify
+      - "-title ~= (?i)to v([2-9]|[1-9][0-9]+)"
     actions:
       queue:
         name: default
