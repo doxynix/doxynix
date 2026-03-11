@@ -10,7 +10,7 @@ queue_rules:
     queue_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success ~= ^CI / notify
+      - check-success = notify
       - label = hotfix
     merge_conditions:
       - "#check-pending = 0"
