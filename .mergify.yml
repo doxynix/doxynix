@@ -36,15 +36,6 @@ pull_request_rules:
       label:
         add: ["hotfix"]
 
-  - name: automatic rebase when behind main
-    conditions:
-      - -draft
-      - -conflict
-      - base = main
-      - "#commits-behind > 0"
-    actions:
-      rebase: {}
-
   - name: automatic merge for Kramarich0
     conditions:
       - author = Kramarich0
