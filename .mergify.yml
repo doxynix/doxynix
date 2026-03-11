@@ -18,10 +18,16 @@ queue_rules:
       - -conflict
       - -draft
       - "-title ~= (?i)(wip|draft|🚧)"
+      - or:
+          - author ~= ^(renovate|dependabot|doxynix-release-bot)\[bot\]$
+          - approved-reviews-by = coderabbitai[bot]
     merge_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
       - check-success ~= notify
+      - or:
+          - author ~= ^(renovate|dependabot|doxynix-release-bot)\[bot\]$
+          - approved-reviews-by = coderabbitai[bot]
     merge_method: squash
     commit_message_template: |
       {{ title }} (#{{ number }})
