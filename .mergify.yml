@@ -10,12 +10,12 @@ queue_rules:
     queue_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success = notify
+      - check-success ~= notify
       - label = hotfix
     merge_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success ~= ^CI / notify
+      - check-success ~= notify
     merge_method: squash
 
   - name: default
@@ -25,12 +25,12 @@ queue_rules:
       - -draft
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success ~= ^CI / notify
+      - check-success ~= notify
       - "-title ~= (?i)(wip|draft|🚧)"
     merge_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success ~= ^CI / notify
+      - check-success ~= notify
     merge_method: squash
     commit_message_template: |
       {{ title }} (#{{ number }})
@@ -57,7 +57,7 @@ pull_request_rules:
       - -conflict
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success ~= ^CI / notify
+      - check-success ~= notify
       - "-title ~= (?i)(wip|draft|🚧)"
     actions:
       queue:
@@ -72,7 +72,7 @@ pull_request_rules:
       - -conflict
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success ~= ^CI / notify
+      - check-success ~= notify
     actions:
       queue:
         name: default
@@ -86,7 +86,7 @@ pull_request_rules:
       - -conflict
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success ~= ^CI / notify
+      - check-success ~= notify
       - "-title ~= (?i)to v([2-9]|[1-9][0-9]+)"
     actions:
       queue:
