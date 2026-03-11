@@ -1,3 +1,5 @@
+name: doxynix-please
+
 on:
   push:
     branches:
@@ -7,19 +9,19 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
-
-name: release-please
-
+  
 jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
+      - name: Generate Bot Token
+        id: app-token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf
+        with:
+          app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLEASE_PRIVATE_KEY }}
+          
       - uses: googleapis/release-please-action@8bb7a2ed0f90c9802c83129a9488d235a1f31a7c
         with:
-          # this assumes that you have created a personal access token
-          # (PAT) and configured it as a GitHub action secret named
-          # `MY_RELEASE_PLEASE_TOKEN` (this secret name is not important).
-          token: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
-          # this is a built-in strategy in release-please, see "Action Inputs"
-          # for more options
+          token: ${{ steps.app-token.outputs.token }}
           release-type: node
