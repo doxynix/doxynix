@@ -120,7 +120,7 @@
     "@upstash/qstash": "2.9.0",
     "@upstash/ratelimit": "2.0.8",
     "@upstash/redis": "1.36.4",
-    "@vercel/analytics": "1.6.1",
+    "@vercel/analytics": "2.0.0",
     "@vercel/speed-insights": "1.3.1",
     "@zenstackhq/runtime": "2.22.1",
     "ably": "2.19.0",
