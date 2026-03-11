@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.14.7](https://github.com/doxynix/doxynix/compare/v1.14.6...v1.14.7) (2026-03-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @vercel/analytics to v2 ([#523](https://github.com/doxynix/doxynix/issues/523)) ([8b11c44](https://github.com/doxynix/doxynix/commit/8b11c449c9e7695d82fa28347808ab4a2e883523))
+* **deps:** update dependency @vercel/speed-insights to v2 ([#524](https://github.com/doxynix/doxynix/issues/524)) ([ee1c2f2](https://github.com/doxynix/doxynix/commit/ee1c2f2194fb8bdd2f79fa38fb98ed92bff03688))
+
 ## [1.14.6](https://github.com/doxynix/doxynix/compare/v1.14.5...v1.14.6) (2026-03-11)
 
 
