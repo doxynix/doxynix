@@ -125,21 +125,20 @@ vi.mock("@/server/utils/file-classifier", () => ({
   },
 }));
 
-type AccountFindFirstResult = {
-  access_token?: string | null;
-  githubInstallationId?: number | null;
-} | null;
+function createMockPrisma(accounts: any[] | any) {
+  const findMany = vi.fn().mockResolvedValue(Array.isArray(accounts) ? accounts : []);
+  const findFirst = vi.fn().mockResolvedValue(Array.isArray(accounts) ? accounts[0] : accounts);
 
-function createMockPrisma(result: AccountFindFirstResult) {
-  const findFirst = vi.fn().mockResolvedValue(result);
   const prisma = {
     account: {
       findFirst,
+      findMany,
     },
   } as unknown as DbClient;
 
   return {
     findFirst,
+    findMany,
     prisma,
   };
 }
@@ -158,9 +157,11 @@ describe("githubService", () => {
 
   describe("getClientContext", () => {
     it("should return installation context when githubInstallationId exists", async () => {
-      const { prisma } = createMockPrisma({
-        githubInstallationId: 12345,
-      });
+      const { prisma } = createMockPrisma([
+        {
+          githubInstallationId: 12345,
+        },
+      ]);
 
       const context = await githubService.getClientContext(prisma, 101);
 
@@ -171,9 +172,11 @@ describe("githubService", () => {
     });
 
     it("should return oauth context when only access_token exists", async () => {
-      const { prisma } = createMockPrisma({
-        access_token: "user-token",
-      });
+      const { prisma } = createMockPrisma([
+        {
+          access_token: "user-token",
+        },
+      ]);
 
       const context = await githubService.getClientContext(prisma, 101);
       expect(context.type).toBe("oauth");
@@ -223,7 +226,7 @@ describe("githubService", () => {
     });
 
     it("should fetch limited repos via listForAuthenticatedUser when limit is provided", async () => {
-      const { prisma } = createMockPrisma({ access_token: "token" });
+      const { prisma } = createMockPrisma([{ access_token: "token" }]);
 
       octokitState.listForAuthenticatedUser.mockResolvedValue({
         data: [
@@ -260,7 +263,7 @@ describe("githubService", () => {
     });
 
     it("should fetch all repos via paginate when limit is not provided", async () => {
-      const { prisma } = createMockPrisma({ access_token: "token" });
+      const { prisma } = createMockPrisma([{ access_token: "token" }]);
       octokitState.paginate.mockResolvedValue([
         {
           description: null,
@@ -293,7 +296,7 @@ describe("githubService", () => {
     });
 
     it("should return empty list and log error when github request throws", async () => {
-      const { prisma } = createMockPrisma({ access_token: "token" });
+      const { prisma } = createMockPrisma([{ access_token: "token" }]);
       octokitState.listForAuthenticatedUser.mockRejectedValue(new Error("GitHub is down"));
 
       const repos = await githubService.getMyRepos(prisma, 4, 1);
