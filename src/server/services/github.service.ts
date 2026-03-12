@@ -144,49 +144,58 @@ export const githubService = {
     return data;
   },
 
-  async getMyRepos(prisma: DbClient, userId: number, limit?: number): Promise<RepoItemFields[]> {
+  async getMyRepos(prisma: DbClient, userId: number): Promise<RepoItemFields[]> {
     try {
-      const clientContext = await this.getClientContext(prisma, userId);
-      const { octokit } = clientContext;
+      const accounts = await prisma.account.findMany({
+        where: { provider: "github", userId },
+      });
 
-      if (clientContext.type === "installation") {
-        if (limit != null) {
-          const { data } = await octokit.rest.apps.listReposAccessibleToInstallation({
-            per_page: limit,
+      if (accounts.length === 0) return [];
+
+      const allRepos: RepoItemFields[] = [];
+      const commonConfig = getCommonConfig();
+
+      for (const account of accounts) {
+        try {
+          if (account.githubInstallationId != null) {
+            const octokit = new MyOctokit({
+              ...commonConfig,
+              auth: {
+                appId: Number(GITHUB_APP_ID),
+                installationId: Number(account.githubInstallationId),
+                privateKey: GITHUB_APP_PRIVATE_KEY,
+              },
+              authStrategy: createAppAuth,
+            }) as OctokitInstance;
+
+            const repos = await octokit.paginate(
+              octokit.rest.apps.listReposAccessibleToInstallation
+            );
+            allRepos.push(...this.mapRepos(repos as GitHubRepoResponse[]));
+          } else if (account.access_token != null) {
+            const octokit = new MyOctokit({
+              ...commonConfig,
+              auth: account.access_token,
+            }) as OctokitInstance;
+
+            const repos = await octokit.paginate(octokit.rest.repos.listForAuthenticatedUser, {
+              per_page: 100,
+              visibility: "all",
+            });
+            allRepos.push(...this.mapRepos(repos));
+          }
+        } catch (e) {
+          console.error(e);
+          logger.error({
+            accountId: account.id,
+            msg: "Failed to fetch repos for one of the installations",
           });
-          return this.mapRepos(data.repositories);
         }
-
-        const repos = await octokit.paginate(octokit.rest.apps.listReposAccessibleToInstallation, {
-          per_page: 100,
-        });
-        return this.mapRepos(repos);
       }
 
-      if (clientContext.type === "oauth") {
-        if (limit != null) {
-          const { data } = await octokit.rest.repos.listForAuthenticatedUser({
-            direction: "desc",
-            per_page: limit,
-            sort: "updated",
-            visibility: "all",
-          });
-          return this.mapRepos(data);
-        }
-
-        const repos = await octokit.paginate(octokit.rest.repos.listForAuthenticatedUser, {
-          direction: "desc",
-          per_page: 100,
-          sort: "updated",
-          visibility: "all",
-        });
-        return this.mapRepos(repos);
-      }
-
-      logger.warn({ msg: "GitHub account not linked. Cannot fetch private repos.", userId });
-      return [];
+      return Array.from(new Map(allRepos.map((r) => [r.fullName, r])).values());
     } catch (error) {
-      logger.error({ error, msg: "Error fetching repositories", userId });
+      logger.error({ error, msg: "Error fetching combined repositories", userId });
       return [];
     }
   },

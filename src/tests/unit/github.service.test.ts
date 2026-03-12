@@ -112,7 +112,6 @@ vi.mock("@/shared/constants/env.server", () => ({
   GITHUB_APP_ID: "123456",
   GITHUB_APP_PRIVATE_KEY: "mock-private-key",
   GITHUB_SYSTEM_INSTALLATION_ID: "999999",
-  SYSTEM_TOKEN: "system-token",
 }));
 
 vi.mock("@/server/logger/logger", () => ({
@@ -241,7 +240,7 @@ describe("githubService", () => {
         ],
       });
 
-      const repos = await githubService.getMyRepos(prisma, 1, 3);
+      const repos = await githubService.getMyRepos(prisma, 1);
 
       expect(octokitState.listForAuthenticatedUser).toHaveBeenCalledWith({
         direction: "desc",
@@ -299,7 +298,7 @@ describe("githubService", () => {
       const { prisma } = createMockPrisma([{ access_token: "token" }]);
       octokitState.listForAuthenticatedUser.mockRejectedValue(new Error("GitHub is down"));
 
-      const repos = await githubService.getMyRepos(prisma, 4, 1);
+      const repos = await githubService.getMyRepos(prisma, 4);
 
       expect(repos).toEqual([]);
       expect(loggerState.error).toHaveBeenCalledWith(

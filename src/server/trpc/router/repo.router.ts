@@ -520,6 +520,7 @@ export const repoRouter = createTRPCRouter({
     .input(z.object({ installationId: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
       const userId = Number(ctx.session.user.id);
+      const installationIdBigInt = BigInt(input.installationId);
 
       let installation;
       try {
@@ -537,16 +538,28 @@ export const repoRouter = createTRPCRouter({
       }
 
       const githubAccountId = String(installation.account.id);
+
       const syntheticId = `inst:${input.installationId}:user:${userId}`;
 
-      const existingAccount = await ctx.db.account.findFirst({
-        where: { provider: "github", userId },
+      const existingSpecific = await ctx.db.account.findFirst({
+        where: { githubInstallationId: installationIdBigInt, provider: "github", userId },
+      });
+
+      if (existingSpecific) {
+        return await ctx.db.account.update({
+          data: { githubInstallationUrl: installation.html_url },
+          where: { id: existingSpecific.id },
+        });
+      }
+
+      const oauthAccount = await ctx.db.account.findFirst({
+        where: { githubInstallationId: null, provider: "github", userId },
       });
 
       if (
-        existingAccount != null &&
-        existingAccount.type !== "app-installation" &&
-        existingAccount.providerAccountId !== githubAccountId
+        oauthAccount &&
+        oauthAccount.providerAccountId !== githubAccountId &&
+        installation.target_type === "User"
       ) {
         throw new TRPCError({
           code: "FORBIDDEN",
@@ -554,26 +567,26 @@ export const repoRouter = createTRPCRouter({
         });
       }
 
-      if (existingAccount != null) {
+      if (oauthAccount && oauthAccount.providerAccountId === githubAccountId) {
         return await ctx.db.account.update({
           data: {
-            githubInstallationId: BigInt(input.installationId),
+            githubInstallationId: installationIdBigInt,
             githubInstallationUrl: installation.html_url,
           },
-          where: { id: existingAccount.id },
-        });
-      } else {
-        return await ctx.db.account.create({
-          data: {
-            githubInstallationId: BigInt(input.installationId),
-            githubInstallationUrl: installation.html_url,
-            provider: "github",
-            providerAccountId: syntheticId,
-            type: "app-installation",
-            userId,
-          },
+          where: { id: oauthAccount.id },
         });
       }
+
+      return await ctx.db.account.create({
+        data: {
+          githubInstallationId: installationIdBigInt,
+          githubInstallationUrl: installation.html_url,
+          provider: "github",
+          providerAccountId: syntheticId,
+          type: "app-installation",
+          userId,
+        },
+      });
     }),
   searchGithub: protectedProcedure.input(GitHubQuerySchema).query(async ({ ctx, input }) => {
     return await githubService.searchRepos(
