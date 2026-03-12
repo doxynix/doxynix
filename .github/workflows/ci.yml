@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: ["main", "develop"]
   schedule:
-    - cron: '30 3 * * *'
+    - cron: "30 3 * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -31,7 +31,10 @@ env:
   NEXT_PUBLIC_APP_URL: "http://localhost:3000"
   RESEND_API_KEY: "re_dummy_123"
   ABLY_API_KEY: "dummy:key"
-  GITHUB_SYSTEM_TOKEN: "ghp_dummy"
+  GITHUB_APP_ID: "dummy"
+  GITHUB_APP_PRIVATE_KEY: "dummy"
+  GITHUB_SYSTEM_INSTALLATION_ID: "dummy"
+  GITHUB_WEBHOOK_SECRET: "dummy"
   GROQ_API_KEY: "gsk_dummy"
   UPLOADTHING_TOKEN: "eyJdummy.token"
   UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
@@ -112,7 +115,7 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -153,7 +156,7 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -198,7 +201,7 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -224,7 +227,6 @@ jobs:
         run: snyk code test . --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
 
   # ------------------------------------------------------------------
   # 5. ИНТЕГРАЦИОННЫЕ и ЮНИТ ТЕСТЫ
@@ -269,7 +271,7 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -316,7 +318,7 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -392,7 +394,7 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -457,7 +459,7 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: 24.14.0
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -604,9 +606,9 @@ jobs:
           format: markdown
           message: ${{ steps.collect.outputs.message }}
 
-      - name: 'notify vercel'
+      - name: "notify vercel"
         if: always()
-        uses: 'vercel/repository-dispatch/actions/status@v1'
+        uses: "vercel/repository-dispatch/actions/status@v1"
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          name: 'Vercel - doxynix: notify vercel'
+          name: "Vercel - doxynix: notify vercel"

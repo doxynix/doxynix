@@ -8,6 +8,7 @@ import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificat
 import { redirect } from "@/i18n/routing";
 
 import { CreateRepoDialog } from "@/features/repo";
+import { GitInstallationCatcher } from "@/features/repo-setup";
 
 import { AppFooter } from "@/widgets/app-footer";
 import { AppHeader } from "@/widgets/app-header";
@@ -58,6 +59,7 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
         </div>
       </SidebarProvider>
       <CreateRepoDialog />
+      <GitInstallationCatcher />
     </ThemeProvider>
   );
 }

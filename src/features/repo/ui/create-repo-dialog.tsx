@@ -4,8 +4,7 @@ import { useRef, useState } from "react";
 import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BookOpen } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { BookOpen, ExternalLink } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
@@ -63,12 +62,13 @@ export function CreateRepoDialog() {
 
   useClickOutside(containerRef, () => setShowSuggestions(false), open);
 
-  async function handleConnectGithub() {
+  async function handleInstallGitHubApp() {
     try {
       setLoading(true);
-      posthog.capture("github_connect_started");
-      await signIn("github");
-    } finally {
+      posthog.capture("github_app_install_started");
+      window.location.href = `https://github.com/apps/doxynix/installations/new`;
+    } catch (error) {
+      console.error(error);
       setLoading(false);
     }
   }
@@ -170,8 +170,25 @@ export function CreateRepoDialog() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium tracking-wider uppercase">
-                <BookOpen className="h-3 w-3" /> {t("repo_your_repos")}
+              <div className="flex items-center justify-between text-xs font-medium tracking-wider">
+                <div className="text-muted-foreground flex items-center gap-2 uppercase">
+                  <BookOpen className="h-3 w-3" />
+                  {t("repo_your_repos")}
+                </div>
+
+                {myGithubData?.isConnected === true && myGithubData.installationId != null && (
+                  <div className="text-muted-foreground flex items-center gap-2 font-normal tracking-normal normal-case">
+                    <span>Don&apos;t see it?</span>
+                    <a
+                      href={`${myGithubData.manageUrl}`}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      className="flex items-center gap-1 transition-colors hover:underline"
+                    >
+                      Manage access <ExternalLink className="h-2.5 w-2.5" />
+                    </a>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-0.5">
@@ -195,11 +212,12 @@ export function CreateRepoDialog() {
                         {t("repo_connect_git_account")}{" "}
                       </p>
                       <LoadingButton
+                        type="button"
                         disabled={loading}
                         isLoading={loading}
                         loadingText="Connecting..."
                         variant="outline"
-                        onClick={() => void handleConnectGithub()}
+                        onClick={() => void handleInstallGitHubApp()}
                         className="cursor-pointer"
                       >
                         <GitHubIcon /> {tCommon("connect")}

@@ -262,25 +262,29 @@ model ApiKey {
 
 model Account {
   /// @zod.custom.omit(["model"])
-  id                Int     @id() @default(autoincrement())
+  id                       Int     @id() @default(autoincrement())
   /// @zod.custom.omit(["model"])
-  publicId          String  @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  publicId                 String  @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   /// @zod.custom.omit(["model"])
-  userId            Int     @map("user_id")
-  type              String
-  provider          String
-  providerAccountId String  @map("provider_account_id")
+  userId                   Int     @map("user_id")
+  type                     String
+  provider                 String
+  providerAccountId        String  @map("provider_account_id")
   /// @zod.custom.omit(["model"])
-  refresh_token     String? @db.Text()
+  refresh_token            String? @db.Text()
   /// @zod.custom.omit(["model"])
-  access_token      String? @db.Text()
-  expires_at        Int?
-  token_type        String?
-  scope             String?
+  access_token             String? @db.Text()
+  githubInstallationId     Int?    @map("github_installation_id")
+  githubInstallationUrl    String? @map("github_installation_url") @db.Text()
   /// @zod.custom.omit(["model"])
-  id_token          String? @db.Text()
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refresh_token_expires_in Int?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  /// @zod.custom.omit(["model"])
+  id_token                 String? @db.Text()
+  session_state            String?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")

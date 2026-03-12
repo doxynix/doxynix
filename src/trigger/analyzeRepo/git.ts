@@ -3,8 +3,6 @@ import fs from "node:fs/promises";
 import type { Repo } from "@prisma/client";
 import simpleGit from "simple-git";
 
-import { SYSTEM_TOKEN } from "@/shared/constants/env.server";
-
 import { prisma } from "@/server/db/db";
 import { githubService } from "@/server/services/github.service";
 
@@ -39,16 +37,22 @@ export async function getAnalysisContext(
     throw new Error("This is a private repository. Please connect your GitHub account.");
   }
 
-  const token = userToken ?? SYSTEM_TOKEN;
-  const { octokit } = await githubService.getClientContext(prisma, userId);
+  const clientContext = await githubService.getClientContext(prisma, userId);
+  const { octokit } = clientContext;
 
-  const { data: refData } = await octokit.git.getRef({
+  if (repo.visibility === "PRIVATE" && clientContext.type === "app") {
+    throw new Error("This is a private repository. Please install Doxynix App or connect GitHub.");
+  }
+
+  const { data: refData } = await octokit.rest.git.getRef({
     owner: repo.owner,
     ref: `heads/${repo.defaultBranch}`,
     repo: repo.name,
   });
 
   const currentSha = refData.object.sha;
+
+  const token = await githubService.getToken(prisma, userId);
 
   if (forceRefresh === false && lastSuccessfulAnalysis.commitSha === currentSha) {
     return { currentSha, repo: null, token };

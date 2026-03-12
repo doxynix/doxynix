@@ -110,12 +110,12 @@ async function handleRateLimitAndSize(
   ip: string,
   requestId: string
 ): Promise<NextResponse | null> {
+  const payloadTooLargeResponse = validateRequestSize(request, requestId);
+  if (payloadTooLargeResponse != null) return payloadTooLargeResponse;
+
   if (hasPathBoundary(pathname, "/webhooks")) {
     return null;
   }
-
-  const payloadTooLargeResponse = validateRequestSize(request, requestId);
-  if (payloadTooLargeResponse != null) return payloadTooLargeResponse;
 
   let success = true;
   let limit = 0;

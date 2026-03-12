@@ -412,25 +412,35 @@ export const repoRouter = createTRPCRouter({
       };
     }),
   getMyGithubRepos: protectedProcedure.query(async ({ ctx }) => {
+    const userId = Number(ctx.session.user.id);
     const account = await ctx.db.account.findFirst({
       where: {
         provider: "github",
       },
     });
 
-    if (account == null) {
+    if (account == null || account.githubInstallationId == null) {
       return {
+        installationId: null,
         isConnected: false,
         items: [],
+        manageUrl: null,
       };
     }
 
-    const repos = await githubService.getMyRepos(ctx.prisma, Number(ctx.session.user.id));
+    try {
+      const repos = await githubService.getMyRepos(ctx.prisma, userId);
 
-    return {
-      isConnected: true,
-      items: repos,
-    };
+      return {
+        installationId: account.githubInstallationId,
+        isConnected: true,
+        items: repos,
+        manageUrl: account.githubInstallationUrl,
+      };
+    } catch (error) {
+      console.error(error);
+      return { isConnected: true, items: [], manageUrl: account.githubInstallationUrl };
+    }
   }),
   getRepoFiles: protectedProcedure
     .input(
@@ -497,6 +507,41 @@ export const repoRouter = createTRPCRouter({
       }));
     }),
 
+  saveInstallation: protectedProcedure
+    .input(z.object({ installationId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = Number(ctx.session.user.id);
+
+      const installation = await githubService.getInstallationInfo(input.installationId);
+
+      if (!installation.account) {
+        throw new Error("Installation account information is missing");
+      }
+
+      const githubAccountId = String(installation.account.id);
+
+      return await ctx.db.account.upsert({
+        create: {
+          githubInstallationId: input.installationId,
+          githubInstallationUrl: installation.html_url,
+          provider: "github",
+          providerAccountId: githubAccountId,
+          type: "app-installation",
+          userId: userId,
+        },
+        update: {
+          githubInstallationId: input.installationId,
+          githubInstallationUrl: installation.html_url,
+          userId: userId,
+        },
+        where: {
+          provider_providerAccountId: {
+            provider: "github",
+            providerAccountId: githubAccountId,
+          },
+        },
+      });
+    }),
   searchGithub: protectedProcedure.input(GitHubQuerySchema).query(async ({ ctx, input }) => {
     return await githubService.searchRepos(
       ctx.prisma,

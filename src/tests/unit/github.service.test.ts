@@ -17,11 +17,13 @@ const loggerState = vi.hoisted(() => ({
 }));
 
 const octokitState = vi.hoisted(() => ({
-  constructorAuths: [] as string[],
-  constructorOptions: [] as ConstructorOptions[],
+  auth: vi.fn(),
+  constructorAuths: [] as any[],
+  constructorOptions: [] as any[],
   getRepo: vi.fn(),
   getTree: vi.fn(),
   listForAuthenticatedUser: vi.fn(),
+  listReposAccessibleToInstallation: vi.fn(),
   paginate: vi.fn(),
   searchRepos: vi.fn(),
 }));
@@ -43,6 +45,10 @@ type ConstructorOptions = {
   };
 };
 
+vi.mock("@octokit/auth-app", () => ({
+  createAppAuth: vi.fn(),
+}));
+
 vi.mock("@octokit/plugin-paginate-rest", () => ({
   paginateRest: vi.fn(),
 }));
@@ -60,10 +66,7 @@ vi.mock("@octokit/rest", () => {
     static plugin() {
       return MockOctokit;
     }
-
-    git = {
-      getTree: octokitState.getTree,
-    };
+    auth = octokitState.auth;
 
     log = {
       debug: vi.fn(),
@@ -74,18 +77,20 @@ vi.mock("@octokit/rest", () => {
 
     paginate = octokitState.paginate;
 
-    repos = {
-      get: octokitState.getRepo,
-    };
-
     rest = {
+      apps: {
+        listReposAccessibleToInstallation: octokitState.listReposAccessibleToInstallation,
+      },
+      git: {
+        getTree: octokitState.getTree,
+      },
       repos: {
+        get: octokitState.getRepo,
         listForAuthenticatedUser: octokitState.listForAuthenticatedUser,
       },
-    };
-
-    search = {
-      repos: octokitState.searchRepos,
+      search: {
+        repos: octokitState.searchRepos,
+      },
     };
 
     constructor(options: ConstructorOptions) {
@@ -104,6 +109,9 @@ vi.mock("parse-github-url", () => ({
 }));
 
 vi.mock("@/shared/constants/env.server", () => ({
+  GITHUB_APP_ID: "123456",
+  GITHUB_APP_PRIVATE_KEY: "mock-private-key",
+  GITHUB_SYSTEM_INSTALLATION_ID: "999999",
   SYSTEM_TOKEN: "system-token",
 }));
 
@@ -118,7 +126,8 @@ vi.mock("@/server/utils/file-classifier", () => ({
 }));
 
 type AccountFindFirstResult = {
-  access_token: string;
+  access_token?: string | null;
+  githubInstallationId?: number | null;
 } | null;
 
 function createMockPrisma(result: AccountFindFirstResult) {
@@ -137,7 +146,7 @@ function createMockPrisma(result: AccountFindFirstResult) {
 
 describe("githubService", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     octokitState.constructorAuths.length = 0;
     octokitState.constructorOptions.length = 0;
     fileClassifierState.isIgnored.mockReturnValue(false);
@@ -148,26 +157,35 @@ describe("githubService", () => {
   });
 
   describe("getClientContext", () => {
-    it("should return user token context when github account has access token", async () => {
-      const { findFirst, prisma } = createMockPrisma({ access_token: "user-token" });
+    it("should return installation context when githubInstallationId exists", async () => {
+      const { prisma } = createMockPrisma({
+        githubInstallationId: 12345,
+      });
 
       const context = await githubService.getClientContext(prisma, 101);
 
-      expect(context.hasUserToken).toBe(true);
-      expect(octokitState.constructorAuths).toEqual(["user-token"]);
-      expect(findFirst).toHaveBeenCalledWith({
-        select: { access_token: true },
-        where: { provider: "github", userId: 101 },
-      });
+      expect(context.type).toBe("installation");
+      const options = octokitState.constructorOptions[0];
+      expect(options.auth.installationId).toBe(12345);
+      expect(options.auth.appId).toBe(123456);
     });
 
-    it("should fallback to SYSTEM_TOKEN when user token is absent", async () => {
-      const { prisma } = createMockPrisma(null);
+    it("should return oauth context when only access_token exists", async () => {
+      const { prisma } = createMockPrisma({
+        access_token: "user-token",
+      });
 
+      const context = await githubService.getClientContext(prisma, 101);
+      expect(context.type).toBe("oauth");
+    });
+
+    it("should return app context (System Bot) when no account found", async () => {
+      const { prisma } = createMockPrisma(null);
       const context = await githubService.getClientContext(prisma, 9);
 
-      expect(context.hasUserToken).toBe(false);
-      expect(octokitState.constructorAuths).toEqual(["system-token"]);
+      expect(context.type).toBe("app");
+      const auth = octokitState.constructorAuths[0];
+      expect(auth.installationId).toBe(999999);
     });
 
     it("should configure and execute throttle callbacks for rate limit handlers", async () => {
@@ -198,7 +216,7 @@ describe("githubService", () => {
 
       expect(repos).toEqual([]);
       expect(loggerState.warn).toHaveBeenCalledWith({
-        msg: "GitHub account not linked. Skipping listForAuthenticatedUser call.",
+        msg: "GitHub account not linked. Cannot fetch private repos.",
         userId: 10,
       });
       expect(octokitState.listForAuthenticatedUser).not.toHaveBeenCalled();
@@ -206,6 +224,7 @@ describe("githubService", () => {
 
     it("should fetch limited repos via listForAuthenticatedUser when limit is provided", async () => {
       const { prisma } = createMockPrisma({ access_token: "token" });
+
       octokitState.listForAuthenticatedUser.mockResolvedValue({
         data: [
           {
@@ -227,6 +246,7 @@ describe("githubService", () => {
         sort: "updated",
         visibility: "all",
       });
+
       expect(repos).toEqual([
         {
           description: "desc",

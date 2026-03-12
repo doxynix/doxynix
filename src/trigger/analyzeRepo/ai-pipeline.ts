@@ -193,7 +193,7 @@ export async function generateDeepDocs(
     tasks.push(
       (async () => {
         const { octokit } = await githubService.getClientContext(prisma, userId);
-        const { data: commitsData } = await octokit.repos.listCommits({
+        const { data: commitsData } = await octokit.rest.repos.listCommits({
           owner: repo.owner,
           per_page: 50, // NOTE: тут возможно стоит придумать другую логику
           repo: repo.name,
