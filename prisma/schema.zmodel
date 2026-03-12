@@ -311,7 +311,7 @@ model Account {
   refresh_token            String? @db.Text @omit
   /// @zod.custom.omit(["model"])
   access_token             String? @db.Text @omit
-  githubInstallationId     BigInt? @map("github_installation_id")
+  githubInstallationId     BigInt? @map("github_installation_id") @unique
   githubInstallationUrl    String? @map("github_installation_url") @db.Text
   /// @zod.custom.omit(["model"])
   refresh_token_expires_in Int?
@@ -326,7 +326,7 @@ model Account {
 
   @@allow('read,delete', auth() == user || auth().role == 'ADMIN')
   @@allow('create', (auth() != null && userId == auth().id) || auth().role == 'ADMIN')
-  @@allow('update', (auth() == user && future().userId == userId) || auth().role == 'ADMIN')
+  @@allow('update', auth().role == 'ADMIN')
 
   @@unique([provider, providerAccountId])
   @@index([githubInstallationId])

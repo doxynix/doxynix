@@ -515,18 +515,13 @@ export const repoRouter = createTRPCRouter({
       const userId = Number(ctx.session.user.id);
       const installationIdBigInt = BigInt(input.installationId);
 
-      const alreadyLinked = await ctx.prisma.account.findFirst({
-        select: { userId: true },
-        where: {
-          githubInstallationId: installationIdBigInt,
-          provider: "github",
-        },
+      const duplicate = await ctx.prisma.account.findFirst({
+        where: { githubInstallationId: installationIdBigInt, NOT: { userId } },
       });
-
-      if (alreadyLinked !== null && alreadyLinked.userId !== userId) {
+      if (duplicate) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "This GitHub installation is already linked to another Doxynix account.",
+          message: "Installation already linked to another user",
         });
       }
 
@@ -537,7 +532,7 @@ export const repoRouter = createTRPCRouter({
         throw new TRPCError({
           cause: error,
           code: "NOT_FOUND",
-          message: "GitHub installation not found or inaccessible",
+          message: "GitHub installation not found",
         });
       }
 
@@ -546,46 +541,47 @@ export const repoRouter = createTRPCRouter({
       }
 
       const githubAccountId = String(installation.account.id);
-
       const syntheticId = `inst:${input.installationId}:user:${userId}`;
 
-      const existingSpecific = await ctx.db.account.findFirst({
-        where: { githubInstallationId: installationIdBigInt, provider: "github", userId },
+      const userAccounts = await ctx.prisma.account.findMany({
+        where: { provider: "github", userId },
       });
 
-      if (existingSpecific != null) {
-        return await ctx.db.account.update({
+      const existingSpecific = userAccounts.find(
+        (a) => a.githubInstallationId === installationIdBigInt
+      );
+      const oauthAccount = userAccounts.find((a) => a.githubInstallationId === null);
+
+      if (existingSpecific) {
+        return await ctx.prisma.account.update({
           data: { githubInstallationUrl: installation.html_url },
           where: { id: existingSpecific.id },
         });
       }
 
-      const oauthAccount = await ctx.db.account.findFirst({
-        where: { githubInstallationId: null, provider: "github", userId },
-      });
+      if (oauthAccount) {
+        if (
+          oauthAccount.providerAccountId !== githubAccountId &&
+          installation.target_type === "User"
+        ) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "This installation belongs to a different GitHub account than your login",
+          });
+        }
 
-      if (
-        oauthAccount != null &&
-        oauthAccount.providerAccountId !== githubAccountId &&
-        installation.target_type === "User"
-      ) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "This installation belongs to a different GitHub account than your login",
-        });
+        if (oauthAccount.providerAccountId === githubAccountId) {
+          return await ctx.prisma.account.update({
+            data: {
+              githubInstallationId: installationIdBigInt,
+              githubInstallationUrl: installation.html_url,
+            },
+            where: { id: oauthAccount.id },
+          });
+        }
       }
 
-      if (oauthAccount != null && oauthAccount.providerAccountId === githubAccountId) {
-        return await ctx.db.account.update({
-          data: {
-            githubInstallationId: installationIdBigInt,
-            githubInstallationUrl: installation.html_url,
-          },
-          where: { id: oauthAccount.id },
-        });
-      }
-
-      return await ctx.db.account.create({
+      return await ctx.prisma.account.create({
         data: {
           githubInstallationId: installationIdBigInt,
           githubInstallationUrl: installation.html_url,
@@ -596,6 +592,7 @@ export const repoRouter = createTRPCRouter({
         },
       });
     }),
+
   searchGithub: protectedProcedure.input(GitHubQuerySchema).query(async ({ ctx, input }) => {
     return await githubService.searchRepos(
       ctx.prisma,
