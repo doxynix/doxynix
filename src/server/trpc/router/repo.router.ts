@@ -530,7 +530,7 @@ export const repoRouter = createTRPCRouter({
         where: { provider: "github", userId: userId },
       });
 
-      if (existingAccount) {
+      if (existingAccount != null) {
         return await ctx.db.account.update({
           data: {
             githubInstallationId: BigInt(input.installationId),
