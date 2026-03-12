@@ -125,8 +125,11 @@ vi.mock("@/server/utils/file-classifier", () => ({
 }));
 
 function createMockPrisma(accounts: any[] | any) {
-  const findMany = vi.fn().mockResolvedValue(Array.isArray(accounts) ? accounts : []);
-  const findFirst = vi.fn().mockResolvedValue(Array.isArray(accounts) ? accounts[0] : accounts);
+  const normalizedAccounts =
+    accounts == null ? [] : Array.isArray(accounts) ? accounts : [accounts];
+
+  const findMany = vi.fn().mockResolvedValue(normalizedAccounts);
+  const findFirst = vi.fn().mockResolvedValue(normalizedAccounts[0] ?? null);
 
   const prisma = {
     account: {

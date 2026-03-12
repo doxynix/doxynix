@@ -420,7 +420,9 @@ export const repoRouter = createTRPCRouter({
       return { installationId: null, isConnected: false, items: [], manageUrl: null };
     }
 
-    const mainAcc = accounts.find((a) => a.githubInstallationId !== null) || accounts[0];
+    const installAcc = accounts.find((a) => a.githubInstallationId !== null);
+    const mainAcc = installAcc ?? accounts[0];
+
     const installationId =
       mainAcc.githubInstallationId != null ? Number(mainAcc.githubInstallationId) : null;
 
@@ -512,6 +514,21 @@ export const repoRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = Number(ctx.session.user.id);
       const installationIdBigInt = BigInt(input.installationId);
+
+      const alreadyLinked = await ctx.prisma.account.findFirst({
+        select: { userId: true },
+        where: {
+          githubInstallationId: installationIdBigInt,
+          provider: "github",
+        },
+      });
+
+      if (alreadyLinked !== null && alreadyLinked.userId !== userId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This GitHub installation is already linked to another Doxynix account.",
+        });
+      }
 
       let installation;
       try {
