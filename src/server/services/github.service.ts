@@ -75,37 +75,39 @@ const getCommonConfig = () => ({
 
 export const githubService = {
   async getClientContext(prisma: DbClient, userId: number): Promise<GitHubClientContext> {
-    const account = await prisma.account.findFirst({
+    const accounts = await prisma.account.findMany({
       where: { provider: "github", userId },
     });
     const commonConfig = getCommonConfig();
     const appId = Number(GITHUB_APP_ID);
     const privateKey = GITHUB_APP_PRIVATE_KEY;
 
-    if (account?.githubInstallationId != null) {
+    const installAcc = accounts.find((a) => a.githubInstallationId != null);
+    if (installAcc?.githubInstallationId != null) {
       return {
-        githubInstallationId: Number(account.githubInstallationId),
+        githubInstallationId: Number(installAcc.githubInstallationId),
         hasUserToken: false,
         octokit: new MyOctokit({
           ...commonConfig,
           auth: {
             appId,
-            installationId: Number(account.githubInstallationId),
+            installationId: Number(installAcc.githubInstallationId),
             privateKey,
           },
           authStrategy: createAppAuth,
-        }),
+        }) as OctokitInstance,
         type: "installation",
       };
     }
 
-    if (account?.access_token != null) {
+    const oauthAcc = accounts.find((a) => a.access_token != null);
+    if (oauthAcc?.access_token != null) {
       return {
         hasUserToken: true,
         octokit: new MyOctokit({
           ...commonConfig,
-          auth: account.access_token,
-        }),
+          auth: oauthAcc.access_token,
+        }) as OctokitInstance,
         type: "oauth",
       };
     }
@@ -120,7 +122,7 @@ export const githubService = {
           privateKey,
         },
         authStrategy: createAppAuth,
-      }),
+      }) as OctokitInstance,
       type: "app",
     };
   },

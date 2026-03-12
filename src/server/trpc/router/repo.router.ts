@@ -420,7 +420,7 @@ export const repoRouter = createTRPCRouter({
       },
     });
 
-    if (account == null || account.githubInstallationId == null) {
+    if (account == null) {
       return {
         installationId: null,
         isConnected: false,
@@ -429,11 +429,14 @@ export const repoRouter = createTRPCRouter({
       };
     }
 
+    const installationId =
+      account.githubInstallationId != null ? Number(account.githubInstallationId) : null;
+
     try {
       const repos = await githubService.getMyRepos(ctx.prisma, userId);
 
       return {
-        installationId: Number(account.githubInstallationId),
+        installationId,
         isConnected: true,
         items: repos,
         manageUrl: account.githubInstallationUrl,
@@ -441,7 +444,7 @@ export const repoRouter = createTRPCRouter({
     } catch (error) {
       console.error(error);
       return {
-        installationId: Number(account.githubInstallationId),
+        installationId,
         isConnected: true,
         items: [],
         manageUrl: account.githubInstallationUrl,
@@ -514,7 +517,7 @@ export const repoRouter = createTRPCRouter({
     }),
 
   saveInstallation: protectedProcedure
-    .input(z.object({ installationId: z.number() }))
+    .input(z.object({ installationId: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
       const userId = Number(ctx.session.user.id);
 
@@ -527,8 +530,15 @@ export const repoRouter = createTRPCRouter({
       const githubAccountId = String(installation.account.id);
 
       const existingAccount = await ctx.db.account.findFirst({
-        where: { provider: "github", userId: userId },
+        where: { provider: "github", userId },
       });
+
+      if (existingAccount && existingAccount.providerAccountId !== githubAccountId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This installation belongs to a different GitHub account",
+        });
+      }
 
       if (existingAccount != null) {
         return await ctx.db.account.update({
