@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { trpc } from "@/shared/api/trpc";
@@ -12,24 +12,36 @@ export function GitInstallationCatcher() {
   const pathname = usePathname();
   const utils = trpc.useUtils();
 
+  const hasprocessed = useRef(false);
+
   const installationId = searchParams.get("installation_id");
   const saveInstall = trpc.repo.saveInstallation.useMutation();
 
   useEffect(() => {
-    if (installationId != null) {
-      saveInstall.mutate(
-        { installationId: Number(installationId) },
-        {
-          onSuccess: () => {
-            void utils.repo.getMyGithubRepos.invalidate();
-            const params = new URLSearchParams(searchParams.toString());
-            params.delete("installation_id");
-            params.delete("setup_action");
-            router.replace(`${pathname}?${params.toString()}`);
-          },
-        }
-      );
-    }
+    if (installationId == null || hasprocessed.current) return;
+
+    hasprocessed.current = true;
+
+    saveInstall.mutate(
+      { installationId: Number(installationId) },
+      {
+        onError: () => {
+          hasprocessed.current = false;
+        },
+        onSuccess: () => {
+          void utils.repo.getMyGithubRepos.invalidate();
+
+          const params = new URLSearchParams(searchParams.toString());
+          params.delete("installation_id");
+          params.delete("setup_action");
+
+          const queryString = params.toString();
+          const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+
+          router.replace(newUrl);
+        },
+      }
+    );
   }, [installationId, pathname, router, saveInstall, searchParams, utils.repo.getMyGithubRepos]);
 
   return null;
