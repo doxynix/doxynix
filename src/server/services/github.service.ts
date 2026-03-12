@@ -32,7 +32,7 @@ type InstallationRepoItem =
 type GitHubRepoResponse = SearchRepoItem | ListRepoItem | InstallationRepoItem;
 
 type GitHubClientContext = (
-  | { githubInstallationId: number; hasUserToken: true; type: "installation" }
+  | { githubInstallationId: number; hasUserToken: false; type: "installation" }
   | { hasUserToken: true; type: "oauth" }
   | { hasUserToken: false; type: "app" }
 ) & {
@@ -84,13 +84,13 @@ export const githubService = {
 
     if (account?.githubInstallationId != null) {
       return {
-        githubInstallationId: account.githubInstallationId,
-        hasUserToken: true,
+        githubInstallationId: Number(account.githubInstallationId),
+        hasUserToken: false,
         octokit: new MyOctokit({
           ...commonConfig,
           auth: {
             appId,
-            installationId: account.githubInstallationId,
+            installationId: Number(account.githubInstallationId),
             privateKey,
           },
           authStrategy: createAppAuth,
@@ -238,6 +238,10 @@ export const githubService = {
 
   async getToken(prisma: DbClient, userId: number): Promise<string | null> {
     const context = await this.getClientContext(prisma, userId);
+
+    if (context.type === "app") {
+      return null;
+    }
 
     try {
       const auth = (await context.octokit.auth()) as { token: string };

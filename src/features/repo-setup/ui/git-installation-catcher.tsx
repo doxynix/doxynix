@@ -15,21 +15,25 @@ export function GitInstallationCatcher() {
   const hasprocessed = useRef(false);
 
   const installationId = searchParams.get("installation_id");
-  const saveInstall = trpc.repo.saveInstallation.useMutation();
+  const { mutate } = trpc.repo.saveInstallation.useMutation();
+  const invalidateMyRepos = utils.repo.getMyGithubRepos.invalidate;
 
   useEffect(() => {
     if (installationId == null || hasprocessed.current) return;
 
+    const parsedId = Number(installationId);
+    if (!Number.isInteger(parsedId) || parsedId <= 0) return;
+
     hasprocessed.current = true;
 
-    saveInstall.mutate(
-      { installationId: Number(installationId) },
+    mutate(
+      { installationId: parsedId },
       {
         onError: () => {
           hasprocessed.current = false;
         },
         onSuccess: () => {
-          void utils.repo.getMyGithubRepos.invalidate();
+          void invalidateMyRepos();
 
           const params = new URLSearchParams(searchParams.toString());
           params.delete("installation_id");
@@ -42,7 +46,6 @@ export function GitInstallationCatcher() {
         },
       }
     );
-  }, [installationId, pathname, router, saveInstall, searchParams, utils.repo.getMyGithubRepos]);
-
+  }, [installationId, pathname, router, searchParams, mutate, invalidateMyRepos]);
   return null;
 }

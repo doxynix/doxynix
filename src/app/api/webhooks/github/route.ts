@@ -5,6 +5,13 @@ import { GITHUB_WEBHOOK_SECRET } from "@/shared/constants/env.server";
 
 import { prisma } from "@/server/db/db";
 
+type GitHubWebhookEvent = {
+  action?: string;
+  installation?: {
+    id?: number;
+  };
+};
+
 export async function POST(req: Request) {
   const payload = await req.text();
   const signature = req.headers.get("x-hub-signature-256") ?? "";
@@ -21,19 +28,29 @@ export async function POST(req: Request) {
     return new NextResponse("Invalid signature", { status: 401 });
   }
 
-  const event = JSON.parse(payload);
+  let event: GitHubWebhookEvent;
+  try {
+    event = JSON.parse(payload) as GitHubWebhookEvent;
+  } catch {
+    return new NextResponse("Invalid JSON", { status: 400 });
+  }
+
   const action = event.action;
+  const githubEvent = req.headers.get("x-github-event");
 
-  if (Boolean(event.installation) && action === "deleted") {
-    const installationId = event.installation.id;
-
-    await prisma.account.updateMany({
-      data: {
-        githubInstallationId: null,
-        githubInstallationUrl: null,
-      },
-      where: { githubInstallationId: installationId },
-    });
+  if (githubEvent === "installation" && event.installation?.id != null && action === "deleted") {
+    try {
+      await prisma.account.updateMany({
+        data: {
+          githubInstallationId: null,
+          githubInstallationUrl: null,
+        },
+        where: { githubInstallationId: BigInt(event.installation.id) },
+      });
+    } catch (error) {
+      console.error("Webhook DB Error:", error);
+      return new NextResponse("DB Error", { status: 500 });
+    }
   }
 
   return NextResponse.json({ ok: true });

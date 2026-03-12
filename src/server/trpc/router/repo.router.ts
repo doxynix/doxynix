@@ -416,6 +416,7 @@ export const repoRouter = createTRPCRouter({
     const account = await ctx.db.account.findFirst({
       where: {
         provider: "github",
+        userId,
       },
     });
 
@@ -432,14 +433,19 @@ export const repoRouter = createTRPCRouter({
       const repos = await githubService.getMyRepos(ctx.prisma, userId);
 
       return {
-        installationId: account.githubInstallationId,
+        installationId: Number(account.githubInstallationId),
         isConnected: true,
         items: repos,
         manageUrl: account.githubInstallationUrl,
       };
     } catch (error) {
       console.error(error);
-      return { isConnected: true, items: [], manageUrl: account.githubInstallationUrl };
+      return {
+        installationId: Number(account.githubInstallationId),
+        isConnected: true,
+        items: [],
+        manageUrl: account.githubInstallationUrl,
+      };
     }
   }),
   getRepoFiles: protectedProcedure
@@ -515,32 +521,36 @@ export const repoRouter = createTRPCRouter({
       const installation = await githubService.getInstallationInfo(input.installationId);
 
       if (!installation.account) {
-        throw new Error("Installation account information is missing");
+        throw new TRPCError({ code: "NOT_FOUND", message: "Installation account missing" });
       }
 
       const githubAccountId = String(installation.account.id);
 
-      return await ctx.db.account.upsert({
-        create: {
-          githubInstallationId: input.installationId,
-          githubInstallationUrl: installation.html_url,
-          provider: "github",
-          providerAccountId: githubAccountId,
-          type: "app-installation",
-          userId: userId,
-        },
-        update: {
-          githubInstallationId: input.installationId,
-          githubInstallationUrl: installation.html_url,
-          userId: userId,
-        },
-        where: {
-          provider_providerAccountId: {
-            provider: "github",
+      const existingAccount = await ctx.db.account.findFirst({
+        where: { provider: "github", userId: userId },
+      });
+
+      if (existingAccount) {
+        return await ctx.db.account.update({
+          data: {
+            githubInstallationId: BigInt(input.installationId),
+            githubInstallationUrl: installation.html_url,
             providerAccountId: githubAccountId,
           },
-        },
-      });
+          where: { id: existingAccount.id },
+        });
+      } else {
+        return await ctx.db.account.create({
+          data: {
+            githubInstallationId: BigInt(input.installationId),
+            githubInstallationUrl: installation.html_url,
+            provider: "github",
+            providerAccountId: githubAccountId,
+            type: "app-installation",
+            userId,
+          },
+        });
+      }
     }),
   searchGithub: protectedProcedure.input(GitHubQuerySchema).query(async ({ ctx, input }) => {
     return await githubService.searchRepos(
