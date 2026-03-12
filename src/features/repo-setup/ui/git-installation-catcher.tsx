@@ -12,25 +12,25 @@ export function GitInstallationCatcher() {
   const pathname = usePathname();
   const utils = trpc.useUtils();
 
-  const hasprocessed = useRef(false);
+  const hasProcessed = useRef(false);
 
   const installationId = searchParams.get("installation_id");
   const { mutate } = trpc.repo.saveInstallation.useMutation();
   const invalidateMyRepos = utils.repo.getMyGithubRepos.invalidate;
 
   useEffect(() => {
-    if (installationId == null || hasprocessed.current) return;
+    if (installationId == null || hasProcessed.current) return;
 
     const parsedId = Number(installationId);
     if (!Number.isInteger(parsedId) || parsedId <= 0) return;
 
-    hasprocessed.current = true;
+    hasProcessed.current = true;
 
     mutate(
       { installationId: parsedId },
       {
         onError: () => {
-          hasprocessed.current = false;
+          hasProcessed.current = false;
         },
         onSuccess: () => {
           void invalidateMyRepos();

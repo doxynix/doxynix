@@ -62,15 +62,10 @@ export function CreateRepoDialog() {
 
   useClickOutside(containerRef, () => setShowSuggestions(false), open);
 
-  async function handleInstallGitHubApp() {
-    try {
-      setLoading(true);
-      posthog.capture("github_app_install_started");
-      window.location.href = `https://github.com/apps/doxynix/installations/new`;
-    } catch (error) {
-      console.error(error);
-      setLoading(false);
-    }
+  function handleInstallGitHubApp() {
+    setLoading(true);
+    posthog.capture("github_app_install_started");
+    window.location.href = `https://github.com/apps/doxynix/installations/new`;
   }
 
   const isUrl = isGitHubUrl(debouncedValue);

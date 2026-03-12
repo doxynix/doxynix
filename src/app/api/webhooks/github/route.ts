@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { GITHUB_WEBHOOK_SECRET } from "@/shared/constants/env.server";
 
 import { prisma } from "@/server/db/db";
+import { logger } from "@/server/logger/logger";
 
 type GitHubWebhookEvent = {
   action?: string;
@@ -47,8 +48,12 @@ export async function POST(req: Request) {
         },
         where: { githubInstallationId: BigInt(event.installation.id) },
       });
+      logger.info({
+        installationId: event.installation.id,
+        msg: "GitHub installation deleted, cleared from accounts",
+      });
     } catch (error) {
-      console.error("Webhook DB Error:", error);
+      logger.error({ error, msg: "Webhook DB Error" });
       return new NextResponse("DB Error", { status: 500 });
     }
   }

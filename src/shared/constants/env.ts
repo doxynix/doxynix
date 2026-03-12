@@ -59,11 +59,13 @@ export const env = createEnv({
     BETTERSTACK_API_TOKEN: z.string().min(1),
     DATABASE_URL: z.url(),
 
-    GITHUB_APP_ID: z.string().min(1),
+    GITHUB_APP_ID: z.string().regex(/^\d+$/, "GITHUB_APP_ID must be numeric"),
     GITHUB_APP_PRIVATE_KEY: z.string().min(1),
     GITHUB_CLIENT_ID: z.string().min(1),
     GITHUB_CLIENT_SECRET: z.string().min(1),
-    GITHUB_SYSTEM_INSTALLATION_ID: z.string().min(1),
+    GITHUB_SYSTEM_INSTALLATION_ID: z
+      .string()
+      .regex(/^\d+$/, "GITHUB_SYSTEM_INSTALLATION_ID must be numeric"),
     GITHUB_WEBHOOK_SECRET: z.string().min(1),
     GITLAB_CLIENT_ID: z.string().min(1),
     GITLAB_CLIENT_SECRET: z.string().min(1),

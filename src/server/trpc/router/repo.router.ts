@@ -545,7 +545,7 @@ export const repoRouter = createTRPCRouter({
         where: { githubInstallationId: installationIdBigInt, provider: "github", userId },
       });
 
-      if (existingSpecific) {
+      if (existingSpecific != null) {
         return await ctx.db.account.update({
           data: { githubInstallationUrl: installation.html_url },
           where: { id: existingSpecific.id },
@@ -557,7 +557,7 @@ export const repoRouter = createTRPCRouter({
       });
 
       if (
-        oauthAccount &&
+        oauthAccount != null &&
         oauthAccount.providerAccountId !== githubAccountId &&
         installation.target_type === "User"
       ) {
@@ -567,7 +567,7 @@ export const repoRouter = createTRPCRouter({
         });
       }
 
-      if (oauthAccount && oauthAccount.providerAccountId === githubAccountId) {
+      if (oauthAccount != null && oauthAccount.providerAccountId === githubAccountId) {
         return await ctx.db.account.update({
           data: {
             githubInstallationId: installationIdBigInt,

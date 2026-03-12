@@ -184,10 +184,10 @@ export const githubService = {
             });
             allRepos.push(...this.mapRepos(repos));
           }
-        } catch (e) {
-          console.error(e);
+        } catch (error) {
           logger.error({
             accountId: account.id,
+            error,
             msg: "Failed to fetch repos for one of the installations",
           });
         }
@@ -258,7 +258,12 @@ export const githubService = {
       const auth = (await context.octokit.auth()) as { token: string };
       return auth.token;
     } catch (error) {
-      console.error(error);
+      logger.error({
+        contextType: context.type,
+        error,
+        msg: "Failed to resolve GitHub token",
+        userId,
+      });
       return null;
     }
   },
