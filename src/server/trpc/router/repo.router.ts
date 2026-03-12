@@ -544,7 +544,7 @@ export const repoRouter = createTRPCRouter({
       });
 
       if (
-        existingAccount &&
+        existingAccount != null &&
         existingAccount.type !== "app-installation" &&
         existingAccount.providerAccountId !== githubAccountId
       ) {
