@@ -329,7 +329,6 @@ model Account {
   @@allow('update', auth().role == 'ADMIN')
 
   @@unique([provider, providerAccountId])
-  @@index([githubInstallationId])
   @@map("accounts")
 }
 

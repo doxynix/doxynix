@@ -9,7 +9,11 @@ import { logger } from "@/server/logger/logger";
 type GitHubWebhookEvent = {
   action?: string;
   installation?: {
-    id?: number;
+    account: {
+      id: number;
+      login: string;
+    };
+    id: number;
   };
 };
 
@@ -39,21 +43,43 @@ export async function POST(req: Request) {
   const action = event.action;
   const githubEvent = req.headers.get("x-github-event");
 
-  if (githubEvent === "installation" && event.installation?.id != null && action === "deleted") {
+  if (githubEvent === "installation" && event.installation?.id != null) {
+    const instIdBigInt = BigInt(event.installation.id);
+    const githubLogin = event.installation.account.login;
+
     try {
-      await prisma.account.updateMany({
-        data: {
-          githubInstallationId: null,
-          githubInstallationUrl: null,
-        },
-        where: { githubInstallationId: BigInt(event.installation.id) },
-      });
-      logger.info({
-        installationId: event.installation.id,
-        msg: "GitHub installation deleted, cleared from accounts",
-      });
+      if (action === "deleted" || action === "suspend") {
+        const result = await prisma.account.updateMany({
+          data: {
+            githubInstallationId: null,
+            githubInstallationUrl: null,
+          },
+          where: { githubInstallationId: instIdBigInt },
+        });
+
+        await prisma.auditLog.create({
+          data: {
+            model: "Account",
+            operation: `GITHUB_INSTALLATION_${action.toUpperCase()}`,
+            payload: { githubLogin, installationId: event.installation.id },
+          },
+        });
+
+        logger.info({
+          affectedRows: result.count,
+          installationId: event.installation.id,
+          msg: `GitHub installation ${action}`,
+        });
+      }
+
+      if (action === "new_permissions_accepted") {
+        logger.info({
+          installationId: event.installation.id,
+          msg: "GitHub App permissions updated by user",
+        });
+      }
     } catch (error) {
-      logger.error({ error, msg: "Webhook DB Error" });
+      logger.error({ error, msg: "Webhook DB Processing Error" });
       return new NextResponse("DB Error", { status: 500 });
     }
   }

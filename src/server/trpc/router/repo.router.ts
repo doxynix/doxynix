@@ -416,12 +416,16 @@ export const repoRouter = createTRPCRouter({
     const userId = Number(ctx.session.user.id);
     const accounts = await ctx.db.account.findMany({ where: { provider: "github", userId } });
 
-    if (accounts.length === 0) {
+    const activeAccounts = accounts.filter(
+      (a) => a.githubInstallationId != null || a.access_token != null
+    );
+
+    if (activeAccounts.length === 0) {
       return { installationId: null, isConnected: false, items: [], manageUrl: null };
     }
 
-    const installAcc = accounts.find((a) => a.githubInstallationId !== null);
-    const mainAcc = installAcc ?? accounts[0];
+    const installAcc = activeAccounts.find((a) => a.githubInstallationId !== null);
+    const mainAcc = installAcc ?? activeAccounts[0];
 
     const installationId =
       mainAcc.githubInstallationId != null ? Number(mainAcc.githubInstallationId) : null;
@@ -518,7 +522,7 @@ export const repoRouter = createTRPCRouter({
       const duplicate = await ctx.prisma.account.findFirst({
         where: { githubInstallationId: installationIdBigInt, NOT: { userId } },
       });
-      if (duplicate) {
+      if (duplicate != null) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Installation already linked to another user",
@@ -548,18 +552,20 @@ export const repoRouter = createTRPCRouter({
       });
 
       const existingSpecific = userAccounts.find(
-        (a) => a.githubInstallationId === installationIdBigInt
+        (a) => a.githubInstallationId === installationIdBigInt && a.access_token != null
       );
-      const oauthAccount = userAccounts.find((a) => a.githubInstallationId === null);
+      const oauthAccount = userAccounts.find(
+        (a) => a.githubInstallationId === null && a.access_token != null
+      );
 
-      if (existingSpecific) {
+      if (existingSpecific != null) {
         return await ctx.prisma.account.update({
           data: { githubInstallationUrl: installation.html_url },
           where: { id: existingSpecific.id },
         });
       }
 
-      if (oauthAccount) {
+      if (oauthAccount != null) {
         if (
           oauthAccount.providerAccountId !== githubAccountId &&
           installation.target_type === "User"
