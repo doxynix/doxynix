@@ -82,6 +82,18 @@ export const githubService = {
     const appId = Number(GITHUB_APP_ID);
     const privateKey = GITHUB_APP_PRIVATE_KEY;
 
+    const oauthAcc = accounts.find((a) => a.access_token != null);
+    if (oauthAcc?.access_token != null) {
+      return {
+        hasUserToken: true,
+        octokit: new MyOctokit({
+          ...commonConfig,
+          auth: oauthAcc.access_token,
+        }) as OctokitInstance,
+        type: "oauth",
+      };
+    }
+
     const installAcc = accounts.find((a) => a.githubInstallationId != null);
     if (installAcc?.githubInstallationId != null) {
       return {
@@ -97,18 +109,6 @@ export const githubService = {
           authStrategy: createAppAuth,
         }) as OctokitInstance,
         type: "installation",
-      };
-    }
-
-    const oauthAcc = accounts.find((a) => a.access_token != null);
-    if (oauthAcc?.access_token != null) {
-      return {
-        hasUserToken: true,
-        octokit: new MyOctokit({
-          ...commonConfig,
-          auth: oauthAcc.access_token,
-        }) as OctokitInstance,
-        type: "oauth",
       };
     }
 

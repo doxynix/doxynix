@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { CreateRepoSchema, GitHubQuerySchema } from "@/shared/api/schemas/repo";
 
+import { logger } from "@/server/logger/logger";
 import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
 import { FileClassifier } from "@/server/utils/file-classifier";
@@ -413,41 +414,31 @@ export const repoRouter = createTRPCRouter({
     }),
   getMyGithubRepos: protectedProcedure.query(async ({ ctx }) => {
     const userId = Number(ctx.session.user.id);
-    const account = await ctx.db.account.findFirst({
-      where: {
-        provider: "github",
-        userId,
-      },
-    });
+    const accounts = await ctx.db.account.findMany({ where: { provider: "github", userId } });
 
-    if (account == null) {
-      return {
-        installationId: null,
-        isConnected: false,
-        items: [],
-        manageUrl: null,
-      };
+    if (accounts.length === 0) {
+      return { installationId: null, isConnected: false, items: [], manageUrl: null };
     }
 
+    const mainAcc = accounts.find((a) => a.githubInstallationId !== null) || accounts[0];
     const installationId =
-      account.githubInstallationId != null ? Number(account.githubInstallationId) : null;
+      mainAcc.githubInstallationId != null ? Number(mainAcc.githubInstallationId) : null;
 
     try {
       const repos = await githubService.getMyRepos(ctx.prisma, userId);
-
       return {
         installationId,
         isConnected: true,
         items: repos,
-        manageUrl: account.githubInstallationUrl,
+        manageUrl: mainAcc.githubInstallationUrl,
       };
     } catch (error) {
-      console.error(error);
+      logger.error({ error, msg: "Dashboard fetch failed", userId });
       return {
         installationId,
         isConnected: true,
         items: [],
-        manageUrl: account.githubInstallationUrl,
+        manageUrl: mainAcc.githubInstallationUrl,
       };
     }
   }),
