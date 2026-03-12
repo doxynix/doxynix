@@ -186,7 +186,7 @@ jobs:
 
       - name: Secret Scanning (TruffleHog)
         # v3.93.4
-        uses: trufflesecurity/trufflehog@4860052fc923ce00536db0f7b257092794dbb750
+        uses: trufflesecurity/trufflehog@42b02effea51fe010d760597336cb42cf58a8daa
         with:
           path: ./
           extra_args: --only-verified
@@ -445,7 +445,7 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Download Build
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        uses: actions/download-artifact@484a0b528fb4d7bd804637ccb632e47a0e638317
         with:
           name: next-build
           path: .
