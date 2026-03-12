@@ -521,22 +521,36 @@ export const repoRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = Number(ctx.session.user.id);
 
-      const installation = await githubService.getInstallationInfo(input.installationId);
+      let installation;
+      try {
+        installation = await githubService.getInstallationInfo(input.installationId);
+      } catch (error) {
+        throw new TRPCError({
+          cause: error,
+          code: "NOT_FOUND",
+          message: "GitHub installation not found or inaccessible",
+        });
+      }
 
-      if (!installation.account) {
+      if (installation.account == null) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Installation account missing" });
       }
 
       const githubAccountId = String(installation.account.id);
+      const syntheticId = `inst:${input.installationId}:user:${userId}`;
 
       const existingAccount = await ctx.db.account.findFirst({
         where: { provider: "github", userId },
       });
 
-      if (existingAccount && existingAccount.providerAccountId !== githubAccountId) {
+      if (
+        existingAccount &&
+        existingAccount.type !== "app-installation" &&
+        existingAccount.providerAccountId !== githubAccountId
+      ) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "This installation belongs to a different GitHub account",
+          message: "This installation belongs to a different GitHub account than your login",
         });
       }
 
@@ -545,7 +559,6 @@ export const repoRouter = createTRPCRouter({
           data: {
             githubInstallationId: BigInt(input.installationId),
             githubInstallationUrl: installation.html_url,
-            providerAccountId: githubAccountId,
           },
           where: { id: existingAccount.id },
         });
@@ -555,7 +568,7 @@ export const repoRouter = createTRPCRouter({
             githubInstallationId: BigInt(input.installationId),
             githubInstallationUrl: installation.html_url,
             provider: "github",
-            providerAccountId: githubAccountId,
+            providerAccountId: syntheticId,
             type: "app-installation",
             userId,
           },

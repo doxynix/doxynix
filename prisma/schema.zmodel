@@ -326,7 +326,7 @@ model Account {
 
   @@allow('read,delete', auth() == user || auth().role == 'ADMIN')
   @@allow('create', (auth() != null && userId == auth().id) || auth().role == 'ADMIN')
-  @@allow('update', auth().role == 'ADMIN')
+  @@allow('update', (auth() == user && future().userId == userId) || auth().role == 'ADMIN')
 
   @@unique([provider, providerAccountId])
   @@index([githubInstallationId])
