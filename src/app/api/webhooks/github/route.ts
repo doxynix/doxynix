@@ -48,27 +48,35 @@ export async function POST(req: Request) {
     const githubLogin = event.installation.account.login;
 
     try {
-      if (action === "deleted" || action === "suspend") {
-        const result = await prisma.account.updateMany({
-          data: {
-            githubInstallationId: null,
-            githubInstallationUrl: null,
-          },
-          where: { githubInstallationId: instIdBigInt },
-        });
-
-        await prisma.auditLog.create({
-          data: {
-            model: "Account",
-            operation: `GITHUB_INSTALLATION_${action.toUpperCase()}`,
-            payload: { githubLogin, installationId: event.installation.id },
-          },
-        });
+      if (action === "deleted") {
+        const [result] = await prisma.$transaction([
+          prisma.account.updateMany({
+            data: {
+              githubInstallationId: null,
+              githubInstallationUrl: null,
+            },
+            where: { githubInstallationId: instIdBigInt },
+          }),
+          prisma.auditLog.create({
+            data: {
+              model: "Account",
+              operation: `GITHUB_INSTALLATION_${action.toUpperCase()}`,
+              payload: { githubLogin, installationId: event.installation.id },
+            },
+          }),
+        ]);
 
         logger.info({
           affectedRows: result.count,
           installationId: event.installation.id,
           msg: `GitHub installation ${action}`,
+        });
+      }
+
+      if (action === "suspend") {
+        logger.info({
+          installationId: event.installation.id,
+          msg: "GitHub installation suspended",
         });
       }
 

@@ -552,7 +552,7 @@ export const repoRouter = createTRPCRouter({
       });
 
       const existingSpecific = userAccounts.find(
-        (a) => a.githubInstallationId === installationIdBigInt && a.access_token != null
+        (a) => a.githubInstallationId === installationIdBigInt
       );
       const oauthAccount = userAccounts.find(
         (a) => a.githubInstallationId === null && a.access_token != null

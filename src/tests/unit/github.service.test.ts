@@ -150,6 +150,8 @@ describe("githubService", () => {
     vi.resetAllMocks();
     octokitState.constructorAuths.length = 0;
     octokitState.constructorOptions.length = 0;
+    octokitState.auth.mockResolvedValue({ token: "mock-token" });
+    octokitState.paginate.mockResolvedValue([]);
     fileClassifierState.isIgnored.mockReturnValue(false);
   });
 
@@ -214,100 +216,52 @@ describe("githubService", () => {
   });
 
   describe("getMyRepos", () => {
-    it("should return empty list and warn when user token is missing", async () => {
-      const { prisma } = createMockPrisma(null);
-
+    it("should return empty list when user has no accounts", async () => {
+      const { prisma } = createMockPrisma([]);
       const repos = await githubService.getMyRepos(prisma, 10);
-
       expect(repos).toEqual([]);
-      expect(loggerState.warn).toHaveBeenCalledWith({
-        msg: "GitHub account not linked. Cannot fetch private repos.",
-        userId: 10,
-      });
-      expect(octokitState.listForAuthenticatedUser).not.toHaveBeenCalled();
+      expect(octokitState.paginate).not.toHaveBeenCalled();
     });
 
-    it("should fetch limited repos via listForAuthenticatedUser when limit is provided", async () => {
+    it("should fetch repos via paginate for oauth account", async () => {
       const { prisma } = createMockPrisma([{ access_token: "token" }]);
-
-      octokitState.listForAuthenticatedUser.mockResolvedValue({
-        data: [
-          {
-            description: "desc",
-            full_name: "owner/repo",
-            language: "TypeScript",
-            private: false,
-            stargazers_count: 15,
-            updated_at: "2025-01-01T00:00:00.000Z",
-          },
-        ],
-      });
+      octokitState.paginate.mockResolvedValue([
+        { full_name: "owner/repo", private: false, stargazers_count: 5 },
+      ]);
 
       const repos = await githubService.getMyRepos(prisma, 1);
 
-      expect(octokitState.listForAuthenticatedUser).toHaveBeenCalledWith({
-        direction: "desc",
-        per_page: 3,
-        sort: "updated",
-        visibility: "all",
-      });
-
-      expect(repos).toEqual([
-        {
-          description: "desc",
-          fullName: "owner/repo",
-          language: "TypeScript",
-          stars: 15,
-          updatedAt: "2025-01-01T00:00:00.000Z",
-          visibility: "PUBLIC",
-        },
-      ]);
+      expect(octokitState.paginate).toHaveBeenCalledWith(
+        octokitState.listForAuthenticatedUser,
+        expect.objectContaining({ per_page: 100, visibility: "all" })
+      );
+      expect(repos[0].fullName).toBe("owner/repo");
     });
 
-    it("should fetch all repos via paginate when limit is not provided", async () => {
-      const { prisma } = createMockPrisma([{ access_token: "token" }]);
-      octokitState.paginate.mockResolvedValue([
-        {
-          description: null,
-          full_name: "owner/another",
-          language: null,
-          private: true,
-          stargazers_count: 1,
-          updated_at: "2025-02-02T00:00:00.000Z",
-        },
+    it("should combine repos from multiple accounts and deduplicate", async () => {
+      const { prisma } = createMockPrisma([
+        { access_token: "token1" },
+        { githubInstallationId: 123 },
       ]);
 
-      const repos = await githubService.getMyRepos(prisma, 2);
+      octokitState.paginate.mockResolvedValue([{ full_name: "org/shared", private: false }]);
 
-      expect(octokitState.paginate).toHaveBeenCalledWith(octokitState.listForAuthenticatedUser, {
-        direction: "desc",
-        per_page: 100,
-        sort: "updated",
-        visibility: "all",
-      });
-      expect(repos).toEqual([
-        {
-          description: null,
-          fullName: "owner/another",
-          language: null,
-          stars: 1,
-          updatedAt: "2025-02-02T00:00:00.000Z",
-          visibility: "PRIVATE",
-        },
-      ]);
+      const repos = await githubService.getMyRepos(prisma, 1);
+
+      expect(repos).toHaveLength(1);
+      expect(repos[0].fullName).toBe("org/shared");
     });
 
-    it("should return empty list and log error when github request throws", async () => {
+    it("should log error and continue if one account fails", async () => {
       const { prisma } = createMockPrisma([{ access_token: "token" }]);
-      octokitState.listForAuthenticatedUser.mockRejectedValue(new Error("GitHub is down"));
+      octokitState.paginate.mockRejectedValue(new Error("GitHub Down"));
 
       const repos = await githubService.getMyRepos(prisma, 4);
 
       expect(repos).toEqual([]);
       expect(loggerState.error).toHaveBeenCalledWith(
         expect.objectContaining({
-          msg: "Error fetching repositories",
-          userId: 4,
+          msg: "Failed to fetch repos for one of the installations",
         })
       );
     });

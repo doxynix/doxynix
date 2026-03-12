@@ -171,7 +171,7 @@ export const githubService = {
             const repos = await octokit.paginate(
               octokit.rest.apps.listReposAccessibleToInstallation
             );
-            allRepos.push(...this.mapRepos(repos as GitHubRepoResponse[]));
+            allRepos.push(...githubService.mapRepos(repos as GitHubRepoResponse[]));
           } else if (account.access_token != null) {
             const octokit = new MyOctokit({
               ...commonConfig,
@@ -182,7 +182,7 @@ export const githubService = {
               per_page: 100,
               visibility: "all",
             });
-            allRepos.push(...this.mapRepos(repos));
+            allRepos.push(...githubService.mapRepos(repos));
           }
         } catch (error) {
           logger.error({

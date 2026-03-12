@@ -274,7 +274,7 @@ model Account {
   refresh_token            String? @db.Text()
   /// @zod.custom.omit(["model"])
   access_token             String? @db.Text()
-  githubInstallationId     BigInt? @map("github_installation_id")
+  githubInstallationId     BigInt? @unique() @map("github_installation_id")
   githubInstallationUrl    String? @map("github_installation_url") @db.Text()
   /// @zod.custom.omit(["model"])
   refresh_token_expires_in Int?
@@ -287,7 +287,6 @@ model Account {
   user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@index([githubInstallationId])
   @@map("accounts")
 }
 
