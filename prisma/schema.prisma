@@ -298,6 +298,7 @@ model GithubInstallation {
   accountAvatar       String?  @map("account_avatar")
   repositorySelection String   @map("repository_selection")
   isSuspended         Boolean  @default(false) @map("is_suspended")
+  htmlUrl             String?  @map("html_url")
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt() @map("updated_at")
   userId              Int?     @map("user_id")

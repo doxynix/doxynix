@@ -5,7 +5,6 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { CreateRepoSchema, GitHubQuerySchema } from "@/shared/api/schemas/repo";
-import { NEXTAUTH_SECRET } from "@/shared/constants/env.server";
 
 import { logger } from "@/server/logger/logger";
 import { githubService } from "@/server/services/github.service";
@@ -459,13 +458,18 @@ export const repoRouter = createTRPCRouter({
       };
     }),
 
-  getGithubInstallUrl: protectedProcedure.query(({ ctx }) => {
-    const userId = String(ctx.session.user.id);
-    const timestamp = Date.now().toString();
-    const payload = `${userId}:${timestamp}`;
-    const signature = crypto.createHmac("sha256", NEXTAUTH_SECRET).update(payload).digest("hex");
+  getGithubInstallUrl: protectedProcedure.query(async ({ ctx }) => {
+    const userId = Number(ctx.session.user.id);
+    const state = crypto.randomBytes(32).toString("hex");
 
-    const state = encodeURIComponent(Buffer.from(`${payload}:${signature}`).toString("base64"));
+    await ctx.prisma.verificationToken.create({
+      data: {
+        expires: new Date(Date.now() + 10 * 60 * 1000),
+        identifier: `github_install_${userId}`,
+        token: state,
+      },
+    });
+
     return `https://github.com/apps/doxynix/installations/new?state=${state}`;
   }),
 
@@ -474,7 +478,7 @@ export const repoRouter = createTRPCRouter({
 
     const installations = await ctx.db.githubInstallation.findMany({
       orderBy: { createdAt: "asc" },
-      where: { userId },
+      where: { isSuspended: false, userId },
     });
 
     const oauthAccounts = await ctx.db.account.findMany({
@@ -485,12 +489,10 @@ export const repoRouter = createTRPCRouter({
       return { installationId: null, isConnected: false, items: [], manageUrl: null };
     }
 
-    const mainInstall = installations[0] ?? null;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const installationId = mainInstall != null ? Number(mainInstall.id) : null;
-    const manageUrl =
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      mainInstall != null ? `https://github.com/settings/installations/${mainInstall.id}` : null;
+    const mainInstall = installations.length > 0 ? installations[0] : undefined;
+
+    const manageUrl = mainInstall?.htmlUrl ?? null;
+    const installationId = mainInstall ? Number(mainInstall.id) : null;
 
     try {
       const repos = await githubService.getMyRepos(ctx.prisma, userId);
@@ -570,26 +572,21 @@ export const repoRouter = createTRPCRouter({
       const instIdBigInt = BigInt(input.installationId);
       const inputInstIdNum = Number(input.installationId);
 
-      const tokenRecord = await ctx.db.verificationToken.findFirst({
+      const consumed = await ctx.prisma.verificationToken.deleteMany({
         where: {
+          expires: { gt: new Date() },
           identifier: `github_install_${userIdNum}`,
           token: input.state,
         },
       });
 
-      if (!tokenRecord || tokenRecord.expires < new Date()) {
+      if (consumed.count === 0) {
         logger.warn({ msg: "CSRF/Replay attack or expired state", userId: userIdNum });
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Invalid, expired, or already used security state. Please try installing again.",
         });
       }
-
-      await ctx.db.verificationToken.delete({
-        where: {
-          identifier_token: { identifier: `github_install_${userIdNum}`, token: input.state },
-        },
-      });
 
       const oauthAccount = await ctx.prisma.account.findFirst({
         select: { access_token: true },
@@ -643,6 +640,7 @@ export const repoRouter = createTRPCRouter({
           data: {
             accountAvatar,
             accountLogin,
+            htmlUrl: installationInfo.html_url,
             repositorySelection: installationInfo.repository_selection,
             userId: userIdNum,
           },
@@ -659,6 +657,7 @@ export const repoRouter = createTRPCRouter({
                 accountAvatar,
                 accountLogin,
                 appId: installationInfo.app_id,
+                htmlUrl: installationInfo.html_url,
                 id: instIdBigInt,
                 repositorySelection: installationInfo.repository_selection,
                 targetId: BigInt(installationInfo.target_id),

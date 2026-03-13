@@ -351,15 +351,18 @@ export const githubService = {
     }));
   },
 
-  parseUrl(input: string) {
-    if (!input.trim()) throw new Error("Field cannot be empty");
+  parseUrl(input: string): { name: string; owner: string } {
+    if (input.trim() === "") throw new Error("Field cannot be empty");
     const parsed = parseGithubUrl(input);
 
-    if (parsed == null || parsed.owner?.trim() === "" || parsed.name?.trim() === "") {
+    const owner = parsed?.owner?.trim() ?? "";
+    const name = parsed?.name?.trim() ?? "";
+
+    if (owner === "" || name === "") {
       throw new Error("Invalid format. Enter 'owner/repo' or repository URL");
     }
 
-    return { name: parsed.name, owner: parsed.owner };
+    return { name, owner };
   },
 
   async searchRepos(

@@ -15,6 +15,7 @@ type GitHubWebhookEvent = {
       login: string;
     };
     app_id: number;
+    html_url: string;
     id: number;
     repository_selection: string;
     target_id: number;
@@ -68,26 +69,37 @@ export async function POST(req: Request) {
           if (account != null) matchedUserId = account.userId;
         }
 
-        await prisma.githubInstallation.upsert({
-          create: {
-            accountAvatar: event.installation.account.avatar_url,
-            accountLogin: event.installation.account.login,
-            appId: event.installation.app_id,
-            id: instIdBigInt,
-            repositorySelection: event.installation.repository_selection,
-            targetId: BigInt(event.installation.target_id || event.installation.account.id),
-            targetType: event.installation.target_type,
-            userId: matchedUserId,
-          },
-          update: {
-            accountAvatar: event.installation.account.avatar_url,
-            accountLogin: event.installation.account.login,
-            isSuspended: false,
-            repositorySelection: event.installation.repository_selection,
-          },
-          where: { id: instIdBigInt },
-        });
-
+        await prisma.$transaction([
+          prisma.githubInstallation.upsert({
+            create: {
+              accountAvatar: event.installation.account.avatar_url,
+              accountLogin: event.installation.account.login,
+              appId: event.installation.app_id,
+              htmlUrl: event.installation.html_url,
+              id: instIdBigInt,
+              repositorySelection: event.installation.repository_selection,
+              targetId: BigInt(event.installation.target_id || event.installation.account.id),
+              targetType: event.installation.target_type,
+              userId: matchedUserId,
+            },
+            update: {
+              accountAvatar: event.installation.account.avatar_url,
+              accountLogin: event.installation.account.login,
+              htmlUrl: event.installation.html_url,
+              isSuspended: false,
+              repositorySelection: event.installation.repository_selection,
+            },
+            where: { id: instIdBigInt },
+          }),
+          prisma.auditLog.create({
+            data: {
+              model: "GithubInstallation",
+              operation: `GITHUB_APP_INSTALLED`,
+              payload: { githubLogin, installationId: event.installation!.id },
+              userId: matchedUserId,
+            },
+          }),
+        ]);
         logger.info({
           installationId: event.installation.id,
           matchedUserId,
@@ -97,13 +109,11 @@ export async function POST(req: Request) {
 
       if (action === "deleted") {
         const [result] = await prisma.$transaction([
-          prisma.githubInstallation.deleteMany({
-            where: { id: instIdBigInt },
-          }),
+          prisma.githubInstallation.deleteMany({ where: { id: instIdBigInt } }),
           prisma.auditLog.create({
             data: {
               model: "GithubInstallation",
-              operation: `GITHUB_INSTALLATION_DELETED`,
+              operation: `GITHUB_APP_DELETED`,
               payload: { githubLogin, installationId: event.installation.id },
             },
           }),
@@ -117,10 +127,19 @@ export async function POST(req: Request) {
       }
 
       if (action === "suspend") {
-        await prisma.githubInstallation.updateMany({
-          data: { isSuspended: true },
-          where: { id: instIdBigInt },
-        });
+        await prisma.$transaction([
+          prisma.githubInstallation.updateMany({
+            data: { isSuspended: true },
+            where: { id: instIdBigInt },
+          }),
+          prisma.auditLog.create({
+            data: {
+              model: "GithubInstallation",
+              operation: `GITHUB_APP_SUSPENDED`,
+              payload: { githubLogin, installationId: event.installation.id },
+            },
+          }),
+        ]);
         logger.info({
           installationId: event.installation.id,
           msg: "GitHub installation suspended",
@@ -128,10 +147,19 @@ export async function POST(req: Request) {
       }
 
       if (action === "unsuspend") {
-        await prisma.githubInstallation.updateMany({
-          data: { isSuspended: false },
-          where: { id: instIdBigInt },
-        });
+        await prisma.$transaction([
+          prisma.githubInstallation.updateMany({
+            data: { isSuspended: false },
+            where: { id: instIdBigInt },
+          }),
+          prisma.auditLog.create({
+            data: {
+              model: "GithubInstallation",
+              operation: `GITHUB_APP_UNSUSPENDED`,
+              payload: { githubLogin, installationId: event.installation.id },
+            },
+          }),
+        ]);
         logger.info({
           installationId: event.installation.id,
           msg: "GitHub installation unsuspended",
