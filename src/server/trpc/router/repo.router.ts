@@ -566,41 +566,30 @@ export const repoRouter = createTRPCRouter({
     )
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      const userIdStr = String(ctx.session.user.id);
       const userIdNum = Number(ctx.session.user.id);
       const instIdBigInt = BigInt(input.installationId);
       const inputInstIdNum = Number(input.installationId);
 
-      try {
-        const decodedState = Buffer.from(decodeURIComponent(input.state), "base64").toString(
-          "utf-8"
-        );
-        const [stateUserId, stateTimestamp, stateSignature] = decodedState.split(":");
+      const tokenRecord = await ctx.db.verificationToken.findFirst({
+        where: {
+          identifier: `github_install_${userIdNum}`,
+          token: input.state,
+        },
+      });
 
-        const expectedSignature = crypto
-          .createHmac("sha256", NEXTAUTH_SECRET)
-          .update(`${stateUserId}:${stateTimestamp}`)
-          .digest("hex");
-
-        const isExpired = Date.now() - Number(stateTimestamp) > 1000 * 60 * 30; // 30 minutes TTL
-
-        if (stateSignature !== expectedSignature || stateUserId !== userIdStr || isExpired) {
-          logger.warn({
-            msg: "CSRF attack or expired state detected on GitHub installation",
-            userId: userIdNum,
-          });
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Invalid or expired security state. Installation rejected.",
-          });
-        }
-      } catch (e) {
-        if (e instanceof TRPCError) throw e;
+      if (!tokenRecord || tokenRecord.expires < new Date()) {
+        logger.warn({ msg: "CSRF/Replay attack or expired state", userId: userIdNum });
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Malformed security state. Installation rejected.",
+          message: "Invalid, expired, or already used security state. Please try installing again.",
         });
       }
+
+      await ctx.db.verificationToken.delete({
+        where: {
+          identifier_token: { identifier: `github_install_${userIdNum}`, token: input.state },
+        },
+      });
 
       const oauthAccount = await ctx.prisma.account.findFirst({
         select: { access_token: true },

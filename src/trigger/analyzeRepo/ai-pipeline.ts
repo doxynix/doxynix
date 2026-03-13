@@ -212,7 +212,6 @@ export async function generateDeepDocs(
             error,
             msg: "Failed to fetch commits for CHANGELOG. Returning empty string.",
           });
-          return "";
         }
 
         return await callWithFallback<string>({

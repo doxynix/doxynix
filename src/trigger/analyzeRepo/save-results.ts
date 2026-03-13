@@ -173,12 +173,13 @@ export async function calculateBusFactor(repo: Repo, userId: number): Promise<nu
       if (repo.visibility === "PRIVATE") throw e;
       octokit = githubService.getSystemClient();
     }
-
+    let fetchedContributors = 0;
     const contributors = await octokit.paginate(
       octokit.rest.repos.listContributors,
       { owner: repo.owner, per_page: 100, repo: repo.name },
       (response, done) => {
-        if (response.data.length >= 500) done();
+        fetchedContributors += response.data.length;
+        if (fetchedContributors >= 500) done();
         return response.data;
       }
     );

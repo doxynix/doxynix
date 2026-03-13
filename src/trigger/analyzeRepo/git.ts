@@ -37,7 +37,12 @@ export async function getAnalysisContext(
   try {
     const clientContext = await githubService.getClientContext(prisma, userId, repo.owner);
     octokit = clientContext.octokit;
-  } catch {
+  } catch (error) {
+    const isMissingAuth =
+      error instanceof Error && error.message.includes("No valid GitHub authorization found");
+
+    if (!isMissingAuth) throw error;
+
     if (repo.visibility === "PRIVATE") {
       throw new Error(
         "This is a private repository. Please install Doxynix App or connect GitHub."

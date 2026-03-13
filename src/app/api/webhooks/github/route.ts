@@ -82,6 +82,7 @@ export async function POST(req: Request) {
           update: {
             accountAvatar: event.installation.account.avatar_url,
             accountLogin: event.installation.account.login,
+            isSuspended: false,
             repositorySelection: event.installation.repository_selection,
           },
           where: { id: instIdBigInt },
@@ -116,6 +117,10 @@ export async function POST(req: Request) {
       }
 
       if (action === "suspend") {
+        await prisma.githubInstallation.updateMany({
+          data: { isSuspended: true },
+          where: { id: instIdBigInt },
+        });
         logger.info({
           installationId: event.installation.id,
           msg: "GitHub installation suspended",
@@ -123,6 +128,10 @@ export async function POST(req: Request) {
       }
 
       if (action === "unsuspend") {
+        await prisma.githubInstallation.updateMany({
+          data: { isSuspended: false },
+          where: { id: instIdBigInt },
+        });
         logger.info({
           installationId: event.installation.id,
           msg: "GitHub installation unsuspended",
