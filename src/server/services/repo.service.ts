@@ -52,7 +52,7 @@ export const repoService = {
   async createRepo(db: DbClient, userId: number, url: string) {
     let repoInfo;
     try {
-      repoInfo = githubService.parseUrl(url);
+      repoInfo = githubService.parseUrl(url) as { name: string; owner: string };
     } catch {
       throw new TRPCError({
         code: "BAD_REQUEST",
