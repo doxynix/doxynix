@@ -69,15 +69,7 @@ export async function POST(req: Request) {
       }
 
       if (action === "created") {
-        const senderId = event.sender?.id;
         let matchedUserId: number | null = null;
-
-        if (senderId != null) {
-          const account = await prisma.account.findFirst({
-            where: { provider: "github", providerAccountId: String(senderId) },
-          });
-          if (account != null) matchedUserId = account.userId;
-        }
 
         await prisma.$transaction([
           prisma.githubInstallation.upsert({
