@@ -341,7 +341,10 @@ export const githubService = {
   async getToken(prisma: DbClient, userId: number, owner?: string): Promise<string | null> {
     try {
       const context = await this.getClientContext(prisma, userId, owner);
-      const auth = (await context.octokit.auth()) as { token: string };
+      const auth =
+        context.type === "installation"
+          ? ((await context.octokit.auth({ type: "installation" })) as { token: string })
+          : ((await context.octokit.auth()) as { token: string });
       return auth.token;
     } catch (error) {
       logger.error({ error, msg: "Failed to resolve GitHub token", userId });
