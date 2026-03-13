@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.16.2](https://github.com/doxynix/doxynix/compare/v1.16.1...v1.16.2) (2026-03-13)
+
+
+### Bug Fixes
+
+* **tooling:** пофикшены сурс мапы для загрузки их в sentry ([#590](https://github.com/doxynix/doxynix/issues/590)) ([ec27c7b](https://github.com/doxynix/doxynix/commit/ec27c7b3f5d3046f6b7678788b02e43415f014ed))
+
 ## [1.16.1](https://github.com/doxynix/doxynix/compare/v1.16.0...v1.16.1) (2026-03-13)
 
 
