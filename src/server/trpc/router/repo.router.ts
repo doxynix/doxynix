@@ -492,7 +492,7 @@ export const repoRouter = createTRPCRouter({
     const mainInstall = installations.length > 0 ? installations[0] : undefined;
 
     const manageUrl = mainInstall?.htmlUrl ?? null;
-    const installationId = mainInstall ? Number(mainInstall.id) : null;
+    const installationId = mainInstall != null ? Number(mainInstall.id) : null;
 
     try {
       const repos = await githubService.getMyRepos(ctx.prisma, userId);
