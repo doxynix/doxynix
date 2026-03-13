@@ -312,12 +312,14 @@ const sentryOptions = {
     excludeReplayShadowDom: true,
   },
 
-  hideSourceMaps: IS_PROD,
   org: "doxynix",
-
   project: "doxynix",
 
   silent: process.env.CI == null,
+
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: IS_PROD,
+  },
 
   tunnelRoute: `${API_PREFIX}/dxnx/s`,
 
