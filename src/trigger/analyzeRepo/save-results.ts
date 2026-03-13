@@ -170,7 +170,10 @@ export async function calculateBusFactor(repo: Repo, userId: number): Promise<nu
       const context = await githubService.getClientContext(prisma, userId, repo.owner);
       octokit = context.octokit;
     } catch (e) {
-      if (repo.visibility === "PRIVATE") throw e;
+      const isMissingAuth =
+        e instanceof Error && e.message.includes("No valid GitHub authorization found");
+
+      if (!isMissingAuth || repo.visibility === "PRIVATE") throw e;
       octokit = githubService.getSystemClient();
     }
     let fetchedContributors = 0;

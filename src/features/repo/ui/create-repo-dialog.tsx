@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BookOpen, ExternalLink } from "lucide-react";
+import { BookOpen, ExternalLink, RefreshCcw } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
@@ -14,6 +14,7 @@ import { CreateRepoSchema, type CreateRepoInput } from "@/shared/api/schemas/rep
 import { trpc } from "@/shared/api/trpc";
 import { useClickOutside } from "@/shared/hooks/use-click-outside";
 import { isGitHubUrl } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/core/button";
 import {
   Dialog,
   DialogContent,
@@ -92,13 +93,14 @@ export function CreateRepoDialog() {
     }
   );
 
-  const { data: myGithubData, isFetching: isFetchingMyRepos } = trpc.repo.getMyGithubRepos.useQuery(
-    undefined,
-    {
-      enabled: open,
-      staleTime: STALE_TIME,
-    }
-  );
+  const {
+    data: myGithubData,
+    isFetching: isFetchingMyRepos,
+    refetch: refetchMyRepos,
+  } = trpc.repo.getMyGithubRepos.useQuery(undefined, {
+    enabled: open,
+    staleTime: STALE_TIME,
+  });
 
   const onSubmit = (values: CreateRepoInput) => {
     create.mutate(values, {
@@ -230,8 +232,19 @@ export function CreateRepoDialog() {
                   </div>
                 ) : myGithubData == null ? (
                   <div className="h-70 rounded-xl border p-1">
-                    <div className="text-muted-foreground flex h-full items-center justify-center p-4 text-center text-sm">
-                      Failed to load repositories. Please try again.
+                    <div className="flex h-full flex-col items-center justify-center p-4 text-center">
+                      <p className="text-muted-foreground mb-3 text-sm">
+                        Failed to load repositories.
+                      </p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void refetchMyRepos()}
+                        className="h-8 gap-2"
+                      >
+                        <RefreshCcw className="h-3.5 w-3.5" /> Retry
+                      </Button>
                     </div>
                   </div>
                 ) : myGithubData.isConnected === false ? (

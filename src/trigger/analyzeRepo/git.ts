@@ -32,11 +32,12 @@ export async function getAnalysisContext(
   const lastSuccessfulAnalysis = repo.analyses[0];
 
   let octokit;
-  let isAppClient = false;
+  let clientType: "installation" | "oauth" | "app" = "oauth";
 
   try {
     const clientContext = await githubService.getClientContext(prisma, userId, repo.owner);
     octokit = clientContext.octokit;
+    clientType = clientContext.type;
   } catch (error) {
     const isMissingAuth =
       error instanceof Error && error.message.includes("No valid GitHub authorization found");
@@ -49,18 +50,28 @@ export async function getAnalysisContext(
       );
     }
     octokit = githubService.getSystemClient();
-    isAppClient = true;
+    clientType = "app";
   }
 
-  const { data: refData } = await octokit.rest.git.getRef({
-    owner: repo.owner,
-    ref: `heads/${repo.defaultBranch}`,
-    repo: repo.name,
-  });
+  const refData = await githubService.executeWithFallback(
+    prisma,
+    userId,
+    octokit,
+    clientType,
+    async (client) => {
+      const { data } = await client.rest.git.getRef({
+        owner: repo.owner,
+        ref: `heads/${repo.defaultBranch}`,
+        repo: repo.name,
+      });
+      return data;
+    }
+  );
 
   const currentSha = refData.object.sha;
 
-  const token = isAppClient ? null : await githubService.getToken(prisma, userId, repo.owner);
+  const token =
+    clientType === "app" ? null : await githubService.getToken(prisma, userId, repo.owner);
 
   if (repo.visibility === "PRIVATE" && token == null) {
     throw new Error("Unable to resolve GitHub token for private repository.");
