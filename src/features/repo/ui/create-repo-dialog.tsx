@@ -76,8 +76,7 @@ export function CreateRepoDialog() {
       }
 
       window.location.assign(url);
-    } catch (error) {
-      console.error(error);
+    } catch {
       posthog.capture("github_app_install_failed");
     } finally {
       setLoading(false);
@@ -114,7 +113,11 @@ export function CreateRepoDialog() {
   async function handleSignIn() {
     try {
       setLoadingOauth(true);
+      posthog.capture("github_oauth_started");
       await signIn("github", { callbackUrl: "/dashboard" });
+    } catch (error) {
+      console.error(error);
+      posthog.capture("github_oauth_failed");
     } finally {
       setLoadingOauth(false);
     }
@@ -248,31 +251,31 @@ export function CreateRepoDialog() {
                       </LoadingButton>
                     </div>
                   </div>
-                ) : myGithubData.installationId == null ? (
-                  <div className="h-70 rounded-xl border p-1">
-                    <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
-                      <p className="text-muted-foreground mb-3 text-sm">
-                        Great! Now install our GitHub App to grant access to your repositories.
-                      </p>
-                      <LoadingButton
-                        type="button"
-                        disabled={loading}
-                        isLoading={loading}
-                        loadingText="Connecting..."
-                        variant="outline"
-                        onClick={() => void handleInstallGitHubApp()}
-                        className="cursor-pointer"
-                      >
-                        <GitHubIcon /> Install GitHub App
-                      </LoadingButton>
-                    </div>
-                  </div>
                 ) : (
                   <ScrollArea type="always" className="h-70 rounded-xl border p-1">
                     {myGithubData.items.length === 0 ? (
-                      <div className="text-muted-foreground flex h-full items-center justify-center p-4 text-center text-sm">
-                        No repositories found. Ensure you granted access to them.
-                      </div>
+                      myGithubData.installationId == null ? (
+                        <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
+                          <p className="text-muted-foreground mb-3 text-sm">
+                            Great! Now install our GitHub App to grant access to your repositories.
+                          </p>
+                          <LoadingButton
+                            type="button"
+                            disabled={loading}
+                            isLoading={loading}
+                            loadingText="Connecting..."
+                            variant="outline"
+                            onClick={() => void handleInstallGitHubApp()}
+                            className="cursor-pointer"
+                          >
+                            <GitHubIcon /> Install GitHub App
+                          </LoadingButton>
+                        </div>
+                      ) : (
+                        <div className="text-muted-foreground flex h-full items-center justify-center p-4 text-center text-sm">
+                          No repositories found. Ensure you granted access to them.
+                        </div>
+                      )
                     ) : (
                       myGithubData.items.map((myRepo) => (
                         <RepoItem

@@ -198,13 +198,11 @@ describe("githubService", () => {
       expect(context.type).toBe("oauth");
     });
 
-    it("should return app context (System Bot) when no account found", async () => {
+    it("should throw when no GitHub authorization is available", async () => {
       const { prisma } = createMockPrisma(null);
-      const context = await githubService.getClientContext(prisma, 9);
-
-      expect(context.type).toBe("app");
-      const auth = octokitState.constructorAuths[0];
-      expect(auth.installationId).toBe(999999);
+      await expect(githubService.getClientContext(prisma, 9)).rejects.toThrow(
+        "No valid GitHub authorization found"
+      );
     });
 
     it("should configure and execute throttle callbacks for rate limit handlers", async () => {
@@ -222,7 +220,7 @@ describe("githubService", () => {
 
       expect(onRateLimit?.(3, { method: "GET", url: "/repos" }, octokit, 0)).toBe(true);
       expect(onRateLimit?.(3, { method: "GET", url: "/repos" }, octokit, 2)).toBe(false);
-      expect(onSecondaryRateLimit?.(2, { method: "POST", url: "/search" }, octokit)).toBe(true);
+      expect(onSecondaryRateLimit?.(2, { method: "POST", url: "/search" }, octokit, 0)).toBe(true);
       expect(warn).toHaveBeenCalledTimes(3);
     });
   });
@@ -289,15 +287,6 @@ describe("githubService", () => {
 
       expect(data).toEqual(repoPayload);
       expect(octokitState.getRepo).toHaveBeenCalledWith({ owner: "owner", repo: "repo" });
-    });
-
-    it("should propagate error when octokit throws", async () => {
-      const { prisma } = createMockPrisma({ access_token: "token" });
-      octokitState.getRepo.mockRejectedValue(new Error("Not found"));
-
-      await expect(githubService.getRepoInfo(prisma, 1, "owner", "repo")).rejects.toThrow(
-        "Not found"
-      );
     });
   });
 

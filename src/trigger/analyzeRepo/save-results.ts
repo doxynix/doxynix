@@ -165,14 +165,27 @@ export async function saveResults(params: {
 
 export async function calculateBusFactor(repo: Repo, userId: number): Promise<number> {
   try {
-    const { octokit } = await githubService.getClientContext(prisma, userId, repo.owner);
-    const contributors = await octokit.paginate(octokit.rest.repos.listContributors, {
-      owner: repo.owner,
-      per_page: 100,
-      repo: repo.name,
-    });
+    let octokit;
+    try {
+      const context = await githubService.getClientContext(prisma, userId, repo.owner);
+      octokit = context.octokit;
+    } catch (e) {
+      if (repo.visibility === "PRIVATE") throw e;
+      octokit = githubService.getSystemClient();
+    }
+
+    const contributors = await octokit.paginate(
+      octokit.rest.repos.listContributors,
+      { owner: repo.owner, per_page: 100, repo: repo.name },
+      (response, done) => {
+        if (response.data.length >= 500) done();
+        return response.data;
+      }
+    );
 
     const totalCommits = contributors.reduce((acc, c) => acc + (c.contributions || 0), 0);
+    if (totalCommits === 0) return 0;
+
     let runningSum = 0;
     let busFactor = 0;
 
@@ -184,11 +197,22 @@ export async function calculateBusFactor(repo: Repo, userId: number): Promise<nu
 
     return busFactor;
   } catch (error) {
-    logger.warn({
-      error,
-      msg: "Failed to fetch contributors for Bus Factor calculation. Defaulting to 0.",
-      repoId: repo.id,
-    });
-    return 0;
+    const status =
+      typeof error === "object" && error !== null && "status" in error
+        ? Number((error as { status?: number }).status)
+        : undefined;
+    const isMissingAuth =
+      error instanceof Error && error.message.includes("No valid GitHub authorization found");
+
+    if (isMissingAuth || status === 401 || status === 403 || status === 404) {
+      logger.warn({
+        error,
+        msg: "Failed to fetch contributors for Bus Factor calculation. Defaulting to 0.",
+        repoId: repo.id,
+      });
+      return 0;
+    }
+
+    throw error;
   }
 }

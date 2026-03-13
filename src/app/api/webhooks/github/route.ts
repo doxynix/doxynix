@@ -83,7 +83,6 @@ export async function POST(req: Request) {
             accountAvatar: event.installation.account.avatar_url,
             accountLogin: event.installation.account.login,
             repositorySelection: event.installation.repository_selection,
-            ...(matchedUserId != null ? { userId: matchedUserId } : {}),
           },
           where: { id: instIdBigInt },
         });
@@ -120,6 +119,13 @@ export async function POST(req: Request) {
         logger.info({
           installationId: event.installation.id,
           msg: "GitHub installation suspended",
+        });
+      }
+
+      if (action === "unsuspend") {
+        logger.info({
+          installationId: event.installation.id,
+          msg: "GitHub installation unsuspended",
         });
       }
 

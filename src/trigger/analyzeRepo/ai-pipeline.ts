@@ -192,6 +192,7 @@ export async function generateDeepDocs(
     taskMap["CHANGELOG"] = tasks.length;
     tasks.push(
       (async () => {
+        let simpleCommits;
         try {
           const { octokit } = await githubService.getClientContext(prisma, userId, repo.owner);
           const { data: commitsData } = await octokit.rest.repos.listCommits({
@@ -200,31 +201,31 @@ export async function generateDeepDocs(
             repo: repo.name,
           });
 
-          const simpleCommits = commitsData.map((c) => ({
+          simpleCommits = commitsData.map((c) => ({
             author: c.commit.author?.name,
             date: c.commit.author?.date,
             message: c.commit.message,
           }));
-
-          return await callWithFallback<string>({
-            attemptMetadata: { analysisId, phase: "writer_changelog" },
-            models: AI_MODELS.WRITER,
-            outputSchema: null,
-            prompt: CHANGELOG_WRITER_USER_PROMPT(
-              JSON.stringify(simpleCommits, null, 2),
-              analysisResult.executive_summary.stack_details
-            ),
-            system: CHANGELOG_WRITER_SYSTEM_PROMPT(language),
-            temperature: 0.2,
-          }).then(unwrapAiText);
         } catch (error) {
           logger.warn({
             analysisId,
             error,
             msg: "Failed to fetch commits for CHANGELOG. Returning empty string.",
           });
-          return "Changelog could not be generated: unable to fetch commit history.";
+          return "";
         }
+
+        return await callWithFallback<string>({
+          attemptMetadata: { analysisId, phase: "writer_changelog" },
+          models: AI_MODELS.WRITER,
+          outputSchema: null,
+          prompt: CHANGELOG_WRITER_USER_PROMPT(
+            JSON.stringify(simpleCommits, null, 2),
+            analysisResult.executive_summary.stack_details
+          ),
+          system: CHANGELOG_WRITER_SYSTEM_PROMPT(language),
+          temperature: 0.2,
+        }).then(unwrapAiText);
       })()
     );
   }

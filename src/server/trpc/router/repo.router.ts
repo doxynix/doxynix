@@ -11,7 +11,7 @@ import { logger } from "@/server/logger/logger";
 import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
 import { FileClassifier } from "@/server/utils/file-classifier";
-import { handlePrismaError } from "@/server/utils/handle-error";
+import { handlePrismaError, isOctokitError } from "@/server/utils/handle-error";
 import { DocTypeSchema, RepoSchema, StatusSchema } from "@/generated/zod";
 
 import { OpenApiErrorResponses, RepoFilterSchema } from "../shared";
@@ -317,19 +317,61 @@ export const repoRouter = createTRPCRouter({
   getBranches: protectedProcedure
     .input(z.object({ name: z.string(), owner: z.string() }))
     .query(async ({ ctx, input }) => {
-      const { octokit } = await githubService.getClientContext(
-        ctx.prisma,
-        Number(ctx.session.user.id),
-        input.owner
-      );
+      let activeOctokit;
+      let type;
+      try {
+        const context = await githubService.getClientContext(
+          ctx.prisma,
+          Number(ctx.session.user.id),
+          input.owner
+        );
+        activeOctokit = context.octokit;
+        type = context.type;
+      } catch (err) {
+        if (err instanceof Error && err.message.includes("No valid GitHub")) {
+          activeOctokit = githubService.getSystemClient();
+          type = "app";
+        } else {
+          throw err;
+        }
+      }
 
-      const branches = await octokit.paginate(octokit.rest.repos.listBranches, {
-        owner: input.owner,
-        per_page: 100,
-        repo: input.name,
-      });
-
-      return branches.map((b) => b.name);
+      try {
+        const branches = await activeOctokit.paginate(activeOctokit.rest.repos.listBranches, {
+          owner: input.owner,
+          per_page: 100,
+          repo: input.name,
+        });
+        return branches.map((b) => b.name);
+      } catch (error) {
+        if (
+          type === "installation" &&
+          isOctokitError(error) &&
+          (error.status === 403 || error.status === 404)
+        ) {
+          const oauthAcc = await ctx.prisma.account.findFirst({
+            select: { access_token: true },
+            where: {
+              access_token: { not: null },
+              provider: "github",
+              userId: Number(ctx.session.user.id),
+            },
+          });
+          if (oauthAcc?.access_token != null) {
+            const fallbackOctokit = githubService.getUserClient(oauthAcc.access_token);
+            const branches = await fallbackOctokit.paginate(
+              fallbackOctokit.rest.repos.listBranches,
+              {
+                owner: input.owner,
+                per_page: 100,
+                repo: input.name,
+              }
+            );
+            return branches.map((b) => b.name);
+          }
+        }
+        throw error;
+      }
     }),
 
   getByName: protectedProcedure
@@ -622,29 +664,43 @@ export const repoRouter = createTRPCRouter({
         });
 
         if (updated.count === 0) {
-          const existing = await ctx.db.githubInstallation.findUnique({
-            where: { id: instIdBigInt },
+          const created = await ctx.db.githubInstallation.createMany({
+            data: [
+              {
+                accountAvatar,
+                accountLogin,
+                appId: installationInfo.app_id,
+                id: instIdBigInt,
+                repositorySelection: installationInfo.repository_selection,
+                targetId: BigInt(installationInfo.target_id),
+                targetType: installationInfo.target_type || "Unknown",
+                userId: userIdNum,
+              },
+            ],
+            skipDuplicates: true,
           });
 
-          if (existing !== null && existing.userId !== null && existing.userId !== userIdNum) {
-            throw new TRPCError({
-              code: "FORBIDDEN",
-              message: "This installation is already linked to another workspace.",
+          if (created.count === 0) {
+            const claimed = await ctx.db.githubInstallation.updateMany({
+              data: {
+                accountAvatar,
+                accountLogin,
+                repositorySelection: installationInfo.repository_selection,
+                userId: userIdNum,
+              },
+              where: {
+                id: instIdBigInt,
+                OR: [{ userId: null }, { userId: userIdNum }],
+              },
             });
-          }
 
-          await ctx.db.githubInstallation.create({
-            data: {
-              accountAvatar,
-              accountLogin,
-              appId: installationInfo.app_id,
-              id: instIdBigInt,
-              repositorySelection: installationInfo.repository_selection,
-              targetId: BigInt(installationInfo.target_id),
-              targetType: installationInfo.target_type || "Unknown",
-              userId: userIdNum,
-            },
-          });
+            if (claimed.count === 0) {
+              throw new TRPCError({
+                code: "FORBIDDEN",
+                message: "This installation is already linked to another workspace.",
+              });
+            }
+          }
         }
       } catch (error) {
         if (error instanceof TRPCError) throw error;

@@ -37,13 +37,12 @@ export async function getAnalysisContext(
   try {
     const clientContext = await githubService.getClientContext(prisma, userId, repo.owner);
     octokit = clientContext.octokit;
-  } catch (error) {
+  } catch {
     if (repo.visibility === "PRIVATE") {
       throw new Error(
         "This is a private repository. Please install Doxynix App or connect GitHub."
       );
     }
-    console.error(error);
     octokit = githubService.getSystemClient();
     isAppClient = true;
   }
@@ -57,6 +56,10 @@ export async function getAnalysisContext(
   const currentSha = refData.object.sha;
 
   const token = isAppClient ? null : await githubService.getToken(prisma, userId, repo.owner);
+
+  if (repo.visibility === "PRIVATE" && token == null) {
+    throw new Error("Unable to resolve GitHub token for private repository.");
+  }
 
   if (forceRefresh === false && lastSuccessfulAnalysis.commitSha === currentSha) {
     return { currentSha, repo: null, token };

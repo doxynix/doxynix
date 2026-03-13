@@ -67,7 +67,7 @@ const getCommonConfig = () => ({
       options: RequestOptions,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       octokit: any,
-      retryCount: number
+      retryCount = 0
     ) => {
       octokit.log.warn(
         `Secondary rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s. (Attempt ${retryCount})`
@@ -201,7 +201,21 @@ export const githubService = {
   },
 
   async getRepoInfo(prisma: DbClient, userId: number, owner: string, name: string) {
-    const { octokit, type } = await this.getClientContext(prisma, userId, owner);
+    let octokit;
+    let type;
+    try {
+      const context = await this.getClientContext(prisma, userId, owner);
+      octokit = context.octokit;
+      type = context.type;
+    } catch (err) {
+      if (err instanceof Error && err.message.includes("No valid GitHub")) {
+        octokit = this.getSystemClient();
+        type = "app";
+      } else {
+        throw err;
+      }
+    }
+
     try {
       const { data } = await octokit.rest.repos.get({ owner, repo: name });
       return data;
@@ -231,10 +245,22 @@ export const githubService = {
     name: string,
     branch?: string
   ) {
+    let activeOctokit;
+    let type;
     try {
-      const { octokit, type } = await this.getClientContext(prisma, userId, owner);
-      let activeOctokit = octokit;
+      const context = await this.getClientContext(prisma, userId, owner);
+      activeOctokit = context.octokit;
+      type = context.type;
+    } catch (err) {
+      if (err instanceof Error && err.message.includes("No valid GitHub")) {
+        activeOctokit = this.getSystemClient();
+        type = "app";
+      } else {
+        throw err;
+      }
+    }
 
+    try {
       const repoData = await (async () => {
         try {
           const response = await activeOctokit.rest.repos.get({ owner, repo: name });
@@ -284,7 +310,6 @@ export const githubService = {
     }
   },
 
-  // === ФАБРИКИ КЛИЕНТОВ (УБИРАЮТ ДУБЛИРОВАНИЕ) ===
   getSystemClient(): OctokitInstance {
     return new MyOctokit({
       ...getCommonConfig(),
@@ -330,7 +355,7 @@ export const githubService = {
     if (!input.trim()) throw new Error("Field cannot be empty");
     const parsed = parseGithubUrl(input);
 
-    if (parsed?.owner?.trim() == null || parsed.name?.trim() == null) {
+    if (parsed == null || parsed.owner?.trim() === "" || parsed.name?.trim() === "") {
       throw new Error("Invalid format. Enter 'owner/repo' or repository URL");
     }
 
@@ -345,7 +370,17 @@ export const githubService = {
   ): Promise<RepoItemFields[]> {
     if (query.length < 2 || query.length > 256) return [];
 
-    const { octokit } = await this.getClientContext(prisma, userId);
+    let octokit;
+    try {
+      const context = await this.getClientContext(prisma, userId);
+      octokit = context.octokit;
+    } catch (e) {
+      if (e instanceof Error && e.message.includes("No valid GitHub")) {
+        octokit = this.getSystemClient();
+      } else {
+        throw e;
+      }
+    }
 
     try {
       const { data } = await octokit.rest.search.repos({
