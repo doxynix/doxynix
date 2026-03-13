@@ -9,7 +9,15 @@
   "packageRules": [
     {
       "matchUpdateTypes": ["major"],
-      "addLabels": ["major"]
+      "addLabels": ["major-update"]
+    },
+    {
+      "matchUpdateTypes": ["minor"],
+      "addLabels": ["minor-update"]
+    },
+    {
+      "matchUpdateTypes": ["patch"],
+      "addLabels": ["patch-update"]
     },
     {
       "description": "Запрещаем мажорный апдейт cookie (v1 ломает совместимость с auth/sockets)",
