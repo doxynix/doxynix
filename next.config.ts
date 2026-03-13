@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
     removeConsole: IS_PROD ? { exclude: ["error", "info"] } : false,
   },
   compress: true,
-  enablePrerenderSourceMaps: false,
+  enablePrerenderSourceMaps: IS_PROD,
   experimental: {
     authInterrupts: true,
     optimizePackageImports: [
@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
     ],
     preloadEntriesOnStart: false,
     serverComponentsHmrCache: true,
-    serverSourceMaps: false,
+    serverSourceMaps: IS_PROD,
     taint: true,
     typedEnv: true,
     useLightningcss: IS_PROD,
@@ -313,10 +313,13 @@ const sentryOptions = {
   },
 
   org: "doxynix",
-
   project: "doxynix",
 
   silent: process.env.CI == null,
+
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
 
   tunnelRoute: `${API_PREFIX}/dxnx/s`,
 
