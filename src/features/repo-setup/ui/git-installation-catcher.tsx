@@ -17,11 +17,21 @@ export function GitInstallationCatcher() {
   const { mutate } = trpc.repo.saveInstallation.useMutation();
 
   useEffect(() => {
+    if (hasProcessed.current) return;
+
     const installationIdStr = params.installation_id?.trim();
     const stateFromUrl = params.state;
 
-    if (installationIdStr == null || stateFromUrl == null || hasProcessed.current) return;
-    if (!/^\d+$/.test(installationIdStr)) return;
+    if (installationIdStr == null && stateFromUrl == null) return;
+
+    if (installationIdStr == null || stateFromUrl == null || !/^\d+$/.test(installationIdStr)) {
+      void setParams({
+        installation_id: null,
+        setup_action: null,
+        state: null,
+      });
+      return;
+    }
 
     hasProcessed.current = true;
 

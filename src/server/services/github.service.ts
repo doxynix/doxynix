@@ -187,47 +187,47 @@ export const githubService = {
 
   async getMyRepos(prisma: DbClient, userId: number): Promise<RepoItemFields[]> {
     try {
-      const allRepos: RepoItemFields[] = [];
-
-      const installations = await prisma.githubInstallation.findMany({
-        where: { isSuspended: false, userId },
-      });
-      const oauthAccounts = await prisma.account.findMany({
-        where: { access_token: { not: null }, provider: "github", userId },
-      });
+      const [installations, oauthAccounts] = await Promise.all([
+        prisma.githubInstallation.findMany({
+          where: { isSuspended: false, userId },
+        }),
+        prisma.account.findMany({
+          where: { access_token: { not: null }, provider: "github", userId },
+        }),
+      ]);
 
       if (installations.length === 0 && oauthAccounts.length === 0) return [];
 
-      for (const inst of installations) {
+      const installationTasks = installations.map(async (inst) => {
         try {
           const octokit = this.getInstallationClient(Number(inst.id));
           const repos = await octokit.paginate(octokit.rest.apps.listReposAccessibleToInstallation);
-          allRepos.push(...githubService.mapRepos(repos as GitHubRepoResponse[]));
+          return this.mapRepos(repos as GitHubRepoResponse[]);
         } catch (error) {
-          logger.error({
-            error,
-            installationId: Number(inst.id),
-            msg: "Failed to fetch repos for installation",
-          });
+          logger.error({ error, installationId: inst.id, msg: "Failed installation fetch" });
+          return [];
         }
-      }
+      });
 
-      for (const account of oauthAccounts) {
+      const oauthTasks = oauthAccounts.map(async (account) => {
         try {
           const octokit = this.getUserClient(account.access_token!);
           const repos = await octokit.paginate(octokit.rest.repos.listForAuthenticatedUser, {
             per_page: 100,
             visibility: "all",
           });
-          allRepos.push(...githubService.mapRepos(repos));
+          return this.mapRepos(repos);
         } catch (error) {
-          logger.error({
-            accountId: account.id,
-            error,
-            msg: "Failed to fetch repos for OAuth account",
-          });
+          logger.error({ accountId: account.id, error, msg: "Failed OAuth fetch" });
+          return [];
         }
-      }
+      });
+
+      const results = await Promise.allSettled([...installationTasks, ...oauthTasks]);
+
+      const allRepos = results.flatMap((result) =>
+        result.status === "fulfilled" ? result.value : []
+      );
 
       return Array.from(new Map(allRepos.map((r) => [r.fullName, r])).values());
     } catch (error) {

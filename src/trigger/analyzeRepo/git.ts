@@ -32,7 +32,7 @@ export async function getAnalysisContext(
   const lastSuccessfulAnalysis = repo.analyses[0];
 
   let octokit;
-  let clientType: "installation" | "oauth" | "app" = "oauth";
+  let clientType: "installation" | "oauth" | "app";
 
   try {
     const clientContext = await githubService.getClientContext(prisma, userId, repo.owner);
@@ -53,25 +53,27 @@ export async function getAnalysisContext(
     clientType = "app";
   }
 
-  const refData = await githubService.executeWithFallback(
+  const { currentSha, token } = await githubService.executeWithFallback(
     prisma,
     userId,
     octokit,
     clientType,
     async (client) => {
-      const { data } = await client.rest.git.getRef({
+      const { data: refData } = await client.rest.git.getRef({
         owner: repo.owner,
         ref: `heads/${repo.defaultBranch}`,
         repo: repo.name,
       });
-      return data;
+
+      let resolvedToken: string | null = null;
+      if (clientType !== "app") {
+        const auth = (await client.auth()) as { token?: string };
+        resolvedToken = auth.token ?? null;
+      }
+
+      return { currentSha: refData.object.sha, token: resolvedToken };
     }
   );
-
-  const currentSha = refData.object.sha;
-
-  const token =
-    clientType === "app" ? null : await githubService.getToken(prisma, userId, repo.owner);
 
   if (repo.visibility === "PRIVATE" && token == null) {
     throw new Error("Unable to resolve GitHub token for private repository.");
