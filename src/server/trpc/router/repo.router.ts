@@ -462,13 +462,18 @@ export const repoRouter = createTRPCRouter({
     const userId = Number(ctx.session.user.id);
     const state = crypto.randomBytes(32).toString("hex");
 
-    await ctx.prisma.verificationToken.create({
-      data: {
-        expires: new Date(Date.now() + 10 * 60 * 1000),
-        identifier: `github_install_${userId}`,
-        token: state,
-      },
-    });
+    await ctx.prisma.$transaction([
+      ctx.prisma.verificationToken.deleteMany({
+        where: { identifier: `github_install_${userId}` },
+      }),
+      ctx.prisma.verificationToken.create({
+        data: {
+          expires: new Date(Date.now() + 10 * 60 * 1000),
+          identifier: `github_install_${userId}`,
+          token: state,
+        },
+      }),
+    ]);
 
     return `https://github.com/apps/doxynix/installations/new?state=${state}`;
   }),
@@ -489,10 +494,10 @@ export const repoRouter = createTRPCRouter({
       return { installationId: null, isConnected: false, items: [], manageUrl: null };
     }
 
-    const mainInstall = installations.length > 0 ? installations[0] : undefined;
+    const mainInstall = installations.length > 0 ? installations[0] : null;
 
-    const manageUrl = mainInstall?.htmlUrl ?? null;
-    const installationId = mainInstall != null ? Number(mainInstall.id) : null;
+    const manageUrl = mainInstall != null ? (mainInstall.htmlUrl ?? null) : null;
+    const installationId = mainInstall !== null ? Number(mainInstall.id) : null;
 
     try {
       const repos = await githubService.getMyRepos(ctx.prisma, userId);

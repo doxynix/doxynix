@@ -167,6 +167,13 @@ export async function POST(req: Request) {
       }
 
       if (action === "new_permissions_accepted") {
+        await prisma.auditLog.create({
+          data: {
+            model: "GithubInstallation",
+            operation: `GITHUB_APP_PERMISSIONS_UPDATED`,
+            payload: { githubLogin, installationId: event.installation.id },
+          },
+        });
         logger.info({
           installationId: event.installation.id,
           msg: "GitHub App permissions updated by user",

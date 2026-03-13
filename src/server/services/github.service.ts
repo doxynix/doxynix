@@ -86,7 +86,7 @@ export const githubService = {
   ): Promise<GitHubClientContext> {
     if (owner != null) {
       const specificInstallation = await prisma.githubInstallation.findFirst({
-        where: { accountLogin: { equals: owner, mode: "insensitive" }, userId },
+        where: { accountLogin: { equals: owner, mode: "insensitive" }, isSuspended: false, userId },
       });
 
       if (specificInstallation != null) {
@@ -113,7 +113,7 @@ export const githubService = {
 
     if (owner == null) {
       const anyInstallation = await prisma.githubInstallation.findFirst({
-        where: { userId },
+        where: { isSuspended: false, userId },
       });
 
       if (anyInstallation != null) {
@@ -155,7 +155,9 @@ export const githubService = {
     try {
       const allRepos: RepoItemFields[] = [];
 
-      const installations = await prisma.githubInstallation.findMany({ where: { userId } });
+      const installations = await prisma.githubInstallation.findMany({
+        where: { isSuspended: false, userId },
+      });
       const oauthAccounts = await prisma.account.findMany({
         where: { access_token: { not: null }, provider: "github", userId },
       });

@@ -349,9 +349,9 @@ model GithubInstallation {
   user                User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@allow('read', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))
-  @@allow('delete', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))
-  @@allow('create', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))
-  @@allow('update', auth() != null && (auth().role == 'ADMIN' || ((userId == auth().id || userId == null) && future().userId == auth().id)))
+  @@allow('delete', auth().role == 'ADMIN')
+  @@allow('create', auth().role == 'ADMIN')
+  @@allow('update', auth().role == 'ADMIN' || (userId == null && future().userId == auth().id))
 
   @@index([userId])
   @@map("github_installations")
