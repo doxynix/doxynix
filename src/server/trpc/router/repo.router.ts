@@ -593,45 +593,57 @@ export const repoRouter = createTRPCRouter({
         });
       }
 
-      const oauthAccount = await ctx.prisma.account.findFirst({
+      const oauthAccounts = await ctx.prisma.account.findMany({
         select: { access_token: true },
         where: { access_token: { not: null }, provider: "github", userId: userIdNum },
       });
 
-      if (oauthAccount?.access_token == null) {
+      if (oauthAccounts.length === 0) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You must link your GitHub account before installing the app.",
         });
       }
 
-      try {
-        const userOctokit = githubService.getUserClient(oauthAccount.access_token);
+      let hasAccess = false;
+      let verifiedAtLeastOneAccount = false;
 
-        const userInstallations = await userOctokit.paginate(
-          userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
-          { per_page: 100 }
-        );
+      for (const oauthAccount of oauthAccounts) {
+        if (oauthAccount.access_token == null) continue;
+        try {
+          const userOctokit = githubService.getUserClient(oauthAccount.access_token);
+          const userInstallations = await userOctokit.paginate(
+            userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
+            { per_page: 100 }
+          );
 
-        const hasAccess = userInstallations.some((inst) => inst.id === inputInstIdNum);
+          verifiedAtLeastOneAccount = true;
 
-        if (!hasAccess) {
-          logger.warn({
-            installationId: input.installationId,
-            msg: "IDOR attempt: User tried to claim unowned installation",
-            userId: userIdNum,
-          });
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "You do not have permission to claim this GitHub installation.",
-          });
+          if (userInstallations.some((inst) => inst.id === inputInstIdNum)) {
+            hasAccess = true;
+            break;
+          }
+        } catch (error) {
+          logger.warn({ error, msg: "GitHub API verification failed for one OAuth account" });
         }
-      } catch (error) {
-        if (error instanceof TRPCError) throw error;
-        logger.error({ error, msg: "GitHub API verification failed during saveInstallation" });
+      }
+
+      if (!verifiedAtLeastOneAccount) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to verify installation ownership via GitHub.",
+        });
+      }
+
+      if (!hasAccess) {
+        logger.warn({
+          installationId: input.installationId,
+          msg: "IDOR attempt: User tried to claim unowned installation",
+          userId: userIdNum,
+        });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You do not have permission to claim this GitHub installation.",
         });
       }
 
