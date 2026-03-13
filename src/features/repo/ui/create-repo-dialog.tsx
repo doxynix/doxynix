@@ -197,19 +197,21 @@ export function CreateRepoDialog() {
                   {t("repo_your_repos")}
                 </div>
 
-                {myGithubData?.isConnected === true && myGithubData.installationId != null && (
-                  <div className="text-muted-foreground flex items-center gap-2 font-normal tracking-normal normal-case">
-                    <span>Don&apos;t see it?</span>
-                    <a
-                      href={`${myGithubData.manageUrl}`}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                      className="flex items-center gap-1 transition-colors hover:underline"
-                    >
-                      Manage access <ExternalLink className="h-2.5 w-2.5" />
-                    </a>
-                  </div>
-                )}
+                {myGithubData?.isConnected === true &&
+                  myGithubData.installationId != null &&
+                  myGithubData.manageUrl != null && (
+                    <div className="text-muted-foreground flex items-center gap-2 font-normal tracking-normal normal-case">
+                      <span>Don&apos;t see it?</span>
+                      <a
+                        href={`${myGithubData.manageUrl}`}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        className="flex items-center gap-1 transition-colors hover:underline"
+                      >
+                        Manage access <ExternalLink className="h-2.5 w-2.5" />
+                      </a>
+                    </div>
+                  )}
               </div>
 
               <div className="space-y-0.5">

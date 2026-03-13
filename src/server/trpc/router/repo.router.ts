@@ -641,7 +641,7 @@ export const repoRouter = createTRPCRouter({
       const accountAvatar = account !== null && "avatar_url" in account ? account.avatar_url : null;
 
       try {
-        const updated = await ctx.db.githubInstallation.updateMany({
+        const updated = await ctx.prisma.githubInstallation.updateMany({
           data: {
             accountAvatar,
             accountLogin,
@@ -656,7 +656,7 @@ export const repoRouter = createTRPCRouter({
         });
 
         if (updated.count === 0) {
-          const created = await ctx.db.githubInstallation.createMany({
+          const created = await ctx.prisma.githubInstallation.createMany({
             data: [
               {
                 accountAvatar,
@@ -674,7 +674,7 @@ export const repoRouter = createTRPCRouter({
           });
 
           if (created.count === 0) {
-            const claimed = await ctx.db.githubInstallation.updateMany({
+            const claimed = await ctx.prisma.githubInstallation.updateMany({
               data: {
                 accountAvatar,
                 accountLogin,

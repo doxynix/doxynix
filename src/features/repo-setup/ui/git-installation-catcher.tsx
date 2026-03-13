@@ -30,6 +30,11 @@ export function GitInstallationCatcher() {
       {
         onError: () => {
           hasProcessed.current = false;
+          void setParams({
+            installation_id: null,
+            setup_action: null,
+            state: null,
+          });
         },
         onSuccess: () => {
           void utils.repo.getMyGithubRepos.invalidate();

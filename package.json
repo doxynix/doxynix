@@ -65,7 +65,8 @@
       "systeminformation": "5.31.4",
       "rollup": "4.59.0",
       "serialize-javascript": "7.0.4",
-      "@react-email/body": "0.3.0"
+      "@react-email/body": "0.3.0",
+      "flatted": "3.4.0"
     },
     "onlyBuiltDependencies": [
       "@swc/core",
