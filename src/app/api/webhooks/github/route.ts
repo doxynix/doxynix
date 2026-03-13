@@ -63,7 +63,7 @@ export async function POST(req: Request) {
         where: { model: "GithubInstallation", requestId: deliveryId },
       });
 
-      if (existingLog) {
+      if (existingLog != null) {
         logger.info({ deliveryId, msg: "Webhook already processed, skipping" });
         return NextResponse.json({ ok: true });
       }

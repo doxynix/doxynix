@@ -99,14 +99,14 @@ export const githubService = {
       }
     }
 
-    const oauthAcc = await prisma.account.findFirst({
+    const oauthAccounts = await prisma.account.findMany({
       where: { access_token: { not: null }, provider: "github", userId },
     });
 
-    if (oauthAcc?.access_token != null) {
+    if (oauthAccounts.length > 0 && oauthAccounts[0]?.access_token != null) {
       return {
         hasUserToken: true,
-        octokit: this.getUserClient(oauthAcc.access_token),
+        octokit: this.getUserClient(oauthAccounts[0].access_token),
         type: "oauth",
       };
     }
@@ -227,13 +227,20 @@ export const githubService = {
         isOctokitError(error) &&
         (error.status === 403 || error.status === 404)
       ) {
-        const oauthAcc = await prisma.account.findFirst({
+        const oauthAccounts = await prisma.account.findMany({
           where: { access_token: { not: null }, provider: "github", userId },
         });
-        if (oauthAcc?.access_token != null) {
-          const fallbackOctokit = this.getUserClient(oauthAcc.access_token);
-          const { data } = await fallbackOctokit.rest.repos.get({ owner, repo: name });
-          return data;
+
+        for (const oauthAcc of oauthAccounts) {
+          if (oauthAcc.access_token == null) continue;
+          try {
+            const fallbackOctokit = this.getUserClient(oauthAcc.access_token);
+            const { data } = await fallbackOctokit.rest.repos.get({ owner, repo: name });
+            return data;
+          } catch (error) {
+            logger.error({ error, msg: "Token didn't work" });
+            continue;
+          }
         }
       }
       throw error;
@@ -273,13 +280,20 @@ export const githubService = {
             isOctokitError(error) &&
             (error.status === 403 || error.status === 404)
           ) {
-            const oauthAcc = await prisma.account.findFirst({
+            const oauthAccounts = await prisma.account.findMany({
               where: { access_token: { not: null }, provider: "github", userId },
             });
-            if (oauthAcc?.access_token != null) {
-              activeOctokit = this.getUserClient(oauthAcc.access_token);
-              const response = await activeOctokit.rest.repos.get({ owner, repo: name });
-              return response.data;
+
+            for (const oauthAcc of oauthAccounts) {
+              if (oauthAcc.access_token == null) continue;
+              try {
+                activeOctokit = this.getUserClient(oauthAcc.access_token);
+                const response = await activeOctokit.rest.repos.get({ owner, repo: name });
+                return response.data;
+              } catch (error) {
+                logger.error({ error, msg: "Token didn't work" });
+                continue;
+              }
             }
           }
           throw error;

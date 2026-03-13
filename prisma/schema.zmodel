@@ -345,7 +345,7 @@ model GithubInstallation {
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
 
-  userId              Int?     @map("user_id")
+  userId              Int?     @map("user_id") @omit
   user                User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@allow('read', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))
