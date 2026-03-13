@@ -1,9 +1,11 @@
+import crypto from "node:crypto";
 import { Status } from "@prisma/client";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { CreateRepoSchema, GitHubQuerySchema } from "@/shared/api/schemas/repo";
+import { NEXTAUTH_SECRET } from "@/shared/constants/env.server";
 
 import { logger } from "@/server/logger/logger";
 import { githubService } from "@/server/services/github.service";
@@ -316,7 +318,8 @@ export const repoRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { octokit } = await githubService.getClientContext(
         ctx.prisma,
-        Number(ctx.session.user.id)
+        Number(ctx.session.user.id),
+        input.owner
       );
 
       const branches = await octokit.paginate(octokit.repos.listBranches, {
@@ -412,40 +415,35 @@ export const repoRouter = createTRPCRouter({
         version,
       };
     }),
+  getGithubInstallUrl: protectedProcedure.query(({ ctx }) => {
+    const userId = String(ctx.session.user.id);
+    const state = crypto.createHmac("sha256", NEXTAUTH_SECRET).update(userId).digest("hex");
+    return `https://github.com/apps/doxynix/installations/new?state=${state}`;
+  }),
   getMyGithubRepos: protectedProcedure.query(async ({ ctx }) => {
     const userId = Number(ctx.session.user.id);
-    const accounts = await ctx.db.account.findMany({ where: { provider: "github", userId } });
 
-    const activeAccounts = accounts.filter(
-      (a) => a.githubInstallationId != null || a.access_token != null
-    );
+    const installations = await ctx.db.githubInstallation.findMany({ where: { userId } });
+    const oauthAccounts = await ctx.db.account.findMany({
+      where: { access_token: { not: null }, provider: "github", userId },
+    });
 
-    if (activeAccounts.length === 0) {
+    if (installations.length === 0 && oauthAccounts.length === 0) {
       return { installationId: null, isConnected: false, items: [], manageUrl: null };
     }
 
-    const installAcc = activeAccounts.find((a) => a.githubInstallationId !== null);
-    const mainAcc = installAcc ?? activeAccounts[0];
-
-    const installationId =
-      mainAcc.githubInstallationId != null ? Number(mainAcc.githubInstallationId) : null;
+    const mainInstall = installations[0];
+    const installationId = mainInstall.id ? Number(mainInstall.id) : null;
+    const manageUrl = mainInstall.id
+      ? `https://github.com/settings/installations/${mainInstall.id}`
+      : null;
 
     try {
       const repos = await githubService.getMyRepos(ctx.prisma, userId);
-      return {
-        installationId,
-        isConnected: true,
-        items: repos,
-        manageUrl: mainAcc.githubInstallationUrl,
-      };
+      return { installationId, isConnected: true, items: repos, manageUrl };
     } catch (error) {
       logger.error({ error, msg: "Dashboard fetch failed", userId });
-      return {
-        installationId,
-        isConnected: true,
-        items: [],
-        manageUrl: mainAcc.githubInstallationUrl,
-      };
+      return { installationId, isConnected: true, items: [], manageUrl };
     }
   }),
   getRepoFiles: protectedProcedure
@@ -472,6 +470,7 @@ export const repoRouter = createTRPCRouter({
         FileClassifier.getScore(file.path) > 40 ? 1 : 0,
       ]);
     }),
+
   getSlim: protectedProcedure
     .meta({
       openapi: {
@@ -484,7 +483,6 @@ export const repoRouter = createTRPCRouter({
         tags: ["repositories"],
       },
     })
-
     .input(z.object({ limit: z.coerce.number().min(1).max(100000).optional() }))
     .output(
       z.array(
@@ -498,105 +496,128 @@ export const repoRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const repos = await ctx.db.repo.findMany({
         orderBy: { name: "asc" },
-        select: {
-          name: true,
-          owner: true,
-          publicId: true,
-        },
+        select: { name: true, owner: true, publicId: true },
         take: input.limit,
       });
 
-      return repos.map((r) => ({
-        id: r.publicId,
-        name: r.name,
-        owner: r.owner,
-      }));
+      return repos.map((r) => ({ id: r.publicId, name: r.name, owner: r.owner }));
     }),
 
   saveInstallation: protectedProcedure
-    .input(z.object({ installationId: z.number().int().positive() }))
+    .input(
+      z.object({
+        installationId: z.string().regex(/^\d+$/),
+        state: z.string(),
+      })
+    )
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
-      const installationIdBigInt = BigInt(input.installationId);
+      const userIdStr = String(ctx.session.user.id);
+      const userIdNum = Number(ctx.session.user.id);
+      const instIdBigInt = BigInt(input.installationId);
 
-      const duplicate = await ctx.prisma.account.findFirst({
-        where: { githubInstallationId: installationIdBigInt, NOT: { userId } },
-      });
-      if (duplicate != null) {
+      const expectedState = crypto
+        .createHmac("sha256", NEXTAUTH_SECRET)
+        .update(userIdStr)
+        .digest("hex");
+
+      if (input.state !== expectedState) {
+        logger.warn({ msg: "CSRF attack detected on GitHub installation", userId: userIdNum });
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Installation already linked to another user",
+          message: "Invalid security state. Installation rejected.",
         });
       }
 
-      let installation;
-      try {
-        installation = await githubService.getInstallationInfo(input.installationId);
-      } catch (error) {
-        throw new TRPCError({
-          cause: error,
-          code: "NOT_FOUND",
-          message: "GitHub installation not found",
-        });
-      }
-
-      if (installation.account == null) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Installation account missing" });
-      }
-
-      const githubAccountId = String(installation.account.id);
-      const syntheticId = `inst:${input.installationId}:user:${userId}`;
-
-      const userAccounts = await ctx.prisma.account.findMany({
-        where: { provider: "github", userId },
+      const oauthAccount = await ctx.db.account.findFirst({
+        where: { access_token: { not: null }, provider: "github", userId: userIdNum },
       });
 
-      const existingSpecific = userAccounts.find(
-        (a) => a.githubInstallationId === installationIdBigInt
-      );
-      const oauthAccount = userAccounts.find(
-        (a) => a.githubInstallationId === null && a.access_token != null
-      );
-
-      if (existingSpecific != null) {
-        return await ctx.prisma.account.update({
-          data: { githubInstallationUrl: installation.html_url },
-          where: { id: existingSpecific.id },
+      if (!oauthAccount || oauthAccount.access_token == null) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You must link your GitHub account before installing the app.",
         });
       }
 
-      if (oauthAccount != null) {
-        if (
-          oauthAccount.providerAccountId !== githubAccountId &&
-          installation.target_type === "User"
-        ) {
+      try {
+        const verifyRes = await fetch("https://api.github.com/user/installations", {
+          headers: {
+            Accept: "application/vnd.github.v3+json",
+            Authorization: `Bearer ${oauthAccount.access_token}`,
+          },
+        });
+
+        if (!verifyRes.ok) throw new Error("GitHub API verification failed");
+
+        const verifyData = (await verifyRes.json()) as {
+          installations: Array<{ id: number }>;
+        };
+
+        const hasAccess = verifyData.installations.some(
+          (inst) => inst.id === Number(input.installationId)
+        );
+
+        if (!hasAccess) {
+          logger.warn({
+            installationId: input.installationId,
+            msg: "IDOR attempt: User tried to claim unowned installation",
+            userId: userIdNum,
+          });
           throw new TRPCError({
             code: "FORBIDDEN",
-            message: "This installation belongs to a different GitHub account than your login",
+            message: "You do not have permission to claim this GitHub installation.",
           });
         }
-
-        if (oauthAccount.providerAccountId === githubAccountId) {
-          return await ctx.prisma.account.update({
-            data: {
-              githubInstallationId: installationIdBigInt,
-              githubInstallationUrl: installation.html_url,
-            },
-            where: { id: oauthAccount.id },
-          });
-        }
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to verify ownership via GitHub API.",
+        });
       }
 
-      return await ctx.prisma.account.create({
-        data: {
-          githubInstallationId: installationIdBigInt,
-          githubInstallationUrl: installation.html_url,
-          provider: "github",
-          providerAccountId: syntheticId,
-          type: "app-installation",
-          userId,
-        },
+      const existing = await ctx.db.githubInstallation.findUnique({
+        where: { id: instIdBigInt },
       });
+
+      if (existing != null && existing.userId !== null && existing.userId !== userIdNum) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This installation is already linked to another workspace.",
+        });
+      }
+
+      const installationInfo = await githubService.getInstallationInfo(
+        Number(input.installationId)
+      );
+
+      const accountLogin =
+        installationInfo.account && "login" in installationInfo.account
+          ? installationInfo.account.login
+          : "Unknown";
+
+      const accountAvatar =
+        installationInfo.account && "avatar_url" in installationInfo.account
+          ? installationInfo.account.avatar_url
+          : null;
+
+      await ctx.db.githubInstallation.upsert({
+        create: {
+          accountAvatar: accountAvatar,
+          accountLogin: accountLogin,
+          appId: installationInfo.app_id,
+          id: instIdBigInt,
+          repositorySelection: installationInfo.repository_selection,
+          targetId: BigInt(installationInfo.target_id),
+          targetType: installationInfo.target_type || "Unknown",
+          userId: userIdNum,
+        },
+        update: { userId: userIdNum },
+        where: { id: instIdBigInt },
+      });
+
+      return { success: true };
     }),
 
   searchGithub: protectedProcedure.input(GitHubQuerySchema).query(async ({ ctx, input }) => {

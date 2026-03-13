@@ -37,7 +37,7 @@ export async function getAnalysisContext(
     throw new Error("This is a private repository. Please connect your GitHub account.");
   }
 
-  const clientContext = await githubService.getClientContext(prisma, userId);
+  const clientContext = await githubService.getClientContext(prisma, userId, repo.owner);
   const { octokit } = clientContext;
 
   if (repo.visibility === "PRIVATE" && clientContext.type === "app") {
@@ -52,7 +52,7 @@ export async function getAnalysisContext(
 
   const currentSha = refData.object.sha;
 
-  const token = await githubService.getToken(prisma, userId);
+  const token = await githubService.getToken(prisma, userId, repo.owner);
 
   if (forceRefresh === false && lastSuccessfulAnalysis.commitSha === currentSha) {
     return { currentSha, repo: null, token };

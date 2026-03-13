@@ -74,15 +74,42 @@ const getCommonConfig = () => ({
 });
 
 export const githubService = {
-  async getClientContext(prisma: DbClient, userId: number): Promise<GitHubClientContext> {
-    const accounts = await prisma.account.findMany({
-      where: { provider: "github", userId },
-    });
+  async getClientContext(
+    prisma: DbClient,
+    userId: number,
+    owner?: string
+  ): Promise<GitHubClientContext> {
     const commonConfig = getCommonConfig();
     const appId = Number(GITHUB_APP_ID);
     const privateKey = GITHUB_APP_PRIVATE_KEY;
 
-    const oauthAcc = accounts.find((a) => a.access_token != null);
+    if (owner != null) {
+      const specificInstallation = await prisma.githubInstallation.findFirst({
+        where: { accountLogin: { equals: owner, mode: "insensitive" }, userId },
+      });
+
+      if (specificInstallation) {
+        return {
+          githubInstallationId: Number(specificInstallation.id),
+          hasUserToken: false,
+          octokit: new MyOctokit({
+            ...commonConfig,
+            auth: {
+              appId,
+              installationId: Number(specificInstallation.id),
+              privateKey,
+            },
+            authStrategy: createAppAuth,
+          }) as OctokitInstance,
+          type: "installation",
+        };
+      }
+    }
+
+    const oauthAcc = await prisma.account.findFirst({
+      where: { access_token: { not: null }, provider: "github", userId },
+    });
+
     if (oauthAcc?.access_token != null) {
       return {
         hasUserToken: true,
@@ -94,22 +121,27 @@ export const githubService = {
       };
     }
 
-    const installAcc = accounts.find((a) => a.githubInstallationId != null);
-    if (installAcc?.githubInstallationId != null) {
-      return {
-        githubInstallationId: Number(installAcc.githubInstallationId),
-        hasUserToken: false,
-        octokit: new MyOctokit({
-          ...commonConfig,
-          auth: {
-            appId,
-            installationId: Number(installAcc.githubInstallationId),
-            privateKey,
-          },
-          authStrategy: createAppAuth,
-        }) as OctokitInstance,
-        type: "installation",
-      };
+    if (owner == null) {
+      const anyInstallation = await prisma.githubInstallation.findFirst({
+        where: { userId },
+      });
+
+      if (anyInstallation) {
+        return {
+          githubInstallationId: Number(anyInstallation.id),
+          hasUserToken: false,
+          octokit: new MyOctokit({
+            ...commonConfig,
+            auth: {
+              appId,
+              installationId: Number(anyInstallation.id),
+              privateKey,
+            },
+            authStrategy: createAppAuth,
+          }) as OctokitInstance,
+          type: "installation",
+        };
+      }
     }
 
     return {
@@ -146,49 +178,61 @@ export const githubService = {
 
   async getMyRepos(prisma: DbClient, userId: number): Promise<RepoItemFields[]> {
     try {
-      const accounts = await prisma.account.findMany({
-        where: { provider: "github", userId },
-      });
-
-      if (accounts.length === 0) return [];
-
       const allRepos: RepoItemFields[] = [];
       const commonConfig = getCommonConfig();
 
-      for (const account of accounts) {
+      const installations = await prisma.githubInstallation.findMany({
+        where: { userId },
+      });
+
+      const oauthAccounts = await prisma.account.findMany({
+        where: { access_token: { not: null }, provider: "github", userId },
+      });
+
+      if (installations.length === 0 && oauthAccounts.length === 0) {
+        return [];
+      }
+
+      for (const inst of installations) {
         try {
-          if (account.githubInstallationId != null) {
-            const octokit = new MyOctokit({
-              ...commonConfig,
-              auth: {
-                appId: Number(GITHUB_APP_ID),
-                installationId: Number(account.githubInstallationId),
-                privateKey: GITHUB_APP_PRIVATE_KEY,
-              },
-              authStrategy: createAppAuth,
-            }) as OctokitInstance;
+          const octokit = new MyOctokit({
+            ...commonConfig,
+            auth: {
+              appId: Number(GITHUB_APP_ID),
+              installationId: Number(inst.id),
+              privateKey: GITHUB_APP_PRIVATE_KEY,
+            },
+            authStrategy: createAppAuth,
+          }) as OctokitInstance;
 
-            const repos = await octokit.paginate(
-              octokit.rest.apps.listReposAccessibleToInstallation
-            );
-            allRepos.push(...githubService.mapRepos(repos as GitHubRepoResponse[]));
-          } else if (account.access_token != null) {
-            const octokit = new MyOctokit({
-              ...commonConfig,
-              auth: account.access_token,
-            }) as OctokitInstance;
+          const repos = await octokit.paginate(octokit.rest.apps.listReposAccessibleToInstallation);
+          allRepos.push(...githubService.mapRepos(repos as GitHubRepoResponse[]));
+        } catch (error) {
+          logger.error({
+            error,
+            installationId: Number(inst.id),
+            msg: "Failed to fetch repos for installation",
+          });
+        }
+      }
 
-            const repos = await octokit.paginate(octokit.rest.repos.listForAuthenticatedUser, {
-              per_page: 100,
-              visibility: "all",
-            });
-            allRepos.push(...githubService.mapRepos(repos));
-          }
+      for (const account of oauthAccounts) {
+        try {
+          const octokit = new MyOctokit({
+            ...commonConfig,
+            auth: account.access_token!,
+          }) as OctokitInstance;
+
+          const repos = await octokit.paginate(octokit.rest.repos.listForAuthenticatedUser, {
+            per_page: 100,
+            visibility: "all",
+          });
+          allRepos.push(...githubService.mapRepos(repos));
         } catch (error) {
           logger.error({
             accountId: account.id,
             error,
-            msg: "Failed to fetch repos for one of the installations",
+            msg: "Failed to fetch repos for OAuth account",
           });
         }
       }
@@ -201,7 +245,7 @@ export const githubService = {
   },
 
   async getRepoInfo(prisma: DbClient, userId: number, owner: string, name: string) {
-    const { octokit } = await this.getClientContext(prisma, userId);
+    const { octokit } = await this.getClientContext(prisma, userId, owner);
     const { data } = await octokit.rest.repos.get({ owner, repo: name });
     return data;
   },
@@ -214,7 +258,7 @@ export const githubService = {
     branch?: string
   ) {
     try {
-      const { octokit } = await this.getClientContext(prisma, userId);
+      const { octokit } = await this.getClientContext(prisma, userId, owner);
 
       const { data: repoData } = await octokit.rest.repos.get({ owner, repo: name });
       const treeSha = branch ?? repoData.default_branch;
@@ -247,8 +291,8 @@ export const githubService = {
     }
   },
 
-  async getToken(prisma: DbClient, userId: number): Promise<string | null> {
-    const context = await this.getClientContext(prisma, userId);
+  async getToken(prisma: DbClient, userId: number, owner?: string): Promise<string | null> {
+    const context = await this.getClientContext(prisma, userId, owner);
 
     if (context.type === "app") {
       return null;
@@ -295,6 +339,7 @@ export const githubService = {
 
     return { name: parsed.name, owner: parsed.owner };
   },
+
   async searchRepos(
     prisma: DbClient,
     userId: number,

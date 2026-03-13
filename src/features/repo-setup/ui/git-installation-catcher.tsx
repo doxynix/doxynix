@@ -1,51 +1,48 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { parseAsString, useQueryStates } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
-import { usePathname, useRouter } from "@/i18n/routing";
 
 export function GitInstallationCatcher() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const [params, setParams] = useQueryStates({
+    installation_id: parseAsString,
+    setup_action: parseAsString,
+    state: parseAsString,
+  });
+
   const utils = trpc.useUtils();
-
   const hasProcessed = useRef(false);
-
-  const installationId = searchParams.get("installation_id");
   const { mutate } = trpc.repo.saveInstallation.useMutation();
-  const invalidateMyRepos = utils.repo.getMyGithubRepos.invalidate;
 
   useEffect(() => {
-    if (installationId == null || hasProcessed.current) return;
+    const installationIdStr = params.installation_id?.trim();
+    const stateFromUrl = params.state;
 
-    const parsedId = Number(installationId);
-    if (!Number.isInteger(parsedId) || parsedId <= 0) return;
+    if (installationIdStr == null || stateFromUrl == null || hasProcessed.current) return;
+    if (!/^\d+$/.test(installationIdStr)) return;
 
     hasProcessed.current = true;
 
     mutate(
-      { installationId: parsedId },
+      { installationId: installationIdStr, state: stateFromUrl },
       {
         onError: () => {
           hasProcessed.current = false;
         },
         onSuccess: () => {
-          void invalidateMyRepos();
+          void utils.repo.getMyGithubRepos.invalidate();
 
-          const params = new URLSearchParams(searchParams.toString());
-          params.delete("installation_id");
-          params.delete("setup_action");
-
-          const queryString = params.toString();
-          const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
-
-          router.replace(newUrl);
+          void setParams({
+            installation_id: null,
+            setup_action: null,
+            state: null,
+          });
         },
       }
     );
-  }, [installationId, pathname, router, searchParams, mutate, invalidateMyRepos]);
+  }, [mutate, params.installation_id, params.state, utils.repo.getMyGithubRepos, setParams]);
+
   return null;
 }

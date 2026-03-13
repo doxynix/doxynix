@@ -192,7 +192,7 @@ export async function generateDeepDocs(
     taskMap["CHANGELOG"] = tasks.length;
     tasks.push(
       (async () => {
-        const { octokit } = await githubService.getClientContext(prisma, userId);
+        const { octokit } = await githubService.getClientContext(prisma, userId, repo.owner);
         const { data: commitsData } = await octokit.rest.repos.listCommits({
           owner: repo.owner,
           per_page: 50, // NOTE: тут возможно стоит придумать другую логику

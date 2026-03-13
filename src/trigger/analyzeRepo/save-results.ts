@@ -164,7 +164,7 @@ export async function saveResults(params: {
 }
 
 export async function calculateBusFactor(repo: Repo, userId: number): Promise<number> {
-  const { octokit } = await githubService.getClientContext(prisma, userId);
+  const { octokit } = await githubService.getClientContext(prisma, userId, repo.owner);
   const contributors = await octokit.paginate(octokit.rest.repos.listContributors, {
     owner: repo.owner,
     per_page: 100,

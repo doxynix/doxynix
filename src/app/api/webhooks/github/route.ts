@@ -10,10 +10,19 @@ type GitHubWebhookEvent = {
   action?: string;
   installation?: {
     account: {
+      avatar_url?: string;
       id: number;
       login: string;
     };
+    app_id: number;
     id: number;
+    repository_selection: string;
+    target_id: number;
+    target_type: string;
+  };
+  sender?: {
+    id: number;
+    login: string;
   };
 };
 
@@ -48,19 +57,53 @@ export async function POST(req: Request) {
     const githubLogin = event.installation.account.login;
 
     try {
+      if (action === "created") {
+        const senderId = event.sender?.id;
+        let matchedUserId: number | null = null;
+
+        if (senderId != null) {
+          const account = await prisma.account.findFirst({
+            where: { provider: "github", providerAccountId: String(senderId) },
+          });
+          if (account) matchedUserId = account.userId;
+        }
+
+        await prisma.githubInstallation.upsert({
+          create: {
+            accountAvatar: event.installation.account.avatar_url,
+            accountLogin: event.installation.account.login,
+            appId: event.installation.app_id,
+            id: instIdBigInt,
+            repositorySelection: event.installation.repository_selection,
+            targetId: BigInt(event.installation.target_id || event.installation.account.id),
+            targetType: event.installation.target_type,
+            userId: matchedUserId,
+          },
+          update: {
+            accountAvatar: event.installation.account.avatar_url,
+            accountLogin: event.installation.account.login,
+            repositorySelection: event.installation.repository_selection,
+            ...(matchedUserId != null ? { userId: matchedUserId } : {}),
+          },
+          where: { id: instIdBigInt },
+        });
+
+        logger.info({
+          installationId: event.installation.id,
+          matchedUserId,
+          msg: "GitHub installation created via webhook",
+        });
+      }
+
       if (action === "deleted") {
         const [result] = await prisma.$transaction([
-          prisma.account.updateMany({
-            data: {
-              githubInstallationId: null,
-              githubInstallationUrl: null,
-            },
-            where: { githubInstallationId: instIdBigInt },
+          prisma.githubInstallation.deleteMany({
+            where: { id: instIdBigInt },
           }),
           prisma.auditLog.create({
             data: {
-              model: "Account",
-              operation: `GITHUB_INSTALLATION_${action.toUpperCase()}`,
+              model: "GithubInstallation",
+              operation: `GITHUB_INSTALLATION_DELETED`,
               payload: { githubLogin, installationId: event.installation.id },
             },
           }),
@@ -69,7 +112,7 @@ export async function POST(req: Request) {
         logger.info({
           affectedRows: result.count,
           installationId: event.installation.id,
-          msg: `GitHub installation ${action}`,
+          msg: "GitHub installation deleted via webhook",
         });
       }
 
