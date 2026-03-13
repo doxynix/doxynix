@@ -30,6 +30,7 @@ type GitHubWebhookEvent = {
 export async function POST(req: Request) {
   const payload = await req.text();
   const signature = req.headers.get("x-hub-signature-256") ?? "";
+  const deliveryId = req.headers.get("x-github-delivery") ?? "";
 
   const hmac = crypto.createHmac("sha256", GITHUB_WEBHOOK_SECRET);
   const digest = "sha256=" + hmac.update(payload).digest("hex");
@@ -58,6 +59,15 @@ export async function POST(req: Request) {
     const githubLogin = event.installation.account.login;
 
     try {
+      const existingLog = await prisma.auditLog.findFirst({
+        where: { model: "GithubInstallation", requestId: deliveryId },
+      });
+
+      if (existingLog) {
+        logger.info({ deliveryId, msg: "Webhook already processed, skipping" });
+        return NextResponse.json({ ok: true });
+      }
+
       if (action === "created") {
         const senderId = event.sender?.id;
         let matchedUserId: number | null = null;
@@ -96,6 +106,7 @@ export async function POST(req: Request) {
               model: "GithubInstallation",
               operation: `GITHUB_APP_INSTALLED`,
               payload: { githubLogin, installationId: event.installation!.id },
+              requestId: deliveryId,
               userId: matchedUserId,
             },
           }),
@@ -115,6 +126,7 @@ export async function POST(req: Request) {
               model: "GithubInstallation",
               operation: `GITHUB_APP_DELETED`,
               payload: { githubLogin, installationId: event.installation.id },
+              requestId: deliveryId,
             },
           }),
         ]);
@@ -137,6 +149,7 @@ export async function POST(req: Request) {
               model: "GithubInstallation",
               operation: `GITHUB_APP_SUSPENDED`,
               payload: { githubLogin, installationId: event.installation.id },
+              requestId: deliveryId,
             },
           }),
         ]);
@@ -157,6 +170,7 @@ export async function POST(req: Request) {
               model: "GithubInstallation",
               operation: `GITHUB_APP_UNSUSPENDED`,
               payload: { githubLogin, installationId: event.installation.id },
+              requestId: deliveryId,
             },
           }),
         ]);
@@ -172,6 +186,7 @@ export async function POST(req: Request) {
             model: "GithubInstallation",
             operation: `GITHUB_APP_PERMISSIONS_UPDATED`,
             payload: { githubLogin, installationId: event.installation.id },
+            requestId: deliveryId,
           },
         });
         logger.info({

@@ -351,7 +351,10 @@ model GithubInstallation {
   @@allow('read', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))
   @@allow('delete', auth().role == 'ADMIN')
   @@allow('create', auth().role == 'ADMIN')
-  @@allow('update', auth().role == 'ADMIN' || (userId == null && future().userId == auth().id))
+  @@allow(
+    'update',
+    auth().role == 'ADMIN' || (userId == auth().id && future().userId == userId)
+  )
 
   @@index([userId])
   @@map("github_installations")
