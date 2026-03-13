@@ -65,7 +65,7 @@ export async function POST(req: Request) {
           const account = await prisma.account.findFirst({
             where: { provider: "github", providerAccountId: String(senderId) },
           });
-          if (account) matchedUserId = account.userId;
+          if (account != null) matchedUserId = account.userId;
         }
 
         await prisma.githubInstallation.upsert({

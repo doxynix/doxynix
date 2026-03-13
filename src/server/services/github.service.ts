@@ -88,7 +88,7 @@ export const githubService = {
         where: { accountLogin: { equals: owner, mode: "insensitive" }, userId },
       });
 
-      if (specificInstallation) {
+      if (specificInstallation != null) {
         return {
           githubInstallationId: Number(specificInstallation.id),
           hasUserToken: false,
@@ -126,7 +126,7 @@ export const githubService = {
         where: { userId },
       });
 
-      if (anyInstallation) {
+      if (anyInstallation != null) {
         return {
           githubInstallationId: Number(anyInstallation.id),
           hasUserToken: false,

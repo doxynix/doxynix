@@ -433,10 +433,11 @@ export const repoRouter = createTRPCRouter({
     }
 
     const mainInstall = installations[0];
-    const installationId = mainInstall.id ? Number(mainInstall.id) : null;
-    const manageUrl = mainInstall.id
-      ? `https://github.com/settings/installations/${mainInstall.id}`
-      : null;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const installationId = mainInstall.id != null ? Number(mainInstall.id) : null;
+    const manageUrl =
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      mainInstall.id != null ? `https://github.com/settings/installations/${mainInstall.id}` : null;
 
     try {
       const repos = await githubService.getMyRepos(ctx.prisma, userId);
@@ -533,7 +534,7 @@ export const repoRouter = createTRPCRouter({
         where: { access_token: { not: null }, provider: "github", userId: userIdNum },
       });
 
-      if (!oauthAccount || oauthAccount.access_token == null) {
+      if (oauthAccount == null || oauthAccount.access_token == null) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You must link your GitHub account before installing the app.",
