@@ -1,66 +1,41 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
+  "extends": ["config:recommended"],
   "dependencyDashboard": true,
   "rangeStrategy": "pin",
-  "postUpdateOptions": [
-    "pnpmDedupe"
-  ],
-  "labels": [
-    "dependencies"
-  ],
-  "ignoreDeps": [
-    "zod-prisma-types"
-  ],
+  "postUpdateOptions": ["pnpmDedupe"],
+  "labels": ["dependencies"],
+  "ignoreDeps": ["zod-prisma-types"],
   "packageRules": [
     {
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "addLabels": [
-        "major"
-      ]
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["major"]
     },
     {
       "description": "Запрещаем мажорный апдейт cookie (v1 ломает совместимость с auth/sockets)",
-      "matchPackageNames": [
-        "cookie"
-      ],
+      "matchPackageNames": ["cookie"],
       "allowedVersions": "<1.0.0"
     },
     {
       "description": "Запрещаем мажорный апдейт eslint (v10 ломает плагины React)",
-      "matchPackageNames": [
-        "eslint"
-      ],
+      "matchPackageNames": ["eslint"],
       "allowedVersions": "<10.0.0"
     },
     {
       "description": "Группируем все минорные и патч обновления npm",
-      "matchManagers": [
-        "npm"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch"
     },
     {
       "description": "Группируем ВСЕ обновления GitHub Actions",
-      "matchManagers": [
-        "github-actions"
-      ],
+      "matchManagers": ["github-actions"],
       "groupName": "github-actions updates",
       "groupSlug": "all-actions"
     },
     {
-      "matchPackageNames": [
-        "@types/**"
-      ],
+      "matchPackageNames": ["@types/**"],
       "groupName": "all @types"
     }
   ],
