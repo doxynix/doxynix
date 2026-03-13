@@ -120,6 +120,7 @@ export const repoRouter = createTRPCRouter({
         success: true,
       };
     }),
+
   delete: protectedProcedure
     .meta({
       openapi: {
@@ -322,7 +323,7 @@ export const repoRouter = createTRPCRouter({
         input.owner
       );
 
-      const branches = await octokit.paginate(octokit.repos.listBranches, {
+      const branches = await octokit.paginate(octokit.rest.repos.listBranches, {
         owner: input.owner,
         per_page: 100,
         repo: input.name,
@@ -415,15 +416,25 @@ export const repoRouter = createTRPCRouter({
         version,
       };
     }),
+
   getGithubInstallUrl: protectedProcedure.query(({ ctx }) => {
     const userId = String(ctx.session.user.id);
-    const state = crypto.createHmac("sha256", NEXTAUTH_SECRET).update(userId).digest("hex");
+    const timestamp = Date.now().toString();
+    const payload = `${userId}:${timestamp}`;
+    const signature = crypto.createHmac("sha256", NEXTAUTH_SECRET).update(payload).digest("hex");
+
+    const state = Buffer.from(`${payload}:${signature}`).toString("base64");
     return `https://github.com/apps/doxynix/installations/new?state=${state}`;
   }),
+
   getMyGithubRepos: protectedProcedure.query(async ({ ctx }) => {
     const userId = Number(ctx.session.user.id);
 
-    const installations = await ctx.db.githubInstallation.findMany({ where: { userId } });
+    const installations = await ctx.db.githubInstallation.findMany({
+      orderBy: { createdAt: "asc" },
+      where: { userId },
+    });
+
     const oauthAccounts = await ctx.db.account.findMany({
       where: { access_token: { not: null }, provider: "github", userId },
     });
@@ -432,12 +443,12 @@ export const repoRouter = createTRPCRouter({
       return { installationId: null, isConnected: false, items: [], manageUrl: null };
     }
 
-    const mainInstall = installations[0];
+    const mainInstall = installations[0] ?? null;
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const installationId = mainInstall.id != null ? Number(mainInstall.id) : null;
+    const installationId = mainInstall != null ? Number(mainInstall.id) : null;
     const manageUrl =
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      mainInstall.id != null ? `https://github.com/settings/installations/${mainInstall.id}` : null;
+      mainInstall != null ? `https://github.com/settings/installations/${mainInstall.id}` : null;
 
     try {
       const repos = await githubService.getMyRepos(ctx.prisma, userId);
@@ -516,17 +527,34 @@ export const repoRouter = createTRPCRouter({
       const userIdStr = String(ctx.session.user.id);
       const userIdNum = Number(ctx.session.user.id);
       const instIdBigInt = BigInt(input.installationId);
+      const inputInstIdNum = Number(input.installationId);
 
-      const expectedState = crypto
-        .createHmac("sha256", NEXTAUTH_SECRET)
-        .update(userIdStr)
-        .digest("hex");
+      try {
+        const decodedState = Buffer.from(input.state, "base64").toString("utf-8");
+        const [stateUserId, stateTimestamp, stateSignature] = decodedState.split(":");
 
-      if (input.state !== expectedState) {
-        logger.warn({ msg: "CSRF attack detected on GitHub installation", userId: userIdNum });
+        const expectedSignature = crypto
+          .createHmac("sha256", NEXTAUTH_SECRET)
+          .update(`${stateUserId}:${stateTimestamp}`)
+          .digest("hex");
+
+        const isExpired = Date.now() - Number(stateTimestamp) > 1000 * 60 * 30; // 30 minutes TTL
+
+        if (stateSignature !== expectedSignature || stateUserId !== userIdStr || isExpired) {
+          logger.warn({
+            msg: "CSRF attack or expired state detected on GitHub installation",
+            userId: userIdNum,
+          });
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Invalid or expired security state. Installation rejected.",
+          });
+        }
+      } catch (e) {
+        if (e instanceof TRPCError) throw e;
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Invalid security state. Installation rejected.",
+          message: "Malformed security state. Installation rejected.",
         });
       }
 
@@ -534,30 +562,38 @@ export const repoRouter = createTRPCRouter({
         where: { access_token: { not: null }, provider: "github", userId: userIdNum },
       });
 
-      if (oauthAccount == null || oauthAccount.access_token == null) {
+      if (oauthAccount?.access_token == null) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You must link your GitHub account before installing the app.",
         });
       }
 
+      let hasAccess = false;
+      let page = 1;
+
       try {
-        const verifyRes = await fetch("https://api.github.com/user/installations", {
-          headers: {
-            Accept: "application/vnd.github.v3+json",
-            Authorization: `Bearer ${oauthAccount.access_token}`,
-          },
-        });
+        while (!hasAccess) {
+          const verifyRes = await fetch(
+            `https://api.github.com/user/installations?per_page=100&page=${page}`,
+            {
+              headers: {
+                Accept: "application/vnd.github.v3+json",
+                Authorization: `Bearer ${oauthAccount.access_token}`,
+              },
+            }
+          );
 
-        if (!verifyRes.ok) throw new Error("GitHub API verification failed");
+          if (!verifyRes.ok) throw new Error("GitHub API verification failed");
 
-        const verifyData = (await verifyRes.json()) as {
-          installations: Array<{ id: number }>;
-        };
+          const verifyData = (await verifyRes.json()) as { installations: Array<{ id: number }> };
+          if (verifyData.installations.length === 0) break;
 
-        const hasAccess = verifyData.installations.some(
-          (inst) => inst.id === Number(input.installationId)
-        );
+          hasAccess = verifyData.installations.some((inst) => inst.id === inputInstIdNum);
+
+          if (verifyData.installations.length < 100) break;
+          page++;
+        }
 
         if (!hasAccess) {
           logger.warn({
@@ -578,45 +614,57 @@ export const repoRouter = createTRPCRouter({
         });
       }
 
-      const existing = await ctx.db.githubInstallation.findUnique({
-        where: { id: instIdBigInt },
-      });
+      const installationInfo = await githubService.getInstallationInfo(inputInstIdNum);
+      const account = installationInfo.account;
+      const accountLogin = account !== null && "login" in account ? account.login : "Unknown";
+      const accountAvatar = account !== null && "avatar_url" in account ? account.avatar_url : null;
 
-      if (existing != null && existing.userId !== null && existing.userId !== userIdNum) {
+      try {
+        const updated = await ctx.db.githubInstallation.updateMany({
+          data: {
+            accountAvatar,
+            accountLogin,
+            repositorySelection: installationInfo.repository_selection,
+            userId: userIdNum,
+          },
+          where: {
+            id: instIdBigInt,
+            OR: [{ userId: null }, { userId: userIdNum }],
+          },
+        });
+
+        if (updated.count === 0) {
+          const existing = await ctx.db.githubInstallation.findUnique({
+            where: { id: instIdBigInt },
+          });
+
+          if (existing !== null && existing.userId !== null && existing.userId !== userIdNum) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "This installation is already linked to another workspace.",
+            });
+          }
+
+          await ctx.db.githubInstallation.create({
+            data: {
+              accountAvatar,
+              accountLogin,
+              appId: installationInfo.app_id,
+              id: instIdBigInt,
+              repositorySelection: installationInfo.repository_selection,
+              targetId: BigInt(installationInfo.target_id),
+              targetType: installationInfo.target_type || "Unknown",
+              userId: userIdNum,
+            },
+          });
+        }
+      } catch (error) {
+        logger.error({ error, msg: "Failed to securely claim installtion" });
         throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "This installation is already linked to another workspace.",
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to securely claim installation.",
         });
       }
-
-      const installationInfo = await githubService.getInstallationInfo(
-        Number(input.installationId)
-      );
-
-      const accountLogin =
-        installationInfo.account && "login" in installationInfo.account
-          ? installationInfo.account.login
-          : "Unknown";
-
-      const accountAvatar =
-        installationInfo.account && "avatar_url" in installationInfo.account
-          ? installationInfo.account.avatar_url
-          : null;
-
-      await ctx.db.githubInstallation.upsert({
-        create: {
-          accountAvatar: accountAvatar,
-          accountLogin: accountLogin,
-          appId: installationInfo.app_id,
-          id: instIdBigInt,
-          repositorySelection: installationInfo.repository_selection,
-          targetId: BigInt(installationInfo.target_id),
-          targetType: installationInfo.target_type || "Unknown",
-          userId: userIdNum,
-        },
-        update: { userId: userIdNum },
-        where: { id: instIdBigInt },
-      });
 
       return { success: true };
     }),

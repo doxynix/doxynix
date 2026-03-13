@@ -42,7 +42,7 @@ export function GitInstallationCatcher() {
         },
       }
     );
-  }, [mutate, params.installation_id, params.state, utils.repo.getMyGithubRepos, setParams]);
+  }, [params.installation_id, params.state, mutate, utils.repo.getMyGithubRepos, setParams]);
 
   return null;
 }

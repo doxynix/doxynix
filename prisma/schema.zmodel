@@ -297,7 +297,6 @@ model ApiKey {
   @@map("api_keys")
 }
 
-
 model Account {
   /// @zod.custom.omit(["model"])
   id                       Int     @id @default(autoincrement()) @omit
@@ -348,7 +347,7 @@ model GithubInstallation {
 
   @@allow('read', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))
   @@allow('delete', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))
-  @@allow('create,update', true)
+  @@allow('create,update', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))
 
   @@index([userId])
   @@map("github_installations")

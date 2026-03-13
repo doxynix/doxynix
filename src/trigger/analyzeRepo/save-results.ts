@@ -164,22 +164,31 @@ export async function saveResults(params: {
 }
 
 export async function calculateBusFactor(repo: Repo, userId: number): Promise<number> {
-  const { octokit } = await githubService.getClientContext(prisma, userId, repo.owner);
-  const contributors = await octokit.paginate(octokit.rest.repos.listContributors, {
-    owner: repo.owner,
-    per_page: 100,
-    repo: repo.name,
-  });
+  try {
+    const { octokit } = await githubService.getClientContext(prisma, userId, repo.owner);
+    const contributors = await octokit.paginate(octokit.rest.repos.listContributors, {
+      owner: repo.owner,
+      per_page: 100,
+      repo: repo.name,
+    });
 
-  const totalCommits = contributors.reduce((acc, c) => acc + (c.contributions || 0), 0);
-  let runningSum = 0;
-  let busFactor = 0;
+    const totalCommits = contributors.reduce((acc, c) => acc + (c.contributions || 0), 0);
+    let runningSum = 0;
+    let busFactor = 0;
 
-  for (const c of contributors) {
-    runningSum += c.contributions || 0;
-    busFactor++;
-    if (runningSum >= totalCommits * 0.5) break;
+    for (const c of contributors) {
+      runningSum += c.contributions || 0;
+      busFactor++;
+      if (runningSum >= totalCommits * 0.5) break;
+    }
+
+    return busFactor;
+  } catch (error) {
+    logger.warn({
+      error,
+      msg: "Failed to fetch contributors for Bus Factor calculation. Defaulting to 0.",
+      repoId: repo.id,
+    });
+    return 0;
   }
-
-  return busFactor;
 }

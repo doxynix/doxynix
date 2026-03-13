@@ -31,17 +31,21 @@ export async function getAnalysisContext(
   const repo = analysis.repo;
   const lastSuccessfulAnalysis = repo.analyses[0];
 
-  const account = await prisma.account.findFirst({ where: { provider: "github", userId } });
-  const userToken = account?.access_token;
-  if (repo.visibility === "PRIVATE" && userToken == null) {
-    throw new Error("This is a private repository. Please connect your GitHub account.");
-  }
+  let octokit;
+  let isAppClient = false;
 
-  const clientContext = await githubService.getClientContext(prisma, userId, repo.owner);
-  const { octokit } = clientContext;
-
-  if (repo.visibility === "PRIVATE" && clientContext.type === "app") {
-    throw new Error("This is a private repository. Please install Doxynix App or connect GitHub.");
+  try {
+    const clientContext = await githubService.getClientContext(prisma, userId, repo.owner);
+    octokit = clientContext.octokit;
+  } catch (error) {
+    if (repo.visibility === "PRIVATE") {
+      throw new Error(
+        "This is a private repository. Please install Doxynix App or connect GitHub."
+      );
+    }
+    console.error(error);
+    octokit = githubService.getSystemClient();
+    isAppClient = true;
   }
 
   const { data: refData } = await octokit.rest.git.getRef({
@@ -52,7 +56,7 @@ export async function getAnalysisContext(
 
   const currentSha = refData.object.sha;
 
-  const token = await githubService.getToken(prisma, userId, repo.owner);
+  const token = isAppClient ? null : await githubService.getToken(prisma, userId, repo.owner);
 
   if (forceRefresh === false && lastSuccessfulAnalysis.commitSha === currentSha) {
     return { currentSha, repo: null, token };

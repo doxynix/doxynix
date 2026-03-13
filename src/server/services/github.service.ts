@@ -34,7 +34,6 @@ type GitHubRepoResponse = SearchRepoItem | ListRepoItem | InstallationRepoItem;
 type GitHubClientContext = (
   | { githubInstallationId: number; hasUserToken: false; type: "installation" }
   | { hasUserToken: true; type: "oauth" }
-  | { hasUserToken: false; type: "app" }
 ) & {
   octokit: OctokitInstance;
 };
@@ -144,19 +143,9 @@ export const githubService = {
       }
     }
 
-    return {
-      hasUserToken: false,
-      octokit: new MyOctokit({
-        ...commonConfig,
-        auth: {
-          appId,
-          installationId: Number(GITHUB_SYSTEM_INSTALLATION_ID),
-          privateKey,
-        },
-        authStrategy: createAppAuth,
-      }) as OctokitInstance,
-      type: "app",
-    };
+    throw new Error(
+      "No valid GitHub authorization found. Please connect your GitHub account or install the app."
+    );
   },
 
   async getInstallationInfo(installationId: number) {
@@ -245,9 +234,30 @@ export const githubService = {
   },
 
   async getRepoInfo(prisma: DbClient, userId: number, owner: string, name: string) {
-    const { octokit } = await this.getClientContext(prisma, userId, owner);
-    const { data } = await octokit.rest.repos.get({ owner, repo: name });
-    return data;
+    const { octokit, type } = await this.getClientContext(prisma, userId, owner);
+    try {
+      const { data } = await octokit.rest.repos.get({ owner, repo: name });
+      return data;
+    } catch (error) {
+      if (
+        type === "installation" &&
+        isOctokitError(error) &&
+        (error.status === 403 || error.status === 404)
+      ) {
+        const oauthAcc = await prisma.account.findFirst({
+          where: { access_token: { not: null }, provider: "github", userId },
+        });
+        if (oauthAcc?.access_token != null) {
+          const fallbackOctokit = new MyOctokit({
+            ...getCommonConfig(),
+            auth: oauthAcc.access_token,
+          }) as OctokitInstance;
+          const { data } = await fallbackOctokit.rest.repos.get({ owner, repo: name });
+          return data;
+        }
+      }
+      throw error;
+    }
   },
 
   async getRepoTree(
@@ -258,12 +268,37 @@ export const githubService = {
     branch?: string
   ) {
     try {
-      const { octokit } = await this.getClientContext(prisma, userId, owner);
+      const { octokit, type } = await this.getClientContext(prisma, userId, owner);
+      let activeOctokit = octokit;
 
-      const { data: repoData } = await octokit.rest.repos.get({ owner, repo: name });
+      try {
+        await activeOctokit.rest.repos.get({ owner, repo: name });
+      } catch (error) {
+        if (
+          type === "installation" &&
+          isOctokitError(error) &&
+          (error.status === 403 || error.status === 404)
+        ) {
+          const oauthAcc = await prisma.account.findFirst({
+            where: { access_token: { not: null }, provider: "github", userId },
+          });
+          if (oauthAcc?.access_token != null) {
+            activeOctokit = new MyOctokit({
+              ...getCommonConfig(),
+              auth: oauthAcc.access_token,
+            }) as OctokitInstance;
+          } else {
+            throw error;
+          }
+        } else {
+          throw error;
+        }
+      }
+
+      const { data: repoData } = await activeOctokit.rest.repos.get({ owner, repo: name });
       const treeSha = branch ?? repoData.default_branch;
 
-      const { data } = await octokit.rest.git.getTree({
+      const { data } = await activeOctokit.rest.git.getTree({
         owner,
         recursive: "1",
         repo: name,
@@ -291,19 +326,26 @@ export const githubService = {
     }
   },
 
+  getSystemClient(): OctokitInstance {
+    const commonConfig = getCommonConfig();
+    return new MyOctokit({
+      ...commonConfig,
+      auth: {
+        appId: Number(GITHUB_APP_ID),
+        installationId: Number(GITHUB_SYSTEM_INSTALLATION_ID),
+        privateKey: GITHUB_APP_PRIVATE_KEY,
+      },
+      authStrategy: createAppAuth,
+    }) as OctokitInstance;
+  },
+
   async getToken(prisma: DbClient, userId: number, owner?: string): Promise<string | null> {
-    const context = await this.getClientContext(prisma, userId, owner);
-
-    if (context.type === "app") {
-      return null;
-    }
-
     try {
+      const context = await this.getClientContext(prisma, userId, owner);
       const auth = (await context.octokit.auth()) as { token: string };
       return auth.token;
     } catch (error) {
       logger.error({
-        contextType: context.type,
         error,
         msg: "Failed to resolve GitHub token",
         userId,

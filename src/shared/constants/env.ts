@@ -60,7 +60,12 @@ export const env = createEnv({
     DATABASE_URL: z.url(),
 
     GITHUB_APP_ID: z.string().regex(/^\d+$/, "GITHUB_APP_ID must be numeric"),
-    GITHUB_APP_PRIVATE_KEY: z.string().min(1),
+    GITHUB_APP_PRIVATE_KEY: z
+      .string()
+      .regex(
+        /^-----BEGIN RSA PRIVATE KEY-----/,
+        "GITHUB_APP_PRIVATE_KEY must be a valid PEM-formatted private key"
+      ),
     GITHUB_CLIENT_ID: z.string().min(1),
     GITHUB_CLIENT_SECRET: z.string().min(1),
     GITHUB_SYSTEM_INSTALLATION_ID: z

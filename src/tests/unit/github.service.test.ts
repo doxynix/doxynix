@@ -29,7 +29,7 @@ const octokitState = vi.hoisted(() => ({
 }));
 
 type ConstructorOptions = {
-  auth: string;
+  auth: string | any;
   throttle?: {
     onRateLimit?: (
       retryAfter: number,
@@ -128,19 +128,31 @@ function createMockPrisma(accounts: any[] | any) {
   const normalizedAccounts =
     accounts == null ? [] : Array.isArray(accounts) ? accounts : [accounts];
 
-  const findMany = vi.fn().mockResolvedValue(normalizedAccounts);
-  const findFirst = vi.fn().mockResolvedValue(normalizedAccounts[0] ?? null);
+  const oauthAccounts = normalizedAccounts.filter((account) => account?.access_token != null);
+  const installations = normalizedAccounts
+    .filter((account) => account?.githubInstallationId != null)
+    .map((account) => ({ id: account.githubInstallationId }));
+
+  const accountFindMany = vi.fn().mockResolvedValue(oauthAccounts);
+  const accountFindFirst = vi.fn().mockResolvedValue(oauthAccounts[0] ?? null);
+
+  const installationFindMany = vi.fn().mockResolvedValue(installations);
+  const installationFindFirst = vi.fn().mockResolvedValue(installations[0] ?? null);
 
   const prisma = {
     account: {
-      findFirst,
-      findMany,
+      findFirst: accountFindFirst,
+      findMany: accountFindMany,
+    },
+    githubInstallation: {
+      findFirst: installationFindFirst,
+      findMany: installationFindMany,
     },
   } as unknown as DbClient;
 
   return {
-    findFirst,
-    findMany,
+    findFirst: accountFindFirst,
+    findMany: accountFindMany,
     prisma,
   };
 }
@@ -261,7 +273,7 @@ describe("githubService", () => {
       expect(repos).toEqual([]);
       expect(loggerState.error).toHaveBeenCalledWith(
         expect.objectContaining({
-          msg: "Failed to fetch repos for one of the installations",
+          msg: "Failed to fetch repos for OAuth account",
         })
       );
     });
