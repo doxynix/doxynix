@@ -79,6 +79,40 @@ const getCommonConfig = () => ({
 });
 
 export const githubService = {
+  async executeWithFallback<T>(
+    prisma: DbClient,
+    userId: number,
+    initialOctokit: OctokitInstance,
+    initialType: string,
+    operation: (client: OctokitInstance) => Promise<T>
+  ): Promise<T> {
+    try {
+      return await operation(initialOctokit);
+    } catch (error) {
+      if (
+        initialType === "installation" &&
+        isOctokitError(error) &&
+        (error.status === 403 || error.status === 404)
+      ) {
+        const oauthAccounts = await prisma.account.findMany({
+          where: { access_token: { not: null }, provider: "github", userId },
+        });
+
+        for (const oauthAcc of oauthAccounts) {
+          if (oauthAcc.access_token == null) continue;
+          try {
+            const fallbackOctokit = this.getUserClient(oauthAcc.access_token);
+            return await operation(fallbackOctokit);
+          } catch (fallbackError) {
+            logger.error({ error: fallbackError, msg: "Token didn't work in fallback" });
+            continue;
+          }
+        }
+      }
+      throw error;
+    }
+  },
+
   async getClientContext(
     prisma: DbClient,
     userId: number,
@@ -218,33 +252,10 @@ export const githubService = {
       }
     }
 
-    try {
-      const { data } = await octokit.rest.repos.get({ owner, repo: name });
+    return this.executeWithFallback(prisma, userId, octokit, type, async (client) => {
+      const { data } = await client.rest.repos.get({ owner, repo: name });
       return data;
-    } catch (error) {
-      if (
-        type === "installation" &&
-        isOctokitError(error) &&
-        (error.status === 403 || error.status === 404)
-      ) {
-        const oauthAccounts = await prisma.account.findMany({
-          where: { access_token: { not: null }, provider: "github", userId },
-        });
-
-        for (const oauthAcc of oauthAccounts) {
-          if (oauthAcc.access_token == null) continue;
-          try {
-            const fallbackOctokit = this.getUserClient(oauthAcc.access_token);
-            const { data } = await fallbackOctokit.rest.repos.get({ owner, repo: name });
-            return data;
-          } catch (error) {
-            logger.error({ error, msg: "Token didn't work" });
-            continue;
-          }
-        }
-      }
-      throw error;
-    }
+    });
   },
 
   async getRepoTree(
@@ -270,52 +281,25 @@ export const githubService = {
     }
 
     try {
-      const repoData = await (async () => {
-        try {
-          const response = await activeOctokit.rest.repos.get({ owner, repo: name });
-          return response.data;
-        } catch (error) {
-          if (
-            type === "installation" &&
-            isOctokitError(error) &&
-            (error.status === 403 || error.status === 404)
-          ) {
-            const oauthAccounts = await prisma.account.findMany({
-              where: { access_token: { not: null }, provider: "github", userId },
-            });
+      return await this.executeWithFallback(prisma, userId, activeOctokit, type, async (client) => {
+        const { data: repoData } = await client.rest.repos.get({ owner, repo: name });
+        const treeSha = branch ?? repoData.default_branch;
 
-            for (const oauthAcc of oauthAccounts) {
-              if (oauthAcc.access_token == null) continue;
-              try {
-                activeOctokit = this.getUserClient(oauthAcc.access_token);
-                const response = await activeOctokit.rest.repos.get({ owner, repo: name });
-                return response.data;
-              } catch (error) {
-                logger.error({ error, msg: "Token didn't work" });
-                continue;
-              }
-            }
-          }
-          throw error;
-        }
-      })();
+        const { data } = await client.rest.git.getTree({
+          owner,
+          recursive: "1",
+          repo: name,
+          tree_sha: treeSha,
+        });
 
-      const treeSha = branch ?? repoData.default_branch;
-
-      const { data } = await activeOctokit.rest.git.getTree({
-        owner,
-        recursive: "1",
-        repo: name,
-        tree_sha: treeSha,
+        return data.tree
+          .filter((item) => {
+            if (!item.path) return false;
+            if (item.type !== "blob") return false;
+            return !FileClassifier.isIgnored(item.path);
+          })
+          .map((item) => ({ path: item.path, sha: item.sha, type: item.type }));
       });
-
-      return data.tree
-        .filter((item) => {
-          if (!item.path) return false;
-          if (item.type !== "blob") return false;
-          return !FileClassifier.isIgnored(item.path);
-        })
-        .map((item) => ({ path: item.path, sha: item.sha, type: item.type }));
     } catch (error) {
       if (isOctokitError(error)) {
         logger.info({ msg: "Repo empty or not found", status: error.status });
@@ -341,7 +325,10 @@ export const githubService = {
   async getToken(prisma: DbClient, userId: number, owner?: string): Promise<string | null> {
     try {
       const context = await this.getClientContext(prisma, userId, owner);
-      const auth = (await context.octokit.auth()) as { token: string };
+      const auth =
+        context.type === "installation"
+          ? ((await context.octokit.auth({ type: "installation" })) as { token: string })
+          : ((await context.octokit.auth()) as { token: string });
       return auth.token;
     } catch (error) {
       logger.error({ error, msg: "Failed to resolve GitHub token", userId });

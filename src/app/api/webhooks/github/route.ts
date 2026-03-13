@@ -32,6 +32,10 @@ export async function POST(req: Request) {
   const signature = req.headers.get("x-hub-signature-256") ?? "";
   const deliveryId = req.headers.get("x-github-delivery") ?? "";
 
+  if (deliveryId.length === 0) {
+    return new NextResponse("Missing x-github-delivery", { status: 400 });
+  }
+
   const hmac = crypto.createHmac("sha256", GITHUB_WEBHOOK_SECRET);
   const digest = "sha256=" + hmac.update(payload).digest("hex");
   const signatureBuffer = Buffer.from(signature);
