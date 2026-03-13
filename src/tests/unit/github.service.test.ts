@@ -40,7 +40,8 @@ type ConstructorOptions = {
     onSecondaryRateLimit?: (
       retryAfter: number,
       options: { method: string; url: string },
-      octokit: { log: { warn: (message: string) => void } }
+      octokit: { log: { warn: (message: string) => void } },
+      retryCount: number
     ) => boolean;
   };
 };
@@ -271,7 +272,7 @@ describe("githubService", () => {
       expect(repos).toEqual([]);
       expect(loggerState.error).toHaveBeenCalledWith(
         expect.objectContaining({
-          msg: "Failed to fetch repos for OAuth account",
+          msg: "Failed OAuth fetch",
         })
       );
     });

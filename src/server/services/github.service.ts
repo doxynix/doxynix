@@ -90,7 +90,7 @@ export const githubService = {
       return await operation(initialOctokit);
     } catch (error) {
       if (
-        initialType === "installation" &&
+        (initialType === "installation" || initialType === "oauth") &&
         isOctokitError(error) &&
         (error.status === 403 || error.status === 404)
       ) {
