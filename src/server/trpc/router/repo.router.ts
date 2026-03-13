@@ -423,7 +423,7 @@ export const repoRouter = createTRPCRouter({
     const payload = `${userId}:${timestamp}`;
     const signature = crypto.createHmac("sha256", NEXTAUTH_SECRET).update(payload).digest("hex");
 
-    const state = Buffer.from(`${payload}:${signature}`).toString("base64");
+    const state = encodeURIComponent(Buffer.from(`${payload}:${signature}`).toString("base64"));
     return `https://github.com/apps/doxynix/installations/new?state=${state}`;
   }),
 
@@ -530,7 +530,9 @@ export const repoRouter = createTRPCRouter({
       const inputInstIdNum = Number(input.installationId);
 
       try {
-        const decodedState = Buffer.from(input.state, "base64").toString("utf-8");
+        const decodedState = Buffer.from(decodeURIComponent(input.state), "base64").toString(
+          "utf-8"
+        );
         const [stateUserId, stateTimestamp, stateSignature] = decodedState.split(":");
 
         const expectedSignature = crypto
@@ -558,7 +560,8 @@ export const repoRouter = createTRPCRouter({
         });
       }
 
-      const oauthAccount = await ctx.db.account.findFirst({
+      const oauthAccount = await ctx.prisma.account.findFirst({
+        select: { access_token: true },
         where: { access_token: { not: null }, provider: "github", userId: userIdNum },
       });
 
@@ -569,31 +572,15 @@ export const repoRouter = createTRPCRouter({
         });
       }
 
-      let hasAccess = false;
-      let page = 1;
-
       try {
-        while (!hasAccess) {
-          const verifyRes = await fetch(
-            `https://api.github.com/user/installations?per_page=100&page=${page}`,
-            {
-              headers: {
-                Accept: "application/vnd.github.v3+json",
-                Authorization: `Bearer ${oauthAccount.access_token}`,
-              },
-            }
-          );
+        const userOctokit = githubService.getUserClient(oauthAccount.access_token);
 
-          if (!verifyRes.ok) throw new Error("GitHub API verification failed");
+        const userInstallations = await userOctokit.paginate(
+          userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
+          { per_page: 100 }
+        );
 
-          const verifyData = (await verifyRes.json()) as { installations: Array<{ id: number }> };
-          if (verifyData.installations.length === 0) break;
-
-          hasAccess = verifyData.installations.some((inst) => inst.id === inputInstIdNum);
-
-          if (verifyData.installations.length < 100) break;
-          page++;
-        }
+        const hasAccess = userInstallations.some((inst) => inst.id === inputInstIdNum);
 
         if (!hasAccess) {
           logger.warn({
@@ -608,9 +595,10 @@ export const repoRouter = createTRPCRouter({
         }
       } catch (error) {
         if (error instanceof TRPCError) throw error;
+        logger.error({ error, msg: "GitHub API verification failed during saveInstallation" });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to verify ownership via GitHub API.",
+          message: "Failed to verify installation ownership via GitHub.",
         });
       }
 
@@ -659,7 +647,9 @@ export const repoRouter = createTRPCRouter({
           });
         }
       } catch (error) {
-        logger.error({ error, msg: "Failed to securely claim installtion" });
+        if (error instanceof TRPCError) throw error;
+
+        logger.error({ error, msg: "Failed to securely claim installation" });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to securely claim installation.",

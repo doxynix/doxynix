@@ -63,7 +63,7 @@ export const env = createEnv({
     GITHUB_APP_PRIVATE_KEY: z
       .string()
       .regex(
-        /^-----BEGIN RSA PRIVATE KEY-----/,
+        /^-----BEGIN (?:RSA )?PRIVATE KEY-----[\s\S]+-----END (?:RSA )?PRIVATE KEY-----\s*$/,
         "GITHUB_APP_PRIVATE_KEY must be a valid PEM-formatted private key"
       ),
     GITHUB_CLIENT_ID: z.string().min(1),

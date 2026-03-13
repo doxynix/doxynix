@@ -68,11 +68,16 @@ export function CreateRepoDialog() {
     posthog.capture("github_app_install_started");
 
     try {
-      const { data: url } = await getInstallUrl();
+      const { data: url, error } = await getInstallUrl();
 
-      if (url == null) return;
+      if (error != null || url == null) {
+        posthog.capture("github_app_install_failed");
+        return;
+      }
+
       window.location.assign(url);
-    } catch {
+    } catch (error) {
+      console.error(error);
       posthog.capture("github_app_install_failed");
     } finally {
       setLoading(false);

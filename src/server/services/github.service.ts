@@ -61,12 +61,18 @@ const getCommonConfig = () => ({
       );
       return retryCount < 2;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onSecondaryRateLimit: (retryAfter: number, options: RequestOptions, octokit: any) => {
+
+    onSecondaryRateLimit: (
+      retryAfter: number,
+      options: RequestOptions,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      octokit: any,
+      retryCount: number
+    ) => {
       octokit.log.warn(
-        `Secondary rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s.`
+        `Secondary rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s. (Attempt ${retryCount})`
       );
-      return true;
+      return retryCount < 2;
     },
   },
   userAgent: "Doxynix/1.0.0",
@@ -78,10 +84,6 @@ export const githubService = {
     userId: number,
     owner?: string
   ): Promise<GitHubClientContext> {
-    const commonConfig = getCommonConfig();
-    const appId = Number(GITHUB_APP_ID);
-    const privateKey = GITHUB_APP_PRIVATE_KEY;
-
     if (owner != null) {
       const specificInstallation = await prisma.githubInstallation.findFirst({
         where: { accountLogin: { equals: owner, mode: "insensitive" }, userId },
@@ -91,15 +93,7 @@ export const githubService = {
         return {
           githubInstallationId: Number(specificInstallation.id),
           hasUserToken: false,
-          octokit: new MyOctokit({
-            ...commonConfig,
-            auth: {
-              appId,
-              installationId: Number(specificInstallation.id),
-              privateKey,
-            },
-            authStrategy: createAppAuth,
-          }) as OctokitInstance,
+          octokit: this.getInstallationClient(Number(specificInstallation.id)),
           type: "installation",
         };
       }
@@ -112,10 +106,7 @@ export const githubService = {
     if (oauthAcc?.access_token != null) {
       return {
         hasUserToken: true,
-        octokit: new MyOctokit({
-          ...commonConfig,
-          auth: oauthAcc.access_token,
-        }) as OctokitInstance,
+        octokit: this.getUserClient(oauthAcc.access_token),
         type: "oauth",
       };
     }
@@ -129,15 +120,7 @@ export const githubService = {
         return {
           githubInstallationId: Number(anyInstallation.id),
           hasUserToken: false,
-          octokit: new MyOctokit({
-            ...commonConfig,
-            auth: {
-              appId,
-              installationId: Number(anyInstallation.id),
-              privateKey,
-            },
-            authStrategy: createAppAuth,
-          }) as OctokitInstance,
+          octokit: this.getInstallationClient(Number(anyInstallation.id)),
           type: "installation",
         };
       }
@@ -148,52 +131,40 @@ export const githubService = {
     );
   },
 
-  async getInstallationInfo(installationId: number) {
-    const octokit = new MyOctokit({
+  getInstallationClient(installationId: number): OctokitInstance {
+    return new MyOctokit({
       ...getCommonConfig(),
       auth: {
         appId: Number(GITHUB_APP_ID),
+        installationId,
         privateKey: GITHUB_APP_PRIVATE_KEY,
       },
       authStrategy: createAppAuth,
-    });
+    }) as OctokitInstance;
+  },
 
+  async getInstallationInfo(installationId: number) {
+    const octokit = this.getSystemClient();
     const { data } = await octokit.rest.apps.getInstallation({
       installation_id: installationId,
     });
-
     return data;
   },
 
   async getMyRepos(prisma: DbClient, userId: number): Promise<RepoItemFields[]> {
     try {
       const allRepos: RepoItemFields[] = [];
-      const commonConfig = getCommonConfig();
 
-      const installations = await prisma.githubInstallation.findMany({
-        where: { userId },
-      });
-
+      const installations = await prisma.githubInstallation.findMany({ where: { userId } });
       const oauthAccounts = await prisma.account.findMany({
         where: { access_token: { not: null }, provider: "github", userId },
       });
 
-      if (installations.length === 0 && oauthAccounts.length === 0) {
-        return [];
-      }
+      if (installations.length === 0 && oauthAccounts.length === 0) return [];
 
       for (const inst of installations) {
         try {
-          const octokit = new MyOctokit({
-            ...commonConfig,
-            auth: {
-              appId: Number(GITHUB_APP_ID),
-              installationId: Number(inst.id),
-              privateKey: GITHUB_APP_PRIVATE_KEY,
-            },
-            authStrategy: createAppAuth,
-          }) as OctokitInstance;
-
+          const octokit = this.getInstallationClient(Number(inst.id));
           const repos = await octokit.paginate(octokit.rest.apps.listReposAccessibleToInstallation);
           allRepos.push(...githubService.mapRepos(repos as GitHubRepoResponse[]));
         } catch (error) {
@@ -207,11 +178,7 @@ export const githubService = {
 
       for (const account of oauthAccounts) {
         try {
-          const octokit = new MyOctokit({
-            ...commonConfig,
-            auth: account.access_token!,
-          }) as OctokitInstance;
-
+          const octokit = this.getUserClient(account.access_token!);
           const repos = await octokit.paginate(octokit.rest.repos.listForAuthenticatedUser, {
             per_page: 100,
             visibility: "all",
@@ -248,10 +215,7 @@ export const githubService = {
           where: { access_token: { not: null }, provider: "github", userId },
         });
         if (oauthAcc?.access_token != null) {
-          const fallbackOctokit = new MyOctokit({
-            ...getCommonConfig(),
-            auth: oauthAcc.access_token,
-          }) as OctokitInstance;
+          const fallbackOctokit = this.getUserClient(oauthAcc.access_token);
           const { data } = await fallbackOctokit.rest.repos.get({ owner, repo: name });
           return data;
         }
@@ -271,31 +235,29 @@ export const githubService = {
       const { octokit, type } = await this.getClientContext(prisma, userId, owner);
       let activeOctokit = octokit;
 
-      try {
-        await activeOctokit.rest.repos.get({ owner, repo: name });
-      } catch (error) {
-        if (
-          type === "installation" &&
-          isOctokitError(error) &&
-          (error.status === 403 || error.status === 404)
-        ) {
-          const oauthAcc = await prisma.account.findFirst({
-            where: { access_token: { not: null }, provider: "github", userId },
-          });
-          if (oauthAcc?.access_token != null) {
-            activeOctokit = new MyOctokit({
-              ...getCommonConfig(),
-              auth: oauthAcc.access_token,
-            }) as OctokitInstance;
-          } else {
-            throw error;
+      const repoData = await (async () => {
+        try {
+          const response = await activeOctokit.rest.repos.get({ owner, repo: name });
+          return response.data;
+        } catch (error) {
+          if (
+            type === "installation" &&
+            isOctokitError(error) &&
+            (error.status === 403 || error.status === 404)
+          ) {
+            const oauthAcc = await prisma.account.findFirst({
+              where: { access_token: { not: null }, provider: "github", userId },
+            });
+            if (oauthAcc?.access_token != null) {
+              activeOctokit = this.getUserClient(oauthAcc.access_token);
+              const response = await activeOctokit.rest.repos.get({ owner, repo: name });
+              return response.data;
+            }
           }
-        } else {
           throw error;
         }
-      }
+      })();
 
-      const { data: repoData } = await activeOctokit.rest.repos.get({ owner, repo: name });
       const treeSha = branch ?? repoData.default_branch;
 
       const { data } = await activeOctokit.rest.git.getTree({
@@ -311,11 +273,7 @@ export const githubService = {
           if (item.type !== "blob") return false;
           return !FileClassifier.isIgnored(item.path);
         })
-        .map((item) => ({
-          path: item.path,
-          sha: item.sha,
-          type: item.type,
-        }));
+        .map((item) => ({ path: item.path, sha: item.sha, type: item.type }));
     } catch (error) {
       if (isOctokitError(error)) {
         logger.info({ msg: "Repo empty or not found", status: error.status });
@@ -326,10 +284,10 @@ export const githubService = {
     }
   },
 
+  // === ФАБРИКИ КЛИЕНТОВ (УБИРАЮТ ДУБЛИРОВАНИЕ) ===
   getSystemClient(): OctokitInstance {
-    const commonConfig = getCommonConfig();
     return new MyOctokit({
-      ...commonConfig,
+      ...getCommonConfig(),
       auth: {
         appId: Number(GITHUB_APP_ID),
         installationId: Number(GITHUB_SYSTEM_INSTALLATION_ID),
@@ -345,13 +303,16 @@ export const githubService = {
       const auth = (await context.octokit.auth()) as { token: string };
       return auth.token;
     } catch (error) {
-      logger.error({
-        error,
-        msg: "Failed to resolve GitHub token",
-        userId,
-      });
+      logger.error({ error, msg: "Failed to resolve GitHub token", userId });
       return null;
     }
+  },
+
+  getUserClient(token: string): OctokitInstance {
+    return new MyOctokit({
+      ...getCommonConfig(),
+      auth: token,
+    }) as OctokitInstance;
   },
 
   mapRepos(data: GitHubRepoResponse[]): RepoItemFields[] {
@@ -367,15 +328,9 @@ export const githubService = {
 
   parseUrl(input: string) {
     if (!input.trim()) throw new Error("Field cannot be empty");
-
     const parsed = parseGithubUrl(input);
 
-    if (
-      parsed?.owner == null ||
-      parsed.owner.trim().length === 0 ||
-      parsed.name == null ||
-      parsed.name.trim().length === 0
-    ) {
+    if (parsed?.owner?.trim() == null || parsed.name?.trim() == null) {
       throw new Error("Invalid format. Enter 'owner/repo' or repository URL");
     }
 
