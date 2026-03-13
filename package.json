@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "1.14.10",
+  "version": "1.15.0",
   "license": "MIT",
   "private": true,
   "lint-staged": {
@@ -112,7 +112,7 @@
     "@radix-ui/react-tooltip": "1.2.8",
     "@react-email/components": "1.0.9",
     "@react-email/render": "2.0.4",
-    "@scalar/nextjs-api-reference": "0.10.2",
+    "@scalar/nextjs-api-reference": "0.10.3",
     "@sentry/nextjs": "10.43.0",
     "@t3-oss/env-nextjs": "0.13.10",
     "@tanstack/react-query": "5.90.21",
