@@ -37,6 +37,7 @@ export async function createContext({ req }: Props) {
 
         return {
           prisma,
+          redis: redisClient,
           req,
           requestInfo,
           session: {

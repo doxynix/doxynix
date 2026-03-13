@@ -9,9 +9,12 @@ export const BETTERSTACK_TOKEN = env.BETTERSTACK_API_TOKEN;
 export const TURNSTILE_SECRET_KEY = env.TURNSTILE_SECRET_KEY;
 export const RESEND_API_KEY = env.RESEND_API_KEY;
 export const ABLY_API_KEY = env.ABLY_API_KEY;
-export const SYSTEM_TOKEN = env.GITHUB_SYSTEM_TOKEN;
 export const GROQ_API_KEY = env.GROQ_API_KEY;
 export const UPLOADTHING_TOKEN = env.UPLOADTHING_TOKEN;
+export const GITHUB_APP_ID = env.GITHUB_APP_ID;
+export const GITHUB_APP_PRIVATE_KEY = env.GITHUB_APP_PRIVATE_KEY.replace(/\\n/g, "\n");
+export const GITHUB_WEBHOOK_SECRET = env.GITHUB_WEBHOOK_SECRET;
+export const GITHUB_SYSTEM_INSTALLATION_ID = env.GITHUB_SYSTEM_INSTALLATION_ID;
 
 export const AUTH_PROVIDERS = {
   github: {

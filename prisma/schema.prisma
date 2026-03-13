@@ -84,26 +84,27 @@ enum NotifyType {
 
 model User {
   /// @zod.custom.omit(["model"])
-  id            Int            @id() @default(autoincrement())
+  id                  Int                  @id() @default(autoincrement())
   /// @zod.custom.omit(["model"])
-  publicId      String         @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  publicId            String               @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   /// @zod.string.email({ message: "Incorrect email" })
-  email         String?        @unique()
+  email               String?              @unique()
   /// @zod.string.trim().min(1, { message: "Name required" }).max(50, { message: "Name cannot exceed 50 characters" })
-  name          String?
-  emailVerified DateTime?      @map("email_verified")
+  name                String?
+  emailVerified       DateTime?            @map("email_verified")
   /// @zod.string.url({ message: "Incorrect link to avatar" })
-  image         String?
+  image               String?
   /// @zod.custom.omit(["model"])
-  imageKey      String?        @unique() @map("image_key")
-  role          UserRole       @default(USER)
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt() @map("updated_at")
-  accounts      Account[]
-  sessions      Session[]
-  repos         Repo[]
-  apiKeys       ApiKey[]
-  notifications Notification[]
+  imageKey            String?              @unique() @map("image_key")
+  role                UserRole             @default(USER)
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt() @map("updated_at")
+  accounts            Account[]
+  sessions            Session[]
+  repos               Repo[]
+  apiKeys             ApiKey[]
+  notifications       Notification[]
+  githubInstallations GithubInstallation[]
 
   @@map("users")
 }
@@ -262,28 +263,49 @@ model ApiKey {
 
 model Account {
   /// @zod.custom.omit(["model"])
-  id                Int     @id() @default(autoincrement())
+  id                       Int     @id() @default(autoincrement())
   /// @zod.custom.omit(["model"])
-  publicId          String  @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  publicId                 String  @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   /// @zod.custom.omit(["model"])
-  userId            Int     @map("user_id")
-  type              String
-  provider          String
-  providerAccountId String  @map("provider_account_id")
+  userId                   Int     @map("user_id")
+  type                     String
+  provider                 String
+  providerAccountId        String  @map("provider_account_id")
   /// @zod.custom.omit(["model"])
-  refresh_token     String? @db.Text()
+  refresh_token            String? @db.Text()
   /// @zod.custom.omit(["model"])
-  access_token      String? @db.Text()
-  expires_at        Int?
-  token_type        String?
-  scope             String?
+  access_token             String? @db.Text()
   /// @zod.custom.omit(["model"])
-  id_token          String? @db.Text()
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refresh_token_expires_in Int?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  /// @zod.custom.omit(["model"])
+  id_token                 String? @db.Text()
+  session_state            String?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
+}
+
+model GithubInstallation {
+  id                  BigInt   @id()
+  appId               Int      @map("app_id")
+  targetId            BigInt   @map("target_id")
+  targetType          String   @map("target_type")
+  accountLogin        String   @map("account_login")
+  accountAvatar       String?  @map("account_avatar")
+  repositorySelection String   @map("repository_selection")
+  isSuspended         Boolean  @default(false) @map("is_suspended")
+  htmlUrl             String?  @map("html_url")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt() @map("updated_at")
+  userId              Int?     @map("user_id")
+  user                User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("github_installations")
 }
 
 model Session {

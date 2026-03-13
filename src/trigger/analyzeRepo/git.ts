@@ -3,8 +3,6 @@ import fs from "node:fs/promises";
 import type { Repo } from "@prisma/client";
 import simpleGit from "simple-git";
 
-import { SYSTEM_TOKEN } from "@/shared/constants/env.server";
-
 import { prisma } from "@/server/db/db";
 import { githubService } from "@/server/services/github.service";
 
@@ -33,22 +31,53 @@ export async function getAnalysisContext(
   const repo = analysis.repo;
   const lastSuccessfulAnalysis = repo.analyses[0];
 
-  const account = await prisma.account.findFirst({ where: { provider: "github", userId } });
-  const userToken = account?.access_token;
-  if (repo.visibility === "PRIVATE" && userToken == null) {
-    throw new Error("This is a private repository. Please connect your GitHub account.");
+  let octokit;
+  let clientType: "installation" | "oauth" | "app";
+
+  try {
+    const clientContext = await githubService.getClientContext(prisma, userId, repo.owner);
+    octokit = clientContext.octokit;
+    clientType = clientContext.type;
+  } catch (error) {
+    const isMissingAuth =
+      error instanceof Error && error.message.includes("No valid GitHub authorization found");
+
+    if (!isMissingAuth) throw error;
+
+    if (repo.visibility === "PRIVATE") {
+      throw new Error(
+        "This is a private repository. Please install Doxynix App or connect GitHub."
+      );
+    }
+    octokit = githubService.getSystemClient();
+    clientType = "app";
   }
 
-  const token = userToken ?? SYSTEM_TOKEN;
-  const { octokit } = await githubService.getClientContext(prisma, userId);
+  const { currentSha, token } = await githubService.executeWithFallback(
+    prisma,
+    userId,
+    octokit,
+    clientType,
+    async (client) => {
+      const { data: refData } = await client.rest.git.getRef({
+        owner: repo.owner,
+        ref: `heads/${repo.defaultBranch}`,
+        repo: repo.name,
+      });
 
-  const { data: refData } = await octokit.git.getRef({
-    owner: repo.owner,
-    ref: `heads/${repo.defaultBranch}`,
-    repo: repo.name,
-  });
+      let resolvedToken: string | null = null;
+      if (clientType !== "app") {
+        const auth = (await client.auth()) as { token?: string };
+        resolvedToken = auth.token ?? null;
+      }
 
-  const currentSha = refData.object.sha;
+      return { currentSha: refData.object.sha, token: resolvedToken };
+    }
+  );
+
+  if (repo.visibility === "PRIVATE" && token == null) {
+    throw new Error("Unable to resolve GitHub token for private repository.");
+  }
 
   if (forceRefresh === false && lastSuccessfulAnalysis.commitSha === currentSha) {
     return { currentSha, repo: null, token };

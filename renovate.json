@@ -8,6 +8,10 @@
   "ignoreDeps": ["zod-prisma-types"],
   "packageRules": [
     {
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["major"]
+    },
+    {
       "description": "Запрещаем мажорный апдейт cookie (v1 ломает совместимость с auth/sockets)",
       "matchPackageNames": ["cookie"],
       "allowedVersions": "<1.0.0"

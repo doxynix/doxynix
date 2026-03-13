@@ -83,28 +83,29 @@ generator fakeData {
 
 model User {
   /// @zod.custom.omit(["model"])
-  id            Int            @id @default(autoincrement()) @omit
+  id                  Int                  @id @default(autoincrement()) @omit
   /// @zod.custom.omit(["model"])
-  publicId      String         @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  publicId            String               @unique @default(uuid(7)) @map("public_id") @db.Uuid
   /// @zod.string.email({ message: "Incorrect email" })
-  email         String?        @unique @email(message: "Incorrect email")
+  email               String?              @unique @email(message: "Incorrect email")
   /// @zod.string.trim().min(1, { message: "Name required" }).max(50, { message: "Name cannot exceed 50 characters" })
-  name          String?        @length(min: 1, max: 50, message: "Name cannot exceed 50 characters")
-  emailVerified DateTime?      @map("email_verified")
+  name                String?              @length(min: 1, max: 50, message: "Name cannot exceed 50 characters")
+  emailVerified       DateTime?            @map("email_verified")
   /// @zod.string.url({ message: "Incorrect link to avatar" })
-  image         String?        @url(message: "Incorrect link to avatar")
+  image               String?              @url(message: "Incorrect link to avatar")
   /// @zod.custom.omit(["model"])
-  imageKey      String?        @map("image_key") @omit @unique
-  role          UserRole       @default(USER)
+  imageKey            String?              @map("image_key") @omit @unique
+  role                UserRole             @default(USER)
 
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
 
-  accounts      Account[]
-  sessions      Session[]
-  repos         Repo[]
-  apiKeys       ApiKey[]
-  notifications Notification[]
+  accounts            Account[]
+  sessions            Session[]
+  repos               Repo[]
+  apiKeys             ApiKey[]
+  notifications       Notification[]
+  githubInstallations GithubInstallation[]
 
   @@allow('create', true)
   @@allow('read,delete', auth() == this || auth().role == 'ADMIN')
@@ -296,34 +297,67 @@ model ApiKey {
   @@map("api_keys")
 }
 
-
 model Account {
   /// @zod.custom.omit(["model"])
-  id                Int     @id @default(autoincrement()) @omit
+  id                       Int     @id @default(autoincrement()) @omit
   /// @zod.custom.omit(["model"])
-  publicId          String  @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  publicId                 String  @unique @default(uuid(7)) @map("public_id") @db.Uuid
   /// @zod.custom.omit(["model"])
-  userId            Int     @map("user_id") @omit
-  type              String
-  provider          String
-  providerAccountId String  @map("provider_account_id")
+  userId                   Int     @map("user_id") @omit
+  type                     String
+  provider                 String
+  providerAccountId        String  @map("provider_account_id")
   /// @zod.custom.omit(["model"])
-  refresh_token     String? @db.Text @omit
+  refresh_token            String? @db.Text @omit
   /// @zod.custom.omit(["model"])
-  access_token      String? @db.Text @omit
-  expires_at        Int?
-  token_type        String?
-  scope             String?
+  access_token             String? @db.Text @omit
   /// @zod.custom.omit(["model"])
-  id_token          String? @db.Text @omit
-  session_state     String?
+  refresh_token_expires_in Int?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  /// @zod.custom.omit(["model"])
+  id_token                 String? @db.Text @omit
+  session_state            String?
 
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@allow('read,delete', auth() == user || auth().role == 'ADMIN')
   @@allow('create', (auth() != null && userId == auth().id) || auth().role == 'ADMIN')
+  @@allow('update', auth().role == 'ADMIN')
+
   @@unique([provider, providerAccountId])
   @@map("accounts")
+}
+
+model GithubInstallation {
+  id                  BigInt   @id
+  appId               Int      @map("app_id")
+  targetId            BigInt   @map("target_id")
+  targetType          String   @map("target_type")
+  accountLogin        String   @map("account_login")
+  accountAvatar       String?  @map("account_avatar")
+  repositorySelection String   @map("repository_selection")
+
+  isSuspended         Boolean  @default(false) @map("is_suspended")
+  htmlUrl             String?  @map("html_url")
+
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  userId              Int?     @map("user_id") @omit
+  user                User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@allow('read', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))
+  @@allow('delete', auth().role == 'ADMIN')
+  @@allow('create', auth().role == 'ADMIN')
+  @@allow(
+    'update',
+    auth().role == 'ADMIN' || (userId == auth().id && future().userId == userId)
+  )
+
+  @@index([userId])
+  @@map("github_installations")
 }
 
 model Session {

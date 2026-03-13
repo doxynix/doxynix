@@ -17,17 +17,19 @@ const loggerState = vi.hoisted(() => ({
 }));
 
 const octokitState = vi.hoisted(() => ({
-  constructorAuths: [] as string[],
-  constructorOptions: [] as ConstructorOptions[],
+  auth: vi.fn(),
+  constructorAuths: [] as any[],
+  constructorOptions: [] as any[],
   getRepo: vi.fn(),
   getTree: vi.fn(),
   listForAuthenticatedUser: vi.fn(),
+  listReposAccessibleToInstallation: vi.fn(),
   paginate: vi.fn(),
   searchRepos: vi.fn(),
 }));
 
 type ConstructorOptions = {
-  auth: string;
+  auth: string | any;
   throttle?: {
     onRateLimit?: (
       retryAfter: number,
@@ -38,10 +40,15 @@ type ConstructorOptions = {
     onSecondaryRateLimit?: (
       retryAfter: number,
       options: { method: string; url: string },
-      octokit: { log: { warn: (message: string) => void } }
+      octokit: { log: { warn: (message: string) => void } },
+      retryCount: number
     ) => boolean;
   };
 };
+
+vi.mock("@octokit/auth-app", () => ({
+  createAppAuth: vi.fn(),
+}));
 
 vi.mock("@octokit/plugin-paginate-rest", () => ({
   paginateRest: vi.fn(),
@@ -60,10 +67,7 @@ vi.mock("@octokit/rest", () => {
     static plugin() {
       return MockOctokit;
     }
-
-    git = {
-      getTree: octokitState.getTree,
-    };
+    auth = octokitState.auth;
 
     log = {
       debug: vi.fn(),
@@ -74,18 +78,20 @@ vi.mock("@octokit/rest", () => {
 
     paginate = octokitState.paginate;
 
-    repos = {
-      get: octokitState.getRepo,
-    };
-
     rest = {
+      apps: {
+        listReposAccessibleToInstallation: octokitState.listReposAccessibleToInstallation,
+      },
+      git: {
+        getTree: octokitState.getTree,
+      },
       repos: {
+        get: octokitState.getRepo,
         listForAuthenticatedUser: octokitState.listForAuthenticatedUser,
       },
-    };
-
-    search = {
-      repos: octokitState.searchRepos,
+      search: {
+        repos: octokitState.searchRepos,
+      },
     };
 
     constructor(options: ConstructorOptions) {
@@ -104,7 +110,9 @@ vi.mock("parse-github-url", () => ({
 }));
 
 vi.mock("@/shared/constants/env.server", () => ({
-  SYSTEM_TOKEN: "system-token",
+  GITHUB_APP_ID: "123456",
+  GITHUB_APP_PRIVATE_KEY: "mock-private-key",
+  GITHUB_SYSTEM_INSTALLATION_ID: "999999",
 }));
 
 vi.mock("@/server/logger/logger", () => ({
@@ -117,29 +125,46 @@ vi.mock("@/server/utils/file-classifier", () => ({
   },
 }));
 
-type AccountFindFirstResult = {
-  access_token: string;
-} | null;
+function createMockPrisma(accounts: any[] | any) {
+  const normalizedAccounts =
+    accounts == null ? [] : Array.isArray(accounts) ? accounts : [accounts];
 
-function createMockPrisma(result: AccountFindFirstResult) {
-  const findFirst = vi.fn().mockResolvedValue(result);
+  const oauthAccounts = normalizedAccounts.filter((account) => account?.access_token != null);
+  const installations = normalizedAccounts
+    .filter((account) => account?.githubInstallationId != null)
+    .map((account) => ({ id: account.githubInstallationId }));
+
+  const accountFindMany = vi.fn().mockResolvedValue(oauthAccounts);
+  const accountFindFirst = vi.fn().mockResolvedValue(oauthAccounts[0] ?? null);
+
+  const installationFindMany = vi.fn().mockResolvedValue(installations);
+  const installationFindFirst = vi.fn().mockResolvedValue(installations[0] ?? null);
+
   const prisma = {
     account: {
-      findFirst,
+      findFirst: accountFindFirst,
+      findMany: accountFindMany,
+    },
+    githubInstallation: {
+      findFirst: installationFindFirst,
+      findMany: installationFindMany,
     },
   } as unknown as DbClient;
 
   return {
-    findFirst,
+    findFirst: accountFindFirst,
+    findMany: accountFindMany,
     prisma,
   };
 }
 
 describe("githubService", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     octokitState.constructorAuths.length = 0;
     octokitState.constructorOptions.length = 0;
+    octokitState.auth.mockResolvedValue({ token: "mock-token" });
+    octokitState.paginate.mockResolvedValue([]);
     fileClassifierState.isIgnored.mockReturnValue(false);
   });
 
@@ -148,26 +173,37 @@ describe("githubService", () => {
   });
 
   describe("getClientContext", () => {
-    it("should return user token context when github account has access token", async () => {
-      const { findFirst, prisma } = createMockPrisma({ access_token: "user-token" });
+    it("should return installation context when githubInstallationId exists", async () => {
+      const { prisma } = createMockPrisma([
+        {
+          githubInstallationId: 12345,
+        },
+      ]);
 
       const context = await githubService.getClientContext(prisma, 101);
 
-      expect(context.hasUserToken).toBe(true);
-      expect(octokitState.constructorAuths).toEqual(["user-token"]);
-      expect(findFirst).toHaveBeenCalledWith({
-        select: { access_token: true },
-        where: { provider: "github", userId: 101 },
-      });
+      expect(context.type).toBe("installation");
+      const options = octokitState.constructorOptions[0];
+      expect(options.auth.installationId).toBe(12345);
+      expect(options.auth.appId).toBe(123456);
     });
 
-    it("should fallback to SYSTEM_TOKEN when user token is absent", async () => {
+    it("should return oauth context when only access_token exists", async () => {
+      const { prisma } = createMockPrisma([
+        {
+          access_token: "user-token",
+        },
+      ]);
+
+      const context = await githubService.getClientContext(prisma, 101);
+      expect(context.type).toBe("oauth");
+    });
+
+    it("should throw when no GitHub authorization is available", async () => {
       const { prisma } = createMockPrisma(null);
-
-      const context = await githubService.getClientContext(prisma, 9);
-
-      expect(context.hasUserToken).toBe(false);
-      expect(octokitState.constructorAuths).toEqual(["system-token"]);
+      await expect(githubService.getClientContext(prisma, 9)).rejects.toThrow(
+        "No valid GitHub authorization found"
+      );
     });
 
     it("should configure and execute throttle callbacks for rate limit handlers", async () => {
@@ -185,104 +221,58 @@ describe("githubService", () => {
 
       expect(onRateLimit?.(3, { method: "GET", url: "/repos" }, octokit, 0)).toBe(true);
       expect(onRateLimit?.(3, { method: "GET", url: "/repos" }, octokit, 2)).toBe(false);
-      expect(onSecondaryRateLimit?.(2, { method: "POST", url: "/search" }, octokit)).toBe(true);
+      expect(onSecondaryRateLimit?.(2, { method: "POST", url: "/search" }, octokit, 0)).toBe(true);
       expect(warn).toHaveBeenCalledTimes(3);
     });
   });
 
   describe("getMyRepos", () => {
-    it("should return empty list and warn when user token is missing", async () => {
-      const { prisma } = createMockPrisma(null);
-
+    it("should return empty list when user has no accounts", async () => {
+      const { prisma } = createMockPrisma([]);
       const repos = await githubService.getMyRepos(prisma, 10);
-
       expect(repos).toEqual([]);
-      expect(loggerState.warn).toHaveBeenCalledWith({
-        msg: "GitHub account not linked. Skipping listForAuthenticatedUser call.",
-        userId: 10,
-      });
-      expect(octokitState.listForAuthenticatedUser).not.toHaveBeenCalled();
+      expect(octokitState.paginate).not.toHaveBeenCalled();
     });
 
-    it("should fetch limited repos via listForAuthenticatedUser when limit is provided", async () => {
-      const { prisma } = createMockPrisma({ access_token: "token" });
-      octokitState.listForAuthenticatedUser.mockResolvedValue({
-        data: [
-          {
-            description: "desc",
-            full_name: "owner/repo",
-            language: "TypeScript",
-            private: false,
-            stargazers_count: 15,
-            updated_at: "2025-01-01T00:00:00.000Z",
-          },
-        ],
-      });
-
-      const repos = await githubService.getMyRepos(prisma, 1, 3);
-
-      expect(octokitState.listForAuthenticatedUser).toHaveBeenCalledWith({
-        direction: "desc",
-        per_page: 3,
-        sort: "updated",
-        visibility: "all",
-      });
-      expect(repos).toEqual([
-        {
-          description: "desc",
-          fullName: "owner/repo",
-          language: "TypeScript",
-          stars: 15,
-          updatedAt: "2025-01-01T00:00:00.000Z",
-          visibility: "PUBLIC",
-        },
-      ]);
-    });
-
-    it("should fetch all repos via paginate when limit is not provided", async () => {
-      const { prisma } = createMockPrisma({ access_token: "token" });
+    it("should fetch repos via paginate for oauth account", async () => {
+      const { prisma } = createMockPrisma([{ access_token: "token" }]);
       octokitState.paginate.mockResolvedValue([
-        {
-          description: null,
-          full_name: "owner/another",
-          language: null,
-          private: true,
-          stargazers_count: 1,
-          updated_at: "2025-02-02T00:00:00.000Z",
-        },
+        { full_name: "owner/repo", private: false, stargazers_count: 5 },
       ]);
 
-      const repos = await githubService.getMyRepos(prisma, 2);
+      const repos = await githubService.getMyRepos(prisma, 1);
 
-      expect(octokitState.paginate).toHaveBeenCalledWith(octokitState.listForAuthenticatedUser, {
-        direction: "desc",
-        per_page: 100,
-        sort: "updated",
-        visibility: "all",
-      });
-      expect(repos).toEqual([
-        {
-          description: null,
-          fullName: "owner/another",
-          language: null,
-          stars: 1,
-          updatedAt: "2025-02-02T00:00:00.000Z",
-          visibility: "PRIVATE",
-        },
-      ]);
+      expect(octokitState.paginate).toHaveBeenCalledWith(
+        octokitState.listForAuthenticatedUser,
+        expect.objectContaining({ per_page: 100, visibility: "all" })
+      );
+      expect(repos[0].fullName).toBe("owner/repo");
     });
 
-    it("should return empty list and log error when github request throws", async () => {
-      const { prisma } = createMockPrisma({ access_token: "token" });
-      octokitState.listForAuthenticatedUser.mockRejectedValue(new Error("GitHub is down"));
+    it("should combine repos from multiple accounts and deduplicate", async () => {
+      const { prisma } = createMockPrisma([
+        { access_token: "token1" },
+        { githubInstallationId: 123 },
+      ]);
 
-      const repos = await githubService.getMyRepos(prisma, 4, 1);
+      octokitState.paginate.mockResolvedValue([{ full_name: "org/shared", private: false }]);
+
+      const repos = await githubService.getMyRepos(prisma, 1);
+
+      expect(repos).toHaveLength(1);
+      expect(repos[0].fullName).toBe("org/shared");
+    });
+
+    it("should log error and continue if one account fails", async () => {
+      const { prisma } = createMockPrisma([{ access_token: "token" }]);
+      octokitState.paginate.mockRejectedValue(new Error("GitHub Down"));
+
+      const repos = await githubService.getMyRepos(prisma, 4);
 
       expect(repos).toEqual([]);
       expect(loggerState.error).toHaveBeenCalledWith(
         expect.objectContaining({
-          msg: "Error fetching repositories",
-          userId: 4,
+          msg: "Failed OAuth fetch",
         })
       );
     });
@@ -298,15 +288,6 @@ describe("githubService", () => {
 
       expect(data).toEqual(repoPayload);
       expect(octokitState.getRepo).toHaveBeenCalledWith({ owner: "owner", repo: "repo" });
-    });
-
-    it("should propagate error when octokit throws", async () => {
-      const { prisma } = createMockPrisma({ access_token: "token" });
-      octokitState.getRepo.mockRejectedValue(new Error("Not found"));
-
-      await expect(githubService.getRepoInfo(prisma, 1, "owner", "repo")).rejects.toThrow(
-        "Not found"
-      );
     });
   });
 

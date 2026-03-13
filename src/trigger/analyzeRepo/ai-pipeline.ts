@@ -192,20 +192,34 @@ export async function generateDeepDocs(
     taskMap["CHANGELOG"] = tasks.length;
     tasks.push(
       (async () => {
-        const { octokit } = await githubService.getClientContext(prisma, userId);
-        const { data: commitsData } = await octokit.repos.listCommits({
-          owner: repo.owner,
-          per_page: 50, // NOTE: тут возможно стоит придумать другую логику
-          repo: repo.name,
-        });
+        let simpleCommits: Array<{
+          author: string | null | undefined;
+          date: string | null | undefined;
+          message: string;
+        }> = [];
 
-        const simpleCommits = commitsData.map((c) => ({
-          author: c.commit.author?.name,
-          date: c.commit.author?.date,
-          message: c.commit.message,
-        }));
+        try {
+          const { octokit } = await githubService.getClientContext(prisma, userId, repo.owner);
+          const { data: commitsData } = await octokit.rest.repos.listCommits({
+            owner: repo.owner,
+            per_page: 50, // NOTE: тут возможно стоит придумать другую логику
+            repo: repo.name,
+          });
 
-        return callWithFallback<string>({
+          simpleCommits = commitsData.map((c) => ({
+            author: c.commit.author?.name,
+            date: c.commit.author?.date,
+            message: c.commit.message,
+          }));
+        } catch (error) {
+          logger.warn({
+            analysisId,
+            error,
+            msg: "Failed to fetch commits for CHANGELOG. Returning empty string.",
+          });
+        }
+
+        return await callWithFallback<string>({
           attemptMetadata: { analysisId, phase: "writer_changelog" },
           models: AI_MODELS.WRITER,
           outputSchema: null,

@@ -1,12 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { Route } from "next";
-import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BookOpen } from "lucide-react";
+import { BookOpen, ExternalLink, RefreshCcw } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { useDebounce } from "use-debounce";
@@ -15,6 +14,7 @@ import { CreateRepoSchema, type CreateRepoInput } from "@/shared/api/schemas/rep
 import { trpc } from "@/shared/api/trpc";
 import { useClickOutside } from "@/shared/hooks/use-click-outside";
 import { isGitHubUrl } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/core/button";
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,6 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
-import { usePathname, useRouter } from "@/i18n/routing";
 
 import { useCreateRepoDialogStore, useRepoActions } from "@/entities/repo";
 
@@ -41,14 +40,16 @@ const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут
 export function CreateRepoDialog() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
+  const { refetch: getInstallUrl } = trpc.repo.getGithubInstallUrl.useQuery(undefined, {
+    enabled: false,
+  });
 
   const { closeDialog, open } = useCreateRepoDialogStore();
   const { create } = useRepoActions();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [loadingOauth, setLoadingOauth] = useState(false);
+  const [, setPage] = useQueryState("page");
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -63,11 +64,21 @@ export function CreateRepoDialog() {
 
   useClickOutside(containerRef, () => setShowSuggestions(false), open);
 
-  async function handleConnectGithub() {
+  async function handleInstallGitHubApp() {
+    setLoading(true);
+    posthog.capture("github_app_install_started");
+
     try {
-      setLoading(true);
-      posthog.capture("github_connect_started");
-      await signIn("github");
+      const { data: url, error } = await getInstallUrl();
+
+      if (error != null || url == null) {
+        posthog.capture("github_app_install_failed");
+        return;
+      }
+
+      window.location.assign(url);
+    } catch {
+      posthog.capture("github_app_install_failed");
     } finally {
       setLoading(false);
     }
@@ -82,25 +93,37 @@ export function CreateRepoDialog() {
     }
   );
 
-  const { data: myGithubData, isFetching: isFetchingMyRepos } = trpc.repo.getMyGithubRepos.useQuery(
-    undefined,
-    {
-      enabled: open,
-      staleTime: STALE_TIME,
-    }
-  );
+  const {
+    data: myGithubData,
+    isFetching: isFetchingMyRepos,
+    refetch: refetchMyRepos,
+  } = trpc.repo.getMyGithubRepos.useQuery(undefined, {
+    enabled: open,
+    staleTime: STALE_TIME,
+  });
 
   const onSubmit = (values: CreateRepoInput) => {
     create.mutate(values, {
       onSuccess: () => {
         closeDialog();
         form.reset();
-        const params = new URLSearchParams(searchParams.toString());
-        params.delete("page");
-        router.push(`${pathname}?${params.toString()}` as Route);
+        void setPage(null);
       },
     });
   };
+
+  async function handleSignIn() {
+    try {
+      setLoadingOauth(true);
+      posthog.capture("github_oauth_started");
+      await signIn("github", { callbackUrl: "/dashboard" });
+    } catch (error) {
+      console.error(error);
+      posthog.capture("github_oauth_failed");
+    } finally {
+      setLoadingOauth(false);
+    }
+  }
 
   const handleSelectRepo = (repoUrl: string) => {
     form.setValue("url", repoUrl, { shouldValidate: true });
@@ -170,8 +193,27 @@ export function CreateRepoDialog() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium tracking-wider uppercase">
-                <BookOpen className="h-3 w-3" /> {t("repo_your_repos")}
+              <div className="flex items-center justify-between text-xs font-medium tracking-wider">
+                <div className="text-muted-foreground flex items-center gap-2 uppercase">
+                  <BookOpen className="h-3 w-3" />
+                  {t("repo_your_repos")}
+                </div>
+
+                {myGithubData?.isConnected === true &&
+                  myGithubData.installationId != null &&
+                  myGithubData.manageUrl != null && (
+                    <div className="text-muted-foreground flex items-center gap-2 font-normal tracking-normal normal-case">
+                      <span>Don&apos;t see it?</span>
+                      <a
+                        href={`${myGithubData.manageUrl}`}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        className="flex items-center gap-1 transition-colors hover:underline"
+                      >
+                        Manage access <ExternalLink className="h-2.5 w-2.5" />
+                      </a>
+                    </div>
+                  )}
               </div>
 
               <div className="space-y-0.5">
@@ -188,34 +230,77 @@ export function CreateRepoDialog() {
                       </div>
                     ))}
                   </div>
-                ) : myGithubData?.isConnected === false ? (
+                ) : myGithubData == null ? (
+                  <div className="h-70 rounded-xl border p-1">
+                    <div className="flex h-full flex-col items-center justify-center p-4 text-center">
+                      <p className="text-muted-foreground mb-3 text-sm">
+                        Failed to load repositories.
+                      </p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void refetchMyRepos()}
+                        className="h-8 gap-2"
+                      >
+                        <RefreshCcw className="h-3.5 w-3.5" /> Retry
+                      </Button>
+                    </div>
+                  </div>
+                ) : myGithubData.isConnected === false ? (
                   <div className="h-70 rounded-xl border p-1">
                     <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
                       <p className="text-muted-foreground mb-3 text-sm">
-                        {t("repo_connect_git_account")}{" "}
+                        First, you need to link your GitHub profile.
                       </p>
                       <LoadingButton
-                        disabled={loading}
-                        isLoading={loading}
-                        loadingText="Connecting..."
+                        type="button"
+                        disabled={loadingOauth}
+                        isLoading={loadingOauth}
+                        loadingText="Processing..."
                         variant="outline"
-                        onClick={() => void handleConnectGithub()}
+                        onClick={() => void handleSignIn()}
                         className="cursor-pointer"
                       >
-                        <GitHubIcon /> {tCommon("connect")}
+                        <GitHubIcon /> Link GitHub Account
                       </LoadingButton>
                     </div>
                   </div>
                 ) : (
                   <ScrollArea type="always" className="h-70 rounded-xl border p-1">
-                    {myGithubData?.items.map((myRepo) => (
-                      <RepoItem
-                        key={myRepo.fullName}
-                        disabled={create.isPending}
-                        repo={myRepo}
-                        onClick={() => handleSelectRepo(myRepo.fullName)}
-                      />
-                    ))}
+                    {myGithubData.items.length === 0 ? (
+                      myGithubData.installationId == null ? (
+                        <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
+                          <p className="text-muted-foreground mb-3 text-sm">
+                            Great! Now install our GitHub App to grant access to your repositories.
+                          </p>
+                          <LoadingButton
+                            type="button"
+                            disabled={loading}
+                            isLoading={loading}
+                            loadingText="Connecting..."
+                            variant="outline"
+                            onClick={() => void handleInstallGitHubApp()}
+                            className="cursor-pointer"
+                          >
+                            <GitHubIcon /> Install GitHub App
+                          </LoadingButton>
+                        </div>
+                      ) : (
+                        <div className="text-muted-foreground flex h-full items-center justify-center p-4 text-center text-sm">
+                          No repositories found. Ensure you granted access to them.
+                        </div>
+                      )
+                    ) : (
+                      myGithubData.items.map((myRepo) => (
+                        <RepoItem
+                          key={myRepo.fullName}
+                          disabled={create.isPending}
+                          repo={myRepo}
+                          onClick={() => handleSelectRepo(myRepo.fullName)}
+                        />
+                      ))
+                    )}
                   </ScrollArea>
                 )}
               </div>
@@ -230,7 +315,7 @@ export function CreateRepoDialog() {
                 {tCommon("add")}
               </LoadingButton>
             </DialogFooter>
-          </form>{" "}
+          </form>
         </Form>
       </DialogContent>
     </Dialog>
