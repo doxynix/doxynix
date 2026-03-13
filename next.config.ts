@@ -318,7 +318,7 @@ const sentryOptions = {
   silent: process.env.CI == null,
 
   sourcemaps: {
-    deleteSourcemapsAfterUpload: IS_PROD,
+    deleteSourcemapsAfterUpload: true,
   },
 
   tunnelRoute: `${API_PREFIX}/dxnx/s`,
