@@ -357,10 +357,10 @@ model AuditLog {
   userAgent String?  @map("user_agent")
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@unique([model, requestId])
   @@index([userId])
   @@index([requestId])
   @@index([createdAt(sort: Desc)])
   @@index([userId, operation])
+  @@index([model, requestId])
   @@map("audit_logs")
 }

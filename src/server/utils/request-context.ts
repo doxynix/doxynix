@@ -1,5 +1,4 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 
 import { IS_PROD } from "@/shared/constants/env.client";
@@ -85,6 +84,13 @@ export function getRequestIdFromHeaders(request: NextRequest): string | undefine
   return request.headers.get("x-request-id") ?? undefined;
 }
 
+export function generateRequestId(): string {
+  if (typeof globalThis.crypto.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
+  }
+  throw new Error("crypto.randomUUID is not available in this runtime");
+}
+
 export function resolveRequestId(request?: NextRequest, existing?: string): string | undefined {
   if (existing != null) return existing;
   if (request == null) return undefined;
@@ -92,7 +98,7 @@ export function resolveRequestId(request?: NextRequest, existing?: string): stri
 }
 
 export function ensureRequestId(request: NextRequest, existing?: string): string {
-  return existing ?? getRequestIdFromHeaders(request) ?? crypto.randomUUID();
+  return existing ?? getRequestIdFromHeaders(request) ?? generateRequestId();
 }
 
 export function buildRequestStore(input: RequestContextInput): RequestStore {

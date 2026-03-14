@@ -68,13 +68,10 @@ export async function getAnalysisContext(
       });
 
       let resolvedToken: string | null = null;
-      if (clientType === "installation") {
+      try {
         const auth = (await client.auth({ type: "installation" })) as { token?: string };
         resolvedToken = auth.token ?? null;
-      } else if (clientType === "oauth") {
-        const auth = (await client.auth()) as { token?: string };
-        resolvedToken = auth.token ?? null;
-      } else if (clientType === "public") {
+      } catch {
         try {
           const auth = (await client.auth()) as { token?: string };
           resolvedToken = auth.token ?? null;

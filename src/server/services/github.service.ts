@@ -425,18 +425,18 @@ export const githubService = {
             type: "public",
           };
         }
-        if (options?.allowPublicFallback === true) {
-          return {
-            hasUserToken: false,
-            octokit: this.getPublicClient(),
-            type: "public",
-          };
-        }
         if (options?.allowSystemFallback === true) {
           return {
             hasUserToken: false,
             octokit: this.getSystemClient(),
             type: "app",
+          };
+        }
+        if (options?.allowPublicFallback === true) {
+          return {
+            hasUserToken: false,
+            octokit: this.getPublicClient(),
+            type: "public",
           };
         }
       }

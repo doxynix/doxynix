@@ -205,8 +205,7 @@ export async function calculateBusFactor(repo: Repo, userId: number): Promise<nu
       typeof error === "object" && error !== null && "status" in error
         ? Number((error as { status?: number }).status)
         : undefined;
-    const isMissingAuth =
-      error instanceof Error && error.message.includes("No valid GitHub authorization found");
+    const isMissingAuth = error instanceof GitHubAuthRequiredError;
 
     if (
       repo.visibility === "PRIVATE" &&

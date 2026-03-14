@@ -425,7 +425,7 @@ model AuditLog {
   @@index([requestId])
   @@index([createdAt(sort: Desc)])
   @@index([userId, operation])
-  @@unique([model, requestId])
+  @@index([model, requestId])
   @@map("audit_logs")
 }
 

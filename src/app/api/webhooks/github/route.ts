@@ -166,6 +166,16 @@ export async function POST(req: Request) {
         }
       } catch (error) {
         logger.error({ error, msg: "Webhook DB Processing Error" });
+        try {
+          await prisma.webhookDelivery.deleteMany({
+            where: {
+              deliveryId,
+              provider: "github",
+            },
+          });
+        } catch (cleanupError) {
+          logger.error({ error: cleanupError, msg: "Webhook dedupe cleanup failed" });
+        }
         return new NextResponse("DB Error", { status: 500 });
       }
     }

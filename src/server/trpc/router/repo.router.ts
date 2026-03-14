@@ -470,12 +470,13 @@ export const repoRouter = createTRPCRouter({
 
     if (oauthAccounts.length > 0) {
       let hasUnauthorized = false;
+      let hasValid = false;
       for (const oauthAccount of oauthAccounts) {
         if (oauthAccount.access_token == null) continue;
         try {
           const userOctokit = githubService.getUserClient(oauthAccount.access_token);
           await userOctokit.rest.users.getAuthenticated();
-          oauthStatus = "valid";
+          hasValid = true;
           break;
         } catch (error) {
           if (isOctokitError(error) && error.status === 401) {
@@ -485,8 +486,10 @@ export const repoRouter = createTRPCRouter({
           }
         }
       }
-      if (oauthStatus !== "valid") {
-        oauthStatus = hasUnauthorized ? "invalid" : "valid";
+      if (hasValid) {
+        oauthStatus = "valid";
+      } else if (hasUnauthorized) {
+        oauthStatus = "invalid";
       }
     }
 
@@ -579,8 +582,7 @@ export const repoRouter = createTRPCRouter({
       const instIdBigInt = BigInt(input.installationId);
       const inputInstIdNum = Number(input.installationId);
 
-      const stateRecord = await ctx.prisma.verificationToken.findFirst({
-        select: { token: true },
+      const consumedState = await ctx.prisma.verificationToken.deleteMany({
         where: {
           expires: { gt: new Date() },
           identifier: `github_install_${userIdNum}`,
@@ -588,7 +590,7 @@ export const repoRouter = createTRPCRouter({
         },
       });
 
-      if (stateRecord == null) {
+      if (consumedState.count === 0) {
         logger.warn({ msg: "CSRF/Replay attack or expired state", userId: userIdNum });
         throw new TRPCError({
           code: "FORBIDDEN",
@@ -727,20 +729,6 @@ export const repoRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to securely claim installation.",
-        });
-      }
-
-      const consumed = await ctx.prisma.verificationToken.deleteMany({
-        where: {
-          identifier: `github_install_${userIdNum}`,
-          token: input.state,
-        },
-      });
-
-      if (consumed.count === 0) {
-        logger.warn({
-          msg: "Verification state missing after successful install",
-          userId: userIdNum,
         });
       }
 
