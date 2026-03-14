@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 
 import type { DbClient } from "../db/db";
 import { handlePrismaError, isOctokitError } from "../utils/handle-error";
-import { githubService } from "./github.service";
+import { GitHubAuthRequiredError, githubService } from "./github.service";
 
 export const repoService = {
   buildWhereClause(filters: {
@@ -66,6 +66,12 @@ export const repoService = {
     try {
       githubData = await githubService.getRepoInfo(db, userId, owner, name);
     } catch (error) {
+      if (error instanceof GitHubAuthRequiredError) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Connect your GitHub account or install the app to access this repository.",
+        });
+      }
       if (isOctokitError(error)) {
         if (error.status === 401) {
           throw new TRPCError({

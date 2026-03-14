@@ -1,10 +1,12 @@
 import crypto from "node:crypto";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 
 import { GITHUB_WEBHOOK_SECRET } from "@/shared/constants/env.server";
 
 import { prisma } from "@/server/db/db";
 import { logger } from "@/server/logger/logger";
+import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 
 type GitHubWebhookEvent = {
   action?: string;
@@ -58,143 +60,126 @@ export async function POST(req: Request) {
   const action = event.action;
   const githubEvent = req.headers.get("x-github-event");
 
-  if (githubEvent === "installation" && event.installation?.id != null) {
-    const instIdBigInt = BigInt(event.installation.id);
-    const githubLogin = event.installation.account.login;
+  const store = buildRequestStore({
+    method: "webhook",
+    path: "/api/webhooks/github",
+    req: req as NextRequest,
+    requestId: deliveryId,
+  });
 
+  return await requestContext.run(store, async () => {
     try {
-      const existingLog = await prisma.auditLog.findFirst({
-        where: { model: "GithubInstallation", requestId: deliveryId },
+      await prisma.webhookDelivery.create({
+        data: {
+          deliveryId: deliveryId,
+          event: githubEvent ?? null,
+          provider: "github",
+        },
       });
-
-      if (existingLog != null) {
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
         logger.info({ deliveryId, msg: "Webhook already processed, skipping" });
         return NextResponse.json({ ok: true });
       }
+      logger.error({ error, msg: "Webhook dedupe write failed" });
+      return new NextResponse("DB Error", { status: 500 });
+    }
 
-      if (action === "created") {
-        const matchedUserId: number | null = null;
+    if (githubEvent === "installation" && event.installation?.id != null) {
+      const instIdBigInt = BigInt(event.installation.id);
+      const githubLogin = event.installation.account.login;
+      const githubAvatar = event.installation.account.avatar_url;
+      const githubRepoSelection = event.installation.repository_selection;
+      const githubHtmlUrl = event.installation.html_url;
 
-        await prisma.$transaction([
-          prisma.githubInstallation.upsert({
+      try {
+        if (action === "created") {
+          const matchedUserId: number | null = null;
+
+          await prisma.githubInstallation.upsert({
             create: {
-              accountAvatar: event.installation.account.avatar_url,
-              accountLogin: event.installation.account.login,
+              accountAvatar: githubAvatar,
+              accountLogin: githubLogin,
               appId: event.installation.app_id,
-              htmlUrl: event.installation.html_url,
+              htmlUrl: githubHtmlUrl,
               id: instIdBigInt,
-              repositorySelection: event.installation.repository_selection,
+              repositorySelection: githubRepoSelection,
               targetId: BigInt(event.installation.target_id || event.installation.account.id),
               targetType: event.installation.target_type,
               userId: matchedUserId,
             },
             update: {
-              accountAvatar: event.installation.account.avatar_url,
-              accountLogin: event.installation.account.login,
-              htmlUrl: event.installation.html_url,
+              accountAvatar: githubAvatar,
+              accountLogin: githubLogin,
+              htmlUrl: githubHtmlUrl,
               isSuspended: false,
-              repositorySelection: event.installation.repository_selection,
+              repositorySelection: githubRepoSelection,
             },
             where: { id: instIdBigInt },
-          }),
-          prisma.auditLog.create({
-            data: {
-              model: "GithubInstallation",
-              operation: `GITHUB_APP_INSTALLED`,
-              payload: { githubLogin, installationId: event.installation!.id },
-              requestId: deliveryId,
-              userId: matchedUserId,
-            },
-          }),
-        ]);
-        logger.info({
-          installationId: event.installation.id,
-          matchedUserId,
-          msg: "GitHub installation created via webhook",
-        });
-      }
+          });
+          logger.info({
+            installationId: event.installation.id,
+            matchedUserId,
+            msg: "GitHub installation created via webhook",
+          });
+        }
 
-      if (action === "deleted") {
-        const [result] = await prisma.$transaction([
-          prisma.githubInstallation.deleteMany({ where: { id: instIdBigInt } }),
-          prisma.auditLog.create({
-            data: {
-              model: "GithubInstallation",
-              operation: `GITHUB_APP_DELETED`,
-              payload: { githubLogin, installationId: event.installation.id },
-              requestId: deliveryId,
-            },
-          }),
-        ]);
+        if (action === "deleted") {
+          const result = await prisma.githubInstallation.deleteMany({
+            where: { id: instIdBigInt },
+          });
 
-        logger.info({
-          affectedRows: result.count,
-          installationId: event.installation.id,
-          msg: "GitHub installation deleted via webhook",
-        });
-      }
+          logger.info({
+            affectedRows: result.count,
+            installationId: event.installation.id,
+            msg: "GitHub installation deleted via webhook",
+          });
+        }
 
-      if (action === "suspend") {
-        await prisma.$transaction([
-          prisma.githubInstallation.updateMany({
+        if (action === "suspend") {
+          await prisma.githubInstallation.updateMany({
             data: { isSuspended: true },
             where: { id: instIdBigInt },
-          }),
-          prisma.auditLog.create({
-            data: {
-              model: "GithubInstallation",
-              operation: `GITHUB_APP_SUSPENDED`,
-              payload: { githubLogin, installationId: event.installation.id },
-              requestId: deliveryId,
-            },
-          }),
-        ]);
-        logger.info({
-          installationId: event.installation.id,
-          msg: "GitHub installation suspended",
-        });
-      }
+          });
+          logger.info({
+            installationId: event.installation.id,
+            msg: "GitHub installation suspended",
+          });
+        }
 
-      if (action === "unsuspend") {
-        await prisma.$transaction([
-          prisma.githubInstallation.updateMany({
+        if (action === "unsuspend") {
+          await prisma.githubInstallation.updateMany({
             data: { isSuspended: false },
             where: { id: instIdBigInt },
-          }),
-          prisma.auditLog.create({
-            data: {
-              model: "GithubInstallation",
-              operation: `GITHUB_APP_UNSUSPENDED`,
-              payload: { githubLogin, installationId: event.installation.id },
-              requestId: deliveryId,
+          });
+          logger.info({
+            installationId: event.installation.id,
+            msg: "GitHub installation unsuspended",
+          });
+        }
+
+        if (action === "new_permissions_accepted") {
+          logger.info({
+            installationId: event.installation.id,
+            msg: "GitHub App permissions updated by user",
+          });
+        }
+      } catch (error) {
+        logger.error({ error, msg: "Webhook DB Processing Error" });
+        try {
+          await prisma.webhookDelivery.deleteMany({
+            where: {
+              deliveryId,
+              provider: "github",
             },
-          }),
-        ]);
-        logger.info({
-          installationId: event.installation.id,
-          msg: "GitHub installation unsuspended",
-        });
+          });
+        } catch (cleanupError) {
+          logger.error({ error: cleanupError, msg: "Webhook dedupe cleanup failed" });
+        }
+        return new NextResponse("DB Error", { status: 500 });
       }
-
-      if (action === "new_permissions_accepted") {
-        await prisma.auditLog.create({
-          data: {
-            model: "GithubInstallation",
-            operation: `GITHUB_APP_PERMISSIONS_UPDATED`,
-            payload: { githubLogin, installationId: event.installation.id },
-            requestId: deliveryId,
-          },
-        });
-        logger.info({
-          installationId: event.installation.id,
-          msg: "GitHub App permissions updated by user",
-        });
-      }
-    } catch (error) {
-      logger.error({ error, msg: "Webhook DB Processing Error" });
-      return new NextResponse("DB Error", { status: 500 });
     }
-  }
 
-  return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true });
+  });
 }

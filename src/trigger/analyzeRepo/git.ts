@@ -4,7 +4,7 @@ import type { Repo } from "@prisma/client";
 import simpleGit from "simple-git";
 
 import { prisma } from "@/server/db/db";
-import { githubService } from "@/server/services/github.service";
+import { GitHubAuthRequiredError, githubService } from "@/server/services/github.service";
 
 export async function getAnalysisContext(
   analysisId: string,
@@ -32,25 +32,27 @@ export async function getAnalysisContext(
   const lastSuccessfulAnalysis = repo.analyses[0];
 
   let octokit;
-  let clientType: "installation" | "oauth" | "app";
+  let clientType: "installation" | "oauth" | "app" | "public";
 
   try {
-    const clientContext = await githubService.getClientContext(prisma, userId, repo.owner);
+    const clientContext = await githubService.resolveClientContext(prisma, userId, {
+      allowPublicFallback: true,
+      allowSystemFallback: true,
+      owner: repo.owner,
+    });
     octokit = clientContext.octokit;
     clientType = clientContext.type;
   } catch (error) {
-    const isMissingAuth =
-      error instanceof Error && error.message.includes("No valid GitHub authorization found");
-
-    if (!isMissingAuth) throw error;
-
-    if (repo.visibility === "PRIVATE") {
+    if (error instanceof GitHubAuthRequiredError) {
       throw new Error(
         "This is a private repository. Please install Doxynix App or connect GitHub."
       );
     }
-    octokit = githubService.getSystemClient();
-    clientType = "app";
+    throw error;
+  }
+
+  if (repo.visibility === "PRIVATE" && (clientType === "app" || clientType === "public")) {
+    throw new Error("This is a private repository. Please install Doxynix App or connect GitHub.");
   }
 
   const { currentSha, token } = await githubService.executeWithFallback(
@@ -66,9 +68,16 @@ export async function getAnalysisContext(
       });
 
       let resolvedToken: string | null = null;
-      if (clientType !== "app") {
-        const auth = (await client.auth()) as { token?: string };
+      try {
+        const auth = (await client.auth({ type: "installation" })) as { token?: string };
         resolvedToken = auth.token ?? null;
+      } catch {
+        try {
+          const auth = (await client.auth()) as { token?: string };
+          resolvedToken = auth.token ?? null;
+        } catch {
+          resolvedToken = null;
+        }
       }
 
       return { currentSha: refData.object.sha, token: resolvedToken };

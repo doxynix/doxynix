@@ -11,6 +11,7 @@ import {
   GITHUB_APP_ID,
   GITHUB_APP_PRIVATE_KEY,
   GITHUB_SYSTEM_INSTALLATION_ID,
+  GITHUB_SYSTEM_PAT,
 } from "@/shared/constants/env.server";
 import type { RepoItemFields } from "@/shared/types/repo";
 
@@ -34,9 +35,47 @@ type GitHubRepoResponse = SearchRepoItem | ListRepoItem | InstallationRepoItem;
 type GitHubClientContext = (
   | { githubInstallationId: number; hasUserToken: false; type: "installation" }
   | { hasUserToken: true; type: "oauth" }
+  | { hasUserToken: false; type: "app" }
+  | { hasUserToken: false; type: "public" }
 ) & {
   octokit: OctokitInstance;
 };
+
+export class GitHubAuthRequiredError extends Error {
+  constructor() {
+    super(
+      "No valid GitHub authorization found. Please connect your GitHub account or install the app."
+    );
+    this.name = "GitHubAuthRequiredError";
+  }
+}
+
+type ClientContextOptions = {
+  allowPublicFallback?: boolean;
+  allowSystemFallback?: boolean;
+  owner?: string;
+};
+
+async function getRepoDataOrAuthError(
+  client: OctokitInstance,
+  owner: string,
+  name: string,
+  type: GitHubClientContext["type"]
+) {
+  const isPublicContext = type === "app" || type === "public";
+  try {
+    const { data } = await client.rest.repos.get({ owner, repo: name });
+    if (isPublicContext && data.private) {
+      throw new GitHubAuthRequiredError();
+    }
+    return data;
+  } catch (error) {
+    if (isPublicContext && isOctokitError(error) && error.status === 403) {
+      throw new GitHubAuthRequiredError();
+    }
+    throw error;
+  }
+}
 
 const getCommonConfig = () => ({
   log: {
@@ -92,7 +131,7 @@ export const githubService = {
       if (
         (initialType === "installation" || initialType === "oauth") &&
         isOctokitError(error) &&
-        (error.status === 403 || error.status === 404)
+        (error.status === 401 || error.status === 403 || error.status === 404)
       ) {
         const oauthAccounts = await prisma.account.findMany({
           where: { access_token: { not: null }, provider: "github", userId },
@@ -160,9 +199,7 @@ export const githubService = {
       }
     }
 
-    throw new Error(
-      "No valid GitHub authorization found. Please connect your GitHub account or install the app."
-    );
+    throw new GitHubAuthRequiredError();
   },
 
   getInstallationClient(installationId: number): OctokitInstance {
@@ -236,25 +273,47 @@ export const githubService = {
     }
   },
 
-  async getRepoInfo(prisma: DbClient, userId: number, owner: string, name: string) {
-    let octokit;
-    let type;
-    try {
-      const context = await this.getClientContext(prisma, userId, owner);
-      octokit = context.octokit;
-      type = context.type;
-    } catch (err) {
-      if (err instanceof Error && err.message.includes("No valid GitHub")) {
-        octokit = this.getSystemClient();
-        type = "app";
-      } else {
-        throw err;
-      }
-    }
+  getPublicClient(token?: string): OctokitInstance {
+    return new MyOctokit({
+      ...getCommonConfig(),
+      auth: token,
+    }) as OctokitInstance;
+  },
+
+  async getRepoBranches(prisma: DbClient, userId: number, owner: string, name: string) {
+    const context = await this.resolveClientContext(prisma, userId, {
+      allowPublicFallback: true,
+      allowSystemFallback: true,
+      owner,
+    });
+    const octokit = context.octokit;
+    const type = context.type;
 
     return this.executeWithFallback(prisma, userId, octokit, type, async (client) => {
-      const { data } = await client.rest.repos.get({ owner, repo: name });
-      return data;
+      if (type === "app" || type === "public") {
+        await getRepoDataOrAuthError(client, owner, name, type);
+      }
+
+      const branches = await client.paginate(client.rest.repos.listBranches, {
+        owner,
+        per_page: 100,
+        repo: name,
+      });
+      return branches.map((b) => b.name);
+    });
+  },
+
+  async getRepoInfo(prisma: DbClient, userId: number, owner: string, name: string) {
+    const context = await this.resolveClientContext(prisma, userId, {
+      allowPublicFallback: true,
+      allowSystemFallback: true,
+      owner,
+    });
+    const octokit = context.octokit;
+    const type = context.type;
+
+    return this.executeWithFallback(prisma, userId, octokit, type, async (client) => {
+      return await getRepoDataOrAuthError(client, owner, name, type);
     });
   },
 
@@ -265,24 +324,17 @@ export const githubService = {
     name: string,
     branch?: string
   ) {
-    let activeOctokit;
-    let type;
-    try {
-      const context = await this.getClientContext(prisma, userId, owner);
-      activeOctokit = context.octokit;
-      type = context.type;
-    } catch (err) {
-      if (err instanceof Error && err.message.includes("No valid GitHub")) {
-        activeOctokit = this.getSystemClient();
-        type = "app";
-      } else {
-        throw err;
-      }
-    }
+    const context = await this.resolveClientContext(prisma, userId, {
+      allowPublicFallback: true,
+      allowSystemFallback: true,
+      owner,
+    });
+    const activeOctokit = context.octokit;
+    const type = context.type;
 
     try {
       return await this.executeWithFallback(prisma, userId, activeOctokit, type, async (client) => {
-        const { data: repoData } = await client.rest.repos.get({ owner, repo: name });
+        const repoData = await getRepoDataOrAuthError(client, owner, name, type);
         const treeSha = branch ?? repoData.default_branch;
 
         const { data } = await client.rest.git.getTree({
@@ -368,6 +420,41 @@ export const githubService = {
     return { name, owner };
   },
 
+  async resolveClientContext(
+    prisma: DbClient,
+    userId: number,
+    options?: ClientContextOptions
+  ): Promise<GitHubClientContext> {
+    try {
+      return await this.getClientContext(prisma, userId, options?.owner);
+    } catch (error) {
+      if (error instanceof GitHubAuthRequiredError) {
+        if (options?.allowPublicFallback === true && GITHUB_SYSTEM_PAT != null) {
+          return {
+            hasUserToken: false,
+            octokit: this.getPublicClient(GITHUB_SYSTEM_PAT),
+            type: "public",
+          };
+        }
+        if (options?.allowSystemFallback === true) {
+          return {
+            hasUserToken: false,
+            octokit: this.getSystemClient(),
+            type: "app",
+          };
+        }
+        if (options?.allowPublicFallback === true) {
+          return {
+            hasUserToken: false,
+            octokit: this.getPublicClient(),
+            type: "public",
+          };
+        }
+      }
+      throw error;
+    }
+  },
+
   async searchRepos(
     prisma: DbClient,
     userId: number,
@@ -376,25 +463,26 @@ export const githubService = {
   ): Promise<RepoItemFields[]> {
     if (query.length < 2 || query.length > 256) return [];
 
-    let octokit;
-    try {
-      const context = await this.getClientContext(prisma, userId);
-      octokit = context.octokit;
-    } catch (e) {
-      if (e instanceof Error && e.message.includes("No valid GitHub")) {
-        octokit = this.getSystemClient();
-      } else {
-        throw e;
-      }
-    }
+    const context = await this.resolveClientContext(prisma, userId, {
+      allowPublicFallback: true,
+      allowSystemFallback: true,
+    });
+    const octokit = context.octokit;
+    const queryWithVisibility =
+      context.type === "app" || context.type === "public" ? `${query} is:public` : query;
 
     try {
       const { data } = await octokit.rest.search.repos({
         per_page: limit ?? 10,
-        q: query,
+        q: queryWithVisibility,
       });
 
-      return data.items.map((repo) => ({
+      const items =
+        context.type === "app" || context.type === "public"
+          ? data.items.filter((repo) => !repo.private)
+          : data.items;
+
+      return items.map((repo) => ({
         description: repo.description,
         fullName: repo.full_name,
         language: repo.language,

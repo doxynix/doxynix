@@ -7,7 +7,7 @@ import { z } from "zod";
 import { CreateRepoSchema, GitHubQuerySchema } from "@/shared/api/schemas/repo";
 
 import { logger } from "@/server/logger/logger";
-import { githubService } from "@/server/services/github.service";
+import { GitHubAuthRequiredError, githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
 import { FileClassifier } from "@/server/utils/file-classifier";
 import { handlePrismaError, isOctokitError } from "@/server/utils/handle-error";
@@ -316,58 +316,31 @@ export const repoRouter = createTRPCRouter({
   getBranches: protectedProcedure
     .input(z.object({ name: z.string(), owner: z.string() }))
     .query(async ({ ctx, input }) => {
-      let activeOctokit;
-      let type;
       try {
-        const context = await githubService.getClientContext(
+        return await githubService.getRepoBranches(
           ctx.prisma,
           Number(ctx.session.user.id),
-          input.owner
+          input.owner,
+          input.name
         );
-        activeOctokit = context.octokit;
-        type = context.type;
-      } catch (err) {
-        if (err instanceof Error && err.message.includes("No valid GitHub")) {
-          activeOctokit = githubService.getSystemClient();
-          type = "app";
-        } else {
-          throw err;
-        }
-      }
-
-      try {
-        const branches = await activeOctokit.paginate(activeOctokit.rest.repos.listBranches, {
-          owner: input.owner,
-          per_page: 100,
-          repo: input.name,
-        });
-        return branches.map((b) => b.name);
       } catch (error) {
-        if (
-          type === "installation" &&
-          isOctokitError(error) &&
-          (error.status === 403 || error.status === 404)
-        ) {
-          const oauthAcc = await ctx.prisma.account.findFirst({
-            select: { access_token: true },
-            where: {
-              access_token: { not: null },
-              provider: "github",
-              userId: Number(ctx.session.user.id),
-            },
+        if (error instanceof GitHubAuthRequiredError) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Connect your GitHub account or install the app to access branches.",
           });
-          if (oauthAcc?.access_token != null) {
-            const fallbackOctokit = githubService.getUserClient(oauthAcc.access_token);
-            const branches = await fallbackOctokit.paginate(
-              fallbackOctokit.rest.repos.listBranches,
-              {
-                owner: input.owner,
-                per_page: 100,
-                repo: input.name,
-              }
-            );
-            return branches.map((b) => b.name);
-          }
+        }
+        if (isOctokitError(error) && error.status === 404) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Repository or branch not found.",
+          });
+        }
+        if (isOctokitError(error) && error.status === 403) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "GitHub denied access to repository branches.",
+          });
         }
         throw error;
       }
@@ -491,7 +464,13 @@ export const repoRouter = createTRPCRouter({
     });
 
     if (installations.length === 0 && oauthAccounts.length === 0) {
-      return { installationId: null, isConnected: false, items: [], manageUrl: null };
+      return {
+        installationId: null,
+        isConnected: false,
+        items: [],
+        manageUrl: null,
+        oauthStatus: "missing",
+      };
     }
 
     const mainInstall = installations.length > 0 ? installations[0] : null;
@@ -499,12 +478,43 @@ export const repoRouter = createTRPCRouter({
     const manageUrl = mainInstall != null ? (mainInstall.htmlUrl ?? null) : null;
     const installationId = mainInstall !== null ? Number(mainInstall.id) : null;
 
+    let oauthStatus: "valid" | "invalid" | "missing" = "missing";
+
+    if (oauthAccounts.length > 0) {
+      let hasUnauthorized = false;
+      let hasValid = false;
+      for (const oauthAccount of oauthAccounts) {
+        if (oauthAccount.access_token == null) continue;
+        try {
+          const userOctokit = githubService.getUserClient(oauthAccount.access_token);
+          await userOctokit.rest.users.getAuthenticated();
+          hasValid = true;
+          break;
+        } catch (error) {
+          if (isOctokitError(error) && error.status === 401) {
+            hasUnauthorized = true;
+          } else {
+            logger.warn({ error, msg: "GitHub OAuth validation failed" });
+          }
+        }
+      }
+      if (hasValid) {
+        oauthStatus = "valid";
+      } else if (hasUnauthorized) {
+        oauthStatus = "invalid";
+      }
+    }
+
+    if (installationId == null && oauthStatus === "invalid") {
+      return { installationId, isConnected: true, items: [], manageUrl, oauthStatus };
+    }
+
     try {
       const repos = await githubService.getMyRepos(ctx.prisma, userId);
-      return { installationId, isConnected: true, items: repos, manageUrl };
+      return { installationId, isConnected: true, items: repos, manageUrl, oauthStatus };
     } catch (error) {
       logger.error({ error, msg: "Dashboard fetch failed", userId });
-      return { installationId, isConnected: true, items: [], manageUrl };
+      return { installationId, isConnected: true, items: [], manageUrl, oauthStatus };
     }
   }),
   getRepoFiles: protectedProcedure
@@ -516,13 +526,24 @@ export const repoRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const tree = await githubService.getRepoTree(
-        ctx.prisma,
-        Number(ctx.session.user.id),
-        input.owner,
-        input.name,
-        input.branch
-      );
+      let tree;
+      try {
+        tree = await githubService.getRepoTree(
+          ctx.prisma,
+          Number(ctx.session.user.id),
+          input.owner,
+          input.name,
+          input.branch
+        );
+      } catch (error) {
+        if (error instanceof GitHubAuthRequiredError) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Connect your GitHub account or install the app to access repository files.",
+          });
+        }
+        throw error;
+      }
 
       return tree.map((file) => [
         file.path,
@@ -577,7 +598,7 @@ export const repoRouter = createTRPCRouter({
       const instIdBigInt = BigInt(input.installationId);
       const inputInstIdNum = Number(input.installationId);
 
-      const consumed = await ctx.prisma.verificationToken.deleteMany({
+      const consumedState = await ctx.prisma.verificationToken.deleteMany({
         where: {
           expires: { gt: new Date() },
           identifier: `github_install_${userIdNum}`,
@@ -585,7 +606,7 @@ export const repoRouter = createTRPCRouter({
         },
       });
 
-      if (consumed.count === 0) {
+      if (consumedState.count === 0) {
         logger.warn({ msg: "CSRF/Replay attack or expired state", userId: userIdNum });
         throw new TRPCError({
           code: "FORBIDDEN",
@@ -607,6 +628,7 @@ export const repoRouter = createTRPCRouter({
 
       let hasAccess = false;
       let verifiedAtLeastOneAccount = false;
+      let hasUnauthorized = false;
 
       for (const oauthAccount of oauthAccounts) {
         if (oauthAccount.access_token == null) continue;
@@ -624,11 +646,20 @@ export const repoRouter = createTRPCRouter({
             break;
           }
         } catch (error) {
+          if (isOctokitError(error) && (error.status === 401 || error.status === 403)) {
+            hasUnauthorized = true;
+          }
           logger.warn({ error, msg: "GitHub API verification failed for one OAuth account" });
         }
       }
 
       if (!verifiedAtLeastOneAccount) {
+        if (hasUnauthorized) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "GitHub authorization expired. Please relink your GitHub account.",
+          });
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to verify installation ownership via GitHub.",
@@ -721,11 +752,21 @@ export const repoRouter = createTRPCRouter({
     }),
 
   searchGithub: protectedProcedure.input(GitHubQuerySchema).query(async ({ ctx, input }) => {
-    return await githubService.searchRepos(
-      ctx.prisma,
-      Number(ctx.session.user.id),
-      input.query,
-      10
-    );
+    try {
+      return await githubService.searchRepos(
+        ctx.prisma,
+        Number(ctx.session.user.id),
+        input.query,
+        10
+      );
+    } catch (error) {
+      if (error instanceof GitHubAuthRequiredError) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Connect your GitHub account or install the app to search repositories.",
+        });
+      }
+      throw error;
+    }
   }),
 });

@@ -7,7 +7,7 @@ import type { RepoMetrics } from "@/server/ai/types";
 import { prisma } from "@/server/db/db";
 import { realtimeServer } from "@/server/lib/realtime";
 import { logger } from "@/server/logger/logger";
-import { githubService } from "@/server/services/github.service";
+import { GitHubAuthRequiredError, githubService } from "@/server/services/github.service";
 import { calculateCodeMetrics, calculateHealthScore } from "@/server/utils/metrics";
 
 export async function saveResults(params: {
@@ -165,25 +165,33 @@ export async function saveResults(params: {
 
 export async function calculateBusFactor(repo: Repo, userId: number): Promise<number> {
   try {
-    let octokit;
-    try {
-      const context = await githubService.getClientContext(prisma, userId, repo.owner);
-      octokit = context.octokit;
-    } catch (e) {
-      const isMissingAuth =
-        e instanceof Error && e.message.includes("No valid GitHub authorization found");
+    const context = await githubService.resolveClientContext(prisma, userId, {
+      allowPublicFallback: true,
+      allowSystemFallback: true,
+      owner: repo.owner,
+    });
+    const octokit = context.octokit;
+    const clientType = context.type;
 
-      if (!isMissingAuth || repo.visibility === "PRIVATE") throw e;
-      octokit = githubService.getSystemClient();
+    if (repo.visibility === "PRIVATE" && (clientType === "app" || clientType === "public")) {
+      throw new GitHubAuthRequiredError();
     }
-    let fetchedContributors = 0;
-    const contributors = await octokit.paginate(
-      octokit.rest.repos.listContributors,
-      { owner: repo.owner, per_page: 100, repo: repo.name },
-      (response, done) => {
-        fetchedContributors += response.data.length;
-        if (fetchedContributors >= 500) done();
-        return response.data;
+    const contributors = await githubService.executeWithFallback(
+      prisma,
+      userId,
+      octokit,
+      clientType,
+      async (client) => {
+        let fetchedContributors = 0;
+        return await client.paginate(
+          client.rest.repos.listContributors,
+          { owner: repo.owner, per_page: 100, repo: repo.name },
+          (response, done) => {
+            fetchedContributors += response.data.length;
+            if (fetchedContributors >= 500) done();
+            return response.data;
+          }
+        );
       }
     );
 
@@ -205,14 +213,14 @@ export async function calculateBusFactor(repo: Repo, userId: number): Promise<nu
       typeof error === "object" && error !== null && "status" in error
         ? Number((error as { status?: number }).status)
         : undefined;
-    const isMissingAuth =
-      error instanceof Error && error.message.includes("No valid GitHub authorization found");
+    const isMissingAuth = error instanceof GitHubAuthRequiredError;
 
     if (
       repo.visibility === "PRIVATE" &&
       (isMissingAuth || status === 401 || status === 403 || status === 404)
     ) {
-      throw error;
+      if (isMissingAuth) throw error;
+      throw new GitHubAuthRequiredError();
     }
 
     if (isMissingAuth || status === 401 || status === 403 || status === 404) {

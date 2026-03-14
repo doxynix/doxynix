@@ -5,7 +5,14 @@ import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { redisClient } from "./server/lib/redis";
 import { logger } from "./server/logger/logger";
-import { anonymizeIp, getCountry, getIp, getUa } from "./server/utils/request-context";
+import {
+  anonymizeIp,
+  generateRequestId,
+  getCountry,
+  getIp,
+  getUa,
+  sanitizeRequestId,
+} from "./server/utils/request-context";
 import { API_PREFIX, IS_PROD } from "./shared/constants/env.client";
 import { TURNSTILE_SECRET_KEY } from "./shared/constants/env.server";
 import { LOCALE_REGEX_STR } from "./shared/constants/locales";
@@ -197,18 +204,48 @@ async function handleApiRequest(
   ip: string
 ): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
+  const attachRequestMeta = (response: NextResponse): NextResponse => {
+    response.headers.set("x-request-id", requestId);
+    response.cookies.set("last_request_id", requestId, {
+      httpOnly: false,
+      maxAge: 60,
+      path: "/",
+      sameSite: "lax",
+      secure: IS_PROD,
+    });
+    return response;
+  };
 
   const rateLimitResponse = await handleRateLimitAndSize(request, pathname, ip, requestId);
-  if (rateLimitResponse) return rateLimitResponse;
+  if (rateLimitResponse) return attachRequestMeta(rateLimitResponse);
 
   if (pathname === "/api/auth/signin/email" && request.method === "POST") {
     const turnstileResponse = await handleTurnstile(request, ip);
-    if (turnstileResponse) return turnstileResponse;
+    if (turnstileResponse) {
+      if (turnstileResponse.status !== 200) return attachRequestMeta(turnstileResponse);
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set("x-request-id", requestId);
+      const response = NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+      for (const cookie of turnstileResponse.cookies.getAll()) {
+        response.cookies.set(cookie);
+      }
+      return attachRequestMeta(response);
+    }
   }
 
-  const response = NextResponse.next();
-  response.headers.set("x-request-id", requestId);
-  return response;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-request-id", requestId);
+
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+  return attachRequestMeta(response);
 }
 
 function handlePageRequest(request: NextRequest, requestId: string): NextResponse {
@@ -233,10 +270,6 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
     return NextResponse.redirect(url);
   }
 
-  // const requestHeaders = new Headers(request.headers);
-  // requestHeaders.set("x-request-id", requestId);
-  // requestHeaders.set("x-url", request.url);
-
   const response = intlMiddleware(request);
 
   response.headers.set("x-request-id", requestId);
@@ -252,7 +285,7 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
 }
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
-  const requestId = crypto.randomUUID();
+  const requestId = sanitizeRequestId(request.headers.get("x-request-id")) ?? generateRequestId();
   const { pathname } = request.nextUrl;
 
   if (isUploadThingPath(pathname)) {

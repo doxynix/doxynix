@@ -8,6 +8,7 @@ import { repoService } from "@/server/services/repo.service";
 import { handlePrismaError } from "@/server/utils/handle-error";
 
 vi.mock("@/server/services/github.service", () => ({
+  GitHubAuthRequiredError: class GitHubAuthRequiredError extends Error {},
   githubService: {
     getRepoInfo: vi.fn(),
     parseUrl: vi.fn(),

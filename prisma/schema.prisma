@@ -333,6 +333,18 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
+model WebhookDelivery {
+  id         String   @id() @default(uuid(7)) @db.Uuid()
+  provider   String
+  deliveryId String   @map("delivery_id")
+  event      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([provider, deliveryId])
+  @@index([createdAt(sort: Desc)])
+  @@map("webhook_deliveries")
+}
+
 model AuditLog {
   id        String   @id() @default(uuid(7)) @db.Uuid()
   requestId String?  @map("request_id")
@@ -349,5 +361,6 @@ model AuditLog {
   @@index([requestId])
   @@index([createdAt(sort: Desc)])
   @@index([userId, operation])
+  @@index([model, requestId])
   @@map("audit_logs")
 }

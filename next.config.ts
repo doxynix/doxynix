@@ -237,8 +237,7 @@ const nextConfig: NextConfig = {
       { d: "https://status.doxynix.space", s: "/status" },
     ];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const results: any[] = [];
+    const results: { destination: string; permanent: boolean; source: string }[] = [];
 
     shortcuts.forEach(({ d, s }) => {
       const isExternal = d.startsWith("http");

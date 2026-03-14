@@ -12,7 +12,15 @@ export const ABLY_API_KEY = env.ABLY_API_KEY;
 export const GROQ_API_KEY = env.GROQ_API_KEY;
 export const UPLOADTHING_TOKEN = env.UPLOADTHING_TOKEN;
 export const GITHUB_APP_ID = env.GITHUB_APP_ID;
-export const GITHUB_APP_PRIVATE_KEY = env.GITHUB_APP_PRIVATE_KEY.replace(/\\n/g, "\n");
+const rawGithubAppPrivateKey = env.GITHUB_APP_PRIVATE_KEY;
+
+if (env.NODE_ENV !== "test" && typeof rawGithubAppPrivateKey !== "string") {
+  throw new Error("GITHUB_APP_PRIVATE_KEY is required and must be a valid PEM string");
+}
+
+export const GITHUB_APP_PRIVATE_KEY =
+  typeof rawGithubAppPrivateKey === "string" ? rawGithubAppPrivateKey.replace(/\\n/g, "\n") : "";
+export const GITHUB_SYSTEM_PAT = env.GITHUB_SYSTEM_PAT ?? null;
 export const GITHUB_WEBHOOK_SECRET = env.GITHUB_WEBHOOK_SECRET;
 export const GITHUB_SYSTEM_INSTALLATION_ID = env.GITHUB_SYSTEM_INSTALLATION_ID;
 

@@ -70,3 +70,56 @@ export function getCountry(request: NextRequest): string {
 
   return "UNKNOWN";
 }
+
+type RequestContextInput = {
+  method: string;
+  path: string;
+  req: NextRequest;
+  requestId?: string;
+  userId?: number;
+  userRole?: string;
+};
+
+export function getRequestIdFromHeaders(request: NextRequest): string | undefined {
+  return sanitizeRequestId(request.headers.get("x-request-id"));
+}
+
+export function generateRequestId(): string {
+  if (typeof globalThis.crypto.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
+  }
+  throw new Error("crypto.randomUUID is not available in this runtime");
+}
+
+export function sanitizeRequestId(value?: string | null): string | undefined {
+  if (value == null) return undefined;
+  const trimmed = value.trim();
+  if (trimmed.length === 0 || trimmed.length > 64) return undefined;
+  if (!/^[\w-]+$/.test(trimmed)) return undefined;
+  return trimmed;
+}
+
+export function resolveRequestId(request?: NextRequest, existing?: string): string | undefined {
+  if (existing != null) return sanitizeRequestId(existing);
+  if (request == null) return undefined;
+  return getRequestIdFromHeaders(request);
+}
+
+export function ensureRequestId(request: NextRequest, existing?: string): string {
+  return sanitizeRequestId(existing) ?? getRequestIdFromHeaders(request) ?? generateRequestId();
+}
+
+export function buildRequestStore(input: RequestContextInput): RequestStore {
+  const requestId = ensureRequestId(input.req, input.requestId);
+  return {
+    ip: anonymizeIp(getIp(input.req)),
+    method: input.method,
+    origin: input.req.headers.get("origin") ?? undefined,
+    path: input.path,
+    referer: input.req.headers.get("referer") ?? undefined,
+    requestId,
+    userAgent: getUa(input.req),
+    userId: input.userId,
+    userRole: input.userRole,
+  };
+}
