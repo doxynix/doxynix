@@ -271,7 +271,11 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
 }
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
-  const requestId = generateRequestId();
+  const incomingRequestId = request.headers.get("x-request-id");
+  const requestId =
+    incomingRequestId == null || incomingRequestId.trim() === ""
+      ? generateRequestId()
+      : incomingRequestId;
   const { pathname } = request.nextUrl;
 
   if (isUploadThingPath(pathname)) {

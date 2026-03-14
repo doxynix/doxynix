@@ -176,14 +176,22 @@ export async function calculateBusFactor(repo: Repo, userId: number): Promise<nu
     if (repo.visibility === "PRIVATE" && (clientType === "app" || clientType === "public")) {
       throw new GitHubAuthRequiredError();
     }
-    let fetchedContributors = 0;
-    const contributors = await octokit.paginate(
-      octokit.rest.repos.listContributors,
-      { owner: repo.owner, per_page: 100, repo: repo.name },
-      (response, done) => {
-        fetchedContributors += response.data.length;
-        if (fetchedContributors >= 500) done();
-        return response.data;
+    const contributors = await githubService.executeWithFallback(
+      prisma,
+      userId,
+      octokit,
+      clientType,
+      async (client) => {
+        let fetchedContributors = 0;
+        return await client.paginate(
+          client.rest.repos.listContributors,
+          { owner: repo.owner, per_page: 100, repo: repo.name },
+          (response, done) => {
+            fetchedContributors += response.data.length;
+            if (fetchedContributors >= 500) done();
+            return response.data;
+          }
+        );
       }
     );
 

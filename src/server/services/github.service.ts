@@ -56,6 +56,31 @@ type ClientContextOptions = {
   owner?: string;
 };
 
+async function getRepoDataOrAuthError(
+  client: OctokitInstance,
+  owner: string,
+  name: string,
+  type: GitHubClientContext["type"]
+) {
+  const isPublicContext = type === "app" || type === "public";
+  try {
+    const { data } = await client.rest.repos.get({ owner, repo: name });
+    if (isPublicContext && data.private) {
+      throw new GitHubAuthRequiredError();
+    }
+    return data;
+  } catch (error) {
+    if (
+      isPublicContext &&
+      isOctokitError(error) &&
+      (error.status === 403 || error.status === 404)
+    ) {
+      throw new GitHubAuthRequiredError();
+    }
+    throw error;
+  }
+}
+
 const getCommonConfig = () => ({
   log: {
     debug: (msg: string) => logger.debug({ msg }),
@@ -270,10 +295,7 @@ export const githubService = {
 
     return this.executeWithFallback(prisma, userId, octokit, type, async (client) => {
       if (type === "app" || type === "public") {
-        const { data: repoData } = await client.rest.repos.get({ owner, repo: name });
-        if (repoData.private) {
-          throw new GitHubAuthRequiredError();
-        }
+        await getRepoDataOrAuthError(client, owner, name, type);
       }
 
       const branches = await client.paginate(client.rest.repos.listBranches, {
@@ -295,11 +317,7 @@ export const githubService = {
     const type = context.type;
 
     return this.executeWithFallback(prisma, userId, octokit, type, async (client) => {
-      const { data } = await client.rest.repos.get({ owner, repo: name });
-      if ((type === "app" || type === "public") && data.private) {
-        throw new GitHubAuthRequiredError();
-      }
-      return data;
+      return await getRepoDataOrAuthError(client, owner, name, type);
     });
   },
 
@@ -320,10 +338,7 @@ export const githubService = {
 
     try {
       return await this.executeWithFallback(prisma, userId, activeOctokit, type, async (client) => {
-        const { data: repoData } = await client.rest.repos.get({ owner, repo: name });
-        if ((type === "app" || type === "public") && repoData.private) {
-          throw new GitHubAuthRequiredError();
-        }
+        const repoData = await getRepoDataOrAuthError(client, owner, name, type);
         const treeSha = branch ?? repoData.default_branch;
 
         const { data } = await client.rest.git.getTree({
