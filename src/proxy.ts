@@ -11,6 +11,7 @@ import {
   getCountry,
   getIp,
   getUa,
+  sanitizeRequestId,
 } from "./server/utils/request-context";
 import { API_PREFIX, IS_PROD } from "./shared/constants/env.client";
 import { TURNSTILE_SECRET_KEY } from "./shared/constants/env.server";
@@ -220,7 +221,20 @@ async function handleApiRequest(
 
   if (pathname === "/api/auth/signin/email" && request.method === "POST") {
     const turnstileResponse = await handleTurnstile(request, ip);
-    if (turnstileResponse) return attachRequestMeta(turnstileResponse);
+    if (turnstileResponse) {
+      if (turnstileResponse.status !== 200) return attachRequestMeta(turnstileResponse);
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set("x-request-id", requestId);
+      const response = NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+      for (const cookie of turnstileResponse.cookies.getAll()) {
+        response.cookies.set(cookie);
+      }
+      return attachRequestMeta(response);
+    }
   }
 
   const requestHeaders = new Headers(request.headers);
@@ -271,15 +285,7 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
 }
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
-  const incomingRequestId = request.headers.get("x-request-id");
-  const isValidRequestId = (id: string | null): id is string => {
-    if (id == null) return false;
-    const trimmed = id.trim();
-    return trimmed.length > 0 && trimmed.length <= 64 && /^[\w-]+$/.test(trimmed);
-  };
-  const requestId = isValidRequestId(incomingRequestId)
-    ? incomingRequestId.trim()
-    : generateRequestId();
+  const requestId = sanitizeRequestId(request.headers.get("x-request-id")) ?? generateRequestId();
   const { pathname } = request.nextUrl;
 
   if (isUploadThingPath(pathname)) {

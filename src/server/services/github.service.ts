@@ -70,11 +70,7 @@ async function getRepoDataOrAuthError(
     }
     return data;
   } catch (error) {
-    if (
-      isPublicContext &&
-      isOctokitError(error) &&
-      (error.status === 403 || error.status === 404)
-    ) {
+    if (isPublicContext && isOctokitError(error) && error.status === 403) {
       throw new GitHubAuthRequiredError();
     }
     throw error;

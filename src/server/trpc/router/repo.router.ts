@@ -646,7 +646,7 @@ export const repoRouter = createTRPCRouter({
             break;
           }
         } catch (error) {
-          if (isOctokitError(error) && error.status === 401) {
+          if (isOctokitError(error) && (error.status === 401 || error.status === 403)) {
             hasUnauthorized = true;
           }
           logger.warn({ error, msg: "GitHub API verification failed for one OAuth account" });

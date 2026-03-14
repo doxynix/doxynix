@@ -219,7 +219,8 @@ export async function calculateBusFactor(repo: Repo, userId: number): Promise<nu
       repo.visibility === "PRIVATE" &&
       (isMissingAuth || status === 401 || status === 403 || status === 404)
     ) {
-      throw error;
+      if (isMissingAuth) throw error;
+      throw new GitHubAuthRequiredError();
     }
 
     if (isMissingAuth || status === 401 || status === 403 || status === 404) {

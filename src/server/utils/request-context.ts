@@ -81,7 +81,7 @@ type RequestContextInput = {
 };
 
 export function getRequestIdFromHeaders(request: NextRequest): string | undefined {
-  return request.headers.get("x-request-id") ?? undefined;
+  return sanitizeRequestId(request.headers.get("x-request-id"));
 }
 
 export function generateRequestId(): string {
@@ -91,14 +91,22 @@ export function generateRequestId(): string {
   throw new Error("crypto.randomUUID is not available in this runtime");
 }
 
+export function sanitizeRequestId(value?: string | null): string | undefined {
+  if (value == null) return undefined;
+  const trimmed = value.trim();
+  if (trimmed.length === 0 || trimmed.length > 64) return undefined;
+  if (!/^[\w-]+$/.test(trimmed)) return undefined;
+  return trimmed;
+}
+
 export function resolveRequestId(request?: NextRequest, existing?: string): string | undefined {
-  if (existing != null) return existing;
+  if (existing != null) return sanitizeRequestId(existing);
   if (request == null) return undefined;
   return getRequestIdFromHeaders(request);
 }
 
 export function ensureRequestId(request: NextRequest, existing?: string): string {
-  return existing ?? getRequestIdFromHeaders(request) ?? generateRequestId();
+  return sanitizeRequestId(existing) ?? getRequestIdFromHeaders(request) ?? generateRequestId();
 }
 
 export function buildRequestStore(input: RequestContextInput): RequestStore {
