@@ -21,6 +21,8 @@
 ![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
 ![Zod](https://img.shields.io/badge/Zod-Validation-3068b7?style=for-the-badge&logo=zod&logoColor=white)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?style=for-the-badge&logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
+[![RelativeCI](https://badges.relative-ci.com/badges/pSyX3AJ3lNJwWJIvB8qs?branch=main&style=flat-square)](https://app.relative-ci.com/projects/pSyX3AJ3lNJwWJIvB8qs)
+[![codecov](https://codecov.io/gh/doxynix/doxynix/graph/badge.svg?token=6JIP6IY9CB)](https://codecov.io/gh/doxynix/doxynix)
 
 <!-- Header Content -->
 <h3>Repository Analysis & Documentation Generator Service</h3>
