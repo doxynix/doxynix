@@ -268,7 +268,9 @@ export function CreateRepoDialog() {
                       </LoadingButton>
                     </div>
                   </div>
-                ) : oauthStatus === "invalid" && myGithubData.installationId == null ? (
+                ) : oauthStatus === "invalid" &&
+                  myGithubData.installationId == null &&
+                  myGithubData.items.length === 0 ? (
                   <div className="h-70 rounded-xl border p-1">
                     <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
                       <p className="text-muted-foreground mb-3 text-sm">

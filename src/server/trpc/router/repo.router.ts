@@ -330,6 +330,18 @@ export const repoRouter = createTRPCRouter({
             message: "Connect your GitHub account or install the app to access branches.",
           });
         }
+        if (isOctokitError(error) && error.status === 404) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Repository or branch not found.",
+          });
+        }
+        if (isOctokitError(error) && error.status === 403) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "GitHub denied access to repository branches.",
+          });
+        }
         throw error;
       }
     }),
@@ -491,6 +503,10 @@ export const repoRouter = createTRPCRouter({
       } else if (hasUnauthorized) {
         oauthStatus = "invalid";
       }
+    }
+
+    if (installationId == null && oauthStatus === "invalid") {
+      return { installationId, isConnected: true, items: [], manageUrl, oauthStatus };
     }
 
     try {

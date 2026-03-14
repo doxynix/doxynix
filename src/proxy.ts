@@ -272,10 +272,14 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const incomingRequestId = request.headers.get("x-request-id");
-  const requestId =
-    incomingRequestId == null || incomingRequestId.trim() === ""
-      ? generateRequestId()
-      : incomingRequestId;
+  const isValidRequestId = (id: string | null): id is string => {
+    if (id == null) return false;
+    const trimmed = id.trim();
+    return trimmed.length > 0 && trimmed.length <= 64 && /^[\w-]+$/.test(trimmed);
+  };
+  const requestId = isValidRequestId(incomingRequestId)
+    ? incomingRequestId.trim()
+    : generateRequestId();
   const { pathname } = request.nextUrl;
 
   if (isUploadThingPath(pathname)) {

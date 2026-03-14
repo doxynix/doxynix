@@ -135,7 +135,7 @@ export const githubService = {
       if (
         (initialType === "installation" || initialType === "oauth") &&
         isOctokitError(error) &&
-        (error.status === 403 || error.status === 404)
+        (error.status === 401 || error.status === 403 || error.status === 404)
       ) {
         const oauthAccounts = await prisma.account.findMany({
           where: { access_token: { not: null }, provider: "github", userId },
