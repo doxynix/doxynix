@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.16.3](https://github.com/doxynix/doxynix/compare/v1.16.2...v1.16.3) (2026-03-14)
+
+
+### Bug Fixes
+
+* **api:** исправлен флоу github app, внесены сопутствующие правки ([#604](https://github.com/doxynix/doxynix/issues/604)) ([2f6b086](https://github.com/doxynix/doxynix/commit/2f6b086a9fc117771693e5fccda37d28da5c0393))
+
 ## [1.16.2](https://github.com/doxynix/doxynix/compare/v1.16.1...v1.16.2) (2026-03-13)
 
 
