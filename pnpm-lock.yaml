@@ -309,8 +309,8 @@ importers:
         version: 5.0.11(@types/react@19.2.14)(immer@10.2.0)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
       '@bundle-stats/plugin-webpack-filter':
-        specifier: 4.21.10
-        version: 4.21.10(core-js@3.48.0)
+        specifier: 4.22.0
+        version: 4.22.0(core-js@3.48.0)
       '@changesets/cli':
         specifier: 2.30.0
         version: 2.30.0(@types/node@25.5.0)
@@ -465,8 +465,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       bundle-stats-webpack-plugin:
-        specifier: 4.21.10
-        version: 4.21.10(webpack@5.105.4(@swc/core@1.15.18(@swc/helpers@0.5.19)))
+        specifier: 4.22.0
+        version: 4.22.0(webpack@5.105.4(@swc/core@1.15.18(@swc/helpers@0.5.19)))
       cross-env:
         specifier: 10.1.0
         version: 10.1.0
@@ -540,8 +540,8 @@ importers:
         specifier: 5.86.0
         version: 5.86.0(@types/node@25.5.0)(typescript@5.9.3)
       lint-staged:
-        specifier: 16.3.3
-        version: 16.3.3
+        specifier: 16.4.0
+        version: 16.4.0
       next-sitemap:
         specifier: 4.2.3
         version: 4.2.3(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
@@ -885,25 +885,25 @@ packages:
   '@bugsnag/cuid@3.2.1':
     resolution: {integrity: sha512-zpvN8xQ5rdRWakMd/BcVkdn2F8HKlDSbM3l7duueK590WmI1T0ObTLc1V/1e55r14WNjPd5AJTYX4yPEAFVi+Q==}
 
-  '@bundle-stats/cli-utils@4.21.10':
-    resolution: {integrity: sha512-x+wJvQFLU+82hLyIfzo3IR3oj7Ba+OaBF2Jhkg7i11bUkxR+KjTtdguwKcI5COI1ZT5dnPgngySEiNXd+vTuXA==}
+  '@bundle-stats/cli-utils@4.22.0':
+    resolution: {integrity: sha512-Po8/27Xd23MbbGsDyzvStB13PYIs/Y3sngrmyafIdrCUXZycXSq4X8LNYR1YfTxAzs3whOBaF5cVOEZQAT5NPQ==}
     engines: {node: '>= 14.0'}
 
-  '@bundle-stats/html-templates@4.21.10':
-    resolution: {integrity: sha512-PKOlrbsU7pOE2meid8Pudbi+CriH5nO/CQtVjVxtktgw+kDOMt2fZoasWaZ+pP6Zk07r6chX/F9ntBP9FjYVYg==}
+  '@bundle-stats/html-templates@4.22.0':
+    resolution: {integrity: sha512-ZM40lBnNyNCbxqLJ3Sh505Ttv94Y290XtY5MXqZDhP33nWJAZbQCZXEUCXtK6WlL+panoXr4iZlc3tJIQ/Xp1Q==}
 
-  '@bundle-stats/plugin-webpack-filter@4.21.10':
-    resolution: {integrity: sha512-r32p1Y4xNkXPP2vZIJBiKhynog8P2AJDbgw9lxROp3IBe/7M7i+wkxATSGHkuWaYisJDBj7/28acjl7YJYDuzA==}
+  '@bundle-stats/plugin-webpack-filter@4.22.0':
+    resolution: {integrity: sha512-JOXFjo7VdSIfyy4SOe3CJuvzP86Rvn8n0VhAiZjLbENRaEn2TETfVqzrAexI65fq+swStAYn0EKouMH7nDas9Q==}
     engines: {node: '>= 14.0'}
     peerDependencies:
       core-js: ^3.0.0
 
-  '@bundle-stats/plugin-webpack-validate@4.21.10':
-    resolution: {integrity: sha512-izQrd6Bbjcuh+HzYhvcS2STdPRbtnKYQ1yTj1itxm09piVS9UEtbXqzfRsMkiKZ8lXr9IauKOWK7ZOSCIlcgkg==}
+  '@bundle-stats/plugin-webpack-validate@4.22.0':
+    resolution: {integrity: sha512-Mt0N40B0eeSgX5AqDouVhvUTmfWH3tbXkc6YrWj3nVkYwmMO5JpLXuDJOFm08yYG8tnd740RPV9lIyBtm/czBw==}
     engines: {node: '>= 14.0'}
 
-  '@bundle-stats/utils@4.21.10':
-    resolution: {integrity: sha512-eKsrvf+/nP4l1NaJXv7dsot0iSDuadsefBE4oL3+fCsir+kaMYVqknN9oh4EEaDb3ycxxWglE/50xDqFXTWEwg==}
+  '@bundle-stats/utils@4.22.0':
+    resolution: {integrity: sha512-2hY3cCvestmFRpKnMkf+bhWdrmBCzOeUN+jbyhAnwkU9FFZKW/5tFiUc8WOiC1UYrGzMRF55MSTha7WWdk36ng==}
     engines: {node: '>= 14.0'}
     peerDependencies:
       core-js: ^3.0.0
@@ -6544,8 +6544,8 @@ packages:
     resolution: {integrity: sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q==}
     engines: {node: '>=18'}
 
-  bundle-stats-webpack-plugin@4.21.10:
-    resolution: {integrity: sha512-64/sNCNZp3BDESg+nAUbXGRXFuzXkRB5g6+TJ3L0BuffOaszKRj7WrufOHpikLE4gERdJyrRBsgv6OxLU8TSmw==}
+  bundle-stats-webpack-plugin@4.22.0:
+    resolution: {integrity: sha512-HO5mDnrZQBSgKfFftUlI0KhO53c1W6P5blbyTQKMVcm4dcrtolwGYbHmt9yhDWCejNnwGl2VeI0m6g8owYLxpw==}
     engines: {node: '>= 14.0'}
     peerDependencies:
       '@rspack/core': 0.x || 1.x
@@ -9419,8 +9419,8 @@ packages:
   linkify-it@5.0.0:
     resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
 
-  lint-staged@16.3.3:
-    resolution: {integrity: sha512-RLq2koZ5fGWrx7tcqx2tSTMQj4lRkfNJaebO/li/uunhCJbtZqwTuwPHpgIimAHHi/2nZIiGrkCHDCOeR1onxA==}
+  lint-staged@16.4.0:
+    resolution: {integrity: sha512-lBWt8hujh/Cjysw5GYVmZpFHXDCgZzhrOm8vbcUdobADZNOK/bRshr2kM3DfgrrtR1DQhfupW9gnIXOfiFi+bw==}
     engines: {node: '>=20.17'}
     hasBin: true
 
@@ -12254,8 +12254,8 @@ packages:
   tinyexec@0.3.2:
     resolution: {integrity: sha512-KQQR9yN7R5+OSwaK0XQoj22pwHoTlgYqmUscPYoknOoWCWfj/5/ABTMRi69FrKU5ffPVh5QcFikpWJI/P1ocHA==}
 
-  tinyexec@1.0.2:
-    resolution: {integrity: sha512-W/KYk+NFhkmsYpuHq5JykngiOCnxeVL8v8dFnqxSD8qEEdRfXk1SDM6JzNqcERbcGYj9tMrDQBYV9cjgnunFIg==}
+  tinyexec@1.0.4:
+    resolution: {integrity: sha512-u9r3uZC0bdpGOXtlxUIdwf9pkmvhqJdrVCH9fapQtgy/OeTTMZ1nqH7agtvEfmGui6e1XxjcdrlxvxJvc3sMqw==}
     engines: {node: '>=18'}
 
   tinyglobby@0.2.15:
@@ -13438,7 +13438,7 @@ snapshots:
   '@antfu/install-pkg@1.1.0':
     dependencies:
       package-manager-detector: 1.6.0
-      tinyexec: 1.0.2
+      tinyexec: 1.0.4
 
   '@antfu/ni@0.21.4': {}
 
@@ -13715,11 +13715,11 @@ snapshots:
 
   '@bugsnag/cuid@3.2.1': {}
 
-  '@bundle-stats/cli-utils@4.21.10(core-js@3.48.0)':
+  '@bundle-stats/cli-utils@4.22.0(core-js@3.48.0)':
     dependencies:
-      '@bundle-stats/html-templates': 4.21.10
-      '@bundle-stats/plugin-webpack-filter': 4.21.10(core-js@3.48.0)
-      '@bundle-stats/utils': 4.21.10(core-js@3.48.0)(lodash@4.17.23)
+      '@bundle-stats/html-templates': 4.22.0
+      '@bundle-stats/plugin-webpack-filter': 4.22.0(core-js@3.48.0)
+      '@bundle-stats/utils': 4.22.0(core-js@3.48.0)(lodash@4.17.23)
       find-cache-dir: 3.3.2
       lodash: 4.17.23
       stream-chain: 3.4.0
@@ -13727,23 +13727,23 @@ snapshots:
     transitivePeerDependencies:
       - core-js
 
-  '@bundle-stats/html-templates@4.21.10': {}
+  '@bundle-stats/html-templates@4.22.0': {}
 
-  '@bundle-stats/plugin-webpack-filter@4.21.10(core-js@3.48.0)':
+  '@bundle-stats/plugin-webpack-filter@4.22.0(core-js@3.48.0)':
     dependencies:
       core-js: 3.48.0
       tslib: 2.8.1
 
-  '@bundle-stats/plugin-webpack-validate@4.21.10':
+  '@bundle-stats/plugin-webpack-validate@4.22.0':
     dependencies:
       lodash: 4.17.23
       superstruct: 2.0.2
       tslib: 2.8.1
 
-  '@bundle-stats/utils@4.21.10(core-js@3.48.0)(lodash@4.17.23)':
+  '@bundle-stats/utils@4.22.0(core-js@3.48.0)(lodash@4.17.23)':
     dependencies:
-      '@bundle-stats/plugin-webpack-filter': 4.21.10(core-js@3.48.0)
-      '@bundle-stats/plugin-webpack-validate': 4.21.10
+      '@bundle-stats/plugin-webpack-filter': 4.22.0(core-js@3.48.0)
+      '@bundle-stats/plugin-webpack-validate': 4.22.0
       core-js: 3.48.0
       lodash: 4.17.23
       serialize-query-params: 2.0.4
@@ -13964,7 +13964,7 @@ snapshots:
       '@commitlint/load': 20.4.4(@types/node@25.5.0)(typescript@5.9.3)
       '@commitlint/read': 20.4.4(conventional-commits-parser@6.3.0)
       '@commitlint/types': 20.4.4
-      tinyexec: 1.0.2
+      tinyexec: 1.0.4
       yargs: 17.7.2
     transitivePeerDependencies:
       - '@types/node'
@@ -14039,7 +14039,7 @@ snapshots:
       '@commitlint/types': 20.4.4
       git-raw-commits: 5.0.1(conventional-commits-parser@6.3.0)
       minimist: 1.2.8
-      tinyexec: 1.0.2
+      tinyexec: 1.0.4
     transitivePeerDependencies:
       - conventional-commits-filter
       - conventional-commits-parser
@@ -15207,7 +15207,7 @@ snapshots:
       srvx: 0.11.9
       std-env: 3.10.0
       tinyclip: 0.1.12
-      tinyexec: 1.0.2
+      tinyexec: 1.0.4
       ufo: 1.6.3
       youch: 4.1.0
     optionalDependencies:
@@ -20014,10 +20014,10 @@ snapshots:
       run-applescript: 7.1.0
     optional: true
 
-  bundle-stats-webpack-plugin@4.21.10(webpack@5.105.4(@swc/core@1.15.18(@swc/helpers@0.5.19))):
+  bundle-stats-webpack-plugin@4.22.0(webpack@5.105.4(@swc/core@1.15.18(@swc/helpers@0.5.19))):
     dependencies:
-      '@bundle-stats/cli-utils': 4.21.10(core-js@3.48.0)
-      '@bundle-stats/plugin-webpack-validate': 4.21.10
+      '@bundle-stats/cli-utils': 4.22.0(core-js@3.48.0)
+      '@bundle-stats/plugin-webpack-validate': 4.22.0
       core-js: 3.48.0
       lodash: 4.17.23
     optionalDependencies:
@@ -23375,13 +23375,13 @@ snapshots:
     dependencies:
       uc.micro: 2.1.0
 
-  lint-staged@16.3.3:
+  lint-staged@16.4.0:
     dependencies:
       commander: 14.0.3
       listr2: 9.0.5
-      micromatch: 4.0.8
+      picomatch: 4.0.3
       string-argv: 0.3.2
-      tinyexec: 1.0.2
+      tinyexec: 1.0.4
       yaml: 2.8.2
 
   listhen@1.9.0:
@@ -24301,7 +24301,7 @@ snapshots:
     dependencies:
       citty: 0.2.1
       pathe: 2.0.3
-      tinyexec: 1.0.2
+      tinyexec: 1.0.4
 
   oauth@0.9.15: {}
 
@@ -26811,7 +26811,7 @@ snapshots:
 
   tinyexec@0.3.2: {}
 
-  tinyexec@1.0.2: {}
+  tinyexec@1.0.4: {}
 
   tinyglobby@0.2.15:
     dependencies:
@@ -27536,7 +27536,7 @@ snapshots:
       picomatch: 4.0.3
       std-env: 4.0.0
       tinybench: 2.9.0
-      tinyexec: 1.0.2
+      tinyexec: 1.0.4
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
       vite: 7.3.1(@types/node@25.5.0)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
