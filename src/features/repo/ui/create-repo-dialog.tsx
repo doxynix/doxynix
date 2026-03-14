@@ -137,6 +137,8 @@ export function CreateRepoDialog() {
     }
   };
 
+  const oauthStatus = myGithubData?.oauthStatus;
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
@@ -266,6 +268,25 @@ export function CreateRepoDialog() {
                       </LoadingButton>
                     </div>
                   </div>
+                ) : oauthStatus === "invalid" ? (
+                  <div className="h-70 rounded-xl border p-1">
+                    <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
+                      <p className="text-muted-foreground mb-3 text-sm">
+                        Your GitHub authorization expired. Please relink your account.
+                      </p>
+                      <LoadingButton
+                        type="button"
+                        disabled={loadingOauth}
+                        isLoading={loadingOauth}
+                        loadingText="Processing..."
+                        variant="outline"
+                        onClick={() => void handleSignIn()}
+                        className="cursor-pointer"
+                      >
+                        <GitHubIcon /> Relink GitHub Account
+                      </LoadingButton>
+                    </div>
+                  </div>
                 ) : (
                   <ScrollArea type="always" className="h-70 rounded-xl border p-1">
                     {myGithubData.items.length === 0 ? (
@@ -292,14 +313,36 @@ export function CreateRepoDialog() {
                         </div>
                       )
                     ) : (
-                      myGithubData.items.map((myRepo) => (
-                        <RepoItem
-                          key={myRepo.fullName}
-                          disabled={create.isPending}
-                          repo={myRepo}
-                          onClick={() => handleSelectRepo(myRepo.fullName)}
-                        />
-                      ))
+                      <>
+                        {myGithubData.installationId == null && (
+                          <div className="xs:px-4 xs:py-4 border-border/70 flex flex-col gap-2 border-b px-2 py-3 text-center">
+                            <p className="text-muted-foreground text-sm">
+                              Want private and org repositories? Install our GitHub App.
+                            </p>
+                            <div className="flex justify-center">
+                              <LoadingButton
+                                type="button"
+                                disabled={loading}
+                                isLoading={loading}
+                                loadingText="Connecting..."
+                                variant="outline"
+                                onClick={() => void handleInstallGitHubApp()}
+                                className="cursor-pointer"
+                              >
+                                <GitHubIcon /> Install GitHub App
+                              </LoadingButton>
+                            </div>
+                          </div>
+                        )}
+                        {myGithubData.items.map((myRepo) => (
+                          <RepoItem
+                            key={myRepo.fullName}
+                            disabled={create.isPending}
+                            repo={myRepo}
+                            onClick={() => handleSelectRepo(myRepo.fullName)}
+                          />
+                        ))}
+                      </>
                     )}
                   </ScrollArea>
                 )}

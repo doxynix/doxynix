@@ -30,6 +30,7 @@ export const env = createEnv({
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
     GITHUB_SYSTEM_INSTALLATION_ID: process.env.GITHUB_SYSTEM_INSTALLATION_ID,
+    GITHUB_SYSTEM_PAT: process.env.GITHUB_SYSTEM_PAT,
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
     GITLAB_CLIENT_ID: process.env.GITLAB_CLIENT_ID,
     GITLAB_CLIENT_SECRET: process.env.GITLAB_CLIENT_SECRET,
@@ -74,6 +75,7 @@ export const env = createEnv({
     GITHUB_SYSTEM_INSTALLATION_ID: z
       .string()
       .regex(/^\d+$/, "GITHUB_SYSTEM_INSTALLATION_ID must be numeric"),
+    GITHUB_SYSTEM_PAT: z.string().min(1).optional(),
     GITHUB_WEBHOOK_SECRET: z.string().min(1),
     GITLAB_CLIENT_ID: z.string().min(1),
     GITLAB_CLIENT_SECRET: z.string().min(1),

@@ -147,6 +147,7 @@ export const authOptions: NextAuthOptions = {
 
     GitHubProvider({
       allowDangerousEmailAccountLinking: true,
+      authorization: { params: { scope: "read:user read:org" } },
       clientId: AUTH_PROVIDERS.github.id,
       clientSecret: AUTH_PROVIDERS.github.secret,
     }),

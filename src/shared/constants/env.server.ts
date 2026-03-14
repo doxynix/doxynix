@@ -12,7 +12,11 @@ export const ABLY_API_KEY = env.ABLY_API_KEY;
 export const GROQ_API_KEY = env.GROQ_API_KEY;
 export const UPLOADTHING_TOKEN = env.UPLOADTHING_TOKEN;
 export const GITHUB_APP_ID = env.GITHUB_APP_ID;
-export const GITHUB_APP_PRIVATE_KEY = env.GITHUB_APP_PRIVATE_KEY.replace(/\\n/g, "\n");
+export const GITHUB_APP_PRIVATE_KEY =
+  typeof env.GITHUB_APP_PRIVATE_KEY === "string"
+    ? env.GITHUB_APP_PRIVATE_KEY.replace(/\\n/g, "\n")
+    : "";
+export const GITHUB_SYSTEM_PAT = env.GITHUB_SYSTEM_PAT ?? null;
 export const GITHUB_WEBHOOK_SECRET = env.GITHUB_WEBHOOK_SECRET;
 export const GITHUB_SYSTEM_INSTALLATION_ID = env.GITHUB_SYSTEM_INSTALLATION_ID;
 

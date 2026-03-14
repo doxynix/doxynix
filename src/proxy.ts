@@ -206,8 +206,22 @@ async function handleApiRequest(
     if (turnstileResponse) return turnstileResponse;
   }
 
-  const response = NextResponse.next();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-request-id", requestId);
+
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
   response.headers.set("x-request-id", requestId);
+  response.cookies.set("last_request_id", requestId, {
+    httpOnly: false,
+    maxAge: 60,
+    path: "/",
+    sameSite: "lax",
+    secure: IS_PROD,
+  });
   return response;
 }
 
@@ -232,10 +246,6 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
-
-  // const requestHeaders = new Headers(request.headers);
-  // requestHeaders.set("x-request-id", requestId);
-  // requestHeaders.set("x-url", request.url);
 
   const response = intlMiddleware(request);
 

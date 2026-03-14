@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 
 import { IS_PROD } from "@/shared/constants/env.client";
@@ -69,4 +70,42 @@ export function getCountry(request: NextRequest): string {
   if (!IS_PROD) return "LOCAL";
 
   return "UNKNOWN";
+}
+
+type RequestContextInput = {
+  method: string;
+  path: string;
+  req: NextRequest;
+  requestId?: string;
+  userId?: number;
+  userRole?: string;
+};
+
+export function getRequestIdFromHeaders(request: NextRequest): string | undefined {
+  return request.headers.get("x-request-id") ?? undefined;
+}
+
+export function resolveRequestId(request?: NextRequest, existing?: string): string | undefined {
+  if (existing != null) return existing;
+  if (request == null) return undefined;
+  return getRequestIdFromHeaders(request);
+}
+
+export function ensureRequestId(request: NextRequest, existing?: string): string {
+  return existing ?? getRequestIdFromHeaders(request) ?? crypto.randomUUID();
+}
+
+export function buildRequestStore(input: RequestContextInput): RequestStore {
+  const requestId = ensureRequestId(input.req, input.requestId);
+  return {
+    ip: anonymizeIp(getIp(input.req)),
+    method: input.method,
+    origin: input.req.headers.get("origin") ?? undefined,
+    path: input.path,
+    referer: input.req.headers.get("referer") ?? undefined,
+    requestId,
+    userAgent: getUa(input.req),
+    userId: input.userId,
+    userRole: input.userRole,
+  };
 }

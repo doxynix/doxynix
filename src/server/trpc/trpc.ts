@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import type { UserRole } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
@@ -9,7 +8,7 @@ import { IS_PROD } from "@/shared/constants/env.client";
 
 import type { DbClient } from "../db/db";
 import { logger } from "../logger/logger";
-import { anonymizeIp, requestContext } from "../utils/request-context";
+import { buildRequestStore, requestContext, resolveRequestId } from "../utils/request-context";
 import type { Context } from "./context";
 
 export const t = initTRPC
@@ -32,7 +31,7 @@ export const t = initTRPC
         ...shape,
         data: {
           ...shape.data,
-          requestId: requestContext.getStore()?.requestId ?? ctx?.req.headers.get("x-request-id"),
+          requestId: resolveRequestId(ctx?.req, requestContext.getStore()?.requestId),
           stack: IS_PROD ? undefined : error.stack,
           zodError: error.code === "BAD_REQUEST" ? error.cause : null,
         },
@@ -64,23 +63,17 @@ const withZenStack = t.middleware(async ({ ctx, next }) => {
 });
 
 const contextMiddleware = t.middleware(async ({ ctx, next, path, type }) => {
-  const requestId = ctx.req.headers.get("x-request-id") ?? crypto.randomUUID();
   const sessionUser = ctx.session?.user;
 
-  return requestContext.run(
-    {
-      ip: anonymizeIp(ctx.requestInfo.ip),
-      method: type,
-      origin: ctx.req.headers.get("origin") ?? undefined,
-      path,
-      referer: ctx.req.headers.get("referer") ?? undefined,
-      requestId,
-      userAgent: ctx.requestInfo.userAgent,
-      userId: sessionUser?.id == null ? undefined : Number(sessionUser.id),
-      userRole: sessionUser?.role,
-    },
-    () => next({ ctx })
-  );
+  const store = buildRequestStore({
+    method: type,
+    path,
+    req: ctx.req,
+    userId: sessionUser?.id == null ? undefined : Number(sessionUser.id),
+    userRole: sessionUser?.role,
+  });
+
+  return requestContext.run(store, () => next({ ctx }));
 });
 
 const loggerMiddleware = t.middleware(async ({ next, path, type }) => {
