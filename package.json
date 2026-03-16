@@ -171,7 +171,7 @@
     "uploadthing": "7.7.4",
     "use-debounce": "10.1.0",
     "zod": "4.3.6",
-    "zustand": "5.0.11"
+    "zustand": "5.0.12"
   },
   "devDependencies": {
     "@bundle-stats/plugin-webpack-filter": "4.22.0",
