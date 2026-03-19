@@ -293,8 +293,8 @@ importers:
         specifier: 3.5.0
         version: 3.5.0
       trpc-to-openapi:
-        specifier: 3.1.0
-        version: 3.1.0(@trpc/server@11.13.4(typescript@5.9.3))(zod-openapi@5.4.6(zod@4.3.6))(zod@4.3.6)
+        specifier: 3.2.0
+        version: 3.2.0(@trpc/server@11.13.4(typescript@5.9.3))(zod-openapi@5.4.6(zod@4.3.6))(zod@4.3.6)
       uploadthing:
         specifier: 7.7.4
         version: 7.7.4(express@4.22.1)(h3@1.15.9)(next@16.2.0(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.2)
@@ -12317,8 +12317,8 @@ packages:
   trim-lines@3.0.1:
     resolution: {integrity: sha512-kRj8B+YHZCc9kQYdWfJB2/oUl9rA99qbowYYBtr4ui4mZyAQ2JpvVBd/6U2YloATfqBhBTSMhTpgBHtU0Mf3Rg==}
 
-  trpc-to-openapi@3.1.0:
-    resolution: {integrity: sha512-5hKNl8XxE7QZE5UiaxpyKrRQCk6JRNiei4Ddg9I2Tmk2eEzR3/QhTvTElS32COZY+pWwVtqksVTwVWY8dHxLNw==}
+  trpc-to-openapi@3.2.0:
+    resolution: {integrity: sha512-nRexppGtL7og73dI4900xnfiGoOAx9PppAi7CVNeh8JfRHXUJ3lDe4JCjHgDAvC3FPHmwJAGDJ0b0BbRll98YA==}
     peerDependencies:
       '@trpc/server': ^11.1.0
       zod: ^4.0.0
@@ -26892,7 +26892,7 @@ snapshots:
 
   trim-lines@3.0.1: {}
 
-  trpc-to-openapi@3.1.0(@trpc/server@11.13.4(typescript@5.9.3))(zod-openapi@5.4.6(zod@4.3.6))(zod@4.3.6):
+  trpc-to-openapi@3.2.0(@trpc/server@11.13.4(typescript@5.9.3))(zod-openapi@5.4.6(zod@4.3.6))(zod@4.3.6):
     dependencies:
       '@trpc/server': 11.13.4(typescript@5.9.3)
       co-body: 6.2.0
