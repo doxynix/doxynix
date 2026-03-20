@@ -66,7 +66,8 @@
       "rollup": "4.59.0",
       "serialize-javascript": "7.0.4",
       "@react-email/body": "0.3.0",
-      "flatted": "3.4.2"
+      "flatted": "3.4.2",
+      "dompurify": "3.3.2"
     },
     "onlyBuiltDependencies": [
       "esbuild",
