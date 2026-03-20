@@ -4,7 +4,8 @@ import { getTranslations } from "next-intl/server";
 
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
-import { RepoAvatar, type SearchParams } from "@/entities/repo";
+import { RepoAvatar } from "@/entities/repo";
+import type { SearchParams } from "@/entities/repo-setup";
 
 import {
   CreateRepoButton,

@@ -14,8 +14,7 @@ import {
 } from "lucide-react";
 
 import type { RepoDetailsOverview } from "@/shared/api/trpc";
-import { cn, getHealthColor } from "@/shared/lib/utils";
-import { AnimatedCircularProgressBar } from "@/shared/ui/core/animated-circular-progress-bar";
+import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 
