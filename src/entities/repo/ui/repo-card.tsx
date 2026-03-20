@@ -4,7 +4,7 @@ import { Play, Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import type { UiRepoListItem } from "@/shared/api/trpc";
-import { cn, formatFullDate, formatRelativeTime } from "@/shared/lib/utils";
+import { cn, formatFullDate, formatRelativeTime, getHealthColor } from "@/shared/lib/utils";
 import { AnimatedCircularProgressBar } from "@/shared/ui/core/animated-circular-progress-bar";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
@@ -12,11 +12,12 @@ import { Card, CardContent } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
+import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { Link } from "@/i18n/routing";
 
 import { getGitMetrics } from "../model/git-metrics";
 import { getMetrics } from "../model/metrics";
-import { repoStatusConfig } from "../model/repo-status";
+import { repoStatusConfig } from "../model/repo-status-config";
 import { repoVisibilityConfig } from "../model/repo-visibility";
 import { RepoAvatar } from "./repo-avatar";
 import { RepoGitMetric } from "./repo-git-metric";
@@ -24,12 +25,6 @@ import { RepoTopics } from "./repo-topics";
 
 type Props = {
   repo: UiRepoListItem;
-};
-
-const getHealthColor = (score: number) => {
-  if (score < 50) return "var(--destructive)";
-  if (score < 80) return "var(--status-warning)";
-  return "var(--status-success)";
 };
 
 export function RepoCard({ repo }: Readonly<Props>) {
@@ -73,20 +68,18 @@ export function RepoCard({ repo }: Readonly<Props>) {
                 >
                   <CopyButton value={repo.id} />
                   <AppTooltip content={t("repo_open_on_github_tooltip")}>
-                    <a
+                    <ExternalLink
                       href={repo.url}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                      className="text-muted-foreground hover:text-foreground flex h-6 w-6 items-center justify-center rounded opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
+                      className="text-muted-foreground hover:text-foreground flex size-6 items-center justify-center rounded opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
                     >
-                      <GitHubIcon className="h-4 w-4" />
-                    </a>
+                      <GitHubIcon className="size-4" />
+                    </ExternalLink>
                   </AppTooltip>
                   <Link
                     href={`/dashboard/repo/${repo.owner}/${repo.name}/settings`}
-                    className="text-muted-foreground hover:text-foreground flex h-6 w-6 items-center justify-center opacity-0 transition-all not-md:opacity-100 group-hover:opacity-100"
+                    className="text-muted-foreground hover:text-foreground flex size-6 items-center justify-center opacity-0 transition-all not-md:opacity-100 group-hover:opacity-100"
                   >
-                    <Settings className="h-4 w-4" />
+                    <Settings className="size-4" />
                   </Link>
                 </div>
               </div>
@@ -134,10 +127,9 @@ export function RepoCard({ repo }: Readonly<Props>) {
             <span className="text-muted-foreground my-2 text-right text-xs">Not analyzed yet</span>
           )}
           <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center gap-1 rounded">
-              <span className={cn("h-2 w-2 rounded-full", status.color)} />
-              <span className="font-medium">{status.label}</span>
-            </div>
+            <Badge variant="outline" className={cn(status.color)}>
+              {status.label}
+            </Badge>
             {repo.lastAnalysisDate != null && (
               <AppTooltip
                 content={t("repo_last_analyzed", {
@@ -152,7 +144,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
             {!hasAnalysis && (
               <Button asChild size="sm" variant="outline" className="mt-2 cursor-pointer">
                 <Link href={`/dashboard/repo/${repo.owner}/${repo.name}/analyze`}>
-                  <Play className="h-4 w-4" />
+                  <Play className="size-4" />
                   Run Analysis
                 </Link>
               </Button>

@@ -110,8 +110,8 @@ export default async function AboutPage() {
               className="bg-landing-bg-light/50 rounded-2xl border p-8 transition-all duration-300"
             >
               <div className="space-y-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl border transition-colors">
-                  <feature.icon className="text-foreground/60 h-6 w-6" />
+                <div className="flex size-12 items-center justify-center rounded-xl border transition-colors">
+                  <feature.icon className="text-foreground/60 size-6" />
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-foreground text-lg font-semibold">{feature.title}</h3>
@@ -134,7 +134,7 @@ export default async function AboutPage() {
             className="bg-foreground text-background inline-flex items-center gap-3 rounded-xl px-8 py-4 font-semibold transition-all hover:opacity-90 active:scale-95"
           >
             Get Started Free
-            <ArrowRight className="h-5 w-5" />
+            <ArrowRight className="size-5" />
           </Link>
         </div>
       </section>

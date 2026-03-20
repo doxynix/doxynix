@@ -30,7 +30,7 @@ import {
 import { Textarea } from "@/shared/ui/core/textarea";
 import { Flag, FLAGS } from "@/shared/ui/kit/language-switcher";
 
-import type { ActionsType, StateType } from "../model/user-repo-setup";
+import type { ActionsType, StateType } from "@/entities/repo-setup";
 
 type DocOption = {
   desc: string;
@@ -59,11 +59,13 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
     (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const
   );
 
+  const isSelectionEmpty = state.selectedFilesCount === 0 || state.selectedDocs.length === 0;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Settings className="h-5 w-5" />
+          <Settings className="size-5" />
           Analysis Configuration
         </CardTitle>
         <CardDescription>
@@ -74,7 +76,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-3">
             <Label className="text-muted-foreground flex items-center gap-2 text-sm">
-              <Languages className="h-4 w-4" />
+              <Languages className="size-4" />
               Output Language
             </Label>
             <Select value={state.analysisLocale} onValueChange={actions.setAnalysisLocale}>
@@ -97,7 +99,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
 
         <div className="space-y-3">
           <Label className="text-muted-foreground flex items-center gap-2 text-sm">
-            <FileText className="h-4 w-4" />
+            <FileText className="size-4" />
             Documentation Types
           </Label>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -108,7 +110,6 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                   key={opt.id}
                   className={cn(
                     "relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3 transition-all",
-                    "hover:border-border-strong focus-within:ring-ring focus-within:ring-2 focus-within:ring-offset-2",
                     isSelected
                       ? "border-border-strong bg-surface-selected"
                       : "border-border bg-card"
@@ -125,20 +126,20 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                   <div className="flex items-center justify-between">
                     <div
                       className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-lg border",
+                        "flex size-8 items-center justify-center rounded-lg border",
                         isSelected
                           ? "bg-primary text-primary-foreground border-border-strong"
                           : "bg-surface-hover text-muted-foreground border-border"
                       )}
                     >
-                      <opt.icon className="h-4 w-4" />
+                      <opt.icon className="size-4" />
                     </div>
                     <Checkbox
                       checked={isSelected}
                       disabled={disabled}
                       tabIndex={-1}
                       aria-hidden="true"
-                      className="pointer-events-none h-4 w-4 rounded-full"
+                      className="pointer-events-none size-4 rounded-full"
                     />
                   </div>
                   <div>
@@ -153,7 +154,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
 
         <div className="space-y-3">
           <Label className="text-muted-foreground flex items-center gap-2 text-sm">
-            <MessageSquareText className="h-4 w-4" />
+            <MessageSquareText className="size-4" />
             Custom Instructions (optional)
           </Label>
           <Textarea
@@ -166,11 +167,11 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
 
         <div className="flex justify-end">
           <Button
-            disabled={disabled}
+            disabled={disabled || isSelectionEmpty}
             onClick={actions.handleStartAnalysis}
             className="w-fit cursor-pointer gap-2"
           >
-            <Play className="h-4 w-4" />
+            <Play className="size-4" />
             Start Analysis
           </Button>
         </div>

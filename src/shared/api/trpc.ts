@@ -16,8 +16,6 @@ export type UiRepoListItem = RouterOutput["repo"]["getAll"]["items"][number];
 
 export type UiRepoDetailed = NonNullable<RouterOutput["repo"]["getByName"]>;
 
-export type UiRepoFile = RouterOutput["repo"]["getRepoFiles"][number];
-
 export type DashboardStats = RouterOutput["analytics"]["getDashboardStats"];
 
 export type RecentActivityItem = DashboardStats["recentActivity"][number];
@@ -36,10 +34,22 @@ export type RepoStatus = UiRepoDetailed["status"];
 
 export type RepoVisibility = UiRepoDetailed["visibility"];
 
-export type DocType = RouterInput["repo"]["getDocument"]["type"];
+export type DocType = RouterInput["repoDetails"]["getDocumentContent"]["type"];
 
 export type RepoGetAll = RouterOutput["repo"]["getAll"];
 
 export type RepoMeta = RepoGetAll["meta"];
 
 export type MarkAllInput = RouterInput["notification"]["markAllAsRead"];
+
+export type RepoDetailsOverview = RouterOutput["repoDetails"]["getOverview"];
+
+export type UiRepoHistory = RouterOutput["repoDetails"]["getHistory"];
+
+export type FileContent = RouterOutput["repoGithub"]["getFileContent"];
+
+export type FileMeta = RouterOutput["repoGithub"]["getFileContent"]["meta"];
+
+export type RepoMetricsItem = RouterOutput["repoDetails"]["getDetailedMetrics"];
+
+export type AvailableDocs = RouterOutput["repoDetails"]["getAvailableDocs"];

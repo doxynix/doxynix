@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BookOpen, ExternalLink, RefreshCcw } from "lucide-react";
+import { BookOpen, ExternalLinkIcon, RefreshCcw } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
@@ -29,6 +29,7 @@ import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
+import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { useCreateRepoDialogStore, useRepoActions } from "@/entities/repo";
@@ -40,7 +41,7 @@ const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут
 export function CreateRepoDialog() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const { refetch: getInstallUrl } = trpc.repo.getGithubInstallUrl.useQuery(undefined, {
+  const { refetch: getInstallUrl } = trpc.repoGithub.getGithubInstallUrl.useQuery(undefined, {
     enabled: false,
   });
 
@@ -85,7 +86,7 @@ export function CreateRepoDialog() {
   }
 
   const isUrl = isGitHubUrl(debouncedValue);
-  const { data: suggestions, isFetching } = trpc.repo.searchGithub.useQuery(
+  const { data: suggestions, isFetching } = trpc.repoGithub.searchGithub.useQuery(
     { query: debouncedValue },
     {
       enabled: debouncedValue.length >= 2 && !isUrl,
@@ -97,7 +98,7 @@ export function CreateRepoDialog() {
     data: myGithubData,
     isFetching: isFetchingMyRepos,
     refetch: refetchMyRepos,
-  } = trpc.repo.getMyGithubRepos.useQuery(undefined, {
+  } = trpc.repoGithub.getMyGithubRepos.useQuery(undefined, {
     enabled: open,
     staleTime: STALE_TIME,
   });
@@ -159,7 +160,7 @@ export function CreateRepoDialog() {
                         {isFetching ? (
                           <Spinner className="absolute top-2.5 left-2.5" />
                         ) : (
-                          <GitHubIcon className="absolute top-2.5 left-2.5 h-4 w-4" />
+                          <GitHubIcon className="absolute top-2.5 left-2.5 size-4" />
                         )}
                         <Input
                           {...field}
@@ -197,7 +198,7 @@ export function CreateRepoDialog() {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs font-medium tracking-wider">
                 <div className="text-muted-foreground flex items-center gap-2 uppercase">
-                  <BookOpen className="h-3 w-3" />
+                  <BookOpen className="size-3" />
                   {t("repo_your_repos")}
                 </div>
 
@@ -206,14 +207,12 @@ export function CreateRepoDialog() {
                   myGithubData.manageUrl != null && (
                     <div className="text-muted-foreground flex items-center gap-2 font-normal tracking-normal normal-case">
                       <span>Don&apos;t see it?</span>
-                      <a
+                      <ExternalLink
                         href={`${myGithubData.manageUrl}`}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                        className="flex items-center gap-1 transition-colors hover:underline"
+                        className="flex items-center gap-1 hover:underline"
                       >
-                        Manage access <ExternalLink className="h-2.5 w-2.5" />
-                      </a>
+                        Manage access <ExternalLinkIcon className="h-2.5 w-2.5" />
+                      </ExternalLink>
                     </div>
                   )}
               </div>

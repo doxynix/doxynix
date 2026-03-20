@@ -26,7 +26,7 @@ export function BackOrLinkButton({
 
   const content = (
     <>
-      {showIcon && <MoveLeft className="mr-2 h-4 w-4" />}
+      {showIcon && <MoveLeft className="mr-2 size-4" />}
       {label || children}
     </>
   );

@@ -38,11 +38,11 @@ export function NotificationActionButton({
           onClick();
         }}
         className={cn(
-          "text-muted-foreground hover:text-foreground z-10 h-6 w-6 opacity-0 transition-all not-md:opacity-100 group-hover:opacity-100",
+          "text-muted-foreground hover:text-foreground z-10 size-6 opacity-0 transition-all not-md:opacity-100 group-hover:opacity-100",
           className
         )}
       >
-        <Icon className="h-4 w-4" />
+        <Icon className="size-4" />
       </LoadingButton>
     </AppTooltip>
   );

@@ -11,7 +11,7 @@ import themeLight from "shiki/themes/github-light.mjs";
 
 let highlighter: Awaited<ReturnType<typeof createHighlighter>> | null = null;
 
-async function getHighlighter() {
+export async function getHighlighter() {
   highlighter ??= await createHighlighter({
     langs: [langTs, langJSON, langMarkdown, langConsole],
     themes: [themeDark, themeLight],

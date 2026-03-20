@@ -25,6 +25,20 @@ type PathTypes = {
   toRef: React.RefObject<HTMLDivElement | null>;
 };
 
+type NodeType = {
+  circleClass?: string;
+  gapClass?: string;
+  icon: React.ReactNode;
+  label: string;
+  labelClass?: string;
+  ref: React.RefObject<HTMLDivElement | null>;
+};
+
+type ColumnTypes = {
+  className: string;
+  nodes: NodeType[];
+};
+
 const Circle = forwardRef<HTMLDivElement, { children?: React.ReactNode; className?: string }>(
   ({ children, className }, ref) => {
     return (
@@ -126,6 +140,60 @@ export function HowItWorksSection() {
     },
   ];
 
+  const COLUMNS: ColumnTypes[] = [
+    {
+      className: "flex h-full flex-col justify-center",
+      nodes: [
+        {
+          circleClass: "border-border-strong",
+          gapClass: "gap-3",
+          icon: <User />,
+          label: t("section_how_node_client"),
+          labelClass: "font-bold",
+          ref: clientRef,
+        },
+      ],
+    },
+    {
+      className: "flex h-full flex-col justify-center px-8 md:px-0",
+      nodes: [
+        {
+          circleClass: "border-brand-trigger/40 size-16 sm:size-24",
+          gapClass: "gap-3",
+          icon: <TriggerIcon />,
+          label: t("section_how_node_orchestrator"),
+          ref: triggerRef,
+        },
+      ],
+    },
+    {
+      className: "flex h-full flex-col justify-between gap-8",
+      nodes: [
+        {
+          circleClass: "border-brand-ai/40",
+          gapClass: "gap-2",
+          icon: <Brain className="text-brand-ai" />,
+          label: t("section_how_node_ai"),
+          ref: llmRef,
+        },
+        {
+          circleClass: "border-brand-db/40",
+          gapClass: "gap-2",
+          icon: <NeonIcon />,
+          label: t("section_how_node_db"),
+          ref: dbRef,
+        },
+        {
+          circleClass: "border-brand-ably/40",
+          gapClass: "gap-2",
+          icon: <AblyIcon />,
+          label: t("section_how_node_ably"),
+          ref: ablyRef,
+        },
+      ],
+    },
+  ];
+
   return (
     <section className="mx-auto flex w-full max-w-7xl flex-col items-center justify-center overflow-hidden px-4 py-24">
       <div className="mb-12 text-center">
@@ -140,60 +208,21 @@ export function HowItWorksSection() {
         ref={containerRef}
         className="relative flex w-full items-center justify-between overflow-hidden sm:p-10"
       >
-        <div className="flex h-full flex-col justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <Circle ref={clientRef} className="border-border-strong">
-              <User />
-            </Circle>
-            <span className="text-muted-foreground text-xs font-semibold sm:text-sm">
-              {t("section_how_node_client")}
-            </span>
+        {COLUMNS.map((col, idx) => (
+          <div key={idx} className={col.className}>
+            {col.nodes.map((node, nodeIdx) => (
+              <div key={nodeIdx} className={cn("flex flex-col items-center", node.gapClass)}>
+                <Circle ref={node.ref} className={node.circleClass}>
+                  {node.icon}
+                </Circle>
+                <span className={cn("text-muted-foreground text-xs sm:text-sm", node.labelClass)}>
+                  {node.label}
+                </span>
+              </div>
+            ))}
           </div>
-        </div>
+        ))}
 
-        <div className="flex h-full flex-col justify-center px-8 md:px-0">
-          <div className="flex flex-col items-center gap-3">
-            <Circle ref={triggerRef} className="border-brand-trigger/40 size-16 sm:size-24">
-              <TriggerIcon />
-            </Circle>
-            <div className="flex flex-col items-center">
-              <span className="text-muted-foreground text-xs sm:text-sm">
-                {" "}
-                {t("section_how_node_orchestrator")}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex h-full flex-col justify-between gap-8">
-          <div className="flex flex-col items-center gap-2">
-            <Circle ref={llmRef} className="border-brand-ai/40">
-              <Brain className="text-brand-ai" />
-            </Circle>
-            <span className="text-muted-foreground text-xs sm:text-sm">
-              {" "}
-              {t("section_how_node_ai")}
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center gap-2">
-            <Circle ref={dbRef} className="border-brand-db/40">
-              <NeonIcon />
-            </Circle>
-            <span className="text-muted-foreground text-xs sm:text-sm">
-              {t("section_how_node_db")}
-            </span>
-          </div>
-
-          <div className="flex flex-col items-center gap-2">
-            <Circle ref={ablyRef} className="border-brand-ably/40">
-              <AblyIcon />
-            </Circle>
-            <span className="text-muted-foreground text-xs sm:text-sm">
-              {t("section_how_node_ably")}
-            </span>
-          </div>
-        </div>
         {PATHS.map((path) => (
           <AnimatedBeam
             key={path.name}
@@ -213,7 +242,7 @@ export function HowItWorksSection() {
         ))}
       </div>
       <Badge variant="outline" className="px-4 py-1">
-        <FileText className="text-success h-4 w-4" />
+        <FileText className="text-success size-4" />
         <span className="text-muted-foreground text-xs">{t("section_how_status_msg")}</span>
       </Badge>
     </section>

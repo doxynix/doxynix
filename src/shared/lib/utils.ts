@@ -221,3 +221,17 @@ export function setClientCookie(name: string, value: string | boolean, maxAge: n
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
   document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(String(value))}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
 }
+
+export const formatSize = (bytes?: number) => {
+  if (bytes == null) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+};
+
+export const getHealthColor = (score: number) => {
+  if (score < 50) return "var(--destructive)";
+  if (score < 80) return "var(--status-warning)";
+  return "var(--status-success)";
+};

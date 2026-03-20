@@ -79,9 +79,9 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             )}
           >
             {isPrevLoading ? (
-              <Spinner className="h-4 w-4 animate-spin" />
+              <Spinner className="size-4 animate-spin" />
             ) : (
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="size-4" />
             )}
             <span className="ml-1">{t("back")}</span>
           </PaginationLink>
@@ -138,9 +138,9 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
           >
             <span className="mr-1">{t("next")}</span>
             {isNextLoading ? (
-              <Spinner className="h-4 w-4 animate-spin" />
+              <Spinner className="size-4 animate-spin" />
             ) : (
-              <ChevronLeft className="h-4 w-4 rotate-180" />
+              <ChevronLeft className="size-4 rotate-180" />
             )}
           </PaginationLink>
         </PaginationItem>

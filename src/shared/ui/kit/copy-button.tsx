@@ -37,14 +37,14 @@ export function CopyButton({
         variant="ghost"
         onClick={handleCopy}
         className={cn(
-          "h-6 w-6 transition-all not-md:opacity-100",
+          "size-6 transition-all not-md:opacity-100",
           isCopied
             ? "text-success hover:text-success opacity-100"
             : "text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100",
           className
         )}
       >
-        {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+        {isCopied ? <Check className="size-4" /> : <Copy className="size-4" />}
       </Button>
     </AppTooltip>
   );

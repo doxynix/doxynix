@@ -11,7 +11,7 @@ export function RepoAvatar({ alt, src }: Readonly<{ alt: string; src: string | n
   const [loaded, setLoaded] = useState(loadedAvatars.get(imageSrc) ?? false);
 
   return (
-    <div className="bg-muted relative h-9 w-9 shrink-0 overflow-hidden rounded-full border">
+    <div className="bg-muted relative size-9 shrink-0 overflow-hidden rounded-full border">
       {!loaded && <Skeleton className="absolute inset-0" />}
       <Image
         fill

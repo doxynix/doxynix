@@ -40,7 +40,7 @@ export function AppCommandMenu() {
     trpc.repo.getAll.useInfiniteQuery(
       {
         limit: 10,
-        search: debouncedSearch,
+        search: debouncedSearch || undefined,
       },
       {
         enabled: open,
@@ -142,7 +142,7 @@ export function AppCommandMenu() {
         variant="outline"
         onClick={() => setOpen(true)}
         className={cn(
-          "text-muted-foreground lg:border-border/70 lg:bg-surface-hover/70 relative h-9 w-9 justify-start rounded-xl text-sm font-normal not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12"
+          "text-muted-foreground lg:border-border/70 lg:bg-surface-hover/70 relative size-9 justify-start rounded-xl text-sm font-normal not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12"
         )}
       >
         <Search className="absolute top-2.25 left-2.25" />
@@ -185,9 +185,9 @@ export function AppCommandMenu() {
                     </div>
                     <div className="flex items-center gap-1">
                       {item.url != null && (
-                        <span className="text-muted-foreground bg-muted rounded border px-1.5 py-0.5 font-mono text-xs">
+                        <kbd className="text-muted-foreground px-1.5 py-0.5 text-xs">
                           {item.url}
-                        </span>
+                        </kbd>
                       )}
                       {item.shortcut != null && (
                         <CommandShortcut className="hidden text-xs md:flex">

@@ -90,7 +90,7 @@ export function RepoFilters() {
 
         <Button disabled={!hasFilters} variant="outline" onClick={handleReset} className="px-2">
           {tCommon("reset")}
-          <X className="h-4 w-4" />
+          <X className="size-4" />
         </Button>
       </div>
     </div>

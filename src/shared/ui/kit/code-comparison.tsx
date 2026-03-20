@@ -58,7 +58,7 @@ export function CodeComparison({
         <Badge
           variant="outline"
           aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 left-1/2 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-xs font-bold md:flex"
+          className="pointer-events-none absolute top-1/2 left-1/2 hidden size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-xs font-bold md:flex"
         >
           VS
         </Badge>

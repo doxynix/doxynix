@@ -22,9 +22,9 @@ import { routing } from "@/i18n/routing";
 
 import { HotkeyListeners } from "@/widgets/hotkey-manager";
 
-import { Providers } from "@/app/providers";
-
 import { ourFileRouter } from "@/server/lib/core";
+
+import { Providers } from "../providers";
 
 async function UTSSR() {
   await connection();

@@ -32,7 +32,7 @@ export function PublicHeader() {
           {publicHeaderMenu.map((item) => (
             <Button key={item.href} asChild variant="ghost">
               <Link href={item.href as Route} className="flex items-center gap-2">
-                <item.icon className="h-4 w-4" />
+                <item.icon className="size-4" />
                 {item.label}
               </Link>
             </Button>
@@ -47,7 +47,7 @@ export function PublicHeader() {
             <Sheet>
               <SheetTrigger asChild>
                 <Button size="icon" variant="ghost">
-                  <Menu className="h-5 w-5" />
+                  <Menu className="size-5" />
                   <span className="sr-only">{t("open_menu")}</span>
                 </Button>
               </SheetTrigger>
@@ -62,7 +62,7 @@ export function PublicHeader() {
                       <SheetClose key={item.href} asChild>
                         <Button asChild variant="ghost" className="justify-start">
                           <Link href={item.href as Route} className="flex items-center gap-2">
-                            <item.icon className="h-4 w-4" />
+                            <item.icon className="size-4" />
                             {item.label}
                           </Link>
                         </Button>

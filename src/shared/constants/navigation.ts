@@ -1,8 +1,12 @@
 import {
   AlertTriangle,
+  BarChart3,
   Bell,
+  Code2,
+  FileText,
   FolderGit2,
   Headset,
+  HistoryIcon,
   Home,
   KeyRound,
   LayoutGrid,
@@ -10,15 +14,17 @@ import {
   SquareTerminal,
   User,
   Users2,
+  Zap,
 } from "lucide-react";
 
-import type { MenuItem, MenuItems } from "../types/navigation";
+import type { MenuItems } from "../types/navigation";
 
-const DASHBOARD_BASE: MenuItem[] = [
+const DASHBOARD_BASE: MenuItems = [
   {
     exact: true,
     href: "/dashboard",
     icon: LayoutGrid,
+    id: "dashboard",
     label: "Dashboard",
     shortcut: "G then O",
     url: "/o",
@@ -26,6 +32,7 @@ const DASHBOARD_BASE: MenuItem[] = [
   {
     href: "/dashboard/repo",
     icon: FolderGit2,
+    id: "repositories",
     label: "Repositories",
     shortcut: "G then R",
     url: "/r",
@@ -33,6 +40,7 @@ const DASHBOARD_BASE: MenuItem[] = [
   {
     href: "/dashboard/settings",
     icon: Settings,
+    id: "settings",
     label: "Settings",
     shortcut: "G then S",
     url: "/s",
@@ -40,6 +48,7 @@ const DASHBOARD_BASE: MenuItem[] = [
   {
     href: "/dashboard/notifications",
     icon: Bell,
+    id: "notifications",
     label: "Notifications",
     shortcut: "G then N",
     url: "/n",
@@ -50,6 +59,7 @@ const SETTINGS_PAGES: MenuItems = [
   {
     href: "/dashboard/settings/profile",
     icon: User,
+    id: "profile",
     label: "Profile",
     shortcut: "G then P",
     url: "/me",
@@ -57,6 +67,7 @@ const SETTINGS_PAGES: MenuItems = [
   {
     href: "/dashboard/settings/api-keys",
     icon: KeyRound,
+    id: "api keys",
     label: "API Keys",
     shortcut: "G then K",
     url: "/k",
@@ -64,6 +75,7 @@ const SETTINGS_PAGES: MenuItems = [
   {
     href: "/dashboard/settings/danger-zone",
     icon: AlertTriangle,
+    id: "danger zone",
     label: "Danger Zone",
     shortcut: "G then D",
     url: "/d",
@@ -72,7 +84,14 @@ const SETTINGS_PAGES: MenuItems = [
 ];
 
 const GLOBAL_FEATURES: MenuItems = [
-  { href: "/support", icon: Headset, label: "Support", shortcut: "G then H", url: "/h" },
+  {
+    href: "/support",
+    icon: Headset,
+    id: "support",
+    label: "Support",
+    shortcut: "G then H",
+    url: "/h",
+  },
 ];
 
 export const actionsMenu: MenuItems = [
@@ -80,6 +99,7 @@ export const actionsMenu: MenuItems = [
     actionId: "createRepo",
     commandType: "dialog",
     icon: SquareTerminal,
+    id: "createRepo",
     label: "Create Repository",
     shortcut: "C then N",
   },
@@ -99,7 +119,71 @@ export const commandMenuItems: MenuItems = [
 ];
 
 export const publicHeaderMenu: MenuItems = [
-  { href: "/", icon: Home, label: "Home" },
-  { href: "/about", icon: Users2, label: "About" },
-  { href: "/support", icon: Headset, label: "Help" },
+  {
+    href: "/",
+    icon: Home,
+    id: "Home",
+    label: "Home",
+  },
+  {
+    href: "/about",
+    icon: Users2,
+    id: "About",
+    label: "About",
+  },
+  {
+    href: "/support",
+    icon: Headset,
+    id: "Help",
+    label: "Help",
+  },
 ];
+
+export const getRepoDetailsMenu = (owner: string, name: string): MenuItems => {
+  const base = `/dashboard/repo/${owner}/${name}`;
+
+  return [
+    {
+      href: base,
+      icon: LayoutGrid,
+      id: "overview",
+      label: "Overview",
+    },
+    {
+      href: `${base}/analyze`,
+      icon: Zap,
+      id: "analyze",
+      label: "Analyze",
+    },
+    {
+      href: `${base}/code`,
+      icon: Code2,
+      id: "code",
+      label: "Code",
+    },
+    {
+      href: `${base}/docs`,
+      icon: FileText,
+      id: "documentation",
+      label: "Documentation",
+    },
+    {
+      href: `${base}/history`,
+      icon: HistoryIcon,
+      id: "history",
+      label: "History",
+    },
+    {
+      href: `${base}/metrics`,
+      icon: BarChart3,
+      id: "metrics",
+      label: "Metrics",
+    },
+    {
+      href: `${base}/settings`,
+      icon: Settings,
+      id: "settings",
+      label: "Settings",
+    },
+  ];
+};

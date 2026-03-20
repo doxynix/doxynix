@@ -9,9 +9,9 @@ export const TerminalWindow = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="glass-panel border-border/80 bg-card/70 pointer-events-none flex h-full w-full flex-col overflow-hidden rounded-2xl border">
       <div className="border-border/60 bg-muted/30 flex items-center gap-1.5 border-b p-3">
-        <div className="bg-destructive/80 h-3 w-3 rounded-full" />
-        <div className="bg-warning/80 h-3 w-3 rounded-full" />
-        <div className="bg-success/80 h-3 w-3 rounded-full" />
+        <div className="bg-destructive/80 size-3 rounded-full" />
+        <div className="bg-warning/80 size-3 rounded-full" />
+        <div className="bg-success/80 size-3 rounded-full" />
         <div className="text-muted-foreground ml-2 text-xs font-medium">bash</div>
       </div>
       <div className="flex-1 overflow-hidden p-4 font-mono text-xs leading-relaxed sm:text-sm">
@@ -88,21 +88,21 @@ export function SimulationTerminal() {
 
           {step >= 4 && (
             <div className="animate-in fade-in slide-in-from-left-2 flex items-center gap-2 duration-200">
-              <Check className="text-success h-3 w-3" />
+              <Check className="text-success size-3" />
               <span>{t("section_terminal_step_parsing")}</span>
             </div>
           )}
 
           {step >= 5 && (
             <div className="animate-in fade-in slide-in-from-left-2 flex items-center gap-2 duration-200">
-              <Check className="text-success h-3 w-3" />
+              <Check className="text-success size-3" />
               <span>{t("section_terminal_step_relationships")}</span>
             </div>
           )}
 
           {step >= 6 && (
             <div className="animate-in fade-in slide-in-from-left-2 flex items-center gap-2 duration-200">
-              <Check className="text-success h-3 w-3" />
+              <Check className="text-success size-3" />
               <span>{t("section_terminal_step_generating")}</span>
             </div>
           )}

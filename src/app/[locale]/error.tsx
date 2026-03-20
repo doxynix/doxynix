@@ -10,6 +10,7 @@ import { IS_DEV } from "@/shared/constants/env.client";
 import { Button } from "@/shared/ui/core/button";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
+import { ExternalLink } from "@/shared/ui/kit/external-link";
 
 export default function ErrorPage({
   error,
@@ -83,7 +84,7 @@ export default function ErrorPage({
           {IS_DEV && (
             <div className="border-border/50 border-t pt-2">
               <p className="text-destructive/70 text-xs font-semibold uppercase">Debug Error:</p>
-              <p className="text-destructive truncate font-mono text-xs">{error.message}</p>
+              <p className="text-destructive truncate text-xs">{error.message}</p>
             </div>
           )}
         </div>
@@ -104,14 +105,9 @@ export default function ErrorPage({
           </a>
         </div>
         <Button asChild size="sm" variant="outline" className="mx-auto w-fit">
-          <a
-            href="https://status.doxynix.space"
-            rel="noopener noreferrer"
-            target="_blank"
-            className="flex items-center gap-2.5"
-          >
+          <ExternalLink href="https://status.doxynix.space" className="flex items-center gap-2.5">
             Check System Status
-          </a>
+          </ExternalLink>
         </Button>
       </footer>
     </div>

@@ -20,7 +20,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold tracking-tight">{t("recent_repositories")}</h2>
+            <h2 className="text-lg tracking-tight">{t("recent_repositories")}</h2>
             <CreateRepoButton />
           </div>
 

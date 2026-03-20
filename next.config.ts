@@ -60,8 +60,8 @@ const nextConfig: NextConfig = {
     taint: true,
     typedEnv: true,
     useLightningcss: IS_PROD,
-    webpackMemoryOptimizations: false,
-    workerThreads: false,
+    webpackMemoryOptimizations: true,
+    workerThreads: true,
   },
   async headers() {
     return [
@@ -83,6 +83,8 @@ const nextConfig: NextConfig = {
               object-src 'none';
               style-src 'self' 'unsafe-inline';
               img-src 'self' blob: data:
+                https://img.shields.io
+                https://cdn.jsdelivr.net
                 https://sun1-26.userapi.com
                 https://ufs.sh
                 https://*.ufs.sh
@@ -275,7 +277,7 @@ const nextConfig: NextConfig = {
     ];
   },
   skipTrailingSlashRedirect: true,
-  typedRoutes: IS_PROD,
+  typedRoutes: false,
   typescript: { ignoreBuildErrors: false },
   webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {
