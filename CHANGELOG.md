@@ -2,6 +2,104 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.16.16](https://github.com/doxynix/doxynix/compare/v1.16.15...v1.16.16) (2026-03-19)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#676](https://github.com/doxynix/doxynix/issues/676)) ([1af859e](https://github.com/doxynix/doxynix/commit/1af859e1331cc9761e285fc9a0d8829821a41a90))
+
+## [1.16.15](https://github.com/doxynix/doxynix/compare/v1.16.14...v1.16.15) (2026-03-18)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#665](https://github.com/doxynix/doxynix/issues/665)) ([b1660d1](https://github.com/doxynix/doxynix/commit/b1660d1f379a05c7ece4b728e4c1cf2ed1a29c30))
+
+## [1.16.14](https://github.com/doxynix/doxynix/compare/v1.16.13...v1.16.14) (2026-03-18)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#662](https://github.com/doxynix/doxynix/issues/662)) ([2ec3f80](https://github.com/doxynix/doxynix/commit/2ec3f80615dcbf5d43bcad1a366c4631f9155da8))
+
+## [1.16.13](https://github.com/doxynix/doxynix/compare/v1.16.12...v1.16.13) (2026-03-18)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#658](https://github.com/doxynix/doxynix/issues/658)) ([cb74f59](https://github.com/doxynix/doxynix/commit/cb74f591391f8301592d8c23c60109a7cc09d6f0))
+
+## [1.16.12](https://github.com/doxynix/doxynix/compare/v1.16.11...v1.16.12) (2026-03-17)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#656](https://github.com/doxynix/doxynix/issues/656)) ([a20cc58](https://github.com/doxynix/doxynix/commit/a20cc58a1429a4ba1516a37ff4bb89c7726b7ecb))
+
+## [1.16.11](https://github.com/doxynix/doxynix/compare/v1.16.10...v1.16.11) (2026-03-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency motion to v12.38.0 ([#647](https://github.com/doxynix/doxynix/issues/647)) ([694d80e](https://github.com/doxynix/doxynix/commit/694d80e1882ac0a22068d99ea3f2f651363fa13f))
+
+## [1.16.10](https://github.com/doxynix/doxynix/compare/v1.16.9...v1.16.10) (2026-03-17)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies to v16.1.7 ([#643](https://github.com/doxynix/doxynix/issues/643)) ([3c84de2](https://github.com/doxynix/doxynix/commit/3c84de2b5386778100b46d1f4774d8f9978e0e4a))
+
+## [1.16.9](https://github.com/doxynix/doxynix/compare/v1.16.8...v1.16.9) (2026-03-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency resend to v6.9.4 ([#639](https://github.com/doxynix/doxynix/issues/639)) ([afa85c2](https://github.com/doxynix/doxynix/commit/afa85c2e376b155e23ec6c39d6e14b918149ab30))
+
+## [1.16.8](https://github.com/doxynix/doxynix/compare/v1.16.7...v1.16.8) (2026-03-16)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#632](https://github.com/doxynix/doxynix/issues/632)) ([bfabb4a](https://github.com/doxynix/doxynix/commit/bfabb4aa4ce4d79ce67369cae547af8c8e4e5f9b))
+
+## [1.16.7](https://github.com/doxynix/doxynix/compare/v1.16.6...v1.16.7) (2026-03-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency zustand to v5.0.12 ([#627](https://github.com/doxynix/doxynix/issues/627)) ([a8b334e](https://github.com/doxynix/doxynix/commit/a8b334eb18bb10c0539a672c384fa832e08cc858))
+
+## [1.16.6](https://github.com/doxynix/doxynix/compare/v1.16.5...v1.16.6) (2026-03-15)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#621](https://github.com/doxynix/doxynix/issues/621)) ([80990af](https://github.com/doxynix/doxynix/commit/80990af53096f19941a7043a564cf87547525b25))
+
+## [1.16.5](https://github.com/doxynix/doxynix/compare/v1.16.4...v1.16.5) (2026-03-15)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies to v11.13.3 ([#617](https://github.com/doxynix/doxynix/issues/617)) ([cc7d559](https://github.com/doxynix/doxynix/commit/cc7d5590376d679480b1e5767d936b89fb9d2694))
+
+## [1.16.4](https://github.com/doxynix/doxynix/compare/v1.16.3...v1.16.4) (2026-03-15)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies to v11.12.1 ([#613](https://github.com/doxynix/doxynix/issues/613)) ([26a6966](https://github.com/doxynix/doxynix/commit/26a6966a01fcb059dc005083c33eaa544bc3b50c))
+
+## [1.16.3](https://github.com/doxynix/doxynix/compare/v1.16.2...v1.16.3) (2026-03-14)
+
+
+### Bug Fixes
+
+* **api:** исправлен флоу github app, внесены сопутствующие правки ([#604](https://github.com/doxynix/doxynix/issues/604)) ([2f6b086](https://github.com/doxynix/doxynix/commit/2f6b086a9fc117771693e5fccda37d28da5c0393))
+
 ## [1.16.2](https://github.com/doxynix/doxynix/compare/v1.16.1...v1.16.2) (2026-03-13)
 
 
