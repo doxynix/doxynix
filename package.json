@@ -67,7 +67,7 @@
       "serialize-javascript": "7.0.4",
       "@react-email/body": "0.3.0",
       "flatted": "3.4.2",
-      "effect": "3.20.0"
+      "effect": "3.21.0"
     },
     "onlyBuiltDependencies": [
       "@swc/core",
@@ -118,9 +118,9 @@
     "@t3-oss/env-nextjs": "0.13.10",
     "@tanstack/react-query": "5.91.3",
     "@trigger.dev/sdk": "4.4.3",
-    "@trpc/client": "11.13.4",
-    "@trpc/react-query": "11.13.4",
-    "@trpc/server": "11.13.4",
+    "@trpc/client": "11.14.0",
+    "@trpc/react-query": "11.14.0",
+    "@trpc/server": "11.14.0",
     "@uploadthing/react": "7.3.3",
     "@upstash/ratelimit": "2.0.8",
     "@upstash/redis": "1.37.0",
@@ -128,7 +128,7 @@
     "@vercel/speed-insights": "2.0.0",
     "@zenstackhq/runtime": "2.22.1",
     "ably": "2.21.0",
-    "ai": "6.0.133",
+    "ai": "6.0.134",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
