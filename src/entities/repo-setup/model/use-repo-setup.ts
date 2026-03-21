@@ -198,12 +198,12 @@ export function useRepoSetup(repo: UiRepoDetailed) {
       treeApi,
     },
     state: {
-      isPending: analyzeMutation.isPending,
       analysisLocale,
       branches,
       hasSearchMatches,
       instructions,
       isLoading,
+      isPending: analyzeMutation.isPending,
       searchTerm,
       selectedBranch,
       selectedDocs,

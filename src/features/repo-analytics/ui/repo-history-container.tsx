@@ -23,7 +23,7 @@ export function RepoHistoryContainer({ id }: Readonly<Props>) {
     );
   }
 
-  if (!data || data.length === 0) {
+  if (data == null || data.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed py-20 text-center">
         <HistoryIcon className="text-muted-foreground mb-4 size-12 opacity-20" />

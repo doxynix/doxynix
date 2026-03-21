@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { BookOpen, FileText, HistoryIcon, Layers, Terminal, Users2 } from "lucide-react";
 
-import { AvailableDocs, trpc, type DocType } from "@/shared/api/trpc";
+import { trpc, type AvailableDocs, type DocType } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Tabs, TabsContent } from "@/shared/ui/core/tabs";
@@ -62,7 +62,7 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
                   <div className="flex items-center gap-4">
                     <div className="bg-primary/10 rounded-md p-2">
                       {(() => {
-                        const Icon = DOC_ICONS[doc.type] ?? FileText;
+                        const Icon = DOC_ICONS[doc.type];
                         return <Icon className="text-primary size-6" />;
                       })()}
                     </div>

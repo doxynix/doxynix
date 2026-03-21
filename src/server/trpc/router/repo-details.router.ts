@@ -79,7 +79,7 @@ export const repoDetailsRouter = createTRPCRouter({
         },
       });
 
-      if (!doc) throw new TRPCError({ code: "NOT_FOUND" });
+      if (doc == null) throw new TRPCError({ code: "NOT_FOUND" });
 
       const html = await unstable_cache(
         async () => markdownToHtml(doc.content),
@@ -133,7 +133,7 @@ export const repoDetailsRouter = createTRPCRouter({
         where: { publicId: input.repoId },
       });
 
-      if (!repo) throw new TRPCError({ code: "NOT_FOUND" });
+      if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
 
       const lastAnalysis = repo.analyses[0];
       if (lastAnalysis.resultJson == null || lastAnalysis.metricsJson == null) {

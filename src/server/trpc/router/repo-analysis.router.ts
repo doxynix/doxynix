@@ -89,7 +89,8 @@ export const repoAnalysisRouter = createTRPCRouter({
       const repo = await ctx.db.repo.findFirst({
         where: { publicId: input.repoId, userId: Number(userId) },
       });
-      if (!repo) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
 
       const handle = await tasks.trigger(
         "analyze-single-file",
@@ -122,7 +123,8 @@ export const repoAnalysisRouter = createTRPCRouter({
       const repo = await ctx.db.repo.findUnique({
         where: { publicId: input.repoId, userId },
       });
-      if (!repo) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
 
       const handle = await tasks.trigger(
         "document-single-file",

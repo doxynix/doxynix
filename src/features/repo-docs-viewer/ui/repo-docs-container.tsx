@@ -33,7 +33,7 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
     );
   }
 
-  if (!availableDocs || availableDocs.length === 0) {
+  if (availableDocs == null || availableDocs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed py-20 text-center">
         <FileText className="text-muted-foreground mb-4 size-12 opacity-20" />

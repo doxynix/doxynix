@@ -59,7 +59,7 @@ export const repoGithubRouter = createTRPCRouter({
         where: { publicId: input.repoId, userId },
       });
 
-      if (!repo) {
+      if (repo == null) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
       }
 
