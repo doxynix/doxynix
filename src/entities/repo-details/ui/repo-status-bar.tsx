@@ -20,7 +20,7 @@ export function RepoStatusBar({ meta, readOnly, stats }: Readonly<Props>) {
             "rounded border p-px text-[10px] font-bold uppercase",
             readOnly
               ? "bg-info/10 text-info border-info/50"
-              : "bg-success/10 text-success border-success/50]"
+              : "bg-success/10 text-success border-success/50"
           )}
         >
           {readOnly ? "View" : "Edit"}
