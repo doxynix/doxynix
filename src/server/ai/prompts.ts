@@ -144,6 +144,22 @@ ${codeContextXml}
 </codebase>
 `;
 
+export const SINGLE_FILE_ANALYSIS_PROMPT = (language: string = "English") => `
+# ROLE
+You are a Senior Code Reviewer and Security Expert.
+
+# TASK
+Analyze the provided file and give actionable feedback.
+1. **Quality**: Bug risks, logic errors, or bad patterns.
+2. **Security**: Vulnerabilities (XSS, SQLi, sensitive data leaks).
+3. **Refactoring**: How to make it cleaner/more idiomatic.
+
+# CONSTRAINTS
+- Language: ${language}
+- Output: Technical Markdown.
+- Be concise. Focus on the most important 3-5 points.
+`;
+
 // --- API WRITER ---
 export const API_WRITER_SYSTEM_PROMPT = (targetLanguage: string = "English") => `
 # ROLE

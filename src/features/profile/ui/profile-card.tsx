@@ -55,7 +55,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
         <CardContent className="flex items-center gap-6">
           <div className="relative">
             <ProfileAvatar
-              avatarClassName="border-border h-24 w-24 border-2"
+              avatarClassName="border-border size-24 border-2"
               avatarFallbackClassName="text-2xl"
               avatarUrl={avatarUrl || undefined}
               user={currentUser}
@@ -70,7 +70,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
                 onClick={() => removeAvatar.mutate()}
                 className="absolute right-0 bottom-0 cursor-pointer"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="size-4" />
               </LoadingButton>
             )}
           </div>
@@ -91,7 +91,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
               onClick={() => fileInputRef.current?.click()}
               className="cursor-pointer"
             >
-              <CloudUpload className="h-4 w-4" /> {t("settings_profile_upload_photo_button")}
+              <CloudUpload className="size-4" /> {t("settings_profile_upload_photo_button")}
             </LoadingButton>
 
             <p className="text-muted-foreground text-center text-xs">

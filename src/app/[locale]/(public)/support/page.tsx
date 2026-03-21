@@ -120,8 +120,8 @@ export default async function SupportPage() {
               className="group bg-landing-bg-light/50 hover:border-border-accent hover:bg-surface-panel/60 relative cursor-pointer overflow-hidden rounded-2xl border p-8 transition-all duration-300"
             >
               <div className="relative space-y-5">
-                <div className="bg-surface-hover group-hover:border-border-accent flex h-14 w-14 items-center justify-center rounded-xl border transition-all">
-                  <channel.icon className="text-foreground/60 h-7 w-7" />
+                <div className="bg-surface-hover group-hover:border-border-accent flex size-14 items-center justify-center rounded-xl border transition-all">
+                  <channel.icon className="text-foreground/60 size-7" />
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-foreground text-lg font-semibold">{channel.title}</h3>
@@ -129,7 +129,7 @@ export default async function SupportPage() {
                 </div>
                 <div className="text-foreground flex items-center gap-2 pt-2 text-sm font-medium transition-transform group-hover:translate-x-1">
                   {channel.action}
-                  <MoveLeft className="h-4 w-4 rotate-180" />
+                  <MoveLeft className="size-4 rotate-180" />
                 </div>
               </div>
             </a>

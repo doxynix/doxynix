@@ -42,7 +42,7 @@ export function NotificationsNav() {
           >
             <Bell />
             {unreadCount > 0 && (
-              <span className="bg-foreground absolute top-2 right-2 h-2 w-2 rounded-full" />
+              <span className="bg-foreground absolute top-2 right-2 size-2 rounded-full" />
             )}
           </Button>
         </DropdownMenuTrigger>
@@ -71,7 +71,7 @@ export function NotificationsNav() {
 
               const innerContent = (
                 <>
-                  <Icon className={cn("h-5 w-5", color)} />
+                  <Icon className={cn("size-5", color)} />
                   <div className="flex w-full items-center justify-between gap-2">
                     <div className="flex flex-col">
                       <p
@@ -88,7 +88,7 @@ export function NotificationsNav() {
                       <TimeAgo date={note.createdAt} locale={locale} />
                     </div>
                     {note.isRead === false && (
-                      <span className="bg-foreground mt-1 h-2 w-2 shrink-0 rounded-full" />
+                      <span className="bg-foreground mt-1 size-2 shrink-0 rounded-full" />
                     )}
                   </div>
                 </>

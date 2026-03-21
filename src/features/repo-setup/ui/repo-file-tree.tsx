@@ -8,10 +8,13 @@ import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
-import type { FileNode } from "@/entities/repo";
+import {
+  RepoBranchSelector,
+  type ActionsType,
+  type FileNode,
+  type StateType,
+} from "@/entities/repo-setup";
 
-import type { ActionsType, StateType } from "../model/user-repo-setup";
-import { RepoBranchSelector } from "./repo-branch-selector";
 import { RepoFileNode } from "./repo-file-node";
 import { RepoSetupSkeleton } from "./repo-setup-skeleton";
 
@@ -76,17 +79,21 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
             branches={state.branches}
             defaultBranch={repo.defaultBranch}
             selectedBranch={state.selectedBranch}
-            onSelect={actions.setSelectedBranch}
+            onSelect={(val) => {
+              void actions.setSelectedBranch(val);
+            }}
           />
         </div>
         <div className="flex flex-2 flex-col gap-2">
           <div className="relative">
-            <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+            <Search className="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
             <Input
               type="search"
               value={state.searchTerm}
               placeholder="Search files..."
-              onChange={(e) => actions.setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                void actions.setSearchTerm(e.target.value);
+              }}
               className="pl-9"
             />
           </div>
@@ -104,7 +111,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
                 onClick={action.onClick}
                 className="h-7 gap-1.5 px-2"
               >
-                <action.icon className="h-4 w-4" />
+                <action.icon className="size-4" />
                 {action.label}
               </Button>
             ))}
@@ -120,7 +127,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
                   onClick={action.onClick}
                   className={cn("h-7 gap-1.5 px-2", action.className)}
                 >
-                  <action.icon className="h-4 w-4" />
+                  <action.icon className="size-4" />
                   {action.label}
                 </Button>
               );

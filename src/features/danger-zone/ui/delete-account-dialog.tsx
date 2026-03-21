@@ -45,15 +45,15 @@ export function DeleteAccountDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="destructive" className="w-fit cursor-pointer">
-          {t("settings_danger_delete_account_title")} <Trash2 className="h-4 w-4" />
+          {t("settings_danger_delete_account_title")} <Trash2 className="size-4" />
         </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="gap-2 sm:gap-0">
           <div className="flex items-center gap-4">
-            <div className="bg-destructive/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-              <AlertTriangle className="text-destructive h-5 w-5" />
+            <div className="bg-destructive/15 flex size-10 shrink-0 items-center justify-center rounded-full">
+              <AlertTriangle className="text-destructive size-5" />
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
               <DialogTitle>{t("settings_danger_delete_account_dialog_title")}</DialogTitle>

@@ -40,7 +40,11 @@ export function NotificationsListContainer() {
       <NotificationsHeader stats={stats} />
 
       {isListLoading || !data ? (
-        <NotificationCardSkeleton />
+        <div className="space-y-3">
+          {Array.from({ length: params.limit }).map((_, i) => (
+            <NotificationCardSkeleton key={i} />
+          ))}
+        </div>
       ) : (
         <>
           <div className={isFetching ? "opacity-50" : ""}>

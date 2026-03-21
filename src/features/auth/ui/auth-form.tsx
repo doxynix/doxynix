@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
@@ -195,14 +195,11 @@ export function AuthForm() {
     setErrorMessage("Verification expired. Please try again.");
   }, [isSent, loadingProvider]);
 
-  const turnstileOptions = useMemo(
-    () => ({
-      action: "auth",
-      size: "invisible" as const,
-      theme: "dark" as const,
-    }),
-    []
-  );
+  const turnstileOptions = {
+    action: "auth",
+    size: "invisible" as const,
+    theme: "dark" as const,
+  };
 
   return (
     <section className="relative container mx-auto flex min-h-[calc(100dvh-3rem)] items-center justify-center overflow-hidden px-4">
@@ -233,7 +230,7 @@ export function AuthForm() {
 
           <div className="grid gap-3 sm:grid-cols-2">
             {AUTH_BENEFITS.map((item) => (
-              <div key={item.title} className="bg-card/68 border-border/70 rounded-2xl border p-5">
+              <div key={item.title} className="bg-card/70 border-border/70 rounded-2xl border p-5">
                 <div className="flex items-center gap-3">
                   <span className="bg-primary/10 border-border/70 flex size-9 items-center justify-center rounded-full border">
                     <item.icon className="text-foreground size-4" />

@@ -45,13 +45,17 @@ export function AppSidebar() {
       }
     );
 
+  const { data: stats } = trpc.notification.getStats.useQuery();
+
   return (
     <Sidebar collapsible="icon" variant="sidebar" className="top-16 h-[calc(100vh-4rem)]">
       <SidebarHeader>
         <SidebarMenu>
-          {sidebarMenu.map((item) => (
-            <SidebarLink key={item.href} {...item} />
-          ))}
+          {sidebarMenu.map((item) => {
+            const dynamicBadge = item.id === "notifications" ? stats?.unread : undefined;
+
+            return <SidebarLink key={item.href} {...item} notificationsCount={dynamicBadge} />;
+          })}
         </SidebarMenu>
       </SidebarHeader>
       <SidebarSeparator className="m-0" />
@@ -63,12 +67,12 @@ export function AppSidebar() {
               <SidebarGroupLabel asChild className="truncate">
                 <CollapsibleTrigger
                   className={cn(
-                    "flex cursor-pointer justify-between hover:underline",
+                    "text-muted-foreground flex cursor-pointer justify-between hover:underline",
                     state === "collapsed" && "pointer-events-none"
                   )}
                 >
                   {(state === "expanded" || isMobile) && <span>{t("recent_repositories")}</span>}
-                  <ChevronDown className="transition-standard ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                  <ChevronDown className="transition-standard ml-auto size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
               <CollapsibleContent>
@@ -78,7 +82,7 @@ export function AppSidebar() {
                       <div className="flex flex-col gap-2">
                         {Array.from({ length: 5 }).map((_, i) => (
                           <div key={i} className="flex items-center justify-center gap-2 p-2">
-                            <Skeleton className="h-4 w-4" />
+                            <Skeleton className="size-4" />
                             <Skeleton className="h-4 w-full" />
                           </div>
                         ))}
@@ -134,9 +138,9 @@ export function AppSidebar() {
                               className="text-muted-foreground flex h-8 w-full cursor-pointer items-center justify-center p-1"
                             >
                               {isFetchingNextPage ? (
-                                <Spinner className="text-muted-foreground h-4 w-4" />
+                                <Spinner className="text-muted-foreground size-4" />
                               ) : (
-                                <ChevronDown className="flex h-4 w-4 cursor-pointer items-center justify-center text-xs" />
+                                <ChevronDown className="flex size-4 cursor-pointer items-center justify-center text-xs" />
                               )}
                             </Button>
                           )}

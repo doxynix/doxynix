@@ -66,7 +66,7 @@ export function FeaturesSection() {
     {
       background: (
         <div className="flex justify-end p-4 text-right opacity-30 transition-opacity group-hover:opacity-50">
-          <Code2 className="text-muted-foreground h-24 w-24 -rotate-12" />
+          <Code2 className="text-muted-foreground size-24 -rotate-12" />
         </div>
       ),
       className: "lg:col-span-1 lg:row-span-1",
@@ -79,7 +79,7 @@ export function FeaturesSection() {
     {
       background: (
         <div className="flex justify-end p-4 text-right opacity-30 transition-opacity group-hover:opacity-50">
-          <Lock className="text-muted-foreground h-24 w-24 -rotate-12" />
+          <Lock className="text-muted-foreground size-24 -rotate-12" />
         </div>
       ),
       className: "lg:col-span-1 lg:row-span-1",
@@ -92,7 +92,7 @@ export function FeaturesSection() {
     {
       background: (
         <div className="flex justify-end p-4 text-right opacity-30 transition-opacity group-hover:opacity-50">
-          <FileJson className="text-muted-foreground h-24 w-24 -rotate-12" />
+          <FileJson className="text-muted-foreground size-24 -rotate-12" />
         </div>
       ),
       className: "lg:col-span-1 lg:row-span-1",

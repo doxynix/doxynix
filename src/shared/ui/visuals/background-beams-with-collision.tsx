@@ -239,7 +239,7 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
   }));
 
   return (
-    <div {...props} className={cn("absolute z-50 h-2 w-2", props.className)}>
+    <div {...props} className={cn("absolute z-50 size-2", props.className)}>
       <motion.div
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -258,7 +258,7 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
           initial={{ opacity: 1, x: span.initialX, y: span.initialY }}
           // eslint-disable-next-line react-hooks/purity
           transition={{ duration: Math.random() * 1.5 + 0.5, ease: "easeOut" }}
-          className="to-primary from-foreground absolute h-1 w-1 rounded-full bg-linear-to-b"
+          className="to-primary from-foreground absolute size-1 rounded-full bg-linear-to-b"
         />
       ))}
     </div>

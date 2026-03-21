@@ -50,7 +50,7 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
             variant="ghost"
             className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="size-4" />
           </Button>
         </DialogTrigger>
       </AppTooltip>
@@ -58,8 +58,8 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="gap-2 sm:gap-0">
           <div className="flex items-center gap-4">
-            <div className="bg-destructive/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-              <AlertTriangle className="text-destructive h-5 w-5" />
+            <div className="bg-destructive/15 flex size-10 shrink-0 items-center justify-center rounded-full">
+              <AlertTriangle className="text-destructive size-5" />
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
               <DialogTitle>{t("settings_api_keys_revoke_key")}?</DialogTitle>

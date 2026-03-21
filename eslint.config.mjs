@@ -274,6 +274,8 @@ export default defineConfig([
       "@typescript-eslint/no-misused-promises": "error",
       "@typescript-eslint/no-unnecessary-condition": "error",
       "@typescript-eslint/switch-exhaustiveness-check": "error",
+      "import/no-cycle": ["error", { maxDepth: 10 }],
+      "import/no-self-import": "error",
 
       "perfectionist/sort-jsx-props": [
         "error",

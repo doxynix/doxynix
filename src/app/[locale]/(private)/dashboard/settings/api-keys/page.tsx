@@ -3,6 +3,8 @@ import { getTranslations } from "next-intl/server";
 
 import { APP_URL } from "@/shared/constants/env.client";
 import { createMetadata } from "@/shared/lib/metadata";
+import { Button } from "@/shared/ui/core/button";
+import { ExternalLink } from "@/shared/ui/kit/external-link";
 
 import { ApiKeysListContainer, CreateApiKeyDialog } from "@/features/api-keys";
 
@@ -18,15 +20,12 @@ export default async function ApiKeysPage() {
           <h2 className="text-2xl font-bold tracking-tight">{t("settings_api_keys_title")}</h2>
           <p className="text-muted-foreground text-sm">{t("settings_api_keys_desc")}</p>
         </div>
-        <a
-          href={`${APP_URL}/api/docs`}
-          rel="noopener noreferrer"
-          target="_blank"
-          className="flex items-center gap-4 underline hover:no-underline"
-        >
-          {t("settings_api_keys_api_documentation")}
-          <SquareArrowOutUpRight className="h-4 w-4" />
-        </a>
+        <Button asChild variant="link">
+          <ExternalLink href={`${APP_URL}/api/docs`} className="flex items-center gap-4">
+            {t("settings_api_keys_api_documentation")}
+            <SquareArrowOutUpRight className="size-4" />
+          </ExternalLink>
+        </Button>
       </div>
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">{t("settings_api_keys_active_keys")}</h3>

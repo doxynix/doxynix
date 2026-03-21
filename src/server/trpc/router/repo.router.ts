@@ -1,17 +1,11 @@
-import crypto from "node:crypto";
 import { Status } from "@prisma/client";
-import { tasks } from "@trigger.dev/sdk/v3";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { CreateRepoSchema, GitHubQuerySchema } from "@/shared/api/schemas/repo";
+import { CreateRepoSchema } from "@/shared/api/schemas/repo";
 
-import { logger } from "@/server/logger/logger";
-import { GitHubAuthRequiredError, githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
-import { FileClassifier } from "@/server/utils/file-classifier";
-import { handlePrismaError, isOctokitError } from "@/server/utils/handle-error";
-import { DocTypeSchema, RepoSchema, StatusSchema } from "@/generated/zod";
+import { handlePrismaError } from "@/server/utils/handle-error";
+import { RepoSchema, StatusSchema } from "@/generated/zod";
 
 import { OpenApiErrorResponses, RepoFilterSchema } from "../shared";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -21,70 +15,6 @@ export const PublicRepoSchema = RepoSchema.extend({
 });
 
 export const repoRouter = createTRPCRouter({
-  analyze: protectedProcedure
-    .meta({
-      openapi: {
-        errorResponses: OpenApiErrorResponses,
-        method: "POST",
-        path: "/repos/analyze",
-        protect: true,
-        summary: "Analyze your repository",
-        tags: ["repositories"],
-      },
-    })
-    .input(
-      z.object({
-        branch: z.string().optional(),
-        docTypes: z.array(DocTypeSchema),
-        files: z.array(z.string()),
-        instructions: z.string().optional(),
-        language: z.string(),
-        repoId: z.uuid(),
-      })
-    )
-    .output(z.object({ jobId: z.string(), status: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const repo = await ctx.db.repo.findUnique({
-        where: { publicId: input.repoId },
-      });
-
-      if (repo == null) throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
-
-      const analysis = await ctx.db.analysis.create({
-        data: {
-          repo: {
-            connect: {
-              publicId: input.repoId,
-            },
-          },
-          status: "PENDING",
-        },
-      });
-      const handle = await tasks.trigger(
-        "analyze-repo",
-        {
-          analysisId: analysis.publicId,
-          docTypes: input.docTypes,
-          instructions: input.instructions,
-          language: input.language,
-          selectedBranch: input.branch,
-          selectedFiles: input.files,
-          userId: Number(ctx.session.user.id),
-        },
-        {
-          concurrencyKey: `user-${ctx.session.user.id}`,
-          idempotencyKey: `analysis-${analysis.publicId}`,
-          ttl: "30m",
-        }
-      );
-
-      await ctx.db.analysis.update({
-        data: { jobId: handle.id },
-        where: { publicId: analysis.publicId },
-      });
-
-      return { jobId: handle.id, status: "QUEUED" };
-    }),
   create: protectedProcedure
     .meta({
       openapi: {
@@ -313,39 +243,6 @@ export const repoRouter = createTRPCRouter({
       };
     }),
 
-  getBranches: protectedProcedure
-    .input(z.object({ name: z.string(), owner: z.string() }))
-    .query(async ({ ctx, input }) => {
-      try {
-        return await githubService.getRepoBranches(
-          ctx.prisma,
-          Number(ctx.session.user.id),
-          input.owner,
-          input.name
-        );
-      } catch (error) {
-        if (error instanceof GitHubAuthRequiredError) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Connect your GitHub account or install the app to access branches.",
-          });
-        }
-        if (isOctokitError(error) && error.status === 404) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Repository or branch not found.",
-          });
-        }
-        if (isOctokitError(error) && error.status === 403) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "GitHub denied access to repository branches.",
-          });
-        }
-        throw error;
-      }
-    }),
-
   getByName: protectedProcedure
     .meta({
       openapi: {
@@ -387,170 +284,39 @@ export const repoRouter = createTRPCRouter({
       };
     }),
 
-  getDocument: protectedProcedure
+  getByOwner: protectedProcedure
+    .meta({
+      openapi: {
+        description:
+          "Retrieves detailed information about a repository identified by its GitHub owner, including its latest analysis state.",
+        errorResponses: OpenApiErrorResponses,
+        method: "GET",
+        path: "/repos/{owner}",
+        protect: true,
+        summary: "Get repository by owner",
+        tags: ["repositories"],
+      },
+    })
     .input(
       z.object({
-        repoId: z.string(),
-        type: DocTypeSchema,
+        owner: z.string().trim().min(1),
       })
     )
-    .output(z.object({ content: z.string().nullable(), version: z.string().nullable() }))
+    .output(PublicRepoSchema.extend({ message: z.string() }).nullable())
     .query(async ({ ctx, input }) => {
-      const repo = await ctx.db.repo.findUnique({
-        include: {
-          analyses: {
-            orderBy: { createdAt: "desc" },
-            select: { commitSha: true },
-            take: 1,
-            where: { status: "DONE" },
-          },
-        },
-        where: { publicId: input.repoId },
-      });
-
-      if (repo?.analyses[0]?.commitSha == null) {
-        return { content: null, version: null };
-      }
-
-      const version = repo.analyses[0].commitSha.substring(0, 7);
-
-      const doc = await ctx.db.document.findUnique({
-        select: { content: true },
+      const repo = await ctx.db.repo.findFirst({
         where: {
-          repoId_version_type: {
-            repoId: repo.id,
-            type: input.type,
-            version: version,
-          },
+          owner: { equals: input.owner, mode: "insensitive" },
         },
       });
 
+      if (repo == null) return null;
+
       return {
-        content: doc?.content ?? null,
-        version,
+        ...repo,
+        id: repo.publicId,
+        message: "Owner found",
       };
-    }),
-
-  getGithubInstallUrl: protectedProcedure.query(async ({ ctx }) => {
-    const userId = Number(ctx.session.user.id);
-    const state = crypto.randomBytes(32).toString("hex");
-
-    await ctx.prisma.$transaction([
-      ctx.prisma.verificationToken.deleteMany({
-        where: { identifier: `github_install_${userId}` },
-      }),
-      ctx.prisma.verificationToken.create({
-        data: {
-          expires: new Date(Date.now() + 10 * 60 * 1000),
-          identifier: `github_install_${userId}`,
-          token: state,
-        },
-      }),
-    ]);
-
-    return `https://github.com/apps/doxynix/installations/new?state=${state}`;
-  }),
-
-  getMyGithubRepos: protectedProcedure.query(async ({ ctx }) => {
-    const userId = Number(ctx.session.user.id);
-
-    const installations = await ctx.db.githubInstallation.findMany({
-      orderBy: { createdAt: "asc" },
-      where: { isSuspended: false, userId },
-    });
-
-    const oauthAccounts = await ctx.db.account.findMany({
-      where: { access_token: { not: null }, provider: "github", userId },
-    });
-
-    if (installations.length === 0 && oauthAccounts.length === 0) {
-      return {
-        installationId: null,
-        isConnected: false,
-        items: [],
-        manageUrl: null,
-        oauthStatus: "missing",
-      };
-    }
-
-    const mainInstall = installations.length > 0 ? installations[0] : null;
-
-    const manageUrl = mainInstall != null ? (mainInstall.htmlUrl ?? null) : null;
-    const installationId = mainInstall !== null ? Number(mainInstall.id) : null;
-
-    let oauthStatus: "valid" | "invalid" | "missing" = "missing";
-
-    if (oauthAccounts.length > 0) {
-      let hasUnauthorized = false;
-      let hasValid = false;
-      for (const oauthAccount of oauthAccounts) {
-        if (oauthAccount.access_token == null) continue;
-        try {
-          const userOctokit = githubService.getUserClient(oauthAccount.access_token);
-          await userOctokit.rest.users.getAuthenticated();
-          hasValid = true;
-          break;
-        } catch (error) {
-          if (isOctokitError(error) && error.status === 401) {
-            hasUnauthorized = true;
-          } else {
-            logger.warn({ error, msg: "GitHub OAuth validation failed" });
-          }
-        }
-      }
-      if (hasValid) {
-        oauthStatus = "valid";
-      } else if (hasUnauthorized) {
-        oauthStatus = "invalid";
-      }
-    }
-
-    if (installationId == null && oauthStatus === "invalid") {
-      return { installationId, isConnected: true, items: [], manageUrl, oauthStatus };
-    }
-
-    try {
-      const repos = await githubService.getMyRepos(ctx.prisma, userId);
-      return { installationId, isConnected: true, items: repos, manageUrl, oauthStatus };
-    } catch (error) {
-      logger.error({ error, msg: "Dashboard fetch failed", userId });
-      return { installationId, isConnected: true, items: [], manageUrl, oauthStatus };
-    }
-  }),
-  getRepoFiles: protectedProcedure
-    .input(
-      z.object({
-        branch: z.string().optional(),
-        name: z.string(),
-        owner: z.string(),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      let tree;
-      try {
-        tree = await githubService.getRepoTree(
-          ctx.prisma,
-          Number(ctx.session.user.id),
-          input.owner,
-          input.name,
-          input.branch
-        );
-      } catch (error) {
-        if (error instanceof GitHubAuthRequiredError) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Connect your GitHub account or install the app to access repository files.",
-          });
-        }
-        throw error;
-      }
-
-      return tree.map((file) => [
-        file.path,
-        file.type === "blob" ? 1 : 0,
-        file.sha.substring(0, 7),
-        FileClassifier.getScore(file.path) > 40 ? 1 : 0,
-      ]);
     }),
 
   getSlim: protectedProcedure
@@ -584,189 +350,4 @@ export const repoRouter = createTRPCRouter({
 
       return repos.map((r) => ({ id: r.publicId, name: r.name, owner: r.owner }));
     }),
-
-  saveInstallation: protectedProcedure
-    .input(
-      z.object({
-        installationId: z.string().regex(/^\d+$/),
-        state: z.string(),
-      })
-    )
-    .output(z.object({ success: z.boolean() }))
-    .mutation(async ({ ctx, input }) => {
-      const userIdNum = Number(ctx.session.user.id);
-      const instIdBigInt = BigInt(input.installationId);
-      const inputInstIdNum = Number(input.installationId);
-
-      const consumedState = await ctx.prisma.verificationToken.deleteMany({
-        where: {
-          expires: { gt: new Date() },
-          identifier: `github_install_${userIdNum}`,
-          token: input.state,
-        },
-      });
-
-      if (consumedState.count === 0) {
-        logger.warn({ msg: "CSRF/Replay attack or expired state", userId: userIdNum });
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Invalid, expired, or already used security state. Please try installing again.",
-        });
-      }
-
-      const oauthAccounts = await ctx.prisma.account.findMany({
-        select: { access_token: true },
-        where: { access_token: { not: null }, provider: "github", userId: userIdNum },
-      });
-
-      if (oauthAccounts.length === 0) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You must link your GitHub account before installing the app.",
-        });
-      }
-
-      let hasAccess = false;
-      let verifiedAtLeastOneAccount = false;
-      let hasUnauthorized = false;
-
-      for (const oauthAccount of oauthAccounts) {
-        if (oauthAccount.access_token == null) continue;
-        try {
-          const userOctokit = githubService.getUserClient(oauthAccount.access_token);
-          const userInstallations = await userOctokit.paginate(
-            userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
-            { per_page: 100 }
-          );
-
-          verifiedAtLeastOneAccount = true;
-
-          if (userInstallations.some((inst) => inst.id === inputInstIdNum)) {
-            hasAccess = true;
-            break;
-          }
-        } catch (error) {
-          if (isOctokitError(error) && (error.status === 401 || error.status === 403)) {
-            hasUnauthorized = true;
-          }
-          logger.warn({ error, msg: "GitHub API verification failed for one OAuth account" });
-        }
-      }
-
-      if (!verifiedAtLeastOneAccount) {
-        if (hasUnauthorized) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "GitHub authorization expired. Please relink your GitHub account.",
-          });
-        }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to verify installation ownership via GitHub.",
-        });
-      }
-
-      if (!hasAccess) {
-        logger.warn({
-          installationId: input.installationId,
-          msg: "IDOR attempt: User tried to claim unowned installation",
-          userId: userIdNum,
-        });
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You do not have permission to claim this GitHub installation.",
-        });
-      }
-
-      const installationInfo = await githubService.getInstallationInfo(inputInstIdNum);
-      const account = installationInfo.account;
-      const accountLogin = account !== null && "login" in account ? account.login : "Unknown";
-      const accountAvatar = account !== null && "avatar_url" in account ? account.avatar_url : null;
-
-      try {
-        const updated = await ctx.prisma.githubInstallation.updateMany({
-          data: {
-            accountAvatar,
-            accountLogin,
-            htmlUrl: installationInfo.html_url,
-            repositorySelection: installationInfo.repository_selection,
-            userId: userIdNum,
-          },
-          where: {
-            id: instIdBigInt,
-            OR: [{ userId: null }, { userId: userIdNum }],
-          },
-        });
-
-        if (updated.count === 0) {
-          const created = await ctx.prisma.githubInstallation.createMany({
-            data: [
-              {
-                accountAvatar,
-                accountLogin,
-                appId: installationInfo.app_id,
-                htmlUrl: installationInfo.html_url,
-                id: instIdBigInt,
-                repositorySelection: installationInfo.repository_selection,
-                targetId: BigInt(installationInfo.target_id),
-                targetType: installationInfo.target_type || "Unknown",
-                userId: userIdNum,
-              },
-            ],
-            skipDuplicates: true,
-          });
-
-          if (created.count === 0) {
-            const claimed = await ctx.prisma.githubInstallation.updateMany({
-              data: {
-                accountAvatar,
-                accountLogin,
-                repositorySelection: installationInfo.repository_selection,
-                userId: userIdNum,
-              },
-              where: {
-                id: instIdBigInt,
-                OR: [{ userId: null }, { userId: userIdNum }],
-              },
-            });
-
-            if (claimed.count === 0) {
-              throw new TRPCError({
-                code: "FORBIDDEN",
-                message: "This installation is already linked to another workspace.",
-              });
-            }
-          }
-        }
-      } catch (error) {
-        if (error instanceof TRPCError) throw error;
-
-        logger.error({ error, msg: "Failed to securely claim installation" });
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to securely claim installation.",
-        });
-      }
-
-      return { success: true };
-    }),
-
-  searchGithub: protectedProcedure.input(GitHubQuerySchema).query(async ({ ctx, input }) => {
-    try {
-      return await githubService.searchRepos(
-        ctx.prisma,
-        Number(ctx.session.user.id),
-        input.query,
-        10
-      );
-    } catch (error) {
-      if (error instanceof GitHubAuthRequiredError) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Connect your GitHub account or install the app to search repositories.",
-        });
-      }
-      throw error;
-    }
-  }),
 });

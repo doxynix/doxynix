@@ -30,6 +30,7 @@
     "**/*.tsx",
     "trigger.config.ts",
     "src/global.d.ts",
+    "eslint.config.mjs",
     "messages/*.json",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"

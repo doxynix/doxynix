@@ -58,6 +58,7 @@ kbd {
   --color-success: var(--status-success);
   --color-warning: var(--status-warning);
   --color-error: var(--status-error);
+  --color-info: var(--status-info);
   --color-landing-bg-dark: var(--surface-contrast);
   --color-landing-bg-light: var(--surface-landing);
 
@@ -269,6 +270,7 @@ kbd {
   --ring-color: oklch(0.22 0.004 255);
   --status-success: oklch(0.62 0.11 150);
   --status-warning: oklch(0.72 0.12 80);
+  --status-info: oklch(0.6 0.15 250);
   --status-error: oklch(0.6 0.18 25);
 
   /* Marketing / brand */
@@ -350,6 +352,7 @@ kbd {
   --ring-color: oklch(0.68 0.003 255);
   --status-success: oklch(0.72 0.1 150);
   --status-warning: oklch(0.78 0.11 80);
+  --status-info: oklch(0.7 0.12 250);
   --status-error: oklch(0.7 0.16 25);
 
   /* Marketing / brand */

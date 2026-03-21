@@ -3,6 +3,9 @@ import { analyticsRouter } from "./analytics.router";
 import { apiKeyRouter } from "./apikey.router";
 import { healthRouter } from "./health.router";
 import { notificationRouter } from "./notifications.router";
+import { repoAnalysisRouter } from "./repo-analysis.router";
+import { repoDetailsRouter } from "./repo-details.router";
+import { repoGithubRouter } from "./repo-github.router";
 import { repoRouter } from "./repo.router";
 import { userRouter } from "./user.router";
 
@@ -12,6 +15,9 @@ export const appRouter = createTRPCRouter({
   health: healthRouter,
   notification: notificationRouter,
   repo: repoRouter,
+  repoAnalysis: repoAnalysisRouter,
+  repoDetails: repoDetailsRouter,
+  repoGithub: repoGithubRouter,
   user: userRouter,
 });
 

@@ -33,13 +33,9 @@ export function calculateHealthScore(repo: Repo, busFactor: number, docDensity: 
   return Math.max(0, Math.min(100, score));
 }
 
-export function calculateCodeMetrics(files: { content: string; path: string }[]): Omit<
-  RepoMetrics,
-  "busFactor" | "healthScore" | "onboardingScore" | "maintenanceStatus"
-> & {
-  docDensity: number;
-  modularityIndex: number;
-} {
+export function calculateCodeMetrics(
+  files: { content: string; path: string }[]
+): Omit<RepoMetrics, "busFactor" | "healthScore" | "onboardingScore" | "maintenanceStatus"> {
   let totalSource = 0;
   let totalComments = 0;
   let totalSize = 0;

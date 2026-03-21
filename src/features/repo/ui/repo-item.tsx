@@ -36,7 +36,7 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
             </div>
           </div>
           <div className={cn("text-muted-foreground flex shrink-0 items-center gap-1 text-xs")}>
-            <Star className="text-warning h-3 w-3 fill-current" />
+            <Star className="text-warning size-3 fill-current" />
             {repo.stars.toLocaleString(locale)}
             {langColor !== "" && (
               <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: langColor }} />

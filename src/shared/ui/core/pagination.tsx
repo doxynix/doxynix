@@ -102,7 +102,7 @@ const PaginationPrevious = ({
     className={cn("gap-1 pl-2.5", className)}
     {...props}
   >
-    <ChevronLeft className="h-4 w-4" />
+    <ChevronLeft className="size-4" />
     <span>Back</span>
   </PaginationLink>
 );
@@ -116,18 +116,14 @@ const PaginationNext = ({ className, ...props }: React.ComponentProps<typeof Pag
     {...props}
   >
     <span>Next</span>
-    <ChevronRight className="h-4 w-4" />
+    <ChevronRight className="size-4" />
   </PaginationLink>
 );
 PaginationNext.displayName = "PaginationNext";
 
 const PaginationEllipsis = ({ className, ...props }: React.ComponentProps<"span">) => (
-  <span
-    aria-hidden
-    className={cn("flex h-9 w-9 items-center justify-center", className)}
-    {...props}
-  >
-    <MoreHorizontal className="h-4 w-4" />
+  <span aria-hidden className={cn("flex size-9 items-center justify-center", className)} {...props}>
+    <MoreHorizontal className="size-4" />
     <span className="sr-only">More pages</span>
   </span>
 );

@@ -71,8 +71,8 @@ export function WelcomeFlow({ user }: Readonly<Props>) {
         {FEATURE_CARDS.map((item) => (
           <Card key={item.title} className={"bg-card/50 flex w-full flex-col"}>
             <CardHeader>
-              <item.icon className="h-5 w-5" />
-              <CardTitle className="text-lg font-semibold">{item.title}</CardTitle>
+              <item.icon className="size-5" />
+              <CardTitle className="text-lg font-bold">{item.title}</CardTitle>
             </CardHeader>
             <CardContent className="text-muted-foreground text-sm">{item.desc}</CardContent>
           </Card>

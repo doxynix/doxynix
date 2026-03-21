@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Lock, Mail, User2 } from "lucide-react";
 import type { User } from "next-auth";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
@@ -88,31 +89,42 @@ export function ProfileDetailsForm({
                 {t("settings_profile_personal_information_label")}
               </FormLabel>
               <FormControl>
-                <Input
-                  disabled={updateProfile.isPending}
-                  placeholder={t("settings_profile_personal_information_placeholder")}
-                  {...field}
-                />
+                <div className="relative">
+                  <User2 className="text-muted-foreground absolute top-2.5 left-3 size-4" />
+                  <Input
+                    disabled={updateProfile.isPending}
+                    placeholder={t("settings_profile_personal_information_placeholder")}
+                    className="pl-9 text-sm sm:text-base"
+                    {...field}
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* <FormField
-                   control={form.control}
-                   name="email"
-                   render={({ field }) => (
-                     <FormItem className="flex flex-col">
-                       <FormLabel className="text-muted-foreground">Email</FormLabel>
-                       <FormControl>
-                         <div className="relative">
-                           <Input {...field} className="text-sm sm:text-base" placeholder="Your email" />
-                         </div>
-                       </FormControl>
-                     </FormItem>
-                   )}
-                 /> */}
+        <FormField
+          name="email"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel className="text-muted-foreground">Email</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Mail className="text-muted-foreground absolute top-2.5 left-3 size-4" />
+                  <Input
+                    {...field}
+                    disabled
+                    placeholder="Your email"
+                    className="pl-9 text-sm sm:text-base"
+                  />
+                  <Lock className="text-muted-foreground absolute top-2.5 right-3 size-4" />
+                </div>
+              </FormControl>
+            </FormItem>
+          )}
+        />
         <div className="flex justify-end">
           <LoadingButton
             disabled={(!isWelcome && !isDirty) || !isValid || updateProfile.isPending}

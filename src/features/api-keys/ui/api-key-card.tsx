@@ -35,7 +35,7 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
           </CardDescription>
         </div>
         <div className="flex shrink-0 flex-col items-center gap-1">
-          <CopyButton value={active.id} className="h-9 w-9" />
+          <CopyButton value={active.id} className="size-9" />
           <UpdateApiKeyDialog apiKey={active} />
           <RevokeApiKeyDialog apiKey={active} />
         </div>

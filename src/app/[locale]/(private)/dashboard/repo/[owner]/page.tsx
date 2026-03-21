@@ -4,9 +4,15 @@ import { getTranslations } from "next-intl/server";
 
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
-import { RepoAvatar, type SearchParams } from "@/entities/repo";
+import { RepoAvatar } from "@/entities/repo";
+import type { SearchParams } from "@/entities/repo-setup";
 
-import { CreateRepoButton, RepoFilters, RepoListContainer } from "@/features/repo";
+import {
+  CreateRepoButton,
+  DeleteByOwnerDialog,
+  RepoFilters,
+  RepoListContainer,
+} from "@/features/repo";
 
 import { api } from "@/server/trpc/server";
 
@@ -29,16 +35,15 @@ export default async function OwnerPage({ params }: Readonly<Props>) {
 
   const data = await (
     await api()
-  ).repo.getAll({
-    limit: 1,
+  ).repo.getByOwner({
     owner: owner,
   });
 
-  if (data.items.length === 0) {
+  if (data == null) {
     notFound();
   }
 
-  const avatarUrl = data.items[0].ownerAvatarUrl;
+  const avatarUrl = data.ownerAvatarUrl;
 
   return (
     <div className="mx-auto flex h-full w-full flex-col">
@@ -53,6 +58,7 @@ export default async function OwnerPage({ params }: Readonly<Props>) {
           <RepoFilters />
         </div>
         <CreateRepoButton />
+        <DeleteByOwnerDialog owner={owner} />
       </div>
 
       <RepoListContainer config={{ forcedFilters: { owner } }} />

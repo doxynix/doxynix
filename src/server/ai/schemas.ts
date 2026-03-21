@@ -2,7 +2,6 @@ import z from "zod";
 
 const RiskLevel = z.enum(["LOW", "MODERATE", "HIGH", "CRITICAL"]);
 
-// --- Project Map ---
 export const projectMapSchema = z.object({
   language_breakdown: z
     .object({
@@ -23,13 +22,11 @@ export const projectMapSchema = z.object({
   overview: z.string(),
 });
 
-// --- Sentinel ---
 export const sentinelSchema = z.object({
   reason: z.string().optional(),
   status: z.enum(["SAFE", "UNSAFE"]),
 });
 
-// --- AI Analysis ---
 export const aiSchema = z.object({
   complexityScore: z.number().optional(),
 
