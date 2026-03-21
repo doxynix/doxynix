@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.17.0](https://github.com/doxynix/doxynix/compare/v1.16.16...v1.17.0) (2026-03-21)
+
+
+### Features
+
+* **features:** реализована главная фича приложения - детали репозитория ([#695](https://github.com/doxynix/doxynix/issues/695)) ([596155d](https://github.com/doxynix/doxynix/commit/596155dd5f72f85fa6338c49ce4c61ce47913f75))
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#689](https://github.com/doxynix/doxynix/issues/689)) ([2ba8425](https://github.com/doxynix/doxynix/commit/2ba8425f36e6edda79df7507be475f2d65b05588))
+* **deps:** update all non-major dependencies ([#692](https://github.com/doxynix/doxynix/issues/692)) ([f60d31c](https://github.com/doxynix/doxynix/commit/f60d31ccd278d8f98512aa0ab2b2f95322803151))
+* **deps:** update all non-major dependencies ([#700](https://github.com/doxynix/doxynix/issues/700)) ([099c159](https://github.com/doxynix/doxynix/commit/099c159ca932daea1caa202bc8ea2fe5555910f1))
+* **deps:** update all non-major dependencies ([#704](https://github.com/doxynix/doxynix/issues/704)) ([8660949](https://github.com/doxynix/doxynix/commit/8660949f7e10fc0cea704ae68c18d63aa09e1576))
+* **deps:** update dependency trpc-to-openapi to v3.2.0 ([#687](https://github.com/doxynix/doxynix/issues/687)) ([76b9acb](https://github.com/doxynix/doxynix/commit/76b9acb4dfa9cfb2aea0e676377fa0422e28dd46))
+* **security:** исправление уязвимости в пакете effect ([#701](https://github.com/doxynix/doxynix/issues/701)) ([4cdc586](https://github.com/doxynix/doxynix/commit/4cdc586c03a276183b24d915f9e0aeabfdc16e4e))
+
 ## [1.16.16](https://github.com/doxynix/doxynix/compare/v1.16.15...v1.16.16) (2026-03-19)
 
 
