@@ -36,13 +36,13 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
     >
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
-          <History className="text-muted-foreground h-4 w-4" />
+          <History className="text-muted-foreground size-4" />
           <h3 className="text-sm font-medium">{t("settings_api_keys_history_revoked")}</h3>
           <Badge className="ml-1 text-xs">{archived.length}</Badge>
         </div>
 
         <CollapsibleTrigger asChild>
-          <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+          <Button size="sm" variant="ghost" className="size-8 p-0">
             <ChevronDown
               className={cn(
                 "-rotate-90 transition-transform duration-300",

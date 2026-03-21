@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 
 import type { ParamTypes } from "@/shared/types/app";
 
-import { RepoDetailsHeader } from "@/features/repo-details";
+import { RepoDetailsTabs } from "@/entities/repo-details";
+
+import { RepoDetailsHeader } from "@/features/repo";
 
 import { api } from "@/server/trpc/server";
 
@@ -38,8 +40,9 @@ export default async function RepoDetailsLayout({ children, params }: Readonly<P
 
   return (
     <div className="mx-auto space-y-4">
-      <div className="flex">
+      <div className="flex flex-col gap-4">
         <RepoDetailsHeader repo={repo} />
+        <RepoDetailsTabs name={repo.name} owner={repo.owner} status={repo.status} />
       </div>
       {children}
     </div>

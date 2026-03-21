@@ -155,7 +155,7 @@ See [SECURITY.md](SECURITY.md) for our vulnerability reporting policy.
 
 ## 📄 License
 
-Distributed under the MIT License. See [LICENSE.md](LICENSE.md) for more information.
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ---
 

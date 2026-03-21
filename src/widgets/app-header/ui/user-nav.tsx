@@ -54,7 +54,7 @@ export function UserNav() {
   }
 
   if (status === "loading") {
-    return <Skeleton className="h-9 w-9 rounded-full" />;
+    return <Skeleton className="size-9 rounded-full" />;
   }
 
   return (
@@ -62,7 +62,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <div className="flex cursor-pointer items-center gap-3">
           <ProfileAvatar
-            avatarClassName="w-9 h-9"
+            avatarClassName="size-9"
             avatarFallbackClassName="text-xs"
             avatarUrl={avatar}
             user={user}

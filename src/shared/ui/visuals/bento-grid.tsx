@@ -53,7 +53,7 @@ const BentoCard = ({
     <div>{background}</div>
     <div className="p-4">
       <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 transition-all duration-300 lg:group-hover:-translate-y-10">
-        <Icon className="h-12 w-12 origin-left transform-gpu transition-all duration-300 ease-in-out group-hover:scale-75" />
+        <Icon className="size-12 origin-left transform-gpu transition-all duration-300 ease-in-out group-hover:scale-75" />
         <h3 className="text-xl font-semibold">{name}</h3>
         <p className="text-muted-foreground max-w-lg">{description}</p>
       </div>
@@ -66,7 +66,7 @@ const BentoCard = ({
         <Button asChild size="sm" variant="link" className="pointer-events-auto p-0">
           <Link href={href}>
             <span className="text-foreground">{cta}</span>
-            <ArrowRightIcon className="text-foreground ms-2 h-4 w-4 rtl:rotate-180" />
+            <ArrowRightIcon className="text-foreground ms-2 size-4 rtl:rotate-180" />
           </Link>
         </Button>
       </div>
@@ -80,7 +80,7 @@ const BentoCard = ({
       <Button asChild size="sm" variant="link" className="pointer-events-auto p-0">
         <Link href={href}>
           <span className="text-foreground">{cta}</span>
-          <ArrowRightIcon className="text-foreground ms-2 h-4 w-4 rtl:rotate-180" />
+          <ArrowRightIcon className="text-foreground ms-2 size-4 rtl:rotate-180" />
         </Link>
       </Button>
     </div>

@@ -56,6 +56,16 @@ type ClientContextOptions = {
   owner?: string;
 };
 
+type GitHubFileResponse = {
+  content: string;
+  meta: {
+    name: string;
+    sha: string;
+    size: number;
+    url: string | null;
+  };
+};
+
 async function getRepoDataOrAuthError(
   client: OctokitInstance,
   owner: string,
@@ -200,6 +210,47 @@ export const githubService = {
     }
 
     throw new GitHubAuthRequiredError();
+  },
+
+  async getFileContent(
+    prisma: DbClient,
+    userId: number,
+    owner: string,
+    name: string,
+    path: string,
+    branch?: string
+  ): Promise<GitHubFileResponse> {
+    const context = await this.resolveClientContext(prisma, userId, {
+      allowPublicFallback: true,
+      allowSystemFallback: true,
+      owner,
+    });
+
+    const activeOctokit = context.octokit;
+    const type = context.type;
+
+    return await this.executeWithFallback(prisma, userId, activeOctokit, type, async (client) => {
+      const { data } = await client.rest.repos.getContent({
+        owner,
+        path,
+        ref: branch,
+        repo: name,
+      });
+
+      if (Array.isArray(data) || data.type !== "file") {
+        throw new Error("Target path is not a file");
+      }
+
+      return {
+        content: Buffer.from(data.content, "base64").toString("utf8"),
+        meta: {
+          name: data.name,
+          sha: data.sha,
+          size: data.size,
+          url: data.html_url,
+        },
+      };
+    });
   },
 
   getInstallationClient(installationId: number): OctokitInstance {
@@ -454,7 +505,6 @@ export const githubService = {
       throw error;
     }
   },
-
   async searchRepos(
     prisma: DbClient,
     userId: number,

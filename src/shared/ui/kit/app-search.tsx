@@ -9,7 +9,7 @@ type Props = {
   placeholder: string;
 };
 
-const ICON_STYLES = "text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4";
+const ICON_STYLES = "text-muted-foreground absolute top-2.5 left-2.5 size-4";
 
 export function AppSearch({ placeholder }: Readonly<Props>) {
   const [{ search }, setParams] = useQueryStates({

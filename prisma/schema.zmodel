@@ -42,20 +42,20 @@ generator zod {
 
   useMultipleFiles       = true
   writeBarrelFiles       = true
-  createIndexType        = true
+  createIndexType        = false
 
-  createInputTypes                 = true
+  createInputTypes                 = false
   createModelTypes                 = true
-  createOptionalDefaultValuesTypes = true
-  createRelationValuesTypes        = true
-  createPartialTypes               = true
+  createOptionalDefaultValuesTypes = false
+  createRelationValuesTypes        = false
+  createPartialTypes               = false
 
   addInputTypeValidation   = true
   coerceDate               = true
   writeNullishInInputTypes = true
 
-  addIncludeType    = true
-  addSelectType     = true
+  addIncludeType    = false
+  addSelectType     = false
   useJsonParameters = true
 
   useTypeAssertions = false // NOTE: если поставить 'true' будет падать

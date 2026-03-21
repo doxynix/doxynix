@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { ExternalLink } from "@/shared/ui/kit/external-link";
 
 type StatusType = "up" | "down" | "maintenance" | "unknown";
 
@@ -68,10 +69,8 @@ export function SystemStatus({ className }: Readonly<{ className?: string }>) {
         <Skeleton className="h-8 w-45" />
       ) : (
         <Button asChild size="sm" variant="outline" className="cursor-pointer">
-          <a
+          <ExternalLink
             href="https://status.doxynix.space"
-            rel="noopener noreferrer"
-            target="_blank"
             className={cn("flex items-center gap-2", current.textColor)}
           >
             <span className="relative flex size-2">
@@ -87,7 +86,7 @@ export function SystemStatus({ className }: Readonly<{ className?: string }>) {
             </span>
 
             {current.label}
-          </a>
+          </ExternalLink>
         </Button>
       )}
     </div>

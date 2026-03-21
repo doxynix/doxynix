@@ -107,7 +107,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
 
         <Button disabled={!hasFilters} variant="outline" onClick={handleReset} className="px-2">
           Reset
-          <X className="h-4 w-4" />
+          <X className="size-4" />
         </Button>
       </div>
       <NotificationsBulkActions stats={stats} />

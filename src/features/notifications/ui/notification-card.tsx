@@ -42,10 +42,10 @@ export function NotificationCard({ notification }: Readonly<Props>) {
       <CardContent className="flex items-center justify-between">
         <div className="flex gap-4">
           <div className="flex items-center gap-4">
-            <Icon className={cn("h-5 w-5", color)} />
+            <Icon className={cn("size-5", color)} />
             <span
               className={cn(
-                "bg-foreground h-2 w-2 shrink-0 rounded-full opacity-0",
+                "bg-foreground size-2 shrink-0 rounded-full opacity-0",
                 notification.isRead === false && "opacity-100"
               )}
             />

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import type { ParamTypes } from "@/shared/types/app";
 
+import { RepoOverviewContainer } from "@/features/repo-analytics";
 import { RepoSetup } from "@/features/repo-setup";
 
 import { api } from "@/server/trpc/server";
@@ -34,5 +35,13 @@ export default async function RepoOwnerNamePage({ params }: Readonly<Props>) {
     notFound();
   }
 
-  return <>{repo.status === "NEW" && <RepoSetup repo={repo} />}</>;
+  if (repo.status === "NEW") {
+    return <RepoSetup repo={repo} />;
+  }
+
+  return (
+    <div className="space-y-10">
+      <RepoOverviewContainer id={repo.id} />
+    </div>
+  );
 }
