@@ -67,7 +67,7 @@
       "serialize-javascript": "7.0.4",
       "@react-email/body": "0.3.0",
       "flatted": "3.4.2",
-      "dompurify": "3.3.2",
+      "dompurify": "3.3.3",
       "effect": "3.21.0"
     },
     "onlyBuiltDependencies": [
@@ -125,7 +125,7 @@
     "@react-email/components": "1.0.10",
     "@react-email/render": "2.0.4",
     "@replit/codemirror-minimap": "0.5.2",
-    "@scalar/api-reference-react": "0.9.9",
+    "@scalar/api-reference-react": "0.9.13",
     "@scalar/nextjs-api-reference": "0.10.4",
     "@sentry/nextjs": "10.45.0",
     "@shikijs/rehype": "4.0.2",
@@ -186,7 +186,7 @@
     "react-hook-form": "7.71.2",
     "react-hotkeys-hook": "5.2.4",
     "react-markdown": "10.1.0",
-    "react-resizable-panels": "4.7.3",
+    "react-resizable-panels": "4.7.4",
     "recharts": "2.15.4",
     "rehype-autolink-headings": "7.1.0",
     "rehype-external-links": "3.0.0",
