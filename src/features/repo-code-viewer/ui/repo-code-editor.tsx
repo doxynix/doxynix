@@ -45,6 +45,7 @@ export function RepoCodeEditor({
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
+    let cancelled = false;
     async function loadDynamicLanguage() {
       const extName = (path.split(".").pop() ?? "").toLowerCase();
       const dynamicExt: Extension[] = [...EXTRA_EXTENSIONS];
@@ -61,14 +62,21 @@ export function RepoCodeEditor({
           dynamicExt.push(languageSupport);
         }
 
-        setExt(dynamicExt);
+        if (!cancelled) {
+          setExt(dynamicExt);
+        }
       } catch (error) {
         console.error("Failed to load language support", error);
-        setExt(EXTRA_EXTENSIONS);
+        if (!cancelled) {
+          setExt(EXTRA_EXTENSIONS);
+        }
       }
     }
 
     void loadDynamicLanguage();
+    return () => {
+      cancelled = true;
+    };
   }, [path, meta, readOnly]);
 
   const isDiffMode = showDiff && compareValue != null;

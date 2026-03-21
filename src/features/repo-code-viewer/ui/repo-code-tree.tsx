@@ -33,8 +33,16 @@ export function RepoCodeTree({ activePath, onSelect, repo }: Readonly<Props>) {
   const { setTreeApi } = useRepoCodeActions();
   const treeApi = useRepoCodeStore((s) => s.treeApi);
 
-  const handleExpandAll = () => treeApi?.openAll();
-  const handleCollapseAll = () => treeApi?.closeAll();
+  const handleExpandAll = () => {
+    React.startTransition(() => {
+      treeApi?.openAll();
+    });
+  };
+  const handleCollapseAll = () => {
+    React.startTransition(() => {
+      treeApi?.closeAll();
+    });
+  };
 
   const treeActions = [
     { icon: FolderOpen, label: "Expand All", onClick: handleExpandAll },
@@ -50,6 +58,8 @@ export function RepoCodeTree({ activePath, onSelect, repo }: Readonly<Props>) {
           selectedBranch={state.selectedBranch}
           onSelect={(branch) => {
             void actions.setSelectedBranch(branch);
+
+            onSelect("");
           }}
         />
         <div className="relative">

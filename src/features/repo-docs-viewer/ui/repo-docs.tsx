@@ -48,8 +48,11 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
 
       <div className="bg-card relative flex flex-1 flex-col rounded-xl border shadow-sm">
         {availableDocs.map((doc) => {
-          const isCurrentApiSwagger =
-            doc.type === "API" && apiMode === "swagger" && metrics?.swagger;
+          const isCurrentApiSwagger = !!(
+            doc.type === "API" &&
+            apiMode === "swagger" &&
+            metrics?.swagger != null
+          );
 
           return (
             <TabsContent
@@ -96,7 +99,7 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
                 </div>
               </div>
 
-              {isCurrentApiSwagger != null ? (
+              {isCurrentApiSwagger ? (
                 <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden px-8 pb-8 md:px-12">
                   {/* <RepoSwagger spec={metrics.swagger} /> */}
                 </div>

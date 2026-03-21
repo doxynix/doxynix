@@ -136,7 +136,10 @@ export function RepoCodeBrowser({ fileData, path, repoId }: Readonly<Props>) {
       hideTooltip: true,
       icon: X,
       label: "Cancel",
-      onClick: () => setMode("view"),
+      onClick: () => {
+        setLocalContent(fileData.content);
+        setMode("view");
+      },
       tooltipText: "Discard changes",
     },
     {
@@ -154,7 +157,7 @@ export function RepoCodeBrowser({ fileData, path, repoId }: Readonly<Props>) {
 
   const breadcrumbItems = pathParts.map((part, i) => ({
     className: i === pathParts.length - 1 ? "max-w-50" : "max-w-30",
-    label: part,
+    label: encodeURIComponent(part),
     onClick: () => handleFolderClick(i),
   }));
 

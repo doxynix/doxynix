@@ -27,9 +27,9 @@ type Props = {
 export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
   const initialQuery = getSearchQuery(view.state);
   const [options, setOptions] = useState({
-    caseSensitive: false,
-    regexp: false,
-    wholeWord: false,
+    caseSensitive: initialQuery.caseSensitive,
+    regexp: initialQuery.regexp,
+    wholeWord: initialQuery.wholeWord,
   });
 
   const [search, setSearch] = useState(initialQuery.search || "");
@@ -79,7 +79,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
   };
 
   const onKeyDown = (e: React.KeyboardEvent, action: () => void) => {
-    if (e.code === "Enter") {
+    if (e.key === "Enter") {
       e.preventDefault();
       action();
     }

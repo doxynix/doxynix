@@ -51,13 +51,16 @@ function buildTodoDecorations(view: EditorView): DecorationSet {
       enter: (node) => {
         if (!node.type.name.includes("Comment")) return;
         hasCommentNodes = true;
-        const text = view.state.doc.sliceString(node.from, node.to);
-
+        const visibleFrom = Math.max(node.from, from);
+        const visibleTo = Math.min(node.to, to);
+        if (visibleFrom >= visibleTo) return;
+        const text = view.state.doc.sliceString(visibleFrom, visibleTo);
         TAG_REGEX.lastIndex = 0;
+
         for (const match of text.matchAll(TAG_REGEX)) {
           const word = (match[1] || match[0]).toUpperCase();
           const urgent = word === "FIXME" || word === "BUG" || word === "XXX";
-          const start = node.from + match.index;
+          const start = visibleFrom + match.index;
           const end = start + match[0].length;
           const className = urgent
             ? "cm-todo-marker cm-todo-urgent"
