@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.18.3](https://github.com/doxynix/doxynix/compare/v1.18.2...v1.18.3) (2026-03-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-resizable-panels to v4.7.5 ([#732](https://github.com/doxynix/doxynix/issues/732)) ([c55cd0d](https://github.com/doxynix/doxynix/commit/c55cd0d79d0e4f3a7d9cb5d77017a07419a19971))
+
 ## [1.18.2](https://github.com/doxynix/doxynix/compare/v1.18.1...v1.18.2) (2026-03-22)
 
 
