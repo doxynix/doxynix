@@ -247,7 +247,7 @@
     "@stryker-mutator/vitest-runner": "9.6.0",
     "@tailwindcss/postcss": "4.2.2",
     "@tailwindcss/typography": "0.5.19",
-    "@tanstack/eslint-plugin-query": "5.94.5",
+    "@tanstack/eslint-plugin-query": "5.95.0",
     "@tanstack/react-query-devtools": "5.94.5",
     "@trigger.dev/build": "4.4.3",
     "@types/file-saver": "2.0.7",
