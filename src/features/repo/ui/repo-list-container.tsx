@@ -5,6 +5,7 @@ import { useQueryStates } from "nuqs";
 import { useDebounce } from "use-debounce";
 
 import { trpc, type RepoStatus } from "@/shared/api/trpc";
+import { clampIntegerParam } from "@/shared/lib/utils";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
@@ -34,9 +35,10 @@ export function RepoListContainer({ config }: Readonly<Props>) {
   const [debouncedSearch] = useDebounce(filters.search, 500);
 
   const limit = config?.limit ?? 5;
+  const safePage = clampIntegerParam(filters.page, { fallback: 1, max: 1_000_000, min: 1 });
 
   const queryParams = {
-    cursor: filters.page,
+    cursor: safePage,
     limit,
     search: debouncedSearch || undefined,
     sortBy: filters.sortBy,

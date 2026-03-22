@@ -3,48 +3,61 @@ import { TRPCError } from "@trpc/server";
 
 import type { DbClient } from "../db/db";
 import { handlePrismaError, isOctokitError } from "../utils/handle-error";
+import { normalizeSearchInput, tokenizeSearchInput } from "../utils/search";
 import { GitHubAuthRequiredError, githubService } from "./github.service";
 
+type RepoSearchFilters = {
+  owner?: string;
+  search?: string;
+  status?: Status;
+  visibility?: Visibility;
+};
+
+function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
+  return {
+    OR: [
+      { name: { contains: term, mode: "insensitive" } },
+      { owner: { contains: term, mode: "insensitive" } },
+      { description: { contains: term, mode: "insensitive" } },
+    ],
+  };
+}
+
 export const repoService = {
-  buildWhereClause(filters: {
-    owner?: string;
-    search?: string;
-    status?: Status;
-    visibility?: Visibility;
-  }): Prisma.RepoWhereInput {
-    const { owner, search, status, visibility } = filters;
-    const normalizedSearch = search?.trim();
-    const searchTerms = normalizedSearch != null ? normalizedSearch.split(/\s+/) : [];
+  buildWhereClause(filters: RepoSearchFilters): Prisma.RepoWhereInput {
+    const normalizedOwner = filters.owner?.trim();
+    const normalizedSearch = normalizeSearchInput(filters.search);
+    const searchTerms = tokenizeSearchInput(filters.search);
 
     const statusFilter: Prisma.RepoWhereInput =
-      status == null
+      filters.status == null
         ? {}
-        : status === Status.NEW
+        : filters.status === Status.NEW
           ? { OR: [{ analyses: { none: {} } }, { analyses: { some: { status: Status.NEW } } }] }
-          : { analyses: { some: { status } } };
+          : { analyses: { some: { status: filters.status } } };
 
-    const visibilityFilter = visibility == null ? {} : { visibility };
+    const rawSearchFilter: Prisma.RepoWhereInput =
+      normalizedSearch != null ? buildRepoSearchClause(normalizedSearch) : {};
 
-    const ownerFilter: Prisma.RepoWhereInput =
-      owner == null ? {} : { owner: { equals: owner, mode: "insensitive" } };
-
-    const searchFilter: Prisma.RepoWhereInput =
-      searchTerms.length > 0
+    const tokenSearchFilter: Prisma.RepoWhereInput =
+      searchTerms.length > 1
         ? {
-            AND: searchTerms.map((term) => ({
-              OR: [
-                { name: { contains: term, mode: "insensitive" } },
-                { owner: { contains: term, mode: "insensitive" } },
-                { description: { contains: term, mode: "insensitive" } },
-              ],
-            })),
+            AND: searchTerms.map((term) => buildRepoSearchClause(term)),
           }
         : {};
 
+    const searchFilter: Prisma.RepoWhereInput =
+      normalizedSearch != null && searchTerms.length > 1
+        ? { OR: [rawSearchFilter, tokenSearchFilter] }
+        : rawSearchFilter;
+
     return {
-      ...visibilityFilter,
+      ...(filters.visibility != null && { visibility: filters.visibility }),
+      ...(normalizedOwner != null &&
+        normalizedOwner.length > 0 && {
+          owner: { equals: normalizedOwner, mode: "insensitive" },
+        }),
       ...statusFilter,
-      ...ownerFilter,
       ...searchFilter,
     };
   },
@@ -56,7 +69,7 @@ export const repoService = {
     } catch {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Invalid URL. Use 'owner/repo' format or 'https://github.com/...",
+        message: "Invalid URL. Use 'owner/repo' format or 'https://github.com/...'",
       });
     }
 
@@ -79,10 +92,18 @@ export const repoService = {
             message: "GitHub token expired",
           });
         }
-        if (error.status === 404)
-          throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found on GitHub" });
-        if (error.status === 403)
-          throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "GitHub API limit exceeded" });
+        if (error.status === 404) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Repository not found on GitHub",
+          });
+        }
+        if (error.status === 403) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "GitHub API limit exceeded",
+          });
+        }
       }
       throw error;
     }
@@ -115,7 +136,6 @@ export const repoService = {
         defaultConflict: "You have already added this repository",
         uniqueConstraint: {
           githubId: "This repository is already added",
-          url: "Repository with this URL already exists",
         },
       });
     }

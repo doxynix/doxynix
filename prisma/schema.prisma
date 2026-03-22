@@ -4,22 +4,21 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  extensions = [pg_trgm, unaccent, fuzzystrmatch, btree_gin, pg_stat_statements, uuidOssp(map: "uuid-ossp")]
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearchPostgres", "relationJoins", "postgresqlExtensions"]
+  previewFeatures = ["relationJoins", "strictUndefinedChecks", "nativeDistinct"]
   binaryTargets   = ["native", "debian-openssl-3.0.x"]
 }
 
 generator zod {
   provider                         = "zod-prisma-types"
   output                           = "../src/generated/zod"
-  useMultipleFiles                 = true
-  writeBarrelFiles                 = true
+  useMultipleFiles                 = false
+  writeBarrelFiles                 = false
   createIndexType                  = false
   createInputTypes                 = false
   createModelTypes                 = true
@@ -32,7 +31,7 @@ generator zod {
   addIncludeType                   = false
   addSelectType                    = false
   useJsonParameters                = true
-  useTypeAssertions                = false
+  useTypeAssertions                = true
   modelSuffix                      = "Schema"
 }
 
@@ -88,7 +87,7 @@ model User {
   /// @zod.custom.omit(["model"])
   publicId            String               @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   /// @zod.string.email({ message: "Incorrect email" })
-  email               String?              @unique()
+  email               String?              @unique() @db.Citext()
   /// @zod.string.trim().min(1, { message: "Name required" }).max(50, { message: "Name cannot exceed 50 characters" })
   name                String?
   emailVerified       DateTime?            @map("email_verified")
@@ -115,9 +114,9 @@ model Notification {
   /// @zod.custom.omit(["model"])
   publicId  String     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   createdAt DateTime   @default(now()) @map("created_at")
-  /// @zod.string.min(1, { message: "The title cannot be empty" })
+  /// @zod.string.trim().min(1, { message: "The title cannot be empty" }).max(300, { message: "The title cannot exceed 300 characters" })
   title     String
-  /// @zod.string.min(1, { message: "The text of the notification is mandatory" })
+  /// @zod.string.trim().min(1, { message: "The text of the notification is mandatory" }).max(5000, { message: "The text of the notification cannot exceed 5000 characters" })
   body      String
   type      NotifyType @default(INFO)
   isRead    Boolean    @default(false) @map("is_read")
@@ -128,9 +127,12 @@ model Notification {
   repoId    Int?       @map("repo_id")
   repo      Repo?      @relation(fields: [repoId], references: [id], onDelete: SetNull)
 
-  @@index([userId, isRead])
   @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@index([userId, type, createdAt(sort: Desc)])
   @@index([repoId])
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_title_trgm_idx")
+  @@index([body(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_body_trgm_idx")
   @@map("notifications")
 }
 
@@ -176,10 +178,14 @@ model Repo {
   @@unique([owner, name, userId])
   @@unique([githubId, userId])
   @@index([userId, owner])
+  @@index([userId, name])
+  @@index([userId, createdAt(sort: Desc)])
   @@index([userId, updatedAt(sort: Desc)])
   @@index([userId, visibility])
   @@index([githubId])
-  @@index([name, description])
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_name_trgm_idx")
+  @@index([owner(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_owner_trgm_idx")
+  @@index([description(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_description_trgm_idx")
   @@map("repos")
 }
 
@@ -294,7 +300,7 @@ model GithubInstallation {
   appId               Int      @map("app_id")
   targetId            BigInt   @map("target_id")
   targetType          String   @map("target_type")
-  accountLogin        String   @map("account_login")
+  accountLogin        String   @map("account_login") @db.Citext()
   accountAvatar       String?  @map("account_avatar")
   repositorySelection String   @map("repository_selection")
   isSuspended         Boolean  @default(false) @map("is_suspended")
@@ -304,7 +310,8 @@ model GithubInstallation {
   userId              Int?     @map("user_id")
   user                User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
+  @@index([userId, isSuspended, createdAt(sort: Asc)])
+  @@index([userId, isSuspended, accountLogin])
   @@map("github_installations")
 }
 
