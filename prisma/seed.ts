@@ -105,7 +105,7 @@ async function seedStressProfile() {
     where: { email: STRESS_USER_EMAIL },
   });
 
-  if (existingUser) {
+  if (existingUser != null) {
     await prisma.notification.deleteMany({ where: { userId: existingUser.id } });
     await prisma.repo.deleteMany({ where: { userId: existingUser.id } });
   }
