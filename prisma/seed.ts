@@ -163,17 +163,23 @@ async function seedStressProfile() {
   const repoIds = benchmarkRepos.map((repo) => repo.id);
 
   if (STRESS_NOTIFICATION_COUNT > 0) {
-    const notifications = Array.from({ length: STRESS_NOTIFICATION_COUNT }, (_, index) =>
-      createStressNotification(index, repoIds, benchmarkUser.id)
+    const totalNotificationBatches = Math.ceil(
+      STRESS_NOTIFICATION_COUNT / NOTIFICATION_BATCH_SIZE
     );
 
-    for (const [batchIndex, notificationBatch] of chunk(
-      notifications,
-      NOTIFICATION_BATCH_SIZE
-    ).entries()) {
+    for (let batchIndex = 0; batchIndex < totalNotificationBatches; batchIndex++) {
+      const start = batchIndex * NOTIFICATION_BATCH_SIZE;
+      const batchLength = Math.min(
+        NOTIFICATION_BATCH_SIZE,
+        STRESS_NOTIFICATION_COUNT - start
+      );
+      const notificationBatch = Array.from({ length: batchLength }, (_, offset) =>
+        createStressNotification(start + offset, repoIds, benchmarkUser.id)
+      );
+
       await prisma.notification.createMany({ data: notificationBatch });
       console.log(
-        `  benchmark notifications batch ${batchIndex + 1}/${Math.ceil(notifications.length / NOTIFICATION_BATCH_SIZE)}`
+        `  benchmark notifications batch ${batchIndex + 1}/${totalNotificationBatches}`
       );
     }
   }
