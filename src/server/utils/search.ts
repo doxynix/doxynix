@@ -1,10 +1,9 @@
-const SEARCH_TOKEN_PATTERN = /[\p{L}\p{N}]+/gu;
+const SEARCH_TOKEN_PATTERN = /[\p{L}\p{N}\p{M}]+/gu;
 const MAX_SEARCH_TERMS = 8;
 const MIN_SEARCH_TERM_LENGTH = 2;
 
 export function normalizeSearchInput(search?: string): string | undefined {
-  const normalized = search?.trim().toLowerCase();
-
+  const normalized = search?.trim().normalize("NFC").toLowerCase();
   return normalized != null && normalized.length > 0 ? normalized : undefined;
 }
 

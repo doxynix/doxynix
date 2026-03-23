@@ -25,7 +25,7 @@ const repoIdentityFields = {
 };
 
 const validateRepoPair = (data: ValidatePairType, ctx: z.RefinementCtx) => {
-  if (data.repoName != null && data.repoOwner != null) {
+  if ((data.repoName == null) !== (data.repoOwner == null)) {
     const message = "repoName and repoOwner must be provided together";
     ctx.addIssue({ code: "custom", message, path: ["repoName"] });
     ctx.addIssue({ code: "custom", message, path: ["repoOwner"] });

@@ -87,7 +87,7 @@ export async function POST(req: Request) {
 
     if (githubEvent === "installation" && event.installation?.id != null) {
       const instIdBigInt = BigInt(event.installation.id);
-      const githubLogin = event.installation.account.login;
+      const githubLogin = event.installation.account.login.slice(0, 39);
       const githubAvatar = event.installation.account.avatar_url;
       const githubRepoSelection = event.installation.repository_selection;
       const githubHtmlUrl = event.installation.html_url;

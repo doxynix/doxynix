@@ -34,8 +34,8 @@ export function RepoListContainer({ config }: Readonly<Props>) {
 
   const [debouncedSearch] = useDebounce(filters.search, 500);
 
-  const safeLimit = clampIntegerParam(config?.limit, { fallback: 5, max: 1_000_000, min: 1 });
-  const safePage = clampIntegerParam(filters.page, { fallback: 1, max: 100, min: 1 });
+  const safeLimit = clampIntegerParam(config?.limit, { fallback: 5, max: 100, min: 1 });
+  const safePage = clampIntegerParam(filters.page, { fallback: 1, max: 1_000_000, min: 1 });
 
   const queryParams = {
     cursor: safePage,

@@ -30,12 +30,12 @@ function clean<T>(obj: T): T {
 function parseSeedNumber(value: string | undefined, fallback: number): number {
   if (value == null || value.trim() === "") return fallback;
 
-  const parsed = Number.parseInt(value, 10);
-  if (!Number.isFinite(parsed) || parsed < 0) {
-    throw new Error(`Invalid seed count: ${value}`);
+  const trimmed = value.trim();
+  if (!/^\d+$/.test(trimmed)) {
+    throw new Error(`Invalid seed count: "${value}". Expected a positive integer.`);
   }
 
-  return parsed;
+  return Number(trimmed);
 }
 
 function createStressRepo(index: number, userId: number) {
@@ -153,24 +153,17 @@ async function seedStressProfile() {
   const repoIds = benchmarkRepos.map((repo) => repo.id);
 
   if (STRESS_NOTIFICATION_COUNT > 0) {
-    const totalNotificationBatches = Math.ceil(
-      STRESS_NOTIFICATION_COUNT / NOTIFICATION_BATCH_SIZE
-    );
+    const totalNotificationBatches = Math.ceil(STRESS_NOTIFICATION_COUNT / NOTIFICATION_BATCH_SIZE);
 
     for (let batchIndex = 0; batchIndex < totalNotificationBatches; batchIndex++) {
       const start = batchIndex * NOTIFICATION_BATCH_SIZE;
-      const batchLength = Math.min(
-        NOTIFICATION_BATCH_SIZE,
-        STRESS_NOTIFICATION_COUNT - start
-      );
+      const batchLength = Math.min(NOTIFICATION_BATCH_SIZE, STRESS_NOTIFICATION_COUNT - start);
       const notificationBatch = Array.from({ length: batchLength }, (_, offset) =>
         createStressNotification(start + offset, repoIds, benchmarkUser.id)
       );
 
       await prisma.notification.createMany({ data: notificationBatch });
-      console.log(
-        `  benchmark notifications batch ${batchIndex + 1}/${totalNotificationBatches}`
-      );
+      console.log(`  benchmark notifications batch ${batchIndex + 1}/${totalNotificationBatches}`);
     }
   }
 
