@@ -40,15 +40,15 @@ export const notificationsService = {
       normalizedSearch != null ? buildNotificationSearchClause(normalizedSearch) : {};
 
     const tokenSearchFilter: Prisma.NotificationWhereInput =
-      repoSearchTerms.length > 1
-        ? {
-            AND: repoSearchTerms.map((term) => buildNotificationSearchClause(term)),
-          }
+      repoSearchTerms.length > 0
+        ? { AND: repoSearchTerms.map((term) => buildNotificationSearchClause(term)) }
         : {};
 
     const searchFilter: Prisma.NotificationWhereInput =
-      normalizedSearch != null && repoSearchTerms.length > 1
-        ? { OR: [rawSearchFilter, tokenSearchFilter] }
+      normalizedSearch != null && repoSearchTerms.length > 0
+        ? normalizedSearch === repoSearchTerms[0] && repoSearchTerms.length === 1
+          ? rawSearchFilter
+          : { OR: [rawSearchFilter, tokenSearchFilter] }
         : rawSearchFilter;
 
     const repoFilter: Prisma.NotificationWhereInput =

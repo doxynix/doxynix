@@ -1,7 +1,7 @@
 // run: pnpm db:seed
 import { faker } from "@faker-js/faker";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { NotifyType, PrismaClient, UserRole, Visibility } from "@prisma/client";
+import { NotifyType, PrismaClient, Status, UserRole, Visibility } from "@prisma/client";
 import pg from "pg";
 
 import * as Fake from "../src/generated/fake-data";
@@ -11,7 +11,7 @@ const LIGHT_USER_COUNT = 50;
 const LIGHT_REPOS_PER_USER = 3;
 const REPO_BATCH_SIZE = 500;
 const NOTIFICATION_BATCH_SIZE = 500;
-const MY_EMAIL = "karen.avakov2@gmail.com";
+const MY_EMAIL = process.env.SEED_ADMIN_EMAIL ?? "admin@example.test";
 const STRESS_USER_EMAIL = "search-benchmark@example.test";
 const STRESS_USER_NAME = "Search Benchmark";
 const STRESS_REPO_COUNT = parseSeedNumber(process.env.SEED_STRESS_REPOS, 0);
@@ -100,6 +100,16 @@ function createStressNotification(index: number, repoIds: number[], userId: numb
 }
 
 async function seedStressProfile() {
+  const existingUser = await prisma.user.findUnique({
+    select: { id: true },
+    where: { email: STRESS_USER_EMAIL },
+  });
+
+  if (existingUser) {
+    await prisma.notification.deleteMany({ where: { userId: existingUser.id } });
+    await prisma.repo.deleteMany({ where: { userId: existingUser.id } });
+  }
+
   if (STRESS_REPO_COUNT === 0 && STRESS_NOTIFICATION_COUNT === 0) {
     return;
   }
@@ -215,12 +225,12 @@ async function main() {
                     ...Fake.fakeAnalysis(),
                     progress: 100,
                     score: faker.number.int({ max: 100, min: 1 }),
-                    status: "DONE",
+                    status: Status.DONE,
                   }),
                   clean({
                     ...Fake.fakeAnalysis(),
                     progress: faker.number.int({ max: 99, min: 1 }),
-                    status: "PENDING",
+                    status: Status.PENDING,
                   }),
                 ],
               },

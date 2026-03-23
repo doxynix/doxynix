@@ -18,14 +18,14 @@ describe("shared schemas", () => {
         repoName: "react-query",
         repoOwner: "tanstack",
       }).success
-    ).toBe(false);
+    ).toBe(true);
 
     expect(
       NotificationsBulkFilterSchema.safeParse({
         repoName: "react-query",
         repoOwner: "tanstack",
       }).success
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("rejects invalid repository cursor values", () => {

@@ -232,9 +232,14 @@ describe("repoService.createRepo", () => {
       status: 404,
     },
     {
+      expectedCode: "FORBIDDEN",
+      expectedMessage: "GitHub denied access to this repository",
+      status: 403,
+    },
+    {
       expectedCode: "TOO_MANY_REQUESTS",
       expectedMessage: "GitHub API limit exceeded",
-      status: 403,
+      status: 429,
     },
   ])(
     "should map GitHub status $status to TRPC error $expectedCode",

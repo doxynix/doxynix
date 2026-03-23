@@ -100,6 +100,12 @@ export const repoService = {
         }
         if (error.status === 403) {
           throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "GitHub denied access to this repository",
+          });
+        }
+        if (error.status === 429) {
+          throw new TRPCError({
             code: "TOO_MANY_REQUESTS",
             message: "GitHub API limit exceeded",
           });
