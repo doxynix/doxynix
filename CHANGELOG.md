@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.18.4](https://github.com/doxynix/doxynix/compare/v1.18.3...v1.18.4) (2026-03-23)
+
+
+### Performance Improvements
+
+* **db:** оптимизация бд, добавлены gin индексы и триграммы для поиска, усилена валидация ([#738](https://github.com/doxynix/doxynix/issues/738)) ([075dce9](https://github.com/doxynix/doxynix/commit/075dce97b46f0350c9e4edadd3433d45f54265f9))
+
 ## [1.18.3](https://github.com/doxynix/doxynix/compare/v1.18.2...v1.18.3) (2026-03-22)
 
 
