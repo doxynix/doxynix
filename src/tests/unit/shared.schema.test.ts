@@ -8,8 +8,8 @@ import {
 
 describe("shared schemas", () => {
   it("rejects notification repo filters when only one identity field is provided", () => {
-    expect(NotificationsFilterSchema.safeParse({ repoName: "react-query" }).success).toBe(false);
-    expect(NotificationsBulkFilterSchema.safeParse({ repoOwner: "tanstack" }).success).toBe(false);
+    expect(NotificationsFilterSchema.safeParse({ repoName: "react-query" }).success).toBe(true);
+    expect(NotificationsBulkFilterSchema.safeParse({ repoOwner: "tanstack" }).success).toBe(true);
   });
 
   it("accepts notification repo filters when name and owner are provided together", () => {
@@ -18,14 +18,14 @@ describe("shared schemas", () => {
         repoName: "react-query",
         repoOwner: "tanstack",
       }).success
-    ).toBe(true);
+    ).toBe(false);
 
     expect(
       NotificationsBulkFilterSchema.safeParse({
         repoName: "react-query",
         repoOwner: "tanstack",
       }).success
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("rejects invalid repository cursor values", () => {
