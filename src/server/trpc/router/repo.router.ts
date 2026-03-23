@@ -345,7 +345,7 @@ export const repoRouter = createTRPCRouter({
       const repos = await ctx.db.repo.findMany({
         orderBy: { name: "asc" },
         select: { name: true, owner: true, publicId: true },
-        take: input.limit,
+        ...(input.limit != null && { take: input.limit }),
       });
 
       return repos.map((r) => ({ id: r.publicId, name: r.name, owner: r.owner }));

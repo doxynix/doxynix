@@ -1,5 +1,9 @@
+// TODO: потестить
+
 import { NotifyType, Status, Visibility } from "@prisma/client";
 import { z } from "zod";
+
+type ValidatePairType = { repoName?: string; repoOwner?: string };
 
 export const PaginationSchema = z.object({
   cursor: z.coerce.number().min(1).max(1000000).nullish(),
@@ -15,32 +19,32 @@ export const RepoFilterSchema = PaginationSchema.extend({
   visibility: z.enum(Visibility).optional(),
 });
 
-const NotificationsFilterFieldsSchema = PaginationSchema.extend({
-  isRead: z.boolean().optional(),
+const repoIdentityFields = {
   repoName: z.string().trim().min(1).max(255).optional(),
   repoOwner: z.string().trim().min(1).max(39).optional(),
+};
+
+const validateRepoPair = (data: ValidatePairType, ctx: z.RefinementCtx) => {
+  if (data.repoName != null && data.repoOwner != null) {
+    const message = "repoName and repoOwner must be provided together";
+    ctx.addIssue({ code: "custom", message, path: ["repoName"] });
+    ctx.addIssue({ code: "custom", message, path: ["repoOwner"] });
+  }
+};
+
+export const NotificationsFilterSchema = PaginationSchema.extend({
+  ...repoIdentityFields,
+  isRead: z.boolean().optional(),
   type: z.enum(NotifyType).optional(),
-});
+}).superRefine(validateRepoPair);
 
-function requireRepoIdentityPair<T extends { repoName?: string; repoOwner?: string }>(
-  schema: z.ZodType<T>
-) {
-  return schema.refine(
-    (value) =>
-      (value.repoName == null && value.repoOwner == null) ||
-      (value.repoName != null && value.repoOwner != null),
-    {
-      message: "repoName and repoOwner must be provided together",
-      path: ["repoName"],
-    }
-  );
-}
-
-export const NotificationsFilterSchema = requireRepoIdentityPair(NotificationsFilterFieldsSchema);
-
-export const NotificationsBulkFilterSchema = requireRepoIdentityPair(
-  NotificationsFilterFieldsSchema.omit({ cursor: true, isRead: true, limit: true }).partial()
-);
+export const NotificationsBulkFilterSchema = z
+  .object({
+    ...repoIdentityFields,
+    search: z.string().trim().max(1000).optional(),
+    type: z.enum(NotifyType).optional(),
+  })
+  .superRefine(validateRepoPair);
 
 export const OpenApiErrorResponses = {
   400: "Invalid request",

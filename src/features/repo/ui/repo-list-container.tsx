@@ -34,12 +34,12 @@ export function RepoListContainer({ config }: Readonly<Props>) {
 
   const [debouncedSearch] = useDebounce(filters.search, 500);
 
-  const limit = config?.limit ?? 5;
-  const safePage = clampIntegerParam(filters.page, { fallback: 1, max: 1_000_000, min: 1 });
+  const safeLimit = clampIntegerParam(config?.limit, { fallback: 5, max: 1_000_000, min: 1 });
+  const safePage = clampIntegerParam(filters.page, { fallback: 1, max: 100, min: 1 });
 
   const queryParams = {
     cursor: safePage,
-    limit,
+    limit: safeLimit,
     search: debouncedSearch || undefined,
     sortBy: filters.sortBy,
     status: filters.status ?? undefined,
@@ -56,7 +56,7 @@ export function RepoListContainer({ config }: Readonly<Props>) {
       <>
         {config?.showTotalCount !== false && <Skeleton className="mb-4 ml-auto h-5 w-24 text-sm" />}
         <div className="space-y-3">
-          {Array.from({ length: limit }).map((_, i) => (
+          {Array.from({ length: safeLimit }).map((_, i) => (
             <RepoCardSkeleton key={i} />
           ))}
         </div>
