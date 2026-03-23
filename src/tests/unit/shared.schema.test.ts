@@ -8,8 +8,8 @@ import {
 
 describe("shared schemas", () => {
   it("rejects notification repo filters when only one identity field is provided", () => {
-    expect(NotificationsFilterSchema.safeParse({ repoName: "react-query" }).success).toBe(true);
-    expect(NotificationsBulkFilterSchema.safeParse({ repoOwner: "tanstack" }).success).toBe(true);
+    expect(NotificationsFilterSchema.safeParse({ repoName: "react-query" }).success).toBe(false);
+    expect(NotificationsBulkFilterSchema.safeParse({ repoOwner: "tanstack" }).success).toBe(false);
   });
 
   it("accepts notification repo filters when name and owner are provided together", () => {
