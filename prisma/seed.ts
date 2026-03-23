@@ -142,15 +142,17 @@ async function seedStressProfile() {
   });
 
   if (STRESS_REPO_COUNT > 0) {
-    const repos = Array.from({ length: STRESS_REPO_COUNT }, (_, index) =>
-      createStressRepo(index, benchmarkUser.id)
-    );
+    const totalRepoBatches = Math.ceil(STRESS_REPO_COUNT / REPO_BATCH_SIZE);
 
-    for (const [batchIndex, repoBatch] of chunk(repos, REPO_BATCH_SIZE).entries()) {
-      await prisma.repo.createMany({ data: repoBatch });
-      console.log(
-        `  benchmark repos batch ${batchIndex + 1}/${Math.ceil(repos.length / REPO_BATCH_SIZE)}`
+    for (let batchIndex = 0; batchIndex < totalRepoBatches; batchIndex++) {
+      const start = batchIndex * REPO_BATCH_SIZE;
+      const batchLength = Math.min(REPO_BATCH_SIZE, STRESS_REPO_COUNT - start);
+      const repoBatch = Array.from({ length: batchLength }, (_, offset) =>
+        createStressRepo(start + offset, benchmarkUser.id)
       );
+
+      await prisma.repo.createMany({ data: repoBatch });
+      console.log(`  benchmark repos batch ${batchIndex + 1}/${totalRepoBatches}`);
     }
   }
 
