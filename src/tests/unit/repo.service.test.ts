@@ -135,27 +135,45 @@ describe("repoService.buildWhereClause", () => {
     });
   });
 
-  it("should split search by spaces and build AND of OR conditions", () => {
+  it("should combine raw search with tokenized search for slug-like queries", () => {
     const filters = {
-      search: "  react   query  ",
+      search: "  @TanStack/react-query  ",
     };
 
     const where = repoService.buildWhereClause(filters);
 
     expect(where).toEqual({
-      AND: [
+      OR: [
         {
           OR: [
-            { name: { contains: "react", mode: "insensitive" } },
-            { owner: { contains: "react", mode: "insensitive" } },
-            { description: { contains: "react", mode: "insensitive" } },
+            { name: { contains: "@tanstack/react-query", mode: "insensitive" } },
+            { owner: { contains: "@tanstack/react-query", mode: "insensitive" } },
+            { description: { contains: "@tanstack/react-query", mode: "insensitive" } },
           ],
         },
         {
-          OR: [
-            { name: { contains: "query", mode: "insensitive" } },
-            { owner: { contains: "query", mode: "insensitive" } },
-            { description: { contains: "query", mode: "insensitive" } },
+          AND: [
+            {
+              OR: [
+                { name: { contains: "tanstack", mode: "insensitive" } },
+                { owner: { contains: "tanstack", mode: "insensitive" } },
+                { description: { contains: "tanstack", mode: "insensitive" } },
+              ],
+            },
+            {
+              OR: [
+                { name: { contains: "react", mode: "insensitive" } },
+                { owner: { contains: "react", mode: "insensitive" } },
+                { description: { contains: "react", mode: "insensitive" } },
+              ],
+            },
+            {
+              OR: [
+                { name: { contains: "query", mode: "insensitive" } },
+                { owner: { contains: "query", mode: "insensitive" } },
+                { description: { contains: "query", mode: "insensitive" } },
+              ],
+            },
           ],
         },
       ],
@@ -174,14 +192,10 @@ describe("repoService.buildWhereClause", () => {
 
     expect(where).toEqual({
       analyses: { some: { status: Status.FAILED } },
-      AND: [
-        {
-          OR: [
-            { name: { contains: "repo", mode: "insensitive" } },
-            { owner: { contains: "repo", mode: "insensitive" } },
-            { description: { contains: "repo", mode: "insensitive" } },
-          ],
-        },
+      OR: [
+        { name: { contains: "repo", mode: "insensitive" } },
+        { owner: { contains: "repo", mode: "insensitive" } },
+        { description: { contains: "repo", mode: "insensitive" } },
       ],
       owner: { equals: "owner", mode: "insensitive" },
       visibility: Visibility.PUBLIC,
@@ -218,9 +232,14 @@ describe("repoService.createRepo", () => {
       status: 404,
     },
     {
+      expectedCode: "FORBIDDEN",
+      expectedMessage: "GitHub denied access to this repository",
+      status: 403,
+    },
+    {
       expectedCode: "TOO_MANY_REQUESTS",
       expectedMessage: "GitHub API limit exceeded",
-      status: 403,
+      status: 429,
     },
   ])(
     "should map GitHub status $status to TRPC error $expectedCode",
@@ -333,7 +352,6 @@ describe("repoService.createRepo", () => {
       defaultConflict: "You have already added this repository",
       uniqueConstraint: {
         githubId: "This repository is already added",
-        url: "Repository with this URL already exists",
       },
     });
   });

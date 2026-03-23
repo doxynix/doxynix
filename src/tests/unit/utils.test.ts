@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  clampIntegerParam,
   cn,
   formatFullDate,
   formatRelativeTime,
@@ -297,5 +298,17 @@ describe("shared/lib/utils:sanitizePayload", () => {
     });
     expect(input.nested.password).toBe("p1");
     expect(input.users[0].access_token).toBe("a1");
+  });
+});
+
+describe("shared/lib/number:clampIntegerParam", () => {
+  it("clamps invalid values to fallback and valid values to bounds", () => {
+    expect(clampIntegerParam(undefined, { fallback: 1, max: 100, min: 1 })).toBe(1);
+    expect(clampIntegerParam(Number.NaN, { fallback: 1, max: 100, min: 1 })).toBe(1);
+    expect(clampIntegerParam(0, { fallback: 1, max: 100, min: 1 })).toBe(1);
+    expect(clampIntegerParam(-200000000000000, { fallback: 1, max: 100, min: 1 })).toBe(1);
+    expect(clampIntegerParam(200000000000000, { fallback: 1, max: 100, min: 1 })).toBe(100);
+    expect(clampIntegerParam(25, { fallback: 1, max: 100, min: 1 })).toBe(25);
+    expect(clampIntegerParam(1.5, { fallback: 1, max: 100, min: 1 })).toBe(1);
   });
 });

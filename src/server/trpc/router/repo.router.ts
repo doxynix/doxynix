@@ -120,7 +120,7 @@ export const repoRouter = createTRPCRouter({
     })
     .input(
       z.object({
-        owner: z.string().trim().min(1),
+        owner: z.string().trim().min(1).max(39),
       })
     )
     .output(
@@ -217,7 +217,7 @@ export const repoRouter = createTRPCRouter({
         ctx.db.repo.count({ where }),
       ]);
 
-      const totalPages = Math.ceil(filteredCount / limit);
+      const totalPages = Math.max(1, Math.ceil(filteredCount / limit));
 
       return {
         items: items.map((repo) => ({
@@ -258,8 +258,8 @@ export const repoRouter = createTRPCRouter({
     })
     .input(
       z.object({
-        name: z.string().trim().min(1),
-        owner: z.string().trim().min(1),
+        name: z.string().trim().min(1).max(255),
+        owner: z.string().trim().min(1).max(39),
       })
     )
     .output(PublicRepoSchema.extend({ message: z.string(), status: StatusSchema }).nullable())
@@ -299,7 +299,7 @@ export const repoRouter = createTRPCRouter({
     })
     .input(
       z.object({
-        owner: z.string().trim().min(1),
+        owner: z.string().trim().min(1).max(39),
       })
     )
     .output(PublicRepoSchema.extend({ message: z.string() }).nullable())
@@ -345,7 +345,7 @@ export const repoRouter = createTRPCRouter({
       const repos = await ctx.db.repo.findMany({
         orderBy: { name: "asc" },
         select: { name: true, owner: true, publicId: true },
-        take: input.limit,
+        ...(input.limit != null && { take: Math.floor(input.limit) }),
       });
 
       return repos.map((r) => ({ id: r.publicId, name: r.name, owner: r.owner }));

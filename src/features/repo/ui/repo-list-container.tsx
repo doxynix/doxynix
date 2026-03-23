@@ -5,6 +5,7 @@ import { useQueryStates } from "nuqs";
 import { useDebounce } from "use-debounce";
 
 import { trpc, type RepoStatus } from "@/shared/api/trpc";
+import { clampIntegerParam } from "@/shared/lib/utils";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
@@ -33,11 +34,12 @@ export function RepoListContainer({ config }: Readonly<Props>) {
 
   const [debouncedSearch] = useDebounce(filters.search, 500);
 
-  const limit = config?.limit ?? 5;
+  const safeLimit = clampIntegerParam(config?.limit, { fallback: 5, max: 100, min: 1 });
+  const safePage = clampIntegerParam(filters.page, { fallback: 1, max: 1_000_000, min: 1 });
 
   const queryParams = {
-    cursor: filters.page,
-    limit,
+    cursor: safePage,
+    limit: safeLimit,
     search: debouncedSearch || undefined,
     sortBy: filters.sortBy,
     status: filters.status ?? undefined,
@@ -54,7 +56,7 @@ export function RepoListContainer({ config }: Readonly<Props>) {
       <>
         {config?.showTotalCount !== false && <Skeleton className="mb-4 ml-auto h-5 w-24 text-sm" />}
         <div className="space-y-3">
-          {Array.from({ length: limit }).map((_, i) => (
+          {Array.from({ length: safeLimit }).map((_, i) => (
             <RepoCardSkeleton key={i} />
           ))}
         </div>

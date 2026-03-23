@@ -235,3 +235,22 @@ export const getHealthColor = (score: number) => {
   if (score < 80) return "var(--status-warning)";
   return "var(--status-success)";
 };
+
+export function clampIntegerParam(
+  value: number | null | undefined,
+  {
+    fallback,
+    max,
+    min,
+  }: {
+    fallback: number;
+    max: number;
+    min: number;
+  }
+): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.max(min, value));
+}

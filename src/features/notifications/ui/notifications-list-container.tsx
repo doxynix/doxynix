@@ -4,6 +4,7 @@ import { useQueryStates } from "nuqs";
 import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
+import { clampIntegerParam } from "@/shared/lib/utils";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
 import { notificationsParsers } from "@/entities/notifications";
@@ -15,6 +16,8 @@ import { NotificationsList } from "./notifications-list";
 export function NotificationsListContainer() {
   const [params] = useQueryStates(notificationsParsers);
   const [debouncedSearch] = useDebounce(params.search, 500);
+  const safePage = clampIntegerParam(params.page, { fallback: 1, max: 1_000_000, min: 1 });
+  const safeLimit = clampIntegerParam(params.limit, { fallback: 5, max: 100, min: 1 });
 
   const {
     data,
@@ -22,9 +25,9 @@ export function NotificationsListContainer() {
     isLoading: isListLoading,
   } = trpc.notification.getAll.useQuery(
     {
-      cursor: params.page,
+      cursor: safePage,
       isRead: params.isRead ?? undefined,
-      limit: params.limit,
+      limit: safeLimit,
       repoName: params.repo ?? undefined,
       repoOwner: params.owner ?? undefined,
       search: debouncedSearch || undefined,
@@ -41,7 +44,7 @@ export function NotificationsListContainer() {
 
       {isListLoading || !data ? (
         <div className="space-y-3">
-          {Array.from({ length: params.limit }).map((_, i) => (
+          {Array.from({ length: safeLimit }).map((_, i) => (
             <NotificationCardSkeleton key={i} />
           ))}
         </div>

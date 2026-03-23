@@ -1,12 +1,12 @@
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  extensions = [pg_trgm, unaccent, fuzzystrmatch, btree_gin, pg_stat_statements, uuidOssp(map: "uuid-ossp")]
+  extensions = [pg_trgm, unaccent, citext, fuzzystrmatch, btree_gin, pg_stat_statements, uuidOssp(map: "uuid-ossp")]
 }
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["fullTextSearchPostgres", "relationJoins", "postgresqlExtensions"]
+  previewFeatures = ["fullTextSearchPostgres", "relationJoins", "postgresqlExtensions", "typedSql", "strictUndefinedChecks", "nativeDistinct"]
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
@@ -40,8 +40,8 @@ generator zod {
   provider = "zod-prisma-types"
   output   = "../src/generated/zod"
 
-  useMultipleFiles       = true
-  writeBarrelFiles       = true
+  useMultipleFiles       = false
+  writeBarrelFiles       = false
   createIndexType        = false
 
   createInputTypes                 = false
@@ -58,7 +58,7 @@ generator zod {
   addSelectType     = false
   useJsonParameters = true
 
-  useTypeAssertions = false // NOTE: если поставить 'true' будет падать
+  useTypeAssertions = true
   modelSuffix       = "Schema"
 }
 
@@ -76,6 +76,12 @@ generator dbml {
 //   // mmdcPath = "node_modules/.bin"  не нужно
 // }
 
+// generator markdown {
+//   provider = "prisma-markdown"
+//   output   = "../docs/schema.md"
+//   title    = "Database Schema"
+// }
+
 generator fakeData {
   provider = "prisma-generator-fake-data"
   output   = "../src/generated/fake-data.ts"
@@ -87,7 +93,7 @@ model User {
   /// @zod.custom.omit(["model"])
   publicId            String               @unique @default(uuid(7)) @map("public_id") @db.Uuid
   /// @zod.string.email({ message: "Incorrect email" })
-  email               String?              @unique @email(message: "Incorrect email")
+  email               String?              @unique @db.Citext @email(message: "Incorrect email")
   /// @zod.string.trim().min(1, { message: "Name required" }).max(50, { message: "Name cannot exceed 50 characters" })
   name                String?              @length(min: 1, max: 50, message: "Name cannot exceed 50 characters")
   emailVerified       DateTime?            @map("email_verified")
@@ -124,9 +130,9 @@ model Notification {
   /// @zod.custom.omit(["model"])
   publicId  String     @unique @default(uuid(7)) @map("public_id") @db.Uuid
   createdAt DateTime   @default(now()) @map("created_at")
-  /// @zod.string.min(1, { message: "The title cannot be empty" })
+  /// @zod.string.trim().min(1, { message: "The title cannot be empty" }).max(300, { message: "The title cannot exceed 300 characters" })
   title     String
-  /// @zod.string.min(1, { message: "The text of the notification is mandatory" })
+  /// @zod.string.trim().min(1, { message: "The text of the notification is mandatory" }).max(5000, { message: "The text of the notification cannot exceed 5000 characters" })
   body      String
   type      NotifyType @default(INFO)
   isRead    Boolean    @default(false) @map("is_read")
@@ -138,9 +144,12 @@ model Notification {
   repo      Repo?      @relation(fields: [repoId], references: [id], onDelete: SetNull)
 
   @@allow('all', auth() == user || auth().role == "ADMIN")
-  @@index([userId, isRead])
   @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@index([userId, type, createdAt(sort: Desc)])
   @@index([repoId])
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_title_trgm_idx")
+  @@index([body(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_body_trgm_idx")
 
   @@map("notifications")
 }
@@ -151,7 +160,7 @@ model Repo {
   /// @zod.custom.omit(["model"])
   publicId        String         @unique @default(uuid(7)) @map("public_id") @db.Uuid
   githubId        Int            @map("github_id")
-  owner           String
+  owner           String         @length(min: 1, max: 39, message: "Repository owner login cannot exceed 39 characters")
   /// @zod.string.min(1).max(255)
   name            String         @length(min: 1, max: 255)
   /// @zod.string.max(1000)
@@ -194,10 +203,15 @@ model Repo {
   @@unique([owner, name, userId])
   @@unique([githubId, userId])
   @@index([userId, owner])
+  @@index([userId, name])
+  @@index([userId, createdAt(sort: Desc)])
   @@index([userId, updatedAt(sort: Desc)])
   @@index([userId, visibility])
   @@index([githubId])
-  @@index([name, description])
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_name_trgm_idx")
+  @@index([owner(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_owner_trgm_idx")
+  @@index([description(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_description_trgm_idx")
+
   @@map("repos")
 }
 
@@ -335,7 +349,7 @@ model GithubInstallation {
   appId               Int      @map("app_id")
   targetId            BigInt   @map("target_id")
   targetType          String   @map("target_type")
-  accountLogin        String   @map("account_login")
+  accountLogin        String   @map("account_login") @db.Citext @length(min: 1, max: 39, message: "GitHub login cannot exceed 39 characters")
   accountAvatar       String?  @map("account_avatar")
   repositorySelection String   @map("repository_selection")
 
@@ -356,7 +370,9 @@ model GithubInstallation {
     auth().role == 'ADMIN' || (userId == auth().id && future().userId == userId)
   )
 
-  @@index([userId])
+  @@index([userId, isSuspended, createdAt(sort: Asc)])
+  @@index([userId, isSuspended, accountLogin])
+
   @@map("github_installations")
 }
 
@@ -426,6 +442,7 @@ model AuditLog {
   @@index([createdAt(sort: Desc)])
   @@index([userId, operation])
   @@index([model, requestId])
+
   @@map("audit_logs")
 }
 

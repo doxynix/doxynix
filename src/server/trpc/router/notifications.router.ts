@@ -4,7 +4,11 @@ import { notificationsService } from "@/server/services/notifications.service";
 import { handlePrismaError } from "@/server/utils/handle-error";
 import { NotificationSchema } from "@/generated/zod";
 
-import { NotificationsFilterSchema, OpenApiErrorResponses } from "../shared";
+import {
+  NotificationsBulkFilterSchema,
+  NotificationsFilterSchema,
+  OpenApiErrorResponses,
+} from "../shared";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const NotificationsPublicSchema = NotificationSchema.extend({
@@ -56,7 +60,7 @@ export const notificationRouter = createTRPCRouter({
         tags: ["notifications"],
       },
     })
-    .input(NotificationsFilterSchema.omit({ cursor: true, isRead: true, limit: true }).partial())
+    .input(NotificationsBulkFilterSchema)
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const { repoName, repoOwner, search, type } = input;
@@ -191,7 +195,7 @@ export const notificationRouter = createTRPCRouter({
         tags: ["notifications"],
       },
     })
-    .input(NotificationsFilterSchema.omit({ cursor: true, isRead: true, limit: true }).partial())
+    .input(NotificationsBulkFilterSchema)
     .output(
       z.object({
         message: z.string(),
@@ -209,20 +213,22 @@ export const notificationRouter = createTRPCRouter({
       });
 
       try {
-        const result = await ctx.db.notification.updateMany({
-          data: {
-            isRead: true,
-          },
-          where: {
-            ...where,
-            isRead: false,
-          },
-        });
+        const updatedCount = (
+          await ctx.db.notification.updateMany({
+            data: {
+              isRead: true,
+            },
+            where: {
+              ...where,
+              isRead: false,
+            },
+          })
+        ).count;
 
         return {
-          message: `Marked ${result.count} notifications as read`,
+          message: `Marked ${updatedCount} notifications as read`,
           success: true,
-          updatedCount: result.count,
+          updatedCount,
         };
       } catch (error) {
         handlePrismaError(error);
