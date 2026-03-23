@@ -38,16 +38,6 @@ function parseSeedNumber(value: string | undefined, fallback: number): number {
   return parsed;
 }
 
-function chunk<T>(items: T[], size: number): T[][] {
-  const chunks: T[][] = [];
-
-  for (let index = 0; index < items.length; index += size) {
-    chunks.push(items.slice(index, index + size));
-  }
-
-  return chunks;
-}
-
 function createStressRepo(index: number, userId: number) {
   const ownerPool = ["vercel", "facebook", "microsoft", "tanstack", "nestjs", "vuejs", "angular"];
   const topicPool = ["react", "typescript", "nextjs", "nodejs", "graphql", "postgres", "prisma"];
