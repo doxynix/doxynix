@@ -127,7 +127,7 @@
     "@replit/codemirror-minimap": "0.5.2",
     "@scalar/api-reference-react": "0.9.15",
     "@scalar/nextjs-api-reference": "0.10.5",
-    "@sentry/nextjs": "10.45.0",
+    "@sentry/nextjs": "10.46.0",
     "@shikijs/rehype": "4.0.2",
     "@t3-oss/env-nextjs": "0.13.11",
     "@tanstack/react-query": "5.95.2",
