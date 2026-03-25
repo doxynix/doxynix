@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.18.7](https://github.com/doxynix/doxynix/compare/v1.18.6...v1.18.7) (2026-03-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @codemirror/language to v6.12.3 ([#762](https://github.com/doxynix/doxynix/issues/762)) ([b287160](https://github.com/doxynix/doxynix/commit/b28716082c209c7f38e1db1661ad4708ecb5f2b9))
+
 ## [1.18.6](https://github.com/doxynix/doxynix/compare/v1.18.5...v1.18.6) (2026-03-25)
 
 
