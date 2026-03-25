@@ -584,14 +584,14 @@ importers:
         specifier: 1.6.13
         version: 1.6.13(@typescript-eslint/eslint-plugin@8.57.2(@typescript-eslint/parser@8.57.2(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.4(jiti@1.21.7))(typescript@5.9.3)(vitest@4.1.1(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(vite@7.3.1(@types/node@25.5.0)(jiti@1.21.7)(lightningcss@1.32.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)))
       '@zenstackhq/sdk':
-        specifier: 3.4.6
-        version: 3.4.6
+        specifier: 3.5.0
+        version: 3.5.0
       '@zenstackhq/trpc':
         specifier: 2.22.1
         version: 2.22.1(@prisma/client@6.19.2(prisma@6.19.2(magicast@0.5.2)(typescript@5.9.3))(typescript@5.9.3))(magicast@0.5.2)(typescript@5.9.3)(zod@4.3.6)
       '@zenstackhq/zod':
-        specifier: 3.4.6
-        version: 3.4.6(zod@4.3.6)
+        specifier: 3.5.0
+        version: 3.5.0(zod@4.3.6)
       babel-plugin-react-compiler:
         specifier: 1.0.0
         version: 1.0.0
@@ -6796,14 +6796,14 @@ packages:
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
 
-  '@zenstackhq/common-helpers@3.4.6':
-    resolution: {integrity: sha512-d2ojRGTG9WW5hGgYX3PassNy/BVmprRsjNJfJjvEAvzWuvMF9F5/30Sj7pdisRHKQ8vXchdERhniF+yz4ZCsEg==}
+  '@zenstackhq/common-helpers@3.5.0':
+    resolution: {integrity: sha512-dYh2dXFHiS0fiFld/PE/445ae2OCJhKdITsIZHSwOEiUTOlNV3kc5FEdTH5ehmEieJyNDWlJ/OhrFPXBAhKYAA==}
 
   '@zenstackhq/language@2.22.1':
     resolution: {integrity: sha512-VSCVV7aMXMcC/tBnURIehtdQrm04u7EtwbtFB391PPW3ZESp9tEIK4CskLzEiaR8tR/w+rMOQiX3dyXuhJVZOA==}
 
-  '@zenstackhq/language@3.4.6':
-    resolution: {integrity: sha512-MXPCArToJ7uoVoV1qjSfy4zXXp8ObPtCSl9J9u/NL9aa89HqXGAvF+/SEELs0mSXVdPYCkCDQ91HiJg5CMUYPA==}
+  '@zenstackhq/language@3.5.0':
+    resolution: {integrity: sha512-vBmk26eaAxJZQ7TTe8p6TxDZcrbuBsy6njysqx9IEcyTl5w9GOaLEdRfpaI5XiE5EW8sAsQxucJ19YYdgvgsFQ==}
 
   '@zenstackhq/runtime@2.22.1':
     resolution: {integrity: sha512-u12W7z0uQDtpvILPmKOHZ3AC/3uEPnfkNbhMGllGREKEgU1qoKY9PWfHFlR3ZKK1fIxOQEW8NFcO8OsW4fUXFg==}
@@ -6811,22 +6811,22 @@ packages:
       '@prisma/client': 5.0.0 - 7.x
       zod: ^3.25.0 || ^4.0.0
 
-  '@zenstackhq/schema@3.4.6':
-    resolution: {integrity: sha512-itYWvtD4ObKyW3Z059u1mdT1M7wgezkXQAvgelwYbalDlI4xGIfMUi4nnAY7vtfbBay+GLccv/fOxXGBtFHMJA==}
+  '@zenstackhq/schema@3.5.0':
+    resolution: {integrity: sha512-85T2gAyHrlPNjkiix4v9WK+mS/i3s5DZc133xIzoGOjMOJcJ6jmg4xMXlhmGsvmY4F2n4z2jRHFfo36NOic09Q==}
 
   '@zenstackhq/sdk@2.22.1':
     resolution: {integrity: sha512-N6FxqdzWWoQKxBVZzfgIui7ve5raolrGZAyCGM/9rwiMJcwCTbrRf/F98kvCoCtLasRfzQJjz7L9CBRjXOdgew==}
 
-  '@zenstackhq/sdk@3.4.6':
-    resolution: {integrity: sha512-gSFfAmkzLcHJJ/jA9t/NuvprBcOkYNSxGWAWF7xvqx3nU3K2qEj4OMt9C2KkHSANBZcU2A210sV4QMvqEryC1w==}
+  '@zenstackhq/sdk@3.5.0':
+    resolution: {integrity: sha512-EB5qYpm4XziCQpKzzIdTfGmvk76OEAZYsR4quklhP4Cl7IY3npo77MthlaLKGAYKiwPHrqW3DXX93yeEZD1qrg==}
 
   '@zenstackhq/trpc@2.22.1':
     resolution: {integrity: sha512-Bbn1BINTfiIgGn9i0R48ma0KDI+Fzxh84NeYTJUZ3qbmf03RhLfYPtBVGQOkdD+0TJCbvKUzP1uFweJpquEXqg==}
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
 
-  '@zenstackhq/zod@3.4.6':
-    resolution: {integrity: sha512-UQzGEJhJGJVHsYSJHbkBlhqV3yLX8gyp4Ba5OINkTrM+c7kwgMsXwCJ9rvKnwBdJKC6mZaZ1WFBdXyT4P/4epw==}
+  '@zenstackhq/zod@3.5.0':
+    resolution: {integrity: sha512-gAnqpFHJGQ9VWVAJ7rp6YUYwEXneKTGufCnjyjnjv6T7ldJigNXeUbyzLgaRf7QB76gRirLimXnTyA3xDXPolw==}
     peerDependencies:
       zod: ^4.0.0
 
@@ -21853,15 +21853,15 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  '@zenstackhq/common-helpers@3.4.6': {}
+  '@zenstackhq/common-helpers@3.5.0': {}
 
   '@zenstackhq/language@2.22.1':
     dependencies:
       langium: 1.3.1
 
-  '@zenstackhq/language@3.4.6':
+  '@zenstackhq/language@3.5.0':
     dependencies:
-      '@zenstackhq/common-helpers': 3.4.6
+      '@zenstackhq/common-helpers': 3.5.0
       langium: 3.5.0
       pluralize: 8.0.0
       ts-pattern: 5.9.0
@@ -21885,7 +21885,7 @@ snapshots:
       zod: 4.3.6
       zod-validation-error: 4.0.2(zod@4.3.6)
 
-  '@zenstackhq/schema@3.4.6':
+  '@zenstackhq/schema@3.5.0':
     dependencies:
       decimal.js: 10.6.0
 
@@ -21905,10 +21905,10 @@ snapshots:
       - typescript
       - zod
 
-  '@zenstackhq/sdk@3.4.6':
+  '@zenstackhq/sdk@3.5.0':
     dependencies:
-      '@zenstackhq/common-helpers': 3.4.6
-      '@zenstackhq/language': 3.4.6
+      '@zenstackhq/common-helpers': 3.5.0
+      '@zenstackhq/language': 3.5.0
       langium: 3.5.0
       ts-pattern: 5.9.0
       typescript: 5.9.3
@@ -21925,9 +21925,9 @@ snapshots:
       - magicast
       - typescript
 
-  '@zenstackhq/zod@3.4.6(zod@4.3.6)':
+  '@zenstackhq/zod@3.5.0(zod@4.3.6)':
     dependencies:
-      '@zenstackhq/schema': 3.4.6
+      '@zenstackhq/schema': 3.5.0
       decimal.js: 10.6.0
       zod: 4.3.6
 
