@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.18.9](https://github.com/doxynix/doxynix/compare/v1.18.8...v1.18.9) (2026-03-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @sentry/nextjs to v10.46.0 ([#775](https://github.com/doxynix/doxynix/issues/775)) ([7442c9a](https://github.com/doxynix/doxynix/commit/7442c9a4acdec16515b589abc2306b5cfdf499ed))
+
 ## [1.18.8](https://github.com/doxynix/doxynix/compare/v1.18.7...v1.18.8) (2026-03-25)
 
 
