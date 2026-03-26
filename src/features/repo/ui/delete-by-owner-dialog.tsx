@@ -11,10 +11,14 @@ import { useRepoActions } from "@/entities/repo";
 
 type Props = { owner: string };
 
+const richStyles = {
+  strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+};
+
 export function DeleteByOwnerDialog({ owner }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("Dashboard");
-  const tsRich = (key: string) => t.rich(key, { strong: (chunks) => <strong>{chunks}</strong> });
+  const tsRich = (key: string) => t.rich(key, richStyles);
   const { deleteByOwner } = useRepoActions();
 
   const handleDelete = () => {

@@ -180,6 +180,12 @@ export const analyticsService = {
       },
     });
 
+    const dateFormatter = new Intl.DateTimeFormat("en-US", {
+      day: "numeric",
+      month: "short",
+      timeZone: "UTC",
+    });
+
     const grouped = new Map<
       string,
       {
@@ -193,10 +199,7 @@ export const analyticsService = {
     >();
 
     analyses.forEach((a) => {
-      const dateKey = new Intl.DateTimeFormat("en-US", {
-        day: "numeric",
-        month: "short",
-      }).format(a.createdAt);
+      const dateKey = a.createdAt.toISOString().slice(0, 10);
 
       if (!grouped.has(dateKey)) {
         grouped.set(dateKey, {
@@ -218,10 +221,10 @@ export const analyticsService = {
       entry.count += 1;
     });
 
-    return Array.from(grouped.entries()).map(([date, data]) => ({
+    return Array.from(grouped.entries()).map(([fullDate, data]) => ({
       complexity: Math.round(data.compSum / data.count),
-      date,
-      fullDate: date,
+      date: dateFormatter.format(new Date(`${fullDate}T00:00:00.000Z`)),
+      fullDate,
       health: Math.round(data.healthSum / data.count),
       onboarding: Math.round(data.onbSum / data.count),
       security: Math.round(data.secSum / data.count),

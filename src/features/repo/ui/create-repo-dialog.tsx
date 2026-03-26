@@ -105,11 +105,16 @@ export function CreateRepoDialog() {
     staleTime: STALE_TIME,
   });
 
+  const closeDialog = () => {
+    setOpen(false);
+    setShowSuggestions(false);
+    form.reset();
+  };
+
   const onSubmit = (values: CreateRepoInput) => {
     create.mutate(values, {
       onSuccess: () => {
-        setOpen(false);
-        form.reset();
+        closeDialog();
         void setPage(null);
       },
     });
@@ -135,8 +140,7 @@ export function CreateRepoDialog() {
 
   const handleClose = (v: boolean) => {
     if (!v) {
-      setOpen(v);
-      form.reset();
+      closeDialog();
     }
   };
 

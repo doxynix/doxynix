@@ -83,6 +83,18 @@ export const notificationRouter = createTRPCRouter({
     }),
 
   getStats: protectedProcedure
+    .meta({
+      openapi: {
+        description:
+          "Returns notification statistics (total, read, unread) for the authenticated user.",
+        errorResponses: OpenApiErrorResponses,
+        method: "GET",
+        path: "/notifications/stats",
+        protect: true,
+        summary: "Get notification stats",
+        tags: ["notifications"],
+      },
+    })
     .output(
       z.object({
         read: z.number().int(),

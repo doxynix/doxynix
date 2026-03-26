@@ -1,3 +1,5 @@
+import type { ComponentType } from "react";
+
 export type SearchParams = {
   page?: string;
   search?: string;
@@ -21,7 +23,7 @@ export type FileNode = {
 
 export type ActionItem = {
   className?: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   label: string;
   onClick: () => void;
   tooltip?: string;

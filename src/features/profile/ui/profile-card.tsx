@@ -78,7 +78,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".jpg, .jpeg, .png"
+              accept=".jpg, .jpeg, .png, .webp"
               disabled={isUploading}
               onChange={(e) => void handleImageSelect(e)}
               className="hidden"

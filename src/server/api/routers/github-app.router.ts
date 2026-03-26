@@ -17,7 +17,7 @@ export const githubAppRouter = createTRPCRouter({
     .input(
       z.object({
         installationId: z.string().regex(/^\d+$/),
-        state: z.string(),
+        state: z.string().trim().min(1),
       })
     )
     .output(z.object({ success: z.boolean() }))

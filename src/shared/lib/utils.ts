@@ -173,6 +173,8 @@ const replacer = (key: string, value: unknown): unknown => {
 };
 
 export const sanitizePayload = (obj: unknown): unknown => {
+  if (typeof obj === "string") return replacer("", obj);
+
   if (obj == null || typeof obj !== "object") return obj;
 
   try {
@@ -326,6 +328,10 @@ export function isRouteActive(
   }
 
   if (!cleanPath.startsWith(cleanHref)) return false;
+
+  if (cleanHref !== "/" && cleanPath !== cleanHref && !cleanPath.startsWith(`${cleanHref}/`)) {
+    return false;
+  }
 
   if (cleanHref === "/" && cleanPath !== "/") {
     const rootSegments = cleanPath.split("/").filter(Boolean);

@@ -90,10 +90,14 @@ export const notificationsService = {
     const where = this.buildWhereClause(filters);
 
     try {
-      await db.notification.deleteMany({
+      const result = await db.notification.deleteMany({
         where: { ...where, isRead: true },
       });
-      return { message: "All read notifications were deleted", success: true };
+      return {
+        deletedCount: result.count,
+        message: `Deleted ${result.count} read notifications`,
+        success: true,
+      };
     } catch (error) {
       handlePrismaError(error, { notFound: "Notification not found" });
     }

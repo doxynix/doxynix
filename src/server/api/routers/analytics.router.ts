@@ -1,7 +1,7 @@
-import { Status } from "@prisma/client";
 import { z } from "zod";
 
 import { analyticsService } from "@/server/services/analytics.service";
+import { StatusSchema } from "@/generated/zod";
 
 import { OpenApiErrorResponses } from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -57,7 +57,7 @@ export const analyticsRouter = createTRPCRouter({
             progress: z.number(),
             repoName: z.string(),
             repoOwner: z.string(),
-            status: Status,
+            status: StatusSchema,
           })
         ),
       })
@@ -67,6 +67,7 @@ export const analyticsRouter = createTRPCRouter({
     }),
 
   getTrends: protectedProcedure
+    .input(z.void())
     .output(
       z.array(
         z.object({

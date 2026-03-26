@@ -119,12 +119,10 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
         URL.revokeObjectURL(localPreviewUrl);
       }
     };
+    const uploadPromise = processUpload();
 
-    toast.promise(processUpload(), {
+    toast.promise(uploadPromise, {
       error: (error: unknown) => {
-        URL.revokeObjectURL(localPreviewUrl);
-        propsRef.current.onAvatarUpdateSuccess?.(session?.user.image ?? "");
-
         const errorMessage = error instanceof Error ? error.message : String(error);
 
         let message = t("settings_profile_error_uploading_file");
@@ -139,10 +137,11 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
       },
       success: (data) => {
         propsRef.current.onAvatarUpdateSuccess?.(data.ufsUrl);
-        URL.revokeObjectURL(localPreviewUrl);
         return t("settings_profile_update_avatar_toast_success");
       },
     });
+
+    return uploadPromise;
   };
 
   return {

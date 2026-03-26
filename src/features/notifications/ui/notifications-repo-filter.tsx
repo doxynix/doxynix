@@ -89,7 +89,10 @@ export function NotificationsRepoFilter() {
                   <p>Repositories not found</p>
                   <Button
                     size="sm"
-                    onClick={() => setOpenCreateDialog(true)}
+                    onClick={() => {
+                      setOpen(false);
+                      setOpenCreateDialog(true);
+                    }}
                     className="w-fit cursor-pointer"
                   >
                     Add

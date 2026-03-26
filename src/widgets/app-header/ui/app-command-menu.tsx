@@ -123,7 +123,7 @@ export function AppCommandMenu() {
     }
   };
 
-  const s = search.toLowerCase();
+  const s = search.trim().toLowerCase();
 
   const filteredCommands = !s
     ? commandMenuItems

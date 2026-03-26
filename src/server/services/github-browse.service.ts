@@ -65,6 +65,25 @@ export const githubBrowseService = {
       };
     } catch (error) {
       logger.error({ error, msg: "Failed to fetch file content from GitHub", path });
+      if (error instanceof GitHubAuthRequiredError) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Connect your GitHub account or install the app to access this file.",
+        });
+      }
+      if (isOctokitError(error) && error.status === 404) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "File or branch not found.",
+        });
+      }
+      if (isOctokitError(error) && error.status === 403) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "GitHub denied access to this file.",
+        });
+      }
+
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Could not fetch file content from GitHub.",
