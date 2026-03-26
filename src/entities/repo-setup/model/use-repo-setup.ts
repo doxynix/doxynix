@@ -37,11 +37,11 @@ export function useRepoSetup(repo: UiRepoDetailed) {
 
   const { name, owner } = repo;
 
-  const { data: branches, isLoading: isBranchesLoading } = trpc.repoGithub.getBranches.useQuery(
+  const { data: branches, isLoading: isBranchesLoading } = trpc.githubBrowse.getBranches.useQuery(
     { name, owner },
     { enabled: open }
   );
-  const { data: apiFiles, isLoading } = trpc.repoGithub.getRepoFiles.useQuery({
+  const { data: apiFiles, isLoading } = trpc.githubBrowse.getRepoFiles.useQuery({
     branch: selectedBranch,
     name,
     owner,

@@ -1,16 +1,12 @@
-import { TRPCError } from "@trpc/server";
-import { UTApi } from "uploadthing/server";
 import { z } from "zod";
 
 import { UpdateProfileSchema } from "@/shared/api/schemas/user";
 
-import { logger } from "@/server/logger/logger";
+import { userService } from "@/server/services/user.service";
 import { UserSchema } from "@/generated/zod";
 
-import { OpenApiErrorResponses } from "../shared";
+import { OpenApiErrorResponses } from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-
-const utapi = new UTApi();
 
 export const PublicUserSchema = UserSchema.extend({
   id: z.string(),
@@ -32,31 +28,7 @@ export const userRouter = createTRPCRouter({
     .input(z.void())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
-      const userId = Number(ctx.session.user.id);
-      // NOTE: используется чистая призма
-      const user = await ctx.prisma.user.findUnique({
-        select: { imageKey: true },
-        where: { id: userId },
-      });
-
-      if (user == null) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
-      }
-
-      await ctx.db.user.delete({
-        where: { id: userId },
-      });
-
-      if (user.imageKey != null) {
-        utapi.deleteFiles(user.imageKey).catch((e) => {
-          logger.error({ error: e, msg: "Failed to delete avatar on account deletion" });
-        });
-      }
-
-      return {
-        message: "Your account and all associated data have been permanently deleted",
-        success: true,
-      };
+      return userService.deleteAccount(ctx.db, ctx.prisma, Number(ctx.session.user.id));
     }),
 
   me: protectedProcedure
@@ -74,28 +46,9 @@ export const userRouter = createTRPCRouter({
     .input(z.void())
     .output(z.object({ message: z.string(), user: PublicUserSchema }))
     .query(async ({ ctx }) => {
-      const userId = Number(ctx.session.user.id);
-
-      const user = await ctx.db.user.findUnique({
-        where: { id: userId },
-      });
-
-      if (user == null) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
-
-      return {
-        message: "User found",
-        user: {
-          createdAt: user.createdAt,
-          email: user.email,
-          emailVerified: user.emailVerified,
-          id: user.publicId,
-          image: user.image,
-          name: user.name,
-          role: user.role,
-          updatedAt: user.updatedAt,
-        },
-      };
+      return userService.getMe(ctx.db, Number(ctx.session.user.id));
     }),
+
   removeAvatar: protectedProcedure
     .meta({
       openapi: {
@@ -111,36 +64,7 @@ export const userRouter = createTRPCRouter({
     .input(z.void())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
-      const userId = Number(ctx.session.user.id);
-
-      // NOTE: используется чистая призма
-      const user = await ctx.prisma.user.findUnique({
-        select: { imageKey: true },
-        where: { id: userId },
-      });
-
-      const keyToDelete = user?.imageKey;
-
-      await ctx.db.user.update({
-        data: {
-          image: null,
-          imageKey: null,
-        },
-        where: { id: userId },
-      });
-
-      if (keyToDelete != null) {
-        utapi.deleteFiles(keyToDelete).catch((error) => {
-          logger.error({
-            error: error instanceof Error ? error.message : String(error),
-            keyToDelete,
-            msg: "Failed to delete avatar from UT during removal",
-            userId,
-          });
-        });
-      }
-
-      return { message: "Profile Picture removed", success: true };
+      return userService.removeAvatar(ctx.db, ctx.prisma, Number(ctx.session.user.id));
     }),
 
   updateUser: protectedProcedure
@@ -157,22 +81,6 @@ export const userRouter = createTRPCRouter({
     .input(UpdateProfileSchema)
     .output(z.object({ message: z.string(), user: PublicUserSchema }))
     .mutation(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
-
-      const updatedUser = await ctx.db.user.update({
-        data: {
-          email: input.email,
-          name: input.name,
-        },
-        where: { id: userId },
-      });
-
-      return {
-        message: "Credentials updated",
-        user: {
-          ...updatedUser,
-          id: updatedUser.publicId,
-        },
-      };
+      return userService.updateUser(ctx.db, Number(ctx.session.user.id), input);
     }),
 });

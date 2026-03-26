@@ -41,7 +41,7 @@ const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут
 export function CreateRepoDialog() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const { refetch: getInstallUrl } = trpc.repoGithub.getGithubInstallUrl.useQuery(undefined, {
+  const { refetch: getInstallUrl } = trpc.githubApp.getGithubInstallUrl.useQuery(undefined, {
     enabled: false,
   });
 
@@ -88,7 +88,7 @@ export function CreateRepoDialog() {
   }
 
   const isUrl = isGitHubUrl(debouncedValue);
-  const { data: suggestions, isFetching } = trpc.repoGithub.searchGithub.useQuery(
+  const { data: suggestions, isFetching } = trpc.githubBrowse.searchGithub.useQuery(
     { query: debouncedValue },
     {
       enabled: debouncedValue.length >= 2 && !isUrl,
@@ -100,7 +100,7 @@ export function CreateRepoDialog() {
     data: myGithubData,
     isFetching: isFetchingMyRepos,
     refetch: refetchMyRepos,
-  } = trpc.repoGithub.getMyGithubRepos.useQuery(undefined, {
+  } = trpc.githubApp.getMyGithubRepos.useQuery(undefined, {
     enabled: open,
     staleTime: STALE_TIME,
   });

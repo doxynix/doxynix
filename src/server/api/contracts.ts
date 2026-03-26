@@ -1,5 +1,3 @@
-// TODO: потестить
-
 import { NotifyType, Status, Visibility } from "@prisma/client";
 import { z } from "zod";
 
@@ -18,6 +16,8 @@ export const RepoFilterSchema = PaginationSchema.extend({
   status: z.enum(Status).optional(),
   visibility: z.enum(Visibility).optional(),
 });
+
+export type RepoFiltersInput = z.infer<typeof RepoFilterSchema>;
 
 const repoIdentityFields = {
   repoName: z.string().trim().min(1).max(255).optional(),
@@ -38,6 +38,8 @@ export const NotificationsFilterSchema = PaginationSchema.extend({
   type: z.enum(NotifyType).optional(),
 }).superRefine(validateRepoPair);
 
+export type NotificationsFilterInput = z.infer<typeof NotificationsFilterSchema>;
+
 export const NotificationsBulkFilterSchema = z
   .object({
     ...repoIdentityFields,
@@ -45,6 +47,8 @@ export const NotificationsBulkFilterSchema = z
     type: z.enum(NotifyType).optional(),
   })
   .superRefine(validateRepoPair);
+
+export type NotificationsBulkFilterInput = z.infer<typeof NotificationsBulkFilterSchema>;
 
 export const OpenApiErrorResponses = {
   400: "Invalid request",

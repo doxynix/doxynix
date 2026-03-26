@@ -1,10 +1,9 @@
-import { tasks } from "@trigger.dev/sdk/v3";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { repoAnalysisService } from "@/server/services/repo-analysis.service";
 import { DocTypeSchema } from "@/generated/zod";
 
-import { OpenApiErrorResponses } from "../shared";
+import { OpenApiErrorResponses } from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const repoAnalysisRouter = createTRPCRouter({
@@ -31,49 +30,9 @@ export const repoAnalysisRouter = createTRPCRouter({
     )
     .output(z.object({ jobId: z.string(), status: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
-
-      const repo = await ctx.db.repo.findUnique({
-        where: { publicId: input.repoId },
-      });
-
-      if (repo == null) throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
-
-      const analysis = await ctx.db.analysis.create({
-        data: {
-          repo: {
-            connect: {
-              publicId: input.repoId,
-            },
-          },
-          status: "PENDING",
-        },
-      });
-      const handle = await tasks.trigger(
-        "analyze-repo",
-        {
-          analysisId: analysis.publicId,
-          docTypes: input.docTypes,
-          instructions: input.instructions,
-          language: input.language,
-          selectedBranch: input.branch,
-          selectedFiles: input.files,
-          userId,
-        },
-        {
-          concurrencyKey: `user-${userId}`,
-          idempotencyKey: `analysis-${analysis.publicId}`,
-          ttl: "30m",
-        }
-      );
-
-      await ctx.db.analysis.update({
-        data: { jobId: handle.id },
-        where: { publicId: analysis.publicId },
-      });
-
-      return { jobId: handle.id, status: "QUEUED" };
+      return repoAnalysisService.analyze(ctx.db, Number(ctx.session.user.id), input);
     }),
+
   analyzeFile: protectedProcedure
     .input(
       z.object({
@@ -84,31 +43,9 @@ export const repoAnalysisRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
-
-      const repo = await ctx.db.repo.findFirst({
-        where: { publicId: input.repoId, userId: Number(userId) },
-      });
-
-      if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
-
-      const handle = await tasks.trigger(
-        "analyze-single-file",
-        {
-          content: input.content,
-          language: input.language,
-          path: input.path,
-          repoId: input.repoId,
-        },
-        {
-          concurrencyKey: `user-${userId}`,
-          idempotencyKey: `analyze-file-${input.repoId}-${input.path}`,
-          ttl: "10m",
-        }
-      );
-
-      return { jobId: handle.id };
+      return repoAnalysisService.analyzeFile(ctx.db, Number(ctx.session.user.id), input);
     }),
+
   documentFile: protectedProcedure
     .input(
       z.object({
@@ -119,29 +56,6 @@ export const repoAnalysisRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = Number(ctx.session.user.id);
-      const repo = await ctx.db.repo.findUnique({
-        where: { publicId: input.repoId, userId },
-      });
-
-      if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
-
-      const handle = await tasks.trigger(
-        "document-single-file",
-        {
-          content: input.content,
-          language: input.language,
-          path: input.path,
-          repoId: input.repoId,
-          userId,
-        },
-        {
-          concurrencyKey: `user-${userId}`,
-          idempotencyKey: `doc-file-${input.repoId}-${input.path}`,
-          ttl: "10m",
-        }
-      );
-
-      return { jobId: handle.id };
+      return repoAnalysisService.documentFile(ctx.db, Number(ctx.session.user.id), input);
     }),
 });

@@ -1,13 +1,12 @@
-import { Status } from "@prisma/client";
 import { z } from "zod";
 
 import { CreateRepoSchema } from "@/shared/api/schemas/repo";
 
 import { repoService } from "@/server/services/repo.service";
-import { handlePrismaError } from "@/server/utils/handle-error";
+import { PaginationMetaSchema } from "@/server/utils/pagination";
 import { RepoSchema, StatusSchema } from "@/generated/zod";
 
-import { OpenApiErrorResponses, RepoFilterSchema } from "../shared";
+import { OpenApiErrorResponses, RepoFilterSchema } from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const PublicRepoSchema = RepoSchema.extend({
@@ -37,11 +36,7 @@ export const repoRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const newRepo = await repoService.createRepo(
-        ctx.prisma,
-        Number(ctx.session.user.id),
-        input.url
-      );
+      const newRepo = await repoService.createRepo(ctx.db, Number(ctx.session.user.id), input.url);
 
       return {
         message: "Repository added",
@@ -66,15 +61,7 @@ export const repoRouter = createTRPCRouter({
     .input(z.object({ id: z.uuid() }))
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.db.repo.delete({
-          where: { publicId: input.id },
-        });
-
-        return { message: "Repository deleted", success: true };
-      } catch (error) {
-        handlePrismaError(error, { notFound: "Repository not found" });
-      }
+      return repoService.delete(ctx.db, input.id);
     }),
 
   deleteAll: protectedProcedure
@@ -93,16 +80,7 @@ export const repoRouter = createTRPCRouter({
     .input(z.void())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
-      try {
-        const deletedRepoCount = await ctx.db.repo.deleteMany();
-        if (deletedRepoCount.count === 0) {
-          return { message: "No repositories found", success: false };
-        }
-
-        return { message: "All repositories have been deleted", success: true };
-      } catch (error) {
-        handlePrismaError(error, { notFound: "Repositories not found" });
-      }
+      return repoService.deleteAll(ctx.db);
     }),
 
   deleteByOwner: protectedProcedure
@@ -131,17 +109,7 @@ export const repoRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.db.repo.deleteMany({
-        where: {
-          owner: { equals: input.owner, mode: "insensitive" },
-        },
-      });
-
-      return {
-        count: result.count,
-        message: `Deleted ${result.count} repositories for ${input.owner}`,
-        success: true,
-      };
+      return repoService.deleteByOwner(ctx.db, input.owner);
     }),
 
   getAll: protectedProcedure
@@ -171,76 +139,11 @@ export const repoRouter = createTRPCRouter({
             techDebtScore: z.number().nullish(),
           })
         ),
-        meta: z.object({
-          currentPage: z.number().int(),
-          filteredCount: z.number().int(),
-          nextCursor: z.number().int().optional(),
-          pageSize: z.number().int(),
-          searchQuery: z.string().optional(),
-          totalCount: z.number().int(),
-          totalPages: z.number().int(),
-        }),
+        meta: PaginationMetaSchema,
       })
     )
     .query(async ({ ctx, input }) => {
-      const { cursor, limit, owner, search, sortBy, sortOrder, status, visibility } = input;
-      const page = Math.min(Math.max(1, cursor ?? 1), 1000000);
-
-      const where = repoService.buildWhereClause({ owner, search, status, visibility });
-
-      const contextWhere: typeof where =
-        owner == null ? {} : { owner: { equals: owner, mode: "insensitive" } };
-
-      const [items, totalCount, filteredCount] = await Promise.all([
-        ctx.db.repo.findMany({
-          include: {
-            analyses: {
-              orderBy: { createdAt: "desc" },
-              select: {
-                complexityScore: true,
-                createdAt: true,
-                onboardingScore: true,
-                score: true,
-                securityScore: true,
-                status: true,
-                techDebtScore: true,
-              },
-              take: 1,
-            },
-          },
-          orderBy: { [sortBy]: sortOrder },
-          skip: (page - 1) * limit,
-          take: limit,
-          where,
-        }),
-        ctx.db.repo.count({ where: contextWhere }),
-        ctx.db.repo.count({ where }),
-      ]);
-
-      const totalPages = Math.max(1, Math.ceil(filteredCount / limit));
-
-      return {
-        items: items.map((repo) => ({
-          ...repo,
-          complexityScore: repo.analyses[0]?.complexityScore ?? null,
-          healthScore: repo.analyses[0]?.score ?? null,
-          id: repo.publicId,
-          lastAnalysisDate: repo.analyses[0]?.createdAt ?? null,
-          onboardingScore: repo.analyses[0]?.onboardingScore ?? null,
-          securityScore: repo.analyses[0]?.securityScore ?? null,
-          status: repo.analyses[0]?.status ?? Status.NEW,
-          techDebtScore: repo.analyses[0]?.techDebtScore ?? null,
-        })),
-        meta: {
-          currentPage: page,
-          filteredCount,
-          nextCursor: page < totalPages ? page + 1 : undefined,
-          pageSize: limit,
-          searchQuery: search,
-          totalCount,
-          totalPages,
-        },
-      };
+      return repoService.getAll(ctx.db, input);
     }),
 
   getByName: protectedProcedure
@@ -264,24 +167,7 @@ export const repoRouter = createTRPCRouter({
     )
     .output(PublicRepoSchema.extend({ message: z.string(), status: StatusSchema }).nullable())
     .query(async ({ ctx, input }) => {
-      const repo = await ctx.db.repo.findFirst({
-        include: {
-          analyses: { orderBy: { createdAt: "desc" }, take: 1 },
-        },
-        where: {
-          name: { equals: input.name, mode: "insensitive" },
-          owner: { equals: input.owner, mode: "insensitive" },
-        },
-      });
-
-      if (repo == null) return null;
-
-      return {
-        ...repo,
-        id: repo.publicId,
-        message: "Repository found",
-        status: repo.analyses[0]?.status ?? Status.NEW,
-      };
+      return repoService.getByName(ctx.db, input.owner, input.name);
     }),
 
   getByOwner: protectedProcedure
@@ -304,19 +190,7 @@ export const repoRouter = createTRPCRouter({
     )
     .output(PublicRepoSchema.extend({ message: z.string() }).nullable())
     .query(async ({ ctx, input }) => {
-      const repo = await ctx.db.repo.findFirst({
-        where: {
-          owner: { equals: input.owner, mode: "insensitive" },
-        },
-      });
-
-      if (repo == null) return null;
-
-      return {
-        ...repo,
-        id: repo.publicId,
-        message: "Owner found",
-      };
+      return repoService.getByOwner(ctx.db, input.owner);
     }),
 
   getSlim: protectedProcedure
@@ -342,12 +216,6 @@ export const repoRouter = createTRPCRouter({
       )
     )
     .query(async ({ ctx, input }) => {
-      const repos = await ctx.db.repo.findMany({
-        orderBy: { name: "asc" },
-        select: { name: true, owner: true, publicId: true },
-        ...(input.limit != null && { take: Math.floor(input.limit) }),
-      });
-
-      return repos.map((r) => ({ id: r.publicId, name: r.name, owner: r.owner }));
+      return repoService.getSlim(ctx.db, input.limit);
     }),
 });

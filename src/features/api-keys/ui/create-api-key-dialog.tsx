@@ -5,9 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import type { z } from "zod/v4-mini";
 
-import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
+import { CreateApiKeySchema, type CreateApiKeyInput } from "@/shared/api/schemas/api-key";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -35,12 +34,12 @@ export function CreateApiKeyDialog() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
 
-  const form = useForm<z.infer<typeof CreateApiKeySchema>>({
+  const form = useForm<CreateApiKeyInput>({
     defaultValues: { description: "", name: "" },
     resolver: zodResolver(CreateApiKeySchema),
   });
 
-  const onSubmit = (values: z.infer<typeof CreateApiKeySchema>) => {
+  const onSubmit = (values: CreateApiKeyInput) => {
     create.mutate(values, {
       onSuccess: (data) => {
         setCreatedKey(data.key);

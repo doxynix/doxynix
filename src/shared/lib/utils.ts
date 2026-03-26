@@ -142,8 +142,12 @@ const SENSITIVE_KEYS = new Set([
   "authorization",
   "cookie",
   "set-cookie",
+  "identifier",
   "proxy-authorization",
   "x-github-token",
+  "imagekey",
+  "session_state",
+  "state",
 ]);
 
 const GITHUB_TOKEN_REGEX = /(gh[pousr]_\w{36,})/g;

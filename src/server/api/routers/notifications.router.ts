@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 import { notificationsService } from "@/server/services/notifications.service";
-import { handlePrismaError } from "@/server/utils/handle-error";
+import { PaginationMetaSchema } from "@/server/utils/pagination";
 import { NotificationSchema } from "@/generated/zod";
 
 import {
   NotificationsBulkFilterSchema,
   NotificationsFilterSchema,
   OpenApiErrorResponses,
-} from "../shared";
+} from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const NotificationsPublicSchema = NotificationSchema.extend({
@@ -37,15 +37,7 @@ export const notificationRouter = createTRPCRouter({
     .input(z.object({ id: z.uuid() }))
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.db.notification.delete({
-          where: { publicId: input.id },
-        });
-
-        return { message: "Notification deleted", success: true };
-      } catch (error) {
-        handlePrismaError(error, { notFound: "Notification not found" });
-      }
+      return notificationsService.deleteOne(ctx.db, input.id);
     }),
 
   deleteRead: protectedProcedure
@@ -63,22 +55,7 @@ export const notificationRouter = createTRPCRouter({
     .input(NotificationsBulkFilterSchema)
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      const { repoName, repoOwner, search, type } = input;
-      const where = notificationsService.buildWhereClause({
-        repoName,
-        repoOwner,
-        search,
-        type,
-      });
-
-      try {
-        await ctx.db.notification.deleteMany({
-          where: { ...where, isRead: true },
-        });
-        return { message: "All read notifications were deleted", success: true };
-      } catch (error) {
-        handlePrismaError(error, { notFound: "Notification not found" });
-      }
+      return notificationsService.deleteRead(ctx.db, input);
     }),
 
   getAll: protectedProcedure
@@ -98,60 +75,11 @@ export const notificationRouter = createTRPCRouter({
     .output(
       z.object({
         items: z.array(NotificationsPublicSchema),
-        meta: z.object({
-          currentPage: z.number().int(),
-          filteredCount: z.number().int(),
-          nextCursor: z.number().int().optional(),
-          pageSize: z.number().int(),
-          searchQuery: z.string().optional(),
-          totalCount: z.number().int(),
-          totalPages: z.number().int(),
-        }),
+        meta: PaginationMetaSchema,
       })
     )
     .query(async ({ ctx, input }) => {
-      const { cursor, isRead, limit, repoName, repoOwner, search, type } = input;
-      const requestedPage = Math.min(Math.max(1, cursor ?? 1), 1000000);
-      const where = notificationsService.buildWhereClause({
-        isRead,
-        repoName,
-        repoOwner,
-        search,
-        type,
-      });
-
-      const [totalCount, filteredCount] = await Promise.all([
-        ctx.db.notification.count(),
-        ctx.db.notification.count({ where }),
-      ]);
-
-      const totalPages = Math.max(1, Math.ceil(filteredCount / limit));
-      const page = Math.min(requestedPage, totalPages);
-
-      const items = await ctx.db.notification.findMany({
-        include: { repo: true },
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * limit,
-        take: limit,
-        where,
-      });
-
-      return {
-        items: items.map((n) => ({
-          ...n,
-          id: n.publicId,
-          repo: n.repo != null ? { name: n.repo.name, owner: n.repo.owner } : null,
-        })),
-        meta: {
-          currentPage: page,
-          filteredCount,
-          nextCursor: page < totalPages ? page + 1 : undefined,
-          pageSize: limit,
-          searchQuery: search,
-          totalCount,
-          totalPages,
-        },
-      };
+      return notificationsService.getAll(ctx.db, input);
     }),
 
   getStats: protectedProcedure
@@ -163,24 +91,7 @@ export const notificationRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx }) => {
-      try {
-        const groups = await ctx.db.notification.groupBy({
-          _count: { _all: true },
-          by: ["isRead"],
-        });
-
-        return groups.reduce(
-          (acc, group) => {
-            if (group.isRead === true) acc.read = group._count._all;
-            else acc.unread = group._count._all;
-            acc.total += group._count._all;
-            return acc;
-          },
-          { read: 0, total: 0, unread: 0 }
-        );
-      } catch (error) {
-        handlePrismaError(error);
-      }
+      return notificationsService.getStats(ctx.db);
     }),
 
   markAllAsRead: protectedProcedure
@@ -204,35 +115,7 @@ export const notificationRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { repoName, repoOwner, search, type } = input;
-      const where = notificationsService.buildWhereClause({
-        repoName,
-        repoOwner,
-        search,
-        type,
-      });
-
-      try {
-        const updatedCount = (
-          await ctx.db.notification.updateMany({
-            data: {
-              isRead: true,
-            },
-            where: {
-              ...where,
-              isRead: false,
-            },
-          })
-        ).count;
-
-        return {
-          message: `Marked ${updatedCount} notifications as read`,
-          success: true,
-          updatedCount,
-        };
-      } catch (error) {
-        handlePrismaError(error);
-      }
+      return notificationsService.markAllAsRead(ctx.db, input);
     }),
 
   markAs: protectedProcedure
@@ -251,14 +134,6 @@ export const notificationRouter = createTRPCRouter({
     .input(z.object({ id: z.uuid(), isRead: z.boolean() }))
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.db.notification.update({
-          data: { isRead: input.isRead },
-          where: { publicId: input.id },
-        });
-        return { message: input.isRead ? "Marked as read" : "Marked as unread", success: true };
-      } catch (error) {
-        handlePrismaError(error, { notFound: "Notification not found" });
-      }
+      return notificationsService.markAs(ctx.db, input.id, input.isRead);
     }),
 });

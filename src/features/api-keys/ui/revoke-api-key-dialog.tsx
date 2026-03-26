@@ -43,6 +43,10 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
           <Button
             size="icon"
             variant="ghost"
+            onClick={(e) => {
+              e.preventDefault();
+              setOpen(true);
+            }}
             className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
           >
             <Trash2 className="size-4" />

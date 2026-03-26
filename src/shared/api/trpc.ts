@@ -46,9 +46,9 @@ export type RepoDetailsOverview = RouterOutput["repoDetails"]["getOverview"];
 
 export type UiRepoHistory = RouterOutput["repoDetails"]["getHistory"];
 
-export type FileContent = RouterOutput["repoGithub"]["getFileContent"];
+export type FileContent = RouterOutput["githubBrowse"]["getFileContent"];
 
-export type FileMeta = RouterOutput["repoGithub"]["getFileContent"]["meta"];
+export type FileMeta = RouterOutput["githubBrowse"]["getFileContent"]["meta"];
 
 export type RepoMetricsItem = RouterOutput["repoDetails"]["getDetailedMetrics"];
 

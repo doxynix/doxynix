@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
@@ -22,6 +22,8 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
   const { data: session, update: updateSession } = useSession();
   const utils = trpc.useUtils();
   const t = useTranslations("Dashboard");
+
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const propsRef = useRef(props);
   useEffect(() => {
@@ -62,7 +64,9 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
   });
 
   const removeAvatar = trpc.user.removeAvatar.useMutation({
-    onError: (err) => toast.error(err.message),
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: async () => {
       toast.success(t("settings_profile_remove_avatar_toast_success"));
 
@@ -73,37 +77,47 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
     },
   });
 
-  const { isUploading, startUpload } = useUploadThing("avatarUploader");
+  const { startUpload } = useUploadThing("avatarUploader");
 
   const uploadAvatar = async (files: File[]) => {
     const file = files[0];
+
+    setIsProcessing(true);
 
     const localPreviewUrl = URL.createObjectURL(file);
     propsRef.current.onAvatarUpdateSuccess?.(localPreviewUrl);
 
     const processUpload = async () => {
-      const { default: imageCompression } = await import("browser-image-compression");
+      try {
+        const { default: imageCompression } = await import("browser-image-compression");
 
-      const compressedBlob = await imageCompression(file, {
-        fileType: "image/webp",
-        initialQuality: 0.8,
-        maxSizeMB: 0.1,
-        maxWidthOrHeight: 512,
-        useWebWorker: true,
-      });
+        const compressedBlob = await imageCompression(file, {
+          fileType: "image/webp",
+          initialQuality: 0.8,
+          maxSizeMB: 0.1,
+          maxWidthOrHeight: 512,
+          useWebWorker: true,
+        });
 
-      const fileName = file.name.replace(/\.[^/.]+$/, ".webp");
-      const finalFile = new File([compressedBlob], fileName, { type: "image/webp" });
+        const fileName = file.name.replace(/\.[^/.]+$/, ".webp");
+        const finalFile = new File([compressedBlob], fileName, { type: "image/webp" });
 
-      const res = await startUpload([finalFile]);
-      if (!res?.[0]) throw new Error("Upload failed");
+        const res = await startUpload([finalFile]);
+        if (!res?.[0]) throw new Error("Upload failed");
 
-      const uploadedFile = res[0];
+        const uploadedFile = res[0];
 
-      await updateSession({ image: uploadedFile.ufsUrl });
-      await utils.user.me.invalidate();
+        await updateSession({ image: uploadedFile.ufsUrl });
+        await utils.user.me.invalidate();
 
-      return uploadedFile;
+        return uploadedFile;
+      } catch (error) {
+        propsRef.current.onAvatarUpdateSuccess?.(session?.user.image ?? "");
+        throw error;
+      } finally {
+        setIsProcessing(false);
+        URL.revokeObjectURL(localPreviewUrl);
+      }
     };
 
     toast.promise(processUpload(), {
@@ -123,7 +137,6 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
         }
         return message;
       },
-      loading: "Optimizing & uploading...",
       success: (data) => {
         propsRef.current.onAvatarUpdateSuccess?.(data.ufsUrl);
         URL.revokeObjectURL(localPreviewUrl);
@@ -134,8 +147,8 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
 
   return {
     deleteProfile,
-    isPending: updateProfile.isPending || removeAvatar.isPending || isUploading,
-    isUploading,
+    isPending: updateProfile.isPending || removeAvatar.isPending || isProcessing,
+    isUploading: isProcessing,
     removeAvatar,
     updateProfile,
     uploadAvatar,
