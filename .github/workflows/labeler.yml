@@ -16,6 +16,6 @@ jobs:
           fetch-depth: 0
 
       - name: Run labeler
-        uses: actions/labeler@e52e4fb63ed5cd0e07abaad9826b2a893ccb921f
+        uses: actions/labeler@c5dadc2a45784a4b6adfcd20fea3465da3a5f904
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}

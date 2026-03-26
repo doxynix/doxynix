@@ -109,7 +109,7 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
+        uses: pnpm/action-setup@738f428026a1f5a72398de22aeed83d859c4a660
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
@@ -150,7 +150,7 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
+        uses: pnpm/action-setup@738f428026a1f5a72398de22aeed83d859c4a660
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
@@ -195,7 +195,7 @@ jobs:
           extra_args: --only-verified
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
+        uses: pnpm/action-setup@738f428026a1f5a72398de22aeed83d859c4a660
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
@@ -266,7 +266,7 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
+        uses: pnpm/action-setup@738f428026a1f5a72398de22aeed83d859c4a660
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
@@ -287,7 +287,7 @@ jobs:
         run: pnpm test:coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/coverage-final.json
@@ -313,7 +313,7 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
+        uses: pnpm/action-setup@738f428026a1f5a72398de22aeed83d859c4a660
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
@@ -389,7 +389,7 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
+        uses: pnpm/action-setup@738f428026a1f5a72398de22aeed83d859c4a660
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
@@ -454,7 +454,7 @@ jobs:
           path: .
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
+        uses: pnpm/action-setup@738f428026a1f5a72398de22aeed83d859c4a660
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
