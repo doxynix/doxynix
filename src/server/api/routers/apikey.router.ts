@@ -162,11 +162,7 @@ export const apiKeyRouter = createTRPCRouter({
         tags: ["api-keys"],
       },
     })
-    .input(
-      CreateApiKeySchema.extend({
-        id: z.uuid(),
-      })
-    )
+    .input(z.intersection(CreateApiKeySchema, z.object({ id: z.uuid() })))
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       try {

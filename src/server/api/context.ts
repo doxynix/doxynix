@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "../auth/options";
 import { prisma } from "../db/db";
-import { redisClient } from "../lib/redis";
+import { redisClient } from "../infrastructure/redis";
 import { getIp, getUa } from "../utils/request-context";
 
 type Props = {

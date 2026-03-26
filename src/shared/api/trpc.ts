@@ -2,7 +2,7 @@ import { createTRPCReact } from "@trpc/react-query";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 // eslint-disable-next-line boundaries/element-types
-import type { AppRouter } from "@/server/trpc/router";
+import type { AppRouter } from "@/server/api/routers";
 
 export const trpc = createTRPCReact<AppRouter>();
 

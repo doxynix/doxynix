@@ -5,7 +5,7 @@ import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import type { AIResult } from "@/server/ai/schemas";
 import type { RepoMetrics } from "@/server/ai/types";
 import { prisma } from "@/server/db/db";
-import { realtimeServer } from "@/server/lib/realtime";
+import { realtimeServer } from "@/server/infrastructure/realtime";
 import { logger } from "@/server/logger/logger";
 import { GitHubAuthRequiredError, githubService } from "@/server/services/github.service";
 import { calculateCodeMetrics, calculateHealthScore } from "@/server/utils/metrics";

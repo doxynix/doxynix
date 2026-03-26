@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { UTApi } from "uploadthing/server";
-import z from "zod";
+import { z } from "zod";
 
 import { UpdateProfileSchema } from "@/shared/api/schemas/user";
 

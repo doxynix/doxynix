@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { REALTIME_CONFIG, type AblyCapability } from "@/shared/constants/realtime";
 
 import { getServerAuthSession } from "@/server/auth/options";
-import { realtimeServer } from "@/server/lib/realtime";
+import { realtimeServer } from "@/server/infrastructure/realtime";
 import { logger } from "@/server/logger/logger";
 
 const ONE_HOUR = 3600000;

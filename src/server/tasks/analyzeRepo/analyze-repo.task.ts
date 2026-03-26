@@ -6,7 +6,7 @@ import { task } from "@trigger.dev/sdk/v3";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { prisma } from "@/server/db/db";
-import { realtimeServer } from "@/server/lib/realtime";
+import { realtimeServer } from "@/server/infrastructure/realtime";
 import { logger } from "@/server/logger/logger";
 
 import { generateDeepDocs, runAiPipeline } from "../utils/ai-pipeline";

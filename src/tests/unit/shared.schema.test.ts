@@ -4,7 +4,7 @@ import {
   NotificationsBulkFilterSchema,
   NotificationsFilterSchema,
   RepoFilterSchema,
-} from "@/server/trpc/shared";
+} from "@/server/api/shared";
 
 describe("shared schemas", () => {
   it("rejects notification repo filters when only one identity field is provided", () => {

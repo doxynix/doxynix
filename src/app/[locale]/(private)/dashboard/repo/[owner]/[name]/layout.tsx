@@ -8,7 +8,7 @@ import { RepoDetailsTabs } from "@/entities/repo-details";
 
 import { RepoDetailsHeader } from "@/features/repo";
 
-import { api } from "@/server/trpc/server";
+import { api } from "@/server/api/server";
 
 type Props = {
   children: ReactNode;

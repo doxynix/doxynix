@@ -7,7 +7,7 @@ import { NextRequest } from "next/server";
 import { IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
 
 import { createContext } from "./context";
-import { appRouter } from "./router";
+import { appRouter } from "./routers";
 import { createCallerFactory } from "./trpc";
 
 const caller = createCallerFactory(appRouter);

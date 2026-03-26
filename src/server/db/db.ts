@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { PrismaPg } from "@prisma/adapter-pg";
-import pkg, { type PrismaClient as PrismaClientType } from "@prisma/client";
+import pkg, { type Prisma, type PrismaClient as PrismaClientType } from "@prisma/client";
 import pg from "pg";
 
 import { IS_DEV, IS_TEST } from "@/shared/constants/env.client";
@@ -71,13 +71,15 @@ export const prisma = softDeleteClient.$extends({
           const userId = ctxStore?.userId ?? null;
           const requestId = ctxStore?.requestId ?? crypto.randomUUID();
 
+          const cleanPayload = sanitizePayload(args) as Prisma.InputJsonValue;
+
           (baseClient as PrismaClientType).auditLog
             .create({
               data: {
                 ip: ctxStore?.ip ?? "system",
                 model,
                 operation,
-                payload: sanitizePayload(args),
+                payload: cleanPayload,
                 requestId,
                 userAgent: ctxStore?.userAgent ?? "internal",
                 userId: userId == null ? null : Number(userId),
