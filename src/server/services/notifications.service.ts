@@ -114,7 +114,7 @@ export const notificationsService = {
     const [items, totalCount, filteredCount] = await Promise.all([
       db.notification.findMany({
         include: { repo: { select: { name: true, owner: true } } },
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         skip,
         take: limit,
         where,

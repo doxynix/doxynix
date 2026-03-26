@@ -115,7 +115,7 @@ export function AppCommandMenu() {
       case "navigation":
       case undefined:
         if (item.href != null) {
-          router.push(item.href as Route);
+          navigate(item.href);
         }
         break;
       default:

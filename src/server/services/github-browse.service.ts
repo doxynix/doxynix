@@ -108,6 +108,18 @@ export const githubBrowseService = {
           message: "Connect your GitHub account or install the app to access repository files.",
         });
       }
+      if (isOctokitError(error) && error.status === 404) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Repository or branch not found.",
+        });
+      }
+      if (isOctokitError(error) && error.status === 403) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "GitHub denied access to repository files.",
+        });
+      }
       throw error;
     }
 

@@ -150,17 +150,20 @@ const SENSITIVE_KEYS = new Set([
   "state",
 ]);
 
-const GITHUB_TOKEN_REGEX = /(gh[pousr]_\w{36,})/g;
+const GITHUB_TOKEN_REGEX = /(github_pat_\w+|gh[pousr]_\w{36,})/g;
 const BEARER_TOKEN_REGEX = /([Bb]earer\s+)[a-zA-Z0-9\-._~+/]+=*/g;
 
 const replacer = (key: string, value: unknown): unknown => {
-  if (key && SENSITIVE_KEYS.has(key.toLowerCase())) {
+  const lowerKey = key.toLowerCase();
+  const normalizedKey = lowerKey.replace(/[_-]/g, "");
+
+  if (SENSITIVE_KEYS.has(lowerKey) || SENSITIVE_KEYS.has(normalizedKey)) {
     return "[REDACTED]";
   }
 
   if (typeof value === "string") {
     let safeString = value;
-    if (safeString.includes("gh")) {
+    if (safeString.includes("gh") || safeString.includes("github_pat_")) {
       safeString = safeString.replace(GITHUB_TOKEN_REGEX, "[REDACTED_GH_TOKEN]");
     }
     if (safeString.includes("earer")) {

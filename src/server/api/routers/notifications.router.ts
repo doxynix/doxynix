@@ -53,7 +53,13 @@ export const notificationRouter = createTRPCRouter({
       },
     })
     .input(NotificationsBulkFilterSchema)
-    .output(z.object({ message: z.string(), success: z.boolean() }))
+    .output(
+      z.object({
+        deletedCount: z.number().int().min(0),
+        message: z.string(),
+        success: z.boolean(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       return notificationsService.deleteRead(ctx.db, input);
     }),
