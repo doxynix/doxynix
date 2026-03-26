@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.18.10](https://github.com/doxynix/doxynix/compare/v1.18.9...v1.18.10) (2026-03-25)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies to v4.25.9 ([#779](https://github.com/doxynix/doxynix/issues/779)) ([97361fa](https://github.com/doxynix/doxynix/commit/97361fae514019b92212f635d9ddb8d821cfa0af))
+
+## [1.18.9](https://github.com/doxynix/doxynix/compare/v1.18.8...v1.18.9) (2026-03-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @sentry/nextjs to v10.46.0 ([#775](https://github.com/doxynix/doxynix/issues/775)) ([7442c9a](https://github.com/doxynix/doxynix/commit/7442c9a4acdec16515b589abc2306b5cfdf499ed))
+
+## [1.18.8](https://github.com/doxynix/doxynix/compare/v1.18.7...v1.18.8) (2026-03-25)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#768](https://github.com/doxynix/doxynix/issues/768)) ([3e4d5c2](https://github.com/doxynix/doxynix/commit/3e4d5c2e957d8f82d165613fe2219ec8654417c7))
+
+## [1.18.7](https://github.com/doxynix/doxynix/compare/v1.18.6...v1.18.7) (2026-03-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @codemirror/language to v6.12.3 ([#762](https://github.com/doxynix/doxynix/issues/762)) ([b287160](https://github.com/doxynix/doxynix/commit/b28716082c209c7f38e1db1661ad4708ecb5f2b9))
+
+## [1.18.6](https://github.com/doxynix/doxynix/compare/v1.18.5...v1.18.6) (2026-03-25)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#757](https://github.com/doxynix/doxynix/issues/757)) ([3f32216](https://github.com/doxynix/doxynix/commit/3f32216124b120243b139805d43eae8e41f768d0))
+
+## [1.18.5](https://github.com/doxynix/doxynix/compare/v1.18.4...v1.18.5) (2026-03-24)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#742](https://github.com/doxynix/doxynix/issues/742)) ([5bbf70e](https://github.com/doxynix/doxynix/commit/5bbf70ef9637788cf9804a06ba436c66595de364))
+* **deps:** update dependency lucide-react to v1 ([#744](https://github.com/doxynix/doxynix/issues/744)) ([5389211](https://github.com/doxynix/doxynix/commit/5389211f251205d44e0546177a7ba9b652b43ab6))
+
 ## [1.18.4](https://github.com/doxynix/doxynix/compare/v1.18.3...v1.18.4) (2026-03-23)
 
 

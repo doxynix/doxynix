@@ -82,7 +82,7 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
         with:
           fetch-depth: 2
-      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d
+      - uses: dorny/paths-filter@61f87a10cd2c304679af17bb73ef192addf33c1c
         id: filter
         with:
           filters: |
@@ -109,12 +109,12 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@58e6119fe4f3092a76a7771efb55e04d25b6b26f
+        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
-          node-version: 24.14.0
+          node-version: 24.14.1
           cache: "pnpm"
 
       - name: Install dependencies
@@ -150,12 +150,12 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@58e6119fe4f3092a76a7771efb55e04d25b6b26f
+        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
-          node-version: 24.14.0
+          node-version: 24.14.1
           cache: "pnpm"
 
       - name: Install dependencies
@@ -189,18 +189,18 @@ jobs:
 
       - name: Secret Scanning (TruffleHog)
         # v3.93.4
-        uses: trufflesecurity/trufflehog@6c64db94d5b2e09d7e0948fb6bd3166cc6fffbc7
+        uses: trufflesecurity/trufflehog@586f66d7886cd0b037c7c245d4a6e34ef357ab10
         with:
           path: ./
           extra_args: --only-verified
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@58e6119fe4f3092a76a7771efb55e04d25b6b26f
+        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
-          node-version: 24.14.0
+          node-version: 24.14.1
           cache: "pnpm"
 
       - name: Install dependencies
@@ -266,12 +266,12 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@58e6119fe4f3092a76a7771efb55e04d25b6b26f
+        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
-          node-version: 24.14.0
+          node-version: 24.14.1
           cache: "pnpm"
 
       - name: Install dependencies
@@ -313,12 +313,12 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@58e6119fe4f3092a76a7771efb55e04d25b6b26f
+        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
-          node-version: 24.14.0
+          node-version: 24.14.1
           cache: "pnpm"
 
       - name: Install dependencies
@@ -389,12 +389,12 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@58e6119fe4f3092a76a7771efb55e04d25b6b26f
+        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
-          node-version: 24.14.0
+          node-version: 24.14.1
           cache: "pnpm"
 
       - name: Install dependencies
@@ -454,12 +454,12 @@ jobs:
           path: .
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@58e6119fe4f3092a76a7771efb55e04d25b6b26f
+        uses: pnpm/action-setup@62bce642757454630341df504b8b9ee51f1332da
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
-          node-version: 24.14.0
+          node-version: 24.14.1
           cache: "pnpm"
 
       - name: Install dependencies

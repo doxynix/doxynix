@@ -161,6 +161,10 @@ const replacer = (key: string, value: unknown): unknown => {
     return "[REDACTED]";
   }
 
+  if (typeof value === "bigint") {
+    return value.toString();
+  }
+
   if (typeof value === "string") {
     let safeString = value;
     if (safeString.includes("gh") || safeString.includes("github_pat_")) {
