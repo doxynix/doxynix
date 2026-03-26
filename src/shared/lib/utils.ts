@@ -1,22 +1,11 @@
+import { Temporal } from "@js-temporal/polyfill";
 import { clsx, type ClassValue } from "clsx";
-import { format, type Locale as DateFnsLocale } from "date-fns";
-import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
-import { de, enUS, es, fr, ptBR, ru, zhCN } from "date-fns/locale";
+import safeStringify from "fast-safe-stringify";
 import { twMerge } from "tailwind-merge";
 
 import { IS_PROD } from "../constants/env.client";
 import { EXTENSION_MAP, LANGUAGE_COLORS } from "../constants/languages";
-import { DEFAULT_LOCALE, type Locale } from "../constants/locales";
-
-const dateFnsLocales: Record<Locale, DateFnsLocale> = {
-  de: de,
-  en: enUS,
-  es: es,
-  fr: fr,
-  "pt-BR": ptBR,
-  ru: ru,
-  "zh-CN": zhCN,
-};
+import { DEFAULT_LOCALE } from "../constants/locales";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -34,17 +23,38 @@ export function formatRelativeTime(
 
   try {
     const d = new Date(date);
-
     if (Number.isNaN(d.getTime())) return defaultValue;
 
-    const locale = dateFnsLocales[localeStr as Locale];
+    const timeZone = Temporal.Now.timeZoneId();
 
-    const result = formatDistanceToNow(d, {
-      addSuffix: true,
-      locale: locale,
+    const nowZdt = Temporal.Now.zonedDateTimeISO(timeZone);
+
+    const targetZdt = Temporal.Instant.fromEpochMilliseconds(d.getTime()).toZonedDateTimeISO(
+      timeZone
+    );
+
+    const duration = nowZdt.since(targetZdt, {
+      largestUnit: "year",
     });
 
-    return result.toLowerCase();
+    const rtf = new Intl.RelativeTimeFormat(localeStr, { numeric: "auto" });
+
+    const sign = duration.sign < 0 ? 1 : -1;
+
+    const years = Math.abs(duration.years);
+    const months = Math.abs(duration.months);
+    const weeks = Math.abs(duration.weeks);
+    const days = Math.abs(duration.days);
+    const hours = Math.abs(duration.hours);
+    const minutes = Math.abs(duration.minutes);
+
+    if (years > 0) return rtf.format(sign * years, "year");
+    if (months > 0) return rtf.format(sign * months, "month");
+    if (weeks > 0) return rtf.format(sign * weeks, "week");
+    if (days > 0) return rtf.format(sign * days, "day");
+    if (hours > 0) return rtf.format(sign * hours, "hour");
+
+    return rtf.format(sign * Math.max(1, minutes), "minute");
   } catch (error) {
     console.error("Date formatting error:", error);
     return defaultValue;
@@ -55,9 +65,24 @@ export function formatFullDate(
   date: Date | string | number,
   localeStr: string = DEFAULT_LOCALE
 ): string {
-  const locale = dateFnsLocales[localeStr as keyof typeof dateFnsLocales];
+  try {
+    const d = new Date(date);
+    if (Number.isNaN(d.getTime())) return "—";
 
-  return format(new Date(date), "d MMMM yyyy, HH:mm", { locale: locale });
+    const instant = Temporal.Instant.fromEpochMilliseconds(d.getTime());
+
+    return instant.toLocaleString(localeStr, {
+      day: "numeric",
+      hour: "2-digit",
+      hour12: false,
+      minute: "2-digit",
+      month: "long",
+      timeZone: Temporal.Now.timeZoneId(),
+      year: "numeric",
+    });
+  } catch {
+    return "—";
+  }
 }
 
 export function isGitHubUrl(input: string): boolean {
@@ -94,47 +119,69 @@ export function isGitHubUrl(input: string): boolean {
   return parts.length === 2;
 }
 
-const SENSITIVE_FIELDS = new Set([
+const SENSITIVE_KEYS = new Set([
   "password",
-  "newPassword",
-  "passwordHash",
+  "newpassword",
+  "passwordhash",
   "hash",
   "salt",
   "token",
-  "sessionToken",
-  "verificationToken",
-  "identifier",
+  "sessiontoken",
+  "verificationtoken",
+  "gh_token",
   "access_token",
   "refresh_token",
   "id_token",
-  "hashedKey",
   "secret",
-  "clientSecret",
+  "clientsecret",
+  "hashedkey",
+  "apikey",
   "cvv",
-  "creditCard",
+  "creditcard",
   "iban",
+  "authorization",
+  "cookie",
+  "set-cookie",
+  "proxy-authorization",
+  "x-github-token",
 ]);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const sanitizePayload = (obj: any): any => {
+const GITHUB_TOKEN_REGEX = /(gh[pousr]_\w{36,})/g;
+const BEARER_TOKEN_REGEX = /([Bb]earer\s+)[a-zA-Z0-9\-._~+/]+=*/g;
+
+const replacer = (key: string, value: unknown): unknown => {
+  if (key && SENSITIVE_KEYS.has(key.toLowerCase())) {
+    return "[REDACTED]";
+  }
+
+  if (typeof value === "string") {
+    let safeString = value;
+    if (safeString.includes("gh")) {
+      safeString = safeString.replace(GITHUB_TOKEN_REGEX, "[REDACTED_GH_TOKEN]");
+    }
+    if (safeString.includes("earer")) {
+      safeString = safeString.replace(BEARER_TOKEN_REGEX, "$1[REDACTED]");
+    }
+    return safeString;
+  }
+
+  return value;
+};
+
+export const sanitizePayload = (obj: unknown): unknown => {
   if (obj == null || typeof obj !== "object") return obj;
 
-  if (Array.isArray(obj)) {
-    return obj.map(sanitizePayload);
-  }
+  try {
+    const redactedString = safeStringify(obj, replacer);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const newObj: any = {};
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      if (SENSITIVE_FIELDS.has(key)) {
-        newObj[key] = "***REDACTED***";
-      } else {
-        newObj[key] = sanitizePayload(obj[key]);
-      }
-    }
+    return JSON.parse(redactedString);
+  } catch (error) {
+    return {
+      _sanitization_error: true,
+      reason: error instanceof Error ? error.message : "Unknown error during stringify",
+      type_was: typeof obj,
+    };
   }
-  return newObj;
 };
 
 export const smoothScrollTo = (targetId: string, offset: number = 80, duration: number = 800) => {
@@ -253,4 +300,38 @@ export function clampIntegerParam(
   }
 
   return Math.min(max, Math.max(min, value));
+}
+
+export function isRouteActive(
+  pathname: string,
+  href: string | null | undefined,
+  exact?: boolean
+): boolean {
+  if (href == null) return false;
+
+  const normalize = (path: string) => {
+    const clean = path.replace(/\/$/, "");
+    return clean === "" ? "/" : clean;
+  };
+
+  const cleanPath = normalize(pathname);
+  const cleanHref = normalize(href);
+
+  if (exact === true) {
+    return cleanPath === cleanHref;
+  }
+
+  if (!cleanPath.startsWith(cleanHref)) return false;
+
+  if (cleanHref === "/" && cleanPath !== "/") {
+    const rootSegments = cleanPath.split("/").filter(Boolean);
+    return rootSegments.length <= 1;
+  }
+
+  const pathSegments = cleanPath.split("/").filter(Boolean);
+  const hrefSegments = cleanHref.split("/").filter(Boolean);
+
+  const depthDelta = pathSegments.length - hrefSegments.length;
+
+  return depthDelta <= 1;
 }

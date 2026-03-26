@@ -1,18 +1,14 @@
-import { useMemo } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { useCreateRepoDialogStore } from "@/entities/repo";
+import { useCreateRepoActions } from "@/entities/repo";
 
 export function useActionsHotkeys() {
-  const { openDialog: openCreateRepoDialog } = useCreateRepoDialogStore();
+  const { setOpen } = useCreateRepoActions();
 
-  const hotkeyActions = useMemo(() => {
-    const map: Record<string, () => void> = {
-      "c>n": openCreateRepoDialog,
-      // сюда добавляются новые действия
-    };
-    return map;
-  }, [openCreateRepoDialog]);
+  const hotkeyActions: Record<string, () => void> = {
+    "c>n": () => setOpen(true),
+    // сюда добавляются новые действия
+  };
 
   const hotkeys = Object.keys(hotkeyActions);
 

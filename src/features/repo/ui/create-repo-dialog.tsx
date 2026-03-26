@@ -32,7 +32,7 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { useCreateRepoDialogStore, useRepoActions } from "@/entities/repo";
+import { useCreateRepoActions, useCreateRepoOpen, useRepoActions } from "@/entities/repo";
 
 import { RepoItem } from "./repo-item";
 
@@ -45,8 +45,10 @@ export function CreateRepoDialog() {
     enabled: false,
   });
 
-  const { closeDialog, open } = useCreateRepoDialogStore();
+  const open = useCreateRepoOpen();
+  const { setOpen } = useCreateRepoActions();
   const { create } = useRepoActions();
+
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingOauth, setLoadingOauth] = useState(false);
@@ -106,7 +108,7 @@ export function CreateRepoDialog() {
   const onSubmit = (values: CreateRepoInput) => {
     create.mutate(values, {
       onSuccess: () => {
-        closeDialog();
+        setOpen(false);
         form.reset();
         void setPage(null);
       },
@@ -133,7 +135,7 @@ export function CreateRepoDialog() {
 
   const handleClose = (v: boolean) => {
     if (!v) {
-      closeDialog();
+      setOpen(v);
       form.reset();
     }
   };

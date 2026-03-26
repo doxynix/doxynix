@@ -4,7 +4,7 @@ import type { Route } from "next";
 
 import type { RepoStatus } from "@/shared/api/trpc";
 import { getRepoDetailsMenu } from "@/shared/constants/navigation";
-import { cn } from "@/shared/lib/utils";
+import { cn, isRouteActive } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
 import { Link, usePathname } from "@/i18n/routing";
 
@@ -14,6 +14,7 @@ export function RepoDetailsTabs({ name, owner, status }: Readonly<Props>) {
   const pathname = usePathname();
 
   const nav = getRepoDetailsMenu(owner, name);
+
   const filteredNav = nav.filter((item) => {
     if (status === "NEW") {
       return item.id === "overview" || item.id === "settings";
@@ -24,7 +25,7 @@ export function RepoDetailsTabs({ name, owner, status }: Readonly<Props>) {
   return (
     <div className="border-border no-scrollbar relative flex w-full items-center gap-2 overflow-x-auto border-b">
       {filteredNav.map((n) => {
-        const isActive = pathname === n.href;
+        const isActive = isRouteActive(pathname, n.href, n.exact);
 
         return (
           <Button key={n.label} asChild variant="ghost">

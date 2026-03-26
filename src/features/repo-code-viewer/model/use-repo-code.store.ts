@@ -7,20 +7,15 @@ type RepoCodeState = {
   actions: {
     setTreeApi: (api: TreeApi<FileNode> | undefined) => void;
   };
-
   treeApi: TreeApi<FileNode> | undefined;
 };
 
-export const useRepoCodeStore = create<RepoCodeState>((set) => ({
+const useStore = create<RepoCodeState>((set) => ({
   actions: {
-    setTreeApi: (api) =>
-      set((state) => {
-        if (state.treeApi === api) return state;
-        return { treeApi: api };
-      }),
+    setTreeApi: (api) => set({ treeApi: api }),
   },
-
   treeApi: undefined,
 }));
 
-export const useRepoCodeActions = () => useRepoCodeStore((s) => s.actions);
+export const useRepoTreeApi = () => useStore((s) => s.treeApi);
+export const useRepoCodeActions = () => useStore((s) => s.actions);

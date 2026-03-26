@@ -6,7 +6,7 @@ import { Lock, Mail, User2 } from "lucide-react";
 import type { User } from "next-auth";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import type z from "zod";
+import type { z } from "zod/v4-mini";
 
 import { UpdateProfileSchema } from "@/shared/api/schemas/user";
 import {

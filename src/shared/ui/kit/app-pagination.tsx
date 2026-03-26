@@ -78,11 +78,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
               isPrevDisabled ? "pointer-events-none opacity-50" : "cursor-pointer"
             )}
           >
-            {isPrevLoading ? (
-              <Spinner className="size-4 animate-spin" />
-            ) : (
-              <ChevronLeft className="size-4" />
-            )}
+            {isPrevLoading ? <Spinner /> : <ChevronLeft className="size-4" />}
             <span className="ml-1">{t("back")}</span>
           </PaginationLink>
         </PaginationItem>
@@ -137,11 +133,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             )}
           >
             <span className="mr-1">{t("next")}</span>
-            {isNextLoading ? (
-              <Spinner className="size-4 animate-spin" />
-            ) : (
-              <ChevronLeft className="size-4 rotate-180" />
-            )}
+            {isNextLoading ? <Spinner /> : <ChevronLeft className="size-4 rotate-180" />}
           </PaginationLink>
         </PaginationItem>
       </PaginationContent>

@@ -36,7 +36,7 @@ export function Flag({ alt, src }: Readonly<{ alt: string; src: string }>) {
       <Image
         unoptimized
         alt={alt}
-        height={15}
+        height={14}
         src={src}
         width={20}
         onLoad={() => {
@@ -44,7 +44,7 @@ export function Flag({ alt, src }: Readonly<{ alt: string; src: string }>) {
           setLoaded(true);
         }}
         className={cn(
-          "h-full w-full object-cover transition-opacity duration-300",
+          "object-cover transition-opacity duration-300",
           loaded ? "opacity-100" : "opacity-0"
         )}
       />

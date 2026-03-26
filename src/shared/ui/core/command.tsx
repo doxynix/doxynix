@@ -55,7 +55,7 @@ const CommandInput = React.forwardRef<
 >(({ className, isLoading, ...props }, ref) => (
   <div cmdk-input-wrapper="" className="flex items-center border-b px-3">
     {isLoading ? (
-      <Spinner className="mr-2 size-4 shrink-0 opacity-50" />
+      <Spinner className="mr-2 shrink-0 opacity-50" />
     ) : (
       <Search className="mr-2 size-4 shrink-0 opacity-50" />
     )}

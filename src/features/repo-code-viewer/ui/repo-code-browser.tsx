@@ -14,7 +14,7 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import { RepoStatusBar, type EditorStats } from "@/entities/repo-details";
 
-import { useRepoCodeStore } from "../model/use-repo-code.store";
+import { useRepoTreeApi } from "../model/use-repo-code.store";
 import { RepoCodeActionButton } from "./repo-code-action-button";
 import { RepoSearchPanel } from "./repo-code-search-panel";
 import { CodeSkeleton } from "./repo-code-skeleton";
@@ -28,7 +28,7 @@ type Props = { fileData: FileContent; path: string; repoId: string };
 
 export function RepoCodeBrowser({ fileData, path, repoId }: Readonly<Props>) {
   const [mode, setMode] = useState<"view" | "edit">("view");
-  const treeApi = useRepoCodeStore((s) => s.treeApi);
+  const treeApi = useRepoTreeApi();
   const [view, setView] = useState<EditorView | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);

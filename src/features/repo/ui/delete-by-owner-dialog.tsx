@@ -9,16 +9,17 @@ import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
 import { useRepoActions } from "@/entities/repo";
 
-type Props = { id: string };
+type Props = { owner: string };
 
-export function DeleteRepoDialog({ id }: Readonly<Props>) {
+export function DeleteByOwnerDialog({ owner }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("Dashboard");
-  const { deleteRepo } = useRepoActions();
+  const tsRich = (key: string) => t.rich(key, { strong: (chunks) => <strong>{chunks}</strong> });
+  const { deleteByOwner } = useRepoActions();
 
   const handleDelete = () => {
-    deleteRepo.mutate(
-      { id },
+    deleteByOwner.mutate(
+      { owner },
       {
         onSuccess: () => setOpen(false),
       }
@@ -28,26 +29,16 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
   return (
     <DangerActionDialog
       confirmLabel={t("settings_danger_delete_confirmation")}
-      description="You are about to delete repository!"
-      destructiveAlertContent={
-        <span>
-          This action is <strong>irreversible</strong>. Deleting repository entails the complete
-          removal of all generated documentation and calculated metrics.
-        </span>
-      }
-      isLoading={deleteRepo.isPending}
+      description={t("settings_danger_delete_all_repos_desc")}
+      destructiveAlertContent={tsRich("settings_danger_delete_all_repos_note_4")}
+      isLoading={deleteByOwner.isPending}
       open={open}
-      successAlertContent={
-        <span>
-          This action <strong>will not delete</strong> your GitHub/GitLab repositories. They will
-          simply stop appearing in this service.
-        </span>
-      }
+      successAlertContent={tsRich("settings_danger_delete_all_repos_note_3")}
       successAlertTitle={t("settings_danger_alert_title")}
-      title="Delete repository?"
+      title={`${t("settings_danger_delete_all_repos")}?`}
       trigger={
         <Button variant="destructive" className="w-fit cursor-pointer">
-          Delete repository <Trash2 className="size-4" />
+          {t("settings_danger_delete_all_repos")} <Trash2 className="size-4" />
         </Button>
       }
       onConfirm={handleDelete}

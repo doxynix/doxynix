@@ -80,6 +80,9 @@
     ]
   },
   "dependencies": {
+    "@ai-sdk/google": "3.0.52",
+    "@ai-sdk/groq": "3.0.31",
+    "@ai-sdk/openai": "3.0.47",
     "@codemirror/autocomplete": "6.20.1",
     "@codemirror/commands": "6.10.3",
     "@codemirror/language": "6.12.2",
@@ -89,10 +92,8 @@
     "@codemirror/state": "6.6.0",
     "@codemirror/theme-one-dark": "6.1.3",
     "@codemirror/view": "6.40.0",
-    "@ai-sdk/google": "3.0.52",
-    "@ai-sdk/groq": "3.0.31",
-    "@ai-sdk/openai": "3.0.47",
     "@hookform/resolvers": "5.2.2",
+    "@js-temporal/polyfill": "0.5.1",
     "@lezer/highlight": "1.2.3",
     "@marsidev/react-turnstile": "1.4.2",
     "@next-auth/prisma-adapter": "1.0.7",
@@ -132,6 +133,9 @@
     "@t3-oss/env-nextjs": "0.13.10",
     "@tanstack/react-query": "5.94.5",
     "@trigger.dev/sdk": "4.4.3",
+    "@trpc/client": "11.14.1",
+    "@trpc/react-query": "11.14.1",
+    "@trpc/server": "11.14.1",
     "@uiw/codemirror-extensions-color": "4.25.8",
     "@uiw/codemirror-extensions-events": "4.25.8",
     "@uiw/codemirror-extensions-hyper-link": "4.25.8",
@@ -141,9 +145,6 @@
     "@uiw/codemirror-theme-github": "4.25.8",
     "@uiw/codemirror-themes": "4.25.8",
     "@uiw/react-codemirror": "4.25.8",
-    "@trpc/client": "11.14.1",
-    "@trpc/react-query": "11.14.1",
-    "@trpc/server": "11.14.1",
     "@uploadthing/react": "7.3.3",
     "@upstash/ratelimit": "2.0.8",
     "@upstash/redis": "1.37.0",
@@ -152,12 +153,14 @@
     "@zenstackhq/runtime": "2.22.1",
     "ably": "2.21.0",
     "ai": "6.0.134",
+    "browser-image-compression": "2.0.2",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
     "cookie": "0.7.2",
     "date-fns": "4.1.0",
     "detect-language": "3.0.0",
+    "fast-safe-stringify": "2.1.1",
     "file-saver": "2.0.5",
     "isbinaryfile": "6.0.0",
     "js-cookie": "3.0.5",
@@ -323,5 +326,5 @@
     "zenstack": "2.22.1",
     "zod-prisma-types": "3.3.10"
   },
-  "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be"
+  "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319"
 }

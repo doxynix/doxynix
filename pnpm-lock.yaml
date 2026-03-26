@@ -66,6 +66,9 @@ importers:
       '@hookform/resolvers':
         specifier: 5.2.2
         version: 5.2.2(react-hook-form@7.72.0(react@19.2.4))
+      '@js-temporal/polyfill':
+        specifier: 0.5.1
+        version: 0.5.1
       '@lezer/highlight':
         specifier: 1.2.3
         version: 1.2.3
@@ -243,6 +246,9 @@ importers:
       ai:
         specifier: 6.0.134
         version: 6.0.134(zod@4.3.6)
+      browser-image-compression:
+        specifier: 2.0.2
+        version: 2.0.2
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -261,6 +267,9 @@ importers:
       detect-language:
         specifier: 3.0.0
         version: 3.0.0
+      fast-safe-stringify:
+        specifier: 2.1.1
+        version: 2.1.1
       file-saver:
         specifier: 2.0.5
         version: 2.0.5
@@ -2329,6 +2338,10 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+
+  '@js-temporal/polyfill@0.5.1':
+    resolution: {integrity: sha512-hloP58zRVCRSpgDxmqCWJNlizAlUgJFqG2ypq79DCvyv9tHjRYMDOcPFjzfl/A1/YxDvRCZz8wvZvmapQnKwFQ==}
+    engines: {node: '>=12'}
 
   '@jscpd/badge-reporter@4.0.4':
     resolution: {integrity: sha512-I9b4MmLXPM2vo0SxSUWnNGKcA4PjQlD3GzXvFK60z43cN/EIdLbOq3FVwCL+dg2obUqGXKIzAm7EsDFTg0D+mQ==}
@@ -7316,6 +7329,9 @@ packages:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
 
+  browser-image-compression@2.0.2:
+    resolution: {integrity: sha512-pBLlQyUf6yB8SmmngrcOw3EoS4RpQ1BcylI3T9Yqn7+4nrQTXJD4sJDe5ODnJdrvNMaio5OicFo75rDyJD2Ucw==}
+
   browserslist@4.28.1:
     resolution: {integrity: sha512-ZC5Bd0LgJXgwGqUknZY/vkUQ04r8NXnJZ3yYi4vDmSiZmC/pdSN0NbNRPxZpbtO4uAfDUAFffO8IZoM3Gj8IkA==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
@@ -10177,6 +10193,9 @@ packages:
   js-yaml@4.1.1:
     resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
     hasBin: true
+
+  jsbi@4.3.2:
+    resolution: {integrity: sha512-9fqMSQbhJykSeii05nxKl4m6Eqn2P6rOlYiS+C5Dr/HPIU/7yZxu5qzbs40tgaFORiw2Amd0mirjxatXYMkIew==}
 
   jscpd-sarif-reporter@4.0.6:
     resolution: {integrity: sha512-b9Sm3IPZ3+m8Lwa4gZa+4/LhDhlc/ZLEsLXKSOy1DANQ6kx0ueqZT+fUHWEdQ6m0o3+RIVIa7DmvLSojQD05ng==}
@@ -14171,6 +14190,9 @@ packages:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
     hasBin: true
 
+  uzip@0.20201231.0:
+    resolution: {integrity: sha512-OZeJfZP+R0z9D6TmBgLq2LHzSSptGMGDGigGiEe0pr8UBe/7fdflgHlHBNDASTXB5jnFuxHpNaJywSg8YFeGng==}
+
   v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
 
@@ -16663,6 +16685,10 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@js-temporal/polyfill@0.5.1':
+    dependencies:
+      jsbi: 4.3.2
 
   '@jscpd/badge-reporter@4.0.4':
     dependencies:
@@ -22506,6 +22532,10 @@ snapshots:
     dependencies:
       fill-range: 7.1.1
 
+  browser-image-compression@2.0.2:
+    dependencies:
+      uzip: 0.20201231.0
+
   browserslist@4.28.1:
     dependencies:
       baseline-browser-mapping: 2.10.0
@@ -25867,6 +25897,8 @@ snapshots:
   js-yaml@4.1.1:
     dependencies:
       argparse: 2.0.1
+
+  jsbi@4.3.2: {}
 
   jscpd-sarif-reporter@4.0.6:
     dependencies:
@@ -30877,6 +30909,8 @@ snapshots:
   uuid@9.0.0: {}
 
   uuid@9.0.1: {}
+
+  uzip@0.20201231.0: {}
 
   v8-compile-cache-lib@3.0.1: {}
 

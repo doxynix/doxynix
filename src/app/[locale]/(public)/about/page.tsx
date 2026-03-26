@@ -1,4 +1,4 @@
-import React from "react";
+import type { ComponentType } from "react";
 import { ArrowRight, Network, Shield, Sparkles, Zap } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -12,7 +12,7 @@ export const generateMetadata = createMetadata("about_title", "about_desc");
 
 type FeatureItem = {
   description: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   title: string;
 };
 

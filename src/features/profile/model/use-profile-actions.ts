@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
@@ -52,6 +52,15 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
     },
   });
 
+  const deleteProfile = trpc.user.deleteAccount.useMutation({
+    onError: (err) => toast.error(err.message),
+    onSuccess: async () => {
+      toast.success(t("settings_danger_delete_account_toast_success"));
+      posthog.capture("account_deleted");
+      await signOut({ callbackUrl: "/auth" });
+    },
+  });
+
   const removeAvatar = trpc.user.removeAvatar.useMutation({
     onError: (err) => toast.error(err.message),
     onSuccess: async () => {
@@ -64,34 +73,71 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
     },
   });
 
-  const uploadThing = useUploadThing("avatarUploader", {
-    onClientUploadComplete: async (res) => {
-      const file = res[0];
-      toast.success(t("settings_profile_update_avatar_toast_success"));
+  const { isUploading, startUpload } = useUploadThing("avatarUploader");
 
-      propsRef.current.onAvatarUpdateSuccess?.(file.ufsUrl);
+  const uploadAvatar = async (files: File[]) => {
+    const file = files[0];
 
-      await updateSession({ image: file.ufsUrl });
+    const localPreviewUrl = URL.createObjectURL(file);
+    propsRef.current.onAvatarUpdateSuccess?.(localPreviewUrl);
+
+    const processUpload = async () => {
+      const { default: imageCompression } = await import("browser-image-compression");
+
+      const compressedBlob = await imageCompression(file, {
+        fileType: "image/webp",
+        initialQuality: 0.8,
+        maxSizeMB: 0.1,
+        maxWidthOrHeight: 512,
+        useWebWorker: true,
+      });
+
+      const fileName = file.name.replace(/\.[^/.]+$/, ".webp");
+      const finalFile = new File([compressedBlob], fileName, { type: "image/webp" });
+
+      const res = await startUpload([finalFile]);
+      if (!res?.[0]) throw new Error("Upload failed");
+
+      const uploadedFile = res[0];
+
+      await updateSession({ image: uploadedFile.ufsUrl });
       await utils.user.me.invalidate();
-    },
-    onUploadError: (error) => {
-      let message = t("settings_profile_error_uploading_file");
-      if (error.message.includes("FileSizeMismatch")) {
-        message = t("settings_profile_file_too_large");
-      } else if (error.message.includes("InvalidFileType")) {
-        message = t("settings_profile_invalid_file_format");
-      } else if (error.message.includes(t("settings_profile_unauthorized"))) {
-        message = t("settings_profile_not_logged_in");
-      }
-      toast.error(message);
-    },
-  });
+
+      return uploadedFile;
+    };
+
+    toast.promise(processUpload(), {
+      error: (error: unknown) => {
+        URL.revokeObjectURL(localPreviewUrl);
+        propsRef.current.onAvatarUpdateSuccess?.(session?.user.image ?? "");
+
+        const errorMessage = error instanceof Error ? error.message : String(error);
+
+        let message = t("settings_profile_error_uploading_file");
+        if (errorMessage.includes("FileSizeMismatch")) {
+          message = t("settings_profile_file_too_large");
+        } else if (errorMessage.includes("InvalidFileType")) {
+          message = t("settings_profile_invalid_file_format");
+        } else if (errorMessage.includes(t("settings_profile_unauthorized"))) {
+          message = t("settings_profile_not_logged_in");
+        }
+        return message;
+      },
+      loading: "Optimizing & uploading...",
+      success: (data) => {
+        propsRef.current.onAvatarUpdateSuccess?.(data.ufsUrl);
+        URL.revokeObjectURL(localPreviewUrl);
+        return t("settings_profile_update_avatar_toast_success");
+      },
+    });
+  };
 
   return {
-    isPending: updateProfile.isPending || removeAvatar.isPending || uploadThing.isUploading,
-    isUploading: uploadThing.isUploading,
+    deleteProfile,
+    isPending: updateProfile.isPending || removeAvatar.isPending || isUploading,
+    isUploading,
     removeAvatar,
     updateProfile,
-    uploadAvatar: uploadThing.startUpload,
+    uploadAvatar,
   };
 }

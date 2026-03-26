@@ -1,4 +1,3 @@
-import React, { useMemo } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -26,9 +25,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
   const isRecommended = node.data.recommended;
   const isSelected = mySelectedIds.has(node.id);
 
-  const selectionState = useMemo(() => {
-    return getFolderSelectionState(node.data, mySelectedIds);
-  }, [node.data, mySelectedIds]);
+  const selectionState = getFolderSelectionState(node.data, mySelectedIds);
 
   const handleSelect = () => {
     onMyToggle(node.id, node.data);

@@ -1,23 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { UiApiKey } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/shared/ui/core/dialog";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
-import { LoadingButton } from "@/shared/ui/kit/loading-button";
+import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
 import { useApiKeyActions } from "../model/use-api-key-actions";
 
@@ -29,7 +19,6 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
   const { revoke } = useApiKeyActions();
 
-  const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
 
   const handleRevoke = () => {
@@ -42,9 +31,15 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <AppTooltip content={t("settings_api_keys_revoke_key")}>
-        <DialogTrigger asChild>
+    <DangerActionDialog
+      confirmLabel={t("settings_api_keys_confirm_revoke")}
+      description={t("settings_api_keys_revoke_key_desc")}
+      destructiveAlertContent={t("settings_api_keys_revoke_note")}
+      isLoading={revoke.isPending}
+      open={open}
+      title={`${t("settings_api_keys_revoke_key")}?`}
+      trigger={
+        <AppTooltip content={t("settings_api_keys_revoke_key")}>
           <Button
             size="icon"
             variant="ghost"
@@ -52,44 +47,12 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
           >
             <Trash2 className="size-4" />
           </Button>
-        </DialogTrigger>
-      </AppTooltip>
-
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader className="gap-2 sm:gap-0">
-          <div className="flex items-center gap-4">
-            <div className="bg-destructive/15 flex size-10 shrink-0 items-center justify-center rounded-full">
-              <AlertTriangle className="text-destructive size-5" />
-            </div>
-            <div className="flex flex-col gap-1 overflow-hidden">
-              <DialogTitle>{t("settings_api_keys_revoke_key")}?</DialogTitle>
-              <DialogDescription className="flex max-w-75 flex-col gap-1">
-                <span>{t("settings_api_keys_revoke_key_desc")}</span>
-                <span className="text-foreground truncate font-bold">{apiKey.name}</span>
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
-
-        <p className="text-muted-foreground text-sm">{t("settings_api_keys_revoke_note")}</p>
-
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline" className="cursor-pointer">
-              {tCommon("cancel")}
-            </Button>
-          </DialogClose>
-          <LoadingButton
-            isLoading={revoke.isPending}
-            loadingText="Revoking..."
-            variant="destructive"
-            onClick={handleRevoke}
-            className="cursor-pointer"
-          >
-            {t("settings_api_keys_confirm_revoke")}
-          </LoadingButton>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </AppTooltip>
+      }
+      onConfirm={handleRevoke}
+      onOpenChange={setOpen}
+    >
+      <div className="text-foreground truncate pb-2 font-bold">{apiKey.name}</div>
+    </DangerActionDialog>
   );
 }

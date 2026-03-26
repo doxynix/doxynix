@@ -138,7 +138,7 @@ export function AppSidebar() {
                               className="text-muted-foreground flex h-8 w-full cursor-pointer items-center justify-center p-1"
                             >
                               {isFetchingNextPage ? (
-                                <Spinner className="text-muted-foreground size-4" />
+                                <Spinner className="text-muted-foreground" />
                               ) : (
                                 <ChevronDown className="flex size-4 cursor-pointer items-center justify-center text-xs" />
                               )}

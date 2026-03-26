@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import type { UiApiKey } from "@/shared/api/trpc";
+import { EmptyState } from "@/shared/ui/kit/empty-state";
 
 import { ApiKeyArchivedTable } from "./api-key-archived-table";
 import { ApiKeyCard } from "./api-key-card";
-import { ApiKeysEmpty } from "./api-keys-empty";
 
 type Props = {
   active: UiApiKey[];
@@ -12,10 +14,15 @@ type Props = {
 };
 
 export function ApiKeysList({ active, archived }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
+
   return (
     <div className="flex w-full flex-col gap-6">
       {active.length === 0 ? (
-        <ApiKeysEmpty />
+        <EmptyState
+          description={t("settings_api_keys_empty_desc")}
+          title={t("settings_api_keys_empty_title")}
+        />
       ) : (
         <div className="grid grid-cols-2 gap-2">
           {active.map((key) => (

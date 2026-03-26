@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { formatRelativeTime } from "@/shared/lib/utils";
 
@@ -17,31 +17,26 @@ const DAY = 24 * HOUR;
 export function TimeAgo({ date, locale }: Readonly<Props>) {
   const [relativeTime, setRelativeTime] = useState(() => formatRelativeTime(date, locale));
 
-  const updateTime = useCallback(() => {
-    const now = new Date().getTime();
-    const created = new Date(date).getTime();
-    const diff = now - created;
-
-    setRelativeTime(formatRelativeTime(date, locale));
-
-    let nextDelay: number | null = null;
-
-    if (diff < HOUR) {
-      nextDelay = MINUTE;
-    } else if (diff < DAY) {
-      nextDelay = HOUR;
-    }
-
-    return nextDelay;
-  }, [date, locale]);
-
   useEffect(() => {
     let timerId: NodeJS.Timeout;
 
     const tick = () => {
-      const delay = updateTime();
-      if (delay != null) {
-        timerId = setTimeout(tick, delay);
+      const now = new Date().getTime();
+      const created = new Date(date).getTime();
+      const diff = now - created;
+
+      setRelativeTime(formatRelativeTime(date, locale));
+
+      let nextDelay: number | null = null;
+
+      if (diff < HOUR) {
+        nextDelay = MINUTE;
+      } else if (diff < DAY) {
+        nextDelay = HOUR;
+      }
+
+      if (nextDelay != null) {
+        timerId = setTimeout(tick, nextDelay);
       }
     };
 
@@ -50,7 +45,7 @@ export function TimeAgo({ date, locale }: Readonly<Props>) {
     return () => {
       clearTimeout(timerId);
     };
-  }, [updateTime]);
+  }, [date, locale]);
 
   return (
     <span suppressHydrationWarning className="text-muted-foreground mt-1 text-xs">

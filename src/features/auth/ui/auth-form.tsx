@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4-mini";
 
 import { TURNSTILE_SITE_KEY } from "@/shared/constants/env.client";
 import { cn, setClientCookie } from "@/shared/lib/utils";
@@ -33,8 +33,11 @@ import { Link } from "@/i18n/routing";
 
 const MagicLinkSchema = z.object({
   email: z
-    .email({ message: "Please enter a valid email address" })
-    .max(254, "Email address cannot exceed 254 characters"),
+    .string()
+    .check(
+      z.email("Please enter a valid email address"),
+      z.maxLength(254, "Email address cannot exceed 254 characters")
+    ),
 });
 
 type AuthProvider = {
