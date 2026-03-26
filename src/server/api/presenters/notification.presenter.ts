@@ -25,7 +25,7 @@ export const notificationPresenter = {
     return {
       ...n,
       id: n.publicId,
-      repo: n.repo ? { name: n.repo.name, owner: n.repo.owner } : null,
+      repo: n.repo != null ? { name: n.repo.name, owner: n.repo.owner } : null,
     };
   },
 };
