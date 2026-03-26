@@ -22,7 +22,7 @@ import { routing } from "@/i18n/routing";
 
 import { HotkeyListeners } from "@/widgets/hotkey-manager";
 
-import { ourFileRouter } from "@/server/lib/core";
+import { ourFileRouter } from "@/server/infrastructure/core";
 
 import { Providers } from "../providers";
 

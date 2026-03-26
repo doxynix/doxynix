@@ -7,5 +7,5 @@ export { RepoGitMetric } from "./ui/repo-git-metric";
 export { RepoTopics } from "./ui/repo-topics";
 export { useRepoActions } from "./model/use-repo-actions";
 export { repoParsers } from "./model/repo-parsers";
-export { useCreateRepoDialogStore } from "./model/create-repo-dialog.store";
 export { repoStatusConfig } from "./model/repo-status-config";
+export { useCreateRepoActions, useCreateRepoOpen } from "./model/use-create-repo-dialog.store";

@@ -87,7 +87,7 @@ export function AnalyticsWidgets() {
                       <XCircle className="text-destructive size-4" />
                     )}
                     {(activity.status === "PENDING" || activity.status === "NEW") && (
-                      <Spinner className="text-warning size-4 animate-spin" />
+                      <Spinner className="text-warning" />
                     )}
 
                     <div className="flex min-w-0 flex-1 flex-col">

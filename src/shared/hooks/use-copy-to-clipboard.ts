@@ -1,34 +1,31 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export function useCopyToClipboard(timeout = 2000) {
   const [isCopied, setIsCopied] = useState(false);
 
-  const copy = useCallback(
-    async (value: string) => {
-      if (typeof window === "undefined") {
-        return;
-      }
+  const copy = async (value: string) => {
+    if (typeof window === "undefined") {
+      return;
+    }
 
-      const isClipboardAvailable = typeof navigator !== "undefined" && "clipboard" in navigator;
+    const isClipboardAvailable = typeof navigator !== "undefined" && "clipboard" in navigator;
 
-      if (!isClipboardAvailable) {
-        toast.error("Clipboard API not available");
-        return;
-      }
+    if (!isClipboardAvailable) {
+      toast.error("Clipboard API not available");
+      return;
+    }
 
-      try {
-        await navigator.clipboard.writeText(value);
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), timeout);
-      } catch (err) {
-        console.error("Failed to copy:", err);
-        toast.error("Copy failed");
-        setIsCopied(false);
-      }
-    },
-    [timeout]
-  );
+    try {
+      await navigator.clipboard.writeText(value);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), timeout);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      toast.error("Copy failed");
+      setIsCopied(false);
+    }
+  };
 
   return { copy, isCopied };
 }

@@ -32,7 +32,7 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { useCreateRepoDialogStore, useRepoActions } from "@/entities/repo";
+import { useCreateRepoActions, useCreateRepoOpen, useRepoActions } from "@/entities/repo";
 
 import { RepoItem } from "./repo-item";
 
@@ -41,12 +41,14 @@ const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут
 export function CreateRepoDialog() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const { refetch: getInstallUrl } = trpc.repoGithub.getGithubInstallUrl.useQuery(undefined, {
+  const { refetch: getInstallUrl } = trpc.githubApp.getGithubInstallUrl.useQuery(undefined, {
     enabled: false,
   });
 
-  const { closeDialog, open } = useCreateRepoDialogStore();
+  const open = useCreateRepoOpen();
+  const { setOpen } = useCreateRepoActions();
   const { create } = useRepoActions();
+
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingOauth, setLoadingOauth] = useState(false);
@@ -86,7 +88,7 @@ export function CreateRepoDialog() {
   }
 
   const isUrl = isGitHubUrl(debouncedValue);
-  const { data: suggestions, isFetching } = trpc.repoGithub.searchGithub.useQuery(
+  const { data: suggestions, isFetching } = trpc.githubBrowse.searchGithub.useQuery(
     { query: debouncedValue },
     {
       enabled: debouncedValue.length >= 2 && !isUrl,
@@ -98,16 +100,21 @@ export function CreateRepoDialog() {
     data: myGithubData,
     isFetching: isFetchingMyRepos,
     refetch: refetchMyRepos,
-  } = trpc.repoGithub.getMyGithubRepos.useQuery(undefined, {
+  } = trpc.githubApp.getMyGithubRepos.useQuery(undefined, {
     enabled: open,
     staleTime: STALE_TIME,
   });
+
+  const closeDialog = () => {
+    setOpen(false);
+    setShowSuggestions(false);
+    form.reset();
+  };
 
   const onSubmit = (values: CreateRepoInput) => {
     create.mutate(values, {
       onSuccess: () => {
         closeDialog();
-        form.reset();
         void setPage(null);
       },
     });
@@ -134,7 +141,6 @@ export function CreateRepoDialog() {
   const handleClose = (v: boolean) => {
     if (!v) {
       closeDialog();
-      form.reset();
     }
   };
 

@@ -144,6 +144,7 @@ export const getRepoDetailsMenu = (owner: string, name: string): MenuItems => {
 
   return [
     {
+      exact: true,
       href: base,
       icon: LayoutGrid,
       id: "overview",

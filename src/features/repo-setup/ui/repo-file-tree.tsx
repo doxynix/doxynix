@@ -10,27 +10,20 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import {
   RepoBranchSelector,
+  RepoTreeSkeleton,
+  type ActionItem,
   type ActionsType,
   type FileNode,
   type StateType,
 } from "@/entities/repo-setup";
 
 import { RepoFileNode } from "./repo-file-node";
-import { RepoSetupSkeleton } from "./repo-setup-skeleton";
 
 type Props = {
   actions: ActionsType;
   repo: UiRepoDetailed;
   state: StateType;
   treeApi: TreeApi<FileNode> | null;
-};
-
-type ActionItem = {
-  className?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  onClick: () => void;
-  tooltip?: string;
 };
 
 export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>) {
@@ -78,6 +71,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
           <RepoBranchSelector
             branches={state.branches}
             defaultBranch={repo.defaultBranch}
+            isLoading={state.isBranchesLoading}
             selectedBranch={state.selectedBranch}
             onSelect={(val) => {
               void actions.setSelectedBranch(val);
@@ -165,7 +159,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
         )}
 
         {state.isLoading ? (
-          <RepoSetupSkeleton />
+          <RepoTreeSkeleton variant="setup" />
         ) : (
           <Tree
             ref={(api) => actions.setTreeApi(api || null)}

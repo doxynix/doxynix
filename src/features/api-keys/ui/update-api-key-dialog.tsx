@@ -5,9 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import type { z } from "zod";
 
-import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
+import { CreateApiKeySchema, type CreateApiKeyInput } from "@/shared/api/schemas/api-key";
 import type { UiApiKey } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -19,20 +18,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/ui/core/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/shared/ui/core/form";
-import { Input } from "@/shared/ui/core/input";
-import { Textarea } from "@/shared/ui/core/textarea";
+import { Form } from "@/shared/ui/core/form";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { useApiKeyActions } from "../model/use-api-key-actions";
+import { ApiKeyFormFields } from "./api-key-form-fields";
 
 type Props = {
   apiKey: UiApiKey;
@@ -45,7 +36,7 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
 
-  const form = useForm<z.infer<typeof CreateApiKeySchema>>({
+  const form = useForm<CreateApiKeyInput>({
     defaultValues: {
       description: apiKey.description ?? "",
       name: apiKey.name,
@@ -53,7 +44,7 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
     resolver: zodResolver(CreateApiKeySchema),
   });
 
-  const onSubmit = (values: z.infer<typeof CreateApiKeySchema>) => {
+  const onSubmit = (values: CreateApiKeyInput) => {
     update.mutate(
       { id: apiKey.id, ...values },
       {
@@ -97,39 +88,7 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
               </DialogDescription>
             </DialogHeader>
 
-            <FormField
-              name="name"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-muted-foreground">{tCommon("name")}</FormLabel>
-                  <FormControl>
-                    <Input placeholder={t("settings_api_keys_name_placeholder")} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              name="description"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-muted-foreground">
-                    {t("settings_api_keys_label")}
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={t("settings_api_keys_desc_placeholder")}
-                      className="min-h-25 resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <ApiKeyFormFields control={form.control} isPending={update.isPending} />
 
             <DialogFooter>
               <LoadingButton

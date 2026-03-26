@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "zod";
 
 const RiskLevel = z.enum(["LOW", "MODERATE", "HIGH", "CRITICAL"]);
 

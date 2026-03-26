@@ -188,71 +188,82 @@ export const EXTRA_EXTENSIONS: Extension[] = [
   ]),
 
   EditorView.theme({
-    "&": { fontSize: "13px", height: "100%" },
-    "&.cm-focused .cm-cursor": { borderLeftColor: "#58a6ff" },
+    "&": {
+      backgroundColor: "var(--background)",
+      color: "var(--foreground)",
+      fontSize: "13px",
+      height: "100%",
+    },
+    "&.cm-focused .cm-cursor": { borderLeftColor: "var(--primary)" },
     ".close-btn": {
       "&:hover": {
-        backgroundColor: "rgba(255, 123, 114, 0.1)",
-        borderColor: "transparent",
-        color: "#ff7b72",
+        backgroundColor: "color-mix(in srgb, var(--status-error), transparent 90%)",
+        color: "var(--status-error)",
       },
-      backgroundColor: "transparent",
-      borderColor: "transparent",
-      color: "#8b949e",
+      color: "var(--text-muted)",
     },
-    ".cm-activeLine": { backgroundColor: "#161b22" },
-    ".cm-activeLineGutter": { backgroundColor: "#161b22", color: "#e6edf3" },
-    ".cm-cursor": { borderLeftColor: "#58a6ff", borderLeftWidth: "2px" },
+    ".cm-activeLine": { backgroundColor: "var(--surface-hover)" },
+    ".cm-activeLineGutter": {
+      backgroundColor: "var(--surface-hover)",
+      color: "var(--text-primary)",
+    },
+    ".cm-cursor": { borderLeftColor: "var(--primary)", borderLeftWidth: "2px" },
     ".cm-gutters": {
-      backgroundColor: "#0d1117",
-      borderRight: "1px solid #30363d",
-      color: "#6e7681",
+      backgroundColor: "var(--surface-subtle)",
+      borderRight: "1px solid var(--border-soft)",
+      color: "var(--text-muted)",
       minWidth: "40px",
     },
 
     ".cm-hover-scanner": {
-      backgroundColor: "#0d1117",
-      border: "1px solid #30363d",
-      borderRadius: "6px",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
-      color: "#79c0ff",
-      fontFamily: "var(--font-mono, monospace)",
+      backgroundColor: "var(--surface-panel)",
+      border: "1px solid var(--border-strong)",
+      borderRadius: "var(--radius-md)",
+      boxShadow: "var(--shadow-md)",
+      color: "var(--brand-docs)",
+      fontFamily: "var(--font-mono)",
       fontSize: "11px",
       padding: "6px 10px",
     },
     ".cm-mergeView": { height: "100%" },
     ".cm-mergeView .cm-scroller": { overflow: "auto" },
     ".cm-note-marker": {
-      backgroundColor: "rgba(56, 139, 253, 0.15)",
-      border: "1px solid rgba(56, 139, 253, 0.4)",
+      backgroundColor: "color-mix(in srgb, var(--status-info), transparent 80%)",
+      border: "1px solid color-mix(in srgb, var(--status-info), transparent 60%)",
       borderRadius: "3px",
-      color: "#58a6ff",
+      color: "var(--status-info)",
       fontWeight: "700",
       padding: "0 2px",
     },
-    ".cm-scroller": { fontFamily: "var(--font-mono)", scrollbarWidth: "thin" },
+    ".cm-scroller": {
+      fontFamily: "var(--font-mono)",
+      scrollbarWidth: "thin",
+    },
 
     ".cm-search": { display: "none !important" },
 
-    ".cm-searchMatch": { backgroundColor: "#3fb95055", outline: "1px solid #3fb950" },
-
-    ".cm-searchMatch.cm-searchMatch-selected": {
-      backgroundColor: "#9e6a03",
-      outline: "1px solid #f2cc60",
+    ".cm-searchMatch": {
+      backgroundColor: "color-mix(in srgb, var(--status-success), transparent 70%)",
+      outline: "1px solid var(--status-success)",
     },
+    ".cm-searchMatch.cm-searchMatch-selected": {
+      backgroundColor: "var(--status-warning)",
+      outline: "1px solid var(--text-primary)",
+    },
+
     ".cm-todo-marker": {
-      backgroundColor: "rgba(242, 204, 96, 0.2)",
+      backgroundColor: "color-mix(in srgb, var(--status-warning), transparent 80%)",
       borderRadius: "3px",
-      color: "#f2cc60",
+      color: "var(--status-warning)",
       fontWeight: "700",
       padding: "0 2px",
     },
 
     ".cm-todo-urgent": {
-      backgroundColor: "rgba(248, 81, 73, 0.2)",
-      border: "1px solid rgba(248, 81, 73, 0.35)",
+      backgroundColor: "color-mix(in srgb, var(--status-error), transparent 80%)",
+      border: "1px solid color-mix(in srgb, var(--status-error), transparent 60%)",
       borderRadius: "3px",
-      color: "#ff7b72",
+      color: "var(--status-error)",
       fontWeight: "700",
       padding: "0 2px",
     },
@@ -260,15 +271,15 @@ export const EXTRA_EXTENSIONS: Extension[] = [
     ".icon-btn": { fontWeight: "bold", padding: "6px 10px" },
 
     ".is-edit": {
-      backgroundColor: "rgba(35, 134, 54, 0.15)",
-      borderColor: "rgba(46, 160, 67, 0.4)",
-      color: "#3fb950",
+      backgroundColor: "color-mix(in srgb, var(--status-success), transparent 85%)",
+      borderColor: "color-mix(in srgb, var(--status-success), transparent 60%)",
+      color: "var(--status-success)",
     },
 
     ".is-readonly": {
-      backgroundColor: "#21262d",
-      borderColor: "#30363d",
-      color: "#8b949e",
+      backgroundColor: "var(--surface-subtle)",
+      borderColor: "var(--border-soft)",
+      color: "var(--text-muted)",
     },
     ".search-group, .replace-group": { alignItems: "center", display: "flex", gap: "8px" },
   }),

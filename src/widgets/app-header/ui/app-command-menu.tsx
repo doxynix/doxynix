@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { Route } from "next";
 import { Book, ChevronDown, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -25,7 +25,7 @@ import {
 import { Spinner } from "@/shared/ui/core/spinner";
 import { useRouter } from "@/i18n/routing";
 
-import { useCreateRepoDialogStore } from "@/entities/repo";
+import { useCreateRepoActions } from "@/entities/repo";
 
 export function AppCommandMenu() {
   const t = useTranslations("Dashboard");
@@ -33,7 +33,7 @@ export function AppCommandMenu() {
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 300);
   const [isReposExpanded, setIsReposExpanded] = useState(true);
-  const { openDialog: openCreateRepoDialog } = useCreateRepoDialogStore();
+  const { setOpen: setOpenCreateDialog } = useCreateRepoActions();
 
   const router = useRouter();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
@@ -99,42 +99,38 @@ export function AppCommandMenu() {
     router.push(path as Route);
   };
 
-  const runCommand = useCallback(
-    (item: MenuItem) => {
-      setOpen(false);
+  const runCommand = (item: MenuItem) => {
+    setOpen(false);
 
-      switch (item.commandType) {
-        case "dialog":
-          if (item.actionId === "createRepo") {
-            openCreateRepoDialog();
-          }
-          break;
+    switch (item.commandType) {
+      case "dialog":
+        if (item.actionId === "createRepo") {
+          setOpenCreateDialog(true);
+        }
+        break;
 
-        case "action":
-          break;
+      case "action":
+        break;
 
-        case "navigation":
-        case undefined:
-          if (item.href != null) {
-            router.push(item.href as Route);
-          }
-          break;
-        default:
-          break;
-      }
-    },
-    [router, openCreateRepoDialog]
-  );
+      case "navigation":
+      case undefined:
+        if (item.href != null) {
+          navigate(item.href);
+        }
+        break;
+      default:
+        break;
+    }
+  };
 
-  const filteredCommands = React.useMemo(() => {
-    const s = search.toLowerCase();
-    if (!s) return commandMenuItems;
+  const s = search.trim().toLowerCase();
 
-    return commandMenuItems.filter(
-      (item) =>
-        (item.label.toLowerCase().includes(s) || item.url?.toLowerCase().includes(s)) ?? false
-    );
-  }, [search]);
+  const filteredCommands = !s
+    ? commandMenuItems
+    : commandMenuItems.filter(
+        (item) =>
+          (item.label.toLowerCase().includes(s) || item.url?.toLowerCase().includes(s)) ?? false
+      );
 
   return (
     <>

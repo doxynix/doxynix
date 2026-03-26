@@ -3,7 +3,7 @@
 import type { Route } from "next";
 import { SquareArrowOutUpRight } from "lucide-react";
 
-import { cn } from "@/shared/lib/utils";
+import { cn, isRouteActive } from "@/shared/lib/utils";
 import type { MenuItem } from "@/shared/types/navigation";
 import { Badge } from "@/shared/ui/core/badge";
 import { SidebarMenuButton, SidebarMenuShortcut } from "@/shared/ui/core/sidebar";
@@ -24,23 +24,7 @@ export function SidebarLink({
     return null;
   }
 
-  const isActive = (() => {
-    if (blank) return false;
-
-    if (exact === true) return pathname === href;
-
-    const cleanPath = pathname.replace(/\/$/, "");
-    const cleanHref = href.replace(/\/$/, "");
-
-    if (!cleanPath.startsWith(cleanHref)) return false;
-
-    const pathSegments = cleanPath.split("/").filter(Boolean);
-    const hrefSegments = cleanHref.split("/").filter(Boolean);
-
-    const depthDelta = pathSegments.length - hrefSegments.length;
-
-    return depthDelta <= 1;
-  })();
+  const isActive = !blank && isRouteActive(pathname, href, exact);
 
   return (
     <SidebarMenuButton

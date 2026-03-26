@@ -17,6 +17,7 @@ export function RepoAvatar({ alt, src }: Readonly<{ alt: string; src: string | n
         fill
         priority
         alt={alt}
+        sizes="36px"
         src={imageSrc}
         onLoad={() => {
           loadedAvatars.set(imageSrc, true);

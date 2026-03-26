@@ -12,7 +12,7 @@ import { RepoCodeTree } from "./repo-code-tree";
 export function RepoCodeContainer({ repo }: Readonly<{ repo: UiRepoDetailed }>) {
   const [path, setPath] = useQueryState("path");
 
-  const { data, isLoading } = trpc.repoGithub.getFileContent.useQuery(
+  const { data, isLoading } = trpc.githubBrowse.getFileContent.useQuery(
     { path: path ?? "", repoId: repo.id },
     { enabled: path != null && path !== "" }
   );

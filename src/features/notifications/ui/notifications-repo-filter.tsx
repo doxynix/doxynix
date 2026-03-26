@@ -19,11 +19,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/core/popove
 import { Skeleton } from "@/shared/ui/core/skeleton";
 
 import { notificationsParsers } from "@/entities/notifications";
-import { useCreateRepoDialogStore } from "@/entities/repo";
+import { useCreateRepoActions } from "@/entities/repo";
 
 export function NotificationsRepoFilter() {
   const [filters, setFilters] = useQueryStates(notificationsParsers, { shallow: true });
-  const { openDialog } = useCreateRepoDialogStore();
+  const { setOpen: setOpenCreateDialog } = useCreateRepoActions();
 
   const [open, setOpen] = useState(false);
 
@@ -50,7 +50,12 @@ export function NotificationsRepoFilter() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button role="combobox" variant="outline" className="cursor-pointer justify-between">
+        <Button
+          role="combobox"
+          variant="outline"
+          aria-expanded={open}
+          className="cursor-pointer justify-between"
+        >
           <div className="flex w-60 items-center gap-2 truncate">
             <Book className="size-4 shrink-0 opacity-50" />
             <span className="truncate">{label}</span>
@@ -63,7 +68,7 @@ export function NotificationsRepoFilter() {
           <CommandInput placeholder="Search repository..." />
           <CommandList>
             <CommandEmpty>
-              {repos?.length === 0 || repos == null ? null : "No repository found."}
+              {repos?.length === 0 || repos == null ? null : "No repository found"}
             </CommandEmpty>
             <CommandGroup>
               <CommandItem onSelect={() => handleRepoSelect(null)} className="cursor-pointer">
@@ -82,7 +87,14 @@ export function NotificationsRepoFilter() {
               {(repos?.length === 0 || repos == null) && !isLoading ? (
                 <div className="flex flex-col items-center gap-4 p-4 text-center text-sm">
                   <p>Repositories not found</p>
-                  <Button size="sm" onClick={() => openDialog()} className="w-fit cursor-pointer">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setOpen(false);
+                      setOpenCreateDialog(true);
+                    }}
+                    className="w-fit cursor-pointer"
+                  >
                     Add
                   </Button>
                 </div>

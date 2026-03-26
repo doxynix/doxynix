@@ -3,7 +3,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import createMiddleware from "next-intl/middleware";
 
 import { routing } from "./i18n/routing";
-import { redisClient } from "./server/lib/redis";
+import { redisClient } from "./server/infrastructure/redis";
 import { logger } from "./server/logger/logger";
 import {
   anonymizeIp,

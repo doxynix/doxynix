@@ -6,7 +6,7 @@ import type { ParamTypes } from "@/shared/types/app";
 import { RepoOverviewContainer } from "@/features/repo-analytics";
 import { RepoSetup } from "@/features/repo-setup";
 
-import { api } from "@/server/trpc/server";
+import { api } from "@/server/api/server";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;

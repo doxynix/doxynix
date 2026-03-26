@@ -156,7 +156,7 @@ describe("shared/lib/utils:formatFullDate", () => {
     const formatted = formatFullDate("2026-01-02T03:04:00.000Z", "en");
 
     expect(formatted).toContain("2026");
-    expect(formatted).toMatch(/,\s\d{2}:\d{2}$/);
+    expect(formatted).toMatch(/at\s\d{2}:\d{2}$/);
   });
 });
 
@@ -262,7 +262,7 @@ describe("shared/lib/utils:sanitizePayload", () => {
     const result = sanitizePayload(input) as Record<(typeof SENSITIVE_FIELDS)[number], string>;
 
     for (const key of SENSITIVE_FIELDS) {
-      expect(result[key]).toBe("***REDACTED***");
+      expect(result[key]).toBe("[REDACTED]");
     }
   });
 
@@ -288,12 +288,12 @@ describe("shared/lib/utils:sanitizePayload", () => {
     expect(result).toEqual({
       meta: { page: 1 },
       nested: {
-        password: "***REDACTED***",
-        token: "***REDACTED***",
+        password: "[REDACTED]",
+        token: "[REDACTED]",
       },
       users: [
-        { access_token: "***REDACTED***", login: "alice" },
-        { login: "bob", refresh_token: "***REDACTED***" },
+        { access_token: "[REDACTED]", login: "alice" },
+        { login: "bob", refresh_token: "[REDACTED]" },
       ],
     });
     expect(input.nested.password).toBe("p1");

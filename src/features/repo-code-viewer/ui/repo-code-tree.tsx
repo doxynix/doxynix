@@ -8,11 +8,15 @@ import type { UiRepoDetailed } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 
-import { RepoBranchSelector, useRepoSetup } from "@/entities/repo-setup";
+import {
+  RepoBranchSelector,
+  RepoTreeSkeleton,
+  useRepoSetup,
+  type ActionItem,
+} from "@/entities/repo-setup";
 
-import { useRepoCodeActions, useRepoCodeStore } from "../model/use-repo-code.store";
+import { useRepoCodeActions, useRepoTreeApi } from "../model/use-repo-code.store";
 import { RepoCodeNode } from "./repo-code-node";
-import { RepoCodeTreeSkeleton } from "./repo-code-tree-skeleton";
 
 type Props = {
   activePath: string | null;
@@ -20,18 +24,10 @@ type Props = {
   repo: UiRepoDetailed;
 };
 
-type ActionItem = {
-  className?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  onClick: () => void;
-  tooltip?: string;
-};
-
 export function RepoCodeTree({ activePath, onSelect, repo }: Readonly<Props>) {
   const { actions, state } = useRepoSetup(repo);
   const { setTreeApi } = useRepoCodeActions();
-  const treeApi = useRepoCodeStore((s) => s.treeApi);
+  const treeApi = useRepoTreeApi();
 
   const handleExpandAll = () => {
     React.startTransition(() => {
@@ -55,6 +51,7 @@ export function RepoCodeTree({ activePath, onSelect, repo }: Readonly<Props>) {
         <RepoBranchSelector
           branches={state.branches}
           defaultBranch={repo.defaultBranch}
+          isLoading={state.isBranchesLoading}
           selectedBranch={state.selectedBranch}
           onSelect={(branch) => {
             void actions.setSelectedBranch(branch);
@@ -92,7 +89,7 @@ export function RepoCodeTree({ activePath, onSelect, repo }: Readonly<Props>) {
 
       <div className="flex-1 overflow-hidden p-2">
         {state.isLoading ? (
-          <RepoCodeTreeSkeleton />
+          <RepoTreeSkeleton variant="tree" />
         ) : state.treeData.length === 0 ? (
           <p className="text-muted-foreground flex h-full items-center justify-center text-sm">
             No files found

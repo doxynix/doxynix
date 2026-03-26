@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
@@ -9,6 +9,7 @@ import { trpc, type DocType, type UiRepoDetailed } from "@/shared/api/trpc";
 import { DocTypeSchema } from "@/generated/zod";
 
 import type { FileNode, FileTuple } from "./repo-setup.types";
+import { useRepoBranchOpen } from "./use-repo-branch.store";
 import { collectAllIds, getFolderSelectionState, sortNodes } from "./utils";
 
 export type RepoSetupReturn = ReturnType<typeof useRepoSetup>;
@@ -32,11 +33,15 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   const [analysisLocale, setAnalysisLocale] = useState(locale);
   const [instructions, setInstructions] = useState("");
   const [selectedDocs, setSelectedDocs] = useState<DocType[]>([DocTypeSchema.enum.README]);
+  const open = useRepoBranchOpen();
 
   const { name, owner } = repo;
 
-  const { data: branches } = trpc.repoGithub.getBranches.useQuery({ name, owner });
-  const { data: apiFiles, isLoading } = trpc.repoGithub.getRepoFiles.useQuery({
+  const { data: branches, isLoading: isBranchesLoading } = trpc.githubBrowse.getBranches.useQuery(
+    { name, owner },
+    { enabled: open }
+  );
+  const { data: apiFiles, isLoading } = trpc.githubBrowse.getRepoFiles.useQuery({
     branch: selectedBranch,
     name,
     owner,
@@ -53,7 +58,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     }
   }, [apiFiles]);
 
-  const treeData = useMemo(() => {
+  const getTreeData = () => {
     if (!apiFiles) return [];
     const root: FileNode[] = [];
     const map = new Map<string, FileNode>();
@@ -88,9 +93,11 @@ export function useRepoSetup(repo: UiRepoDetailed) {
       });
     });
     return sortNodes(root);
-  }, [apiFiles]);
+  };
 
-  const handleToggleSelection = useCallback((nodeId: string, nodeData: FileNode) => {
+  const treeData = getTreeData();
+
+  const handleToggleSelection = (nodeId: string, nodeData: FileNode) => {
     const idsToToggle = collectAllIds(nodeData);
 
     setSelectedIds((prev) => {
@@ -105,9 +112,9 @@ export function useRepoSetup(repo: UiRepoDetailed) {
       }
       return newSelection;
     });
-  }, []);
+  };
 
-  const allIds = useMemo(() => {
+  const getAllIds = () => {
     const ids: string[] = [];
     const collect = (nodes: FileNode[]) => {
       nodes.forEach((node) => {
@@ -117,18 +124,20 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     };
     collect(treeData);
     return ids;
-  }, [treeData]);
+  };
 
-  const handleSelectAll = useCallback(() => setSelectedIds(new Set(allIds)), [allIds]);
-  const handleClearAll = useCallback(() => setSelectedIds(new Set()), []);
+  const allIds = getAllIds();
 
-  const handleSelectRecommended = useCallback(() => {
+  const handleSelectAll = () => setSelectedIds(new Set(allIds));
+  const handleClearAll = () => setSelectedIds(new Set());
+
+  const handleSelectRecommended = () => {
     if (!apiFiles) return;
     const recommendedPaths = (apiFiles as FileTuple[])
       .filter((f) => f[3] === 1 && f[1] === 1)
       .map((f) => f[0]);
     setSelectedIds(new Set(recommendedPaths));
-  }, [apiFiles]);
+  };
 
   const handleStartAnalysis = () => {
     if (!apiFiles) return;
@@ -156,7 +165,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     });
   };
 
-  const selectedFilesCount = useMemo(() => {
+  const getSelectedFilesCount = () => {
     if (!apiFiles) return 0;
     const allFilePaths = new Set(
       (apiFiles as FileTuple[]).filter((f) => f[1] === 1).map((f) => f[0])
@@ -166,13 +175,17 @@ export function useRepoSetup(repo: UiRepoDetailed) {
       if (allFilePaths.has(id)) count++;
     });
     return count;
-  }, [selectedIds, apiFiles]);
+  };
 
-  const hasSearchMatches = useMemo(() => {
+  const selectedFilesCount = getSelectedFilesCount();
+
+  const getHasSearchMatches = () => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
     return (apiFiles as FileTuple[] | undefined)?.some((f) => f[0].toLowerCase().includes(term));
-  }, [apiFiles, searchTerm]);
+  };
+
+  const hasSearchMatches = getHasSearchMatches();
 
   const toggleDocType = (id: DocType) => {
     setSelectedDocs((prev) =>
@@ -202,6 +215,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
       branches,
       hasSearchMatches,
       instructions,
+      isBranchesLoading,
       isLoading,
       isPending: analyzeMutation.isPending,
       searchTerm,

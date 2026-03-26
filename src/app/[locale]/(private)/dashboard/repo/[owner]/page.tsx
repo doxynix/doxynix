@@ -14,7 +14,7 @@ import {
   RepoListContainer,
 } from "@/features/repo";
 
-import { api } from "@/server/trpc/server";
+import { api } from "@/server/api/server";
 
 type Props = {
   params: Promise<{ owner: string }>;

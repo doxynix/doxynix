@@ -6,9 +6,8 @@ import { Lock, Mail, User2 } from "lucide-react";
 import type { User } from "next-auth";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import type z from "zod";
 
-import { UpdateProfileSchema } from "@/shared/api/schemas/user";
+import { UpdateProfileSchema, type UpdateProfileInput } from "@/shared/api/schemas/user";
 import {
   Form,
   FormControl,
@@ -21,8 +20,6 @@ import { Input } from "@/shared/ui/core/input";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { useProfileActions } from "../model/use-profile-actions";
-
-type ProfileFormValues = z.infer<typeof UpdateProfileSchema>;
 
 type Props = {
   buttonText?: string;
@@ -42,7 +39,7 @@ export function ProfileDetailsForm({
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
 
-  const form = useForm<ProfileFormValues>({
+  const form = useForm<UpdateProfileInput>({
     defaultValues: {
       email: user.email ?? "",
       name: user.name ?? "",
@@ -68,7 +65,7 @@ export function ProfileDetailsForm({
     },
   });
 
-  const onSubmit = (values: ProfileFormValues) => {
+  const onSubmit = (values: UpdateProfileInput) => {
     updateProfile.mutate(values);
   };
 

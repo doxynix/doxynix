@@ -1,17 +1,13 @@
 import { Status, Visibility, type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
+import type { RepoFiltersInput } from "../api/contracts";
+import { repoPresenter, type RepoWithAnalyses } from "../api/presenters/repo.presenter";
 import type { DbClient } from "../db/db";
 import { handlePrismaError, isOctokitError } from "../utils/handle-error";
+import { getPaginationMeta } from "../utils/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "../utils/search";
 import { GitHubAuthRequiredError, githubService } from "./github.service";
-
-type RepoSearchFilters = {
-  owner?: string;
-  search?: string;
-  status?: Status;
-  visibility?: Visibility;
-};
 
 function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
   return {
@@ -24,17 +20,17 @@ function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
 }
 
 export const repoService = {
-  buildWhereClause(filters: RepoSearchFilters): Prisma.RepoWhereInput {
+  buildWhereClause(filters: Partial<RepoFiltersInput>): Prisma.RepoWhereInput {
     const normalizedOwner = filters.owner?.trim();
-    const normalizedSearch = normalizeSearchInput(filters.search);
-    const searchTerms = tokenizeSearchInput(filters.search);
+    const normalizedSearch = normalizeSearchInput(filters.search ?? undefined);
+    const searchTerms = tokenizeSearchInput(filters.search ?? undefined);
 
     const statusFilter: Prisma.RepoWhereInput =
       filters.status == null
         ? {}
         : filters.status === Status.NEW
           ? { OR: [{ analyses: { none: {} } }, { analyses: { some: { status: Status.NEW } } }] }
-          : { analyses: { some: { status: filters.status } } };
+          : { analyses: { some: { status: filters.status as Status } } };
 
     const rawSearchFilter: Prisma.RepoWhereInput =
       normalizedSearch != null ? buildRepoSearchClause(normalizedSearch) : {};
@@ -52,7 +48,7 @@ export const repoService = {
         : rawSearchFilter;
 
     return {
-      ...(filters.visibility != null && { visibility: filters.visibility }),
+      ...(filters.visibility != null && { visibility: filters.visibility as Visibility }),
       ...(normalizedOwner != null &&
         normalizedOwner.length > 0 && {
           owner: { equals: normalizedOwner, mode: "insensitive" },
@@ -145,5 +141,136 @@ export const repoService = {
         },
       });
     }
+  },
+
+  async delete(db: DbClient, id: string) {
+    try {
+      await db.repo.delete({
+        where: { publicId: id },
+      });
+
+      return { message: "Repository deleted", success: true };
+    } catch (error) {
+      handlePrismaError(error, { notFound: "Repository not found" });
+    }
+  },
+
+  async deleteAll(db: DbClient) {
+    try {
+      const deletedRepoCount = await db.repo.deleteMany();
+      if (deletedRepoCount.count === 0) {
+        return { message: "No repositories found", success: false };
+      }
+
+      return { message: "All repositories have been deleted", success: true };
+    } catch (error) {
+      handlePrismaError(error, { notFound: "Repositories not found" });
+    }
+  },
+
+  async deleteByOwner(db: DbClient, owner: string) {
+    const result = await db.repo.deleteMany({
+      where: {
+        owner: { equals: owner, mode: "insensitive" },
+      },
+    });
+
+    return {
+      count: result.count,
+      message: `Deleted ${result.count} repositories for ${owner}`,
+      success: true,
+    };
+  },
+
+  async getAll(db: DbClient, input: RepoFiltersInput) {
+    const { cursor, limit, owner, search, sortBy, sortOrder, status, visibility } = input;
+    const page = Math.min(Math.max(1, cursor ?? 1), 1000000);
+    const skip = (page - 1) * limit;
+
+    const where = this.buildWhereClause({ owner, search, status, visibility });
+    const contextWhere: Prisma.RepoWhereInput =
+      owner == null ? {} : { owner: { equals: owner, mode: "insensitive" } };
+
+    const [items, totalCount, filteredCount] = await Promise.all([
+      db.repo.findMany({
+        include: {
+          analyses: {
+            orderBy: { createdAt: "desc" },
+            select: {
+              complexityScore: true,
+              createdAt: true,
+              onboardingScore: true,
+              score: true,
+              securityScore: true,
+              status: true,
+              techDebtScore: true,
+            },
+            take: 1,
+          },
+        },
+        orderBy: { [sortBy]: sortOrder },
+        skip,
+        take: limit,
+        where,
+      }),
+      db.repo.count({ where: contextWhere }),
+      db.repo.count({ where }),
+    ]);
+
+    const meta = getPaginationMeta({
+      filteredCount,
+      limit,
+      page,
+      search: search ?? undefined,
+      totalCount,
+    });
+
+    return repoPresenter.toPaginatedList(items as RepoWithAnalyses[], meta);
+  },
+
+  async getByName(db: DbClient, owner: string, name: string) {
+    const repo = await db.repo.findFirst({
+      include: {
+        analyses: { orderBy: { createdAt: "desc" }, take: 1 },
+      },
+      where: {
+        name: { equals: name, mode: "insensitive" },
+        owner: { equals: owner, mode: "insensitive" },
+      },
+    });
+
+    if (repo == null) return null;
+
+    return {
+      ...repo,
+      id: repo.publicId,
+      message: "Repository found",
+      status: repo.analyses[0]?.status ?? Status.NEW,
+    };
+  },
+  async getByOwner(db: DbClient, owner: string) {
+    const repo = await db.repo.findFirst({
+      where: {
+        owner: { equals: owner, mode: "insensitive" },
+      },
+    });
+
+    if (repo == null) return null;
+
+    return {
+      ...repo,
+      id: repo.publicId,
+      message: "Owner found",
+    };
+  },
+
+  async getSlim(db: DbClient, limit?: number) {
+    const repos = await db.repo.findMany({
+      orderBy: { name: "asc" },
+      select: { name: true, owner: true, publicId: true },
+      ...(limit != null && { take: Math.floor(limit) }),
+    });
+
+    return repos.map((r) => ({ id: r.publicId, name: r.name, owner: r.owner }));
   },
 };

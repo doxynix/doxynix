@@ -1,11 +1,13 @@
 "use client";
 
+import { SearchX } from "lucide-react";
+import { useTranslations } from "next-intl";
+
 import type { RepoMeta, UiRepoListItem } from "@/shared/api/trpc";
+import { Button } from "@/shared/ui/core/button";
+import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import { RepoCard } from "@/entities/repo";
-
-import { RepoEmpty } from "./repo-empty";
-import { RepoSearchEmpty } from "./repo-search-empty";
+import { RepoCard, useCreateRepoActions } from "@/entities/repo";
 
 type Props = {
   meta?: RepoMeta;
@@ -13,12 +15,41 @@ type Props = {
 };
 
 export function RepoList({ meta, repos }: Readonly<Props>) {
+  const { setOpen } = useCreateRepoActions();
+  const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("Common");
+
   if (!meta || meta.totalCount === 0) {
-    return <RepoEmpty />;
+    return (
+      <EmptyState
+        action={
+          <Button variant="secondary" onClick={() => setOpen(true)} className="cursor-pointer">
+            {tCommon("add")}
+          </Button>
+        }
+        description={t("repo_empty_repos_desc")}
+        title={t("repo_empty_title")}
+      />
+    );
   }
 
   if (meta.filteredCount === 0) {
-    return <RepoSearchEmpty meta={meta} />;
+    return (
+      <EmptyState
+        description={
+          meta.searchQuery !== "" && meta.searchQuery != null ? (
+            <span>
+              {t("repo_no_results_found_for")}{" "}
+              <span className="italic">{`"${meta.searchQuery}"`}</span>
+            </span>
+          ) : (
+            t("repo_change_filters")
+          )
+        }
+        icon={SearchX}
+        title={t("repo_no_results_found")}
+      />
+    );
   }
 
   return (

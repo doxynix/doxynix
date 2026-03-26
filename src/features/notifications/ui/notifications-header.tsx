@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useQueryStates, type inferParserType } from "nuqs";
+import { useQueryStates } from "nuqs";
 
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -14,7 +14,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
-import { notificationsParsers } from "@/entities/notifications";
+import { notificationsParsers, type NotificationsParsersState } from "@/entities/notifications";
 
 import { NotifyTypeSchema } from "@/generated/zod";
 
@@ -25,8 +25,6 @@ type Props = {
   stats?: { read: number; total: number; unread: number };
 };
 
-type NotificationsFilters = inferParserType<typeof notificationsParsers>;
-
 type TabItem = { count?: number; id: string; label: string; value: string };
 
 export function NotificationsHeader({ stats }: Readonly<Props>) {
@@ -34,9 +32,9 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
 
   const tabValue = filters.isRead === null ? "all" : filters.isRead ? "read" : "unread";
 
-  const handleUpdate = <K extends keyof NotificationsFilters>(
+  const handleUpdate = <K extends keyof NotificationsParsersState>(
     key: K,
-    value: NotificationsFilters[K]
+    value: NotificationsParsersState[K]
   ) => {
     void setFilters({ [key]: value, page: null });
   };
@@ -90,7 +88,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
         <Select
           value={filters.type ?? "all"}
           onValueChange={(v) =>
-            handleUpdate("type", v === "all" ? null : (v as NotificationsFilters["type"]))
+            handleUpdate("type", v === "all" ? null : (v as NotificationsParsersState["type"]))
           }
         >
           <SelectTrigger className="">

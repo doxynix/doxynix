@@ -1,21 +1,19 @@
 import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import { z } from "zod/v4-mini";
 
 export const env = createEnv({
   client: {
     NEXT_PUBLIC_API_PREFIX: z
       .string()
-      .startsWith("/")
-      .regex(/^\/[\w\-\/]*$/, "Invalid prefix format"),
-    NEXT_PUBLIC_APP_URL: z.url().optional(),
-    NEXT_PUBLIC_POSTHOG_HOST: z.url().min(1),
-    NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1),
+      .check(z.startsWith("/"), z.regex(/^\/[\w\-\/]*$/, "Invalid prefix format")),
+    NEXT_PUBLIC_APP_URL: z.optional(z.url()),
+    NEXT_PUBLIC_POSTHOG_HOST: z.string().check(z.minLength(1)),
+    NEXT_PUBLIC_POSTHOG_KEY: z.string().check(z.minLength(1)),
     NEXT_PUBLIC_SENTRY_DSN: z.url(),
     NEXT_PUBLIC_TRPC_PREFIX: z
       .string()
-      .startsWith("/")
-      .regex(/^\/[\w\-\/]*$/, "Invalid prefix format"),
-    NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1),
+      .check(z.startsWith("/"), z.regex(/^\/[\w\-\/]*$/, "Invalid prefix format")),
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().check(z.minLength(1)),
   },
   emptyStringAsUndefined: true,
 
@@ -56,47 +54,38 @@ export const env = createEnv({
   },
 
   server: {
-    ABLY_API_KEY: z.string().min(1),
-    BETTERSTACK_API_TOKEN: z.string().min(1),
+    ABLY_API_KEY: z.string().check(z.minLength(1)),
+    BETTERSTACK_API_TOKEN: z.string().check(z.minLength(1)),
     DATABASE_URL: z.url(),
 
-    GITHUB_APP_ID: z.string().regex(/^\d+$/, "GITHUB_APP_ID must be numeric"),
-    GITHUB_APP_PRIVATE_KEY: z.preprocess(
-      (value) => (typeof value === "string" ? value.replace(/\\n/g, "\n") : value),
-      z
-        .string()
-        .regex(
-          /^-----BEGIN (?:RSA )?PRIVATE KEY-----[\s\S]+-----END (?:RSA )?PRIVATE KEY-----\s*$/,
-          "GITHUB_APP_PRIVATE_KEY must be a valid PEM-formatted private key"
-        )
-    ),
-    GITHUB_CLIENT_ID: z.string().min(1),
-    GITHUB_CLIENT_SECRET: z.string().min(1),
-    GITHUB_SYSTEM_INSTALLATION_ID: z
+    GITHUB_APP_ID: z.string().check(z.regex(/^\d+$/, "must be numeric")),
+    GITHUB_APP_PRIVATE_KEY: z
       .string()
-      .regex(/^\d+$/, "GITHUB_SYSTEM_INSTALLATION_ID must be numeric"),
-    GITHUB_SYSTEM_PAT: z.string().min(1).optional(),
-    GITHUB_WEBHOOK_SECRET: z.string().min(1),
-    GITLAB_CLIENT_ID: z.string().min(1),
-    GITLAB_CLIENT_SECRET: z.string().min(1),
-    GOOGLE_CLIENT_ID: z.string().min(1),
-
-    GOOGLE_CLIENT_SECRET: z.string().min(1),
-    GROQ_API_KEY: z.string().min(1),
-    JWT_SECRET: z.string().min(1),
-    NEXTAUTH_SECRET: z.string().min(1),
-    RESEND_API_KEY: z.string().min(1),
-    TURNSTILE_SECRET_KEY: z.string().min(1),
-    UPLOADTHING_TOKEN: z.string().min(1),
-    YANDEX_CLIENT_ID: z.string().min(1),
-    YANDEX_CLIENT_SECRET: z.string().min(1),
+      .check(z.regex(/BEGIN .*PRIVATE KEY/), z.regex(/END .*PRIVATE KEY/)),
+    GITHUB_CLIENT_ID: z.string().check(z.minLength(1)),
+    GITHUB_CLIENT_SECRET: z.string().check(z.minLength(1)),
+    GITHUB_SYSTEM_INSTALLATION_ID: z.string().check(z.regex(/^\d+$/)),
+    GITHUB_SYSTEM_PAT: z.optional(z.string().check(z.minLength(1))),
+    GITHUB_WEBHOOK_SECRET: z.string().check(z.minLength(1)),
+    GITLAB_CLIENT_ID: z.string().check(z.minLength(1)),
+    GITLAB_CLIENT_SECRET: z.string().check(z.minLength(1)),
+    GOOGLE_CLIENT_ID: z.string().check(z.minLength(1)),
+    GOOGLE_CLIENT_SECRET: z.string().check(z.minLength(1)),
+    GROQ_API_KEY: z.string().check(z.minLength(1)),
+    JWT_SECRET: z.string().check(z.minLength(1)),
+    NEXTAUTH_SECRET: z.string().check(z.minLength(1)),
+    RESEND_API_KEY: z.string().check(z.minLength(1)),
+    TURNSTILE_SECRET_KEY: z.string().check(z.minLength(1)),
+    UPLOADTHING_TOKEN: z.string().check(z.minLength(1)),
+    YANDEX_CLIENT_ID: z.string().check(z.minLength(1)),
+    YANDEX_CLIENT_SECRET: z.string().check(z.minLength(1)),
   },
 
   shared: {
-    ANALYZE: z.enum(["true", "false"]).optional().default("false"),
-    CI: z.enum(["true", "false"]).optional().default("false"),
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    PORT: z.string().optional().default("3000"),
+    ANALYZE: z.optional(z.enum(["true", "false"])),
+    CI: z.optional(z.enum(["true", "false"])),
+    NODE_ENV: z.enum(["development", "test", "production"]),
+    PORT: z.optional(z.string()),
   },
 
   skipValidation:

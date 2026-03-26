@@ -30,7 +30,7 @@ export function LoadingButton({
       <span className="absolute inset-0 flex items-center justify-center gap-2 p-2">
         {isLoading ? (
           <>
-            <Spinner className="size-4" />
+            <Spinner />
             {reservedContent}
           </>
         ) : (

@@ -64,6 +64,46 @@ const nextConfig: NextConfig = {
     workerThreads: true,
   },
   async headers() {
+    const scriptSrc = [
+      "'self'",
+      "'unsafe-inline'",
+      IS_DEV ? "'unsafe-eval'" : "",
+      "blob:",
+      "https://vercel.live",
+      "https://va.vercel-scripts.com",
+      "https://cdn.jsdelivr.net",
+      "https://challenges.cloudflare.com",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    const connectSrc = [
+      "'self'",
+      IS_DEV ? "ws://localhost:*" : "",
+      "https://cdn.jsdelivr.net",
+      "https://ufs.sh",
+      "https://*.ufs.sh",
+      "https://utfs.io",
+      "https://*.utfs.io",
+      "https://uploadthing.com",
+      "https://*.uploadthing.com",
+      "https://vitals.vercel-insights.com",
+      "https://axiom.co",
+      "https://challenges.cloudflare.com",
+      "https://*.ably-realtime.com",
+      "https://*.realtime.ably.net",
+      "wss://*.ably-realtime.com",
+      "https://*.ably.net",
+      "wss://*.ably.net",
+      "wss://*.realtime.ably.net",
+      "https://*.ingest.sentry.io",
+      "https://*.sentry.io",
+      "https://us.i.posthog.com",
+      "https://us-assets.i.posthog.com",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
     return [
       {
         headers: [
@@ -75,7 +115,7 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: `
               default-src 'none';
-              script-src 'self' 'unsafe-inline' blob: https://vercel.live https://va.vercel-scripts.com https://cdn.jsdelivr.net https://challenges.cloudflare.com;
+              script-src ${scriptSrc};
               frame-src 'self' https://vercel.live https://challenges.cloudflare.com;
               worker-src 'self' blob:;
               base-uri 'none';
@@ -95,27 +135,7 @@ const nextConfig: NextConfig = {
                 https://avatars.yandex.net;
               font-src 'self' data:;
               media-src 'self';
-              connect-src 'self'
-                https://cdn.jsdelivr.net
-                https://ufs.sh
-                https://*.ufs.sh
-                https://utfs.io
-                https://*.utfs.io
-                https://uploadthing.com
-                https://*.uploadthing.com
-                https://vitals.vercel-insights.com
-                https://axiom.co
-                https://challenges.cloudflare.com
-                https://*.ably-realtime.com
-                https://*.realtime.ably.net
-                wss://*.ably-realtime.com
-                https://*.ably.net
-                wss://*.ably.net
-                wss://*.realtime.ably.net
-                https://*.ingest.sentry.io
-                https://*.sentry.io
-                https://us.i.posthog.com
-                https://us-assets.i.posthog.com;
+              connect-src ${connectSrc};
               frame-ancestors 'none';
               manifest-src 'self';
               upgrade-insecure-requests;
