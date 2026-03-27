@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.18.12](https://github.com/doxynix/doxynix/compare/v1.18.11...v1.18.12) (2026-03-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ai to v6.0.140 ([#795](https://github.com/doxynix/doxynix/issues/795)) ([fdfc57d](https://github.com/doxynix/doxynix/commit/fdfc57d40ac6c2b85d49d20dd71bce8be2737f88))
+
 ## [1.18.11](https://github.com/doxynix/doxynix/compare/v1.18.10...v1.18.11) (2026-03-26)
 
 
