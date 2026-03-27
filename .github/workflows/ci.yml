@@ -109,7 +109,7 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@994d756a33d64d79175a2d721a1a1b6976958b2d
+        uses: pnpm/action-setup@6b87c4621a21f802115d27ffcbfb44e28abd1387
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
@@ -150,7 +150,7 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@994d756a33d64d79175a2d721a1a1b6976958b2d
+        uses: pnpm/action-setup@6b87c4621a21f802115d27ffcbfb44e28abd1387
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
@@ -189,13 +189,13 @@ jobs:
 
       - name: Secret Scanning (TruffleHog)
         # v3.93.4
-        uses: trufflesecurity/trufflehog@61d57c10a563ba8a33a4c4205c85b5b3505a050e
+        uses: trufflesecurity/trufflehog@6171fa9f6676edf21e15bba41f049b18399d7372
         with:
           path: ./
           extra_args: --only-verified
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@994d756a33d64d79175a2d721a1a1b6976958b2d
+        uses: pnpm/action-setup@6b87c4621a21f802115d27ffcbfb44e28abd1387
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
@@ -266,7 +266,7 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@994d756a33d64d79175a2d721a1a1b6976958b2d
+        uses: pnpm/action-setup@6b87c4621a21f802115d27ffcbfb44e28abd1387
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
@@ -313,7 +313,7 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@994d756a33d64d79175a2d721a1a1b6976958b2d
+        uses: pnpm/action-setup@6b87c4621a21f802115d27ffcbfb44e28abd1387
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
@@ -389,7 +389,7 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@994d756a33d64d79175a2d721a1a1b6976958b2d
+        uses: pnpm/action-setup@6b87c4621a21f802115d27ffcbfb44e28abd1387
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
@@ -454,7 +454,7 @@ jobs:
           path: .
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@994d756a33d64d79175a2d721a1a1b6976958b2d
+        uses: pnpm/action-setup@6b87c4621a21f802115d27ffcbfb44e28abd1387
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
