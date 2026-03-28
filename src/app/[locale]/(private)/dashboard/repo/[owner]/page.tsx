@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
-import { RepoAvatar } from "@/entities/repo";
 import type { SearchParams } from "@/entities/repo-setup";
 
 import {
@@ -48,7 +48,7 @@ export default async function OwnerPage({ params }: Readonly<Props>) {
   return (
     <div className="mx-auto flex h-full w-full flex-col">
       <div className="not-xs:justify-center mb-4 flex items-center gap-4">
-        <RepoAvatar alt={owner} src={avatarUrl ?? "/avatar-placeholder.png"} />
+        <AppAvatar alt={owner} sizeClassName="size-9" src={avatarUrl} />
         <h1 className="text-2xl font-bold">{owner}</h1>
       </div>
 

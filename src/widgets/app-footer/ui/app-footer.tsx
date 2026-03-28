@@ -35,6 +35,13 @@ export function AppFooter() {
             Privacy Policy
           </Link>
 
+          <Link
+            href="/thanks"
+            className="hover:text-foreground text-center text-xs transition-colors"
+          >
+            Thanks!
+          </Link>
+
           <div className="border-border flex items-center gap-4 md:pl-6 xl:border-l">
             <ExternalLink
               href="https://github.com/doxynix/doxynix"
