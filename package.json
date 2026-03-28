@@ -132,7 +132,7 @@
     "@react-email/components": "1.0.10",
     "@react-email/render": "2.0.4",
     "@replit/codemirror-minimap": "0.5.2",
-    "@scalar/api-reference-react": "0.9.15",
+    "@scalar/api-reference-react": "0.9.16",
     "@scalar/nextjs-api-reference": "0.10.5",
     "@sentry/nextjs": "10.46.0",
     "@shikijs/rehype": "4.0.2",
