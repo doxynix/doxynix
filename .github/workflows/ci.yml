@@ -600,7 +600,7 @@ jobs:
 
       - name: Notify Telegram
         if: github.actor != 'ImgBotApp' && !contains(github.actor, '[bot]')
-        uses: appleboy/telegram-action@1b2bf60368dcf9d8375bd26bee6c94649f670968
+        uses: appleboy/telegram-action@847a2d3240d33a6137191cc89b3ad7f53e427c06
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
