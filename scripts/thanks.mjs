@@ -228,6 +228,22 @@ const toPublicUrl = (url) => {
   }
 };
 
+const sanitizeAuthorName = (rawName) => {
+  if (!rawName) return "";
+
+  let cleanedName = String(rawName)
+    .replace(/\([^)]+\)/g, "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/\b[^\s@]+@[^\s@]+\.[^\s@]+\b/g, "")
+    .replace(/[<>]/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  cleanedName = cleanedName.replace(/[^a-zA-Z0-9\s.'"-]/g, "").trim();
+
+  return cleanedName;
+};
+
 function enrichPackageData(pkg) {
   let authorName = "";
   let githubOwner = "";
@@ -256,23 +272,7 @@ function enrichPackageData(pkg) {
     const rawName =
       typeof pkg.author === "object" ? String(pkg.author?.name ?? "") : String(pkg.author ?? "");
 
-    let cleanedName = rawName;
-    let previousName = "";
-    let iterations = 0;
-
-    while (cleanedName !== previousName && iterations < 5) {
-      previousName = cleanedName;
-      cleanedName = cleanedName
-        .replace(/\([^)]+\)/g, "")
-        .replace(/<[^>]*>/g, "")
-        .replace(/\b[^\s@]+@[^\s@]+\.[^\s@]+\b/g, "")
-        .replace(/[<>]/g, "")
-        .replace(/\s{2,}/g, " ")
-        .trim();
-      iterations++;
-    }
-
-    cleanedName = cleanedName.replace(/[^a-zA-Z0-9\s.'"-]/g, "").trim();
+    const cleanedName = sanitizeAuthorName(rawName);
 
     if (cleanedName.length > 0) {
       authorName = capitalize(cleanedName);
