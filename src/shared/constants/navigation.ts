@@ -6,6 +6,7 @@ import {
   FileText,
   FolderGit2,
   Headset,
+  HeartHandshakeIcon,
   HistoryIcon,
   Home,
   KeyRound,
@@ -136,6 +137,12 @@ export const publicHeaderMenu: MenuItems = [
     icon: Headset,
     id: "Help",
     label: "Help",
+  },
+  {
+    href: "/thanks",
+    icon: HeartHandshakeIcon,
+    id: "Thanks",
+    label: "Thanks",
   },
 ];
 

@@ -13,8 +13,8 @@
     ]
   },
   "scripts": {
-    "dev": "pnpm db:generate && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" next dev",
-    "build": "pnpm db:generate && next build",
+    "dev": "pnpm gen:credits && pnpm db:generate && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" next dev",
+    "build": "pnpm gen:credits && pnpm db:generate && next build",
     "sitemap": "next-sitemap",
     "start": "next start",
     "lint": "eslint .",
@@ -31,6 +31,7 @@
     "knip": "knip --no-exit-code",
     "spellcheck": "cspell \"**/*\" --no-progress --show-suggestions",
     "gen:client": "openapi --input http://localhost:3000/api/openapi --output ./src/generated/client --client axios",
+    "gen:credits": "node scripts/thanks.mjs",
     "doc:gen": "typedoc",
     "db:generate": "zenstack generate --schema prisma/schema.zmodel",
     "db:migrate": "pnpm db:generate && prisma migrate dev",
@@ -85,6 +86,9 @@
     ]
   },
   "dependencies": {
+    "@ai-sdk/google": "3.0.53",
+    "@ai-sdk/groq": "3.0.31",
+    "@ai-sdk/openai": "3.0.48",
     "@codemirror/autocomplete": "6.20.1",
     "@codemirror/commands": "6.10.3",
     "@codemirror/language": "6.12.3",
@@ -94,9 +98,6 @@
     "@codemirror/state": "6.6.0",
     "@codemirror/theme-one-dark": "6.1.3",
     "@codemirror/view": "6.40.0",
-    "@ai-sdk/google": "3.0.53",
-    "@ai-sdk/groq": "3.0.31",
-    "@ai-sdk/openai": "3.0.48",
     "@hookform/resolvers": "5.2.2",
     "@js-temporal/polyfill": "0.5.1",
     "@lezer/highlight": "1.2.3",

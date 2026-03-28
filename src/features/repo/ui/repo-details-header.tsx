@@ -8,11 +8,11 @@ import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
+import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
 import {
   getGitMetrics,
-  RepoAvatar,
   RepoGitMetric,
   repoStatusConfig,
   RepoTopics,
@@ -31,7 +31,7 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
   return (
     <div className="mx-auto w-full space-y-4">
       <div className="flex items-center gap-4">
-        <RepoAvatar alt={repo.owner} src={repo.ownerAvatarUrl ?? "/avatar-placeholder.png"} />
+        <AppAvatar alt={repo.owner} src={repo.ownerAvatarUrl} />
         <h1 className="flex items-center text-2xl font-bold">
           {repo.owner} / {repo.name}
         </h1>

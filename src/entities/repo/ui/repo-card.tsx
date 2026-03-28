@@ -10,6 +10,7 @@ import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Card, CardContent } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
+import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
@@ -19,7 +20,6 @@ import { getGitMetrics } from "../model/git-metrics";
 import { getMetrics } from "../model/metrics";
 import { repoStatusConfig } from "../model/repo-status-config";
 import { repoVisibilityConfig } from "../model/repo-visibility";
-import { RepoAvatar } from "./repo-avatar";
 import { RepoGitMetric } from "./repo-git-metric";
 import { RepoTopics } from "./repo-topics";
 
@@ -41,7 +41,13 @@ export function RepoCard({ repo }: Readonly<Props>) {
     <Card className="group hover:border-border-strong relative flex overflow-hidden p-4 transition-colors">
       <CardContent className="flex justify-center gap-4 md:justify-between">
         <div className="flex min-w-0 flex-wrap gap-2 not-md:justify-center sm:flex-nowrap">
-          <RepoAvatar alt={repo.owner} src={repo.ownerAvatarUrl ?? "/avatar-placeholder.png"} />
+          <AppAvatar
+            alt={repo.owner}
+            fallbackText={repo.owner}
+            sizeClassName="size-9"
+            src={repo.ownerAvatarUrl}
+          />
+
           <div className="flex min-w-0 flex-col justify-between gap-1 not-md:items-center">
             <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center justify-center gap-1 truncate text-sm">
