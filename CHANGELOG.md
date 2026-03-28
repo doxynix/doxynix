@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.18.15](https://github.com/doxynix/doxynix/compare/v1.18.14...v1.18.15) (2026-03-28)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @marsidev/react-turnstile to v1.5.0 ([#821](https://github.com/doxynix/doxynix/issues/821)) ([c8f3d39](https://github.com/doxynix/doxynix/commit/c8f3d39c6ece5abcd56af3c7eb35de512c7060bf))
+
+## [1.18.14](https://github.com/doxynix/doxynix/compare/v1.18.13...v1.18.14) (2026-03-27)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#810](https://github.com/doxynix/doxynix/issues/810)) ([665cbca](https://github.com/doxynix/doxynix/commit/665cbca2040baab719b2d7859b8c1d2deb377bf7))
+
 ## [1.18.13](https://github.com/doxynix/doxynix/compare/v1.18.12...v1.18.13) (2026-03-27)
 
 
