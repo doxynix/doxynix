@@ -17,6 +17,21 @@ type Props = {
   src?: string | null;
 };
 
+function isUnoptimizedHost(src: string): boolean {
+  try {
+    const url = new URL(src);
+    const hostname = url.hostname.toLowerCase();
+
+    const allowedHosts = ["utfs.io", "ufs.sh"];
+
+    return allowedHosts.some((allowed) => {
+      return hostname === allowed || hostname.endsWith("." + allowed);
+    });
+  } catch {
+    return false;
+  }
+}
+
 export function AppAvatar({
   alt,
   className,
@@ -64,7 +79,7 @@ export function AppAvatar({
           priority={priority}
           sizes={sizeClassName.includes("size-24") ? "96px" : "48px"}
           src={src}
-          unoptimized={src.includes("ufs.sh") || src.includes("utfs.io")}
+          unoptimized={isUnoptimizedHost(src)}
           onError={() => {
             console.error("Image load error:", src);
             setStatus("error");

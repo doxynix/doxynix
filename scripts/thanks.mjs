@@ -236,7 +236,11 @@ function enrichPackageData(pkg) {
 
   if (!authorName && pkg.author) {
     const rawName = typeof pkg.author === "object" ? pkg.author.name : String(pkg.author);
-    authorName = capitalize(rawName.replace(/(<[^>]+>|\([^)]+\))/g, "").trim());
+    const cleanedName = rawName
+      .replace(/\([^)]+\)/g, "")
+      .replace(/[<>]/g, "")
+      .trim();
+    authorName = capitalize(cleanedName);
   }
 
   authorName = authorName || "Open Source Community";
