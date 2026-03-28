@@ -1,33 +1,28 @@
-import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import createMiddleware from "next-intl/middleware";
 
 import { routing } from "./i18n/routing";
 import { redisClient } from "./server/infrastructure/redis";
 import { logger } from "./server/logger/logger";
-import {
-  anonymizeIp,
-  generateRequestId,
-  getCountry,
-  getIp,
-  getUa,
-  sanitizeRequestId,
-} from "./server/utils/request-context";
+import { generateRequestId, getIp, sanitizeRequestId } from "./server/utils/request-context";
 import { API_PREFIX, IS_PROD } from "./shared/constants/env.client";
 import { TURNSTILE_SECRET_KEY } from "./shared/constants/env.server";
 import { LOCALE_REGEX_STR } from "./shared/constants/locales";
 import { getCookieName } from "./shared/lib/utils";
 
-const ONE_MB = 1024 * 1024;
 const protectedRoutes = ["/dashboard"];
 const authRoutes = ["/auth"];
 const cookieName = getCookieName();
 const ANALYTICS_TUNNELS = [`${API_PREFIX}/dxnx/p`, `${API_PREFIX}/dxnx/s`];
 
 let ratelimit: Ratelimit | null = null;
+const ephemeralCache = new Map<string, number>();
+
 if (IS_PROD) {
   ratelimit = new Ratelimit({
     analytics: false,
+    ephemeralCache: ephemeralCache,
     limiter: Ratelimit.slidingWindow(20, "10 s"),
     prefix: "@upstash/ratelimit",
     redis: redisClient,
@@ -35,12 +30,6 @@ if (IS_PROD) {
 }
 
 const intlMiddleware = createMiddleware(routing);
-
-async function hashToken(token: string): Promise<string> {
-  const data = new TextEncoder().encode(token);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return Buffer.from(hashBuffer).toString("hex");
-}
 
 function hasPathBoundary(pathname: string, prefix: string): boolean {
   if (!pathname.startsWith(prefix)) return false;
@@ -56,107 +45,37 @@ function isUploadThingPath(pathname: string): boolean {
   return hasPathBoundary(pathname, "/api/uploadthing");
 }
 
-type LogTrafficParams = {
-  country: string;
-  event: NextFetchEvent;
-  ip: string;
-  method: string;
-  msg: string;
-  path: string;
-  requestId: string;
-  url: string;
-  userAgent: string;
-};
-
-function logTraffic({
-  country,
-  event,
-  ip,
-  method,
-  msg,
-  path,
-  requestId,
-  url,
-  userAgent,
-}: LogTrafficParams) {
-  logger.info({
-    country,
-    ip: anonymizeIp(ip),
-    method,
-    msg,
-    path,
-    requestId,
-    url,
-    userAgent,
-  });
-
-  event.waitUntil(logger.flush());
-}
-
-function getPayloadTooLargeResponse(requestId: string): NextResponse {
-  return new NextResponse(JSON.stringify({ error: "Payload Too Large", requestId }), {
-    headers: { "content-type": "application/json" },
-    status: 413,
-  });
-}
-
-function validateRequestSize(request: NextRequest, requestId: string): NextResponse | null {
-  const header = request.headers.get("content-length");
-  if (header != null) {
-    const contentLength = Number.parseInt(header, 10);
-    if (!Number.isFinite(contentLength) || contentLength < 0 || contentLength > ONE_MB) {
-      return getPayloadTooLargeResponse(requestId);
-    }
-  }
-  return null;
-}
-
 async function handleRateLimitAndSize(
   request: NextRequest,
   pathname: string,
-  ip: string,
-  requestId: string
+  ip: string
 ): Promise<NextResponse | null> {
-  const payloadTooLargeResponse = validateRequestSize(request, requestId);
-  if (payloadTooLargeResponse != null) return payloadTooLargeResponse;
-
   if (hasPathBoundary(pathname, "/webhooks")) {
     return null;
   }
 
-  let success = true;
-  let limit = 0;
-  let reset = 0;
-  let remaining = 0;
-
-  if (ratelimit) {
+  if (ratelimit != null) {
     const token = request.cookies.get(cookieName)?.value;
-    let identifier = ip;
-    if (token != null) identifier = await hashToken(token);
+    const identifier = token != null ? `user_${token.slice(-16)}` : `ip_${ip}`;
+    const { limit, remaining, reset, success } = await ratelimit.limit(identifier);
 
-    const result = await ratelimit.limit(identifier);
-    success = result.success;
-    limit = result.limit;
-    reset = result.reset;
-    remaining = result.remaining;
-  }
-
-  if (!success) {
-    return new NextResponse(
-      JSON.stringify({
-        error: "Too Many Requests",
-        message: "You're sending requests too often. Please wait.",
-      }),
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "X-RateLimit-Limit": limit.toString(),
-          "X-RateLimit-Remaining": remaining.toString(),
-          "X-RateLimit-Reset": reset.toString(),
-        },
-        status: 429,
-      }
-    );
+    if (!success) {
+      return new NextResponse(
+        JSON.stringify({
+          error: "Too Many Requests",
+          message: "You're sending requests too often. Please wait.",
+        }),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
+          },
+          status: 429,
+        }
+      );
+    }
   }
 
   return null;
@@ -216,7 +135,7 @@ async function handleApiRequest(
     return response;
   };
 
-  const rateLimitResponse = await handleRateLimitAndSize(request, pathname, ip, requestId);
+  const rateLimitResponse = await handleRateLimitAndSize(request, pathname, ip);
   if (rateLimitResponse) return attachRequestMeta(rateLimitResponse);
 
   if (pathname === "/api/auth/signin/email" && request.method === "POST") {
@@ -284,7 +203,7 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
   return response;
 }
 
-export async function proxy(request: NextRequest, event: NextFetchEvent) {
+export async function proxy(request: NextRequest) {
   const requestId = sanitizeRequestId(request.headers.get("x-request-id")) ?? generateRequestId();
   const { pathname } = request.nextUrl;
 
@@ -293,36 +212,10 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
   }
 
   if (isAnalyticsTunnel(pathname)) {
-    const payloadTooLargeResponse = validateRequestSize(request, requestId);
-    if (payloadTooLargeResponse != null) {
-      logger.error({
-        msg: "Analytics tunnel payload too large",
-        path: pathname,
-        requestId,
-        url: request.url,
-      });
-      event.waitUntil(logger.flush());
-      return payloadTooLargeResponse;
-    }
-
     return NextResponse.next();
   }
 
   const ip = getIp(request);
-  const userAgent = getUa(request);
-  const method = request.method;
-  const country = getCountry(request);
-  logTraffic({
-    country,
-    event,
-    ip,
-    method,
-    msg: "Incoming Traffic",
-    path: pathname,
-    requestId,
-    url: request.url,
-    userAgent,
-  });
 
   if (pathname.startsWith("/api") || pathname.startsWith("/trpc")) {
     return handleApiRequest(request, requestId, ip);
