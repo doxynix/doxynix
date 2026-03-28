@@ -257,6 +257,8 @@ function enrichPackageData(pkg) {
       iterations++;
     }
 
+    cleanedName = cleanedName.replace(/[<>]/g, "");
+
     if (cleanedName.length > 0) {
       authorName = capitalize(cleanedName);
     }
