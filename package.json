@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "1.18.15",
+  "version": "1.18.16",
   "license": "MIT",
   "private": true,
   "lint-staged": {
