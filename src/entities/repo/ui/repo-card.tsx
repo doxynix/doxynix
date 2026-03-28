@@ -41,7 +41,12 @@ export function RepoCard({ repo }: Readonly<Props>) {
     <Card className="group hover:border-border-strong relative flex overflow-hidden p-4 transition-colors">
       <CardContent className="flex justify-center gap-4 md:justify-between">
         <div className="flex min-w-0 flex-wrap gap-2 not-md:justify-center sm:flex-nowrap">
-          <AppAvatar alt={repo.owner} sizeClassName="size-9" src={repo.ownerAvatarUrl} />
+          <AppAvatar
+            alt={repo.owner}
+            fallbackText={repo.owner}
+            sizeClassName="size-9"
+            src={repo.ownerAvatarUrl}
+          />
 
           <div className="flex min-w-0 flex-col justify-between gap-1 not-md:items-center">
             <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2">

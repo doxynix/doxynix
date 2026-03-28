@@ -84,7 +84,7 @@ export function LanguageSwitcher() {
               {LOCALES.map((l, i) => (
                 <SelectItem key={l} value={l}>
                   <div className="flex items-center gap-3">
-                    <Flag alt={`${l} flag`} src={FLAGS[l] || FLAGS.en} />
+                    <Flag alt="" src={FLAGS[l] || FLAGS.en} />
                     <span>{t(translationKeys[i])}</span>
                   </div>
                 </SelectItem>

@@ -59,6 +59,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
               fallbackClassName="text-2xl"
               fallbackText={currentUser.name ?? currentUser.email ?? undefined}
               priority={true}
+              sizeClassName="size-24"
               src={avatarUrl}
               className="size-24"
             />

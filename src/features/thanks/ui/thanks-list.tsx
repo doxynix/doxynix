@@ -15,7 +15,7 @@ export function ThanksList({ initialGroups }: Readonly<Props>) {
   const [search] = useQueryState("search", parseAsString.withDefault(""));
 
   const getFiltered = () => {
-    const s = search.toLowerCase();
+    const s = search.trim().toLowerCase();
     if (!s) return initialGroups;
 
     return initialGroups

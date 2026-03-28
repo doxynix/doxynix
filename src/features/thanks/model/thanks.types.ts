@@ -1,6 +1,5 @@
 export type Dependency = {
   license: string;
-  link: string;
   name: string;
 };
 

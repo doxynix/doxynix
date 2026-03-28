@@ -235,12 +235,18 @@ function enrichPackageData(pkg) {
   }
 
   if (!authorName && pkg.author) {
-    const rawName = typeof pkg.author === "object" ? pkg.author.name : String(pkg.author);
+    const rawName =
+      typeof pkg.author === "object" ? String(pkg.author?.name ?? "") : String(pkg.author ?? "");
+
     const cleanedName = rawName
       .replace(/\([^)]+\)/g, "")
-      .replace(/[<>]/g, "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s{2,}/g, " ")
       .trim();
-    authorName = capitalize(cleanedName);
+
+    if (cleanedName.length > 0) {
+      authorName = capitalize(cleanedName);
+    }
   }
 
   authorName = authorName || "Open Source Community";
