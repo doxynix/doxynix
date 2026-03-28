@@ -34,11 +34,11 @@ export function Flag({ alt, src }: Readonly<{ alt: string; src: string }>) {
   return (
     <div className="relative h-3.5 w-5 shrink-0 overflow-hidden rounded-[2px]">
       <Image
+        fill
         unoptimized
         alt={alt}
-        height={14}
+        sizes="20px"
         src={src}
-        width={20}
         onLoad={() => {
           loadedFlags.set(src, true);
           setLoaded(true);
@@ -84,7 +84,7 @@ export function LanguageSwitcher() {
               {LOCALES.map((l, i) => (
                 <SelectItem key={l} value={l}>
                   <div className="flex items-center gap-3">
-                    <Flag alt={l} src={FLAGS[l] || FLAGS.en} />
+                    <Flag alt={`${l} flag`} src={FLAGS[l] || FLAGS.en} />
                     <span>{t(translationKeys[i])}</span>
                   </div>
                 </SelectItem>

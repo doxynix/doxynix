@@ -130,6 +130,7 @@ const nextConfig: NextConfig = {
                 https://*.ufs.sh
                 https://utfs.io
                 https://*.utfs.io
+                https://github.com
                 https://avatars.githubusercontent.com
                 https://*.googleusercontent.com
                 https://avatars.yandex.net;
@@ -162,11 +163,6 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        hostname: "sun1-26.userapi.com",
-        pathname: "/**",
-        protocol: "https",
-      },
-      {
         hostname: "avatars.githubusercontent.com",
         pathname: "/**",
         protocol: "https",
@@ -187,7 +183,22 @@ const nextConfig: NextConfig = {
         protocol: "https",
       },
       {
+        hostname: "**.utfs.io",
+        pathname: "/**",
+        protocol: "https",
+      },
+      {
         hostname: "ufs.sh",
+        pathname: "/**",
+        protocol: "https",
+      },
+      {
+        hostname: "**.ufs.sh",
+        pathname: "/**",
+        protocol: "https",
+      },
+      {
+        hostname: "github.com",
         pathname: "/**",
         protocol: "https",
       },

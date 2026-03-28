@@ -7,10 +7,10 @@ import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { useProfileActions } from "../model/use-profile-actions";
-import { ProfileAvatar } from "./profile-avatar";
 import { ProfileDetailsForm } from "./profile-details-form";
 
 type Props = {
@@ -54,11 +54,13 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
         </CardHeader>
         <CardContent className="flex items-center gap-6">
           <div className="relative">
-            <ProfileAvatar
-              avatarClassName="border-border size-24 border-2"
-              avatarFallbackClassName="text-2xl"
-              avatarUrl={avatarUrl || undefined}
-              user={currentUser}
+            <AppAvatar
+              alt={currentUser.name ?? "User"}
+              fallbackClassName="text-2xl"
+              fallbackText={currentUser.name ?? currentUser.email ?? undefined}
+              priority={true}
+              src={avatarUrl}
+              className="size-24"
             />
             {avatarUrl && (
               <LoadingButton

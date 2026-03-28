@@ -28,10 +28,9 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/core/dropdown-menu";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 import { Link } from "@/i18n/routing";
-
-import { ProfileAvatar } from "@/features/profile";
 
 export function UserNav() {
   const { data: session, status } = useSession();
@@ -61,11 +60,13 @@ export function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="flex cursor-pointer items-center gap-3">
-          <ProfileAvatar
-            avatarClassName="size-9"
-            avatarFallbackClassName="text-xs"
-            avatarUrl={avatar}
-            user={user}
+          <AppAvatar
+            alt={user?.name ?? "User"}
+            fallbackClassName="text-xs"
+            fallbackText={user?.name ?? user?.email ?? undefined}
+            priority={true}
+            src={avatar}
+            className="size-9"
           />
         </div>
       </DropdownMenuTrigger>
