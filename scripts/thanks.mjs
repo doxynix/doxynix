@@ -238,11 +238,19 @@ function enrichPackageData(pkg) {
     const rawName =
       typeof pkg.author === "object" ? String(pkg.author?.name ?? "") : String(pkg.author ?? "");
 
-    const cleanedName = rawName
-      .replace(/\([^)]+\)/g, "")
-      .replace(/<[^>]+>/g, "")
-      .replace(/\s{2,}/g, " ")
-      .trim();
+    let cleanedName = rawName;
+    let previousName = "";
+    let iterations = 0;
+
+    while (cleanedName !== previousName && iterations < 5) {
+      previousName = cleanedName;
+      cleanedName = cleanedName
+        .replace(/\([^)]+\)/g, "")
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+      iterations++;
+    }
 
     if (cleanedName.length > 0) {
       authorName = capitalize(cleanedName);
