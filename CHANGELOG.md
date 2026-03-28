@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.19.1](https://github.com/doxynix/doxynix/compare/v1.19.0...v1.19.1) (2026-03-28)
+
+
+### Bug Fixes
+
+* **app:** исправление ошибки билда путем удаления генерации gen:credits ([#838](https://github.com/doxynix/doxynix/issues/838)) ([9de2228](https://github.com/doxynix/doxynix/commit/9de2228323d6b3f2fe18a998417c147ce6caf8e5))
+
 ## [1.19.0](https://github.com/doxynix/doxynix/compare/v1.18.16...v1.19.0) (2026-03-28)
 
 
