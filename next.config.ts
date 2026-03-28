@@ -183,7 +183,7 @@ const nextConfig: NextConfig = {
         protocol: "https",
       },
       {
-        hostname: "**.utfs.io",
+        hostname: "*.utfs.io",
         pathname: "/**",
         protocol: "https",
       },
@@ -193,7 +193,7 @@ const nextConfig: NextConfig = {
         protocol: "https",
       },
       {
-        hostname: "**.ufs.sh",
+        hostname: "*.ufs.sh",
         pathname: "/**",
         protocol: "https",
       },

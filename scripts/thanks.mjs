@@ -204,7 +204,12 @@ const MAPPINGS = [
 
 const cleanUrl = (url) => {
   if (!url) return "";
-  return url
+
+  const rawUrl = typeof url === "string" ? url : url.url || String(url);
+
+  if (typeof rawUrl !== "string" || !rawUrl) return "";
+
+  return rawUrl
     .replace(/^git\+/, "")
     .replace(/\.git$/, "")
     .replace(/\/$/, "");

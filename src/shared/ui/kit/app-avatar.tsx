@@ -20,8 +20,13 @@ type Props = {
 function isUnoptimizedHost(src: string): boolean {
   try {
     const url = new URL(src);
-    const hostname = url.hostname.toLowerCase();
+    const protocol = url.protocol.toLowerCase();
 
+    if (protocol !== "http:" && protocol !== "https:") {
+      return true;
+    }
+
+    const hostname = url.hostname.toLowerCase();
     const allowedHosts = ["utfs.io", "ufs.sh"];
 
     return allowedHosts.some((allowed) => {
