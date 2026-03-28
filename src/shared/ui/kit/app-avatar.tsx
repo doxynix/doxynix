@@ -17,6 +17,24 @@ type Props = {
   src?: string | null;
 };
 
+const SIZE_MAP: Record<string, string> = {
+  "size-6": "24px",
+  "size-8": "32px",
+  "size-9": "36px",
+  "size-10": "40px",
+  "size-12": "48px",
+  "size-16": "64px",
+  "size-24": "96px",
+  "size-32": "128px",
+};
+
+function getSizesFromClassName(sizeClassName: string): string {
+  for (const [key, value] of Object.entries(SIZE_MAP)) {
+    if (sizeClassName.includes(key)) return value;
+  }
+  return "48px";
+}
+
 function isUnoptimizedHost(src: string): boolean {
   try {
     const url = new URL(src);
@@ -82,7 +100,7 @@ export function AppAvatar({
           alt={alt}
           loading={priority ? undefined : "lazy"}
           priority={priority}
-          sizes={sizeClassName.includes("size-24") ? "96px" : "48px"}
+          sizes={getSizesFromClassName(sizeClassName)}
           src={src}
           unoptimized={isUnoptimizedHost(src)}
           onError={() => {

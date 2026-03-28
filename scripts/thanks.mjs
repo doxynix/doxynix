@@ -215,6 +215,19 @@ const cleanUrl = (url) => {
     .replace(/\/$/, "");
 };
 
+const toPublicUrl = (url) => {
+  const cleaned = cleanUrl(url);
+
+  try {
+    const parsed = new URL(cleaned);
+    return parsed.protocol === "https:" || parsed.protocol === "http:"
+      ? parsed.toString().replace(/\/$/, "")
+      : "";
+  } catch {
+    return "";
+  }
+};
+
 function enrichPackageData(pkg) {
   let authorName = "";
   let githubOwner = "";
@@ -251,7 +264,9 @@ function enrichPackageData(pkg) {
       previousName = cleanedName;
       cleanedName = cleanedName
         .replace(/\([^)]+\)/g, "")
-        .replace(/<[^>]+>/g, "")
+        .replace(/<[^>]*>/g, "")
+        .replace(/\b[^\s@]+@[^\s@]+\.[^\s@]+\b/g, "")
+        .replace(/[<>]/g, "")
         .replace(/\s{2,}/g, " ")
         .trim();
       iterations++;
@@ -274,7 +289,7 @@ function enrichPackageData(pkg) {
     authorName,
     authorLink: githubOwner
       ? `https://github.com/${githubOwner}`
-      : cleanUrl(pkg.homepage) || cleanUrl(pkg.repository?.url || pkg.repository),
+      : toPublicUrl(pkg.homepage) || toPublicUrl(pkg.repository?.url || pkg.repository),
     avatarUrl: githubOwner ? `https://github.com/${githubOwner}.png?size=96` : null,
     description: pkg.description || "Essential dependency",
   };
@@ -290,7 +305,7 @@ try {
   const output = execSync("pnpm licenses list --json", { maxBuffer: 1024 * 1024 * 50 }).toString();
   const rawData = JSON.parse(output);
 
-  const grouped = {};
+  const grouped = Object.create(null);
 
   Object.entries(rawData).forEach(([licenseType, packages]) => {
     packages.forEach((pkg) => {
