@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.19.0](https://github.com/doxynix/doxynix/compare/v1.18.16...v1.19.0) (2026-03-28)
+
+
+### Features
+
+* **features:** добавлена страница /thanks  ([#828](https://github.com/doxynix/doxynix/issues/828)) ([943d6fd](https://github.com/doxynix/doxynix/commit/943d6fd0a1151ce2a1083e7c706124b5c956bc74))
+
 ## [1.18.16](https://github.com/doxynix/doxynix/compare/v1.18.15...v1.18.16) (2026-03-28)
 
 
