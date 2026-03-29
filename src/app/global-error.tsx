@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import * as Sentry from "@sentry/nextjs";
 
 export default function GlobalError({
   error,
@@ -29,12 +28,29 @@ export default function GlobalError({
       ?.split("=")[1];
 
     if (requestId != null) {
-      Sentry.setTag("request_id", requestId);
-      Sentry.setTag("error_type", "fatal_global");
       setRequestId(requestId);
     }
 
-    Sentry.captureException(error);
+    let isActive = true;
+
+    void import("@sentry/nextjs")
+      .then((Sentry) => {
+        if (!isActive) return;
+
+        if (requestId != null) {
+          Sentry.setTag("request_id", requestId);
+          Sentry.setTag("error_type", "fatal_global");
+        }
+
+        Sentry.captureException(error);
+      })
+      .catch((error) => {
+        console.error("Sentry is unavailable", error);
+      });
+
+    return () => {
+      isActive = false;
+    };
   }, [error]);
 
   const emailBody = `
@@ -52,10 +68,30 @@ export default function GlobalError({
   `.trim();
 
   const mailtoLink = `mailto:support@doxynix.space?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+  const themeBootstrapScript = `
+    try {
+      const cookieTheme = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("doxynix-theme="))
+        ?.split("=")[1];
+      const storedTheme = localStorage.getItem("doxynix-theme");
+      const rawTheme = cookieTheme ?? storedTheme;
+      const theme =
+        rawTheme === "light" || rawTheme === "dark" || rawTheme === "system"
+          ? rawTheme
+          : "system";
+      const isDark =
+        theme === "dark" ||
+        (theme !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+      document.documentElement.classList.toggle("dark", isDark);
+    } catch {}
+  `;
 
   return (
-    <html lang="en">
+    <html suppressHydrationWarning lang="en">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
         <style>{`
           :root {
             --surface-page: oklch(0.985 0.002 255);
@@ -70,20 +106,18 @@ export default function GlobalError({
             --border-soft: oklch(0.922 0.004 255);
             --border-strong: oklch(0.86 0.005 255);
           }
-          @media (prefers-color-scheme: dark) {
-            :root {
-              --surface-page: oklch(0.145 0.004 255);
-              --surface-panel: oklch(0.205 0.004 255);
-              --text-primary: oklch(0.985 0.002 255);
-              --text-muted: oklch(0.58 0.004 255);
-              --text-soft: oklch(0.74 0.004 255);
-              --primary: oklch(0.985 0.002 255);
-              --primary-foreground: oklch(0.145 0.004 255);
-              --status-error: oklch(0.7 0.16 25);
-              --status-error-bg: oklch(0.7 0.16 25 / 0.12);
-              --border-soft: oklch(0.285 0.004 255);
-              --border-strong: oklch(0.36 0.004 255);
-            }
+          html.dark {
+            --surface-page: oklch(0.145 0.004 255);
+            --surface-panel: oklch(0.205 0.004 255);
+            --text-primary: oklch(0.985 0.002 255);
+            --text-muted: oklch(0.58 0.004 255);
+            --text-soft: oklch(0.74 0.004 255);
+            --primary: oklch(0.985 0.002 255);
+            --primary-foreground: oklch(0.145 0.004 255);
+            --status-error: oklch(0.7 0.16 25);
+            --status-error-bg: oklch(0.7 0.16 25 / 0.12);
+            --border-soft: oklch(0.285 0.004 255);
+            --border-strong: oklch(0.36 0.004 255);
           }
           body { margin: 0; font-family: sans-serif; background: var(--surface-page); color: var(--text-primary); display: flex; align-items: center; justify-content: center; min-height: 100vh; }
           .container { max-width: 400px; padding: 24px; text-align: center; }

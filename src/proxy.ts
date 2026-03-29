@@ -172,8 +172,10 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
   const localeRegex = new RegExp(`^/(${LOCALE_REGEX_STR})`);
   const pathWithoutLocale = pathname.replace(localeRegex, "") || "/";
 
-  const isProtectedRoute = protectedRoutes.some((route) => pathWithoutLocale.startsWith(route));
-  const isAuthRoute = authRoutes.some((route) => pathWithoutLocale.startsWith(route));
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    hasPathBoundary(pathWithoutLocale, route)
+  );
+  const isAuthRoute = authRoutes.some((route) => hasPathBoundary(pathWithoutLocale, route));
 
   const token = request.cookies.get(cookieName)?.value;
 
@@ -223,7 +225,6 @@ export async function proxy(request: NextRequest) {
 
   return handlePageRequest(request, requestId);
 }
-
 export const config = {
   matcher: [
     "/dashboard/repo/:path*",
