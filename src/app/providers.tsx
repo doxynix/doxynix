@@ -5,11 +5,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { httpBatchLink, loggerLink } from "@trpc/client";
 import { SessionProvider } from "next-auth/react";
+import { useTheme } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import superjson from "superjson";
 
 import { trpc } from "@/shared/api/trpc";
 import { APP_URL, IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
+import { setClientCookie } from "@/shared/lib/utils";
 import { TooltipProvider } from "@/shared/ui/core/tooltip";
 
 import { AnalyticsSync } from "./_components/analytics-sync";
@@ -68,7 +70,20 @@ export function Providers({ children }: Readonly<Props>) {
 
 const InnerProviders = ({ children }: { children: ReactNode }) => (
   <TooltipProvider>
+    <ThemeCookieSync />
     <AnalyticsSync />
     <NuqsAdapter>{children}</NuqsAdapter>
   </TooltipProvider>
 );
+
+function ThemeCookieSync() {
+  const { theme } = useTheme();
+
+  React.useEffect(() => {
+    if (theme == null) return;
+
+    setClientCookie("doxynix-theme", theme, 31536000);
+  }, [theme]);
+
+  return null;
+}
