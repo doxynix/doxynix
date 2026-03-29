@@ -50,7 +50,7 @@ async function handleRateLimitAndSize(
   pathname: string,
   ip: string
 ): Promise<NextResponse | null> {
-  if (hasPathBoundary(pathname, "/webhooks")) {
+  if (hasPathBoundary(pathname, "/api/webhooks") || hasPathBoundary(pathname, "/webhooks")) {
     return null;
   }
 
