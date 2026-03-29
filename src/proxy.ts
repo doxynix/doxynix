@@ -225,7 +225,6 @@ export async function proxy(request: NextRequest) {
 
   return handlePageRequest(request, requestId);
 }
-
 export const config = {
   matcher: [
     "/dashboard/repo/:path*",
