@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.19.4](https://github.com/doxynix/doxynix/compare/v1.19.3...v1.19.4) (2026-03-29)
+
+
+### Performance Improvements
+
+* **app:** оптимизирован proxy.ts, убраны не нужные операции ([#850](https://github.com/doxynix/doxynix/issues/850)) ([48a91a2](https://github.com/doxynix/doxynix/commit/48a91a23a390009eedfdfe0f72ebf52e1d6837f5))
+
 ## [1.19.3](https://github.com/doxynix/doxynix/compare/v1.19.2...v1.19.3) (2026-03-28)
 
 
