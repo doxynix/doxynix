@@ -1,6 +1,4 @@
-import { getLocale } from "next-intl/server";
-
-import { redirect } from "@/i18n/routing";
+import { unauthorized } from "next/navigation";
 
 import { WelcomeFlow } from "@/widgets/welcome-flow";
 
@@ -8,11 +6,9 @@ import { getServerAuthSession } from "@/server/auth/options";
 
 export default async function WelcomePage() {
   const session = await getServerAuthSession();
-  const locale = await getLocale();
 
   if (!session?.user) {
-    redirect({ href: "/auth", locale });
-    return null;
+    unauthorized();
   }
 
   return (

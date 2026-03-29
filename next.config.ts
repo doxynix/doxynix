@@ -58,6 +58,8 @@ const nextConfig: NextConfig = {
     serverComponentsHmrCache: true,
     serverSourceMaps: IS_PROD,
     taint: true,
+    turbopackFileSystemCacheForBuild: true,
+    turbopackFileSystemCacheForDev: true,
     typedEnv: true,
     useLightningcss: IS_PROD,
     webpackMemoryOptimizations: true,

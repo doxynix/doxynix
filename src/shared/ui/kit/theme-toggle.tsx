@@ -3,7 +3,7 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
-import { cn, setClientCookie } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
@@ -19,8 +19,6 @@ export function ThemeToggle({ className }: Readonly<Props>) {
   const toggleTheme = () => {
     const newTheme = resolvedTheme === "dark" ? "light" : "dark";
     setTheme(newTheme);
-
-    setClientCookie("doxynix-theme", newTheme, 31536000);
   };
 
   return (

@@ -1,11 +1,9 @@
 import { type ReactNode } from "react";
 import { cookies } from "next/headers";
-import { getLocale } from "next-intl/server";
-import { ThemeProvider } from "next-themes";
+import { unauthorized } from "next/navigation";
 
 import { SidebarProvider } from "@/shared/ui/core/sidebar";
 import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificator";
-import { redirect } from "@/i18n/routing";
 
 import { CreateRepoDialog } from "@/features/repo";
 import { GitInstallationCatcher } from "@/features/repo-setup";
@@ -18,25 +16,16 @@ import { getServerAuthSession } from "@/server/auth/options";
 
 export default async function PrivateLayout({ children }: Readonly<{ children: ReactNode }>) {
   const session = await getServerAuthSession();
-  const locale = await getLocale();
 
   if (!session?.user) {
-    redirect({ href: "/auth", locale });
-    return null;
+    unauthorized();
   }
 
   const cookieStore = await cookies();
-  const themeCookie = cookieStore.get("doxynix-theme")?.value ?? "system";
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
   return (
-    <ThemeProvider
-      disableTransitionOnChange
-      enableSystem
-      attribute="class"
-      defaultTheme={themeCookie}
-      storageKey="doxynix-theme"
-    >
+    <>
       <SentryUserIdentificator user={session.user} />
       <SidebarProvider
         defaultOpen={defaultOpen}
@@ -60,6 +49,6 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
       </SidebarProvider>
       <CreateRepoDialog />
       <GitInstallationCatcher />
-    </ThemeProvider>
+    </>
   );
 }
