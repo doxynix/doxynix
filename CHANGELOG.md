@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.20.0](https://github.com/doxynix/doxynix/compare/v1.19.4...v1.20.0) (2026-03-29)
+
+
+### Features
+
+* **app:** добавлены unauthorized и forbidden сценарии  ([#858](https://github.com/doxynix/doxynix/issues/858)) ([4cc6946](https://github.com/doxynix/doxynix/commit/4cc6946659c4046d12e39f86440cac2fb8a869f9))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @scalar/api-reference-react to v0.9.17 ([#859](https://github.com/doxynix/doxynix/issues/859)) ([0ed6352](https://github.com/doxynix/doxynix/commit/0ed63522d08f94a9e43bb7c1021412df01ace128))
+
 ## [1.19.4](https://github.com/doxynix/doxynix/compare/v1.19.3...v1.19.4) (2026-03-29)
 
 
