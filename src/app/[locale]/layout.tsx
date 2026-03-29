@@ -1,6 +1,7 @@
 import { Suspense, type ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
@@ -8,6 +9,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import { ThemeProvider } from "next-themes";
 import NextTopLoader from "nextjs-toploader";
 import { extractRouterConfig } from "uploadthing/server";
 
@@ -29,6 +31,10 @@ import { Providers } from "../providers";
 async function UTSSR() {
   await connection();
   return <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />;
+}
+
+function normalizeTheme(theme: string | undefined) {
+  return theme === "light" || theme === "dark" || theme === "system" ? theme : "system";
 }
 
 const fontSans = Inter({
@@ -136,9 +142,11 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
+  const cookieStore = await cookies();
+  const themeCookie = normalizeTheme(cookieStore.get("doxynix-theme")?.value);
 
   return (
-    <html suppressHydrationWarning lang={locale}>
+    <html suppressHydrationWarning lang={locale} data-scroll-behavior="smooth">
       <body
         className={cn(
           "flex min-h-dvh flex-col",
@@ -148,25 +156,33 @@ export default async function LocaleLayout({
         )}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Toaster
-            // richColors
-            duration={4000}
-            gap={8}
-            position="top-center"
-          />
-          <NextTopLoader color="var(--primary)" showSpinner={false} zIndex={9999} />
-          <Suspense>
-            <UTSSR />
-          </Suspense>
-          <Providers>{children}</Providers>
-          {IS_PROD && (
-            <>
-              <Analytics />
-              <SpeedInsights />
-            </>
-          )}
-          <ConsoleEasterEgg />
-          <HotkeyListeners />
+          <ThemeProvider
+            disableTransitionOnChange
+            enableSystem
+            attribute="class"
+            defaultTheme={themeCookie}
+            storageKey="doxynix-theme"
+          >
+            <Toaster
+              // richColors
+              duration={4000}
+              gap={8}
+              position="top-center"
+            />
+            <NextTopLoader color="var(--foreground)" showSpinner={false} zIndex={9999} />
+            <Suspense>
+              <UTSSR />
+            </Suspense>
+            <Providers>{children}</Providers>
+            {IS_PROD && (
+              <>
+                <Analytics />
+                <SpeedInsights />
+              </>
+            )}
+            <ConsoleEasterEgg />
+            <HotkeyListeners />
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>
