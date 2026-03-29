@@ -172,8 +172,10 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
   const localeRegex = new RegExp(`^/(${LOCALE_REGEX_STR})`);
   const pathWithoutLocale = pathname.replace(localeRegex, "") || "/";
 
-  const isProtectedRoute = protectedRoutes.some((route) => pathWithoutLocale.startsWith(route));
-  const isAuthRoute = authRoutes.some((route) => pathWithoutLocale.startsWith(route));
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    hasPathBoundary(pathWithoutLocale, route)
+  );
+  const isAuthRoute = authRoutes.some((route) => hasPathBoundary(pathWithoutLocale, route));
 
   const token = request.cookies.get(cookieName)?.value;
 
@@ -224,9 +226,9 @@ export async function proxy(request: NextRequest) {
   return handlePageRequest(request, requestId);
 }
 
+const PROXY_MATCHER =
+  "/((?!_next|_vercel|monitoring|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|xml|json|woff2?|ttf|otf|webmanifest)$).*)";
+
 export const config = {
-  matcher: [
-    "/dashboard/repo/:path*",
-    "/((?!_next|_vercel|monitoring|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|xml|json|woff2?|ttf|otf|webmanifest)$).*)",
-  ],
+  matcher: ["/dashboard/repo/:path*", PROXY_MATCHER],
 };
