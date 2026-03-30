@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.20.1](https://github.com/doxynix/doxynix/compare/v1.20.0...v1.20.1) (2026-03-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency use-debounce to v10.1.1 ([#866](https://github.com/doxynix/doxynix/issues/866)) ([a339940](https://github.com/doxynix/doxynix/commit/a3399409b737e948c1570bf0350c3751fcfea3a3))
+
 ## [1.20.0](https://github.com/doxynix/doxynix/compare/v1.19.4...v1.20.0) (2026-03-29)
 
 
