@@ -64,7 +64,7 @@
       "cookie": "0.7.2",
       "minimatch": "10.2.4",
       "systeminformation": "5.31.5",
-      "rollup": "4.60.0",
+      "rollup": "4.60.1",
       "serialize-javascript": "7.0.5",
       "@react-email/body": "0.3.0",
       "flatted": "3.4.2",
