@@ -103,11 +103,6 @@ pull_request_rules:
   #     comment:
   #       message: "Ого, @{{author}}, ну ты и настрочил! 🏋️‍♂️ Такой большой PR может проверяться дольше."
 
-  - name: delete head branch after merge
-    conditions:
-      - merged
-    actions:
-      delete_head_branch: {}
 
   - name: label on conflicts
     conditions:
