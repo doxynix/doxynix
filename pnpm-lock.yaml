@@ -431,8 +431,8 @@ importers:
         specifier: 7.7.4
         version: 7.7.4(express@4.22.1)(h3@1.15.10)(next@16.2.1(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.2)
       use-debounce:
-        specifier: 10.1.0
-        version: 10.1.0(react@19.2.4)
+        specifier: 10.1.1
+        version: 10.1.1(react@19.2.4)
       zod:
         specifier: 4.3.6
         version: 4.3.6
@@ -12609,8 +12609,8 @@ packages:
       '@types/react':
         optional: true
 
-  use-debounce@10.1.0:
-    resolution: {integrity: sha512-lu87Za35V3n/MyMoEpD5zJv0k7hCn0p+V/fK2kWD+3k2u3kOCwO593UArbczg1fhfs2rqPEnHpULJ3KmGdDzvg==}
+  use-debounce@10.1.1:
+    resolution: {integrity: sha512-kvds8BHR2k28cFsxW8k3nc/tRga2rs1RHYCqmmGqb90MEeE++oALwzh2COiuBLO1/QXiOuShXoSN2ZpWnMmvuQ==}
     engines: {node: '>= 16.0.0'}
     peerDependencies:
       react: '*'
@@ -26990,7 +26990,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  use-debounce@10.1.0(react@19.2.4):
+  use-debounce@10.1.1(react@19.2.4):
     dependencies:
       react: 19.2.4
 
