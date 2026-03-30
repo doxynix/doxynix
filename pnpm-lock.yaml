@@ -35,8 +35,8 @@ importers:
         specifier: 3.0.31
         version: 3.0.31(zod@4.3.6)
       '@ai-sdk/openai':
-        specifier: 3.0.48
-        version: 3.0.48(zod@4.3.6)
+        specifier: 3.0.49
+        version: 3.0.49(zod@4.3.6)
       '@codemirror/autocomplete':
         specifier: 6.20.1
         version: 6.20.1
@@ -398,8 +398,8 @@ importers:
         specifier: 9.0.0
         version: 9.0.0
       resend:
-        specifier: 6.9.4
-        version: 6.9.4(@react-email/render@2.0.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
+        specifier: 6.10.0
+        version: 6.10.0(@react-email/render@2.0.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
       server-only:
         specifier: 0.0.1
         version: 0.0.1
@@ -782,8 +782,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@3.0.48':
-    resolution: {integrity: sha512-ALmj/53EXpcRqMbGpPJPP4UOSWw0q4VGpnDo7YctvsynjkrKDmoneDG/1a7VQnSPYHnJp6tTRMf5ZdxZ5whulg==}
+  '@ai-sdk/openai@3.0.49':
+    resolution: {integrity: sha512-U2f0pCyNn/jQH3wjgxr8o9VvCkuDFTtXbIhbFFtgXqCzMbed6rBnvzQcAMEK0/Pa44byL9zfcvCOFOflvkRA8w==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -10803,8 +10803,8 @@ packages:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
 
-  postal-mime@2.7.3:
-    resolution: {integrity: sha512-MjhXadAJaWgYzevi46+3kLak8y6gbg0ku14O1gO/LNOuay8dO+1PtcSGvAdgDR0DoIsSaiIA8y/Ddw6MnrO0Tw==}
+  postal-mime@2.7.4:
+    resolution: {integrity: sha512-0WdnFQYUrPGGTFu1uOqD2s7omwua8xaeYGdO6rb88oD5yJ/4pPHDA4sdWqfD8wQVfCny563n/HQS7zTFft+f/g==}
 
   postcss-import@15.1.0:
     resolution: {integrity: sha512-hpr+J05B2FVYUAXHeK1YyI267J/dDDhMU6B6civm8hSY1jYJnBXxzKDKDswzJmtLHryrjhnDjqqp/49t8FALew==}
@@ -11489,8 +11489,8 @@ packages:
   require-main-filename@2.0.0:
     resolution: {integrity: sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==}
 
-  resend@6.9.4:
-    resolution: {integrity: sha512-/M3dsJzu5OgozqVsA4Psd/1L7EdePgOIIxClas453GOQYFG3VHc2ZyCHZFlvqsc9aZCCd2BJRRqZgWC8D9c7/g==}
+  resend@6.10.0:
+    resolution: {integrity: sha512-i7CwZpYj4Oho1RxsTpLcCUkO08+HiL4NXrm6jLJ2WzJ89UGI8eROSieLONJA3hnUrf1OYnCyfq5F6POnHUMv1Q==}
     engines: {node: '>=20'}
     peerDependencies:
       '@react-email/render': '*'
@@ -12102,8 +12102,8 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
-  svix@1.86.0:
-    resolution: {integrity: sha512-/HTvXwjLJe1l/MsLXAO1ddCYxElJk4eNR4DzOjDOEmGrPN/3BtBE8perGwMAaJ2sT5T172VkBYzmHcjUfM1JRQ==}
+  svix@1.88.0:
+    resolution: {integrity: sha512-vm/JrrUd3bVyBE+3L33TIyVSs8gS5fYx7lrISvKlDJXTYX1ACH4REX8P1tHxsSKoZi/rvifM1t0XRc5Vc45THw==}
 
   swrv@1.2.0:
     resolution: {integrity: sha512-lH/g4UcNyj+7lzK4eRGT4C68Q4EhQ6JtM9otPRIASfhhzfLWtbZPHcMuhuba7S9YVYuxkMUGImwMyGpfbkH07A==}
@@ -13292,7 +13292,7 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
       zod: 4.3.6
 
-  '@ai-sdk/openai@3.0.48(zod@4.3.6)':
+  '@ai-sdk/openai@3.0.49(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
@@ -24894,7 +24894,7 @@ snapshots:
 
   possible-typed-array-names@1.1.0: {}
 
-  postal-mime@2.7.3: {}
+  postal-mime@2.7.4: {}
 
   postcss-import@15.1.0(postcss@8.5.8):
     dependencies:
@@ -25760,10 +25760,10 @@ snapshots:
 
   require-main-filename@2.0.0: {}
 
-  resend@6.9.4(@react-email/render@2.0.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)):
+  resend@6.10.0(@react-email/render@2.0.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)):
     dependencies:
-      postal-mime: 2.7.3
-      svix: 1.86.0
+      postal-mime: 2.7.4
+      svix: 1.88.0
     optionalDependencies:
       '@react-email/render': 2.0.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
 
@@ -26533,7 +26533,7 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
-  svix@1.86.0:
+  svix@1.88.0:
     dependencies:
       standardwebhooks: 1.0.0
       uuid: 10.0.0
