@@ -32,7 +32,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Create Release Pull Request or Publish to GitHub
-        uses: changesets/action@a7c500273b5be4fb897d21ceededa4767223a843
+        uses: changesets/action@81b3f61ebffcb868f73e4c0b2682517149c834a2
         with:
           publish: pnpm exec changeset tag
           commit: "chore(release): version packages"
