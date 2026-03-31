@@ -186,7 +186,7 @@ importers:
         version: 5.96.0(react@19.2.4)
       '@trigger.dev/sdk':
         specifier: 4.4.3
-        version: 4.4.3(ai@6.0.141(zod@4.3.6))(zod@4.3.6)
+        version: 4.4.3(ai@6.0.142(zod@4.3.6))(zod@4.3.6)
       '@trpc/client':
         specifier: 11.16.0
         version: 11.16.0(@trpc/server@11.16.0(typescript@6.0.2))(typescript@6.0.2)
@@ -245,8 +245,8 @@ importers:
         specifier: 2.21.0
         version: 2.21.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       ai:
-        specifier: 6.0.141
-        version: 6.0.141(zod@4.3.6)
+        specifier: 6.0.142
+        version: 6.0.142(zod@4.3.6)
       browser-image-compression:
         specifier: 2.0.2
         version: 2.0.2
@@ -764,8 +764,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/gateway@3.0.83':
-    resolution: {integrity: sha512-LvlWujbSdEkTBXBLFtF7GS6riXdHhH0O+DpDrCaNQvXeHmSF2jKsOg7JWXiCgygAHM5cWFAO3JYmZp83DjiuBQ==}
+  '@ai-sdk/gateway@3.0.84':
+    resolution: {integrity: sha512-RnUw6UNvkaw9MEaJU9cIjA+WBP+ZR5+M/9nfbfJHcGKtTbcWXijJuYKx9nYRnm+qU+iiakb0XvQA/vvho6lTsw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -6356,8 +6356,8 @@ packages:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
 
-  ai@6.0.141:
-    resolution: {integrity: sha512-+GomGQWaId3xN0wcugUW/H7xMMaFkID2PiS7K/Wugj45G3efv0BXhQ3psRZoQVoRbOpdNoUqcK/KTB+FR4h6qg==}
+  ai@6.0.142:
+    resolution: {integrity: sha512-ZoxAsnTL/dFg5WdcwC8QNhKVlLtqwwT3I7p/4i8IJJP+6ZwqF1ljuwMsAsPYYvppZ+RzUxjxxFGb1cbEhNH3dg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -13274,7 +13274,7 @@ snapshots:
       '@vercel/oidc': 3.1.0
       zod: 4.3.6
 
-  '@ai-sdk/gateway@3.0.83(zod@4.3.6)':
+  '@ai-sdk/gateway@3.0.84(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
@@ -18630,7 +18630,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/sdk@4.4.3(ai@6.0.141(zod@4.3.6))(zod@4.3.6)':
+  '@trigger.dev/sdk@4.4.3(ai@6.0.142(zod@4.3.6))(zod@4.3.6)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.36.0
@@ -18646,7 +18646,7 @@ snapshots:
       ws: 8.20.0
       zod: 4.3.6
     optionalDependencies:
-      ai: 6.0.141(zod@4.3.6)
+      ai: 6.0.142(zod@4.3.6)
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -19831,9 +19831,9 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@6.0.141(zod@4.3.6):
+  ai@6.0.142(zod@4.3.6):
     dependencies:
-      '@ai-sdk/gateway': 3.0.83(zod@4.3.6)
+      '@ai-sdk/gateway': 3.0.84(zod@4.3.6)
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
       '@opentelemetry/api': 1.9.0
