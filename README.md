@@ -155,20 +155,19 @@ See [SECURITY.md](SECURITY.md) for our vulnerability reporting policy.
 
 ## 📄 License
 
-Doxynix is **dual-licensed** to ensure that the project remains open-source while providing a path for sustainable commercial development.
+Doxynix is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0-only)**.
 
-### 1. Open Source Use (AGPLv3)
-Doxynix is licensed under the **GNU Affero General Public License v3 (AGPL-3.0)**. 
+### Open Source Use (AGPLv3)
 - **Ideal for:** Individuals, open-source contributors, and self-hosters.
 - **Requirement:** If you modify Doxynix and run it as a service over a network, you **must** make your modified source code available to your users under the same AGPLv3 license. This ensures that all improvements to the "Engineering Knowledge Base" engine return to the community.
 
-### 2. Commercial Use
+### Alternative Commercial Licensing
 If you represent a company or an organization that wants to:
 - Integrate Doxynix into a closed-source commercial product.
 - Use Doxynix in a production environment without the AGPLv3 copyleft restrictions.
 - Receive professional support and enterprise-grade features.
 
-Please contact us to obtain a **Commercial License**.
+A separate **Commercial License** is available by request. This is not included in the package's SPDX license identifier, but can be negotiated independently for enterprise use cases.
 
 📫 **Contact:** [licensing@doxynix.space](mailto:licensing@doxynix.space)
 
