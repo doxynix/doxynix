@@ -181,7 +181,7 @@ function calculateModernHealthScore(params: HealthScoreParams) {
   score += clamp(busFactor * 18, 0, 100) * 0.1;
   score += clamp(100 - dependencyCycles * 18, 0, 100) * 0.1;
 
-  const lastPushDate = repo.pushedAt ? new Date(repo.pushedAt) : new Date();
+  const lastPushDate = repo.pushedAt != null ? new Date(repo.pushedAt) : new Date();
   const daysSincePush = (Date.now() - lastPushDate.getTime()) / (1000 * 60 * 60 * 24);
   if (daysSincePush < 30) score += 10;
   else if (daysSincePush < 90) score += 4;
