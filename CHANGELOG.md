@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.20.6](https://github.com/doxynix/doxynix/compare/v1.20.5...v1.20.6) (2026-04-01)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#898](https://github.com/doxynix/doxynix/issues/898)) ([f652454](https://github.com/doxynix/doxynix/commit/f6524545c0be1e4ea200b5364f942e5d1ef2515f))
+
+## [1.20.5](https://github.com/doxynix/doxynix/compare/v1.20.4...v1.20.5) (2026-03-31)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ai to v6.0.142 ([#894](https://github.com/doxynix/doxynix/issues/894)) ([8503e43](https://github.com/doxynix/doxynix/commit/8503e431b6d952f6c3725a107b7bc8031e8cfc56))
+
+## [1.20.4](https://github.com/doxynix/doxynix/compare/v1.20.3...v1.20.4) (2026-03-31)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#885](https://github.com/doxynix/doxynix/issues/885)) ([b2700af](https://github.com/doxynix/doxynix/commit/b2700af4b09a98fc47ee939f3a1851069ac811db))
+
+## [1.20.3](https://github.com/doxynix/doxynix/compare/v1.20.2...v1.20.3) (2026-03-30)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#880](https://github.com/doxynix/doxynix/issues/880)) ([3492618](https://github.com/doxynix/doxynix/commit/3492618841f41ee33e41c53120c39d495385a108))
+
+## [1.20.2](https://github.com/doxynix/doxynix/compare/v1.20.1...v1.20.2) (2026-03-30)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#876](https://github.com/doxynix/doxynix/issues/876)) ([4bb2b90](https://github.com/doxynix/doxynix/commit/4bb2b9027906fe43c43429439ebf342002734b7b))
+
 ## [1.20.1](https://github.com/doxynix/doxynix/compare/v1.20.0...v1.20.1) (2026-03-30)
 
 
