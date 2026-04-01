@@ -170,7 +170,7 @@ If you represent a company or an organization that wants to:
 
 Please contact us to obtain a **Commercial License**.
 
-📫 **Contact:** [licensing@doxynix.space]
+📫 **Contact:** [licensing@doxynix.space](mailto:licensing@doxynix.space)
 
 ---
 
