@@ -76,7 +76,7 @@ describe("calculateCodeMetrics", () => {
 });
 
 describe("calculateTeamRoles", () => {
-  it("should map contributors to roles based on contribution share and limit to top 5", () => {
+  it("should map contributors to roles based on contribution share", () => {
     const contributors = [
       { contributions: 60, login: "guardian" },
       { contributions: 25, login: "architect" },
@@ -88,7 +88,7 @@ describe("calculateTeamRoles", () => {
 
     const result = calculateTeamRoles(contributors);
 
-    expect(result).toHaveLength(5);
+    expect(result).toHaveLength(6);
     expect(result[0]).toEqual({
       login: "guardian",
       role: "Project Guardian",

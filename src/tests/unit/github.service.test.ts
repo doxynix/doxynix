@@ -110,6 +110,8 @@ vi.mock("parse-github-url", () => ({
 }));
 
 vi.mock("@/shared/constants/env.server", () => ({
+  // secretlint-disable-next-line
+  DATABASE_URL: "postgresql://mock:mock@localhost:5432/db",
   GITHUB_APP_ID: "123456",
   GITHUB_APP_PRIVATE_KEY: "mock-private-key",
   GITHUB_SYSTEM_INSTALLATION_ID: "999999",

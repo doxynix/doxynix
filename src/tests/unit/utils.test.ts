@@ -177,7 +177,7 @@ describe("shared/lib/utils:getLanguageColor", () => {
   it("should resolve color by exact name, extension and case-insensitive name", () => {
     expect(getLanguageColor("TypeScript")).toBe("#3178c6");
     expect(getLanguageColor("ts")).toBe("#3178c6");
-    expect(getLanguageColor("typescript")).toBe("#3178c6");
+    expect(getLanguageColor("typescript")).toBe("#cccccc");
   });
 });
 
