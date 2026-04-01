@@ -36,8 +36,8 @@ describe("calculateHealthScore", () => {
 });
 
 describe("calculateCodeMetrics", () => {
-  it("should return zeroed metrics for empty input", () => {
-    const metrics = calculateCodeMetrics([]);
+  it("should return zeroed metrics for empty input", async () => {
+    const metrics = await calculateCodeMetrics([]);
 
     expect(metrics).toEqual({
       complexityScore: 0,

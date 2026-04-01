@@ -115,7 +115,7 @@ vi.mock("@/shared/constants/env.server", () => ({
   GITHUB_SYSTEM_INSTALLATION_ID: "999999",
 }));
 
-vi.mock("@/server/logger/logger", () => ({
+vi.mock("@/server/infrastructure/logger", () => ({
   logger: loggerState,
 }));
 
