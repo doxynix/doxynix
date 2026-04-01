@@ -6,7 +6,7 @@ import { highlightCode } from "@/shared/lib/shiki";
 
 import { aiSchema, type AIResult } from "@/server/ai/schemas";
 import type { RepoMetrics } from "@/server/ai/types";
-import type { DbClient } from "@/server/db/db";
+import type { DbClient } from "@/server/infrastructure/db";
 import { markdownToHtml } from "@/server/utils/markdown-to-html";
 
 export const repoDetailsService = {
@@ -31,24 +31,51 @@ export const repoDetailsService = {
       where: { repo: { publicId: repoId }, status: "DONE" },
     });
 
-    if (analysis == null || analysis.resultJson == null) return null;
+    if (analysis == null || analysis.resultJson == null || analysis.metricsJson == null)
+      return null;
 
     const res = aiSchema.parse(analysis.resultJson);
+    const metrics = analysis.metricsJson as RepoMetrics;
+    const findings = res.findings ?? [];
 
     return {
       apiStructure: res.sections.api_structure,
       bottlenecks: res.mainBottlenecks ?? [],
       dataFlow: res.sections.data_flow,
+      facts: res.repository_facts ?? [],
+      findings,
       onboarding: res.onboarding_guide,
       performance: res.sections.performance,
       refactoringTargets: res.refactoring_targets,
+      scorecard: {
+        analysisCoverage: metrics.analysisCoverage,
+        apiSurface: metrics.apiSurface,
+        busFactor: metrics.busFactor,
+        dependencyCycles: metrics.dependencyCycles.length,
+        docDensity: metrics.docDensity,
+        duplicationPercentage: metrics.duplicationPercentage,
+        healthScore: analysis.score,
+        modularityScore: metrics.modularityIndex,
+        securityScore: analysis.securityScore,
+      },
       security: {
+        findings: metrics.securityFindings,
         risks: res.sections.security_audit.risks,
         score: res.sections.security_audit.score,
         vulnerabilities: res.vulnerabilities ?? [],
       },
+      structure: {
+        analysisCoverage: metrics.analysisCoverage,
+        configInventory: metrics.configInventory,
+        dependencyHotspots: metrics.dependencyHotspots,
+        entrypoints: metrics.entrypoints,
+        hotspotFiles: metrics.hotspotFiles,
+        orphanModules: metrics.orphanModules,
+        teamRoles: metrics.teamRoles,
+      },
       swagger: res.swaggerYaml,
       techDebt: res.sections.tech_debt,
+      topRisks: findings,
     };
   },
 
@@ -123,27 +150,35 @@ export const repoDetailsService = {
 
     return {
       description: repo.description,
+      facts: (result.repository_facts ?? []).slice(0, 4),
       languages: metrics.languages,
       maintenance: metrics.maintenanceStatus,
-      mostComplexFiles: metrics.mostComplexFiles,
+      mostComplexFiles:
+        metrics.hotspotFiles.length > 0 ? metrics.hotspotFiles : metrics.mostComplexFiles,
       name: repo.name,
       owner: repo.owner,
       scores: {
+        analysisCoverage: metrics.analysisCoverage,
+        apiSurface: metrics.apiSurface,
         busFactor: metrics.busFactor,
         complexityScore: metrics.complexityScore,
+        dependencyCycles: metrics.dependencyCycles.length,
         docDensity: metrics.docDensity,
+        duplicationPercentage: metrics.duplicationPercentage,
         healthScore: lastAnalysis.score,
-        modularityScore: metrics.modularityIndex,
         onboardingScore: lastAnalysis.onboardingScore,
         securityScore: lastAnalysis.securityScore,
         techDebtScore: lastAnalysis.techDebtScore,
       },
       stats: {
+        configFiles: metrics.configFiles,
         fileCount: metrics.fileCount,
         linesOfCode: metrics.totalLoc,
         totalSize: `${metrics.totalSizeKb} KB`,
       },
       summary: result.executive_summary,
+      teamRoles: metrics.teamRoles,
+      topRisks: (result.findings ?? []).slice(0, 3),
     };
   },
 

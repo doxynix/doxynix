@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { FileClassifier } from "@/server/utils/file-classifier";
+import { FileClassifier } from "@/server/engine/extractors/file-classifier";
 
 describe("FileClassifier", () => {
   describe("isConfigFile", () => {

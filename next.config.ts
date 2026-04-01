@@ -26,6 +26,22 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   enablePrerenderSourceMaps: IS_PROD,
+  serverExternalPackages: [
+    "tree-sitter",
+    "tree-sitter-c",
+    "tree-sitter-c-sharp",
+    "tree-sitter-cpp",
+    "tree-sitter-go",
+    "tree-sitter-java",
+    "tree-sitter-json",
+    "tree-sitter-php",
+    "tree-sitter-python",
+    "tree-sitter-ruby",
+    "tree-sitter-rust",
+    "tree-sitter-typescript",
+    "tree-sitter-wasms",
+    "web-tree-sitter",
+  ],
   experimental: {
     authInterrupts: true,
     optimizePackageImports: [

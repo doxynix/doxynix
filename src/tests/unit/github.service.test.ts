@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { DbClient } from "@/server/db/db";
+import type { DbClient } from "@/server/infrastructure/db";
 import { githubService } from "@/server/services/github.service";
 
 const parseGithubUrlMock = vi.hoisted(() => vi.fn());

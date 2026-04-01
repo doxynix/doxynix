@@ -2,7 +2,7 @@ import { google } from "@ai-sdk/google";
 import { generateText, Output } from "ai";
 import type z from "zod";
 
-import { logger } from "@/server/logger/logger";
+import { logger } from "@/server/infrastructure/logger";
 
 type CallWithFallbackProps<T> = {
   attemptMetadata?: Record<string, unknown>;

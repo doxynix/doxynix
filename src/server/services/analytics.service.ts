@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { DbClient } from "@/server/db/db";
+import type { DbClient } from "@/server/infrastructure/db";
 
 const LanguageMetricSchema = z.object({
   color: z.string(),

@@ -1,7 +1,7 @@
 import { enhance } from "@zenstackhq/runtime";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { prisma } from "@/server/db/db";
+import { prisma } from "@/server/infrastructure/db";
 
 import { cleanupDatabase, createTestUser, expectDenied, expectValidationFail } from "../helpers";
 

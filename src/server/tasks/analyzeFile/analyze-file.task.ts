@@ -1,8 +1,8 @@
 import { task } from "@trigger.dev/sdk/v3";
 
 import { AI_MODELS } from "@/server/ai/constants";
+import { cleanCodeForAi } from "@/server/ai/optimizers";
 import { callWithFallback } from "@/server/utils/call";
-import { cleanCodeForAi } from "@/server/utils/optimizers";
 
 export const analyzeFileTask = task({
   id: "analyze-single-file",

@@ -1,9 +1,9 @@
 import { TRPCError } from "@trpc/server";
 
-import type { DbClient, PrismaClientExtended } from "@/server/db/db";
-import { logger } from "@/server/logger/logger";
+import { FileClassifier } from "@/server/engine/core/file-classifier";
+import type { DbClient, PrismaClientExtended } from "@/server/infrastructure/db";
+import { logger } from "@/server/infrastructure/logger";
 import { GitHubAuthRequiredError, githubService } from "@/server/services/github.service";
-import { FileClassifier } from "@/server/utils/file-classifier";
 import { isOctokitError } from "@/server/utils/handle-error";
 
 export const githubBrowseService = {

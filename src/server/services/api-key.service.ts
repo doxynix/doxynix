@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { TRPCError } from "@trpc/server";
 
-import type { DbClient } from "@/server/db/db";
+import type { DbClient } from "@/server/infrastructure/db";
 import { handlePrismaError } from "@/server/utils/handle-error";
 
 const BRAND_PREFIX = "dxnx_";

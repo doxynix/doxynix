@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import type { Repo } from "@prisma/client";
 import simpleGit from "simple-git";
 
-import { prisma } from "@/server/db/db";
+import { prisma } from "@/server/infrastructure/db";
 import { GitHubAuthRequiredError, githubService } from "@/server/services/github.service";
 
 export async function getAnalysisContext(
@@ -111,7 +111,7 @@ export async function cloneRepository(
 
   const repoUrl = `https://github.com/${repo.owner}/${repo.name}.git`;
 
-  const options = ["--depth", "1", "--branch", branchToClone];
+  const options = ["--filter=blob:none", "--single-branch", "--branch", branchToClone, "--no-tags"];
 
   if (token != null) {
     const base64Auth = Buffer.from(`x-access-token:${token}`).toString("base64");
@@ -119,5 +119,16 @@ export async function cloneRepository(
     options.push("-c", `http.extraheader=AUTHORIZATION: basic ${base64Auth}`);
   }
 
-  await git.clone(repoUrl, targetPath, options);
+  try {
+    await git.clone(repoUrl, targetPath, options);
+
+    await git.cwd(targetPath);
+  } catch (error) {
+    if (existsSync(targetPath)) {
+      await fs.rm(targetPath, { force: true, recursive: true });
+    }
+    throw new Error(
+      `Failed to clone repository: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
 }

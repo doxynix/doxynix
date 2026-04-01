@@ -1,11 +1,8 @@
 import type { Repo } from "@prisma/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  calculateCodeMetrics,
-  calculateHealthScore,
-  calculateTeamRoles,
-} from "@/server/utils/metrics";
+import { calculateCodeMetrics, calculateTeamRoles } from "@/server/engine/metrics/common-metrics";
+import { calculateHealthScore } from "@/server/engine/metrics/complexity";
 
 describe("calculateHealthScore", () => {
   beforeEach(() => {
@@ -55,7 +52,7 @@ describe("calculateCodeMetrics", () => {
     });
   });
 
-  it("should calculate aggregate metrics and language distribution", () => {
+  it("should calculate aggregate metrics and language distribution", async () => {
     const files = [
       {
         content: "const a = 1;\nconst b = 2;",
@@ -67,7 +64,7 @@ describe("calculateCodeMetrics", () => {
       },
     ];
 
-    const metrics = calculateCodeMetrics(files);
+    const metrics = await calculateCodeMetrics(files);
 
     expect(metrics.fileCount).toBe(2);
     expect(metrics.totalLoc).toBeGreaterThan(0);

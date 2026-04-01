@@ -1,9 +1,9 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError, UTApi } from "uploadthing/server";
 
-import { getServerAuthSession } from "../auth/options";
-import { prisma } from "../db/db";
-import { logger } from "../logger/logger";
+import { getServerAuthSession } from "./auth";
+import { prisma } from "./db";
+import { logger } from "./logger";
 
 const utapi = new UTApi();
 const f = createUploadthing();

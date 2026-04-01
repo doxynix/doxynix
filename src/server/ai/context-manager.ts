@@ -1,113 +1,266 @@
-import { cleanCodeForAi } from "../utils/optimizers";
+import { FileClassifier } from "@/server/engine/core/file-classifier";
+
+import { cleanCodeForAi } from "./optimizers";
 
 type FileEntry = { content: string; path: string };
 
-const CRITICAL_FILES = [
-  "package.json",
-  "tsconfig.json",
+export type AiContextStage = "architect" | "writer_api" | "writer_architecture" | "writer_readme";
+
+export type ContextDropReason =
+  | "budget"
+  | "empty-after-clean"
+  | "secondary-no-budget"
+  | "sensitive"
+  | "stage-filter";
+
+export type StageContextDebugEntry = {
+  chars: number;
+  path: string;
+  reason: string;
+  score: number;
+  truncated: boolean;
+};
+
+export type StageContextDropEntry = {
+  path: string;
+  reason: ContextDropReason;
+  score: number;
+};
+
+export type StageContextSelection = {
+  budgetChars: number;
+  dropped: StageContextDropEntry[];
+  overflowPrevented: boolean;
+  selected: StageContextDebugEntry[];
+  selectedChars: number;
+  selectedEvidencePaths: string[];
+  stage: AiContextStage;
+};
+
+export type StageContextPack = {
+  context: string;
+  debug: StageContextSelection;
+};
+
+type StageContextParams = {
+  files: FileEntry[];
+  maxChars?: number;
+  preferredPaths?: string[];
+  stage: AiContextStage;
+};
+
+const STAGE_BUDGETS: Record<AiContextStage, number> = {
+  architect: 220_000,
+  writer_api: 120_000,
+  writer_architecture: 110_000,
+  writer_readme: 80_000,
+};
+
+const STAGE_FILE_LIMITS: Record<AiContextStage, number> = {
+  architect: 12_000,
+  writer_api: 16_000,
+  writer_architecture: 14_000,
+  writer_readme: 10_000,
+};
+
+const ROOT_MANIFESTS = new Set([
+  "cargo.toml",
   "go.mod",
-  "Cargo.toml",
+  "package.json",
   "pom.xml",
-  "build.gradle",
+  "pyproject.toml",
+  "readme.md",
   "requirements.txt",
-  "Gemfile",
-  "docker-compose.yml",
-  "Dockerfile",
-  "Makefile",
-  ".env.example",
+  "setup.py",
+  "tsconfig.json",
+]);
 
-  "schema.prisma",
-  "schema.rb",
-  "models.py",
+function isExampleLike(path: string) {
+  return /(^|\/)(example|examples|sample|samples)\//iu.test(path);
+}
 
-  "openapi.yaml",
-  "swagger.json",
-];
+function isRootManifest(path: string) {
+  return !path.includes("/") && ROOT_MANIFESTS.has(path.toLowerCase());
+}
 
-const HIGH_PRIORITY_TOKENS = [
-  "types",
-  "interface",
-  "api",
-  "router",
-  "controller",
-  "model",
-  "entity",
-  "config",
-  "auth",
-  "service",
-  "main",
-  "index",
-  "app",
-];
+function uniquePaths(paths: string[]) {
+  return Array.from(new Set(paths.filter((value) => value.length > 0)));
+}
 
-const LOW_PRIORITY_TOKENS = [
-  "test",
-  "spec",
-  "mock",
-  "fixture",
-  "e2e",
-  "ui/",
-  "view/",
-  "style/",
-  "css",
-  "icon",
-  "assets",
-  "public",
-];
+function truncateSnippet(content: string, limit: number) {
+  if (content.length <= limit) {
+    return { content, truncated: false };
+  }
 
-function getGenericFileScore(filePath: string): number {
-  const fileName = filePath.split("/").pop()?.toLowerCase() ?? "";
-  const pathLower = filePath.toLowerCase();
+  return {
+    content: `${content.slice(0, limit)}\n/* ...truncated for AI budget... */`,
+    truncated: true,
+  };
+}
 
-  if (CRITICAL_FILES.some((f) => fileName === f.toLowerCase())) return 100;
+function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boolean) {
+  if (FileClassifier.isSensitiveFile(filePath)) return false;
+  if (FileClassifier.isGeneratedFile(filePath) || FileClassifier.isAssetFile(filePath))
+    return false;
+  if (preferred) return true;
 
-  if (fileName.includes("config") || fileName.endsWith(".yml") || fileName.endsWith(".yaml"))
-    return 85;
+  const docsLike = FileClassifier.isDocsFile(filePath) || isExampleLike(filePath);
+  const testLike = FileClassifier.isTestFile(filePath);
+  const benchmarkLike = FileClassifier.isBenchmarkFile(filePath);
 
-  let score = 50;
+  switch (stage) {
+    case "architect":
+    case "writer_architecture":
+      if (docsLike || testLike || benchmarkLike) return false;
+      return (
+        FileClassifier.isPrimaryArchitectureFile(filePath) ||
+        FileClassifier.isConfigFile(filePath) ||
+        isRootManifest(filePath)
+      );
+    case "writer_api":
+      if (docsLike || testLike || benchmarkLike) return false;
+      return (
+        FileClassifier.isApiFile(filePath) ||
+        FileClassifier.isPrimaryArchitectureFile(filePath) ||
+        isRootManifest(filePath)
+      );
+    case "writer_readme":
+      if (benchmarkLike) return false;
+      if (testLike) return false;
+      return (
+        FileClassifier.isConfigFile(filePath) ||
+        FileClassifier.isPrimaryArchitectureFile(filePath) ||
+        isRootManifest(filePath)
+      );
+  }
+}
 
-  if (HIGH_PRIORITY_TOKENS.some((token) => pathLower.includes(token))) score += 25;
+function scoreFile(stage: AiContextStage, filePath: string, preferred: boolean) {
+  let score = FileClassifier.getScore(filePath);
 
-  if (LOW_PRIORITY_TOKENS.some((token) => pathLower.includes(token))) score -= 30;
-
-  const depth = filePath.split("/").length;
-  if (depth < 3) score += 10;
+  if (preferred) score += 80;
+  if (isRootManifest(filePath)) score += 30;
+  if (FileClassifier.isPrimaryArchitectureFile(filePath)) score += 20;
+  if (FileClassifier.isConfigFile(filePath)) score += stage === "writer_readme" ? 25 : 10;
+  if (stage === "writer_api" && FileClassifier.isApiFile(filePath)) score += 35;
+  if (stage === "architect" && FileClassifier.isApiFile(filePath)) score += 15;
+  if ((FileClassifier.isDocsFile(filePath) || isExampleLike(filePath)) && !preferred) score -= 50;
+  if (FileClassifier.isTestFile(filePath) && !preferred) score -= 60;
 
   return score;
 }
 
-export function prepareSmartContext(files: FileEntry[], maxChars: number = 1000000): string {
-  const scoredFiles = files.map((f) => ({
-    ...f,
-    cleanContent: cleanCodeForAi(f.content),
-    score: getGenericFileScore(f.path),
-  }));
+function buildSelectionReason(stage: AiContextStage, filePath: string, preferred: boolean) {
+  if (preferred) return "preferred-evidence";
+  if (isRootManifest(filePath)) return "root-manifest";
+  if (FileClassifier.isConfigFile(filePath))
+    return stage === "writer_readme" ? "config-evidence" : "config-support";
+  if (stage === "writer_api" && FileClassifier.isApiFile(filePath)) return "api-evidence";
+  if (FileClassifier.isPrimaryArchitectureFile(filePath)) return "primary-architecture";
+  return "secondary-support";
+}
 
-  scoredFiles.sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    return a.cleanContent.length - b.cleanContent.length;
+export function buildStageContextPack({
+  files,
+  maxChars,
+  preferredPaths = [],
+  stage,
+}: StageContextParams): StageContextPack {
+  const preferredSet = new Set(preferredPaths);
+  const budgetChars = maxChars ?? STAGE_BUDGETS[stage];
+  const perFileLimit = STAGE_FILE_LIMITS[stage];
+  const dropped: StageContextDropEntry[] = [];
+
+  const candidates = files
+    .map((file) => {
+      const preferred = preferredSet.has(file.path);
+      const lowerPath = file.path.toLowerCase();
+
+      if (FileClassifier.isSensitiveFile(lowerPath)) {
+        dropped.push({ path: file.path, reason: "sensitive", score: 0 });
+        return null;
+      }
+
+      if (!stageAllowsFile(stage, lowerPath, preferred)) {
+        dropped.push({ path: file.path, reason: "stage-filter", score: 0 });
+        return null;
+      }
+
+      const cleaned = cleanCodeForAi(file.content, file.path).trim();
+      if (cleaned.length === 0) {
+        dropped.push({ path: file.path, reason: "empty-after-clean", score: 0 });
+        return null;
+      }
+
+      const snippet = truncateSnippet(cleaned, perFileLimit);
+      const xml = `<file path="${file.path}">\n${snippet.content}\n</file>`;
+      const score = scoreFile(stage, lowerPath, preferred);
+
+      return {
+        chars: xml.length,
+        path: file.path,
+        preferred,
+        reason: buildSelectionReason(stage, lowerPath, preferred),
+        score,
+        truncated: snippet.truncated,
+        xml,
+      };
+    })
+    .filter((candidate): candidate is NonNullable<typeof candidate> => candidate != null);
+
+  candidates.sort((left, right) => {
+    if (right.score !== left.score) return right.score - left.score;
+    return left.chars - right.chars;
   });
 
-  let currentChars = 0;
-  const selectedFiles: string[] = [];
-  const skippedFiles: string[] = [];
+  const selected: StageContextDebugEntry[] = [];
+  const selectedXml: string[] = [];
+  let selectedChars = 0;
+  let overflowPrevented = false;
 
-  for (const file of scoredFiles) {
-    const fileXml = `<file path="${file.path}">\n${file.cleanContent}\n</file>`;
-
-    if (currentChars + fileXml.length <= maxChars) {
-      selectedFiles.push(fileXml);
-      currentChars += fileXml.length;
-    } else {
-      skippedFiles.push(file.path);
+  for (const candidate of candidates) {
+    if (selectedChars + candidate.chars > budgetChars) {
+      dropped.push({
+        path: candidate.path,
+        reason: candidate.preferred ? "budget" : "secondary-no-budget",
+        score: candidate.score,
+      });
+      overflowPrevented = true;
+      continue;
     }
+
+    selected.push({
+      chars: candidate.chars,
+      path: candidate.path,
+      reason: candidate.reason,
+      score: candidate.score,
+      truncated: candidate.truncated,
+    });
+    selectedXml.push(candidate.xml);
+    selectedChars += candidate.chars;
   }
 
-  let result = selectedFiles.join("\n");
+  return {
+    context: selectedXml.join("\n\n"),
+    debug: {
+      budgetChars,
+      dropped,
+      overflowPrevented,
+      selected,
+      selectedChars,
+      selectedEvidencePaths: uniquePaths(selected.map((entry) => entry.path)),
+      stage,
+    },
+  };
+}
 
-  if (skippedFiles.length > 0) {
-    result += `\n\n<!-- INFO: The following files exist but were omitted from context to save space. Infer their purpose from their names:\n${skippedFiles.join("\n")}\n-->`;
-  }
-
-  return result;
+export function prepareSmartContext(
+  files: FileEntry[],
+  maxChars: number = STAGE_BUDGETS.architect
+): string {
+  return buildStageContextPack({
+    files,
+    maxChars,
+    stage: "architect",
+  }).context;
 }

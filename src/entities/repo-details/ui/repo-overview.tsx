@@ -108,12 +108,12 @@ export function RepoOverview({ data }: Readonly<Props>) {
     },
     {
       className: "bg-blue/10",
-      description: scores.modularityScore > 70 ? "Good separation" : "Tight coupling",
+      description: scores.duplicationPercentage > 70 ? "Good separation" : "Tight coupling",
       icon: Code2,
       iconClass: "text-blue",
       id: "modularity",
       label: "Modularity",
-      value: `${scores.modularityScore}/100`,
+      value: `${scores.duplicationPercentage}/100`,
     },
     {
       className: "bg-blue/10",

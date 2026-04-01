@@ -1,11 +1,6 @@
-import { isBinaryFile } from "isbinaryfile";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { cleanCodeForAi, CodeOptimizer, isBinary, unwrapAiText } from "@/server/utils/optimizers";
-
-vi.mock("isbinaryfile", () => ({
-  isBinaryFile: vi.fn(),
-}));
+import { cleanCodeForAi, CodeOptimizer, unwrapAiText } from "@/server/ai/optimizers";
 
 describe("CodeOptimizer", () => {
   beforeEach(() => {
@@ -114,17 +109,5 @@ describe("unwrapAiText", () => {
   it("should convert primitive non-string values to strings", () => {
     expect(unwrapAiText(42)).toBe("42");
     expect(unwrapAiText(false)).toBe("false");
-  });
-});
-
-describe("isBinary", () => {
-  it("should proxy to isBinaryFile", async () => {
-    vi.mocked(isBinaryFile).mockResolvedValue(true);
-    const buffer = Buffer.from([0, 255, 10]);
-
-    const result = await isBinary(buffer);
-
-    expect(result).toBe(true);
-    expect(isBinaryFile).toHaveBeenCalledWith(buffer);
   });
 });

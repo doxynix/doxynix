@@ -1,9 +1,9 @@
 import { task } from "@trigger.dev/sdk/v3";
 
 import { AI_MODELS } from "@/server/ai/constants";
+import { cleanCodeForAi } from "@/server/ai/optimizers";
 import { CODE_DOC_SYSTEM_PROMPT, CODE_DOC_USER_PROMPT } from "@/server/ai/prompts";
 import { callWithFallback } from "@/server/utils/call";
-import { cleanCodeForAi } from "@/server/utils/optimizers";
 
 export const documentFileTask = task({
   id: "document-single-file",
