@@ -286,7 +286,7 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
     entrypointHint: (file) =>
       /\bdef\s+main\s*\(/.test(file.content) || /\bextends\s+App\b/.test(file.content),
     exportPatterns: [/^\s*(?:object|class|trait)\s+[A-Z][A-Za-z0-9_]*/gm],
-    importPatterns: [/^\s*import\s+([A-Za-z0-9_.*{}.,\s]+)/gm],
+    importPatterns: [/^\s*import\s+([A-Za-z0-9_.*{},\s]+)/gm],
     symbolPatterns: [
       { exported: true, kind: "class", pattern: /^\s*class\s+([A-Z][A-Za-z0-9_]*)/gm },
       { exported: true, kind: "trait", pattern: /^\s*trait\s+([A-Z][A-Za-z0-9_]*)/gm },
