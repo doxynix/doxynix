@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.21.0](https://github.com/doxynix/doxynix/compare/v1.20.6...v1.21.0) (2026-04-04)
+
+
+### Features
+
+* **ui:** полный пересмотр ui для страницы деталей репозитория (wip) ([#913](https://github.com/doxynix/doxynix/issues/913)) ([580d6a2](https://github.com/doxynix/doxynix/commit/580d6a247d7c28160817c2dab0600b2cf297aa09))
+
+
+### Bug Fixes
+
+* **security:** исправление уязвимостей в пакетах lodash, lodash-es, defu (wip) ([#914](https://github.com/doxynix/doxynix/issues/914)) ([4d3ecc2](https://github.com/doxynix/doxynix/commit/4d3ecc2747a1eae3d4394e1336e2146993117a0d))
+
 ## [1.20.6](https://github.com/doxynix/doxynix/compare/v1.20.5...v1.20.6) (2026-04-01)
 
 

@@ -4,13 +4,12 @@ import React, { useEffect, useRef, useState } from "react";
 import type { Route } from "next";
 import { Book, ChevronDown, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useHotkeys } from "react-hotkeys-hook";
 import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/constants/navigation";
 import { cn } from "@/shared/lib/utils";
-import type { MenuItem } from "@/shared/types/navigation";
+import type { MenuItem } from "@/shared/types/navigation.types";
 import { Button } from "@/shared/ui/core/button";
 import {
   CommandDialog,
@@ -25,11 +24,13 @@ import {
 import { Spinner } from "@/shared/ui/core/spinner";
 import { useRouter } from "@/i18n/routing";
 
+import { useCommandMenuActions, useCommandMenuIsOpen } from "@/entities/command-menu";
 import { useCreateRepoActions } from "@/entities/repo";
 
 export function AppCommandMenu() {
   const t = useTranslations("Dashboard");
-  const [open, setOpen] = useState(false);
+  const open = useCommandMenuIsOpen();
+  const { setOpen } = useCommandMenuActions();
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 300);
   const [isReposExpanded, setIsReposExpanded] = useState(true);
@@ -84,15 +85,6 @@ export function AppCommandMenu() {
       setSearch("");
     }
   }, [open]);
-
-  useHotkeys(
-    "mod+k",
-    (e) => {
-      e.preventDefault();
-      setOpen((prev) => !prev);
-    },
-    { enableOnFormTags: true }
-  );
 
   const navigate = (path: string) => {
     setOpen(false);
@@ -211,7 +203,7 @@ export function AppCommandMenu() {
                     e.stopPropagation();
                     setIsReposExpanded(!isReposExpanded);
                   }}
-                  className="text-muted-foreground cursor-pointer bg-transparent hover:underline"
+                  className="text-muted-foreground cursor-pointer bg-transparent"
                 >
                   {isReposExpanded ? t("command_collapse") : t("command_expand")}
                   <ChevronDown

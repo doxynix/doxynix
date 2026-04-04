@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import type { ParamTypes } from "@/shared/types/app";
+import type { ParamTypes } from "@/shared/types/app.types";
 
 import { RepoOverviewContainer } from "@/features/repo-analytics";
-import { RepoSetup } from "@/features/repo-setup";
 
 import { api } from "@/server/api/server";
 
@@ -33,10 +32,6 @@ export default async function RepoOwnerNamePage({ params }: Readonly<Props>) {
 
   if (repo == null) {
     notFound();
-  }
-
-  if (repo.status === "NEW") {
-    return <RepoSetup repo={repo} />;
   }
 
   return (

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import type { ParamTypes } from "@/shared/types/app";
+import type { ParamTypes } from "@/shared/types/app.types";
 
 import { DeleteRepoCard } from "@/features/repo-settings";
 

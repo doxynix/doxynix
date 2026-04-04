@@ -26,8 +26,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           actionButton: "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
           cancelButton: "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
           description: "group-[.toast]:text-muted-foreground",
-          toast:
-            "group toast group-[.toaster]:glass-panel group-[.toaster]:bg-popover group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-md",
+          toast: "group toast group-[.toaster]:glass-panel group-[.toaster]:border-border",
         },
         style: {
           background: "var(--popover)",
@@ -36,14 +35,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
         },
       }}
       className="toaster group"
-      style={
-        {
-          "--sonner-background": "var(--popover)",
-          "--sonner-border": "var(--border)",
-          "--sonner-text-primary": "var(--foreground)",
-          "--sonner-text-secondary": "var(--text-secondary)",
-        } as React.CSSProperties
-      }
       {...props}
     />
   );

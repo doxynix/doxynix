@@ -42,11 +42,11 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
       value={activeTab}
       orientation="vertical"
       onValueChange={(v) => onTabChange(v as DocType)}
-      className="flex h-[calc(100vh-220px)] w-full flex-row gap-10"
+      className="flex h-[calc(100dvh-220px)] w-full flex-row gap-10"
     >
       <RepoDocsTabs activeTab={activeTab} items={tabItems} />
 
-      <div className="bg-card relative flex flex-1 flex-col rounded-xl border shadow-sm">
+      <div className="bg-card relative flex flex-1 flex-col rounded-xl border">
         {availableDocs.map((doc) => {
           const isCurrentApiSwagger = !!(
             doc.type === "API" &&
@@ -77,7 +77,7 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
                   </div>
 
                   {doc.type === "API" && metrics?.swagger != null && (
-                    <div className="bg-muted/50 flex gap-1 rounded-lg border p-1">
+                    <div className="flex gap-1 rounded-lg border p-1">
                       <Button
                         size="sm"
                         variant={apiMode === "md" ? "secondary" : "ghost"}

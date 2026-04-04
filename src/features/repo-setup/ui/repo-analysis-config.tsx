@@ -72,7 +72,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
           Fine-tune how Doxynix should interpret and document your code.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 overflow-y-auto">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-3">
             <Label className="text-muted-foreground flex items-center gap-2 text-sm">
@@ -161,7 +161,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
             value={state.instructions}
             placeholder="e.g. 'Use technical tone', 'Highlight security risks', 'Add code examples'..."
             onChange={(e) => actions.setInstructions(e.target.value)}
-            className="h-35 resize-none"
+            className="h-30 resize-none"
           />
         </div>
 

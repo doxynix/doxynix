@@ -8,3 +8,5 @@ export { useRepoActions } from "./model/use-repo-actions";
 export { repoParsers } from "./model/repo-parsers";
 export { repoStatusConfig } from "./model/repo-status-config";
 export { useCreateRepoActions, useCreateRepoOpen } from "./model/use-create-repo-dialog.store";
+export { RepoAnalyzeButton } from "./ui/repo-analyze-button";
+export { useRepoParams } from "./model/use-repo-params";

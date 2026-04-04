@@ -13,7 +13,7 @@ import {
   GITHUB_SYSTEM_INSTALLATION_ID,
   GITHUB_SYSTEM_PAT,
 } from "@/shared/constants/env.server";
-import type { RepoItemFields } from "@/shared/types/repo";
+import type { RepoItemFields } from "@/shared/types/repo.types";
 
 import { FileClassifier } from "../engine/core/file-classifier";
 import { prisma, type DbClient } from "../infrastructure/db";

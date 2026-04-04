@@ -19,6 +19,7 @@ export const repoDetailsService = {
       },
       where: { repo: { publicId: repoId } },
     });
+
     return docs.map((d) => ({
       id: d.publicId,
       type: d.type,
@@ -149,14 +150,27 @@ export const repoDetailsService = {
     const result = lastAnalysis.resultJson as AIResult;
 
     return {
-      description: repo.description,
-      facts: (result.repository_facts ?? []).slice(0, 4),
       languages: metrics.languages,
       maintenance: metrics.maintenanceStatus,
-      mostComplexFiles:
-        metrics.hotspotFiles.length > 0 ? metrics.hotspotFiles : metrics.mostComplexFiles,
-      name: repo.name,
-      owner: repo.owner,
+      mostComplexFiles: metrics.mostComplexFiles,
+      repo: {
+        defaultBranch: repo.defaultBranch,
+        description: repo.description,
+        forks: repo.forks,
+        id: repo.publicId,
+        language: repo.language,
+        license: repo.license,
+        name: repo.name,
+        openIssues: repo.openIssues,
+        owner: repo.owner,
+        ownerAvatarUrl: repo.ownerAvatarUrl,
+        pushedAt: repo.pushedAt,
+        size: repo.size,
+        stars: repo.stars,
+        topics: repo.topics,
+        url: repo.url,
+        visibility: repo.visibility,
+      },
       scores: {
         analysisCoverage: metrics.analysisCoverage,
         apiSurface: metrics.apiSurface,

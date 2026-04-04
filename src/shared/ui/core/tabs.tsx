@@ -20,20 +20,21 @@ function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimi
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        "bg-muted/70 text-muted-foreground inline-flex h-10 w-fit items-center justify-center rounded-xl p-1",
+        "border-border/50 bg-muted/50 text-muted-foreground inline-flex h-9 items-center justify-center rounded-lg border p-1",
         className
       )}
       {...props}
     />
   );
 }
-
 function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "transition-standard data-[state=active]:border-border-strong data-[state=active]:bg-background data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-foreground dark:text-muted-foreground hover:border-border-strong hover:bg-background/70 inline-flex h-full flex-1 items-center justify-center gap-1.5 rounded-lg border border-transparent px-3 py-1.5 text-sm font-medium whitespace-nowrap focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "focus-visible:ring-ring/50 hover:text-foreground inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap outline-hidden transition-all focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50",
+        "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+        "gap-1.5 [&_svg]:size-4 [&_svg]:shrink-0",
         className
       )}
       {...props}
@@ -45,7 +46,10 @@ function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPr
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("flex-1 outline-none", className)}
+      className={cn(
+        "focus-visible:ring-ring/50 mt-4 flex-1 outline-hidden focus-visible:ring-2",
+        className
+      )}
       {...props}
     />
   );

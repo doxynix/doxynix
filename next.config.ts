@@ -227,11 +227,12 @@ const nextConfig: NextConfig = {
       { d: "/dashboard", s: "/dash" },
       { d: "/dashboard", s: "/home" },
       { d: "/dashboard/settings/profile", s: "/dashboard/settings" },
+      { d: "/dashboard/repos", s: "/dashboard/repo" },
 
       // --- REPOS ---
-      { d: "/dashboard/repo", s: "/r" },
-      { d: "/dashboard/repo", s: "/repos" },
-      { d: "/dashboard/repo", s: "/code" },
+      { d: "/dashboard/repos", s: "/r" },
+      { d: "/dashboard/repos", s: "/repos" },
+      { d: "/dashboard/repos", s: "/code" },
 
       // --- SETTINGS & PROFILE ---
       { d: "/dashboard/settings/profile", s: "/s" },

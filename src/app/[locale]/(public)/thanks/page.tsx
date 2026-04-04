@@ -10,7 +10,7 @@ export default async function ThanksPage() {
   const groups = rawLicenses as AuthorGroup[];
 
   return (
-    <div className="animate-fade-in relative container mx-auto min-h-screen max-w-5xl overflow-hidden px-4 py-12 pt-24">
+    <div className="animate-fade-in relative container mx-auto min-h-dvh max-w-5xl overflow-hidden px-4 py-12 pt-24">
       <BackOrLinkButton
         showIcon
         label={tCommon("back")}

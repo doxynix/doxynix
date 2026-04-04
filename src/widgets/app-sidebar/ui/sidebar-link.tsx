@@ -4,7 +4,7 @@ import type { Route } from "next";
 import { SquareArrowOutUpRight } from "lucide-react";
 
 import { cn, isRouteActive } from "@/shared/lib/utils";
-import type { MenuItem } from "@/shared/types/navigation";
+import type { MenuItem } from "@/shared/types/navigation.types";
 import { Badge } from "@/shared/ui/core/badge";
 import { SidebarMenuButton, SidebarMenuShortcut } from "@/shared/ui/core/sidebar";
 import { Link, usePathname } from "@/i18n/routing";
@@ -42,7 +42,7 @@ export function SidebarLink({
         rel={blank ? "noopener noreferrer" : undefined}
         target={blank ? "_blank" : undefined}
       >
-        <Icon className="size-3.5!" />
+        <Icon className="size-3.5" />
         <span className="truncate">{title}</span>
 
         <div className="ml-auto flex items-center gap-2">
@@ -55,7 +55,7 @@ export function SidebarLink({
             </SidebarMenuShortcut>
           )}
         </div>
-        {blank && <SquareArrowOutUpRight className="ml-auto" />}
+        {blank && <SquareArrowOutUpRight className="ml-auto size-3.5" />}
       </Link>
     </SidebarMenuButton>
   );

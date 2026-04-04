@@ -22,7 +22,20 @@ type Props = {
   tooltip?: string;
 };
 
-export function getGitMetrics(repo: UiRepoListItem, locale: string): Props[] {
+type GitMetrics = Pick<
+  UiRepoListItem,
+  | "language"
+  | "id"
+  | "stars"
+  | "defaultBranch"
+  | "openIssues"
+  | "license"
+  | "forks"
+  | "size"
+  | "pushedAt"
+>;
+
+export function getGitMetrics(repo: GitMetrics, locale: string): Props[] {
   const langColor = getLanguageColor(repo.language);
 
   const items = [
