@@ -1,15 +1,22 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { HistoryIcon } from "lucide-react";
 
 import { trpc } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { EmptyState } from "@/shared/ui/kit/empty-state";
+
+import { RepoAnalyzeButton } from "@/entities/repo";
 
 import { RepoHistory } from "./repo-history";
 
 type Props = { id: string };
 
 export function RepoHistoryContainer({ id }: Readonly<Props>) {
+  const params = useParams();
+  const owner = params.owner as string;
+  const name = params.name as string;
   const { data, isLoading } = trpc.repoDetails.getHistory.useQuery({
     repoId: id,
   });
@@ -25,10 +32,13 @@ export function RepoHistoryContainer({ id }: Readonly<Props>) {
 
   if (data == null || data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed py-20 text-center">
-        <HistoryIcon className="text-muted-foreground mb-4 size-12 opacity-20" />
-        <h3 className="text-lg font-medium">No history found</h3>
-        <p className="text-muted-foreground text-sm">Run a full analysis to generate docs.</p>
+      <div className="flex h-150 items-center justify-center rounded-xl border border-dashed">
+        <EmptyState
+          action={<RepoAnalyzeButton name={name} owner={owner} />}
+          description="We haven't tracked any analysis runs for this repository yet."
+          icon={HistoryIcon}
+          title="Analysis history is empty"
+        />
       </div>
     );
   }

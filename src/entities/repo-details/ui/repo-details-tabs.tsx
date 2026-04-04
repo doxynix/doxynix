@@ -2,47 +2,35 @@
 
 import type { Route } from "next";
 
-import type { RepoStatus } from "@/shared/api/trpc";
 import { getRepoDetailsMenu } from "@/shared/constants/navigation";
 import { cn, isRouteActive } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
 import { Link, usePathname } from "@/i18n/routing";
 
-type Props = { name: string; owner: string; status: RepoStatus };
+type Props = { name: string; owner: string };
 
-export function RepoDetailsTabs({ name, owner, status }: Readonly<Props>) {
+export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
   const pathname = usePathname();
-
   const nav = getRepoDetailsMenu(owner, name);
 
-  const filteredNav = nav.filter((item) => {
-    if (status === "NEW") {
-      return item.id === "overview" || item.id === "settings";
-    }
-    return true;
-  });
-
   return (
-    <div className="border-border no-scrollbar relative flex w-full items-center gap-2 overflow-x-auto border-b">
-      {filteredNav.map((n) => {
+    <div className="no-scrollbar relative flex h-12 w-full items-center gap-1 overflow-x-auto">
+      {nav.map((n) => {
         const isActive = isRouteActive(pathname, n.href, n.exact);
 
         return (
-          <Button key={n.label} asChild variant="ghost">
+          <Button key={n.label} asChild variant="ghost" className={cn("relative h-8")}>
             <Link
               href={n.href as Route}
               className={cn(
-                "relative flex items-center gap-2 rounded-b-none p-2 text-sm transition-all outline-none",
-                "rounded-t-xl",
+                "flex items-center gap-2 text-sm outline-hidden",
                 isActive
-                  ? "after:bg-foreground font-bold after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full"
+                  ? "after:bg-foreground after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <span className="relative z-10 flex items-center gap-2">
-                <n.icon className="size-4" />
-                {n.label}
-              </span>
+              <n.icon className={cn("size-4")} />
+              <span>{n.label}</span>
             </Link>
           </Button>
         );

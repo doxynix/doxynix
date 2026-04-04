@@ -49,7 +49,7 @@ export const Spotlight = ({
           repeat: Infinity,
           repeatType: "reverse",
         }}
-        className="pointer-events-none absolute top-0 left-0 z-40 h-screen w-screen"
+        className="pointer-events-none absolute top-0 left-0 z-40 h-dvh w-dvh"
       >
         <div
           className="absolute top-0 left-0"
@@ -92,7 +92,7 @@ export const Spotlight = ({
           repeat: Infinity,
           repeatType: "reverse",
         }}
-        className="pointer-events-none absolute top-0 right-0 z-40 h-screen w-screen"
+        className="pointer-events-none absolute top-0 right-0 z-40 h-dvh w-dvh"
       >
         <div
           className="absolute top-0 right-0"

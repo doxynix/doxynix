@@ -12,7 +12,7 @@ const SEQUENTIAL_ROUTES: Record<string, Record<string, string>> = {
     n: "/dashboard/notifications",
     o: "/dashboard",
     p: "/dashboard/settings/profile",
-    r: "/dashboard/repo",
+    r: "/dashboard/repos",
     s: "/dashboard/settings/profile",
   },
 };
@@ -35,12 +35,11 @@ export function useNavigationHotkeys(onAction?: () => void) {
 
   useHotkeys(
     PREFIX_KEYS.join(","),
-    (e, handler) => {
-      e.preventDefault();
+    (_, handler) => {
       const pressedKey = handler.hotkey;
       setPrefix(pressedKey);
     },
-    { enableOnFormTags: false }
+    { enableOnFormTags: false, preventDefault: true }
   );
 
   useHotkeys(
@@ -63,13 +62,12 @@ export function useNavigationHotkeys(onAction?: () => void) {
       const path = SEQUENTIAL_ROUTES[prefix][secondKey];
 
       if (path) {
-        e.preventDefault();
         onAction?.();
         router.push(path as Route);
       }
 
       setPrefix(null);
     },
-    { enabled: prefix != null, enableOnFormTags: false }
+    { enabled: prefix != null, enableOnFormTags: false, preventDefault: true }
   );
 }

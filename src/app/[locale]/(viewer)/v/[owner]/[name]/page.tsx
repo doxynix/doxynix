@@ -28,7 +28,7 @@ export default async function SharedDocsPage({ params }: Readonly<Props>) {
   //   storageKey="doxynix-theme"
   // >
   //{
-  // <div className="min-h-screen bg-background">
+  // <div className="min-h-dvh bg-background">
   //        <header className="border-b bg-card/50 backdrop-blur-md px-6 py-4 flex justify-between items-center sticky top-0 z-50">
   //       <div className="flex items-center gap-2">
   //         <div className="size-6 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-xs mr-1">D</div>

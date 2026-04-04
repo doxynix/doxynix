@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto h-full w-full space-y-6">
       <div className="flex flex-col gap-4">
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
         <StatCardContainer />
       </div>
 

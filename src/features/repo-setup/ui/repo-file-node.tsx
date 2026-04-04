@@ -33,10 +33,6 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
 
   return (
     <div
-      role="treeitem"
-      tabIndex={0}
-      aria-expanded={isFolder ? node.isOpen : undefined}
-      aria-selected={isSelected}
       onClick={handleSelect}
       onKeyDown={(e) => {
         if (e.key === " " || e.key === "Enter") {
@@ -54,6 +50,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
         {isFolder && (
           <Button
             type="button"
+            tabIndex={-1}
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
@@ -66,7 +63,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
             ) : (
               <ChevronRight className="size-3.5" />
             )}
-            <span className="sr-only">Toggle folder</span>
+            <span className="sr-only">Toggle folder {node.data.name}</span>
           </Button>
         )}
       </div>

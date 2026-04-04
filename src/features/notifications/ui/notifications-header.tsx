@@ -74,6 +74,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
                 key={t.id}
                 value={t.value}
                 disabled={!stats || (t.id !== "all" && t.count === 0)}
+                className="m-0.5"
               >
                 {t.label} ({t.count ?? 0})
               </TabsTrigger>

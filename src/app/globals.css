@@ -3,18 +3,12 @@
 @plugin "tailwind-scrollbar";
 @plugin "@tailwindcss/typography";
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: var(--font-sans);
-}
-
-code,
-pre,
-kbd {
-  font-family: var(--font-mono);
+@custom-variant hover {
+  @media (hover: hover) {
+    &:hover {
+      @slot;
+    }
+  }
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -466,12 +460,30 @@ kbd {
 }
 
 @layer base {
+  *,
+  ::before,
+  ::after {
+    @apply border-border outline-ring/50;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  code,
+  pre,
+  kbd {
+    font-family: var(--font-mono);
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
     line-height: 1.6;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -516,8 +528,10 @@ kbd {
     border-radius: 10px;
   }
 
-  ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--text-secondary);
+  @media (hover: hover) {
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: var(--text-secondary);
+    }
   }
 }
 

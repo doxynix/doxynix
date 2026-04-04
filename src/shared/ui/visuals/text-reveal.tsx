@@ -22,7 +22,7 @@ export const TextReveal: FC<TextRevealProps> = ({ children, className }) => {
   const words = children.split(" ");
 
   return (
-    <div ref={targetRef} className={cn("relative z-0 h-[200vh]", className)}>
+    <div ref={targetRef} className={cn("relative z-0 h-[200dvh]", className)}>
       <div
         className={
           "sticky top-0 mx-auto flex h-[50%] max-w-4xl items-center bg-transparent px-4 py-20"

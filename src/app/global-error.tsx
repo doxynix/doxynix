@@ -119,7 +119,7 @@ export default function GlobalError({
             --border-soft: oklch(0.285 0.004 255);
             --border-strong: oklch(0.36 0.004 255);
           }
-          body { margin: 0; font-family: sans-serif; background: var(--surface-page); color: var(--text-primary); display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+          body { margin: 0; font-family: sans-serif; background: var(--surface-page); color: var(--text-primary); display: flex; align-items: center; justify-content: center; min-height: 100dvh; }
           .container { max-width: 400px; padding: 24px; text-align: center; }
           .icon-circle { width: 80px; height: 80px; background: var(--status-error-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
           h1 { font-size: 30px; font-weight: 700; margin: 0 0 16px; letter-spacing: -0.025em; }

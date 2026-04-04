@@ -43,12 +43,7 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
 
         <CollapsibleTrigger asChild>
           <Button size="sm" variant="ghost" className="size-8 p-0">
-            <ChevronDown
-              className={cn(
-                "-rotate-90 transition-transform duration-300",
-                isArchivedOpen && "rotate-0"
-              )}
-            />
+            <ChevronDown className={cn("-rotate-90", isArchivedOpen && "rotate-0")} />
           </Button>
         </CollapsibleTrigger>
       </div>

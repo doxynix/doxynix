@@ -1,19 +1,22 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { SlashIcon } from "lucide-react";
+import { useParams, usePathname } from "next/navigation";
+import { Book, SlashIcon } from "lucide-react";
 
 import { LOCALES, type Locale } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/utils";
-import { useSidebar } from "@/shared/ui/core/sidebar";
+import { Button } from "@/shared/ui/core/button";
+import { SidebarTrigger } from "@/shared/ui/core/sidebar";
 import { Logo } from "@/shared/ui/icons/logo";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ThemeToggle } from "@/shared/ui/kit/theme-toggle";
+import { Link } from "@/i18n/routing";
+
+import { RepoDetailsTabs } from "@/entities/repo-details";
 
 import { AppCommandMenu } from "./app-command-menu";
 import { NotificationsNav } from "./notifications-nav";
-import { SidebarToggle } from "./sidebar-toggle";
 import { UserNav } from "./user-nav";
 
 function stripLocalePrefix(pathname: string) {
@@ -26,10 +29,13 @@ function stripLocalePrefix(pathname: string) {
 }
 
 export function AppHeader() {
-  const { state } = useSidebar();
+  const params = useParams();
   const rawPathname = usePathname();
   const pathname = stripLocalePrefix(rawPathname);
   const segments = pathname.split("/").filter(Boolean);
+  const owner = params.owner as string;
+  const name = params.name as string;
+  const isRepoOwnerPage = typeof owner === "string" && typeof name === "string";
 
   const breadcrumbItems = segments.map((segment, index) => ({
     className: cn(
@@ -43,33 +49,46 @@ export function AppHeader() {
   }));
 
   return (
-    <header className="bg-background flex h-full items-center justify-between p-4">
-      <div className="flex items-center gap-2.5">
-        <AppTooltip content={cn(state === "expanded" ? "Hide" : "Show")}>
-          <SidebarToggle />
-        </AppTooltip>
+    <header className="bg-background flex h-full flex-col justify-between px-4">
+      <div className="flex w-full justify-between py-4">
+        <div className="flex items-center gap-2.5">
+          <AppTooltip content="Toggle Sidebar (ctrl+b)">
+            <SidebarTrigger
+              variant="ghost"
+              className="text-muted-foreground hover:cursor-pointer"
+            />
+          </AppTooltip>
 
-        <Logo className="mt-1 w-20" />
+          <Logo className="mt-1 w-20" />
 
-        <AppBreadcrumbs
-          items={breadcrumbItems}
-          separator={<SlashIcon className="size-3 rotate-340" />}
-          showSeparatorAtStart={true}
-          className="hidden md:block"
-        />
+          <AppBreadcrumbs
+            items={breadcrumbItems}
+            separator={<SlashIcon className="size-3 rotate-340" />}
+            showSeparatorAtStart={true}
+            className="hidden md:block"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 md:gap-4">
+          <AppTooltip content="Work in Progress">
+            <span className="text-warning bg-warning/20 cursor-default rounded p-1 py-0.5 text-xs">
+              BETA
+            </span>
+          </AppTooltip>
+          <AppCommandMenu />
+          <ThemeToggle className="text-muted-foreground" />
+          <AppTooltip content="Repositories">
+            <Button asChild size="icon" variant="ghost">
+              <Link href="/dashboard/repos">
+                <Book className="size-4" />
+              </Link>
+            </Button>
+          </AppTooltip>
+          <NotificationsNav />
+          <UserNav />
+        </div>
       </div>
-
-      <div className="flex items-center gap-2 md:gap-4">
-        <AppTooltip content="Work in Progress">
-          <span className="text-warning bg-warning/20 cursor-default rounded p-1 py-0.5 text-xs">
-            BETA
-          </span>
-        </AppTooltip>
-        <AppCommandMenu />
-        <ThemeToggle className="text-muted-foreground" />
-        <NotificationsNav />
-        <UserNav />
-      </div>
+      {isRepoOwnerPage && <RepoDetailsTabs name={name} owner={owner} />}
     </header>
   );
 }

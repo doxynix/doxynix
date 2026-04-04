@@ -17,9 +17,10 @@ export function RepoSetup({ repo }: Readonly<Props>) {
   const isBusy = state.isLoading || state.isPending;
 
   return (
-    <div className="flex justify-center gap-4">
-      <RepoFileTree actions={actions} repo={repo} state={state} treeApi={refs.treeApi} />
-
+    <div className="flex h-[calc(100dvh-260px)] w-full justify-center gap-6">
+      <div className="flex-1">
+        <RepoFileTree actions={actions} repo={repo} state={state} treeApi={refs.treeApi} />
+      </div>
       <RepoAnalysisConfig actions={actions} disabled={isBusy} state={state} />
     </div>
   );

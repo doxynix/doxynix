@@ -34,9 +34,7 @@ export async function markdownToHtml(content: string) {
       ...defaultSchema,
       attributes: {
         ...defaultSchema.attributes,
-        "*": ["className", "style", "id", "aria-hidden"],
-        a: ["href", "target", "rel", "className"],
-        img: ["src", "alt", "title", "width", "height"],
+        "*": ["className", "style", "id", "ariaHidden"],
       },
       clobberPrefix: "",
       tagNames: [
@@ -77,7 +75,7 @@ export async function markdownToHtml(content: string) {
     })
 
     .use(rehypeStringify)
-    .process();
+    .process(content);
 
-  return result.toString();
+  return String(result.value);
 }

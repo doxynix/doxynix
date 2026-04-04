@@ -11,6 +11,7 @@ import { GitInstallationCatcher } from "@/features/repo-setup";
 import { AppFooter } from "@/widgets/app-footer";
 import { AppHeader } from "@/widgets/app-header";
 import { AppSidebar } from "@/widgets/app-sidebar";
+import { HotkeyListeners } from "@/widgets/hotkey-manager";
 
 import { getServerAuthSession } from "@/server/auth/options";
 
@@ -39,13 +40,14 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
           <AppSidebar />
           <div className="relative flex flex-1 flex-col overflow-y-auto">
             {/* <ScrollArea className="flex-1"> */}
-            <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col p-4">{children}</main>
+            <main className="mx-auto flex w-full max-w-400 flex-1 flex-col p-4">{children}</main>
             {/* </ScrollArea> */}
             <div className="z-50 w-full shrink-0 border-t">
               <AppFooter />
             </div>
           </div>
         </div>
+        <HotkeyListeners />
       </SidebarProvider>
       <CreateRepoDialog />
       <GitInstallationCatcher />
