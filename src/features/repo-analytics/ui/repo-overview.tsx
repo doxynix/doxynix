@@ -45,7 +45,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
   const REPO_STATS_CARDS = [
     {
-      className: "bg-suucess/10",
+      className: "bg-success/10",
       description:
         scores.healthScore === null
           ? "No health data"

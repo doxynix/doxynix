@@ -17,20 +17,22 @@ type Props = { repo: UiRepoDetailed };
 export function RepoDetailsHeader({ repo }: Readonly<Props>) {
   const visibility = repoVisibilityConfig[repo.visibility];
   const status = repoStatusConfig[repo.status];
+  const ownerSlug = encodeURIComponent(repo.owner);
+  const repoSlug = encodeURIComponent(repo.name);
 
   return (
     <div className="mx-auto w-full space-y-4">
       <div className="flex items-center gap-4">
         <AppAvatar alt={repo.owner} src={repo.ownerAvatarUrl} />
-        <div className="flex gap-1 text-2xl font-bold">
-          <Link href={`/dashboard/repo/${repo.owner}`} className="hover:underline">
+        <h1 className="flex gap-1 text-2xl font-bold">
+          <Link href={`/dashboard/repo/${ownerSlug}`} className="hover:underline">
             {repo.owner}
           </Link>
           <span>/</span>
-          <Link href={`/dashboard/repo/${repo.owner}/${repo.name}`} className="hover:underline">
+          <Link href={`/dashboard/repo/${ownerSlug}/${repoSlug}`} className="hover:underline">
             {repo.name}
           </Link>
-        </div>
+        </h1>
         <Badge variant="outline" className={visibility.color}>
           {visibility.label}
         </Badge>

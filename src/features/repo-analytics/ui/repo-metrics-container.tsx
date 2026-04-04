@@ -1,20 +1,17 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { Activity } from "lucide-react";
 
 import { trpc } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import { RepoAnalyzeButton } from "@/entities/repo";
+import { RepoAnalyzeButton, useRepoParams } from "@/entities/repo";
 
 import { RepoMetrics } from "./repo-metrics";
 
 export function RepoMetricsContainer({ id }: Readonly<{ id: string }>) {
-  const params = useParams();
-  const owner = params.owner as string;
-  const name = params.name as string;
+  const { name, owner } = useRepoParams();
 
   const { data, isLoading } = trpc.repoDetails.getDetailedMetrics.useQuery({
     repoId: id,

@@ -1,26 +1,22 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { BarChart3 } from "lucide-react";
 
 import { trpc } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import { RepoAnalyzeButton } from "@/entities/repo";
+import { RepoAnalyzeButton, useRepoParams } from "@/entities/repo";
 
 import { RepoOverview } from "./repo-overview";
 
 type Props = { id: string };
 
 export function RepoOverviewContainer({ id }: Readonly<Props>) {
-  const params = useParams();
+  const { name, owner } = useRepoParams();
   const { data, isLoading } = trpc.repoDetails.getOverview.useQuery({
     repoId: id,
   });
-
-  const owner = params.owner as string;
-  const name = params.name as string;
 
   if (isLoading) {
     return <Skeleton className="mb-4 ml-auto h-150 w-full text-sm" />;

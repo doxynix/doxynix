@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Book, SlashIcon } from "lucide-react";
 
 import { LOCALES, type Locale } from "@/shared/constants/locales";
@@ -13,6 +13,7 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ThemeToggle } from "@/shared/ui/kit/theme-toggle";
 import { Link } from "@/i18n/routing";
 
+import { useRepoParams } from "@/entities/repo";
 import { RepoDetailsTabs } from "@/entities/repo-details";
 
 import { AppCommandMenu } from "./app-command-menu";
@@ -29,13 +30,11 @@ function stripLocalePrefix(pathname: string) {
 }
 
 export function AppHeader() {
-  const params = useParams();
+  const { name, owner } = useRepoParams();
   const rawPathname = usePathname();
   const pathname = stripLocalePrefix(rawPathname);
   const segments = pathname.split("/").filter(Boolean);
-  const owner = params.owner as string;
-  const name = params.name as string;
-  const isRepoOwnerPage = typeof owner === "string" && typeof name === "string";
+  const isRepoOwnerPage = owner !== "" && name !== "";
 
   const breadcrumbItems = segments.map((segment, index) => ({
     className: cn(
@@ -79,7 +78,7 @@ export function AppHeader() {
           <ThemeToggle className="text-muted-foreground" />
           <AppTooltip content="Repositories">
             <Button asChild size="icon" variant="ghost">
-              <Link href="/dashboard/repos">
+              <Link href="/dashboard/repos" aria-label="Repositories">
                 <Book className="size-4" />
               </Link>
             </Button>

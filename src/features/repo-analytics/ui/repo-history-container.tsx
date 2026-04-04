@@ -1,22 +1,20 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { HistoryIcon } from "lucide-react";
 
 import { trpc } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import { RepoAnalyzeButton } from "@/entities/repo";
+import { RepoAnalyzeButton, useRepoParams } from "@/entities/repo";
 
 import { RepoHistory } from "./repo-history";
 
 type Props = { id: string };
 
 export function RepoHistoryContainer({ id }: Readonly<Props>) {
-  const params = useParams();
-  const owner = params.owner as string;
-  const name = params.name as string;
+  const { name, owner } = useRepoParams();
+
   const { data, isLoading } = trpc.repoDetails.getHistory.useQuery({
     repoId: id,
   });

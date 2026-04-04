@@ -1,6 +1,5 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { FileText } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 
@@ -8,7 +7,7 @@ import { trpc, type DocType } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import { RepoAnalyzeButton } from "@/entities/repo";
+import { RepoAnalyzeButton, useRepoParams } from "@/entities/repo";
 
 import { DocTypeSchema } from "@/generated/zod";
 
@@ -17,9 +16,7 @@ import { RepoDocs } from "./repo-docs";
 type Props = { id: string };
 
 export function RepoDocsContainer({ id }: Readonly<Props>) {
-  const params = useParams();
-  const owner = params.owner as string;
-  const name = params.name as string;
+  const { name, owner } = useRepoParams();
 
   const [activeTab, setActiveTab] = useQueryState(
     "type",

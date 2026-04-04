@@ -21,7 +21,7 @@ import { RepoCodeNode } from "./repo-code-node";
 
 type Props = {
   activePath: string | null;
-  onSelect: (path: string) => void;
+  onSelect: (path: string | null) => void;
   onTreeApiChange: (api: TreeApi<FileNode> | undefined) => void;
   repo: UiRepoDetailed;
   treeApi: TreeApi<FileNode> | undefined;
@@ -77,8 +77,7 @@ export function RepoCodeTree({
             selectedBranch={state.selectedBranch}
             onSelect={(branch) => {
               void actions.setSelectedBranch(branch);
-
-              onSelect("");
+              onSelect(null);
             }}
           />
         </div>

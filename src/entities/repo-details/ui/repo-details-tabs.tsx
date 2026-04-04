@@ -19,7 +19,7 @@ export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
         const isActive = isRouteActive(pathname, n.href, n.exact);
 
         return (
-          <Button key={n.label} asChild variant="ghost" className={cn("relative h-8")}>
+          <Button key={n.id} asChild variant="ghost" className={cn("relative h-8")}>
             <Link
               href={n.href as Route}
               className={cn(

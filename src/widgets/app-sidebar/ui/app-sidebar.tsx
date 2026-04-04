@@ -1,6 +1,5 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { Book, BookText, ChevronDown, CircleQuestionMark } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -28,6 +27,8 @@ import { Spinner } from "@/shared/ui/core/spinner";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import { useRepoParams } from "@/entities/repo";
+
 import { SidebarLink } from "./sidebar-link";
 
 export function AppSidebar() {
@@ -46,11 +47,9 @@ export function AppSidebar() {
 
   const { data: stats } = trpc.notification.getStats.useQuery();
 
-  const params = useParams();
-  const owner = params.owner;
-  const name = params.name;
+  const { name, owner } = useRepoParams();
 
-  const isRepoOwnerPage = typeof owner === "string" && typeof name === "string";
+  const isRepoOwnerPage = owner !== "" && name !== "";
 
   return (
     <Sidebar
