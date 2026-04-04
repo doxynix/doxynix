@@ -57,8 +57,8 @@
       "cross-spawn": "7.0.6",
       "tmp": "0.2.5",
       "diff": "8.0.4",
-      "lodash": "4.17.23",
-      "lodash-es": "4.17.23",
+      "lodash": "4.18.0",
+      "lodash-es": "4.18.0",
       "fast-xml-parser": "5.5.9",
       "ajv@^8": "8.18.0",
       "cookie": "0.7.2",
@@ -70,7 +70,8 @@
       "flatted": "3.4.2",
       "dompurify": "3.3.3",
       "effect": "3.21.0",
-      "handlebars": "4.7.9"
+      "handlebars": "4.7.9",
+      "defu": "6.1.5"
     },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
