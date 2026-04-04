@@ -8,7 +8,8 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
 import { RepoAnalyzeButton } from "@/entities/repo";
-import { RepoOverview } from "@/entities/repo-details";
+
+import { RepoOverview } from "./repo-overview";
 
 type Props = { id: string };
 

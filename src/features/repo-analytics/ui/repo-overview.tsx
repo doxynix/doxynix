@@ -21,8 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card"
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 
 import { getGitMetrics, RepoGitMetric, RepoTopics } from "@/entities/repo";
-
-import { StatCard } from "./stat-card";
+import { StatCard } from "@/entities/repo-details";
 
 type Props = { data: RepoDetailsOverview };
 
