@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import type { EditorView } from "@uiw/react-codemirror";
 import { saveAs } from "file-saver";
 import { Code, Download, Edit3, FileCode, Save, Sparkles, X } from "lucide-react";
+import type { TreeApi } from "react-arborist";
 import { toast } from "sonner";
 
 import { trpc, type FileContent } from "@/shared/api/trpc";
@@ -13,8 +14,8 @@ import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import { RepoStatusBar, type EditorStats } from "@/entities/repo-details";
+import type { FileNode } from "@/entities/repo-setup";
 
-import { useRepoTreeApi } from "../model/use-repo-code.store";
 import { RepoCodeActionButton } from "./repo-code-action-button";
 import { RepoSearchPanel } from "./repo-code-search-panel";
 import { CodeSkeleton } from "./repo-code-skeleton";
@@ -24,11 +25,15 @@ const Editor = dynamic(() => import("./repo-code-editor").then((m) => m.RepoCode
   ssr: false,
 });
 
-type Props = { fileData: FileContent; path: string; repoId: string };
+type Props = {
+  fileData: FileContent;
+  path: string;
+  repoId: string;
+  treeApi: TreeApi<FileNode> | undefined;
+};
 
-export function RepoCodeBrowser({ fileData, path, repoId }: Readonly<Props>) {
+export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Props>) {
   const [mode, setMode] = useState<"view" | "edit">("view");
-  const treeApi = useRepoTreeApi();
   const [view, setView] = useState<EditorView | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -177,18 +182,16 @@ export function RepoCodeBrowser({ fileData, path, repoId }: Readonly<Props>) {
         <div className="flex items-center justify-end gap-2">
           {mode === "view" ? (
             <>
-              <>
-                {VIEW_ACTIONS.map(({ icon: Icon, ...action }) => (
-                  <RepoCodeActionButton key={action.tooltipText} className="size-8" {...action}>
-                    <Icon className="size-3" />
-                  </RepoCodeActionButton>
-                ))}
-                <CopyButton
-                  value={localContent}
-                  tooltipText="Copy file"
-                  className="size-8 px-3 opacity-100"
-                />
-              </>
+              {VIEW_ACTIONS.map(({ icon: Icon, ...action }) => (
+                <RepoCodeActionButton key={action.tooltipText} className="size-8" {...action}>
+                  <Icon className="size-3" />
+                </RepoCodeActionButton>
+              ))}
+              <CopyButton
+                value={localContent}
+                tooltipText="Copy file"
+                className="size-8 px-3 opacity-100"
+              />
             </>
           ) : (
             <>

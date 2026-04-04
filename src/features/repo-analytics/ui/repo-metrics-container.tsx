@@ -1,14 +1,19 @@
 "use client";
 
-import { AlertCircle } from "lucide-react";
+import { Activity } from "lucide-react";
 
 import { trpc } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+import { EmptyState } from "@/shared/ui/kit/empty-state";
+
+import { RepoAnalyzeButton, useRepoParams } from "@/entities/repo";
 
 import { RepoMetrics } from "./repo-metrics";
 
 export function RepoMetricsContainer({ id }: Readonly<{ id: string }>) {
-  const { data, error, isLoading } = trpc.repoDetails.getDetailedMetrics.useQuery({
+  const { name, owner } = useRepoParams();
+
+  const { data, isLoading } = trpc.repoDetails.getDetailedMetrics.useQuery({
     repoId: id,
   });
 
@@ -24,11 +29,15 @@ export function RepoMetricsContainer({ id }: Readonly<{ id: string }>) {
     );
   }
 
-  if (error || !data) {
+  if (data == null) {
     return (
-      <div className="text-destructive flex flex-col items-center justify-center py-20">
-        <AlertCircle className="mb-4 size-10" />
-        <p>Failed to load analysis metrics. Make sure analysis is completed.</p>
+      <div className="flex h-150 items-center justify-center rounded-xl border border-dashed">
+        <EmptyState
+          action={<RepoAnalyzeButton name={name} owner={owner} />}
+          description="Detailed code metrics will appear here after the first analysis."
+          icon={Activity}
+          title="No metrics data available"
+        />
       </div>
     );
   }

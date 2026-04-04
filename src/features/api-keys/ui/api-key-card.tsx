@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from "next-intl";
 import type { UiApiKey } from "@/shared/api/trpc";
 import { formatRelativeTime } from "@/shared/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
-import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import { RevokeApiKeyDialog } from "./revoke-api-key-dialog";
 import { UpdateApiKeyDialog } from "./update-api-key-dialog";
@@ -35,7 +34,6 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
           </CardDescription>
         </div>
         <div className="flex shrink-0 flex-col items-center gap-1">
-          <CopyButton value={active.id} className="size-9" />
           <UpdateApiKeyDialog apiKey={active} />
           <RevokeApiKeyDialog apiKey={active} />
         </div>

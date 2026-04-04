@@ -9,6 +9,30 @@ import { Link } from "@/i18n/routing";
 
 import { SystemStatus } from "./system-status";
 
+const INTERNAL_LINKS = [
+  { href: "/terms", label: "Terms of Service" },
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/thanks", label: "Thanks!" },
+] as const;
+
+const SOCIAL_LINKS = [
+  {
+    href: "https://github.com/doxynix/doxynix",
+    icon: GitHubIcon,
+    label: "GitHub",
+  },
+  {
+    href: "https://www.crunchbase.com/organization/doxynix",
+    icon: CrunchbaseIcon,
+    label: "Crunchbase",
+  },
+  {
+    href: "https://t.me/doxynix",
+    icon: TelegramIcon,
+    label: "Telegram",
+  },
+] as const;
+
 export function AppFooter() {
   const tFooter = useTranslations("Footer");
 
@@ -22,50 +46,24 @@ export function AppFooter() {
           <SystemStatus />
         </div>
         <div className="text-muted-foreground xs:flex-row flex flex-col flex-wrap items-center justify-center gap-2 text-sm not-md:justify-center md:gap-6">
-          <Link
-            href="/terms"
-            className="hover:text-foreground text-center text-xs transition-colors"
-          >
-            Terms of Service
-          </Link>
-          <Link
-            href="/privacy"
-            className="hover:text-foreground text-center text-xs transition-colors"
-          >
-            Privacy Policy
-          </Link>
-
-          <Link
-            href="/thanks"
-            className="hover:text-foreground text-center text-xs transition-colors"
-          >
-            Thanks!
-          </Link>
+          {INTERNAL_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="hover:text-foreground text-center text-xs transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
 
           <div className="border-border flex items-center gap-4 md:pl-6 xl:border-l">
-            <ExternalLink
-              href="https://github.com/doxynix/doxynix"
-              className="hover:text-foreground"
-            >
-              <GitHubIcon className="hidden size-4 md:block" />
-              <span className="text-xs md:hidden">GitHub</span>
-              <span className="sr-only">GitHub</span>
-            </ExternalLink>
-
-            <ExternalLink
-              href="https://www.crunchbase.com/organization/doxynix"
-              className="hover:text-foreground"
-            >
-              <CrunchbaseIcon className="hidden size-4 md:block" />
-              <span className="text-xs md:hidden">Crunchbase</span>
-              <span className="sr-only">Crunchbase</span>
-            </ExternalLink>
-
-            <ExternalLink href="https://t.me/Float_inf" className="hover:text-foreground">
-              <TelegramIcon className="hidden size-4 md:block" />
-              <span className="text-xs md:hidden">Telegram</span>
-              <span className="sr-only">Telegram</span>
-            </ExternalLink>
+            {SOCIAL_LINKS.map((social) => (
+              <ExternalLink key={social.href} href={social.href} className="hover:text-foreground">
+                <social.icon className="hidden size-4 md:block" />
+                <span className="text-xs md:hidden">{social.label}</span>
+                <span className="sr-only">{social.label}</span>
+              </ExternalLink>
+            ))}
           </div>
         </div>
       </div>

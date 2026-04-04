@@ -56,7 +56,7 @@ function NavigationMenuItem({
 }
 
 const navigationMenuTriggerStyle = cva(
-  "transition-standard group inline-flex h-9 w-max items-center justify-center rounded-xl border border-transparent bg-background/70 px-4 py-2 text-sm font-medium tracking-[-0.02em] shadow-sm hover:border-border-accent hover:bg-accent hover:text-accent-foreground hover:[box-shadow:var(--shadow-sm)] focus:border-border-accent focus:bg-accent focus:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=open]:border-border-accent data-[state=open]:hover:bg-accent data-[state=open]:text-accent-foreground data-[state=open]:focus:bg-accent data-[state=open]:bg-accent focus-visible:ring-ring/50 outline-none focus-visible:ring-[3px] focus-visible:outline-1"
+  "transition-standard group inline-flex h-9 w-max items-center justify-center rounded-xl border border-transparent bg-background/70 px-4 py-2 text-sm font-medium tracking-[-0.02em] shadow-sm hover:border-border-accent hover:bg-accent hover:text-accent-foreground hover:[box-shadow:var(--shadow-sm)] focus:border-border-accent focus:bg-accent focus:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=open]:border-border-accent data-[state=open]:hover:bg-accent data-[state=open]:text-accent-foreground data-[state=open]:focus:bg-accent data-[state=open]:bg-accent focus-visible:ring-ring/50 outline-hidden focus-visible:ring-2"
 );
 
 function NavigationMenuTrigger({
@@ -71,10 +71,7 @@ function NavigationMenuTrigger({
       {...props}
     >
       {children}{" "}
-      <ChevronDownIcon
-        aria-hidden="true"
-        className="transition-standard relative top-px ml-1 size-3 group-data-[state=open]:rotate-180"
-      />
+      <ChevronDownIcon className="transition-standard relative top-px ml-1 size-3 group-data-[state=open]:rotate-180" />
     </NavigationMenuPrimitive.Trigger>
   );
 }
@@ -122,7 +119,7 @@ function NavigationMenuLink({
     <NavigationMenuPrimitive.Link
       data-slot="navigation-menu-link"
       className={cn(
-        "transition-standard data-[active=true]:border-border-accent data-[active=true]:focus:bg-accent data-[active=true]:hover:bg-accent data-[active=true]:bg-accent data-[active=true]:text-accent-foreground hover:border-border-accent hover:bg-accent hover:text-accent-foreground focus:border-border-accent focus:bg-accent focus:text-accent-foreground focus-visible:ring-ring/50 [&_svg:not([class*='text-'])]:text-muted-foreground flex flex-col gap-1 rounded-xl border border-transparent p-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:outline-1 [&_svg:not([class*='size-'])]:size-4",
+        "transition-standard data-[active=true]:border-border-accent data-[active=true]:focus:bg-accent data-[active=true]:hover:bg-accent data-[active=true]:bg-accent data-[active=true]:text-accent-foreground hover:border-border-accent hover:bg-accent hover:text-accent-foreground focus:border-border-accent focus:text-accent-foreground focus-visible:ring-ring/50 [&_svg:not([class*='text-'])]:text-muted-foreground flex flex-col gap-1 rounded-xl border border-transparent p-2 text-sm outline-hidden focus-visible:ring-2 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}

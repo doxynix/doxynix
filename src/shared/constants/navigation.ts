@@ -2,23 +2,24 @@ import {
   AlertTriangle,
   BarChart3,
   Bell,
+  Book,
+  BookOpen,
   Code2,
   FileText,
-  FolderGit2,
   Headset,
   HeartHandshakeIcon,
   HistoryIcon,
   Home,
   KeyRound,
   LayoutGrid,
+  ScanSearch,
   Settings,
   SquareTerminal,
   User,
   Users2,
-  Zap,
 } from "lucide-react";
 
-import type { MenuItems } from "../types/navigation";
+import type { MenuItems } from "../types/navigation.types";
 
 const DASHBOARD_BASE: MenuItems = [
   {
@@ -31,8 +32,8 @@ const DASHBOARD_BASE: MenuItems = [
     url: "/o",
   },
   {
-    href: "/dashboard/repo",
-    icon: FolderGit2,
+    href: "/dashboard/repos",
+    icon: Book,
     id: "repositories",
     label: "Repositories",
     shortcut: "G then R",
@@ -110,7 +111,7 @@ export const sidebarMenu: MenuItems = [...DASHBOARD_BASE];
 
 export const settingsMenu: MenuItems = [...SETTINGS_PAGES];
 
-export const userNavMenu: MenuItems = [SETTINGS_PAGES[0], SETTINGS_PAGES[1]];
+export const userNavMenu: MenuItems = [SETTINGS_PAGES[0], SETTINGS_PAGES[1], DASHBOARD_BASE[1]];
 
 export const commandMenuItems: MenuItems = [
   ...DASHBOARD_BASE,
@@ -153,13 +154,13 @@ export const getRepoDetailsMenu = (owner: string, name: string): MenuItems => {
     {
       exact: true,
       href: base,
-      icon: LayoutGrid,
+      icon: BookOpen,
       id: "overview",
       label: "Overview",
     },
     {
       href: `${base}/analyze`,
-      icon: Zap,
+      icon: ScanSearch,
       id: "analyze",
       label: "Analyze",
     },

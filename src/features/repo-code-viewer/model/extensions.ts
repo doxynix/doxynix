@@ -194,7 +194,7 @@ export const EXTRA_EXTENSIONS: Extension[] = [
       fontSize: "13px",
       height: "100%",
     },
-    "&.cm-focused .cm-cursor": { borderLeftColor: "var(--primary)" },
+    "&.cm-focused .cm-cursor": { borderLeftColor: "var(--foreground)" },
     ".close-btn": {
       "&:hover": {
         backgroundColor: "color-mix(in srgb, var(--status-error), transparent 90%)",

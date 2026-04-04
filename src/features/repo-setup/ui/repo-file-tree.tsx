@@ -3,6 +3,7 @@ import { Check, Folder, FolderOpen, Search, Sparkles, X } from "lucide-react";
 import { Tree, type TreeApi } from "react-arborist";
 
 import type { UiRepoDetailed } from "@/shared/api/trpc";
+import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
@@ -27,6 +28,8 @@ type Props = {
 };
 
 export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>) {
+  const [measureRef, size] = useResizeObserver<HTMLDivElement>();
+
   const handleExpandAll = () => {
     startTransition(() => {
       treeApi?.openAll();
@@ -64,21 +67,9 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
   const isRepoEmpty = !state.isLoading && state.treeData.length === 0 && state.searchTerm === "";
 
   return (
-    <div className="space-y-4">
+    <div className="flex h-full flex-col space-y-4">
       <div className="flex items-end gap-4">
         <div className="flex flex-1 flex-col gap-2">
-          <span className="text-sm font-medium">Select Branch</span>
-          <RepoBranchSelector
-            branches={state.branches}
-            defaultBranch={repo.defaultBranch}
-            isLoading={state.isBranchesLoading}
-            selectedBranch={state.selectedBranch}
-            onSelect={(val) => {
-              void actions.setSelectedBranch(val);
-            }}
-          />
-        </div>
-        <div className="flex flex-2 flex-col gap-2">
           <div className="relative">
             <Search className="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
             <Input
@@ -92,11 +83,23 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
             />
           </div>
         </div>
+        <div className="flex flex-1 flex-col gap-2">
+          <span className="text-sm font-medium">Select Branch</span>
+          <RepoBranchSelector
+            branches={state.branches}
+            defaultBranch={repo.defaultBranch}
+            isLoading={state.isBranchesLoading}
+            selectedBranch={state.selectedBranch}
+            onSelect={(val) => {
+              void actions.setSelectedBranch(val);
+            }}
+          />
+        </div>
       </div>
 
       <div className="text-muted-foreground flex flex-col items-end justify-between gap-2 px-1 text-xs">
-        <div className="flex gap-4">
-          <div className="flex">
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center">
             {treeActions.map((action) => (
               <Button
                 key={action.label}
@@ -109,9 +112,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
                 {action.label}
               </Button>
             ))}
-          </div>
 
-          <div className="flex">
             {selectionActions.map((action) => {
               const ButtonElement = (
                 <Button
@@ -134,8 +135,6 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
               );
             })}
           </div>
-        </div>
-        <div className="flex items-center gap-2 font-medium">
           <span>Files selected: {state.selectedFilesCount}</span>
         </div>
       </div>
@@ -143,7 +142,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
       <div
         onKeyDownCapture={(e) => e.key === " " && e.stopPropagation()}
         onPointerDownCapture={(e) => e.target === e.currentTarget && e.stopPropagation()}
-        className="relative overflow-hidden rounded-lg border p-1"
+        className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border p-1"
       >
         {isSearchEmpty && (
           <p className="text-muted-foreground absolute inset-0 z-10 flex items-center justify-center truncate text-sm">
@@ -157,39 +156,45 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
             Repository is empty
           </p>
         )}
-
-        {state.isLoading ? (
-          <RepoTreeSkeleton variant="setup" />
-        ) : (
-          <Tree
-            ref={(api) => actions.setTreeApi(api || null)}
-            disableDrag
-            disableDrop
-            disableEdit
-            data={state.treeData}
-            disableMultiSelection={false}
-            height={580}
-            indent={20}
-            openByDefault={false}
-            rowHeight={34}
-            searchMatch={(node, term) => node.data.name.toLowerCase().includes(term.toLowerCase())}
-            searchTerm={state.searchTerm}
-            selectionFollowsFocus={false}
-            width="100%"
-            onCreate={() => null}
-            onDelete={() => {}}
-            onMove={() => {}}
-            onRename={() => {}}
-          >
-            {(props) => (
-              <RepoFileNode
-                {...props}
-                mySelectedIds={state.selectedIds}
-                onMyToggle={actions.handleToggleSelection}
-              />
-            )}
-          </Tree>
-        )}
+        <div ref={measureRef} className="relative h-full min-h-0 w-full flex-1 overflow-hidden">
+          {state.isLoading ? (
+            <RepoTreeSkeleton variant="setup" />
+          ) : (
+            size.height > 0 && (
+              <Tree
+                ref={(api) => actions.setTreeApi(api || null)}
+                disableDrag
+                disableDrop
+                disableEdit
+                data={state.treeData}
+                disableMultiSelection={false}
+                height={size.height}
+                indent={16}
+                openByDefault={false}
+                overscanCount={30}
+                rowHeight={32}
+                searchMatch={(node, term) =>
+                  node.data.name.toLowerCase().includes(term.toLowerCase())
+                }
+                searchTerm={state.searchTerm}
+                selectionFollowsFocus={false}
+                width="100%"
+                onCreate={() => null}
+                onDelete={() => {}}
+                onMove={() => {}}
+                onRename={() => {}}
+              >
+                {(props) => (
+                  <RepoFileNode
+                    {...props}
+                    mySelectedIds={state.selectedIds}
+                    onMyToggle={actions.handleToggleSelection}
+                  />
+                )}
+              </Tree>
+            )
+          )}
+        </div>
       </div>
     </div>
   );

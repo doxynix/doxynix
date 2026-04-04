@@ -15,7 +15,7 @@ export default async function NotFound() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 p-4 text-center">
       <div className="bg-warning/10 text-warning flex size-20 items-center justify-center rounded-full">
-        <SearchX size={35} className="animate-pulse" />
+        <SearchX size={35} />
       </div>
 
       <div className="flex flex-col gap-2">

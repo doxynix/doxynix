@@ -9,7 +9,7 @@ export default function PublicLayout({ children }: Readonly<{ children: ReactNod
   return (
     <div
       data-public-theme="marketing-dark"
-      className="dark bg-background text-foreground relative flex min-h-screen flex-col"
+      className="dark bg-background text-foreground relative flex min-h-dvh flex-col"
     >
       <PublicHeaderWrapper>
         <PublicHeader />

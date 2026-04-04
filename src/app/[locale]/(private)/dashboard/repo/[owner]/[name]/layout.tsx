@@ -2,9 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import type { ParamTypes } from "@/shared/types/app";
-
-import { RepoDetailsTabs } from "@/entities/repo-details";
+import type { ParamTypes } from "@/shared/types/app.types";
 
 import { RepoDetailsHeader } from "@/features/repo";
 
@@ -39,10 +37,9 @@ export default async function RepoDetailsLayout({ children, params }: Readonly<P
   }
 
   return (
-    <div className="mx-auto space-y-4">
+    <div className="space-y-4">
       <div className="flex flex-col gap-4">
         <RepoDetailsHeader repo={repo} />
-        <RepoDetailsTabs name={repo.name} owner={repo.owner} status={repo.status} />
       </div>
       {children}
     </div>

@@ -13,7 +13,7 @@ export default function UnauthorizedPage() {
   }, []);
 
   return (
-    <div className="bg-background flex h-screen w-full flex-col items-center justify-center">
+    <div className="bg-background flex h-dvh w-full flex-col items-center justify-center">
       <div className="flex max-w-md flex-col items-center space-y-6 text-center">
         <div className="bg-destructive/10 text-destructive flex size-20 items-center justify-center rounded-full">
           <ShieldAlert size={40} />

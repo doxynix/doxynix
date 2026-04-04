@@ -7,7 +7,7 @@ import { CreateRepoButton, RepoFilters, RepoListContainer } from "@/features/rep
 
 export const generateMetadata = createMetadata("repositories_title", "repositories_desc");
 
-export default async function RepoPage() {
+export default async function ReposPage() {
   const t = await getTranslations("Dashboard");
 
   return (

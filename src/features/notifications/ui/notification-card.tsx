@@ -6,7 +6,6 @@ import { useLocale } from "next-intl";
 import { type UiNotification } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/utils";
 import { Card, CardContent, CardDescription, CardTitle } from "@/shared/ui/core/card";
-import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 import { Link } from "@/i18n/routing";
 
@@ -64,8 +63,6 @@ export function NotificationCard({ notification }: Readonly<Props>) {
         </div>
         <div className="flex flex-col items-end gap-4">
           <div className="flex items-center gap-2">
-            <CopyButton value={notification.id} className="z-10" />
-
             <NotificationActionButton
               disabled={isPending}
               icon={notification.isRead === true ? EyeOff : Eye}

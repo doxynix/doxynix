@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { sidebarMenu } from "@/shared/constants/navigation";
-import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/core/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";
@@ -28,11 +27,12 @@ import { Spinner } from "@/shared/ui/core/spinner";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
+import { useRepoParams } from "@/entities/repo";
+
 import { SidebarLink } from "./sidebar-link";
 
 export function AppSidebar() {
   const t = useTranslations("Dashboard");
-  const isMobile = useIsMobile();
   const { state } = useSidebar();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     trpc.repo.getAll.useInfiniteQuery(
@@ -47,8 +47,18 @@ export function AppSidebar() {
 
   const { data: stats } = trpc.notification.getStats.useQuery();
 
+  const { name, owner } = useRepoParams();
+
+  const isRepoOwnerPage = owner !== "" && name !== "";
+
   return (
-    <Sidebar collapsible="icon" variant="sidebar" className="top-16 h-[calc(100vh-4rem)]">
+    <Sidebar
+      collapsible="offcanvas"
+      variant="sidebar"
+      className={cn(
+        isRepoOwnerPage ? "top-29 h-[calc(100dvh-7rem)]" : "top-16 h-[calc(100dvh-4rem)]"
+      )}
+    >
       <SidebarHeader>
         <SidebarMenu>
           {sidebarMenu.map((item) => {
@@ -60,18 +70,18 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarSeparator className="m-0" />
 
-      <SidebarContent className="max-h-[calc(100vh-HeaderHeight-FooterHeight)] overflow-hidden">
+      <SidebarContent className="max-h-[calc(100dvh-HeaderHeight-FooterHeight)] overflow-hidden">
         <ScrollArea className="h-full">
           <Collapsible defaultOpen className="group/collapsible">
             <SidebarGroup>
-              <SidebarGroupLabel asChild className="truncate">
+              <SidebarGroupLabel asChild className="transition-standard truncate">
                 <CollapsibleTrigger
                   className={cn(
-                    "text-muted-foreground flex cursor-pointer justify-between hover:underline",
-                    state === "collapsed" && "pointer-events-none"
+                    "text-muted-foreground hover:bg-accent hover:text-foreground flex w-full cursor-pointer justify-between px-3",
+                    state === "collapsed" && "pointer-events-none opacity-0"
                   )}
                 >
-                  {(state === "expanded" || isMobile) && <span>{t("recent_repositories")}</span>}
+                  <span>{t("recent_repositories")}</span>
                   <ChevronDown className="transition-standard ml-auto size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
@@ -129,7 +139,7 @@ export function AppSidebar() {
                               onClick={() => void fetchNextPage()}
                               className="text-muted-foreground flex h-8 w-full cursor-pointer items-center justify-start text-xs"
                             >
-                              <ChevronDown /> <>{t("sidebar_show_more")}</>
+                              <ChevronDown /> {t("sidebar_show_more")}
                             </LoadingButton>
                           ) : (
                             <Button

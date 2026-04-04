@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, type ReactNode } from "react";
+import React, { type ReactNode } from "react";
 
+import { useCanHover } from "@/shared/hooks/use-can-hover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/core/tooltip";
 
 type Props = {
+  align?: "start" | "center" | "end";
   children: ReactNode;
   content: ReactNode;
   delay?: number;
@@ -15,26 +17,18 @@ type Props = {
 };
 
 export function AppTooltip({
+  align = "center",
   children,
   content,
-  delay = 300,
+  delay = 400,
   disableHoverableContent = true,
   hidden,
   open: controlledOpen,
-  side,
+  side = "top",
 }: Readonly<Props>) {
-  const [canHover, setCanHover] = useState(false);
+  const canHover = useCanHover();
 
-  React.useEffect(() => {
-    const mql = window.matchMedia("(hover: hover)");
-    setCanHover(mql.matches);
-
-    const handler = (e: MediaQueryListEvent) => setCanHover(e.matches);
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
-  }, []);
-
-  if (!canHover) {
+  if (!canHover || !content) {
     return <>{children}</>;
   }
 
@@ -45,7 +39,7 @@ export function AppTooltip({
       open={controlledOpen}
     >
       <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent hidden={hidden} side={side}>
+      <TooltipContent align={align} hidden={hidden} side={side}>
         {content}
       </TooltipContent>
     </Tooltip>

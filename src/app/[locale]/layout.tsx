@@ -22,8 +22,6 @@ import { Toaster } from "@/shared/ui/core/sonner";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
 import { routing } from "@/i18n/routing";
 
-import { HotkeyListeners } from "@/widgets/hotkey-manager";
-
 import { ourFileRouter } from "@/server/infrastructure/core";
 
 import { Providers } from "../providers";
@@ -181,7 +179,6 @@ export default async function LocaleLayout({
               </>
             )}
             <ConsoleEasterEgg />
-            <HotkeyListeners />
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

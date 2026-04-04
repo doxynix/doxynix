@@ -60,7 +60,7 @@ export default function ErrorPage({
   return (
     <div className="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center px-4">
       <div className="bg-destructive/10 text-destructive flex size-20 items-center justify-center rounded-full">
-        <ServerCrash size={35} className="animate-pulse" />
+        <ServerCrash size={35} />
       </div>
 
       <div className="w-full max-w-md space-y-4 text-center">

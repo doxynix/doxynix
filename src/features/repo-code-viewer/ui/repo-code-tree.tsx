@@ -2,9 +2,10 @@
 
 import React from "react";
 import { Folder, FolderOpen, Search } from "lucide-react";
-import { Tree } from "react-arborist";
+import { Tree, type TreeApi } from "react-arborist";
 
 import type { UiRepoDetailed } from "@/shared/api/trpc";
+import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
 import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 
@@ -13,21 +14,29 @@ import {
   RepoTreeSkeleton,
   useRepoSetup,
   type ActionItem,
+  type FileNode,
 } from "@/entities/repo-setup";
 
-import { useRepoCodeActions, useRepoTreeApi } from "../model/use-repo-code.store";
 import { RepoCodeNode } from "./repo-code-node";
 
 type Props = {
   activePath: string | null;
-  onSelect: (path: string) => void;
+  onSelect: (path: string | null) => void;
+  onTreeApiChange: (api: TreeApi<FileNode> | undefined) => void;
   repo: UiRepoDetailed;
+  treeApi: TreeApi<FileNode> | undefined;
 };
 
-export function RepoCodeTree({ activePath, onSelect, repo }: Readonly<Props>) {
+export function RepoCodeTree({
+  activePath,
+  onSelect,
+  onTreeApiChange,
+  repo,
+  treeApi,
+}: Readonly<Props>) {
   const { actions, state } = useRepoSetup(repo);
-  const { setTreeApi } = useRepoCodeActions();
-  const treeApi = useRepoTreeApi();
+
+  const [measureRef, size] = useResizeObserver<HTMLDivElement>();
 
   const handleExpandAll = () => {
     React.startTransition(() => {
@@ -48,27 +57,28 @@ export function RepoCodeTree({ activePath, onSelect, repo }: Readonly<Props>) {
   return (
     <div className="bg-card flex h-full flex-col">
       <div className="border-border/40 bg-muted/20 flex flex-col gap-2 border-b p-3">
-        <RepoBranchSelector
-          branches={state.branches}
-          defaultBranch={repo.defaultBranch}
-          isLoading={state.isBranchesLoading}
-          selectedBranch={state.selectedBranch}
-          onSelect={(branch) => {
-            void actions.setSelectedBranch(branch);
-
-            onSelect("");
-          }}
-        />
-        <div className="relative">
-          <Search className="text-muted-foreground absolute top-2 left-2 size-3.5" />
-          <Input
-            type="search"
-            value={state.searchTerm}
-            placeholder="Search..."
-            onChange={(e) => {
-              void actions.setSearchTerm(e.target.value);
+        <div className="grid grid-cols-2 gap-2">
+          <div className="relative">
+            <Search className="text-muted-foreground absolute top-2.75 left-2.5 size-3.5" />
+            <Input
+              type="search"
+              value={state.searchTerm}
+              placeholder="Search..."
+              onChange={(e) => {
+                void actions.setSearchTerm(e.target.value);
+              }}
+              className="bg-background pl-7 text-xs"
+            />
+          </div>
+          <RepoBranchSelector
+            branches={state.branches}
+            defaultBranch={repo.defaultBranch}
+            isLoading={state.isBranchesLoading}
+            selectedBranch={state.selectedBranch}
+            onSelect={(branch) => {
+              void actions.setSelectedBranch(branch);
+              onSelect(null);
             }}
-            className="bg-background h-8 pl-7 text-xs"
           />
         </div>
         <div className="flex items-center gap-4">
@@ -87,7 +97,7 @@ export function RepoCodeTree({ activePath, onSelect, repo }: Readonly<Props>) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden p-2">
+      <div ref={measureRef} className="min-h-0 flex-1 overflow-hidden p-2">
         {state.isLoading ? (
           <RepoTreeSkeleton variant="tree" />
         ) : state.treeData.length === 0 ? (
@@ -95,28 +105,38 @@ export function RepoCodeTree({ activePath, onSelect, repo }: Readonly<Props>) {
             No files found
           </p>
         ) : (
-          <Tree
-            ref={(api) => setTreeApi(api ?? undefined)}
-            disableDrag
-            disableDrop
-            disableEdit
-            data={state.treeData}
-            disableMultiSelection={false}
-            height={700}
-            indent={16}
-            openByDefault={false}
-            rowHeight={30}
-            searchMatch={(node, term) => node.data.name.toLowerCase().includes(term.toLowerCase())}
-            searchTerm={state.searchTerm}
-            selectionFollowsFocus={false}
-            width="100%"
-            onCreate={() => null}
-            onDelete={() => {}}
-            onMove={() => {}}
-            onRename={() => {}}
-          >
-            {(props) => <RepoCodeNode {...props} activePath={activePath} onSelect={onSelect} />}
-          </Tree>
+          size.height > 0 && (
+            <Tree
+              ref={(api) => onTreeApiChange(api ?? undefined)}
+              disableDrag
+              disableDrop
+              disableEdit
+              data={state.treeData}
+              disableMultiSelection={true}
+              height={size.height}
+              indent={16}
+              openByDefault={false}
+              overscanCount={30}
+              rowHeight={32}
+              searchMatch={(node, term) =>
+                node.data.name.toLowerCase().includes(term.toLowerCase())
+              }
+              searchTerm={state.searchTerm}
+              selectionFollowsFocus={false}
+              width="100%"
+              onActivate={(node) => {
+                if (node.isLeaf) {
+                  onSelect(node.data.path);
+                }
+              }}
+              onCreate={() => null}
+              onDelete={() => {}}
+              onMove={() => {}}
+              onRename={() => {}}
+            >
+              {(props) => <RepoCodeNode {...props} activePath={activePath} onSelect={onSelect} />}
+            </Tree>
+          )
         )}
       </div>
     </div>

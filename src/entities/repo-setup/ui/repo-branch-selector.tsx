@@ -54,7 +54,9 @@ export function RepoBranchSelector({
         <Command>
           <CommandInput placeholder="Search branch..." />
           <CommandList>
-            {!isLoading && <CommandEmpty>No branch found</CommandEmpty>}
+            {!isLoading && (branches?.length ?? 0) > 0 && (
+              <CommandEmpty>No branch found</CommandEmpty>
+            )}
             <CommandGroup>
               {isLoading && (
                 <div className="flex flex-col gap-2 p-2">

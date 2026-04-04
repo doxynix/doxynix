@@ -12,17 +12,24 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+import { useLocale } from "next-intl";
 
 import type { RepoDetailsOverview } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 
-import { StatCard } from "./stat-card";
+import { getGitMetrics, RepoGitMetric, RepoTopics } from "@/entities/repo";
+import { StatCard } from "@/entities/repo-details";
 
 type Props = { data: RepoDetailsOverview };
 
 export function RepoOverview({ data }: Readonly<Props>) {
+  const locale = useLocale();
+
+  const gitMetrics = getGitMetrics(data.repo, locale);
+
   const { languages, maintenance, mostComplexFiles, scores, stats, summary } = data;
   const status =
     maintenance === "active"
@@ -38,7 +45,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
   const REPO_STATS_CARDS = [
     {
-      className: "bg-suucess/10",
+      className: "bg-success/10",
       description:
         scores.healthScore === null
           ? "No health data"
@@ -158,7 +165,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
           <StatCard key={item.id} {...item} />
         ))}
 
-        <Card className="lg:col-span-2">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm font-medium">
               <Code2 className="size-4" /> Repository Stats
@@ -179,10 +186,34 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </div>
           </CardContent>
         </Card>
-
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-muted-foreground text-sm font-medium">Languages</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <GitHubIcon className="size-4" /> Github Stats
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="mt-1 flex flex-wrap items-center gap-3 not-md:justify-center">
+            {gitMetrics.map((m) => (
+              <RepoGitMetric
+                key={m.id}
+                color={m.color}
+                icon={m.icon}
+                label={m.label}
+                tooltip={m.tooltip}
+                className={cn(
+                  "text-muted-foreground hover:text-foreground text-xs transition-colors",
+                  m.className
+                )}
+              />
+            ))}
+            <RepoTopics repoTopics={data.repo.topics} />
+            <p className="text-muted-foreground text-sm">{data.repo.description}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Languages</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4 flex h-2 w-full overflow-hidden rounded-full">

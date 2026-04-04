@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import type { ParamTypes } from "@/shared/types/app";
+import type { ParamTypes } from "@/shared/types/app.types";
 
 import { RepoHistoryContainer } from "@/features/repo-analytics";
 
@@ -30,7 +30,7 @@ export default async function RepoHistoryPage({ params }: Readonly<Props>) {
     owner,
   });
 
-  if (repo == null || repo.status === "NEW") {
+  if (repo == null) {
     notFound();
   }
 

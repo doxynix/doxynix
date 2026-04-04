@@ -1,18 +1,16 @@
 "use client";
 
-import { Play, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import type { UiRepoListItem } from "@/shared/api/trpc";
 import { cn, formatFullDate, formatRelativeTime, getHealthColor } from "@/shared/lib/utils";
 import { AnimatedCircularProgressBar } from "@/shared/ui/core/animated-circular-progress-bar";
 import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
 import { Card, CardContent } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
-import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { Link } from "@/i18n/routing";
 
@@ -20,6 +18,7 @@ import { getGitMetrics } from "../model/git-metrics";
 import { getMetrics } from "../model/metrics";
 import { repoStatusConfig } from "../model/repo-status-config";
 import { repoVisibilityConfig } from "../model/repo-visibility";
+import { RepoAnalyzeButton } from "./repo-analyze-button";
 import { RepoGitMetric } from "./repo-git-metric";
 import { RepoTopics } from "./repo-topics";
 
@@ -72,7 +71,6 @@ export function RepoCard({ repo }: Readonly<Props>) {
                 <div
                   className={cn("flex shrink-0 items-center gap-1 transition-opacity duration-200")}
                 >
-                  <CopyButton value={repo.id} />
                   <AppTooltip content={t("repo_open_on_github_tooltip")}>
                     <ExternalLink
                       href={repo.url}
@@ -147,14 +145,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
                 </span>
               </AppTooltip>
             )}
-            {!hasAnalysis && (
-              <Button asChild size="sm" variant="outline" className="mt-2 cursor-pointer">
-                <Link href={`/dashboard/repo/${repo.owner}/${repo.name}/analyze`}>
-                  <Play className="size-4" />
-                  Run Analysis
-                </Link>
-              </Button>
-            )}
+            {!hasAnalysis && <RepoAnalyzeButton name={repo.name} owner={repo.owner} />}
           </div>
         </div>
       </CardContent>

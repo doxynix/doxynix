@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Loader2 } from "lucide-react";
 
 import { cn } from "@/shared/lib/utils";
+
+import { Spinner } from "./spinner";
 
 export interface ZoomPanProps {
   children?: React.ReactNode;
@@ -499,7 +500,7 @@ export function ZoomPan({
 
         {isLoading && (
           <div className="bg-background/50 absolute inset-0 z-50 flex items-center justify-center">
-            {loadingFallback || <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />}
+            {loadingFallback || <Spinner />}
           </div>
         )}
       </div>
