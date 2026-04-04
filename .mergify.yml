@@ -113,3 +113,5 @@ pull_request_rules:
         add: ["conflict"]
       comment:
         message: "Упс, @Kramarich0, тут конфликт. Поправь руками! 🛠️"
+merge_protections_settings:
+  reporting_method: check-runs
