@@ -8,7 +8,7 @@ import type { FileNode } from "@/entities/repo-setup";
 
 type RepoCodeNodeProps = NodeRendererProps<FileNode> & {
   activePath: string | null;
-  onSelect: (path: string) => void;
+  onSelect: (path: string | null) => void;
 };
 
 export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNodeProps) {
