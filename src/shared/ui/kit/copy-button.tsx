@@ -35,6 +35,7 @@ export function CopyButton({
         type="button"
         size="icon"
         variant="ghost"
+        aria-label={isCopied ? successText : tooltipText}
         onClick={handleCopy}
         className={cn(
           "size-6 transition-all not-md:opacity-100",
@@ -45,6 +46,9 @@ export function CopyButton({
         )}
       >
         {isCopied ? <Check className="size-4" /> : <Copy className="size-4" />}
+        <span aria-live="polite" className="sr-only">
+          {isCopied ? successText : ""}
+        </span>
       </Button>
     </AppTooltip>
   );

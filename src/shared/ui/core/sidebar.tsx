@@ -218,7 +218,8 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)"
         )}
       />
-      <div
+      <aside
+        aria-label="Sidebar"
         data-slot="sidebar-container"
         className={cn(
           "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
@@ -240,7 +241,7 @@ function Sidebar({
         >
           {children}
         </div>
-      </div>
+      </aside>
     </div>
   );
 }
@@ -573,7 +574,7 @@ function SidebarMenuBadge({ className, ...props }: React.ComponentProps<"div">) 
       data-sidebar="menu-badge"
       data-slot="sidebar-menu-badge"
       className={cn(
-        "text-sidebar-foreground pointer-events-none absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-xl px-1 text-xs font-medium tabular-nums select-none",
+        "text-sidebar-foreground pointer-events-none right-1 flex h-5 min-w-5 items-center justify-center rounded-xl px-1 text-xs font-medium tabular-nums select-none",
         "peer-hover/menu-button:text-sidebar-accent-foreground peer-data-[active=true]/menu-button:text-sidebar-accent-foreground",
         "peer-data-[size=sm]/menu-button:top-1",
         "peer-data-[size=default]/menu-button:top-1.5",
@@ -593,12 +594,6 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean;
 }) {
-  const [width, setWidth] = React.useState<string>("90%");
-
-  React.useEffect(() => {
-    setWidth(`${Math.floor(Math.random() * 40) + 50}%`);
-  }, []);
-
   return (
     <div
       data-sidebar="menu-skeleton"
@@ -606,17 +601,11 @@ function SidebarMenuSkeleton({
       className={cn("flex h-8 items-center gap-2 rounded-xl px-2", className)}
       {...props}
     >
-      {showIcon && <Skeleton data-sidebar="menu-skeleton-icon" className="size-4 rounded-xl" />}
+      {showIcon && (
+        <Skeleton data-sidebar="menu-skeleton-icon" className="size-4 shrink-0 rounded-xl" />
+      )}
 
-      <Skeleton
-        data-sidebar="menu-skeleton-text"
-        className="h-4 max-w-(--skeleton-width) flex-1"
-        style={
-          {
-            "--skeleton-width": width,
-          } as React.CSSProperties
-        }
-      />
+      <Skeleton data-sidebar="menu-skeleton-text" className="h-4 w-full flex-1" />
     </div>
   );
 }

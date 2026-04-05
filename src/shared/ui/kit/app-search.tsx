@@ -27,6 +27,7 @@ export function AppSearch({ placeholder }: Readonly<Props>) {
         type="search"
         value={search}
         placeholder={placeholder}
+        aria-label={placeholder}
         onChange={(e) => {
           void setParams({ page: null, search: e.target.value || null });
         }}

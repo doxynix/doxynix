@@ -228,9 +228,8 @@ export function Mermaid({
     <div className={cn("relative min-h-25 w-full", className)}>
       {/* 1. Visible Output Container */}
       {status === "success" && svg && (
-        <div
+        <figure
           dangerouslySetInnerHTML={{ __html: svg }}
-          role="img"
           aria-label="Mermaid diagram"
           className="animate-in fade-in flex h-full w-full items-center justify-center overflow-auto duration-300 [&_svg]:h-auto [&_svg]:max-w-full"
         />

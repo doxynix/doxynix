@@ -40,6 +40,10 @@ export type RepoGetAll = RouterOutput["repo"]["getAll"];
 
 export type RepoMeta = RepoGetAll["meta"];
 
+export type NotificationGetAll = RouterOutput["notification"]["getAll"];
+
+export type NotificationMeta = NotificationGetAll["meta"];
+
 export type MarkAllInput = RouterInput["notification"]["markAllAsRead"];
 
 export type RepoDetailsOverview = RouterOutput["repoDetails"]["getOverview"];

@@ -97,7 +97,7 @@ function LogoLink({ children, isInteractive }: Readonly<Props>) {
   }
 
   return (
-    <Link href="/" className="hover:text-muted-foreground cursor-pointer">
+    <Link href="/" aria-label="Doxynix Home" className="hover:text-muted-foreground cursor-pointer">
       {children}
     </Link>
   );

@@ -30,7 +30,11 @@ export function PublicHeaderWrapper({ children }: Readonly<{ children: React.Rea
 
   return (
     <>
-      <div onMouseEnter={() => setIsHidden(false)} className="fixed inset-x-0 top-0 z-50 h-16" />
+      <div
+        aria-hidden="true"
+        onMouseEnter={() => setIsHidden(false)}
+        className="fixed inset-x-0 top-0 z-50 h-16"
+      />
 
       <motion.div
         animate={isHidden ? "hidden" : "visible"}

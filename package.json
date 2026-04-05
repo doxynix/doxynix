@@ -226,6 +226,7 @@
     "zustand": "5.0.12"
   },
   "devDependencies": {
+    "@axe-core/react": "4.11.1",
     "@bundle-stats/plugin-webpack-filter": "4.22.0",
     "@changesets/cli": "2.30.0",
     "@commitlint/cli": "20.5.0",

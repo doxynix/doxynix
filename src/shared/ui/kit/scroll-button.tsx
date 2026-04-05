@@ -7,6 +7,7 @@ import { smoothScrollTo } from "@/shared/lib/utils";
 import { Button } from "../core/button";
 
 type Props = {
+  ariaLabel?: string;
   arrowClassName?: string;
   buttonClassName?: string;
   duration?: number;
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export function ScrollButton({
+  ariaLabel = "Scroll to next section",
   arrowClassName,
   buttonClassName,
   duration = 800,
@@ -24,6 +26,7 @@ export function ScrollButton({
   return (
     <Button
       variant="ghost"
+      aria-label={ariaLabel}
       onClick={() => {
         smoothScrollTo(targetId, offset, duration);
       }}

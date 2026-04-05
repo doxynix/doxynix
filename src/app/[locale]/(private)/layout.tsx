@@ -2,7 +2,7 @@ import { type ReactNode } from "react";
 import { cookies } from "next/headers";
 import { unauthorized } from "next/navigation";
 
-import { SidebarProvider } from "@/shared/ui/core/sidebar";
+import { SidebarInset, SidebarProvider } from "@/shared/ui/core/sidebar";
 import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificator";
 
 import { CreateRepoDialog } from "@/features/repo";
@@ -40,7 +40,9 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
           <AppSidebar />
           <div className="relative flex flex-1 flex-col overflow-y-auto">
             {/* <ScrollArea className="flex-1"> */}
-            <main className="mx-auto flex w-full max-w-400 flex-1 flex-col p-4">{children}</main>
+            <SidebarInset id="main-content" tabIndex={-1} className="mx-auto max-w-400 p-4">
+              {children}
+            </SidebarInset>
             {/* </ScrollArea> */}
             <div className="z-50 w-full shrink-0 border-t">
               <AppFooter />

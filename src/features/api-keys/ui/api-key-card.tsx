@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import type { UiApiKey } from "@/shared/api/trpc";
 import { formatRelativeTime } from "@/shared/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Input } from "@/shared/ui/core/input";
 
 import { RevokeApiKeyDialog } from "./revoke-api-key-dialog";
 import { UpdateApiKeyDialog } from "./update-api-key-dialog";
@@ -13,6 +14,11 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const locale = useLocale();
+
+  const maskValue =
+    active.prefix === ""
+      ? "dxnx_••••••••••••••••••••••••••••••••••••••••••••••••••••"
+      : `${active.prefix}••••••••••••••••••••••••••••••••••••••••••••••••••••`;
 
   return (
     <Card className="group hover:border-border-strong justify-between">
@@ -39,11 +45,12 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="bg-surface-hover text-muted-foreground border-border/80 truncate rounded-xl border p-2 font-mono text-xs">
-          {active.prefix === ""
-            ? "dxnx_••••••••••••••••••••••••••••••••••••••••••••••••••••"
-            : `${active.prefix}••••••••••••••••••••••••••••••••••••••••••••••••••••`}
-        </div>
+        <Input
+          value={maskValue}
+          readOnly
+          aria-label="Key prefix"
+          className="bg-surface-hover text-muted-foreground border-border/80 truncate rounded-xl border p-2 font-mono text-xs"
+        />
       </CardContent>
     </Card>
   );
