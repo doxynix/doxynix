@@ -21,6 +21,7 @@ import { cn } from "@/shared/lib/utils";
 import { Toaster } from "@/shared/ui/core/sonner";
 import { A11yProvider } from "@/shared/ui/kit/a11y-provider";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
+import { SkipLink } from "@/shared/ui/kit/skip-link";
 import { routing } from "@/i18n/routing";
 
 import { ourFileRouter } from "@/server/infrastructure/core";
@@ -146,15 +147,16 @@ export default async function LocaleLayout({
 
   return (
     <html suppressHydrationWarning lang={locale} data-scroll-behavior="smooth">
-      <A11yProvider>
-        <body
-          className={cn(
-            "flex min-h-dvh flex-col",
-            fontSans.variable,
-            fontMono.variable,
-            "antialiased"
-          )}
-        >
+      <body
+        className={cn(
+          "flex min-h-dvh flex-col",
+          fontSans.variable,
+          fontMono.variable,
+          "antialiased"
+        )}
+      >
+        <A11yProvider>
+          <SkipLink />
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ThemeProvider
               disableTransitionOnChange
@@ -183,8 +185,8 @@ export default async function LocaleLayout({
               <ConsoleEasterEgg />
             </ThemeProvider>
           </NextIntlClientProvider>
-        </body>
-      </A11yProvider>
+        </A11yProvider>
+      </body>
     </html>
   );
 }

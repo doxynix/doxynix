@@ -51,7 +51,7 @@ export function RepoFilters() {
           value={filters.status ?? "all"}
           onValueChange={(v) => handleUpdate("status", v === "all" ? null : v)}
         >
-          <SelectTrigger className="w-35">
+          <SelectTrigger aria-label={tCommon("status")} className="w-35">
             <SelectValue placeholder={tCommon("status")} />
           </SelectTrigger>
           <SelectContent>
@@ -67,7 +67,7 @@ export function RepoFilters() {
           value={filters.visibility ?? "all"}
           onValueChange={(v) => handleUpdate("visibility", v === "all" ? null : v)}
         >
-          <SelectTrigger className="w-32.5">
+          <SelectTrigger aria-label={tCommon("visibility")} className="w-32.5">
             <SelectValue placeholder={tCommon("visibility")} />
           </SelectTrigger>
           <SelectContent>
@@ -78,7 +78,7 @@ export function RepoFilters() {
         </Select>
 
         <Select value={filters.sortBy} onValueChange={(v) => handleUpdate("sortBy", v)}>
-          <SelectTrigger className="w-37.5">
+          <SelectTrigger aria-label={t("repo_sort_by")} className="w-37.5">
             <SelectValue placeholder={t("repo_sort_by")} />
           </SelectTrigger>
           <SelectContent>

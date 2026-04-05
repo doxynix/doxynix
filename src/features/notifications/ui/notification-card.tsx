@@ -29,7 +29,7 @@ export function NotificationCard({ notification }: Readonly<Props>) {
   return (
     <Card
       className={cn(
-        "group hover:border-border-strong relative border-l-4",
+        "group hover:border-border-strong relative border-l-4 p-4",
         notification.isRead === false && "bg-surface-selected",
         border
       )}
@@ -61,7 +61,7 @@ export function NotificationCard({ notification }: Readonly<Props>) {
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-4">
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <NotificationActionButton
               disabled={isPending}

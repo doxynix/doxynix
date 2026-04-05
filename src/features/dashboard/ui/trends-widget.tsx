@@ -12,7 +12,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/shared/ui/core/chart";
-import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 
 import { TrendsWidgetsSkeleton } from "./trends-widgets-skeleton";
 
@@ -56,6 +56,9 @@ export function TrendsWidget() {
                 Engineering
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="overview" className="sr-only" />
+            <TabsContent value="engineering" className="sr-only" />
           </Tabs>
         </div>
       </CardHeader>

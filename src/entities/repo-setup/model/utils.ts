@@ -1,35 +1,59 @@
 import type { FileNode } from "./repo-setup.types";
 
 export const sortNodes = (nodes: FileNode[]): FileNode[] => {
-  return nodes
-    .toSorted((a, b) => {
-      const aIsFolder = !!a.children;
-      const bIsFolder = !!b.children;
-      if (aIsFolder && !bIsFolder) return -1;
-      if (!aIsFolder && bIsFolder) return 1;
-      return a.name.localeCompare(b.name);
-    })
-    .map((node) => {
-      if (node.children) node.children = sortNodes(node.children);
-      return node;
-    });
+  const sorted = [...nodes].sort((a, b) => {
+    const aIsFolder = !!a.children;
+    const bIsFolder = !!b.children;
+
+    if (aIsFolder !== bIsFolder) return aIsFolder ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  for (let i = 0; i < sorted.length; i++) {
+    if (sorted[i].children) {
+      sorted[i].children = sortNodes(sorted[i].children!);
+    }
+  }
+
+  return sorted;
 };
 
 export const collectAllIds = (node: FileNode, ids: string[] = []) => {
   ids.push(node.id);
   if (node.children) {
-    node.children.forEach((child) => collectAllIds(child, ids));
+    for (let i = 0; i < node.children.length; i++) {
+      collectAllIds(node.children[i], ids);
+    }
   }
   return ids;
 };
 
 export const getFolderSelectionState = (node: FileNode, selectedIds: Set<string>) => {
-  const allChildIds = collectAllIds(node).filter((id) => id !== node.id);
-  if (allChildIds.length === 0) return selectedIds.has(node.id);
+  if (!node.children || node.children.length === 0) {
+    return selectedIds.has(node.id);
+  }
 
-  const selectedChildren = allChildIds.filter((id) => selectedIds.has(id));
+  let totalCount = 0;
+  let selectedCount = 0;
 
-  if (selectedChildren.length === 0) return false;
-  if (selectedChildren.length === allChildIds.length) return true;
+  const countDescendants = (currentNode: FileNode) => {
+    if (!currentNode.children) return;
+
+    for (let i = 0; i < currentNode.children.length; i++) {
+      const child = currentNode.children[i];
+      totalCount++;
+
+      if (selectedIds.has(child.id)) {
+        selectedCount++;
+      }
+
+      countDescendants(child);
+    }
+  };
+
+  countDescendants(node);
+
+  if (selectedCount === 0) return false;
+  if (selectedCount === totalCount) return true;
   return "indeterminate";
 };

@@ -55,7 +55,11 @@ export function AnalyticsWidgets() {
                       </span>
                     </div>
 
-                    <Progress value={percentage} indicatorStyle={{ backgroundColor: lang.color }} />
+                    <Progress
+                      value={percentage}
+                      indicatorStyle={{ backgroundColor: lang.color }}
+                      aria-label={`Usage of ${lang.name} language`}
+                    />
                   </div>
                 );
               })

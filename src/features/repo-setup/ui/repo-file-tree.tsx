@@ -140,7 +140,6 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
       </div>
 
       <div
-        onKeyDownCapture={(e) => e.key === " " && e.stopPropagation()}
         onPointerDownCapture={(e) => e.target === e.currentTarget && e.stopPropagation()}
         className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border p-1"
       >
@@ -179,6 +178,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
                 searchTerm={state.searchTerm}
                 selectionFollowsFocus={false}
                 width="100%"
+                onActivate={(node) => actions.handleToggleSelection(node.id, node.data)}
                 onCreate={() => null}
                 onDelete={() => {}}
                 onMove={() => {}}

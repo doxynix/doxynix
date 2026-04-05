@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/core/toolti
 type Props = {
   align?: "start" | "center" | "end";
   children: ReactNode;
+  className?: string;
   content: ReactNode;
   delay?: number;
   disableHoverableContent?: boolean;
@@ -19,6 +20,7 @@ type Props = {
 export function AppTooltip({
   align = "center",
   children,
+  className,
   content,
   delay = 400,
   disableHoverableContent = true,
@@ -39,7 +41,7 @@ export function AppTooltip({
       open={controlledOpen}
     >
       <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent align={align} hidden={hidden} side={side}>
+      <TooltipContent align={align} hidden={hidden} side={side} className={className}>
         {content}
       </TooltipContent>
     </Tooltip>

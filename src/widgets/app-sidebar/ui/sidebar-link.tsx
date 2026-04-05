@@ -5,8 +5,7 @@ import { SquareArrowOutUpRight } from "lucide-react";
 
 import { cn, isRouteActive } from "@/shared/lib/utils";
 import type { MenuItem } from "@/shared/types/navigation.types";
-import { Badge } from "@/shared/ui/core/badge";
-import { SidebarMenuButton, SidebarMenuShortcut } from "@/shared/ui/core/sidebar";
+import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuShortcut } from "@/shared/ui/core/sidebar";
 import { Link, usePathname } from "@/i18n/routing";
 
 export function SidebarLink({
@@ -42,12 +41,14 @@ export function SidebarLink({
         rel={blank ? "noopener noreferrer" : undefined}
         target={blank ? "_blank" : undefined}
       >
-        <Icon className="size-3.5" />
+        <Icon className="size-3.5 shrink-0" />
         <span className="truncate">{title}</span>
 
         <div className="ml-auto flex items-center gap-2">
           {notificationsCount != null && notificationsCount > 0 && (
-            <Badge>{notificationsCount > 99 ? "99+" : notificationsCount}</Badge>
+            <SidebarMenuBadge>
+              {notificationsCount > 9 ? "9+" : notificationsCount}
+            </SidebarMenuBadge>
           )}
           {shortcut != null && (
             <SidebarMenuShortcut className="opacity-0 transition-opacity group-hover/link:opacity-100">

@@ -73,10 +73,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             tabIndex={isPrevDisabled ? -1 : undefined}
             aria-disabled={isPrevDisabled}
             onClick={() => !isPrevDisabled && handlePageChange(meta.currentPage - 1, "prev")}
-            className={cn(
-              navBtnClass,
-              isPrevDisabled ? "pointer-events-none opacity-50" : "cursor-pointer"
-            )}
+            className={cn(navBtnClass, isPrevDisabled ? "opacity-50" : "cursor-pointer")}
           >
             {isPrevLoading ? <Spinner /> : <ChevronLeft className="size-4" />}
             <span className="ml-1">{t("back")}</span>
@@ -111,7 +108,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
                 onClick={() => handlePageChange(page, page)}
                 className={cn(
                   "cursor-pointer",
-                  page === meta.currentPage && "pointer-events-none opacity-100!"
+                  page === meta.currentPage && "text-foreground opacity-100!"
                 )}
               >
                 {isCurrentPageLoading ? <Spinner /> : page}
@@ -129,7 +126,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             className={cn(
               navBtnClass,
               "pr-2.5 pl-4",
-              isNextDisabled ? "pointer-events-none opacity-50" : "cursor-pointer"
+              isNextDisabled ? "opacity-50" : "cursor-pointer"
             )}
           >
             <span className="mr-1">{t("next")}</span>
