@@ -130,7 +130,6 @@ export function RepoCodeEditor({
     <div className="group relative h-full w-full">
       <CodeMirror
         value={value}
-        autoFocus
         basicSetup={false}
         editable={!readOnly}
         extensions={ext}
