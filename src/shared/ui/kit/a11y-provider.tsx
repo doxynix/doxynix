@@ -25,7 +25,13 @@ export function A11yProvider({ children }: Readonly<Props>) {
   useEffect(() => {
     if (pathname) {
       const title = document.title || "Page changed";
-      setAnnouncement(`Navigated to ${title}`);
+      setAnnouncement("");
+
+      const id = window.setTimeout(() => {
+        setAnnouncement(`Navigated to ${title}`);
+      }, 50);
+
+      return () => window.clearTimeout(id);
     }
   }, [pathname]);
 

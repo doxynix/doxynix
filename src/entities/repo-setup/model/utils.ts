@@ -1,21 +1,22 @@
 import type { FileNode } from "./repo-setup.types";
 
 export const sortNodes = (nodes: FileNode[]): FileNode[] => {
-  const sorted = [...nodes].sort((a, b) => {
-    const aIsFolder = !!a.children;
-    const bIsFolder = !!b.children;
+  return [...nodes]
+    .sort((a, b) => {
+      const aIsFolder = !!a.children;
+      const bIsFolder = !!b.children;
 
-    if (aIsFolder !== bIsFolder) return aIsFolder ? -1 : 1;
-    return a.name.localeCompare(b.name);
-  });
+      if (aIsFolder !== bIsFolder) return aIsFolder ? -1 : 1;
 
-  for (let i = 0; i < sorted.length; i++) {
-    if (sorted[i].children) {
-      sorted[i].children = sortNodes(sorted[i].children!);
-    }
-  }
-
-  return sorted;
+      return a.name.localeCompare(b.name, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      });
+    })
+    .map((node) => ({
+      ...node,
+      ...(node.children && node.children.length > 0 ? { children: sortNodes(node.children) } : {}),
+    }));
 };
 
 export const collectAllIds = (node: FileNode, ids: string[] = []) => {

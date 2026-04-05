@@ -75,7 +75,10 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
       <CardContent className="space-y-6 overflow-y-auto">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-3">
-            <Label className="text-muted-foreground flex items-center gap-2 text-sm">
+            <Label
+              id="lang-label"
+              className="text-muted-foreground flex items-center gap-2 text-sm"
+            >
               <Languages className="size-4" />
               Output Language
             </Label>

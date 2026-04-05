@@ -56,7 +56,7 @@ export function HeroSection() {
           </ShimmerButton>
         </div>
         <ScrollButton
-          ariaLabel="Scroll to top"
+          ariaLabel="Scroll to brands section"
           arrowClassName="rotate-90"
           buttonClassName="animate-float"
           offset={0}

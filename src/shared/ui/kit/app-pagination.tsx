@@ -104,10 +104,11 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
               <PaginationLink
                 disabled={isPageDisabled}
                 isActive={page === meta.currentPage}
+                tabIndex={isPageDisabled ? -1 : undefined}
                 aria-disabled={isPageDisabled}
-                onClick={() => handlePageChange(page, page)}
+                onClick={() => !isPageDisabled && handlePageChange(page, page)}
                 className={cn(
-                  "cursor-pointer",
+                  !isPageDisabled && "cursor-pointer",
                   page === meta.currentPage && "text-foreground opacity-100!"
                 )}
               >
