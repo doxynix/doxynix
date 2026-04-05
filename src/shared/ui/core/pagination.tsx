@@ -79,6 +79,7 @@ const PaginationLink = ({
       tabIndex={effectiveTabIndex}
       aria-current={isActive ? "page" : undefined}
       aria-disabled={disabled || undefined}
+      aria-label={props["aria-label"] || (isActive ? "Current page" : "Go to page")}
       onClick={(event) => {
         if (disabled) {
           event.preventDefault();

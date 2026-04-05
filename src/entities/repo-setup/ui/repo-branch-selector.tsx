@@ -38,9 +38,9 @@ export function RepoBranchSelector({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          role="combobox"
           variant="outline"
           aria-expanded={open}
+          aria-haspopup="listbox"
           className="w-full justify-between font-normal"
         >
           <div className="flex items-center gap-2 truncate">
