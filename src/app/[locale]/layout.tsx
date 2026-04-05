@@ -19,6 +19,7 @@ import { APP_URL, IS_PROD } from "@/shared/constants/env.client";
 import type { Locale } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/utils";
 import { Toaster } from "@/shared/ui/core/sonner";
+import { A11yProvider } from "@/shared/ui/kit/a11y-provider";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
 import { routing } from "@/i18n/routing";
 
@@ -145,43 +146,45 @@ export default async function LocaleLayout({
 
   return (
     <html suppressHydrationWarning lang={locale} data-scroll-behavior="smooth">
-      <body
-        className={cn(
-          "flex min-h-dvh flex-col",
-          fontSans.variable,
-          fontMono.variable,
-          "antialiased"
-        )}
-      >
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider
-            disableTransitionOnChange
-            enableSystem
-            attribute="class"
-            defaultTheme={themeCookie}
-            storageKey="doxynix-theme"
-          >
-            <Toaster
-              // richColors
-              duration={4000}
-              gap={8}
-              position="top-center"
-            />
-            <NextTopLoader color="var(--foreground)" showSpinner={false} zIndex={9999} />
-            <Suspense>
-              <UTSSR />
-            </Suspense>
-            <Providers>{children}</Providers>
-            {IS_PROD && (
-              <>
-                <Analytics />
-                <SpeedInsights />
-              </>
-            )}
-            <ConsoleEasterEgg />
-          </ThemeProvider>
-        </NextIntlClientProvider>
-      </body>
+      <A11yProvider>
+        <body
+          className={cn(
+            "flex min-h-dvh flex-col",
+            fontSans.variable,
+            fontMono.variable,
+            "antialiased"
+          )}
+        >
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <ThemeProvider
+              disableTransitionOnChange
+              enableSystem
+              attribute="class"
+              defaultTheme={themeCookie}
+              storageKey="doxynix-theme"
+            >
+              <Toaster
+                // richColors
+                duration={4000}
+                gap={8}
+                position="top-center"
+              />
+              <NextTopLoader color="var(--foreground)" showSpinner={false} zIndex={9999} />
+              <Suspense>
+                <UTSSR />
+              </Suspense>
+              <Providers>{children}</Providers>
+              {IS_PROD && (
+                <>
+                  <Analytics />
+                  <SpeedInsights />
+                </>
+              )}
+              <ConsoleEasterEgg />
+            </ThemeProvider>
+          </NextIntlClientProvider>
+        </body>
+      </A11yProvider>
     </html>
   );
 }

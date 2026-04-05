@@ -51,9 +51,9 @@ export function NotificationsRepoFilter() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          role="combobox"
           variant="outline"
           aria-expanded={open}
+          aria-haspopup="listbox"
           className="cursor-pointer justify-between"
         >
           <div className="flex w-60 items-center gap-2 truncate">

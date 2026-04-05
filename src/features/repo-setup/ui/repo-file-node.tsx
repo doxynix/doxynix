@@ -32,7 +32,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
   };
 
   return (
-    <div
+    <Button
       onClick={handleSelect}
       onKeyDown={(e) => {
         if (e.key === " " || e.key === "Enter") {
@@ -68,7 +68,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
         )}
       </div>
 
-      <div onClick={(e) => e.stopPropagation()} className="flex items-center px-1">
+      <div className="flex items-center px-1">
         <Checkbox
           checked={selectionState}
           tabIndex={-1}
@@ -98,6 +98,6 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
           </Badge>
         )}
       </div>
-    </div>
+    </Button>
   );
 }
