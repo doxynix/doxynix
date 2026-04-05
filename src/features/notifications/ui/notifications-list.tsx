@@ -1,17 +1,35 @@
 "use client";
 
-import { BellOff } from "lucide-react";
+import { BellOff, SearchX } from "lucide-react";
 
-import { type UiNotification } from "@/shared/api/trpc";
+import { type NotificationMeta, type UiNotification } from "@/shared/api/trpc";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
 import { NotificationCard } from "./notification-card";
 
-type Props = { notifications: UiNotification[] };
+type Props = { meta?: NotificationMeta; notifications: UiNotification[] };
 
-export function NotificationsList({ notifications }: Readonly<Props>) {
-  if (notifications.length === 0) {
+export function NotificationsList({ meta, notifications }: Readonly<Props>) {
+  if (!meta || meta.totalCount === 0) {
     return <EmptyState description={undefined} icon={BellOff} title="No notifications found" />;
+  }
+
+  if (meta.filteredCount === 0) {
+    return (
+      <EmptyState
+        description={
+          meta.searchQuery !== "" && meta.searchQuery != null ? (
+            <span>
+              Nothing found for <span className="italic">{`"${meta.searchQuery}"`}</span>
+            </span>
+          ) : (
+            "Try changing filter parameters"
+          )
+        }
+        icon={SearchX}
+        title="Nothing found"
+      />
+    );
   }
 
   return (

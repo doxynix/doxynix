@@ -60,9 +60,7 @@ export function AppBreadcrumbs({
                   <BreadcrumbLink
                     asChild={!!item.href}
                     onClick={item.onClick}
-                    className={cn(
-                      "hover:text-foreground w-full min-w-0 cursor-pointer transition-colors"
-                    )}
+                    className={cn("hover:text-foreground min-w-0 cursor-pointer transition-colors")}
                   >
                     {item.href ? (
                       <Link href={item.href as Route}>

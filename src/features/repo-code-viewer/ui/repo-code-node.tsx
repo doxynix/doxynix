@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, Folder, FolderOpen, File as LucideFile } fro
 import type { NodeRendererProps } from "react-arborist";
 
 import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/core/button";
 
 import type { FileNode } from "@/entities/repo-setup";
 
@@ -25,10 +26,11 @@ export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNode
   };
 
   return (
-    <div
+    <Button
+      variant="ghost"
       onClick={handleClick}
       className={cn(
-        "hover:bg-surface-hover text-muted-foreground flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1 transition-colors outline-none",
+        "hover:bg-surface-hover text-muted-foreground flex h-7 w-full cursor-pointer items-center justify-start rounded-xl transition-colors outline-none",
         isActive && "bg-surface-selected hover:bg-surface-selected text-foreground"
       )}
       style={style}
@@ -53,6 +55,6 @@ export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNode
         )}
       </div>
       <span className="truncate text-sm">{node.data.name}</span>
-    </div>
+    </Button>
   );
 }

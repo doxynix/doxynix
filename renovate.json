@@ -61,5 +61,6 @@
   ],
   "separateMajorMinor": true,
   "prHourlyLimit": 5,
-  "prConcurrentLimit": 10
+  "prConcurrentLimit": 10,
+  "automerge": false
 }

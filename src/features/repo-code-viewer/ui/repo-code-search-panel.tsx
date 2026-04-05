@@ -25,6 +25,7 @@ type Props = {
 };
 
 export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const initialQuery = getSearchQuery(view.state);
   const [options, setOptions] = useState({
     caseSensitive: initialQuery.caseSensitive,
@@ -45,6 +46,11 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
       wholeWord: q.wholeWord,
     });
   }, [view]);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => inputRef.current?.focus(), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const syncToCM = (s: string, r: string, opts = options) => {
     view.dispatch({
@@ -91,8 +97,8 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
         <div className="relative">
           <Search className="text-muted-foreground absolute top-2 left-2.5 size-4" />
           <Input
+            ref={inputRef}
             value={search}
-            autoFocus
             placeholder="Find..."
             onChange={onSearchChange}
             onKeyDown={(e) =>

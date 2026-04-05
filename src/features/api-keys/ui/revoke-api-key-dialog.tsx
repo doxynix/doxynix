@@ -43,6 +43,7 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
           <Button
             size="icon"
             variant="ghost"
+            aria-label="Revoke key"
             onClick={(e) => {
               e.preventDefault();
               setOpen(true);
