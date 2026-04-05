@@ -6,7 +6,7 @@ priority_rules:
   - name: dependencies
     priority: 500
     conditions:
-      - author ~= ^(renovate|dependabot)\[bot\]$
+      - author ~= ^(renovate|dependabot|doxynix-deps-bot)\[bot\]$
 
 queue_rules:
   - name: default
@@ -19,14 +19,14 @@ queue_rules:
       - -draft
       - "-title ~= (?i)(wip|draft|🚧)"
       - or:
-          - author ~= ^(renovate|dependabot|doxynix-release-bot)\[bot\]$
+          - author ~= ^(renovate|dependabot|doxynix-(release|deps)-bot)\[bot\]$
           - approved-reviews-by = coderabbitai[bot]
     merge_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
       - check-success ~= notify
       - or:
-          - author ~= ^(renovate|dependabot|doxynix-release-bot)\[bot\]$
+          - author ~= ^(renovate|dependabot|doxynix-(release|deps)-bot)\[bot\]$
           - approved-reviews-by = coderabbitai[bot]
     merge_method: squash
     commit_message_template: |
@@ -75,6 +75,7 @@ pull_request_rules:
       - or:
           - author = renovate[bot]
           - author = dependabot[bot]
+          - author = doxynix-deps-bot[bot]
       - -draft
       - -conflict
       - "#check-pending = 0"
