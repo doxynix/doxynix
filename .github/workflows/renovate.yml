@@ -37,5 +37,6 @@ jobs:
           configurationFile: renovate.json
           token: ${{ steps.app-token.outputs.token }}
         env:
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
           NODE_OPTIONS: "--max-old-space-size=6144"
           LOG_LEVEL: info
