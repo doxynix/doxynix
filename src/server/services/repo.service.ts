@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 
 import type { RepoFiltersInput } from "../api/contracts";
 import { repoPresenter, type RepoWithAnalyses } from "../api/presenters/repo.presenter";
-import type { DbClient } from "../db/db";
+import type { DbClient } from "../infrastructure/db";
 import { handlePrismaError, isOctokitError } from "../utils/handle-error";
 import { getPaginationMeta } from "../utils/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "../utils/search";

@@ -5,7 +5,7 @@ import {
   notificationPresenter,
   type NotificationWithRepo,
 } from "../api/presenters/notification.presenter";
-import type { DbClient } from "../db/db";
+import type { DbClient } from "../infrastructure/db";
 import { handlePrismaError } from "../utils/handle-error";
 import { getPaginationMeta } from "../utils/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "../utils/search";

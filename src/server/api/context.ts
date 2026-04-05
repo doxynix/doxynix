@@ -2,8 +2,8 @@ import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "../auth/options";
-import { prisma } from "../db/db";
+import { authOptions } from "../infrastructure/auth";
+import { prisma } from "../infrastructure/db";
 import { redisClient } from "../infrastructure/redis";
 import { getIp, getUa } from "../utils/request-context";
 

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { api } from "@/server/api/server";
-import { getServerAuthSession } from "@/server/auth/options";
+import { getServerAuthSession } from "@/server/infrastructure/auth";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;

@@ -2,7 +2,7 @@ import { Status, Visibility } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { DbClient } from "@/server/db/db";
+import type { DbClient } from "@/server/infrastructure/db";
 import { githubService } from "@/server/services/github.service";
 import { repoService } from "@/server/services/repo.service";
 import { handlePrismaError } from "@/server/utils/handle-error";

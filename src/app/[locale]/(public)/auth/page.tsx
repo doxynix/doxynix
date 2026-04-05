@@ -5,7 +5,7 @@ import { redirect } from "@/i18n/routing";
 
 import { AuthForm } from "@/features/auth";
 
-import { getServerAuthSession } from "@/server/auth/options";
+import { getServerAuthSession } from "@/server/infrastructure/auth";
 
 export const generateMetadata = createMetadata("sign_in_title", "sign_in_desc");
 

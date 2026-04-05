@@ -1,6 +1,5 @@
 /* eslint-disable sonarjs/slow-regex */
 /* eslint-disable sonarjs/regex-complexity */
-import { isBinaryFile } from "isbinaryfile";
 
 type AiTextLike = {
   content?: unknown;
@@ -89,8 +88,4 @@ export function unwrapAiText(value: unknown): string {
   }
   if (Array.isArray(value)) return value.join("\n");
   return String(value);
-}
-
-export async function isBinary(buffer: Buffer): Promise<boolean> {
-  return await isBinaryFile(buffer);
 }

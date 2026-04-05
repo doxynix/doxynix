@@ -7,8 +7,8 @@ import { IS_DEV, IS_TEST } from "@/shared/constants/env.client";
 import { DATABASE_URL } from "@/shared/constants/env.server";
 import { sanitizePayload } from "@/shared/lib/utils";
 
-import { logger } from "../logger/logger";
 import { requestContext } from "../utils/request-context";
+import { logger } from "./logger";
 
 const { PrismaClient } = pkg;
 const pool = new pg.Pool({

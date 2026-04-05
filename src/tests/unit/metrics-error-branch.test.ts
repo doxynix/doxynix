@@ -17,8 +17,8 @@ describe("calculateCodeMetrics error branch", () => {
       }),
     }));
 
-    const { calculateCodeMetrics } = await import("@/server/utils/metrics");
-    const metrics = calculateCodeMetrics([
+    const { calculateCodeMetrics } = await import("@/server/engine/metrics/common-metrics");
+    const metrics = await calculateCodeMetrics([
       {
         content: "line1\nline2\nline3",
         path: "src/index.ts",

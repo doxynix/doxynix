@@ -4,7 +4,7 @@ import { retry } from "@octokit/plugin-retry";
 import { throttling } from "@octokit/plugin-throttling";
 import { Octokit, type RestEndpointMethodTypes } from "@octokit/rest";
 import type { RequestOptions } from "@octokit/types";
-import { Visibility } from "@prisma/client";
+import { Visibility, type Repo } from "@prisma/client";
 import parseGithubUrl from "parse-github-url";
 
 import {
@@ -15,9 +15,9 @@ import {
 } from "@/shared/constants/env.server";
 import type { RepoItemFields } from "@/shared/types/repo.types";
 
-import type { DbClient } from "../db/db";
-import { logger } from "../logger/logger";
-import { FileClassifier } from "../utils/file-classifier";
+import { FileClassifier } from "../engine/core/file-classifier";
+import { prisma, type DbClient } from "../infrastructure/db";
+import { logger } from "../infrastructure/logger";
 import { isOctokitError } from "../utils/handle-error";
 
 const MyOctokit = Octokit.plugin(retry, throttling, paginateRest);
@@ -128,6 +128,97 @@ const getCommonConfig = () => ({
 });
 
 export const githubService = {
+  async calculateBusFactor(repo: Repo, userId: number) {
+    try {
+      const context = await githubService.resolveClientContext(prisma, userId, {
+        allowPublicFallback: true,
+        allowSystemFallback: true,
+        owner: repo.owner,
+      });
+      const octokit = context.octokit;
+      const clientType = context.type;
+
+      if (repo.visibility === "PRIVATE" && (clientType === "app" || clientType === "public")) {
+        throw new GitHubAuthRequiredError();
+      }
+      const contributors = await githubService.executeWithFallback(
+        prisma,
+        userId,
+        octokit,
+        clientType,
+        async (client) => {
+          let fetchedContributors = 0;
+          return await client.paginate(
+            client.rest.repos.listContributors,
+            { owner: repo.owner, per_page: 100, repo: repo.name },
+            (
+              response: Awaited<ReturnType<OctokitInstance["rest"]["repos"]["listContributors"]>>,
+              done: () => void
+            ) => {
+              fetchedContributors += response.data.length;
+              if (fetchedContributors >= 500) done();
+              return response.data;
+            }
+          );
+        }
+      );
+
+      const rawContributors = contributors.map((contributor: (typeof contributors)[number]) => ({
+        contributions: contributor.contributions,
+        login: contributor.login ?? "unknown",
+      }));
+      const totalCommits = rawContributors.reduce(
+        (acc: number, contributor) => acc + contributor.contributions,
+        0
+      );
+      if (totalCommits === 0) {
+        return {
+          busFactor: 0,
+          rawContributors,
+        };
+      }
+
+      let runningSum = 0;
+      let busFactor = 0;
+
+      for (const contributor of rawContributors) {
+        runningSum += contributor.contributions;
+        busFactor++;
+        if (runningSum >= totalCommits * 0.5) break;
+      }
+
+      return {
+        busFactor,
+        rawContributors,
+      };
+    } catch (error) {
+      const status =
+        typeof error === "object" && error !== null && "status" in error
+          ? Number((error as { status?: number }).status)
+          : undefined;
+      const isMissingAuth = error instanceof GitHubAuthRequiredError;
+
+      if (
+        repo.visibility === "PRIVATE" &&
+        (isMissingAuth || status === 401 || status === 403 || status === 404)
+      ) {
+        if (isMissingAuth) throw error;
+        throw new GitHubAuthRequiredError();
+      }
+
+      if (isMissingAuth || status === 401 || status === 403 || status === 404) {
+        logger.warn({
+          error,
+          msg: "Failed to fetch contributors for Bus Factor calculation. Defaulting to 0.",
+          repoId: repo.id,
+        });
+        return { busFactor: 0, rawContributors: [] };
+      }
+
+      throw error;
+    }
+  },
+
   async executeWithFallback<T>(
     prisma: DbClient,
     userId: number,

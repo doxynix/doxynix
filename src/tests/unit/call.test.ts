@@ -24,7 +24,7 @@ vi.mock("ai", () => ({
   },
 }));
 
-vi.mock("@/server/logger/logger", () => ({
+vi.mock("@/server/infrastructure/logger", () => ({
   logger: loggerState,
 }));
 

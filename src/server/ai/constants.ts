@@ -23,13 +23,22 @@ export const groq = createOpenAI({
   baseURL: "https://api.groq.com/openai/v1",
 });
 
+// export const AI_MODELS = {
+//   ARCHITECT: ["gemini-3-flash-preview", "gemini-flash-latest"],
+//   CARTOGRAPHER: ["gemini-flash-latest", "gemini-flash-lite-latest"],
+//   FALLBACK: ["gemini-flash-latest"],
+//   POWERFUL: ["gemini-3-flash-preview", "gemini-2.5-flash-lite", "gemini-flash-latest"],
+//   SENTINEL: ["gemini-flash-latest"],
+//   WRITER: ["gemini-3-flash-preview", "gemini-2.5-flash-lite", "gemini-flash-latest"],
+// };
+
 export const AI_MODELS = {
-  ARCHITECT: ["gemini-3-flash-preview", "gemini-flash-latest"],
-  CARTOGRAPHER: ["gemini-flash-latest", "gemini-flash-lite-latest"],
-  FALLBACK: ["gemini-flash-latest"],
-  POWERFUL: ["gemini-3-flash-preview", "gemini-2.5-flash-lite", "gemini-flash-latest"],
-  SENTINEL: ["gemini-flash-latest"],
-  WRITER: ["gemini-3-flash-preview", "gemini-2.5-flash-lite", "gemini-flash-latest"],
+  ARCHITECT: ["gemini-3.1-flash-lite-preview"],
+  CARTOGRAPHER: ["gemini-3.1-flash-lite-preview"],
+  FALLBACK: ["gemini-3.1-flash-lite-preview"],
+  POWERFUL: ["gemini-3.1-flash-lite-preview"],
+  SENTINEL: ["gemini-3.1-flash-lite-preview"],
+  WRITER: ["gemini-3.1-flash-lite-preview"],
 };
 
 export const SAFETY_SETTINGS = [
