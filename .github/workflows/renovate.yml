@@ -32,7 +32,7 @@ jobs:
           private-key: ${{ secrets.RENOVATE_PRIVATE_KEY }}
 
       - name: Run deps updates
-        uses: renovatebot/github-action@db16b25e58b044a36fa8a74191aaf8674667e478 
+        uses: renovatebot/github-action@3633cede7d4d4598438e654eac4a695e46004420 
         with:
           configurationFile: renovate.json
           token: ${{ steps.app-token.outputs.token }}
