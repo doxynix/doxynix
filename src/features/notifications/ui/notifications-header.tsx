@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/core/select";
-import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
 import { notificationsParsers, type NotificationsParsersState } from "@/entities/notifications";
@@ -68,7 +68,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
           value={tabValue}
           onValueChange={(v) => handleUpdate("isRead", v === "all" ? null : v === "read")}
         >
-          <TabsList>
+          <TabsList aria-label="Filter notifications by status">
             {TABS.map((t) => (
               <TabsTrigger
                 key={t.id}
@@ -80,6 +80,9 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
               </TabsTrigger>
             ))}
           </TabsList>
+          {TABS.map((t) => (
+            <TabsContent key={t.id} value={t.value} className="hidden" />
+          ))}
         </Tabs>
 
         <AppSearch placeholder="Search notification..." />
@@ -92,7 +95,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
             handleUpdate("type", v === "all" ? null : (v as NotificationsParsersState["type"]))
           }
         >
-          <SelectTrigger className="">
+          <SelectTrigger aria-label="Filter by notification type" className="">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent>

@@ -17,7 +17,7 @@ export function NotificationsListContainer() {
   const [params] = useQueryStates(notificationsParsers);
   const [debouncedSearch] = useDebounce(params.search, 500);
   const safePage = clampIntegerParam(params.page, { fallback: 1, max: 1_000_000, min: 1 });
-  const safeLimit = clampIntegerParam(params.limit, { fallback: 5, max: 100, min: 1 });
+  const safeLimit = clampIntegerParam(params.limit, { fallback: 20, max: 100, min: 1 });
 
   const {
     data,
@@ -39,7 +39,7 @@ export function NotificationsListContainer() {
   const { data: stats } = trpc.notification.getStats.useQuery();
 
   return (
-    <div className="flex flex-col gap-6">
+    <>
       <NotificationsHeader stats={stats} />
 
       {isListLoading || !data ? (
@@ -50,12 +50,12 @@ export function NotificationsListContainer() {
         </div>
       ) : (
         <>
-          <div className={isFetching ? "opacity-50" : ""}>
-            <NotificationsList notifications={data.items} />
+          <div className="flex-1">
+            <NotificationsList meta={data.meta} notifications={data.items} />
           </div>
-          <AppPagination isLoading={isFetching} meta={data.meta} className="mt-auto" />
+          <AppPagination isLoading={isFetching} meta={data.meta} className="mt-4" />
         </>
       )}
-    </div>
+    </>
   );
 }

@@ -80,7 +80,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
               Output Language
             </Label>
             <Select value={state.analysisLocale} onValueChange={actions.setAnalysisLocale}>
-              <SelectTrigger className="w-full md:w-64">
+              <SelectTrigger aria-labelledby="lang-label" className="w-full md:w-64">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

@@ -70,6 +70,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
                 loadingText=""
                 size="icon"
                 variant="destructive"
+                aria-label="Delete Avatar"
                 onClick={() => removeAvatar.mutate()}
                 className="absolute right-0 bottom-0 cursor-pointer"
               >

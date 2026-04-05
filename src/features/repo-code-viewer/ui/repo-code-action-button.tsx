@@ -5,7 +5,7 @@ import { Button } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
-type ActionButtonProps = {
+type Props = {
   children: ReactNode;
   className?: string;
   disabled?: boolean;
@@ -27,7 +27,7 @@ export function RepoCodeActionButton({
   onClick,
   tooltipText,
   variant = "ghost",
-}: Readonly<ActionButtonProps>) {
+}: Readonly<Props>) {
   if (hidden === true) return null;
 
   const buttonElement = (
@@ -35,6 +35,7 @@ export function RepoCodeActionButton({
       disabled={disabled}
       size="sm"
       variant={variant}
+      aria-label={tooltipText}
       onClick={onClick}
       className={cn("gap-1.5 text-xs", className)}
     >
@@ -51,7 +52,7 @@ export function RepoCodeActionButton({
           variant={variant}
           className={cn("gap-1.5 px-2 text-xs", className)}
         >
-          <ExternalLink href={href} className="px-3">
+          <ExternalLink href={href} aria-label={tooltipText} className="px-3">
             {children}
           </ExternalLink>
         </Button>

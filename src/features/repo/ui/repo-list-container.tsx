@@ -78,7 +78,7 @@ export function RepoListContainer({ config }: Readonly<Props>) {
           </p>
         </div>
       )}
-      <div className={isFetching ? "opacity-50" : ""}>
+      <div className="flex-1">
         <RepoList meta={meta} repos={items} />
       </div>
 

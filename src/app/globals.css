@@ -334,7 +334,7 @@
   --overlay: oklch(0 0 0 / 0.68);
   --text-primary: oklch(0.972 0.002 255);
   --text-secondary: oklch(0.77 0.003 255);
-  --text-muted: oklch(0.62 0.004 255);
+  --text-muted: oklch(0.68 0.004 255);
   --text-inverse: oklch(0.128 0.004 255);
   --text-on-accent: oklch(0.972 0.002 255);
 
