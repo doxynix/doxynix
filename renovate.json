@@ -3,7 +3,6 @@
   "extends": [
     "config:recommended",
     ":dependencyDashboard",
-    ":enableHelpfulPreCommitHooks",
     "helpers:pinGitHubActionDigests"
   ],
   "rebaseWhen": "behind-base-branch",
