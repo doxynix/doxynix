@@ -46,20 +46,28 @@
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "all non-major dependencies",
-      "groupSlug": "all-minor-patch"
+      "groupSlug": "all-minor-patch",
+      "automerge": true,
+      "automergeType": "pr"
     },
     {
       "description": "Группируем ВСЕ обновления GitHub Actions",
       "matchManagers": ["github-actions"],
       "groupName": "github-actions updates",
-      "groupSlug": "all-actions"
+      "groupSlug": "all-actions",
+      "automerge": true,
+      "automergeType": "pr"
     },
     {
       "matchPackageNames": ["@types/**"],
-      "groupName": "all @types"
+      "groupName": "all @types",
+      "automerge": true,
+      "automergeType": "pr"
     }
   ],
   "separateMajorMinor": true,
   "prHourlyLimit": 5,
-  "prConcurrentLimit": 10
+  "prConcurrentLimit": 10,
+  "schedule": ["before 6am on Monday"],
+  "automergeSchedule": ["at any time"]
 }
