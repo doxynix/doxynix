@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.22.0](https://github.com/doxynix/doxynix/compare/v1.21.0...v1.22.0) (2026-04-05)
+
+
+### Features
+
+* **app:** внедрение системы строгого аудита и исправление нарушений в UI  ([#930](https://github.com/doxynix/doxynix/issues/930)) ([0a53714](https://github.com/doxynix/doxynix/commit/0a537140e9d1225c8dd34211cef891b9173b732c))
+
 ## [1.21.0](https://github.com/doxynix/doxynix/compare/v1.20.6...v1.21.0) (2026-04-04)
 
 
