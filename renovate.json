@@ -1,12 +1,28 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":enableHelpfulPreCommitHooks",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "rebaseWhen": "behind-base-branch",
   "dependencyDashboard": true,
   "gitAuthor": "doxynix-deps-bot <273657142+doxynix-deps-bot[bot]@users.noreply.github.com>",
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
+  "timezone": "Europe/Moscow",
+  "pinDigests": true,
   "rangeStrategy": "pin",
+  "minimumReleaseAge": "3 days",
   "postUpdateOptions": ["pnpmDedupe"],
   "labels": ["dependencies"],
   "ignoreDeps": ["zod-prisma-types"],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "addLabels": ["security"]
+  },
   "packageRules": [
     {
       "matchUpdateTypes": ["major"],
