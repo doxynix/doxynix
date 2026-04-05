@@ -1,11 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":dependencyDashboard",
-    ":enableHelpfulPreCommitHooks",
-    "helpers:pinGitHubActionDigests"
-  ],
+  "extends": ["config:best-practices"],
   "rebaseWhen": "behind-base-branch",
   "dependencyDashboard": true,
   "gitAuthor": "doxynix-deps-bot <273657142+doxynix-deps-bot[bot]@users.noreply.github.com>",
@@ -66,5 +61,6 @@
   ],
   "separateMajorMinor": true,
   "prHourlyLimit": 5,
-  "prConcurrentLimit": 10
+  "prConcurrentLimit": 10,
+  "automerge": false
 }
