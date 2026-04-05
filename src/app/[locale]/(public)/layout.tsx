@@ -22,7 +22,9 @@ export default function PublicLayout({ children }: Readonly<{ children: ReactNod
         width={20}
         className="stroke-border-strong/70 pointer-events-none fixed inset-0 h-full w-full mask-[radial-gradient(circle_at_center,white,transparent)]"
       />
-      <main className="z-10 mx-auto flex w-full flex-1 flex-col">{children}</main>
+      <main id="main-content" tabIndex={-1} className="z-10 mx-auto flex w-full flex-1 flex-col">
+        {children}
+      </main>
       <div className="z-50 w-full shrink-0 border-t">
         <AppFooter />
       </div>

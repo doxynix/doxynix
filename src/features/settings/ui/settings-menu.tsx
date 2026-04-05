@@ -29,7 +29,7 @@ export function SettingsMenu() {
 
               isDestructive &&
                 !isActive &&
-                "text-destructive/75 hover:bg-destructive/10 hover:text-destructive",
+                "text-destructive hover:bg-destructive/10 hover:text-destructive",
 
               !isDestructive &&
                 isActive &&

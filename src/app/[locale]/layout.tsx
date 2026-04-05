@@ -19,7 +19,9 @@ import { APP_URL, IS_PROD } from "@/shared/constants/env.client";
 import type { Locale } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/utils";
 import { Toaster } from "@/shared/ui/core/sonner";
+import { A11yProvider } from "@/shared/ui/kit/a11y-provider";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
+import { SkipLink } from "@/shared/ui/kit/skip-link";
 import { routing } from "@/i18n/routing";
 
 import { ourFileRouter } from "@/server/infrastructure/core";
@@ -153,34 +155,37 @@ export default async function LocaleLayout({
           "antialiased"
         )}
       >
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider
-            disableTransitionOnChange
-            enableSystem
-            attribute="class"
-            defaultTheme={themeCookie}
-            storageKey="doxynix-theme"
-          >
-            <Toaster
-              // richColors
-              duration={4000}
-              gap={8}
-              position="top-center"
-            />
-            <NextTopLoader color="var(--foreground)" showSpinner={false} zIndex={9999} />
-            <Suspense>
-              <UTSSR />
-            </Suspense>
-            <Providers>{children}</Providers>
-            {IS_PROD && (
-              <>
-                <Analytics />
-                <SpeedInsights />
-              </>
-            )}
-            <ConsoleEasterEgg />
-          </ThemeProvider>
-        </NextIntlClientProvider>
+        <A11yProvider>
+          <SkipLink />
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <ThemeProvider
+              disableTransitionOnChange
+              enableSystem
+              attribute="class"
+              defaultTheme={themeCookie}
+              storageKey="doxynix-theme"
+            >
+              <Toaster
+                // richColors
+                duration={4000}
+                gap={8}
+                position="top-center"
+              />
+              <NextTopLoader color="var(--foreground)" showSpinner={false} zIndex={9999} />
+              <Suspense>
+                <UTSSR />
+              </Suspense>
+              <Providers>{children}</Providers>
+              {IS_PROD && (
+                <>
+                  <Analytics />
+                  <SpeedInsights />
+                </>
+              )}
+              <ConsoleEasterEgg />
+            </ThemeProvider>
+          </NextIntlClientProvider>
+        </A11yProvider>
       </body>
     </html>
   );

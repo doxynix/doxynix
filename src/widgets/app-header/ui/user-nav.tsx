@@ -59,16 +59,16 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="flex cursor-pointer items-center gap-3">
+        <Button size="icon" className="flex cursor-pointer items-center gap-3">
           <AppAvatar
             alt={user?.name ?? "User"}
             fallbackClassName="text-xs"
             fallbackText={user?.name ?? user?.email ?? undefined}
             priority={true}
             src={avatar}
-            className="size-9"
+            className="size-9 border-0"
           />
-        </div>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
