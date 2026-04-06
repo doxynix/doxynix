@@ -11,7 +11,7 @@ overrides:
   diff: 8.0.4
   lodash: 4.18.1
   lodash-es: 4.18.1
-  fast-xml-parser: 5.5.9
+  fast-xml-parser: 5.5.10
   ajv@^8: 8.18.0
   cookie: 0.7.2
   minimatch: 10.2.5
