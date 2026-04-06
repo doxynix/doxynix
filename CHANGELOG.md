@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.23.1](https://github.com/doxynix/doxynix/compare/v1.23.0...v1.23.1) (2026-04-06)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#959](https://github.com/doxynix/doxynix/issues/959)) ([e79d2e4](https://github.com/doxynix/doxynix/commit/e79d2e49d56db14639373948cf1a065bd80a3481))
+* **deps:** update dependency @types/picomatch to v4.0.3 ([#958](https://github.com/doxynix/doxynix/issues/958)) ([7a52ce3](https://github.com/doxynix/doxynix/commit/7a52ce3e14471d6e454f50d043c255ef524815d0))
+
 ## [1.23.0](https://github.com/doxynix/doxynix/compare/v1.22.2...v1.23.0) (2026-04-06)
 
 
