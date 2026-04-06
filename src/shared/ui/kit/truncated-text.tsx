@@ -49,7 +49,7 @@ export function TruncatedText({ className, text, tooltipProps }: Readonly<Props>
   if (!isTruncated) return content;
 
   return (
-    <AppTooltip content={text} side="right" {...tooltipProps}>
+    <AppTooltip content={text} {...tooltipProps}>
       {content}
     </AppTooltip>
   );

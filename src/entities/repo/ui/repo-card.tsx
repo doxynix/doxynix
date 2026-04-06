@@ -74,17 +74,21 @@ export function RepoCard({ repo }: Readonly<Props>) {
                   <AppTooltip content={t("repo_open_on_github_tooltip")}>
                     <ExternalLink
                       href={repo.url}
+                      aria-label={t("repo_open_on_github_tooltip")}
                       className="text-muted-foreground hover:text-foreground flex size-6 items-center justify-center rounded opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
                     >
                       <GitHubIcon className="size-4" />
                     </ExternalLink>
                   </AppTooltip>
-                  <Link
-                    href={`/dashboard/repo/${repo.owner}/${repo.name}/settings`}
-                    className="text-muted-foreground hover:text-foreground flex size-6 items-center justify-center opacity-0 transition-all not-md:opacity-100 group-hover:opacity-100"
-                  >
-                    <Settings className="size-4" />
-                  </Link>
+                  <AppTooltip content="Open settings">
+                    <Link
+                      href={`/dashboard/repo/${repo.owner}/${repo.name}/settings`}
+                      aria-label={`Settings for ${repo.name}`}
+                      className="text-muted-foreground hover:text-foreground flex size-6 items-center justify-center opacity-0 transition-all not-md:opacity-100 group-hover:opacity-100"
+                    >
+                      <Settings className="size-4" />
+                    </Link>
+                  </AppTooltip>
                 </div>
               </div>
             </div>

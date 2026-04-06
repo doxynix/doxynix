@@ -77,7 +77,7 @@ export function LanguageSwitcher() {
         </CardHeader>
         <CardContent className="flex items-center gap-2">
           <Select value={locale} disabled={isPending} onValueChange={handleLanguageChange}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger aria-label="Change Language" className="w-40">
               <SelectValue placeholder={t("settings_language_select_placeholder")} />
             </SelectTrigger>
             <SelectContent>

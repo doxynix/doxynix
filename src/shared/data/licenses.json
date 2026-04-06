@@ -1185,6 +1185,17 @@
     ]
   },
   {
+    "author": "Dequelabs",
+    "avatar": "https://github.com/dequelabs.png?size=96",
+    "authorLink": "https://github.com/dequelabs",
+    "packages": [
+      {
+        "name": "@axe-core/react",
+        "license": "MPL-2.0"
+      }
+    ]
+  },
+  {
     "author": "Donald Chan",
     "avatar": "https://github.com/Donaldcwl.png?size=96",
     "authorLink": "https://github.com/Donaldcwl",

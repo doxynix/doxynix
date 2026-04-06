@@ -38,6 +38,7 @@ export function NotificationsNav() {
           <Button
             size="icon"
             variant="ghost"
+            aria-label={t("notifications_title")}
             className="text-muted-foreground relative cursor-pointer"
           >
             <Bell />

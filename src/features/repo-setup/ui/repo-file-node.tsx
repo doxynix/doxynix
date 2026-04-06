@@ -1,3 +1,4 @@
+import React from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -27,56 +28,48 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
 
   const selectionState = getFolderSelectionState(node.data, mySelectedIds);
 
-  const handleSelect = () => {
-    onMyToggle(node.id, node.data);
-  };
-
   return (
     <div
-      onClick={handleSelect}
-      onKeyDown={(e) => {
-        if (e.key === " " || e.key === "Enter") {
-          e.preventDefault();
-          onMyToggle(node.id, node.data);
-        }
-      }}
       className={cn(
-        "hover:bg-surface-hover text-muted-foreground flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1 transition-colors outline-none",
+        "hover:text-foreground text-muted-foreground hover:bg-surface-hover flex w-full cursor-pointer items-center rounded-xl font-medium transition-colors",
         isSelected && "bg-surface-selected hover:bg-surface-selected text-foreground"
       )}
       style={style}
     >
-      <div className="flex size-4 shrink-0 items-center justify-center">
-        {isFolder && (
-          <Button
-            type="button"
+      <div className="flex pl-2">
+        <div className="flex size-4 shrink-0 items-center justify-center">
+          {isFolder && (
+            <Button
+              type="button"
+              tabIndex={-1}
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                node.toggle();
+              }}
+              className="bg-transparent hover:bg-transparent"
+            >
+              {node.isOpen ? (
+                <ChevronDown className="size-3.5" />
+              ) : (
+                <ChevronRight className="size-3.5" />
+              )}
+              <span className="sr-only">Toggle folder {node.data.name}</span>
+            </Button>
+          )}
+        </div>
+
+        <div onPointerDown={(e) => e.stopPropagation()} className="flex items-center px-1">
+          <Checkbox
+            checked={selectionState}
             tabIndex={-1}
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              node.toggle();
-            }}
-            className="bg-transparent p-0 hover:bg-transparent"
-          >
-            {node.isOpen ? (
-              <ChevronDown className="size-3.5" />
-            ) : (
-              <ChevronRight className="size-3.5" />
-            )}
-            <span className="sr-only">Toggle folder {node.data.name}</span>
-          </Button>
-        )}
+            aria-label={`Select ${node.data.name}`}
+            onCheckedChange={() => onMyToggle(node.id, node.data)}
+          />
+        </div>
       </div>
 
-      <div onClick={(e) => e.stopPropagation()} className="flex items-center px-1">
-        <Checkbox
-          checked={selectionState}
-          tabIndex={-1}
-          onCheckedChange={() => onMyToggle(node.id, node.data)}
-        />
-      </div>
-
-      <div className="flex grow items-center gap-2 overflow-hidden">
+      <div className="flex h-7 grow items-center gap-2 overflow-hidden pr-2">
         <div className="flex size-4 shrink-0 items-center justify-center">
           {isFolder ? (
             node.isOpen ? (
@@ -92,8 +85,8 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
         <span className="truncate text-sm">{node.data.name}</span>
 
         {isRecommended === true && (
-          <Badge variant="outline" className="ml-auto">
-            <Sparkles className="h-2.5 w-2.5" />
+          <Badge variant="outline" className="ml-auto shrink-0">
+            <Sparkles className="size-2.5" />
             Core
           </Badge>
         )}
