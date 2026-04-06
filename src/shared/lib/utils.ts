@@ -1,10 +1,10 @@
 import { Temporal } from "@js-temporal/polyfill";
 import { clsx, type ClassValue } from "clsx";
 import safeStringify from "fast-safe-stringify";
+import * as languages from "linguist-languages";
 import { twMerge } from "tailwind-merge";
 
 import { IS_PROD } from "../constants/env.client";
-import { EXTENSION_MAP, LANGUAGE_COLORS } from "../constants/languages";
 import { DEFAULT_LOCALE } from "../constants/locales";
 
 export function cn(...inputs: ClassValue[]) {
@@ -257,22 +257,46 @@ export function getInitials(name?: string | null, email?: string | null): string
   return "U";
 }
 
-export const getLanguageColor = (lang: string | null): string => {
-  if (lang == null) return "#cccccc";
+type LinguistInfo = {
+  readonly color?: string;
+  readonly extensions?: readonly string[];
+};
 
-  if (LANGUAGE_COLORS[lang]) return LANGUAGE_COLORS[lang];
+const langData = languages as Record<string, LinguistInfo | undefined>;
 
-  const normalized = EXTENSION_MAP[lang.toLowerCase()];
-  if (normalized && LANGUAGE_COLORS[normalized]) return LANGUAGE_COLORS[normalized];
+const findByExtension = (ext: string) => {
+  const normalized = ext.startsWith(".") ? ext.toLowerCase() : `.${ext.toLowerCase()}`;
 
-  const lowerLang = lang.toLowerCase();
-  const foundKey = Object.keys(LANGUAGE_COLORS).find((k) => k.toLowerCase() === lowerLang);
+  const entry = Object.entries(langData).find(
+    ([_, info]) => info?.extensions?.includes(normalized) ?? false
+  );
 
-  return foundKey != null ? LANGUAGE_COLORS[foundKey] : "#cccccc";
+  if (entry == null) return null;
+
+  return {
+    color: entry[1]?.color ?? null,
+    name: entry[0],
+  };
+};
+
+export const getLanguageColor = (langOrExt: string | null): string => {
+  if (langOrExt == null || langOrExt === "") return "#cccccc";
+
+  const directMatch = langData[langOrExt];
+  if (directMatch != null && directMatch.color != null) {
+    return directMatch.color;
+  }
+
+  const found = findByExtension(langOrExt);
+
+  if (found?.color == null) return "#cccccc";
+
+  return found.color;
 };
 
 export const normalizeLanguageName = (ext: string): string => {
-  return EXTENSION_MAP[ext.toLowerCase()] ?? ext.toUpperCase();
+  const found = findByExtension(ext);
+  return found != null ? found.name : ext.toUpperCase();
 };
 
 export function setClientCookie(name: string, value: string | boolean, maxAge: number) {

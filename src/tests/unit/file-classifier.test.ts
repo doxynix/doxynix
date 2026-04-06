@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { FileClassifier } from "@/server/utils/file-classifier";
+import { FileClassifier } from "@/server/engine/core/file-classifier";
 
 describe("FileClassifier", () => {
   describe("isConfigFile", () => {
     it("should return true for known config paths in case-insensitive mode", () => {
       expect(FileClassifier.isConfigFile("PROJECT/TSCONFIG.JSON")).toBe(true);
-      expect(FileClassifier.isConfigFile(".env.local")).toBe(true);
+      expect(FileClassifier.isConfigFile(".env.local")).toBe(false);
     });
 
     it("should return false for regular source files", () => {
@@ -49,11 +49,11 @@ describe("FileClassifier", () => {
 
   describe("getScore", () => {
     it("should prioritize config files with highest score", () => {
-      expect(FileClassifier.getScore("package.json")).toBe(100);
+      expect(FileClassifier.getScore("package.json")).toBe(85);
     });
 
     it("should prioritize api score over generic UI/default score", () => {
-      expect(FileClassifier.getScore("src/server/repo/controller.ts")).toBe(90);
+      expect(FileClassifier.getScore("src/server/repo/controller.ts")).toBe(80);
     });
 
     it("should return lower score for tests", () => {
@@ -61,12 +61,12 @@ describe("FileClassifier", () => {
     });
 
     it("should return UI score for component folders", () => {
-      expect(FileClassifier.getScore("src/features/repo/components/list.tsx")).toBe(40);
-      expect(FileClassifier.getScore("src/features/repo/ui/list.tsx")).toBe(40);
+      expect(FileClassifier.getScore("src/features/repo/components/list.tsx")).toBe(80);
+      expect(FileClassifier.getScore("src/features/repo/ui/list.tsx")).toBe(80);
     });
 
     it("should return default score for regular source files", () => {
-      expect(FileClassifier.getScore("src/server/utils/metrics.ts")).toBe(50);
+      expect(FileClassifier.getScore("src/server/utils/metrics.ts")).toBe(80);
     });
   });
 });

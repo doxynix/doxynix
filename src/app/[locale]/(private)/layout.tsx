@@ -13,7 +13,7 @@ import { AppHeader } from "@/widgets/app-header";
 import { AppSidebar } from "@/widgets/app-sidebar";
 import { HotkeyListeners } from "@/widgets/hotkey-manager";
 
-import { getServerAuthSession } from "@/server/auth/options";
+import { getServerAuthSession } from "@/server/infrastructure/auth";
 
 export default async function PrivateLayout({ children }: Readonly<{ children: ReactNode }>) {
   const session = await getServerAuthSession();

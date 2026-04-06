@@ -4,8 +4,8 @@ import { Prisma } from "@prisma/client";
 
 import { GITHUB_WEBHOOK_SECRET } from "@/shared/constants/env.server";
 
-import { prisma } from "@/server/db/db";
-import { logger } from "@/server/logger/logger";
+import { prisma } from "@/server/infrastructure/db";
+import { logger } from "@/server/infrastructure/logger";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 
 type GitHubWebhookEvent = {

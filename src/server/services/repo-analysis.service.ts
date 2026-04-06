@@ -1,8 +1,18 @@
-import type { DocType } from "@prisma/client";
+import { DocType, Status, type Prisma, type Repo } from "@prisma/client";
 import { tasks } from "@trigger.dev/sdk/v3";
 import { TRPCError } from "@trpc/server";
 
-import type { DbClient } from "@/server/db/db";
+import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+
+import { prisma, type DbClient } from "@/server/infrastructure/db";
+
+import { calculateDocumentationOutputScore } from "../ai/doc-priority";
+import type { AIResult } from "../ai/schemas";
+import type { RepoMetrics } from "../ai/types";
+import { calculateTeamRoles } from "../engine/metrics/common-metrics";
+import { calculateHealthScore } from "../engine/metrics/complexity";
+import { logger } from "../infrastructure/logger";
+import { realtimeServer } from "../infrastructure/realtime";
 
 export const repoAnalysisService = {
   async analyze(
@@ -127,5 +137,169 @@ export const repoAnalysisService = {
     );
 
     return { jobId: handle.id };
+  },
+
+  async saveResults(params: {
+    aiResult: AIResult;
+    analysisId: string;
+    busFactor: number;
+    channelName: string;
+    currentSha: string;
+    hardMetrics: RepoMetrics;
+    rawContributors: { contributions: number; login: string }[];
+    repo: Repo;
+    repositoryFacts: NonNullable<AIResult["repository_facts"]>;
+    repositoryFindings: NonNullable<AIResult["findings"]>;
+    userId: number;
+  }) {
+    const {
+      aiResult,
+      analysisId,
+      busFactor,
+      channelName,
+      currentSha,
+      hardMetrics,
+      rawContributors,
+      repo,
+      repositoryFacts,
+      repositoryFindings,
+      userId,
+    } = params;
+
+    const teamRoles = calculateTeamRoles(rawContributors);
+    const docOutputScore = calculateDocumentationOutputScore(aiResult);
+
+    const onboardingScore = Math.min(
+      100,
+      docOutputScore.score +
+        (hardMetrics.docDensity > 10 ? 10 : 0) +
+        (hardMetrics.entrypoints.length > 0 ? 15 : 0) +
+        (hardMetrics.configFiles > 0 ? 10 : 0) +
+        (repositoryFacts.some((fact) => fact.category === "architecture") ? 10 : 0)
+    );
+
+    const finalHealthScore = calculateHealthScore({
+      busFactor,
+      complexityScore: hardMetrics.complexityScore,
+      dependencyCycles: hardMetrics.dependencyCycles.length,
+      docDensity: hardMetrics.docDensity,
+      duplicationPercentage: hardMetrics.duplicationPercentage,
+      repo,
+      securityScore: hardMetrics.securityScore,
+      techDebtScore: hardMetrics.techDebtScore,
+    });
+
+    aiResult.complexityScore = hardMetrics.complexityScore;
+    aiResult.findings = repositoryFindings;
+    aiResult.mostComplexFiles = hardMetrics.mostComplexFiles;
+    aiResult.onboardingScore = onboardingScore;
+    aiResult.repository_facts = repositoryFacts;
+    aiResult.techDebtScore = hardMetrics.techDebtScore;
+    aiResult.securityScore = hardMetrics.securityScore;
+    aiResult.vulnerabilities = hardMetrics.securityFindings.map((finding) => ({
+      description: finding.message,
+      file: finding.path,
+      lineHint: finding.line != null ? `line ${finding.line}` : undefined,
+      risk: finding.severity === "error" ? "HIGH" : "MODERATE",
+      suggestion:
+        "Review the flagged secret-like value and replace it with a safe placeholder or managed secret.",
+    }));
+
+    const metrics: RepoMetrics = {
+      ...hardMetrics,
+      busFactor,
+      factCount: repositoryFacts.length,
+      findingCount: repositoryFindings.length,
+      healthScore: finalHealthScore,
+      maintenanceStatus:
+        (Date.now() - new Date(repo.pushedAt!).getTime()) / (1000 * 60 * 60 * 24 * 30) > 12
+          ? "dead"
+          : (Date.now() - new Date(repo.pushedAt!).getTime()) / (1000 * 60 * 60 * 24 * 30) > 6
+            ? "stale"
+            : "active",
+      onboardingScore,
+      teamRoles,
+    };
+
+    logger.info({
+      analysisId,
+      finalHealthScore,
+      metricsSummary: {
+        fileCount: metrics.fileCount,
+        mostComplexFiles: metrics.mostComplexFiles,
+        primaryDocs: docOutputScore.snapshot.primary,
+        secondaryDocs: docOutputScore.snapshot.secondary,
+        totalLoc: metrics.totalLoc,
+      },
+      msg: "Metrics computed, saving results",
+      repoId: repo.id,
+    });
+
+    const note = await prisma.$transaction(async (tx) => {
+      const cleanResultJson = { ...aiResult };
+
+      delete cleanResultJson.generatedReadme;
+      delete cleanResultJson.generatedApiMarkdown;
+      delete cleanResultJson.generatedContributing;
+      delete cleanResultJson.generatedChangelog;
+      delete cleanResultJson.generatedArchitecture;
+
+      await tx.analysis.update({
+        data: {
+          commitSha: currentSha,
+          complexityScore: hardMetrics.complexityScore,
+          message: "Completed successfully",
+          metricsJson: metrics as unknown as Prisma.InputJsonValue,
+          onboardingScore: onboardingScore,
+          progress: 100,
+          resultJson: cleanResultJson as Prisma.InputJsonValue,
+          score: finalHealthScore,
+          securityScore: hardMetrics.securityScore,
+          status: Status.DONE,
+          techDebtScore: hardMetrics.techDebtScore,
+        },
+        where: { publicId: analysisId },
+      });
+
+      const saveDoc = async (type: DocType, content: string | undefined) => {
+        if (content == null) return;
+        await tx.document.upsert({
+          create: { content, repoId: repo.id, type, version: currentSha },
+          update: { content },
+          where: {
+            repoId_version_type: { repoId: repo.id, type, version: currentSha },
+          },
+        });
+      };
+
+      await Promise.all([
+        saveDoc(DocType.README, aiResult.generatedReadme),
+        saveDoc(DocType.API, aiResult.generatedApiMarkdown),
+        saveDoc(DocType.CONTRIBUTING, aiResult.generatedContributing),
+        saveDoc(DocType.CHANGELOG, aiResult.generatedChangelog),
+        saveDoc(DocType.ARCHITECTURE, aiResult.generatedArchitecture),
+      ]);
+
+      return await tx.notification.create({
+        data: {
+          body: `Health Score: ${finalHealthScore}/100`,
+          repoId: repo.id,
+          title: `Analysis for ${repo.owner}/${repo.name} ready`,
+          type: "SUCCESS",
+          userId,
+        },
+      });
+    });
+
+    await realtimeServer.channels
+      .get(channelName)
+      .publish(REALTIME_CONFIG.events.user.notification, {
+        id: note.publicId,
+        title: note.title,
+      });
+
+    logger.info({ analysisId, commitSha: currentSha, msg: "Results saved", repoId: repo.id });
+
+    return finalHealthScore;
   },
 };

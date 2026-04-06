@@ -2,7 +2,7 @@ import { unauthorized } from "next/navigation";
 
 import { WelcomeFlow } from "@/widgets/welcome-flow";
 
-import { getServerAuthSession } from "@/server/auth/options";
+import { getServerAuthSession } from "@/server/infrastructure/auth";
 
 export default async function WelcomePage() {
   const session = await getServerAuthSession();

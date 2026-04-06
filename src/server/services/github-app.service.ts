@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 import { TRPCError } from "@trpc/server";
 
-import type { DbClient, PrismaClientExtended } from "@/server/db/db";
-import { logger } from "@/server/logger/logger";
+import type { DbClient, PrismaClientExtended } from "@/server/infrastructure/db";
+import { logger } from "@/server/infrastructure/logger";
 import { githubService } from "@/server/services/github.service";
 import { isOctokitError } from "@/server/utils/handle-error";
 

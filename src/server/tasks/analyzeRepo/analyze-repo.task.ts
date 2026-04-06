@@ -5,14 +5,26 @@ import { task } from "@trigger.dev/sdk/v3";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
-import { prisma } from "@/server/db/db";
+import type { RepoMetrics } from "@/server/ai/types";
+import { buildEvaluationSnapshot } from "@/server/engine/evaluation/quality-matrix";
+import { analyzeRepository } from "@/server/engine/metrics/code-metrics";
+import {
+  calculateTeamRoles,
+  computeChangeCoupling,
+  computeGitChurnHotspots,
+} from "@/server/engine/metrics/common-metrics";
+import { buildRepositoryArtifacts } from "@/server/engine/pipeline/artifacts";
+import { buildDocumentationInputModel } from "@/server/engine/pipeline/documentation-input";
+import { prisma } from "@/server/infrastructure/db";
+import { logger } from "@/server/infrastructure/logger";
 import { realtimeServer } from "@/server/infrastructure/realtime";
-import { logger } from "@/server/logger/logger";
+import { githubService } from "@/server/services/github.service";
+import { repoAnalysisService } from "@/server/services/repo-analysis.service";
+import { dumpDebug } from "@/server/utils/debug-logger";
 
-import { generateDeepDocs, runAiPipeline } from "../utils/ai-pipeline";
-import { cloneRepository, getAnalysisContext } from "../utils/git";
-import { calculateBusFactor, saveResults } from "../utils/save-results";
-import { cleanup, handleError, readAndFilterFiles } from "../utils/utils";
+import { generateDeepDocs, runAiPipeline } from "../../ai/ai-pipeline";
+import { cloneRepository, getAnalysisContext } from "../../infrastructure/git";
+import { cleanup, handleError, readAndFilterFiles } from "../utils";
 
 type TaskPayload = {
   analysisId: string;
@@ -103,42 +115,107 @@ export const analyzeRepoTask = task({
       }
 
       await updateStatus("Calculating Bus Factor...", 15);
-      const busFactor = await calculateBusFactor(repo, userId);
+      const { busFactor, rawContributors } = await githubService.calculateBusFactor(repo, userId);
 
       await updateStatus("Cloning repository...", 20);
       await cloneRepository(repo, token, tempClonePath, selectedBranch);
 
       await updateStatus(`Reading ${selectedFiles.length} files...`, 35);
       const validFiles = await readAndFilterFiles(tempClonePath, selectedFiles);
+      const { evidence, metrics: hardMetricsCore } = await analyzeRepository(validFiles);
+      const churnHotspots = await computeGitChurnHotspots(
+        tempClonePath,
+        validFiles.map((f) => f.path)
+      );
+      const changeCoupling = await computeChangeCoupling(
+        tempClonePath,
+        validFiles.map((f) => f.path)
+      );
+      const hardMetrics: RepoMetrics = { ...hardMetricsCore, changeCoupling, churnHotspots };
+      const teamRoles = calculateTeamRoles(rawContributors);
+      const { facts: repositoryFacts, findings: repositoryFindings } = buildRepositoryArtifacts({
+        busFactor,
+        evidence,
+        metrics: hardMetrics,
+        teamRoles,
+      });
 
       const aiResult = await runAiPipeline(
         validFiles,
+        repositoryFacts,
+        repositoryFindings,
+        evidence,
+        hardMetrics,
         instructions,
         updateStatus,
         analysisId,
         language
       );
       await updateStatus("Generating Deep Documentation (Step 3/3)...", 85);
-      const { apiDoc, architecture, changelog, contributing, readme, swaggerYaml } =
-        await generateDeepDocs(validFiles, aiResult, analysisId, docTypes, repo, userId, language);
+      const {
+        generatedApiMarkdown,
+        generatedArchitecture,
+        generatedChangelog,
+        generatedContributing,
+        generatedReadme,
+        swaggerYaml,
+      } = await generateDeepDocs(
+        validFiles,
+        aiResult,
+        evidence,
+        hardMetrics,
+        analysisId,
+        docTypes,
+        repo,
+        userId,
+        language
+      );
 
-      aiResult.generatedReadme = readme;
-      aiResult.generatedApiMarkdown = apiDoc;
-      aiResult.generatedContributing = contributing;
+      aiResult.generatedReadme = generatedReadme;
+      aiResult.generatedApiMarkdown = generatedApiMarkdown;
+      aiResult.generatedContributing = generatedContributing;
       aiResult.swaggerYaml = swaggerYaml;
-      aiResult.generatedChangelog = changelog;
-      aiResult.generatedArchitecture = architecture;
+      aiResult.generatedChangelog = generatedChangelog;
+      aiResult.generatedArchitecture = generatedArchitecture;
+      const documentationInput = buildDocumentationInputModel(evidence, hardMetrics);
+      hardMetrics.documentationInput = documentationInput;
+      dumpDebug("documentation-input-model", {
+        analysisSummary: {
+          executive_summary: aiResult.executive_summary,
+          findings: aiResult.findings ?? [],
+          onboarding_guide: aiResult.onboarding_guide,
+          repository_facts: aiResult.repository_facts ?? [],
+          sections: aiResult.sections,
+        },
+        model: documentationInput,
+        source: "post-doc-generation",
+      });
+      dumpDebug(
+        "quality-matrix",
+        buildEvaluationSnapshot({
+          documentationInput,
+          evidence,
+          generatedDocs: aiResult,
+          metrics: hardMetrics,
+          repository: `${repo.owner}/${repo.name}`,
+          repositoryFacts,
+          repositoryFindings,
+        })
+      );
 
       await updateStatus("Finalizing and saving results...", 90);
-      await saveResults({
+      await repoAnalysisService.saveResults({
         aiResult,
         analysisId,
         busFactor,
         channelName,
         currentSha,
+        hardMetrics,
+        rawContributors,
         repo,
+        repositoryFacts,
+        repositoryFindings,
         userId,
-        validFiles,
       });
 
       await cleanup(tempClonePath);

@@ -3,8 +3,8 @@ import { UTApi } from "uploadthing/server";
 
 import type { UpdateProfileInput } from "@/shared/api/schemas/user";
 
-import type { DbClient, PrismaClientExtended } from "@/server/db/db";
-import { logger } from "@/server/logger/logger";
+import type { DbClient, PrismaClientExtended } from "@/server/infrastructure/db";
+import { logger } from "@/server/infrastructure/logger";
 
 const utapi = new UTApi();
 

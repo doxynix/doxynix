@@ -13,8 +13,8 @@ import { AuthEmail } from "@/shared/api/auth/templates/auth-email";
 import { IS_DEV, IS_PROD } from "@/shared/constants/env.client";
 import { AUTH_PROVIDERS, NEXTAUTH_SECRET, RESEND_API_KEY } from "@/shared/constants/env.server";
 
-import { baseClient, prisma } from "@/server/db/db";
-import { logger } from "@/server/logger/logger";
+import { baseClient, prisma } from "@/server/infrastructure/db";
+import { logger } from "@/server/infrastructure/logger";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 дней
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: сутки
