@@ -147,7 +147,7 @@
     "@trpc/client": "11.16.0",
     "@trpc/react-query": "11.16.0",
     "@trpc/server": "11.16.0",
-    "@types/picomatch": "4.0.2",
+    "@types/picomatch": "4.0.3",
     "@uiw/codemirror-extensions-color": "4.25.9",
     "@uiw/codemirror-extensions-events": "4.25.9",
     "@uiw/codemirror-extensions-hyper-link": "4.25.9",
