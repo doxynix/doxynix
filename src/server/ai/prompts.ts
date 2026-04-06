@@ -351,8 +351,10 @@ Return ONLY raw Markdown.
 
 export const CHANGELOG_WRITER_USER_PROMPT = (commitsJson: string, techStack: string[]) => `
 # INPUT
-Stack: ${techStack.join(", ")}
-Commits: ${commitsJson}
+Stack: ${escapePromptXmlText(techStack.join(", "))}
+<commits>
+${escapePromptXmlText(commitsJson)}
+</commits>
 `;
 
 // --- CODE DOC ---

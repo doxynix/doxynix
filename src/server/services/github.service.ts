@@ -163,10 +163,12 @@ export const githubService = {
         }
       );
 
-      const rawContributors = contributors.map((contributor: (typeof contributors)[number]) => ({
-        contributions: contributor.contributions,
-        login: contributor.login ?? "unknown",
-      }));
+      const rawContributors = contributors
+        .map((contributor: (typeof contributors)[number]) => ({
+          contributions: contributor.contributions,
+          login: contributor.login ?? "unknown",
+        }))
+        .sort((left, right) => right.contributions - left.contributions);
       const totalCommits = rawContributors.reduce(
         (acc: number, contributor) => acc + contributor.contributions,
         0

@@ -37,6 +37,10 @@ const FILE_TRIGGERS: Record<string, { category: TechCategory; name: string }> = 
   "**/k8s/**": { category: "Infrastructure", name: "Kubernetes" },
   "**/tailwind.config.*": { category: "UI/Styling", name: "Tailwind CSS" },
 };
+const FILE_TRIGGER_MATCHERS = Object.entries(FILE_TRIGGERS).map(([pattern, info]) => ({
+  info,
+  isMatch: pm(pattern),
+}));
 
 function mapFrameworkCategory(category: FrameworkFact["category"]): TechCategory {
   switch (category) {
@@ -172,8 +176,8 @@ export class FactCollector {
   }
 
   private collectFileTriggerFacts(pathLower: string) {
-    for (const [pattern, info] of Object.entries(FILE_TRIGGERS)) {
-      if (!pm(pattern)(pathLower)) continue;
+    for (const { info, isMatch } of FILE_TRIGGER_MATCHERS) {
+      if (!isMatch(pathLower)) continue;
       this.addFact(info.name, info.category, 100);
     }
   }
