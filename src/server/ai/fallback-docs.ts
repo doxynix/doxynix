@@ -76,9 +76,19 @@ function buildFallbackNotice(docName: string) {
   return `> Fallback ${docName} generated from canonical analysis sections because the writer model was unavailable or returned no usable content.`;
 }
 
+function getApiReferenceMode(apiReference: DocumentationInputModel["sections"]["api_reference"]) {
+  const hasConcreteRuntimeApi = apiReference.body.sourceOfTruth !== "unknown";
+  const hasPublicLibrarySurface = apiReference.body.publicSurfacePaths.length > 0;
+
+  if (hasConcreteRuntimeApi) return "runtime";
+  if (hasPublicLibrarySurface) return "public-surface";
+  return "unknown";
+}
+
 export function buildFallbackReadme(repo: Repo, documentationInput: DocumentationInputModel) {
   const { api_reference, architecture, onboarding, overview, risks } = documentationInput.sections;
   const primaryEntrypoints = overview.body.primaryEntrypoints;
+  const apiReferenceMode = getApiReferenceMode(api_reference);
 
   return [
     `# ${repo.name}`,
@@ -112,10 +122,12 @@ export function buildFallbackReadme(repo: Repo, documentationInput: Documentatio
     "## Architecture Snapshot",
     renderModules(architecture.body.modules, "Core modules were not identified confidently."),
     "## Public Interface",
-    api_reference.body.sourceOfTruth === "unknown"
+    apiReferenceMode !== "runtime"
       ? renderBulletList(
           [
-            "This repository exposes a framework/library public surface rather than a concrete application HTTP API.",
+            apiReferenceMode === "public-surface"
+              ? "This repository exposes a framework/library public surface rather than a concrete application HTTP API."
+              : "Concrete runtime API evidence is weak, so the public interface is only partially known.",
             ...(api_reference.body.publicSurfacePaths.length > 0
               ? [
                   `Primary public surface files: ${api_reference.body.publicSurfacePaths
@@ -168,6 +180,7 @@ export function buildFallbackReadme(repo: Repo, documentationInput: Documentatio
 export function buildFallbackArchitecture(repo: Repo, documentationInput: DocumentationInputModel) {
   const { api_reference, architecture, onboarding, overview, risks } = documentationInput.sections;
   const graph = architecture.body.graphReliability;
+  const apiReferenceMode = getApiReferenceMode(api_reference);
 
   return [
     `# ${repo.name} Architecture`,
@@ -199,10 +212,12 @@ export function buildFallbackArchitecture(repo: Repo, documentationInput: Docume
       "Dependency graph reliability is unknown."
     ),
     "## Public Surface",
-    api_reference.body.sourceOfTruth === "unknown"
+    apiReferenceMode !== "runtime"
       ? renderBulletList(
           [
-            "This repository behaves more like a framework/library public surface than a concrete application API.",
+            apiReferenceMode === "public-surface"
+              ? "This repository behaves more like a framework/library public surface than a concrete application API."
+              : "Concrete runtime API evidence is weak, so the public surface stays only partially known.",
             ...(api_reference.body.publicSurfacePaths.length > 0
               ? [
                   `Representative public files: ${api_reference.body.publicSurfacePaths
@@ -252,10 +267,13 @@ export function buildFallbackArchitecture(repo: Repo, documentationInput: Docume
 
 export function buildFallbackApiDocument(repo: Repo, documentationInput: DocumentationInputModel) {
   const apiReference = documentationInput.sections.api_reference;
+  const apiReferenceMode = getApiReferenceMode(apiReference);
   const title =
-    apiReference.body.sourceOfTruth === "unknown"
-      ? "# Public Interface Reference"
-      : "# API Reference";
+    apiReferenceMode === "runtime"
+      ? "# API Reference"
+      : apiReferenceMode === "public-surface"
+        ? "# Public Interface Reference"
+        : "# API / Public Interface Reference";
 
   return [
     title,
@@ -276,10 +294,8 @@ export function buildFallbackApiDocument(repo: Repo, documentationInput: Documen
       ],
       "Repository context is only partially known."
     ),
-    apiReference.body.sourceOfTruth === "unknown"
-      ? "## Public Interface Surface"
-      : "## Runtime API Surface",
-    apiReference.body.sourceOfTruth === "unknown"
+    apiReferenceMode !== "runtime" ? "## Public Interface Surface" : "## Runtime API Surface",
+    apiReferenceMode === "public-surface"
       ? renderBulletList(
           [
             "No strong concrete runtime route evidence was found, so this document focuses on public framework/library surface.",
@@ -302,25 +318,40 @@ export function buildFallbackApiDocument(repo: Repo, documentationInput: Documen
           ],
           "Public interface surface is only partially known."
         )
-      : renderBulletList(
-          [
-            `Estimated operations: ${apiReference.body.routeInventory.estimatedOperations}.`,
-            ...(apiReference.body.routeInventory.rpcProcedures > 0
-              ? [`RPC procedures: ${apiReference.body.routeInventory.rpcProcedures}.`]
-              : []),
-            ...(apiReference.body.routeInventory.sourceFiles.length > 0
-              ? [
-                  `Route/source files: ${apiReference.body.routeInventory.sourceFiles
-                    .slice(0, 16)
-                    .map((path) => `\`${path}\``)
-                    .join(", ")}.`,
-                ]
-              : []),
-          ],
-          "Runtime API surface is only partially known."
-        ),
+      : apiReferenceMode === "unknown"
+        ? renderBulletList(
+            [
+              "Concrete runtime API evidence is weak, and a stable public interface surface was not identified confidently.",
+              ...(apiReference.body.entrypoints.length > 0
+                ? [
+                    `Candidate interface entrypoints: ${apiReference.body.entrypoints
+                      .slice(0, 12)
+                      .map((entrypoint) => `\`${entrypoint.path}\``)
+                      .join(", ")}.`,
+                  ]
+                : []),
+            ],
+            "API/public interface surface is only partially known."
+          )
+        : renderBulletList(
+            [
+              `Estimated operations: ${apiReference.body.routeInventory.estimatedOperations}.`,
+              ...(apiReference.body.routeInventory.rpcProcedures > 0
+                ? [`RPC procedures: ${apiReference.body.routeInventory.rpcProcedures}.`]
+                : []),
+              ...(apiReference.body.routeInventory.sourceFiles.length > 0
+                ? [
+                    `Route/source files: ${apiReference.body.routeInventory.sourceFiles
+                      .slice(0, 16)
+                      .map((path) => `\`${path}\``)
+                      .join(", ")}.`,
+                  ]
+                : []),
+            ],
+            "Runtime API surface is only partially known."
+          ),
     "## Routes",
-    apiReference.body.sourceOfTruth === "unknown"
+    apiReferenceMode !== "runtime"
       ? renderBulletList(
           apiReference.summary,
           "Concrete HTTP routes were not extracted confidently.",

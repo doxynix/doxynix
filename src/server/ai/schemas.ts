@@ -81,6 +81,13 @@ export const aiSchema = z.object({
           status: z.enum(["partial", "success"]),
         })
         .optional(),
+      mapper: z
+        .object({
+          reason: z.string().optional(),
+          source: z.enum(["fallback", "llm"]),
+          status: z.enum(["partial", "success"]),
+        })
+        .optional(),
       writers: z
         .object({
           api: z.enum(["failed", "fallback", "llm", "missing"]).optional(),

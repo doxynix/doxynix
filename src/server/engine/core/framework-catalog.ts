@@ -60,6 +60,21 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["vitest", "pytest", "junit"], category: "testing", name: "Testing Frameworks" },
 ];
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function matchesFrameworkAlias(token: string, alias: string) {
+  const normalizedAlias = alias.toLowerCase();
+
+  if (/[@./-]/.test(normalizedAlias)) {
+    return token.includes(normalizedAlias);
+  }
+
+  const escapedAlias = escapeRegExp(normalizedAlias);
+  return RegExp(`(^|[^a-z0-9])${escapedAlias}([^a-z0-9]|$)`, "iu").test(token);
+}
+
 export function collectFrameworkFactsFromTokens(
   tokens: Iterable<string>,
   source: string,
@@ -70,7 +85,7 @@ export function collectFrameworkFactsFromTokens(
   for (const rawToken of tokens) {
     const token = rawToken.toLowerCase();
     for (const entry of FRAMEWORK_CATALOG) {
-      if (!entry.aliases.some((alias) => token.includes(alias.toLowerCase()))) continue;
+      if (!entry.aliases.some((alias) => matchesFrameworkAlias(token, alias))) continue;
 
       const existing = collected.get(entry.name);
       const next: FrameworkFact = {

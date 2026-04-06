@@ -31,6 +31,7 @@ type DocumentationContext = {
   architectureModules: ArchitectureModuleInput[];
   entrypoints: EntrypointInput[];
   frameworkFacts: FrameworkFactInput[];
+  graphReliability: RepositoryEvidence["dependencyGraph"];
   hotspots: HotspotInput[];
   primaryEntrypoints: string[];
   risksBody: DocumentationInputModel["sections"]["risks"]["body"];
@@ -139,10 +140,27 @@ function buildStackProfile(
   ).sort((left, right) => left.localeCompare(right));
 }
 
+function mergeGraphReliability(
+  evidence: RepositoryEvidence,
+  metrics: RepoMetrics
+): RepositoryEvidence["dependencyGraph"] {
+  if (metrics.graphReliability == null) {
+    return evidence.dependencyGraph;
+  }
+
+  return {
+    ...evidence.dependencyGraph,
+    resolvedEdges: metrics.graphReliability.resolvedEdges,
+    unresolvedImportSpecifiers: metrics.graphReliability.unresolvedImportSpecifiers,
+    unresolvedSamples: metrics.graphReliability.unresolvedSamples,
+  };
+}
+
 function buildDocumentationContext(
   evidence: RepositoryEvidence,
   metrics: RepoMetrics
 ): DocumentationContext {
+  const graphReliability = mergeGraphReliability(evidence, metrics);
   const frameworkFacts = buildFrameworkFacts(evidence, metrics);
   const entrypoints = buildEntrypoints(evidence, metrics);
   const routeInventory = buildRouteInventory(evidence, metrics, frameworkFacts);
@@ -154,7 +172,7 @@ function buildDocumentationContext(
   const risksBody = buildRiskSectionBody(evidence, {
     changeCoupling: metrics.changeCoupling,
     complexityScore: metrics.complexityScore,
-    graphReliability: metrics.graphReliability,
+    graphReliability,
     hotspotSignals: metrics.hotspotSignals,
   });
 
@@ -162,6 +180,7 @@ function buildDocumentationContext(
     architectureModules,
     entrypoints,
     frameworkFacts,
+    graphReliability,
     hotspots,
     primaryEntrypoints,
     risksBody,
@@ -232,7 +251,7 @@ function buildArchitectureSection(
   const body: ArchitectureSectionBody = {
     dependencyCycles: evidence.dependencyCycles,
     dependencyHotspots: metrics.dependencyHotspots,
-    graphReliability: evidence.dependencyGraph,
+    graphReliability: context.graphReliability,
     modules: context.architectureModules,
     orphanModules: evidence.orphanModules,
     primaryEntrypoints: context.primaryEntrypoints,
@@ -245,7 +264,7 @@ function buildArchitectureSection(
       62 +
       (body.modules.length > 0 ? 18 : 0) +
       (body.primaryEntrypoints.length > 0 ? 10 : 0) -
-      Math.min(20, evidence.dependencyGraph.unresolvedImportSpecifiers),
+      Math.min(20, context.graphReliability.unresolvedImportSpecifiers),
     evidencePaths: [
       ...body.primaryEntrypoints,
       ...body.modules.slice(0, 10).map((module) => module.path),
@@ -266,7 +285,7 @@ function buildArchitectureSection(
     ],
     title: "Architecture",
     unknowns: [
-      ...(evidence.dependencyGraph.unresolvedImportSpecifiers > 0
+      ...(context.graphReliability.unresolvedImportSpecifiers > 0
         ? [
             "Dependency graph has unresolved internal imports, so some relationships may be partial.",
           ]
@@ -520,7 +539,7 @@ function buildArchitectureInput(
   return {
     dependencyCycles: evidence.dependencyCycles,
     dependencyHotspots: metrics.dependencyHotspots,
-    graphReliability: evidence.dependencyGraph,
+    graphReliability: context.graphReliability,
     modules: context.architectureModules,
     orphanModules: evidence.orphanModules,
   };

@@ -10,6 +10,10 @@ import {
 import { buildRiskSectionBody } from "./risk-model";
 
 const FINDING_SEVERITY_WEIGHT = { CRITICAL: 4, HIGH: 3, LOW: 1, MODERATE: 2 } as const;
+const MAX_FACT_EVIDENCE = 5;
+const MAX_FACTS = 16;
+const MAX_FINDING_EVIDENCE = 6;
+const MAX_FINDINGS = 12;
 
 type ArtifactFact = ArtifactBuildResult["facts"][number];
 type ArtifactFinding = ArtifactBuildResult["findings"][number];
@@ -509,8 +513,18 @@ function buildFindings(context: ArtifactContext): ArtifactFinding[] {
 export function buildRepositoryArtifacts(params: ArtifactBuildParams): ArtifactBuildResult {
   const context = buildArtifactContext(params);
   const result: ArtifactBuildResult = {
-    facts: buildFacts(context),
-    findings: buildFindings(context),
+    facts: buildFacts(context)
+      .slice(0, MAX_FACTS)
+      .map((fact) => ({
+        ...fact,
+        evidence: fact.evidence.slice(0, MAX_FACT_EVIDENCE),
+      })),
+    findings: buildFindings(context)
+      .slice(0, MAX_FINDINGS)
+      .map((finding) => ({
+        ...finding,
+        evidence: finding.evidence.slice(0, MAX_FINDING_EVIDENCE),
+      })),
   };
   dumpDebug("artifacts-facts-findings", result);
   return result;

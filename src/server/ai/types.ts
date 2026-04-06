@@ -126,6 +126,7 @@ export type RepoMetrics = {
   publicExports: number;
   routeInventory?: RouteInventoryMetric;
   securityFindings: SecurityFindingMetric[];
+  securityScanStatus: "ok" | "partial";
   securityScore: number;
   teamRoles: TeamRole[];
   techDebtScore: number;

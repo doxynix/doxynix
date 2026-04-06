@@ -235,7 +235,7 @@ export const repoAnalysisService = {
       repoId: repo.id,
     });
 
-    await prisma.$transaction(async (tx) => {
+    const note = await prisma.$transaction(async (tx) => {
       const cleanResultJson = { ...aiResult };
 
       delete cleanResultJson.generatedReadme;
@@ -264,10 +264,10 @@ export const repoAnalysisService = {
       const saveDoc = async (type: DocType, content: string | undefined) => {
         if (content == null) return;
         await tx.document.upsert({
-          create: { content, repoId: repo.id, type, version: currentSha.substring(0, 7) },
+          create: { content, repoId: repo.id, type, version: currentSha },
           update: { content },
           where: {
-            repoId_version_type: { repoId: repo.id, type, version: currentSha.substring(0, 7) },
+            repoId_version_type: { repoId: repo.id, type, version: currentSha },
           },
         });
       };
@@ -280,7 +280,7 @@ export const repoAnalysisService = {
         saveDoc(DocType.ARCHITECTURE, aiResult.generatedArchitecture),
       ]);
 
-      const note = await tx.notification.create({
+      return await tx.notification.create({
         data: {
           body: `Health Score: ${finalHealthScore}/100`,
           repoId: repo.id,
@@ -289,14 +289,14 @@ export const repoAnalysisService = {
           userId,
         },
       });
-
-      await realtimeServer.channels
-        .get(channelName)
-        .publish(REALTIME_CONFIG.events.user.notification, {
-          id: note.publicId,
-          title: note.title,
-        });
     });
+
+    await realtimeServer.channels
+      .get(channelName)
+      .publish(REALTIME_CONFIG.events.user.notification, {
+        id: note.publicId,
+        title: note.title,
+      });
 
     logger.info({ analysisId, commitSha: currentSha, msg: "Results saved", repoId: repo.id });
 

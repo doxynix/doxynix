@@ -186,28 +186,40 @@ function buildFallbackAiResult(
   hardMetrics: RepoMetrics,
   repositoryFacts: RepositoryFact[],
   repositoryFindings: RepositoryFinding[],
-  error: unknown
+  error: unknown,
+  stage: "architect" | "mapper" = "architect"
 ): AIResult {
   const riskTitles = documentationInput.sections.risks.body.findings.map(
     (finding) => finding.title
   );
   const riskSummaries = repositoryFindings.map((finding) => finding.summary);
   const fallbackReason = error instanceof Error ? error.message : String(error);
+  const fallbackStageLabel = stage === "mapper" ? "mapper" : "architect";
+  const fallbackRuntime =
+    stage === "mapper"
+      ? {
+          mapper: {
+            reason: fallbackReason,
+            source: "fallback" as const,
+            status: "partial" as const,
+          },
+        }
+      : {
+          architect: {
+            reason: fallbackReason,
+            source: "fallback" as const,
+            status: "partial" as const,
+          },
+        };
 
   return {
-    analysisRuntime: {
-      architect: {
-        reason: fallbackReason,
-        source: "fallback",
-        status: "partial",
-      },
-    },
+    analysisRuntime: fallbackRuntime,
     executive_summary: {
       architecture_style:
         documentationInput.sections.architecture.body.modules.length > 0
           ? "Evidence-driven modular architecture"
           : "unknown",
-      purpose: `Repository summary built from canonical analysis sections because the architect model returned partial output.`,
+      purpose: `Repository summary built from canonical analysis sections because the ${fallbackStageLabel} model returned partial output.`,
       stack_details: documentationInput.sections.overview.body.stackProfile,
     },
     findings: repositoryFindings.slice(0, 12),
@@ -334,16 +346,34 @@ export async function runAiPipeline(
     MAX_MAPPER_CHARS
   );
   const documentationInput = getDocumentationInputSnapshot(evidence, hardMetrics);
+  let projectMap: ProjectMap;
 
-  const projectMap = await callWithFallback<ProjectMap>({
-    attemptMetadata: { analysisId, phase: "mapper" },
-    models: AI_MODELS.CARTOGRAPHER,
-    outputSchema: projectMapSchema,
-    prompt: MAPPER_USER_PROMPT(mapContext),
-    providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
-    system: MAPPER_SYSTEM_PROMPT,
-    temperature: 0.05,
-  });
+  try {
+    projectMap = await callWithFallback<ProjectMap>({
+      attemptMetadata: { analysisId, phase: "mapper" },
+      models: AI_MODELS.CARTOGRAPHER,
+      outputSchema: projectMapSchema,
+      prompt: MAPPER_USER_PROMPT(mapContext),
+      providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
+      system: MAPPER_SYSTEM_PROMPT,
+      temperature: 0.05,
+    });
+  } catch (error) {
+    logger.warn({
+      analysisId,
+      error,
+      msg: "Mapper stage failed; continuing with fallback analysis summary",
+    });
+
+    return buildFallbackAiResult(
+      documentationInput,
+      hardMetrics,
+      repositoryFacts,
+      repositoryFindings,
+      error,
+      "mapper"
+    );
+  }
 
   logger.debug({
     analysisId,
@@ -410,6 +440,10 @@ export async function runAiPipeline(
     aiResult.analysisRuntime = {
       ...(aiResult.analysisRuntime ?? {}),
       architect: {
+        source: "llm",
+        status: "success",
+      },
+      mapper: {
         source: "llm",
         status: "success",
       },

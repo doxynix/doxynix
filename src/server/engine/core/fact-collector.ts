@@ -261,8 +261,12 @@ export class FactCollector {
   private parseManifestDotNet(content: string, filePath: string) {
     try {
       const jsonObj = xmlParser.parse(content);
-      const packages = jsonObj?.Project?.ItemGroup?.PackageReference;
-      const pkgArray = Array.isArray(packages) ? packages : [packages];
+      const itemGroups = jsonObj?.Project?.ItemGroup;
+      const groupArray = Array.isArray(itemGroups) ? itemGroups : [itemGroups];
+      const pkgArray = groupArray.flatMap((group: unknown) => {
+        const refs = (group as { PackageReference?: unknown })?.PackageReference;
+        return Array.isArray(refs) ? refs : [refs];
+      });
       const tokens = pkgArray
         .map((pkg: any) => pkg?.["@_Include"])
         .filter((value: unknown): value is string => typeof value === "string");

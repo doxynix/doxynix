@@ -12,7 +12,11 @@ export function getLikelyEntrypoints(
   apiSurfaceByFile: Map<string, number>,
   entrypointHints: Set<string>
 ) {
-  const discovered = new Set<string>(entrypointHints);
+  const discovered = new Set<string>(
+    [...entrypointHints].filter(
+      (path) => !FileClassifier.isPrimaryContourExcluded(path) && !FileClassifier.isConfigFile(path)
+    )
+  );
 
   for (const file of files) {
     const path = file.path;

@@ -1,6 +1,7 @@
 import { FileClassifier } from "@/server/engine/core/file-classifier";
 
 import { cleanCodeForAi } from "./optimizers";
+import { escapePromptXmlAttr, escapePromptXmlText } from "./prompt-xml";
 
 type FileEntry = { content: string; path: string };
 
@@ -193,7 +194,7 @@ export function buildStageContextPack({
       }
 
       const snippet = truncateSnippet(cleaned, perFileLimit);
-      const xml = `<file path="${file.path}">\n${snippet.content}\n</file>`;
+      const xml = `<file path="${escapePromptXmlAttr(file.path)}">\n${escapePromptXmlText(snippet.content)}\n</file>`;
       const score = scoreFile(stage, lowerPath, preferred);
 
       return {

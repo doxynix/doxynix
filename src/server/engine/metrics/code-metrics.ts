@@ -43,6 +43,7 @@ type FileScanResult = {
   prettyName: string;
   securityFindings: RepoMetrics["securityFindings"];
   securityIssues: number;
+  securityScanStatus: "ok" | "partial";
   signal: FileSignals;
   size: number;
   source: number;
@@ -56,6 +57,7 @@ type ScanAggregation = {
   languages: LanguageMetric[];
   mostComplexFiles: string[];
   securityFindings: RepoMetrics["securityFindings"];
+  securityScanStatus: RepoMetrics["securityScanStatus"];
   totals: {
     comments: number;
     maxNesting: number;
@@ -198,11 +200,13 @@ async function collectSecuritySignals(normalizedPath: string, content: string) {
         severity: (message.severity === "error" ? "error" : "warning") as "error" | "warning",
       })),
       issueCount: relevantMessages.length,
+      status: "ok" as const,
     };
   } catch {
     return {
       findings: [] as RepoMetrics["securityFindings"],
       issueCount: 0,
+      status: "partial" as const,
     };
   }
 }
@@ -265,6 +269,7 @@ async function scanRepositoryFile(file: {
     prettyName,
     securityFindings: security.findings,
     securityIssues: security.issueCount,
+    securityScanStatus: security.status,
     signal,
     size: file.content.length,
     source: sourceStats.source,
@@ -350,6 +355,9 @@ function aggregateScanResults(results: FileScanResult[]): ScanAggregation {
       .sort((left, right) => right.lines - left.lines),
     mostComplexFiles,
     securityFindings: results.flatMap((result) => result.securityFindings),
+    securityScanStatus: results.some((result) => result.securityScanStatus === "partial")
+      ? "partial"
+      : "ok",
     totals: results.reduce(
       (acc, result) => ({
         comments: acc.comments + result.comments,
@@ -410,7 +418,13 @@ function buildRepoMetrics(params: {
     orphanModules: structuralSignals.orphanModules.length,
     todos: scan.totals.todos,
   });
-  const securityScore = clamp(100 - scan.totals.securityIssues * 12, 0, 100);
+  const securityScore = clamp(
+    scan.securityScanStatus === "partial"
+      ? Math.min(60, 100 - scan.totals.securityIssues * 12)
+      : 100 - scan.totals.securityIssues * 12,
+    0,
+    100
+  );
 
   return {
     analysisCoverage: scan.analysisCoverage,
@@ -451,6 +465,7 @@ function buildRepoMetrics(params: {
     publicExports: structuralSignals.publicExports,
     routeInventory,
     securityFindings: scan.securityFindings,
+    securityScanStatus: scan.securityScanStatus,
     securityScore,
     teamRoles: [],
     techDebtScore,
@@ -471,7 +486,14 @@ export async function analyzeRepository(
     content: file.content,
     path: normalizeRepoPath(file.path),
   }));
-  const scanResults = await Promise.all(normalizedFiles.map((file) => scanRepositoryFile(file)));
+  const scanResults: FileScanResult[] = [];
+  const batchSize = 8;
+
+  for (let index = 0; index < normalizedFiles.length; index += batchSize) {
+    const batch = normalizedFiles.slice(index, index + batchSize);
+    scanResults.push(...(await Promise.all(batch.map((file) => scanRepositoryFile(file)))));
+  }
+
   const scan = aggregateScanResults(scanResults);
 
   const { evidence, structuralSignals } = await collectStructuralSignals(

@@ -6,18 +6,23 @@ import { normalizeLanguageName } from "@/shared/lib/utils";
 import { PATH_PATTERNS } from "./patterns";
 import type { FileCategory } from "./types";
 
-const isApi = pm(PATH_PATTERNS.API);
-const isAsset = pm(PATH_PATTERNS.ASSET);
-const isBenchmark = pm(PATH_PATTERNS.BENCHMARK);
-const isConfig = pm(PATH_PATTERNS.CONFIG);
-const isDocs = pm(PATH_PATTERNS.DOCS);
-const isGenerated = pm(PATH_PATTERNS.GENERATED);
-const isInfra = pm([...PATH_PATTERNS.INFRA, ...PATH_PATTERNS.INFRA_DIRS]);
-const isTest = pm(PATH_PATTERNS.TEST);
-const isIgnored = pm(PATH_PATTERNS.IGNORE);
-const isSensitive = pm(PATH_PATTERNS.SENSITIVE);
-const isTooling = pm(PATH_PATTERNS.TOOLING);
-const isRuntimeSource = pm(PATH_PATTERNS.RUNTIME_SOURCE);
+function compileMatcher(patterns: string | string[]) {
+  const values = Array.isArray(patterns) ? patterns : [patterns];
+  return pm(values.map((pattern) => pattern.toLowerCase()));
+}
+
+const isApi = compileMatcher(PATH_PATTERNS.API);
+const isAsset = compileMatcher(PATH_PATTERNS.ASSET);
+const isBenchmark = compileMatcher(PATH_PATTERNS.BENCHMARK);
+const isConfig = compileMatcher(PATH_PATTERNS.CONFIG);
+const isDocs = compileMatcher(PATH_PATTERNS.DOCS);
+const isGenerated = compileMatcher(PATH_PATTERNS.GENERATED);
+const isInfra = compileMatcher([...PATH_PATTERNS.INFRA, ...PATH_PATTERNS.INFRA_DIRS]);
+const isTest = compileMatcher(PATH_PATTERNS.TEST);
+const isIgnored = compileMatcher(PATH_PATTERNS.IGNORE);
+const isSensitive = compileMatcher(PATH_PATTERNS.SENSITIVE);
+const isTooling = compileMatcher(PATH_PATTERNS.TOOLING);
+const isRuntimeSource = compileMatcher(PATH_PATTERNS.RUNTIME_SOURCE);
 
 export class FileClassifier {
   static isPrimaryContourExcluded(path: string): boolean {
@@ -92,7 +97,7 @@ export class FileClassifier {
     ) {
       return false;
     }
-    return isRuntimeSource(lower) || (this.isApiFile(lower) && !this.isInfraFile(lower));
+    return isRuntimeSource(lower) || this.isApiFile(lower);
   }
 
   static getCategories(path: string): FileCategory[] {
@@ -165,21 +170,22 @@ export class FileClassifier {
     if (this.isPrimaryContourExcluded(lower)) return false;
     if (this.isConfigFile(lower) || this.isInfraFile(lower) || this.isToolingFile(lower))
       return false;
-    return this.isRuntimeSourceFile(lower) || /\/(index|main|server|app)\.[^/]+$/iu.test(lower);
+    return this.isRuntimeSourceFile(lower) || /(^|\/)(index|main|server|app)\.[^/]+$/iu.test(lower);
   }
 
   static isPrimaryApiEvidenceFile(path: string) {
     const lower = path.toLowerCase();
     if (this.isPrimaryContourExcluded(lower)) return false;
-    if (this.isConfigFile(lower) || this.isInfraFile(lower) || this.isToolingFile(lower))
-      return false;
+    if (this.isConfigFile(lower) || this.isToolingFile(lower)) return false;
+    if (this.isInfraFile(lower) && !this.isApiFile(lower)) return false;
     return this.isApiFile(lower) || this.isPrimaryArchitectureFile(lower);
   }
 
   static isCoreFrameworkFactSource(path: string) {
     const lower = path.toLowerCase();
     if (this.isPrimaryContourExcluded(lower)) return false;
-    if (this.isInfraFile(lower) || this.isToolingFile(lower)) return false;
+    if (this.isToolingFile(lower)) return false;
+    if (this.isInfraFile(lower) && !this.isApiFile(lower)) return false;
     return this.isPrimaryArchitectureFile(lower) || this.isApiFile(lower);
   }
 

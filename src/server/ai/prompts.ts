@@ -1,3 +1,5 @@
+import { escapePromptXmlAttr, escapePromptXmlText } from "./prompt-xml";
+
 // --- SENTINEL ---
 export const SENTINEL_SYSTEM_PROMPT = `
 ### ROLE
@@ -72,7 +74,7 @@ Return ONLY a JSON object matching this structure EXACTLY:
 export const MAPPER_USER_PROMPT = (skeletonJson: string) => `
 # INPUT — STRUCTURED_REPOSITORY_SKELETON (JSON)
 <structured_skeleton>
-${skeletonJson}
+${escapePromptXmlText(skeletonJson)}
 </structured_skeleton>
 `;
 
@@ -143,11 +145,11 @@ export const ANALYSIS_USER_PROMPT = (
 ) => `
 # INPUT DATA
 <architect_digest>
-${architectDigestJson}
+${escapePromptXmlText(architectDigestJson)}
 </architect_digest>
 
-<user_instructions status="${sentinelStatus}">
-${instructions}
+<user_instructions status="${escapePromptXmlAttr(sentinelStatus)}">
+${escapePromptXmlText(instructions)}
 </user_instructions>
 
 <codebase_snippets>
@@ -224,10 +226,10 @@ export const API_WRITER_USER_PROMPT = (
 # INPUT
 Use only the following API evidence and do not infer hidden endpoints.
 <allowed_repository_paths>
-${allowedPathsJson}
+${escapePromptXmlText(allowedPathsJson)}
 </allowed_repository_paths>
 <api_reference_section>
-${apiReferenceSectionJson}
+${escapePromptXmlText(apiReferenceSectionJson)}
 </api_reference_section>
 <api_context>
 ${apiFilesContext}
@@ -276,11 +278,11 @@ export const README_WRITER_USER_PROMPT = (
 ) => `
 # INPUT ANALYSIS
 <primary_readme_sections>
-${readmeSectionsJson}
+${escapePromptXmlText(readmeSectionsJson)}
 </primary_readme_sections>
 - **Allowed repository paths (only cite these)**:
 <allowed_repository_paths>
-${allowedPathsJson}
+${escapePromptXmlText(allowedPathsJson)}
 </allowed_repository_paths>
 - **Configs**:
 <supporting_context>
@@ -317,11 +319,11 @@ export const CONTRIBUTING_WRITER_USER_PROMPT = (
   allowedPathsJson: string
 ) => `
 # CONTEXT
-Analysis: ${analysisJson}
+Analysis: ${escapePromptXmlText(analysisJson)}
 Configs: ${configFilesContext}
 Allowed repository paths:
 <allowed_repository_paths>
-${allowedPathsJson}
+${escapePromptXmlText(allowedPathsJson)}
 </allowed_repository_paths>
 `;
 
@@ -379,8 +381,8 @@ Return the full file content with added documentation.
 
 export const CODE_DOC_USER_PROMPT = (filePath: string, content: string) => `
 # INPUT
-<file path="${filePath}">
-${content}
+<file path="${escapePromptXmlAttr(filePath)}">
+${escapePromptXmlText(content)}
 </file>
 `;
 
@@ -423,16 +425,16 @@ export const ARCHITECTURE_WRITER_USER_PROMPT = (
 ) => `
 # INPUT DATA
 <allowed_repository_paths>
-${allowedPathsJson}
+${escapePromptXmlText(allowedPathsJson)}
 </allowed_repository_paths>
 <architecture_section>
-${architectureSectionJson}
+${escapePromptXmlText(architectureSectionJson)}
 </architecture_section>
 <risks_section>
-${risksSectionJson}
+${escapePromptXmlText(risksSectionJson)}
 </risks_section>
 <onboarding_section>
-${onboardingSectionJson}
+${escapePromptXmlText(onboardingSectionJson)}
 </onboarding_section>
 <architecture_context>
 ${architectureContext}

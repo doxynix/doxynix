@@ -478,6 +478,7 @@ export type RepoMetrics = {
   publicExports: number;
   routeInventory?: RouteInventory;
   securityFindings: SecurityFindingMetric[];
+  securityScanStatus: "ok" | "partial";
   securityScore: number;
   teamRoles: TeamRole[];
   techDebtScore: number;
@@ -521,6 +522,7 @@ export type ArtifactBuildParams = {
       path: string;
       severity: "error" | "warning";
     }>;
+    securityScanStatus: "ok" | "partial";
     totalLoc: number;
     tsStaticHints?: TsStaticHint[];
   };

@@ -95,7 +95,12 @@ function buildFilesByBaseName(files: NormalizedRepositoryFile[]) {
   for (const file of files) {
     const baseName = file.path.split("/").at(-1)?.toLowerCase();
     if (baseName == null) continue;
-    filesByBaseName.set(baseName, [...(filesByBaseName.get(baseName) ?? []), file.path]);
+    const bucket = filesByBaseName.get(baseName);
+    if (bucket == null) {
+      filesByBaseName.set(baseName, [file.path]);
+    } else {
+      bucket.push(file.path);
+    }
   }
 
   return filesByBaseName;
@@ -124,6 +129,7 @@ function buildRouteInventory(
   const primaryRoutes = evidence.routes.filter((route) =>
     FileClassifier.isPrimaryApiEvidenceFile(route.sourcePath)
   );
+  const rpcProcedures = primaryRoutes.filter((route) => route.kind === "rpc").length;
   const httpRoutes = primaryRoutes
     .filter((route) => route.kind === "http" && route.method != null)
     .map((route) => ({
@@ -133,10 +139,10 @@ function buildRouteInventory(
     }));
 
   return {
-    estimatedOperations: httpRoutes.length,
+    estimatedOperations: httpRoutes.length + rpcProcedures,
     frameworks: evidence.frameworkFacts.map((fact) => fact.name),
     httpRoutes,
-    rpcProcedures: primaryRoutes.filter((route) => route.kind === "rpc").length,
+    rpcProcedures,
     source: "extracted",
     sourceFiles: Array.from(new Set(primaryRoutes.map((route) => route.sourcePath))).sort(
       (left, right) => left.localeCompare(right)
@@ -281,7 +287,11 @@ function resolveImportEdges(
       resolveRelativeImport(filePath, importPath, lookups.fileSet) ??
       resolveModuleImport(importPath, lookups.fileSet, lookups.filesByBaseName, lookups.aliasRules);
 
-    if (resolved != null && resolved !== filePath) {
+    if (resolved === filePath) {
+      continue;
+    }
+
+    if (resolved != null) {
       resolvedImports.push(resolved);
       tracking.resolvedEdges += 1;
       tracking.edges.push({
