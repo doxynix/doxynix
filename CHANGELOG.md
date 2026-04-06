@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.23.0](https://github.com/doxynix/doxynix/compare/v1.22.2...v1.23.0) (2026-04-06)
+
+
+### Features
+
+* **server:** масштабная ревизия конвейера статического анализа и AI-пайплайна ([#911](https://github.com/doxynix/doxynix/issues/911)) ([0dbb7f5](https://github.com/doxynix/doxynix/commit/0dbb7f5356c4069863186ed5024e92f11e23ada3))
+
 ## [1.22.2](https://github.com/doxynix/doxynix/compare/v1.22.1...v1.22.2) (2026-04-06)
 
 
