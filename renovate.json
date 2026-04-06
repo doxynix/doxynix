@@ -18,6 +18,10 @@
     "enabled": true,
     "addLabels": ["security"]
   },
+  "separateMajorMinor": true,
+  "prHourlyLimit": 5,
+  "prConcurrentLimit": 10,
+  "automerge": false,
   "packageRules": [
     {
       "matchUpdateTypes": ["major"],
@@ -30,16 +34,6 @@
     {
       "matchUpdateTypes": ["patch"],
       "addLabels": ["patch-update"]
-    },
-    {
-      "description": "Запрещаем мажорный апдейт cookie (v1 ломает совместимость с auth/sockets)",
-      "matchPackageNames": ["cookie"],
-      "allowedVersions": "<1.0.0"
-    },
-    {
-      "description": "Запрещаем мажорный апдейт eslint (v10 ломает плагины React)",
-      "matchPackageNames": ["eslint"],
-      "allowedVersions": "<10.0.0"
     },
     {
       "description": "Группируем все минорные и патч обновления npm",
@@ -55,12 +49,19 @@
       "groupSlug": "all-actions"
     },
     {
+      "description": "Группируем все обновления типов отдельно",
       "matchPackageNames": ["@types/**"],
       "groupName": "all @types"
+    },
+    {
+      "description": "Запрещаем мажорный апдейт cookie (v1 ломает совместимость с auth/sockets)",
+      "matchPackageNames": ["cookie"],
+      "allowedVersions": "<1.0.0"
+    },
+    {
+      "description": "Запрещаем мажорный апдейт eslint (v10 ломает плагины React)",
+      "matchPackageNames": ["eslint"],
+      "allowedVersions": "<10.0.0"
     }
-  ],
-  "separateMajorMinor": true,
-  "prHourlyLimit": 5,
-  "prConcurrentLimit": 10,
-  "automerge": false
+  ]
 }
