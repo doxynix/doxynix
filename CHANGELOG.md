@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.24.0](https://github.com/doxynix/doxynix/compare/v1.23.1...v1.24.0) (2026-04-06)
+
+
+### Features
+
+* **ui:** ui приведен в соответствие новому движку ([#965](https://github.com/doxynix/doxynix/issues/965)) ([150bf8c](https://github.com/doxynix/doxynix/commit/150bf8c7aa975f52b0990f04f421880d1c280850))
+
 ## [1.23.1](https://github.com/doxynix/doxynix/compare/v1.23.0...v1.23.1) (2026-04-06)
 
 
