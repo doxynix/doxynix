@@ -2,13 +2,16 @@
 
 import { ChevronRight } from "lucide-react";
 
-import { type DocType } from "@/shared/api/trpc";
+import { type AvailableDocs, type DocType } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/utils";
+import { Badge } from "@/shared/ui/core/badge";
 import { TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 
 type TabItem = {
   icon: React.ComponentType<{ className?: string }>;
   id: string;
+  isFallback: boolean;
+  status: AvailableDocs[number]["status"];
   value: DocType;
 };
 
@@ -19,7 +22,7 @@ type Props = {
 
 export function RepoDocsTabs({ activeTab, items }: Readonly<Props>) {
   return (
-    <div className="w-64 shrink-0 space-y-4">
+    <div className="w-72 shrink-0 space-y-4">
       <h2 className="px-2 py-1 font-bold">Documentation</h2>
       <TabsList className="flex h-auto w-full flex-col items-stretch justify-start gap-1 p-0">
         {items.map((item) => {
@@ -43,6 +46,17 @@ export function RepoDocsTabs({ activeTab, items }: Readonly<Props>) {
               <span className="grow text-left text-sm font-medium capitalize">
                 {item.value.toLowerCase().replace("_", " ")}
               </span>
+              {item.status != null && (
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "text-xs uppercase",
+                    item.isFallback ? "border-warning text-warning" : ""
+                  )}
+                >
+                  {item.isFallback ? "fallback" : item.status}
+                </Badge>
+              )}
               {isActive && <ChevronRight className="size-3" />}
             </TabsTrigger>
           );
