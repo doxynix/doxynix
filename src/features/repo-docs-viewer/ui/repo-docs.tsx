@@ -4,6 +4,8 @@ import { useState } from "react";
 import { BookOpen, FileText, HistoryIcon, Layers, Terminal, Users2 } from "lucide-react";
 
 import { trpc, type AvailableDocs, type DocType } from "@/shared/api/trpc";
+import { formatFullDate } from "@/shared/lib/utils";
+import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Tabs, TabsContent } from "@/shared/ui/core/tabs";
@@ -34,6 +36,8 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
   const tabItems = availableDocs.map((doc) => ({
     icon: DOC_ICONS[doc.type],
     id: doc.id,
+    isFallback: doc.isFallback,
+    status: doc.status,
     value: doc.type,
   }));
 
@@ -41,17 +45,15 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
     <Tabs
       value={activeTab}
       orientation="vertical"
-      onValueChange={(v) => onTabChange(v as DocType)}
+      onValueChange={(value) => onTabChange(value as DocType)}
       className="flex h-[calc(100dvh-220px)] w-full flex-row gap-10"
     >
       <RepoDocsTabs activeTab={activeTab} items={tabItems} />
 
       <div className="bg-card relative flex flex-1 flex-col rounded-xl border">
         {availableDocs.map((doc) => {
-          const isCurrentApiSwagger = !!(
-            doc.type === "API" &&
-            apiMode === "swagger" &&
-            metrics?.swagger != null
+          const isCurrentApiSwagger = Boolean(
+            doc.type === "API" && apiMode === "swagger" && metrics?.reference.swagger != null
           );
 
           return (
@@ -61,7 +63,7 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
               className="mt-0 flex flex-1 flex-col outline-none data-[state=inactive]:hidden"
             >
               <div className="flex-none px-8 pt-8 md:px-12">
-                <div className="mb-10 flex items-center justify-between border-b pb-6">
+                <div className="mb-6 flex items-center justify-between border-b pb-6">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary/10 rounded-md p-2">
                       {(() => {
@@ -69,14 +71,31 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
                         return <Icon className="text-primary size-6" />;
                       })()}
                     </div>
-                    <h2 className="text-2xl font-bold tracking-tight capitalize">
-                      {doc.type === "API" && apiMode === "swagger"
-                        ? "Interactive Console"
-                        : doc.type.toLowerCase().replace("_", " ")}
-                    </h2>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-2xl font-bold tracking-tight capitalize">
+                          {doc.type === "API" && apiMode === "swagger"
+                            ? "Interactive Console"
+                            : doc.type.toLowerCase().replace("_", " ")}
+                        </h2>
+                        {doc.status != null && (
+                          <Badge
+                            variant="outline"
+                            className={doc.isFallback ? "border-warning text-warning" : ""}
+                          >
+                            {doc.isFallback ? "fallback" : doc.status}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-xs">
+                        <span>Version: {doc.version.slice(0, 7)}</span>
+                        <span>Updated: {formatFullDate(doc.updatedAt)}</span>
+                        {doc.isFallback && <span>Generated from canonical analysis sections.</span>}
+                      </div>
+                    </div>
                   </div>
 
-                  {doc.type === "API" && metrics?.swagger != null && (
+                  {doc.type === "API" && metrics?.reference.swagger != null && (
                     <div className="flex gap-1 rounded-lg border p-1">
                       <Button
                         size="sm"
@@ -101,7 +120,7 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
 
               {isCurrentApiSwagger ? (
                 <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden px-8 pb-8 md:px-12">
-                  {/* <RepoSwagger spec={metrics.swagger} /> */}
+                  {/* <RepoSwagger spec={metrics.reference.swagger} /> */}
                 </div>
               ) : (
                 <ScrollArea className="w-full flex-1">

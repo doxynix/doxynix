@@ -4,13 +4,13 @@ import {
   Activity,
   AlertTriangle,
   Book,
-  BookOpen,
   Code2,
   FileCode,
+  FileText,
   HeartPulse,
   Layers,
   ShieldCheck,
-  Users,
+  Sparkles,
 } from "lucide-react";
 import { useLocale } from "next-intl";
 
@@ -23,14 +23,14 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { getGitMetrics, RepoGitMetric, RepoTopics } from "@/entities/repo";
 import { StatCard } from "@/entities/repo-details";
 
-type Props = { data: RepoDetailsOverview };
+type Props = { data: NonNullable<RepoDetailsOverview> };
 
 export function RepoOverview({ data }: Readonly<Props>) {
   const locale = useLocale();
 
   const gitMetrics = getGitMetrics(data.repo, locale);
 
-  const { languages, maintenance, mostComplexFiles, scores, stats, summary } = data;
+  const { docs, languages, maintenance, mostComplexFiles, scores, signals, stats, summary } = data;
   const status =
     maintenance === "active"
       ? "border-success text-success"
@@ -38,89 +38,48 @@ export function RepoOverview({ data }: Readonly<Props>) {
         ? "border-warning text-warning"
         : "border-destructive text-destructive";
 
-  const health = scores.healthScore ?? 0;
-  const security = scores.securityScore ?? 0;
-  const techDebt = scores.techDebtScore ?? 0;
-  const onboarding = scores.onboardingScore ?? 0;
+  const health = scores.health;
+  const security = scores.security;
+  const techDebt = scores.techDebt;
+  const onboarding = scores.onboarding;
+  const complexity = scores.complexity;
 
   const REPO_STATS_CARDS = [
     {
       className: "bg-success/10",
-      description:
-        scores.healthScore === null
-          ? "No health data"
-          : health > 75
-            ? "Codebase is stable"
-            : "Maintenance required",
+      description: health > 75 ? "Codebase is stable" : "Maintenance required",
       icon: Activity,
       iconClass: "text-success",
       id: "health",
       label: "Health Score",
-      value: scores.healthScore !== null ? `${scores.healthScore}/100` : "N/A",
+      value: `${health}/100`,
     },
     {
       className: "bg-emerald-500/10",
-      description:
-        scores.securityScore === null
-          ? "Security not assessed"
-          : security > 80
-            ? "No critical leaks"
-            : "Check vulnerabilities",
+      description: security > 80 ? "No critical leaks" : "Check vulnerabilities",
       icon: ShieldCheck,
       iconClass: "text-emerald-500",
       id: "security",
       label: "Security Score",
-      value: scores.securityScore !== null ? `${scores.securityScore}/100` : "N/A",
+      value: `${security}/100`,
     },
     {
-      className: scores.busFactor <= 2 ? "bg-destructive/10" : "bg-blue/10",
-      description: scores.busFactor <= 2 ? "Knowledge silo risk" : "Team knowledge shared",
-      icon: Users,
-      iconClass: scores.busFactor <= 2 ? "text-destructive" : "text-blue",
-      id: "bus-factor",
-      label: "Bus Factor",
-      value: String(scores.busFactor),
-    },
-    {
-      className: scores.complexityScore > 60 ? "bg-destructive/10" : "bg-warning/10",
-      description: scores.complexityScore > 60 ? "High cognitive load" : "Logic is manageable",
+      className: complexity > 60 ? "bg-destructive/10" : "bg-warning/10",
+      description: complexity > 60 ? "High cognitive load" : "Logic is manageable",
       icon: Layers,
-      iconClass: scores.complexityScore > 60 ? "text-destructive" : "text-warning",
+      iconClass: complexity > 60 ? "text-destructive" : "text-warning",
       id: "complexity",
       label: "Complexity",
-      value: `${scores.complexityScore}/100`,
-    },
-    {
-      className: scores.docDensity < 20 ? "bg-warning/10" : "bg-success/10",
-      description: scores.docDensity < 20 ? "Missing context" : "Well documented",
-      icon: BookOpen,
-      iconClass: scores.docDensity < 20 ? "text-warning" : "text-success",
-      id: "doc-density",
-      label: "Documentation",
-      value: `${scores.docDensity}%`,
+      value: `${complexity}/100`,
     },
     {
       className: techDebt > 50 ? "bg-destructive/10" : "bg-success/10",
-      description:
-        scores.techDebtScore === null
-          ? "Debt not measured"
-          : techDebt > 50
-            ? "Refactoring urgent"
-            : "Technical debt low",
+      description: techDebt > 50 ? "Refactoring urgent" : "Technical debt low",
       icon: AlertTriangle,
       iconClass: techDebt > 50 ? "text-destructive" : "text-success",
       id: "tech-debt",
       label: "Tech Debt",
-      value: scores.techDebtScore !== null ? `${scores.techDebtScore}/100` : "N/A",
-    },
-    {
-      className: "bg-blue/10",
-      description: scores.duplicationPercentage > 70 ? "Good separation" : "Tight coupling",
-      icon: Code2,
-      iconClass: "text-blue",
-      id: "modularity",
-      label: "Modularity",
-      value: `${scores.duplicationPercentage}/100`,
+      value: `${techDebt}/100`,
     },
     {
       className: "bg-blue/10",
@@ -182,7 +141,11 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </div>
             <div>
               <p className="text-muted-foreground text-[10px] font-bold uppercase">Size</p>
-              <p className="text-xl font-bold">{stats.totalSize}</p>
+              <p className="text-xl font-bold">{stats.totalSizeLabel}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-[10px] font-bold uppercase">Config Files</p>
+              <p className="text-xl font-bold">{stats.configFiles}</p>
             </div>
           </CardContent>
         </Card>
@@ -213,6 +176,64 @@ export function RepoOverview({ data }: Readonly<Props>) {
         </Card>
         <Card>
           <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <Sparkles className="size-4" /> Analysis Signals
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-muted-foreground text-[10px] font-bold uppercase">Coverage</p>
+              <p className="text-xl font-bold">{signals.analysisCoverage.parserCoveragePercent}%</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-[10px] font-bold uppercase">Bus Factor</p>
+              <p className="text-xl font-bold">{signals.busFactor}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-[10px] font-bold uppercase">API</p>
+              <p className="text-xl font-bold">{signals.apiSurface}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-[10px] font-bold uppercase">Cycles</p>
+              <p className="text-xl font-bold">{signals.dependencyCycles}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-[10px] font-bold uppercase">Docs</p>
+              <p className="text-xl font-bold">{signals.docDensity}%</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-[10px] font-bold uppercase">Duplication</p>
+              <p className="text-xl font-bold">{signals.duplicationPercentage}%</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <FileText className="size-4" /> Documentation
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-muted-foreground text-xs">{docs.availableCount} docs available</p>
+            <div className="flex flex-wrap gap-2">
+              {docs.items.map((item) => (
+                <Badge
+                  key={item.id}
+                  variant="outline"
+                  className={item.isFallback ? "border-warning text-warning" : ""}
+                >
+                  {item.type.toLowerCase().replace("_", " ")}{" "}
+                  {item.isFallback ? "fallback" : item.status}
+                </Badge>
+              ))}
+              {docs.hasSwagger && <Badge variant="secondary">swagger</Badge>}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle className="text-sm font-medium">Languages</CardTitle>
           </CardHeader>
           <CardContent>
@@ -228,7 +249,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
               ))}
             </div>
             <div className="grid grid-cols-3 gap-y-2">
-              {languages.slice(0, 6).map((lang) => (
+              {languages.map((lang) => (
                 <div key={lang.name} className="flex flex-col text-[11px]">
                   <span className="flex items-center gap-1 font-bold">
                     <span
@@ -254,7 +275,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {mostComplexFiles.slice(0, 5).map((file, idx) => (
+              {mostComplexFiles.map((file, idx) => (
                 <div
                   key={file}
                   className="group hover:bg-muted/50 flex items-center justify-between rounded p-1 text-[13px] transition-colors"
@@ -266,6 +287,29 @@ export function RepoOverview({ data }: Readonly<Props>) {
                   </div>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Top Risks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {data.topRisks.length > 0 ? (
+                data.topRisks.map((risk) => (
+                  <div key={risk.id} className="rounded-lg border p-3">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium">{risk.title}</p>
+                      <Badge variant="outline">{risk.severity}</Badge>
+                    </div>
+                    <p className="text-muted-foreground text-xs leading-relaxed">{risk.summary}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted-foreground text-sm">No significant risks detected.</p>
+              )}
             </div>
           </CardContent>
         </Card>
