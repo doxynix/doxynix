@@ -9,7 +9,7 @@ import {
   buildInteractiveBriefNodePayload,
   buildInteractiveBriefPanel,
   buildInteractiveBriefPayload,
-} from "@/server/entities/analyze/lib/repo-details-brief";
+} from "@/server/entities/analyze/lib/brief";
 import type { DbClient } from "@/server/shared/infrastructure/db";
 import {
   getLatestCompletedAnalysis,

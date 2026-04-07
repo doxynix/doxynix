@@ -4,7 +4,7 @@ import {
   buildRecommendedActions,
   buildReviewPriority,
   buildSuggestedPathsForEntry,
-} from "@/server/entities/analyze/lib/repo-details-node-context";
+} from "@/server/entities/analyze/lib/context";
 import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
 
 function unique<T>(values: T[]) {
