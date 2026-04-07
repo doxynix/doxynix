@@ -2,7 +2,7 @@
 import type { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 
-import { anonymizeIp, getCountry, getIp, getUa } from "@/server/utils/request-context";
+import { anonymizeIp, getCountry, getIp, getUa } from "@/server/shared/lib/request-context";
 
 type RequestExtras = {
   geo?: {

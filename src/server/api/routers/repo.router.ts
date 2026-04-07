@@ -2,8 +2,8 @@ import { z } from "zod";
 
 import { CreateRepoSchema } from "@/shared/api/schemas/repo";
 
-import { repoService } from "@/server/services/repo.service";
-import { PaginationMetaSchema } from "@/server/utils/pagination";
+import { repoService } from "@/server/entities/repo/api/repo.service";
+import { PaginationMetaSchema } from "@/server/shared/lib/pagination";
 import { RepoSchema, StatusSchema } from "@/generated/zod";
 
 import { OpenApiErrorResponses, RepoFilterSchema } from "../contracts";

@@ -1,8 +1,11 @@
 import type { Repo } from "@prisma/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { calculateCodeMetrics, calculateTeamRoles } from "@/server/engine/metrics/common-metrics";
-import { calculateHealthScore } from "@/server/engine/metrics/complexity";
+import {
+  calculateCodeMetrics,
+  calculateTeamRoles,
+} from "@/server/shared/engine/metrics/common-metrics";
+import { calculateHealthScore } from "@/server/shared/engine/metrics/complexity";
 
 describe("calculateHealthScore", () => {
   beforeEach(() => {

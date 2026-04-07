@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { GitHubQuerySchema } from "@/shared/api/schemas/repo";
 
-import { githubBrowseService } from "@/server/services/github-browse.service";
+import { githubBrowseService } from "@/server/shared/infrastructure/github/github-browse.service";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 

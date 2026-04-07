@@ -2,7 +2,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { handlePrismaError } from "@/server/utils/handle-error";
+import { handlePrismaError } from "@/server/shared/lib/handle-error";
 
 type KnownErrorOptions = {
   clientVersion: string;

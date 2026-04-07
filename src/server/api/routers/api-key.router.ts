@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 
-import { apiKeyService } from "@/server/services/api-key.service";
+import { apiKeyService } from "@/server/entities/api-key/api/api-key.service";
 import { ApiKeySchema } from "@/generated/zod";
 
 import { OpenApiErrorResponses } from "../contracts";

@@ -6,9 +6,9 @@ import type { OpenApiMeta } from "trpc-to-openapi";
 
 import { IS_PROD } from "@/shared/constants/env.client";
 
-import type { DbClient } from "../infrastructure/db";
-import { logger } from "../infrastructure/logger";
-import { buildRequestStore, requestContext, resolveRequestId } from "../utils/request-context";
+import type { DbClient } from "../shared/infrastructure/db";
+import { logger } from "../shared/infrastructure/logger";
+import { buildRequestStore, requestContext, resolveRequestId } from "../shared/lib/request-context";
 import type { Context } from "./context";
 
 export const t = initTRPC

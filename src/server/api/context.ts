@@ -2,10 +2,10 @@ import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { authOptions } from "../infrastructure/auth";
-import { prisma } from "../infrastructure/db";
-import { redisClient } from "../infrastructure/redis";
-import { getIp, getUa } from "../utils/request-context";
+import { authOptions } from "../shared/infrastructure/auth";
+import { prisma } from "../shared/infrastructure/db";
+import { redisClient } from "../shared/infrastructure/redis";
+import { getIp, getUa } from "../shared/lib/request-context";
 
 type Props = {
   req: NextRequest;

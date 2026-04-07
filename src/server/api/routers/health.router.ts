@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { handlePrismaError } from "@/server/utils/handle-error";
+import { handlePrismaError } from "@/server/shared/lib/handle-error";
 
 import { OpenApiErrorResponses } from "../contracts";
 import { createTRPCRouter, publicProcedure } from "../trpc";

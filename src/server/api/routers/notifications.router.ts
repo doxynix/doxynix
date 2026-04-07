@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { notificationsService } from "@/server/services/notifications.service";
-import { PaginationMetaSchema } from "@/server/utils/pagination";
+import { notificationsService } from "@/server/entities/notification/api/notifications.service";
+import { PaginationMetaSchema } from "@/server/shared/lib/pagination";
 import { NotificationSchema } from "@/generated/zod";
 
 import {

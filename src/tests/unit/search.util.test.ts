@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
+import { normalizeSearchInput, tokenizeSearchInput } from "@/server/shared/lib/search";
 
 describe("search utils", () => {
   it("should normalize raw search input", () => {

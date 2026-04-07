@@ -2,7 +2,7 @@ import { generateText, Output } from "ai";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import { callWithFallback } from "@/server/utils/call";
+import { callWithFallback } from "@/server/shared/lib/call";
 
 const googleState = vi.hoisted(() => ({
   google: vi.fn((modelName: string) => `google:${modelName}`),
