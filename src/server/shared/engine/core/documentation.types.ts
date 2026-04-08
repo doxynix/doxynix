@@ -1,5 +1,4 @@
-import type { AnalysisCoverage, DependencyNodeMetric } from "@/server/shared/types";
-
+import type { AnalysisCoverage, DependencyNodeMetric } from "../../types";
 import type {
   ChangeCouplingRef,
   DependencyGraphEvidence,

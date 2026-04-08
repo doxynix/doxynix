@@ -1,10 +1,11 @@
+import type { FileActionPreviewResult } from "@/server/shared/types";
+
 import {
   formatQuickFileAuditMarkdown,
   type DocumentFilePreviewResult,
   type QuickFileAuditResult,
-} from "@/server/features/file-actions/model/file-actions";
-import type { SyncFileActionMeta } from "@/server/features/file-actions/model/repo-file-action-state";
-import type { FileActionPreviewResult } from "@/server/shared/types";
+} from "./file-actions";
+import type { SyncFileActionMeta } from "./repo-file-action-state";
 
 function buildContextNote(result: Pick<SyncFileActionMeta, "contextDiagnostics" | "contextMeta">) {
   if (!result.contextDiagnostics.hasContext) {

@@ -1,4 +1,5 @@
-import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
+import { normalizeRepoPath } from "@/server/shared/engine/core/common";
+import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
 import {
   toAnalysisRef,
   type AnalysisRef,
@@ -14,8 +15,6 @@ import {
   getGenericGroupPenalty,
   isMeaningfulChildNode,
   isMeaningfulTopLevelNode,
-  pickPrimarySemanticKind,
-  prettifyGroupLabel,
   rankStructureNode,
   SEMANTIC_META,
   summarizeGroupImportance,
@@ -83,7 +82,7 @@ export function buildStructureMapPayloadFromContext(
         .map(
           (edge) =>
             nodeLabelById.get(makeStructureNodeId("group", edge.target)) ??
-            prettifyGroupLabel(edge.target)
+            ProjectPolicy.getGroupLabel(edge.target)
         )
         .slice(0, 5);
       const incoming = context.rawTopLevelEdges
@@ -92,7 +91,7 @@ export function buildStructureMapPayloadFromContext(
         .map(
           (edge) =>
             nodeLabelById.get(makeStructureNodeId("group", edge.source)) ??
-            prettifyGroupLabel(edge.source)
+            ProjectPolicy.getGroupLabel(edge.source)
         )
         .slice(0, 5);
 
@@ -254,7 +253,7 @@ export function buildStructureNodePayloadFromContext(
   const { nodeType, path } = parseStructureNodeId(nodeId);
 
   if (nodeType === "file") {
-    const normalizedPath = normalizePath(path);
+    const normalizedPath = normalizeRepoPath(path);
     if (!context.allInterestingPaths.includes(normalizedPath)) return null;
 
     const entry = aggregateEntryForPaths([normalizedPath], context);
@@ -367,7 +366,7 @@ export function buildStructureNodeSummary(params: {
   path: string;
 }) {
   const uniquePathsInGroup = unique(params.entry.paths);
-  const primaryKind = pickPrimarySemanticKind(params.entry.semanticCounts);
+  const primaryKind = ProjectPolicy.getPrimarySemanticKind(params.entry.semanticCounts);
   const entrypointCount = unique(params.entry.entrypointDetails.map((item) => item.path)).length;
   const apiCount = unique(params.entry.apiPaths).length;
   const churnCount = unique(params.entry.churnHotspots.map((item) => item.path)).length;
@@ -412,7 +411,7 @@ export function buildStructureNodeSummary(params: {
     kind: primaryKind,
     label:
       params.nodeType === "group"
-        ? prettifyGroupLabel(params.path)
+        ? ProjectPolicy.getGroupLabel(params.path)
         : (params.path.split("/").filter(Boolean).at(-1) ?? params.path),
     markers: {
       api: apiCount > 0,

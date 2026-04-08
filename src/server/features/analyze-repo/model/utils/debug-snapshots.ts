@@ -1,11 +1,12 @@
 import { DocType } from "@prisma/client";
 
-import type { buildStageContextPack } from "@/server/features/analyze-repo/model/context-manager";
 import {
   PRIMARY_DOC_TYPES,
   SECONDARY_DOC_TYPES,
 } from "@/server/features/generate-docs/lib/doc-priority";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
+
+import type { buildStageContextPack } from "../context-manager";
 
 type DocumentationInputSnapshot = NonNullable<RepoMetrics["documentationInput"]>;
 type WriterPayload = {

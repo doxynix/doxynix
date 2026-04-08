@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
-import { logger } from "@/server/shared/infrastructure/logger";
+import { logger } from "../infrastructure/logger";
 
 type ErrorMapping = {
   [key: string]: string | Record<string, string> | undefined;

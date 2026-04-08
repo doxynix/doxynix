@@ -5,9 +5,8 @@ import sloc, { type Extension } from "sloc";
 
 import { normalizeLanguageName } from "@/shared/lib/utils";
 
-import { logger } from "@/server/shared/infrastructure/logger";
-import { dumpDebug } from "@/server/shared/lib/debug-logger";
-
+import { logger } from "../../infrastructure/logger";
+import { dumpDebug } from "../../lib/debug-logger";
 import { calculateDocDensity, clamp, getFileExtension, normalizeRepoPath } from "../core/common";
 import type {
   RepositoryEvidence,

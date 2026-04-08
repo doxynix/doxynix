@@ -14,7 +14,7 @@ import { buildNodeExplainPayloadFromContext, type NodeExplainPayload } from "./n
 import { buildStructureContext } from "./structure-context";
 import type { StructureContext } from "./structure-shared";
 
-export type AnalyzeEntityContext = {
+type AnalyzeEntityContext = {
   analysisRef: AnalysisRef | null;
   repo: RepoWithLatestAnalysisAndDocs;
   structureContext: StructureContext | null;

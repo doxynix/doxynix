@@ -1,3 +1,5 @@
+// TODO: тоже разгребсти типы по возможности
+
 export type TeamRole = {
   login: string;
   role: string;

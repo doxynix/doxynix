@@ -1,9 +1,10 @@
+// TODO: перевести на project policy
+
 import { XMLParser } from "fast-xml-parser";
 import pm from "picomatch";
 import YAML from "yaml";
 
-import { dumpDebug } from "@/server/shared/lib/debug-logger";
-
+import { dumpDebug } from "../../lib/debug-logger";
 import type {
   FileSignals,
   FrameworkFact,

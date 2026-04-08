@@ -1,23 +1,23 @@
 import { DocType, type Repo } from "@prisma/client";
 
-import { buildStageContextPack } from "@/server/features/analyze-repo/model/context-manager";
-import {
-  buildSectionDebugSnapshot,
-  buildWriterContextSnapshot,
-  buildWriterPlanDebugSnapshot,
-} from "@/server/features/analyze-repo/model/utils/debug-snapshots";
-import { getDocumentationInputSnapshot } from "@/server/features/analyze-repo/model/utils/input-retrieval";
-import {
-  buildWriterSectionPayloads,
-  serializeAllowedPaths,
-  serializeForWriter,
-} from "@/server/features/analyze-repo/model/utils/payload-serialization";
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "@/server/shared/engine/core/discovery.types";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { uniquePaths } from "@/server/shared/lib/array-utils";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
 
+import { buildStageContextPack } from "../context-manager";
+import {
+  buildSectionDebugSnapshot,
+  buildWriterContextSnapshot,
+  buildWriterPlanDebugSnapshot,
+} from "../utils/debug-snapshots";
+import { getDocumentationInputSnapshot } from "../utils/input-retrieval";
+import {
+  buildWriterSectionPayloads,
+  serializeAllowedPaths,
+  serializeForWriter,
+} from "../utils/payload-serialization";
 import { applyWriterFallbacks } from "./writer-fallbacks";
 import {
   executeApiWriter,
@@ -29,7 +29,6 @@ import {
   type WriterResult,
 } from "./writer-tasks";
 
-type DocumentationInputSnapshot = NonNullable<RepoMetrics["documentationInput"]>;
 type WriterTaskKey = "API" | "ARCHITECTURE" | "CHANGELOG" | "CONTRIBUTING" | "README";
 
 export async function orchestrateWriterTasks(
@@ -194,7 +193,7 @@ export async function orchestrateWriterTasks(
   } = applyWriterFallbacks(results, taskMap, repo, documentationInput, writerErrors);
 
   let swaggerYaml: string | undefined;
-  if (taskMap.API != null && generatedApiMarkdown) {
+  if (taskMap.API != null && generatedApiMarkdown != null) {
     const yamlMatch = RegExp(/```yaml([\s\S]*?)```/).exec(generatedApiMarkdown);
     if (yamlMatch) {
       swaggerYaml = yamlMatch[1].trim();

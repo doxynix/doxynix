@@ -1,8 +1,6 @@
-import type {
-  NodeContextDiagnostics,
-  NodeContextMeta,
-} from "@/server/features/file-actions/model/repo-node-context";
 import type { AnalysisRef } from "@/server/shared/infrastructure/repo-snapshots";
+
+import type { NodeContextDiagnostics, NodeContextMeta } from "./repo-node-context";
 
 export type ContentRefInput = {
   analysisId?: string;

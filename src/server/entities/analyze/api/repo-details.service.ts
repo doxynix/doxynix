@@ -4,19 +4,20 @@ import { TRPCError } from "@trpc/server";
 
 import { highlightCode } from "@/shared/lib/shiki";
 
-import { repoDetailsPresenter } from "@/server/entities/analyze/api/repo-details.presenter";
-import { createAnalyzeContextBuilder } from "@/server/entities/analyze/lib/analyze-context-builder";
-import {
-  buildInteractiveBriefNodePayload,
-  buildInteractiveBriefPanel,
-  buildInteractiveBriefPayload,
-} from "@/server/entities/analyze/lib/brief";
 import type { DbClient } from "@/server/shared/infrastructure/db";
 import {
   getLatestCompletedAnalysis,
   getRepoWithLatestAnalysisAndDocs,
 } from "@/server/shared/infrastructure/repo-snapshots";
 import { markdownToHtml } from "@/server/shared/lib/markdown-to-html";
+
+import { createAnalyzeContextBuilder } from "../lib/analyze-context-builder";
+import {
+  buildInteractiveBriefNodePayload,
+  buildInteractiveBriefPanel,
+  buildInteractiveBriefPayload,
+} from "../lib/brief";
+import { repoDetailsPresenter } from "./repo-details.presenter";
 
 type ExplainPayload = NonNullable<
   ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getNodeExplain"]>

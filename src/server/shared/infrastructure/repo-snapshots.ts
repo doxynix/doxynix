@@ -1,3 +1,5 @@
+// TODO: подумать как его нормально разнести
+
 import { type Prisma } from "@prisma/client";
 
 import type { DbClient } from "@/server/shared/infrastructure/db";

@@ -1,18 +1,17 @@
-import { dumpDebug } from "@/server/shared/lib/debug-logger";
-
+import { dumpDebug } from "../../lib/debug-logger";
 import { buildEvidence, clamp } from "../core/common";
-import { RISK_SCORING } from "../core/scoring-constants";
 import type {
   ChangeCouplingRef,
   DependencyGraphEvidence,
   HotspotSignal,
-  RepoMetrics,
   RepositoryEvidence,
   RiskDerivedScores,
   RiskFindingRef,
   RiskRawMetrics,
-  RisksSectionBody,
-} from "../core/types";
+} from "../core/discovery.types";
+import type { RisksSectionBody } from "../core/documentation.types";
+import type { RepoMetrics } from "../core/metrics.types";
+import { RISK_SCORING } from "../core/scoring-constants";
 
 function severityForScore(score: number): RiskFindingRef["severity"] {
   if (score >= 85) return "CRITICAL";

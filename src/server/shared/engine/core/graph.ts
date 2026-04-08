@@ -3,8 +3,7 @@ import { DirectedGraph } from "graphology";
 import * as languages from "linguist-languages";
 import ts from "typescript";
 
-import { dumpDebug } from "@/server/shared/lib/debug-logger";
-
+import { dumpDebug } from "../../lib/debug-logger";
 import { normalizeRepoPath } from "./common";
 
 export type AliasRule = {
@@ -38,7 +37,7 @@ const RELATIVE_IMPORT_SUFFIXES = [
 ];
 
 export function resolveRelativeImport(fromPath: string, importPath: string, fileSet: Set<string>) {
-  const normalizedImport = importPath.replaceAll("\\", "/");
+  const normalizedImport = normalizeRepoPath(importPath);
   if (!normalizedImport.startsWith(".")) return null;
 
   const basePath = path.posix.normalize(

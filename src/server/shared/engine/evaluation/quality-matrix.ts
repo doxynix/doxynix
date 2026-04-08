@@ -1,6 +1,7 @@
+import type { RepositoryFact, RepositoryFinding } from "../../types";
 import type { RepositoryEvidence } from "../core/discovery.types";
 import type { DocumentationInputModel, ReportSectionKind } from "../core/documentation.types";
-import type { RepoMetrics, RepositoryFact, RepositoryFinding } from "../core/metrics.types";
+import type { RepoMetrics } from "../core/metrics.types";
 
 export type EvaluationStatus =
   | "manual-review-required"

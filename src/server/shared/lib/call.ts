@@ -2,11 +2,8 @@ import { google } from "@ai-sdk/google";
 import { generateText, Output } from "ai";
 import type z from "zod";
 
-import {
-  LLM_TEMPERATURE_STRATEGY,
-  type LLMTaskType,
-} from "@/server/shared/engine/core/scoring-constants";
-import { logger } from "@/server/shared/infrastructure/logger";
+import { LLM_TEMPERATURE_STRATEGY, type LLMTaskType } from "../engine/core/scoring-constants";
+import { logger } from "../infrastructure/logger";
 
 type CallWithFallbackProps<T> = {
   attemptMetadata?: Record<string, unknown>;

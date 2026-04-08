@@ -1,7 +1,6 @@
 import "server-only";
 
-import { logger } from "@/server/shared/infrastructure/logger";
-
+import { logger } from "../../infrastructure/logger";
 import type {
   FileSignals,
   RepositoryFile,

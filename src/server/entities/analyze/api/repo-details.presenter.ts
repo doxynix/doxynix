@@ -1,6 +1,6 @@
-import {
-  type LatestCompletedAnalysis,
-  type RepoWithLatestAnalysisAndDocs,
+import type {
+  LatestCompletedAnalysis,
+  RepoWithLatestAnalysisAndDocs,
 } from "@/server/shared/infrastructure/repo-snapshots";
 import { hasText } from "@/server/shared/lib/string-utils";
 

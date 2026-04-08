@@ -1,4 +1,5 @@
 import { normalizeRepoPath } from "./common";
+import type { EntrypointKind, ModuleRef } from "./discovery.types";
 import type {
   CollectedFileEvidence,
   DependencyTracking,
@@ -6,7 +7,6 @@ import type {
   NormalizedRepositoryFile,
 } from "./evidence-support";
 import { ProjectPolicy } from "./project-policy";
-import type { EntrypointKind, ModuleRef } from "./types";
 
 export function kindForFile(path: string, categories: string[]): EntrypointKind {
   if (categories.includes("benchmark")) return "benchmark";

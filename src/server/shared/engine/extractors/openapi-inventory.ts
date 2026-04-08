@@ -1,9 +1,8 @@
 import pm from "picomatch";
 import YAML from "yaml";
 
-import { logger } from "@/server/shared/infrastructure/logger";
-import type { OpenApiInventory } from "@/server/shared/types";
-
+import { logger } from "../../infrastructure/logger";
+import type { OpenApiInventory } from "../../types";
 import { PATH_PATTERNS } from "../core/project-policy-rules";
 
 const isSpecFile = pm([...PATH_PATTERNS.OPENAPI]);

@@ -1,5 +1,4 @@
-import type { DependencyNodeMetric } from "@/server/shared/types";
-
+import type { DependencyNodeMetric } from "../../types";
 import type {
   ConfigRef,
   EntrypointRef,

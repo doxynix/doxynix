@@ -1,6 +1,5 @@
-import { dumpDebug } from "@/server/shared/lib/debug-logger";
-import type { DependencyNodeMetric } from "@/server/shared/types";
-
+import { dumpDebug } from "../../lib/debug-logger";
+import type { DependencyNodeMetric } from "../../types";
 import { clamp } from "./common";
 import type {
   FileComplexity,

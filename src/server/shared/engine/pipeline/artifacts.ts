@@ -1,7 +1,6 @@
-import { dumpDebug } from "@/server/shared/lib/debug-logger";
-
+import { dumpDebug } from "../../lib/debug-logger";
 import { buildEvidence, clamp } from "../core/common";
-import type { ArtifactBuildParams, ArtifactBuildResult } from "../core/types";
+import type { ArtifactBuildParams, ArtifactBuildResult } from "../core/metrics.types";
 import {
   buildReferenceEvidencePaths,
   getPrimaryArchitectureModules,

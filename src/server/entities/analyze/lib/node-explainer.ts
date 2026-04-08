@@ -1,4 +1,4 @@
-import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
+import { normalizeRepoPath } from "@/server/shared/engine/core/common";
 import {
   toAnalysisRef,
   type AnalysisRef,
@@ -32,9 +32,9 @@ export function buildNodeExplainPayloadFromContext(
 
   const sourcePaths = unique([
     ...scopedPaths,
-    ...signals.facts.flatMap((fact) => fact.evidence.map((item) => normalizePath(item.path))),
+    ...signals.facts.flatMap((fact) => fact.evidence.map((item) => normalizeRepoPath(item.path))),
     ...signals.findings.flatMap((finding) =>
-      finding.evidence.map((item) => normalizePath(item.path))
+      finding.evidence.map((item) => normalizeRepoPath(item.path))
     ),
   ]).slice(0, 8);
 
@@ -133,7 +133,7 @@ type ExplainNodeLike = {
     entrypointCount: number;
   };
 };
-export function buildNodeRole(node: ExplainNodeLike, semanticLabel: string) {
+function buildNodeRole(node: ExplainNodeLike, semanticLabel: string) {
   if (node.nodeType === "file") {
     if (node.markers.entrypoint) return "File with localized entrypoint significance";
     if (node.markers.api) return "File participating in the public API surface";
@@ -209,7 +209,7 @@ export function buildNodeExplainSummary(params: {
   return unique(lines).slice(0, 4);
 }
 
-export function buildExplainConfidence(params: {
+function buildExplainConfidence(params: {
   findingsCount: number;
   node: ExplainNodeLike;
   sourcePathCount: number;

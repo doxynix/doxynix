@@ -1,4 +1,4 @@
-import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
+import { normalizeRepoPath } from "@/server/shared/engine/core/common";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
 import { unique } from "@/server/shared/lib/array-utils";
@@ -72,27 +72,16 @@ export const SEMANTIC_META: Record<StructureSemanticKind, { description: string;
       label: "Module",
     },
   };
-export function deriveGroupId(path: string) {
-  return ProjectPolicy.deriveGroupId(path);
-}
-export function prettifyGroupLabel(groupId: string) {
-  return ProjectPolicy.getGroupLabel(groupId);
-}
+
 export function collectSemanticKinds(path: string, apiPaths: Set<string>): StructureSemanticKind[] {
   return ProjectPolicy.getSemanticKinds(path, { apiPaths }) as StructureSemanticKind[];
 }
-export function pickPrimarySemanticKind(
-  counts: Record<StructureSemanticKind, number>
-): StructureSemanticKind {
-  return ProjectPolicy.getPrimarySemanticKind(counts);
-}
+
 export function describeGroup(groupId: string, primaryKind: StructureSemanticKind) {
-  const label = prettifyGroupLabel(groupId);
+  const label = ProjectPolicy.getGroupLabel(groupId);
   return `${label}: ${SEMANTIC_META[primaryKind].description}`;
 }
-export function isBroadGenericGroupPath(groupPath: string) {
-  return ProjectPolicy.isBroadGenericGroupPath(groupPath);
-}
+
 export function getGenericGroupPenalty(node: StructureNodeSummaryLike) {
   if (node.nodeType !== "group") return 0;
 
@@ -108,24 +97,24 @@ export function getGenericGroupPenalty(node: StructureNodeSummaryLike) {
 
   return Math.max(0, penalty);
 }
+
 export function isLikelyBarrelPath(path: string) {
-  const normalized = normalizePath(path).toLowerCase();
+  const normalized = normalizeRepoPath(path).toLowerCase();
   return /(^|\/)index\.(ts|tsx|js|jsx|mts|cts)$/u.test(normalized);
 }
+
 export function buildGroupKeySet(paths: string[], _apiPaths: Set<string>) {
-  return unique(paths.map((path) => deriveGroupId(path)));
+  return unique(paths.map((path) => ProjectPolicy.deriveGroupId(path)));
 }
 
 export function getPrimaryKindForEntry(entry: StructureGroupEntry) {
-  return pickPrimarySemanticKind(entry.semanticCounts);
+  return ProjectPolicy.getPrimarySemanticKind(entry.semanticCounts);
 }
+
 export function filterMeaningfulEntrypoints(paths: string[]) {
-  const normalized = unique(paths.filter(hasText).map((path) => normalizePath(path)));
+  const normalized = unique(paths.filter(hasText).map((path) => normalizeRepoPath(path)));
   const nonBarrel = normalized.filter((path) => !isLikelyBarrelPath(path));
   return nonBarrel.length > 0 ? nonBarrel : normalized;
-}
-export function isNoisyConfigOnlyPath(path: string) {
-  return ProjectPolicy.isLowSignalConfig(path);
 }
 
 export function summarizeGroupImportance(params: {
@@ -166,6 +155,7 @@ export function summarizeGroupImportance(params: {
 
   return `${describeGroup(params.groupId, params.primaryKind)} This area ${reasons.join(", ")}.`;
 }
+
 export function getStructureSeedScore(params: {
   apiPaths: Set<string>;
   graphRelatedPaths: Set<string>;
@@ -176,7 +166,7 @@ export function getStructureSeedScore(params: {
     Set<"api" | "config" | "entrypoint" | "fact" | "finding" | "hotspot" | "onboarding">
   >;
 }) {
-  const normalizedPath = normalizePath(params.path);
+  const normalizedPath = normalizeRepoPath(params.path);
   const signals = params.signalMap.get(normalizedPath) ?? new Set();
   let score = 0;
 
@@ -184,7 +174,7 @@ export function getStructureSeedScore(params: {
   if (signals.has("api")) score += 4;
   if (signals.has("hotspot") || signals.has("finding")) score += 4;
   if (signals.has("fact") || signals.has("onboarding")) score += 3;
-  if (signals.has("config") && !isNoisyConfigOnlyPath(normalizedPath)) score += 1;
+  if (signals.has("config") && !ProjectPolicy.isLowSignalConfig(normalizedPath)) score += 1;
 
   if (params.graphRelatedPaths.has(normalizedPath)) score += 3;
   if ((params.metrics.documentationInput?.api.publicSurfacePaths ?? []).includes(normalizedPath))
@@ -194,15 +184,19 @@ export function getStructureSeedScore(params: {
   if (ProjectPolicy.isApiPath(normalizedPath)) score += 2;
   if (ProjectPolicy.isArchitectureRelevant(normalizedPath)) score += 2;
   if (ProjectPolicy.isPrimaryEntrypoint(normalizedPath)) score += 2;
-  if (ProjectPolicy.isConfigFile(normalizedPath) && !isNoisyConfigOnlyPath(normalizedPath))
+  if (
+    ProjectPolicy.isConfigFile(normalizedPath) &&
+    !ProjectPolicy.isLowSignalConfig(normalizedPath)
+  )
     score += 1;
 
-  const groupId = deriveGroupId(normalizedPath);
-  if (isBroadGenericGroupPath(groupId)) score -= 2;
+  const groupId = ProjectPolicy.deriveGroupId(normalizedPath);
+  if (ProjectPolicy.isBroadGenericGroupPath(groupId)) score -= 2;
   if (normalizedPath.split("/").filter(Boolean).length <= 1) score -= 2;
 
   return score;
 }
+
 export function shouldKeepStructurePath(
   path: string,
   signalMap: Map<
@@ -213,7 +207,7 @@ export function shouldKeepStructurePath(
   apiPaths: Set<string>,
   graphRelatedPaths: Set<string>
 ) {
-  const normalizedPath = normalizePath(path);
+  const normalizedPath = normalizeRepoPath(path);
   if (ProjectPolicy.isSensitive(normalizedPath)) return false;
   if (ProjectPolicy.isIgnored(normalizedPath)) return false;
 
@@ -227,7 +221,7 @@ export function shouldKeepStructurePath(
     signals.has("onboarding");
 
   if (hasStrongSignal) return true;
-  if (signals.has("config")) return !isNoisyConfigOnlyPath(normalizedPath);
+  if (signals.has("config")) return !ProjectPolicy.isLowSignalConfig(normalizedPath);
   if (ProjectPolicy.isLikelyBarrelFile(normalizedPath)) return false;
   if (ProjectPolicy.isDocsFile(normalizedPath)) return false;
   if (ProjectPolicy.isGeneratedFile(normalizedPath)) return false;
@@ -245,6 +239,7 @@ export function shouldKeepStructurePath(
     }) >= 2
   );
 }
+
 export function rankStructureNode(node: StructureNodeSummaryLike) {
   let rank = node.score;
   if (node.nodeType === "group") rank += 6;
@@ -258,9 +253,10 @@ export function rankStructureNode(node: StructureNodeSummaryLike) {
   rank -= getGenericGroupPenalty(node);
   return rank;
 }
+
 export function isMeaningfulTopLevelNode(node: StructureNodeSummaryLike) {
   if (
-    isBroadGenericGroupPath(node.path) &&
+    ProjectPolicy.isBroadGenericGroupPath(node.path) &&
     !node.markers.entrypoint &&
     !node.markers.api &&
     !node.markers.risk &&
@@ -274,6 +270,7 @@ export function isMeaningfulTopLevelNode(node: StructureNodeSummaryLike) {
   if (node.stats.pathCount >= 2) return true;
   return node.kind !== "unknown";
 }
+
 export function isMeaningfulChildNode(node: StructureNodeSummaryLike) {
   if (node.nodeType === "group") {
     return (
@@ -294,6 +291,7 @@ export function isMeaningfulChildNode(node: StructureNodeSummaryLike) {
   if (ProjectPolicy.isLikelyBarrelFile(node.path)) return false;
   return ProjectPolicy.isArchitectureRelevant(node.path) || ProjectPolicy.isApiPath(node.path);
 }
+
 export function collectGroupsByKind(groupMap: Map<string, StructureGroupEntry>) {
   const byKind = new Map<StructureSemanticKind, string[]>();
 
@@ -306,6 +304,7 @@ export function collectGroupsByKind(groupMap: Map<string, StructureGroupEntry>) 
 
   return byKind;
 }
+
 export function getStrongGroups(
   groups: string[] | undefined,
   groupMap: Map<string, StructureGroupEntry>,

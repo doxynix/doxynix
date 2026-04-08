@@ -1,8 +1,3 @@
-import { AI_MODELS, SAFETY_SETTINGS } from "@/server/features/analyze-repo/lib/constants";
-import {
-  MAPPER_SYSTEM_PROMPT,
-  MAPPER_USER_PROMPT,
-} from "@/server/features/analyze-repo/lib/prompts-refactored";
 import {
   projectMapSchema,
   type ProjectMap,
@@ -12,6 +7,8 @@ import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { callWithFallback } from "@/server/shared/lib/call";
 
+import { AI_MODELS, SAFETY_SETTINGS } from "../../lib/constants";
+import { MAPPER_SYSTEM_PROMPT, MAPPER_USER_PROMPT } from "../../lib/prompts-refactored";
 import { buildMapperSkeleton } from "../mapper-skeleton";
 
 export async function executeMapperPhase(

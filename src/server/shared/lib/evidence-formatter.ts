@@ -4,8 +4,7 @@
  * Provides consistent transformation and escaping across all evidence types.
  */
 
-import { logger } from "@/server/shared/infrastructure/logger";
-
+import { logger } from "../infrastructure/logger";
 import { escapePromptXmlAttr, escapePromptXmlText } from "./string-utils";
 
 /**

@@ -1,15 +1,16 @@
 import { z } from "zod";
 
-import { AI_MODELS } from "@/server/features/analyze-repo/lib/constants";
-import {
-  CODE_DOC_SYSTEM_PROMPT,
-  CODE_DOC_USER_PROMPT,
-  SINGLE_FILE_ANALYSIS_PROMPT,
-} from "@/server/features/analyze-repo/lib/prompts-refactored";
 import { normalizeRepoPath } from "@/server/shared/engine/core/common";
 import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
 import { callWithFallback } from "@/server/shared/lib/call";
 import { cleanCodeForAi } from "@/server/shared/lib/optimizers";
+
+import { AI_MODELS } from "../../analyze-repo/lib/constants";
+import {
+  CODE_DOC_SYSTEM_PROMPT,
+  CODE_DOC_USER_PROMPT,
+  SINGLE_FILE_ANALYSIS_PROMPT,
+} from "../../analyze-repo/lib/prompts-refactored";
 
 const FileActionConfidenceSchema = z.enum(["high", "medium", "low"]);
 

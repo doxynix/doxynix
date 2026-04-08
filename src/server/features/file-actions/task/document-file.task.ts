@@ -1,9 +1,6 @@
 import { task } from "@trigger.dev/sdk/v3";
 
-import {
-  runDocumentFilePreview,
-  type FileActionNodeContext,
-} from "@/server/features/file-actions/model/file-actions";
+import { runDocumentFilePreview, type FileActionNodeContext } from "../model/file-actions";
 
 export const documentFileTask = task({
   id: "document-single-file",

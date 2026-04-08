@@ -4,7 +4,7 @@ import {
   formatQuickFileAuditMarkdown,
   runQuickFileAudit,
   type FileActionNodeContext,
-} from "@/server/features/file-actions/model/file-actions";
+} from "../model/file-actions";
 
 export const analyzeFileTask = task({
   id: "analyze-single-file",

@@ -1,8 +1,7 @@
 import path from "node:path";
 import ts from "typescript";
 
-import type { TsStaticHint } from "@/server/shared/types";
-
+import type { TsStaticHint } from "../../types";
 import { normalizeRepoPath } from "../core/common";
 
 const TS_LIKE = new Set([".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"]);

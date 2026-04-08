@@ -1,5 +1,5 @@
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
-import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
+import { normalizeRepoPath } from "@/server/shared/engine/core/common";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
 import type { RepoWithLatestAnalysisAndDocs } from "@/server/shared/infrastructure/repo-snapshots";
@@ -11,10 +11,8 @@ import { coerceAnalysisPayload } from "./payload";
 import {
   buildGroupKeySet,
   collectSemanticKinds,
-  deriveGroupId,
   filterMeaningfulEntrypoints,
   isLikelyBarrelPath,
-  prettifyGroupLabel,
   shouldKeepStructurePath,
 } from "./semantics";
 import { collectScopedEntrySignals } from "./signals";
@@ -28,14 +26,14 @@ import {
 } from "./structure-shared";
 
 export function buildBreadcrumbs(nodeType: StructureNodeType, path: string) {
-  const parts = normalizePath(path).split("/").filter(Boolean);
+  const parts = normalizeRepoPath(path).split("/").filter(Boolean);
   if (parts.length === 0) return [];
 
   const breadcrumbs = parts.slice(0, -1).map((_, index) => {
     const crumbPath = parts.slice(0, index + 1).join("/");
     return {
       id: makeStructureNodeId("group", crumbPath),
-      label: prettifyGroupLabel(crumbPath),
+      label: ProjectPolicy.getGroupLabel(crumbPath),
       nodeType: "group" as const,
       path: crumbPath,
     };
@@ -46,7 +44,7 @@ export function buildBreadcrumbs(nodeType: StructureNodeType, path: string) {
       ...breadcrumbs,
       {
         id: makeStructureNodeId("group", path),
-        label: prettifyGroupLabel(path),
+        label: ProjectPolicy.getGroupLabel(path),
         nodeType: "group" as const,
         path,
       },
@@ -70,7 +68,7 @@ export function collectNodeScopePaths(
   path: string
 ) {
   if (nodeType === "file") {
-    const normalizedPath = normalizePath(path);
+    const normalizedPath = normalizeRepoPath(path);
     return context.allInterestingPaths.includes(normalizedPath) ? [normalizedPath] : [];
   }
 
@@ -79,7 +77,7 @@ export function collectNodeScopePaths(
   );
 }
 export function aggregateEntryForPaths(paths: string[], context: StructureContext) {
-  const normalizedPaths = unique(paths.map((path) => normalizePath(path)));
+  const normalizedPaths = unique(paths.map((path) => normalizeRepoPath(path)));
   const pathSet = new Set(normalizedPaths);
   const entry = createEmptyGroupEntry();
 
@@ -95,14 +93,14 @@ export function aggregateEntryForPaths(paths: string[], context: StructureContex
   }
 
   for (const entrypoint of context.metrics.entrypointDetails ?? []) {
-    const normalizedEntrypointPath = normalizePath(entrypoint.path);
+    const normalizedEntrypointPath = normalizeRepoPath(entrypoint.path);
     if (pathSet.has(normalizedEntrypointPath)) {
       entry.entrypointDetails.push(entrypoint);
     }
   }
 
   for (const finding of context.aiResult.findings ?? []) {
-    if (finding.evidence.some((item) => pathSet.has(normalizePath(item.path)))) {
+    if (finding.evidence.some((item) => pathSet.has(normalizeRepoPath(item.path)))) {
       entry.riskTitles.push(finding.title);
     }
   }
@@ -145,7 +143,7 @@ export function collectInterestingPaths(
       ),
     ]
       .filter(hasText)
-      .map((path) => normalizePath(path))
+      .map((path) => normalizeRepoPath(path))
   );
 }
 export function collectStructureSignalMap(params: {
@@ -164,7 +162,7 @@ export function collectStructureSignalMap(params: {
   ) {
     for (const rawPath of paths) {
       if (!hasText(rawPath)) continue;
-      const path = normalizePath(rawPath);
+      const path = normalizeRepoPath(rawPath);
       const current = map.get(path) ?? new Set();
       current.add(signal);
       map.set(path, current);
@@ -201,8 +199,8 @@ export function collectStructureSignalMap(params: {
 export function buildGraphRelatedPathSet(metrics: RepoMetrics) {
   return new Set(
     (metrics.graphPreviewEdges ?? []).flatMap((edge) => [
-      normalizePath(edge.fromPath),
-      normalizePath(edge.toPath),
+      normalizeRepoPath(edge.fromPath),
+      normalizeRepoPath(edge.toPath),
     ])
   );
 }
@@ -217,7 +215,7 @@ export function buildStructureContext(
   const apiPaths = buildApiPathSet(metrics);
   const graphRelatedPaths = buildGraphRelatedPathSet(metrics);
   const meaningfulEntrypoints = filterMeaningfulEntrypoints(metrics.entrypoints);
-  const normalizedConfigInventory = metrics.configInventory.map((path) => normalizePath(path));
+  const normalizedConfigInventory = metrics.configInventory.map((path) => normalizeRepoPath(path));
   const signalMap = collectStructureSignalMap({ aiResult, meaningfulEntrypoints, metrics });
   const allInterestingPaths = collectInterestingPaths(
     aiResult,
@@ -230,7 +228,7 @@ export function buildStructureContext(
   const groupMap = new Map<string, StructureGroupEntry>();
 
   for (const path of allInterestingPaths) {
-    const groupId = deriveGroupId(path);
+    const groupId = ProjectPolicy.deriveGroupId(path);
     const current = groupMap.get(groupId) ?? createEmptyGroupEntry();
     current.paths.push(path);
     if (apiPaths.has(path)) current.apiPaths.push(path);
@@ -250,8 +248,8 @@ export function buildStructureContext(
       !ProjectPolicy.isSensitive(item.path) &&
       !ProjectPolicy.isLowSignalConfig(item.path)
   )) {
-    const normalizedEntrypointPath = normalizePath(entrypoint.path);
-    const groupId = deriveGroupId(normalizedEntrypointPath);
+    const normalizedEntrypointPath = normalizeRepoPath(entrypoint.path);
+    const groupId = ProjectPolicy.deriveGroupId(normalizedEntrypointPath);
     const current = groupMap.get(groupId) ?? createEmptyGroupEntry();
     current.entrypointDetails.push(entrypoint);
     current.paths.push(normalizedEntrypointPath);
@@ -263,7 +261,7 @@ export function buildStructureContext(
 
   for (const finding of aiResult.findings ?? []) {
     const findingGroups = buildGroupKeySet(
-      finding.evidence.map((item) => normalizePath(item.path)),
+      finding.evidence.map((item) => normalizeRepoPath(item.path)),
       apiPaths
     );
     for (const groupId of findingGroups) {
@@ -307,6 +305,6 @@ export function buildApiPathSet(metrics: RepoMetrics) {
     unique([
       ...(metrics.routeInventory?.sourceFiles ?? []),
       ...(metrics.documentationInput?.api.publicSurfacePaths ?? []),
-    ]).map((path) => normalizePath(path))
+    ]).map((path) => normalizeRepoPath(path))
   );
 }

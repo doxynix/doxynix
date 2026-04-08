@@ -16,7 +16,6 @@ import type {
   ChangeCouplingRef,
   EntrypointRef,
   FileCategoryBreakdownItem,
-  FileComplexity,
   FrameworkFact,
   GraphPreviewEdge,
   HotspotSignal,
@@ -129,15 +128,4 @@ export type ArtifactBuildParams = {
 export type ArtifactBuildResult = {
   facts: RepositoryFact[];
   findings: RepositoryFinding[];
-};
-
-export type {
-  AnalysisCoverage,
-  ChurnHotspot,
-  FileComplexity,
-  OpenApiInventory,
-  RepositoryFact,
-  RepositoryFinding,
-  TeamRole,
-  TsStaticHint,
 };

@@ -1,5 +1,5 @@
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
-import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
+import { normalizeRepoPath } from "@/server/shared/engine/core/common";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
 import { unique } from "@/server/shared/lib/array-utils";
@@ -7,7 +7,6 @@ import { unique } from "@/server/shared/lib/array-utils";
 import {
   buildGroupKeySet,
   collectGroupsByKind,
-  deriveGroupId,
   filterMeaningfulEntrypoints,
   getStrongGroups,
 } from "./semantics";
@@ -30,26 +29,26 @@ type StructureNodeSummaryLike = {
   path: string;
 };
 
-export function addWeightedEdge(
+function addWeightedEdge(
   edges: Map<
     string,
     { relation: StructureEdgeRelationType; source: string; target: string; weight: number }
   >,
-  source: string,
-  target: string,
+  fromNode: string,
+  toNode: string,
   relation: StructureEdgeRelationType,
   weight = 1
 ) {
-  if (source === target) return;
-  const key = `${source}:${target}:${relation}`;
+  if (fromNode === toNode) return;
+  const key = `${fromNode}:${toNode}:${relation}`;
   const current = edges.get(key);
   if (current == null) {
-    edges.set(key, { relation, source, target, weight });
+    edges.set(key, { relation, source: fromNode, target: toNode, weight });
     return;
   }
   current.weight += weight;
 }
-export function connectGroupSet(
+function connectGroupSet(
   edges: Map<
     string,
     { relation: StructureEdgeRelationType; source: string; target: string; weight: number }
@@ -67,7 +66,7 @@ export function connectGroupSet(
     }
   }
 }
-export function addGraphPreviewEdges(params: {
+function addGraphPreviewEdges(params: {
   apiPaths: Set<string>;
   edges: Map<
     string,
@@ -76,8 +75,8 @@ export function addGraphPreviewEdges(params: {
   metrics: RepoMetrics;
 }) {
   for (const edge of params.metrics.graphPreviewEdges ?? []) {
-    const sourcePath = normalizePath(edge.fromPath);
-    const targetPath = normalizePath(edge.toPath);
+    const sourcePath = normalizeRepoPath(edge.fromPath);
+    const targetPath = normalizeRepoPath(edge.toPath);
 
     if (sourcePath === targetPath) continue;
     if (ProjectPolicy.isSensitive(sourcePath) || ProjectPolicy.isSensitive(targetPath)) {
@@ -85,8 +84,8 @@ export function addGraphPreviewEdges(params: {
     }
     if (ProjectPolicy.isIgnored(sourcePath) || ProjectPolicy.isIgnored(targetPath)) continue;
 
-    const sourceGroup = deriveGroupId(sourcePath);
-    const targetGroup = deriveGroupId(targetPath);
+    const sourceGroup = ProjectPolicy.deriveGroupId(sourcePath);
+    const targetGroup = ProjectPolicy.deriveGroupId(targetPath);
     if (sourceGroup === targetGroup) continue;
 
     const relation: StructureEdgeRelationType =
@@ -99,7 +98,7 @@ export function addGraphPreviewEdges(params: {
     addWeightedEdge(params.edges, sourceGroup, targetGroup, relation, Math.max(1, edge.weight));
   }
 }
-export function connectDirectionalGroups(
+function connectDirectionalGroups(
   edges: Map<
     string,
     { relation: StructureEdgeRelationType; source: string; target: string; weight: number }
@@ -115,7 +114,7 @@ export function connectDirectionalGroups(
     }
   }
 }
-export function addSemanticTopologyEdges(
+function addSemanticTopologyEdges(
   edges: Map<
     string,
     { relation: StructureEdgeRelationType; source: string; target: string; weight: number }
@@ -266,7 +265,7 @@ export function buildDrilldownEdges(params: {
   function connectPaths(paths: string[], relation: StructureEdgeRelationType, weight: number) {
     const ids = unique(
       paths
-        .map((path) => resolveImmediateChildScope(params.parentPath, normalizePath(path)))
+        .map((path) => resolveImmediateChildScope(params.parentPath, normalizeRepoPath(path)))
         .filter((scope): scope is NonNullable<typeof scope> => scope != null)
         .map((scope) => makeStructureNodeId(scope.nodeType, scope.path))
         .filter((id) => childIdSet.has(id))
@@ -287,9 +286,12 @@ export function buildDrilldownEdges(params: {
     for (const edge of params.context.metrics.graphPreviewEdges ?? []) {
       const sourceScope = resolveImmediateChildScope(
         params.parentPath,
-        normalizePath(edge.fromPath)
+        normalizeRepoPath(edge.fromPath)
       );
-      const targetScope = resolveImmediateChildScope(params.parentPath, normalizePath(edge.toPath));
+      const targetScope = resolveImmediateChildScope(
+        params.parentPath,
+        normalizeRepoPath(edge.toPath)
+      );
 
       if (sourceScope == null || targetScope == null) continue;
 
@@ -299,8 +301,8 @@ export function buildDrilldownEdges(params: {
       if (!childIdSet.has(sourceId) || !childIdSet.has(targetId)) continue;
 
       const relation: StructureEdgeRelationType =
-        params.context.apiPaths.has(normalizePath(edge.fromPath)) ||
-        params.context.apiPaths.has(normalizePath(edge.toPath))
+        params.context.apiPaths.has(normalizeRepoPath(edge.fromPath)) ||
+        params.context.apiPaths.has(normalizeRepoPath(edge.toPath))
           ? "api"
           : ProjectPolicy.isConfigFile(edge.fromPath) || ProjectPolicy.isConfigFile(edge.toPath)
             ? "config"

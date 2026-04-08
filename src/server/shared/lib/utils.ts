@@ -5,11 +5,10 @@ import { isBinaryFile } from "isbinaryfile";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
-import { prisma } from "@/server/shared/infrastructure/db";
-import { logger } from "@/server/shared/infrastructure/logger";
-import { realtimeServer } from "@/server/shared/infrastructure/realtime";
-
 import { ProjectPolicy } from "../engine/core/project-policy";
+import { prisma } from "../infrastructure/db";
+import { logger } from "../infrastructure/logger";
+import { realtimeServer } from "../infrastructure/realtime";
 
 export async function handleError(
   error: unknown,

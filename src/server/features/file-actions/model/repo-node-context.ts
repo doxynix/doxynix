@@ -1,7 +1,8 @@
 import { createAnalyzeContextBuilder } from "@/server/entities/analyze/lib/analyze-context-builder";
-import type { FileActionNodeContext } from "@/server/features/file-actions/model/file-actions";
 import type { DbClient } from "@/server/shared/infrastructure/db";
 import { getRepoWithLatestAnalysisAndDocs } from "@/server/shared/infrastructure/repo-snapshots";
+
+import type { FileActionNodeContext } from "./file-actions";
 
 export type NodeContext = Omit<
   FileActionNodeContext,

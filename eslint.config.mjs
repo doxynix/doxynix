@@ -419,9 +419,9 @@ export default defineConfig([
 
   {
     files: [
-      "src/server/engine/extractors/regex-signal-specs.ts",
-      "src/server/engine/extractors/tree-sitter-signals.ts",
-      "src/server/engine/core/graph.ts",
+      "src/server/shared/engine/extractors/regex-signal-specs.ts",
+      "src/server/shared/engine/extractors/tree-sitter-signals.ts",
+      "src/server/shared/engine/core/graph.ts",
     ],
     rules: {
       "sonarjs/concise-regex": "off",
@@ -433,9 +433,9 @@ export default defineConfig([
 
   {
     files: [
-      "src/server/engine/extractors/tree-sitter-signals.ts",
-      "src/server/engine/core/fact-collector.ts",
-      "src/server/engine/extractors/openapi-inventory.ts",
+      "src/server/shared/engine/extractors/tree-sitter-signals.ts",
+      "src/server/shared/engine/core/fact-collector.ts",
+      "src/server/shared/engine/extractors/openapi-inventory.ts",
     ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
@@ -446,8 +446,8 @@ export default defineConfig([
 
   {
     files: [
-      "src/server/engine/metrics/code-metrics.ts",
-      "src/server/engine/metrics/common-metrics.ts",
+      "src/server/shared/engine/metrics/code-metrics.ts",
+      "src/server/shared/engine/metrics/common-metrics.ts",
     ],
     rules: {
       "import/no-cycle": "off",

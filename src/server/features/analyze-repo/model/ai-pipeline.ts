@@ -1,11 +1,11 @@
-import { type DocType, type Repo, type Status } from "@prisma/client";
+import type { DocType, Repo, Status } from "@prisma/client";
 
-import { buildArchitectDigest } from "@/server/features/analyze-repo/model/architect-digest";
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "@/server/shared/engine/core/discovery.types";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import type { RepositoryFact, RepositoryFinding } from "@/server/shared/types";
 
+import { buildArchitectDigest } from "./architect-digest";
 import { executeArchitectPhase } from "./stages/architect-stage";
 import { executeMapperPhase } from "./stages/mapper-stage";
 import { executeSentinelPhase } from "./stages/sentinel-stage";

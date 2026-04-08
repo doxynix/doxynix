@@ -4,8 +4,7 @@
  * Centralizes escaping, sanitization, and validation logic.
  */
 
-import { logger } from "@/server/shared/infrastructure/logger";
-
+import { logger } from "../infrastructure/logger";
 import { escapePromptXmlAttr, escapePromptXmlText } from "./string-utils";
 
 /**

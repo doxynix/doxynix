@@ -1,6 +1,13 @@
 import type { Repo } from "@prisma/client";
 
-import { AI_MODELS, SAFETY_SETTINGS } from "@/server/features/analyze-repo/lib/constants";
+import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
+import { prisma } from "@/server/shared/infrastructure/db";
+import { getClientContext } from "@/server/shared/infrastructure/github/github-provider";
+import { logger } from "@/server/shared/infrastructure/logger";
+import { callWithFallback } from "@/server/shared/lib/call";
+import { unwrapAiText } from "@/server/shared/lib/optimizers";
+
+import { AI_MODELS, SAFETY_SETTINGS } from "../../lib/constants";
 import {
   API_WRITER_SYSTEM_PROMPT,
   API_WRITER_USER_PROMPT,
@@ -12,13 +19,7 @@ import {
   CONTRIBUTING_WRITER_USER_PROMPT,
   README_WRITER_SYSTEM_PROMPT,
   README_WRITER_USER_PROMPT,
-} from "@/server/features/analyze-repo/lib/prompts-refactored";
-import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
-import { prisma } from "@/server/shared/infrastructure/db";
-import { getClientContext } from "@/server/shared/infrastructure/github/github-provider";
-import { logger } from "@/server/shared/infrastructure/logger";
-import { callWithFallback } from "@/server/shared/lib/call";
-import { unwrapAiText } from "@/server/shared/lib/optimizers";
+} from "../../lib/prompts-refactored";
 
 export type WriterName = "api" | "architecture" | "changelog" | "contributing" | "readme";
 export type WriterStatus = "failed" | "fallback" | "llm" | "missing";

@@ -1,5 +1,5 @@
+import type { FrameworkCategory, FrameworkFact } from "./discovery.types";
 import { ProjectPolicy } from "./project-policy";
-import type { FrameworkCategory, FrameworkFact } from "./types";
 
 type FrameworkCatalogEntry = {
   aliases: string[];

@@ -1,14 +1,12 @@
-import { AI_MODELS, SAFETY_SETTINGS } from "@/server/features/analyze-repo/lib/constants";
-import {
-  SENTINEL_SYSTEM_PROMPT,
-  SENTINEL_USER_PROMPT,
-} from "@/server/features/analyze-repo/lib/prompts-refactored";
 import {
   sentinelSchema,
   type SentinelResult,
 } from "@/server/shared/engine/core/analysis-result.schemas";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { callWithFallback } from "@/server/shared/lib/call";
+
+import { AI_MODELS, SAFETY_SETTINGS } from "../../lib/constants";
+import { SENTINEL_SYSTEM_PROMPT, SENTINEL_USER_PROMPT } from "../../lib/prompts-refactored";
 
 export async function executeSentinelPhase(
   instructions: string | undefined,

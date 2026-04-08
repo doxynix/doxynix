@@ -1,9 +1,6 @@
-import {
-  REPORT_FOCUS_SECTIONS,
-  type DocumentationInputModel,
-  type RepoMetrics,
-  type RepositoryEvidence,
-} from "../core/types";
+import type { RepositoryEvidence } from "../core/discovery.types";
+import { REPORT_FOCUS_SECTIONS, type DocumentationInputModel } from "../core/documentation.types";
+import type { RepoMetrics } from "../core/metrics.types";
 import {
   buildDocumentationContext,
   type DocumentationContext,

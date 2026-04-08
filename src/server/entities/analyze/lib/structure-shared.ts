@@ -1,5 +1,5 @@
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
-import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
+import { normalizeRepoPath } from "@/server/shared/engine/core/common";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import type { ProjectPolicySemanticKind } from "@/server/shared/engine/core/project-policy-rules";
 import type { RepoWithLatestAnalysisAndDocs } from "@/server/shared/infrastructure/repo-snapshots";
@@ -99,7 +99,7 @@ export function createEmptyGroupEntry(): StructureGroupEntry {
 }
 
 export function makeStructureNodeId(nodeType: StructureNodeType, path: string) {
-  return `${nodeType}:${normalizePath(path)}`;
+  return `${nodeType}:${normalizeRepoPath(path)}`;
 }
 
 export function parseStructureNodeId(nodeId: string): {
@@ -107,23 +107,23 @@ export function parseStructureNodeId(nodeId: string): {
   path: string;
 } {
   if (nodeId.startsWith("group:")) {
-    return { nodeType: "group", path: normalizePath(nodeId.slice("group:".length)) };
+    return { nodeType: "group", path: normalizeRepoPath(nodeId.slice("group:".length)) };
   }
   if (nodeId.startsWith("file:")) {
-    return { nodeType: "file", path: normalizePath(nodeId.slice("file:".length)) };
+    return { nodeType: "file", path: normalizeRepoPath(nodeId.slice("file:".length)) };
   }
-  return { nodeType: "group", path: normalizePath(nodeId) };
+  return { nodeType: "group", path: normalizeRepoPath(nodeId) };
 }
 
 export function isPathInsideScope(path: string, scopePath: string) {
-  const normalizedPath = normalizePath(path);
-  const normalizedScope = normalizePath(scopePath);
+  const normalizedPath = normalizeRepoPath(path);
+  const normalizedScope = normalizeRepoPath(scopePath);
   return normalizedPath === normalizedScope || normalizedPath.startsWith(`${normalizedScope}/`);
 }
 
 export function resolveImmediateChildScope(parentPath: string, candidatePath: string) {
-  const normalizedParent = normalizePath(parentPath);
-  const normalizedCandidate = normalizePath(candidatePath);
+  const normalizedParent = normalizeRepoPath(parentPath);
+  const normalizedCandidate = normalizeRepoPath(candidatePath);
 
   if (!normalizedCandidate.startsWith(`${normalizedParent}/`)) return null;
 

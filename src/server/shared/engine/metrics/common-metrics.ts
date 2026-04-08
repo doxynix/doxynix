@@ -1,8 +1,7 @@
 import simpleGit from "simple-git";
 
-import { logger } from "@/server/shared/infrastructure/logger";
-import type { ChurnHotspot, TeamRole } from "@/server/shared/types";
-
+import { logger } from "../../infrastructure/logger";
+import type { ChurnHotspot, TeamRole } from "../../types";
 import { normalizeRepoPath } from "../core/common";
 import type { ChangeCouplingRef } from "../core/discovery.types";
 import { ProjectPolicy } from "../core/project-policy";

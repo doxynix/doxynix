@@ -1,5 +1,5 @@
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
-import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
+import { normalizeRepoPath } from "@/server/shared/engine/core/common";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { unique } from "@/server/shared/lib/array-utils";
 
@@ -10,22 +10,22 @@ export function collectScopedEntrySignals(
     metrics: RepoMetrics;
   }
 ) {
-  const normalizedPaths = unique(paths.map((path) => normalizePath(path)));
+  const normalizedPaths = unique(paths.map((path) => normalizeRepoPath(path)));
   const pathSet = new Set(normalizedPaths);
 
   const frameworkNames = unique(
     (context.metrics.frameworkFacts ?? [])
-      .filter((fact) => fact.sources.some((source) => pathSet.has(normalizePath(source))))
+      .filter((fact) => fact.sources.some((source) => pathSet.has(normalizeRepoPath(source))))
       .map((fact) => fact.name)
   ).slice(0, 5);
 
   const hotspotSignals = [...(context.metrics.hotspotSignals ?? [])]
-    .filter((signal) => pathSet.has(normalizePath(signal.path)))
+    .filter((signal) => pathSet.has(normalizeRepoPath(signal.path)))
     .sort((left, right) => right.score - left.score)
     .slice(0, 4);
 
   const dependencyHotspots = [...context.metrics.dependencyHotspots]
-    .filter((hotspot) => pathSet.has(normalizePath(hotspot.path)))
+    .filter((hotspot) => pathSet.has(normalizeRepoPath(hotspot.path)))
     .sort(
       (left, right) =>
         right.inbound +
@@ -37,19 +37,19 @@ export function collectScopedEntrySignals(
 
   const orphanPaths = unique(
     context.metrics.orphanModules
-      .map((path) => normalizePath(path))
+      .map((path) => normalizeRepoPath(path))
       .filter((path) => pathSet.has(path))
   ).slice(0, 4);
 
   const graphUnresolvedSamples = (context.metrics.graphReliability?.unresolvedSamples ?? [])
-    .filter((sample) => pathSet.has(normalizePath(sample.fromPath)))
+    .filter((sample) => pathSet.has(normalizeRepoPath(sample.fromPath)))
     .slice(0, 4);
 
   const graphNeighborPaths = unique(
     (context.metrics.graphPreviewEdges ?? [])
       .flatMap((edge) => {
-        const fromPath = normalizePath(edge.fromPath);
-        const toPath = normalizePath(edge.toPath);
+        const fromPath = normalizeRepoPath(edge.fromPath);
+        const toPath = normalizeRepoPath(edge.toPath);
 
         if (pathSet.has(fromPath) && !pathSet.has(toPath)) return [toPath];
         if (pathSet.has(toPath) && !pathSet.has(fromPath)) return [fromPath];
@@ -60,7 +60,7 @@ export function collectScopedEntrySignals(
 
   const factTitles = unique(
     (context.aiResult.repository_facts ?? [])
-      .filter((fact) => fact.evidence.some((item) => pathSet.has(normalizePath(item.path))))
+      .filter((fact) => fact.evidence.some((item) => pathSet.has(normalizeRepoPath(item.path))))
       .map((fact) => fact.title)
   ).slice(0, 5);
 
@@ -68,12 +68,13 @@ export function collectScopedEntrySignals(
     changeCoupling: [...(context.metrics.changeCoupling ?? [])]
       .filter(
         (pair) =>
-          pathSet.has(normalizePath(pair.fromPath)) || pathSet.has(normalizePath(pair.toPath))
+          pathSet.has(normalizeRepoPath(pair.fromPath)) ||
+          pathSet.has(normalizeRepoPath(pair.toPath))
       )
       .sort((left, right) => right.commits - left.commits)
       .slice(0, 4),
     churnHotspots: [...(context.metrics.churnHotspots ?? [])]
-      .filter((hotspot) => pathSet.has(normalizePath(hotspot.path)))
+      .filter((hotspot) => pathSet.has(normalizeRepoPath(hotspot.path)))
       .sort((left, right) => right.commitsInWindow - left.commitsInWindow)
       .slice(0, 4),
     dependencyHotspots,
@@ -92,13 +93,13 @@ export function collectScopedSignals(
     aiResult: AIResult;
   }
 ) {
-  const pathSet = new Set(paths.map((path) => normalizePath(path)));
+  const pathSet = new Set(paths.map((path) => normalizeRepoPath(path)));
 
   const matchingFacts = (context.aiResult.repository_facts ?? []).filter((fact) =>
-    fact.evidence.some((item) => pathSet.has(normalizePath(item.path)))
+    fact.evidence.some((item) => pathSet.has(normalizeRepoPath(item.path)))
   );
   const matchingFindings = (context.aiResult.findings ?? []).filter((finding) =>
-    finding.evidence.some((item) => pathSet.has(normalizePath(item.path)))
+    finding.evidence.some((item) => pathSet.has(normalizeRepoPath(item.path)))
   );
 
   return {

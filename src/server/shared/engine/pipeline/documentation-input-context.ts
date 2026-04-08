@@ -1,12 +1,8 @@
+import type { HotspotSignal, RepositoryEvidence } from "../core/discovery.types";
+import type { ArchitectureSectionBody, DocumentationInputModel } from "../core/documentation.types";
 import { selectRepositoryFrameworkFacts } from "../core/framework-catalog";
+import type { RepoMetrics } from "../core/metrics.types";
 import { ProjectPolicy } from "../core/project-policy";
-import {
-  type ArchitectureSectionBody,
-  type DocumentationInputModel,
-  type HotspotSignal,
-  type RepoMetrics,
-  type RepositoryEvidence,
-} from "../core/types";
 import {
   getPrimaryArchitectureModules,
   getPrimaryEntrypointPaths,

@@ -5,7 +5,6 @@ import { task } from "@trigger.dev/sdk/v3";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
-import { repoAnalysisService } from "@/server/features/analyze-repo/api/repo-analysis.service";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { buildEvaluationSnapshot } from "@/server/shared/engine/evaluation/quality-matrix";
 import { analyzeRepository } from "@/server/shared/engine/metrics/code-metrics";
@@ -17,13 +16,14 @@ import {
 import { buildRepositoryArtifacts } from "@/server/shared/engine/pipeline/artifacts";
 import { buildDocumentationInputModel } from "@/server/shared/engine/pipeline/documentation-input";
 import { prisma } from "@/server/shared/infrastructure/db";
-import { cloneRepository, getAnalysisContext } from "@/server/shared/infrastructure/git";
+import { cloneRepository, getAnalysisContext } from "@/server/shared/infrastructure/github/git";
 import { calculateBusFactor } from "@/server/shared/infrastructure/github/github-api";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { realtimeServer } from "@/server/shared/infrastructure/realtime";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
 import { cleanup, handleError, readAndFilterFiles } from "@/server/shared/lib/utils";
 
+import { repoAnalysisService } from "../api/repo-analysis.service";
 import { generateDeepDocs, runAiPipeline } from "../model/ai-pipeline";
 
 type TaskPayload = {

@@ -7,12 +7,10 @@ import {
   buildRecommendedActions,
   buildReviewPriority,
   buildSuggestedPathsForEntry,
-  type StructureInspectContextLike as BaseStructureInspectContextLike,
   type StructureInspectEntryLike as BaseStructureInspectEntryLike,
   type StructureInspectNodeLike as BaseStructureInspectNodeLike,
+  type StructureInspectContextLike,
 } from "./node-inspection";
-
-type StructureInspectContextLike = BaseStructureInspectContextLike;
 
 type StructureInspectEntryLike = BaseStructureInspectEntryLike & {
   changeCoupling: Array<{ commits: number; fromPath: string; toPath: string }>;

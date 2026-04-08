@@ -1,17 +1,12 @@
-import { AI_MODELS, SAFETY_SETTINGS } from "@/server/features/analyze-repo/lib/constants";
-import {
-  ANALYSIS_SYSTEM_PROMPT,
-  ANALYSIS_USER_PROMPT,
-} from "@/server/features/analyze-repo/lib/prompts-refactored";
-import {
-  collectArchitectPreferredPaths,
-  type buildArchitectDigest,
-} from "@/server/features/analyze-repo/model/architect-digest";
-import { buildStageContextPack } from "@/server/features/analyze-repo/model/context-manager";
 import { aiSchema, type AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { callWithFallback } from "@/server/shared/lib/call";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
+
+import { AI_MODELS, SAFETY_SETTINGS } from "../../lib/constants";
+import { ANALYSIS_SYSTEM_PROMPT, ANALYSIS_USER_PROMPT } from "../../lib/prompts-refactored";
+import { collectArchitectPreferredPaths, type buildArchitectDigest } from "../architect-digest";
+import { buildStageContextPack } from "../context-manager";
 
 export async function executeArchitectPhase(
   validFiles: { content: string; path: string }[],
