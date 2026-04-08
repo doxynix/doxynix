@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.24.3](https://github.com/doxynix/doxynix/compare/v1.24.2...v1.24.3) (2026-04-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @scalar/api-reference-react to v0.9.20 ([#981](https://github.com/doxynix/doxynix/issues/981)) ([52aecde](https://github.com/doxynix/doxynix/commit/52aecde08d98adc4c734c3c123f2cf3a3e121376))
+
 ## [1.24.2](https://github.com/doxynix/doxynix/compare/v1.24.1...v1.24.2) (2026-04-07)
 
 
