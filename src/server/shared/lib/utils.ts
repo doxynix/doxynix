@@ -5,10 +5,11 @@ import { isBinaryFile } from "isbinaryfile";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
-import { FileClassifier } from "@/server/shared/engine/core/file-classifier";
 import { prisma } from "@/server/shared/infrastructure/db";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { realtimeServer } from "@/server/shared/infrastructure/realtime";
+
+import { ProjectPolicy } from "../engine/core/project-policy";
 
 export async function handleError(
   error: unknown,
@@ -56,7 +57,7 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
   const resolvedBase = await fs.realpath(basePath);
 
   const filePromises = selectedFiles.map(async (filePath) => {
-    if (FileClassifier.isSensitiveFile(filePath)) {
+    if (ProjectPolicy.isSensitive(filePath)) {
       logger.warn({
         filePath,
         msg: "Skipping sensitive file from analysis context",

@@ -6,7 +6,7 @@ import { task } from "@trigger.dev/sdk/v3";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { repoAnalysisService } from "@/server/features/analyze-repo/api/repo-analysis.service";
-import type { RepoMetrics } from "@/server/features/analyze-repo/lib/types";
+import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { buildEvaluationSnapshot } from "@/server/shared/engine/evaluation/quality-matrix";
 import { analyzeRepository } from "@/server/shared/engine/metrics/code-metrics";
 import {
@@ -17,13 +17,13 @@ import {
 import { buildRepositoryArtifacts } from "@/server/shared/engine/pipeline/artifacts";
 import { buildDocumentationInputModel } from "@/server/shared/engine/pipeline/documentation-input";
 import { prisma } from "@/server/shared/infrastructure/db";
-import { githubService } from "@/server/shared/infrastructure/github/github.service";
+import { cloneRepository, getAnalysisContext } from "@/server/shared/infrastructure/git";
+import { calculateBusFactor } from "@/server/shared/infrastructure/github/github-api";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { realtimeServer } from "@/server/shared/infrastructure/realtime";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
+import { cleanup, handleError, readAndFilterFiles } from "@/server/shared/lib/utils";
 
-import { cloneRepository, getAnalysisContext } from "../../../shared/infrastructure/git";
-import { cleanup, handleError, readAndFilterFiles } from "../../../shared/lib/utils";
 import { generateDeepDocs, runAiPipeline } from "../model/ai-pipeline";
 
 type TaskPayload = {
@@ -115,7 +115,7 @@ export const analyzeRepoTask = task({
       }
 
       await updateStatus("Calculating Bus Factor...", 15);
-      const { busFactor, rawContributors } = await githubService.calculateBusFactor(repo, userId);
+      const { busFactor, rawContributors } = await calculateBusFactor(repo, userId, prisma);
 
       await updateStatus("Cloning repository...", 20);
       await cloneRepository(repo, token, tempClonePath, selectedBranch);

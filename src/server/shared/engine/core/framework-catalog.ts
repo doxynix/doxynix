@@ -1,4 +1,4 @@
-import { FileClassifier } from "./file-classifier";
+import { ProjectPolicy } from "./project-policy";
 import type { FrameworkCategory, FrameworkFact } from "./types";
 
 type FrameworkCatalogEntry = {
@@ -125,7 +125,7 @@ export function mergeFrameworkFacts(facts: FrameworkFact[]) {
 
 function countCoreSources(fact: FrameworkFact) {
   return Array.from(
-    new Set(fact.sources.filter((source) => FileClassifier.isCoreFrameworkFactSource(source)))
+    new Set(fact.sources.filter((source) => ProjectPolicy.isFrameworkFactSource(source)))
   ).length;
 }
 
@@ -134,11 +134,11 @@ function hasManifestOnlySources(fact: FrameworkFact) {
     fact.sources.length > 0 &&
     fact.sources.every(
       (source) =>
-        FileClassifier.isConfigFile(source) ||
-        FileClassifier.isDocsFile(source) ||
-        FileClassifier.isInfraFile(source) ||
-        FileClassifier.isTestFile(source) ||
-        FileClassifier.isToolingFile(source)
+        ProjectPolicy.isConfigFile(source) ||
+        ProjectPolicy.isDocsFile(source) ||
+        ProjectPolicy.isInfraFile(source) ||
+        ProjectPolicy.isTestFile(source) ||
+        ProjectPolicy.isToolingFile(source)
     )
   );
 }

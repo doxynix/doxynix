@@ -1,10 +1,18 @@
-import { repoDetailsPresenter } from "@/server/entities/analyze/api/repo-details.presenter";
+import { createAnalyzeContextBuilder } from "@/server/entities/analyze/lib/analyze-context-builder";
 import type { FileActionNodeContext } from "@/server/features/file-actions/model/file-actions";
 import type { DbClient } from "@/server/shared/infrastructure/db";
 import { getRepoWithLatestAnalysisAndDocs } from "@/server/shared/infrastructure/repo-snapshots";
 
-export type NodeContext = FileActionNodeContext & {
+export type NodeContext = Omit<
+  FileActionNodeContext,
+  "graphNeighbors" | "neighborPaths" | "nextSuggestedPaths" | "recommendedActions" | "sourcePaths"
+> & {
+  graphNeighbors: string[];
+  neighborPaths: string[];
+  nextSuggestedPaths: string[];
   nodeId: string;
+  recommendedActions: string[];
+  sourcePaths: string[];
 };
 
 export type NodeContextMeta = {
@@ -37,18 +45,18 @@ export async function buildNodeContext(
   const repo = await getRepoWithLatestAnalysisAndDocs(db, repoId);
   if (repo == null) return null;
 
-  const explain = repoDetailsPresenter.toNodeExplain(repo, nodeId);
+  const explain = createAnalyzeContextBuilder(repo).getNodeExplain(nodeId);
   if (explain == null) return null;
 
   return {
     confidence: explain.confidence,
-    graphNeighbors: explain.relationships.neighborBuckets?.graphNeighbors ?? [],
-    neighborBuckets: explain.relationships.neighborBuckets ?? null,
-    neighborPaths: explain.relationships.neighborPaths ?? [],
+    graphNeighbors: explain.relationships.neighborBuckets.graphNeighbors,
+    neighborBuckets: explain.relationships.neighborBuckets,
+    neighborPaths: explain.relationships.neighborPaths,
     nextSuggestedPaths: explain.nextSuggestedPaths,
     nodeId: explain.node.id,
-    recommendedActions: explain.relationships.recommendedActions ?? [],
-    reviewPriority: explain.relationships.reviewPriority ?? null,
+    recommendedActions: explain.relationships.recommendedActions,
+    reviewPriority: explain.relationships.reviewPriority,
     role: explain.role,
     sourcePaths: explain.sourcePaths,
     summary: explain.summary,

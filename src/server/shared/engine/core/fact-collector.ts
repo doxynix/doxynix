@@ -4,17 +4,17 @@ import YAML from "yaml";
 
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
 
-import {
-  collectFrameworkFactsFromTokens,
-  selectRepositoryFrameworkFacts,
-} from "./framework-catalog";
 import type {
   FileSignals,
   FrameworkFact,
   RepositoryEvidence,
   TechCategory,
   TechFact,
-} from "./types";
+} from "./discovery.types";
+import {
+  collectFrameworkFactsFromTokens,
+  selectRepositoryFrameworkFacts,
+} from "./framework-catalog";
 
 const xmlParser = new XMLParser({ ignoreAttributes: false });
 
@@ -80,7 +80,7 @@ export class FactCollector {
   ) {
     const collector = new FactCollector();
 
-    if (evidence?.frameworkFacts?.length) {
+    if (evidence?.frameworkFacts.length != null) {
       collector.frameworkFacts.push(...evidence.frameworkFacts);
     }
     if (
@@ -190,10 +190,10 @@ export class FactCollector {
   }
 
   private collectSignalDerivedFacts(filePath: string, signals?: FileSignals) {
-    if (signals?.frameworkHints?.length) {
+    if (signals?.frameworkHints?.length != null) {
       this.frameworkFacts.push(...signals.frameworkHints);
     }
-    if (signals?.imports?.length) {
+    if (signals?.imports.length != null) {
       this.collectFrameworkFactsFromTokens(signals.imports, filePath, 72);
     }
   }
@@ -226,9 +226,9 @@ export class FactCollector {
       const data = JSON.parse(content);
       const frameworkTokens = [
         data.name,
-        ...Object.keys(data.scripts || {}),
-        ...Object.keys(data.dependencies || {}),
-        ...Object.keys(data.devDependencies || {}),
+        ...Object.keys(Boolean(data.scripts) || {}),
+        ...Object.keys(Boolean(data.dependencies) || {}),
+        ...Object.keys(Boolean(data.devDependencies) || {}),
       ].filter((value): value is string => typeof value === "string");
       this.collectFrameworkFactsFromTokens(frameworkTokens, filePath, 95);
     } catch {
@@ -240,7 +240,7 @@ export class FactCollector {
     try {
       const data = JSON.parse(content);
       for (const key of keys) {
-        const deps = Object.keys(data[key] || {});
+        const deps = Object.keys(Boolean(data[key]) || {});
         this.collectFrameworkFactsFromTokens(deps, filePath, 94);
       }
     } catch {
@@ -268,7 +268,7 @@ export class FactCollector {
       const itemGroups = jsonObj?.Project?.ItemGroup;
       const groupArray = Array.isArray(itemGroups) ? itemGroups : [itemGroups];
       const pkgArray = groupArray.flatMap((group: unknown) => {
-        const refs = (group as { PackageReference?: unknown })?.PackageReference;
+        const refs = (group as { PackageReference?: unknown }).PackageReference;
         return Array.isArray(refs) ? refs : [refs];
       });
       const tokens = pkgArray
@@ -291,7 +291,7 @@ export class FactCollector {
   private parseManifestPubspec(content: string, filePath: string) {
     try {
       const data = YAML.parse(content);
-      const deps = Object.keys(data?.dependencies || {});
+      const deps = Object.keys(Boolean(data?.dependencies) || {});
       this.collectFrameworkFactsFromTokens(deps, filePath, 88);
     } catch {
       // Optional signal only.

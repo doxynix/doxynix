@@ -100,23 +100,18 @@ export const aiSchema = z.object({
     })
     .optional(),
   complexityScore: z.number().optional(),
-
   executive_summary: z.object({
     architecture_style: z.string(),
     purpose: z.string(),
     stack_details: z.array(z.string()),
   }),
-
   findings: z.array(repositoryFindingSchema).max(12).optional(),
-
   generatedApiMarkdown: z.string().optional(),
-
   generatedArchitecture: z.string().optional(),
   generatedChangelog: z.string().optional(),
   generatedContributing: z.string().optional(),
   generatedReadme: z.string().optional(),
   mainBottlenecks: z.array(z.string()).optional(),
-
   mostComplexFiles: z.array(z.string()).optional(),
   onboarding_guide: z.object({
     prerequisites: z.array(z.string()),
@@ -134,7 +129,6 @@ export const aiSchema = z.object({
       })
     )
     .max(5),
-
   repository_facts: z.array(repositoryFactSchema).max(16).optional(),
   sections: z.object({
     api_structure: z.string(),

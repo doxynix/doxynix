@@ -2,6 +2,10 @@ import { google } from "@ai-sdk/google";
 import { generateText, Output } from "ai";
 import type z from "zod";
 
+import {
+  LLM_TEMPERATURE_STRATEGY,
+  type LLMTaskType,
+} from "@/server/shared/engine/core/scoring-constants";
 import { logger } from "@/server/shared/infrastructure/logger";
 
 type CallWithFallbackProps<T> = {
@@ -15,6 +19,7 @@ type CallWithFallbackProps<T> = {
   providerOptions?: Record<string, unknown>;
   stopSequences?: string[];
   system: string;
+  taskType?: LLMTaskType;
   temperature?: number;
   topK?: number;
   topP?: number;
@@ -32,14 +37,21 @@ export async function callWithFallback<T>({
   providerOptions,
   stopSequences,
   system,
-  temperature = 0.1,
-  topK = 1,
-  topP = 0.1,
+  taskType = "default",
+  temperature,
+  topK,
+  topP,
   useSearchGrounding = true,
 }: CallWithFallbackProps<T>): Promise<T> {
   if (models.length === 0) {
     throw new Error("No models configured for fallback.");
   }
+
+  // Apply temperature strategy if not explicitly provided
+  const strategy = LLM_TEMPERATURE_STRATEGY[taskType];
+  const finalTemperature = temperature ?? strategy.temperature;
+  const finalTopK = topK ?? strategy.topK;
+  const finalTopP = topP ?? strategy.topP;
 
   let lastError: unknown = null;
 
@@ -48,6 +60,7 @@ export async function callWithFallback<T>({
       logger.info({
         model: modelName,
         msg: "Attempting model",
+        taskType,
         ...attemptMetadata,
       });
 
@@ -61,9 +74,9 @@ export async function callWithFallback<T>({
         providerOptions,
         stopSequences,
         system,
-        temperature,
-        topK,
-        topP,
+        temperature: finalTemperature,
+        topK: finalTopK,
+        topP: finalTopP,
         useSearchGrounding,
       };
 

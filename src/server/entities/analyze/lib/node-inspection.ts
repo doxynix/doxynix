@@ -1,5 +1,9 @@
 import { normalizeRepoPath } from "@/server/shared/engine/core/common";
-import { FileClassifier } from "@/server/shared/engine/core/file-classifier";
+import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
+import { unique } from "@/server/shared/lib/array-utils";
+import { excludePath } from "@/server/shared/lib/path-operations";
+
+import { isPathInsideScope } from "./structure-shared";
 
 type StructureInspectNodeType = "file" | "group";
 
@@ -13,7 +17,7 @@ type OnboardingDocInputLike = {
   };
 } | null;
 
-type StructureInspectContextLike = {
+export type StructureInspectContextLike = {
   docInput?: OnboardingDocInputLike;
 };
 
@@ -22,8 +26,8 @@ type StructureEntrypointLike = {
 };
 
 type StructureHotspotSignalLike = {
-  complexity: number;
   churnScore: number;
+  complexity: number;
   path: string;
   score: number;
 };
@@ -44,7 +48,7 @@ type StructureChurnHotspotLike = {
   path: string;
 };
 
-type StructureInspectEntryLike = {
+export type StructureInspectEntryLike = {
   apiPaths: string[];
   changeCoupling: StructureChangeCouplingLike[];
   churnHotspots: StructureChurnHotspotLike[];
@@ -60,7 +64,7 @@ type StructureInspectEntryLike = {
   riskTitles: string[];
 };
 
-type StructureInspectNodeLike = {
+export type StructureInspectNodeLike = {
   canDrillDeeper: boolean;
   markers: {
     api: boolean;
@@ -70,52 +74,36 @@ type StructureInspectNodeLike = {
   nodeType: StructureInspectNodeType;
 };
 
-function unique<T>(values: T[]) {
-  return Array.from(new Set(values));
-}
-
-function normalizePath(path: string) {
-  return normalizeRepoPath(path);
-}
-
-function isPathInsideScope(path: string, scopePath: string) {
-  const normalizedPath = normalizePath(path);
-  const normalizedScope = normalizePath(scopePath);
-  return normalizedPath === normalizedScope || normalizedPath.startsWith(`${normalizedScope}/`);
-}
-
 export function buildSuggestedPathsForEntry(params: {
   context: StructureInspectContextLike;
   currentPath: string;
   entry: StructureInspectEntryLike;
   relatedChildPaths: string[];
 }) {
-  const currentPath = normalizePath(params.currentPath);
+  const currentPath = normalizeRepoPath(params.currentPath);
   const prioritizedSuggestions = [
     ...params.relatedChildPaths,
     ...params.entry.graphNeighborPaths,
     ...(params.context.docInput?.sections?.onboarding?.body?.firstLookPaths ?? []).filter(
       (candidatePath) =>
         params.entry.paths.some((scopePath) => isPathInsideScope(candidatePath, scopePath)) &&
-        normalizePath(candidatePath) !== currentPath
+        normalizeRepoPath(candidatePath) !== currentPath
     ),
-    ...params.entry.entrypointDetails.map((item) => normalizePath(item.path)),
+    ...params.entry.entrypointDetails.map((item) => normalizeRepoPath(item.path)),
     ...params.entry.apiPaths,
     ...params.entry.publicSurfacePaths,
-    ...params.entry.hotspotSignals.map((item) => normalizePath(item.path)),
-    ...params.entry.churnHotspots.map((item) => normalizePath(item.path)),
+    ...params.entry.hotspotSignals.map((item) => normalizeRepoPath(item.path)),
+    ...params.entry.churnHotspots.map((item) => normalizeRepoPath(item.path)),
     ...params.entry.changeCoupling.flatMap((item) => [
-      normalizePath(item.fromPath),
-      normalizePath(item.toPath),
+      normalizeRepoPath(item.fromPath),
+      normalizeRepoPath(item.toPath),
     ]),
-    ...params.entry.dependencyHotspots.map((item) => normalizePath(item.path)),
+    ...params.entry.dependencyHotspots.map((item) => normalizeRepoPath(item.path)),
     ...params.entry.orphanPaths,
     ...params.entry.configPaths,
   ];
 
-  return unique(
-    prioritizedSuggestions.filter((candidatePath) => normalizePath(candidatePath) !== currentPath)
-  ).slice(0, 6);
+  return excludePath(prioritizedSuggestions, currentPath, 6);
 }
 
 export function buildNeighborPathsForEntry(params: {
@@ -123,11 +111,11 @@ export function buildNeighborPathsForEntry(params: {
   entry: StructureInspectEntryLike;
   relatedChildPaths: string[];
 }) {
-  const normalizedCurrentPath = normalizePath(params.currentPath);
+  const normalizedCurrentPath = normalizeRepoPath(params.currentPath);
 
   const coupledNeighbors = params.entry.changeCoupling.flatMap((pair) => {
-    const fromPath = normalizePath(pair.fromPath);
-    const toPath = normalizePath(pair.toPath);
+    const fromPath = normalizeRepoPath(pair.fromPath);
+    const toPath = normalizeRepoPath(pair.toPath);
     if (fromPath === normalizedCurrentPath) return [toPath];
     if (toPath === normalizedCurrentPath) return [fromPath];
     return [fromPath, toPath];
@@ -135,20 +123,16 @@ export function buildNeighborPathsForEntry(params: {
 
   const prioritizedNeighbors = [
     ...coupledNeighbors,
-    ...params.entry.hotspotSignals.map((item) => normalizePath(item.path)),
-    ...params.entry.dependencyHotspots.map((item) => normalizePath(item.path)),
+    ...params.entry.hotspotSignals.map((item) => normalizeRepoPath(item.path)),
+    ...params.entry.dependencyHotspots.map((item) => normalizeRepoPath(item.path)),
     ...params.entry.graphNeighborPaths,
     ...params.entry.publicSurfacePaths,
     ...params.entry.apiPaths,
-    ...params.entry.entrypointDetails.map((item) => normalizePath(item.path)),
+    ...params.entry.entrypointDetails.map((item) => normalizeRepoPath(item.path)),
     ...params.relatedChildPaths,
   ];
 
-  return unique(
-    prioritizedNeighbors.filter(
-      (candidatePath) => normalizePath(candidatePath) !== normalizedCurrentPath
-    )
-  ).slice(0, 6);
+  return excludePath(prioritizedNeighbors, normalizedCurrentPath, 6);
 }
 
 export function buildNeighborBucketsForEntry(params: {
@@ -156,73 +140,67 @@ export function buildNeighborBucketsForEntry(params: {
   entry: StructureInspectEntryLike;
   relatedChildPaths: string[];
 }) {
-  const normalizedCurrentPath = normalizePath(params.currentPath);
+  const normalizedCurrentPath = normalizeRepoPath(params.currentPath);
 
   const coupledNeighbors = params.entry.changeCoupling.flatMap((pair) => {
-    const fromPath = normalizePath(pair.fromPath);
-    const toPath = normalizePath(pair.toPath);
+    const fromPath = normalizeRepoPath(pair.fromPath);
+    const toPath = normalizeRepoPath(pair.toPath);
     if (fromPath === normalizedCurrentPath) return [toPath];
     if (toPath === normalizedCurrentPath) return [fromPath];
     return [fromPath, toPath];
   });
 
   return {
-    apiNeighbors: unique(
-      [...params.entry.apiPaths, ...params.entry.publicSurfacePaths].filter(
-        (candidatePath) => normalizePath(candidatePath) !== normalizedCurrentPath
-      )
-    ).slice(0, 4),
-    changeRiskNeighbors: unique(
+    apiNeighbors: excludePath(
+      [...params.entry.apiPaths, ...params.entry.publicSurfacePaths],
+      normalizedCurrentPath,
+      4
+    ),
+    changeRiskNeighbors: excludePath(
       [
-        ...params.entry.hotspotSignals.map((item) => normalizePath(item.path)),
-        ...params.entry.dependencyHotspots.map((item) => normalizePath(item.path)),
+        ...params.entry.hotspotSignals.map((item) => normalizeRepoPath(item.path)),
+        ...params.entry.dependencyHotspots.map((item) => normalizeRepoPath(item.path)),
         ...coupledNeighbors,
-      ].filter((candidatePath) => normalizePath(candidatePath) !== normalizedCurrentPath)
-    ).slice(0, 4),
-    configNeighbors: unique(
-      params.entry.configPaths.filter(
-        (candidatePath) => normalizePath(candidatePath) !== normalizedCurrentPath
-      )
-    ).slice(0, 4),
-    coupledNeighbors: unique(
-      [...coupledNeighbors, ...params.entry.graphNeighborPaths].filter(
-        (candidatePath) => normalizePath(candidatePath) !== normalizedCurrentPath
-      )
-    ).slice(0, 4),
-    entryFlowNeighbors: unique(
+      ],
+      normalizedCurrentPath,
+      4
+    ),
+    configNeighbors: excludePath(params.entry.configPaths, normalizedCurrentPath, 4),
+    coupledNeighbors: excludePath(
+      [...coupledNeighbors, ...params.entry.graphNeighborPaths],
+      normalizedCurrentPath,
+      4
+    ),
+    entryFlowNeighbors: excludePath(
       [
-        ...params.entry.entrypointDetails.map((item) => normalizePath(item.path)),
+        ...params.entry.entrypointDetails.map((item) => normalizeRepoPath(item.path)),
         ...params.relatedChildPaths.filter((candidatePath) =>
-          FileClassifier.isLikelyEntrypoint(candidatePath)
+          ProjectPolicy.isPrimaryEntrypoint(candidatePath)
         ),
-      ].filter((candidatePath) => normalizePath(candidatePath) !== normalizedCurrentPath)
-    ).slice(0, 4),
-    entryNeighbors: unique(
-      params.entry.entrypointDetails
-        .map((item) => normalizePath(item.path))
-        .filter((candidatePath) => normalizePath(candidatePath) !== normalizedCurrentPath)
-    ).slice(0, 4),
-    publicSurfaceNeighbors: unique(
-      [...params.entry.publicSurfacePaths, ...params.entry.apiPaths].filter(
-        (candidatePath) => normalizePath(candidatePath) !== normalizedCurrentPath
-      )
-    ).slice(0, 4),
-    graphNeighbors: unique(
-      params.entry.graphNeighborPaths.filter(
-        (candidatePath) => normalizePath(candidatePath) !== normalizedCurrentPath
-      )
-    ).slice(0, 4),
-    relatedChildNeighbors: unique(
-      params.relatedChildPaths.filter(
-        (candidatePath) => normalizePath(candidatePath) !== normalizedCurrentPath
-      )
-    ).slice(0, 4),
-    riskNeighbors: unique(
+      ],
+      normalizedCurrentPath,
+      4
+    ),
+    entryNeighbors: excludePath(
+      params.entry.entrypointDetails.map((item) => normalizeRepoPath(item.path)),
+      normalizedCurrentPath,
+      4
+    ),
+    graphNeighbors: excludePath(params.entry.graphNeighborPaths, normalizedCurrentPath, 4),
+    publicSurfaceNeighbors: excludePath(
+      [...params.entry.publicSurfacePaths, ...params.entry.apiPaths],
+      normalizedCurrentPath,
+      4
+    ),
+    relatedChildNeighbors: excludePath(params.relatedChildPaths, normalizedCurrentPath, 4),
+    riskNeighbors: excludePath(
       [
-        ...params.entry.hotspotSignals.map((item) => normalizePath(item.path)),
-        ...params.entry.dependencyHotspots.map((item) => normalizePath(item.path)),
-      ].filter((candidatePath) => normalizePath(candidatePath) !== normalizedCurrentPath)
-    ).slice(0, 4),
+        ...params.entry.hotspotSignals.map((item) => normalizeRepoPath(item.path)),
+        ...params.entry.dependencyHotspots.map((item) => normalizeRepoPath(item.path)),
+      ],
+      normalizedCurrentPath,
+      4
+    ),
   };
 }
 

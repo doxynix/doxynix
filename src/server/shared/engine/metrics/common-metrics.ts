@@ -1,10 +1,11 @@
 import simpleGit from "simple-git";
 
+import { logger } from "@/server/shared/infrastructure/logger";
 import type { ChurnHotspot, TeamRole } from "@/server/shared/types";
 
 import { normalizeRepoPath } from "../core/common";
-import { FileClassifier } from "../core/file-classifier";
-import type { ChangeCouplingRef, RepositoryFile } from "../core/types";
+import type { ChangeCouplingRef } from "../core/discovery.types";
+import { ProjectPolicy } from "../core/project-policy";
 
 export type SimplifiedRepoMetrics = {
   complexityScore: number;
@@ -75,42 +76,6 @@ export function calculateTeamRoles(
     .sort((left, right) => right.share - left.share);
 }
 
-export function calculateApproximateDuplication(files: RepositoryFile[]): number {
-  const hashes = new Set<string>();
-  let duplicatedLines = 0;
-
-  for (const file of files) {
-    if (FileClassifier.isTestFile(file.path) || FileClassifier.isConfigFile(file.path)) continue;
-
-    const cleanLines = file.content
-      .split(/\r?\n/u)
-      .map((line) => line.trim())
-      .filter(
-        (line) =>
-          line.length > 5 && !line.startsWith("/") && !line.startsWith("*") && !line.startsWith("#")
-      );
-
-    const WINDOW_SIZE = 6;
-    for (let i = 0; i <= cleanLines.length - WINDOW_SIZE; i++) {
-      const block = cleanLines
-        .slice(i, i + WINDOW_SIZE)
-        .join("|")
-        .toLowerCase();
-
-      const hash = Buffer.from(block).toString("base64");
-
-      if (hashes.has(hash)) {
-        duplicatedLines += WINDOW_SIZE;
-        i += WINDOW_SIZE - 1;
-      } else {
-        hashes.add(hash);
-      }
-    }
-  }
-
-  return duplicatedLines;
-}
-
 const WINDOW_DAYS = 90;
 
 export async function computeGitChurnHotspots(
@@ -146,7 +111,13 @@ export async function computeGitChurnHotspots(
         path: filePath,
       }))
       .sort((a, b) => b.commitsInWindow - a.commitsInWindow);
-  } catch {
+  } catch (error) {
+    logger.debug({
+      error,
+      msg: "Git churn hotspot calculation skipped after git failure",
+      repoRoot,
+      trackedPathCount: allowed.size,
+    });
     return [];
   }
 }
@@ -198,7 +169,7 @@ export async function computeChangeCoupling(
       if (trimmed.length === 0) continue;
       const norm = normalizeRepoPath(trimmed);
       if (!allowed.has(norm)) continue;
-      if (!FileClassifier.isArchitectureRelevant(norm)) continue;
+      if (!ProjectPolicy.isArchitectureRelevant(norm)) continue;
       currentCommitFiles.add(norm);
     }
 
@@ -212,7 +183,13 @@ export async function computeChangeCoupling(
       .filter((item) => item.commits >= 2)
       .sort((left, right) => right.commits - left.commits)
       .slice(0, 24);
-  } catch {
+  } catch (error) {
+    logger.debug({
+      error,
+      msg: "Change coupling calculation skipped after git failure",
+      repoRoot,
+      trackedPathCount: allowed.size,
+    });
     return [];
   }
 }

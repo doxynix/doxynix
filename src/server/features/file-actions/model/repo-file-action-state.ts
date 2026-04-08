@@ -1,5 +1,4 @@
 import type {
-  NodeContext,
   NodeContextDiagnostics,
   NodeContextMeta,
 } from "@/server/features/file-actions/model/repo-node-context";
@@ -14,9 +13,9 @@ export type SyncFileActionMeta = {
   analysisRef: AnalysisRef | null;
   consistency: "matched" | "mismatch" | "unknown";
   consistencyNote: string | null;
+  contentRef: ContentRefInput;
   contextDiagnostics: NodeContextDiagnostics;
   contextMeta: NodeContextMeta;
-  contentRef: ContentRefInput;
 };
 
 export function buildConsistencyState(
@@ -72,8 +71,8 @@ export function buildSyncFileActionMeta(params: {
     analysisRef: params.analysisRef,
     consistency: consistency.consistency,
     consistencyNote: consistency.consistencyNote,
+    contentRef: params.contentRef,
     contextDiagnostics: params.contextDiagnostics,
     contextMeta: params.contextMeta,
-    contentRef: params.contentRef,
   } satisfies SyncFileActionMeta;
 }

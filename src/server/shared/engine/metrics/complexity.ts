@@ -1,8 +1,9 @@
 import type { Repo } from "@prisma/client";
-import * as ts from "typescript";
+import ts from "typescript";
 
-import { clamp, normalizeRepoPath } from "../core/common";
-import type { HealthScoreParams } from "../core/types";
+import { clamp, getFileExtension } from "../core/common";
+import type { HealthScoreParams } from "../core/metrics.types";
+import { MODERN_HEALTH_SCORE } from "../core/scoring-constants";
 
 const COMPLEXITY_AST_EXTENSIONS = new Set([
   ".cts",
@@ -120,15 +121,8 @@ function calculateRegexComplexity(content: string) {
   return { complexity, maxNesting };
 }
 
-function getComplexityExtension(filePath: string) {
-  const normalizedPath = normalizeRepoPath(filePath).toLowerCase();
-  const fileName = normalizedPath.split("/").at(-1) ?? normalizedPath;
-  const dotIndex = fileName.lastIndexOf(".");
-  return dotIndex >= 0 ? fileName.slice(dotIndex) : "";
-}
-
 function shouldUseAstComplexity(filePath: string) {
-  return COMPLEXITY_AST_EXTENSIONS.has(getComplexityExtension(filePath));
+  return COMPLEXITY_AST_EXTENSIONS.has(getFileExtension(filePath));
 }
 
 export function calculateComplexity(content: string, filePath: string) {
@@ -173,18 +167,28 @@ function calculateModernHealthScore(params: HealthScoreParams) {
   } = params;
 
   let score = 0;
-  score += securityScore * 0.24;
-  score += techDebtScore * 0.2;
-  score += complexityScore * 0.16;
-  score += clamp(100 - duplicationPercentage * 2, 0, 100) * 0.12;
-  score += clamp(docDensity * 4, 0, 100) * 0.08;
-  score += clamp(busFactor * 18, 0, 100) * 0.1;
-  score += clamp(100 - dependencyCycles * 18, 0, 100) * 0.1;
+  score += securityScore * MODERN_HEALTH_SCORE.securityWeight;
+  score += techDebtScore * MODERN_HEALTH_SCORE.techDebtWeight;
+  score += complexityScore * MODERN_HEALTH_SCORE.complexityWeight;
+  score +=
+    clamp(
+      100 - duplicationPercentage * MODERN_HEALTH_SCORE.duplicationMultiplierForHealth,
+      0,
+      100
+    ) * MODERN_HEALTH_SCORE.duplicationWeight;
+  score +=
+    clamp(docDensity * MODERN_HEALTH_SCORE.docDensityMultiplierForHealth, 0, 100) *
+    MODERN_HEALTH_SCORE.documentationWeight;
+  score += clamp(busFactor * 18, 0, 100) * MODERN_HEALTH_SCORE.busFactorWeight;
+  score += clamp(100 - dependencyCycles * 18, 0, 100) * MODERN_HEALTH_SCORE.cyclesWeight;
 
   const lastPushDate = repo.pushedAt != null ? new Date(repo.pushedAt) : new Date();
   const daysSincePush = (Date.now() - lastPushDate.getTime()) / (1000 * 60 * 60 * 24);
-  if (daysSincePush < 30) score += 10;
-  else if (daysSincePush < 90) score += 4;
+  if (daysSincePush < MODERN_HEALTH_SCORE.activityDaysThresholdRecent) {
+    score += MODERN_HEALTH_SCORE.recentActivityBonus;
+  } else if (daysSincePush < MODERN_HEALTH_SCORE.activityDaysThresholdActive) {
+    score += MODERN_HEALTH_SCORE.activeActivityBonus;
+  }
 
   return clamp(Math.round(score), 0, 100);
 }

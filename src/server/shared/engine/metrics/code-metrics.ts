@@ -3,27 +3,36 @@ import { creator as canaryPreset } from "@secretlint/secretlint-rule-preset-cana
 import { isExtensionSupported, parse } from "leasot";
 import sloc, { type Extension } from "sloc";
 
-import { getLanguageColor, normalizeLanguageName } from "@/shared/lib/utils";
+import { normalizeLanguageName } from "@/shared/lib/utils";
 
+import { logger } from "@/server/shared/infrastructure/logger";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
 
-import { calculateDocDensity, clamp, normalizeRepoPath } from "../core/common";
-import { FactCollector } from "../core/fact-collector";
-import { FileClassifier, linguistStyleLabel } from "../core/file-classifier";
-import { collectStructuralSignals, scoreStructuralModularity } from "../core/structure";
+import { calculateDocDensity, clamp, getFileExtension, normalizeRepoPath } from "../core/common";
 import type {
-  FileSignals,
-  LanguageMetric,
-  RepoMetrics,
   RepositoryEvidence,
   SecretLintMessage,
   StructuralSignals,
-} from "../core/types";
+} from "../core/discovery.types";
+import { FactCollector } from "../core/fact-collector";
+import { linguistStyleLabel } from "../core/file-classifier";
+import type { RepoMetrics } from "../core/metrics.types";
+import { collectStructuralSignals, scoreStructuralModularity } from "../core/structure";
 import { collectPolyglotSignals } from "../extractors/language-signals";
 import { collectOpenApiInventory } from "../extractors/openapi-inventory";
 import { collectTypeScriptStaticHints } from "../extractors/ts-static-hints";
-import { calculateApproximateDuplication } from "./common-metrics";
+import {
+  mergeRouteInventories,
+  normalizeComplexityScore,
+  normalizeTechDebtScore,
+} from "./code-metric-formulas";
+import {
+  aggregateScanResults,
+  type FileScanResult,
+  type ScanAggregation,
+} from "./code-metric-scan";
 import { calculateComplexity } from "./complexity";
+import { calculateApproximateDuplication } from "./duplication-metrics";
 
 const secretLintConfig = {
   rules: [
@@ -34,148 +43,6 @@ const secretLintConfig = {
     },
   ],
 };
-
-type FileScanResult = {
-  comments: number;
-  complexity: number;
-  maxNesting: number;
-  normalizedPath: string;
-  prettyName: string;
-  securityFindings: RepoMetrics["securityFindings"];
-  securityIssues: number;
-  securityScanStatus: "ok" | "partial";
-  signal: FileSignals;
-  size: number;
-  source: number;
-  todos: number;
-};
-
-type ScanAggregation = {
-  analysisCoverage: RepoMetrics["analysisCoverage"];
-  fileComplexities: Array<{ path: string; score: number }>;
-  fileSignalsByPath: Map<string, FileSignals>;
-  languages: LanguageMetric[];
-  mostComplexFiles: string[];
-  securityFindings: RepoMetrics["securityFindings"];
-  securityScanStatus: RepoMetrics["securityScanStatus"];
-  totals: {
-    comments: number;
-    maxNesting: number;
-    securityIssues: number;
-    size: number;
-    source: number;
-    todos: number;
-  };
-};
-
-function getFileExtension(filePath: string) {
-  const normalizedPath = filePath.replace(/\\/g, "/");
-  const filename = normalizedPath.slice(normalizedPath.lastIndexOf("/") + 1);
-  const dotIndex = filename.lastIndexOf(".");
-  return dotIndex >= 0 ? filename.slice(dotIndex).toLowerCase() : "";
-}
-
-function percentile(values: number[], ratio: number) {
-  if (values.length === 0) return 0;
-  const sorted = [...values].sort((left, right) => left - right);
-  const index = Math.min(sorted.length - 1, Math.max(0, Math.floor((sorted.length - 1) * ratio)));
-  return sorted[index] ?? 0;
-}
-
-function normalizeComplexityScore(params: {
-  cycles: number;
-  fileCount: number;
-  maxNesting: number;
-  scores: number[];
-}) {
-  const average =
-    params.fileCount === 0
-      ? 0
-      : params.scores.reduce((sum, value) => sum + value, 0) / params.fileCount;
-  const p85 = percentile(params.scores, 0.85);
-  const highComplexityThreshold = Math.max(12, p85);
-  const highComplexityFiles = params.scores.filter(
-    (score) => score >= highComplexityThreshold
-  ).length;
-  const hotspotRatio = params.fileCount === 0 ? 0 : highComplexityFiles / params.fileCount;
-
-  const averagePenalty = clamp(average * 1.6, 0, 34);
-  const nestingPenalty = clamp(params.maxNesting * 3, 0, 20);
-  const cyclePenalty = clamp(params.cycles * 8, 0, 24);
-  const hotspotPenalty = clamp(hotspotRatio * 30, 0, 22);
-
-  return clamp(
-    Math.round(100 - averagePenalty - nestingPenalty - cyclePenalty - hotspotPenalty),
-    0,
-    100
-  );
-}
-
-function normalizeTechDebtScore(params: {
-  dependencyCycles: number;
-  duplicationPercentage: number;
-  fileCount: number;
-  orphanModules: number;
-  todos: number;
-}) {
-  const todoDensity = params.fileCount === 0 ? 0 : params.todos / params.fileCount;
-  const orphanRatio = params.fileCount === 0 ? 0 : params.orphanModules / params.fileCount;
-
-  const todoPenalty = clamp(todoDensity * 3, 0, 18);
-  const duplicationPenalty = clamp(params.duplicationPercentage * 1.8, 0, 28);
-  const cyclePenalty = clamp(params.dependencyCycles * 7, 0, 22);
-  const orphanPenalty = clamp(orphanRatio * 100 * 0.35, 0, 18);
-
-  return clamp(
-    Math.round(100 - todoPenalty - duplicationPenalty - cyclePenalty - orphanPenalty),
-    0,
-    100
-  );
-}
-
-function mergeRouteInventories(
-  extracted: RepoMetrics["routeInventory"] | undefined,
-  openapiInventory: RepoMetrics["openapiInventory"]
-): NonNullable<RepoMetrics["routeInventory"]> {
-  const extractedInventory =
-    extracted ??
-    ({
-      estimatedOperations: 0,
-      frameworks: [],
-      httpRoutes: [],
-      rpcProcedures: 0,
-      source: "extracted",
-      sourceFiles: [],
-    } satisfies NonNullable<RepoMetrics["routeInventory"]>);
-
-  if (openapiInventory == null || openapiInventory.sourceFiles.length === 0) {
-    return extractedInventory;
-  }
-
-  const combinedFrameworks = Array.from(
-    new Set([
-      ...extractedInventory.frameworks,
-      ...(openapiInventory.sourceFiles.length > 0 ? ["OpenAPI"] : []),
-    ])
-  );
-
-  return {
-    estimatedOperations: Math.max(
-      extractedInventory.estimatedOperations,
-      openapiInventory.estimatedOperations
-    ),
-    frameworks: combinedFrameworks,
-    httpRoutes: extractedInventory.httpRoutes,
-    rpcProcedures: extractedInventory.rpcProcedures,
-    source:
-      extractedInventory.estimatedOperations > 0 && openapiInventory.estimatedOperations > 0
-        ? "mixed"
-        : "openapi",
-    sourceFiles: Array.from(
-      new Set([...extractedInventory.sourceFiles, ...openapiInventory.sourceFiles])
-    ).sort((a, b) => a.localeCompare(b)),
-  };
-}
 
 async function collectSecuritySignals(normalizedPath: string, content: string) {
   try {
@@ -202,7 +69,12 @@ async function collectSecuritySignals(normalizedPath: string, content: string) {
       issueCount: relevantMessages.length,
       status: "ok" as const,
     };
-  } catch {
+  } catch (error) {
+    logger.debug({
+      error,
+      msg: "Secret scan skipped after analyzer failure",
+      path: normalizedPath,
+    });
     return {
       findings: [] as RepoMetrics["securityFindings"],
       issueCount: 0,
@@ -222,7 +94,13 @@ async function collectTodoCount(content: string, extensionWithDot: string, norma
       filename: normalizedPath,
     });
     return todos.length;
-  } catch {
+  } catch (error) {
+    logger.debug({
+      error,
+      extension: extensionWithDot,
+      msg: "TODO parsing skipped after analyzer failure",
+      path: normalizedPath,
+    });
     return 0;
   }
 }
@@ -237,8 +115,12 @@ function collectSourceStats(content: string, extension: string) {
         source: stats.source,
       };
     }
-  } catch {
-    // Fall back to rough line counting below.
+  } catch (error) {
+    logger.debug({
+      error,
+      extension,
+      msg: "SLOC parser failed, using fallback line counting",
+    });
   }
 
   const lines = content.split(/\r?\n/u).length;
@@ -274,124 +156,6 @@ async function scanRepositoryFile(file: {
     size: file.content.length,
     source: sourceStats.source,
     todos,
-  };
-}
-
-function buildAnalysisCoverage(
-  results: FileScanResult[],
-  totalFiles: number
-): RepoMetrics["analysisCoverage"] {
-  const languagesByMode = {
-    heuristic: new Set<string>(),
-    treeSitter: new Set<string>(),
-    typeScriptAst: new Set<string>(),
-  };
-
-  for (const result of results) {
-    if (result.signal.analysisMode === "typescript-ast") {
-      languagesByMode.typeScriptAst.add(result.prettyName);
-    } else if (result.signal.analysisMode === "tree-sitter") {
-      languagesByMode.treeSitter.add(result.prettyName);
-    } else {
-      languagesByMode.heuristic.add(result.prettyName);
-    }
-  }
-
-  const typeScriptAstFiles = results.filter(
-    (result) => result.signal.analysisMode === "typescript-ast"
-  ).length;
-  const treeSitterFiles = results.filter(
-    (result) => result.signal.analysisMode === "tree-sitter"
-  ).length;
-  const heuristicFiles = Math.max(0, totalFiles - typeScriptAstFiles - treeSitterFiles);
-
-  return {
-    heuristicFiles,
-    languagesByMode: {
-      heuristic: Array.from(languagesByMode.heuristic).sort((left, right) =>
-        left.localeCompare(right)
-      ),
-      treeSitter: Array.from(languagesByMode.treeSitter).sort((left, right) =>
-        left.localeCompare(right)
-      ),
-      typeScriptAst: Array.from(languagesByMode.typeScriptAst).sort((left, right) =>
-        left.localeCompare(right)
-      ),
-    },
-    parserCoveragePercent:
-      totalFiles === 0
-        ? 0
-        : Math.round(((typeScriptAstFiles + treeSitterFiles) / totalFiles) * 100),
-    totalFiles,
-    treeSitterFiles,
-    typeScriptAstFiles,
-  };
-}
-
-function aggregateScanResults(results: FileScanResult[]): ScanAggregation {
-  const fileComplexities = results.map((result) => ({
-    path: result.normalizedPath,
-    score: result.complexity,
-  }));
-  const langStats = results.reduce<Record<string, number>>((acc, result) => {
-    acc[result.prettyName] = (acc[result.prettyName] ?? 0) + result.source;
-    return acc;
-  }, {});
-  const rankedComplexities = [...fileComplexities].sort((left, right) => right.score - left.score);
-  const focusedThreshold = Math.max(
-    8,
-    percentile(
-      rankedComplexities
-        .filter((item) => FileClassifier.isUsefulComplexityCandidate(item.path))
-        .map((item) => item.score),
-      0.8
-    )
-  );
-  const focusedComplexFiles = rankedComplexities
-    .filter((item) => item.score >= focusedThreshold)
-    .map((item) => item.path)
-    .filter((path) => FileClassifier.isUsefulComplexityCandidate(path));
-  const fallbackComplexFiles = rankedComplexities
-    .map((item) => item.path)
-    .filter((path) => FileClassifier.isUsefulComplexityCandidate(path));
-  const mostComplexFiles = (
-    focusedComplexFiles.length > 0 ? focusedComplexFiles : fallbackComplexFiles
-  ).slice(0, 12);
-
-  return {
-    analysisCoverage: buildAnalysisCoverage(results, results.length),
-    fileComplexities,
-    fileSignalsByPath: new Map(results.map((result) => [result.normalizedPath, result.signal])),
-    languages: Object.entries(langStats)
-      .map(([name, lines]) => ({
-        color: getLanguageColor(name) || "#cccccc",
-        lines,
-        name,
-      }))
-      .sort((left, right) => right.lines - left.lines),
-    mostComplexFiles,
-    securityFindings: results.flatMap((result) => result.securityFindings),
-    securityScanStatus: results.some((result) => result.securityScanStatus === "partial")
-      ? "partial"
-      : "ok",
-    totals: results.reduce(
-      (acc, result) => ({
-        comments: acc.comments + result.comments,
-        maxNesting: Math.max(acc.maxNesting, result.maxNesting),
-        securityIssues: acc.securityIssues + result.securityIssues,
-        size: acc.size + result.size,
-        source: acc.source + result.source,
-        todos: acc.todos + result.todos,
-      }),
-      {
-        comments: 0,
-        maxNesting: 0,
-        securityIssues: 0,
-        size: 0,
-        source: 0,
-        todos: 0,
-      }
-    ),
   };
 }
 

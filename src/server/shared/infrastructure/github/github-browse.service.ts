@@ -1,38 +1,55 @@
 import { TRPCError } from "@trpc/server";
 
-import { FileClassifier } from "@/server/shared/engine/core/file-classifier";
+import { getFileScore } from "@/server/shared/engine/core/file-classifier";
 import type { DbClient, PrismaClientExtended } from "@/server/shared/infrastructure/db";
 import {
-  GitHubAuthRequiredError,
-  githubService,
-} from "@/server/shared/infrastructure/github/github.service";
+  getFileContent,
+  getRepoBranches,
+  getRepoTree,
+  searchRepos,
+} from "@/server/shared/infrastructure/github/github-api";
+import { GitHubAuthRequiredError } from "@/server/shared/infrastructure/github/github-provider";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { isOctokitError } from "@/server/shared/lib/handle-error";
+
+function throwBrowseAccessError(params: {
+  authMessage: string;
+  forbiddenMessage: string;
+  notFoundMessage: string;
+  sourceError: unknown;
+}) {
+  if (params.sourceError instanceof GitHubAuthRequiredError) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: params.authMessage,
+    });
+  }
+  if (isOctokitError(params.sourceError) && params.sourceError.status === 404) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: params.notFoundMessage,
+    });
+  }
+  if (isOctokitError(params.sourceError) && params.sourceError.status === 403) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: params.forbiddenMessage,
+    });
+  }
+  throw params.sourceError;
+}
 
 export const githubBrowseService = {
   async getBranches(prisma: PrismaClientExtended, userId: number, owner: string, name: string) {
     try {
-      return await githubService.getRepoBranches(prisma, userId, owner, name);
+      return await getRepoBranches(prisma, userId, owner, name);
     } catch (error) {
-      if (error instanceof GitHubAuthRequiredError) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Connect your GitHub account or install the app to access branches.",
-        });
-      }
-      if (isOctokitError(error) && error.status === 404) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Repository or branch not found.",
-        });
-      }
-      if (isOctokitError(error) && error.status === 403) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "GitHub denied access to repository branches.",
-        });
-      }
-      throw error;
+      throwBrowseAccessError({
+        authMessage: "Connect your GitHub account or install the app to access branches.",
+        forbiddenMessage: "GitHub denied access to repository branches.",
+        notFoundMessage: "Repository or branch not found.",
+        sourceError: error,
+      });
     }
   },
 
@@ -53,7 +70,7 @@ export const githubBrowseService = {
     }
 
     try {
-      const fileData = await githubService.getFileContent(
+      const fileData = await getFileContent(
         prisma,
         userId,
         repo.owner,
@@ -68,29 +85,25 @@ export const githubBrowseService = {
       };
     } catch (error) {
       logger.error({ error, msg: "Failed to fetch file content from GitHub", path });
-      if (error instanceof GitHubAuthRequiredError) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Connect your GitHub account or install the app to access this file.",
-        });
-      }
-      if (isOctokitError(error) && error.status === 404) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "File or branch not found.",
-        });
-      }
-      if (isOctokitError(error) && error.status === 403) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "GitHub denied access to this file.",
+      if (
+        error instanceof GitHubAuthRequiredError ||
+        (isOctokitError(error) && (error.status === 403 || error.status === 404))
+      ) {
+        throwBrowseAccessError({
+          authMessage: "Connect your GitHub account or install the app to access this file.",
+          forbiddenMessage: "GitHub denied access to this file.",
+          notFoundMessage: "File or branch not found.",
+          sourceError: error,
         });
       }
 
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Could not fetch file content from GitHub.",
-      });
+      if (!isOctokitError(error)) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Could not fetch file content from GitHub.",
+        });
+      }
+      throw error;
     }
   },
 
@@ -101,42 +114,36 @@ export const githubBrowseService = {
     name: string,
     branch?: string
   ) {
-    let tree;
+    let tree: Awaited<ReturnType<typeof getRepoTree>> | null = null;
     try {
-      tree = await githubService.getRepoTree(prisma, userId, owner, name, branch);
+      tree = await getRepoTree(prisma, userId, owner, name, branch);
     } catch (error) {
-      if (error instanceof GitHubAuthRequiredError) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Connect your GitHub account or install the app to access repository files.",
-        });
-      }
-      if (isOctokitError(error) && error.status === 404) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Repository or branch not found.",
-        });
-      }
-      if (isOctokitError(error) && error.status === 403) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "GitHub denied access to repository files.",
-        });
-      }
-      throw error;
+      throwBrowseAccessError({
+        authMessage: "Connect your GitHub account or install the app to access repository files.",
+        forbiddenMessage: "GitHub denied access to repository files.",
+        notFoundMessage: "Repository or branch not found.",
+        sourceError: error,
+      });
+    }
+
+    if (tree == null) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Could not fetch repository files from GitHub.",
+      });
     }
 
     return tree.map((file) => [
       file.path,
       file.type === "blob" ? 1 : 0,
       file.sha.substring(0, 7),
-      FileClassifier.getScore(file.path) > 40 ? 1 : 0,
+      getFileScore(file.path) > 40 ? 1 : 0,
     ]);
   },
 
   async searchGithub(prisma: PrismaClientExtended, userId: number, query: string) {
     try {
-      return await githubService.searchRepos(prisma, userId, query, 10);
+      return await searchRepos(prisma, userId, query, 10);
     } catch (error) {
       if (error instanceof GitHubAuthRequiredError) {
         throw new TRPCError({

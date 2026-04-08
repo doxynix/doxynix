@@ -35,12 +35,6 @@ export const repoDetailsRouter = createTRPCRouter({
       return repoDetailsService.getHistory(ctx.db, input.repoId);
     }),
 
-  getOverview: protectedProcedure
-    .input(z.object({ repoId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      return repoDetailsService.getOverview(ctx.db, input.repoId);
-    }),
-
   getInteractiveBrief: protectedProcedure
     .input(z.object({ repoId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -53,6 +47,18 @@ export const repoDetailsRouter = createTRPCRouter({
       return repoDetailsService.getInteractiveBriefNode(ctx.db, input.repoId, input.nodeId);
     }),
 
+  getNodeExplain: protectedProcedure
+    .input(z.object({ nodeId: z.string(), repoId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return repoDetailsService.getNodeExplain(ctx.db, input.repoId, input.nodeId);
+    }),
+
+  getOverview: protectedProcedure
+    .input(z.object({ repoId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return repoDetailsService.getOverview(ctx.db, input.repoId);
+    }),
+
   getStructureMap: protectedProcedure
     .input(z.object({ repoId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -63,12 +69,6 @@ export const repoDetailsRouter = createTRPCRouter({
     .input(z.object({ nodeId: z.string(), repoId: z.string() }))
     .query(async ({ ctx, input }) => {
       return repoDetailsService.getStructureNode(ctx.db, input.repoId, input.nodeId);
-    }),
-
-  getNodeExplain: protectedProcedure
-    .input(z.object({ nodeId: z.string(), repoId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      return repoDetailsService.getNodeExplain(ctx.db, input.repoId, input.nodeId);
     }),
 
   highlightFile: protectedProcedure

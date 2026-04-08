@@ -1,7 +1,8 @@
 import { DocType } from "@prisma/client";
 
-import type { AIResult } from "@/server/features/analyze-repo/lib/schemas";
-import type { ReportSectionKind } from "@/server/shared/engine/core/types";
+import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
+import type { ReportSectionKind } from "@/server/shared/engine/core/documentation.types";
+import { hasText } from "@/server/shared/lib/string-utils";
 
 type GeneratedDocState = Pick<
   AIResult,
@@ -43,20 +44,16 @@ const SECONDARY_DOC_WEIGHTS: Record<(typeof SECONDARY_DOC_TYPES)[number], number
   [DocType.CONTRIBUTING]: 5,
 };
 
-function hasGeneratedContent(content: string | undefined) {
-  return typeof content === "string" && content.trim().length > 0;
-}
-
 export function buildGeneratedDocPrioritySnapshot(aiResult: GeneratedDocState) {
   return {
     primary: {
-      api: hasGeneratedContent(aiResult.generatedApiMarkdown),
-      architecture: hasGeneratedContent(aiResult.generatedArchitecture),
-      readme: hasGeneratedContent(aiResult.generatedReadme),
+      api: hasText(aiResult.generatedApiMarkdown),
+      architecture: hasText(aiResult.generatedArchitecture),
+      readme: hasText(aiResult.generatedReadme),
     },
     secondary: {
-      changelog: hasGeneratedContent(aiResult.generatedChangelog),
-      contributing: hasGeneratedContent(aiResult.generatedContributing),
+      changelog: hasText(aiResult.generatedChangelog),
+      contributing: hasText(aiResult.generatedContributing),
     },
   };
 }

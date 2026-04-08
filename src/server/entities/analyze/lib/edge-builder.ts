@@ -1,24 +1,34 @@
-import type { AIResult } from "@/server/features/analyze-repo/lib/schemas";
-import type { RepoMetrics } from "@/server/features/analyze-repo/lib/types";
+import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
-import { FileClassifier } from "@/server/shared/engine/core/file-classifier";
+import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
+import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
+import { unique } from "@/server/shared/lib/array-utils";
 
-import {
-  makeStructureNodeId,
-  resolveImmediateChildScope,
-  StructureContext,
-  StructureEdgeRelationType,
-  StructureGroupEntry,
-} from "./analysis-utils";
-import { buildStructureNodeSummary } from "./graph-navigator";
 import {
   buildGroupKeySet,
   collectGroupsByKind,
   deriveGroupId,
   filterMeaningfulEntrypoints,
   getStrongGroups,
-  unique,
 } from "./semantics";
+import {
+  makeStructureNodeId,
+  resolveImmediateChildScope,
+  type StructureContext,
+  type StructureEdgeRelationType,
+  type StructureGroupEntry,
+} from "./structure-shared";
+
+type StructureNodeSummaryLike = {
+  id: string;
+  kind: string;
+  markers: {
+    api: boolean;
+    config: boolean;
+  };
+  nodeType: "file" | "group";
+  path: string;
+};
 
 export function addWeightedEdge(
   edges: Map<
@@ -50,10 +60,8 @@ export function connectGroupSet(
 ) {
   for (let index = 0; index < groups.length; index += 1) {
     const source = groups[index];
-    if (source == null) continue;
     for (let inner = index + 1; inner < groups.length; inner += 1) {
       const target = groups[inner];
-      if (target == null) continue;
       addWeightedEdge(edges, source, target, relation, weight);
       addWeightedEdge(edges, target, source, relation, weight);
     }
@@ -72,10 +80,10 @@ export function addGraphPreviewEdges(params: {
     const targetPath = normalizePath(edge.toPath);
 
     if (sourcePath === targetPath) continue;
-    if (FileClassifier.isSensitiveFile(sourcePath) || FileClassifier.isSensitiveFile(targetPath)) {
+    if (ProjectPolicy.isSensitive(sourcePath) || ProjectPolicy.isSensitive(targetPath)) {
       continue;
     }
-    if (FileClassifier.isIgnored(sourcePath) || FileClassifier.isIgnored(targetPath)) continue;
+    if (ProjectPolicy.isIgnored(sourcePath) || ProjectPolicy.isIgnored(targetPath)) continue;
 
     const sourceGroup = deriveGroupId(sourcePath);
     const targetGroup = deriveGroupId(targetPath);
@@ -84,7 +92,7 @@ export function addGraphPreviewEdges(params: {
     const relation: StructureEdgeRelationType =
       params.apiPaths.has(sourcePath) || params.apiPaths.has(targetPath)
         ? "api"
-        : FileClassifier.isConfigFile(sourcePath) || FileClassifier.isConfigFile(targetPath)
+        : ProjectPolicy.isConfigFile(sourcePath) || ProjectPolicy.isConfigFile(targetPath)
           ? "config"
           : "focus";
 
@@ -188,15 +196,10 @@ export function createStructuralContextEdges(params: {
     "api",
     2
   );
+  connectGroupSet(edges, buildGroupKeySet(params.metrics.hotspotFiles, params.apiPaths), "risk", 2);
   connectGroupSet(
     edges,
-    buildGroupKeySet(params.metrics.hotspotFiles ?? [], params.apiPaths),
-    "risk",
-    2
-  );
-  connectGroupSet(
-    edges,
-    buildGroupKeySet(params.metrics.configInventory ?? [], params.apiPaths),
+    buildGroupKeySet(params.metrics.configInventory, params.apiPaths),
     "config",
     1
   );
@@ -250,7 +253,7 @@ export function createStructuralContextEdges(params: {
     }));
 }
 export function buildDrilldownEdges(params: {
-  childNodes: ReturnType<typeof buildStructureNodeSummary>[];
+  childNodes: StructureNodeSummaryLike[];
   context: StructureContext;
   parentPath: string;
 }) {
@@ -271,10 +274,9 @@ export function buildDrilldownEdges(params: {
 
     for (let index = 0; index < ids.length; index += 1) {
       const source = ids[index];
-      if (source == null) continue;
       for (let inner = index + 1; inner < ids.length; inner += 1) {
         const target = ids[inner];
-        if (target == null || target === source) continue;
+        if (target === source) continue;
         addWeightedEdge(edgeMap, source, target, relation, weight);
         addWeightedEdge(edgeMap, target, source, relation, weight);
       }
@@ -300,7 +302,7 @@ export function buildDrilldownEdges(params: {
         params.context.apiPaths.has(normalizePath(edge.fromPath)) ||
         params.context.apiPaths.has(normalizePath(edge.toPath))
           ? "api"
-          : FileClassifier.isConfigFile(edge.fromPath) || FileClassifier.isConfigFile(edge.toPath)
+          : ProjectPolicy.isConfigFile(edge.fromPath) || ProjectPolicy.isConfigFile(edge.toPath)
             ? "config"
             : "focus";
 
@@ -319,8 +321,8 @@ export function buildDrilldownEdges(params: {
   );
   connectPaths(params.context.metrics.routeInventory?.sourceFiles ?? [], "api", 2);
   connectPaths(params.context.docInput?.api.publicSurfacePaths ?? [], "api", 2);
-  connectPaths(params.context.metrics.hotspotFiles ?? [], "risk", 2);
-  connectPaths(params.context.metrics.configInventory ?? [], "config", 1);
+  connectPaths(params.context.metrics.hotspotFiles, "risk", 2);
+  connectPaths(params.context.metrics.configInventory, "config", 1);
 
   for (const cycle of params.context.docInput?.architecture.dependencyCycles ?? []) {
     connectPaths(cycle, "cycle", 3);

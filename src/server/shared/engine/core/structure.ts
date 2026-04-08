@@ -2,8 +2,6 @@ import { dumpDebug } from "@/server/shared/lib/debug-logger";
 import type { DependencyNodeMetric } from "@/server/shared/types";
 
 import { clamp } from "./common";
-import { collectRepositoryEvidence } from "./evidence";
-import { FileClassifier } from "./file-classifier";
 import type {
   FileComplexity,
   FileSignals,
@@ -11,24 +9,10 @@ import type {
   RepositoryEvidence,
   RepositoryFile,
   StructuralSignals,
-} from "./types";
-
-function isGraphPreviewCandidate(path: string) {
-  if (FileClassifier.isSensitiveFile(path)) return false;
-  if (FileClassifier.isIgnored(path)) return false;
-  if (FileClassifier.isDocsFile(path)) return false;
-  if (FileClassifier.isGeneratedFile(path)) return false;
-  if (FileClassifier.isTestFile(path)) return false;
-  if (FileClassifier.isAssetFile(path)) return false;
-  if (FileClassifier.isToolingFile(path)) return false;
-  if (FileClassifier.isLowSignalConfigFile(path)) return false;
-
-  return (
-    FileClassifier.isArchitectureRelevant(path) ||
-    FileClassifier.isApiFile(path) ||
-    FileClassifier.isConfigFile(path)
-  );
-}
+} from "./discovery.types";
+import { collectRepositoryEvidence } from "./evidence";
+import { ProjectPolicy } from "./project-policy";
+import { STRUCTURAL_MODULARITY_SCORING } from "./scoring-constants";
 
 function buildGraphPreviewEdges(evidence: RepositoryEvidence, limit = 96): GraphPreviewEdge[] {
   const edgeMap = new Map<string, GraphPreviewEdge>();
@@ -38,7 +22,8 @@ function buildGraphPreviewEdges(evidence: RepositoryEvidence, limit = 96): Graph
 
     const fromPath = edge.fromPath;
     const toPath = edge.toPath;
-    if (!isGraphPreviewCandidate(fromPath) || !isGraphPreviewCandidate(toPath)) continue;
+    if (!ProjectPolicy.isGraphPreviewCandidate(fromPath)) continue;
+    if (!ProjectPolicy.isGraphPreviewCandidate(toPath)) continue;
 
     const key = `${fromPath}=>${toPath}`;
     const current = edgeMap.get(key);
@@ -71,7 +56,7 @@ export function buildStructuralSignals(
     dependencyCycles: evidence.dependencyCycles,
     dependencyHotspots,
     entrypointDetails: evidence.entrypoints,
-    entrypoints: FileClassifier.filterPrimaryEntrypointPaths(
+    entrypoints: ProjectPolicy.filterPrimaryEntrypointPaths(
       evidence.entrypoints
         .filter((entrypoint) => entrypoint.kind === "runtime" || entrypoint.kind === "library")
         .map((entrypoint) => entrypoint.path)
@@ -115,13 +100,21 @@ export function scoreStructuralModularity(params: {
   dependencyHotspots: DependencyNodeMetric[];
   orphanModules: string[];
 }) {
-  const cyclePenalty = Math.min(28, params.dependencyCycles.length * 9);
-  const orphanPenalty = Math.min(22, params.orphanModules.length * 2);
+  const cyclePenalty = Math.min(
+    STRUCTURAL_MODULARITY_SCORING.cyclePenaltyMax,
+    params.dependencyCycles.length * STRUCTURAL_MODULARITY_SCORING.cycleMultiplier
+  );
+  const orphanPenalty = Math.min(
+    STRUCTURAL_MODULARITY_SCORING.orphanPenaltyMax,
+    params.orphanModules.length * STRUCTURAL_MODULARITY_SCORING.orphanMultiplier
+  );
   const avgInbound =
     params.dependencyHotspots.length === 0
       ? 0
       : params.dependencyHotspots.reduce((sum, item) => sum + item.inbound, 0) /
         params.dependencyHotspots.length;
 
-  return clamp(Math.round(100 - cyclePenalty - orphanPenalty - avgInbound * 3), 0, 100);
+  const hotspotPenalty = clamp(avgInbound * 3, 0, STRUCTURAL_MODULARITY_SCORING.hotspotPenaltyMax);
+
+  return clamp(Math.round(100 - cyclePenalty - orphanPenalty - hotspotPenalty), 0, 100);
 }

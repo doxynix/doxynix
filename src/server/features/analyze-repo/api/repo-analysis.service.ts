@@ -4,8 +4,6 @@ import { TRPCError } from "@trpc/server";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
-import type { AIResult } from "@/server/features/analyze-repo/lib/schemas";
-import type { RepoMetrics } from "@/server/features/analyze-repo/lib/types";
 import {
   runDocumentFilePreview,
   runQuickFileAudit,
@@ -26,6 +24,8 @@ import {
   buildNodeContextMeta,
 } from "@/server/features/file-actions/model/repo-node-context";
 import { calculateDocumentationOutputScore } from "@/server/features/generate-docs/lib/doc-priority";
+import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
+import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { calculateTeamRoles } from "@/server/shared/engine/metrics/common-metrics";
 import { calculateHealthScore } from "@/server/shared/engine/metrics/complexity";
 import { prisma, type DbClient } from "@/server/shared/infrastructure/db";
@@ -35,14 +35,6 @@ import { getLatestCompletedAnalysisRef } from "@/server/shared/infrastructure/re
 import type { FileActionPreviewResult } from "@/server/shared/types";
 
 export const repoAnalysisService = {
-  async assertRepoAccess(db: DbClient, userId: number, repoId: string) {
-    const repo = await db.repo.findFirst({
-      where: { publicId: repoId, userId },
-    });
-
-    if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
-    return repo;
-  },
   async analyze(
     db: DbClient,
     userId: number,
@@ -55,11 +47,7 @@ export const repoAnalysisService = {
       repoId: string;
     }
   ) {
-    const repo = await db.repo.findUnique({
-      where: { publicId: input.repoId },
-    });
-
-    if (repo == null) throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
+    await assertRepoAccess(db, userId, input.repoId);
 
     const analysis = await db.analysis.create({
       data: {
@@ -97,7 +85,6 @@ export const repoAnalysisService = {
 
     return { jobId: handle.id, status: "QUEUED" };
   },
-
   async analyzeFile(
     db: DbClient,
     userId: number,
@@ -109,24 +96,21 @@ export const repoAnalysisService = {
       repoId: string;
     }
   ) {
-    await this.assertRepoAccess(db, userId, input.repoId);
+    await assertRepoAccess(db, userId, input.repoId);
     const nodeContext = await buildNodeContext(db, input.repoId, input.nodeId);
 
-    const handle = await tasks.trigger(
-      "analyze-single-file",
-      {
+    const handle = await triggerSingleFileTask({
+      payload: {
         content: input.content,
         language: input.language,
         nodeContext: nodeContext ?? undefined,
         path: input.path,
         repoId: input.repoId,
       },
-      {
-        concurrencyKey: `user-${userId}`,
-        idempotencyKey: `analyze-file-${input.repoId}-${input.path}`,
-        ttl: "10m",
-      }
-    );
+      taskId: "analyze-single-file",
+      userId,
+      workItemId: `analyze-file-${input.repoId}-${input.path}`,
+    });
 
     return { jobId: handle.id };
   },
@@ -142,12 +126,11 @@ export const repoAnalysisService = {
       repoId: string;
     }
   ) {
-    await this.assertRepoAccess(db, userId, input.repoId);
+    await assertRepoAccess(db, userId, input.repoId);
     const nodeContext = await buildNodeContext(db, input.repoId, input.nodeId);
 
-    const handle = await tasks.trigger(
-      "document-single-file",
-      {
+    const handle = await triggerSingleFileTask({
+      payload: {
         content: input.content,
         language: input.language,
         nodeContext: nodeContext ?? undefined,
@@ -155,56 +138,12 @@ export const repoAnalysisService = {
         repoId: input.repoId,
         userId,
       },
-      {
-        concurrencyKey: `user-${userId}`,
-        idempotencyKey: `doc-file-${input.repoId}-${input.path}`,
-        ttl: "10m",
-      }
-    );
-
-    return { jobId: handle.id };
-  },
-
-  async quickFileAudit(
-    db: DbClient,
-    userId: number,
-    input: {
-      analysisId?: string;
-      commitSha?: string;
-      content: string;
-      language: string;
-      nodeId?: string;
-      path: string;
-      repoId: string;
-    }
-  ): Promise<QuickFileAuditResult & SyncFileActionMeta & FileActionPreviewResult> {
-    await this.assertRepoAccess(db, userId, input.repoId);
-    const [nodeContext, analysisRef] = await Promise.all([
-      buildNodeContext(db, input.repoId, input.nodeId),
-      getLatestCompletedAnalysisRef(db, input.repoId),
-    ]);
-    const result = await runQuickFileAudit({
-      ...input,
-      nodeContext: nodeContext ?? undefined,
+      taskId: "document-single-file",
+      userId,
+      workItemId: `doc-file-${input.repoId}-${input.path}`,
     });
 
-    const response = {
-      ...result,
-      ...buildSyncFileActionMeta({
-        analysisRef,
-        contentRef: {
-          analysisId: input.analysisId,
-          commitSha: input.commitSha,
-        },
-        contextDiagnostics: buildNodeContextDiagnostics(nodeContext),
-        contextMeta: buildNodeContextMeta(nodeContext),
-      }),
-    };
-
-    return {
-      ...response,
-      ...toQuickFileAuditPreview(response),
-    };
+    return { jobId: handle.id };
   },
 
   async documentFilePreview(
@@ -219,12 +158,9 @@ export const repoAnalysisService = {
       path: string;
       repoId: string;
     }
-  ): Promise<DocumentFilePreviewResult & SyncFileActionMeta & FileActionPreviewResult> {
-    await this.assertRepoAccess(db, userId, input.repoId);
-    const [nodeContext, analysisRef] = await Promise.all([
-      buildNodeContext(db, input.repoId, input.nodeId),
-      getLatestCompletedAnalysisRef(db, input.repoId),
-    ]);
+  ): Promise<DocumentFilePreviewResult & FileActionPreviewResult & SyncFileActionMeta> {
+    await assertRepoAccess(db, userId, input.repoId);
+    const { analysisRef, nodeContext } = await buildFileActionRuntimeContext(db, input);
     const result = await runDocumentFilePreview({
       ...input,
       nodeContext: nodeContext ?? undefined,
@@ -232,20 +168,43 @@ export const repoAnalysisService = {
 
     const response = {
       ...result,
-      ...buildSyncFileActionMeta({
-        analysisRef,
-        contentRef: {
-          analysisId: input.analysisId,
-          commitSha: input.commitSha,
-        },
-        contextDiagnostics: buildNodeContextDiagnostics(nodeContext),
-        contextMeta: buildNodeContextMeta(nodeContext),
-      }),
+      ...buildSyncFileMeta(input, nodeContext, analysisRef),
     };
 
     return {
       ...response,
       ...toDocumentFilePreview(response),
+    };
+  },
+
+  async quickFileAudit(
+    db: DbClient,
+    userId: number,
+    input: {
+      analysisId?: string;
+      commitSha?: string;
+      content: string;
+      language: string;
+      nodeId?: string;
+      path: string;
+      repoId: string;
+    }
+  ): Promise<FileActionPreviewResult & QuickFileAuditResult & SyncFileActionMeta> {
+    await assertRepoAccess(db, userId, input.repoId);
+    const { analysisRef, nodeContext } = await buildFileActionRuntimeContext(db, input);
+    const result = await runQuickFileAudit({
+      ...input,
+      nodeContext: nodeContext ?? undefined,
+    });
+
+    const response = {
+      ...result,
+      ...buildSyncFileMeta(input, nodeContext, analysisRef),
+    };
+
+    return {
+      ...response,
+      ...toQuickFileAuditPreview(response),
     };
   },
 
@@ -321,12 +280,7 @@ export const repoAnalysisService = {
       factCount: repositoryFacts.length,
       findingCount: repositoryFindings.length,
       healthScore: finalHealthScore,
-      maintenanceStatus:
-        (Date.now() - new Date(repo.pushedAt!).getTime()) / (1000 * 60 * 60 * 24 * 30) > 12
-          ? "dead"
-          : (Date.now() - new Date(repo.pushedAt!).getTime()) / (1000 * 60 * 60 * 24 * 30) > 6
-            ? "stale"
-            : "active",
+      maintenanceStatus: deriveMaintenanceStatus(repo),
       onboardingScore,
       teamRoles,
     };
@@ -413,3 +367,61 @@ export const repoAnalysisService = {
     return finalHealthScore;
   },
 };
+
+async function assertRepoAccess(db: DbClient, userId: number, repoId: string) {
+  const repo = await db.repo.findFirst({
+    where: { publicId: repoId, userId },
+  });
+
+  if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
+  return repo;
+}
+
+async function buildFileActionRuntimeContext(
+  db: DbClient,
+  input: { nodeId?: string; repoId: string }
+) {
+  const [nodeContext, analysisRef] = await Promise.all([
+    buildNodeContext(db, input.repoId, input.nodeId),
+    getLatestCompletedAnalysisRef(db, input.repoId),
+  ]);
+
+  return { analysisRef, nodeContext };
+}
+
+function buildSyncFileMeta(
+  input: { analysisId?: string; commitSha?: string },
+  nodeContext: Awaited<ReturnType<typeof buildNodeContext>>,
+  analysisRef: Awaited<ReturnType<typeof getLatestCompletedAnalysisRef>>
+) {
+  return buildSyncFileActionMeta({
+    analysisRef,
+    contentRef: {
+      analysisId: input.analysisId,
+      commitSha: input.commitSha,
+    },
+    contextDiagnostics: buildNodeContextDiagnostics(nodeContext),
+    contextMeta: buildNodeContextMeta(nodeContext),
+  });
+}
+
+function deriveMaintenanceStatus(repo: Repo) {
+  const pushedAt = repo.pushedAt ?? repo.updatedAt;
+  const ageInMonths = (Date.now() - new Date(pushedAt).getTime()) / (1000 * 60 * 60 * 24 * 30);
+  if (ageInMonths > 12) return "dead" as const;
+  if (ageInMonths > 6) return "stale" as const;
+  return "active" as const;
+}
+
+async function triggerSingleFileTask<TPayload extends object>(params: {
+  payload: TPayload;
+  taskId: "analyze-single-file" | "document-single-file";
+  userId: number;
+  workItemId: string;
+}) {
+  return tasks.trigger(params.taskId, params.payload, {
+    concurrencyKey: `user-${params.userId}`,
+    idempotencyKey: params.workItemId,
+    ttl: "10m",
+  });
+}

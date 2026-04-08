@@ -1,9 +1,40 @@
-import type { RepoMetrics } from "@/server/features/analyze-repo/lib/types";
 import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
-import { FileClassifier } from "@/server/shared/engine/core/file-classifier";
+import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
+import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
+import { unique } from "@/server/shared/lib/array-utils";
+import { hasText } from "@/server/shared/lib/string-utils";
 
-import { StructureGroupEntry, StructureSemanticKind } from "./analysis-utils";
-import { buildStructureNodeSummary } from "./graph-navigator";
+import type { StructureGroupEntry, StructureSemanticKind } from "./structure-shared";
+
+type StructureNodeSummaryLike = {
+  kind: string;
+  label: string;
+  markers: {
+    api: boolean;
+    config: boolean;
+    entrypoint: boolean;
+    risk: boolean;
+    server: boolean;
+    shared: boolean;
+  };
+  nodeType: "file" | "group";
+  path: string;
+  score: number;
+  stats: {
+    apiCount: number;
+    changeCouplingCount: number;
+    churnCount: number;
+    configCount: number;
+    dependencyHotspotCount: number;
+    entrypointCount: number;
+    frameworkCount: number;
+    graphWarningCount: number;
+    hotspotCount: number;
+    orphanCount: number;
+    pathCount: number;
+    riskCount: number;
+  };
+};
 
 export const SEMANTIC_META: Record<StructureSemanticKind, { description: string; label: string }> =
   {
@@ -41,243 +72,31 @@ export const SEMANTIC_META: Record<StructureSemanticKind, { description: string;
       label: "Module",
     },
   };
-export const GROUPING_ROOTS = new Set([
-  "app",
-  "apps",
-  "backend",
-  "client",
-  "cli",
-  "cmd",
-  "components",
-  "core",
-  "crates",
-  "desktop",
-  "domain",
-  "entities",
-  "extensions",
-  "features",
-  "frontend",
-  "include",
-  "internal",
-  "lib",
-  "libs",
-  "mobile",
-  "modules",
-  "packages",
-  "pages",
-  "plugins",
-  "pkg",
-  "sdk",
-  "server",
-  "services",
-  "shared",
-  "src",
-  "workers",
-  "widgets",
-]);
-export const JVM_SOURCE_ROOTS = new Set([
-  "clojure",
-  "groovy",
-  "java",
-  "kotlin",
-  "resources",
-  "scala",
-]);
-export const POLYGLOT_CONFIG_HINTS = [
-  "build.gradle",
-  "build.gradle.kts",
-  "cmakelists.txt",
-  "cargo.toml",
-  "deno.json",
-  "deno.jsonc",
-  "directory.build.props",
-  "directory.packages.props",
-  "dockerfile",
-  "gemfile",
-  "go.mod",
-  "makefile",
-  "meson.build",
-  "mix.exs",
-  "package.json",
-  "pipfile",
-  "pipfile.lock",
-  "poetry.lock",
-  "pom.xml",
-  "pyproject.toml",
-  "rebar.config",
-  "requirements.txt",
-  "settings.gradle",
-  "settings.gradle.kts",
-  "setup.cfg",
-  "setup.py",
-];
-export const GENERIC_GROUP_ROOTS = new Set([
-  "app",
-  "apps",
-  "backend",
-  "client",
-  "cli",
-  "cmd",
-  "components",
-  "core",
-  "crates",
-  "domain",
-  "frontend",
-  "include",
-  "internal",
-  "lib",
-  "libs",
-  "mobile",
-  "modules",
-  "packages",
-  "pages",
-  "pkg",
-  "sdk",
-  "server",
-  "services",
-  "shared",
-  "src",
-  "workers",
-]);
 export function deriveGroupId(path: string) {
-  const normalized = normalizePath(path);
-  const parts = normalized.split("/").filter(Boolean);
-
-  if (parts.length === 0) return "other";
-  if (parts[0]?.startsWith(".")) return parts[0];
-
-  if (
-    parts[0] === "src" &&
-    (parts[1] === "main" || parts[1] === "test") &&
-    parts[2] != null &&
-    JVM_SOURCE_ROOTS.has(parts[2])
-  ) {
-    if (parts[3] == null || parts[2] === "resources") return `src/${parts[1]}/${parts[2]}`;
-    return `src/${parts[1]}/${parts[2]}/${parts[3]}`;
-  }
-
-  if (parts[0] === "src") {
-    if (parts[1] == null) return "src";
-    if (parts[2] == null) return `src/${parts[1]}`;
-    return `src/${parts[1]}/${parts[2]}`;
-  }
-
-  if (GROUPING_ROOTS.has(parts[0] ?? "") && parts[1] != null) {
-    return `${parts[0]}/${parts[1]}`;
-  }
-
-  return parts[0] ?? "other";
+  return ProjectPolicy.deriveGroupId(path);
 }
 export function prettifyGroupLabel(groupId: string) {
-  const parts = groupId.split("/").filter(Boolean);
-  const raw =
-    parts[0] === "src" && (parts[1] === "main" || parts[1] === "test")
-      ? parts.slice(-3).join(" / ")
-      : parts.slice(-2).join(" / ");
-  return raw.replace(/[-_]/g, " ");
+  return ProjectPolicy.getGroupLabel(groupId);
 }
 export function collectSemanticKinds(path: string, apiPaths: Set<string>): StructureSemanticKind[] {
-  const normalized = normalizePath(path);
-  const lower = normalized.toLowerCase();
-  const kinds = new Set<StructureSemanticKind>();
-
-  if (
-    apiPaths.has(normalized) ||
-    FileClassifier.isApiFile(normalized) ||
-    /(^|\/)(api|routers|routes|controllers|handlers|trpc|grpc|rpc|gateway|endpoints?)(\/|$)/iu.test(
-      lower
-    )
-  ) {
-    kinds.add("api");
-  }
-  if (
-    /(^|\/)(server|backend|services|workers|jobs|cli|cmd|internal|daemon|commands?|processors?|consumers?)(\/|$)/iu.test(
-      lower
-    ) ||
-    lower.startsWith("src/server/")
-  ) {
-    kinds.add("backend");
-  }
-  if (
-    /(^|\/)(app|pages|components|features|widgets|frontend|client|ui|screens|views|templates|android|ios)(\/|$)/iu.test(
-      lower
-    ) ||
-    lower.startsWith("src/app/")
-  ) {
-    kinds.add("frontend");
-  }
-  if (
-    /(^|\/)(shared|common|utils|helpers|sdk|kernel|base)(\/|$)/iu.test(lower) ||
-    lower.startsWith("src/shared/")
-  ) {
-    kinds.add("shared");
-  }
-  if (/(^|\/)(engine|core|domain|runtime|kernel)(\/|$)/iu.test(lower)) {
-    kinds.add("core");
-  }
-  if (
-    /(^|\/)(prisma|migrations|schema|schemas|db|database|repositories|repository|persistence|storage|store|dao|orm|redis|mongo|postgres|mysql|sqlite)(\/|$)/iu.test(
-      lower
-    )
-  ) {
-    kinds.add("data");
-  }
-  if (
-    FileClassifier.isInfraFile(normalized) ||
-    /(^|\/)(infra|infrastructure|adapters|drivers|integrations|deploy|helm|terraform|ansible|k8s|kubernetes|cloud|providers)(\/|$)/iu.test(
-      lower
-    )
-  ) {
-    kinds.add("infrastructure");
-  }
-  if (
-    /(^|\/)(config|configs)(\/|$)/iu.test(lower) ||
-    FileClassifier.isConfigFile(normalized) ||
-    POLYGLOT_CONFIG_HINTS.some((hint) => lower.endsWith(hint))
-  ) {
-    kinds.add("config");
-  }
-
-  if (kinds.size === 0) kinds.add("unknown");
-  return Array.from(kinds);
+  return ProjectPolicy.getSemanticKinds(path, { apiPaths }) as StructureSemanticKind[];
 }
 export function pickPrimarySemanticKind(
   counts: Record<StructureSemanticKind, number>
 ): StructureSemanticKind {
-  return (
-    (Object.entries(counts).sort(
-      (left, right) => right[1] - left[1] || left[0].localeCompare(right[0])
-    )[0]?.[0] as StructureSemanticKind | undefined) ?? "unknown"
-  );
+  return ProjectPolicy.getPrimarySemanticKind(counts);
 }
 export function describeGroup(groupId: string, primaryKind: StructureSemanticKind) {
   const label = prettifyGroupLabel(groupId);
   return `${label}: ${SEMANTIC_META[primaryKind].description}`;
 }
 export function isBroadGenericGroupPath(groupPath: string) {
-  const normalized = normalizePath(groupPath);
-  if (normalized === "other") return true;
-  if (normalized.startsWith(".")) return true;
-
-  const parts = normalized.split("/").filter(Boolean);
-  if (parts.length === 0) return true;
-  if (parts.length === 1 && GENERIC_GROUP_ROOTS.has(parts[0] ?? "")) return true;
-  if (normalized === "src") return true;
-  if (
-    /^src\/[^/]+$/u.test(normalized) &&
-    !/^src\/(app|api|server|shared|core|features|entities|widgets)$/u.test(normalized)
-  ) {
-    return true;
-  }
-
-  return false;
+  return ProjectPolicy.isBroadGenericGroupPath(groupPath);
 }
-export function getGenericGroupPenalty(node: ReturnType<typeof buildStructureNodeSummary>) {
+export function getGenericGroupPenalty(node: StructureNodeSummaryLike) {
   if (node.nodeType !== "group") return 0;
 
-  let penalty = 0;
-  if (isBroadGenericGroupPath(node.path)) penalty += 10;
-  if (node.path === "other") penalty += 12;
+  let penalty = ProjectPolicy.getGenericGroupPathPenalty(node.path);
   if (node.kind === "unknown") penalty += 6;
 
   const hasStrongSignal = node.markers.entrypoint || node.markers.api || node.markers.risk;
@@ -301,20 +120,14 @@ export function getPrimaryKindForEntry(entry: StructureGroupEntry) {
   return pickPrimarySemanticKind(entry.semanticCounts);
 }
 export function filterMeaningfulEntrypoints(paths: string[]) {
-  const normalized = unique(paths.filter(hasPath).map((path) => normalizePath(path)));
+  const normalized = unique(paths.filter(hasText).map((path) => normalizePath(path)));
   const nonBarrel = normalized.filter((path) => !isLikelyBarrelPath(path));
   return nonBarrel.length > 0 ? nonBarrel : normalized;
 }
 export function isNoisyConfigOnlyPath(path: string) {
-  return FileClassifier.isLowSignalConfigFile(path);
-}
-export function unique<T>(values: T[]) {
-  return Array.from(new Set(values));
+  return ProjectPolicy.isLowSignalConfig(path);
 }
 
-export function hasPath(value: string | undefined | null): value is string {
-  return typeof value === "string" && value.trim().length > 0;
-}
 export function summarizeGroupImportance(params: {
   apiCount: number;
   changeCouplingCount: number;
@@ -323,8 +136,8 @@ export function summarizeGroupImportance(params: {
   dependencyHotspotCount: number;
   entrypointCount: number;
   frameworkCount: number;
-  groupId: string;
   graphWarningCount: number;
+  groupId: string;
   hotspotCount: number;
   orphanCount: number;
   primaryKind: StructureSemanticKind;
@@ -378,10 +191,10 @@ export function getStructureSeedScore(params: {
     score += 3;
   if ((params.metrics.routeInventory?.sourceFiles ?? []).includes(normalizedPath)) score += 2;
 
-  if (FileClassifier.isApiFile(normalizedPath)) score += 2;
-  if (FileClassifier.isArchitectureRelevant(normalizedPath)) score += 2;
-  if (FileClassifier.isPrimaryEntrypointFile(normalizedPath)) score += 2;
-  if (FileClassifier.isConfigFile(normalizedPath) && !isNoisyConfigOnlyPath(normalizedPath))
+  if (ProjectPolicy.isApiPath(normalizedPath)) score += 2;
+  if (ProjectPolicy.isArchitectureRelevant(normalizedPath)) score += 2;
+  if (ProjectPolicy.isPrimaryEntrypoint(normalizedPath)) score += 2;
+  if (ProjectPolicy.isConfigFile(normalizedPath) && !isNoisyConfigOnlyPath(normalizedPath))
     score += 1;
 
   const groupId = deriveGroupId(normalizedPath);
@@ -401,8 +214,8 @@ export function shouldKeepStructurePath(
   graphRelatedPaths: Set<string>
 ) {
   const normalizedPath = normalizePath(path);
-  if (FileClassifier.isSensitiveFile(normalizedPath)) return false;
-  if (FileClassifier.isIgnored(normalizedPath)) return false;
+  if (ProjectPolicy.isSensitive(normalizedPath)) return false;
+  if (ProjectPolicy.isIgnored(normalizedPath)) return false;
 
   const signals = signalMap.get(normalizedPath) ?? new Set();
   const hasStrongSignal =
@@ -415,12 +228,12 @@ export function shouldKeepStructurePath(
 
   if (hasStrongSignal) return true;
   if (signals.has("config")) return !isNoisyConfigOnlyPath(normalizedPath);
-  if (FileClassifier.isLikelyBarrelFile(normalizedPath)) return false;
-  if (FileClassifier.isDocsFile(normalizedPath)) return false;
-  if (FileClassifier.isGeneratedFile(normalizedPath)) return false;
-  if (FileClassifier.isTestFile(normalizedPath)) return false;
-  if (FileClassifier.isAssetFile(normalizedPath)) return false;
-  if (FileClassifier.isToolingFile(normalizedPath)) return false;
+  if (ProjectPolicy.isLikelyBarrelFile(normalizedPath)) return false;
+  if (ProjectPolicy.isDocsFile(normalizedPath)) return false;
+  if (ProjectPolicy.isGeneratedFile(normalizedPath)) return false;
+  if (ProjectPolicy.isTestFile(normalizedPath)) return false;
+  if (ProjectPolicy.isAssetFile(normalizedPath)) return false;
+  if (ProjectPolicy.isToolingFile(normalizedPath)) return false;
 
   return (
     getStructureSeedScore({
@@ -432,7 +245,7 @@ export function shouldKeepStructurePath(
     }) >= 2
   );
 }
-export function rankStructureNode(node: ReturnType<typeof buildStructureNodeSummary>) {
+export function rankStructureNode(node: StructureNodeSummaryLike) {
   let rank = node.score;
   if (node.nodeType === "group") rank += 6;
   if (node.markers.entrypoint) rank += 12;
@@ -441,11 +254,11 @@ export function rankStructureNode(node: ReturnType<typeof buildStructureNodeSumm
   if (node.markers.config) rank += 4;
   if (node.markers.shared) rank += 3;
   if (node.kind !== "unknown") rank += 2;
-  if (node.nodeType === "file" && FileClassifier.isLikelyBarrelFile(node.path)) rank -= 8;
+  if (node.nodeType === "file" && ProjectPolicy.isLikelyBarrelFile(node.path)) rank -= 8;
   rank -= getGenericGroupPenalty(node);
   return rank;
 }
-export function isMeaningfulTopLevelNode(node: ReturnType<typeof buildStructureNodeSummary>) {
+export function isMeaningfulTopLevelNode(node: StructureNodeSummaryLike) {
   if (
     isBroadGenericGroupPath(node.path) &&
     !node.markers.entrypoint &&
@@ -461,7 +274,7 @@ export function isMeaningfulTopLevelNode(node: ReturnType<typeof buildStructureN
   if (node.stats.pathCount >= 2) return true;
   return node.kind !== "unknown";
 }
-export function isMeaningfulChildNode(node: ReturnType<typeof buildStructureNodeSummary>) {
+export function isMeaningfulChildNode(node: StructureNodeSummaryLike) {
   if (node.nodeType === "group") {
     return (
       node.markers.entrypoint ||
@@ -478,8 +291,8 @@ export function isMeaningfulChildNode(node: ReturnType<typeof buildStructureNode
     return true;
   }
 
-  if (FileClassifier.isLikelyBarrelFile(node.path)) return false;
-  return FileClassifier.isArchitectureRelevant(node.path) || FileClassifier.isApiFile(node.path);
+  if (ProjectPolicy.isLikelyBarrelFile(node.path)) return false;
+  return ProjectPolicy.isArchitectureRelevant(node.path) || ProjectPolicy.isApiPath(node.path);
 }
 export function collectGroupsByKind(groupMap: Map<string, StructureGroupEntry>) {
   const byKind = new Map<StructureSemanticKind, string[]>();

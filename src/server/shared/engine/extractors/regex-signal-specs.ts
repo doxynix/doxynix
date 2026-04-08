@@ -1,4 +1,4 @@
-import type { RepositoryFile, RouteRef, SymbolKind } from "../core/types";
+import type { RepositoryFile, RouteRef, SymbolKind } from "../core/discovery.types";
 
 const ONE_C_PROCEDURE = "\\u041F\\u0440\\u043E\\u0446\\u0435\\u0434\\u0443\\u0440\\u0430";
 const ONE_C_FUNCTION = "\\u0424\\u0443\\u043D\\u043A\\u0446\\u0438\\u044F";

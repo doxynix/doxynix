@@ -2,8 +2,14 @@ import "server-only";
 
 import { logger } from "@/server/shared/infrastructure/logger";
 
+import type {
+  FileSignals,
+  RepositoryFile,
+  RouteRef,
+  SymbolKind,
+  SymbolRef,
+} from "../core/discovery.types";
 import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
-import type { FileSignals, RepositoryFile, RouteRef, SymbolKind, SymbolRef } from "../core/types";
 
 type LanguageSpec = {
   api?: RegExp[];
@@ -376,11 +382,14 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
       return {
         analysisMode: "tree-sitter",
         apiSurface: Math.max(apiSurface, routes.length),
+        confidence: 80, // AST-based extraction has high confidence
         entrypointHint: spec.entrypoints.some((re) => re.test(file.content)),
         exports,
         frameworkHints,
         imports: Array.from(imports),
+        path: file.path,
         routes,
+        source: "extraction" as const,
         symbols,
       };
     } finally {

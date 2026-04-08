@@ -1,13 +1,10 @@
-import { FileClassifier } from "../core/file-classifier";
+import type { EntrypointRef, ModuleRef, RouteInventory } from "../core/discovery.types";
 import type {
   DocumentationAudience,
-  EntrypointRef,
-  FileCategory,
-  ModuleRef,
   ReportSectionInput,
   ReportSectionKind,
-  RouteInventory,
-} from "../core/types";
+} from "../core/documentation.types";
+import { ProjectPolicy } from "../core/project-policy";
 
 type SectionBuilderArgs<TBody> = {
   audience: DocumentationAudience | "mixed";
@@ -21,25 +18,6 @@ type SectionBuilderArgs<TBody> = {
 };
 
 type RankedModule = Pick<ModuleRef, "apiSurface" | "exports" | "path" | "routeCount" | "symbols">;
-
-const NON_ARCHITECTURE_CATEGORIES = new Set<FileCategory>([
-  "asset",
-  "benchmark",
-  "docs",
-  "generated",
-  "test",
-]);
-
-const SECONDARY_EVIDENCE_CATEGORIES = new Set<FileCategory>([
-  "asset",
-  "benchmark",
-  "config",
-  "docs",
-  "generated",
-  "infra",
-  "test",
-  "tooling",
-]);
 
 export function clampSectionConfidence(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
@@ -64,18 +42,8 @@ export function sortArchitectureModules<TModule extends RankedModule>(modules: T
   );
 }
 
-function isArchitectureRelevantModule(module: Pick<ModuleRef, "categories">) {
-  return (
-    module.categories.includes("runtime-source") &&
-    !module.categories.some((category) => NON_ARCHITECTURE_CATEGORIES.has(category))
-  );
-}
-
 function isPrimaryArchitectureModule(module: Pick<ModuleRef, "categories">) {
-  return (
-    isArchitectureRelevantModule(module) &&
-    !module.categories.some((category) => SECONDARY_EVIDENCE_CATEGORIES.has(category))
-  );
+  return ProjectPolicy.isPrimaryArchitectureCategories(module.categories);
 }
 
 export function getPrimaryArchitectureModules(modules: ModuleRef[], limit = 24) {
@@ -85,7 +53,7 @@ export function getPrimaryArchitectureModules(modules: ModuleRef[], limit = 24) 
 }
 
 export function getPrimaryEntrypointPaths(entrypoints: EntrypointRef[]) {
-  return FileClassifier.filterPrimaryEntrypointPaths(
+  return ProjectPolicy.filterPrimaryEntrypointPaths(
     entrypoints
       .filter((entrypoint) => entrypoint.kind === "library" || entrypoint.kind === "runtime")
       .map((entrypoint) => entrypoint.path)

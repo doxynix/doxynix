@@ -1,5 +1,5 @@
+import type { FileSignals, RepositoryFile, RouteRef, SymbolRef } from "../core/discovery.types";
 import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
-import type { FileSignals, RepositoryFile, RouteRef, SymbolRef } from "../core/types";
 import {
   getRegexSignalSpec,
   type RegexRoutePattern,
@@ -99,11 +99,14 @@ function buildSignals(
   return {
     analysisMode: "heuristic",
     apiSurface: params.apiSurface,
+    confidence: 60, // Regex-based extraction has moderate confidence
     entrypointHint: params.entrypointHint,
     exports: params.exports,
     frameworkHints,
     imports: params.imports,
+    path: file.path,
     routes: params.routes ?? [],
+    source: "extraction" as const,
     symbols: params.symbols ?? [],
   };
 }

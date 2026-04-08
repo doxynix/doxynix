@@ -2,16 +2,16 @@ import {
   type LatestCompletedAnalysis,
   type RepoWithLatestAnalysisAndDocs,
 } from "@/server/shared/infrastructure/repo-snapshots";
+import { hasText } from "@/server/shared/lib/string-utils";
 
+import { buildStructureMapPayload, buildStructureNodePayload } from "../lib/graph-navigator";
+import { buildNodeExplainPayload } from "../lib/node-explainer";
 import {
   coerceAnalysisPayload,
   dedupeLatestDocsByType,
-  hasText,
   normalizeWriterStatuses,
   toDocSummary,
-} from "../lib/analysis-utils";
-import { buildStructureMapPayload, buildStructureNodePayload } from "../lib/graph-navigator";
-import { buildNodeExplainPayload } from "../lib/node-explainer";
+} from "../lib/payload";
 
 export const repoDetailsPresenter = {
   toAvailableDocs(repo: Pick<RepoWithLatestAnalysisAndDocs, "analyses" | "documents">) {
@@ -85,6 +85,10 @@ export const repoDetailsPresenter = {
     };
   },
 
+  toNodeExplain(repo: RepoWithLatestAnalysisAndDocs, nodeId: string) {
+    return buildNodeExplainPayload(repo, nodeId);
+  },
+
   toOverview(repo: RepoWithLatestAnalysisAndDocs) {
     const payload = coerceAnalysisPayload(repo.analyses[0]);
     if (payload == null) return null;
@@ -155,9 +159,5 @@ export const repoDetailsPresenter = {
 
   toStructureNode(repo: RepoWithLatestAnalysisAndDocs, nodeId: string) {
     return buildStructureNodePayload(repo, nodeId);
-  },
-
-  toNodeExplain(repo: RepoWithLatestAnalysisAndDocs, nodeId: string) {
-    return buildNodeExplainPayload(repo, nodeId);
   },
 };

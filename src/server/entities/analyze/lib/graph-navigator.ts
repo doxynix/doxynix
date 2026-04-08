@@ -1,21 +1,11 @@
 import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
 import {
   toAnalysisRef,
+  type AnalysisRef,
   type RepoWithLatestAnalysisAndDocs,
 } from "@/server/shared/infrastructure/repo-snapshots";
+import { unique } from "@/server/shared/lib/array-utils";
 
-import {
-  aggregateEntryForPaths,
-  buildBreadcrumbs,
-  buildStructureContext,
-  isPathInsideScope,
-  makeStructureNodeId,
-  parseStructureNodeId,
-  resolveImmediateChildScope,
-  StructureContext,
-  StructureGroupEntry,
-  StructureNodeType,
-} from "./analysis-utils";
 import { buildDrilldownEdges } from "./edge-builder";
 import { buildInspectPayload } from "./inspect";
 import {
@@ -29,14 +19,52 @@ import {
   rankStructureNode,
   SEMANTIC_META,
   summarizeGroupImportance,
-  unique,
 } from "./semantics";
+import {
+  aggregateEntryForPaths,
+  buildBreadcrumbs,
+  buildStructureContext,
+} from "./structure-context";
+import {
+  isPathInsideScope,
+  makeStructureNodeId,
+  parseStructureNodeId,
+  resolveImmediateChildScope,
+  type StructureContext,
+  type StructureGroupEntry,
+  type StructureNodeType,
+} from "./structure-shared";
 
-export function buildStructureMapPayload(repo: RepoWithLatestAnalysisAndDocs) {
-  const context = buildStructureContext(repo);
-  if (context == null) return null;
-  const analysisRef = toAnalysisRef(repo.analyses[0]);
+function createSummarizeImportance() {
+  return (input: {
+    apiCount: number;
+    changeCouplingCount: number;
+    churnCount: number;
+    configCount: number;
+    dependencyHotspotCount: number;
+    entrypointCount: number;
+    frameworkCount: number;
+    graphWarningCount: number;
+    groupId: string;
+    hotspotCount: number;
+    orphanCount: number;
+    primaryKind: string;
+    riskCount: number;
+    sampleCount: number;
+  }) =>
+    summarizeGroupImportance({
+      ...input,
+      primaryKind: input.primaryKind as Parameters<
+        typeof summarizeGroupImportance
+      >[0]["primaryKind"],
+    });
+}
 
+export function buildStructureMapPayloadFromContext(
+  context: StructureContext,
+  analysisRef: AnalysisRef | null
+) {
+  const summarizeImportance = createSummarizeImportance();
   const nodes = buildTopLevelNodes(context);
   const nodeLabelById = new Map(nodes.map((node) => [node.id, node.label] as const));
   const edges = context.rawTopLevelEdges.map((edge) => ({
@@ -76,7 +104,7 @@ export function buildStructureMapPayload(repo: RepoWithLatestAnalysisAndDocs) {
           node,
           outgoing,
           semanticLabel: SEMANTIC_META[node.kind].label,
-          summarizeImportance: summarizeGroupImportance,
+          summarizeImportance,
         }),
       ];
     })
@@ -118,6 +146,16 @@ export function buildStructureMapPayload(repo: RepoWithLatestAnalysisAndDocs) {
       defaultNodeId: defaultNode?.id ?? null,
     },
   };
+}
+export type StructureMapPayload = NonNullable<
+  ReturnType<typeof buildStructureMapPayloadFromContext>
+>;
+
+export function buildStructureMapPayload(repo: RepoWithLatestAnalysisAndDocs) {
+  const context = buildStructureContext(repo);
+  if (context == null) return null;
+  const analysisRef = toAnalysisRef(repo.analyses[0]);
+  return buildStructureMapPayloadFromContext(context, analysisRef);
 }
 export function buildTopLevelNodes(context: StructureContext) {
   const nodes = Array.from(context.groupMap.entries())
@@ -202,16 +240,17 @@ export function selectDefaultTopLevelNode(
   });
 
   return (
-    scored.sort(
+    scored.toSorted(
       (left, right) => right.score - left.score || left.node.label.localeCompare(right.node.label)
     )[0]?.node ?? null
   );
 }
-export function buildStructureNodePayload(repo: RepoWithLatestAnalysisAndDocs, nodeId: string) {
-  const context = buildStructureContext(repo);
-  if (context == null) return null;
-  const analysisRef = toAnalysisRef(repo.analyses[0]);
-
+export function buildStructureNodePayloadFromContext(
+  context: StructureContext,
+  analysisRef: AnalysisRef | null,
+  nodeId: string
+) {
+  const summarizeImportance = createSummarizeImportance();
   const { nodeType, path } = parseStructureNodeId(nodeId);
 
   if (nodeType === "file") {
@@ -236,7 +275,7 @@ export function buildStructureNodePayload(repo: RepoWithLatestAnalysisAndDocs, n
           node,
           outgoing: [],
           semanticLabel: SEMANTIC_META[node.kind].label,
-          summarizeImportance: summarizeGroupImportance,
+          summarizeImportance,
         }),
         contains: [],
       },
@@ -305,12 +344,22 @@ export function buildStructureNodePayload(repo: RepoWithLatestAnalysisAndDocs, n
         outgoing: limitedChildren.map((child) => child.label).slice(0, 5),
         relatedChildPaths: limitedChildren.map((child) => child.path),
         semanticLabel: SEMANTIC_META[node.kind].label,
-        summarizeImportance: summarizeGroupImportance,
+        summarizeImportance,
       }),
       contains: limitedChildren.map((child) => child.label).slice(0, 8),
     },
     node,
   };
+}
+export type StructureNodePayload = NonNullable<
+  ReturnType<typeof buildStructureNodePayloadFromContext>
+>;
+
+export function buildStructureNodePayload(repo: RepoWithLatestAnalysisAndDocs, nodeId: string) {
+  const context = buildStructureContext(repo);
+  if (context == null) return null;
+  const analysisRef = toAnalysisRef(repo.analyses[0]);
+  return buildStructureNodePayloadFromContext(context, analysisRef, nodeId);
 }
 export function buildStructureNodeSummary(params: {
   entry: StructureGroupEntry;
@@ -354,6 +403,7 @@ export function buildStructureNodeSummary(params: {
     uniquePathsInGroup.some((candidatePath) => candidatePath.startsWith(`${params.path}/`));
 
   return {
+    canDrillDeeper,
     description:
       params.nodeType === "group"
         ? describeGroup(params.path, primaryKind)
@@ -403,6 +453,5 @@ export function buildStructureNodeSummary(params: {
       pathCount: uniquePathsInGroup.length,
       riskCount,
     },
-    canDrillDeeper,
   };
 }

@@ -1,10 +1,7 @@
-import type { AIResult } from "@/server/features/analyze-repo/lib/schemas";
-import type { RepoMetrics } from "@/server/features/analyze-repo/lib/types";
+import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
-
-function unique<T>(values: T[]) {
-  return Array.from(new Set(values));
-}
+import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
+import { unique } from "@/server/shared/lib/array-utils";
 
 export function collectScopedEntrySignals(
   paths: string[],

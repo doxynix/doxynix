@@ -1,59 +1,29 @@
-import path from "node:path";
+import { getLanguageColor } from "@/shared/lib/utils";
 
-import { getLanguageColor, normalizeLanguageName } from "@/shared/lib/utils";
-
-import type { RepoMetrics } from "@/server/features/analyze-repo/lib/types";
-import { normalizeRepoPath } from "@/server/shared/engine/core/common";
-import {
-  REPORT_FOCUS_SECTIONS,
-  type FileCategory,
-  type RepositoryEvidence,
-} from "@/server/shared/engine/core/types";
+import { getFileExtension, normalizeRepoPath } from "@/server/shared/engine/core/common";
+import type {
+  Module,
+  ModuleRef,
+  RepositoryEvidence,
+} from "@/server/shared/engine/core/discovery.types";
+import { REPORT_FOCUS_SECTIONS } from "@/server/shared/engine/core/documentation.types";
+import { linguistStyleLabel } from "@/server/shared/engine/core/file-classifier";
+import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
+import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
+import { MAPPER_FILE_SCORING } from "@/server/shared/engine/core/scoring-constants";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
-
-import { cleanCodeForAi } from "../../../shared/lib/optimizers";
+import { cleanCodeForAi } from "@/server/shared/lib/optimizers";
 
 const HEAD_LINE_LIMIT = 12;
 const MAX_HEAD_CHARS = 900;
 const MAX_FILES_IN_TREE = 120;
 const MAX_FOLDER_ROWS = 35;
 
-type MapperFileEntry = {
-  approxLines: number;
-  head: string;
-  isApiHeuristic: boolean;
-  isConfig: boolean;
-  linguistLabel: string;
-  path: string;
-  roleHint: string;
-};
-
 type MapperFolderAgg = {
   depth: number;
   fileCount: number;
   path: string;
 };
-
-type ModuleSnapshot = RepositoryEvidence["modules"][number];
-
-const SECONDARY_EVIDENCE_CATEGORIES = new Set<FileCategory>([
-  "asset",
-  "benchmark",
-  "config",
-  "docs",
-  "generated",
-  "infra",
-  "test",
-  "tooling",
-]);
-
-const NON_ARCHITECTURE_CATEGORIES = new Set<FileCategory>([
-  "asset",
-  "benchmark",
-  "docs",
-  "generated",
-  "test",
-]);
 
 function topFolderPrefixes(paths: string[]): MapperFolderAgg[] {
   const counts = new Map<string, number>();
@@ -73,31 +43,22 @@ function topFolderPrefixes(paths: string[]): MapperFolderAgg[] {
     }));
 }
 
-function getFileExtension(filePath: string) {
-  return path.posix.extname(filePath).replace(".", "").toLowerCase();
-}
-
-function linguistStyleLabel(filePath: string) {
-  return (
-    normalizeLanguageName(path.posix.extname(filePath)) ||
-    normalizeLanguageName(getFileExtension(filePath))
-  );
-}
-
-function isArchitectureRelevantModule(fileModule: ModuleSnapshot | undefined) {
+function isArchitectureRelevantModule(fileModule: ModuleRef | undefined) {
   if (fileModule == null) return false;
-  return (
-    fileModule.categories.includes("runtime-source") &&
-    !fileModule.categories.some((category) => NON_ARCHITECTURE_CATEGORIES.has(category))
-  );
+  return ProjectPolicy.isArchitectureRelevantCategories(fileModule.categories);
 }
 
-function isPrimaryArchitectureModule(fileModule: ModuleSnapshot | undefined) {
+// Local wrapper for linguistStyleLabel with sensible fallback
+function fileLanguageLabel(filePath: string): string {
+  const ext = getFileExtension(filePath);
+  const fallback = ext ? ext.slice(1).toUpperCase() : "Unknown";
+  return linguistStyleLabel(filePath, fallback);
+}
+
+function isPrimaryArchitectureModule(fileModule: ModuleRef | undefined) {
+  if (fileModule == null) return false;
   if (!isArchitectureRelevantModule(fileModule)) return false;
-  return (
-    (fileModule?.categories.some((category) => SECONDARY_EVIDENCE_CATEGORIES.has(category)) ??
-      true) === false
-  );
+  return ProjectPolicy.isPrimaryArchitectureCategories(fileModule.categories);
 }
 
 function buildEvidenceMaps(evidence: RepositoryEvidence, metrics: RepoMetrics) {
@@ -124,7 +85,7 @@ function buildEvidenceMaps(evidence: RepositoryEvidence, metrics: RepoMetrics) {
 
 function fileRoleHint(
   filePath: string,
-  module: ModuleSnapshot | undefined,
+  module: ModuleRef | undefined,
   isApiHeuristic: boolean,
   isConfig: boolean
 ): string {
@@ -141,26 +102,31 @@ function fileRoleHint(
 }
 
 function scoreFileCandidate(params: {
-  fileModule: ModuleSnapshot | undefined;
+  fileModule: ModuleRef | undefined;
   isApiHeuristic: boolean;
   isConfig: boolean;
   lines: number;
   path: string;
   primaryEntrypointPaths: Set<string>;
 }) {
-  let score = Math.min(params.lines, 400) * 0.02;
+  let score =
+    Math.min(params.lines, MAPPER_FILE_SCORING.maxLinesForLineScore) *
+    MAPPER_FILE_SCORING.lineMultiplier;
 
-  if (params.primaryEntrypointPaths.has(params.path)) score += 120;
-  if (params.isConfig) score += 100;
-  if (params.isApiHeuristic) score += 85;
-  if (isPrimaryArchitectureModule(params.fileModule)) score += 70;
-  else if (isArchitectureRelevantModule(params.fileModule)) score += 35;
+  if (params.primaryEntrypointPaths.has(params.path))
+    score += MAPPER_FILE_SCORING.primaryEntrypointBonus;
+  if (params.isConfig) score += MAPPER_FILE_SCORING.configFileBonus;
+  if (params.isApiHeuristic) score += MAPPER_FILE_SCORING.apiHeuristicBonus;
+  if (isPrimaryArchitectureModule(params.fileModule))
+    score += MAPPER_FILE_SCORING.primaryArchitectureBonus;
+  else if (isArchitectureRelevantModule(params.fileModule))
+    score += MAPPER_FILE_SCORING.secondaryArchitectureBonus;
 
   return score;
 }
 
 export function buildMapperSkeleton(
-  files: { content: string; path: string }[],
+  files: Module[],
   metrics: RepoMetrics,
   evidence: RepositoryEvidence
 ): string {
@@ -189,13 +155,14 @@ export function buildMapperSkeleton(
       approxLines: lines,
       entry: {
         approxLines: lines,
+        content: file.content,
         head,
         isApiHeuristic,
         isConfig,
-        linguistLabel: linguistStyleLabel(file.path),
+        linguistLabel: fileLanguageLabel(file.path),
         path: file.path,
         roleHint: fileRoleHint(file.path, fileModule, isApiHeuristic, isConfig),
-      } satisfies MapperFileEntry,
+      } satisfies Module,
       score: scoreFileCandidate({
         fileModule,
         isApiHeuristic,

@@ -4,10 +4,39 @@ import type { Repo } from "@prisma/client";
 import simpleGit from "simple-git";
 
 import { prisma } from "@/server/shared/infrastructure/db";
+import { executeWithFallback } from "@/server/shared/infrastructure/github/github-api";
 import {
   GitHubAuthRequiredError,
-  githubService,
-} from "@/server/shared/infrastructure/github/github.service";
+  resolveClientContext,
+} from "@/server/shared/infrastructure/github/github-provider";
+
+const PRIVATE_REPO_AUTH_MESSAGE =
+  "This is a private repository. Please install Doxynix App or connect GitHub.";
+
+function assertPrivateRepoAccess(
+  repo: Repo,
+  clientType: "installation" | "oauth" | "app" | "public"
+) {
+  if (repo.visibility === "PRIVATE" && (clientType === "app" || clientType === "public")) {
+    throw new Error(PRIVATE_REPO_AUTH_MESSAGE);
+  }
+}
+
+async function resolveAuthToken(client: {
+  auth: (() => Promise<unknown>) & ((options?: unknown) => Promise<unknown>);
+}): Promise<string | null> {
+  try {
+    const auth = (await client.auth({ type: "installation" })) as { token?: string };
+    return auth.token ?? null;
+  } catch {
+    try {
+      const auth = (await client.auth()) as { token?: string };
+      return auth.token ?? null;
+    } catch {
+      return null;
+    }
+  }
+}
 
 export async function getAnalysisContext(
   analysisId: string,
@@ -38,7 +67,7 @@ export async function getAnalysisContext(
   let clientType: "installation" | "oauth" | "app" | "public";
 
   try {
-    const clientContext = await githubService.resolveClientContext(prisma, userId, {
+    const clientContext = await resolveClientContext(prisma, userId, {
       allowPublicFallback: true,
       allowSystemFallback: true,
       owner: repo.owner,
@@ -47,18 +76,14 @@ export async function getAnalysisContext(
     clientType = clientContext.type;
   } catch (error) {
     if (error instanceof GitHubAuthRequiredError) {
-      throw new Error(
-        "This is a private repository. Please install Doxynix App or connect GitHub."
-      );
+      throw new Error(PRIVATE_REPO_AUTH_MESSAGE);
     }
     throw error;
   }
 
-  if (repo.visibility === "PRIVATE" && (clientType === "app" || clientType === "public")) {
-    throw new Error("This is a private repository. Please install Doxynix App or connect GitHub.");
-  }
+  assertPrivateRepoAccess(repo, clientType);
 
-  const { currentSha, token } = await githubService.executeWithFallback(
+  const { currentSha, token } = await executeWithFallback(
     prisma,
     userId,
     octokit,
@@ -70,19 +95,7 @@ export async function getAnalysisContext(
         repo: repo.name,
       });
 
-      let resolvedToken: string | null = null;
-      try {
-        const auth = (await client.auth({ type: "installation" })) as { token?: string };
-        resolvedToken = auth.token ?? null;
-      } catch {
-        try {
-          const auth = (await client.auth()) as { token?: string };
-          resolvedToken = auth.token ?? null;
-        } catch {
-          resolvedToken = null;
-        }
-      }
-
+      const resolvedToken = await resolveAuthToken(client);
       return { currentSha: refData.object.sha, token: resolvedToken };
     }
   );

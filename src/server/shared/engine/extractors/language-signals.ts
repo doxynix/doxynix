@@ -1,9 +1,9 @@
-import path from "node:path";
+import { logger } from "@/server/shared/infrastructure/logger";
 
 import { getLanguageAdapters } from "../adapters/registry";
 import { normalizeRepoPath } from "../core/common";
-import { FileClassifier } from "../core/file-classifier";
-import type { FileSignals, RepositoryFile } from "../core/types";
+import type { FileSignals, RepositoryFile } from "../core/discovery.types";
+import { ProjectPolicy } from "../core/project-policy";
 import { collectRegexSignals } from "./regex-signals";
 
 export async function collectPolyglotSignals(file: RepositoryFile): Promise<FileSignals> {
@@ -17,21 +17,38 @@ export async function collectPolyglotSignals(file: RepositoryFile): Promise<File
       if (signals == null) continue;
       return {
         ...signals,
-        categories: FileClassifier.getCategories(normalizedPath),
-        configRefs: FileClassifier.isConfigFile(normalizedPath)
-          ? [{ confidence: 90, kind: path.posix.basename(normalizedPath), path: normalizedPath }]
+        categories: ProjectPolicy.getCategories(normalizedPath),
+        configRefs: ProjectPolicy.isConfigFile(normalizedPath)
+          ? [
+              {
+                confidence: 90,
+                kind: normalizedPath.split("/").pop() ?? normalizedPath,
+                path: normalizedPath,
+              },
+            ]
           : [],
       };
-    } catch {
-      // Try the next adapter in the cascade.
+    } catch (error) {
+      logger.debug({
+        adapter: adapter.constructor.name,
+        error,
+        msg: "Language adapter failed, trying next parser",
+        path: normalizedPath,
+      });
     }
   }
 
   return {
     ...collectRegexSignals(normalizedFile),
-    categories: FileClassifier.getCategories(normalizedPath),
-    configRefs: FileClassifier.isConfigFile(normalizedPath)
-      ? [{ confidence: 90, kind: path.posix.basename(normalizedPath), path: normalizedPath }]
+    categories: ProjectPolicy.getCategories(normalizedPath),
+    configRefs: ProjectPolicy.isConfigFile(normalizedPath)
+      ? [
+          {
+            confidence: 90,
+            kind: normalizedPath.split("/").pop() ?? normalizedPath,
+            path: normalizedPath,
+          },
+        ]
       : [],
   };
 }

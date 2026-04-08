@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import type { FileSignals, RepositoryFile } from "../core/types";
+import type { FileSignals, RepositoryFile } from "../core/discovery.types";
 
 export type LanguageAdapter = {
   detect?: (file: RepositoryFile) => boolean;

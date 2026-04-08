@@ -1,10 +1,8 @@
-import type { ProjectMap } from "@/server/features/analyze-repo/lib/schemas";
-import type {
-  RepoMetrics,
-  RepositoryFact,
-  RepositoryFinding,
-} from "@/server/features/analyze-repo/lib/types";
-import type { DocumentationInputModel } from "@/server/shared/engine/core/types";
+import type { ProjectMap } from "@/server/shared/engine/core/analysis-result.schemas";
+import type { DocumentationInputModel } from "@/server/shared/engine/core/documentation.types";
+import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
+import { uniquePaths } from "@/server/shared/lib/array-utils";
+import type { RepositoryFact, RepositoryFinding } from "@/server/shared/types";
 
 type ArchitectDigestSection = {
   confidence: number;
@@ -113,10 +111,6 @@ export type ArchitectDigest = {
 
 function limit<T>(items: T[], max: number) {
   return items.slice(0, max);
-}
-
-function uniquePaths(paths: string[], max: number) {
-  return Array.from(new Set(paths.filter((path) => path.length > 0))).slice(0, max);
 }
 
 export function collectArchitectPreferredPaths(digest: ArchitectDigest) {

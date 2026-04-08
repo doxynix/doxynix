@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { highlightCode } from "@/shared/lib/shiki";
 
 import { repoDetailsPresenter } from "@/server/entities/analyze/api/repo-details.presenter";
+import { createAnalyzeContextBuilder } from "@/server/entities/analyze/lib/analyze-context-builder";
 import {
   buildInteractiveBriefNodePayload,
   buildInteractiveBriefPanel,
@@ -17,11 +18,46 @@ import {
 } from "@/server/shared/infrastructure/repo-snapshots";
 import { markdownToHtml } from "@/server/shared/lib/markdown-to-html";
 
+type ExplainPayload = NonNullable<
+  ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getNodeExplain"]>
+>;
+type StructureNodePayload = NonNullable<
+  ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getStructureNode"]>
+>;
+
+function toBriefPanelInput(params: {
+  explain: NonNullable<
+    ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getNodeExplain"]>
+  >;
+  structureNode: NonNullable<
+    ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getStructureNode"]>
+  >;
+}) {
+  return {
+    explain: mapExplainBase(params.explain),
+    structureNode: mapStructureNodeBase(params.structureNode),
+  };
+}
+
+function toInteractiveBriefNodePayloadInput(params: {
+  explain: ExplainPayload;
+  structureNode: StructureNodePayload;
+}) {
+  return {
+    explain: {
+      analysisRef: params.explain.analysisRef ?? null,
+      ...mapExplainBase(params.explain),
+    },
+    structureNode: {
+      analysisRef: params.structureNode.analysisRef ?? null,
+      ...mapStructureNodeBase(params.structureNode),
+    },
+  };
+}
+
 export const repoDetailsService = {
   async getAvailableDocs(db: DbClient, repoId: string) {
-    const repo = await getRepoWithLatestAnalysisAndDocs(db, repoId);
-    if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
-
+    const repo = await loadRepoOrThrow(db, repoId);
     return repoDetailsPresenter.toAvailableDocs(repo);
   },
 
@@ -77,41 +113,11 @@ export const repoDetailsService = {
     }));
   },
 
-  async getOverview(db: DbClient, repoId: string) {
-    const repo = await getRepoWithLatestAnalysisAndDocs(db, repoId);
-
-    if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
-    return repoDetailsPresenter.toOverview(repo);
-  },
-
-  async getStructureMap(db: DbClient, repoId: string) {
-    const repo = await getRepoWithLatestAnalysisAndDocs(db, repoId);
-
-    if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
-    return repoDetailsPresenter.toStructureMap(repo);
-  },
-
-  async getStructureNode(db: DbClient, repoId: string, nodeId: string) {
-    const repo = await getRepoWithLatestAnalysisAndDocs(db, repoId);
-
-    if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
-    return repoDetailsPresenter.toStructureNode(repo, nodeId);
-  },
-
-  async getNodeExplain(db: DbClient, repoId: string, nodeId: string) {
-    const repo = await getRepoWithLatestAnalysisAndDocs(db, repoId);
-
-    if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
-    return repoDetailsPresenter.toNodeExplain(repo, nodeId);
-  },
-
   async getInteractiveBrief(db: DbClient, repoId: string) {
-    const repo = await getRepoWithLatestAnalysisAndDocs(db, repoId);
-
-    if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
-
+    const repo = await loadRepoOrThrow(db, repoId);
+    const analyzeContext = createAnalyzeContextBuilder(repo);
     const overview = repoDetailsPresenter.toOverview(repo);
-    const structure = repoDetailsPresenter.toStructureMap(repo);
+    const structure = analyzeContext.getStructureMap();
 
     if (structure == null || overview == null) return null;
 
@@ -120,14 +126,11 @@ export const repoDetailsService = {
       defaultNodeId == null
         ? null
         : (() => {
-            const structureNode = repoDetailsPresenter.toStructureNode(repo, defaultNodeId);
-            const explain = repoDetailsPresenter.toNodeExplain(repo, defaultNodeId);
+            const structureNode = analyzeContext.getStructureNode(defaultNodeId);
+            const explain = analyzeContext.getNodeExplain(defaultNodeId);
             if (structureNode == null || explain == null) return null;
 
-            return buildInteractiveBriefPanel({
-              explain,
-              structureNode,
-            });
+            return buildInteractiveBriefPanel(toBriefPanelInput({ explain, structureNode }));
           })();
 
     return buildInteractiveBriefPayload({
@@ -163,19 +166,35 @@ export const repoDetailsService = {
   },
 
   async getInteractiveBriefNode(db: DbClient, repoId: string, nodeId: string) {
-    const repo = await getRepoWithLatestAnalysisAndDocs(db, repoId);
-
-    if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
-
-    const structureNode = repoDetailsPresenter.toStructureNode(repo, nodeId);
-    const explain = repoDetailsPresenter.toNodeExplain(repo, nodeId);
+    const analyzeContext = await loadAnalyzeContextBuilderOrThrow(db, repoId);
+    const structureNode = analyzeContext.getStructureNode(nodeId);
+    const explain = analyzeContext.getNodeExplain(nodeId);
 
     if (structureNode == null || explain == null) return null;
 
-    return buildInteractiveBriefNodePayload({
-      explain,
-      structureNode,
-    });
+    return buildInteractiveBriefNodePayload(
+      toInteractiveBriefNodePayloadInput({ explain, structureNode })
+    );
+  },
+
+  async getNodeExplain(db: DbClient, repoId: string, nodeId: string) {
+    const analyzeContext = await loadAnalyzeContextBuilderOrThrow(db, repoId);
+    return analyzeContext.getNodeExplain(nodeId);
+  },
+
+  async getOverview(db: DbClient, repoId: string) {
+    const repo = await loadRepoOrThrow(db, repoId);
+    return repoDetailsPresenter.toOverview(repo);
+  },
+
+  async getStructureMap(db: DbClient, repoId: string) {
+    const analyzeContext = await loadAnalyzeContextBuilderOrThrow(db, repoId);
+    return analyzeContext.getStructureMap();
+  },
+
+  async getStructureNode(db: DbClient, repoId: string, nodeId: string) {
+    const analyzeContext = await loadAnalyzeContextBuilderOrThrow(db, repoId);
+    return analyzeContext.getStructureNode(nodeId);
   },
 
   async highlightFile(content: string, path: string) {
@@ -184,3 +203,40 @@ export const repoDetailsService = {
     return { html };
   },
 };
+
+async function loadRepoOrThrow(db: DbClient, repoId: string) {
+  const repo = await getRepoWithLatestAnalysisAndDocs(db, repoId);
+  if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
+  return repo;
+}
+
+async function loadAnalyzeContextBuilderOrThrow(db: DbClient, repoId: string) {
+  return createAnalyzeContextBuilder(await loadRepoOrThrow(db, repoId));
+}
+
+function mapExplainBase(explain: ExplainPayload) {
+  return {
+    confidence: explain.confidence,
+    nextSuggestedPaths: explain.nextSuggestedPaths,
+    relationships: explain.relationships,
+    role: explain.role,
+    sourcePaths: explain.sourcePaths,
+    summary: explain.summary,
+    whyImportant: explain.whyImportant,
+  };
+}
+
+function mapStructureNodeBase(structureNode: StructureNodePayload) {
+  return {
+    breadcrumbs: structureNode.breadcrumbs.map((item) => ({
+      id: item.id,
+      label: item.label,
+      path: item.path,
+    })),
+    canDrillDeeper: structureNode.canDrillDeeper,
+    children: structureNode.children,
+    edges: structureNode.edges,
+    inspect: structureNode.inspect,
+    node: structureNode.node,
+  };
+}

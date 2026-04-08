@@ -1,15 +1,11 @@
 import type { Repo } from "@prisma/client";
 
+import type { HotspotSignal } from "@/server/shared/engine/core/discovery.types";
 import type {
   DocumentationInputModel,
-  HotspotSignal,
   ModuleArchitectureSummary,
   ReportSectionInput,
-} from "@/server/shared/engine/core/types";
-
-// function hasText(value: string | undefined | null) {
-//   return typeof value === "string" && value.trim().length > 0;
-// }
+} from "@/server/shared/engine/core/documentation.types";
 
 function uniqueItems(items: string[], limit?: number) {
   const deduped = Array.from(

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "../shared/infrastructure/auth";
 import { prisma } from "../shared/infrastructure/db";
+import { logger } from "../shared/infrastructure/logger";
 import { redisClient } from "../shared/infrastructure/redis";
 import { getIp, getUa } from "../shared/lib/request-context";
 
@@ -33,7 +34,14 @@ export async function createContext({ req }: Props) {
             data: { lastUsed: new Date() },
             where: { id: keyRecord.id },
           })
-          .catch(console.error);
+          .catch((error) =>
+            logger.error({
+              error:
+                error instanceof Error ? { message: error.message, stack: error.stack } : error,
+              keyId: keyRecord.id,
+              msg: "Failed to update api key lastUsed",
+            })
+          );
 
         return {
           prisma,

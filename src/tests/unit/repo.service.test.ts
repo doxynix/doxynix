@@ -4,18 +4,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { repoService } from "@/server/entities/repo/api/repo.service";
 import type { DbClient } from "@/server/shared/infrastructure/db";
-import { githubService } from "@/server/shared/infrastructure/github/github.service";
+import * as githubApi from "@/server/shared/infrastructure/github/github-api";
+import * as githubProvider from "@/server/shared/infrastructure/github/github-provider";
 import { handlePrismaError } from "@/server/shared/lib/handle-error";
 
-vi.mock("@/server/services/github.service", () => ({
-  GitHubAuthRequiredError: class GitHubAuthRequiredError extends Error {},
-  githubService: {
-    getRepoInfo: vi.fn(),
-    parseUrl: vi.fn(),
-  },
+vi.mock("@/server/shared/infrastructure/github/github-api", () => ({
+  getRepoInfo: vi.fn(),
 }));
 
-vi.mock("@/server/utils/handle-error", () => ({
+vi.mock("@/server/shared/lib/handle-error", () => ({
   handlePrismaError: vi.fn(() => {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
@@ -25,6 +22,16 @@ vi.mock("@/server/utils/handle-error", () => ({
   isOctokitError: vi.fn((error: any): error is { status: number } => {
     return error !== null && typeof error === "object" && "status" in error;
   }),
+}));
+
+const githubService = {
+  getRepoInfo: githubApi.getRepoInfo,
+  parseUrl: githubProvider.parseUrl,
+};
+
+vi.mock("@/server/shared/infrastructure/github/github-provider", () => ({
+  GitHubAuthRequiredError: class GitHubAuthRequiredError extends Error {},
+  parseUrl: vi.fn(),
 }));
 
 const db = {

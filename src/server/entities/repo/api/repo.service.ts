@@ -1,15 +1,17 @@
 import { Status, Visibility, type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
-import type { RepoFiltersInput } from "../../../api/contracts";
-import type { DbClient } from "../../../shared/infrastructure/db";
+import type { RepoFiltersInput } from "@/server/api/contracts";
+import type { DbClient } from "@/server/shared/infrastructure/db";
+import { getRepoInfo } from "@/server/shared/infrastructure/github/github-api";
 import {
   GitHubAuthRequiredError,
-  githubService,
-} from "../../../shared/infrastructure/github/github.service";
-import { handlePrismaError, isOctokitError } from "../../../shared/lib/handle-error";
-import { getPaginationMeta } from "../../../shared/lib/pagination";
-import { normalizeSearchInput, tokenizeSearchInput } from "../../../shared/lib/search";
+  parseUrl,
+} from "@/server/shared/infrastructure/github/github-provider";
+import { handlePrismaError, isOctokitError } from "@/server/shared/lib/handle-error";
+import { getPaginationMeta } from "@/server/shared/lib/pagination";
+import { normalizeSearchInput, tokenizeSearchInput } from "@/server/shared/lib/search";
+
 import { repoPresenter, type RepoWithAnalyses } from "./repo.presenter";
 
 function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
@@ -64,7 +66,7 @@ export const repoService = {
   async createRepo(db: DbClient, userId: number, url: string) {
     let repoInfo;
     try {
-      repoInfo = githubService.parseUrl(url) as { name: string; owner: string };
+      repoInfo = parseUrl(url);
     } catch {
       throw new TRPCError({
         code: "BAD_REQUEST",
@@ -76,7 +78,7 @@ export const repoService = {
 
     let githubData;
     try {
-      githubData = await githubService.getRepoInfo(db, userId, owner, name);
+      githubData = await getRepoInfo(db, userId, owner, name);
     } catch (error) {
       if (error instanceof GitHubAuthRequiredError) {
         throw new TRPCError({
@@ -133,7 +135,7 @@ export const repoService = {
           topics: githubData.topics ?? [],
           url: githubData.html_url,
           userId,
-          visibility: githubData.private ? Visibility.PRIVATE : Visibility.PUBLIC,
+          visibility: Boolean(githubData.private) ? Visibility.PRIVATE : Visibility.PUBLIC,
         },
       });
     } catch (error) {

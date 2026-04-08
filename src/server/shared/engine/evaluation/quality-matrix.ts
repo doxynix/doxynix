@@ -1,11 +1,6 @@
-import type {
-  DocumentationInputModel,
-  RepoMetrics,
-  ReportSectionKind,
-  RepositoryEvidence,
-  RepositoryFact,
-  RepositoryFinding,
-} from "../core/types";
+import type { RepositoryEvidence } from "../core/discovery.types";
+import type { DocumentationInputModel, ReportSectionKind } from "../core/documentation.types";
+import type { RepoMetrics, RepositoryFact, RepositoryFinding } from "../core/metrics.types";
 
 export type EvaluationStatus =
   | "manual-review-required"

@@ -1,8 +1,8 @@
 import pm from "picomatch";
 
-import { FileClassifier } from "./file-classifier";
-import { PATH_PATTERNS } from "./patterns";
-import type { RepositoryFile } from "./types";
+import type { RepositoryFile } from "./discovery.types";
+import { ProjectPolicy } from "./project-policy";
+import { PATH_PATTERNS } from "./project-policy-rules";
 
 const isEntry = pm([...PATH_PATTERNS.ENTRY, ...PATH_PATTERNS.INFRA_DIRS]);
 
@@ -14,26 +14,26 @@ export function getLikelyEntrypoints(
 ) {
   const discovered = new Set<string>(
     [...entrypointHints].filter(
-      (path) => !FileClassifier.isPrimaryContourExcluded(path) && !FileClassifier.isConfigFile(path)
+      (path) => !ProjectPolicy.isPrimaryContourExcluded(path) && !ProjectPolicy.isConfigFile(path)
     )
   );
 
   for (const file of files) {
     const path = file.path;
-    if (FileClassifier.isPrimaryContourExcluded(path)) continue;
-    if (FileClassifier.isConfigFile(path)) continue;
+    if (ProjectPolicy.isPrimaryContourExcluded(path)) continue;
+    if (ProjectPolicy.isConfigFile(path)) continue;
 
     const inbound = inboundByFile.get(path) ?? 0;
 
     if (isEntry(path)) {
-      if (FileClassifier.isPrimaryEntrypointFile(path)) discovered.add(path);
+      if (ProjectPolicy.isPrimaryEntrypoint(path)) discovered.add(path);
       continue;
     }
 
     if (
       (apiSurfaceByFile.get(path) ?? 0) > 0 &&
       inbound === 0 &&
-      FileClassifier.isPrimaryEntrypointFile(path)
+      ProjectPolicy.isPrimaryEntrypoint(path)
     ) {
       discovered.add(path);
       continue;
@@ -41,8 +41,8 @@ export function getLikelyEntrypoints(
 
     if (
       inbound === 0 &&
-      (path.includes("/api/") || path.includes("/server/")) &&
-      FileClassifier.isPrimaryEntrypointFile(path)
+      (Boolean(path.includes("/api/")) || Boolean(path.includes("/server/"))) &&
+      ProjectPolicy.isPrimaryEntrypoint(path)
     ) {
       discovered.add(path);
     }

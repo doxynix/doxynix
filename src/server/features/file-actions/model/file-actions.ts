@@ -5,9 +5,9 @@ import {
   CODE_DOC_SYSTEM_PROMPT,
   CODE_DOC_USER_PROMPT,
   SINGLE_FILE_ANALYSIS_PROMPT,
-} from "@/server/features/analyze-repo/lib/prompts";
+} from "@/server/features/analyze-repo/lib/prompts-refactored";
 import { normalizeRepoPath } from "@/server/shared/engine/core/common";
-import { FileClassifier } from "@/server/shared/engine/core/file-classifier";
+import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
 import { callWithFallback } from "@/server/shared/lib/call";
 import { cleanCodeForAi } from "@/server/shared/lib/optimizers";
 
@@ -177,16 +177,16 @@ function getNonActionableReason(
   nodeContext?: FileActionNodeContext
 ) {
   const normalizedPath = normalizeRepoPath(path);
-  if (FileClassifier.isSensitiveFile(normalizedPath)) {
+  if (ProjectPolicy.isSensitive(normalizedPath)) {
     return `The file looks sensitive, so the server intentionally skips AI inspection for it. ${describeContextQualifier(nodeContext)}`;
   }
-  if (FileClassifier.isIgnored(normalizedPath) || FileClassifier.isAssetFile(normalizedPath)) {
+  if (ProjectPolicy.isIgnored(normalizedPath) || ProjectPolicy.isAssetFile(normalizedPath)) {
     return `The file looks like an asset, vendored dependency, or build artifact, so an AI code action would be mostly noise. ${describeContextQualifier(nodeContext)}`;
   }
-  if (FileClassifier.isGeneratedFile(normalizedPath)) {
+  if (ProjectPolicy.isGeneratedFile(normalizedPath)) {
     return `The file looks generated, so auditing or documenting it directly would add more noise than value. ${describeContextQualifier(nodeContext)}`;
   }
-  if (FileClassifier.isLowSignalConfigFile(normalizedPath)) {
+  if (ProjectPolicy.isLowSignalConfig(normalizedPath)) {
     return `The file looks like low-signal lock or build metadata, so a code-focused action would not be very useful. ${describeContextQualifier(nodeContext)}`;
   }
   if (isProbablyMinifiedContent(content)) {

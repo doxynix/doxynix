@@ -47,22 +47,6 @@ export const repoAnalysisRouter = createTRPCRouter({
       return repoAnalysisService.analyzeFile(ctx.db, Number(ctx.session.user.id), input);
     }),
 
-  quickFileAudit: protectedProcedure
-    .input(
-      z.object({
-        analysisId: z.string().optional(),
-        commitSha: z.string().optional(),
-        content: z.string(),
-        language: z.string().default("English"),
-        nodeId: z.string().optional(),
-        path: z.string(),
-        repoId: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      return repoAnalysisService.quickFileAudit(ctx.db, Number(ctx.session.user.id), input);
-    }),
-
   documentFile: protectedProcedure
     .input(
       z.object({
@@ -91,5 +75,21 @@ export const repoAnalysisRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       return repoAnalysisService.documentFilePreview(ctx.db, Number(ctx.session.user.id), input);
+    }),
+
+  quickFileAudit: protectedProcedure
+    .input(
+      z.object({
+        analysisId: z.string().optional(),
+        commitSha: z.string().optional(),
+        content: z.string(),
+        language: z.string().default("English"),
+        nodeId: z.string().optional(),
+        path: z.string(),
+        repoId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return repoAnalysisService.quickFileAudit(ctx.db, Number(ctx.session.user.id), input);
     }),
 });

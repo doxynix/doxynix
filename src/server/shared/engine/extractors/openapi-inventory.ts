@@ -1,11 +1,12 @@
 import pm from "picomatch";
 import YAML from "yaml";
 
+import { logger } from "@/server/shared/infrastructure/logger";
 import type { OpenApiInventory } from "@/server/shared/types";
 
-import { PATH_PATTERNS } from "../core/patterns";
+import { PATH_PATTERNS } from "../core/project-policy-rules";
 
-const isSpecFile = pm(PATH_PATTERNS.OPENAPI);
+const isSpecFile = pm([...PATH_PATTERNS.OPENAPI]);
 
 type OpenApiLikeObject = {
   paths?: Record<string, unknown>;
@@ -14,7 +15,7 @@ type OpenApiLikeObject = {
 function processSpecObject(data: unknown) {
   if (typeof data !== "object" || data == null) return null;
   const candidate = data as OpenApiLikeObject;
-  if (typeof candidate.paths !== "object" || candidate.paths == null) return null;
+  if (typeof candidate.paths !== "object") return null;
 
   const paths = Object.keys(candidate.paths).filter((path) => path.startsWith("/"));
   let operations = 0;
@@ -55,7 +56,12 @@ export function collectOpenApiInventory(
       } else {
         specData = YAML.parse(file.content);
       }
-    } catch {
+    } catch (error) {
+      logger.debug({
+        error,
+        msg: "OpenAPI inventory skipped malformed spec file",
+        path: file.path,
+      });
       continue;
     }
 

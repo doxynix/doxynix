@@ -1724,6 +1724,17 @@
     ]
   },
   {
+    "author": "Sverweij",
+    "avatar": "https://github.com/sverweij.png?size=96",
+    "authorLink": "https://github.com/sverweij",
+    "packages": [
+      {
+        "name": "dependency-cruiser",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "T3-oss",
     "avatar": "https://github.com/t3-oss.png?size=96",
     "authorLink": "https://github.com/t3-oss",

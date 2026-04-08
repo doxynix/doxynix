@@ -1,11 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DbClient } from "@/server/shared/infrastructure/db";
-import { githubService } from "@/server/shared/infrastructure/github/github.service";
+import * as githubApi from "@/server/shared/infrastructure/github/github-api";
+import * as githubProvider from "@/server/shared/infrastructure/github/github-provider";
+
+const githubService = {
+  ...githubApi,
+  ...githubProvider,
+};
 
 const parseGithubUrlMock = vi.hoisted(() => vi.fn());
 
-const fileClassifierState = vi.hoisted(() => ({
+const projectPolicyState = vi.hoisted(() => ({
   isIgnored: vi.fn<(path: string) => boolean>(),
 }));
 
@@ -117,13 +123,13 @@ vi.mock("@/shared/constants/env.server", () => ({
   GITHUB_SYSTEM_INSTALLATION_ID: "999999",
 }));
 
-vi.mock("@/server/infrastructure/logger", () => ({
+vi.mock("@/server/shared/infrastructure/logger", () => ({
   logger: loggerState,
 }));
 
-vi.mock("@/server/utils/file-classifier", () => ({
-  FileClassifier: {
-    isIgnored: fileClassifierState.isIgnored,
+vi.mock("@/server/shared/engine/core/project-policy", () => ({
+  ProjectPolicy: {
+    isIgnored: projectPolicyState.isIgnored,
   },
 }));
 
@@ -167,7 +173,7 @@ describe("githubService", () => {
     octokitState.constructorOptions.length = 0;
     octokitState.auth.mockResolvedValue({ token: "mock-token" });
     octokitState.paginate.mockResolvedValue([]);
-    fileClassifierState.isIgnored.mockReturnValue(false);
+    projectPolicyState.isIgnored.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -296,7 +302,7 @@ describe("githubService", () => {
   describe("getRepoTree", () => {
     it("should load tree by default branch and filter ignored/non-blob nodes", async () => {
       const { prisma } = createMockPrisma({ access_token: "token" });
-      fileClassifierState.isIgnored.mockImplementation((path) => path.includes("node_modules"));
+      projectPolicyState.isIgnored.mockImplementation((path) => path.includes("node_modules"));
       octokitState.getRepo.mockResolvedValue({ data: { default_branch: "main" } });
       octokitState.getTree.mockResolvedValue({
         data: {

@@ -1,100 +1,32 @@
-import { DocType } from "@prisma/client";
-
-import { aiSchema, type AIResult } from "@/server/features/analyze-repo/lib/schemas";
-import type { RepoMetrics } from "@/server/features/analyze-repo/lib/types";
+import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
-import { FileClassifier } from "@/server/shared/engine/core/file-classifier";
-import type {
-  LatestCompletedAnalysis,
-  RepoWithLatestAnalysisAndDocs,
-} from "@/server/shared/infrastructure/repo-snapshots";
+import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
+import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
+import type { RepoWithLatestAnalysisAndDocs } from "@/server/shared/infrastructure/repo-snapshots";
+import { unique } from "@/server/shared/lib/array-utils";
+import { hasText } from "@/server/shared/lib/string-utils";
 
 import { createStructuralContextEdges } from "./edge-builder";
+import { coerceAnalysisPayload } from "./payload";
 import {
   buildGroupKeySet,
   collectSemanticKinds,
   deriveGroupId,
   filterMeaningfulEntrypoints,
-  hasPath,
   isLikelyBarrelPath,
   prettifyGroupLabel,
   shouldKeepStructurePath,
-  unique,
 } from "./semantics";
 import { collectScopedEntrySignals } from "./signals";
+import {
+  createEmptyGroupEntry,
+  isPathInsideScope,
+  makeStructureNodeId,
+  type StructureContext,
+  type StructureGroupEntry,
+  type StructureNodeType,
+} from "./structure-shared";
 
-export function coerceAnalysisPayload(analysis: LatestCompletedAnalysis | undefined | null) {
-  if (analysis == null || analysis.metricsJson == null || analysis.resultJson == null) return null;
-
-  const parsed = aiSchema.safeParse(analysis.resultJson);
-  if (!parsed.success) return null;
-
-  return {
-    aiResult: parsed.data,
-    analysis,
-    metrics: analysis.metricsJson as RepoMetrics,
-  };
-}
-export function dedupeLatestDocsByType(docs: StoredDocument[]) {
-  const latestByType = new Map<DocType, StoredDocument>();
-
-  for (const doc of docs) {
-    const current = latestByType.get(doc.type);
-    if (current == null || doc.updatedAt > current.updatedAt) {
-      latestByType.set(doc.type, doc);
-    }
-  }
-
-  return Array.from(latestByType.values()).sort((left, right) => {
-    const orderDiff = DOC_TYPE_ORDER[left.type] - DOC_TYPE_ORDER[right.type];
-    if (orderDiff !== 0) return orderDiff;
-    return right.updatedAt.getTime() - left.updatedAt.getTime();
-  });
-}
-export function getWriterStatus(docType: DocType, aiResult: AIResult | null): WriterStatus | null {
-  const writerKey = WRITER_KEY_BY_DOC_TYPE[docType];
-  if (writerKey == null) return null;
-  return aiResult?.analysisRuntime?.writers?.[writerKey] ?? null;
-}
-export function normalizeWriterStatuses(aiResult: AIResult | null) {
-  return {
-    api: getWriterStatus(DocType.API, aiResult),
-    architecture: getWriterStatus(DocType.ARCHITECTURE, aiResult),
-    changelog: getWriterStatus(DocType.CHANGELOG, aiResult),
-    contributing: getWriterStatus(DocType.CONTRIBUTING, aiResult),
-    readme: getWriterStatus(DocType.README, aiResult),
-  };
-}
-export function toDocSummary(doc: StoredDocument, aiResult: AIResult | null) {
-  const status = getWriterStatus(doc.type, aiResult);
-  return {
-    id: doc.publicId,
-    isFallback: status === "fallback",
-    source: status === "fallback" ? "fallback" : status === "llm" ? "llm" : null,
-    status,
-    type: doc.type,
-    updatedAt: doc.updatedAt,
-    version: doc.version,
-  };
-}
-export const DOC_TYPE_ORDER: Record<DocType, number> = {
-  [DocType.API]: 2,
-  [DocType.ARCHITECTURE]: 1,
-  [DocType.CHANGELOG]: 4,
-  [DocType.CODE_DOC]: 5,
-  [DocType.CONTRIBUTING]: 3,
-  [DocType.README]: 0,
-};
-
-export const WRITER_KEY_BY_DOC_TYPE: Partial<
-  Record<DocType, keyof NonNullable<NonNullable<AIResult["analysisRuntime"]>["writers"]>>
-> = {
-  [DocType.API]: "api",
-  [DocType.ARCHITECTURE]: "architecture",
-  [DocType.CHANGELOG]: "changelog",
-  [DocType.CONTRIBUTING]: "contributing",
-  [DocType.README]: "readme",
-};
 export function buildBreadcrumbs(nodeType: StructureNodeType, path: string) {
   const parts = normalizePath(path).split("/").filter(Boolean);
   if (parts.length === 0) return [];
@@ -130,24 +62,6 @@ export function buildBreadcrumbs(nodeType: StructureNodeType, path: string) {
       path,
     },
   ];
-}
-
-export function resolveImmediateChildScope(parentPath: string, candidatePath: string) {
-  const normalizedParent = normalizePath(parentPath);
-  const normalizedCandidate = normalizePath(candidatePath);
-
-  if (!normalizedCandidate.startsWith(`${normalizedParent}/`)) return null;
-
-  const relative = normalizedCandidate.slice(normalizedParent.length + 1);
-  const parts = relative.split("/").filter(Boolean);
-  const head = parts[0];
-  if (head == null) return null;
-
-  const scopePath = `${normalizedParent}/${head}`;
-  return {
-    nodeType: parts.length > 1 ? ("group" as const) : ("file" as const),
-    path: scopePath,
-  };
 }
 
 export function collectNodeScopePaths(
@@ -223,21 +137,21 @@ export function collectInterestingPaths(
       ...(docInput?.sections.onboarding.body.riskPaths ?? []),
       ...(metrics.routeInventory?.sourceFiles ?? []),
       ...(docInput?.api.publicSurfacePaths ?? []),
-      ...(metrics.hotspotFiles ?? []),
-      ...(metrics.configInventory ?? []),
+      ...metrics.hotspotFiles,
+      ...metrics.configInventory,
       ...(aiResult.findings ?? []).flatMap((finding) => finding.evidence.map((item) => item.path)),
       ...(aiResult.repository_facts ?? []).flatMap((fact) =>
         fact.evidence.map((item) => item.path)
       ),
     ]
-      .filter(hasPath)
+      .filter(hasText)
       .map((path) => normalizePath(path))
   );
 }
 export function collectStructureSignalMap(params: {
   aiResult: AIResult;
-  metrics: RepoMetrics;
   meaningfulEntrypoints: string[];
+  metrics: RepoMetrics;
 }) {
   const map = new Map<
     string,
@@ -249,7 +163,7 @@ export function collectStructureSignalMap(params: {
     signal: "api" | "config" | "entrypoint" | "fact" | "finding" | "hotspot" | "onboarding"
   ) {
     for (const rawPath of paths) {
-      if (!hasPath(rawPath)) continue;
+      if (!hasText(rawPath)) continue;
       const path = normalizePath(rawPath);
       const current = map.get(path) ?? new Set();
       current.add(signal);
@@ -260,8 +174,8 @@ export function collectStructureSignalMap(params: {
   add(params.meaningfulEntrypoints, "entrypoint");
   add(params.metrics.routeInventory?.sourceFiles ?? [], "api");
   add(params.metrics.documentationInput?.api.publicSurfacePaths ?? [], "api");
-  add(params.metrics.hotspotFiles ?? [], "hotspot");
-  add(params.metrics.configInventory ?? [], "config");
+  add(params.metrics.hotspotFiles, "hotspot");
+  add(params.metrics.configInventory, "config");
   add(
     params.metrics.documentationInput?.sections.onboarding.body.firstLookPaths ?? [],
     "onboarding"
@@ -332,9 +246,9 @@ export function buildStructureContext(
   for (const entrypoint of (metrics.entrypointDetails ?? []).filter(
     (item) =>
       !isLikelyBarrelPath(item.path) &&
-      !FileClassifier.isIgnored(item.path) &&
-      !FileClassifier.isSensitiveFile(item.path) &&
-      !FileClassifier.isLowSignalConfigFile(item.path)
+      !ProjectPolicy.isIgnored(item.path) &&
+      !ProjectPolicy.isSensitive(item.path) &&
+      !ProjectPolicy.isLowSignalConfig(item.path)
   )) {
     const normalizedEntrypointPath = normalizePath(entrypoint.path);
     const groupId = deriveGroupId(normalizedEntrypointPath);
@@ -387,91 +301,7 @@ export function buildStructureContext(
     signalMap,
   };
 }
-export function hasText(value: string | undefined) {
-  return typeof value === "string" && value.trim().length > 0;
-}
-export type WriterStatus = "failed" | "fallback" | "llm" | "missing";
-export type StructureEdgeRelationType =
-  | "api"
-  | "config"
-  | "cycle"
-  | "entrypoint"
-  | "focus"
-  | "risk";
-export type StructureNodeType = "file" | "group";
-export type StructureSemanticKind =
-  | "api"
-  | "backend"
-  | "config"
-  | "core"
-  | "data"
-  | "frontend"
-  | "infrastructure"
-  | "shared"
-  | "unknown";
 
-export type StoredDocument = RepoWithLatestAnalysisAndDocs["documents"][number];
-export type StructureGroupEntry = {
-  apiPaths: string[];
-  changeCoupling: NonNullable<RepoMetrics["changeCoupling"]>;
-  churnHotspots: NonNullable<RepoMetrics["churnHotspots"]>;
-  configPaths: string[];
-  dependencyHotspots: NonNullable<RepoMetrics["dependencyHotspots"]>;
-  entrypointDetails: NonNullable<RepoMetrics["entrypointDetails"]>;
-  factTitles: string[];
-  frameworkNames: string[];
-  graphNeighborPaths: string[];
-  graphUnresolvedSamples: NonNullable<
-    NonNullable<RepoMetrics["graphReliability"]>["unresolvedSamples"]
-  >;
-  hotspotSignals: NonNullable<RepoMetrics["hotspotSignals"]>;
-  orphanPaths: string[];
-  paths: string[];
-  publicSurfacePaths: string[];
-  riskTitles: string[];
-  semanticCounts: Record<StructureSemanticKind, number>;
-};
-export type StructureContext = {
-  aiResult: AIResult;
-  allInterestingPaths: string[];
-  apiPaths: Set<string>;
-  docInput: RepoMetrics["documentationInput"] | null;
-  groupMap: Map<string, StructureGroupEntry>;
-  meaningfulEntrypoints: string[];
-  metrics: RepoMetrics;
-  normalizedConfigInventory: string[];
-  rawTopLevelEdges: Array<{
-    id: string;
-    relation: StructureEdgeRelationType;
-    source: string;
-    target: string;
-    weight: number;
-  }>;
-  signalMap: Map<
-    string,
-    Set<"api" | "config" | "entrypoint" | "fact" | "finding" | "hotspot" | "onboarding">
-  >;
-};
-export function createEmptyGroupEntry(): StructureGroupEntry {
-  return {
-    apiPaths: [],
-    changeCoupling: [],
-    churnHotspots: [],
-    configPaths: [],
-    dependencyHotspots: [],
-    entrypointDetails: [],
-    factTitles: [],
-    frameworkNames: [],
-    graphNeighborPaths: [],
-    graphUnresolvedSamples: [],
-    hotspotSignals: [],
-    orphanPaths: [],
-    paths: [],
-    publicSurfacePaths: [],
-    riskTitles: [],
-    semanticCounts: createSemanticCounts(),
-  };
-}
 export function buildApiPathSet(metrics: RepoMetrics) {
   return new Set(
     unique([
@@ -479,41 +309,4 @@ export function buildApiPathSet(metrics: RepoMetrics) {
       ...(metrics.documentationInput?.api.publicSurfacePaths ?? []),
     ]).map((path) => normalizePath(path))
   );
-}
-
-export function createSemanticCounts(): Record<StructureSemanticKind, number> {
-  return {
-    api: 0,
-    backend: 0,
-    config: 0,
-    core: 0,
-    data: 0,
-    frontend: 0,
-    infrastructure: 0,
-    shared: 0,
-    unknown: 0,
-  };
-}
-
-export function makeStructureNodeId(nodeType: StructureNodeType, path: string) {
-  return `${nodeType}:${normalizePath(path)}`;
-}
-
-export function parseStructureNodeId(nodeId: string): {
-  nodeType: StructureNodeType;
-  path: string;
-} {
-  if (nodeId.startsWith("group:")) {
-    return { nodeType: "group", path: normalizePath(nodeId.slice("group:".length)) };
-  }
-  if (nodeId.startsWith("file:")) {
-    return { nodeType: "file", path: normalizePath(nodeId.slice("file:".length)) };
-  }
-  return { nodeType: "group", path: normalizePath(nodeId) };
-}
-
-export function isPathInsideScope(path: string, scopePath: string) {
-  const normalizedPath = normalizePath(path);
-  const normalizedScope = normalizePath(scopePath);
-  return normalizedPath === normalizedScope || normalizedPath.startsWith(`${normalizedScope}/`);
 }

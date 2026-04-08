@@ -1,6 +1,5 @@
 import ts from "typescript";
 
-import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
 import type {
   EntrypointRef,
   FileSignals,
@@ -9,7 +8,8 @@ import type {
   RouteRef,
   SymbolKind,
   SymbolRef,
-} from "../core/types";
+} from "../core/discovery.types";
+import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
 
 function getScriptKind(filePath: string) {
   if (filePath.endsWith(".tsx")) return ts.ScriptKind.TSX;
@@ -269,12 +269,15 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
   return {
     analysisMode: "typescript-ast",
     apiSurface,
+    confidence: 92, // TypeScript compiler has very high confidence
     entrypointHint,
     entrypointRefs,
     exports,
     frameworkHints,
     imports,
+    path: file.path,
     routes,
+    source: "extraction" as const,
     symbols,
   };
 }

@@ -1,9 +1,10 @@
-import { FileClassifier } from "@/server/shared/engine/core/file-classifier";
-
-import { cleanCodeForAi } from "../../../shared/lib/optimizers";
-import { escapePromptXmlAttr, escapePromptXmlText } from "../../../shared/lib/prompt-xml";
-
-type FileEntry = { content: string; path: string };
+import type { Module } from "@/server/shared/engine/core/discovery.types";
+import { getFileScore } from "@/server/shared/engine/core/file-classifier";
+import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
+import { FILE_CONTEXT_MODIFIERS } from "@/server/shared/engine/core/scoring-constants";
+import { uniquePaths } from "@/server/shared/lib/array-utils";
+import { cleanCodeForAi } from "@/server/shared/lib/optimizers";
+import { escapePromptXmlAttr, escapePromptXmlText } from "@/server/shared/lib/string-utils";
 
 export type AiContextStage = "architect" | "writer_api" | "writer_architecture" | "writer_readme";
 
@@ -44,7 +45,7 @@ export type StageContextPack = {
 };
 
 type StageContextParams = {
-  files: FileEntry[];
+  files: Module[];
   maxChars?: number;
   preferredPaths?: string[];
   stage: AiContextStage;
@@ -84,10 +85,6 @@ function isRootManifest(path: string) {
   return !path.includes("/") && ROOT_MANIFESTS.has(path.toLowerCase());
 }
 
-function uniquePaths(paths: string[]) {
-  return Array.from(new Set(paths.filter((value) => value.length > 0)));
-}
-
 function truncateSnippet(content: string, limit: number) {
   if (content.length <= limit) {
     return { content, truncated: false };
@@ -100,53 +97,62 @@ function truncateSnippet(content: string, limit: number) {
 }
 
 function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boolean) {
-  if (FileClassifier.isSensitiveFile(filePath)) return false;
-  if (FileClassifier.isGeneratedFile(filePath) || FileClassifier.isAssetFile(filePath))
-    return false;
+  if (ProjectPolicy.isSensitive(filePath)) return false;
+  if (ProjectPolicy.isGeneratedFile(filePath) || ProjectPolicy.isAssetFile(filePath)) return false;
   if (preferred) return true;
 
-  const docsLike = FileClassifier.isDocsFile(filePath) || isExampleLike(filePath);
-  const testLike = FileClassifier.isTestFile(filePath);
-  const benchmarkLike = FileClassifier.isBenchmarkFile(filePath);
+  const docsLike = ProjectPolicy.isDocsFile(filePath) || isExampleLike(filePath);
+  const testLike = ProjectPolicy.isTestFile(filePath);
+  const benchmarkLike = ProjectPolicy.isBenchmarkFile(filePath);
 
   switch (stage) {
     case "architect":
     case "writer_architecture":
       if (docsLike || testLike || benchmarkLike) return false;
       return (
-        FileClassifier.isPrimaryArchitectureFile(filePath) ||
-        FileClassifier.isConfigFile(filePath) ||
+        ProjectPolicy.isPrimaryArchitecturePath(filePath) ||
+        ProjectPolicy.isConfigFile(filePath) ||
         isRootManifest(filePath)
       );
     case "writer_api":
       if (docsLike || testLike || benchmarkLike) return false;
       return (
-        FileClassifier.isApiFile(filePath) ||
-        FileClassifier.isPrimaryArchitectureFile(filePath) ||
+        ProjectPolicy.isApiPath(filePath) ||
+        ProjectPolicy.isPrimaryArchitecturePath(filePath) ||
         isRootManifest(filePath)
       );
     case "writer_readme":
       if (benchmarkLike) return false;
       if (testLike) return false;
       return (
-        FileClassifier.isConfigFile(filePath) ||
-        FileClassifier.isPrimaryArchitectureFile(filePath) ||
+        ProjectPolicy.isConfigFile(filePath) ||
+        ProjectPolicy.isPrimaryArchitecturePath(filePath) ||
         isRootManifest(filePath)
       );
   }
 }
 
 function scoreFile(stage: AiContextStage, filePath: string, preferred: boolean) {
-  let score = FileClassifier.getScore(filePath);
+  let score = getFileScore(filePath);
 
-  if (preferred) score += 80;
-  if (isRootManifest(filePath)) score += 30;
-  if (FileClassifier.isPrimaryArchitectureFile(filePath)) score += 20;
-  if (FileClassifier.isConfigFile(filePath)) score += stage === "writer_readme" ? 25 : 10;
-  if (stage === "writer_api" && FileClassifier.isApiFile(filePath)) score += 35;
-  if (stage === "architect" && FileClassifier.isApiFile(filePath)) score += 15;
-  if ((FileClassifier.isDocsFile(filePath) || isExampleLike(filePath)) && !preferred) score -= 50;
-  if (FileClassifier.isTestFile(filePath) && !preferred) score -= 60;
+  if (preferred) score += FILE_CONTEXT_MODIFIERS.preferredFileBonus;
+  if (isRootManifest(filePath)) score += FILE_CONTEXT_MODIFIERS.rootManifestBonus;
+  if (ProjectPolicy.isPrimaryArchitecturePath(filePath))
+    score += FILE_CONTEXT_MODIFIERS.primaryArchitectureBonus;
+  if (ProjectPolicy.isConfigFile(filePath)) {
+    score +=
+      stage === "writer_readme"
+        ? FILE_CONTEXT_MODIFIERS.configFileBonusForReadme
+        : FILE_CONTEXT_MODIFIERS.configFileBonus;
+  }
+  if (stage === "writer_api" && ProjectPolicy.isApiPath(filePath))
+    score += FILE_CONTEXT_MODIFIERS.apiFileBonus;
+  if (stage === "architect" && ProjectPolicy.isApiPath(filePath))
+    score += FILE_CONTEXT_MODIFIERS.apiFileSecondaryBonus;
+  if ((ProjectPolicy.isDocsFile(filePath) || isExampleLike(filePath)) && !preferred)
+    score += FILE_CONTEXT_MODIFIERS.docFilePenalty;
+  if (ProjectPolicy.isTestFile(filePath) && !preferred)
+    score += FILE_CONTEXT_MODIFIERS.testFilePenalty;
 
   return score;
 }
@@ -154,10 +160,10 @@ function scoreFile(stage: AiContextStage, filePath: string, preferred: boolean) 
 function buildSelectionReason(stage: AiContextStage, filePath: string, preferred: boolean) {
   if (preferred) return "preferred-evidence";
   if (isRootManifest(filePath)) return "root-manifest";
-  if (FileClassifier.isConfigFile(filePath))
+  if (ProjectPolicy.isConfigFile(filePath))
     return stage === "writer_readme" ? "config-evidence" : "config-support";
-  if (stage === "writer_api" && FileClassifier.isApiFile(filePath)) return "api-evidence";
-  if (FileClassifier.isPrimaryArchitectureFile(filePath)) return "primary-architecture";
+  if (stage === "writer_api" && ProjectPolicy.isApiPath(filePath)) return "api-evidence";
+  if (ProjectPolicy.isPrimaryArchitecturePath(filePath)) return "primary-architecture";
   return "secondary-support";
 }
 
@@ -177,7 +183,7 @@ export function buildStageContextPack({
       const preferred = preferredSet.has(file.path);
       const lowerPath = file.path.toLowerCase();
 
-      if (FileClassifier.isSensitiveFile(lowerPath)) {
+      if (ProjectPolicy.isSensitive(lowerPath)) {
         dropped.push({ path: file.path, reason: "sensitive", score: 0 });
         return null;
       }
@@ -256,7 +262,7 @@ export function buildStageContextPack({
 }
 
 export function prepareSmartContext(
-  files: FileEntry[],
+  files: Module[],
   maxChars: number = STAGE_BUDGETS.architect
 ): string {
   return buildStageContextPack({

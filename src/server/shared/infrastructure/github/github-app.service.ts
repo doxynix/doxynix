@@ -2,9 +2,39 @@ import crypto from "node:crypto";
 import { TRPCError } from "@trpc/server";
 
 import type { DbClient, PrismaClientExtended } from "@/server/shared/infrastructure/db";
-import { githubService } from "@/server/shared/infrastructure/github/github.service";
+import { getMyRepos } from "@/server/shared/infrastructure/github/github-api";
+import {
+  getInstallationInfo,
+  getUserClient,
+} from "@/server/shared/infrastructure/github/github-provider";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { isOctokitError } from "@/server/shared/lib/handle-error";
+
+type OauthValidationStatus = "invalid" | "missing" | "valid";
+
+async function resolveOauthValidationStatus(
+  oauthAccounts: Array<{ access_token: string | null }>
+): Promise<OauthValidationStatus> {
+  if (oauthAccounts.length === 0) return "missing";
+
+  let hasUnauthorized = false;
+  for (const oauthAccount of oauthAccounts) {
+    if (oauthAccount.access_token == null) continue;
+    try {
+      const userOctokit = getUserClient(oauthAccount.access_token);
+      await userOctokit.rest.users.getAuthenticated();
+      return "valid";
+    } catch (error) {
+      if (isOctokitError(error) && error.status === 401) {
+        hasUnauthorized = true;
+      } else {
+        logger.warn({ error, msg: "GitHub OAuth validation failed" });
+      }
+    }
+  }
+
+  return hasUnauthorized ? "invalid" : "missing";
+}
 
 export const githubAppService = {
   async getInstallUrl(prisma: PrismaClientExtended, userId: number) {
@@ -51,39 +81,14 @@ export const githubAppService = {
     const manageUrl = mainInstall != null ? (mainInstall.htmlUrl ?? null) : null;
     const installationId = mainInstall !== null ? Number(mainInstall.id) : null;
 
-    let oauthStatus: "valid" | "invalid" | "missing" = "missing";
-
-    if (oauthAccounts.length > 0) {
-      let hasUnauthorized = false;
-      let hasValid = false;
-      for (const oauthAccount of oauthAccounts) {
-        if (oauthAccount.access_token == null) continue;
-        try {
-          const userOctokit = githubService.getUserClient(oauthAccount.access_token);
-          await userOctokit.rest.users.getAuthenticated();
-          hasValid = true;
-          break;
-        } catch (error) {
-          if (isOctokitError(error) && error.status === 401) {
-            hasUnauthorized = true;
-          } else {
-            logger.warn({ error, msg: "GitHub OAuth validation failed" });
-          }
-        }
-      }
-      if (hasValid) {
-        oauthStatus = "valid";
-      } else if (hasUnauthorized) {
-        oauthStatus = "invalid";
-      }
-    }
+    const oauthStatus = await resolveOauthValidationStatus(oauthAccounts);
 
     if (installationId == null && oauthStatus === "invalid") {
       return { installationId, isConnected: true, items: [], manageUrl, oauthStatus };
     }
 
     try {
-      const repos = await githubService.getMyRepos(prisma, userId);
+      const repos = await getMyRepos(prisma, userId);
       return { installationId, isConnected: true, items: repos, manageUrl, oauthStatus };
     } catch (error) {
       logger.error({ error, msg: "Dashboard fetch failed", userId });
@@ -135,7 +140,7 @@ export const githubAppService = {
     for (const oauthAccount of oauthAccounts) {
       if (oauthAccount.access_token == null) continue;
       try {
-        const userOctokit = githubService.getUserClient(oauthAccount.access_token);
+        const userOctokit = getUserClient(oauthAccount.access_token);
         const userInstallations = await userOctokit.paginate(
           userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
           { per_page: 100 }
@@ -180,7 +185,7 @@ export const githubAppService = {
       });
     }
 
-    const installationInfo = await githubService.getInstallationInfo(inputInstIdNum);
+    const installationInfo = await getInstallationInfo(inputInstIdNum);
     const account = installationInfo.account;
     const accountLogin = account !== null && "login" in account ? account.login : "Unknown";
     const accountAvatar = account !== null && "avatar_url" in account ? account.avatar_url : null;

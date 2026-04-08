@@ -1,28 +1,27 @@
 import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
 import {
   toAnalysisRef,
+  type AnalysisRef,
   type RepoWithLatestAnalysisAndDocs,
 } from "@/server/shared/infrastructure/repo-snapshots";
+import { unique } from "@/server/shared/lib/array-utils";
 
+import { buildStructureNodePayload, type StructureNodePayload } from "./graph-navigator";
+import { SEMANTIC_META } from "./semantics";
+import { collectScopedSignals } from "./signals";
 import {
   aggregateEntryForPaths,
   buildStructureContext,
   collectNodeScopePaths,
-  parseStructureNodeId,
-} from "./analysis-utils";
-import { buildSuggestedPathsForEntry } from "./context";
-import { buildStructureNodePayload } from "./graph-navigator";
-import { SEMANTIC_META } from "./semantics";
-import { collectScopedSignals } from "./signals";
+} from "./structure-context";
+import { parseStructureNodeId, type StructureContext } from "./structure-shared";
 
-export function buildNodeExplainPayload(repo: RepoWithLatestAnalysisAndDocs, nodeId: string) {
-  const context = buildStructureContext(repo);
-  if (context == null) return null;
-  const analysisRef = toAnalysisRef(repo.analyses[0]);
-
-  const drilldown = buildStructureNodePayload(repo, nodeId);
-  if (drilldown == null) return null;
-
+export function buildNodeExplainPayloadFromContext(
+  context: StructureContext,
+  analysisRef: AnalysisRef | null,
+  nodeId: string,
+  drilldown: StructureNodePayload
+) {
   const { nodeType, path } = parseStructureNodeId(nodeId);
   const scopedPaths = collectNodeScopePaths(context, nodeType, path);
   if (scopedPaths.length === 0) return null;
@@ -39,15 +38,7 @@ export function buildNodeExplainPayload(repo: RepoWithLatestAnalysisAndDocs, nod
     ),
   ]).slice(0, 8);
 
-  const nextSuggestedPaths =
-    drilldown.inspect.nextSuggestedPaths ??
-    buildSuggestedPathsForEntry({
-      context,
-      currentPath: path,
-      entry,
-      relatedChildPaths: drilldown.children.map((child) => child.path),
-    });
-
+  const nextSuggestedPaths = drilldown.inspect.nextSuggestedPaths;
   const confidence = buildExplainConfidence({
     findingsCount: signals.findings.length,
     node: drilldown.node,
@@ -69,7 +60,7 @@ export function buildNodeExplainPayload(repo: RepoWithLatestAnalysisAndDocs, nod
       apiHints: drilldown.inspect.apiHints,
       apiSurface: drilldown.node.markers.api,
       breadcrumbs: drilldown.breadcrumbs,
-      contains: drilldown.inspect.contains ?? [],
+      contains: drilldown.inspect.contains,
       dependsOn: drilldown.inspect.dependsOn,
       entrypoint: drilldown.node.markers.entrypoint,
       entrypointReason: drilldown.inspect.entrypointReason,
@@ -77,15 +68,15 @@ export function buildNodeExplainPayload(repo: RepoWithLatestAnalysisAndDocs, nod
         0,
         5
       ),
-      frameworkHints: drilldown.inspect.frameworkHints ?? [],
-      graphHints: drilldown.inspect.graphHints ?? [],
-      gitHints: drilldown.inspect.gitHints ?? [],
-      hotspotHints: drilldown.inspect.hotspotHints ?? [],
-      neighborBuckets: drilldown.inspect.neighborBuckets ?? null,
-      neighborPaths: drilldown.inspect.neighborPaths ?? [],
-      relatedPaths: drilldown.inspect.relatedPaths ?? [],
-      recommendedActions: drilldown.inspect.recommendedActions ?? [],
-      reviewPriority: drilldown.inspect.reviewPriority ?? null,
+      frameworkHints: drilldown.inspect.frameworkHints,
+      gitHints: drilldown.inspect.gitHints,
+      graphHints: drilldown.inspect.graphHints,
+      hotspotHints: drilldown.inspect.hotspotHints,
+      neighborBuckets: drilldown.inspect.neighborBuckets,
+      neighborPaths: drilldown.inspect.neighborPaths,
+      recommendedActions: drilldown.inspect.recommendedActions,
+      relatedPaths: drilldown.inspect.relatedPaths,
+      reviewPriority: drilldown.inspect.reviewPriority,
       riskTitles: unique(signals.findings.map((finding) => finding.title)).slice(0, 5),
       usedBy: drilldown.inspect.usedBy,
     },
@@ -108,6 +99,23 @@ export function buildNodeExplainPayload(repo: RepoWithLatestAnalysisAndDocs, nod
     whyImportant: drilldown.inspect.whyImportant,
   };
 }
+export type NodeExplainPayload = NonNullable<ReturnType<typeof buildNodeExplainPayloadFromContext>>;
+
+export function buildNodeExplainPayload(repo: RepoWithLatestAnalysisAndDocs, nodeId: string) {
+  // Build node payload first to keep expensive context construction on the hot path only.
+  const drilldown = buildStructureNodePayload(repo, nodeId);
+  if (drilldown == null) return null;
+
+  const context = buildStructureContext(repo);
+  if (context == null) return null;
+
+  return buildNodeExplainPayloadFromContext(
+    context,
+    toAnalysisRef(repo.analyses[0]),
+    nodeId,
+    drilldown
+  );
+}
 type ExplainNodeLike = {
   kind: string;
   label: string;
@@ -125,10 +133,6 @@ type ExplainNodeLike = {
     entrypointCount: number;
   };
 };
-function unique<T>(values: T[]) {
-  return Array.from(new Set(values));
-}
-
 export function buildNodeRole(node: ExplainNodeLike, semanticLabel: string) {
   if (node.nodeType === "file") {
     if (node.markers.entrypoint) return "File with localized entrypoint significance";

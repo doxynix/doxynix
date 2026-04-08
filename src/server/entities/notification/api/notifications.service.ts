@@ -3,11 +3,12 @@ import type { NotifyType, Prisma } from "@prisma/client";
 import type {
   NotificationsBulkFilterInput,
   NotificationsFilterInput,
-} from "../../../api/contracts";
-import type { DbClient } from "../../../shared/infrastructure/db";
-import { handlePrismaError } from "../../../shared/lib/handle-error";
-import { getPaginationMeta } from "../../../shared/lib/pagination";
-import { normalizeSearchInput, tokenizeSearchInput } from "../../../shared/lib/search";
+} from "@/server/api/contracts";
+import type { DbClient } from "@/server/shared/infrastructure/db";
+import { handlePrismaError } from "@/server/shared/lib/handle-error";
+import { getPaginationMeta } from "@/server/shared/lib/pagination";
+import { normalizeSearchInput, tokenizeSearchInput } from "@/server/shared/lib/search";
+
 import { notificationPresenter, type NotificationWithRepo } from "./notification.presenter";
 
 function buildNotificationSearchClause(term: string): Prisma.NotificationWhereInput {

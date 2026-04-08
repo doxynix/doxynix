@@ -1,6 +1,7 @@
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
 
 import { buildEvidence, clamp } from "../core/common";
+import { RISK_SCORING } from "../core/scoring-constants";
 import type {
   ChangeCouplingRef,
   DependencyGraphEvidence,
@@ -60,22 +61,38 @@ function buildRiskDerivedScores(
 ): RiskDerivedScores {
   const derivedScores: RiskDerivedScores = {
     changeCouplingRisk: clamp(
-      35 + rawMetrics.strongestChangeCouplingCommits * 12 + rawMetrics.changeCouplingPairs * 3,
+      RISK_SCORING.changeCouplingBase +
+        rawMetrics.strongestChangeCouplingCommits * RISK_SCORING.strongestCommitMultiplier +
+        rawMetrics.changeCouplingPairs * RISK_SCORING.pairMultiplier,
       0,
       100
     ),
-    dependencyCycleRisk: clamp(40 + rawMetrics.dependencyCycleGroups * 14, 0, 100),
-    graphReliabilityRisk: clamp(rawMetrics.unresolvedInternalImports * 4, 0, 100),
+    dependencyCycleRisk: clamp(
+      RISK_SCORING.dependencyCycleBase +
+        rawMetrics.dependencyCycleGroups * RISK_SCORING.cycleMultiplier,
+      0,
+      100
+    ),
+    graphReliabilityRisk: clamp(
+      rawMetrics.unresolvedInternalImports * RISK_SCORING.unresolvedImportMultiplier,
+      0,
+      100
+    ),
     hotspotRisk: clamp(
       Math.round(
-        rawMetrics.strongestHotspotScore * 0.45 +
-          rawMetrics.hotspotCount * 3 +
-          metrics.complexityScore * 0.15
+        rawMetrics.strongestHotspotScore * RISK_SCORING.hotspotScoreMultiplier +
+          rawMetrics.hotspotCount * RISK_SCORING.hotspotCountMultiplier +
+          metrics.complexityScore * RISK_SCORING.complexityWeightInHotspot
       ),
       0,
       100
     ),
-    orphanModuleRisk: clamp(25 + rawMetrics.orphanModuleCount * 8, 0, 100),
+    orphanModuleRisk: clamp(
+      RISK_SCORING.orphanModuleBase +
+        rawMetrics.orphanModuleCount * RISK_SCORING.orphanCountMultiplier,
+      0,
+      100
+    ),
     overallRisk: 0,
   };
 

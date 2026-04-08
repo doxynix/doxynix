@@ -1,45 +1,33 @@
+import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
+import { unique } from "@/server/shared/lib/array-utils";
+
 import {
   buildNeighborBucketsForEntry,
   buildNeighborPathsForEntry,
   buildRecommendedActions,
   buildReviewPriority,
   buildSuggestedPathsForEntry,
-} from "@/server/entities/analyze/lib/context";
-import { normalizeRepoPath as normalizePath } from "@/server/shared/engine/core/common";
+  type StructureInspectContextLike as BaseStructureInspectContextLike,
+  type StructureInspectEntryLike as BaseStructureInspectEntryLike,
+  type StructureInspectNodeLike as BaseStructureInspectNodeLike,
+} from "./node-inspection";
 
-function unique<T>(values: T[]) {
-  return Array.from(new Set(values));
-}
+type StructureInspectContextLike = BaseStructureInspectContextLike;
 
-type StructureInspectContextLike = {
-  docInput: unknown;
-};
-
-type StructureInspectEntryLike = {
-  apiPaths: string[];
+type StructureInspectEntryLike = BaseStructureInspectEntryLike & {
   changeCoupling: Array<{ commits: number; fromPath: string; toPath: string }>;
   churnHotspots: Array<{ commitsInWindow: number; path: string }>;
-  configPaths: string[];
-  dependencyHotspots: Array<{ exports: number; inbound: number; outbound: number; path: string }>;
   entrypointDetails: Array<{ path: string; reason?: string | null }>;
   factTitles: string[];
   frameworkNames: string[];
-  graphNeighborPaths: string[];
   graphUnresolvedSamples: Array<{ fromPath: string; specifier: string }>;
-  hotspotSignals: Array<{ churnScore: number; complexity: number; path: string; score: number }>;
-  orphanPaths: string[];
-  publicSurfacePaths: string[];
 };
 
-type StructureInspectNodeLike = {
+type StructureInspectNodeLike = BaseStructureInspectNodeLike & {
   kind: string;
   label: string;
-  nodeType: "file" | "group";
   path: string;
   previewPaths: string[];
-  markers: {
-    api: boolean;
-  };
   stats: {
     apiCount: number;
     changeCouplingCount: number;
@@ -85,7 +73,7 @@ export function buildInspectPayload(params: {
   const frameworkHints = unique(params.entry.frameworkNames).slice(0, 5);
   const hotspotHints = unique([
     ...params.entry.hotspotSignals
-      .sort((left, right) => right.score - left.score)
+      .toSorted((left, right) => right.score - left.score)
       .slice(0, 2)
       .map(
         (signal) =>
@@ -109,7 +97,10 @@ export function buildInspectPayload(params: {
       ? [
           `Dependency resolution is partial here: ${params.entry.graphUnresolvedSamples
             .slice(0, 2)
-            .map((sample) => `${sample.fromPath} -> ${sample.specifier}`)
+            .map((sample) => {
+              const typedSample = sample as { fromPath: string; specifier: string };
+              return `${typedSample.fromPath} -> ${typedSample.specifier}`;
+            })
             .join("; ")}.`,
         ]
       : []),
@@ -133,13 +124,13 @@ export function buildInspectPayload(params: {
       .slice(0, 2)
       .map(
         (hotspot) =>
-          `${hotspot.path} changed frequently in recent history (${hotspot.commitsInWindow} commits in window).`
+          `${hotspot.path} changed frequently in recent history (${(hotspot as unknown as { commitsInWindow: number }).commitsInWindow} commits in window).`
       ),
     ...params.entry.changeCoupling
       .slice(0, 2)
       .map(
         (pair) =>
-          `${pair.fromPath} and ${pair.toPath} often change together (${pair.commits} coupled commits).`
+          `${pair.fromPath} and ${pair.toPath} often change together (${(pair as unknown as { commits: number }).commits} coupled commits).`
       ),
   ]).slice(0, 4);
   const nextSuggestedPaths =
@@ -183,21 +174,21 @@ export function buildInspectPayload(params: {
           ],
     configHints: unique(params.entry.configPaths).slice(0, 5),
     dependsOn: unique(params.outgoing),
-    entrypointReason: params.entry.entrypointDetails[0]?.reason ?? null,
+    entrypointReason: params.entry.entrypointDetails[0].reason ?? null,
     factTitles: unique(params.entry.factTitles).slice(0, 5),
     frameworkHints,
-    graphHints,
     gitHints,
+    graphHints,
     hotspotHints,
     kind: params.semanticLabel,
     neighborBuckets,
     neighborPaths,
     nextSuggestedPaths,
-    relatedPaths,
     recommendedActions: buildRecommendedActions({
       entry: params.entry,
       node: params.node,
     }),
+    relatedPaths,
     reviewPriority,
     samplePaths: params.node.previewPaths,
     title: params.node.label,
