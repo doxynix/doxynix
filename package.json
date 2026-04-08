@@ -300,7 +300,7 @@
     "cross-env": "10.1.0",
     "cspell": "9.8.0",
     "decimal.js": "10.6.0",
-    "dotenv": "17.4.0",
+    "dotenv": "17.4.1",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.2",
     "eslint-config-prettier": "10.1.8",
