@@ -240,10 +240,13 @@ export class FactCollector {
 
   private parseManifestJsonDependencies(content: string, keys: string[], filePath: string) {
     try {
-      const data = JSON.parse(content);
+      const data = JSON.parse(content) as Record<string, unknown>;
       for (const key of keys) {
-        const deps = Object.keys(Boolean(data[key]) || {});
-        this.collectFrameworkFactsFromTokens(deps, filePath, 94);
+        const section = data[key];
+        if (section != null && typeof section === "object" && !Array.isArray(section)) {
+          const deps = Object.keys(section);
+          this.collectFrameworkFactsFromTokens(deps, filePath, 94);
+        }
       }
     } catch {
       // Optional signal only.
@@ -293,8 +296,12 @@ export class FactCollector {
   private parseManifestPubspec(content: string, filePath: string) {
     try {
       const data = YAML.parse(content);
-      const deps = Object.keys(Boolean(data?.dependencies) || {});
-      this.collectFrameworkFactsFromTokens(deps, filePath, 88);
+      const deps = data?.dependencies;
+
+      if (deps != null && typeof deps === "object" && !Array.isArray(deps)) {
+        const depKeys = Object.keys(deps);
+        this.collectFrameworkFactsFromTokens(depKeys, filePath, 88);
+      }
     } catch {
       // Optional signal only.
     }
