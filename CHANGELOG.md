@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.24.4](https://github.com/doxynix/doxynix/compare/v1.24.3...v1.24.4) (2026-04-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency simple-git to v3.35.1 ([#997](https://github.com/doxynix/doxynix/issues/997)) ([9a1a107](https://github.com/doxynix/doxynix/commit/9a1a107214868837a706401c3b4c01a94f2c6f54))
+
 ## [1.24.3](https://github.com/doxynix/doxynix/compare/v1.24.2...v1.24.3) (2026-04-08)
 
 
