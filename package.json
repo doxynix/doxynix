@@ -76,7 +76,8 @@
       "effect": "3.21.0",
       "handlebars": "4.7.9",
       "defu": "6.1.6",
-      "vite": "8.0.5"
+      "vite": "8.0.5",
+      "basic-ftp": "5.2.1"
     },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
