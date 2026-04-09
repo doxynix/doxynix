@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { repoAnalysisService } from "@/server/services/repo-analysis.service";
+import { repoAnalysisService } from "@/server/features/analyze-repo/api/repo-analysis.service";
 import { DocTypeSchema } from "@/generated/zod";
 
 import { OpenApiErrorResponses } from "../contracts";
@@ -38,6 +38,7 @@ export const repoAnalysisRouter = createTRPCRouter({
       z.object({
         content: z.string(),
         language: z.string().default("English"),
+        nodeId: z.string().optional(),
         path: z.string(),
         repoId: z.string(),
       })
@@ -51,11 +52,44 @@ export const repoAnalysisRouter = createTRPCRouter({
       z.object({
         content: z.string(),
         language: z.string().default("Russian"),
+        nodeId: z.string().optional(),
         path: z.string(),
         repoId: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       return repoAnalysisService.documentFile(ctx.db, Number(ctx.session.user.id), input);
+    }),
+
+  documentFilePreview: protectedProcedure
+    .input(
+      z.object({
+        analysisId: z.string().optional(),
+        commitSha: z.string().optional(),
+        content: z.string(),
+        language: z.string().default("Russian"),
+        nodeId: z.string().optional(),
+        path: z.string(),
+        repoId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return repoAnalysisService.documentFilePreview(ctx.db, Number(ctx.session.user.id), input);
+    }),
+
+  quickFileAudit: protectedProcedure
+    .input(
+      z.object({
+        analysisId: z.string().optional(),
+        commitSha: z.string().optional(),
+        content: z.string(),
+        language: z.string().default("English"),
+        nodeId: z.string().optional(),
+        path: z.string(),
+        repoId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return repoAnalysisService.quickFileAudit(ctx.db, Number(ctx.session.user.id), input);
     }),
 });

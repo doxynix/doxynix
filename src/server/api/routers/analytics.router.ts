@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { analyticsService } from "@/server/services/analytics.service";
+import { analyticsService } from "@/server/entities/analyze/api/analytics.service";
 import { StatusSchema } from "@/generated/zod";
 
 import { OpenApiErrorResponses } from "../contracts";

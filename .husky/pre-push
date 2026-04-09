@@ -1,3 +1,3 @@
 echo "Running type check before push..."
-pnpm db:generate && pnpm tsc --noEmit
+doppler run -- pnpm db:generate && pnpm tsc --noEmit
 echo "Done!"

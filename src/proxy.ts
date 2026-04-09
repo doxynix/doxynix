@@ -3,9 +3,9 @@ import { Ratelimit } from "@upstash/ratelimit";
 import createMiddleware from "next-intl/middleware";
 
 import { routing } from "./i18n/routing";
-import { logger } from "./server/infrastructure/logger";
-import { redisClient } from "./server/infrastructure/redis";
-import { generateRequestId, getIp, sanitizeRequestId } from "./server/utils/request-context";
+import { logger } from "./server/shared/infrastructure/logger";
+import { redisClient } from "./server/shared/infrastructure/redis";
+import { generateRequestId, getIp, sanitizeRequestId } from "./server/shared/lib/request-context";
 import { API_PREFIX, IS_PROD } from "./shared/constants/env.client";
 import { TURNSTILE_SECRET_KEY } from "./shared/constants/env.server";
 import { LOCALE_REGEX_STR } from "./shared/constants/locales";

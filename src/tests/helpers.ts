@@ -1,7 +1,7 @@
 import { enhance } from "@zenstackhq/runtime";
 import { expect } from "vitest";
 
-import { prisma } from "@/server/infrastructure/db";
+import { prisma } from "@/server/shared/infrastructure/db";
 
 export async function cleanupDatabase() {
   const tablenames = [

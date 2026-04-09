@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { githubAppService } from "@/server/services/github-app.service";
+import { githubAppService } from "@/server/shared/infrastructure/github/github-app.service";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 

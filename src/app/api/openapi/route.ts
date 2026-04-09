@@ -5,7 +5,7 @@ import { API_PREFIX, APP_URL } from "@/shared/constants/env.client";
 import { getCookieName } from "@/shared/lib/utils";
 
 import { appRouter } from "@/server/api/routers";
-import { logger } from "@/server/infrastructure/logger";
+import { logger } from "@/server/shared/infrastructure/logger";
 
 export const GET = () => {
   try {

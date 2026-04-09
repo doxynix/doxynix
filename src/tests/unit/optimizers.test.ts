@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { cleanCodeForAi, CodeOptimizer, unwrapAiText } from "@/server/ai/optimizers";
+import { cleanCodeForAi, CodeOptimizer, unwrapAiText } from "@/server/shared/lib/optimizers";
 
 describe("CodeOptimizer", () => {
   beforeEach(() => {
