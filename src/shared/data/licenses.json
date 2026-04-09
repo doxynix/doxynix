@@ -444,6 +444,41 @@
     ]
   },
   {
+    "author": "TypeStrong",
+    "avatar": "https://github.com/TypeStrong.png?size=96",
+    "authorLink": "https://github.com/TypeStrong",
+    "packages": [
+      {
+        "name": "typedoc",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "ts-node",
+        "license": "MIT"
+      },
+      {
+        "name": "typedoc-plugin-extras",
+        "license": "MIT"
+      },
+      {
+        "name": "typedoc-plugin-markdown",
+        "license": "MIT"
+      },
+      {
+        "name": "typedoc-plugin-rename-defaults",
+        "license": "MIT"
+      },
+      {
+        "name": "typedoc-plugin-zod",
+        "license": "MIT"
+      },
+      {
+        "name": "typedoc-plugin-llms-txt",
+        "license": "BlueOak-1.0.0"
+      }
+    ]
+  },
+  {
     "author": "GitHub",
     "avatar": "https://github.com/octokit.png?size=96",
     "authorLink": "https://github.com/octokit",
@@ -968,21 +1003,6 @@
     ]
   },
   {
-    "author": "TypeStrong",
-    "avatar": "https://github.com/TypeStrong.png?size=96",
-    "authorLink": "https://github.com/TypeStrong",
-    "packages": [
-      {
-        "name": "typedoc",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "ts-node",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
     "author": "Upstash",
     "avatar": "https://github.com/upstash.png?size=96",
     "authorLink": "https://github.com/upstash",
@@ -1082,6 +1102,17 @@
       {
         "name": "superjson",
         "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Boneskull",
+    "avatar": "https://github.com/boneskull.png?size=96",
+    "authorLink": "https://github.com/boneskull",
+    "packages": [
+      {
+        "name": "@boneskull/typedoc-plugin-mermaid",
+        "license": "BlueOak-1.0.0"
       }
     ]
   },
@@ -1653,6 +1684,17 @@
     "packages": [
       {
         "name": "zustand",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Pradeepmouli",
+    "avatar": "https://github.com/pradeepmouli.png?size=96",
+    "authorLink": "https://github.com/pradeepmouli",
+    "packages": [
+      {
+        "name": "@to-skills/typedoc",
         "license": "MIT"
       }
     ]

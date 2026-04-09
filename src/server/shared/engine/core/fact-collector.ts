@@ -1,7 +1,4 @@
-// TODO: перевести на project policy
-
 import { XMLParser } from "fast-xml-parser";
-import pm from "picomatch";
 import YAML from "yaml";
 
 import { dumpDebug } from "../../lib/debug-logger";
@@ -16,6 +13,7 @@ import {
   collectFrameworkFactsFromTokens,
   selectRepositoryFrameworkFacts,
 } from "./framework-catalog";
+import { ProjectPolicy } from "./project-policy";
 
 const xmlParser = new XMLParser({ ignoreAttributes: false });
 
@@ -24,24 +22,6 @@ type ManifestHandler = {
   matches: (fileName: string) => boolean;
   run: (collector: FactCollector, file: AnalyzedFile) => void;
 };
-
-const FILE_TRIGGERS: Record<string, { category: TechCategory; name: string }> = {
-  "**/*.tf": { category: "Infrastructure", name: "Terraform" },
-  "**/.github/workflows/**": { category: "CI/CD", name: "GitHub Actions" },
-  "**/.gitlab-ci.yml": { category: "CI/CD", name: "GitLab CI" },
-  "**/ansible.cfg": { category: "Infrastructure", name: "Ansible" },
-  "**/capacitor.config.*": { category: "Mobile", name: "Capacitor" },
-  "**/deployment.{yml,yaml}": { category: "Infrastructure", name: "Kubernetes" },
-  "**/docker-compose.{yml,yaml}": { category: "Infrastructure", name: "Docker Compose" },
-  "**/dockerfile": { category: "Infrastructure", name: "Docker" },
-  "**/expo.json": { category: "Mobile", name: "Expo" },
-  "**/k8s/**": { category: "Infrastructure", name: "Kubernetes" },
-  "**/tailwind.config.*": { category: "UI/Styling", name: "Tailwind CSS" },
-};
-const FILE_TRIGGER_MATCHERS = Object.entries(FILE_TRIGGERS).map(([pattern, info]) => ({
-  info,
-  isMatch: pm(pattern),
-}));
 
 function mapFrameworkCategory(category: FrameworkFact["category"]): TechCategory {
   switch (category) {
@@ -170,17 +150,38 @@ export class FactCollector {
     const fileName = rawFileName ?? "";
     const pathLower = file.path.toLowerCase();
 
-    this.collectFileTriggerFacts(pathLower);
+    this.collectPolicyPathFacts(pathLower, fileName);
     this.collectManifestFacts(fileName, file);
     this.collectSignalDerivedFacts(file.path, signals);
     if (this.isOneC(pathLower)) this.addFact("1C:Enterprise", "Language", 95);
   }
 
-  private collectFileTriggerFacts(pathLower: string) {
-    for (const { info, isMatch } of FILE_TRIGGER_MATCHERS) {
-      if (!isMatch(pathLower)) continue;
-      this.addFact(info.name, info.category, 100);
+  private collectPolicyPathFacts(pathLower: string, fileName: string) {
+    const categories = ProjectPolicy.getCategories(pathLower);
+
+    if (categories.includes("infra")) this.addFact("Infrastructure as Code", "Infrastructure", 84);
+    if (categories.includes("tooling")) this.addFact("Build Tooling", "CI/CD", 70);
+    if (categories.includes("config"))
+      this.addFact("Configuration-Driven Setup", "Infrastructure", 66);
+
+    if (pathLower.includes("/.github/workflows/")) this.addFact("GitHub Actions", "CI/CD", 100);
+    if (fileName === ".gitlab-ci.yml") this.addFact("GitLab CI", "CI/CD", 100);
+    if (fileName === "dockerfile") this.addFact("Docker", "Infrastructure", 100);
+    if (fileName === "docker-compose.yml" || fileName === "docker-compose.yaml") {
+      this.addFact("Docker Compose", "Infrastructure", 100);
     }
+    if (fileName === "ansible.cfg") this.addFact("Ansible", "Infrastructure", 100);
+    if (fileName.endsWith(".tf")) this.addFact("Terraform", "Infrastructure", 100);
+    if (fileName.startsWith("capacitor.config.")) this.addFact("Capacitor", "Mobile", 100);
+    if (fileName === "expo.json") this.addFact("Expo", "Mobile", 100);
+    if (
+      pathLower.includes("/k8s/") ||
+      fileName === "deployment.yml" ||
+      fileName === "deployment.yaml"
+    ) {
+      this.addFact("Kubernetes", "Infrastructure", 100);
+    }
+    if (fileName.startsWith("tailwind.config.")) this.addFact("Tailwind CSS", "UI/Styling", 100);
   }
 
   private collectManifestFacts(fileName: string, file: AnalyzedFile) {

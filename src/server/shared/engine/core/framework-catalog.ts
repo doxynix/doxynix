@@ -8,6 +8,7 @@ type FrameworkCatalogEntry = {
 };
 
 export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
+  // --- JS/TS ECOSYSTEM (Frontend & Backend) ---
   { aliases: ["hono", "@hono/"], category: "framework", name: "Hono" },
   { aliases: ["express"], category: "framework", name: "Express" },
   { aliases: ["fastify"], category: "framework", name: "Fastify" },
@@ -16,48 +17,128 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   { aliases: ["next", "next/"], category: "framework", name: "Next.js" },
   { aliases: ["nuxt"], category: "framework", name: "Nuxt.js" },
   { aliases: ["sveltekit", "@sveltejs/kit"], category: "framework", name: "SvelteKit" },
+  { aliases: ["@remix-run/"], category: "framework", name: "Remix" },
+  { aliases: ["astro"], category: "framework", name: "Astro" },
   { aliases: ["react"], category: "ui", name: "React" },
+  { aliases: ["@adonisjs/"], category: "framework", name: "AdonisJS" },
+  { aliases: ["solid-js"], category: "ui", name: "SolidJS" },
+  { aliases: ["qwik"], category: "ui", name: "Qwik" },
+  { aliases: ["preact"], category: "ui", name: "Preact" },
+  { aliases: ["alpinejs"], category: "ui", name: "Alpine.js" },
   { aliases: ["vue"], category: "ui", name: "Vue" },
   { aliases: ["svelte"], category: "ui", name: "Svelte" },
+
+  // --- PYTHON ECOSYSTEM ---
   { aliases: ["fastapi"], category: "framework", name: "FastAPI" },
   { aliases: ["flask"], category: "framework", name: "Flask" },
-  { aliases: ["django"], category: "framework", name: "Django" },
+  { aliases: ["django", "django-rest-framework"], category: "framework", name: "Django" },
+  { aliases: ["tornado"], category: "framework", name: "Tornado" },
+  { aliases: ["pyramid"], category: "framework", name: "Pyramid" },
+  { aliases: ["masonite"], category: "framework", name: "Masonite" },
+
+  // --- GO ECOSYSTEM ---
   { aliases: ["gin-gonic/gin", "github.com/gin-gonic/gin"], category: "framework", name: "Gin" },
   {
     aliases: ["gorilla/mux", "github.com/gorilla/mux"],
     category: "framework",
     name: "Gorilla Mux",
   },
+  { aliases: ["labstack/echo", "github.com/labstack/echo"], category: "framework", name: "Echo" },
+  { aliases: ["gofiber/fiber", "github.com/gofiber/fiber"], category: "framework", name: "Fiber" },
+  { aliases: ["beego", "github.com/beego/beego"], category: "framework", name: "Beego" },
+  { aliases: ["revel", "github.com/revel/revel"], category: "framework", name: "Revel" },
+
+  // --- RUST ECOSYSTEM ---
   { aliases: ["actix-web"], category: "framework", name: "Actix Web" },
   { aliases: ["axum"], category: "framework", name: "Axum" },
+  { aliases: ["rocket"], category: "framework", name: "Rocket" },
+  { aliases: ["warp"], category: "framework", name: "Warp" },
+  { aliases: ["leptos"], category: "framework", name: "Leptos" },
+  { aliases: ["poise"], category: "framework", name: "Poise" },
+
+  // --- JAVA / KOTLIN ECOSYSTEM ---
   {
     aliases: ["spring-boot", "spring-boot-starter", "springframework"],
     category: "framework",
     name: "Spring Boot",
   },
-  { aliases: ["laravel/framework"], category: "framework", name: "Laravel" },
-  { aliases: ["symfony"], category: "framework", name: "Symfony" },
-  { aliases: ["microsoft.aspnetcore"], category: "framework", name: "ASP.NET Core" },
+  { aliases: ["io.quarkus", "quarkus"], category: "framework", name: "Quarkus" },
+  { aliases: ["io.micronaut", "micronaut"], category: "framework", name: "Micronaut" },
+  {
+    aliases: ["playframework", "com.typesafe.play"],
+    category: "framework",
+    name: "Play Framework",
+  },
+  { aliases: ["ktor", "io.ktor"], category: "framework", name: "Ktor" },
+
+  // --- PHP ECOSYSTEM ---
+  { aliases: ["laravel/framework", "laravel/laravel"], category: "framework", name: "Laravel" },
+  {
+    aliases: ["symfony/symfony", "symfony/framework-bundle"],
+    category: "framework",
+    name: "Symfony",
+  },
+  { aliases: ["yiisoft/yii2"], category: "framework", name: "Yii2" },
+  { aliases: ["codeigniter4/framework"], category: "framework", name: "CodeIgniter" },
+  { aliases: ["cakephp/cakephp"], category: "framework", name: "CakePHP" },
+
+  // --- .NET / C# ---
+  {
+    aliases: ["microsoft.aspnetcore", "microsoft.extensions.hosting"],
+    category: "framework",
+    name: "ASP.NET Core",
+  },
+  { aliases: ["microsoft.entityframeworkcore"], category: "orm", name: "Entity Framework" },
+
+  // --- MOBILE ---
+  { aliases: ["react-native"], category: "framework", name: "React Native" },
+  { aliases: ["flutter", "io.flutter"], category: "framework", name: "Flutter" },
+  { aliases: ["@ionic/core", "@ionic/react"], category: "framework", name: "Ionic" },
+  { aliases: ["nativescript"], category: "framework", name: "NativeScript" },
+
+  // --- API / COMMUNICATION ---
   { aliases: ["@trpc/", "trpc"], category: "api", name: "tRPC" },
   { aliases: ["graphql", "@apollo/", "apollo-server"], category: "api", name: "GraphQL" },
   { aliases: ["openapi", "swagger"], category: "api", name: "OpenAPI" },
+  { aliases: ["grpc", "@grpc/grpc-js", "google.golang.org/grpc"], category: "api", name: "gRPC" },
+
+  // --- ORM & DATABASE ---
   { aliases: ["prisma"], category: "orm", name: "Prisma" },
   { aliases: ["typeorm"], category: "orm", name: "TypeORM" },
   { aliases: ["sequelize"], category: "orm", name: "Sequelize" },
   { aliases: ["mongoose"], category: "orm", name: "Mongoose" },
   { aliases: ["drizzle-orm"], category: "orm", name: "Drizzle" },
   { aliases: ["sqlalchemy"], category: "orm", name: "SQLAlchemy" },
-  { aliases: ["microsoft.entityframeworkcore"], category: "orm", name: "Entity Framework" },
+  { aliases: ["tortoise-orm"], category: "orm", name: "Tortoise ORM" },
+  { aliases: ["gorm.io/gorm", "github.com/jinzhu/gorm"], category: "orm", name: "GORM" },
+  { aliases: ["diesel"], category: "orm", name: "Diesel" },
   { aliases: ["redis", "ioredis"], category: "database", name: "Redis" },
   { aliases: ["pg", "postgres", "postgresql"], category: "database", name: "PostgreSQL" },
   { aliases: ["mysql", "mysql2"], category: "database", name: "MySQL" },
   { aliases: ["mongodb", "mongo"], category: "database", name: "MongoDB" },
-  { aliases: ["docker"], category: "infrastructure", name: "Docker" },
-  { aliases: ["terraform"], category: "infrastructure", name: "Terraform" },
-  { aliases: ["kubernetes", "k8s"], category: "infrastructure", name: "Kubernetes" },
-  { aliases: [".github/workflows", "github actions"], category: "tooling", name: "GitHub Actions" },
+  { aliases: ["sqlite", "sqlite3"], category: "database", name: "SQLite" },
+  { aliases: ["@supabase/supabase-js"], category: "database", name: "Supabase" },
+  { aliases: ["firebase-admin", "firebase-functions"], category: "database", name: "Firebase" },
+
+  // --- UI / STYLING ---
   { aliases: ["tailwindcss"], category: "ui", name: "Tailwind CSS" },
-  { aliases: ["vitest", "pytest", "junit"], category: "testing", name: "Testing Frameworks" },
+  { aliases: ["@chakra-ui/react"], category: "ui", name: "Chakra UI" },
+  { aliases: ["@mui/material"], category: "ui", name: "Material UI" },
+  { aliases: ["styled-components"], category: "ui", name: "Styled Components" },
+  { aliases: ["bootstrap"], category: "ui", name: "Bootstrap" },
+  { aliases: ["sass", "scss"], category: "ui", name: "Sass" },
+
+  // --- INFRASTRUCTURE & TOOLING ---
+  { aliases: ["docker", "dockerfile"], category: "infrastructure", name: "Docker" },
+  { aliases: ["terraform"], category: "infrastructure", name: "Terraform" },
+  { aliases: ["kubernetes", "k8s", "helm"], category: "infrastructure", name: "Kubernetes" },
+  { aliases: ["ansible"], category: "infrastructure", name: "Ansible" },
+  { aliases: [".github/workflows", "github actions"], category: "tooling", name: "GitHub Actions" },
+  {
+    aliases: ["vitest", "jest", "pytest", "junit", "mocha", "cypress", "playwright"],
+    category: "testing",
+    name: "Testing Frameworks",
+  },
 ];
 
 function escapeRegExp(value: string) {

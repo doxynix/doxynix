@@ -31,6 +31,7 @@ export default defineConfig([
       "eslint.config.mjs",
       "postcss.config.mjs",
       "next.config.mjs",
+      ".dependency-cruiser.js",
       "coverage/**",
       "report/**",
       ".trigger/**",

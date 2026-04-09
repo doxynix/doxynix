@@ -188,7 +188,7 @@ module.exports = {
     //   path: '',
     // },
 
-    includeOnly: ["src/server"],
+    includeOnly: ["src"],
 
     // moduleSystems: ['cjs', 'es6'],
 
