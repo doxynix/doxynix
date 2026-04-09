@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { UpdateProfileSchema } from "@/shared/api/schemas/user";
 
-import { userService } from "@/server/services/user.service";
+import { userService } from "@/server/entities/user/api/user.service";
 import { UserSchema } from "@/generated/zod";
 
 import { OpenApiErrorResponses } from "../contracts";

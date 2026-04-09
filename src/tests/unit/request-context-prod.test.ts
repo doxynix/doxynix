@@ -18,7 +18,7 @@ describe("request-context getCountry in production", () => {
       IS_PROD: true,
     }));
 
-    const { getCountry } = await import("@/server/utils/request-context");
+    const { getCountry } = await import("@/server/shared/lib/request-context");
 
     expect(getCountry(createRequest())).toBe("UNKNOWN");
   });

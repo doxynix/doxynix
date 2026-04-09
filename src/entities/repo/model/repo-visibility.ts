@@ -1,6 +1,6 @@
 import { Lock, Unlock, type LucideIcon } from "lucide-react";
 
-import type { RepoVisibility } from "@/shared/api/trpc";
+import type { RepoVisibility } from "@/shared/types/repo.types";
 
 export const repoVisibilityConfig: Record<
   RepoVisibility,

@@ -2,7 +2,38 @@
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": ["src"],
   "entryPointStrategy": "expand",
-  "out": "public/tech-docs",
-  "exclude": ["**/*.test.ts", "**/*.spec.ts", "**/node_modules/**", "**/.next/**"],
-  "skipErrorChecking": true
+  "out": "public/docs",
+
+  "hideGenerator": true,
+  "includeVersion": true,
+
+  "publicPath": "/docs/",
+
+  "plugin": [
+    "typedoc-plugin-markdown",
+    "typedoc-plugin-zod",
+    "typedoc-plugin-extras",
+    "typedoc-plugin-rename-defaults",
+    "@boneskull/typedoc-plugin-mermaid",
+    "@to-skills/typedoc"
+  ],
+  "hideBreadcrumbs": true,
+  "hidePageTitle": false,
+  "entryFileName": "INDEX_FOR_AI.md",
+  "useCodeBlocks": true,
+
+  "llmsTxt": true,
+  "llmsTxtOutDir": "/docs/llms",
+  "skillsOutDir": "/docs/skills",
+  "skillsIncludeExamples": true,
+  "skillsIncludeSignatures": true,
+  "skillsMaxTokens": 8000,
+
+  "exclude": ["**/*.test.ts", "**/*.spec.ts", "**/generated/**", "**/node_modules/**"],
+  "excludeInternal": true,
+  "excludePrivate": true,
+
+  "skipErrorChecking": true,
+  "cleanOutputDir": true,
+  "name": "Doxynix"
 }

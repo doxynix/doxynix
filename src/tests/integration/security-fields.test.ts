@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { prisma } from "@/server/infrastructure/db";
+import { prisma } from "@/server/shared/infrastructure/db";
 
 import { cleanupDatabase, createAnon, createTestUser, expectDenied } from "../helpers";
 

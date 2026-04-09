@@ -1,4 +1,4 @@
-import type { RepoVisibility } from "../api/trpc";
+export type RepoVisibility = "PRIVATE" | "PUBLIC";
 
 export type RepoItemFields = {
   description: string | null;
