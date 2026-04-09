@@ -75,23 +75,13 @@ export function getPublicClient(token?: string): OctokitInstance {
 }
 
 export function getSystemClient(): OctokitInstance {
-  return new MyOctokit({
-    ...getCommonConfig(),
-    auth: {
-      appId: Number(GITHUB_APP_ID),
-      installationId: Number(GITHUB_SYSTEM_INSTALLATION_ID),
-      privateKey: GITHUB_APP_PRIVATE_KEY,
-    },
-    authStrategy: createAppAuth,
-  }) as OctokitInstance;
+  return getInstallationClient(Number(GITHUB_SYSTEM_INSTALLATION_ID));
 }
 
 export function getUserClient(token: string): OctokitInstance {
-  return new MyOctokit({
-    ...getCommonConfig(),
-    auth: token,
-  }) as OctokitInstance;
+  return getPublicClient(token);
 }
+
 export class GitHubAuthRequiredError extends Error {
   constructor() {
     super(

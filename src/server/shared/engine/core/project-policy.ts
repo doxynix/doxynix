@@ -112,24 +112,19 @@ export const ProjectPolicy = {
     if (
       lowerParts[0] === "src" &&
       (lowerParts[1] === "main" || lowerParts[1] === "test") &&
-      lowerParts[2] != null &&
       PROJECT_POLICY_RULES.grouping.jvmSourceRoots.has(lowerParts[2])
     ) {
-      if (parts[3] == null || lowerParts[2] === "resources") return `src/${parts[1]}/${parts[2]}`;
+      if (lowerParts[2] === "resources") return `src/${parts[1]}/${parts[2]}`;
       return `src/${parts[1]}/${parts[2]}/${parts[3]}`;
     }
 
     if (lowerParts[0] === "src") {
-      if (parts[1] == null) return "src";
-      if (parts[2] == null) return `src/${parts[1]}`;
+      if (parts.length < 2) return "src";
+      if (parts.length < 3) return `src/${parts[1]}`;
       return `src/${parts[1]}/${parts[2]}`;
     }
 
-    if (
-      lowerParts[0] != null &&
-      PROJECT_POLICY_RULES.grouping.groupingRoots.has(lowerParts[0]) &&
-      parts[1] != null
-    ) {
+    if (PROJECT_POLICY_RULES.grouping.groupingRoots.has(lowerParts[0])) {
       return `${parts[0]}/${parts[1]}`;
     }
 
@@ -236,7 +231,7 @@ export const ProjectPolicy = {
     const kinds = new Set<ProjectPolicySemanticKind>();
 
     if (
-      options?.apiPaths?.has(normalized) ||
+      options?.apiPaths?.has(normalized) === true ||
       this.isApiPath(normalized) ||
       hasAnySegment(normalized, PROJECT_POLICY_RULES.semantics.apiSegments)
     ) {
@@ -415,7 +410,7 @@ export const ProjectPolicy = {
     ) {
       return true;
     }
-    return /(\.|-)(min)\.(js|cjs|mjs|css)$/iu.test(lower);
+    return /[.-](min)\.(js|cjs|mjs|css)$/iu.test(lower);
   },
 
   isPrimaryApiSurface(path: string) {

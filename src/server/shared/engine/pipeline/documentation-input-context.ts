@@ -96,12 +96,12 @@ function buildHotspots(evidence: RepositoryEvidence, metrics: RepoMetrics): Hots
     categories: signal.categories as HotspotInput["categories"],
     churnScore: signal.churnScore,
     complexity: signal.complexity,
-    confidence: signal.confidence ?? 85,
+    confidence: signal.confidence,
     inbound: signal.inbound,
     outbound: signal.outbound,
     path: signal.path,
     score: signal.score,
-    source: (signal.source ?? "risk-model") as HotspotSignal["source"],
+    source: signal.source as HotspotSignal["source"],
   }));
 }
 
