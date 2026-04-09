@@ -40,7 +40,7 @@ vi.mock("@prisma/client", () => ({
   },
 }));
 
-vi.mock("@/server/infrastructure/logger", () => ({
+vi.mock("@/server/shared/infrastructure/logger", () => ({
   logger: loggerState,
 }));
 

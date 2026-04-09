@@ -62,8 +62,8 @@ describe("FileClassifier", () => {
     });
 
     it("should return UI score for component folders", () => {
-      expect(getFileScore("src/features/repo/components/list.tsx")).toBe(60);
-      expect(getFileScore("src/features/repo/ui/list.tsx")).toBe(60);
+      expect(getFileScore("src/features/repo/components/list.tsx")).toBe(80);
+      expect(getFileScore("src/features/repo/ui/list.tsx")).toBe(80);
     });
 
     it("should return default score for regular source files", () => {
