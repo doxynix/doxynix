@@ -76,7 +76,7 @@
       "effect": "3.21.0",
       "handlebars": "4.7.9",
       "defu": "6.1.7",
-      "vite": "8.0.5",
+      "vite": "8.0.7",
       "basic-ftp": "5.2.1"
     },
     "onlyBuiltDependencies": [
