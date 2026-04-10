@@ -25,7 +25,7 @@ overrides:
   handlebars: 4.7.9
   defu: 6.1.7
   vite: 8.0.7
-  basic-ftp: 5.2.1
+  basic-ftp: 5.2.2
 
 importers:
 
@@ -6819,8 +6819,8 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  basic-ftp@5.2.1:
-    resolution: {integrity: sha512-0yaL8JdxTknKDILitVpfYfV2Ob6yb3udX/hK97M7I3jOeznBNxQPtVvTUtnhUkyHlxFWyr5Lvknmgzoc7jf+1Q==}
+  basic-ftp@5.2.2:
+    resolution: {integrity: sha512-1tDrzKsdCg70WGvbFss/ulVAxupNauGnOlgpyjKzeQxzyllBLS0CGLV7tjIXTK3ZQA9/FBEm9qyFFN1bciA6pw==}
     engines: {node: '>=10.0.0'}
 
   bcryptjs@2.4.3:
@@ -6878,11 +6878,6 @@ packages:
 
   browser-image-compression@2.0.2:
     resolution: {integrity: sha512-pBLlQyUf6yB8SmmngrcOw3EoS4RpQ1BcylI3T9Yqn7+4nrQTXJD4sJDe5ODnJdrvNMaio5OicFo75rDyJD2Ucw==}
-
-  browserslist@4.28.1:
-    resolution: {integrity: sha512-ZC5Bd0LgJXgwGqUknZY/vkUQ04r8NXnJZ3yYi4vDmSiZmC/pdSN0NbNRPxZpbtO4uAfDUAFffO8IZoM3Gj8IkA==}
-    engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
-    hasBin: true
 
   browserslist@4.28.2:
     resolution: {integrity: sha512-48xSriZYYg+8qXna9kwqjIVzuQxi+KYWp2+5nCYnYKPTr0LvD89Jqk2Or5ogxz0NUMfIjhh2lIUX/LyX9B4oIg==}
@@ -7913,9 +7908,6 @@ packages:
 
   effect@3.21.0:
     resolution: {integrity: sha512-PPN80qRokCd1f015IANNhrwOnLO7GrrMQfk4/lnZRE/8j7UPWrNNjPV0uBrZutI/nHzernbW+J0hdqQysHiSnQ==}
-
-  electron-to-chromium@1.5.325:
-    resolution: {integrity: sha512-PwfIw7WQSt3xX7yOf5OE/unLzsK9CaN2f/FvV3WjPR1Knoc1T9vePRVV4W1EM301JzzysK51K7FNKcusCr0zYA==}
 
   electron-to-chromium@1.5.334:
     resolution: {integrity: sha512-mgjZAz7Jyx1SRCwEpy9wefDS7GvNPazLthHg8eQMJ76wBdGQQDW33TCrUTvQ4wzpmOrv2zrFoD3oNufMdyMpog==}
@@ -10644,9 +10636,6 @@ packages:
   node-mock-http@1.0.4:
     resolution: {integrity: sha512-8DY+kFsDkNXy1sJglUfuODx1/opAGJGyrTuFqEoN90oRc2Vk0ZbD4K2qmKXBBEhZQzdKHIVfEJpDU8Ak2NJEvQ==}
 
-  node-releases@2.0.36:
-    resolution: {integrity: sha512-TdC8FSgHz8Mwtw9g5L4gR/Sh9XhSP/0DEkQxfEFXOpiul5IiHgHan2VhYYb6agDSfp4KuvltmGApc8HMgUrIkA==}
-
   node-releases@2.0.37:
     resolution: {integrity: sha512-1h5gKZCF+pO/o3Iqt5Jp7wc9rH3eJJ0+nh/CIoiRwjRxde/hAHyLPXYN4V3CqKAbiZPSeJFSWHmJsbkicta0Eg==}
 
@@ -11216,10 +11205,6 @@ packages:
 
   postcss@8.4.31:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
-    engines: {node: ^10 || ^12 || >=14}
-
-  postcss@8.5.8:
-    resolution: {integrity: sha512-OW/rX8O/jXnm82Ey1k44pObPtdblfiuWnrd8X7GJ7emImCOstunGbXUpp7HdBrFQX6rJzn3sPT397Wp5aCwCHg==}
     engines: {node: ^10 || ^12 || >=14}
 
   postcss@8.5.9:
@@ -12648,10 +12633,6 @@ packages:
     resolution: {integrity: sha512-u9r3uZC0bdpGOXtlxUIdwf9pkmvhqJdrVCH9fapQtgy/OeTTMZ1nqH7agtvEfmGui6e1XxjcdrlxvxJvc3sMqw==}
     engines: {node: '>=18'}
 
-  tinyglobby@0.2.15:
-    resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
-    engines: {node: '>=12.0.0'}
-
   tinyglobby@0.2.16:
     resolution: {integrity: sha512-pn99VhoACYR8nFHhxqix+uvsbXineAasWm5ojXoN8xEwK5Kd3/TrhNn1wByuD52UxWRLy8pu+kRMniEi6Eq9Zg==}
     engines: {node: '>=12.0.0'}
@@ -13837,7 +13818,7 @@ snapshots:
     dependencies:
       '@babel/compat-data': 7.29.0
       '@babel/helper-validator-option': 7.27.1
-      browserslist: 4.28.1
+      browserslist: 4.28.2
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -18990,7 +18971,7 @@ snapshots:
       '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.2.2
       '@tailwindcss/oxide': 4.2.2
-      postcss: 8.5.8
+      postcss: 8.5.9
       tailwindcss: 4.2.2
 
   '@tailwindcss/typography@0.5.19(tailwindcss@4.2.2)':
@@ -19087,7 +19068,7 @@ snapshots:
       mlly: 1.8.2
       pkg-types: 1.3.1
       resolve: 1.22.11
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.16
       tsconfck: 3.1.3(typescript@6.0.2)
     transitivePeerDependencies:
       - bufferutil
@@ -19638,7 +19619,7 @@ snapshots:
       debug: 4.4.3
       minimatch: 10.2.5
       semver: 7.7.4
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.16
       ts-api-utils: 2.5.0(typescript@6.0.2)
       typescript: 6.0.2
     transitivePeerDependencies:
@@ -19653,7 +19634,7 @@ snapshots:
       debug: 4.4.3
       minimatch: 10.2.5
       semver: 7.7.4
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.16
       ts-api-utils: 2.5.0(typescript@6.0.2)
       typescript: 6.0.2
     transitivePeerDependencies:
@@ -20658,7 +20639,7 @@ snapshots:
 
   baseline-browser-mapping@2.10.17: {}
 
-  basic-ftp@5.2.1: {}
+  basic-ftp@5.2.2: {}
 
   bcryptjs@2.4.3: {}
 
@@ -20726,14 +20707,6 @@ snapshots:
   browser-image-compression@2.0.2:
     dependencies:
       uzip: 0.20201231.0
-
-  browserslist@4.28.1:
-    dependencies:
-      baseline-browser-mapping: 2.10.17
-      caniuse-lite: 1.0.30001787
-      electron-to-chromium: 1.5.325
-      node-releases: 2.0.36
-      update-browserslist-db: 1.2.3(browserslist@4.28.1)
 
   browserslist@4.28.2:
     dependencies:
@@ -21242,7 +21215,7 @@ snapshots:
 
   core-js-compat@3.49.0:
     dependencies:
-      browserslist: 4.28.1
+      browserslist: 4.28.2
 
   core-js@3.49.0: {}
 
@@ -21398,7 +21371,7 @@ snapshots:
       fast-json-stable-stringify: 2.1.0
       flatted: 3.4.2
       semver: 7.7.4
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.16
 
   cssesc@3.0.0: {}
 
@@ -21852,8 +21825,6 @@ snapshots:
       '@standard-schema/spec': 1.1.0
       fast-check: 3.23.2
 
-  electron-to-chromium@1.5.325: {}
-
   electron-to-chromium@1.5.334: {}
 
   emoji-regex@10.6.0: {}
@@ -22132,7 +22103,7 @@ snapshots:
       get-tsconfig: 4.13.7
       is-bun-module: 2.0.0
       stable-hash: 0.0.5
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.16
       unrs-resolver: 1.11.1
     optionalDependencies:
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.58.0(eslint@9.39.4(jiti@1.21.7))(typescript@6.0.2))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@1.21.7))
@@ -22869,7 +22840,7 @@ snapshots:
 
   get-uri@6.0.5:
     dependencies:
-      basic-ftp: 5.2.1
+      basic-ftp: 5.2.2
       data-uri-to-buffer: 6.0.2
       debug: 4.4.3
     transitivePeerDependencies:
@@ -25183,8 +25154,6 @@ snapshots:
 
   node-mock-http@1.0.4: {}
 
-  node-releases@2.0.36: {}
-
   node-releases@2.0.37: {}
 
   node-sarif-builder@3.4.0:
@@ -25801,12 +25770,6 @@ snapshots:
   postcss-value-parser@4.2.0: {}
 
   postcss@8.4.31:
-    dependencies:
-      nanoid: 3.3.11
-      picocolors: 1.1.1
-      source-map-js: 1.2.1
-
-  postcss@8.5.8:
     dependencies:
       nanoid: 3.3.11
       picocolors: 1.1.1
@@ -27376,7 +27339,7 @@ snapshots:
       lines-and-columns: 1.2.4
       mz: 2.7.0
       pirates: 4.0.7
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.16
       ts-interface-checker: 0.1.13
 
   super-regex@1.1.0:
@@ -27626,11 +27589,6 @@ snapshots:
   tinyexec@0.3.2: {}
 
   tinyexec@1.0.4: {}
-
-  tinyglobby@0.2.15:
-    dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
 
   tinyglobby@0.2.16:
     dependencies:
@@ -28035,12 +27993,6 @@ snapshots:
       '@unrs/resolver-binding-win32-ia32-msvc': 1.11.1
       '@unrs/resolver-binding-win32-x64-msvc': 1.11.1
 
-  update-browserslist-db@1.2.3(browserslist@4.28.1):
-    dependencies:
-      browserslist: 4.28.1
-      escalade: 3.2.0
-      picocolors: 1.1.1
-
   update-browserslist-db@1.2.3(browserslist@4.28.2):
     dependencies:
       browserslist: 4.28.2
@@ -28211,7 +28163,7 @@ snapshots:
       std-env: 4.0.0
       tinybench: 2.9.0
       tinyexec: 1.0.4
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.16
       tinyrainbow: 3.1.0
       vite: 8.0.7(@types/node@25.5.2)(esbuild@0.27.4)(jiti@1.21.7)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
       why-is-node-running: 2.3.0
