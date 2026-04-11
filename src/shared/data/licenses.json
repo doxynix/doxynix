@@ -1480,6 +1480,17 @@
     ]
   },
   {
+    "author": "Kieler",
+    "avatar": "https://github.com/kieler.png?size=96",
+    "authorLink": "https://github.com/kieler",
+    "packages": [
+      {
+        "name": "elkjs",
+        "license": "EPL-2.0"
+      }
+    ]
+  },
+  {
     "author": "lint-staged",
     "avatar": "https://github.com/lint-staged.png?size=96",
     "authorLink": "https://github.com/lint-staged",
@@ -1711,6 +1722,17 @@
     ]
   },
   {
+    "author": "Qq15725",
+    "avatar": "https://github.com/qq15725.png?size=96",
+    "authorLink": "https://github.com/qq15725",
+    "packages": [
+      {
+        "name": "modern-screenshot",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Recharts",
     "avatar": "https://github.com/recharts.png?size=96",
     "authorLink": "https://github.com/recharts",
@@ -1850,6 +1872,17 @@
       {
         "name": "knip",
         "license": "ISC"
+      }
+    ]
+  },
+  {
+    "author": "Xyflow",
+    "avatar": "https://github.com/xyflow.png?size=96",
+    "authorLink": "https://github.com/xyflow",
+    "packages": [
+      {
+        "name": "@xyflow/react",
+        "license": "MIT"
       }
     ]
   },

@@ -127,22 +127,23 @@ export function AppCommandMenu() {
 
   return (
     <>
-      <Button
-        variant="outline"
-        aria-label="Search site"
-        onClick={() => setOpen(true)}
-        className={cn(
-          "text-muted-foreground lg:border-border/70 lg:bg-surface-hover/70 relative size-9 justify-start rounded-xl text-sm font-normal not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12"
-        )}
-      >
-        <AppTooltip content="Search site" className="lg:hidden">
+      <AppTooltip content="Search site" className="lg:hidden">
+        <Button
+          variant="outline"
+          aria-label="Search site"
+          onClick={() => setOpen(true)}
+          className={cn(
+            "text-muted-foreground lg:border-border/70 lg:bg-surface-hover/70 relative size-9 justify-start rounded-xl text-sm font-normal not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12"
+          )}
+        >
           <Search className="absolute top-2.25 left-2.25" />
-        </AppTooltip>
-        <span className="hidden lg:inline-flex lg:pl-4">{t("command_search")}</span>
-        <CommandShortcut className="absolute top-1.5 right-3 hidden text-xs lg:flex">
-          Ctrl+K
-        </CommandShortcut>
-      </Button>
+
+          <span className="hidden lg:inline-flex lg:pl-4">{t("command_search")}</span>
+          <CommandShortcut className="absolute top-1.5 right-3 hidden text-xs lg:flex">
+            Ctrl+K
+          </CommandShortcut>
+        </Button>
+      </AppTooltip>
 
       <CommandDialog open={open} shouldFilter={false} onOpenChange={setOpen}>
         <CommandInput

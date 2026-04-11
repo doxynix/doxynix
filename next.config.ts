@@ -217,7 +217,7 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
-  reactCompiler: IS_PROD, // аккуратно фича еще в бете (пока багов не обнаружено - 20.01.2026)
+  reactCompiler: true,
   // cacheComponents: true, // если будут баги выключить (// NOTE: обнаружен баг №418 с гидратацией выяснено что приходится оборачивать каждый чих в suspense так еще и юзать везде 'use cache' директиву ибо теперь кеширование руками надо делать слишком много переписывать пока PPR отложен на неопределенный срок)
   reactStrictMode: true,
   async redirects() {

@@ -12,6 +12,7 @@ import {
   Home,
   KeyRound,
   LayoutGrid,
+  Map,
   ScanSearch,
   Settings,
   SquareTerminal,
@@ -163,6 +164,12 @@ export const getRepoDetailsMenu = (owner: string, name: string): MenuItems => {
       icon: ScanSearch,
       id: "analyze",
       label: "Analyze",
+    },
+    {
+      href: `${base}/map`,
+      icon: Map,
+      id: "map",
+      label: "Map",
     },
     {
       href: `${base}/code`,

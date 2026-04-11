@@ -1,31 +1,74 @@
+import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { useCreateRepoActions } from "@/entities/repo";
 
-export function useActionsHotkeys() {
+const PREFIXES = ["c"];
+
+export function useGlobalActionsHotkeys(onAction?: () => void) {
   const { setOpen } = useCreateRepoActions();
+  const [prefix, setPrefix] = useState<string | null>(null);
 
-  const hotkeyActions: Record<string, () => void> = {
-    "c>n": () => setOpen(true),
-    // сюда добавляются новые действия
-  };
+  useEffect(() => {
+    if (prefix == null) return;
 
-  const hotkeys = Object.keys(hotkeyActions);
+    const timer = setTimeout(() => {
+      setPrefix(null);
+    }, 1500);
 
-  return useHotkeys(
-    hotkeys,
-    (e, handler) => {
-      const actionKey = handler.hotkey;
-      const action = hotkeyActions[actionKey];
+    return () => clearTimeout(timer);
+  }, [prefix]);
 
-      e.preventDefault();
-      action();
+  useHotkeys(
+    PREFIXES.join(","),
+    (_, handler) => {
+      setPrefix(handler.hotkey);
     },
     {
+      enabled: prefix == null,
       enableOnFormTags: false,
       preventDefault: true,
-      sequenceTimeoutMs: 1500,
     },
-    [hotkeyActions]
+    [prefix]
+  );
+
+  useHotkeys(
+    "*",
+    (e) => {
+      if (prefix == null) return;
+
+      const code = e.code;
+      let secondKey: string | null = null;
+
+      if (code.startsWith("Key")) {
+        secondKey = code.slice(3).toLowerCase();
+      }
+
+      if (secondKey == null) {
+        setPrefix(null);
+        return;
+      }
+
+      const actions: Record<string, Record<string, () => void>> = {
+        c: {
+          r: () => {
+            setTimeout(() => setOpen(true), 10);
+          },
+        },
+      };
+
+      const action = actions[prefix][secondKey];
+
+      e.stopPropagation();
+      onAction?.();
+      action();
+
+      setPrefix(null);
+    },
+    {
+      enabled: prefix != null,
+      enableOnFormTags: false,
+      preventDefault: true,
+    }
   );
 }
