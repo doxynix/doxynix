@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.25.0](https://github.com/doxynix/doxynix/compare/v1.24.9...v1.25.0) (2026-04-11)
+
+
+### Features
+
+* **features:** добавлена новая фича "карта репозитория"  ([#1032](https://github.com/doxynix/doxynix/issues/1032)) ([fb651ec](https://github.com/doxynix/doxynix/commit/fb651ec825180b0a145c58f9183fe5a0fae38593))
+
 ## [1.24.9](https://github.com/doxynix/doxynix/compare/v1.24.8...v1.24.9) (2026-04-11)
 
 
