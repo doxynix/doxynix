@@ -57,3 +57,17 @@ export type FileMeta = RouterOutput["githubBrowse"]["getFileContent"]["meta"];
 export type RepoMetricsItem = RouterOutput["repoDetails"]["getDetailedMetrics"];
 
 export type AvailableDocs = RouterOutput["repoDetails"]["getAvailableDocs"];
+
+export type RepoMapType = RouterOutput["repoDetails"]["getStructureMap"];
+
+export type InteractiveBrief = RouterOutput["repoDetails"]["getInteractiveBrief"];
+
+export type NodeType = RouterOutput["repoDetails"]["getStructureNode"];
+
+export type MapNodeData = NonNullable<RepoMapType>["graph"]["nodes"][number];
+
+export type MapEdgeData = NonNullable<RepoMapType>["graph"]["edges"][number];
+
+export type RepoMapDisplayData = NonNullable<RepoMapType> | NonNullable<NodeType>;
+
+export type NodeBrief = NonNullable<RouterOutput["repoDetails"]["getInteractiveBriefNode"]>;

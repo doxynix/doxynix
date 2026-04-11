@@ -11,6 +11,7 @@ import { AppTooltip } from "./app-tooltip";
 type CopyButtonProps = {
   className?: string;
   successText?: string;
+  tooltipSide?: "top" | "right" | "left" | "bottom";
   tooltipText?: string;
   value: string;
 };
@@ -18,6 +19,7 @@ type CopyButtonProps = {
 export function CopyButton({
   className,
   successText = "Copied!",
+  tooltipSide,
   tooltipText = "Copy ID",
   value,
 }: Readonly<CopyButtonProps>) {
@@ -30,7 +32,11 @@ export function CopyButton({
   };
 
   return (
-    <AppTooltip content={isCopied ? successText : tooltipText} open={isCopied ? true : undefined}>
+    <AppTooltip
+      content={isCopied ? successText : tooltipText}
+      open={isCopied ? true : undefined}
+      side={tooltipSide}
+    >
       <Button
         type="button"
         size="icon"
