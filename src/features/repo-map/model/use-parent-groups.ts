@@ -40,7 +40,7 @@ export function enrichNodesWithParents(
   parents: ParentNodeConfig[]
 ): Node<RepoMapNodeData>[] {
   const createParentNode = (parent: ParentNodeConfig): Node<RepoMapNodeData> => {
-    const baseData = nodes[0]?.data;
+    const baseData = nodes.find((node) => parent.children.includes(node.id))?.data;
     return {
       data: {
         ...baseData,

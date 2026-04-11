@@ -60,7 +60,7 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
       knownNodeType === "file" ||
       (!knownNodeType && nextId.split("/").pop()?.includes("."));
 
-    if (isFile != null) {
+    if (isFile === true) {
       const formattedId = nextId.startsWith("file:") ? nextId : `file:${nextId}`;
       void setSelectedId(formattedId);
 
@@ -88,8 +88,10 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
   React.useEffect(() => {
     if (currentData != null) {
       setDisplayData(currentData);
+    } else if (!isFetching && currentData === null) {
+      setDisplayData(null);
     }
-  }, [currentData]);
+  }, [currentData, isFetching]);
 
   if (displayData == null && isFetching) {
     return <Skeleton className="h-180 w-full" />;
