@@ -8,7 +8,10 @@
     "**/.next/**",
     "**/dist/**",
     "**/*.d.ts",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "**/src/shared/ui/icons",
+    "**/src/shared/ui/visuals",
+    "**/src/shared/ui/core"
   ],
   "format": ["typescript", "tsx"],
   "pattern": "**/*.{ts,tsx}"
