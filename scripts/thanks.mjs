@@ -55,6 +55,7 @@ const MAPPINGS = [
   { prefix: "tailwind-merge", name: "Dany Castillo", gh: "dcastil" },
   { prefix: "tw-animate-css", name: "Luca", gh: "Wombosvideo" },
   { prefix: "clsx", name: "Luke Edwards", gh: "lukeed" },
+  { prefix: "@xyflow", name: "Xyflow", gh: "xyflow" },
 
   // Prisma & Databases
   { prefix: "prisma-dbml-generator", name: "Notiz", gh: "notiz-dev" },
