@@ -14,11 +14,17 @@ export function extractParentGroups(nodes: Node<RepoMapNodeData>[]): ParentNodeC
   nodes.forEach((node) => {
     const parts = node.id.split(":");
     if (parts[0] === "group" && parts.length >= 2) {
-      const parentId = parts[1];
-      if (!parentMap.has(parentId)) {
-        parentMap.set(parentId, new Set());
+      const groupPath = parts.slice(1).join(":");
+      const parentPath = groupPath.split("/").slice(0, -1).join("/");
+
+      let childrenSet = parentMap.get(parentPath);
+
+      if (childrenSet == null) {
+        childrenSet = new Set<string>();
+        parentMap.set(parentPath, childrenSet);
       }
-      parentMap.get(parentId)!.add(node.id);
+
+      childrenSet.add(node.id);
     }
   });
 
@@ -53,12 +59,15 @@ export function enrichNodesWithParents(
   };
 
   const parentNodes = parents.map(createParentNode);
+  const childToParent = new Map<string, string>();
+  parents.forEach((p) => {
+    p.children.forEach((childId) => childToParent.set(childId, p.id));
+  });
 
   const enrichedNodes = nodes.map((node) => {
-    const parentId = parents.find((p) => p.children.includes(node.id))?.id;
     return {
       ...node,
-      parentId,
+      parentId: childToParent.get(node.id),
     };
   });
 

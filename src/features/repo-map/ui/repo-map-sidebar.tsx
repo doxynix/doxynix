@@ -14,19 +14,20 @@ type Props = {
 };
 
 export function RepoMapSidebar({ nodeId, onClose, onNavigate, repoId }: Readonly<Props>) {
-  const { data: briefData } = trpc.repoDetails.getInteractiveBrief.useQuery({ repoId });
+  const { data: briefData, isLoading: isBriefLoading } =
+    trpc.repoDetails.getInteractiveBrief.useQuery({ repoId });
 
-  const { data: nodeBrief, isLoading } = trpc.repoDetails.getInteractiveBriefNode.useQuery(
+  const { data: nodeBrief } = trpc.repoDetails.getInteractiveBriefNode.useQuery(
     { nodeId: nodeId ?? "", repoId },
     { enabled: nodeId != null }
   );
 
   return (
     <aside className="bg-card flex h-full flex-col overflow-hidden">
-      {nodeId == null && briefData != null ? (
-        <RepoMapOverview brief={briefData} onNavigate={onNavigate} />
-      ) : isLoading ? (
+      {nodeId == null && isBriefLoading ? (
         <RepoMapSidebarSkeleton />
+      ) : nodeId == null && briefData != null ? (
+        <RepoMapOverview brief={briefData} onNavigate={onNavigate} />
       ) : nodeBrief != null ? (
         <RepoNodeInspector data={nodeBrief} onClose={onClose} onNavigate={onNavigate} />
       ) : null}

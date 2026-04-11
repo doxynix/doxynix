@@ -1,3 +1,5 @@
+"use client";
+
 import { FileIcon, FileText, GitCommit, Layers } from "lucide-react";
 
 import type { InteractiveBrief } from "@/shared/api/trpc";

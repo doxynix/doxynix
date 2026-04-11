@@ -161,6 +161,8 @@ export function useMapLayout(data: RepoMapDisplayData) {
       } catch (err) {
         if (!cancelled) {
           console.error("ELK Layout Error:", err);
+          setNodes(layoutNodes);
+          setEdges(layoutEdges.filter((e) => nodeIds.has(e.source) && nodeIds.has(e.target)));
           setLayoutReady(true);
         }
       }

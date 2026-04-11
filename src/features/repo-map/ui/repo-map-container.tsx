@@ -50,14 +50,23 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
       return;
     }
 
-    const isFile = nextId.startsWith("file:") || nextId.split("/").pop()?.includes(".");
+    const knownNodeType =
+      displayData != null && "children" in displayData
+        ? displayData.children.find((c) => c.id === nextId || c.path === nextId)?.nodeType
+        : null;
 
-    if (isFile === true) {
+    const isFile =
+      nextId.startsWith("file:") ||
+      knownNodeType === "file" ||
+      (!knownNodeType && nextId.split("/").pop()?.includes("."));
+
+    if (isFile != null) {
       const formattedId = nextId.startsWith("file:") ? nextId : `file:${nextId}`;
       void setSelectedId(formattedId);
 
-      const path = formattedId.split(":")[1];
+      const path = formattedId.split(":")[1] ?? "";
       const segments = path.split("/");
+
       if (segments.length > 1) {
         const parentFolder = `group:${segments.slice(0, -1).join("/")}`;
         if (viewId !== parentFolder) {

@@ -69,9 +69,9 @@ export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props
             scale: 2,
 
             style: {
-              height: String(height),
+              height: `${height}px`,
               transform: `translate(${-nodesBounds.x + padding}px, ${-nodesBounds.y + padding}px) scale(1)`,
-              width: String(width),
+              width: `${width}px`,
             },
 
             width,

@@ -39,13 +39,12 @@ pnpm secretlint
 
 # 4. Architecture: verify FSD boundaries
 pnpm arch:check
-Step 4: Final Checklist
+```
+## Step 4: Final Checklist
 
-Code strictly follows FSD rules.
-
-No hardcoded secrets.
-
-pnpm typecheck and pnpm arch:check passed with 0 errors.
+- [ ] Code strictly follows FSD rules.
+- [ ] No hardcoded secrets.
+- [ ] `pnpm typecheck` and `pnpm arch:check` passed with 0 errors.
 
 
 ---
@@ -61,21 +60,21 @@ Whenever you need to change the database schema or add models:
 2. After editing, generate the client and APIs:
 ```bash
 pnpm db:generate
+```
 If applying to local DB, run:
-
+```bash
 pnpm db:migrate
+```
 
 Verify data via pnpm db:studio.
 
-Skill 2: Writing & Running Tests
+## Skill 2: Writing & Running Tests
 
 When adding new features or fixing bugs, run the appropriate test suite:
 
-Unit tests: pnpm test:unit
-
-Integration tests: pnpm test:int
-
-E2E (Playwright): pnpm test:e2e
+- Unit tests: `pnpm test:unit`
+- Integration tests: `pnpm test:int`
+- E2E (Playwright): `pnpm test:e2e`
 
 Rule: Keep the whole test suite green. If tests fail, fix them before proceeding.
 

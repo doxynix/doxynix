@@ -43,7 +43,7 @@ export default defineConfig({
       }),
     ],
   },
-  dirs: ["./src/server"],
+  dirs: ["./src/server/**/task"],
   logLevel: "log",
   maxDuration: 1000000,
 

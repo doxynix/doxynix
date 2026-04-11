@@ -173,7 +173,7 @@ export function buildInspectPayload(params: {
     configHints: unique(params.entry.configPaths).slice(0, 5),
     dependsOn: unique(params.outgoing),
     entrypointReason:
-      params.entry.entrypointDetails[0].reason != null
+      params.entry.entrypointDetails.length > 0
         ? (params.entry.entrypointDetails[0].reason ?? null)
         : null,
     factTitles: unique(params.entry.factTitles).slice(0, 5),

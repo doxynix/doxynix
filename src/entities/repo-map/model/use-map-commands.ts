@@ -8,7 +8,12 @@ export function useMapCommands() {
       void fitView({ duration: 400, padding: 0.1 });
     },
     focusSelected: () => {
-      const selectedNode = getNodes().find((n) => n.selected ?? false);
+      const nodes = getNodes();
+      const selectedIdFromQuery = new URLSearchParams(window.location.search).get("node");
+      const selectedNode =
+        nodes.find((n) => n.selected === true) ??
+        (selectedIdFromQuery != null ? nodes.find((n) => n.id === selectedIdFromQuery) : undefined);
+
       if (selectedNode) {
         void fitView({
           duration: 400,

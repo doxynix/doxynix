@@ -1,3 +1,5 @@
+"use client";
+
 import type { ComponentType } from "react";
 import { Panel } from "@xyflow/react";
 import { Eye, EyeOff, FocusIcon, Maximize, ZoomIn, ZoomOut } from "lucide-react";

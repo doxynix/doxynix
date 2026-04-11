@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Background,
   MiniMap,
@@ -89,8 +89,10 @@ function enrichRepoMapNodes(
 
   let filterAllowed: Set<string> | null = null;
   if (highlightKey && "filters" in data) {
-    const list = data.filters[highlightKey];
-    if (list.length) filterAllowed = new Set(list);
+    const list = data.filters[highlightKey as keyof typeof data.filters];
+    if (Array.isArray(list) && list.length > 0) {
+      filterAllowed = new Set(list);
+    }
   }
 
   return flowNodes.map((node) => {
@@ -145,11 +147,6 @@ export function RepoMap({
   const hide = useMapControlsHide();
 
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
-  const hoveredNodeIdRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    hoveredNodeIdRef.current = hoveredNodeId;
-  }, [hoveredNodeId]);
 
   const viewKey = activeNodeId ?? "root";
   const rawEdges = "graph" in data ? data.graph.edges : data.edges;
