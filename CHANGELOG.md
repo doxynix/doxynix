@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.25.1](https://github.com/doxynix/doxynix/compare/v1.25.0...v1.25.1) (2026-04-11)
+
+
+### Bug Fixes
+
+* **security:** исправление уязвимости в пакете unhead ([#1039](https://github.com/doxynix/doxynix/issues/1039)) ([0c1f045](https://github.com/doxynix/doxynix/commit/0c1f0454ce43012fd73b46d66dc0921092491ce1))
+
 ## [1.25.0](https://github.com/doxynix/doxynix/compare/v1.24.9...v1.25.0) (2026-04-11)
 
 
