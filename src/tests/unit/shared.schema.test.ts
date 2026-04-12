@@ -30,7 +30,7 @@ describe("shared schemas", () => {
 
   it("rejects invalid repository cursor values", () => {
     expect(RepoFilterSchema.safeParse({ cursor: -1 }).success).toBe(false);
-    expect(RepoFilterSchema.safeParse({ cursor: -100000000000000000 }).success).toBe(false);
-    expect(RepoFilterSchema.safeParse({ cursor: 1000001 }).success).toBe(false);
+    expect(RepoFilterSchema.safeParse({ cursor: -100_000_000_000_000_000 }).success).toBe(false);
+    expect(RepoFilterSchema.safeParse({ cursor: 1_000_001 }).success).toBe(false);
   });
 });

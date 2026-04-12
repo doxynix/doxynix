@@ -24,7 +24,7 @@ type PathExplanation = {
   sensitive: boolean;
 };
 
-function compileMatcher(patterns: string | readonly string[]) {
+function compileMatcher(patterns: readonly string[] | string) {
   const values = Array.isArray(patterns) ? patterns : [patterns];
   return pm(values.map((pattern) => pattern.toLowerCase()));
 }
@@ -107,24 +107,26 @@ export const ProjectPolicy = {
     const lowerParts = splitLowerPath(normalized);
 
     if (parts.length === 0) return "other";
-    if (parts[0]?.startsWith(".")) return parts[0];
+    if (parts[0] != null && parts[0].startsWith(".")) return parts[0];
 
     if (
       lowerParts[0] === "src" &&
+      lowerParts[1] != null &&
       (lowerParts[1] === "main" || lowerParts[1] === "test") &&
+      lowerParts[2] != null &&
       PROJECT_POLICY_RULES.grouping.jvmSourceRoots.has(lowerParts[2])
     ) {
       if (lowerParts[2] === "resources") return `src/${parts[1]}/${parts[2]}`;
       return `src/${parts[1]}/${parts[2]}/${parts[3]}`;
     }
 
-    if (lowerParts[0] === "src") {
+    if (lowerParts[0] != null && lowerParts[0] === "src") {
       if (parts.length < 2) return "src";
       if (parts.length < 3) return `src/${parts[1]}`;
       return `src/${parts[1]}/${parts[2]}`;
     }
 
-    if (PROJECT_POLICY_RULES.grouping.groupingRoots.has(lowerParts[0])) {
+    if (lowerParts[0] != null && PROJECT_POLICY_RULES.grouping.groupingRoots.has(lowerParts[0])) {
       return `${parts[0]}/${parts[1]}`;
     }
 
@@ -192,7 +194,7 @@ export const ProjectPolicy = {
       parts[0] === "src" && (parts[1] === "main" || parts[1] === "test")
         ? parts.slice(-3).join(" / ")
         : parts.slice(-2).join(" / ");
-    return raw.replace(/[-_]/g, " ");
+    return raw.replaceAll(/[_-]/g, " ");
   },
 
   getPrimaryCategory(path: string): FileCategory {

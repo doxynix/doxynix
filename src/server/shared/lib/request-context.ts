@@ -21,7 +21,7 @@ export interface RequestStore {
 
 export const requestContext = new AsyncLocalStorage<RequestStore>();
 
-export function anonymizeIp(ip: string | undefined | null): string {
+export function anonymizeIp(ip: null | string | undefined): string {
   if (ip == null || ip === "unknown" || ip === "127.0.0.1" || ip === "::1") return ip ?? "unknown";
 
   if (ip.includes(".")) {
@@ -91,7 +91,7 @@ export function generateRequestId(): string {
   throw new Error("crypto.randomUUID is not available in this runtime");
 }
 
-export function sanitizeRequestId(value?: string | null): string | undefined {
+export function sanitizeRequestId(value?: null | string): string | undefined {
   if (value == null) return undefined;
   const trimmed = value.trim();
   if (trimmed.length === 0 || trimmed.length > 64) return undefined;

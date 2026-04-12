@@ -57,15 +57,15 @@ function createStressRepo(index: number, userId: number) {
     description,
     forks: faker.number.int({ max: 5000 }),
     githubCreatedAt: faker.date.past({ years: 3 }),
-    githubId: 900000000 + index,
+    githubId: 900_000_000 + index,
     language: index % 3 === 0 ? "TypeScript" : index % 3 === 1 ? "JavaScript" : "Go",
     name,
     openIssues: faker.number.int({ max: 200 }),
     owner,
     ownerAvatarUrl: faker.image.avatar(),
     pushedAt: faker.date.recent({ days: 30 }),
-    size: faker.number.int({ max: 200000, min: 100 }),
-    stars: faker.number.int({ max: 25000 }),
+    size: faker.number.int({ max: 200_000, min: 100 }),
+    stars: faker.number.int({ max: 25_000 }),
     topics: [primaryTopic, secondaryTopic],
     updatedAt: faker.date.recent({ days: 30 }),
     url: `https://github.com/${owner}/${name}`,
@@ -239,11 +239,11 @@ async function main() {
                 create: [clean(Fake.fakeDocument()), clean(Fake.fakeDocument())],
               },
               forks: faker.number.int({ max: 5000 }),
-              githubId: faker.number.int({ max: 100000000 }),
+              githubId: faker.number.int({ max: 100_000_000 }),
               name: `${faker.word.noun()}-${faker.string.alphanumeric(4)}`,
               openIssues: faker.number.int({ max: 100 }),
-              size: faker.number.int({ max: 100000 }),
-              stars: faker.number.int({ max: 10000 }),
+              size: faker.number.int({ max: 100_000 }),
+              stars: faker.number.int({ max: 10_000 }),
               url: faker.internet.url(),
             })
           ),
@@ -283,14 +283,13 @@ async function main() {
   console.log("Seeding completed. Database is now full of life.");
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-    await pool.end();
-  })
-  .catch(async (error) => {
-    console.error("Seeding failed:", error);
-    await prisma.$disconnect();
-    await pool.end();
-    process.exit(1);
-  });
+try {
+  await main();
+  await prisma.$disconnect();
+  await pool.end();
+} catch (error) {
+  console.error("Seeding failed:", error);
+  await prisma.$disconnect();
+  await pool.end();
+  process.exit(1);
+}

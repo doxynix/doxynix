@@ -6,8 +6,8 @@ import type { HealthScoreParams } from "../core/metrics.types";
 import { MODERN_HEALTH_SCORE } from "../core/scoring-constants";
 
 const COMPLEXITY_AST_EXTENSIONS = new Set([
-  ".cts",
   ".cjs",
+  ".cts",
   ".js",
   ".jsx",
   ".mjs",
@@ -109,9 +109,8 @@ function calculateRegexComplexity(content: string) {
 
   for (const line of lines) {
     const indentMatch = /^(\s+)/u.exec(line);
-    const nesting = indentMatch
-      ? Math.floor(indentMatch[1].replaceAll("\t", "    ").length / 2)
-      : 0;
+    const nesting =
+      indentMatch?.[1] != null ? Math.floor(indentMatch[1].replaceAll("\t", "    ").length / 2) : 0;
     const keywordCount = Array.from(line.matchAll(CONTROL_FLOW_REGEX)).length;
 
     complexity += keywordCount * (1 + nesting * 0.5);

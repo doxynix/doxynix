@@ -120,64 +120,72 @@ export function applyWriterFallbacks(
 
   if (taskMap.README != null) {
     const readmeResult = results[taskMap.README];
-    generatedReadme = readmeResult.content;
-    updatedStatus.readme = readmeResult.status;
-    if (!hasText(generatedReadme)) {
-      generatedReadme = buildFallbackReadme(repo, documentationInput);
-      updatedStatus.readme = hasText(generatedReadme) ? "fallback" : updatedStatus.readme;
-      writerFallbacks.readme = buildWriterFallbackReason("readme", writerErrors.readme);
+    if (readmeResult) {
+      generatedReadme = readmeResult.content;
+      updatedStatus.readme = readmeResult.status;
+      if (!hasText(generatedReadme)) {
+        generatedReadme = buildFallbackReadme(repo, documentationInput);
+        updatedStatus.readme = hasText(generatedReadme) ? "fallback" : updatedStatus.readme;
+        writerFallbacks.readme = buildWriterFallbackReason("readme", writerErrors.readme);
+      }
     }
   }
 
   if (taskMap.API != null) {
     const apiResult = results[taskMap.API];
-    updatedStatus.api = apiResult.status;
-    if (apiResult.content != null) {
-      const yamlMatch = RegExp(/```yaml([\s\S]*?)```/).exec(apiResult.content);
-      if (yamlMatch) {
-        generatedApiMarkdown = apiResult.content
-          .replace(/# OpenAPI Specification[\s\S]*/, "")
-          .trim();
-      } else {
-        generatedApiMarkdown = apiResult.content;
+    if (apiResult != null) {
+      updatedStatus.api = apiResult.status;
+      if (apiResult.content != null) {
+        const yamlMatch = RegExp(/```yaml([\S\s]*?)```/).exec(apiResult.content);
+        if (yamlMatch) {
+          generatedApiMarkdown = apiResult.content
+            .replace(/# OpenAPI Specification[\S\s]*/, "")
+            .trim();
+        } else {
+          generatedApiMarkdown = apiResult.content;
+        }
       }
-    }
-    if (!hasText(generatedApiMarkdown)) {
-      generatedApiMarkdown = buildFallbackApiDocument(repo, documentationInput);
-      updatedStatus.api = hasText(generatedApiMarkdown) ? "fallback" : updatedStatus.api;
-      writerFallbacks.api = buildWriterFallbackReason("api", writerErrors.api);
+      if (!hasText(generatedApiMarkdown)) {
+        generatedApiMarkdown = buildFallbackApiDocument(repo, documentationInput);
+        updatedStatus.api = hasText(generatedApiMarkdown) ? "fallback" : updatedStatus.api;
+        writerFallbacks.api = buildWriterFallbackReason("api", writerErrors.api);
+      }
     }
   }
 
   if (taskMap.CONTRIBUTING != null) {
     const contributingResult = results[taskMap.CONTRIBUTING];
-    generatedContributing = contributingResult.content;
-    updatedStatus.contributing = contributingResult.status;
-    if (!hasText(generatedContributing)) {
-      generatedContributing = buildFallbackContributing(documentationInput);
-      updatedStatus.contributing = hasText(generatedContributing)
-        ? "fallback"
-        : updatedStatus.contributing;
-      writerFallbacks.contributing = buildWriterFallbackReason(
-        "contributing",
-        writerErrors.contributing
-      );
+    if (contributingResult != null) {
+      generatedContributing = contributingResult.content;
+      updatedStatus.contributing = contributingResult.status;
+      if (!hasText(generatedContributing)) {
+        generatedContributing = buildFallbackContributing(documentationInput);
+        updatedStatus.contributing = hasText(generatedContributing)
+          ? "fallback"
+          : updatedStatus.contributing;
+        writerFallbacks.contributing = buildWriterFallbackReason(
+          "contributing",
+          writerErrors.contributing
+        );
+      }
     }
   }
 
   if (taskMap.ARCHITECTURE != null) {
     const architectureResult = results[taskMap.ARCHITECTURE];
-    generatedArchitecture = architectureResult.content;
-    updatedStatus.architecture = architectureResult.status;
-    if (!hasText(generatedArchitecture)) {
-      generatedArchitecture = buildFallbackArchitecture(repo, documentationInput);
-      updatedStatus.architecture = hasText(generatedArchitecture)
-        ? "fallback"
-        : updatedStatus.architecture;
-      writerFallbacks.architecture = buildWriterFallbackReason(
-        "architecture",
-        writerErrors.architecture
-      );
+    if (architectureResult != null) {
+      generatedArchitecture = architectureResult.content;
+      updatedStatus.architecture = architectureResult.status;
+      if (!hasText(generatedArchitecture)) {
+        generatedArchitecture = buildFallbackArchitecture(repo, documentationInput);
+        updatedStatus.architecture = hasText(generatedArchitecture)
+          ? "fallback"
+          : updatedStatus.architecture;
+        writerFallbacks.architecture = buildWriterFallbackReason(
+          "architecture",
+          writerErrors.architecture
+        );
+      }
     }
   }
 

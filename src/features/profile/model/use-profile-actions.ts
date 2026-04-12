@@ -8,8 +8,8 @@ import { trpc } from "@/shared/api/trpc";
 import { useUploadThing } from "@/shared/lib/uploadthing";
 
 type ProfileData = {
-  email: string | null;
-  name: string | null;
+  email: null | string;
+  name: null | string;
 };
 
 type UseProfileActionsProps = {
@@ -81,6 +81,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
 
   const uploadAvatar = async (files: File[]) => {
     const file = files[0];
+    if (file == null) return;
 
     setIsProcessing(true);
 
@@ -99,7 +100,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
           useWebWorker: true,
         });
 
-        const fileName = file.name.replace(/\.[^/.]+$/, ".webp");
+        const fileName = file.name.replace(/\.[^./]+$/, ".webp");
         const finalFile = new File([compressedBlob], fileName, { type: "image/webp" });
 
         const res = await startUpload([finalFile]);

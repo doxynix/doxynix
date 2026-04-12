@@ -59,7 +59,7 @@ const SPECS: Record<string, LanguageSpec> = {
   },
   ".go": {
     declarations: [{ kind: "function", types: ["function_declaration", "method_declaration"] }],
-    entrypoints: [/\bpackage\s+main\b[\s\S]*\bfunc\s+main\s*\(/],
+    entrypoints: [/\bpackage\s+main\b[\S\s]*\bfunc\s+main\s*\(/],
     imports: { patterns: [/^\s*import\s+"([^"]+)"/m], types: ["import_declaration"] },
     routePatterns: [
       {
@@ -129,7 +129,7 @@ const SPECS: Record<string, LanguageSpec> = {
         framework: "Axum",
         methodIndex: 1,
         pathIndex: 2,
-        pattern: /#\[(get|post|put|patch|delete)\(\s*"([^"]+)"\s*\)\]/g,
+        pattern: /#\[(get|post|put|patch|delete)\(\s*"([^"]+)"\s*\)]/g,
       },
     ],
     wasm: "tree-sitter-rust.wasm",
@@ -158,11 +158,11 @@ export const TREE_SITTER_SUPPORTED_EXTENSIONS = Object.keys(SPECS);
 let ParserRuntime: any;
 let LanguageRuntime: any;
 const languageCache = new Map<string, Promise<any>>();
-let runtimeInitPromise: Promise<void> | null = null;
+let runtimeInitPromise: null | Promise<void> = null;
 const smokeCheckedExtensions = new Set<string>();
 
 function joinFsPath(...parts: string[]) {
-  return parts.join("/").replace(/[\\/]+/g, "/");
+  return parts.join("/").replaceAll(/[/\\]+/g, "/");
 }
 
 async function initRuntime() {
@@ -254,17 +254,17 @@ function resolvePnpmPackageAsset(packageName: string, assetName: string) {
 
 function lineOf(content: string, fragment: string) {
   const index = content.indexOf(fragment);
-  if (index < 0) return undefined;
+  if (index < 0) return;
   return content.slice(0, index).split(/\r?\n/u).length;
 }
 
 function extractNodeName(nodeText: string) {
   const firstLine = nodeText.split(/\r?\n/u, 1)[0]?.trim() ?? "";
-  return /([A-Za-z_][\w]*)/.exec(firstLine)?.[1];
+  return /([A-Z_a-z]\w*)/.exec(firstLine)?.[1];
 }
 
 function getFileExtension(filePath: string) {
-  const normalized = filePath.replace(/\\/g, "/");
+  const normalized = filePath.replaceAll("\\", "/");
   const filename = normalized.slice(normalized.lastIndexOf("/") + 1);
   const dotIndex = filename.lastIndexOf(".");
   return dotIndex >= 0 ? filename.slice(dotIndex).toLowerCase() : "";
@@ -277,7 +277,7 @@ function collectRoutes(file: RepositoryFile, spec: LanguageSpec) {
     for (const match of file.content.matchAll(routePattern.pattern)) {
       const method =
         typeof match[routePattern.methodIndex] === "string"
-          ? match[routePattern.methodIndex].toUpperCase()
+          ? match[routePattern.methodIndex]?.toUpperCase()
           : undefined;
       const routePath =
         typeof match[routePattern.pathIndex] === "string"
@@ -319,7 +319,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
       const imports = new Set<string>();
       const symbols: SymbolRef[] = [];
 
-      const declarationTypes = spec.declarations.flatMap((entry) => entry.types);
+      const declarationTypes = new Set(spec.declarations.flatMap((entry) => entry.types));
       const declarationKindByType = new Map(
         spec.declarations.flatMap((entry) => entry.types.map((type) => [type, entry.kind] as const))
       );
@@ -337,7 +337,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
           });
         }
 
-        if (declarationTypes.includes(nodeType)) {
+        if (declarationTypes.has(nodeType)) {
           exports += 1;
           const kind = declarationKindByType.get(nodeType) ?? "function";
           const name = extractNodeName(nodeText);

@@ -1,4 +1,4 @@
-// TODO: тоже разгребсти типы по возможности
+// TODO: тоже разгрести типы по возможности
 
 export type TeamRole = {
   login: string;
@@ -94,7 +94,7 @@ export type ChurnHotspot = {
 
 export type AnalysisRefView = {
   analysisId: string;
-  commitSha: string | null;
+  commitSha: null | string;
   createdAt: Date;
 };
 
@@ -137,17 +137,17 @@ export type InteractiveBriefPanel = {
       contains: string[];
       dependsOn: string[];
       entrypoint: boolean;
-      entrypointReason: string | null;
+      entrypointReason: null | string;
       factTitles: string[];
       frameworkHints: string[];
       gitHints: string[];
       graphHints: string[];
       hotspotHints: string[];
-      neighborBuckets: Record<string, string[]> | null;
+      neighborBuckets: null | Record<string, string[]>;
       neighborPaths: string[];
       recommendedActions: string[];
       relatedPaths: string[];
-      reviewPriority: { level: "high" | "low" | "medium"; reason: string } | null;
+      reviewPriority: null | { level: "high" | "low" | "medium"; reason: string };
       riskTitles: string[];
       usedBy: string[];
     };
@@ -161,19 +161,19 @@ export type InteractiveBriefPanel = {
     configHints: string[];
     contains: string[];
     dependsOn: string[];
-    entrypointReason: string | null;
+    entrypointReason: null | string;
     factTitles: string[];
     frameworkHints: string[];
     gitHints: string[];
     graphHints: string[];
     hotspotHints: string[];
     kind: string;
-    neighborBuckets: Record<string, string[]> | null;
+    neighborBuckets: null | Record<string, string[]>;
     neighborPaths: string[];
     nextSuggestedPaths: string[];
     recommendedActions: string[];
     relatedPaths: string[];
-    reviewPriority: { level: "high" | "low" | "medium"; reason: string } | null;
+    reviewPriority: null | { level: "high" | "low" | "medium"; reason: string };
     samplePaths: string[];
     title: string;
     usedBy: string[];
@@ -220,7 +220,7 @@ export type InteractiveBriefPayload = {
   capabilities: InteractiveBriefCapabilities;
   docsSummary: InteractiveBriefDocsSummary;
   overview: {
-    architectureStyle: string | null;
+    architectureStyle: null | string;
     primaryEntrypoints: string[];
     primaryModules: string[];
     purpose: string;
@@ -231,7 +231,7 @@ export type InteractiveBriefPayload = {
     defaultNode: InteractiveBriefPanel | null;
   };
   selection: {
-    defaultNodeId: string | null;
+    defaultNodeId: null | string;
   };
   structure: {
     edges: Array<{
@@ -267,7 +267,7 @@ export type FileActionPreviewResult = {
   analysisRef: AnalysisRefView | null;
   confidence: "high" | "low" | "medium";
   consistency: "matched" | "mismatch" | "unknown";
-  consistencyNote: string | null;
+  consistencyNote: null | string;
   content: string;
   contextDiagnostics: {
     contextStrength: "light" | "moderate" | "none" | "strong";
@@ -283,9 +283,9 @@ export type FileActionPreviewResult = {
     confidence: "high" | "low" | "medium" | null;
     graphBacked: boolean;
     mode: "node" | "none";
-    nodeId: string | null;
+    nodeId: null | string;
     source: "node-explain" | "none";
-    title: string | null;
+    title: null | string;
   };
   path: string;
   summary: string;

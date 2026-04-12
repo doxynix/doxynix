@@ -18,21 +18,21 @@ type Props = {
   color?: string;
   icon?: ComponentType<{ className?: string }>;
   id: string;
-  label: string | number | null;
+  label: null | number | string;
   tooltip?: string;
 };
 
 type GitMetrics = Pick<
   UiRepoListItem,
-  | "language"
-  | "id"
-  | "stars"
   | "defaultBranch"
-  | "openIssues"
-  | "license"
   | "forks"
-  | "size"
+  | "id"
+  | "language"
+  | "license"
+  | "openIssues"
   | "pushedAt"
+  | "size"
+  | "stars"
 >;
 
 export function getGitMetrics(repo: GitMetrics, locale: string): Props[] {

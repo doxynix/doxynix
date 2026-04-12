@@ -1,6 +1,6 @@
 import { Badge } from "@/shared/ui/core/badge";
 
-type Props = { repoTopics?: string[] | null };
+type Props = { repoTopics?: null | string[] };
 
 export function RepoTopics({ repoTopics }: Readonly<Props>) {
   if (repoTopics == null || repoTopics.length === 0) return null;

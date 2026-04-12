@@ -205,8 +205,8 @@ describe("Repositories & Data Visibility", () => {
     });
 
     expect(aliceResults).toHaveLength(3);
-    expect(aliceResults[0].name).toBe("react-secret");
-    expect(aliceResults[1].name).toBe("react-ui");
-    expect(aliceResults[2].name).toBe("react-core");
+    expect(aliceResults[0]?.name).toBe("react-secret");
+    expect(aliceResults[1]?.name).toBe("react-ui");
+    expect(aliceResults[2]?.name).toBe("react-core");
   });
 });

@@ -28,7 +28,7 @@ export function unique<T>(values: T[]): T[] {
  * uniquePaths(paths, 10) // Get first 10 unique non-empty paths
  */
 export function uniquePaths(
-  paths: Array<string | null | undefined | false>,
+  paths: Array<false | null | string | undefined>,
   limit?: number
 ): string[] {
   const deduped = Array.from(

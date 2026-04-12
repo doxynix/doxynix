@@ -65,7 +65,7 @@ export async function executeArchitectPhase(
     logger.info({ analysisId, msg: "Architect stage completed with compact digest" });
 
     aiResult.analysisRuntime = {
-      ...(aiResult.analysisRuntime ?? {}),
+      ...aiResult.analysisRuntime,
       architect: {
         source: "llm",
         status: "success",

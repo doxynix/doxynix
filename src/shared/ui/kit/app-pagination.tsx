@@ -31,7 +31,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
   );
 
   const [isPending, startTransition] = useTransition();
-  const [clickedButton, setClickedButton] = useState<"prev" | "next" | number | null>(null);
+  const [clickedButton, setClickedButton] = useState<"next" | "prev" | null | number>(null);
 
   const isAnyLoading = isPending || (isLoading ?? false);
 
@@ -41,7 +41,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
     }
   }, [isAnyLoading]);
 
-  const handlePageChange = (targetPage: number, btnType: "prev" | "next" | number) => {
+  const handlePageChange = (targetPage: number, btnType: "next" | "prev" | number) => {
     if (targetPage === page) return;
 
     setClickedButton(btnType);

@@ -25,28 +25,39 @@ type ManifestHandler = {
 
 function mapFrameworkCategory(category: FrameworkFact["category"]): TechCategory {
   switch (category) {
-    case "api":
+    case "api": {
       return "Framework";
-    case "cloud":
+    }
+    case "cloud": {
       return "Cloud";
-    case "database":
+    }
+    case "database": {
       return "Database";
-    case "framework":
+    }
+    case "framework": {
       return "Framework";
-    case "infrastructure":
+    }
+    case "infrastructure": {
       return "Infrastructure";
-    case "orm":
+    }
+    case "orm": {
       return "ORM";
-    case "testing":
+    }
+    case "testing": {
       return "Testing";
-    case "tooling":
+    }
+    case "tooling": {
       return "CI/CD";
-    case "ui":
+    }
+    case "ui": {
       return "UI/Styling";
-    case "runtime":
+    }
+    case "runtime": {
       return "Framework";
-    default:
+    }
+    default: {
       return "Library";
+    }
   }
 }
 
@@ -122,7 +133,7 @@ export class FactCollector {
     {
       matches: (fileName) => fileName === "requirements.txt",
       run: (collector, file) =>
-        collector.parseManifestRegex(file.content, /^([a-z0-9_.-]+)/gim, file.path, 88),
+        collector.parseManifestRegex(file.content, /^([\w.-]+)/gim, file.path, 88),
     },
     {
       matches: (fileName) => fileName === "go.mod",

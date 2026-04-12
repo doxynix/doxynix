@@ -33,7 +33,7 @@ type Props = {
 };
 
 export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Props>) {
-  const [mode, setMode] = useState<"view" | "edit">("view");
+  const [mode, setMode] = useState<"edit" | "view">("view");
   const [view, setView] = useState<EditorView | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);

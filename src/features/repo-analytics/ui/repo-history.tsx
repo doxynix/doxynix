@@ -35,7 +35,7 @@ export function RepoHistory({ history }: Readonly<Props>) {
           {history.map((h) => (
             <TableRow key={h.id} className="opacity-70 hover:opacity-100">
               <TableCell className="max-w-sm truncate font-mono text-xs">
-                {h.commitSha?.substring(0, 7) ?? "—"}
+                {h.commitSha?.slice(0, 7) ?? "—"}
               </TableCell>
               <TableCell className="text-xs font-medium tracking-wider uppercase">
                 {h.status}

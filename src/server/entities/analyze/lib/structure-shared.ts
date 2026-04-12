@@ -45,7 +45,7 @@ export type StructureContext = {
   aiResult: AIResult;
   allInterestingPaths: string[];
   apiPaths: Set<string>;
-  docInput: RepoMetrics["documentationInput"] | null;
+  docInput: null | RepoMetrics["documentationInput"];
   groupMap: Map<string, StructureGroupEntry>;
   meaningfulEntrypoints: string[];
   metrics: RepoMetrics;

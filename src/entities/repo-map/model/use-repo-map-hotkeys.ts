@@ -9,7 +9,7 @@ const MAP_PREFIXES = ["t", "z", "f"];
 export function useRepoMapHotkeys() {
   const { toggleControls } = useMapControlsActions();
   const map = useMapCommands();
-  const [prefix, setPrefix] = useState<string | null>(null);
+  const [prefix, setPrefix] = useState<null | string>(null);
 
   useEffect(() => {
     if (prefix == null) return;
@@ -46,7 +46,11 @@ export function useRepoMapHotkeys() {
         },
       };
 
-      const action = actions[prefix][secondKey];
+      const action = actions[prefix]?.[secondKey];
+      if (action == null) {
+        setPrefix(null);
+        return;
+      }
       e.stopPropagation();
       action();
       setPrefix(null);

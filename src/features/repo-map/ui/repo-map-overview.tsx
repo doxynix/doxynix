@@ -9,7 +9,7 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 type Props = {
   brief: NonNullable<InteractiveBrief>;
-  onNavigate: (id: string | null) => void;
+  onNavigate: (id: null | string) => void;
 };
 
 export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {

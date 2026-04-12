@@ -56,9 +56,9 @@ describe("highlightCode", () => {
     await highlightCode("const b = 2;");
 
     expect(shikiState.createHighlighter).toHaveBeenCalledTimes(1);
-    const callArgs = shikiState.createHighlighter.mock.calls[0][0] as any;
-    expect(callArgs.themes).toContainEqual(expect.objectContaining({ id: "github-dark-dimmed" }));
-    expect(callArgs.themes).toContainEqual(expect.objectContaining({ id: "github-light" }));
+    const callArgs = shikiState.createHighlighter.mock.calls[0]?.[0] as any;
+    expect(callArgs?.themes).toContainEqual(expect.objectContaining({ id: "github-dark-dimmed" }));
+    expect(callArgs?.themes).toContainEqual(expect.objectContaining({ id: "github-light" }));
   });
 
   it("should use github-light when light theme is requested", async () => {

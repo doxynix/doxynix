@@ -39,7 +39,7 @@ import {
 import { color } from "@uiw/codemirror-extensions-color";
 import { hyperLink } from "@uiw/codemirror-extensions-hyper-link";
 
-const TAG_REGEX = /\b(TODO|FIXME|BUG|HACK|NOTE|XXX)\b/gi;
+const TAG_REGEX = /\b(todo|fixme|bug|hack|note|xxx)\b/gi;
 
 function buildTodoDecorations(view: EditorView): DecorationSet {
   const builder = new RangeSetBuilder<Decoration>();
@@ -58,7 +58,7 @@ function buildTodoDecorations(view: EditorView): DecorationSet {
         TAG_REGEX.lastIndex = 0;
 
         for (const match of text.matchAll(TAG_REGEX)) {
-          const word = (match[1] || match[0]).toUpperCase();
+          const word = (match[1] ?? match[0]).toUpperCase();
           const urgent = word === "FIXME" || word === "BUG" || word === "XXX";
           const start = visibleFrom + match.index;
           const end = start + match[0].length;
@@ -81,7 +81,7 @@ function buildTodoDecorations(view: EditorView): DecorationSet {
       TAG_REGEX.lastIndex = 0;
 
       for (const match of text.matchAll(TAG_REGEX)) {
-        const word = (match[1] || match[0]).toUpperCase();
+        const word = (match[1] ?? match[0]).toUpperCase();
         const urgent = word === "FIXME" || word === "BUG" || word === "XXX";
         const start = from + match.index;
         const end = start + match[0].length;

@@ -176,10 +176,15 @@ export async function computeChangeCoupling(
 
     return [...pairCounts.entries()]
       .map(([key, commits]) => {
-        const [fromPath, toPath] = key.split("::");
+        const parts = key.split("::");
+        const fromPath = parts[0];
+        const toPath = parts[1];
         return { commits, fromPath, toPath };
       })
-      .filter((item) => item.commits >= 2)
+      .filter(
+        (item): item is { commits: number; fromPath: string; toPath: string } =>
+          item.fromPath != null && item.toPath != null && item.commits >= 2
+      )
       .sort((left, right) => right.commits - left.commits)
       .slice(0, 24);
   } catch (error) {

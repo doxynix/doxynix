@@ -25,7 +25,7 @@ import { ScrollArea } from "@/shared/ui/core/scroll-area";
 type Props = {
   data: NodeBrief;
   onClose: () => void;
-  onNavigate: (id: string | null) => void;
+  onNavigate: (id: null | string) => void;
 };
 
 export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>) {
@@ -136,7 +136,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
       label: "Deps",
       value: explain.relationships.dependsOn.length,
     },
-  ].filter((stat) => stat.value > 0);
+  ].filter((stat) => stat.value != null && stat.value > 0);
 
   return (
     <>

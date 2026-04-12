@@ -82,7 +82,7 @@ function ThemeCookieSync() {
   React.useEffect(() => {
     if (theme == null) return;
 
-    setClientCookie("doxynix-theme", theme, 31536000);
+    setClientCookie("doxynix-theme", theme, 31_536_000);
   }, [theme]);
 
   return null;

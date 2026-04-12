@@ -70,7 +70,7 @@ export function buildInteractiveBriefPanel(params: {
 export function buildInteractiveBriefPayload(params: {
   analysisRef: InteractiveBriefPayload["analysisRef"];
   capabilities: InteractiveBriefPayload["capabilities"];
-  defaultNodeId: string | null;
+  defaultNodeId: null | string;
   docsSummary: InteractiveBriefPayload["docsSummary"];
   overview: InteractiveBriefPayload["overview"];
   panel: InteractiveBriefPanel | null;

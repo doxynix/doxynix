@@ -7,7 +7,7 @@ import { handlePrismaError } from "@/server/shared/lib/handle-error";
 const BRAND_PREFIX = "dxnx_";
 
 export const apiKeyService = {
-  async create(db: DbClient, userId: number, input: { description?: string | null; name: string }) {
+  async create(db: DbClient, userId: number, input: { description?: null | string; name: string }) {
     const randomPart = crypto.randomBytes(32).toString("hex");
     const fullKey = `${BRAND_PREFIX}${randomPart}`;
     const displayPrefix = `${BRAND_PREFIX}${randomPart.slice(0, 6)}`;
@@ -82,7 +82,7 @@ export const apiKeyService = {
     return { success: true };
   },
 
-  async update(db: DbClient, id: string, input: { description?: string | null; name: string }) {
+  async update(db: DbClient, id: string, input: { description?: null | string; name: string }) {
     try {
       const data = await db.apiKey.updateMany({
         data: { description: input.description, name: input.name },

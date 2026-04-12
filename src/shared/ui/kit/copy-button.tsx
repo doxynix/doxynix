@@ -11,7 +11,7 @@ import { AppTooltip } from "./app-tooltip";
 type CopyButtonProps = {
   className?: string;
   successText?: string;
-  tooltipSide?: "top" | "right" | "left" | "bottom";
+  tooltipSide?: "bottom" | "left" | "right" | "top";
   tooltipText?: string;
   value: string;
 };

@@ -8,7 +8,7 @@ type KnownErrorOptions = {
   clientVersion: string;
   code: string;
   meta?: {
-    target?: string[] | string;
+    target?: string | string[];
   };
 };
 

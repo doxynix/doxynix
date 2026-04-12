@@ -16,7 +16,7 @@ const authRoutes = ["/auth"];
 const cookieName = getCookieName();
 const ANALYTICS_TUNNELS = [`${API_PREFIX}/dxnx/p`, `${API_PREFIX}/dxnx/s`];
 
-let ratelimit: Ratelimit | null = null;
+let ratelimit: null | Ratelimit = null;
 const ephemeralCache = new Map<string, number>();
 
 if (IS_PROD) {

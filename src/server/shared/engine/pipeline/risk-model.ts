@@ -123,7 +123,7 @@ function createRiskFinding(
 function buildDependencyCycleFinding(
   evidence: RepositoryEvidence,
   derivedScores: RiskDerivedScores
-): RiskFindingRef | null {
+): null | RiskFindingRef {
   if (evidence.dependencyCycles.length === 0) return null;
 
   return createRiskFinding({
@@ -145,7 +145,7 @@ function buildDependencyCycleFinding(
 function buildHotspotFinding(
   hotspots: HotspotSignal[],
   derivedScores: RiskDerivedScores
-): RiskFindingRef | null {
+): null | RiskFindingRef {
   if (hotspots.length === 0) return null;
 
   return createRiskFinding({
@@ -173,7 +173,7 @@ function buildHotspotFinding(
 function buildChangeCouplingFinding(
   changeCoupling: ChangeCouplingRef[],
   derivedScores: RiskDerivedScores
-): RiskFindingRef | null {
+): null | RiskFindingRef {
   if (changeCoupling.length === 0) return null;
 
   const strongestPairs = changeCoupling.slice(0, 6);
@@ -206,7 +206,7 @@ function buildChangeCouplingFinding(
 function buildOrphanModuleFinding(
   evidence: RepositoryEvidence,
   derivedScores: RiskDerivedScores
-): RiskFindingRef | null {
+): null | RiskFindingRef {
   if (evidence.orphanModules.length === 0) return null;
 
   return createRiskFinding({
@@ -228,7 +228,7 @@ function buildOrphanModuleFinding(
 function buildGraphReliabilityFinding(
   graphReliability: DependencyGraphEvidence,
   derivedScores: RiskDerivedScores
-): RiskFindingRef | null {
+): null | RiskFindingRef {
   if (graphReliability.unresolvedImportSpecifiers === 0) return null;
 
   return createRiskFinding({

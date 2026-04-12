@@ -91,9 +91,10 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
       if (isBinary) return null;
 
       return { content: buffer.toString("utf-8"), path: filePath };
-    } catch (e) {
+    } catch (error) {
       logger.warn({
-        error: e instanceof Error ? { message: e.message, stack: e.stack } : String(e),
+        error:
+          error instanceof Error ? { message: error.message, stack: error.stack } : String(error),
         filePath,
         msg: "Failed to read file",
       });
@@ -101,9 +102,9 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
     }
   });
 
-  const validFiles = (await Promise.all(filePromises)).filter(
-    (f): f is { content: string; path: string } => f != null
-  );
+  const settledFiles = await Promise.all(filePromises);
+
+  const validFiles = settledFiles.filter((f): f is { content: string; path: string } => f != null);
 
   if (validFiles.length === 0) throw new Error("No valid text files found to analyze");
   return validFiles;

@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { logger } from "../infrastructure/logger";
 
 type ErrorMapping = {
-  [key: string]: string | Record<string, string> | undefined;
+  [key: string]: Record<string, string> | string | undefined;
   defaultConflict?: string;
   notFound?: string;
   notNull?: string;

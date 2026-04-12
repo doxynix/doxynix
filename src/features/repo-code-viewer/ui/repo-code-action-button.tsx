@@ -14,7 +14,7 @@ type Props = {
   href?: string;
   onClick?: () => void;
   tooltipText: string;
-  variant?: "ghost" | "outline" | "default";
+  variant?: "default" | "ghost" | "outline";
 };
 
 export function RepoCodeActionButton({

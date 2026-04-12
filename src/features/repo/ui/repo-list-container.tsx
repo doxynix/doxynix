@@ -17,7 +17,7 @@ type Props = {
   config?: {
     forcedFilters?: {
       owner?: string;
-      sortBy?: "updatedAt" | "createdAt" | "name";
+      sortBy?: "createdAt" | "name" | "updatedAt";
       sortOrder?: "asc" | "desc";
       status?: RepoStatus;
     };

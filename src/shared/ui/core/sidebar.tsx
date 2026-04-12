@@ -33,11 +33,11 @@ type SidebarContextProps = {
   openMobile: boolean;
   setOpen: (open: boolean) => void;
   setOpenMobile: (open: boolean) => void;
-  state: "expanded" | "collapsed";
+  state: "collapsed" | "expanded";
   toggleSidebar: () => void;
 };
 
-const SidebarContext = React.createContext<SidebarContextProps | null>(null);
+const SidebarContext = React.createContext<null | SidebarContextProps>(null);
 
 function useSidebar() {
   const context = React.useContext(SidebarContext);
@@ -69,7 +69,7 @@ function SidebarProvider({
   const [_open, _setOpen] = React.useState(defaultOpen);
   const open = openProp ?? _open;
   const setOpen = React.useCallback(
-    (value: boolean | ((value: boolean) => boolean)) => {
+    (value: ((value: boolean) => boolean) | boolean) => {
       const openState = typeof value === "function" ? value(open) : value;
       if (setOpenProp) {
         setOpenProp(openState);
@@ -151,9 +151,9 @@ function Sidebar({
   variant = "sidebar",
   ...props
 }: React.ComponentProps<"div"> & {
-  collapsible?: "offcanvas" | "icon" | "none";
+  collapsible?: "icon" | "none" | "offcanvas";
   side?: "left" | "right";
-  variant?: "sidebar" | "floating" | "inset";
+  variant?: "floating" | "inset" | "sidebar";
 }) {
   const { isMobile, openMobile, setOpenMobile, state } = useSidebar();
 
@@ -496,7 +496,7 @@ function SidebarMenuButton({
   VariantProps<typeof sidebarMenuButtonVariants> & {
     asChild?: boolean;
     isActive?: boolean;
-    tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+    tooltip?: React.ComponentProps<typeof TooltipContent> | string;
   }) {
   const Comp = asChild ? Slot : "button";
   const { isMobile, state } = useSidebar();
@@ -645,7 +645,7 @@ function SidebarMenuSubButton({
 }: React.ComponentProps<"a"> & {
   asChild?: boolean;
   isActive?: boolean;
-  size?: "sm" | "md";
+  size?: "md" | "sm";
 }) {
   const Comp = asChild ? Slot : "a";
 
@@ -694,6 +694,7 @@ export {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuShortcut,
   SidebarMenuSkeleton,
   SidebarMenuSub,
   SidebarMenuSubButton,
@@ -702,6 +703,5 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-  SidebarMenuShortcut,
   useSidebar,
 };

@@ -28,7 +28,7 @@ export function RepoFilters() {
   const hasFilters =
     filters.status !== null || filters.visibility !== null || filters.sortBy !== "updatedAt";
 
-  const handleUpdate = (key: keyof typeof repoParsers, value: string | number | null) => {
+  const handleUpdate = (key: keyof typeof repoParsers, value: null | number | string) => {
     void setFilters({
       [key]: value,
       page: null,

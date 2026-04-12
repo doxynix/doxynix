@@ -48,9 +48,9 @@ const FILTER_CONFIG = {
 
 type FilterKey = keyof typeof FILTER_CONFIG;
 
-function applyEdgeHover(edges: Edge[], hoveredNodeId: string | null): Edge[] {
+function applyEdgeHover(edges: Edge[], hoveredNodeId: null | string): Edge[] {
   return edges.map((edge) => {
-    const rel = (edge.data as { relation?: string } | undefined)?.relation;
+    const rel = (edge.data as undefined | { relation?: string })?.relation;
     const isCycle = rel === "cycle";
     const isEdgeActive =
       hoveredNodeId == null || edge.source === hoveredNodeId || edge.target === hoveredNodeId;
@@ -71,8 +71,8 @@ function enrichRepoMapNodes(
   options: {
     data: RepoMapDisplayData;
     highlightKey: FilterKey | null;
-    hoveredNodeId: string | null;
-    rawEdges: { source: string; target: string }[] | undefined;
+    hoveredNodeId: null | string;
+    rawEdges: undefined | { source: string; target: string }[];
   }
 ): Node<RepoMapNodeData>[] {
   const { data, highlightKey, hoveredNodeId, rawEdges } = options;
@@ -87,7 +87,7 @@ function enrichRepoMapNodes(
   }
   const highlightOn = hoveredCluster.size > 0;
 
-  let filterAllowed: Set<string> | null = null;
+  let filterAllowed: null | Set<string> = null;
   if (highlightKey && "filters" in data) {
     const list = data.filters[highlightKey as keyof typeof data.filters];
     if (Array.isArray(list) && list.length > 0) {
@@ -112,14 +112,14 @@ function enrichRepoMapNodes(
 }
 
 type Props = {
-  activeFilter: string | null;
-  activeNodeId: string | null;
+  activeFilter: null | string;
+  activeNodeId: null | string;
   data: NonNullable<RepoMapDisplayData>;
-  onFilterChange: (key: string | null) => void;
-  onNavigate: (id: string | null) => void;
-  onSelect: (id: string | null) => void;
+  onFilterChange: (key: null | string) => void;
+  onNavigate: (id: null | string) => void;
+  onSelect: (id: null | string) => void;
   repoId: string;
-  selectedNodeId: string | null;
+  selectedNodeId: null | string;
 };
 
 export function RepoMap({
@@ -146,7 +146,7 @@ export function RepoMap({
 
   const hide = useMapControlsHide();
 
-  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
+  const [hoveredNodeId, setHoveredNodeId] = useState<null | string>(null);
 
   const viewKey = activeNodeId ?? "root";
   const rawEdges = "graph" in data ? data.graph.edges : data.edges;
@@ -205,7 +205,7 @@ export function RepoMap({
   const rawBreadcrumbs = "breadcrumbs" in data ? data.breadcrumbs : [];
   const breadcrumbItems = rawBreadcrumbs.map((crumb) => {
     const segments = crumb.path.split("/").filter(Boolean);
-    const cleanLabel = segments[segments.length - 1] || crumb.label;
+    const cleanLabel = segments.at(-1) ?? crumb.label;
 
     return {
       label: cleanLabel,

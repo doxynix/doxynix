@@ -11,8 +11,8 @@ const THEMES = { dark: ".dark", light: "" } as const;
 
 export type ChartConfig = {
   [k in string]: (
-    | { color?: string; theme?: never }
     | { color?: never; theme: Record<keyof typeof THEMES, string> }
+    | { color?: string; theme?: never }
   ) & {
     icon?: React.ComponentType;
     label?: React.ReactNode;
@@ -77,13 +77,14 @@ const ChartStyle = ({ config, id }: { config: ChartConfig; id: string }) => {
         __html: Object.entries(THEMES)
           .map(
             ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
-  })
-  .join("\n")}
+        ${prefix} [data-chart=${id}] {
+        ${colorConfig
+          .map(([key, itemConfig]) => {
+            const color =
+              itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+            return color ? `  --color-${key}: ${color};` : null;
+          })
+          .join("\n")}
 }
 `
           )
@@ -101,7 +102,7 @@ const ChartTooltipContent = React.forwardRef<
     React.ComponentProps<typeof RechartsPrimitive.Tooltip> & {
       hideIndicator?: boolean;
       hideLabel?: boolean;
-      indicator?: "line" | "dot" | "dashed";
+      indicator?: "dashed" | "dot" | "line";
       labelKey?: string;
       nameKey?: string;
     }
@@ -132,14 +133,16 @@ const ChartTooltipContent = React.forwardRef<
         return null;
       }
 
-      const [item] = payload;
+      const item = payload[0];
+      if (item == null) {
+        return null;
+      }
       const key = `${labelKey || item.dataKey || item.name || "value"}`;
       const itemConfig = getPayloadConfigFromPayload(config, item, key);
       const rawConfig = label as keyof typeof config;
       const value =
         !labelKey && typeof label === "string" && rawConfig in config
-          ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            (config[rawConfig]?.label ?? label)
+          ? (config[rawConfig]?.label ?? label)
           : itemConfig?.label;
 
       if (labelFormatter) {
@@ -304,7 +307,7 @@ ChartLegendContent.displayName = "ChartLegend";
 // Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key: string) {
   if (typeof payload !== "object" || payload == null) {
-    return undefined;
+    return;
   }
 
   const payloadPayload =
@@ -329,9 +332,9 @@ function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key:
 
 export {
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
+  ChartTooltip,
+  ChartTooltipContent,
 };

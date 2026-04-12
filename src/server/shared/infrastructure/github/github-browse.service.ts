@@ -50,6 +50,7 @@ export const githubBrowseService = {
         notFoundMessage: "Repository or branch not found.",
         sourceError: error,
       });
+      throw error;
     }
   },
 
@@ -136,7 +137,7 @@ export const githubBrowseService = {
     return tree.map((file) => [
       file.path,
       file.type === "blob" ? 1 : 0,
-      file.sha.substring(0, 7),
+      file.sha.slice(0, 7),
       getFileScore(file.path) > 40 ? 1 : 0,
     ]);
   },

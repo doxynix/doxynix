@@ -1,9 +1,9 @@
 export type RepoVisibility = "PRIVATE" | "PUBLIC";
 
 export type RepoItemFields = {
-  description: string | null;
+  description: null | string;
   fullName: string;
-  language: string | null;
+  language: null | string;
   stars: number;
   updatedAt: string;
   visibility: RepoVisibility;
