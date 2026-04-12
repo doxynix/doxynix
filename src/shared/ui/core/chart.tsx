@@ -77,13 +77,14 @@ const ChartStyle = ({ config, id }: { config: ChartConfig; id: string }) => {
         __html: Object.entries(THEMES)
           .map(
             ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
-  })
-  .join("\n")}
+        ${prefix} [data-chart=${id}] {
+        ${colorConfig
+          .map(([key, itemConfig]) => {
+            const color =
+              itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+            return color ? `  --color-${key}: ${color};` : null;
+          })
+          .join("\n")}
 }
 `
           )
@@ -132,14 +133,16 @@ const ChartTooltipContent = React.forwardRef<
         return null;
       }
 
-      const [item] = payload;
+      const item = payload[0];
+      if (item == null) {
+        return null;
+      }
       const key = `${labelKey || item.dataKey || item.name || "value"}`;
       const itemConfig = getPayloadConfigFromPayload(config, item, key);
       const rawConfig = label as keyof typeof config;
       const value =
         !labelKey && typeof label === "string" && rawConfig in config
-          ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            (config[rawConfig]?.label ?? label)
+          ? (config[rawConfig]?.label ?? label)
           : itemConfig?.label;
 
       if (labelFormatter) {

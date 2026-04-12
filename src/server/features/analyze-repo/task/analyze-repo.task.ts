@@ -220,6 +220,7 @@ export const analyzeRepoTask = task({
 
       await cleanup(tempClonePath);
       await updateStatus("Analysis Complete", 100, Status.DONE);
+      return { success: true };
     } catch (error: unknown) {
       await handleError(error, analysisId, channelName, tempClonePath);
       throw error;

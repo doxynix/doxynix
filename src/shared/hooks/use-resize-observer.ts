@@ -22,6 +22,7 @@ export function useResizeObserver<T extends HTMLElement>() {
 
       const observer = new ResizeObserver((entries) => {
         const entry = entries[0];
+        if (entry == null) return;
 
         const { height: newHeight, width: newWidth } = entry.contentRect;
 

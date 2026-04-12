@@ -254,7 +254,7 @@ describe("githubService", () => {
         octokitState.listForAuthenticatedUser,
         expect.objectContaining({ per_page: 100, visibility: "all" })
       );
-      expect(repos[0].fullName).toBe("owner/repo");
+      expect(repos[0]?.fullName).toBe("owner/repo");
     });
 
     it("should combine repos from multiple accounts and deduplicate", async () => {
@@ -268,7 +268,7 @@ describe("githubService", () => {
       const repos = await githubService.getMyRepos(prisma, 1);
 
       expect(repos).toHaveLength(1);
-      expect(repos[0].fullName).toBe("org/shared");
+      expect(repos[0]?.fullName).toBe("org/shared");
     });
 
     it("should log error and continue if one account fails", async () => {

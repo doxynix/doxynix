@@ -50,6 +50,7 @@ export const githubBrowseService = {
         notFoundMessage: "Repository or branch not found.",
         sourceError: error,
       });
+      throw error;
     }
   },
 

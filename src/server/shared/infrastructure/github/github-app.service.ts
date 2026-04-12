@@ -79,7 +79,7 @@ export const githubAppService = {
     const mainInstall = installations.length > 0 ? installations[0] : null;
 
     const manageUrl = mainInstall != null ? (mainInstall.htmlUrl ?? null) : null;
-    const installationId = mainInstall !== null ? Number(mainInstall.id) : null;
+    const installationId = mainInstall != null ? Number(mainInstall.id) : null;
 
     const oauthStatus = await resolveOauthValidationStatus(oauthAccounts);
 

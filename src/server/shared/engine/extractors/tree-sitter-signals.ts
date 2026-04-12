@@ -277,7 +277,7 @@ function collectRoutes(file: RepositoryFile, spec: LanguageSpec) {
     for (const match of file.content.matchAll(routePattern.pattern)) {
       const method =
         typeof match[routePattern.methodIndex] === "string"
-          ? match[routePattern.methodIndex].toUpperCase()
+          ? match[routePattern.methodIndex]?.toUpperCase()
           : undefined;
       const routePath =
         typeof match[routePattern.pathIndex] === "string"

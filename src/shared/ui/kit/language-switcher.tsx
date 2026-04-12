@@ -81,14 +81,18 @@ export function LanguageSwitcher() {
               <SelectValue placeholder={t("settings_language_select_placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              {LOCALES.map((l, i) => (
-                <SelectItem key={l} value={l}>
-                  <div className="flex items-center gap-3">
-                    <Flag alt="" src={FLAGS[l] || FLAGS.en} />
-                    <span>{t(translationKeys[i])}</span>
-                  </div>
-                </SelectItem>
-              ))}
+              {LOCALES.map((l, i) => {
+                const key = translationKeys[i];
+                if (key == null) return null;
+                return (
+                  <SelectItem key={l} value={l}>
+                    <div className="flex items-center gap-3">
+                      <Flag alt="" src={FLAGS[l] || FLAGS.en} />
+                      <span>{t(key)}</span>
+                    </div>
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
           {isPending && <Spinner />}

@@ -40,6 +40,7 @@ const getCommonConfig = () => ({
       );
       return retryCount < 2;
     },
+
     onSecondaryRateLimit: (
       retryAfter: number,
       options: RequestOptions,

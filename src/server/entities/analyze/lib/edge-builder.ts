@@ -58,9 +58,13 @@ function connectGroupSet(
   weight = 1
 ) {
   for (let index = 0; index < groups.length; index += 1) {
-    const source = groups[index];
+    const source = groups.at(index);
+    if (source == null) continue;
+
     for (let inner = index + 1; inner < groups.length; inner += 1) {
-      const target = groups[inner];
+      const target = groups.at(inner);
+      if (target == null) continue;
+
       addWeightedEdge(edges, source, target, relation, weight);
       addWeightedEdge(edges, target, source, relation, weight);
     }
@@ -272,9 +276,13 @@ export function buildDrilldownEdges(params: {
     );
 
     for (let index = 0; index < ids.length; index += 1) {
-      const source = ids[index];
+      const source = ids.at(index);
+      if (source == null) continue;
+
       for (let inner = index + 1; inner < ids.length; inner += 1) {
-        const target = ids[inner];
+        const target = ids.at(inner);
+        if (target == null) continue;
+
         if (target === source) continue;
         addWeightedEdge(edgeMap, source, target, relation, weight);
         addWeightedEdge(edgeMap, target, source, relation, weight);

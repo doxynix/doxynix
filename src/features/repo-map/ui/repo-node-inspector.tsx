@@ -136,7 +136,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
       label: "Deps",
       value: explain.relationships.dependsOn.length,
     },
-  ].filter((stat) => stat.value > 0);
+  ].filter((stat) => stat.value != null && stat.value > 0);
 
   return (
     <>

@@ -196,14 +196,16 @@ export async function orchestrateWriterTasks(
   if (taskMap.API != null && generatedApiMarkdown != null) {
     const yamlMatch = RegExp(/```yaml([\s\S]*?)```/).exec(generatedApiMarkdown);
     if (yamlMatch) {
-      swaggerYaml = yamlMatch[1].trim();
+      swaggerYaml = yamlMatch[1]?.trim();
     }
   }
 
   let generatedChangelog: string | undefined;
   if (taskMap.CHANGELOG != null) {
     const changelogResult = results[taskMap.CHANGELOG];
-    generatedChangelog = changelogResult.content;
+    if (changelogResult != null) {
+      generatedChangelog = changelogResult.content;
+    }
   }
 
   analysisResult.analysisRuntime = {

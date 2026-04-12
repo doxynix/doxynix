@@ -81,6 +81,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
 
   const uploadAvatar = async (files: File[]) => {
     const file = files[0];
+    if (file == null) return;
 
     setIsProcessing(true);
 

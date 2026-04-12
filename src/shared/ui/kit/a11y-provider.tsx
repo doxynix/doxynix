@@ -33,6 +33,7 @@ export function A11yProvider({ children }: Readonly<Props>) {
 
       return () => window.clearTimeout(id);
     }
+    return undefined;
   }, [pathname]);
 
   return (

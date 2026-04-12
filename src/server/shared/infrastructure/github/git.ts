@@ -104,7 +104,7 @@ export async function getAnalysisContext(
     throw new Error("Unable to resolve GitHub token for private repository.");
   }
 
-  if (forceRefresh === false && lastSuccessfulAnalysis.commitSha === currentSha) {
+  if (forceRefresh === false && lastSuccessfulAnalysis?.commitSha === currentSha) {
     return { currentSha, repo: null, token };
   }
 

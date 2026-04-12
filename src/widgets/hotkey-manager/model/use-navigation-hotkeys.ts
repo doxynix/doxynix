@@ -59,9 +59,9 @@ export function useNavigationHotkeys(onAction?: () => void) {
         return;
       }
 
-      const path = SEQUENTIAL_ROUTES[prefix][secondKey];
+      const path = SEQUENTIAL_ROUTES[prefix]?.[secondKey];
 
-      if (path) {
+      if (path != null) {
         onAction?.();
         router.push(path as Route);
       }

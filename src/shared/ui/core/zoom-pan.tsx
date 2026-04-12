@@ -71,15 +71,21 @@ export function ZoomPan({
   } | null>(null);
 
   const getTouchDistance = (touches: React.TouchList | TouchList) => {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
+    if (touches.length < 2) return 0;
+    const touch0 = touches[0]!;
+    const touch1 = touches[1]!;
+    const dx = touch0.clientX - touch1.clientX;
+    const dy = touch0.clientY - touch1.clientY;
     return Math.sqrt(dx * dx + dy * dy);
   };
 
   const getTouchCenter = (touches: React.TouchList | TouchList) => {
+    if (touches.length < 2) return { x: touches[0]?.clientX || 0, y: touches[0]?.clientY || 0 };
+    const touch0 = touches[0]!;
+    const touch1 = touches[1]!;
     return {
-      x: (touches[0].clientX + touches[1].clientX) / 2,
-      y: (touches[0].clientY + touches[1].clientY) / 2,
+      x: (touch0.clientX + touch1.clientX) / 2,
+      y: (touch0.clientY + touch1.clientY) / 2,
     };
   };
 
@@ -331,30 +337,37 @@ export function ZoomPan({
     targetRef.current = { ...currentRef.current };
 
     if (e.touches.length === 1) {
-      isDragging.current = true;
-      touchStartRef.current = {
-        center: { x: 0, y: 0 },
-        distance: 0,
-        scale: currentRef.current.scale,
-        touches: [{ x: e.touches[0].clientX, y: e.touches[0].clientY }],
-        translateX: currentRef.current.x,
-        translateY: currentRef.current.y,
-      };
+      const touch0 = e.touches[0];
+      if (touch0 != null) {
+        isDragging.current = true;
+        touchStartRef.current = {
+          center: { x: 0, y: 0 },
+          distance: 0,
+          scale: currentRef.current.scale,
+          touches: [{ x: touch0.clientX, y: touch0.clientY }],
+          translateX: currentRef.current.x,
+          translateY: currentRef.current.y,
+        };
+      }
     } else if (e.touches.length === 2) {
-      isPinching.current = true;
-      isDragging.current = false;
+      const touch0 = e.touches[0];
+      const touch1 = e.touches[1];
+      if (touch0 != null && touch1 != null) {
+        isPinching.current = true;
+        isDragging.current = false;
 
-      touchStartRef.current = {
-        center: getTouchCenter(e.touches),
-        distance: getTouchDistance(e.touches),
-        scale: currentRef.current.scale,
-        touches: [
-          { x: e.touches[0].clientX, y: e.touches[0].clientY },
-          { x: e.touches[1].clientX, y: e.touches[1].clientY },
-        ],
-        translateX: currentRef.current.x,
-        translateY: currentRef.current.y,
-      };
+        touchStartRef.current = {
+          center: getTouchCenter(e.touches),
+          distance: getTouchDistance(e.touches),
+          scale: currentRef.current.scale,
+          touches: [
+            { x: touch0.clientX, y: touch0.clientY },
+            { x: touch1.clientX, y: touch1.clientY },
+          ],
+          translateX: currentRef.current.x,
+          translateY: currentRef.current.y,
+        };
+      }
     }
     updateImmediate();
   };
@@ -364,11 +377,15 @@ export function ZoomPan({
     if (!touchStartRef.current) return;
 
     if (e.touches.length === 1 && isDragging.current) {
-      const dx = e.touches[0].clientX - touchStartRef.current.touches[0].x;
-      const dy = e.touches[0].clientY - touchStartRef.current.touches[0].y;
+      const touch0 = e.touches[0];
+      const startTouch = touchStartRef.current.touches[0];
+      if (touch0 && startTouch) {
+        const dx = touch0.clientX - startTouch.x;
+        const dy = touch0.clientY - startTouch.y;
 
-      targetRef.current.x = touchStartRef.current.translateX + dx;
-      targetRef.current.y = touchStartRef.current.translateY + dy;
+        targetRef.current.x = touchStartRef.current.translateX + dx;
+        targetRef.current.y = touchStartRef.current.translateY + dy;
+      }
     } else if (e.touches.length === 2) {
       const newDist = getTouchDistance(e.touches);
       const newCenter = getTouchCenter(e.touches);
@@ -410,6 +427,7 @@ export function ZoomPan({
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
+      if (!entry) return;
 
       const { height, width } = entry.contentRect;
       const canvas = canvasRef.current;

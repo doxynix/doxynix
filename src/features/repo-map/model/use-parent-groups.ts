@@ -2,11 +2,11 @@ import type { Node } from "@xyflow/react";
 
 import type { RepoMapNodeData } from "./repo-map-types";
 
-export interface ParentNodeConfig {
+type ParentNodeConfig = {
   children: string[];
   id: string;
   label: string;
-}
+};
 
 export function extractParentGroups(nodes: Node<RepoMapNodeData>[]): ParentNodeConfig[] {
   const parentMap = new Map<string, Set<string>>();

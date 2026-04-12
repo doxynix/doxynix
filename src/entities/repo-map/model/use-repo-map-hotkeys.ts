@@ -46,7 +46,11 @@ export function useRepoMapHotkeys() {
         },
       };
 
-      const action = actions[prefix][secondKey];
+      const action = actions[prefix]?.[secondKey];
+      if (action == null) {
+        setPrefix(null);
+        return;
+      }
       e.stopPropagation();
       action();
       setPrefix(null);

@@ -57,7 +57,12 @@ export function useGlobalActionsHotkeys(onAction?: () => void) {
         },
       };
 
-      const action = actions[prefix][secondKey];
+      const action = actions[prefix]?.[secondKey];
+
+      if (action == null) {
+        setPrefix(null);
+        return;
+      }
 
       e.stopPropagation();
       onAction?.();

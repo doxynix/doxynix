@@ -297,7 +297,7 @@ describe("shared/lib/utils:sanitizePayload", () => {
       ],
     });
     expect(input.nested.password).toBe("p1");
-    expect(input.users[0].access_token).toBe("a1");
+    expect(input.users[0]?.access_token).toBe("a1");
   });
 });
 

@@ -53,7 +53,11 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
 
   const resolvedActiveTab = availableDocs.some((doc) => doc.type === activeTab)
     ? activeTab
-    : availableDocs[0].type;
+    : availableDocs[0]?.type;
+
+  if (resolvedActiveTab == null) {
+    return null;
+  }
 
   return (
     <RepoDocs

@@ -1,4 +1,4 @@
-// TODO: тоже разгребсти типы по возможности
+// TODO: тоже разгрести типы по возможности
 
 export type TeamRole = {
   login: string;

@@ -47,6 +47,7 @@ export function FeaturesSection() {
     },
     {
       background: (
+        // TODO: разобрать что за itemend опечатка скорее всего
         <div className="itemend flex flex-col justify-end overflow-hidden p-8 text-right">
           <div className="top-10 right-10 text-4xl font-bold">98%</div>
           <div className="text-muted-foreground top-20 right-10 text-xs">

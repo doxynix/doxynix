@@ -16,7 +16,7 @@ import {
 
 import { TruncatedText } from "./truncated-text";
 
-export type BreadcrumbItemConfig = {
+type BreadcrumbItemConfig = {
   className?: string;
   href?: string;
   label: string;

@@ -20,7 +20,7 @@ import {
   Users2,
 } from "lucide-react";
 
-import type { MenuItems } from "../types/navigation.types";
+import type { MenuItem, MenuItems } from "../types/navigation.types";
 
 const DASHBOARD_BASE: MenuItems = [
   {
@@ -112,7 +112,11 @@ export const sidebarMenu: MenuItems = [...DASHBOARD_BASE];
 
 export const settingsMenu: MenuItems = [...SETTINGS_PAGES];
 
-export const userNavMenu: MenuItems = [SETTINGS_PAGES[0], SETTINGS_PAGES[1], DASHBOARD_BASE[1]];
+export const userNavMenu: MenuItems = [
+  SETTINGS_PAGES[0],
+  SETTINGS_PAGES[1],
+  DASHBOARD_BASE[1],
+].filter((item): item is MenuItem => item != null);
 
 export const commandMenuItems: MenuItems = [
   ...DASHBOARD_BASE,
