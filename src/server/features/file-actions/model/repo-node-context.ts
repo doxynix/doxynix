@@ -20,9 +20,9 @@ export type NodeContextMeta = {
   confidence: "high" | "low" | "medium" | null;
   graphBacked: boolean;
   mode: "node" | "none";
-  nodeId: string | null;
+  nodeId: null | string;
   source: "node-explain" | "none";
-  title: string | null;
+  title: null | string;
 };
 
 export type NodeContextDiagnostics = {

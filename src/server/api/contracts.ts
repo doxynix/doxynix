@@ -4,7 +4,7 @@ import { z } from "zod";
 type ValidatePairType = { repoName?: string; repoOwner?: string };
 
 export const PaginationSchema = z.object({
-  cursor: z.coerce.number().int().min(1).max(1000000).nullish(),
+  cursor: z.coerce.number().int().min(1).max(1_000_000).nullish(),
   limit: z.coerce.number().int().min(1).max(100).default(10),
   search: z.string().trim().max(1000).optional(),
 });

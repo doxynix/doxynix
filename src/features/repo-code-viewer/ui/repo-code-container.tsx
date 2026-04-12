@@ -19,7 +19,7 @@ type Props = {
 
 export function RepoCodeContainer({ repo }: Readonly<Props>) {
   const [path, setPath] = useQueryState("path");
-  const [treeApi, setTreeApi] = useState<TreeApi<FileNode> | undefined>(undefined);
+  const [treeApi, setTreeApi] = useState<TreeApi<FileNode> | undefined>();
 
   const { data, isLoading } = trpc.githubBrowse.getFileContent.useQuery(
     { path: path ?? "", repoId: repo.id },

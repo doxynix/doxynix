@@ -51,7 +51,7 @@ export const analyzeRepoTask = task({
   retry: {
     factor: 2,
     maxAttempts: 2,
-    maxTimeoutInMs: 60000,
+    maxTimeoutInMs: 60_000,
     minTimeoutInMs: 5000,
     randomize: true,
   },
@@ -220,6 +220,7 @@ export const analyzeRepoTask = task({
 
       await cleanup(tempClonePath);
       await updateStatus("Analysis Complete", 100, Status.DONE);
+      return { success: true };
     } catch (error: unknown) {
       await handleError(error, analysisId, channelName, tempClonePath);
       throw error;

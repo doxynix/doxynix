@@ -27,70 +27,68 @@ export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props
   const exportMap = async (format: ImageType) => {
     setIsExporting(format);
 
-    setTimeout(() => {
-      void (async () => {
-        try {
-          const nodes = getNodes();
-          const nodesBounds = getNodesBounds(nodes);
-          const viewportElement = document.querySelector(".react-flow__viewport") as HTMLElement;
+    try {
+      const nodes = getNodes();
+      const nodesBounds = getNodesBounds(nodes);
+      const viewportElement = document.querySelector(".react-flow__viewport") as HTMLElement | null;
 
-          const standardProps = Array.from(
-            window.getComputedStyle(document.documentElement)
-          ).filter(
-            (key) =>
-              !key.startsWith("--") && !key.startsWith("-webkit-") && !key.startsWith("-moz-")
-          );
+      if (viewportElement == null) {
+        console.error("Viewport element not found");
+        return;
+      }
 
-          const padding = 50;
-          const width = nodesBounds.width + padding * 2;
-          const height = nodesBounds.height + padding * 2;
+      const standardProps = Array.from(window.getComputedStyle(document.documentElement)).filter(
+        (key) => !key.startsWith("--") && !key.startsWith("-webkit-") && !key.startsWith("-moz-")
+      );
 
-          const options: Options = {
-            backgroundColor: resolvedTheme === "dark" ? "#0a0a0a" : "#ffffff",
-            features: {
-              copyScrollbar: false,
-              fixSvgXmlDecode: true,
-              removeAbnormalAttributes: true,
-              removeControlCharacter: true,
-              restoreScrollPosition: false,
-            },
-            filter: (node: Node) => {
-              if (node instanceof HTMLElement) {
-                return !["react-flow__controls", "react-flow__minimap", "react-flow__panel"].some(
-                  (cls) => node.classList.contains(cls)
-                );
-              }
-              return true;
-            },
-            height,
-            includeStyleProperties: standardProps,
-            quality: 0.9,
+      const padding = 50;
+      const width = nodesBounds.width + padding * 2;
+      const height = nodesBounds.height + padding * 2;
 
-            scale: 2,
-
-            style: {
-              height: `${height}px`,
-              transform: `translate(${-nodesBounds.x + padding}px, ${-nodesBounds.y + padding}px) scale(1)`,
-              width: `${width}px`,
-            },
-
-            width,
-          };
-
-          if (format === "png") {
-            const blob = await domToBlob(viewportElement, options);
-            saveAs(blob, `${filename}.png`);
-          } else {
-            const blob = await domToWebp(viewportElement, options);
-            saveAs(blob, `${filename}.webp`);
+      const options: Options = {
+        backgroundColor: resolvedTheme === "dark" ? "#0a0a0a" : "#ffffff",
+        features: {
+          copyScrollbar: false,
+          fixSvgXmlDecode: true,
+          removeAbnormalAttributes: true,
+          removeControlCharacter: true,
+          restoreScrollPosition: false,
+        },
+        filter: (node: Node) => {
+          if (node instanceof HTMLElement) {
+            return !["react-flow__controls", "react-flow__minimap", "react-flow__panel"].some(
+              (cls) => node.classList.contains(cls)
+            );
           }
-        } catch (error) {
-          console.error(`Failed to export:`, error);
-        } finally {
-          setIsExporting(null);
-        }
-      })();
-    }, 50);
+          return true;
+        },
+        height,
+        includeStyleProperties: standardProps,
+        quality: 0.9,
+
+        scale: 2,
+
+        style: {
+          height: `${height}px`,
+          transform: `translate(${-nodesBounds.x + padding}px, ${-nodesBounds.y + padding}px) scale(1)`,
+          width: `${width}px`,
+        },
+
+        width,
+      };
+
+      if (format === "png") {
+        const blob = await domToBlob(viewportElement, options);
+        saveAs(blob, `${filename}.png`);
+      } else {
+        const blob = await domToWebp(viewportElement, options);
+        saveAs(blob, `${filename}.webp`);
+      }
+    } catch (error) {
+      console.error(`Failed to export:`, error);
+    } finally {
+      setIsExporting(null);
+    }
   };
 
   return (

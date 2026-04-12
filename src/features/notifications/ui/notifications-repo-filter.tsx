@@ -34,7 +34,7 @@ export function NotificationsRepoFilter() {
     }
   );
 
-  const handleRepoSelect = (r: { name: string; owner: string } | null) => {
+  const handleRepoSelect = (r: null | { name: string; owner: string }) => {
     void setFilters({
       owner: r?.owner ?? null,
       page: null,

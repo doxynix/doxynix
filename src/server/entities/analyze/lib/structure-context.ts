@@ -55,7 +55,7 @@ export function buildBreadcrumbs(nodeType: StructureNodeType, path: string) {
     ...breadcrumbs,
     {
       id: makeStructureNodeId("file", path),
-      label: path.split("/").filter(Boolean).at(-1) ?? path,
+      label: path.split("/").findLast(Boolean) ?? path,
       nodeType: "file" as const,
       path,
     },
@@ -206,7 +206,7 @@ export function buildGraphRelatedPathSet(metrics: RepoMetrics) {
 }
 export function buildStructureContext(
   repo: RepoWithLatestAnalysisAndDocs
-): StructureContext | null {
+): null | StructureContext {
   const payload = coerceAnalysisPayload(repo.analyses[0]);
   if (payload == null) return null;
 

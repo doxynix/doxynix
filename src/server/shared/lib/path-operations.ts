@@ -13,7 +13,7 @@ export function uniqueObjectPaths<T extends { path: string }>(items: Iterable<T>
 }
 
 export function uniqueStringPaths(
-  paths: Iterable<string | null | undefined | false>,
+  paths: Iterable<false | null | string | undefined>,
   limit?: number
 ): string[] {
   const values = Array.from(

@@ -23,7 +23,10 @@ export const collectAllIds = (node: FileNode, ids: string[] = []) => {
   ids.push(node.id);
   if (node.children) {
     for (let i = 0; i < node.children.length; i++) {
-      collectAllIds(node.children[i], ids);
+      const child = node.children[i];
+      if (child != null) {
+        collectAllIds(child, ids);
+      }
     }
   }
   return ids;
@@ -42,6 +45,7 @@ export const getFolderSelectionState = (node: FileNode, selectedIds: Set<string>
 
     for (let i = 0; i < currentNode.children.length; i++) {
       const child = currentNode.children[i];
+      if (child == null) continue;
       totalCount++;
 
       if (selectedIds.has(child.id)) {

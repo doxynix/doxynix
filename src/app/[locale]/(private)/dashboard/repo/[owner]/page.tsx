@@ -33,10 +33,9 @@ export default async function OwnerPage({ params }: Readonly<Props>) {
   const t = await getTranslations("Dashboard");
   const { owner } = await params;
 
-  const data = await (
-    await api()
-  ).repo.getByOwner({
-    owner: owner,
+  const serverApi = await api();
+  const data = await serverApi.repo.getByOwner({
+    owner,
   });
 
   if (data == null) {

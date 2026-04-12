@@ -25,9 +25,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RepoDetailsLayout({ children, params }: Readonly<Props>) {
   const { name, owner } = await params;
 
-  const repo = await (
-    await api()
-  ).repo.getByName({
+  const serverApi = await api();
+  const repo = await serverApi.repo.getByName({
     name,
     owner,
   });

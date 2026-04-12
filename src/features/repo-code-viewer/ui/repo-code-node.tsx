@@ -8,8 +8,8 @@ import { Button } from "@/shared/ui/core/button";
 import type { FileNode } from "@/entities/repo-setup";
 
 type RepoCodeNodeProps = NodeRendererProps<FileNode> & {
-  activePath: string | null;
-  onSelect: (path: string | null) => void;
+  activePath: null | string;
+  onSelect: (path: null | string) => void;
 };
 
 export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNodeProps) {

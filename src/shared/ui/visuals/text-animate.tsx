@@ -6,18 +6,18 @@ import { AnimatePresence, motion, type MotionProps, type Variants } from "motion
 
 import { cn } from "@/shared/lib/utils";
 
-type AnimationType = "text" | "word" | "character" | "line";
+type AnimationType = "character" | "line" | "text" | "word";
 type AnimationVariant =
-  | "fadeIn"
   | "blurIn"
-  | "blurInUp"
   | "blurInDown"
-  | "slideUp"
+  | "blurInUp"
+  | "fadeIn"
+  | "scaleDown"
+  | "scaleUp"
   | "slideDown"
   | "slideLeft"
   | "slideRight"
-  | "scaleUp"
-  | "scaleDown";
+  | "slideUp";
 
 interface TextAnimateProps extends MotionProps {
   /**
@@ -322,19 +322,23 @@ const TextAnimateBase = ({
 
   let segments: string[] = [];
   switch (by) {
-    case "word":
+    case "word": {
       segments = children.split(/(\s+)/);
       break;
-    case "character":
+    }
+    case "character": {
       segments = children.split("");
       break;
-    case "line":
+    }
+    case "line": {
       segments = children.split("\n");
       break;
+    }
     case "text":
-    default:
+    default: {
       segments = [children];
       break;
+    }
   }
 
   const finalVariants = variants

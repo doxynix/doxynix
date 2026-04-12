@@ -146,7 +146,7 @@ export interface BaseSignal {
   confidence: number;
   path: string;
   score?: number;
-  source: "extraction" | "analysis" | "risk-model";
+  source: "analysis" | "extraction" | "risk-model";
 }
 
 export interface FileSignals extends BaseSignal {

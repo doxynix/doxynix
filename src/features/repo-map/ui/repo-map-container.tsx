@@ -31,7 +31,7 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
   );
   const [filter, setFilter] = useQueryState("filter", parseAsString.withOptions({ shallow: true }));
 
-  const [displayData, setDisplayData] = useState<RepoMapDisplayData | null>(null);
+  const [displayData, setDisplayData] = useState<null | RepoMapDisplayData>(null);
 
   const { data: mapData, isFetching: isMapFetching } = trpc.repoDetails.getStructureMap.useQuery(
     { repoId: id },
@@ -43,7 +43,7 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
     { enabled: viewId != null }
   );
 
-  function navigateMap(nextId: string | null) {
+  function navigateMap(nextId: null | string) {
     if (nextId == null) {
       void setViewId(null);
       void setSelectedId(null);

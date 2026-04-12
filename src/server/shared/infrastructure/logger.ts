@@ -59,7 +59,7 @@ const pinoLogger = createPinoLogger();
 
 const axiomLogger = IS_PROD ? new Logger() : null;
 
-const log = (level: "debug" | "info" | "warn" | "error", payload: LogPayload) => {
+const log = (level: "debug" | "error" | "info" | "warn", payload: LogPayload) => {
   const data = prepareData(payload);
   const { msg, ...rest } = data;
 

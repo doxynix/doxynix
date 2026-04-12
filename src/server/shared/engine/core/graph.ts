@@ -93,13 +93,13 @@ export function resolveModuleImport(
     `${normalizedImport}/__init__.py`,
     `${normalizedImport}/index.ts`,
     `${normalizedImport}/index.js`,
-  ].map(normalizeRepoPath);
+  ].map((path) => normalizeRepoPath(path));
 
   for (const candidate of candidates) {
     if (fileSet.has(candidate)) return candidate;
   }
 
-  const lastSegment = normalizedImport.split("/").filter(Boolean).at(-1);
+  const lastSegment = normalizedImport.split("/").findLast(Boolean);
   if (lastSegment == null) return null;
 
   const fileNameCandidates = [

@@ -22,7 +22,7 @@ export default function ErrorPage({
   const tCommon = useTranslations("Common");
   const t = useTranslations("Error");
 
-  const [requestId, setRequestId] = useState<string | null>(null);
+  const [requestId, setRequestId] = useState<null | string>(null);
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
   const userAgent = typeof window !== "undefined" ? window.navigator.userAgent : "";
   const screenSize =

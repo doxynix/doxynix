@@ -29,7 +29,7 @@ function countRegexMatches(content: string, patterns: RegExp[]) {
 
 function lineOf(content: string, fragment: string) {
   const index = content.indexOf(fragment);
-  if (index < 0) return undefined;
+  if (index < 0) return;
   return content.slice(0, index).split(/\r?\n/u).length;
 }
 

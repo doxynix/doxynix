@@ -11,7 +11,7 @@ import {
 } from "./shared/constants/env.client";
 
 function escapeRegExp(str: string) {
-  return str.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+  return str.replaceAll(/[$()*+.?[\\\]^{|}]/g, String.raw`\$&`);
 }
 
 Sentry.init({

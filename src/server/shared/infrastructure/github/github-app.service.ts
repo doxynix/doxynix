@@ -13,7 +13,7 @@ import { isOctokitError } from "@/server/shared/lib/handle-error";
 type OauthValidationStatus = "invalid" | "missing" | "valid";
 
 async function resolveOauthValidationStatus(
-  oauthAccounts: Array<{ access_token: string | null }>
+  oauthAccounts: Array<{ access_token: null | string }>
 ): Promise<OauthValidationStatus> {
   if (oauthAccounts.length === 0) return "missing";
 
@@ -79,7 +79,7 @@ export const githubAppService = {
     const mainInstall = installations.length > 0 ? installations[0] : null;
 
     const manageUrl = mainInstall != null ? (mainInstall.htmlUrl ?? null) : null;
-    const installationId = mainInstall !== null ? Number(mainInstall.id) : null;
+    const installationId = mainInstall != null ? Number(mainInstall.id) : null;
 
     const oauthStatus = await resolveOauthValidationStatus(oauthAccounts);
 

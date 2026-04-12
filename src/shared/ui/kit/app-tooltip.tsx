@@ -6,7 +6,7 @@ import { useCanHover } from "@/shared/hooks/use-can-hover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/core/tooltip";
 
 type Props = {
-  align?: "start" | "center" | "end";
+  align?: "center" | "end" | "start";
   children: ReactNode;
   className?: string;
   content: ReactNode;
@@ -14,7 +14,7 @@ type Props = {
   disableHoverableContent?: boolean;
   hidden?: boolean;
   open?: boolean;
-  side?: "top" | "right" | "left" | "bottom";
+  side?: "bottom" | "left" | "right" | "top";
 };
 
 export function AppTooltip({

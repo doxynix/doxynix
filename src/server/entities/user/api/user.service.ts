@@ -25,8 +25,8 @@ export const userService = {
     });
 
     if (user.imageKey != null) {
-      utapi.deleteFiles(user.imageKey).catch((e) => {
-        logger.error({ error: e, msg: "Failed to delete avatar on account deletion" });
+      utapi.deleteFiles(user.imageKey).catch((error) => {
+        logger.error({ error: error, msg: "Failed to delete avatar on account deletion" });
       });
     }
 

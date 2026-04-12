@@ -10,7 +10,7 @@ export type ContentRefInput = {
 export type SyncFileActionMeta = {
   analysisRef: AnalysisRef | null;
   consistency: "matched" | "mismatch" | "unknown";
-  consistencyNote: string | null;
+  consistencyNote: null | string;
   contentRef: ContentRefInput;
   contextDiagnostics: NodeContextDiagnostics;
   contextMeta: NodeContextMeta;
@@ -21,7 +21,7 @@ export function buildConsistencyState(
   contentRef: ContentRefInput
 ): {
   consistency: "matched" | "mismatch" | "unknown";
-  consistencyNote: string | null;
+  consistencyNote: null | string;
 } {
   if (analysisRef == null) {
     return {

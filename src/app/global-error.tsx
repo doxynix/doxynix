@@ -9,7 +9,7 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }>) {
-  const [requestId, setRequestId] = useState<string | null>(null);
+  const [requestId, setRequestId] = useState<null | string>(null);
   const isClient = typeof window !== "undefined";
   const currentUrl = isClient ? globalThis.location.href : "";
   const userAgent = isClient ? globalThis.navigator.userAgent : "";

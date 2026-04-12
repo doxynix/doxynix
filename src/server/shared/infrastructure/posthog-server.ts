@@ -2,7 +2,7 @@ import { PostHog } from "posthog-node";
 
 import { env } from "@/shared/constants/env";
 
-let posthogClient: PostHog | null = null;
+let posthogClient: null | PostHog = null;
 
 export function getPostHogClient(): PostHog {
   if (posthogClient == null) {

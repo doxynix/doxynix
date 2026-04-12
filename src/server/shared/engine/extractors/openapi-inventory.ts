@@ -19,13 +19,11 @@ function processSpecObject(data: unknown) {
   const paths = Object.keys(candidate.paths).filter((path) => path.startsWith("/"));
   let operations = 0;
 
-  const methods = ["get", "post", "put", "patch", "delete", "options", "head"];
+  const methods = new Set(["delete", "get", "head", "options", "patch", "post", "put"]);
   for (const pathKey in candidate.paths) {
     const pathItem = candidate.paths[pathKey];
     if (typeof pathItem === "object" && pathItem != null) {
-      operations += Object.keys(pathItem).filter((key) =>
-        methods.includes(key.toLowerCase())
-      ).length;
+      operations += Object.keys(pathItem).filter((key) => methods.has(key.toLowerCase())).length;
     }
   }
 

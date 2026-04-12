@@ -116,12 +116,15 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
         data: { userId: bob.user.id },
         where: { publicId: repo.publicId },
       });
-    } catch (e: unknown) {
-      if (e instanceof Error && e.message.includes("result is not allowed to be read back")) {
+    } catch (error: unknown) {
+      if (
+        error instanceof Error &&
+        error.message.includes("result is not allowed to be read back")
+      ) {
         return;
       }
 
-      throw e;
+      throw error;
     }
 
     const final = await prisma.repo.findUnique({ where: { publicId: repo.publicId } });

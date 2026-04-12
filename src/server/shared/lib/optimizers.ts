@@ -21,8 +21,8 @@ const REMOVED_MSG = "/* ...content truncated... */";
 export const CodeOptimizer = {
   basicClean(code: string): string {
     return code
-      .replaceAll(/^\s*[\r\n]/gm, "")
-      .replaceAll(/[ \t]+$/gm, "")
+      .replaceAll(/^\s*[\n\r]/gm, "")
+      .replaceAll(/[\t ]+$/gm, "")
       .trim();
   },
 
@@ -44,27 +44,27 @@ export const CodeOptimizer = {
 
   redactSecrets(code: string): string {
     return code
-      .replaceAll(/[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,}/g, "<REDACTED_EMAIL>")
+      .replaceAll(/[\w%+.-]+@[\w.-]+\.[A-Za-z]{2,}/g, "<REDACTED_EMAIL>")
       .replaceAll(
         /(?<!\d)(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?!\d)/g,
         "<REDACTED_IP>"
       )
-      .replaceAll(/(['"])eyJ[\w-]*\.[\w-]*\.[\w-]*(['"])/g, "$1<REDACTED_JWT>$2");
+      .replaceAll(/(["'])eyJ(?:[\w-]*\.){2}[\w-]*(["'])/g, "$1<REDACTED_JWT>$2");
   },
 
   removeLicenseHeaders(code: string): string {
-    return code.replace(/^\s*\/\*[\s\S]*?(?:license|copyright)[\s\S]*?\*\//i, "");
+    return code.replace(/^\s*\/\*[\S\s]*?(?:license|copyright)[\S\s]*?\*\//i, "");
   },
 
   truncateLargeDataStructures(code: string): string {
-    return code.replaceAll(/\[\s*([\d\s,.-]{500,})\s*\]/g, `[ /* large data array truncated */ ]`);
+    return code.replaceAll(/\[\s*([\d\s,.-]{500,})\s*]/g, `[ /* large data array truncated */ ]`);
   },
 
   truncateLargeLiterals(code: string): string {
     let newCode = code.replaceAll(/(d\s*=\s*["'])([^"']{150,})(["'])/g, `$1${REMOVED_MSG}$3`);
 
     newCode = newCode.replaceAll(
-      /(['"]data:[^;]+;base64,)([^'"]{50,})(['"])/g,
+      /(["']data:[^;]+;base64,)([^"']{50,})(["'])/g,
       `$1${REMOVED_MSG}$3`
     );
 

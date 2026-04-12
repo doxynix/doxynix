@@ -33,13 +33,19 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
   const [apiMode, setApiMode] = useState<"md" | "swagger">("md");
   const { data: metrics } = trpc.repoDetails.getDetailedMetrics.useQuery({ repoId });
 
-  const tabItems = availableDocs.map((doc) => ({
-    icon: DOC_ICONS[doc.type],
-    id: doc.id,
-    isFallback: doc.isFallback,
-    status: doc.status,
-    value: doc.type,
-  }));
+  const tabItems = availableDocs
+    .map((doc) => {
+      const icon = DOC_ICONS[doc.type];
+      if (icon == null) return null;
+      return {
+        icon,
+        id: doc.id,
+        isFallback: doc.isFallback,
+        status: doc.status,
+        value: doc.type,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 
   return (
     <Tabs
@@ -68,6 +74,7 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
                     <div className="bg-primary/10 rounded-md p-2">
                       {(() => {
                         const Icon = DOC_ICONS[doc.type];
+                        if (Icon == null) return null;
                         return <Icon className="text-primary size-6" />;
                       })()}
                     </div>

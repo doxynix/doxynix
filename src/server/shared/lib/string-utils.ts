@@ -7,7 +7,7 @@
  * Type-safe guard for non-empty strings (including whitespace checks).
  * Useful in filter chains: `values.filter(hasText)`
  */
-export function hasText(value: string | undefined | null): value is string {
+export function hasText(value: null | string | undefined): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
@@ -15,14 +15,14 @@ export function hasText(value: string | undefined | null): value is string {
  * Generic string content check - same logic as hasText.
  * Alias for compatibility with existing code.
  */
-export function hasContent(value: string | undefined | null): value is string {
+export function hasContent(value: null | string | undefined): value is string {
   return hasText(value);
 }
 
 /**
  * Check if a string is empty or only whitespace.
  */
-export function isEmpty(value: string | undefined | null): value is null | undefined | "" {
+export function isEmpty(value: null | string | undefined): value is "" | null | undefined {
   return !hasText(value);
 }
 

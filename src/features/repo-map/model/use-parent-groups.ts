@@ -2,11 +2,11 @@ import type { Node } from "@xyflow/react";
 
 import type { RepoMapNodeData } from "./repo-map-types";
 
-export interface ParentNodeConfig {
+type ParentNodeConfig = {
   children: string[];
   id: string;
   label: string;
-}
+};
 
 export function extractParentGroups(nodes: Node<RepoMapNodeData>[]): ParentNodeConfig[] {
   const parentMap = new Map<string, Set<string>>();
@@ -58,7 +58,7 @@ export function enrichNodesWithParents(
     };
   };
 
-  const parentNodes = parents.map(createParentNode);
+  const parentNodes = parents.map((parent) => createParentNode(parent));
   const childToParent = new Map<string, string>();
   parents.forEach((p) => {
     p.children.forEach((childId) => childToParent.set(childId, p.id));

@@ -23,7 +23,7 @@ import { UserNav } from "./user-nav";
 function stripLocalePrefix(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
   const first = segments[0];
-  if (first && LOCALES.includes(first as Locale)) {
+  if (first != null && LOCALES.includes(first as Locale)) {
     segments.shift();
   }
   return `/${segments.join("/")}`;

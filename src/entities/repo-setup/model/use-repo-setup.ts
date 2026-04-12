@@ -28,7 +28,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     defaultValue: "",
   });
 
-  const [treeApi, setTreeApi] = useState<TreeApi<FileNode> | null>(null);
+  const [treeApi, setTreeApi] = useState<null | TreeApi<FileNode>>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [analysisLocale, setAnalysisLocale] = useState(locale);
   const [instructions, setInstructions] = useState("");

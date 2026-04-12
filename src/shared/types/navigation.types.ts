@@ -2,7 +2,7 @@ import type { ComponentType } from "react";
 
 export type MenuItem = {
   actionId?: string;
-  commandType?: "navigation" | "action" | "dialog";
+  commandType?: "action" | "dialog" | "navigation";
   exact?: boolean;
   href?: string;
   icon: ComponentType<{ className?: string }>;

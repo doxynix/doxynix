@@ -58,7 +58,8 @@ export function AppCommandMenu() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        const entry = entries[0];
+        if (entry != null && entry.isIntersecting) {
           void fetchNextPage();
         }
       },
@@ -96,23 +97,27 @@ export function AppCommandMenu() {
     setOpen(false);
 
     switch (item.commandType) {
-      case "dialog":
+      case "dialog": {
         if (item.actionId === "createRepo") {
           setOpenCreateDialog(true);
         }
         break;
+      }
 
-      case "action":
+      case "action": {
         break;
+      }
 
       case "navigation":
-      case undefined:
+      case undefined: {
         if (item.href != null) {
           navigate(item.href);
         }
         break;
-      default:
+      }
+      default: {
         break;
+      }
     }
   };
 

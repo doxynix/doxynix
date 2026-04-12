@@ -8,9 +8,9 @@ type Size = {
 export function useResizeObserver<T extends HTMLElement>() {
   const [size, setSize] = useState<Size>({ height: 0, width: 0 });
 
-  const observerRef = useRef<ResizeObserver | null>(null);
+  const observerRef = useRef<null | ResizeObserver>(null);
 
-  const ref = useCallback((node: T | null) => {
+  const ref = useCallback((node: null | T) => {
     if (observerRef.current) {
       observerRef.current.disconnect();
       observerRef.current = null;
@@ -22,6 +22,7 @@ export function useResizeObserver<T extends HTMLElement>() {
 
       const observer = new ResizeObserver((entries) => {
         const entry = entries[0];
+        if (entry == null) return;
 
         const { height: newHeight, width: newWidth } = entry.contentRect;
 

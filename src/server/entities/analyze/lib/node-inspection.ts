@@ -7,7 +7,7 @@ import { isPathInsideScope } from "./structure-shared";
 
 type StructureInspectNodeType = "file" | "group";
 
-type OnboardingDocInputLike = {
+type OnboardingDocInputLike = null | {
   sections?: {
     onboarding?: {
       body?: {
@@ -15,7 +15,7 @@ type OnboardingDocInputLike = {
       };
     };
   };
-} | null;
+};
 
 export type StructureInspectContextLike = {
   docInput?: OnboardingDocInputLike;
