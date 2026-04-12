@@ -1,7 +1,5 @@
 import { defineConfig } from "@playwright/test";
 
-import { IS_CI } from "./src/shared/constants/env.client";
-
 export default defineConfig({
   outputDir: "src/tests/e2e/test-results",
   reporter: [["html", { outputFolder: "src/tests/e2e/playwright-report" }]],
@@ -16,7 +14,7 @@ export default defineConfig({
   },
   webServer: {
     command: "pnpm build && pnpm start",
-    reuseExistingServer: !IS_CI,
+    reuseExistingServer: process.env.CI !== "true",
     stderr: "pipe",
     stdout: "pipe",
     timeout: 300 * 1000,

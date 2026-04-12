@@ -15,7 +15,8 @@ import { extractRouterConfig } from "uploadthing/server";
 
 import "../globals.css";
 
-import { APP_URL, IS_PROD } from "@/shared/constants/env.client";
+import { APP_URL } from "@/shared/constants/env.client";
+import { IS_PROD } from "@/shared/constants/env.flags";
 import type { Locale } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/utils";
 import { Toaster } from "@/shared/ui/core/sonner";

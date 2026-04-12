@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 import { trpc, type RepoStatus } from "@/shared/api/trpc";
-import { IS_PROD } from "@/shared/constants/env.client";
+import { IS_PROD } from "@/shared/constants/env.flags";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { useRepoActions } from "@/entities/repo";

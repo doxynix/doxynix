@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { IS_PROD } from "@/shared/constants/env.client";
+import { IS_PROD } from "@/shared/constants/env.flags";
 
 export function dumpDebug(name: string, data: any, subfolder?: string) {
   if (IS_PROD) return;

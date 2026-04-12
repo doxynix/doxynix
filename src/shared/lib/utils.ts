@@ -4,7 +4,7 @@ import safeStringify from "fast-safe-stringify";
 import * as languages from "linguist-languages";
 import { twMerge } from "tailwind-merge";
 
-import { IS_PROD } from "../constants/env.client";
+import { IS_PROD } from "../constants/env.flags";
 import { DEFAULT_LOCALE } from "../constants/locales";
 
 export function cn(...inputs: ClassValue[]) {
@@ -231,10 +231,7 @@ export const smoothScrollTo = (targetId: string, offset: number = 80, duration: 
 };
 
 export const getCookieName = () => {
-  if (IS_PROD) {
-    return "__Secure-next-auth.session-token";
-  }
-  return "next-auth.session-token";
+  return IS_PROD ? "__Secure-next-auth.session-token" : "next-auth.session-token";
 };
 
 export function getInitials(name?: null | string, email?: null | string): string {

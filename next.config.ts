@@ -7,7 +7,8 @@ import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
 import { StatsWriterPlugin } from "webpack-stats-plugin";
 
-import { API_PREFIX, IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/constants/env.client";
+import { API_PREFIX } from "@/shared/constants/env.client";
+import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
 import { LOCALE_REGEX_STR } from "@/shared/constants/locales";
 
 const bundleAnalyzer = withBundleAnalyzer({
@@ -61,7 +62,7 @@ const nextConfig: NextConfig = {
     turbopackFileSystemCacheForBuild: true,
     turbopackFileSystemCacheForDev: true,
     typedEnv: true,
-    useLightningcss: IS_PROD,
+    // useLightningcss: IS_PROD,
     webpackMemoryOptimizations: true,
     workerThreads: true,
   },

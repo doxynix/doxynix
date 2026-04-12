@@ -1,7 +1,8 @@
 import type { NextRequest } from "next/server";
 import { createOpenApiFetchHandler } from "trpc-to-openapi";
 
-import { API_PREFIX, IS_DEV } from "@/shared/constants/env.client";
+import { API_PREFIX } from "@/shared/constants/env.client";
+import { IS_DEV } from "@/shared/constants/env.flags";
 
 import { createContext } from "@/server/api/context";
 import { appRouter } from "@/server/api/routers";

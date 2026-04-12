@@ -3,7 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import pkg, { type Prisma, type PrismaClient as PrismaClientType } from "@prisma/client";
 import pg from "pg";
 
-import { IS_DEV, IS_TEST } from "@/shared/constants/env.client";
+import { IS_DEV, IS_TEST } from "@/shared/constants/env.flags";
 import { DATABASE_URL } from "@/shared/constants/env.server";
 import { sanitizePayload } from "@/shared/lib/utils";
 

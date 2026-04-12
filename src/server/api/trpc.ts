@@ -4,7 +4,7 @@ import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-to-openapi";
 
-import { IS_PROD } from "@/shared/constants/env.client";
+import { IS_PROD } from "@/shared/constants/env.flags";
 
 import type { DbClient } from "../shared/infrastructure/db";
 import { logger } from "../shared/infrastructure/logger";

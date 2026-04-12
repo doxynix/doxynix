@@ -1,14 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEdgesState, useNodesState, type Edge, type Node } from "@xyflow/react";
-import type { ElkNode } from "elkjs";
-import ELK from "elkjs/lib/elk.bundled.js";
+import type { ELK, ElkNode } from "elkjs";
 
 import type { RepoMapDisplayData } from "@/shared/api/trpc";
 
 import type { RepoMapNodeData } from "./repo-map-types";
 import { extractParentGroups } from "./use-parent-groups";
-
-const elk = new ELK();
 
 const elkOptions = {
   "elk.algorithm": "layered",
@@ -29,6 +26,7 @@ export function useMapLayout(data: RepoMapDisplayData) {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [layoutReady, setLayoutReady] = useState(false);
   const [layoutTick, setLayoutTick] = useState(0);
+  const elkRef = useRef<ELK | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -125,7 +123,12 @@ export function useMapLayout(data: RepoMapDisplayData) {
       };
 
       try {
-        const layoutedGraph = (await elk.layout(elkGraph)) as ElkNodeWithChildren;
+        if (elkRef.current == null) {
+          const ELKModule = await import("elkjs/lib/elk.bundled.js");
+          elkRef.current = new ELKModule.default();
+        }
+
+        const layoutedGraph = (await elkRef.current.layout(elkGraph)) as ElkNodeWithChildren;
         if (cancelled) return;
 
         const nodePositions = new Map<string, { x: number; y: number }>();

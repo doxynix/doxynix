@@ -6,7 +6,7 @@ import Cookies from "js-cookie";
 import { ServerCrash } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { IS_DEV } from "@/shared/constants/env.client";
+import { IS_DEV } from "@/shared/constants/env.flags";
 import { Button } from "@/shared/ui/core/button";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
