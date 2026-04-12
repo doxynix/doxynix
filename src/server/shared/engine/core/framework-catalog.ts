@@ -142,13 +142,13 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
 ];
 
 function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return value.replaceAll(/[$()*+.?[\\\]^{|}]/g, "\\$&");
 }
 
 function matchesFrameworkAlias(token: string, alias: string) {
   const normalizedAlias = alias.toLowerCase();
 
-  if (/[@./-]/.test(normalizedAlias)) {
+  if (/[./@-]/.test(normalizedAlias)) {
     return token.includes(normalizedAlias);
   }
 

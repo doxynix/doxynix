@@ -205,7 +205,7 @@ export function RepoMap({
   const rawBreadcrumbs = "breadcrumbs" in data ? data.breadcrumbs : [];
   const breadcrumbItems = rawBreadcrumbs.map((crumb) => {
     const segments = crumb.path.split("/").filter(Boolean);
-    const cleanLabel = segments[segments.length - 1] ?? crumb.label;
+    const cleanLabel = segments.at(-1) ?? crumb.label;
 
     return {
       label: cleanLabel,

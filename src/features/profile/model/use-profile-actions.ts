@@ -100,7 +100,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
           useWebWorker: true,
         });
 
-        const fileName = file.name.replace(/\.[^/.]+$/, ".webp");
+        const fileName = file.name.replace(/\.[^./]+$/, ".webp");
         const finalFile = new File([compressedBlob], fileName, { type: "image/webp" });
 
         const res = await startUpload([finalFile]);

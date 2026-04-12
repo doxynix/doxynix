@@ -6,7 +6,7 @@ import { getServerAuthSession } from "@/server/shared/infrastructure/auth";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { realtimeServer } from "@/server/shared/infrastructure/realtime";
 
-const ONE_HOUR = 3600000;
+const ONE_HOUR = 3_600_000;
 
 export async function GET() {
   const session = await getServerAuthSession();

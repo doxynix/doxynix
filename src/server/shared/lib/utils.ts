@@ -102,9 +102,9 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
     }
   });
 
-  const validFiles = (await Promise.all(filePromises)).filter(
-    (f): f is { content: string; path: string } => f != null
-  );
+  const settledFiles = await Promise.all(filePromises);
+
+  const validFiles = settledFiles.filter((f): f is { content: string; path: string } => f != null);
 
   if (validFiles.length === 0) throw new Error("No valid text files found to analyze");
   return validFiles;

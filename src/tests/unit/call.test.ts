@@ -116,7 +116,7 @@ describe("callWithFallback", () => {
   });
 
   it("should throw default all models failed error when model throws undefined", async () => {
-    vi.mocked(generateText).mockRejectedValueOnce(undefined);
+    vi.mocked(generateText).mockRejectedValueOnce();
 
     const callPromise = callWithFallback<string>({
       models: ["model-a"],

@@ -194,7 +194,7 @@ describe("shared/lib/utils:smoothScrollTo", () => {
   });
 
   it("should warn and stop when element is not found", () => {
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     vi.stubGlobal("document", {
       getElementById: vi.fn(() => null),
@@ -306,8 +306,8 @@ describe("shared/lib/number:clampIntegerParam", () => {
     expect(clampIntegerParam(undefined, { fallback: 1, max: 100, min: 1 })).toBe(1);
     expect(clampIntegerParam(Number.NaN, { fallback: 1, max: 100, min: 1 })).toBe(1);
     expect(clampIntegerParam(0, { fallback: 1, max: 100, min: 1 })).toBe(1);
-    expect(clampIntegerParam(-200000000000000, { fallback: 1, max: 100, min: 1 })).toBe(1);
-    expect(clampIntegerParam(200000000000000, { fallback: 1, max: 100, min: 1 })).toBe(100);
+    expect(clampIntegerParam(-200_000_000_000_000, { fallback: 1, max: 100, min: 1 })).toBe(1);
+    expect(clampIntegerParam(200_000_000_000_000, { fallback: 1, max: 100, min: 1 })).toBe(100);
     expect(clampIntegerParam(25, { fallback: 1, max: 100, min: 1 })).toBe(25);
     expect(clampIntegerParam(1.5, { fallback: 1, max: 100, min: 1 })).toBe(1);
   });

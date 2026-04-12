@@ -69,7 +69,7 @@ export interface FormattedEvidence {
 export class EvidenceFormatter {
   private defaultOptions: EvidenceFormattingOptions = {
     includeMetadata: false,
-    maxSize: 100000,
+    maxSize: 100_000,
     prettyPrint: true,
     truncationSuffix: "\n<!-- [DATA TRUNCATED] -->",
   };

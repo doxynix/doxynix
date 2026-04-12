@@ -20,8 +20,8 @@ export const baseClient = new PrismaClient({
   adapter,
   log: IS_DEV && !IS_TEST ? ["error", "warn"] : ["error"],
   transactionOptions: {
-    maxWait: 20000,
-    timeout: 30000,
+    maxWait: 20_000,
+    timeout: 30_000,
   },
 });
 

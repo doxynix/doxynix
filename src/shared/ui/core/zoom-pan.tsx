@@ -76,7 +76,7 @@ export function ZoomPan({
     const touch1 = touches[1]!;
     const dx = touch0.clientX - touch1.clientX;
     const dy = touch0.clientY - touch1.clientY;
-    return Math.sqrt(dx * dx + dy * dy);
+    return Math.hypot(dx, dy);
   };
 
   const getTouchCenter = (touches: React.TouchList | TouchList) => {

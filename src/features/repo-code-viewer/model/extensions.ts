@@ -39,7 +39,7 @@ import {
 import { color } from "@uiw/codemirror-extensions-color";
 import { hyperLink } from "@uiw/codemirror-extensions-hyper-link";
 
-const TAG_REGEX = /\b(TODO|FIXME|BUG|HACK|NOTE|XXX)\b/gi;
+const TAG_REGEX = /\b(todo|fixme|bug|hack|note|xxx)\b/gi;
 
 function buildTodoDecorations(view: EditorView): DecorationSet {
   const builder = new RangeSetBuilder<Decoration>();

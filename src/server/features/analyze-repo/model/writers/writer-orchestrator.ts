@@ -194,7 +194,7 @@ export async function orchestrateWriterTasks(
 
   let swaggerYaml: string | undefined;
   if (taskMap.API != null && generatedApiMarkdown != null) {
-    const yamlMatch = RegExp(/```yaml([\s\S]*?)```/).exec(generatedApiMarkdown);
+    const yamlMatch = RegExp(/```yaml([\S\s]*?)```/).exec(generatedApiMarkdown);
     if (yamlMatch) {
       swaggerYaml = yamlMatch[1]?.trim();
     }
@@ -209,7 +209,7 @@ export async function orchestrateWriterTasks(
   }
 
   analysisResult.analysisRuntime = {
-    ...(analysisResult.analysisRuntime ?? {}),
+    ...analysisResult.analysisRuntime,
     writers: updatedStatus,
   };
 

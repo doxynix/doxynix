@@ -412,7 +412,7 @@ export function buildStructureNodeSummary(params: {
     label:
       params.nodeType === "group"
         ? ProjectPolicy.getGroupLabel(params.path)
-        : (params.path.split("/").filter(Boolean).at(-1) ?? params.path),
+        : (params.path.split("/").findLast(Boolean) ?? params.path),
     markers: {
       api: apiCount > 0,
       client: params.entry.semanticCounts.frontend > 0,

@@ -23,15 +23,15 @@ export function RepoMapSearchPanel() {
           if (!query) return true;
           const label = String(node.data.label).toLowerCase();
           const id = node.id.toLowerCase();
-          const normalizedLabel = label.replace(/\s+/g, "");
-          const normalizedId = id.replace(/\s+/g, "");
+          const normalizedLabel = label.replaceAll(/\s+/g, "");
+          const normalizedId = id.replaceAll(/\s+/g, "");
 
           return searchWords.every(
             (word) =>
               label.includes(word) ||
               id.includes(word) ||
-              normalizedLabel.includes(word.replace(/\s+/g, "")) ||
-              normalizedId.includes(word.replace(/\s+/g, ""))
+              normalizedLabel.includes(word.replaceAll(/\s+/g, "")) ||
+              normalizedId.includes(word.replaceAll(/\s+/g, ""))
           );
         })
         .map((n) => n.id)
@@ -57,7 +57,7 @@ export function RepoMapSearchPanel() {
             data: {
               ...node.data,
               repoMap: {
-                ...(node.data.repoMap ?? {}),
+                ...node.data.repoMap,
                 dimBySearch: shouldBeDimmed,
               },
             },

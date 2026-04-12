@@ -64,14 +64,18 @@ export class SafetyContext {
     }
 
     switch (context) {
-      case "xml-text":
+      case "xml-text": {
         return escapePromptXmlText(data);
-      case "xml-attr":
+      }
+      case "xml-attr": {
         return escapePromptXmlAttr(data);
-      case "json":
+      }
+      case "json": {
         return JSON.stringify(data);
-      default:
+      }
+      default: {
         return data;
+      }
     }
   }
 
@@ -120,7 +124,7 @@ export class SafetyContext {
   prepareFileContent(
     filePath: string,
     content: string,
-    maxLength = 50000,
+    maxLength = 50_000,
     escapeContext: "xml-attr" | "xml-text" = "xml-text"
   ): { content: string; path: string; truncated: boolean } {
     let truncated = false;
@@ -180,7 +184,7 @@ export class SafetyContext {
     data: object,
     {
       allowedPaths,
-      maxSize = 100000,
+      maxSize = 100_000,
       validatePaths = false,
     }: { allowedPaths?: Set<string>; maxSize?: number; validatePaths?: boolean } = {}
   ): { invalidPaths: string[]; truncated: boolean; xml: string } {

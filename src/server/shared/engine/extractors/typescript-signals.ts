@@ -30,14 +30,12 @@ function getNodeLine(sourceFile: ts.SourceFile, node: ts.Node) {
   return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
 }
 
-function nodeName(node: ts.Node) {
-  if ("name" in node) {
-    const namedNode = node as ts.Node & { name?: ts.Node };
-    if (namedNode.name != null && ts.isIdentifier(namedNode.name)) {
-      return namedNode.name.text;
-    }
-  }
-  return undefined;
+function nodeName(node: ts.Node): string | undefined {
+  const namedNode = "name" in node ? (node as ts.Node & { name?: ts.Node }) : undefined;
+
+  return namedNode?.name != null && ts.isIdentifier(namedNode.name)
+    ? namedNode.name.text
+    : undefined;
 }
 
 function pushSymbol(
@@ -61,12 +59,11 @@ function pushSymbol(
   });
 }
 
-function literalPath(argument: ts.Expression | undefined) {
-  if (argument == null) return undefined;
-  if (ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument)) {
-    return argument.text;
-  }
-  return undefined;
+function literalPath(argument: ts.Expression | undefined): string | undefined {
+  return argument != null &&
+    (ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument))
+    ? argument.text
+    : undefined;
 }
 
 function collectCallRoute(

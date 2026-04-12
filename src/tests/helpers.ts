@@ -30,7 +30,7 @@ export async function cleanupDatabase() {
 }
 
 export async function createTestUser(name: string, role: "ADMIN" | "USER" = "USER") {
-  const email = `${name.toLowerCase()}_${Date.now()}_${Math.floor(Math.random() * 10000)}@test.com`;
+  const email = `${name.toLowerCase()}_${Date.now()}_${Math.floor(Math.random() * 10_000)}@test.com`;
   const user = await prisma.user.create({
     data: { email, name, role },
   });
@@ -44,12 +44,12 @@ export function createAnon() {
 
 export async function expectDenied(promise: Promise<any>) {
   await expect(promise).rejects.toThrowError(
-    /denied|P2004|P2025|not found|unique constraint|result is not allowed to be read back/i
+    /denied|p2004|p2025|not found|unique constraint|result is not allowed to be read back/i
   );
 }
 
 export async function expectValidationFail(promise: Promise<any>) {
   await expect(promise).rejects.toThrowError(
-    /validation|P2002|argument|value out of range|invalid url|Unique constraint failed/i
+    /validation|p2002|argument|value out of range|invalid url|unique constraint failed/i
   );
 }

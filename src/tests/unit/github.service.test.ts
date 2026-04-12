@@ -184,7 +184,7 @@ describe("githubService", () => {
     it("should return installation context when githubInstallationId exists", async () => {
       const { prisma } = createMockPrisma([
         {
-          githubInstallationId: 12345,
+          githubInstallationId: 12_345,
         },
       ]);
 
@@ -192,8 +192,8 @@ describe("githubService", () => {
 
       expect(context.type).toBe("installation");
       const options = octokitState.constructorOptions[0];
-      expect(options.auth.installationId).toBe(12345);
-      expect(options.auth.appId).toBe(123456);
+      expect(options.auth.installationId).toBe(12_345);
+      expect(options.auth.appId).toBe(123_456);
     });
 
     it("should return oauth context when only access_token exists", async () => {
@@ -454,7 +454,7 @@ describe("githubService", () => {
       const { prisma } = createMockPrisma({ access_token: "token" });
       octokitState.searchRepos.mockResolvedValue({ data: { items: [] } });
 
-      await githubService.searchRepos(prisma, 1, "query", undefined);
+      await githubService.searchRepos(prisma, 1, "query");
 
       expect(octokitState.searchRepos).toHaveBeenCalledWith({
         per_page: 10,

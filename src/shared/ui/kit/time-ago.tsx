@@ -21,7 +21,7 @@ export function TimeAgo({ date, locale }: Readonly<Props>) {
     let timerId: NodeJS.Timeout;
 
     const tick = () => {
-      const now = new Date().getTime();
+      const now = Date.now();
       const created = new Date(date).getTime();
       const diff = now - created;
 

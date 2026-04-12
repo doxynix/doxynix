@@ -58,7 +58,7 @@ export function enrichNodesWithParents(
     };
   };
 
-  const parentNodes = parents.map(createParentNode);
+  const parentNodes = parents.map((parent) => createParentNode(parent));
   const childToParent = new Map<string, string>();
   parents.forEach((p) => {
     p.children.forEach((childId) => childToParent.set(childId, p.id));

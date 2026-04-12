@@ -107,21 +107,23 @@ function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boo
 
   switch (stage) {
     case "architect":
-    case "writer_architecture":
+    case "writer_architecture": {
       if (docsLike || testLike || benchmarkLike) return false;
       return (
         ProjectPolicy.isPrimaryArchitecturePath(filePath) ||
         ProjectPolicy.isConfigFile(filePath) ||
         isRootManifest(filePath)
       );
-    case "writer_api":
+    }
+    case "writer_api": {
       if (docsLike || testLike || benchmarkLike) return false;
       return (
         ProjectPolicy.isApiPath(filePath) ||
         ProjectPolicy.isPrimaryArchitecturePath(filePath) ||
         isRootManifest(filePath)
       );
-    case "writer_readme":
+    }
+    case "writer_readme": {
       if (benchmarkLike) return false;
       if (testLike) return false;
       return (
@@ -129,6 +131,7 @@ function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boo
         ProjectPolicy.isPrimaryArchitecturePath(filePath) ||
         isRootManifest(filePath)
       );
+    }
   }
 }
 

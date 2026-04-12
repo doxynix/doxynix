@@ -26,7 +26,7 @@ type CallWithFallbackProps<T> = {
 export async function callWithFallback<T>({
   attemptMetadata = {},
   frequencyPenalty = 0,
-  maxOutputTokens = 65536,
+  maxOutputTokens = 65_536,
   models,
   outputSchema,
   presencePenalty = 0,

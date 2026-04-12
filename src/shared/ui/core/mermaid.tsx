@@ -67,7 +67,7 @@ function useMermaid({
   const [status, setStatus] = React.useState<"error" | "idle" | "loading" | "success">("idle");
 
   // Unique ID for this diagram instance
-  const id = React.useId().replace(/:/g, "");
+  const id = React.useId().replaceAll(":", "");
 
   // Hidden container for Mermaid's size calculations
   const renderRef = React.useRef<HTMLDivElement>(null);
@@ -94,7 +94,8 @@ function useMermaid({
 
       try {
         // Dynamic import to keep bundle size small
-        const mermaid = (await import("mermaid")).default;
+        const mermaidModule = await import("mermaid");
+        const mermaid = mermaidModule.default;
 
         if (isCancelled) return;
 

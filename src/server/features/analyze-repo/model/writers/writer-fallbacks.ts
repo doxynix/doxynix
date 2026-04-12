@@ -136,10 +136,10 @@ export function applyWriterFallbacks(
     if (apiResult != null) {
       updatedStatus.api = apiResult.status;
       if (apiResult.content != null) {
-        const yamlMatch = RegExp(/```yaml([\s\S]*?)```/).exec(apiResult.content);
+        const yamlMatch = RegExp(/```yaml([\S\s]*?)```/).exec(apiResult.content);
         if (yamlMatch) {
           generatedApiMarkdown = apiResult.content
-            .replace(/# OpenAPI Specification[\s\S]*/, "")
+            .replace(/# OpenAPI Specification[\S\s]*/, "")
             .trim();
         } else {
           generatedApiMarkdown = apiResult.content;

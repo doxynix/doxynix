@@ -51,7 +51,7 @@ export const analyzeRepoTask = task({
   retry: {
     factor: 2,
     maxAttempts: 2,
-    maxTimeoutInMs: 60000,
+    maxTimeoutInMs: 60_000,
     minTimeoutInMs: 5000,
     randomize: true,
   },

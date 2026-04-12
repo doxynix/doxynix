@@ -194,7 +194,7 @@ export const ProjectPolicy = {
       parts[0] === "src" && (parts[1] === "main" || parts[1] === "test")
         ? parts.slice(-3).join(" / ")
         : parts.slice(-2).join(" / ");
-    return raw.replace(/[-_]/g, " ");
+    return raw.replaceAll(/[_-]/g, " ");
   },
 
   getPrimaryCategory(path: string): FileCategory {

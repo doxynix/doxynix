@@ -33,13 +33,11 @@ export function NumberTicker({
   const locale = useLocale();
 
   useEffect(() => {
-    if (isInView) {
-      const timer = setTimeout(() => {
-        motionValue.set(direction === "down" ? startValue : value);
-      }, delay * 1000);
-      return () => clearTimeout(timer);
-    }
-    return undefined;
+    if (!isInView) return;
+    const timer = setTimeout(() => {
+      motionValue.set(direction === "down" ? startValue : value);
+    }, delay * 1000);
+    return () => clearTimeout(timer);
   }, [motionValue, isInView, delay, value, direction, startValue]);
 
   useEffect(() => {

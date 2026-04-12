@@ -78,7 +78,7 @@ export function TypingAnimation({
       const graphemes = Array.from(currentWord);
 
       switch (phase) {
-        case "typing":
+        case "typing": {
           if (currentCharIndex < graphemes.length) {
             setDisplayedText(graphemes.slice(0, currentCharIndex + 1).join(""));
             setCurrentCharIndex(currentCharIndex + 1);
@@ -91,12 +91,14 @@ export function TypingAnimation({
             }
           }
           break;
+        }
 
-        case "pause":
+        case "pause": {
           setPhase("deleting");
           break;
+        }
 
-        case "deleting":
+        case "deleting": {
           if (currentCharIndex > 0) {
             setDisplayedText(graphemes.slice(0, currentCharIndex - 1).join(""));
             setCurrentCharIndex(currentCharIndex - 1);
@@ -106,6 +108,7 @@ export function TypingAnimation({
             setPhase("typing");
           }
           break;
+        }
       }
     }, timeoutDelay);
 
@@ -139,13 +142,16 @@ export function TypingAnimation({
 
   const getCursorChar = () => {
     switch (cursorStyle) {
-      case "block":
+      case "block": {
         return "▌";
-      case "underscore":
+      }
+      case "underscore": {
         return "_";
+      }
       case "line":
-      default:
+      default: {
         return "|";
+      }
     }
   };
 

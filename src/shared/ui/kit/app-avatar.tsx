@@ -120,7 +120,7 @@ export function AppAvatar({
 
       {showFallback && (
         <AvatarFallback className={cn("bg-secondary text-secondary-foreground", fallbackClassName)}>
-          {fallbackText != null ? getInitials(fallbackText) : alt.substring(0, 2).toUpperCase()}
+          {fallbackText != null ? getInitials(fallbackText) : alt.slice(0, 2).toUpperCase()}
         </AvatarFallback>
       )}
     </Avatar>

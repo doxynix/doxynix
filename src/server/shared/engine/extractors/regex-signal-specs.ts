@@ -39,19 +39,19 @@ const DEFAULT_SIGNAL_SPEC: RegexSignalSpec = {
     /^\s*(?:function|class|interface|module|procedure|func|proc)\s+/gim,
   ],
   importPatterns: [
-    /^\s*import\s+([A-Za-z0-9_./-]+)/gm,
-    /^\s*from\s+([A-Za-z0-9_./-]+)\s+import\b/gm,
-    /^\s*use\s+([A-Za-z0-9_./-]+)/gm,
+    /^\s*import\s+([\w./-]+)/gm,
+    /^\s*from\s+([\w./-]+)\s+import\b/gm,
+    /^\s*use\s+([\w./-]+)/gm,
     /^\s*include\s+["']([^"']+)["']/gm,
   ],
   symbolPatterns: [
     {
       exported: true,
       kind: "function",
-      pattern: /^\s*(?:function|func|proc|procedure)\s+([A-Za-z_][\w]*)/gim,
+      pattern: /^\s*(?:function|func|proc|procedure)\s+([_a-z]\w*)/gim,
     },
-    { exported: true, kind: "class", pattern: /^\s*class\s+([A-Za-z_][\w]*)/gm },
-    { exported: true, kind: "interface", pattern: /^\s*interface\s+([A-Za-z_][\w]*)/gm },
+    { exported: true, kind: "class", pattern: /^\s*class\s+([A-Z_a-z]\w*)/gm },
+    { exported: true, kind: "interface", pattern: /^\s*interface\s+([A-Z_a-z]\w*)/gm },
   ],
 };
 
@@ -86,9 +86,9 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
       /\bWebApplication\.CreateBuilder\s*\(/.test(file.content),
     exportPatterns: [
       /\bpublic\s+(?:class|interface|enum|record|struct)\b/g,
-      /\bpublic\s+[A-Za-z0-9_<>,[\]?]+\s+[A-Za-z_][\w]*\s*\(/g,
+      /\bpublic\s+[\w,<>?[\]]+\s+[A-Z_a-z]\w*\s*\(/g,
     ],
-    importPatterns: [/^\s*using\s+([A-Za-z0-9_.]+)\s*;$/gm],
+    importPatterns: [/^\s*using\s+([\w.]+)\s*;$/gm],
     routePatterns: [
       {
         framework: "ASP.NET Core",
@@ -98,24 +98,24 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
       },
     ],
     symbolPatterns: [
-      { exported: true, kind: "class", pattern: /\bpublic\s+class\s+([A-Za-z_][\w]*)\b/g },
-      { exported: true, kind: "interface", pattern: /\bpublic\s+interface\s+([A-Za-z_][\w]*)\b/g },
+      { exported: true, kind: "class", pattern: /\bpublic\s+class\s+([A-Z_a-z]\w*)\b/g },
+      { exported: true, kind: "interface", pattern: /\bpublic\s+interface\s+([A-Z_a-z]\w*)\b/g },
     ],
   },
   ".dart": {
     apiSurfacePatterns: [/@(?:GET|POST|PUT|PATCH|DELETE)\b/g],
     entrypointHint: (file) => /\bvoid\s+main\s*\(/.test(file.content),
     exportPatterns: [
-      /^\s*class\s+[A-Z][A-Za-z0-9_]*/gm,
-      /^\s*(?:Future<[^>]+>\s+)?[A-Za-z_][\w<>?]*\s+[A-Za-z_][\w]*\s*\(/gm,
+      /^\s*class\s+[A-Z]\w*/gm,
+      /^\s*(?:Future<[^>]+>\s+)?[A-Z_a-z][\w<>?]*\s+[A-Z_a-z]\w*\s*\(/gm,
     ],
     importPatterns: [/^\s*import\s+["']([^"']+)["']/gm],
     symbolPatterns: [
-      { exported: true, kind: "class", pattern: /^\s*class\s+([A-Z][A-Za-z0-9_]*)/gm },
+      { exported: true, kind: "class", pattern: /^\s*class\s+([A-Z]\w*)/gm },
       {
         exported: true,
         kind: "function",
-        pattern: /^\s*(?:Future<[^>]+>\s+)?[A-Za-z_][\w<>?]*\s+([A-Za-z_][\w]*)\s*\(/gm,
+        pattern: /^\s*(?:Future<[^>]+>\s+)?[A-Z_a-z][\w<>?]*\s+([A-Z_a-z]\w*)\s*\(/gm,
       },
     ],
   },
@@ -128,8 +128,8 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
     entrypointHint: (file) =>
       /\bpackage\s+main\b/.test(file.content) && /\bfunc\s+main\s*\(/.test(file.content),
     exportPatterns: [
-      /^func\s*(?:\([^)]*\)\s*)?[A-Z][A-Za-z0-9_]*\s*\(/gm,
-      /^(?:type|const|var)\s+[A-Z][A-Za-z0-9_]*\b/gm,
+      /^func\s*(?:\([^)]*\)\s*)?[A-Z]\w*\s*\(/gm,
+      /^(?:type|const|var)\s+[A-Z]\w*\b/gm,
     ],
     importPatterns: [/^\s*import\s+"([^"]+)"/gm, /^\s*"([^"]+)"\s*$/gm],
     routePatterns: [
@@ -144,22 +144,22 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
       {
         exported: true,
         kind: "function",
-        pattern: /^func\s*(?:\([^)]*\)\s*)?([A-Z][A-Za-z0-9_]*)\s*\(/gm,
+        pattern: /^func\s*(?:\([^)]*\)\s*)?([A-Z]\w*)\s*\(/gm,
       },
-      { exported: true, kind: "struct", pattern: /^type\s+([A-Z][A-Za-z0-9_]*)\s+struct\b/gm },
+      { exported: true, kind: "struct", pattern: /^type\s+([A-Z]\w*)\s+struct\b/gm },
     ],
   },
   ".java": {
-    apiSurfacePatterns: [/@(Get|Post|Put|Delete|Patch|Request)Mapping\b/g, /\brouting\s*\{/g],
+    apiSurfacePatterns: [/@(Get|Post|Put|Delete|Patch|Request)Mapping\b/g, /\brouting\s*{/g],
     entrypointHint: (file) =>
       /\bpublic\s+static\s+void\s+main\s*\(/.test(file.content) ||
       /\bfun\s+main\s*\(/.test(file.content),
     exportPatterns: [
       /\bpublic\s+(?:class|interface|enum|record)\b/g,
-      /\bpublic\s+[A-Za-z0-9_<>,[\]?]+\s+[A-Za-z_][\w]*\s*\(/g,
-      /^\s*(?:class|object|interface|fun)\s+[A-Z][A-Za-z0-9_]*/gm,
+      /\bpublic\s+[\w,<>?[\]]+\s+[A-Z_a-z]\w*\s*\(/g,
+      /^\s*(?:class|object|interface|fun)\s+[A-Z]\w*/gm,
     ],
-    importPatterns: [/^\s*import\s+([A-Za-z0-9_.*]+)\s*;?$/gm],
+    importPatterns: [/^\s*import\s+([\w*.]+)\s*;?$/gm],
     routePatterns: [
       {
         framework: "Spring Boot",
@@ -169,14 +169,14 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
       },
     ],
     symbolPatterns: [
-      { exported: true, kind: "class", pattern: /\bpublic\s+class\s+([A-Za-z_][\w]*)\b/g },
-      { exported: true, kind: "interface", pattern: /\bpublic\s+interface\s+([A-Za-z_][\w]*)\b/g },
+      { exported: true, kind: "class", pattern: /\bpublic\s+class\s+([A-Z_a-z]\w*)\b/g },
+      { exported: true, kind: "interface", pattern: /\bpublic\s+interface\s+([A-Z_a-z]\w*)\b/g },
     ],
   },
   ".php": {
-    apiSurfacePatterns: [/\bRoute::(get|post|put|patch|delete)\b/gi, /#\[Route\(/g],
+    apiSurfacePatterns: [/\broute::(get|post|put|patch|delete)\b/gi, /#\[Route\(/g],
     entrypointHint: (file) => getFileName(file.path).toLowerCase() === "index.php",
-    exportPatterns: [/\bpublic\s+function\b/g, /\bclass\s+[A-Z][A-Za-z0-9_]*\b/g],
+    exportPatterns: [/\bpublic\s+function\b/g, /\bclass\s+[A-Z]\w*\b/g],
     importPatterns: [
       /^\s*use\s+([^;]+);$/gm,
       /\b(?:require|include)(?:_once)?\s*\(?\s*["']([^"']+)["']/g,
@@ -186,12 +186,12 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
         framework: "Laravel",
         methodIndex: 1,
         pathIndex: 2,
-        pattern: /\bRoute::(get|post|put|patch|delete)\s*\(\s*["']([^"']+)["']/gi,
+        pattern: /\broute::(get|post|put|patch|delete)\s*\(\s*["']([^"']+)["']/gi,
       },
     ],
     symbolPatterns: [
-      { exported: true, kind: "class", pattern: /\bclass\s+([A-Z][A-Za-z0-9_]*)\b/g },
-      { exported: true, kind: "function", pattern: /\bfunction\s+([A-Za-z_][\w]*)\s*\(/g },
+      { exported: true, kind: "class", pattern: /\bclass\s+([A-Z]\w*)\b/g },
+      { exported: true, kind: "function", pattern: /\bfunction\s+([A-Z_a-z]\w*)\s*\(/g },
     ],
   },
   ".py": {
@@ -202,15 +202,15 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
     ],
     entrypointHint: (file) => /if\s+__name__\s*==\s*["']__main__["']/.test(file.content),
     exportPatterns: [
-      /^(?:async\s+)?def\s+(?!_)[A-Za-z_][\w]*\s*\(/gm,
-      /^class\s+(?!_)[A-Za-z_][\w]*\b/gm,
+      /^(?:async\s+)?def\s+(?!_)[A-Z_a-z]\w*\s*\(/gm,
+      /^class\s+(?!_)[A-Z_a-z]\w*\b/gm,
     ],
     extraFrameworkTokens: (file) => [
       ...((file.content.match(/\b(FastAPI|APIRouter|Flask|Django)\b/g) ?? []) as string[]),
     ],
     importPatterns: [
-      /^\s*import\s+([A-Za-z_][\w.]*)/gm,
-      /^\s*from\s+([.A-Za-z_][\w.]*)\s+import\b/gm,
+      /^\s*import\s+([A-Z_a-z][\w.]*)/gm,
+      /^\s*from\s+([.A-Z_a-z][\w.]*)\s+import\b/gm,
     ],
     routePatterns: [
       {
@@ -227,22 +227,22 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
       },
     ],
     symbolPatterns: [
-      { exported: true, kind: "function", pattern: /^(?:async\s+)?def\s+([A-Za-z_][\w]*)\s*\(/gm },
-      { exported: true, kind: "class", pattern: /^class\s+([A-Za-z_][\w]*)\b/gm },
+      { exported: true, kind: "function", pattern: /^(?:async\s+)?def\s+([A-Z_a-z]\w*)\s*\(/gm },
+      { exported: true, kind: "class", pattern: /^class\s+([A-Z_a-z]\w*)\b/gm },
     ],
   },
   ".rb": {
     apiSurfacePatterns: [
       /^\s*(get|post|put|patch|delete)\s+["']/gm,
-      /\bresources\s+:[A-Za-z_][\w]*/g,
+      /\bresources\s+:[A-Z_a-z]\w*/g,
     ],
     entrypointHint: (file) =>
       /\b(run|start)\b/.test(getFileName(file.path).toLowerCase()) ||
       file.path.endsWith("config.ru"),
     exportPatterns: [
-      /^\s*class\s+[A-Z][A-Za-z0-9_:]*/gm,
-      /^\s*module\s+[A-Z][A-Za-z0-9_:]*/gm,
-      /^\s*def\s+[a-zA-Z_][\w!?=]*/gm,
+      /^\s*class\s+[A-Z][\w:]*/gm,
+      /^\s*module\s+[A-Z][\w:]*/gm,
+      /^\s*def\s+[A-Z_a-z][\w!=?]*/gm,
     ],
     importPatterns: [
       /^\s*require_relative\s+["']([^"']+)["']/gm,
@@ -257,71 +257,71 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
       },
     ],
     symbolPatterns: [
-      { exported: true, kind: "class", pattern: /^\s*class\s+([A-Z][A-Za-z0-9_:]*)/gm },
-      { exported: true, kind: "module", pattern: /^\s*module\s+([A-Z][A-Za-z0-9_:]*)/gm },
-      { exported: true, kind: "function", pattern: /^\s*def\s+([a-zA-Z_][\w!?=]*)/gm },
+      { exported: true, kind: "class", pattern: /^\s*class\s+([A-Z][\w:]*)/gm },
+      { exported: true, kind: "module", pattern: /^\s*module\s+([A-Z][\w:]*)/gm },
+      { exported: true, kind: "function", pattern: /^\s*def\s+([A-Z_a-z][\w!=?]*)/gm },
     ],
   },
   ".rs": {
-    apiSurfacePatterns: [/#\[(get|post|put|patch|delete)\]/g, /\bRouter::new\s*\(/g],
+    apiSurfacePatterns: [/#\[(get|post|put|patch|delete)]/g, /\bRouter::new\s*\(/g],
     entrypointHint: (file) => /\bfn\s+main\s*\(/.test(file.content),
     exportPatterns: [/\bpub\s+(?:fn|struct|enum|trait|mod|const|type)\b/g],
-    importPatterns: [/^\s*use\s+([^;]+);$/gm, /^\s*mod\s+([A-Za-z_][\w]*)\s*;$/gm],
+    importPatterns: [/^\s*use\s+([^;]+);$/gm, /^\s*mod\s+([A-Z_a-z]\w*)\s*;$/gm],
     routePatterns: [
       {
         framework: "Axum",
         methodIndex: 1,
         pathIndex: 2,
-        pattern: /#\[(get|post|put|patch|delete)\(\s*"([^"]+)"\s*\)\]/g,
+        pattern: /#\[(get|post|put|patch|delete)\(\s*"([^"]+)"\s*\)]/g,
       },
     ],
     symbolPatterns: [
-      { exported: true, kind: "function", pattern: /\bpub\s+fn\s+([A-Za-z_][\w]*)\s*\(/g },
-      { exported: true, kind: "struct", pattern: /\bpub\s+struct\s+([A-Za-z_][\w]*)\b/g },
-      { exported: true, kind: "trait", pattern: /\bpub\s+trait\s+([A-Za-z_][\w]*)\b/g },
+      { exported: true, kind: "function", pattern: /\bpub\s+fn\s+([A-Z_a-z]\w*)\s*\(/g },
+      { exported: true, kind: "struct", pattern: /\bpub\s+struct\s+([A-Z_a-z]\w*)\b/g },
+      { exported: true, kind: "trait", pattern: /\bpub\s+trait\s+([A-Z_a-z]\w*)\b/g },
     ],
   },
   ".scala": {
     apiSurfacePatterns: [],
     entrypointHint: (file) =>
       /\bdef\s+main\s*\(/.test(file.content) || /\bextends\s+App\b/.test(file.content),
-    exportPatterns: [/^\s*(?:object|class|trait)\s+[A-Z][A-Za-z0-9_]*/gm],
-    importPatterns: [/^\s*import\s+([A-Za-z0-9_.*{},\s]+)/gm],
+    exportPatterns: [/^\s*(?:object|class|trait)\s+[A-Z]\w*/gm],
+    importPatterns: [/^\s*import\s+([\s\w*,.{}]+)/gm],
     symbolPatterns: [
-      { exported: true, kind: "class", pattern: /^\s*class\s+([A-Z][A-Za-z0-9_]*)/gm },
-      { exported: true, kind: "trait", pattern: /^\s*trait\s+([A-Z][A-Za-z0-9_]*)/gm },
-      { exported: true, kind: "module", pattern: /^\s*object\s+([A-Z][A-Za-z0-9_]*)/gm },
+      { exported: true, kind: "class", pattern: /^\s*class\s+([A-Z]\w*)/gm },
+      { exported: true, kind: "trait", pattern: /^\s*trait\s+([A-Z]\w*)/gm },
+      { exported: true, kind: "module", pattern: /^\s*object\s+([A-Z]\w*)/gm },
     ],
   },
   ".swift": {
     apiSurfacePatterns: [/@main/g],
     entrypointHint: (file) => /@main/.test(file.content),
     exportPatterns: [/\b(?:public|open)\s+(?:class|struct|enum|protocol|func)\b/g],
-    importPatterns: [/^\s*import\s+([A-Za-z0-9_.]+)/gm],
+    importPatterns: [/^\s*import\s+([\w.]+)/gm],
     symbolPatterns: [
-      { exported: true, kind: "class", pattern: /\b(?:public|open)\s+class\s+([A-Za-z_][\w]*)\b/g },
+      { exported: true, kind: "class", pattern: /\b(?:public|open)\s+class\s+([A-Z_a-z]\w*)\b/g },
       {
         exported: true,
         kind: "struct",
-        pattern: /\b(?:public|open)\s+struct\s+([A-Za-z_][\w]*)\b/g,
+        pattern: /\b(?:public|open)\s+struct\s+([A-Z_a-z]\w*)\b/g,
       },
       {
         exported: true,
         kind: "function",
-        pattern: /\b(?:public|open)\s+func\s+([A-Za-z_][\w]*)\s*\(/g,
+        pattern: /\b(?:public|open)\s+func\s+([A-Z_a-z]\w*)\s*\(/g,
       },
     ],
   },
   "c-family": {
     apiSurfacePatterns: [],
     entrypointHint: (file) => /\bint\s+main\s*\(/.test(file.content),
-    exportPatterns: [/^[A-Za-z_][\w\s*]*\s+([A-Za-z_][\w]*)\s*\([^;]*\)\s*\{/gm],
+    exportPatterns: [/^[A-Z_a-z][\s\w*]*\s+([A-Z_a-z]\w*)\s*\([^;]*\)\s*{/gm],
     importPatterns: [/^\s*#include\s+"([^"]+)"/gm],
     symbolPatterns: [
       {
         exported: true,
         kind: "function",
-        pattern: /^[A-Za-z_][\w\s*]*\s+([A-Za-z_][\w]*)\s*\([^;]*\)\s*\{/gm,
+        pattern: /^[A-Z_a-z][\s\w*]*\s+([A-Z_a-z]\w*)\s*\([^;]*\)\s*{/gm,
       },
     ],
   },
@@ -329,8 +329,8 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
     apiSurfacePatterns: [/\b(get|post|put|patch|delete)\s+["']/g],
     entrypointHint: (file) =>
       /\bdefmodule\b/.test(file.content) && file.path.endsWith("application.ex"),
-    exportPatterns: [/^\s*def(module|p)?\s+[A-Za-z_][\w!?]*/gm],
-    importPatterns: [/^\s*(?:use|import|alias)\s+([A-Za-z0-9_.]+)/gm],
+    exportPatterns: [/^\s*def(module|p)?\s+[A-Z_a-z][\w!?]*/gm],
+    importPatterns: [/^\s*(?:use|import|alias)\s+([\w.]+)/gm],
     routePatterns: [
       {
         framework: "Phoenix",
@@ -340,8 +340,8 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
       },
     ],
     symbolPatterns: [
-      { exported: true, kind: "module", pattern: /^\s*defmodule\s+([A-Za-z_.][\w.]*)/gm },
-      { exported: true, kind: "function", pattern: /^\s*defp?\s+([A-Za-z_][\w!?]*)/gm },
+      { exported: true, kind: "module", pattern: /^\s*defmodule\s+([.A-Z_a-z][\w.]*)/gm },
+      { exported: true, kind: "function", pattern: /^\s*defp?\s+([A-Z_a-z][\w!?]*)/gm },
     ],
   },
 };
@@ -360,14 +360,14 @@ const SPEC_ALIASES: Record<string, string> = {
 };
 
 function getFileExtension(filePath: string) {
-  const normalizedPath = filePath.replace(/\\/g, "/");
+  const normalizedPath = filePath.replaceAll("\\", "/");
   const filename = normalizedPath.slice(normalizedPath.lastIndexOf("/") + 1);
   const dotIndex = filename.lastIndexOf(".");
   return dotIndex >= 0 ? filename.slice(dotIndex).toLowerCase() : "";
 }
 
 function getFileName(filePath: string) {
-  const normalizedPath = filePath.replace(/\\/g, "/");
+  const normalizedPath = filePath.replaceAll("\\", "/");
   return normalizedPath.slice(normalizedPath.lastIndexOf("/") + 1);
 }
 

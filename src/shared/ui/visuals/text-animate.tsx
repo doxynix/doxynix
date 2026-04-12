@@ -322,19 +322,23 @@ const TextAnimateBase = ({
 
   let segments: string[] = [];
   switch (by) {
-    case "word":
+    case "word": {
       segments = children.split(/(\s+)/);
       break;
-    case "character":
+    }
+    case "character": {
       segments = children.split("");
       break;
-    case "line":
+    }
+    case "line": {
       segments = children.split("\n");
       break;
+    }
     case "text":
-    default:
+    default: {
       segments = [children];
       break;
+    }
   }
 
   const finalVariants = variants

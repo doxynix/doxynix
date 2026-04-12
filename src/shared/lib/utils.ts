@@ -150,12 +150,12 @@ const SENSITIVE_KEYS = new Set([
   "x-github-token",
 ]);
 
-const GITHUB_TOKEN_REGEX = /(github_pat_\w+|gh[pousr]_\w{36,})/g;
-const BEARER_TOKEN_REGEX = /([Bb]earer\s+)[a-zA-Z0-9\-._~+/]+=*/g;
+const GITHUB_TOKEN_REGEX = /(github_pat_\w+|gh[oprsu]_\w{36,})/g;
+const BEARER_TOKEN_REGEX = /([Bb]earer\s+)[\w+./~\-]+=*/g;
 
 const replacer = (key: string, value: unknown): unknown => {
   const lowerKey = key.toLowerCase();
-  const normalizedKey = lowerKey.replace(/[_-]/g, "");
+  const normalizedKey = lowerKey.replaceAll(/[_-]/g, "");
 
   if (SENSITIVE_KEYS.has(lowerKey) || SENSITIVE_KEYS.has(normalizedKey)) {
     return "[REDACTED]";
@@ -168,10 +168,10 @@ const replacer = (key: string, value: unknown): unknown => {
   if (typeof value === "string") {
     let safeString = value;
     if (safeString.includes("gh") || safeString.includes("github_pat_")) {
-      safeString = safeString.replace(GITHUB_TOKEN_REGEX, "[REDACTED_GH_TOKEN]");
+      safeString = safeString.replaceAll(GITHUB_TOKEN_REGEX, "[REDACTED_GH_TOKEN]");
     }
     if (safeString.includes("earer")) {
-      safeString = safeString.replace(BEARER_TOKEN_REGEX, "$1[REDACTED]");
+      safeString = safeString.replaceAll(BEARER_TOKEN_REGEX, "$1[REDACTED]");
     }
     return safeString;
   }
@@ -197,6 +197,10 @@ export const sanitizePayload = (obj: unknown): unknown => {
   }
 };
 
+const easeInOutCubic = (t: number): number => {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+};
+
 export const smoothScrollTo = (targetId: string, offset: number = 80, duration: number = 800) => {
   const targetElement = document.getElementById(targetId);
   if (!targetElement) {
@@ -208,10 +212,6 @@ export const smoothScrollTo = (targetId: string, offset: number = 80, duration: 
   const targetPosition = targetElement.getBoundingClientRect().top + startPosition - offset;
   const distance = targetPosition - startPosition;
   let startTime: null | number = null;
-
-  const easeInOutCubic = (t: number): number => {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  };
 
   const animation = (currentTime: number) => {
     startTime ??= currentTime;
@@ -250,13 +250,13 @@ export function getInitials(name?: null | string, email?: null | string): string
     }
 
     if (parts.length === 1) {
-      const firstChar = parts[0]?.substring(0, 1);
+      const firstChar = parts[0]?.slice(0, 1);
       return (firstChar != null ? firstChar : "U").toUpperCase();
     }
   }
 
   if (email != null && email.length > 0) {
-    return email.substring(0, 1).toUpperCase();
+    return email.slice(0, 1).toUpperCase();
   }
 
   return "U";
@@ -308,6 +308,7 @@ export function setClientCookie(name: string, value: boolean | string, maxAge: n
   if (typeof window === "undefined") return;
 
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  // eslint-disable-next-line unicorn/no-document-cookie
   document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(String(value))}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
 }
 
@@ -344,17 +345,17 @@ export function clampIntegerParam(
   return Math.min(max, Math.max(min, value));
 }
 
+const normalize = (path: string) => {
+  const clean = path.replace(/\/$/, "");
+  return clean === "" ? "/" : clean;
+};
+
 export function isRouteActive(
   pathname: string,
   href: null | string | undefined,
   exact?: boolean
 ): boolean {
   if (href == null) return false;
-
-  const normalize = (path: string) => {
-    const clean = path.replace(/\/$/, "");
-    return clean === "" ? "/" : clean;
-  };
 
   const cleanPath = normalize(pathname);
   const cleanHref = normalize(href);
