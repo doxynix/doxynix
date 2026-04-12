@@ -4,7 +4,7 @@ import ts from "typescript";
 import type { TsStaticHint } from "../../types";
 import { normalizeRepoPath } from "../core/common";
 
-const TS_LIKE = new Set([".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"]);
+const TS_LIKE = new Set([".cjs", ".cts", ".js", ".jsx", ".mjs", ".mts", ".ts", ".tsx"]);
 
 const LONG_FN_LINES = 80;
 const MANY_PARAMS = 7;

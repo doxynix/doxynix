@@ -99,7 +99,7 @@ export async function POST(req: Request) {
 
       try {
         if (action === "created") {
-          const matchedUserId: number | null = null;
+          const matchedUserId: null | number = null;
 
           await prisma.githubInstallation.upsert({
             create: {

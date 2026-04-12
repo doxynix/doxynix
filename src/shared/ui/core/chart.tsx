@@ -11,8 +11,8 @@ const THEMES = { dark: ".dark", light: "" } as const;
 
 export type ChartConfig = {
   [k in string]: (
-    | { color?: string; theme?: never }
     | { color?: never; theme: Record<keyof typeof THEMES, string> }
+    | { color?: string; theme?: never }
   ) & {
     icon?: React.ComponentType;
     label?: React.ReactNode;
@@ -102,7 +102,7 @@ const ChartTooltipContent = React.forwardRef<
     React.ComponentProps<typeof RechartsPrimitive.Tooltip> & {
       hideIndicator?: boolean;
       hideLabel?: boolean;
-      indicator?: "line" | "dot" | "dashed";
+      indicator?: "dashed" | "dot" | "line";
       labelKey?: string;
       nameKey?: string;
     }
@@ -332,9 +332,9 @@ function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key:
 
 export {
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
+  ChartTooltip,
+  ChartTooltipContent,
 };

@@ -7,7 +7,7 @@ import { Button } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
-type StatusType = "up" | "down" | "maintenance" | "unknown";
+type StatusType = "down" | "maintenance" | "unknown" | "up";
 
 type StatusResponse = {
   status: StatusType;

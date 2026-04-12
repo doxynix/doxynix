@@ -3,7 +3,7 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 
 type Props = {
   rows?: number;
-  variant?: "tree" | "setup";
+  variant?: "setup" | "tree";
 };
 
 const LEVELS = [0, 1, 2, 2, 1, 2, 2, 2, 0, 1, 1, 2, 1, 0, 0, 1, 2, 1, 0, 1];

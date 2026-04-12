@@ -24,7 +24,7 @@ type PathExplanation = {
   sensitive: boolean;
 };
 
-function compileMatcher(patterns: string | readonly string[]) {
+function compileMatcher(patterns: readonly string[] | string) {
   const values = Array.isArray(patterns) ? patterns : [patterns];
   return pm(values.map((pattern) => pattern.toLowerCase()));
 }

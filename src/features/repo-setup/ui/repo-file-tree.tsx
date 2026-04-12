@@ -24,7 +24,7 @@ type Props = {
   actions: ActionsType;
   repo: UiRepoDetailed;
   state: StateType;
-  treeApi: TreeApi<FileNode> | null;
+  treeApi: null | TreeApi<FileNode>;
 };
 
 export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>) {

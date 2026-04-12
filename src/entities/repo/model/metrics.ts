@@ -3,7 +3,7 @@ import type { UiRepoListItem } from "@/shared/api/trpc";
 type Props = {
   id: string;
   label: string;
-  score: number | null | undefined;
+  score: null | number | undefined;
 };
 
 export function getMetrics(repo: UiRepoListItem): Props[] {

@@ -6,18 +6,18 @@ import { AnimatePresence, motion, type MotionProps, type Variants } from "motion
 
 import { cn } from "@/shared/lib/utils";
 
-type AnimationType = "text" | "word" | "character" | "line";
+type AnimationType = "character" | "line" | "text" | "word";
 type AnimationVariant =
-  | "fadeIn"
   | "blurIn"
-  | "blurInUp"
   | "blurInDown"
-  | "slideUp"
+  | "blurInUp"
+  | "fadeIn"
+  | "scaleDown"
+  | "scaleUp"
   | "slideDown"
   | "slideLeft"
   | "slideRight"
-  | "scaleUp"
-  | "scaleDown";
+  | "slideUp";
 
 interface TextAnimateProps extends MotionProps {
   /**

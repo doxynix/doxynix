@@ -9,7 +9,7 @@ import { cn } from "@/shared/lib/utils";
 interface NumberTickerProps extends ComponentPropsWithoutRef<"span"> {
   decimalPlaces?: number;
   delay?: number;
-  direction?: "up" | "down";
+  direction?: "down" | "up";
   startValue?: number;
   value: number;
 }

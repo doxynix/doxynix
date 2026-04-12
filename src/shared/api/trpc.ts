@@ -1,7 +1,6 @@
 import { createTRPCReact } from "@trpc/react-query";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
-// eslint-disable-next-line boundaries/element-types
 import type { AppRouter } from "@/server/api/routers";
 
 export const trpc = createTRPCReact<AppRouter>();
@@ -68,6 +67,6 @@ export type MapNodeData = NonNullable<RepoMapType>["graph"]["nodes"][number];
 
 export type MapEdgeData = NonNullable<RepoMapType>["graph"]["edges"][number];
 
-export type RepoMapDisplayData = NonNullable<RepoMapType> | NonNullable<NodeType>;
+export type RepoMapDisplayData = NonNullable<NodeType> | NonNullable<RepoMapType>;
 
 export type NodeBrief = NonNullable<RouterOutput["repoDetails"]["getInteractiveBriefNode"]>;

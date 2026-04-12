@@ -21,7 +21,7 @@ type ListRepoItem =
   RestEndpointMethodTypes["repos"]["listForAuthenticatedUser"]["response"]["data"][number];
 type InstallationRepoItem =
   RestEndpointMethodTypes["apps"]["listReposAccessibleToInstallation"]["response"]["data"]["repositories"][number];
-type GitHubRepoResponse = SearchRepoItem | ListRepoItem | InstallationRepoItem;
+type GitHubRepoResponse = InstallationRepoItem | ListRepoItem | SearchRepoItem;
 type GitHubContextType = "app" | "installation" | "oauth" | "public";
 const FALLBACK_RETRYABLE_STATUSES = new Set([401, 403, 404]);
 /**
@@ -83,7 +83,7 @@ async function fetchInstallationRepos(installationId: number): Promise<RepoItemF
   }
 }
 
-async function fetchOauthRepos(account: { access_token: string | null; id: string | number }) {
+async function fetchOauthRepos(account: { access_token: null | string; id: number | string }) {
   if (account.access_token == null) return [];
   try {
     const octokit = getUserClient(account.access_token);
@@ -281,7 +281,7 @@ export type GitHubFileResponse = {
     name: string;
     sha: string;
     size: number;
-    url: string | null;
+    url: null | string;
   };
 };
 /**

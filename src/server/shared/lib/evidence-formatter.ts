@@ -11,15 +11,15 @@ import { escapePromptXmlAttr, escapePromptXmlText } from "./string-utils";
  * Evidence block types
  */
 export type EvidenceType =
-  | "repository"
-  | "metrics"
-  | "risks"
   | "api"
   | "architecture"
-  | "modules"
+  | "custom"
   | "dependencies"
-  | "security"
-  | "custom";
+  | "metrics"
+  | "modules"
+  | "repository"
+  | "risks"
+  | "security";
 
 /**
  * Formatting options for evidence blocks
@@ -50,7 +50,7 @@ export interface FormattedEvidence {
 
   /** Metadata about the formatting */
   metadata: {
-    format: "xml" | "json";
+    format: "json" | "xml";
     originalSize?: number;
     timestamp: Date;
     type: EvidenceType;
@@ -227,7 +227,7 @@ export class EvidenceFormatter {
    */
   formatPaths(
     paths: string[],
-    format: "xml" | "json" | "text" = "xml",
+    format: "json" | "text" | "xml" = "xml",
     options: EvidenceFormattingOptions = {}
   ): FormattedEvidence {
     if (format === "text") {

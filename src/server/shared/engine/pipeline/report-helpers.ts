@@ -7,10 +7,10 @@ import type {
 import { ProjectPolicy } from "../core/project-policy";
 
 type SectionBuilderArgs<TBody> = {
-  audience: DocumentationAudience | "mixed";
+  audience: "mixed" | DocumentationAudience;
   body: TBody;
   confidence: number;
-  evidencePaths: Array<string | null | undefined | false>;
+  evidencePaths: Array<false | null | string | undefined>;
   section: ReportSectionKind;
   summary: string[];
   title: string;
@@ -23,7 +23,7 @@ export function clampSectionConfidence(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-export function uniquePaths(paths: Array<string | null | undefined | false>, limit?: number) {
+export function uniquePaths(paths: Array<false | null | string | undefined>, limit?: number) {
   const deduped = Array.from(
     new Set(paths.filter((path): path is string => typeof path === "string" && path.length > 0))
   );

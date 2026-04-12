@@ -18,12 +18,12 @@
     "forceConsistentCasingInFileNames": true,
     "noUncheckedIndexedAccess": true,
     "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noErrorTruncation": true,
     "useDefineForClassFields": true,
-    "allowImportingTsExtensions": true,
     "plugins": [
       {
         "name": "next"

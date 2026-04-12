@@ -21,7 +21,7 @@ const PREFIX_KEYS = Object.keys(SEQUENTIAL_ROUTES);
 
 export function useNavigationHotkeys(onAction?: () => void) {
   const router = useRouter();
-  const [prefix, setPrefix] = useState<string | null>(null);
+  const [prefix, setPrefix] = useState<null | string>(null);
 
   useEffect(() => {
     if (prefix == null) return;
@@ -48,7 +48,7 @@ export function useNavigationHotkeys(onAction?: () => void) {
       if (prefix == null) return;
 
       const code = e.code;
-      let secondKey: string | null = null;
+      let secondKey: null | string = null;
 
       if (code.startsWith("Key")) {
         secondKey = code.slice(3).toLowerCase();

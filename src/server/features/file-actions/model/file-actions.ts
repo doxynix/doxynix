@@ -31,14 +31,14 @@ const DocumentFilePreviewSchema = z.object({
 export type FileActionNodeContext = {
   confidence: "high" | "low" | "medium";
   graphNeighbors?: string[];
-  neighborBuckets?: Record<string, string[]> | null;
+  neighborBuckets?: null | Record<string, string[]>;
   neighborPaths?: string[];
   nextSuggestedPaths?: string[];
   recommendedActions?: string[];
-  reviewPriority?: {
+  reviewPriority?: null | {
     level: "high" | "low" | "medium";
     reason: string;
-  } | null;
+  };
   role: string;
   sourcePaths?: string[];
   summary?: string[];

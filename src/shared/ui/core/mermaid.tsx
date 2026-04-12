@@ -9,21 +9,21 @@ import { cn } from "@/shared/lib/utils";
  * Types
  * -----------------------------------------------------------------------------------------------*/
 
-export type MermaidBuiltinTheme = "default" | "dark" | "forest" | "neutral" | "base";
+export type MermaidBuiltinTheme = "base" | "dark" | "default" | "forest" | "neutral";
 export type MermaidTheme = MermaidBuiltinTheme | MermaidCustomTheme;
 
-const BUILTIN_THEMES = new Set<string>(["default", "dark", "forest", "neutral", "base"]);
+const BUILTIN_THEMES = new Set<string>(["base", "dark", "default", "forest", "neutral"]);
 
 export interface MermaidConfig {
   darkMode?: boolean;
   flowchart?: {
-    curve?: "linear" | "cardinal";
+    curve?: "cardinal" | "linear";
     htmlLabels?: boolean;
     padding?: number;
   };
   fontFamily?: string;
   fontSize?: number;
-  logLevel?: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
+  logLevel?: "debug" | "error" | "fatal" | "info" | "trace" | "warn";
   look?: "classic" | "handdrawn";
   sequence?: {
     actorMargin?: number;
@@ -62,9 +62,9 @@ function useMermaid({
   config?: MermaidConfig;
   debounceTime?: number;
 }) {
-  const [svg, setSvg] = React.useState<string | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
-  const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [svg, setSvg] = React.useState<null | string>(null);
+  const [error, setError] = React.useState<null | string>(null);
+  const [status, setStatus] = React.useState<"error" | "idle" | "loading" | "success">("idle");
 
   // Unique ID for this diagram instance
   const id = React.useId().replace(/:/g, "");
@@ -159,10 +159,10 @@ function useMermaid({
           // Clean up the calculation node to free memory
           renderRef.current.innerHTML = "";
         }
-      } catch (err) {
+      } catch (error_) {
         if (!isCancelled) {
-          const message = err instanceof Error ? err.message : "Failed to render diagram";
-          console.error("Mermaid Render Error:", err);
+          const message = error_ instanceof Error ? error_.message : "Failed to render diagram";
+          console.error("Mermaid Render Error:", error_);
           setError(message);
           setStatus("error");
           setSvg(null);

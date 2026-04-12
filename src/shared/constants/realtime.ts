@@ -2,7 +2,7 @@ export const REALTIME_CONFIG = {
   channels: {
     news: "public-news",
     system: "system-broadcast",
-    user: (userId: string | number) => `user:${userId}`,
+    user: (userId: number | string) => `user:${userId}`,
   },
   events: {
     system: {
@@ -15,4 +15,4 @@ export const REALTIME_CONFIG = {
   },
 } as const;
 
-export type AblyCapability = "publish" | "subscribe" | "presence";
+export type AblyCapability = "presence" | "publish" | "subscribe";

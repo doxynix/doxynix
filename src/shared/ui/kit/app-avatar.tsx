@@ -14,7 +14,7 @@ type Props = {
   fallbackText?: string;
   priority?: boolean;
   sizeClassName?: string;
-  src?: string | null;
+  src?: null | string;
 };
 
 const SIZE_MAP: Record<string, string> = {
@@ -66,7 +66,7 @@ export function AppAvatar({
 }: Readonly<Props>) {
   const hasSrc = typeof src === "string" && src !== "";
 
-  const [status, setStatus] = useState<"loading" | "error" | "success">(() => {
+  const [status, setStatus] = useState<"error" | "loading" | "success">(() => {
     if (!hasSrc) return "error";
     if (loadedAvatars.get(src) === true) return "success";
     return "loading";

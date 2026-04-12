@@ -5,7 +5,7 @@ import type { FileSignals, RepositoryFile } from "../core/discovery.types";
 export type LanguageAdapter = {
   detect?: (file: RepositoryFile) => boolean;
   id: string;
-  parse: (file: RepositoryFile) => Promise<FileSignals | null> | FileSignals | null;
+  parse: (file: RepositoryFile) => FileSignals | null | Promise<FileSignals | null>;
   priority: number;
   supportedExtensions: string[];
 };

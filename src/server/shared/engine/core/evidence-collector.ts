@@ -21,13 +21,13 @@ export function kindForFile(path: string, categories: string[]): EntrypointKind 
 
 export async function collectFileEvidence(
   file: NormalizedRepositoryFile,
-  lookups: Pick<EvidenceLookups, "aliasRules" | "fileSet" | "filesByBaseName">,
+  lookups: Pick<EvidenceLookups, "aliasRules" | "filesByBaseName" | "fileSet">,
   tracking: DependencyTracking,
   fileSignalsByPath: Map<string, CollectedFileEvidence["signals"]>,
   resolveImportEdges: (
     filePath: string,
     imports: string[],
-    innerLookups: Pick<EvidenceLookups, "aliasRules" | "fileSet" | "filesByBaseName">,
+    innerLookups: Pick<EvidenceLookups, "aliasRules" | "filesByBaseName" | "fileSet">,
     innerTracking: DependencyTracking
   ) => string[]
 ): Promise<CollectedFileEvidence> {

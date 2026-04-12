@@ -10,7 +10,7 @@ type Props = {
   className?: string;
   color?: string;
   icon?: ComponentType<{ className?: string; style?: CSSProperties }>;
-  label: string | number | null | undefined;
+  label: null | number | string | undefined;
   tooltip?: string;
 };
 

@@ -31,9 +31,9 @@ export default defineConfig({
               fs.writeFileSync(schemaPath, content);
               console.log("Schema cleaned up for cloud build");
             }
-          } catch (e) {
-            console.error("❌ ZenStack generation failed", e);
-            throw e;
+          } catch (error) {
+            console.error("❌ ZenStack generation failed", error);
+            throw error;
           }
         },
       },

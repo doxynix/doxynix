@@ -35,7 +35,7 @@ const octokitState = vi.hoisted(() => ({
 }));
 
 type ConstructorOptions = {
-  auth: string | any;
+  auth: any | string;
   throttle?: {
     onRateLimit?: (
       retryAfter: number,
@@ -133,7 +133,7 @@ vi.mock("@/server/shared/engine/core/project-policy", () => ({
   },
 }));
 
-function createMockPrisma(accounts: any[] | any) {
+function createMockPrisma(accounts: any | any[]) {
   const normalizedAccounts =
     accounts == null ? [] : Array.isArray(accounts) ? accounts : [accounts];
 

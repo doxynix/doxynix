@@ -5,11 +5,11 @@ const notFound = () => {
 };
 
 export {
-  notFound as GET,
-  notFound as POST,
-  notFound as PUT,
-  notFound as PATCH,
   notFound as DELETE,
+  notFound as GET,
   notFound as HEAD,
   notFound as OPTIONS,
+  notFound as PATCH,
+  notFound as POST,
+  notFound as PUT,
 };

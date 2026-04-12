@@ -25,7 +25,7 @@ import { ScrollArea } from "@/shared/ui/core/scroll-area";
 type Props = {
   data: NodeBrief;
   onClose: () => void;
-  onNavigate: (id: string | null) => void;
+  onNavigate: (id: null | string) => void;
 };
 
 export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>) {

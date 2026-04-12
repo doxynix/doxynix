@@ -10,7 +10,7 @@ interface TypingAnimationProps extends MotionProps {
   blinkCursor?: boolean;
   children?: string;
   className?: string;
-  cursorStyle?: "line" | "block" | "underscore";
+  cursorStyle?: "block" | "line" | "underscore";
   delay?: number;
   deleteSpeed?: number;
   duration?: number;
@@ -46,7 +46,7 @@ export function TypingAnimation({
   const [displayedText, setDisplayedText] = useState<string>("");
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentCharIndex, setCurrentCharIndex] = useState(0);
-  const [phase, setPhase] = useState<"typing" | "pause" | "deleting">("typing");
+  const [phase, setPhase] = useState<"deleting" | "pause" | "typing">("typing");
   const elementRef = useRef<HTMLElement | null>(null);
   const isInView = useInView(elementRef as React.RefObject<Element>, {
     amount: 0.3,

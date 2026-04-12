@@ -29,7 +29,7 @@ export async function cleanupDatabase() {
   }
 }
 
-export async function createTestUser(name: string, role: "USER" | "ADMIN" = "USER") {
+export async function createTestUser(name: string, role: "ADMIN" | "USER" = "USER") {
   const email = `${name.toLowerCase()}_${Date.now()}_${Math.floor(Math.random() * 10000)}@test.com`;
   const user = await prisma.user.create({
     data: { email, name, role },

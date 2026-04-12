@@ -8,8 +8,8 @@ import { trpc } from "@/shared/api/trpc";
 import { useUploadThing } from "@/shared/lib/uploadthing";
 
 type ProfileData = {
-  email: string | null;
-  name: string | null;
+  email: null | string;
+  name: null | string;
 };
 
 type UseProfileActionsProps = {

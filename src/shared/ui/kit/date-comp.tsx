@@ -2,7 +2,7 @@
 
 type Props = {
   isYear?: boolean;
-  value?: string | Date;
+  value?: Date | string;
 };
 
 export function DateComp({ isYear = false, value }: Readonly<Props>) {

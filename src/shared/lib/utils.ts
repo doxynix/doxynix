@@ -15,7 +15,7 @@ export const loadedAvatars = new Map<string, boolean>();
 export const loadedFlags = new Map<string, boolean>();
 
 export function formatRelativeTime(
-  date: Date | string | number | null,
+  date: Date | null | number | string,
   localeStr: string = DEFAULT_LOCALE,
   defaultValue: string = "—"
 ): string {
@@ -62,7 +62,7 @@ export function formatRelativeTime(
 }
 
 export function formatFullDate(
-  date: Date | string | number,
+  date: Date | number | string,
   localeStr: string = DEFAULT_LOCALE
 ): string {
   try {
@@ -120,34 +120,34 @@ export function isGitHubUrl(input: string): boolean {
 }
 
 const SENSITIVE_KEYS = new Set([
-  "password",
-  "newpassword",
-  "passwordhash",
-  "hash",
-  "salt",
-  "token",
-  "sessiontoken",
-  "verificationtoken",
-  "gh_token",
   "access_token",
-  "refresh_token",
-  "id_token",
-  "secret",
-  "clientsecret",
-  "hashedkey",
   "apikey",
-  "cvv",
-  "creditcard",
-  "iban",
   "authorization",
+  "clientsecret",
   "cookie",
-  "set-cookie",
+  "creditcard",
+  "cvv",
+  "gh_token",
+  "hash",
+  "hashedkey",
+  "iban",
+  "id_token",
   "identifier",
-  "proxy-authorization",
-  "x-github-token",
   "imagekey",
+  "newpassword",
+  "password",
+  "passwordhash",
+  "proxy-authorization",
+  "refresh_token",
+  "salt",
+  "secret",
   "session_state",
+  "sessiontoken",
+  "set-cookie",
   "state",
+  "token",
+  "verificationtoken",
+  "x-github-token",
 ]);
 
 const GITHUB_TOKEN_REGEX = /(github_pat_\w+|gh[pousr]_\w{36,})/g;
@@ -207,7 +207,7 @@ export const smoothScrollTo = (targetId: string, offset: number = 80, duration: 
   const startPosition = window.pageYOffset;
   const targetPosition = targetElement.getBoundingClientRect().top + startPosition - offset;
   const distance = targetPosition - startPosition;
-  let startTime: number | null = null;
+  let startTime: null | number = null;
 
   const easeInOutCubic = (t: number): number => {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -237,7 +237,7 @@ export const getCookieName = () => {
   return "next-auth.session-token";
 };
 
-export function getInitials(name?: string | null, email?: string | null): string {
+export function getInitials(name?: null | string, email?: null | string): string {
   if (name != null && name.length > 0) {
     const parts = name.trim().split(" ").filter(Boolean);
 
@@ -284,7 +284,7 @@ const findByExtension = (ext: string) => {
   };
 };
 
-export const getLanguageColor = (langOrExt: string | null): string => {
+export const getLanguageColor = (langOrExt: null | string): string => {
   if (langOrExt == null || langOrExt === "") return "#cccccc";
 
   const directMatch = langData[langOrExt];
@@ -304,7 +304,7 @@ export const normalizeLanguageName = (ext: string): string => {
   return found != null ? found.name : ext.toUpperCase();
 };
 
-export function setClientCookie(name: string, value: string | boolean, maxAge: number) {
+export function setClientCookie(name: string, value: boolean | string, maxAge: number) {
   if (typeof window === "undefined") return;
 
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
@@ -326,7 +326,7 @@ export const getHealthColor = (score: number) => {
 };
 
 export function clampIntegerParam(
-  value: number | null | undefined,
+  value: null | number | undefined,
   {
     fallback,
     max,
@@ -346,7 +346,7 @@ export function clampIntegerParam(
 
 export function isRouteActive(
   pathname: string,
-  href: string | null | undefined,
+  href: null | string | undefined,
   exact?: boolean
 ): boolean {
   if (href == null) return false;

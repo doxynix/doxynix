@@ -94,9 +94,9 @@ export class GitHubAuthRequiredError extends Error {
 
 export type GitHubClientContext = (
   | { githubInstallationId: number; hasUserToken: false; type: "installation" }
-  | { hasUserToken: true; type: "oauth" }
   | { hasUserToken: false; type: "app" }
   | { hasUserToken: false; type: "public" }
+  | { hasUserToken: true; type: "oauth" }
 ) & {
   octokit: OctokitInstance;
 };
@@ -238,7 +238,7 @@ export async function getToken(
   prisma: DbClient,
   userId: number,
   owner?: string
-): Promise<string | null> {
+): Promise<null | string> {
   try {
     const context = await getClientContext(prisma, userId, owner);
     const auth =

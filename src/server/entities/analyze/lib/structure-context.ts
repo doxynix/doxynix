@@ -206,7 +206,7 @@ export function buildGraphRelatedPathSet(metrics: RepoMetrics) {
 }
 export function buildStructureContext(
   repo: RepoWithLatestAnalysisAndDocs
-): StructureContext | null {
+): null | StructureContext {
   const payload = coerceAnalysisPayload(repo.analyses[0]);
   if (payload == null) return null;
 

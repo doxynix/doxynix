@@ -7,7 +7,7 @@ type Props = {
   icon: React.ComponentType<{ className?: string }>;
   iconClass?: string;
   label: string;
-  value: string | number;
+  value: number | string;
 };
 
 export function StatCard({

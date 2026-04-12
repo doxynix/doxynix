@@ -158,7 +158,7 @@ export const TREE_SITTER_SUPPORTED_EXTENSIONS = Object.keys(SPECS);
 let ParserRuntime: any;
 let LanguageRuntime: any;
 const languageCache = new Map<string, Promise<any>>();
-let runtimeInitPromise: Promise<void> | null = null;
+let runtimeInitPromise: null | Promise<void> = null;
 const smokeCheckedExtensions = new Set<string>();
 
 function joinFsPath(...parts: string[]) {

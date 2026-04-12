@@ -10,12 +10,12 @@ import { escapePromptXmlAttr, escapePromptXmlText } from "./string-utils";
 /**
  * Safety level for handling user input
  */
-export type SafetyLevel = "strict" | "moderate" | "permissive";
+export type SafetyLevel = "moderate" | "permissive" | "strict";
 
 /**
  * Data handling strategy
  */
-export type DataHandlingStrategy = "escape-xml" | "escape-json" | "sanitize-html" | "no-escape";
+export type DataHandlingStrategy = "escape-json" | "escape-xml" | "no-escape" | "sanitize-html";
 
 /**
  * SafetyContext manages all data safety and escaping across LLM prompts
@@ -58,7 +58,7 @@ export class SafetyContext {
   /**
    * Escape data based on context type
    */
-  escape(data: string, context: "xml-text" | "xml-attr" | "json" = "xml-text"): string {
+  escape(data: string, context: "json" | "xml-attr" | "xml-text" = "xml-text"): string {
     if (this.level === "permissive") {
       return data;
     }
@@ -121,7 +121,7 @@ export class SafetyContext {
     filePath: string,
     content: string,
     maxLength = 50000,
-    escapeContext: "xml-text" | "xml-attr" = "xml-text"
+    escapeContext: "xml-attr" | "xml-text" = "xml-text"
   ): { content: string; path: string; truncated: boolean } {
     let truncated = false;
     let processedContent = content;
@@ -232,7 +232,7 @@ export class SafetyContext {
 /**
  * Global safety context singleton
  */
-let globalSafetyContext: SafetyContext | null = null;
+let globalSafetyContext: null | SafetyContext = null;
 
 /**
  * Get or create global safety context

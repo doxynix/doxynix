@@ -27,7 +27,7 @@ export function TimeAgo({ date, locale }: Readonly<Props>) {
 
       setRelativeTime(formatRelativeTime(date, locale));
 
-      let nextDelay: number | null = null;
+      let nextDelay: null | number = null;
 
       if (diff < HOUR) {
         nextDelay = MINUTE;

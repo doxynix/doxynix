@@ -6,7 +6,7 @@ import type { LatestCompletedAnalysis } from "@/server/shared/infrastructure/rep
 
 import type { StoredDocument, WriterStatus } from "./structure-shared";
 
-export function coerceAnalysisPayload(analysis: LatestCompletedAnalysis | undefined | null) {
+export function coerceAnalysisPayload(analysis: LatestCompletedAnalysis | null | undefined) {
   if (analysis == null || analysis.metricsJson == null || analysis.resultJson == null) return null;
 
   const parsed = aiSchema.safeParse(analysis.resultJson);
@@ -36,7 +36,7 @@ export function dedupeLatestDocsByType(docs: StoredDocument[]) {
   });
 }
 
-export function getWriterStatus(docType: DocType, aiResult: AIResult | null): WriterStatus | null {
+export function getWriterStatus(docType: DocType, aiResult: AIResult | null): null | WriterStatus {
   const writerKey = WRITER_KEY_BY_DOC_TYPE[docType];
   if (writerKey == null) return null;
   return aiResult?.analysisRuntime?.writers?.[writerKey] ?? null;

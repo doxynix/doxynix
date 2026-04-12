@@ -57,18 +57,18 @@ export function ZoomPan({
   const targetStartRef = React.useRef({ x: 0, y: 0 });
 
   // Animation/Raf ref
-  const rafRef = React.useRef<number | null>(null);
+  const rafRef = React.useRef<null | number>(null);
   const hasCentered = React.useRef(false);
 
   // Touch refs
-  const touchStartRef = React.useRef<{
+  const touchStartRef = React.useRef<null | {
     center: { x: number; y: number };
     distance: number;
     scale: number;
     touches: Array<{ x: number; y: number }>;
     translateX: number;
     translateY: number;
-  } | null>(null);
+  }>(null);
 
   const getTouchDistance = (touches: React.TouchList | TouchList) => {
     if (touches.length < 2) return 0;
@@ -237,13 +237,13 @@ export function ZoomPan({
     updateSmooth();
   }, [getCenterTransform, updateSmooth]);
 
-  const [api, setApi] = React.useState<{
+  const [api, setApi] = React.useState<null | {
     centerView: () => void;
     resetZoom: () => void;
     scalePercent: number;
     zoomIn: () => void;
     zoomOut: () => void;
-  } | null>(null);
+  }>(null);
 
   React.useEffect(() => {
     setApi({

@@ -15,7 +15,7 @@ import {
 type StructureInspectEntryLike = BaseStructureInspectEntryLike & {
   changeCoupling: Array<{ commits: number; fromPath: string; toPath: string }>;
   churnHotspots: Array<{ commitsInWindow: number; path: string }>;
-  entrypointDetails: Array<{ path: string; reason?: string | null }>;
+  entrypointDetails: Array<{ path: string; reason?: null | string }>;
   factTitles: string[];
   frameworkNames: string[];
   graphUnresolvedSamples: Array<{ fromPath: string; specifier: string }>;

@@ -14,7 +14,7 @@ type Props = {
 
 export function TruncatedText({ className, text, tooltipProps }: Readonly<Props>) {
   const [isTruncated, setIsTruncated] = useState(false);
-  const observerRef = useRef<ResizeObserver | null>(null);
+  const observerRef = useRef<null | ResizeObserver>(null);
 
   const setRef = (node: HTMLSpanElement | null) => {
     if (observerRef.current) observerRef.current.disconnect();

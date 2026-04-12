@@ -15,7 +15,7 @@ const PRIVATE_REPO_AUTH_MESSAGE =
 
 function assertPrivateRepoAccess(
   repo: Repo,
-  clientType: "installation" | "oauth" | "app" | "public"
+  clientType: "app" | "installation" | "oauth" | "public"
 ) {
   if (repo.visibility === "PRIVATE" && (clientType === "app" || clientType === "public")) {
     throw new Error(PRIVATE_REPO_AUTH_MESSAGE);
@@ -24,7 +24,7 @@ function assertPrivateRepoAccess(
 
 async function resolveAuthToken(client: {
   auth: (() => Promise<unknown>) & ((options?: unknown) => Promise<unknown>);
-}): Promise<string | null> {
+}): Promise<null | string> {
   try {
     const auth = (await client.auth({ type: "installation" })) as { token?: string };
     return auth.token ?? null;
@@ -64,7 +64,7 @@ export async function getAnalysisContext(
   const lastSuccessfulAnalysis = repo.analyses[0];
 
   let octokit;
-  let clientType: "installation" | "oauth" | "app" | "public";
+  let clientType: "app" | "installation" | "oauth" | "public";
 
   try {
     const clientContext = await resolveClientContext(prisma, userId, {
@@ -113,7 +113,7 @@ export async function getAnalysisContext(
 
 export async function cloneRepository(
   repo: Repo,
-  token: string | undefined | null,
+  token: null | string | undefined,
   targetPath: string,
   selectedBranch?: string
 ) {

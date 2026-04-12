@@ -58,7 +58,7 @@ function buildTodoDecorations(view: EditorView): DecorationSet {
         TAG_REGEX.lastIndex = 0;
 
         for (const match of text.matchAll(TAG_REGEX)) {
-          const word = (match[1] || match[0]).toUpperCase();
+          const word = (match[1] ?? match[0]).toUpperCase();
           const urgent = word === "FIXME" || word === "BUG" || word === "XXX";
           const start = visibleFrom + match.index;
           const end = start + match[0].length;
@@ -81,7 +81,7 @@ function buildTodoDecorations(view: EditorView): DecorationSet {
       TAG_REGEX.lastIndex = 0;
 
       for (const match of text.matchAll(TAG_REGEX)) {
-        const word = (match[1] || match[0]).toUpperCase();
+        const word = (match[1] ?? match[0]).toUpperCase();
         const urgent = word === "FIXME" || word === "BUG" || word === "XXX";
         const start = from + match.index;
         const end = start + match[0].length;

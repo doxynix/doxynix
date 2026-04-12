@@ -13,7 +13,7 @@ import { isOctokitError } from "@/server/shared/lib/handle-error";
 type OauthValidationStatus = "invalid" | "missing" | "valid";
 
 async function resolveOauthValidationStatus(
-  oauthAccounts: Array<{ access_token: string | null }>
+  oauthAccounts: Array<{ access_token: null | string }>
 ): Promise<OauthValidationStatus> {
   if (oauthAccounts.length === 0) return "missing";
 
