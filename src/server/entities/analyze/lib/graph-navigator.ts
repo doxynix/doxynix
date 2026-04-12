@@ -34,36 +34,32 @@ import {
   type StructureNodeType,
 } from "./structure-shared";
 
-function createSummarizeImportance() {
-  return (input: {
-    apiCount: number;
-    changeCouplingCount: number;
-    churnCount: number;
-    configCount: number;
-    dependencyHotspotCount: number;
-    entrypointCount: number;
-    frameworkCount: number;
-    graphWarningCount: number;
-    groupId: string;
-    hotspotCount: number;
-    orphanCount: number;
-    primaryKind: string;
-    riskCount: number;
-    sampleCount: number;
-  }) =>
-    summarizeGroupImportance({
-      ...input,
-      primaryKind: input.primaryKind as Parameters<
-        typeof summarizeGroupImportance
-      >[0]["primaryKind"],
-    });
-}
+const summarizeImportanceHelper = (input: {
+  apiCount: number;
+  changeCouplingCount: number;
+  churnCount: number;
+  configCount: number;
+  dependencyHotspotCount: number;
+  entrypointCount: number;
+  frameworkCount: number;
+  graphWarningCount: number;
+  groupId: string;
+  hotspotCount: number;
+  orphanCount: number;
+  primaryKind: string;
+  riskCount: number;
+  sampleCount: number;
+}) =>
+  summarizeGroupImportance({
+    ...input,
+    primaryKind: input.primaryKind as Parameters<typeof summarizeGroupImportance>[0]["primaryKind"],
+  });
 
 export function buildStructureMapPayloadFromContext(
   context: StructureContext,
   analysisRef: AnalysisRef | null
 ) {
-  const summarizeImportance = createSummarizeImportance();
+  const summarizeImportance = summarizeImportanceHelper;
   const nodes = buildTopLevelNodes(context);
   const nodeLabelById = new Map(nodes.map((node) => [node.id, node.label] as const));
   const edges = context.rawTopLevelEdges.map((edge) => ({
@@ -249,7 +245,7 @@ export function buildStructureNodePayloadFromContext(
   analysisRef: AnalysisRef | null,
   nodeId: string
 ) {
-  const summarizeImportance = createSummarizeImportance();
+  const summarizeImportance = summarizeImportanceHelper;
   const { nodeType, path } = parseStructureNodeId(nodeId);
 
   if (nodeType === "file") {

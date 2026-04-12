@@ -192,6 +192,7 @@ export default defineConfig([
       "sonarjs/no-nested-conditional": "off",
       "sonarjs/void-use": "off",
       "sonarjs/function-return-type": "off",
+      "sonarjs/deprecation": "off", // NOTE: долговатый слишком не окупается
 
       "@typescript-eslint/consistent-type-imports": [
         "error",
