@@ -205,7 +205,7 @@ export const repoRouter = createTRPCRouter({
         tags: ["repositories"],
       },
     })
-    .input(z.object({ limit: z.coerce.number().int().min(1).max(100000).optional() }))
+    .input(z.object({ limit: z.coerce.number().int().min(1).max(100_000).optional() }))
     .output(
       z.array(
         z.object({

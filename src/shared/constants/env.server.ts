@@ -19,7 +19,7 @@ if (env.NODE_ENV !== "test" && typeof rawGithubAppPrivateKey !== "string") {
 }
 
 export const GITHUB_APP_PRIVATE_KEY =
-  typeof rawGithubAppPrivateKey === "string" ? rawGithubAppPrivateKey.replace(/\\n/g, "\n") : "";
+  typeof rawGithubAppPrivateKey === "string" ? rawGithubAppPrivateKey.replaceAll("\\n", "\n") : "";
 export const GITHUB_SYSTEM_PAT = env.GITHUB_SYSTEM_PAT ?? null;
 export const GITHUB_WEBHOOK_SECRET = env.GITHUB_WEBHOOK_SECRET;
 export const GITHUB_SYSTEM_INSTALLATION_ID = env.GITHUB_SYSTEM_INSTALLATION_ID;

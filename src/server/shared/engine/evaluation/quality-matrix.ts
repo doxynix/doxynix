@@ -4,11 +4,11 @@ import type { DocumentationInputModel, ReportSectionKind } from "../core/documen
 import type { RepoMetrics } from "../core/metrics.types";
 
 export type EvaluationStatus =
+  | "fail"
   | "manual-review-required"
   | "not-reviewed"
-  | "pass"
   | "partial"
-  | "fail";
+  | "pass";
 
 export type EvaluationDimension = {
   notes: string;
@@ -90,8 +90,8 @@ export type EvaluationSnapshot = {
     languages: string[];
     primaryEntrypoints: string[];
     routeSource:
-      | DocumentationInputModel["sections"]["api_reference"]["body"]["sourceOfTruth"]
-      | "unknown";
+      | "unknown"
+      | DocumentationInputModel["sections"]["api_reference"]["body"]["sourceOfTruth"];
     routeSources: string[];
   };
   targets: {

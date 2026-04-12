@@ -28,7 +28,7 @@ import { ApiKeyFormFields } from "./api-key-form-fields";
 
 export function CreateApiKeyDialog() {
   const [open, setOpen] = useState(false);
-  const [createdKey, setCreatedKey] = useState<string | null>(null);
+  const [createdKey, setCreatedKey] = useState<null | string>(null);
   const { create } = useApiKeyActions();
 
   const tCommon = useTranslations("Common");

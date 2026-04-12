@@ -26,14 +26,14 @@ export default defineConfig({
               console.log("Stripping extra generators from schema.prisma...");
               let content = fs.readFileSync(schemaPath, "utf-8");
 
-              content = content.replace(/generator\s+(?!client)\w+\s+\{[^}]+\}/g, "");
+              content = content.replaceAll(/generator\s+(?!client)\w+\s+{[^}]+}/g, "");
 
               fs.writeFileSync(schemaPath, content);
               console.log("Schema cleaned up for cloud build");
             }
-          } catch (e) {
-            console.error("❌ ZenStack generation failed", e);
-            throw e;
+          } catch (error) {
+            console.error("❌ ZenStack generation failed", error);
+            throw error;
           }
         },
       },
@@ -45,7 +45,7 @@ export default defineConfig({
   },
   dirs: ["./src/server/**/task"],
   logLevel: "log",
-  maxDuration: 1000000,
+  maxDuration: 1_000_000,
 
   project: "proj_whmkduzdqfzcgoyuhdyp",
   runtime: "node",

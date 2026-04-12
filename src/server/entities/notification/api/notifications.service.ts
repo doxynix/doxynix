@@ -107,7 +107,7 @@ export const notificationsService = {
   async getAll(db: DbClient, input: NotificationsFilterInput) {
     const { cursor, isRead, limit, repoName, repoOwner, search, type } = input;
 
-    const page = Math.min(Math.max(1, cursor ?? 1), 1000000);
+    const page = Math.min(Math.max(1, cursor ?? 1), 1_000_000);
     const skip = (page - 1) * limit;
 
     const where = this.buildWhereClause({ isRead, repoName, repoOwner, search, type });
@@ -160,17 +160,12 @@ export const notificationsService = {
     const where = this.buildWhereClause(filters);
 
     try {
-      const updatedCount = (
-        await db.notification.updateMany({
-          data: {
-            isRead: true,
-          },
-          where: {
-            ...where,
-            isRead: false,
-          },
-        })
-      ).count;
+      const result = await db.notification.updateMany({
+        data: { isRead: true },
+        where: { ...where, isRead: false },
+      });
+
+      const updatedCount = result.count;
 
       return {
         message: `Marked ${updatedCount} notifications as read`,

@@ -11,7 +11,8 @@ export default async function SharedDocsPage({ params }: Readonly<Props>) {
   const { name, owner } = await params;
   const session = await getServerAuthSession();
 
-  const repo = await (await api()).repo.getByName({ name, owner });
+  const serverApi = await api();
+  const repo = await serverApi.repo.getByName({ name, owner });
 
   if (repo == null) notFound();
 

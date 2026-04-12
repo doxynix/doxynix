@@ -72,7 +72,7 @@ describe("calculateCodeMetrics", () => {
     expect(metrics.fileCount).toBe(2);
     expect(metrics.totalLoc).toBeGreaterThan(0);
     expect(metrics.totalSizeKb).toBe(
-      Math.round((files[0].content.length + files[1].content.length) / 1024)
+      Math.round(((files[0]?.content.length ?? 0) + (files[1]?.content.length ?? 0)) / 1024)
     );
     expect(metrics.languages.length).toBeGreaterThan(0);
   });

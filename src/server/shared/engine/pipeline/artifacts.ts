@@ -29,7 +29,7 @@ type ArtifactContext = {
   teamRoles: ArtifactBuildParams["teamRoles"];
 };
 
-function compactArtifacts<T>(items: Array<T | null>): T[] {
+function compactArtifacts<T>(items: Array<null | T>): T[] {
   return items.filter((item): item is T => item != null);
 }
 

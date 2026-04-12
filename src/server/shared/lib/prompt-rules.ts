@@ -14,7 +14,7 @@ export const GroundingRules = {
     `Treat the supplied \`${dataType}\` as authoritative. Do not contradict or override it with inferences.`,
 
   /** Rule: Cite only from canonical sources */
-  citeOnlyCanonical: (sourceType: "file paths" | "metrics" | "entrypoints" = "file paths") =>
+  citeOnlyCanonical: (sourceType: "entrypoints" | "file paths" | "metrics" = "file paths") =>
     `Cite only from supplied ${sourceType} or evidence. Never invent new ${sourceType}.`,
 
   /** Rule: Handle missing data gracefully */

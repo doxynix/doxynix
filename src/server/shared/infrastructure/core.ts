@@ -54,13 +54,13 @@ export const ourFileRouter = {
           where: { id: userId },
         });
         if (oldKey != null && oldKey !== file.key) {
-          utapi.deleteFiles(oldKey).catch((e) => {
-            logger.error({ error: e, msg: "Failed to delete old avatar" });
+          utapi.deleteFiles(oldKey).catch((error) => {
+            logger.error({ error: error, msg: "Failed to delete old avatar" });
           });
         }
         return { url: file.ufsUrl };
-      } catch (err) {
-        logger.error({ error: err, msg: "DB user update error" });
+      } catch (error) {
+        logger.error({ error: error, msg: "DB user update error" });
         throw new UploadThingError("Failed to update avatar");
       }
     }),

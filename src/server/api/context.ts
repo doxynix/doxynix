@@ -20,7 +20,7 @@ export async function createContext({ req }: Props) {
   const authHeader = req.headers.get("authorization");
   if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
     const token = authHeader.split(" ")[1];
-    if (token.startsWith("dxnx_")) {
+    if (token != null && token.startsWith("dxnx_")) {
       const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
       const keyRecord = await prisma.apiKey.findUnique({

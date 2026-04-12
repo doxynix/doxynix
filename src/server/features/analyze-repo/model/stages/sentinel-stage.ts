@@ -26,8 +26,8 @@ export async function executeSentinelPhase(
         temperature: 0.0,
       });
       sentinelStatus = sentinelOut.status;
-    } catch (e) {
-      logger.warn({ analysisId, error: e, msg: "Sentinel unavailable, defaulting to SAFE" });
+    } catch (error) {
+      logger.warn({ analysisId, error: error, msg: "Sentinel unavailable, defaulting to SAFE" });
       sentinelStatus = "SAFE";
     }
   }

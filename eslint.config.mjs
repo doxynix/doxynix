@@ -120,7 +120,58 @@ export default defineConfig([
       "@tanstack/query/stable-query-client": "error",
 
       eqeqeq: ["error", "always", { null: "ignore" }],
+      "no-implicit-coercion": ["error", { allow: ["!!"] }],
       "unicorn/prefer-node-protocol": "error",
+      "unicorn/catch-error-name": "error",
+      "unicorn/prefer-optional-catch-binding": "error",
+      "unicorn/consistent-function-scoping": "error",
+      "unicorn/prefer-top-level-await": "error",
+      "unicorn/no-await-expression-member": "error",
+      "unicorn/no-useless-fallback-in-spread": "error",
+      "unicorn/no-array-callback-reference": "error",
+      "unicorn/no-instanceof-array": "error",
+      "unicorn/no-thenable": "error",
+      "unicorn/no-document-cookie": "error",
+      "unicorn/prefer-set-has": "error",
+      "unicorn/prefer-array-find": "error",
+      "unicorn/prefer-array-some": "error",
+      "unicorn/prefer-array-flat": "error",
+      "unicorn/prefer-logical-operator-over-ternary": "error",
+      "unicorn/no-unreadable-array-destructuring": "error",
+      "unicorn/prefer-date-now": "error",
+      "unicorn/no-lonely-if": "error",
+      "unicorn/numeric-separators-style": "error",
+      "unicorn/prefer-default-parameters": "error",
+      "unicorn/prefer-string-replace-all": "error",
+      "unicorn/prefer-includes": "error",
+      "unicorn/prefer-dom-node-append": "error",
+      "unicorn/prefer-dom-node-remove": "error",
+      "unicorn/prefer-modern-math-apis": "error",
+      "unicorn/no-null": "off",
+      "unicorn/prevent-abbreviations": "off",
+      "unicorn/no-array-reduce": "off",
+      "unicorn/no-keyword-prefix": "off",
+      "unicorn/no-for-loop": "off",
+      "unicorn/no-array-for-each": "off",
+      "unicorn/better-regex": "error",
+      "unicorn/error-message": "error",
+      "unicorn/no-unnecessary-await": "error",
+      "unicorn/no-useless-spread": "error",
+      "unicorn/no-useless-undefined": "error",
+      "unicorn/prefer-array-flat-map": "error",
+      "unicorn/prefer-at": "error",
+      "unicorn/prefer-native-coercion-functions": "error",
+      "unicorn/prefer-string-slice": "error",
+      "unicorn/prefer-string-starts-ends-with": "error",
+      "unicorn/switch-case-braces": ["error", "always"],
+      "unicorn/throw-new-error": "error",
+      "unicorn/filename-case": [
+        "error",
+        {
+          case: "kebabCase",
+          ignore: ["README.md"],
+        },
+      ],
 
       "no-unneeded-ternary": "error",
       "sonarjs/cognitive-complexity": ["off", 15], // NOTE: пока выключен я пока не хочу рефакторить некоторый код
@@ -141,6 +192,7 @@ export default defineConfig([
       "sonarjs/no-nested-conditional": "off",
       "sonarjs/void-use": "off",
       "sonarjs/function-return-type": "off",
+      "sonarjs/deprecation": "off", // NOTE: долговатый слишком не окупается
 
       "@typescript-eslint/consistent-type-imports": [
         "error",
@@ -152,73 +204,75 @@ export default defineConfig([
 
       "validate-jsx-nesting/no-invalid-jsx-nesting": "error",
 
-      "boundaries/element-types": [
+      "boundaries/dependencies": [
         "error",
         {
           default: "allow",
           rules: [
             {
-              from: ["shared", "generated", "i18n"],
-              disallow: ["app", "trigger", "widgets", "features", "entities", "server"],
+              from: { type: "shared|generated|i18n" },
+              disallow: [{ to: { type: "app|trigger|widgets|features|entities|server" } }],
               message:
                 "FSD Violation: Shared, Generated and i18n layers must be pure and cannot depend on upper layers or server logic.",
+              // allow type-only imports from server (needed for tRPC type inference)
+              allow: [{ to: { type: "server" }, dependency: { kind: "type" } }],
             },
             {
-              from: ["entities"],
-              disallow: ["app", "trigger", "widgets", "features", "server"],
+              from: { type: "entities" },
+              disallow: [{ to: { type: "app|trigger|widgets|features|server" } }],
               message:
                 "FSD Violation: Entities should only depend on other Entities (check composition), Shared, or Generated. They cannot import Features, Widgets or direct Server code.",
             },
             {
-              from: ["features"],
-              disallow: ["app", "trigger", "widgets", "server"],
+              from: { type: "features" },
+              disallow: [{ to: { type: "app|trigger|widgets|server" } }],
               message:
                 "FSD Violation: Features can only depend on Entities or Shared. They cannot import Widgets, App, or direct Server code.",
             },
             {
-              from: ["widgets"],
-              disallow: ["app", "trigger", "server"],
+              from: { type: "widgets" },
+              disallow: [{ to: { type: "app|trigger|server" } }],
               message:
                 "FSD Violation: Widgets can depend on Features, Entities, and Shared. They cannot import the App layer or direct Server code.",
             },
             {
-              from: ["server"],
-              disallow: ["app", "trigger", "widgets", "features", "entities"],
+              from: { type: "server" },
+              disallow: [{ to: { type: "app|trigger|widgets|features|entities" } }],
               message:
                 "Architectural Violation: The 'server' layer contains pure business logic and must not depend on UI layers (entities, features, etc.). Use shared/api for schemas.",
             },
             {
-              from: ["trigger"],
-              disallow: ["app", "widgets", "features", "entities"],
+              from: { type: "trigger" },
+              disallow: [{ to: { type: "app|widgets|features|entities" } }],
               message:
                 "Architectural Violation: Trigger tasks should only depend on 'server' logic or 'shared' resources. Do not import UI components into background jobs.",
             },
             {
-              from: ["features"],
-              disallow: ["features"],
+              from: { type: "features" },
+              disallow: [{ to: { type: "features" } }],
               message:
                 "FSD Violation: Cross-import between Features is forbidden to prevent high coupling. Move shared logic to 'entities' or 'shared'.",
             },
             {
-              from: ["entities"],
-              disallow: ["entities"],
+              from: { type: "entities" },
+              disallow: [{ to: { type: "entities" } }],
               message:
                 "FSD Violation: Cross-import between Entities is forbidden. Use composition in 'features' or 'widgets' instead.",
             },
             {
-              from: ["widgets"],
-              disallow: ["widgets"],
+              from: { type: "widgets" },
+              disallow: [{ to: { type: "widgets" } }],
               message: "FSD Violation: Widgets should not import other Widgets.",
             },
             {
-              from: ["app"],
-              disallow: ["trigger"],
+              from: { type: "app" },
+              disallow: [{ to: { type: "trigger" } }],
               message:
                 "Safety Violation: Do not import 'trigger' background task definitions directly into the 'app' router.",
             },
             {
-              from: ["app"],
-              disallow: ["app"],
+              from: { type: "app" },
+              disallow: [{ to: { type: "app" } }],
               message:
                 "FSD Violation: App routes should not import other routes. Use 'widgets' or 'features' for shared UI logic.",
             },
@@ -278,13 +332,6 @@ export default defineConfig([
           varsIgnorePattern: "^_",
         },
       ],
-      "unicorn/filename-case": [
-        "error",
-        {
-          case: "kebabCase",
-          ignore: ["README.md"],
-        },
-      ],
 
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/strict-boolean-expressions": "error",
@@ -332,6 +379,14 @@ export default defineConfig([
       "perfectionist/sort-interfaces": ["error", { type: "natural", order: "asc" }],
       "perfectionist/sort-object-types": ["error", { type: "natural", order: "asc" }],
       "perfectionist/sort-intersection-types": ["error", { type: "natural", order: "asc" }],
+      "perfectionist/sort-exports": ["error", { type: "natural", order: "asc" }],
+      "perfectionist/sort-named-exports": ["error", { type: "natural", order: "asc" }],
+      "perfectionist/sort-union-types": ["error", { type: "natural", order: "asc" }],
+      "perfectionist/sort-enums": ["error", { type: "natural", order: "asc" }],
+      "perfectionist/sort-maps": ["error", { type: "natural", order: "asc" }],
+      "perfectionist/sort-sets": ["error", { type: "natural", order: "asc" }],
+      "perfectionist/sort-heritage-clauses": ["error", { type: "natural", order: "asc" }],
+      "perfectionist/sort-array-includes": ["error", { type: "natural", order: "asc" }],
 
       ...jsxA11y.flatConfigs.strict.rules,
 

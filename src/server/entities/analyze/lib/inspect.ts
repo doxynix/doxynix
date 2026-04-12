@@ -15,7 +15,7 @@ import {
 type StructureInspectEntryLike = BaseStructureInspectEntryLike & {
   changeCoupling: Array<{ commits: number; fromPath: string; toPath: string }>;
   churnHotspots: Array<{ commitsInWindow: number; path: string }>;
-  entrypointDetails: Array<{ path: string; reason?: string | null }>;
+  entrypointDetails: Array<{ path: string; reason?: null | string }>;
   factTitles: string[];
   frameworkNames: string[];
   graphUnresolvedSamples: Array<{ fromPath: string; specifier: string }>;
@@ -172,10 +172,7 @@ export function buildInspectPayload(params: {
           ],
     configHints: unique(params.entry.configPaths).slice(0, 5),
     dependsOn: unique(params.outgoing),
-    entrypointReason:
-      params.entry.entrypointDetails.length > 0
-        ? (params.entry.entrypointDetails[0].reason ?? null)
-        : null,
+    entrypointReason: params.entry.entrypointDetails[0]?.reason ?? null,
     factTitles: unique(params.entry.factTitles).slice(0, 5),
     frameworkHints,
     gitHints,

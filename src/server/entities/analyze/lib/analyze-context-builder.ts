@@ -17,15 +17,15 @@ import type { StructureContext } from "./structure-shared";
 type AnalyzeEntityContext = {
   analysisRef: AnalysisRef | null;
   repo: RepoWithLatestAnalysisAndDocs;
-  structureContext: StructureContext | null;
+  structureContext: null | StructureContext;
 };
 
 export class AnalyzeContextBuilder {
   private readonly analysisRef: AnalysisRef | null;
   private readonly explainByNodeId = new Map<string, NodeExplainPayload | null>();
-  private readonly nodeById = new Map<string, StructureNodePayload | null>();
-  private structureContext: StructureContext | null | undefined;
-  private structureMap: StructureMapPayload | null | undefined;
+  private readonly nodeById = new Map<string, null | StructureNodePayload>();
+  private structureContext: null | StructureContext | undefined;
+  private structureMap: null | StructureMapPayload | undefined;
 
   constructor(private readonly repo: RepoWithLatestAnalysisAndDocs) {
     this.analysisRef = toAnalysisRef(repo.analyses[0]);

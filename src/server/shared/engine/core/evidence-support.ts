@@ -154,7 +154,7 @@ export function createEvidenceAssembly(): EvidenceAssembly {
 export function resolveImportEdges(
   filePath: string,
   imports: string[],
-  lookups: Pick<EvidenceLookups, "aliasRules" | "fileSet" | "filesByBaseName">,
+  lookups: Pick<EvidenceLookups, "aliasRules" | "filesByBaseName" | "fileSet">,
   tracking: DependencyTracking
 ) {
   const resolvedImports: string[] = [];

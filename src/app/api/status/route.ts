@@ -7,7 +7,7 @@ export const runtime = "edge";
 type Monitor = {
   attributes: {
     paused: boolean;
-    status: "up" | "down" | "paused" | "pending" | "maintenance";
+    status: "down" | "maintenance" | "paused" | "pending" | "up";
   };
   id: string;
 };

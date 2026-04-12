@@ -174,8 +174,8 @@ export async function executeChangelogWriter(
   language: string
 ): Promise<WriterResult> {
   let simpleCommits: Array<{
-    author: string | null | undefined;
-    date: string | null | undefined;
+    author: null | string | undefined;
+    date: null | string | undefined;
     message: string;
   }> = [];
 

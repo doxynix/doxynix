@@ -189,7 +189,7 @@ export const repoService = {
 
   async getAll(db: DbClient, input: RepoFiltersInput) {
     const { cursor, limit, owner, search, sortBy, sortOrder, status, visibility } = input;
-    const page = Math.min(Math.max(1, cursor ?? 1), 1000000);
+    const page = Math.min(Math.max(1, cursor ?? 1), 1_000_000);
     const skip = (page - 1) * limit;
 
     const where = this.buildWhereClause({ owner, search, status, visibility });

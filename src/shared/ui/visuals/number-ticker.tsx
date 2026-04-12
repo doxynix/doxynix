@@ -9,7 +9,7 @@ import { cn } from "@/shared/lib/utils";
 interface NumberTickerProps extends ComponentPropsWithoutRef<"span"> {
   decimalPlaces?: number;
   delay?: number;
-  direction?: "up" | "down";
+  direction?: "down" | "up";
   startValue?: number;
   value: number;
 }
@@ -33,12 +33,11 @@ export function NumberTicker({
   const locale = useLocale();
 
   useEffect(() => {
-    if (isInView) {
-      const timer = setTimeout(() => {
-        motionValue.set(direction === "down" ? startValue : value);
-      }, delay * 1000);
-      return () => clearTimeout(timer);
-    }
+    if (!isInView) return;
+    const timer = setTimeout(() => {
+      motionValue.set(direction === "down" ? startValue : value);
+    }, delay * 1000);
+    return () => clearTimeout(timer);
   }, [motionValue, isInView, delay, value, direction, startValue]);
 
   useEffect(() => {

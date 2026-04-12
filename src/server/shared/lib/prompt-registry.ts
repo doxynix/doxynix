@@ -44,7 +44,7 @@ export interface PromptMetadata {
   taskType: LLMTaskType;
 
   /** Whether this is a system or user prompt */
-  type: "system" | "user" | "both";
+  type: "both" | "system" | "user";
 
   /** Current version (for tracking updates) */
   version: string;
@@ -91,7 +91,7 @@ export class PromptRegistry {
   /**
    * Get prompt metadata by ID
    */
-  getMetadata(promptId: string): PromptMetadata | null {
+  getMetadata(promptId: string): null | PromptMetadata {
     const resolved = this.aliases.get(promptId) ?? promptId;
     const prompt = this.prompts.get(resolved);
     return prompt?.metadata ?? null;
@@ -202,7 +202,7 @@ export class PromptRegistry {
 /**
  * Global prompt registry singleton
  */
-let globalRegistry: PromptRegistry | null = null;
+let globalRegistry: null | PromptRegistry = null;
 
 /**
  * Get or create global prompt registry

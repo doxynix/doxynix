@@ -87,14 +87,18 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {LOCALES.map((l, i) => (
-                  <SelectItem key={l} value={l}>
-                    <div className="flex items-center gap-3">
-                      <Flag alt={l} src={FLAGS[l] || FLAGS.en} />
-                      <span>{t(translationKeys[i])}</span>
-                    </div>
-                  </SelectItem>
-                ))}
+                {LOCALES.map((l, i) => {
+                  const key = translationKeys[i];
+                  if (key == null) return null;
+                  return (
+                    <SelectItem key={l} value={l}>
+                      <div className="flex items-center gap-3">
+                        <Flag alt={l} src={FLAGS[l] || FLAGS.en} />
+                        <span>{t(key)}</span>
+                      </div>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>

@@ -125,7 +125,7 @@ describe("Business Logic & Integrity Constraints", () => {
 
     const session = await alice.db.session.create({
       data: {
-        expires: new Date(Date.now() + 10000),
+        expires: new Date(Date.now() + 10_000),
         sessionToken: "secret_token_123",
         userId: alice.user.id,
       },

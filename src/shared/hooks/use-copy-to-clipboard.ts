@@ -20,8 +20,8 @@ export function useCopyToClipboard(timeout = 2000) {
       await navigator.clipboard.writeText(value);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), timeout);
-    } catch (err) {
-      console.error("Failed to copy:", err);
+    } catch (error) {
+      console.error("Failed to copy:", error);
       toast.error("Copy failed");
       setIsCopied(false);
     }

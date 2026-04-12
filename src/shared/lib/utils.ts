@@ -15,7 +15,7 @@ export const loadedAvatars = new Map<string, boolean>();
 export const loadedFlags = new Map<string, boolean>();
 
 export function formatRelativeTime(
-  date: Date | string | number | null,
+  date: Date | null | number | string,
   localeStr: string = DEFAULT_LOCALE,
   defaultValue: string = "—"
 ): string {
@@ -62,7 +62,7 @@ export function formatRelativeTime(
 }
 
 export function formatFullDate(
-  date: Date | string | number,
+  date: Date | number | string,
   localeStr: string = DEFAULT_LOCALE
 ): string {
   try {
@@ -120,42 +120,42 @@ export function isGitHubUrl(input: string): boolean {
 }
 
 const SENSITIVE_KEYS = new Set([
-  "password",
-  "newpassword",
-  "passwordhash",
-  "hash",
-  "salt",
-  "token",
-  "sessiontoken",
-  "verificationtoken",
-  "gh_token",
   "access_token",
-  "refresh_token",
-  "id_token",
-  "secret",
-  "clientsecret",
-  "hashedkey",
   "apikey",
-  "cvv",
-  "creditcard",
-  "iban",
   "authorization",
+  "clientsecret",
   "cookie",
-  "set-cookie",
+  "creditcard",
+  "cvv",
+  "gh_token",
+  "hash",
+  "hashedkey",
+  "iban",
+  "id_token",
   "identifier",
-  "proxy-authorization",
-  "x-github-token",
   "imagekey",
+  "newpassword",
+  "password",
+  "passwordhash",
+  "proxy-authorization",
+  "refresh_token",
+  "salt",
+  "secret",
   "session_state",
+  "sessiontoken",
+  "set-cookie",
   "state",
+  "token",
+  "verificationtoken",
+  "x-github-token",
 ]);
 
-const GITHUB_TOKEN_REGEX = /(github_pat_\w+|gh[pousr]_\w{36,})/g;
-const BEARER_TOKEN_REGEX = /([Bb]earer\s+)[a-zA-Z0-9\-._~+/]+=*/g;
+const GITHUB_TOKEN_REGEX = /(github_pat_\w+|gh[oprsu]_\w{36,})/g;
+const BEARER_TOKEN_REGEX = /([Bb]earer\s+)[\w+./~\-]+=*/g;
 
 const replacer = (key: string, value: unknown): unknown => {
   const lowerKey = key.toLowerCase();
-  const normalizedKey = lowerKey.replace(/[_-]/g, "");
+  const normalizedKey = lowerKey.replaceAll(/[_-]/g, "");
 
   if (SENSITIVE_KEYS.has(lowerKey) || SENSITIVE_KEYS.has(normalizedKey)) {
     return "[REDACTED]";
@@ -168,10 +168,10 @@ const replacer = (key: string, value: unknown): unknown => {
   if (typeof value === "string") {
     let safeString = value;
     if (safeString.includes("gh") || safeString.includes("github_pat_")) {
-      safeString = safeString.replace(GITHUB_TOKEN_REGEX, "[REDACTED_GH_TOKEN]");
+      safeString = safeString.replaceAll(GITHUB_TOKEN_REGEX, "[REDACTED_GH_TOKEN]");
     }
     if (safeString.includes("earer")) {
-      safeString = safeString.replace(BEARER_TOKEN_REGEX, "$1[REDACTED]");
+      safeString = safeString.replaceAll(BEARER_TOKEN_REGEX, "$1[REDACTED]");
     }
     return safeString;
   }
@@ -197,6 +197,10 @@ export const sanitizePayload = (obj: unknown): unknown => {
   }
 };
 
+const easeInOutCubic = (t: number): number => {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+};
+
 export const smoothScrollTo = (targetId: string, offset: number = 80, duration: number = 800) => {
   const targetElement = document.getElementById(targetId);
   if (!targetElement) {
@@ -207,11 +211,7 @@ export const smoothScrollTo = (targetId: string, offset: number = 80, duration: 
   const startPosition = window.pageYOffset;
   const targetPosition = targetElement.getBoundingClientRect().top + startPosition - offset;
   const distance = targetPosition - startPosition;
-  let startTime: number | null = null;
-
-  const easeInOutCubic = (t: number): number => {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  };
+  let startTime: null | number = null;
 
   const animation = (currentTime: number) => {
     startTime ??= currentTime;
@@ -237,21 +237,26 @@ export const getCookieName = () => {
   return "next-auth.session-token";
 };
 
-export function getInitials(name?: string | null, email?: string | null): string {
-  if (name != null) {
+export function getInitials(name?: null | string, email?: null | string): string {
+  if (name != null && name.length > 0) {
     const parts = name.trim().split(" ").filter(Boolean);
 
     if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
+      const first = parts[0]?.[0];
+      const second = parts[1]?.[0];
+      if (first != null && second != null) {
+        return (first + second).toUpperCase();
+      }
     }
 
     if (parts.length === 1) {
-      return parts[0].substring(0, 1).toUpperCase();
+      const firstChar = parts[0]?.slice(0, 1);
+      return (firstChar != null ? firstChar : "U").toUpperCase();
     }
   }
 
-  if (email != null) {
-    return email.substring(0, 1).toUpperCase();
+  if (email != null && email.length > 0) {
+    return email.slice(0, 1).toUpperCase();
   }
 
   return "U";
@@ -279,7 +284,7 @@ const findByExtension = (ext: string) => {
   };
 };
 
-export const getLanguageColor = (langOrExt: string | null): string => {
+export const getLanguageColor = (langOrExt: null | string): string => {
   if (langOrExt == null || langOrExt === "") return "#cccccc";
 
   const directMatch = langData[langOrExt];
@@ -299,10 +304,11 @@ export const normalizeLanguageName = (ext: string): string => {
   return found != null ? found.name : ext.toUpperCase();
 };
 
-export function setClientCookie(name: string, value: string | boolean, maxAge: number) {
+export function setClientCookie(name: string, value: boolean | string, maxAge: number) {
   if (typeof window === "undefined") return;
 
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  // eslint-disable-next-line unicorn/no-document-cookie
   document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(String(value))}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
 }
 
@@ -321,7 +327,7 @@ export const getHealthColor = (score: number) => {
 };
 
 export function clampIntegerParam(
-  value: number | null | undefined,
+  value: null | number | undefined,
   {
     fallback,
     max,
@@ -339,17 +345,17 @@ export function clampIntegerParam(
   return Math.min(max, Math.max(min, value));
 }
 
+const normalize = (path: string) => {
+  const clean = path.replace(/\/$/, "");
+  return clean === "" ? "/" : clean;
+};
+
 export function isRouteActive(
   pathname: string,
-  href: string | null | undefined,
+  href: null | string | undefined,
   exact?: boolean
 ): boolean {
   if (href == null) return false;
-
-  const normalize = (path: string) => {
-    const clean = path.replace(/\/$/, "");
-    return clean === "" ? "/" : clean;
-  };
 
   const cleanPath = normalize(pathname);
   const cleanHref = normalize(href);

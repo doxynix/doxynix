@@ -4,10 +4,57 @@ import ts from "typescript";
 import type { TsStaticHint } from "../../types";
 import { normalizeRepoPath } from "../core/common";
 
-const TS_LIKE = new Set([".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"]);
+const TS_LIKE = new Set([".cjs", ".cts", ".js", ".jsx", ".mjs", ".mts", ".ts", ".tsx"]);
 
 const LONG_FN_LINES = 80;
 const MANY_PARAMS = 7;
+
+type VisitContext = {
+  hints: TsStaticHint[];
+  normalizedPath: string;
+  sourceFile: ts.SourceFile;
+};
+
+const visitNode = (node: ts.Node, context: VisitContext) => {
+  const { hints, normalizedPath, sourceFile } = context;
+
+  if (node.kind === ts.SyntaxKind.AnyKeyword) {
+    const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+    hints.push({
+      detail: "Explicit `any` weakens type safety.",
+      kind: "explicit-any",
+      line: line + 1,
+      path: normalizedPath,
+    });
+    return;
+  }
+
+  if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
+    const start = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+    const end = sourceFile.getLineAndCharacterOfPosition(node.getEnd());
+    const lineSpan = end.line - start.line + 1;
+    if (lineSpan >= LONG_FN_LINES) {
+      hints.push({
+        detail: `Function spans ~${lineSpan} lines (threshold ${LONG_FN_LINES}).`,
+        kind: "long-function",
+        line: start.line + 1,
+        path: normalizedPath,
+      });
+    }
+
+    const paramCount = node.parameters.length;
+    if (paramCount >= MANY_PARAMS) {
+      hints.push({
+        detail: `Function has ${paramCount} parameters (threshold ${MANY_PARAMS - 1}).`,
+        kind: "many-params",
+        line: start.line + 1,
+        path: normalizedPath,
+      });
+    }
+  }
+
+  ts.forEachChild(node, (child) => visitNode(child, context));
+};
 
 function scriptKind(filePath: string) {
   if (filePath.endsWith(".tsx")) return ts.ScriptKind.TSX;
@@ -37,54 +84,11 @@ export function collectTypeScriptStaticHints(
         true,
         scriptKind(normalized)
       );
+
+      visitNode(sourceFile, { hints, normalizedPath: normalized, sourceFile });
     } catch {
       continue;
     }
-
-    const visit = (node: ts.Node) => {
-      if (node.kind === ts.SyntaxKind.AnyKeyword) {
-        const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
-        hints.push({
-          detail: "Explicit `any` weakens type safety.",
-          kind: "explicit-any",
-          line: line + 1,
-          path: normalized,
-        });
-        return;
-      }
-
-      if (
-        ts.isFunctionDeclaration(node) ||
-        ts.isFunctionExpression(node) ||
-        ts.isArrowFunction(node)
-      ) {
-        const start = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
-        const end = sourceFile.getLineAndCharacterOfPosition(node.getEnd());
-        const lineSpan = end.line - start.line + 1;
-        if (lineSpan >= LONG_FN_LINES) {
-          hints.push({
-            detail: `Function spans ~${lineSpan} lines (threshold ${LONG_FN_LINES}).`,
-            kind: "long-function",
-            line: start.line + 1,
-            path: normalized,
-          });
-        }
-
-        const paramCount = node.parameters.length;
-        if (paramCount >= MANY_PARAMS) {
-          hints.push({
-            detail: `Function has ${paramCount} parameters (threshold ${MANY_PARAMS - 1}).`,
-            kind: "many-params",
-            line: start.line + 1,
-            path: normalized,
-          });
-        }
-      }
-
-      ts.forEachChild(node, visit);
-    };
-
-    visit(sourceFile);
   }
 
   return hints;

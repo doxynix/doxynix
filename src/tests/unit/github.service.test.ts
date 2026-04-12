@@ -35,7 +35,7 @@ const octokitState = vi.hoisted(() => ({
 }));
 
 type ConstructorOptions = {
-  auth: string | any;
+  auth: any | string;
   throttle?: {
     onRateLimit?: (
       retryAfter: number,
@@ -133,7 +133,7 @@ vi.mock("@/server/shared/engine/core/project-policy", () => ({
   },
 }));
 
-function createMockPrisma(accounts: any[] | any) {
+function createMockPrisma(accounts: any | any[]) {
   const normalizedAccounts =
     accounts == null ? [] : Array.isArray(accounts) ? accounts : [accounts];
 
@@ -184,7 +184,7 @@ describe("githubService", () => {
     it("should return installation context when githubInstallationId exists", async () => {
       const { prisma } = createMockPrisma([
         {
-          githubInstallationId: 12345,
+          githubInstallationId: 12_345,
         },
       ]);
 
@@ -192,8 +192,8 @@ describe("githubService", () => {
 
       expect(context.type).toBe("installation");
       const options = octokitState.constructorOptions[0];
-      expect(options.auth.installationId).toBe(12345);
-      expect(options.auth.appId).toBe(123456);
+      expect(options.auth.installationId).toBe(12_345);
+      expect(options.auth.appId).toBe(123_456);
     });
 
     it("should return oauth context when only access_token exists", async () => {
@@ -254,7 +254,7 @@ describe("githubService", () => {
         octokitState.listForAuthenticatedUser,
         expect.objectContaining({ per_page: 100, visibility: "all" })
       );
-      expect(repos[0].fullName).toBe("owner/repo");
+      expect(repos[0]?.fullName).toBe("owner/repo");
     });
 
     it("should combine repos from multiple accounts and deduplicate", async () => {
@@ -268,7 +268,7 @@ describe("githubService", () => {
       const repos = await githubService.getMyRepos(prisma, 1);
 
       expect(repos).toHaveLength(1);
-      expect(repos[0].fullName).toBe("org/shared");
+      expect(repos[0]?.fullName).toBe("org/shared");
     });
 
     it("should log error and continue if one account fails", async () => {
@@ -454,7 +454,7 @@ describe("githubService", () => {
       const { prisma } = createMockPrisma({ access_token: "token" });
       octokitState.searchRepos.mockResolvedValue({ data: { items: [] } });
 
-      await githubService.searchRepos(prisma, 1, "query", undefined);
+      await githubService.searchRepos(prisma, 1, "query", 10);
 
       expect(octokitState.searchRepos).toHaveBeenCalledWith({
         per_page: 10,

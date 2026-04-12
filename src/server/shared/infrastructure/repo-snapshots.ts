@@ -63,12 +63,12 @@ export type RepoWithLatestAnalysisAndDocs = Prisma.RepoGetPayload<{
 
 export type AnalysisRef = {
   analysisId: string;
-  commitSha: string | null;
+  commitSha: null | string;
   createdAt: Date;
 };
 
 export function toAnalysisRef(
-  analysis: Pick<LatestCompletedAnalysis, "commitSha" | "createdAt" | "publicId"> | null | undefined
+  analysis: null | Pick<LatestCompletedAnalysis, "commitSha" | "createdAt" | "publicId"> | undefined
 ): AnalysisRef | null {
   if (analysis == null) return null;
 
@@ -83,7 +83,7 @@ export async function getRepoWithLatestAnalysisAndDocs(db: DbClient, repoId: str
   return db.repo.findUnique({
     select: repoWithLatestAnalysisAndDocsSelect,
     where: { publicId: repoId },
-  }) as Promise<RepoWithLatestAnalysisAndDocs | null>;
+  }) as Promise<null | RepoWithLatestAnalysisAndDocs>;
 }
 
 export async function getLatestCompletedAnalysis(db: DbClient, repoId: string) {

@@ -2,6 +2,17 @@ import { trpc, type MarkAllInput } from "@/shared/api/trpc";
 
 import type { NotificationsParsersState } from "@/entities/notifications";
 
+const mapFiltersToInput = (filters?: NotificationsParsersState): MarkAllInput => {
+  if (filters == null) return {};
+
+  return {
+    repoName: filters.repo ?? undefined,
+    repoOwner: filters.owner ?? undefined,
+    search: filters.search || undefined,
+    type: filters.type ?? undefined,
+  };
+};
+
 export function useNotificationActions() {
   const utils = trpc.useUtils();
 
@@ -11,17 +22,6 @@ export function useNotificationActions() {
       utils.notification.getAll.invalidate(),
     ]);
   };
-
-  const mapFiltersToInput = (filters?: NotificationsParsersState): MarkAllInput => {
-    if (!filters) return {};
-    return {
-      repoName: filters.repo ?? undefined,
-      repoOwner: filters.owner ?? undefined,
-      search: filters.search || undefined,
-      type: filters.type ?? undefined,
-    };
-  };
-
   const markAllAsRead = trpc.notification.markAllAsRead.useMutation({
     onSuccess: invalidateAll,
   });

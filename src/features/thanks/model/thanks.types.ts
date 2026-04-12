@@ -6,6 +6,6 @@ export type Dependency = {
 export type AuthorGroup = {
   author: string;
   authorLink: string;
-  avatar: string | null;
+  avatar: null | string;
   packages: Dependency[];
 };

@@ -81,13 +81,13 @@ export function AuthForm() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
   const turnstileRef = useRef<TurnstileInstance>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<null | string>(null);
 
   const [isSent, setIsSent] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<null | string>(null);
+  const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [pendingData, setPendingData] = useState<z.infer<typeof MagicLinkSchema> | null>(null);
+  const [pendingData, setPendingData] = useState<null | z.infer<typeof MagicLinkSchema>>(null);
 
   const form = useForm<z.infer<typeof MagicLinkSchema>>({
     defaultValues: { email: "" },

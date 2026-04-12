@@ -6,17 +6,17 @@
 import { escapePromptXmlAttr, escapePromptXmlText } from "./string-utils";
 
 export type PromptRole =
-  | "security-sentinel"
-  | "architect"
-  | "code-analyzer"
-  | "code-reviewer"
   | "api-documentarian"
-  | "readme-writer"
-  | "contributing-writer"
-  | "changelog-writer"
-  | "code-documenter"
+  | "architect"
   | "architecture-writer"
-  | "generic";
+  | "changelog-writer"
+  | "code-analyzer"
+  | "code-documenter"
+  | "code-reviewer"
+  | "contributing-writer"
+  | "generic"
+  | "readme-writer"
+  | "security-sentinel";
 
 export interface PromptSection {
   content: string;

@@ -7,8 +7,8 @@ export function CodeSkeleton() {
   return (
     <div className="h-full w-full space-y-3 overflow-hidden p-4 font-mono text-[13px]">
       {Array.from({ length: 32 }).map((_, i) => {
-        const width = widths[i % widths.length];
-        const indent = indents[i % indents.length];
+        const width = widths[i % widths.length]!;
+        const indent = indents[i % indents.length]!;
 
         return (
           <div key={i} className="flex items-center gap-4">

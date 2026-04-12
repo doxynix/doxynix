@@ -10,7 +10,7 @@ type CallWithFallbackProps<T> = {
   frequencyPenalty?: number;
   maxOutputTokens?: number;
   models: string[];
-  outputSchema: z.ZodSchema<T> | null;
+  outputSchema: null | z.ZodSchema<T>;
   presencePenalty?: number;
   prompt: string;
   providerOptions?: Record<string, unknown>;
@@ -26,7 +26,7 @@ type CallWithFallbackProps<T> = {
 export async function callWithFallback<T>({
   attemptMetadata = {},
   frequencyPenalty = 0,
-  maxOutputTokens = 65536,
+  maxOutputTokens = 65_536,
   models,
   outputSchema,
   presencePenalty = 0,
@@ -91,10 +91,10 @@ export async function callWithFallback<T>({
         ...attemptMetadata,
       });
       return finalValue as T;
-    } catch (err) {
-      lastError = err;
+    } catch (error) {
+      lastError = error;
       logger.warn({
-        error: err instanceof Error ? { message: err.message } : String(err),
+        error: error instanceof Error ? { message: error.message } : String(error),
         model: modelName,
         msg: "Model call failed, trying next model",
       });

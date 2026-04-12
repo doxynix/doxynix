@@ -20,8 +20,8 @@ import {
 import { RepoCodeNode } from "./repo-code-node";
 
 type Props = {
-  activePath: string | null;
-  onSelect: (path: string | null) => void;
+  activePath: null | string;
+  onSelect: (path: null | string) => void;
   onTreeApiChange: (api: TreeApi<FileNode> | undefined) => void;
   repo: UiRepoDetailed;
   treeApi: TreeApi<FileNode> | undefined;
