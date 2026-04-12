@@ -78,7 +78,7 @@
       "defu": "6.1.7",
       "vite": "8.0.8",
       "basic-ftp": "5.2.2",
-      "unhead": "2.1.13"
+      "unhead": "3.0.0"
     },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
