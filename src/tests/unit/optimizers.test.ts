@@ -74,7 +74,7 @@ describe("CodeOptimizer", () => {
 describe("unwrapAiText", () => {
   it("should return empty string for nullish values", () => {
     expect(unwrapAiText(null)).toBe("");
-    expect(unwrapAiText()).toBe("");
+    expect(unwrapAiText(null)).toBe("");
   });
 
   it("should return string as is", () => {

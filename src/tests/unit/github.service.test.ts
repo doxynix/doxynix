@@ -454,7 +454,7 @@ describe("githubService", () => {
       const { prisma } = createMockPrisma({ access_token: "token" });
       octokitState.searchRepos.mockResolvedValue({ data: { items: [] } });
 
-      await githubService.searchRepos(prisma, 1, "query");
+      await githubService.searchRepos(prisma, 1, "query", 10);
 
       expect(octokitState.searchRepos).toHaveBeenCalledWith({
         per_page: 10,
