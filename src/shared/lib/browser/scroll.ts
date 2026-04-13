@@ -3,6 +3,8 @@ function easeInOutCubic(t: number): number {
 }
 
 export function smoothScrollTo(targetId: string, offset: number = 80, duration: number = 800) {
+  if (typeof window === "undefined") return;
+
   const targetElement = document.getElementById(targetId);
   if (!targetElement) {
     console.warn(`Element with id #${targetId} not found`);
@@ -11,13 +13,17 @@ export function smoothScrollTo(targetId: string, offset: number = 80, duration: 
 
   const startPosition = window.pageYOffset;
   const targetPosition = targetElement.getBoundingClientRect().top + startPosition - offset;
+  const targetY = Math.max(0, targetPosition);
 
-  if (duration <= 0) {
-    window.scrollTo(0, Math.max(0, targetPosition));
+  const prefersReducedMotion =
+    window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+
+  if (duration <= 0 || prefersReducedMotion) {
+    window.scrollTo(0, targetY);
     return;
   }
 
-  const distance = targetPosition - startPosition;
+  const distance = targetY - startPosition;
   let startTime: null | number = null;
 
   const animation = (currentTime: number) => {
