@@ -2,11 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { cn } from "@/shared/lib/cn";
 import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
+import { getInitials } from "@/shared/lib/get-initials";
 import { isGitHubUrl } from "@/shared/lib/github-url";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { smoothScrollTo } from "@/shared/lib/scroll";
 import { getCookieName } from "@/shared/lib/session-cookie";
-import { getInitials } from "@/shared/lib/user-display";
 
 import { getLanguageColor, normalizeLanguageName } from "@/server/shared/lib/language-metadata";
 import { sanitizePayload } from "@/server/shared/lib/sanitize-payload";
