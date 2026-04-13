@@ -15,8 +15,7 @@ export function smoothScrollTo(targetId: string, offset: number = 80, duration: 
   const targetPosition = targetElement.getBoundingClientRect().top + startPosition - offset;
   const targetY = Math.max(0, targetPosition);
 
-  const prefersReducedMotion =
-    window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (duration <= 0 || prefersReducedMotion) {
     window.scrollTo(0, targetY);

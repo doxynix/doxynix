@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { smoothScrollTo } from "@/shared/lib/browser/scroll";
 import { cn } from "@/shared/lib/cn";
 import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
 import { isGitHubUrl } from "@/shared/lib/github-url";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
+import { smoothScrollTo } from "@/shared/lib/scroll";
 import { getCookieName } from "@/shared/lib/session-cookie";
 import { getInitials } from "@/shared/lib/user-display";
 

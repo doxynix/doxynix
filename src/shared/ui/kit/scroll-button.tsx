@@ -2,7 +2,7 @@
 
 import { MoveRight } from "lucide-react";
 
-import { smoothScrollTo } from "@/shared/lib/browser/scroll";
+import { smoothScrollTo } from "@/shared/lib/scroll";
 
 import { Button } from "../core/button";
 

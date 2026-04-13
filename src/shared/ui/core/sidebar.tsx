@@ -6,8 +6,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { Menu, PanelLeft } from "lucide-react";
 
 import { useIsMobile } from "@/shared/hooks/use-mobile";
-import { setClientCookie } from "@/shared/lib/browser/cookies";
 import { cn } from "@/shared/lib/cn";
+import { setClientCookie } from "@/shared/lib/cookies";
 import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { Separator } from "@/shared/ui/core/separator";
