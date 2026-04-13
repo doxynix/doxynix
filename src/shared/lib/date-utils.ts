@@ -5,7 +5,7 @@ import { DEFAULT_LOCALE } from "../constants/locales";
 export function formatRelativeTime(
   date: Date | null | number | string,
   localeStr: string = DEFAULT_LOCALE,
-  defaultValue: string = "вЂ”"
+  defaultValue: string = "—"
 ): string {
   if (date == null) return defaultValue;
 
@@ -48,7 +48,7 @@ export function formatFullDate(
 ): string {
   try {
     const parsedDate = new Date(date);
-    if (Number.isNaN(parsedDate.getTime())) return "вЂ”";
+    if (Number.isNaN(parsedDate.getTime())) return "—";
 
     const instant = Temporal.Instant.fromEpochMilliseconds(parsedDate.getTime());
 
@@ -62,6 +62,6 @@ export function formatFullDate(
       year: "numeric",
     });
   } catch {
-    return "вЂ”";
+    return "—";
   }
 }
