@@ -5,7 +5,8 @@ import { ChevronDown, History } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import type { UiApiKey } from "@/shared/api/trpc";
-import { cn, formatRelativeTime } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
+import { formatRelativeTime } from "@/shared/lib/date-utils";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";

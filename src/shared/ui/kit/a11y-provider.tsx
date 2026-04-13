@@ -4,8 +4,6 @@ import React, { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import ReactDOM from "react-dom";
 
-import { IS_DEV } from "@/shared/constants/env.client";
-
 type Props = {
   children: ReactNode;
 };
@@ -15,7 +13,7 @@ export function A11yProvider({ children }: Readonly<Props>) {
   const [announcement, setAnnouncement] = useState("");
 
   useEffect(() => {
-    if (IS_DEV && typeof globalThis.window !== "undefined") {
+    if (process.env.NODE_ENV === "development" && typeof globalThis.window !== "undefined") {
       void import("@axe-core/react").then((axe) => {
         void axe.default(React, ReactDOM, 1000);
       });

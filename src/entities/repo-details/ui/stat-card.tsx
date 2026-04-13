@@ -1,4 +1,4 @@
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 
 type Props = {

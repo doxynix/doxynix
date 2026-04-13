@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { formatRelativeTime } from "@/shared/lib/utils";
+import { formatRelativeTime } from "@/shared/lib/date-utils";
 
 type Props = {
   date: Date | string;

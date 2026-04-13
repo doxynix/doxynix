@@ -98,6 +98,8 @@ const MAPPINGS = [
   { prefix: "@faker-js/", name: "Faker-js", gh: "faker-js" },
   { prefix: "knip", name: "Webpro", gh: "Webpro-nl" },
   { prefix: "webpack-stats-plugin", name: "Nearform Commerce", gh: "FormidableLabs" },
+  { prefix: "eslint-config-prettier", name: "Prettier", gh: "prettier" },
+  { prefix: "eslint-plugin-sonarjs", name: "Sonar", gh: "SonarSource" },
 
   // General ecosystem
   { prefix: "@tanstack/", name: "TanStack", gh: "tanstack" },

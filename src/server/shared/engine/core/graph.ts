@@ -1,9 +1,9 @@
 import path from "node:path";
 import { DirectedGraph } from "graphology";
-import * as languages from "linguist-languages";
 import ts from "typescript";
 
 import { dumpDebug } from "../../lib/debug-logger";
+import { getKnownLanguageExtensions } from "../../lib/language-metadata";
 import { normalizeRepoPath } from "./common";
 
 export type AliasRule = {
@@ -19,18 +19,9 @@ export function isLikelyInternalImportSpecifier(spec: string): boolean {
   return false;
 }
 
-const ALL_LINGUIST_EXTENSIONS = Array.from(
-  new Set(
-    Object.values(languages).flatMap((lang) => {
-      const l = lang as { extensions?: readonly string[] };
-      return l.extensions || [];
-    })
-  )
-);
-
 const RELATIVE_IMPORT_SUFFIXES = [
   "",
-  ...ALL_LINGUIST_EXTENSIONS,
+  ...getKnownLanguageExtensions(),
   "/index.ts",
   "/index.js",
   "/__init__.py",

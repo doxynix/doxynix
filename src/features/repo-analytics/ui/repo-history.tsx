@@ -3,7 +3,7 @@
 import { useLocale } from "next-intl";
 
 import type { UiRepoHistory } from "@/shared/api/trpc";
-import { formatRelativeTime } from "@/shared/lib/utils";
+import { formatRelativeTime } from "@/shared/lib/date-utils";
 import {
   Table,
   TableBody,

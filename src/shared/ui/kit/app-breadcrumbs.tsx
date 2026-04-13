@@ -4,7 +4,7 @@ import React from "react";
 import type { Route } from "next";
 import Link from "next/link";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import {
   Breadcrumb,
   BreadcrumbItem,

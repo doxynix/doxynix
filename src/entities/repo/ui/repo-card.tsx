@@ -4,7 +4,9 @@ import { Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import type { UiRepoListItem } from "@/shared/api/trpc";
-import { cn, formatFullDate, formatRelativeTime, getHealthColor } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
+import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
+import { getHealthColor } from "@/shared/lib/health-score";
 import { AnimatedCircularProgressBar } from "@/shared/ui/core/animated-circular-progress-bar";
 import { Badge } from "@/shared/ui/core/badge";
 import { Card, CardContent } from "@/shared/ui/core/card";

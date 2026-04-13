@@ -1,6 +1,6 @@
 import { useId } from "react";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 
 interface GridPatternProps extends React.SVGProps<SVGSVGElement> {
   [key: string]: unknown;

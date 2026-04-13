@@ -4,7 +4,7 @@ import { useState } from "react";
 import { BookOpen, FileText, HistoryIcon, Layers, Terminal, Users2 } from "lucide-react";
 
 import { trpc, type AvailableDocs, type DocType } from "@/shared/api/trpc";
-import { formatFullDate } from "@/shared/lib/utils";
+import { formatFullDate } from "@/shared/lib/date-utils";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";

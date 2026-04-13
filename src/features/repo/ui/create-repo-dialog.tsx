@@ -13,7 +13,7 @@ import { useDebounce } from "use-debounce";
 import { CreateRepoSchema, type CreateRepoInput } from "@/shared/api/schemas/repo";
 import { trpc } from "@/shared/api/trpc";
 import { useClickOutside } from "@/shared/hooks/use-click-outside";
-import { isGitHubUrl } from "@/shared/lib/utils";
+import { isGitHubUrl } from "@/shared/lib/github-url";
 import { Button } from "@/shared/ui/core/button";
 import {
   Dialog,

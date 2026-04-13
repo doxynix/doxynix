@@ -1,7 +1,8 @@
 import type { NextRequest } from "next/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-import { IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
+import { TRPC_PREFIX } from "@/shared/constants/env.client";
+import { IS_DEV } from "@/shared/constants/env.flags";
 
 import { createContext } from "@/server/api/context";
 import { appRouter } from "@/server/api/routers";

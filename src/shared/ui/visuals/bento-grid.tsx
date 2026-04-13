@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
 import { Link } from "@/i18n/routing";
 

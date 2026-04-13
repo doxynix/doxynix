@@ -132,6 +132,7 @@ export const repoRouter = createTRPCRouter({
           PublicRepoSchema.extend({
             complexityScore: z.number().nullish(),
             healthScore: z.number().nullish(),
+            languageColor: z.string(),
             lastAnalysisDate: z.date().nullish(),
             onboardingScore: z.number().nullish(),
             securityScore: z.number().nullish(),

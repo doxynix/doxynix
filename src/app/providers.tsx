@@ -10,8 +10,9 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import superjson from "superjson";
 
 import { trpc } from "@/shared/api/trpc";
-import { APP_URL, IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
-import { setClientCookie } from "@/shared/lib/utils";
+import { APP_URL, TRPC_PREFIX } from "@/shared/constants/env.client";
+import { IS_DEV } from "@/shared/constants/env.flags";
+import { setClientCookie } from "@/shared/lib/cookies";
 import { TooltipProvider } from "@/shared/ui/core/tooltip";
 
 import { AnalyticsSync } from "./_components/analytics-sync";

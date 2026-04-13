@@ -4,7 +4,7 @@ import { useQueryStates } from "nuqs";
 import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
-import { clampIntegerParam } from "@/shared/lib/utils";
+import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
 import { notificationsParsers } from "@/entities/notifications";

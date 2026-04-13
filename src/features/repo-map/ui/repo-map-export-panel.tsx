@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useReactFlow } from "@xyflow/react";
 import saveAs from "file-saver";
 import { Download } from "lucide-react";
-import { domToBlob, domToWebp, type Options } from "modern-screenshot";
+import type { Options } from "modern-screenshot";
 import { useTheme } from "next-themes";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 type Props = {
@@ -76,6 +76,8 @@ export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props
 
         width,
       };
+
+      const { domToBlob, domToWebp } = await import("modern-screenshot");
 
       if (format === "png") {
         const blob = await domToBlob(viewportElement, options);

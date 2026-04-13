@@ -15,9 +15,10 @@ import { extractRouterConfig } from "uploadthing/server";
 
 import "../globals.css";
 
-import { APP_URL, IS_PROD } from "@/shared/constants/env.client";
+import { APP_URL } from "@/shared/constants/env.client";
+import { IS_PROD } from "@/shared/constants/env.flags";
 import type { Locale } from "@/shared/constants/locales";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Toaster } from "@/shared/ui/core/sonner";
 import { A11yProvider } from "@/shared/ui/kit/a11y-provider";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";

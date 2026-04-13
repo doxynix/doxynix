@@ -1,7 +1,8 @@
 import { Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { cn, formatFullDate, formatRelativeTime, getLanguageColor } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
+import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
 import type { RepoItemFields } from "@/shared/types/repo.types";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
@@ -12,7 +13,7 @@ import { repoVisibilityConfig } from "@/entities/repo";
 type Props = { disabled?: boolean; onClick: () => void; repo: RepoItemFields };
 
 export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
-  const langColor = getLanguageColor(repo.language);
+  const langColor = repo.languageColor ?? "#ccc";
   const visibility = repoVisibilityConfig[repo.visibility];
   const t = useTranslations("Dashboard");
   const locale = useLocale();
@@ -38,9 +39,7 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
           <div className={cn("text-muted-foreground flex shrink-0 items-center gap-1 text-xs")}>
             <Star className="text-warning size-3 fill-current" />
             {repo.stars.toLocaleString(locale)}
-            {langColor !== "" && (
-              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: langColor }} />
-            )}
+            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: langColor }} />
             <div className="flex items-center gap-1 text-xs">{repo.language}</div>
           </div>
         </div>

@@ -8,7 +8,7 @@ import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/constants/navigation";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import type { MenuItem } from "@/shared/types/navigation.types";
 import { Button } from "@/shared/ui/core/button";
 import {

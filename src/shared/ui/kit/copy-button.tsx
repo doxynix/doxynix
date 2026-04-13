@@ -3,7 +3,7 @@
 import { Check, Copy } from "lucide-react";
 
 import { useCopyToClipboard } from "@/shared/hooks/use-copy-to-clipboard";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 
 import { Button } from "../core/button";
 import { AppTooltip } from "./app-tooltip";

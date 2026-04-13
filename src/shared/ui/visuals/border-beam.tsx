@@ -2,7 +2,7 @@
 
 import { motion, type MotionStyle, type Transition } from "motion/react";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 
 type BorderBeamProps = {
   /**

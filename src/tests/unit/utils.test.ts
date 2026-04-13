@@ -1,18 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  clampIntegerParam,
-  cn,
-  formatFullDate,
-  formatRelativeTime,
-  getCookieName,
-  getInitials,
-  getLanguageColor,
-  isGitHubUrl,
-  normalizeLanguageName,
-  sanitizePayload,
-  smoothScrollTo,
-} from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
+import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
+import { getInitials } from "@/shared/lib/get-initials";
+import { isGitHubUrl } from "@/shared/lib/github-url";
+import { clampIntegerParam } from "@/shared/lib/number-utils";
+import { smoothScrollTo } from "@/shared/lib/scroll";
+import { getCookieName } from "@/shared/lib/session-cookie";
+
+import { getLanguageColor, normalizeLanguageName } from "@/server/shared/lib/language-metadata";
+import { sanitizePayload } from "@/server/shared/lib/sanitize-payload";
 
 describe("shared/lib/utils:getInitials", () => {
   it("should return initials for names with two or more words", () => {
@@ -189,6 +186,17 @@ describe("shared/lib/utils:normalizeLanguageName", () => {
 });
 
 describe("shared/lib/utils:smoothScrollTo", () => {
+  const scrollToMock = vi.fn();
+  const matchMediaMock = vi.fn().mockReturnValue({ matches: false });
+
+  beforeEach(() => {
+    vi.stubGlobal("window", {
+      matchMedia: matchMediaMock,
+      pageYOffset: 0,
+      scrollTo: scrollToMock,
+    });
+  });
+
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -210,15 +218,15 @@ describe("shared/lib/utils:smoothScrollTo", () => {
     const element = {
       getBoundingClientRect: vi.fn(() => ({ top: 300 })),
     };
-    const scrollTo = vi.fn();
     let currentTime = 0;
 
     vi.stubGlobal("document", {
       getElementById: vi.fn(() => element),
     });
     vi.stubGlobal("window", {
+      matchMedia: matchMediaMock,
       pageYOffset: 100,
-      scrollTo,
+      scrollTo: scrollToMock,
     });
     vi.stubGlobal("requestAnimationFrame", (callback: (time: number) => void) => {
       currentTime += 400;
@@ -228,7 +236,7 @@ describe("shared/lib/utils:smoothScrollTo", () => {
 
     smoothScrollTo("target", 80, 800);
 
-    expect(scrollTo).toHaveBeenCalled();
+    expect(scrollToMock).toHaveBeenCalled();
   });
 });
 

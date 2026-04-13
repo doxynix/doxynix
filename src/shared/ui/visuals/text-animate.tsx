@@ -4,7 +4,7 @@
 import { memo, type ElementType } from "react";
 import { AnimatePresence, motion, type MotionProps, type Variants } from "motion/react";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 
 type AnimationType = "character" | "line" | "text" | "word";
 type AnimationVariant =

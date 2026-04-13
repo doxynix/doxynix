@@ -5,7 +5,7 @@ import { Book, Check, ChevronDown } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
 import {
   Command,

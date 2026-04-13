@@ -3,10 +3,9 @@ import { creator as canaryPreset } from "@secretlint/secretlint-rule-preset-cana
 import { isExtensionSupported, parse } from "leasot";
 import sloc, { type Extension } from "sloc";
 
-import { normalizeLanguageName } from "@/shared/lib/utils";
-
 import { logger } from "../../infrastructure/logger";
 import { dumpDebug } from "../../lib/debug-logger";
+import { normalizeLanguageName } from "../../lib/language-metadata";
 import { calculateDocDensity, clamp, getFileExtension, normalizeRepoPath } from "../core/common";
 import type {
   RepositoryEvidence,

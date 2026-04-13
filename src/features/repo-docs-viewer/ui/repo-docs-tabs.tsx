@@ -3,7 +3,7 @@
 import { ChevronRight } from "lucide-react";
 
 import { type AvailableDocs, type DocType } from "@/shared/api/trpc";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 

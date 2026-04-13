@@ -10,11 +10,11 @@ function createRequest(headers: Record<string, string> = {}): NextRequest {
 describe("request-context getCountry in production", () => {
   afterEach(() => {
     vi.resetModules();
-    vi.doUnmock("@/shared/constants/env.client");
+    vi.doUnmock("@/shared/constants/env.flags");
   });
 
   it("should return UNKNOWN in production when geo and headers are missing", async () => {
-    vi.doMock("@/shared/constants/env.client", () => ({
+    vi.doMock("@/shared/constants/env.flags", () => ({
       IS_PROD: true,
     }));
 

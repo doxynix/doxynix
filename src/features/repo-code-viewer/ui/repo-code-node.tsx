@@ -2,7 +2,7 @@ import React from "react";
 import { ChevronDown, ChevronRight, Folder, FolderOpen, File as LucideFile } from "lucide-react";
 import type { NodeRendererProps } from "react-arborist";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
 
 import type { FileNode } from "@/entities/repo-setup";

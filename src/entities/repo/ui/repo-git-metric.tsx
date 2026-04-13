@@ -3,7 +3,7 @@
 import type { ComponentType, CSSProperties } from "react";
 import { useLocale } from "next-intl";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 type Props = {

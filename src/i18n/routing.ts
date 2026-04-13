@@ -1,7 +1,7 @@
 import { createNavigation } from "next-intl/navigation";
 import { defineRouting } from "next-intl/routing";
 
-import { IS_PROD } from "@/shared/constants/env.client";
+import { IS_PROD } from "@/shared/constants/env.flags";
 import { DEFAULT_LOCALE, LOCALES } from "@/shared/constants/locales";
 
 export const routing = defineRouting({

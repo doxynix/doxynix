@@ -4,7 +4,8 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { NextRequest } from "next/server";
 
-import { IS_DEV, TRPC_PREFIX } from "@/shared/constants/env.client";
+import { TRPC_PREFIX } from "@/shared/constants/env.client";
+import { IS_DEV } from "@/shared/constants/env.flags";
 
 import { createContext } from "./context";
 import { appRouter } from "./routers";

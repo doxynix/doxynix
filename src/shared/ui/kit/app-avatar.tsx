@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import Image from "next/image";
 
-import { cn, getInitials, loadedAvatars } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
+import { getInitials } from "@/shared/lib/get-initials";
+import { loadedAvatars } from "@/shared/lib/load-state";
 import { Avatar, AvatarFallback } from "@/shared/ui/core/avatar";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 

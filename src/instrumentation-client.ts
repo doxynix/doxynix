@@ -3,12 +3,11 @@ import posthog from "posthog-js";
 
 import {
   API_PREFIX,
-  IS_DEV,
-  IS_PROD,
   NEXT_PUBLIC_POSTHOG_KEY,
   SENTRY_DSN,
   TRPC_PREFIX,
 } from "./shared/constants/env.client";
+import { IS_DEV, IS_PROD } from "./shared/constants/env.flags";
 
 function escapeRegExp(str: string) {
   return str.replaceAll(/[$()*+.?[\\\]^{|}]/g, String.raw`\$&`);

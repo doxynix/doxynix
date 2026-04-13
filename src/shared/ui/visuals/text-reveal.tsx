@@ -3,7 +3,7 @@
 import { useRef, type ComponentPropsWithoutRef, type FC, type ReactNode } from "react";
 import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 
 export interface TextRevealProps extends ComponentPropsWithoutRef<"div"> {
   children: string;

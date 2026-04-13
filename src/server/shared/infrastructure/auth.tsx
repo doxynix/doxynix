@@ -10,7 +10,7 @@ import YandexProvider from "next-auth/providers/yandex";
 import { Resend } from "resend";
 
 import { AuthEmail } from "@/shared/api/auth/templates/auth-email";
-import { IS_DEV, IS_PROD } from "@/shared/constants/env.client";
+import { IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
 import { AUTH_PROVIDERS, NEXTAUTH_SECRET, RESEND_API_KEY } from "@/shared/constants/env.server";
 
 import { baseClient, prisma } from "@/server/shared/infrastructure/db";

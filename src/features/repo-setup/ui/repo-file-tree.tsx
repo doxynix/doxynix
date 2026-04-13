@@ -4,7 +4,7 @@ import { Tree, type TreeApi } from "react-arborist";
 
 import type { UiRepoDetailed } from "@/shared/api/trpc";
 import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";

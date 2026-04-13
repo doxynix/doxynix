@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { generateOpenApiDocument } from "trpc-to-openapi";
 
 import { API_PREFIX, APP_URL } from "@/shared/constants/env.client";
-import { getCookieName } from "@/shared/lib/utils";
+import { getCookieName } from "@/shared/lib/session-cookie";
 
 import { appRouter } from "@/server/api/routers";
 import { logger } from "@/server/shared/infrastructure/logger";

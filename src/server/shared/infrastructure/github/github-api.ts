@@ -5,6 +5,7 @@ import type { RepoItemFields } from "@/shared/types/repo.types";
 
 import { ProjectPolicy } from "../../engine/core/project-policy";
 import { isOctokitError } from "../../lib/handle-error";
+import { getLanguageColor } from "../../lib/language-metadata";
 import type { DbClient } from "../db";
 import { logger } from "../logger";
 import {
@@ -62,6 +63,7 @@ export function mapRepos(data: GitHubRepoResponse[]): RepoItemFields[] {
     description: repo.description ?? null,
     fullName: repo.full_name,
     language: repo.language ?? null,
+    languageColor: getLanguageColor(repo.language),
     stars: repo.stargazers_count,
     updatedAt: repo.updated_at ?? new Date().toISOString(),
     visibility: repo.private ? Visibility.PRIVATE : Visibility.PUBLIC,
@@ -170,14 +172,7 @@ export async function searchRepos(
         ? data.items.filter((repo) => !repo.private)
         : data.items;
 
-    return items.map((repo) => ({
-      description: repo.description,
-      fullName: repo.full_name,
-      language: repo.language,
-      stars: repo.stargazers_count,
-      updatedAt: repo.updated_at,
-      visibility: repo.private ? Visibility.PRIVATE : Visibility.PUBLIC,
-    }));
+    return mapRepos(items as GitHubRepoResponse[]);
   } catch (error) {
     logger.error({ error, msg: "GitHub search error" });
     return [];
