@@ -11,6 +11,12 @@ export function smoothScrollTo(targetId: string, offset: number = 80, duration: 
 
   const startPosition = window.pageYOffset;
   const targetPosition = targetElement.getBoundingClientRect().top + startPosition - offset;
+
+  if (duration <= 0) {
+    window.scrollTo(0, Math.max(0, targetPosition));
+    return;
+  }
+
   const distance = targetPosition - startPosition;
   let startTime: null | number = null;
 

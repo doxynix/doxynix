@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-os-command-from-path */
 import { spawn } from "node:child_process";
 
 const args = process.argv.slice(2);
@@ -10,15 +11,23 @@ if (!command) {
 
 const isCI = process.env.CI === "true" || process.env.VERCEL === "1";
 
-const finalCommand = isCI ? command : `doppler run -- ${command}`;
+const shell = process.platform === "win32" ? process.env.ComSpec || "cmd.exe" : "/bin/sh";
 
-const shell = process.platform === "win32" ? true : "/bin/sh";
+const shellArgs = process.platform === "win32" ? ["/d", "/s", "/c", command] : ["-c", command];
 
-const child = spawn(finalCommand, {
-  stdio: "inherit",
-  shell: shell,
-});
+const child = isCI
+  ? spawn(shell, shellArgs, {
+      stdio: "inherit",
+    })
+  : spawn("doppler", ["run", "--", shell, ...shellArgs], {
+      stdio: "inherit",
+    });
 
-child.on("exit", (code) => {
-  process.exit(code ?? 0);
+child.on("close", (code, signal) => {
+  if (signal) {
+    process.kill(process.pid, signal);
+    return;
+  }
+
+  process.exit(code ?? 1);
 });

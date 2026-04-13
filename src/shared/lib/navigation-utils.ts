@@ -1,5 +1,8 @@
-function normalizeRoutePath(path: string) {
-  const clean = path.replace(/\/$/, "");
+export function normalizeRoutePath(path: string) {
+  let clean = path;
+  while (clean.length > 1 && clean.endsWith("/")) {
+    clean = clean.slice(0, -1);
+  }
   return clean === "" ? "/" : clean;
 }
 

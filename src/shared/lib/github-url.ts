@@ -9,7 +9,8 @@ export function isGitHubUrl(input: string): boolean {
       if (protocol !== "http:" && protocol !== "https:") return false;
 
       const host = url.hostname.toLowerCase();
-      const isGithubHost = host === "github.com" || host.endsWith(".github.com");
+      const isGithubHost =
+        host === "github.com" || host.endsWith(".github.com") || host.startsWith("github.");
       if (!isGithubHost) return false;
 
       return url.pathname.split("/").filter(Boolean).length >= 2;
