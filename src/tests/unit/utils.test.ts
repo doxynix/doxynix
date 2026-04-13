@@ -186,6 +186,17 @@ describe("shared/lib/utils:normalizeLanguageName", () => {
 });
 
 describe("shared/lib/utils:smoothScrollTo", () => {
+  const scrollToMock = vi.fn();
+  const matchMediaMock = vi.fn().mockReturnValue({ matches: false });
+
+  beforeEach(() => {
+    vi.stubGlobal("window", {
+      matchMedia: matchMediaMock,
+      pageYOffset: 0,
+      scrollTo: scrollToMock,
+    });
+  });
+
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -207,15 +218,15 @@ describe("shared/lib/utils:smoothScrollTo", () => {
     const element = {
       getBoundingClientRect: vi.fn(() => ({ top: 300 })),
     };
-    const scrollTo = vi.fn();
     let currentTime = 0;
 
     vi.stubGlobal("document", {
       getElementById: vi.fn(() => element),
     });
     vi.stubGlobal("window", {
+      matchMedia: matchMediaMock,
       pageYOffset: 100,
-      scrollTo,
+      scrollTo: scrollToMock,
     });
     vi.stubGlobal("requestAnimationFrame", (callback: (time: number) => void) => {
       currentTime += 400;
@@ -225,7 +236,7 @@ describe("shared/lib/utils:smoothScrollTo", () => {
 
     smoothScrollTo("target", 80, 800);
 
-    expect(scrollTo).toHaveBeenCalled();
+    expect(scrollToMock).toHaveBeenCalled();
   });
 });
 
