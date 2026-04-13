@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs"
 import { TrendsWidgetsSkeleton } from "./trends-widgets-skeleton";
 
 const TrendsChart = dynamic(() => import("./trends-chart").then((m) => m.TrendsChart), {
-  loading: () => <TrendsWidgetsSkeleton />,
+  loading: () => <div className="h-75 w-full" />,
   ssr: false,
 });
 

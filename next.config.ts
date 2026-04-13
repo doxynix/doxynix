@@ -62,7 +62,7 @@ const nextConfig: NextConfig = {
     turbopackFileSystemCacheForBuild: true,
     turbopackFileSystemCacheForDev: true,
     typedEnv: true,
-    // useLightningcss: IS_PROD,
+    useLightningcss: IS_PROD,
     webpackMemoryOptimizations: true,
     workerThreads: true,
   },
