@@ -18,7 +18,7 @@ import "@xyflow/react/dist/style.css";
 import { FilterIcon, SlashIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";

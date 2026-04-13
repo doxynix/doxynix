@@ -12,7 +12,8 @@ import { toast } from "sonner";
 import { z } from "zod/v4-mini";
 
 import { TURNSTILE_SITE_KEY } from "@/shared/constants/env.client";
-import { cn, setClientCookie } from "@/shared/lib/utils";
+import { setClientCookie } from "@/shared/lib/browser/cookies";
+import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import {

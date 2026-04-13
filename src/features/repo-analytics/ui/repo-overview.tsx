@@ -15,7 +15,7 @@ import {
 import { useLocale } from "next-intl";
 
 import type { RepoDetailsOverview } from "@/shared/api/trpc";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";

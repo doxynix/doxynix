@@ -1,6 +1,6 @@
 import { Loader2Icon } from "lucide-react";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 
 function Spinner({ className, ...props }: Readonly<React.ComponentProps<"svg">>) {
   return (

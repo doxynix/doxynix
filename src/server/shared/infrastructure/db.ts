@@ -5,9 +5,9 @@ import pg from "pg";
 
 import { IS_DEV, IS_TEST } from "@/shared/constants/env.flags";
 import { DATABASE_URL } from "@/shared/constants/env.server";
-import { sanitizePayload } from "@/shared/lib/utils";
 
 import { requestContext } from "../lib/request-context";
+import { sanitizePayload } from "../lib/sanitize-payload";
 import { logger } from "./logger";
 
 const { PrismaClient } = pkg;

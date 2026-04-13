@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "motion/react";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 
 export const BackgroundBeams = React.memo(({ className }: { className?: string }) => {
   const paths = [

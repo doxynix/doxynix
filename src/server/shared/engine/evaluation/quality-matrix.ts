@@ -405,6 +405,7 @@ export function buildEvaluationSnapshot(params: EvaluationBuildParams): Evaluati
   };
 
   return {
+    // TODO: рассмотреть переход на Temporal
     generatedAt: new Date().toISOString(),
     languageMaturity: buildLanguageMaturitySnapshot(metrics),
     manualReview: buildManualReviewChecklist({

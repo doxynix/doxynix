@@ -1,7 +1,8 @@
 import { AlertCircle, FileEdit } from "lucide-react";
 
 import type { FileMeta } from "@/shared/api/trpc";
-import { cn, formatSize } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
+import { formatSize } from "@/shared/lib/size-format";
 
 import type { EditorStats } from "../model/editor-stats.types";
 

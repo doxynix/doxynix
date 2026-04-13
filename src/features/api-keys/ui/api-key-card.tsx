@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 
 import type { UiApiKey } from "@/shared/api/trpc";
-import { formatRelativeTime } from "@/shared/lib/utils";
+import { formatRelativeTime } from "@/shared/lib/date-utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Input } from "@/shared/ui/core/input";
 

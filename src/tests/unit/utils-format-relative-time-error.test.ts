@@ -1,7 +1,7 @@
-import { Temporal } from "@js-temporal/polyfill";
+import { Temporal } from "temporal-polyfill";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { formatRelativeTime } from "@/shared/lib/utils";
+import { formatRelativeTime } from "@/shared/lib/date-utils";
 
 describe("formatRelativeTime error fallback", () => {
   afterEach(() => {

@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import type { UiRepoListItem } from "@/shared/api/trpc";
-import { formatRelativeTime, getLanguageColor } from "@/shared/lib/utils";
+import { formatRelativeTime } from "@/shared/lib/date-utils";
 
 type Props = {
   className?: string;
@@ -28,6 +28,7 @@ type GitMetrics = Pick<
   | "forks"
   | "id"
   | "language"
+  | "languageColor"
   | "license"
   | "openIssues"
   | "pushedAt"
@@ -36,11 +37,9 @@ type GitMetrics = Pick<
 >;
 
 export function getGitMetrics(repo: GitMetrics, locale: string): Props[] {
-  const langColor = getLanguageColor(repo.language);
-
   const items = [
     {
-      color: langColor,
+      color: repo.languageColor,
       icon: Circle,
       id: "Language",
       label: repo.language,

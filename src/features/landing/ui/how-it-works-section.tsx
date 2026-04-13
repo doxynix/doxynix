@@ -5,7 +5,7 @@ import { Brain, FileText, User } from "lucide-react";
 import { useInView } from "motion/react";
 import { useTranslations } from "next-intl";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { AblyIcon } from "@/shared/ui/icons/ably-icon";
 import { NeonIcon } from "@/shared/ui/icons/neon-icon";

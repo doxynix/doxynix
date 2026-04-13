@@ -9,7 +9,7 @@ describe("getCookieName runtime branches", () => {
   it("should return secure cookie name in production mode", async () => {
     vi.stubEnv("NODE_ENV", "production");
 
-    const { getCookieName } = await import("@/shared/lib/utils");
+    const { getCookieName } = await import("@/shared/lib/session-cookie");
 
     expect(getCookieName()).toBe("__Secure-next-auth.session-token");
   });
@@ -17,7 +17,7 @@ describe("getCookieName runtime branches", () => {
   it("should return standard cookie name in development mode", async () => {
     vi.stubEnv("NODE_ENV", "development");
 
-    const { getCookieName } = await import("@/shared/lib/utils");
+    const { getCookieName } = await import("@/shared/lib/session-cookie");
 
     expect(getCookieName()).toBe("next-auth.session-token");
   });

@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 type Props = {

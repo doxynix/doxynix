@@ -1,5 +1,4 @@
-import { getLanguageColor } from "@/shared/lib/utils";
-
+import { getLanguageColor } from "../../lib/language-metadata";
 import type { FileSignals, LanguageMetric } from "../core/discovery.types";
 import type { RepoMetrics } from "../core/metrics.types";
 import { ProjectPolicy } from "../core/project-policy";

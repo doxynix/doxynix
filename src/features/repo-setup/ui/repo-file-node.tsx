@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import type { NodeRendererProps } from "react-arborist";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Checkbox } from "@/shared/ui/core/checkbox";

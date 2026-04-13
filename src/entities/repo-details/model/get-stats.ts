@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import type { DashboardStats } from "@/shared/api/trpc";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 
 type TFunction = (key: string) => string;
 

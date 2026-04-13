@@ -4,7 +4,7 @@ import { useEffect, useRef, type ComponentPropsWithoutRef } from "react";
 import { useInView, useMotionValue, useSpring } from "motion/react";
 import { useLocale } from "next-intl";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 
 interface NumberTickerProps extends ComponentPropsWithoutRef<"span"> {
   decimalPlaces?: number;

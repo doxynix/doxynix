@@ -1,4 +1,4 @@
-import { normalizeLanguageName } from "@/shared/lib/utils";
+import { normalizeLanguageName } from "@/server/shared/lib/language-metadata";
 
 import { ProjectPolicy } from "./project-policy";
 import { FILE_CATEGORY_SCORING } from "./scoring-constants";

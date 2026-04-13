@@ -11,7 +11,7 @@ import {
 import type { EditorView } from "@codemirror/view";
 import { CaseSensitive, MoveLeft, Replace, ReplaceAll, Search, WholeWord, X } from "lucide-react";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Input } from "@/shared/ui/core/input";
 
 import type { EditorStats } from "@/entities/repo-details";

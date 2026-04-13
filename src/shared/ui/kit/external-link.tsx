@@ -1,6 +1,6 @@
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 
 type ExternalLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   children: ReactNode;

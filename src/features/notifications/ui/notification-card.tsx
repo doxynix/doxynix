@@ -4,7 +4,7 @@ import { Eye, EyeOff, Trash2 } from "lucide-react";
 import { useLocale } from "next-intl";
 
 import { type UiNotification } from "@/shared/api/trpc";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Card, CardContent, CardDescription, CardTitle } from "@/shared/ui/core/card";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 import { Link } from "@/i18n/routing";

@@ -1,5 +1,3 @@
-import { getLanguageColor } from "@/shared/lib/utils";
-
 import { getFileExtension, normalizeRepoPath } from "@/server/shared/engine/core/common";
 import type {
   Module,
@@ -12,6 +10,7 @@ import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
 import { MAPPER_FILE_SCORING } from "@/server/shared/engine/core/scoring-constants";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
+import { getLanguageColor } from "@/server/shared/lib/language-metadata";
 import { cleanCodeForAi } from "@/server/shared/lib/optimizers";
 
 const HEAD_LINE_LIMIT = 12;

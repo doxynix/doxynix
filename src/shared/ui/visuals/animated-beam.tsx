@@ -3,7 +3,7 @@
 import { useEffect, useId, useState, type RefObject } from "react";
 import { motion } from "motion/react";
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 
 export type AnimatedBeamProps = {
   className?: string;

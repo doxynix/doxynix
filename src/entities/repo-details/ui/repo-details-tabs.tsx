@@ -3,7 +3,8 @@
 import type { Route } from "next";
 
 import { getRepoDetailsMenu } from "@/shared/constants/navigation";
-import { cn, isRouteActive } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
+import { isRouteActive } from "@/shared/lib/navigation-utils";
 import { Button } from "@/shared/ui/core/button";
 import { Link, usePathname } from "@/i18n/routing";
 

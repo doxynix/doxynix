@@ -2,6 +2,7 @@ import type {
   LatestCompletedAnalysis,
   RepoWithLatestAnalysisAndDocs,
 } from "@/server/shared/infrastructure/repo-snapshots";
+import { getLanguageColor } from "@/server/shared/lib/language-metadata";
 import { hasText } from "@/server/shared/lib/string-utils";
 
 import { buildStructureMapPayload, buildStructureNodePayload } from "../lib/graph-navigator";
@@ -113,6 +114,7 @@ export const repoDetailsPresenter = {
         forks: repo.forks,
         id: repo.publicId,
         language: repo.language,
+        languageColor: getLanguageColor(repo.language),
         license: repo.license,
         name: repo.name,
         openIssues: repo.openIssues,

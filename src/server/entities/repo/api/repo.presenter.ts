@@ -1,5 +1,6 @@
 import { Status, type Prisma } from "@prisma/client";
 
+import { getLanguageColor } from "@/server/shared/lib/language-metadata";
 import type { PaginationMeta } from "@/server/shared/lib/pagination";
 
 export type RepoWithAnalyses = Prisma.RepoGetPayload<{
@@ -32,6 +33,7 @@ export const repoPresenter = {
       complexityScore: repo.analyses[0]?.complexityScore ?? null,
       healthScore: repo.analyses[0]?.score ?? null,
       id: repo.publicId,
+      languageColor: getLanguageColor(repo.language),
       lastAnalysisDate: repo.analyses[0]?.createdAt ?? null,
       onboardingScore: repo.analyses[0]?.onboardingScore ?? null,
       securityScore: repo.analyses[0]?.securityScore ?? null,

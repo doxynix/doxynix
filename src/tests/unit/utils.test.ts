@@ -1,18 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  clampIntegerParam,
-  cn,
-  formatFullDate,
-  formatRelativeTime,
-  getCookieName,
-  getInitials,
-  getLanguageColor,
-  isGitHubUrl,
-  normalizeLanguageName,
-  sanitizePayload,
-  smoothScrollTo,
-} from "@/shared/lib/utils";
+import { smoothScrollTo } from "@/shared/lib/browser/scroll";
+import { cn } from "@/shared/lib/cn";
+import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
+import { isGitHubUrl } from "@/shared/lib/github-url";
+import { clampIntegerParam } from "@/shared/lib/number-utils";
+import { getCookieName } from "@/shared/lib/session-cookie";
+import { getInitials } from "@/shared/lib/user-display";
+
+import { getLanguageColor, normalizeLanguageName } from "@/server/shared/lib/language-metadata";
+import { sanitizePayload } from "@/server/shared/lib/sanitize-payload";
 
 describe("shared/lib/utils:getInitials", () => {
   it("should return initials for names with two or more words", () => {

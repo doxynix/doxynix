@@ -3,9 +3,9 @@ import pino from "pino";
 import pretty from "pino-pretty";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
-import { sanitizePayload } from "@/shared/lib/utils";
 
 import { requestContext } from "@/server/shared/lib/request-context";
+import { sanitizePayload } from "@/server/shared/lib/sanitize-payload";
 
 type SerializedError = {
   kind: string;

@@ -5,7 +5,7 @@ import { useQueryStates } from "nuqs";
 import { useDebounce } from "use-debounce";
 
 import { trpc, type RepoStatus } from "@/shared/api/trpc";
-import { clampIntegerParam } from "@/shared/lib/utils";
+import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 

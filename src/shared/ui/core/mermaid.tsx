@@ -2,8 +2,8 @@
 
 import * as React from "react";
 
+import { cn } from "@/shared/lib/cn";
 import { mermaidThemes, type MermaidCustomTheme } from "@/shared/lib/mermaid-themes";
-import { cn } from "@/shared/lib/utils";
 
 /* -------------------------------------------------------------------------------------------------
  * Types

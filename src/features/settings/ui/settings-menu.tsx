@@ -3,7 +3,7 @@
 import type { Route } from "next";
 
 import { settingsMenu } from "@/shared/constants/navigation";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
 import { Link, usePathname } from "@/i18n/routing";
 

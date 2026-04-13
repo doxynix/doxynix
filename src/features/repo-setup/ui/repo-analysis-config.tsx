@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl";
 
 import type { DocType } from "@/shared/api/trpc";
 import { LOCALES } from "@/shared/constants/locales";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Checkbox } from "@/shared/ui/core/checkbox";

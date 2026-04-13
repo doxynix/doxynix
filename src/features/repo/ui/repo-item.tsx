@@ -1,7 +1,8 @@
 import { Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { cn, formatFullDate, formatRelativeTime, getLanguageColor } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/cn";
+import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
 import type { RepoItemFields } from "@/shared/types/repo.types";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
@@ -12,7 +13,7 @@ import { repoVisibilityConfig } from "@/entities/repo";
 type Props = { disabled?: boolean; onClick: () => void; repo: RepoItemFields };
 
 export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
-  const langColor = getLanguageColor(repo.language);
+  const langColor = repo.languageColor;
   const visibility = repoVisibilityConfig[repo.visibility];
   const t = useTranslations("Dashboard");
   const locale = useLocale();
