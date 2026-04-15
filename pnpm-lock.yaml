@@ -198,8 +198,8 @@ importers:
         specifier: 5.99.0
         version: 5.99.0(react@19.2.5)
       '@to-skills/typedoc':
-        specifier: 0.10.0
-        version: 0.10.0(typedoc@0.28.18(typescript@6.0.2))
+        specifier: 0.11.0
+        version: 0.11.0(typedoc@0.28.19(typescript@6.0.2))
       '@trigger.dev/sdk':
         specifier: 4.4.3
         version: 4.4.3(ai@6.0.158(zod@4.3.6))(zod@4.3.6)
@@ -399,8 +399,8 @@ importers:
         specifier: 5.2.4
         version: 5.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       react-resizable-panels:
-        specifier: 4.9.0
-        version: 4.9.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+        specifier: 4.10.0
+        version: 4.10.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       recharts:
         specifier: 2.15.4
         version: 2.15.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -456,8 +456,8 @@ importers:
         specifier: 4.0.2
         version: 4.0.2
       simple-git:
-        specifier: 3.35.2
-        version: 3.35.2
+        specifier: 3.36.0
+        version: 3.36.0
       sloc:
         specifier: 0.3.2
         version: 0.3.2
@@ -506,7 +506,7 @@ importers:
         version: 4.11.1
       '@boneskull/typedoc-plugin-mermaid':
         specifier: 0.2.1
-        version: 0.2.1(mermaid@11.14.0)(typedoc@0.28.18(typescript@6.0.2))
+        version: 0.2.1(mermaid@11.14.0)(typedoc@0.28.19(typescript@6.0.2))
       '@bundle-stats/plugin-webpack-filter':
         specifier: 4.22.0
         version: 4.22.0(core-js@3.49.0)
@@ -802,23 +802,23 @@ importers:
         specifier: 2.29.7
         version: 2.29.7(typescript@6.0.2)
       typedoc:
-        specifier: 0.28.18
-        version: 0.28.18(typescript@6.0.2)
+        specifier: 0.28.19
+        version: 0.28.19(typescript@6.0.2)
       typedoc-plugin-extras:
         specifier: 4.0.1
-        version: 4.0.1(typedoc@0.28.18(typescript@6.0.2))
+        version: 4.0.1(typedoc@0.28.19(typescript@6.0.2))
       typedoc-plugin-llms-txt:
         specifier: 0.1.2
-        version: 0.1.2(typedoc@0.28.18(typescript@6.0.2))
+        version: 0.1.2(typedoc@0.28.19(typescript@6.0.2))
       typedoc-plugin-markdown:
         specifier: 4.11.0
-        version: 4.11.0(typedoc@0.28.18(typescript@6.0.2))
+        version: 4.11.0(typedoc@0.28.19(typescript@6.0.2))
       typedoc-plugin-rename-defaults:
         specifier: 0.7.3
-        version: 0.7.3(typedoc@0.28.18(typescript@6.0.2))
+        version: 0.7.3(typedoc@0.28.19(typescript@6.0.2))
       typedoc-plugin-zod:
         specifier: 1.4.3
-        version: 1.4.3(typedoc@0.28.18(typescript@6.0.2))
+        version: 1.4.3(typedoc@0.28.19(typescript@6.0.2))
       typescript:
         specifier: 6.0.2
         version: 6.0.2
@@ -4943,11 +4943,11 @@ packages:
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
 
-  '@simple-git/args-pathspec@1.0.2':
-    resolution: {integrity: sha512-nEFVejViHUoL8wU8GTcwqrvqfUG40S5ts6S4fr1u1Ki5CklXlRDYThPVA/qurTmCYFGnaX3XpVUmICLHdvhLaA==}
+  '@simple-git/args-pathspec@1.0.3':
+    resolution: {integrity: sha512-ngJMaHlsWDTfjyq9F3VIQ8b7NXbBLq5j9i5bJ6XLYtD6qlDXT7fdKY2KscWWUF8t18xx052Y/PUO1K1TRc9yKA==}
 
-  '@simple-git/argv-parser@1.0.3':
-    resolution: {integrity: sha512-NMKv9sJcSN2VvnPT9Ja7eKfGy8Q8mMFLwPTCcuZMtv3+mYcLIZflg31S/tp2XCCyiY7YAx6cgBHQ0fwA2fWHpQ==}
+  '@simple-git/argv-parser@1.1.1':
+    resolution: {integrity: sha512-Q9lBcfQ+VQCpQqGJFHe5yooOS5hGdLFFbJ5R+R5aDsnkPCahtn1hSkMcORX65J2Z5lxSkD0lQorMsncuBQxYUw==}
 
   '@simple-libs/child-process-utils@1.0.2':
     resolution: {integrity: sha512-/4R8QKnd/8agJynkNdJmNw2MBxuFTRcNFnE5Sg/G+jkSsV8/UBgULMzhizWWW42p8L5H7flImV2ATi79Ove2Tw==}
@@ -5315,11 +5315,11 @@ packages:
   '@textlint/types@15.5.2':
     resolution: {integrity: sha512-sJOrlVLLXp4/EZtiWKWq9y2fWyZlI8GP+24rnU5avtPWBIMm/1w97yzKrAqYF8czx2MqR391z5akhnfhj2f/AQ==}
 
-  '@to-skills/core@0.9.0':
-    resolution: {integrity: sha512-Qo61VLPO+hNURN2zKsGYUmcx3XbqMcJ1v/rbkovbB5UtSHnolS9xVLzfHBGKjmQhGj8Mmp6+9gMO+rSJOCPTyA==}
+  '@to-skills/core@0.10.0':
+    resolution: {integrity: sha512-GVcwK3wzp62idDti7asNMHSr+kaeqWXuVXTKvncUkbDr5jGgDVTlgV+GUPgcCO/7qyV9XEKEPk7EUiAdxnEmlA==}
 
-  '@to-skills/typedoc@0.10.0':
-    resolution: {integrity: sha512-QR7TUr5qPErP951E0RaQ9+8jEkcTkAUR3dS8rju6HJx6g1VtLNy+r8y1VDgWKQlTQuyEz+WLz66OyTOM5LpWIA==}
+  '@to-skills/typedoc@0.11.0':
+    resolution: {integrity: sha512-COGD8p9qqwBBrnW1uDCbXzGHzSLmVewTrEPBEt4bOXPY0/+RLTw4hggvv+gJhoZoo2FCDSfI5t5DUh5U9ekHFA==}
     peerDependencies:
       typedoc: '>=0.28.0'
 
@@ -11501,8 +11501,8 @@ packages:
       '@types/react':
         optional: true
 
-  react-resizable-panels@4.9.0:
-    resolution: {integrity: sha512-sEl+hA6y9/kxa0aPlrUC+G1lcShAf/PiIjoeC8kWXxa53RfAVplVCIxEl01Nwa4L2iRa5JXBXq1/mI8ch6qOZQ==}
+  react-resizable-panels@4.10.0:
+    resolution: {integrity: sha512-frjewRQt7TCv/vCH1pJfjZ7RxAhr5pKuqVQtVgzFq/vherxBFOWyC3xMbryx5Ti2wylViGUFc93Etg4rB3E0UA==}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
@@ -11985,8 +11985,8 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
-  simple-git@3.35.2:
-    resolution: {integrity: sha512-ZMjl06lzTm1EScxEGuM6+mEX+NQd14h/B3x0vWU+YOXAMF8sicyi1K4cjTfj5is+35ChJEHDl1EjypzYFWH2FA==}
+  simple-git@3.36.0:
+    resolution: {integrity: sha512-cGQjLjK8bxJw4QuYT7gxHw3/IouVESbhahSsHrX97MzCL1gu2u7oy38W6L2ZIGECEfIBG4BabsWDPjBxJENv9Q==}
 
   sirv@2.0.4:
     resolution: {integrity: sha512-94Bdh3cC2PKrbgSOUqTiGPWVZeSiXfKOVZNJniWoqrWrRkB1CJzBU3NEbiTsPcYy1lDsANA/THzS+9WBiy5nfQ==}
@@ -12793,8 +12793,8 @@ packages:
     peerDependencies:
       typedoc: 0.23.x || 0.24.x || 0.25.x || 0.26.x || 0.27.x || 0.28.x
 
-  typedoc@0.28.18:
-    resolution: {integrity: sha512-NTWTUOFRQ9+SGKKTuWKUioUkjxNwtS3JDRPVKZAXGHZy2wCA8bdv2iJiyeePn0xkmK+TCCqZFT0X7+2+FLjngA==}
+  typedoc@0.28.19:
+    resolution: {integrity: sha512-wKh+lhdmMFivMlc6vRRcMGXeGEHGU2g8a2CkPTJjJlwRf1iXbimWIPcFolCqe4E0d/FRtGszpIrsp3WLpDB8Pw==}
     engines: {node: '>= 18', pnpm: '>= 10'}
     hasBin: true
     peerDependencies:
@@ -13910,9 +13910,9 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@boneskull/typedoc-plugin-mermaid@0.2.1(mermaid@11.14.0)(typedoc@0.28.18(typescript@6.0.2))':
+  '@boneskull/typedoc-plugin-mermaid@0.2.1(mermaid@11.14.0)(typedoc@0.28.19(typescript@6.0.2))':
     dependencies:
-      typedoc: 0.28.18(typescript@6.0.2)
+      typedoc: 0.28.19(typescript@6.0.2)
     optionalDependencies:
       mermaid: 11.14.0
 
@@ -18538,11 +18538,11 @@ snapshots:
 
   '@shikijs/vscode-textmate@10.0.2': {}
 
-  '@simple-git/args-pathspec@1.0.2': {}
+  '@simple-git/args-pathspec@1.0.3': {}
 
-  '@simple-git/argv-parser@1.0.3':
+  '@simple-git/argv-parser@1.1.1':
     dependencies:
-      '@simple-git/args-pathspec': 1.0.2
+      '@simple-git/args-pathspec': 1.0.3
 
   '@simple-libs/child-process-utils@1.0.2':
     dependencies:
@@ -18883,12 +18883,12 @@ snapshots:
     dependencies:
       '@textlint/ast-node-types': 15.5.2
 
-  '@to-skills/core@0.9.0': {}
+  '@to-skills/core@0.10.0': {}
 
-  '@to-skills/typedoc@0.10.0(typedoc@0.28.18(typescript@6.0.2))':
+  '@to-skills/typedoc@0.11.0(typedoc@0.28.19(typescript@6.0.2))':
     dependencies:
-      '@to-skills/core': 0.9.0
-      typedoc: 0.28.18(typescript@6.0.2)
+      '@to-skills/core': 0.10.0
+      typedoc: 0.28.19(typescript@6.0.2)
 
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
@@ -26090,7 +26090,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  react-resizable-panels@4.9.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
+  react-resizable-panels@4.10.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
@@ -26793,12 +26793,12 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
-  simple-git@3.35.2:
+  simple-git@3.36.0:
     dependencies:
       '@kwsites/file-exists': 1.1.1
       '@kwsites/promise-deferred': 1.1.1
-      '@simple-git/args-pathspec': 1.0.2
-      '@simple-git/argv-parser': 1.0.3
+      '@simple-git/args-pathspec': 1.0.3
+      '@simple-git/argv-parser': 1.1.1
       debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
@@ -27661,28 +27661,28 @@ snapshots:
     dependencies:
       is-typedarray: 1.0.0
 
-  typedoc-plugin-extras@4.0.1(typedoc@0.28.18(typescript@6.0.2)):
+  typedoc-plugin-extras@4.0.1(typedoc@0.28.19(typescript@6.0.2)):
     dependencies:
-      typedoc: 0.28.18(typescript@6.0.2)
+      typedoc: 0.28.19(typescript@6.0.2)
 
-  typedoc-plugin-llms-txt@0.1.2(typedoc@0.28.18(typescript@6.0.2)):
+  typedoc-plugin-llms-txt@0.1.2(typedoc@0.28.19(typescript@6.0.2)):
     dependencies:
-      typedoc: 0.28.18(typescript@6.0.2)
+      typedoc: 0.28.19(typescript@6.0.2)
 
-  typedoc-plugin-markdown@4.11.0(typedoc@0.28.18(typescript@6.0.2)):
+  typedoc-plugin-markdown@4.11.0(typedoc@0.28.19(typescript@6.0.2)):
     dependencies:
-      typedoc: 0.28.18(typescript@6.0.2)
+      typedoc: 0.28.19(typescript@6.0.2)
 
-  typedoc-plugin-rename-defaults@0.7.3(typedoc@0.28.18(typescript@6.0.2)):
+  typedoc-plugin-rename-defaults@0.7.3(typedoc@0.28.19(typescript@6.0.2)):
     dependencies:
       camelcase: 8.0.0
-      typedoc: 0.28.18(typescript@6.0.2)
+      typedoc: 0.28.19(typescript@6.0.2)
 
-  typedoc-plugin-zod@1.4.3(typedoc@0.28.18(typescript@6.0.2)):
+  typedoc-plugin-zod@1.4.3(typedoc@0.28.19(typescript@6.0.2)):
     dependencies:
-      typedoc: 0.28.18(typescript@6.0.2)
+      typedoc: 0.28.19(typescript@6.0.2)
 
-  typedoc@0.28.18(typescript@6.0.2):
+  typedoc@0.28.19(typescript@6.0.2):
     dependencies:
       '@gerrit0/mini-shiki': 3.23.0
       lunr: 2.3.9
