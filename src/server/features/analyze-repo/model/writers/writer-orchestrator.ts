@@ -18,7 +18,6 @@ import {
   serializeAllowedPaths,
   serializeForWriter,
 } from "../utils/payload-serialization";
-import { applyWriterFallbacks } from "./writer-fallbacks";
 import {
   executeApiWriter,
   executeArchitectureWriter,
@@ -50,7 +49,7 @@ export async function orchestrateWriterTasks(
   const writerContexts = {
     api: buildStageContextPack({
       files,
-      preferredPaths: uniquePaths(documentationInput.sections.api_reference.evidencePaths, 24),
+      preferredPaths: uniquePaths(documentationInput.sections.api_reference.evidencePaths, 100),
       stage: "writer_api",
     }),
     architecture: buildStageContextPack({
@@ -61,7 +60,7 @@ export async function orchestrateWriterTasks(
           ...documentationInput.sections.risks.evidencePaths,
           ...documentationInput.sections.onboarding.evidencePaths,
         ],
-        28
+        280
       ),
       stage: "writer_architecture",
     }),
@@ -72,7 +71,7 @@ export async function orchestrateWriterTasks(
           ...documentationInput.sections.overview.evidencePaths,
           ...documentationInput.sections.architecture.evidencePaths,
         ],
-        24
+        240
       ),
       stage: "writer_readme",
     }),
@@ -90,7 +89,7 @@ export async function orchestrateWriterTasks(
         ...writerContexts.api.debug.selectedEvidencePaths,
         ...documentationInput.sections.api_reference.evidencePaths,
       ],
-      48
+      480
     ),
     architecture: buildAllowedPaths(
       [
@@ -99,7 +98,7 @@ export async function orchestrateWriterTasks(
         ...documentationInput.sections.risks.evidencePaths,
         ...documentationInput.sections.onboarding.evidencePaths,
       ],
-      64
+      640
     ),
     readme: buildAllowedPaths(
       [
@@ -107,7 +106,7 @@ export async function orchestrateWriterTasks(
         ...documentationInput.sections.overview.evidencePaths,
         ...documentationInput.sections.architecture.evidencePaths,
       ],
-      48
+      480
     ),
   };
 
@@ -183,30 +182,41 @@ export async function orchestrateWriterTasks(
     }
   }
 
-  const {
-    generatedApiMarkdown,
-    generatedArchitecture,
-    generatedContributing,
-    generatedReadme,
-    updatedStatus,
-    writerFallbacks,
-  } = applyWriterFallbacks(results, taskMap, repo, documentationInput, writerErrors);
+  const getResult = (key: WriterTaskKey) => {
+    const idx = taskMap[key];
+    return idx !== undefined ? results[idx] : null;
+  };
+
+  const readmeRes = getResult("README");
+  const apiRes = getResult("API");
+  const archRes = getResult("ARCHITECTURE");
+  const contrRes = getResult("CONTRIBUTING");
+  const changeRes = getResult("CHANGELOG");
+
+  const generatedReadme = readmeRes?.content ?? undefined;
+  let generatedApiMarkdown = apiRes?.content ?? undefined;
+  const generatedArchitecture = archRes?.content ?? undefined;
+  const generatedContributing = contrRes?.content ?? undefined;
+  const generatedChangelog = changeRes?.content ?? undefined;
 
   let swaggerYaml: string | undefined;
   if (taskMap.API != null && generatedApiMarkdown != null) {
     const yamlMatch = RegExp(/```yaml([\S\s]*?)```/).exec(generatedApiMarkdown);
     if (yamlMatch) {
       swaggerYaml = yamlMatch[1]?.trim();
+      generatedApiMarkdown = generatedApiMarkdown
+        .replace(/# OpenAPI Specification[\S\s]*/, "")
+        .trim();
     }
   }
 
-  let generatedChangelog: string | undefined;
-  if (taskMap.CHANGELOG != null) {
-    const changelogResult = results[taskMap.CHANGELOG];
-    if (changelogResult != null) {
-      generatedChangelog = changelogResult.content;
-    }
-  }
+  const updatedStatus: any = {
+    api: apiRes != null ? (apiRes.error != null ? "failed" : "llm") : "missing",
+    architecture: archRes != null ? (archRes.error != null ? "failed" : "llm") : "missing",
+    changelog: changeRes != null ? (changeRes.error != null ? "failed" : "llm") : "missing",
+    contributing: contrRes != null ? (contrRes.error != null ? "failed" : "llm") : "missing",
+    readme: readmeRes != null ? (readmeRes.error != null ? "failed" : "llm") : "missing",
+  };
 
   analysisResult.analysisRuntime = {
     ...analysisResult.analysisRuntime,
@@ -243,7 +253,6 @@ export async function orchestrateWriterTasks(
       readme: JSON.parse(allowedPathsByWriter.readme),
     },
     writerErrors,
-    writerFallbacks,
     writerPlan,
   });
 
@@ -256,7 +265,6 @@ export async function orchestrateWriterTasks(
     runtime: analysisResult.analysisRuntime,
     swaggerYaml,
     writerErrors,
-    writerFallbacks,
   });
 
   return {

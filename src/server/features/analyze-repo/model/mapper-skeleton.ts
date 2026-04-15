@@ -11,12 +11,9 @@ import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
 import { MAPPER_FILE_SCORING } from "@/server/shared/engine/core/scoring-constants";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
 import { getLanguageColor } from "@/server/shared/lib/language-metadata";
-import { cleanCodeForAi } from "@/server/shared/lib/optimizers";
 
-const HEAD_LINE_LIMIT = 12;
-const MAX_HEAD_CHARS = 900;
-const MAX_FILES_IN_TREE = 120;
-const MAX_FOLDER_ROWS = 35;
+const MAX_FILES_IN_TREE = 1000;
+const MAX_FOLDER_ROWS = 100;
 
 type MapperFolderAgg = {
   depth: number;
@@ -140,11 +137,7 @@ export function buildMapperSkeleton(
   );
 
   const scored = normalized.map((file) => {
-    const lines = file.content.split(/\r?\n/u).length;
-    const clean = cleanCodeForAi(file.content, file.path);
-    const headLines = clean.split(/\r?\n/u).slice(0, HEAD_LINE_LIMIT);
-    let head = headLines.join("\n");
-    if (head.length > MAX_HEAD_CHARS) head = `${head.slice(0, MAX_HEAD_CHARS)}…`;
+    const lines = file.content?.split(/\r?\n/u).length;
 
     const fileModule = moduleByPath.get(file.path);
     const isConfig = configPaths.has(file.path);
@@ -154,8 +147,6 @@ export function buildMapperSkeleton(
       approxLines: lines,
       entry: {
         approxLines: lines,
-        content: file.content,
-        head,
         isApiHeuristic,
         isConfig,
         linguistLabel: fileLanguageLabel(file.path),
@@ -166,7 +157,7 @@ export function buildMapperSkeleton(
         fileModule,
         isApiHeuristic,
         isConfig,
-        lines,
+        lines: lines ?? 0,
         path: file.path,
         primaryEntrypointPaths,
       }),

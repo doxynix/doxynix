@@ -52,10 +52,10 @@ type StageContextParams = {
 };
 
 const STAGE_BUDGETS: Record<AiContextStage, number> = {
-  architect: 220_000,
-  writer_api: 120_000,
-  writer_architecture: 110_000,
-  writer_readme: 80_000,
+  architect: 1_000_000,
+  writer_api: 500_000,
+  writer_architecture: 500_000,
+  writer_readme: 300_000,
 };
 
 const STAGE_FILE_LIMITS: Record<AiContextStage, number> = {
@@ -196,7 +196,7 @@ export function buildStageContextPack({
         return null;
       }
 
-      const cleaned = cleanCodeForAi(file.content, file.path).trim();
+      const cleaned = cleanCodeForAi(file.content ?? "", file.path).trim();
       if (cleaned.length === 0) {
         dropped.push({ path: file.path, reason: "empty-after-clean", score: 0 });
         return null;
