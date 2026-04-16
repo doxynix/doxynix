@@ -74,7 +74,7 @@
       "serialize-javascript": "7.0.5",
       "@react-email/body": "0.3.0",
       "flatted": "3.4.2",
-      "dompurify": "3.3.3",
+      "dompurify": "3.4.0",
       "effect": "3.21.0",
       "handlebars": "4.7.9",
       "defu": "6.1.7",
