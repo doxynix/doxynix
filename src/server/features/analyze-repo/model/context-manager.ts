@@ -1,6 +1,9 @@
+import { normalize } from "pathe";
+
 import type { Module } from "@/server/shared/engine/core/discovery.types";
 import { getFileScore } from "@/server/shared/engine/core/file-classifier";
 import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
+import { PROJECT_POLICY_RULES } from "@/server/shared/engine/core/project-policy-rules";
 import { FILE_CONTEXT_MODIFIERS } from "@/server/shared/engine/core/scoring-constants";
 import { cleanCodeForAi, skeletonizeCode } from "@/server/shared/lib/optimizers";
 import { escapePromptXmlAttr, escapePromptXmlText } from "@/server/shared/lib/string-utils";
@@ -67,24 +70,20 @@ const STAGE_FILE_TOKEN_LIMITS: Record<AiContextStage, number> = {
   writer_readme: 3500,
 };
 
-const ROOT_MANIFESTS = new Set([
-  "cargo.toml",
-  "go.mod",
-  "package.json",
-  "pom.xml",
-  "pyproject.toml",
-  "readme.md",
-  "requirements.txt",
-  "setup.py",
-  "tsconfig.json",
-]);
-
 function isExampleLike(path: string) {
   return /(^|\/)(example|examples|sample|samples)\//iu.test(path);
 }
 
 function isRootManifest(path: string) {
-  return !path.includes("/") && ROOT_MANIFESTS.has(path.toLowerCase());
+  const parts = normalize(path).split("/");
+
+  return (
+    parts[0] != null &&
+    parts.length === 1 &&
+    PROJECT_POLICY_RULES.manifests.rootFiles.includes(
+      parts[0].toLowerCase() as (typeof PROJECT_POLICY_RULES.manifests.rootFiles)[number]
+    )
+  );
 }
 
 function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boolean) {

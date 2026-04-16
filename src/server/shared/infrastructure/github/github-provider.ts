@@ -5,6 +5,7 @@ import { throttling } from "@octokit/plugin-throttling";
 import { Octokit } from "@octokit/rest";
 import type { RequestOptions } from "@octokit/types";
 import gitUrlParse from "git-url-parse";
+import { createPullRequest } from "octokit-plugin-create-pull-request";
 
 import {
   GITHUB_APP_ID,
@@ -16,7 +17,7 @@ import {
 import type { DbClient } from "../db";
 import { logger } from "../logger";
 
-const MyOctokit = Octokit.plugin(retry, throttling, paginateRest);
+const MyOctokit = Octokit.plugin(retry, throttling, paginateRest, createPullRequest);
 export type OctokitInstance = InstanceType<typeof MyOctokit>;
 
 const getCommonConfig = () => ({

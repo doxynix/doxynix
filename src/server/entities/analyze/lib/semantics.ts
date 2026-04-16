@@ -63,6 +63,14 @@ export const SEMANTIC_META: Record<StructureSemanticKind, { description: string;
       description: "Adapters and infrastructure integrations around the main runtime.",
       label: "Infrastructure",
     },
+    ml: {
+      description: "Machine learning models, training pipelines, datasets or inference logic.",
+      label: "Machine Learning",
+    },
+    mobile: {
+      description: "Mobile-specific application code, platform assets or cross-platform flows.",
+      label: "Mobile",
+    },
     shared: {
       description: "Cross-cutting shared primitives reused across the codebase.",
       label: "Shared",

@@ -51,7 +51,7 @@ export const repoAnalysisRouter = createTRPCRouter({
     .input(
       z.object({
         content: z.string(),
-        language: z.string().default("Russian"),
+        language: z.string().default("English"),
         nodeId: z.string().optional(),
         path: z.string(),
         repoId: z.string(),
@@ -67,7 +67,7 @@ export const repoAnalysisRouter = createTRPCRouter({
         analysisId: z.string().optional(),
         commitSha: z.string().optional(),
         content: z.string(),
-        language: z.string().default("Russian"),
+        language: z.string().default("English"),
         nodeId: z.string().optional(),
         path: z.string(),
         repoId: z.string(),

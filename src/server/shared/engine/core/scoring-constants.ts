@@ -350,6 +350,40 @@ export const LLM_TEMPERATURE_STRATEGY = {
   },
 };
 
+export const AI_POLICY_CONSTANTS = {
+  /** Коэффициент оценки: сколько символов в среднем приходится на 1 токен */
+  CHARS_PER_TOKEN_RATIO: 3.5,
+
+  /** Максимальное кол-во токенов на один файл (чтобы один файл не съел весь бюджет) */
+  FILE_TOKEN_LIMITS: {
+    architect: 4000,
+    writer_api: 6000,
+    writer_architecture: 5000,
+    writer_readme: 3500,
+  },
+
+  /** Пороги для анализа PR */
+  PR_ANALYSIS: {
+    COMPLEXITY_RATIO_THRESHOLD: 2.0,
+    DENSE_CHANGE_THRESHOLD: 300, // Строк
+    MAX_CHANGES_PER_FILE: 1000, // Строк изменений
+    SEVERITY_THRESHOLDS: {
+      CRITICAL: 9,
+      HIGH: 7,
+      MEDIUM: 4,
+    },
+  },
+
+  /** Лимиты токенов на разные стадии анализа */
+  TOKEN_BUDGETS: {
+    architect: 210_000,
+    pr_differential: 40_000, // Добавили для PR
+    writer_api: 180_000,
+    writer_architecture: 180_000,
+    writer_readme: 150_000,
+  },
+} as const;
+
 export type LLMTaskType = keyof typeof LLM_TEMPERATURE_STRATEGY;
 
 /**

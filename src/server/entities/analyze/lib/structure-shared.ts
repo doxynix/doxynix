@@ -72,6 +72,8 @@ export function createSemanticCounts(): Record<StructureSemanticKind, number> {
     data: 0,
     frontend: 0,
     infrastructure: 0,
+    ml: 0,
+    mobile: 0,
     shared: 0,
     unknown: 0,
   };

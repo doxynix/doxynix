@@ -52,6 +52,7 @@ export async function orchestrateWriterTasks(
   limiter.on("failed", async (error, jobInfo) => {
     logger.warn({ error, jobInfo, msg: "Job failed, checking for retry" });
     if (jobInfo.retryCount < 2) return 1000;
+    return -1;
   });
 
   const documentationInput = getDocumentationInputSnapshot(evidence, hardMetrics);
