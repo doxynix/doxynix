@@ -1,17 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import fs from "node:fs";
-import path from "node:path";
+import fs from "node:fs/promises";
+import { attempt } from "es-toolkit";
+import { join } from "pathe";
 
-import { IS_PROD } from "@/shared/constants/env.flags";
+import { IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
 
-export function dumpDebug(name: string, data: any, subfolder?: string) {
-  if (IS_PROD) return;
+export async function dumpDebug(name: string, data: any, subfolder?: string) {
+  if (IS_PROD || !IS_DEV) return;
 
-  const baseDir = path.join(process.cwd(), ".debug");
-  const targetDir = subfolder != null ? path.join(baseDir, subfolder) : baseDir;
+  const targetDir = join(process.cwd(), ".debug", subfolder ?? "");
 
-  if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+  const mkdirResult = attempt(() => fs.mkdir(targetDir, { recursive: true }));
+  if (mkdirResult instanceof Error) return;
 
   const fileName = `${name}.json`;
-  fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(data, null, 2));
+  const filePath = join(targetDir, fileName);
+
+  void attempt(() => fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8"));
 }

@@ -82,7 +82,7 @@ export function buildWriterPlanDebugSnapshot(
 }
 
 export function buildWriterContextSnapshot(
-  writerContexts: Record<string, ReturnType<typeof buildStageContextPack>>
+  writerContexts: Record<string, Awaited<ReturnType<typeof buildStageContextPack>>>
 ) {
   return Object.fromEntries(
     Object.entries(writerContexts).map(([key, value]) => [

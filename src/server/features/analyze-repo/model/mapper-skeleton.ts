@@ -1,4 +1,4 @@
-import { getFileExtension, normalizeRepoPath } from "@/server/shared/engine/core/common";
+import { normalizeRepoPath } from "@/server/shared/engine/core/common";
 import type {
   Module,
   ModuleRef,
@@ -11,6 +11,7 @@ import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
 import { MAPPER_FILE_SCORING } from "@/server/shared/engine/core/scoring-constants";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
 import { getLanguageColor } from "@/server/shared/lib/language-metadata";
+import { getFileExtension } from "@/server/shared/lib/path-operations";
 
 const MAX_FILES_IN_TREE = 1000;
 const MAX_FOLDER_ROWS = 100;
@@ -221,7 +222,7 @@ export function buildMapperSkeleton(
     tsStaticHints: tsStaticHints.slice(0, 12),
   };
 
-  dumpDebug("mapper-skeleton-payload", payload);
+  void dumpDebug("mapper-skeleton-payload", payload);
 
   return JSON.stringify(payload, null, 2);
 }

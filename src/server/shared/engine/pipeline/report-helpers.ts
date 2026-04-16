@@ -1,3 +1,4 @@
+import { uniquePaths } from "../../lib/array-utils";
 import type { EntrypointRef, ModuleRef, RouteInventory } from "../core/discovery.types";
 import type {
   DocumentationAudience,
@@ -21,13 +22,6 @@ type RankedModule = Pick<ModuleRef, "apiSurface" | "exports" | "path" | "routeCo
 
 export function clampSectionConfidence(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
-}
-
-export function uniquePaths(paths: Array<false | null | string | undefined>, limit?: number) {
-  const deduped = Array.from(
-    new Set(paths.filter((path): path is string => typeof path === "string" && path.length > 0))
-  );
-  return typeof limit === "number" ? deduped.slice(0, limit) : deduped;
 }
 
 export function rankArchitectureModule(module: RankedModule) {

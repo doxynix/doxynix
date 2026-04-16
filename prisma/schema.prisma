@@ -15,39 +15,13 @@ generator client {
   binaryTargets   = ["native", "debian-openssl-3.0.x"]
 }
 
-generator zod {
-  provider                         = "zod-prisma-types"
-  output                           = "../src/generated/zod"
-  useMultipleFiles                 = false
-  writeBarrelFiles                 = false
-  createIndexType                  = false
-  createInputTypes                 = false
-  createModelTypes                 = true
-  createOptionalDefaultValuesTypes = false
-  createRelationValuesTypes        = false
-  createPartialTypes               = false
-  addInputTypeValidation           = true
-  coerceDate                       = true
-  writeNullishInInputTypes         = true
-  addIncludeType                   = false
-  addSelectType                    = false
-  useJsonParameters                = true
-  useTypeAssertions                = true
-  modelSuffix                      = "Schema"
-}
 
-generator jsonSchema {
-  provider = "prisma-json-schema-generator"
-}
 
-generator dbml {
-  provider = "prisma-dbml-generator"
-}
 
-generator fakeData {
-  provider = "prisma-generator-fake-data"
-  output   = "../src/generated/fake-data.ts"
-}
+
+
+
+
 
 enum UserRole {
   USER

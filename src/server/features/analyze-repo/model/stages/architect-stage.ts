@@ -16,14 +16,14 @@ export async function executeArchitectPhase(
   sentinelStatus: "SAFE" | "UNSAFE",
   language: string
 ): Promise<AIResult> {
-  const architectContext = buildStageContextPack({
+  const architectContext = await buildStageContextPack({
     files: validFiles,
     preferredPaths: collectArchitectPreferredPaths(documentationDigest),
     stage: "architect",
   });
 
-  dumpDebug("architect-budget", architectContext.debug);
-  dumpDebug("smart-context-files", {
+  void dumpDebug("architect-budget", architectContext.debug);
+  void dumpDebug("smart-context-files", {
     stages: {
       architect: {
         budget: architectContext.debug.budgetChars,
@@ -35,7 +35,7 @@ export async function executeArchitectPhase(
       },
     },
   });
-  dumpDebug("architect-input", {
+  void dumpDebug("architect-input", {
     digest: documentationDigest,
     promptChars: architectContext.context.length,
     selectedEvidencePaths: architectContext.debug.selectedEvidencePaths,

@@ -1,13 +1,7 @@
+import { percentile } from "../../lib/math-utils";
 import { clamp } from "../core/common";
 import type { RepoMetrics } from "../core/metrics.types";
 import { COMPLEXITY_SCORING, TECH_DEBT_SCORING } from "../core/scoring-constants";
-
-function percentile(values: number[], ratio: number) {
-  if (values.length === 0) return 0;
-  const sorted = [...values].sort((left, right) => left - right);
-  const index = Math.min(sorted.length - 1, Math.max(0, Math.floor((sorted.length - 1) * ratio)));
-  return sorted[index] ?? 0;
-}
 
 export function normalizeComplexityScore(params: {
   cycles: number;

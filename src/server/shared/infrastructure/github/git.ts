@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import type { Repo } from "@prisma/client";
+import gitUrlParse from "git-url-parse";
 import simpleGit from "simple-git";
 
 import { prisma } from "@/server/shared/infrastructure/db";
@@ -125,15 +126,14 @@ export async function cloneRepository(
   const git = simpleGit();
   const branchToClone = selectedBranch ?? repo.defaultBranch;
 
-  const repoUrl = `https://github.com/${repo.owner}/${repo.name}.git`;
+  const parsed = gitUrlParse(repo.url);
+
+  let repoUrl = repo.url;
+  if (token != null) {
+    repoUrl = `https://x-access-token:${token}@${parsed.resource}/${parsed.full_name}.git`;
+  }
 
   const options = ["--filter=blob:none", "--single-branch", "--branch", branchToClone, "--no-tags"];
-
-  if (token != null) {
-    const base64Auth = Buffer.from(`x-access-token:${token}`).toString("base64");
-
-    options.push("-c", `http.extraheader=AUTHORIZATION: basic ${base64Auth}`);
-  }
 
   try {
     await git.clone(repoUrl, targetPath, options);

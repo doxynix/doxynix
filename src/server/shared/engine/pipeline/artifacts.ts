@@ -525,6 +525,6 @@ export function buildRepositoryArtifacts(params: ArtifactBuildParams): ArtifactB
         evidence: finding.evidence.slice(0, MAX_FINDING_EVIDENCE),
       })),
   };
-  dumpDebug("artifacts-facts-findings", result);
+  void dumpDebug("artifacts-facts-findings", result);
   return result;
 }
