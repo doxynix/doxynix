@@ -152,7 +152,7 @@ describe("Repositories & Data Visibility", () => {
 
     const doc = await alice.db.document.create({
       data: {
-        analysis: { connect: { id: analysis.id } },
+        analysis: { connect: { publicId: analysis.publicId } },
         content: hugeContent,
         repo: { connect: { publicId: repo.publicId } },
         type: "README",
