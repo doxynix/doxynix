@@ -1,3 +1,5 @@
+import type { PRAnalysisConfig } from "@/server/features/pr-analysis/model/pr-types";
+
 import { logger as baseLogger } from "../infrastructure/logger";
 
 /**
@@ -52,7 +54,7 @@ export const prAnalysisLogger = {
     });
   },
 
-  configUpdated: (repoId: number, config: any) => {
+  configUpdated: (repoId: number, config: PRAnalysisConfig) => {
     baseLogger.info({ config, msg: "pr_config_updated", repoId });
   },
 

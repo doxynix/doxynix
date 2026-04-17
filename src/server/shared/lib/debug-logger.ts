@@ -2,10 +2,10 @@ import fs from "node:fs/promises";
 import { attempt } from "es-toolkit";
 import { join } from "pathe";
 
-import { IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
+import { IS_PROD } from "@/shared/constants/env.flags";
 
-export async function dumpDebug(name: string, data: any, subfolder?: string) {
-  if (IS_PROD || !IS_DEV) return;
+export async function dumpDebug<T>(name: string, data: T, subfolder?: string) {
+  if (IS_PROD) return;
 
   const targetDir = join(process.cwd(), ".debug", subfolder ?? "");
 

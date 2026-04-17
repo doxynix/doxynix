@@ -132,13 +132,25 @@ export const generatedFixRouter = createTRPCRouter({
       });
 
       try {
+        // Fetch repo metadata (to detect language)
+        const repo = await ctx.prisma.repo.findUnique({
+          where: { id: input.repoId },
+        });
+
+        if (!repo) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Repository not found",
+          });
+        }
+
         // Generate fix in-memory with file contents for diff generation
         const fixService = new FixService();
         const fixResult = await fixService.createFixFromAnalysis({
           fileContents: input.fileContents,
           findings: input.findings as FindingForFix[],
           prAnalysisId: input.prAnalysisId,
-          repoContext: { language: "typescript" }, // TODO: detect from repo
+          repoContext: { language: repo.language ?? "typescript" },
           repoId: input.repoId,
         });
 

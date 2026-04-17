@@ -77,24 +77,24 @@ export const aiSchema = z.object({
       architect: z
         .object({
           reason: z.string().optional(),
-          source: z.enum(["fallback", "llm"]),
+          source: "llm",
           status: z.enum(["partial", "success"]),
         })
         .optional(),
       mapper: z
         .object({
           reason: z.string().optional(),
-          source: z.enum(["fallback", "llm"]),
+          source: "llm",
           status: z.enum(["partial", "success"]),
         })
         .optional(),
       writers: z
         .object({
-          api: z.enum(["failed", "fallback", "llm", "missing"]).optional(),
-          architecture: z.enum(["failed", "fallback", "llm", "missing"]).optional(),
-          changelog: z.enum(["failed", "fallback", "llm", "missing"]).optional(),
-          contributing: z.enum(["failed", "fallback", "llm", "missing"]).optional(),
-          readme: z.enum(["failed", "fallback", "llm", "missing"]).optional(),
+          api: z.enum(["failed", "llm", "missing"]).optional(),
+          architecture: z.enum(["failed", "llm", "missing"]).optional(),
+          changelog: z.enum(["failed", "llm", "missing"]).optional(),
+          contributing: z.enum(["failed", "llm", "missing"]).optional(),
+          readme: z.enum(["failed", "llm", "missing"]).optional(),
         })
         .optional(),
     })

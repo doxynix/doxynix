@@ -133,13 +133,18 @@ export class DocumentGraphLinker {
  * Formats document with graph links for API response
  */
 export class DocumentFormatter {
-  static withGraphLinks(document: string, graph: any, docType: string): DocumentWithSections {
+  static withGraphLinks(
+    document: string,
+    graph: any,
+    docType: string,
+    version: string
+  ): DocumentWithSections {
     const sections = DocumentGraphLinker.linkSectionsToGraph(document, graph, docType);
 
     return {
       sections,
       type: docType,
-      version: "1.0", // TODO: track versions
+      version,
     };
   }
 }

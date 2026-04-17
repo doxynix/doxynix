@@ -68,7 +68,12 @@ export const documentsRouter = createTRPCRouter({
           : {};
 
       // Format with graph links
-      const formatted = DocumentFormatter.withGraphLinks(document.content, graph, input.docType);
+      const formatted = DocumentFormatter.withGraphLinks(
+        document.content,
+        graph,
+        input.docType,
+        document.version
+      );
 
       return {
         ...document,

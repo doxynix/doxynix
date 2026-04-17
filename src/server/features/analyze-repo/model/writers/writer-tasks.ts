@@ -22,7 +22,7 @@ import {
 } from "../../lib/prompts-refactored";
 
 export type WriterName = "api" | "architecture" | "changelog" | "contributing" | "readme";
-export type WriterStatus = "failed" | "fallback" | "llm" | "missing";
+export type WriterStatus = "failed" | "llm" | "missing";
 export type WriterResult = {
   content?: string;
   error?: string;

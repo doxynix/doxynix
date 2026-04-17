@@ -17,8 +17,8 @@ import {
 import type { DbClient } from "../db";
 import { logger } from "../logger";
 
-const MyOctokit = Octokit.plugin(retry, throttling, paginateRest, createPullRequest);
-export type OctokitInstance = InstanceType<typeof MyOctokit>;
+const AppOctokit = Octokit.plugin(retry, throttling, paginateRest, createPullRequest);
+export type OctokitInstance = InstanceType<typeof AppOctokit>;
 
 const getCommonConfig = () => ({
   log: {
@@ -59,7 +59,7 @@ const getCommonConfig = () => ({
 });
 
 export function getInstallationClient(installationId: number): OctokitInstance {
-  return new MyOctokit({
+  return new AppOctokit({
     ...getCommonConfig(),
     auth: {
       appId: Number(GITHUB_APP_ID),
@@ -71,7 +71,7 @@ export function getInstallationClient(installationId: number): OctokitInstance {
 }
 
 export function getPublicClient(token?: string): OctokitInstance {
-  return new MyOctokit({
+  return new AppOctokit({
     ...getCommonConfig(),
     auth: token,
   }) as OctokitInstance;

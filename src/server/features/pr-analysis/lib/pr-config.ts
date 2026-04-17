@@ -41,7 +41,7 @@ export class PRConfigService {
 
     await prisma.repo.update({
       data: {
-        prAnalysisConfig: newConfig as any,
+        prAnalysisConfig: newConfig as PRAnalysisConfig,
       },
       where: { id: repoId },
     });

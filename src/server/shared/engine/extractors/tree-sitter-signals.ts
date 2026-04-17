@@ -1,7 +1,6 @@
 import "server-only";
 
-import path from "node:path";
-import fg from "fast-glob";
+import { join, resolve } from "pathe";
 
 import { logger } from "../../infrastructure/logger";
 import { getFileExtension } from "../../lib/path-operations";
@@ -155,10 +154,6 @@ const languageCache = new Map<string, Promise<any>>();
 let runtimeInitPromise: null | Promise<void> = null;
 const smokeCheckedExtensions = new Set<string>();
 
-function joinFsPath(...parts: string[]) {
-  return parts.join("/").replaceAll(/[/\\]+/g, "/");
-}
-
 async function initRuntime() {
   if (runtimeInitPromise != null) return await runtimeInitPromise;
 
@@ -177,8 +172,9 @@ async function initRuntime() {
     }
 
     await ParserRuntime.init({
-      locateFile: (name: string) =>
-        joinFsPath(process.cwd(), "node_modules", "web-tree-sitter", name),
+      locateFile: (name: string) => {
+        return join(process.cwd(), "node_modules/web-tree-sitter", name);
+      },
     });
   })().catch((error) => {
     runtimeInitPromise = null;
@@ -218,14 +214,16 @@ async function loadLanguage(ext: string, spec: LanguageSpec) {
 }
 
 async function resolveGrammarWasmPath(spec: LanguageSpec) {
-  if (spec.wasmPackage) {
-    const pattern = `node_modules/.pnpm/${spec.wasmPackage}@*/node_modules/${spec.wasmPackage}/${spec.wasm}`;
-    const [foundPath] = await fg(pattern, { absolute: true, cwd: process.cwd() });
+  const pathsToTry = [
+    join(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm),
+    resolve(`./node_modules/tree-sitter-wasms/out/${spec.wasm}`),
+  ];
 
-    if (foundPath) return foundPath;
+  for (const p of pathsToTry) {
+    return p;
   }
 
-  return path.join(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm);
+  return pathsToTry[0];
 }
 
 function lineOf(content: string, fragment: string) {

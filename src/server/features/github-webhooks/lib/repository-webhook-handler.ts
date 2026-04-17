@@ -33,8 +33,15 @@ export async function handleRepositoryEvent(payload: RepositoryEvent): Promise<v
       logger.info({ githubId: repository.id, msg: "repository_archived" });
     }
 
-    const syncActions = ["renamed", "edited", "privatized", "publicized"];
-
+    const syncActions = [
+      "renamed",
+      "edited",
+      "privatized",
+      "publicized",
+      "archived",
+      "transferred",
+      "unarchived",
+    ];
     if (syncActions.includes(action)) {
       await syncRepoMetadata(repository);
 

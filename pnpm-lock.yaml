@@ -89,6 +89,9 @@ importers:
       '@octokit/auth-app':
         specifier: 8.2.0
         version: 8.2.0
+      '@octokit/auth-oauth-user':
+        specifier: 6.0.2
+        version: 6.0.2
       '@octokit/plugin-paginate-rest':
         specifier: 14.0.0
         version: 14.0.0(@octokit/core@7.0.6)
