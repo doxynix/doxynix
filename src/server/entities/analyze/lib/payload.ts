@@ -1,4 +1,5 @@
 import { DocType } from "@prisma/client";
+import { uniqBy } from "es-toolkit";
 
 import { aiSchema, type AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
@@ -20,19 +21,13 @@ export function coerceAnalysisPayload(analysis: LatestCompletedAnalysis | null |
 }
 
 export function dedupeLatestDocsByType(docs: StoredDocument[]) {
-  const latestByType = new Map<DocType, StoredDocument>();
+  const sorted = [...docs].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
-  for (const doc of docs) {
-    const current = latestByType.get(doc.type);
-    if (current == null || doc.updatedAt > current.updatedAt) {
-      latestByType.set(doc.type, doc);
-    }
-  }
+  const uniqueDocs = uniqBy(sorted, (d) => d.type);
 
-  return Array.from(latestByType.values()).sort((left, right) => {
+  return uniqueDocs.sort((left, right) => {
     const orderDiff = DOC_TYPE_ORDER[left.type] - DOC_TYPE_ORDER[right.type];
-    if (orderDiff !== 0) return orderDiff;
-    return right.updatedAt.getTime() - left.updatedAt.getTime();
+    return orderDiff !== 0 ? orderDiff : right.updatedAt.getTime() - left.updatedAt.getTime();
   });
 }
 
@@ -56,8 +51,7 @@ export function toDocSummary(doc: StoredDocument, aiResult: AIResult | null) {
   const status = getWriterStatus(doc.type, aiResult);
   return {
     id: doc.publicId,
-    isFallback: status === "fallback",
-    source: status === "fallback" ? "fallback" : status === "llm" ? "llm" : null,
+    source: status === "llm" ? "llm" : null,
     status,
     type: doc.type,
     updatedAt: doc.updatedAt,

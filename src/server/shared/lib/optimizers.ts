@@ -89,3 +89,14 @@ export function unwrapAiText(value: unknown): string {
   if (Array.isArray(value)) return value.join("\n");
   return String(value);
 }
+
+export function skeletonizeCode(code: string): string {
+  return code
+    .replaceAll(/({[\S\s]*?})/gm, (match) => {
+      if (match.length > 100) {
+        return "{ /* ... implementation hidden to ... */ }";
+      }
+      return match;
+    })
+    .slice(0, 5000);
+}

@@ -9,7 +9,7 @@ const githubService = {
   ...githubProvider,
 };
 
-const parseGithubUrlMock = vi.hoisted(() => vi.fn());
+const gitUrlParseMock = vi.hoisted(() => vi.fn());
 
 const projectPolicyState = vi.hoisted(() => ({
   isIgnored: vi.fn<(path: string) => boolean>(),
@@ -111,8 +111,8 @@ vi.mock("@octokit/rest", () => {
   };
 });
 
-vi.mock("parse-github-url", () => ({
-  default: parseGithubUrlMock,
+vi.mock("git-url-parse", () => ({
+  default: gitUrlParseMock,
 }));
 
 vi.mock("@/shared/constants/env.server", () => ({
@@ -375,23 +375,20 @@ describe("githubService", () => {
   describe("parseUrl", () => {
     it("should throw when input is empty after trim", () => {
       expect(() => githubService.parseUrl("   ")).toThrow("Field cannot be empty");
-      expect(parseGithubUrlMock).not.toHaveBeenCalled();
+      expect(gitUrlParseMock).not.toHaveBeenCalled();
     });
 
-    it("should throw when parser returns invalid owner or repo name", () => {
-      parseGithubUrlMock.mockReturnValueOnce({ name: "repo", owner: "" });
-      expect(() => githubService.parseUrl("owner/repo")).toThrow(
-        "Invalid format. Enter 'owner/repo' or repository URL"
-      );
-
-      parseGithubUrlMock.mockReturnValueOnce({ name: "", owner: "owner" });
-      expect(() => githubService.parseUrl("owner/repo")).toThrow(
+    it("should throw when parser throws error", () => {
+      gitUrlParseMock.mockImplementationOnce(() => {
+        throw new Error("Invalid format");
+      });
+      expect(() => githubService.parseUrl("invalid")).toThrow(
         "Invalid format. Enter 'owner/repo' or repository URL"
       );
     });
 
     it("should return parsed owner and repo for valid input", () => {
-      parseGithubUrlMock.mockReturnValue({ name: "repo", owner: "owner" });
+      gitUrlParseMock.mockReturnValue({ name: "repo", owner: "owner" });
 
       expect(githubService.parseUrl("https://github.com/owner/repo")).toEqual({
         name: "repo",

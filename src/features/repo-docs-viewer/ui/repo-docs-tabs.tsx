@@ -10,7 +10,6 @@ import { TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 type TabItem = {
   icon: React.ComponentType<{ className?: string }>;
   id: string;
-  isFallback: boolean;
   status: AvailableDocs[number]["status"];
   value: DocType;
 };
@@ -47,14 +46,8 @@ export function RepoDocsTabs({ activeTab, items }: Readonly<Props>) {
                 {item.value.toLowerCase().replace("_", " ")}
               </span>
               {item.status != null && (
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "text-xs uppercase",
-                    item.isFallback ? "border-warning text-warning" : ""
-                  )}
-                >
-                  {item.isFallback ? "fallback" : item.status}
+                <Badge variant="outline" className={cn("text-xs uppercase")}>
+                  {item.status}
                 </Badge>
               )}
               {isActive && <ChevronRight className="size-3" />}

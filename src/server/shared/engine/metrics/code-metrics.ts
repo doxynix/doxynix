@@ -6,7 +6,8 @@ import sloc, { type Extension } from "sloc";
 import { logger } from "../../infrastructure/logger";
 import { dumpDebug } from "../../lib/debug-logger";
 import { normalizeLanguageName } from "../../lib/language-metadata";
-import { calculateDocDensity, clamp, getFileExtension, normalizeRepoPath } from "../core/common";
+import { getFileExtension } from "../../lib/path-operations";
+import { calculateDocDensity, clamp, normalizeRepoPath } from "../core/common";
 import type {
   RepositoryEvidence,
   SecretLintMessage,
@@ -307,7 +308,7 @@ export async function analyzeRepository(
     tsStaticHints,
   });
 
-  dumpDebug("full-metrics-output", finalMetrics);
+  void dumpDebug("full-metrics-output", finalMetrics);
   return { evidence, metrics: finalMetrics };
 }
 

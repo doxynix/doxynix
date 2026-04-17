@@ -334,7 +334,7 @@ export type Module = {
   apiSurface?: number;
   approxLines?: number;
   categories?: FileCategory[];
-  content: string;
+  content?: string;
   entrypointHints?: EntrypointRef[];
   exports?: number;
   frameworkHints?: FrameworkFact[];

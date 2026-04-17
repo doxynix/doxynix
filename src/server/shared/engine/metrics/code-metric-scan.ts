@@ -1,4 +1,5 @@
 import { getLanguageColor } from "../../lib/language-metadata";
+import { percentile } from "../../lib/math-utils";
 import type { FileSignals, LanguageMetric } from "../core/discovery.types";
 import type { RepoMetrics } from "../core/metrics.types";
 import { ProjectPolicy } from "../core/project-policy";
@@ -35,13 +36,6 @@ export type ScanAggregation = {
     todos: number;
   };
 };
-
-function percentile(values: number[], ratio: number) {
-  if (values.length === 0) return 0;
-  const sorted = [...values].sort((left, right) => left - right);
-  const index = Math.min(sorted.length - 1, Math.max(0, Math.floor((sorted.length - 1) * ratio)));
-  return sorted[index] ?? 0;
-}
 
 export function buildAnalysisCoverage(
   results: FileScanResult[],

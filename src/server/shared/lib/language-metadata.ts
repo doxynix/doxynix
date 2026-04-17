@@ -9,15 +9,19 @@ type LinguistInfo = {
   readonly extensions?: readonly string[];
 };
 
+const languageByExtension = new Map<string, { color: null | string; name: string }>();
+
 const languageData = languages as Record<string, LinguistInfo | undefined>;
 
-const extensionIndex = new Map<string, { color: null | string; name: string }>();
-
 for (const [name, info] of Object.entries(languageData)) {
-  for (const ext of info?.extensions ?? []) {
-    const normalized = ext.startsWith(".") ? ext.toLowerCase() : `.${ext.toLowerCase()}`;
-    if (!extensionIndex.has(normalized)) {
-      extensionIndex.set(normalized, { color: info?.color ?? null, name });
+  if (info == null) continue;
+  for (const ext of info.extensions ?? []) {
+    const normalized = ext.toLowerCase();
+    if (!languageByExtension.has(normalized)) {
+      languageByExtension.set(normalized, {
+        color: info.color ?? null,
+        name,
+      });
     }
   }
 }
@@ -32,16 +36,7 @@ function normalizeExtension(value: string) {
 
 function findLanguageByExtension(extension: string) {
   const normalizedExtension = normalizeExtension(extension);
-  const entry = Object.entries(languageData).find(
-    ([, info]) => info?.extensions?.includes(normalizedExtension) ?? false
-  );
-
-  if (entry == null) return null;
-
-  return {
-    color: entry[1]?.color ?? null,
-    name: entry[0],
-  };
+  return languageByExtension.get(normalizedExtension) ?? null;
 }
 
 export function getKnownLanguageExtensions() {

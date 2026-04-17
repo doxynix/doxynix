@@ -1,6 +1,6 @@
-import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import type { Repo } from "@prisma/client";
+import gitUrlParse from "git-url-parse";
 import simpleGit from "simple-git";
 
 import { prisma } from "@/server/shared/infrastructure/db";
@@ -117,34 +117,28 @@ export async function cloneRepository(
   targetPath: string,
   selectedBranch?: string
 ) {
-  if (existsSync(targetPath)) {
-    await fs.rm(targetPath, { force: true, recursive: true });
-  }
+  await fs.rm(targetPath, { force: true, recursive: true });
   await fs.mkdir(targetPath, { recursive: true });
 
   const git = simpleGit();
   const branchToClone = selectedBranch ?? repo.defaultBranch;
-
-  const repoUrl = `https://github.com/${repo.owner}/${repo.name}.git`;
+  const parsed = gitUrlParse(repo.url);
+  const repoUrl = `https://${parsed.resource}/${parsed.full_name}.git`;
 
   const options = ["--filter=blob:none", "--single-branch", "--branch", branchToClone, "--no-tags"];
-
   if (token != null) {
-    const base64Auth = Buffer.from(`x-access-token:${token}`).toString("base64");
-
-    options.push("-c", `http.extraheader=AUTHORIZATION: basic ${base64Auth}`);
+    const basicAuth = Buffer.from(`x-access-token:${token}`).toString("base64");
+    options.push("-c", `http.extraheader=Authorization: Basic ${basicAuth}`);
   }
 
   try {
     await git.clone(repoUrl, targetPath, options);
-
     await git.cwd(targetPath);
   } catch (error) {
-    if (existsSync(targetPath)) {
-      await fs.rm(targetPath, { force: true, recursive: true });
-    }
-    throw new Error(
-      `Failed to clone repository: ${error instanceof Error ? error.message : String(error)}`
-    );
+    await fs.rm(targetPath, { force: true, recursive: true });
+
+    const raw = error instanceof Error ? error.message : String(error);
+    const safe = token != null ? raw.replaceAll(token, "***") : raw;
+    throw new Error(`Failed to clone repository: ${safe}`);
   }
 }

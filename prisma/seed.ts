@@ -235,9 +235,6 @@ async function main() {
                 ],
               },
               description: faker.lorem.sentence(),
-              documents: {
-                create: [clean(Fake.fakeDocument()), clean(Fake.fakeDocument())],
-              },
               forks: faker.number.int({ max: 5000 }),
               githubId: faker.number.int({ max: 100_000_000 }),
               name: `${faker.word.noun()}-${faker.string.alphanumeric(4)}`,

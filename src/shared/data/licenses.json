@@ -142,69 +142,6 @@
     ]
   },
   {
-    "author": "ESLint",
-    "avatar": "https://github.com/eslint.png?size=96",
-    "authorLink": "https://github.com/eslint",
-    "packages": [
-      {
-        "name": "@eslint/compat",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "@eslint/eslintrc",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-config-prettier",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-boundaries",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-import",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-jsx-a11y",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-perfectionist",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-playwright",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-prettier",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-unicorn",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-unused-imports",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-validate-jsx-nesting",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-sonarjs",
-        "license": "LGPL-3.0-only"
-      }
-    ]
-  },
-  {
     "author": "DefinitelyTyped",
     "avatar": "https://github.com/DefinitelyTyped.png?size=96",
     "authorLink": "https://github.com/DefinitelyTyped",
@@ -259,6 +196,61 @@
       },
       {
         "name": "@types/webpack-stats-plugin",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "ESLint",
+    "avatar": "https://github.com/eslint.png?size=96",
+    "authorLink": "https://github.com/eslint",
+    "packages": [
+      {
+        "name": "@eslint/compat",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@eslint/eslintrc",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-boundaries",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-import",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-jsx-a11y",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-perfectionist",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-playwright",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-prettier",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-unicorn",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-unused-imports",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-validate-jsx-nesting",
         "license": "MIT"
       }
     ]
@@ -908,6 +900,21 @@
       },
       {
         "name": "posthog-node",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Prettier",
+    "avatar": "https://github.com/prettier.png?size=96",
+    "authorLink": "https://github.com/prettier",
+    "packages": [
+      {
+        "name": "eslint-config-prettier",
+        "license": "MIT"
+      },
+      {
+        "name": "prettier",
         "license": "MIT"
       }
     ]
@@ -1711,17 +1718,6 @@
     ]
   },
   {
-    "author": "Prettier",
-    "avatar": "https://github.com/prettier.png?size=96",
-    "authorLink": "https://github.com/prettier",
-    "packages": [
-      {
-        "name": "prettier",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
     "author": "Qq15725",
     "avatar": "https://github.com/qq15725.png?size=96",
     "authorLink": "https://github.com/qq15725",
@@ -1773,6 +1769,17 @@
       {
         "name": "nextjs-toploader",
         "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Sonar",
+    "avatar": "https://github.com/SonarSource.png?size=96",
+    "authorLink": "https://github.com/SonarSource",
+    "packages": [
+      {
+        "name": "eslint-plugin-sonarjs",
+        "license": "LGPL-3.0-only"
       }
     ]
   },

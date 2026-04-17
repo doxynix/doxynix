@@ -300,6 +300,6 @@ export function buildRiskSectionBody(
     rawMetrics,
   };
 
-  dumpDebug("risk-model", riskBody);
+  void dumpDebug("risk-model", riskBody);
   return riskBody;
 }

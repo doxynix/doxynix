@@ -1,7 +1,9 @@
-import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { compact } from "es-toolkit";
+import fg from "fast-glob";
 import { isBinaryFile } from "isbinaryfile";
+import { normalize } from "pathe";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
@@ -44,18 +46,26 @@ export async function handleError(
 }
 
 export async function cleanup(dirPath: string) {
-  if (existsSync(dirPath)) {
-    logger.info({ msg: "Removing temp clone path", path: dirPath });
-    await fs.rm(dirPath, { force: true, recursive: true });
-  } else {
-    logger.debug({ msg: "Temp clone path not present", path: dirPath });
-  }
+  const path = normalize(dirPath);
+  await fs.rm(path, { force: true, recursive: true });
 }
 
 export async function readAndFilterFiles(basePath: string, selectedFiles: string[]) {
   const resolvedBase = await fs.realpath(basePath);
 
-  const filePromises = selectedFiles.map(async (filePath) => {
+  const entries = await fg(selectedFiles, {
+    absolute: false,
+    cwd: resolvedBase,
+    dot: true,
+    followSymbolicLinks: false,
+    onlyFiles: true,
+  });
+
+  if (entries.length === 0) {
+    throw new Error("No valid files found to analyze in the specified path");
+  }
+
+  const filePromises = entries.map(async (filePath) => {
     if (ProjectPolicy.isSensitive(filePath)) {
       logger.warn({
         filePath,
@@ -64,30 +74,21 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
       return null;
     }
 
-    const fullPath = path.resolve(basePath, filePath);
+    const fullPath = path.join(resolvedBase, filePath);
+    const realFullPath = await fs.realpath(fullPath).catch(() => null);
+
+    if (realFullPath == null || !realFullPath.startsWith(resolvedBase)) {
+      logger.warn({
+        filePath,
+        msg: "Security: rejected path outside base directory",
+      });
+      return null;
+    }
 
     try {
-      const realPath = await fs.realpath(fullPath);
+      const buffer = await fs.readFile(realFullPath);
+      const isBinary = await isBinaryFile(buffer);
 
-      const relative = path.relative(resolvedBase, realPath);
-      const isOutside = relative.startsWith("..") || path.isAbsolute(relative);
-
-      if (isOutside) {
-        logger.warn({
-          filePath,
-          msg: "Security: attempt to read file outside of basePath",
-          resolvedPath: realPath,
-        });
-        return null;
-      }
-
-      const stat = await fs.lstat(realPath);
-      if (!stat.isFile()) {
-        return null;
-      }
-
-      const buffer = await fs.readFile(realPath);
-      const isBinary = await isBinaryFile(buffer, { size: stat.size });
       if (isBinary) return null;
 
       return { content: buffer.toString("utf-8"), path: filePath };
@@ -103,8 +104,7 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
   });
 
   const settledFiles = await Promise.all(filePromises);
-
-  const validFiles = settledFiles.filter((f): f is { content: string; path: string } => f != null);
+  const validFiles = compact(settledFiles);
 
   if (validFiles.length === 0) throw new Error("No valid text files found to analyze");
   return validFiles;

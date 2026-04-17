@@ -1,7 +1,7 @@
 import os from "node:os";
-import path from "node:path";
 import { Status, type DocType } from "@prisma/client";
 import { task } from "@trigger.dev/sdk/v3";
+import { join } from "pathe";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
@@ -69,7 +69,7 @@ export const analyzeRepoTask = task({
     } = payload;
 
     let currentLogs = "";
-    const tempClonePath = path.join(os.tmpdir(), `doxynix-clone-${analysisId}`);
+    const tempClonePath = join(os.tmpdir(), `doxynix-clone-${analysisId}`);
     const channelName = REALTIME_CONFIG.channels.user(userId);
 
     const updateStatus: StatusUpdater = async (msg, percent, status = Status.PENDING) => {
@@ -179,7 +179,7 @@ export const analyzeRepoTask = task({
       aiResult.generatedArchitecture = generatedArchitecture;
       const documentationInput = buildDocumentationInputModel(evidence, hardMetrics);
       hardMetrics.documentationInput = documentationInput;
-      dumpDebug("documentation-input-model", {
+      void dumpDebug("documentation-input-model", {
         analysisSummary: {
           executive_summary: aiResult.executive_summary,
           findings: aiResult.findings ?? [],
@@ -190,7 +190,7 @@ export const analyzeRepoTask = task({
         model: documentationInput,
         source: "post-doc-generation",
       });
-      dumpDebug(
+      void dumpDebug(
         "quality-matrix",
         buildEvaluationSnapshot({
           documentationInput,

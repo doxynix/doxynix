@@ -308,7 +308,7 @@ export const repoAnalysisService = {
       delete cleanResultJson.generatedChangelog;
       delete cleanResultJson.generatedArchitecture;
 
-      await tx.analysis.update({
+      const analysis = await tx.analysis.update({
         data: {
           commitSha: currentSha,
           complexityScore: hardMetrics.complexityScore,
@@ -328,10 +328,15 @@ export const repoAnalysisService = {
       const saveDoc = async (type: DocType, content: string | undefined) => {
         if (content == null) return;
         await tx.document.upsert({
-          create: { content, repoId: repo.id, type, version: currentSha },
+          create: { analysisId: analysis.id, content, repoId: repo.id, type, version: currentSha },
           update: { content },
           where: {
-            repoId_version_type: { repoId: repo.id, type, version: currentSha },
+            repoId_version_type_analysisId: {
+              analysisId: analysis.id,
+              repoId: repo.id,
+              type,
+              version: currentSha,
+            },
           },
         });
       };

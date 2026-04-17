@@ -1,8 +1,10 @@
 import { DocType, type Repo } from "@prisma/client";
+import Bottleneck from "bottleneck";
 
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "@/server/shared/engine/core/discovery.types";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
+import { logger } from "@/server/shared/infrastructure/logger";
 import { uniquePaths } from "@/server/shared/lib/array-utils";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
 
@@ -18,7 +20,6 @@ import {
   serializeAllowedPaths,
   serializeForWriter,
 } from "../utils/payload-serialization";
-import { applyWriterFallbacks } from "./writer-fallbacks";
 import {
   executeApiWriter,
   executeArchitectureWriter,
@@ -42,18 +43,30 @@ export async function orchestrateWriterTasks(
   userId: number,
   language: string
 ) {
+  const limiter = new Bottleneck({
+    maxConcurrent: 1,
+    minTime: 3000,
+    trackDoneStatus: true,
+  });
+
+  limiter.on("failed", async (error, jobInfo) => {
+    logger.warn({ error, jobInfo, msg: "Job failed, checking for retry" });
+    if (jobInfo.retryCount < 2) return 1000;
+    return -1;
+  });
+
   const documentationInput = getDocumentationInputSnapshot(evidence, hardMetrics);
   const writerInputs = buildWriterSectionPayloads(documentationInput);
   const sectionDebugSnapshot = buildSectionDebugSnapshot(documentationInput);
   const writerPlan = buildWriterPlanDebugSnapshot(writerInputs, requestedDocs);
 
   const writerContexts = {
-    api: buildStageContextPack({
+    api: await buildStageContextPack({
       files,
-      preferredPaths: uniquePaths(documentationInput.sections.api_reference.evidencePaths, 24),
+      preferredPaths: uniquePaths(documentationInput.sections.api_reference.evidencePaths, 100),
       stage: "writer_api",
     }),
-    architecture: buildStageContextPack({
+    architecture: await buildStageContextPack({
       files,
       preferredPaths: uniquePaths(
         [
@@ -61,25 +74,25 @@ export async function orchestrateWriterTasks(
           ...documentationInput.sections.risks.evidencePaths,
           ...documentationInput.sections.onboarding.evidencePaths,
         ],
-        28
+        280
       ),
       stage: "writer_architecture",
     }),
-    readme: buildStageContextPack({
+    readme: await buildStageContextPack({
       files,
       preferredPaths: uniquePaths(
         [
           ...documentationInput.sections.overview.evidencePaths,
           ...documentationInput.sections.architecture.evidencePaths,
         ],
-        24
+        240
       ),
       stage: "writer_readme",
     }),
   };
 
-  dumpDebug("writer-budget", buildWriterContextSnapshot(writerContexts));
-  dumpDebug("report-section-inputs", {
+  void dumpDebug("writer-budget", buildWriterContextSnapshot(writerContexts));
+  void dumpDebug("report-section-inputs", {
     sections: sectionDebugSnapshot,
     writerPlan,
   });
@@ -90,7 +103,7 @@ export async function orchestrateWriterTasks(
         ...writerContexts.api.debug.selectedEvidencePaths,
         ...documentationInput.sections.api_reference.evidencePaths,
       ],
-      48
+      480
     ),
     architecture: buildAllowedPaths(
       [
@@ -99,7 +112,7 @@ export async function orchestrateWriterTasks(
         ...documentationInput.sections.risks.evidencePaths,
         ...documentationInput.sections.onboarding.evidencePaths,
       ],
-      64
+      640
     ),
     readme: buildAllowedPaths(
       [
@@ -107,16 +120,21 @@ export async function orchestrateWriterTasks(
         ...documentationInput.sections.overview.evidencePaths,
         ...documentationInput.sections.architecture.evidencePaths,
       ],
-      48
+      480
     ),
   };
 
-  const tasks: Promise<WriterResult>[] = [];
+  const results: WriterResult[] = [];
   const taskMap: Partial<Record<WriterTaskKey, number>> = {};
 
+  const addToQueue = async (key: WriterTaskKey, taskFn: () => Promise<WriterResult>) => {
+    taskMap[key] = results.length;
+    const result = await limiter.schedule({ id: `${analysisId}-${key}` }, taskFn);
+    results.push(result);
+  };
+
   if (requestedDocs.includes(DocType.README)) {
-    taskMap["README"] = tasks.length;
-    tasks.push(
+    await addToQueue("README", async () =>
       executeReadmeWriter(
         analysisId,
         writerInputs.readme.payload,
@@ -128,8 +146,7 @@ export async function orchestrateWriterTasks(
   }
 
   if (requestedDocs.includes(DocType.API)) {
-    taskMap["API"] = tasks.length;
-    tasks.push(
+    await addToQueue("API", async () =>
       executeApiWriter(
         analysisId,
         writerInputs.api.payload,
@@ -141,8 +158,7 @@ export async function orchestrateWriterTasks(
   }
 
   if (requestedDocs.includes(DocType.ARCHITECTURE)) {
-    taskMap["ARCHITECTURE"] = tasks.length;
-    tasks.push(
+    await addToQueue("ARCHITECTURE", async () =>
       executeArchitectureWriter(
         analysisId,
         writerInputs.architecture.payload,
@@ -156,8 +172,7 @@ export async function orchestrateWriterTasks(
   }
 
   if (requestedDocs.includes(DocType.CONTRIBUTING)) {
-    taskMap["CONTRIBUTING"] = tasks.length;
-    tasks.push(
+    await addToQueue("CONTRIBUTING", async () =>
       executeContributingWriter(
         analysisId,
         writerInputs.contributing.payload,
@@ -169,11 +184,10 @@ export async function orchestrateWriterTasks(
   }
 
   if (requestedDocs.includes(DocType.CHANGELOG)) {
-    taskMap["CHANGELOG"] = tasks.length;
-    tasks.push(executeChangelogWriter(analysisId, analysisResult, userId, repo, language));
+    await addToQueue("CHANGELOG", () =>
+      executeChangelogWriter(analysisId, analysisResult, userId, repo, language)
+    );
   }
-
-  const results = await Promise.all(tasks);
 
   const writerErrors: Partial<Record<WriterName, string>> = {};
 
@@ -183,37 +197,48 @@ export async function orchestrateWriterTasks(
     }
   }
 
-  const {
-    generatedApiMarkdown,
-    generatedArchitecture,
-    generatedContributing,
-    generatedReadme,
-    updatedStatus,
-    writerFallbacks,
-  } = applyWriterFallbacks(results, taskMap, repo, documentationInput, writerErrors);
+  const getResult = (key: WriterTaskKey) => {
+    const idx = taskMap[key];
+    return idx !== undefined ? results[idx] : null;
+  };
+
+  const readmeRes = getResult("README");
+  const apiRes = getResult("API");
+  const archRes = getResult("ARCHITECTURE");
+  const contrRes = getResult("CONTRIBUTING");
+  const changeRes = getResult("CHANGELOG");
+
+  const generatedReadme = readmeRes?.content ?? undefined;
+  let generatedApiMarkdown = apiRes?.content ?? undefined;
+  const generatedArchitecture = archRes?.content ?? undefined;
+  const generatedContributing = contrRes?.content ?? undefined;
+  const generatedChangelog = changeRes?.content ?? undefined;
 
   let swaggerYaml: string | undefined;
   if (taskMap.API != null && generatedApiMarkdown != null) {
     const yamlMatch = RegExp(/```yaml([\S\s]*?)```/).exec(generatedApiMarkdown);
     if (yamlMatch) {
       swaggerYaml = yamlMatch[1]?.trim();
+      generatedApiMarkdown = generatedApiMarkdown
+        .replace(/# OpenAPI Specification[\S\s]*/, "")
+        .trim();
     }
   }
 
-  let generatedChangelog: string | undefined;
-  if (taskMap.CHANGELOG != null) {
-    const changelogResult = results[taskMap.CHANGELOG];
-    if (changelogResult != null) {
-      generatedChangelog = changelogResult.content;
-    }
-  }
+  const updatedStatus: any = {
+    api: apiRes != null ? (apiRes.error != null ? "failed" : "llm") : "missing",
+    architecture: archRes != null ? (archRes.error != null ? "failed" : "llm") : "missing",
+    changelog: changeRes != null ? (changeRes.error != null ? "failed" : "llm") : "missing",
+    contributing: contrRes != null ? (contrRes.error != null ? "failed" : "llm") : "missing",
+    readme: readmeRes != null ? (readmeRes.error != null ? "failed" : "llm") : "missing",
+  };
 
   analysisResult.analysisRuntime = {
     ...analysisResult.analysisRuntime,
     writers: updatedStatus,
   };
 
-  dumpDebug("report-section-docs", {
+  void dumpDebug("report-section-docs", {
     generated: {
       api: {
         hasMarkdown: generatedApiMarkdown != null && generatedApiMarkdown.length > 0,
@@ -243,11 +268,10 @@ export async function orchestrateWriterTasks(
       readme: JSON.parse(allowedPathsByWriter.readme),
     },
     writerErrors,
-    writerFallbacks,
     writerPlan,
   });
 
-  dumpDebug("generated-docs-raw", {
+  void dumpDebug("generated-docs-raw", {
     generatedApiMarkdown,
     generatedArchitecture,
     generatedChangelog,
@@ -256,7 +280,6 @@ export async function orchestrateWriterTasks(
     runtime: analysisResult.analysisRuntime,
     swaggerYaml,
     writerErrors,
-    writerFallbacks,
   });
 
   return {
