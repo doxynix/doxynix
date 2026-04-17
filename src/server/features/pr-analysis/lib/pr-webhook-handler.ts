@@ -88,7 +88,7 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
 
     let analysisId: number;
 
-    if (!existingAnalysis) {
+    if (existingAnalysis == null) {
       // Create new analysis
       const analysis = await prAnalysisService.create(prisma, {
         baseSha: pull_request.base.sha,

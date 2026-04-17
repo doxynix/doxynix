@@ -54,7 +54,7 @@ export const generatedFixRouter = createTRPCRouter({
           where: { id: input.repoId },
         });
 
-        if (!repo) {
+        if (repo == null) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Repository not found",
@@ -137,7 +137,7 @@ export const generatedFixRouter = createTRPCRouter({
           where: { id: input.repoId },
         });
 
-        if (!repo) {
+        if (repo == null) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Repository not found",

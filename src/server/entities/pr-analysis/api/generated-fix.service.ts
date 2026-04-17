@@ -43,7 +43,7 @@ export const generatedFixService = {
       orderBy: { createdAt: "desc" },
       where: {
         repoId,
-        ...(status && { status }),
+        ...(status != null && { status }),
       },
     });
   },
