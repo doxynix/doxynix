@@ -6,7 +6,6 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/shared/ui/core/button";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
-import { redirect } from "@/i18n/routing";
 
 import { useRepoActions } from "@/entities/repo";
 
@@ -24,7 +23,7 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
       {
         onSuccess: () => {
           setOpen(false);
-          redirect({ href: "/dashboard/repos", locale });
+          window.location.assign(`/${locale}/dashboard/repos`);
         },
       }
     );

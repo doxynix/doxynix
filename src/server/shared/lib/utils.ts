@@ -51,9 +51,11 @@ export async function cleanup(dirPath: string) {
 }
 
 export async function readAndFilterFiles(basePath: string, selectedFiles: string[]) {
+  const resolvedBase = await fs.realpath(basePath);
+
   const entries = await fg(selectedFiles, {
     absolute: false,
-    cwd: basePath,
+    cwd: resolvedBase,
     dot: true,
     followSymbolicLinks: false,
     onlyFiles: true,
@@ -63,7 +65,7 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
     throw new Error("No valid files found to analyze in the specified path");
   }
 
-  const filePromises = selectedFiles.map(async (filePath) => {
+  const filePromises = entries.map(async (filePath) => {
     if (ProjectPolicy.isSensitive(filePath)) {
       logger.warn({
         filePath,
@@ -72,10 +74,19 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
       return null;
     }
 
-    const fullPath = path.join(basePath, filePath);
+    const fullPath = path.join(resolvedBase, filePath);
+    const realFullPath = await fs.realpath(fullPath).catch(() => null);
+
+    if (realFullPath == null || !realFullPath.startsWith(resolvedBase)) {
+      logger.warn({
+        filePath,
+        msg: "Security: rejected path outside base directory",
+      });
+      return null;
+    }
 
     try {
-      const buffer = await fs.readFile(fullPath);
+      const buffer = await fs.readFile(realFullPath);
       const isBinary = await isBinaryFile(buffer);
 
       if (isBinary) return null;
@@ -93,7 +104,6 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
   });
 
   const settledFiles = await Promise.all(filePromises);
-
   const validFiles = compact(settledFiles);
 
   if (validFiles.length === 0) throw new Error("No valid text files found to analyze");

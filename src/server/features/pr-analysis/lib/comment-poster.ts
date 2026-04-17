@@ -46,7 +46,7 @@ export class GitHubCommentPoster {
   constructor(private octokit: Octokit) {}
 
   /**
-   * Post PR comments in batch (one review per file group)
+   * Post PR comments in batch (single review with all findings)
    */
   async postComments(
     owner: string,
@@ -56,61 +56,40 @@ export class GitHubCommentPoster {
     findings: PRFinding[],
     style: "concise" | "detailed" = "detailed"
   ): Promise<Array<{ commentId: number; finding: PRFinding }>> {
-    // Group findings by file
-    const findingsByFile = new Map<string, PRFinding[]>();
-    for (const finding of findings) {
-      if (!findingsByFile.has(finding.file)) {
-        findingsByFile.set(finding.file, []);
-      }
-      findingsByFile.get(finding.file)!.push(finding);
+    if (findings.length === 0) return [];
+
+    const reviewComments = findings.map((finding) => ({
+      body: CommentFormatter.formatFinding(finding, style),
+      line: finding.line,
+      path: finding.file,
+    }));
+
+    try {
+      const review = await this.octokit.rest.pulls.createReview({
+        comments: reviewComments,
+        commit_id: commitId,
+        event: "COMMENT",
+        owner,
+        pull_number: prNumber,
+        repo,
+      });
+
+      logger.debug({
+        commentCount: reviewComments.length,
+        msg: "pr_review_posted",
+        prNumber,
+        reviewId: review.data.id,
+      });
+
+      return findings.map((finding) => ({ commentId: review.data.id, finding }));
+    } catch (error) {
+      logger.error({
+        error: error instanceof Error ? error.message : String(error),
+        msg: "pr_review_post_failed",
+        prNumber,
+      });
+      return [];
     }
-
-    const results: Array<{ commentId: number; finding: PRFinding }> = [];
-
-    // Post comments file by file
-    for (const [filePath, fileFindings] of findingsByFile) {
-      try {
-        for (const finding of fileFindings) {
-          const body = CommentFormatter.formatFinding(finding, style);
-
-          const comment = await this.octokit.rest.pulls.createReview({
-            body,
-            comments: [
-              {
-                body,
-                line: finding.line,
-                path: filePath,
-              },
-            ],
-            commit_id: commitId,
-            event: "COMMENT",
-            owner,
-            pull_number: prNumber,
-            repo,
-          });
-
-          if (comment.data.id) {
-            results.push({ commentId: comment.data.id, finding });
-            logger.debug({
-              commentId: comment.data.id,
-              file: filePath,
-              line: finding.line,
-              msg: "pr_comment_posted",
-              prNumber,
-            });
-          }
-        }
-      } catch (error) {
-        logger.error({
-          error: error instanceof Error ? error.message : String(error),
-          filePath,
-          msg: "pr_comment_post_failed",
-          prNumber,
-        });
-      }
-    }
-
-    return results;
   }
 
   /**

@@ -16,7 +16,6 @@
     "with-doppler": "node scripts/doppler.mjs",
     "dev": "pnpm with-doppler \"pnpm gen:credits && pnpm db:generate && cross-env NODE_OPTIONS=\\\"--max-old-space-size=4096\\\" next dev\"",
     "build": "pnpm with-doppler \"pnpm db:generate && next build\"",
-    "sitemap": "next-sitemap",
     "start": "next start",
     "lint": "eslint . --cache --cache-location node_modules/.cache/eslint",
     "lint:fix": "eslint . --fix --cache --cache-location node_modules/.cache/eslint",

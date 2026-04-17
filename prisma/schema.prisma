@@ -97,6 +97,12 @@ enum NotifyType {
   SUCCESS
 }
 
+enum WebhookStatus {
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
 model User {
   /// @zod.custom.omit(["model"])
   id                  Int                  @id() @default(autoincrement())
@@ -365,11 +371,13 @@ model VerificationToken {
 }
 
 model WebhookDelivery {
-  id         String   @id() @default(uuid(7)) @db.Uuid()
+  id         String        @id() @default(uuid(7)) @db.Uuid()
   provider   String
-  deliveryId String   @map("delivery_id")
+  deliveryId String        @map("delivery_id")
   event      String?
-  createdAt  DateTime @default(now()) @map("created_at")
+  status     WebhookStatus @default(PROCESSING)
+  error      String?       @db.Text()
+  createdAt  DateTime      @default(now()) @map("created_at")
 
   @@unique([provider, deliveryId])
   @@index([createdAt(sort: Desc)])

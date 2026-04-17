@@ -61,21 +61,39 @@ export async function POST(req: Request) {
   });
 
   return await requestContext.run(store, async () => {
+    let delivery;
+
     try {
-      await prisma.webhookDelivery.create({
+      delivery = await prisma.webhookDelivery.create({
         data: {
           deliveryId: deliveryId,
           event: githubEvent,
           provider: "github",
+          status: "PROCESSING",
         },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-        logger.info({ deliveryId, msg: "Webhook already processed, skipping" });
-        return NextResponse.json({ ok: true });
+        const existing = await prisma.webhookDelivery.findUnique({
+          where: { provider_deliveryId: { deliveryId, provider: "github" } },
+        });
+
+        if (existing?.status === "SUCCESS") {
+          return NextResponse.json({ msg: "Already processed", ok: true });
+        }
+
+        if (existing?.status === "PROCESSING") {
+          return new NextResponse("Processing in progress", { status: 202 });
+        }
+
+        delivery = await prisma.webhookDelivery.update({
+          data: { error: null, status: "PROCESSING" },
+          where: { provider_deliveryId: { deliveryId, provider: "github" } },
+        });
+      } else {
+        logger.error({ error, msg: "Webhook dedupe database error" });
+        return new NextResponse("DB Error", { status: 500 });
       }
-      logger.error({ error, msg: "Webhook dedupe write failed" });
-      return new NextResponse("DB Error", { status: 500 });
     }
 
     try {
@@ -87,12 +105,21 @@ export async function POST(req: Request) {
 
       await webhooks.receive(eventToReceive);
 
+      await prisma.webhookDelivery.update({
+        data: { status: "SUCCESS" },
+        where: { id: delivery.id },
+      });
+
       return NextResponse.json({ ok: true });
     } catch (error) {
       logger.error({ error, msg: "Webhook processing failed" });
 
-      await prisma.webhookDelivery.deleteMany({
-        where: { deliveryId, provider: "github" },
+      await prisma.webhookDelivery.update({
+        data: {
+          error: error instanceof Error ? error.message : String(error),
+          status: "FAILED",
+        },
+        where: { id: delivery.id },
       });
 
       return new NextResponse("Internal Error", { status: 500 });

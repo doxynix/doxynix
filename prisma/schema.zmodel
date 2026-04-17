@@ -417,11 +417,13 @@ model VerificationToken {
 }
 
 model WebhookDelivery {
-  id         String   @id @default(uuid(7)) @db.Uuid
+  id         String        @id @default(uuid(7)) @db.Uuid
   provider   String
-  deliveryId String   @map("delivery_id")
+  deliveryId String        @map("delivery_id")
   event      String?
-  createdAt  DateTime @default(now()) @map("created_at")
+  status     WebhookStatus @default(PROCESSING)
+  error      String?       @db.Text
+  createdAt  DateTime      @default(now()) @map("created_at")
 
   @@allow('create', true)
   @@allow('read', auth().role == 'ADMIN')
@@ -611,4 +613,10 @@ enum NotifyType {
   WARNING
   INFO
   SUCCESS
+}
+
+enum WebhookStatus {
+  PROCESSING
+  SUCCESS
+  FAILED
 }

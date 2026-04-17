@@ -66,6 +66,16 @@ export class DocumentGraphLinker {
       currentSection.content = contentBuffer.join("\n").trim();
       currentSection.endLine = lines.length - 1;
       sections.push(currentSection as DocumentSection);
+    } else if (document.trim().length > 0) {
+      // Fallback: create single section if no headings found
+      sections.push({
+        content: document.trim(),
+        endLine: lines.length - 1,
+        graphNodeIds: [],
+        id: this.generateSectionId(docType, "document"),
+        startLine: 0,
+        title: "Document",
+      });
     }
 
     // Link sections to graph nodes

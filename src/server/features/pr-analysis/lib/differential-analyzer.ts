@@ -145,20 +145,34 @@ export class DifferentialAnalyzer {
 
   private runSentinelPhase(files: PRDiffInfo["changedFiles"], prNumber: number): PRFinding[] {
     const findings: PRFinding[] = [];
+    const hunkRe = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/;
 
-    // Heuristic-based security and quality detection on diffs
     for (const file of files) {
       if (file.patch == null) continue;
       const { patterns, todoPatterns } = PROJECT_POLICY_RULES.security;
 
       const lines = file.patch.split("\n");
-      lines.forEach((line, index) => {
-        // Security patterns
+      let newLineNum = 0;
+
+      for (const raw of lines) {
+        const m = hunkRe.exec(raw);
+        if (m != null) {
+          newLineNum = Number(m[1]);
+          continue;
+        }
+
+        if (raw.startsWith("+++ ") || raw.startsWith("--- ")) continue;
+        if (raw.startsWith("-")) {
+          continue;
+        }
+
+        const line = raw.startsWith("+") ? raw.slice(1) : raw;
+
         if (patterns.test(line)) {
           findings.push({
             codeSnippet: line.trim(),
             file: file.filename,
-            line: (file.changes_start ?? 1) + index,
+            line: newLineNum,
             message: "Code pattern may introduce security vulnerability",
             score: 8,
             severity: this.mapScoreToSeverity(8),
@@ -168,12 +182,11 @@ export class DifferentialAnalyzer {
           });
         }
 
-        // TODO pattern
         if (todoPatterns.test(line)) {
           findings.push({
             codeSnippet: line.trim(),
             file: file.filename,
-            line: (file.changes_start ?? 1) + index,
+            line: newLineNum,
             message: "Incomplete implementation marker",
             score: 2,
             severity: this.mapScoreToSeverity(2),
@@ -182,11 +195,14 @@ export class DifferentialAnalyzer {
             type: "style",
           });
         }
-      });
+
+        if (!raw.startsWith("-")) {
+          newLineNum++;
+        }
+      }
     }
 
     prAnalysisLogger.sentinelPhaseCompleted(prNumber, prNumber, findings.length, 0);
-
     return findings;
   }
 
@@ -201,13 +217,13 @@ export class DifferentialAnalyzer {
         if (complexityRatio > 2 || addedLines > 300) {
           return {
             file: file.filename,
-            line: file.changes_start ?? 1,
+            line: 1,
             message: `Файл содержит ${addedLines} новых строк. Высокая плотность изменений затрудняет ревью.`,
             score: 5,
             severity: this.mapScoreToSeverity(5),
             suggestion: "Разбейте изменения на несколько логических модулей или PR.",
             title: "Высокая сложность изменений",
-            type: "complexity",
+            type: "performance",
           } satisfies PRFinding;
         }
         return null;

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { join, resolve } from "pathe";
+import { join } from "pathe";
 
 import { logger } from "../../infrastructure/logger";
 import { getFileExtension } from "../../lib/path-operations";
@@ -213,17 +213,8 @@ async function loadLanguage(ext: string, spec: LanguageSpec) {
   return await languageCache.get(ext);
 }
 
-async function resolveGrammarWasmPath(spec: LanguageSpec) {
-  const pathsToTry = [
-    join(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm),
-    resolve(`./node_modules/tree-sitter-wasms/out/${spec.wasm}`),
-  ];
-
-  for (const p of pathsToTry) {
-    return p;
-  }
-
-  return pathsToTry[0];
+function resolveGrammarWasmPath(spec: LanguageSpec) {
+  return join(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm);
 }
 
 function lineOf(content: string, fragment: string) {

@@ -36,16 +36,7 @@ function normalizeExtension(value: string) {
 
 function findLanguageByExtension(extension: string) {
   const normalizedExtension = normalizeExtension(extension);
-  const entry = Object.entries(languageData).find(
-    ([, info]) => info?.extensions?.includes(normalizedExtension) ?? false
-  );
-
-  if (entry == null) return null;
-
-  return {
-    color: entry[1]?.color ?? null,
-    name: entry[0],
-  };
+  return languageByExtension.get(normalizedExtension) ?? null;
 }
 
 export function getKnownLanguageExtensions() {
