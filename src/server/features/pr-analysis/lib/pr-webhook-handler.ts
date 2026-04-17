@@ -60,7 +60,7 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
     }
 
     // Check if PR analysis is enabled
-    const config = await PRConfigService.getConfig(repo.id);
+    const config = await PRConfigService.getConfig(repo.id, prisma);
     if (!config.enabled) {
       logger.debug({
         msg: "pr_webhook_analysis_disabled",
