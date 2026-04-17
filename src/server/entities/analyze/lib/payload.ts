@@ -51,8 +51,7 @@ export function toDocSummary(doc: StoredDocument, aiResult: AIResult | null) {
   const status = getWriterStatus(doc.type, aiResult);
   return {
     id: doc.publicId,
-    isFallback: status === "fallback",
-    source: status === "fallback" ? "fallback" : status === "llm" ? "llm" : null,
+    source: status === "llm" ? "llm" : null,
     status,
     type: doc.type,
     updatedAt: doc.updatedAt,

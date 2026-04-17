@@ -77,14 +77,14 @@ export const aiSchema = z.object({
       architect: z
         .object({
           reason: z.string().optional(),
-          source: "llm",
+          source: z.literal("llm"),
           status: z.enum(["partial", "success"]),
         })
         .optional(),
       mapper: z
         .object({
           reason: z.string().optional(),
-          source: "llm",
+          source: z.literal("llm"),
           status: z.enum(["partial", "success"]),
         })
         .optional(),

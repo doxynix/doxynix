@@ -4,7 +4,7 @@ import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import type { ProjectPolicySemanticKind } from "@/server/shared/engine/core/project-policy-rules";
 import type { RepoWithLatestAnalysisAndDocs } from "@/server/shared/infrastructure/repo-snapshots";
 
-export type WriterStatus = "failed" | "fallback" | "llm" | "missing";
+export type WriterStatus = "failed" | "llm" | "missing";
 
 export type StructureEdgeRelationType =
   | "api"
