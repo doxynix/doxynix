@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.26.14](https://github.com/doxynix/doxynix/compare/v1.26.13...v1.26.14) (2026-04-17)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1116](https://github.com/doxynix/doxynix/issues/1116)) ([c6a94e8](https://github.com/doxynix/doxynix/commit/c6a94e8a5eff91c7810717fd02a8f19d257cec20))
+* **deps:** update dependency posthog-js to v1.368.2 ([#1120](https://github.com/doxynix/doxynix/issues/1120)) ([5500e93](https://github.com/doxynix/doxynix/commit/5500e93d4b1246fadf5c1bb8493c29216f17ae51))
+* **security:** устранение уязвимости в пакете basic-ftp ([#1122](https://github.com/doxynix/doxynix/issues/1122)) ([5d30853](https://github.com/doxynix/doxynix/commit/5d30853b1e678cf301481de939133a817ce527e1))
+
 ## [1.26.13](https://github.com/doxynix/doxynix/compare/v1.26.12...v1.26.13) (2026-04-16)
 
 
