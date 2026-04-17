@@ -213,7 +213,6 @@ importers:
       '@trigger.dev/sdk':
         specifier: 4.4.4
         version: 4.4.4(ai@6.0.161(zod@4.3.6))(zod@4.3.6)
-        version: 4.4.4(ai@6.0.159(zod@4.3.6))(zod@4.3.6)
       '@trpc/client':
         specifier: 11.16.0
         version: 11.16.0(@trpc/server@11.16.0(typescript@6.0.2))(typescript@6.0.2)
@@ -283,8 +282,6 @@ importers:
       ai:
         specifier: 6.0.161
         version: 6.0.161(zod@4.3.6)
-        specifier: 6.0.159
-        version: 6.0.159(zod@4.3.6)
       binary-extensions:
         specifier: 3.1.0
         version: 3.1.0
@@ -885,8 +882,6 @@ packages:
 
   '@ai-sdk/gateway@3.0.98':
     resolution: {integrity: sha512-Ol+nP8PIlj8FjN8qKlxhE89N0woqAaGi9CUBGp1boe3RafpphJ7WMuq/RErSvxtwTqje03TP+zIdzP113krxRg==}
-  '@ai-sdk/gateway@3.0.96':
-    resolution: {integrity: sha512-BDiVEMUVHGpngReeigzLyJobG0TvzYbNGzdHI8JYBZHrjOX4aL6qwIls7z3p7V4TuXVWUCbG8TSWEe7ksX4Vhw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -5600,9 +5595,6 @@ packages:
   '@types/keyv@3.1.4':
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
 
-  '@types/long@4.0.2':
-    resolution: {integrity: sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==}
-
   '@types/mdast@4.0.4':
     resolution: {integrity: sha512-kGaNbPh1k7AFzgpud/gMdvIm5xuECykRR+JnWKQno9TAXVa6WIVCGTPvYGekIDL4uwCZQSYbUxNBSb1aUo79oA==}
 
@@ -6452,8 +6444,6 @@ packages:
 
   ai@6.0.161:
     resolution: {integrity: sha512-ufhmijmx2YyWTPAicGgtpLOB/xD7mG8zKs1pT1Trj+JL/3r1rS8fkMi/cHZoChSAQSGB4pgmcWVxDrVTUvK2IQ==}
-  ai@6.0.159:
-    resolution: {integrity: sha512-S18ozG7Dkm3Ud1tzOtAK5acczD4vygfml80RkpM9VWMFpvAFwAKSHaGYkATvPQHIE+VpD1tJY9zcTXLZ/zR5cw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -11474,12 +11464,6 @@ packages:
   property-information@7.1.0:
     resolution: {integrity: sha512-TwEZ+X+yCJmYfL7TPUOcvBZ4QfoT5YenQiJuX//0th53DE6w0xxLEtfK3iyryQFddXuvkIk51EEgrJQ0WJkOmQ==}
 
-  protobufjs@6.11.5:
-    resolution: {integrity: sha512-OKjVH3hDoXdIZ/s5MLv8O2X0s+wOxGfV7ar6WFSKGaSAxi/6gYn3px5POS4vi+mc/0zCOdL7Jkwrj0oT1Yst2A==}
-    hasBin: true
-
-  protobufjs@7.5.4:
-    resolution: {integrity: sha512-CvexbZtbov6jW2eXAvLukXjXUW1TzFaivC46BpWc/3BpcCysb5Vffu+B3XHMm8lVEuy2Mm4XGex8hBSg1yapPg==}
   protobufjs@7.5.5:
     resolution: {integrity: sha512-3wY1AxV+VBNW8Yypfd1yQY9pXnqTAN+KwQxL8iYm3/BjKYMNg4i0owhEe26PWDOMaIrzeeF98Lqd5NGz4omiIg==}
     engines: {node: '>=12.0.0'}
@@ -13817,7 +13801,6 @@ snapshots:
       zod: 4.3.6
 
   '@ai-sdk/gateway@3.0.98(zod@4.3.6)':
-  '@ai-sdk/gateway@3.0.96(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.23(zod@4.3.6)
@@ -19183,7 +19166,6 @@ snapshots:
       - utf-8-validate
 
   '@trigger.dev/sdk@4.4.4(ai@6.0.161(zod@4.3.6))(zod@4.3.6)':
-  '@trigger.dev/sdk@4.4.4(ai@6.0.159(zod@4.3.6))(zod@4.3.6)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.36.0
@@ -19200,7 +19182,6 @@ snapshots:
       zod: 4.3.6
     optionalDependencies:
       ai: 6.0.161(zod@4.3.6)
-      ai: 6.0.159(zod@4.3.6)
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -19435,8 +19416,6 @@ snapshots:
   '@types/keyv@3.1.4':
     dependencies:
       '@types/node': 25.6.0
-
-  '@types/long@4.0.2': {}
 
   '@types/mdast@4.0.4':
     dependencies:
@@ -20441,9 +20420,6 @@ snapshots:
   ai@6.0.161(zod@4.3.6):
     dependencies:
       '@ai-sdk/gateway': 3.0.98(zod@4.3.6)
-  ai@6.0.159(zod@4.3.6):
-    dependencies:
-      '@ai-sdk/gateway': 3.0.96(zod@4.3.6)
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.23(zod@4.3.6)
       '@opentelemetry/api': 1.9.0
@@ -25489,7 +25465,7 @@ snapshots:
 
   onnx-proto@4.0.4:
     dependencies:
-      protobufjs: 6.11.5
+      protobufjs: 7.5.5
 
   onnxruntime-common@1.14.0: {}
 
@@ -26149,23 +26125,6 @@ snapshots:
 
   property-information@7.1.0: {}
 
-  protobufjs@6.11.5:
-    dependencies:
-      '@protobufjs/aspromise': 1.1.2
-      '@protobufjs/base64': 1.1.2
-      '@protobufjs/codegen': 2.0.4
-      '@protobufjs/eventemitter': 1.1.0
-      '@protobufjs/fetch': 1.1.0
-      '@protobufjs/float': 1.0.2
-      '@protobufjs/inquire': 1.1.0
-      '@protobufjs/path': 1.1.2
-      '@protobufjs/pool': 1.1.0
-      '@protobufjs/utf8': 1.1.0
-      '@types/long': 4.0.2
-      '@types/node': 25.6.0
-      long: 4.0.0
-
-  protobufjs@7.5.4:
   protobufjs@7.5.5:
     dependencies:
       '@protobufjs/aspromise': 1.1.2

@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 import { repoDetailsService } from "@/server/entities/analyze/api/repo-details.service";
+import { DocumentFormatter } from "@/server/features/analyze-repo/lib/section-graph-linker";
+import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import { DocTypeSchema } from "@/generated/zod";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -69,6 +71,55 @@ export const repoDetailsRouter = createTRPCRouter({
     .input(z.object({ nodeId: z.string(), repoId: z.string() }))
     .query(async ({ ctx, input }) => {
       return repoDetailsService.getStructureNode(ctx.db, input.repoId, input.nodeId);
+    }),
+
+  getWithGraphLinks: protectedProcedure
+    .input(
+      z.object({
+        analysisId: z.number(),
+        docType: DocTypeSchema,
+        repoId: z.number(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const document = await ctx.db.document.findUnique({
+        where: {
+          repoId_version_type: {
+            repoId: input.repoId,
+            type: input.docType,
+            version: "1.0", // Latest
+          },
+        },
+      });
+
+      if (document == null) {
+        throw new Error("Document not found");
+      }
+
+      const analysis = await ctx.db.analysis.findUnique({
+        select: { resultJson: true },
+        where: { id: input.analysisId },
+      });
+
+      // Get dependency graph for linking
+      const aiResult = analysis?.resultJson as AIResult | null;
+      const graph =
+        aiResult?.analysisRuntime?.mapper?.status === "success"
+          ? (aiResult as any).dependencyGraph
+          : {};
+
+      // Format with graph links
+      const formatted = DocumentFormatter.withGraphLinks(
+        document.content,
+        graph,
+        input.docType,
+        document.version
+      );
+
+      return {
+        ...document,
+        sections: formatted.sections,
+      };
     }),
 
   highlightFile: protectedProcedure
