@@ -3,6 +3,7 @@ priority_rules:
     priority: 3000
     conditions:
       - label = hotfix
+    allow_checks_interruption: true
   - name: dependencies
     priority: 500
     conditions:
