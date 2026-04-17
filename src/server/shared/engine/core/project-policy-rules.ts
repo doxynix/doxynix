@@ -10,17 +10,19 @@ export type ProjectPolicySemanticKind =
   | "data"
   | "frontend"
   | "infrastructure"
+  | "ml"
+  | "mobile"
   | "shared"
   | "unknown";
 
 export const PATH_PATTERNS = {
   API: [
-    "**/{api,routes,routers,controllers,handlers,graphql,gql}/**",
-    "**/*.{controller,handler,router,route,schema,dto,model,trpc,openapi,swagger,gql,graphql}.*",
+    "**/{api,routes,routers,controllers,handlers,graphql,gql,rpc,endpoints}/**",
+    "**/*.{controller,handler,router,route,schema,dto,model,trpc,openapi,swagger,gql,graphql,proto,thrift}.*",
   ],
   ASSET: [
-    "**/{public,static,assets,css,scss,less,sass,icons,images,fonts,theme,themes}/**",
-    "**/*.{css,scss,less,sass,svg,png,jpg,jpeg,gif,ico,woff,woff2,ttf,eot}",
+    "**/{public,static,assets,css,scss,less,sass,icons,images,fonts,theme,themes,media,videos,audio}/**",
+    "**/*.{css,scss,less,sass,svg,png,jpg,jpeg,gif,ico,woff,woff2,ttf,eot,webp,avif,obj,glb}",
   ],
   BENCHMARK: [
     "**/{bench,benchmarks,perf-measures,performance}/**",
@@ -31,6 +33,14 @@ export const PATH_PATTERNS = {
     "**/package.json",
     "**/.npmrc",
     "**/.yarnrc*",
+    "**/pnpm-workspace.yaml",
+    "**/bun.lockb",
+    "**/tsconfig*.json",
+    "**/jsconfig.json",
+    "**/{vite,rollup,next,nuxt,svelte,astro}.config.*",
+    "**/biome.json",
+    "**/{nginx.conf,Caddyfile,Procfile}",
+    "**/{netlify.toml,vercel.json}",
     "**/bunfig.toml",
     "**/deno.json",
     "**/deno.jsonc",
@@ -79,25 +89,29 @@ export const PATH_PATTERNS = {
     "**/*.{yml,yaml,toml,ini,conf,properties,env,env.example}",
   ],
   DOCS: [
-    "**/{docs,doc,documentation,example,examples,sample,samples,guides,website}/**",
-    "**/{README,CHANGELOG,CONTRIBUTING,CODE_OF_CONDUCT,SECURITY,LICENSE}*",
-    "**/*.md",
+    "**/{docs,doc,documentation,example,examples,sample,samples,guides,website,wiki,manual}/**",
+    "**/{README,CHANGELOG,CONTRIBUTING,CODE_OF_CONDUCT,SECURITY,LICENSE,AUTHORS,HISTORY}*",
+    "**/*.{md,txt,rst,adoc}",
   ],
   ENTRY: [
-    "**/main.{ts,js,py,go,rs,cpp,c,java,kt,cs,rb,php,swift,ex,scala}",
+    "**/main.{ts,js,py,go,rs,cpp,c,java,kt,cs,rb,php,swift,ex,scala,zig,m,mm}",
     "**/index.{ts,js,py,php}",
     "**/server.{ts,js,py,go}",
     "**/app.{ts,js,py,rb,swift}",
     "**/manage.py",
     "**/wsgi.py",
     "**/asgi.py",
+    "**/lambda_function.py",
     "**/__main__.py",
     "**/program.cs",
     "**/startup.cs",
     "**/bootstrap.{php,ts,js}",
     "**/handler.{js,ts,py}",
   ],
-  GENERATED: ["**/{generated,.generated}/**", "**/*.generated.*", "**/*.gen.*", "**/*_generated.*"],
+  GENERATED: [
+    "**/{generated,.generated,dist,build,out,target,bin,obj,vendor,node_modules,.next,.nuxt,.svelte-kit,.output,.turbo,.cache,.parcel-cache}/**",
+    "**/__generated__/**",
+  ],
   IGNORE: [
     "**/{.git,node_modules,dist,build,out,target,.next,.nuxt,.svelte-kit,.output,vendor,bower_components,coverage,.pnpm-store,.yarn,.turbo,.parcel-cache,.cache,.serverless,.terraform,.gradle,.mvn,.dart_tool,__pycache__,.pytest_cache,.mypy_cache,.ruff_cache,.tox,.nox,.venv,venv,obj,Debug,Release}/**",
     "**/{.ds_store,thumbs.db,.idea,.vscode}/**",
@@ -108,6 +122,11 @@ export const PATH_PATTERNS = {
     "**/.github/workflows/**",
     "**/{deploy,deployment,helm,k8s,terraform,infra,infrastructure}/**",
     "**/docker-compose.{yml,yaml}",
+    "**/.gitlab-ci.yml",
+    "**/azure-pipelines.yml",
+    "**/Jenkinsfile",
+    "**/{cloudformation,pulumi}/**",
+    "**/*.{tfvars,nomad,hcl}",
     "**/Dockerfile",
     "**/*.tf",
   ],
@@ -119,6 +138,14 @@ export const PATH_PATTERNS = {
     "**/functions/**",
     "**/k8s/**",
   ],
+  ML: [
+    "**/{models,notebooks,data_science,training,datasets,inference}/**",
+    "**/*.{ipynb,onnx,pb,h5,pt,pth,pkl,joblib,dvc}",
+  ],
+  MOBILE: [
+    "**/{ios,android,mobile,cordova,capacitor,flutter,react-native}/**",
+    "**/*.{swift,plist,xcworkspace,xcodeproj,storyboard,xib}",
+  ],
   OPENAPI: [
     "**/openapi.{json,yaml,yml}",
     "**/swagger.{json,yaml,yml}",
@@ -126,11 +153,14 @@ export const PATH_PATTERNS = {
     "**/*swagger*",
   ],
   RUNTIME_SOURCE: [
-    "**/{src,app,lib,core,domain,internal,pkg,services,server,include,crates,packages,modules,cmd,cli,sdk}/**",
-    "**/*.{service,repository,use-case,handler,router,route,controller,model,entity,dto,contract,action}.*",
+    "**/{src,app,lib,core,domain,internal,pkg,services,server,include,crates,packages,modules,cmd,cli,sdk,entities,features,widgets}/**",
+    "**/*.{service,repository,use-case,handler,router,route,controller,model,entity,dto,contract,action,util,helper,logic}.*",
   ],
   SENSITIVE: [
     "**/.env*",
+    "**/*.{keystore,jks}",
+    "**/config/master.key",
+    "**/credentials.json",
     "**/{secrets,secret,credentials,auth,keys}/**",
     "**/*.{pem,key,p12,pfx,crt,der}",
   ],
@@ -213,6 +243,7 @@ export const PROJECT_POLICY_RULES = {
       "setup.py",
     ],
   },
+
   grouping: {
     genericGroupRoots: new Set([
       "app",
@@ -277,6 +308,24 @@ export const PROJECT_POLICY_RULES = {
       "workers",
     ]),
     jvmSourceRoots: new Set(["clojure", "groovy", "java", "kotlin", "resources", "scala"]),
+  },
+  manifests: {
+    rootFiles: [
+      "cargo.toml",
+      "go.mod",
+      "package.json",
+      "pom.xml",
+      "pyproject.toml",
+      "readme.md",
+      "requirements.txt",
+      "setup.py",
+      "tsconfig.json",
+    ],
+  },
+  security: {
+    patterns:
+      /eval\(|exec\(|dangerouslysetinnerhtml|innerhtml\s*=|password|secret|api[_-]?key|token|bearer|auth|credentials|private_key/i,
+    todoPatterns: /\/\/\s*todo|\/\/\s*fixme|\/\/\s*xxx|\/\/\s*hack/i,
   },
   semanticPrefixes: {
     backend: ["src/server/"],

@@ -58,6 +58,15 @@ interface RegisteredPrompt {
   metadata: PromptMetadata;
 }
 
+export const PROMPT_IDS = {
+  API_DOC: "api-documentarian",
+  ARCHITECT: "architect",
+  README: "readme-writer",
+  SENTINEL: "security-sentinel",
+} as const;
+
+type PromptId = (typeof PROMPT_IDS)[keyof typeof PROMPT_IDS];
+
 /**
  * PromptRegistry: Central management of all prompts
  */
@@ -125,7 +134,7 @@ export class PromptRegistry {
   /**
    * Build a prompt by ID with given parameters
    */
-  build(promptId: string, params: Record<string, unknown> = {}): string {
+  build(promptId: PromptId, params: Record<string, unknown> = {}): string {
     const resolved = this.aliases.get(promptId) ?? promptId;
     const prompt = this.prompts.get(resolved);
 

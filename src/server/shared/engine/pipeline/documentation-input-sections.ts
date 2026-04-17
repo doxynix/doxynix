@@ -1,3 +1,4 @@
+import { uniquePaths } from "../../lib/array-utils";
 import type { RepositoryEvidence } from "../core/discovery.types";
 import type {
   ApiReferenceSectionBody,
@@ -8,7 +9,7 @@ import type {
 import type { RepoMetrics } from "../core/metrics.types";
 import { ProjectPolicy } from "../core/project-policy";
 import type { DocumentationContext } from "./documentation-input-context";
-import { buildSectionInput, inferRepositoryKind, uniquePaths } from "./report-helpers";
+import { buildSectionInput, inferRepositoryKind } from "./report-helpers";
 
 type DocumentationSections = DocumentationInputModel["sections"];
 

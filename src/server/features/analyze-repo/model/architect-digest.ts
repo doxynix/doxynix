@@ -74,6 +74,8 @@ export type ArchitectDigest = {
         apiSurface: number;
         categories: string[];
         exports: number;
+        inbound?: number;
+        outbound?: number;
         path: string;
       }>;
       orphanModules: string[];
@@ -129,7 +131,7 @@ export function collectArchitectPreferredPaths(digest: ArchitectDigest) {
       ...digest.facts.flatMap((fact) => fact.evidencePaths),
       ...digest.findings.flatMap((finding) => finding.evidencePaths),
     ],
-    36
+    200
   );
 }
 
@@ -145,29 +147,23 @@ export function buildArchitectDigest(
       repositoryFacts.map((fact) => ({
         category: fact.category,
         confidence: fact.confidence,
-        evidencePaths: uniquePaths(
-          fact.evidence.map((evidence) => evidence.path),
-          4
-        ),
+        evidencePaths: uniquePaths(fact.evidence.map((evidence) => evidence.path)),
         id: fact.id,
         title: fact.title,
       })),
-      8
+      100
     ),
     findings: limit(
       repositoryFindings.map((finding) => ({
         category: finding.category,
-        evidencePaths: uniquePaths(
-          finding.evidence.map((evidence) => evidence.path),
-          4
-        ),
+        evidencePaths: uniquePaths(finding.evidence.map((evidence) => evidence.path)),
         id: finding.id,
         score: finding.score,
         severity: finding.severity,
         summary: finding.summary,
         title: finding.title,
       })),
-      8
+      100
     ),
     metrics: {
       analysisCoverage: metrics.analysisCoverage,
@@ -178,14 +174,14 @@ export function buildArchitectDigest(
           fromPath: pair.fromPath,
           toPath: pair.toPath,
         })),
-        10
+        100
       ),
       churnHotspots: limit(
         (metrics.churnHotspots ?? []).map((hotspot) => ({
           commitsInWindow: hotspot.commitsInWindow,
           path: hotspot.path,
         })),
-        10
+        100
       ),
       complexityScore: metrics.complexityScore,
       duplicationPercentage: metrics.duplicationPercentage,
@@ -201,12 +197,12 @@ export function buildArchitectDigest(
       languageBreakdown: projectMap.language_breakdown,
       modules: limit(
         projectMap.modules.map((module) => ({
-          dependencies: limit(module.dependencies ?? [], 4),
+          dependencies: limit(module.dependencies ?? [], 40),
           path: module.path,
           responsibility: module.responsibility,
           type: module.type,
         })),
-        14
+        500
       ),
       overview: projectMap.overview,
     },
@@ -218,16 +214,16 @@ export function buildArchitectDigest(
         evidencePaths: uniquePaths(documentationInput.sections.api_reference.evidencePaths, 12),
         frameworks: limit(
           documentationInput.sections.api_reference.body.frameworkFacts.map((fact) => fact.name),
-          6
+          60
         ),
         publicSurfacePaths: limit(
           documentationInput.sections.api_reference.body.publicSurfacePaths,
-          12
+          120
         ),
         routeSource: documentationInput.sections.api_reference.body.sourceOfTruth,
         routeSourceFiles: limit(
           documentationInput.sections.api_reference.body.routeInventory.sourceFiles,
-          12
+          120
         ),
         sampleRoutes: limit(
           documentationInput.sections.api_reference.body.routeInventory.httpRoutes.map((route) => ({
@@ -235,7 +231,7 @@ export function buildArchitectDigest(
             path: route.path,
             sourcePath: route.sourcePath,
           })),
-          12
+          120
         ),
         summary: documentationInput.sections.api_reference.summary,
         title: documentationInput.sections.api_reference.title,
@@ -250,9 +246,9 @@ export function buildArchitectDigest(
             outbound: hotspot.outbound,
             path: hotspot.path,
           })),
-          10
+          100
         ),
-        evidencePaths: uniquePaths(documentationInput.sections.architecture.evidencePaths, 12),
+        evidencePaths: uniquePaths(documentationInput.sections.architecture.evidencePaths, 120),
         graphReliability: {
           resolvedEdges:
             documentationInput.sections.architecture.body.graphReliability.resolvedEdges,
@@ -267,35 +263,38 @@ export function buildArchitectDigest(
             exports: module.exports,
             path: module.path,
           })),
-          12
+          120
         ),
-        orphanModules: limit(documentationInput.sections.architecture.body.orphanModules, 10),
+        orphanModules: limit(documentationInput.sections.architecture.body.orphanModules, 100),
         primaryEntrypoints: limit(
           documentationInput.sections.architecture.body.primaryEntrypoints,
-          10
+          100
         ),
         summary: documentationInput.sections.architecture.summary,
         title: documentationInput.sections.architecture.title,
         unknowns: documentationInput.sections.architecture.unknowns,
       },
       onboarding: {
-        apiPaths: limit(documentationInput.sections.onboarding.body.apiPaths, 10),
+        apiPaths: limit(documentationInput.sections.onboarding.body.apiPaths, 100),
         confidence: documentationInput.sections.onboarding.confidence,
-        configPaths: limit(documentationInput.sections.onboarding.body.configPaths, 8),
-        evidencePaths: uniquePaths(documentationInput.sections.onboarding.evidencePaths, 12),
-        firstLookPaths: limit(documentationInput.sections.onboarding.body.firstLookPaths, 10),
+        configPaths: limit(documentationInput.sections.onboarding.body.configPaths, 80),
+        evidencePaths: uniquePaths(documentationInput.sections.onboarding.evidencePaths, 120),
+        firstLookPaths: limit(documentationInput.sections.onboarding.body.firstLookPaths, 100),
         newcomerSteps: documentationInput.sections.onboarding.body.newcomerSteps,
-        riskPaths: limit(documentationInput.sections.onboarding.body.riskPaths, 10),
+        riskPaths: limit(documentationInput.sections.onboarding.body.riskPaths, 100),
         summary: documentationInput.sections.onboarding.summary,
         title: documentationInput.sections.onboarding.title,
         unknowns: documentationInput.sections.onboarding.unknowns,
       },
       overview: {
         confidence: documentationInput.sections.overview.confidence,
-        configFiles: limit(documentationInput.sections.overview.body.configFiles, 8),
-        evidencePaths: uniquePaths(documentationInput.sections.overview.evidencePaths, 12),
-        primaryEntrypoints: limit(documentationInput.sections.overview.body.primaryEntrypoints, 10),
-        primaryModules: limit(documentationInput.sections.overview.body.primaryModules, 10),
+        configFiles: limit(documentationInput.sections.overview.body.configFiles, 80),
+        evidencePaths: uniquePaths(documentationInput.sections.overview.evidencePaths, 120),
+        primaryEntrypoints: limit(
+          documentationInput.sections.overview.body.primaryEntrypoints,
+          100
+        ),
+        primaryModules: limit(documentationInput.sections.overview.body.primaryModules, 100),
         repositoryKind: documentationInput.sections.overview.body.repositoryKind,
         stackProfile: documentationInput.sections.overview.body.stackProfile,
         summary: documentationInput.sections.overview.summary,
@@ -305,12 +304,12 @@ export function buildArchitectDigest(
       risks: {
         confidence: documentationInput.sections.risks.confidence,
         derivedScores: documentationInput.sections.risks.body.derivedScores,
-        evidencePaths: uniquePaths(documentationInput.sections.risks.evidencePaths, 12),
+        evidencePaths: uniquePaths(documentationInput.sections.risks.evidencePaths, 120),
         findings: limit(
           documentationInput.sections.risks.body.findings.map((finding) => ({
             evidencePaths: uniquePaths(
               finding.evidence.map((evidence) => evidence.path),
-              4
+              40
             ),
             id: finding.id,
             score: finding.score,
@@ -318,14 +317,14 @@ export function buildArchitectDigest(
             summary: finding.summary,
             title: finding.title,
           })),
-          8
+          80
         ),
         hotspots: limit(
           documentationInput.sections.risks.body.hotspots.map((hotspot) => ({
             path: hotspot.path,
             score: hotspot.score,
           })),
-          10
+          100
         ),
         rawMetrics: documentationInput.sections.risks.body.rawMetrics,
         summary: documentationInput.sections.risks.summary,

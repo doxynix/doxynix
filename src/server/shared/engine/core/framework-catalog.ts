@@ -1,3 +1,5 @@
+import { escapeRegExp, uniq } from "es-toolkit";
+
 import type { FrameworkCategory, FrameworkFact } from "./discovery.types";
 import { ProjectPolicy } from "./project-policy";
 
@@ -141,10 +143,6 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   },
 ];
 
-function escapeRegExp(value: string) {
-  return value.replaceAll(/[$()*+.?[\\\]^{|}]/g, "\\$&");
-}
-
 function matchesFrameworkAlias(token: string, alias: string) {
   const normalizedAlias = alias.toLowerCase();
 
@@ -173,7 +171,7 @@ export function collectFrameworkFactsFromTokens(
         category: entry.category,
         confidence: baseConfidence,
         name: entry.name,
-        sources: existing == null ? [source] : Array.from(new Set([...existing.sources, source])),
+        sources: existing == null ? [source] : uniq([...existing.sources, source]),
       };
 
       if (existing == null || existing.confidence < next.confidence) {
@@ -198,7 +196,7 @@ export function mergeFrameworkFacts(facts: FrameworkFact[]) {
     }
 
     existing.confidence = Math.max(existing.confidence, fact.confidence);
-    existing.sources = Array.from(new Set([...existing.sources, ...fact.sources]));
+    existing.sources = uniq([...existing.sources, ...fact.sources]);
   }
 
   return Array.from(merged.values()).sort((left, right) => right.confidence - left.confidence);

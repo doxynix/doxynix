@@ -1,35 +1,64 @@
+import { compact, uniq } from "es-toolkit";
+import { basename, extname } from "pathe";
+
 import { normalizeRepoPath } from "../engine/core/common";
 
+/**
+ * Extract file extension from path (lowercase, with leading dot).
+ */
+export function getFileExtension(filePath: string): string {
+  return extname(normalizeRepoPath(filePath));
+}
+
+/**
+ * Extract file name from path (basename).
+ */
+export function getFileName(filePath: string): string {
+  return basename(normalizeRepoPath(filePath));
+}
+
+/**
+ * Unique normalized paths with limit.
+ */
 export function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): string[] {
-  const values = Array.from(new Set(Array.from(paths, (path) => normalizeRepoPath(path))));
-  return typeof limit === "number" ? values.slice(0, limit) : values;
+  const list = uniq(compact(Array.from(paths).map((path) => normalizeRepoPath(path))));
+
+  return limit != null ? list.slice(0, limit) : list;
 }
 
-export function uniqueObjectPaths<T extends { path: string }>(items: Iterable<T>, limit?: number) {
-  return uniqueNormalizedPaths(
-    Array.from(items, (item) => item.path),
-    limit
-  );
+/**
+ * Unique object paths.
+ */
+export function uniqueObjectPaths<T extends { path: string }>(
+  items: Iterable<T>,
+  limit?: number
+): string[] {
+  const paths = Array.from(items).map((i) => i.path);
+  return uniqueNormalizedPaths(paths, limit);
 }
 
+/**
+ * Unique string paths from mixed.
+ */
 export function uniqueStringPaths(
   paths: Iterable<false | null | string | undefined>,
   limit?: number
 ): string[] {
-  const values = Array.from(
-    new Set(
-      Array.from(paths).filter(
-        (path): path is string => typeof path === "string" && path.length > 0
-      )
-    )
-  );
-  return typeof limit === "number" ? values.slice(0, limit) : values;
+  const cleanPaths = compact(Array.from(paths)) as string[];
+  return uniqueNormalizedPaths(cleanPaths, limit);
 }
 
-export function excludePath(paths: Iterable<string>, excludedPath: string, limit?: number) {
-  const normalizedExcludedPath = normalizeRepoPath(excludedPath);
-  const filtered = Array.from(paths).filter(
-    (candidatePath) => normalizeRepoPath(candidatePath) !== normalizedExcludedPath
-  );
+/**
+ * Exclude path from list.
+ */
+export function excludePath(
+  paths: Iterable<string>,
+  excludedPath: string,
+  limit?: number
+): string[] {
+  const normalizedExcluded = normalizeRepoPath(excludedPath);
+
+  const filtered = Array.from(paths).filter((p) => normalizeRepoPath(p) !== normalizedExcluded);
+
   return uniqueNormalizedPaths(filtered, limit);
 }

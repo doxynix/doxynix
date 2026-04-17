@@ -10,7 +10,6 @@ import { executeArchitectPhase } from "./stages/architect-stage";
 import { executeMapperPhase } from "./stages/mapper-stage";
 import { executeSentinelPhase } from "./stages/sentinel-stage";
 import { getDocumentationInputSnapshot } from "./utils/input-retrieval";
-import { buildFallbackAiResult } from "./writers/writer-fallbacks";
 import { orchestrateWriterTasks } from "./writers/writer-orchestrator";
 
 type StatusUpdater = (msg: string, percent: number, status?: Status) => Promise<void>;
@@ -36,20 +35,7 @@ export async function runAiPipeline(
 
   // Stage 2: Project mapping
   await updateStatus("Mapping project structure (Step 1/3)...", 45);
-  let projectMap;
-  try {
-    projectMap = await executeMapperPhase(validFiles, hardMetrics, evidence, analysisId);
-  } catch (error) {
-    const documentationInput = getDocumentationInputSnapshot(evidence, hardMetrics);
-    return buildFallbackAiResult(
-      documentationInput,
-      hardMetrics,
-      repositoryFacts,
-      repositoryFindings,
-      error,
-      "mapper"
-    );
-  }
+  const projectMap = await executeMapperPhase(validFiles, hardMetrics, evidence, analysisId);
 
   // Stage 3: Deep analysis
   await updateStatus("Deep Analysis & Swagger Gen (Step 2/3)...", 70);
@@ -62,24 +48,14 @@ export async function runAiPipeline(
     repositoryFindings
   );
 
-  try {
-    return await executeArchitectPhase(
-      validFiles,
-      architectDigest,
-      analysisId,
-      instructions,
-      sentinelStatus,
-      language
-    );
-  } catch (error) {
-    return buildFallbackAiResult(
-      documentationInput,
-      hardMetrics,
-      repositoryFacts,
-      repositoryFindings,
-      error
-    );
-  }
+  return await executeArchitectPhase(
+    validFiles,
+    architectDigest,
+    analysisId,
+    instructions,
+    sentinelStatus,
+    language
+  );
 }
 
 /**

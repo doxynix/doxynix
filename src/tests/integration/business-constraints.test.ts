@@ -7,7 +7,7 @@ describe("Business Logic & Integrity Constraints", () => {
     await cleanupDatabase();
   });
 
-  it("should enforce unique constraint on Documents (Repo + Version + Type)", async () => {
+  it("should enforce unique constraint on Documents (Repo + Version + Type + Analysis)", async () => {
     const alice = await createTestUser("Alice");
 
     const repo = await alice.db.repo.create({
@@ -20,8 +20,24 @@ describe("Business Logic & Integrity Constraints", () => {
       },
     });
 
+    const analysis1 = await alice.db.analysis.create({
+      data: {
+        repo: { connect: { publicId: repo.publicId } },
+        status: "DONE",
+      },
+    });
+
+    const analysis2 = await alice.db.analysis.create({
+      data: {
+        repo: { connect: { publicId: repo.publicId } },
+        status: "DONE",
+      },
+    });
+
+    // Same (repo, version, type) but different analysis - should succeed
     await alice.db.document.create({
       data: {
+        analysis: { connect: { publicId: analysis1.publicId } },
         content: "Original Content",
         repo: { connect: { publicId: repo.publicId } },
         type: "README",
@@ -29,9 +45,23 @@ describe("Business Logic & Integrity Constraints", () => {
       },
     });
 
+    await expect(
+      alice.db.document.create({
+        data: {
+          analysis: { connect: { publicId: analysis2.publicId } },
+          content: "Different Analysis Content",
+          repo: { connect: { publicId: repo.publicId } },
+          type: "README",
+          version: "v1",
+        },
+      })
+    ).resolves.toBeDefined();
+
+    // Same (repo, version, type, analysis) - should fail
     await expectValidationFail(
       alice.db.document.create({
         data: {
+          analysis: { connect: { publicId: analysis1.publicId } },
           content: "Duplicate Content",
           repo: { connect: { publicId: repo.publicId } },
           type: "README",
@@ -40,9 +70,11 @@ describe("Business Logic & Integrity Constraints", () => {
       })
     );
 
+    // Different version/type - should always succeed
     await expect(
       alice.db.document.create({
         data: {
+          analysis: { connect: { publicId: analysis1.publicId } },
           content: "New Version",
           repo: { connect: { publicId: repo.publicId } },
           type: "README",
@@ -50,9 +82,11 @@ describe("Business Logic & Integrity Constraints", () => {
         },
       })
     ).resolves.toBeDefined();
+
     await expect(
       alice.db.document.create({
         data: {
+          analysis: { connect: { publicId: analysis1.publicId } },
           content: "API Docs",
           repo: { connect: { publicId: repo.publicId } },
           type: "API",

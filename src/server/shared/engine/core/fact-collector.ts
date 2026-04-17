@@ -92,7 +92,7 @@ export class FactCollector {
 
     collector.promoteMergedFrameworkFacts();
     const result = Array.from(collector.facts.values()).sort((a, b) => b.confidence - a.confidence);
-    dumpDebug("tech-facts-detected", result);
+    void dumpDebug("tech-facts-detected", result);
     return result;
   }
 

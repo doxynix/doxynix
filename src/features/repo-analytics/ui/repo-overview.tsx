@@ -218,13 +218,8 @@ export function RepoOverview({ data }: Readonly<Props>) {
             <p className="text-muted-foreground text-xs">{docs.availableCount} docs available</p>
             <div className="flex flex-wrap gap-2">
               {docs.items.map((item) => (
-                <Badge
-                  key={item.id}
-                  variant="outline"
-                  className={item.isFallback ? "border-warning text-warning" : ""}
-                >
-                  {item.type.toLowerCase().replace("_", " ")}{" "}
-                  {item.isFallback ? "fallback" : item.status}
+                <Badge key={item.id} variant="outline">
+                  {item.type.toLowerCase().replace("_", " ")} {item.status}
                 </Badge>
               ))}
               {docs.hasSwagger && <Badge variant="secondary">swagger</Badge>}

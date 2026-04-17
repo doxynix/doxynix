@@ -6,6 +6,8 @@ import { DocTypeSchema } from "@/generated/zod";
 import { OpenApiErrorResponses } from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
+const DEFAULT_DOC_LANGUAGE = "English";
+
 export const repoAnalysisRouter = createTRPCRouter({
   analyze: protectedProcedure
     .meta({
@@ -37,7 +39,7 @@ export const repoAnalysisRouter = createTRPCRouter({
     .input(
       z.object({
         content: z.string(),
-        language: z.string().default("English"),
+        language: z.string().default(DEFAULT_DOC_LANGUAGE),
         nodeId: z.string().optional(),
         path: z.string(),
         repoId: z.string(),
@@ -51,7 +53,7 @@ export const repoAnalysisRouter = createTRPCRouter({
     .input(
       z.object({
         content: z.string(),
-        language: z.string().default("Russian"),
+        language: z.string().default(DEFAULT_DOC_LANGUAGE),
         nodeId: z.string().optional(),
         path: z.string(),
         repoId: z.string(),
@@ -67,7 +69,7 @@ export const repoAnalysisRouter = createTRPCRouter({
         analysisId: z.string().optional(),
         commitSha: z.string().optional(),
         content: z.string(),
-        language: z.string().default("Russian"),
+        language: z.string().default(DEFAULT_DOC_LANGUAGE),
         nodeId: z.string().optional(),
         path: z.string(),
         repoId: z.string(),
@@ -83,7 +85,7 @@ export const repoAnalysisRouter = createTRPCRouter({
         analysisId: z.string().optional(),
         commitSha: z.string().optional(),
         content: z.string(),
-        language: z.string().default("English"),
+        language: z.string().default(DEFAULT_DOC_LANGUAGE),
         nodeId: z.string().optional(),
         path: z.string(),
         repoId: z.string(),

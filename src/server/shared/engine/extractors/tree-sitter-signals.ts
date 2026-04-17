@@ -1,6 +1,9 @@
 import "server-only";
 
+import { join } from "pathe";
+
 import { logger } from "../../infrastructure/logger";
+import { getFileExtension } from "../../lib/path-operations";
 import type {
   FileSignals,
   RepositoryFile,
@@ -26,17 +29,7 @@ type LanguageSpec = {
   wasmPackage?: string;
 };
 
-type FsDirentLike = {
-  isDirectory(): boolean;
-  name: string;
-};
-
 declare const process: { cwd(): string };
-
-const fs = eval("require")("fs") as {
-  existsSync(path: string): boolean;
-  readdirSync(path: string, options: { withFileTypes: true }): FsDirentLike[];
-};
 
 const SPECS: Record<string, LanguageSpec> = {
   ".c": {
@@ -161,10 +154,6 @@ const languageCache = new Map<string, Promise<any>>();
 let runtimeInitPromise: null | Promise<void> = null;
 const smokeCheckedExtensions = new Set<string>();
 
-function joinFsPath(...parts: string[]) {
-  return parts.join("/").replaceAll(/[/\\]+/g, "/");
-}
-
 async function initRuntime() {
   if (runtimeInitPromise != null) return await runtimeInitPromise;
 
@@ -183,8 +172,9 @@ async function initRuntime() {
     }
 
     await ParserRuntime.init({
-      locateFile: (name: string) =>
-        joinFsPath(process.cwd(), "node_modules", "web-tree-sitter", name),
+      locateFile: (name: string) => {
+        return join(process.cwd(), "node_modules/web-tree-sitter", name);
+      },
     });
   })().catch((error) => {
     runtimeInitPromise = null;
@@ -224,32 +214,7 @@ async function loadLanguage(ext: string, spec: LanguageSpec) {
 }
 
 function resolveGrammarWasmPath(spec: LanguageSpec) {
-  if (spec.wasmPackage != null) {
-    const directGrammarPath = resolvePnpmPackageAsset(spec.wasmPackage, spec.wasm);
-    if (directGrammarPath != null) {
-      return directGrammarPath;
-    }
-  }
-
-  return joinFsPath(process.cwd(), "node_modules", "tree-sitter-wasms", "out", spec.wasm);
-}
-
-function resolvePnpmPackageAsset(packageName: string, assetName: string) {
-  const pnpmRoot = joinFsPath(process.cwd(), "node_modules", ".pnpm");
-  if (!fs.existsSync(pnpmRoot)) return null;
-
-  for (const entry of fs.readdirSync(pnpmRoot, { withFileTypes: true })) {
-    if (!entry.isDirectory() || !entry.name.startsWith(`${packageName}@`)) {
-      continue;
-    }
-
-    const candidate = joinFsPath(pnpmRoot, entry.name, "node_modules", packageName, assetName);
-    if (fs.existsSync(candidate)) {
-      return candidate;
-    }
-  }
-
-  return null;
+  return join(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm);
 }
 
 function lineOf(content: string, fragment: string) {
@@ -261,13 +226,6 @@ function lineOf(content: string, fragment: string) {
 function extractNodeName(nodeText: string) {
   const firstLine = nodeText.split(/\r?\n/u, 1)[0]?.trim() ?? "";
   return /([A-Z_a-z]\w*)/.exec(firstLine)?.[1];
-}
-
-function getFileExtension(filePath: string) {
-  const normalized = filePath.replaceAll("\\", "/");
-  const filename = normalized.slice(normalized.lastIndexOf("/") + 1);
-  const dotIndex = filename.lastIndexOf(".");
-  return dotIndex >= 0 ? filename.slice(dotIndex).toLowerCase() : "";
 }
 
 function collectRoutes(file: RepositoryFile, spec: LanguageSpec) {

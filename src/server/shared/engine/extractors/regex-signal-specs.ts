@@ -1,3 +1,4 @@
+import { getFileExtension, getFileName } from "../../lib/path-operations";
 import type { RepositoryFile, RouteRef, SymbolKind } from "../core/discovery.types";
 
 const ONE_C_PROCEDURE = "\\u041F\\u0440\\u043E\\u0446\\u0435\\u0434\\u0443\\u0440\\u0430";
@@ -358,18 +359,6 @@ const SPEC_ALIASES: Record<string, string> = {
   ".kts": ".java",
   ".os": "1c",
 };
-
-function getFileExtension(filePath: string) {
-  const normalizedPath = filePath.replaceAll("\\", "/");
-  const filename = normalizedPath.slice(normalizedPath.lastIndexOf("/") + 1);
-  const dotIndex = filename.lastIndexOf(".");
-  return dotIndex >= 0 ? filename.slice(dotIndex).toLowerCase() : "";
-}
-
-function getFileName(filePath: string) {
-  const normalizedPath = filePath.replaceAll("\\", "/");
-  return normalizedPath.slice(normalizedPath.lastIndexOf("/") + 1);
-}
 
 export function getRegexSignalSpec(file: RepositoryFile): RegexSignalSpec {
   const extension = getFileExtension(file.path);

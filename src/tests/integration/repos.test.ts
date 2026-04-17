@@ -143,8 +143,16 @@ describe("Repositories & Data Visibility", () => {
       },
     });
 
+    const analysis = await alice.db.analysis.create({
+      data: {
+        repo: { connect: { publicId: repo.publicId } },
+        status: "DONE",
+      },
+    });
+
     const doc = await alice.db.document.create({
       data: {
+        analysis: { connect: { publicId: analysis.publicId } },
         content: hugeContent,
         repo: { connect: { publicId: repo.publicId } },
         type: "README",
