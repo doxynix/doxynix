@@ -82,13 +82,11 @@ export const repoDetailsRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const document = await ctx.db.document.findUnique({
+      const document = await ctx.db.document.findFirst({
         where: {
-          repoId_version_type: {
-            repoId: input.repoId,
-            type: input.docType,
-            version: "1.0", // Latest
-          },
+          analysisId: input.analysisId,
+          repoId: input.repoId,
+          type: input.docType,
         },
       });
 

@@ -211,34 +211,35 @@ model Repo {
 
 model Analysis {
   /// @zod.custom.omit(["model"])
-  id              Int      @id() @default(autoincrement())
+  id              Int        @id() @default(autoincrement())
   /// @zod.custom.omit(["model"])
-  publicId        String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  status          Status   @default(NEW)
+  publicId        String     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  status          Status     @default(NEW)
   /// @zod.number.int().min(0).max(100)
-  progress        Int      @default(0)
-  message         String?  @db.Text()
+  progress        Int        @default(0)
+  message         String?    @db.Text()
   /// @zod.number.int().min(0).max(100)
   score           Int?
   /// @zod.number.int().min(0).max(100)
-  securityScore   Int?     @map("security_score")
+  securityScore   Int?       @map("security_score")
   /// @zod.number.int().min(0).max(100)
-  complexityScore Int?     @map("complexity_score")
+  complexityScore Int?       @map("complexity_score")
   /// @zod.number.int().min(0).max(100)
-  techDebtScore   Int?     @map("tech_debt_score")
+  techDebtScore   Int?       @map("tech_debt_score")
   /// @zod.number.int().min(0).max(100)
-  onboardingScore Int?     @map("onboarding_score")
-  metricsJson     Json?    @map("metrics_json")
-  resultJson      Json?    @map("result_json")
-  commitSha       String?  @map("commit_sha")
+  onboardingScore Int?       @map("onboarding_score")
+  metricsJson     Json?      @map("metrics_json")
+  resultJson      Json?      @map("result_json")
+  commitSha       String?    @map("commit_sha")
   jobId           String?
-  logs            String?  @db.Text()
-  error           String?  @db.Text()
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt() @map("updated_at")
+  logs            String?    @db.Text()
+  error           String?    @db.Text()
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  repoId          Int      @map("repo_id")
-  repo            Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
+  repoId          Int        @map("repo_id")
+  repo            Repo       @relation(fields: [repoId], references: [id], onDelete: Cascade)
+  documents       Document[]
 
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
@@ -249,21 +250,24 @@ model Analysis {
 
 model Document {
   /// @zod.custom.omit(["model"])
-  id        Int      @id() @default(autoincrement())
+  id         Int       @id() @default(autoincrement())
   /// @zod.custom.omit(["model"])
-  publicId  String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  version   String
-  type      DocType
+  publicId   String    @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  version    String
+  type       DocType
   /// @zod.string.min(1, { message: "Content cannot be empty" })
-  content   String   @db.Text()
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt() @map("updated_at")
+  content    String    @db.Text()
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  repoId    Int      @map("repo_id")
-  repo      Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
+  repoId     Int       @map("repo_id")
+  repo       Repo      @relation(fields: [repoId], references: [id], onDelete: Cascade)
+  analysis   Analysis? @relation(fields: [analysisId], references: [id], onDelete: SetNull)
+  analysisId Int?      @map("analysis_id")
 
-  @@unique([repoId, version, type])
+  @@unique([repoId, version, type, analysisId])
   @@index([repoId])
+  @@index([analysisId])
   @@map("documents")
 }
 
