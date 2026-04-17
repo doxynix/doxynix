@@ -652,9 +652,6 @@ importers:
       '@types/nodemailer':
         specifier: 7.0.11
         version: 7.0.11
-      '@types/parse-github-url':
-        specifier: 1.0.3
-        version: 1.0.3
       '@types/pg':
         specifier: 8.20.0
         version: 8.20.0
@@ -5618,9 +5615,6 @@ packages:
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
-
-  '@types/parse-github-url@1.0.3':
-    resolution: {integrity: sha512-7sTbCVmSVzK/iAsHGIxoqiyAnqix9opZm68lOvaU6DBx9EQ9kHMSp0y7Criu2OCsZ9wDllEyCRU+LU4hPRxXUA==}
 
   '@types/parse-path@7.1.0':
     resolution: {integrity: sha512-EULJ8LApcVEPbrfND0cRQqutIOdiIgJ1Mgrhpy755r14xMohPTEpkV/k28SJvuOs9bHRFW8x+KeDAEPiGQPB9Q==}
@@ -19442,10 +19436,6 @@ snapshots:
       '@types/node': 25.6.0
 
   '@types/normalize-package-data@2.4.4': {}
-
-  '@types/parse-github-url@1.0.3':
-    dependencies:
-      '@types/node': 25.6.0
 
   '@types/parse-path@7.1.0':
     dependencies:
