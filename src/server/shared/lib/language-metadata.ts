@@ -13,7 +13,7 @@ const languageByExtension = new Map<string, { color: null | string; name: string
 
 const languageData = languages as Record<string, LinguistInfo | undefined>;
 
-for (const [name, info] of Object.entries(languages as Record<string, LinguistInfo | undefined>)) {
+for (const [name, info] of Object.entries(languageData)) {
   if (info == null) continue;
   for (const ext of info.extensions ?? []) {
     const normalized = ext.toLowerCase();

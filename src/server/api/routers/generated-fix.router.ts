@@ -50,7 +50,7 @@ export const generatedFixRouter = createTRPCRouter({
 
       try {
         // Fetch repo metadata (owner, name, defaultBranch)
-        const repo = await ctx.prisma.repo.findUnique({
+        const repo = await ctx.db.repo.findUnique({
           where: { id: input.repoId },
         });
 
@@ -63,7 +63,7 @@ export const generatedFixRouter = createTRPCRouter({
 
         // Resolve GitHub client context (installation or OAuth)
         const clientContext = await getClientContext(
-          ctx.prisma,
+          ctx.db,
           Number(ctx.session.user.id),
           repo.owner
         );
@@ -82,7 +82,7 @@ export const generatedFixRouter = createTRPCRouter({
         });
 
         // Update fix status with PR metadata (no diffs stored)
-        await generatedFixService.updateStatus(ctx.prisma, input.fixId, "PR_OPENED", {
+        await generatedFixService.updateStatus(ctx.db, input.fixId, "PR_OPENED", {
           githubPrNumber: result.prNumber,
           githubPrUrl: result.prUrl,
         });
@@ -133,7 +133,7 @@ export const generatedFixRouter = createTRPCRouter({
 
       try {
         // Fetch repo metadata (to detect language)
-        const repo = await ctx.prisma.repo.findUnique({
+        const repo = await ctx.db.repo.findUnique({
           where: { id: input.repoId },
         });
 
@@ -155,7 +155,7 @@ export const generatedFixRouter = createTRPCRouter({
         });
 
         // Create fix record (metadata only, no code/diffs stored)
-        const fix = await generatedFixService.create(ctx.prisma, {
+        const fix = await generatedFixService.create(ctx.db, {
           branch: fixResult.branch,
           createdByUser: true,
           prAnalysisId: input.prAnalysisId,
@@ -197,7 +197,7 @@ export const generatedFixRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.object({ fixId: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {
-      return generatedFixService.getById(ctx.prisma, input.fixId);
+      return generatedFixService.getById(ctx.db, input.fixId);
     }),
 
   /**
@@ -206,6 +206,6 @@ export const generatedFixRouter = createTRPCRouter({
   getByRepository: protectedProcedure
     .input(z.object({ repoId: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {
-      return generatedFixService.getByRepoId(ctx.prisma, input.repoId);
+      return generatedFixService.getByRepoId(ctx.db, input.repoId);
     }),
 });

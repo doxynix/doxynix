@@ -20,11 +20,11 @@ export type GitHubCommentInput = {
 export class CommentFormatter {
   static formatFinding(finding: PRFinding, style: "concise" | "detailed"): string {
     if (style === "concise") {
-      return `**${finding.type.toUpperCase()}** (Risk: ${finding.severity}/10)\n${finding.message}`;
+      return `**${finding.type.toUpperCase()}** (${finding.severity}, score ${finding.score}/10)\n${finding.message}`;
     }
 
     let body = `## ${finding.title}\n\n`;
-    body += `**Type:** ${finding.type} | **Severity:** ${finding.severity}/10\n\n`;
+    body += `**Type:** ${finding.type} | **Severity:** ${finding.severity} | **Score:** ${finding.score}/10\n\n`;
     body += `${finding.message}\n\n`;
 
     if (finding.suggestion != null) {

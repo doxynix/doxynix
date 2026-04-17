@@ -256,20 +256,20 @@ model Analysis {
 
 model Document {
   /// @zod.custom.omit(["model"])
-  id         Int       @id() @default(autoincrement())
+  id         Int      @id() @default(autoincrement())
   /// @zod.custom.omit(["model"])
-  publicId   String    @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  publicId   String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   version    String
   type       DocType
   /// @zod.string.min(1, { message: "Content cannot be empty" })
-  content    String    @db.Text()
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt() @map("updated_at")
+  content    String   @db.Text()
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  repoId     Int       @map("repo_id")
-  repo       Repo      @relation(fields: [repoId], references: [id], onDelete: Cascade)
-  analysis   Analysis? @relation(fields: [analysisId], references: [id], onDelete: SetNull)
-  analysisId Int?      @map("analysis_id")
+  repoId     Int      @map("repo_id")
+  repo       Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
+  analysisId Int      @map("analysis_id")
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
   @@unique([repoId, version, type, analysisId])
   @@index([repoId])
@@ -428,7 +428,7 @@ model PullRequestAnalysis {
   comments       PullRequestComment[]
   generatedFixes GeneratedFix[]
 
-  @@unique([repoId, prNumber])
+  @@unique([repoId, prNumber, headSha])
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
   @@index([status])
@@ -471,7 +471,6 @@ model GeneratedFix {
   status          FixStatus            @default(DRAFT) @map("status")
   /// @zod.number.int().min(0).max(100)
   estimatedImpact Int?                 @map("estimated_impact")
-  diffJson        Json?                @map("diff_json")
   githubPrUrl     String?              @map("github_pr_url")
   githubPrNumber  Int?                 @map("github_pr_number")
   createdAt       DateTime             @default(now()) @map("created_at")

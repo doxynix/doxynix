@@ -28,32 +28,39 @@ export const prAnalysisRouter = createTRPCRouter({
         userId: ctx.session.user.id,
       });
 
-      return await PRConfigService.updateConfig(input.repoId, {
-        commentStyle: input.commentStyle,
+      return await PRConfigService.updateConfig(
+        input.repoId,
+        {
+          commentStyle: input.commentStyle,
+          enabled: input.enabled,
+          focusAreas: input.focusAreas,
+          tokenBudget: input.tokenBudget,
+        },
+        ctx.db
+      );
+    }),
+
+  /**
+   * Toggle PR analysis status for repo
+   */
+  setAnalysisStatus: protectedProcedure
+    .input(
+      z.object({
+        enabled: z.boolean(),
+        repoId: z.number().int().positive(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      logger.info({
         enabled: input.enabled,
-        focusAreas: input.focusAreas,
-        tokenBudget: input.tokenBudget,
+        msg: "pr_analysis_status_toggling",
+        repoId: input.repoId,
+        userId: ctx.session.user.id,
       });
-    }),
 
-  /**
-   * Disable PR analysis for repo
-   */
-  disableAnalysis: protectedProcedure
-    .input(z.object({ repoId: z.number().int().positive() }))
-    .mutation(async ({ input }) => {
-      await PRConfigService.disablePRAnalysis(input.repoId);
-      return { enabled: false };
-    }),
+      await PRConfigService.updateConfig(input.repoId, { enabled: input.enabled }, ctx.db);
 
-  /**
-   * Enable PR analysis for repo
-   */
-  enableAnalysis: protectedProcedure
-    .input(z.object({ repoId: z.number().int().positive() }))
-    .mutation(async ({ input }) => {
-      await PRConfigService.enablePRAnalysis(input.repoId);
-      return { enabled: true };
+      return { enabled: input.enabled };
     }),
 
   /**
@@ -62,7 +69,7 @@ export const prAnalysisRouter = createTRPCRouter({
   getAnalysis: protectedProcedure
     .input(z.object({ analysisId: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {
-      const analysis = await prAnalysisService.getById(ctx.prisma, input.analysisId);
+      const analysis = await prAnalysisService.getById(ctx.db, input.analysisId);
 
       if (analysis == null) {
         throw new Error("Analysis not found");
@@ -82,7 +89,7 @@ export const prAnalysisRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      return await prAnalysisService.getByRepoAndPRNumber(ctx.prisma, input.repoId, input.prNumber);
+      return await prAnalysisService.getByRepoAndPRNumber(ctx.db, input.repoId, input.prNumber);
     }),
 
   /**
@@ -91,6 +98,6 @@ export const prAnalysisRouter = createTRPCRouter({
   getComments: protectedProcedure
     .input(z.object({ analysisId: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {
-      return prAnalysisService.getCommentsByAnalysis(ctx.prisma, input.analysisId);
+      return prAnalysisService.getCommentsByAnalysis(ctx.db, input.analysisId);
     }),
 });

@@ -13,6 +13,15 @@ export interface DocumentWithSections {
   version: string;
 }
 
+export interface GraphNode {
+  id: string;
+  label?: string;
+  name?: string;
+}
+export interface DependencyGraph {
+  nodes: GraphNode[];
+}
+
 /**
  * Links documentation sections to dependency graph nodes
  * Enables UI synergy: click graph node -> highlight doc section
@@ -23,7 +32,7 @@ export class DocumentGraphLinker {
    */
   static linkSectionsToGraph(
     document: string,
-    dependencyGraph: any, // Graph structure from analyzer
+    dependencyGraph: DependencyGraph | null | undefined, // Graph structure from analyzer
     docType: string
   ): DocumentSection[] {
     const sections: DocumentSection[] = [];
@@ -43,6 +52,15 @@ export class DocumentGraphLinker {
           currentSection.content = contentBuffer.join("\n").trim();
           currentSection.endLine = i - 1;
           sections.push(currentSection as DocumentSection);
+        } else if (contentBuffer.join("").trim().length > 0) {
+          sections.push({
+            content: contentBuffer.join("\n").trim(),
+            endLine: i - 1,
+            graphNodeIds: [],
+            id: this.generateSectionId(docType, "preamble"),
+            startLine: 0,
+            title: "Preamble",
+          });
         }
 
         // Start new section
@@ -93,7 +111,10 @@ export class DocumentGraphLinker {
    * Find graph nodes related to doc section
    * Uses heuristics: component name mentions, file references, etc.
    */
-  private static findRelatedGraphNodes(section: DocumentSection, graph: any): string[] {
+  private static findRelatedGraphNodes(
+    section: DocumentSection,
+    graph: DependencyGraph | null | undefined
+  ): string[] {
     const nodeIds: string[] = [];
     const content = section.content.toLowerCase();
 
@@ -131,8 +152,10 @@ export class DocumentGraphLinker {
 
   private static isSimilar(str1: string, str2: string): boolean {
     // Simple similarity: contains or shared meaningful words
-    const words1 = str1.split(/[\s-_]+/);
-    const words2 = str2.split(/[\s-_]+/);
+    const words1 = str1.split(/[\s-_]+/).filter((w) => w.length > 1);
+    const words2 = str2.split(/[\s-_]+/).filter((w) => w.length > 1);
+
+    if (words1.length === 0 || words2.length === 0) return false;
 
     const shared = words1.filter((w) => words2.some((w2) => w2.includes(w) || w.includes(w2)));
     return shared.length > 0;
@@ -145,7 +168,7 @@ export class DocumentGraphLinker {
 export class DocumentFormatter {
   static withGraphLinks(
     document: string,
-    graph: any,
+    graph: DependencyGraph | null | undefined,
     docType: string,
     version: string
   ): DocumentWithSections {

@@ -271,22 +271,22 @@ model Analysis {
 
 model Document {
   /// @zod.custom.omit(["model"])
-  id         Int       @id @default(autoincrement()) @omit
+  id         Int      @id @default(autoincrement()) @omit
   /// @zod.custom.omit(["model"])
-  publicId   String    @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  publicId   String   @unique @default(uuid(7)) @map("public_id") @db.Uuid
   version    String
   type       DocType
   /// @zod.string.min(1, { message: "Content cannot be empty" })
-  content    String    @db.Text
+  content    String   @db.Text
 
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
   /// @zod.custom.omit(["model"])
-  repoId     Int       @map("repo_id") @omit
-  repo       Repo      @relation(fields: [repoId], references: [id], onDelete: Cascade)
-  analysis   Analysis? @relation(fields: [analysisId], references: [id], onDelete: SetNull)
+  repoId     Int      @map("repo_id") @omit
+  repo       Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
-  analysisId Int?      @map("analysis_id")
+  analysisId Int      @map("analysis_id")
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
   @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
 
@@ -492,7 +492,7 @@ model PullRequestAnalysis {
 
   @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
 
-  @@unique([repoId, prNumber])
+  @@unique([repoId, prNumber, headSha])
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
   @@index([status])
@@ -544,7 +544,6 @@ model GeneratedFix {
   /// @zod.number.int().min(0).max(100)
   estimatedImpact Int?                 @map("estimated_impact") @gte(0) @lte(100)
 
-  diffJson        Json?                @map("diff_json")
   githubPrUrl     String?              @map("github_pr_url") @url
   githubPrNumber  Int?                 @map("github_pr_number")
 

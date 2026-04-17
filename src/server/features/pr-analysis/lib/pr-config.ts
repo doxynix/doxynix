@@ -1,5 +1,5 @@
 import { PATH_PATTERNS } from "@/server/shared/engine/core/project-policy-rules";
-import { prisma } from "@/server/shared/infrastructure/db";
+import type { DbClient } from "@/server/shared/infrastructure/db";
 
 import type { PRAnalysisConfig } from "../model/pr-types";
 
@@ -13,8 +13,8 @@ const DEFAULT_PR_CONFIG: PRAnalysisConfig = {
 };
 
 export class PRConfigService {
-  static async getConfig(repoId: number): Promise<PRAnalysisConfig> {
-    const repo = await prisma.repo.findUnique({
+  static async getConfig(repoId: number, db: DbClient): Promise<PRAnalysisConfig> {
+    const repo = await db.repo.findUnique({
       select: { prAnalysisConfig: true },
       where: { id: repoId },
     });
@@ -31,15 +31,16 @@ export class PRConfigService {
 
   static async updateConfig(
     repoId: number,
-    config: Partial<PRAnalysisConfig>
+    config: Partial<PRAnalysisConfig>,
+    db: DbClient
   ): Promise<PRAnalysisConfig> {
-    const currentConfig = await this.getConfig(repoId);
+    const currentConfig = await this.getConfig(repoId, db);
     const newConfig = {
       ...currentConfig,
       ...config,
     };
 
-    await prisma.repo.update({
+    await db.repo.update({
       data: {
         prAnalysisConfig: newConfig as PRAnalysisConfig,
       },
@@ -49,19 +50,27 @@ export class PRConfigService {
     return newConfig;
   }
 
-  static async enablePRAnalysis(repoId: number): Promise<void> {
-    await this.updateConfig(repoId, { enabled: true });
+  static async enablePRAnalysis(repoId: number, db: DbClient): Promise<void> {
+    await this.updateConfig(repoId, { enabled: true }, db);
   }
 
-  static async disablePRAnalysis(repoId: number): Promise<void> {
-    await this.updateConfig(repoId, { enabled: false });
+  static async disablePRAnalysis(repoId: number, db: DbClient): Promise<void> {
+    await this.updateConfig(repoId, { enabled: false }, db);
   }
 
-  static async setTokenBudget(repoId: number, budget: number): Promise<void> {
-    await this.updateConfig(repoId, { tokenBudget: Math.max(10_000, Math.min(100_000, budget)) });
+  static async setTokenBudget(repoId: number, budget: number, db: DbClient): Promise<void> {
+    await this.updateConfig(
+      repoId,
+      { tokenBudget: Math.max(10_000, Math.min(100_000, budget)) },
+      db
+    );
   }
 
-  static async setFocusAreas(repoId: number, areas: PRAnalysisConfig["focusAreas"]): Promise<void> {
-    await this.updateConfig(repoId, { focusAreas: areas });
+  static async setFocusAreas(
+    repoId: number,
+    areas: PRAnalysisConfig["focusAreas"],
+    db: DbClient
+  ): Promise<void> {
+    await this.updateConfig(repoId, { focusAreas: areas }, db);
   }
 }

@@ -43,7 +43,13 @@ export async function POST(req: Request) {
   const payload = await req.text();
   const signature = req.headers.get("x-hub-signature-256") ?? "";
   const deliveryId = req.headers.get("x-github-delivery") ?? "";
-  const githubEvent = req.headers.get("x-github-event") as WebhookEventName;
+  const githubEventHeader = req.headers.get("x-github-event");
+
+  if (githubEventHeader == null) {
+    return new NextResponse("Bad Request: Missing x-github-event", { status: 400 });
+  }
+
+  const githubEvent = githubEventHeader as WebhookEventName;
 
   if (deliveryId.length === 0) {
     return new NextResponse("Bad Request", { status: 400 });
@@ -61,7 +67,7 @@ export async function POST(req: Request) {
   });
 
   return await requestContext.run(store, async () => {
-    let delivery;
+    let delivery: { id: string } | null = null;
 
     try {
       delivery = await prisma.webhookDelivery.create({
@@ -78,23 +84,31 @@ export async function POST(req: Request) {
           where: { provider_deliveryId: { deliveryId, provider: "github" } },
         });
 
+        if (existing == null) {
+          return new NextResponse("Conflict error", { status: 409 });
+        }
+
         if (existing?.status === "SUCCESS") {
           return NextResponse.json({ msg: "Already processed", ok: true });
         }
 
-        if (existing?.status === "PROCESSING") {
+        const isStale = Date.now() - existing.createdAt.getTime() > 5 * 60 * 1000;
+
+        if (existing.status === "PROCESSING" && !isStale) {
           return new NextResponse("Processing in progress", { status: 202 });
         }
 
         delivery = await prisma.webhookDelivery.update({
-          data: { error: null, status: "PROCESSING" },
-          where: { provider_deliveryId: { deliveryId, provider: "github" } },
+          where: { id: existing.id },
+          data: { status: "PROCESSING", error: null },
         });
       } else {
         logger.error({ error, msg: "Webhook dedupe database error" });
         return new NextResponse("DB Error", { status: 500 });
       }
     }
+
+    if (delivery == null) return new NextResponse("Internal Error", { status: 500 });
 
     try {
       const eventToReceive = {

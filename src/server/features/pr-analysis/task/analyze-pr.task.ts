@@ -32,7 +32,7 @@ export const analyzePrTask = task({
       if (repo == null) throw new Error(`Repo with ID ${payload.repoId} not found`);
 
       // Get config
-      const config = await PRConfigService.getConfig(payload.repoId);
+      const config = await PRConfigService.getConfig(payload.repoId, prisma);
 
       // Update status to ANALYZING
       await prAnalysisService.updateStatus(
@@ -44,10 +44,11 @@ export const analyzePrTask = task({
 
       const { octokit } = await getClientContext(prisma, repo.userId, payload.owner);
 
-      const { data: ghFiles } = await octokit.rest.pulls.listFiles({
+      const ghFiles = await octokit.paginate(octokit.rest.pulls.listFiles, {
         owner: payload.owner,
         pull_number: payload.prNumber,
         repo: payload.repoName,
+        per_page: 100,
       });
 
       const changedFiles = ghFiles.map((f) => ({

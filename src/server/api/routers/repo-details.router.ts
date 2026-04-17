@@ -95,16 +95,14 @@ export const repoDetailsRouter = createTRPCRouter({
       }
 
       const analysis = await ctx.db.analysis.findUnique({
-        select: { resultJson: true },
+        select: { resultJson: true, metricsJson: true },
         where: { id: input.analysisId },
       });
 
       // Get dependency graph for linking
       const aiResult = analysis?.resultJson as AIResult | null;
       const graph =
-        aiResult?.analysisRuntime?.mapper?.status === "success"
-          ? (aiResult as any).dependencyGraph
-          : {};
+        (aiResult as any)?.dependencyGraph || (analysis?.metricsJson as any)?.dependencyGraph || {};
 
       // Format with graph links
       const formatted = DocumentFormatter.withGraphLinks(
