@@ -67,7 +67,7 @@ export async function POST(req: Request) {
   });
 
   return await requestContext.run(store, async () => {
-    let delivery: { id: string } | null = null;
+    let delivery: null | { id: string } = null;
 
     try {
       delivery = await prisma.webhookDelivery.create({
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
           return new NextResponse("Conflict error", { status: 409 });
         }
 
-        if (existing?.status === "SUCCESS") {
+        if (existing.status === "SUCCESS") {
           return NextResponse.json({ msg: "Already processed", ok: true });
         }
 
@@ -99,16 +99,14 @@ export async function POST(req: Request) {
         }
 
         delivery = await prisma.webhookDelivery.update({
+          data: { error: null, status: "PROCESSING" },
           where: { id: existing.id },
-          data: { status: "PROCESSING", error: null },
         });
       } else {
         logger.error({ error, msg: "Webhook dedupe database error" });
         return new NextResponse("DB Error", { status: 500 });
       }
     }
-
-    if (delivery == null) return new NextResponse("Internal Error", { status: 500 });
 
     try {
       const eventToReceive = {

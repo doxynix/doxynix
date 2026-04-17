@@ -41,29 +41,6 @@ export const prAnalysisRouter = createTRPCRouter({
     }),
 
   /**
-   * Toggle PR analysis status for repo
-   */
-  setAnalysisStatus: protectedProcedure
-    .input(
-      z.object({
-        enabled: z.boolean(),
-        repoId: z.number().int().positive(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      logger.info({
-        enabled: input.enabled,
-        msg: "pr_analysis_status_toggling",
-        repoId: input.repoId,
-        userId: ctx.session.user.id,
-      });
-
-      await PRConfigService.updateConfig(input.repoId, { enabled: input.enabled }, ctx.db);
-
-      return { enabled: input.enabled };
-    }),
-
-  /**
    * Get PR analysis by analysis ID
    */
   getAnalysis: protectedProcedure
@@ -99,5 +76,28 @@ export const prAnalysisRouter = createTRPCRouter({
     .input(z.object({ analysisId: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {
       return prAnalysisService.getCommentsByAnalysis(ctx.db, input.analysisId);
+    }),
+
+  /**
+   * Toggle PR analysis status for repo
+   */
+  setAnalysisStatus: protectedProcedure
+    .input(
+      z.object({
+        enabled: z.boolean(),
+        repoId: z.number().int().positive(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      logger.info({
+        enabled: input.enabled,
+        msg: "pr_analysis_status_toggling",
+        repoId: input.repoId,
+        userId: ctx.session.user.id,
+      });
+
+      await PRConfigService.updateConfig(input.repoId, { enabled: input.enabled }, ctx.db);
+
+      return { enabled: input.enabled };
     }),
 });

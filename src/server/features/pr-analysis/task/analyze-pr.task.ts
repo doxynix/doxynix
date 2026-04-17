@@ -46,9 +46,9 @@ export const analyzePrTask = task({
 
       const ghFiles = await octokit.paginate(octokit.rest.pulls.listFiles, {
         owner: payload.owner,
+        per_page: 100,
         pull_number: payload.prNumber,
         repo: payload.repoName,
-        per_page: 100,
       });
 
       const changedFiles = ghFiles.map((f) => ({
