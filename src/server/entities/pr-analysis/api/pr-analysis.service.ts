@@ -69,13 +69,17 @@ export const prAnalysisService = {
   },
 
   async getByRepoAndPRNumber(db: DbClient, repoId: number, prNumber: number) {
-    return db.pullRequestAnalysis.findUnique({
+    return db.pullRequestAnalysis.findFirst({
       include: {
         comments: true,
         generatedFixes: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
       where: {
-        repoId_prNumber: { prNumber, repoId },
+        prNumber,
+        repoId,
       },
     });
   },

@@ -139,7 +139,7 @@ export class DocumentGraphLinker {
     if (graph?.nodes != null && Array.isArray(graph.nodes)) {
       for (const node of graph.nodes) {
         const nodeName = (node.label ?? node.name ?? "").toLowerCase();
-        const nodeId = node.id ?? "";
+        const nodeId = node.id;
 
         if (mentionedNames.has(nodeName) || this.isSimilar(nodeName, section.title.toLowerCase())) {
           nodeIds.push(nodeId);
