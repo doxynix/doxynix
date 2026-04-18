@@ -57,7 +57,7 @@ const CommandInput = React.forwardRef<
     {isLoading ? (
       <Spinner className="mr-2 shrink-0 opacity-50" />
     ) : (
-      <Search className="mr-2 size-4 shrink-0 opacity-50" />
+      <Search className="mr-2 shrink-0 opacity-50" />
     )}
     <CommandPrimitive.Input
       ref={ref}

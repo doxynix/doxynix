@@ -66,7 +66,7 @@ const BentoCard = ({
         <Button asChild size="sm" variant="link" className="pointer-events-auto p-0">
           <Link href={href}>
             <span className="text-foreground">{cta}</span>
-            <ArrowRightIcon className="text-foreground ms-2 size-4 rtl:rotate-180" />
+            <ArrowRightIcon className="text-foreground ms-2 rtl:rotate-180" />
           </Link>
         </Button>
       </div>
@@ -80,7 +80,7 @@ const BentoCard = ({
       <Button asChild size="sm" variant="link" className="pointer-events-auto p-0">
         <Link href={href}>
           <span className="text-foreground">{cta}</span>
-          <ArrowRightIcon className="text-foreground ms-2 size-4 rtl:rotate-180" />
+          <ArrowRightIcon className="text-foreground ms-2 rtl:rotate-180" />
         </Link>
       </Button>
     </div>

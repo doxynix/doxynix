@@ -65,7 +65,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
             <div className="space-y-3">
               {data.security.risks.map((item) => (
                 <div key={item} className="flex gap-2 text-xs">
-                  <AlertTriangle className="text-warning size-3.5 shrink-0" />
+                  <AlertTriangle className="text-warning size-3.5" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -78,7 +78,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <GitBranch className="size-4" /> Quality Snapshot
+              <GitBranch /> Quality Snapshot
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
@@ -104,7 +104,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Network className="size-4" /> Architecture Snapshot
+              <Network /> Architecture Snapshot
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
@@ -132,7 +132,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Users className="size-4" /> Onboarding
+              <Users /> Onboarding
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -159,7 +159,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Terminal className="size-4" /> Reference & Routes
+              <Terminal /> Reference & Routes
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -220,7 +220,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <AlertTriangle className="size-4" /> Risks
+              <AlertTriangle /> Risks
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -307,7 +307,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
         <Card className="bg-warning/15">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Zap className="text-warning size-4" /> Performance Bottlenecks
+              <Zap className="text-warning" /> Performance Bottlenecks
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -325,7 +325,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Binary className="size-4" /> Tech Debt Items
+              <Binary /> Tech Debt Items
             </CardTitle>
           </CardHeader>
           <CardContent>

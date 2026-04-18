@@ -42,14 +42,14 @@ export function RepoMapCustomControls() {
               hide ? "pointer-events-none -translate-x-full opacity-0" : "translate-x-0 opacity-100"
             )}
           >
-            <item.icon className="size-4" />
+            <item.icon />
           </Button>
         </AppTooltip>
       ))}
 
       <AppTooltip content="Toggle Controls (T then C)" side="left">
         <Button size="icon" variant="outline" onClick={toggleControls}>
-          {hide ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          {hide ? <EyeOff /> : <Eye />}
         </Button>
       </AppTooltip>
     </Panel>

@@ -55,7 +55,7 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
         onClick={() => markAllAsRead.mutate({ ...filters, search: debouncedSearch })}
         className="flex cursor-pointer"
       >
-        <CheckCheck className="size-4" /> Mark all as read
+        <CheckCheck /> Mark all as read
       </LoadingButton>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
@@ -64,7 +64,7 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
             variant="destructive"
             className="flex cursor-pointer"
           >
-            <Trash2 className="size-4" /> Delete all read
+            <Trash2 /> Delete all read
           </Button>
         </DialogTrigger>
         <DialogContent>

@@ -30,7 +30,7 @@ export function DeleteAccountDialog() {
       title={t("settings_danger_delete_account_dialog_title")}
       trigger={
         <Button variant="destructive" className="w-fit cursor-pointer">
-          {t("settings_danger_delete_account_title")} <Trash2 className="size-4" />
+          {t("settings_danger_delete_account_title")} <Trash2 />
         </Button>
       }
       onConfirm={handleDelete}

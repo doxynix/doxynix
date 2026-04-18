@@ -1,7 +1,5 @@
 "use client";
 
-import { ExternalLinkIcon } from "lucide-react";
-
 import type { UiRepoDetailed } from "@/shared/api/trpc";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
@@ -41,7 +39,7 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
         </Badge>
         <Button asChild variant="outline">
           <ExternalLink href={repo.url} className="hover:text-foreground">
-            <GitHubIcon className="size-4" /> Github <ExternalLinkIcon className="size-4" />
+            <GitHubIcon className="size-4" /> Github
           </ExternalLink>
         </Button>
       </div>

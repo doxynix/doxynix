@@ -25,14 +25,14 @@ export const analyzePrTask = task({
       const startTime = Date.now();
 
       const repo = await prisma.repo.findUnique({
-        select: { userId: true },
+        select: { publicId: true, userId: true },
         where: { id: payload.repoId },
       });
 
       if (repo == null) throw new Error(`Repo with ID ${payload.repoId} not found`);
 
       // Get config
-      const config = await PRConfigService.getConfig(payload.repoId, prisma);
+      const config = await PRConfigService.getConfig(repo.publicId, prisma);
 
       // Update status to ANALYZING
       await prAnalysisService.updateStatus(

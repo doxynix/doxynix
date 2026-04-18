@@ -57,10 +57,10 @@ export function NotificationsRepoFilter() {
           className="cursor-pointer justify-between"
         >
           <div className="flex w-60 items-center gap-2 truncate">
-            <Book className="size-4 shrink-0 opacity-50" />
+            <Book className="opacity-50" />
             <span className="truncate">{label}</span>
           </div>
-          <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
+          <ChevronDown className="ml-2 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="p-0">
@@ -73,7 +73,7 @@ export function NotificationsRepoFilter() {
             <CommandGroup>
               <CommandItem onSelect={() => handleRepoSelect(null)} className="cursor-pointer">
                 <Check
-                  className={cn("mr-1 size-4", filters.owner == null ? "opacity-100" : "opacity-0")}
+                  className={cn("mr-1", filters.owner == null ? "opacity-100" : "opacity-0")}
                 />
                 All repositories
               </CommandItem>
@@ -108,7 +108,7 @@ export function NotificationsRepoFilter() {
                   >
                     <Check
                       className={cn(
-                        "mr-2 size-4",
+                        "mr-2",
                         filters.repo === r.name && filters.owner === r.owner
                           ? "opacity-100"
                           : "opacity-0"

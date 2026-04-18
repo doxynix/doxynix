@@ -128,7 +128,7 @@ export const RepoNode = ({ data }: Props) => {
       <Card className="w-96">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {isGroup ? <Folder className="size-4 fill-current" /> : <File className="h-4 w-4" />}
+            {isGroup ? <Folder className="fill-current" /> : <File className="h-4 w-4" />}
             <span className="flex-1 truncate text-xs font-bold">{label}</span>
             <Badge variant="outline">{data.kind}</Badge>
           </CardTitle>
@@ -140,7 +140,7 @@ export const RepoNode = ({ data }: Props) => {
             (m) =>
               m.show && (
                 <Badge key={m.id} variant="outline">
-                  <m.icon className={cn("size-4 shrink-0", m.color)} />
+                  <m.icon className={cn(m.color)} />
                   <div className="text-muted-foreground flex gap-1">
                     <span className="text-[10px]">{m.val}</span>
                     <span className="text-[10px]">{m.id}</span>

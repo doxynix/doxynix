@@ -44,7 +44,7 @@ export type EvidenceFormattingOptions = {
 /**
  * Result of formatting evidence
  */
-export interface FormattedEvidence {
+export type FormattedEvidence = {
   /** The formatted XML/JSON block */
   content: string;
 
@@ -61,7 +61,7 @@ export interface FormattedEvidence {
 
   /** Whether the content was truncated */
   truncated: boolean;
-}
+};
 
 /**
  * EvidenceFormatter: Manages consistent evidence presentation in prompts

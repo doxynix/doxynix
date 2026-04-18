@@ -7,6 +7,7 @@ import type {
   NormalizedRepositoryFile,
 } from "./evidence-support";
 import { ProjectPolicy } from "./project-policy";
+import { CONFIDENCE_LEVELS } from "./scoring-constants";
 
 export function kindForFile(path: string, categories: string[]): EntrypointKind {
   if (categories.includes("benchmark")) return "benchmark";
@@ -44,7 +45,7 @@ export async function collectFileEvidence(
       ...(ProjectPolicy.isConfigFile(file.path)
         ? [
             {
-              confidence: 90,
+              confidence: CONFIDENCE_LEVELS.configDiscovery,
               kind: file.path.split("/").at(-1) ?? "config",
               path: file.path,
             },

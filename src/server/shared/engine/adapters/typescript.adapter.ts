@@ -1,3 +1,4 @@
+import { ADAPTER_PRIORITIES } from "../core/scoring-constants";
 import { collectTypeScriptSignals } from "../extractors/typescript-signals";
 import type { LanguageAdapter } from "./types";
 
@@ -8,6 +9,6 @@ export const typeScriptAdapter: LanguageAdapter = {
     ),
   id: "typescript-native",
   parse: (file) => collectTypeScriptSignals(file),
-  priority: 300,
+  priority: ADAPTER_PRIORITIES.typescript,
   supportedExtensions: [".cts", ".cjs", ".js", ".jsx", ".mjs", ".mts", ".ts", ".tsx"],
 };

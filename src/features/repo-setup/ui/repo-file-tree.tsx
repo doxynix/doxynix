@@ -71,7 +71,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
       <div className="flex items-end gap-4">
         <div className="flex flex-1 flex-col gap-2">
           <div className="relative">
-            <Search className="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
+            <Search className="text-muted-foreground absolute top-2.5 left-2.5" />
             <Input
               type="search"
               value={state.searchTerm}
@@ -108,7 +108,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
                 onClick={action.onClick}
                 className="h-7 gap-1.5 px-2"
               >
-                <action.icon className="size-4" />
+                <action.icon />
                 {action.label}
               </Button>
             ))}
@@ -122,7 +122,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
                   onClick={action.onClick}
                   className={cn("h-7 gap-1.5 px-2", action.className)}
                 >
-                  <action.icon className="size-4" />
+                  <action.icon />
                   {action.label}
                 </Button>
               );

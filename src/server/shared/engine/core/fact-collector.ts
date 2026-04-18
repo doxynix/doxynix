@@ -14,6 +14,7 @@ import {
   selectRepositoryFrameworkFacts,
 } from "./framework-catalog";
 import { ProjectPolicy } from "./project-policy";
+import { CONFIDENCE_LEVELS } from "./scoring-constants";
 
 const xmlParser = new XMLParser({ ignoreAttributes: false });
 
@@ -80,7 +81,7 @@ export class FactCollector {
         evidence?.routeInventory.source === "openapi") &&
       evidence.routeInventory.sourceFiles.length > 0
     ) {
-      collector.addFact("OpenAPI", "Framework", 92);
+      collector.addFact("OpenAPI", "Framework", CONFIDENCE_LEVELS.openapiSpec);
     }
     for (const config of evidence?.configs ?? []) {
       collector.collectFrameworkFactsFromTokens([config.kind, config.path], config.path, 68);

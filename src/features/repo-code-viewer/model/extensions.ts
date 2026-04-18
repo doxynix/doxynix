@@ -36,6 +36,7 @@ import {
   type DecorationSet,
   type ViewUpdate,
 } from "@codemirror/view";
+import { showMinimap } from "@replit/codemirror-minimap";
 import { color } from "@uiw/codemirror-extensions-color";
 import { hyperLink } from "@uiw/codemirror-extensions-hyper-link";
 
@@ -144,6 +145,17 @@ export const EXTRA_EXTENSIONS: Extension[] = [
 
   todoHighlighter,
 
+  showMinimap.compute(["doc"], (state) => {
+    return {
+      create: (view: EditorView) => {
+        const dom = document.createElement("div");
+        return { dom };
+      },
+      displayText: "characters",
+      showOverlay: "mouse-over",
+    };
+  }),
+
   lineNumbers(),
   highlightActiveLineGutter(),
   highlightSpecialChars(),
@@ -195,6 +207,9 @@ export const EXTRA_EXTENSIONS: Extension[] = [
       height: "100%",
     },
     "&.cm-focused .cm-cursor": { borderLeftColor: "var(--foreground)" },
+    "&:hover .cm-minimap-container": {
+      opacity: "1",
+    },
     ".close-btn": {
       "&:hover": {
         backgroundColor: "color-mix(in srgb, var(--status-error), transparent 90%)",
@@ -208,6 +223,7 @@ export const EXTRA_EXTENSIONS: Extension[] = [
       color: "var(--text-primary)",
     },
     ".cm-cursor": { borderLeftColor: "var(--primary)", borderLeftWidth: "2px" },
+
     ".cm-gutters": {
       backgroundColor: "var(--surface-subtle)",
       borderRight: "1px solid var(--border-soft)",
@@ -226,7 +242,23 @@ export const EXTRA_EXTENSIONS: Extension[] = [
       padding: "6px 10px",
     },
     ".cm-mergeView": { height: "100%" },
+
     ".cm-mergeView .cm-scroller": { overflow: "auto" },
+
+    ".cm-minimap-container": {
+      backgroundColor: "var(--surface-subtle)",
+      borderLeft: "1px solid var(--border-soft)",
+      opacity: "0.7",
+      transition: "opacity 0.2s",
+      width: "80px",
+    },
+    ".cm-minimap-gutter": {
+      backgroundColor: "transparent",
+    },
+    ".cm-minimap-overlay": {
+      backgroundColor: "color-mix(in srgb, var(--primary), transparent 85%)",
+      border: "1px solid color-mix(in srgb, var(--primary), transparent 50%)",
+    },
     ".cm-note-marker": {
       backgroundColor: "color-mix(in srgb, var(--status-info), transparent 80%)",
       border: "1px solid color-mix(in srgb, var(--status-info), transparent 60%)",

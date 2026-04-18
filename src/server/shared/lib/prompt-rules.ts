@@ -98,7 +98,7 @@ export const BehavioralRules = {
   primaryArtifact: `This is a **primary artifact**. Prefer precise reference over broad prose. It will be delivered to users as the source of truth.`,
 
   /** Rule: Secondary artifact handling */
-  secondaryArtifact: `This is a **secondary compatibility document**. Keep it useful, but do not behave as if it is the core product artifact.`,
+  secondaryArtifact: `This is a **compatibility document**. Keep it useful, but do not behave as if it is the core product artifact.`,
 };
 
 // =============================================================================

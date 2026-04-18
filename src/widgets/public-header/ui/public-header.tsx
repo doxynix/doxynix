@@ -32,7 +32,7 @@ export function PublicHeader() {
           {publicHeaderMenu.map((item) => (
             <Button key={item.href} asChild variant="ghost">
               <Link href={item.href as Route} className="flex items-center gap-2">
-                <item.icon className="size-4" />
+                <item.icon />
                 {item.label}
               </Link>
             </Button>
@@ -62,7 +62,7 @@ export function PublicHeader() {
                       <SheetClose key={item.href} asChild>
                         <Button asChild variant="ghost" className="justify-start">
                           <Link href={item.href as Route} className="flex items-center gap-2">
-                            <item.icon className="size-4" />
+                            <item.icon />
                             {item.label}
                           </Link>
                         </Button>

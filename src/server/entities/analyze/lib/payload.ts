@@ -1,8 +1,10 @@
 import { DocType } from "@prisma/client";
 import { uniqBy } from "es-toolkit";
+import { z } from "zod";
 
 import { aiSchema, type AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
+import { logger } from "@/server/shared/infrastructure/logger";
 import type { LatestCompletedAnalysis } from "@/server/shared/infrastructure/repo-snapshots";
 
 import type { StoredDocument, WriterStatus } from "./structure-shared";
@@ -11,7 +13,18 @@ export function coerceAnalysisPayload(analysis: LatestCompletedAnalysis | null |
   if (analysis == null || analysis.metricsJson == null || analysis.resultJson == null) return null;
 
   const parsed = aiSchema.safeParse(analysis.resultJson);
-  if (!parsed.success) return null;
+  if (!parsed.success) {
+    logger.warn({
+      error: z.treeifyError(parsed.error),
+      id: analysis.publicId,
+      msg: "Zod mismatch",
+    });
+    return {
+      aiResult: analysis.resultJson as AIResult,
+      analysis,
+      metrics: analysis.metricsJson,
+    };
+  }
 
   return {
     aiResult: parsed.data,

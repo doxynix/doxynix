@@ -42,7 +42,7 @@ export function SidebarLink({
         rel={blank ? "noopener noreferrer" : undefined}
         target={blank ? "_blank" : undefined}
       >
-        <Icon className="size-3.5 shrink-0" />
+        <Icon className="size-3.5" />
         <span className="truncate">{title}</span>
 
         <div className="ml-auto flex items-center gap-2">

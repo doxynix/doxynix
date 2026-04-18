@@ -3,6 +3,7 @@ import { percentile } from "../../lib/math-utils";
 import type { FileSignals, LanguageMetric } from "../core/discovery.types";
 import type { RepoMetrics } from "../core/metrics.types";
 import { ProjectPolicy } from "../core/project-policy";
+import { COMPLEXITY_SCORING, SCHEMA_LIMITS } from "../core/scoring-constants";
 
 export type FileScanResult = {
   comments: number;
@@ -104,7 +105,7 @@ export function aggregateScanResults(results: FileScanResult[]): ScanAggregation
       rankedComplexities
         .filter((item) => ProjectPolicy.isUsefulComplexityCandidate(item.path))
         .map((item) => item.score),
-      0.8
+      COMPLEXITY_SCORING.percentileThreshold
     )
   );
   const focusedComplexFiles = rankedComplexities
@@ -116,7 +117,7 @@ export function aggregateScanResults(results: FileScanResult[]): ScanAggregation
     .filter((path) => ProjectPolicy.isUsefulComplexityCandidate(path));
   const mostComplexFiles = (
     focusedComplexFiles.length > 0 ? focusedComplexFiles : fallbackComplexFiles
-  ).slice(0, 12);
+  ).slice(0, SCHEMA_LIMITS.maxFilesToSkeletonize);
 
   return {
     analysisCoverage: buildAnalysisCoverage(results, results.length),

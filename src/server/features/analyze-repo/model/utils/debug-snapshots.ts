@@ -1,9 +1,6 @@
-import { DocType } from "@prisma/client";
+import type { DocType } from "@prisma/client";
 
-import {
-  PRIMARY_DOC_TYPES,
-  SECONDARY_DOC_TYPES,
-} from "@/server/features/generate-docs/lib/doc-priority";
+import { ALL_DOC_TYPES } from "@/server/features/generate-docs/lib/doc-priority";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 
 import type { buildStageContextPack } from "../context-manager";
@@ -12,7 +9,6 @@ type DocumentationInputSnapshot = NonNullable<RepoMetrics["documentationInput"]>
 type WriterPayload = {
   payload: string;
   sections: readonly string[];
-  tier: "primary" | "secondary";
 };
 
 export function summarizeSectionForDebug(
@@ -48,37 +44,24 @@ export function buildWriterPlanDebugSnapshot(
   requestedDocs: DocType[]
 ) {
   const requestedSet = new Set(requestedDocs);
-  const summarizeDoc = (type: DocType, input: WriterPayload) => ({
-    payloadSize: input.payload.length,
-    requested: requestedSet.has(type),
-    sections: [...input.sections],
-    tier: input.tier,
-  });
 
-  return {
-    primary: Object.fromEntries(
-      PRIMARY_DOC_TYPES.map((type) => [
+  const docs = Object.fromEntries(
+    ALL_DOC_TYPES.map((type) => {
+      const key = type.toLowerCase() as keyof typeof writerInputs;
+      const input = writerInputs[key];
+
+      return [
         type,
-        summarizeDoc(
-          type,
-          type === DocType.README
-            ? writerInputs.readme
-            : type === DocType.API
-              ? writerInputs.api
-              : writerInputs.architecture
-        ),
-      ])
-    ),
-    secondary: Object.fromEntries(
-      SECONDARY_DOC_TYPES.map((type) => [
-        type,
-        summarizeDoc(
-          type,
-          type === DocType.CONTRIBUTING ? writerInputs.contributing : writerInputs.changelog
-        ),
-      ])
-    ),
-  };
+        {
+          payloadSize: input.payload.length,
+          requested: requestedSet.has(type),
+          sections: input.sections,
+        },
+      ];
+    })
+  );
+
+  return { docs };
 }
 
 export function buildWriterContextSnapshot(

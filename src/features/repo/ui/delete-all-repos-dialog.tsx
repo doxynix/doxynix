@@ -39,7 +39,7 @@ export function DeleteAllReposDialog({ hasRepos }: Readonly<Props>) {
       title={`${t("settings_danger_delete_all_repos")}?`}
       trigger={
         <Button disabled={!hasRepos} variant="destructive" className="w-fit cursor-pointer">
-          {t("settings_danger_delete_all_repos")} <Trash2 className="size-4" />
+          {t("settings_danger_delete_all_repos")} <Trash2 />
         </Button>
       }
       onConfirm={handleDelete}

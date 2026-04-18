@@ -87,7 +87,7 @@ export function ProfileDetailsForm({
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <User2 className="text-muted-foreground absolute top-2.5 left-3 size-4" />
+                  <User2 className="text-muted-foreground absolute top-2.5 left-3" />
                   <Input
                     disabled={updateProfile.isPending}
                     placeholder={t("settings_profile_personal_information_placeholder")}
@@ -109,14 +109,14 @@ export function ProfileDetailsForm({
               <FormLabel className="text-muted-foreground">Email</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Mail className="text-muted-foreground absolute top-2.5 left-3 size-4" />
+                  <Mail className="text-muted-foreground absolute top-2.5 left-3" />
                   <Input
                     {...field}
                     disabled
                     placeholder="Your email"
                     className="pl-9 text-sm sm:text-base"
                   />
-                  <Lock className="text-muted-foreground absolute top-2.5 right-3 size-4" />
+                  <Lock className="text-muted-foreground absolute top-2.5 right-3" />
                 </div>
               </FormControl>
             </FormItem>

@@ -79,7 +79,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
               id="lang-label"
               className="text-muted-foreground flex items-center gap-2 text-sm"
             >
-              <Languages className="size-4" />
+              <Languages />
               Output Language
             </Label>
             <Select value={state.analysisLocale} onValueChange={actions.setAnalysisLocale}>
@@ -106,7 +106,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
 
         <div className="space-y-3">
           <Label className="text-muted-foreground flex items-center gap-2 text-sm">
-            <FileText className="size-4" />
+            <FileText />
             Documentation Types
           </Label>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -139,7 +139,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                           : "bg-surface-hover text-muted-foreground border-border"
                       )}
                     >
-                      <opt.icon className="size-4" />
+                      <opt.icon />
                     </div>
                     <Checkbox
                       checked={isSelected}
@@ -161,7 +161,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
 
         <div className="space-y-3">
           <Label className="text-muted-foreground flex items-center gap-2 text-sm">
-            <MessageSquareText className="size-4" />
+            <MessageSquareText />
             Custom Instructions (optional)
           </Label>
           <Textarea
@@ -178,7 +178,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
             onClick={actions.handleStartAnalysis}
             className="w-fit cursor-pointer gap-2"
           >
-            <Play className="size-4" />
+            <Play />
             Start Analysis
           </Button>
         </div>

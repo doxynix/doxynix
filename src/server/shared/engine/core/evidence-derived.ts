@@ -7,6 +7,7 @@ import type {
 } from "./discovery.types";
 import { kindForFile } from "./evidence-collector";
 import { ProjectPolicy } from "./project-policy";
+import { ARCHITECTURE_WEIGHTS, CONFIDENCE_LEVELS } from "./scoring-constants";
 
 function dedupeEntrypoints(entrypoints: EntrypointRef[]) {
   const seen = new Map<string, EntrypointRef>();
@@ -152,8 +153,14 @@ export function buildDependencyHotspots(
       path: module.path,
     }))
     .sort((left, right) => {
-      const leftScore = left.inbound * 3 + left.outbound + left.exports;
-      const rightScore = right.inbound * 3 + right.outbound + right.exports;
+      const leftScore =
+        left.inbound * ARCHITECTURE_WEIGHTS.inboundMultiplier +
+        left.outbound * ARCHITECTURE_WEIGHTS.outboundMultiplier +
+        left.exports * ARCHITECTURE_WEIGHTS.exportMultiplier;
+      const rightScore =
+        right.inbound * ARCHITECTURE_WEIGHTS.inboundMultiplier +
+        right.outbound * ARCHITECTURE_WEIGHTS.outboundMultiplier +
+        right.exports * ARCHITECTURE_WEIGHTS.exportMultiplier;
       return rightScore - leftScore;
     });
 }
@@ -171,9 +178,9 @@ export function buildHotspotSignals(
       const outbound = graph.get(module.path)?.size ?? 0;
       const complexity = complexityByFile.get(module.path) ?? 0;
       const score =
-        complexity * 1.15 +
-        inbound * 14 +
-        outbound * 3 +
+        complexity * ARCHITECTURE_WEIGHTS.complexityOffset +
+        inbound * ARCHITECTURE_WEIGHTS.riskInboundMultiplier +
+        outbound * ARCHITECTURE_WEIGHTS.riskOutboundMultiplier +
         module.apiSurface * 4 +
         module.exports * 2;
 
@@ -181,7 +188,7 @@ export function buildHotspotSignals(
         categories: module.categories,
         churnScore: 0,
         complexity,
-        confidence: 85,
+        confidence: CONFIDENCE_LEVELS.tsInferred,
         inbound,
         outbound,
         path: module.path,

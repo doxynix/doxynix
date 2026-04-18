@@ -7,7 +7,6 @@ type DocumentationInputSnapshot = NonNullable<RepoMetrics["documentationInput"]>
 type WriterPayload = {
   payload: string;
   sections: readonly string[];
-  tier: "primary" | "secondary";
 };
 
 export function serializeForWriter(value: unknown): string {
@@ -25,17 +24,14 @@ export function buildWriterSectionPayloads(
     api: {
       payload: serializeForWriter(documentationInput.sections.api_reference),
       sections: DOC_SECTION_DEPENDENCIES[DocType.API],
-      tier: "primary",
     } satisfies WriterPayload,
     architecture: {
       payload: serializeForWriter(documentationInput.sections.architecture),
       sections: DOC_SECTION_DEPENDENCIES[DocType.ARCHITECTURE],
-      tier: "primary",
     } satisfies WriterPayload,
     changelog: {
       payload: "",
       sections: DOC_SECTION_DEPENDENCIES[DocType.CHANGELOG],
-      tier: "secondary",
     } satisfies WriterPayload,
     contributing: {
       payload: serializeForWriter({
@@ -43,7 +39,6 @@ export function buildWriterSectionPayloads(
         overview: documentationInput.sections.overview,
       }),
       sections: DOC_SECTION_DEPENDENCIES[DocType.CONTRIBUTING],
-      tier: "secondary",
     } satisfies WriterPayload,
     readme: {
       payload: serializeForWriter({
@@ -51,7 +46,6 @@ export function buildWriterSectionPayloads(
         overview: documentationInput.sections.overview,
       }),
       sections: DOC_SECTION_DEPENDENCIES[DocType.README],
-      tier: "primary",
     } satisfies WriterPayload,
   };
 }

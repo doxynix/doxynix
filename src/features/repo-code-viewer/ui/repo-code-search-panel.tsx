@@ -95,7 +95,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
     <div className="bg-card border-border animate-in slide-in-from-top-2 flex flex-wrap items-center justify-between gap-4 border-b px-3 py-2 font-sans text-xs duration-200">
       <div className="flex items-center gap-2">
         <div className="relative">
-          <Search className="text-muted-foreground absolute top-2 left-2.5 size-4" />
+          <Search className="text-muted-foreground absolute top-2 left-2.5" />
           <Input
             ref={inputRef}
             value={search}
@@ -154,7 +154,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           onClick={() => findPrevious(view)}
           className="h-8 w-8 p-0"
         >
-          <MoveLeft className="size-4 rotate-90" />
+          <MoveLeft className="rotate-90" />
         </RepoCodeActionButton>
 
         <RepoCodeActionButton
@@ -162,7 +162,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           onClick={() => findNext(view)}
           className="h-8 w-8 p-0"
         >
-          <MoveLeft className="size-4 -rotate-90" />
+          <MoveLeft className="-rotate-90" />
         </RepoCodeActionButton>
       </div>
 
@@ -179,7 +179,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           onClick={() => replaceNext(view)}
           className="h-8 px-2"
         >
-          <Replace className="mr-1.5 size-4" />
+          <Replace className="mr-1.5" />
           Replace
         </RepoCodeActionButton>
 
@@ -188,7 +188,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           onClick={() => replaceAll(view)}
           className="h-8 px-2"
         >
-          <ReplaceAll className="mr-1.5 size-4" />
+          <ReplaceAll className="mr-1.5" />
           All
         </RepoCodeActionButton>
 
@@ -197,7 +197,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           onClick={onClose}
           className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 ml-2 h-8 w-8 p-0"
         >
-          <X className="size-4" />
+          <X />
         </RepoCodeActionButton>
       </div>
     </div>

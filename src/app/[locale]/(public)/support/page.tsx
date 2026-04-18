@@ -129,7 +129,7 @@ export default async function SupportPage() {
                 </div>
                 <div className="text-foreground flex items-center gap-2 pt-2 text-sm font-medium transition-transform group-hover:translate-x-1">
                   {channel.action}
-                  <MoveLeft className="size-4 rotate-180" />
+                  <MoveLeft className="rotate-180" />
                 </div>
               </div>
             </a>

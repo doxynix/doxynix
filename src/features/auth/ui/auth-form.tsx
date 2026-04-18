@@ -237,7 +237,7 @@ export function AuthForm() {
               <div key={item.title} className="bg-card/70 border-border/70 rounded-2xl border p-5">
                 <div className="flex items-center gap-3">
                   <span className="bg-primary/10 border-border/70 flex size-9 items-center justify-center rounded-full border">
-                    <item.icon className="text-foreground size-4" />
+                    <item.icon className="text-foreground" />
                   </span>
                   <p className="text-foreground text-sm font-medium">{item.title}</p>
                 </div>

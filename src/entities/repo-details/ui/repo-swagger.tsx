@@ -15,7 +15,7 @@ export function RepoSwagger({ spec }: Readonly<{ spec: string }>) {
   };
 
   return (
-    <div className="bg-background relative flex h-full min-h-0 w-full flex-col rounded-xl border shadow-inner">
+    <div className="bg-background relative flex h-full min-h-0 w-full flex-col rounded-xl">
       <ApiReferenceReact configuration={config} />
 
       <style global jsx>{`

@@ -26,7 +26,7 @@ export function AnalyticsWidgets() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base font-semibold">
-            <FileCode2 className="text-muted-foreground size-4" />
+            <FileCode2 className="text-muted-foreground" />
             {t("languages_distribution")}
           </CardTitle>
         </CardHeader>
@@ -71,7 +71,7 @@ export function AnalyticsWidgets() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base font-semibold">
-            <Clock className="text-muted-foreground size-4" />
+            <Clock className="text-muted-foreground" />
             {t("recent_activity")}
           </CardTitle>
         </CardHeader>
@@ -86,10 +86,8 @@ export function AnalyticsWidgets() {
                   className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    {activity.status === "DONE" && <CheckCircle2 className="text-success size-4" />}
-                    {activity.status === "FAILED" && (
-                      <XCircle className="text-destructive size-4" />
-                    )}
+                    {activity.status === "DONE" && <CheckCircle2 className="text-success" />}
+                    {activity.status === "FAILED" && <XCircle className="text-destructive" />}
                     {(activity.status === "PENDING" || activity.status === "NEW") && (
                       <Spinner className="text-warning" />
                     )}

@@ -1,26 +1,26 @@
-export interface DocumentSection {
+export type DocumentSection = {
   content: string;
   endLine?: number;
   graphNodeIds: string[];
   id: string;
   startLine?: number;
   title: string;
-}
+};
 
-export interface DocumentWithSections {
+export type DocumentWithSections = {
   sections: DocumentSection[];
   type: string;
   version: string;
-}
+};
 
-export interface GraphNode {
+export type GraphNode = {
   id: string;
   label?: string;
   name?: string;
-}
-export interface DependencyGraph {
+};
+export type DependencyGraph = {
   nodes: GraphNode[];
-}
+};
 
 /**
  * Links documentation sections to dependency graph nodes

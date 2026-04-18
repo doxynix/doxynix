@@ -44,10 +44,10 @@ export function RepoBranchSelector({
           className="w-full justify-between font-normal"
         >
           <div className="flex items-center gap-2 truncate">
-            <GitBranch className="size-3 shrink-0" />
+            <GitBranch className="size-3" />
             {selectedBranch || "Select branch..."}
           </div>
-          <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
+          <ChevronDown className="ml-2 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="p-0">
@@ -77,9 +77,7 @@ export function RepoBranchSelector({
                       setOpen(false);
                     }}
                   >
-                    <Check
-                      className={cn("size-4", selectedBranch === b ? "opacity-100" : "opacity-0")}
-                    />
+                    <Check className={cn(selectedBranch === b ? "opacity-100" : "opacity-0")} />
                     {b}
                     {defaultBranch === b && <Badge variant="outline">default</Badge>}
                   </CommandItem>

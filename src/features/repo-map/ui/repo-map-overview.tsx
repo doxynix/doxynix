@@ -19,7 +19,7 @@ export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {
       <div className="flex items-center gap-2">
         {brief.analysisRef?.commitSha != null && (
           <Badge variant="outline" className="gap-1 font-mono text-xs">
-            <GitCommit className="size-4" />
+            <GitCommit />
             {brief.analysisRef.commitSha.slice(0, 7)}
             <CopyButton
               value={brief.analysisRef.commitSha}
@@ -34,7 +34,7 @@ export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2 rounded-xl border p-4">
           <div className="flex items-center gap-1 text-xs">
-            <Layers className="size-4" /> Architecture Style
+            <Layers /> Architecture Style
           </div>
           {brief.overview.architectureStyle != null && (
             <p className="text-sm">{brief.overview.architectureStyle || "Standard / Layered"}</p>
@@ -43,7 +43,7 @@ export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {
 
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2 text-xs">
-            <FileText className="size-4" /> Stack
+            <FileText /> Stack
           </div>
           <div className="flex flex-wrap gap-2">
             {brief.overview.stack.map((path) => (
@@ -56,7 +56,7 @@ export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-xs">
-            <FileText className="size-4" /> Primary modules
+            <FileText /> Primary modules
           </div>
           <div className="gap-2">
             {brief.overview.primaryModules.map((path) => (
@@ -66,7 +66,7 @@ export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {
                 onClick={() => onNavigate(path)}
                 className="p-2 text-xs"
               >
-                <FileIcon className="size-4" />
+                <FileIcon />
                 <span className="truncate">{path.split("/").pop()}</span>
               </Button>
             ))}
@@ -82,7 +82,7 @@ export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {
 
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2 text-xs">
-            <FileText className="size-4" /> Resources
+            <FileText /> Resources
           </div>
           <div className="flex flex-wrap gap-2">
             {brief.overview.primaryEntrypoints.map((path) => (
@@ -92,7 +92,7 @@ export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {
                 onClick={() => onNavigate(path)}
                 className="p-2 text-xs"
               >
-                <FileIcon className="size-4" />
+                <FileIcon />
                 <span className="truncate">{path.split("/").pop()}</span>
               </Button>
             ))}

@@ -88,7 +88,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
                       aria-label={`Settings for ${repo.name}`}
                       className="text-muted-foreground hover:text-foreground flex size-6 items-center justify-center opacity-0 transition-all not-md:opacity-100 group-hover:opacity-100"
                     >
-                      <Settings className="size-4" />
+                      <Settings />
                     </Link>
                   </AppTooltip>
                 </div>

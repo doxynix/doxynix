@@ -3,11 +3,9 @@ import ts from "typescript";
 
 import type { TsStaticHint } from "../../types";
 import { normalizeRepoPath } from "../core/common";
+import { COMPLEXITY_SCORING } from "../core/scoring-constants";
 
 const TS_LIKE = new Set([".cjs", ".cts", ".js", ".jsx", ".mjs", ".mts", ".ts", ".tsx"]);
-
-const LONG_FN_LINES = 80;
-const MANY_PARAMS = 7;
 
 type VisitContext = {
   hints: TsStaticHint[];
@@ -33,9 +31,9 @@ const visitNode = (node: ts.Node, context: VisitContext) => {
     const start = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
     const end = sourceFile.getLineAndCharacterOfPosition(node.getEnd());
     const lineSpan = end.line - start.line + 1;
-    if (lineSpan >= LONG_FN_LINES) {
+    if (lineSpan >= COMPLEXITY_SCORING.lineCountThreshold) {
       hints.push({
-        detail: `Function spans ~${lineSpan} lines (threshold ${LONG_FN_LINES}).`,
+        detail: `Function spans ~${lineSpan} lines (threshold ${COMPLEXITY_SCORING.lineCountThreshold}).`,
         kind: "long-function",
         line: start.line + 1,
         path: normalizedPath,
@@ -43,9 +41,9 @@ const visitNode = (node: ts.Node, context: VisitContext) => {
     }
 
     const paramCount = node.parameters.length;
-    if (paramCount >= MANY_PARAMS) {
+    if (paramCount >= COMPLEXITY_SCORING.paramCountThreshold) {
       hints.push({
-        detail: `Function has ${paramCount} parameters (threshold ${MANY_PARAMS - 1}).`,
+        detail: `Function has ${paramCount} parameters (threshold ${COMPLEXITY_SCORING.paramCountThreshold - 1}).`,
         kind: "many-params",
         line: start.line + 1,
         path: normalizedPath,

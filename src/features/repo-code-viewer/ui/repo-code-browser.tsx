@@ -4,17 +4,32 @@ import React, { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { EditorView } from "@uiw/react-codemirror";
 import { saveAs } from "file-saver";
-import { Code, Download, Edit3, FileCode, Save, Sparkles, X } from "lucide-react";
+import {
+  Code,
+  Download,
+  Edit3,
+  FileCode,
+  FileText,
+  Loader2,
+  Save,
+  Sparkles,
+  X,
+  Zap,
+} from "lucide-react";
+import { useSession } from "next-auth/react";
 import type { TreeApi } from "react-arborist";
 import { toast } from "sonner";
 
 import { trpc, type FileContent } from "@/shared/api/trpc";
+import { Button } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import { RepoStatusBar, type EditorStats } from "@/entities/repo-details";
 import type { FileNode } from "@/entities/repo-setup";
+
+import { FixAnalysisModal } from "@/features/repo-pulls/ui/repo-fix-analysis-dialog";
 
 import { RepoCodeActionButton } from "./repo-code-action-button";
 import { RepoSearchPanel } from "./repo-code-search-panel";
@@ -33,10 +48,16 @@ type Props = {
 };
 
 export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Props>) {
+  const { data: session } = useSession();
+  const userId = session?.user.id;
   const [mode, setMode] = useState<"edit" | "view">("view");
   const [view, setView] = useState<EditorView | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [showDiff, setShowDiff] = useState(false);
+  const [isAuditDismissed, setIsAuditDismissed] = useState(false);
+  const [isFixModalOpen, setIsFixModalOpen] = useState(false);
 
   const [localContent, setLocalContent] = useState(fileData.content);
 
@@ -50,17 +71,36 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     totalMatches: 0,
   });
 
-  const analyzeMutation = trpc.repoAnalysis.analyzeFile.useMutation({
-    onSuccess: (data) => toast.success(`Audit started! Job: ${data.jobId}`),
+  const { data: aiResult, isFetching } = trpc.repoAnalysis.getFileActionResult.useQuery(
+    { path },
+    { enabled: !!path && !!userId }
+  );
+
+  useEffect(() => {
+    if (!isFetching && aiResult) {
+      setIsAiLoading(false);
+      if (aiResult.action === "document-file-preview") {
+        setShowDiff(true);
+      }
+    }
+  }, [aiResult, isFetching]);
+
+  const auditMutation = trpc.repoAnalysis.quickFileAudit.useMutation({
+    onError: () => setIsAiLoading(false),
+    onMutate: () => setIsAiLoading(true),
+    onSuccess: () => toast.info("Audit started..."),
   });
 
   const documentMutation = trpc.repoAnalysis.documentFile.useMutation({
-    onSuccess: (data) => toast.success(`Documentation task queued: ${data.jobId}`),
+    onError: () => setIsAiLoading(false),
+    onMutate: () => setIsAiLoading(true),
+    onSuccess: () => toast.info("Documentation generation started..."),
   });
 
   React.useEffect(() => {
     setLocalContent(fileData.content);
     setMode("view");
+    // setShowDiff(false);
   }, [path, fileData.content]);
 
   useEffect(() => {
@@ -85,6 +125,10 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isSearchOpen, view]);
 
+  useEffect(() => {
+    setIsAuditDismissed(false);
+  }, [path]);
+
   const pathParts = path.split("/");
 
   const handleFolderClick = (index: number) => {
@@ -105,6 +149,22 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     saveAs(new Blob([localContent], { type: "text/plain;charset=utf-8" }), fileName);
   };
 
+  const handleAudit = () => {
+    setShowDiff(false);
+    auditMutation.mutate({ content: localContent, path, repoId });
+  };
+
+  const handleDocument = () => {
+    documentMutation.mutate({ content: localContent, path, repoId });
+  };
+
+  const pinMutation = trpc.repoAnalysis.pinAuditToDocs.useMutation({
+    onSuccess: () => {
+      toast.success("Audit saved to project documentation");
+    },
+    onError: (err) => toast.error("Failed to save: " + err.message),
+  });
+
   const VIEW_ACTIONS = [
     {
       icon: Download,
@@ -112,9 +172,9 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
       tooltipText: "Download file",
     },
     {
-      disabled: analyzeMutation.isPending,
-      icon: Sparkles,
-      onClick: () => analyzeMutation.mutate({ content: localContent, path, repoId }),
+      disabled: isAiLoading || auditMutation.isPending,
+      icon: isAiLoading ? Loader2 : Sparkles,
+      onClick: handleAudit,
       tooltipText: "Quick AI Audit",
     },
     {
@@ -123,9 +183,9 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
       tooltipText: "Edit file",
     },
     {
-      disabled: documentMutation.isPending,
-      icon: Code,
-      onClick: () => documentMutation.mutate({ content: localContent, path, repoId }),
+      disabled: isAiLoading || documentMutation.isPending,
+      icon: isAiLoading ? Loader2 : FileText,
+      onClick: () => handleDocument,
       tooltipText: "Document file",
     },
     {
@@ -170,7 +230,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     <div ref={containerRef} className="bg-background flex h-full flex-col">
       <div className="border-border flex flex-col justify-between gap-4 border-b px-4 py-2">
         <div className="flex items-center gap-2 overflow-hidden">
-          <FileCode className="text-muted-foreground size-4 shrink-0" />
+          <FileCode className="text-muted-foreground" />
           <AppBreadcrumbs
             items={breadcrumbItems}
             listClassName="sm:gap-1"
@@ -210,18 +270,72 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
         <RepoSearchPanel stats={editorStats} view={view} onClose={() => setIsSearchOpen(false)} />
       )}
 
+      {aiResult?.action === "quick-file-audit" && !showDiff && !isAuditDismissed && (
+        <div className="bg-popover animate-in fade-in slide-in-from-right-4 absolute top-20 right-6 z-50 w-96 rounded-xl border p-4 shadow-2xl">
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-xs font-bold">Audit Result</h3>
+            <Button size="icon" onClick={() => setIsAuditDismissed(true)} variant="ghost">
+              <X />
+            </Button>
+          </div>
+          <article
+            dangerouslySetInnerHTML={{ __html: aiResult.html }}
+            className="prose prose-invert text-foreground max-h-120 overflow-y-auto text-xs"
+          />
+          <div className="mt-4 flex items-center gap-1 border-t pt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              disabled={pinMutation.isPending}
+              onClick={() => pinMutation.mutate({ path, repoId })}
+            >
+              {pinMutation.isPending ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : (
+                <Save className="size-3" />
+              )}
+              Pin to Docs
+            </Button>
+            <Button className="w-full" size="sm" onClick={() => setIsFixModalOpen(true)}>
+              <Zap className="size-3" />
+              Fix with AI
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="relative flex-1 overflow-hidden">
         <Editor
-          value={localContent}
+          value={showDiff && aiResult?.content ? aiResult.content : localContent}
+          compareValue={fileData.content}
           initialValue={fileData.content}
           meta={fileData.meta}
           path={path}
           readOnly={mode === "view"}
+          showDiff={showDiff}
           onChange={setLocalContent}
           onStats={setEditorStats}
           onViewCreated={setView}
         />
       </div>
+
+      {isFixModalOpen && (
+        <FixAnalysisModal
+          open={isFixModalOpen}
+          onOpenChange={setIsFixModalOpen}
+          repoId={repoId}
+          analysisId={aiResult?.analysisRef?.analysisId ?? ""}
+          findings={[
+            {
+              filePath: path,
+              line: 1,
+              findingType: "performance",
+              body: aiResult?.content ?? "",
+            },
+          ]}
+        />
+      )}
 
       <RepoStatusBar meta={fileData.meta} readOnly={mode === "view"} stats={editorStats} />
     </div>

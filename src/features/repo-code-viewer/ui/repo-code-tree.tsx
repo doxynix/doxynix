@@ -90,7 +90,7 @@ export function RepoCodeTree({
               onClick={action.onClick}
               className="gap-1.5 px-2"
             >
-              <action.icon className="size-4" />
+              <action.icon />
               {action.label}
             </Button>
           ))}

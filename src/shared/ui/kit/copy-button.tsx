@@ -14,6 +14,7 @@ type CopyButtonProps = {
   tooltipSide?: "bottom" | "left" | "right" | "top";
   tooltipText?: string;
   value: string;
+  disabled?: boolean;
 };
 
 export function CopyButton({
@@ -22,6 +23,7 @@ export function CopyButton({
   tooltipSide,
   tooltipText = "Copy ID",
   value,
+  disabled,
 }: Readonly<CopyButtonProps>) {
   const { copy, isCopied } = useCopyToClipboard();
 
@@ -40,6 +42,7 @@ export function CopyButton({
       <Button
         type="button"
         size="icon"
+        disabled={disabled}
         variant="ghost"
         aria-label={isCopied ? successText : tooltipText}
         onClick={handleCopy}
@@ -51,7 +54,7 @@ export function CopyButton({
           className
         )}
       >
-        {isCopied ? <Check className="size-4" /> : <Copy className="size-4" />}
+        {isCopied ? <Check /> : <Copy />}
         <span aria-live="polite" className="sr-only">
           {isCopied ? successText : ""}
         </span>
