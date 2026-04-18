@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "1.26.15",
+  "version": "1.26.16",
   "license": "AGPL-3.0-only",
   "private": true,
   "lint-staged": {
