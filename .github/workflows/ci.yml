@@ -248,7 +248,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:18
+        image: postgres:18@sha256:52e6ffd11fddd081ae63880b635b2a61c14008c17fc98cdc7ce5472265516dd0
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
@@ -367,7 +367,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:18
+        image: postgres:18@sha256:52e6ffd11fddd081ae63880b635b2a61c14008c17fc98cdc7ce5472265516dd0
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
@@ -430,7 +430,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:18
+        image: postgres:18@sha256:52e6ffd11fddd081ae63880b635b2a61c14008c17fc98cdc7ce5472265516dd0
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
@@ -609,7 +609,7 @@ jobs:
 
       - name: "notify vercel"
         if: always()
-        uses: "vercel/repository-dispatch/actions/status@v1"
+        uses: "vercel/repository-dispatch/actions/status@30f760c6640485cd92f8c785ef361382555fb712" # v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           name: "Vercel - doxynix: notify vercel"
