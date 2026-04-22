@@ -208,8 +208,8 @@ importers:
         specifier: 5.99.2
         version: 5.99.2(react@19.2.5)
       '@to-skills/typedoc':
-        specifier: 0.11.4
-        version: 0.11.4(typedoc@0.28.19(typescript@6.0.3))
+        specifier: 0.12.0
+        version: 0.12.0(typedoc@0.28.19(typescript@6.0.3))
       '@trigger.dev/sdk':
         specifier: 4.4.4
         version: 4.4.4(ai@6.0.168(zod@4.3.6))(zod@4.3.6)
@@ -5348,11 +5348,11 @@ packages:
   '@textlint/types@15.5.4':
     resolution: {integrity: sha512-mY28j2U7nrWmZbxyKnRvB8vJxJab4AxqOobLfb6iozrLelJbqxcOTvBQednadWPfAk9XWaZVMqUr9Nird3mutg==}
 
-  '@to-skills/core@0.10.3':
-    resolution: {integrity: sha512-xPQsfY30rrIZThu13d/AFzUnXNySPC1hG+6xbnvEe3Z1ZZZgHc4u8KP+IcrAa/YX1gKbkr4x9Bog2tZTDrYYxw==}
+  '@to-skills/core@0.11.0':
+    resolution: {integrity: sha512-7uwBJprTJBZO5pFEYz2A77X1bQuqtUr5TIdz084S0RYcf2SYc8yJAcA/ZY0P4ncY8OVeAxueOnOkCQYo2pYwQA==}
 
-  '@to-skills/typedoc@0.11.4':
-    resolution: {integrity: sha512-FFGhyx/tEtzbQQxNFGGdbLO8tNXtwwL1O9izTBaElwrzDPJHa12SsLIakD5NlyeKn+YOOKLGnKFKjxy+5eNVPw==}
+  '@to-skills/typedoc@0.12.0':
+    resolution: {integrity: sha512-zg9llpZKUlA1UOb5XX1ZON/tNBFq7Ll3Y0Os60Uky7JowEE0GuWq4x28wNragG4/kITztB6avhJxlA+/UIPZaQ==}
     peerDependencies:
       typedoc: '>=0.28.0'
 
@@ -19075,11 +19075,11 @@ snapshots:
     dependencies:
       '@textlint/ast-node-types': 15.5.4
 
-  '@to-skills/core@0.10.3': {}
+  '@to-skills/core@0.11.0': {}
 
-  '@to-skills/typedoc@0.11.4(typedoc@0.28.19(typescript@6.0.3))':
+  '@to-skills/typedoc@0.12.0(typedoc@0.28.19(typescript@6.0.3))':
     dependencies:
-      '@to-skills/core': 0.10.3
+      '@to-skills/core': 0.11.0
       typedoc: 0.28.19(typescript@6.0.3)
 
   '@tootallnate/quickjs-emscripten@0.23.0': {}
