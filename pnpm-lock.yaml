@@ -28,6 +28,7 @@ overrides:
   basic-ftp: 5.3.0
   unhead: 2.1.13
   protobufjs: 7.5.5
+  '@xmldom/xmldom': 0.8.13
 
 importers:
 
@@ -6316,10 +6317,9 @@ packages:
   '@xenova/transformers@2.17.2':
     resolution: {integrity: sha512-lZmHqzrVIkSvZdKZEx7IYY51TK0WDrC8eR0c5IMnBsO8di8are1zzw8BlLhyO2TklZKLN5UffNGs1IJwT6oOqQ==}
 
-  '@xmldom/xmldom@0.8.12':
-    resolution: {integrity: sha512-9k/gHF6n/pAi/9tqr3m3aqkuiNosYTurLLUtc7xQ9sxB/wm7WPygCv8GYa6mS0fLJEHhqMC1ATYhz++U/lRHqg==}
+  '@xmldom/xmldom@0.8.13':
+    resolution: {integrity: sha512-KRYzxepc14G/CEpEGc3Yn+JKaAeT63smlDr+vjB8jRfgTBBI9wRj/nkQEO+ucV8p8I9bfKLWp37uHgFrbntPvw==}
     engines: {node: '>=10.0.0'}
-    deprecated: this version has critical issues, please update to the latest version
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -20215,7 +20215,7 @@ snapshots:
       - bare-buffer
       - react-native-b4a
 
-  '@xmldom/xmldom@0.8.12': {}
+  '@xmldom/xmldom@0.8.13': {}
 
   '@xtuc/ieee754@1.2.0': {}
 
@@ -23123,7 +23123,7 @@ snapshots:
 
   graphology-gexf@0.10.3(graphology-types@0.24.8):
     dependencies:
-      '@xmldom/xmldom': 0.8.12
+      '@xmldom/xmldom': 0.8.13
       graphology-operators: 1.6.1(graphology-types@0.24.8)
       graphology-types: 0.24.8
       graphology-utils: 2.5.2(graphology-types@0.24.8)
@@ -23131,7 +23131,7 @@ snapshots:
 
   graphology-graphml@0.5.2(graphology-types@0.24.8):
     dependencies:
-      '@xmldom/xmldom': 0.8.12
+      '@xmldom/xmldom': 0.8.13
       graphology-operators: 1.6.1(graphology-types@0.24.8)
       graphology-utils: 2.5.2(graphology-types@0.24.8)
       xml-writer: 1.7.0
