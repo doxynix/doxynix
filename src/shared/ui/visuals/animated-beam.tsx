@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, type RefObject } from "react";
+import { useEffect, useId, useState, type FC, type RefObject } from "react";
 import { motion } from "motion/react";
 
 import { cn } from "@/shared/lib/cn";
@@ -27,7 +27,7 @@ export type AnimatedBeamProps = {
   toRef: RefObject<HTMLElement | null>;
 };
 
-export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
+export const AnimatedBeam: FC<AnimatedBeamProps> = ({
   className,
   containerRef,
   curvature = 0,

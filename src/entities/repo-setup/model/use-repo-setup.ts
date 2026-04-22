@@ -50,7 +50,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   const analyzeMutation = trpc.repoAnalysis.analyze.useMutation();
 
   useEffect(() => {
-    if (apiFiles) {
+    if (apiFiles != null) {
       const recommendedPaths = (apiFiles as FileTuple[])
         .filter((f) => f[3] === 1 && f[1] === 1)
         .map((f) => f[0]);

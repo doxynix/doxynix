@@ -1,10 +1,10 @@
 "use client";
 
-import * as React from "react";
+import type { CSSProperties, HTMLAttributes } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
-interface ShineBorderProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ShineBorderProps extends HTMLAttributes<HTMLDivElement> {
   /**
    * Width of the border in pixels
    * @default 1
@@ -55,7 +55,7 @@ export function ShineBorder({
           WebkitMask: `linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)`,
           WebkitMaskComposite: "xor",
           ...style,
-        } as React.CSSProperties
+        } as CSSProperties
       }
       {...props}
     />

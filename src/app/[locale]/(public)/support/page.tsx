@@ -1,3 +1,4 @@
+import type { ComponentType } from "react";
 import { BookOpen, Mail, MessageSquare, MoveLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -16,7 +17,7 @@ type SupportChannel = {
   description: string;
   external?: boolean;
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   title: string;
 };
 

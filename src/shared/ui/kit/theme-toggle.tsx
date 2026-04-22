@@ -14,7 +14,7 @@ type Props = {
 export function ThemeToggle({ className }: Readonly<Props>) {
   const { forcedTheme, resolvedTheme, setTheme } = useTheme();
 
-  if (forcedTheme) return null;
+  if (forcedTheme != null) return null;
 
   const toggleTheme = () => {
     const newTheme = resolvedTheme === "dark" ? "light" : "dark";

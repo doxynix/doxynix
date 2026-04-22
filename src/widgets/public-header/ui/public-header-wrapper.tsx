@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { motion, useMotionValueEvent, useScroll } from "motion/react";
 
-export function PublicHeaderWrapper({ children }: Readonly<{ children: React.ReactNode }>) {
+export function PublicHeaderWrapper({ children }: Readonly<{ children: ReactNode }>) {
   const [isHidden, setIsHidden] = useState(false);
 
   const { scrollY } = useScroll();

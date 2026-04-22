@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Route } from "next";
 import { Book, ChevronDown, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -38,6 +38,18 @@ export function AppCommandMenu() {
   const { setOpen: setOpenCreateDialog } = useCreateRepoActions();
 
   const router = useRouter();
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open) setSearch("");
+  }
+  const [prevDebouncedSearch, setPrevDebouncedSearch] = useState(debouncedSearch);
+  if (debouncedSearch !== prevDebouncedSearch) {
+    setPrevDebouncedSearch(debouncedSearch);
+    if (debouncedSearch.length > 0) {
+      setIsReposExpanded(true);
+    }
+  }
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     trpc.repo.getAll.useInfiniteQuery(
       {
@@ -75,18 +87,6 @@ export function AppCommandMenu() {
       if (currentTarget) observer.unobserve(currentTarget);
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, isReposExpanded]);
-
-  React.useEffect(() => {
-    if (debouncedSearch.length > 0) {
-      setIsReposExpanded(true);
-    }
-  }, [debouncedSearch]);
-
-  React.useEffect(() => {
-    if (open) {
-      setSearch("");
-    }
-  }, [open]);
 
   const navigate = (path: string) => {
     setOpen(false);

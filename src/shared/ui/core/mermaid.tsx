@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useEffect } from "react";
 
 import { cn } from "@/shared/lib/cn";
 import { mermaidThemes, type MermaidCustomTheme } from "@/shared/lib/mermaid-themes";
@@ -62,23 +63,23 @@ function useMermaid({
   config?: MermaidConfig;
   debounceTime?: number;
 }) {
-  const [svg, setSvg] = React.useState<null | string>(null);
-  const [error, setError] = React.useState<null | string>(null);
-  const [status, setStatus] = React.useState<"error" | "idle" | "loading" | "success">("idle");
+  const [svg, setSvg] = useState<null | string>(null);
+  const [error, setError] = useState<null | string>(null);
+  const [status, setStatus] = useState<"error" | "idle" | "loading" | "success">("idle");
 
   // Unique ID for this diagram instance
-  const id = React.useId().replaceAll(":", "");
+  const id = useId().replaceAll(":", "");
 
   // Hidden container for Mermaid's size calculations
-  const renderRef = React.useRef<HTMLDivElement>(null);
+  const renderRef = useRef<HTMLDivElement>(null);
 
   // Debounce the input chart string to avoid thrashing
   const debouncedChart = useDebounce(chart, debounceTime);
 
   // Memoize config to prevent deep object comparison issues in effects
-  const configString = React.useMemo(() => JSON.stringify(config ?? {}), [config]);
+  const configString = useMemo(() => JSON.stringify(config ?? {}), [config]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!debouncedChart.trim()) {
       setStatus("idle");
       setSvg(null);
@@ -186,9 +187,9 @@ function useMermaid({
  * -----------------------------------------------------------------------------------------------*/
 
 function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = React.useState(value);
+  const [debouncedValue, setDebouncedValue] = useState(value);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
@@ -220,7 +221,7 @@ export function Mermaid({
   });
 
   // Propagate events to parent
-  React.useEffect(() => {
+  useEffect(() => {
     if (status === "success" && svg) onSuccess?.(svg);
     if (status === "error" && error) onError?.(error);
   }, [status, svg, error, onSuccess, onError]);

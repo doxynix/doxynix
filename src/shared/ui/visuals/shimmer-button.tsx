@@ -1,4 +1,9 @@
-import React, { type ComponentPropsWithoutRef, type CSSProperties } from "react";
+import {
+  forwardRef,
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 
 import { cn } from "@/shared/lib/cn";
 import { Link } from "@/i18n/routing";
@@ -8,7 +13,7 @@ import { Button } from "../core/button";
 export interface ShimmerButtonProps extends ComponentPropsWithoutRef<"button"> {
   background?: string;
   borderRadius?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
   href: string;
   shimmerColor?: string;
@@ -16,7 +21,7 @@ export interface ShimmerButtonProps extends ComponentPropsWithoutRef<"button"> {
   shimmerSize?: string;
 }
 
-export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
+export const ShimmerButton = forwardRef<HTMLButtonElement, ShimmerButtonProps>(
   (
     {
       background = "var(--primary)",
@@ -35,7 +40,7 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
       <Button
         ref={ref}
         className={cn(
-          "transition-standard group border-border/70 text-primary-foreground hover:border-border-accent hover:text-primary-foreground relative isolate flex cursor-pointer items-center justify-center overflow-hidden rounded-(--radius) border bg-transparent px-6 py-3 whitespace-nowrap shadow-sm hover:bg-transparent hover:[box-shadow:var(--shadow-md)]",
+          "transition-standard group border-border/70 text-primary-foreground hover:border-border-accent hover:text-primary-foreground relative isolate flex cursor-pointer items-center justify-center overflow-hidden rounded-lg border bg-transparent px-6 py-3 whitespace-nowrap shadow-sm hover:bg-transparent hover:[box-shadow:var(--shadow-md)]",
           "active:translate-y-px",
           className
         )}
@@ -53,7 +58,7 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
         asChild
       >
         <Link href={href}>
-          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-(--radius)">
+          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-lg">
             <div className="@container-[size] absolute inset-0 overflow-visible blur-[2px]">
               <div className="animate-shimmer-slide absolute inset-0 aspect-[1] h-[100cqh] rounded-none [mask:none]">
                 <div className="animate-spin-around absolute -inset-[220%] block aspect-square [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]" />
@@ -68,7 +73,7 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
           {/* Highlight */}
           <div
             className={cn(
-              "absolute inset-0 z-20 size-full rounded-(--radius)",
+              "absolute inset-0 z-20 size-full rounded-lg",
 
               // transition
               "transition-standard transform-gpu",

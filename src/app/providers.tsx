@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { httpBatchLink, loggerLink } from "@trpc/client";
@@ -80,7 +80,7 @@ const InnerProviders = ({ children }: { children: ReactNode }) => (
 function ThemeCookieSync() {
   const { theme } = useTheme();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (theme == null) return;
 
     setClientCookie("doxynix-theme", theme, 31_536_000);

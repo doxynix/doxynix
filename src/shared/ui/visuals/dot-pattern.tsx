@@ -1,4 +1,4 @@
-import React, { useId } from "react";
+import { useId, type SVGProps } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -15,7 +15,7 @@ import { cn } from "@/shared/lib/cn";
  * @param {string} [className] - Additional CSS classes to apply to the SVG container
  * @param {boolean} [glow=false] - Whether dots should have a glowing animation effect
  */
-interface DotPatternProps extends React.SVGProps<SVGSVGElement> {
+interface DotPatternProps extends SVGProps<SVGSVGElement> {
   [key: string]: unknown;
   className?: string;
   cr?: number;

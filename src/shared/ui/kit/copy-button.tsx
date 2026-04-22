@@ -25,7 +25,7 @@ export function CopyButton({
 }: Readonly<CopyButtonProps>) {
   const { copy, isCopied } = useCopyToClipboard();
 
-  const handleCopy = (e: React.MouseEvent) => {
+  const handleCopy = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     void copy(value);

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -18,18 +19,18 @@ import {
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 type Props = {
-  children?: React.ReactNode;
+  children?: ReactNode;
   confirmLabel: string;
   description: string;
-  destructiveAlertContent: React.ReactNode;
+  destructiveAlertContent: ReactNode;
   isLoading: boolean;
   onConfirm: () => void;
   onOpenChange: (open: boolean) => void;
   open: boolean;
-  successAlertContent?: React.ReactNode;
+  successAlertContent?: ReactNode;
   successAlertTitle?: string;
   title: string;
-  trigger: React.ReactNode;
+  trigger: ReactNode;
 };
 
 export function DangerActionDialog({

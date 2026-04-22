@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
@@ -42,7 +42,7 @@ const MagicLinkSchema = z.object({
 });
 
 type AuthProvider = {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   provider: "github" | "google" | "yandex";
   text: string;
 };
@@ -55,7 +55,7 @@ const BUTTONS = [
 
 type AuthBenefit = {
   desc: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   title: string;
 };
 
