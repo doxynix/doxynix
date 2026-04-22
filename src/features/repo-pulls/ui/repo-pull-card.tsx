@@ -4,6 +4,7 @@ import { CheckCircle2, Clock, ShieldAlert } from "lucide-react";
 import type { RepoPull } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { formatRelativeTime } from "@/shared/lib/date-utils";
+import { Badge } from "@/shared/ui/core/badge";
 
 type Props = {
   name: string;
@@ -18,13 +19,13 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
       className="hover:bg-muted/50 flex items-center justify-between rounded-xl border p-4 transition-colors"
     >
       <div className="flex items-center gap-4">
-        <div className="flex size-10 items-center justify-center rounded-full border">
+        <div className="flex items-center justify-center">
           {pull.status === "COMPLETED" ? (
-            <CheckCircle2 className="size-5 text-green-500" />
+            <CheckCircle2 className="text-success size-5" />
           ) : pull.status === "FAILED" ? (
-            <ShieldAlert className="size-5 text-red-500" />
+            <ShieldAlert className="text-destructive size-5" />
           ) : (
-            <Clock className="size-5 animate-pulse text-yellow-500" />
+            <Clock className="text-warning size-5" />
           )}
         </div>
 
@@ -47,18 +48,18 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
       {pull.riskScore !== null && (
         <div className="flex flex-col items-end">
           <span className="text-muted-foreground mb-1 text-xs">Risk Level</span>
-          <div
+          <Badge
+            variant="outline"
             className={cn(
-              "rounded border px-2 py-0.5 text-sm font-bold",
               pull.riskScore > 7
-                ? "border-red-500/20 bg-red-500/10 text-red-500"
+                ? "text-destructive"
                 : pull.riskScore > 4
-                  ? "border-yellow-500/20 bg-yellow-500/10 text-yellow-500"
-                  : "border-green-500/20 bg-green-500/10 text-green-500"
+                  ? "text-warning"
+                  : "text-success"
             )}
           >
             {pull.riskScore}/10
-          </div>
+          </Badge>
         </div>
       )}
     </Link>

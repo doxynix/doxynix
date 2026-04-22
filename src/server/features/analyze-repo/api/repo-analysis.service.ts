@@ -34,6 +34,16 @@ type SaveResultsParams = {
   userId: number;
 };
 
+type FileActionInput = {
+  analysisId?: string;
+  commitSha?: string;
+  content: string;
+  language: string;
+  nodeId?: string;
+  path: string;
+  repoId: string;
+};
+
 export const repoAnalysisService = {
   async analyze(
     db: DbClient,
@@ -86,11 +96,11 @@ export const repoAnalysisService = {
     return { jobId: handle.id, status: "QUEUED" };
   },
 
-  async auditFile(db: DbClient, userId: number, input: any) {
+  async auditFile(db: DbClient, userId: number, input: FileActionInput) {
     return this.runFileAction(db, userId, "analyze-single-file", input);
   },
 
-  async documentFile(db: DbClient, userId: number, input: any) {
+  async documentFile(db: DbClient, userId: number, input: FileActionInput) {
     return this.runFileAction(db, userId, "document-single-file", input);
   },
 
@@ -98,15 +108,7 @@ export const repoAnalysisService = {
     db: DbClient,
     userId: number,
     taskId: "analyze-single-file" | "document-single-file",
-    input: {
-      analysisId?: string;
-      commitSha?: string;
-      content: string;
-      language: string;
-      nodeId?: string;
-      path: string;
-      repoId: string;
-    }
+    input: FileActionInput
   ) {
     await assertRepoAccess(db, userId, input.repoId);
 

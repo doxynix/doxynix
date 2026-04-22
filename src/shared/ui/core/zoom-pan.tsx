@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useEffect } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -177,7 +178,7 @@ export function ZoomPan({
   }, [render]);
 
   // Clean up RAF on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
@@ -245,7 +246,7 @@ export function ZoomPan({
     zoomOut: () => void;
   }>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setApi({
       centerView,
       resetZoom,
@@ -270,7 +271,7 @@ export function ZoomPan({
   };
 
   // Setup non-passive wheel event listener
-  React.useEffect(() => {
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -307,7 +308,7 @@ export function ZoomPan({
   }, [maxScale, minScale, updateImmediate]);
 
   // Window events for dragging
-  React.useEffect(() => {
+  useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging.current) return;
       const dx = e.clientX - panStartRef.current.x;
@@ -421,7 +422,7 @@ export function ZoomPan({
   };
 
   // ResizeObserver
-  React.useEffect(() => {
+  useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
@@ -458,7 +459,7 @@ export function ZoomPan({
   }, [render, getCenterTransform]);
 
   // Image loading logic
-  React.useEffect(() => {
+  useEffect(() => {
     if (!imageSrc) {
       imageRef.current = null;
       hasCentered.current = false;

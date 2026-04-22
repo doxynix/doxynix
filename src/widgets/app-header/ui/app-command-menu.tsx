@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Route } from "next";
 import { Book, ChevronDown, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -76,13 +76,13 @@ export function AppCommandMenu() {
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, isReposExpanded]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (debouncedSearch.length > 0) {
       setIsReposExpanded(true);
     }
   }, [debouncedSearch]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
       setSearch("");
     }

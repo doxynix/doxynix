@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useEffect } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Menu, PanelLeft } from "lucide-react";
@@ -82,7 +83,7 @@ function SidebarProvider({
   );
 
   // This sets the cookie to keep the sidebar state.
-  React.useEffect(() => {
+  useEffect(() => {
     setClientCookie(SIDEBAR_COOKIE_NAME, open, SIDEBAR_COOKIE_MAX_AGE);
   }, [open]);
 
@@ -92,7 +93,7 @@ function SidebarProvider({
   }, [isMobile, setOpen, setOpenMobile]);
 
   // Adds a keyboard shortcut to toggle the sidebar.
-  // React.useEffect(() => {
+  // useEffect(() => {
   //   const handleKeyDown = (event: KeyboardEvent) => {
   //     if (event.key === SIDEBAR_KEYBOARD_SHORTCUT && (event.metaKey || event.ctrlKey)) {
   //       event.preventDefault();

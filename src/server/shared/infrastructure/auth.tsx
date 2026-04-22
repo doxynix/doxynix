@@ -156,11 +156,6 @@ export const authOptions: NextAuthOptions = {
       clientId: AUTH_PROVIDERS.google.id,
       clientSecret: AUTH_PROVIDERS.google.secret,
     }),
-    GitLabProvider({
-      allowDangerousEmailAccountLinking: true,
-      clientId: AUTH_PROVIDERS.gitlab.id,
-      clientSecret: AUTH_PROVIDERS.gitlab.secret,
-    }),
     YandexProvider({
       allowDangerousEmailAccountLinking: true,
       clientId: AUTH_PROVIDERS.yandex.id,

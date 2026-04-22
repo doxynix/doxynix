@@ -189,6 +189,8 @@ export const githubAppService = {
     const account = installationInfo.account;
     const accountLogin = account !== null && "login" in account ? account.login : "Unknown";
     const accountAvatar = account !== null && "avatar_url" in account ? account.avatar_url : null;
+    const repoSelection = installationInfo.repository_selection.toUpperCase();
+    const targetType = (installationInfo.target_type || "USER").toUpperCase();
 
     try {
       const updated = await prisma.githubInstallation.updateMany({
@@ -196,7 +198,7 @@ export const githubAppService = {
           accountAvatar,
           accountLogin,
           htmlUrl: installationInfo.html_url,
-          repositorySelection: installationInfo.repository_selection,
+          repositorySelection: repoSelection,
           userId: userIdNum,
         },
         where: {
@@ -214,9 +216,9 @@ export const githubAppService = {
               appId: installationInfo.app_id,
               htmlUrl: installationInfo.html_url,
               id: instIdBigInt,
-              repositorySelection: installationInfo.repository_selection,
+              repositorySelection: repoSelection,
               targetId: BigInt(installationInfo.target_id),
-              targetType: installationInfo.target_type || "Unknown",
+              targetType: targetType,
               userId: userIdNum,
             },
           ],

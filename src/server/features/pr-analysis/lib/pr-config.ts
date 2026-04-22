@@ -1,31 +1,40 @@
+import { PRCommentStyle, PRFocusArea } from "@prisma/client";
+
 import { PATH_PATTERNS } from "@/server/shared/engine/core/project-policy-rules";
 import type { DbClient } from "@/server/shared/infrastructure/db";
 
 import type { PRAnalysisConfig } from "../model/pr-types";
 
+const SYSTEM_IGNORES = [
+  ...PATH_PATTERNS.IGNORE,
+  ...PATH_PATTERNS.GENERATED,
+  ...PATH_PATTERNS.ASSET,
+];
+
 const DEFAULT_PR_CONFIG: PRAnalysisConfig = {
   ciSkip: false,
-  commentStyle: "detailed",
+  commentStyle: PRCommentStyle.DETAILED,
   enabled: false,
-  excludePatterns: [...PATH_PATTERNS.IGNORE, ...PATH_PATTERNS.GENERATED, ...PATH_PATTERNS.ASSET],
-  focusAreas: ["security", "performance"],
+  excludePatterns: SYSTEM_IGNORES,
+  focusAreas: [PRFocusArea.SECURITY, PRFocusArea.PERFORMANCE],
   tokenBudget: 30_000,
 };
 
 export class PRConfigService {
   static async getConfig(repoId: string, db: DbClient): Promise<PRAnalysisConfig> {
-    const repo = await db.repo.findUnique({
-      select: { prAnalysisConfig: true },
-      where: { publicId: repoId },
+    const config = await db.pullRequestAnalysisConfig.findFirst({
+      where: { repo: { publicId: repoId } },
     });
 
-    if (repo?.prAnalysisConfig == null) {
-      return DEFAULT_PR_CONFIG;
-    }
+    if (config == null) return DEFAULT_PR_CONFIG;
 
     return {
-      ...DEFAULT_PR_CONFIG,
-      ...(repo.prAnalysisConfig as Partial<PRAnalysisConfig>),
+      ciSkip: config.ciSkip,
+      commentStyle: config.commentStyle,
+      enabled: config.enabled,
+      excludePatterns: Array.from(new Set([...SYSTEM_IGNORES, ...config.excludePatterns])),
+      focusAreas: config.focusAreas,
+      tokenBudget: config.tokenBudget,
     };
   }
 
@@ -34,20 +43,28 @@ export class PRConfigService {
     config: Partial<PRAnalysisConfig>,
     db: DbClient
   ): Promise<PRAnalysisConfig> {
-    const currentConfig = await this.getConfig(repoId, db);
-    const newConfig = {
-      ...currentConfig,
-      ...config,
-    };
+    const cleanUpdate = Object.fromEntries(Object.entries(config));
 
     await db.repo.update({
       data: {
-        prAnalysisConfig: newConfig as PRAnalysisConfig,
+        prAnalysisConfig: {
+          upsert: {
+            create: {
+              ciSkip: config.ciSkip ?? DEFAULT_PR_CONFIG.ciSkip,
+              commentStyle: config.commentStyle ?? DEFAULT_PR_CONFIG.commentStyle,
+              enabled: config.enabled ?? DEFAULT_PR_CONFIG.enabled,
+              excludePatterns: config.excludePatterns ?? [],
+              focusAreas: config.focusAreas ?? DEFAULT_PR_CONFIG.focusAreas,
+              tokenBudget: config.tokenBudget ?? DEFAULT_PR_CONFIG.tokenBudget,
+            },
+            update: cleanUpdate,
+          },
+        },
       },
       where: { publicId: repoId },
     });
 
-    return newConfig;
+    return this.getConfig(repoId, db);
   }
 
   static async enablePRAnalysis(repoId: string, db: DbClient): Promise<void> {

@@ -15,13 +15,39 @@ generator client {
   binaryTargets   = ["native", "debian-openssl-3.0.x"]
 }
 
+generator zod {
+  provider                         = "zod-prisma-types"
+  output                           = "../src/generated/zod"
+  useMultipleFiles                 = false
+  writeBarrelFiles                 = false
+  createIndexType                  = false
+  createInputTypes                 = false
+  createModelTypes                 = true
+  createOptionalDefaultValuesTypes = false
+  createRelationValuesTypes        = false
+  createPartialTypes               = false
+  addInputTypeValidation           = true
+  coerceDate                       = true
+  writeNullishInInputTypes         = true
+  addIncludeType                   = false
+  addSelectType                    = false
+  useJsonParameters                = true
+  useTypeAssertions                = true
+  modelSuffix                      = "Schema"
+}
 
+generator jsonSchema {
+  provider = "prisma-json-schema-generator"
+}
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
 
-
-
-
-
+generator fakeData {
+  provider = "prisma-generator-fake-data"
+  output   = "../src/generated/fake-data.ts"
+}
 
 enum PRAnalysisStatus {
   PENDING
@@ -76,6 +102,29 @@ enum WebhookStatus {
   PROCESSING
   SUCCESS
   FAILED
+}
+
+enum PRCommentStyle {
+  CONCISE
+  DETAILED
+  OFF
+}
+
+enum PRFocusArea {
+  SECURITY
+  PERFORMANCE
+  ARCHITECTURE
+  STYLE
+}
+
+enum InstallationTargetType {
+  USER
+  ORGANIZATION
+}
+
+enum RepositorySelection {
+  ALL
+  SELECTED
 }
 
 model User {
@@ -135,46 +184,45 @@ model Notification {
 
 model Repo {
   /// @zod.custom.omit(["model"])
-  id               Int                   @id() @default(autoincrement())
+  id               Int                        @id() @default(autoincrement())
   /// @zod.custom.omit(["model"])
-  publicId         String                @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  githubId         Int                   @map("github_id")
+  publicId         String                     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  githubId         Int                        @map("github_id")
   owner            String
   /// @zod.string.min(1).max(255)
   name             String
   /// @zod.string.max(1000)
-  description      String?               @db.Text()
+  description      String?                    @db.Text()
   /// @zod.string.url({ message: "Invalid repository URL" })
   url              String
   language         String?
   license          String?
   topics           String[]
   /// @zod.number.int().min(0)
-  stars            Int                   @default(0) @map("stargazers_count")
+  stars            Int                        @default(0) @map("stargazers_count")
   /// @zod.number.int().min(0)
-  forks            Int                   @default(0) @map("forks_count")
-  defaultBranch    String                @default("main") @map("default_branch")
+  forks            Int                        @default(0) @map("forks_count")
+  defaultBranch    String                     @default("main") @map("default_branch")
   /// @zod.string.url()
-  ownerAvatarUrl   String?               @map("owner_avatar_url")
+  ownerAvatarUrl   String?                    @map("owner_avatar_url")
   /// @zod.number.int().min(0)
-  openIssues       Int                   @default(0) @map("open_issues_count")
+  openIssues       Int                        @default(0) @map("open_issues_count")
   /// @zod.number.int().min(0)
-  size             Int                   @default(0)
-  visibility       Visibility            @default(PRIVATE)
-  pushedAt         DateTime?             @map("pushed_at")
-  createdAt        DateTime              @default(now()) @map("created_at")
-  githubCreatedAt  DateTime?             @map("github_created_at")
-  updatedAt        DateTime              @updatedAt() @map("updated_at")
+  size             Int                        @default(0)
+  visibility       Visibility                 @default(PRIVATE)
+  pushedAt         DateTime?                  @map("pushed_at")
+  createdAt        DateTime                   @default(now()) @map("created_at")
+  githubCreatedAt  DateTime?                  @map("github_created_at")
+  updatedAt        DateTime                   @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  userId           Int                   @map("user_id")
-  user             User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           Int                        @map("user_id")
+  user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
   analyses         Analysis[]
   documents        Document[]
   notifications    Notification[]
-  pullRequests     PullRequestAnalysis[] @relation("RepoPullRequests")
-  generatedFixes   GeneratedFix[]        @relation("RepoGeneratedFixes")
-  /// @zod.custom.omit(["model"])
-  prAnalysisConfig Json?                 @map("pr_analysis_config")
+  pullRequests     PullRequestAnalysis[]      @relation("RepoPullRequests")
+  generatedFixes   GeneratedFix[]             @relation("RepoGeneratedFixes")
+  prAnalysisConfig PullRequestAnalysisConfig?
 
   @@unique([owner, name, userId])
   @@unique([githubId, userId])
@@ -303,19 +351,19 @@ model Account {
 }
 
 model GithubInstallation {
-  id                  BigInt   @id()
-  appId               Int      @map("app_id")
-  targetId            BigInt   @map("target_id")
-  targetType          String   @map("target_type")
-  accountLogin        String   @map("account_login") @db.Citext()
-  accountAvatar       String?  @map("account_avatar")
-  repositorySelection String   @map("repository_selection")
-  isSuspended         Boolean  @default(false) @map("is_suspended")
-  htmlUrl             String?  @map("html_url")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt() @map("updated_at")
-  userId              Int?     @map("user_id")
-  user                User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  BigInt                 @id()
+  appId               Int                    @map("app_id")
+  targetId            BigInt                 @map("target_id")
+  targetType          InstallationTargetType @map("target_type")
+  accountLogin        String                 @map("account_login") @db.Citext()
+  accountAvatar       String?                @map("account_avatar")
+  repositorySelection RepositorySelection    @map("repository_selection")
+  isSuspended         Boolean                @default(false) @map("is_suspended")
+  htmlUrl             String?                @map("html_url")
+  createdAt           DateTime               @default(now()) @map("created_at")
+  updatedAt           DateTime               @updatedAt() @map("updated_at")
+  userId              Int?                   @map("user_id")
+  user                User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isSuspended, createdAt(sort: Asc)])
   @@index([userId, isSuspended, accountLogin])
@@ -410,6 +458,25 @@ model PullRequestAnalysis {
   @@index([repoId, createdAt(sort: Desc)])
   @@index([status])
   @@map("pull_request_analyses")
+}
+
+model PullRequestAnalysisConfig {
+  /// @zod.custom.omit(["model"])
+  id              Int            @id() @default(autoincrement())
+  /// @zod.custom.omit(["model"])
+  publicId        String         @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  enabled         Boolean        @default(false)
+  ciSkip          Boolean        @default(false) @map("ci_skip")
+  commentStyle    PRCommentStyle @default(DETAILED) @map("comment_style")
+  tokenBudget     Int            @default(30000)
+  focusAreas      PRFocusArea[]  @default([SECURITY, PERFORMANCE]) @map("focus_areas")
+  excludePatterns String[]       @default([]) @map("exclude_patterns")
+  updatedAt       DateTime       @updatedAt() @map("updated_at")
+  /// @zod.custom.omit(["model"])
+  repoId          Int            @unique() @map("repo_id")
+  repo            Repo           @relation(fields: [repoId], references: [id], onDelete: Cascade)
+
+  @@map("pr_analysis_configs")
 }
 
 model PullRequestComment {

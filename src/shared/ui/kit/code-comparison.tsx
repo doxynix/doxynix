@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 
 import { Badge } from "../core/badge";
@@ -28,7 +28,7 @@ export function CodeComparison({
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setMounted(true);
   }, []);
 

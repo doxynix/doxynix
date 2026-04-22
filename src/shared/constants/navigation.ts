@@ -105,7 +105,7 @@ export const actionsMenu: MenuItems = [
     icon: SquareTerminal,
     id: "createRepo",
     label: "Create Repository",
-    shortcut: "C then N",
+    shortcut: "C then R",
   },
 ];
 

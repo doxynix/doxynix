@@ -8,6 +8,7 @@ import { FixService } from "@/server/features/pr-analysis/lib/fix-generator";
 import type { FindingForFix } from "@/server/features/pr-analysis/model/pr-types";
 import { getClientContext } from "@/server/shared/infrastructure/github/github-provider";
 import { logger } from "@/server/shared/infrastructure/logger";
+import { REDIS_CONFIG } from "@/server/shared/lib/redis";
 
 // ============================================================================
 // VALIDATION SCHEMAS
@@ -29,7 +30,7 @@ const FixApplicationPayloadSchema = z.object({
   branch: z.string().min(1),
   estimatedImpact: z.number().int().min(0).max(100),
   fixedFiles: z.array(FixedFileContentSchema).min(1),
-  fixId: z.number(),
+  fixId: z.string(),
   repoId: z.string(),
   title: z.string().min(1),
 });
@@ -77,7 +78,7 @@ export const generatedFixRouter = createTRPCRouter({
           fixedFiles: input.fixedFiles,
           fixId: input.fixId,
           owner: repo.owner,
-          repoId: input.repoId,
+          repoId: repo.publicId,
           repoName: repo.name,
           title: input.title,
         });
@@ -87,6 +88,9 @@ export const generatedFixRouter = createTRPCRouter({
           githubPrNumber: result.prNumber,
           githubPrUrl: result.prUrl,
         });
+
+        const cacheKey = REDIS_CONFIG.keys.prStaging(ctx.session.user.id, input.repoId);
+        await ctx.redis.del(cacheKey);
 
         return {
           prNumber: result.prNumber,
@@ -133,12 +137,12 @@ export const generatedFixRouter = createTRPCRouter({
       });
 
       try {
-        let validPrAnalysisId: string | undefined = undefined;
+        let validPrAnalysisId: string | undefined;
 
-        if (input.prAnalysisId && input.prAnalysisId !== "") {
+        if (input.prAnalysisId != null) {
           const prAnalysisRecord = await ctx.db.pullRequestAnalysis.findUnique({
-            where: { publicId: input.prAnalysisId },
             select: { publicId: true },
+            where: { publicId: input.prAnalysisId },
           });
 
           if (prAnalysisRecord) {
@@ -168,11 +172,12 @@ export const generatedFixRouter = createTRPCRouter({
 
         await generateFixTask.trigger(
           {
-            fixId: fix.id,
-            repoId: repo.id,
             fileContents: input.fileContents,
             findings: input.findings as FindingForFix[],
+            fixId: fix.publicId,
             prAnalysisId: validPrAnalysisId,
+            repoId: repo.publicId,
+            userId: Number(ctx.session.user.id),
           },
           {
             concurrencyKey: `repo-${repo.id}`,

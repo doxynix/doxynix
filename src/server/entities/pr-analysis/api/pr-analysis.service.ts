@@ -7,7 +7,7 @@ type PRAnalysisCreateInput = {
   headSha: string;
   owner: string;
   prNumber: number;
-  repoId: number;
+  repoId: string;
   repoName: string;
 };
 
@@ -51,7 +51,11 @@ export const prAnalysisService = {
         headSha: input.headSha,
         owner: input.owner,
         prNumber: input.prNumber,
-        repoId: input.repoId,
+        repo: {
+          connect: {
+            publicId: input.repoId,
+          },
+        },
         repoName: input.repoName,
         status: PRAnalysisStatus.PENDING,
       },

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function GlobalError({
   error,
@@ -21,7 +21,7 @@ export default function GlobalError({
   const finalId = requestId ?? error.digest ?? "No-ID";
   const emailSubject = `[Bug Report] Doxynix - Error ${finalId}`;
 
-  React.useEffect(() => {
+  useEffect(() => {
     const requestId = document.cookie
       .split("; ")
       .find((row) => row.startsWith("last_request_id="))

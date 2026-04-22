@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { parseAsInteger, useQueryState } from "nuqs";
@@ -35,7 +35,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
 
   const isAnyLoading = isPending || (isLoading ?? false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isAnyLoading) {
       setClickedButton(null);
     }

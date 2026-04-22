@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   findNext,
   findPrevious,
@@ -36,7 +36,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
   const [search, setSearch] = useState(initialQuery.search || "");
   const [replace, setReplace] = useState(initialQuery.replace || "");
 
-  React.useEffect(() => {
+  useEffect(() => {
     const q = getSearchQuery(view.state);
     setSearch(q.search);
     setReplace(q.replace);
@@ -47,7 +47,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
     });
   }, [view]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => inputRef.current?.focus(), 100);
     return () => clearTimeout(timer);
   }, []);

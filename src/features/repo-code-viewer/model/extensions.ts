@@ -145,9 +145,9 @@ export const EXTRA_EXTENSIONS: Extension[] = [
 
   todoHighlighter,
 
-  showMinimap.compute(["doc"], (state) => {
+  showMinimap.compute(["doc"], () => {
     return {
-      create: (view: EditorView) => {
+      create: () => {
         const dom = document.createElement("div");
         return { dom };
       },

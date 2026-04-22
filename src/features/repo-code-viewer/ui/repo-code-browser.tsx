@@ -1,20 +1,20 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { EditorView } from "@uiw/react-codemirror";
 import { saveAs } from "file-saver";
 import {
-  Code,
+  Check,
   Download,
   Edit3,
+  FileChartLine,
   FileCode,
   FileText,
   Loader2,
   Save,
   Sparkles,
   X,
-  Zap,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import type { TreeApi } from "react-arborist";
@@ -22,14 +22,13 @@ import { toast } from "sonner";
 
 import { trpc, type FileContent } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
+import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import { RepoStatusBar, type EditorStats } from "@/entities/repo-details";
 import type { FileNode } from "@/entities/repo-setup";
-
-import { FixAnalysisModal } from "@/features/repo-pulls/ui/repo-fix-analysis-dialog";
 
 import { RepoCodeActionButton } from "./repo-code-action-button";
 import { RepoSearchPanel } from "./repo-code-search-panel";
@@ -57,7 +56,6 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [showDiff, setShowDiff] = useState(false);
   const [isAuditDismissed, setIsAuditDismissed] = useState(false);
-  const [isFixModalOpen, setIsFixModalOpen] = useState(false);
 
   const [localContent, setLocalContent] = useState(fileData.content);
 
@@ -73,11 +71,11 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
 
   const { data: aiResult, isFetching } = trpc.repoAnalysis.getFileActionResult.useQuery(
     { path },
-    { enabled: !!path && !!userId }
+    { enabled: !!path && userId != null }
   );
 
   useEffect(() => {
-    if (!isFetching && aiResult) {
+    if (!isFetching && aiResult != null) {
       setIsAiLoading(false);
       if (aiResult.action === "document-file-preview") {
         setShowDiff(true);
@@ -97,10 +95,19 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     onSuccess: () => toast.info("Documentation generation started..."),
   });
 
-  React.useEffect(() => {
+  const stageMutation = trpc.prStaging.stageFile.useMutation({
+    onError: (error) => {
+      toast.error(`Failed to stage changes: ${error.message}`);
+    },
+    onSuccess: (data) => {
+      toast.success(`Changes staged for PR. Total files in draft: ${data.stagedCount}`);
+    },
+  });
+
+  useEffect(() => {
     setLocalContent(fileData.content);
     setMode("view");
-    // setShowDiff(false);
+    setShowDiff(false);
   }, [path, fileData.content]);
 
   useEffect(() => {
@@ -150,7 +157,6 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
   };
 
   const handleAudit = () => {
-    setShowDiff(false);
     auditMutation.mutate({ content: localContent, path, repoId });
   };
 
@@ -158,11 +164,31 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     documentMutation.mutate({ content: localContent, path, repoId });
   };
 
+  const handleAcceptDiff = (): void => {
+    if (aiResult != null) {
+      const proposedContent: string = aiResult.content;
+
+      stageMutation.mutate({
+        content: proposedContent,
+        filePath: path,
+        repoId: repoId,
+      });
+
+      setLocalContent(proposedContent);
+
+      setShowDiff(false);
+    }
+  };
+
+  const handleDiscardDiff = () => {
+    setShowDiff(false);
+  };
+
   const pinMutation = trpc.repoAnalysis.pinAuditToDocs.useMutation({
+    onError: (err) => toast.error("Failed to save: " + err.message),
     onSuccess: () => {
       toast.success("Audit saved to project documentation");
     },
-    onError: (err) => toast.error("Failed to save: " + err.message),
   });
 
   const VIEW_ACTIONS = [
@@ -173,7 +199,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     },
     {
       disabled: isAiLoading || auditMutation.isPending,
-      icon: isAiLoading ? Loader2 : Sparkles,
+      icon: Sparkles,
       onClick: handleAudit,
       tooltipText: "Quick AI Audit",
     },
@@ -184,9 +210,14 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     },
     {
       disabled: isAiLoading || documentMutation.isPending,
-      icon: isAiLoading ? Loader2 : FileText,
-      onClick: () => handleDocument,
+      icon: FileText,
+      onClick: handleDocument,
       tooltipText: "Document file",
+    },
+    {
+      icon: FileChartLine,
+      onClick: () => setIsAuditDismissed(true),
+      tooltipText: "Sho documentation",
     },
     {
       hidden: fileData.meta.url == null,
@@ -270,11 +301,11 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
         <RepoSearchPanel stats={editorStats} view={view} onClose={() => setIsSearchOpen(false)} />
       )}
 
-      {aiResult?.action === "quick-file-audit" && !showDiff && !isAuditDismissed && (
-        <div className="bg-popover animate-in fade-in slide-in-from-right-4 absolute top-20 right-6 z-50 w-96 rounded-xl border p-4 shadow-2xl">
+      {aiResult?.action === "quick-file-audit" && !isAuditDismissed && (
+        <div className="bg-popover animate-in fade-in slide-in-from-right-4 absolute top-20 right-6 z-50 w-96 rounded-xl border p-4">
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-xs font-bold">Audit Result</h3>
-            <Button size="icon" onClick={() => setIsAuditDismissed(true)} variant="ghost">
+            <Button size="icon" variant="ghost" onClick={() => setIsAuditDismissed(true)}>
               <X />
             </Button>
           </div>
@@ -284,22 +315,48 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
           />
           <div className="mt-4 flex items-center gap-1 border-t pt-3">
             <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
               disabled={pinMutation.isPending}
+              size="sm"
+              variant="outline"
               onClick={() => pinMutation.mutate({ path, repoId })}
+              className="w-full"
             >
-              {pinMutation.isPending ? (
-                <Loader2 className="size-3 animate-spin" />
-              ) : (
-                <Save className="size-3" />
-              )}
+              {pinMutation.isPending ? <Spinner className="size-3" /> : <Save className="size-3" />}
               Pin to Docs
             </Button>
-            <Button className="w-full" size="sm" onClick={() => setIsFixModalOpen(true)}>
-              <Zap className="size-3" />
-              Fix with AI
+          </div>
+        </div>
+      )}
+
+      {showDiff === true && aiResult?.action === "document-file-preview" && (
+        <div className="bg-primary/5 border-primary/20 animate-in slide-in-from-top-1 flex items-center justify-between border-b px-4 py-2 duration-300">
+          <div className="flex items-center gap-2">
+            <div className="bg-primary/10 flex h-6 w-6 items-center justify-center rounded-full">
+              <Sparkles className="text-primary h-3 w-3" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[11px] font-semibold tracking-tight">
+                Documentation Preview
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="ghost" onClick={handleDiscardDiff}>
+              <X className="mr-1 h-3 w-3" />
+              Discard
+            </Button>
+            <Button
+              disabled={stageMutation.isPending === true}
+              size="sm"
+              variant="default"
+              onClick={handleAcceptDiff}
+            >
+              {stageMutation.isPending === true ? (
+                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+              ) : (
+                <Check className="mr-1 h-3 w-3" />
+              )}
+              Accept Changes
             </Button>
           </div>
         </div>
@@ -307,7 +364,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
 
       <div className="relative flex-1 overflow-hidden">
         <Editor
-          value={showDiff && aiResult?.content ? aiResult.content : localContent}
+          value={showDiff && aiResult?.content != null ? aiResult.content : localContent}
           compareValue={fileData.content}
           initialValue={fileData.content}
           meta={fileData.meta}
@@ -319,23 +376,6 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
           onViewCreated={setView}
         />
       </div>
-
-      {isFixModalOpen && (
-        <FixAnalysisModal
-          open={isFixModalOpen}
-          onOpenChange={setIsFixModalOpen}
-          repoId={repoId}
-          analysisId={aiResult?.analysisRef?.analysisId ?? ""}
-          findings={[
-            {
-              filePath: path,
-              line: 1,
-              findingType: "performance",
-              body: aiResult?.content ?? "",
-            },
-          ]}
-        />
-      )}
 
       <RepoStatusBar meta={fileData.meta} readOnly={mode === "view"} stats={editorStats} />
     </div>

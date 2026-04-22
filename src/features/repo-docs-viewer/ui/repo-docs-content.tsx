@@ -1,8 +1,6 @@
 "use client";
 
-import saveAs from "file-saver";
-
-import { trpc, type DocContent, type DocType } from "@/shared/api/trpc";
+import { type DocContent } from "@/shared/api/trpc";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 

@@ -1,3 +1,5 @@
+import type { PRCommentStyle, PRFocusArea } from "@prisma/client";
+
 // ============================================================================
 // FINDINGS & ANALYSIS
 // ============================================================================
@@ -24,10 +26,10 @@ export type DifferentialAnalysisResult = {
 
 export type PRAnalysisConfig = {
   ciSkip: boolean;
-  commentStyle: "concise" | "detailed" | "off";
+  commentStyle: PRCommentStyle;
   enabled: boolean;
   excludePatterns: string[];
-  focusAreas: Array<"architecture" | "performance" | "security" | "style">;
+  focusAreas: PRFocusArea[];
   tokenBudget: number;
 };
 

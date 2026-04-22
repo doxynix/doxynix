@@ -11,6 +11,8 @@ import { API_PREFIX } from "@/shared/constants/env.client";
 import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
 import { LOCALE_REGEX_STR } from "@/shared/constants/locales";
 
+import pkg from "./package.json" with { type: "json" };
+
 const bundleAnalyzer = withBundleAnalyzer({
   enabled: IS_ANALYZE,
 });
@@ -27,6 +29,9 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   enablePrerenderSourceMaps: IS_PROD,
+  env: {
+    APP_VERSION: pkg.version,
+  },
   experimental: {
     authInterrupts: true,
     optimizePackageImports: [
@@ -227,8 +232,11 @@ const nextConfig: NextConfig = {
       { d: "/dashboard", s: "/o" },
       { d: "/dashboard", s: "/dash" },
       { d: "/dashboard", s: "/home" },
+
+      // --- LOGICAL REDIRECTS ---
       { d: "/dashboard/settings/profile", s: "/dashboard/settings" },
       { d: "/dashboard/repos", s: "/dashboard/repo" },
+      { d: "/dashboard/repo/:owner/:name/pulls", s: "/dashboard/repo/:owner/:name/pull" },
 
       // --- REPOS ---
       { d: "/dashboard/repos", s: "/r" },

@@ -10,20 +10,20 @@ import { AppTooltip } from "./app-tooltip";
 
 type CopyButtonProps = {
   className?: string;
+  disabled?: boolean;
   successText?: string;
   tooltipSide?: "bottom" | "left" | "right" | "top";
   tooltipText?: string;
   value: string;
-  disabled?: boolean;
 };
 
 export function CopyButton({
   className,
+  disabled,
   successText = "Copied!",
   tooltipSide,
   tooltipText = "Copy ID",
   value,
-  disabled,
 }: Readonly<CopyButtonProps>) {
   const { copy, isCopied } = useCopyToClipboard();
 
@@ -41,8 +41,8 @@ export function CopyButton({
     >
       <Button
         type="button"
-        size="icon"
         disabled={disabled}
+        size="icon"
         variant="ghost"
         aria-label={isCopied ? successText : tooltipText}
         onClick={handleCopy}

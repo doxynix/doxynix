@@ -6,14 +6,13 @@ import { BookOpen, Download, FileText, HistoryIcon, Layers, Terminal, Users2 } f
 
 import { trpc, type AvailableDocs, type DocType } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
-import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Tabs, TabsContent } from "@/shared/ui/core/tabs";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import { RepoSwagger } from "@/entities/repo-details/ui/repo-swagger";
+import { RepoSwagger } from "@/entities/repo-details";
 
 import { RepoDocsContent } from "./repo-docs-content";
 import { RepoDocsTabs } from "./repo-docs-tabs";
@@ -119,19 +118,19 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
                       <>
                         <AppTooltip content="Download file">
                           <Button
-                            variant="ghost"
+                            disabled={isDocLoading}
                             size="icon"
+                            variant="ghost"
                             onClick={handleDownload}
-                            disabled={isDocLoading || doc == null}
                           >
                             <Download className="size-3" />
                           </Button>
                         </AppTooltip>
                         <CopyButton
-                          tooltipText="Copy file"
-                          disabled={isDocLoading || doc == null}
-                          className="size-8 px-3 opacity-100"
                           value={docContent?.raw ?? ""}
+                          disabled={isDocLoading}
+                          tooltipText="Copy file"
+                          className="size-8 px-3 opacity-100"
                         />
                       </>
                     )}

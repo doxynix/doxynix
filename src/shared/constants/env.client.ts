@@ -8,7 +8,7 @@ export const envClient = createEnv({
     NEXT_PUBLIC_API_PREFIX: z
       .string()
       .check(z.startsWith("/"), z.regex(/^\/[\w/\-]*$/, "Invalid prefix format")),
-    NEXT_PUBLIC_APP_URL: z.optional(z.url()),
+    NEXT_PUBLIC_APP_URL: z.url(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string().check(z.minLength(1)),
     NEXT_PUBLIC_POSTHOG_KEY: z.string().check(z.minLength(1)),
     NEXT_PUBLIC_SENTRY_DSN: z.url(),
@@ -44,15 +44,12 @@ const normalizePrefix = (value: string | undefined): `/${string}` => {
 };
 
 export const NODE_ENV = envClient.NODE_ENV;
-export const PORT = envClient.PORT;
 export const API_PREFIX = normalizePrefix(envClient.NEXT_PUBLIC_API_PREFIX);
 export const TRPC_PREFIX = normalizePrefix(envClient.NEXT_PUBLIC_TRPC_PREFIX);
 
 export const TURNSTILE_SITE_KEY = envClient.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
-export const APP_URL =
-  envClient.NEXT_PUBLIC_APP_URL ??
-  (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://doxynix.space");
+export const APP_URL = envClient.NEXT_PUBLIC_APP_URL;
 
 export const SENTRY_DSN = envClient.NEXT_PUBLIC_SENTRY_DSN;
 export const NEXT_PUBLIC_POSTHOG_KEY = envClient.NEXT_PUBLIC_POSTHOG_KEY;

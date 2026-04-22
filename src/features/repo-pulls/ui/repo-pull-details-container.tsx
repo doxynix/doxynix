@@ -1,24 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { Loader2, ShieldCheck, Wand2 } from "lucide-react";
+import { Loader2, ShieldCheck } from "lucide-react";
 
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
-
-import { FixAnalysisModal } from "./repo-fix-analysis-dialog";
 
 type Props = {
-  name: string;
-  owner: string;
   prNumber: number;
   repoId: string;
 };
 
-export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Readonly<Props>) {
-  const [isFixModalOpen, setIsFixModalOpen] = useState(false);
-
+export function RepoPullDetailContainer({ prNumber, repoId }: Readonly<Props>) {
   const { data: analysis, isLoading: isAnalysisLoading } = trpc.prAnalysis.getByPRNumber.useQuery({
     prNumber,
     repoId,
@@ -63,16 +55,6 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
               </p>
             </div>
           )}
-
-          <Button
-            disabled={comments?.length === 0}
-            size="lg"
-            onClick={() => setIsFixModalOpen(true)}
-            className="gap-2"
-          >
-            <Wand2 />
-            Fix All Issues
-          </Button>
         </div>
       </div>
 
@@ -109,9 +91,6 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
             <h4 className="text-sm font-bold tracking-tighter uppercase">PR Details</h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Owner:</span> <span>{owner}</span>
-              </div>
-              <div className="flex justify-between">
                 <span className="text-muted-foreground">Base SHA:</span>{" "}
                 <span className="font-mono">{analysis.baseSha.slice(0, 7)}</span>
               </div>
@@ -127,15 +106,6 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
           </div>
         </div>
       </div>
-      {isFixModalOpen && (
-        <FixAnalysisModal
-          analysisId={analysis.id}
-          findings={comments ?? []}
-          open={isFixModalOpen}
-          repoId={repoId}
-          onOpenChange={setIsFixModalOpen}
-        />
-      )}
     </div>
   );
 }

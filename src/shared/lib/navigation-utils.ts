@@ -1,9 +1,8 @@
-export function normalizeRoutePath(path: string) {
-  let clean = path;
-  while (clean.length > 1 && clean.endsWith("/")) {
-    clean = clean.slice(0, -1);
-  }
-  return clean === "" ? "/" : clean;
+import { normalize } from "pathe";
+
+function standardize(segment?: string) {
+  if (segment == null) return segment;
+  return segment.endsWith("s") ? segment.slice(0, -1) : segment;
 }
 
 export function isRouteActive(
@@ -13,22 +12,24 @@ export function isRouteActive(
 ): boolean {
   if (href == null) return false;
 
-  const cleanPath = normalizeRoutePath(pathname);
-  const cleanHref = normalizeRoutePath(href);
+  const p = normalize(pathname).split("/").filter(Boolean);
+  const h = normalize(href).split("/").filter(Boolean);
 
-  if (exact === true) return cleanPath === cleanHref;
-  if (!cleanPath.startsWith(cleanHref)) return false;
+  if (exact === true) return p.join("/") === h.join("/");
+  if (h.length > p.length) return false;
 
-  if (cleanHref !== "/" && cleanPath !== cleanHref && !cleanPath.startsWith(`${cleanHref}/`)) {
-    return false;
+  const isMatch = h.every((seg, i) => standardize(seg) === standardize(p[i]));
+  if (!isMatch) return false;
+
+  const isSpecificRepo = h[1] === "repo" && h.length === 4;
+  if (isSpecificRepo) return true;
+
+  const isGlobal = h.length <= 2;
+  if (isGlobal) {
+    if (h[1] === "repos" && p[1] === "repo") return false;
+
+    return p.length === h.length;
   }
 
-  if (cleanHref === "/" && cleanPath !== "/") {
-    return cleanPath.split("/").filter(Boolean).length <= 1;
-  }
-
-  const pathSegments = cleanPath.split("/").filter(Boolean);
-  const hrefSegments = cleanHref.split("/").filter(Boolean);
-
-  return pathSegments.length - hrefSegments.length <= 1;
+  return p.length - h.length <= 1;
 }

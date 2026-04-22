@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { CloudUpload, Trash2 } from "lucide-react";
 import type { User } from "next-auth";
 import { useSession } from "next-auth/react";
@@ -25,7 +25,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
 
   const [avatarUrl, setAvatarUrl] = useState(currentUser.image ?? "");
 
-  React.useEffect(() => {
+  useEffect(() => {
     setAvatarUrl(currentUser.image ?? "");
   }, [currentUser.image]);
 

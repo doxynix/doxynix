@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNodes, useReactFlow, type Node } from "@xyflow/react";
 import { parseAsString, useQueryStates } from "nuqs";
 
@@ -13,7 +13,7 @@ export function RepoMapSearchPanel() {
 
   const lastQueryRef = React.useRef(params.search);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const query = params.search.trim();
     const searchWords = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
 

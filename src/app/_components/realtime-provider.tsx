@@ -26,7 +26,7 @@ export const RealtimeProvider = ({ children }: Props) => {
 
   const [client, setClient] = useState<Ably.Realtime | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (userId == null) return;
 
     const realtime = new Ably.Realtime({
@@ -94,13 +94,21 @@ export const RealtimeProvider = ({ children }: Props) => {
       }
 
       if (msg.name === REALTIME_CONFIG.events.user.fileActionCompleted) {
-        const payload = msg.data as { path: string; type: "AUDIT" | "DOCUMENTATION" };
+        const payload = msg.data as {
+          fixId?: string;
+          path?: string;
+          type: "AUDIT" | "DOCUMENTATION" | "FIX_GENERATED";
+        };
 
-        void utils.repoAnalysis.getFileActionResult.invalidate({ path: payload.path });
-
-        toast.success(
-          `ИИ завершил ${payload.type === "AUDIT" ? "аудит" : "документирование"} файла!`
-        );
+        if (payload.type === "FIX_GENERATED" && payload.fixId != null) {
+          void utils.generatedFix.getById.invalidate({ fixId: payload.fixId });
+          toast.success("AI код-фикс готов!");
+        } else if (payload.path != null) {
+          void utils.repoAnalysis.getFileActionResult.invalidate({ path: payload.path });
+          toast.success(
+            `ИИ завершил ${payload.type === "AUDIT" ? "аудит" : "документирование"} файла!`
+          );
+        }
       }
     };
 

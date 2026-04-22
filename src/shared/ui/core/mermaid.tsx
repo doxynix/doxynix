@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useEffect } from "react";
 
 import { cn } from "@/shared/lib/cn";
 import { mermaidThemes, type MermaidCustomTheme } from "@/shared/lib/mermaid-themes";
@@ -78,7 +79,7 @@ function useMermaid({
   // Memoize config to prevent deep object comparison issues in effects
   const configString = React.useMemo(() => JSON.stringify(config ?? {}), [config]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!debouncedChart.trim()) {
       setStatus("idle");
       setSvg(null);
@@ -188,7 +189,7 @@ function useMermaid({
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = React.useState(value);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
@@ -220,7 +221,7 @@ export function Mermaid({
   });
 
   // Propagate events to parent
-  React.useEffect(() => {
+  useEffect(() => {
     if (status === "success" && svg) onSuccess?.(svg);
     if (status === "error" && error) onError?.(error);
   }, [status, svg, error, onSuccess, onError]);

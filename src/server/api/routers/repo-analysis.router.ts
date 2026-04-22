@@ -3,8 +3,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { repoAnalysisService } from "@/server/features/analyze-repo/api/repo-analysis.service";
-import { formatQuickFileAuditMarkdown } from "@/server/features/file-actions/model/file-actions";
 import { markdownToHtml } from "@/server/shared/lib/markdown-to-html";
+import { REDIS_CONFIG } from "@/server/shared/lib/redis";
 import type { FileActionPreviewResult } from "@/server/shared/types";
 import { DocTypeSchema } from "@/generated/zod";
 
@@ -59,7 +59,7 @@ export const repoAnalysisRouter = createTRPCRouter({
   getFileActionResult: protectedProcedure
     .input(z.object({ path: z.string() }))
     .query(async ({ ctx, input }) => {
-      const cacheKey = `file-result:${ctx.session.user.id}:${input.path}`;
+      const cacheKey = REDIS_CONFIG.keys.fileAction(ctx.session.user.id, input.path);
       const data = await ctx.redis.get<FileActionPreviewResult>(cacheKey);
 
       if (data == null) return null;
@@ -79,6 +79,53 @@ export const repoAnalysisRouter = createTRPCRouter({
       };
     }),
 
+  pinAuditToDocs: protectedProcedure
+    .input(
+      z.object({
+        path: z.string(),
+        repoId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const cacheKey = REDIS_CONFIG.keys.fileAction(ctx.session.user.id, input.path);
+      const cachedData = await ctx.redis.get<any>(cacheKey);
+
+      if (cachedData == null) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Audit result expired or not found. Please run audit again.",
+        });
+      }
+
+      const { analysisId, commitSha } = cachedData.contentRef ?? {};
+
+      let internalAnalysisId: number | undefined;
+      if (analysisId != null) {
+        const analysis = await ctx.db.analysis.findUnique({
+          select: { id: true },
+          where: { publicId: analysisId },
+        });
+        internalAnalysisId = analysis?.id;
+      }
+
+      const markdownContent = cachedData.content;
+
+      return ctx.db.document.create({
+        data: {
+          content: markdownContent,
+          path: input.path,
+          repo: { connect: { publicId: input.repoId } },
+          type: "CODE_DOC",
+          version: commitSha ?? "manual",
+          ...(internalAnalysisId != null
+            ? {
+                analysis: { connect: { id: internalAnalysisId } },
+              }
+            : {}),
+        },
+      });
+    }),
+
   quickFileAudit: protectedProcedure
     .input(
       z.object({
@@ -93,52 +140,5 @@ export const repoAnalysisRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       return repoAnalysisService.auditFile(ctx.db, Number(ctx.session.user.id), input);
-    }),
-
-  pinAuditToDocs: protectedProcedure
-    .input(
-      z.object({
-        path: z.string(),
-        repoId: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const cacheKey = `file-result:${ctx.session.user.id}:${input.path}`;
-      const cachedData = await ctx.redis.get<any>(cacheKey);
-
-      if (cachedData == null) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Audit result expired or not found. Please run audit again.",
-        });
-      }
-
-      const { analysisId, commitSha } = cachedData.contentRef || {};
-
-      let internalAnalysisId: number | undefined;
-      if (analysisId) {
-        const analysis = await ctx.db.analysis.findUnique({
-          where: { publicId: analysisId },
-          select: { id: true },
-        });
-        internalAnalysisId = analysis?.id;
-      }
-
-      const markdownContent = cachedData.content;
-
-      return ctx.db.document.create({
-        data: {
-          content: markdownContent,
-          type: "CODE_DOC",
-          path: input.path,
-          version: commitSha || "manual",
-          repo: { connect: { publicId: input.repoId } },
-          ...(internalAnalysisId
-            ? {
-                analysis: { connect: { id: internalAnalysisId } },
-              }
-            : {}),
-        },
-      });
     }),
 });

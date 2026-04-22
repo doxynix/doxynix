@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import * as Sentry from "@sentry/nextjs";
 import Cookies from "js-cookie";
 import { ServerCrash } from "lucide-react";
@@ -48,7 +48,7 @@ export default function ErrorPage({
 
   const mailtoLink = `mailto:support@doxynix.space?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
-  React.useEffect(() => {
+  useEffect(() => {
     Sentry.captureException(error);
 
     const rid = Cookies.get("last_request_id");
