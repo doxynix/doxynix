@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type { ComponentProps, CSSProperties } from "react";
 import * as ProgressPrimitive from "@radix-ui/react-progress";
 
 import { cn } from "@/shared/lib/cn";

@@ -1,7 +1,6 @@
 "use client";
 
-import * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/shared/lib/cn";
 import { mermaidThemes, type MermaidCustomTheme } from "@/shared/lib/mermaid-themes";

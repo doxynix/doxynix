@@ -1,4 +1,4 @@
-import * as React from "react";
+import { forwardRef, type ComponentProps, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";

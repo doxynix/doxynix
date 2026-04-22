@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/shared/lib/cn";

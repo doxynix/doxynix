@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type { ComponentProps } from "react";
 import { GripVertical } from "lucide-react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 

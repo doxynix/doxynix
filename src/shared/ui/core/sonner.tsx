@@ -1,5 +1,6 @@
 "use client";
 
+import type { ComponentProps } from "react";
 import { AlertTriangle, CheckCircle2, Info, XCircle } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Toaster as Sonner } from "sonner";

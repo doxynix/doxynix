@@ -1,5 +1,6 @@
 "use client";
 
+import type { MouseEvent } from "react";
 import { Check, Copy } from "lucide-react";
 
 import { useCopyToClipboard } from "@/shared/hooks/use-copy-to-clipboard";
