@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.26.22](https://github.com/doxynix/doxynix/compare/v1.26.21...v1.26.22) (2026-04-22)
+
+
+### Bug Fixes
+
+* **deps:** update secretlint monorepo to v12 (major) ([#1165](https://github.com/doxynix/doxynix/issues/1165)) ([3f852c7](https://github.com/doxynix/doxynix/commit/3f852c7efbebf355bb9bb3f1e68ba79dabae6490))
+
 ## [1.26.21](https://github.com/doxynix/doxynix/compare/v1.26.20...v1.26.21) (2026-04-19)
 
 
