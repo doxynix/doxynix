@@ -25,7 +25,7 @@ import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
 import { SkipLink } from "@/shared/ui/kit/skip-link";
 import { routing } from "@/i18n/routing";
 
-import { ourFileRouter } from "@/server/shared/infrastructure/core";
+import { ourFileRouter } from "@/server/shared/infrastructure/uploadthing";
 
 import { Providers } from "../providers";
 

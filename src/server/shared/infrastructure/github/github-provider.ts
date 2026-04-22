@@ -4,7 +4,8 @@ import { retry } from "@octokit/plugin-retry";
 import { throttling } from "@octokit/plugin-throttling";
 import { Octokit } from "@octokit/rest";
 import type { RequestOptions } from "@octokit/types";
-import parseGithubUrl from "parse-github-url";
+import gitUrlParse from "git-url-parse";
+import { createPullRequest } from "octokit-plugin-create-pull-request";
 
 import {
   GITHUB_APP_ID,
@@ -16,8 +17,9 @@ import {
 import type { DbClient } from "../db";
 import { logger } from "../logger";
 
-const MyOctokit = Octokit.plugin(retry, throttling, paginateRest);
-export type OctokitInstance = InstanceType<typeof MyOctokit>;
+const AppOctokit = Octokit.plugin(retry, throttling, paginateRest, createPullRequest);
+export type OctokitInstance = InstanceType<typeof AppOctokit>;
+
 const getCommonConfig = () => ({
   log: {
     debug: (msg: string) => logger.debug({ msg }),
@@ -57,7 +59,7 @@ const getCommonConfig = () => ({
 });
 
 export function getInstallationClient(installationId: number): OctokitInstance {
-  return new MyOctokit({
+  return new AppOctokit({
     ...getCommonConfig(),
     auth: {
       appId: Number(GITHUB_APP_ID),
@@ -69,7 +71,7 @@ export function getInstallationClient(installationId: number): OctokitInstance {
 }
 
 export function getPublicClient(token?: string): OctokitInstance {
-  return new MyOctokit({
+  return new AppOctokit({
     ...getCommonConfig(),
     auth: token,
   }) as OctokitInstance;
@@ -106,12 +108,12 @@ export type ClientContextOptions = {
   allowSystemFallback?: boolean;
   owner?: string;
 };
+
 /**
  * Resolves user's GitHub client context based on available credentials
  * Priority: specific installation > oauth > any installation
  * Throws GitHubAuthRequiredError if no context available
  */
-
 export async function getClientContext(
   prisma: DbClient,
   userId: number,
@@ -164,6 +166,7 @@ export async function getClientContext(
 
   throw new GitHubAuthRequiredError();
 }
+
 /**
  * Resolves client context with fallback chain:
  * 1. Primary client context
@@ -171,7 +174,6 @@ export async function getClientContext(
  * 3. If auth fails: system app (if allowSystemFallback)
  * 4. If auth fails: unauthenticated public (if allowPublicFallback)
  */
-
 export async function resolveClientContext(
   prisma: DbClient,
   userId: number,
@@ -210,30 +212,33 @@ export async function resolveClientContext(
     }
     throw error;
   }
-} /**
+}
+
+/**
  * Parses GitHub URL or owner/repo string
  * Validates and normalizes owner and name
  * Throws if format invalid
  */
-
 export function parseUrl(input: string): { name: string; owner: string } {
-  if (input.trim() === "") throw new Error("Field cannot be empty");
+  const trimmedInput = input.trim();
+  if (trimmedInput === "") throw new Error("Field cannot be empty");
 
-  const parsed = parseGithubUrl(input);
-  const owner = parsed?.owner?.trim() ?? "";
-  const name = parsed?.name?.trim() ?? "";
+  try {
+    const parsed = gitUrlParse(trimmedInput);
 
-  if (owner === "" || name === "") {
+    return {
+      name: parsed.name,
+      owner: parsed.owner,
+    };
+  } catch {
     throw new Error("Invalid format. Enter 'owner/repo' or repository URL");
   }
-
-  return { name, owner };
 }
+
 /**
  * Retrieves GitHub token for user and optional owner
  * Returns null if token unavailable (logs error)
  */
-
 export async function getToken(
   prisma: DbClient,
   userId: number,
@@ -250,11 +255,11 @@ export async function getToken(
     logger.error({ error, msg: "Failed to resolve GitHub token", userId });
     return null;
   }
-} /**
+}
+/**
  * Gets installation metadata from GitHub App
  * Requires system app credentials
  */
-
 export async function getInstallationInfo(installationId: number) {
   const octokit = getSystemClient();
   const { data } = await octokit.rest.apps.getInstallation({

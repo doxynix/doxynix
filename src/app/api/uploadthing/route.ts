@@ -1,6 +1,6 @@
 import { createRouteHandler } from "uploadthing/next";
 
-import { ourFileRouter } from "@/server/shared/infrastructure/core";
+import { ourFileRouter } from "@/server/shared/infrastructure/uploadthing";
 
 export const runtime = "nodejs";
 

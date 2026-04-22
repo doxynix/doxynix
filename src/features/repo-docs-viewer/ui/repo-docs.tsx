@@ -40,7 +40,6 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
       return {
         icon,
         id: doc.id,
-        isFallback: doc.isFallback,
         status: doc.status,
         value: doc.type,
       };
@@ -85,19 +84,11 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
                             ? "Interactive Console"
                             : doc.type.toLowerCase().replace("_", " ")}
                         </h2>
-                        {doc.status != null && (
-                          <Badge
-                            variant="outline"
-                            className={doc.isFallback ? "border-warning text-warning" : ""}
-                          >
-                            {doc.isFallback ? "fallback" : doc.status}
-                          </Badge>
-                        )}
+                        {doc.status != null && <Badge variant="outline">{doc.status}</Badge>}
                       </div>
                       <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-xs">
                         <span>Version: {doc.version.slice(0, 7)}</span>
                         <span>Updated: {formatFullDate(doc.updatedAt)}</span>
-                        {doc.isFallback && <span>Generated from canonical analysis sections.</span>}
                       </div>
                     </div>
                   </div>

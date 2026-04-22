@@ -1,5 +1,6 @@
 import path from "node:path";
 import { DirectedGraph } from "graphology";
+import { dirname, join, normalize } from "pathe";
 import ts from "typescript";
 
 import { dumpDebug } from "../../lib/debug-logger";
@@ -31,9 +32,8 @@ export function resolveRelativeImport(fromPath: string, importPath: string, file
   const normalizedImport = normalizeRepoPath(importPath);
   if (!normalizedImport.startsWith(".")) return null;
 
-  const basePath = path.posix.normalize(
-    path.posix.join(path.posix.dirname(fromPath), normalizedImport)
-  );
+  const basePath = normalize(join(dirname(fromPath), normalizedImport));
+
   for (const suffix of RELATIVE_IMPORT_SUFFIXES) {
     const candidate = normalizeRepoPath(`${basePath}${suffix}`);
     if (fileSet.has(candidate)) return candidate;
@@ -69,7 +69,7 @@ export function resolveModuleImport(
   const aliasResolved = resolveAliasImport(importPath, fileSet, aliasRules);
   if (aliasResolved != null) return aliasResolved;
 
-  const normalizedImport = importPath.replaceAll("\\", "/").replaceAll(".", "/");
+  const normalizedImport = normalize(importPath).replaceAll(".", "/");
   const candidates = [
     normalizedImport,
     `${normalizedImport}.py`,
@@ -197,6 +197,6 @@ export function findDependencyCycles(graphMap: Map<string, Set<string>>): string
     }
   });
   const result = [...cycles].sort((left, right) => left.length - right.length);
-  dumpDebug("dependency-cycles", { count: result.length, cycles: result });
+  void dumpDebug("dependency-cycles", { count: result.length, cycles: result });
   return result;
 }

@@ -12,7 +12,7 @@ export function getDocumentationInputSnapshot(
   const documentationInput =
     hardMetrics.documentationInput ?? buildDocumentationInputModel(evidence, hardMetrics);
 
-  dumpDebug("documentation-input-model", {
+  void dumpDebug("documentation-input-model", {
     model: documentationInput,
     source: hardMetrics.documentationInput != null ? "metrics-cache" : "rebuilt-from-evidence",
   });

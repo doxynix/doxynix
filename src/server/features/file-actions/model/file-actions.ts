@@ -339,7 +339,6 @@ Return a JSON object with:
 
 Use "low" confidence when the file is too small, too generic, or lacks enough context.`,
     temperature: 0.2,
-    useSearchGrounding: false,
   });
 
   return {
@@ -393,7 +392,6 @@ Return a JSON object with:
 
 Use "low" confidence when the file is too small, too generic, or non-idiomatic for reliable inline documentation.`,
     temperature: 0.1,
-    useSearchGrounding: false,
   });
 
   return {

@@ -1,10 +1,13 @@
+import { normalize } from "pathe";
+
 import type { Module } from "@/server/shared/engine/core/discovery.types";
 import { getFileScore } from "@/server/shared/engine/core/file-classifier";
 import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
+import { PROJECT_POLICY_RULES } from "@/server/shared/engine/core/project-policy-rules";
 import { FILE_CONTEXT_MODIFIERS } from "@/server/shared/engine/core/scoring-constants";
-import { uniquePaths } from "@/server/shared/lib/array-utils";
-import { cleanCodeForAi } from "@/server/shared/lib/optimizers";
+import { cleanCodeForAi, skeletonizeCode } from "@/server/shared/lib/optimizers";
 import { escapePromptXmlAttr, escapePromptXmlText } from "@/server/shared/lib/string-utils";
+import { countTokens } from "@/server/shared/lib/tokenizer";
 
 export type AiContextStage = "architect" | "writer_api" | "writer_architecture" | "writer_readme";
 
@@ -16,10 +19,10 @@ export type ContextDropReason =
   | "stage-filter";
 
 export type StageContextDebugEntry = {
-  chars: number;
   path: string;
   reason: string;
   score: number;
+  tokens: number;
   truncated: boolean;
 };
 
@@ -30,12 +33,14 @@ export type StageContextDropEntry = {
 };
 
 export type StageContextSelection = {
-  budgetChars: number;
+  budgetChars: any;
+  budgetTokens: number;
   dropped: StageContextDropEntry[];
   overflowPrevented: boolean;
   selected: StageContextDebugEntry[];
-  selectedChars: number;
+  selectedChars: any;
   selectedEvidencePaths: string[];
+  selectedTokens: number;
   stage: AiContextStage;
 };
 
@@ -46,54 +51,39 @@ export type StageContextPack = {
 
 type StageContextParams = {
   files: Module[];
-  maxChars?: number;
+  maxTokens?: number;
   preferredPaths?: string[];
   stage: AiContextStage;
 };
 
-const STAGE_BUDGETS: Record<AiContextStage, number> = {
-  architect: 220_000,
-  writer_api: 120_000,
-  writer_architecture: 110_000,
-  writer_readme: 80_000,
+const STAGE_TOKEN_BUDGETS: Record<AiContextStage, number> = {
+  architect: 210_000,
+  writer_api: 180_000,
+  writer_architecture: 180_000,
+  writer_readme: 150_000,
 };
 
-const STAGE_FILE_LIMITS: Record<AiContextStage, number> = {
-  architect: 12_000,
-  writer_api: 16_000,
-  writer_architecture: 14_000,
-  writer_readme: 10_000,
+const STAGE_FILE_TOKEN_LIMITS: Record<AiContextStage, number> = {
+  architect: 4000,
+  writer_api: 6000,
+  writer_architecture: 5000,
+  writer_readme: 3500,
 };
-
-const ROOT_MANIFESTS = new Set([
-  "cargo.toml",
-  "go.mod",
-  "package.json",
-  "pom.xml",
-  "pyproject.toml",
-  "readme.md",
-  "requirements.txt",
-  "setup.py",
-  "tsconfig.json",
-]);
 
 function isExampleLike(path: string) {
   return /(^|\/)(example|examples|sample|samples)\//iu.test(path);
 }
 
 function isRootManifest(path: string) {
-  return !path.includes("/") && ROOT_MANIFESTS.has(path.toLowerCase());
-}
+  const parts = normalize(path).split("/");
 
-function truncateSnippet(content: string, limit: number) {
-  if (content.length <= limit) {
-    return { content, truncated: false };
-  }
-
-  return {
-    content: `${content.slice(0, limit)}\n/* ...truncated for AI budget... */`,
-    truncated: true,
-  };
+  return (
+    parts[0] != null &&
+    parts.length === 1 &&
+    PROJECT_POLICY_RULES.manifests.rootFiles.includes(
+      parts[0].toLowerCase() as (typeof PROJECT_POLICY_RULES.manifests.rootFiles)[number]
+    )
+  );
 }
 
 function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boolean) {
@@ -116,7 +106,6 @@ function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boo
       );
     }
     case "writer_api": {
-      if (docsLike || testLike || benchmarkLike) return false;
       return (
         ProjectPolicy.isApiPath(filePath) ||
         ProjectPolicy.isPrimaryArchitecturePath(filePath) ||
@@ -124,8 +113,6 @@ function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boo
       );
     }
     case "writer_readme": {
-      if (benchmarkLike) return false;
-      if (testLike) return false;
       return (
         ProjectPolicy.isConfigFile(filePath) ||
         ProjectPolicy.isPrimaryArchitecturePath(filePath) ||
@@ -170,21 +157,21 @@ function buildSelectionReason(stage: AiContextStage, filePath: string, preferred
   return "secondary-support";
 }
 
-export function buildStageContextPack({
+export async function buildStageContextPack({
   files,
-  maxChars,
+  maxTokens,
   preferredPaths = [],
   stage,
-}: StageContextParams): StageContextPack {
+}: StageContextParams): Promise<StageContextPack> {
   const preferredSet = new Set(preferredPaths);
-  const budgetChars = maxChars ?? STAGE_BUDGETS[stage];
-  const perFileLimit = STAGE_FILE_LIMITS[stage];
+  const budgetTokens = maxTokens ?? STAGE_TOKEN_BUDGETS[stage];
+  const perFileTokenLimit = STAGE_FILE_TOKEN_LIMITS[stage];
   const dropped: StageContextDropEntry[] = [];
 
   const candidates = files
     .map((file) => {
-      const preferred = preferredSet.has(file.path);
       const lowerPath = file.path.toLowerCase();
+      const preferred = preferredSet.has(file.path);
 
       if (ProjectPolicy.isSensitive(lowerPath)) {
         dropped.push({ path: file.path, reason: "sensitive", score: 0 });
@@ -196,81 +183,98 @@ export function buildStageContextPack({
         return null;
       }
 
-      const cleaned = cleanCodeForAi(file.content, file.path).trim();
-      if (cleaned.length === 0) {
-        dropped.push({ path: file.path, reason: "empty-after-clean", score: 0 });
-        return null;
-      }
-
-      const snippet = truncateSnippet(cleaned, perFileLimit);
-      const xml = `<file path="${escapePromptXmlAttr(file.path)}">\n${escapePromptXmlText(snippet.content)}\n</file>`;
-      const score = scoreFile(stage, lowerPath, preferred);
-
       return {
-        chars: xml.length,
+        file,
         path: file.path,
         preferred,
-        reason: buildSelectionReason(stage, lowerPath, preferred),
-        score,
-        truncated: snippet.truncated,
-        xml,
+        score: scoreFile(stage, lowerPath, preferred),
       };
     })
-    .filter((candidate): candidate is NonNullable<typeof candidate> => candidate != null);
-
-  candidates.sort((left, right) => {
-    if (right.score !== left.score) return right.score - left.score;
-    return left.chars - right.chars;
-  });
+    .filter((c): c is NonNullable<typeof c> => c !== null)
+    .sort((a, b) => b.score - a.score);
 
   const selected: StageContextDebugEntry[] = [];
   const selectedXml: string[] = [];
-  let selectedChars = 0;
-  let overflowPrevented = false;
+  let currentTotalTokens = 0;
 
-  for (const candidate of candidates) {
-    if (selectedChars + candidate.chars > budgetChars) {
-      dropped.push({
-        path: candidate.path,
-        reason: candidate.preferred ? "budget" : "secondary-no-budget",
-        score: candidate.score,
-      });
-      overflowPrevented = true;
+  for (const item of candidates) {
+    if (currentTotalTokens >= budgetTokens) {
+      dropped.push({ path: item.path, reason: "budget", score: item.score });
       continue;
     }
 
+    let content = cleanCodeForAi(item.file.content ?? "", item.path).trim();
+    if (!content) {
+      dropped.push({ path: item.path, reason: "empty-after-clean", score: item.score });
+      continue;
+    }
+
+    let fileTokens = await countTokens(content);
+    let isTruncated = false;
+
+    if (fileTokens > perFileTokenLimit) {
+      content = skeletonizeCode(content);
+      fileTokens = await countTokens(content);
+      isTruncated = true;
+    }
+
+    const xml = `<file path="${escapePromptXmlAttr(item.path)}">\n${escapePromptXmlText(content)}\n</file>`;
+    const totalWithXmlTokens = fileTokens + 15;
+
+    if (currentTotalTokens + totalWithXmlTokens > budgetTokens) {
+      if (item.preferred) {
+        content = content.slice(0, 500) + "\n/* ...emergency truncated... */";
+        const emergencyTokens = (await countTokens(content)) + 15;
+        if (currentTotalTokens + emergencyTokens <= budgetTokens) {
+          addFileToContext(item, buildXml(item.path, content), emergencyTokens, true);
+          continue;
+        }
+      }
+
+      dropped.push({ path: item.path, reason: "secondary-no-budget", score: item.score });
+      continue;
+    }
+
+    addFileToContext(item, xml, totalWithXmlTokens, isTruncated);
+  }
+
+  function addFileToContext(item: any, xml: string, tokens: number, truncated: boolean) {
     selected.push({
-      chars: candidate.chars,
-      path: candidate.path,
-      reason: candidate.reason,
-      score: candidate.score,
-      truncated: candidate.truncated,
+      path: item.path,
+      reason: buildSelectionReason(stage, item.path.toLowerCase(), item.preferred),
+      score: item.score,
+      tokens,
+      truncated,
     });
-    selectedXml.push(candidate.xml);
-    selectedChars += candidate.chars;
+    selectedXml.push(xml);
+    currentTotalTokens += tokens;
   }
 
   return {
     context: selectedXml.join("\n\n"),
     debug: {
-      budgetChars,
+      budgetChars: undefined,
+      budgetTokens,
       dropped,
-      overflowPrevented,
+      overflowPrevented: dropped.some((d) => d.reason === "budget"),
       selected,
-      selectedChars,
-      selectedEvidencePaths: uniquePaths(selected.map((entry) => entry.path)),
+      selectedChars: undefined,
+      selectedEvidencePaths: selected.map((s) => s.path),
+      selectedTokens: currentTotalTokens,
       stage,
     },
   };
 }
 
-export function prepareSmartContext(
-  files: Module[],
-  maxChars: number = STAGE_BUDGETS.architect
-): string {
-  return buildStageContextPack({
+function buildXml(path: string, content: string) {
+  return `<file path="${escapePromptXmlAttr(path)}">\n${escapePromptXmlText(content)}\n</file>`;
+}
+
+export async function prepareSmartContext(files: Module[], maxTokens?: number): Promise<string> {
+  const result = await buildStageContextPack({
     files,
-    maxChars,
+    maxTokens,
     stage: "architect",
-  }).context;
+  });
+  return result.context;
 }

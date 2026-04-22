@@ -33,12 +33,12 @@ export const groq = createOpenAI({
 // };
 
 export const AI_MODELS = {
-  ARCHITECT: ["gemini-3.1-flash-lite-preview"],
-  CARTOGRAPHER: ["gemini-3.1-flash-lite-preview"],
-  FALLBACK: ["gemini-3.1-flash-lite-preview"],
-  POWERFUL: ["gemini-3.1-flash-lite-preview"],
-  SENTINEL: ["gemini-3.1-flash-lite-preview"],
-  WRITER: ["gemini-3.1-flash-lite-preview"],
+  ARCHITECT: ["gemini-flash-latest"],
+  CARTOGRAPHER: ["gemini-flash-latest"],
+  FALLBACK: ["gemini-flash-latest"],
+  POWERFUL: ["gemini-flash-latest"],
+  SENTINEL: ["gemini-flash-latest"],
+  WRITER: ["gemini-flash-latest"],
 };
 
 export const SAFETY_SETTINGS = [

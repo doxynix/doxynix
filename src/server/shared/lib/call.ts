@@ -1,9 +1,12 @@
 import { google } from "@ai-sdk/google";
-import { generateText, Output } from "ai";
+import * as ai from "ai";
+import { wrapAISDK } from "langsmith/experimental/vercel";
 import type z from "zod";
 
 import { LLM_TEMPERATURE_STRATEGY, type LLMTaskType } from "../engine/core/scoring-constants";
 import { logger } from "../infrastructure/logger";
+
+const tracedAi = wrapAISDK(ai);
 
 type CallWithFallbackProps<T> = {
   attemptMetadata?: Record<string, unknown>;
@@ -13,14 +16,13 @@ type CallWithFallbackProps<T> = {
   outputSchema: null | z.ZodSchema<T>;
   presencePenalty?: number;
   prompt: string;
-  providerOptions?: Record<string, unknown>;
+  providerOptions?: Record<string, any>;
   stopSequences?: string[];
   system: string;
   taskType?: LLMTaskType;
   temperature?: number;
   topK?: number;
   topP?: number;
-  useSearchGrounding?: boolean;
 };
 
 export async function callWithFallback<T>({
@@ -38,7 +40,6 @@ export async function callWithFallback<T>({
   temperature,
   topK,
   topP,
-  useSearchGrounding = true,
 }: CallWithFallbackProps<T>): Promise<T> {
   if (models.length === 0) {
     throw new Error("No models configured for fallback.");
@@ -61,10 +62,18 @@ export async function callWithFallback<T>({
         ...attemptMetadata,
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const options: any = {
+      const result = await tracedAi.generateText({
+        experimental_telemetry: {
+          functionId: `writer-${taskType}`,
+          isEnabled: true,
+          metadata: {
+            ...attemptMetadata,
+            taskType,
+          },
+        },
         frequencyPenalty,
         maxOutputTokens,
+        maxRetries: 3,
         model: google(modelName),
         presencePenalty,
         prompt,
@@ -74,23 +83,18 @@ export async function callWithFallback<T>({
         temperature: finalTemperature,
         topK: finalTopK,
         topP: finalTopP,
-        useSearchGrounding,
-      };
-
-      if (outputSchema != null) {
-        options.output = Output.object({ schema: outputSchema });
-      }
-
-      const result = await generateText(options);
-
-      const finalValue = outputSchema == null ? result.text : result.output;
+        ...(outputSchema != null && {
+          output: ai.Output.object({ schema: outputSchema }),
+        }),
+      });
 
       logger.info({
         model: modelName,
         msg: "Model returned output",
         ...attemptMetadata,
       });
-      return finalValue as T;
+
+      return (outputSchema != null ? result.output : result.text) as T;
     } catch (error) {
       lastError = error;
       logger.warn({

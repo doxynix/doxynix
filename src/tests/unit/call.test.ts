@@ -17,12 +17,17 @@ vi.mock("@ai-sdk/google", () => ({
   google: googleState.google,
 }));
 
-vi.mock("ai", () => ({
-  generateText: vi.fn(),
-  Output: {
-    object: vi.fn((input: { schema: z.ZodSchema }) => ({ kind: "object", ...input })),
-  },
-}));
+vi.mock("ai", async (importOriginal) => {
+  const actual: any = await importOriginal();
+  return {
+    ...actual,
+    generateText: vi.fn(),
+    Output: {
+      ...actual.Output,
+      object: vi.fn((input: { schema: z.ZodSchema }) => ({ kind: "object", ...input })),
+    },
+  };
+});
 
 vi.mock("@/server/shared/infrastructure/logger", () => ({
   logger: loggerState,
@@ -61,13 +66,10 @@ describe("callWithFallback", () => {
 
     expect(result).toBe("final text");
     expect(googleState.google).toHaveBeenCalledWith("gemini-1");
-    expect(vi.mocked(generateText)).toHaveBeenCalledWith(
-      expect.objectContaining({
-        model: "google:gemini-1",
-        prompt: "prompt",
-        system: "system",
-      })
-    );
+    expect(vi.mocked(generateText)).toHaveBeenCalledOnce();
+    const callArgs = vi.mocked(generateText).mock.calls[0]?.[0];
+    expect(callArgs?.prompt).toBe("prompt");
+    expect(callArgs?.system).toBe("system");
     expect(loggerState.info).toHaveBeenCalledTimes(2);
   });
 

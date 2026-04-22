@@ -17,7 +17,7 @@ export async function executeMapperPhase(
   evidence: RepositoryEvidence,
   analysisId: string
 ): Promise<ProjectMap> {
-  const MAX_MAPPER_CHARS = 380_000;
+  const MAX_MAPPER_CHARS = 1_500_000;
   const mapContext = buildMapperSkeleton(validFiles, hardMetrics, evidence).slice(
     0,
     MAX_MAPPER_CHARS

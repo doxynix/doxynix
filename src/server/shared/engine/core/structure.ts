@@ -89,8 +89,8 @@ export async function collectStructuralSignals(
 
   const structuralResult = buildStructuralSignals(evidence, dependencyHotspots);
 
-  dumpDebug("structural-signals", structuralResult);
-  dumpDebug("repository-evidence", evidence);
+  void dumpDebug("structural-signals", structuralResult);
+  void dumpDebug("repository-evidence", evidence);
   return { evidence, structuralSignals: structuralResult };
 }
 

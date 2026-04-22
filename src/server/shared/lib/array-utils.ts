@@ -1,3 +1,5 @@
+import { compact, flattenDeep, uniq, uniqBy } from "es-toolkit";
+
 /**
  * Array manipulation utilities for the server layer.
  * Shared across all features and entities.
@@ -12,7 +14,7 @@
  * unique(paths.map(normalizePath)) // unique normalized paths
  */
 export function unique<T>(values: T[]): T[] {
-  return Array.from(new Set(values));
+  return uniq(values);
 }
 
 /**
@@ -28,13 +30,16 @@ export function unique<T>(values: T[]): T[] {
  * uniquePaths(paths, 10) // Get first 10 unique non-empty paths
  */
 export function uniquePaths(
-  paths: Array<false | null | string | undefined>,
+  paths: Iterable<false | null | string | undefined>,
   limit?: number
 ): string[] {
-  const deduped = Array.from(
-    new Set(paths.filter((path): path is string => typeof path === "string" && path.length > 0))
-  );
-  return typeof limit === "number" ? deduped.slice(0, limit) : deduped;
+  const items = Array.from(paths);
+
+  const cleaned = compact(items) as string[];
+
+  const result = uniq(cleaned);
+
+  return typeof limit === "number" ? result.slice(0, limit) : result;
 }
 
 /**
@@ -46,16 +51,7 @@ export function uniquePaths(
  * uniqueBy(paths, (p) => normalizePath(p))
  */
 export function uniqueBy<T, K>(values: T[], keyFn: (item: T) => K): T[] {
-  const seen = new Set<K>();
-  const result: T[] = [];
-  for (const item of values) {
-    const key = keyFn(item);
-    if (!seen.has(key)) {
-      seen.add(key);
-      result.push(item);
-    }
-  }
-  return result;
+  return uniqBy(values, keyFn);
 }
 
 /**
@@ -66,12 +62,5 @@ export function uniqueBy<T, K>(values: T[], keyFn: (item: T) => K): T[] {
  * flatten([[1, 2], [3, [4, 5]]]) // [1, 2, 3, 4, 5]
  */
 export function flatten<T>(arr: (T | T[])[]): T[] {
-  return arr.reduce<T[]>((acc, val) => {
-    if (Array.isArray(val)) {
-      acc.push(...flatten(val));
-    } else {
-      acc.push(val);
-    }
-    return acc;
-  }, []);
+  return flattenDeep(arr) as T[];
 }
