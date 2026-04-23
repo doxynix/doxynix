@@ -42,7 +42,7 @@ export function CodeComparison({
   const { resolvedTheme } = useTheme();
   const isMounted = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
 
-  const isDark = !isMounted || resolvedTheme === "dark";
+  const isDark = isMounted && resolvedTheme === "dark";
 
   const beforeHtml = isDark ? beforeHtmlDark : beforeHtmlLight;
   const afterHtml = isDark ? afterHtmlDark : afterHtmlLight;

@@ -57,14 +57,9 @@ export function useRepoSetup(repo: UiRepoDetailed) {
 
   const [prevBranch, setPrevBranch] = useState(selectedBranch);
 
-  if (selectedBranch !== prevBranch) {
+  if (selectedBranch !== prevBranch && apiFiles) {
+    setSelectedIds(new Set(getRecommendedPaths(apiFiles)));
     setPrevBranch(selectedBranch);
-
-    if (apiFiles) {
-      setSelectedIds(new Set(getRecommendedPaths(apiFiles)));
-    } else {
-      setSelectedIds(new Set());
-    }
   }
 
   const getTreeData = () => {

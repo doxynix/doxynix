@@ -21,7 +21,7 @@ export default function GlobalError({
       ?.split("=")[1];
 
     if (rid != null) {
-      requestAnimationFrame(() => setRequestId(rid));
+      setRequestId(rid);
     }
   }, []);
 
