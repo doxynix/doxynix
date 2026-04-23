@@ -78,7 +78,7 @@ export const prAnalysisRouter = createTRPCRouter({
         input.prNumber
       );
 
-      if (!analysis) return null;
+      if (analysis == null) return null;
 
       const { publicId, ...rest } = analysis;
       return { ...rest, id: publicId };
@@ -146,5 +146,26 @@ export const prAnalysisRouter = createTRPCRouter({
         riskScore: item.riskScore,
         status: item.status,
       }));
+    }),
+
+  /**
+   * Toggle PR analysis status for repo
+   */
+  setAnalysisStatus: protectedProcedure
+    .input(
+      z.object({
+        enabled: z.boolean(),
+        repoId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      logger.info({
+        enabled: input.enabled,
+        msg: "pr_analysis_status_toggling",
+        repoId: input.repoId,
+        userId: ctx.session.user.id,
+      });
+
+      return comments.map(({ publicId, ...c }) => ({ ...c, id: publicId }));
     }),
 });

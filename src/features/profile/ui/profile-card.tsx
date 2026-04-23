@@ -76,7 +76,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
                 onClick={() => removeAvatar.mutate()}
                 className="absolute right-0 bottom-0 cursor-pointer"
               >
-                <Trash2 className="size-4" />
+                <Trash2 />
               </LoadingButton>
             )}
           </div>
@@ -97,7 +97,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
               onClick={() => fileInputRef.current?.click()}
               className="cursor-pointer"
             >
-              <CloudUpload className="size-4" /> {t("settings_profile_upload_photo_button")}
+              <CloudUpload /> {t("settings_profile_upload_photo_button")}
             </LoadingButton>
 
             <p className="text-muted-foreground text-center text-xs">

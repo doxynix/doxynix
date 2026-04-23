@@ -70,13 +70,19 @@ export const generatedFixRouter = createTRPCRouter({
           repo.owner
         );
 
+        const fix = await generatedFixService.getById(ctx.db, input.fixId);
+
+        if (fix == null) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Fix not found" });
+        }
+
         // Apply fix using full-content strategy
         const fixService = new FixService();
         const result = await fixService.applyFix(clientContext.octokit, {
           branch: input.branch,
           defaultBranch: repo.defaultBranch,
           fixedFiles: input.fixedFiles,
-          fixId: input.fixId,
+          fixId: fix.publicId,
           owner: repo.owner,
           repoId: repo.publicId,
           repoName: repo.name,
@@ -84,7 +90,7 @@ export const generatedFixRouter = createTRPCRouter({
         });
 
         // Update fix status with PR metadata (no diffs stored)
-        await generatedFixService.updateStatus(ctx.db, input.fixId, "PR_OPENED", {
+        await generatedFixService.updateStatus(ctx.db, fix.publicId, "PR_OPENED", {
           githubPrNumber: result.prNumber,
           githubPrUrl: result.prUrl,
         });
@@ -145,7 +151,7 @@ export const generatedFixRouter = createTRPCRouter({
             where: { publicId: input.prAnalysisId },
           });
 
-          if (prAnalysisRecord) {
+          if (prAnalysisRecord != null) {
             validPrAnalysisId = prAnalysisRecord.publicId;
           }
         }

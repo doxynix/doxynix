@@ -123,7 +123,15 @@ export const RealtimeProvider = ({ children }: Props) => {
       // systemChannel.detach();
       // userChannel.detach();
     };
-  }, [client, userId, invalidateAll, invalidate, utils.analytics.getDashboardStats]);
+  }, [
+    client,
+    userId,
+    invalidateAll,
+    invalidate,
+    utils.analytics.getDashboardStats,
+    utils.repoAnalysis.getFileActionResult,
+    utils.generatedFix.getById,
+  ]);
 
   if (!client) return <>{children}</>;
 

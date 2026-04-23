@@ -12,8 +12,6 @@ import { Tabs, TabsContent } from "@/shared/ui/core/tabs";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import { RepoSwagger } from "@/entities/repo-details";
-
 import { RepoDocsContent } from "./repo-docs-content";
 import { RepoDocsTabs } from "./repo-docs-tabs";
 
@@ -71,11 +69,11 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
       value={activeTab}
       orientation="vertical"
       onValueChange={(value) => onTabChange(value as DocType)}
-      className="flex h-[calc(100dvh-220px)] w-full flex-row gap-10"
+      className="flex h-[calc(100dvh-250px)] w-full flex-row gap-10"
     >
       <RepoDocsTabs activeTab={activeTab} items={tabItems} />
 
-      <div className="bg-card relative flex flex-1 flex-col rounded-xl border">
+      <div className="bg-card relative flex flex-1 flex-col border">
         {availableDocs.map((doc) => {
           const isCurrentApiSwagger = Boolean(
             doc.type === "API" && apiMode === "swagger" && metrics?.reference.swagger != null
@@ -161,7 +159,8 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
 
               {isCurrentApiSwagger ? (
                 <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden px-8 pb-8 md:px-12">
-                  <RepoSwagger spec={metrics?.reference.swagger ?? ""} />
+                  {/* <RepoSwagger spec={metrics?.reference.swagger ?? ""} /> */}{" "}
+                  {/* NOTE: эта штука тянет миллиард мб в бандл клиента потом подумать че делать с ним*/}
                 </div>
               ) : (
                 <ScrollArea className="w-full flex-1">

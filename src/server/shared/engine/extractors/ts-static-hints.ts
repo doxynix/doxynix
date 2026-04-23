@@ -43,7 +43,7 @@ const visitNode = (node: ts.Node, context: VisitContext) => {
     const paramCount = node.parameters.length;
     if (paramCount >= COMPLEXITY_SCORING.paramCountThreshold) {
       hints.push({
-        detail: `Function has ${paramCount} parameters (threshold ${COMPLEXITY_SCORING.paramCountThreshold - 1}).`,
+        detail: `Function has ${paramCount} parameters (threshold ${COMPLEXITY_SCORING.paramCountThreshold}).`,
         kind: "many-params",
         line: start.line + 1,
         path: normalizedPath,
