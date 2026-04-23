@@ -34,7 +34,7 @@ export const envServer = createEnv({
 
   server: {
     ABLY_API_KEY: z.string().check(z.minLength(1)),
-    APP_VERSION: z.string().check(z.minLength(1)),
+    APP_VERSION: z._default(z.string(), "1.0.0"),
     BETTERSTACK_API_TOKEN: z.string().check(z.minLength(1)),
 
     DATABASE_URL: z.url(),
