@@ -242,7 +242,7 @@ export function HowItWorksSection() {
         ))}
       </div>
       <Badge variant="outline" className="px-4 py-1">
-        <FileText className="text-success size-4" />
+        <FileText className="text-success" />
         <span className="text-muted-foreground text-xs">{t("section_how_status_msg")}</span>
       </Badge>
     </section>

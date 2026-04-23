@@ -59,7 +59,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     setMode("view");
   }
 
-  const analyzeMutation = trpc.repoAnalysis.analyzeFile.useMutation({
+  const analyzeMutation = trpc.repoAnalysis.quickFileAudit.useMutation({
     onSuccess: (data) => toast.success(`Audit started! Job: ${data.jobId}`),
   });
 

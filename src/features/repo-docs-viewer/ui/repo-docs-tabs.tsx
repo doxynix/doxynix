@@ -5,7 +5,6 @@ import { ChevronRight } from "lucide-react";
 
 import { type AvailableDocs, type DocType } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
-import { Badge } from "@/shared/ui/core/badge";
 import { TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 
 type TabItem = {
@@ -32,25 +31,12 @@ export function RepoDocsTabs({ activeTab, items }: Readonly<Props>) {
             <TabsTrigger
               key={item.id}
               value={item.value}
-              className={cn(
-                "relative flex w-full items-center justify-start gap-3 rounded-lg px-3 py-2.5 shadow-none transition-all",
-                "text-muted-foreground"
-              )}
+              className={cn("w-full items-center justify-start gap-3 p-3")}
             >
-              <item.icon
-                className={cn(
-                  "size-4 shrink-0",
-                  isActive ? "text-foreground" : "text-muted-foreground"
-                )}
-              />
+              <item.icon className={cn(isActive ? "text-foreground" : "text-muted-foreground")} />
               <span className="grow text-left text-sm font-medium capitalize">
                 {item.value.toLowerCase().replace("_", " ")}
               </span>
-              {item.status != null && (
-                <Badge variant="outline" className={cn("text-xs uppercase")}>
-                  {item.status}
-                </Badge>
-              )}
               {isActive && <ChevronRight className="size-3" />}
             </TabsTrigger>
           );

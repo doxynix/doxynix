@@ -17,7 +17,7 @@ export const prAnalysisRouter = createTRPCRouter({
         focusAreas: z
           .array(z.enum(["architecture", "performance", "security", "style"]))
           .optional(),
-        repoId: z.number().int().positive(),
+        repoId: z.string(),
         tokenBudget: z.number().int().min(10_000).max(100_000).optional(),
       })
     )
@@ -44,15 +44,28 @@ export const prAnalysisRouter = createTRPCRouter({
    * Get PR analysis by analysis ID
    */
   getAnalysis: protectedProcedure
-    .input(z.object({ analysisId: z.number().int().positive() }))
+    .input(z.object({ analysisId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const analysis = await prAnalysisService.getById(ctx.db, input.analysisId);
+      const analysis = await ctx.db.pullRequestAnalysis.findUnique({
+        select: {
+          baseSha: true,
+          createdAt: true,
+          error: true,
+          headSha: true,
+          prNumber: true,
+          publicId: true,
+          riskScore: true,
+          status: true,
+        },
+        where: { publicId: input.analysisId },
+      });
 
       if (analysis == null) {
         throw new Error("Analysis not found");
       }
 
-      return analysis;
+      const { publicId, ...rest } = analysis;
+      return { ...rest, id: publicId };
     }),
 
   /**
@@ -62,20 +75,78 @@ export const prAnalysisRouter = createTRPCRouter({
     .input(
       z.object({
         prNumber: z.number().int().positive(),
-        repoId: z.number().int().positive(),
+        repoId: z.string(),
       })
     )
     .query(async ({ ctx, input }) => {
-      return await prAnalysisService.getByRepoAndPRNumber(ctx.db, input.repoId, input.prNumber);
+      const analysis = await prAnalysisService.getByRepoAndPRNumber(
+        ctx.db,
+        input.repoId,
+        input.prNumber
+      );
+
+      if (analysis == null) return null;
+
+      const { publicId, ...rest } = analysis;
+      return { ...rest, id: publicId };
     }),
 
   /**
    * Get PR comments for an analysis
    */
   getComments: protectedProcedure
-    .input(z.object({ analysisId: z.number().int().positive() }))
+    .input(z.object({ analysisId: z.string() }))
     .query(async ({ ctx, input }) => {
-      return prAnalysisService.getCommentsByAnalysis(ctx.db, input.analysisId);
+      const comments = await ctx.db.pullRequestComment.findMany({
+        orderBy: [{ filePath: "asc" }, { line: "asc" }],
+        select: {
+          body: true,
+          filePath: true,
+          findingType: true,
+          line: true,
+          publicId: true,
+          riskLevel: true,
+        },
+        where: {
+          analysis: { publicId: input.analysisId },
+        },
+      });
+
+      return comments.map(({ publicId, ...c }) => ({ ...c, id: publicId }));
+    }),
+
+  listByRepository: protectedProcedure
+    .input(z.object({ repoId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const items = await ctx.db.pullRequestAnalysis.findMany({
+        orderBy: { createdAt: "desc" },
+        select: {
+          _count: {
+            select: { comments: true },
+          },
+          createdAt: true,
+          headSha: true,
+          prNumber: true,
+          publicId: true,
+          riskScore: true,
+          status: true,
+        },
+        where: {
+          repo: {
+            publicId: input.repoId,
+          },
+        },
+      });
+
+      return items.map((item) => ({
+        createdAt: item.createdAt,
+        findingCount: item._count.comments,
+        headSha: item.headSha,
+        id: item.publicId,
+        prNumber: item.prNumber,
+        riskScore: item.riskScore,
+        status: item.status,
+      }));
     }),
 
   /**
@@ -85,7 +156,7 @@ export const prAnalysisRouter = createTRPCRouter({
     .input(
       z.object({
         enabled: z.boolean(),
-        repoId: z.number().int().positive(),
+        repoId: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {

@@ -127,7 +127,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm font-medium">
-              <Code2 className="size-4" /> Repository Stats
+              <Code2 /> Repository Stats
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-3 gap-4">
@@ -177,7 +177,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm font-medium">
-              <Sparkles className="size-4" /> Analysis Signals
+              <Sparkles /> Analysis Signals
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
@@ -211,7 +211,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm font-medium">
-              <FileText className="size-4" /> Documentation
+              <FileText /> Documentation
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -265,7 +265,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-warning flex items-center gap-2 text-sm font-medium">
-              <AlertTriangle className="size-4" /> Complex Files
+              <AlertTriangle /> Complex Files
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -277,7 +277,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                 >
                   <div className="flex items-center gap-2 truncate">
                     <span className="text-muted-foreground text-[10px]">{idx + 1}.</span>
-                    <FileCode className="size-3.5 shrink-0 opacity-60" />
+                    <FileCode className="size-3.5 opacity-60" />
                     <span className="truncate">{file}</span>
                   </div>
                 </div>

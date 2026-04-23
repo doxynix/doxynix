@@ -30,7 +30,7 @@ export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <n.icon className={cn("size-4")} />
+              <n.icon />
               <span>{n.label}</span>
             </Link>
           </Button>

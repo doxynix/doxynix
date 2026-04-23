@@ -51,7 +51,7 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
       title="Delete repository?"
       trigger={
         <Button variant="destructive" className="w-fit cursor-pointer">
-          Delete repository <Trash2 className="size-4" />
+          Delete repository <Trash2 />
         </Button>
       }
       onConfirm={handleDelete}

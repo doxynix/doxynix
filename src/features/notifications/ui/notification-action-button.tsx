@@ -42,7 +42,7 @@ export function NotificationActionButton({
           className
         )}
       >
-        <Icon className="size-4" />
+        <Icon />
       </LoadingButton>
     </AppTooltip>
   );

@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
 
-export interface RequestStore {
+export type RequestStore = {
   ip: string;
   method: string;
   origin?: string;
@@ -17,7 +17,7 @@ export interface RequestStore {
   userRole?: string;
 
   // appVersion?: string;
-}
+};
 
 export const requestContext = new AsyncLocalStorage<RequestStore>();
 

@@ -2,6 +2,7 @@ import type { RepositoryFact, RepositoryFinding } from "../../types";
 import type { RepositoryEvidence } from "../core/discovery.types";
 import type { DocumentationInputModel, ReportSectionKind } from "../core/documentation.types";
 import type { RepoMetrics } from "../core/metrics.types";
+import { DOC_PIPELINE_THRESHOLDS, SCHEMA_LIMITS } from "../core/scoring-constants";
 
 export type EvaluationStatus =
   | "fail"
@@ -19,7 +20,6 @@ export type PrimaryDocEvaluation = {
   notes: string[];
   ready: boolean;
   supportedBySections: ReportSectionKind[];
-  tier: "primary";
 };
 
 export type SectionEvaluationSummary = {
@@ -155,7 +155,6 @@ function buildPrimaryDocEvaluation(
     notes,
     ready,
     supportedBySections,
-    tier: "primary",
   };
 }
 
@@ -172,7 +171,9 @@ function buildSectionEvaluationSummary(
     evidencePathCount: section.evidencePaths.length,
     section: section.section,
     title: section.title,
-    unknownHeavy: section.confidence < 70 || section.unknowns.length >= 2,
+    unknownHeavy:
+      section.confidence < DOC_PIPELINE_THRESHOLDS.minConfidenceForFact ||
+      section.unknowns.length >= 2,
     unknowns: section.unknowns,
   };
 }
@@ -437,7 +438,7 @@ export function buildEvaluationSnapshot(params: EvaluationBuildParams): Evaluati
       ),
     },
     topSignals: {
-      facts: repositoryFacts.slice(0, 5).map((fact) => ({
+      facts: repositoryFacts.slice(0, SCHEMA_LIMITS.maxDebugSignals).map((fact) => ({
         confidence: fact.confidence,
         id: fact.id,
         title: fact.title,

@@ -142,65 +142,6 @@
     ]
   },
   {
-    "author": "DefinitelyTyped",
-    "avatar": "https://github.com/DefinitelyTyped.png?size=96",
-    "authorLink": "https://github.com/DefinitelyTyped",
-    "packages": [
-      {
-        "name": "@types/file-saver",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/js-cookie",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/jsonwebtoken",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/node",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/nodemailer",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/parse-github-url",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/pg",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/picomatch",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/react",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/react-dom",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/react-scroll",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/sloc",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/webpack-stats-plugin",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
     "author": "ESLint",
     "avatar": "https://github.com/eslint.png?size=96",
     "authorLink": "https://github.com/eslint",
@@ -251,6 +192,57 @@
       },
       {
         "name": "eslint-plugin-validate-jsx-nesting",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "DefinitelyTyped",
+    "avatar": "https://github.com/DefinitelyTyped.png?size=96",
+    "authorLink": "https://github.com/DefinitelyTyped",
+    "packages": [
+      {
+        "name": "@types/file-saver",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/js-cookie",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/node",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/nodemailer",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/pg",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/picomatch",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/react",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/react-dom",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/react-scroll",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/sloc",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/webpack-stats-plugin",
         "license": "MIT"
       }
     ]
@@ -345,6 +337,49 @@
       },
       {
         "name": "react-codemirror-merge",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "GitHub",
+    "avatar": "https://github.com/octokit.png?size=96",
+    "authorLink": "https://github.com/octokit",
+    "packages": [
+      {
+        "name": "@octokit/auth-app",
+        "license": "MIT"
+      },
+      {
+        "name": "@octokit/auth-oauth-user",
+        "license": "MIT"
+      },
+      {
+        "name": "@octokit/plugin-paginate-rest",
+        "license": "MIT"
+      },
+      {
+        "name": "@octokit/plugin-retry",
+        "license": "MIT"
+      },
+      {
+        "name": "@octokit/plugin-throttling",
+        "license": "MIT"
+      },
+      {
+        "name": "@octokit/rest",
+        "license": "MIT"
+      },
+      {
+        "name": "@octokit/types",
+        "license": "MIT"
+      },
+      {
+        "name": "@octokit/webhooks",
+        "license": "MIT"
+      },
+      {
+        "name": "@octokit/webhooks-types",
         "license": "MIT"
       }
     ]
@@ -467,37 +502,6 @@
       {
         "name": "typedoc-plugin-llms-txt",
         "license": "BlueOak-1.0.0"
-      }
-    ]
-  },
-  {
-    "author": "GitHub",
-    "avatar": "https://github.com/octokit.png?size=96",
-    "authorLink": "https://github.com/octokit",
-    "packages": [
-      {
-        "name": "@octokit/auth-app",
-        "license": "MIT"
-      },
-      {
-        "name": "@octokit/plugin-paginate-rest",
-        "license": "MIT"
-      },
-      {
-        "name": "@octokit/plugin-retry",
-        "license": "MIT"
-      },
-      {
-        "name": "@octokit/plugin-throttling",
-        "license": "MIT"
-      },
-      {
-        "name": "@octokit/rest",
-        "license": "MIT"
-      },
-      {
-        "name": "@octokit/types",
-        "license": "MIT"
       }
     ]
   },
@@ -965,21 +969,6 @@
     ]
   },
   {
-    "author": "Sindresorhus",
-    "avatar": "https://github.com/sindresorhus.png?size=96",
-    "authorLink": "https://github.com/sindresorhus",
-    "packages": [
-      {
-        "name": "binary-extensions",
-        "license": "MIT"
-      },
-      {
-        "name": "p-limit",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
     "author": "Trigger.dev",
     "avatar": "https://github.com/triggerdotdev.png?size=96",
     "authorLink": "https://github.com/triggerdotdev",
@@ -1076,17 +1065,6 @@
       {
         "name": "nodemailer",
         "license": "MIT-0"
-      }
-    ]
-  },
-  {
-    "author": "Auth0",
-    "avatar": "https://github.com/auth0.png?size=96",
-    "authorLink": "https://github.com/auth0",
-    "packages": [
-      {
-        "name": "jsonwebtoken",
-        "license": "MIT"
       }
     ]
   },
@@ -1245,6 +1223,17 @@
     ]
   },
   {
+    "author": "Dqbd",
+    "avatar": "https://github.com/dqbd.png?size=96",
+    "authorLink": "https://github.com/dqbd",
+    "packages": [
+      {
+        "name": "js-tiktoken",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Eemeli Aro",
     "avatar": null,
     "authorLink": "https://eemeli.org/yaml",
@@ -1333,6 +1322,17 @@
     ]
   },
   {
+    "author": "Gr2m",
+    "avatar": "https://github.com/gr2m.png?size=96",
+    "authorLink": "https://github.com/gr2m",
+    "packages": [
+      {
+        "name": "octokit-plugin-create-pull-request",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Gregoor",
     "avatar": "https://github.com/Gregoor.png?size=96",
     "authorLink": "https://github.com/Gregoor",
@@ -1388,6 +1388,17 @@
     ]
   },
   {
+    "author": "IonicaBizau",
+    "avatar": "https://github.com/IonicaBizau.png?size=96",
+    "authorLink": "https://github.com/IonicaBizau",
+    "packages": [
+      {
+        "name": "git-url-parse",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Jan Amann",
     "avatar": "https://github.com/amannn.png?size=96",
     "authorLink": "https://github.com/amannn",
@@ -1432,12 +1443,12 @@
     ]
   },
   {
-    "author": "Jon Schlinkert",
-    "avatar": "https://github.com/Jonschlinkert.png?size=96",
-    "authorLink": "https://github.com/Jonschlinkert",
+    "author": "Jonschlinkert",
+    "avatar": "https://github.com/jonschlinkert.png?size=96",
+    "authorLink": "https://github.com/jonschlinkert",
     "packages": [
       {
-        "name": "parse-github-url",
+        "name": "strip-comments",
         "license": "MIT"
       }
     ]
@@ -1498,6 +1509,17 @@
     ]
   },
   {
+    "author": "Langchain-ai",
+    "avatar": "https://github.com/langchain-ai.png?size=96",
+    "authorLink": "https://github.com/langchain-ai",
+    "packages": [
+      {
+        "name": "langsmith",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "lint-staged",
     "avatar": "https://github.com/lint-staged.png?size=96",
     "authorLink": "https://github.com/lint-staged",
@@ -1527,6 +1549,17 @@
       {
         "name": "lucide-react",
         "license": "ISC"
+      }
+    ]
+  },
+  {
+    "author": "Luin",
+    "avatar": "https://github.com/luin.png?size=96",
+    "authorLink": "https://github.com/luin",
+    "packages": [
+      {
+        "name": "ioredis",
+        "license": "MIT"
       }
     ]
   },
@@ -1630,6 +1663,17 @@
     ]
   },
   {
+    "author": "Mrmlnc",
+    "avatar": "https://github.com/mrmlnc.png?size=96",
+    "authorLink": "https://github.com/mrmlnc",
+    "packages": [
+      {
+        "name": "fast-glob",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "NaturalIntelligence",
     "avatar": "https://github.com/NaturalIntelligence.png?size=96",
     "authorLink": "https://github.com/NaturalIntelligence",
@@ -1680,6 +1724,17 @@
     "packages": [
       {
         "name": "prisma-dbml-generator",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Open Source Community",
+    "avatar": null,
+    "authorLink": "https://es-toolkit.dev",
+    "packages": [
+      {
+        "name": "es-toolkit",
         "license": "MIT"
       }
     ]
@@ -1762,12 +1817,34 @@
     ]
   },
   {
+    "author": "SGrondin",
+    "avatar": "https://github.com/SGrondin.png?size=96",
+    "authorLink": "https://github.com/SGrondin",
+    "packages": [
+      {
+        "name": "bottleneck",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Shri Ganesh Jha",
     "avatar": "https://github.com/TheSGJ.png?size=96",
     "authorLink": "https://github.com/TheSGJ",
     "packages": [
       {
         "name": "nextjs-toploader",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Sindresorhus",
+    "avatar": "https://github.com/sindresorhus.png?size=96",
+    "authorLink": "https://github.com/sindresorhus",
+    "packages": [
+      {
+        "name": "binary-extensions",
         "license": "MIT"
       }
     ]
@@ -1839,23 +1916,23 @@
     ]
   },
   {
+    "author": "Unjs",
+    "avatar": "https://github.com/unjs.png?size=96",
+    "authorLink": "https://github.com/unjs",
+    "packages": [
+      {
+        "name": "pathe",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Valentin Palkovic",
     "avatar": "https://github.com/valentinpalkovic.png?size=96",
     "authorLink": "https://github.com/valentinpalkovic",
     "packages": [
       {
         "name": "prisma-json-schema-generator",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "Vishnu Sankar",
-    "avatar": "https://github.com/iamvishnusankar.png?size=96",
-    "authorLink": "https://github.com/iamvishnusankar",
-    "packages": [
-      {
-        "name": "next-sitemap",
         "license": "MIT"
       }
     ]
@@ -1879,6 +1956,17 @@
       {
         "name": "knip",
         "license": "ISC"
+      }
+    ]
+  },
+  {
+    "author": "Xenova",
+    "avatar": "https://github.com/xenova.png?size=96",
+    "authorLink": "https://github.com/xenova",
+    "packages": [
+      {
+        "name": "@xenova/transformers",
+        "license": "Apache-2.0"
       }
     ]
   },

@@ -79,7 +79,7 @@ export function AppHeader() {
           <AppTooltip content="Repositories">
             <Button asChild size="icon" variant="ghost">
               <Link href="/dashboard/repos" aria-label="Repositories">
-                <Book className="size-4" />
+                <Book />
               </Link>
             </Button>
           </AppTooltip>

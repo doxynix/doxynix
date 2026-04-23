@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, History } from "lucide-react";
+import { ChevronDown, HistoryIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import type { UiApiKey } from "@/shared/api/trpc";
@@ -37,7 +37,7 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
     >
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
-          <History className="text-muted-foreground size-4" />
+          <HistoryIcon className="text-muted-foreground" />
           <h3 className="text-sm font-medium">{t("settings_api_keys_history_revoked")}</h3>
           <Badge className="ml-1 text-xs">{archived.length}</Badge>
         </div>

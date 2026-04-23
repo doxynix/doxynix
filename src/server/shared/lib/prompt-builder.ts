@@ -18,10 +18,10 @@ export type PromptRole =
   | "readme-writer"
   | "security-sentinel";
 
-export interface PromptSection {
+export type PromptSection = {
   content: string;
   title: string;
-}
+};
 
 /**
  * FluentPromptBuilder for consistent prompt construction

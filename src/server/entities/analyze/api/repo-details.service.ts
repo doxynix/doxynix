@@ -87,7 +87,7 @@ export const repoDetailsService = {
       }
     )();
 
-    return { html, id: doc.publicId };
+    return { html, id: doc.publicId, raw: doc.content };
   },
 
   async getHistory(db: DbClient, repoId: string) {

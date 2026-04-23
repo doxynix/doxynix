@@ -11,12 +11,12 @@ import type {
 } from "../core/discovery.types";
 import type { RisksSectionBody } from "../core/documentation.types";
 import type { RepoMetrics } from "../core/metrics.types";
-import { RISK_SCORING } from "../core/scoring-constants";
+import { RISK_SCORING, RISK_THRESHOLDS } from "../core/scoring-constants";
 
 function severityForScore(score: number): RiskFindingRef["severity"] {
-  if (score >= 85) return "CRITICAL";
-  if (score >= 65) return "HIGH";
-  if (score >= 40) return "MODERATE";
+  if (score >= RISK_THRESHOLDS.critical) return "CRITICAL";
+  if (score >= RISK_THRESHOLDS.high) return "HIGH";
+  if (score >= RISK_THRESHOLDS.moderate) return "MODERATE";
   return "LOW";
 }
 

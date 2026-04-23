@@ -50,7 +50,7 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
             }}
             className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
           >
-            <Trash2 className="size-4" />
+            <Trash2 />
           </Button>
         </AppTooltip>
       }

@@ -13,7 +13,7 @@ export const generatedFixService = {
       branch: string;
       createdByUser?: boolean;
       description?: string;
-      prAnalysisId?: number;
+      prAnalysisId?: string;
       repoId: number;
       title: string;
     }
@@ -23,26 +23,29 @@ export const generatedFixService = {
         branch: input.branch,
         createdByUser: input.createdByUser ?? false,
         description: input.description,
-        prAnalysisId: input.prAnalysisId,
-        repoId: input.repoId,
-        status: "DRAFT" as const,
+        repo: { connect: { id: input.repoId } },
+        status: "DRAFT",
         title: input.title,
-        // IMPORTANT: diffJson is NOT set here. Diffs are transient.
+        ...(input.prAnalysisId != null && {
+          prAnalysis: { connect: { publicId: input.prAnalysisId } },
+        }),
       },
     });
   },
 
-  async getById(db: DbClient, id: number) {
+  async getById(db: DbClient, id: string) {
     return db.generatedFix.findUnique({
-      where: { id },
+      where: { publicId: id },
     });
   },
 
-  async getByRepoId(db: DbClient, repoId: number, status?: FixStatus) {
+  async getByRepoId(db: DbClient, repoPublicId: string, status?: FixStatus) {
     return db.generatedFix.findMany({
       orderBy: { createdAt: "desc" },
       where: {
-        repoId,
+        repo: {
+          publicId: repoPublicId,
+        },
         ...(status != null && { status }),
       },
     });
@@ -68,7 +71,6 @@ export const generatedFixService = {
         githubPrNumber: data?.githubPrNumber,
         githubPrUrl: data?.githubPrUrl,
         status,
-        // IMPORTANT: diffJson explicitly NOT updated. Use transient diffs in routes.
       },
       where: { id },
     });

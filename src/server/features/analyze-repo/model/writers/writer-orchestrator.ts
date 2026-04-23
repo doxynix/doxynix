@@ -1,5 +1,4 @@
 import { DocType, type Repo } from "@prisma/client";
-import Bottleneck from "bottleneck";
 
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "@/server/shared/engine/core/discovery.types";
@@ -7,8 +6,10 @@ import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { uniquePaths } from "@/server/shared/lib/array-utils";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
+import { llmLimiter } from "@/server/shared/lib/llm-limiter";
+import { hasText } from "@/server/shared/lib/string-utils";
 
-import { buildStageContextPack } from "../context-manager";
+import { buildStageContextPack, type StageContextPack } from "../context-manager";
 import {
   buildSectionDebugSnapshot,
   buildWriterContextSnapshot,
@@ -43,18 +44,6 @@ export async function orchestrateWriterTasks(
   userId: number,
   language: string
 ) {
-  const limiter = new Bottleneck({
-    maxConcurrent: 1,
-    minTime: 3000,
-    trackDoneStatus: true,
-  });
-
-  limiter.on("failed", async (error, jobInfo) => {
-    logger.warn({ error, jobInfo, msg: "Job failed, checking for retry" });
-    if (jobInfo.retryCount < 2) return 1000;
-    return -1;
-  });
-
   const documentationInput = getDocumentationInputSnapshot(evidence, hardMetrics);
   const writerInputs = buildWriterSectionPayloads(documentationInput);
   const sectionDebugSnapshot = buildSectionDebugSnapshot(documentationInput);
@@ -127,14 +116,44 @@ export async function orchestrateWriterTasks(
   const results: WriterResult[] = [];
   const taskMap: Partial<Record<WriterTaskKey, number>> = {};
 
-  const addToQueue = async (key: WriterTaskKey, taskFn: () => Promise<WriterResult>) => {
+  const addToQueue = async (
+    key: WriterTaskKey,
+    contextPack: null | StageContextPack,
+    taskFn: () => Promise<WriterResult>
+  ) => {
     taskMap[key] = results.length;
-    const result = await limiter.schedule({ id: `${analysisId}-${key}` }, taskFn);
-    results.push(result);
+
+    const rawTokens = contextPack?.debug.selectedTokens ?? 10_000;
+    const estimatedWeight = Math.ceil(rawTokens * 1.3) + 15_000;
+
+    try {
+      logger.info({
+        calculatedWeight: estimatedWeight,
+        msg: `Scheduling task ${key}`,
+        tokens: rawTokens,
+      });
+
+      const result = await llmLimiter.schedule(
+        {
+          id: `${analysisId}-${key}`,
+          weight: estimatedWeight,
+        },
+        taskFn
+      );
+
+      results.push(result);
+    } catch (error) {
+      logger.error({ error, key, msg: "Writer failed in queue" });
+      results.push({
+        error: "Queue overflow or API error",
+        name: key.toLowerCase() as WriterName,
+        status: "failed",
+      });
+    }
   };
 
   if (requestedDocs.includes(DocType.README)) {
-    await addToQueue("README", async () =>
+    await addToQueue("README", writerContexts.readme, async () =>
       executeReadmeWriter(
         analysisId,
         writerInputs.readme.payload,
@@ -146,7 +165,7 @@ export async function orchestrateWriterTasks(
   }
 
   if (requestedDocs.includes(DocType.API)) {
-    await addToQueue("API", async () =>
+    await addToQueue("API", writerContexts.api, async () =>
       executeApiWriter(
         analysisId,
         writerInputs.api.payload,
@@ -158,7 +177,7 @@ export async function orchestrateWriterTasks(
   }
 
   if (requestedDocs.includes(DocType.ARCHITECTURE)) {
-    await addToQueue("ARCHITECTURE", async () =>
+    await addToQueue("ARCHITECTURE", writerContexts.architecture, async () =>
       executeArchitectureWriter(
         analysisId,
         writerInputs.architecture.payload,
@@ -172,7 +191,7 @@ export async function orchestrateWriterTasks(
   }
 
   if (requestedDocs.includes(DocType.CONTRIBUTING)) {
-    await addToQueue("CONTRIBUTING", async () =>
+    await addToQueue("CONTRIBUTING", writerContexts.readme, async () =>
       executeContributingWriter(
         analysisId,
         writerInputs.contributing.payload,
@@ -184,7 +203,7 @@ export async function orchestrateWriterTasks(
   }
 
   if (requestedDocs.includes(DocType.CHANGELOG)) {
-    await addToQueue("CHANGELOG", () =>
+    await addToQueue("CHANGELOG", null, () =>
       executeChangelogWriter(analysisId, analysisResult, userId, repo, language)
     );
   }
@@ -241,23 +260,19 @@ export async function orchestrateWriterTasks(
   void dumpDebug("report-section-docs", {
     generated: {
       api: {
-        hasMarkdown: generatedApiMarkdown != null && generatedApiMarkdown.length > 0,
-        hasSpec: swaggerYaml != null && swaggerYaml.length > 0,
+        hasMarkdown: hasText(generatedApiMarkdown),
+        hasSpec: hasText(swaggerYaml),
       },
-      architecture: {
-        hasMarkdown: generatedArchitecture != null && generatedArchitecture.length > 0,
-      },
-      primary: {
-        apiReady: generatedApiMarkdown != null && generatedApiMarkdown.length > 0,
-        architectureReady: generatedArchitecture != null && generatedArchitecture.length > 0,
-        readmeReady: generatedReadme != null && generatedReadme.length > 0,
-      },
-      readme: {
-        hasMarkdown: generatedReadme != null && generatedReadme.length > 0,
-      },
-      secondary: {
-        changelogReady: generatedChangelog != null && generatedChangelog.length > 0,
-        contributingReady: generatedContributing != null && generatedContributing.length > 0,
+      architecture: hasText(generatedArchitecture),
+      changelog: hasText(generatedChangelog),
+      contributing: hasText(generatedContributing),
+      readme: hasText(generatedReadme),
+      readyStates: {
+        api: hasText(generatedApiMarkdown),
+        architecture: hasText(generatedArchitecture),
+        changelog: hasText(generatedChangelog),
+        contributing: hasText(generatedContributing),
+        readme: hasText(generatedReadme),
       },
     },
     runtime: analysisResult.analysisRuntime,

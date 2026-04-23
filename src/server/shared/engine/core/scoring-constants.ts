@@ -35,13 +35,17 @@ export const COMPLEXITY_SCORING = {
   /** Maximum penalty from hotspot ratio (multiplied by 30) */
   hotspotRatioPenaltyMax: 22,
 
+  lineCountThreshold: 80, // LONG_FN_LINES
   /** Maximum penalty from max nesting depth (multiplied by 3) */
   maxNestingPenaltyMax: 20,
+
   /** Minimum complexity threshold (absolute floor) */
   minComplexityThreshold: 12,
-
   /** Nesting depth multiplier - deeper nesting = worse */
   nestingDepthMultiplier: 3,
+
+  paramCountThreshold: 7, // MANY_PARAMS
+
   /** P85 percentile for complexity threshold detection */
   percentileThreshold: 0.85,
 };
@@ -64,6 +68,10 @@ export const TECH_DEBT_SCORING = {
   duplicationMultiplier: 1.8,
   /** Maximum penalty from code duplication */
   duplicationPenaltyMax: 28,
+
+  highDuplicationThreshold: 15,
+
+  minDuplicationThreshold: 8, // Процент, ниже которого не создаем Finding
 
   /** Maximum penalty from orphaned modules */
   orphanPenaltyMax: 18,
@@ -227,14 +235,14 @@ export const MAPPER_FILE_SCORING = {
  * Used in doc-priority.ts to calculate which docs should be generated.
  */
 export const DOC_PRIORITY_WEIGHTS = {
-  api: 16,
-  architecture: 18,
-  changelog: 3,
+  api: 20,
+  architecture: 20,
+  changelog: 20,
 
   // Secondary documentation (lower priority)
-  contributing: 5,
+  contributing: 20,
   // Primary documentation (higher priority)
-  readme: 18,
+  readme: 20,
 };
 
 // ============================================================================
@@ -385,6 +393,127 @@ export const AI_POLICY_CONSTANTS = {
 } as const;
 
 export type LLMTaskType = keyof typeof LLM_TEMPERATURE_STRATEGY;
+
+// ============================================================================
+// ADAPTER & PARSER PRIORITIES
+// ============================================================================
+
+export const ADAPTER_PRIORITIES = {
+  regex: 100, // Базовый уровень (наименее точный)
+  treeSitter: 200, // Средний уровень (AST без типов)
+  typescript: 300, // Максимальный уровень (полный компилятор с типами)
+};
+
+// ============================================================================
+// SCHEMA & COLLECTION LIMITS (Validation & UI)
+// ============================================================================
+
+export const SCHEMA_LIMITS = {
+  maxCommitsInHotspots: 100,
+  maxCyclesDetected: 100,
+  maxDebugSignals: 100, // Для отображения в топ-сигналах
+  maxDominantLanguages: 100,
+  maxEvidencePerFact: 100,
+  maxEvidencePerFinding: 100,
+  maxFilesPerScanBatch: 100,
+  maxFilesToSkeletonize: 100,
+  maxFrameworksInProfile: 100,
+  maxRepositoryFacts: 100,
+  maxRepositoryFindings: 100,
+  maxUnresolvedImportsSamples: 100,
+};
+
+// ============================================================================
+// HEURISTIC CONFIDENCE LEVELS (0-100)
+// ============================================================================
+
+/**
+ * Уровни уверенности для различных методов извлечения фактов.
+ * Чем глубже анализ, тем выше число.
+ */
+export const CONFIDENCE_LEVELS = {
+  astRoute: 74,
+  // Tree-sitter (Хорошая точность по структуре)
+  astStructure: 80,
+  astSymbol: 78,
+
+  // Базовые категории
+  configDiscovery: 90,
+  frameworkDiscovery: 72,
+  inferredLibrary: 68,
+
+  lowSignalDiscovery: 58,
+
+  // Regex / Manifests (Средняя точность)
+  manifestMatch: 88,
+  // OpenAPI / Swagger
+  openapiSpec: 92,
+  regexExported: 75,
+
+  regexInternal: 60,
+  // TypeScript Compiler (Самый надежный)
+  tsCompiler: 95,
+  tsHeuristic: 75,
+  tsInferred: 88,
+};
+
+// ============================================================================
+// ENTRYPOINT DETECTION CONFIDENCE
+// ============================================================================
+
+export const ENTRYPOINT_CONFIDENCE = {
+  heuristic: 58, // Предположение по названию файла
+  libraryExport: 72, // Публичный экспорт библиотеки
+  runtimeApi: 86, // Явный API endpoint
+  runtimeLogic: 74, // Логика запуска
+};
+
+// ============================================================================
+// ARCHITECTURE RANKING WEIGHTS
+// ============================================================================
+
+/**
+ * Веса для определения "важности" модулей в архитектуре.
+ * Используются для сортировки и выбора файлов в отчет.
+ */
+export const ARCHITECTURE_WEIGHTS = {
+  apiSurfaceMultiplier: 4,
+  complexityOffset: 1.15,
+  exportMultiplier: 1,
+  inboundMultiplier: 3, // Входящие связи важнее исходящих
+  outboundMultiplier: 1,
+
+  // Модификаторы для риск-модели
+  riskInboundMultiplier: 14,
+  riskOutboundMultiplier: 3,
+};
+
+// ============================================================================
+// RISK SEVERITY THRESHOLDS
+// ============================================================================
+
+export const RISK_THRESHOLDS = {
+  critical: 85,
+  high: 65,
+  moderate: 40,
+};
+
+// ============================================================================
+// PIPELINE & DOCUMENTATION THRESHOLDS
+// ============================================================================
+
+export const DOC_PIPELINE_THRESHOLDS = {
+  maxConfigPaths: 6,
+  // Лимиты на количество путей в секциях
+  maxEvidencePaths: 10,
+
+  maxFirstLookPaths: 12,
+  maxPublicInterfacePaths: 24,
+  maxRiskPaths: 8,
+  minConfidenceForFact: 70,
+  // Порог уверенности, ниже которого ставится плашка "Unknown" или "Low Confidence"
+  minConfidenceForStrength: 75,
+};
 
 /**
  * Validate that penalty values make sense (for development/testing).

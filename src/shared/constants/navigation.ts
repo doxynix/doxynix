@@ -6,6 +6,7 @@ import {
   BookOpen,
   Code2,
   FileText,
+  GitPullRequest,
   Headset,
   HeartHandshakeIcon,
   HistoryIcon,
@@ -174,6 +175,12 @@ export const getRepoDetailsMenu = (owner: string, name: string): MenuItems => {
       icon: Map,
       id: "map",
       label: "Map",
+    },
+    {
+      href: `${base}/pulls`,
+      icon: GitPullRequest,
+      id: "pulls",
+      label: "Pulls",
     },
     {
       href: `${base}/code`,

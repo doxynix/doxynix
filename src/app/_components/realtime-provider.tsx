@@ -93,6 +93,16 @@ export const RealtimeProvider = ({ children }: Props) => {
           invalidate();
         }
       }
+
+      if (msg.name === REALTIME_CONFIG.events.user.fileActionCompleted) {
+        const payload = msg.data as { path: string; type: "AUDIT" | "DOCUMENTATION" };
+
+        void utils.repoAnalysis.getFileActionResult.invalidate({ path: payload.path });
+
+        toast.success(
+          `ИИ завершил ${payload.type === "AUDIT" ? "аудит" : "документирование"} файла!`
+        );
+      }
     };
 
     void systemChannel.subscribe(handleSystemMsg);
@@ -105,7 +115,14 @@ export const RealtimeProvider = ({ children }: Props) => {
       // systemChannel.detach();
       // userChannel.detach();
     };
-  }, [client, userId, invalidateAll, invalidate, utils.analytics.getDashboardStats]);
+  }, [
+    client,
+    userId,
+    invalidateAll,
+    invalidate,
+    utils.analytics.getDashboardStats,
+    utils.repoAnalysis.getFileActionResult,
+  ]);
 
   if (!client) return <>{children}</>;
 

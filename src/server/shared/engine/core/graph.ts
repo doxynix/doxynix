@@ -6,6 +6,7 @@ import ts from "typescript";
 import { dumpDebug } from "../../lib/debug-logger";
 import { getKnownLanguageExtensions } from "../../lib/language-metadata";
 import { normalizeRepoPath } from "./common";
+import { SCHEMA_LIMITS } from "./scoring-constants";
 
 export type AliasRule = {
   prefix: string;
@@ -176,7 +177,7 @@ export function findDependencyCycles(graphMap: Map<string, Set<string>>): string
     stack.push(node);
 
     graph.forEachOutNeighbor(node, (neighbor) => {
-      if (cycles.length >= 8) return;
+      if (cycles.length >= SCHEMA_LIMITS.maxCyclesDetected) return;
 
       if (onStack.has(neighbor)) {
         const cycleStart = stack.indexOf(neighbor);

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { generatedFixService } from "@/server/entities/pr-analysis/api/generated-fix.service";
+import { generateFixTask } from "@/server/features/generate-docs/task/generate-fix.task";
 import { FixService } from "@/server/features/pr-analysis/lib/fix-generator";
 import type { FindingForFix } from "@/server/features/pr-analysis/model/pr-types";
 import { getClientContext } from "@/server/shared/infrastructure/github/github-provider";
@@ -28,8 +29,8 @@ const FixApplicationPayloadSchema = z.object({
   branch: z.string().min(1),
   estimatedImpact: z.number().int().min(0).max(100),
   fixedFiles: z.array(FixedFileContentSchema).min(1),
-  fixId: z.number().int().positive(),
-  repoId: z.number().int().positive(),
+  fixId: z.string(),
+  repoId: z.string(),
   title: z.string().min(1),
 });
 
@@ -51,7 +52,7 @@ export const generatedFixRouter = createTRPCRouter({
       try {
         // Fetch repo metadata (owner, name, defaultBranch)
         const repo = await ctx.db.repo.findUnique({
-          where: { id: input.repoId },
+          where: { publicId: input.repoId },
         });
 
         if (repo == null) {
@@ -68,13 +69,19 @@ export const generatedFixRouter = createTRPCRouter({
           repo.owner
         );
 
+        const fix = await generatedFixService.getById(ctx.db, input.fixId);
+
+        if (fix == null) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Fix not found" });
+        }
+
         // Apply fix using full-content strategy
         const fixService = new FixService();
         const result = await fixService.applyFix(clientContext.octokit, {
           branch: input.branch,
           defaultBranch: repo.defaultBranch,
           fixedFiles: input.fixedFiles,
-          fixId: input.fixId,
+          fixId: fix.id,
           owner: repo.owner,
           repoId: input.repoId,
           repoName: repo.name,
@@ -82,7 +89,7 @@ export const generatedFixRouter = createTRPCRouter({
         });
 
         // Update fix status with PR metadata (no diffs stored)
-        await generatedFixService.updateStatus(ctx.db, input.fixId, "PR_OPENED", {
+        await generatedFixService.updateStatus(ctx.db, fix.id, "PR_OPENED", {
           githubPrNumber: result.prNumber,
           githubPrUrl: result.prUrl,
         });
@@ -119,8 +126,8 @@ export const generatedFixRouter = createTRPCRouter({
       z.object({
         fileContents: z.record(z.string(), z.string()), // Map of filePath -> originalContent
         findings: z.array(FindingForFixSchema).min(1),
-        prAnalysisId: z.number().int().optional(),
-        repoId: z.number().int().positive(),
+        prAnalysisId: z.string().optional(),
+        repoId: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -132,9 +139,22 @@ export const generatedFixRouter = createTRPCRouter({
       });
 
       try {
+        let validPrAnalysisId: string | undefined;
+
+        if (input.prAnalysisId != null && input.prAnalysisId !== "") {
+          const prAnalysisRecord = await ctx.db.pullRequestAnalysis.findUnique({
+            select: { publicId: true },
+            where: { publicId: input.prAnalysisId },
+          });
+
+          if (prAnalysisRecord != null) {
+            validPrAnalysisId = prAnalysisRecord.publicId;
+          }
+        }
+
         // Fetch repo metadata (to detect language)
         const repo = await ctx.db.repo.findUnique({
-          where: { id: input.repoId },
+          where: { publicId: input.repoId },
         });
 
         if (repo == null) {
@@ -144,38 +164,32 @@ export const generatedFixRouter = createTRPCRouter({
           });
         }
 
-        // Generate fix in-memory with file contents for diff generation
-        const fixService = new FixService();
-        const fixResult = await fixService.createFixFromAnalysis({
-          fileContents: input.fileContents,
-          findings: input.findings as FindingForFix[],
-          prAnalysisId: input.prAnalysisId,
-          repoContext: { language: repo.language ?? "typescript" },
-          repoId: input.repoId,
-        });
-
-        // Create fix record (metadata only, no code/diffs stored)
-        const fix = await generatedFixService.create(ctx.db, {
-          branch: fixResult.branch,
+        const fix = await generatedFixService.create(ctx.prisma, {
+          branch: `doxynix/fix-${Date.now()}`,
           createdByUser: true,
-          prAnalysisId: input.prAnalysisId,
-          repoId: input.repoId,
-          title: fixResult.title,
+          prAnalysisId: validPrAnalysisId,
+          repoId: repo.id,
+          title: "AI Suggested Improvements",
         });
 
-        logger.info({
-          fixId: fix.id,
-          msg: "fix_created",
-          repoId: input.repoId,
-        });
+        await generateFixTask.trigger(
+          {
+            fileContents: input.fileContents,
+            findings: input.findings as FindingForFix[],
+            fixId: fix.id,
+            prAnalysisId: validPrAnalysisId,
+            repoId: repo.id,
+          },
+          {
+            concurrencyKey: `repo-${repo.id}`,
+            idempotencyKey: `fix-${fix.id}`,
+            ttl: "30m",
+          }
+        );
 
         return {
-          branch: fix.branch,
-          diffs: fixResult.diffs, // For UI preview only (not stored in DB)
-          estimatedImpact: fixResult.estimatedImpact,
-          fixedFiles: fixResult.fixedFiles, // Will have placeholders; AI populates in applyFix
-          fixId: fix.id,
-          title: fix.title,
+          fixId: fix.publicId,
+          status: "PENDING",
         };
       } catch (error) {
         logger.error({
@@ -195,16 +209,19 @@ export const generatedFixRouter = createTRPCRouter({
    * Get fix metadata (no diffs in response)
    */
   getById: protectedProcedure
-    .input(z.object({ fixId: z.number().int().positive() }))
+    .input(z.object({ fixId: z.string() }))
     .query(async ({ ctx, input }) => {
-      return generatedFixService.getById(ctx.db, input.fixId);
+      const fix = await generatedFixService.getById(ctx.db, input.fixId);
+      const cachedResult = await ctx.redis.get(`fix-result:${input.fixId}`);
+
+      return { ...fix, resultJson: cachedResult };
     }),
 
   /**
    * Get all fixes for a repo (metadata only)
    */
   getByRepository: protectedProcedure
-    .input(z.object({ repoId: z.number().int().positive() }))
+    .input(z.object({ repoId: z.string() }))
     .query(async ({ ctx, input }) => {
       return generatedFixService.getByRepoId(ctx.db, input.repoId);
     }),

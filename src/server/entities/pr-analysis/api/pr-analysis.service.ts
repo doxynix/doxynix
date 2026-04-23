@@ -21,7 +21,7 @@ type PRFinding = {
 };
 
 export const prAnalysisService = {
-  addComments: async (
+  async addComments(
     db: DbClient,
     analysisId: number,
     comments: Array<{
@@ -31,7 +31,7 @@ export const prAnalysisService = {
       line: number;
       riskLevel: number;
     }>
-  ) => {
+  ) {
     return db.pullRequestComment.createMany({
       data: comments.map((c) => ({
         analysisId,
@@ -44,7 +44,7 @@ export const prAnalysisService = {
     });
   },
 
-  create: async (db: DbClient, input: PRAnalysisCreateInput) => {
+  async create(db: DbClient, input: PRAnalysisCreateInput) {
     return db.pullRequestAnalysis.create({
       data: {
         baseSha: input.baseSha,
@@ -58,17 +58,7 @@ export const prAnalysisService = {
     });
   },
 
-  async getById(db: DbClient, id: number) {
-    return db.pullRequestAnalysis.findUnique({
-      include: {
-        comments: true,
-        generatedFixes: true,
-      },
-      where: { id },
-    });
-  },
-
-  async getByRepoAndPRNumber(db: DbClient, repoId: number, prNumber: number) {
+  async getByRepoAndPRNumber(db: DbClient, repoId: string, prNumber: number) {
     return db.pullRequestAnalysis.findFirst({
       include: {
         comments: true,
@@ -79,15 +69,10 @@ export const prAnalysisService = {
       },
       where: {
         prNumber,
-        repoId,
+        repo: {
+          publicId: repoId,
+        },
       },
-    });
-  },
-
-  async getCommentsByAnalysis(db: DbClient, analysisId: number) {
-    return db.pullRequestComment.findMany({
-      orderBy: [{ filePath: "asc" }, { line: "asc" }],
-      where: { analysisId },
     });
   },
 

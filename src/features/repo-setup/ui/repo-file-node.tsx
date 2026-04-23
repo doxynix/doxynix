@@ -1,11 +1,4 @@
-import {
-  ChevronDown,
-  ChevronRight,
-  Folder,
-  FolderOpen,
-  File as LucideFile,
-  Sparkles,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, FileIcon, Folder, FolderOpen, Sparkles } from "lucide-react";
 import type { NodeRendererProps } from "react-arborist";
 
 import { cn } from "@/shared/lib/cn";
@@ -72,12 +65,12 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
         <div className="flex size-4 shrink-0 items-center justify-center">
           {isFolder ? (
             node.isOpen ? (
-              <FolderOpen className="size-4" />
+              <FolderOpen />
             ) : (
-              <Folder className="size-4 fill-current" />
+              <Folder className="fill-current" />
             )
           ) : (
-            <LucideFile className={cn("size-4", isSelected && "font-bold")} />
+            <FileIcon className={cn(isSelected && "font-bold")} />
           )}
         </div>
 

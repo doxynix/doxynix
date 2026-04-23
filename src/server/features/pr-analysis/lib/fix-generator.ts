@@ -11,26 +11,26 @@ import { AI_MODELS, SAFETY_SETTINGS } from "../../analyze-repo/lib/constants";
 /**
  * Full file content after AI fixing (from AI response)
  */
-export interface FixedFileContent {
+export type FixedFileContent = {
   filePath: string;
   newContent: string; // Full file content, not a patch
-}
+};
 
-export interface FixRecommendation {
+export type FixRecommendation = {
   branch: string;
   description: string;
   diffs: GeneratedDiff[];
   estimatedImpact: number;
   fixedFiles: FixedFileContent[]; // NEW: Full content for each file
   title: string;
-}
+};
 
-export interface FindingInput {
+export type FindingInput = {
   file: string;
   line: number;
   suggestion?: string;
   type: string;
-}
+};
 
 /**
  * Schema for AI-generated fixed code response.
@@ -253,7 +253,7 @@ Ensure:
   async createFixFromAnalysis(input: {
     fileContents: Record<string, string>; // Original file contents
     findings: FindingForFix[];
-    prAnalysisId?: number;
+    prAnalysisId?: string;
     repoContext: { framework?: string; language: string };
     repoId: number;
   }): Promise<{
@@ -364,7 +364,7 @@ Ensure:
       fixedFiles: FixedFileContent[]; // Full content, not patches
       fixId: number;
       owner: string;
-      repoId: number;
+      repoId: string;
       repoName: string;
       title: string;
     }

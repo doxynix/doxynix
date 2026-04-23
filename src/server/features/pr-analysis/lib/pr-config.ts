@@ -13,10 +13,10 @@ const DEFAULT_PR_CONFIG: PRAnalysisConfig = {
 };
 
 export class PRConfigService {
-  static async getConfig(repoId: number, db: DbClient): Promise<PRAnalysisConfig> {
+  static async getConfig(repoId: string, db: DbClient): Promise<PRAnalysisConfig> {
     const repo = await db.repo.findUnique({
       select: { prAnalysisConfig: true },
-      where: { id: repoId },
+      where: { publicId: repoId },
     });
 
     if (repo?.prAnalysisConfig == null) {
@@ -30,7 +30,7 @@ export class PRConfigService {
   }
 
   static async updateConfig(
-    repoId: number,
+    repoId: string,
     config: Partial<PRAnalysisConfig>,
     db: DbClient
   ): Promise<PRAnalysisConfig> {
@@ -44,21 +44,21 @@ export class PRConfigService {
       data: {
         prAnalysisConfig: newConfig as PRAnalysisConfig,
       },
-      where: { id: repoId },
+      where: { publicId: repoId },
     });
 
     return newConfig;
   }
 
-  static async enablePRAnalysis(repoId: number, db: DbClient): Promise<void> {
+  static async enablePRAnalysis(repoId: string, db: DbClient): Promise<void> {
     await this.updateConfig(repoId, { enabled: true }, db);
   }
 
-  static async disablePRAnalysis(repoId: number, db: DbClient): Promise<void> {
+  static async disablePRAnalysis(repoId: string, db: DbClient): Promise<void> {
     await this.updateConfig(repoId, { enabled: false }, db);
   }
 
-  static async setTokenBudget(repoId: number, budget: number, db: DbClient): Promise<void> {
+  static async setTokenBudget(repoId: string, budget: number, db: DbClient): Promise<void> {
     await this.updateConfig(
       repoId,
       { tokenBudget: Math.max(10_000, Math.min(100_000, budget)) },
@@ -67,7 +67,7 @@ export class PRConfigService {
   }
 
   static async setFocusAreas(
-    repoId: number,
+    repoId: string,
     areas: PRAnalysisConfig["focusAreas"],
     db: DbClient
   ): Promise<void> {

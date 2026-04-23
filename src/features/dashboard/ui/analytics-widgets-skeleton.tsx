@@ -14,7 +14,7 @@ export function AnalyticsWidgetsSkeleton() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base font-semibold">
-            <FileCode2 className="text-muted-foreground size-4" />
+            <FileCode2 className="text-muted-foreground" />
             {t("languages_distribution")}
           </CardTitle>
         </CardHeader>
@@ -38,7 +38,7 @@ export function AnalyticsWidgetsSkeleton() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base font-semibold">
-            <Clock className="text-muted-foreground size-4" />
+            <Clock className="text-muted-foreground" />
             {t("recent_activity")}
           </CardTitle>
         </CardHeader>
@@ -47,7 +47,7 @@ export function AnalyticsWidgetsSkeleton() {
             <div className="space-y-4">
               <div className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
                 <div className="flex items-center gap-3">
-                  <Skeleton className="size-4" />
+                  <Skeleton />
                   <div className="flex flex-col gap-1">
                     <Skeleton className="h-3 w-24" />
                     <Skeleton className="h-3 w-50" />

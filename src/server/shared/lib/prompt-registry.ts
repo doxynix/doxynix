@@ -9,7 +9,7 @@ import type { LLMTaskType } from "../engine/core/scoring-constants";
 /**
  * Metadata about a registered prompt
  */
-export interface PromptMetadata {
+export type PromptMetadata = {
   /** Created date */
   createdAt: Date;
 
@@ -48,15 +48,15 @@ export interface PromptMetadata {
 
   /** Current version (for tracking updates) */
   version: string;
-}
+};
 
 /**
  * Represents a registered prompt plus its builder function
  */
-interface RegisteredPrompt {
+type RegisteredPrompt = {
   builderFn: (params: Record<string, unknown>) => string;
   metadata: PromptMetadata;
-}
+};
 
 export const PROMPT_IDS = {
   API_DOC: "api-documentarian",
