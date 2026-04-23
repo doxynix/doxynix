@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { RepoPullDetailContainer } from "@/features/repo-pulls/ui/repo-pull-details-container";
+import { RepoPullDetailContainer } from "@/features/repo-pulls";
 
 import { api } from "@/server/api/server";
 
@@ -17,5 +17,5 @@ export default async function PullRequestDetailPage({ params }: Readonly<Props>)
 
   if (!repo || isNaN(prNumber)) notFound();
 
-  return <RepoPullDetailContainer name={name} owner={owner} prNumber={prNumber} repoId={repo.id} />;
+  return <RepoPullDetailContainer prNumber={prNumber} repoId={repo.id} />;
 }
