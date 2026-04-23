@@ -118,7 +118,7 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
                       <>
                         <AppTooltip content="Download file">
                           <Button
-                            disabled={isDocLoading || doc == null}
+                            disabled={isDocLoading}
                             size="icon"
                             variant="ghost"
                             onClick={handleDownload}
@@ -128,7 +128,7 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
                         </AppTooltip>
                         <CopyButton
                           value={docContent?.raw ?? ""}
-                          disabled={isDocLoading || doc == null}
+                          disabled={isDocLoading}
                           tooltipText="Copy file"
                           className="size-8 px-3 opacity-100"
                         />

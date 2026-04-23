@@ -135,7 +135,7 @@ export const generatedFixRouter = createTRPCRouter({
       try {
         let validPrAnalysisId: string | undefined;
 
-        if (input.prAnalysisId && input.prAnalysisId !== "") {
+        if (input.prAnalysisId != null && input.prAnalysisId !== "") {
           const prAnalysisRecord = await ctx.db.pullRequestAnalysis.findUnique({
             select: { publicId: true },
             where: { publicId: input.prAnalysisId },
