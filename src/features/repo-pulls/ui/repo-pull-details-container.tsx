@@ -27,7 +27,8 @@ export function RepoPullDetailContainer({ prNumber, repoId }: Readonly<Props>) {
         <Loader2 className="animate-spin" />
       </div>
     );
-  if (!analysis) return <div>Analysis not found for this PR.</div>;
+
+  if (analysis == null) return <div>Analysis not found for this PR.</div>;
 
   return (
     <div className="space-y-6">

@@ -15,7 +15,7 @@ export default async function PullRequestDetailPage({ params }: Readonly<Props>)
   const serverApi = await api();
   const repo = await serverApi.repo.getByName({ name, owner });
 
-  if (!repo || isNaN(prNumber)) notFound();
+  if (repo == null || isNaN(prNumber)) notFound();
 
   return <RepoPullDetailContainer prNumber={prNumber} repoId={repo.id} />;
 }
