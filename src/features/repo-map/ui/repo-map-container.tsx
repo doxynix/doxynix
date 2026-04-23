@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { ReactFlowProvider } from "@xyflow/react";
 import { FileText } from "lucide-react";
@@ -85,10 +85,12 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
   const currentData = viewId == null ? mapData : nodeData;
   const isFetching = viewId == null ? isMapFetching : isNodeFetching;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentData != null) {
+      // FIXME: пока так ибо если менять то с типами приколы
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDisplayData(currentData);
-    } else if (!isFetching && currentData === null) {
+    } else if (!isFetching) {
       setDisplayData(null);
     }
   }, [currentData, isFetching]);

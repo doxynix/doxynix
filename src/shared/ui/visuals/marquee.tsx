@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -6,7 +6,7 @@ interface MarqueeProps extends ComponentPropsWithoutRef<"div"> {
   /**
    * Content to be displayed in the marquee
    */
-  children: React.ReactNode;
+  children: ReactNode;
   /**
    * Optional CSS class name to apply custom styles
    */

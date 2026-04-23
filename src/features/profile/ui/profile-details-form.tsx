@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Mail, User2 } from "lucide-react";
 import type { User } from "next-auth";

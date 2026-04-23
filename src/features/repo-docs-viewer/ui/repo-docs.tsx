@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ComponentType } from "react";
 import { BookOpen, FileText, HistoryIcon, Layers, Terminal, Users2 } from "lucide-react";
 
 import { trpc, type AvailableDocs, type DocType } from "@/shared/api/trpc";
@@ -13,7 +13,7 @@ import { Tabs, TabsContent } from "@/shared/ui/core/tabs";
 import { RepoDocsContent } from "./repo-docs-content";
 import { RepoDocsTabs } from "./repo-docs-tabs";
 
-const DOC_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const DOC_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   API: Terminal,
   ARCHITECTURE: Layers,
   CHANGELOG: HistoryIcon,

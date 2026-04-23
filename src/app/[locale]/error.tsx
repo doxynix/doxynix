@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import * as Sentry from "@sentry/nextjs";
 import Cookies from "js-cookie";
 import { ServerCrash } from "lucide-react";
@@ -23,11 +23,38 @@ export default function ErrorPage({
   const t = useTranslations("Error");
 
   const [requestId, setRequestId] = useState<null | string>(null);
-  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
-  const userAgent = typeof window !== "undefined" ? window.navigator.userAgent : "";
-  const screenSize =
-    typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : "N/A";
-  const timestamp = new Date().toISOString();
+
+  const [techInfo, setTechInfo] = useState(() => ({
+    screen: "N/A",
+    time: new Date().toISOString(),
+    ua: "",
+    url: "",
+  }));
+
+  useEffect(() => {
+    const rid = Cookies.get("last_request_id") ?? null;
+
+    const info = {
+      screen: `${window.innerWidth}x${window.innerHeight}`,
+      time: new Date().toISOString(),
+      ua: window.navigator.userAgent,
+      url: window.location.href,
+    };
+
+    requestAnimationFrame(() => {
+      setRequestId(rid);
+      setTechInfo(info);
+    });
+
+    Sentry.withScope((scope) => {
+      if (rid != null) {
+        scope.setTag("request_id", rid);
+      }
+      scope.setExtra("digest", error.digest);
+      Sentry.captureException(error);
+    });
+  }, [error]);
+
   const finalId = requestId ?? error.digest ?? "No-ID";
 
   const emailSubject = `[Bug Report] Doxynix - Error ${finalId}`;
@@ -40,22 +67,13 @@ export default function ErrorPage({
     Technical Information (Please, do not edit):
     ------------------------------------------------
     Error ID: ${finalId}
-    Page: ${currentUrl}
-    Screen: ${screenSize}
-    Time: ${timestamp}
-    User Agent: ${userAgent}
+    Page: ${techInfo.url}
+    Screen: ${techInfo.screen}
+    Time: ${techInfo.time}
+    User Agent: ${techInfo.ua}
   `.trim();
 
   const mailtoLink = `mailto:support@doxynix.space?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-
-  React.useEffect(() => {
-    Sentry.captureException(error);
-
-    const rid = Cookies.get("last_request_id");
-    if (rid != null) {
-      setRequestId(rid);
-    }
-  }, [error]);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center px-4">

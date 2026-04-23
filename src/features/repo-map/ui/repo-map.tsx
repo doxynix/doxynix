@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import {
   Background,
   MiniMap,
@@ -190,11 +190,11 @@ export function RepoMap({
     }
   }, [selectedNodeId, layoutReady, fitView]);
 
-  const onNodeClick = (_: React.MouseEvent, node: Node<RepoMapNodeData>) => {
+  const onNodeClick = (_: MouseEvent, node: Node<RepoMapNodeData>) => {
     onSelect(node.id);
   };
 
-  const onNodeDoubleClick = (_: React.MouseEvent, node: Node<RepoMapNodeData>) => {
+  const onNodeDoubleClick = (_: MouseEvent, node: Node<RepoMapNodeData>) => {
     const isGroup = node.id.startsWith("group:");
 
     if (isGroup) {

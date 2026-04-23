@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import {
   findNext,
   findPrevious,
@@ -24,8 +24,15 @@ type Props = {
   view: EditorView;
 };
 
+const onKeyDown = (e: KeyboardEvent, action: () => void) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    action();
+  }
+};
+
 export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const initialQuery = getSearchQuery(view.state);
   const [options, setOptions] = useState({
     caseSensitive: initialQuery.caseSensitive,
@@ -36,8 +43,11 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
   const [search, setSearch] = useState(initialQuery.search || "");
   const [replace, setReplace] = useState(initialQuery.replace || "");
 
-  React.useEffect(() => {
+  const [prevView, setPrevView] = useState(view);
+
+  if (view !== prevView) {
     const q = getSearchQuery(view.state);
+    setPrevView(view);
     setSearch(q.search);
     setReplace(q.replace);
     setOptions({
@@ -45,9 +55,9 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
       regexp: q.regexp,
       wholeWord: q.wholeWord,
     });
-  }, [view]);
+  }
 
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => inputRef.current?.focus(), 100);
     return () => clearTimeout(timer);
   }, []);
@@ -72,23 +82,16 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
     syncToCM(search, replace, nextOpts);
   };
 
-  const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSearch(val);
     syncToCM(val, replace);
   };
 
-  const onReplaceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onReplaceChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setReplace(val);
     syncToCM(search, val);
-  };
-
-  const onKeyDown = (e: React.KeyboardEvent, action: () => void) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      action();
-    }
   };
 
   return (

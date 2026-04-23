@@ -1,4 +1,4 @@
-import React, { startTransition } from "react";
+import { startTransition } from "react";
 import { Check, Folder, FolderOpen, Search, Sparkles, X } from "lucide-react";
 import { Tree, type TreeApi } from "react-arborist";
 

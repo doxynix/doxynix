@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 
 import { cn } from "@/shared/lib/cn";
@@ -16,7 +16,7 @@ interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
   cta: string;
   description: string;
   href: string;
-  Icon: React.ElementType;
+  Icon: ElementType;
   name: string;
 }
 

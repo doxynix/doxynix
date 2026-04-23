@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 
 import { cn } from "@/shared/lib/cn";
@@ -74,17 +74,18 @@ export function AppAvatar({
     return "loading";
   });
 
-  React.useEffect(() => {
-    if (hasSrc) {
-      if (loadedAvatars.get(src) === true) {
-        setStatus("success");
-      } else {
-        setStatus("loading");
-      }
-    } else {
+  const [prevSrc, setPrevSrc] = useState(src);
+
+  if (src !== prevSrc) {
+    setPrevSrc(src);
+    if (!hasSrc) {
       setStatus("error");
+    } else if (loadedAvatars.get(src) === true) {
+      setStatus("success");
+    } else {
+      setStatus("loading");
     }
-  }, [hasSrc, src]);
+  }
 
   const isError = status === "error";
   const isEmpty = typeof src !== "string" || src === "";

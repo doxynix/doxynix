@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ComponentProps } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -9,7 +9,7 @@ import { AppTooltip } from "./app-tooltip";
 type Props = {
   className?: string;
   text: string;
-  tooltipProps?: Omit<React.ComponentProps<typeof AppTooltip>, "children" | "content">;
+  tooltipProps?: Omit<ComponentProps<typeof AppTooltip>, "children" | "content">;
 };
 
 export function TruncatedText({ className, text, tooltipProps }: Readonly<Props>) {

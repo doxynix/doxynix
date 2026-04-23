@@ -1,13 +1,13 @@
-import type { ReactNode } from "react";
+import type { ReactNode, SVGProps } from "react";
 
 import { Link } from "@/i18n/routing";
 
-type LogoProps = React.SVGProps<SVGSVGElement> & {
+type LogoProps = SVGProps<SVGSVGElement> & {
   collapsed?: boolean;
   isInteractive?: boolean;
 };
 
-type InnerLogoProps = React.SVGProps<SVGSVGElement> & {
+type InnerLogoProps = SVGProps<SVGSVGElement> & {
   isInteractive?: boolean;
 };
 
