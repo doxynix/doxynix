@@ -9,17 +9,21 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }>) {
-  const [requestId] = useState<null | string>(() => {
-    if (typeof window === "undefined") return null;
-    return (
-      document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("last_request_id="))
-        ?.split("=")[1] ?? null
-    );
-  });
+  const [requestId, setRequestId] = useState<null | string>(null);
+
   const finalId = requestId ?? error.digest ?? "No-ID";
   const emailSubject = `[Bug Report] Doxynix - Error ${finalId}`;
+
+  useEffect(() => {
+    const rid = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("last_request_id="))
+      ?.split("=")[1];
+
+    if (rid != null) {
+      requestAnimationFrame(() => setRequestId(rid));
+    }
+  }, []);
 
   const [techInfo] = useState(() => {
     const isClient = typeof window !== "undefined";
@@ -52,7 +56,7 @@ export default function GlobalError({
     return () => {
       isActive = false;
     };
-  }, [error]);
+  }, [error, requestId]);
 
   const emailBody = `
     Describe what you were doing before the error (optional):

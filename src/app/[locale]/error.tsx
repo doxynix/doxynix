@@ -22,14 +22,25 @@ export default function ErrorPage({
   const tCommon = useTranslations("Common");
   const t = useTranslations("Error");
 
-  const [requestId] = useState(() =>
-    typeof window !== "undefined" ? Cookies.get("last_request_id") : null
-  );
-  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
-  const userAgent = typeof window !== "undefined" ? window.navigator.userAgent : "";
-  const screenSize =
-    typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : "N/A";
-  const timestamp = new Date().toISOString();
+  const [requestId, setRequestId] = useState<null | string>(null);
+
+  useEffect(() => {
+    const rid = Cookies.get("last_request_id") ?? null;
+    if (rid != null) {
+      requestAnimationFrame(() => setRequestId(rid));
+    }
+  }, []);
+
+  const [techInfo] = useState(() => {
+    const isBrowser = typeof window !== "undefined";
+    return {
+      screen: isBrowser ? `${window.innerWidth}x${window.innerHeight}` : "N/A",
+      time: new Date().toISOString(),
+      ua: isBrowser ? window.navigator.userAgent : "",
+      url: isBrowser ? window.location.href : "",
+    };
+  });
+
   const finalId = requestId ?? error.digest ?? "No-ID";
 
   const emailSubject = `[Bug Report] Doxynix - Error ${finalId}`;
@@ -42,17 +53,20 @@ export default function ErrorPage({
     Technical Information (Please, do not edit):
     ------------------------------------------------
     Error ID: ${finalId}
-    Page: ${currentUrl}
-    Screen: ${screenSize}
-    Time: ${timestamp}
-    User Agent: ${userAgent}
+    Page: ${techInfo.url}
+    Screen: ${techInfo.screen}
+    Time: ${techInfo.time}
+    User Agent: ${techInfo.ua}
   `.trim();
 
   const mailtoLink = `mailto:support@doxynix.space?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
   useEffect(() => {
+    if (requestId != null) {
+      Sentry.setTag("request_id", requestId);
+    }
     Sentry.captureException(error);
-  }, [error]);
+  }, [error, requestId]);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center px-4">

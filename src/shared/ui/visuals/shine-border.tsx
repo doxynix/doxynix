@@ -1,5 +1,3 @@
-"use client";
-
 import type { CSSProperties, HTMLAttributes } from "react";
 
 import { cn } from "@/shared/lib/cn";

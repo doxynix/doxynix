@@ -49,9 +49,11 @@ export const AnimatedBeam: FC<AnimatedBeamProps> = ({
   toRef,
 }) => {
   const id = useId();
+  const [fallbackDuration] = useState(() => Math.random() * 3 + 4);
+  const duration = durationProp ?? fallbackDuration;
+
   const [pathD, setPathD] = useState("");
   const [svgDimensions, setSvgDimensions] = useState({ height: 0, width: 0 });
-  const [duration] = useState(() => durationProp ?? Math.random() * 3 + 4);
 
   // Calculate the gradient coordinates based on the reverse prop
   const gradientCoordinates = reverse

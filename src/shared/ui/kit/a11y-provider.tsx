@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, type ReactNode } from "react";
+import React, { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import ReactDOM from "react-dom";
 
@@ -11,6 +11,7 @@ type Props = {
 export function A11yProvider({ children }: Readonly<Props>) {
   const pathname = usePathname();
   const [announcement, setAnnouncement] = useState("");
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     if (process.env.NODE_ENV === "development" && typeof globalThis.window !== "undefined") {
@@ -28,16 +29,18 @@ export function A11yProvider({ children }: Readonly<Props>) {
   }
 
   useEffect(() => {
-    const title = document.title || "Page changed";
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
 
-    const clearId = window.setTimeout(() => setAnnouncement(""), 0);
+    const title = document.title || "Page changed";
 
     const announceId = window.setTimeout(() => {
       setAnnouncement(`Navigated to ${title}`);
     }, 50);
 
     return () => {
-      window.clearTimeout(clearId);
       window.clearTimeout(announceId);
     };
   }, [pathname]);

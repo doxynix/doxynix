@@ -169,11 +169,12 @@ export function AuthForm() {
     (token: string) => {
       setTurnstileToken(token);
 
-      if (isVerifying && pendingDataRef.current) {
-        void proceedWithSignIn(pendingDataRef.current, token);
+      const data = pendingDataRef.current;
+      if (data) {
+        void proceedWithSignIn(data, token);
       }
     },
-    [isVerifying, proceedWithSignIn]
+    [proceedWithSignIn]
   );
 
   const onTurnstileError = useCallback(() => {

@@ -17,6 +17,11 @@ export type RepoSetupReturn = ReturnType<typeof useRepoSetup>;
 export type StateType = RepoSetupReturn["state"];
 export type ActionsType = RepoSetupReturn["actions"];
 
+const getRecommendedPaths = (files: FileTuple[] | undefined) => {
+  if (files == null) return [];
+  return (files as FileTuple[]).filter((f) => f[3] === 1 && f[1] === 1).map((f) => f[0]);
+};
+
 export function useRepoSetup(repo: UiRepoDetailed) {
   const locale = useLocale();
 
@@ -41,23 +46,24 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     { name, owner },
     { enabled: open }
   );
-  const { data: apiFiles, isLoading } = trpc.githubBrowse.getRepoFiles.useQuery({
+  const { data: apiFilesRaw, isLoading } = trpc.githubBrowse.getRepoFiles.useQuery({
     branch: selectedBranch,
     name,
     owner,
   });
 
   const analyzeMutation = trpc.repoAnalysis.analyze.useMutation();
-  const [prevApiFiles, setPrevApiFiles] = useState(apiFiles);
+  const apiFiles = apiFilesRaw as FileTuple[] | undefined;
 
-  if (apiFiles !== prevApiFiles) {
-    setPrevApiFiles(apiFiles);
+  const [prevBranch, setPrevBranch] = useState(selectedBranch);
 
-    if (apiFiles != null) {
-      const recommendedPaths = (apiFiles as FileTuple[])
-        .filter((f) => f[3] === 1 && f[1] === 1)
-        .map((f) => f[0]);
-      setSelectedIds(new Set(recommendedPaths));
+  if (selectedBranch !== prevBranch) {
+    setPrevBranch(selectedBranch);
+
+    if (apiFiles) {
+      setSelectedIds(new Set(getRecommendedPaths(apiFiles)));
+    } else {
+      setSelectedIds(new Set());
     }
   }
 
@@ -135,11 +141,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   const handleClearAll = () => setSelectedIds(new Set());
 
   const handleSelectRecommended = () => {
-    if (!apiFiles) return;
-    const recommendedPaths = (apiFiles as FileTuple[])
-      .filter((f) => f[3] === 1 && f[1] === 1)
-      .map((f) => f[0]);
-    setSelectedIds(new Set(recommendedPaths));
+    setSelectedIds(new Set(getRecommendedPaths(apiFiles)));
   };
 
   const handleStartAnalysis = () => {

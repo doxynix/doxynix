@@ -80,7 +80,7 @@ export function AppAvatar({
     setPrevSrc(src);
     if (!hasSrc) {
       setStatus("error");
-    } else if (loadedAvatars.get(src!) === true) {
+    } else if (loadedAvatars.get(src) === true) {
       setStatus("success");
     } else {
       setStatus("loading");

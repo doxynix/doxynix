@@ -33,7 +33,7 @@ export function AppCommandMenu() {
   const open = useCommandMenuIsOpen();
   const { setOpen } = useCommandMenuActions();
   const [search, setSearch] = useState("");
-  const [debouncedSearch] = useDebounce(search, 300);
+  const [debouncedSearch, { cancel }] = useDebounce(search, 300);
   const [isReposExpanded, setIsReposExpanded] = useState(true);
   const { setOpen: setOpenCreateDialog } = useCreateRepoActions();
 
@@ -41,7 +41,10 @@ export function AppCommandMenu() {
   const [prevOpen, setPrevOpen] = useState(open);
   if (open !== prevOpen) {
     setPrevOpen(open);
-    if (open) setSearch("");
+    if (open) {
+      setSearch("");
+      cancel();
+    }
   }
   const [prevDebouncedSearch, setPrevDebouncedSearch] = useState(debouncedSearch);
   if (debouncedSearch !== prevDebouncedSearch) {
