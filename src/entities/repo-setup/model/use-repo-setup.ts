@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocale } from "next-intl";
 import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
@@ -16,6 +16,11 @@ export type RepoSetupReturn = ReturnType<typeof useRepoSetup>;
 
 export type StateType = RepoSetupReturn["state"];
 export type ActionsType = RepoSetupReturn["actions"];
+
+const getRecommendedPaths = (files: FileTuple[] | undefined) => {
+  if (files == null) return [];
+  return (files as FileTuple[]).filter((f) => f[3] === 1 && f[1] === 1).map((f) => f[0]);
+};
 
 export function useRepoSetup(repo: UiRepoDetailed) {
   const locale = useLocale();
@@ -41,22 +46,21 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     { name, owner },
     { enabled: open }
   );
-  const { data: apiFiles, isLoading } = trpc.githubBrowse.getRepoFiles.useQuery({
+  const { data: apiFilesRaw, isLoading } = trpc.githubBrowse.getRepoFiles.useQuery({
     branch: selectedBranch,
     name,
     owner,
   });
 
   const analyzeMutation = trpc.repoAnalysis.analyze.useMutation();
+  const apiFiles = apiFilesRaw as FileTuple[] | undefined;
 
-  useEffect(() => {
-    if (apiFiles) {
-      const recommendedPaths = (apiFiles as FileTuple[])
-        .filter((f) => f[3] === 1 && f[1] === 1)
-        .map((f) => f[0]);
-      setSelectedIds(new Set(recommendedPaths));
-    }
-  }, [apiFiles]);
+  const [prevBranch, setPrevBranch] = useState(selectedBranch);
+
+  if (selectedBranch !== prevBranch && apiFiles) {
+    setSelectedIds(new Set(getRecommendedPaths(apiFiles)));
+    setPrevBranch(selectedBranch);
+  }
 
   const getTreeData = () => {
     if (!apiFiles) return [];
@@ -132,11 +136,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   const handleClearAll = () => setSelectedIds(new Set());
 
   const handleSelectRecommended = () => {
-    if (!apiFiles) return;
-    const recommendedPaths = (apiFiles as FileTuple[])
-      .filter((f) => f[3] === 1 && f[1] === 1)
-      .map((f) => f[0]);
-    setSelectedIds(new Set(recommendedPaths));
+    setSelectedIds(new Set(getRecommendedPaths(apiFiles)));
   };
 
   const handleStartAnalysis = () => {

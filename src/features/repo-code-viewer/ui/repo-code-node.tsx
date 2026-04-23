@@ -1,4 +1,4 @@
-import React from "react";
+import { type MouseEvent } from "react";
 import { ChevronDown, ChevronRight, Folder, FolderOpen, File as LucideFile } from "lucide-react";
 import type { NodeRendererProps } from "react-arborist";
 
@@ -16,7 +16,7 @@ export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNode
   const isActive = activePath === node.id;
   const isFolder = !node.isLeaf;
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: MouseEvent) => {
     e.stopPropagation();
     if (isFolder) {
       node.toggle();

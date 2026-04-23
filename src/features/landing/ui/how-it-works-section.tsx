@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef, useRef } from "react";
+import { forwardRef, useRef, type ReactNode, type RefObject } from "react";
 import { Brain, FileText, User } from "lucide-react";
 import { useInView } from "motion/react";
 import { useTranslations } from "next-intl";
@@ -13,25 +13,25 @@ import { TriggerIcon } from "@/shared/ui/icons/trigger-icon";
 import { AnimatedBeam } from "@/shared/ui/visuals/animated-beam";
 
 type PathTypes = {
-  containerRef: React.RefObject<HTMLDivElement | null>;
+  containerRef: RefObject<HTMLDivElement | null>;
   curvature?: number;
   delay?: number;
   duration?: number;
-  fromRef: React.RefObject<HTMLDivElement | null>;
+  fromRef: RefObject<HTMLDivElement | null>;
   gradientStartColor: string;
   gradientStopColor: string;
   name: string;
   reverse?: boolean;
-  toRef: React.RefObject<HTMLDivElement | null>;
+  toRef: RefObject<HTMLDivElement | null>;
 };
 
 type NodeType = {
   circleClass?: string;
   gapClass?: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   labelClass?: string;
-  ref: React.RefObject<HTMLDivElement | null>;
+  ref: RefObject<HTMLDivElement | null>;
 };
 
 type ColumnTypes = {
@@ -39,7 +39,7 @@ type ColumnTypes = {
   nodes: NodeType[];
 };
 
-const Circle = forwardRef<HTMLDivElement, { children?: React.ReactNode; className?: string }>(
+const Circle = forwardRef<HTMLDivElement, { children?: ReactNode; className?: string }>(
   ({ children, className }, ref) => {
     return (
       <div

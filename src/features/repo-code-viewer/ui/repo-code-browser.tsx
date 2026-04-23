@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { EditorView } from "@uiw/react-codemirror";
 import { saveAs } from "file-saver";
@@ -39,6 +39,8 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [localContent, setLocalContent] = useState(fileData.content);
+  const [prevPath, setPrevPath] = useState(path);
+  const [prevExternalContent, setPrevExternalContent] = useState(fileData.content);
 
   const [editorStats, setEditorStats] = useState<EditorStats>({
     col: 1,
@@ -50,6 +52,13 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     totalMatches: 0,
   });
 
+  if (path !== prevPath || fileData.content !== prevExternalContent) {
+    setPrevPath(path);
+    setPrevExternalContent(fileData.content);
+    setLocalContent(fileData.content);
+    setMode("view");
+  }
+
   const analyzeMutation = trpc.repoAnalysis.analyzeFile.useMutation({
     onSuccess: (data) => toast.success(`Audit started! Job: ${data.jobId}`),
   });
@@ -57,11 +66,6 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
   const documentMutation = trpc.repoAnalysis.documentFile.useMutation({
     onSuccess: (data) => toast.success(`Documentation task queued: ${data.jobId}`),
   });
-
-  React.useEffect(() => {
-    setLocalContent(fileData.content);
-    setMode("view");
-  }, [path, fileData.content]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -148,7 +152,6 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
       tooltipText: "Discard changes",
     },
     {
-      className: "bg-success/10 text-success hover:bg-success/20 border-success/20",
       hideTooltip: true,
       icon: Save,
       label: "Save Changes",

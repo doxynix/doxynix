@@ -398,7 +398,8 @@
     "adoxography",
     "поддерживаемости",
     "multiformat",
-    "hashicorp"
+    "hashicorp",
+    "дизейблить"
   ],
   "import": [
     "@cspell/dict-en_us/cspell-ext.json",

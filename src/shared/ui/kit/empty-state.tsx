@@ -1,6 +1,6 @@
 "use client";
 
-import React, { type ComponentType } from "react";
+import { type ComponentType, type ReactNode } from "react";
 import { CircleOff } from "lucide-react";
 
 import {
@@ -13,8 +13,8 @@ import {
 } from "@/shared/ui/core/empty";
 
 type Props = {
-  action?: React.ReactNode;
-  description: React.ReactNode;
+  action?: ReactNode;
+  description: ReactNode;
   icon?: ComponentType<{ className?: string }>;
   title: string;
 };

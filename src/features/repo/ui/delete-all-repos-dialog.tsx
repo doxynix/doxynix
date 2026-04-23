@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -10,7 +10,7 @@ import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 import { useRepoActions } from "@/entities/repo";
 
 const richStyles = {
-  strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+  strong: (chunks: ReactNode) => <strong>{chunks}</strong>,
 };
 
 type Props = { hasRepos: boolean };

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ElementType, type RefObject } from "react";
 import { motion, useInView, type MotionProps } from "motion/react";
 
 import { cn } from "@/shared/lib/cn";
 
 interface TypingAnimationProps extends MotionProps {
-  as?: React.ElementType;
+  as?: ElementType;
   blinkCursor?: boolean;
   children?: string;
   className?: string;
@@ -48,7 +48,7 @@ export function TypingAnimation({
   const [currentCharIndex, setCurrentCharIndex] = useState(0);
   const [phase, setPhase] = useState<"deleting" | "pause" | "typing">("typing");
   const elementRef = useRef<HTMLElement | null>(null);
-  const isInView = useInView(elementRef as React.RefObject<Element>, {
+  const isInView = useInView(elementRef as RefObject<Element>, {
     amount: 0.3,
     once: true,
   });

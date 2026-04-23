@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
@@ -12,8 +13,8 @@ const LIST_STYLES = "list-disc space-y-2 pl-5 marker:text-foreground";
 const STRONG_TEXT = "font-medium text-foreground";
 
 const richStyles = {
-  italic: (chunks: React.ReactNode) => <i className="italic">{chunks}</i>,
-  strong: (chunks: React.ReactNode) => <span className={STRONG_TEXT}>{chunks}</span>,
+  italic: (chunks: ReactNode) => <i className="italic">{chunks}</i>,
+  strong: (chunks: ReactNode) => <span className={STRONG_TEXT}>{chunks}</span>,
 };
 
 export default async function TermsPage() {

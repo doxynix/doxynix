@@ -1,9 +1,11 @@
+import type { ReactNode } from "react";
+
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/shared/ui/core/accordion";
 
 type Props = {
   className?: string;
-  content: React.ReactNode;
-  trigger: React.ReactNode;
+  content: ReactNode;
+  trigger: ReactNode;
   value: string;
 };
 

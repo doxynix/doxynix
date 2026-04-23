@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { startTransition } from "react";
 import { Folder, FolderOpen, Search } from "lucide-react";
 import { Tree, type TreeApi } from "react-arborist";
 
@@ -39,12 +39,12 @@ export function RepoCodeTree({
   const [measureRef, size] = useResizeObserver<HTMLDivElement>();
 
   const handleExpandAll = () => {
-    React.startTransition(() => {
+    startTransition(() => {
       treeApi?.openAll();
     });
   };
   const handleCollapseAll = () => {
-    React.startTransition(() => {
+    startTransition(() => {
       treeApi?.closeAll();
     });
   };
