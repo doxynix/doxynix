@@ -86,7 +86,7 @@ export const analyzePrTask = task({
       }
 
       // Post comments
-      if (config.commentStyle !== "off") {
+      if (config.commentStyle !== "OFF") {
         const poster = new GitHubCommentPoster(octokit);
         const postedComments = await poster.postComments(
           payload.owner,
@@ -102,10 +102,7 @@ export const analyzePrTask = task({
         // Store comments in DB
         if (postedComments.length > 0) {
           const dbComments = postedComments.map((c) => ({
-            body: CommentFormatter.formatFinding(
-              c.finding,
-              config.commentStyle as "concise" | "detailed"
-            ),
+            body: CommentFormatter.formatFinding(c.finding, config.commentStyle),
             filePath: c.finding.file,
             findingType: c.finding.type,
             line: c.finding.line,

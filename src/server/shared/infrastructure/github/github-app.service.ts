@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import type { InstallationTargetType, RepositorySelection } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
 import type { DbClient, PrismaClientExtended } from "@/server/shared/infrastructure/db";
@@ -189,8 +190,11 @@ export const githubAppService = {
     const account = installationInfo.account;
     const accountLogin = account !== null && "login" in account ? account.login : "Unknown";
     const accountAvatar = account !== null && "avatar_url" in account ? account.avatar_url : null;
-    const repoSelection = installationInfo.repository_selection.toUpperCase();
-    const targetType = (installationInfo.target_type || "USER").toUpperCase();
+    const repoSelection =
+      installationInfo.repository_selection.toUpperCase() as RepositorySelection;
+    const targetType = (
+      installationInfo.target_type || "USER"
+    ).toUpperCase() as InstallationTargetType;
 
     try {
       const updated = await prisma.githubInstallation.updateMany({
@@ -218,7 +222,7 @@ export const githubAppService = {
               id: instIdBigInt,
               repositorySelection: repoSelection,
               targetId: BigInt(installationInfo.target_id),
-              targetType: targetType,
+              targetType,
               userId: userIdNum,
             },
           ],
@@ -230,7 +234,7 @@ export const githubAppService = {
             data: {
               accountAvatar,
               accountLogin,
-              repositorySelection: installationInfo.repository_selection,
+              repositorySelection: repoSelection,
               userId: userIdNum,
             },
             where: {

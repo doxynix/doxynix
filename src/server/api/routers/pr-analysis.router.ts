@@ -147,25 +147,4 @@ export const prAnalysisRouter = createTRPCRouter({
         status: item.status,
       }));
     }),
-
-  /**
-   * Toggle PR analysis status for repo
-   */
-  setAnalysisStatus: protectedProcedure
-    .input(
-      z.object({
-        enabled: z.boolean(),
-        repoId: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      logger.info({
-        enabled: input.enabled,
-        msg: "pr_analysis_status_toggling",
-        repoId: input.repoId,
-        userId: ctx.session.user.id,
-      });
-
-      return comments.map(({ publicId, ...c }) => ({ ...c, id: publicId }));
-    }),
 });
