@@ -9,7 +9,15 @@ import type { LatestCompletedAnalysis } from "@/server/shared/infrastructure/rep
 
 import type { StoredDocument, WriterStatus } from "./structure-shared";
 
-export function coerceAnalysisPayload(analysis: LatestCompletedAnalysis | null | undefined) {
+type AnalysisPayload = {
+  aiResult: AIResult;
+  analysis: LatestCompletedAnalysis;
+  metrics: RepoMetrics;
+};
+
+export function coerceAnalysisPayload(
+  analysis: LatestCompletedAnalysis | null | undefined
+): AnalysisPayload | null {
   if (analysis == null || analysis.metricsJson == null || analysis.resultJson == null) return null;
 
   const parsed = aiSchema.safeParse(analysis.resultJson);
@@ -22,7 +30,7 @@ export function coerceAnalysisPayload(analysis: LatestCompletedAnalysis | null |
     return {
       aiResult: analysis.resultJson as AIResult,
       analysis,
-      metrics: analysis.metricsJson,
+      metrics: analysis.metricsJson as unknown as RepoMetrics,
     };
   }
 
