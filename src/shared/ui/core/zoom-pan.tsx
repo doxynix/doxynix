@@ -1,14 +1,13 @@
 "use client";
 
-import * as React from "react";
-import { useEffect } from "react";
+import React, { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
 import { Spinner } from "./spinner";
 
 export interface ZoomPanProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
   controls?: (api: {
     centerView: () => void;
@@ -16,11 +15,11 @@ export interface ZoomPanProps {
     scalePercent: number;
     zoomIn: () => void;
     zoomOut: () => void;
-  }) => React.ReactNode;
+  }) => ReactNode;
   imageSrc?: string;
   initialScale?: number;
   isLoading?: boolean;
-  loadingFallback?: React.ReactNode;
+  loadingFallback?: ReactNode;
   maxScale?: number;
   minScale?: number;
   onLoad?: () => void;
@@ -40,29 +39,29 @@ export function ZoomPan({
   onLoad,
   zoomStep = 0.1,
 }: Readonly<ZoomPanProps>) {
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const imageRef = React.useRef<HTMLImageElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
 
   // Transform refs
-  const currentRef = React.useRef({ scale: initialScale, x: 0, y: 0 });
-  const targetRef = React.useRef({ scale: initialScale, x: 0, y: 0 });
+  const currentRef = useRef({ scale: initialScale, x: 0, y: 0 });
+  const targetRef = useRef({ scale: initialScale, x: 0, y: 0 });
 
   // UI state for controls
-  const [scalePercent, setScalePercent] = React.useState(Math.round(initialScale * 100));
+  const [scalePercent, setScalePercent] = useState(Math.round(initialScale * 100));
 
   // Interaction refs
-  const isDragging = React.useRef(false);
-  const isPinching = React.useRef(false);
-  const panStartRef = React.useRef({ x: 0, y: 0 });
-  const targetStartRef = React.useRef({ x: 0, y: 0 });
+  const isDragging = useRef(false);
+  const isPinching = useRef(false);
+  const panStartRef = useRef({ x: 0, y: 0 });
+  const targetStartRef = useRef({ x: 0, y: 0 });
 
   // Animation/Raf ref
-  const rafRef = React.useRef<null | number>(null);
-  const hasCentered = React.useRef(false);
+  const rafRef = useRef<null | number>(null);
+  const hasCentered = useRef(false);
 
   // Touch refs
-  const touchStartRef = React.useRef<null | {
+  const touchStartRef = useRef<null | {
     center: { x: number; y: number };
     distance: number;
     scale: number;
@@ -247,6 +246,7 @@ export function ZoomPan({
   }>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setApi({
       centerView,
       resetZoom,

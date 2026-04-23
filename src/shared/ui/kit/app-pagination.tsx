@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { parseAsInteger, useQueryState } from "nuqs";
@@ -35,11 +35,14 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
 
   const isAnyLoading = isPending || (isLoading ?? false);
 
-  useEffect(() => {
+  const [prevIsLoading, setPrevIsLoading] = useState(isAnyLoading);
+
+  if (isAnyLoading !== prevIsLoading) {
+    setPrevIsLoading(isAnyLoading);
     if (!isAnyLoading) {
       setClickedButton(null);
     }
-  }, [isAnyLoading]);
+  }
 
   const handlePageChange = (targetPage: number, btnType: "next" | "prev" | number) => {
     if (targetPage === page) return;

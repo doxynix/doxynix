@@ -1,6 +1,14 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+  type HTMLProps,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { cn } from "@/shared/lib/cn";
@@ -18,7 +26,7 @@ export const BackgroundBeamsWithCollision = ({
   children,
   className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -107,7 +115,7 @@ export const BackgroundBeamsWithCollision = ({
   );
 };
 
-const CollisionMechanism = React.forwardRef<
+const CollisionMechanism = forwardRef<
   HTMLDivElement,
   {
     beamOptions?: {
@@ -121,8 +129,8 @@ const CollisionMechanism = React.forwardRef<
       translateX?: number;
       translateY?: number;
     };
-    containerRef: React.RefObject<HTMLDivElement | null>;
-    parentRef: React.RefObject<HTMLDivElement | null>;
+    containerRef: RefObject<HTMLDivElement | null>;
+    parentRef: RefObject<HTMLDivElement | null>;
   }
 >(({ beamOptions = {}, containerRef, parentRef }, __) => {
   const beamRef = useRef<HTMLDivElement>(null);
@@ -227,7 +235,7 @@ const CollisionMechanism = React.forwardRef<
 
 CollisionMechanism.displayName = "CollisionMechanism";
 
-const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
+const Explosion = ({ ...props }: HTMLProps<HTMLDivElement>) => {
   const spans = Array.from({ length: 20 }, (_, index) => ({
     // eslint-disable-next-line react-hooks/purity
     directionX: Math.floor(Math.random() * 80 - 40),

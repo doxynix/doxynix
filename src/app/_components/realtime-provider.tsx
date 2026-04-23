@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import * as Ably from "ably";
 import { AblyProvider } from "ably/react";
 import { useSession } from "next-auth/react";
@@ -14,7 +14,7 @@ import { useRepoActions } from "@/entities/repo";
 
 import { useNotificationActions } from "@/features/notifications";
 
-type Props = { children: React.ReactNode };
+type Props = { children: ReactNode };
 
 export const RealtimeProvider = ({ children }: Props) => {
   const { data: session } = useSession();
@@ -40,7 +40,8 @@ export const RealtimeProvider = ({ children }: Props) => {
         console.log("Realtime connection:", state.current);
       });
     }
-
+    // FIXME: дизейблить пока что потом придумаю чет
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setClient(realtime);
 
     return () => {

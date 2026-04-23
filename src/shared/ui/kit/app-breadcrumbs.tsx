@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { Fragment, type ReactNode } from "react";
 import type { Route } from "next";
 import Link from "next/link";
 
@@ -27,7 +27,7 @@ type Props = {
   className?: string;
   items: BreadcrumbItemConfig[];
   listClassName?: string;
-  separator?: React.ReactNode;
+  separator?: ReactNode;
   showSeparatorAtStart?: boolean;
 };
 
@@ -46,7 +46,7 @@ export function AppBreadcrumbs({
           const label = decodeURIComponent(item.label);
 
           return (
-            <React.Fragment key={item.label + index}>
+            <Fragment key={item.label + index}>
               {(index > 0 || showSeparatorAtStart) && (
                 <BreadcrumbSeparator className="shrink-0">{separator}</BreadcrumbSeparator>
               )}
@@ -72,7 +72,7 @@ export function AppBreadcrumbs({
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
-            </React.Fragment>
+            </Fragment>
           );
         })}
       </BreadcrumbList>

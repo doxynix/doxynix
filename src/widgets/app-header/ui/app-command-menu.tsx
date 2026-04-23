@@ -38,11 +38,33 @@ export function AppCommandMenu() {
   const { setOpen: setOpenCreateDialog } = useCreateRepoActions();
 
   const router = useRouter();
+  const [prevOpen, setPrevOpen] = useState(open);
+  const isOpening = open && open !== prevOpen;
+
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open) {
+      setSearch("");
+    }
+  }
+
+  const [prevDebouncedSearch, setPrevDebouncedSearch] = useState(debouncedSearch);
+
+  if (debouncedSearch !== prevDebouncedSearch) {
+    setPrevDebouncedSearch(debouncedSearch);
+    if (debouncedSearch.length > 0) {
+      setIsReposExpanded(true);
+    }
+  }
+
+  const repoSearch =
+    isOpening || search.trim().length === 0 ? undefined : debouncedSearch || undefined;
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     trpc.repo.getAll.useInfiniteQuery(
       {
         limit: 10,
-        search: debouncedSearch || undefined,
+        search: repoSearch,
       },
       {
         enabled: open,
@@ -75,18 +97,6 @@ export function AppCommandMenu() {
       if (currentTarget) observer.unobserve(currentTarget);
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, isReposExpanded]);
-
-  useEffect(() => {
-    if (debouncedSearch.length > 0) {
-      setIsReposExpanded(true);
-    }
-  }, [debouncedSearch]);
-
-  useEffect(() => {
-    if (open) {
-      setSearch("");
-    }
-  }, [open]);
 
   const navigate = (path: string) => {
     setOpen(false);

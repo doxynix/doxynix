@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, type RefObject } from "react";
+import { useEffect, useId, useState, type FC, type RefObject } from "react";
 import { motion } from "motion/react";
 
 import { cn } from "@/shared/lib/cn";
@@ -27,12 +27,12 @@ export type AnimatedBeamProps = {
   toRef: RefObject<HTMLElement | null>;
 };
 
-export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
+export const AnimatedBeam: FC<AnimatedBeamProps> = ({
   className,
   containerRef,
   curvature = 0,
   delay = 0,
-  duration = Math.random() * 3 + 4,
+  duration: durationProp,
   endXOffset = 0,
   endYOffset = 0,
   fromRef,
@@ -49,6 +49,9 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
   toRef,
 }) => {
   const id = useId();
+  const [fallbackDuration] = useState(() => Math.random() * 3 + 4);
+  const duration = durationProp ?? fallbackDuration;
+
   const [pathD, setPathD] = useState("");
   const [svgDimensions, setSvgDimensions] = useState({ height: 0, width: 0 });
 

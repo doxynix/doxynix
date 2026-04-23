@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 
 import { Badge } from "../core/badge";
@@ -16,6 +16,20 @@ type Props = {
   goodCode: string;
 };
 
+function noop() {}
+
+function subscribe() {
+  return noop;
+}
+
+function getClientSnapshot() {
+  return true;
+}
+
+function getServerSnapshot() {
+  return false;
+}
+
 export function CodeComparison({
   afterHtmlDark,
   afterHtmlLight,
@@ -26,13 +40,9 @@ export function CodeComparison({
   goodCode,
 }: Readonly<Props>) {
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const isMounted = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = !mounted || resolvedTheme === "dark";
+  const isDark = isMounted && resolvedTheme === "dark";
 
   const beforeHtml = isDark ? beforeHtmlDark : beforeHtmlLight;
   const afterHtml = isDark ? afterHtmlDark : afterHtmlLight;

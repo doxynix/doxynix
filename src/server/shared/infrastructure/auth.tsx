@@ -4,7 +4,6 @@ import { render } from "@react-email/render";
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import GitHubProvider from "next-auth/providers/github";
-import GitLabProvider from "next-auth/providers/gitlab";
 import GoogleProvider from "next-auth/providers/google";
 import YandexProvider from "next-auth/providers/yandex";
 import { Resend } from "resend";

@@ -4,25 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { EditorView } from "@uiw/react-codemirror";
 import { saveAs } from "file-saver";
-import {
-  Check,
-  Download,
-  Edit3,
-  FileChartLine,
-  FileCode,
-  FileText,
-  Loader2,
-  Save,
-  Sparkles,
-  X,
-} from "lucide-react";
-import { useSession } from "next-auth/react";
+import { Code, Download, Edit3, FileCode, Save, Sparkles, X } from "lucide-react";
 import type { TreeApi } from "react-arborist";
 import { toast } from "sonner";
 
 import { trpc, type FileContent } from "@/shared/api/trpc";
-import { Button } from "@/shared/ui/core/button";
-import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
@@ -47,17 +33,14 @@ type Props = {
 };
 
 export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Props>) {
-  const { data: session } = useSession();
-  const userId = session?.user.id;
   const [mode, setMode] = useState<"edit" | "view">("view");
   const [view, setView] = useState<EditorView | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  const [showDiff, setShowDiff] = useState(false);
-  const [isAuditDismissed, setIsAuditDismissed] = useState(false);
 
   const [localContent, setLocalContent] = useState(fileData.content);
+  const [prevPath, setPrevPath] = useState(path);
+  const [prevExternalContent, setPrevExternalContent] = useState(fileData.content);
 
   const [editorStats, setEditorStats] = useState<EditorStats>({
     col: 1,
@@ -69,46 +52,20 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     totalMatches: 0,
   });
 
-  const { data: aiResult, isFetching } = trpc.repoAnalysis.getFileActionResult.useQuery(
-    { path },
-    { enabled: !!path && userId != null }
-  );
+  if (path !== prevPath || fileData.content !== prevExternalContent) {
+    setPrevPath(path);
+    setPrevExternalContent(fileData.content);
+    setLocalContent(fileData.content);
+    setMode("view");
+  }
 
-  useEffect(() => {
-    if (!isFetching && aiResult != null) {
-      setIsAiLoading(false);
-      if (aiResult.action === "document-file-preview") {
-        setShowDiff(true);
-      }
-    }
-  }, [aiResult, isFetching]);
-
-  const auditMutation = trpc.repoAnalysis.quickFileAudit.useMutation({
-    onError: () => setIsAiLoading(false),
-    onMutate: () => setIsAiLoading(true),
-    onSuccess: () => toast.info("Audit started..."),
+  const analyzeMutation = trpc.repoAnalysis.quickFileAudit.useMutation({
+    onSuccess: (data) => toast.success(`Audit started! Job: ${data.jobId}`),
   });
 
   const documentMutation = trpc.repoAnalysis.documentFile.useMutation({
-    onError: () => setIsAiLoading(false),
-    onMutate: () => setIsAiLoading(true),
-    onSuccess: () => toast.info("Documentation generation started..."),
+    onSuccess: (data) => toast.success(`Documentation task queued: ${data.jobId}`),
   });
-
-  const stageMutation = trpc.prStaging.stageFile.useMutation({
-    onError: (error) => {
-      toast.error(`Failed to stage changes: ${error.message}`);
-    },
-    onSuccess: (data) => {
-      toast.success(`Changes staged for PR. Total files in draft: ${data.stagedCount}`);
-    },
-  });
-
-  useEffect(() => {
-    setLocalContent(fileData.content);
-    setMode("view");
-    setShowDiff(false);
-  }, [path, fileData.content]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -132,10 +89,6 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isSearchOpen, view]);
 
-  useEffect(() => {
-    setIsAuditDismissed(false);
-  }, [path]);
-
   const pathParts = path.split("/");
 
   const handleFolderClick = (index: number) => {
@@ -156,41 +109,6 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     saveAs(new Blob([localContent], { type: "text/plain;charset=utf-8" }), fileName);
   };
 
-  const handleAudit = () => {
-    auditMutation.mutate({ content: localContent, path, repoId });
-  };
-
-  const handleDocument = () => {
-    documentMutation.mutate({ content: localContent, path, repoId });
-  };
-
-  const handleAcceptDiff = (): void => {
-    if (aiResult != null) {
-      const proposedContent: string = aiResult.content;
-
-      stageMutation.mutate({
-        content: proposedContent,
-        filePath: path,
-        repoId: repoId,
-      });
-
-      setLocalContent(proposedContent);
-
-      setShowDiff(false);
-    }
-  };
-
-  const handleDiscardDiff = () => {
-    setShowDiff(false);
-  };
-
-  const pinMutation = trpc.repoAnalysis.pinAuditToDocs.useMutation({
-    onError: (err) => toast.error("Failed to save: " + err.message),
-    onSuccess: () => {
-      toast.success("Audit saved to project documentation");
-    },
-  });
-
   const VIEW_ACTIONS = [
     {
       icon: Download,
@@ -198,9 +116,9 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
       tooltipText: "Download file",
     },
     {
-      disabled: isAiLoading || auditMutation.isPending,
+      disabled: analyzeMutation.isPending,
       icon: Sparkles,
-      onClick: handleAudit,
+      onClick: () => analyzeMutation.mutate({ content: localContent, path, repoId }),
       tooltipText: "Quick AI Audit",
     },
     {
@@ -209,15 +127,10 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
       tooltipText: "Edit file",
     },
     {
-      disabled: isAiLoading || documentMutation.isPending,
-      icon: FileText,
-      onClick: handleDocument,
+      disabled: documentMutation.isPending,
+      icon: Code,
+      onClick: () => documentMutation.mutate({ content: localContent, path, repoId }),
       tooltipText: "Document file",
-    },
-    {
-      icon: FileChartLine,
-      onClick: () => setIsAuditDismissed(true),
-      tooltipText: "Sho documentation",
     },
     {
       hidden: fileData.meta.url == null,
@@ -239,7 +152,6 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
       tooltipText: "Discard changes",
     },
     {
-      className: "bg-success/10 text-success hover:bg-success/20 border-success/20",
       hideTooltip: true,
       icon: Save,
       label: "Save Changes",
@@ -261,7 +173,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     <div ref={containerRef} className="bg-background flex h-full flex-col">
       <div className="border-border flex flex-col justify-between gap-4 border-b px-4 py-2">
         <div className="flex items-center gap-2 overflow-hidden">
-          <FileCode className="text-muted-foreground" />
+          <FileCode className="text-muted-foreground size-4 shrink-0" />
           <AppBreadcrumbs
             items={breadcrumbItems}
             listClassName="sm:gap-1"
@@ -301,76 +213,13 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
         <RepoSearchPanel stats={editorStats} view={view} onClose={() => setIsSearchOpen(false)} />
       )}
 
-      {aiResult?.action === "quick-file-audit" && !isAuditDismissed && (
-        <div className="bg-popover animate-in fade-in slide-in-from-right-4 absolute top-20 right-6 z-50 w-96 rounded-xl border p-4">
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-xs font-bold">Audit Result</h3>
-            <Button size="icon" variant="ghost" onClick={() => setIsAuditDismissed(true)}>
-              <X />
-            </Button>
-          </div>
-          <article
-            dangerouslySetInnerHTML={{ __html: aiResult.html }}
-            className="prose prose-invert text-foreground max-h-120 overflow-y-auto text-xs"
-          />
-          <div className="mt-4 flex items-center gap-1 border-t pt-3">
-            <Button
-              disabled={pinMutation.isPending}
-              size="sm"
-              variant="outline"
-              onClick={() => pinMutation.mutate({ path, repoId })}
-              className="w-full"
-            >
-              {pinMutation.isPending ? <Spinner className="size-3" /> : <Save className="size-3" />}
-              Pin to Docs
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {showDiff === true && aiResult?.action === "document-file-preview" && (
-        <div className="bg-primary/5 border-primary/20 animate-in slide-in-from-top-1 flex items-center justify-between border-b px-4 py-2 duration-300">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary/10 flex h-6 w-6 items-center justify-center rounded-full">
-              <Sparkles className="text-primary h-3 w-3" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[11px] font-semibold tracking-tight">
-                Documentation Preview
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="ghost" onClick={handleDiscardDiff}>
-              <X className="mr-1 h-3 w-3" />
-              Discard
-            </Button>
-            <Button
-              disabled={stageMutation.isPending === true}
-              size="sm"
-              variant="default"
-              onClick={handleAcceptDiff}
-            >
-              {stageMutation.isPending === true ? (
-                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-              ) : (
-                <Check className="mr-1 h-3 w-3" />
-              )}
-              Accept Changes
-            </Button>
-          </div>
-        </div>
-      )}
-
       <div className="relative flex-1 overflow-hidden">
         <Editor
-          value={showDiff && aiResult?.content != null ? aiResult.content : localContent}
-          compareValue={fileData.content}
+          value={localContent}
           initialValue={fileData.content}
           meta={fileData.meta}
           path={path}
           readOnly={mode === "view"}
-          showDiff={showDiff}
           onChange={setLocalContent}
           onStats={setEditorStats}
           onViewCreated={setView}

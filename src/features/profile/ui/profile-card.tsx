@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import { CloudUpload, Trash2 } from "lucide-react";
 import type { User } from "next-auth";
 import { useSession } from "next-auth/react";
@@ -24,10 +24,12 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
   const currentUser = session?.user ?? initialUser;
 
   const [avatarUrl, setAvatarUrl] = useState(currentUser.image ?? "");
+  const [prevImage, setPrevImage] = useState(currentUser.image);
 
-  useEffect(() => {
+  if (currentUser.image !== prevImage) {
+    setPrevImage(currentUser.image);
     setAvatarUrl(currentUser.image ?? "");
-  }, [currentUser.image]);
+  }
 
   const { isUploading, removeAvatar, uploadAvatar } = useProfileActions({
     onAvatarRemoveSuccess: () => {
@@ -39,7 +41,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
     },
   });
 
-  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     await uploadAvatar([file]);
@@ -74,7 +76,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
                 onClick={() => removeAvatar.mutate()}
                 className="absolute right-0 bottom-0 cursor-pointer"
               >
-                <Trash2 />
+                <Trash2 className="size-4" />
               </LoadingButton>
             )}
           </div>
@@ -95,7 +97,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
               onClick={() => fileInputRef.current?.click()}
               className="cursor-pointer"
             >
-              <CloudUpload /> {t("settings_profile_upload_photo_button")}
+              <CloudUpload className="size-4" /> {t("settings_profile_upload_photo_button")}
             </LoadingButton>
 
             <p className="text-muted-foreground text-center text-xs">

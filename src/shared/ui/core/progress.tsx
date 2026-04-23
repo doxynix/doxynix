@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type { ComponentProps, CSSProperties } from "react";
 import * as ProgressPrimitive from "@radix-ui/react-progress";
 
 import { cn } from "@/shared/lib/cn";
@@ -11,9 +11,9 @@ function Progress({
   indicatorStyle,
   value,
   ...props
-}: React.ComponentProps<typeof ProgressPrimitive.Root> & {
+}: ComponentProps<typeof ProgressPrimitive.Root> & {
   indicatorClassName?: string;
-  indicatorStyle?: React.CSSProperties;
+  indicatorStyle?: CSSProperties;
 }) {
   const safe = Number.isFinite(value) ? (value as number) : 0;
   const percentage = Math.min(100, Math.max(0, safe));

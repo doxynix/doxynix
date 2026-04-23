@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import {
   findNext,
   findPrevious,
@@ -24,8 +24,15 @@ type Props = {
   view: EditorView;
 };
 
+const onKeyDown = (e: KeyboardEvent, action: () => void) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    action();
+  }
+};
+
 export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const initialQuery = getSearchQuery(view.state);
   const [options, setOptions] = useState({
     caseSensitive: initialQuery.caseSensitive,
@@ -36,8 +43,11 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
   const [search, setSearch] = useState(initialQuery.search || "");
   const [replace, setReplace] = useState(initialQuery.replace || "");
 
-  useEffect(() => {
+  const [prevView, setPrevView] = useState(view);
+
+  if (view !== prevView) {
     const q = getSearchQuery(view.state);
+    setPrevView(view);
     setSearch(q.search);
     setReplace(q.replace);
     setOptions({
@@ -45,7 +55,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
       regexp: q.regexp,
       wholeWord: q.wholeWord,
     });
-  }, [view]);
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => inputRef.current?.focus(), 100);
@@ -72,30 +82,23 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
     syncToCM(search, replace, nextOpts);
   };
 
-  const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSearch(val);
     syncToCM(val, replace);
   };
 
-  const onReplaceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onReplaceChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setReplace(val);
     syncToCM(search, val);
-  };
-
-  const onKeyDown = (e: React.KeyboardEvent, action: () => void) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      action();
-    }
   };
 
   return (
     <div className="bg-card border-border animate-in slide-in-from-top-2 flex flex-wrap items-center justify-between gap-4 border-b px-3 py-2 font-sans text-xs duration-200">
       <div className="flex items-center gap-2">
         <div className="relative">
-          <Search className="text-muted-foreground absolute top-2 left-2.5" />
+          <Search className="text-muted-foreground absolute top-2 left-2.5 size-4" />
           <Input
             ref={inputRef}
             value={search}
@@ -154,7 +157,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           onClick={() => findPrevious(view)}
           className="h-8 w-8 p-0"
         >
-          <MoveLeft className="rotate-90" />
+          <MoveLeft className="size-4 rotate-90" />
         </RepoCodeActionButton>
 
         <RepoCodeActionButton
@@ -162,7 +165,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           onClick={() => findNext(view)}
           className="h-8 w-8 p-0"
         >
-          <MoveLeft className="-rotate-90" />
+          <MoveLeft className="size-4 -rotate-90" />
         </RepoCodeActionButton>
       </div>
 
@@ -179,7 +182,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           onClick={() => replaceNext(view)}
           className="h-8 px-2"
         >
-          <Replace className="mr-1.5" />
+          <Replace className="mr-1.5 size-4" />
           Replace
         </RepoCodeActionButton>
 
@@ -188,7 +191,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           onClick={() => replaceAll(view)}
           className="h-8 px-2"
         >
-          <ReplaceAll className="mr-1.5" />
+          <ReplaceAll className="mr-1.5 size-4" />
           All
         </RepoCodeActionButton>
 
@@ -197,7 +200,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           onClick={onClose}
           className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 ml-2 h-8 w-8 p-0"
         >
-          <X />
+          <X className="size-4" />
         </RepoCodeActionButton>
       </div>
     </div>

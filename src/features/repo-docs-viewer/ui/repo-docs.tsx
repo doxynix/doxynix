@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ComponentType } from "react";
 import saveAs from "file-saver";
 import { BookOpen, Download, FileText, HistoryIcon, Layers, Terminal, Users2 } from "lucide-react";
 
@@ -17,7 +17,7 @@ import { RepoSwagger } from "@/entities/repo-details";
 import { RepoDocsContent } from "./repo-docs-content";
 import { RepoDocsTabs } from "./repo-docs-tabs";
 
-const DOC_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const DOC_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   API: Terminal,
   ARCHITECTURE: Layers,
   CHANGELOG: HistoryIcon,
@@ -71,11 +71,11 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
       value={activeTab}
       orientation="vertical"
       onValueChange={(value) => onTabChange(value as DocType)}
-      className="flex h-[calc(100dvh-250px)] w-full flex-row gap-10"
+      className="flex h-[calc(100dvh-220px)] w-full flex-row gap-10"
     >
       <RepoDocsTabs activeTab={activeTab} items={tabItems} />
 
-      <div className="bg-card relative flex flex-1 flex-col border">
+      <div className="bg-card relative flex flex-1 flex-col rounded-xl border">
         {availableDocs.map((doc) => {
           const isCurrentApiSwagger = Boolean(
             doc.type === "API" && apiMode === "swagger" && metrics?.reference.swagger != null

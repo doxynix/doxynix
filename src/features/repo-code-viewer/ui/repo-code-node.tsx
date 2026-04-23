@@ -1,5 +1,5 @@
-import React from "react";
-import { ChevronDown, ChevronRight, FileIcon, Folder, FolderOpen } from "lucide-react";
+import { type MouseEvent } from "react";
+import { ChevronDown, ChevronRight, Folder, FolderOpen, File as LucideFile } from "lucide-react";
 import type { NodeRendererProps } from "react-arborist";
 
 import { cn } from "@/shared/lib/cn";
@@ -16,7 +16,7 @@ export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNode
   const isActive = activePath === node.id;
   const isFolder = !node.isLeaf;
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: MouseEvent) => {
     e.stopPropagation();
     if (isFolder) {
       node.toggle();
@@ -46,12 +46,12 @@ export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNode
       <div className="flex size-4 shrink-0 items-center justify-center">
         {isFolder ? (
           node.isOpen ? (
-            <FolderOpen />
+            <FolderOpen className="size-4" />
           ) : (
-            <Folder className="fill-current" />
+            <Folder className="size-4 fill-current" />
           )
         ) : (
-          <FileIcon className={cn(isActive && "font-bold")} />
+          <LucideFile className={cn("size-4", isActive && "font-bold")} />
         )}
       </div>
       <span className="truncate text-sm">{node.data.name}</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -12,7 +12,7 @@ import { useRepoActions } from "@/entities/repo";
 type Props = { owner: string };
 
 const richStyles = {
-  strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+  strong: (chunks: ReactNode) => <strong>{chunks}</strong>,
 };
 
 export function DeleteByOwnerDialog({ owner }: Readonly<Props>) {

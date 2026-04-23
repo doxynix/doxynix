@@ -10,48 +10,50 @@ export default function GlobalError({
   reset: () => void;
 }>) {
   const [requestId, setRequestId] = useState<null | string>(null);
-  const isClient = typeof window !== "undefined";
-  const currentUrl = isClient ? globalThis.location.href : "";
-  const userAgent = isClient ? globalThis.navigator.userAgent : "";
-  const screenSize = isClient
-    ? `${globalThis.window.innerWidth}x${globalThis.window.innerHeight}`
-    : "N/A";
 
-  const timestamp = new Date().toISOString();
   const finalId = requestId ?? error.digest ?? "No-ID";
   const emailSubject = `[Bug Report] Doxynix - Error ${finalId}`;
 
   useEffect(() => {
-    const requestId = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("last_request_id="))
-      ?.split("=")[1];
-
-    if (requestId != null) {
-      setRequestId(requestId);
-    }
-
     let isActive = true;
 
-    void import("@sentry/nextjs")
-      .then((Sentry) => {
-        if (!isActive) return;
+    const rid =
+      document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("last_request_id="))
+        ?.split("=")[1] ?? null;
 
-        if (requestId != null) {
-          Sentry.setTag("request_id", requestId);
-          Sentry.setTag("error_type", "fatal_global");
-        }
-
-        Sentry.captureException(error);
-      })
-      .catch((error) => {
-        console.error("Sentry is unavailable", error);
+    if (rid != null) {
+      requestAnimationFrame(() => {
+        if (isActive) setRequestId(rid);
       });
+    }
+
+    void import("@sentry/nextjs").then((Sentry) => {
+      if (!isActive) return;
+
+      if (rid !== null) {
+        Sentry.setTag("request_id", rid);
+        Sentry.setTag("error_type", "fatal_global");
+      }
+
+      Sentry.captureException(error);
+    });
 
     return () => {
       isActive = false;
     };
   }, [error]);
+
+  const [techInfo] = useState(() => {
+    const isClient = typeof window !== "undefined";
+    return {
+      screen: isClient ? `${globalThis.window.innerWidth}x${globalThis.window.innerHeight}` : "N/A",
+      time: new Date().toISOString(),
+      ua: isClient ? globalThis.navigator.userAgent : "",
+      url: isClient ? globalThis.location.href : "",
+    };
+  });
 
   const emailBody = `
     Describe what you were doing before the error (optional):
@@ -61,10 +63,10 @@ export default function GlobalError({
     Technical Information (Please, do not edit):
     ------------------------------------------------
     Error ID: ${finalId}
-    Page: ${currentUrl}
-    Screen: ${screenSize}
-    Time: ${timestamp}
-    User Agent: ${userAgent}
+    Page: ${techInfo.url}
+    Screen: ${techInfo.screen}
+    Time: ${techInfo.time}
+    User Agent: ${techInfo.ua}
   `.trim();
 
   const mailtoLink = `mailto:support@doxynix.space?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
