@@ -96,10 +96,10 @@ export const repoAnalysisRouter = createTRPCRouter({
         });
       }
 
-      const { analysisId, commitSha } = cachedData.contentRef || {};
+      const { analysisId, commitSha } = cachedData.contentRef ?? {};
 
       let internalAnalysisId: number | undefined;
-      if (analysisId) {
+      if (analysisId != null) {
         const analysis = await ctx.db.analysis.findUnique({
           select: { id: true },
           where: { publicId: analysisId },
@@ -115,8 +115,8 @@ export const repoAnalysisRouter = createTRPCRouter({
           path: input.path,
           repo: { connect: { publicId: input.repoId } },
           type: "CODE_DOC",
-          version: commitSha || "manual",
-          ...(internalAnalysisId
+          version: commitSha ?? "manual",
+          ...(internalAnalysisId != null
             ? {
                 analysis: { connect: { id: internalAnalysisId } },
               }
