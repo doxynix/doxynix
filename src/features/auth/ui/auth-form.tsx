@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
+import { useCallback, useRef, useState, type ComponentType } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
@@ -40,6 +40,8 @@ const MagicLinkSchema = z.object({
       z.maxLength(254, "Email address cannot exceed 254 characters")
     ),
 });
+
+type MagicLinkSchemaValue = z.infer<typeof MagicLinkSchema>;
 
 type AuthProvider = {
   icon: ComponentType<{ className?: string }>;
@@ -82,29 +84,22 @@ export function AuthForm() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
   const turnstileRef = useRef<TurnstileInstance>(null);
+  const pendingDataRef = useRef<MagicLinkSchemaValue | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<null | string>(null);
 
   const [isSent, setIsSent] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<null | string>(null);
   const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [pendingData, setPendingData] = useState<null | z.infer<typeof MagicLinkSchema>>(null);
 
-  const form = useForm<z.infer<typeof MagicLinkSchema>>({
+  const form = useForm<MagicLinkSchemaValue>({
     defaultValues: { email: "" },
     resolver: zodResolver(MagicLinkSchema),
   });
 
   const disabled = loadingProvider != null || isVerifying;
 
-  useEffect(() => {
-    if (errorMessage != null) {
-      toast.error(errorMessage);
-    }
-  }, [errorMessage]);
-
   const proceedWithSignIn = useCallback(
-    async (values: z.infer<typeof MagicLinkSchema>, token: string) => {
+    async (values: MagicLinkSchemaValue, token: string) => {
       setIsVerifying(false);
       setLoadingProvider("email");
 
@@ -122,41 +117,38 @@ export function AuthForm() {
           toast.success(t("sent_toast_success"));
           posthog.capture("sign_in_email_sent", { provider: "email" });
         } else {
-          if (res?.status === 403) {
-            setErrorMessage("Captcha validation failed. Are you a robot?");
-          } else {
-            setErrorMessage(t("sent_toast_error"));
-          }
+          const msg =
+            res?.status === 403
+              ? "Captcha validation failed. Are you a robot?"
+              : t("sent_toast_error");
+          toast.error(msg);
           turnstileRef.current?.reset();
           setTurnstileToken(null);
         }
       } catch {
-        setErrorMessage("Something went wrong. Please try again.");
+        toast.error("Something went wrong. Please try again.");
         turnstileRef.current?.reset();
       } finally {
         setLoadingProvider(null);
-        setPendingData(null);
+        pendingDataRef.current = null;
         setTurnstileToken(null);
       }
     },
     [t]
   );
 
-  const onSubmit = async (values: z.infer<typeof MagicLinkSchema>) => {
-    setErrorMessage(null);
-
+  const onSubmit = async (values: MagicLinkSchemaValue) => {
     if (turnstileToken != null) {
       await proceedWithSignIn(values, turnstileToken);
       return;
     }
 
     setIsVerifying(true);
-    setPendingData(values);
+    pendingDataRef.current = values;
 
     if (turnstileRef.current == null) {
       setIsVerifying(false);
-      setPendingData(null);
-      setErrorMessage("Security widget is not available. Please refresh the page.");
+      pendingDataRef.current = null;
       return;
     }
 
@@ -173,21 +165,22 @@ export function AuthForm() {
     }
   }
 
-  useEffect(() => {
-    if (isVerifying && pendingData && turnstileToken != null) {
-      void proceedWithSignIn(pendingData, turnstileToken);
-    }
-  }, [isVerifying, pendingData, turnstileToken, proceedWithSignIn]);
+  const onTurnstileSuccess = useCallback(
+    (token: string) => {
+      setTurnstileToken(token);
 
-  const onTurnstileSuccess = useCallback((token: string) => {
-    setTurnstileToken(token);
-  }, []);
+      if (isVerifying && pendingDataRef.current) {
+        void proceedWithSignIn(pendingDataRef.current, token);
+      }
+    },
+    [isVerifying, proceedWithSignIn]
+  );
 
   const onTurnstileError = useCallback(() => {
     setTurnstileToken(null);
     setIsVerifying(false);
-    setPendingData(null);
-    setErrorMessage("Verification service error. Please try again.");
+    pendingDataRef.current = null;
+    toast.error("Verification service error.");
   }, []);
 
   const onTurnstileExpire = useCallback(() => {
@@ -195,8 +188,8 @@ export function AuthForm() {
 
     setTurnstileToken(null);
     setIsVerifying(false);
-    setPendingData(null);
-    setErrorMessage("Verification expired. Please try again.");
+    pendingDataRef.current = null;
+    toast.error("Verification expired.");
   }, [isSent, loadingProvider]);
 
   const turnstileOptions = {

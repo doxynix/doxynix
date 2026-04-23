@@ -9,28 +9,29 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }>) {
-  const [requestId, setRequestId] = useState<null | string>(null);
-  const isClient = typeof window !== "undefined";
-  const currentUrl = isClient ? globalThis.location.href : "";
-  const userAgent = isClient ? globalThis.navigator.userAgent : "";
-  const screenSize = isClient
-    ? `${globalThis.window.innerWidth}x${globalThis.window.innerHeight}`
-    : "N/A";
-
-  const timestamp = new Date().toISOString();
+  const [requestId] = useState<null | string>(() => {
+    if (typeof window === "undefined") return null;
+    return (
+      document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("last_request_id="))
+        ?.split("=")[1] ?? null
+    );
+  });
   const finalId = requestId ?? error.digest ?? "No-ID";
   const emailSubject = `[Bug Report] Doxynix - Error ${finalId}`;
 
+  const [techInfo] = useState(() => {
+    const isClient = typeof window !== "undefined";
+    return {
+      screen: isClient ? `${globalThis.window.innerWidth}x${globalThis.window.innerHeight}` : "N/A",
+      time: new Date().toISOString(),
+      ua: isClient ? globalThis.navigator.userAgent : "",
+      url: isClient ? globalThis.location.href : "",
+    };
+  });
+
   useEffect(() => {
-    const requestId = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("last_request_id="))
-      ?.split("=")[1];
-
-    if (requestId != null) {
-      setRequestId(requestId);
-    }
-
     let isActive = true;
 
     void import("@sentry/nextjs")
@@ -61,10 +62,10 @@ export default function GlobalError({
     Technical Information (Please, do not edit):
     ------------------------------------------------
     Error ID: ${finalId}
-    Page: ${currentUrl}
-    Screen: ${screenSize}
-    Time: ${timestamp}
-    User Agent: ${userAgent}
+    Page: ${techInfo.url}
+    Screen: ${techInfo.screen}
+    Time: ${techInfo.time}
+    User Agent: ${techInfo.ua}
   `.trim();
 
   const mailtoLink = `mailto:support@doxynix.space?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;

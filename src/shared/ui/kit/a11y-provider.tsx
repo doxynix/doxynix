@@ -20,15 +20,26 @@ export function A11yProvider({ children }: Readonly<Props>) {
     }
   }, []);
 
+  const [prevPathname, setPrevPathname] = useState(pathname);
+
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setAnnouncement("");
+  }
+
   useEffect(() => {
     const title = document.title || "Page changed";
-    setAnnouncement("");
 
-    const id = window.setTimeout(() => {
+    const clearId = window.setTimeout(() => setAnnouncement(""), 0);
+
+    const announceId = window.setTimeout(() => {
       setAnnouncement(`Navigated to ${title}`);
     }, 50);
 
-    return () => window.clearTimeout(id);
+    return () => {
+      window.clearTimeout(clearId);
+      window.clearTimeout(announceId);
+    };
   }, [pathname]);
 
   return (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocale } from "next-intl";
 import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
@@ -48,15 +48,18 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   });
 
   const analyzeMutation = trpc.repoAnalysis.analyze.useMutation();
+  const [prevApiFiles, setPrevApiFiles] = useState(apiFiles);
 
-  useEffect(() => {
+  if (apiFiles !== prevApiFiles) {
+    setPrevApiFiles(apiFiles);
+
     if (apiFiles != null) {
       const recommendedPaths = (apiFiles as FileTuple[])
         .filter((f) => f[3] === 1 && f[1] === 1)
         .map((f) => f[0]);
       setSelectedIds(new Set(recommendedPaths));
     }
-  }, [apiFiles]);
+  }
 
   const getTreeData = () => {
     if (!apiFiles) return [];

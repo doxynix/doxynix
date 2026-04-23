@@ -78,11 +78,20 @@ function useMermaid({
   // Memoize config to prevent deep object comparison issues in effects
   const configString = useMemo(() => JSON.stringify(config ?? {}), [config]);
 
-  useEffect(() => {
+  const [prevDebouncedChart, setPrevDebouncedChart] = useState(debouncedChart);
+
+  if (debouncedChart !== prevDebouncedChart) {
+    setPrevDebouncedChart(debouncedChart);
+
     if (!debouncedChart.trim()) {
       setStatus("idle");
       setSvg(null);
       setError(null);
+    }
+  }
+
+  useEffect(() => {
+    if (!debouncedChart.trim()) {
       return;
     }
 
