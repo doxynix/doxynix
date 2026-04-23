@@ -12,8 +12,6 @@ import { Tabs, TabsContent } from "@/shared/ui/core/tabs";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import { RepoSwagger } from "@/entities/repo-details";
-
 import { RepoDocsContent } from "./repo-docs-content";
 import { RepoDocsTabs } from "./repo-docs-tabs";
 
@@ -161,7 +159,8 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
 
               {isCurrentApiSwagger ? (
                 <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden px-8 pb-8 md:px-12">
-                  <RepoSwagger spec={metrics?.reference.swagger ?? ""} />
+                  {/* <RepoSwagger spec={metrics?.reference.swagger ?? ""} /> */}{" "}
+                  {/* NOTE: эта штука тянет миллиард мб в бандл клиента потом подумать че делать с ним*/}
                 </div>
               ) : (
                 <ScrollArea className="w-full flex-1">
