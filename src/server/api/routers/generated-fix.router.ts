@@ -29,7 +29,7 @@ const FixApplicationPayloadSchema = z.object({
   branch: z.string().min(1),
   estimatedImpact: z.number().int().min(0).max(100),
   fixedFiles: z.array(FixedFileContentSchema).min(1),
-  fixId: z.number(),
+  fixId: z.string(),
   repoId: z.string(),
   title: z.string().min(1),
 });
@@ -69,13 +69,19 @@ export const generatedFixRouter = createTRPCRouter({
           repo.owner
         );
 
+        const fix = await generatedFixService.getById(ctx.db, input.fixId);
+
+        if (fix == null) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Fix not found" });
+        }
+
         // Apply fix using full-content strategy
         const fixService = new FixService();
         const result = await fixService.applyFix(clientContext.octokit, {
           branch: input.branch,
           defaultBranch: repo.defaultBranch,
           fixedFiles: input.fixedFiles,
-          fixId: input.fixId,
+          fixId: fix.id,
           owner: repo.owner,
           repoId: input.repoId,
           repoName: repo.name,
@@ -83,7 +89,7 @@ export const generatedFixRouter = createTRPCRouter({
         });
 
         // Update fix status with PR metadata (no diffs stored)
-        await generatedFixService.updateStatus(ctx.db, input.fixId, "PR_OPENED", {
+        await generatedFixService.updateStatus(ctx.db, fix.id, "PR_OPENED", {
           githubPrNumber: result.prNumber,
           githubPrUrl: result.prUrl,
         });
