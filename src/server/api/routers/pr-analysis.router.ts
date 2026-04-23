@@ -85,7 +85,7 @@ export const prAnalysisRouter = createTRPCRouter({
         input.prNumber
       );
 
-      if (!analysis) return null;
+      if (analysis == null) return null;
 
       const { publicId, ...rest } = analysis;
       return { ...rest, id: publicId };

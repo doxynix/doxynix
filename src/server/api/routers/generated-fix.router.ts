@@ -141,7 +141,7 @@ export const generatedFixRouter = createTRPCRouter({
             where: { publicId: input.prAnalysisId },
           });
 
-          if (prAnalysisRecord) {
+          if (prAnalysisRecord != null) {
             validPrAnalysisId = prAnalysisRecord.publicId;
           }
         }
