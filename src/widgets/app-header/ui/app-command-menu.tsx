@@ -33,31 +33,38 @@ export function AppCommandMenu() {
   const open = useCommandMenuIsOpen();
   const { setOpen } = useCommandMenuActions();
   const [search, setSearch] = useState("");
-  const [debouncedSearch, { cancel }] = useDebounce(search, 300);
+  const [debouncedSearch] = useDebounce(search, 300);
   const [isReposExpanded, setIsReposExpanded] = useState(true);
   const { setOpen: setOpenCreateDialog } = useCreateRepoActions();
 
   const router = useRouter();
   const [prevOpen, setPrevOpen] = useState(open);
+  const isOpening = open && open !== prevOpen;
+
   if (open !== prevOpen) {
     setPrevOpen(open);
     if (open) {
       setSearch("");
-      cancel();
     }
   }
+
   const [prevDebouncedSearch, setPrevDebouncedSearch] = useState(debouncedSearch);
+
   if (debouncedSearch !== prevDebouncedSearch) {
     setPrevDebouncedSearch(debouncedSearch);
     if (debouncedSearch.length > 0) {
       setIsReposExpanded(true);
     }
   }
+
+  const repoSearch =
+    isOpening || search.trim().length === 0 ? undefined : debouncedSearch || undefined;
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     trpc.repo.getAll.useInfiniteQuery(
       {
         limit: 10,
-        search: debouncedSearch || undefined,
+        search: repoSearch,
       },
       {
         enabled: open,

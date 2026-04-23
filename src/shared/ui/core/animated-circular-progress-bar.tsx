@@ -21,7 +21,9 @@ export function AnimatedCircularProgressBar({
 }: Readonly<AnimatedCircularProgressBarProps>) {
   const circumference = 2 * Math.PI * 45;
   const percentPx = circumference / 100;
-  const currentPercent = Math.round(((value - min) / (max - min)) * 100);
+
+  const range = max - min;
+  const currentPercent = range === 0 ? 0 : Math.round(((value - min) / range) * 100);
 
   return (
     <div

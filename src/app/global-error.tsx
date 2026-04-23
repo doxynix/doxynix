@@ -15,15 +15,35 @@ export default function GlobalError({
   const emailSubject = `[Bug Report] Doxynix - Error ${finalId}`;
 
   useEffect(() => {
-    const rid = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("last_request_id="))
-      ?.split("=")[1];
+    let isActive = true;
+
+    const rid =
+      document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("last_request_id="))
+        ?.split("=")[1] ?? null;
 
     if (rid != null) {
-      setRequestId(rid);
+      requestAnimationFrame(() => {
+        if (isActive) setRequestId(rid);
+      });
     }
-  }, []);
+
+    void import("@sentry/nextjs").then((Sentry) => {
+      if (!isActive) return;
+
+      if (rid !== null) {
+        Sentry.setTag("request_id", rid);
+        Sentry.setTag("error_type", "fatal_global");
+      }
+
+      Sentry.captureException(error);
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [error]);
 
   const [techInfo] = useState(() => {
     const isClient = typeof window !== "undefined";
@@ -34,29 +54,6 @@ export default function GlobalError({
       url: isClient ? globalThis.location.href : "",
     };
   });
-
-  useEffect(() => {
-    let isActive = true;
-
-    void import("@sentry/nextjs")
-      .then((Sentry) => {
-        if (!isActive) return;
-
-        if (requestId != null) {
-          Sentry.setTag("request_id", requestId);
-          Sentry.setTag("error_type", "fatal_global");
-        }
-
-        Sentry.captureException(error);
-      })
-      .catch((error) => {
-        console.error("Sentry is unavailable", error);
-      });
-
-    return () => {
-      isActive = false;
-    };
-  }, [error, requestId]);
 
   const emailBody = `
     Describe what you were doing before the error (optional):

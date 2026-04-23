@@ -23,15 +23,6 @@ export default function ErrorPage({
   const t = useTranslations("Error");
 
   const [requestId, setRequestId] = useState<null | string>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    const rid = Cookies.get("last_request_id") ?? null;
-    if (rid != null) {
-      requestAnimationFrame(() => setRequestId(rid));
-    }
-    setReady(true);
-  }, []);
 
   const [techInfo, setTechInfo] = useState(() => ({
     screen: "N/A",
@@ -41,13 +32,28 @@ export default function ErrorPage({
   }));
 
   useEffect(() => {
-    setTechInfo({
+    const rid = Cookies.get("last_request_id") ?? null;
+
+    const info = {
       screen: `${window.innerWidth}x${window.innerHeight}`,
       time: new Date().toISOString(),
       ua: window.navigator.userAgent,
       url: window.location.href,
+    };
+
+    requestAnimationFrame(() => {
+      setRequestId(rid);
+      setTechInfo(info);
     });
-  }, []);
+
+    Sentry.withScope((scope) => {
+      if (rid != null) {
+        scope.setTag("request_id", rid);
+      }
+      scope.setExtra("digest", error.digest);
+      Sentry.captureException(error);
+    });
+  }, [error]);
 
   const finalId = requestId ?? error.digest ?? "No-ID";
 
@@ -68,18 +74,6 @@ export default function ErrorPage({
   `.trim();
 
   const mailtoLink = `mailto:support@doxynix.space?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-
-  useEffect(() => {
-    if (!ready) return;
-
-    Sentry.withScope((scope) => {
-      if (requestId) {
-        scope.setTag("request_id", requestId);
-      }
-      scope.setExtra("digest", error.digest);
-      Sentry.captureException(error);
-    });
-  }, [error, ready, requestId]);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center px-4">
