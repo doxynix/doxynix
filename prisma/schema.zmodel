@@ -271,25 +271,27 @@ model Analysis {
 
 model Document {
   /// @zod.custom.omit(["model"])
-  id         Int      @id @default(autoincrement()) @omit
+  id         Int       @id @default(autoincrement()) @omit
   /// @zod.custom.omit(["model"])
-  publicId   String   @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  publicId   String    @unique @default(uuid(7)) @map("public_id") @db.Uuid
   version    String
   type       DocType
   /// @zod.string.min(1, { message: "Content cannot be empty" })
-  content    String   @db.Text
+  content    String    @db.Text
+  path       String?
 
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
   /// @zod.custom.omit(["model"])
-  repoId     Int      @map("repo_id") @omit
-  repo       Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
+  repoId     Int       @map("repo_id") @omit
+  repo       Repo      @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
-  analysisId Int      @map("analysis_id")
-  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  analysisId Int?      @map("analysis_id")
+  analysis   Analysis? @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
   @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
 
+  @@unique([repoId, version, type, path])
   @@unique([repoId, version, type, analysisId])
   @@index([repoId])
   @@index([analysisId])
@@ -575,6 +577,7 @@ enum PRAnalysisStatus {
 
 enum FixStatus {
   DRAFT
+  GENERATING
   READY_TO_APPLY
   PR_OPENED
   COMPLETED

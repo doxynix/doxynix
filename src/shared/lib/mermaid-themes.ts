@@ -1,4 +1,4 @@
-export interface MermaidThemeVariables {
+export type MermaidThemeVariables = {
   [key: string]: string;
   background: string;
   lineColor: string;
@@ -8,7 +8,7 @@ export interface MermaidThemeVariables {
   secondaryColor: string;
   tertiaryColor: string;
   textColor: string;
-}
+};
 
 export const mermaidThemes: Record<string, MermaidThemeVariables> = {
   amber: {

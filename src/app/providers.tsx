@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { httpBatchLink, loggerLink } from "@trpc/client";
+import { LucideProvider } from "lucide-react";
 import { SessionProvider } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -71,9 +72,16 @@ export function Providers({ children }: Readonly<Props>) {
 
 const InnerProviders = ({ children }: { children: ReactNode }) => (
   <TooltipProvider>
-    <ThemeCookieSync />
-    <AnalyticsSync />
-    <NuqsAdapter>{children}</NuqsAdapter>
+    <LucideProvider
+      absoluteStrokeWidth={true}
+      size={16}
+      strokeWidth={1.5}
+      className="shrink-0 select-none"
+    >
+      <ThemeCookieSync />
+      <AnalyticsSync />
+      <NuqsAdapter>{children}</NuqsAdapter>
+    </LucideProvider>
   </TooltipProvider>
 );
 

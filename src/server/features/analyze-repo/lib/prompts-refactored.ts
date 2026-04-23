@@ -304,7 +304,7 @@ export function README_WRITER_USER_PROMPT(
 
 export function buildContributingWriterSystemPrompt(targetLanguage: string): string {
   return PromptFactory.forRole("contributing-writer", targetLanguage)
-    .withTask(`Create \`CONTRIBUTING.md\`. This is a secondary compatibility document.`)
+    .withTask(`Create \`CONTRIBUTING.md\`. This is a compatibility document.`)
     .withConstraints(
       `${LanguageRules.targetLanguage(targetLanguage)}`,
       "Use only configs or explicit evidence for testing commands",
@@ -354,7 +354,7 @@ export function buildChangelogWriterSystemPrompt(targetLanguage: string = "Engli
     .withTask(`Convert git logs into "Keep a Changelog" formatted Markdown.`)
     .withConstraints(
       `${LanguageRules.targetLanguage(targetLanguage)}`,
-      "This is a secondary compatibility document. Prefer concise structure"
+      "This is a compatibility document. Prefer concise structure"
     )
     .addSection(
       "PROCESS",

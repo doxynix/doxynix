@@ -12,6 +12,7 @@ import type {
   SymbolRef,
 } from "../core/discovery.types";
 import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
+import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
 
 type LanguageSpec = {
   api?: RegExp[];
@@ -243,7 +244,7 @@ function collectRoutes(file: RepositoryFile, spec: LanguageSpec) {
           : undefined;
       if (method == null || routePath == null) continue;
       routes.push({
-        confidence: routePattern.confidence ?? 74,
+        confidence: routePattern.confidence ?? CONFIDENCE_LEVELS.astRoute,
         framework: routePattern.framework,
         kind: "http",
         line: lineOf(file.content, match[0]),
@@ -301,7 +302,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
           const name = extractNodeName(nodeText);
           if (name != null) {
             symbols.push({
-              confidence: 72,
+              confidence: CONFIDENCE_LEVELS.astSymbol,
               exported: true,
               kind,
               line: lineOf(file.content, nodeText),
@@ -339,7 +340,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
       return {
         analysisMode: "tree-sitter",
         apiSurface: Math.max(apiSurface, routes.length),
-        confidence: 80, // AST-based extraction has high confidence
+        confidence: CONFIDENCE_LEVELS.astStructure, // AST-based extraction has high confidence
         entrypointHint: spec.entrypoints.some((re) => re.test(file.content)),
         exports,
         frameworkHints,

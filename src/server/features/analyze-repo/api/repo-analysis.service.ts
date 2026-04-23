@@ -4,20 +4,7 @@ import { TRPCError } from "@trpc/server";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
-import {
-  runDocumentFilePreview,
-  runQuickFileAudit,
-  type DocumentFilePreviewResult,
-  type QuickFileAuditResult,
-} from "@/server/features/file-actions/model/file-actions";
-import {
-  toDocumentFilePreview,
-  toQuickFileAuditPreview,
-} from "@/server/features/file-actions/model/repo-file-action-preview";
-import {
-  buildSyncFileActionMeta,
-  type SyncFileActionMeta,
-} from "@/server/features/file-actions/model/repo-file-action-state";
+import { buildSyncFileActionMeta } from "@/server/features/file-actions/model/repo-file-action-state";
 import {
   buildNodeContext,
   buildNodeContextDiagnostics,
@@ -32,7 +19,30 @@ import { prisma, type DbClient } from "@/server/shared/infrastructure/db";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { realtimeServer } from "@/server/shared/infrastructure/realtime";
 import { getLatestCompletedAnalysisRef } from "@/server/shared/infrastructure/repo-snapshots";
-import type { FileActionPreviewResult } from "@/server/shared/types";
+
+type SaveResultsParams = {
+  aiResult: AIResult;
+  analysisId: string;
+  busFactor: number;
+  channelName: string;
+  currentSha: string;
+  hardMetrics: RepoMetrics;
+  rawContributors: { contributions: number; login: string }[];
+  repo: Repo;
+  repositoryFacts: NonNullable<AIResult["repository_facts"]>;
+  repositoryFindings: NonNullable<AIResult["findings"]>;
+  userId: number;
+};
+
+type FileActionInput = {
+  analysisId?: string;
+  commitSha?: string;
+  content: string;
+  language: string;
+  nodeId?: string;
+  path: string;
+  repoId: string;
+};
 
 export const repoAnalysisService = {
   async analyze(
@@ -85,142 +95,49 @@ export const repoAnalysisService = {
 
     return { jobId: handle.id, status: "QUEUED" };
   },
-  async analyzeFile(
-    db: DbClient,
-    userId: number,
-    input: {
-      content: string;
-      language: string;
-      nodeId?: string;
-      path: string;
-      repoId: string;
-    }
-  ) {
-    await assertRepoAccess(db, userId, input.repoId);
-    const nodeContext = await buildNodeContext(db, input.repoId, input.nodeId);
 
-    const handle = await triggerSingleFileTask({
-      payload: {
-        content: input.content,
-        language: input.language,
-        nodeContext: nodeContext ?? undefined,
-        path: input.path,
-        repoId: input.repoId,
-      },
-      taskId: "analyze-single-file",
-      userId,
-      workItemId: `analyze-file-${input.repoId}-${input.path}`,
-    });
-
-    return { jobId: handle.id };
+  async auditFile(db: DbClient, userId: number, input: FileActionInput) {
+    return this.runFileAction(db, userId, "analyze-single-file", input);
   },
 
-  async documentFile(
+  async documentFile(db: DbClient, userId: number, input: FileActionInput) {
+    return this.runFileAction(db, userId, "document-single-file", input);
+  },
+
+  async runFileAction(
     db: DbClient,
     userId: number,
-    input: {
-      content: string;
-      language: string;
-      nodeId?: string;
-      path: string;
-      repoId: string;
-    }
+    taskId: "analyze-single-file" | "document-single-file",
+    input: FileActionInput
   ) {
     await assertRepoAccess(db, userId, input.repoId);
-    const nodeContext = await buildNodeContext(db, input.repoId, input.nodeId);
 
-    const handle = await triggerSingleFileTask({
-      payload: {
+    const { analysisRef, nodeContext } = await buildFileActionRuntimeContext(db, input);
+
+    const syncMeta = buildSyncFileMeta(input, nodeContext, analysisRef);
+
+    const handle = await tasks.trigger(
+      taskId,
+      {
         content: input.content,
         language: input.language,
         nodeContext: nodeContext ?? undefined,
         path: input.path,
         repoId: input.repoId,
+        syncMeta,
         userId,
       },
-      taskId: "document-single-file",
-      userId,
-      workItemId: `doc-file-${input.repoId}-${input.path}`,
-    });
+      {
+        concurrencyKey: `user-${userId}`,
+        idempotencyKey: `${taskId}-${input.repoId}-${input.path}`,
+        ttl: "10m",
+      }
+    );
 
     return { jobId: handle.id };
   },
 
-  async documentFilePreview(
-    db: DbClient,
-    userId: number,
-    input: {
-      analysisId?: string;
-      commitSha?: string;
-      content: string;
-      language: string;
-      nodeId?: string;
-      path: string;
-      repoId: string;
-    }
-  ): Promise<DocumentFilePreviewResult & FileActionPreviewResult & SyncFileActionMeta> {
-    await assertRepoAccess(db, userId, input.repoId);
-    const { analysisRef, nodeContext } = await buildFileActionRuntimeContext(db, input);
-    const result = await runDocumentFilePreview({
-      ...input,
-      nodeContext: nodeContext ?? undefined,
-    });
-
-    const response = {
-      ...result,
-      ...buildSyncFileMeta(input, nodeContext, analysisRef),
-    };
-
-    return {
-      ...response,
-      ...toDocumentFilePreview(response),
-    };
-  },
-
-  async quickFileAudit(
-    db: DbClient,
-    userId: number,
-    input: {
-      analysisId?: string;
-      commitSha?: string;
-      content: string;
-      language: string;
-      nodeId?: string;
-      path: string;
-      repoId: string;
-    }
-  ): Promise<FileActionPreviewResult & QuickFileAuditResult & SyncFileActionMeta> {
-    await assertRepoAccess(db, userId, input.repoId);
-    const { analysisRef, nodeContext } = await buildFileActionRuntimeContext(db, input);
-    const result = await runQuickFileAudit({
-      ...input,
-      nodeContext: nodeContext ?? undefined,
-    });
-
-    const response = {
-      ...result,
-      ...buildSyncFileMeta(input, nodeContext, analysisRef),
-    };
-
-    return {
-      ...response,
-      ...toQuickFileAuditPreview(response),
-    };
-  },
-
-  async saveResults(params: {
-    aiResult: AIResult;
-    analysisId: string;
-    busFactor: number;
-    channelName: string;
-    currentSha: string;
-    hardMetrics: RepoMetrics;
-    rawContributors: { contributions: number; login: string }[];
-    repo: Repo;
-    repositoryFacts: NonNullable<AIResult["repository_facts"]>;
-    repositoryFindings: NonNullable<AIResult["findings"]>;
-    userId: number;
-  }) {
+  async saveResults(params: SaveResultsParams) {
     const {
       aiResult,
       analysisId,
@@ -234,6 +151,15 @@ export const repoAnalysisService = {
       repositoryFindings,
       userId,
     } = params;
+
+    const {
+      generatedApiMarkdown,
+      generatedArchitecture,
+      generatedChangelog,
+      generatedContributing,
+      generatedReadme,
+      ...cleanAiResult
+    } = aiResult;
 
     const teamRoles = calculateTeamRoles(rawContributors);
     const docOutputScore = calculateDocumentationOutputScore(aiResult);
@@ -258,23 +184,26 @@ export const repoAnalysisService = {
       techDebtScore: hardMetrics.techDebtScore,
     });
 
-    aiResult.complexityScore = hardMetrics.complexityScore;
-    aiResult.findings = repositoryFindings;
-    aiResult.mostComplexFiles = hardMetrics.mostComplexFiles;
-    aiResult.onboardingScore = onboardingScore;
-    aiResult.repository_facts = repositoryFacts;
-    aiResult.techDebtScore = hardMetrics.techDebtScore;
-    aiResult.securityScore = hardMetrics.securityScore;
-    aiResult.vulnerabilities = hardMetrics.securityFindings.map((finding) => ({
-      description: finding.message,
-      file: finding.path,
-      lineHint: finding.line != null ? `line ${finding.line}` : undefined,
-      risk: finding.severity === "error" ? "HIGH" : "MODERATE",
-      suggestion:
-        "Review the flagged secret-like value and replace it with a safe placeholder or managed secret.",
-    }));
+    const resultToStore = {
+      ...cleanAiResult,
+      complexityScore: hardMetrics.complexityScore,
+      findings: repositoryFindings,
+      mostComplexFiles: hardMetrics.mostComplexFiles,
+      onboardingScore,
+      repository_facts: repositoryFacts,
+      securityScore: hardMetrics.securityScore,
+      techDebtScore: hardMetrics.techDebtScore,
+      vulnerabilities: hardMetrics.securityFindings.map((f) => ({
+        description: f.message,
+        file: f.path,
+        lineHint: f.line != null ? `line ${f.line}` : undefined,
+        risk: f.severity === "error" ? "HIGH" : "MODERATE",
+        suggestion:
+          "Review the flagged secret-like value and replace it with a safe managed secret.",
+      })),
+    };
 
-    const metrics: RepoMetrics = {
+    const finalMetrics: RepoMetrics = {
       ...hardMetrics,
       busFactor,
       factCount: repositoryFacts.length,
@@ -289,34 +218,25 @@ export const repoAnalysisService = {
       analysisId,
       finalHealthScore,
       metricsSummary: {
-        fileCount: metrics.fileCount,
-        mostComplexFiles: metrics.mostComplexFiles,
-        primaryDocs: docOutputScore.snapshot.primary,
-        secondaryDocs: docOutputScore.snapshot.secondary,
-        totalLoc: metrics.totalLoc,
+        docs: docOutputScore.snapshot,
+        fileCount: finalMetrics.fileCount,
+        mostComplexFiles: finalMetrics.mostComplexFiles,
+        totalLoc: finalMetrics.totalLoc,
       },
       msg: "Metrics computed, saving results",
       repoId: repo.id,
     });
 
     const note = await prisma.$transaction(async (tx) => {
-      const cleanResultJson = { ...aiResult };
-
-      delete cleanResultJson.generatedReadme;
-      delete cleanResultJson.generatedApiMarkdown;
-      delete cleanResultJson.generatedContributing;
-      delete cleanResultJson.generatedChangelog;
-      delete cleanResultJson.generatedArchitecture;
-
       const analysis = await tx.analysis.update({
         data: {
           commitSha: currentSha,
           complexityScore: hardMetrics.complexityScore,
           message: "Completed successfully",
-          metricsJson: metrics as unknown as Prisma.InputJsonValue,
+          metricsJson: finalMetrics as unknown as Prisma.InputJsonValue,
           onboardingScore: onboardingScore,
           progress: 100,
-          resultJson: cleanResultJson as Prisma.InputJsonValue,
+          resultJson: resultToStore as Prisma.InputJsonValue,
           score: finalHealthScore,
           securityScore: hardMetrics.securityScore,
           status: Status.DONE,
@@ -325,29 +245,36 @@ export const repoAnalysisService = {
         where: { publicId: analysisId },
       });
 
-      const saveDoc = async (type: DocType, content: string | undefined) => {
-        if (content == null) return;
-        await tx.document.upsert({
-          create: { analysisId: analysis.id, content, repoId: repo.id, type, version: currentSha },
-          update: { content },
-          where: {
-            repoId_version_type_analysisId: {
+      const docsToSave = [
+        { content: generatedReadme, type: DocType.README },
+        { content: generatedApiMarkdown, type: DocType.API },
+        { content: generatedContributing, type: DocType.CONTRIBUTING },
+        { content: generatedChangelog, type: DocType.CHANGELOG },
+        { content: generatedArchitecture, type: DocType.ARCHITECTURE },
+      ].filter((doc) => doc.content != null && doc.content.length > 0);
+
+      await Promise.all(
+        docsToSave.map((doc) =>
+          tx.document.upsert({
+            create: {
               analysisId: analysis.id,
+              content: doc.content!,
               repoId: repo.id,
-              type,
+              type: doc.type,
               version: currentSha,
             },
-          },
-        });
-      };
-
-      await Promise.all([
-        saveDoc(DocType.README, aiResult.generatedReadme),
-        saveDoc(DocType.API, aiResult.generatedApiMarkdown),
-        saveDoc(DocType.CONTRIBUTING, aiResult.generatedContributing),
-        saveDoc(DocType.CHANGELOG, aiResult.generatedChangelog),
-        saveDoc(DocType.ARCHITECTURE, aiResult.generatedArchitecture),
-      ]);
+            update: { content: doc.content! },
+            where: {
+              repoId_version_type_analysisId: {
+                analysisId: analysis.id,
+                repoId: repo.id,
+                type: doc.type,
+                version: currentSha,
+              },
+            },
+          })
+        )
+      );
 
       return await tx.notification.create({
         data: {
@@ -416,17 +343,4 @@ function deriveMaintenanceStatus(repo: Repo) {
   if (ageInMonths > 12) return "dead" as const;
   if (ageInMonths > 6) return "stale" as const;
   return "active" as const;
-}
-
-async function triggerSingleFileTask<TPayload extends object>(params: {
-  payload: TPayload;
-  taskId: "analyze-single-file" | "document-single-file";
-  userId: number;
-  workItemId: string;
-}) {
-  return tasks.trigger(params.taskId, params.payload, {
-    concurrencyKey: `user-${params.userId}`,
-    idempotencyKey: params.workItemId,
-    ttl: "10m",
-  });
 }

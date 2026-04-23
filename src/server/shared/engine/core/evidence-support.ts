@@ -19,6 +19,7 @@ import {
   resolveRelativeImport,
 } from "./graph";
 import { ProjectPolicy } from "./project-policy";
+import { SCHEMA_LIMITS } from "./scoring-constants";
 
 export type NormalizedRepositoryFile = RepositoryFile & { path: string };
 
@@ -190,7 +191,7 @@ export function resolveImportEdges(
 
     if (kind === "internal") {
       tracking.unresolvedImportSpecifiers += 1;
-      if (tracking.unresolvedSamples.length < 24) {
+      if (tracking.unresolvedSamples.length < SCHEMA_LIMITS.maxUnresolvedImportsSamples) {
         tracking.unresolvedSamples.push({ fromPath: filePath, specifier: importPath });
       }
     }

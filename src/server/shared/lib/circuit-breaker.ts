@@ -2,13 +2,13 @@ import { logger } from "../infrastructure/logger";
 
 export type CircuitBreakerState = "CLOSED" | "HALF_OPEN" | "OPEN";
 
-export interface CircuitBreakerConfig {
+export type CircuitBreakerConfig = {
   onClose?: () => void;
   onHalfOpen?: () => void;
   onOpen?: () => void;
   threshold: number; // Number of failures before opening
   timeout: number; // Milliseconds to stay open
-}
+};
 
 /**
  * Circuit breaker pattern for external API calls (GitHub API)

@@ -78,7 +78,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             onClick={() => !isPrevDisabled && handlePageChange(meta.currentPage - 1, "prev")}
             className={cn(navBtnClass, isPrevDisabled ? "opacity-50" : "cursor-pointer")}
           >
-            {isPrevLoading ? <Spinner /> : <ChevronLeft className="size-4" />}
+            {isPrevLoading ? <Spinner /> : <ChevronLeft />}
             <span className="ml-1">{t("back")}</span>
           </PaginationLink>
         </PaginationItem>
@@ -134,7 +134,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             )}
           >
             <span className="mr-1">{t("next")}</span>
-            {isNextLoading ? <Spinner /> : <ChevronLeft className="size-4 rotate-180" />}
+            {isNextLoading ? <Spinner /> : <ChevronLeft className="rotate-180" />}
           </PaginationLink>
         </PaginationItem>
       </PaginationContent>

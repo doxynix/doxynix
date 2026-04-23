@@ -80,59 +80,59 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
   const activeStats = [
     {
-      icon: <Activity className="text-foreground size-4" />,
+      icon: <Activity className="text-foreground" />,
       label: "Files",
       value: stats.pathCount,
     },
-    { icon: <Zap className="text-destructive size-4" />, label: "Risks", value: stats.riskCount },
-    { icon: <Compass className="text-success size-4" />, label: "APIs", value: stats.apiCount },
+    { icon: <Zap className="text-destructive" />, label: "Risks", value: stats.riskCount },
+    { icon: <Compass className="text-success" />, label: "APIs", value: stats.apiCount },
     {
-      icon: <Layers className="text-warning size-4" />,
+      icon: <Layers className="text-warning" />,
       label: "Coupling",
       value: stats.changeCouplingCount,
     },
     {
-      icon: <ShieldCheck className="text-warning size-4" />,
+      icon: <ShieldCheck className="text-warning" />,
       label: "Warnings",
       value: stats.graphWarningCount,
     },
     {
-      icon: <Activity className="size-4 text-pink-400" />,
+      icon: <Activity className="text-pink-400" />,
       label: "Churn",
       value: stats.churnCount,
     },
     {
-      icon: <Target className="text-destructive size-4" />,
+      icon: <Target className="text-destructive" />,
       label: "Hotspots",
       value: stats.hotspotCount,
     },
     {
-      icon: <FileText className="text-blue size-4" />,
+      icon: <FileText className="text-blue" />,
       label: "Configs",
       value: stats.configCount,
     },
     {
-      icon: <Zap className="size-4 text-purple-400" />,
+      icon: <Zap className="text-purple-400" />,
       label: "Dep Risks",
       value: stats.dependencyHotspotCount,
     },
     {
-      icon: <ArrowRight className="text-success size-4" />,
+      icon: <ArrowRight className="text-success" />,
       label: "Entries",
       value: stats.entrypointCount,
     },
     {
-      icon: <Boxes className="size-4 text-cyan-400" />,
+      icon: <Boxes className="text-cyan-400" />,
       label: "Frameworks",
       value: stats.frameworkCount,
     },
     {
-      icon: <FileSearch className="size-4 text-gray-400" />,
+      icon: <FileSearch className="text-gray-400" />,
       label: "Orphans",
       value: stats.orphanCount,
     },
     {
-      icon: <GitBranch className="size-4 text-purple-400" />,
+      icon: <GitBranch className="text-purple-400" />,
       label: "Deps",
       value: explain.relationships.dependsOn.length,
     },
@@ -158,7 +158,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           ))}
         </div>
         <Button size="icon" variant="ghost" onClick={onClose} className="shrink-0">
-          <X className="size-4" />
+          <X />
         </Button>
       </div>
 
@@ -174,7 +174,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           )}
           <div className="flex flex-col gap-4">
             <div className="flex items-start gap-3 rounded-xl p-3">
-              <ShieldCheck className="text-warning size-5 shrink-0" />
+              <ShieldCheck className="text-warning size-5" />
               <p className="text-warning text-xs">{explain.relationships.reviewPriority?.reason}</p>
             </div>
 
@@ -220,7 +220,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2 text-xs">
-              <Compass className="size-4" /> Synthesis
+              <Compass /> Synthesis
             </div>
             <div className="flex flex-col gap-3">
               {explain.summary.map((line: string, i: number) => (
@@ -235,7 +235,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           {(children.length > 0 || allFileReferences.length > 0) && (
             <section className="space-y-3">
               <div className="flex items-center gap-2 text-xs">
-                <Boxes className="size-4" /> Module Composition
+                <Boxes /> Module Composition
               </div>
 
               {children.length > 0 && (
@@ -249,7 +249,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                         onNavigate(child.path);
                       }}
                     >
-                      <FileIcon className="size-4" /> {child.label}
+                      <FileIcon /> {child.label}
                     </Button>
                   ))}
                 </div>
@@ -260,7 +260,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           {connections.length > 0 && (
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-1 text-xs">
-                <Compass className="size-4" /> Explore Connections
+                <Compass /> Explore Connections
               </div>
               <div className="flex flex-col gap-1">
                 {connections.map((path) => (
@@ -274,7 +274,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                     className="justify-between"
                   >
                     <span className="truncate">{path.split("/").pop()}</span>
-                    <ArrowRight className="size-4" />
+                    <ArrowRight />
                   </Button>
                 ))}
               </div>
@@ -307,7 +307,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                     key={i}
                     className="flex gap-2 rounded-md border border-amber-500/10 bg-amber-500/5 p-2 text-xs"
                   >
-                    <Zap className="mt-0.5 size-4 shrink-0 text-amber-500" />
+                    <Zap className="mt-0.5 text-amber-500" />
                     <span>{action}</span>
                   </div>
                 ))}
@@ -329,7 +329,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           {allHints.length > 0 && (
             <div className="bg-muted/5 flex flex-col gap-3 rounded-xl border p-4">
               <div className="text-warning flex items-center gap-2 text-xs font-bold">
-                <Lightbulb className="size-4" /> Technical Context
+                <Lightbulb /> Technical Context
               </div>
               <div className="flex flex-col gap-3">
                 {allHints.map((hint, i) => (
@@ -344,12 +344,12 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           <div className="flex gap-2">
             {availableActions.canQuickAudit && (
               <Button className="w-full gap-2">
-                <FileSearch className="size-4" /> Start Quick Audit
+                <FileSearch /> Start Quick Audit
               </Button>
             )}
             {availableActions.canDocumentFile && (
               <Button variant="outline" className="w-full gap-2">
-                <SearchCode className="size-4" /> Document Logic
+                <SearchCode /> Document Logic
               </Button>
             )}
           </div>

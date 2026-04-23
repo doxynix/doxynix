@@ -10,6 +10,7 @@ import type {
   SymbolRef,
 } from "../core/discovery.types";
 import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
+import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
 
 function getScriptKind(filePath: string) {
   if (filePath.endsWith(".tsx")) return ts.ScriptKind.TSX;
@@ -50,7 +51,7 @@ function pushSymbol(
   if (name == null || name.length === 0) return;
 
   symbols.push({
-    confidence: exported ? 95 : 75,
+    confidence: exported ? CONFIDENCE_LEVELS.tsCompiler : 75,
     exported,
     kind,
     line: getNodeLine(sourceFile, node),
@@ -81,7 +82,7 @@ function collectCallRoute(
 
   if (HTTP_METHODS.has(normalizedMethod) && path != null) {
     routes.push({
-      confidence: 88,
+      confidence: CONFIDENCE_LEVELS.tsInferred,
       framework: frameworkHints[0]?.name,
       kind: "http",
       line: getNodeLine(sourceFile, node),
@@ -266,7 +267,7 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
   return {
     analysisMode: "typescript-ast",
     apiSurface,
-    confidence: 92, // TypeScript compiler has very high confidence
+    confidence: CONFIDENCE_LEVELS.tsCompiler, // TypeScript compiler has very high confidence
     entrypointHint,
     entrypointRefs,
     exports,

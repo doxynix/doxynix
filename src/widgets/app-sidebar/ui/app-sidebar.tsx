@@ -87,7 +87,7 @@ export function AppSidebar() {
                     )}
                   >
                     <span>{t("recent_repositories")}</span>
-                    <ChevronDown className="transition-standard ml-auto size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    <ChevronDown className="transition-standard ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
                 <CollapsibleContent>

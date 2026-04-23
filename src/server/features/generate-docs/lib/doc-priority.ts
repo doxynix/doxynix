@@ -2,24 +2,13 @@ import { DocType } from "@prisma/client";
 
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { ReportSectionKind } from "@/server/shared/engine/core/documentation.types";
+import { DOC_PRIORITY_WEIGHTS } from "@/server/shared/engine/core/scoring-constants";
 import { hasText } from "@/server/shared/lib/string-utils";
 
-type GeneratedDocState = Pick<
-  AIResult,
-  | "generatedApiMarkdown"
-  | "generatedArchitecture"
-  | "generatedChangelog"
-  | "generatedContributing"
-  | "generatedReadme"
->;
-
-export const PRIMARY_DOC_TYPES = [
+export const ALL_DOC_TYPES = [
   DocType.README,
   DocType.API,
   DocType.ARCHITECTURE,
-] as const satisfies readonly DocType[];
-
-export const SECONDARY_DOC_TYPES = [
   DocType.CONTRIBUTING,
   DocType.CHANGELOG,
 ] as const satisfies readonly DocType[];
@@ -33,49 +22,38 @@ export const DOC_SECTION_DEPENDENCIES: Record<DocType, readonly ReportSectionKin
   [DocType.README]: ["overview", "architecture"],
 };
 
-const PRIMARY_DOC_WEIGHTS: Record<(typeof PRIMARY_DOC_TYPES)[number], number> = {
-  [DocType.API]: 16,
-  [DocType.ARCHITECTURE]: 18,
-  [DocType.README]: 18,
+export const DOC_WEIGHTS: Partial<Record<DocType, number>> = {
+  [DocType.API]: DOC_PRIORITY_WEIGHTS.api,
+  [DocType.ARCHITECTURE]: DOC_PRIORITY_WEIGHTS.architecture,
+  [DocType.CHANGELOG]: DOC_PRIORITY_WEIGHTS.changelog,
+  [DocType.CONTRIBUTING]: DOC_PRIORITY_WEIGHTS.contributing,
+  [DocType.README]: DOC_PRIORITY_WEIGHTS.readme,
 };
 
-const SECONDARY_DOC_WEIGHTS: Record<(typeof SECONDARY_DOC_TYPES)[number], number> = {
-  [DocType.CHANGELOG]: 3,
-  [DocType.CONTRIBUTING]: 5,
-};
-
-export function buildGeneratedDocPrioritySnapshot(aiResult: GeneratedDocState) {
-  return {
-    primary: {
-      api: hasText(aiResult.generatedApiMarkdown),
-      architecture: hasText(aiResult.generatedArchitecture),
-      readme: hasText(aiResult.generatedReadme),
-    },
-    secondary: {
-      changelog: hasText(aiResult.generatedChangelog),
-      contributing: hasText(aiResult.generatedContributing),
-    },
-  };
-}
-
-export function calculateDocumentationOutputScore(aiResult: GeneratedDocState) {
-  const snapshot = buildGeneratedDocPrioritySnapshot(aiResult);
+export function calculateDocumentationOutputScore(aiResult: Partial<AIResult>) {
   let score = 0;
+  let generatedCount = 0;
 
-  if (snapshot.primary.readme) score += PRIMARY_DOC_WEIGHTS[DocType.README];
-  if (snapshot.primary.api) score += PRIMARY_DOC_WEIGHTS[DocType.API];
-  if (snapshot.primary.architecture) score += PRIMARY_DOC_WEIGHTS[DocType.ARCHITECTURE];
-  if (snapshot.secondary.contributing) score += SECONDARY_DOC_WEIGHTS[DocType.CONTRIBUTING];
-  if (snapshot.secondary.changelog) score += SECONDARY_DOC_WEIGHTS[DocType.CHANGELOG];
+  const snapshot = {
+    api: hasText(aiResult.generatedApiMarkdown),
+    architecture: hasText(aiResult.generatedArchitecture),
+    changelog: hasText(aiResult.generatedChangelog),
+    contributing: hasText(aiResult.generatedContributing),
+    readme: hasText(aiResult.generatedReadme),
+  };
+
+  Object.entries(snapshot).forEach(([key, isGenerated]) => {
+    if (isGenerated) {
+      const type = DocType[key.toUpperCase() as keyof typeof DocType];
+      score += DOC_WEIGHTS[type] ?? 0;
+      generatedCount++;
+    }
+  });
 
   return {
-    primaryDocCount:
-      Number(snapshot.primary.readme) +
-      Number(snapshot.primary.api) +
-      Number(snapshot.primary.architecture),
+    generatedCount,
     score,
-    secondaryDocCount:
-      Number(snapshot.secondary.contributing) + Number(snapshot.secondary.changelog),
     snapshot,
+    totalCount: ALL_DOC_TYPES.length,
   };
 }

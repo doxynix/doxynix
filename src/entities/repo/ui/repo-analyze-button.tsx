@@ -11,7 +11,7 @@ export function RepoAnalyzeButton({ name, owner }: Readonly<Props>) {
   return (
     <Button asChild size="sm" variant="outline" className="mt-2 cursor-pointer">
       <Link href={href}>
-        <Play className="size-4" />
+        <Play />
         Run Analysis
       </Link>
     </Button>

@@ -35,6 +35,8 @@ export type RepoVisibility = UiRepoDetailed["visibility"];
 
 export type DocType = RouterInput["repoDetails"]["getDocumentContent"]["type"];
 
+export type DocContent = RouterOutput["repoDetails"]["getDocumentContent"];
+
 export type RepoGetAll = RouterOutput["repo"]["getAll"];
 
 export type RepoMeta = RepoGetAll["meta"];
@@ -70,3 +72,5 @@ export type MapEdgeData = NonNullable<RepoMapType>["graph"]["edges"][number];
 export type RepoMapDisplayData = NonNullable<NodeType> | NonNullable<RepoMapType>;
 
 export type NodeBrief = NonNullable<RouterOutput["repoDetails"]["getInteractiveBriefNode"]>;
+
+export type RepoPull = RouterOutput["prAnalysis"]["listByRepository"][number];

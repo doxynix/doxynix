@@ -1,5 +1,6 @@
 import type { FileSignals, RepositoryFile, RouteRef, SymbolRef } from "../core/discovery.types";
 import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
+import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
 import {
   getRegexSignalSpec,
   type RegexRoutePattern,
@@ -41,7 +42,7 @@ function collectSymbols(filePath: string, content: string, patterns: RegexSymbol
       const name = typeof match[1] === "string" ? match[1].trim() : "";
       if (name.length === 0) continue;
       symbols.push({
-        confidence: exported ? 75 : 60,
+        confidence: exported ? CONFIDENCE_LEVELS.regexExported : CONFIDENCE_LEVELS.regexInternal,
         exported,
         kind,
         line: lineOf(content, match[0]),
@@ -93,7 +94,7 @@ function buildSignals(
   const frameworkHints = collectFrameworkFactsFromTokens(
     [...params.imports, ...(params.extraFrameworkTokens ?? []), file.path],
     file.path,
-    70
+    CONFIDENCE_LEVELS.manifestMatch
   );
 
   return {

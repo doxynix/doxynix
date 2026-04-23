@@ -24,6 +24,7 @@ export const envServer = createEnv({
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     JWT_SECRET: process.env.JWT_SECRET,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    REDIS_TCP_URL: process.env.REDIS_TCP_URL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
@@ -53,6 +54,7 @@ export const envServer = createEnv({
     GROQ_API_KEY: z.string().check(z.minLength(1)),
     JWT_SECRET: z.string().check(z.minLength(1)),
     NEXTAUTH_SECRET: z.string().check(z.minLength(1)),
+    REDIS_TCP_URL: z.string().check(z.minLength(1)),
     RESEND_API_KEY: z.string().check(z.minLength(1)),
     TURNSTILE_SECRET_KEY: z.string().check(z.minLength(1)),
     UPLOADTHING_TOKEN: z.string().check(z.minLength(1)),
@@ -68,6 +70,7 @@ export const envServer = createEnv({
 export const JWT_SECRET = envServer.JWT_SECRET;
 export const NEXTAUTH_SECRET = envServer.NEXTAUTH_SECRET;
 export const DATABASE_URL = envServer.DATABASE_URL;
+export const REDIS_TCP_URL = envServer.REDIS_TCP_URL;
 export const BETTERSTACK_TOKEN = envServer.BETTERSTACK_API_TOKEN;
 export const TURNSTILE_SECRET_KEY = envServer.TURNSTILE_SECRET_KEY;
 export const RESEND_API_KEY = envServer.RESEND_API_KEY;

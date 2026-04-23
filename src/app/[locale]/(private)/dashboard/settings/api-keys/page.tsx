@@ -23,7 +23,7 @@ export default async function ApiKeysPage() {
         <Button asChild variant="link">
           <ExternalLink href={`${APP_URL}/api/docs`} className="flex items-center gap-4">
             {t("settings_api_keys_api_documentation")}
-            <SquareArrowOutUpRight className="size-4" />
+            <SquareArrowOutUpRight />
           </ExternalLink>
         </Button>
       </div>
