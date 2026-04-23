@@ -133,12 +133,12 @@ export const generatedFixRouter = createTRPCRouter({
       });
 
       try {
-        let validPrAnalysisId: string | undefined = undefined;
+        let validPrAnalysisId: string | undefined;
 
         if (input.prAnalysisId && input.prAnalysisId !== "") {
           const prAnalysisRecord = await ctx.db.pullRequestAnalysis.findUnique({
-            where: { publicId: input.prAnalysisId },
             select: { publicId: true },
+            where: { publicId: input.prAnalysisId },
           });
 
           if (prAnalysisRecord) {
@@ -168,11 +168,11 @@ export const generatedFixRouter = createTRPCRouter({
 
         await generateFixTask.trigger(
           {
-            fixId: fix.id,
-            repoId: repo.id,
             fileContents: input.fileContents,
             findings: input.findings as FindingForFix[],
+            fixId: fix.id,
             prAnalysisId: validPrAnalysisId,
+            repoId: repo.id,
           },
           {
             concurrencyKey: `repo-${repo.id}`,

@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { motion, type MotionStyle, type Transition } from "motion/react";
 
 import { cn } from "@/shared/lib/cn";
@@ -44,7 +45,7 @@ type BorderBeamProps = {
   /**
    * The style of the border beam.
    */
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   /**
    * The motion transition of the border beam.
    */
@@ -70,7 +71,7 @@ export const BorderBeam = ({
       style={
         {
           "--border-beam-width": `${borderWidth}px`,
-        } as React.CSSProperties
+        } as CSSProperties
       }
     >
       <motion.div

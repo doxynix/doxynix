@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import { CloudUpload, Trash2 } from "lucide-react";
 import type { User } from "next-auth";
 import { useSession } from "next-auth/react";
@@ -24,10 +24,12 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
   const currentUser = session?.user ?? initialUser;
 
   const [avatarUrl, setAvatarUrl] = useState(currentUser.image ?? "");
+  const [prevImage, setPrevImage] = useState(currentUser.image);
 
-  React.useEffect(() => {
+  if (currentUser.image !== prevImage) {
+    setPrevImage(currentUser.image);
     setAvatarUrl(currentUser.image ?? "");
-  }, [currentUser.image]);
+  }
 
   const { isUploading, removeAvatar, uploadAvatar } = useProfileActions({
     onAvatarRemoveSuccess: () => {
@@ -39,7 +41,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
     },
   });
 
-  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     await uploadAvatar([file]);

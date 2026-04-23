@@ -1,8 +1,8 @@
-import { useId } from "react";
+import { useId, type SVGProps } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
-interface GridPatternProps extends React.SVGProps<SVGSVGElement> {
+interface GridPatternProps extends SVGProps<SVGSVGElement> {
   [key: string]: unknown;
   className?: string;
   height?: number;

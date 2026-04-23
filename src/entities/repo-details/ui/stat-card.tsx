@@ -1,10 +1,12 @@
+import type { ComponentType } from "react";
+
 import { cn } from "@/shared/lib/cn";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 
 type Props = {
   className?: string;
   description: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   iconClass?: string;
   label: string;
   value: number | string;

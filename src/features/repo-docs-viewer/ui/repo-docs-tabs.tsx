@@ -1,14 +1,14 @@
 "use client";
 
+import type { ComponentType } from "react";
 import { ChevronRight } from "lucide-react";
 
 import { type AvailableDocs, type DocType } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
-import { Badge } from "@/shared/ui/core/badge";
 import { TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 
 type TabItem = {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   id: string;
   status: AvailableDocs[number]["status"];
   value: DocType;

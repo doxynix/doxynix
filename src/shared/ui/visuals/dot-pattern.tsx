@@ -1,4 +1,4 @@
-import React, { useId } from "react";
+import { useId, type SVGProps } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -13,15 +13,13 @@ import { cn } from "@/shared/lib/cn";
  * @param {number} [cy=1] - The y-offset of individual dots
  * @param {number} [cr=1] - The radius of each dot
  * @param {string} [className] - Additional CSS classes to apply to the SVG container
- * @param {boolean} [glow=false] - Whether dots should have a glowing animation effect
  */
-interface DotPatternProps extends React.SVGProps<SVGSVGElement> {
+interface DotPatternProps extends SVGProps<SVGSVGElement> {
   [key: string]: unknown;
   className?: string;
   cr?: number;
   cx?: number;
   cy?: number;
-  glow?: boolean;
   height?: number;
   width?: number;
   x?: number;
@@ -31,8 +29,8 @@ interface DotPatternProps extends React.SVGProps<SVGSVGElement> {
 /**
  * DotPattern Component
  *
- * A React component that creates an animated or static dot pattern background using SVG.
- * The pattern automatically adjusts to fill its container and can optionally display glowing dots.
+ * A React component that creates a static dot pattern background using SVG.
+ * The pattern automatically adjusts to fill its container.
  *
  * @component
  *
@@ -42,20 +40,16 @@ interface DotPatternProps extends React.SVGProps<SVGSVGElement> {
  * // Basic usage
  * <DotPattern />
  *
- * // With glowing effect and custom spacing
+ * // With custom spacing
  * <DotPattern
  *   width={20}
  *   height={20}
- *   glow
  *   className="opacity-50"
  * />
  *
  * @notes
- * - The component is client-side only ("use client")
- * - Automatically responds to container size changes
- * - When glow is enabled, dots will animate with random delays and durations
- * - Uses Motion for animations
- * - Dots color can be controlled via the text color utility classes
+ * - Uses useId for unique pattern IDs
+ * - Dots color can be controlled via the fill color utility classes
  */
 
 export function DotPattern({

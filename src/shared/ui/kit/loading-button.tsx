@@ -1,11 +1,11 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
 import { Button } from "../core/button";
 import { Spinner } from "../core/spinner";
 
-type Props = React.ComponentProps<typeof Button> & {
+type Props = ComponentProps<typeof Button> & {
   children: ReactNode;
   isLoading: boolean;
   loadingText?: string;

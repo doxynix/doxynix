@@ -3,7 +3,6 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { prAnalysisService } from "@/server/entities/pr-analysis/api/pr-analysis.service";
 import { PRConfigService } from "@/server/features/pr-analysis/lib/pr-config";
-import { getClientContext } from "@/server/shared/infrastructure/github/github-provider";
 import { logger } from "@/server/shared/infrastructure/logger";
 
 export const prAnalysisRouter = createTRPCRouter({

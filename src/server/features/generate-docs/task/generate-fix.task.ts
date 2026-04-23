@@ -12,11 +12,11 @@ import type { FindingForFix } from "../../pr-analysis/model/pr-types";
 export const generateFixTask = task({
   id: "generate-fix",
   run: async (payload: {
-    fixId: number;
-    repoId: number;
     fileContents: Record<string, string>;
     findings: FindingForFix[];
+    fixId: number;
     prAnalysisId?: string;
+    repoId: number;
   }) => {
     const fixService = new FixService();
 
@@ -54,7 +54,7 @@ export const generateFixTask = task({
         repoId: payload.repoId,
       });
 
-      return { success: true, fixId: payload.fixId };
+      return { fixId: payload.fixId, success: true };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       const cacheKey = `fix-result:${payload.fixId}`;

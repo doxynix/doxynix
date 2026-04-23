@@ -1,5 +1,6 @@
 "use client";
 
+import type { MouseEvent } from "react";
 import { Check, Copy } from "lucide-react";
 
 import { useCopyToClipboard } from "@/shared/hooks/use-copy-to-clipboard";
@@ -10,24 +11,24 @@ import { AppTooltip } from "./app-tooltip";
 
 type CopyButtonProps = {
   className?: string;
+  disabled?: boolean;
   successText?: string;
   tooltipSide?: "bottom" | "left" | "right" | "top";
   tooltipText?: string;
   value: string;
-  disabled?: boolean;
 };
 
 export function CopyButton({
   className,
+  disabled,
   successText = "Copied!",
   tooltipSide,
   tooltipText = "Copy ID",
   value,
-  disabled,
 }: Readonly<CopyButtonProps>) {
   const { copy, isCopied } = useCopyToClipboard();
 
-  const handleCopy = (e: React.MouseEvent) => {
+  const handleCopy = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     void copy(value);
@@ -41,8 +42,8 @@ export function CopyButton({
     >
       <Button
         type="button"
-        size="icon"
         disabled={disabled}
+        size="icon"
         variant="ghost"
         aria-label={isCopied ? successText : tooltipText}
         onClick={handleCopy}

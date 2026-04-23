@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
@@ -36,11 +37,9 @@ function PrivacyListItem({ descKey, name }: Readonly<Props>) {
 }
 
 const richStyles = {
-  important: (chunks: React.ReactNode) => (
-    <span className="text-destructive font-medium">{chunks}</span>
-  ),
-  strong: (chunks: React.ReactNode) => <span className={STRONG_TEXT}>{chunks}</span>,
-  u: (chunks: React.ReactNode) => <u>{chunks}</u>,
+  important: (chunks: ReactNode) => <span className="text-destructive font-medium">{chunks}</span>,
+  strong: (chunks: ReactNode) => <span className={STRONG_TEXT}>{chunks}</span>,
+  u: (chunks: ReactNode) => <u>{chunks}</u>,
 };
 
 export default async function PrivacyPage() {

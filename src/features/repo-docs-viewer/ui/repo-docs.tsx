@@ -1,24 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ComponentType } from "react";
 import saveAs from "file-saver";
 import { BookOpen, Download, FileText, HistoryIcon, Layers, Terminal, Users2 } from "lucide-react";
 
 import { trpc, type AvailableDocs, type DocType } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
-import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Tabs, TabsContent } from "@/shared/ui/core/tabs";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import { RepoSwagger } from "@/entities/repo-details/ui/repo-swagger";
+import { RepoSwagger } from "@/entities/repo-details";
 
 import { RepoDocsContent } from "./repo-docs-content";
 import { RepoDocsTabs } from "./repo-docs-tabs";
 
-const DOC_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const DOC_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   API: Terminal,
   ARCHITECTURE: Layers,
   CHANGELOG: HistoryIcon,
@@ -119,19 +118,19 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
                       <>
                         <AppTooltip content="Download file">
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={handleDownload}
                             disabled={isDocLoading || doc == null}
+                            size="icon"
+                            variant="ghost"
+                            onClick={handleDownload}
                           >
                             <Download className="size-3" />
                           </Button>
                         </AppTooltip>
                         <CopyButton
-                          tooltipText="Copy file"
-                          disabled={isDocLoading || doc == null}
-                          className="size-8 px-3 opacity-100"
                           value={docContent?.raw ?? ""}
+                          disabled={isDocLoading || doc == null}
+                          tooltipText="Copy file"
+                          className="size-8 px-3 opacity-100"
                         />
                       </>
                     )}

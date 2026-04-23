@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import * as Ably from "ably";
 import { AblyProvider } from "ably/react";
 import { useSession } from "next-auth/react";
@@ -14,7 +14,7 @@ import { useRepoActions } from "@/entities/repo";
 
 import { useNotificationActions } from "@/features/notifications";
 
-type Props = { children: React.ReactNode };
+type Props = { children: ReactNode };
 
 export const RealtimeProvider = ({ children }: Props) => {
   const { data: session } = useSession();
@@ -26,7 +26,7 @@ export const RealtimeProvider = ({ children }: Props) => {
 
   const [client, setClient] = useState<Ably.Realtime | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (userId == null) return;
 
     const realtime = new Ably.Realtime({
@@ -40,7 +40,8 @@ export const RealtimeProvider = ({ children }: Props) => {
         console.log("Realtime connection:", state.current);
       });
     }
-
+    // FIXME: дизейблить пока что потом придумаю чет
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setClient(realtime);
 
     return () => {
@@ -114,7 +115,14 @@ export const RealtimeProvider = ({ children }: Props) => {
       // systemChannel.detach();
       // userChannel.detach();
     };
-  }, [client, userId, invalidateAll, invalidate, utils.analytics.getDashboardStats]);
+  }, [
+    client,
+    userId,
+    invalidateAll,
+    invalidate,
+    utils.analytics.getDashboardStats,
+    utils.repoAnalysis.getFileActionResult,
+  ]);
 
   if (!client) return <>{children}</>;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import { diagnosticCount } from "@codemirror/lint";
 import { getSearchQuery, setSearchQuery } from "@codemirror/search";
 import { EditorState, type Extension } from "@codemirror/state";
@@ -88,8 +88,8 @@ export function RepoCodeEditor({
   const mergeExtensionsEditable = readOnly ? mergeExtensionsReadOnly : ext;
 
   const Merge = CodeMirrorMerge as unknown as {
-    Modified?: React.ComponentType<Record<string, unknown>>;
-    Original?: React.ComponentType<Record<string, unknown>>;
+    Modified?: ComponentType<Record<string, unknown>>;
+    Original?: ComponentType<Record<string, unknown>>;
   };
   const Original = Merge.Original;
   const Modified = Merge.Modified;

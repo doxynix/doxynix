@@ -3,7 +3,6 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { repoAnalysisService } from "@/server/features/analyze-repo/api/repo-analysis.service";
-import { formatQuickFileAuditMarkdown } from "@/server/features/file-actions/model/file-actions";
 import { markdownToHtml } from "@/server/shared/lib/markdown-to-html";
 import type { FileActionPreviewResult } from "@/server/shared/types";
 import { DocTypeSchema } from "@/generated/zod";
@@ -79,22 +78,6 @@ export const repoAnalysisRouter = createTRPCRouter({
       };
     }),
 
-  quickFileAudit: protectedProcedure
-    .input(
-      z.object({
-        analysisId: z.string().optional(),
-        commitSha: z.string().optional(),
-        content: z.string(),
-        language: z.string().default(DEFAULT_DOC_LANGUAGE),
-        nodeId: z.string().optional(),
-        path: z.string(),
-        repoId: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      return repoAnalysisService.auditFile(ctx.db, Number(ctx.session.user.id), input);
-    }),
-
   pinAuditToDocs: protectedProcedure
     .input(
       z.object({
@@ -118,8 +101,8 @@ export const repoAnalysisRouter = createTRPCRouter({
       let internalAnalysisId: number | undefined;
       if (analysisId) {
         const analysis = await ctx.db.analysis.findUnique({
-          where: { publicId: analysisId },
           select: { id: true },
+          where: { publicId: analysisId },
         });
         internalAnalysisId = analysis?.id;
       }
@@ -129,10 +112,10 @@ export const repoAnalysisRouter = createTRPCRouter({
       return ctx.db.document.create({
         data: {
           content: markdownContent,
-          type: "CODE_DOC",
           path: input.path,
-          version: commitSha || "manual",
           repo: { connect: { publicId: input.repoId } },
+          type: "CODE_DOC",
+          version: commitSha || "manual",
           ...(internalAnalysisId
             ? {
                 analysis: { connect: { id: internalAnalysisId } },
@@ -140,5 +123,21 @@ export const repoAnalysisRouter = createTRPCRouter({
             : {}),
         },
       });
+    }),
+
+  quickFileAudit: protectedProcedure
+    .input(
+      z.object({
+        analysisId: z.string().optional(),
+        commitSha: z.string().optional(),
+        content: z.string(),
+        language: z.string().default(DEFAULT_DOC_LANGUAGE),
+        nodeId: z.string().optional(),
+        path: z.string(),
+        repoId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return repoAnalysisService.auditFile(ctx.db, Number(ctx.session.user.id), input);
     }),
 });

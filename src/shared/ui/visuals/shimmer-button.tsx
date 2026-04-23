@@ -1,22 +1,27 @@
-import React, { type ComponentPropsWithoutRef, type CSSProperties } from "react";
+import {
+  forwardRef,
+  type ComponentPropsWithoutRef,
+  type ComponentRef,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 
 import { cn } from "@/shared/lib/cn";
 import { Link } from "@/i18n/routing";
 
 import { Button } from "../core/button";
 
-export interface ShimmerButtonProps extends ComponentPropsWithoutRef<"button"> {
+export interface ShimmerButtonProps extends ComponentPropsWithoutRef<typeof Link> {
   background?: string;
   borderRadius?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
-  href: string;
   shimmerColor?: string;
   shimmerDuration?: string;
   shimmerSize?: string;
 }
 
-export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
+export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButtonProps>(
   (
     {
       background = "var(--primary)",
@@ -27,13 +32,14 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
       shimmerColor = "var(--primary-foreground)",
       shimmerDuration = "3s",
       shimmerSize = "0.05em",
+      style,
       ...props
     },
     ref
   ) => {
     return (
       <Button
-        ref={ref}
+        asChild
         className={cn(
           "transition-standard group border-border/70 text-primary-foreground hover:border-border-accent hover:text-primary-foreground relative isolate flex cursor-pointer items-center justify-center overflow-hidden rounded-(--radius) border bg-transparent px-6 py-3 whitespace-nowrap shadow-sm hover:bg-transparent hover:[box-shadow:var(--shadow-md)]",
           "active:translate-y-px",
@@ -41,6 +47,7 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
         )}
         style={
           {
+            ...style,
             "--bg": background,
             "--cut": shimmerSize,
             "--radius": borderRadius,
@@ -49,10 +56,8 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
             "--spread": "90deg",
           } as CSSProperties
         }
-        {...props}
-        asChild
       >
-        <Link href={href}>
+        <Link ref={ref} href={href} {...props}>
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-(--radius)">
             <div className="@container-[size] absolute inset-0 overflow-visible blur-[2px]">
               <div className="animate-shimmer-slide absolute inset-0 aspect-[1] h-[100cqh] rounded-none [mask:none]">

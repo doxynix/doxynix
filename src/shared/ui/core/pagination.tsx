@@ -1,11 +1,11 @@
-import * as React from "react";
+import { forwardRef, type ComponentProps, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
 import { Button, buttonVariants, type ButtonProps } from "@/shared/ui/core/button";
 import { Link } from "@/i18n/routing";
 
-const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
+const Pagination = ({ className, ...props }: ComponentProps<"nav">) => (
   <nav
     role="navigation"
     aria-label="pagination"
@@ -15,28 +15,28 @@ const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
 );
 Pagination.displayName = "Pagination";
 
-const PaginationContent = React.forwardRef<HTMLUListElement, React.ComponentProps<"ul">>(
+const PaginationContent = forwardRef<HTMLUListElement, ComponentProps<"ul">>(
   ({ className, ...props }, ref) => (
     <ul ref={ref} className={cn("flex flex-row items-center gap-1", className)} {...props} />
   )
 );
 PaginationContent.displayName = "PaginationContent";
 
-const PaginationItem = React.forwardRef<HTMLLIElement, React.ComponentProps<"li">>(
+const PaginationItem = forwardRef<HTMLLIElement, ComponentProps<"li">>(
   ({ className, ...props }, ref) => <li ref={ref} className={cn("", className)} {...props} />
 );
 PaginationItem.displayName = "PaginationItem";
 
 type BasePaginationLinkProps = Pick<ButtonProps, "size"> & {
-  children?: React.ReactNode;
+  children?: ReactNode;
   className?: string;
   disabled?: boolean;
   isActive?: boolean;
 };
 
 type PaginationLinkProps = (
-  | (React.ComponentProps<"button"> & { href?: never })
-  | React.ComponentProps<typeof Link>
+  | (ComponentProps<"button"> & { href?: never })
+  | ComponentProps<typeof Link>
 ) &
   BasePaginationLinkProps;
 
@@ -56,7 +56,7 @@ const PaginationLink = ({
   );
 
   if (!("href" in props) || props.href === undefined) {
-    const buttonProps = props as React.ComponentProps<"button">;
+    const buttonProps = props as ComponentProps<"button">;
 
     return (
       <Button
@@ -70,7 +70,7 @@ const PaginationLink = ({
     );
   }
 
-  const { href, onClick, tabIndex, ...linkProps } = props as React.ComponentProps<typeof Link>;
+  const { href, onClick, tabIndex, ...linkProps } = props as ComponentProps<typeof Link>;
   const effectiveTabIndex = disabled ? -1 : tabIndex;
 
   return (
@@ -94,10 +94,7 @@ const PaginationLink = ({
 };
 PaginationLink.displayName = "PaginationLink";
 
-const PaginationPrevious = ({
-  className,
-  ...props
-}: React.ComponentProps<typeof PaginationLink>) => (
+const PaginationPrevious = ({ className, ...props }: ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
     size="default"
     aria-label="Go to previous page"
@@ -110,7 +107,7 @@ const PaginationPrevious = ({
 );
 PaginationPrevious.displayName = "PaginationPrevious";
 
-const PaginationNext = ({ className, ...props }: React.ComponentProps<typeof PaginationLink>) => (
+const PaginationNext = ({ className, ...props }: ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
     size="default"
     aria-label="Go to next page"
@@ -123,7 +120,7 @@ const PaginationNext = ({ className, ...props }: React.ComponentProps<typeof Pag
 );
 PaginationNext.displayName = "PaginationNext";
 
-const PaginationEllipsis = ({ className, ...props }: React.ComponentProps<"span">) => (
+const PaginationEllipsis = ({ className, ...props }: ComponentProps<"span">) => (
   <span aria-hidden className={cn("flex size-9 items-center justify-center", className)} {...props}>
     <MoreHorizontal />
     <span className="sr-only">More pages</span>

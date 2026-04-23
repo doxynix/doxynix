@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.26.22](https://github.com/doxynix/doxynix/compare/v1.26.21...v1.26.22) (2026-04-22)
+
+
+### Bug Fixes
+
+* **deps:** update secretlint monorepo to v12 (major) ([#1165](https://github.com/doxynix/doxynix/issues/1165)) ([3f852c7](https://github.com/doxynix/doxynix/commit/3f852c7efbebf355bb9bb3f1e68ba79dabae6490))
+
+## [1.26.21](https://github.com/doxynix/doxynix/compare/v1.26.20...v1.26.21) (2026-04-19)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1160](https://github.com/doxynix/doxynix/issues/1160)) ([db96fbf](https://github.com/doxynix/doxynix/commit/db96fbf95fde6430697ef0479e271eab5a7f9268))
+
+## [1.26.20](https://github.com/doxynix/doxynix/compare/v1.26.19...v1.26.20) (2026-04-19)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1156](https://github.com/doxynix/doxynix/issues/1156)) ([aeb0ec0](https://github.com/doxynix/doxynix/commit/aeb0ec09dd69c30704227ab793bacbdb8651952a))
+
+## [1.26.19](https://github.com/doxynix/doxynix/compare/v1.26.18...v1.26.19) (2026-04-19)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1146](https://github.com/doxynix/doxynix/issues/1146)) ([5fdb11b](https://github.com/doxynix/doxynix/commit/5fdb11bf8f7653341fd28ba719c7d736b352a1fb))
+
+## [1.26.18](https://github.com/doxynix/doxynix/compare/v1.26.17...v1.26.18) (2026-04-19)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1142](https://github.com/doxynix/doxynix/issues/1142)) ([58e76af](https://github.com/doxynix/doxynix/commit/58e76af03f9eb30fb3d0d8be86dfa1b6fa7fda0c))
+
+## [1.26.17](https://github.com/doxynix/doxynix/compare/v1.26.16...v1.26.17) (2026-04-18)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1138](https://github.com/doxynix/doxynix/issues/1138)) ([5eb02ce](https://github.com/doxynix/doxynix/commit/5eb02cecbc40ad69f156321c6327607103a3df4c))
+
+## [1.26.16](https://github.com/doxynix/doxynix/compare/v1.26.15...v1.26.16) (2026-04-18)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1132](https://github.com/doxynix/doxynix/issues/1132)) ([13f333e](https://github.com/doxynix/doxynix/commit/13f333e521e1efacb931bd59655324fb66433482))
+
 ## [1.26.15](https://github.com/doxynix/doxynix/compare/v1.26.14...v1.26.15) (2026-04-17)
 
 
