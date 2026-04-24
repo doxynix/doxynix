@@ -20,8 +20,10 @@ import { Badge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 
-import { getGitMetrics, RepoGitMetric, RepoTopics } from "@/entities/repo";
-import { StatCard } from "@/entities/repo-details";
+import { StatCard } from "@/entities/repo-details/ui/stat-card";
+import { getGitMetrics } from "@/entities/repo/model/git-metrics";
+import { RepoGitMetric } from "@/entities/repo/ui/repo-git-metric";
+import { RepoTopics } from "@/entities/repo/ui/repo-topics";
 
 type Props = { data: NonNullable<RepoDetailsOverview> };
 

@@ -6,7 +6,8 @@ import { createMetadata } from "@/shared/lib/metadata";
 import { Button } from "@/shared/ui/core/button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
-import { ApiKeysListContainer, CreateApiKeyDialog } from "@/features/api-keys";
+import { ApiKeysListContainer } from "@/features/api-keys/ui/api-keys-list-container";
+import { CreateApiKeyDialog } from "@/features/api-keys/ui/create-api-key-dialog";
 
 export const generateMetadata = createMetadata("api_keys_title", "api_keys_desc");
 

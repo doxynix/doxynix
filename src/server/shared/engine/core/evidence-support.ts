@@ -13,7 +13,6 @@ import type {
 } from "./discovery.types";
 import {
   collectAliasRules,
-  findDependencyCycles,
   isLikelyInternalImportSpecifier,
   resolveModuleImport,
   resolveRelativeImport,
@@ -200,5 +199,3 @@ export function resolveImportEdges(
   tracking.graph.set(filePath, new Set(resolvedImports));
   return resolvedImports;
 }
-
-export { findDependencyCycles };

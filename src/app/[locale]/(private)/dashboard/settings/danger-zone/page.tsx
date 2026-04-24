@@ -2,8 +2,8 @@ import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
 
-import { DeleteAccountCard } from "@/features/profile";
-import { DeleteAllReposCard } from "@/features/repo";
+import { DeleteAccountCard } from "@/features/profile/ui/delete-account-card";
+import { DeleteAllReposCard } from "@/features/repo/ui/delete-all-repos-card";
 
 export const generateMetadata = createMetadata("danger_zone_title", "danger_zone_desc");
 

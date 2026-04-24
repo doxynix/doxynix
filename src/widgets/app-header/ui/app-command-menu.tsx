@@ -25,8 +25,11 @@ import { Spinner } from "@/shared/ui/core/spinner";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { useRouter } from "@/i18n/routing";
 
-import { useCommandMenuActions, useCommandMenuIsOpen } from "@/entities/command-menu";
-import { useCreateRepoActions } from "@/entities/repo";
+import {
+  useCommandMenuActions,
+  useCommandMenuIsOpen,
+} from "@/entities/command-menu/model/use-command-menu.store";
+import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
 
 export function AppCommandMenu() {
   const t = useTranslations("Dashboard");

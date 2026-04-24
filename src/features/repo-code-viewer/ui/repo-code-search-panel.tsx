@@ -14,7 +14,7 @@ import { CaseSensitive, MoveLeft, Replace, ReplaceAll, Search, WholeWord, X } fr
 import { cn } from "@/shared/lib/cn";
 import { Input } from "@/shared/ui/core/input";
 
-import type { EditorStats } from "@/entities/repo-details";
+import type { EditorStats } from "@/entities/repo-details/model/editor-stats.types";
 
 import { RepoCodeActionButton } from "./repo-code-action-button";
 

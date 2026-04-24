@@ -10,7 +10,8 @@ import { trpc, type RepoMapDisplayData } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import { RepoAnalyzeButton, useRepoParams } from "@/entities/repo";
+import { useRepoParams } from "@/entities/repo/model/use-repo-params";
+import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
 
 import { RepoMapHotkeyListeners } from "./repo-map-hotkey-listeners";
 

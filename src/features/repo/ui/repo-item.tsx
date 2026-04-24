@@ -8,7 +8,7 @@ import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
-import { repoVisibilityConfig } from "@/entities/repo";
+import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";
 
 type Props = { disabled?: boolean; onClick: () => void; repo: RepoItemFields };
 

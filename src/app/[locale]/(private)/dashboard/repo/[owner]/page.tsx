@@ -5,14 +5,12 @@ import { getTranslations } from "next-intl/server";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
-import type { SearchParams } from "@/entities/repo-setup";
+import type { SearchParams } from "@/entities/repo-setup/model/repo-setup.types";
 
-import {
-  CreateRepoButton,
-  DeleteByOwnerDialog,
-  RepoFilters,
-  RepoListContainer,
-} from "@/features/repo";
+import { CreateRepoButton } from "@/features/repo/ui/create-repo-button";
+import { DeleteByOwnerDialog } from "@/features/repo/ui/delete-by-owner-dialog";
+import { RepoFilters } from "@/features/repo/ui/repo-filters";
+import { RepoListContainer } from "@/features/repo/ui/repo-list-container";
 
 import { api } from "@/server/api/server";
 

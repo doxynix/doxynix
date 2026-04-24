@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
-import { SettingsMenu } from "@/features/settings";
+import { SettingsMenu } from "@/features/settings/ui/settings-menu";
 
 export default async function SettingsLayout({ children }: Readonly<{ children: ReactNode }>) {
   const t = await getTranslations("Dashboard");

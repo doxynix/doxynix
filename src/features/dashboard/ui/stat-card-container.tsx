@@ -4,7 +4,9 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 
-import { getStats, StatCard, StatCardSkeleton } from "@/entities/repo-details";
+import { getStats } from "@/entities/repo-details/model/get-stats";
+import { StatCard } from "@/entities/repo-details/ui/stat-card";
+import { StatCardSkeleton } from "@/entities/repo-details/ui/stat-card-skeleton";
 
 export function StatCardContainer() {
   const locale = useLocale();

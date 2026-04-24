@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
-import { RepoHistoryContainer } from "@/features/repo-analytics";
+import { RepoHistoryContainer } from "@/features/repo-analytics/ui/repo-history-container";
 
 import { api } from "@/server/api/server";
 

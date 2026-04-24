@@ -17,7 +17,8 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 import { Link } from "@/i18n/routing";
 
-import { notificationTypeConfig, useNotificationActions } from "@/features/notifications";
+import { notificationTypeConfig } from "@/features/notifications/model/notification-type-config";
+import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
 
 export function NotificationsNav() {
   const t = useTranslations("Dashboard");

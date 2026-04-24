@@ -1,6 +1,6 @@
 import { unauthorized } from "next/navigation";
 
-import { ProfileCard } from "@/features/profile";
+import { ProfileCard } from "@/features/profile/ui/profile-card";
 
 import { getServerAuthSession } from "@/server/shared/infrastructure/auth";
 

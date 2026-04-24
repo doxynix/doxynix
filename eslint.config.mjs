@@ -6,6 +6,7 @@ import nextTs from "eslint-config-next/typescript";
 import prettierConfig from "eslint-config-prettier";
 import boundaries from "eslint-plugin-boundaries";
 import jsxA11y from "eslint-plugin-jsx-a11y";
+import noBarrelFiles from "eslint-plugin-no-barrel-files";
 import perfectionist from "eslint-plugin-perfectionist";
 import playwright from "eslint-plugin-playwright";
 import prettierPlugin from "eslint-plugin-prettier";
@@ -58,6 +59,7 @@ export default defineConfig([
       unicorn,
       perfectionist,
       "validate-jsx-nesting": validateJsxNesting,
+      "no-barrel-files": noBarrelFiles,
     },
 
     languageOptions: {
@@ -280,36 +282,8 @@ export default defineConfig([
         },
       ],
 
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            {
-              group: [
-                "@/app/**/?*",
-                "@/widgets/**/?*",
-                "@/features/**/?*",
-                "@/entities/**/?*",
-
-                "!@/app/*",
-                "!@/widgets/*",
-                "!@/features/*",
-                "!@/entities/*",
-              ],
-              message:
-                "FSD Violation: Deep imports are forbidden. Import only from the Public API (index.ts) of the slice.",
-            },
-          ],
-        },
-      ],
-
       "no-restricted-syntax": [
         "error",
-        {
-          selector: "ExportAllDeclaration",
-          message:
-            "Next.js Performance: Do not use 'export *'. Export modules explicitly to avoid huge barrel files and tree-shaking issues.",
-        },
         {
           selector:
             "JSXAttribute[name.name='className'] > JSXExpressionContainer > TemplateLiteral",
@@ -323,6 +297,8 @@ export default defineConfig([
             "Use cn() utility for conditional Tailwind classes instead of string concatenation.",
         },
       ],
+
+      "no-barrel-files/no-barrel-files": "error",
 
       "unused-imports/no-unused-imports": "error",
       "@typescript-eslint/no-unused-vars": [

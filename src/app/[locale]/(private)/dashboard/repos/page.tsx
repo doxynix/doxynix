@@ -3,7 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { createMetadata } from "@/shared/lib/metadata";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
-import { CreateRepoButton, RepoFilters, RepoListContainer } from "@/features/repo";
+import { CreateRepoButton } from "@/features/repo/ui/create-repo-button";
+import { RepoFilters } from "@/features/repo/ui/repo-filters";
+import { RepoListContainer } from "@/features/repo/ui/repo-list-container";
 
 export const generateMetadata = createMetadata("repositories_title", "repositories_desc");
 

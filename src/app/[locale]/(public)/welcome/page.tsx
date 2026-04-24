@@ -1,6 +1,6 @@
 import { unauthorized } from "next/navigation";
 
-import { WelcomeFlow } from "@/widgets/welcome-flow";
+import { WelcomeFlow } from "@/widgets/welcome-flow/ui/welcome-flow";
 
 import { getServerAuthSession } from "@/server/shared/infrastructure/auth";
 

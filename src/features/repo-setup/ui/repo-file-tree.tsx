@@ -9,14 +9,10 @@ import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
-import {
-  RepoBranchSelector,
-  RepoTreeSkeleton,
-  type ActionItem,
-  type ActionsType,
-  type FileNode,
-  type StateType,
-} from "@/entities/repo-setup";
+import type { ActionItem, FileNode } from "@/entities/repo-setup/model/repo-setup.types";
+import type { ActionsType, StateType } from "@/entities/repo-setup/model/use-repo-setup";
+import { RepoBranchSelector } from "@/entities/repo-setup/ui/repo-branch-selector";
+import { RepoTreeSkeleton } from "@/entities/repo-setup/ui/repo-tree-skeleton";
 
 import { RepoFileNode } from "./repo-file-node";
 
