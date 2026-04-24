@@ -416,8 +416,8 @@ importers:
         specifier: 19.2.5
         version: 19.2.5
       react-arborist:
-        specifier: 3.4.3
-        version: 3.4.3(@types/node@25.6.0)(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+        specifier: 3.5.0
+        version: 3.5.0(@types/node@25.6.0)(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       react-codemirror-merge:
         specifier: 4.25.9
         version: 4.25.9(@babel/runtime@7.29.2)(@codemirror/autocomplete@6.20.1)(@codemirror/language@6.12.3)(@codemirror/lint@6.9.5)(@codemirror/search@6.6.0)(@codemirror/state@6.6.0)(@codemirror/theme-one-dark@6.1.3)(@codemirror/view@6.41.1)(codemirror@6.0.2)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -684,14 +684,14 @@ importers:
         specifier: 1.6.16
         version: 1.6.16(@typescript-eslint/eslint-plugin@8.59.0(@typescript-eslint/parser@8.59.0(eslint@9.39.4(jiti@1.21.7))(typescript@6.0.3))(eslint@9.39.4(jiti@1.21.7))(typescript@6.0.3))(eslint@9.39.4(jiti@1.21.7))(typescript@6.0.3)(vitest@4.1.4)
       '@zenstackhq/sdk':
-        specifier: 3.5.6
-        version: 3.5.6
+        specifier: 3.6.0
+        version: 3.6.0
       '@zenstackhq/trpc':
         specifier: 2.22.1
         version: 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(typescript@6.0.3)(zod@4.3.6)
       '@zenstackhq/zod':
-        specifier: 3.5.6
-        version: 3.5.6(zod@4.3.6)
+        specifier: 3.6.0
+        version: 3.6.0(zod@4.3.6)
       babel-plugin-react-compiler:
         specifier: 1.0.0
         version: 1.0.0
@@ -6336,14 +6336,14 @@ packages:
   '@yomguithereal/helpers@1.1.1':
     resolution: {integrity: sha512-UYvAq/XCA7xoh1juWDYsq3W0WywOB+pz8cgVnE1b45ZfdMhBvHDrgmSFG3jXeZSr2tMTYLGHFHON+ekG05Jebg==}
 
-  '@zenstackhq/common-helpers@3.5.6':
-    resolution: {integrity: sha512-yh380RGsTq7g6pYjKIwAcKYtY7MdEzr8afzrnr2BfkTH90ETOvSIqLppNxWHTL2b8bnKsfHssHwxQ50z0tfjyg==}
+  '@zenstackhq/common-helpers@3.6.0':
+    resolution: {integrity: sha512-jjK8l80Lbo+dYO3gX+Fj3cbJb/qPflLt8jD0Xx2dRxTQEaW0S3BwE8Xv7h9HtHeSTneiM3ilAQGScAJPeyHXlQ==}
 
   '@zenstackhq/language@2.22.1':
     resolution: {integrity: sha512-VSCVV7aMXMcC/tBnURIehtdQrm04u7EtwbtFB391PPW3ZESp9tEIK4CskLzEiaR8tR/w+rMOQiX3dyXuhJVZOA==}
 
-  '@zenstackhq/language@3.5.6':
-    resolution: {integrity: sha512-AZpx+24UjWmxUT7AzcFrIj2DE5wEHavn4hvzPDwAbWTEv8YDr5f7FObtYURxtdo0VbWXH9WEx6PcBw2sTQke3g==}
+  '@zenstackhq/language@3.6.0':
+    resolution: {integrity: sha512-gCtO8oJxxA5v8Ou7bu6c3D92xjaIRmmzigHAdW1kUj8a8vRDIDblm6a8Cjo62M5rjDSWZfW7C0PP4mt/Iz6Cvg==}
 
   '@zenstackhq/runtime@2.22.1':
     resolution: {integrity: sha512-u12W7z0uQDtpvILPmKOHZ3AC/3uEPnfkNbhMGllGREKEgU1qoKY9PWfHFlR3ZKK1fIxOQEW8NFcO8OsW4fUXFg==}
@@ -6351,22 +6351,22 @@ packages:
       '@prisma/client': 5.0.0 - 7.x
       zod: ^3.25.0 || ^4.0.0
 
-  '@zenstackhq/schema@3.5.6':
-    resolution: {integrity: sha512-dew4oIJZ620A01h2J4Y2VmTyf4+uhM/IOtSlfkGLTrki3/yL79+p3DuKbXB5/Dr6w9FI/6lscxCe9Rwk+XoEug==}
+  '@zenstackhq/schema@3.6.0':
+    resolution: {integrity: sha512-ED6V1MoaSku7ssopOh8ORo7w78ecrUvE89j2PoYRRYan4gKnstISYgtIO+rdJyiOmA+7mLJCgDgXmAeQezAGgw==}
 
   '@zenstackhq/sdk@2.22.1':
     resolution: {integrity: sha512-N6FxqdzWWoQKxBVZzfgIui7ve5raolrGZAyCGM/9rwiMJcwCTbrRf/F98kvCoCtLasRfzQJjz7L9CBRjXOdgew==}
 
-  '@zenstackhq/sdk@3.5.6':
-    resolution: {integrity: sha512-+vAeTWDn5FHGLw5R0vypOHUqhsmkrjlaFD0NjA0DAxLSadmMYD+dOBRZsUwvYphvG/kwJunIPm/jDoP54AFINw==}
+  '@zenstackhq/sdk@3.6.0':
+    resolution: {integrity: sha512-yXUCvCFSoJu+CmaBLT+Jk6RzZ/CQn9lqZZOR4MNHM/Y5OLrNAw+jZnQG0X7c160valQ3vHJ/ePkshCs4odka3A==}
 
   '@zenstackhq/trpc@2.22.1':
     resolution: {integrity: sha512-Bbn1BINTfiIgGn9i0R48ma0KDI+Fzxh84NeYTJUZ3qbmf03RhLfYPtBVGQOkdD+0TJCbvKUzP1uFweJpquEXqg==}
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
 
-  '@zenstackhq/zod@3.5.6':
-    resolution: {integrity: sha512-jDlaNeioU/zIeJxR6QJ49vNe6TWx6mSy4T5E1Fh9y0FmJ0Q4SjFZNlfGTu9lb2ljFGB43Sy9nMhWzSv8Ucu7FA==}
+  '@zenstackhq/zod@3.6.0':
+    resolution: {integrity: sha512-LEA0wmk/iI6/7Bjse6EsJK5BQPy9601gak9/cYqTTED2v8w2K4Pd7+rx7Ups6i6aWOXToJhD+fG84zgyqBNgbg==}
     peerDependencies:
       zod: ^4.0.0
 
@@ -11573,8 +11573,8 @@ packages:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
     hasBin: true
 
-  react-arborist@3.4.3:
-    resolution: {integrity: sha512-yFnq1nIQhT2uJY4TZVz2tgAiBb9lxSyvF4vC3S8POCK8xLzjGIxVv3/4dmYquQJ7AHxaZZArRGHiHKsEewKdTQ==}
+  react-arborist@3.5.0:
+    resolution: {integrity: sha512-FdXOICSt7P2h+Pxin1ULN02b4qrXJznNcshgwwWVtuYMLWSJcD245PQ4HOSj/Lr2T1uEegmnEm5Lbns2hUUsqg==}
     peerDependencies:
       react: '>= 16.14'
       react-dom: '>= 16.14'
@@ -20232,15 +20232,15 @@ snapshots:
 
   '@yomguithereal/helpers@1.1.1': {}
 
-  '@zenstackhq/common-helpers@3.5.6': {}
+  '@zenstackhq/common-helpers@3.6.0': {}
 
   '@zenstackhq/language@2.22.1':
     dependencies:
       langium: 1.3.1
 
-  '@zenstackhq/language@3.5.6':
+  '@zenstackhq/language@3.6.0':
     dependencies:
-      '@zenstackhq/common-helpers': 3.5.6
+      '@zenstackhq/common-helpers': 3.6.0
       langium: 3.5.0
       pluralize: 8.0.0
       ts-pattern: 5.9.0
@@ -20264,7 +20264,7 @@ snapshots:
       zod: 4.3.6
       zod-validation-error: 4.0.2(zod@4.3.6)
 
-  '@zenstackhq/schema@3.5.6':
+  '@zenstackhq/schema@3.6.0':
     dependencies:
       decimal.js: 10.6.0
 
@@ -20284,10 +20284,10 @@ snapshots:
       - typescript
       - zod
 
-  '@zenstackhq/sdk@3.5.6':
+  '@zenstackhq/sdk@3.6.0':
     dependencies:
-      '@zenstackhq/common-helpers': 3.5.6
-      '@zenstackhq/language': 3.5.6
+      '@zenstackhq/common-helpers': 3.6.0
+      '@zenstackhq/language': 3.6.0
       langium: 3.5.0
       ts-pattern: 5.9.0
       typescript: 5.9.3
@@ -20304,9 +20304,9 @@ snapshots:
       - magicast
       - typescript
 
-  '@zenstackhq/zod@3.5.6(zod@4.3.6)':
+  '@zenstackhq/zod@3.6.0(zod@4.3.6)':
     dependencies:
-      '@zenstackhq/schema': 3.5.6
+      '@zenstackhq/schema': 3.6.0
       decimal.js: 10.6.0
       zod: 4.3.6
 
@@ -26313,7 +26313,7 @@ snapshots:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  react-arborist@3.4.3(@types/node@25.6.0)(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
+  react-arborist@3.5.0(@types/node@25.6.0)(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:
       react: 19.2.5
       react-dnd: 14.0.5(@types/node@25.6.0)(@types/react@19.2.14)(react@19.2.5)
