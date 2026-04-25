@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { repoAnalysisService } from "@/server/features/analyze-repo/api/repo-analysis.service";
 import { markdownToHtml } from "@/server/shared/lib/markdown-to-html";
+import { REDIS_CONFIG } from "@/server/shared/lib/redis";
 import type { FileActionPreviewResult } from "@/server/shared/types";
 import { DocTypeSchema } from "@/generated/zod";
 
@@ -58,7 +59,7 @@ export const repoAnalysisRouter = createTRPCRouter({
   getFileActionResult: protectedProcedure
     .input(z.object({ path: z.string() }))
     .query(async ({ ctx, input }) => {
-      const cacheKey = `file-result:${ctx.session.user.id}:${input.path}`;
+      const cacheKey = REDIS_CONFIG.keys.fileAction(ctx.session.user.id, input.path);
       const data = await ctx.redis.get<FileActionPreviewResult>(cacheKey);
 
       if (data == null) return null;
@@ -86,7 +87,7 @@ export const repoAnalysisRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const cacheKey = `file-result:${ctx.session.user.id}:${input.path}`;
+      const cacheKey = REDIS_CONFIG.keys.fileAction(ctx.session.user.id, input.path);
       const cachedData = await ctx.redis.get<any>(cacheKey);
 
       if (cachedData == null) {

@@ -8,6 +8,7 @@ import { FixService } from "@/server/features/pr-analysis/lib/fix-generator";
 import type { FindingForFix } from "@/server/features/pr-analysis/model/pr-types";
 import { getClientContext } from "@/server/shared/infrastructure/github/github-provider";
 import { logger } from "@/server/shared/infrastructure/logger";
+import { REDIS_CONFIG } from "@/server/shared/lib/redis";
 
 // ============================================================================
 // VALIDATION SCHEMAS
@@ -81,18 +82,21 @@ export const generatedFixRouter = createTRPCRouter({
           branch: input.branch,
           defaultBranch: repo.defaultBranch,
           fixedFiles: input.fixedFiles,
-          fixId: fix.id,
+          fixId: fix.publicId,
           owner: repo.owner,
-          repoId: input.repoId,
+          repoId: repo.publicId,
           repoName: repo.name,
           title: input.title,
         });
 
         // Update fix status with PR metadata (no diffs stored)
-        await generatedFixService.updateStatus(ctx.db, fix.id, "PR_OPENED", {
+        await generatedFixService.updateStatus(ctx.db, fix.publicId, "PR_OPENED", {
           githubPrNumber: result.prNumber,
           githubPrUrl: result.prUrl,
         });
+
+        const cacheKey = REDIS_CONFIG.keys.prStaging(ctx.session.user.id, input.repoId);
+        await ctx.redis.del(cacheKey);
 
         return {
           prNumber: result.prNumber,
@@ -141,7 +145,7 @@ export const generatedFixRouter = createTRPCRouter({
       try {
         let validPrAnalysisId: string | undefined;
 
-        if (input.prAnalysisId != null && input.prAnalysisId !== "") {
+        if (input.prAnalysisId != null) {
           const prAnalysisRecord = await ctx.db.pullRequestAnalysis.findUnique({
             select: { publicId: true },
             where: { publicId: input.prAnalysisId },
@@ -165,7 +169,7 @@ export const generatedFixRouter = createTRPCRouter({
         }
 
         const fix = await generatedFixService.create(ctx.prisma, {
-          branch: `doxynix/fix-${Date.now()}`,
+          branch: `doxynix/fix-${crypto.randomUUID().slice(0, 8)}`,
           createdByUser: true,
           prAnalysisId: validPrAnalysisId,
           repoId: repo.id,
@@ -176,9 +180,10 @@ export const generatedFixRouter = createTRPCRouter({
           {
             fileContents: input.fileContents,
             findings: input.findings as FindingForFix[],
-            fixId: fix.id,
+            fixId: fix.publicId,
             prAnalysisId: validPrAnalysisId,
-            repoId: repo.id,
+            repoId: repo.publicId,
+            userId: Number(ctx.session.user.id),
           },
           {
             concurrencyKey: `repo-${repo.id}`,
@@ -212,7 +217,7 @@ export const generatedFixRouter = createTRPCRouter({
     .input(z.object({ fixId: z.string() }))
     .query(async ({ ctx, input }) => {
       const fix = await generatedFixService.getById(ctx.db, input.fixId);
-      const cachedResult = await ctx.redis.get(`fix-result:${input.fixId}`);
+      const cachedResult = await ctx.redis.get(REDIS_CONFIG.keys.fixResult(input.fixId));
 
       return { ...fix, resultJson: cachedResult };
     }),

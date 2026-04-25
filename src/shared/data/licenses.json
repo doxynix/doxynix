@@ -61,7 +61,15 @@
         "license": "MIT"
       },
       {
+        "name": "@radix-ui/react-slider",
+        "license": "MIT"
+      },
+      {
         "name": "@radix-ui/react-slot",
+        "license": "MIT"
+      },
+      {
+        "name": "@radix-ui/react-switch",
         "license": "MIT"
       },
       {

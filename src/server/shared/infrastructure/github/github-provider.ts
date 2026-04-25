@@ -8,6 +8,7 @@ import gitUrlParse from "git-url-parse";
 import { createPullRequest } from "octokit-plugin-create-pull-request";
 
 import {
+  APP_VERSION,
   GITHUB_APP_ID,
   GITHUB_APP_PRIVATE_KEY,
   GITHUB_SYSTEM_INSTALLATION_ID,
@@ -55,12 +56,13 @@ const getCommonConfig = () => ({
       return retryCount < 2;
     },
   },
-  userAgent: "Doxynix/1.0.0",
+  userAgent: `Doxynix/${APP_VERSION}`,
 });
 
 export function getInstallationClient(installationId: number): OctokitInstance {
   return new AppOctokit({
     ...getCommonConfig(),
+
     auth: {
       appId: Number(GITHUB_APP_ID),
       installationId,

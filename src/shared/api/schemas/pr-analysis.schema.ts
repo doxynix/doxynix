@@ -1,27 +1,30 @@
 import { z } from "zod";
 
+import { PRCommentStyleSchema, PRFocusAreaSchema } from "@/generated/zod";
+
 export const PRAnalysisConfigSchema = z.object({
   ciSkip: z.boolean().default(false),
-  commentStyle: z.enum(["detailed", "concise", "off"]).default("detailed"),
+  commentStyle: PRCommentStyleSchema.default(PRCommentStyleSchema.enum.DETAILED),
   enabled: z.boolean().default(false),
-  excludePatterns: z.array(z.string()).default(["*.test.ts", "*.spec.ts", "dist/**", "build/**"]),
+  excludePatterns: z.array(z.string()).default([]),
   focusAreas: z
-    .array(z.enum(["security", "performance", "style", "architecture"]))
-    .default(["security", "performance"]),
+    .array(PRFocusAreaSchema)
+    .default([PRFocusAreaSchema.enum.SECURITY, PRFocusAreaSchema.enum.PERFORMANCE]),
   tokenBudget: z.number().int().min(10_000).max(100_000).default(30_000),
 });
 
 export type PRAnalysisConfig = z.infer<typeof PRAnalysisConfigSchema>;
 
-export const CreatePRConfigInput = z.object({
-  commentStyle: z.enum(["detailed", "concise", "off"]).optional(),
+export const UpdatePRConfigInput = z.object({
+  ciSkip: z.boolean().optional(),
+  commentStyle: PRCommentStyleSchema.optional(),
   enabled: z.boolean().optional(),
-  focusAreas: z.array(z.enum(["security", "performance", "style", "architecture"])).optional(),
-  repoId: z.number(),
+  focusAreas: z.array(PRFocusAreaSchema).optional(),
+  repoId: z.string(),
   tokenBudget: z.number().int().min(10_000).max(100_000).optional(),
 });
 
-export type CreatePRConfigInput = z.infer<typeof CreatePRConfigInput>;
+export type UpdatePRConfigInputValues = z.infer<typeof UpdatePRConfigInput>;
 
 export const PRFindingSchema = z.object({
   codeSnippet: z.string().optional(),

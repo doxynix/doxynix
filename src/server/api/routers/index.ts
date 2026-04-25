@@ -7,6 +7,7 @@ import { githubBrowseRouter } from "./github-browse.router";
 import { healthRouter } from "./health.router";
 import { notificationRouter } from "./notifications.router";
 import { prAnalysisRouter } from "./pr-analysis.router";
+import { prStagingRouter } from "./pr-staging.router";
 import { repoAnalysisRouter } from "./repo-analysis.router";
 import { repoDetailsRouter } from "./repo-details.router";
 import { repoRouter } from "./repo.router";
@@ -21,6 +22,7 @@ export const appRouter = createTRPCRouter({
   health: healthRouter,
   notification: notificationRouter,
   prAnalysis: prAnalysisRouter,
+  prStaging: prStagingRouter,
   repo: repoRouter,
   repoAnalysis: repoAnalysisRouter,
   repoDetails: repoDetailsRouter,

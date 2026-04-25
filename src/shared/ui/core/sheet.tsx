@@ -49,7 +49,7 @@ function SheetContent({
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          "transition-standard bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-md outline-hidden data-[state=closed]:duration-150 data-[state=open]:duration-150",
+          "transition-standard bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 outline-hidden data-[state=closed]:duration-150 data-[state=open]:duration-150",
           side === "right" &&
             "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
           side === "left" &&
@@ -63,7 +63,7 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="transition-standard ring-offset-background focus-visible:ring-ring data-[state=open]:bg-secondary hover:border-border-strong hover:bg-surface-hover absolute top-4 right-4 rounded-xl border border-transparent bg-transparent p-1 opacity-70 hover:opacity-100 hover:shadow-sm focus-visible:ring-2 focus-visible:outline-hidden disabled:pointer-events-none">
+        <SheetPrimitive.Close className="transition-standard ring-offset-background focus-visible:ring-ring data-[state=open]:bg-secondary hover:border-border-strong hover:bg-surface-hover absolute top-4 right-4 rounded-xl border border-transparent bg-transparent p-1 opacity-70 hover:opacity-100 focus-visible:ring-2 focus-visible:outline-hidden disabled:pointer-events-none">
           <XIcon />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>

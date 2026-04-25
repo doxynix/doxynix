@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
-import { DeleteRepoCard } from "@/features/repo-settings";
+import { DeleteRepoCard, PRAnalysisConfigCard } from "@/features/repo-settings";
 
 import { api } from "@/server/api/server";
 
@@ -33,5 +33,11 @@ export default async function RepoSettingsPage({ params }: Readonly<Props>) {
     notFound();
   }
 
-  return <DeleteRepoCard id={repo.id} />;
+  return (
+    <>
+      <PRAnalysisConfigCard repoId={repo.id} />
+      <h2 className="text-destructive text-2xl font-bold">Danger Zone</h2>
+      <DeleteRepoCard id={repo.id} />
+    </>
+  );
 }

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { UpdatePRConfigInput } from "@/shared/api/schemas/pr-analysis.schema";
+
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { prAnalysisService } from "@/server/entities/pr-analysis/api/pr-analysis.service";
 import { PRConfigService } from "@/server/features/pr-analysis/lib/pr-config";
@@ -10,17 +12,7 @@ export const prAnalysisRouter = createTRPCRouter({
    * Configure PR analysis for a repo
    */
   configureRepository: protectedProcedure
-    .input(
-      z.object({
-        commentStyle: z.enum(["concise", "detailed", "off"]).optional(),
-        enabled: z.boolean().optional(),
-        focusAreas: z
-          .array(z.enum(["architecture", "performance", "security", "style"]))
-          .optional(),
-        repoId: z.string(),
-        tokenBudget: z.number().int().min(10_000).max(100_000).optional(),
-      })
-    )
+    .input(UpdatePRConfigInput)
     .mutation(async ({ ctx, input }) => {
       logger.info({
         msg: "pr_config_updating",
@@ -31,6 +23,7 @@ export const prAnalysisRouter = createTRPCRouter({
       return await PRConfigService.updateConfig(
         input.repoId,
         {
+          ciSkip: input.ciSkip,
           commentStyle: input.commentStyle,
           enabled: input.enabled,
           focusAreas: input.focusAreas,
@@ -115,6 +108,12 @@ export const prAnalysisRouter = createTRPCRouter({
       return comments.map(({ publicId, ...c }) => ({ ...c, id: publicId }));
     }),
 
+  getRepoConfig: protectedProcedure
+    .input(z.object({ repoId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await PRConfigService.getConfig(input.repoId, ctx.db);
+    }),
+
   listByRepository: protectedProcedure
     .input(z.object({ repoId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -147,28 +146,5 @@ export const prAnalysisRouter = createTRPCRouter({
         riskScore: item.riskScore,
         status: item.status,
       }));
-    }),
-
-  /**
-   * Toggle PR analysis status for repo
-   */
-  setAnalysisStatus: protectedProcedure
-    .input(
-      z.object({
-        enabled: z.boolean(),
-        repoId: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      logger.info({
-        enabled: input.enabled,
-        msg: "pr_analysis_status_toggling",
-        repoId: input.repoId,
-        userId: ctx.session.user.id,
-      });
-
-      await PRConfigService.updateConfig(input.repoId, { enabled: input.enabled }, ctx.db);
-
-      return { enabled: input.enabled };
     }),
 });

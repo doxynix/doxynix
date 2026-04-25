@@ -8,6 +8,7 @@ import { envShared, isSharedValidationSkipped, sharedSchema } from "./env.shared
 export const envServer = createEnv({
   runtimeEnv: {
     ABLY_API_KEY: process.env.ABLY_API_KEY,
+    APP_VERSION: process.env.APP_VERSION,
     BETTERSTACK_API_TOKEN: process.env.BETTERSTACK_API_TOKEN,
     DATABASE_URL: process.env.DATABASE_URL,
     GITHUB_APP_ID: process.env.GITHUB_APP_ID,
@@ -17,12 +18,9 @@ export const envServer = createEnv({
     GITHUB_SYSTEM_INSTALLATION_ID: process.env.GITHUB_SYSTEM_INSTALLATION_ID,
     GITHUB_SYSTEM_PAT: process.env.GITHUB_SYSTEM_PAT,
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
-    GITLAB_CLIENT_ID: process.env.GITLAB_CLIENT_ID,
-    GITLAB_CLIENT_SECRET: process.env.GITLAB_CLIENT_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
-    JWT_SECRET: process.env.JWT_SECRET,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     REDIS_TCP_URL: process.env.REDIS_TCP_URL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
@@ -35,9 +33,10 @@ export const envServer = createEnv({
 
   server: {
     ABLY_API_KEY: z.string().check(z.minLength(1)),
+    APP_VERSION: z._default(z.string(), "1.0.0"),
     BETTERSTACK_API_TOKEN: z.string().check(z.minLength(1)),
-    DATABASE_URL: z.url(),
 
+    DATABASE_URL: z.url(),
     GITHUB_APP_ID: z.string().check(z.regex(/^\d+$/, "must be numeric")),
     GITHUB_APP_PRIVATE_KEY: z
       .string()
@@ -47,12 +46,9 @@ export const envServer = createEnv({
     GITHUB_SYSTEM_INSTALLATION_ID: z.string().check(z.regex(/^\d+$/)),
     GITHUB_SYSTEM_PAT: z.optional(z.string().check(z.minLength(1))),
     GITHUB_WEBHOOK_SECRET: z.string().check(z.minLength(1)),
-    GITLAB_CLIENT_ID: z.string().check(z.minLength(1)),
-    GITLAB_CLIENT_SECRET: z.string().check(z.minLength(1)),
     GOOGLE_CLIENT_ID: z.string().check(z.minLength(1)),
     GOOGLE_CLIENT_SECRET: z.string().check(z.minLength(1)),
     GROQ_API_KEY: z.string().check(z.minLength(1)),
-    JWT_SECRET: z.string().check(z.minLength(1)),
     NEXTAUTH_SECRET: z.string().check(z.minLength(1)),
     REDIS_TCP_URL: z.string().check(z.minLength(1)),
     RESEND_API_KEY: z.string().check(z.minLength(1)),
@@ -67,13 +63,13 @@ export const envServer = createEnv({
   skipValidation: isSharedValidationSkipped,
 });
 
-export const JWT_SECRET = envServer.JWT_SECRET;
 export const NEXTAUTH_SECRET = envServer.NEXTAUTH_SECRET;
 export const DATABASE_URL = envServer.DATABASE_URL;
 export const REDIS_TCP_URL = envServer.REDIS_TCP_URL;
 export const BETTERSTACK_TOKEN = envServer.BETTERSTACK_API_TOKEN;
 export const TURNSTILE_SECRET_KEY = envServer.TURNSTILE_SECRET_KEY;
 export const RESEND_API_KEY = envServer.RESEND_API_KEY;
+export const APP_VERSION = envServer.APP_VERSION;
 export const ABLY_API_KEY = envServer.ABLY_API_KEY;
 export const GROQ_API_KEY = envServer.GROQ_API_KEY;
 export const UPLOADTHING_TOKEN = envServer.UPLOADTHING_TOKEN;
@@ -94,10 +90,6 @@ export const AUTH_PROVIDERS = {
   github: {
     id: envServer.GITHUB_CLIENT_ID,
     secret: envServer.GITHUB_CLIENT_SECRET,
-  },
-  gitlab: {
-    id: envServer.GITLAB_CLIENT_ID,
-    secret: envServer.GITLAB_CLIENT_SECRET,
   },
   google: {
     id: envServer.GOOGLE_CLIENT_ID,

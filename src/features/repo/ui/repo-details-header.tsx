@@ -10,6 +10,8 @@ import { Link } from "@/i18n/routing";
 
 import { repoStatusConfig, repoVisibilityConfig } from "@/entities/repo";
 
+import { PrDraftSheet } from "./pr-draft-sheet";
+
 type Props = { repo: UiRepoDetailed };
 
 export function RepoDetailsHeader({ repo }: Readonly<Props>) {
@@ -31,6 +33,7 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
             {repo.name}
           </Link>
         </h1>
+        <PrDraftSheet repoId={repo.id} />
         <Badge variant="outline" className={visibility.color}>
           {visibility.label}
         </Badge>

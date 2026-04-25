@@ -57,7 +57,7 @@ export const generatedFixService = {
    */
   async updateStatus(
     db: DbClient,
-    id: number,
+    id: string,
     status: FixStatus,
     data?: {
       estimatedImpact?: number;
@@ -72,7 +72,7 @@ export const generatedFixService = {
         githubPrUrl: data?.githubPrUrl,
         status,
       },
-      where: { id },
+      where: { publicId: id },
     });
   },
 };

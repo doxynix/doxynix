@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import type { InstallationTargetType, RepositorySelection } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
 import type { DbClient, PrismaClientExtended } from "@/server/shared/infrastructure/db";
@@ -189,6 +190,11 @@ export const githubAppService = {
     const account = installationInfo.account;
     const accountLogin = account !== null && "login" in account ? account.login : "Unknown";
     const accountAvatar = account !== null && "avatar_url" in account ? account.avatar_url : null;
+    const repoSelection =
+      installationInfo.repository_selection.toUpperCase() as RepositorySelection;
+    const targetType = (
+      installationInfo.target_type || "USER"
+    ).toUpperCase() as InstallationTargetType;
 
     try {
       const updated = await prisma.githubInstallation.updateMany({
@@ -196,7 +202,7 @@ export const githubAppService = {
           accountAvatar,
           accountLogin,
           htmlUrl: installationInfo.html_url,
-          repositorySelection: installationInfo.repository_selection,
+          repositorySelection: repoSelection,
           userId: userIdNum,
         },
         where: {
@@ -214,9 +220,9 @@ export const githubAppService = {
               appId: installationInfo.app_id,
               htmlUrl: installationInfo.html_url,
               id: instIdBigInt,
-              repositorySelection: installationInfo.repository_selection,
+              repositorySelection: repoSelection,
               targetId: BigInt(installationInfo.target_id),
-              targetType: installationInfo.target_type || "Unknown",
+              targetType,
               userId: userIdNum,
             },
           ],
@@ -228,7 +234,7 @@ export const githubAppService = {
             data: {
               accountAvatar,
               accountLogin,
-              repositorySelection: installationInfo.repository_selection,
+              repositorySelection: repoSelection,
               userId: userIdNum,
             },
             where: {

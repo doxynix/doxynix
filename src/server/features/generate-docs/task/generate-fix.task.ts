@@ -5,6 +5,7 @@ import { generatedFixService } from "@/server/entities/pr-analysis/api/generated
 import { prisma } from "@/server/shared/infrastructure/db";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { redisClient } from "@/server/shared/infrastructure/redis";
+import { REDIS_CONFIG } from "@/server/shared/lib/redis";
 
 import { FixService } from "../../pr-analysis/lib/fix-generator";
 import type { FindingForFix } from "../../pr-analysis/model/pr-types";
@@ -14,15 +15,16 @@ export const generateFixTask = task({
   run: async (payload: {
     fileContents: Record<string, string>;
     findings: FindingForFix[];
-    fixId: number;
+    fixId: string;
     prAnalysisId?: string;
-    repoId: number;
+    repoId: string;
+    userId: number;
   }) => {
     const fixService = new FixService();
 
     try {
       const repo = await prisma.repo.findUnique({
-        where: { id: payload.repoId },
+        where: { publicId: payload.repoId },
       });
 
       if (repo == null) {
@@ -40,11 +42,11 @@ export const generateFixTask = task({
         findings: payload.findings,
         prAnalysisId: payload.prAnalysisId,
         repoContext: { language: repo.language ?? "typescript" },
-        repoId: payload.repoId,
+        repoId: repo.id,
       });
 
-      const cacheKey = `fix-result:${payload.fixId}`;
-      await redisClient.set(cacheKey, fixResult, { ex: 86_000 });
+      const cacheKey = REDIS_CONFIG.keys.fixResult(payload.fixId);
+      await redisClient.set(cacheKey, fixResult, { ex: REDIS_CONFIG.ttl.fixResult });
 
       await generatedFixService.updateStatus(prisma, payload.fixId, "COMPLETED");
 
@@ -57,8 +59,8 @@ export const generateFixTask = task({
       return { fixId: payload.fixId, success: true };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      const cacheKey = `fix-result:${payload.fixId}`;
-      await redisClient.set(cacheKey, { error: errorMsg }, { ex: 86_000 });
+      const cacheKey = REDIS_CONFIG.keys.fixResult(payload.fixId);
+      await redisClient.set(cacheKey, { error: errorMsg }, { ex: REDIS_CONFIG.ttl.fixResult });
 
       await generatedFixService.updateStatus(prisma, payload.fixId, "FAILED");
       throw error;

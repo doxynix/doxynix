@@ -95,7 +95,7 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
         headSha: pull_request.head.sha,
         owner: repository.owner.login,
         prNumber: pull_request.number,
-        repoId: repo.id,
+        repoId: repo.publicId,
         repoName: repository.name,
       });
 

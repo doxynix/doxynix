@@ -1,4 +1,5 @@
 import type { Octokit } from "@octokit/rest";
+import type { PRCommentStyle } from "@prisma/client";
 
 import { logger } from "@/server/shared/infrastructure/logger";
 
@@ -18,8 +19,8 @@ export type GitHubCommentInput = {
  * Formats PR findings into GitHub comment bodies
  */
 export class CommentFormatter {
-  static formatFinding(finding: PRFinding, style: "concise" | "detailed"): string {
-    if (style === "concise") {
+  static formatFinding(finding: PRFinding, style: PRCommentStyle): string {
+    if (style === "CONCISE") {
       return `**${finding.type.toUpperCase()}** (${finding.severity}, score ${finding.score}/10)\n${finding.message}`;
     }
 
@@ -54,7 +55,7 @@ export class GitHubCommentPoster {
     prNumber: number,
     commitId: string,
     findings: PRFinding[],
-    style: "concise" | "detailed" = "detailed"
+    style: PRCommentStyle
   ): Promise<Array<{ commentId: number; finding: PRFinding }>> {
     if (findings.length === 0) return [];
 

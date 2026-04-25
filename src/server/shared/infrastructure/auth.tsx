@@ -4,7 +4,6 @@ import { render } from "@react-email/render";
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import GitHubProvider from "next-auth/providers/github";
-import GitLabProvider from "next-auth/providers/gitlab";
 import GoogleProvider from "next-auth/providers/google";
 import YandexProvider from "next-auth/providers/yandex";
 import { Resend } from "resend";
@@ -155,11 +154,6 @@ export const authOptions: NextAuthOptions = {
       allowDangerousEmailAccountLinking: true,
       clientId: AUTH_PROVIDERS.google.id,
       clientSecret: AUTH_PROVIDERS.google.secret,
-    }),
-    GitLabProvider({
-      allowDangerousEmailAccountLinking: true,
-      clientId: AUTH_PROVIDERS.gitlab.id,
-      clientSecret: AUTH_PROVIDERS.gitlab.secret,
     }),
     YandexProvider({
       allowDangerousEmailAccountLinking: true,

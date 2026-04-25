@@ -69,15 +69,31 @@ export const analyzePrTask = task({
         repoName: payload.repoName,
       });
 
+      const finalFindings = [...result.findings];
+
+      if (finalFindings.length === 0) {
+        finalFindings.push({
+          file: changedFiles[0]?.filename ?? "README.md",
+          line: 1,
+          message:
+            "✅ **Doxynix Analysis Summary**:\n\nПроверка завершена. В предоставленном диффе критических уязвимостей, нарушений архитектуры или проблем с производительностью не обнаружено. Код соответствует установленным политикам проекта.",
+          score: 0,
+          severity: "LOW",
+          suggestion: "Изменения выглядят безопасно. Можно продолжать ревью.",
+          title: "Analysis Completed",
+          type: "style",
+        });
+      }
+
       // Post comments
-      if (result.findings.length > 0 && config.commentStyle !== "off") {
+      if (config.commentStyle !== "OFF") {
         const poster = new GitHubCommentPoster(octokit);
         const postedComments = await poster.postComments(
           payload.owner,
           payload.repoName,
           payload.prNumber,
           payload.headSha,
-          result.findings,
+          finalFindings,
           config.commentStyle
         );
 
@@ -86,10 +102,7 @@ export const analyzePrTask = task({
         // Store comments in DB
         if (postedComments.length > 0) {
           const dbComments = postedComments.map((c) => ({
-            body: CommentFormatter.formatFinding(
-              c.finding,
-              config.commentStyle as "concise" | "detailed"
-            ),
+            body: CommentFormatter.formatFinding(c.finding, config.commentStyle),
             filePath: c.finding.file,
             findingType: c.finding.type,
             line: c.finding.line,
@@ -106,7 +119,7 @@ export const analyzePrTask = task({
         payload.analysisId,
         "COMPLETED" as PRAnalysisStatus,
         {
-          findingsJson: result.findings as any,
+          findingsJson: finalFindings as any,
           riskScore: result.riskScore,
         }
       );

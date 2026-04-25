@@ -4,6 +4,7 @@ import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { realtimeServer } from "@/server/shared/infrastructure/realtime";
 import { redisClient } from "@/server/shared/infrastructure/redis";
+import { REDIS_CONFIG } from "@/server/shared/lib/redis";
 
 import { runQuickFileAudit, type FileActionNodeContext } from "../model/file-actions";
 import { toQuickFileAuditPreview } from "../model/repo-file-action-preview";
@@ -34,8 +35,8 @@ export const analyzeFileTask = task({
       commitSha: payload.commitSha,
     };
 
-    const cacheKey = `file-result:${payload.userId}:${payload.path}`;
-    await redisClient.set(cacheKey, result, { ex: 86_400 });
+    const cacheKey = REDIS_CONFIG.keys.fileAction(payload.userId, payload.path);
+    await redisClient.set(cacheKey, result, { ex: REDIS_CONFIG.ttl.fileAction });
 
     const channelName = REALTIME_CONFIG.channels.user(payload.userId);
     await realtimeServer.channels
