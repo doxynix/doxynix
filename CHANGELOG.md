@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.27.1](https://github.com/doxynix/doxynix/compare/v1.27.0...v1.27.1) (2026-04-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency posthog-js to v1.370.1 ([#1218](https://github.com/doxynix/doxynix/issues/1218)) ([67f7cd3](https://github.com/doxynix/doxynix/commit/67f7cd3543b6bda454093fce918e52e02ef8a352))
+
 ## [1.27.0](https://github.com/doxynix/doxynix/compare/v1.26.31...v1.27.0) (2026-04-25)
 
 
