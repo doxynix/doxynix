@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
-import { RepoSetup } from "@/features/repo-setup";
+import { RepoSetup } from "@/features/repo-setup/ui/repo-setup";
 
 import { api } from "@/server/api/server";
 

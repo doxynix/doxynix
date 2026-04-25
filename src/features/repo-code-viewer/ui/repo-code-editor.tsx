@@ -12,7 +12,7 @@ import CodeMirrorMerge from "react-codemirror-merge";
 
 import type { FileMeta } from "@/shared/api/trpc";
 
-import type { EditorStats } from "@/entities/repo-details";
+import type { EditorStats } from "@/entities/repo-details/model/editor-stats.types";
 
 import { EXTRA_EXTENSIONS } from "../model/extensions";
 

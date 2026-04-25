@@ -18,8 +18,8 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/core/popover";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 
-import { notificationsParsers } from "@/entities/notifications";
-import { useCreateRepoActions } from "@/entities/repo";
+import { notificationsParsers } from "@/entities/notifications/model/notifications-parsers";
+import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
 
 export function NotificationsRepoFilter() {
   const [filters, setFilters] = useQueryStates(notificationsParsers, { shallow: true });

@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/shared/ui/core/select";
 
-import { repoParsers } from "@/entities/repo";
+import { repoParsers } from "@/entities/repo/model/repo-parsers";
 
 import { StatusSchema, VisibilitySchema } from "@/generated/zod";
 

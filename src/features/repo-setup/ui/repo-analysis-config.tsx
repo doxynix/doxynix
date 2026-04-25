@@ -30,7 +30,7 @@ import {
 import { Textarea } from "@/shared/ui/core/textarea";
 import { Flag, FLAGS } from "@/shared/ui/kit/language-switcher";
 
-import type { ActionsType, StateType } from "@/entities/repo-setup";
+import type { ActionsType, StateType } from "@/entities/repo-setup/model/use-repo-setup";
 
 type DocOption = {
   desc: string;

@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
 
-import { NotificationsListContainer } from "@/features/notifications";
+import { NotificationsListContainer } from "@/features/notifications/ui/notifications-list-container";
 
 export const generateMetadata = createMetadata("notifications_title", "notifications_desc");
 

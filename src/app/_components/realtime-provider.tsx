@@ -10,9 +10,9 @@ import { trpc, type RepoStatus } from "@/shared/api/trpc";
 import { IS_PROD } from "@/shared/constants/env.flags";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
-import { useRepoActions } from "@/entities/repo";
+import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
 
-import { useNotificationActions } from "@/features/notifications";
+import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
 
 type Props = { children: ReactNode };
 

@@ -9,13 +9,10 @@ import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
 import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 
-import {
-  RepoBranchSelector,
-  RepoTreeSkeleton,
-  useRepoSetup,
-  type ActionItem,
-  type FileNode,
-} from "@/entities/repo-setup";
+import type { ActionItem, FileNode } from "@/entities/repo-setup/model/repo-setup.types";
+import { useRepoSetup } from "@/entities/repo-setup/model/use-repo-setup";
+import { RepoBranchSelector } from "@/entities/repo-setup/ui/repo-branch-selector";
+import { RepoTreeSkeleton } from "@/entities/repo-setup/ui/repo-tree-skeleton";
 
 import { RepoCodeNode } from "./repo-code-node";
 

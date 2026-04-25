@@ -32,7 +32,11 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { useCreateRepoActions, useCreateRepoOpen, useRepoActions } from "@/entities/repo";
+import {
+  useCreateRepoActions,
+  useCreateRepoOpen,
+} from "@/entities/repo/model/use-create-repo-dialog.store";
+import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
 
 import { RepoItem } from "./repo-item";
 

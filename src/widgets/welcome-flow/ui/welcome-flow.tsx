@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { useRouter } from "@/i18n/routing";
 
-import { ProfileDetailsForm } from "@/features/profile";
+import { ProfileDetailsForm } from "@/features/profile/ui/profile-details-form";
 
 type Props = {
   user: User;

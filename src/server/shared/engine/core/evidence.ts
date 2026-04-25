@@ -18,10 +18,10 @@ import {
   buildEvidenceLookups,
   buildRouteInventory,
   createEvidenceAssembly,
-  findDependencyCycles,
   resolveImportEdges,
 } from "./evidence-support";
 import { selectRepositoryFrameworkFacts } from "./framework-catalog";
+import { findDependencyCycles } from "./graph";
 import { ProjectPolicy } from "./project-policy";
 
 // Source-of-truth builder for repository structure: modules, graph, entrypoints, routes, configs, and hotspots.

@@ -26,7 +26,7 @@ import {
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { useRepoParams } from "@/entities/repo";
+import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { SidebarLink } from "./sidebar-link";
 

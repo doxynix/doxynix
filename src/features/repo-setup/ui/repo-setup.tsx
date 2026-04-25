@@ -2,7 +2,7 @@
 
 import type { UiRepoDetailed } from "@/shared/api/trpc";
 
-import { useRepoSetup } from "@/entities/repo-setup";
+import { useRepoSetup } from "@/entities/repo-setup/model/use-repo-setup";
 
 import { RepoAnalysisConfig } from "./repo-analysis-config";
 import { RepoFileTree } from "./repo-file-tree";

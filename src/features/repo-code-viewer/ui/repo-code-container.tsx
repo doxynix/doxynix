@@ -7,7 +7,7 @@ import type { TreeApi } from "react-arborist";
 import { trpc, type UiRepoDetailed } from "@/shared/api/trpc";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 
-import type { FileNode } from "@/entities/repo-setup";
+import type { FileNode } from "@/entities/repo-setup/model/repo-setup.types";
 
 import { RepoCodeBrowser } from "./repo-code-browser";
 import { CodeSkeleton } from "./repo-code-skeleton";
