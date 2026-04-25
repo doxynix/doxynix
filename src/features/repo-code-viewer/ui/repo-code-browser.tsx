@@ -82,6 +82,8 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     setPrevExternalContent(fileData.content);
     setLocalContent(fileData.content);
     setMode("view");
+    setIsAuditDismissed(false);
+    setShowDiff(false);
   }
 
   const auditMutation = trpc.repoAnalysis.quickFileAudit.useMutation({

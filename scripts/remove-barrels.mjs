@@ -8,7 +8,7 @@ const barrelMap = {};
 const layers = ["features", "entities", "widgets", "shared"];
 
 layers.forEach((layer) => {
-  const patterns = [`src/${layer}/**/index.ts` || `src/${layer}/**/index.tsx`];
+  const patterns = [`src/${layer}/**/index.{ts,tsx}`];
   const indexes = sync(patterns, { onlyFiles: true });
 
   indexes.forEach((indexPath) => {
