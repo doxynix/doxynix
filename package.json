@@ -231,7 +231,7 @@
     "pg": "8.20.0",
     "picomatch": "4.0.4",
     "pino": "10.3.1",
-    "posthog-js": "1.370.0",
+    "posthog-js": "1.370.1",
     "posthog-node": "5.29.5",
     "react": "19.2.5",
     "react-arborist": "3.5.0",
