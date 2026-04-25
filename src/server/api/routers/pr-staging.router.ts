@@ -50,12 +50,11 @@ export const prStagingRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const cacheKey = REDIS_CONFIG.keys.prStaging(ctx.session.user.id, input.repoId);
 
-      const currentStage = (await ctx.redis.get<Record<string, string>>(cacheKey)) ?? {};
+      await ctx.redis.hset(cacheKey, { [input.filePath]: input.content });
+      await ctx.redis.expire(cacheKey, REDIS_CONFIG.ttl.prStaging);
 
-      currentStage[input.filePath] = input.content;
+      const stagedCount = await ctx.redis.hlen(cacheKey);
 
-      await ctx.redis.set(cacheKey, currentStage, { ex: REDIS_CONFIG.ttl.prStaging });
-
-      return { stagedCount: Object.keys(currentStage).length, success: true };
+      return { stagedCount, success: true };
     }),
 });

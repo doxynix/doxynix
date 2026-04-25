@@ -1,8 +1,12 @@
 import { normalize } from "pathe";
 
+const SEGMENT_ALIASES: Record<string, string> = {
+  repos: "repo",
+};
+
 function standardize(segment?: string) {
   if (segment == null) return segment;
-  return segment.endsWith("s") ? segment.slice(0, -1) : segment;
+  return SEGMENT_ALIASES[segment] ?? segment;
 }
 
 export function isRouteActive(
@@ -26,9 +30,7 @@ export function isRouteActive(
 
   const isGlobal = h.length <= 2;
   if (isGlobal) {
-    if (h[1] === "repos" && p[1] === "repo") return false;
-
-    return p.length === h.length;
+    return !(h[1] === "repos" && p[1] === "repo");
   }
 
   return p.length - h.length <= 1;

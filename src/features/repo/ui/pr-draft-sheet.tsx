@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileCode, GitPullRequest, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -37,8 +36,6 @@ type Props = {
   repoId: string;
 };
 
-const BRANCH_TIME = Date.now();
-
 export function PrDraftSheet({ repoId }: Readonly<Props>) {
   const utils = trpc.useUtils();
 
@@ -59,7 +56,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
 
   const form = useForm<CreatePrValues>({
     defaultValues: {
-      branchName: `doxynix/fix-${BRANCH_TIME}`,
+      branchName: `doxynix/fix-${crypto.randomUUID().slice(0, 8)}`,
       prTitle: "Doxynix Suggested code improvements",
     },
     resolver: zodResolver(createPrSchema),
@@ -112,9 +109,9 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
             <Label className="text-muted-foreground">Staged Files ({filesCount})</Label>
             <ScrollArea className="h-75 rounded-xl border p-2">
               {isFilesLoading === true ? (
-                <div className="flex h-20 items-center justify-center">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-40 w-full" />
+                <div className="flex flex-col gap-2 p-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-10 w-full" />
                   ))}
                 </div>
               ) : filesCount === 0 ? (
@@ -147,7 +144,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
           <Form {...form}>
             <form
               id="pr-form"
-              onSubmit={() => void form.handleSubmit(onSubmit)}
+              onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
               className="space-y-4 border-t pt-4"
             >
               <FormField

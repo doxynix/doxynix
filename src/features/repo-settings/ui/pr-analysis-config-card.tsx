@@ -104,7 +104,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
             checked={isEnabled}
             onCheckedChange={(checked) => {
               form.setValue("enabled", checked, { shouldDirty: true });
-              void form.handleSubmit(onSubmit)();
+              updateConfig.mutate({ ...form.getValues(), enabled: checked, repoId });
             }}
             className="data-[state=checked]:bg-foreground"
           />
@@ -235,7 +235,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
           <LoadingButton
             disabled={isUpdating || !form.formState.isDirty}
             isLoading={isUpdating}
-            onClick={() => void form.handleSubmit(onSubmit)}
+            onClick={() => void form.handleSubmit(onSubmit)()}
             className="mt-6"
           >
             Save Configuration

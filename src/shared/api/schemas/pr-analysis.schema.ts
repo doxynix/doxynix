@@ -9,7 +9,7 @@ export const PRAnalysisConfigSchema = z.object({
   excludePatterns: z.array(z.string()).default([]),
   focusAreas: z
     .array(PRFocusAreaSchema)
-    .default([PRFocusAreaSchema.enum.PERFORMANCE, PRFocusAreaSchema.enum.SECURITY]),
+    .default([PRFocusAreaSchema.enum.SECURITY, PRFocusAreaSchema.enum.PERFORMANCE]),
   tokenBudget: z.number().int().min(10_000).max(100_000).default(30_000),
 });
 
