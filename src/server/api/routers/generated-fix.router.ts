@@ -169,7 +169,7 @@ export const generatedFixRouter = createTRPCRouter({
         }
 
         const fix = await generatedFixService.create(ctx.prisma, {
-          branch: `doxynix/fix-${Date.now()}`,
+          branch: `doxynix/fix-${crypto.randomUUID().slice(0, 8)}`,
           createdByUser: true,
           prAnalysisId: validPrAnalysisId,
           repoId: repo.id,
@@ -217,7 +217,7 @@ export const generatedFixRouter = createTRPCRouter({
     .input(z.object({ fixId: z.string() }))
     .query(async ({ ctx, input }) => {
       const fix = await generatedFixService.getById(ctx.db, input.fixId);
-      const cachedResult = await ctx.redis.get(`fix-result:${input.fixId}`);
+      const cachedResult = await ctx.redis.get(REDIS_CONFIG.keys.fixResult(input.fixId));
 
       return { ...fix, resultJson: cachedResult };
     }),

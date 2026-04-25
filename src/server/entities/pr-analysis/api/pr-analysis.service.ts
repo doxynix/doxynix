@@ -99,7 +99,7 @@ export const prAnalysisService = {
     return db.pullRequestAnalysis.update({
       data: {
         error: data?.error,
-        findingsJson: data?.findingsJson as PRFinding[],
+        findingsJson: data?.findingsJson,
         riskScore: data?.riskScore,
         status,
       },

@@ -88,7 +88,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
         <Loader2 className="animate-spin" />
       </div>
     );
-  const currentFocusAreas = form.watch("focusAreas") || [];
+  const currentFocusAreas = form.watch("focusAreas") ?? [];
   const isUpdating = updateConfig.isPending;
   const isEnabled = form.watch("enabled");
 
@@ -104,7 +104,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
             checked={isEnabled}
             onCheckedChange={(checked) => {
               form.setValue("enabled", checked, { shouldDirty: true });
-              void form.handleSubmit(onSubmit)();
+              updateConfig.mutate({ ...form.getValues(), enabled: checked, repoId });
             }}
             className="data-[state=checked]:bg-foreground"
           />
@@ -149,7 +149,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                     key={area.id}
                     className={cn(
                       "relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3 transition-all",
-                      isSelected
+                      isSelected === true
                         ? "border-border-strong bg-surface-selected"
                         : "border-border bg-card"
                     )}
@@ -159,9 +159,10 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                       checked={isSelected}
                       disabled={isUpdating}
                       onChange={() => {
-                        const next = isSelected
-                          ? currentFocusAreas.filter((id) => id !== area.id)
-                          : [...currentFocusAreas, area.id];
+                        const next =
+                          isSelected === true
+                            ? currentFocusAreas.filter((id) => id !== area.id)
+                            : [...currentFocusAreas, area.id];
                         form.setValue("focusAreas", next, { shouldDirty: true });
                       }}
                       className="sr-only"
@@ -171,7 +172,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                       <div
                         className={cn(
                           "flex size-8 items-center justify-center rounded-lg border",
-                          isSelected
+                          isSelected === true
                             ? "bg-primary text-primary-foreground border-border-strong"
                             : "bg-surface-hover text-muted-foreground border-border"
                         )}
@@ -234,7 +235,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
           <LoadingButton
             disabled={isUpdating || !form.formState.isDirty}
             isLoading={isUpdating}
-            onClick={() => void form.handleSubmit(onSubmit)}
+            onClick={() => void form.handleSubmit(onSubmit)()}
             className="mt-6"
           >
             Save Configuration
