@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.27.2](https://github.com/doxynix/doxynix/compare/v1.27.1...v1.27.2) (2026-04-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency langsmith to v0.5.22 ([#1222](https://github.com/doxynix/doxynix/issues/1222)) ([5df46c7](https://github.com/doxynix/doxynix/commit/5df46c761a946619ac8d0df181e35cd4fef2ad51))
+
 ## [1.27.1](https://github.com/doxynix/doxynix/compare/v1.27.0...v1.27.1) (2026-04-25)
 
 
