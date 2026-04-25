@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
-import { DeleteRepoCard, PRAnalysisConfigCard } from "@/features/repo-settings";
+import { DeleteRepoCard } from "@/features/repo-settings/ui/delete-repo-card";
+import { PRAnalysisConfigCard } from "@/features/repo-settings/ui/pr-analysis-config-card";
 
 import { api } from "@/server/api/server";
 

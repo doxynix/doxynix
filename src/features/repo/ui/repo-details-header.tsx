@@ -8,7 +8,8 @@ import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { Link } from "@/i18n/routing";
 
-import { repoStatusConfig, repoVisibilityConfig } from "@/entities/repo";
+import { repoStatusConfig } from "@/entities/repo/model/repo-status-config";
+import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";
 
 import { PrDraftSheet } from "./pr-draft-sheet";
 

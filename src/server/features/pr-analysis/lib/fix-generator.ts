@@ -217,7 +217,6 @@ Ensure:
     const fixedCode: Record<string, string> = {};
 
     // Match <fixed_code>filepath</fixed_code>...content...</fixed_code>
-
     const tagRegex = /<file\s+path="([^"]+)">([\S\s]*?)<\/file>/g;
     let match;
 

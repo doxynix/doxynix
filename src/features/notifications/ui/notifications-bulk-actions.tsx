@@ -18,7 +18,7 @@ import {
 } from "@/shared/ui/core/dialog";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { notificationsParsers } from "@/entities/notifications";
+import { notificationsParsers } from "@/entities/notifications/model/notifications-parsers";
 
 import { useNotificationActions } from "../model/use-notification-actions";
 

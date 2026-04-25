@@ -5,13 +5,13 @@ import { unauthorized } from "next/navigation";
 import { SidebarInset, SidebarProvider } from "@/shared/ui/core/sidebar";
 import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificator";
 
-import { CreateRepoDialog } from "@/features/repo";
-import { GitInstallationCatcher } from "@/features/repo-setup";
+import { GitInstallationCatcher } from "@/features/repo-setup/ui/git-installation-catcher";
+import { CreateRepoDialog } from "@/features/repo/ui/create-repo-dialog";
 
-import { AppFooter } from "@/widgets/app-footer";
-import { AppHeader } from "@/widgets/app-header";
-import { AppSidebar } from "@/widgets/app-sidebar";
-import { HotkeyListeners } from "@/widgets/hotkey-manager";
+import { AppFooter } from "@/widgets/app-footer/ui/app-footer";
+import { AppHeader } from "@/widgets/app-header/ui/app-header";
+import { AppSidebar } from "@/widgets/app-sidebar/ui/app-sidebar";
+import { HotkeyListeners } from "@/widgets/hotkey-manager/ui/hotkey-listeners";
 
 import { getServerAuthSession } from "@/server/shared/infrastructure/auth";
 

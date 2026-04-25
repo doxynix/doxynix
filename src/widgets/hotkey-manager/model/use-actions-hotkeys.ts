@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { useCreateRepoActions } from "@/entities/repo";
+import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
 
 const PREFIXES = ["c"];
 

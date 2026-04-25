@@ -7,7 +7,8 @@ import type { RepoMeta, UiRepoListItem } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import { RepoCard, useCreateRepoActions } from "@/entities/repo";
+import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
+import { RepoCard } from "@/entities/repo/ui/repo-card";
 
 type Props = {
   meta?: RepoMeta;

@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { createMetadata } from "@/shared/lib/metadata";
 import { LanguageSwitcher } from "@/shared/ui/kit/language-switcher";
 
-import { ProfileSkeleton } from "@/features/profile";
+import { ProfileSkeleton } from "@/features/profile/ui/profile-skeleton";
 
 import { ProfileDataLoader } from "./_components/profile-data-loader";
 

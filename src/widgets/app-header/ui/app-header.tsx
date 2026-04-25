@@ -13,8 +13,8 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ThemeToggle } from "@/shared/ui/kit/theme-toggle";
 import { Link } from "@/i18n/routing";
 
-import { useRepoParams } from "@/entities/repo";
-import { RepoDetailsTabs } from "@/entities/repo-details";
+import { RepoDetailsTabs } from "@/entities/repo-details/ui/repo-details-tabs";
+import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { AppCommandMenu } from "./app-command-menu";
 import { NotificationsNav } from "./notifications-nav";

@@ -14,7 +14,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
-import { notificationsParsers, type NotificationsParsersState } from "@/entities/notifications";
+import {
+  notificationsParsers,
+  type NotificationsParsersState,
+} from "@/entities/notifications/model/notifications-parsers";
 
 import { NotifyTypeSchema } from "@/generated/zod";
 

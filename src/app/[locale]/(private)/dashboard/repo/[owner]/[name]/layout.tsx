@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
-import { RepoDetailsHeader } from "@/features/repo";
+import { RepoDetailsHeader } from "@/features/repo/ui/repo-details-header";
 
 import { api } from "@/server/api/server";
 

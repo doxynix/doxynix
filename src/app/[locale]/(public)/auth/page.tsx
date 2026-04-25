@@ -3,7 +3,7 @@ import { getLocale } from "next-intl/server";
 import { createMetadata } from "@/shared/lib/metadata";
 import { redirect } from "@/i18n/routing";
 
-import { AuthForm } from "@/features/auth";
+import { AuthForm } from "@/features/auth/ui/auth-form";
 
 import { getServerAuthSession } from "@/server/shared/infrastructure/auth";
 

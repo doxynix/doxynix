@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { RepoPullDetailContainer } from "@/features/repo-pulls";
+import { RepoPullDetailContainer } from "@/features/repo-pulls/ui/repo-pull-details-container";
 
 import { api } from "@/server/api/server";
 

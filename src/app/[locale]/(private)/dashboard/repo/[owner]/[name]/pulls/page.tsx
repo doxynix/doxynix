@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
-import { RepoPullsListContainer } from "@/features/repo-pulls";
+import { RepoPullsListContainer } from "@/features/repo-pulls/ui/repo-pulls-list-container";
 
 import { api } from "@/server/api/server";
 

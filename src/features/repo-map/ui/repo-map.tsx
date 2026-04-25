@@ -23,7 +23,7 @@ import { Button } from "@/shared/ui/core/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 
-import { useMapControlsHide } from "@/entities/repo-map";
+import { useMapControlsHide } from "@/entities/repo-map/model/use-repo-map-store";
 
 import type { RepoMapNodeData } from "../model/repo-map-types";
 import { useMapLayout } from "../model/use-map-layout";
