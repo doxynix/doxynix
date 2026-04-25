@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.27.0](https://github.com/doxynix/doxynix/compare/v1.26.31...v1.27.0) (2026-04-25)
+
+
+### Features
+
+* **features:** реализована основная часть фичи пул реквестов ([#1175](https://github.com/doxynix/doxynix/issues/1175)) ([8301aae](https://github.com/doxynix/doxynix/commit/8301aae07d7e412c0b7803f746cae58c9cf215e3))
+
 ## [1.26.31](https://github.com/doxynix/doxynix/compare/v1.26.30...v1.26.31) (2026-04-25)
 
 
