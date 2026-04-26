@@ -413,11 +413,11 @@ importers:
         specifier: 10.3.1
         version: 10.3.1
       posthog-js:
-        specifier: 1.370.1
-        version: 1.370.1
+        specifier: 1.371.1
+        version: 1.371.1
       posthog-node:
-        specifier: 5.29.5
-        version: 5.29.5(rxjs@7.8.2)
+        specifier: 5.29.6
+        version: 5.29.6(rxjs@7.8.2)
       react:
         specifier: 19.2.5
         version: 19.2.5
@@ -798,8 +798,8 @@ importers:
         specifier: 3.8.3
         version: 3.8.3
       prettier-plugin-tailwindcss:
-        specifier: 0.7.2
-        version: 0.7.2(@ianvs/prettier-plugin-sort-imports@4.7.1(@vue/compiler-sfc@3.5.31)(prettier@3.8.3))(prettier@3.8.3)
+        specifier: 0.7.3
+        version: 0.7.3(@ianvs/prettier-plugin-sort-imports@4.7.1(@vue/compiler-sfc@3.5.31)(prettier@3.8.3))(prettier@3.8.3)
       prisma:
         specifier: 6.19.3
         version: 6.19.3(typescript@6.0.3)
@@ -3345,11 +3345,11 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@posthog/core@1.26.0':
-    resolution: {integrity: sha512-q6pSkW7V9RC3rIXjJBo7IBXOH2KPJEh8o+xIcSqw7QD4vq7OYVzTJfUIvkD38+sm54RG/61/3QaPdpQZkDnOyg==}
+  '@posthog/core@1.27.0':
+    resolution: {integrity: sha512-09IQgr7BocTrETbYVNQx5Dq06xsCItXbxYO8dpHIE4rEcDvWiIv3/4zEaVzsKrCI1cSLds3d5sgBGaEfh7RScA==}
 
-  '@posthog/types@1.370.1':
-    resolution: {integrity: sha512-91AGn76zDgitMphnjrhvZ0WZ1oPipW4P8vrhVz/uKjtisYTZtokjrxeZyD+3imx4nYGyi6eNpPcvPdWXNBmN/A==}
+  '@posthog/types@1.371.1':
+    resolution: {integrity: sha512-JAJMEZ9OzqpVLojIA98s/AFl9t+q0cqoQFWrMDvegm0AhH+wPMI55w74LFNAOaDSGm5/pyPaSul04r6ciTaA6A==}
 
   '@prisma/adapter-pg@6.19.3':
     resolution: {integrity: sha512-ocbvVIP/wX2uJWWLvo1/UK0nH8L5dv4MlE1DddVPID0/VRiEZDguWmAgKLVuPM6BuWTH3wGluZR40VgXb4WjiQ==}
@@ -11287,11 +11287,11 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  posthog-js@1.370.1:
-    resolution: {integrity: sha512-cj9V6L0qyf0htMfBshBdwvcUEfhTfqUEQPI/ly2dN4kZx4QmhmKERcelSI9CMKoBD1gX5Fp+f/cNTwKvzDvjsQ==}
+  posthog-js@1.371.1:
+    resolution: {integrity: sha512-oShGkEe+E1W5MTQJgl3LtN6UegOApj38SnQWBNS0IgrCusjQ4efnQaC/Vz7SRj42LPAnh+6MKN9msbVpYv31GQ==}
 
-  posthog-node@5.29.5:
-    resolution: {integrity: sha512-mxM8+mXHHMgBKp8f4EhR5TR96tGJ9IqgYa4bPzKgSUW2uxL2vu9AVEz8dusbc913BXPRrDjw4fp+q/PoSsuQFQ==}
+  posthog-node@5.29.6:
+    resolution: {integrity: sha512-x77Ps+vLn2QgJ+i1wfFnAd+VVoMY1ZxpwV8un+jKRJUU/57zX8sInDyCaG8x08dlBd5Bys+xKtIV7uNJsUOFJw==}
     engines: {node: ^20.20.0 || >=22.22.0}
     peerDependencies:
       rxjs: ^7.0.0
@@ -11321,8 +11321,8 @@ packages:
     resolution: {integrity: sha512-SxToR7P8Y2lWmv/kTzVLC1t/GDI2WGjMwNhLLE9qtH8Q13C+aEmuRlzDst4Up4s0Wc8sF2M+J57iB3cMLqftfg==}
     engines: {node: '>=6.0.0'}
 
-  prettier-plugin-tailwindcss@0.7.2:
-    resolution: {integrity: sha512-LkphyK3Fw+q2HdMOoiEHWf93fNtYJwfamoKPl7UwtjFQdei/iIBoX11G6j706FzN3ymX9mPVi97qIY8328vdnA==}
+  prettier-plugin-tailwindcss@0.7.3:
+    resolution: {integrity: sha512-lckXaWWdo2ZVXoMoUO3WIBiz9hVY+YBEh1gYyMFfrWP9WZW/wpFXQKizHx7WrFQFMkcG0bGShdpp531X1n+qpg==}
     engines: {node: '>=20.19'}
     peerDependencies:
       '@ianvs/prettier-plugin-sort-imports': '*'
@@ -16747,9 +16747,9 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@posthog/core@1.26.0': {}
+  '@posthog/core@1.27.0': {}
 
-  '@posthog/types@1.370.1': {}
+  '@posthog/types@1.371.1': {}
 
   '@prisma/adapter-pg@6.19.3':
     dependencies:
@@ -25984,15 +25984,15 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  posthog-js@1.370.1:
+  posthog-js@1.371.1:
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/api-logs': 0.208.0
       '@opentelemetry/exporter-logs-otlp-http': 0.208.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources': 2.6.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-logs': 0.208.0(@opentelemetry/api@1.9.1)
-      '@posthog/core': 1.26.0
-      '@posthog/types': 1.370.1
+      '@posthog/core': 1.27.0
+      '@posthog/types': 1.371.1
       core-js: 3.49.0
       dompurify: 3.4.1
       fflate: 0.4.8
@@ -26000,9 +26000,9 @@ snapshots:
       query-selector-shadow-dom: 1.0.1
       web-vitals: 5.2.0
 
-  posthog-node@5.29.5(rxjs@7.8.2):
+  posthog-node@5.29.6(rxjs@7.8.2):
     dependencies:
-      '@posthog/core': 1.26.0
+      '@posthog/core': 1.27.0
     optionalDependencies:
       rxjs: 7.8.2
 
@@ -26034,7 +26034,7 @@ snapshots:
     dependencies:
       fast-diff: 1.3.0
 
-  prettier-plugin-tailwindcss@0.7.2(@ianvs/prettier-plugin-sort-imports@4.7.1(@vue/compiler-sfc@3.5.31)(prettier@3.8.3))(prettier@3.8.3):
+  prettier-plugin-tailwindcss@0.7.3(@ianvs/prettier-plugin-sort-imports@4.7.1(@vue/compiler-sfc@3.5.31)(prettier@3.8.3))(prettier@3.8.3):
     dependencies:
       prettier: 3.8.3
     optionalDependencies:
