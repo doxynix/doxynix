@@ -1,12 +1,21 @@
 import { z } from "zod";
-
 import { analyticsService } from "@/server/entities/analyze/api/analytics.service";
 import { StatusSchema } from "@/generated/zod";
-
 import { OpenApiErrorResponses } from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
+/**
+ * Router for handling analytics-related operations.
+ * Provides endpoints for dashboard statistics and historical trends.
+ */
 export const analyticsRouter = createTRPCRouter({
+  /**
+   * Retrieves aggregated dashboard statistics including analysis status,
+   * highlights, language distribution, and repository overview metrics.
+   *
+   * @returns {Promise<object>} An object containing analysis stats, highlights, language data, overview metrics, and recent activity.
+   * @throws {TRPCError} Throws an error if the user is not authenticated or database access fails.
+   */
   getDashboardStats: protectedProcedure
     .meta({
       openapi: {
@@ -66,6 +75,12 @@ export const analyticsRouter = createTRPCRouter({
       return analyticsService.getDashboardStats(ctx.db);
     }),
 
+  /**
+   * Retrieves historical trend data for various metrics over time.
+   *
+   * @returns {Promise<Array<object>>} An array of trend data points including health, security, and complexity scores.
+   * @throws {TRPCError} Throws an error if the user is not authenticated or database access fails.
+   */
   getTrends: protectedProcedure
     .input(z.void())
     .output(
