@@ -1,9 +1,10 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { FileText } from "lucide-react";
-import { parseAsStringEnum, useQueryState } from "nuqs";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 
-import { trpc, type DocType } from "@/shared/api/trpc";
+import { trpc, type AvailableDocs, type DocType } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
@@ -16,8 +17,12 @@ import { RepoDocs } from "./repo-docs";
 
 type Props = { id: string };
 
+const EMPTY_DOCS: AvailableDocs = [];
+
 export function RepoDocsContainer({ id }: Readonly<Props>) {
   const { name, owner } = useRepoParams();
+  const [node] = useQueryState("node", parseAsString.withOptions({ shallow: true }));
+  const autoSelectedNodeRef = useRef<null | string>(null);
 
   const [activeTab, setActiveTab] = useQueryState(
     "type",
@@ -29,6 +34,28 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
   const { data: availableDocs, isLoading } = trpc.repoDetails.getAvailableDocs.useQuery({
     repoId: id,
   });
+
+  const { data: nodeContext } = trpc.repoDetails.getNodeContext.useQuery(
+    { nodeId: node ?? "", repoId: id },
+    { enabled: node != null && node.length > 0 }
+  );
+
+  const docs = availableDocs ?? EMPTY_DOCS;
+  const resolvedActiveTab = docs.some((doc) => doc.type === activeTab) ? activeTab : docs[0]?.type;
+
+  useEffect(() => {
+    const nodeId = nodeContext?.node.id ?? null;
+    const preferredDocType = nodeContext?.related.docs[0]?.docType;
+    if (preferredDocType == null || docs.length === 0) return;
+
+    const matchingDoc = docs.find((doc) => doc.type === preferredDocType);
+    if (matchingDoc == null || matchingDoc.type === resolvedActiveTab) return;
+
+    if (nodeId != null && autoSelectedNodeRef.current !== nodeId) {
+      autoSelectedNodeRef.current = nodeId;
+      void setActiveTab(matchingDoc.type);
+    }
+  }, [docs, resolvedActiveTab, setActiveTab, nodeContext?.node.id, nodeContext?.related.docs]);
 
   if (isLoading) {
     return (
@@ -52,10 +79,6 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
     );
   }
 
-  const resolvedActiveTab = availableDocs.some((doc) => doc.type === activeTab)
-    ? activeTab
-    : availableDocs[0]?.type;
-
   if (resolvedActiveTab == null) {
     return null;
   }
@@ -64,6 +87,7 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
     <RepoDocs
       activeTab={resolvedActiveTab}
       availableDocs={availableDocs}
+      nodeContext={nodeContext ?? null}
       repoId={id}
       onTabChange={(tab) => {
         void setActiveTab(tab);

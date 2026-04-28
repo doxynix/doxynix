@@ -14,25 +14,30 @@ type Props = {
 };
 
 export function RepoMapSidebar({ nodeId, onClose, onNavigate, repoId }: Readonly<Props>) {
-  const { data: briefData, isLoading: isBriefLoading } =
-    trpc.repoDetails.getInteractiveBrief.useQuery({ repoId });
+  const shouldLoadWorkspace = nodeId == null || nodeId.length === 0;
+  const shouldLoadNodeContext = nodeId != null && nodeId.length > 0;
 
-  const { data: nodeBrief, isLoading: isNodeBriefLoading } =
-    trpc.repoDetails.getInteractiveBriefNode.useQuery(
+  const { data: workspace, isLoading: isWorkspaceLoading } = trpc.repoDetails.getWorkspace.useQuery(
+    { repoId },
+    { enabled: shouldLoadWorkspace }
+  );
+
+  const { data: nodeContext, isLoading: isNodeContextLoading } =
+    trpc.repoDetails.getNodeContext.useQuery(
       { nodeId: nodeId ?? "", repoId },
-      { enabled: nodeId != null }
+      { enabled: shouldLoadNodeContext }
     );
 
   return (
     <aside className="bg-card flex h-full flex-col overflow-hidden">
-      {nodeId == null && isBriefLoading ? (
+      {nodeId == null && isWorkspaceLoading ? (
         <RepoMapSidebarSkeleton />
-      ) : nodeId == null && briefData != null ? (
-        <RepoMapOverview brief={briefData} onNavigate={onNavigate} />
-      ) : nodeId != null && isNodeBriefLoading ? (
+      ) : nodeId == null && workspace != null ? (
+        <RepoMapOverview workspace={workspace} onNavigate={onNavigate} />
+      ) : nodeId != null && isNodeContextLoading ? (
         <RepoMapSidebarSkeleton />
-      ) : nodeBrief != null ? (
-        <RepoNodeInspector data={nodeBrief} onClose={onClose} onNavigate={onNavigate} />
+      ) : nodeContext != null ? (
+        <RepoNodeInspector data={nodeContext} onClose={onClose} onNavigate={onNavigate} />
       ) : null}
     </aside>
   );

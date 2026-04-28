@@ -262,6 +262,221 @@ export type InteractiveBriefNodePayload = {
   node: InteractiveBriefPanel["node"];
 };
 
+export type RepoWorkspacePayload = {
+  analysisRef: AnalysisRefView | null;
+  docs: InteractiveBriefDocsSummary & {
+    items: Array<{
+      id: string;
+      source: "llm" | null;
+      status: "failed" | "llm" | "missing" | null;
+      type: string;
+      updatedAt: Date;
+      version: string;
+    }>;
+  };
+  mostComplexFiles: string[];
+  navigation: {
+    defaultNodeId: null | string;
+    keyZones: InteractiveBriefPayload["structure"]["nodes"];
+    primaryEntrypoints: string[];
+    primaryModules: string[];
+  };
+  repo: {
+    defaultBranch: string;
+    description: null | string;
+    forks: number;
+    id: string;
+    language: null | string;
+    languageColor: string;
+    license: null | string;
+    name: string;
+    openIssues: number;
+    owner: string;
+    ownerAvatarUrl: null | string;
+    pushedAt: Date | null;
+    size: number;
+    stars: number;
+    topics: string[];
+    url: string;
+    visibility: string;
+  };
+  secondary: {
+    languages: Array<{ color: string; lines: number; name: string }>;
+    scores: {
+      complexity: number;
+      health: number;
+      onboarding: number;
+      security: number;
+      techDebt: number;
+    };
+    signals: {
+      analysisCoverage: AnalysisCoverage;
+      apiSurface: number;
+      busFactor: number;
+      dependencyCycles: number;
+      docDensity: number;
+      duplicationPercentage: number;
+    };
+    stats: {
+      configFiles: number;
+      fileCount: number;
+      linesOfCode: number;
+      totalSizeKb: number;
+      totalSizeLabel: string;
+    };
+  };
+  summary: {
+    architectureStyle: null | string;
+    maintenance: string;
+    purpose: string;
+    repositoryKind: string;
+    stack: string[];
+  };
+  topRisks: Array<{
+    id: string;
+    severity: "CRITICAL" | "HIGH" | "LOW" | "MODERATE";
+    suggestedNextChange: string;
+    summary: string;
+    title: string;
+  }>;
+};
+
+export type RepoNodeContextPayload = {
+  analysisRef: AnalysisRefView | null;
+  availableActions: InteractiveBriefActionAvailability;
+  breadcrumbs: InteractiveBriefPanel["breadcrumbs"];
+  canDrillDeeper: boolean;
+  children: InteractiveBriefPanel["node"][];
+  edges: InteractiveBriefPayload["structure"]["edges"];
+  explain: InteractiveBriefPanel["explain"];
+  inspect: InteractiveBriefPanel["inspect"];
+  node: InteractiveBriefPanel["node"];
+  related: {
+    docs: Array<{
+      docId: string;
+      docType: string;
+      id: string;
+      title: string;
+    }>;
+    files: string[];
+    findings: Array<{
+      body: string;
+      filePath: string;
+      findingType: string;
+      id: string;
+      line: number;
+      prAnalysisId: string;
+      prNumber: number;
+      riskLevel: number;
+    }>;
+    fixes: Array<{
+      githubPrNumber: null | number;
+      githubPrUrl: null | string;
+      id: string;
+      status: string;
+      title: string;
+    }>;
+  };
+};
+
+export type RepoSearchResult = {
+  description: string;
+  docSectionId: null | string;
+  docType: null | string;
+  id: string;
+  kind: "doc-section" | "entrypoint" | "file" | "node" | "route";
+  label: string;
+  nodeId: null | string;
+  path: null | string;
+  score: number;
+  targetView: "code" | "docs" | "map";
+};
+
+export type PRChangedFileSnapshot = {
+  additions: number;
+  deletions: number;
+  filePath: string;
+  previousFilePath: null | string;
+  status: "added" | "modified" | "removed" | "renamed";
+};
+
+export type PRImpactPayload = {
+  affectedNodes: Array<{
+    fileCount: number;
+    findingCount: number;
+    impactScore: number;
+    kind: string;
+    label: string;
+    nodeId: string;
+    nodeType: "file" | "group";
+    path: string;
+    relatedChangedFiles: string[];
+    whyAffected: string;
+    zoneId: null | string;
+  }>;
+  affectedZones: Array<{
+    fileCount: number;
+    findingCount: number;
+    impactScore: number;
+    kind: string;
+    label: string;
+    nodeId: string;
+    path: string;
+    relatedChangedFiles: string[];
+  }>;
+  analysis: {
+    baseSha: string;
+    createdAt: Date;
+    headSha: string;
+    id: string;
+    prNumber: number;
+    riskScore: null | number;
+    status: string;
+  };
+  changedFiles: Array<
+    PRChangedFileSnapshot & {
+      findingCount: number;
+      nodeId: null | string;
+      nodeLabel: null | string;
+      targetView: "code" | "map";
+      zoneId: null | string;
+      zoneLabel: null | string;
+    }
+  >;
+  fixes: Array<{
+    githubPrNumber: null | number;
+    githubPrUrl: null | string;
+    id: string;
+    status: string;
+    title: string;
+  }>;
+  navigationHints: {
+    primaryFilePath: null | string;
+    primaryNodeId: null | string;
+    recommendedView: "code" | "docs" | "map";
+  };
+  summary: {
+    affectedFiles: number;
+    affectedNodes: number;
+    affectedZones: number;
+    findings: number;
+    linkedFixes: number;
+  };
+  topFindings: Array<{
+    filePath: string;
+    findingType: string;
+    id: string;
+    line: number;
+    message: string;
+    messageHtml: string;
+    nodeId: null | string;
+    riskLevel: number;
+    title: string;
+    zoneId: null | string;
+    zoneLabel: null | string;
+  }>;
+};
+
 export type FileActionPreviewResult = {
   action: "document-file-preview" | "quick-file-audit";
   analysisRef: AnalysisRefView | null;

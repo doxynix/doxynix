@@ -1,6 +1,7 @@
 import { PRAnalysisStatus } from "@prisma/client";
 
 import type { DbClient } from "@/server/shared/infrastructure/db";
+import type { PRChangedFileSnapshot } from "@/server/shared/types";
 
 type PRAnalysisCreateInput = {
   baseSha: string;
@@ -77,6 +78,15 @@ export const prAnalysisService = {
           publicId: repoId,
         },
       },
+    });
+  },
+
+  async storeChangedFilesSnapshot(db: DbClient, id: number, changedFiles: PRChangedFileSnapshot[]) {
+    return db.pullRequestAnalysis.update({
+      data: {
+        changedFilesJson: changedFiles,
+      },
+      where: { id },
     });
   },
 

@@ -172,7 +172,7 @@ export const generatedFixRouter = createTRPCRouter({
           branch: `doxynix/fix-${crypto.randomUUID().slice(0, 8)}`,
           createdByUser: true,
           prAnalysisId: validPrAnalysisId,
-          repoId: repo.id,
+          repoId: repo.publicId,
           title: "AI Suggested Improvements",
         });
 

@@ -30,6 +30,7 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
     "node",
     parseAsString.withOptions({ shallow: true })
   );
+  const [, setPath] = useQueryState("path", parseAsString.withOptions({ shallow: true }));
   const [filter, setFilter] = useQueryState("filter", parseAsString.withOptions({ shallow: true }));
 
   const [displayData, setDisplayData] = useState<null | RepoMapDisplayData>(null);
@@ -48,6 +49,7 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
     if (nextId == null) {
       void setViewId(null);
       void setSelectedId(null);
+      void setPath(null);
       return;
     }
 
@@ -66,6 +68,7 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
       void setSelectedId(formattedId);
 
       const path = formattedId.split(":")[1] ?? "";
+      void setPath(path);
       const segments = path.split("/");
 
       if (segments.length > 1) {
@@ -80,6 +83,7 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
       const formattedId = nextId.startsWith("group:") ? nextId : `group:${nextId}`;
       void setViewId(formattedId);
       void setSelectedId(null);
+      void setPath(null);
     }
   }
 
@@ -131,7 +135,20 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
             selectedNodeId={selectedId}
             onFilterChange={(val) => void setFilter(val)}
             onNavigate={navigateMap}
-            onSelect={(val) => void setSelectedId(val)}
+            onSelect={(val) => {
+              void setSelectedId(val);
+
+              if (val == null) {
+                void setPath(null);
+                return;
+              }
+
+              if (val.startsWith("file:")) {
+                void setPath(val.slice("file:".length));
+              } else {
+                void setPath(null);
+              }
+            }}
           />
         </div>
       </div>

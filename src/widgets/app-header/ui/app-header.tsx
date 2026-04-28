@@ -36,16 +36,20 @@ export function AppHeader() {
   const segments = pathname.split("/").filter(Boolean);
   const isRepoOwnerPage = owner !== "" && name !== "";
 
-  const breadcrumbItems = segments.map((segment, index) => ({
-    className: cn(
-      "lowercase",
-      index === segments.length - 1
-        ? "max-w-[140px] xl:max-w-[300px]"
-        : "max-w-[70px] xl:max-w-[120px]"
-    ),
-    href: `/${segments.slice(0, index + 1).join("/")}`,
-    label: segment,
-  }));
+  const breadcrumbItems = segments.map((segment, index) => {
+    const label = /^\d+$/.test(segment) ? `#${segment}` : segment;
+
+    return {
+      className: cn(
+        "lowercase",
+        index === segments.length - 1
+          ? "max-w-[140px] xl:max-w-[300px]"
+          : "max-w-[70px] xl:max-w-[120px]"
+      ),
+      href: `/${segments.slice(0, index + 1).join("/")}`,
+      label,
+    };
+  });
 
   return (
     <header className="bg-background flex h-full flex-col justify-between px-4">

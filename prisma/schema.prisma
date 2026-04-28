@@ -431,27 +431,28 @@ model AuditLog {
 
 model PullRequestAnalysis {
   /// @zod.custom.omit(["model"])
-  id             Int                  @id() @default(autoincrement())
+  id               Int                  @id() @default(autoincrement())
   /// @zod.custom.omit(["model"])
-  publicId       String               @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  prNumber       Int                  @map("pr_number")
-  owner          String
-  repoName       String               @map("repo_name")
-  headSha        String               @map("head_sha")
-  baseSha        String               @map("base_sha")
-  status         PRAnalysisStatus     @default(PENDING) @map("status")
+  publicId         String               @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+  prNumber         Int                  @map("pr_number")
+  owner            String
+  repoName         String               @map("repo_name")
+  headSha          String               @map("head_sha")
+  baseSha          String               @map("base_sha")
+  status           PRAnalysisStatus     @default(PENDING) @map("status")
   /// @zod.number.int().min(0).max(10)
-  riskScore      Int?                 @map("risk_score")
-  findingsJson   Json?                @map("findings_json")
-  jobId          String?
-  error          String?              @db.Text()
-  createdAt      DateTime             @default(now()) @map("created_at")
-  updatedAt      DateTime             @updatedAt() @map("updated_at")
+  riskScore        Int?                 @map("risk_score")
+  findingsJson     Json?                @map("findings_json")
+  changedFilesJson Json?                @map("changed_files_json")
+  jobId            String?
+  error            String?              @db.Text()
+  createdAt        DateTime             @default(now()) @map("created_at")
+  updatedAt        DateTime             @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
-  repoId         Int                  @map("repo_id")
-  repo           Repo                 @relation("RepoPullRequests", fields: [repoId], references: [id], onDelete: Cascade)
-  comments       PullRequestComment[]
-  generatedFixes GeneratedFix[]
+  repoId           Int                  @map("repo_id")
+  repo             Repo                 @relation("RepoPullRequests", fields: [repoId], references: [id], onDelete: Cascade)
+  comments         PullRequestComment[]
+  generatedFixes   GeneratedFix[]
 
   @@unique([repoId, prNumber, headSha])
   @@index([repoId, status])

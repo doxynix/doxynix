@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Layout, Loader2, Palette, ShieldCheck, Zap } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import {
@@ -78,6 +78,12 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
     values: config != null ? { ...config, repoId } : undefined,
   });
 
+  const currentFocusAreas = useWatch({ control: form.control, name: "focusAreas" }) ?? [];
+  const isEnabled = useWatch({ control: form.control, name: "enabled" });
+  const commentStyle = useWatch({ control: form.control, name: "commentStyle" });
+  const tokenBudget = useWatch({ control: form.control, name: "tokenBudget" });
+  const ciSkip = useWatch({ control: form.control, name: "ciSkip" });
+
   const onSubmit = (values: UpdatePRConfigInputValues) => {
     updateConfig.mutate({ ...values, repoId });
   };
@@ -88,9 +94,8 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
         <Loader2 className="animate-spin" />
       </div>
     );
-  const currentFocusAreas = form.watch("focusAreas") ?? [];
+
   const isUpdating = updateConfig.isPending;
-  const isEnabled = form.watch("enabled");
 
   return (
     <Card className="w-full">
@@ -116,7 +121,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
           <div className="mb-6 space-y-2">
             <Label>Comment Style</Label>
             <Select
-              value={form.watch("commentStyle")}
+              value={commentStyle}
               onValueChange={(v) =>
                 form.setValue("commentStyle", v as UpdatePRConfigInputValues["commentStyle"], {
                   shouldDirty: true,
@@ -200,11 +205,11 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
             <div className="flex justify-between text-sm">
               <Label>Token Budget</Label>
               <span className="text-muted-foreground font-mono">
-                {form.watch("tokenBudget")?.toLocaleString()}
+                {tokenBudget?.toLocaleString()}
               </span>
             </div>
             <Slider
-              value={[form.watch("tokenBudget") ?? 30_000]}
+              value={[tokenBudget ?? 30_000]}
               max={100_000}
               min={10_000}
               step={5000}
@@ -227,7 +232,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
               </p>
             </div>
             <Switch
-              checked={form.watch("ciSkip")}
+              checked={ciSkip}
               onCheckedChange={(val) => form.setValue("ciSkip", val, { shouldDirty: true })}
               className="data-[state=checked]:bg-foreground"
             />

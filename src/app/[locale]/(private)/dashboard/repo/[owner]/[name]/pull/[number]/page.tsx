@@ -17,5 +17,5 @@ export default async function PullRequestDetailPage({ params }: Readonly<Props>)
 
   if (repo == null || isNaN(prNumber)) notFound();
 
-  return <RepoPullDetailContainer prNumber={prNumber} repoId={repo.id} />;
+  return <RepoPullDetailContainer name={name} owner={owner} prNumber={prNumber} repoId={repo.id} />;
 }
