@@ -2,6 +2,70 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.27.10](https://github.com/doxynix/doxynix/compare/v1.27.9...v1.27.10) (2026-04-28)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1263](https://github.com/doxynix/doxynix/issues/1263)) ([8b01e70](https://github.com/doxynix/doxynix/commit/8b01e70dc63fe459e7379744d09cfa2ac37314a6))
+
+## [1.27.9](https://github.com/doxynix/doxynix/compare/v1.27.8...v1.27.9) (2026-04-28)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1259](https://github.com/doxynix/doxynix/issues/1259)) ([6a614a0](https://github.com/doxynix/doxynix/commit/6a614a06e58f4efd8ffaecc3655d6ffc49a7c071))
+
+## [1.27.8](https://github.com/doxynix/doxynix/compare/v1.27.7...v1.27.8) (2026-04-27)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1252](https://github.com/doxynix/doxynix/issues/1252)) ([a183d78](https://github.com/doxynix/doxynix/commit/a183d7886cf3b05277074504c459b1fd2aa481d8))
+* **deps:** update all non-major dependencies ([#1254](https://github.com/doxynix/doxynix/issues/1254)) ([59352e9](https://github.com/doxynix/doxynix/commit/59352e932e7be2666609285bf9ef572913142ead))
+
+## [1.27.7](https://github.com/doxynix/doxynix/compare/v1.27.6...v1.27.7) (2026-04-27)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1245](https://github.com/doxynix/doxynix/issues/1245)) ([0a69a5b](https://github.com/doxynix/doxynix/commit/0a69a5b15df91a570af28851c7fff09f1b75bdc9))
+
+## [1.27.6](https://github.com/doxynix/doxynix/compare/v1.27.5...v1.27.6) (2026-04-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency langsmith to v0.5.23 ([#1241](https://github.com/doxynix/doxynix/issues/1241)) ([8f54eb1](https://github.com/doxynix/doxynix/commit/8f54eb1c452931ed8bfcbfd2c195e88ff1d9eaa7))
+
+## [1.27.5](https://github.com/doxynix/doxynix/compare/v1.27.4...v1.27.5) (2026-04-26)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1237](https://github.com/doxynix/doxynix/issues/1237)) ([c72c2cb](https://github.com/doxynix/doxynix/commit/c72c2cb99f8e739b29f7c3ea28e5babb8bb12b59))
+
+## [1.27.4](https://github.com/doxynix/doxynix/compare/v1.27.3...v1.27.4) (2026-04-26)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1232](https://github.com/doxynix/doxynix/issues/1232)) ([b178daa](https://github.com/doxynix/doxynix/commit/b178daa660caf383ea11bd059e65e0cacafd1a81))
+
+## [1.27.3](https://github.com/doxynix/doxynix/compare/v1.27.2...v1.27.3) (2026-04-26)
+
+
+### Bug Fixes
+
+* **deps:** update all non-major dependencies ([#1228](https://github.com/doxynix/doxynix/issues/1228)) ([1def787](https://github.com/doxynix/doxynix/commit/1def787ce6a45c67485f4e5009b2efcb07db88c8))
+
+## [1.27.2](https://github.com/doxynix/doxynix/compare/v1.27.1...v1.27.2) (2026-04-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency langsmith to v0.5.22 ([#1222](https://github.com/doxynix/doxynix/issues/1222)) ([5df46c7](https://github.com/doxynix/doxynix/commit/5df46c761a946619ac8d0df181e35cd4fef2ad51))
+
 ## [1.27.1](https://github.com/doxynix/doxynix/compare/v1.27.0...v1.27.1) (2026-04-25)
 
 
