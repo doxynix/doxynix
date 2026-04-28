@@ -72,8 +72,13 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     totalMatches: 0,
   });
 
-  const { data: aiResult } = trpc.repoAnalysis.getFileActionResult.useQuery(
-    { path },
+  const { data: auditResult } = trpc.repoAnalysis.getFileActionResult.useQuery(
+    { action: "quick-file-audit", path },
+    { enabled: !!path && userId != null }
+  );
+
+  const { data: documentResult } = trpc.repoAnalysis.getFileActionResult.useQuery(
+    { action: "document-file-preview", path },
     { enabled: !!path && userId != null }
   );
 
@@ -158,8 +163,8 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
   };
 
   const handleAcceptDiff = (): void => {
-    if (aiResult != null) {
-      const proposedContent: string = aiResult.content;
+    if (documentResult != null) {
+      const proposedContent: string = documentResult.content;
 
       stageMutation.mutate({
         content: proposedContent,
@@ -293,7 +298,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
         <RepoSearchPanel stats={editorStats} view={view} onClose={() => setIsSearchOpen(false)} />
       )}
 
-      {aiResult?.action === "quick-file-audit" && !isAuditDismissed && (
+      {auditResult?.action === "quick-file-audit" && !isAuditDismissed && (
         <div className="bg-popover animate-in fade-in slide-in-from-right-4 absolute top-20 right-6 z-50 w-96 rounded-xl border p-4">
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-xs font-bold">Audit Result</h3>
@@ -302,7 +307,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
             </Button>
           </div>
           <article
-            dangerouslySetInnerHTML={{ __html: aiResult.html }}
+            dangerouslySetInnerHTML={{ __html: auditResult.html }}
             className="prose prose-invert text-foreground max-h-120 overflow-y-auto text-xs"
           />
           <div className="mt-4 flex items-center gap-1 border-t pt-3">
@@ -320,7 +325,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
         </div>
       )}
 
-      {showDiff === true && aiResult?.action === "document-file-preview" && (
+      {showDiff === false && documentResult?.action === "document-file-preview" && (
         <div className="bg-primary/5 border-primary/20 animate-in slide-in-from-top-1 flex items-center justify-between border-b px-4 py-2 duration-300">
           <div className="flex items-center gap-2">
             <div className="bg-primary/10 flex h-6 w-6 items-center justify-center rounded-full">
@@ -356,13 +361,15 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
 
       <div className="relative flex-1 overflow-hidden">
         <Editor
-          value={showDiff && aiResult?.content != null ? aiResult.content : localContent}
+          value={
+            !showDiff && documentResult?.content != null ? documentResult.content : localContent
+          }
           compareValue={fileData.content}
           initialValue={fileData.content}
           meta={fileData.meta}
           path={path}
           readOnly={mode === "view"}
-          showDiff={showDiff}
+          showDiff={!showDiff}
           onChange={setLocalContent}
           onStats={setEditorStats}
           onViewCreated={setView}

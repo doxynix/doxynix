@@ -5,7 +5,11 @@
 export const REDIS_CONFIG = {
   keys: {
     // Результаты аудита конкретного файла
-    fileAction: (userId: number | string, path: string): string => `file-result:${userId}:${path}`,
+    fileAction: (
+      userId: number | string,
+      path: string,
+      action: "document-file-preview" | "quick-file-audit"
+    ): string => `file-result:${userId}:${action}:${path}`,
 
     // Результаты генерации фиксов (код для диффа)
     fixResult: (fixId: string): string => `fix-result:${fixId}`,

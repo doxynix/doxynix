@@ -49,6 +49,12 @@ export const repoDetailsRouter = createTRPCRouter({
       return repoDetailsService.getInteractiveBriefNode(ctx.db, input.repoId, input.nodeId);
     }),
 
+  getNodeContext: protectedProcedure
+    .input(z.object({ nodeId: z.string(), repoId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return repoDetailsService.getNodeContext(ctx.db, input.repoId, input.nodeId);
+    }),
+
   getNodeExplain: protectedProcedure
     .input(z.object({ nodeId: z.string(), repoId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -118,9 +124,21 @@ export const repoDetailsRouter = createTRPCRouter({
       };
     }),
 
+  getWorkspace: protectedProcedure
+    .input(z.object({ repoId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return repoDetailsService.getWorkspace(ctx.db, input.repoId);
+    }),
+
   highlightFile: protectedProcedure
     .input(z.object({ content: z.string(), path: z.string() }))
     .query(async ({ input }) => {
       return repoDetailsService.highlightFile(input.content, input.path);
+    }),
+
+  searchWorkspace: protectedProcedure
+    .input(z.object({ repoId: z.string(), search: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return repoDetailsService.searchWorkspace(ctx.db, input.repoId, input.search);
     }),
 });

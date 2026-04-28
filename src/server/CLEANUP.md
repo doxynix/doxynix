@@ -4,9 +4,9 @@
 
 | Файл | Статус | Причина | Действие |
 |------|--------|---------|----------|
-| `shared/lib/math-utils.ts` | ❌ Unused | Нет импортов | Удалить когда будет время |
+| `shared/lib/math-utils.ts` | ❌ Unused | Нет импортов | Удалить когда будет время | (UPD: уже используется)
 | `shared/lib/prompt-registry.ts` | ⚠️ Reserve | Старая версия кэширования | Оставить на потом |
-| `shared/lib/circuit-breaker.ts` | ⚠️ Dupe | Аналог в `call.ts` | Merge в call.ts потом |
+| `shared/lib/circuit-breaker.ts` | ⚠️ Dupe | Аналог в `call.ts` | Merge в call.ts потом | (FIX: это не клон call.ts!)
 | `shared/engine/extractors/regex-signal-specs.ts` | ⚠️ Reserve | Для рефакторинга | Оставить |
 
 **Действие:** Когда будет спокойное время, запустить:

@@ -40,7 +40,7 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
           <div className="text-muted-foreground flex items-center gap-3 text-xs">
             <span>Issues: {pull.findingCount}</span>
             <span>•</span>
-            <span>{formatRelativeTime(pull.createdAt)} ago</span>
+            <span>{formatRelativeTime(pull.createdAt)}</span>
           </div>
         </div>
       </div>

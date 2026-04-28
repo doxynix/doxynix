@@ -1,11 +1,14 @@
+import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 import { UpdatePRConfigInput } from "@/shared/api/schemas/pr-analysis.schema";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { prAnalysisService } from "@/server/entities/pr-analysis/api/pr-analysis.service";
+import { prImpactService } from "@/server/entities/pr-analysis/api/pr-impact.service";
 import { PRConfigService } from "@/server/features/pr-analysis/lib/pr-config";
 import { logger } from "@/server/shared/infrastructure/logger";
+import { markdownToHtml } from "@/server/shared/lib/markdown-to-html";
 
 export const prAnalysisRouter = createTRPCRouter({
   /**
@@ -105,7 +108,41 @@ export const prAnalysisRouter = createTRPCRouter({
         },
       });
 
-      return comments.map(({ publicId, ...c }) => ({ ...c, id: publicId }));
+      const renderedComments = await Promise.all(
+        comments.map(async (c) => {
+          const html = await unstable_cache(
+            async () => markdownToHtml(c.body),
+            [`comment-html-${c.publicId}`],
+            {
+              revalidate: false,
+              tags: ["comments", c.publicId],
+            }
+          )();
+          return {
+            bodyHtml: html,
+            filePath: c.filePath,
+            findingType: c.findingType,
+            id: c.publicId,
+            line: c.line,
+            riskLevel: c.riskLevel,
+          };
+        })
+      );
+
+      return {
+        renderedComments,
+      };
+    }),
+
+  getImpactByPRNumber: protectedProcedure
+    .input(
+      z.object({
+        prNumber: z.number().int().positive(),
+        repoId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return prImpactService.getByRepoAndPRNumber(ctx.db, input.repoId, input.prNumber);
     }),
 
   getRepoConfig: protectedProcedure

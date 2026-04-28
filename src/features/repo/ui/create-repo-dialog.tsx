@@ -7,7 +7,7 @@ import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useDebounce } from "use-debounce";
 
 import { CreateRepoSchema, type CreateRepoInput } from "@/shared/api/schemas/repo";
@@ -66,7 +66,7 @@ export function CreateRepoDialog() {
     resolver: zodResolver(CreateRepoSchema),
   });
 
-  const urlValue = form.watch("url");
+  const urlValue = useWatch({ control: form.control, name: "url" });
   const [debouncedValue] = useDebounce(urlValue, 300);
 
   useClickOutside(containerRef, () => setShowSuggestions(false), open);

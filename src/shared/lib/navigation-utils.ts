@@ -1,6 +1,7 @@
 import { normalize } from "pathe";
 
 const SEGMENT_ALIASES: Record<string, string> = {
+  pulls: "pull",
   repos: "repo",
 };
 
