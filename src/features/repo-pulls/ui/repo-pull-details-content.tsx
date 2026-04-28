@@ -65,7 +65,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
     { label: "Affected zones", value: impact?.summary.affectedZones ?? 0 },
     {
       label: "Created",
-      value: analysis?.createdAt ? String(formatRelativeTime(analysis.createdAt)) : "n/a",
+      value: analysis?.createdAt != null ? String(formatRelativeTime(analysis.createdAt)) : "n/a",
     },
   ];
 
