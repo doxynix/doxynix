@@ -145,6 +145,8 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
 
               if (val.startsWith("file:")) {
                 void setPath(val.slice("file:".length));
+              } else {
+                void setPath(null);
               }
             }}
           />

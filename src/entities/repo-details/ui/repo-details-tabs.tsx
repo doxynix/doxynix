@@ -21,7 +21,8 @@ export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
   return (
     <div className="no-scrollbar relative flex h-12 w-full items-center gap-1 overflow-x-auto">
       {nav.map((n) => {
-        const baseHref = n.href ?? "/dashboard";
+        const baseHref = n.href;
+        if (baseHref == null) return null;
         const isActive = isRouteActive(pathname, baseHref, Boolean(n.exact));
         const href = buildRepoDetailHref(baseHref, searchParams) as Route;
 

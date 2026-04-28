@@ -52,7 +52,7 @@ export const prImpactService = {
     const findings = parsePersistedFindings(analysis);
 
     if (repo == null) {
-      return buildFallbackImpactPayload(analysis, changedFiles, findings);
+      return null;
     }
 
     const analyzeContext = createAnalyzeContextBuilder(repo);
@@ -453,65 +453,4 @@ function computeImpactScore(
     (markers.entrypoint ? 12 : 0) + (markers.api ? 10 : 0) + (markers.risk ? 6 : 0);
 
   return Math.min(100, changeIntensity + findingBoost + markerBoost);
-}
-
-function buildFallbackImpactPayload(
-  analysis: ImpactAnalysis,
-  changedFiles: PRChangedFileSnapshot[],
-  findings: ParsedFinding[]
-): PRImpactPayload {
-  return {
-    affectedNodes: [],
-    affectedZones: [],
-    analysis: {
-      baseSha: analysis.baseSha,
-      createdAt: analysis.createdAt,
-      headSha: analysis.headSha,
-      id: analysis.publicId,
-      prNumber: analysis.prNumber,
-      riskScore: analysis.riskScore,
-      status: analysis.status,
-    },
-    changedFiles: changedFiles.map((file) => ({
-      ...file,
-      findingCount: findings.filter((finding) => finding.file === file.filePath).length,
-      nodeId: null,
-      nodeLabel: null,
-      targetView: "code",
-      zoneId: null,
-      zoneLabel: null,
-    })),
-    fixes: analysis.generatedFixes.map((fix) => ({
-      githubPrNumber: fix.githubPrNumber,
-      githubPrUrl: fix.githubPrUrl,
-      id: fix.publicId,
-      status: fix.status,
-      title: fix.title,
-    })),
-    navigationHints: {
-      primaryFilePath: changedFiles[0]?.filePath ?? null,
-      primaryNodeId: null,
-      recommendedView: "code",
-    },
-    summary: {
-      affectedFiles: changedFiles.length,
-      affectedNodes: 0,
-      affectedZones: 0,
-      findings: findings.length,
-      linkedFixes: analysis.generatedFixes.length,
-    },
-    topFindings: findings.slice(0, 8).map((finding, index) => ({
-      filePath: finding.file,
-      findingType: finding.type,
-      id: `${finding.file}:${finding.line}:${finding.type}:${index}`,
-      line: finding.line,
-      message: finding.message,
-      messageHtml: finding.message,
-      nodeId: null,
-      riskLevel: finding.score ?? 0,
-      title: finding.title,
-      zoneId: null,
-      zoneLabel: null,
-    })),
-  };
 }

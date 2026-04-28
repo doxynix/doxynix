@@ -14,14 +14,18 @@ type Props = {
 };
 
 export function RepoMapSidebar({ nodeId, onClose, onNavigate, repoId }: Readonly<Props>) {
+  const shouldLoadWorkspace = nodeId == null || nodeId.length === 0;
+  const shouldLoadNodeContext = nodeId != null && nodeId.length > 0;
+
   const { data: workspace, isLoading: isWorkspaceLoading } = trpc.repoDetails.getWorkspace.useQuery(
-    { repoId }
+    { repoId },
+    { enabled: shouldLoadWorkspace }
   );
 
   const { data: nodeContext, isLoading: isNodeContextLoading } =
     trpc.repoDetails.getNodeContext.useQuery(
       { nodeId: nodeId ?? "", repoId },
-      { enabled: nodeId != null }
+      { enabled: shouldLoadNodeContext }
     );
 
   return (

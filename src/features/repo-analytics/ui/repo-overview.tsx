@@ -166,6 +166,9 @@ export function RepoOverview({ data }: Readonly<Props>) {
     { label: "Config Files", value: (s: typeof secondary.stats) => s.configFiles },
   ] as const;
 
+  const totalLines = secondary.stats.linesOfCode;
+  const getLangPercent = (lines: number) => (totalLines > 0 ? (lines / totalLines) * 100 : 0);
+
   return (
     <div className="space-y-6">
       <Card>
@@ -336,7 +339,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                   key={lang.name}
                   style={{
                     backgroundColor: lang.color,
-                    width: `${(lang.lines / secondary.stats.linesOfCode) * 100}%`,
+                    width: `${getLangPercent(lang.lines)}%`,
                   }}
                 />
               ))}
@@ -352,7 +355,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                     {lang.name}
                   </span>
                   <span className="text-muted-foreground ml-2.5">
-                    {Math.round((lang.lines / secondary.stats.linesOfCode) * 100)}%
+                    {Math.round(getLangPercent(lang.lines))}%
                   </span>
                 </div>
               ))}
