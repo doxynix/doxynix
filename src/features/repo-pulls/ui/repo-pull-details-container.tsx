@@ -87,7 +87,7 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
       <RepoPullDetailsContent
         name={name}
         analysis={analysis}
-        impact={impact}
+        impact={impact ?? null}
         owner={owner}
         repoId={repoId}
       />

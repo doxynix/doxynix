@@ -85,11 +85,6 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
       label: "Generated Fixes",
       value: analysis?.generatedFixes.length ?? 0,
     },
-    {
-      isUpper: true,
-      label: "Primary View",
-      value: impact?.navigationHints.recommendedView ?? "map",
-    },
   ];
 
   return (
