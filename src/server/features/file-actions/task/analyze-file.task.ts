@@ -35,7 +35,7 @@ export const analyzeFileTask = task({
       commitSha: payload.commitSha,
     };
 
-    const cacheKey = REDIS_CONFIG.keys.fileAction(payload.userId, payload.path);
+    const cacheKey = REDIS_CONFIG.keys.fileAction(payload.userId, payload.path, "quick-file-audit");
     await redisClient.set(cacheKey, result, { ex: REDIS_CONFIG.ttl.fileAction });
 
     const channelName = REALTIME_CONFIG.channels.user(payload.userId);

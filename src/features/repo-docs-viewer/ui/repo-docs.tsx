@@ -4,8 +4,9 @@ import { useState, type ComponentType } from "react";
 import saveAs from "file-saver";
 import { BookOpen, Download, FileText, HistoryIcon, Layers, Terminal, Users2 } from "lucide-react";
 
-import { trpc, type AvailableDocs, type DocType } from "@/shared/api/trpc";
+import { trpc, type AvailableDocs, type DocType, type RepoNodeContext } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
+import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Tabs, TabsContent } from "@/shared/ui/core/tabs";
@@ -27,11 +28,18 @@ const DOC_ICONS: Record<string, ComponentType<{ className?: string }>> = {
 type Props = {
   activeTab: DocType;
   availableDocs: AvailableDocs;
+  nodeContext: RepoNodeContext;
   onTabChange: (type: DocType) => void;
   repoId: string;
 };
 
-export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Readonly<Props>) {
+export function RepoDocs({
+  activeTab,
+  availableDocs,
+  nodeContext,
+  onTabChange,
+  repoId,
+}: Readonly<Props>) {
   const [apiMode, setApiMode] = useState<"md" | "swagger">("md");
   const { data: metrics } = trpc.repoDetails.getDetailedMetrics.useQuery({ repoId });
 
@@ -155,6 +163,30 @@ export function RepoDocs({ activeTab, availableDocs, onTabChange, repoId }: Read
                     )}
                   </div>
                 </div>
+
+                {nodeContext != null && nodeContext.related.docs.length > 0 && (
+                  <div className="mb-6 space-y-3 rounded-lg border p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium">{nodeContext.node.label}</p>
+                        <p className="text-muted-foreground text-xs">{nodeContext.explain.role}</p>
+                      </div>
+                      <Badge variant="outline">
+                        {nodeContext.related.docs.length} related sections
+                      </Badge>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {nodeContext.related.docs
+                        .filter((doc) => doc.docType === activeTab)
+                        .slice(0, 6)
+                        .map((doc) => (
+                          <Badge key={doc.id} variant="secondary">
+                            {doc.title}
+                          </Badge>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {isCurrentApiSwagger ? (

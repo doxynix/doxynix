@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useQueryState } from "nuqs";
+import { useEffect, useState } from "react";
+import { parseAsString, useQueryState } from "nuqs";
 import type { TreeApi } from "react-arborist";
 
 import { trpc, type UiRepoDetailed } from "@/shared/api/trpc";
@@ -18,13 +18,28 @@ type Props = {
 };
 
 export function RepoCodeContainer({ repo }: Readonly<Props>) {
-  const [path, setPath] = useQueryState("path");
+  const [path, setPath] = useQueryState("path", parseAsString.withOptions({ shallow: true }));
+  const [node, setNode] = useQueryState("node", parseAsString.withOptions({ shallow: true }));
   const [treeApi, setTreeApi] = useState<TreeApi<FileNode> | undefined>();
+
+  const { data: nodeContext } = trpc.repoDetails.getNodeContext.useQuery(
+    { nodeId: node ?? "", repoId: repo.id },
+    { enabled: node != null && node.length > 0 }
+  );
 
   const { data, isLoading } = trpc.githubBrowse.getFileContent.useQuery(
     { path: path ?? "", repoId: repo.id },
     { enabled: path != null && path !== "" }
   );
+
+  useEffect(() => {
+    if (path != null && path.length > 0) return;
+
+    const nextPath = nodeContext?.related.files[0];
+    if (nextPath == null || nextPath.length === 0) return;
+
+    void setPath(nextPath);
+  }, [nodeContext?.related.files, path, setPath]);
 
   return (
     <div className="bg-background flex h-[calc(100dvh-260px)] overflow-hidden rounded-xl border">
@@ -36,6 +51,7 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
             treeApi={treeApi}
             onSelect={(val) => {
               void setPath(val);
+              void setNode(val != null ? `file:${val}` : null);
             }}
             onTreeApiChange={setTreeApi}
           />

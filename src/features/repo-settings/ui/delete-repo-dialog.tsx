@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/shared/ui/core/button";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
+import { useRouter } from "@/i18n/routing";
 
 import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
 
@@ -15,7 +16,7 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("Dashboard");
   const { deleteRepo } = useRepoActions();
-  const locale = useLocale();
+  const router = useRouter();
 
   const handleDelete = () => {
     deleteRepo.mutate(
@@ -23,7 +24,7 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
       {
         onSuccess: () => {
           setOpen(false);
-          window.location.assign(`/${locale}/dashboard/repos`);
+          router.push(`/dashboard/repos`);
         },
       }
     );

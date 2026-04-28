@@ -105,10 +105,9 @@ export const RealtimeProvider = ({ children }: Props) => {
           void utils.generatedFix.getById.invalidate({ fixId: payload.fixId });
           toast.success("AI код-фикс готов!");
         } else if (payload.path != null) {
-          void utils.repoAnalysis.getFileActionResult.invalidate({ path: payload.path });
-          toast.success(
-            `ИИ завершил ${payload.type === "AUDIT" ? "аудит" : "документирование"} файла!`
-          );
+          const action = payload.type === "AUDIT" ? "quick-file-audit" : "document-file-preview";
+          void utils.repoAnalysis.getFileActionResult.invalidate({ action, path: payload.path });
+          toast.success(`AI завершил ${payload.type === "AUDIT" ? "audit" : "document"} file!`);
         }
       }
     };

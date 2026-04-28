@@ -14,7 +14,7 @@ export const generatedFixService = {
       createdByUser?: boolean;
       description?: string;
       prAnalysisId?: string;
-      repoId: number;
+      repoId: string;
       title: string;
     }
   ) {
@@ -23,7 +23,7 @@ export const generatedFixService = {
         branch: input.branch,
         createdByUser: input.createdByUser ?? false,
         description: input.description,
-        repo: { connect: { id: input.repoId } },
+        repo: { connect: { publicId: input.repoId } },
         status: "DRAFT",
         title: input.title,
         ...(input.prAnalysisId != null && {

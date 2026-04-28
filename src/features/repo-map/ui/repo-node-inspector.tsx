@@ -16,14 +16,14 @@ import {
   Zap,
 } from "lucide-react";
 
-import type { NodeBrief } from "@/shared/api/trpc";
+import type { RepoNodeContext } from "@/shared/api/trpc";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Card, CardContent } from "@/shared/ui/core/card";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 
 type Props = {
-  data: NodeBrief;
+  data: NonNullable<RepoNodeContext>;
   onClose: () => void;
   onNavigate: (id: null | string) => void;
 };
@@ -309,6 +309,38 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                   >
                     <Zap className="mt-0.5 text-amber-500" />
                     <span>{action}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {data.related.docs.length > 0 && (
+            <section className="space-y-3">
+              <div className="text-xs">Related Docs</div>
+              <div className="flex flex-wrap gap-2">
+                {data.related.docs.map((doc) => (
+                  <Badge key={doc.id} variant="secondary" className="text-[10px]">
+                    {doc.docType}: {doc.title}
+                  </Badge>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {data.related.findings.length > 0 && (
+            <section className="space-y-3">
+              <div className="text-xs">Recent PR Findings</div>
+              <div className="space-y-2">
+                {data.related.findings.slice(0, 4).map((finding) => (
+                  <div key={finding.id} className="rounded-md border p-2 text-xs">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <span className="font-medium">
+                        PR #{finding.prNumber} · {finding.findingType}
+                      </span>
+                      <Badge variant="outline">{finding.filePath.split("/").pop()}</Badge>
+                    </div>
+                    <p className="text-muted-foreground line-clamp-3">{finding.body}</p>
                   </div>
                 ))}
               </div>

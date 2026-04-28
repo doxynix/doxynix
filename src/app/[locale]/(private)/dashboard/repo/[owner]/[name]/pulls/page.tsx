@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function RepoMetricsPage({ params }: Readonly<Props>) {
+export default async function RepoPullsPage({ params }: Readonly<Props>) {
   const { name, owner } = await params;
 
   const serverApi = await api();
