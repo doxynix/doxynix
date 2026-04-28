@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.28.0](https://github.com/doxynix/doxynix/compare/v1.27.10...v1.28.0) (2026-04-28)
+
+
+### Features
+
+* **features:** улучшение и углубление логики деталей PR  ([#1267](https://github.com/doxynix/doxynix/issues/1267)) ([c799ead](https://github.com/doxynix/doxynix/commit/c799eadafd030e3b394e553e7ebc3975ee582fd1))
+
 ## [1.27.10](https://github.com/doxynix/doxynix/compare/v1.27.9...v1.27.10) (2026-04-28)
 
 
