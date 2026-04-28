@@ -1,12 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileCode, GitPullRequest, Trash2 } from "lucide-react";
+import { FileIcon, GitPullRequest, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { createPrSchema, type CreatePrValues } from "@/shared/api/schemas/pr";
 import { trpc } from "@/shared/api/trpc";
+import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import {
   Form,
@@ -19,7 +20,6 @@ import {
 import { Input } from "@/shared/ui/core/input";
 import { Label } from "@/shared/ui/core/label";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
-import { Separator } from "@/shared/ui/core/separator";
 import {
   Sheet,
   SheetContent,
@@ -43,14 +43,22 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
     repoId,
   });
 
-  const applyPrMutation = trpc.generatedFix.applyFix.useMutation({
+  const openPrMutation = trpc.prStaging.openPullRequest.useMutation({
     onError: (err) => toast.error(`Failed to create PR: ${err.message}`),
     onSuccess: (data) => {
       if (data.success === true) {
         toast.success("Pull Request created successfully!");
         window.open(data.prUrl, "_blank");
         void utils.prStaging.getStagedFiles.invalidate({ repoId });
+        void utils.generatedFix.getByRepository.invalidate({ repoId });
       }
+    },
+  });
+
+  const unstageMutation = trpc.prStaging.unstageFile.useMutation({
+    onError: (err) => toast.error(`Failed to remove file from draft: ${err.message}`),
+    onSuccess: () => {
+      void utils.prStaging.getStagedFiles.invalidate({ repoId });
     },
   });
 
@@ -68,14 +76,8 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
       return;
     }
 
-    applyPrMutation.mutate({
+    openPrMutation.mutate({
       branch: values.branchName,
-      estimatedImpact: 0,
-      fixedFiles: stagedFiles.map((f) => ({
-        filePath: f.filePath,
-        newContent: f.content,
-      })),
-      fixId: "batch-pr",
       repoId,
       title: values.prTitle,
     });
@@ -86,17 +88,17 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
   return (
     <Sheet onOpenChange={(open) => open === false && form.reset()}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <GitPullRequest className="size-4" />
+        <Button variant="outline" className="relative gap-2">
+          <GitPullRequest />
           <span>PR Draft</span>
-          {filesCount > 0 && <span className="text-xs">{filesCount}</span>}
+          {filesCount > 0 && <Badge className="absolute -top-2 -right-2">{filesCount}</Badge>}
         </Button>
       </SheetTrigger>
 
       <SheetContent className="flex flex-col gap-6 p-6 sm:max-w-lg">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
-            <GitPullRequest className="size-4" />
+            <GitPullRequest />
             Pull Request Draft
           </SheetTitle>
           <SheetDescription>
@@ -126,20 +128,32 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                       className="flex items-center justify-between rounded-xl border p-1"
                     >
                       <div className="flex items-center gap-2 p-1">
-                        <FileCode className="size-4" />
+                        <FileIcon />
                         <span className="truncate text-xs">{file.filePath}</span>
                       </div>
-                      <Button size="icon" variant="ghost" className="size-8">
+                      <LoadingButton
+                        disabled={unstageMutation.isPending}
+                        isLoading={unstageMutation.isPending}
+                        loadingText=""
+                        size="icon"
+                        variant="ghost"
+                        aria-label="Unstage file"
+                        onClick={() =>
+                          unstageMutation.mutate({
+                            filePath: file.filePath,
+                            repoId,
+                          })
+                        }
+                        className="hover:text-destructive hover:bg-destructive/10"
+                      >
                         <Trash2 />
-                      </Button>
+                      </LoadingButton>
                     </div>
                   ))}
                 </div>
               )}
             </ScrollArea>
           </div>
-
-          <Separator />
 
           <Form {...form}>
             <form
@@ -152,7 +166,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="">Branch Name</FormLabel>
+                    <FormLabel className="text-muted-foreground">Branch Name</FormLabel>
                     <FormControl>
                       <Input {...field} className="h-9 text-xs" />
                     </FormControl>
@@ -166,7 +180,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="">PR Title</FormLabel>
+                    <FormLabel className="text-muted-foreground">PR Title</FormLabel>
                     <FormControl>
                       <Input {...field} className="h-9 text-xs" />
                     </FormControl>
@@ -181,9 +195,9 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
         <SheetFooter className="border-t pt-4">
           <LoadingButton
             type="submit"
-            disabled={filesCount === 0 || applyPrMutation.isPending}
+            disabled={filesCount === 0 || openPrMutation.isPending}
             form="pr-form"
-            isLoading={applyPrMutation.isPending}
+            isLoading={openPrMutation.isPending}
             loadingText="Processing..."
           >
             <GitPullRequest /> Open Pull Request

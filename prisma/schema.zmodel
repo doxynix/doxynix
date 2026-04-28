@@ -477,6 +477,7 @@ model PullRequestAnalysis {
   riskScore      Int?                 @map("risk_score") @gte(0) @lte(10)
 
   findingsJson   Json?                @map("findings_json")
+  changedFilesJson Json?              @map("changed_files_json")
 
   jobId          String?
   error          String?              @db.Text

@@ -12,6 +12,7 @@ import { OpenApiErrorResponses } from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const DEFAULT_DOC_LANGUAGE = "English";
+const FileActionResultSchema = z.enum(["document-file-preview", "quick-file-audit"]);
 
 export const repoAnalysisRouter = createTRPCRouter({
   analyze: protectedProcedure
@@ -57,9 +58,14 @@ export const repoAnalysisRouter = createTRPCRouter({
     }),
 
   getFileActionResult: protectedProcedure
-    .input(z.object({ path: z.string() }))
+    .input(
+      z.object({
+        action: FileActionResultSchema,
+        path: z.string(),
+      })
+    )
     .query(async ({ ctx, input }) => {
-      const cacheKey = REDIS_CONFIG.keys.fileAction(ctx.session.user.id, input.path);
+      const cacheKey = REDIS_CONFIG.keys.fileAction(ctx.session.user.id, input.path, input.action);
       const data = await ctx.redis.get<FileActionPreviewResult>(cacheKey);
 
       if (data == null) return null;
@@ -87,7 +93,11 @@ export const repoAnalysisRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const cacheKey = REDIS_CONFIG.keys.fileAction(ctx.session.user.id, input.path);
+      const cacheKey = REDIS_CONFIG.keys.fileAction(
+        ctx.session.user.id,
+        input.path,
+        "quick-file-audit"
+      );
       const cachedData = await ctx.redis.get<any>(cacheKey);
 
       if (cachedData == null) {

@@ -49,6 +49,8 @@ export type MarkAllInput = RouterInput["notification"]["markAllAsRead"];
 
 export type RepoDetailsOverview = RouterOutput["repoDetails"]["getOverview"];
 
+export type RepoWorkspace = RouterOutput["repoDetails"]["getWorkspace"];
+
 export type UiRepoHistory = RouterOutput["repoDetails"]["getHistory"];
 
 export type FileContent = RouterOutput["githubBrowse"]["getFileContent"];
@@ -73,4 +75,12 @@ export type RepoMapDisplayData = NonNullable<NodeType> | NonNullable<RepoMapType
 
 export type NodeBrief = NonNullable<RouterOutput["repoDetails"]["getInteractiveBriefNode"]>;
 
+export type RepoNodeContext = RouterOutput["repoDetails"]["getNodeContext"];
+
+export type RepoSearchResult = RouterOutput["repoDetails"]["searchWorkspace"][number];
+
 export type RepoPull = RouterOutput["prAnalysis"]["listByRepository"][number];
+
+export type PRImpact = RouterOutput["prAnalysis"]["getImpactByPRNumber"];
+
+export type PRNumber = RouterOutput["prAnalysis"]["getByPRNumber"];

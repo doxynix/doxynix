@@ -56,7 +56,27 @@ export const analyzePrTask = task({
         deletions: f.deletions,
         filename: f.filename,
         patch: f.patch,
+        previousFilename: f.previous_filename ?? null,
+        status:
+          f.status === "added" ||
+          f.status === "modified" ||
+          f.status === "removed" ||
+          f.status === "renamed"
+            ? f.status
+            : "modified",
       }));
+
+      await prAnalysisService.storeChangedFilesSnapshot(
+        prisma,
+        payload.analysisId,
+        changedFiles.map((file) => ({
+          additions: file.additions,
+          deletions: file.deletions,
+          filePath: file.filename,
+          previousFilePath: file.previousFilename,
+          status: file.status,
+        }))
+      );
 
       // Run differential analysis
       const analyzer = new DifferentialAnalyzer(config);

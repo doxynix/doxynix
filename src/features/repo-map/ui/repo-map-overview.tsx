@@ -2,42 +2,42 @@
 
 import { FileIcon, FileText, GitCommit, Layers } from "lucide-react";
 
-import type { InteractiveBrief } from "@/shared/api/trpc";
+import type { RepoWorkspace } from "@/shared/api/trpc";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 type Props = {
-  brief: NonNullable<InteractiveBrief>;
   onNavigate: (id: null | string) => void;
+  workspace: NonNullable<RepoWorkspace>;
 };
 
-export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {
+export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
   return (
     <div className="flex flex-col gap-4 overflow-y-auto p-6">
       <h3 className="text-2xl">Project Brain</h3>
       <div className="flex items-center gap-2">
-        {brief.analysisRef?.commitSha != null && (
+        {workspace.analysisRef?.commitSha != null && (
           <Badge variant="outline" className="gap-1 font-mono text-xs">
             <GitCommit />
-            {brief.analysisRef.commitSha.slice(0, 7)}
+            {workspace.analysisRef.commitSha.slice(0, 7)}
             <CopyButton
-              value={brief.analysisRef.commitSha}
+              value={workspace.analysisRef.commitSha}
               tooltipSide="bottom"
               tooltipText="Copy SHA"
               className="opacity-100"
             />
           </Badge>
         )}
-        <Badge variant="outline">{brief.overview.repositoryKind}</Badge>
+        <Badge variant="outline">{workspace.summary.repositoryKind}</Badge>
       </div>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2 rounded-xl border p-4">
           <div className="flex items-center gap-1 text-xs">
             <Layers /> Architecture Style
           </div>
-          {brief.overview.architectureStyle != null && (
-            <p className="text-sm">{brief.overview.architectureStyle || "Standard / Layered"}</p>
+          {workspace.summary.architectureStyle != null && (
+            <p className="text-sm">{workspace.summary.architectureStyle || "Standard / Layered"}</p>
           )}
         </div>
 
@@ -46,7 +46,7 @@ export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {
             <FileText /> Stack
           </div>
           <div className="flex flex-wrap gap-2">
-            {brief.overview.stack.map((path) => (
+            {workspace.summary.stack.map((path) => (
               <div key={path} className="text-muted-foreground p-2 text-xs">
                 <span className="truncate">{path.split("/").pop()}</span>
               </div>
@@ -59,7 +59,7 @@ export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {
             <FileText /> Primary modules
           </div>
           <div className="gap-2">
-            {brief.overview.primaryModules.map((path) => (
+            {workspace.navigation.primaryModules.map((path) => (
               <Button
                 key={path}
                 variant="ghost"
@@ -76,7 +76,7 @@ export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {
         <div className="flex flex-col gap-3">
           <div className="text-xs">Purpose</div>
           <div className="text-muted-foreground rounded-xl border p-4 text-xs italic">
-            &quot;{brief.overview.purpose}&quot;
+            &quot;{workspace.summary.purpose}&quot;
           </div>
         </div>
 
@@ -85,7 +85,7 @@ export function RepoMapOverview({ brief, onNavigate }: Readonly<Props>) {
             <FileText /> Resources
           </div>
           <div className="flex flex-wrap gap-2">
-            {brief.overview.primaryEntrypoints.map((path) => (
+            {workspace.navigation.primaryEntrypoints.map((path) => (
               <Button
                 key={path}
                 variant="ghost"

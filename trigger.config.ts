@@ -42,6 +42,7 @@ export default defineConfig({
         schema: "prisma/schema.prisma",
       }),
     ],
+    external: ["ioredis", "bottleneck"],
   },
   dirs: ["./src/server/**/task"],
   logLevel: "log",
