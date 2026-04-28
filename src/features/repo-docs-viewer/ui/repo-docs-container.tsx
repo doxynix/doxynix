@@ -22,7 +22,7 @@ const EMPTY_DOCS: AvailableDocs = [];
 export function RepoDocsContainer({ id }: Readonly<Props>) {
   const { name, owner } = useRepoParams();
   const [node] = useQueryState("node", parseAsString.withOptions({ shallow: true }));
-  const autoSelectedNodeRef = useRef<string | null>(null);
+  const autoSelectedNodeRef = useRef<null | string>(null);
 
   const [activeTab, setActiveTab] = useQueryState(
     "type",
@@ -44,7 +44,7 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
   const resolvedActiveTab = docs.some((doc) => doc.type === activeTab) ? activeTab : docs[0]?.type;
 
   useEffect(() => {
-    const nodeId = nodeContext?.node?.id ?? null;
+    const nodeId = nodeContext?.node.id ?? null;
     const preferredDocType = nodeContext?.related.docs[0]?.docType;
     if (preferredDocType == null || docs.length === 0) return;
 
@@ -55,7 +55,7 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
       autoSelectedNodeRef.current = nodeId;
       void setActiveTab(matchingDoc.type);
     }
-  }, [docs, resolvedActiveTab, setActiveTab, nodeContext?.node?.id, nodeContext?.related.docs]);
+  }, [docs, resolvedActiveTab, setActiveTab, nodeContext?.node.id, nodeContext?.related.docs]);
 
   if (isLoading) {
     return (

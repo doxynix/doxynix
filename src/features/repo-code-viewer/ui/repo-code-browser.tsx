@@ -215,7 +215,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     {
       icon: FileChartLine,
       onClick: () => setIsAuditDismissed(false),
-      tooltipText: "Sho documentation",
+      tooltipText: "Show documentation",
     },
     {
       hidden: fileData.meta.url == null,
