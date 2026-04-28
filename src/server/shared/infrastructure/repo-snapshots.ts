@@ -98,3 +98,21 @@ export async function getLatestCompletedAnalysisRef(db: DbClient, repoId: string
   const analysis = await getLatestCompletedAnalysis(db, repoId);
   return toAnalysisRef(analysis);
 }
+
+export async function getRepoWithAnalysisByCommitSha(
+  db: DbClient,
+  repoId: string,
+  commitSha: string
+) {
+  return db.repo.findUnique({
+    select: {
+      ...repoWithLatestAnalysisAndDocsSelect,
+      analyses: {
+        select: latestCompletedAnalysisSelect,
+        take: 1,
+        where: { commitSha, status: "DONE" },
+      },
+    },
+    where: { publicId: repoId },
+  }) as Promise<null | RepoWithLatestAnalysisAndDocs>;
+}

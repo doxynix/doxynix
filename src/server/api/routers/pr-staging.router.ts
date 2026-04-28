@@ -181,6 +181,19 @@ export const prStagingRouter = createTRPCRouter({
         });
       }
 
+      // Verify that the fix belongs to the requested repo
+      const fixRepo = await ctx.db.repo.findUnique({
+        select: { publicId: true },
+        where: { id: fix.repoId },
+      });
+
+      if (fixRepo == null || fixRepo.publicId !== input.repoId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Generated fix does not belong to the specified repository",
+        });
+      }
+
       const cachedResult = await ctx.redis.get(REDIS_CONFIG.keys.fixResult(input.fixId));
       const parsed = z
         .object({

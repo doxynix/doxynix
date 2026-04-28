@@ -10,7 +10,10 @@ import {
 } from "@/server/entities/analyze/lib/structure-shared";
 import { normalizeRepoPath } from "@/server/shared/engine/core/common";
 import type { DbClient } from "@/server/shared/infrastructure/db";
-import { getRepoWithLatestAnalysisAndDocs } from "@/server/shared/infrastructure/repo-snapshots";
+import {
+  getRepoWithAnalysisByCommitSha,
+  getRepoWithLatestAnalysisAndDocs,
+} from "@/server/shared/infrastructure/repo-snapshots";
 import { markdownToHtml } from "@/server/shared/lib/markdown-to-html";
 import type { PRChangedFileSnapshot, PRImpactPayload } from "@/server/shared/types";
 
@@ -47,15 +50,20 @@ export const prImpactService = {
     const analysis = await loadImpactAnalysis(db, repoId, prNumber);
     if (analysis == null) return null;
 
-    const repo = await getRepoWithLatestAnalysisAndDocs(db, repoId);
     const changedFiles = parseChangedFilesSnapshot(analysis);
     const findings = parsePersistedFindings(analysis);
 
-    if (repo == null) {
+    // Get the repository snapshot tied to the same commit as the PR analysis
+    const repo = await getRepoWithAnalysisByCommitSha(db, repoId, analysis.headSha);
+
+    // Fallback to latest analysis if no analysis exists for the specific commit
+    const repoSnapshot = repo ?? (await getRepoWithLatestAnalysisAndDocs(db, repoId));
+
+    if (repoSnapshot == null) {
       return null;
     }
 
-    const analyzeContext = createAnalyzeContextBuilder(repo);
+    const analyzeContext = createAnalyzeContextBuilder(repoSnapshot);
     const structureContext = analyzeContext.getStructureContext();
     const topLevelNodes = structureContext == null ? [] : buildTopLevelNodes(structureContext);
     const interestingPaths = new Set(structureContext?.allInterestingPaths ?? []);

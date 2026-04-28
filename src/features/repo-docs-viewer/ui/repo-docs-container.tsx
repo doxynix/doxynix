@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { FileText } from "lucide-react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 
@@ -22,6 +22,7 @@ const EMPTY_DOCS: AvailableDocs = [];
 export function RepoDocsContainer({ id }: Readonly<Props>) {
   const { name, owner } = useRepoParams();
   const [node] = useQueryState("node", parseAsString.withOptions({ shallow: true }));
+  const autoSelectedNodeRef = useRef<string | null>(null);
 
   const [activeTab, setActiveTab] = useQueryState(
     "type",
@@ -43,14 +44,18 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
   const resolvedActiveTab = docs.some((doc) => doc.type === activeTab) ? activeTab : docs[0]?.type;
 
   useEffect(() => {
+    const nodeId = nodeContext?.node?.id ?? null;
     const preferredDocType = nodeContext?.related.docs[0]?.docType;
     if (preferredDocType == null || docs.length === 0) return;
 
     const matchingDoc = docs.find((doc) => doc.type === preferredDocType);
     if (matchingDoc == null || matchingDoc.type === resolvedActiveTab) return;
 
-    void setActiveTab(matchingDoc.type);
-  }, [docs, nodeContext?.related.docs, resolvedActiveTab, setActiveTab]);
+    if (nodeId != null && autoSelectedNodeRef.current !== nodeId) {
+      autoSelectedNodeRef.current = nodeId;
+      void setActiveTab(matchingDoc.type);
+    }
+  }, [docs, resolvedActiveTab, setActiveTab, nodeContext?.node?.id, nodeContext?.related.docs]);
 
   if (isLoading) {
     return (
