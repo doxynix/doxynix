@@ -172,7 +172,6 @@ export async function getClientContext(
  * 1. Primary client context
  * 2. If auth fails: public PAT (if allowPublicFallback)
  * 3. If auth fails: system app (if allowSystemFallback)
- * 4. If auth fails: unauthenticated public (if allowPublicFallback)
  */
 export async function resolveClientContext(
   prisma: DbClient,
@@ -184,7 +183,7 @@ export async function resolveClientContext(
   } catch (error) {
     if (error instanceof GitHubAuthRequiredError) {
       // Fallback 1: System PAT for public queries
-      if (options?.allowPublicFallback === true && GITHUB_SYSTEM_PAT != null) {
+      if (options?.allowPublicFallback === true) {
         return {
           hasUserToken: false,
           octokit: getPublicClient(GITHUB_SYSTEM_PAT),
@@ -198,15 +197,6 @@ export async function resolveClientContext(
           hasUserToken: false,
           octokit: getSystemClient(),
           type: "app",
-        };
-      }
-
-      // Fallback 3: Unauthenticated public
-      if (options?.allowPublicFallback === true) {
-        return {
-          hasUserToken: false,
-          octokit: getPublicClient(),
-          type: "public",
         };
       }
     }

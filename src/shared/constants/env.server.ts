@@ -3,14 +3,23 @@ import "server-only";
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4-mini";
 
-import { envShared, isSharedValidationSkipped, sharedSchema } from "./env.shared";
+import {
+  envShared,
+  isSharedValidationSkipped,
+  numericSchema,
+  sharedSchema,
+  stringSchema,
+} from "./env.shared";
 
 export const envServer = createEnv({
+  emptyStringAsUndefined: true,
+
   runtimeEnv: {
     ABLY_API_KEY: process.env.ABLY_API_KEY,
     APP_VERSION: process.env.APP_VERSION,
     BETTERSTACK_API_TOKEN: process.env.BETTERSTACK_API_TOKEN,
     DATABASE_URL: process.env.DATABASE_URL,
+    DIRECT_URL: process.env.DIRECT_URL,
     GITHUB_APP_ID: process.env.GITHUB_APP_ID,
     GITHUB_APP_PRIVATE_KEY: process.env.GITHUB_APP_PRIVATE_KEY,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
@@ -32,34 +41,33 @@ export const envServer = createEnv({
   },
 
   server: {
-    ABLY_API_KEY: z.string().check(z.minLength(1)),
+    ABLY_API_KEY: stringSchema,
     APP_VERSION: z._default(z.string(), "1.0.0"),
-    BETTERSTACK_API_TOKEN: z.string().check(z.minLength(1)),
+    BETTERSTACK_API_TOKEN: stringSchema,
 
     DATABASE_URL: z.url(),
-    GITHUB_APP_ID: z.string().check(z.regex(/^\d+$/, "must be numeric")),
+    DIRECT_URL: z.url(),
+    GITHUB_APP_ID: numericSchema,
     GITHUB_APP_PRIVATE_KEY: z
       .string()
       .check(z.regex(/BEGIN .*PRIVATE KEY/), z.regex(/END .*PRIVATE KEY/)),
-    GITHUB_CLIENT_ID: z.string().check(z.minLength(1)),
-    GITHUB_CLIENT_SECRET: z.string().check(z.minLength(1)),
-    GITHUB_SYSTEM_INSTALLATION_ID: z.string().check(z.regex(/^\d+$/)),
-    GITHUB_SYSTEM_PAT: z.optional(z.string().check(z.minLength(1))),
-    GITHUB_WEBHOOK_SECRET: z.string().check(z.minLength(1)),
-    GOOGLE_CLIENT_ID: z.string().check(z.minLength(1)),
-    GOOGLE_CLIENT_SECRET: z.string().check(z.minLength(1)),
-    GROQ_API_KEY: z.string().check(z.minLength(1)),
-    NEXTAUTH_SECRET: z.string().check(z.minLength(1)),
-    REDIS_TCP_URL: z.string().check(z.minLength(1)),
-    RESEND_API_KEY: z.string().check(z.minLength(1)),
-    TURNSTILE_SECRET_KEY: z.string().check(z.minLength(1)),
-    UPLOADTHING_TOKEN: z.string().check(z.minLength(1)),
-    YANDEX_CLIENT_ID: z.string().check(z.minLength(1)),
-    YANDEX_CLIENT_SECRET: z.string().check(z.minLength(1)),
+    GITHUB_CLIENT_ID: stringSchema,
+    GITHUB_CLIENT_SECRET: stringSchema,
+    GITHUB_SYSTEM_INSTALLATION_ID: numericSchema,
+    GITHUB_SYSTEM_PAT: stringSchema,
+    GITHUB_WEBHOOK_SECRET: stringSchema,
+    GOOGLE_CLIENT_ID: stringSchema,
+    GOOGLE_CLIENT_SECRET: stringSchema,
+    GROQ_API_KEY: stringSchema,
+    NEXTAUTH_SECRET: stringSchema,
+    REDIS_TCP_URL: stringSchema,
+    RESEND_API_KEY: stringSchema,
+    TURNSTILE_SECRET_KEY: stringSchema,
+    UPLOADTHING_TOKEN: stringSchema,
+    YANDEX_CLIENT_ID: stringSchema,
+    YANDEX_CLIENT_SECRET: stringSchema,
   },
-
   shared: sharedSchema,
-
   skipValidation: isSharedValidationSkipped,
 });
 
@@ -82,7 +90,7 @@ if (envServer.NODE_ENV !== "test" && typeof rawGithubAppPrivateKey !== "string")
 
 export const GITHUB_APP_PRIVATE_KEY =
   typeof rawGithubAppPrivateKey === "string" ? rawGithubAppPrivateKey.replaceAll("\\n", "\n") : "";
-export const GITHUB_SYSTEM_PAT = envServer.GITHUB_SYSTEM_PAT ?? null;
+export const GITHUB_SYSTEM_PAT = envServer.GITHUB_SYSTEM_PAT;
 export const GITHUB_WEBHOOK_SECRET = envServer.GITHUB_WEBHOOK_SECRET;
 export const GITHUB_SYSTEM_INSTALLATION_ID = envServer.GITHUB_SYSTEM_INSTALLATION_ID;
 
