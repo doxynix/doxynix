@@ -1,5 +1,8 @@
 import { z } from "zod/v4-mini";
 
+export const stringSchema = z.string().check(z.minLength(1));
+export const numericSchema = z.string().check(z.regex(/^\d+$/));
+
 export const sharedSchema = {
   ANALYZE: z.optional(z.enum(["true", "false"])),
   CI: z.optional(z.enum(["true", "false"])),

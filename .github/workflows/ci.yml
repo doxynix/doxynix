@@ -23,6 +23,7 @@ env:
   SKIP_ENV_VALIDATION: "true"
   NEXT_TELEMETRY_DISABLED: 1
   DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+  DIRECT_URL: postgresql://user:password@localhost:5432/test_db
   NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
   NEXTAUTH_URL: "http://localhost:3000"
   JWT_SECRET: "dummy-jwt-secret"
@@ -179,11 +180,13 @@ jobs:
         run: pnpm prisma db push --skip-generate
         env:
           DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+          DIRECT_URL: postgresql://user:password@localhost:5432/test_db
 
       - name: Prisma Generate
         run: pnpm db:generate
         env:
           DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+          DIRECT_URL: postgresql://user:password@localhost:5432/test_db
 
       - name: Type Checking
         run: pnpm tsc --noEmit
