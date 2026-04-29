@@ -5,7 +5,7 @@ import { unauthorized } from "next/navigation";
 import { SidebarInset, SidebarProvider } from "@/shared/ui/core/sidebar";
 import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificator";
 
-import { GitInstallationCatcher } from "@/features/repo-setup/ui/git-installation-catcher";
+import { GithubConnectionFeedback } from "@/features/dashboard/ui/github-connection-feedback";
 import { CreateRepoDialog } from "@/features/repo/ui/create-repo-dialog";
 
 import { AppFooter } from "@/widgets/app-footer/ui/app-footer";
@@ -51,8 +51,8 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
         </div>
         <HotkeyListeners />
       </SidebarProvider>
+      <GithubConnectionFeedback />
       <CreateRepoDialog />
-      <GitInstallationCatcher />
     </>
   );
 }

@@ -353,6 +353,7 @@ model Account {
   @@allow('update', auth().role == 'ADMIN')
 
   @@unique([provider, providerAccountId])
+  @@unique([userId, provider])
   @@map("accounts")
 }
 
@@ -462,35 +463,35 @@ model AuditLog {
 
 model PullRequestAnalysis {
   /// @zod.custom.omit(["model"])
-  id             Int                  @id @default(autoincrement()) @omit
+  id               Int                  @id @default(autoincrement()) @omit
   /// @zod.custom.omit(["model"])
-  publicId       String               @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  publicId         String               @unique @default(uuid(7)) @map("public_id") @db.Uuid
 
-  prNumber       Int                  @map("pr_number")
-  owner          String               @length(min: 1, max: 39)
-  repoName       String               @map("repo_name") @length(min: 1, max: 255)
-  headSha        String               @map("head_sha")
-  baseSha        String               @map("base_sha")
+  prNumber         Int                  @map("pr_number")
+  owner            String               @length(min: 1, max: 39)
+  repoName         String               @map("repo_name") @length(min: 1, max: 255)
+  headSha          String               @map("head_sha")
+  baseSha          String               @map("base_sha")
 
-  status         PRAnalysisStatus     @default(PENDING) @map("status")
+  status           PRAnalysisStatus     @default(PENDING) @map("status")
   /// @zod.number.int().min(0).max(10)
-  riskScore      Int?                 @map("risk_score") @gte(0) @lte(10)
+  riskScore        Int?                 @map("risk_score") @gte(0) @lte(10)
 
-  findingsJson   Json?                @map("findings_json")
-  changedFilesJson Json?              @map("changed_files_json")
+  findingsJson     Json?                @map("findings_json")
+  changedFilesJson Json?                @map("changed_files_json")
 
-  jobId          String?
-  error          String?              @db.Text
+  jobId            String?
+  error            String?              @db.Text
 
-  createdAt      DateTime             @default(now()) @map("created_at")
-  updatedAt      DateTime             @updatedAt @map("updated_at")
+  createdAt        DateTime             @default(now()) @map("created_at")
+  updatedAt        DateTime             @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
-  repoId         Int                  @map("repo_id") @omit
-  repo           Repo                 @relation("RepoPullRequests", fields: [repoId], references: [id], onDelete: Cascade)
+  repoId           Int                  @map("repo_id") @omit
+  repo             Repo                 @relation("RepoPullRequests", fields: [repoId], references: [id], onDelete: Cascade)
 
-  comments       PullRequestComment[]
-  generatedFixes GeneratedFix[]
+  comments         PullRequestComment[]
+  generatedFixes   GeneratedFix[]
 
   @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
 

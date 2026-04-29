@@ -17,6 +17,7 @@ import {
 
 import type { DbClient } from "../db";
 import { logger } from "../logger";
+import { githubTokenService } from "./github-token.service";
 
 const AppOctokit = Octokit.plugin(retry, throttling, paginateRest, createPullRequest);
 export type OctokitInstance = InstanceType<typeof AppOctokit>;
@@ -72,14 +73,14 @@ export function getInstallationClient(installationId: number): OctokitInstance {
   }) as OctokitInstance;
 }
 
-export function getPublicClient(token?: string): OctokitInstance {
+function getPublicClient(token?: string): OctokitInstance {
   return new AppOctokit({
     ...getCommonConfig(),
     auth: token,
   }) as OctokitInstance;
 }
 
-export function getSystemClient(): OctokitInstance {
+function getSystemClient(): OctokitInstance {
   return getInstallationClient(Number(GITHUB_SYSTEM_INSTALLATION_ID));
 }
 
@@ -137,15 +138,12 @@ export async function getClientContext(
     }
   }
 
-  // Try oauth tokens
-  const oauthAccounts = await prisma.account.findMany({
-    where: { access_token: { not: null }, provider: "github", userId },
-  });
-
-  if (oauthAccounts.length > 0 && oauthAccounts[0]?.access_token != null) {
+  // Get token
+  const validToken = await githubTokenService.getValidToken(userId);
+  if (validToken != null) {
     return {
       hasUserToken: true,
-      octokit: getUserClient(oauthAccounts[0].access_token),
+      octokit: getUserClient(validToken),
       type: "oauth",
     };
   }
