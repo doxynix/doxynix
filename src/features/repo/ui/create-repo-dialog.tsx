@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BookOpen, ExternalLinkIcon, RefreshCcw } from "lucide-react";
+import { Book, Plus, RefreshCcw } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
@@ -29,6 +29,8 @@ import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
+import { AppAvatar } from "@/shared/ui/kit/app-avatar";
+import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
@@ -208,23 +210,38 @@ export function CreateRepoDialog() {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs font-medium tracking-wider">
                 <div className="text-muted-foreground flex items-center gap-2 uppercase">
-                  <BookOpen className="size-3" />
+                  <Book className="size-3" />
                   {t("repo_your_repos")}
                 </div>
 
-                {myGithubData?.isConnected === true &&
-                  myGithubData.installationId != null &&
-                  myGithubData.manageUrl != null && (
-                    <div className="text-muted-foreground flex items-center gap-2 font-normal tracking-normal normal-case">
-                      <span>Don&apos;t see it?</span>
-                      <ExternalLink
-                        href={`${myGithubData.manageUrl}`}
-                        className="flex items-center gap-1 hover:underline"
+                {myGithubData?.installations && myGithubData.installations.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {myGithubData.installations.map((inst) => (
+                      <AppTooltip key={inst.id} content={inst.login}>
+                        <ExternalLink
+                          href={inst.manageUrl ?? ""}
+                          className="flex items-center gap-1 hover:underline"
+                        >
+                          <AppAvatar alt={inst.login} sizeClassName="size-6" src={inst.avatar} />
+                        </ExternalLink>
+                      </AppTooltip>
+                    ))}
+                    <AppTooltip content="Add new">
+                      <LoadingButton
+                        type="button"
+                        disabled={loading}
+                        isLoading={loading}
+                        loadingText=""
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => void handleInstallGitHubApp()}
+                        className="size-6"
                       >
-                        Manage access <ExternalLinkIcon className="h-2.5 w-2.5" />
-                      </ExternalLink>
-                    </div>
-                  )}
+                        <Plus />
+                      </LoadingButton>
+                    </AppTooltip>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-0.5">
@@ -273,13 +290,11 @@ export function CreateRepoDialog() {
                         onClick={() => void handleSignIn()}
                         className="cursor-pointer"
                       >
-                        <GitHubIcon /> Link GitHub Account
+                        <GitHubIcon /> Link
                       </LoadingButton>
                     </div>
                   </div>
-                ) : oauthStatus === "invalid" &&
-                  myGithubData.installationId == null &&
-                  myGithubData.items.length === 0 ? (
+                ) : oauthStatus === "invalid" ? (
                   <div className="h-70 rounded-xl border p-1">
                     <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
                       <p className="text-muted-foreground mb-3 text-sm">
@@ -294,66 +309,63 @@ export function CreateRepoDialog() {
                         onClick={() => void handleSignIn()}
                         className="cursor-pointer"
                       >
-                        <GitHubIcon /> Relink GitHub Account
+                        <GitHubIcon /> Relink
                       </LoadingButton>
                     </div>
                   </div>
                 ) : (
                   <ScrollArea type="always" className="h-70 rounded-xl border p-1">
+                    {myGithubData.items.length > 0 && myGithubData.installations?.length === 0 && (
+                      <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
+                        <p className="text-muted-foreground mb-3 text-sm">
+                          Want private and org repositories? Install our GitHub App!
+                        </p>
+                        <LoadingButton
+                          type="button"
+                          disabled={loading}
+                          isLoading={loading}
+                          loadingText="Connecting..."
+                          variant="outline"
+                          onClick={() => void handleInstallGitHubApp()}
+                          className="cursor-pointer"
+                        >
+                          <GitHubIcon /> Install
+                        </LoadingButton>
+                      </div>
+                    )}
+
                     {myGithubData.items.length === 0 ? (
-                      myGithubData.installationId == null ? (
-                        <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
-                          <p className="text-muted-foreground mb-3 text-sm">
-                            Great! Now install our GitHub App to grant access to your repositories.
-                          </p>
-                          <LoadingButton
-                            type="button"
-                            disabled={loading}
-                            isLoading={loading}
-                            loadingText="Connecting..."
-                            variant="outline"
-                            onClick={() => void handleInstallGitHubApp()}
-                            className="cursor-pointer"
-                          >
-                            <GitHubIcon /> Install GitHub App
-                          </LoadingButton>
-                        </div>
-                      ) : (
-                        <div className="text-muted-foreground flex h-full items-center justify-center p-4 text-center text-sm">
-                          No repositories found. Ensure you granted access to them.
-                        </div>
-                      )
-                    ) : (
-                      <>
-                        {myGithubData.installationId == null && (
-                          <div className="xs:px-4 xs:py-4 border-border/70 flex flex-col gap-2 border-b px-2 py-3 text-center">
-                            <p className="text-muted-foreground text-sm">
-                              Want private and org repositories? Install our GitHub App.
+                      <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
+                        {myGithubData.installations?.length === 0 ? (
+                          <>
+                            <p className="text-muted-foreground mb-3 text-sm font-medium">
+                              Install our GitHub App to grant access to your repositories.
                             </p>
-                            <div className="flex justify-center">
-                              <LoadingButton
-                                type="button"
-                                disabled={loading}
-                                isLoading={loading}
-                                loadingText="Connecting..."
-                                variant="outline"
-                                onClick={() => void handleInstallGitHubApp()}
-                                className="cursor-pointer"
-                              >
-                                <GitHubIcon /> Install GitHub App
-                              </LoadingButton>
-                            </div>
-                          </div>
+                            <LoadingButton
+                              type="button"
+                              disabled={loading}
+                              isLoading={loading}
+                              variant="outline"
+                              onClick={() => void handleInstallGitHubApp()}
+                            >
+                              <GitHubIcon /> Install App
+                            </LoadingButton>
+                          </>
+                        ) : (
+                          <p className="text-muted-foreground flex h-full items-center justify-center p-4 text-center text-sm">
+                            No repositories found. Ensure you granted access to them.
+                          </p>
                         )}
-                        {myGithubData.items.map((myRepo) => (
-                          <RepoItem
-                            key={myRepo.fullName}
-                            disabled={create.isPending}
-                            repo={myRepo}
-                            onClick={() => handleSelectRepo(myRepo.fullName)}
-                          />
-                        ))}
-                      </>
+                      </div>
+                    ) : (
+                      myGithubData.items.map((myRepo) => (
+                        <RepoItem
+                          key={myRepo.fullName}
+                          disabled={create.isPending}
+                          repo={myRepo}
+                          onClick={() => handleSelectRepo(myRepo.fullName)}
+                        />
+                      ))
                     )}
                   </ScrollArea>
                 )}

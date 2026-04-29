@@ -11,31 +11,7 @@ import {
 import { logger } from "@/server/shared/infrastructure/logger";
 import { isOctokitError } from "@/server/shared/lib/handle-error";
 
-type OauthValidationStatus = "invalid" | "missing" | "valid";
-
-async function resolveOauthValidationStatus(
-  oauthAccounts: Array<{ access_token: null | string }>
-): Promise<OauthValidationStatus> {
-  if (oauthAccounts.length === 0) return "missing";
-
-  let hasUnauthorized = false;
-  for (const oauthAccount of oauthAccounts) {
-    if (oauthAccount.access_token == null) continue;
-    try {
-      const userOctokit = getUserClient(oauthAccount.access_token);
-      await userOctokit.rest.users.getAuthenticated();
-      return "valid";
-    } catch (error) {
-      if (isOctokitError(error) && error.status === 401) {
-        hasUnauthorized = true;
-      } else {
-        logger.warn({ error, msg: "GitHub OAuth validation failed" });
-      }
-    }
-  }
-
-  return hasUnauthorized ? "invalid" : "missing";
-}
+import { githubTokenService } from "./github-token.service";
 
 export const githubAppService = {
   async getInstallUrl(prisma: PrismaClientExtended, userId: number) {
@@ -63,11 +39,11 @@ export const githubAppService = {
       where: { isSuspended: false, userId },
     });
 
-    const oauthAccounts = await db.account.findMany({
-      where: { access_token: { not: null }, provider: "github", userId },
-    });
+    const validToken = await githubTokenService.getValidToken(userId);
 
-    if (installations.length === 0 && oauthAccounts.length === 0) {
+    const oauthStatus = validToken != null ? "valid" : "invalid";
+
+    if (installations.length === 0 && validToken == null) {
       return {
         installationId: null,
         isConnected: false,
@@ -77,23 +53,30 @@ export const githubAppService = {
       };
     }
 
-    const mainInstall = installations.length > 0 ? installations[0] : null;
-
-    const manageUrl = mainInstall != null ? (mainInstall.htmlUrl ?? null) : null;
-    const installationId = mainInstall != null ? Number(mainInstall.id) : null;
-
-    const oauthStatus = await resolveOauthValidationStatus(oauthAccounts);
-
-    if (installationId == null && oauthStatus === "invalid") {
-      return { installationId, isConnected: true, items: [], manageUrl, oauthStatus };
-    }
+    const installationList = installations.map((inst) => ({
+      avatar: inst.accountAvatar,
+      id: Number(inst.id),
+      login: inst.accountLogin,
+      manageUrl: inst.htmlUrl,
+    }));
 
     try {
       const repos = await getMyRepos(prisma, userId);
-      return { installationId, isConnected: true, items: repos, manageUrl, oauthStatus };
+
+      return {
+        installations: installationList,
+        isConnected: true,
+        items: repos,
+        oauthStatus,
+      };
     } catch (error) {
       logger.error({ error, msg: "Dashboard fetch failed", userId });
-      return { installationId, isConnected: true, items: [], manageUrl, oauthStatus };
+      return {
+        installations: installationList,
+        isConnected: true,
+        items: [],
+        oauthStatus,
+      };
     }
   },
 
@@ -122,12 +105,9 @@ export const githubAppService = {
       });
     }
 
-    const oauthAccounts = await prisma.account.findMany({
-      select: { access_token: true },
-      where: { access_token: { not: null }, provider: "github", userId: userIdNum },
-    });
+    const validToken = await githubTokenService.getValidToken(userIdNum);
 
-    if (oauthAccounts.length === 0) {
+    if (validToken == null) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "You must link your GitHub account before installing the app.",
@@ -135,39 +115,24 @@ export const githubAppService = {
     }
 
     let hasAccess = false;
-    let verifiedAtLeastOneAccount = false;
-    let hasUnauthorized = false;
+    try {
+      const userOctokit = getUserClient(validToken);
+      const userInstallations = await userOctokit.paginate(
+        userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
+        { per_page: 100 }
+      );
 
-    for (const oauthAccount of oauthAccounts) {
-      if (oauthAccount.access_token == null) continue;
-      try {
-        const userOctokit = getUserClient(oauthAccount.access_token);
-        const userInstallations = await userOctokit.paginate(
-          userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
-          { per_page: 100 }
-        );
-
-        verifiedAtLeastOneAccount = true;
-
-        if (userInstallations.some((inst) => inst.id === inputInstIdNum)) {
-          hasAccess = true;
-          break;
-        }
-      } catch (error) {
-        if (isOctokitError(error) && (error.status === 401 || error.status === 403)) {
-          hasUnauthorized = true;
-        }
-        logger.warn({ error, msg: "GitHub API verification failed for one OAuth account" });
+      if (userInstallations.some((inst) => inst.id === inputInstIdNum)) {
+        hasAccess = true;
       }
-    }
-
-    if (!verifiedAtLeastOneAccount) {
-      if (hasUnauthorized) {
+    } catch (error) {
+      if (isOctokitError(error) && (error.status === 401 || error.status === 403)) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "GitHub authorization expired. Please relink your GitHub account.",
         });
       }
+      logger.warn({ error, msg: "GitHub API verification failed for one OAuth account" });
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to verify installation ownership via GitHub.",
