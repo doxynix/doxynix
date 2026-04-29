@@ -204,7 +204,7 @@ export const githubAppService = {
             where: { id: instIdBigInt },
           });
 
-          if (existing) {
+          if (existing != null) {
             throw new TRPCError({
               code: "FORBIDDEN",
               message: "This installation is already linked to another workspace.",
