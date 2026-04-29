@@ -144,6 +144,20 @@ jobs:
     if: github.actor != 'ImgBotApp'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout repo
@@ -161,8 +175,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Prepare Database Schema
+        run: pnpm prisma db push --skip-generate
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+
       - name: Prisma Generate
         run: pnpm db:generate
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/test_db
 
       - name: Type Checking
         run: pnpm tsc --noEmit
@@ -277,11 +298,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify Database Schema
+        run: pnpm prisma db push --skip-generate
+
       - name: Prisma Generate
         run: pnpm db:generate
-
-      - name: Verify Database Schema
-        run: pnpm prisma db push
 
       - name: Run Tests with Coverage
         run: pnpm test:coverage
@@ -301,6 +322,21 @@ jobs:
     needs: [quality, types, security, tests, changes, init]
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     if: |
       always() && github.actor != 'ImgBotApp' &&
       needs.quality.result == 'success' &&
@@ -323,6 +359,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Prepare Database Schema
+        run: pnpm prisma db push --skip-generate
 
       - name: Prisma Generate
         run: pnpm db:generate
@@ -400,11 +439,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Setup DB Schema
+        run: pnpm prisma db push --skip-generate
+
       - name: Prisma Generate
         run: pnpm db:generate
-
-      - name: Setup DB Schema
-        run: pnpm prisma db push
 
       - name: Build app
         run: pnpm build
@@ -468,11 +507,11 @@ jobs:
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Setup DB Schema
+        run: pnpm prisma db push --skip-generate
+
       - name: Prisma Generate
         run: pnpm db:generate
-
-      - name: Setup DB Schema
-        run: pnpm prisma db push
 
       - name: Run Playwright tests
         run: pnpm exec playwright test
