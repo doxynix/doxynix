@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.28.5](https://github.com/doxynix/doxynix/compare/v1.28.4...v1.28.5) (2026-04-29)
+
+
+### Bug Fixes
+
+* исправление ошибки билда на vercel  ([#1289](https://github.com/doxynix/doxynix/issues/1289)) ([98fba2a](https://github.com/doxynix/doxynix/commit/98fba2a6563827ace19c652c6202bfe91db1b81f))
+
 ## [1.28.4](https://github.com/doxynix/doxynix/compare/v1.28.3...v1.28.4) (2026-04-29)
 
 
