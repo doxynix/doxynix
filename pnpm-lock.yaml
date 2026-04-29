@@ -197,11 +197,11 @@ importers:
         specifier: 0.10.10
         version: 0.10.10(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)
       '@secretlint/core':
-        specifier: 12.2.0
-        version: 12.2.0
+        specifier: 12.3.0
+        version: 12.3.0
       '@secretlint/secretlint-rule-preset-canary':
-        specifier: 12.2.0
-        version: 12.2.0
+        specifier: 12.3.0
+        version: 12.3.0
       '@sentry/nextjs':
         specifier: 10.50.0
         version: 10.50.0(@opentelemetry/core@2.7.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.203.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.0(@opentelemetry/api@1.9.1))(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(webpack@5.106.2(@swc/core@1.15.32(@swc/helpers@0.5.21))(esbuild@0.27.7))
@@ -609,11 +609,11 @@ importers:
         specifier: 1.59.1
         version: 1.59.1
       '@secretlint/secretlint-rule-pattern':
-        specifier: 12.2.0
-        version: 12.2.0
+        specifier: 12.3.0
+        version: 12.3.0
       '@secretlint/secretlint-rule-preset-recommend':
-        specifier: 12.2.0
-        version: 12.2.0
+        specifier: 12.3.0
+        version: 12.3.0
       '@shikijs/transformers':
         specifier: 4.0.2
         version: 4.0.2
@@ -816,8 +816,8 @@ importers:
         specifier: 5.1.5
         version: 5.1.5
       secretlint:
-        specifier: 12.2.0
-        version: 12.2.0
+        specifier: 12.3.0
+        version: 12.3.0
       tailwind-scrollbar:
         specifier: 4.0.2
         version: 4.0.2(react@19.2.5)(tailwindcss@4.2.4)
@@ -4705,54 +4705,54 @@ packages:
   '@sec-ant/readable-stream@0.4.1':
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
 
-  '@secretlint/config-creator@12.2.0':
-    resolution: {integrity: sha512-enoydCMrJ8rmrM09qxDBd2XU1V3u9N9CfjRyUbYh3+m74G17u2PCTnlAw5UyeobewCb06d4Dym5t5ybCabATyA==}
+  '@secretlint/config-creator@12.3.0':
+    resolution: {integrity: sha512-Gj5SfVl2JJ5JKuvmWBN5NVdmjPwlFYPMB1tEmUC69/ZzcDA0sTu8XHesnxcBPCDHltA8OvK14qjA+r4tI5Limw==}
     engines: {node: '>=22.0.0'}
 
-  '@secretlint/config-loader@12.2.0':
-    resolution: {integrity: sha512-f7B9o6YF1jhTtd0ccJywcliCWkP02eYNM4efmua77AuztQTkXLVsw6eECXGAfZ9vh9uPHAK87Km6X4ta5hhtlA==}
+  '@secretlint/config-loader@12.3.0':
+    resolution: {integrity: sha512-eUtA1BkitYxhb+csk7CcTG5EmmR8Y0YInnfrSXgPAGth0LkljctUf2V8GXVpN+qza8v+K3VzOLdffjmMD4OvwA==}
     engines: {node: '>=22.0.0'}
 
-  '@secretlint/core@12.2.0':
-    resolution: {integrity: sha512-ZT4irO8fPUg2810kcnfNQZ+AHIIYLFKyEqR91aSDl3g/RFOOLC66CAzGmMA1OuMc+sx9XE9TnM/IpLmLVvUSnA==}
+  '@secretlint/core@12.3.0':
+    resolution: {integrity: sha512-19h/WkXe2fC1wyT5REZ3ucGMufKXP+Qdux+QgQp5HTfnnhJZbJnm1SrRTw0+F2phlpxZ5dwoVvWhATJNCegYaA==}
     engines: {node: '>=22.0.0'}
 
-  '@secretlint/formatter@12.2.0':
-    resolution: {integrity: sha512-1KDSx4NgKObi8OQoPjBaGa41/sv9ZIrEMa94kQ3PhhVTPONP4N618W2c1CBVMuSNvRHilsKjXWZlKJKcIF4FlQ==}
+  '@secretlint/formatter@12.3.0':
+    resolution: {integrity: sha512-U/TIVfLq7jBhezRw1WnbnTgrJ/l3Hx5+qRCI39ek6u6fcppaPkQTYDmoh0+xTVromkXO1DCeHfZIQtztqkWhbQ==}
     engines: {node: '>=22.0.0'}
 
-  '@secretlint/node@12.2.0':
-    resolution: {integrity: sha512-7hZxi49l2pkGjCT/BQf+ElKqFcbxooH9JslCThRfAMElyL3KGo14HhGfFFyWhhTLH2enAds1nKXczhWBI3otIQ==}
+  '@secretlint/node@12.3.0':
+    resolution: {integrity: sha512-V9v1yoxUP+eIoP3tICHsJZIwbuolaTvV5fAJeFAQ2UjPhThec60eiqVZrg3LDV+uOhrPC7lU93Rlcv456dvoOg==}
     engines: {node: '>=22.0.0'}
 
-  '@secretlint/profiler@12.2.0':
-    resolution: {integrity: sha512-tB1NhUbCWH+32wSx6xE+Uj7nTUkidYEyW6B6pdGxsiZSM4SGz+FuKpr9OcylGsEphkkz1cQA3P9CjwCHcQqrnw==}
+  '@secretlint/profiler@12.3.0':
+    resolution: {integrity: sha512-duXLiohJxBDlDOBmUJ04UyT8RXa3RXcqd3kC+EVmWbNfRD2Sxb4HXyXCB93mLvwXfsrDp3Xv5ZjfoVG/jx7Qog==}
 
-  '@secretlint/resolver@12.2.0':
-    resolution: {integrity: sha512-k3Mq4zeLpJtvBoEggEYstWhEiD23tL8qHbz/eYN+yQaQ2tItebIMd34qFX1jjeooiZdp/OuNWZA5JeyTw+SXcQ==}
+  '@secretlint/resolver@12.3.0':
+    resolution: {integrity: sha512-7OI8pYORU5eukqocX/KhTr073wc3AzPVWiL3PfeK7JIAo5PoNVNux7f3v5WrjAcgRg0QhKlgVX3sEw8JraFuaw==}
 
-  '@secretlint/secretlint-rule-pattern@12.2.0':
-    resolution: {integrity: sha512-WZykGPsE2wGcil0OjGQb8Wh1Y+lSoCSZnZ4k/fdWUNNMnXvDkctb7hNxBgJ2t6MYaS6JkhzBGi4X8/EUlDGHpA==}
+  '@secretlint/secretlint-rule-pattern@12.3.0':
+    resolution: {integrity: sha512-+Qg7MXqeMpzjR1QBfebS6YO5tXGX1YD9L+Oqu5j5P791gTinU/+SSOFCMwVs/dV4CXjmhSlZRrZfjFO4MMVvDg==}
     engines: {node: '>=22.0.0'}
 
-  '@secretlint/secretlint-rule-preset-canary@12.2.0':
-    resolution: {integrity: sha512-sZEhjw3DuonyPmTASPLlLzKqYzVhRp0VZ4zkRROwHLflXW2bQJ4O/zHkc6ZiEqYmLOWhgemHyI7ZkwHN7cWjig==}
+  '@secretlint/secretlint-rule-preset-canary@12.3.0':
+    resolution: {integrity: sha512-mt1ecogQiE/X7Hgw/HlVs46+3cdSGENHVYsO0bsMsHWia3enpQoXbdAx4gcUi6GE8pmRhUhKZHS91F/xc8F2zg==}
     engines: {node: '>=22.0.0'}
 
-  '@secretlint/secretlint-rule-preset-recommend@12.2.0':
-    resolution: {integrity: sha512-n4qknL6vYRelmyrAyV/Z8I85c6jS6yF/ZxpgcqebjJuECIiel8OT2wIVIq9vk0MwlQN35skaQu0KvfM8uuGeyA==}
+  '@secretlint/secretlint-rule-preset-recommend@12.3.0':
+    resolution: {integrity: sha512-i/oRR3PNgbmdiDU0xDEkGN3pnDvj6VjRB/OdXCb5fZ/DjlqFaZ83DSEE9Wxo8CpYNwHeBf8XNcVr/zVvCPtBVw==}
     engines: {node: '>=22.0.0'}
 
-  '@secretlint/source-creator@12.2.0':
-    resolution: {integrity: sha512-FYPtOmnm5daQnY4m2mgf/06bXkCL2oj1CIs+76tBu80kE1RDH0/ejsVKsiw6O5H3E2J1ruchRpSXTAlyQw1rYA==}
+  '@secretlint/source-creator@12.3.0':
+    resolution: {integrity: sha512-Rl/kLnwfjwvviXA/LlN8xe+ndeI+Jq4GDKHhqvW9xUCl9uPHi7PUbgvqrkmFc2lFibxfC+qA+1J0cPe8WJLLAw==}
     engines: {node: '>=22.0.0'}
 
-  '@secretlint/tester@12.2.0':
-    resolution: {integrity: sha512-4PcvrD12uwWooe4zChmR2e6vGdZtaKC1JoGjcHctSS7VC/N3sY6s7GLIb8zpEWYVzmQX2qded8K+sFvhOFK4wg==}
+  '@secretlint/tester@12.3.0':
+    resolution: {integrity: sha512-aXs+QgPxX7e75SLQWdrtUKw5efKUzpTsx66yc3C758cp9Tjp9LFu4jBFMzy5GCmsSxdbtSDd3lW4vlealHkXfQ==}
     engines: {node: '>=22.0.0'}
 
-  '@secretlint/types@12.2.0':
-    resolution: {integrity: sha512-pIqhdWTFMN/cBfpZkAX1A8dqavsFvAdLobbxyMUHBUn/sUgXzyvUp7I52iyTr21EPc/BvOT9lDWdJBkcNz+n7Q==}
+  '@secretlint/types@12.3.0':
+    resolution: {integrity: sha512-LR8XB4uNCFJcYTV2wZ1ZNxOW47BWO6lZr99VCCIVj5TfFjU7RAROQQVzJkuoarGirxHuIg+rRYP2DF8GJTaPXA==}
     engines: {node: '>=22.0.0'}
 
   '@selderee/plugin-htmlparser2@0.11.0':
@@ -12058,8 +12058,8 @@ packages:
   scule@1.3.0:
     resolution: {integrity: sha512-6FtHJEvt+pVMIB9IBY+IcCJ6Z5f1iQnytgyfKMhDKgmzYG+TeH/wx1y3l27rshSbLiSanrR9ffZDrEsmjlQF2g==}
 
-  secretlint@12.2.0:
-    resolution: {integrity: sha512-nIl6JNhywewJIJGHNeCpu0/NXs4zyhTriz9683SWNIjH6etDyN/Q/L2fJ4nCxqdl7iZM3MlVtQQMtPDomQINuw==}
+  secretlint@12.3.0:
+    resolution: {integrity: sha512-awfppc6VmsgMHK23WVOpcFO94oZxoOntsfwE5WRQU5ir2PLJT2dd0WlgGfQN1Jjq3Xo+jQhaFfkPyw1XVmCsLg==}
     engines: {node: '>=22.0.0'}
     hasBin: true
 
@@ -18302,34 +18302,34 @@ snapshots:
 
   '@sec-ant/readable-stream@0.4.1': {}
 
-  '@secretlint/config-creator@12.2.0':
+  '@secretlint/config-creator@12.3.0':
     dependencies:
-      '@secretlint/types': 12.2.0
+      '@secretlint/types': 12.3.0
 
-  '@secretlint/config-loader@12.2.0':
+  '@secretlint/config-loader@12.3.0':
     dependencies:
-      '@secretlint/profiler': 12.2.0
-      '@secretlint/resolver': 12.2.0
-      '@secretlint/types': 12.2.0
+      '@secretlint/profiler': 12.3.0
+      '@secretlint/resolver': 12.3.0
+      '@secretlint/types': 12.3.0
       ajv: 8.20.0
       debug: 4.4.3
       rc-config-loader: 4.1.4
     transitivePeerDependencies:
       - supports-color
 
-  '@secretlint/core@12.2.0':
+  '@secretlint/core@12.3.0':
     dependencies:
-      '@secretlint/profiler': 12.2.0
-      '@secretlint/types': 12.2.0
+      '@secretlint/profiler': 12.3.0
+      '@secretlint/types': 12.3.0
       debug: 4.4.3
       structured-source: 4.0.0
     transitivePeerDependencies:
       - supports-color
 
-  '@secretlint/formatter@12.2.0':
+  '@secretlint/formatter@12.3.0':
     dependencies:
-      '@secretlint/resolver': 12.2.0
-      '@secretlint/types': 12.2.0
+      '@secretlint/resolver': 12.3.0
+      '@secretlint/types': 12.3.0
       '@textlint/linter-formatter': 15.6.0
       '@textlint/module-interop': 15.6.0
       '@textlint/types': 15.6.0
@@ -18342,51 +18342,51 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@secretlint/node@12.2.0':
+  '@secretlint/node@12.3.0':
     dependencies:
-      '@secretlint/config-loader': 12.2.0
-      '@secretlint/core': 12.2.0
-      '@secretlint/formatter': 12.2.0
-      '@secretlint/profiler': 12.2.0
-      '@secretlint/source-creator': 12.2.0
-      '@secretlint/types': 12.2.0
+      '@secretlint/config-loader': 12.3.0
+      '@secretlint/core': 12.3.0
+      '@secretlint/formatter': 12.3.0
+      '@secretlint/profiler': 12.3.0
+      '@secretlint/source-creator': 12.3.0
+      '@secretlint/types': 12.3.0
       debug: 4.4.3
       p-map: 7.0.4
     transitivePeerDependencies:
       - supports-color
 
-  '@secretlint/profiler@12.2.0': {}
+  '@secretlint/profiler@12.3.0': {}
 
-  '@secretlint/resolver@12.2.0': {}
+  '@secretlint/resolver@12.3.0': {}
 
-  '@secretlint/secretlint-rule-pattern@12.2.0':
+  '@secretlint/secretlint-rule-pattern@12.3.0':
     dependencies:
-      '@secretlint/tester': 12.2.0
-      '@secretlint/types': 12.2.0
+      '@secretlint/tester': 12.3.0
+      '@secretlint/types': 12.3.0
       '@textlint/regexp-string-matcher': 2.0.2
       micromatch: 4.0.8
     transitivePeerDependencies:
       - supports-color
 
-  '@secretlint/secretlint-rule-preset-canary@12.2.0': {}
+  '@secretlint/secretlint-rule-preset-canary@12.3.0': {}
 
-  '@secretlint/secretlint-rule-preset-recommend@12.2.0': {}
+  '@secretlint/secretlint-rule-preset-recommend@12.3.0': {}
 
-  '@secretlint/source-creator@12.2.0':
+  '@secretlint/source-creator@12.3.0':
     dependencies:
-      '@secretlint/types': 12.2.0
+      '@secretlint/types': 12.3.0
       istextorbinary: 9.5.0
 
-  '@secretlint/tester@12.2.0':
+  '@secretlint/tester@12.3.0':
     dependencies:
-      '@secretlint/config-loader': 12.2.0
-      '@secretlint/core': 12.2.0
-      '@secretlint/source-creator': 12.2.0
-      '@secretlint/types': 12.2.0
+      '@secretlint/config-loader': 12.3.0
+      '@secretlint/core': 12.3.0
+      '@secretlint/source-creator': 12.3.0
+      '@secretlint/types': 12.3.0
     transitivePeerDependencies:
       - supports-color
 
-  '@secretlint/types@12.2.0': {}
+  '@secretlint/types@12.3.0': {}
 
   '@selderee/plugin-htmlparser2@0.11.0':
     dependencies:
@@ -26986,13 +26986,13 @@ snapshots:
 
   scule@1.3.0: {}
 
-  secretlint@12.2.0:
+  secretlint@12.3.0:
     dependencies:
-      '@secretlint/config-creator': 12.2.0
-      '@secretlint/formatter': 12.2.0
-      '@secretlint/node': 12.2.0
-      '@secretlint/profiler': 12.2.0
-      '@secretlint/resolver': 12.2.0
+      '@secretlint/config-creator': 12.3.0
+      '@secretlint/formatter': 12.3.0
+      '@secretlint/node': 12.3.0
+      '@secretlint/profiler': 12.3.0
+      '@secretlint/resolver': 12.3.0
       debug: 4.4.3
       globby: 16.2.0
       read-pkg: 10.1.0
