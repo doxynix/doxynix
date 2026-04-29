@@ -38,6 +38,7 @@ export default defineConfig({
         },
       },
       prismaExtension({
+        typedSql: true,
         mode: "legacy",
         schema: "prisma/schema.prisma",
       }),
