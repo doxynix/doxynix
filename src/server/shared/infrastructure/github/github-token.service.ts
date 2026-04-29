@@ -80,6 +80,32 @@ export const githubTokenService = {
       });
     } catch (error) {
       logger.error({ error, msg: "Token rotation failed", userId });
+
+      // Clear tokens for poisoned account to prevent infinite retry
+      try {
+        await prisma.account.updateMany({
+          data: {
+            access_token: null,
+            expires_at: null,
+            refresh_token: null,
+          },
+          where: {
+            provider: "github",
+            userId,
+          },
+        });
+        logger.info({
+          msg: "Cleared poisoned GitHub tokens to prevent infinite retry",
+          userId,
+        });
+      } catch (cleanupError) {
+        logger.error({
+          cleanupError,
+          msg: "Failed to clear poisoned tokens",
+          userId,
+        });
+      }
+
       return null;
     }
   },

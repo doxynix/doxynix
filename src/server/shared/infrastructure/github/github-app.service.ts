@@ -60,6 +60,16 @@ export const githubAppService = {
       manageUrl: inst.htmlUrl,
     }));
 
+    // Skip OAuth calls when validToken is null (installation-only scenario)
+    if (validToken == null) {
+      return {
+        installations: installationList,
+        isConnected: true,
+        items: [],
+        oauthStatus,
+      };
+    }
+
     try {
       const repos = await getMyRepos(prisma, userId);
 
