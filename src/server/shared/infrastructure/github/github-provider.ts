@@ -172,7 +172,6 @@ export async function getClientContext(
  * 1. Primary client context
  * 2. If auth fails: public PAT (if allowPublicFallback)
  * 3. If auth fails: system app (if allowSystemFallback)
- * 4. If auth fails: unauthenticated public (if allowPublicFallback)
  */
 export async function resolveClientContext(
   prisma: DbClient,
@@ -200,13 +199,6 @@ export async function resolveClientContext(
           type: "app",
         };
       }
-
-      // Fallback 3: Unauthenticated public
-      return {
-        hasUserToken: false,
-        octokit: getPublicClient(),
-        type: "public",
-      };
     }
     throw error;
   }
