@@ -40,6 +40,7 @@ export default defineConfig({
       prismaExtension({
         mode: "legacy",
         schema: "prisma/schema.prisma",
+        typedSql: true,
       }),
     ],
     external: ["ioredis", "bottleneck"],
