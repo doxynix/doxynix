@@ -6,6 +6,7 @@
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
   extensions = [pg_trgm, unaccent, citext, fuzzystrmatch, btree_gin, pg_stat_statements, uuidOssp(map: "uuid-ossp")]
 }
 

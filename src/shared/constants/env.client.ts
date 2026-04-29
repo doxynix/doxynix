@@ -1,21 +1,21 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4-mini";
 
-import { envShared, isSharedValidationSkipped, sharedSchema } from "./env.shared";
+import { envShared, isSharedValidationSkipped, sharedSchema, stringSchema } from "./env.shared";
+
+const prefixSchema = z
+  .string()
+  .check(z.startsWith("/"), z.regex(/^\/[\w/\-]*$/, "Invalid prefix format"));
 
 export const envClient = createEnv({
   client: {
-    NEXT_PUBLIC_API_PREFIX: z
-      .string()
-      .check(z.startsWith("/"), z.regex(/^\/[\w/\-]*$/, "Invalid prefix format")),
+    NEXT_PUBLIC_API_PREFIX: prefixSchema,
     NEXT_PUBLIC_APP_URL: z.url(),
-    NEXT_PUBLIC_POSTHOG_HOST: z.string().check(z.minLength(1)),
-    NEXT_PUBLIC_POSTHOG_KEY: z.string().check(z.minLength(1)),
+    NEXT_PUBLIC_POSTHOG_HOST: stringSchema,
+    NEXT_PUBLIC_POSTHOG_KEY: stringSchema,
     NEXT_PUBLIC_SENTRY_DSN: z.url(),
-    NEXT_PUBLIC_TRPC_PREFIX: z
-      .string()
-      .check(z.startsWith("/"), z.regex(/^\/[\w/\-]*$/, "Invalid prefix format")),
-    NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().check(z.minLength(1)),
+    NEXT_PUBLIC_TRPC_PREFIX: prefixSchema,
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: stringSchema,
   },
 
   emptyStringAsUndefined: true,

@@ -184,7 +184,7 @@ export async function resolveClientContext(
   } catch (error) {
     if (error instanceof GitHubAuthRequiredError) {
       // Fallback 1: System PAT for public queries
-      if (options?.allowPublicFallback === true && GITHUB_SYSTEM_PAT != null) {
+      if (options?.allowPublicFallback === true) {
         return {
           hasUserToken: false,
           octokit: getPublicClient(GITHUB_SYSTEM_PAT),
@@ -202,13 +202,11 @@ export async function resolveClientContext(
       }
 
       // Fallback 3: Unauthenticated public
-      if (options?.allowPublicFallback === true) {
-        return {
-          hasUserToken: false,
-          octokit: getPublicClient(),
-          type: "public",
-        };
-      }
+      return {
+        hasUserToken: false,
+        octokit: getPublicClient(),
+        type: "public",
+      };
     }
     throw error;
   }
