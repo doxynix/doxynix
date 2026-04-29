@@ -58,7 +58,7 @@
     "release": "changeset publish",
     "trigger": "pnpm with-doppler \"pnpm dlx trigger.dev@latest dev\"",
     "trigger:remote": "pnpm with-doppler \"pnpm dlx trigger.dev@latest deploy --env prod\"",
-    "trigger:deploy": "pnpm dlx trigger.dev deploy",
+    "trigger:deploy": "pnpm with-doppler \"pnpm dlx trigger.dev deploy\"",
     "arch:graph": "depcruise src --config .dependency-cruiser.js --output-type dot | dot -T svg > arch/architecture.svg",
     "arch:check": "depcruise src --config .dependency-cruiser.js --output-type err",
     "arch:html": "dependency-cruiser src --config .dependency-cruiser.js --output-type err-html -f arch/server-report.html",
