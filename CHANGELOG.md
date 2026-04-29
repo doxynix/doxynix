@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.28.3](https://github.com/doxynix/doxynix/compare/v1.28.2...v1.28.3) (2026-04-29)
+
+
+### Bug Fixes
+
+* **auth:** фикс рефреша токенов гита  ([#1281](https://github.com/doxynix/doxynix/issues/1281)) ([9aae141](https://github.com/doxynix/doxynix/commit/9aae1413b64145a0bd171fbbf92217980afac7f5))
+
 ## [1.28.2](https://github.com/doxynix/doxynix/compare/v1.28.1...v1.28.2) (2026-04-29)
 
 
