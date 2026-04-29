@@ -99,7 +99,7 @@ export const githubAppService = {
     const instIdBigInt = BigInt(installationId);
     const inputInstIdNum = Number(installationId);
 
-    const consumedState = await prisma.verificationToken.deleteMany({
+    const validState = await prisma.verificationToken.findFirst({
       where: {
         expires: { gt: new Date() },
         identifier: `github_install_${userIdNum}`,
@@ -107,7 +107,7 @@ export const githubAppService = {
       },
     });
 
-    if (consumedState.count === 0) {
+    if (validState == null) {
       logger.warn({ msg: "CSRF/Replay attack or expired state", userId: userIdNum });
       throw new TRPCError({
         code: "FORBIDDEN",
@@ -142,7 +142,6 @@ export const githubAppService = {
           message: "GitHub authorization expired. Please relink your GitHub account.",
         });
       }
-      logger.warn({ error, msg: "GitHub API verification failed for one OAuth account" });
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to verify installation ownership via GitHub.",
@@ -172,24 +171,48 @@ export const githubAppService = {
     ).toUpperCase() as InstallationTargetType;
 
     try {
-      const updated = await prisma.githubInstallation.updateMany({
-        data: {
-          accountAvatar,
-          accountLogin,
-          htmlUrl: installationInfo.html_url,
-          repositorySelection: repoSelection,
-          userId: userIdNum,
-        },
-        where: {
-          id: instIdBigInt,
-          OR: [{ userId: null }, { userId: userIdNum }],
-        },
-      });
+      await prisma.$transaction(async (tx) => {
+        const consumed = await tx.verificationToken.deleteMany({
+          where: { identifier: `github_install_${userIdNum}`, token: state },
+        });
 
-      if (updated.count === 0) {
-        const created = await prisma.githubInstallation.createMany({
-          data: [
-            {
+        if (consumed.count === 0) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Security state already used or expired.",
+          });
+        }
+
+        const updated = await tx.githubInstallation.updateMany({
+          data: {
+            accountAvatar,
+            accountLogin,
+            htmlUrl: installationInfo.html_url,
+            isSuspended: false,
+            repositorySelection: repoSelection,
+            userId: userIdNum,
+          },
+          where: {
+            id: instIdBigInt,
+            OR: [{ userId: null }, { userId: userIdNum }],
+          },
+        });
+
+        if (updated.count === 0) {
+          const existing = await tx.githubInstallation.findUnique({
+            select: { userId: true },
+            where: { id: instIdBigInt },
+          });
+
+          if (existing) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "This installation is already linked to another workspace.",
+            });
+          }
+
+          await tx.githubInstallation.create({
+            data: {
               accountAvatar,
               accountLogin,
               appId: installationInfo.app_id,
@@ -200,32 +223,9 @@ export const githubAppService = {
               targetType,
               userId: userIdNum,
             },
-          ],
-          skipDuplicates: true,
-        });
-
-        if (created.count === 0) {
-          const claimed = await prisma.githubInstallation.updateMany({
-            data: {
-              accountAvatar,
-              accountLogin,
-              repositorySelection: repoSelection,
-              userId: userIdNum,
-            },
-            where: {
-              id: instIdBigInt,
-              OR: [{ userId: null }, { userId: userIdNum }],
-            },
           });
-
-          if (claimed.count === 0) {
-            throw new TRPCError({
-              code: "FORBIDDEN",
-              message: "This installation is already linked to another workspace.",
-            });
-          }
         }
-      }
+      });
     } catch (error) {
       if (error instanceof TRPCError) throw error;
 
