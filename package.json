@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "1.28.3",
+  "version": "1.28.4",
   "engines": {
     "node": ">=22.11.0",
     "pnpm": ">=10.0.0"
