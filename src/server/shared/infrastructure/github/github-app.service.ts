@@ -11,31 +11,7 @@ import {
 import { logger } from "@/server/shared/infrastructure/logger";
 import { isOctokitError } from "@/server/shared/lib/handle-error";
 
-type OauthValidationStatus = "invalid" | "missing" | "valid";
-
-async function resolveOauthValidationStatus(
-  oauthAccounts: Array<{ access_token: null | string }>
-): Promise<OauthValidationStatus> {
-  if (oauthAccounts.length === 0) return "missing";
-
-  let hasUnauthorized = false;
-  for (const oauthAccount of oauthAccounts) {
-    if (oauthAccount.access_token == null) continue;
-    try {
-      const userOctokit = getUserClient(oauthAccount.access_token);
-      await userOctokit.rest.users.getAuthenticated();
-      return "valid";
-    } catch (error) {
-      if (isOctokitError(error) && error.status === 401) {
-        hasUnauthorized = true;
-      } else {
-        logger.warn({ error, msg: "GitHub OAuth validation failed" });
-      }
-    }
-  }
-
-  return hasUnauthorized ? "invalid" : "missing";
-}
+import { githubTokenService } from "./github-token.service";
 
 export const githubAppService = {
   async getInstallUrl(prisma: PrismaClientExtended, userId: number) {
@@ -63,11 +39,11 @@ export const githubAppService = {
       where: { isSuspended: false, userId },
     });
 
-    const oauthAccounts = await db.account.findMany({
-      where: { access_token: { not: null }, provider: "github", userId },
-    });
+    const validToken = await githubTokenService.getValidToken(userId);
 
-    if (installations.length === 0 && oauthAccounts.length === 0) {
+    const oauthStatus = validToken != null ? "valid" : "invalid";
+
+    if (installations.length === 0 && validToken == null) {
       return {
         installationId: null,
         isConnected: false,
@@ -77,23 +53,40 @@ export const githubAppService = {
       };
     }
 
-    const mainInstall = installations.length > 0 ? installations[0] : null;
+    const installationList = installations.map((inst) => ({
+      avatar: inst.accountAvatar,
+      id: Number(inst.id),
+      login: inst.accountLogin,
+      manageUrl: inst.htmlUrl,
+    }));
 
-    const manageUrl = mainInstall != null ? (mainInstall.htmlUrl ?? null) : null;
-    const installationId = mainInstall != null ? Number(mainInstall.id) : null;
-
-    const oauthStatus = await resolveOauthValidationStatus(oauthAccounts);
-
-    if (installationId == null && oauthStatus === "invalid") {
-      return { installationId, isConnected: true, items: [], manageUrl, oauthStatus };
+    // Skip OAuth calls when validToken is null (installation-only scenario)
+    if (validToken == null) {
+      return {
+        installations: installationList,
+        isConnected: true,
+        items: [],
+        oauthStatus,
+      };
     }
 
     try {
       const repos = await getMyRepos(prisma, userId);
-      return { installationId, isConnected: true, items: repos, manageUrl, oauthStatus };
+
+      return {
+        installations: installationList,
+        isConnected: true,
+        items: repos,
+        oauthStatus,
+      };
     } catch (error) {
       logger.error({ error, msg: "Dashboard fetch failed", userId });
-      return { installationId, isConnected: true, items: [], manageUrl, oauthStatus };
+      return {
+        installations: installationList,
+        isConnected: true,
+        items: [],
+        oauthStatus,
+      };
     }
   },
 
@@ -106,7 +99,7 @@ export const githubAppService = {
     const instIdBigInt = BigInt(installationId);
     const inputInstIdNum = Number(installationId);
 
-    const consumedState = await prisma.verificationToken.deleteMany({
+    const validState = await prisma.verificationToken.findFirst({
       where: {
         expires: { gt: new Date() },
         identifier: `github_install_${userIdNum}`,
@@ -114,7 +107,7 @@ export const githubAppService = {
       },
     });
 
-    if (consumedState.count === 0) {
+    if (validState == null) {
       logger.warn({ msg: "CSRF/Replay attack or expired state", userId: userIdNum });
       throw new TRPCError({
         code: "FORBIDDEN",
@@ -122,12 +115,9 @@ export const githubAppService = {
       });
     }
 
-    const oauthAccounts = await prisma.account.findMany({
-      select: { access_token: true },
-      where: { access_token: { not: null }, provider: "github", userId: userIdNum },
-    });
+    const validToken = await githubTokenService.getValidToken(userIdNum);
 
-    if (oauthAccounts.length === 0) {
+    if (validToken == null) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "You must link your GitHub account before installing the app.",
@@ -135,34 +125,18 @@ export const githubAppService = {
     }
 
     let hasAccess = false;
-    let verifiedAtLeastOneAccount = false;
-    let hasUnauthorized = false;
+    try {
+      const userOctokit = getUserClient(validToken);
+      const userInstallations = await userOctokit.paginate(
+        userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
+        { per_page: 100 }
+      );
 
-    for (const oauthAccount of oauthAccounts) {
-      if (oauthAccount.access_token == null) continue;
-      try {
-        const userOctokit = getUserClient(oauthAccount.access_token);
-        const userInstallations = await userOctokit.paginate(
-          userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
-          { per_page: 100 }
-        );
-
-        verifiedAtLeastOneAccount = true;
-
-        if (userInstallations.some((inst) => inst.id === inputInstIdNum)) {
-          hasAccess = true;
-          break;
-        }
-      } catch (error) {
-        if (isOctokitError(error) && (error.status === 401 || error.status === 403)) {
-          hasUnauthorized = true;
-        }
-        logger.warn({ error, msg: "GitHub API verification failed for one OAuth account" });
+      if (userInstallations.some((inst) => inst.id === inputInstIdNum)) {
+        hasAccess = true;
       }
-    }
-
-    if (!verifiedAtLeastOneAccount) {
-      if (hasUnauthorized) {
+    } catch (error) {
+      if (isOctokitError(error) && (error.status === 401 || error.status === 403)) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "GitHub authorization expired. Please relink your GitHub account.",
@@ -197,24 +171,48 @@ export const githubAppService = {
     ).toUpperCase() as InstallationTargetType;
 
     try {
-      const updated = await prisma.githubInstallation.updateMany({
-        data: {
-          accountAvatar,
-          accountLogin,
-          htmlUrl: installationInfo.html_url,
-          repositorySelection: repoSelection,
-          userId: userIdNum,
-        },
-        where: {
-          id: instIdBigInt,
-          OR: [{ userId: null }, { userId: userIdNum }],
-        },
-      });
+      await prisma.$transaction(async (tx) => {
+        const consumed = await tx.verificationToken.deleteMany({
+          where: { identifier: `github_install_${userIdNum}`, token: state },
+        });
 
-      if (updated.count === 0) {
-        const created = await prisma.githubInstallation.createMany({
-          data: [
-            {
+        if (consumed.count === 0) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Security state already used or expired.",
+          });
+        }
+
+        const updated = await tx.githubInstallation.updateMany({
+          data: {
+            accountAvatar,
+            accountLogin,
+            htmlUrl: installationInfo.html_url,
+            isSuspended: false,
+            repositorySelection: repoSelection,
+            userId: userIdNum,
+          },
+          where: {
+            id: instIdBigInt,
+            OR: [{ userId: null }, { userId: userIdNum }],
+          },
+        });
+
+        if (updated.count === 0) {
+          const existing = await tx.githubInstallation.findUnique({
+            select: { userId: true },
+            where: { id: instIdBigInt },
+          });
+
+          if (existing != null) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "This installation is already linked to another workspace.",
+            });
+          }
+
+          await tx.githubInstallation.create({
+            data: {
               accountAvatar,
               accountLogin,
               appId: installationInfo.app_id,
@@ -225,32 +223,9 @@ export const githubAppService = {
               targetType,
               userId: userIdNum,
             },
-          ],
-          skipDuplicates: true,
-        });
-
-        if (created.count === 0) {
-          const claimed = await prisma.githubInstallation.updateMany({
-            data: {
-              accountAvatar,
-              accountLogin,
-              repositorySelection: repoSelection,
-              userId: userIdNum,
-            },
-            where: {
-              id: instIdBigInt,
-              OR: [{ userId: null }, { userId: userIdNum }],
-            },
           });
-
-          if (claimed.count === 0) {
-            throw new TRPCError({
-              code: "FORBIDDEN",
-              message: "This installation is already linked to another workspace.",
-            });
-          }
         }
-      }
+      });
     } catch (error) {
       if (error instanceof TRPCError) throw error;
 
