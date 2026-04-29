@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.28.6](https://github.com/doxynix/doxynix/compare/v1.28.5...v1.28.6) (2026-04-29)
+
+
+### Bug Fixes
+
+* фикс деплоя на trigger.dev ([#1293](https://github.com/doxynix/doxynix/issues/1293)) ([926e846](https://github.com/doxynix/doxynix/commit/926e846e4b727630a88fab7035e576bbd78144ea))
+
 ## [1.28.5](https://github.com/doxynix/doxynix/compare/v1.28.4...v1.28.5) (2026-04-29)
 
 
