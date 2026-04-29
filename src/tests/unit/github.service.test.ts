@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { DbClient } from "@/server/shared/infrastructure/db";
 import * as githubApi from "@/server/shared/infrastructure/github/github-api";
 import * as githubProvider from "@/server/shared/infrastructure/github/github-provider";
+import { githubTokenService } from "@/server/shared/infrastructure/github/github-token.service";
 
 const githubService = {
   ...githubApi,
@@ -134,6 +135,12 @@ vi.mock("@/server/shared/engine/core/project-policy", () => ({
   },
 }));
 
+vi.mock("@/server/shared/infrastructure/github/github-token.service", () => ({
+  githubTokenService: {
+    getValidToken: vi.fn(),
+  },
+}));
+
 function createMockPrisma(accounts: any | any[]) {
   const normalizedAccounts =
     accounts == null ? [] : Array.isArray(accounts) ? accounts : [accounts];
@@ -171,6 +178,7 @@ describe("githubService", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     octokitState.constructorAuths.length = 0;
+    vi.mocked(githubTokenService.getValidToken).mockResolvedValue("mock-token");
     octokitState.constructorOptions.length = 0;
     octokitState.auth.mockResolvedValue({ token: "mock-token" });
     octokitState.paginate.mockResolvedValue([]);
@@ -188,6 +196,8 @@ describe("githubService", () => {
           githubInstallationId: 12_345,
         },
       ]);
+
+      vi.mocked(githubTokenService.getValidToken).mockResolvedValue(null);
 
       const context = await githubService.getClientContext(prisma, 101);
 
@@ -210,6 +220,7 @@ describe("githubService", () => {
 
     it("should throw when no GitHub authorization is available", async () => {
       const { prisma } = createMockPrisma(null);
+      vi.mocked(githubTokenService.getValidToken).mockResolvedValue(null);
       await expect(githubService.getClientContext(prisma, 9)).rejects.toThrow(
         "No valid GitHub authorization found"
       );

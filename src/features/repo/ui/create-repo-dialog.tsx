@@ -214,7 +214,7 @@ export function CreateRepoDialog() {
                   {t("repo_your_repos")}
                 </div>
 
-                {myGithubData?.installations && myGithubData.installations.length > 0 && (
+                {myGithubData?.installations != null && myGithubData.installations.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {myGithubData.installations.map((inst) => (
                       <AppTooltip key={inst.id} content={inst.login}>
