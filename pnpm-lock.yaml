@@ -29,7 +29,7 @@ overrides:
   unhead: 2.1.13
   protobufjs: 7.5.5
   '@xmldom/xmldom': 0.9.10
-  path-to-regexp@6: 6.3.0
+  path-to-regexp@^6: 6.3.0
 
 importers:
 
@@ -11206,8 +11206,8 @@ packages:
   path-to-regexp@0.1.13:
     resolution: {integrity: sha512-A/AGNMFN3c8bOlvV9RreMdrv7jsmF9XIfDeCd87+I8RNg6s78BhJxMu69NEMHBSJFxKidViTEdruRwEk/WIKqA==}
 
-  path-to-regexp@6.2.1:
-    resolution: {integrity: sha512-JLyh7xT1kizaEvcaXOQwOc2/Yhw6KZOvPf1S8401UyLk86CU79LN3vl7ztXGm/pZ+YjoyAJ4rxmHwbkBXJX+yw==}
+  path-to-regexp@6.3.0:
+    resolution: {integrity: sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==}
 
   path-type@4.0.0:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
@@ -20139,7 +20139,7 @@ snapshots:
       jsonc-parser: 3.3.1
       md5: 2.3.0
       nanoid: 3.3.11
-      path-to-regexp: 6.2.1
+      path-to-regexp: 6.3.0
       semver: 7.7.4
     optionalDependencies:
       '@vercel/analytics': 2.0.1(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(vue@3.5.33(typescript@6.0.3))
@@ -26066,7 +26066,7 @@ snapshots:
 
   path-to-regexp@0.1.13: {}
 
-  path-to-regexp@6.2.1: {}
+  path-to-regexp@6.3.0: {}
 
   path-type@4.0.0: {}
 
