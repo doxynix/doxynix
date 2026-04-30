@@ -51,7 +51,8 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
   const [disconnectingProvider, setDisconnectingProvider] = useState<null | string>(null);
   const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
 
-  const canDisconnectAny = accounts.length > 1 || (user?.email != null && user?.emailVerified != null);
+  const canDisconnectAny =
+    accounts.length > 1 || (user?.email != null && user.emailVerified != null);
 
   const utils = trpc.useUtils();
   const disconnect = trpc.user.disconnectAccount.useMutation({
@@ -118,6 +119,8 @@ type OAuthProvider = (typeof OAUTH_PROVIDERS)[number];
 
 type LinkedAccount = LinkedAccounts[number];
 
+type AuthProviderId = (typeof OAUTH_PROVIDERS)[number]["id"];
+
 type ProviderActionProps = {
   canDisconnectAny: boolean;
   isConnectingThis: boolean;
@@ -125,8 +128,8 @@ type ProviderActionProps = {
   isLoadingAny: boolean;
   isMutationPending: boolean;
   linked?: LinkedAccount;
-  onConnect: (id: string) => void;
-  onDisconnect: (id: string) => void;
+  onConnect: (id: AuthProviderId) => void;
+  onDisconnect: (id: AuthProviderId) => void;
   onOpenChange: (open: boolean) => void;
   provider: OAuthProvider;
 };

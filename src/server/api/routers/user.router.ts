@@ -37,7 +37,7 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = Number(ctx.session.user.id);
 
-      await ctx.db.$transaction(
+      await ctx.prisma.$transaction(
         async (tx) => {
           // Check if the account exists
           const accountToDelete = await tx.account.findUnique({
@@ -71,7 +71,8 @@ export const userRouter = createTRPCRouter({
           if (accountCount <= 1 && !hasEmailAuth) {
             throw new TRPCError({
               code: "BAD_REQUEST",
-              message: "You cannot disconnect your only authentication method. Add another one first.",
+              message:
+                "You cannot disconnect your only authentication method. Add another one first.",
             });
           }
 
