@@ -13,6 +13,7 @@ import {
   Home,
   KeyRound,
   LayoutGrid,
+  Link,
   Map,
   ScanSearch,
   Settings,
@@ -67,6 +68,14 @@ const SETTINGS_PAGES: MenuItems = [
     label: "Profile",
     shortcut: "G then P",
     url: "/me",
+  },
+  {
+    href: "/dashboard/settings/connections",
+    icon: Link,
+    id: "connections",
+    label: "Connections",
+    shortcut: "G then C",
+    url: "/c",
   },
   {
     href: "/dashboard/settings/api-keys",
