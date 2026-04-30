@@ -87,7 +87,7 @@ importers:
         version: 1.5.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@next-auth/prisma-adapter':
         specifier: 1.0.7
-        version: 1.0.7(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(next-auth@4.24.14(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(nodemailer@8.0.6)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))
+        version: 1.0.7(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(next-auth@4.24.14(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(nodemailer@8.0.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))
       '@octokit/auth-app':
         specifier: 8.2.0
         version: 8.2.0
@@ -378,7 +378,7 @@ importers:
         version: 16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       next-auth:
         specifier: 4.24.14
-        version: 4.24.14(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(nodemailer@8.0.6)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+        version: 4.24.14(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(nodemailer@8.0.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       next-axiom:
         specifier: 1.10.0
         version: 1.10.0(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)
@@ -392,8 +392,8 @@ importers:
         specifier: 3.9.17
         version: 3.9.17(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       nodemailer:
-        specifier: 8.0.6
-        version: 8.0.6
+        specifier: 8.0.7
+        version: 8.0.7
       nuqs:
         specifier: 2.8.9
         version: 2.8.9(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)
@@ -413,11 +413,11 @@ importers:
         specifier: 10.3.1
         version: 10.3.1
       posthog-js:
-        specifier: 1.372.1
-        version: 1.372.1
+        specifier: 1.372.2
+        version: 1.372.2
       posthog-node:
-        specifier: 5.30.4
-        version: 5.30.4(rxjs@7.8.2)
+        specifier: 5.30.5
+        version: 5.30.5(rxjs@7.8.2)
       react:
         specifier: 19.2.5
         version: 19.2.5
@@ -3346,11 +3346,11 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@posthog/core@1.27.5':
-    resolution: {integrity: sha512-sYCcUDuYKumYTjwGqGCPT8aUy086v9PKw5wD+UXCRSfCsxWy5R/ic6W13kGTn4O5B2cD1V19wJv19oIH5kHUiQ==}
+  '@posthog/core@1.27.6':
+    resolution: {integrity: sha512-FjvgPdORywAjgjtgkZJ2/x9ED52jtOJym/RVldY4Oa7wzmlY49rxZm8gvOlocEnjP90bSbj3ko7qVjXNhftFvA==}
 
-  '@posthog/types@1.372.1':
-    resolution: {integrity: sha512-yl2x2HgtdhFk8bvf6HuRSDzXnKmKGrzNxUahKvA/0mcwheweINvmWy5MsN55NevrcCrNXA6m8GPHS9o/y1mn4A==}
+  '@posthog/types@1.372.2':
+    resolution: {integrity: sha512-dx+WImdDg2NDqaDowTmW+BMNalUfPKngR+g1Iom8ULSav+fGacxexv6fSOl0uSVBwYZsDFe7qNUu0NB/rwGjEw==}
 
   '@prisma/adapter-pg@6.19.3':
     resolution: {integrity: sha512-ocbvVIP/wX2uJWWLvo1/UK0nH8L5dv4MlE1DddVPID0/VRiEZDguWmAgKLVuPM6BuWTH3wGluZR40VgXb4WjiQ==}
@@ -10651,8 +10651,8 @@ packages:
     resolution: {integrity: sha512-tGnJW6OKRii9u/b2WiUViTJS+h7Apxx17qsMUjsUeNDiMMX5ZFf8F8Fcz7PAQ6omvOxHZtvDTmOYKJQwmfpjeg==}
     engines: {node: '>=20'}
 
-  nodemailer@8.0.6:
-    resolution: {integrity: sha512-Nm2XeuDwwy2wi5A+8jPWwQwNzcjNjhWdE3pVLoXEusxJqCnAPAgnBGkSmiLknbnWuOF9qraRpYZjfxqtKZ4tPw==}
+  nodemailer@8.0.7:
+    resolution: {integrity: sha512-pkjE4mkBzQjdJT4/UmlKl3pX0rC9fZmjh7c6C9o7lv66Ac6w9WCnzPzhbPNxwZAzlF4mdq4CSWB5+FbK6FWCow==}
     engines: {node: '>=6.0.0'}
 
   normalize-package-data@2.5.0:
@@ -11260,11 +11260,11 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  posthog-js@1.372.1:
-    resolution: {integrity: sha512-gP316wDc36YbieIEW48wfB6wq2ugBNQc+XwNkewN9QRPzhitX+9dG6lUjqHEhMx3A2Y41HjbZf5Vl0Ll0ju8UA==}
+  posthog-js@1.372.2:
+    resolution: {integrity: sha512-FS+vKDXB1vghrVch3EDi3IRcoH5OnLQYxchHWi+8U4D4PzWQZnZLo5vyMRL1+ZUHNEZ2v599uX3UKhRZv2z6Cg==}
 
-  posthog-node@5.30.4:
-    resolution: {integrity: sha512-NjEgLdQwff9aPssHgmDYYDe5EbMsR33k327g/hC7RM3qbaqWio559TqAaVjP+Ks8c61liP0Vhr90lr4dpO48OQ==}
+  posthog-node@5.30.5:
+    resolution: {integrity: sha512-TlxyX+Yip2cChU1YLDWbCEVOlDEbTsO3f5ujMqR94dRLUeQw0wBCXMgjDcnxhVisdzXFTzcBoWvf0LXDWZqo8A==}
     engines: {node: ^20.20.0 || >=22.22.0}
     peerDependencies:
       rxjs: ^7.0.0
@@ -15896,10 +15896,10 @@ snapshots:
       '@tybys/wasm-util': 0.10.1
     optional: true
 
-  '@next-auth/prisma-adapter@1.0.7(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(next-auth@4.24.14(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(nodemailer@8.0.6)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))':
+  '@next-auth/prisma-adapter@1.0.7(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(next-auth@4.24.14(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(nodemailer@8.0.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))':
     dependencies:
       '@prisma/client': 6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)
-      next-auth: 4.24.14(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(nodemailer@8.0.6)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      next-auth: 4.24.14(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(nodemailer@8.0.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
 
   '@next/bundle-analyzer@16.2.4':
     dependencies:
@@ -16725,11 +16725,11 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@posthog/core@1.27.5':
+  '@posthog/core@1.27.6':
     dependencies:
-      '@posthog/types': 1.372.1
+      '@posthog/types': 1.372.2
 
-  '@posthog/types@1.372.1': {}
+  '@posthog/types@1.372.2': {}
 
   '@prisma/adapter-pg@6.19.3':
     dependencies:
@@ -25170,7 +25170,7 @@ snapshots:
 
   new-github-issue-url@0.2.1: {}
 
-  next-auth@4.24.14(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(nodemailer@8.0.6)(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
+  next-auth@4.24.14(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(nodemailer@8.0.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:
       '@babel/runtime': 7.29.2
       '@panva/hkdf': 1.2.1
@@ -25185,7 +25185,7 @@ snapshots:
       react-dom: 19.2.5(react@19.2.5)
       uuid: 8.3.2
     optionalDependencies:
-      nodemailer: 8.0.6
+      nodemailer: 8.0.7
 
   next-axiom@1.10.0(next@16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5):
     dependencies:
@@ -25316,7 +25316,7 @@ snapshots:
       '@types/sarif': 2.1.7
       fs-extra: 11.3.4
 
-  nodemailer@8.0.6: {}
+  nodemailer@8.0.7: {}
 
   normalize-package-data@2.5.0:
     dependencies:
@@ -25956,15 +25956,15 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  posthog-js@1.372.1:
+  posthog-js@1.372.2:
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/api-logs': 0.208.0
       '@opentelemetry/exporter-logs-otlp-http': 0.208.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources': 2.7.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-logs': 0.208.0(@opentelemetry/api@1.9.1)
-      '@posthog/core': 1.27.5
-      '@posthog/types': 1.372.1
+      '@posthog/core': 1.27.6
+      '@posthog/types': 1.372.2
       core-js: 3.49.0
       dompurify: 3.4.1
       fflate: 0.4.8
@@ -25972,9 +25972,9 @@ snapshots:
       query-selector-shadow-dom: 1.0.1
       web-vitals: 5.2.0
 
-  posthog-node@5.30.4(rxjs@7.8.2):
+  posthog-node@5.30.5(rxjs@7.8.2):
     dependencies:
-      '@posthog/core': 1.27.5
+      '@posthog/core': 1.27.6
     optionalDependencies:
       rxjs: 7.8.2
 
