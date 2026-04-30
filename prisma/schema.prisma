@@ -333,6 +333,11 @@ model Account {
   type                     String
   provider                 String
   providerAccountId        String  @map("provider_account_id")
+  /// @zod.string.email({ message: "Incorrect email" })
+  email                    String? @db.Citext()
+  /// @zod.string.url({ message: "Incorrect link to avatar" })
+  image                    String?
+  name                     String?
   /// @zod.custom.omit(["model"])
   refresh_token            String? @db.Text()
   /// @zod.custom.omit(["model"])

@@ -7,6 +7,7 @@ import { connection } from "next/server";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { VercelToolbar } from "@vercel/toolbar/next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
@@ -16,7 +17,7 @@ import { extractRouterConfig } from "uploadthing/server";
 import "../globals.css";
 
 import { APP_URL } from "@/shared/constants/env.client";
-import { IS_PROD } from "@/shared/constants/env.flags";
+import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
 import type { Locale } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/cn";
 import { Toaster } from "@/shared/ui/core/sonner";
@@ -183,6 +184,7 @@ export default async function LocaleLayout({
                   <SpeedInsights />
                 </>
               )}
+              {IS_DEV && !IS_ANALYZE && <VercelToolbar />}
               <ConsoleEasterEgg />
             </ThemeProvider>
           </NextIntlClientProvider>
