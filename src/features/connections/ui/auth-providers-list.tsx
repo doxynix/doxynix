@@ -51,7 +51,7 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
   const [disconnectingProvider, setDisconnectingProvider] = useState<null | string>(null);
   const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
 
-  const canDisconnectAny = accounts.length > 1 || user?.emailVerified != null;
+  const canDisconnectAny = accounts.length > 1 || (user?.email != null && user?.emailVerified != null);
 
   const utils = trpc.useUtils();
   const disconnect = trpc.user.disconnectAccount.useMutation({

@@ -33,36 +33,62 @@ export const userRouter = createTRPCRouter({
     }),
 
   disconnectAccount: protectedProcedure
-    .input(z.object({ provider: z.string() }))
+    .input(z.object({ provider: z.enum(["github", "google", "yandex"]) }))
     .mutation(async ({ ctx, input }) => {
       const userId = Number(ctx.session.user.id);
 
-      const accountCount = await ctx.db.account.count({
-        where: { userId },
-      });
+      await ctx.db.$transaction(
+        async (tx) => {
+          // Check if the account exists
+          const accountToDelete = await tx.account.findUnique({
+            where: {
+              userId_provider: {
+                provider: input.provider,
+                userId,
+              },
+            },
+          });
 
-      const user = await ctx.db.user.findUnique({
-        select: { email: true, emailVerified: true },
-        where: { id: userId },
-      });
+          if (!accountToDelete) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Account not found or already disconnected.",
+            });
+          }
 
-      const hasEmailAuth = user?.email != null && user.emailVerified != null;
+          // Re-validate account count and email auth within transaction
+          const accountCount = await tx.account.count({
+            where: { userId },
+          });
 
-      if (accountCount <= 1 && !hasEmailAuth) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "You cannot disconnect your only authentication method. Add another one first.",
-        });
-      }
+          const user = await tx.user.findUnique({
+            select: { email: true, emailVerified: true },
+            where: { id: userId },
+          });
 
-      await ctx.db.account.delete({
-        where: {
-          userId_provider: {
-            provider: input.provider,
-            userId,
-          },
+          const hasEmailAuth = user?.email != null && user.emailVerified != null;
+
+          if (accountCount <= 1 && !hasEmailAuth) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "You cannot disconnect your only authentication method. Add another one first.",
+            });
+          }
+
+          // Perform the delete
+          await tx.account.delete({
+            where: {
+              userId_provider: {
+                provider: input.provider,
+                userId,
+              },
+            },
+          });
         },
-      });
+        {
+          isolationLevel: "Serializable",
+        }
+      );
 
       return { success: true };
     }),

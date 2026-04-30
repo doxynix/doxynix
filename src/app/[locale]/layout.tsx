@@ -17,7 +17,7 @@ import { extractRouterConfig } from "uploadthing/server";
 import "../globals.css";
 
 import { APP_URL } from "@/shared/constants/env.client";
-import { IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
+import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
 import type { Locale } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/cn";
 import { Toaster } from "@/shared/ui/core/sonner";
@@ -184,7 +184,7 @@ export default async function LocaleLayout({
                   <SpeedInsights />
                 </>
               )}
-              {IS_DEV && <VercelToolbar />}
+              {IS_DEV && !IS_ANALYZE && <VercelToolbar />}
               <ConsoleEasterEgg />
             </ThemeProvider>
           </NextIntlClientProvider>

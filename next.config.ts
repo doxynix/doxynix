@@ -103,11 +103,11 @@ const nextConfig: NextConfig = {
       "https://challenges.cloudflare.com",
       "https://*.ably-realtime.com",
       "https://*.realtime.ably.net",
-      "https://vercel.live",
-      "ws://localhost:25002",
+      IS_DEV ? "https://vercel.live" : "",
+      IS_DEV ? "ws://localhost:25002" : "",
       "https://*.pusher.com",
       "wss://*.pusher.com",
-      "http://localhost:25002",
+      IS_DEV ? "http://localhost:25002" : "",
       "wss://*.ably-realtime.com",
       "https://*.ably.net",
       "wss://*.ably.net",
@@ -132,7 +132,7 @@ const nextConfig: NextConfig = {
             value: `
               default-src 'none';
               script-src ${scriptSrc};
-              frame-src 'self' https://vercel.live https://challenges.cloudflare.com;
+              frame-src 'self' ${IS_DEV ? "https://vercel.live" : ""} https://challenges.cloudflare.com;
               worker-src 'self' blob:;
               base-uri 'none';
               form-action 'self';
@@ -142,7 +142,7 @@ const nextConfig: NextConfig = {
                 https://img.shields.io
                 https://cdn.jsdelivr.net
                 https://sun1-26.userapi.com
-                https://vercel.live
+                ${IS_DEV ? "https://vercel.live" : ""}
                 https://vercel.com
                 https://ufs.sh
                 https://*.ufs.sh
@@ -152,17 +152,17 @@ const nextConfig: NextConfig = {
                 https://avatars.githubusercontent.com
                 https://*.googleusercontent.com
                 https://avatars.yandex.net;
-              font-src 'self' https://vercel.live data:;
+              font-src 'self' ${IS_DEV ? "https://vercel.live" : ""} data:;
               media-src 'self';
               connect-src ${connectSrc};
-              frame-ancestors 'self' https://vercel.live;
+              frame-ancestors 'self' ${IS_DEV ? "https://vercel.live" : ""};
               manifest-src 'self';
               upgrade-insecure-requests;
             `
               .replaceAll(/\s{2,}/g, " ")
               .trim(),
           },
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-Frame-Options", value: IS_DEV ? "SAMEORIGIN" : "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Cross-Origin-Embedder-Policy", value: IS_DEV ? "unsafe-none" : "credentialless" },
