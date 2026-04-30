@@ -84,3 +84,7 @@ export type RepoPull = RouterOutput["prAnalysis"]["listByRepository"][number];
 export type PRImpact = RouterOutput["prAnalysis"]["getImpactByPRNumber"];
 
 export type PRNumber = RouterOutput["prAnalysis"]["getByPRNumber"];
+
+export type LinkedAccounts = RouterOutput["user"]["getLinkedAccounts"]["accounts"];
+
+export type LinkedUser = RouterOutput["user"]["getLinkedAccounts"]["user"];

@@ -50,15 +50,83 @@ export const authOptions: NextAuthOptions = {
         });
       }
     },
-    async linkAccount({ account, user }) {
-      logger.info({
-        msg: "External account linked",
-        provider: account.provider,
-        type: "auth.link_account",
-        userId: user.id,
-      });
+    async linkAccount({ account, profile, user }) {
+      const providerEmail = profile.email;
+      const providerImage = profile.image;
+      const providerName = profile.name;
+
+      if (providerEmail != null || providerImage != null) {
+        await prisma.account.update({
+          data: {
+            email: providerEmail,
+            image: providerImage,
+            name: providerName,
+          },
+          where: {
+            provider_providerAccountId: {
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+            },
+          },
+        });
+
+        if (providerImage != null && user.image == null) {
+          await prisma.user.update({
+            data: { image: providerImage },
+            where: { id: Number(user.id) },
+          });
+        }
+
+        logger.info({
+          msg: "External account linked",
+          provider: account.provider,
+          type: "auth.link_account",
+          userId: user.id,
+        });
+      }
     },
-    async signIn({ account, user }) {
+    async signIn({ account, isNewUser, profile, user }) {
+      const providerEmail = profile?.email;
+      const providerImage = profile?.image;
+      const providerName = profile?.name;
+
+      if (isNewUser === true) {
+        logger.info({ msg: "First time login experience triggered", userId: user.id });
+      }
+
+      if (profile != null && account?.provider !== "email") {
+        const freshImage = profile.image;
+        const freshName = profile.name;
+
+        try {
+          await prisma.user.update({
+            data: {
+              ...(freshImage != null && freshImage !== user.image && { image: freshImage }),
+              ...(freshName != null &&
+                (user.name == null || user.name === user.email?.split("@")[0]) && {
+                  name: freshName,
+                }),
+            },
+            where: { id: Number(user.id) },
+          });
+          await prisma.account.update({
+            data: {
+              email: providerEmail,
+              image: providerImage,
+              name: providerName,
+            },
+            where: {
+              provider_providerAccountId: {
+                provider: account?.provider ?? "",
+                providerAccountId: account?.providerAccountId ?? "",
+              },
+            },
+          });
+        } catch (error) {
+          logger.error({ error, msg: "Failed to sync user profile on signIn", userId: user.id });
+        }
+      }
+
       logger.info({
         msg: "User signed in",
         provider: account?.provider,
@@ -83,7 +151,7 @@ export const authOptions: NextAuthOptions = {
   },
 
   pages: {
-    error: "/auth/error", // TODO: Реализовать /auth/error page
+    error: "/auth/error",
     newUser: "/welcome",
     signIn: "/auth",
     signOut: "/",
@@ -107,22 +175,13 @@ export const authOptions: NextAuthOptions = {
           html,
           reply_to: "support@doxynix.space",
           subject: user?.emailVerified == null ? "Doxynix | Account Activation" : "Doxynix | Login",
-          tags: [
-            {
-              name: "category",
-              value: "authentication",
-            },
-          ],
-
+          tags: [{ name: "category", value: "authentication" }],
           to: identifier,
         };
 
         try {
           if (resend == null) {
-            logger.warn({
-              msg: "Resend disabled (no API key)",
-              type: "auth.email_warn",
-            });
+            logger.warn({ msg: "Resend disabled (no API key)", type: "auth.email_warn" });
             return;
           }
           await resend.emails.send(template);

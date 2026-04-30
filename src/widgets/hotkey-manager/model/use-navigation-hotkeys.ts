@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/routing";
 
 const SEQUENTIAL_ROUTES: Record<string, Record<string, string>> = {
   g: {
+    c: "/dashboard/settings/connections",
     d: "/dashboard/settings/danger-zone",
     h: "/support",
     k: "/dashboard/settings/api-keys",

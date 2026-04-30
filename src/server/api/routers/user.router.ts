@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { UpdateProfileSchema } from "@/shared/api/schemas/user";
@@ -30,6 +31,65 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx }) => {
       return userService.deleteAccount(ctx.db, ctx.prisma, Number(ctx.session.user.id));
     }),
+
+  disconnectAccount: protectedProcedure
+    .input(z.object({ provider: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = Number(ctx.session.user.id);
+
+      const accountCount = await ctx.db.account.count({
+        where: { userId },
+      });
+
+      const user = await ctx.db.user.findUnique({
+        select: { email: true, emailVerified: true },
+        where: { id: userId },
+      });
+
+      const hasEmailAuth = user?.email != null && user.emailVerified != null;
+
+      if (accountCount <= 1 && !hasEmailAuth) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You cannot disconnect your only authentication method. Add another one first.",
+        });
+      }
+
+      await ctx.db.account.delete({
+        where: {
+          userId_provider: {
+            provider: input.provider,
+            userId,
+          },
+        },
+      });
+
+      return { success: true };
+    }),
+
+  getLinkedAccounts: protectedProcedure.query(async ({ ctx }) => {
+    const userId = Number(ctx.session.user.id);
+
+    const [accounts, user] = await Promise.all([
+      ctx.db.account.findMany({
+        orderBy: { provider: "asc" },
+        select: {
+          email: true,
+          image: true,
+          name: true,
+          provider: true,
+          providerAccountId: true,
+        },
+        where: { userId },
+      }),
+      ctx.db.user.findUnique({
+        select: { email: true, emailVerified: true },
+        where: { id: userId },
+      }),
+    ]);
+
+    return { accounts, user };
+  }),
 
   me: protectedProcedure
     .meta({
