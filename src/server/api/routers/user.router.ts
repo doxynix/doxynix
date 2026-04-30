@@ -49,7 +49,7 @@ export const userRouter = createTRPCRouter({
             },
           });
 
-          if (!accountToDelete) {
+          if (accountToDelete == null) {
             throw new TRPCError({
               code: "NOT_FOUND",
               message: "Account not found or already disconnected.",
