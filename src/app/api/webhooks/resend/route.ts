@@ -89,9 +89,20 @@ export async function POST(req: Request) {
           return NextResponse.json({ msg: "Already processed", ok: true });
         }
 
-        return new NextResponse("Processing in progress or failed before", { status: 202 });
+        if (existing?.status === "FAILED") {
+          // Update the failed record back to PROCESSING and continue processing
+          delivery = await prisma.webhookDelivery.update({
+            data: { status: "PROCESSING" },
+            select: { id: true },
+            where: { id: existing.id },
+          });
+        } else if (existing?.status === "PROCESSING") {
+          // Already being processed, return early
+          return new NextResponse("Processing in progress", { status: 202 });
+        }
+      } else {
+        return new NextResponse("DB Error", { status: 500 });
       }
-      return new NextResponse("DB Error", { status: 500 });
     }
 
     const { data, type } = evt;
@@ -120,7 +131,7 @@ export async function POST(req: Request) {
           }),
           prisma.webhookDelivery.update({
             data: { status: "SUCCESS" },
-            where: { id: delivery.id },
+            where: { id: delivery!.id },
           }),
         ]);
 
@@ -133,7 +144,7 @@ export async function POST(req: Request) {
             error: error instanceof Error ? error.message : String(error),
             status: "FAILED",
           },
-          where: { id: delivery.id },
+          where: { id: delivery!.id },
         });
 
         return new NextResponse("Internal Error", { status: 500 });
@@ -141,7 +152,7 @@ export async function POST(req: Request) {
     } else {
       await prisma.webhookDelivery.update({
         data: { status: "SUCCESS" },
-        where: { id: delivery.id },
+        where: { id: delivery!.id },
       });
     }
 

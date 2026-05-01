@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { resolveMx } from "node:dns/promises";
 import disposableDomains from "disposable-email-domains";
 import validator from "validator";
@@ -8,6 +9,12 @@ export function normalizeEmail(email: string): string {
   });
 
   return typeof normalized === "string" ? normalized : email.toLowerCase().trim();
+}
+
+export function maskEmail(email: string): string {
+  const hash = crypto.createHash("sha256").update(email).digest("hex").slice(0, 8);
+  const domain = email.split("@")[1] ?? "unknown";
+  return `${hash}@${domain}`;
 }
 
 export async function validateEmailSafety(

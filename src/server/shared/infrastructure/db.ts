@@ -31,14 +31,14 @@ const encryptedClient = baseClient.$extends(fieldEncryptionExtension());
 const softDeleteClient = encryptedClient.$extends({
   query: {
     apiKey: {
-      async delete({ args }) {
-        return encryptedClient.apiKey.update({
+      async delete({ args, query }: { args: any; query: any }) {
+        return this.apiKey.update({
           ...args,
           data: { revoked: true },
         });
       },
-      async deleteMany({ args }) {
-        return encryptedClient.apiKey.updateMany({
+      async deleteMany({ args, query }: { args: any; query: any }) {
+        return this.apiKey.updateMany({
           ...args,
           data: { revoked: true },
         });
@@ -50,7 +50,7 @@ const softDeleteClient = encryptedClient.$extends({
 export const prisma = softDeleteClient.$extends({
   query: {
     $allModels: {
-      async $allOperations({ args, model, operation, query }) {
+      async $allOperations({ args, model, operation, query }: { args: any; model: any; operation: any; query: any }) {
         const start = performance.now();
 
         let result;
@@ -88,7 +88,7 @@ export const prisma = softDeleteClient.$extends({
                 userId: userId == null ? null : Number(userId),
               },
             })
-            .catch((error_) => {
+            .catch((error_: any) => {
               logger.error({ error: error_, msg: "AUDIT LOG WRITE FAILED" });
             });
 

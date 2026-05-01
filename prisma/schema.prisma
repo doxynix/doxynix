@@ -4,593 +4,593 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  directUrl  = env("DIRECT_URL")
-  extensions = [pg_trgm, unaccent, citext, fuzzystrmatch, btree_gin, pg_stat_statements, uuidOssp(map: "uuid-ossp")]
+    provider = "postgresql"
+    url = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
+    extensions = [pg_trgm, unaccent, citext, fuzzystrmatch, btree_gin, pg_stat_statements, uuidOssp(map: "uuid-ossp")]
 }
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearchPostgres", "relationJoins", "postgresqlExtensions", "typedSql", "nativeDistinct"]
-  binaryTargets   = ["native", "debian-openssl-3.0.x"]
+    provider = "prisma-client-js"
+    previewFeatures = ["fullTextSearchPostgres","relationJoins","postgresqlExtensions","typedSql","nativeDistinct"]
+    binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 generator zod {
-  provider                         = "zod-prisma-types"
-  output                           = "../src/generated/zod"
-  useMultipleFiles                 = false
-  writeBarrelFiles                 = false
-  createIndexType                  = false
-  createInputTypes                 = false
-  createModelTypes                 = true
-  createOptionalDefaultValuesTypes = false
-  createRelationValuesTypes        = false
-  createPartialTypes               = false
-  addInputTypeValidation           = true
-  coerceDate                       = true
-  writeNullishInInputTypes         = true
-  addIncludeType                   = false
-  addSelectType                    = false
-  useJsonParameters                = true
-  useTypeAssertions                = true
-  modelSuffix                      = "Schema"
+    provider = "zod-prisma-types"
+    output = "../src/generated/zod"
+    useMultipleFiles = false
+    writeBarrelFiles = false
+    createIndexType = false
+    createInputTypes = false
+    createModelTypes = true
+    createOptionalDefaultValuesTypes = false
+    createRelationValuesTypes = false
+    createPartialTypes = false
+    addInputTypeValidation = true
+    coerceDate = true
+    writeNullishInInputTypes = true
+    addIncludeType = false
+    addSelectType = false
+    useJsonParameters = true
+    useTypeAssertions = true
+    modelSuffix = "Schema"
 }
 
 generator jsonSchema {
-  provider = "prisma-json-schema-generator"
+    provider = "prisma-json-schema-generator"
 }
 
 generator dbml {
-  provider = "prisma-dbml-generator"
+    provider = "prisma-dbml-generator"
 }
 
 generator fakeData {
-  provider = "prisma-generator-fake-data"
-  output   = "../src/generated/fake-data.ts"
+    provider = "prisma-generator-fake-data"
+    output = "../src/generated/fake-data.ts"
 }
 
 enum PRAnalysisStatus {
-  PENDING
-  ANALYZING
-  COMPLETED
-  FAILED
+    PENDING
+    ANALYZING
+    COMPLETED
+    FAILED
 }
 
 enum FixStatus {
-  DRAFT
-  GENERATING
-  READY_TO_APPLY
-  PR_OPENED
-  COMPLETED
-  FAILED
+    DRAFT
+    GENERATING
+    READY_TO_APPLY
+    PR_OPENED
+    COMPLETED
+    FAILED
 }
 
 enum UserRole {
-  USER
-  ADMIN
+    USER
+    ADMIN
 }
 
 enum Visibility {
-  PUBLIC
-  PRIVATE
+    PUBLIC
+    PRIVATE
 }
 
 enum Status {
-  PENDING
-  DONE
-  FAILED
-  NEW
+    PENDING
+    DONE
+    FAILED
+    NEW
 }
 
 enum DocType {
-  README
-  API
-  CONTRIBUTING
-  CHANGELOG
-  CODE_DOC
-  ARCHITECTURE
+    README
+    API
+    CONTRIBUTING
+    CHANGELOG
+    CODE_DOC
+    ARCHITECTURE
 }
 
 enum NotifyType {
-  ERROR
-  WARNING
-  INFO
-  SUCCESS
+    ERROR
+    WARNING
+    INFO
+    SUCCESS
 }
 
 enum WebhookStatus {
-  PROCESSING
-  SUCCESS
-  FAILED
+    PROCESSING
+    SUCCESS
+    FAILED
 }
 
 enum PRCommentStyle {
-  CONCISE
-  DETAILED
-  OFF
+    CONCISE
+    DETAILED
+    OFF
 }
 
 enum PRFocusArea {
-  SECURITY
-  PERFORMANCE
-  ARCHITECTURE
-  STYLE
+    SECURITY
+    PERFORMANCE
+    ARCHITECTURE
+    STYLE
 }
 
 enum InstallationTargetType {
-  USER
-  ORGANIZATION
+    USER
+    ORGANIZATION
 }
 
 enum RepositorySelection {
-  ALL
-  SELECTED
+    ALL
+    SELECTED
 }
 
 enum BannedEmailReason {
-  BOUNCED
-  COMPLAINED
-  SUPPRESSED
-  FAILED
-  DISPOSABLE
-  MANUAL
+    BOUNCED
+    COMPLAINED
+    SUPPRESSED
+    FAILED
+    DISPOSABLE
+    MANUAL
 }
 
 model User {
-  /// @zod.custom.omit(["model"])
-  id                  Int                  @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId            String               @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  /// @encrypted
-  /// @zod.string.email({ message: "Incorrect email" })
-  email               String?              @unique() @db.Citext()
-  /// @encryption:hash(email)?normalize=lowercase&normalize=trim
-  /// @zod.custom.omit(["model"])
-  emailHash           String?              @unique() @map("email_hash")
-  /// @zod.string.trim().min(1, { message: "Name required" }).max(50, { message: "Name cannot exceed 50 characters" })
-  name                String?
-  emailVerified       DateTime?            @map("email_verified")
-  /// @zod.string.url({ message: "Incorrect link to avatar" })
-  image               String?
-  /// @zod.custom.omit(["model"])
-  imageKey            String?              @unique() @map("image_key")
-  role                UserRole             @default(USER)
-  createdAt           DateTime             @default(now()) @map("created_at")
-  updatedAt           DateTime             @default(now()) @updatedAt() @map("updated_at")
-  accounts            Account[]
-  sessions            Session[]
-  repos               Repo[]
-  apiKeys             ApiKey[]
-  notifications       Notification[]
-  githubInstallations GithubInstallation[]
+    /// @zod.custom.omit(["model"])
+    id Int @id() @default(autoincrement())
+    /// @zod.custom.omit(["model"])
+    publicId String @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+    /// @encrypted
+    /// @zod.string.email({ message: "Incorrect email" })
+    email String? @unique() @db.Citext()
+    /// @encryption:hash(email)?normalize=lowercase&normalize=trim
+    /// @zod.custom.omit(["model"])
+    emailHash String? @unique() @map("email_hash")
+    /// @zod.string.trim().min(1, { message: "Name required" }).max(50, { message: "Name cannot exceed 50 characters" })
+    name String?
+    emailVerified DateTime? @map("email_verified")
+    /// @zod.string.url({ message: "Incorrect link to avatar" })
+    image String?
+    /// @zod.custom.omit(["model"])
+    imageKey String? @map("image_key") @unique()
+    role UserRole @default(USER)
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    accounts Account[]
+    sessions Session[]
+    repos Repo[]
+    apiKeys ApiKey[]
+    notifications Notification[]
+    githubInstallations GithubInstallation[]
 
-  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "users_name_trgm_idx")
-  @@map("users")
+    @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "users_name_trgm_idx")
+    @@map("users")
 }
 
 model Notification {
-  /// @zod.custom.omit(["model"])
-  id        Int        @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId  String     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  /// @zod.string.trim().min(1, { message: "The title cannot be empty" }).max(300, { message: "The title cannot exceed 300 characters" })
-  title     String
-  /// @zod.string.trim().min(1, { message: "The text of the notification is mandatory" }).max(5000, { message: "The text of the notification cannot exceed 5000 characters" })
-  body      String
-  type      NotifyType @default(INFO)
-  isRead    Boolean    @default(false) @map("is_read")
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @default(now()) @updatedAt() @map("updated_at")
-  /// @zod.custom.omit(["model"])
-  userId    Int        @map("user_id")
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  /// @zod.custom.omit(["model"])
-  repoId    Int?       @map("repo_id")
-  repo      Repo?      @relation(fields: [repoId], references: [id], onDelete: SetNull)
+    /// @zod.custom.omit(["model"])
+    id Int @id() @default(autoincrement())
+    /// @zod.custom.omit(["model"])
+    publicId String @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+    /// @zod.string.trim().min(1, { message: "The title cannot be empty" }).max(300, { message: "The title cannot exceed 300 characters" })
+    title String
+    /// @zod.string.trim().min(1, { message: "The text of the notification is mandatory" }).max(5000, { message: "The text of the notification cannot exceed 5000 characters" })
+    body String
+    type NotifyType @default(INFO)
+    isRead Boolean @default(false) @map("is_read")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    /// @zod.custom.omit(["model"])
+    userId Int @map("user_id")
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    /// @zod.custom.omit(["model"])
+    repoId Int? @map("repo_id")
+    repo Repo? @relation(fields: [repoId], references: [id], onDelete: SetNull)
 
-  @@index([userId, createdAt(sort: Desc)])
-  @@index([userId, isRead, createdAt(sort: Desc)])
-  @@index([userId, type, createdAt(sort: Desc)])
-  @@index([repoId])
-  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_title_trgm_idx")
-  @@index([body(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_body_trgm_idx")
-  @@map("notifications")
+    @@index([userId, createdAt(sort: Desc)])
+    @@index([userId, isRead, createdAt(sort: Desc)])
+    @@index([userId, type, createdAt(sort: Desc)])
+    @@index([repoId])
+    @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_title_trgm_idx")
+    @@index([body(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_body_trgm_idx")
+    @@map("notifications")
 }
 
 model Repo {
-  /// @zod.custom.omit(["model"])
-  id               Int                        @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId         String                     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  githubId         Int                        @map("github_id")
-  owner            String                     @db.Citext()
-  /// @zod.string.min(1).max(255)
-  name             String                     @db.Citext()
-  /// @zod.string.max(1000)
-  description      String?                    @db.Text()
-  /// @zod.string.url({ message: "Invalid repository URL" })
-  url              String
-  language         String?
-  license          String?
-  topics           String[]
-  /// @zod.number.int().min(0)
-  stars            Int                        @default(0) @map("stargazers_count")
-  /// @zod.number.int().min(0)
-  forks            Int                        @default(0) @map("forks_count")
-  defaultBranch    String                     @default("main") @map("default_branch")
-  /// @zod.string.url()
-  ownerAvatarUrl   String?                    @map("owner_avatar_url")
-  /// @zod.number.int().min(0)
-  openIssues       Int                        @default(0) @map("open_issues_count")
-  /// @zod.number.int().min(0)
-  size             Int                        @default(0)
-  visibility       Visibility                 @default(PRIVATE)
-  pushedAt         DateTime?                  @map("pushed_at")
-  createdAt        DateTime                   @default(now()) @map("created_at")
-  githubCreatedAt  DateTime?                  @map("github_created_at")
-  updatedAt        DateTime                   @default(now()) @updatedAt() @map("updated_at")
-  /// @zod.custom.omit(["model"])
-  userId           Int                        @map("user_id")
-  user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  analyses         Analysis[]
-  documents        Document[]
-  notifications    Notification[]
-  pullRequests     PullRequestAnalysis[]      @relation("RepoPullRequests")
-  generatedFixes   GeneratedFix[]             @relation("RepoGeneratedFixes")
-  prAnalysisConfig PullRequestAnalysisConfig?
+    /// @zod.custom.omit(["model"])
+    id Int @id() @default(autoincrement())
+    /// @zod.custom.omit(["model"])
+    publicId String @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+    githubId Int @map("github_id")
+    owner String @db.Citext()
+    /// @zod.string.min(1).max(255)
+    name String @db.Citext()
+    /// @zod.string.max(1000)
+    description String? @db.Text()
+    /// @zod.string.url({ message: "Invalid repository URL" })
+    url String
+    language String?
+    license String?
+    topics String[]
+    /// @zod.number.int().min(0)
+    stars Int @default(0) @map("stargazers_count")
+    /// @zod.number.int().min(0)
+    forks Int @default(0) @map("forks_count")
+    defaultBranch String @default("main") @map("default_branch")
+    /// @zod.string.url()
+    ownerAvatarUrl String? @map("owner_avatar_url")
+    /// @zod.number.int().min(0)
+    openIssues Int @default(0) @map("open_issues_count")
+    /// @zod.number.int().min(0)
+    size Int @default(0)
+    visibility Visibility @default(PRIVATE)
+    pushedAt DateTime? @map("pushed_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    githubCreatedAt DateTime? @map("github_created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    /// @zod.custom.omit(["model"])
+    userId Int @map("user_id")
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    analyses Analysis[]
+    documents Document[]
+    notifications Notification[]
+    pullRequests PullRequestAnalysis[] @relation("RepoPullRequests")
+    generatedFixes GeneratedFix[] @relation("RepoGeneratedFixes")
+    prAnalysisConfig PullRequestAnalysisConfig?
 
-  @@unique([owner, name, userId])
-  @@unique([githubId, userId])
-  @@index([userId, owner])
-  @@index([userId, name])
-  @@index([userId, createdAt(sort: Desc)])
-  @@index([userId, updatedAt(sort: Desc)])
-  @@index([userId, visibility])
-  @@index([githubId])
-  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_name_trgm_idx")
-  @@index([owner(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_owner_trgm_idx")
-  @@index([description(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_description_trgm_idx")
-  @@map("repos")
+    @@unique([owner, name, userId])
+    @@unique([githubId, userId])
+    @@index([userId, owner])
+    @@index([userId, name])
+    @@index([userId, createdAt(sort: Desc)])
+    @@index([userId, updatedAt(sort: Desc)])
+    @@index([userId, visibility])
+    @@index([githubId])
+    @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_name_trgm_idx")
+    @@index([owner(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_owner_trgm_idx")
+    @@index([description(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_description_trgm_idx")
+    @@map("repos")
 }
 
 model Analysis {
-  /// @zod.custom.omit(["model"])
-  id              Int        @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId        String     @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  status          Status     @default(NEW)
-  /// @zod.number.int().min(0).max(100)
-  progress        Int        @default(0)
-  message         String?    @db.Text()
-  /// @zod.number.int().min(0).max(100)
-  score           Int?
-  /// @zod.number.int().min(0).max(100)
-  securityScore   Int?       @map("security_score")
-  /// @zod.number.int().min(0).max(100)
-  complexityScore Int?       @map("complexity_score")
-  /// @zod.number.int().min(0).max(100)
-  techDebtScore   Int?       @map("tech_debt_score")
-  /// @zod.number.int().min(0).max(100)
-  onboardingScore Int?       @map("onboarding_score")
-  metricsJson     Json?      @map("metrics_json")
-  resultJson      Json?      @map("result_json")
-  commitSha       String?    @map("commit_sha")
-  jobId           String?
-  logs            String?    @db.Text()
-  error           String?    @db.Text()
-  createdAt       DateTime   @default(now()) @map("created_at")
-  updatedAt       DateTime   @default(now()) @updatedAt() @map("updated_at")
-  /// @zod.custom.omit(["model"])
-  repoId          Int        @map("repo_id")
-  repo            Repo       @relation(fields: [repoId], references: [id], onDelete: Cascade)
-  documents       Document[]
+    /// @zod.custom.omit(["model"])
+    id Int @id() @default(autoincrement())
+    /// @zod.custom.omit(["model"])
+    publicId String @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+    status Status @default(NEW)
+    /// @zod.number.int().min(0).max(100)
+    progress Int @default(0)
+    message String? @db.Text()
+    /// @zod.number.int().min(0).max(100)
+    score Int?
+    /// @zod.number.int().min(0).max(100)
+    securityScore Int? @map("security_score")
+    /// @zod.number.int().min(0).max(100)
+    complexityScore Int? @map("complexity_score")
+    /// @zod.number.int().min(0).max(100)
+    techDebtScore Int? @map("tech_debt_score")
+    /// @zod.number.int().min(0).max(100)
+    onboardingScore Int? @map("onboarding_score")
+    metricsJson Json? @map("metrics_json")
+    resultJson Json? @map("result_json")
+    commitSha String? @map("commit_sha")
+    jobId String?
+    logs String? @db.Text()
+    error String? @db.Text()
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    /// @zod.custom.omit(["model"])
+    repoId Int @map("repo_id")
+    repo Repo @relation(fields: [repoId], references: [id], onDelete: Cascade)
+    documents Document[]
 
-  @@index([repoId, status])
-  @@index([repoId, createdAt(sort: Desc)])
-  @@index([jobId])
-  @@index([status])
-  @@map("analyses")
+    @@index([repoId, status])
+    @@index([repoId, createdAt(sort: Desc)])
+    @@index([jobId])
+    @@index([status])
+    @@map("analyses")
 }
 
 model Document {
-  /// @zod.custom.omit(["model"])
-  id         Int       @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId   String    @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  version    String
-  type       DocType
-  /// @zod.string.min(1, { message: "Content cannot be empty" })
-  content    String    @db.Text()
-  path       String?
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @default(now()) @updatedAt() @map("updated_at")
-  /// @zod.custom.omit(["model"])
-  repoId     Int       @map("repo_id")
-  repo       Repo      @relation(fields: [repoId], references: [id], onDelete: Cascade)
-  analysisId Int?      @map("analysis_id")
-  analysis   Analysis? @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+    /// @zod.custom.omit(["model"])
+    id Int @id() @default(autoincrement())
+    /// @zod.custom.omit(["model"])
+    publicId String @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+    version String
+    type DocType
+    /// @zod.string.min(1, { message: "Content cannot be empty" })
+    content String @db.Text()
+    path String?
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    /// @zod.custom.omit(["model"])
+    repoId Int @map("repo_id")
+    repo Repo @relation(fields: [repoId], references: [id], onDelete: Cascade)
+    analysisId Int? @map("analysis_id")
+    analysis Analysis? @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
-  @@unique([repoId, version, type, path])
-  @@unique([repoId, version, type, analysisId])
-  @@index([repoId])
-  @@index([analysisId])
-  @@map("documents")
+    @@unique([repoId, version, type, path])
+    @@unique([repoId, version, type, analysisId])
+    @@index([repoId])
+    @@index([analysisId])
+    @@map("documents")
 }
 
 model ApiKey {
-  id          String    @id() @default(uuid(7)) @db.Uuid()
-  prefix      String
-  /// @zod.custom.omit(["model"])
-  hashedKey   String    @unique() @map("hashed_key")
-  /// @zod.string.trim().min(1, { message: "The name must be between 1 and 50 characters long" }).max(50)
-  name        String
-  /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
-  description String?   @db.Text()
-  lastUsed    DateTime? @map("last_used")
-  revoked     Boolean   @default(false)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @default(now()) @updatedAt() @map("updated_at")
-  /// @zod.custom.omit(["model"])
-  userId      Int       @map("user_id")
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id String @id() @default(uuid(7)) @db.Uuid()
+    prefix String
+    /// @zod.custom.omit(["model"])
+    hashedKey String @unique() @map("hashed_key")
+    /// @zod.string.trim().min(1, { message: "The name must be between 1 and 50 characters long" }).max(50)
+    name String
+    /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
+    description String? @db.Text()
+    lastUsed DateTime? @map("last_used")
+    revoked Boolean @default(false)
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    /// @zod.custom.omit(["model"])
+    userId Int @map("user_id")
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@map("api_keys")
+    @@index([userId])
+    @@map("api_keys")
 }
 
 model Account {
-  /// @zod.custom.omit(["model"])
-  id                       Int      @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId                 String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  /// @zod.custom.omit(["model"])
-  userId                   Int      @map("user_id")
-  type                     String
-  provider                 String
-  providerAccountId        String   @map("provider_account_id")
-  /// @encrypted
-  /// @zod.string.email({ message: "Incorrect email" })
-  email                    String?  @db.Citext()
-  /// @encryption:hash(email)?normalize=lowercase&normalize=trim
-  /// @zod.custom.omit(["model"])
-  emailHash                String?  @map("email_hash")
-  /// @zod.string.url({ message: "Incorrect link to avatar" })
-  image                    String?
-  name                     String?
-  /// @encrypted
-  /// @zod.custom.omit(["model"])
-  refresh_token            String?  @db.Text()
-  /// @encrypted
-  /// @zod.custom.omit(["model"])
-  access_token             String?  @db.Text()
-  /// @zod.custom.omit(["model"])
-  refresh_token_expires_in Int?
-  expires_at               Int?
-  token_type               String?
-  scope                    String?
-  /// @encrypted
-  /// @zod.custom.omit(["model"])
-  id_token                 String?  @db.Text()
-  session_state            String?
-  createdAt                DateTime @default(now()) @map("created_at")
-  updatedAt                DateTime @default(now()) @updatedAt() @map("updated_at")
-  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    /// @zod.custom.omit(["model"])
+    id Int @id() @default(autoincrement())
+    /// @zod.custom.omit(["model"])
+    publicId String @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+    /// @zod.custom.omit(["model"])
+    userId Int @map("user_id")
+    type String
+    provider String
+    providerAccountId String @map("provider_account_id")
+    /// @encrypted
+    /// @zod.string.email({ message: "Incorrect email" })
+    email String? @db.Citext()
+    /// @encryption:hash(email)?normalize=lowercase&normalize=trim
+    /// @zod.custom.omit(["model"])
+    emailHash String? @map("email_hash")
+    /// @zod.string.url({ message: "Incorrect link to avatar" })
+    image String?
+    name String?
+    /// @encrypted
+    /// @zod.custom.omit(["model"])
+    refresh_token String? @db.Text()
+    /// @encrypted
+    /// @zod.custom.omit(["model"])
+    access_token String? @db.Text()
+    /// @zod.custom.omit(["model"])
+    refresh_token_expires_in Int?
+    expires_at Int?
+    token_type String?
+    scope String?
+    /// @encrypted
+    /// @zod.custom.omit(["model"])
+    id_token String? @db.Text()
+    session_state String?
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
-  @@unique([userId, provider])
-  @@map("accounts")
+    @@unique([provider, providerAccountId])
+    @@unique([userId, provider])
+    @@map("accounts")
 }
 
 model BannedEmail {
-  id        Int               @id() @default(autoincrement())
-  /// @encrypted
-  /// @zod.string.email({ message: "Incorrect email" })
-  email     String            @unique() @db.Citext()
-  /// @encryption:hash(email)?normalize=lowercase&normalize=trim
-  /// @zod.custom.omit(["model"])
-  emailHash String?           @unique() @map("email_hash")
-  reason    BannedEmailReason
-  createdAt DateTime          @default(now()) @map("created_at")
-  updatedAt DateTime          @default(now()) @updatedAt() @map("updated_at")
+    id Int @id() @default(autoincrement())
+    /// @encrypted
+    /// @zod.string.email({ message: "Incorrect email" })
+    email String @unique() @db.Citext()
+    /// @encryption:hash(email)?normalize=lowercase&normalize=trim
+    /// @zod.custom.omit(["model"])
+    emailHash String? @unique() @map("email_hash")
+    reason BannedEmailReason
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
 
-  @@map("banned_emails")
+    @@map("banned_emails")
 }
 
 model GithubInstallation {
-  id                  BigInt                 @id()
-  appId               Int                    @map("app_id")
-  targetId            BigInt                 @map("target_id")
-  targetType          InstallationTargetType @map("target_type")
-  accountLogin        String                 @map("account_login") @db.Citext()
-  accountAvatar       String?                @map("account_avatar")
-  repositorySelection RepositorySelection    @map("repository_selection")
-  isSuspended         Boolean                @default(false) @map("is_suspended")
-  htmlUrl             String?                @map("html_url")
-  createdAt           DateTime               @default(now()) @map("created_at")
-  updatedAt           DateTime               @default(now()) @updatedAt() @map("updated_at")
-  userId              Int?                   @map("user_id")
-  user                User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id BigInt @id()
+    appId Int @map("app_id")
+    targetId BigInt @map("target_id")
+    targetType InstallationTargetType @map("target_type")
+    accountLogin String @map("account_login") @db.Citext()
+    accountAvatar String? @map("account_avatar")
+    repositorySelection RepositorySelection @map("repository_selection")
+    isSuspended Boolean @default(false) @map("is_suspended")
+    htmlUrl String? @map("html_url")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    userId Int? @map("user_id")
+    user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, isSuspended, createdAt(sort: Asc)])
-  @@index([userId, isSuspended, accountLogin])
-  @@map("github_installations")
+    @@index([userId, isSuspended, createdAt(sort: Asc)])
+    @@index([userId, isSuspended, accountLogin])
+    @@map("github_installations")
 }
 
 model Session {
-  /// @zod.custom.omit(["model"])
-  id               Int      @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId         String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  /// @encrypted
-  /// @zod.custom.omit(["model"])
-  sessionToken     String   @unique() @map("session_token")
-  /// @encryption:hash(sessionToken)
-  /// @zod.custom.omit(["model"])
-  sessionTokenHash String?  @unique() @map("session_token_hash")
-  /// @zod.custom.omit(["model"])
-  userId           Int      @map("user_id")
-  expires          DateTime
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @default(now()) @updatedAt() @map("updated_at")
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    /// @zod.custom.omit(["model"])
+    id Int @id() @default(autoincrement())
+    /// @zod.custom.omit(["model"])
+    publicId String @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+    /// @encrypted
+    /// @zod.custom.omit(["model"])
+    sessionToken String @unique() @map("session_token")
+    /// @encryption:hash(sessionToken)
+    /// @zod.custom.omit(["model"])
+    sessionTokenHash String? @unique() @map("session_token_hash")
+    /// @zod.custom.omit(["model"])
+    userId Int @map("user_id")
+    expires DateTime
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("sessions")
+    @@map("sessions")
 }
 
 model VerificationToken {
-  identifier String
-  /// @encrypted
-  /// @zod.custom.omit(["model"])
-  token      String   @unique()
-  /// @encryption:hash(token)
-  /// @zod.custom.omit(["model"])
-  tokenHash  String?  @unique() @map("token_hash")
-  expires    DateTime
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @default(now()) @updatedAt() @map("updated_at")
+    identifier String
+    /// @encrypted
+    /// @zod.custom.omit(["model"])
+    token String @unique()
+    /// @encryption:hash(token)
+    /// @zod.custom.omit(["model"])
+    tokenHash String? @unique() @map("token_hash")
+    expires DateTime
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
 
-  @@unique([identifier, token])
-  @@map("verification_tokens")
+    @@unique([identifier, token])
+    @@map("verification_tokens")
 }
 
 model WebhookDelivery {
-  id         String        @id() @default(uuid(7)) @db.Uuid()
-  provider   String
-  deliveryId String        @map("delivery_id")
-  event      String?
-  status     WebhookStatus @default(PROCESSING)
-  error      String?       @db.Text()
-  createdAt  DateTime      @default(now()) @map("created_at")
-  updatedAt  DateTime      @default(now()) @updatedAt() @map("updated_at")
+    id String @id() @default(uuid(7)) @db.Uuid()
+    provider String
+    deliveryId String @map("delivery_id")
+    event String?
+    status WebhookStatus @default(PROCESSING)
+    error String? @db.Text()
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
 
-  @@unique([provider, deliveryId])
-  @@index([createdAt(sort: Desc)])
-  @@map("webhook_deliveries")
+    @@unique([provider, deliveryId])
+    @@index([createdAt(sort: Desc)])
+    @@map("webhook_deliveries")
 }
 
 model AuditLog {
-  id        String   @id() @default(uuid(7)) @db.Uuid()
-  requestId String?  @map("request_id")
-  model     String
-  operation String
-  payload   Json
-  /// @zod.custom.omit(["model"])
-  userId    Int?     @map("user_id")
-  ip        String?  @db.Inet()
-  userAgent String?  @map("user_agent")
-  createdAt DateTime @default(now()) @map("created_at")
+    id String @id() @default(uuid(7)) @db.Uuid()
+    requestId String? @map("request_id")
+    model String
+    operation String
+    payload Json
+    /// @zod.custom.omit(["model"])
+    userId Int? @map("user_id")
+    ip String? @db.Inet()
+    userAgent String? @map("user_agent")
+    createdAt DateTime @default(now()) @map("created_at")
 
-  @@index([userId])
-  @@index([requestId])
-  @@index([createdAt(sort: Desc)])
-  @@index([userId, operation])
-  @@index([model, requestId])
-  @@map("audit_logs")
+    @@index([userId])
+    @@index([requestId])
+    @@index([createdAt(sort: Desc)])
+    @@index([userId, operation])
+    @@index([model, requestId])
+    @@map("audit_logs")
 }
 
 model PullRequestAnalysis {
-  /// @zod.custom.omit(["model"])
-  id               Int                  @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId         String               @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  prNumber         Int                  @map("pr_number")
-  owner            String               @db.Citext()
-  repoName         String               @map("repo_name") @db.Citext()
-  headSha          String               @map("head_sha")
-  baseSha          String               @map("base_sha")
-  status           PRAnalysisStatus     @default(PENDING) @map("status")
-  /// @zod.number.int().min(0).max(10)
-  riskScore        Int?                 @map("risk_score")
-  findingsJson     Json?                @map("findings_json")
-  changedFilesJson Json?                @map("changed_files_json")
-  jobId            String?
-  error            String?              @db.Text()
-  createdAt        DateTime             @default(now()) @map("created_at")
-  updatedAt        DateTime             @default(now()) @updatedAt() @map("updated_at")
-  /// @zod.custom.omit(["model"])
-  repoId           Int                  @map("repo_id")
-  repo             Repo                 @relation("RepoPullRequests", fields: [repoId], references: [id], onDelete: Cascade)
-  comments         PullRequestComment[]
-  generatedFixes   GeneratedFix[]
+    /// @zod.custom.omit(["model"])
+    id Int @id() @default(autoincrement())
+    /// @zod.custom.omit(["model"])
+    publicId String @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+    prNumber Int @map("pr_number")
+    owner String @db.Citext()
+    repoName String @map("repo_name") @db.Citext()
+    headSha String @map("head_sha")
+    baseSha String @map("base_sha")
+    status PRAnalysisStatus @default(PENDING) @map("status")
+    /// @zod.number.int().min(0).max(10)
+    riskScore Int? @map("risk_score")
+    findingsJson Json? @map("findings_json")
+    changedFilesJson Json? @map("changed_files_json")
+    jobId String?
+    error String? @db.Text()
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    /// @zod.custom.omit(["model"])
+    repoId Int @map("repo_id")
+    repo Repo @relation("RepoPullRequests", fields: [repoId], references: [id], onDelete: Cascade)
+    comments PullRequestComment[]
+    generatedFixes GeneratedFix[]
 
-  @@unique([repoId, prNumber, headSha])
-  @@index([repoId, status])
-  @@index([repoId, createdAt(sort: Desc)])
-  @@index([status])
-  @@map("pull_request_analyses")
+    @@unique([repoId, prNumber, headSha])
+    @@index([repoId, status])
+    @@index([repoId, createdAt(sort: Desc)])
+    @@index([status])
+    @@map("pull_request_analyses")
 }
 
 model PullRequestAnalysisConfig {
-  /// @zod.custom.omit(["model"])
-  id              Int            @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId        String         @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  enabled         Boolean        @default(false)
-  ciSkip          Boolean        @default(false) @map("ci_skip")
-  commentStyle    PRCommentStyle @default(DETAILED) @map("comment_style")
-  tokenBudget     Int            @default(30000)
-  focusAreas      PRFocusArea[]  @default([SECURITY, PERFORMANCE]) @map("focus_areas")
-  excludePatterns String[]       @default([]) @map("exclude_patterns")
-  createdAt       DateTime       @default(now()) @map("created_at")
-  updatedAt       DateTime       @default(now()) @updatedAt() @map("updated_at")
-  /// @zod.custom.omit(["model"])
-  repoId          Int            @unique() @map("repo_id")
-  repo            Repo           @relation(fields: [repoId], references: [id], onDelete: Cascade)
+    /// @zod.custom.omit(["model"])
+    id Int @id() @default(autoincrement())
+    /// @zod.custom.omit(["model"])
+    publicId String @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+    enabled Boolean @default(false)
+    ciSkip Boolean @default(false) @map("ci_skip")
+    commentStyle PRCommentStyle @default(DETAILED) @map("comment_style")
+    tokenBudget Int @default(30000)
+    focusAreas PRFocusArea[] @default([SECURITY, PERFORMANCE]) @map("focus_areas")
+    excludePatterns String[] @default([]) @map("exclude_patterns")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    /// @zod.custom.omit(["model"])
+    repoId Int @unique() @map("repo_id")
+    repo Repo @relation(fields: [repoId], references: [id], onDelete: Cascade)
 
-  @@map("pr_analysis_configs")
+    @@map("pr_analysis_configs")
 }
 
 model PullRequestComment {
-  /// @zod.custom.omit(["model"])
-  id              Int                 @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId        String              @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  filePath        String              @map("file_path")
-  line            Int
-  /// @zod.number.int().min(0).max(10)
-  riskLevel       Int                 @map("risk_level")
-  /// @zod.string.min(1, { message: "Comment body cannot be empty" })
-  body            String              @db.Text()
-  findingType     String              @map("finding_type")
-  githubCommentId BigInt?             @map("github_comment_id")
-  createdAt       DateTime            @default(now()) @map("created_at")
-  updatedAt       DateTime            @default(now()) @updatedAt() @map("updated_at")
-  /// @zod.custom.omit(["model"])
-  analysisId      Int                 @map("analysis_id")
-  analysis        PullRequestAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+    /// @zod.custom.omit(["model"])
+    id Int @id() @default(autoincrement())
+    /// @zod.custom.omit(["model"])
+    publicId String @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+    filePath String @map("file_path")
+    line Int
+    /// @zod.number.int().min(0).max(10)
+    riskLevel Int @map("risk_level")
+    /// @zod.string.min(1, { message: "Comment body cannot be empty" })
+    body String @db.Text()
+    findingType String @map("finding_type")
+    githubCommentId BigInt? @map("github_comment_id")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    /// @zod.custom.omit(["model"])
+    analysisId Int @map("analysis_id")
+    analysis PullRequestAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
-  @@index([analysisId, filePath])
-  @@index([analysisId])
-  @@map("pull_request_comments")
+    @@index([analysisId, filePath])
+    @@index([analysisId])
+    @@map("pull_request_comments")
 }
 
 model GeneratedFix {
-  /// @zod.custom.omit(["model"])
-  id              Int                  @id() @default(autoincrement())
-  /// @zod.custom.omit(["model"])
-  publicId        String               @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
-  title           String
-  description     String?              @db.Text()
-  /// @zod.string.min(1)
-  branch          String
-  status          FixStatus            @default(DRAFT) @map("status")
-  /// @zod.number.int().min(0).max(100)
-  estimatedImpact Int?                 @map("estimated_impact")
-  githubPrUrl     String?              @map("github_pr_url")
-  githubPrNumber  Int?                 @map("github_pr_number")
-  createdAt       DateTime             @default(now()) @map("created_at")
-  updatedAt       DateTime             @default(now()) @updatedAt() @map("updated_at")
-  createdByUser   Boolean              @default(false) @map("created_by_user")
-  /// @zod.custom.omit(["model"])
-  repoId          Int                  @map("repo_id")
-  repo            Repo                 @relation("RepoGeneratedFixes", fields: [repoId], references: [id], onDelete: Cascade)
-  /// @zod.custom.omit(["model"])
-  prAnalysisId    Int?                 @map("pr_analysis_id")
-  prAnalysis      PullRequestAnalysis? @relation(fields: [prAnalysisId], references: [id], onDelete: SetNull)
+    /// @zod.custom.omit(["model"])
+    id Int @id() @default(autoincrement())
+    /// @zod.custom.omit(["model"])
+    publicId String @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
+    title String
+    description String? @db.Text()
+    /// @zod.string.min(1)
+    branch String
+    status FixStatus @default(DRAFT) @map("status")
+    /// @zod.number.int().min(0).max(100)
+    estimatedImpact Int? @map("estimated_impact")
+    githubPrUrl String? @map("github_pr_url")
+    githubPrNumber Int? @map("github_pr_number")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt() @map("updated_at")
+    createdByUser Boolean @default(false) @map("created_by_user")
+    /// @zod.custom.omit(["model"])
+    repoId Int @map("repo_id")
+    repo Repo @relation("RepoGeneratedFixes", fields: [repoId], references: [id], onDelete: Cascade)
+    /// @zod.custom.omit(["model"])
+    prAnalysisId Int? @map("pr_analysis_id")
+    prAnalysis PullRequestAnalysis? @relation(fields: [prAnalysisId], references: [id], onDelete: SetNull)
 
-  @@index([repoId, status])
-  @@index([repoId, createdAt(sort: Desc)])
-  @@index([prAnalysisId])
-  @@map("generated_fixes")
+    @@index([repoId, status])
+    @@index([repoId, createdAt(sort: Desc)])
+    @@index([prAnalysisId])
+    @@map("generated_fixes")
 }

@@ -17,7 +17,7 @@ import { AUTH_PROVIDERS, NEXTAUTH_SECRET, RESEND_API_KEY } from "@/shared/consta
 import { prisma } from "@/server/shared/infrastructure/db";
 import { logger } from "@/server/shared/infrastructure/logger";
 
-import { normalizeEmail, validateEmailSafety } from "../lib/email-guard";
+import { maskEmail, normalizeEmail, validateEmailSafety } from "../lib/email-guard";
 import { emailSignInLimiter } from "./ratelimit";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 дней
@@ -44,7 +44,7 @@ export const authOptions: NextAuthOptions = {
       });
 
       if (isBanned != null) {
-        logger.warn({ email: normalizedEmail, msg: "Banned user tried to sign in" });
+        logger.warn({ email: maskEmail(normalizedEmail), msg: "Banned user tried to sign in" });
         throw new Error("EmailBanned");
       }
 
@@ -55,12 +55,12 @@ export const authOptions: NextAuthOptions = {
           headerList.get("x-real-ip") ??
           "127.0.0.1";
 
-        const { reason: limitReason, success } = await emailSignInLimiter.limit(normalizedEmail, {
+        const { reason: limitReason, success } = await emailSignInLimiter.limit(`${normalizedEmail}:${ip}`, {
           ip: ip,
         });
 
         if (!success) {
-          logger.warn({ email: normalizedEmail, limitReason, msg: "Rate limit hit on sign in" });
+          logger.warn({ email: maskEmail(normalizedEmail), ip, limitReason, msg: "Rate limit hit on sign in" });
           throw new Error("RateLimitExceeded");
         }
 
@@ -68,7 +68,8 @@ export const authOptions: NextAuthOptions = {
 
         if (!safe) {
           logger.warn({
-            email: normalizedEmail,
+            email: maskEmail(normalizedEmail),
+            ip,
             msg: "Security guard blocked email",
             safetyReason,
           });
