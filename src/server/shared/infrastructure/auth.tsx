@@ -38,13 +38,18 @@ export const authOptions: NextAuthOptions = {
       if (user.email == null) return false;
 
       const normalizedEmail = normalizeEmail(user.email);
+      const userId = user.id;
 
       const isBanned = await prisma.bannedEmail.findUnique({
         where: { email: normalizedEmail },
       });
 
       if (isBanned != null) {
-        logger.warn({ email: maskEmail(normalizedEmail), msg: "Banned user tried to sign in" });
+        logger.warn({
+          email: maskEmail(normalizedEmail),
+          msg: "Banned user tried to sign in",
+          userId,
+        });
         throw new Error("EmailBanned");
       }
 
@@ -55,12 +60,20 @@ export const authOptions: NextAuthOptions = {
           headerList.get("x-real-ip") ??
           "127.0.0.1";
 
-        const { reason: limitReason, success } = await emailSignInLimiter.limit(`${normalizedEmail}:${ip}`, {
-          ip: ip,
-        });
+        const { reason: limitReason, success } = await emailSignInLimiter.limit(
+          `${normalizedEmail}:${ip}`,
+          {
+            ip: ip,
+          }
+        );
 
         if (!success) {
-          logger.warn({ email: maskEmail(normalizedEmail), ip, limitReason, msg: "Rate limit hit on sign in" });
+          logger.warn({
+            email: maskEmail(normalizedEmail),
+            ip,
+            limitReason,
+            msg: "Rate limit hit on sign in",
+          });
           throw new Error("RateLimitExceeded");
         }
 
@@ -91,7 +104,7 @@ export const authOptions: NextAuthOptions = {
           where: { id: Number(user.id) },
         });
         logger.info({
-          email: user.email,
+          email: maskEmail(user.email),
           msg: "New user created",
           name: finalName,
           type: "auth.register",
@@ -239,13 +252,13 @@ export const authOptions: NextAuthOptions = {
           await resend.emails.send(template);
 
           logger.info({
-            email: identifier,
+            email: maskEmail(identifier),
             msg: "Verification email sent",
             type: "auth.email_sent",
           });
         } catch (error) {
           logger.error({
-            email: identifier,
+            email: maskEmail(identifier),
             error: error instanceof Error ? error.message : String(error),
             msg: "Failed to send verification email",
             type: "auth.email_error",

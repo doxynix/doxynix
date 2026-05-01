@@ -30,6 +30,7 @@ export const envServer = createEnv({
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
+    LOG_SALT_SECRET: process.env.LOG_SALT_SECRET,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,
     REDIS_TCP_URL: process.env.REDIS_TCP_URL,
@@ -61,6 +62,7 @@ export const envServer = createEnv({
     GOOGLE_CLIENT_ID: stringSchema,
     GOOGLE_CLIENT_SECRET: stringSchema,
     GROQ_API_KEY: stringSchema,
+    LOG_SALT_SECRET: stringSchema,
     NEXTAUTH_SECRET: stringSchema,
     PRISMA_FIELD_ENCRYPTION_KEY: stringSchema,
     REDIS_TCP_URL: stringSchema,
@@ -88,6 +90,7 @@ export const GROQ_API_KEY = envServer.GROQ_API_KEY;
 export const UPLOADTHING_TOKEN = envServer.UPLOADTHING_TOKEN;
 export const GITHUB_APP_ID = envServer.GITHUB_APP_ID;
 export const PRISMA_FIELD_ENCRYPTION_KEY = envServer.PRISMA_FIELD_ENCRYPTION_KEY;
+export const LOG_SALT_SECRET = envServer.LOG_SALT_SECRET;
 const rawGithubAppPrivateKey = envServer.GITHUB_APP_PRIVATE_KEY;
 
 if (envServer.NODE_ENV !== "test" && typeof rawGithubAppPrivateKey !== "string") {

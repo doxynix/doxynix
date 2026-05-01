@@ -1,11 +1,11 @@
 import crypto from "node:crypto";
 import { PrismaPg } from "@prisma/adapter-pg";
-import pkg, { type Prisma, type PrismaClient as PrismaClientType } from "@prisma/client";
+import pkg, { Prisma, type PrismaClient as PrismaClientType } from "@prisma/client";
 import pg from "pg";
 import { fieldEncryptionExtension } from "prisma-field-encryption";
 
 import { IS_DEV, IS_TEST } from "@/shared/constants/env.flags";
-import { DATABASE_URL } from "@/shared/constants/env.server";
+import { DATABASE_URL, PRISMA_FIELD_ENCRYPTION_KEY } from "@/shared/constants/env.server";
 
 import { requestContext } from "../lib/request-context";
 import { sanitizePayload } from "../lib/sanitize-payload";
@@ -26,19 +26,27 @@ const baseClient = new PrismaClient({
   },
 });
 
-const encryptedClient = baseClient.$extends(fieldEncryptionExtension());
+const encryptedClient = baseClient.$extends(
+  fieldEncryptionExtension({
+    decryptionKeys: [],
+    dmmf: Prisma.dmmf,
+    encryptionKey: PRISMA_FIELD_ENCRYPTION_KEY,
+  })
+);
 
 const softDeleteClient = encryptedClient.$extends({
   query: {
     apiKey: {
-      async delete({ args, query }: { args: any; query: any }) {
-        return this.apiKey.update({
+      async delete({ args }) {
+        const ctx = Prisma.getExtensionContext(this);
+        return (ctx as any).update({
           ...args,
           data: { revoked: true },
         });
       },
-      async deleteMany({ args, query }: { args: any; query: any }) {
-        return this.apiKey.updateMany({
+      async deleteMany({ args }) {
+        const ctx = Prisma.getExtensionContext(this);
+        return (ctx as any).updateMany({
           ...args,
           data: { revoked: true },
         });
@@ -50,7 +58,7 @@ const softDeleteClient = encryptedClient.$extends({
 export const prisma = softDeleteClient.$extends({
   query: {
     $allModels: {
-      async $allOperations({ args, model, operation, query }: { args: any; model: any; operation: any; query: any }) {
+      async $allOperations({ args, model, operation, query }) {
         const start = performance.now();
 
         let result;
@@ -88,8 +96,8 @@ export const prisma = softDeleteClient.$extends({
                 userId: userId == null ? null : Number(userId),
               },
             })
-            .catch((error_: any) => {
-              logger.error({ error: error_, msg: "AUDIT LOG WRITE FAILED" });
+            .catch((error) => {
+              logger.error({ error, msg: "AUDIT LOG WRITE FAILED" });
             });
 
           if (!IS_TEST) {

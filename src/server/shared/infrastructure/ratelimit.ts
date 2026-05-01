@@ -5,7 +5,7 @@ import { redisClient } from "./redis";
 const ephemeralCache = new Map<string, number>();
 
 export const emailSignInLimiter = new Ratelimit({
-  analytics: true,
+  analytics: false,
   enableProtection: true,
   ephemeralCache: ephemeralCache,
   limiter: Ratelimit.slidingWindow(3, "10 m"),

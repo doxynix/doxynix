@@ -7,7 +7,7 @@ import { RESEND_WEBHOOK_SECRET } from "@/shared/constants/env.server";
 
 import { prisma } from "@/server/shared/infrastructure/db";
 import { logger } from "@/server/shared/infrastructure/logger";
-import { normalizeEmail } from "@/server/shared/lib/email-guard";
+import { maskEmail, normalizeEmail } from "@/server/shared/lib/email-guard";
 import { buildRequestStore, requestContext } from "@/server/shared/lib/request-context";
 
 type ResendWebhookType =
@@ -90,14 +90,12 @@ export async function POST(req: Request) {
         }
 
         if (existing?.status === "FAILED") {
-          // Update the failed record back to PROCESSING and continue processing
           delivery = await prisma.webhookDelivery.update({
             data: { status: "PROCESSING" },
             select: { id: true },
             where: { id: existing.id },
           });
         } else if (existing?.status === "PROCESSING") {
-          // Already being processed, return early
           return new NextResponse("Processing in progress", { status: 202 });
         }
       } else {
@@ -135,16 +133,21 @@ export async function POST(req: Request) {
           }),
         ]);
 
-        logger.warn({ email, msg: "User blacklisted and delivery marked success", reason, type });
+        logger.warn({
+          email: maskEmail(email),
+          msg: "User blacklisted and delivery marked success",
+          reason,
+          type,
+        });
       } catch (error) {
-        logger.error({ email, error, msg: "Failed to process transaction" });
+        logger.error({ email: maskEmail(email), error, msg: "Failed to process transaction" });
 
         await prisma.webhookDelivery.update({
           data: {
             error: error instanceof Error ? error.message : String(error),
             status: "FAILED",
           },
-          where: { id: delivery!.id },
+          where: { id: delivery?.id },
         });
 
         return new NextResponse("Internal Error", { status: 500 });

@@ -3,6 +3,8 @@ import { resolveMx } from "node:dns/promises";
 import disposableDomains from "disposable-email-domains";
 import validator from "validator";
 
+import { LOG_SALT_SECRET } from "@/shared/constants/env.server";
+
 export function normalizeEmail(email: string): string {
   const normalized = validator.normalizeEmail(email, {
     gmail_remove_dots: false, // NOTE: для совместимости с google oAuth
@@ -11,10 +13,30 @@ export function normalizeEmail(email: string): string {
   return typeof normalized === "string" ? normalized : email.toLowerCase().trim();
 }
 
-export function maskEmail(email: string): string {
-  const hash = crypto.createHash("sha256").update(email).digest("hex").slice(0, 8);
-  const domain = email.split("@")[1] ?? "unknown";
-  return `${hash}@${domain}`;
+export function maskEmail(email: null | string | undefined): string {
+  if (email == null) {
+    return "unknown@address";
+  }
+
+  const normalized = normalizeEmail(email);
+  const parts = normalized.split("@");
+
+  const local = parts[0];
+  const domain = parts[1];
+
+  if (local == null || domain == null) {
+    return "invalid-email";
+  }
+
+  const firstChar = local.charAt(0);
+
+  const hash = crypto
+    .createHmac("sha256", LOG_SALT_SECRET)
+    .update(local)
+    .digest("hex")
+    .slice(0, 10);
+
+  return `${firstChar}...${hash}@${domain}`;
 }
 
 export async function validateEmailSafety(
