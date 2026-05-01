@@ -994,8 +994,8 @@ packages:
     resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/compat-data@7.29.3':
-    resolution: {integrity: sha512-LIVqM46zQWZhj17qA8wb4nW/ixr2y1Nw+r1etiAWgRM6U1IqP+LNhL1yg440jYZR72jCWcWbLWzIosH+uP1fqg==}
+  '@babel/compat-data@7.29.0':
+    resolution: {integrity: sha512-T1NCJqT/j9+cn8fvkt7jtwbLBfLC/1y1c7NtCeXFRgzGTsafi68MRv8yzkYSapBnFA6L3U2VSc02ciDzoAJhJg==}
     engines: {node: '>=6.9.0'}
 
   '@babel/core@7.29.0':
@@ -1014,8 +1014,8 @@ packages:
     resolution: {integrity: sha512-JYtls3hqi15fcx5GaSNL7SCTJ2MNmjrkHXg4FSpOA/grxK8KwyZ5bubHsCq8FXCkua6xhuaaBit+3b7+VZRfcA==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/helper-create-class-features-plugin@7.29.3':
-    resolution: {integrity: sha512-RpLYy2sb51oNLjuu1iD3bwBqCBWUzjO0ocp+iaCP/lJtb2CPLcnC2Fftw+4sAzaMELGeWTgExSKADbdo0GFVzA==}
+  '@babel/helper-create-class-features-plugin@7.28.6':
+    resolution: {integrity: sha512-dTOdvsjnG3xNT9Y0AUg1wAl38y+4Rl4sf9caSQZOXdNqVn+H+HbbJ4IyyHaIqNR6SW9oJpA/RuRjsjCw2IdIow==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
@@ -1072,8 +1072,8 @@ packages:
     resolution: {integrity: sha512-HoGuUs4sCZNezVEKdVcwqmZN8GoHirLUcLaYVNBK2J0DadGtdcqgr3BCbvH8+XUo4NGjNl3VOtSjEKNzqfFgKw==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/parser@7.29.3':
-    resolution: {integrity: sha512-b3ctpQwp+PROvU/cttc4OYl4MzfJUWy6FZg+PMXfzmt/+39iHVF0sDfqay8TQM3JA2EUOyKcFZt75jWriQijsA==}
+  '@babel/parser@7.29.2':
+    resolution: {integrity: sha512-4GgRzy/+fsBa72/RZVJmGKPmZu9Byn8o4MoLpmNe1m8ZfYnz5emHLQz3U4gLud6Zwl0RZIcgiLD7Uq7ySFuDLA==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -2008,9 +2008,6 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
-
-  '@floating-ui/vue@1.1.11':
-    resolution: {integrity: sha512-HzHKCNVxnGS35r9fCHBc3+uCnjw9IWIlCPL683cGgM9Kgj2BiAl8x1mS7vtvP6F9S/e/q4O6MApwSHj8hNLGfw==}
 
   '@floating-ui/vue@1.1.9':
     resolution: {integrity: sha512-BfNqNW6KA83Nexspgb9DZuz578R7HT8MZw1CfK9I6Ah4QReNWEJsXWHN+SdmOVLNGmTPDi+fDT535Df5PzMLbQ==}
@@ -6760,8 +6757,8 @@ packages:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
     engines: {node: '>= 0.4'}
 
-  b4a@1.8.1:
-    resolution: {integrity: sha512-aiqre1Nr0B/6DgE2N5vwTc+2/oQZ4Wh1t4NznYY4E00y8LCt6NqdRv81so00oo27D8MVKTpUa/MwUUtBLXCoDw==}
+  b4a@1.8.0:
+    resolution: {integrity: sha512-qRuSmNSkGQaHwNbM7J78Wwy+ghLEYF1zNrSeMxj4Kgw6y33O3mXcQ6Ie9fRvfU/YnxWkOchPXbaLb73TkIsfdg==}
     peerDependencies:
       react-native-b4a: '*'
     peerDependenciesMeta:
@@ -6802,8 +6799,8 @@ packages:
       bare-buffer:
         optional: true
 
-  bare-os@3.9.1:
-    resolution: {integrity: sha512-6M5XjcnsygQNPMCMPXSK379xrJFiZ/AEMNBmFEmQW8d/789VQATvriyi5r0HYTL9TkQ26rn3kgdTG3aisbrXkQ==}
+  bare-os@3.9.0:
+    resolution: {integrity: sha512-JTjuZyNIDpw+GytMO4a6TK1VXdVKKJr6DRxEHasyuYyShV2deuiHJK/ahGZlebc+SG0/wJCB9XK8gprBGDFi/Q==}
     engines: {bare: '>=1.14.0'}
 
   bare-path@3.0.0:
@@ -6837,8 +6834,8 @@ packages:
     resolution: {integrity: sha512-lGe34o6EHj9y3Kts9R4ZYs/Gr+6N7MCaMlIFA3F1R2O5/m7K06AxfSeO5530PEERE6/WyEg3lsuyw4GHlPZHog==}
     engines: {node: ^4.5.0 || >= 5.9}
 
-  baseline-browser-mapping@2.10.25:
-    resolution: {integrity: sha512-QO/VHsXCQdnzADMfmkeOPvHdIAkoB7i0/rGjINPJEetLx75hNttVWGQ/jycHUDP9zZ9rupbm60WRxcwViB0MiA==}
+  baseline-browser-mapping@2.10.24:
+    resolution: {integrity: sha512-I2NkZOOrj2XuguvWCK6OVh9GavsNjZjK908Rq3mIBK25+GD8vPX5w2WdxVqnQ7xx3SrZJiCiZFu+/Oz50oSYSA==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -7969,8 +7966,8 @@ packages:
   effect@3.21.2:
     resolution: {integrity: sha512-rXd2FGDM8KdjSIrc+mqEELo7ScW7xTVxEf1iInmPSpIde9/nyGuFM710cjTo7/EreGXiUX2MOonPpprbz2XHCg==}
 
-  electron-to-chromium@1.5.348:
-    resolution: {integrity: sha512-QC2X59nRlycQQMc4ZXjSVBX+tSgJfgRtcrYHbIZLgOV2dCvefoQGegLR7lLXKgpPpSuVmJU19LMzGrSa2C7k3Q==}
+  electron-to-chromium@1.5.345:
+    resolution: {integrity: sha512-F9JXQGiMrz6yVNPI2qOVPvB9HzjH5cGzhs8oJ6A28V5L/YnzN/0KsuiibqF+F1Fd9qxFzD1BUnYSd8JfULxTwg==}
 
   elkjs@0.11.1:
     resolution: {integrity: sha512-zxxR9k+rx5ktMwT/FwyLdPCrq7xN6e4VGGHH8hA01vVYKjTFik7nHOxBnAYtrgYUB1RpAiLvA1/U2YraWxyKKg==}
@@ -8851,8 +8848,8 @@ packages:
     resolution: {integrity: sha512-ob/2LcVVaVGCYN+r14cnwnoDPUufjiYgSqRhiFD0Q1iI4Odora5RE8Iv1D24hAz5oMophRGkGz+yuvQmmUMnMw==}
     engines: {node: '>=18'}
 
-  globals@17.6.0:
-    resolution: {integrity: sha512-sepffkT8stwnIYbsMBpoCHJuJM5l98FUF2AnE07hfvE0m/qp3R586hw4jF4uadbhvg1ooIdzuu7CsfD2jzCaNA==}
+  globals@17.5.0:
+    resolution: {integrity: sha512-qoV+HK2yFl/366t2/Cb3+xxPUo5BuMynomoDmiaZBIdbs+0pYbjfZU+twLhGKp4uCZ/+NbtpVepH5bGCxRyy2g==}
     engines: {node: '>=18'}
 
   globalthis@1.0.4:
@@ -9158,8 +9155,8 @@ packages:
   hosted-git-info@2.8.9:
     resolution: {integrity: sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==}
 
-  hosted-git-info@9.0.3:
-    resolution: {integrity: sha512-Hc+ghLoSt6QaYZUv0WBiIvmMDZuZZ7oaDvdH8MbfOO4lOsxdXLEvuC6ePoGs9H1X9oCLyq6+NVN0MKqD+ydxyg==}
+  hosted-git-info@9.0.2:
+    resolution: {integrity: sha512-M422h7o/BR3rmCQ8UHi7cyyMqKltdP9Uo+J2fXK+RSAY+wTcKOIRyhTuKv4qn+DJf3g+PL890AzId5KZpX+CBg==}
     engines: {node: ^20.17.0 || >=22.9.0}
 
   hsl-matcher@1.2.4:
@@ -9395,8 +9392,8 @@ packages:
     resolution: {integrity: sha512-HuEDBTI70aYdx1v6U97SbNx9F1+svQKBDo30o0b9fw055LMepzpOOd0Ccg9Q6tbqmBSJaMuY0fB7yw9/vjBYCA==}
     engines: {node: '>=12.22.0'}
 
-  ip-address@10.2.0:
-    resolution: {integrity: sha512-/+S6j4E9AHvW9SWMSEY9Xfy66O5PWvVEJ08O0y5JGyEKQpojb0K0GKpz/v5HJ/G0vi3D2sjGK78119oXZeE0qA==}
+  ip-address@10.1.1:
+    resolution: {integrity: sha512-1FMu8/N15Ck1BL551Jf42NYIoin2unWjLQ2Fze/DXryJRl5twqtwNHlO39qERGbIOcKYWHdgRryhOC+NG4eaLw==}
     engines: {node: '>= 12'}
 
   ipaddr.js@1.9.1:
@@ -9874,8 +9871,8 @@ packages:
     resolution: {integrity: sha512-tnqVzWOkUcoiY0bWlyE8diFrZjmGBCF7MesC1bjUaZM+YGQSfdPC+KkhmHM0DWFG+uLcPxidKaPP1SYGtg3J0Q==}
     engines: {node: '>=18.0.0'}
 
-  langium@4.2.3:
-    resolution: {integrity: sha512-sOPIi4hISFnY7twwV97ca1TsxpBtXq0URu/LL1AvxwccPG/RIBBlKS7a/f/EL6w8lTNaS0EFs/F+IdSOaqYpng==}
+  langium@4.2.2:
+    resolution: {integrity: sha512-JUshTRAfHI4/MF9dH2WupvjSXyn8JBuUEWazB8ZVJUtXutT0doDlAv1XKbZ1Pb5sMexa8FF4CFBc0iiul7gbUQ==}
     engines: {node: '>=20.10.0', npm: '>=10.2.3'}
 
   langsmith@0.5.25:
@@ -10600,8 +10597,8 @@ packages:
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
 
-  nanoid@3.3.12:
-    resolution: {integrity: sha512-ZB9RH/39qpq5Vu6Y+NmUaFhQR6pp+M2Xt76XBnEwDaGcVAqhlvxrl3B2bKS5D3NH3QR76v3aSrKaF/Kiy7lEtQ==}
+  nanoid@3.3.11:
+    resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -10610,8 +10607,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@5.1.11:
-    resolution: {integrity: sha512-v+KEsUv2ps74PaSKv0gHTxTCgMXOIfBEbaqa6w6ISIGC7ZsvHN4N9oJ8d4cmf0n5oTzQz2SLmThbQWhjd/8eKg==}
+  nanoid@5.1.9:
+    resolution: {integrity: sha512-ZUvP7KeBLe3OZ1ypw6dI/TzYJuvHP77IM4Ry73waSQTLn8/g8rpdjfyVAh7t1/+FjBtG4lCP42MEbDxOsRpBMw==}
     engines: {node: ^18 || >=20}
     hasBin: true
 
@@ -10730,8 +10727,8 @@ packages:
       react: '>= 16.0.0'
       react-dom: '>= 16.0.0'
 
-  node-abi@3.90.0:
-    resolution: {integrity: sha512-pZNQT7UnYlMwMBy5N1lV5X/YLTbZM5ncytN3xL7CHEzhDN8uVe0u55yaPUJICIJjaCW8NrM5BFdqr7HLweStNA==}
+  node-abi@3.89.0:
+    resolution: {integrity: sha512-6u9UwL0HlAl21+agMN3YAMXcKByMqwGx+pq+P76vii5f7hTPtKDp08/H9py6DY+cfDw7kQNTGEj/rly3IgbNQA==}
     engines: {node: '>=10'}
 
   node-addon-api@6.1.0:
@@ -11384,8 +11381,8 @@ packages:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.5.13:
-    resolution: {integrity: sha512-qif0+jGGZoLWdHey3UFHHWP0H7Gbmsk8T5VEqyYFbWqPr1XqvLGBbk/sl8V5exGmcYJklJOhOQq1pV9IcsiFag==}
+  postcss@8.5.12:
+    resolution: {integrity: sha512-W62t/Se6rA0Az3DfCL0AqJwXuKwBeYg6nOaIgzP+xZ7N5BFCI7DYi1qs6ygUYT6rvfi6t9k65UMLJC+PHZpDAA==}
     engines: {node: ^10 || ^12 || >=14}
 
   postgres-array@2.0.0:
@@ -14100,7 +14097,7 @@ snapshots:
       js-tokens: 4.0.0
       picocolors: 1.1.1
 
-  '@babel/compat-data@7.29.3': {}
+  '@babel/compat-data@7.29.0': {}
 
   '@babel/core@7.29.0':
     dependencies:
@@ -14109,7 +14106,7 @@ snapshots:
       '@babel/helper-compilation-targets': 7.28.6
       '@babel/helper-module-transforms': 7.28.6(@babel/core@7.29.0)
       '@babel/helpers': 7.29.2
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       '@babel/template': 7.28.6
       '@babel/traverse': 7.29.0
       '@babel/types': 7.29.0
@@ -14124,7 +14121,7 @@ snapshots:
 
   '@babel/generator@7.29.1':
     dependencies:
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       '@babel/types': 7.29.0
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
@@ -14136,13 +14133,13 @@ snapshots:
 
   '@babel/helper-compilation-targets@7.28.6':
     dependencies:
-      '@babel/compat-data': 7.29.3
+      '@babel/compat-data': 7.29.0
       '@babel/helper-validator-option': 7.27.1
       browserslist: 4.28.2
       lru-cache: 5.1.1
       semver: 6.3.1
 
-  '@babel/helper-create-class-features-plugin@7.29.3(@babel/core@7.29.0)':
+  '@babel/helper-create-class-features-plugin@7.28.6(@babel/core@7.29.0)':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/helper-annotate-as-pure': 7.27.3
@@ -14213,14 +14210,14 @@ snapshots:
       '@babel/template': 7.28.6
       '@babel/types': 7.29.0
 
-  '@babel/parser@7.29.3':
+  '@babel/parser@7.29.2':
     dependencies:
       '@babel/types': 7.29.0
 
   '@babel/plugin-proposal-decorators@7.29.0(@babel/core@7.29.0)':
     dependencies:
       '@babel/core': 7.29.0
-      '@babel/helper-create-class-features-plugin': 7.29.3(@babel/core@7.29.0)
+      '@babel/helper-create-class-features-plugin': 7.28.6(@babel/core@7.29.0)
       '@babel/helper-plugin-utils': 7.28.6
       '@babel/plugin-syntax-decorators': 7.28.6(@babel/core@7.29.0)
     transitivePeerDependencies:
@@ -14229,7 +14226,7 @@ snapshots:
   '@babel/plugin-proposal-private-methods@7.18.6(@babel/core@7.29.0)':
     dependencies:
       '@babel/core': 7.29.0
-      '@babel/helper-create-class-features-plugin': 7.29.3(@babel/core@7.29.0)
+      '@babel/helper-create-class-features-plugin': 7.28.6(@babel/core@7.29.0)
       '@babel/helper-plugin-utils': 7.28.6
     transitivePeerDependencies:
       - supports-color
@@ -14277,7 +14274,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.29.0
       '@babel/helper-annotate-as-pure': 7.27.3
-      '@babel/helper-create-class-features-plugin': 7.29.3(@babel/core@7.29.0)
+      '@babel/helper-create-class-features-plugin': 7.28.6(@babel/core@7.29.0)
       '@babel/helper-plugin-utils': 7.28.6
       '@babel/helper-skip-transparent-expression-wrappers': 7.27.1
       '@babel/plugin-syntax-typescript': 7.28.6(@babel/core@7.29.0)
@@ -14300,7 +14297,7 @@ snapshots:
   '@babel/template@7.28.6':
     dependencies:
       '@babel/code-frame': 7.29.0
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       '@babel/types': 7.29.0
 
   '@babel/traverse@7.29.0':
@@ -14308,7 +14305,7 @@ snapshots:
       '@babel/code-frame': 7.29.0
       '@babel/generator': 7.29.1
       '@babel/helper-globals': 7.28.0
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       '@babel/template': 7.28.6
       '@babel/types': 7.29.0
       debug: 4.4.3
@@ -15411,15 +15408,6 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
-  '@floating-ui/vue@1.1.11(vue@3.5.33(typescript@6.0.3))':
-    dependencies:
-      '@floating-ui/dom': 1.7.6
-      '@floating-ui/utils': 0.2.11
-      vue-demi: 0.14.10(vue@3.5.33(typescript@6.0.3))
-    transitivePeerDependencies:
-      - '@vue/composition-api'
-      - vue
-
   '@floating-ui/vue@1.1.9(vue@3.5.33(typescript@6.0.3))':
     dependencies:
       '@floating-ui/dom': 1.7.6
@@ -15528,7 +15516,7 @@ snapshots:
   '@ianvs/prettier-plugin-sort-imports@4.7.1(@vue/compiler-sfc@3.5.33)(prettier@3.8.3)':
     dependencies:
       '@babel/generator': 7.29.1
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       '@babel/traverse': 7.29.0
       '@babel/types': 7.29.0
       prettier: 3.8.3
@@ -16043,7 +16031,7 @@ snapshots:
 
   '@mermaid-js/parser@1.1.0':
     dependencies:
-      langium: 4.2.3
+      langium: 4.2.2
 
   '@microsoft/fetch-event-source@2.0.1': {}
 
@@ -16280,7 +16268,7 @@ snapshots:
 
   '@opentelemetry/api-logs@0.203.0':
     dependencies:
-      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/api': 1.9.0
 
   '@opentelemetry/api-logs@0.207.0':
     dependencies:
@@ -16311,12 +16299,12 @@ snapshots:
   '@opentelemetry/core@2.0.1(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.36.0
 
   '@opentelemetry/core@2.0.1(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.36.0
     optional: true
 
   '@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.1)':
@@ -16653,13 +16641,13 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.0.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.36.0
 
   '@opentelemetry/resources@2.0.1(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.0.1(@opentelemetry/api@1.9.1)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.36.0
     optional: true
 
   '@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.1)':
@@ -16720,14 +16708,14 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.0.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.0.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.36.0
 
   '@opentelemetry/sdk-trace-base@2.0.1(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.0.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources': 2.0.1(@opentelemetry/api@1.9.1)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.36.0
     optional: true
 
   '@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.1)':
@@ -18227,7 +18215,7 @@ snapshots:
       js-base64: 3.7.8
       monaco-editor: 0.55.1
       monaco-yaml: 5.4.1(monaco-editor@0.55.1)
-      nanoid: 5.1.11
+      nanoid: 5.1.9
       pretty-ms: 9.3.0
       radix-vue: 1.9.17(vue@3.5.33(typescript@6.0.3))
       set-cookie-parser: 3.1.0
@@ -18302,7 +18290,7 @@ snapshots:
       fuse.js: 7.3.0
       github-slugger: 2.0.0
       microdiff: 1.5.0
-      nanoid: 5.1.11
+      nanoid: 5.1.9
       vue: 3.5.33(typescript@6.0.3)
       yaml: 2.8.3
     transitivePeerDependencies:
@@ -18360,7 +18348,7 @@ snapshots:
       '@scalar/use-hooks': 0.4.3(typescript@6.0.3)
       '@vueuse/core': 13.9.0(vue@3.5.33(typescript@6.0.3))
       cva: 1.0.0-beta.4(typescript@6.0.3)
-      nanoid: 5.1.11
+      nanoid: 5.1.9
       radix-vue: 1.9.17(vue@3.5.33(typescript@6.0.3))
       vue: 3.5.33(typescript@6.0.3)
       vue-component-type-helpers: 3.2.7
@@ -18438,19 +18426,14 @@ snapshots:
 
   '@scalar/themes@0.15.3':
     dependencies:
-      nanoid: 5.1.11
+      nanoid: 5.1.9
 
   '@scalar/typebox@0.1.3': {}
 
   '@scalar/types@0.9.3':
     dependencies:
-<<<<<<< feature/dxnx-183-improve-server-security
-      '@scalar/helpers': 0.5.2
-      nanoid: 5.1.11
-=======
       '@scalar/helpers': 0.5.3
       nanoid: 5.1.9
->>>>>>> main
       type-fest: 5.6.0
       zod: 4.3.6
 
@@ -18975,7 +18958,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.29.0
       '@babel/generator': 7.29.1
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       '@babel/plugin-proposal-decorators': 7.29.0(@babel/core@7.29.0)
       '@babel/plugin-transform-explicit-resource-management': 7.28.6(@babel/core@7.29.0)
       '@babel/preset-typescript': 7.28.5(@babel/core@7.29.0)
@@ -19166,7 +19149,7 @@ snapshots:
       '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.2.4
       '@tailwindcss/oxide': 4.2.4
-      postcss: 8.5.13
+      postcss: 8.5.12
       tailwindcss: 4.2.4
 
   '@tailwindcss/typography@0.5.19(tailwindcss@4.2.4)':
@@ -20070,7 +20053,7 @@ snapshots:
       http-proxy: 1.18.1
       jsonc-parser: 3.3.1
       md5: 2.3.0
-      nanoid: 3.3.12
+      nanoid: 3.3.11
       path-to-regexp: 6.3.0
       semver: 7.7.4
     optionalDependencies:
@@ -20206,7 +20189,7 @@ snapshots:
 
   '@vue/compiler-core@3.5.33':
     dependencies:
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       '@vue/shared': 3.5.33
       entities: 7.0.1
       estree-walker: 2.0.2
@@ -20219,14 +20202,14 @@ snapshots:
 
   '@vue/compiler-sfc@3.5.33':
     dependencies:
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       '@vue/compiler-core': 3.5.33
       '@vue/compiler-dom': 3.5.33
       '@vue/compiler-ssr': 3.5.33
       '@vue/shared': 3.5.33
       estree-walker: 2.0.2
       magic-string: 0.30.21
-      postcss: 8.5.13
+      postcss: 8.5.12
       source-map-js: 1.2.1
 
   '@vue/compiler-ssr@3.5.33':
@@ -20818,7 +20801,7 @@ snapshots:
 
   ast-kit@2.2.0:
     dependencies:
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       pathe: 2.0.3
 
   ast-types-flow@0.0.8: {}
@@ -20835,7 +20818,7 @@ snapshots:
 
   ast-walker-scope@0.8.3:
     dependencies:
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       ast-kit: 2.2.0
 
   astral-regex@2.0.0: {}
@@ -20856,7 +20839,7 @@ snapshots:
 
   axobject-query@4.1.0: {}
 
-  b4a@1.8.1: {}
+  b4a@1.8.0: {}
 
   babel-plugin-react-compiler@1.0.0:
     dependencies:
@@ -20885,11 +20868,11 @@ snapshots:
       - bare-abort-controller
       - react-native-b4a
 
-  bare-os@3.9.1: {}
+  bare-os@3.9.0: {}
 
   bare-path@3.0.0:
     dependencies:
-      bare-os: 3.9.1
+      bare-os: 3.9.0
 
   bare-stream@2.13.1(bare-events@2.8.2):
     dependencies:
@@ -20910,7 +20893,7 @@ snapshots:
 
   base64id@2.0.0: {}
 
-  baseline-browser-mapping@2.10.25: {}
+  baseline-browser-mapping@2.10.24: {}
 
   basic-ftp@5.3.1: {}
 
@@ -20985,9 +20968,9 @@ snapshots:
 
   browserslist@4.28.2:
     dependencies:
-      baseline-browser-mapping: 2.10.25
+      baseline-browser-mapping: 2.10.24
       caniuse-lite: 1.0.30001791
-      electron-to-chromium: 1.5.348
+      electron-to-chromium: 1.5.345
       node-releases: 2.0.38
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
 
@@ -21464,7 +21447,7 @@ snapshots:
 
   constantinople@4.0.1:
     dependencies:
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       '@babel/types': 7.29.0
 
   content-disposition@0.5.4:
@@ -22115,7 +22098,7 @@ snapshots:
       '@standard-schema/spec': 1.1.0
       fast-check: 3.23.2
 
-  electron-to-chromium@1.5.348: {}
+  electron-to-chromium@1.5.345: {}
 
   elkjs@0.11.1: {}
 
@@ -22569,7 +22552,7 @@ snapshots:
   eslint-plugin-playwright@2.10.2(eslint@9.39.4(jiti@1.21.7)):
     dependencies:
       eslint: 9.39.4(jiti@1.21.7)
-      globals: 17.6.0
+      globals: 17.5.0
 
   eslint-plugin-prettier@5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@9.39.4(jiti@1.21.7)))(eslint@9.39.4(jiti@1.21.7))(prettier@3.8.3):
     dependencies:
@@ -22584,7 +22567,7 @@ snapshots:
   eslint-plugin-react-compiler@19.1.0-rc.2(eslint@9.39.4(jiti@1.21.7)):
     dependencies:
       '@babel/core': 7.29.0
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       '@babel/plugin-proposal-private-methods': 7.18.6(@babel/core@7.29.0)
       eslint: 9.39.4(jiti@1.21.7)
       hermes-parser: 0.25.1
@@ -22596,7 +22579,7 @@ snapshots:
   eslint-plugin-react-hooks@7.1.1(eslint@9.39.4(jiti@1.21.7)):
     dependencies:
       '@babel/core': 7.29.0
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       eslint: 9.39.4(jiti@1.21.7)
       hermes-parser: 0.25.1
       zod: 4.3.6
@@ -22633,7 +22616,7 @@ snapshots:
       bytes: 3.1.2
       eslint: 9.39.4(jiti@1.21.7)
       functional-red-black-tree: 1.0.1
-      globals: 17.6.0
+      globals: 17.5.0
       jsx-ast-utils-x: 0.1.0
       lodash.merge: 4.6.2
       minimatch: 10.2.5
@@ -22652,7 +22635,7 @@ snapshots:
       core-js-compat: 3.49.0
       eslint: 9.39.4(jiti@1.21.7)
       find-up-simple: 1.0.1
-      globals: 17.6.0
+      globals: 17.5.0
       indent-string: 5.0.0
       is-builtin-module: 5.0.0
       jsesc: 3.1.0
@@ -23307,7 +23290,7 @@ snapshots:
 
   globals@16.4.0: {}
 
-  globals@17.6.0: {}
+  globals@17.5.0: {}
 
   globalthis@1.0.4:
     dependencies:
@@ -23758,7 +23741,7 @@ snapshots:
 
   hosted-git-info@2.8.9: {}
 
-  hosted-git-info@9.0.3:
+  hosted-git-info@9.0.2:
     dependencies:
       lru-cache: 11.3.5
 
@@ -24033,7 +24016,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ip-address@10.2.0: {}
+  ip-address@10.1.1: {}
 
   ipaddr.js@1.9.1: {}
 
@@ -24468,7 +24451,7 @@ snapshots:
       vscode-languageserver-textdocument: 1.0.12
       vscode-uri: 3.0.8
 
-  langium@4.2.3:
+  langium@4.2.2:
     dependencies:
       '@chevrotain/regexp-to-ast': 12.0.0
       chevrotain: 12.0.0
@@ -24782,7 +24765,7 @@ snapshots:
 
   magicast@0.5.2:
     dependencies:
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       '@babel/types': 7.29.0
       source-map-js: 1.2.1
 
@@ -25397,11 +25380,11 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
-  nanoid@3.3.12: {}
+  nanoid@3.3.11: {}
 
   nanoid@3.3.8: {}
 
-  nanoid@5.1.11: {}
+  nanoid@5.1.9: {}
 
   napi-build-utils@2.0.0: {}
 
@@ -25482,7 +25465,7 @@ snapshots:
     dependencies:
       '@next/env': 16.2.4
       '@swc/helpers': 0.5.15
-      baseline-browser-mapping: 2.10.25
+      baseline-browser-mapping: 2.10.24
       caniuse-lite: 1.0.30001791
       postcss: 8.4.31
       react: 19.2.5
@@ -25523,7 +25506,7 @@ snapshots:
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
 
-  node-abi@3.90.0:
+  node-abi@3.89.0:
     dependencies:
       semver: 7.7.4
 
@@ -25578,13 +25561,13 @@ snapshots:
   normalize-package-data@2.5.0:
     dependencies:
       hosted-git-info: 2.8.9
-      resolve: 1.22.12
+      resolve: 1.22.2
       semver: 5.7.2
       validate-npm-package-license: 3.0.4
 
   normalize-package-data@8.0.0:
     dependencies:
-      hosted-git-info: 9.0.3
+      hosted-git-info: 9.0.2
       semver: 7.7.4
       validate-npm-package-license: 3.0.4
 
@@ -26155,30 +26138,30 @@ snapshots:
 
   postal-mime@2.7.4: {}
 
-  postcss-import@15.1.0(postcss@8.5.13):
+  postcss-import@15.1.0(postcss@8.5.12):
     dependencies:
-      postcss: 8.5.13
+      postcss: 8.5.12
       postcss-value-parser: 4.2.0
       read-cache: 1.0.0
       resolve: 1.22.12
 
-  postcss-js@4.1.0(postcss@8.5.13):
+  postcss-js@4.1.0(postcss@8.5.12):
     dependencies:
       camelcase-css: 2.0.1
-      postcss: 8.5.13
+      postcss: 8.5.12
 
-  postcss-load-config@6.0.1(jiti@1.21.7)(postcss@8.5.13)(tsx@4.21.0)(yaml@2.8.3):
+  postcss-load-config@6.0.1(jiti@1.21.7)(postcss@8.5.12)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:
       lilconfig: 3.1.3
     optionalDependencies:
       jiti: 1.21.7
-      postcss: 8.5.13
+      postcss: 8.5.12
       tsx: 4.21.0
       yaml: 2.8.3
 
-  postcss-nested@6.2.0(postcss@8.5.13):
+  postcss-nested@6.2.0(postcss@8.5.12):
     dependencies:
-      postcss: 8.5.13
+      postcss: 8.5.12
       postcss-selector-parser: 6.1.2
 
   postcss-selector-parser@6.0.10:
@@ -26195,13 +26178,13 @@ snapshots:
 
   postcss@8.4.31:
     dependencies:
-      nanoid: 3.3.12
+      nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postcss@8.5.13:
+  postcss@8.5.12:
     dependencies:
-      nanoid: 3.3.12
+      nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
@@ -26254,7 +26237,7 @@ snapshots:
       minimist: 1.2.8
       mkdirp-classic: 0.5.3
       napi-build-utils: 2.0.0
-      node-abi: 3.90.0
+      node-abi: 3.89.0
       pump: 3.0.4
       rc: 1.2.8
       simple-get: 4.0.1
@@ -26369,7 +26352,7 @@ snapshots:
 
   prom-client@15.1.3:
     dependencies:
-      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/api': 1.9.0
       tdigest: 0.1.2
 
   promise@7.3.1:
@@ -26577,7 +26560,7 @@ snapshots:
   radix-vue@1.9.17(vue@3.5.33(typescript@6.0.3)):
     dependencies:
       '@floating-ui/dom': 1.7.6
-      '@floating-ui/vue': 1.1.11(vue@3.5.33(typescript@6.0.3))
+      '@floating-ui/vue': 1.1.9(vue@3.5.33(typescript@6.0.3))
       '@internationalized/date': 3.12.1
       '@internationalized/number': 3.6.6
       '@tanstack/vue-virtual': 3.13.24(vue@3.5.33(typescript@6.0.3))
@@ -26586,7 +26569,7 @@ snapshots:
       aria-hidden: 1.2.6
       defu: 6.1.7
       fast-deep-equal: 3.1.3
-      nanoid: 5.1.11
+      nanoid: 5.1.9
       vue: 3.5.33(typescript@6.0.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -27592,7 +27575,7 @@ snapshots:
 
   socks@2.8.8:
     dependencies:
-      ip-address: 10.2.0
+      ip-address: 10.1.1
       smart-buffer: 4.2.0
 
   sonic-boom@3.8.1:
@@ -27960,11 +27943,11 @@ snapshots:
       normalize-path: 3.0.0
       object-hash: 3.0.0
       picocolors: 1.1.1
-      postcss: 8.5.13
-      postcss-import: 15.1.0(postcss@8.5.13)
-      postcss-js: 4.1.0(postcss@8.5.13)
-      postcss-load-config: 6.0.1(jiti@1.21.7)(postcss@8.5.13)(tsx@4.21.0)(yaml@2.8.3)
-      postcss-nested: 6.2.0(postcss@8.5.13)
+      postcss: 8.5.12
+      postcss-import: 15.1.0(postcss@8.5.12)
+      postcss-js: 4.1.0(postcss@8.5.12)
+      postcss-load-config: 6.0.1(jiti@1.21.7)(postcss@8.5.12)(tsx@4.21.0)(yaml@2.8.3)
+      postcss-nested: 6.2.0(postcss@8.5.12)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.12
       sucrase: 3.35.1
@@ -28005,7 +27988,7 @@ snapshots:
 
   tar-stream@3.2.0:
     dependencies:
-      b4a: 1.8.1
+      b4a: 1.8.0
       bare-fs: 4.7.1
       fast-fifo: 1.3.2
       streamx: 2.25.0
@@ -28083,7 +28066,7 @@ snapshots:
 
   text-decoder@1.2.7:
     dependencies:
-      b4a: 1.8.1
+      b4a: 1.8.0
     transitivePeerDependencies:
       - react-native-b4a
 
@@ -28233,7 +28216,7 @@ snapshots:
   tsconfig-paths-webpack-plugin@4.2.0:
     dependencies:
       chalk: 4.1.2
-      enhanced-resolve: 5.21.0
+      enhanced-resolve: 5.20.1
       tapable: 2.3.3
       tsconfig-paths: 4.2.0
 
@@ -28685,7 +28668,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
-      postcss: 8.5.13
+      postcss: 8.5.12
       rolldown: 1.0.0-rc.17
       tinyglobby: 0.2.16
     optionalDependencies:
@@ -28968,7 +28951,7 @@ snapshots:
 
   with@7.0.2:
     dependencies:
-      '@babel/parser': 7.29.3
+      '@babel/parser': 7.29.2
       '@babel/types': 7.29.0
       assert-never: 1.4.0
       babel-walk: 3.0.0-canary-5
