@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { BannedEmailReason, Prisma } from "@prisma/client";
 import { Webhook } from "svix";
+import { z } from "zod";
 
 import { RESEND_WEBHOOK_SECRET } from "@/shared/constants/env.server";
 
@@ -10,30 +11,23 @@ import { logger } from "@/server/shared/infrastructure/logger";
 import { maskEmail, normalizeEmail } from "@/server/shared/lib/email-guard";
 import { buildRequestStore, requestContext } from "@/server/shared/lib/request-context";
 
-type ResendWebhookType =
-  | "email.bounced"
-  | "email.clicked"
-  | "email.complained"
-  | "email.delivered"
-  | "email.delivery_delayed"
-  | "email.failed"
-  | "email.opened"
-  | "email.sent"
-  | "email.suppressed";
-
-type ResendWebhookEvent = {
-  created_at: string;
-  data: {
-    bounce?: { sub_type: string; type: string };
-    created_at: string;
-    email_id: string;
-    from: string;
-    subject: string;
-    to: string[];
-  };
-  id: string;
-  type: ResendWebhookType | string;
-};
+const resendWebhookSchema = z.object({
+  created_at: z.string(),
+  data: z.object({
+    bounce: z
+      .object({
+        sub_type: z.string(),
+        type: z.string(),
+      })
+      .optional(),
+    email_id: z.string(),
+    from: z.string().optional(),
+    subject: z.string().optional(),
+    to: z.array(z.string()),
+  }),
+  id: z.string(),
+  type: z.string(),
+});
 
 export async function POST(req: Request) {
   const payload = await req.text();
@@ -48,17 +42,24 @@ export async function POST(req: Request) {
   }
 
   const wh = new Webhook(RESEND_WEBHOOK_SECRET);
-  let evt: ResendWebhookEvent;
+  let rawEvt: unknown;
 
   try {
-    evt = wh.verify(payload, {
+    rawEvt = wh.verify(payload, {
       "svix-id": svix_id,
       "svix-signature": svix_signature,
       "svix-timestamp": svix_timestamp,
-    }) as ResendWebhookEvent;
+    });
   } catch {
     return new NextResponse("Verify failed", { status: 400 });
   }
+
+  const parseResult = resendWebhookSchema.safeParse(rawEvt);
+  if (!parseResult.success) {
+    logger.error({ error: parseResult.error.format(), msg: "Invalid Resend webhook schema" });
+    return new NextResponse("Invalid payload structure", { status: 400 });
+  }
+  const evt = parseResult.data;
 
   const store = buildRequestStore({
     method: "webhook",
@@ -91,7 +92,7 @@ export async function POST(req: Request) {
 
         if (existing?.status === "FAILED") {
           delivery = await prisma.webhookDelivery.update({
-            data: { status: "PROCESSING" },
+            data: { error: null, status: "PROCESSING" },
             select: { id: true },
             where: { id: existing.id },
           });
@@ -101,6 +102,10 @@ export async function POST(req: Request) {
       } else {
         return new NextResponse("DB Error", { status: 500 });
       }
+    }
+
+    if (delivery == null) {
+      return new NextResponse("Internal Error: Delivery not initialized", { status: 500 });
     }
 
     const { data, type } = evt;
@@ -116,7 +121,17 @@ export async function POST(req: Request) {
 
     if (reason != null) {
       const rawEmail = data.to[0];
-      if (rawEmail == null) return NextResponse.json({ ok: true });
+      if (rawEmail == null) {
+        await prisma.webhookDelivery.update({
+          data: {
+            error: "Webhook payload missing recipient email",
+            status: "FAILED",
+          },
+          where: { id: delivery.id },
+        });
+
+        return new NextResponse("Invalid payload", { status: 400 });
+      }
 
       const email = normalizeEmail(rawEmail);
 
@@ -128,8 +143,8 @@ export async function POST(req: Request) {
             where: { email },
           }),
           prisma.webhookDelivery.update({
-            data: { status: "SUCCESS" },
-            where: { id: delivery!.id },
+            data: { error: null, status: "SUCCESS" },
+            where: { id: delivery.id },
           }),
         ]);
 
@@ -147,15 +162,15 @@ export async function POST(req: Request) {
             error: error instanceof Error ? error.message : String(error),
             status: "FAILED",
           },
-          where: { id: delivery?.id },
+          where: { id: delivery.id },
         });
 
         return new NextResponse("Internal Error", { status: 500 });
       }
     } else {
       await prisma.webhookDelivery.update({
-        data: { status: "SUCCESS" },
-        where: { id: delivery!.id },
+        data: { error: null, status: "SUCCESS" },
+        where: { id: delivery.id },
       });
     }
 

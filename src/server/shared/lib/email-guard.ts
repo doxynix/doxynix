@@ -5,6 +5,8 @@ import validator from "validator";
 
 import { LOG_SALT_SECRET } from "@/shared/constants/env.server";
 
+import { logger } from "../infrastructure/logger";
+
 export function normalizeEmail(email: string): string {
   const normalized = validator.normalizeEmail(email, {
     gmail_remove_dots: false, // NOTE: для совместимости с google oAuth
@@ -39,6 +41,19 @@ export function maskEmail(email: null | string | undefined): string {
   return `${firstChar}...${hash}@${domain}`;
 }
 
+interface NodeSystemError extends Error {
+  code?: string;
+}
+
+const isPermanentDnsError = (err: unknown): err is NodeSystemError => {
+  return (
+    err instanceof Error &&
+    "code" in err &&
+    typeof err.code === "string" &&
+    ["ENODATA", "ENOTFOUND"].includes(err.code)
+  );
+};
+
 export async function validateEmailSafety(
   email: string
 ): Promise<{ reason?: string; safe: boolean }> {
@@ -52,13 +67,18 @@ export async function validateEmailSafety(
   try {
     const mxPromise = resolveMx(domain);
     const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Timeout")), 5000)
+      setTimeout(() => reject(new Error("DNS_TIMEOUT")), 5000)
     );
 
     const mx = await Promise.race([mxPromise, timeout]);
     if (mx.length === 0) return { reason: "no_mx_records", safe: false };
-  } catch {
-    return { reason: "invalid_domain", safe: false };
+  } catch (error_) {
+    if (isPermanentDnsError(error_)) {
+      return { reason: "invalid_domain", safe: false };
+    }
+    const errorMessage = error_ instanceof Error ? error_.message : String(error_);
+    logger.warn({ domain, error: errorMessage, msg: "DNS check bypassed due to temporary error" });
+    return { safe: true };
   }
 
   return { safe: true };
