@@ -54,13 +54,15 @@ const isPermanentDnsError = (err: unknown): err is NodeSystemError => {
   );
 };
 
+const disposableDomainSet = new Set(disposableDomains);
+
 export async function validateEmailSafety(
   email: string
 ): Promise<{ reason?: string; safe: boolean }> {
   const domain = email.split("@")[1]?.toLowerCase();
   if (domain == null) return { reason: "invalid_format", safe: false };
 
-  if (disposableDomains.includes(domain)) {
+  if (disposableDomainSet.has(domain)) {
     return { reason: "disposable", safe: false };
   }
 
