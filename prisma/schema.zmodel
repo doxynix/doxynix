@@ -390,7 +390,7 @@ model BannedEmail {
   email     String            @unique @db.Citext
   /// @encryption:hash(email)?normalize=lowercase&normalize=trim
   /// @zod.custom.omit(["model"])
-  emailHash String            @unique @map("email_hash") @omit
+  emailHash String?           @unique @map("email_hash") @omit
   reason    BannedEmailReason
 
   createdAt DateTime          @default(now()) @map("created_at")
