@@ -92,7 +92,7 @@ export const userService = {
   async updateUser(db: DbClient, userId: number, input: UpdateProfileInput) {
     const updatedUser = await db.user.update({
       data: {
-        email: input.email,
+        // email: input.email,
         name: input.name,
       },
       where: { id: userId },

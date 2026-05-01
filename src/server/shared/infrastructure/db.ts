@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pkg, { type Prisma, type PrismaClient as PrismaClientType } from "@prisma/client";
 import pg from "pg";
+import { fieldEncryptionExtension } from "prisma-field-encryption";
 
 import { IS_DEV, IS_TEST } from "@/shared/constants/env.flags";
 import { DATABASE_URL } from "@/shared/constants/env.server";
@@ -16,7 +17,7 @@ const pool = new pg.Pool({
 });
 const adapter = new PrismaPg(pool);
 
-export const baseClient = new PrismaClient({
+const baseClient = new PrismaClient({
   adapter,
   log: IS_DEV && !IS_TEST ? ["error", "warn"] : ["error"],
   transactionOptions: {
@@ -25,17 +26,19 @@ export const baseClient = new PrismaClient({
   },
 });
 
-const softDeleteClient = baseClient.$extends({
+const encryptedClient = baseClient.$extends(fieldEncryptionExtension());
+
+const softDeleteClient = encryptedClient.$extends({
   query: {
     apiKey: {
       async delete({ args }) {
-        return baseClient.apiKey.update({
+        return encryptedClient.apiKey.update({
           ...args,
           data: { revoked: true },
         });
       },
       async deleteMany({ args }) {
-        return baseClient.apiKey.updateMany({
+        return encryptedClient.apiKey.updateMany({
           ...args,
           data: { revoked: true },
         });
@@ -76,7 +79,7 @@ export const prisma = softDeleteClient.$extends({
           (baseClient as PrismaClientType).auditLog
             .create({
               data: {
-                ip: ctxStore?.ip ?? "system",
+                ip: ctxStore?.ip ?? null,
                 model,
                 operation,
                 payload: cleanPayload,

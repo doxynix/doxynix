@@ -317,6 +317,9 @@ importers:
       detect-language:
         specifier: 3.0.0
         version: 3.0.0
+      disposable-email-domains:
+        specifier: 1.0.62
+        version: 1.0.62
       elkjs:
         specifier: 0.11.1
         version: 0.11.1
@@ -347,6 +350,9 @@ importers:
       ioredis:
         specifier: 5.10.1
         version: 5.10.1
+      ipaddr.js:
+        specifier: 2.3.0
+        version: 2.3.0
       isbinaryfile:
         specifier: 6.0.0
         version: 6.0.0
@@ -422,6 +428,9 @@ importers:
       posthog-node:
         specifier: 5.30.6
         version: 5.30.6(rxjs@7.8.2)
+      prisma-field-encryption:
+        specifier: 1.6.0
+        version: 1.6.0(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))
       react:
         specifier: 19.2.5
         version: 19.2.5
@@ -512,6 +521,9 @@ importers:
       superjson:
         specifier: 2.2.6
         version: 2.2.6
+      svix:
+        specifier: 1.92.2
+        version: 1.92.2
       tailwind-merge:
         specifier: 3.5.0
         version: 3.5.0
@@ -533,6 +545,9 @@ importers:
       use-debounce:
         specifier: 10.1.1
         version: 10.1.1(react@19.2.5)
+      validator:
+        specifier: 13.15.35
+        version: 13.15.35
       web-tree-sitter:
         specifier: 0.26.8
         version: 0.26.8
@@ -675,6 +690,9 @@ importers:
       '@types/sloc':
         specifier: 0.2.3
         version: 0.2.3
+      '@types/validator':
+        specifier: 13.15.10
+        version: 13.15.10
       '@types/webpack-stats-plugin':
         specifier: 0.3.5
         version: 0.3.5
@@ -878,6 +896,14 @@ importers:
         version: 3.3.10(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(prisma@6.19.3(typescript@6.0.3))(zod@4.3.6)
 
 packages:
+
+  '@47ng/cloak@1.2.0':
+    resolution: {integrity: sha512-kKufIDIfW7+YdW+m/0PIFR9zsoIan04tCiAoWsvd2e/MsIh4HtU//n/xDk8eNTTl9cN/rI78qd1r2zCP0QB7hw==}
+    hasBin: true
+
+  '@47ng/codec@1.1.0':
+    resolution: {integrity: sha512-gvtA2RjijvEiYQbURPM6/Z+ySfS4lmtQ9NovDzzT+5ekeZ3M5pGiotlT94Qd+At4AYwWp7mWJLvxFn3JR+BZbA==}
+    engines: {node: '>=11'}
 
   '@ably/msgpack-js@0.4.1':
     resolution: {integrity: sha512-Sjxj6SOr17hExAVrsycN7u6oV4PhZcK7Z2S8dM71CH/butgO47cSo/TL6FJPCXUyDAzKkOWjMUpJGyZkEpyu4Q==}
@@ -3377,6 +3403,9 @@ packages:
   '@prisma/debug@5.0.0':
     resolution: {integrity: sha512-3q/M/KqlQ01/HJXifU/zCNOHkoTWu24kGelMF/IBrRxm7njPqTTbwfnT1dh4JK+nuWM5/Dg1Lv00u2c0l7AHxg==}
 
+  '@prisma/debug@5.22.0':
+    resolution: {integrity: sha512-AUt44v3YJeggO2ZU5BkXI7M4hu9BF2zzH2iF2V5pyXT/lRTyWiElZ7It+bRH1EshoMRxHgpYg4VB6rCM+mG5jQ==}
+
   '@prisma/debug@5.8.1':
     resolution: {integrity: sha512-tjuw7eA0Us3T42jx9AmAgL58rzwzpFGYc3R7Y4Ip75EBYrKMBA1YihuWMcBC92ILmjlQ/u3p8VxcIE0hr+fZfg==}
 
@@ -3427,6 +3456,9 @@ packages:
 
   '@prisma/generator-helper@5.0.0':
     resolution: {integrity: sha512-pufQ1mhoH6WzKNtzL79HZDoW4Ql3Lf8QEKVmBoW8e3Tdb50bxpYBYue5LBqp9vNW1xd1pgZO53cNiRfLX2d4Zg==}
+
+  '@prisma/generator-helper@5.22.0':
+    resolution: {integrity: sha512-LwqcBQ5/QsuAaLNQZAIVIAJDJBMjHwMwn16e06IYx/3Okj/xEEfw9IvrqB2cJCl3b2mCBlh3eVH0w9WGmi4aHg==}
 
   '@prisma/generator-helper@5.8.1':
     resolution: {integrity: sha512-2EDd0o+GHfbX1dtw5BnfOz3hQB7AtYrwe4YNiKfo2UDBvB/ne/ChZa3b/vBm/GKpjW2Xaymct8D9oIHev3juzQ==}
@@ -5011,6 +5043,12 @@ packages:
   '@stablelib/base64@1.0.1':
     resolution: {integrity: sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ==}
 
+  '@stablelib/hex@1.0.1':
+    resolution: {integrity: sha512-PQOEChVBjhYGgAD+ehO2ow1gSj1slre3jW4oMD4kV8VrhYhzmtsQDWDZej3BQO8qkVezdczDvISxVSF24PuYNA==}
+
+  '@stablelib/utf8@1.0.2':
+    resolution: {integrity: sha512-sDL1aB2U8FIpj7SjQJMxbOFIFkKvDKQGPHSrYejHZhtLNSK3qHe6ZIfa0woWkOiaJsdYslFzrc0VWXJZHmSIQQ==}
+
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
 
@@ -5728,6 +5766,9 @@ packages:
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
+
+  '@types/validator@13.15.10':
+    resolution: {integrity: sha512-T8L6i7wCuyoK8A/ZeLYt1+q0ty3Zb9+qbSSvrIVitzT3YjZqkTZ40IbRsPanlB4h1QB3JVL1SYCdR6ngtFYcuA==}
 
   '@types/web-bluetooth@0.0.20':
     resolution: {integrity: sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==}
@@ -7912,6 +7953,9 @@ packages:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
 
+  disposable-email-domains@1.0.62:
+    resolution: {integrity: sha512-LBQvhRw7mznQTPoyZbsmYeNOZt1pN5aCsx4BAU/3siVFuiM9f2oyKzUaB8v1jbxFjE3aYqYiMo63kAL4pHgfWQ==}
+
   dlv@1.1.3:
     resolution: {integrity: sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==}
 
@@ -7947,6 +7991,10 @@ packages:
   dot-prop@5.3.0:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
     engines: {node: '>=8'}
+
+  dotenv@10.0.0:
+    resolution: {integrity: sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==}
+    engines: {node: '>=10'}
 
   dotenv@16.0.3:
     resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
@@ -10899,6 +10947,10 @@ packages:
     resolution: {integrity: sha512-NuAESUOUMrlIXOfHKzD6bpPu3tYt3xvjNdRIQ+FeT0lNb4K8WR70CaDxhuNguS2XG+GjkyMwOzsN5ZktImfhLA==}
     engines: {node: '>= 0.4'}
 
+  object-path@0.11.8:
+    resolution: {integrity: sha512-YJjNZrlXJFM42wTBn6zgOJVar9KFJvzx6sTWDte8sWZF//cnjl0BxHNpfZx+ZffXX63A9q0b1zsFiBX4g4X5KA==}
+    engines: {node: '>= 10.12.0'}
+
   object.assign@4.1.7:
     resolution: {integrity: sha512-nK28WOo+QIjBkDduTINE4JkF/UJJKyf2EJxvJKfblDpyg0Q+pkOHNTL0Qwy6NP6FhE/EnzV73BxxqcJaXY9anw==}
     engines: {node: '>= 0.4'}
@@ -11538,6 +11590,12 @@ packages:
     peerDependencies:
       '@prisma/client': ^5.0.0 || ^6.0.0 || ^7.0.0
 
+  prisma-field-encryption@1.6.0:
+    resolution: {integrity: sha512-JEKHyq5z0Wn6x74UtQN6n7ppXEGRq7ViyRophzELRAhCVnZv4JGrBOlrX4aWKiU+ZPL2BO9E1HxzcSjAN7pWKQ==}
+    hasBin: true
+    peerDependencies:
+      '@prisma/client': '>= 4.7'
+
   prisma-generator-fake-data@0.18.3:
     resolution: {integrity: sha512-HQuM5ybZ1kv7rwq0WyD4aYdSUkLu3ZItDgiD9o0o2fnqFsylfpCnp/3sPvp3Q8dI6w+pTaqJmsXh4ll6i8SFeQ==}
     engines: {node: '>= 20.19.0'}
@@ -12175,6 +12233,9 @@ packages:
   rxjs@7.8.2:
     resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
 
+  s-ago@2.2.0:
+    resolution: {integrity: sha512-t6Q/aFCCJSBf5UUkR/WH0mDHX8EGm2IBQ7nQLobVLsdxOlkryYMbOlwu2D4Cf7jPUp0v1LhfPgvIZNoi9k8lUA==}
+
   safe-array-concat@1.1.4:
     resolution: {integrity: sha512-wtZlHyOje6OZTGqAoaDKxFkgRtkF9CnHAVnCHKfuj200wAgL+bSJhdsCD2l0Qx/2ekEXjPWcyKkfGb5CPboslg==}
     engines: {node: '>=0.4'}
@@ -12722,6 +12783,9 @@ packages:
 
   svix@1.90.0:
     resolution: {integrity: sha512-ljkZuyy2+IBEoESkIpn8sLM+sxJHQcPxlZFxU+nVDhltNfUMisMBzWX/UR8SjEnzoI28ZjCzMbmYAPwSTucoMw==}
+
+  svix@1.92.2:
+    resolution: {integrity: sha512-ZmuA3UVvlnF9EgxlzmPtF7CKjQb64Z6OFlyfdDfU0sdcC7dJa+3aOYX5B9mA+RS6ch1AxBa4UP/l6KmqfGtWBQ==}
 
   swrv@1.2.0:
     resolution: {integrity: sha512-lH/g4UcNyj+7lzK4eRGT4C68Q4EhQ6JtM9otPRIASfhhzfLWtbZPHcMuhuba7S9YVYuxkMUGImwMyGpfbkH07A==}
@@ -13413,6 +13477,10 @@ packages:
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
 
+  validator@13.15.35:
+    resolution: {integrity: sha512-TQ5pAGhd5whStmqWvYF4OjQROlmv9SMFVt37qoCBdqRffuuklWYQlCNnEs2ZaIBD1kZRNnikiZOS1eqgkar0iw==}
+    engines: {node: '>= 0.10'}
+
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
@@ -13973,6 +14041,22 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
+
+  '@47ng/cloak@1.2.0':
+    dependencies:
+      '@47ng/codec': 1.1.0
+      '@stablelib/base64': 1.0.1
+      '@stablelib/hex': 1.0.1
+      '@stablelib/utf8': 1.0.2
+      chalk: 4.1.2
+      commander: 8.3.0
+      dotenv: 10.0.0
+      s-ago: 2.2.0
+
+  '@47ng/codec@1.1.0':
+    dependencies:
+      '@stablelib/base64': 1.0.1
+      '@stablelib/hex': 1.0.1
 
   '@ably/msgpack-js@0.4.1':
     dependencies:
@@ -16909,6 +16993,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@prisma/debug@5.22.0': {}
+
   '@prisma/debug@5.8.1': {}
 
   '@prisma/debug@6.19.3': {}
@@ -16990,6 +17076,10 @@ snapshots:
       kleur: 4.1.5
     transitivePeerDependencies:
       - supports-color
+
+  '@prisma/generator-helper@5.22.0':
+    dependencies:
+      '@prisma/debug': 5.22.0
 
   '@prisma/generator-helper@5.8.1':
     dependencies:
@@ -18872,6 +18962,10 @@ snapshots:
 
   '@stablelib/base64@1.0.1': {}
 
+  '@stablelib/hex@1.0.1': {}
+
+  '@stablelib/utf8@1.0.2': {}
+
   '@standard-schema/spec@1.0.0': {}
 
   '@standard-schema/spec@1.0.0-beta.4': {}
@@ -19667,6 +19761,8 @@ snapshots:
   '@types/ungap__structured-clone@1.2.0': {}
 
   '@types/unist@3.0.3': {}
+
+  '@types/validator@13.15.10': {}
 
   '@types/web-bluetooth@0.0.20': {}
 
@@ -22078,6 +22174,8 @@ snapshots:
     dependencies:
       path-type: 4.0.0
 
+  disposable-email-domains@1.0.62: {}
+
   dlv@1.1.3: {}
 
   dnd-core@14.0.1:
@@ -22122,6 +22220,8 @@ snapshots:
   dot-prop@5.3.0:
     dependencies:
       is-obj: 2.0.0
+
+  dotenv@10.0.0: {}
 
   dotenv@16.0.3: {}
 
@@ -25680,6 +25780,8 @@ snapshots:
 
   object-keys@1.1.1: {}
 
+  object-path@0.11.8: {}
+
   object.assign@4.1.7:
     dependencies:
       call-bind: 1.0.9
@@ -26348,6 +26450,18 @@ snapshots:
       - puppeteer
       - tsx
       - yaml
+
+  prisma-field-encryption@1.6.0(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)):
+    dependencies:
+      '@47ng/cloak': 1.2.0
+      '@prisma/client': 6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)
+      '@prisma/generator-helper': 5.22.0
+      debug: 4.4.3
+      immer: 10.2.0
+      object-path: 0.11.8
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - supports-color
 
   prisma-generator-fake-data@0.18.3(typescript@6.0.3):
     dependencies:
@@ -27249,6 +27363,8 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  s-ago@2.2.0: {}
+
   safe-array-concat@1.1.4:
     dependencies:
       call-bind: 1.0.9
@@ -27925,6 +28041,10 @@ snapshots:
     dependencies:
       standardwebhooks: 1.0.0
       uuid: 10.0.0
+
+  svix@1.92.2:
+    dependencies:
+      standardwebhooks: 1.0.0
 
   swrv@1.2.0(vue@3.5.33(typescript@6.0.3)):
     dependencies:
@@ -28641,6 +28761,8 @@ snapshots:
     dependencies:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
+
+  validator@13.15.35: {}
 
   vary@1.1.2: {}
 
