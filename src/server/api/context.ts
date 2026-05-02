@@ -15,7 +15,7 @@ type Props = {
 export async function createContext({ req }: Props) {
   const ip = getIp(req);
   const userAgent = getUa(req);
-  const requestInfo = { ip, userAgent };
+  const requestInfo = { ip, userAgent }; // NOTE: мб заменить на request-context.ts
 
   const authHeader = req.headers.get("authorization");
   if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {

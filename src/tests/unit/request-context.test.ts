@@ -23,21 +23,24 @@ function createRequest(
 
 describe("request-context utils", () => {
   describe("anonymizeIp", () => {
-    it("should keep local and unknown addresses unchanged", () => {
-      expect(anonymizeIp(null)).toBe("unknown");
-      expect(anonymizeIp("unknown")).toBe("unknown");
+    it("should keep local addresses and return null for unknown", () => {
+      expect(anonymizeIp(null)).toBe(null);
+      expect(anonymizeIp("unknown")).toBe(null);
       expect(anonymizeIp("127.0.0.1")).toBe("127.0.0.1");
       expect(anonymizeIp("::1")).toBe("::1");
     });
 
     it("should anonymize ipv4 and ipv6 addresses", () => {
       expect(anonymizeIp("192.168.10.22")).toBe("192.168.10.0");
-      expect(anonymizeIp("2001:0db8:85a3:0000:0000:8a2e:0370:7334")).toBe("2001:0db8:85a3:0000::");
+
+      const inputIpv6 = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+      const expectedIpv6 = "2001:db8:85a3:0:0:0:0:0";
+      expect(anonymizeIp(inputIpv6)).toBe(expectedIpv6);
     });
 
-    it("should return unknown for invalid ip format", () => {
-      expect(anonymizeIp("1:2:3")).toBe("unknown");
-      expect(anonymizeIp("invalid-ip")).toBe("unknown");
+    it("should return null for invalid ip format", () => {
+      expect(anonymizeIp("1:2:3")).toBe(null);
+      expect(anonymizeIp("invalid-ip")).toBe(null);
     });
   });
 

@@ -93,8 +93,12 @@ model User {
   id                  Int                  @id @default(autoincrement()) @omit
   /// @zod.custom.omit(["model"])
   publicId            String               @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
   email               String?              @unique @db.Citext @email(message: "Incorrect email")
+  /// @encryption:hash(email)?normalize=lowercase&normalize=trim
+  /// @zod.custom.omit(["model"])
+  emailHash           String?              @unique @map("email_hash") @omit
   /// @zod.string.trim().min(1, { message: "Name required" }).max(50, { message: "Name cannot exceed 50 characters" })
   name                String?              @length(min: 1, max: 50, message: "Name cannot exceed 50 characters")
   emailVerified       DateTime?            @map("email_verified")
@@ -105,7 +109,7 @@ model User {
   role                UserRole             @default(USER)
 
   createdAt           DateTime             @default(now()) @map("created_at")
-  updatedAt           DateTime             @updatedAt @map("updated_at")
+  updatedAt           DateTime             @default(now()) @updatedAt @map("updated_at")
 
   accounts            Account[]
   sessions            Session[]
@@ -122,6 +126,7 @@ model User {
     (auth() == this && future().role == role && future().createdAt == createdAt)
   )
 
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "users_name_trgm_idx")
   @@map("users")
 }
 
@@ -130,13 +135,16 @@ model Notification {
   id        Int        @id @default(autoincrement()) @omit
   /// @zod.custom.omit(["model"])
   publicId  String     @unique @default(uuid(7)) @map("public_id") @db.Uuid
-  createdAt DateTime   @default(now()) @map("created_at")
   /// @zod.string.trim().min(1, { message: "The title cannot be empty" }).max(300, { message: "The title cannot exceed 300 characters" })
   title     String
   /// @zod.string.trim().min(1, { message: "The text of the notification is mandatory" }).max(5000, { message: "The text of the notification cannot exceed 5000 characters" })
   body      String
   type      NotifyType @default(INFO)
   isRead    Boolean    @default(false) @map("is_read")
+
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at")
+
   /// @zod.custom.omit(["model"])
   userId    Int        @map("user_id") @omit
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -161,9 +169,9 @@ model Repo {
   /// @zod.custom.omit(["model"])
   publicId         String                     @unique @default(uuid(7)) @map("public_id") @db.Uuid
   githubId         Int                        @map("github_id")
-  owner            String                     @length(min: 1, max: 39, message: "Repository owner login cannot exceed 39 characters")
+  owner            String                     @db.Citext @length(min: 1, max: 39, message: "Repository owner login cannot exceed 39 characters")
   /// @zod.string.min(1).max(255)
-  name             String                     @length(min: 1, max: 255)
+  name             String                     @db.Citext @length(min: 1, max: 255)
   /// @zod.string.max(1000)
   description      String?                    @db.Text @length(max: 1000)
   /// @zod.string.url({ message: "Invalid repository URL" })
@@ -187,7 +195,7 @@ model Repo {
   pushedAt         DateTime?                  @map("pushed_at")
   createdAt        DateTime                   @default(now()) @map("created_at")
   githubCreatedAt  DateTime?                  @map("github_created_at")
-  updatedAt        DateTime                   @updatedAt @map("updated_at")
+  updatedAt        DateTime                   @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
   userId           Int                        @map("user_id") @omit
@@ -252,7 +260,7 @@ model Analysis {
   error           String?    @db.Text
 
   createdAt       DateTime   @default(now()) @map("created_at")
-  updatedAt       DateTime   @updatedAt @map("updated_at")
+  updatedAt       DateTime   @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
   repoId          Int        @map("repo_id") @omit
@@ -281,7 +289,7 @@ model Document {
   path       String?
 
   createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
   /// @zod.custom.omit(["model"])
   repoId     Int       @map("repo_id") @omit
   repo       Repo      @relation(fields: [repoId], references: [id], onDelete: Cascade)
@@ -307,18 +315,20 @@ model ApiKey {
   name        String    @length(min: 1, max: 50, message: "The name must be between 1 and 50 characters long")
   /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
   description String?   @db.Text @length(max: 1000, message: "The description must be less than 1000 characters")
-  /// @zod.custom.omit(["model"])
-  userId      Int       @map("user_id") @omit
-  createdAt   DateTime  @default(now()) @map("created_at")
   lastUsed    DateTime? @map("last_used")
   revoked     Boolean   @default(false)
 
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  /// @zod.custom.omit(["model"])
+  userId      Int       @map("user_id") @omit
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@allow('create', auth() == user && userId == auth().id && !revoked)
   @@allow('read', auth() == user || auth().role == 'ADMIN')
   @@allow('update', (auth() == user && future().userId == userId) || auth().role == 'ADMIN')
-  @@allow('delete', (auth() == user && !revoked) || auth().role == 'ADMIN')
+  @@deny('delete', true)
 
   @@index([userId])
   @@map("api_keys")
@@ -326,33 +336,43 @@ model ApiKey {
 
 model Account {
   /// @zod.custom.omit(["model"])
-  id                       Int     @id @default(autoincrement()) @omit
+  id                       Int      @id @default(autoincrement()) @omit
   /// @zod.custom.omit(["model"])
-  publicId                 String  @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  publicId                 String   @unique @default(uuid(7)) @map("public_id") @db.Uuid
   /// @zod.custom.omit(["model"])
-  userId                   Int     @map("user_id") @omit
+  userId                   Int      @map("user_id") @omit
   type                     String
   provider                 String
-  providerAccountId        String  @map("provider_account_id")
+  providerAccountId        String   @map("provider_account_id")
+  /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
-  email                    String? @db.Citext @email(message: "Incorrect email")
+  email                    String?  @db.Citext @email(message: "Incorrect email")
+  /// @encryption:hash(email)?normalize=lowercase&normalize=trim
+  /// @zod.custom.omit(["model"])
+  emailHash                String?  @map("email_hash") @omit
   /// @zod.string.url({ message: "Incorrect link to avatar" })
-  image                    String? @url(message: "Incorrect link to avatar")
+  image                    String?  @url(message: "Incorrect link to avatar")
   name                     String?
+  /// @encrypted
   /// @zod.custom.omit(["model"])
-  refresh_token            String? @db.Text @omit
+  refresh_token            String?  @db.Text @omit
+  /// @encrypted
   /// @zod.custom.omit(["model"])
-  access_token             String? @db.Text @omit
+  access_token             String?  @db.Text @omit
   /// @zod.custom.omit(["model"])
   refresh_token_expires_in Int?
   expires_at               Int?
   token_type               String?
   scope                    String?
+  /// @encrypted
   /// @zod.custom.omit(["model"])
-  id_token                 String? @db.Text @omit
+  id_token                 String?  @db.Text @omit
   session_state            String?
 
-  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@allow('read,delete', auth() == user || auth().role == 'ADMIN')
   @@allow('create', (auth() != null && userId == auth().id) || auth().role == 'ADMIN')
@@ -361,6 +381,24 @@ model Account {
   @@unique([provider, providerAccountId])
   @@unique([userId, provider])
   @@map("accounts")
+}
+
+model BannedEmail {
+  id        Int               @id @default(autoincrement())
+  /// @encrypted
+  /// @zod.string.email({ message: "Incorrect email" })
+  email     String            @unique @db.Citext
+  /// @encryption:hash(email)?normalize=lowercase&normalize=trim
+  /// @zod.custom.omit(["model"])
+  emailHash String?           @unique @map("email_hash") @omit
+  reason    BannedEmailReason
+
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @default(now()) @updatedAt @map("updated_at")
+
+  @@allow('all', auth().role == 'ADMIN')
+
+  @@map("banned_emails")
 }
 
 model GithubInstallation {
@@ -376,7 +414,7 @@ model GithubInstallation {
   htmlUrl             String?                @map("html_url")
 
   createdAt           DateTime               @default(now()) @map("created_at")
-  updatedAt           DateTime               @updatedAt @map("updated_at")
+  updatedAt           DateTime               @default(now()) @updatedAt @map("updated_at")
 
   userId              Int?                   @map("user_id") @omit
   user                User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -397,16 +435,23 @@ model GithubInstallation {
 
 model Session {
   /// @zod.custom.omit(["model"])
-  id           Int      @id @default(autoincrement()) @omit
+  id               Int      @id @default(autoincrement()) @omit
   /// @zod.custom.omit(["model"])
-  publicId     String   @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  publicId         String   @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  /// @encrypted
   /// @zod.custom.omit(["model"])
-  sessionToken String   @unique @map("session_token") @omit
+  sessionToken     String   @unique @map("session_token") @omit
+  /// @encryption:hash(sessionToken)
   /// @zod.custom.omit(["model"])
-  userId       Int      @map("user_id") @omit
-  expires      DateTime
+  sessionTokenHash String?  @unique @map("session_token_hash") @omit
+  /// @zod.custom.omit(["model"])
+  userId           Int      @map("user_id") @omit
+  expires          DateTime
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@allow('read,delete', auth() == user || auth().role == 'ADMIN')
   @@allow('create', (auth() != null && userId == auth().id) || auth().role == 'ADMIN')
@@ -415,9 +460,16 @@ model Session {
 
 model VerificationToken {
   identifier String
+  /// @encrypted
   /// @zod.custom.omit(["model"])
   token      String   @unique @omit
+  /// @encryption:hash(token)
+  /// @zod.custom.omit(["model"])
+  tokenHash  String?  @unique @map("token_hash") @omit
   expires    DateTime
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@allow('all', auth().role == 'ADMIN')
   @@unique([identifier, token])
@@ -431,7 +483,9 @@ model WebhookDelivery {
   event      String?
   status     WebhookStatus @default(PROCESSING)
   error      String?       @db.Text
+
   createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @default(now()) @updatedAt @map("updated_at")
 
   @@allow('create', true)
   @@allow('read', auth().role == 'ADMIN')
@@ -450,7 +504,7 @@ model AuditLog {
   payload   Json
   /// @zod.custom.omit(["model"])
   userId    Int?     @map("user_id") @omit
-  ip        String?
+  ip        String?  @db.Inet
   userAgent String?  @map("user_agent")
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -474,8 +528,8 @@ model PullRequestAnalysis {
   publicId         String               @unique @default(uuid(7)) @map("public_id") @db.Uuid
 
   prNumber         Int                  @map("pr_number")
-  owner            String               @length(min: 1, max: 39)
-  repoName         String               @map("repo_name") @length(min: 1, max: 255)
+  owner            String               @db.Citext @length(min: 1, max: 39)
+  repoName         String               @map("repo_name") @db.Citext @length(min: 1, max: 255)
   headSha          String               @map("head_sha")
   baseSha          String               @map("base_sha")
 
@@ -490,7 +544,7 @@ model PullRequestAnalysis {
   error            String?              @db.Text
 
   createdAt        DateTime             @default(now()) @map("created_at")
-  updatedAt        DateTime             @updatedAt @map("updated_at")
+  updatedAt        DateTime             @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
   repoId           Int                  @map("repo_id") @omit
@@ -521,7 +575,8 @@ model PullRequestAnalysisConfig {
   focusAreas      PRFocusArea[]  @default([SECURITY, PERFORMANCE]) @map("focus_areas")
   excludePatterns String[]       @default([]) @map("exclude_patterns")
 
-  updatedAt       DateTime       @updatedAt @map("updated_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
   repoId          Int            @unique @map("repo_id")
@@ -548,7 +603,7 @@ model PullRequestComment {
   githubCommentId BigInt?             @map("github_comment_id")
 
   createdAt       DateTime            @default(now()) @map("created_at")
-  updatedAt       DateTime            @updatedAt @map("updated_at")
+  updatedAt       DateTime            @default(now()) @updatedAt @map("updated_at")
 
   /// @zod.custom.omit(["model"])
   analysisId      Int                 @map("analysis_id") @omit
@@ -580,6 +635,7 @@ model GeneratedFix {
   githubPrNumber  Int?                 @map("github_pr_number")
 
   createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @default(now()) @updatedAt @map("updated_at")
   createdByUser   Boolean              @default(false) @map("created_by_user")
 
   /// @zod.custom.omit(["model"])
@@ -674,4 +730,13 @@ enum InstallationTargetType {
 enum RepositorySelection {
   ALL
   SELECTED
+}
+
+enum BannedEmailReason {
+  BOUNCED
+  COMPLAINED
+  SUPPRESSED
+  FAILED
+  DISPOSABLE
+  MANUAL
 }

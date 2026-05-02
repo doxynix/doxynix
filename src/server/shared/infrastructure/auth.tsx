@@ -1,5 +1,7 @@
 import { cache } from "react";
+import { headers } from "next/headers";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import type { PrismaClient } from "@prisma/client";
 import { render } from "@react-email/render";
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
@@ -12,8 +14,11 @@ import { AuthEmail } from "@/shared/api/auth/templates/auth-email";
 import { IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
 import { AUTH_PROVIDERS, NEXTAUTH_SECRET, RESEND_API_KEY } from "@/shared/constants/env.server";
 
-import { baseClient, prisma } from "@/server/shared/infrastructure/db";
+import { prisma } from "@/server/shared/infrastructure/db";
 import { logger } from "@/server/shared/infrastructure/logger";
+
+import { maskEmail, normalizeEmail, validateEmailSafety } from "../lib/email-guard";
+import { emailSignInLimiter } from "./ratelimit";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 дней
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: сутки
@@ -22,12 +27,69 @@ const MAGIC_LINK_MAX_AGE = 10 * 60; // TIME: 10 минут
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(baseClient),
+  adapter: PrismaAdapter(prisma as unknown as PrismaClient),
   callbacks: {
     async session({ session, user }) {
       session.user.id = user.id;
       session.user.role = user.role;
       return session;
+    },
+    async signIn({ account, user }) {
+      if (user.email == null) return false;
+
+      const normalizedEmail = normalizeEmail(user.email);
+      const userId = user.id;
+
+      const isBanned = await prisma.bannedEmail.findUnique({
+        where: { email: normalizedEmail },
+      });
+
+      if (isBanned != null) {
+        logger.warn({
+          email: maskEmail(normalizedEmail),
+          msg: "Banned user tried to sign in",
+          userId,
+        });
+        throw new Error("EmailBanned");
+      }
+
+      if (account?.provider === "email") {
+        const headerList = await headers();
+        const ip =
+          headerList.get("x-forwarded-for")?.split(",")[0] ??
+          headerList.get("x-real-ip") ??
+          "127.0.0.1";
+
+        const { reason: limitReason, success } = await emailSignInLimiter.limit(
+          `${normalizedEmail}:${ip}`,
+          {
+            ip: ip,
+          }
+        );
+
+        if (!success) {
+          logger.warn({
+            email: maskEmail(normalizedEmail),
+            ip,
+            limitReason,
+            msg: "Rate limit hit on sign in",
+          });
+          throw new Error("RateLimitExceeded");
+        }
+
+        const { reason: safetyReason, safe } = await validateEmailSafety(normalizedEmail);
+
+        if (!safe) {
+          logger.warn({
+            email: maskEmail(normalizedEmail),
+            ip,
+            msg: "Security guard blocked email",
+            safetyReason,
+          });
+          throw new Error("EmailRejected");
+        }
+      }
+      return true;
     },
   },
   debug: IS_DEV,
@@ -42,7 +104,7 @@ export const authOptions: NextAuthOptions = {
           where: { id: Number(user.id) },
         });
         logger.info({
-          email: user.email,
+          email: maskEmail(user.email),
           msg: "New user created",
           name: finalName,
           type: "auth.register",
@@ -162,6 +224,9 @@ export const authOptions: NextAuthOptions = {
     EmailProvider({
       from: "Doxynix Auth <auth@doxynix.space>",
       maxAge: MAGIC_LINK_MAX_AGE,
+      normalizeIdentifier(identifier) {
+        return normalizeEmail(identifier);
+      },
       secret: NEXTAUTH_SECRET,
       sendVerificationRequest: async ({ identifier, provider, url }) => {
         const user = await prisma.user.findUnique({
@@ -187,13 +252,13 @@ export const authOptions: NextAuthOptions = {
           await resend.emails.send(template);
 
           logger.info({
-            email: identifier,
+            email: maskEmail(identifier),
             msg: "Verification email sent",
             type: "auth.email_sent",
           });
         } catch (error) {
           logger.error({
-            email: identifier,
+            email: maskEmail(identifier),
             error: error instanceof Error ? error.message : String(error),
             msg: "Failed to send verification email",
             type: "auth.email_error",

@@ -15,7 +15,7 @@ import { githubTokenService } from "./github-token.service";
 
 export const githubAppService = {
   async getInstallUrl(prisma: PrismaClientExtended, userId: number) {
-    const state = crypto.randomBytes(32).toString("hex");
+    const state = crypto.randomBytes(32).toString("base64url");
 
     await prisma.$transaction([
       prisma.verificationToken.deleteMany({

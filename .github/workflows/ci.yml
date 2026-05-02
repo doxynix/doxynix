@@ -22,6 +22,7 @@ env:
   CI: "true"
   SKIP_ENV_VALIDATION: "true"
   NEXT_TELEMETRY_DISABLED: 1
+  PRISMA_FIELD_ENCRYPTION_KEY: ${{ secrets.PRISMA_FIELD_ENCRYPTION_KEY }}
   DATABASE_URL: postgresql://user:password@localhost:5432/test_db
   DIRECT_URL: postgresql://user:password@localhost:5432/test_db
   NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
