@@ -328,7 +328,7 @@ model ApiKey {
   @@allow('create', auth() == user && userId == auth().id && !revoked)
   @@allow('read', auth() == user || auth().role == 'ADMIN')
   @@allow('update', (auth() == user && future().userId == userId) || auth().role == 'ADMIN')
-  @@allow('delete', (auth() == user && !revoked) || auth().role == 'ADMIN')
+  @@deny('delete', true)
 
   @@index([userId])
   @@map("api_keys")

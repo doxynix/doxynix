@@ -34,28 +34,7 @@ const encryptedClient = baseClient.$extends(
   })
 );
 
-const softDeleteClient = encryptedClient.$extends({
-  query: {
-    apiKey: {
-      async delete({ args }) {
-        const ctx = Prisma.getExtensionContext(this);
-        return (ctx as any).update({
-          ...args,
-          data: { revoked: true },
-        });
-      },
-      async deleteMany({ args }) {
-        const ctx = Prisma.getExtensionContext(this);
-        return (ctx as any).updateMany({
-          ...args,
-          data: { revoked: true },
-        });
-      },
-    },
-  },
-});
-
-export const prisma = softDeleteClient.$extends({
+export const prisma = encryptedClient.$extends({
   query: {
     $allModels: {
       async $allOperations({ args, model, operation, query }) {
