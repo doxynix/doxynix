@@ -138,7 +138,7 @@ export async function POST(req: Request) {
       try {
         await prisma.$transaction([
           prisma.bannedEmail.upsert({
-            create: { email, emailHash: "", reason }, // NOTE: emailHash заполняется автоматически расширением prisma-field-encryption. Передаем пустую строку, чтобы удовлетворить строгие типы Prisma в методе upsert.
+            create: { email, reason }, // NOTE: emailHash заполняется автоматически расширением prisma-field-encryption. Передаем пустую строку, чтобы удовлетворить строгие типы Prisma в методе upsert.
             update: { reason },
             where: { email },
           }),
