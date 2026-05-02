@@ -37,8 +37,6 @@ export const PRFindingSchema = z.object({
   type: z.enum(["security", "performance", "complexity", "style", "bug", "architecture"]),
 });
 
-export type PRFinding = z.infer<typeof PRFindingSchema>;
-
 export const ApplyFixInput = z.object({
   fixId: z.number(),
 });

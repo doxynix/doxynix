@@ -43,7 +43,7 @@ function buildGraphPreviewEdges(evidence: RepositoryEvidence, limit = 96): Graph
     .slice(0, limit);
 }
 
-export function buildStructuralSignals(
+function buildStructuralSignals(
   evidence: RepositoryEvidence,
   dependencyHotspots: DependencyNodeMetric[]
 ): StructuralSignals {

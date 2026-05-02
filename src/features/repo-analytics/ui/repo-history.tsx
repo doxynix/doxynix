@@ -2,7 +2,6 @@
 
 import { useLocale } from "next-intl";
 
-import type { UiRepoHistory } from "@/shared/api/trpc";
 import { formatRelativeTime } from "@/shared/lib/date-utils";
 import {
   Table,
@@ -12,6 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/ui/core/table";
+
+import type { UiRepoHistory } from "@/entities/repo/model/repo.types";
 
 type Props = {
   history: UiRepoHistory;

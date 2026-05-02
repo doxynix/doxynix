@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { DocType } from "@prisma/client";
 import {
   BookOpen,
   Code2,
@@ -13,7 +14,6 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { DocType } from "@/shared/api/trpc";
 import { LOCALES } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
@@ -30,7 +30,7 @@ import {
 import { Textarea } from "@/shared/ui/core/textarea";
 import { Flag, FLAGS } from "@/shared/ui/kit/language-switcher";
 
-import type { ActionsType, StateType } from "@/entities/repo-setup/model/use-repo-setup";
+import type { ActionsType, StateType } from "@/entities/repo/model/use-repo-setup";
 
 type DocOption = {
   desc: string;

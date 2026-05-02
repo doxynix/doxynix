@@ -5,7 +5,7 @@ import { ExternalLinkIcon } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 
-import { trpc, type LinkedAccounts, type LinkedUser } from "@/shared/api/trpc";
+import { trpc } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { GoogleIcon } from "@/shared/ui/icons/google-icon";
@@ -16,7 +16,8 @@ import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { ConnectionCard } from "./connection-card";
+import { ConnectionCard } from "@/entities/connection/ui/connection-card";
+import type { LinkedAccounts, LinkedUser } from "@/entities/user/model/user.types";
 
 type Props = {
   accounts: LinkedAccounts;

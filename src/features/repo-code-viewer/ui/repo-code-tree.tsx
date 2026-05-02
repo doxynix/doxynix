@@ -4,17 +4,16 @@ import { startTransition } from "react";
 import { Folder, FolderOpen, Search } from "lucide-react";
 import { Tree, type TreeApi } from "react-arborist";
 
-import type { UiRepoDetailed } from "@/shared/api/trpc";
 import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
 import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 
-import type { ActionItem, FileNode } from "@/entities/repo-setup/model/repo-setup.types";
-import { useRepoSetup } from "@/entities/repo-setup/model/use-repo-setup";
-import { RepoBranchSelector } from "@/entities/repo-setup/ui/repo-branch-selector";
-import { RepoTreeSkeleton } from "@/entities/repo-setup/ui/repo-tree-skeleton";
-
-import { RepoCodeNode } from "./repo-code-node";
+import type { ActionItem, FileNode } from "@/entities/repo/model/repo-setup.types";
+import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
+import { RepoBranchSelector } from "@/entities/repo/ui/repo-branch-selector";
+import { RepoCodeNode } from "@/entities/repo/ui/repo-code-node";
+import { RepoTreeSkeleton } from "@/entities/repo/ui/repo-tree-skeleton";
 
 type Props = {
   activePath: null | string;

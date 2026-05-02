@@ -1,4 +1,4 @@
-import type { UiRepoListItem } from "@/shared/api/trpc";
+import type { UiRepoListItem } from "./repo.types";
 
 type Props = {
   id: string;

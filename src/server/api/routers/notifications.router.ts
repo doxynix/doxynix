@@ -11,7 +11,7 @@ import {
 } from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
-export const NotificationsPublicSchema = NotificationSchema.extend({
+const NotificationsPublicSchema = NotificationSchema.extend({
   id: z.string(),
   repo: z
     .object({

@@ -5,7 +5,6 @@ import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { parseAsInteger, useQueryState } from "nuqs";
 
-import type { RepoMeta } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import {
   Pagination,
@@ -15,6 +14,8 @@ import {
   PaginationLink,
 } from "@/shared/ui/core/pagination";
 import { Spinner } from "@/shared/ui/core/spinner";
+
+import type { RepoMeta } from "@/entities/repo/model/repo.types";
 
 type Props = {
   className?: string;

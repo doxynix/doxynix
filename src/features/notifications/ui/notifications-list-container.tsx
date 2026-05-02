@@ -8,8 +8,8 @@ import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
 import { notificationsParsers } from "@/entities/notifications/model/notifications-parsers";
+import { NotificationCardSkeleton } from "@/entities/notifications/ui/notification-card-skeleton";
 
-import { NotificationCardSkeleton } from "./notification-card-skeleton";
 import { NotificationsHeader } from "./notifications-header";
 import { NotificationsList } from "./notifications-list";
 

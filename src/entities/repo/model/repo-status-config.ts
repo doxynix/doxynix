@@ -1,4 +1,4 @@
-import type { RepoStatus } from "@/shared/api/trpc";
+import type { RepoStatus } from "./repo.types";
 
 export const repoStatusConfig: Record<
   RepoStatus,

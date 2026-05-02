@@ -1,4 +1,4 @@
-export type DocumentSection = {
+type DocumentSection = {
   content: string;
   endLine?: number;
   graphNodeIds: string[];
@@ -7,18 +7,18 @@ export type DocumentSection = {
   title: string;
 };
 
-export type DocumentWithSections = {
+type DocumentWithSections = {
   sections: DocumentSection[];
   type: string;
   version: string;
 };
 
-export type GraphNode = {
+type GraphNode = {
   id: string;
   label?: string;
   name?: string;
 };
-export type DependencyGraph = {
+type DependencyGraph = {
   nodes: GraphNode[];
 };
 
@@ -26,7 +26,7 @@ export type DependencyGraph = {
  * Links documentation sections to dependency graph nodes
  * Enables UI synergy: click graph node -> highlight doc section
  */
-export class DocumentGraphLinker {
+class DocumentGraphLinker {
   /**
    * Extract anchors and link to graph nodes
    */

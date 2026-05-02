@@ -11,14 +11,16 @@ import {
 } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
 
-import { trpc, type RepoSearchResult } from "@/shared/api/trpc";
+import { trpc } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 import { useRouter } from "@/i18n/routing";
 
-import { buildRepoSearchResultHref } from "@/entities/repo-details/model/repo-workspace-navigation";
+import { buildRepoSearchResultHref } from "@/entities/repo/model/repo-workspace-navigation";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
+
+import type { RepoSearchResult } from "@/server/shared/types";
 
 const RESULT_ICONS = {
   "doc-section": BookOpen,

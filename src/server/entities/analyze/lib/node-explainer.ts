@@ -150,7 +150,7 @@ function buildNodeRole(node: ExplainNodeLike, semanticLabel: string) {
   return `${semanticLabel} structural area`;
 }
 
-export function buildNodeExplainSummary(params: {
+function buildNodeExplainSummary(params: {
   changeCouplingCount: number;
   churnCount: number;
   dependencyHotspotCount: number;

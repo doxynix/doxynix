@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
 import { CreateApiKeySchema, type CreateApiKeyInput } from "@/shared/api/schemas/api-key";
-import type { UiApiKey } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -21,6 +20,8 @@ import {
 import { Form } from "@/shared/ui/core/form";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
+
+import type { UiApiKey } from "@/entities/api-keys/model/api-keys.types";
 
 import { useApiKeyActions } from "../model/use-api-key-actions";
 import { ApiKeyFormFields } from "./api-key-form-fields";

@@ -13,11 +13,12 @@ import {
   Zap,
 } from "lucide-react";
 
-import type { RepoMetricsItem } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
+
+import type { RepoMetricsItem } from "@/entities/repo/model/repo.types";
 
 type Props = { data: NonNullable<RepoMetricsItem> };
 

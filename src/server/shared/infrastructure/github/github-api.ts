@@ -270,7 +270,7 @@ export async function getRepoTree(
     throw error;
   }
 }
-export type GitHubFileResponse = {
+type GitHubFileResponse = {
   content: string;
   meta: {
     name: string;
@@ -364,7 +364,7 @@ export async function executeWithFallback<T>(
     throw error;
   }
 }
-export type BusFactorResult = {
+type BusFactorResult = {
   busFactor: number;
   rawContributors: Array<{
     contributions: number;
@@ -379,7 +379,6 @@ export type BusFactorResult = {
  * - Validates private repo access
  * Complexity: 12 branches (error handling + auth)
  */
-
 export async function calculateBusFactor(
   repo: Repo,
   userId: number,

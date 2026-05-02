@@ -1,13 +1,8 @@
-import {
-  parseAsInteger,
-  parseAsString,
-  parseAsStringLiteral,
-  type inferParserType,
-} from "nuqs/server";
+import { parseAsInteger, parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 import { StatusSchema, VisibilitySchema } from "@/generated/zod";
 
-export const REPO_DEFAULTS = {
+const REPO_DEFAULTS = {
   PAGE: 1,
   SEARCH: "",
 };
@@ -21,5 +16,3 @@ export const repoParsers = {
   status: parseAsStringLiteral(StatusSchema.options),
   visibility: parseAsStringLiteral(VisibilitySchema.options),
 };
-
-export type repoParsersType = inferParserType<typeof repoParsers>;

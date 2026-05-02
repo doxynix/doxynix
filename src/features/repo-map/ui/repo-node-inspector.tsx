@@ -16,11 +16,12 @@ import {
   Zap,
 } from "lucide-react";
 
-import type { RepoNodeContext } from "@/shared/api/trpc";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Card, CardContent } from "@/shared/ui/core/card";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
+
+import type { RepoNodeContext } from "@/entities/repo/model/repo.types";
 
 type Props = {
   data: NonNullable<RepoNodeContext>;

@@ -527,5 +527,3 @@ export const ProjectPolicy = {
     return this.isArchitectureRelevant(normalized) || this.isApiPath(normalized);
   },
 } as const;
-
-export type ProjectPolicyApi = typeof ProjectPolicy;

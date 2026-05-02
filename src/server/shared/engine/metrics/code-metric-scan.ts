@@ -38,7 +38,7 @@ export type ScanAggregation = {
   };
 };
 
-export function buildAnalysisCoverage(
+function buildAnalysisCoverage(
   results: FileScanResult[],
   totalFiles: number
 ): RepoMetrics["analysisCoverage"] {

@@ -6,7 +6,7 @@ import { normalizeRepoPath } from "../core/common";
 import type { ChangeCouplingRef } from "../core/discovery.types";
 import { ProjectPolicy } from "../core/project-policy";
 
-export type SimplifiedRepoMetrics = {
+type SimplifiedRepoMetrics = {
   complexityScore: number;
   docDensity: number;
   fileCount: number;

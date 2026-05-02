@@ -1,4 +1,4 @@
-export type RepoVisibility = "PRIVATE" | "PUBLIC";
+import type { VisibilityType } from "@/generated/zod";
 
 export type RepoItemFields = {
   description: null | string;
@@ -7,5 +7,5 @@ export type RepoItemFields = {
   languageColor?: string;
   stars: number;
   updatedAt: string;
-  visibility: RepoVisibility;
+  visibility: VisibilityType;
 };

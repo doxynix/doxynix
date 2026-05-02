@@ -97,7 +97,7 @@ export class GitHubAuthRequiredError extends Error {
   }
 }
 
-export type GitHubClientContext = (
+type GitHubClientContext = (
   | { githubInstallationId: number; hasUserToken: false; type: "installation" }
   | { hasUserToken: false; type: "app" }
   | { hasUserToken: false; type: "public" }
@@ -106,7 +106,7 @@ export type GitHubClientContext = (
   octokit: OctokitInstance;
 };
 
-export type ClientContextOptions = {
+type ClientContextOptions = {
   allowPublicFallback?: boolean;
   allowSystemFallback?: boolean;
   owner?: string;
