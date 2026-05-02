@@ -158,7 +158,7 @@ export function buildSafetyConstraints(): string {
 /**
  * Build format section
  */
-export function buildFormatSection(format: "json" | "markdown" | "xml"): string {
+function buildFormatSection(format: "json" | "markdown" | "xml"): string {
   const rule =
     format === "json"
       ? OutputFormatRules.jsonOnly
