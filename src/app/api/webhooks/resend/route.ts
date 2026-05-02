@@ -1,0 +1,179 @@
+import { headers } from "next/headers";
+import { NextResponse, type NextRequest } from "next/server";
+import { BannedEmailReason, Prisma } from "@prisma/client";
+import { Webhook } from "svix";
+import { z } from "zod";
+
+import { RESEND_WEBHOOK_SECRET } from "@/shared/constants/env.server";
+
+import { prisma } from "@/server/shared/infrastructure/db";
+import { logger } from "@/server/shared/infrastructure/logger";
+import { maskEmail, normalizeEmail } from "@/server/shared/lib/email-guard";
+import { buildRequestStore, requestContext } from "@/server/shared/lib/request-context";
+
+const resendWebhookSchema = z.object({
+  created_at: z.string(),
+  data: z.object({
+    bounce: z
+      .object({
+        sub_type: z.string(),
+        type: z.string(),
+      })
+      .optional(),
+    email_id: z.string(),
+    from: z.string().optional(),
+    subject: z.string().optional(),
+    to: z.array(z.string()),
+  }),
+  id: z.string(),
+  type: z.string(),
+});
+
+export async function POST(req: Request) {
+  const payload = await req.text();
+  const headerPayload = await headers();
+
+  const svix_id = headerPayload.get("svix-id");
+  const svix_timestamp = headerPayload.get("svix-timestamp");
+  const svix_signature = headerPayload.get("svix-signature");
+
+  if (svix_id == null || svix_timestamp == null || svix_signature == null) {
+    return new NextResponse("Missing svix headers", { status: 400 });
+  }
+
+  const wh = new Webhook(RESEND_WEBHOOK_SECRET);
+  let rawEvt: unknown;
+
+  try {
+    rawEvt = wh.verify(payload, {
+      "svix-id": svix_id,
+      "svix-signature": svix_signature,
+      "svix-timestamp": svix_timestamp,
+    });
+  } catch {
+    return new NextResponse("Verify failed", { status: 400 });
+  }
+
+  const parseResult = resendWebhookSchema.safeParse(rawEvt);
+  if (!parseResult.success) {
+    logger.error({ error: parseResult.error.format(), msg: "Invalid Resend webhook schema" });
+    return new NextResponse("Invalid payload structure", { status: 400 });
+  }
+  const evt = parseResult.data;
+
+  const store = buildRequestStore({
+    method: "webhook",
+    path: "/api/webhooks/resend",
+    req: req as NextRequest,
+    requestId: svix_id,
+  });
+
+  return await requestContext.run(store, async () => {
+    let delivery: null | { id: string } = null;
+
+    try {
+      delivery = await prisma.webhookDelivery.create({
+        data: {
+          deliveryId: svix_id,
+          event: evt.type,
+          provider: "resend",
+          status: "PROCESSING",
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        const existing = await prisma.webhookDelivery.findUnique({
+          where: { provider_deliveryId: { deliveryId: svix_id, provider: "resend" } },
+        });
+
+        if (existing?.status === "SUCCESS") {
+          return NextResponse.json({ msg: "Already processed", ok: true });
+        }
+
+        if (existing?.status === "FAILED") {
+          delivery = await prisma.webhookDelivery.update({
+            data: { error: null, status: "PROCESSING" },
+            select: { id: true },
+            where: { id: existing.id },
+          });
+        } else if (existing?.status === "PROCESSING") {
+          return new NextResponse("Processing in progress", { status: 202 });
+        }
+      } else {
+        return new NextResponse("DB Error", { status: 500 });
+      }
+    }
+
+    if (delivery == null) {
+      return new NextResponse("Internal Error: Delivery not initialized", { status: 500 });
+    }
+
+    const { data, type } = evt;
+
+    const reasonMap: Record<string, BannedEmailReason> = {
+      "email.bounced": BannedEmailReason.BOUNCED,
+      "email.complained": BannedEmailReason.COMPLAINED,
+      "email.failed": BannedEmailReason.FAILED,
+      "email.suppressed": BannedEmailReason.SUPPRESSED,
+    };
+
+    const reason = reasonMap[type];
+
+    if (reason != null) {
+      const rawEmail = data.to[0];
+      if (rawEmail == null) {
+        await prisma.webhookDelivery.update({
+          data: {
+            error: "Webhook payload missing recipient email",
+            status: "FAILED",
+          },
+          where: { id: delivery.id },
+        });
+
+        return new NextResponse("Invalid payload", { status: 400 });
+      }
+
+      const email = normalizeEmail(rawEmail);
+
+      try {
+        await prisma.$transaction([
+          prisma.bannedEmail.upsert({
+            create: { email, reason }, // NOTE: emailHash заполняется автоматически расширением prisma-field-encryption. Передаем пустую строку, чтобы удовлетворить строгие типы Prisma в методе upsert.
+            update: { reason },
+            where: { email },
+          }),
+          prisma.webhookDelivery.update({
+            data: { error: null, status: "SUCCESS" },
+            where: { id: delivery.id },
+          }),
+        ]);
+
+        logger.warn({
+          email: maskEmail(email),
+          msg: "User blacklisted and delivery marked success",
+          reason,
+          type,
+        });
+      } catch (error) {
+        logger.error({ email: maskEmail(email), error, msg: "Failed to process transaction" });
+
+        await prisma.webhookDelivery.update({
+          data: {
+            error: error instanceof Error ? error.message : String(error),
+            status: "FAILED",
+          },
+          where: { id: delivery.id },
+        });
+
+        return new NextResponse("Internal Error", { status: 500 });
+      }
+    } else {
+      await prisma.webhookDelivery.update({
+        data: { error: null, status: "SUCCESS" },
+        where: { id: delivery.id },
+      });
+    }
+
+    return NextResponse.json({ ok: true });
+  });
+}

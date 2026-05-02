@@ -8,7 +8,7 @@ const BRAND_PREFIX = "dxnx_";
 
 export const apiKeyService = {
   async create(db: DbClient, userId: number, input: { description?: null | string; name: string }) {
-    const randomPart = crypto.randomBytes(32).toString("hex");
+    const randomPart = crypto.randomBytes(32).toString("base64url");
     const fullKey = `${BRAND_PREFIX}${randomPart}`;
     const displayPrefix = `${BRAND_PREFIX}${randomPart.slice(0, 6)}`;
     const hashedKey = crypto.createHash("sha256").update(fullKey).digest("hex");
@@ -52,7 +52,8 @@ export const apiKeyService = {
 
   async revoke(db: DbClient, id: string) {
     try {
-      await db.apiKey.delete({
+      await db.apiKey.update({
+        data: { revoked: true },
         where: { id },
       });
 

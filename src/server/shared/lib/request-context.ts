@@ -1,41 +1,60 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { NextRequest } from "next/server";
+import ipaddr from "ipaddr.js";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
 
 export type RequestStore = {
-  ip: string;
+  appVersion?: string;
+  ip: null | string;
   method: string;
-  origin?: string;
 
+  origin?: string;
   path: string;
   referer?: string;
   requestId: string;
+
   userAgent: string;
-
   userId?: number;
-  userRole?: string;
 
-  // appVersion?: string;
+  userRole?: string;
 };
 
 export const requestContext = new AsyncLocalStorage<RequestStore>();
 
-export function anonymizeIp(ip: null | string | undefined): string {
-  if (ip == null || ip === "unknown" || ip === "127.0.0.1" || ip === "::1") return ip ?? "unknown";
+/**
+ * Анонимизирует IP-адрес для соответствия GDPR и записи в тип INET PostgreSQL.
+ * IPv4: зануляет последний октет (1.2.3.4 -> 1.2.3.0)
+ * IPv6: зануляет последние 64 бита (2001:db8:85a3:0:0:8a2e:370:7334 -> 2001:db8:85a3:0::)
+ */
+export function anonymizeIp(ip: null | string | undefined): null | string {
+  if (ip == null || ip === "unknown" || ip.trim() === "") return null;
 
-  if (ip.includes(".")) {
-    const parts = ip.split(".");
-    if (parts.length === 4) return `${parts[0]}.${parts[1]}.${parts[2]}.0`;
+  if (ip === "127.0.0.1" || ip === "::1") return ip;
+
+  try {
+    const addr = ipaddr.process(ip);
+    const kind = addr.kind();
+
+    if (kind === "ipv4") {
+      const ipv4 = addr as ipaddr.IPv4;
+      const octets = ipv4.toByteArray();
+      octets[3] = 0;
+      return ipaddr.fromByteArray(octets).toString();
+    }
+
+    const ipv6 = addr as ipaddr.IPv6;
+    const parts = [...ipv6.parts];
+
+    parts[4] = 0;
+    parts[5] = 0;
+    parts[6] = 0;
+    parts[7] = 0;
+
+    return new ipaddr.IPv6(parts).toNormalizedString();
+  } catch {
+    return null;
   }
-
-  if (ip.includes(":")) {
-    const parts = ip.split(":");
-    if (parts.length < 4) return "unknown";
-    return `${parts.slice(0, 4).join(":")}::`;
-  }
-
-  return "unknown";
 }
 
 type VercelNextRequest = NextRequest & {

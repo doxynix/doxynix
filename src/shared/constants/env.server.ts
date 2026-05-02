@@ -30,9 +30,12 @@ export const envServer = createEnv({
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
+    LOG_SALT_SECRET: process.env.LOG_SALT_SECRET,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,
     REDIS_TCP_URL: process.env.REDIS_TCP_URL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
+    RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET,
     TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     YANDEX_CLIENT_ID: process.env.YANDEX_CLIENT_ID,
@@ -59,9 +62,12 @@ export const envServer = createEnv({
     GOOGLE_CLIENT_ID: stringSchema,
     GOOGLE_CLIENT_SECRET: stringSchema,
     GROQ_API_KEY: stringSchema,
+    LOG_SALT_SECRET: stringSchema,
     NEXTAUTH_SECRET: stringSchema,
+    PRISMA_FIELD_ENCRYPTION_KEY: stringSchema,
     REDIS_TCP_URL: stringSchema,
     RESEND_API_KEY: stringSchema,
+    RESEND_WEBHOOK_SECRET: stringSchema,
     TURNSTILE_SECRET_KEY: stringSchema,
     UPLOADTHING_TOKEN: stringSchema,
     YANDEX_CLIENT_ID: stringSchema,
@@ -77,11 +83,14 @@ export const REDIS_TCP_URL = envServer.REDIS_TCP_URL;
 export const BETTERSTACK_TOKEN = envServer.BETTERSTACK_API_TOKEN;
 export const TURNSTILE_SECRET_KEY = envServer.TURNSTILE_SECRET_KEY;
 export const RESEND_API_KEY = envServer.RESEND_API_KEY;
+export const RESEND_WEBHOOK_SECRET = envServer.RESEND_WEBHOOK_SECRET;
 export const APP_VERSION = envServer.APP_VERSION;
 export const ABLY_API_KEY = envServer.ABLY_API_KEY;
 export const GROQ_API_KEY = envServer.GROQ_API_KEY;
 export const UPLOADTHING_TOKEN = envServer.UPLOADTHING_TOKEN;
 export const GITHUB_APP_ID = envServer.GITHUB_APP_ID;
+export const PRISMA_FIELD_ENCRYPTION_KEY = envServer.PRISMA_FIELD_ENCRYPTION_KEY;
+export const LOG_SALT_SECRET = envServer.LOG_SALT_SECRET;
 const rawGithubAppPrivateKey = envServer.GITHUB_APP_PRIVATE_KEY;
 
 if (envServer.NODE_ENV !== "test" && typeof rawGithubAppPrivateKey !== "string") {

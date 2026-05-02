@@ -23,9 +23,10 @@ const ephemeralCache = new Map<string, number>();
 if (IS_PROD) {
   ratelimit = new Ratelimit({
     analytics: false,
+    enableProtection: true,
     ephemeralCache: ephemeralCache,
     limiter: Ratelimit.slidingWindow(20, "10 s"),
-    prefix: "@upstash/ratelimit",
+    prefix: "@doxynix/ratelimit/global",
     redis: redisClient,
   });
 }

@@ -77,7 +77,12 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
       data: { hashedKey: "h", name: "k", prefix: "p", userId: alice.user.id },
     });
 
-    await alice.db.apiKey.delete({ where: { id: key.id } });
+    await expectDenied(alice.db.apiKey.delete({ where: { id: key.id } }));
+
+    await alice.db.apiKey.update({
+      data: { revoked: true },
+      where: { id: key.id },
+    });
 
     const found = await alice.db.apiKey.findUnique({ where: { id: key.id } });
     expect(found).not.toBeNull();
