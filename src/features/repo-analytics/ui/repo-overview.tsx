@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { useLocale } from "next-intl";
 
-import type { RepoWorkspace } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
@@ -23,12 +22,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card"
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { useRouter } from "@/i18n/routing";
 
-import { buildRepoSearchResultHref } from "@/entities/repo-details/model/repo-workspace-navigation";
-import { StatCard } from "@/entities/repo-details/ui/stat-card";
 import { getGitMetrics } from "@/entities/repo/model/git-metrics";
+import { buildRepoSearchResultHref } from "@/entities/repo/model/repo-workspace-navigation";
+import type { RepoWorkspace } from "@/entities/repo/model/repo.types";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoGitMetric } from "@/entities/repo/ui/repo-git-metric";
 import { RepoTopics } from "@/entities/repo/ui/repo-topics";
+import { StatCard } from "@/entities/repo/ui/stat-card";
 
 import { RepoWorkspaceSearch } from "./repo-workspace-search";
 

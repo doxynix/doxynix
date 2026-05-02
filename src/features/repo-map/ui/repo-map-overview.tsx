@@ -2,10 +2,11 @@
 
 import { FileIcon, FileText, GitCommit, Layers } from "lucide-react";
 
-import type { RepoWorkspace } from "@/shared/api/trpc";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
+
+import type { RepoWorkspace } from "@/entities/repo/model/repo.types";
 
 type Props = {
   onNavigate: (id: null | string) => void;

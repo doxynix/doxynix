@@ -20,16 +20,17 @@ import { useSession } from "next-auth/react";
 import type { TreeApi } from "react-arborist";
 import { toast } from "sonner";
 
-import { trpc, type FileContent } from "@/shared/api/trpc";
+import { trpc } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import type { EditorStats } from "@/entities/repo-details/model/editor-stats.types";
-import { RepoStatusBar } from "@/entities/repo-details/ui/repo-status-bar";
-import type { FileNode } from "@/entities/repo-setup/model/repo-setup.types";
+import type { EditorStats } from "@/entities/repo/model/editor-stats.types";
+import type { FileNode } from "@/entities/repo/model/repo-setup.types";
+import type { FileContent } from "@/entities/repo/model/repo.types";
+import { RepoStatusBar } from "@/entities/repo/ui/repo-status-bar";
 
 import { RepoCodeActionButton } from "./repo-code-action-button";
 import { RepoSearchPanel } from "./repo-code-search-panel";

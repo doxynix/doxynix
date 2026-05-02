@@ -2,17 +2,17 @@ import { startTransition } from "react";
 import { Check, Folder, FolderOpen, Search, Sparkles, X } from "lucide-react";
 import { Tree, type TreeApi } from "react-arborist";
 
-import type { UiRepoDetailed } from "@/shared/api/trpc";
 import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
 import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
-import type { ActionItem, FileNode } from "@/entities/repo-setup/model/repo-setup.types";
-import type { ActionsType, StateType } from "@/entities/repo-setup/model/use-repo-setup";
-import { RepoBranchSelector } from "@/entities/repo-setup/ui/repo-branch-selector";
-import { RepoTreeSkeleton } from "@/entities/repo-setup/ui/repo-tree-skeleton";
+import type { ActionItem, FileNode } from "@/entities/repo/model/repo-setup.types";
+import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import type { ActionsType, StateType } from "@/entities/repo/model/use-repo-setup";
+import { RepoBranchSelector } from "@/entities/repo/ui/repo-branch-selector";
+import { RepoTreeSkeleton } from "@/entities/repo/ui/repo-tree-skeleton";
 
 import { RepoFileNode } from "./repo-file-node";
 

@@ -2,13 +2,14 @@
 
 import { useLocale, useTranslations } from "next-intl";
 
-import type { UiApiKey } from "@/shared/api/trpc";
 import { formatRelativeTime } from "@/shared/lib/date-utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Input } from "@/shared/ui/core/input";
 
-import { RevokeApiKeyDialog } from "./revoke-api-key-dialog";
-import { UpdateApiKeyDialog } from "./update-api-key-dialog";
+import { RevokeApiKeyDialog } from "@/features/api-keys/ui/revoke-api-key-dialog";
+import { UpdateApiKeyDialog } from "@/features/api-keys/ui/update-api-key-dialog";
+
+import type { UiApiKey } from "../model/api-keys.types";
 
 export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
   const tCommon = useTranslations("Common");

@@ -1,8 +1,7 @@
 import type { ReadonlyURLSearchParams } from "next/navigation";
 
-import { type RepoSearchResult } from "@/shared/api/trpc";
-
 import { serializeRepoParams } from "./repo-details-params";
+import type { RepoSearchResult } from "./repo.types";
 
 export function buildRepoDetailHref(
   basePath: string,

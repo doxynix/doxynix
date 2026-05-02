@@ -2,9 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useEdgesState, useNodesState, type Edge, type Node } from "@xyflow/react";
 import type { ELK, ElkNode } from "elkjs";
 
-import type { RepoMapDisplayData } from "@/shared/api/trpc";
-
-import type { RepoMapNodeData } from "./repo-map-types";
+import type { RepoMapDisplayData, RepoMapNodeData } from "./repo-map-types";
 import { extractParentGroups } from "./use-parent-groups";
 
 const elkOptions = {

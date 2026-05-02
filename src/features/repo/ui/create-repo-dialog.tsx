@@ -39,8 +39,7 @@ import {
   useCreateRepoOpen,
 } from "@/entities/repo/model/use-create-repo-dialog.store";
 import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
-
-import { RepoItem } from "./repo-item";
+import { RepoItem } from "@/entities/repo/ui/repo-item";
 
 const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут
 

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { CheckCircle2, Clock, ShieldAlert } from "lucide-react";
 
-import type { RepoPull } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { formatRelativeTime } from "@/shared/lib/date-utils";
 import { Badge } from "@/shared/ui/core/badge";
+
+import type { RepoPull } from "../model/pr.types";
 
 type Props = {
   name: string;

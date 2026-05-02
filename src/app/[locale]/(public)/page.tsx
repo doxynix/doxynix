@@ -1,16 +1,16 @@
 import { createMetadata } from "@/shared/lib/metadata";
 
-import { AnalyticsSection } from "@/features/landing/ui/analytics-section";
-import { BrandsSection } from "@/features/landing/ui/brands-section";
-import { CodeComparisonSection } from "@/features/landing/ui/code-comparison-section";
-import { ConfigSection } from "@/features/landing/ui/config-section";
-import { CTASection } from "@/features/landing/ui/cta-section";
-import { DocModesSection } from "@/features/landing/ui/doc-modes-section";
-import { FAQSection } from "@/features/landing/ui/faq-section";
-import { FeaturesSection } from "@/features/landing/ui/features-section";
-import { HeroSection } from "@/features/landing/ui/hero-section";
-import { HowItWorksSection } from "@/features/landing/ui/how-it-works-section";
-import { PricingSection } from "@/features/landing/ui/pricing-section";
+import { AnalyticsSection } from "@/widgets/landing/ui/analytics-section";
+import { BrandsSection } from "@/widgets/landing/ui/brands-section";
+import { CodeComparisonSection } from "@/widgets/landing/ui/code-comparison-section";
+import { ConfigSection } from "@/widgets/landing/ui/config-section";
+import { CTASection } from "@/widgets/landing/ui/cta-section";
+import { DocModesSection } from "@/widgets/landing/ui/doc-modes-section";
+import { FAQSection } from "@/widgets/landing/ui/faq-section";
+import { FeaturesSection } from "@/widgets/landing/ui/features-section";
+import { HeroSection } from "@/widgets/landing/ui/hero-section";
+import { HowItWorksSection } from "@/widgets/landing/ui/how-it-works-section";
+import { PricingSection } from "@/widgets/landing/ui/pricing-section";
 
 // export const runtime = "edge";
 

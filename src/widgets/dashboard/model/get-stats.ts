@@ -9,8 +9,9 @@ import {
   Wrench,
 } from "lucide-react";
 
-import type { DashboardStats } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
+
+import type { DashboardStats } from "./dashboard.types";
 
 type TFunction = (key: string) => string;
 

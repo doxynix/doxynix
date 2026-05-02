@@ -3,15 +3,16 @@
 import { Eye, EyeOff, Trash2 } from "lucide-react";
 import { useLocale } from "next-intl";
 
-import { type UiNotification } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { Card, CardContent, CardDescription, CardTitle } from "@/shared/ui/core/card";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 import { Link } from "@/i18n/routing";
 
-import { notificationTypeConfig } from "../model/notification-type-config";
-import { useNotificationActions } from "../model/use-notification-actions";
-import { NotificationActionButton } from "./notification-action-button";
+import { notificationTypeConfig } from "@/features/notifications/model/notification-type-config";
+import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
+import { NotificationActionButton } from "@/features/notifications/ui/notification-action-button";
+
+import type { UiNotification } from "../model/notifications.types";
 
 type Props = { notification: UiNotification };
 

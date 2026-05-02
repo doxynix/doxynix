@@ -10,8 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { useProfileActions } from "../model/use-profile-actions";
-import { ProfileDetailsForm } from "./profile-details-form";
+import { useProfileActions } from "@/features/profile/model/use-profile-actions";
+import { ProfileDetailsForm } from "@/features/profile/ui/profile-details-form";
 
 type Props = {
   user: User;

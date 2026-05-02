@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { useMapCommands } from "./use-map-commands";
-import { useMapControlsActions } from "./use-repo-map-store";
+import { useMapControlsActions } from "./use-repo-map.store";
 
 const MAP_PREFIXES = ["t", "z", "f"];
 

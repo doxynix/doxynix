@@ -2,7 +2,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 import { useSidebar } from "@/shared/ui/core/sidebar";
 
-import { useCommandMenuActions } from "@/entities/command-menu/model/use-command-menu.store";
+import { useCommandMenuActions } from "@/features/command-menu/model/use-command-menu.store";
 
 export function useLayoutHotkeys() {
   const { toggleSidebar } = useSidebar();

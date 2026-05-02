@@ -4,13 +4,14 @@ import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
 import type { TreeApi } from "react-arborist";
 
-import { trpc, type DocType, type UiRepoDetailed } from "@/shared/api/trpc";
+import { trpc } from "@/shared/api/trpc";
 
 import { DocTypeSchema } from "@/generated/zod";
 
+import { collectAllIds, getFolderSelectionState, sortNodes } from "./repo-setup-utils";
 import type { FileNode, FileTuple } from "./repo-setup.types";
+import type { DocType, UiRepoDetailed } from "./repo.types";
 import { useRepoBranchOpen } from "./use-repo-branch.store";
-import { collectAllIds, getFolderSelectionState, sortNodes } from "./utils";
 
 export type RepoSetupReturn = ReturnType<typeof useRepoSetup>;
 

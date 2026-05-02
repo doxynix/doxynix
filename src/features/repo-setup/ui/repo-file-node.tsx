@@ -6,8 +6,8 @@ import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Checkbox } from "@/shared/ui/core/checkbox";
 
-import type { FileNode } from "@/entities/repo-setup/model/repo-setup.types";
-import { getFolderSelectionState } from "@/entities/repo-setup/model/utils";
+import { getFolderSelectionState } from "@/entities/repo/model/repo-setup-utils";
+import type { FileNode } from "@/entities/repo/model/repo-setup.types";
 
 type RepoFileNodeProps = NodeRendererProps<FileNode> & {
   mySelectedIds: Set<string>;

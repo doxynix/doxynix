@@ -8,7 +8,7 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
-import type { AuthorGroup } from "../model/thanks.types";
+import type { AuthorGroup } from "@/features/thanks/model/thanks.types";
 
 type Props = { group: AuthorGroup };
 
