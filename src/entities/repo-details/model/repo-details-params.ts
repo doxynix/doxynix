@@ -1,6 +1,6 @@
 import { createSerializer, parseAsString } from "nuqs/server";
 
-export const repoWorkspaceParams = {
+const repoWorkspaceParams = {
   filter: parseAsString,
   node: parseAsString,
   path: parseAsString,

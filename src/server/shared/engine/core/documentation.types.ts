@@ -37,7 +37,7 @@ export type ReportSectionKind =
   | "overview"
   | "risks";
 
-export const REPORT_SECTION_KINDS = [
+const REPORT_SECTION_KINDS = [
   "overview",
   "architecture",
   "api_reference",

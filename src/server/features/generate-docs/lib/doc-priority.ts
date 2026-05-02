@@ -22,7 +22,7 @@ export const DOC_SECTION_DEPENDENCIES: Record<DocType, readonly ReportSectionKin
   [DocType.README]: ["overview", "architecture"],
 };
 
-export const DOC_WEIGHTS: Partial<Record<DocType, number>> = {
+const DOC_WEIGHTS: Partial<Record<DocType, number>> = {
   [DocType.API]: DOC_PRIORITY_WEIGHTS.api,
   [DocType.ARCHITECTURE]: DOC_PRIORITY_WEIGHTS.architecture,
   [DocType.CHANGELOG]: DOC_PRIORITY_WEIGHTS.changelog,

@@ -52,7 +52,7 @@ export function dedupeLatestDocsByType(docs: StoredDocument[]) {
   });
 }
 
-export function getWriterStatus(docType: DocType, aiResult: AIResult | null): null | WriterStatus {
+function getWriterStatus(docType: DocType, aiResult: AIResult | null): null | WriterStatus {
   const writerKey = WRITER_KEY_BY_DOC_TYPE[docType];
   if (writerKey == null) return null;
   return aiResult?.analysisRuntime?.writers?.[writerKey] ?? null;

@@ -63,7 +63,7 @@ export type StructureContext = {
   >;
 };
 
-export function createSemanticCounts(): Record<StructureSemanticKind, number> {
+function createSemanticCounts(): Record<StructureSemanticKind, number> {
   return {
     api: 0,
     backend: 0,

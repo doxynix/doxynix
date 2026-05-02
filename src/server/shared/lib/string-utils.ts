@@ -12,7 +12,7 @@ export const hasText = (value: unknown): value is string =>
 /**
  * Check if empty/whitespace.
  */
-export const isEmpty = (value: unknown): value is string =>
+const isEmpty = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length === 0;
 
 /**
@@ -29,24 +29,24 @@ export function escapePromptXmlAttr(value: string): string {
   return escape(value);
 }
 
-export function getFileExtension(filePath: string): string {
+function getFileExtension(filePath: string): string {
   const normalized = normalize(normalizeRepoPath(filePath));
   return extname(normalized);
 }
 
-export function getFileName(filePath: string): string {
+function getFileName(filePath: string): string {
   const normalized = normalize(normalizeRepoPath(filePath));
   return basename(normalized);
 }
 
-export function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): string[] {
+function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): string[] {
   const list = compact(Array.from(paths).map((p) => normalize(normalizeRepoPath(p))));
   const result = uniq(list);
 
   return limit != null ? result.slice(0, limit) : result;
 }
 
-export function uniqueObjectPaths<T extends { path: string }>(
+function uniqueObjectPaths<T extends { path: string }>(
   items: Iterable<T>,
   limit?: number
 ): string[] {
@@ -56,7 +56,7 @@ export function uniqueObjectPaths<T extends { path: string }>(
   );
 }
 
-export function uniqueStringPaths(
+function uniqueStringPaths(
   paths: Iterable<false | null | string | undefined>,
   limit?: number
 ): string[] {
@@ -66,11 +66,7 @@ export function uniqueStringPaths(
   return limit != null ? result.slice(0, limit) : result;
 }
 
-export function excludePath(
-  paths: Iterable<string>,
-  excludedPath: string,
-  limit?: number
-): string[] {
+function excludePath(paths: Iterable<string>, excludedPath: string, limit?: number): string[] {
   const normalizedExcluded = normalize(normalizeRepoPath(excludedPath));
 
   const filtered = Array.from(paths).filter(

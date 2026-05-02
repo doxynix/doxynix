@@ -168,7 +168,7 @@ export function buildTopLevelNodes(context: StructureContext) {
   );
   return [...prioritized, ...fallback].slice(0, 14);
 }
-export function selectDefaultTopLevelNode(
+function selectDefaultTopLevelNode(
   context: StructureContext,
   nodes: ReturnType<typeof buildStructureNodeSummary>[]
 ) {
@@ -356,7 +356,7 @@ export function buildStructureNodePayload(repo: RepoWithLatestAnalysisAndDocs, n
   const analysisRef = toAnalysisRef(repo.analyses[0]);
   return buildStructureNodePayloadFromContext(context, analysisRef, nodeId);
 }
-export function buildStructureNodeSummary(params: {
+function buildStructureNodeSummary(params: {
   entry: StructureGroupEntry;
   nodeType: StructureNodeType;
   path: string;

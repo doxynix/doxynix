@@ -97,7 +97,7 @@ export class GitHubAuthRequiredError extends Error {
   }
 }
 
-export type GitHubClientContext = (
+type GitHubClientContext = (
   | { githubInstallationId: number; hasUserToken: false; type: "installation" }
   | { hasUserToken: false; type: "app" }
   | { hasUserToken: false; type: "public" }
@@ -106,7 +106,7 @@ export type GitHubClientContext = (
   octokit: OctokitInstance;
 };
 
-export type ClientContextOptions = {
+type ClientContextOptions = {
   allowPublicFallback?: boolean;
   allowSystemFallback?: boolean;
   owner?: string;
@@ -229,11 +229,7 @@ export function parseUrl(input: string): { name: string; owner: string } {
  * Retrieves GitHub token for user and optional owner
  * Returns null if token unavailable (logs error)
  */
-export async function getToken(
-  prisma: DbClient,
-  userId: number,
-  owner?: string
-): Promise<null | string> {
+async function getToken(prisma: DbClient, userId: number, owner?: string): Promise<null | string> {
   try {
     const context = await getClientContext(prisma, userId, owner);
     const auth =

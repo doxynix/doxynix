@@ -20,7 +20,7 @@ export function getFileName(filePath: string): string {
 /**
  * Unique normalized paths with limit.
  */
-export function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): string[] {
+function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): string[] {
   const list = uniq(compact(Array.from(paths).map((path) => normalizeRepoPath(path))));
 
   return limit != null ? list.slice(0, limit) : list;
@@ -29,7 +29,7 @@ export function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): 
 /**
  * Unique object paths.
  */
-export function uniqueObjectPaths<T extends { path: string }>(
+function uniqueObjectPaths<T extends { path: string }>(
   items: Iterable<T>,
   limit?: number
 ): string[] {
@@ -40,7 +40,7 @@ export function uniqueObjectPaths<T extends { path: string }>(
 /**
  * Unique string paths from mixed.
  */
-export function uniqueStringPaths(
+function uniqueStringPaths(
   paths: Iterable<false | null | string | undefined>,
   limit?: number
 ): string[] {

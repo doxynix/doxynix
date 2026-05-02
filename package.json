@@ -36,7 +36,7 @@
     "secretlint": "secretlint \"**/*\"",
     "secretlint:check": "secretlint \"**/*\"",
     "typecheck:coverage": "type-coverage --threshold 90",
-    "knip": "knip --no-exit-code",
+    "knip": "pnpm with-doppler \"knip --no-exit-code\"",
     "spellcheck": "cspell \"**/*\" --no-progress --show-suggestions",
     "gen:client": "pnpm with-doppler \"openapi --input http://localhost:3000/api/openapi --output ./src/generated/client --client axios\"",
     "gen:credits": "node scripts/thanks.mjs",

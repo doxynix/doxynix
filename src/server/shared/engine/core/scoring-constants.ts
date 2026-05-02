@@ -284,7 +284,7 @@ export const MODERN_HEALTH_SCORE = {
 /**
  * Edge weight and relationship scoring for dependency graphs.
  */
-export const GRAPH_SCORING = {
+const GRAPH_SCORING = {
   /** Default edge weight when adding relationships */
   defaultEdgeWeight: 1,
 
@@ -308,7 +308,7 @@ export const GRAPH_SCORING = {
  * DEPRECATED: These are for backward compatibility during migration.
  * Prefer the specific scoring object constants above.
  */
-export const PENALTY_CONSTANTS = {
+const PENALTY_CONSTANTS = {
   // Cycle penalties - NORMALIZED to use COMPLEXITY_SCORING.cycleMultiplier
   cyclePenaltyForComplexity: COMPLEXITY_SCORING.cycleMultiplier,
   cyclePenaltyForModularity: STRUCTURAL_MODULARITY_SCORING.cycleMultiplier,
@@ -461,7 +461,7 @@ export const CONFIDENCE_LEVELS = {
 // ENTRYPOINT DETECTION CONFIDENCE
 // ============================================================================
 
-export const ENTRYPOINT_CONFIDENCE = {
+const ENTRYPOINT_CONFIDENCE = {
   heuristic: 58, // Предположение по названию файла
   libraryExport: 72, // Публичный экспорт библиотеки
   runtimeApi: 86, // Явный API endpoint
@@ -519,7 +519,7 @@ export const DOC_PIPELINE_THRESHOLDS = {
  * Validate that penalty values make sense (for development/testing).
  * All scores should clamp to 0-100.
  */
-export function validateScoringConstants(): string[] {
+function validateScoringConstants(): string[] {
   const errors: string[] = [];
 
   // Check all penalties are positive

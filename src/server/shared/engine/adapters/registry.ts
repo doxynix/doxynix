@@ -15,6 +15,6 @@ export function getLanguageAdapters(file: RepositoryFile) {
   });
 }
 
-export function getLanguageAdapterRegistry() {
+function getLanguageAdapterRegistry() {
   return [...REGISTRY];
 }

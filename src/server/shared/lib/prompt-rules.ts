@@ -105,7 +105,7 @@ export const BehavioralRules = {
 // VERIFICATION RULES
 // =============================================================================
 
-export const VerificationRules = {
+const VerificationRules = {
   /** Rule: Categorical clarity */
   categoricalClarity: `If evidence is weak, state so directly instead of smoothing it over with abstract language.`,
 
@@ -127,14 +127,14 @@ export const VerificationRules = {
  * Combine multiple rules into a formatted section
  * Useful for building composite rule sets
  */
-export function combineRules(rules: (string | undefined)[]): string {
+function combineRules(rules: (string | undefined)[]): string {
   return rules.filter(Boolean).join("\n");
 }
 
 /**
  * Build a "do not invent" section for a specific context
  */
-export function buildNoInventionSection(context: string = "information"): string {
+function buildNoInventionSection(context: string = "information"): string {
   return `
 ## GROUNDING (HARD)
 - **${context}**: ${GroundingRules.noInvention}
@@ -146,7 +146,7 @@ export function buildNoInventionSection(context: string = "information"): string
 /**
  * Build safety constraints section
  */
-export function buildSafetyConstraints(): string {
+function buildSafetyConstraints(): string {
   return `
 ## CONSTRAINTS
 - ${BehavioralRules.noHallucination}
@@ -158,7 +158,7 @@ export function buildSafetyConstraints(): string {
 /**
  * Build format section
  */
-export function buildFormatSection(format: "json" | "markdown" | "xml"): string {
+function buildFormatSection(format: "json" | "markdown" | "xml"): string {
   const rule =
     format === "json"
       ? OutputFormatRules.jsonOnly
