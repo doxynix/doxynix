@@ -9,7 +9,7 @@ type FrameworkCatalogEntry = {
   name: string;
 };
 
-export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
+const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   // --- JS/TS ECOSYSTEM (Frontend & Backend) ---
   { aliases: ["hono", "@hono/"], category: "framework", name: "Hono" },
   { aliases: ["express"], category: "framework", name: "Express" },
@@ -185,7 +185,7 @@ export function collectFrameworkFactsFromTokens(
   return Array.from(collected.values()).sort((left, right) => right.confidence - left.confidence);
 }
 
-export function mergeFrameworkFacts(facts: FrameworkFact[]) {
+function mergeFrameworkFacts(facts: FrameworkFact[]) {
   const merged = new Map<string, FrameworkFact>();
 
   for (const fact of facts) {
@@ -222,7 +222,7 @@ function hasManifestOnlySources(fact: FrameworkFact) {
   );
 }
 
-export function isCoreRepositoryFrameworkFact(fact: FrameworkFact) {
+function isCoreRepositoryFrameworkFact(fact: FrameworkFact) {
   const coreSourceCount = countCoreSources(fact);
   if (coreSourceCount >= 2) return true;
   if (coreSourceCount >= 1 && (fact.category === "api" || fact.category === "framework"))

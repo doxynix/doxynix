@@ -50,7 +50,7 @@ export function uniquePaths(
  * uniqueBy(users, (u) => u.id)
  * uniqueBy(paths, (p) => normalizePath(p))
  */
-export function uniqueBy<T, K>(values: T[], keyFn: (item: T) => K): T[] {
+function uniqueBy<T, K>(values: T[], keyFn: (item: T) => K): T[] {
   return uniqBy(values, keyFn);
 }
 
@@ -61,6 +61,6 @@ export function uniqueBy<T, K>(values: T[], keyFn: (item: T) => K): T[] {
  * @example
  * flatten([[1, 2], [3, [4, 5]]]) // [1, 2, 3, 4, 5]
  */
-export function flatten<T>(arr: (T | T[])[]): T[] {
+function flatten<T>(arr: (T | T[])[]): T[] {
   return flattenDeep(arr) as T[];
 }

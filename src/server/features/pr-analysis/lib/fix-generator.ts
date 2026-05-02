@@ -10,12 +10,12 @@ import { AI_MODELS, SAFETY_SETTINGS } from "../../analyze-repo/lib/constants";
 /**
  * Full file content after AI fixing (from AI response)
  */
-export type FixedFileContent = {
+type FixedFileContent = {
   filePath: string;
   newContent: string; // Full file content, not a patch
 };
 
-export type FixRecommendation = {
+type FixRecommendation = {
   branch: string;
   description: string;
   diffs: GeneratedDiff[];
@@ -24,7 +24,7 @@ export type FixRecommendation = {
   title: string;
 };
 
-export type FindingInput = {
+type FindingInput = {
   file: string;
   line: number;
   suggestion?: string;
@@ -36,7 +36,7 @@ export type FindingInput = {
  * AI returns entire fixed file content (wrapped in <fixed_code> tags).
  * No .patch parsing complexity.
  */
-export class FixGenerator {
+class FixGenerator {
   /**
    * Generate fix recommendations from findings + original file contents.
    * AI will return full fixed content for each affected file.

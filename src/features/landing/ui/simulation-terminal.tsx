@@ -5,7 +5,7 @@ import { Check } from "lucide-react";
 import { useInView } from "motion/react";
 import { useTranslations } from "next-intl";
 
-export const TerminalWindow = ({ children }: { children: ReactNode }) => {
+const TerminalWindow = ({ children }: { children: ReactNode }) => {
   return (
     <div className="glass-panel border-border/80 bg-card/70 pointer-events-none flex h-full w-full flex-col overflow-hidden rounded-2xl border">
       <div className="border-border/60 bg-muted/30 flex items-center gap-1.5 border-b p-3">

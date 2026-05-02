@@ -7,7 +7,7 @@ const prefixSchema = z
   .string()
   .check(z.startsWith("/"), z.regex(/^\/[\w/\-]*$/, "Invalid prefix format"));
 
-export const envClient = createEnv({
+const envClient = createEnv({
   client: {
     NEXT_PUBLIC_API_PREFIX: prefixSchema,
     NEXT_PUBLIC_APP_URL: z.url(),

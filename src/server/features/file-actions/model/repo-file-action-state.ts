@@ -2,12 +2,12 @@ import type { AnalysisRef } from "@/server/shared/infrastructure/repo-snapshots"
 
 import type { NodeContextDiagnostics, NodeContextMeta } from "./repo-node-context";
 
-export type ContentRefInput = {
+type ContentRefInput = {
   analysisId?: string;
   commitSha?: string;
 };
 
-export type SyncFileActionMeta = {
+type SyncFileActionMeta = {
   analysisRef: AnalysisRef | null;
   consistency: "matched" | "mismatch" | "unknown";
   consistencyNote: null | string;
@@ -16,7 +16,7 @@ export type SyncFileActionMeta = {
   contextMeta: NodeContextMeta;
 };
 
-export function buildConsistencyState(
+function buildConsistencyState(
   analysisRef: AnalysisRef | null,
   contentRef: ContentRefInput
 ): {

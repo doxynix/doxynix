@@ -107,7 +107,7 @@ const GLOBAL_FEATURES: MenuItems = [
   },
 ];
 
-export const actionsMenu: MenuItems = [
+const actionsMenu: MenuItems = [
   {
     actionId: "createRepo",
     commandType: "dialog",

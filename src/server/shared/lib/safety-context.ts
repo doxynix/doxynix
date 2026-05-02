@@ -10,12 +10,12 @@ import { escapePromptXmlAttr, escapePromptXmlText } from "./string-utils";
 /**
  * Safety level for handling user input
  */
-export type SafetyLevel = "moderate" | "permissive" | "strict";
+type SafetyLevel = "moderate" | "permissive" | "strict";
 
 /**
  * Data handling strategy
  */
-export type DataHandlingStrategy = "escape-json" | "escape-xml" | "no-escape" | "sanitize-html";
+type DataHandlingStrategy = "escape-json" | "escape-xml" | "no-escape" | "sanitize-html";
 
 /**
  * SafetyContext manages all data safety and escaping across LLM prompts
@@ -241,7 +241,7 @@ let globalSafetyContext: null | SafetyContext = null;
 /**
  * Get or create global safety context
  */
-export function getGlobalSafetyContext(level: SafetyLevel = "strict"): SafetyContext {
+function getGlobalSafetyContext(level: SafetyLevel = "strict"): SafetyContext {
   if (!globalSafetyContext) {
     globalSafetyContext = new SafetyContext(level);
   }
@@ -251,6 +251,6 @@ export function getGlobalSafetyContext(level: SafetyLevel = "strict"): SafetyCon
 /**
  * Reset global safety context (for testing)
  */
-export function resetGlobalSafetyContext(): void {
+function resetGlobalSafetyContext(): void {
   globalSafetyContext = null;
 }

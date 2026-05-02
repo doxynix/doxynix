@@ -4,7 +4,7 @@ import ipaddr from "ipaddr.js";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
 
-export type RequestStore = {
+type RequestStore = {
   appVersion?: string;
   ip: null | string;
   method: string;
@@ -99,7 +99,7 @@ type RequestContextInput = {
   userRole?: string;
 };
 
-export function getRequestIdFromHeaders(request: NextRequest): string | undefined {
+function getRequestIdFromHeaders(request: NextRequest): string | undefined {
   return sanitizeRequestId(request.headers.get("x-request-id"));
 }
 
@@ -124,7 +124,7 @@ export function resolveRequestId(request?: NextRequest, existing?: string): stri
   return getRequestIdFromHeaders(request);
 }
 
-export function ensureRequestId(request: NextRequest, existing?: string): string {
+function ensureRequestId(request: NextRequest, existing?: string): string {
   return sanitizeRequestId(existing) ?? getRequestIdFromHeaders(request) ?? generateRequestId();
 }
 

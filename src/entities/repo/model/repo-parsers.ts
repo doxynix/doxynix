@@ -7,7 +7,7 @@ import {
 
 import { StatusSchema, VisibilitySchema } from "@/generated/zod";
 
-export const REPO_DEFAULTS = {
+const REPO_DEFAULTS = {
   PAGE: 1,
   SEARCH: "",
 };
@@ -22,4 +22,4 @@ export const repoParsers = {
   visibility: parseAsStringLiteral(VisibilitySchema.options),
 };
 
-export type repoParsersType = inferParserType<typeof repoParsers>;
+type repoParsersType = inferParserType<typeof repoParsers>;

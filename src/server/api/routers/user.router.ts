@@ -9,7 +9,7 @@ import { UserSchema } from "@/generated/zod";
 import { OpenApiErrorResponses } from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
-export const PublicUserSchema = UserSchema.extend({
+const PublicUserSchema = UserSchema.extend({
   id: z.string(),
 });
 
