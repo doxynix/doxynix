@@ -29,7 +29,7 @@ function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): string[
 /**
  * Unique object paths.
  */
-function uniqueObjectPaths<T extends { path: string }>(
+export function uniqueObjectPaths<T extends { path: string }>(
   items: Iterable<T>,
   limit?: number
 ): string[] {
@@ -40,7 +40,7 @@ function uniqueObjectPaths<T extends { path: string }>(
 /**
  * Unique string paths from mixed.
  */
-function uniqueStringPaths(
+export function uniqueStringPaths(
   paths: Iterable<false | null | string | undefined>,
   limit?: number
 ): string[] {

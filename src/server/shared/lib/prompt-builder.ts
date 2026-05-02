@@ -18,11 +18,6 @@ type PromptRole =
   | "readme-writer"
   | "security-sentinel";
 
-type PromptSection = {
-  content: string;
-  title: string;
-};
-
 /**
  * FluentPromptBuilder for consistent prompt construction
  * Supports method chaining for readability

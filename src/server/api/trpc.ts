@@ -129,4 +129,4 @@ const isAdmin = t.middleware(({ ctx, next }) => {
   return next({ ctx });
 });
 
-const adminProcedure = protectedProcedure.use(isAdmin);
+export const adminProcedure = protectedProcedure.use(isAdmin);

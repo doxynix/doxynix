@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { PRCommentStyleSchema, PRFocusAreaSchema } from "@/generated/zod";
 
-const PRAnalysisConfigSchema = z.object({
+export const PRAnalysisConfigSchema = z.object({
   ciSkip: z.boolean().default(false),
   commentStyle: PRCommentStyleSchema.default(PRCommentStyleSchema.enum.DETAILED),
   enabled: z.boolean().default(false),
@@ -13,7 +13,7 @@ const PRAnalysisConfigSchema = z.object({
   tokenBudget: z.number().int().min(10_000).max(100_000).default(30_000),
 });
 
-type PRAnalysisConfig = z.infer<typeof PRAnalysisConfigSchema>;
+export type PRAnalysisConfig = z.infer<typeof PRAnalysisConfigSchema>;
 
 export const UpdatePRConfigInput = z.object({
   ciSkip: z.boolean().optional(),
@@ -26,7 +26,7 @@ export const UpdatePRConfigInput = z.object({
 
 export type UpdatePRConfigInputValues = z.infer<typeof UpdatePRConfigInput>;
 
-const PRFindingSchema = z.object({
+export const PRFindingSchema = z.object({
   codeSnippet: z.string().optional(),
   file: z.string(),
   line: z.number().int().positive(),
@@ -37,13 +37,11 @@ const PRFindingSchema = z.object({
   type: z.enum(["security", "performance", "complexity", "style", "bug", "architecture"]),
 });
 
-type PRFinding = z.infer<typeof PRFindingSchema>;
-
-const ApplyFixInput = z.object({
+export const ApplyFixInput = z.object({
   fixId: z.number(),
 });
 
-const CreateFixInput = z.object({
+export const CreateFixInput = z.object({
   findings: z.array(
     z.object({
       file: z.string(),

@@ -127,14 +127,14 @@ const VerificationRules = {
  * Combine multiple rules into a formatted section
  * Useful for building composite rule sets
  */
-function combineRules(rules: (string | undefined)[]): string {
+export function combineRules(rules: (string | undefined)[]): string {
   return rules.filter(Boolean).join("\n");
 }
 
 /**
  * Build a "do not invent" section for a specific context
  */
-function buildNoInventionSection(context: string = "information"): string {
+export function buildNoInventionSection(context: string = "information"): string {
   return `
 ## GROUNDING (HARD)
 - **${context}**: ${GroundingRules.noInvention}
@@ -146,7 +146,7 @@ function buildNoInventionSection(context: string = "information"): string {
 /**
  * Build safety constraints section
  */
-function buildSafetyConstraints(): string {
+export function buildSafetyConstraints(): string {
   return `
 ## CONSTRAINTS
 - ${BehavioralRules.noHallucination}

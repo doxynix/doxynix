@@ -4,7 +4,7 @@ import { getRepoWithLatestAnalysisAndDocs } from "@/server/shared/infrastructure
 
 import type { FileActionNodeContext } from "./file-actions";
 
-export type NodeContext = Omit<
+type NodeContext = Omit<
   FileActionNodeContext,
   "graphNeighbors" | "neighborPaths" | "nextSuggestedPaths" | "recommendedActions" | "sourcePaths"
 > & {

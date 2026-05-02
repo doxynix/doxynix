@@ -12,7 +12,7 @@ export const hasText = (value: unknown): value is string =>
 /**
  * Check if empty/whitespace.
  */
-const isEmpty = (value: unknown): value is string =>
+export const isEmpty = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length === 0;
 
 /**
@@ -29,12 +29,12 @@ export function escapePromptXmlAttr(value: string): string {
   return escape(value);
 }
 
-function getFileExtension(filePath: string): string {
+export function getFileExtension(filePath: string): string {
   const normalized = normalize(normalizeRepoPath(filePath));
   return extname(normalized);
 }
 
-function getFileName(filePath: string): string {
+export function getFileName(filePath: string): string {
   const normalized = normalize(normalizeRepoPath(filePath));
   return basename(normalized);
 }
@@ -46,7 +46,7 @@ function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): string[
   return limit != null ? result.slice(0, limit) : result;
 }
 
-function uniqueObjectPaths<T extends { path: string }>(
+export function uniqueObjectPaths<T extends { path: string }>(
   items: Iterable<T>,
   limit?: number
 ): string[] {
@@ -56,7 +56,7 @@ function uniqueObjectPaths<T extends { path: string }>(
   );
 }
 
-function uniqueStringPaths(
+export function uniqueStringPaths(
   paths: Iterable<false | null | string | undefined>,
   limit?: number
 ): string[] {
@@ -66,7 +66,11 @@ function uniqueStringPaths(
   return limit != null ? result.slice(0, limit) : result;
 }
 
-function excludePath(paths: Iterable<string>, excludedPath: string, limit?: number): string[] {
+export function excludePath(
+  paths: Iterable<string>,
+  excludedPath: string,
+  limit?: number
+): string[] {
   const normalizedExcluded = normalize(normalizeRepoPath(excludedPath));
 
   const filtered = Array.from(paths).filter(

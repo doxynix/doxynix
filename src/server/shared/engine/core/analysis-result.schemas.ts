@@ -163,5 +163,5 @@ export const aiSchema = z.object({
 });
 
 export type AIResult = z.infer<typeof aiSchema>;
-type ProjectMap = z.infer<typeof projectMapSchema>;
-type SentinelResult = z.infer<typeof sentinelSchema>;
+export type ProjectMap = z.infer<typeof projectMapSchema>;
+export type SentinelResult = z.infer<typeof sentinelSchema>;

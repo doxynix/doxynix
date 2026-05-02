@@ -79,7 +79,7 @@ export function AppHeader() {
             </span>
           </AppTooltip>
           <AppCommandMenu />
-          <ThemeToggle className="text-muted-foreground" />
+          <ThemeToggle />
           <AppTooltip content="Repositories">
             <Button asChild size="icon" variant="ghost">
               <Link href="/dashboard/repos" aria-label="Repositories">
