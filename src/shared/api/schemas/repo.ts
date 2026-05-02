@@ -12,5 +12,4 @@ export const CreateRepoSchema = z.object({
     .check(z.trim(), z.minLength(1, "URL cannot be empty"), z.maxLength(500, "URL too long")),
 });
 
-export type GitHubQueryInput = z.infer<typeof GitHubQuerySchema>;
 export type CreateRepoInput = z.infer<typeof CreateRepoSchema>;

@@ -142,7 +142,7 @@ export type ChangeCouplingRef = {
   toPath: string;
 };
 
-export type BaseSignal = {
+type BaseSignal = {
   confidence: number;
   path: string;
   score?: number;
@@ -172,13 +172,6 @@ export interface HotspotSignal extends BaseSignal {
   outbound: number;
   score: number;
   source: "risk-model";
-}
-
-export interface SecuritySignal extends BaseSignal {
-  line?: number;
-  message: string;
-  severity: "error" | "warning";
-  source: "analysis";
 }
 
 export type StructuralSignals = {
@@ -238,37 +231,6 @@ export type RiskFindingRef = {
   summary: string;
   title: string;
   whyItMatters: string;
-};
-
-export type GraphEvidence = {
-  dependencyCycles: string[][];
-  dependencyGraph: DependencyGraphEvidence;
-  orphanModules: string[];
-};
-
-export type ModuleEvidence = {
-  fileCategoryBreakdown: FileCategoryBreakdownItem[];
-  frameworkFacts: FrameworkFact[];
-  hotspotSignals: HotspotSignal[];
-  modules: ModuleRef[];
-  publicSurface: SymbolRef[];
-  symbols: SymbolRef[];
-};
-
-export type SecurityEvidence = {
-  configs: ConfigRef[];
-};
-
-export type RouteEvidence = {
-  routeInventory: RouteInventory;
-  routes: RouteRef[];
-};
-
-export type RepositoryEvidenceComposite = {
-  graph: GraphEvidence;
-  modules: ModuleEvidence;
-  routes: RouteEvidence;
-  security: SecurityEvidence;
 };
 
 export type RepositoryEvidence = {

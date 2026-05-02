@@ -241,7 +241,7 @@ let globalSafetyContext: null | SafetyContext = null;
 /**
  * Get or create global safety context
  */
-function getGlobalSafetyContext(level: SafetyLevel = "strict"): SafetyContext {
+export function getGlobalSafetyContext(level: SafetyLevel = "strict"): SafetyContext {
   if (!globalSafetyContext) {
     globalSafetyContext = new SafetyContext(level);
   }
@@ -251,6 +251,6 @@ function getGlobalSafetyContext(level: SafetyLevel = "strict"): SafetyContext {
 /**
  * Reset global safety context (for testing)
  */
-function resetGlobalSafetyContext(): void {
+export function resetGlobalSafetyContext(): void {
   globalSafetyContext = null;
 }

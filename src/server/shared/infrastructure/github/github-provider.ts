@@ -229,7 +229,11 @@ export function parseUrl(input: string): { name: string; owner: string } {
  * Retrieves GitHub token for user and optional owner
  * Returns null if token unavailable (logs error)
  */
-async function getToken(prisma: DbClient, userId: number, owner?: string): Promise<null | string> {
+export async function getToken(
+  prisma: DbClient,
+  userId: number,
+  owner?: string
+): Promise<null | string> {
   try {
     const context = await getClientContext(prisma, userId, owner);
     const auth =

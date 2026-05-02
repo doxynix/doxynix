@@ -11,7 +11,7 @@ import { Link } from "@/i18n/routing";
 
 import { Button } from "../core/button";
 
-export interface ShimmerButtonProps extends ComponentPropsWithoutRef<typeof Link> {
+interface ShimmerButtonProps extends ComponentPropsWithoutRef<typeof Link> {
   background?: string;
   borderRadius?: string;
   children?: ReactNode;
@@ -61,7 +61,7 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-(--radius)">
             <div className="@container-[size] absolute inset-0 overflow-visible blur-[2px]">
               <div className="animate-shimmer-slide absolute inset-0 aspect-[1] h-[100cqh] rounded-none [mask:none]">
-                <div className="animate-spin-around absolute -inset-[220%] block aspect-square [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]" />
+                <div className="animate-spin-around absolute inset-[-220%] block aspect-square [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]" />
               </div>
             </div>
           </div>
