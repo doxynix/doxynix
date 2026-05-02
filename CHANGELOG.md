@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.30.0](https://github.com/doxynix/doxynix/compare/v1.29.6...v1.30.0) (2026-05-02)
+
+
+### Features
+
+* **security:** значительные улучшения безопасности и конфиденциальности ([#1324](https://github.com/doxynix/doxynix/issues/1324)) ([1bfd55e](https://github.com/doxynix/doxynix/commit/1bfd55e89c49f4f982e0c302f8874c11c6acf88c))
+
 ## [1.29.6](https://github.com/doxynix/doxynix/compare/v1.29.5...v1.29.6) (2026-05-02)
 
 
