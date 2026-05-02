@@ -39,7 +39,7 @@ export type DependencyTracking = {
   unresolvedSamples: Array<{ fromPath: string; specifier: string }>;
 };
 
-export type EvidenceAssembly = {
+type EvidenceAssembly = {
   apiSurfaceByFile: Map<string, number>;
   configs: ConfigRef[];
   dependencyTracking: DependencyTracking;
@@ -128,7 +128,7 @@ export function buildEvidenceLookups(
   };
 }
 
-export function createDependencyTracking(): DependencyTracking {
+function createDependencyTracking(): DependencyTracking {
   return {
     edges: [],
     graph: new Map<string, Set<string>>(),

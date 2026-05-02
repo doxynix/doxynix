@@ -1,8 +1,9 @@
 "use client";
 
-import { type DocContent } from "@/shared/api/trpc";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { Skeleton } from "@/shared/ui/core/skeleton";
+
+import type { DocContent } from "@/entities/repo/model/repo.types";
 
 type Props = {
   data?: DocContent;

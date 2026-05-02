@@ -4,10 +4,11 @@ import { useEffect, useRef } from "react";
 import { FileText } from "lucide-react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 
-import { trpc, type AvailableDocs, type DocType } from "@/shared/api/trpc";
+import { trpc } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
+import type { AvailableDocs, DocType } from "@/entities/repo/model/repo.types";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
 

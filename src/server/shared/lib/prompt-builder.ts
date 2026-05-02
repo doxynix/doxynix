@@ -5,7 +5,7 @@
 
 import { escapePromptXmlAttr, escapePromptXmlText } from "./string-utils";
 
-export type PromptRole =
+type PromptRole =
   | "api-documentarian"
   | "architect"
   | "architecture-writer"
@@ -18,16 +18,11 @@ export type PromptRole =
   | "readme-writer"
   | "security-sentinel";
 
-export type PromptSection = {
-  content: string;
-  title: string;
-};
-
 /**
  * FluentPromptBuilder for consistent prompt construction
  * Supports method chaining for readability
  */
-export class PromptBuilder {
+class PromptBuilder {
   private sections: Map<string, string> = new Map();
   private role: PromptRole = "generic";
   private language: string = "English";

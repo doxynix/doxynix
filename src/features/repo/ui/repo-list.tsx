@@ -3,10 +3,10 @@
 import { SearchX } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { RepoMeta, UiRepoListItem } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
+import type { RepoMeta, UiRepoListItem } from "@/entities/repo/model/repo.types";
 import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
 import { RepoCard } from "@/entities/repo/ui/repo-card";
 

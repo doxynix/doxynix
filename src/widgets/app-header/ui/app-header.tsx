@@ -13,8 +13,8 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ThemeToggle } from "@/shared/ui/kit/theme-toggle";
 import { Link } from "@/i18n/routing";
 
-import { RepoDetailsTabs } from "@/entities/repo-details/ui/repo-details-tabs";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
+import { RepoDetailsTabs } from "@/entities/repo/ui/repo-details-tabs";
 
 import { AppCommandMenu } from "./app-command-menu";
 import { NotificationsNav } from "./notifications-nav";
@@ -79,7 +79,7 @@ export function AppHeader() {
             </span>
           </AppTooltip>
           <AppCommandMenu />
-          <ThemeToggle className="text-muted-foreground" />
+          <ThemeToggle />
           <AppTooltip content="Repositories">
             <Button asChild size="icon" variant="ghost">
               <Link href="/dashboard/repos" aria-label="Repositories">

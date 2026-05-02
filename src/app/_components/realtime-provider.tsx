@@ -6,10 +6,11 @@ import { AblyProvider } from "ably/react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
-import { trpc, type RepoStatus } from "@/shared/api/trpc";
+import { trpc } from "@/shared/api/trpc";
 import { IS_PROD } from "@/shared/constants/env.flags";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
+import type { RepoStatus } from "@/entities/repo/model/repo.types";
 import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
 
 import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";

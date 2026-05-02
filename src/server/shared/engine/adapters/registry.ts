@@ -14,7 +14,3 @@ export function getLanguageAdapters(file: RepositoryFile) {
     return adapter.detect?.(file) ?? true;
   });
 }
-
-export function getLanguageAdapterRegistry() {
-  return [...REGISTRY];
-}

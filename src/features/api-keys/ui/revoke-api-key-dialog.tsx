@@ -4,10 +4,11 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { UiApiKey } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
+
+import type { UiApiKey } from "@/entities/api-keys/model/api-keys.types";
 
 import { useApiKeyActions } from "../model/use-api-key-actions";
 

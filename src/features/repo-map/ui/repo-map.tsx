@@ -11,8 +11,6 @@ import {
   type Node,
 } from "@xyflow/react";
 
-import type { RepoMapDisplayData } from "@/shared/api/trpc";
-
 import "@xyflow/react/dist/style.css";
 
 import { FilterIcon, SlashIcon } from "lucide-react";
@@ -23,9 +21,9 @@ import { Button } from "@/shared/ui/core/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 
-import { useMapControlsHide } from "@/entities/repo-map/model/use-repo-map-store";
+import { useMapControlsHide } from "@/features/repo-map/model/use-repo-map.store";
 
-import type { RepoMapNodeData } from "../model/repo-map-types";
+import type { RepoMapDisplayData, RepoMapNodeData } from "../model/repo-map-types";
 import { useMapLayout } from "../model/use-map-layout";
 import { enrichNodesWithParents, extractParentGroups } from "../model/use-parent-groups";
 import { RepoMapCustomControls } from "./repo-map-custom-controls";

@@ -39,7 +39,7 @@ export function getFileName(filePath: string): string {
   return basename(normalized);
 }
 
-export function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): string[] {
+function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): string[] {
   const list = compact(Array.from(paths).map((p) => normalize(normalizeRepoPath(p))));
   const result = uniq(list);
 

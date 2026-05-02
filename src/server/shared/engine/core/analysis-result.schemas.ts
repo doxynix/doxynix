@@ -5,7 +5,7 @@ import { SCHEMA_LIMITS } from "./scoring-constants";
 const RiskLevel = z.enum(["LOW", "MODERATE", "HIGH", "CRITICAL"]);
 const FactConfidence = z.enum(["high", "medium", "low"]);
 
-export const evidenceRefSchema = z
+const evidenceRefSchema = z
   .object({
     line: z.number().int().positive().optional(),
     note: z.string().optional(),
@@ -13,7 +13,7 @@ export const evidenceRefSchema = z
   })
   .loose();
 
-export const repositoryFactSchema = z.object({
+const repositoryFactSchema = z.object({
   category: z.enum([
     "api",
     "architecture",
@@ -30,7 +30,7 @@ export const repositoryFactSchema = z.object({
   title: z.string(),
 });
 
-export const repositoryFindingSchema = z
+const repositoryFindingSchema = z
   .object({
     category: z.enum([
       "architecture",

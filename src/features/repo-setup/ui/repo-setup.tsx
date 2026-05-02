@@ -1,8 +1,7 @@
 "use client";
 
-import type { UiRepoDetailed } from "@/shared/api/trpc";
-
-import { useRepoSetup } from "@/entities/repo-setup/model/use-repo-setup";
+import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
 
 import { RepoAnalysisConfig } from "./repo-analysis-config";
 import { RepoFileTree } from "./repo-file-tree";

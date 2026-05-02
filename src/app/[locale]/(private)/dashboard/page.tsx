@@ -2,11 +2,12 @@ import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
 
-import { AnalyticsWidgets } from "@/features/dashboard/ui/analytics-widgets";
-import { StatCardContainer } from "@/features/dashboard/ui/stat-card-container";
-import { TrendsWidget } from "@/features/dashboard/ui/trends-widget";
 import { CreateRepoButton } from "@/features/repo/ui/create-repo-button";
 import { RepoListContainer } from "@/features/repo/ui/repo-list-container";
+
+import { AnalyticsWidgets } from "@/widgets/dashboard/ui/analytics-widgets";
+import { StatCardContainer } from "@/widgets/dashboard/ui/stat-card-container";
+import { TrendsWidget } from "@/widgets/dashboard/ui/trends-widget";
 
 export const generateMetadata = createMetadata("dashboard_title", "dashboard_desc");
 

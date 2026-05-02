@@ -11,7 +11,7 @@ import { logger } from "../shared/infrastructure/logger";
 import { buildRequestStore, requestContext, resolveRequestId } from "../shared/lib/request-context";
 import type { Context } from "./context";
 
-export const t = initTRPC
+const t = initTRPC
   .context<Context>()
   .meta<OpenApiMeta>()
   .create({

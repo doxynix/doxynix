@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
-import type { SearchParams } from "@/entities/repo-setup/model/repo-setup.types";
+import type { SearchParams } from "@/entities/repo/model/repo-setup.types";
 
 import { CreateRepoButton } from "@/features/repo/ui/create-repo-button";
 import { DeleteByOwnerDialog } from "@/features/repo/ui/delete-by-owner-dialog";

@@ -10,8 +10,9 @@ import {
   Star,
 } from "lucide-react";
 
-import type { UiRepoListItem } from "@/shared/api/trpc";
 import { formatRelativeTime } from "@/shared/lib/date-utils";
+
+import type { UiRepoListItem } from "./repo.types";
 
 type Props = {
   className?: string;

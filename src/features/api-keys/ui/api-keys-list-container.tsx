@@ -2,13 +2,14 @@
 
 import { trpc } from "@/shared/api/trpc";
 
-import { ApiKeyCardSkeleton } from "./api-key-card-skeleton";
+import { ApiKeyCardSkeleton } from "@/entities/api-keys/ui/api-key-card-skeleton";
+
 import { ApiKeysList } from "./api-keys-list";
 
 export function ApiKeysListContainer() {
   const { data, isLoading } = trpc.apikey.list.useQuery();
 
-  if (isLoading || !data) {
+  if (isLoading || data == null) {
     return (
       <div className="grid grid-cols-2 gap-2">
         {Array.from({ length: 4 }).map((_, i) => (

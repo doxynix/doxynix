@@ -118,7 +118,7 @@ export function aggregateEntryForPaths(paths: string[], context: StructureContex
 
   return entry;
 }
-export function collectInterestingPaths(
+function collectInterestingPaths(
   aiResult: AIResult,
   metrics: RepoMetrics,
   meaningfulEntrypoints: string[]
@@ -146,7 +146,7 @@ export function collectInterestingPaths(
       .map((path) => normalizeRepoPath(path))
   );
 }
-export function collectStructureSignalMap(params: {
+function collectStructureSignalMap(params: {
   aiResult: AIResult;
   meaningfulEntrypoints: string[];
   metrics: RepoMetrics;
@@ -196,7 +196,7 @@ export function collectStructureSignalMap(params: {
 
   return map;
 }
-export function buildGraphRelatedPathSet(metrics: RepoMetrics) {
+function buildGraphRelatedPathSet(metrics: RepoMetrics) {
   return new Set(
     (metrics.graphPreviewEdges ?? []).flatMap((edge) => [
       normalizeRepoPath(edge.fromPath),
@@ -300,7 +300,7 @@ export function buildStructureContext(
   };
 }
 
-export function buildApiPathSet(metrics: RepoMetrics) {
+function buildApiPathSet(metrics: RepoMetrics) {
   return new Set(
     unique([
       ...(metrics.routeInventory?.sourceFiles ?? []),

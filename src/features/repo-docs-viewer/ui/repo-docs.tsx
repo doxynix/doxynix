@@ -4,7 +4,7 @@ import { useState, type ComponentType } from "react";
 import saveAs from "file-saver";
 import { BookOpen, Download, FileText, HistoryIcon, Layers, Terminal, Users2 } from "lucide-react";
 
-import { trpc, type AvailableDocs, type DocType, type RepoNodeContext } from "@/shared/api/trpc";
+import { trpc } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
@@ -12,6 +12,8 @@ import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Tabs, TabsContent } from "@/shared/ui/core/tabs";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
+
+import type { AvailableDocs, DocType, RepoNodeContext } from "@/entities/repo/model/repo.types";
 
 import { RepoDocsContent } from "./repo-docs-content";
 import { RepoDocsTabs } from "./repo-docs-tabs";
