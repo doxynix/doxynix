@@ -2,15 +2,18 @@
 
 import { BellOff, SearchX } from "lucide-react";
 
-import { type NotificationMeta, type UiNotification } from "@/shared/api/trpc";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import { NotificationCard } from "./notification-card";
+import type {
+  NotificationMeta,
+  UiNotification,
+} from "@/entities/notifications/model/notifications.types";
+import { NotificationCard } from "@/entities/notifications/ui/notification-card";
 
 type Props = { meta?: NotificationMeta; notifications: UiNotification[] };
 
 export function NotificationsList({ meta, notifications }: Readonly<Props>) {
-  if (!meta || meta.totalCount === 0) {
+  if (meta == null || meta.totalCount === 0) {
     return <EmptyState description={undefined} icon={BellOff} title="No notifications found" />;
   }
 

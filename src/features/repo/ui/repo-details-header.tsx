@@ -1,6 +1,5 @@
 "use client";
 
-import type { UiRepoDetailed } from "@/shared/api/trpc";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
@@ -10,6 +9,7 @@ import { Link } from "@/i18n/routing";
 
 import { repoStatusConfig } from "@/entities/repo/model/repo-status-config";
 import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";
+import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
 
 import { PrDraftSheet } from "./pr-draft-sheet";
 

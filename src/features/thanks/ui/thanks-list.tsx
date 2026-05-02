@@ -4,8 +4,9 @@ import { parseAsString, useQueryState } from "nuqs";
 
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
+import { ThanksCard } from "@/entities/thanks/ui/thanks-card";
+
 import { type AuthorGroup } from "../model/thanks.types";
-import { ThanksCard } from "./thanks-card";
 
 type Props = {
   initialGroups: AuthorGroup[];

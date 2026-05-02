@@ -20,7 +20,7 @@ type AnalyzeEntityContext = {
   structureContext: null | StructureContext;
 };
 
-export class AnalyzeContextBuilder {
+class AnalyzeContextBuilder {
   private readonly analysisRef: AnalysisRef | null;
   private readonly explainByNodeId = new Map<string, NodeExplainPayload | null>();
   private readonly nodeById = new Map<string, null | StructureNodePayload>();

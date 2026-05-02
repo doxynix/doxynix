@@ -10,12 +10,12 @@ import { escapePromptXmlAttr, escapePromptXmlText } from "./string-utils";
 /**
  * Safety level for handling user input
  */
-export type SafetyLevel = "moderate" | "permissive" | "strict";
+type SafetyLevel = "moderate" | "permissive" | "strict";
 
 /**
  * Data handling strategy
  */
-export type DataHandlingStrategy = "escape-json" | "escape-xml" | "no-escape" | "sanitize-html";
+type DataHandlingStrategy = "escape-json" | "escape-xml" | "no-escape" | "sanitize-html";
 
 /**
  * SafetyContext manages all data safety and escaping across LLM prompts

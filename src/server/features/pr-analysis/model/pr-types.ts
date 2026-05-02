@@ -33,12 +33,6 @@ export type PRAnalysisConfig = {
   tokenBudget: number;
 };
 
-export type PRCommentBody = {
-  body: string;
-  suggestions: string[];
-  title: string;
-};
-
 // ============================================================================
 // FIX GENERATION (STATELESS)
 // ============================================================================
@@ -62,27 +56,4 @@ export type GeneratedDiff = {
   deletions: number;
   filePath: string;
   patch: string; // Unified diff format
-};
-
-/**
- * Frontend sends this back to applyFix. No DB storage of diffs.
- */
-export type FixApplicationPayload = {
-  branch: string;
-  diffs: GeneratedDiff[]; // In-memory, not DB-persisted
-  estimatedImpact: number;
-  fixId: number;
-  repoId: number;
-  title: string;
-};
-
-/**
- * Return value from fix generation. Frontend uses this to show preview.
- */
-export type FixGenerationResult = {
-  branch: string;
-  diffs: GeneratedDiff[]; // In-memory diffs for UI preview
-  estimatedImpact: number;
-  fixId: number; // DRAFT fix record ID (minimal metadata only)
-  title: string;
 };

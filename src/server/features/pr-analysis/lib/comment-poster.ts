@@ -5,16 +5,6 @@ import { logger } from "@/server/shared/infrastructure/logger";
 
 import type { PRFinding } from "../model/pr-types";
 
-export type GitHubCommentInput = {
-  commitId: string;
-  filePath: string;
-  finding: PRFinding;
-  line: number;
-  owner: string;
-  prNumber: number;
-  repo: string;
-};
-
 /**
  * Formats PR findings into GitHub comment bodies
  */

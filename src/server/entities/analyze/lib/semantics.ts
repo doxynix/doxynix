@@ -115,7 +115,7 @@ export function buildGroupKeySet(paths: string[], _apiPaths: Set<string>) {
   return unique(paths.map((path) => ProjectPolicy.deriveGroupId(path)));
 }
 
-export function getPrimaryKindForEntry(entry: StructureGroupEntry) {
+function getPrimaryKindForEntry(entry: StructureGroupEntry) {
   return ProjectPolicy.getPrimarySemanticKind(entry.semanticCounts);
 }
 
@@ -164,7 +164,7 @@ export function summarizeGroupImportance(params: {
   return `${describeGroup(params.groupId, params.primaryKind)} This area ${reasons.join(", ")}.`;
 }
 
-export function getStructureSeedScore(params: {
+function getStructureSeedScore(params: {
   apiPaths: Set<string>;
   graphRelatedPaths: Set<string>;
   metrics: RepoMetrics;

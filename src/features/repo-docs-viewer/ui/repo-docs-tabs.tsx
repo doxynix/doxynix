@@ -3,9 +3,10 @@
 import type { ComponentType } from "react";
 import { ChevronRight } from "lucide-react";
 
-import { type AvailableDocs, type DocType } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
+
+import type { AvailableDocs, DocType } from "@/entities/repo/model/repo.types";
 
 type TabItem = {
   icon: ComponentType<{ className?: string }>;

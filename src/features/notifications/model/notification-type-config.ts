@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 import { AlertTriangle, CheckCircle2, Info, XCircle } from "lucide-react";
 
-import type { NotificationType } from "@/shared/api/trpc";
+import type { NotificationType } from "@/entities/notifications/model/notifications.types";
 
 export const notificationTypeConfig: Record<
   NotificationType,

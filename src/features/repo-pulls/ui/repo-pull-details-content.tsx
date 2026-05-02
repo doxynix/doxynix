@@ -13,7 +13,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import { trpc, type PRImpact, type PRNumber } from "@/shared/api/trpc";
+import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { formatRelativeTime } from "@/shared/lib/date-utils";
 import { Badge } from "@/shared/ui/core/badge";
@@ -23,11 +23,12 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { Link } from "@/i18n/routing";
 
+import type { PRImpact, PRNumber } from "@/entities/pr/model/pr.types";
 import {
   buildRepoCodeHref,
   buildRepoDocsHref,
   buildRepoMapHref,
-} from "@/entities/repo-details/model/repo-workspace-navigation";
+} from "@/entities/repo/model/repo-workspace-navigation";
 
 import { usePrStage } from "../model/use-pr-stage";
 

@@ -105,7 +105,7 @@ export const BehavioralRules = {
 // VERIFICATION RULES
 // =============================================================================
 
-export const VerificationRules = {
+const VerificationRules = {
   /** Rule: Categorical clarity */
   categoricalClarity: `If evidence is weak, state so directly instead of smoothing it over with abstract language.`,
 
@@ -158,7 +158,7 @@ export function buildSafetyConstraints(): string {
 /**
  * Build format section
  */
-export function buildFormatSection(format: "json" | "markdown" | "xml"): string {
+function buildFormatSection(format: "json" | "markdown" | "xml"): string {
   const rule =
     format === "json"
       ? OutputFormatRules.jsonOnly

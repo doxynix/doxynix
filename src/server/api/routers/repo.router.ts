@@ -9,7 +9,7 @@ import { RepoSchema, StatusSchema } from "@/generated/zod";
 import { OpenApiErrorResponses, RepoFilterSchema } from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
-export const PublicRepoSchema = RepoSchema.extend({
+const PublicRepoSchema = RepoSchema.extend({
   id: z.string(),
 });
 

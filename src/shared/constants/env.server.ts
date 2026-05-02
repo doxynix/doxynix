@@ -11,7 +11,7 @@ import {
   stringSchema,
 } from "./env.shared";
 
-export const envServer = createEnv({
+const envServer = createEnv({
   emptyStringAsUndefined: true,
 
   runtimeEnv: {

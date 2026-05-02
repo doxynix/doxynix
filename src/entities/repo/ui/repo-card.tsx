@@ -3,10 +3,8 @@
 import { Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import type { UiRepoListItem } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
-import { getHealthColor } from "@/shared/lib/health-score";
 import { AnimatedCircularProgressBar } from "@/shared/ui/core/animated-circular-progress-bar";
 import { Badge } from "@/shared/ui/core/badge";
 import { Card, CardContent } from "@/shared/ui/core/card";
@@ -16,10 +14,12 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { Link } from "@/i18n/routing";
 
+import { getHealthColor } from "../model/get-health-color";
 import { getGitMetrics } from "../model/git-metrics";
 import { getMetrics } from "../model/metrics";
 import { repoStatusConfig } from "../model/repo-status-config";
 import { repoVisibilityConfig } from "../model/repo-visibility";
+import type { UiRepoListItem } from "../model/repo.types";
 import { RepoAnalyzeButton } from "./repo-analyze-button";
 import { RepoGitMetric } from "./repo-git-metric";
 import { RepoTopics } from "./repo-topics";

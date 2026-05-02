@@ -1,0 +1,58 @@
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
+
+import { formatRelativeTime } from "@/shared/lib/date-utils";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Input } from "@/shared/ui/core/input";
+
+import { RevokeApiKeyDialog } from "@/features/api-keys/ui/revoke-api-key-dialog";
+import { UpdateApiKeyDialog } from "@/features/api-keys/ui/update-api-key-dialog";
+
+import type { UiApiKey } from "../model/api-keys.types";
+
+export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
+  const tCommon = useTranslations("Common");
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
+
+  const maskValue =
+    active.prefix === ""
+      ? "dxnx_••••••••••••••••••••••••••••••••••••••••••••••••••••"
+      : `${active.prefix}••••••••••••••••••••••••••••••••••••••••••••••••••••`;
+
+  return (
+    <Card className="group hover:border-border-strong justify-between">
+      <CardHeader className="flex flex-row items-start justify-between pb-2">
+        <div className="space-y-1 overflow-hidden">
+          <CardTitle className="truncate text-base font-semibold">{active.name}</CardTitle>
+          <CardDescription className="flex flex-col gap-2 text-xs">
+            <p>
+              {tCommon("created")}: {formatRelativeTime(active.createdAt, locale)}
+            </p>
+            <p>
+              {t("settings_api_keys_last_used")}: {formatRelativeTime(active.lastUsed, locale)}
+            </p>
+            {active.description != null && (
+              <p className="text-muted-foreground line-clamp-4 leading-relaxed">
+                {active.description}
+              </p>
+            )}
+          </CardDescription>
+        </div>
+        <div className="flex shrink-0 flex-col items-center gap-1">
+          <UpdateApiKeyDialog apiKey={active} />
+          <RevokeApiKeyDialog apiKey={active} />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Input
+          value={maskValue}
+          readOnly
+          aria-label="Key prefix"
+          className="bg-surface-hover text-muted-foreground border-border/80 truncate rounded-xl border p-2 font-mono text-xs"
+        />
+      </CardContent>
+    </Card>
+  );
+}

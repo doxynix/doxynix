@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 
 import { cn } from "@/shared/lib/cn";
 
-export type AnimatedBeamProps = {
+type AnimatedBeamProps = {
   className?: string;
   containerRef: RefObject<HTMLElement | null>; // Container ref
   curvature?: number;

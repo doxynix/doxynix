@@ -8,11 +8,11 @@ import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
-import { useMapCommands } from "@/entities/repo-map/model/use-map-commands";
+import { useMapCommands } from "@/features/repo-map/model/use-map-commands";
 import {
   useMapControlsActions,
   useMapControlsHide,
-} from "@/entities/repo-map/model/use-repo-map-store";
+} from "@/features/repo-map/model/use-repo-map.store";
 
 type ControlItem = {
   action: () => void;

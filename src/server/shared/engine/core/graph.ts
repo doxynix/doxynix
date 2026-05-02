@@ -8,7 +8,7 @@ import { getKnownLanguageExtensions } from "../../lib/language-metadata";
 import { normalizeRepoPath } from "./common";
 import { SCHEMA_LIMITS } from "./scoring-constants";
 
-export type AliasRule = {
+type AliasRule = {
   prefix: string;
   targets: string[];
 };

@@ -2,11 +2,12 @@
 
 import { useTranslations } from "next-intl";
 
-import type { UiApiKey } from "@/shared/api/trpc";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
+import type { UiApiKey } from "@/entities/api-keys/model/api-keys.types";
+import { ApiKeyCard } from "@/entities/api-keys/ui/api-key-card";
+
 import { ApiKeyArchivedTable } from "./api-key-archived-table";
-import { ApiKeyCard } from "./api-key-card";
 
 type Props = {
   active: UiApiKey[];

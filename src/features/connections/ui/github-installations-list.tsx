@@ -5,7 +5,7 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
-import { ConnectionCard } from "./connection-card";
+import { ConnectionCard } from "@/entities/connection/ui/connection-card";
 
 type GitHubInstallation = {
   avatar: null | string;
