@@ -168,7 +168,7 @@
     "@shikijs/rehype": "4.0.2",
     "@t3-oss/env-nextjs": "0.13.11",
     "@tanstack/react-query": "5.100.6",
-    "@to-skills/typedoc": "0.17.3",
+    "@to-skills/typedoc": "1.0.8",
     "@trigger.dev/sdk": "4.4.4",
     "@trpc/client": "11.17.0",
     "@trpc/react-query": "11.17.0",
