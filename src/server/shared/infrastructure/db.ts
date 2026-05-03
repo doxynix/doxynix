@@ -6,10 +6,13 @@ import { fieldEncryptionExtension } from "prisma-field-encryption";
 
 import { IS_DEV, IS_TEST } from "@/shared/constants/env.flags";
 import { DATABASE_URL, PRISMA_FIELD_ENCRYPTION_KEY } from "@/shared/constants/env.server";
+import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
+import { AUDIT_BUSINESS_MODELS } from "../lib/constants";
 import { requestContext } from "../lib/request-context";
 import { sanitizePayload } from "../lib/sanitize-payload";
 import { logger } from "./logger";
+import { realtimeServer } from "./realtime";
 
 const { PrismaClient } = pkg;
 const pool = new pg.Pool({
@@ -74,6 +77,14 @@ export const prisma = encryptedClient.$extends({
                 userAgent: ctxStore?.userAgent ?? "internal",
                 userId: userId == null ? null : Number(userId),
               },
+            })
+            .then(() => {
+              if (userId != null && AUDIT_BUSINESS_MODELS.includes(model)) {
+                const channelName = REALTIME_CONFIG.channels.user(userId);
+                void realtimeServer.channels
+                  .get(channelName)
+                  .publish(REALTIME_CONFIG.events.user.auditUpdated, {});
+              }
             })
             .catch((error) => {
               logger.error({ error, msg: "AUDIT LOG WRITE FAILED" });

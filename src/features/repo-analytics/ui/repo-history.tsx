@@ -2,7 +2,6 @@
 
 import { useLocale } from "next-intl";
 
-import { formatRelativeTime } from "@/shared/lib/date-utils";
 import {
   Table,
   TableBody,
@@ -11,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/ui/core/table";
+import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import type { UiRepoHistory } from "@/entities/repo/model/repo.types";
 
@@ -45,7 +45,7 @@ export function RepoHistory({ history }: Readonly<Props>) {
                 {h.score !== null ? `${h.score}/100` : "—"}
               </TableCell>
               <TableCell className="textsm text-right">
-                {formatRelativeTime(h.createdAt, locale)}
+                <TimeAgo date={h.createdAt} locale={locale} />
               </TableCell>
             </TableRow>
           ))}

@@ -21,7 +21,7 @@ export function RepoGitMetric({ className, color, icon: Icon, label, tooltip }: 
 
   return (
     <AppTooltip content={tooltip}>
-      <div className={cn("flex cursor-help items-center gap-1", className)}>
+      <div className={cn("flex items-center gap-1", className)}>
         {Icon && (
           <Icon
             className={cn("size-3", !(isCssValue ?? false) && color)}

@@ -2,11 +2,10 @@ import { Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
-import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
 import type { RepoItemFields } from "@/shared/types/repo.types";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
-import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
+import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";
 
@@ -48,15 +47,7 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
             {repo.description}
           </span>
         )}
-        <AppTooltip
-          content={t("repo_last_updated", {
-            dateTime: formatFullDate(repo.updatedAt, locale),
-          })}
-        >
-          <span className="text-muted-foreground w-fit text-xs">
-            {formatRelativeTime(repo.updatedAt, locale)}
-          </span>
-        </AppTooltip>
+        <TimeAgo date={repo.updatedAt} locale={locale} tooltipLabel={t("repo_last_updated")} />
       </div>
     </Button>
   );

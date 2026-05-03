@@ -12,6 +12,7 @@ import {
   Search,
   ShieldCheck,
 } from "lucide-react";
+import { useLocale } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
@@ -21,6 +22,7 @@ import { Button } from "@/shared/ui/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
+import { TimeAgo } from "@/shared/ui/kit/time-ago";
 import { Link } from "@/i18n/routing";
 
 import type { PRImpact, PRNumber } from "@/entities/pr/model/pr.types";
@@ -48,6 +50,7 @@ const STATUS_CONFIG = {
 } as const;
 
 export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }: Readonly<Props>) {
+  const locale = useLocale();
   const { data: comments, isLoading: isCommentsLoading } = trpc.prAnalysis.getComments.useQuery(
     { analysisId: analysis?.id ?? "" },
     { enabled: analysis?.id != null }
@@ -67,6 +70,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
     { label: "Changed files", value: impact?.summary.affectedFiles ?? 0 },
     { label: "Affected zones", value: impact?.summary.affectedZones ?? 0 },
     {
+      isTime: true,
       label: "Created",
       value: analysis?.createdAt != null ? String(formatRelativeTime(analysis.createdAt)) : "n/a",
     },
@@ -301,6 +305,8 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     >
                       {STATUS_CONFIG[item.value as keyof typeof STATUS_CONFIG].label}
                     </span>
+                  ) : item.isTime === true ? (
+                    <TimeAgo date={item.value} locale={locale} />
                   ) : (
                     <span className={cn("text-xs font-medium")}>{item.value}</span>
                   )}

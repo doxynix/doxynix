@@ -28,7 +28,7 @@ export default async function LandingPage() {
       <AnalyticsSection />
       <DocModesSection />
       <ConfigSection />
-      {/* ОБЯЗАТЕЛЬНО: Социальное доказательство (когда-нибудь можно marquee пустить в 2 стороны примерно как у BrandsSection только там одно а тут можно и 2 сделать) */}
+      {/* NOTE: Социальное доказательство (когда-нибудь можно marquee пустить в 2 стороны примерно как у BrandsSection только там одно а тут можно и 2 сделать) */}
       {/* <TestimonialsSection /> */}
       <PricingSection />
       <FAQSection />
