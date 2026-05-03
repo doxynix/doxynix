@@ -216,8 +216,8 @@ importers:
         specifier: 5.100.6
         version: 5.100.6(react@19.2.5)
       '@to-skills/typedoc':
-        specifier: 0.17.3
-        version: 0.17.3(typedoc@0.28.19(typescript@6.0.3))
+        specifier: 1.0.8
+        version: 1.0.8(typedoc@0.28.19(typescript@6.0.3))
       '@trigger.dev/sdk':
         specifier: 4.4.4
         version: 4.4.4(ai@6.0.170(zod@4.4.1))(zod@4.4.1)
@@ -5460,11 +5460,11 @@ packages:
     resolution: {integrity: sha512-GgdKez5AaQRIm0kFNp7BZnxFQ2F7LZ7g3rOQ/v11oYZR3jhH7JPGM+7hZQjYqFXD/5TK/of7hepu418K2fghvg==}
     engines: {node: '>=12.4.0'}
 
-  '@to-skills/core@0.16.2':
-    resolution: {integrity: sha512-TYGjQLcNHApe5mAxQeReyvMXmrHHn4DIJWkHCEBEEHkBaESkQ+fPcmk/kwSneCuNyS08A4Tv2zBswyqnfJKJ6g==}
+  '@to-skills/core@1.3.0':
+    resolution: {integrity: sha512-rK0NPuUJAKhja6PZ7o1WRVCeqgJIg9jooiWhWPy6KYVTnMRgDkOvvFFSB5WmprdWqMgewp5I2weSbB9d8A3khg==}
 
-  '@to-skills/typedoc@0.17.3':
-    resolution: {integrity: sha512-D3j8BKkWL6VElTTYzLvvujNALONxUnFXUB7y5v8a4bnRF59s8rbjCxp4Cfa3N58Xraw5JMKw933EIYtclwlYyQ==}
+  '@to-skills/typedoc@1.0.8':
+    resolution: {integrity: sha512-0c3/7Hzse5/1InGXT0DGObsJjs9F+Zj8lWPSI6xI5AAMGlKAkKxbOSK/XM4tsdIIFSt7lTa8UriAnpcxKZZ0GA==}
     peerDependencies:
       typedoc: '>=0.28.0'
 
@@ -19337,11 +19337,11 @@ snapshots:
 
   '@tinyhttp/url@1.3.0': {}
 
-  '@to-skills/core@0.16.2': {}
+  '@to-skills/core@1.3.0': {}
 
-  '@to-skills/typedoc@0.17.3(typedoc@0.28.19(typescript@6.0.3))':
+  '@to-skills/typedoc@1.0.8(typedoc@0.28.19(typescript@6.0.3))':
     dependencies:
-      '@to-skills/core': 0.16.2
+      '@to-skills/core': 1.3.0
       typedoc: 0.28.19(typescript@6.0.3)
 
   '@tootallnate/quickjs-emscripten@0.23.0': {}
