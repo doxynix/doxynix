@@ -1,6 +1,6 @@
 import { Suspense, type ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -39,15 +39,15 @@ function normalizeTheme(theme: string | undefined) {
   return theme === "light" || theme === "dark" || theme === "system" ? theme : "system";
 }
 
-const fontSans = Inter({
+const fontSans = Geist({
   display: "swap",
-  subsets: ["latin", "cyrillic"],
+  subsets: ["latin", "cyrillic", "latin-ext"],
   variable: "--font-sans",
 });
 
-const fontMono = JetBrains_Mono({
+const fontMono = Geist_Mono({
   display: "swap",
-  subsets: ["latin", "cyrillic"],
+  subsets: ["latin", "cyrillic", "latin-ext"],
   variable: "--font-mono",
 });
 

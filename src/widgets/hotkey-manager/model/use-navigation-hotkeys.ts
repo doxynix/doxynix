@@ -10,6 +10,7 @@ const SEQUENTIAL_ROUTES: Record<string, Record<string, string>> = {
     d: "/dashboard/settings/danger-zone",
     h: "/support",
     k: "/dashboard/settings/api-keys",
+    l: "/dashboard/settings/audit-log",
     n: "/dashboard/notifications",
     o: "/dashboard",
     p: "/dashboard/settings/profile",
