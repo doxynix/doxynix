@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "1.30.3",
+  "version": "1.30.4",
   "engines": {
     "node": ">=22.11.0",
     "pnpm": ">=10.0.0"
@@ -82,7 +82,7 @@
       "serialize-javascript": "7.0.5",
       "@react-email/body": "0.3.0",
       "flatted": "3.4.2",
-      "dompurify": "3.4.1",
+      "dompurify": "3.4.2",
       "effect": "3.21.2",
       "handlebars": "4.7.9",
       "defu": "6.1.7",
@@ -239,7 +239,7 @@
     "pino": "10.3.1",
     "posthog-js": "1.372.5",
     "prisma-field-encryption": "1.6.0",
-    "posthog-node": "5.31.0",
+    "posthog-node": "5.32.0",
     "react": "19.2.5",
     "react-arborist": "3.5.0",
     "react-codemirror-merge": "4.25.9",
@@ -286,7 +286,7 @@
     "zustand": "5.0.12"
   },
   "devDependencies": {
-    "@axe-core/react": "4.11.2",
+    "@axe-core/react": "4.11.3",
     "@boneskull/typedoc-plugin-mermaid": "0.2.1",
     "@bundle-stats/plugin-webpack-filter": "4.22.1",
     "@changesets/cli": "2.31.0",

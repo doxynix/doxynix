@@ -20,7 +20,7 @@ overrides:
   serialize-javascript: 7.0.5
   '@react-email/body': 0.3.0
   flatted: 3.4.2
-  dompurify: 3.4.1
+  dompurify: 3.4.2
   effect: 3.21.2
   handlebars: 4.7.9
   defu: 6.1.7
@@ -426,8 +426,8 @@ importers:
         specifier: 1.372.5
         version: 1.372.5
       posthog-node:
-        specifier: 5.31.0
-        version: 5.31.0(rxjs@7.8.2)
+        specifier: 5.32.0
+        version: 5.32.0(rxjs@7.8.2)
       prisma-field-encryption:
         specifier: 1.6.0
         version: 1.6.0(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))
@@ -565,8 +565,8 @@ importers:
         version: 5.0.12(@types/react@19.2.14)(immer@10.2.0)(react@19.2.5)(use-sync-external-store@1.6.0(react@19.2.5))
     devDependencies:
       '@axe-core/react':
-        specifier: 4.11.2
-        version: 4.11.2
+        specifier: 4.11.3
+        version: 4.11.3
       '@boneskull/typedoc-plugin-mermaid':
         specifier: 0.2.1
         version: 0.2.1(mermaid@11.14.0)(typedoc@0.28.19(typescript@6.0.3))
@@ -987,8 +987,8 @@ packages:
     peerDependencies:
       '@types/json-schema': ^7.0.15
 
-  '@axe-core/react@4.11.2':
-    resolution: {integrity: sha512-+bQ5yO9FAU4hfZRJXi81Eiv5bd53BrsjAEFoE6QlMkqKOoIq4wC15a9d8kRHs4i5dgLqD8S9NW5qWkiFVsV3/g==}
+  '@axe-core/react@4.11.3':
+    resolution: {integrity: sha512-G7TrxptKNFfrQZ+Iygb8nGx5w8Su0jIjwmtVN/9Jc4G6RumCh1rD3pZRT2NzZKjT70q4BReuWVwEazS3HxFfjg==}
 
   '@azu/format-text@1.0.2':
     resolution: {integrity: sha512-Swi4N7Edy1Eqq82GxgEECXSSLyn6GOb5htRFPzBDdUkECGXtlf12ynO5oJSpWKPwCaUssOu7NfhDcCWpIC6Ywg==}
@@ -7944,8 +7944,8 @@ packages:
     resolution: {integrity: sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==}
     engines: {node: '>= 4'}
 
-  dompurify@3.4.1:
-    resolution: {integrity: sha512-JahakDAIg1gyOm7dlgWSDjV4n7Ip2PKR55NIT6jrMfIgLFgWo81vdr1/QGqWtFNRqXP9UV71oVePtjqS2ebnPw==}
+  dompurify@3.4.2:
+    resolution: {integrity: sha512-lHeS9SA/IKeIFFyYciHBr2n0v1VMPlSj843HdLOwjb2OxNwdq9Xykxqhk+FE42MzAdHvInbAolSE4mhahPpjXA==}
 
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
@@ -11435,8 +11435,8 @@ packages:
   posthog-js@1.372.5:
     resolution: {integrity: sha512-0Wq4yRTX8rg2/SOTo3T/0tt2EIE0usBDJKxWPY6eRTGxWAajNmPWZwK4vREn2ANZGdPhUHQ+hg4kLEUdQnzs/Q==}
 
-  posthog-node@5.31.0:
-    resolution: {integrity: sha512-vRhLERIOG6gIrfz5zfSUTiIrf4G8yWZPuEUP8TyvIusedMwxUXitCU9HN3uZfzkkOgvgC5MUAr/eN3reO9WQMA==}
+  posthog-node@5.32.0:
+    resolution: {integrity: sha512-kEsQFrpQrrrXQlVzXF5yTyHfnKAP/37W6ta9cFHh8ISlKtyYEKuLGTc5ssfpn4RrRS6r0xsJSK94ScFTQTSEOg==}
     engines: {node: ^20.20.0 || >=22.22.0}
     peerDependencies:
       rxjs: ^7.0.0
@@ -14114,7 +14114,7 @@ snapshots:
       '@types/json-schema': 7.0.15
       js-yaml: 4.1.1
 
-  '@axe-core/react@4.11.2':
+  '@axe-core/react@4.11.3':
     dependencies:
       axe-core: 4.11.4
       requestidlecallback: 0.3.0
@@ -20546,7 +20546,7 @@ snapshots:
       class-variance-authority: 0.7.1
       clsx: 2.1.1
       color-string: 2.1.4
-      dompurify: 3.4.1
+      dompurify: 3.4.2
       highlight.js: 10.7.3
       html-to-image: 1.11.13
       immer: 10.2.0
@@ -22104,7 +22104,7 @@ snapshots:
     dependencies:
       domelementtype: 2.3.0
 
-  dompurify@3.4.1:
+  dompurify@3.4.2:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
@@ -25038,7 +25038,7 @@ snapshots:
       d3-sankey: 0.12.3
       dagre-d3-es: 7.0.14
       dayjs: 1.11.20
-      dompurify: 3.4.1
+      dompurify: 3.4.2
       katex: 0.16.45
       khroma: 2.1.0
       lodash-es: 4.18.1
@@ -25329,7 +25329,7 @@ snapshots:
 
   monaco-editor@0.55.1:
     dependencies:
-      dompurify: 3.4.1
+      dompurify: 3.4.2
       marked: 14.0.0
 
   monaco-languageserver-types@0.4.0:
@@ -26261,13 +26261,13 @@ snapshots:
       '@posthog/core': 1.27.9
       '@posthog/types': 1.372.5
       core-js: 3.49.0
-      dompurify: 3.4.1
+      dompurify: 3.4.2
       fflate: 0.4.8
       preact: 10.29.1
       query-selector-shadow-dom: 1.0.1
       web-vitals: 5.2.0
 
-  posthog-node@5.31.0(rxjs@7.8.2):
+  posthog-node@5.32.0(rxjs@7.8.2):
     dependencies:
       '@posthog/core': 1.27.9
     optionalDependencies:
