@@ -4,7 +4,7 @@ import { Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
-import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
+import { formatFullDate } from "@/shared/lib/date-utils";
 import { AnimatedCircularProgressBar } from "@/shared/ui/core/animated-circular-progress-bar";
 import { Badge } from "@/shared/ui/core/badge";
 import { Card, CardContent } from "@/shared/ui/core/card";
@@ -12,6 +12,7 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
+import { TimeAgo } from "@/shared/ui/kit/time-ago";
 import { Link } from "@/i18n/routing";
 
 import { getHealthColor } from "../model/get-health-color";
@@ -146,9 +147,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
                   dateTime: formatFullDate(repo.lastAnalysisDate, locale),
                 })}
               >
-                <span className="text-muted-foreground hover:text-foreground cursor-help transition-colors">
-                  {formatRelativeTime(repo.lastAnalysisDate, locale)}
-                </span>
+                <TimeAgo date={repo.lastAnalysisDate} locale={locale} />
               </AppTooltip>
             )}
             {!hasAnalysis && <RepoAnalyzeButton name={repo.name} owner={repo.owner} />}

@@ -10,6 +10,7 @@ export const REALTIME_CONFIG = {
     },
     user: {
       analysisProgress: "analysis-progress",
+      auditUpdated: "audit-updated",
       fileActionCompleted: "fileActionCompleted",
       notification: "notification",
     },

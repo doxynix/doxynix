@@ -5,7 +5,6 @@ import { ChevronDown, HistoryIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
-import { formatRelativeTime } from "@/shared/lib/date-utils";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";
@@ -17,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/ui/core/table";
+import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import type { UiApiKey } from "@/entities/api-keys/model/api-keys.types";
 
@@ -69,10 +69,10 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
                     {key.prefix.length > 0 ? `${key.prefix}...` : "..."}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    {formatRelativeTime(key.createdAt, locale)}
+                    <TimeAgo date={key.createdAt} locale={locale} />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    {formatRelativeTime(key.lastUsed, locale)}
+                    <TimeAgo date={key.lastUsed ?? ""} locale={locale} />
                   </TableCell>
                 </TableRow>
               ))}

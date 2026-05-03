@@ -111,6 +111,10 @@ export const RealtimeProvider = ({ children }: Props) => {
           toast.success(`AI завершил ${payload.type === "AUDIT" ? "audit" : "document"} file!`);
         }
       }
+
+      if (msg.name === REALTIME_CONFIG.events.user.auditUpdated) {
+        void utils.audit.getActivityLogs.invalidate();
+      }
     };
 
     void systemChannel.subscribe(handleSystemMsg);
@@ -131,6 +135,7 @@ export const RealtimeProvider = ({ children }: Props) => {
     utils.analytics.getDashboardStats,
     utils.repoAnalysis.getFileActionResult,
     utils.generatedFix.getById,
+    utils.audit.getActivityLogs,
   ]);
 
   if (!client) return <>{children}</>;

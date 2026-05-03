@@ -14,6 +14,7 @@ import {
   KeyRound,
   LayoutGrid,
   Link,
+  Logs,
   Map,
   ScanSearch,
   Settings,
@@ -84,6 +85,14 @@ const SETTINGS_PAGES: MenuItems = [
     label: "API Keys",
     shortcut: "G then K",
     url: "/k",
+  },
+  {
+    href: "/dashboard/settings/audit-log",
+    icon: Logs,
+    id: "audit log",
+    label: "Audit log",
+    shortcut: "G then L",
+    url: "/l",
   },
   {
     href: "/dashboard/settings/danger-zone",

@@ -2,11 +2,17 @@
 
 import { useEffect, useState } from "react";
 
-import { formatRelativeTime } from "@/shared/lib/date-utils";
+import { cn } from "@/shared/lib/cn";
+import { formatFullDate, formatRelativeTime } from "@/shared/lib/date-utils";
+
+import { AppTooltip } from "./app-tooltip";
 
 type Props = {
+  className?: string;
   date: Date | string;
   locale: string;
+  tooltipLabel?: string;
+  withTooltip?: boolean;
 };
 
 const SECOND = 1000;
@@ -14,8 +20,19 @@ const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-export function TimeAgo({ date, locale }: Readonly<Props>) {
+export function TimeAgo({
+  className,
+  date,
+  locale,
+  tooltipLabel,
+  withTooltip = true,
+}: Readonly<Props>) {
   const [relativeTime, setRelativeTime] = useState(() => formatRelativeTime(date, locale));
+
+  const fullDate = () => {
+    const formatted = formatFullDate(date, locale);
+    return tooltipLabel ? `${tooltipLabel} ${formatted}` : formatted;
+  };
 
   useEffect(() => {
     let timerId: NodeJS.Timeout;
@@ -47,9 +64,16 @@ export function TimeAgo({ date, locale }: Readonly<Props>) {
     };
   }, [date, locale]);
 
-  return (
-    <span suppressHydrationWarning className="text-muted-foreground mt-1 text-xs">
+  const content = (
+    <span
+      suppressHydrationWarning
+      className={cn("text-muted-foreground hover:text-foreground transition-colors", className)}
+    >
       {relativeTime}
     </span>
   );
+
+  if (!withTooltip) return content;
+
+  return <AppTooltip content={fullDate()}>{content}</AppTooltip>;
 }

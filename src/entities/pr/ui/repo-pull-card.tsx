@@ -1,9 +1,10 @@
-import Link from "next/link";
 import { CheckCircle2, Clock, ShieldAlert } from "lucide-react";
+import { useLocale } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
-import { formatRelativeTime } from "@/shared/lib/date-utils";
 import { Badge } from "@/shared/ui/core/badge";
+import { TimeAgo } from "@/shared/ui/kit/time-ago";
+import { Link } from "@/i18n/routing";
 
 import type { RepoPull } from "../model/pr.types";
 
@@ -14,6 +15,8 @@ type Props = {
 };
 
 export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
+  const locale = useLocale();
+
   return (
     <Link
       href={`/dashboard/repo/${owner}/${name}/pull/${pull.prNumber}`}
@@ -41,7 +44,7 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
           <div className="text-muted-foreground flex items-center gap-3 text-xs">
             <span>Issues: {pull.findingCount}</span>
             <span>•</span>
-            <span>{formatRelativeTime(pull.createdAt)}</span>
+            <TimeAgo date={pull.createdAt} locale={locale} />
           </div>
         </div>
       </div>
