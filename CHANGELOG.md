@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.30.3](https://github.com/doxynix/doxynix/compare/v1.30.2...v1.30.3) (2026-05-03)
+
+
+### Bug Fixes
+
+* **deps:** update dependency zod to v4.4.1 ([#1351](https://github.com/doxynix/doxynix/issues/1351)) ([8a5718f](https://github.com/doxynix/doxynix/commit/8a5718f30e7b7f9d1f9000d28cc02979bfff1754))
+
 ## [1.30.2](https://github.com/doxynix/doxynix/compare/v1.30.1...v1.30.2) (2026-05-02)
 
 
