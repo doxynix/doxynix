@@ -77,7 +77,11 @@ export function AppBreadcrumbs({
                   <BreadcrumbItem>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="size-7 cursor-pointer">
+                        <Button
+                          variant="ghost"
+                          aria-label="Show hidden elements"
+                          className="size-7 cursor-pointer"
+                        >
                           <BreadcrumbEllipsis />
                         </Button>
                       </DropdownMenuTrigger>
@@ -94,6 +98,7 @@ export function AppBreadcrumbs({
                             {collapsed.href ? (
                               <Link
                                 href={collapsed.href as Route}
+                                onClick={collapsed.onClick}
                                 className="w-full cursor-pointer truncate"
                               >
                                 {decodeURIComponent(collapsed.label)}

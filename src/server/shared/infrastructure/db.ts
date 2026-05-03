@@ -81,10 +81,11 @@ export const prisma = encryptedClient.$extends({
             .then(() => {
               if (userId != null && AUDIT_BUSINESS_MODELS.includes(model)) {
                 const channelName = REALTIME_CONFIG.channels.user(userId);
-                void realtimeServer.channels
+                return realtimeServer.channels
                   .get(channelName)
                   .publish(REALTIME_CONFIG.events.user.auditUpdated, {});
               }
+              return null;
             })
             .catch((error) => {
               logger.error({ error, msg: "AUDIT LOG WRITE FAILED" });

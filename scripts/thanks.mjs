@@ -61,6 +61,7 @@ const MAPPINGS = [
   { prefix: "prisma-dbml-generator", name: "Notiz", gh: "notiz-dev" },
   { prefix: "prisma-erd-generator", name: "John Fay", gh: "keonik" },
   { prefix: "prisma-generator-fake-data", name: "Luís Rudge", gh: "luisrudge" },
+  { prefix: "prisma-field-encryption", name: "47ng", gh: "47ng" },
   { prefix: "prisma-json-schema-generator", name: "Valentin Palkovic", gh: "valentinpalkovic" },
   { prefix: "@prisma/", name: "Prisma", gh: "prisma" },
   { prefix: "prisma", name: "Prisma", gh: "prisma" },

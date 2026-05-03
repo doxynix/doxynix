@@ -19,7 +19,7 @@ export const AuditLogSchema = z.object({
   iconKey: z.string(),
   id: z.string(),
   ip: z.string().nullable(),
-  rawPayload: z.record(z.string(), z.any()),
+  rawPayload: z.record(z.string(), z.unknown()),
   requestId: z.string().nullable(),
   severity: AuditSeveritySchema,
   targetName: z.string(),

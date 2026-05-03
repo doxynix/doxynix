@@ -16,7 +16,6 @@ import { useLocale } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
-import { formatRelativeTime } from "@/shared/lib/date-utils";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
@@ -72,7 +71,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
     {
       isTime: true,
       label: "Created",
-      value: analysis?.createdAt != null ? String(formatRelativeTime(analysis.createdAt)) : "n/a",
+      value: analysis?.createdAt ?? null,
     },
   ];
 
@@ -306,9 +305,9 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                       {STATUS_CONFIG[item.value as keyof typeof STATUS_CONFIG].label}
                     </span>
                   ) : item.isTime === true ? (
-                    <TimeAgo date={item.value} locale={locale} />
+                    <TimeAgo date={item.value ?? ""} locale={locale} />
                   ) : (
-                    <span className={cn("text-xs font-medium")}>{item.value}</span>
+                    <span className={cn("text-xs font-medium")}>N/A</span>
                   )}
                 </div>
               </div>

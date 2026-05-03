@@ -30,6 +30,7 @@ export function AuditLogList({ logs }: Readonly<Props>) {
           <TableHead>Target</TableHead>
           <TableHead>Source</TableHead>
           <TableHead className="text-right">Time</TableHead>
+          <TableHead />
         </TableRow>
       </TableHeader>
       <TableBody>

@@ -90,7 +90,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
               <MetaItem
                 value={log.requestId ?? "N/A"}
                 isCopy
-                copyValue={formattedJson}
+                copyValue={log.requestId ?? ""}
                 icon={Hash}
                 label="Request ID"
                 className="border-r border-b p-4"

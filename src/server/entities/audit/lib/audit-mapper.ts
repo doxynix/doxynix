@@ -44,13 +44,23 @@ function auditReplacer(key: string, value: unknown): unknown {
   return value;
 }
 
-export function sanitizeObject(obj: unknown): Record<string, any> {
+const OP_MAP: Record<string, { severity: AuditSeverityType; title: string }> = {
+  create: { severity: "success", title: "Created" },
+  delete: { severity: "error", title: "Deleted" },
+  deleteMany: { severity: "error", title: "Bulk Deleted" },
+  update: { severity: "info", title: "Updated" },
+  upsert: { severity: "info", title: "Modified" },
+};
+
+export function sanitizeObject(obj: unknown): Record<string, unknown> {
   if (obj == null || typeof obj !== "object") return {};
 
   try {
     const sanitized = JSON.parse(safeStringify(obj, auditReplacer));
 
-    return sanitized != null && typeof sanitized === "object" ? sanitized : {};
+    return sanitized != null && typeof sanitized === "object"
+      ? (sanitized as Record<string, unknown>)
+      : {};
   } catch {
     return { _error: "Sanitization failed" };
   }
@@ -75,14 +85,7 @@ export function mapAuditLogToDTO(log: AuditLog): AuditLogType {
   else if (device.type === "tablet") deviceType = "tablet";
 
   const config = MODEL_CONFIG[log.model] || { icon: "database", name: log.model };
-  const opMap: Record<string, { severity: AuditSeverityType; title: string }> = {
-    create: { severity: "success", title: "Created" },
-    delete: { severity: "error", title: "Deleted" },
-    deleteMany: { severity: "error", title: "Bulk Deleted" },
-    update: { severity: "info", title: "Updated" },
-    upsert: { severity: "info", title: "Modified" },
-  };
-  const op = opMap[log.operation] || { severity: "info", title: log.operation };
+  const op = OP_MAP[log.operation] || { severity: "info", title: log.operation };
 
   let targetName;
   switch (log.model) {
