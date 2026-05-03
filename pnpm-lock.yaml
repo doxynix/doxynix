@@ -37,13 +37,13 @@ importers:
     dependencies:
       '@ai-sdk/google':
         specifier: 3.0.65
-        version: 3.0.65(zod@4.3.6)
+        version: 3.0.65(zod@4.4.1)
       '@ai-sdk/groq':
         specifier: 3.0.36
-        version: 3.0.36(zod@4.3.6)
+        version: 3.0.36(zod@4.4.1)
       '@ai-sdk/openai':
         specifier: 3.0.54
-        version: 3.0.54(zod@4.3.6)
+        version: 3.0.54(zod@4.4.1)
       '@codemirror/autocomplete':
         specifier: 6.20.1
         version: 6.20.1
@@ -211,7 +211,7 @@ importers:
         version: 4.0.2
       '@t3-oss/env-nextjs':
         specifier: 0.13.11
-        version: 0.13.11(typescript@6.0.3)(zod@4.3.6)
+        version: 0.13.11(typescript@6.0.3)(zod@4.4.1)
       '@tanstack/react-query':
         specifier: 5.100.6
         version: 5.100.6(react@19.2.5)
@@ -220,7 +220,7 @@ importers:
         version: 0.17.3(typedoc@0.28.19(typescript@6.0.3))
       '@trigger.dev/sdk':
         specifier: 4.4.4
-        version: 4.4.4(ai@6.0.170(zod@4.3.6))(zod@4.3.6)
+        version: 4.4.4(ai@6.0.170(zod@4.4.1))(zod@4.4.1)
       '@trpc/client':
         specifier: 11.17.0
         version: 11.17.0(@trpc/server@11.17.0(typescript@6.0.3))(typescript@6.0.3)
@@ -286,13 +286,13 @@ importers:
         version: 12.10.2(@types/react@19.2.14)(immer@10.2.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@zenstackhq/runtime':
         specifier: 2.22.1
-        version: 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(zod@4.3.6)
+        version: 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(zod@4.4.1)
       ably:
         specifier: 2.21.0
         version: 2.21.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       ai:
         specifier: 6.0.170
-        version: 6.0.170(zod@4.3.6)
+        version: 6.0.170(zod@4.4.1)
       binary-extensions:
         specifier: 3.1.0
         version: 3.1.0
@@ -535,7 +535,7 @@ importers:
         version: 0.1.13
       trpc-to-openapi:
         specifier: 3.2.0
-        version: 3.2.0(@trpc/server@11.17.0(typescript@6.0.3))(zod-openapi@5.4.6(zod@4.3.6))(zod@4.3.6)
+        version: 3.2.0(@trpc/server@11.17.0(typescript@6.0.3))(zod-openapi@5.4.6(zod@4.4.1))(zod@4.4.1)
       unified:
         specifier: 11.0.5
         version: 11.0.5
@@ -555,8 +555,8 @@ importers:
         specifier: 2.8.3
         version: 2.8.3
       zod:
-        specifier: 4.3.6
-        version: 4.3.6
+        specifier: 4.4.1
+        version: 4.4.1
       zustand:
         specifier: 5.0.12
         version: 5.0.12(@types/react@19.2.14)(immer@10.2.0)(react@19.2.5)(use-sync-external-store@1.6.0(react@19.2.5))
@@ -716,10 +716,10 @@ importers:
         version: 3.6.4
       '@zenstackhq/trpc':
         specifier: 2.22.1
-        version: 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(typescript@6.0.3)(zod@4.3.6)
+        version: 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(typescript@6.0.3)(zod@4.4.1)
       '@zenstackhq/zod':
         specifier: 3.6.4
-        version: 3.6.4(zod@4.3.6)
+        version: 3.6.4(zod@4.4.1)
       babel-plugin-react-compiler:
         specifier: 1.0.0
         version: 1.0.0
@@ -890,10 +890,10 @@ importers:
         version: 1.1.3
       zenstack:
         specifier: 2.22.1
-        version: 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(@types/node@25.6.0)(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)(zod@4.3.6)
+        version: 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(@types/node@25.6.0)(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)(zod@4.4.1)
       zod-prisma-types:
         specifier: 3.3.10
-        version: 3.3.10(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(prisma@6.19.3(typescript@6.0.3))(zod@4.3.6)
+        version: 3.3.10(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(prisma@6.19.3(typescript@6.0.3))(zod@4.4.1)
 
 packages:
 
@@ -13954,8 +13954,8 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
-  zod@4.3.6:
-    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+  zod@4.4.1:
+    resolution: {integrity: sha512-a6ENMBBGZBsnlSebQ/eKCguSBeGKSf4O7BPnqVPmYGtpBYI7VSqoVqw+QcB7kPRjbqPwhYTpFbVj/RqNz/CT0Q==}
 
   zustand@4.5.7:
     resolution: {integrity: sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw==}
@@ -14015,51 +14015,51 @@ snapshots:
     dependencies:
       bops: 1.0.1
 
-  '@ai-sdk/gateway@3.0.105(zod@4.3.6)':
+  '@ai-sdk/gateway@3.0.105(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.9
-      '@ai-sdk/provider-utils': 4.0.24(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.24(zod@4.4.1)
       '@vercel/oidc': 3.2.0
-      zod: 4.3.6
+      zod: 4.4.1
 
-  '@ai-sdk/gateway@3.0.13(zod@4.3.6)':
+  '@ai-sdk/gateway@3.0.13(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.2
-      '@ai-sdk/provider-utils': 4.0.5(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.5(zod@4.4.1)
       '@vercel/oidc': 3.1.0
-      zod: 4.3.6
+      zod: 4.4.1
 
-  '@ai-sdk/google@3.0.65(zod@4.3.6)':
+  '@ai-sdk/google@3.0.65(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.9
-      '@ai-sdk/provider-utils': 4.0.24(zod@4.3.6)
-      zod: 4.3.6
+      '@ai-sdk/provider-utils': 4.0.24(zod@4.4.1)
+      zod: 4.4.1
 
-  '@ai-sdk/groq@3.0.36(zod@4.3.6)':
+  '@ai-sdk/groq@3.0.36(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.9
-      '@ai-sdk/provider-utils': 4.0.24(zod@4.3.6)
-      zod: 4.3.6
+      '@ai-sdk/provider-utils': 4.0.24(zod@4.4.1)
+      zod: 4.4.1
 
-  '@ai-sdk/openai@3.0.54(zod@4.3.6)':
+  '@ai-sdk/openai@3.0.54(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.9
-      '@ai-sdk/provider-utils': 4.0.24(zod@4.3.6)
-      zod: 4.3.6
+      '@ai-sdk/provider-utils': 4.0.24(zod@4.4.1)
+      zod: 4.4.1
 
-  '@ai-sdk/provider-utils@4.0.24(zod@4.3.6)':
+  '@ai-sdk/provider-utils@4.0.24(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.9
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.8
-      zod: 4.3.6
+      zod: 4.4.1
 
-  '@ai-sdk/provider-utils@4.0.5(zod@4.3.6)':
+  '@ai-sdk/provider-utils@4.0.5(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.2
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.8
-      zod: 4.3.6
+      zod: 4.4.1
 
   '@ai-sdk/provider@3.0.2':
     dependencies:
@@ -14069,10 +14069,10 @@ snapshots:
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/vue@3.0.33(vue@3.5.33(typescript@6.0.3))(zod@4.3.6)':
+  '@ai-sdk/vue@3.0.33(vue@3.5.33(typescript@6.0.3))(zod@4.4.1)':
     dependencies:
-      '@ai-sdk/provider-utils': 4.0.5(zod@4.3.6)
-      ai: 6.0.33(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.5(zod@4.4.1)
+      ai: 6.0.33(zod@4.4.1)
       swrv: 1.2.0(vue@3.5.33(typescript@6.0.3))
       vue: 3.5.33(typescript@6.0.3)
     transitivePeerDependencies:
@@ -18167,7 +18167,7 @@ snapshots:
 
   '@scalar/agent-chat@0.10.12(@vue/compiler-sfc@3.5.33)(change-case@5.4.4)(nprogress@0.2.0)(tailwindcss@4.2.4)(typescript@6.0.3)':
     dependencies:
-      '@ai-sdk/vue': 3.0.33(vue@3.5.33(typescript@6.0.3))(zod@4.3.6)
+      '@ai-sdk/vue': 3.0.33(vue@3.5.33(typescript@6.0.3))(zod@4.4.1)
       '@scalar/api-client': 3.5.0(@vue/compiler-sfc@3.5.33)(change-case@5.4.4)(nprogress@0.2.0)(tailwindcss@4.2.4)(typescript@6.0.3)
       '@scalar/components': 0.24.0(typescript@6.0.3)
       '@scalar/helpers': 0.5.4
@@ -18179,12 +18179,12 @@ snapshots:
       '@scalar/use-toasts': 0.10.2(typescript@6.0.3)
       '@scalar/workspace-store': 0.49.0(typescript@6.0.3)
       '@vueuse/core': 13.9.0(vue@3.5.33(typescript@6.0.3))
-      ai: 6.0.33(zod@4.3.6)
+      ai: 6.0.33(zod@4.4.1)
       js-base64: 3.7.8
       neverpanic: 0.0.7(typescript@6.0.3)
       truncate-json: 3.0.1
       vue: 3.5.33(typescript@6.0.3)
-      zod: 4.3.6
+      zod: 4.4.1
     transitivePeerDependencies:
       - '@pinia/colada'
       - '@vue/compiler-sfc'
@@ -18243,7 +18243,7 @@ snapshots:
       vue: 3.5.33(typescript@6.0.3)
       vue-router: 5.0.4(@vue/compiler-sfc@3.5.33)(vue@3.5.33(typescript@6.0.3))
       yaml: 2.8.3
-      zod: 4.3.6
+      zod: 4.4.1
     transitivePeerDependencies:
       - '@pinia/colada'
       - '@vue/compiler-sfc'
@@ -18454,7 +18454,7 @@ snapshots:
       '@scalar/helpers': 0.5.4
       nanoid: 5.1.9
       type-fest: 5.6.0
-      zod: 4.3.6
+      zod: 4.4.1
 
   '@scalar/use-codemirror@0.14.11(typescript@6.0.3)':
     dependencies:
@@ -18483,7 +18483,7 @@ snapshots:
       cva: 1.0.0-beta.4(typescript@6.0.3)
       tailwind-merge: 3.5.0
       vue: 3.5.33(typescript@6.0.3)
-      zod: 4.3.6
+      zod: 4.4.1
     transitivePeerDependencies:
       - typescript
 
@@ -19090,17 +19090,17 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@t3-oss/env-core@0.13.11(typescript@6.0.3)(zod@4.3.6)':
+  '@t3-oss/env-core@0.13.11(typescript@6.0.3)(zod@4.4.1)':
     optionalDependencies:
       typescript: 6.0.3
-      zod: 4.3.6
+      zod: 4.4.1
 
-  '@t3-oss/env-nextjs@0.13.11(typescript@6.0.3)(zod@4.3.6)':
+  '@t3-oss/env-nextjs@0.13.11(typescript@6.0.3)(zod@4.4.1)':
     dependencies:
-      '@t3-oss/env-core': 0.13.11(typescript@6.0.3)(zod@4.3.6)
+      '@t3-oss/env-core': 0.13.11(typescript@6.0.3)(zod@4.4.1)
     optionalDependencies:
       typescript: 6.0.3
-      zod: 4.3.6
+      zod: 4.4.1
 
   '@tailwindcss/node@4.2.4':
     dependencies:
@@ -19382,7 +19382,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/sdk@4.4.4(ai@6.0.170(zod@4.3.6))(zod@4.3.6)':
+  '@trigger.dev/sdk@4.4.4(ai@6.0.170(zod@4.4.1))(zod@4.4.1)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.36.0
@@ -19396,9 +19396,9 @@ snapshots:
       uncrypto: 0.1.3
       uuid: 9.0.1
       ws: 8.20.0
-      zod: 4.3.6
+      zod: 4.4.1
     optionalDependencies:
-      ai: 6.0.170(zod@4.3.6)
+      ai: 6.0.170(zod@4.4.1)
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -20449,7 +20449,7 @@ snapshots:
       ts-pattern: 5.9.0
       vscode-languageserver: 9.0.1
 
-  '@zenstackhq/runtime@2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(zod@4.3.6)':
+  '@zenstackhq/runtime@2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(zod@4.4.1)':
     dependencies:
       '@prisma/client': 6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)
       bcryptjs: 2.4.3
@@ -20464,19 +20464,19 @@ snapshots:
       ts-pattern: 4.3.0
       tslib: 2.8.1
       uuid: 9.0.1
-      zod: 4.3.6
-      zod-validation-error: 4.0.2(zod@4.3.6)
+      zod: 4.4.1
+      zod-validation-error: 4.0.2(zod@4.4.1)
 
   '@zenstackhq/schema@3.6.4':
     dependencies:
       decimal.js: 10.6.0
 
-  '@zenstackhq/sdk@2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(typescript@6.0.3)(zod@4.3.6)':
+  '@zenstackhq/sdk@2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(typescript@6.0.3)(zod@4.4.1)':
     dependencies:
       '@prisma/generator-helper': 6.19.3
       '@prisma/internals': 6.19.3(typescript@6.0.3)
       '@zenstackhq/language': 2.22.1
-      '@zenstackhq/runtime': 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(zod@4.3.6)
+      '@zenstackhq/runtime': 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(zod@4.4.1)
       langium: 1.3.1
       semver: 7.7.4
       ts-morph: 26.0.0
@@ -20495,23 +20495,23 @@ snapshots:
       ts-pattern: 5.9.0
       typescript: 5.9.3
 
-  '@zenstackhq/trpc@2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(typescript@6.0.3)(zod@4.3.6)':
+  '@zenstackhq/trpc@2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(typescript@6.0.3)(zod@4.4.1)':
     dependencies:
-      '@zenstackhq/runtime': 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(zod@4.3.6)
-      '@zenstackhq/sdk': 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(typescript@6.0.3)(zod@4.3.6)
+      '@zenstackhq/runtime': 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(zod@4.4.1)
+      '@zenstackhq/sdk': 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(typescript@6.0.3)(zod@4.4.1)
       ts-morph: 26.0.0
       tslib: 2.8.1
-      zod: 4.3.6
+      zod: 4.4.1
     transitivePeerDependencies:
       - '@prisma/client'
       - magicast
       - typescript
 
-  '@zenstackhq/zod@3.6.4(zod@4.3.6)':
+  '@zenstackhq/zod@3.6.4(zod@4.4.1)':
     dependencies:
       '@zenstackhq/schema': 3.6.4
       decimal.js: 10.6.0
-      zod: 4.3.6
+      zod: 4.4.1
 
   '@zenuml/core@3.47.2(@babel/core@7.29.0)(@babel/template@7.28.6)(@types/react@19.2.14)(tsx@4.21.0)(yaml@2.8.3)':
     dependencies:
@@ -20605,21 +20605,21 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@6.0.170(zod@4.3.6):
+  ai@6.0.170(zod@4.4.1):
     dependencies:
-      '@ai-sdk/gateway': 3.0.105(zod@4.3.6)
+      '@ai-sdk/gateway': 3.0.105(zod@4.4.1)
       '@ai-sdk/provider': 3.0.9
-      '@ai-sdk/provider-utils': 4.0.24(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.24(zod@4.4.1)
       '@opentelemetry/api': 1.9.0
-      zod: 4.3.6
+      zod: 4.4.1
 
-  ai@6.0.33(zod@4.3.6):
+  ai@6.0.33(zod@4.4.1):
     dependencies:
-      '@ai-sdk/gateway': 3.0.13(zod@4.3.6)
+      '@ai-sdk/gateway': 3.0.13(zod@4.4.1)
       '@ai-sdk/provider': 3.0.2
-      '@ai-sdk/provider-utils': 4.0.5(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.5(zod@4.4.1)
       '@opentelemetry/api': 1.9.0
-      zod: 4.3.6
+      zod: 4.4.1
 
   ajv-formats@2.1.1(ajv@8.20.0):
     optionalDependencies:
@@ -22605,8 +22605,8 @@ snapshots:
       '@babel/parser': 7.29.2
       eslint: 9.39.4(jiti@1.21.7)
       hermes-parser: 0.25.1
-      zod: 4.3.6
-      zod-validation-error: 4.0.2(zod@4.3.6)
+      zod: 4.4.1
+      zod-validation-error: 4.0.2(zod@4.4.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -24453,7 +24453,7 @@ snapshots:
       typescript: 6.0.3
       unbash: 2.2.0
       yaml: 2.8.3
-      zod: 4.3.6
+      zod: 4.4.1
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -25381,7 +25381,7 @@ snapshots:
 
   mutation-server-protocol@0.4.1:
     dependencies:
-      zod: 4.3.6
+      zod: 4.4.1
 
   mutation-testing-elements@3.7.3: {}
 
@@ -28172,14 +28172,14 @@ snapshots:
 
   trough@2.2.0: {}
 
-  trpc-to-openapi@3.2.0(@trpc/server@11.17.0(typescript@6.0.3))(zod-openapi@5.4.6(zod@4.3.6))(zod@4.3.6):
+  trpc-to-openapi@3.2.0(@trpc/server@11.17.0(typescript@6.0.3))(zod-openapi@5.4.6(zod@4.4.1))(zod@4.4.1):
     dependencies:
       '@trpc/server': 11.17.0(typescript@6.0.3)
       co-body: 6.2.0
       h3: 1.15.11
       openapi3-ts: 4.4.0
-      zod: 4.3.6
-      zod-openapi: 5.4.6(zod@4.3.6)
+      zod: 4.4.1
+      zod-openapi: 5.4.6(zod@4.4.1)
     optionalDependencies:
       '@rollup/rollup-linux-x64-gnu': 4.6.1
 
@@ -29085,12 +29085,12 @@ snapshots:
 
   yoctocolors@2.1.2: {}
 
-  zenstack@2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(@types/node@25.6.0)(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)(zod@4.3.6):
+  zenstack@2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(@types/node@25.6.0)(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)(zod@4.4.1):
     dependencies:
       '@paralleldrive/cuid2': 2.3.1
       '@types/node': 25.6.0
       '@zenstackhq/language': 2.22.1
-      '@zenstackhq/sdk': 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(typescript@6.0.3)(zod@4.3.6)
+      '@zenstackhq/sdk': 2.22.1(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(typescript@6.0.3)(zod@4.4.1)
       async-exit-hook: 2.0.1
       colors: 1.4.0
       commander: 8.3.0
@@ -29112,8 +29112,8 @@ snapshots:
       vscode-languageserver: 8.1.0
       vscode-languageserver-textdocument: 1.0.12
       vscode-uri: 3.1.0
-      zod: 4.3.6
-      zod-validation-error: 4.0.2(zod@4.3.6)
+      zod: 4.4.1
+      zod-validation-error: 4.0.2(zod@4.4.1)
     transitivePeerDependencies:
       - '@prisma/client'
       - magicast
@@ -29130,11 +29130,11 @@ snapshots:
     dependencies:
       zod: 3.25.76
 
-  zod-openapi@5.4.6(zod@4.3.6):
+  zod-openapi@5.4.6(zod@4.4.1):
     dependencies:
-      zod: 4.3.6
+      zod: 4.4.1
 
-  zod-prisma-types@3.3.10(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(prisma@6.19.3(typescript@6.0.3))(zod@4.3.6):
+  zod-prisma-types@3.3.10(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))(prisma@6.19.3(typescript@6.0.3))(zod@4.4.1):
     dependencies:
       '@prisma/client': 6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)
       '@prisma/dmmf': 7.8.0
@@ -29142,7 +29142,7 @@ snapshots:
       code-block-writer: 13.0.3
       lodash: 4.18.1
       prisma: 6.19.3(typescript@6.0.3)
-      zod: 4.3.6
+      zod: 4.4.1
 
   zod-validation-error@1.5.0(zod@3.25.76):
     dependencies:
@@ -29152,15 +29152,15 @@ snapshots:
     dependencies:
       zod: 3.25.76
 
-  zod-validation-error@4.0.2(zod@4.3.6):
+  zod-validation-error@4.0.2(zod@4.4.1):
     dependencies:
-      zod: 4.3.6
+      zod: 4.4.1
 
   zod@3.23.8: {}
 
   zod@3.25.76: {}
 
-  zod@4.3.6: {}
+  zod@4.4.1: {}
 
   zustand@4.5.7(@types/react@19.2.14)(immer@10.2.0)(react@19.2.5):
     dependencies:
