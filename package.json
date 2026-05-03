@@ -281,7 +281,7 @@
     "validator": "13.15.35",
     "web-tree-sitter": "0.26.8",
     "yaml": "2.8.3",
-    "zod": "4.3.6",
+    "zod": "4.4.1",
     "zustand": "5.0.12"
   },
   "devDependencies": {
