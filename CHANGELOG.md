@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.31.0](https://github.com/doxynix/doxynix/compare/v1.30.4...v1.31.0) (2026-05-03)
+
+
+### Features
+
+* добавлена страница audit log ([#1357](https://github.com/doxynix/doxynix/issues/1357)) ([a2c4e21](https://github.com/doxynix/doxynix/commit/a2c4e218bcf2b1c10f67744138042b3cec32cd9c))
+
 ## [1.30.4](https://github.com/doxynix/doxynix/compare/v1.30.3...v1.30.4) (2026-05-03)
 
 
