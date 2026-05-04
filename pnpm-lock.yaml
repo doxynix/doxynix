@@ -36,14 +36,14 @@ importers:
   .:
     dependencies:
       '@ai-sdk/google':
-        specifier: 3.0.66
-        version: 3.0.66(zod@4.4.1)
+        specifier: 3.0.67
+        version: 3.0.67(zod@4.4.1)
       '@ai-sdk/groq':
-        specifier: 3.0.37
-        version: 3.0.37(zod@4.4.1)
+        specifier: 3.0.38
+        version: 3.0.38(zod@4.4.1)
       '@ai-sdk/openai':
-        specifier: 3.0.55
-        version: 3.0.55(zod@4.4.1)
+        specifier: 3.0.57
+        version: 3.0.57(zod@4.4.1)
       '@codemirror/autocomplete':
         specifier: 6.20.1
         version: 6.20.1
@@ -219,8 +219,8 @@ importers:
         specifier: 0.17.3
         version: 0.17.3(typedoc@0.28.19(typescript@6.0.3))
       '@trigger.dev/sdk':
-        specifier: 4.4.4
-        version: 4.4.4(ai@6.0.172(zod@4.4.1))(zod@4.4.1)
+        specifier: 4.4.5
+        version: 4.4.5(ai@6.0.173(zod@4.4.1))(zod@4.4.1)
       '@trpc/client':
         specifier: 11.17.0
         version: 11.17.0(@trpc/server@11.17.0(typescript@6.0.3))(typescript@6.0.3)
@@ -291,8 +291,8 @@ importers:
         specifier: 2.21.0
         version: 2.21.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       ai:
-        specifier: 6.0.172
-        version: 6.0.172(zod@4.4.1)
+        specifier: 6.0.173
+        version: 6.0.173(zod@4.4.1)
       binary-extensions:
         specifier: 3.1.0
         version: 3.1.0
@@ -423,11 +423,11 @@ importers:
         specifier: 10.3.1
         version: 10.3.1
       posthog-js:
-        specifier: 1.372.5
-        version: 1.372.5
+        specifier: 1.372.6
+        version: 1.372.6
       posthog-node:
-        specifier: 5.32.0
-        version: 5.32.0(rxjs@7.8.2)
+        specifier: 5.32.1
+        version: 5.32.1(rxjs@7.8.2)
       prisma-field-encryption:
         specifier: 1.6.0
         version: 1.6.0(@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3))
@@ -664,8 +664,8 @@ importers:
         specifier: 5.100.7
         version: 5.100.7(@tanstack/react-query@5.100.7(react@19.2.5))(react@19.2.5)
       '@trigger.dev/build':
-        specifier: 4.4.4
-        version: 4.4.4(typescript@6.0.3)
+        specifier: 4.4.5
+        version: 4.4.5(typescript@6.0.3)
       '@types/file-saver':
         specifier: 2.0.7
         version: 2.0.7
@@ -914,8 +914,8 @@ packages:
   '@ably/msgpack-js@0.4.1':
     resolution: {integrity: sha512-Sjxj6SOr17hExAVrsycN7u6oV4PhZcK7Z2S8dM71CH/butgO47cSo/TL6FJPCXUyDAzKkOWjMUpJGyZkEpyu4Q==}
 
-  '@ai-sdk/gateway@3.0.107':
-    resolution: {integrity: sha512-JwODLcuTe8rWXJwQcNPE5fiadjCOKHxNGtL5pHqEhFQSuWs6x47oVRkLs/Zw6eUhTsuXiZbyJ3QJHVIyLKX5hg==}
+  '@ai-sdk/gateway@3.0.108':
+    resolution: {integrity: sha512-hOtwiM6E/m1PgqHnx0/grvh0P/kjENHsN222OL5iYPQwfWmcX+26oFXM7HGL/UzonB+RORMkYAbskgAiANVwCQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -926,26 +926,26 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google@3.0.66':
-    resolution: {integrity: sha512-Q551CgwfakT9/0Vev6iz3ltV3z98jawnVoQ265WrF4aTCn3QE6mgoHDiR43evZFW4gOupvgKhAXez+D4eqvCOA==}
+  '@ai-sdk/google@3.0.67':
+    resolution: {integrity: sha512-Qeq+SidYtzMrcf0fdw3L0QLmtXK+ErwdBzbxS4+0Q/2UP85Ges8RJJcbAj7SO8e2JbeJoM35BLqkeNy1o3wJvQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/groq@3.0.37':
-    resolution: {integrity: sha512-2tcnGNDDHRLs7rSDHm9CpJFVb9t3Rc1tEp0wX7DUNSQY0VvjowTi4hzkIO5L/51zlojrsSfUPTuNABgjmnkqcQ==}
+  '@ai-sdk/groq@3.0.38':
+    resolution: {integrity: sha512-mzn+KYeROVHFZnAr3qNX+eZ4Un4BFykOcs8XDH8LLzdfgrW6fxQkdiZyww0asYGjIYaa16dkyVtglp4GV6BeUQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@3.0.55':
-    resolution: {integrity: sha512-1pZPT/VEKbn/7ItAr5Hkhy41GxbjiJUhsgTFFIPTwYT7Ph/swuByl4YCXLSfuav27zSzQdscOoxCtDasseeQHA==}
+  '@ai-sdk/openai@3.0.57':
+    resolution: {integrity: sha512-2kfzDQYYz0m/yRF4bre9s2j8wNiPdhfHzYZc3dxAOMlprvGmRZOvoZBx8chlJIFwL7xR2EFkvLagBvo2llCXPw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/provider-utils@4.0.25':
-    resolution: {integrity: sha512-yjGPZPiJm79ZOYk0anXn2LkVqUFgStZqEOdyoynhkaAg+yOCuv6PJwf+1gUW0eSIUnYEboT2TPbPX/bxZpx4gw==}
+  '@ai-sdk/provider-utils@4.0.26':
+    resolution: {integrity: sha512-CsKNLKsOpvPujRlIYvoz+Ybw+kGn7J4/fIZa/58+R7iWLLfwn6ifE2G6Yq8K9XvH/I/3bzaDAJ3NhRwEMsLBKQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3387,11 +3387,11 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@posthog/core@1.27.9':
-    resolution: {integrity: sha512-7FFWWYWvRFxQqDXYzv8klCjk0Pox1IpuPr61eeOCBsKkmt6xvvHwH0jc3ObvwDXZj2NSAWg+V9N2E2F1ul2CRQ==}
+  '@posthog/core@1.28.0':
+    resolution: {integrity: sha512-753giUMWuk602UtS101tDZuNcwiKkr+3UEhLgfOwHAk2W32n53knOxAjyWT0JwMq5/+0uSQ2y4uaZXQAxwvBSw==}
 
-  '@posthog/types@1.372.5':
-    resolution: {integrity: sha512-6sYOISiHjfr50FNlFcd8Zw/zCDJzxRCdC7aZzwTCvJABEOLWf41kcsiozi2c3q1cNXYL018X7DAGkUukrNLVIw==}
+  '@posthog/types@1.372.6':
+    resolution: {integrity: sha512-sqI36LBvuo8xcYsXIlVa0q3IXJJjqtatM2LrXlyOM7kgHrldBwS4ldzaTXrTdpe/TiIl1b4ZHxtSHMzPig+DnQ==}
 
   '@prisma/adapter-pg@6.19.3':
     resolution: {integrity: sha512-ocbvVIP/wX2uJWWLvo1/UK0nH8L5dv4MlE1DddVPID0/VRiEZDguWmAgKLVuPM6BuWTH3wGluZR40VgXb4WjiQ==}
@@ -5471,16 +5471,16 @@ packages:
   '@tootallnate/quickjs-emscripten@0.23.0':
     resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
 
-  '@trigger.dev/build@4.4.4':
-    resolution: {integrity: sha512-R9tq03AHqptKA67zUZCEAUa7X4aY7OR/1Vn8HLF0ZCGn3qY/3M3oVg/ipRrRlLbmP4suhBvKIxI47wFV0AoM2Q==}
+  '@trigger.dev/build@4.4.5':
+    resolution: {integrity: sha512-45l8cv59JERkDrC5tADkKVDJriZjPtCtkAHVWvCZXRJMlm93Ao8deTHdtOf++TqdsqdG9Tk5cxhupY1COq4muA==}
     engines: {node: '>=18.20.0'}
 
-  '@trigger.dev/core@4.4.4':
-    resolution: {integrity: sha512-m748W6tF/eIGzEaFjuvlicCqxop5GFxnt/eSb7kg0g9ZC2VW0iBa/rOx4aCQlkHd4MKn3B+t2LQLhn/eI9kHDw==}
+  '@trigger.dev/core@4.4.5':
+    resolution: {integrity: sha512-VI4AjX5ivbm+E8RMdP2kjuo/ph8cTCQTNkZSx6UknnAxyu2mihqPbcYWl2tqZCGbbX/HIlzhEtM2NM3a01Juxg==}
     engines: {node: '>=18.20.0'}
 
-  '@trigger.dev/sdk@4.4.4':
-    resolution: {integrity: sha512-X2R1BCZlptxJw2oT6SJAU8bDKO8pgfNIFrNdo7p6XUjW7gha9s1oNZEicL7cmvJF8rO35MO70vO/Wqo8tjQjPQ==}
+  '@trigger.dev/sdk@4.4.5':
+    resolution: {integrity: sha512-iXjEWQQy+Dc7WDdjOtGLTlHIcVdcg00GUYL/hTr5FwMlY/Aswvfe0Snfn+7XECtls2tgZTPJ+rnTP4mo77o5eg==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
       ai: ^4.2.0 || ^5.0.0 || ^6.0.0
@@ -6545,8 +6545,8 @@ packages:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
 
-  ai@6.0.172:
-    resolution: {integrity: sha512-o12q2SDlrN4btPU2FkFSVEeZiKfQuSbDFixXH8I7AE/zuCXMbN9ilaPThdoAc8mS9+QnhUGy8cSP0IgT3Q+p0A==}
+  ai@6.0.173:
+    resolution: {integrity: sha512-X2noFb82kouYQ4nlKGm1cR1Wvlp4Xit7fjJzwXv/msKQmtqkQn9NiXH6kCX4Gl4G+9DRWsJHIKANtWk8Ix1nTw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -11432,11 +11432,11 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  posthog-js@1.372.5:
-    resolution: {integrity: sha512-0Wq4yRTX8rg2/SOTo3T/0tt2EIE0usBDJKxWPY6eRTGxWAajNmPWZwK4vREn2ANZGdPhUHQ+hg4kLEUdQnzs/Q==}
+  posthog-js@1.372.6:
+    resolution: {integrity: sha512-+Fy9fwWni5WDKQXiUBIzFvdmnZSR6OBxGC/4wj09JvvK5JE4dhI9ZlKO1+b887PowjeAx0sx1Tf+S1eAjDvzqg==}
 
-  posthog-node@5.32.0:
-    resolution: {integrity: sha512-kEsQFrpQrrrXQlVzXF5yTyHfnKAP/37W6ta9cFHh8ISlKtyYEKuLGTc5ssfpn4RrRS6r0xsJSK94ScFTQTSEOg==}
+  posthog-node@5.32.1:
+    resolution: {integrity: sha512-xO9ux41jZS1ZlXSGsQGzFVLtLkHbg7ss8+F9nWAtaliu+MFhR4J3FYOor688GNvuYwY8WNNdJjp9ASP7dDJk7w==}
     engines: {node: ^20.20.0 || >=22.22.0}
     peerDependencies:
       rxjs: ^7.0.0
@@ -14037,10 +14037,10 @@ snapshots:
     dependencies:
       bops: 1.0.1
 
-  '@ai-sdk/gateway@3.0.107(zod@4.4.1)':
+  '@ai-sdk/gateway@3.0.108(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.25(zod@4.4.1)
+      '@ai-sdk/provider-utils': 4.0.26(zod@4.4.1)
       '@vercel/oidc': 3.2.0
       zod: 4.4.1
 
@@ -14051,25 +14051,25 @@ snapshots:
       '@vercel/oidc': 3.1.0
       zod: 4.4.1
 
-  '@ai-sdk/google@3.0.66(zod@4.4.1)':
+  '@ai-sdk/google@3.0.67(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.25(zod@4.4.1)
+      '@ai-sdk/provider-utils': 4.0.26(zod@4.4.1)
       zod: 4.4.1
 
-  '@ai-sdk/groq@3.0.37(zod@4.4.1)':
+  '@ai-sdk/groq@3.0.38(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.25(zod@4.4.1)
+      '@ai-sdk/provider-utils': 4.0.26(zod@4.4.1)
       zod: 4.4.1
 
-  '@ai-sdk/openai@3.0.55(zod@4.4.1)':
+  '@ai-sdk/openai@3.0.57(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.25(zod@4.4.1)
+      '@ai-sdk/provider-utils': 4.0.26(zod@4.4.1)
       zod: 4.4.1
 
-  '@ai-sdk/provider-utils@4.0.25(zod@4.4.1)':
+  '@ai-sdk/provider-utils@4.0.26(zod@4.4.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
       '@standard-schema/spec': 1.1.0
@@ -16939,11 +16939,11 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@posthog/core@1.27.9':
+  '@posthog/core@1.28.0':
     dependencies:
-      '@posthog/types': 1.372.5
+      '@posthog/types': 1.372.6
 
-  '@posthog/types@1.372.5': {}
+  '@posthog/types@1.372.6': {}
 
   '@prisma/adapter-pg@6.19.3':
     dependencies:
@@ -19343,10 +19343,10 @@ snapshots:
 
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
-  '@trigger.dev/build@4.4.4(typescript@6.0.3)':
+  '@trigger.dev/build@4.4.5(typescript@6.0.3)':
     dependencies:
       '@prisma/config': 6.19.3
-      '@trigger.dev/core': 4.4.4
+      '@trigger.dev/core': 4.4.5
       mlly: 1.8.2
       pkg-types: 1.3.1
       resolve: 1.22.12
@@ -19359,7 +19359,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@trigger.dev/core@4.4.4':
+  '@trigger.dev/core@4.4.5':
     dependencies:
       '@bugsnag/cuid': 3.2.2
       '@electric-sql/client': 1.0.14
@@ -19401,11 +19401,11 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/sdk@4.4.4(ai@6.0.172(zod@4.4.1))(zod@4.4.1)':
+  '@trigger.dev/sdk@4.4.5(ai@6.0.173(zod@4.4.1))(zod@4.4.1)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.36.0
-      '@trigger.dev/core': 4.4.4
+      '@trigger.dev/core': 4.4.5
       chalk: 5.6.2
       cronstrue: 2.59.0
       debug: 4.4.3
@@ -19413,11 +19413,10 @@ snapshots:
       slug: 6.1.0
       ulid: 2.4.0
       uncrypto: 0.1.3
-      uuid: 9.0.1
       ws: 8.20.0
       zod: 4.4.1
     optionalDependencies:
-      ai: 6.0.172(zod@4.4.1)
+      ai: 6.0.173(zod@4.4.1)
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -20626,11 +20625,11 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@6.0.172(zod@4.4.1):
+  ai@6.0.173(zod@4.4.1):
     dependencies:
-      '@ai-sdk/gateway': 3.0.107(zod@4.4.1)
+      '@ai-sdk/gateway': 3.0.108(zod@4.4.1)
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.25(zod@4.4.1)
+      '@ai-sdk/provider-utils': 4.0.26(zod@4.4.1)
       '@opentelemetry/api': 1.9.0
       zod: 4.4.1
 
@@ -26248,15 +26247,15 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  posthog-js@1.372.5:
+  posthog-js@1.372.6:
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/api-logs': 0.208.0
       '@opentelemetry/exporter-logs-otlp-http': 0.208.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources': 2.7.1(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-logs': 0.208.0(@opentelemetry/api@1.9.1)
-      '@posthog/core': 1.27.9
-      '@posthog/types': 1.372.5
+      '@posthog/core': 1.28.0
+      '@posthog/types': 1.372.6
       core-js: 3.49.0
       dompurify: 3.4.2
       fflate: 0.4.8
@@ -26264,9 +26263,9 @@ snapshots:
       query-selector-shadow-dom: 1.0.1
       web-vitals: 5.2.0
 
-  posthog-node@5.32.0(rxjs@7.8.2):
+  posthog-node@5.32.1(rxjs@7.8.2):
     dependencies:
-      '@posthog/core': 1.27.9
+      '@posthog/core': 1.28.0
     optionalDependencies:
       rxjs: 7.8.2
 
