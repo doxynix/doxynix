@@ -2,6 +2,7 @@
 import { faker } from "@faker-js/faker";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { NotifyType, PrismaClient, Status, UserRole, Visibility } from "@prisma/client";
+import { subDays } from "date-fns";
 import pg from "pg";
 
 import * as Fake from "../src/generated/fake-data";
@@ -261,6 +262,49 @@ async function main() {
     where: { email: MY_EMAIL },
   });
   console.log(`Admin ready: ${admin.email}`);
+
+  const adminReposData = Array.from({ length: 5 }).map(() => {
+    const repoName = `admin-project-${faker.string.alphanumeric(4)}`;
+    // const isCritical = rIdx === 0;
+
+    return clean({
+      ...Fake.fakeRepo(),
+      analyses: {
+        create: [
+          clean({
+            ...Fake.fakeAnalysis(),
+            complexityScore: faker.number.int({ max: 40, min: 20 }),
+            createdAt: subDays(new Date(), 40),
+            metricsJson: generateMetricsJson(repoName, true),
+            onboardingScore: faker.number.int({ max: 90, min: 75 }),
+            score: 45,
+            securityScore: faker.number.int({ max: 50, min: 30 }),
+            status: Status.DONE,
+            techDebtScore: faker.number.int({ max: 30, min: 10 }),
+          }),
+          clean({
+            ...Fake.fakeAnalysis(),
+            complexityScore: faker.number.int({ max: 40, min: 20 }),
+            createdAt: new Date(),
+            metricsJson: generateMetricsJson(repoName, false),
+            onboardingScore: faker.number.int({ max: 90, min: 75 }),
+            score: 85,
+            securityScore: faker.number.int({ max: 100, min: 70 }),
+            status: Status.DONE,
+            techDebtScore: faker.number.int({ max: 30, min: 10 }),
+          }),
+        ],
+      },
+      description: "Admin seed repository for dashboard testing",
+      githubId: faker.number.int({ max: 2_000_000_000, min: 100_000_000 }),
+      name: repoName,
+      userId: admin.id,
+    });
+  });
+
+  for (const repo of adminReposData) {
+    await prisma.repo.create({ data: repo });
+  }
 
   console.log("Creating more users...");
 

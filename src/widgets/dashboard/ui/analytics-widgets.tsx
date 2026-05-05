@@ -5,6 +5,7 @@ import {
   ArrowLeftRight,
   BookOpenCheck,
   CheckCircle2,
+  CircleDot,
   Clock,
   FileCode2,
   Flame,
@@ -179,7 +180,7 @@ export function HealthExtremesWidget({ data }: Readonly<Props>) {
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         {!hasData ? (
-          <p className="text-muted-foreground text-smF">No extremes detected for this period</p>
+          <p className="text-muted-foreground text-sm">No extremes detected for this period</p>
         ) : (
           <>
             {data.highlights.topPerformer && (
@@ -286,9 +287,8 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
                 <div className="flex min-w-0 items-center gap-3">
                   {activity.status === "DONE" && <CheckCircle2 className="text-success" />}
                   {activity.status === "FAILED" && <XCircle className="text-destructive" />}
-                  {(activity.status === "PENDING" || activity.status === "NEW") && (
-                    <Spinner className="text-warning" />
-                  )}
+                  {activity.status === "PENDING" && <Spinner className="text-warning" />}
+                  {activity.status === "NEW" && <CircleDot />}
 
                   <div className="flex min-w-0 flex-1 flex-col">
                     <Link

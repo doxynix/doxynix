@@ -74,7 +74,7 @@ export const analyticsService = {
     }
   },
 
-  async getDashboardStats(db: DbClient, input: StatsInput) {
+  async getDashboardStats(db: DbClient, input: StatsInput, userId: number) {
     const now = new Date();
 
     let currentStart: Date;
@@ -91,7 +91,7 @@ export const analyticsService = {
     const previousStart = new Date(currentStart.getTime() - durationMs);
 
     const [data] = await db.$queryRawTyped(
-      getDashboardStats(currentStart, previousStart, currentEnd)
+      getDashboardStats(userId, currentStart, previousStart, currentEnd)
     );
 
     if (data == null) {
@@ -117,8 +117,8 @@ export const analyticsService = {
         total: data.totalCount ?? 0,
       },
       highlights: {
-        mostCritical: data.worstRepo as unknown as ExtremeRepoDto,
-        topPerformer: data.bestRepo as unknown as ExtremeRepoDto,
+        mostCritical: data.worstRepo as unknown as ExtremeRepoDto | null,
+        topPerformer: data.bestRepo as unknown as ExtremeRepoDto | null,
       },
       languages: data.languages as unknown as LanguageDto[],
       overview: {
@@ -172,7 +172,7 @@ export const analyticsService = {
     };
   },
 
-  async getTrends(db: DbClient, input: StatsInput) {
+  async getTrends(db: DbClient, input: StatsInput, userId: number) {
     let startDate: Date;
     let endDate = input.to ?? new Date();
 
@@ -183,7 +183,7 @@ export const analyticsService = {
       startDate = input.from ?? subDays(endDate, 30);
     }
 
-    const trends = await db.$queryRawTyped(getTrends(startDate, endDate));
+    const trends = await db.$queryRawTyped(getTrends(userId, startDate, endDate));
 
     const dateFormatter = new Intl.DateTimeFormat("en-US", {
       day: "numeric",

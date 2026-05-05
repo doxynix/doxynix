@@ -1,15 +1,17 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import { format, subDays, subHours, subMinutes, subMonths } from "date-fns";
 import { Check, Clock } from "lucide-react";
-import { parseAsIsoDate, parseAsString, useQueryStates } from "nuqs";
+import { useQueryStates } from "nuqs";
 import type { DateRange } from "react-day-picker";
 
 import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
 import { Calendar } from "@/shared/ui/core/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/core/popover";
+
+import { dashboardParsers } from "../model/dashboard-parsers";
 
 const DATE_PERIODS = [
   {
@@ -45,17 +47,26 @@ const DATE_PERIODS = [
 ] as const;
 
 export function DashboardDatePeriod() {
-  const [urlState, setUrlState] = useQueryStates({
-    from: parseAsIsoDate,
-    period: parseAsString.withDefault("30d"),
-    to: parseAsIsoDate,
-  });
+  const [urlState, setUrlState] = useQueryStates(dashboardParsers);
 
-  const [tempDate, setTempDate] = React.useState<DateRange | undefined>(() => {
+  const getRangeFromUrl = () => {
     if (urlState.from && urlState.to) return { from: urlState.from, to: urlState.to };
-    const p = DATE_PERIODS.find((p) => p.period === urlState.period);
-    return p ? p.getValue() : undefined;
-  });
+    return DATE_PERIODS.find((p) => p.period === urlState.period)?.getValue();
+  };
+
+  const [tempDate, setTempDate] = useState<DateRange | undefined>(getRangeFromUrl);
+
+  const [prevUrlState, setPrevUrlState] = useState(urlState);
+
+  const isUrlChanged =
+    urlState.from?.getTime() !== prevUrlState.from?.getTime() ||
+    urlState.to?.getTime() !== prevUrlState.to?.getTime() ||
+    urlState.period !== prevUrlState.period;
+
+  if (isUrlChanged) {
+    setPrevUrlState(urlState);
+    setTempDate(getRangeFromUrl());
+  }
 
   const activePeriod = DATE_PERIODS.find((p) => p.period === urlState.period);
 
@@ -114,19 +125,20 @@ export function DashboardDatePeriod() {
           <div className="flex flex-col border-l">
             <div className="flex gap-4 border-b p-3 text-center">
               <div className="flex-1 space-y-1">
-                <label className="text-xs">Start Date</label>
+                <span className="text-xs">Start Date</span>
                 <div className="text-xs">
                   {tempDate?.from ? format(tempDate.from, "yyyy-MM-dd") : "YYYY-MM-DD"}
                 </div>
               </div>
               <div className="flex-1 space-y-1">
-                <label className="text-xs">End Date</label>
+                <span className="text-xs">End Date</span>
                 <div className="text-xs">
                   {tempDate?.to ? format(tempDate.to, "yyyy-MM-dd") : "YYYY-MM-DD"}
                 </div>
               </div>
             </div>
             <Calendar
+              key={urlState.period}
               defaultMonth={tempDate?.from}
               mode="range"
               numberOfMonths={2}

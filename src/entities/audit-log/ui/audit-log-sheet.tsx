@@ -123,7 +123,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                     dangerouslySetInnerHTML={{ __html: html ?? "" }}
                     className={cn(
                       "w-full text-sm",
-                      "[&_pre]:!p-0[&_pre]:!m-0 [&_pre]:bg-transparent!",
+                      "[&_pre]:m-0! [&_pre]:bg-transparent! [&_pre]:p-0!",
                       "[&_pre]:break-all! [&_pre]:whitespace-pre-wrap!",
                       "[&_code]:break-all! [&_code]:whitespace-pre-wrap!",
                       "[&_.line]:inline! [&_.line]:break-all! [&_.line]:whitespace-pre-wrap!"

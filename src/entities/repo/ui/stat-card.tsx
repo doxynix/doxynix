@@ -32,7 +32,7 @@ export function StatCard({
   const getDeltaClass = () => {
     if (delta == null || delta === 0) return "text-muted-foreground";
 
-    if (reverseColor != null) {
+    if (reverseColor === true) {
       return isPositiveTrend ? "text-destructive" : "text-success";
     }
 

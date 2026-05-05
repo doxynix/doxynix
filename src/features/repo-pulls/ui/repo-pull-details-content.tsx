@@ -307,7 +307,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   ) : item.isTime === true ? (
                     <TimeAgo date={item.value ?? ""} locale={locale} />
                   ) : (
-                    <span className={cn("text-xs font-medium")}>N/A</span>
+                    <span className={cn("text-xs font-medium")}>N/A</span> // FIXME: пока не допер но вроде тут надо {item.value
                   )}
                 </div>
               </div>

@@ -106,7 +106,7 @@ export const analyticsRouter = createTRPCRouter({
     .output(DashboardStatsOutputSchema)
 
     .query(async ({ ctx, input }) => {
-      return analyticsService.getDashboardStats(ctx.db, input);
+      return analyticsService.getDashboardStats(ctx.db, input, Number(ctx.session.user.id));
     }),
 
   getTrends: protectedProcedure
@@ -125,6 +125,6 @@ export const analyticsRouter = createTRPCRouter({
     .input(InputSchema)
     .output(TrendsOutputSchema)
     .query(async ({ ctx, input }) => {
-      return analyticsService.getTrends(ctx.db, input);
+      return analyticsService.getTrends(ctx.db, input, Number(ctx.session.user.id));
     }),
 });
