@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.32.0](https://github.com/doxynix/doxynix/compare/v1.31.7...v1.32.0) (2026-05-05)
+
+
+### Features
+
+* **features:** улучшения аналитики дашборда, оптимизация запросов к бд ([#1393](https://github.com/doxynix/doxynix/issues/1393)) ([0d1ad08](https://github.com/doxynix/doxynix/commit/0d1ad083967e177b25944bd97e6b877d6d978375))
+
 ## [1.31.7](https://github.com/doxynix/doxynix/compare/v1.31.6...v1.31.7) (2026-05-05)
 
 
