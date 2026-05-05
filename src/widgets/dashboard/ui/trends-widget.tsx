@@ -23,7 +23,7 @@ export function TrendsWidget() {
 
   const { data, isLoading } = trpc.analytics.getTrends.useQuery({
     from: urlParams.from ?? undefined,
-    period: urlParams.period ?? undefined,
+    period: urlParams.period,
     to: urlParams.to ?? undefined,
   });
   const t = useTranslations("Dashboard");

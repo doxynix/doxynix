@@ -19,7 +19,7 @@ export function StatCardContainer() {
 
   const { data, isLoading } = trpc.analytics.getDashboardStats.useQuery({
     from: urlParams.from ?? undefined,
-    period: urlParams.period ?? undefined,
+    period: urlParams.period,
     to: urlParams.to ?? undefined,
   });
 
