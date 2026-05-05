@@ -22,7 +22,7 @@ import { notificationsParsers } from "@/entities/notifications/model/notificatio
 import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
 
 export function NotificationsRepoFilter() {
-  const [filters, setFilters] = useQueryStates(notificationsParsers, { shallow: true });
+  const [filters, setFilters] = useQueryStates(notificationsParsers);
   const { setOpen: setOpenCreateDialog } = useCreateRepoActions();
 
   const [open, setOpen] = useState(false);

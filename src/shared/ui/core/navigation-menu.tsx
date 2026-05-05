@@ -56,7 +56,7 @@ function NavigationMenuItem({
 }
 
 const navigationMenuTriggerStyle = cva(
-  "transition-standard group inline-flex h-9 w-max items-center justify-center rounded-xl border border-transparent bg-background/70 px-4 py-2 text-sm font-medium tracking-[-0.02em] shadow-sm hover:border-border-accent hover:bg-accent hover:text-accent-foreground hover:[box-shadow:var(--shadow-sm)] focus:border-border-accent focus:bg-accent focus:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=open]:border-border-accent data-[state=open]:hover:bg-accent data-[state=open]:text-accent-foreground data-[state=open]:focus:bg-accent data-[state=open]:bg-accent focus-visible:ring-ring/50 outline-hidden focus-visible:ring-2"
+  "transition-standard group inline-flex h-9 w-max items-center justify-center rounded-xl border border-transparent bg-background px-4 py-2 text-sm font-medium tracking-[-0.02em] shadow-sm hover:border-border-accent hover:bg-accent hover:text-accent-foreground hover:[box-shadow:var(--shadow-sm)] focus:border-border-accent focus:bg-accent focus:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=open]:border-border-accent data-[state=open]:hover:bg-accent data-[state=open]:text-accent-foreground data-[state=open]:focus:bg-accent data-[state=open]:bg-accent focus-visible:ring-ring/50 outline-hidden focus-visible:ring-2"
 );
 
 function NavigationMenuTrigger({

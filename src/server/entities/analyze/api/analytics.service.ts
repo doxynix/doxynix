@@ -1,184 +1,189 @@
-import { z } from "zod";
+import type { Status } from "@prisma/client";
+import { getDashboardStats, getTrends } from "@prisma/client/sql";
+import { subDays, subHours, subMinutes } from "date-fns";
 
 import type { DbClient } from "@/server/shared/infrastructure/db";
 
-const LanguageMetricSchema = z.object({
-  color: z.string(),
-  lines: z.number(),
-  name: z.string(),
-});
+type LanguageDto = {
+  color: string;
+  name: string;
+  value: number;
+};
 
-const MetricsJsonSchema = z.object({
-  languages: z.array(LanguageMetricSchema).optional(),
-  totalLoc: z.number().optional(),
-});
+type ExtremeRepoDto = {
+  name: string;
+  score: number;
+};
+
+type RecentActivityDto = {
+  createdAt: Date;
+  id: string;
+  progress: number;
+  repoName: string;
+  repoOwner: string;
+  status: Status;
+};
+
+type StatsInput = {
+  from?: Date | null;
+  period?: null | string;
+  to?: Date | null;
+};
+
+type HotspotDto = {
+  path: string;
+  repo_name: string;
+  score: number;
+};
+
+type CouplingDto = {
+  commits: number;
+  from_path: string;
+  repo_name: string;
+  to_path: string;
+};
+
+type RisksDto = {
+  busFactorRepos: number;
+  topCoupling: CouplingDto[];
+  topHotspots: HotspotDto[];
+};
 
 export const analyticsService = {
-  async getDashboardStats(db: DbClient) {
-    const [
-      repoCount,
-      docsCount,
-      analysisStats,
-      aggregates,
-      recentAnalyses,
-      reposWithMetrics,
-      worstRepo,
-      bestRepo,
-      criticalRepoCount,
-    ] = await Promise.all([
-      db.repo.count(),
-
-      db.document.count(),
-
-      db.analysis.groupBy({
-        _count: { status: true },
-        by: ["status"],
-      }),
-
-      db.analysis.aggregate({
-        _avg: {
-          complexityScore: true,
-          onboardingScore: true,
-          score: true,
-          securityScore: true,
-          techDebtScore: true,
-        },
-        where: { status: "DONE" },
-      }),
-
-      db.analysis.findMany({
-        include: { repo: { select: { name: true, owner: true } } },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      }),
-
-      db.repo.findMany({
-        select: {
-          analyses: {
-            orderBy: { createdAt: "desc" },
-            select: { metricsJson: true },
-            take: 1,
-            where: { status: "DONE" },
-          },
-        },
-      }),
-      db.analysis.findFirst({
-        orderBy: { score: "asc" },
-        select: { repo: { select: { name: true } }, score: true },
-        where: { score: { gt: 0, lt: 50 }, status: "DONE" },
-      }),
-
-      db.analysis.findFirst({
-        orderBy: { score: "desc" },
-        select: { repo: { select: { name: true } }, score: true },
-        where: { status: "DONE" },
-      }),
-      db.repo.count({
-        where: {
-          analyses: {
-            some: {
-              score: { gt: 0, lt: 50 },
-              status: "DONE",
-            },
-          },
-        },
-      }),
-    ]);
-
-    const statsMap = analysisStats.reduce(
-      (acc, curr) => {
-        acc[curr.status] = curr._count.status;
-        return acc;
-      },
-      {} as Record<string, number>
-    );
-
-    const langMap = new Map<string, { color: string; lines: number }>();
-    let globalTotalLoc = 0;
-
-    reposWithMetrics.forEach((repo) => {
-      const metrics = repo.analyses[0]?.metricsJson;
-      if (metrics == null) return;
-
-      const parsed = MetricsJsonSchema.safeParse(metrics);
-      if (parsed.success) {
-        globalTotalLoc += parsed.data.totalLoc ?? 0;
-        parsed.data.languages?.forEach((lang) => {
-          const current = langMap.get(lang.name) || { color: lang.color, lines: 0 };
-          langMap.set(lang.name, {
-            color: lang.color,
-            lines: current.lines + lang.lines,
-          });
-        });
+  calculatePeriodStart(period: string, relativeTo: Date): Date {
+    switch (period) {
+      case "15m": {
+        return subMinutes(relativeTo, 15);
       }
-    });
+      case "1h": {
+        return subHours(relativeTo, 1);
+      }
+      case "24h": {
+        return subDays(relativeTo, 1);
+      }
+      case "7d": {
+        return subDays(relativeTo, 7);
+      }
+      case "90d": {
+        return subDays(relativeTo, 90);
+      }
+      case "30d":
+      default: {
+        return subDays(relativeTo, 30);
+      }
+    }
+  },
 
-    const sortedLanguages = Array.from(langMap.entries())
-      .map(([name, data]) => ({ color: data.color, name, value: data.lines }))
-      .sort((a, b) => b.value - a.value);
+  async getDashboardStats(db: DbClient, input: StatsInput, userId: number) {
+    const now = new Date();
 
-    const topLanguages = sortedLanguages.slice(0, 5);
-    const otherLines = sortedLanguages.slice(5).reduce((acc, curr) => acc + curr.value, 0);
+    let currentStart: Date;
+    let currentEnd: Date = input.to ?? now;
 
-    if (otherLines > 0) {
-      topLanguages.push({ color: "#808080", name: "Other", value: otherLines });
+    if (input.period != null && input.period !== "custom") {
+      currentEnd = now;
+      currentStart = this.calculatePeriodStart(input.period, currentEnd);
+    } else {
+      currentStart = input.from ?? subDays(currentEnd, 30);
     }
 
+    const durationMs = currentEnd.getTime() - currentStart.getTime();
+    const previousStart = new Date(currentStart.getTime() - durationMs);
+
+    const [data] = await db.$queryRawTyped(
+      getDashboardStats(userId, currentStart, previousStart, currentEnd)
+    );
+
+    if (data == null) {
+      return this.getEmptyDashboardStats();
+    }
+
+    const recentActivity = (data.recentActivity as unknown as RecentActivityDto[]).map(
+      (activity): RecentActivityDto => ({
+        createdAt: new Date(activity.createdAt),
+        id: activity.id,
+        progress: activity.progress,
+        repoName: activity.repoName,
+        repoOwner: activity.repoOwner,
+        status: activity.status as Status,
+      })
+    );
     return {
       analysisStats: {
-        failed: statsMap["FAILED"] ?? 0,
-        pending: (statsMap["PENDING"] ?? 0) + (statsMap["NEW"] ?? 0),
-        success: statsMap["DONE"] ?? 0,
-        total: Object.values(statsMap).reduce((a, b) => a + b, 0),
+        failed: data.failedCount ?? 0,
+        new: data.newCount ?? 0,
+        pending: data.pendingCount ?? 0,
+        success: data.successCount ?? 0,
+        total: data.totalCount ?? 0,
       },
       highlights: {
-        mostCritical:
-          worstRepo == null ? null : { name: worstRepo.repo.name, score: worstRepo.score ?? 0 },
-        topPerformer:
-          bestRepo == null ? null : { name: bestRepo.repo.name, score: bestRepo.score ?? 0 },
+        mostCritical: data.worstRepo as unknown as ExtremeRepoDto | null,
+        topPerformer: data.bestRepo as unknown as ExtremeRepoDto | null,
       },
-      languages: topLanguages,
+      languages: data.languages as unknown as LanguageDto[],
       overview: {
-        avgComplexityScore: Math.round(aggregates._avg.complexityScore ?? 0),
-        avgHealthScore: Math.round(aggregates._avg.score ?? 0),
-        avgOnboardingScore: Math.round(aggregates._avg.onboardingScore ?? 0),
-        avgSecurityScore: Math.round(aggregates._avg.securityScore ?? 0),
-        avgTechDebtScore: Math.round(aggregates._avg.techDebtScore ?? 0),
-        criticalRepoCount,
-        docsCount,
-        repoCount,
-        totalLoc: globalTotalLoc,
+        avgComplexityScore: Math.round(data.avgComplexity ?? 0),
+        avgHealthScore: Math.round(data.avgHealth ?? 0),
+        avgOnboardingScore: Math.round(data.avgOnboarding ?? 0),
+        avgSecurityScore: Math.round(data.avgSecurity ?? 0),
+        avgTechDebtScore: Math.round(data.avgTechDebt ?? 0),
+        complexityDelta: data.complexityDelta ?? 0,
+        criticalRepoCount: data.criticalRepoCount ?? 0,
+        docsCount: data.docCount ?? 0,
+        healthDelta: data.healthDelta ?? 0,
+        onboardingDelta: data.onboardingDelta ?? 0,
+        repoCount: data.repoCount ?? 0,
+        securityDelta: data.securityDelta ?? 0,
+        techDebtDelta: data.techDebtDelta ?? 0,
+        totalLoc: data.totalLoc ?? 0,
       },
-      recentActivity: recentAnalyses.map((a) => ({
-        createdAt: a.createdAt,
-        id: a.publicId,
-        progress: a.progress,
-        repoName: a.repo.name,
-        repoOwner: a.repo.owner,
-        status: a.status,
-      })),
+      recentActivity,
+      risks: {
+        busFactorRepos: data.busFactorRepos ?? 0,
+        topCoupling: data.topCoupling as unknown as CouplingDto[],
+        topHotspots: data.topHotspots as unknown as HotspotDto[],
+      } satisfies RisksDto,
     };
   },
 
-  async getTrends(db: DbClient) {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  getEmptyDashboardStats() {
+    return {
+      analysisStats: { failed: 0, new: 0, pending: 0, success: 0, total: 0 },
+      highlights: { mostCritical: null, topPerformer: null },
+      languages: [],
+      overview: {
+        avgComplexityScore: 0,
+        avgHealthScore: 0,
+        avgOnboardingScore: 0,
+        avgSecurityScore: 0,
+        avgTechDebtScore: 0,
+        complexityDelta: 0,
+        criticalRepoCount: 0,
+        docsCount: 0,
+        healthDelta: 0,
+        onboardingDelta: 0,
+        repoCount: 0,
+        securityDelta: 0,
+        techDebtDelta: 0,
+        totalLoc: 0,
+      },
+      recentActivity: [],
+      risks: { busFactorRepos: 0, topCoupling: [], topHotspots: [] },
+    };
+  },
 
-    const analyses = await db.analysis.findMany({
-      orderBy: { createdAt: "asc" },
-      select: {
-        complexityScore: true,
-        createdAt: true,
-        onboardingScore: true,
-        score: true,
-        securityScore: true,
-        techDebtScore: true,
-      },
-      where: {
-        createdAt: { gte: thirtyDaysAgo },
-        status: "DONE",
-      },
-    });
+  async getTrends(db: DbClient, input: StatsInput, userId: number) {
+    let startDate: Date;
+    let endDate = input.to ?? new Date();
+
+    if (input.period != null && input.period !== "custom") {
+      endDate = new Date();
+      startDate = this.calculatePeriodStart(input.period, endDate);
+    } else {
+      startDate = input.from ?? subDays(endDate, 30);
+    }
+
+    const trends = await db.$queryRawTyped(getTrends(userId, startDate, endDate));
 
     const dateFormatter = new Intl.DateTimeFormat("en-US", {
       day: "numeric",
@@ -186,49 +191,18 @@ export const analyticsService = {
       timeZone: "UTC",
     });
 
-    const grouped = new Map<
-      string,
-      {
-        compSum: number;
-        count: number;
-        debtSum: number;
-        healthSum: number;
-        onbSum: number;
-        secSum: number;
-      }
-    >();
+    return trends.map((t) => {
+      const dateKey = t.dateKey ?? new Date();
 
-    analyses.forEach((a) => {
-      const dateKey = a.createdAt.toISOString().slice(0, 10);
-
-      if (!grouped.has(dateKey)) {
-        grouped.set(dateKey, {
-          compSum: 0,
-          count: 0,
-          debtSum: 0,
-          healthSum: 0,
-          onbSum: 0,
-          secSum: 0,
-        });
-      }
-
-      const entry = grouped.get(dateKey)!;
-      entry.healthSum += a.score ?? 0;
-      entry.secSum += a.securityScore ?? 0;
-      entry.compSum += a.complexityScore ?? 0;
-      entry.onbSum += a.onboardingScore ?? 0;
-      entry.debtSum += a.techDebtScore ?? 0;
-      entry.count += 1;
+      return {
+        complexity: t.complexity ?? 0,
+        date: dateFormatter.format(dateKey),
+        fullDate: dateKey.toISOString().slice(0, 10),
+        health: t.health ?? 0,
+        onboarding: t.onboarding ?? 0,
+        security: t.security ?? 0,
+        techDebt: t.techDebt ?? 0,
+      };
     });
-
-    return Array.from(grouped.entries()).map(([fullDate, data]) => ({
-      complexity: Math.round(data.compSum / data.count),
-      date: dateFormatter.format(new Date(`${fullDate}T00:00:00.000Z`)),
-      fullDate,
-      health: Math.round(data.healthSum / data.count),
-      onboarding: Math.round(data.onbSum / data.count),
-      security: Math.round(data.secSum / data.count),
-      techDebt: Math.round(data.debtSum / data.count),
-    }));
   },
 };

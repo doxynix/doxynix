@@ -12,14 +12,13 @@ const badgeVariants = cva(
     },
     variants: {
       variant: {
-        default:
-          "border-border/60 bg-primary text-primary-foreground [a&]:hover:border-border-strong",
+        default: "border-border bg-primary text-primary-foreground [a&]:hover:border-border-strong",
         destructive:
           "border-transparent bg-destructive text-destructive-foreground [a&]:hover:opacity-95 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border-border bg-background/70 text-foreground [a&]:hover:border-border-strong [a&]:hover:bg-surface-hover [a&]:hover:text-foreground",
+          "border-border bg-background text-foreground [a&]:hover:border-border-strong [a&]:hover:bg-surface-hover [a&]:hover:text-foreground",
         secondary:
-          "border-border/60 bg-secondary text-secondary-foreground [a&]:hover:border-border-strong [a&]:hover:bg-surface-hover",
+          "border-border bg-secondary text-secondary-foreground [a&]:hover:border-border-strong [a&]:hover:bg-surface-hover",
       },
     },
   }

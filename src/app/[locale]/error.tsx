@@ -87,7 +87,7 @@ export default function ErrorPage({
         <p className="text-muted-foreground text-left text-xs font-semibold tracking-wider uppercase">
           {t("request_id_label")}
         </p>
-        <div className="bg-muted/50 border-border space-y-3 rounded-xl border p-2 text-left">
+        <div className="bg-muted border-border space-y-3 rounded-xl border p-2 text-left">
           <div className="group flex items-center justify-between">
             <code className="text-xs break-all">
               {requestId ?? error.digest ?? "System Failure"}
@@ -100,8 +100,8 @@ export default function ErrorPage({
           </div>
 
           {IS_DEV && (
-            <div className="border-border/50 border-t pt-2">
-              <p className="text-destructive/70 text-xs font-semibold uppercase">Debug Error:</p>
+            <div className="border-border border-t pt-2">
+              <p className="text-destructive text-xs font-semibold uppercase">Debug Error:</p>
               <p className="text-destructive truncate text-xs">{error.message}</p>
             </div>
           )}

@@ -59,7 +59,7 @@ export function PricingSection() {
   ];
 
   return (
-    <section className="bg-landing-bg-light/20 border-border/70 border-y py-24">
+    <section className="bg-landing-bg-light/20 border-border border-y py-24">
       <div className="container mx-auto px-4">
         <h2 className="mb-16 text-center text-3xl font-bold md:text-5xl">
           {t("section_pricing_title_prefix")}{" "}

@@ -26,6 +26,7 @@ import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
 import { SkipLink } from "@/shared/ui/kit/skip-link";
 import { routing } from "@/i18n/routing";
 
+import { getServerAuthSession } from "@/server/shared/infrastructure/auth";
 import { ourFileRouter } from "@/server/shared/infrastructure/uploadthing";
 
 import { Providers } from "../providers";
@@ -138,6 +139,7 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const { locale } = await params;
+  const session = await getServerAuthSession();
 
   if (!routing.locales.includes(locale as Locale)) {
     notFound();
@@ -167,17 +169,12 @@ export default async function LocaleLayout({
               defaultTheme={themeCookie}
               storageKey="doxynix-theme"
             >
-              <Toaster
-                // richColors
-                duration={4000}
-                gap={8}
-                position="top-center"
-              />
+              <Toaster duration={4000} gap={8} position="top-center" />
               <NextTopLoader color="var(--foreground)" showSpinner={false} zIndex={9999} />
               <Suspense>
                 <UTSSR />
               </Suspense>
-              <Providers>{children}</Providers>
+              <Providers session={session}>{children}</Providers>
               {IS_PROD && (
                 <>
                   <Analytics />

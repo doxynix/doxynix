@@ -128,7 +128,7 @@ export const RepoNode = ({ data }: Props) => {
       <Card className="w-96">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {isGroup ? <Folder className="fill-current" /> : <File className="h-4 w-4" />}
+            {isGroup ? <Folder className="fill-current" /> : <File />}
             <span className="flex-1 truncate text-xs font-bold">{label}</span>
             <Badge variant="outline">{data.kind}</Badge>
           </CardTitle>

@@ -77,8 +77,8 @@ export const RealtimeProvider = ({ children }: Props) => {
           status: RepoStatus;
         };
 
-        utils.analytics.getDashboardStats.setData(undefined, (oldData) => {
-          if (!oldData) return oldData;
+        utils.analytics.getDashboardStats.setData({}, (oldData) => {
+          if (oldData == null) return oldData;
 
           return {
             ...oldData,

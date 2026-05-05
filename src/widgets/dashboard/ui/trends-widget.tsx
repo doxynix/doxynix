@@ -3,12 +3,14 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
+import { useQueryStates } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import type { ChartConfig } from "@/shared/ui/core/chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 
+import { dashboardParsers } from "../model/dashboard-parsers";
 import { TrendsWidgetsSkeleton } from "./trends-widgets-skeleton";
 
 const TrendsChart = dynamic(() => import("./trends-chart").then((m) => m.TrendsChart), {
@@ -17,7 +19,13 @@ const TrendsChart = dynamic(() => import("./trends-chart").then((m) => m.TrendsC
 });
 
 export function TrendsWidget() {
-  const { data, isLoading } = trpc.analytics.getTrends.useQuery();
+  const [urlParams] = useQueryStates(dashboardParsers);
+
+  const { data, isLoading } = trpc.analytics.getTrends.useQuery({
+    from: urlParams.from ?? undefined,
+    period: urlParams.period,
+    to: urlParams.to ?? undefined,
+  });
   const t = useTranslations("Dashboard");
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -29,12 +37,14 @@ export function TrendsWidget() {
     techDebt: { color: "var(--chart-5)", label: "Tech Debt" },
   } satisfies ChartConfig;
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return <TrendsWidgetsSkeleton />;
   }
 
+  const hasData = Array.isArray(data) && data.length > 0;
+
   return (
-    <Card className="border-border/80 bg-card">
+    <Card>
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
           <CardTitle className="text-xl">{t("trends_title")}</CardTitle>
@@ -42,7 +52,7 @@ export function TrendsWidget() {
         </div>
         <div className="flex items-center px-6 py-4 sm:py-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="ml-auto">
-            <TabsList>
+            <TabsList className="flex items-center gap-1">
               <TabsTrigger value="overview" className="text-xs">
                 Overview
               </TabsTrigger>
@@ -58,7 +68,13 @@ export function TrendsWidget() {
       </CardHeader>
 
       <CardContent className="pt-6">
-        <TrendsChart activeTab={activeTab} chartConfig={chartConfig} data={data} />
+        {hasData === false ? (
+          <div className="flex h-80 w-full flex-col items-center justify-center gap-2 rounded-xl border">
+            <p className="text-muted-foreground text-sm">No data</p>
+          </div>
+        ) : (
+          <TrendsChart activeTab={activeTab} chartConfig={chartConfig} data={data} />
+        )}
       </CardContent>
     </Card>
   );

@@ -19,7 +19,7 @@ const SelectTrigger = forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "transition-standard border-input ring-offset-background data-placeholder:text-muted-foreground focus-visible:ring-ring bg-background/80 focus-visible:border-border-accent flex h-9 w-full items-center justify-between rounded-xl border px-3 py-2 text-sm whitespace-nowrap focus-visible:ring-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+      "transition-standard border-input ring-offset-background data-placeholder:text-muted-foreground focus-visible:ring-ring/50 bg-background/80 focus-visible:border-border-accent flex h-9 w-full items-center justify-between rounded-xl border px-3 py-2 text-sm whitespace-nowrap focus-visible:ring-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
       className
     )}
     {...props}
@@ -111,7 +111,7 @@ const SelectItem = forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "transition-standard text-muted-foreground data-highlighted:text-foreground data-highlighted:bg-accent relative flex w-full cursor-default items-center rounded-lg border border-transparent py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50",
+      "transition-standard data-[state=checked]:text-foreground text-muted-foreground data-highlighted:text-foreground data-highlighted:bg-accent relative flex w-full cursor-default items-center rounded-lg border border-transparent py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50",
       className
     )}
     {...props}

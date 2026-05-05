@@ -56,7 +56,7 @@ export function PublicHeaderWrapper({ children }: Readonly<{ children: ReactNode
         }}
         onFocusCapture={() => setIsHidden(false)}
         className={
-          "transition-standard supports-backdrop-filter:bg-background/64 glass-panel border-border/80 bg-background/76 fixed top-0 z-50 w-full border-b"
+          "transition-standard supports-backdrop-filter:bg-background/64 glass-panel border-border bg-background/76 fixed top-0 z-50 w-full border-b"
         }
       >
         <div className="transition-standard relative border-b border-transparent">{children}</div>

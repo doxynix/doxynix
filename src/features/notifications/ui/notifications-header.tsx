@@ -31,7 +31,7 @@ type Props = {
 type TabItem = { count?: number; id: string; label: string; value: string };
 
 export function NotificationsHeader({ stats }: Readonly<Props>) {
-  const [filters, setFilters] = useQueryStates(notificationsParsers, { shallow: true });
+  const [filters, setFilters] = useQueryStates(notificationsParsers);
 
   const tabValue = filters.isRead === null ? "all" : filters.isRead ? "read" : "unread";
 

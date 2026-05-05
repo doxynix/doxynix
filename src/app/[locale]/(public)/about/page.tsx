@@ -111,7 +111,7 @@ export default async function AboutPage() {
             >
               <div className="space-y-4">
                 <div className="flex size-12 items-center justify-center rounded-xl border transition-colors">
-                  <feature.icon className="text-foreground/60 size-6" />
+                  <feature.icon className="text-foreground size-6" />
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-foreground text-lg font-semibold">{feature.title}</h3>

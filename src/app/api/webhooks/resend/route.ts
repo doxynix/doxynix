@@ -11,23 +11,37 @@ import { logger } from "@/server/shared/infrastructure/logger";
 import { maskEmail, normalizeEmail } from "@/server/shared/lib/email-guard";
 import { buildRequestStore, requestContext } from "@/server/shared/lib/request-context";
 
-const resendWebhookSchema = z.object({
-  created_at: z.string(),
-  data: z.object({
-    bounce: z
-      .object({
-        sub_type: z.string(),
-        type: z.string(),
-      })
-      .optional(),
-    email_id: z.string(),
-    from: z.string().optional(),
-    subject: z.string().optional(),
-    to: z.array(z.string()),
-  }),
-  id: z.string(),
-  type: z.string(),
-});
+const resendWebhookSchema = z
+  .object({
+    created_at: z.string(),
+    data: z.looseObject({
+      bounce: z
+        .looseObject({
+          message: z.string(),
+          subType: z.string(),
+          type: z.string(),
+        })
+        .optional(),
+      email_id: z.string(),
+      failed: z
+        .looseObject({
+          reason: z.string(),
+        })
+        .optional(),
+      from: z.string().optional(),
+      subject: z.string().optional(),
+      suppressed: z
+        .looseObject({
+          message: z.string(),
+          reason: z.string().optional(),
+          type: z.string(),
+        })
+        .optional(),
+      to: z.array(z.string()),
+    }),
+    type: z.string(),
+  })
+  .loose();
 
 export async function POST(req: Request) {
   const payload = await req.text();

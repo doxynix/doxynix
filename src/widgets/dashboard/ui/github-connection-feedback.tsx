@@ -21,7 +21,7 @@ export function GithubConnectionFeedback() {
 
       posthog.capture("github_integration_success");
 
-      void setSuccess(null, { shallow: true });
+      void setSuccess(null);
     }
 
     if (error != null) {
@@ -34,7 +34,7 @@ export function GithubConnectionFeedback() {
 
       posthog.capture("github_integration_failed", { reason: error });
 
-      void setError(null, { shallow: true });
+      void setError(null);
     }
   }, [success, error, setSuccess, setError]);
 

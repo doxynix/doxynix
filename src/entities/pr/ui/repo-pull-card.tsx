@@ -20,7 +20,7 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
   return (
     <Link
       href={`/dashboard/repo/${owner}/${name}/pull/${pull.prNumber}`}
-      className="hover:bg-muted/50 flex items-center justify-between rounded-xl border p-4 transition-colors"
+      className="hover:bg-muted flex items-center justify-between rounded-xl border p-4 transition-colors"
     >
       <div className="flex items-center gap-4">
         <div className="flex items-center justify-center">

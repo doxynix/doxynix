@@ -152,7 +152,7 @@ export function AppCommandMenu() {
           aria-label="Search site"
           onClick={() => setOpen(true)}
           className={cn(
-            "text-muted-foreground lg:border-border/70 lg:bg-surface-hover/70 relative size-9 justify-start rounded-xl text-sm font-normal not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12"
+            "text-muted-foreground lg:border-border lg:bg-surface-hover relative size-9 justify-start rounded-xl text-sm font-normal not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12"
           )}
         >
           <Search className="absolute top-2.25 left-2.25" />

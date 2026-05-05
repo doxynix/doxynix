@@ -22,7 +22,7 @@ const EMPTY_DOCS: AvailableDocs = [];
 
 export function RepoDocsContainer({ id }: Readonly<Props>) {
   const { name, owner } = useRepoParams();
-  const [node] = useQueryState("node", parseAsString.withOptions({ shallow: true }));
+  const [node] = useQueryState("node", parseAsString);
   const autoSelectedNodeRef = useRef<null | string>(null);
 
   const [activeTab, setActiveTab] = useQueryState(

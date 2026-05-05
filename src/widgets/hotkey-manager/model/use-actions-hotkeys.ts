@@ -74,6 +74,7 @@ export function useGlobalActionsHotkeys(onAction?: () => void) {
       enabled: prefix != null,
       enableOnFormTags: false,
       preventDefault: true,
-    }
+    },
+    [prefix]
   );
 }

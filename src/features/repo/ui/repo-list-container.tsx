@@ -53,7 +53,7 @@ export function RepoListContainer({ config }: Readonly<Props>) {
     placeholderData: (previousData) => previousData,
   });
 
-  if (isLoading || !data) {
+  if (isLoading || data == null) {
     return (
       <>
         {config?.showTotalCount !== false && <Skeleton className="mb-4 ml-auto h-5 w-24 text-sm" />}

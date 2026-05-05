@@ -16,7 +16,7 @@ export function HeroSection() {
 
       <div className="flex h-full max-w-4xl flex-col items-center justify-between gap-6 text-center">
         <Logo isInteractive={false} className="animate-fade-in mb-8 max-h-150 max-w-150" />
-        <div className="glass-panel border-border/80 bg-landing-bg-dark/56 flex items-center justify-center rounded-full border px-3 py-1">
+        <div className="glass-panel border-border bg-landing-bg-dark/56 flex items-center justify-center rounded-full border px-3 py-1">
           <AnimatedShinyText className="transition-standard via-primary-foreground/95 inline-flex items-center justify-center bg-linear-to-r from-transparent via-50% to-transparent px-4 py-1">
             <span className="text-sm">{t("section_hero_badge")}</span>
           </AnimatedShinyText>

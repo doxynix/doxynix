@@ -178,7 +178,7 @@ const ChartTooltipContent = forwardRef<
       <div
         ref={ref}
         className={cn(
-          "border-border/70 bg-popover grid min-w-32 items-start gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs shadow-md",
+          "border-border bg-popover grid min-w-32 items-start gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs shadow-md",
           className
         )}
       >

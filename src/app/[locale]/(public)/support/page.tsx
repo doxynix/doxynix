@@ -118,11 +118,11 @@ export default async function SupportPage() {
               href={channel.href}
               rel={(channel.external ?? false) ? "noopener noreferrer" : undefined}
               target={(channel.external ?? false) ? "_blank" : undefined}
-              className="group bg-landing-bg-light/50 hover:border-border-accent hover:bg-surface-panel/60 relative cursor-pointer overflow-hidden rounded-2xl border p-8 transition-all duration-300"
+              className="group bg-landing-bg-light/50 hover:border-border-accent hover:bg-surface-panel relative cursor-pointer overflow-hidden rounded-2xl border p-8 transition-all duration-300"
             >
               <div className="relative space-y-5">
                 <div className="bg-surface-hover group-hover:border-border-accent flex size-14 items-center justify-center rounded-xl border transition-all">
-                  <channel.icon className="text-foreground/60 size-7" />
+                  <channel.icon className="text-foreground size-7" />
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-foreground text-lg font-semibold">{channel.title}</h3>

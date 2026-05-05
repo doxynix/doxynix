@@ -2,6 +2,7 @@
 import { faker } from "@faker-js/faker";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { NotifyType, PrismaClient, Status, UserRole, Visibility } from "@prisma/client";
+import { subDays } from "date-fns";
 import pg from "pg";
 
 import * as Fake from "../src/generated/fake-data";
@@ -97,6 +98,64 @@ function createStressNotification(index: number, repoIds: number[], userId: numb
     type: notificationType,
     userId,
   });
+}
+
+const TECH_POOL = [
+  "Docker",
+  "Kubernetes",
+  "Redis",
+  "Kafka",
+  "PostgreSQL",
+  "React",
+  "Next.js",
+  "Tailwind",
+  "gRPC",
+  "GraphQL",
+  "Go Fiber",
+  "Prisma",
+];
+
+function generateMetricsJson(repoName: string, isBad: boolean) {
+  const techStack = faker.helpers.arrayElements(TECH_POOL, { max: 4, min: 2 });
+
+  const hotspotSignals = [
+    { complexity: 40, path: "src/internal/core.go", score: isBad ? 85 : 20 },
+    { complexity: 30, path: "src/api/handler.go", score: isBad ? 70 : 15 },
+    { complexity: 10, path: "config/settings.yaml", score: isBad ? 95 : 5 },
+  ];
+
+  const changeCoupling = [
+    {
+      commits: faker.number.int({ max: 20, min: 5 }),
+      fromPath: "src/models/user.go",
+      toPath: "src/services/auth.go",
+    },
+    {
+      commits: faker.number.int({ max: 15, min: 3 }),
+      fromPath: "api/routes.ts",
+      toPath: "docs/openapi.yaml",
+    },
+  ];
+
+  const securityFindings = isBad
+    ? [
+        { message: "Hardcoded credentials found", severity: "error" },
+        { message: "Insecure TLS configuration", severity: "warning" },
+      ]
+    : [];
+
+  return {
+    busFactor: isBad ? 1 : faker.number.int({ max: 5, min: 2 }),
+    changeCoupling,
+    hotspotSignals,
+    languages: [
+      { color: "#00ADD8", lines: faker.number.int({ max: 5000, min: 1000 }), name: "Go" },
+      { color: "#3178c6", lines: faker.number.int({ max: 2000, min: 500 }), name: "TypeScript" },
+    ],
+    securityFindings,
+    techStack,
+    totalLoc: faker.number.int({ max: 50_000, min: 5000 }),
+  };
 }
 
 async function seedStressProfile() {
@@ -204,8 +263,54 @@ async function main() {
   });
   console.log(`Admin ready: ${admin.email}`);
 
+  const adminReposData = Array.from({ length: 5 }).map(() => {
+    const repoName = `admin-project-${faker.string.alphanumeric(4)}`;
+    // const isCritical = rIdx === 0;
+
+    return clean({
+      ...Fake.fakeRepo(),
+      analyses: {
+        create: [
+          clean({
+            ...Fake.fakeAnalysis(),
+            complexityScore: faker.number.int({ max: 40, min: 20 }),
+            createdAt: subDays(new Date(), 40),
+            metricsJson: generateMetricsJson(repoName, true),
+            onboardingScore: faker.number.int({ max: 90, min: 75 }),
+            score: 45,
+            securityScore: faker.number.int({ max: 50, min: 30 }),
+            status: Status.DONE,
+            techDebtScore: faker.number.int({ max: 30, min: 10 }),
+          }),
+          clean({
+            ...Fake.fakeAnalysis(),
+            complexityScore: faker.number.int({ max: 40, min: 20 }),
+            createdAt: new Date(),
+            metricsJson: generateMetricsJson(repoName, false),
+            onboardingScore: faker.number.int({ max: 90, min: 75 }),
+            score: 85,
+            securityScore: faker.number.int({ max: 100, min: 70 }),
+            status: Status.DONE,
+            techDebtScore: faker.number.int({ max: 30, min: 10 }),
+          }),
+        ],
+      },
+      description: "Admin seed repository for dashboard testing",
+      githubId: faker.number.int({ max: 2_000_000_000, min: 100_000_000 }),
+      name: repoName,
+      userId: admin.id,
+    });
+  });
+
+  for (const repo of adminReposData) {
+    await prisma.repo.create({ data: repo });
+  }
+
   console.log("Creating more users...");
+
   for (let index = 0; index < LIGHT_USER_COUNT; index++) {
+    // const isProblematicUser = index % 5 === 0;
+
     const user = await prisma.user.create({
       data: clean({
         ...Fake.fakeUser(),
@@ -216,34 +321,65 @@ async function main() {
         image: faker.image.avatar(),
         name: faker.person.fullName(),
         repos: {
-          create: Array.from({ length: LIGHT_REPOS_PER_USER }).map(() =>
-            clean({
+          create: Array.from({ length: LIGHT_REPOS_PER_USER }).map(() => {
+            const repoName = `${faker.word.noun()}-${faker.string.alphanumeric(4)}`;
+            // const isCriticalRepo = isProblematicUser && rIdx === 0;
+
+            return clean({
               ...Fake.fakeRepo(),
               analyses: {
                 create: [
                   clean({
                     ...Fake.fakeAnalysis(),
+                    complexityScore: faker.number.int({ max: 90, min: 70 }),
+                    createdAt: faker.date.between({
+                      from: new Date(Date.now() - 55 * 24 * 60 * 60 * 1000),
+                      to: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000),
+                    }),
+                    metricsJson: generateMetricsJson(repoName, true),
+                    onboardingScore: faker.number.int({ max: 40, min: 20 }),
                     progress: 100,
-                    score: faker.number.int({ max: 100, min: 1 }),
+                    score: faker.number.int({ max: 55, min: 40 }),
+                    securityScore: faker.number.int({ max: 50, min: 30 }),
                     status: Status.DONE,
+                    techDebtScore: faker.number.int({ max: 80, min: 60 }),
                   }),
                   clean({
                     ...Fake.fakeAnalysis(),
+                    complexityScore: faker.number.int({ max: 40, min: 20 }),
+                    createdAt: faker.date.recent({ days: 10 }),
+                    metricsJson: generateMetricsJson(repoName, false),
+                    onboardingScore: faker.number.int({ max: 90, min: 70 }),
+                    progress: 100,
+                    score: faker.number.int({ max: 95, min: 75 }),
+                    securityScore: faker.number.int({ max: 100, min: 80 }),
+                    status: Status.DONE,
+                    techDebtScore: faker.number.int({ max: 30, min: 10 }),
+                  }),
+                  clean({
+                    ...Fake.fakeAnalysis(),
+                    createdAt: new Date(),
                     progress: faker.number.int({ max: 99, min: 1 }),
                     status: Status.PENDING,
                   }),
                 ],
               },
               description: faker.lorem.sentence(),
+              documents: {
+                create: [
+                  { content: "# Mock", type: "README", version: "1.0" },
+                  { content: "## API", type: "API", version: "1.0" },
+                ],
+              },
               forks: faker.number.int({ max: 5000 }),
               githubId: faker.number.int({ max: 100_000_000 }),
-              name: `${faker.word.noun()}-${faker.string.alphanumeric(4)}`,
+              name: repoName,
               openIssues: faker.number.int({ max: 100 }),
               size: faker.number.int({ max: 100_000 }),
               stars: faker.number.int({ max: 10_000 }),
               url: faker.internet.url(),
-            })
-          ),
+            });
+          }),
         },
       }),
     });
@@ -276,17 +412,17 @@ async function main() {
       })
     ),
   });
-
-  console.log("Seeding completed. Database is now full of life.");
 }
-
-try {
-  await main();
-  await prisma.$disconnect();
-  await pool.end();
-} catch (error) {
-  console.error("Seeding failed:", error);
-  await prisma.$disconnect();
-  await pool.end();
-  process.exit(1);
-}
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+    await pool.end();
+    console.log("Seeding completed. Database is now full of life.");
+  })
+  // eslint-disable-next-line unicorn/prefer-top-level-await
+  .catch(async (error) => {
+    console.error("Seeding failed:", error);
+    await prisma.$disconnect();
+    await pool.end();
+    process.exit(1);
+  });
