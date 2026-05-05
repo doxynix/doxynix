@@ -41,7 +41,8 @@ export function useNavigationHotkeys(onAction?: () => void) {
       const pressedKey = handler.hotkey;
       setPrefix(pressedKey);
     },
-    { enableOnFormTags: false, preventDefault: true }
+    { enableOnFormTags: false, preventDefault: true },
+    [prefix]
   );
 
   useHotkeys(
@@ -70,6 +71,7 @@ export function useNavigationHotkeys(onAction?: () => void) {
 
       setPrefix(null);
     },
-    { enabled: prefix != null, enableOnFormTags: false, preventDefault: true }
+    { enabled: prefix != null, enableOnFormTags: false, preventDefault: true },
+    [prefix]
   );
 }

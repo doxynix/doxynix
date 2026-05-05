@@ -201,6 +201,7 @@
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
     "cookie": "0.7.2",
+    "date-fns": "4.1.0",
     "detect-language": "3.0.0",
     "disposable-email-domains": "1.0.62",
     "elkjs": "0.11.1",
@@ -238,11 +239,12 @@
     "picomatch": "4.0.4",
     "pino": "10.3.1",
     "posthog-js": "1.372.6",
-    "prisma-field-encryption": "1.6.0",
     "posthog-node": "5.32.1",
+    "prisma-field-encryption": "1.6.0",
     "react": "19.2.5",
     "react-arborist": "3.5.0",
     "react-codemirror-merge": "4.25.9",
+    "react-day-picker": "9.14.0",
     "react-dom": "19.2.5",
     "react-hook-form": "7.74.0",
     "react-hotkeys-hook": "5.3.0",
@@ -399,5 +401,5 @@
     "zenstack": "2.22.1",
     "zod-prisma-types": "3.3.10"
   },
-  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8"
+  "packageManager": "pnpm@10.33.3+sha512.a19744364a7e248b92657a4ca5973f9354d21caf982579674b1c539f32c7420c47138ad8b1254df07aba9bc782d9b3029e3db34d5dbff974326eb74dac8ff489"
 }

@@ -228,9 +228,9 @@ export function AuthForm() {
 
           <div className="grid gap-3 sm:grid-cols-2">
             {AUTH_BENEFITS.map((item) => (
-              <div key={item.title} className="bg-card/70 border-border/70 rounded-2xl border p-5">
+              <div key={item.title} className="bg-card border-border rounded-2xl border p-5">
                 <div className="flex items-center gap-3">
-                  <span className="bg-primary/10 border-border/70 flex size-9 items-center justify-center rounded-full border">
+                  <span className="bg-primary/10 border-border flex size-9 items-center justify-center rounded-full border">
                     <item.icon className="text-foreground" />
                   </span>
                   <p className="text-foreground text-sm font-medium">{item.title}</p>
@@ -253,7 +253,7 @@ export function AuthForm() {
           <div
             inert={isSent ? true : undefined}
             className={cn(
-              "bg-card/80 border-border/80 relative flex w-full flex-col gap-6 rounded-[1.75rem] border p-6 transition-all ease-out sm:p-8",
+              "bg-card border-border relative flex w-full flex-col gap-6 rounded-[1.75rem] border p-6 transition-all ease-out sm:p-8",
               isSent
                 ? "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
                 : "relative scale-100 opacity-100"
@@ -281,7 +281,7 @@ export function AuthForm() {
                   loadingText={t("login_loading")}
                   variant="outline"
                   onClick={() => void handleSignIn(item.provider)}
-                  className="text-foreground border-border/80 bg-background/60 hover:bg-surface-hover w-full cursor-pointer rounded-2xl px-3 py-5"
+                  className="text-foreground border-border bg-background hover:bg-surface-hover w-full cursor-pointer rounded-2xl px-3 py-5"
                 >
                   <div className="flex w-full items-center justify-center gap-3">
                     <div className="flex min-w-0 items-center gap-3">
@@ -297,14 +297,14 @@ export function AuthForm() {
 
             <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">
-                <span className="border-border/80 w-full border-t" />
+                <span className="border-border w-full border-t" />
               </div>
               <div className="relative flex justify-center text-[0.7rem] uppercase">
                 <span className="text-muted-foreground bg-card px-3">{t("or_divider")}</span>
               </div>
             </div>
 
-            <div className="bg-background/40 border-border/70 flex flex-col gap-4 rounded-[1.35rem] border p-5">
+            <div className="bg-background border-border flex flex-col gap-4 rounded-[1.35rem] border p-5">
               <div className="space-y-1">
                 <p className="text-foreground text-sm font-medium">Work email</p>
                 <p className="text-muted-foreground text-sm">
@@ -371,7 +371,7 @@ export function AuthForm() {
           <div
             inert={!isSent ? true : undefined}
             className={cn(
-              "bg-card/80 border-border/80 relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border p-8 text-center transition-all ease-out",
+              "bg-card border-border relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border p-8 text-center transition-all ease-out",
               isSent
                 ? "relative scale-100 opacity-100"
                 : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"

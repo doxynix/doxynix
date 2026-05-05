@@ -8,7 +8,7 @@ import type { RepoMapNodeData } from "../model/repo-map-types";
 
 export function RepoMapSearchPanel() {
   const { fitView, setNodes } = useReactFlow();
-  const [params] = useQueryStates({ search: parseAsString.withDefault("") }, { shallow: true });
+  const [params] = useQueryStates({ search: parseAsString.withDefault("") });
   const nodes = useNodes<Node<RepoMapNodeData>>();
 
   const lastQueryRef = useRef(params.search);

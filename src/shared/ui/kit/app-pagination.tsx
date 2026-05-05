@@ -26,10 +26,7 @@ type Props = {
 export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
   const t = useTranslations("Common");
 
-  const [page, setPage] = useQueryState(
-    "page",
-    parseAsInteger.withDefault(1).withOptions({ shallow: true })
-  );
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
   const [isPending, startTransition] = useTransition();
   const [clickedButton, setClickedButton] = useState<"next" | "prev" | null | number>(null);

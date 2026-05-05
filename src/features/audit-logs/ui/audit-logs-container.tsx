@@ -25,7 +25,7 @@ export function AuditLogsContainer() {
   const allLogs = data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
-    <div className="bg-card border-border/40 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border">
+    <div className="bg-card border-border flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border">
       <div className="custom-scrollbar relative flex-1 overflow-auto">
         <AuditLogList logs={allLogs} />
 
@@ -36,6 +36,7 @@ export function AuditLogsContainer() {
             size="sm"
             variant="ghost"
             onClick={() => void fetchNextPage()}
+            className="flex w-full items-center justify-center rounded-t-none"
           >
             <ChevronDown /> Load more
           </LoadingButton>

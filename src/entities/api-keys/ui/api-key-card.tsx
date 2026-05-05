@@ -51,7 +51,7 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
           value={maskValue}
           readOnly
           aria-label="Key prefix"
-          className="bg-surface-hover text-muted-foreground border-border/80 truncate rounded-xl border p-2 font-mono text-xs"
+          className="bg-surface-hover text-muted-foreground border-border truncate rounded-xl border p-2 font-mono text-xs"
         />
       </CardContent>
     </Card>

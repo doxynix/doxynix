@@ -33,7 +33,7 @@ export async function BrandsSection() {
   return (
     <section
       id="brands"
-      className="glass-panel bg-landing-bg-light/55 border-border/70 relative border-y py-12"
+      className="glass-panel bg-landing-bg-light/55 border-border relative border-y py-12"
     >
       <div className="mx-auto">
         <p className="text-muted-foreground mb-8 text-center text-sm font-medium tracking-widest uppercase">
@@ -44,7 +44,7 @@ export async function BrandsSection() {
             {BRANDS.map((tech) => (
               <div
                 key={tech.name}
-                className="transition-standard text-muted-foreground hover:border-border/80 hover:bg-card/70 hover:text-foreground flex cursor-default items-center gap-2 rounded-2xl border border-transparent px-3 py-3 text-xl font-semibold grayscale hover:grayscale-0 sm:px-8"
+                className="transition-standard text-muted-foreground hover:border-border hover:bg-card hover:text-foreground flex cursor-default items-center gap-2 rounded-2xl border border-transparent px-3 py-3 text-xl font-semibold grayscale hover:grayscale-0 sm:px-8"
               >
                 <tech.icon />
               </div>

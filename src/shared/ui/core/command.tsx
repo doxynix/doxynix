@@ -146,7 +146,7 @@ const CommandShortcut = ({ className, ...props }: HTMLAttributes<HTMLSpanElement
   return (
     <kbd
       className={cn(
-        "text-muted-foreground bg-surface-hover border-border/80 ml-auto flex h-5 items-center rounded border px-1.5 text-xs tracking-widest",
+        "text-muted-foreground bg-surface-hover border-border ml-auto flex h-5 items-center rounded border px-1.5 text-xs tracking-widest",
         className
       )}
       {...props}

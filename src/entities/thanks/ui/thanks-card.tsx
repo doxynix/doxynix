@@ -48,7 +48,7 @@ export function ThanksCard({ group }: Readonly<Props>) {
           <div className="flex flex-wrap gap-1.5">
             {packages.map((pkg) => (
               <Badge key={pkg.name} variant="outline">
-                <Package className="text-muted-foreground/70 size-3" />
+                <Package className="text-muted-foreground size-3" />
                 <span className="truncate">
                   {pkg.name.includes("/") ? (
                     <>

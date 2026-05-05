@@ -59,17 +59,19 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
           </Button>
         </SheetTrigger>
       </AppTooltip>
-      <SheetContent className="p-4 sm:max-w-xl">
-        <div className="flex h-full flex-col">
-          <SheetHeader>
+      <SheetContent className="flex flex-col gap-6 p-6 sm:max-w-2xl">
+        <div className="grid h-full grid-rows-[auto_1fr] gap-6">
+          <SheetHeader className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <SheetTitle>Event Details</SheetTitle>
+                <SheetTitle className="text-xl font-semibold tracking-tight">
+                  Event Details
+                </SheetTitle>
                 <SheetDescription className="text-muted-foreground text-xs">
                   {log.entityType} • {log.actionTitle}
                 </SheetDescription>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 <CopyButton
                   value={formattedJson}
                   tooltipText="Copy JSON"
@@ -86,27 +88,23 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                 </Button>
               </div>
             </div>
-            <div className="border-border grid grid-cols-2 gap-0 overflow-hidden rounded-xl border">
+
+            <div className="divide-border border-border bg-muted/5 grid grid-cols-2 divide-x divide-y overflow-hidden rounded-xl border">
               <MetaItem
                 value={log.requestId ?? "N/A"}
                 isCopy
                 copyValue={log.requestId ?? ""}
                 icon={Hash}
                 label="Request ID"
-                className="border-r border-b p-4"
+                className="p-4"
               />
               <MetaItem
                 value={log.ip ?? "system"}
                 icon={Globe}
                 label="IP Address"
-                className="border-b p-4"
+                className="p-4"
               />
-              <MetaItem
-                value={log.browser}
-                icon={Shield}
-                label="User Agent"
-                className="border-r p-4"
-              />
+              <MetaItem value={log.browser} icon={Shield} label="User Agent" className="p-4" />
               <MetaItem
                 value={formatFullDate(log.createdAt, locale)}
                 icon={Clock}
@@ -116,14 +114,20 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
             </div>
           </SheetHeader>
           <div className="relative flex-1 rounded-xl border">
-            <ScrollArea className="h-full">
+            <ScrollArea className="h-full w-full">
               <div className="p-6">
                 {isLoading ? (
                   <Skeleton className="h-40 w-full" />
                 ) : (
                   <div
                     dangerouslySetInnerHTML={{ __html: html ?? "" }}
-                    className={cn("text-sm", "[&>pre]:bg-transparent!")}
+                    className={cn(
+                      "w-full text-sm",
+                      "[&_pre]:!p-0[&_pre]:!m-0 [&_pre]:bg-transparent!",
+                      "[&_pre]:break-all! [&_pre]:whitespace-pre-wrap!",
+                      "[&_code]:break-all! [&_code]:whitespace-pre-wrap!",
+                      "[&_.line]:inline! [&_.line]:break-all! [&_.line]:whitespace-pre-wrap!"
+                    )}
                   />
                 )}
               </div>

@@ -39,10 +39,7 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const { name, owner } = useRepoParams();
-  const [search] = useQueryState(
-    "search",
-    parseAsString.withDefault("").withOptions({ shallow: true })
-  );
+  const [search] = useQueryState("search", parseAsString.withDefault(""));
 
   const [prevSearch, setPrevSearch] = useState(search);
   if (search !== prevSearch) {

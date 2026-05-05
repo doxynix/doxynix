@@ -46,7 +46,7 @@ export function WelcomeFlow({ user }: Readonly<Props>) {
   return (
     <div className="flex w-full max-w-5xl flex-col items-center gap-12 sm:gap-16">
       <div className="animate-in fade-in zoom-in-95 w-full max-w-md duration-300 ease-out">
-        <Card className="border-border/70">
+        <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold tracking-tight">
               What should we call you?
@@ -69,7 +69,7 @@ export function WelcomeFlow({ user }: Readonly<Props>) {
 
       <div className="animate-in fade-in slide-in-from-bottom-8 flex items-center justify-center gap-4 duration-300">
         {FEATURE_CARDS.map((item) => (
-          <Card key={item.title} className={"bg-card/50 flex w-full flex-col"}>
+          <Card key={item.title} className={"flex w-full flex-col"}>
             <CardHeader>
               <item.icon className="size-5" />
               <CardTitle className="text-lg font-bold">{item.title}</CardTitle>

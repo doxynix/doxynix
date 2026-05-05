@@ -7,8 +7,8 @@ import { useTranslations } from "next-intl";
 
 const TerminalWindow = ({ children }: { children: ReactNode }) => {
   return (
-    <div className="glass-panel border-border/80 bg-card/70 pointer-events-none flex h-full w-full flex-col overflow-hidden rounded-2xl border">
-      <div className="border-border/60 bg-muted/30 flex items-center gap-1.5 border-b p-3">
+    <div className="glass-panel border-border bg-card pointer-events-none flex h-full w-full flex-col overflow-hidden rounded-2xl border">
+      <div className="border-border bg-muted flex items-center gap-1.5 border-b p-3">
         <div className="bg-destructive/80 size-3 rounded-full" />
         <div className="bg-warning/80 size-3 rounded-full" />
         <div className="bg-success/80 size-3 rounded-full" />

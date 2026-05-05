@@ -21,9 +21,7 @@ export function RepoFilters() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
 
-  const [filters, setFilters] = useQueryStates(repoParsers, {
-    shallow: true,
-  });
+  const [filters, setFilters] = useQueryStates(repoParsers);
 
   const hasFilters =
     filters.status !== null || filters.visibility !== null || filters.sortBy !== "updatedAt";

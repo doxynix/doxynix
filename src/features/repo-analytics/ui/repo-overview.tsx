@@ -374,7 +374,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
               {data.mostComplexFiles.map((file, idx) => (
                 <div
                   key={file}
-                  className="group hover:bg-muted/50 flex items-center justify-between rounded p-1 text-sm transition-colors"
+                  className="group hover:bg-muted flex items-center justify-between rounded p-1 text-sm transition-colors"
                 >
                   <div className="flex items-center gap-2 truncate">
                     <span className="text-muted-foreground text-xs">{idx + 1}.</span>

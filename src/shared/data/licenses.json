@@ -561,33 +561,6 @@
     ]
   },
   {
-    "author": "Prisma",
-    "avatar": "https://github.com/prisma.png?size=96",
-    "authorLink": "https://github.com/prisma",
-    "packages": [
-      {
-        "name": "prisma-field-encryption",
-        "license": "MIT"
-      },
-      {
-        "name": "@prisma/adapter-pg",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "@prisma/client",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "prisma",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "@prisma/extension-accelerate",
-        "license": "Unknown"
-      }
-    ]
-  },
-  {
     "author": "Secretlint",
     "avatar": "https://github.com/secretlint.png?size=96",
     "authorLink": "https://github.com/secretlint",
@@ -638,6 +611,29 @@
       {
         "name": "zenstack",
         "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Prisma",
+    "avatar": "https://github.com/prisma.png?size=96",
+    "authorLink": "https://github.com/prisma",
+    "packages": [
+      {
+        "name": "@prisma/adapter-pg",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@prisma/client",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "prisma",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@prisma/extension-accelerate",
+        "license": "Unknown"
       }
     ]
   },
@@ -797,6 +793,21 @@
       },
       {
         "name": "vitest",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "47ng",
+    "avatar": "https://github.com/47ng.png?size=96",
+    "authorLink": "https://github.com/47ng",
+    "packages": [
+      {
+        "name": "nuqs",
+        "license": "MIT"
+      },
+      {
+        "name": "prisma-field-encryption",
         "license": "MIT"
       }
     ]
@@ -1037,17 +1048,6 @@
       },
       {
         "name": "@upstash/redis",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "47ng",
-    "avatar": "https://github.com/47ng.png?size=96",
-    "authorLink": "https://github.com/47ng",
-    "packages": [
-      {
-        "name": "nuqs",
         "license": "MIT"
       }
     ]

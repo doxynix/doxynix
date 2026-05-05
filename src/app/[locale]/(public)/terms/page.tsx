@@ -58,7 +58,7 @@ export default async function TermsPage() {
 
         <section>
           <h2 className={SECTION_TITLE}>{t("section_property_title")}</h2>
-          <div className="bg-muted/50 rounded-xl border p-4">
+          <div className="bg-muted rounded-xl border p-4">
             <p className="mb-2">{tsRich("section_property_your_data")}</p>
             <p>{tsRich("section_property_our_service")}</p>
           </div>

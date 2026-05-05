@@ -27,7 +27,7 @@ type Props = {
 };
 
 export function NotificationsBulkActions({ stats }: Readonly<Props>) {
-  const [filters] = useQueryStates(notificationsParsers, { shallow: true });
+  const [filters] = useQueryStates(notificationsParsers);
   const { deleteRead, markAllAsRead } = useNotificationActions();
   const [open, setOpen] = useState(false);
 

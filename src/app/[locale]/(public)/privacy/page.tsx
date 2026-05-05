@@ -94,7 +94,7 @@ export default async function PrivacyPage() {
         <section>
           <h2 className={SECTION_TITLE}>{t("section_third_party_title")}</h2>
           <p className="mb-3">{t("section_third_party_desc")}</p>
-          <div className="bg-muted/50 rounded-xl border p-4">
+          <div className="bg-muted rounded-xl border p-4">
             <ul className="grid gap-3 sm:grid-cols-2">
               {BRANDS.map((item) => (
                 <PrivacyListItem key={item.descKey} name={item.name} descKey={t(item.descKey)} />

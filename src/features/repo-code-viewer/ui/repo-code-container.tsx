@@ -19,8 +19,8 @@ type Props = {
 };
 
 export function RepoCodeContainer({ repo }: Readonly<Props>) {
-  const [path, setPath] = useQueryState("path", parseAsString.withOptions({ shallow: true }));
-  const [node, setNode] = useQueryState("node", parseAsString.withOptions({ shallow: true }));
+  const [path, setPath] = useQueryState("path", parseAsString);
+  const [node, setNode] = useQueryState("node", parseAsString);
   const [treeApi, setTreeApi] = useState<TreeApi<FileNode> | undefined>();
 
   const { data: nodeContext } = trpc.repoDetails.getNodeContext.useQuery(

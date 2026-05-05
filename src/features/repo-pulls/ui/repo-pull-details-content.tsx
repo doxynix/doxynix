@@ -325,7 +325,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-3 text-sm">
               {IMPACT_STATS.map((stat) => (
-                <div key={stat.label} className="bg-muted/20 rounded-lg border p-3">
+                <div key={stat.label} className="bg-muted rounded-lg border p-3">
                   <p className="text-muted-foreground mb-1 text-xs font-bold">{stat.label}</p>
                   <p className="text-lg font-black capitalize">{stat.value}</p>
                 </div>

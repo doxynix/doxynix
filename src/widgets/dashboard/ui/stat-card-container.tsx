@@ -1,21 +1,29 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { useQueryStates } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
 
 import { StatCard } from "@/entities/repo/ui/stat-card";
 import { StatCardSkeleton } from "@/entities/repo/ui/stat-card-skeleton";
 
-import { getStats } from "@/widgets/dashboard/model/get-stats";
+import { dashboardParsers } from "../model/dashboard-parsers";
+import { getStats } from "../model/get-stats";
 
 export function StatCardContainer() {
   const locale = useLocale();
   const t = useTranslations("Dashboard");
 
-  const { data, isLoading } = trpc.analytics.getDashboardStats.useQuery();
+  const [urlParams] = useQueryStates(dashboardParsers);
 
-  if (isLoading || !data) {
+  const { data, isLoading } = trpc.analytics.getDashboardStats.useQuery({
+    from: urlParams.from ?? undefined,
+    period: urlParams.period ?? undefined,
+    to: urlParams.to ?? undefined,
+  });
+
+  if (isLoading || data == null) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (

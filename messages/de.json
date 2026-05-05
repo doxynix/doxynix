@@ -78,7 +78,7 @@
     "repo_empty_title": "Keine Repositorys",
     "repo_in_progress": "Im Gange",
     "repo_last_analyzed": "Zuletzt analysiert: {dateTime}",
-    "repo_last_updated": "Letzte Aktualisierung: {dateTime}",
+    "repo_last_updated": "Letzte Aktualisierung:",
     "repo_needs_attention": "Braucht Aufmerksamkeit",
     "repo_no_results_found": "Keine Ergebnisse gefunden",
     "repo_no_results_found_for": "Keine Ergebnisse gefunden für",

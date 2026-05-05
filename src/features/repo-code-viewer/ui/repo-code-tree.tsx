@@ -52,7 +52,7 @@ export function RepoCodeTree({
 
   return (
     <div className="bg-card flex h-full flex-col">
-      <div className="border-border/40 bg-muted/20 flex flex-col gap-2 border-b p-3">
+      <div className="border-border bg-muted flex flex-col gap-2 border-b p-3">
         <div className="grid grid-cols-2 gap-2">
           <div className="relative">
             <Search className="text-muted-foreground absolute top-2.75 left-2.5 size-3.5" />

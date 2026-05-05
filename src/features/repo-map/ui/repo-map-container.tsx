@@ -26,13 +26,10 @@ const RepoMap = dynamic(() => import("./repo-map").then((m) => m.RepoMap), {
 export function RepoMapContainer({ id }: Readonly<Props>) {
   const { name, owner } = useRepoParams();
 
-  const [viewId, setViewId] = useQueryState("view", parseAsString.withOptions({ shallow: true }));
-  const [selectedId, setSelectedId] = useQueryState(
-    "node",
-    parseAsString.withOptions({ shallow: true })
-  );
-  const [, setPath] = useQueryState("path", parseAsString.withOptions({ shallow: true }));
-  const [filter, setFilter] = useQueryState("filter", parseAsString.withOptions({ shallow: true }));
+  const [viewId, setViewId] = useQueryState("view", parseAsString);
+  const [selectedId, setSelectedId] = useQueryState("node", parseAsString);
+  const [, setPath] = useQueryState("path", parseAsString);
+  const [filter, setFilter] = useQueryState("filter", parseAsString);
 
   const [displayData, setDisplayData] = useState<null | RepoMapDisplayData>(null);
 

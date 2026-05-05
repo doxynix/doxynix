@@ -149,7 +149,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
             </RepoCodeActionButton>
           </kbd>
         </div>
-        <p className="bg-muted/50 text-muted-foreground pointer-events-none rounded px-1.5 py-0.5 text-[10px] font-medium">
+        <p className="bg-muted text-muted-foreground pointer-events-none rounded px-1.5 py-0.5 text-[10px] font-medium">
           {stats.totalMatches > 0 ? `${stats.currentMatch} of ${stats.totalMatches}` : "No results"}
         </p>
         <RepoCodeActionButton

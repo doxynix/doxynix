@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { httpBatchLink, loggerLink } from "@trpc/client";
 import { LucideProvider } from "lucide-react";
+import type { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -21,6 +22,7 @@ import { RealtimeProvider } from "./_components/realtime-provider";
 
 type Props = {
   children: ReactNode;
+  session: null | Session;
 };
 
 function getBaseUrl() {
@@ -28,7 +30,7 @@ function getBaseUrl() {
   return APP_URL;
 }
 
-export function Providers({ children }: Readonly<Props>) {
+export function Providers({ children, session }: Readonly<Props>) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -59,12 +61,17 @@ export function Providers({ children }: Readonly<Props>) {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <SessionProvider>
+        <SessionProvider
+          refetchInterval={60 * 60}
+          refetchOnWindowFocus={false}
+          refetchWhenOffline={false}
+          session={session}
+        >
           <RealtimeProvider>
             <InnerProviders>{children}</InnerProviders>
           </RealtimeProvider>
         </SessionProvider>
-        {IS_DEV && <ReactQueryDevtools initialIsOpen={false} />}
+        {IS_DEV && <ReactQueryDevtools initialIsOpen={false} theme="dark" />}
       </QueryClientProvider>
     </trpc.Provider>
   );

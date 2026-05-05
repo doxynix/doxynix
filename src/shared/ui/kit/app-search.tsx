@@ -13,10 +13,9 @@ const ICON_STYLES = "text-muted-foreground absolute top-2.5 left-2.5";
 
 export function AppSearch({ placeholder }: Readonly<Props>) {
   const [{ search }, setParams] = useQueryStates({
-    page: parseAsInteger.withDefault(1).withOptions({ shallow: true }),
+    page: parseAsInteger.withDefault(1),
     search: parseAsString.withDefault("").withOptions({
       limitUrlUpdates: throttle(100),
-      shallow: true,
     }),
   });
 

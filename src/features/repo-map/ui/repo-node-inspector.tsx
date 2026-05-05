@@ -349,18 +349,18 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-muted/5 flex flex-col gap-1 rounded-md border p-2">
+            <div className="bg-muted flex flex-col gap-1 rounded-md border p-2">
               <div className="text-muted-foreground text-xs">Depends On</div>
               <div className="text-xs font-bold">{inspect.dependsOn.length} modules</div>
             </div>
-            <div className="bg-muted/5 flex flex-col gap-1 rounded-md border p-2">
+            <div className="bg-muted flex flex-col gap-1 rounded-md border p-2">
               <div className="text-muted-foreground text-xs">Used By</div>
               <div className="text-xs font-bold">{inspect.usedBy.length} consumers</div>
             </div>
           </div>
 
           {allHints.length > 0 && (
-            <div className="bg-muted/5 flex flex-col gap-3 rounded-xl border p-4">
+            <div className="bg-muted flex flex-col gap-3 rounded-xl border p-4">
               <div className="text-warning flex items-center gap-2 text-xs font-bold">
                 <Lightbulb /> Technical Context
               </div>
