@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { format, subDays, subHours, subMinutes, subMonths } from "date-fns";
+import { format, subDays, subHours, subMinutes } from "date-fns";
 import { Check, Clock } from "lucide-react";
 import { useQueryStates } from "nuqs";
 import type { DateRange } from "react-day-picker";
@@ -35,12 +35,12 @@ const DATE_PERIODS = [
     period: "7d",
   },
   {
-    getValue: () => ({ from: subMonths(new Date(), 1), to: new Date() }),
+    getValue: () => ({ from: subDays(new Date(), 30), to: new Date() }),
     label: "Last 30 days",
     period: "30d",
   },
   {
-    getValue: () => ({ from: subMonths(new Date(), 3), to: new Date() }),
+    getValue: () => ({ from: subDays(new Date(), 90), to: new Date() }),
     label: "Last 90 days",
     period: "90d",
   },
@@ -112,7 +112,8 @@ export function DashboardDatePeriod() {
                   onClick={() => handlePeriodClick(p)}
                   className={cn(
                     "flex w-full items-center justify-between",
-                    urlState.period === p.period ? "text-primary-foreground" : ""
+                    urlState.period === p.period &&
+                      "bg-primary text-primary-foreground hover:bg-primary/90"
                   )}
                 >
                   {p.label}

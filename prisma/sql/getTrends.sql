@@ -15,7 +15,7 @@ WITH daily_latest AS (
     WHERE r.user_id = $1
       AND a.status = 'DONE'
       AND a.created_at >= $2
-      AND a.created_at <= $3
+      AND a.created_at < ($3::date + interval '1 day')
     ORDER BY a.repo_id, DATE(a.created_at), a.created_at DESC
 )
 SELECT
