@@ -214,7 +214,7 @@
     "graphology": "0.26.0",
     "graphology-library": "0.8.0",
     "ioredis": "5.10.1",
-    "ipaddr.js": "2.3.0",
+    "ipaddr.js": "2.4.0",
     "isbinaryfile": "6.0.0",
     "js-cookie": "3.0.5",
     "js-tiktoken": "1.0.21",
