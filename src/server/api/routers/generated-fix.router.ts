@@ -9,10 +9,27 @@ import type { FindingForFix } from "@/server/features/pr-analysis/model/pr-types
 import { getClientContext } from "@/server/shared/infrastructure/github/github-provider";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { REDIS_CONFIG } from "@/server/shared/lib/redis";
+import { GeneratedFixSchema } from "@/generated/zod";
 
 // ============================================================================
 // VALIDATION SCHEMAS
 // ============================================================================
+
+const GeneratedFixDTO = GeneratedFixSchema.extend({ id: z.number() });
+
+const FixResultSchema = z.object({
+  error: z.string().optional(),
+  explanation: z.string().optional(),
+  fixedFiles: z
+    .array(
+      z.object({
+        diff: z.string().optional(),
+        filePath: z.string(),
+        newContent: z.string(),
+      })
+    )
+    .optional(),
+});
 
 const FindingForFixSchema = z.object({
   file: z.string().min(1),
@@ -30,9 +47,14 @@ const FixApplicationPayloadSchema = z.object({
   branch: z.string().min(1),
   estimatedImpact: z.number().int().min(0).max(100),
   fixedFiles: z.array(FixedFileContentSchema).min(1),
-  fixId: z.string(),
-  repoId: z.string(),
+  fixId: z.uuid(),
+  repoId: z.uuid(),
   title: z.string().min(1),
+});
+
+const GeneratedFixDetailedDTO = GeneratedFixSchema.extend({
+  id: z.uuid(),
+  resultJson: FixResultSchema.nullable(),
 });
 
 export const generatedFixRouter = createTRPCRouter({
@@ -43,6 +65,14 @@ export const generatedFixRouter = createTRPCRouter({
    */
   applyFix: protectedProcedure
     .input(FixApplicationPayloadSchema)
+    .output(
+      z.object({
+        error: z.string().optional(),
+        prNumber: z.number().optional(),
+        prUrl: z.string().optional(),
+        success: z.boolean(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       logger.info({
         fixId: input.fixId,
@@ -130,8 +160,16 @@ export const generatedFixRouter = createTRPCRouter({
       z.object({
         fileContents: z.record(z.string(), z.string()), // Map of filePath -> originalContent
         findings: z.array(FindingForFixSchema).min(1),
-        prAnalysisId: z.string().optional(),
-        repoId: z.string(),
+        prAnalysisId: z.uuid().optional(),
+        repoId: z.uuid(),
+      })
+    )
+    .output(
+      z.object({
+        error: z.string().optional(),
+        fixId: z.uuid().optional(),
+        status: z.string().optional(),
+        success: z.boolean().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -214,19 +252,34 @@ export const generatedFixRouter = createTRPCRouter({
    * Get fix metadata (no diffs in response)
    */
   getById: protectedProcedure
-    .input(z.object({ fixId: z.string() }))
+    .input(z.object({ fixId: z.uuid() }))
+    .output(GeneratedFixDetailedDTO)
     .query(async ({ ctx, input }) => {
       const fix = await generatedFixService.getById(ctx.db, input.fixId);
-      const cachedResult = await ctx.redis.get(REDIS_CONFIG.keys.fixResult(input.fixId));
 
-      return { ...fix, resultJson: cachedResult };
+      if (fix == null) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Fix not found",
+        });
+      }
+
+      const cachedResult = await ctx.redis.get(REDIS_CONFIG.keys.fixResult(input.fixId));
+      const parsedResult = FixResultSchema.safeParse(cachedResult);
+
+      return {
+        ...fix,
+        id: fix.publicId,
+        resultJson: parsedResult.success ? parsedResult.data : null,
+      };
     }),
 
   /**
    * Get all fixes for a repo (metadata only)
    */
   getByRepository: protectedProcedure
-    .input(z.object({ repoId: z.string() }))
+    .input(z.object({ repoId: z.uuid() }))
+    .output(z.array(GeneratedFixDTO))
     .query(async ({ ctx, input }) => {
       return generatedFixService.getByRepoId(ctx.db, input.repoId);
     }),

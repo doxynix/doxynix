@@ -33,7 +33,7 @@ export function RepoDocsContent({ data, isLoading }: Readonly<Props>) {
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
       <article
         dangerouslySetInnerHTML={{ __html: data.html }}
-        className="prose prose-invert prose-pre:p-0 prose-pre:bg-transparent max-w-none min-w-0 wrap-break-word"
+        className="prose dark:prose-invert prose-pre:p-0 prose-pre:bg-transparent max-w-none min-w-0 wrap-break-word"
       />
     </div>
   );

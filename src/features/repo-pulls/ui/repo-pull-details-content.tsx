@@ -264,7 +264,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     </div>
                     <article
                       dangerouslySetInnerHTML={{ __html: comment.bodyHtml }}
-                      className="prose prose-invert prose-pre:p-0 prose-pre:bg-transparent max-w-none min-w-0 text-xs wrap-break-word"
+                      className="prose dark:prose-invert prose-pre:p-0 prose-pre:bg-transparent max-w-none min-w-0 text-xs wrap-break-word"
                     />
                   </div>
                 ))}
@@ -384,7 +384,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   </p>
                   <article
                     dangerouslySetInnerHTML={{ __html: finding.messageHtml }}
-                    className="prose prose-invert prose-pre:p-0 prose-pre:bg-transparent max-w-none min-w-0 text-xs wrap-break-word"
+                    className="prose dark:prose-invert prose-pre:p-0 prose-pre:bg-transparent max-w-none min-w-0 text-xs wrap-break-word"
                   />
                 </div>
               ))

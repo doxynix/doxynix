@@ -18,7 +18,7 @@ export const healthRouter = createTRPCRouter({
         tags: ["health"],
       },
     })
-    .input(z.void())
+    .input(z.object({}).optional())
     .output(
       z.object({
         status: z.string(),

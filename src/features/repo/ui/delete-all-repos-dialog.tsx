@@ -22,9 +22,12 @@ export function DeleteAllReposDialog({ hasRepos }: Readonly<Props>) {
   const { deleteAll } = useRepoActions();
 
   const handleDelete = () => {
-    deleteAll.mutate(undefined, {
-      onSuccess: () => setOpen(false),
-    });
+    deleteAll.mutate(
+      {},
+      {
+        onSuccess: () => setOpen(false),
+      }
+    );
   };
 
   return (

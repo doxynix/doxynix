@@ -9,7 +9,7 @@ import {
   Wrench,
 } from "lucide-react";
 
-import { cn } from "@/shared/lib/cn";
+import { getHealthClasses } from "@/entities/repo/model/get-health-color";
 
 import type { DashboardStats } from "./dashboard.types";
 
@@ -20,13 +20,8 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
 
   return [
     {
-      className: cn(
-        "text-success bg-success/10",
-        overview.avgHealthScore < 50 && "text-destructive bg-destructive/10",
-        overview.avgHealthScore >= 50 &&
-          overview.avgHealthScore < 80 &&
-          "text-warning bg-warning/10"
-      ),
+      // TODO: переписать на get-health-color.ts
+      className: getHealthClasses(overview.avgHealthScore),
       delta: overview.healthDelta,
       description: "Code quality average",
       icon: HeartPulse,

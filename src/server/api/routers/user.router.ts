@@ -10,7 +10,7 @@ import { OpenApiErrorResponses } from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const PublicUserSchema = UserSchema.extend({
-  id: z.string(),
+  id: z.uuid(),
 });
 
 export const userRouter = createTRPCRouter({
@@ -26,7 +26,7 @@ export const userRouter = createTRPCRouter({
         tags: ["users"],
       },
     })
-    .input(z.void())
+    .input(z.object({}).optional())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
       return userService.deleteAccount(ctx.db, ctx.prisma, Number(ctx.session.user.id));
@@ -130,7 +130,7 @@ export const userRouter = createTRPCRouter({
         tags: ["users"],
       },
     })
-    .input(z.void())
+    .input(z.object({}).optional())
     .output(z.object({ message: z.string(), user: PublicUserSchema }))
     .query(async ({ ctx }) => {
       return userService.getMe(ctx.db, Number(ctx.session.user.id));
@@ -148,7 +148,7 @@ export const userRouter = createTRPCRouter({
         tags: ["users"],
       },
     })
-    .input(z.void())
+    .input(z.object({}).optional())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
       return userService.removeAvatar(ctx.db, ctx.prisma, Number(ctx.session.user.id));

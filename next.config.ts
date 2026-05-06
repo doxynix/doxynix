@@ -37,6 +37,8 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     authInterrupts: true,
+    dynamicOnHover: true,
+    optimisticRouting: true,
     optimizePackageImports: [
       "@radix-ui/react-avatar",
       "@radix-ui/react-dialog",
@@ -63,7 +65,11 @@ const nextConfig: NextConfig = {
       "@sentry-internal/replay",
       "@sentry-internal/browser-utils",
     ],
+    optimizeServerReact: true,
+    prefetchInlining: true,
     preloadEntriesOnStart: false,
+    prerenderEarlyExit: true,
+    scrollRestoration: true,
     serverComponentsHmrCache: true,
     serverSourceMaps: IS_PROD,
     taint: true,

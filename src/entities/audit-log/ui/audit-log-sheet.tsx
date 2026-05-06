@@ -120,7 +120,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                   <Skeleton className="h-40 w-full" />
                 ) : (
                   <div
-                    dangerouslySetInnerHTML={{ __html: html ?? "" }}
+                    dangerouslySetInnerHTML={{ __html: html ?? "" }} // NOTE: санитизации нету здесь так что если в будущем будет вставлять юзерский ввод то иметь ввиду
                     className={cn(
                       "w-full text-sm",
                       "[&_pre]:m-0! [&_pre]:bg-transparent! [&_pre]:p-0!",

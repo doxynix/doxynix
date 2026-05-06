@@ -41,7 +41,7 @@ export function SettingsMenu() {
             )}
           >
             <Link href={item.href as Route} className="flex w-full items-center gap-2">
-              <item.icon />
+              {item.icon != null && <item.icon />}
               {item.label}
             </Link>
           </Button>

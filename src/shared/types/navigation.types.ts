@@ -2,10 +2,11 @@ import type { ComponentType } from "react";
 
 export type MenuItem = {
   actionId?: string;
+  avatar?: string;
   commandType?: "action" | "dialog" | "navigation";
   exact?: boolean;
   href?: string;
-  icon: ComponentType<{ className?: string }>;
+  icon?: ComponentType<{ className?: string }>;
   id?: string;
   isBlank?: boolean;
   label: string;

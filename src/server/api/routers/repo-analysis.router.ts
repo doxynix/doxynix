@@ -44,13 +44,13 @@ export const repoAnalysisRouter = createTRPCRouter({
   documentFile: protectedProcedure
     .input(
       z.object({
-        analysisId: z.string().optional(),
+        analysisId: z.uuid().optional(),
         commitSha: z.string().optional(),
         content: z.string(),
         language: z.string().default(DEFAULT_DOC_LANGUAGE),
         nodeId: z.string().optional(),
         path: z.string(),
-        repoId: z.string(),
+        repoId: z.uuid(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -89,7 +89,7 @@ export const repoAnalysisRouter = createTRPCRouter({
     .input(
       z.object({
         path: z.string(),
-        repoId: z.string(),
+        repoId: z.uuid(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -139,13 +139,13 @@ export const repoAnalysisRouter = createTRPCRouter({
   quickFileAudit: protectedProcedure
     .input(
       z.object({
-        analysisId: z.string().optional(),
+        analysisId: z.uuid().optional(),
         commitSha: z.string().optional(),
         content: z.string(),
         language: z.string().default(DEFAULT_DOC_LANGUAGE),
         nodeId: z.string().optional(),
         path: z.string(),
-        repoId: z.string(),
+        repoId: z.uuid(),
       })
     )
     .mutation(async ({ ctx, input }) => {

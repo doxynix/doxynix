@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
-import { RepoMetricsContainer } from "@/features/repo-analytics/ui/repo-metrics-container";
+import { getRepoOrNotFound } from "@/entities/repo/model/get-repo";
 
-import { api } from "@/server/api/server";
+import { RepoMetricsContainer } from "@/features/repo-analytics/ui/repo-metrics-container";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;
@@ -23,15 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RepoMetricsPage({ params }: Readonly<Props>) {
   const { name, owner } = await params;
 
-  const serverApi = await api();
-  const repo = await serverApi.repo.getByName({
-    name,
-    owner,
-  });
-
-  if (repo == null) {
-    notFound();
-  }
+  const repo = await getRepoOrNotFound(owner, name);
 
   return <RepoMetricsContainer id={repo.id} />;
 }

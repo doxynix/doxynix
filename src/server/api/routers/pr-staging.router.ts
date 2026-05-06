@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import z from "zod";
+import { z } from "zod";
 
 import { generatedFixService } from "@/server/entities/pr-analysis/api/generated-fix.service";
 import { FixService } from "@/server/features/pr-analysis/lib/fix-generator";
@@ -19,7 +19,7 @@ export const prStagingRouter = createTRPCRouter({
    * Очищает корзину после создания PR.
    */
   clearStaging: protectedProcedure
-    .input(z.object({ repoId: z.string() }))
+    .input(z.object({ repoId: z.uuid() }))
     .mutation(async ({ ctx, input }) => {
       const cacheKey = REDIS_CONFIG.keys.prStaging(ctx.session.user.id, input.repoId);
       await ctx.redis.del(cacheKey);
@@ -30,7 +30,7 @@ export const prStagingRouter = createTRPCRouter({
    * Получает все текущие изменения для создания PR.
    */
   getStagedFiles: protectedProcedure
-    .input(z.object({ repoId: z.string() }))
+    .input(z.object({ repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
       const cacheKey = REDIS_CONFIG.keys.prStaging(ctx.session.user.id, input.repoId);
       const staged = await ctx.redis.hgetall<Record<string, string>>(cacheKey);
@@ -49,7 +49,7 @@ export const prStagingRouter = createTRPCRouter({
     .input(
       z.object({
         branch: z.string().min(1),
-        repoId: z.string(),
+        repoId: z.uuid(),
         title: z.string().min(1),
       })
     )
@@ -151,7 +151,7 @@ export const prStagingRouter = createTRPCRouter({
       z.object({
         content: z.string(),
         filePath: z.string(),
-        repoId: z.string(),
+        repoId: z.uuid(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -169,7 +169,7 @@ export const prStagingRouter = createTRPCRouter({
     .input(
       z.object({
         fixId: z.string(),
-        repoId: z.string(),
+        repoId: z.uuid(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -229,7 +229,7 @@ export const prStagingRouter = createTRPCRouter({
     .input(
       z.object({
         filePath: z.string(),
-        repoId: z.string(),
+        repoId: z.uuid(),
       })
     )
     .mutation(async ({ ctx, input }) => {

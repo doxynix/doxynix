@@ -309,7 +309,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
           </div>
           <article
             dangerouslySetInnerHTML={{ __html: auditResult.html }}
-            className="prose prose-invert text-foreground max-h-120 overflow-y-auto text-xs"
+            className="prose dark:prose-invert text-foreground max-h-120 overflow-y-auto text-xs"
           />
           <div className="mt-4 flex items-center gap-1 border-t pt-3">
             <Button

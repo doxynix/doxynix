@@ -5,11 +5,11 @@ import { githubAppService } from "@/server/shared/infrastructure/github/github-a
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const githubAppRouter = createTRPCRouter({
-  getGithubInstallUrl: protectedProcedure.query(async ({ ctx }) => {
+  getGithubInstallUrl: protectedProcedure.input(z.object({}).optional()).query(async ({ ctx }) => {
     return githubAppService.getInstallUrl(ctx.prisma, Number(ctx.session.user.id));
   }),
 
-  getMyGithubRepos: protectedProcedure.query(async ({ ctx }) => {
+  getMyGithubRepos: protectedProcedure.input(z.object({}).optional()).query(async ({ ctx }) => {
     return githubAppService.getMyRepos(ctx.db, ctx.prisma, Number(ctx.session.user.id));
   }),
 

@@ -24,7 +24,7 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
   return (
     <div className="mx-auto w-full space-y-4">
       <div className="flex items-center gap-4">
-        <AppAvatar alt={repo.owner} src={repo.ownerAvatarUrl} />
+        <AppAvatar alt={repo.owner} fallbackText={repo.owner} src={repo.ownerAvatarUrl} />
         <h1 className="flex gap-1 text-2xl font-bold">
           <Link href={`/dashboard/repo/${ownerSlug}`} className="hover:underline">
             {repo.owner}

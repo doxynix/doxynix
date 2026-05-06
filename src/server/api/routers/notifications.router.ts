@@ -12,7 +12,7 @@ import {
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const NotificationsPublicSchema = NotificationSchema.extend({
-  id: z.string(),
+  id: z.uuid(),
   repo: z
     .object({
       name: z.string(),
@@ -101,6 +101,7 @@ export const notificationRouter = createTRPCRouter({
         tags: ["notifications"],
       },
     })
+    .input(z.object({}).optional())
     .output(
       z.object({
         read: z.number().int(),

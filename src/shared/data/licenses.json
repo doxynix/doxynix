@@ -495,6 +495,41 @@
     ]
   },
   {
+    "author": "Meta",
+    "avatar": "https://github.com/facebook.png?size=96",
+    "authorLink": "https://github.com/facebook",
+    "packages": [
+      {
+        "name": "babel-plugin-react-compiler",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-react-compiler",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-react-hooks",
+        "license": "MIT"
+      },
+      {
+        "name": "react",
+        "license": "MIT"
+      },
+      {
+        "name": "react-day-picker",
+        "license": "MIT"
+      },
+      {
+        "name": "react-dom",
+        "license": "MIT"
+      },
+      {
+        "name": "server-only",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "TypeStrong",
     "avatar": "https://github.com/TypeStrong.png?size=96",
     "authorLink": "https://github.com/TypeStrong",
@@ -526,37 +561,6 @@
       {
         "name": "typedoc-plugin-llms-txt",
         "license": "BlueOak-1.0.0"
-      }
-    ]
-  },
-  {
-    "author": "Meta",
-    "avatar": "https://github.com/facebook.png?size=96",
-    "authorLink": "https://github.com/facebook",
-    "packages": [
-      {
-        "name": "babel-plugin-react-compiler",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-react-compiler",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-react-hooks",
-        "license": "MIT"
-      },
-      {
-        "name": "react",
-        "license": "MIT"
-      },
-      {
-        "name": "react-dom",
-        "license": "MIT"
-      },
-      {
-        "name": "server-only",
-        "license": "MIT"
       }
     ]
   },
@@ -1213,6 +1217,17 @@
     "packages": [
       {
         "name": "tailwind-merge",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Date-fns",
+    "avatar": "https://github.com/date-fns.png?size=96",
+    "authorLink": "https://github.com/date-fns",
+    "packages": [
+      {
+        "name": "date-fns",
         "license": "MIT"
       }
     ]

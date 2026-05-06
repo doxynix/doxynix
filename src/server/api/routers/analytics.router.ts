@@ -44,7 +44,7 @@ const DashboardStatsOutputSchema = z.object({
   recentActivity: z.array(
     z.object({
       createdAt: z.date(),
-      id: z.string(),
+      id: z.uuid(),
       progress: z.number(),
       repoName: z.string(),
       repoOwner: z.string(),
@@ -104,7 +104,6 @@ export const analyticsRouter = createTRPCRouter({
     })
     .input(InputSchema)
     .output(DashboardStatsOutputSchema)
-
     .query(async ({ ctx, input }) => {
       return analyticsService.getDashboardStats(ctx.db, input, Number(ctx.session.user.id));
     }),

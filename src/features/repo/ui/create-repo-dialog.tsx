@@ -46,9 +46,12 @@ const STALE_TIME = 1000 * 60 * 5; // TIME: 5 минут
 export function CreateRepoDialog() {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
-  const { refetch: getInstallUrl } = trpc.githubApp.getGithubInstallUrl.useQuery(undefined, {
-    enabled: false,
-  });
+  const { refetch: getInstallUrl } = trpc.githubApp.getGithubInstallUrl.useQuery(
+    {},
+    {
+      enabled: false,
+    }
+  );
 
   const open = useCreateRepoOpen();
   const { setOpen } = useCreateRepoActions();
@@ -105,10 +108,13 @@ export function CreateRepoDialog() {
     data: myGithubData,
     isFetching: isFetchingMyRepos,
     refetch: refetchMyRepos,
-  } = trpc.githubApp.getMyGithubRepos.useQuery(undefined, {
-    enabled: open,
-    staleTime: STALE_TIME,
-  });
+  } = trpc.githubApp.getMyGithubRepos.useQuery(
+    {},
+    {
+      enabled: open,
+      staleTime: STALE_TIME,
+    }
+  );
 
   const closeDialog = () => {
     setOpen(false);
@@ -221,7 +227,12 @@ export function CreateRepoDialog() {
                           href={inst.manageUrl ?? ""}
                           className="flex items-center gap-1 hover:underline"
                         >
-                          <AppAvatar alt={inst.login} sizeClassName="size-6" src={inst.avatar} />
+                          <AppAvatar
+                            alt={inst.login}
+                            fallbackText={inst.login}
+                            sizeClassName="size-6"
+                            src={inst.avatar}
+                          />
                         </ExternalLink>
                       </AppTooltip>
                     ))}

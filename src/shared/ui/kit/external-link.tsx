@@ -11,7 +11,7 @@ export function ExternalLink({ children, className, href, ...props }: ExternalLi
   return (
     <a
       href={href}
-      rel="noopener noreferrer"
+      rel="noopener noreferrer nofollow"
       target="_blank"
       className={cn("transition-colors", className)}
       {...props}

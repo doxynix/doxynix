@@ -37,7 +37,7 @@ export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <n.icon />
+              {n.icon != null && <n.icon />}
               <span>{n.label}</span>
             </Link>
           </Button>
