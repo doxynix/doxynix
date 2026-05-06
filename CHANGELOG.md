@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.32.3](https://github.com/doxynix/doxynix/compare/v1.32.2...v1.32.3) (2026-05-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ipaddr.js to v2.4.0 ([#1410](https://github.com/doxynix/doxynix/issues/1410)) ([cb338bb](https://github.com/doxynix/doxynix/commit/cb338bb1009eb74c4e4479cdb0bb3bd2243bb48b))
+
 ## [1.32.2](https://github.com/doxynix/doxynix/compare/v1.32.1...v1.32.2) (2026-05-06)
 
 
