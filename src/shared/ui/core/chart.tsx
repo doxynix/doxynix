@@ -53,7 +53,7 @@ const ChartContainer = forwardRef<
   }
 >(({ children, className, config, id, ...props }, ref) => {
   const uniqueId = useId();
-  const chartId = `chart-${id || uniqueId.replaceAll(":", "")}`;
+  const chartId = `chart-${id || uniqueId.replaceAll(":", "")}`.replaceAll(/[^\dA-Za-z-]/g, "");
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -79,8 +79,6 @@ const ChartStyle = ({ config, id }: { config: ChartConfig; id: string }) => {
 
   if (!colorConfig.length) return null;
 
-  const safeId = id.replaceAll(/[^\dA-Za-z-]/g, "");
-
   return (
     <style
       dangerouslySetInnerHTML={{
@@ -101,7 +99,7 @@ const ChartStyle = ({ config, id }: { config: ChartConfig; id: string }) => {
               .filter(Boolean)
               .join("\n");
 
-            return `${prefix} [data-chart=${safeId}] {\n${styles}\n}`;
+            return `${prefix} [data-chart=${id}] {\n${styles}\n}`;
           })
           .join("\n"),
       }}

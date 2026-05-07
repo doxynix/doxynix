@@ -105,7 +105,7 @@ export function AppSidebar() {
                           <SidebarMenuItem key={repo.id} className="max-w-60">
                             <SidebarLink
                               href={`/dashboard/repo/${repo.owner}/${repo.name}`}
-                              avatar={repo.avatar ?? ""}
+                              avatar={repo.avatar ?? undefined}
                               label={`${repo.owner}/${repo.name}`}
                             />
                           </SidebarMenuItem>

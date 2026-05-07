@@ -15,7 +15,7 @@ import { GeneratedFixSchema } from "@/generated/zod";
 // VALIDATION SCHEMAS
 // ============================================================================
 
-const GeneratedFixDTO = GeneratedFixSchema.extend({ id: z.number() });
+const GeneratedFixDTO = GeneratedFixSchema.extend({ id: z.uuid() });
 
 const FixResultSchema = z.object({
   error: z.string().optional(),
@@ -233,6 +233,7 @@ export const generatedFixRouter = createTRPCRouter({
         return {
           fixId: fix.publicId,
           status: "PENDING",
+          success: true,
         };
       } catch (error) {
         logger.error({
@@ -281,6 +282,7 @@ export const generatedFixRouter = createTRPCRouter({
     .input(z.object({ repoId: z.uuid() }))
     .output(z.array(GeneratedFixDTO))
     .query(async ({ ctx, input }) => {
-      return generatedFixService.getByRepoId(ctx.db, input.repoId);
+      const fixes = await generatedFixService.getByRepoId(ctx.db, input.repoId);
+      return fixes.map((fix) => ({ ...fix, id: fix.publicId }));
     }),
 });

@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const UpdateProfileSchema = z.object({
   email: z
-    .string()
     .email("Please enter a valid email address")
     .max(254, "Email address cannot exceed 254 characters")
     .optional(),

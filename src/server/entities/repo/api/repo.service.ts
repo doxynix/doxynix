@@ -270,11 +270,11 @@ export const repoService = {
   },
 
   async getSlim(db: DbClient, input: RepoFiltersInput) {
-    const { cursor, limit, owner, search } = input;
+    const { cursor, limit, owner, search, status, visibility } = input;
     const page = Math.max(1, cursor ?? 1);
     const skip = (page - 1) * limit;
 
-    const where = this.buildWhereClause({ owner, search });
+    const where = this.buildWhereClause({ owner, search, status, visibility });
 
     const items = await db.repo.findMany({
       orderBy: { updatedAt: "desc" },
@@ -299,7 +299,7 @@ export const repoService = {
         owner: r.owner,
       })),
       meta: {
-        nextCursor: items.length === limit ? page + 1 : null,
+        nextCursor: skip + items.length < totalCount ? page + 1 : null,
         totalCount,
       },
     };

@@ -10,11 +10,16 @@ type Props = {
 
 export default async function PullRequestDetailPage({ params }: Readonly<Props>) {
   const { name, number, owner } = await params;
-  const prNumber = parseInt(number);
+
+  if (!/^\d+$/.test(number)) {
+    notFound();
+  }
+
+  const prNumber = Number.parseInt(number, 10);
+
+  if (!Number.isSafeInteger(prNumber) || prNumber <= 0) notFound();
 
   const repo = await getRepoOrNotFound(owner, name);
-
-  if (isNaN(prNumber)) notFound();
 
   return <RepoPullDetailContainer name={name} owner={owner} prNumber={prNumber} repoId={repo.id} />;
 }
