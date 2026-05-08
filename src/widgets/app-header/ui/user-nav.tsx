@@ -82,7 +82,7 @@ export function UserNav() {
           {userNavMenu.map((item) => (
             <DropdownMenuItem key={item.href} asChild className="group">
               <Link href={item.href as Route} className="flex items-center">
-                <item.icon />
+                {item.icon != null && <item.icon />}
                 <span>{item.label}</span>
                 {item.shortcut != null && (
                   <DropdownMenuShortcut className="opacity-0 transition-opacity group-hover:opacity-100">

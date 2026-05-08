@@ -11,7 +11,7 @@ import { DeleteAllReposDialog } from "./delete-all-repos-dialog";
 export function DeleteAllReposCard() {
   const t = useTranslations("Dashboard");
   const { data, isLoading } = trpc.repo.getSlim.useQuery({ limit: 1 });
-  const hasRepos = data != null && data.length > 0;
+  const hasRepos = data != null && data.meta.totalCount > 0;
 
   if (isLoading || !data)
     return (

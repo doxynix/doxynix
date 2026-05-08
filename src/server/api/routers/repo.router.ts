@@ -10,7 +10,18 @@ import { OpenApiErrorResponses, RepoFilterSchema } from "../contracts";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const PublicRepoSchema = RepoSchema.extend({
-  id: z.string(),
+  id: z.uuid(),
+});
+
+const RepoWithMetricsSchema = PublicRepoSchema.extend({
+  complexityScore: z.number().nullish(),
+  healthScore: z.number().nullish(),
+  languageColor: z.string(),
+  lastAnalysisDate: z.date().nullish(),
+  onboardingScore: z.number().nullish(),
+  securityScore: z.number().nullish(),
+  status: StatusSchema,
+  techDebtScore: z.number().nullish(),
 });
 
 export const repoRouter = createTRPCRouter({
@@ -77,7 +88,7 @@ export const repoRouter = createTRPCRouter({
         tags: ["repositories"],
       },
     })
-    .input(z.void())
+    .input(z.object({}).optional())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
       return repoService.deleteAll(ctx.db);
@@ -128,18 +139,7 @@ export const repoRouter = createTRPCRouter({
     .input(RepoFilterSchema)
     .output(
       z.object({
-        items: z.array(
-          PublicRepoSchema.extend({
-            complexityScore: z.number().nullish(),
-            healthScore: z.number().nullish(),
-            languageColor: z.string(),
-            lastAnalysisDate: z.date().nullish(),
-            onboardingScore: z.number().nullish(),
-            securityScore: z.number().nullish(),
-            status: StatusSchema,
-            techDebtScore: z.number().nullish(),
-          })
-        ),
+        items: z.array(RepoWithMetricsSchema),
         meta: PaginationMetaSchema,
       })
     )
@@ -206,17 +206,24 @@ export const repoRouter = createTRPCRouter({
         tags: ["repositories"],
       },
     })
-    .input(z.object({ limit: z.coerce.number().int().min(1).max(100_000).optional() }))
+    .input(RepoFilterSchema)
     .output(
-      z.array(
-        z.object({
-          id: z.string(),
-          name: z.string(),
-          owner: z.string(),
-        })
-      )
+      z.object({
+        items: z.array(
+          z.object({
+            avatar: z.string().nullable(),
+            id: z.uuid(),
+            name: z.string(),
+            owner: z.string(),
+          })
+        ),
+        meta: z.object({
+          nextCursor: z.number().nullable(),
+          totalCount: z.number(),
+        }),
+      })
     )
     .query(async ({ ctx, input }) => {
-      return repoService.getSlim(ctx.db, input.limit);
+      return repoService.getSlim(ctx.db, input);
     }),
 });

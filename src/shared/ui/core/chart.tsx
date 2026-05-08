@@ -53,7 +53,7 @@ const ChartContainer = forwardRef<
   }
 >(({ children, className, config, id, ...props }, ref) => {
   const uniqueId = useId();
-  const chartId = `chart-${id || uniqueId.replaceAll(":", "")}`;
+  const chartId = `chart-${id || uniqueId.replaceAll(":", "")}`.replaceAll(/[^\dA-Za-z-]/g, "");
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -77,27 +77,30 @@ ChartContainer.displayName = "Chart";
 const ChartStyle = ({ config, id }: { config: ChartConfig; id: string }) => {
   const colorConfig = Object.entries(config).filter(([, config]) => config.theme || config.color);
 
-  if (!colorConfig.length) {
-    return null;
-  }
+  if (!colorConfig.length) return null;
 
   return (
     <style
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-        ${prefix} [data-chart=${id}] {
-        ${colorConfig
-          .map(([key, itemConfig]) => {
-            const color =
-              itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-            return color ? `  --color-${key}: ${color};` : null;
+          .map(([theme, prefix]) => {
+            const styles = colorConfig
+              .map(([key, itemConfig]) => {
+                const color =
+                  itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+                if (!color) return null;
+
+                const safeKey = key.replaceAll(/[^\dA-Za-z-]/g, "");
+
+                const isSafeColor = !/["';<>\\}]/.test(color);
+
+                return isSafeColor ? `--color-${safeKey}: ${color};` : null;
+              })
+              .filter(Boolean)
+              .join("\n");
+
+            return `${prefix} [data-chart=${id}] {\n${styles}\n}`;
           })
-          .join("\n")}
-}
-`
-          )
           .join("\n"),
       }}
     />

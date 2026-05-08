@@ -47,7 +47,9 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
             {repo.description}
           </span>
         )}
-        <TimeAgo date={repo.updatedAt} locale={locale} tooltipLabel={t("repo_last_updated")} />
+        <span className="w-fit text-xs">
+          <TimeAgo date={repo.updatedAt} locale={locale} tooltipLabel={t("repo_last_updated")} />
+        </span>
       </div>
     </Button>
   );

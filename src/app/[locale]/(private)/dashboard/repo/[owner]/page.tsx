@@ -1,18 +1,16 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
+import { getOwnerOrNotFound } from "@/entities/repo/model/get-repo";
 import type { SearchParams } from "@/entities/repo/model/repo-setup.types";
 
 import { CreateRepoButton } from "@/features/repo/ui/create-repo-button";
 import { DeleteByOwnerDialog } from "@/features/repo/ui/delete-by-owner-dialog";
 import { RepoFilters } from "@/features/repo/ui/repo-filters";
 import { RepoListContainer } from "@/features/repo/ui/repo-list-container";
-
-import { api } from "@/server/api/server";
 
 type Props = {
   params: Promise<{ owner: string }>;
@@ -31,21 +29,14 @@ export default async function OwnerPage({ params }: Readonly<Props>) {
   const t = await getTranslations("Dashboard");
   const { owner } = await params;
 
-  const serverApi = await api();
-  const data = await serverApi.repo.getByOwner({
-    owner,
-  });
-
-  if (data == null) {
-    notFound();
-  }
+  const data = await getOwnerOrNotFound(owner);
 
   const avatarUrl = data.ownerAvatarUrl;
 
   return (
     <div className="mx-auto flex h-full w-full flex-col">
       <div className="not-xs:justify-center mb-4 flex items-center gap-4">
-        <AppAvatar alt={owner} sizeClassName="size-9" src={avatarUrl} />
+        <AppAvatar alt={owner} fallbackText={owner} sizeClassName="size-9" src={avatarUrl} />
         <h1 className="text-2xl font-bold">{owner}</h1>
       </div>
 

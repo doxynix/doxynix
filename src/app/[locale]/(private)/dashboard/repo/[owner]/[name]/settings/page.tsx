@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
+import { getRepoOrNotFound } from "@/entities/repo/model/get-repo";
+
 import { DeleteRepoCard } from "@/features/repo-settings/ui/delete-repo-card";
 import { PRAnalysisConfigCard } from "@/features/repo-settings/ui/pr-analysis-config-card";
-
-import { api } from "@/server/api/server";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;
@@ -24,15 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RepoSettingsPage({ params }: Readonly<Props>) {
   const { name, owner } = await params;
 
-  const serverApi = await api();
-  const repo = await serverApi.repo.getByName({
-    name,
-    owner,
-  });
-
-  if (repo == null) {
-    notFound();
-  }
+  const repo = await getRepoOrNotFound(owner, name);
 
   return (
     <>

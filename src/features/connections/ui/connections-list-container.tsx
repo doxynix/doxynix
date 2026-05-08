@@ -13,9 +13,12 @@ export function ConnectionsListContainer() {
   const { data: githubData, isLoading: isGithubLoading } =
     trpc.githubApp.getMyGithubRepos.useQuery();
 
-  const { isFetching, refetch: getUrl } = trpc.githubApp.getGithubInstallUrl.useQuery(undefined, {
-    enabled: false,
-  });
+  const { isFetching, refetch: getUrl } = trpc.githubApp.getGithubInstallUrl.useQuery(
+    {},
+    {
+      enabled: false,
+    }
+  );
 
   const handleInstall = async () => {
     const { data } = await getUrl();

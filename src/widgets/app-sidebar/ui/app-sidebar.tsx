@@ -1,6 +1,6 @@
 "use client";
 
-import { Book, BookText, ChevronDown, CircleQuestionMark } from "lucide-react";
+import { BookText, ChevronDown, CircleQuestionMark } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
@@ -34,9 +34,9 @@ export function AppSidebar() {
   const t = useTranslations("Dashboard");
   const { state } = useSidebar();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    trpc.repo.getAll.useInfiniteQuery(
+    trpc.repo.getSlim.useInfiniteQuery(
       {
-        limit: 10,
+        limit: 5,
       },
       {
         getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
@@ -105,7 +105,7 @@ export function AppSidebar() {
                           <SidebarMenuItem key={repo.id} className="max-w-60">
                             <SidebarLink
                               href={`/dashboard/repo/${repo.owner}/${repo.name}`}
-                              icon={Book}
+                              avatar={repo.avatar ?? undefined}
                               label={`${repo.owner}/${repo.name}`}
                             />
                           </SidebarMenuItem>

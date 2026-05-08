@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 
-import { RepoPullDetailContainer } from "@/features/repo-pulls/ui/repo-pull-details-container";
+import { getRepoOrNotFound } from "@/entities/repo/model/get-repo";
 
-import { api } from "@/server/api/server";
+import { RepoPullDetailContainer } from "@/features/repo-pulls/ui/repo-pull-details-container";
 
 type Props = {
   params: Promise<{ name: string; number: string; owner: string }>;
@@ -10,12 +10,16 @@ type Props = {
 
 export default async function PullRequestDetailPage({ params }: Readonly<Props>) {
   const { name, number, owner } = await params;
-  const prNumber = parseInt(number);
 
-  const serverApi = await api();
-  const repo = await serverApi.repo.getByName({ name, owner });
+  if (!/^\d+$/.test(number)) {
+    notFound();
+  }
 
-  if (repo == null || isNaN(prNumber)) notFound();
+  const prNumber = Number.parseInt(number, 10);
+
+  if (!Number.isSafeInteger(prNumber) || prNumber <= 0) notFound();
+
+  const repo = await getRepoOrNotFound(owner, name);
 
   return <RepoPullDetailContainer name={name} owner={owner} prNumber={prNumber} repoId={repo.id} />;
 }

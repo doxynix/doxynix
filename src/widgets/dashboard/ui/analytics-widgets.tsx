@@ -129,7 +129,7 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
                     key={i}
                     className="border-border flex items-center justify-between rounded-xl border p-2 text-xs"
                   >
-                    <span title={h.path} className="text-muted-foreground max-w-50 truncate">
+                    <span className="text-muted-foreground max-w-50 truncate">
                       {h.repo_name}/
                       <span className="text-foreground font-bold">{h.path.split("/").pop()}</span>
                     </span>

@@ -1,21 +1,15 @@
-import { z } from "zod/v4-mini";
+import { z } from "zod";
 
 export const UpdateProfileSchema = z.object({
-  email: z.optional(
-    z
-      .string()
-      .check(
-        z.email("Please enter a valid email address"),
-        z.maxLength(254, "Email address cannot exceed 254 characters")
-      )
-  ),
+  email: z
+    .email("Please enter a valid email address")
+    .max(254, "Email address cannot exceed 254 characters")
+    .optional(),
   name: z
     .string()
-    .check(
-      z.trim(),
-      z.minLength(1, "Name must be at least 1 character"),
-      z.maxLength(50, "Name cannot exceed 50 characters")
-    ),
+    .trim()
+    .min(1, "Name must be at least 1 character")
+    .max(50, "Name cannot exceed 50 characters"),
 });
 
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;

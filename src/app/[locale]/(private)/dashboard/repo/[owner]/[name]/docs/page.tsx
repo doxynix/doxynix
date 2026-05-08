@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
-import { RepoDocsContainer } from "@/features/repo-docs-viewer/ui/repo-docs-container";
+import { getRepoOrNotFound } from "@/entities/repo/model/get-repo";
 
-import { api } from "@/server/api/server";
+import { RepoDocsContainer } from "@/features/repo-docs-viewer/ui/repo-docs-container";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;
@@ -23,15 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RepoDocsPage({ params }: Readonly<Props>) {
   const { name, owner } = await params;
 
-  const serverApi = await api();
-  const repo = await serverApi.repo.getByName({
-    name,
-    owner,
-  });
-
-  if (repo == null) {
-    notFound();
-  }
+  const repo = await getRepoOrNotFound(owner, name);
 
   return (
     <div className="space-y-10">

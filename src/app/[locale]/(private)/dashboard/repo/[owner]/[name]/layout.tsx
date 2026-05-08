@@ -1,12 +1,11 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
-import { RepoDetailsHeader } from "@/features/repo/ui/repo-details-header";
+import { getRepoOrNotFound } from "@/entities/repo/model/get-repo";
 
-import { api } from "@/server/api/server";
+import { RepoDetailsHeader } from "@/features/repo/ui/repo-details-header";
 
 type Props = {
   children: ReactNode;
@@ -25,15 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RepoDetailsLayout({ children, params }: Readonly<Props>) {
   const { name, owner } = await params;
 
-  const serverApi = await api();
-  const repo = await serverApi.repo.getByName({
-    name,
-    owner,
-  });
-
-  if (repo == null) {
-    notFound();
-  }
+  const repo = await getRepoOrNotFound(owner, name);
 
   return (
     <div className="space-y-4">

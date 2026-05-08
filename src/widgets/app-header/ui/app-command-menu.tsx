@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Route } from "next";
-import { Book, ChevronDown, Search } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useDebounce } from "use-debounce";
 
@@ -22,6 +22,7 @@ import {
   CommandShortcut,
 } from "@/shared/ui/core/command";
 import { Spinner } from "@/shared/ui/core/spinner";
+import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { useRouter } from "@/i18n/routing";
 
@@ -65,9 +66,9 @@ export function AppCommandMenu() {
     isOpening || search.trim().length === 0 ? undefined : debouncedSearch || undefined;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    trpc.repo.getAll.useInfiniteQuery(
+    trpc.repo.getSlim.useInfiniteQuery(
       {
-        limit: 10,
+        limit: 5,
         search: repoSearch,
       },
       {
@@ -192,7 +193,7 @@ export function AppCommandMenu() {
                     )}
                   >
                     <div className="flex items-center gap-2">
-                      <item.icon />
+                      {item.icon != null && <item.icon />}
                       <span>{item.label}</span>
                     </div>
                     <div className="flex items-center gap-1">
@@ -250,7 +251,12 @@ export function AppCommandMenu() {
                       value={`${repo.owner}/${repo.name}`}
                       onSelect={() => navigate(`/dashboard/repo/${repo.owner}/${repo.name}`)}
                     >
-                      <Book />
+                      <AppAvatar
+                        alt={`${repo.owner}/${repo.name}`}
+                        fallbackText={repo.owner}
+                        sizeClassName="size-8"
+                        src={repo.avatar}
+                      />
                       <div className="line-clamp-1 flex">
                         <span className="text-muted-foreground truncate font-bold">
                           {repo.owner}

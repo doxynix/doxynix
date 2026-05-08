@@ -1,15 +1,12 @@
-import { z } from "zod/v4-mini";
+import { z } from "zod";
 
 export const CreateApiKeySchema = z.object({
-  description: z.optional(z.string().check(z.trim(), z.maxLength(1000, "Description too long"))),
-
+  description: z.string().trim().max(1000, "Description too long").optional(),
   name: z
     .string()
-    .check(
-      z.trim(),
-      z.minLength(1, "Name must be at least 1 character"),
-      z.maxLength(50, "Name cannot exceed 50 characters")
-    ),
+    .trim()
+    .min(1, "Name must be at least 1 character")
+    .max(50, "Name cannot exceed 50 characters"),
 });
 
 export type CreateApiKeyInput = z.infer<typeof CreateApiKeySchema>;

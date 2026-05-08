@@ -138,7 +138,7 @@ export const prAnalysisRouter = createTRPCRouter({
     .input(
       z.object({
         prNumber: z.number().int().positive(),
-        repoId: z.string(),
+        repoId: z.uuid(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -146,13 +146,13 @@ export const prAnalysisRouter = createTRPCRouter({
     }),
 
   getRepoConfig: protectedProcedure
-    .input(z.object({ repoId: z.string() }))
+    .input(z.object({ repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
       return await PRConfigService.getConfig(input.repoId, ctx.db);
     }),
 
   listByRepository: protectedProcedure
-    .input(z.object({ repoId: z.string() }))
+    .input(z.object({ repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
       const items = await ctx.db.pullRequestAnalysis.findMany({
         orderBy: { createdAt: "desc" },

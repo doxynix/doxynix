@@ -78,6 +78,7 @@ export function AppBreadcrumbs({
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
+                          size="icon"
                           variant="ghost"
                           aria-label="Show hidden elements"
                           className="size-7 cursor-pointer"

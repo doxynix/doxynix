@@ -15,9 +15,12 @@ export function DeleteAccountDialog() {
   const t = useTranslations("Dashboard");
 
   const handleDelete = () => {
-    deleteProfile.mutate(undefined, {
-      onSuccess: () => setOpen(false),
-    });
+    deleteProfile.mutate(
+      {},
+      {
+        onSuccess: () => setOpen(false),
+      }
+    );
   };
 
   return (

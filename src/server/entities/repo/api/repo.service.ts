@@ -269,13 +269,39 @@ export const repoService = {
     };
   },
 
-  async getSlim(db: DbClient, limit?: number) {
-    const repos = await db.repo.findMany({
-      orderBy: { name: "asc" },
-      select: { name: true, owner: true, publicId: true },
-      ...(limit != null && { take: Math.floor(limit) }),
+  async getSlim(db: DbClient, input: RepoFiltersInput) {
+    const { cursor, limit, owner, search, status, visibility } = input;
+    const page = Math.max(1, cursor ?? 1);
+    const skip = (page - 1) * limit;
+
+    const where = this.buildWhereClause({ owner, search, status, visibility });
+
+    const items = await db.repo.findMany({
+      orderBy: { updatedAt: "desc" },
+      select: {
+        name: true,
+        owner: true,
+        ownerAvatarUrl: true,
+        publicId: true,
+      },
+      skip,
+      take: limit,
+      where,
     });
 
-    return repos.map((r) => ({ id: r.publicId, name: r.name, owner: r.owner }));
+    const totalCount = await db.repo.count({ where });
+
+    return {
+      items: items.map((r) => ({
+        avatar: r.ownerAvatarUrl,
+        id: r.publicId,
+        name: r.name,
+        owner: r.owner,
+      })),
+      meta: {
+        nextCursor: skip + items.length < totalCount ? page + 1 : null,
+        totalCount,
+      },
+    };
   },
 };
