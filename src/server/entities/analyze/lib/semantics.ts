@@ -1,8 +1,9 @@
+import { compact } from "es-toolkit";
+
 import { normalizeRepoPath } from "@/server/shared/engine/core/common";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
 import { unique } from "@/server/shared/lib/array-utils";
-import { hasText } from "@/server/shared/lib/string-utils";
 
 import type { StructureGroupEntry, StructureSemanticKind } from "./structure-shared";
 
@@ -120,7 +121,7 @@ function getPrimaryKindForEntry(entry: StructureGroupEntry) {
 }
 
 export function filterMeaningfulEntrypoints(paths: string[]) {
-  const normalized = unique(paths.filter(hasText).map((path) => normalizeRepoPath(path)));
+  const normalized = unique(compact(Array.from(paths)).map((path) => normalizeRepoPath(path)));
   const nonBarrel = normalized.filter((path) => !isLikelyBarrelPath(path));
   return nonBarrel.length > 0 ? nonBarrel : normalized;
 }

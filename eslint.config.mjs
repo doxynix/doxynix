@@ -472,7 +472,7 @@ export default defineConfig([
     ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unnecessary-condition": "off",
+      "@typescript-eslint/no-unnecessary-condition": "warn",
       "@typescript-eslint/strict-boolean-expressions": "off",
     },
   },

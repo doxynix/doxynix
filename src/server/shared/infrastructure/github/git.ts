@@ -10,6 +10,8 @@ import {
   resolveClientContext,
 } from "@/server/shared/infrastructure/github/github-provider";
 
+import { taskLogger } from "../../lib/task-logger";
+
 const PRIVATE_REPO_AUTH_MESSAGE =
   "This is a private repository. Please install Doxynix App or connect GitHub.";
 
@@ -43,6 +45,8 @@ export async function getAnalysisContext(
   userId: number,
   forceRefresh?: boolean
 ) {
+  taskLogger.log(`Accessing database for analysis ${analysisId}...`);
+
   const analysis = await prisma.analysis.findUnique({
     include: {
       repo: {
@@ -66,6 +70,8 @@ export async function getAnalysisContext(
   let octokit;
   let clientType: "app" | "installation" | "oauth" | "public";
 
+  taskLogger.log(`Resolving GitHub credentials for ${repo.owner}/${repo.name}...`);
+
   try {
     const clientContext = await resolveClientContext(prisma, userId, {
       allowPublicFallback: true,
@@ -82,6 +88,7 @@ export async function getAnalysisContext(
   }
 
   assertPrivateRepoAccess(repo, clientType);
+  taskLogger.log(`Fetching latest commit info for branch: ${repo.defaultBranch}...`);
 
   const { currentSha, token } = await executeWithFallback(
     prisma,
@@ -107,6 +114,8 @@ export async function getAnalysisContext(
   if (forceRefresh === false && lastSuccessfulAnalysis?.commitSha === currentSha) {
     return { currentSha, repo: null, token };
   }
+
+  taskLogger.log(`Current commit SHA: ${currentSha.slice(0, 7)}`);
 
   return { currentSha, repo, token };
 }

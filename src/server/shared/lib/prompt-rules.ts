@@ -4,6 +4,8 @@
  * Eliminates repetition across all LLM prompts in the system.
  */
 
+import dedent from "ts-dedent";
+
 // =============================================================================
 // GROUNDING & DATA VALIDATION RULES
 // =============================================================================
@@ -135,7 +137,7 @@ export function combineRules(rules: (string | undefined)[]): string {
  * Build a "do not invent" section for a specific context
  */
 export function buildNoInventionSection(context: string = "information"): string {
-  return `
+  return dedent`
 ## GROUNDING (HARD)
 - **${context}**: ${GroundingRules.noInvention}
 - ${GroundingRules.onlySuppliedEvidence}
@@ -147,7 +149,7 @@ export function buildNoInventionSection(context: string = "information"): string
  * Build safety constraints section
  */
 export function buildSafetyConstraints(): string {
-  return `
+  return dedent`
 ## CONSTRAINTS
 - ${BehavioralRules.noHallucination}
 - ${BehavioralRules.noHiddenAssumptions}
@@ -166,5 +168,5 @@ export function buildFormatSection(format: "json" | "markdown" | "xml"): string 
         ? OutputFormatRules.markdownOnly
         : OutputFormatRules.xmlStructure("output");
 
-  return `## OUTPUT\n${rule}`;
+  return dedent`## OUTPUT\n${rule}`;
 }

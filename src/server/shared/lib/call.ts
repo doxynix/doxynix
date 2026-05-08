@@ -1,4 +1,5 @@
 import { google } from "@ai-sdk/google";
+import { metadata } from "@trigger.dev/sdk/v3";
 import * as ai from "ai";
 import { wrapAISDK } from "langsmith/experimental/vercel";
 import type z from "zod";
@@ -21,6 +22,7 @@ type CallWithFallbackProps<T> = {
   system: string;
   taskType?: LLMTaskType;
   temperature?: number;
+  tools?: ai.ToolSet;
   topK?: number;
   topP?: number;
 };
@@ -38,6 +40,7 @@ export async function callWithFallback<T>({
   system,
   taskType = "default",
   temperature,
+  tools,
   topK,
   topP,
 }: CallWithFallbackProps<T>): Promise<T> {
@@ -61,10 +64,37 @@ export async function callWithFallback<T>({
         taskType,
         ...attemptMetadata,
       });
+      if (outputSchema != null) {
+        const result = await tracedAi.generateText({
+          experimental_telemetry: {
+            functionId: `gen-${taskType}`,
+            isEnabled: true,
+            metadata: {
+              ...attemptMetadata,
+              taskType,
+            },
+          },
+          frequencyPenalty,
+          maxOutputTokens,
+          model: google(modelName),
+          output: ai.Output.object({ schema: outputSchema }),
+          presencePenalty,
+          prompt,
+          providerOptions,
+          stopSequences,
+          stopWhen: tools != null ? ai.stepCountIs(5) : undefined,
+          system,
+          temperature: finalTemperature,
+          tools,
+          topK: finalTopK,
+          topP: finalTopP,
+        });
+        return result.output as T;
+      }
 
-      const result = await tracedAi.generateText({
+      const result = tracedAi.streamText({
         experimental_telemetry: {
-          functionId: `writer-${taskType}`,
+          functionId: `stream-${taskType}`,
           isEnabled: true,
           metadata: {
             ...attemptMetadata,
@@ -73,28 +103,35 @@ export async function callWithFallback<T>({
         },
         frequencyPenalty,
         maxOutputTokens,
-        maxRetries: 3,
         model: google(modelName),
         presencePenalty,
         prompt,
         providerOptions,
         stopSequences,
+        stopWhen: tools != null ? ai.stepCountIs(5) : undefined,
         system,
         temperature: finalTemperature,
+        tools,
         topK: finalTopK,
         topP: finalTopP,
-        ...(outputSchema != null && {
-          output: ai.Output.object({ schema: outputSchema }),
-        }),
       });
 
-      logger.info({
-        model: modelName,
-        msg: "Model returned output",
-        ...attemptMetadata,
-      });
+      let fullText = "";
 
-      return (outputSchema != null ? result.output : result.text) as T;
+      for await (const part of result.fullStream) {
+        if (part.type === "text-delta") {
+          fullText += part.text;
+          metadata.append("ai_chunks", part.text);
+        } else if (part.type === "reasoning-delta") {
+          metadata.append("ai_thoughts", part.text);
+        } else if (part.type === "tool-call") {
+          metadata.append("task_logs", `[AGENT] Invoking tool: ${part.toolName}...`);
+        } else if (part.type === "error") {
+          logger.error({ error: part.error, msg: "Stream event error" });
+        }
+      }
+
+      return fullText as T;
     } catch (error) {
       lastError = error;
       logger.warn({

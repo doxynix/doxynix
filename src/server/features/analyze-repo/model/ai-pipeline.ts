@@ -1,8 +1,9 @@
-import type { DocType, Repo, Status } from "@prisma/client";
+import type { DocType, Repo } from "@prisma/client";
 
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "@/server/shared/engine/core/discovery.types";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
+import { taskLogger } from "@/server/shared/lib/task-logger";
 import type { RepositoryFact, RepositoryFinding } from "@/server/shared/types";
 
 import { buildArchitectDigest } from "./architect-digest";
@@ -11,8 +12,6 @@ import { executeMapperPhase } from "./stages/mapper-stage";
 import { executeSentinelPhase } from "./stages/sentinel-stage";
 import { getDocumentationInputSnapshot } from "./utils/input-retrieval";
 import { orchestrateWriterTasks } from "./writers/writer-orchestrator";
-
-type StatusUpdater = (msg: string, percent: number, status?: Status) => Promise<void>;
 
 /**
  * Main AI Pipeline Orchestrator
@@ -25,20 +24,20 @@ export async function runAiPipeline(
   evidence: RepositoryEvidence,
   hardMetrics: RepoMetrics,
   instructions: string | undefined,
-  updateStatus: StatusUpdater,
   analysisId: string,
-  language: string
+  language: string,
+  userId: number,
+  repoId: string,
+  branch: string
 ): Promise<AIResult> {
   // Stage 1: Prompt injection detection
-  await updateStatus("Scanning input for threats...", 40);
+  taskLogger.log("🤖 Initializing AI Multi-Agent Pipeline...");
   const sentinelStatus = await executeSentinelPhase(instructions, analysisId);
 
   // Stage 2: Project mapping
-  await updateStatus("Mapping project structure (Step 1/3)...", 45);
   const projectMap = await executeMapperPhase(validFiles, hardMetrics, evidence, analysisId);
 
   // Stage 3: Deep analysis
-  await updateStatus("Deep Analysis & Swagger Gen (Step 2/3)...", 70);
   const documentationInput = getDocumentationInputSnapshot(evidence, hardMetrics);
   const architectDigest = buildArchitectDigest(
     documentationInput,
@@ -54,7 +53,10 @@ export async function runAiPipeline(
     analysisId,
     instructions,
     sentinelStatus,
-    language
+    language,
+    userId,
+    repoId,
+    branch
   );
 }
 

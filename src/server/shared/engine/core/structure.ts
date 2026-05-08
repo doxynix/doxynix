@@ -1,3 +1,5 @@
+import { meanBy, sumBy } from "es-toolkit";
+
 import { dumpDebug } from "../../lib/debug-logger";
 import type { DependencyNodeMetric } from "../../types";
 import { clamp } from "./common";
@@ -48,7 +50,7 @@ function buildStructuralSignals(
   dependencyHotspots: DependencyNodeMetric[]
 ): StructuralSignals {
   return {
-    apiSurface: evidence.modules.reduce((sum, module) => sum + module.apiSurface, 0),
+    apiSurface: sumBy(evidence.modules, (m) => m.apiSurface),
     configInventory: evidence.configs
       .map((config) => config.path)
       .sort((left, right) => left.localeCompare(right)),
@@ -107,11 +109,7 @@ export function scoreStructuralModularity(params: {
     STRUCTURAL_MODULARITY_SCORING.orphanPenaltyMax,
     params.orphanModules.length * STRUCTURAL_MODULARITY_SCORING.orphanMultiplier
   );
-  const avgInbound =
-    params.dependencyHotspots.length === 0
-      ? 0
-      : params.dependencyHotspots.reduce((sum, item) => sum + item.inbound, 0) /
-        params.dependencyHotspots.length;
+  const avgInbound = meanBy(params.dependencyHotspots, (h) => h.inbound) || 0;
 
   const hotspotPenalty = clamp(avgInbound * 3, 0, STRUCTURAL_MODULARITY_SCORING.hotspotPenaltyMax);
 

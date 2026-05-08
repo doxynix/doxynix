@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
-import { getRepoOrNotFound } from "@/entities/repo/model/get-repo";
-
 import { RepoDetailsHeader } from "@/features/repo/ui/repo-details-header";
+
+import { getRepoOrNotFound } from "@/server/entities/repo/api/get-repo";
 
 type Props = {
   children: ReactNode;

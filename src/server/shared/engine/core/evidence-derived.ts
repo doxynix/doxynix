@@ -1,3 +1,5 @@
+import { countBy, orderBy } from "es-toolkit";
+
 import type { DependencyNodeMetric } from "../../types";
 import type {
   ConfigRef,
@@ -200,19 +202,16 @@ export function buildHotspotSignals(
 }
 
 export function buildFileCategoryBreakdown(modules: ModuleRef[]): FileCategoryBreakdownItem[] {
-  return Array.from(
-    modules.reduce((acc, module) => {
-      for (const category of module.categories) {
-        acc.set(category, (acc.get(category) ?? 0) + 1);
-      }
-      return acc;
-    }, new Map<string, number>())
-  )
-    .map(([category, count]) => ({
-      category: category as FileCategoryBreakdownItem["category"],
-      count,
-    }))
-    .sort((left, right) => right.count - left.count || left.category.localeCompare(right.category));
+  const allCategories = modules.flatMap((m) => m.categories);
+
+  const counts = countBy(allCategories, (category) => category);
+
+  const list = Object.entries(counts).map(([category, count]) => ({
+    category: category as FileCategoryBreakdownItem["category"],
+    count,
+  }));
+
+  return orderBy(list, [(i) => i.count, (i) => i.category], ["desc", "asc"]);
 }
 
 export function dedupeConfigs(configs: ConfigRef[]) {

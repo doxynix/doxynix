@@ -3,6 +3,8 @@
  * Unified XML and JSON formatting for evidence blocks embedded in prompts.
  * Provides consistent transformation and escaping across all evidence types.
  */
+import { defu } from "defu";
+import { compact } from "es-toolkit";
 
 import { logger } from "../infrastructure/logger";
 import { escapePromptXmlAttr, escapePromptXmlText } from "./string-utils";
@@ -78,7 +80,7 @@ export class EvidenceFormatter {
    * Set default formatting options
    */
   setDefaults(options: Partial<EvidenceFormattingOptions>): this {
-    this.defaultOptions = { ...this.defaultOptions, ...options };
+    this.defaultOptions = defu(options, this.defaultOptions);
     return this;
   }
 
@@ -90,7 +92,7 @@ export class EvidenceFormatter {
     data: object,
     options: EvidenceFormattingOptions = {}
   ): FormattedEvidence {
-    const opts = { ...this.defaultOptions, ...options };
+    const opts = defu(options, this.defaultOptions);
 
     // Convert object to JSON
     const json = JSON.stringify(data, null, opts.prettyPrint === true ? 2 : 0);
@@ -303,7 +305,7 @@ export class EvidenceFormatter {
    * Get formatting stats/report
    */
   getFormattingReport(evidence: FormattedEvidence): string {
-    const report = [
+    const report = compact([
       `Evidence Type: ${evidence.metadata.type}`,
       `Format: ${evidence.metadata.format}`,
       `Size: ${evidence.size} bytes`,
@@ -312,9 +314,9 @@ export class EvidenceFormatter {
         ? `Original Size: ${evidence.metadata.originalSize} bytes`
         : null,
       `Timestamp: ${evidence.metadata.timestamp.toISOString()}`,
-    ];
+    ]);
 
-    return report.filter(Boolean).join("\n");
+    return report.join("\n");
   }
 }
 

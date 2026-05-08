@@ -1,3 +1,5 @@
+import { mean } from "es-toolkit";
+
 import { dumpDebug } from "../../lib/debug-logger";
 import { buildEvidence, clamp } from "../core/common";
 import type {
@@ -97,12 +99,13 @@ function buildRiskDerivedScores(
 
   derivedScores.overallRisk = clamp(
     Math.round(
-      (derivedScores.changeCouplingRisk +
-        derivedScores.dependencyCycleRisk +
-        derivedScores.graphReliabilityRisk +
-        derivedScores.hotspotRisk +
-        derivedScores.orphanModuleRisk) /
-        5
+      mean([
+        derivedScores.changeCouplingRisk,
+        derivedScores.dependencyCycleRisk,
+        derivedScores.graphReliabilityRisk,
+        derivedScores.hotspotRisk,
+        derivedScores.orphanModuleRisk,
+      ])
     ),
     0,
     100

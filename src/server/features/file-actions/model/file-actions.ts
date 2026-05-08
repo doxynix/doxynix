@@ -379,7 +379,7 @@ export async function runDocumentFilePreview(
     attemptMetadata: { filePath: input.path, operation: "document-file-preview" },
     models: AI_MODELS.WRITER,
     outputSchema: DocumentFilePreviewSchema,
-    prompt: `${CODE_DOC_USER_PROMPT(input.path, cleanedCode)}${contextSection}`,
+    prompt: `${CODE_DOC_USER_PROMPT(input.path, await cleanedCode)}${contextSection}`,
     system: `${CODE_DOC_SYSTEM_PROMPT(input.language)}
 
 Context handling guidance:

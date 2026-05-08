@@ -1,5 +1,6 @@
 import { compact, escape, uniq } from "es-toolkit";
 import { basename, extname, normalize } from "pathe";
+import validator from "validator";
 
 import { normalizeRepoPath } from "../engine/core/common";
 
@@ -7,13 +8,13 @@ import { normalizeRepoPath } from "../engine/core/common";
  * Type-safe guard for non-empty strings.
  */
 export const hasText = (value: unknown): value is string =>
-  typeof value === "string" && value.trim().length > 0;
+  typeof value === "string" && !validator.isEmpty(value, { ignore_whitespace: true });
 
 /**
  * Check if empty/whitespace.
  */
-export const isEmpty = (value: unknown): value is string =>
-  typeof value === "string" && value.trim().length === 0;
+export const isEmpty = (value: unknown): boolean =>
+  typeof value !== "string" || validator.isEmpty(value, { ignore_whitespace: true });
 
 /**
  * Escape XML text.

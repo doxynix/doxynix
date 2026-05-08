@@ -1,4 +1,4 @@
-import path from "node:path";
+import { extname } from "pathe";
 import ts from "typescript";
 
 import type { TsStaticHint } from "../../types";
@@ -70,7 +70,7 @@ export function collectTypeScriptStaticHints(
 
   for (const file of files) {
     const normalized = normalizeRepoPath(file.path);
-    const ext = path.posix.extname(normalized).toLowerCase();
+    const ext = extname(normalized).toLowerCase();
     if (!TS_LIKE.has(ext)) continue;
 
     let sourceFile: ts.SourceFile;

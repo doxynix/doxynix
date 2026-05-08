@@ -203,7 +203,8 @@ export async function buildStageContextPack({
       continue;
     }
 
-    let content = cleanCodeForAi(item.file.content ?? "", item.path).trim();
+    const cleanedContent = await cleanCodeForAi(item.file.content ?? "", item.path);
+    let content = cleanedContent.trim();
     if (!content) {
       dropped.push({ path: item.path, reason: "empty-after-clean", score: item.score });
       continue;
@@ -223,9 +224,10 @@ export async function buildStageContextPack({
 
     if (currentTotalTokens + totalWithXmlTokens > budgetTokens) {
       if (item.preferred) {
-        content = content.slice(0, 500) + "\n/* ...emergency truncated... */";
-        const emergencyTokens = (await countTokens(content)) + 15;
-        if (currentTotalTokens + emergencyTokens <= budgetTokens) {
+        const remainingSpace = budgetTokens - currentTotalTokens - 20;
+        if (remainingSpace > 200) {
+          content = content.slice(0, remainingSpace * 2) + "\n/* ...emergency truncated... */";
+          const emergencyTokens = (await countTokens(content)) + 15;
           addFileToContext(item, buildXml(item.path, content), emergencyTokens, true);
           continue;
         }

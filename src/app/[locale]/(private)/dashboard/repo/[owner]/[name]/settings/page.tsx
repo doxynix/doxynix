@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
-import { getRepoOrNotFound } from "@/entities/repo/model/get-repo";
-
 import { DeleteRepoCard } from "@/features/repo-settings/ui/delete-repo-card";
 import { PRAnalysisConfigCard } from "@/features/repo-settings/ui/pr-analysis-config-card";
+
+import { getRepoOrNotFound } from "@/server/entities/repo/api/get-repo";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;

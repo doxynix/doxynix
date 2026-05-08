@@ -1,9 +1,8 @@
 import fs from "node:fs/promises";
-import path from "node:path";
 import { compact } from "es-toolkit";
 import fg from "fast-glob";
 import { isBinaryFile } from "isbinaryfile";
-import { normalize } from "pathe";
+import { join, normalize } from "pathe";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
@@ -11,6 +10,7 @@ import { ProjectPolicy } from "../engine/core/project-policy";
 import { prisma } from "../infrastructure/db";
 import { logger } from "../infrastructure/logger";
 import { realtimeServer } from "../infrastructure/realtime";
+import { taskLogger } from "./task-logger";
 
 export async function handleError(
   error: unknown,
@@ -51,6 +51,8 @@ export async function cleanup(dirPath: string) {
 }
 
 export async function readAndFilterFiles(basePath: string, selectedFiles: string[]) {
+  taskLogger.log(`Scanning directory for ${selectedFiles.length} patterns...`);
+
   const resolvedBase = await fs.realpath(basePath);
 
   const entries = await fg(selectedFiles, {
@@ -66,7 +68,11 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
   }
 
   const filePromises = entries.map(async (filePath) => {
+    taskLogger.log(`Reading: ${filePath}`);
+
     if (ProjectPolicy.isSensitive(filePath)) {
+      taskLogger.log(`Skipping sensitive file: ${filePath}`);
+
       logger.warn({
         filePath,
         msg: "Skipping sensitive file from analysis context",
@@ -74,7 +80,7 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
       return null;
     }
 
-    const fullPath = path.join(resolvedBase, filePath);
+    const fullPath = join(resolvedBase, filePath);
     const realFullPath = await fs.realpath(fullPath).catch(() => null);
 
     if (realFullPath == null || !realFullPath.startsWith(resolvedBase)) {

@@ -1,3 +1,5 @@
+import { maxBy, sumBy } from "es-toolkit";
+
 import { getLanguageColor } from "../../lib/language-metadata";
 import { percentile } from "../../lib/math-utils";
 import type { FileSignals, LanguageMetric } from "../core/discovery.types";
@@ -119,6 +121,15 @@ export function aggregateScanResults(results: FileScanResult[]): ScanAggregation
     focusedComplexFiles.length > 0 ? focusedComplexFiles : fallbackComplexFiles
   ).slice(0, SCHEMA_LIMITS.maxFilesToSkeletonize);
 
+  const totals = {
+    comments: sumBy(results, (r) => r.comments),
+    maxNesting: maxBy(results, (r) => r.maxNesting)?.maxNesting ?? 0,
+    securityIssues: sumBy(results, (r) => r.securityIssues),
+    size: sumBy(results, (r) => r.size),
+    source: sumBy(results, (r) => r.source),
+    todos: sumBy(results, (r) => r.todos),
+  };
+
   return {
     analysisCoverage: buildAnalysisCoverage(results, results.length),
     fileComplexities,
@@ -135,23 +146,6 @@ export function aggregateScanResults(results: FileScanResult[]): ScanAggregation
     securityScanStatus: results.some((result) => result.securityScanStatus === "partial")
       ? "partial"
       : "ok",
-    totals: results.reduce(
-      (acc, result) => ({
-        comments: acc.comments + result.comments,
-        maxNesting: Math.max(acc.maxNesting, result.maxNesting),
-        securityIssues: acc.securityIssues + result.securityIssues,
-        size: acc.size + result.size,
-        source: acc.source + result.source,
-        todos: acc.todos + result.todos,
-      }),
-      {
-        comments: 0,
-        maxNesting: 0,
-        securityIssues: 0,
-        size: 0,
-        source: 0,
-        todos: 0,
-      }
-    ),
+    totals,
   };
 }

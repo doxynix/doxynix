@@ -142,15 +142,14 @@ export const notificationsService = {
         by: ["isRead"],
       });
 
-      return groups.reduce(
-        (acc, group) => {
-          if (group.isRead === true) acc.read = group._count._all;
-          else acc.unread = group._count._all;
-          acc.total += group._count._all;
-          return acc;
-        },
-        { read: 0, total: 0, unread: 0 }
-      );
+      const read = groups.find((g) => g.isRead === true)?._count._all ?? 0;
+      const unread = groups.find((g) => g.isRead === false)?._count._all ?? 0;
+
+      return {
+        read,
+        total: read + unread,
+        unread,
+      };
     } catch (error) {
       handlePrismaError(error);
     }

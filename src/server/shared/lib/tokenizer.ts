@@ -1,9 +1,12 @@
 import { getEncoding } from "js-tiktoken";
 
+import { logger } from "../infrastructure/logger";
+import { hasText } from "./string-utils";
+
 const encoding = getEncoding("o200k_base");
 
 export async function countTokens(text: string): Promise<number> {
-  if (!text || text.trim().length === 0) return 0;
+  if (!hasText(text)) return 0;
 
   try {
     const baseCount = encoding.encode(text).length;
@@ -12,7 +15,7 @@ export async function countTokens(text: string): Promise<number> {
 
     return Math.ceil(baseCount * safetyFactor);
   } catch (error) {
-    console.error("Tokenization failed, using fallback:", error);
+    logger.error({ error, msg: "Tokenization failed, using fallback:" });
     return Math.ceil(text.length / 3);
   }
 }

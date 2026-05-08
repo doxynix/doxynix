@@ -1,15 +1,21 @@
 import { DocType, type Repo } from "@prisma/client";
+import { runs } from "@trigger.dev/sdk";
 
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "@/server/shared/engine/core/discovery.types";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { uniquePaths } from "@/server/shared/lib/array-utils";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
-import { llmLimiter } from "@/server/shared/lib/llm-limiter";
 import { hasText } from "@/server/shared/lib/string-utils";
 
-import { buildStageContextPack, type StageContextPack } from "../context-manager";
+import {
+  apiTask,
+  architectureTask,
+  changelogTask,
+  contributingTask,
+  readmeTask,
+} from "../../task/writer.tasks";
+import { buildStageContextPack } from "../context-manager";
 import {
   buildSectionDebugSnapshot,
   buildWriterContextSnapshot,
@@ -21,17 +27,34 @@ import {
   serializeAllowedPaths,
   serializeForWriter,
 } from "../utils/payload-serialization";
-import {
-  executeApiWriter,
-  executeArchitectureWriter,
-  executeChangelogWriter,
-  executeContributingWriter,
-  executeReadmeWriter,
-  type WriterName,
-  type WriterResult,
-} from "./writer-tasks";
+import type { WriterName, WriterResult } from "./writer-tasks";
 
-type WriterTaskKey = "API" | "ARCHITECTURE" | "CHANGELOG" | "CONTRIBUTING" | "README";
+type ModuleDependencyEntry = {
+  graphPartial: boolean;
+  inbound: string[];
+  outbound: string[];
+  path: string;
+};
+type ModuleDependencyContext = {
+  graphPartial: boolean;
+  modules: ModuleDependencyEntry[];
+  resolvedInternalEdges: number;
+  unresolvedInternalImports: number;
+};
+type DocumentationInputSnapshot = NonNullable<RepoMetrics["documentationInput"]>;
+type EngineeringDossier = {
+  changeCoupling: NonNullable<RepoMetrics["changeCoupling"]>;
+  churnHotspots: NonNullable<RepoMetrics["churnHotspots"]>;
+  dependencyCycles: RepoMetrics["dependencyCycles"];
+  dependencyHotspots: RepoMetrics["dependencyHotspots"];
+  documentationInput: DocumentationInputSnapshot;
+  graphReliability: RepositoryEvidence["dependencyGraph"];
+  moduleDependencyContext: ModuleDependencyContext;
+  mostComplexFiles: RepoMetrics["mostComplexFiles"];
+  orphanModules: RepoMetrics["orphanModules"];
+  securityFindings: RepoMetrics["securityFindings"];
+  teamRoles: RepoMetrics["teamRoles"];
+};
 
 export async function orchestrateWriterTasks(
   files: { content: string; path: string }[],
@@ -80,8 +103,33 @@ export async function orchestrateWriterTasks(
     }),
   };
 
+  const architectureDependencyContext = buildModuleDependencyContext(
+    evidence,
+    uniquePaths(
+      [
+        ...documentationInput.sections.architecture.body.primaryEntrypoints,
+        ...documentationInput.sections.architecture.body.modules.map((module) => module.path),
+        ...documentationInput.sections.architecture.body.dependencyHotspots.map(
+          (hotspot) => hotspot.path
+        ),
+      ],
+      120
+    )
+  );
+  const architectureDependencyContextPayload = serializeForWriter(architectureDependencyContext);
+  const engineeringDossier = buildEngineeringDossier(
+    documentationInput,
+    hardMetrics,
+    evidence,
+    architectureDependencyContext
+  );
+  const engineeringDossierPayload = serializeForWriter(engineeringDossier);
+  const engineeringDossierPaths = getEngineeringDossierPaths(engineeringDossier);
+
   void dumpDebug("writer-budget", buildWriterContextSnapshot(writerContexts));
   void dumpDebug("report-section-inputs", {
+    architectureDependencyContext,
+    engineeringDossier,
     sections: sectionDebugSnapshot,
     writerPlan,
   });
@@ -89,13 +137,15 @@ export async function orchestrateWriterTasks(
   const allowedPathsByWriter = {
     api: buildAllowedPaths(
       [
+        ...engineeringDossierPaths,
         ...writerContexts.api.debug.selectedEvidencePaths,
         ...documentationInput.sections.api_reference.evidencePaths,
       ],
-      480
+      640
     ),
     architecture: buildAllowedPaths(
       [
+        ...engineeringDossierPaths,
         ...writerContexts.architecture.debug.selectedEvidencePaths,
         ...documentationInput.sections.architecture.evidencePaths,
         ...documentationInput.sections.risks.evidencePaths,
@@ -105,6 +155,7 @@ export async function orchestrateWriterTasks(
     ),
     readme: buildAllowedPaths(
       [
+        ...engineeringDossierPaths,
         ...writerContexts.readme.debug.selectedEvidencePaths,
         ...documentationInput.sections.overview.evidencePaths,
         ...documentationInput.sections.architecture.evidencePaths,
@@ -113,128 +164,124 @@ export async function orchestrateWriterTasks(
     ),
   };
 
-  const results: WriterResult[] = [];
-  const taskMap: Partial<Record<WriterTaskKey, number>> = {};
-
-  const addToQueue = async (
-    key: WriterTaskKey,
-    contextPack: null | StageContextPack,
-    taskFn: () => Promise<WriterResult>
-  ) => {
-    taskMap[key] = results.length;
-
-    const rawTokens = contextPack?.debug.selectedTokens ?? 10_000;
-    const estimatedWeight = Math.ceil(rawTokens * 1.3) + 15_000;
-
-    try {
-      logger.info({
-        calculatedWeight: estimatedWeight,
-        msg: `Scheduling task ${key}`,
-        tokens: rawTokens,
-      });
-
-      const result = await llmLimiter.schedule(
-        {
-          id: `${analysisId}-${key}`,
-          weight: estimatedWeight,
-        },
-        taskFn
-      );
-
-      results.push(result);
-    } catch (error) {
-      logger.error({ error, key, msg: "Writer failed in queue" });
-      results.push({
-        error: "Queue overflow or API error",
-        name: key.toLowerCase() as WriterName,
-        status: "failed",
-      });
-    }
+  const authParams = {
+    branch: repo.defaultBranch,
+    repoId: repo.publicId,
+    userId,
   };
 
+  const taskHandles: Array<{ id: string; name: WriterName }> = [];
+
   if (requestedDocs.includes(DocType.README)) {
-    await addToQueue("README", writerContexts.readme, async () =>
-      executeReadmeWriter(
-        analysisId,
-        writerInputs.readme.payload,
-        writerContexts.readme.context,
-        allowedPathsByWriter.readme,
-        language
-      )
-    );
+    const handle = await readmeTask.trigger({
+      allowedPaths: allowedPathsByWriter.readme,
+      analysisId,
+      context: writerContexts.readme.context,
+      engineeringDossierPayload,
+      language,
+      payload: writerInputs.readme.payload,
+      selectedTokens: writerContexts.readme.debug.selectedTokens,
+      ...authParams,
+    });
+    taskHandles.push({ id: handle.id, name: "readme" });
   }
 
   if (requestedDocs.includes(DocType.API)) {
-    await addToQueue("API", writerContexts.api, async () =>
-      executeApiWriter(
-        analysisId,
-        writerInputs.api.payload,
-        writerContexts.api.context,
-        allowedPathsByWriter.api,
-        language
-      )
-    );
+    const handle = await apiTask.trigger({
+      allowedPaths: allowedPathsByWriter.api,
+      analysisId,
+      context: writerContexts.api.context,
+      engineeringDossierPayload,
+      language,
+      payload: writerInputs.api.payload,
+      selectedTokens: writerContexts.api.debug.selectedTokens,
+      ...authParams,
+    });
+    taskHandles.push({ id: handle.id, name: "api" });
   }
 
   if (requestedDocs.includes(DocType.ARCHITECTURE)) {
-    await addToQueue("ARCHITECTURE", writerContexts.architecture, async () =>
-      executeArchitectureWriter(
-        analysisId,
-        writerInputs.architecture.payload,
-        serializeForWriter(documentationInput.sections.risks),
-        serializeForWriter(documentationInput.sections.onboarding),
-        writerContexts.architecture.context,
-        allowedPathsByWriter.architecture,
-        language
-      )
-    );
+    const handle = await architectureTask.trigger({
+      allowedPaths: allowedPathsByWriter.architecture,
+      analysisId,
+      context: writerContexts.architecture.context,
+      engineeringDossierPayload,
+      language,
+      moduleContext: architectureDependencyContextPayload,
+      onboardingPayload: serializeForWriter(documentationInput.sections.onboarding),
+      payload: writerInputs.architecture.payload,
+      risksPayload: serializeForWriter(documentationInput.sections.risks),
+      selectedTokens: writerContexts.architecture.debug.selectedTokens,
+      ...authParams,
+    });
+    taskHandles.push({ id: handle.id, name: "architecture" });
   }
 
   if (requestedDocs.includes(DocType.CONTRIBUTING)) {
-    await addToQueue("CONTRIBUTING", writerContexts.readme, async () =>
-      executeContributingWriter(
-        analysisId,
-        writerInputs.contributing.payload,
-        writerContexts.readme.context,
-        allowedPathsByWriter.readme,
-        language
-      )
-    );
+    const handle = await contributingTask.trigger({
+      allowedPaths: allowedPathsByWriter.readme,
+      analysisId,
+      context: writerContexts.readme.context,
+      engineeringDossierPayload,
+      language,
+      payload: writerInputs.contributing.payload,
+      selectedTokens: writerContexts.readme.debug.selectedTokens,
+      ...authParams,
+    });
+    taskHandles.push({ id: handle.id, name: "contributing" });
   }
 
   if (requestedDocs.includes(DocType.CHANGELOG)) {
-    await addToQueue("CHANGELOG", null, () =>
-      executeChangelogWriter(analysisId, analysisResult, userId, repo, language)
-    );
+    const handle = await changelogTask.trigger({
+      analysisId,
+      analysisResult,
+      language,
+      repo,
+      userId,
+    });
+    taskHandles.push({ id: handle.id, name: "changelog" });
+  }
+
+  const results: WriterResult[] = [];
+
+  for (const handle of taskHandles) {
+    const runResult = await runs.poll(handle.id);
+
+    if (runResult.isSuccess) {
+      results.push(runResult.output as WriterResult);
+    } else {
+      console.error(`Writer task ${handle.name} failed with status: ${runResult.status}`);
+      results.push({
+        error: runResult.error?.message ?? "Unknown task error",
+        name: handle.name,
+        status: "failed",
+      });
+    }
   }
 
   const writerErrors: Partial<Record<WriterName, string>> = {};
-
   for (const result of results) {
     if (result.error != null) {
       writerErrors[result.name] = result.error;
     }
   }
 
-  const getResult = (key: WriterTaskKey) => {
-    const idx = taskMap[key];
-    return idx !== undefined ? results[idx] : null;
-  };
+  const getResult = (name: WriterName) => results.find((r) => r.name === name);
 
-  const readmeRes = getResult("README");
-  const apiRes = getResult("API");
-  const archRes = getResult("ARCHITECTURE");
-  const contrRes = getResult("CONTRIBUTING");
-  const changeRes = getResult("CHANGELOG");
+  const readmeRes = getResult("readme");
+  const apiRes = getResult("api");
+  const archRes = getResult("architecture");
+  const contrRes = getResult("contributing");
+  const changeRes = getResult("changelog");
 
-  const generatedReadme = readmeRes?.content ?? undefined;
-  let generatedApiMarkdown = apiRes?.content ?? undefined;
-  const generatedArchitecture = archRes?.content ?? undefined;
-  const generatedContributing = contrRes?.content ?? undefined;
-  const generatedChangelog = changeRes?.content ?? undefined;
+  const generatedReadme = readmeRes?.content;
+  let generatedApiMarkdown = apiRes?.content;
+  const generatedArchitecture = archRes?.content;
+  const generatedContributing = contrRes?.content;
+  const generatedChangelog = changeRes?.content;
 
   let swaggerYaml: string | undefined;
-  if (taskMap.API != null && generatedApiMarkdown != null) {
+  if (apiRes != null && generatedApiMarkdown != null) {
     const yamlMatch = RegExp(/```yaml([\S\s]*?)```/).exec(generatedApiMarkdown);
     if (yamlMatch) {
       swaggerYaml = yamlMatch[1]?.trim();
@@ -244,17 +291,15 @@ export async function orchestrateWriterTasks(
     }
   }
 
-  const updatedStatus: any = {
-    api: apiRes != null ? (apiRes.error != null ? "failed" : "llm") : "missing",
-    architecture: archRes != null ? (archRes.error != null ? "failed" : "llm") : "missing",
-    changelog: changeRes != null ? (changeRes.error != null ? "failed" : "llm") : "missing",
-    contributing: contrRes != null ? (contrRes.error != null ? "failed" : "llm") : "missing",
-    readme: readmeRes != null ? (readmeRes.error != null ? "failed" : "llm") : "missing",
-  };
-
   analysisResult.analysisRuntime = {
     ...analysisResult.analysisRuntime,
-    writers: updatedStatus,
+    writers: {
+      api: apiRes ? (apiRes.error != null ? "failed" : "llm") : "missing",
+      architecture: archRes ? (archRes.error != null ? "failed" : "llm") : "missing",
+      changelog: changeRes ? (changeRes.error != null ? "failed" : "llm") : "missing",
+      contributing: contrRes ? (contrRes.error != null ? "failed" : "llm") : "missing",
+      readme: readmeRes ? (readmeRes.error != null ? "failed" : "llm") : "missing",
+    },
   };
 
   void dumpDebug("report-section-docs", {
@@ -309,4 +354,105 @@ export async function orchestrateWriterTasks(
 
 function buildAllowedPaths(paths: string[], limit: number) {
   return serializeAllowedPaths(uniquePaths(paths, limit));
+}
+
+function buildModuleDependencyContext(
+  evidence: RepositoryEvidence,
+  modulePaths: string[]
+): ModuleDependencyContext {
+  const graphPartial = evidence.dependencyGraph.unresolvedImportSpecifiers > 0;
+  const inboundByPath = new Map<string, string[]>();
+  const outboundByPath = new Map<string, string[]>();
+
+  for (const edge of evidence.dependencyGraph.edges) {
+    if (!isResolvedInternalEdge(edge)) continue;
+
+    const outbound = outboundByPath.get(edge.fromPath) ?? [];
+    outbound.push(edge.toPath);
+    outboundByPath.set(edge.fromPath, outbound);
+
+    const inbound = inboundByPath.get(edge.toPath) ?? [];
+    inbound.push(edge.fromPath);
+    inboundByPath.set(edge.toPath, inbound);
+  }
+
+  return {
+    graphPartial,
+    modules: modulePaths.map((path) => ({
+      graphPartial,
+      inbound: uniquePaths(inboundByPath.get(path) ?? [], 16),
+      outbound: uniquePaths(outboundByPath.get(path) ?? [], 16),
+      path,
+    })),
+    resolvedInternalEdges: evidence.dependencyGraph.resolvedEdges,
+    unresolvedInternalImports: evidence.dependencyGraph.unresolvedImportSpecifiers,
+  };
+}
+
+function getDependencyContextPaths(context: ModuleDependencyContext): string[] {
+  return uniquePaths(
+    context.modules.flatMap((module) => [module.path, ...module.inbound, ...module.outbound]),
+    640
+  );
+}
+
+function buildEngineeringDossier(
+  documentationInput: DocumentationInputSnapshot,
+  hardMetrics: RepoMetrics,
+  evidence: RepositoryEvidence,
+  moduleDependencyContext: ModuleDependencyContext
+): EngineeringDossier {
+  return {
+    changeCoupling: hardMetrics.changeCoupling ?? [],
+    churnHotspots: hardMetrics.churnHotspots ?? [],
+    dependencyCycles: hardMetrics.dependencyCycles,
+    dependencyHotspots: hardMetrics.dependencyHotspots,
+    documentationInput,
+    graphReliability: {
+      ...evidence.dependencyGraph,
+      resolvedEdges:
+        hardMetrics.graphReliability?.resolvedEdges ?? evidence.dependencyGraph.resolvedEdges,
+      unresolvedImportSpecifiers:
+        hardMetrics.graphReliability?.unresolvedImportSpecifiers ??
+        evidence.dependencyGraph.unresolvedImportSpecifiers,
+      unresolvedSamples:
+        hardMetrics.graphReliability?.unresolvedSamples ??
+        evidence.dependencyGraph.unresolvedSamples,
+    },
+    moduleDependencyContext,
+    mostComplexFiles: hardMetrics.mostComplexFiles,
+    orphanModules: hardMetrics.orphanModules,
+    securityFindings: hardMetrics.securityFindings,
+    teamRoles: hardMetrics.teamRoles,
+  };
+}
+
+function getEngineeringDossierPaths(dossier: EngineeringDossier): string[] {
+  return uniquePaths(
+    [
+      ...getDependencyContextPaths(dossier.moduleDependencyContext),
+      ...Object.values(dossier.documentationInput.sections).flatMap(
+        (section) => section.evidencePaths
+      ),
+      ...dossier.documentationInput.report.primaryEntrypoints,
+      ...dossier.documentationInput.report.secondaryEntrypoints,
+      ...dossier.documentationInput.codebase.configFiles,
+      ...dossier.documentationInput.api.publicSurfacePaths,
+      ...dossier.documentationInput.api.routeInventory.sourceFiles,
+      ...dossier.securityFindings.map((finding) => finding.path),
+      ...dossier.churnHotspots.map((hotspot) => hotspot.path),
+      ...dossier.changeCoupling.flatMap((coupling) => [coupling.fromPath, coupling.toPath]),
+      ...dossier.dependencyHotspots.map((hotspot) => hotspot.path),
+      ...dossier.dependencyCycles.flat(),
+      ...dossier.orphanModules,
+      ...dossier.mostComplexFiles,
+    ],
+    640
+  );
+}
+
+function isResolvedInternalEdge(
+  edge: RepositoryEvidence["dependencyGraph"]["edges"][number]
+): edge is RepositoryEvidence["dependencyGraph"]["edges"][number] & { toPath: string } {
+  return edge.kind === "internal" && edge.resolved && edge.toPath != null;
 }

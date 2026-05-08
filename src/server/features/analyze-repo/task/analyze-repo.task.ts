@@ -1,6 +1,6 @@
 import os from "node:os";
 import { Status, type DocType } from "@prisma/client";
-import { task } from "@trigger.dev/sdk/v3";
+import { task } from "@trigger.dev/sdk";
 import { join } from "pathe";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
@@ -18,9 +18,8 @@ import { buildDocumentationInputModel } from "@/server/shared/engine/pipeline/do
 import { prisma } from "@/server/shared/infrastructure/db";
 import { cloneRepository, getAnalysisContext } from "@/server/shared/infrastructure/github/git";
 import { calculateBusFactor } from "@/server/shared/infrastructure/github/github-api";
-import { logger } from "@/server/shared/infrastructure/logger";
-import { realtimeServer } from "@/server/shared/infrastructure/realtime";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
+import { taskLogger } from "@/server/shared/lib/task-logger";
 import { cleanup, handleError, readAndFilterFiles } from "@/server/shared/lib/utils";
 
 import { repoAnalysisService } from "../api/repo-analysis.service";
@@ -36,8 +35,6 @@ type TaskPayload = {
   selectedFiles: string[];
   userId: number;
 };
-
-type StatusUpdater = (msg: string, percent: number, status?: Status) => Promise<void>;
 
 export const analyzeRepoTask = task({
   id: "analyze-repo",
@@ -68,41 +65,11 @@ export const analyzeRepoTask = task({
       userId,
     } = payload;
 
-    let currentLogs = "";
     const tempClonePath = join(os.tmpdir(), `doxynix-clone-${analysisId}`);
     const channelName = REALTIME_CONFIG.channels.user(userId);
 
-    const updateStatus: StatusUpdater = async (msg, percent, status = Status.PENDING) => {
-      const timestamp = new Date().toLocaleTimeString();
-      const logLine = `[${timestamp}] ${msg}\n`;
-      currentLogs += logLine;
-      logger.info({
-        analysisId,
-        detail: msg,
-        msg: `Analysis progress`,
-        percent,
-        status,
-      });
-
-      await Promise.all([
-        prisma.analysis.update({
-          data: { logs: currentLogs, message: msg, progress: percent, status },
-          where: { publicId: analysisId },
-        }),
-        realtimeServer.channels
-          .get(channelName)
-          .publish(REALTIME_CONFIG.events.user.analysisProgress, {
-            analysisId,
-            log: logLine,
-            message: msg,
-            progress: percent,
-            status,
-          }),
-      ]);
-    };
-
     try {
-      await updateStatus("Initializing...", 5);
+      taskLogger.log("Initializing engine...");
       const { currentSha, repo, token } = await getAnalysisContext(
         analysisId,
         userId,
@@ -110,29 +77,36 @@ export const analyzeRepoTask = task({
       );
 
       if (repo == null) {
-        await updateStatus("No changes detected. Skipping...", 100, Status.DONE);
+        taskLogger.log("No changes detected");
         return { reason: "SHA_MATCH", skipped: true };
       }
 
-      await updateStatus("Calculating Bus Factor...", 15);
+      taskLogger.log("Calculating Bus Factor...");
       const { busFactor, rawContributors } = await calculateBusFactor(repo, userId, prisma);
 
-      await updateStatus("Cloning repository...", 20);
+      taskLogger.log("Cloning repository...");
       await cloneRepository(repo, token, tempClonePath, selectedBranch);
 
-      await updateStatus(`Reading ${selectedFiles.length} files...`, 35);
+      taskLogger.log(`Target path: ${tempClonePath}`);
+
+      taskLogger.log(`Reading ${selectedFiles.length} files...`);
       const validFiles = await readAndFilterFiles(tempClonePath, selectedFiles);
+
       const { evidence, metrics: hardMetricsCore } = await analyzeRepository(validFiles);
+
       const churnHotspots = await computeGitChurnHotspots(
         tempClonePath,
         validFiles.map((f) => f.path)
       );
+
       const changeCoupling = await computeChangeCoupling(
         tempClonePath,
         validFiles.map((f) => f.path)
       );
+
       const hardMetrics: RepoMetrics = { ...hardMetricsCore, changeCoupling, churnHotspots };
       const teamRoles = calculateTeamRoles(rawContributors);
+
       const { facts: repositoryFacts, findings: repositoryFindings } = buildRepositoryArtifacts({
         busFactor,
         evidence,
@@ -147,11 +121,13 @@ export const analyzeRepoTask = task({
         evidence,
         hardMetrics,
         instructions,
-        updateStatus,
         analysisId,
-        language
+        language,
+        userId,
+        repo.publicId,
+        selectedBranch ?? repo.defaultBranch
       );
-      await updateStatus("Generating Deep Documentation (Step 3/3)...", 85);
+
       const {
         generatedApiMarkdown,
         generatedArchitecture,
@@ -203,7 +179,7 @@ export const analyzeRepoTask = task({
         })
       );
 
-      await updateStatus("Finalizing and saving results...", 90);
+      taskLogger.log("Saving results...");
       await repoAnalysisService.saveResults({
         aiResult,
         analysisId,
@@ -219,9 +195,10 @@ export const analyzeRepoTask = task({
       });
 
       await cleanup(tempClonePath);
-      await updateStatus("Analysis Complete", 100, Status.DONE);
+      await taskLogger.finalize(analysisId, Status.DONE);
       return { success: true };
     } catch (error: unknown) {
+      await taskLogger.finalize(analysisId, Status.FAILED);
       await handleError(error, analysisId, channelName, tempClonePath);
       throw error;
     }

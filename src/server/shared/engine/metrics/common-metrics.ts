@@ -1,3 +1,4 @@
+import { sumBy } from "es-toolkit";
 import simpleGit from "simple-git";
 
 import { logger } from "../../infrastructure/logger";
@@ -54,7 +55,7 @@ export async function calculateCodeMetrics(
 export function calculateTeamRoles(
   contributors: { contributions: number; login: string }[]
 ): TeamRole[] {
-  const total = contributors.reduce((sum, contributor) => sum + contributor.contributions, 0);
+  const total = sumBy(contributors, (c) => c.contributions);
   if (total === 0) return [];
 
   return contributors

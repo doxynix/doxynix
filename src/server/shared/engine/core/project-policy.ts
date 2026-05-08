@@ -1,3 +1,4 @@
+import { maxBy } from "es-toolkit";
 import pm from "picomatch";
 
 import { unique } from "../../lib/array-utils";
@@ -218,9 +219,9 @@ export const ProjectPolicy = {
     counts: Record<ProjectPolicySemanticKind, number>
   ): ProjectPolicySemanticKind {
     return (
-      (Object.entries(counts).sort(
-        (left, right) => right[1] - left[1] || left[0].localeCompare(right[0])
-      )[0]?.[0] as ProjectPolicySemanticKind | undefined) ?? "unknown"
+      (maxBy(Object.entries(counts), ([, count]) => count)?.[0] as
+        | ProjectPolicySemanticKind
+        | undefined) ?? "unknown"
     );
   },
 

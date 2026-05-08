@@ -1,11 +1,13 @@
 import type { RestEndpointMethodTypes } from "@octokit/rest";
 import { Visibility, type Repo } from "@prisma/client";
+import { sumBy } from "es-toolkit";
 
 import type { RepoItemFields } from "@/shared/types/repo.types";
 
 import { ProjectPolicy } from "../../engine/core/project-policy";
 import { isOctokitError } from "../../lib/handle-error";
 import { getLanguageColor } from "../../lib/language-metadata";
+import { taskLogger } from "../../lib/task-logger";
 import type { DbClient } from "../db";
 import { logger } from "../logger";
 import {
@@ -384,6 +386,8 @@ export async function calculateBusFactor(
   userId: number,
   prisma: DbClient
 ): Promise<BusFactorResult> {
+  taskLogger.log("Analyzing contributor history...");
+
   try {
     const context = await resolveRepoClientContext(prisma, userId, repo.owner);
 
@@ -418,6 +422,8 @@ export async function calculateBusFactor(
       }
     );
 
+    taskLogger.log(`Found ${contributors.length} active contributors.`);
+
     // Normalize and sort contributors
     const rawContributors = contributors
       .map((contributor: (typeof contributors)[number]) => ({
@@ -426,10 +432,7 @@ export async function calculateBusFactor(
       }))
       .sort((left, right) => right.contributions - left.contributions);
 
-    const totalCommits = rawContributors.reduce(
-      (acc: number, contributor) => acc + contributor.contributions,
-      0
-    );
+    const totalCommits = sumBy(rawContributors, (c) => c.contributions);
 
     if (totalCommits === 0) {
       return {
@@ -447,6 +450,10 @@ export async function calculateBusFactor(
       busFactor++;
       if (runningSum >= totalCommits * 0.5) break;
     }
+
+    taskLogger.log(
+      `Bus Factor result: ${busFactor}. Project knowledge is ${busFactor > 2 ? "distributed" : "concentrated"}.`
+    );
 
     return {
       busFactor,

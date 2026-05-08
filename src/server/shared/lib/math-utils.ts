@@ -1,3 +1,5 @@
+import { clamp } from "../engine/core/common";
+
 /**
  * Calculate percentile value from an array of numbers.
  *
@@ -11,7 +13,7 @@ export function percentile(values: number[], ratio: number): number {
   const sorted = [...values].sort((a, b) => a - b);
   const index = Math.floor((sorted.length - 1) * ratio);
 
-  const safeIndex = Math.max(0, Math.min(index, sorted.length - 1));
+  const safeIndex = clamp(index, 0, sorted.length - 1);
 
   return sorted[safeIndex] ?? 0;
 }

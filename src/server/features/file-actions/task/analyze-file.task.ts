@@ -1,4 +1,4 @@
-import { task } from "@trigger.dev/sdk/v3";
+import { task } from "@trigger.dev/sdk";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 

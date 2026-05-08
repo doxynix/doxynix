@@ -1,5 +1,5 @@
 import { DocType, Status, type Prisma, type Repo } from "@prisma/client";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
@@ -93,7 +93,7 @@ export const repoAnalysisService = {
       where: { publicId: analysis.publicId },
     });
 
-    return { jobId: handle.id, status: "QUEUED" };
+    return { jobId: handle.id, publicAccessToken: handle.publicAccessToken, status: "QUEUED" };
   },
 
   async auditFile(db: DbClient, userId: number, input: FileActionInput) {

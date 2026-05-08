@@ -1,5 +1,5 @@
 import type { PRAnalysisStatus } from "@prisma/client";
-import { task } from "@trigger.dev/sdk/v3";
+import { task } from "@trigger.dev/sdk";
 
 import { prAnalysisService } from "@/server/entities/pr-analysis/api/pr-analysis.service";
 import { prisma } from "@/server/shared/infrastructure/db";

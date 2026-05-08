@@ -1,4 +1,4 @@
-import { task } from "@trigger.dev/sdk/v3";
+import { task } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 import { generatedFixService } from "@/server/entities/pr-analysis/api/generated-fix.service";

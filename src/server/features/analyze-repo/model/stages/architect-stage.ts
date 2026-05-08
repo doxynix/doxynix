@@ -5,6 +5,7 @@ import { dumpDebug } from "@/server/shared/lib/debug-logger";
 
 import { AI_MODELS, SAFETY_SETTINGS } from "../../lib/constants";
 import { ANALYSIS_SYSTEM_PROMPT, ANALYSIS_USER_PROMPT } from "../../lib/prompts-refactored";
+import { buildRepositoryTools } from "../ai-tools";
 import { collectArchitectPreferredPaths, type buildArchitectDigest } from "../architect-digest";
 import { buildStageContextPack } from "../context-manager";
 
@@ -14,13 +15,18 @@ export async function executeArchitectPhase(
   analysisId: string,
   instructions: string | undefined,
   sentinelStatus: "SAFE" | "UNSAFE",
-  language: string
+  language: string,
+  userId: number,
+  repoId: string,
+  branch: string
 ): Promise<AIResult> {
   const architectContext = await buildStageContextPack({
     files: validFiles,
     preferredPaths: collectArchitectPreferredPaths(documentationDigest),
     stage: "architect",
   });
+
+  const tools = buildRepositoryTools(userId, repoId, branch);
 
   void dumpDebug("architect-budget", architectContext.debug);
   void dumpDebug("smart-context-files", {
@@ -59,7 +65,9 @@ export async function executeArchitectPhase(
       ),
       providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
       system: ANALYSIS_SYSTEM_PROMPT(language),
+      taskType: "reasoning",
       temperature: 0.1,
+      tools,
     });
 
     logger.info({ analysisId, msg: "Architect stage completed with compact digest" });

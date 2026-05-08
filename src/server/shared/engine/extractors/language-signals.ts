@@ -1,3 +1,5 @@
+import { basename } from "pathe";
+
 import { logger } from "@/server/shared/infrastructure/logger";
 
 import { getLanguageAdapters } from "../adapters/registry";
@@ -22,7 +24,7 @@ export async function collectPolyglotSignals(file: RepositoryFile): Promise<File
           ? [
               {
                 confidence: 90,
-                kind: normalizedPath.split("/").pop() ?? normalizedPath,
+                kind: basename(normalizedPath),
                 path: normalizedPath,
               },
             ]
@@ -45,7 +47,7 @@ export async function collectPolyglotSignals(file: RepositoryFile): Promise<File
       ? [
           {
             confidence: 90,
-            kind: normalizedPath.split("/").pop() ?? normalizedPath,
+            kind: basename(normalizedPath),
             path: normalizedPath,
           },
         ]

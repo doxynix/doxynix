@@ -1,6 +1,5 @@
-import path from "node:path";
 import { DirectedGraph } from "graphology";
-import { dirname, join, normalize } from "pathe";
+import { basename, dirname, join, normalize } from "pathe";
 import ts from "typescript";
 
 import { dumpDebug } from "../../lib/debug-logger";
@@ -50,7 +49,7 @@ function resolveAliasImport(importPath: string, fileSet: Set<string>, aliasRules
     if (!importPath.startsWith(rule.prefix)) continue;
     const suffix = importPath.slice(rule.prefix.length).replace(/^\/+/u, "");
     for (const target of rule.targets) {
-      const candidateBase = normalizeRepoPath(path.posix.join(target, suffix));
+      const candidateBase = normalizeRepoPath(join(target, suffix));
       for (const importSuffix of RELATIVE_IMPORT_SUFFIXES) {
         const candidate = normalizeRepoPath(`${candidateBase}${importSuffix}`);
         if (fileSet.has(candidate)) return candidate;
@@ -91,8 +90,7 @@ export function resolveModuleImport(
     if (fileSet.has(candidate)) return candidate;
   }
 
-  const lastSegment = normalizedImport.split("/").findLast(Boolean);
-  if (lastSegment == null) return null;
+  const lastSegment = basename(normalizedImport);
 
   const fileNameCandidates = [
     lastSegment,
@@ -137,13 +135,7 @@ export function collectAliasRules(files: Array<{ content: string; path: string }
         if (!Array.isArray(rawTargets) || rawTargets.length === 0) continue;
         const prefix = rawAlias.replace(/\*.*$/u, "");
         const targets = rawTargets.map((target) =>
-          normalizeRepoPath(
-            path.posix.join(
-              path.posix.dirname(normalizedPath),
-              baseUrl,
-              target.replace(/\*.*$/u, "")
-            )
-          )
+          normalizeRepoPath(join(dirname(normalizedPath), baseUrl, target.replace(/\*.*$/u, "")))
         );
         rules.push({ prefix, targets });
       }

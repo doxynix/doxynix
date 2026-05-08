@@ -1,5 +1,6 @@
 import { PRCommentStyle, PRFocusArea } from "@prisma/client";
 
+import { clamp } from "@/server/shared/engine/core/common";
 import { PATH_PATTERNS } from "@/server/shared/engine/core/project-policy-rules";
 import type { DbClient } from "@/server/shared/infrastructure/db";
 
@@ -76,11 +77,7 @@ export class PRConfigService {
   }
 
   static async setTokenBudget(repoId: string, budget: number, db: DbClient): Promise<void> {
-    await this.updateConfig(
-      repoId,
-      { tokenBudget: Math.max(10_000, Math.min(100_000, budget)) },
-      db
-    );
+    await this.updateConfig(repoId, { tokenBudget: clamp(budget, 10_000, 100_000) }, db);
   }
 
   static async setFocusAreas(

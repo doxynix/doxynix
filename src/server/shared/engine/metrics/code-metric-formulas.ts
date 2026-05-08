@@ -1,3 +1,5 @@
+import { mean } from "es-toolkit";
+
 import { percentile } from "../../lib/math-utils";
 import { clamp } from "../core/common";
 import type { RepoMetrics } from "../core/metrics.types";
@@ -9,10 +11,8 @@ export function normalizeComplexityScore(params: {
   maxNesting: number;
   scores: number[];
 }) {
-  const average =
-    params.fileCount === 0
-      ? 0
-      : params.scores.reduce((sum, value) => sum + value, 0) / params.fileCount;
+  const average = mean(params.scores);
+
   const p85 = percentile(params.scores, COMPLEXITY_SCORING.percentileThreshold);
   const highComplexityThreshold = Math.max(COMPLEXITY_SCORING.minComplexityThreshold, p85);
   const highComplexityFiles = params.scores.filter(

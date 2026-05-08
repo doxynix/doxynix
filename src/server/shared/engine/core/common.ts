@@ -1,7 +1,8 @@
+import { clamp as esToolkitClamp } from "es-toolkit";
 import { normalize } from "pathe";
 
-export function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value));
+export function clamp(value: number, min: number, max: number): number {
+  return esToolkitClamp(value, min, max);
 }
 
 export const normalizeRepoPath = (filePath: string) => normalize(filePath);

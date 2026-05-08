@@ -4,13 +4,14 @@ import { getTranslations } from "next-intl/server";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
-import { getOwnerOrNotFound } from "@/entities/repo/model/get-repo";
 import type { SearchParams } from "@/entities/repo/model/repo-setup.types";
 
 import { CreateRepoButton } from "@/features/repo/ui/create-repo-button";
 import { DeleteByOwnerDialog } from "@/features/repo/ui/delete-by-owner-dialog";
 import { RepoFilters } from "@/features/repo/ui/repo-filters";
 import { RepoListContainer } from "@/features/repo/ui/repo-list-container";
+
+import { getOwnerOrNotFound } from "@/server/entities/repo/api/get-repo";
 
 type Props = {
   params: Promise<{ owner: string }>;

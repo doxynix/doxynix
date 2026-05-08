@@ -1,6 +1,8 @@
 import { unstable_cache } from "next/cache";
 import type { DocType } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { orderBy, uniqBy } from "es-toolkit";
+import { basename, extname } from "pathe";
 
 import { highlightCode } from "@/shared/lib/shiki";
 
@@ -342,7 +344,7 @@ export const repoDetailsService = {
   },
 
   async highlightFile(content: string, path: string) {
-    const ext = path.split(".").pop() ?? "txt";
+    const ext = extname(path).replace(".", "") || "txt";
     const html = await highlightCode(content, ext);
     return { html };
   },
@@ -382,7 +384,7 @@ export const repoDetailsService = {
     }
 
     for (const path of structureContext.allInterestingPaths) {
-      const label = path.split("/").pop() ?? path;
+      const label = basename(path);
       const score = scoreSearchMatch(terms, [label, path]);
       if (score === 0) continue;
 
@@ -401,7 +403,7 @@ export const repoDetailsService = {
     }
 
     for (const entrypoint of structure.overview.primaryEntrypoints) {
-      const score = scoreSearchMatch(terms, [entrypoint, entrypoint.split("/").pop()]);
+      const score = scoreSearchMatch(terms, [entrypoint, basename(entrypoint)]);
       if (score === 0) continue;
 
       results.push({
@@ -530,8 +532,8 @@ async function loadRelatedDocSections(
   const docs = await loadLatestDocumentsWithContent(db, repoId);
   const graph = analyzeContext.getStructureMap()?.graph ?? null;
   const fileTerms = relatedFiles.flatMap((path) => {
-    const fileName = path.split("/").pop();
-    return fileName != null ? [fileName.toLowerCase(), path.toLowerCase()] : [path.toLowerCase()];
+    const fileName = basename(path);
+    return [fileName.toLowerCase(), path.toLowerCase()];
   });
 
   return docs
@@ -651,28 +653,14 @@ function scoreSearchMatch(terms: string[], values: Array<null | string | undefin
 }
 
 function dedupeSearchResults(results: RepoSearchResult[]) {
-  const seen = new Map<string, RepoSearchResult>();
+  const sortedByBest = orderBy(results, [(r) => r.score], ["desc"]);
 
-  for (const result of results) {
-    const existing = seen.get(result.id);
-    if (existing == null || result.score > existing.score) {
-      seen.set(result.id, result);
-    }
-  }
+  const unique = uniqBy(sortedByBest, (r) => r.id);
 
-  return [...seen.values()];
+  return orderBy(unique, [(r) => r.score, (r) => r.label], ["desc", "asc"]);
 }
 
 function pickLatestDocsByType<TDoc extends { type: DocType; updatedAt: Date }>(docs: TDoc[]) {
-  const latestByType = new Map<DocType, TDoc>();
-
-  for (const doc of docs.toSorted(
-    (left, right) => right.updatedAt.getTime() - left.updatedAt.getTime()
-  )) {
-    if (!latestByType.has(doc.type)) {
-      latestByType.set(doc.type, doc);
-    }
-  }
-
-  return [...latestByType.values()].sort((left, right) => left.type.localeCompare(right.type));
+  const latest = uniqBy(orderBy(docs, [(d) => d.updatedAt], ["desc"]), (d) => d.type);
+  return orderBy(latest, [(d) => d.type], ["asc"]);
 }

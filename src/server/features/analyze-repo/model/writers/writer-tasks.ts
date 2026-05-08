@@ -1,4 +1,5 @@
 import type { Repo } from "@prisma/client";
+import type { ToolSet } from "ai";
 
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import { prisma } from "@/server/shared/infrastructure/db";
@@ -20,6 +21,7 @@ import {
   README_WRITER_SYSTEM_PROMPT,
   README_WRITER_USER_PROMPT,
 } from "../../lib/prompts-refactored";
+import { buildRepositoryTools } from "../ai-tools";
 
 export type WriterName = "api" | "architecture" | "changelog" | "contributing" | "readme";
 export type WriterStatus = "failed" | "llm" | "missing";
@@ -66,6 +68,7 @@ async function runWriterPrompt(params: {
   providerOptions?: { google: { codeExecution: true; safetySettings: typeof SAFETY_SETTINGS } };
   system: string;
   temperature: number;
+  tools?: ToolSet;
 }) {
   return runWriterTask(
     params.name,
@@ -82,6 +85,7 @@ async function runWriterPrompt(params: {
         ...(params.providerOptions != null ? { providerOptions: params.providerOptions } : {}),
         system: params.system,
         temperature: params.temperature,
+        tools: params.tools,
       }).then(unwrapAiText)
   );
 }
@@ -89,37 +93,47 @@ async function runWriterPrompt(params: {
 export async function executeReadmeWriter(
   analysisId: string,
   payload: string,
+  engineeringDossierPayload: string,
   context: string,
   allowedPaths: string,
-  language: string
+  language: string,
+  repoId: string,
+  userId: number,
+  branch: string
 ): Promise<WriterResult> {
   return runWriterPrompt({
     analysisId,
     name: "readme",
     phase: "writer_readme",
-    prompt: README_WRITER_USER_PROMPT(payload, context, allowedPaths),
-    promptChars: payload.length + context.length,
+    prompt: README_WRITER_USER_PROMPT(payload, engineeringDossierPayload, context, allowedPaths),
+    promptChars: payload.length + engineeringDossierPayload.length + context.length,
     providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
     system: README_WRITER_SYSTEM_PROMPT(language),
     temperature: 0.2,
+    tools: buildRepositoryTools(userId, repoId, branch),
   });
 }
 
 export async function executeApiWriter(
   analysisId: string,
   payload: string,
+  engineeringDossierPayload: string,
   context: string,
   allowedPaths: string,
-  language: string
+  language: string,
+  repoId: string,
+  userId: number,
+  branch: string
 ): Promise<WriterResult> {
   return runWriterPrompt({
     analysisId,
     name: "api",
     phase: "writer_api",
-    prompt: API_WRITER_USER_PROMPT(payload, context, allowedPaths),
-    promptChars: payload.length + context.length,
+    prompt: API_WRITER_USER_PROMPT(payload, engineeringDossierPayload, context, allowedPaths),
+    promptChars: payload.length + engineeringDossierPayload.length + context.length,
     system: API_WRITER_SYSTEM_PROMPT(language),
     temperature: 0.1,
+    tools: buildRepositoryTools(userId, repoId, branch),
   });
 }
 
@@ -128,9 +142,14 @@ export async function executeArchitectureWriter(
   payload: string,
   risksPayload: string,
   onboardingPayload: string,
+  moduleDependencyContextPayload: string,
+  engineeringDossierPayload: string,
   context: string,
   allowedPaths: string,
-  language: string
+  language: string,
+  repoId: string,
+  userId: number,
+  branch: string
 ): Promise<WriterResult> {
   return runWriterPrompt({
     analysisId,
@@ -140,29 +159,47 @@ export async function executeArchitectureWriter(
       payload,
       risksPayload,
       onboardingPayload,
+      moduleDependencyContextPayload,
+      engineeringDossierPayload,
       context,
       allowedPaths
     ),
-    promptChars: payload.length + context.length,
+    promptChars:
+      payload.length +
+      moduleDependencyContextPayload.length +
+      engineeringDossierPayload.length +
+      context.length,
     system: ARCHITECTURE_WRITER_SYSTEM_PROMPT(language),
     temperature: 0.2,
+    tools: buildRepositoryTools(userId, repoId, branch),
   });
 }
 
 export async function executeContributingWriter(
   analysisId: string,
   payload: string,
+  engineeringDossierPayload: string,
   context: string,
   allowedPaths: string,
-  language: string
+  language: string,
+  repoId: string,
+  userId: number,
+  branch: string
 ): Promise<WriterResult> {
   return runWriterPrompt({
     analysisId,
     name: "contributing",
     phase: "writer_contributing",
-    prompt: CONTRIBUTING_WRITER_USER_PROMPT(payload, context, allowedPaths),
+    prompt: CONTRIBUTING_WRITER_USER_PROMPT(
+      payload,
+      engineeringDossierPayload,
+      context,
+      allowedPaths
+    ),
+    promptChars: payload.length + engineeringDossierPayload.length + context.length,
     system: CONTRIBUTING_WRITER_SYSTEM_PROMPT(language),
     temperature: 0.2,
+    tools: buildRepositoryTools(userId, repoId, branch),
   });
 }
 

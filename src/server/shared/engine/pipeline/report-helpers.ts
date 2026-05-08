@@ -1,4 +1,5 @@
 import { uniquePaths } from "../../lib/array-utils";
+import { clamp } from "../core/common";
 import type { EntrypointRef, ModuleRef, RouteInventory } from "../core/discovery.types";
 import type {
   DocumentationAudience,
@@ -19,10 +20,6 @@ type SectionBuilderArgs<TBody> = {
 };
 
 type RankedModule = Pick<ModuleRef, "apiSurface" | "exports" | "path" | "routeCount" | "symbols">;
-
-export function clampSectionConfidence(value: number) {
-  return Math.max(0, Math.min(100, Math.round(value)));
-}
 
 export function rankArchitectureModule(module: RankedModule) {
   return module.apiSurface * 6 + module.routeCount * 5 + module.exports * 2 + module.symbols.length;
@@ -84,7 +81,7 @@ export function buildSectionInput<TBody>(
   return {
     audience: args.audience,
     body: args.body,
-    confidence: clampSectionConfidence(args.confidence),
+    confidence: clamp(args.confidence, 0, 100),
     evidencePaths: uniquePaths(args.evidencePaths),
     section: args.section,
     summary: args.summary,

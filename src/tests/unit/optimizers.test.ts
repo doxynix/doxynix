@@ -61,13 +61,14 @@ describe("CodeOptimizer", () => {
     expect(fromJson).not.toContain("large data array truncated");
   });
 
-  it("should run full optimize pipeline in cleanCodeForAi", () => {
+  it("should run full optimize pipeline in cleanCodeForAi", async () => {
     const input = "Email test@mail.com\n\n const a = 1;  ";
 
     const result = cleanCodeForAi(input, "file.ts");
 
     expect(result).toContain("<REDACTED_EMAIL>");
-    expect(result.startsWith("Email")).toBe(true);
+    const value = await result;
+    expect(value.startsWith("Email")).toBe(true);
   });
 });
 

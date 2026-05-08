@@ -1,4 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
+import { basename } from "pathe";
 import YAML from "yaml";
 
 import { dumpDebug } from "../../lib/debug-logger";
@@ -108,11 +109,7 @@ export class FactCollector {
         fileName === "pnpm-lock.yaml" ||
         fileName === "yarn.lock",
       run: (collector, file) =>
-        collector.collectFrameworkFactsFromTokens(
-          [file.path.split("/").pop() ?? ""],
-          file.path,
-          60
-        ),
+        collector.collectFrameworkFactsFromTokens([basename(file.path)], file.path, 60),
     },
     {
       matches: (fileName) => fileName === "composer.json",
@@ -158,8 +155,7 @@ export class FactCollector {
   ];
 
   private analyzeFile(file: AnalyzedFile, signals?: FileSignals) {
-    const rawFileName = file.path.split("/").pop()?.toLowerCase();
-    const fileName = rawFileName ?? "";
+    const fileName = basename(file.path).toLowerCase();
     const pathLower = file.path.toLowerCase();
 
     this.collectPolicyPathFacts(pathLower, fileName);

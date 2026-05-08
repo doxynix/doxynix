@@ -4,12 +4,19 @@ export const formatUserAgent = (uaString: null | string): string => {
   if (uaString == null || uaString === "internal") return "System";
 
   const parser = new UAParser(uaString);
-  const { browser, device, os } = parser.getResult();
+  const { browser, cpu, device, os } = parser.getResult();
 
-  const browserName = browser.name ?? "Unknown Browser";
-  const osName = os.name ?? "Unknown OS";
+  const browserPart =
+    browser.name != null ? `${browser.name} ${browser.major ?? ""}`.trim() : "Unknown Browser";
 
-  const deviceType = device.type === "mobile" ? ` (${device.model})` : "";
+  const osPart = os.name != null ? `${os.name} ${os.version ?? ""}`.trim() : "Unknown OS";
 
-  return `${browserName} on ${osName}${deviceType}`;
+  const deviceInfo = [];
+  if (device.vendor != null) deviceInfo.push(device.vendor);
+  if (device.model != null) deviceInfo.push(device.model);
+  if (cpu.architecture != null) deviceInfo.push(cpu.architecture);
+
+  const hardware = deviceInfo.length > 0 ? ` [${deviceInfo.join(" ")}]` : "";
+
+  return `${browserPart} on ${osPart}${hardware}`;
 };

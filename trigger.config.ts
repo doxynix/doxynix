@@ -1,15 +1,26 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs";
+import { additionalFiles } from "@trigger.dev/build/extensions/core";
 import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
-import { defineConfig } from "@trigger.dev/sdk/v3";
+import { defineConfig } from "@trigger.dev/sdk";
 
 if (!process.env.DATABASE_URL!) {
   process.env.DATABASE_URL = "postgresql://postgres:password@localhost:5432/db";
 }
 
 export default defineConfig({
+  additionalFiles: [
+    "node_modules/web-tree-sitter/web-tree-sitter.wasm",
+    "node_modules/tree-sitter-wasms/out/*.wasm",
+  ],
   build: {
     extensions: [
+      additionalFiles({
+        files: [
+          "node_modules/web-tree-sitter/web-tree-sitter.wasm",
+          "node_modules/tree-sitter-wasms/out/*.wasm",
+        ],
+      }),
       {
         name: "zenstack-generate",
         onBuildStart: async () => {
@@ -43,7 +54,7 @@ export default defineConfig({
         typedSql: true,
       }),
     ],
-    external: ["ioredis", "bottleneck"],
+    external: ["ioredis", "bottleneck", "web-tree-sitter"],
   },
   dirs: ["./src/server/**/task"],
   logLevel: "log",

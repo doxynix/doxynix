@@ -1,6 +1,7 @@
 import "server-only";
 
-import { join } from "pathe";
+import fs from "node:fs";
+import { resolve } from "pathe";
 
 import { logger } from "../../infrastructure/logger";
 import { getFileExtension } from "../../lib/path-operations";
@@ -36,7 +37,7 @@ const SPECS: Record<string, LanguageSpec> = {
   ".c": {
     declarations: [
       { kind: "function", types: ["function_definition"] },
-      { kind: "struct", types: ["struct_specifier"] },
+      { kind: "struct", types: ["struct_specifier", "type_definition"] },
     ],
     entrypoints: [/\bint\s+main\s*\(/],
     imports: { patterns: [/^\s*#include\s+"([^"]+)"/m], types: ["preproc_include"] },
@@ -44,27 +45,87 @@ const SPECS: Record<string, LanguageSpec> = {
   },
   ".cpp": {
     declarations: [
-      { kind: "function", types: ["function_definition"] },
-      { kind: "class", types: ["class_specifier"] },
+      { kind: "function", types: ["function_definition", "template_declaration"] },
+      { kind: "class", types: ["class_specifier", "namespace_definition"] },
     ],
     entrypoints: [/\bint\s+main\s*\(/],
     imports: { patterns: [/^\s*#include\s+"([^"]+)"/m], types: ["preproc_include"] },
     wasm: "tree-sitter-cpp.wasm",
   },
+  ".cs": {
+    declarations: [
+      {
+        kind: "class",
+        types: ["class_declaration", "interface_declaration", "struct_declaration"],
+      },
+      { kind: "method", types: ["method_declaration"] },
+    ],
+    entrypoints: [/\bstatic\s+void\s+Main\b/, /\bWebApplication\.CreateBuilder\b/],
+    imports: { patterns: [/^using\s+([\w.]+);/m], types: ["using_directive"] },
+    wasm: "tree-sitter-c-sharp.wasm",
+  },
+  ".erl": {
+    declarations: [{ kind: "function", types: ["function", "export_attribute"] }],
+    entrypoints: [/-export\s*\(\s*\[\s*main/],
+    imports: { patterns: [/-include\s*\(\s*["']([^"']+)["']\s*\)/g], types: ["pp_directive"] },
+    wasm: "tree-sitter-erlang.wasm",
+  },
   ".go": {
-    declarations: [{ kind: "function", types: ["function_declaration", "method_declaration"] }],
+    declarations: [
+      { kind: "function", types: ["function_declaration", "method_declaration"] },
+      { kind: "interface", types: ["interface_type"] },
+      { kind: "struct", types: ["type_declaration", "struct_type"] },
+    ],
     entrypoints: [/\bpackage\s+main\b[\S\s]*\bfunc\s+main\s*\(/],
-    imports: { patterns: [/^\s*import\s+"([^"]+)"/m], types: ["import_declaration"] },
+    imports: {
+      patterns: [/^\s*import\s+"([^"]+)"/m],
+      types: ["import_declaration", "import_spec"],
+    },
     routePatterns: [
       {
         framework: "Gin",
         methodIndex: 1,
         pathIndex: 2,
-        pattern: /\brouter\.(GET|POST|PUT|PATCH|DELETE)\s*\(\s*"([^"]+)"/g,
+        pattern: /\.(GET|POST|PUT|PATCH|DELETE)\s*\(\s*"([^"]+)"/g,
+      },
+      {
+        framework: "Echo",
+        methodIndex: 1,
+        pathIndex: 2,
+        pattern: /\.(Add|GET|POST|PUT|PATCH|DELETE)\s*\(\s*"([^"]+)"/g,
       },
     ],
     wasm: "tree-sitter-go.wasm",
     wasmPackage: "tree-sitter-go",
+  },
+  ".java": {
+    declarations: [
+      { kind: "class", types: ["class_declaration", "interface_declaration", "enum_declaration"] },
+      { kind: "method", types: ["method_declaration"] },
+    ],
+    entrypoints: [/\bpublic\s+static\s+void\s+main\b/],
+    imports: { patterns: [/^import\s+([\w.]+);/m], types: ["import_declaration"] },
+    routePatterns: [
+      {
+        framework: "Spring",
+        methodIndex: 1,
+        pathIndex: 2,
+        pattern: /@(Get|Post|Put|Delete)Mapping\(\s*["']([^"']+)["']/g,
+      },
+    ],
+    wasm: "tree-sitter-java.wasm",
+  },
+  ".jl": {
+    declarations: [
+      { kind: "function", types: ["function_definition"] },
+      { kind: "struct", types: ["struct_definition"] },
+    ],
+    entrypoints: [/\bmain\s*\(|Base\.run/],
+    imports: {
+      patterns: [/using\s+([\w ,]+)/m, /import\s+([\w ,]+)/m],
+      types: ["using_statement", "import_statement"],
+    },
+    wasm: "tree-sitter-julia.wasm",
   },
   ".js": {
     declarations: [
@@ -83,50 +144,119 @@ const SPECS: Record<string, LanguageSpec> = {
     ],
     wasm: "tree-sitter-javascript.wasm",
   },
-  ".py": {
+  ".kt": {
+    declarations: [
+      {
+        kind: "class",
+        types: ["class_declaration", "object_declaration", "interface_declaration"],
+      },
+      { kind: "function", types: ["function_declaration"] },
+    ],
+    entrypoints: [/\bval\s+app\b/, /\bfun\s+main\b/],
+    imports: { patterns: [/^import\s+([\w.]+)/m], types: ["import_header"] },
+    wasm: "tree-sitter-kotlin.wasm",
+  },
+  ".lua": {
+    declarations: [{ kind: "function", types: ["function_definition", "local_function"] }],
+    entrypoints: [/\bmain\s*\(/],
+    imports: { patterns: [/\brequire\s*\(?\s*["']([^"']+)["']\s*\)?/g], types: ["function_call"] },
+    wasm: "tree-sitter-lua.wasm",
+  },
+  ".m": {
+    declarations: [
+      { kind: "method", types: ["method_definition"] },
+      { kind: "class", types: ["class_interface", "category_interface"] },
+    ],
+    entrypoints: [/main\s*\(|NSApplicationMain/],
+    imports: { patterns: [/#import\s+["<]([^">]+)[">]/m], types: ["preproc_import"] },
+    wasm: "tree-sitter-objc.wasm",
+  },
+  ".php": {
     declarations: [
       { kind: "function", types: ["function_definition"] },
+      { kind: "class", types: ["class_declaration", "interface_declaration", "trait_declaration"] },
+    ],
+    entrypoints: [/Route::(get|post|put|patch|delete)/, /\$app->(get|post|put|patch|delete)/],
+    imports: { patterns: [/use\s+([\w\\]+);/m], types: ["use_declaration", "include_expression"] },
+    routePatterns: [
+      {
+        framework: "Laravel",
+        methodIndex: 1,
+        pathIndex: 2,
+        pattern: /route::(get|post|put|patch|delete)\(\s*["']([^"']+)["']/gi,
+      },
+    ],
+    wasm: "tree-sitter-php.wasm",
+  },
+  ".py": {
+    declarations: [
+      { kind: "function", types: ["function_definition", "decorated_definition"] },
       { kind: "class", types: ["class_definition"] },
     ],
-    entrypoints: [/if\s+__name__\s*==\s*["']__main__["']/],
+    entrypoints: [/if\s+__name__\s*==\s*["']__main__["']/, /app\s*=\s*(FastAPI|Flask|Django)/],
     imports: {
       patterns: [/^\s*import\s+([\w.]+)/m, /^\s*from\s+([\w.]+)\s+import/m],
       types: ["import_statement", "import_from_statement"],
     },
     routePatterns: [
       {
-        framework: "FastAPI",
+        framework: "FastAPI/Flask",
         methodIndex: 1,
         pathIndex: 2,
-        pattern: /@\w*router\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g,
+        pattern: /@\w*\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g,
       },
       {
-        framework: "FastAPI",
-        methodIndex: 1,
-        pathIndex: 2,
-        pattern: /@app\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g,
+        framework: "Django",
+        methodIndex: 0,
+        pathIndex: 1,
+        pattern: /path\(\s*["']([^"']+)["']\s*,\s*(\w+)/g,
       },
     ],
     wasm: "tree-sitter-python.wasm",
     wasmPackage: "tree-sitter-python",
   },
+  ".rb": {
+    declarations: [
+      { kind: "class", types: ["class", "module"] },
+      { kind: "function", types: ["method"] },
+    ],
+    entrypoints: [/config\.ru/, /bin\/rails/],
+    imports: { patterns: [/require\s+["']([^"']+)["']/m], types: ["require"] },
+    wasm: "tree-sitter-ruby.wasm",
+  },
   ".rs": {
     declarations: [
       { kind: "function", types: ["function_item"] },
-      { kind: "struct", types: ["struct_item"] },
-      { kind: "trait", types: ["trait_item"] },
+      { kind: "struct", types: ["struct_item", "enum_item", "union_item"] },
+      { kind: "trait", types: ["trait_item", "impl_item"] },
+      { kind: "module", types: ["mod_item"] },
     ],
-    entrypoints: [/\bfn\s+main\s*\(/],
+    entrypoints: [/\bfn\s+main\s*\(/, /#\[tokio::main]/, /#\[actix_web::main]/],
     imports: { patterns: [/^\s*use\s+([^;]+);/m], types: ["use_declaration"] },
     routePatterns: [
       {
-        framework: "Axum",
+        framework: "Axum/Actix",
         methodIndex: 1,
         pathIndex: 2,
         pattern: /#\[(get|post|put|patch|delete)\(\s*"([^"]+)"\s*\)]/g,
       },
     ],
     wasm: "tree-sitter-rust.wasm",
+  },
+  ".sh": {
+    declarations: [{ kind: "function", types: ["function_definition"] }],
+    entrypoints: [/^#!\//],
+    imports: { patterns: [/\bsource\s+([\w./-]+)/m, /^\.\s+([\w./-]+)/m], types: ["command"] },
+    wasm: "tree-sitter-bash.wasm",
+  },
+  ".swift": {
+    declarations: [
+      { kind: "class", types: ["class_declaration", "struct_declaration", "enum_declaration"] },
+      { kind: "function", types: ["function_declaration"] },
+    ],
+    entrypoints: [/@main/],
+    imports: { patterns: [/^import\s+(\w+)/m], types: ["import_declaration"] },
+    wasm: "tree-sitter-swift.wasm",
   },
   ".ts": {
     declarations: [
@@ -155,37 +285,40 @@ const languageCache = new Map<string, Promise<any>>();
 let runtimeInitPromise: null | Promise<void> = null;
 const smokeCheckedExtensions = new Set<string>();
 
-async function initRuntime() {
+export async function initRuntime() {
   if (runtimeInitPromise != null) return await runtimeInitPromise;
 
   runtimeInitPromise = (async () => {
-    const mod = await import("web-tree-sitter");
-    const runtime = mod.default ?? mod;
-    ParserRuntime = runtime.Parser ?? mod.Parser ?? runtime;
-    LanguageRuntime = runtime.Language ?? mod.Language;
+    // @ts-expect-error: web-tree-sitter entry point lacks type declarations
+    const mod = await import("web-tree-sitter/web-tree-sitter.cjs");
+    const Parser = mod.default ?? mod.Parser ?? mod;
 
-    if (ParserRuntime == null || typeof ParserRuntime.init !== "function") {
-      throw new Error("web-tree-sitter Parser runtime is unavailable");
-    }
+    const cloudWasm = resolve(process.cwd(), "web-tree-sitter.wasm");
+    const localWasm = resolve(process.cwd(), "node_modules/web-tree-sitter/web-tree-sitter.wasm");
 
-    if (LanguageRuntime == null || typeof LanguageRuntime.load !== "function") {
-      throw new Error("web-tree-sitter Language runtime is unavailable");
-    }
+    const finalWasmPath = fs.existsSync(cloudWasm) ? cloudWasm : localWasm;
 
-    await ParserRuntime.init({
+    await (Parser as any).init({
       locateFile: (name: string) => {
-        return join(process.cwd(), "node_modules/web-tree-sitter", name);
+        if (name === "tree-sitter.wasm" || name === "web-tree-sitter.wasm") {
+          return finalWasmPath;
+        }
+        return name;
       },
     });
+
+    ParserRuntime = Parser;
+    LanguageRuntime = Parser.Language;
   })().catch((error) => {
     runtimeInitPromise = null;
+    logger.error({ error, msg: "Failed to initialize tree-sitter runtime" });
     throw error;
   });
 
   return await runtimeInitPromise;
 }
 
-async function loadLanguage(ext: string, spec: LanguageSpec) {
+export async function loadLanguage(ext: string, spec: LanguageSpec) {
   if (!languageCache.has(ext)) {
     languageCache.set(
       ext,
@@ -215,7 +348,10 @@ async function loadLanguage(ext: string, spec: LanguageSpec) {
 }
 
 function resolveGrammarWasmPath(spec: LanguageSpec) {
-  return join(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm);
+  const cloudPath = resolve(process.cwd(), spec.wasm);
+  const localPath = resolve(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm);
+
+  return fs.existsSync(cloudPath) ? cloudPath : localPath;
 }
 
 function lineOf(content: string, fragment: string) {
@@ -363,4 +499,13 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
     });
     return null;
   }
+}
+
+export async function getRuntime() {
+  await initRuntime();
+  return ParserRuntime;
+}
+
+export function getSpecByExt(ext: string) {
+  return SPECS[ext];
 }

@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 
-import { getRepoOrNotFound } from "@/entities/repo/model/get-repo";
-
 import { RepoPullDetailContainer } from "@/features/repo-pulls/ui/repo-pull-details-container";
+
+import { getRepoOrNotFound } from "@/server/entities/repo/api/get-repo";
 
 type Props = {
   params: Promise<{ name: string; number: string; owner: string }>;

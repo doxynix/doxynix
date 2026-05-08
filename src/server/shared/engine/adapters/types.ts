@@ -1,4 +1,4 @@
-import path from "node:path";
+import { extname } from "pathe";
 
 import type { FileSignals, RepositoryFile } from "../core/discovery.types";
 
@@ -12,6 +12,6 @@ export type LanguageAdapter = {
 
 export function matchesExtension(adapter: LanguageAdapter, filePath: string) {
   if (adapter.supportedExtensions.length === 0) return true;
-  const ext = path.posix.extname(filePath).toLowerCase();
+  const ext = extname(filePath).toLowerCase();
   return adapter.supportedExtensions.includes(ext);
 }

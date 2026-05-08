@@ -36,7 +36,7 @@ export const repoAnalysisRouter = createTRPCRouter({
         repoId: z.uuid(),
       })
     )
-    .output(z.object({ jobId: z.string(), status: z.string() }))
+    .output(z.object({ jobId: z.string(), publicAccessToken: z.string(), status: z.string() }))
     .mutation(async ({ ctx, input }) => {
       return repoAnalysisService.analyze(ctx.db, Number(ctx.session.user.id), input);
     }),

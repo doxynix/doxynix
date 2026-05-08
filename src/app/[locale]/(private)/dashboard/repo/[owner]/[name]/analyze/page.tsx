@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
-import { getRepoOrNotFound } from "@/entities/repo/model/get-repo";
-
 import { RepoSetup } from "@/features/repo-setup/ui/repo-setup";
+
+import { getRepoOrNotFound } from "@/server/entities/repo/api/get-repo";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;

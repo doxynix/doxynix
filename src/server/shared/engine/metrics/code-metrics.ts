@@ -7,6 +7,7 @@ import { logger } from "../../infrastructure/logger";
 import { dumpDebug } from "../../lib/debug-logger";
 import { normalizeLanguageName } from "../../lib/language-metadata";
 import { getFileExtension } from "../../lib/path-operations";
+import { taskLogger } from "../../lib/task-logger";
 import { calculateDocDensity, clamp, normalizeRepoPath } from "../core/common";
 import type {
   RepositoryEvidence,
@@ -262,6 +263,8 @@ function buildRepoMetrics(params: {
 export async function analyzeRepository(
   files: { content: string; path: string }[]
 ): Promise<{ evidence: RepositoryEvidence; metrics: RepoMetrics }> {
+  taskLogger.log(`Starting deep static analysis of ${files.length} files...`);
+
   const normalizedFiles = files.map((file) => ({
     content: file.content,
     path: normalizeRepoPath(file.path),
@@ -276,11 +279,15 @@ export async function analyzeRepository(
 
   const scan = aggregateScanResults(scanResults);
 
+  taskLogger.log("Building structural dependency graph...");
   const { evidence, structuralSignals } = await collectStructuralSignals(
     normalizedFiles,
     scan.fileComplexities,
     scan.fileSignalsByPath
   );
+
+  taskLogger.log("Inspecting API surface (OpenAPI/Routes)...");
+
   const openapiInventory = collectOpenApiInventory(normalizedFiles);
   const tsStaticHints = collectTypeScriptStaticHints(normalizedFiles);
   const duplicatedLines = calculateApproximateDuplication(normalizedFiles);
@@ -292,6 +299,8 @@ export async function analyzeRepository(
     name: fact.name,
     sources: fact.sources,
   }));
+
+  taskLogger.log("Detecting technologies and frameworks...");
   const techStack = FactCollector.collect(normalizedFiles, evidence, scan.fileSignalsByPath).map(
     (fact) => fact.name
   );
@@ -309,6 +318,7 @@ export async function analyzeRepository(
   });
 
   void dumpDebug("full-metrics-output", finalMetrics);
+  taskLogger.log(`Metrics engine finished. Stack: ${techStack.join(", ")}`);
   return { evidence, metrics: finalMetrics };
 }
 
