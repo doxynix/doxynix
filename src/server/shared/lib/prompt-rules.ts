@@ -20,17 +20,18 @@ export const GroundingRules = {
     `Cite only from supplied ${sourceType} or evidence. Never invent new ${sourceType}.`,
 
   /** Rule: Handle missing data gracefully */
-  missingDataHandler: `If evidence is missing or contradictory, write "unknown" or "not enough evidence" instead of guessing.`,
+  missingDataHandler: (fallbackValue: string = '"UNKNOWN"') =>
+    `If evidence is missing or contradictory, output ${fallbackValue} according to the expected data type instead of guessing.`,
 
   /** Rule: Never invent or fabricate information */
-  noInvention: `Never invent, fabricate, or guess. If information is missing or unclear, mark it as "unknown".`,
+  noInvention: `Never invent, fabricate, or guess. If information is missing or unclear, mark it as "UNKNOWN".`,
 
   /** Rule: Only use supplied evidence */
   onlySuppliedEvidence: `Use only the supplied evidence and code snippets. Do not assume or infer beyond what is explicitly provided.`,
 
   /** Rule: Mark uncertain paths */
   pathValidation: (source: string = "allowed_repository_paths") =>
-    `When mentioning files or directories, use only paths from \`${source}\`. Never invent or assume paths.`,
+    `When mentioning files, directories, or modules, use ONLY paths from \`${source}\`. Format them as [[path/to/file.ext]].`,
 };
 
 // =============================================================================
@@ -39,17 +40,17 @@ export const GroundingRules = {
 
 export const OutputFormatRules = {
   /** Rule: JSON-only output */
-  jsonOnly: `Return ONLY a valid JSON object. No markdown formatting, no explanation.`,
+  jsonOnly: `Return ONLY a valid JSON object. No markdown formatting outside of string values, no conversational text.`,
 
   /** Rule: Markdown-only output */
-  markdownOnly: `Return ONLY raw Markdown. No JSON, no code blocks, no explanation.`,
+  markdownOnly: `Return ONLY raw Markdown. No JSON wrappers, no conversational intro/outro.`,
 
   /** Rule: No modifications to code */
   noCodeModification: `DO NOT modify the code logic. Only modify documentation. Return the complete file with no omissions.`,
 
   /** Rule: Structured schema compliance */
   schemaCompliance: (schemaName: string) =>
-    `Return ONLY a valid JSON object matching the \`${schemaName}\` schema exactly.`,
+    `Return ONLY a valid JSON object matching the \`${schemaName}\` schema exactly. Fill arrays exhaustively.`,
 
   /** Rule: Strict XML structure */
   xmlStructure: (rootTag: string) =>
@@ -57,10 +58,16 @@ export const OutputFormatRules = {
 };
 
 // =============================================================================
-// LANGUAGE & TONE RULES
+// LANGUAGE, TONE & ANTI-FLUFF RULES (ENTERPRISE GRADE)
 // =============================================================================
 
 export const LanguageRules = {
+  antiFluff: dedent`
+    ANTI-FLUFF POLICY (CRITICAL):
+    - DO NOT use generic filler phrases (e.g., "This file is responsible for", "Overall, the system", "It is important to note").
+    - DO NOT use subjective adjectives (e.g., "simple", "easy", "good", "bad"). Use objective metrics ("high cyclomatic complexity", "tightly coupled").
+    - Maximize information density. Every sentence must contain a technical fact, a metric, or a specific architectural observation.`,
+
   /** Rule: Conciseness */
   conciseness: (maxPoints?: number) =>
     `Be concise. ${maxPoints != null ? `Focus on the most important ${maxPoints} points.` : "Avoid unnecessary details."}`,
@@ -68,12 +75,18 @@ export const LanguageRules = {
   /** Rule: Evidence-first approach */
   evidenceFirst: `Prefer explicit evidence over intuition. If a claim cannot be proven from input, omit it or mark it as "unknown".`,
 
+  exhaustiveDetail: dedent`
+    EXHAUSTIVE DETAIL POLICY:
+    - Do not summarize if you can enumerate.
+    - If analyzing a module, analyze ALL its core functions, not just the first one.
+    - Provide deep, multi-paragraph explanations for architectural decisions and risks.`,
+
   /** Rule: Target-specific language */
   targetLanguage: (language: string = "English") =>
     `Output ALL text in **${language}**. This is non-negotiable.`,
 
   /** Rule: Technical tone */
-  technicalTone: `Tone: Technical, concise, professional. Avoid marketing language or vague abstractions.`,
+  technicalTone: `Tone: Staff Engineer / Principal Architect. Highly analytical, objective, and data-driven.`,
 };
 
 // =============================================================================
@@ -86,7 +99,6 @@ export const BehavioralRules = {
     frameworks.length > 0
       ? `Adapt output for the following frameworks: ${frameworks.join(", ")}.`
       : `Infer the target framework from evidence and adapt output accordingly.`,
-
   /** Rule: Merge duplicates */
   mergeDuplicates: `Merge duplicate observations rather than repeating them across sections.`,
 
@@ -97,17 +109,14 @@ export const BehavioralRules = {
   noHiddenAssumptions: `Do not invent business goals, stack trade-offs, environment variables, or commands that are not supported by the input.`,
 
   /** Rule: Primary artifact handling */
-  primaryArtifact: `This is a **primary artifact**. Prefer precise reference over broad prose. It will be delivered to users as the source of truth.`,
-
-  /** Rule: Secondary artifact handling */
-  secondaryArtifact: `This is a **compatibility document**. Keep it useful, but do not behave as if it is the core product artifact.`,
+  primaryArtifact: `This is a **primary technical artifact**. It will be used for compliance, onboarding, and architectural audits. Precision is mandatory.`,
 };
 
 // =============================================================================
 // VERIFICATION RULES
 // =============================================================================
 
-const VerificationRules = {
+export const VerificationRules = {
   /** Rule: Categorical clarity */
   categoricalClarity: `If evidence is weak, state so directly instead of smoothing it over with abstract language.`,
 
@@ -153,20 +162,5 @@ export function buildSafetyConstraints(): string {
 ## CONSTRAINTS
 - ${BehavioralRules.noHallucination}
 - ${BehavioralRules.noHiddenAssumptions}
-- ${VerificationRules.verifyAgainstEvidence}
 `;
-}
-
-/**
- * Build format section
- */
-export function buildFormatSection(format: "json" | "markdown" | "xml"): string {
-  const rule =
-    format === "json"
-      ? OutputFormatRules.jsonOnly
-      : format === "markdown"
-        ? OutputFormatRules.markdownOnly
-        : OutputFormatRules.xmlStructure("output");
-
-  return dedent`## OUTPUT\n${rule}`;
 }

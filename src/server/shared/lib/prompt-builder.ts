@@ -3,6 +3,7 @@
  * Fluent API for constructing system and user prompts with consistent structure.
  */
 
+import { LanguageRules } from "./prompt-rules";
 import { escapePromptXmlAttr, escapePromptXmlText } from "./string-utils";
 
 type PromptRole =
@@ -109,7 +110,7 @@ class PromptBuilder {
   withJsonSchema(schema: Record<string, unknown>): this {
     this.sections.set(
       "output",
-      `# OUTPUT_SCHEMA\nReturn ONLY a valid JSON object matching this structure:\n\`\`\`json\n${JSON.stringify(schema, null, 2)}\n\`\`\``
+      `# OUTPUT_SCHEMA\nReturn ONLY a valid JSON object matching this structure. Fill arrays exhaustively:\n\`\`\`json\n${JSON.stringify(schema, null, 2)}\n\`\`\``
     );
     return this;
   }
@@ -123,14 +124,25 @@ class PromptBuilder {
   }
 
   /**
+   * Forces the AI to write dense, highly technical text without filler words.
+   */
+  withAntiFluff(): this {
+    this.sections.set(
+      "anti_fluff",
+      `# QUALITY STANDARDS\n${LanguageRules.antiFluff}\n\n${LanguageRules.exhaustiveDetail}`
+    );
+    return this;
+  }
+
+  /**
    * Set language awareness in output
    */
   withLanguageNotice(): this {
-    if (this.language && this.language !== "English") {
-      const notice = `\n## LANGUAGE\nOutput ALL text in **${this.language}**.`;
-      const existing = Array.from(this.sections.values()).join("\n");
-      this.sections.clear();
-      this.sections.set("_combined", existing + notice);
+    if (this.language && this.language.toLowerCase() !== "english") {
+      this.sections.set(
+        "language",
+        `# LANGUAGE CONFIGURATION\nOutput ALL markdown, texts, documentation, and technical notes strictly in **${this.language}**.`
+      );
     }
     return this;
   }
@@ -141,8 +153,17 @@ class PromptBuilder {
   buildSystem(): string {
     const sections: string[] = [];
 
-    // Order matters: role → constraints → grounding → task → strategy → output
-    const order = ["role", "constraints", "grounding", "task", "strategy", "output"];
+    // Order matters: role → task → constraints → grounding → strategy → quality → language → output
+    const order = [
+      "role",
+      "task",
+      "constraints",
+      "grounding",
+      "strategy",
+      "anti_fluff",
+      "language",
+      "output",
+    ];
 
     for (const key of order) {
       const section = this.sections.get(key);
@@ -267,24 +288,41 @@ export const PromptFactory = {
     // Add role-specific defaults
     const roleDescriptions: Record<PromptRole, string> = {
       "api-documentarian":
-        "You are a Senior API Documentation Specialist. You reverse-engineer specifications from code.",
-      architect: "You are an Elite Software Architect and Cartographer.",
+        "You are a Principal API Architect. Your task is to reverse-engineer source code and extract interface contracts. Output must strictly follow the OpenAPI 3.0+ specification in YAML format. Do not invent endpoints or parameters.",
+
+      architect:
+        "You are a Systems Architect conducting an engineering audit. Analyze the provided codebase to map component dependencies, state management patterns, and potential scaling bottlenecks. Focus on architectural trade-offs.",
+
       "architecture-writer":
-        "You are a Lead Software Architect. Your task is to write ARCHITECTURE.md.",
-      "changelog-writer": "You are a Release Manager.",
+        "You are a Staff Technical Writer. Translate codebase structures into a comprehensive ARCHITECTURE.md. Use Mermaid.js syntax for sequence and component diagrams. Focus on data-flow and system topology.",
+
+      "changelog-writer":
+        "You are a Release Manager. Analyze commit logs and diffs to generate user-centric release notes. Adhere strictly to the 'Keep a Changelog' standard. Group changes by Added, Changed, and Fixed.",
+
       "code-analyzer":
-        "You are a Principal Software Engineer producing evidence-based repository intelligence.",
-      "code-documenter": "You are a Polyglot Documentation Engineer.",
-      "code-reviewer": "You are a Senior Code Reviewer and Security Expert.",
-      "contributing-writer": "You are an Open Source Maintainer.",
-      generic: "You are an AI assistant.",
+        "You are a Static Code Auditor. Scan the repository for technical debt, anti-patterns, code duplication, and maintainability scores. Provide evidence-based references to file names and line numbers.",
+
+      "code-documenter":
+        "You are a Technical Documentation Engineer. Generate clean, precise inline documentation (e.g., JSDoc, Docstrings, TSDoc). Adhere strictly to the language-specific formatting conventions and types present in the code.",
+
+      "code-reviewer":
+        "You are a Senior Peer Reviewer. Conduct an objective review focused on edge-case handling, runtime efficiency, and code readability. Provide constructive feedback with 'Before' and 'After' code examples.",
+
+      "contributing-writer":
+        "You are an Open Source Maintainer writing a CONTRIBUTING.md guide. Define clear engineering quality gates, local environment setup instructions, and branch-naming conventions matching the current repository style.",
+
+      generic:
+        "You are an Expert Technical Writer and Software Co-Pilot. Assist with general code explanation and documentation queries following modern software engineering best practices.",
+
       "readme-writer":
-        "You are a Developer Advocate writing accurate repository documentation from verified facts.",
+        "You are a Developer Relations Engineer. Write an executive-level README.md blueprint. Ensure it includes quick-start commands, configuration options, prerequisites, and a high-level value proposition of the system.",
+
       "security-sentinel":
-        "You are a Cyber Security Sentinel AI. Your sole purpose is to filter input for a Code Analysis Service.",
+        "You are an Offensive Security Engineer and Code Auditor. Scan source code for OWASP Top 10 vulnerabilities, insecure dependencies, secret leaks, and compliance flaws. Categorize findings by severity (High, Medium, Low).",
     };
 
-    return builder.withRole(roleDescriptions[role]);
+    const selectedDescription = roleDescriptions[role];
+    return builder.withRole(selectedDescription);
   },
 
   /**

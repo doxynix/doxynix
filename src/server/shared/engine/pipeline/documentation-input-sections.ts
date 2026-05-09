@@ -128,6 +128,7 @@ function buildApiReferenceSection(
     .filter((entrypoint) => entrypoint.kind === "library" || entrypoint.kind === "runtime")
     .filter((entrypoint) => ProjectPolicy.isPrimaryApiSurface(entrypoint.path))
     .slice(0, 24);
+
   const publicSurfacePaths = uniquePaths(
     evidence.publicSurface.length > 0
       ? evidence.publicSurface
@@ -139,9 +140,11 @@ function buildApiReferenceSection(
           .filter((path) => ProjectPolicy.isPrimaryApiSurface(path)),
     48
   );
+
   const hasConcreteRuntimeApi =
     context.routeInventory.sourceFiles.length > 0 &&
     (context.routeInventory.httpRoutes.length > 0 || context.routeInventory.rpcProcedures > 0);
+
   const body: ApiReferenceSectionBody = {
     entrypoints: apiEntrypoints,
     frameworkFacts: context.frameworkFacts,
@@ -208,6 +211,7 @@ function buildOnboardingSection(
     ],
     12
   );
+
   const body: OnboardingSectionBody = {
     apiPaths: uniquePaths(
       [

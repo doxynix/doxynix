@@ -31,8 +31,7 @@ import {
   type FileScanResult,
   type ScanAggregation,
 } from "./code-metric-scan";
-import { calculateComplexity } from "./complexity";
-import { calculateApproximateDuplication } from "./duplication-metrics";
+import { calculateRepositoryDuplication, type DuplicationReport } from "./duplication-metrics";
 
 const secretLintConfig = {
   rules: [
@@ -140,8 +139,13 @@ async function scanRepositoryFile(file: {
   const signal = await collectPolyglotSignals(file);
   const security = await collectSecuritySignals(file.path, file.content);
   const todos = await collectTodoCount(file.content, extWithDot, file.path);
-  const { complexity, maxNesting } = calculateComplexity(file.content, file.path);
   const sourceStats = collectSourceStats(file.content, extension);
+
+  let complexity = 0;
+  let maxNesting = 0;
+
+  complexity = signal.complexityMetrics.complexity;
+  maxNesting = signal.complexityMetrics.maxNesting;
 
   return {
     comments: sourceStats.comments,
@@ -158,9 +162,8 @@ async function scanRepositoryFile(file: {
     todos,
   };
 }
-
 function buildRepoMetrics(params: {
-  duplicationPercentage: number;
+  duplicationReport: DuplicationReport;
   evidence: RepositoryEvidence;
   files: { content: string; path: string }[];
   frameworkFacts: NonNullable<RepoMetrics["frameworkFacts"]>;
@@ -171,7 +174,7 @@ function buildRepoMetrics(params: {
   tsStaticHints: RepoMetrics["tsStaticHints"];
 }): RepoMetrics {
   const {
-    duplicationPercentage,
+    duplicationReport,
     files,
     frameworkFacts,
     openapiInventory,
@@ -191,13 +194,15 @@ function buildRepoMetrics(params: {
     maxNesting: scan.totals.maxNesting,
     scores: complexityValues,
   });
+
   const techDebtScore = normalizeTechDebtScore({
     dependencyCycles: structuralSignals.dependencyCycles.length,
-    duplicationPercentage,
+    duplicationPercentage: duplicationReport.duplicationPercentage,
     fileCount: files.length,
     orphanModules: structuralSignals.orphanModules.length,
     todos: scan.totals.todos,
   });
+
   const securityScore = clamp(
     scan.securityScanStatus === "partial"
       ? Math.min(60, 100 - scan.totals.securityIssues * 12)
@@ -219,7 +224,7 @@ function buildRepoMetrics(params: {
     dependencyHotspots: structuralSignals.dependencyHotspots,
     docDensity: calculateDocDensity(scan.totals.source, scan.totals.comments),
     documentationInput: undefined,
-    duplicationPercentage: Math.round(duplicationPercentage),
+    duplicationReport: duplicationReport,
     entrypointDetails: structuralSignals.entrypointDetails,
     entrypoints: structuralSignals.entrypoints,
     factCount: 0,
@@ -263,7 +268,7 @@ function buildRepoMetrics(params: {
 export async function analyzeRepository(
   files: { content: string; path: string }[]
 ): Promise<{ evidence: RepositoryEvidence; metrics: RepoMetrics }> {
-  taskLogger.log(`Starting deep static analysis of ${files.length} files...`);
+  taskLogger.info(`Metrics: Starting deep static analysis of ${files.length} files...`);
 
   const normalizedFiles = files.map((file) => ({
     content: file.content,
@@ -271,28 +276,30 @@ export async function analyzeRepository(
   }));
   const scanResults: FileScanResult[] = [];
   const batchSize = 8;
+  let processedCount = 0;
 
   for (let index = 0; index < normalizedFiles.length; index += batchSize) {
     const batch = normalizedFiles.slice(index, index + batchSize);
     scanResults.push(...(await Promise.all(batch.map((file) => scanRepositoryFile(file)))));
+    processedCount += batch.length;
+    if (processedCount % 40 === 0 || processedCount === normalizedFiles.length) {
+      taskLogger.info(`Metrics: Processed ${processedCount}/${normalizedFiles.length} files...`);
+    }
   }
 
   const scan = aggregateScanResults(scanResults);
 
-  taskLogger.log("Building structural dependency graph...");
+  taskLogger.info("Metrics: Building structural dependency graph...");
   const { evidence, structuralSignals } = await collectStructuralSignals(
     normalizedFiles,
     scan.fileComplexities,
     scan.fileSignalsByPath
   );
 
-  taskLogger.log("Inspecting API surface (OpenAPI/Routes)...");
-
   const openapiInventory = OpenApiDiscoveryEngine.collect(normalizedFiles);
   const tsStaticHints = collectTypeScriptStaticHints(normalizedFiles);
-  const duplicatedLines = calculateApproximateDuplication(normalizedFiles);
-  const duplicationPercentage =
-    scan.totals.source > 0 ? (duplicatedLines / scan.totals.source) * 100 : 0;
+  const duplicationReport = await calculateRepositoryDuplication(normalizedFiles);
+
   const frameworkFacts = structuralSignals.frameworkFacts.map((fact) => ({
     category: fact.category,
     confidence: fact.confidence,
@@ -306,7 +313,7 @@ export async function analyzeRepository(
   );
 
   const finalMetrics = buildRepoMetrics({
-    duplicationPercentage,
+    duplicationReport,
     evidence,
     files: normalizedFiles,
     frameworkFacts,
@@ -318,7 +325,7 @@ export async function analyzeRepository(
   });
 
   void dumpDebug("full-metrics-output", finalMetrics);
-  taskLogger.log(`Metrics engine finished. Stack: ${techStack.join(", ")}`);
+  taskLogger.success(`Metrics engine finished. Stack detected: ${techStack.join(", ")}`);
   return { evidence, metrics: finalMetrics };
 }
 

@@ -45,7 +45,7 @@ export async function getAnalysisContext(
   userId: number,
   forceRefresh?: boolean
 ) {
-  taskLogger.log(`Accessing database for analysis ${analysisId}...`);
+  taskLogger.info(`GitHub: Accessing database...`);
 
   const analysis = await prisma.analysis.findUnique({
     include: {
@@ -62,7 +62,10 @@ export async function getAnalysisContext(
     where: { publicId: analysisId },
   });
 
-  if (analysis == null) throw new Error("Analysis not found");
+  if (analysis == null) {
+    taskLogger.error("GitHub: Analysis record not found");
+    throw new Error("Analysis not found");
+  }
 
   const repo = analysis.repo;
   const lastSuccessfulAnalysis = repo.analyses[0];
@@ -70,7 +73,7 @@ export async function getAnalysisContext(
   let octokit;
   let clientType: "app" | "installation" | "oauth" | "public";
 
-  taskLogger.log(`Resolving GitHub credentials for ${repo.owner}/${repo.name}...`);
+  taskLogger.info(`GitHub: Resolving credentials for ${repo.owner}/${repo.name}...`);
 
   try {
     const clientContext = await resolveClientContext(prisma, userId, {
@@ -82,13 +85,14 @@ export async function getAnalysisContext(
     clientType = clientContext.type;
   } catch (error) {
     if (error instanceof GitHubAuthRequiredError) {
+      taskLogger.error("GitHub: Authentication required for this repository");
       throw new Error(PRIVATE_REPO_AUTH_MESSAGE);
     }
     throw error;
   }
 
   assertPrivateRepoAccess(repo, clientType);
-  taskLogger.log(`Fetching latest commit info for branch: ${repo.defaultBranch}...`);
+  taskLogger.info(`GitHub: Fetching latest commit info for branch: ${repo.defaultBranch}...`);
 
   const { currentSha, token } = await executeWithFallback(
     prisma,
@@ -108,14 +112,16 @@ export async function getAnalysisContext(
   );
 
   if (repo.visibility === "PRIVATE" && token == null) {
+    taskLogger.error("GitHub: Unable to resolve token for private repository");
     throw new Error("Unable to resolve GitHub token for private repository.");
   }
 
   if (forceRefresh === false && lastSuccessfulAnalysis?.commitSha === currentSha) {
+    taskLogger.info("GitHub: No new commits detected, using cached results");
     return { currentSha, repo: null, token };
   }
 
-  taskLogger.log(`Current commit SHA: ${currentSha.slice(0, 7)}`);
+  taskLogger.success(`GitHub: Target commit identified as ${currentSha}`);
 
   return { currentSha, repo, token };
 }
@@ -126,11 +132,14 @@ export async function cloneRepository(
   targetPath: string,
   selectedBranch?: string
 ) {
+  const branchToClone = selectedBranch ?? repo.defaultBranch;
+
+  taskLogger.info(`Git: Initializing clone for ${repo.owner}/${repo.name} [${branchToClone}]...`);
+
   await fs.rm(targetPath, { force: true, recursive: true });
   await fs.mkdir(targetPath, { recursive: true });
 
   const git = simpleGit();
-  const branchToClone = selectedBranch ?? repo.defaultBranch;
   const parsed = gitUrlParse(repo.url);
   const repoUrl = `https://${parsed.resource}/${parsed.full_name}.git`;
 
@@ -143,11 +152,14 @@ export async function cloneRepository(
   try {
     await git.clone(repoUrl, targetPath, options);
     await git.cwd(targetPath);
+
+    taskLogger.success("Git: Repository cloned to local worker storage");
   } catch (error) {
     await fs.rm(targetPath, { force: true, recursive: true });
 
     const raw = error instanceof Error ? error.message : String(error);
     const safe = token != null ? raw.replaceAll(token, "***") : raw;
+    taskLogger.error(`Git: Clone failed. ${safe}`);
     throw new Error(`Failed to clone repository: ${safe}`);
   }
 }

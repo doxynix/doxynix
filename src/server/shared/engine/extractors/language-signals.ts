@@ -11,24 +11,31 @@ import { collectRegexSignals } from "./regex-signals";
 export async function collectPolyglotSignals(file: RepositoryFile): Promise<FileSignals> {
   const normalizedPath = normalizeRepoPath(file.path);
   const normalizedFile = { ...file, path: normalizedPath };
+
+  const pathDetails = ProjectPolicy.classifyPath(normalizedPath);
+
+  const configRefs =
+    pathDetails.isLowSignalConfig || pathDetails.categories.includes("config")
+      ? [
+          {
+            confidence: 90,
+            kind: basename(normalizedPath),
+            path: normalizedPath,
+          },
+        ]
+      : [];
+
   const adapters = getLanguageAdapters(normalizedFile);
 
   for (const adapter of adapters) {
     try {
       const signals = await adapter.parse(normalizedFile);
       if (signals == null) continue;
+
       return {
         ...signals,
-        categories: ProjectPolicy.getCategories(normalizedPath),
-        configRefs: ProjectPolicy.isConfigFile(normalizedPath)
-          ? [
-              {
-                confidence: 90,
-                kind: basename(normalizedPath),
-                path: normalizedPath,
-              },
-            ]
-          : [],
+        categories: pathDetails.categories,
+        configRefs,
       };
     } catch (error) {
       logger.debug({
@@ -42,15 +49,7 @@ export async function collectPolyglotSignals(file: RepositoryFile): Promise<File
 
   return {
     ...collectRegexSignals(normalizedFile),
-    categories: ProjectPolicy.getCategories(normalizedPath),
-    configRefs: ProjectPolicy.isConfigFile(normalizedPath)
-      ? [
-          {
-            confidence: 90,
-            kind: basename(normalizedPath),
-            path: normalizedPath,
-          },
-        ]
-      : [],
+    categories: pathDetails.categories,
+    configRefs,
   };
 }

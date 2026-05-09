@@ -1,4 +1,6 @@
+import { analyzeGraph, type Edge, type Graph } from "graph-cycles";
 import { DirectedGraph } from "graphology";
+import { hasCycle } from "graphology-dag";
 import { basename, dirname, join, normalize } from "pathe";
 import ts from "typescript";
 
@@ -15,7 +17,7 @@ type AliasRule = {
 export function isLikelyInternalImportSpecifier(spec: string): boolean {
   const t = spec.trim();
   if (t.startsWith(".")) return true;
-  if (t.startsWith("@/") || t.startsWith("~/") || t.startsWith("~~/")) return true;
+  if (/^[@~]{1,2}\//u.test(t)) return true;
   if (t.startsWith("#")) return true;
   return false;
 }
@@ -28,7 +30,11 @@ const RELATIVE_IMPORT_SUFFIXES = [
   "/__init__.py",
 ];
 
-export function resolveRelativeImport(fromPath: string, importPath: string, fileSet: Set<string>) {
+export function resolveRelativeImport(
+  fromPath: string,
+  importPath: string,
+  fileSet: Set<string>
+): null | string {
   const normalizedImport = normalizeRepoPath(importPath);
   if (!normalizedImport.startsWith(".")) return null;
 
@@ -42,12 +48,17 @@ export function resolveRelativeImport(fromPath: string, importPath: string, file
   return null;
 }
 
-function resolveAliasImport(importPath: string, fileSet: Set<string>, aliasRules: AliasRule[]) {
+function resolveAliasImport(
+  importPath: string,
+  fileSet: Set<string>,
+  aliasRules: AliasRule[]
+): null | string {
   if (aliasRules.length === 0) return null;
 
   for (const rule of aliasRules) {
     if (!importPath.startsWith(rule.prefix)) continue;
     const suffix = importPath.slice(rule.prefix.length).replace(/^\/+/u, "");
+
     for (const target of rule.targets) {
       const candidateBase = normalizeRepoPath(join(target, suffix));
       for (const importSuffix of RELATIVE_IMPORT_SUFFIXES) {
@@ -65,13 +76,16 @@ export function resolveModuleImport(
   fileSet: Set<string>,
   filesByBaseName: Map<string, string[]>,
   aliasRules: AliasRule[] = []
-) {
+): null | string {
   const aliasResolved = resolveAliasImport(importPath, fileSet, aliasRules);
   if (aliasResolved != null) return aliasResolved;
 
-  const normalizedImport = normalize(importPath).replaceAll(".", "/");
+  const normalizedImport = normalize(importPath);
+
   const candidates = [
     normalizedImport,
+    `${normalizedImport}.ts`,
+    `${normalizedImport}.js`,
     `${normalizedImport}.py`,
     `${normalizedImport}.go`,
     `${normalizedImport}.java`,
@@ -94,6 +108,8 @@ export function resolveModuleImport(
 
   const fileNameCandidates = [
     lastSegment,
+    `${lastSegment}.ts`,
+    `${lastSegment}.js`,
     `${lastSegment}.py`,
     `${lastSegment}.go`,
     `${lastSegment}.java`,
@@ -103,19 +119,22 @@ export function resolveModuleImport(
     `${lastSegment}.rb`,
     `${lastSegment}.rs`,
     `${lastSegment}.bsl`,
-    `${lastSegment}.ts`,
-    `${lastSegment}.js`,
   ];
 
   for (const fileName of fileNameCandidates) {
     const matches = filesByBaseName.get(fileName.toLowerCase());
-    if (matches != null && matches.length === 1) return matches[0]!;
+    if (matches != null && matches.length > 0) {
+      if (matches.length === 1) return matches[0]!;
+      const tsMatch = matches.find((m) => m.endsWith(".ts"));
+      if (tsMatch != null) return tsMatch;
+      return matches[0]!;
+    }
   }
 
   return null;
 }
 
-export function collectAliasRules(files: Array<{ content: string; path: string }>) {
+export function collectAliasRules(files: Array<{ content: string; path: string }>): AliasRule[] {
   const rules: AliasRule[] = [];
 
   for (const file of files) {
@@ -124,6 +143,8 @@ export function collectAliasRules(files: Array<{ content: string; path: string }
 
     try {
       const parsed = ts.parseConfigFileTextToJson(normalizedPath, file.content);
+      if (parsed.error != null) continue;
+
       const compilerOptions = parsed.config?.compilerOptions;
       if (compilerOptions == null || typeof compilerOptions !== "object") continue;
 
@@ -146,7 +167,6 @@ export function collectAliasRules(files: Array<{ content: string; path: string }
 
   return rules;
 }
-
 export function findDependencyCycles(graphMap: Map<string, Set<string>>): string[][] {
   const graph = new DirectedGraph();
 
@@ -158,38 +178,34 @@ export function findDependencyCycles(graphMap: Map<string, Set<string>>): string
     }
   }
 
-  const cycles: string[][] = [];
-  const visited = new Set<string>();
-  const onStack = new Set<string>();
-  const stack: string[] = [];
-
-  function detect(node: string) {
-    visited.add(node);
-    onStack.add(node);
-    stack.push(node);
-
-    graph.forEachOutNeighbor(node, (neighbor) => {
-      if (cycles.length >= SCHEMA_LIMITS.maxCyclesDetected) return;
-
-      if (onStack.has(neighbor)) {
-        const cycleStart = stack.indexOf(neighbor);
-        const cycle = stack.slice(cycleStart);
-        cycles.push(cycle);
-      } else if (!visited.has(neighbor)) {
-        detect(neighbor);
-      }
-    });
-
-    stack.pop();
-    onStack.delete(node);
+  if (!hasCycle(graph)) {
+    void dumpDebug("dependency-cycles", { count: 0, cycles: [] });
+    return [];
   }
 
-  graph.forEachNode((node) => {
-    if (cycles.length < 8 && !visited.has(node)) {
-      detect(node);
+  const mutableGraphData: Array<Edge> = [];
+
+  const allNodes = new Set<string>();
+  for (const [node, edges] of graphMap.entries()) {
+    allNodes.add(node);
+    for (const edge of edges) {
+      allNodes.add(edge);
     }
-  });
-  const result = [...cycles].sort((left, right) => left.length - right.length);
+  }
+
+  for (const node of allNodes) {
+    const edges = graphMap.get(node);
+    mutableGraphData.push([node, edges ? Array.from(edges) : []]);
+  }
+
+  const analysis = analyzeGraph(mutableGraphData as Graph);
+
+  const detectedCycles: string[][] = analysis.cycles;
+
+  const result = detectedCycles
+    .slice(0, SCHEMA_LIMITS.maxCyclesDetected)
+    .sort((left, right) => left.length - right.length);
+
   void dumpDebug("dependency-cycles", { count: result.length, cycles: result });
   return result;
 }

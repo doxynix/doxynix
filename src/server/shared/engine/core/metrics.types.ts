@@ -12,6 +12,7 @@ import type {
   TsStaticHint,
 } from "@/server/shared/types";
 
+import type { DuplicationReport } from "../metrics/duplication-metrics";
 import type {
   ChangeCouplingRef,
   EntrypointRef,
@@ -28,6 +29,7 @@ import type { DocumentationInputModel } from "./documentation.types";
 
 export type HealthScoreParams = {
   busFactor: number;
+  codeClones?: DuplicationReport["clones"];
   complexityScore: number;
   dependencyCycles: number;
   docDensity: number;
@@ -50,7 +52,7 @@ export type RepoMetrics = {
   dependencyHotspots: DependencyNodeMetric[];
   docDensity: number;
   documentationInput?: DocumentationInputModel;
-  duplicationPercentage: number;
+  duplicationReport: DuplicationReport;
   entrypointDetails?: EntrypointRef[];
   entrypoints: string[];
   factCount: number;
@@ -96,7 +98,7 @@ export type ArtifactBuildParams = {
     configInventory: string[];
     dependencyCycles: string[][];
     docDensity: number;
-    duplicationPercentage: number;
+    duplicationReport: DuplicationReport;
     entrypointDetails?: EntrypointRef[];
     entrypoints: string[];
     fileCategoryBreakdown?: FileCategoryBreakdownItem[];
@@ -106,7 +108,7 @@ export type ArtifactBuildParams = {
     graphReliability?: GraphReliability;
     hotspotFiles: string[];
     hotspotSignals?: HotspotSignal[];
-    languages: { name: string }[];
+    languages: LanguageMetric[];
     mostComplexFiles: string[];
     openapiInventory?: OpenApiInventory;
     orphanModules: string[];

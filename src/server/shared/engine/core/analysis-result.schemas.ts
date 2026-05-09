@@ -7,9 +7,17 @@ const FactConfidence = z.enum(["high", "medium", "low"]);
 
 const evidenceRefSchema = z
   .object({
+    git_info: z
+      .object({
+        author: z.string().optional(),
+        churn_rate: z.number().optional().describe("How often this specific line/block changes"),
+        last_modified: z.string().optional(),
+      })
+      .optional(),
     line: z.number().int().positive().optional(),
     note: z.string().optional(),
     path: z.string(),
+    snippet: z.string().optional().describe("Exact code snippet causing the issue"),
   })
   .loose();
 
@@ -22,11 +30,16 @@ const repositoryFactSchema = z.object({
     "ownership",
     "quality",
     "security",
+    "infrastructure",
   ]),
   confidence: FactConfidence,
-  detail: z.string(),
+  detail: z.string().describe("Exhaustive technical detail"),
   evidence: z.array(evidenceRefSchema).max(SCHEMA_LIMITS.maxEvidencePerFinding),
   id: z.string(),
+  impact_area: z
+    .string()
+    .optional()
+    .describe("Which part of the system is most affected by this fact"),
   title: z.string(),
 });
 
@@ -39,30 +52,56 @@ const repositoryFindingSchema = z
       "maintainability",
       "onboarding",
       "security",
+      "performance",
     ]),
     confidence: z.number().min(0).max(100),
+    effort_to_fix: z.enum(["LOW", "MEDIUM", "HIGH"]).optional(),
     evidence: z.array(evidenceRefSchema).max(SCHEMA_LIMITS.maxEvidencePerFact),
     id: z.string(),
+    remediation_plan: z
+      .array(z.string())
+      .optional()
+      .describe("Step-by-step guide to fix the issue"),
+    risk_of_regression: z.enum(["LOW", "MEDIUM", "HIGH"]).optional(),
     score: z.number().min(0).max(100),
     severity: RiskLevel,
     suggestedNextChange: z.string(),
     summary: z.string(),
     title: z.string(),
-    whyItMatters: z.string(),
+    whyItMatters: z.string().describe("Deep architectural justification"),
   })
   .loose();
 
 export const projectMapSchema = z.object({
+  key_decisions: z
+    .array(
+      z.object({
+        consequences: z.string(),
+        decision: z.string(),
+        rationale: z.string(),
+      })
+    )
+    .optional(),
   language_breakdown: z
     .object({
       frameworks: z.array(z.string()),
       primary: z.string(),
+      secondary: z.array(z.string()).optional(),
     })
     .optional(),
   mermaid_graph: z.string().optional(),
   modules: z.array(
     z.object({
+      churn_score: z.number().optional().describe("Frequency of changes in this module"),
+      complexity_index: z
+        .number()
+        .optional()
+        .describe("1-100 score of how hard this module is to understand"),
       dependencies: z.array(z.string()).optional(),
+      external_integrations: z
+        .array(z.string())
+        .optional()
+        .describe("Third-party APIs or services used here"),
       path: z.string(),
       publicExports: z.array(z.string()).optional(),
       responsibility: z.string(),
@@ -106,17 +145,32 @@ export const aiSchema = z.object({
     })
     .optional(),
   complexityScore: z.number().optional(),
+  domain_analysis: z
+    .object({
+      business_rules: z
+        .array(z.string())
+        .describe("Critical business constraints identified in code"),
+      core_entities: z.array(
+        z.object({
+          logic_complexity: z.enum(["LOW", "MEDIUM", "HIGH"]),
+          name: z.string(),
+          responsibility: z.string(),
+        })
+      ),
+    })
+    .optional(),
   executive_summary: z.object({
-    architecture_style: z.string(),
-    purpose: z.string(),
+    architecture_style: z
+      .string()
+      .describe("Detailed pattern analysis (e.g. Layered, Hexagonal, Event-driven, etc.)"),
+    key_innovations: z
+      .array(z.string())
+      .optional()
+      .describe("Unique technical solutions found in code"),
+    purpose: z.string().describe("Deep dive into the business problem this code solves"),
     stack_details: z.array(z.string()),
   }),
   findings: z.array(repositoryFindingSchema).max(SCHEMA_LIMITS.maxRepositoryFindings).optional(),
-  generatedApiMarkdown: z.string().optional(),
-  generatedArchitecture: z.string().optional(),
-  generatedChangelog: z.string().optional(),
-  generatedContributing: z.string().optional(),
-  generatedReadme: z.string().optional(),
   mainBottlenecks: z.array(z.string()).optional(),
   mostComplexFiles: z.array(z.string()).optional(),
   onboarding_guide: z.object({
@@ -129,7 +183,11 @@ export const aiSchema = z.object({
       z.object({
         description: z.string(),
         file: z.string(),
+        impact_on_health: z
+          .number()
+          .describe("How many points will be added to health score after fix"),
         improved_code: z.string().optional(),
+        issue_category: z.string(),
         original_code: z.string().optional(),
         priority: z.enum(["HIGH", "MEDIUM", "LOW"]),
       })
@@ -139,12 +197,31 @@ export const aiSchema = z.object({
   sections: z.object({
     api_structure: z.string(),
     data_flow: z.string(),
-    performance: z.array(z.string()),
+    infrastructure_and_scaling: z.object({
+      bottlenecks: z.array(z.string()),
+      concurrency_risks: z.array(z.string()),
+      statelessness_check: z.string(),
+    }).optional(),
+    performance_audit: z.array(
+      z.object({
+        impact: z.string(),
+        issue: z.string(),
+        location: z.string(),
+        optimization_strategy: z.string(),
+      })
+    ).optional(),
     security_audit: z.object({
+      attack_surface_analysis: z.string().optional(),
       risks: z.array(z.string()),
       score: z.number().min(0).max(10),
     }),
-    tech_debt: z.array(z.string()),
+    tech_debt_inventory: z.array(
+      z.object({
+        description: z.string(),
+        remediation_effort: z.enum(["LOW", "MEDIUM", "HIGH"]),
+        type: z.enum(["CODE_SMELL", "ARCHITECTURAL_ISSUE", "DOCUMENTATION_GAP"]),
+      })
+    ).optional(),
   }),
   securityScore: z.number().optional(),
   swaggerYaml: z.string().optional(),

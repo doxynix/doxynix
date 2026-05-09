@@ -427,6 +427,37 @@ function collectRoutes(file: RepositoryFile, spec: LanguageSpec) {
   return routes;
 }
 
+// ============================================================================
+// УНИВЕРСАЛЬНЫЙ СЛОВАРЬ УЗЛОВ СЛОЖНОСТИ TREE-SITTER (Branching & Nesting)
+// ============================================================================
+const AST_COMPLEXITY_NODES = new Set([
+  "case_clause",
+  "catch_clause",
+  "conditional_expression",
+  "do_statement",
+  "elif_clause",
+  "else_if_clause",
+  "except_clause",
+  "for_in_clause",
+  "for_statement",
+  "if_statement",
+  "switch_statement",
+  "while_statement",
+]);
+
+const AST_NESTING_NODES = new Set([
+  "catch_clause",
+  "class_definition",
+  "do_statement",
+  "except_clause",
+  "for_statement",
+  "function_definition",
+  "if_statement",
+  "method_definition",
+  "switch_statement",
+  "while_statement",
+]);
+
 export async function collectTreeSitterSignals(file: RepositoryFile): Promise<FileSignals | null> {
   const ext = getFileExtension(file.path);
   const spec = SPECS[ext];
@@ -451,6 +482,10 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
       const imports = new Set<string>();
       const symbols: SymbolRef[] = [];
 
+      let complexity = 0;
+      let maxNesting = 0;
+      let currentNesting = 0;
+
       const declarationTypes = new Set(spec.declarations.flatMap((entry) => entry.types));
       const declarationKindByType = new Map(
         spec.declarations.flatMap((entry) => entry.types.map((type) => [type, entry.kind] as const))
@@ -458,9 +493,15 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
 
       const cursor = root.walk();
       let reachedRoot = false;
+
       while (!reachedRoot) {
         const nodeType = cursor.nodeType;
         const nodeText = cursor.nodeText;
+
+        if (AST_COMPLEXITY_NODES.has(nodeType)) {
+          complexity += 1 + currentNesting;
+          maxNesting = Math.max(maxNesting, currentNesting);
+        }
 
         if (spec.imports.types.includes(nodeType)) {
           spec.imports.patterns.forEach((re) => {
@@ -489,7 +530,13 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
           apiSurface++;
         }
 
-        if (cursor.gotoFirstChild()) continue;
+        if (cursor.gotoFirstChild()) {
+          if (AST_NESTING_NODES.has(nodeType)) {
+            currentNesting++;
+          }
+          continue;
+        }
+
         if (cursor.gotoNextSibling()) continue;
 
         let backtrack = true;
@@ -497,8 +544,15 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
           if (!cursor.gotoParent()) {
             reachedRoot = true;
             backtrack = false;
-          } else if (cursor.gotoNextSibling()) {
-            backtrack = false;
+          } else {
+            const parentType = cursor.nodeType;
+            if (AST_NESTING_NODES.has(parentType)) {
+              currentNesting = Math.max(0, currentNesting - 1);
+            }
+
+            if (cursor.gotoNextSibling()) {
+              backtrack = false;
+            }
           }
         }
       }
@@ -513,6 +567,10 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
       return {
         analysisMode: "tree-sitter",
         apiSurface: Math.max(apiSurface, routes.length),
+        complexityMetrics: {
+          complexity,
+          maxNesting,
+        },
         confidence: CONFIDENCE_LEVELS.astStructure,
         entrypointHint: spec.entrypoints.some((re) => re.test(file.content)),
         exports,

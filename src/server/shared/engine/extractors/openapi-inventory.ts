@@ -1,6 +1,7 @@
 import YAML from "yaml";
 
 import { logger } from "../../infrastructure/logger";
+import { getFileExtension } from "../../lib/path-operations";
 import type { OpenApiInventory } from "../../types";
 
 const IGNORED_EXTENSIONS = new Set([
@@ -21,9 +22,11 @@ const IGNORED_EXTENSIONS = new Set([
 
 const HTTP_METHODS = new Set(["delete", "get", "head", "options", "patch", "post", "put"]);
 
+const MAX_SPEC_SIZE_BYTES = 5 * 1024 * 1024;
+
 export class OpenApiDiscoveryEngine {
   private static isLikelySpec(path: string, content: string): boolean {
-    const ext = path.slice(((path.lastIndexOf(".") - 1) >>> 0) + 2).toLowerCase();
+    const ext = getFileExtension(path).toLowerCase();
 
     if (IGNORED_EXTENSIONS.has(`.${ext}`)) return false;
     if (!["json", "yaml", "yml"].includes(ext)) return false;
@@ -42,6 +45,14 @@ export class OpenApiDiscoveryEngine {
     const uniquePaths = new Set<string>();
 
     for (const file of files) {
+      if (file.content.length > MAX_SPEC_SIZE_BYTES) {
+        logger.debug({
+          msg: "File size exceeds limit for OpenAPI scanning, skipped",
+          path: file.path,
+        });
+        continue;
+      }
+
       if (!this.isLikelySpec(file.path, file.content)) continue;
 
       try {
@@ -73,7 +84,7 @@ export class OpenApiDiscoveryEngine {
       }
     }
 
-    inventory.pathPatterns = Array.from(uniquePaths).sort((a, b) =>
+    inventory.pathPatterns = Array.from(uniquePaths).toSorted((a, b) =>
       a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
     );
     return inventory;

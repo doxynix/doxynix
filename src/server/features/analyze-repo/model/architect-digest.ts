@@ -111,11 +111,11 @@ export type ArchitectDigest = {
   };
 };
 
-function limit<T>(items: T[], max: number) {
+function limit<T>(items: T[], max: number): T[] {
   return items.slice(0, max);
 }
 
-export function collectArchitectPreferredPaths(digest: ArchitectDigest) {
+export function collectArchitectPreferredPaths(digest: ArchitectDigest): string[] {
   return uniquePaths(
     [
       ...digest.sections.overview.primaryEntrypoints,
@@ -184,7 +184,7 @@ export function buildArchitectDigest(
         100
       ),
       complexityScore: metrics.complexityScore,
-      duplicationPercentage: metrics.duplicationPercentage,
+      duplicationPercentage: metrics.duplicationReport.duplicationPercentage,
       graphReliability: metrics.graphReliability,
       languages: metrics.languages.map((language) => language.name).slice(0, 8),
       onboardingScore: metrics.onboardingScore,

@@ -6,7 +6,6 @@ import { join } from "pathe";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
-import { buildEvaluationSnapshot } from "@/server/shared/engine/evaluation/quality-matrix";
 import { analyzeRepository } from "@/server/shared/engine/metrics/code-metrics";
 import {
   calculateTeamRoles,
@@ -18,7 +17,7 @@ import { buildDocumentationInputModel } from "@/server/shared/engine/pipeline/do
 import { prisma } from "@/server/shared/infrastructure/db";
 import { cloneRepository, getAnalysisContext } from "@/server/shared/infrastructure/github/git";
 import { calculateBusFactor } from "@/server/shared/infrastructure/github/github-api";
-import { dumpDebug } from "@/server/shared/lib/debug-logger";
+import { logger } from "@/server/shared/infrastructure/logger";
 import { taskLogger } from "@/server/shared/lib/task-logger";
 import { cleanup, handleError, readAndFilterFiles } from "@/server/shared/lib/utils";
 
@@ -69,7 +68,7 @@ export const analyzeRepoTask = task({
     const channelName = REALTIME_CONFIG.channels.user(userId);
 
     try {
-      taskLogger.log("Initializing engine...");
+      await taskLogger.milestone({ analysisId, msg: "Initializing analysis engine", percent: 5 });
       const { currentSha, repo, token } = await getAnalysisContext(
         analysisId,
         userId,
@@ -77,21 +76,28 @@ export const analyzeRepoTask = task({
       );
 
       if (repo == null) {
-        taskLogger.log("No changes detected");
+        taskLogger.finalize("Current commit SHA matches last analysis. Skipping re-run.");
         return { reason: "SHA_MATCH", skipped: true };
       }
 
-      taskLogger.log("Calculating Bus Factor...");
+      await taskLogger.milestone({ analysisId, msg: "Fetching repository metadata", percent: 10 });
       const { busFactor, rawContributors } = await calculateBusFactor(repo, userId, prisma);
 
-      taskLogger.log("Cloning repository...");
+      await taskLogger.milestone({ analysisId, msg: "Cloning repository to worker", percent: 20 });
       await cloneRepository(repo, token, tempClonePath, selectedBranch);
 
-      taskLogger.log(`Reading ${selectedFiles.length} files...`);
+      await taskLogger.milestone({
+        analysisId,
+        msg: "Reading and filtering source files",
+        percent: 30,
+      });
       const validFiles = await readAndFilterFiles(tempClonePath, selectedFiles);
+      taskLogger.info(`Successfully indexed ${validFiles.length} files for analysis`);
 
+      await taskLogger.milestone({ analysisId, msg: "Running deep static analysis", percent: 45 });
       const { evidence, metrics: hardMetricsCore } = await analyzeRepository(validFiles);
 
+      taskLogger.info("Computing Git churn and change coupling...");
       const churnHotspots = await computeGitChurnHotspots(
         tempClonePath,
         validFiles.map((f) => f.path)
@@ -112,6 +118,11 @@ export const analyzeRepoTask = task({
         teamRoles,
       });
 
+      await taskLogger.milestone({
+        analysisId,
+        msg: "Invoking AI Multi-Agent Pipeline",
+        percent: 65,
+      });
       const aiResult = await runAiPipeline(
         validFiles,
         repositoryFacts,
@@ -126,6 +137,11 @@ export const analyzeRepoTask = task({
         selectedBranch ?? repo.defaultBranch
       );
 
+      await taskLogger.milestone({
+        analysisId,
+        msg: "Generating technical documentation",
+        percent: 85,
+      });
       const {
         generatedApiMarkdown,
         generatedArchitecture,
@@ -145,45 +161,53 @@ export const analyzeRepoTask = task({
         language
       );
 
-      aiResult.generatedReadme = generatedReadme;
-      aiResult.generatedApiMarkdown = generatedApiMarkdown;
-      aiResult.generatedContributing = generatedContributing;
       aiResult.swaggerYaml = swaggerYaml;
-      aiResult.generatedChangelog = generatedChangelog;
-      aiResult.generatedArchitecture = generatedArchitecture;
-      const documentationInput = buildDocumentationInputModel(evidence, hardMetrics);
-      hardMetrics.documentationInput = documentationInput;
-      void dumpDebug("documentation-input-model", {
-        analysisSummary: {
-          executive_summary: aiResult.executive_summary,
-          findings: aiResult.findings ?? [],
-          onboarding_guide: aiResult.onboarding_guide,
-          repository_facts: aiResult.repository_facts ?? [],
-          sections: aiResult.sections,
-        },
-        model: documentationInput,
-        source: "post-doc-generation",
-      });
-      void dumpDebug(
-        "quality-matrix",
-        buildEvaluationSnapshot({
-          documentationInput,
-          evidence,
-          generatedDocs: aiResult,
-          metrics: hardMetrics,
-          repository: `${repo.owner}/${repo.name}`,
-          repositoryFacts,
-          repositoryFindings,
-        })
-      );
 
-      taskLogger.log("Saving results...");
+      const generatedDocsData = {
+        generatedApiMarkdown,
+        generatedArchitecture,
+        generatedChangelog,
+        generatedContributing,
+        generatedReadme,
+        swaggerYaml,
+      };
+
+      // void dumpDebug("documentation-input-model", {
+      //   analysisSummary: {
+      //     executive_summary: aiResult.executive_summary,
+      //     findings: aiResult.findings ?? [],
+      //     onboarding_guide: aiResult.onboarding_guide,
+      //     repository_facts: aiResult.repository_facts ?? [],
+      //     sections: aiResult.sections,
+      //   },
+      //   model: documentationInput,
+      //   source: "post-doc-generation",
+      // });
+      // void dumpDebug(
+      //   "quality-matrix",
+      //   buildEvaluationSnapshot({
+      //     documentationInput,
+      //     evidence,
+      //     generatedDocs: aiResult,
+      //     metrics: hardMetrics,
+      //     repository: `${repo.owner}/${repo.name}`,
+      //     repositoryFacts,
+      //     repositoryFindings,
+      //   })
+      // );
+
+      await taskLogger.milestone({
+        analysisId,
+        msg: "Persisting results to database",
+        percent: 95,
+      });
       await repoAnalysisService.saveResults({
         aiResult,
         analysisId,
         busFactor,
         channelName,
         currentSha,
+        generatedDocsData,
         hardMetrics,
         rawContributors,
         repo,
@@ -192,13 +216,24 @@ export const analyzeRepoTask = task({
         userId,
       });
 
-      await cleanup(tempClonePath);
       await taskLogger.finalize(analysisId, Status.DONE);
       return { success: true };
     } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      taskLogger.error(`Analysis failed: ${errorMessage}`);
       await taskLogger.finalize(analysisId, Status.FAILED);
+
+      logger.error({ msg: `Repo analyze failed: ${errorMessage}`, error });
+
       await handleError(error, analysisId, channelName, tempClonePath);
       throw error;
+    } finally {
+      taskLogger.log("Cleaning up...");
+      try {
+        await cleanup(tempClonePath);
+      } catch (cleanupError) {
+        logger.error({ cleanupError, msg: "Failed to clean up clone path", tempClonePath });
+      }
     }
   },
 });

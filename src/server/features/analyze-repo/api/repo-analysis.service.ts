@@ -20,12 +20,22 @@ import { logger } from "@/server/shared/infrastructure/logger";
 import { realtimeServer } from "@/server/shared/infrastructure/realtime";
 import { getLatestCompletedAnalysisRef } from "@/server/shared/infrastructure/repo-snapshots";
 
+type GeneratedDocsData = {
+  generatedApiMarkdown?: string;
+  generatedArchitecture?: string;
+  generatedChangelog?: string;
+  generatedContributing?: string;
+  generatedReadme?: string;
+  swaggerYaml?: string;
+};
+
 type SaveResultsParams = {
   aiResult: AIResult;
   analysisId: string;
   busFactor: number;
   channelName: string;
   currentSha: string;
+  generatedDocsData: GeneratedDocsData;
   hardMetrics: RepoMetrics;
   rawContributors: { contributions: number; login: string }[];
   repo: Repo;
@@ -137,13 +147,14 @@ export const repoAnalysisService = {
     return { jobId: handle.id };
   },
 
-  async saveResults(params: SaveResultsParams) {
+  async saveResults(params: SaveResultsParams): Promise<number> {
     const {
       aiResult,
       analysisId,
       busFactor,
       channelName,
       currentSha,
+      generatedDocsData,
       hardMetrics,
       rawContributors,
       repo,
@@ -152,17 +163,14 @@ export const repoAnalysisService = {
       userId,
     } = params;
 
-    const {
-      generatedApiMarkdown,
-      generatedArchitecture,
-      generatedChangelog,
-      generatedContributing,
-      generatedReadme,
-      ...cleanAiResult
-    } = aiResult;
-
     const teamRoles = calculateTeamRoles(rawContributors);
-    const docOutputScore = calculateDocumentationOutputScore(aiResult);
+
+    const scoringContext: AIResult & GeneratedDocsData = {
+      ...aiResult,
+      ...generatedDocsData,
+    };
+
+    const docOutputScore = calculateDocumentationOutputScore(scoringContext);
 
     const onboardingScore = Math.min(
       100,
@@ -178,14 +186,14 @@ export const repoAnalysisService = {
       complexityScore: hardMetrics.complexityScore,
       dependencyCycles: hardMetrics.dependencyCycles.length,
       docDensity: hardMetrics.docDensity,
-      duplicationPercentage: hardMetrics.duplicationPercentage,
+      duplicationPercentage: hardMetrics.duplicationReport.duplicationPercentage,
       repo,
       securityScore: hardMetrics.securityScore,
       techDebtScore: hardMetrics.techDebtScore,
     });
 
     const resultToStore = {
-      ...cleanAiResult,
+      ...aiResult,
       complexityScore: hardMetrics.complexityScore,
       findings: repositoryFindings,
       mostComplexFiles: hardMetrics.mostComplexFiles,
@@ -236,7 +244,7 @@ export const repoAnalysisService = {
           metricsJson: finalMetrics as unknown as Prisma.InputJsonValue,
           onboardingScore: onboardingScore,
           progress: 100,
-          resultJson: resultToStore as Prisma.InputJsonValue,
+          resultJson: resultToStore as unknown as Prisma.InputJsonValue,
           score: finalHealthScore,
           securityScore: hardMetrics.securityScore,
           status: Status.DONE,
@@ -246,35 +254,33 @@ export const repoAnalysisService = {
       });
 
       const docsToSave = [
-        { content: generatedReadme, type: DocType.README },
-        { content: generatedApiMarkdown, type: DocType.API },
-        { content: generatedContributing, type: DocType.CONTRIBUTING },
-        { content: generatedChangelog, type: DocType.CHANGELOG },
-        { content: generatedArchitecture, type: DocType.ARCHITECTURE },
+        { content: generatedDocsData.generatedReadme, type: DocType.README },
+        { content: generatedDocsData.generatedApiMarkdown, type: DocType.API },
+        { content: generatedDocsData.generatedContributing, type: DocType.CONTRIBUTING },
+        { content: generatedDocsData.generatedChangelog, type: DocType.CHANGELOG },
+        { content: generatedDocsData.generatedArchitecture, type: DocType.ARCHITECTURE },
       ].filter((doc) => doc.content != null && doc.content.length > 0);
 
-      await Promise.all(
-        docsToSave.map((doc) =>
-          tx.document.upsert({
-            create: {
+      for (const doc of docsToSave) {
+        await tx.document.upsert({
+          create: {
+            analysisId: analysis.id,
+            content: doc.content!,
+            repoId: repo.id,
+            type: doc.type,
+            version: currentSha,
+          },
+          update: { content: doc.content! },
+          where: {
+            repoId_version_type_analysisId: {
               analysisId: analysis.id,
-              content: doc.content!,
               repoId: repo.id,
               type: doc.type,
               version: currentSha,
             },
-            update: { content: doc.content! },
-            where: {
-              repoId_version_type_analysisId: {
-                analysisId: analysis.id,
-                repoId: repo.id,
-                type: doc.type,
-                version: currentSha,
-              },
-            },
-          })
-        )
-      );
+          },
+        });
+      }
 
       return await tx.notification.create({
         data: {

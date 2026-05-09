@@ -1,4 +1,4 @@
-import { maxBy } from "es-toolkit";
+import { maxBy, orderBy } from "es-toolkit";
 import pm from "picomatch";
 
 import { unique } from "../../lib/array-utils";
@@ -24,6 +24,8 @@ type PathExplanation = {
   semanticKinds: ProjectPolicySemanticKind[];
   sensitive: boolean;
 };
+
+const FRONTEND_DIRS_SET = new Set<string>(PROJECT_POLICY_RULES.semantics.frontendDirectories);
 
 function compileMatcher(patterns: readonly string[] | string) {
   const values = Array.isArray(patterns) ? patterns : [patterns];
@@ -78,27 +80,36 @@ export const ProjectPolicy = {
     const semanticKinds = this.getSemanticKinds(normalizedPath);
     const reasons: string[] = [];
 
-    if (this.isIgnored(normalizedPath)) reasons.push("ignored-by-policy");
-    if (this.isSensitive(normalizedPath)) reasons.push("sensitive");
-    if (this.isLowSignalConfig(normalizedPath)) reasons.push("low-signal-config");
-    if (this.isPrimaryEntrypoint(normalizedPath)) reasons.push("primary-entrypoint");
-    if (this.isPrimaryApiSurface(normalizedPath)) reasons.push("api-surface");
-    if (this.isArchitectureRelevant(normalizedPath)) reasons.push("architecture-relevant");
-    if (this.isGraphPreviewCandidate(normalizedPath)) reasons.push("graph-preview-candidate");
+    const isIgnored = this.isIgnored(normalizedPath);
+    const isSensitive = this.isSensitive(normalizedPath);
+    const isLowSignalConfig = this.isLowSignalConfig(normalizedPath);
+    const isPrimaryEntrypoint = this.isPrimaryEntrypoint(normalizedPath);
+    const isPrimaryApiSurface = this.isPrimaryApiSurface(normalizedPath);
+    const isArchitectureRelevant = this.isArchitectureRelevant(normalizedPath);
+    const isGraphPreviewCandidate = this.isGraphPreviewCandidate(normalizedPath);
+    const isRuntimeSource = this.isRuntimeSource(normalizedPath);
+
+    if (isIgnored) reasons.push("ignored-by-policy");
+    if (isSensitive) reasons.push("sensitive");
+    if (isLowSignalConfig) reasons.push("low-signal-config");
+    if (isPrimaryEntrypoint) reasons.push("primary-entrypoint");
+    if (isPrimaryApiSurface) reasons.push("api-surface");
+    if (isArchitectureRelevant) reasons.push("architecture-relevant");
+    if (isGraphPreviewCandidate) reasons.push("graph-preview-candidate");
 
     return {
       categories,
       groupId: this.deriveGroupId(normalizedPath),
-      ignored: this.isIgnored(normalizedPath),
-      isApiSurface: this.isPrimaryApiSurface(normalizedPath),
-      isArchitectureRelevant: this.isArchitectureRelevant(normalizedPath),
-      isEntrypoint: this.isPrimaryEntrypoint(normalizedPath),
-      isGraphPreviewCandidate: this.isGraphPreviewCandidate(normalizedPath),
-      isLowSignalConfig: this.isLowSignalConfig(normalizedPath),
-      isRuntimeSource: this.isRuntimeSource(normalizedPath),
+      ignored: isIgnored,
+      isApiSurface: isPrimaryApiSurface,
+      isArchitectureRelevant: isArchitectureRelevant,
+      isEntrypoint: isPrimaryEntrypoint,
+      isGraphPreviewCandidate: isGraphPreviewCandidate,
+      isLowSignalConfig: isLowSignalConfig,
+      isRuntimeSource: isRuntimeSource,
       reasons,
       semanticKinds,
-      sensitive: this.isSensitive(normalizedPath),
+      sensitive: isSensitive,
     };
   },
 
@@ -218,11 +229,18 @@ export const ProjectPolicy = {
   getPrimarySemanticKind(
     counts: Record<ProjectPolicySemanticKind, number>
   ): ProjectPolicySemanticKind {
-    return (
-      (maxBy(Object.entries(counts), ([, count]) => count)?.[0] as
-        | ProjectPolicySemanticKind
-        | undefined) ?? "unknown"
+    const entries = Object.entries(counts) as [ProjectPolicySemanticKind, number][];
+
+    const sorted = orderBy(
+      entries,
+      [
+        (entry) => entry[1],
+        (entry) => entry[0],
+      ],
+      ["desc", "asc"]
     );
+
+    return sorted[0]?.[0] ?? "unknown";
   },
 
   getSemanticKinds(
@@ -248,7 +266,8 @@ export const ProjectPolicy = {
     }
     if (
       hasAnySegment(normalized, PROJECT_POLICY_RULES.semantics.frontendSegments) ||
-      hasPrefix(normalized, PROJECT_POLICY_RULES.semanticPrefixes.frontend)
+      hasPrefix(normalized, PROJECT_POLICY_RULES.semanticPrefixes.frontend) ||
+      this.isFrontendComponent(normalized)
     ) {
       kinds.add("frontend");
     }
@@ -356,6 +375,11 @@ export const ProjectPolicy = {
     if (this.isLowSignalConfig(normalized)) return false;
     if (this.isInfraFile(normalized) && !this.isApiPath(normalized)) return false;
     return this.isPrimaryArchitecturePath(normalized) || this.isApiPath(normalized);
+  },
+
+  isFrontendComponent(filePath: string): boolean {
+    const parts = splitLowerPath(filePath);
+    return parts.some((part) => FRONTEND_DIRS_SET.has(part));
   },
 
   isGeneratedFile(path: string) {

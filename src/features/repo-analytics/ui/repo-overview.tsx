@@ -319,7 +319,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
               <div className="flex items-center gap-2">
                 <FileText /> Documentation
               </div>
-              <Button variant="ghost" asChild>
+              <Button asChild variant="ghost">
                 <Link href={`/dashboard/repo/${data.repo.owner}/${data.repo.name}/docs`}>View</Link>
               </Button>
             </CardTitle>
@@ -432,7 +432,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </div>
           </CardContent>
         </Card>
-        <TrendsWidget className="col-span-4" repoId={data.repo.id} />
+        <TrendsWidget repoId={data.repo.id} className="col-span-4" />
       </div>
     </div>
   );

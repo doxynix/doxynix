@@ -1,3 +1,5 @@
+import { basename } from "pathe";
+
 import { normalizeRepoPath } from "./common";
 import type { EntrypointKind, ModuleRef } from "./discovery.types";
 import type {
@@ -9,14 +11,18 @@ import type {
 import { ProjectPolicy } from "./project-policy";
 import { CONFIDENCE_LEVELS } from "./scoring-constants";
 
+const SCRIPTS_DIR_REGEX = /^scripts\//iu;
+const CLI_DIR_REGEX = /^cli\//iu;
+const BARREL_FILE_REGEX = /\/index\.[cm]?[jt]sx?$/iu;
+
 export function kindForFile(path: string, categories: string[]): EntrypointKind {
   if (categories.includes("benchmark")) return "benchmark";
   if (categories.includes("test")) return "test";
   if (categories.includes("infra")) return "infra";
-  if (categories.includes("tooling") || /^scripts\//iu.test(path) || /^cli\//iu.test(path)) {
+  if (categories.includes("tooling") || SCRIPTS_DIR_REGEX.test(path) || CLI_DIR_REGEX.test(path)) {
     return "tooling";
   }
-  if (/\/index\.[cm]?[jt]sx?$/iu.test(path)) return "library";
+  if (BARREL_FILE_REGEX.test(path)) return "library";
   return "runtime";
 }
 
@@ -34,19 +40,23 @@ export async function collectFileEvidence(
 ): Promise<CollectedFileEvidence> {
   const signals =
     fileSignalsByPath.get(file.path) ?? fileSignalsByPath.get(normalizeRepoPath(file.path));
+
   if (signals == null) {
     throw new Error(`Missing pre-collected FileSignals for ${file.path}`);
   }
+
   resolveImportEdges(file.path, signals.imports, lookups, tracking);
+
+  const isConfig = ProjectPolicy.isConfigFile(file.path);
 
   return {
     apiSurface: signals.apiSurface,
     configs: [
-      ...(ProjectPolicy.isConfigFile(file.path)
+      ...(isConfig
         ? [
             {
               confidence: CONFIDENCE_LEVELS.configDiscovery,
-              kind: file.path.split("/").at(-1) ?? "config",
+              kind: basename(file.path) || "config",
               path: file.path,
             },
           ]
@@ -67,9 +77,11 @@ export function buildModuleRef(
   signals: CollectedFileEvidence["signals"],
   entrypointHints: CollectedFileEvidence["entrypointHints"]
 ): ModuleRef {
+  const categories = signals.categories ?? [];
+
   return {
     apiSurface: signals.apiSurface,
-    categories: signals.categories ?? ProjectPolicy.getCategories(filePath),
+    categories,
     entrypointHints,
     exports: signals.exports,
     frameworkHints: signals.frameworkHints ?? [],

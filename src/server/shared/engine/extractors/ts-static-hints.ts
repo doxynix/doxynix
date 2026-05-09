@@ -17,7 +17,8 @@ const visitNode = (node: ts.Node, context: VisitContext) => {
   const { hints, normalizedPath, sourceFile } = context;
 
   if (node.kind === ts.SyntaxKind.AnyKeyword) {
-    const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+    const startPos = node.getStart();
+    const { line } = sourceFile.getLineAndCharacterOfPosition(startPos);
     hints.push({
       detail: "Explicit `any` weakens type safety.",
       kind: "explicit-any",
@@ -28,9 +29,13 @@ const visitNode = (node: ts.Node, context: VisitContext) => {
   }
 
   if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
-    const start = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
-    const end = sourceFile.getLineAndCharacterOfPosition(node.getEnd());
+    const nodeStart = node.getStart();
+    const nodeEnd = node.getEnd();
+
+    const start = sourceFile.getLineAndCharacterOfPosition(nodeStart);
+    const end = sourceFile.getLineAndCharacterOfPosition(nodeEnd);
     const lineSpan = end.line - start.line + 1;
+
     if (lineSpan >= COMPLEXITY_SCORING.lineCountThreshold) {
       hints.push({
         detail: `Function spans ~${lineSpan} lines (threshold ${COMPLEXITY_SCORING.lineCountThreshold}).`,
@@ -54,11 +59,15 @@ const visitNode = (node: ts.Node, context: VisitContext) => {
   ts.forEachChild(node, (child) => visitNode(child, context));
 };
 
-function scriptKind(filePath: string) {
-  if (filePath.endsWith(".tsx")) return ts.ScriptKind.TSX;
-  if (filePath.endsWith(".jsx")) return ts.ScriptKind.JSX;
-  if (filePath.endsWith(".js") || filePath.endsWith(".mjs") || filePath.endsWith(".cjs")) {
+function scriptKind(filePath: string): ts.ScriptKind {
+  const lower = filePath.toLowerCase();
+  if (lower.endsWith(".tsx")) return ts.ScriptKind.TSX;
+  if (lower.endsWith(".jsx")) return ts.ScriptKind.JSX;
+  if (lower.endsWith(".js") || lower.endsWith(".mjs") || lower.endsWith(".cjs")) {
     return ts.ScriptKind.JS;
+  }
+  if (lower.endsWith(".cts") || lower.endsWith(".mts")) {
+    return ts.ScriptKind.TS;
   }
   return ts.ScriptKind.TS;
 }
@@ -79,7 +88,7 @@ export function collectTypeScriptStaticHints(
         normalized,
         file.content,
         ts.ScriptTarget.Latest,
-        true,
+        false,
         scriptKind(normalized)
       );
 

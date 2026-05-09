@@ -386,7 +386,7 @@ export async function calculateBusFactor(
   userId: number,
   prisma: DbClient
 ): Promise<BusFactorResult> {
-  taskLogger.log("Analyzing contributor history...");
+  taskLogger.info("GitHub: Analyzing contributor history to calculate Bus Factor...");
 
   try {
     const context = await resolveRepoClientContext(prisma, userId, repo.owner);
@@ -396,6 +396,7 @@ export async function calculateBusFactor(
 
     // Validate private repo access
     if (repo.visibility === "PRIVATE" && (clientType === "app" || clientType === "public")) {
+      taskLogger.error("GitHub: Private repository access denied (missing installation)");
       throw new GitHubAuthRequiredError();
     }
 
@@ -422,7 +423,7 @@ export async function calculateBusFactor(
       }
     );
 
-    taskLogger.log(`Found ${contributors.length} active contributors.`);
+    taskLogger.info(`GitHub: Successfully retrieved ${contributors.length} active contributors`);
 
     // Normalize and sort contributors
     const rawContributors = contributors
@@ -435,6 +436,7 @@ export async function calculateBusFactor(
     const totalCommits = sumBy(rawContributors, (c) => c.contributions);
 
     if (totalCommits === 0) {
+      taskLogger.warn("GitHub: No commit history found for this repository");
       return {
         busFactor: 0,
         rawContributors,
@@ -451,8 +453,10 @@ export async function calculateBusFactor(
       if (runningSum >= totalCommits * 0.5) break;
     }
 
-    taskLogger.log(
-      `Bus Factor result: ${busFactor}. Project knowledge is ${busFactor > 2 ? "distributed" : "concentrated"}.`
+    taskLogger.success(
+      `GitHub: Bus Factor is ${busFactor}. Knowledge is ${
+        busFactor > 2 ? "distributed across the team" : "concentrated in few key people"
+      }.`
     );
 
     return {
@@ -470,12 +474,17 @@ export async function calculateBusFactor(
 
     // Private repo requires auth
     if (repo.visibility === "PRIVATE" && (isMissingAuth || isRetryableGithubStatus(status))) {
+      taskLogger.error("GitHub: Failed to access private repository contributors");
       if (isMissingAuth) throw error;
       throw new GitHubAuthRequiredError();
     }
 
     // Public repo: log and return default
     if (isMissingAuth || isRetryableGithubStatus(status)) {
+      taskLogger.warn(
+        "GitHub: Bus Factor calculation failed (likely due to API limits). Defaulting to 0."
+      );
+
       logger.warn({
         error,
         msg: "Failed to fetch contributors for Bus Factor calculation. Defaulting to 0.",

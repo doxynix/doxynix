@@ -155,6 +155,10 @@
     "authorLink": "https://github.com/DefinitelyTyped",
     "packages": [
       {
+        "name": "@types/diff-match-patch",
+        "license": "MIT"
+      },
+      {
         "name": "@types/file-saver",
         "license": "MIT"
       },
@@ -688,6 +692,25 @@
     ]
   },
   {
+    "author": "Graphology",
+    "avatar": "https://github.com/graphology.png?size=96",
+    "authorLink": "https://github.com/graphology",
+    "packages": [
+      {
+        "name": "graphology",
+        "license": "MIT"
+      },
+      {
+        "name": "graphology-dag",
+        "license": "MIT"
+      },
+      {
+        "name": "graphology-library",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Kucherenko",
     "avatar": "https://github.com/kucherenko.png?size=96",
     "authorLink": "https://github.com/kucherenko",
@@ -846,21 +869,6 @@
       },
       {
         "name": "@commitlint/config-conventional",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "Graphology",
-    "avatar": "https://github.com/graphology.png?size=96",
-    "authorLink": "https://github.com/graphology",
-    "packages": [
-      {
-        "name": "graphology",
-        "license": "MIT"
-      },
-      {
-        "name": "graphology-library",
         "license": "MIT"
       }
     ]
@@ -1406,6 +1414,17 @@
     ]
   },
   {
+    "author": "Grantila",
+    "avatar": "https://github.com/grantila.png?size=96",
+    "authorLink": "https://github.com/grantila",
+    "packages": [
+      {
+        "name": "graph-cycles",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Gregoor",
     "avatar": "https://github.com/Gregoor.png?size=96",
     "authorLink": "https://github.com/Gregoor",
@@ -1479,6 +1498,17 @@
       {
         "name": "disposable-email-domains",
         "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "JackuB",
+    "avatar": "https://github.com/JackuB.png?size=96",
+    "authorLink": "https://github.com/JackuB",
+    "packages": [
+      {
+        "name": "diff-match-patch",
+        "license": "Apache-2.0"
       }
     ]
   },
@@ -1901,6 +1931,17 @@
     ]
   },
   {
+    "author": "Sergeyt",
+    "avatar": "https://github.com/sergeyt.png?size=96",
+    "authorLink": "https://github.com/sergeyt",
+    "packages": [
+      {
+        "name": "parse-diff",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "SGrondin",
     "avatar": "https://github.com/SGrondin.png?size=96",
     "authorLink": "https://github.com/SGrondin",
@@ -2094,6 +2135,17 @@
     "packages": [
       {
         "name": "@xyflow/react",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Yeonjuan",
+    "avatar": "https://github.com/yeonjuan.png?size=96",
+    "authorLink": "https://github.com/yeonjuan",
+    "packages": [
+      {
+        "name": "parse-git-diff",
         "license": "MIT"
       }
     ]

@@ -50,7 +50,14 @@ function buildCodebaseInput(
       count: item.count,
     })),
     frameworkFacts: context.frameworkFacts,
-    languages: metrics.analysisCoverage.languagesByMode,
+    languages: {
+      ...metrics.analysisCoverage.languagesByMode,
+      distribution: metrics.languages.map((l) => ({
+        color: l.color,
+        lines: l.lines,
+        name: l.name,
+      })),
+    },
     totalFiles: metrics.fileCount,
   };
 }

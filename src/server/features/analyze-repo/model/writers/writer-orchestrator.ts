@@ -7,6 +7,7 @@ import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { uniquePaths } from "@/server/shared/lib/array-utils";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
 import { hasText } from "@/server/shared/lib/string-utils";
+import { taskLogger } from "@/server/shared/lib/task-logger";
 
 import {
   apiTask,
@@ -35,13 +36,16 @@ type ModuleDependencyEntry = {
   outbound: string[];
   path: string;
 };
+
 type ModuleDependencyContext = {
   graphPartial: boolean;
   modules: ModuleDependencyEntry[];
   resolvedInternalEdges: number;
   unresolvedInternalImports: number;
 };
+
 type DocumentationInputSnapshot = NonNullable<RepoMetrics["documentationInput"]>;
+
 type EngineeringDossier = {
   changeCoupling: NonNullable<RepoMetrics["changeCoupling"]>;
   churnHotspots: NonNullable<RepoMetrics["churnHotspots"]>;
@@ -56,6 +60,17 @@ type EngineeringDossier = {
   teamRoles: RepoMetrics["teamRoles"];
 };
 
+export type DeepDocsResult = {
+  generatedApiMarkdown?: string;
+  generatedArchitecture?: string;
+  generatedChangelog?: string;
+  generatedContributing?: string;
+  generatedReadme?: string;
+  swaggerYaml?: string;
+};
+
+const MD_YAML_BLOCK_REGEX = /```(?:yaml)?([\S\s]*?)```/i;
+
 export async function orchestrateWriterTasks(
   files: { content: string; path: string }[],
   analysisResult: AIResult,
@@ -66,7 +81,9 @@ export async function orchestrateWriterTasks(
   repo: Repo,
   userId: number,
   language: string
-) {
+): Promise<DeepDocsResult> {
+  taskLogger.info("Documentation: Preparing high-fidelity context for AI writers...");
+
   const documentationInput = getDocumentationInputSnapshot(evidence, hardMetrics);
   const writerInputs = buildWriterSectionPayloads(documentationInput);
   const sectionDebugSnapshot = buildSectionDebugSnapshot(documentationInput);
@@ -170,6 +187,10 @@ export async function orchestrateWriterTasks(
     userId,
   };
 
+  taskLogger.info(
+    `Documentation: Triggering parallel generation for ${requestedDocs.length} assets...`
+  );
+
   const batchDefinitions: any[] = [];
 
   if (requestedDocs.includes(DocType.README)) {
@@ -253,7 +274,16 @@ export async function orchestrateWriterTasks(
   }
 
   if (batchDefinitions.length === 0) {
-    return { generatedApiMarkdown: undefined, generatedReadme: undefined /* ... */ };
+    taskLogger.warn("Documentation: No assets requested for generation");
+
+    return {
+      generatedApiMarkdown: undefined,
+      generatedArchitecture: undefined,
+      generatedChangelog: undefined,
+      generatedContributing: undefined,
+      generatedReadme: undefined,
+      swaggerYaml: undefined,
+    };
   }
 
   const { runs } = await batch.triggerByTaskAndWait(batchDefinitions);
@@ -262,8 +292,12 @@ export async function orchestrateWriterTasks(
     const taskName = batchDefinitions[index].task.id.replace("-task", "") as WriterName;
 
     if (run.ok) {
+      taskLogger.success(`Documentation: ${taskName.toUpperCase()} generated successfully`);
+
       return run.output as WriterResult;
     }
+
+    taskLogger.error(`❌ Documentation: ${taskName.toUpperCase()} failed to generate`);
 
     return {
       error: run.error instanceof Error ? run.error.message : "Writer task failed",
@@ -295,11 +329,11 @@ export async function orchestrateWriterTasks(
 
   let swaggerYaml: string | undefined;
   if (apiRes != null && generatedApiMarkdown != null) {
-    const yamlMatch = RegExp(/```yaml([\S\s]*?)```/).exec(generatedApiMarkdown);
+    const yamlMatch = MD_YAML_BLOCK_REGEX.exec(generatedApiMarkdown);
     if (yamlMatch) {
       swaggerYaml = yamlMatch[1]?.trim();
       generatedApiMarkdown = generatedApiMarkdown
-        .replace(/# OpenAPI Specification[\S\s]*/, "")
+        .replace(/# openapi specification[\S\s]*/i, "")
         .trim();
     }
   }
@@ -307,11 +341,11 @@ export async function orchestrateWriterTasks(
   analysisResult.analysisRuntime = {
     ...analysisResult.analysisRuntime,
     writers: {
-      api: apiRes ? (apiRes.error != null ? "failed" : "llm") : "missing",
-      architecture: archRes ? (archRes.error != null ? "failed" : "llm") : "missing",
-      changelog: changeRes ? (changeRes.error != null ? "failed" : "llm") : "missing",
-      contributing: contrRes ? (contrRes.error != null ? "failed" : "llm") : "missing",
-      readme: readmeRes ? (readmeRes.error != null ? "failed" : "llm") : "missing",
+      api: apiRes?.status ?? "missing",
+      architecture: archRes?.status ?? "missing",
+      changelog: changeRes?.status ?? "missing",
+      contributing: contrRes?.status ?? "missing",
+      readme: readmeRes?.status ?? "missing",
     },
   };
 
@@ -354,6 +388,8 @@ export async function orchestrateWriterTasks(
     swaggerYaml,
     writerErrors,
   });
+
+  taskLogger.success("Documentation: All tasks finished");
 
   return {
     generatedApiMarkdown,

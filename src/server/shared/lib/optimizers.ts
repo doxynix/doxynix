@@ -12,6 +12,7 @@ import {
   TREE_SITTER_SUPPORTED_EXTENSIONS,
 } from "../engine/extractors/tree-sitter-signals";
 import { getFileExtension } from "./path-operations";
+import { logger } from "../infrastructure/logger";
 
 type AiTextLike = {
   content?: unknown;
@@ -127,7 +128,7 @@ export const CodeOptimizer = {
       parser.delete();
       return result;
     } catch (error) {
-      console.error("Polyglot skeletonizer error:", error);
+      logger.error({ msg: "Polyglot skeletonizer error:", error });
       return code.slice(0, 5000);
     } finally {
       tree?.delete();

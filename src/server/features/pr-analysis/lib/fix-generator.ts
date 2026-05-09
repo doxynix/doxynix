@@ -1,18 +1,17 @@
+import diff_match_patch from "diff-match-patch";
 import { groupBy } from "es-toolkit";
 
 import type { FindingForFix, GeneratedDiff } from "@/server/features/pr-analysis/model/pr-types";
 import type { OctokitInstance } from "@/server/shared/infrastructure/github/github-provider";
 import { logger } from "@/server/shared/infrastructure/logger";
+import { unique } from "@/server/shared/lib/array-utils";
 import { callWithFallback } from "@/server/shared/lib/call";
 
 import { AI_MODELS, SAFETY_SETTINGS } from "../../analyze-repo/lib/constants";
 
-/**
- * Full file content after AI fixing (from AI response)
- */
 type FixedFileContent = {
   filePath: string;
-  newContent: string; // Full file content, not a patch
+  newContent: string;
 };
 
 type FixRecommendation = {
@@ -20,7 +19,7 @@ type FixRecommendation = {
   description: string;
   diffs: GeneratedDiff[];
   estimatedImpact: number;
-  fixedFiles: FixedFileContent[]; // NEW: Full content for each file
+  fixedFiles: FixedFileContent[];
   title: string;
 };
 
@@ -31,26 +30,17 @@ type FindingInput = {
   type: string;
 };
 
-/**
- * Generates code fixes for detected issues using "Full Content Replacement" strategy.
- * AI returns entire fixed file content (wrapped in <fixed_code> tags).
- * No .patch parsing complexity.
- */
+const FILE_TAG_REGEX = /<file\s+path="([^"]+)">([\S\s]*?)<\/file>/g;
+const MARKDOWN_CODE_WRAP_PREFIX_REGEX = /^```[a-z]*\n/i;
+const MARKDOWN_CODE_WRAP_SUFFIX_REGEX = /\n```$/;
+
+const dmp = new diff_match_patch();
+
 class FixGenerator {
-  /**
-   * Generate fix recommendations from findings + original file contents.
-   * AI will return full fixed content for each affected file.
-   * Frontend sends both diffs (preview) and fixed content (application) to applyFix.
-   *
-   * @param findings Issues detected in PR
-   * @param fileContents Map of file paths to original content
-   * @returns Fix recommendations with diffs for preview and full content for application
-   */
   static generateFixRecommendations(
     findings: FindingInput[],
     fileContents: Record<string, string>
   ): FixRecommendation[] {
-    // Group findings by type for recommendation batching
     const findingsByType = groupBy(findings, (f) => f.type);
 
     return Object.entries(findingsByType)
@@ -58,15 +48,13 @@ class FixGenerator {
         if (typeFindings.length === 0) return null;
 
         const config = this.getFixConfig(type, typeFindings.length);
-        const affectedFiles = [...new Set(typeFindings.map((f) => f.file))];
+        const affectedFiles = unique(typeFindings.map((f) => f.file));
 
-        // NEW: Will be populated from AI response (in FixService)
         const fixedFiles: FixedFileContent[] = affectedFiles.map((filePath) => ({
           filePath,
-          newContent: "", // Will be filled by AI in createFixFromAnalysis
+          newContent: "",
         }));
 
-        // Generate placeholder diffs for now (will be updated with actual content in applyFix)
         const diffs = this.generateDiffsFromContent(fileContents, fixedFiles);
 
         return {
@@ -82,7 +70,6 @@ class FixGenerator {
   }
 
   private static getFixConfig(type: string, count: number) {
-    // ... existing code ...
     const map: Record<string, { description: string; estimatedImpact: number; title: string }> = {
       complexity: {
         description: `Refactors ${count} complex function(s)`,
@@ -115,10 +102,6 @@ class FixGenerator {
     );
   }
 
-  /**
-   * Generate unified diffs by comparing original vs fixed content.
-   * For now, returns placeholder diffs. Frontend will use jsdiff for preview.
-   */
   private static generateDiffsFromContent(
     originalContents: Record<string, string>,
     fixedFiles: FixedFileContent[]
@@ -127,7 +110,7 @@ class FixGenerator {
   }
 
   /**
-   * Public utility for diff generation (used by FixService).
+   * Генерирует компактные патчи с помощью Google Diff-Match-Patch с полной поддержкой типов
    */
   static generateDiffsFromContentPublic(
     originalContents: Record<string, string>,
@@ -137,47 +120,42 @@ class FixGenerator {
       const original = originalContents[file.filePath] ?? "";
       const newContent = file.newContent;
 
-      // Simple line-by-line diff (frontend will use jsdiff for rich preview)
-      const originalLines = original.split("\n");
-      const newLines = newContent.split("\n");
+      const diffs = dmp.diff_main(original, newContent);
 
-      // Placeholder patch - frontend will generate actual diff for UI
-      const patch = FixGenerator.generateSimplePatch(file.filePath, originalLines, newLines);
+      dmp.diff_cleanupSemantic(diffs);
+
+      const patches = dmp.patch_make(original, diffs);
+      const patchText = dmp.patch_toText(patches);
+
+      let additions = 0;
+      let deletions = 0;
+
+      for (const patchItem of patches) {
+        const typedPatch = patchItem as unknown as diff_match_patch.patch_obj;
+
+        if (Array.isArray(typedPatch.diffs)) {
+          for (const [operation, text] of typedPatch.diffs) {
+            if (operation === 1) {
+              additions += text.split("\n").length;
+            }
+            if (operation === -1) {
+              deletions += text.split("\n").length;
+            }
+          }
+        }
+      }
 
       return {
-        additions: newLines.length,
-        deletions: originalLines.length,
+        additions,
+        deletions,
         filePath: file.filePath,
-        patch,
+        patch: patchText,
       };
     });
   }
-
-  private static generateSimplePatch(
-    filePath: string,
-    originalLines: string[],
-    newLines: string[]
-  ): string {
-    // Placeholder: actual diff generation happens on frontend with jsdiff
-    const summary = `--- a/${filePath}\n+++ b/${filePath}\n`;
-    return (
-      summary +
-      `@@ -1,${originalLines.length} +1,${newLines.length} @@\n` +
-      `// AI-generated fix. Frontend will compute actual diff.\n`
-    );
-  }
 }
 
-/**
- * Service for creating and applying fixes (stateless full-content strategy).
- * Uses octokit-plugin-create-pull-request for atomic PR creation.
- * Orchestrates AI prompting and GitHub integration.
- */
 export class FixService {
-  /**
-   * Build AI prompt asking for full fixed file content.
-   * Returns prompt wrapped in <fixed_code> tags per finding.
-   */
   private static buildFixPrompt(
     findings: FindingInput[],
     fileContents: Record<string, string>
@@ -198,9 +176,9 @@ export class FixService {
 ${findingDetails}
 
 For each file with issues, provide the COMPLETE fixed file content wrapped in:
-<fixed_code>filepath</fixed_code>
+<file path="filepath">
 ...full file content here...
-</fixed_code>
+</file>
 
 Ensure:
 1. Fixed content maintains the original file structure and imports
@@ -209,21 +187,20 @@ Ensure:
 4. No partial content - always provide complete files`;
   }
 
-  /**
-   * Parse AI response to extract fixed file contents.
-   * Looks for <fixed_code>filepath</fixed_code>...content...</fixed_code> patterns.
-   */
   private static parseFixedCodeResponse(response: string): Record<string, string> {
     const fixedCode: Record<string, string> = {};
 
-    // Match <fixed_code>filepath</fixed_code>...content...</fixed_code>
-    const tagRegex = /<file\s+path="([^"]+)">([\S\s]*?)<\/file>/g;
+    FILE_TAG_REGEX.lastIndex = 0;
     let match;
 
-    while ((match = tagRegex.exec(response)) !== null) {
+    while ((match = FILE_TAG_REGEX.exec(response)) !== null) {
       const filePath = match[1]!.trim();
       let content = match[2]!.trim();
-      content = content.replace(/^```[a-z]*\n/i, "").replace(/\n```$/, "");
+
+      content = content
+        .replace(MARKDOWN_CODE_WRAP_PREFIX_REGEX, "")
+        .replace(MARKDOWN_CODE_WRAP_SUFFIX_REGEX, "");
+
       if (filePath && content) {
         fixedCode[filePath] = content;
       }
@@ -232,13 +209,8 @@ Ensure:
     return fixedCode;
   }
 
-  /**
-   * Generate fix from findings via AI.
-   * AI returns full file content wrapped in <fixed_code> tags.
-   * Returns in-memory diffs (not persisted).
-   */
   async createFixFromAnalysis(input: {
-    fileContents: Record<string, string>; // Original file contents
+    fileContents: Record<string, string>;
     findings: FindingForFix[];
     prAnalysisId?: string;
     repoContext: { framework?: string; language: string };
@@ -247,7 +219,7 @@ Ensure:
     branch: string;
     diffs: GeneratedDiff[];
     estimatedImpact: number;
-    fixedFiles: FixedFileContent[]; // Full content for each file
+    fixedFiles: FixedFileContent[];
     title: string;
   }> {
     const recommendations = FixGenerator.generateFixRecommendations(
@@ -259,11 +231,9 @@ Ensure:
       throw new Error("No fix recommendations generated");
     }
 
-    // Use first recommendation as primary
     const primary = recommendations[0]!;
 
     try {
-      // Call AI to generate full fixed content
       const fixPrompt = FixService.buildFixPrompt(input.findings, input.fileContents);
 
       const aiResponse = await callWithFallback<string>({
@@ -274,34 +244,29 @@ Ensure:
         },
         maxOutputTokens: 65_536,
         models: AI_MODELS.POWERFUL,
-        outputSchema: null, // Raw string response
+        outputSchema: null,
         prompt: fixPrompt,
         providerOptions: {
-          google: { codeExecution: false, safetySettings: SAFETY_SETTINGS },
+          google: { safetySettings: SAFETY_SETTINGS },
         },
         system:
-          "You are an expert code fixer. Provide complete, syntactically correct fixed file content. Return ONLY the fixed code wrapped in <fixed_code> tags.",
-        taskType: "default",
-        temperature: 0.3, // Lower temperature for code generation
+          'You are an expert code fixer. Provide complete, syntactically correct fixed file content. Return ONLY the fixed code wrapped in <file path="filepath"> tags.',
+        taskType: "reasoning",
       });
 
-      // Parse AI response to extract fixed files
       const fixedCodeMap = FixService.parseFixedCodeResponse(aiResponse);
 
-      // Populate fixedFiles with AI-generated content
       const fixedFiles = primary.fixedFiles.map((file) => ({
         filePath: file.filePath,
         newContent: fixedCodeMap[file.filePath] ?? file.newContent,
       }));
 
-      // Filter out files with empty content
       const validFixedFiles = fixedFiles.filter((f) => f.newContent.length > 0);
 
       if (validFixedFiles.length === 0) {
         throw new Error("AI failed to generate any fixed file content");
       }
 
-      // Regenerate diffs with actual fixed content
       const diffs = FixGenerator.generateDiffsFromContentPublic(
         input.fileContents,
         validFixedFiles
@@ -334,21 +299,12 @@ Ensure:
     }
   }
 
-  /**
-   * Apply fix to repository using atomic PR creation.
-   * Frontend sends back the fixed file contents (newContent for each file).
-   * Uses octokit.createPullRequest() plugin for atomic operation.
-   *
-   * @param octokit GitHub API client with create-pull-request plugin
-   * @param input Fixed files + repo info
-   * @returns GitHub PR metadata
-   */
   async applyFix(
     octokit: OctokitInstance,
     input: {
       branch: string;
-      defaultBranch: string; // Use repo's actual default branch
-      fixedFiles: FixedFileContent[]; // Full content, not patches
+      defaultBranch: string;
+      fixedFiles: FixedFileContent[];
       fixId: string;
       owner: string;
       repoId: string;
@@ -365,17 +321,15 @@ Ensure:
       repoId: input.repoId,
     });
 
-    // Build file changes object for createPullRequest plugin
     const fileChanges: Record<string, string> = {};
     for (const file of fixedFiles) {
       fileChanges[file.filePath] = file.newContent;
     }
 
     try {
-      // Use octokit plugin for atomic operation: create branch + commit files + open PR
       const pr = await octokit.createPullRequest({
         base: defaultBranch,
-        body: "This PR was automatically generated by Doxynix to address detected issues.",
+        body: "This PR was automatically generated by Doxynix using Google Fuzzy Diff-Match-Patch to address detected issues.",
         changes: [
           {
             commit: title,

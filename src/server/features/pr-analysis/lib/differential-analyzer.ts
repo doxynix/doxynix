@@ -1,4 +1,5 @@
 import { compact, meanBy, sumBy, uniqBy } from "es-toolkit";
+import parseGitDiff from "parse-git-diff";
 import { normalize } from "pathe";
 import pm from "picomatch";
 
@@ -62,12 +63,12 @@ export class DifferentialAnalyzer {
     });
 
     try {
-      // Step 1: Filter changed files
       const relevantFiles = diffInfo.changedFiles.filter((f) => {
         const normalizedPath = normalize(f.filename);
-        if (Boolean(this.isExcluded(normalizedPath))) return false;
+        if (this.isExcluded(normalizedPath)) return false;
         return f.additions + f.deletions <= 1000;
       });
+
       logger.debug({
         excluded: diffInfo.changedFiles.length - relevantFiles.length,
         msg: "pr_files_filtered",
@@ -126,78 +127,53 @@ export class DifferentialAnalyzer {
     }
   }
 
-  private extractCodeContext(files: PRDiffInfo["changedFiles"], tokenBudget: number): string {
-    const maxCharsPerFile = Math.floor(tokenBudget * 3.5); // rough estimate: 1 token ≈ 0.28 chars
-    let context = "";
-
-    for (const file of files) {
-      if (file.patch == null) continue;
-
-      const fileContext = `\n### File: ${file.filename}\n\`\`\`\n${file.patch}\n\`\`\`\n`;
-      if ((context + fileContext).length > maxCharsPerFile) {
-        break;
-      }
-      context += fileContext;
-    }
-
-    return context;
-  }
-
   private runSentinelPhase(files: PRDiffInfo["changedFiles"], prNumber: number): PRFinding[] {
     const findings: PRFinding[] = [];
-    const hunkRe = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/;
+    const { patterns, todoPatterns } = PROJECT_POLICY_RULES.security;
 
     for (const file of files) {
       if (file.patch == null) continue;
-      const { patterns, todoPatterns } = PROJECT_POLICY_RULES.security;
 
-      const lines = file.patch.split("\n");
-      let newLineNum = 0;
+      const parsedDiff = parseGitDiff(file.patch);
 
-      for (const raw of lines) {
-        const m = hunkRe.exec(raw);
-        if (m != null) {
-          newLineNum = Number(m[1]);
-          continue;
-        }
+      for (const parsedFile of parsedDiff.files) {
+        for (const chunk of parsedFile.chunks) {
+          if (!("changes" in chunk)) continue;
 
-        if (raw.startsWith("+++ ") || raw.startsWith("--- ")) continue;
-        if (raw.startsWith("-")) {
-          continue;
-        }
+          for (const change of chunk.changes) {
+            if (change.type !== "AddedLine") continue;
 
-        const line = raw.startsWith("+") ? raw.slice(1) : raw;
+            const newLineNum = change.lineAfter;
+            const lineContent = change.content;
 
-        if (patterns.test(line)) {
-          findings.push({
-            codeSnippet: line.trim(),
-            file: file.filename,
-            line: newLineNum,
-            message: "Code pattern may introduce security vulnerability",
-            score: 8,
-            severity: this.mapScoreToSeverity(8),
-            suggestion: "Review and validate input handling",
-            title: "Potential security issue detected",
-            type: "security",
-          });
-        }
+            if (patterns.test(lineContent)) {
+              findings.push({
+                codeSnippet: lineContent.trim(),
+                file: file.filename,
+                line: newLineNum,
+                message: "Code pattern may introduce security vulnerability",
+                score: 8,
+                severity: this.mapScoreToSeverity(8),
+                suggestion: "Review and validate input handling",
+                title: "Potential security issue detected",
+                type: "security",
+              });
+            }
 
-        if (todoPatterns.test(line)) {
-          findings.push({
-            codeSnippet: line.trim(),
-            file: file.filename,
-            line: newLineNum,
-            message: "Incomplete implementation marker",
-            score: 2,
-            severity: this.mapScoreToSeverity(2),
-            suggestion: "Complete or remove TODO",
-            title: "TODO/FIXME comment found",
-            type: "style",
-          });
-        }
-
-        if (!raw.startsWith("-")) {
-          newLineNum++;
+            if (todoPatterns.test(lineContent)) {
+              findings.push({
+                codeSnippet: lineContent.trim(),
+                file: file.filename,
+                line: newLineNum,
+                message: "Incomplete implementation marker",
+                score: 2,
+                severity: this.mapScoreToSeverity(2),
+                suggestion: "Complete or remove TODO",
+                title: "TODO/FIXME comment found",
+                type: "style",
+              });
+            }
+          }
         }
       }
     }

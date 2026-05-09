@@ -1,4 +1,4 @@
-import { google } from "@ai-sdk/google";
+import { google, type GoogleLanguageModelOptions } from "@ai-sdk/google";
 import { metadata } from "@trigger.dev/sdk/v3";
 import * as ai from "ai";
 import { wrapAISDK } from "langsmith/experimental/vercel";
@@ -6,6 +6,8 @@ import type z from "zod";
 
 import { LLM_TEMPERATURE_STRATEGY, type LLMTaskType } from "../engine/core/scoring-constants";
 import { logger } from "../infrastructure/logger";
+import { taskLogger } from "./task-logger";
+import { TRIGGER_CONFIG } from "./trigger";
 
 const tracedAi = wrapAISDK(ai);
 
@@ -19,7 +21,9 @@ type CallWithFallbackProps<T> = {
   outputSchema: null | z.ZodSchema<T>;
   presencePenalty?: number;
   prompt: string;
-  providerOptions?: Record<string, any>;
+  providerOptions?: {
+    google?: GoogleLanguageModelOptions;
+  };
   stopSequences?: string[];
   system: string;
   taskType?: LLMTaskType;
@@ -91,6 +95,9 @@ export async function callWithFallback<T>({
           topK: finalTopK,
           topP: finalTopP,
         });
+
+        taskLogger.success(`AI: responded successfully.`);
+
         return result.output as T;
       }
 
@@ -119,20 +126,31 @@ export async function callWithFallback<T>({
       });
 
       let fullText = "";
+      const { aiChunks, aiThoughts, taskLogs } = TRIGGER_CONFIG.metadataKeys;
 
       for await (const part of result.fullStream) {
         if (part.type === "text-delta") {
           fullText += part.text;
-          metadata.append("ai_chunks", part.text);
+          metadata.append(aiChunks, part.text);
         } else if (part.type === "reasoning-delta") {
-          metadata.append("ai_thoughts", part.text);
+          metadata.append(aiThoughts, part.text);
         } else if (part.type === "tool-call") {
-          metadata.append("task_logs", `[AGENT] Invoking tool: ${part.toolName}...`);
+          const timestamp = new Date().toLocaleTimeString();
+          const logLine = `info:::${timestamp}:::Agent: Invoking tool [${part.toolName}]...`;
+
+          metadata.append(taskLogs, logLine);
+          logger.info({
+            msg: `AI Tool Call: ${part.toolName}`,
+            analysisId: attemptMetadata.analysisId,
+          });
         } else if (part.type === "error") {
+          const timestamp = new Date().toLocaleTimeString();
+          metadata.append(taskLogs, `error:::${timestamp}:::AI Stream Error: ${part.error}`);
           logger.error({ error: part.error, msg: "Stream event error" });
         }
       }
 
+      taskLogger.success(`AI: finished generation.`);
       return fullText as T;
     } catch (error) {
       lastError = error;

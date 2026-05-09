@@ -123,7 +123,14 @@ export type DocumentationInputModel = {
     configFiles: string[];
     fileCategoryBreakdown: FileCategoryBreakdownItem[];
     frameworkFacts: FrameworkFact[];
-    languages: AnalysisCoverage["languagesByMode"];
+    languages: AnalysisCoverage["languagesByMode"] & {
+      distribution: Array<{
+        color: string;
+        lines: number;
+        name: string;
+      }>;
+    };
+
     totalFiles: number;
   };
   report: {

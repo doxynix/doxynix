@@ -1,4 +1,4 @@
-import { mean } from "es-toolkit";
+import { mean, uniq } from "es-toolkit";
 
 import { dumpDebug } from "../../lib/debug-logger";
 import { buildEvidence, clamp } from "../core/common";
@@ -44,14 +44,29 @@ function buildRiskRawMetrics(
   changeCoupling: ChangeCouplingRef[],
   graphReliability: DependencyGraphEvidence
 ): RiskRawMetrics {
+  // ЭТАЛОН: Линейный поиск экстремумов для защиты от Maximum call stack size exceeded на больших данных
+  let strongestChangeCouplingCommits = 0;
+  for (const pair of changeCoupling) {
+    if (pair.commits > strongestChangeCouplingCommits) {
+      strongestChangeCouplingCommits = pair.commits;
+    }
+  }
+
+  let strongestHotspotScore = 0;
+  for (const signal of hotspots) {
+    if (signal.score > strongestHotspotScore) {
+      strongestHotspotScore = signal.score;
+    }
+  }
+
   return {
     changeCouplingPairs: changeCoupling.length,
     dependencyCycleGroups: evidence.dependencyCycles.length,
     hotspotCount: hotspots.length,
     orphanModuleCount: evidence.orphanModules.length,
     resolvedEdges: graphReliability.resolvedEdges,
-    strongestChangeCouplingCommits: Math.max(0, ...changeCoupling.map((pair) => pair.commits)),
-    strongestHotspotScore: Math.max(0, ...hotspots.map((signal) => signal.score)),
+    strongestChangeCouplingCommits,
+    strongestHotspotScore,
     unresolvedInternalImports: graphReliability.unresolvedImportSpecifiers,
   };
 }
@@ -129,10 +144,13 @@ function buildDependencyCycleFinding(
 ): null | RiskFindingRef {
   if (evidence.dependencyCycles.length === 0) return null;
 
+  // ЭТАЛОН: Извлекаем уникальные файлы из первых трех циклов Тарьяна для расширения контекста улик ИИ
+  const topCyclesFiles = uniq(evidence.dependencyCycles.slice(0, 3).flat());
+
   return createRiskFinding({
     category: "architecture",
     confidence: 92,
-    evidence: buildEvidence(evidence.dependencyCycles[0] ?? [], "Break this cycle first"),
+    evidence: buildEvidence(topCyclesFiles, "Break this cycle first"),
     id: "risk-dependency-cycles",
     score: derivedScores.dependencyCycleRisk,
     signal: "dependency-cycle",
@@ -259,16 +277,17 @@ function buildRiskFindings(
   changeCoupling: ChangeCouplingRef[],
   graphReliability: DependencyGraphEvidence,
   derivedScores: RiskDerivedScores
-) {
-  return [
+): RiskFindingRef[] {
+  const allFindings = [
     buildDependencyCycleFinding(evidence, derivedScores),
     buildHotspotFinding(hotspots, derivedScores),
     buildChangeCouplingFinding(changeCoupling, derivedScores),
     buildOrphanModuleFinding(evidence, derivedScores),
     buildGraphReliabilityFinding(graphReliability, derivedScores),
-  ]
-    .filter((finding): finding is RiskFindingRef => finding != null)
-    .sort((left, right) => right.score - left.score);
+  ].filter((finding): finding is RiskFindingRef => finding != null);
+
+  // ЭТАЛОН: Безопасная иммутабельная сортировка находок
+  return allFindings.toSorted((left, right) => right.score - left.score);
 }
 
 export function buildRiskSectionBody(

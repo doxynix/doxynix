@@ -1,15 +1,18 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
+import { useTypewriter } from "@/shared/hooks/use-typewriter";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Progress } from "@/shared/ui/core/progress";
 import { Spinner } from "@/shared/ui/core/spinner";
 
+import { TRIGGER_CONFIG } from "@/server/shared/lib/trigger";
+
 import { AnalysisTerminal } from "./repo-analysis-terminal";
+import { useRouter } from "@/i18n/routing";
 
 type Props = { accessToken: string; jobId: string; repoId: string };
 
@@ -18,9 +21,12 @@ export function RepoAnalysisLive({ accessToken, jobId, repoId }: Readonly<Props>
   const { run } = useRealtimeRun(jobId, { accessToken });
 
   const metadata = run?.metadata ?? {};
-  const progress = metadata.progress as number;
-  const statusText = metadata.status_text as string;
-  const logs = metadata.task_logs as string[];
+
+  const progress = (metadata[TRIGGER_CONFIG.metadataKeys.progress] as number) ?? 0;
+  const statusText =
+    (metadata[TRIGGER_CONFIG.metadataKeys.statusMessage] as string) ??
+    "Waiting for worker to start...";
+  const logs = (metadata[TRIGGER_CONFIG.metadataKeys.taskLogs] as string[]) ?? [];
 
   const isFinished = run?.status === "COMPLETED";
   const isFailed = run?.status === "FAILED" || run?.status === "CRASHED";
@@ -50,7 +56,7 @@ export function RepoAnalysisLive({ accessToken, jobId, repoId }: Readonly<Props>
                 ? "Analysis Failed"
                 : "Analyzing Repository"}
           </h2>
-          <p className="text-muted-foreground">{statusText}</p>
+          <p className="text-muted-foreground text-sm">{statusText}</p>
         </div>
       </div>
 

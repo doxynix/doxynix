@@ -19,11 +19,17 @@ export class CommentFormatter {
     body += `${finding.message}\n\n`;
 
     if (finding.suggestion != null) {
-      body += `**Suggestion:**\n\`\`\`\n${finding.suggestion}\n\`\`\`\n\n`;
+      const cleanSuggestion = finding.suggestion.trim().startsWith("```")
+        ? finding.suggestion.trim()
+        : `\`\`\`\n\${finding.suggestion}\n\`\`\``;
+      body += `**Suggestion:**\n${cleanSuggestion}\n\n`;
     }
 
     if (finding.codeSnippet != null) {
-      body += `**Code:**\n\`\`\`\n${finding.codeSnippet}\n\`\`\`\n`;
+      const cleanSnippet = finding.codeSnippet.trim().startsWith("```")
+        ? finding.codeSnippet.trim()
+        : `\`\`\`\n${finding.codeSnippet}\n\`\`\``;
+      body += `**Code:**\n${cleanSnippet}\n`;
     }
 
     return body;
@@ -53,6 +59,7 @@ export class GitHubCommentPoster {
       body: CommentFormatter.formatFinding(finding, style),
       line: finding.line,
       path: finding.file,
+      side: "RIGHT" as const,
     }));
 
     try {
@@ -78,6 +85,11 @@ export class GitHubCommentPoster {
         error: error instanceof Error ? error.message : String(error),
         msg: "pr_review_post_failed",
         prNumber,
+        reviewCommentsSummary: reviewComments.map((rc) => ({
+          line: rc.line,
+          path: rc.path,
+          side: rc.side,
+        })),
       });
       return [];
     }

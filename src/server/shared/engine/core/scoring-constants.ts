@@ -48,7 +48,7 @@ export const COMPLEXITY_SCORING = {
 
   /** P85 percentile for complexity threshold detection */
   percentileThreshold: 0.85,
-};
+} as const;
 
 // ============================================================================
 // TECH DEBT SCORING
@@ -82,7 +82,7 @@ export const TECH_DEBT_SCORING = {
   todoDensityMultiplier: 3,
   /** Maximum penalty from TODO item density */
   todoPenaltyMax: 18,
-};
+} as const;
 
 // ============================================================================
 // RISK SCORING
@@ -113,7 +113,7 @@ export const RISK_SCORING = {
   strongestCommitMultiplier: 12, // Each strongly-coupled file pair
   // Graph Reliability Risk
   unresolvedImportMultiplier: 4,
-};
+} as const;
 
 // ============================================================================
 // STRUCTURAL MODULARITY SCORING
@@ -138,7 +138,7 @@ export const STRUCTURAL_MODULARITY_SCORING = {
   orphanMultiplier: 2,
   /** Maximum penalty from orphaned modules */
   orphanPenaltyMax: 22,
-};
+} as const;
 
 // ============================================================================
 // FILE CLASSIFICATION SCORING (FileClassifier.getScore)
@@ -173,7 +173,7 @@ export const FILE_CATEGORY_SCORING = {
   tests: 20, // Test files have some value but not primary
   // High signal
   tooling: 40, // Build configs, linters, formatters
-};
+} as const;
 
 // ============================================================================
 // CONTEXT FILE SCORING MODIFIERS
@@ -200,7 +200,7 @@ export const FILE_CONTEXT_MODIFIERS = {
   // Special file types
   rootManifestBonus: 30, // package.json, go.mod, Cargo.toml, etc.
   testFilePenalty: -60, // Reduce test files when not preferred
-};
+} as const;
 
 // ============================================================================
 // MAPPER FILE SCORING (File selection for LLM prompts)
@@ -216,7 +216,7 @@ export const MAPPER_FILE_SCORING = {
 
   lineMultiplier: 0.02, // Each line = 0.02 points (400 lines = 8 points)
   // Top-N selection
-  maxFilesInTree: 120, // Pick top 120 files by score
+  maxFilesInTree: 75, // Pick top 75 files by score
   // Line-based scoring
   maxLinesForLineScore: 400, // Lines above this are capped
   primaryArchitectureBonus: 70,
@@ -224,7 +224,7 @@ export const MAPPER_FILE_SCORING = {
   primaryEntrypointBonus: 120,
 
   secondaryArchitectureBonus: 35,
-};
+} as const;
 
 // ============================================================================
 // DOCUMENTATION OUTPUT SCORING
@@ -235,15 +235,12 @@ export const MAPPER_FILE_SCORING = {
  * Used in doc-priority.ts to calculate which docs should be generated.
  */
 export const DOC_PRIORITY_WEIGHTS = {
-  api: 20,
+  api: 25,
   architecture: 20,
-  changelog: 20,
-
-  // Secondary documentation (lower priority)
-  contributing: 20,
-  // Primary documentation (higher priority)
-  readme: 20,
-};
+  changelog: 15,
+  contributing: 10,
+  readme: 30,
+} as const;
 
 // ============================================================================
 // HEALTH SCORE CALCULATION (MODERN)
@@ -325,38 +322,40 @@ export const PENALTY_CONSTANTS = {
  * Temperature controls randomness/creativity in outputs.
  */
 export const LLM_TEMPERATURE_STRATEGY = {
-  /** Classification/Detection tasks - must be deterministic (Sentinel, validation) */
+  /** Classification/Detection tasks - must be deterministic (Sentinel, Validation, Security Checks) */
   classification: {
-    description: "Deterministic - deny reasoning, exact classification",
+    description: "Deterministic - deny randomness, exact classification and guardrails",
     temperature: 0.0,
-    topK: 1,
-    topP: 0.1,
+    topK: 1, // Take strictly the first most probable word
+    topP: 0.1, // Narrow the sampling core as much as possible
   },
 
-  /** Creative/Generative tasks - higher creativity (Writers: README, Architecture, etc.) */
+  /** Creative/Generative tasks - balanced technical writing (Writers: README, Architecture, API, Changelog) */
   creative: {
-    description: "Creative - diverse outputs with natural language variation",
-    temperature: 0.4,
-    topK: 16,
-    topP: 0.5,
+    description:
+      "Structured Generation - diverse outputs with natural technical language variation",
+    temperature: 0.35, // Optimal for coherent text without hallucinations
+    topK: 40, // Industry standard for technical copywriting
+    topP: 0.85, // Allows you to use a rich professional vocabulary
   },
 
-  /** Default strategy (fallback) */
+  /** Default strategy (fallback for unknown task types) */
   default: {
-    description: "Conservative - low randomness",
+    description: "Conservative fallback - low randomness, high factual compliance",
     temperature: 0.1,
-    topK: 1,
-    topP: 0.1,
+    topK: 20,
+    topP: 0.4,
   },
 
-  /** Reasoning/Analysis tasks - moderate creativity (Mapper, Analysis) */
+  /** Reasoning/Analysis tasks - optimized for thinking models (Mapper, Analysis, Complex Code Review) */
   reasoning: {
-    description: "Balanced - structured analysis with some reasoning variance",
-    temperature: 0.2,
-    topK: 8,
-    topP: 0.3,
+    description:
+      "Deep Analysis - optimized to let thinking models reason thoroughly without looping",
+    temperature: 0.55, // Slightly increased so that Gemini Thinking does not loop its "thoughts"
+    topK: 50, // Sufficient window to generate deep architectural insights
+    topP: 0.95, // Allows the model to build complex logical chains based on facts
   },
-};
+} as const; // Added as const for strict immutability of types in TypeScript
 
 export const AI_POLICY_CONSTANTS = {
   /** Коэффициент оценки: сколько символов в среднем приходится на 1 токен */
@@ -411,7 +410,7 @@ export const ADAPTER_PRIORITIES = {
 export const SCHEMA_LIMITS = {
   maxCommitsInHotspots: 100,
   maxCyclesDetected: 100,
-  maxDebugSignals: 100, // Для отображения в топ-сигналах
+  maxDebugSignals: 100,
   maxDominantLanguages: 100,
   maxEvidencePerFact: 100,
   maxEvidencePerFinding: 100,
@@ -496,7 +495,7 @@ export const RISK_THRESHOLDS = {
   critical: 85,
   high: 65,
   moderate: 40,
-};
+} as const;
 
 // ============================================================================
 // PIPELINE & DOCUMENTATION THRESHOLDS
@@ -504,8 +503,8 @@ export const RISK_THRESHOLDS = {
 
 export const DOC_PIPELINE_THRESHOLDS = {
   maxConfigPaths: 6,
-  // Лимиты на количество путей в секциях
-  maxEvidencePaths: 10,
+
+  maxEvidencePaths: SCHEMA_LIMITS.maxEvidencePerFinding,
 
   maxFirstLookPaths: 12,
   maxPublicInterfacePaths: 24,
@@ -513,7 +512,7 @@ export const DOC_PIPELINE_THRESHOLDS = {
   minConfidenceForFact: 70,
   // Порог уверенности, ниже которого ставится плашка "Unknown" или "Low Confidence"
   minConfidenceForStrength: 75,
-};
+} as const;
 
 /**
  * Validate that penalty values make sense (for development/testing).
@@ -522,20 +521,29 @@ export const DOC_PIPELINE_THRESHOLDS = {
 export function validateScoringConstants(): string[] {
   const errors: string[] = [];
 
-  // Check all penalties are positive
-  if (COMPLEXITY_SCORING.averagePenaltyMax < 0) errors.push("averagePenaltyMax < 0");
-  if (TECH_DEBT_SCORING.duplicationPenaltyMax < 0) errors.push("duplicationPenaltyMax < 0");
+  const metricsToValidate = [
+    { name: "COMPLEXITY_SCORING.averagePenaltyMax", value: COMPLEXITY_SCORING.averagePenaltyMax },
+    {
+      name: "TECH_DEBT_SCORING.duplicationPenaltyMax",
+      value: TECH_DEBT_SCORING.duplicationPenaltyMax,
+    },
+    {
+      name: "STRUCTURAL_MODULARITY_SCORING.cyclePenaltyMax",
+      value: STRUCTURAL_MODULARITY_SCORING.cyclePenaltyMax,
+    },
+  ];
 
-  // Check max penalties don't exceed 100
-  if (COMPLEXITY_SCORING.averagePenaltyMax > 100) errors.push("averagePenaltyMax > 100");
-  if (STRUCTURAL_MODULARITY_SCORING.cyclePenaltyMax > 100) errors.push("cyclePenaltyMax > 100");
+  for (const metric of metricsToValidate) {
+    if (metric.value < 0) errors.push(`${metric.name} < 0`);
+    if (metric.value > 100) errors.push(`${metric.name} > 100`);
+  }
 
-  // Cycle multiplier consistency warning (not error, since context may differ)
   const cycleMultipliers = [
     COMPLEXITY_SCORING.cycleMultiplier,
     TECH_DEBT_SCORING.cycleMultiplier,
     STRUCTURAL_MODULARITY_SCORING.cycleMultiplier,
   ];
+
   const uniqueCycleMultipliers = new Set(cycleMultipliers);
   if (uniqueCycleMultipliers.size > 1) {
     logger.warn({

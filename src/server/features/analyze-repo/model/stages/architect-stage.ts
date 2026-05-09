@@ -1,7 +1,10 @@
+import { google } from "@ai-sdk/google";
+
 import { aiSchema, type AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { callWithFallback } from "@/server/shared/lib/call";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
+import { taskLogger } from "@/server/shared/lib/task-logger";
 
 import { AI_MODELS, SAFETY_SETTINGS } from "../../lib/constants";
 import { ANALYSIS_SYSTEM_PROMPT, ANALYSIS_USER_PROMPT } from "../../lib/prompts-refactored";
@@ -20,13 +23,19 @@ export async function executeArchitectPhase(
   repoId: string,
   branch: string
 ): Promise<AIResult> {
+  taskLogger.info("Architect: Building final intelligence report...");
+
   const architectContext = await buildStageContextPack({
     files: validFiles,
     preferredPaths: collectArchitectPreferredPaths(documentationDigest),
     stage: "architect",
   });
 
-  const tools = buildRepositoryTools(userId, repoId, branch);
+  taskLogger.info(
+    `Architect: Context assembled (${architectContext.debug.selectedTokens} tokens). Starting reasoning...`
+  );
+
+  const repoTools = buildRepositoryTools(userId, repoId, branch);
 
   void dumpDebug("architect-budget", architectContext.debug);
   void dumpDebug("smart-context-files", {
@@ -63,12 +72,16 @@ export async function executeArchitectPhase(
         instructions ?? "Focus on critical business logic and security.",
         sentinelStatus
       ),
-      providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
+      providerOptions: { google: { safetySettings: SAFETY_SETTINGS } },
       system: ANALYSIS_SYSTEM_PROMPT(language),
       taskType: "reasoning",
-      temperature: 0.1,
-      tools,
+      tools: {
+        ...repoTools,
+        codeExecution: google.tools.codeExecution({}),
+      },
     });
+
+    taskLogger.success("Architect: Analysis complete. System patterns and risks identified.");
 
     logger.info({ analysisId, msg: "Architect stage completed with compact digest" });
 
@@ -86,6 +99,8 @@ export async function executeArchitectPhase(
 
     return aiResult;
   } catch (error) {
+    taskLogger.error("Architect: Critical failure during reasoning phase.");
+
     logger.warn({
       analysisId,
       error,

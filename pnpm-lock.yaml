@@ -326,6 +326,9 @@ importers:
       detect-language:
         specifier: 3.0.0
         version: 3.0.0
+      diff-match-patch:
+        specifier: 1.0.5
+        version: 1.0.5
       disposable-email-domains:
         specifier: 1.0.62
         version: 1.0.62
@@ -350,9 +353,15 @@ importers:
       git-url-parse:
         specifier: 16.1.0
         version: 16.1.0
+      graph-cycles:
+        specifier: 3.0.0
+        version: 3.0.0
       graphology:
         specifier: 0.26.0
         version: 0.26.0(graphology-types@0.24.8)
+      graphology-dag:
+        specifier: 0.4.1
+        version: 0.4.1(graphology-types@0.24.8)
       graphology-library:
         specifier: 0.8.0
         version: 0.8.0(graphology-types@0.24.8)
@@ -419,6 +428,12 @@ importers:
       octokit-plugin-create-pull-request:
         specifier: 6.0.1
         version: 6.0.1
+      parse-diff:
+        specifier: 0.12.0
+        version: 0.12.0
+      parse-git-diff:
+        specifier: 0.0.20
+        version: 0.0.20
       pathe:
         specifier: 2.0.3
         version: 2.0.3
@@ -681,6 +696,9 @@ importers:
       '@trigger.dev/build':
         specifier: 4.4.5
         version: 4.4.5(typescript@6.0.3)
+      '@types/diff-match-patch':
+        specifier: 1.0.36
+        version: 1.0.36
       '@types/file-saver':
         specifier: 2.0.7
         version: 2.0.7
@@ -5562,6 +5580,9 @@ packages:
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
 
+  '@types/bintrees@1.0.6':
+    resolution: {integrity: sha512-pZWT4Bz+tWwxlDspSjdoIza4PE5lbGI4Xvs3FZV/2v5m5SDA8LwNpU8AXxlndmARO7OaQ1Vf3zFenOsNMzaRkQ==}
+
   '@types/cacheable-request@6.0.3':
     resolution: {integrity: sha512-IQ3EbTzGxIigb1I3qPZc1rWJnH0BmSKv5QYTalEwweFvyBDLSAe24zP0le/hyi7ecGfZVlIVAg4BZqb8WBwKqw==}
 
@@ -5681,6 +5702,9 @@ packages:
 
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
+
+  '@types/diff-match-patch@1.0.36':
+    resolution: {integrity: sha512-xFdR6tkm0MWvBfO8xXCSsinYxHcqkQUlcHeSpMC2ukzOb6lwQAfDmW+Qt0AvlGd8HpsS28qKsB+oPeJn9I39jg==}
 
   '@types/eslint-scope@3.7.7':
     resolution: {integrity: sha512-MzMFlSLBqNF2gcHWO0G1vP/YQyfvrxZ0bF+u7mzUdZ1/xK4A4sru+nraZz5i3iEIk1l1uyicaDVTB4QbbEkAYg==}
@@ -8553,6 +8577,10 @@ packages:
   fast-sha256@1.3.0:
     resolution: {integrity: sha512-n11RGP/lrWEFI/bWdygLxhI+pVeo1ZYIVwvvPkW7azl/rOy+F3HYRZ2K5zeE9mmkhQppyv9sQFx0JM9UabnpPQ==}
 
+  fast-string-compare@3.0.0:
+    resolution: {integrity: sha512-PY66/8HelapGo5nqMN17ZTKqJj1nppuS1OoC9Y0aI2jsUDlZDEYhMODTpb68wVCq+xMbaEbPGXRd7qutHzkRXA==}
+    engines: {node: ^14.13.1 || >=16.0.0}
+
   fast-string-truncated-width@3.0.3:
     resolution: {integrity: sha512-0jjjIEL6+0jag3l2XWWizO64/aZVtpiGE3t0Zgqxv0DPuxiMjvB3M24fCyhZUO4KomJQPj3LTSUnDP3GpdwC0g==}
 
@@ -8949,6 +8977,10 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
+  graph-cycles@3.0.0:
+    resolution: {integrity: sha512-9qxd8BQK0tZJ3cRUW0Yn2q6P/9h+bgz/4UYuscpdxPz6851NNBA1IwoYDRHDpKzCqmr1UHlGHcp5+0WzpY9F7A==}
+    engines: {node: ^14.13.1 || >=16.0.0}
+
   graphology-assertions@2.2.1:
     resolution: {integrity: sha512-X6yvm8eYDepIyywDM/K0ud/NDD6I5aZj5+D459z4wZFEtb8B33A4NNPsMpjMNwjNdEo1q4VL1Gqp/usoItEP4g==}
     peerDependencies:
@@ -8970,6 +9002,11 @@ packages:
 
   graphology-components@1.5.4:
     resolution: {integrity: sha512-O37vC226wgnN0C6FUWHNe4fbTzaF51CcQjwX3naId/QTzH/PkUtXaanCShj9ws5Vju+z4u3zvSeEZE84Bo9jlA==}
+    peerDependencies:
+      graphology-types: '>=0.19.0'
+
+  graphology-dag@0.4.1:
+    resolution: {integrity: sha512-3ch9oOAnHZDoT043vyg7ukmSkKJ505nFzaHaYOn0IF2PgGo5VtIavyVK4UpbIa4tli3hhGm1ZTdBsubTmaxu/w==}
     peerDependencies:
       graphology-types: '>=0.19.0'
 
@@ -11195,6 +11232,12 @@ packages:
   parse-cache-control@1.0.1:
     resolution: {integrity: sha512-60zvsJReQPX5/QP0Kzfd/VrpjScIQ7SHBW6bFCYfEP+fp0Eppr1SHhIO5nd1PjZtvclzSzES9D/p5nFJurwfWg==}
 
+  parse-diff@0.12.0:
+    resolution: {integrity: sha512-2Xr5mW4Bqd4CqYq2zttfw/RZraK+KcRuJvNkJzbDk3ea67Ap525XeTvBdtDE5tigJMVzIx/DMUzsShAf6+5SCA==}
+
+  parse-git-diff@0.0.20:
+    resolution: {integrity: sha512-kdoqmZIvkAYmmJxnyetgCf56l/SoYm5zhZ3rJKk/uMgU41YYCtOFvPAu4MMr8YMuAGVQElm/uQ1hXtPHeup6qw==}
+
   parse-json@5.2.0:
     resolution: {integrity: sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg==}
     engines: {node: '>=8'}
@@ -12239,6 +12282,10 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
+  rotated-array-set@3.0.0:
+    resolution: {integrity: sha512-G7689wvCM0szMFXUAhi3GfNGcSPlndg077cdRWoq7UegOAwfU2MJ0jD7s7jB+2ppKA75Kr/O0HwAP9+rRdBctg==}
+    engines: {node: ^14.13.1 || >=16.0.0}
+
   roughjs@4.6.6:
     resolution: {integrity: sha512-ZUz/69+SYpFN/g/lUlo2FXcIjRkSu3nDarreVdGGndHEBJ6cXPdKguS8JGxwj5HA5xIbVKSmLgr5b3AWxtRfvQ==}
 
@@ -12392,6 +12439,10 @@ packages:
   shiki@4.0.2:
     resolution: {integrity: sha512-eAVKTMedR5ckPo4xne/PjYQYrU3qx78gtJZ+sHlXEg5IHhhoQhMfZVzetTYuaJS0L2Ef3AcCRzCHV8T0WI6nIQ==}
     engines: {node: '>=20'}
+
+  short-tree@3.0.0:
+    resolution: {integrity: sha512-Yd9NFs/o9QSoH4/wTjxk4Xe0+CIzitDRN1Qg7iBeTSejKjlCg/3PbgiRwDUVuaIxD0RRdv7Iz9jKr7e0HljtUg==}
+    engines: {node: ^14.13.1 || >=16.0.0}
 
   side-channel-list@1.0.1:
     resolution: {integrity: sha512-mjn/0bi/oUURjc5Xl7IaWi/OJJJumuoJFQJfDDyO46+hBWsfaVM65TBHq2eoZBhzl9EchxOijpkbRC8SVBQU0w==}
@@ -19549,6 +19600,8 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
+  '@types/bintrees@1.0.6': {}
+
   '@types/cacheable-request@6.0.3':
     dependencies:
       '@types/http-cache-semantics': 4.2.0
@@ -19701,6 +19754,8 @@ snapshots:
       '@types/ms': 2.1.0
 
   '@types/deep-eql@4.0.2': {}
+
+  '@types/diff-match-patch@1.0.36': {}
 
   '@types/eslint-scope@3.7.7':
     dependencies:
@@ -23082,6 +23137,8 @@ snapshots:
 
   fast-sha256@1.3.0: {}
 
+  fast-string-compare@3.0.0: {}
+
   fast-string-truncated-width@3.0.3: {}
 
   fast-string-width@3.0.2:
@@ -23495,6 +23552,12 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
+  graph-cycles@3.0.0:
+    dependencies:
+      fast-string-compare: 3.0.0
+      rotated-array-set: 3.0.0
+      short-tree: 3.0.0
+
   graphology-assertions@2.2.1(graphology-types@0.24.8):
     dependencies:
       fast-deep-equal: 3.1.3
@@ -23520,6 +23583,12 @@ snapshots:
       graphology-indices: 0.17.0(graphology-types@0.24.8)
       graphology-types: 0.24.8
       graphology-utils: 2.5.2(graphology-types@0.24.8)
+
+  graphology-dag@0.4.1(graphology-types@0.24.8):
+    dependencies:
+      graphology-types: 0.24.8
+      graphology-utils: 2.5.2(graphology-types@0.24.8)
+      mnemonist: 0.39.8
 
   graphology-generators@0.11.2(graphology-types@0.24.8):
     dependencies:
@@ -26084,6 +26153,10 @@ snapshots:
 
   parse-cache-control@1.0.1: {}
 
+  parse-diff@0.12.0: {}
+
+  parse-git-diff@0.0.20: {}
+
   parse-json@5.2.0:
     dependencies:
       '@babel/code-frame': 7.29.0
@@ -27366,6 +27439,8 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.60.2
       fsevents: 2.3.3
 
+  rotated-array-set@3.0.0: {}
+
   roughjs@4.6.6:
     dependencies:
       hachure-fill: 0.5.2
@@ -27594,6 +27669,11 @@ snapshots:
       '@shikijs/types': 4.0.2
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.4
+
+  short-tree@3.0.0:
+    dependencies:
+      '@types/bintrees': 1.0.6
+      bintrees: 1.0.2
 
   side-channel-list@1.0.1:
     dependencies:

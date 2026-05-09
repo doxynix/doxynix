@@ -10,15 +10,20 @@ export function normalizeComplexityScore(params: {
   fileCount: number;
   maxNesting: number;
   scores: number[];
-}) {
-  const average = mean(params.scores);
+}): number {
+  if (params.scores.length === 0 || params.fileCount === 0) {
+    return 100;
+  }
+
+  const average = params.scores.length === 0 ? 0 : mean(params.scores);
 
   const p85 = percentile(params.scores, COMPLEXITY_SCORING.percentileThreshold);
   const highComplexityThreshold = Math.max(COMPLEXITY_SCORING.minComplexityThreshold, p85);
   const highComplexityFiles = params.scores.filter(
     (score) => score >= highComplexityThreshold
   ).length;
-  const hotspotRatio = params.fileCount === 0 ? 0 : highComplexityFiles / params.fileCount;
+
+  const hotspotRatio = highComplexityFiles / params.fileCount;
 
   const averagePenalty = clamp(
     average * COMPLEXITY_SCORING.averageComplexityMultiplier,
@@ -54,9 +59,13 @@ export function normalizeTechDebtScore(params: {
   fileCount: number;
   orphanModules: number;
   todos: number;
-}) {
-  const todoDensity = params.fileCount === 0 ? 0 : params.todos / params.fileCount;
-  const orphanRatio = params.fileCount === 0 ? 0 : params.orphanModules / params.fileCount;
+}): number {
+  if (params.fileCount === 0) {
+    return 100;
+  }
+
+  const todoDensity = params.todos / params.fileCount;
+  const orphanRatio = params.orphanModules / params.fileCount;
 
   const todoPenalty = clamp(
     todoDensity * TECH_DEBT_SCORING.todoDensityMultiplier,
@@ -105,12 +114,14 @@ export function mergeRouteInventories(
     return extractedInventory;
   }
 
-  const combinedFrameworks = Array.from(
-    new Set([
-      ...extractedInventory.frameworks,
-      ...(openapiInventory.sourceFiles.length > 0 ? ["OpenAPI"] : []),
-    ])
-  );
+  const combinedFrameworks = Array.from(new Set([...extractedInventory.frameworks, "OpenAPI"]));
+
+  let finalSource: "extracted" | "mixed" | "openapi" = "openapi";
+  if (extractedInventory.estimatedOperations > 0 && openapiInventory.estimatedOperations > 0) {
+    finalSource = "mixed";
+  } else if (extractedInventory.estimatedOperations > 0) {
+    finalSource = "extracted";
+  }
 
   return {
     estimatedOperations: Math.max(
@@ -120,10 +131,7 @@ export function mergeRouteInventories(
     frameworks: combinedFrameworks,
     httpRoutes: extractedInventory.httpRoutes,
     rpcProcedures: extractedInventory.rpcProcedures,
-    source:
-      extractedInventory.estimatedOperations > 0 && openapiInventory.estimatedOperations > 0
-        ? "mixed"
-        : "openapi",
+    source: finalSource,
     sourceFiles: Array.from(
       new Set([...extractedInventory.sourceFiles, ...openapiInventory.sourceFiles])
     ).sort((a, b) => a.localeCompare(b)),

@@ -21,9 +21,9 @@ export async function executeSentinelPhase(
         models: AI_MODELS.SENTINEL,
         outputSchema: sentinelSchema,
         prompt: SENTINEL_USER_PROMPT(instructions),
-        providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
+        providerOptions: { google: { safetySettings: SAFETY_SETTINGS } },
         system: SENTINEL_SYSTEM_PROMPT,
-        temperature: 0.0,
+        taskType: "classification",
       });
       sentinelStatus = sentinelOut.status;
     } catch (error) {

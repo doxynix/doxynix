@@ -18,9 +18,20 @@ type GraphNode = {
   label?: string;
   name?: string;
 };
+
 type DependencyGraph = {
   nodes: GraphNode[];
 };
+
+const HEADING_REGEX = /^#+\s+/;
+const SPACES_REGEX = /\s+/g;
+const WORD_SPLIT_REGEX = /[\s-_]+/;
+
+const MENTION_PATTERNS = [
+  /(?:component|module|service|class)\s+(?:named\s+)?["']?(\w+)["']?/gi,
+  /(?:file|path)\s+["']?([^\s"'>]+)["']?/gi,
+  /###\s+(?:component|module):\s+(\w+)/gi,
+];
 
 /**
  * Links documentation sections to dependency graph nodes
@@ -30,9 +41,9 @@ class DocumentGraphLinker {
   /**
    * Extract anchors and link to graph nodes
    */
-  static linkSectionsToGraph(
+  public static linkSectionsToGraph(
     document: string,
-    dependencyGraph: DependencyGraph | null | undefined, // Graph structure from analyzer
+    dependencyGraph: DependencyGraph | null | undefined,
     docType: string
   ): DocumentSection[] {
     const sections: DocumentSection[] = [];
@@ -46,7 +57,7 @@ class DocumentGraphLinker {
       const line = lines[i]!;
 
       // Detect heading (markdown # style)
-      if (RegExp(/^#+\s+/).exec(line)) {
+      if (HEADING_REGEX.test(line)) {
         // Save previous section
         if (currentSection) {
           currentSection.content = contentBuffer.join("\n").trim();
@@ -64,7 +75,7 @@ class DocumentGraphLinker {
         }
 
         // Start new section
-        const title = line.replace(/^#+\s+/, "").trim();
+        const title = line.replace(HEADING_REGEX, "").trim();
 
         currentSection = {
           graphNodeIds: [],
@@ -104,7 +115,7 @@ class DocumentGraphLinker {
   }
 
   private static generateSectionId(docType: string, title: string): string {
-    return `section-${docType.toLowerCase()}-${title.toLowerCase().replaceAll(/\s+/g, "-")}`;
+    return `section-${docType.toLowerCase()}-${title.toLowerCase().replaceAll(SPACES_REGEX, "-")}`;
   }
 
   /**
@@ -117,16 +128,13 @@ class DocumentGraphLinker {
   ): string[] {
     const nodeIds: string[] = [];
     const content = section.content.toLowerCase();
+    const sectionTitleLower = section.title.toLowerCase();
 
     // Extract potential node names from content
-    const patterns = [
-      /(?:component|module|service|class)\s+(?:named\s+)?"?(\w+)"?/gi,
-      /(?:file|path)\s+"?([^\n"]+)"?/gi,
-      /###\s+(?:component|module):\s+(\w+)/gi,
-    ];
-
     const mentionedNames = new Set<string>();
-    for (const pattern of patterns) {
+
+    for (const pattern of MENTION_PATTERNS) {
+      pattern.lastIndex = 0;
       let match;
       while ((match = pattern.exec(content)) !== null) {
         if (match[1] != null) {
@@ -141,7 +149,7 @@ class DocumentGraphLinker {
         const nodeName = (node.label ?? node.name ?? "").toLowerCase();
         const nodeId = node.id;
 
-        if (mentionedNames.has(nodeName) || this.isSimilar(nodeName, section.title.toLowerCase())) {
+        if (mentionedNames.has(nodeName) || this.isSimilar(nodeName, sectionTitleLower)) {
           nodeIds.push(nodeId);
         }
       }
@@ -152,13 +160,22 @@ class DocumentGraphLinker {
 
   private static isSimilar(str1: string, str2: string): boolean {
     // Simple similarity: contains or shared meaningful words
-    const words1 = str1.split(/[\s-_]+/).filter((w) => w.length > 1);
-    const words2 = str2.split(/[\s-_]+/).filter((w) => w.length > 1);
+    const words1 = str1.split(WORD_SPLIT_REGEX).filter((w) => w.length > 1);
+    const words2 = str2.split(WORD_SPLIT_REGEX).filter((w) => w.length > 1);
 
     if (words1.length === 0 || words2.length === 0) return false;
 
-    const shared = words1.filter((w) => words2.some((w2) => w2.includes(w) || w.includes(w2)));
-    return shared.length > 0;
+    const set2 = new Set(words2);
+    for (const word1 of words1) {
+      if (set2.has(word1)) return true;
+      for (const word2 of words2) {
+        if (word1.includes(word2) || word2.includes(word1)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }
 
@@ -166,7 +183,7 @@ class DocumentGraphLinker {
  * Formats document with graph links for API response
  */
 export class DocumentFormatter {
-  static withGraphLinks(
+  public static withGraphLinks(
     document: string,
     graph: DependencyGraph | null | undefined,
     docType: string,

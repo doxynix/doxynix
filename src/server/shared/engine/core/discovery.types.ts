@@ -153,6 +153,10 @@ export interface FileSignals extends BaseSignal {
   analysisMode: ParseTier;
   apiSurface: number;
   categories?: FileCategory[];
+  complexityMetrics: {
+    complexity: number;
+    maxNesting: number;
+  };
   configRefs?: ConfigRef[];
   entrypointHint: boolean;
   entrypointRefs?: EntrypointRef[];
@@ -169,7 +173,7 @@ export interface HotspotSignal extends BaseSignal {
   churnScore: number;
   complexity: number;
   inbound: number;
-  lines: number;
+  lines?: number;
   outbound: number;
   score: number;
   source: "risk-model";

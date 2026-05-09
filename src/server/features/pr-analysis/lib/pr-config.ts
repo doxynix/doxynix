@@ -44,7 +44,12 @@ export class PRConfigService {
     config: Partial<PRAnalysisConfig>,
     db: DbClient
   ): Promise<PRAnalysisConfig> {
-    const cleanUpdate = Object.fromEntries(Object.entries(config));
+    const entries = Object.entries(config).filter(([_, value]) => value !== undefined);
+    const cleanUpdate: Partial<PRAnalysisConfig> = Object.fromEntries(entries);
+
+    if (cleanUpdate.tokenBudget !== undefined && cleanUpdate.tokenBudget !== null) {
+      cleanUpdate.tokenBudget = clamp(cleanUpdate.tokenBudget, 10_000, 100_000);
+    }
 
     await db.repo.update({
       data: {
@@ -56,7 +61,7 @@ export class PRConfigService {
               enabled: config.enabled ?? DEFAULT_PR_CONFIG.enabled,
               excludePatterns: config.excludePatterns ?? [],
               focusAreas: config.focusAreas ?? DEFAULT_PR_CONFIG.focusAreas,
-              tokenBudget: config.tokenBudget ?? DEFAULT_PR_CONFIG.tokenBudget,
+              tokenBudget: cleanUpdate.tokenBudget ?? DEFAULT_PR_CONFIG.tokenBudget,
             },
             update: cleanUpdate,
           },

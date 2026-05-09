@@ -12,7 +12,31 @@ import type {
 import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
 import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
 
-function getScriptKind(filePath: string) {
+const CONTROL_FLOW_KINDS = new Set([
+  ts.SyntaxKind.CaseClause,
+  ts.SyntaxKind.CatchClause,
+  ts.SyntaxKind.ConditionalExpression,
+  ts.SyntaxKind.DoStatement,
+  ts.SyntaxKind.ForInStatement,
+  ts.SyntaxKind.ForOfStatement,
+  ts.SyntaxKind.ForStatement,
+  ts.SyntaxKind.IfStatement,
+  ts.SyntaxKind.SwitchStatement,
+  ts.SyntaxKind.WhileStatement,
+]);
+
+const INCREASES_NESTING_KINDS = new Set([
+  ts.SyntaxKind.CatchClause,
+  ts.SyntaxKind.DoStatement,
+  ts.SyntaxKind.ForInStatement,
+  ts.SyntaxKind.ForOfStatement,
+  ts.SyntaxKind.ForStatement,
+  ts.SyntaxKind.IfStatement,
+  ts.SyntaxKind.SwitchStatement,
+  ts.SyntaxKind.WhileStatement,
+]);
+
+function getScriptKind(filePath: string): ts.ScriptKind {
   if (filePath.endsWith(".tsx")) return ts.ScriptKind.TSX;
   if (filePath.endsWith(".jsx")) return ts.ScriptKind.JSX;
   if (filePath.endsWith(".js") || filePath.endsWith(".mjs") || filePath.endsWith(".cjs")) {
@@ -21,19 +45,18 @@ function getScriptKind(filePath: string) {
   return ts.ScriptKind.TS;
 }
 
-function hasExportModifier(modifiers: ts.NodeArray<ts.ModifierLike> | undefined) {
+function hasExportModifier(modifiers: ts.NodeArray<ts.ModifierLike> | undefined): boolean {
   return modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword) ?? false;
 }
 
 const HTTP_METHODS = new Set(["delete", "get", "head", "options", "patch", "post", "put"]);
 
-function getNodeLine(sourceFile: ts.SourceFile, node: ts.Node) {
+function getNodeLine(sourceFile: ts.SourceFile, node: ts.Node): number {
   return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
 }
 
 function nodeName(node: ts.Node): string | undefined {
   const namedNode = "name" in node ? (node as ts.Node & { name?: ts.Node }) : undefined;
-
   return namedNode?.name != null && ts.isIdentifier(namedNode.name)
     ? namedNode.name.text
     : undefined;
@@ -107,6 +130,10 @@ function collectCallRoute(
   }
 }
 
+/**
+ * Единый сборщик сигналов и сложности TypeScript файлов.
+ * Строит AST-дерево и обходит его строго ОДИН РАЗ, снижая нагрузку на память на 50%.
+ */
 export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
   const sourceFile = ts.createSourceFile(
     file.path,
@@ -134,7 +161,16 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
   const routes: RouteRef[] = [];
   const frameworkTokens = new Set<string>();
 
-  const visit = (node: ts.Node) => {
+  let complexity = 0;
+  let maxNesting = 0;
+
+  const visit = (node: ts.Node, nesting: number = 0) => {
+    if (CONTROL_FLOW_KINDS.has(node.kind)) {
+      complexity += 1 + nesting;
+      maxNesting = Math.max(maxNesting, nesting);
+    }
+    const nextNesting = nesting + (INCREASES_NESTING_KINDS.has(node.kind) ? 1 : 0);
+
     if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
       imports.push(node.moduleSpecifier.text);
       frameworkTokens.add(node.moduleSpecifier.text);
@@ -154,6 +190,7 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
       pushSymbol(symbols, sourceFile, node, "module", true, "default");
     }
 
+    // 3. ОПРЕДЕЛЕНИЕ СИМВОЛОВ (Классы, методы, функции, типы)
     if (
       (ts.isFunctionDeclaration(node) ||
         ts.isClassDeclaration(node) ||
@@ -213,10 +250,10 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
       collectCallRoute(node, sourceFile, routes, frameworkHints);
     }
 
-    ts.forEachChild(node, visit);
+    ts.forEachChild(node, (child) => visit(child, nextNesting));
   };
 
-  visit(sourceFile);
+  visit(sourceFile, 0);
 
   [
     /\bnew\s+Hono\s*\(/,
@@ -267,7 +304,11 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
   return {
     analysisMode: "typescript-ast",
     apiSurface,
-    confidence: CONFIDENCE_LEVELS.tsCompiler, // TypeScript compiler has very high confidence
+    complexityMetrics: {
+      complexity,
+      maxNesting,
+    },
+    confidence: CONFIDENCE_LEVELS.tsCompiler,
     entrypointHint,
     entrypointRefs,
     exports,

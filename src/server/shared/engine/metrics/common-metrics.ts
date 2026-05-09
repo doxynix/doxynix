@@ -2,6 +2,7 @@ import { sumBy } from "es-toolkit";
 import simpleGit from "simple-git";
 
 import { logger } from "../../infrastructure/logger";
+import { taskLogger } from "../../lib/task-logger";
 import type { ChurnHotspot, TeamRole } from "../../types";
 import { normalizeRepoPath } from "../core/common";
 import type { ChangeCouplingRef } from "../core/discovery.types";
@@ -55,10 +56,11 @@ export async function calculateCodeMetrics(
 export function calculateTeamRoles(
   contributors: { contributions: number; login: string }[]
 ): TeamRole[] {
+  taskLogger.info("Metrics: Evaluating team roles and knowledge distribution...");
   const total = sumBy(contributors, (c) => c.contributions);
   if (total === 0) return [];
 
-  return contributors
+  const roles = contributors
     .map((contributor) => {
       const share = (contributor.contributions / total) * 100;
       let role = "Contributor";
@@ -74,6 +76,9 @@ export function calculateTeamRoles(
       };
     })
     .sort((left, right) => right.share - left.share);
+
+  taskLogger.success(`Metrics: Assigned roles to ${roles.length} contributors`);
+  return roles;
 }
 
 const WINDOW_DAYS = 90;
@@ -84,6 +89,8 @@ export async function computeGitChurnHotspots(
 ): Promise<ChurnHotspot[]> {
   const allowed = new Set(relativePaths.map((p) => normalizeRepoPath(p)));
   if (allowed.size === 0) return [];
+
+  taskLogger.info(`Git: Calculating churn hotspots for ${allowed.size} files (90-day window)...`);
 
   try {
     const git = simpleGit(repoRoot);
@@ -103,15 +110,28 @@ export async function computeGitChurnHotspots(
       counts.set(norm, (counts.get(norm) ?? 0) + 1);
     }
 
+    if (counts.size === 0) {
+      taskLogger.info("Git: No recent change history found for the selected files");
+      return [];
+    }
+
     const maxCommits = Math.max(1, ...counts.values());
-    return [...counts.entries()]
+    const result = [...counts.entries()]
       .map(([filePath, commitsInWindow]) => ({
         churnScore: Math.round((commitsInWindow / maxCommits) * 100),
         commitsInWindow,
         path: filePath,
       }))
       .sort((a, b) => b.commitsInWindow - a.commitsInWindow);
+
+    taskLogger.success(
+      `Git: Identified ${result.filter((r) => r.churnScore > 50).length} high-churn files`
+    );
+    return result;
   } catch (error) {
+    taskLogger.warn(
+      "Git: Churn calculation failed. History might be unavailable in this environment."
+    );
     logger.debug({
       error,
       msg: "Git churn hotspot calculation skipped after git failure",
@@ -129,6 +149,8 @@ export async function computeChangeCoupling(
   const allowed = new Set(relativePaths.map((p) => normalizeRepoPath(p)));
   if (allowed.size === 0) return [];
 
+  taskLogger.info("Git: Analyzing change coupling (identifying files that change together)...");
+
   try {
     const git = simpleGit(repoRoot);
     const out = await git.raw([
@@ -143,7 +165,8 @@ export async function computeChangeCoupling(
 
     const flushCommit = () => {
       const files = Array.from(currentCommitFiles).sort((left, right) => left.localeCompare(right));
-      if (files.length < 2) {
+
+      if (files.length < 2 || files.length > 60) {
         currentCommitFiles = new Set<string>();
         return;
       }
@@ -175,7 +198,7 @@ export async function computeChangeCoupling(
 
     flushCommit();
 
-    return [...pairCounts.entries()]
+    const result = [...pairCounts.entries()]
       .map(([key, commits]) => {
         const parts = key.split("::");
         const fromPath = parts[0];
@@ -188,7 +211,10 @@ export async function computeChangeCoupling(
       )
       .sort((left, right) => right.commits - left.commits)
       .slice(0, 24);
+    taskLogger.success(`Git: Found ${result.length} significant change-coupling pairs`);
+    return result;
   } catch (error) {
+    taskLogger.warn("Git: Change coupling analysis skipped.");
     logger.debug({
       error,
       msg: "Change coupling calculation skipped after git failure",

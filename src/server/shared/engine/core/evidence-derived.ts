@@ -1,5 +1,6 @@
 import { countBy, orderBy } from "es-toolkit";
 
+import { uniqueBy } from "../../lib/array-utils";
 import type { DependencyNodeMetric } from "../../types";
 import type {
   ConfigRef,
@@ -11,7 +12,7 @@ import { kindForFile } from "./evidence-collector";
 import { ProjectPolicy } from "./project-policy";
 import { ARCHITECTURE_WEIGHTS, CONFIDENCE_LEVELS } from "./scoring-constants";
 
-function dedupeEntrypoints(entrypoints: EntrypointRef[]) {
+function dedupeEntrypoints(entrypoints: EntrypointRef[]): EntrypointRef[] {
   const seen = new Map<string, EntrypointRef>();
 
   for (const entrypoint of entrypoints) {
@@ -22,7 +23,7 @@ function dedupeEntrypoints(entrypoints: EntrypointRef[]) {
     }
   }
 
-  return Array.from(seen.values()).sort(
+  return Array.from(seen.values()).toSorted(
     (left, right) => right.confidence - left.confidence || left.path.localeCompare(right.path)
   );
 }
@@ -32,7 +33,7 @@ export function inferEntrypoints(params: {
   exportsByFile: Map<string, number>;
   inboundByFile: Map<string, number>;
   moduleByPath: Map<string, ModuleRef>;
-}) {
+}): EntrypointRef[] {
   const entrypoints: EntrypointRef[] = [];
 
   const normalizeHint = (
@@ -117,7 +118,7 @@ export function inferEntrypoints(params: {
   return dedupeEntrypoints(entrypoints);
 }
 
-export function buildMainEntrypointPaths(entrypoints: EntrypointRef[]) {
+export function buildMainEntrypointPaths(entrypoints: EntrypointRef[]): Set<string> {
   return new Set(
     entrypoints
       .filter((entrypoint) => entrypoint.kind === "runtime" || entrypoint.kind === "library")
@@ -130,7 +131,7 @@ export function buildOrphanModules(
   modules: ModuleRef[],
   inboundByFile: Map<string, number>,
   mainEntrypointPaths: Set<string>
-) {
+): string[] {
   return modules
     .filter((module) => {
       if (!ProjectPolicy.isArchitectureRelevant(module.path)) return false;
@@ -145,26 +146,27 @@ export function buildDependencyHotspots(
   exportsByFile: Map<string, number>,
   inboundByFile: Map<string, number>,
   graph: Map<string, Set<string>>
-) {
-  return modules
+): DependencyNodeMetric[] {
+  const mapped = modules
     .filter((module) => ProjectPolicy.isArchitectureRelevant(module.path))
     .map<DependencyNodeMetric>((module) => ({
       exports: exportsByFile.get(module.path) ?? 0,
       inbound: inboundByFile.get(module.path) ?? 0,
       outbound: graph.get(module.path)?.size ?? 0,
       path: module.path,
-    }))
-    .sort((left, right) => {
-      const leftScore =
-        left.inbound * ARCHITECTURE_WEIGHTS.inboundMultiplier +
-        left.outbound * ARCHITECTURE_WEIGHTS.outboundMultiplier +
-        left.exports * ARCHITECTURE_WEIGHTS.exportMultiplier;
-      const rightScore =
-        right.inbound * ARCHITECTURE_WEIGHTS.inboundMultiplier +
-        right.outbound * ARCHITECTURE_WEIGHTS.outboundMultiplier +
-        right.exports * ARCHITECTURE_WEIGHTS.exportMultiplier;
-      return rightScore - leftScore;
-    });
+    }));
+
+  return mapped.toSorted((left, right) => {
+    const leftScore =
+      left.inbound * ARCHITECTURE_WEIGHTS.inboundMultiplier +
+      left.outbound * ARCHITECTURE_WEIGHTS.outboundMultiplier +
+      left.exports * ARCHITECTURE_WEIGHTS.exportMultiplier;
+    const rightScore =
+      right.inbound * ARCHITECTURE_WEIGHTS.inboundMultiplier +
+      right.outbound * ARCHITECTURE_WEIGHTS.outboundMultiplier +
+      right.exports * ARCHITECTURE_WEIGHTS.exportMultiplier;
+    return rightScore - leftScore;
+  });
 }
 
 export function buildHotspotSignals(
@@ -173,7 +175,7 @@ export function buildHotspotSignals(
   inboundByFile: Map<string, number>,
   graph: Map<string, Set<string>>
 ) {
-  return modules
+  const mapped = modules
     .filter((module) => ProjectPolicy.isArchitectureRelevant(module.path))
     .map((module) => {
       const inbound = inboundByFile.get(module.path) ?? 0;
@@ -197,13 +199,13 @@ export function buildHotspotSignals(
         score: Math.round(score),
         source: "risk-model" as const,
       };
-    })
-    .sort((left, right) => right.score - left.score);
+    });
+
+  return mapped.toSorted((left, right) => right.score - left.score);
 }
 
 export function buildFileCategoryBreakdown(modules: ModuleRef[]): FileCategoryBreakdownItem[] {
   const allCategories = modules.flatMap((m) => m.categories);
-
   const counts = countBy(allCategories, (category) => category);
 
   const list = Object.entries(counts).map(([category, count]) => ({
@@ -214,13 +216,8 @@ export function buildFileCategoryBreakdown(modules: ModuleRef[]): FileCategoryBr
   return orderBy(list, [(i) => i.count, (i) => i.category], ["desc", "asc"]);
 }
 
-export function dedupeConfigs(configs: ConfigRef[]) {
-  return configs
-    .filter(
-      (config, index, all) =>
-        all.findIndex(
-          (candidate) => candidate.path === config.path && candidate.kind === config.kind
-        ) === index
-    )
-    .sort((left, right) => left.path.localeCompare(right.path));
+export function dedupeConfigs(configs: ConfigRef[]): ConfigRef[] {
+  const uniqueConfigs = uniqueBy(configs, (config) => `${config.path}::${config.kind}`);
+
+  return uniqueConfigs.toSorted((left, right) => left.path.localeCompare(right.path));
 }

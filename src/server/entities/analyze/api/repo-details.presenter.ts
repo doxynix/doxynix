@@ -67,6 +67,9 @@ export const repoDetailsPresenter = {
         orphanModules: metrics.orphanModules,
         routeInventory: metrics.routeInventory ?? null,
       },
+      domain: {
+        analysis: aiResult.domain_analysis ?? null,
+      },
       onboarding: {
         guide: aiResult.onboarding_guide,
         score: metrics.onboardingScore,
@@ -78,7 +81,7 @@ export const repoDetailsPresenter = {
         complexity: metrics.complexityScore,
         dependencyCycles: metrics.dependencyCycles.length,
         docDensity: metrics.docDensity,
-        duplicationPercentage: metrics.duplicationPercentage,
+        duplicationReport: metrics.duplicationReport,
         health: metrics.healthScore,
         modularity: metrics.modularityIndex,
         security: metrics.securityScore,
@@ -86,9 +89,10 @@ export const repoDetailsPresenter = {
       },
       recommendations: {
         bottlenecks: aiResult.mainBottlenecks ?? [],
-        performance: aiResult.sections.performance,
+        infrastructure: aiResult.sections.infrastructure_and_scaling,
+        performanceAudit: aiResult.sections.performance_audit,
         refactoringTargets: aiResult.refactoring_targets,
-        techDebt: aiResult.sections.tech_debt,
+        techDebtInventory: aiResult.sections.tech_debt_inventory,
       },
       reference: {
         apiStructure: aiResult.sections.api_structure,
@@ -146,6 +150,7 @@ export const repoDetailsPresenter = {
         items: docs,
         writers: normalizeWriterStatuses(aiResult),
       },
+      domain: aiResult.domain_analysis ?? null,
       languages: metrics.languages,
       maintenance: metrics.maintenanceStatus,
       mostComplexFiles: metrics.mostComplexFiles,
@@ -181,7 +186,7 @@ export const repoDetailsPresenter = {
         busFactor: metrics.busFactor,
         dependencyCycles: metrics.dependencyCycles.length,
         docDensity: metrics.docDensity,
-        duplicationPercentage: metrics.duplicationPercentage,
+        duplicationPercentage: metrics.duplicationReport.duplicationPercentage,
       },
       stats: {
         configFiles: metrics.configFiles,
@@ -190,7 +195,10 @@ export const repoDetailsPresenter = {
         totalSizeKb: metrics.totalSizeKb,
         totalSizeLabel: `${metrics.totalSizeKb} KB`,
       },
-      summary: aiResult.executive_summary,
+      summary: {
+        ...aiResult.executive_summary,
+        key_innovations: aiResult.executive_summary.key_innovations ?? [],
+      },
       teamRoles: metrics.teamRoles,
       topRisks: aiResult.findings ?? [],
     };

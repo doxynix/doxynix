@@ -8,24 +8,54 @@ import { cleanCodeForAi } from "@/server/shared/lib/optimizers";
 import { AI_MODELS } from "../../analyze-repo/lib/constants";
 import {
   CODE_DOC_SYSTEM_PROMPT,
-  CODE_DOC_USER_PROMPT,
   SINGLE_FILE_ANALYSIS_PROMPT,
 } from "../../analyze-repo/lib/prompts-refactored";
 
 const FileActionConfidenceSchema = z.enum(["high", "medium", "low"]);
 
 const QuickFileAuditSchema = z.object({
-  confidence: FileActionConfidenceSchema,
-  issues: z.array(z.string()).max(5),
-  strengths: z.array(z.string()).max(5),
-  suggestions: z.array(z.string()).max(5),
-  summary: z.string().min(1),
+  confidence: FileActionConfidenceSchema.describe(
+    'Strictly evaluate the analysis confidence. Choose exactly "high", "medium", or "low".'
+  ),
+  issues: z
+    .array(
+      z
+        .string()
+        .describe(
+          "Technical risk, bug, or anti-pattern. Keep identifiers and variable tokens in pure English."
+        )
+    )
+    .max(5),
+  strengths: z
+    .array(
+      z.string().describe("Positive architectural pattern or good practice found in the code.")
+    )
+    .max(5),
+  suggestions: z
+    .array(z.string().describe("Actionable refactoring step or improvement recommendation."))
+    .max(5),
+  summary: z
+    .string()
+    .min(1)
+    .describe(
+      "A high-density technical summary paragraph detailing the final conclusion of the audit."
+    ),
 });
 
 const DocumentFilePreviewSchema = z.object({
-  confidence: FileActionConfidenceSchema,
-  documentation: z.string().min(1),
-  summary: z.string().min(1),
+  confidence: FileActionConfidenceSchema.describe(
+    'Strictly evaluate the documentation confidence. Choose exactly "high", "medium", or "low".'
+  ),
+  documentation: z
+    .string()
+    .min(1)
+    .describe(
+      "The generated full inline documentation comments (JSDoc/Docstring/etc) inside the target file context."
+    ),
+  summary: z
+    .string()
+    .min(1)
+    .describe("A 1-2 sentence description summarizing the core modules documented."),
 });
 
 export type FileActionNodeContext = {
@@ -62,7 +92,7 @@ export type DocumentFilePreviewResult = z.infer<typeof DocumentFilePreviewSchema
   path: string;
 };
 
-function isBinaryLikeContent(content: string) {
+function isBinaryLikeContent(content: string): boolean {
   return /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(content);
 }
 
@@ -82,7 +112,7 @@ function getContextStrength(nodeContext?: FileActionNodeContext) {
   return "light" as const;
 }
 
-function describeContextQualifier(nodeContext?: FileActionNodeContext) {
+function describeContextQualifier(nodeContext?: FileActionNodeContext): string {
   const strength = getContextStrength(nodeContext);
   if (strength === "none") {
     return "No selected-node repository context was available.";
@@ -105,15 +135,19 @@ function describeContextQualifier(nodeContext?: FileActionNodeContext) {
   return "Only light node-level repository context was available.";
 }
 
-function buildContextPromptGuidance(nodeContext?: FileActionNodeContext) {
+function buildContextPromptGuidance(nodeContext?: FileActionNodeContext): string {
   const strength = getContextStrength(nodeContext);
   const graphBacked = (nodeContext?.graphNeighbors?.length ?? 0) > 0;
+
+  const strictEnumGuard =
+    'CRITICAL: The JSON property "confidence" MUST be set exactly to a literal string value: "high", "medium", or "low". Do not invent other strings.';
 
   if (strength === "none") {
     return [
       "No repository node context is available.",
       "Stay file-local and avoid broad architectural claims.",
-      'Prefer "low" or "medium" confidence unless the code itself is unambiguous.',
+      'Set the JSON "confidence" field strictly to "low" or "medium".',
+      strictEnumGuard,
     ].join(" ");
   }
 
@@ -122,6 +156,7 @@ function buildContextPromptGuidance(nodeContext?: FileActionNodeContext) {
       "Strong graph-backed repository context is available.",
       "You may use nearby structural neighbors and selected-node relationships when explaining impact or responsibilities.",
       "Still avoid claims that are not supported by the provided file and context block.",
+      strictEnumGuard,
     ].join(" ");
   }
 
@@ -129,7 +164,8 @@ function buildContextPromptGuidance(nodeContext?: FileActionNodeContext) {
     return [
       "Moderate graph-backed repository context is available.",
       "Use structural-neighbor hints carefully, but keep conclusions anchored to the current file.",
-      'Use "medium" confidence unless the evidence is unusually clear.',
+      'Set the JSON "confidence" field strictly to "medium".',
+      strictEnumGuard,
     ].join(" ");
   }
 
@@ -137,7 +173,8 @@ function buildContextPromptGuidance(nodeContext?: FileActionNodeContext) {
     return [
       "Only light graph-backed context is available.",
       "Treat repository-level relationships as hints rather than strong facts.",
-      'Prefer cautious wording and "low" or "medium" confidence.',
+      'Set the JSON "confidence" field strictly to "low" or "medium".',
+      strictEnumGuard,
     ].join(" ");
   }
 
@@ -145,30 +182,55 @@ function buildContextPromptGuidance(nodeContext?: FileActionNodeContext) {
     return [
       "Node-level repository context is available, but it is not graph-backed.",
       "You may use it to frame likely role and surrounding concerns, but avoid overstating dependency relationships.",
-      'Prefer "medium" confidence unless the file itself makes the conclusion clear.',
+      'Set the JSON "confidence" field strictly to "medium".',
+      strictEnumGuard,
     ].join(" ");
   }
 
   return [
     "Only light node-level repository context is available.",
     "Keep the result conservative and mostly file-local.",
-    'Prefer "low" confidence unless the code is very clear on its own.',
+    'Set the JSON "confidence" field strictly to "low".',
+    strictEnumGuard,
   ].join(" ");
 }
 
-function isProbablyMinifiedContent(content: string) {
+function isProbablyMinifiedContent(content: string): boolean {
   const sample = content.trim();
-  if (sample.length < 2000) return false;
+  const len = sample.length;
+  if (len < 2000) return false;
 
-  const lines = sample.split(/\r?\n/u);
-  const longestLine = Math.max(...lines.map((line) => line.length), 0);
-  const newlineCount = Math.max(lines.length - 1, 0);
-  const whitespaceRatio = (sample.match(/\s/g) ?? []).length / sample.length;
+  const sliceSize = Math.min(len, 8000);
+  const sampleSlice = sample.slice(0, sliceSize);
+
+  let longestLineInSlice = 0;
+  let lastIndex = 0;
+  let newlineCountInSlice = 0;
+
+  while (true) {
+    const nextIndex = sampleSlice.indexOf("\n", lastIndex);
+    if (nextIndex === -1) {
+      longestLineInSlice = Math.max(longestLineInSlice, sliceSize - lastIndex);
+      break;
+    }
+    longestLineInSlice = Math.max(longestLineInSlice, nextIndex - lastIndex);
+    newlineCountInSlice++;
+    lastIndex = nextIndex + 1;
+  }
+
+  let whitespaceChars = 0;
+  for (let i = 0; i < sliceSize; i++) {
+    const code = sampleSlice.charCodeAt(i);
+    if (code === 32 || code === 9 || code === 10 || code === 13) {
+      whitespaceChars++;
+    }
+  }
+  const whitespaceRatio = whitespaceChars / sliceSize;
 
   return (
-    longestLine > 1800 ||
-    (newlineCount <= 3 && sample.length > 4000) ||
-    (longestLine > 1200 && whitespaceRatio < 0.08)
+    longestLineInSlice > 1800 ||
+    (newlineCountInSlice <= 3 && len > 4000) ||
+    (longestLineInSlice > 1200 && whitespaceRatio < 0.08)
   );
 }
 
@@ -176,7 +238,7 @@ function getNonActionableReason(
   path: string,
   content: string,
   nodeContext?: FileActionNodeContext
-) {
+): null | string {
   const normalizedPath = normalizeRepoPath(path);
   if (ProjectPolicy.isSensitive(normalizedPath)) {
     return `The file looks sensitive, so the server intentionally skips AI inspection for it. ${describeContextQualifier(nodeContext)}`;
@@ -216,7 +278,7 @@ function buildDocumentFallback(path: string, summary: string): DocumentFilePrevi
   };
 }
 
-export function formatQuickFileAuditMarkdown(result: QuickFileAuditResult) {
+export function formatQuickFileAuditMarkdown(result: QuickFileAuditResult): string {
   const sections = [
     "# Quick File Audit",
     `**Path:** \`${result.path}\``,
@@ -240,58 +302,52 @@ export function formatQuickFileAuditMarkdown(result: QuickFileAuditResult) {
   return sections.join("\n");
 }
 
-function buildContextSection(input: FileActionInput) {
+function buildContextSection(input: FileActionInput): string {
   const parts: string[] = [];
 
   if (input.nodeContext != null) {
-    parts.push(`Node title: ${input.nodeContext.title}`);
-    parts.push(`Node role: ${input.nodeContext.role}`);
-    parts.push(`Node confidence: ${input.nodeContext.confidence}`);
-    parts.push(`Why important: ${input.nodeContext.whyImportant}`);
+    const ctx = input.nodeContext;
+    parts.push(`Node title: ${ctx.title}`);
+    parts.push(`Node role: ${ctx.role}`);
+    parts.push(`Node confidence: ${ctx.confidence}`);
+    parts.push(`Why important: ${ctx.whyImportant}`);
 
-    if (input.nodeContext.reviewPriority != null) {
-      parts.push(
-        `Review priority: ${input.nodeContext.reviewPriority.level} - ${input.nodeContext.reviewPriority.reason}`
-      );
+    if (ctx.reviewPriority != null) {
+      parts.push(`Review priority: ${ctx.reviewPriority.level} - ${ctx.reviewPriority.reason}`);
     }
-
-    if ((input.nodeContext.recommendedActions ?? []).length > 0) {
-      parts.push(`Recommended actions: ${input.nodeContext.recommendedActions?.join("; ")}`);
+    if ((ctx.recommendedActions ?? []).length > 0) {
+      parts.push(`Recommended actions: ${ctx.recommendedActions?.join("; ")}`);
     }
-
-    if ((input.nodeContext.nextSuggestedPaths ?? []).length > 0) {
-      parts.push(`Next suggested paths: ${input.nodeContext.nextSuggestedPaths?.join(", ")}`);
+    if ((ctx.nextSuggestedPaths ?? []).length > 0) {
+      parts.push(`Next suggested paths: ${ctx.nextSuggestedPaths?.join(", ")}`);
     }
-
-    if ((input.nodeContext.neighborPaths ?? []).length > 0) {
-      parts.push(`Neighbor paths: ${input.nodeContext.neighborPaths?.join(", ")}`);
+    if ((ctx.neighborPaths ?? []).length > 0) {
+      parts.push(`Neighbor paths: ${ctx.neighborPaths?.join(", ")}`);
     }
-
-    if ((input.nodeContext.graphNeighbors ?? []).length > 0) {
-      parts.push(`Graph neighbors: ${input.nodeContext.graphNeighbors?.join(", ")}`);
+    if ((ctx.graphNeighbors ?? []).length > 0) {
+      parts.push(`Graph neighbors: ${ctx.graphNeighbors?.join(", ")}`);
     }
-
-    if ((input.nodeContext.sourcePaths ?? []).length > 0) {
-      parts.push(`Source paths: ${input.nodeContext.sourcePaths?.join(", ")}`);
+    if ((ctx.sourcePaths ?? []).length > 0) {
+      parts.push(`Source paths: ${ctx.sourcePaths?.join(", ")}`);
     }
-
-    if (input.nodeContext.neighborBuckets != null) {
-      for (const [bucket, paths] of Object.entries(input.nodeContext.neighborBuckets)) {
+    if (ctx.neighborBuckets != null) {
+      for (const [bucket, paths] of Object.entries(ctx.neighborBuckets)) {
         if (paths.length === 0) continue;
         parts.push(`${bucket}: ${paths.join(", ")}`);
       }
     }
-
-    if ((input.nodeContext.summary ?? []).length > 0) {
-      parts.push(`Node summary: ${input.nodeContext.summary?.join(" ")}`);
+    if ((ctx.summary ?? []).length > 0) {
+      parts.push(`Node summary: ${ctx.summary?.join(" ")}`);
     }
   }
 
   if (input.contextBlock != null && input.contextBlock.trim().length > 0) {
-    parts.push(input.contextBlock);
+    parts.push(`\n[Context Block]\n${input.contextBlock}`);
   }
 
-  return parts.length === 0 ? "" : `\n\nRepository context:\n${parts.join("\n")}`;
+  return parts.length === 0
+    ? ""
+    : `<repository_context>\n${parts.join("\n")}\n</repository_context>`;
 }
 
 export async function runQuickFileAudit(input: FileActionInput): Promise<QuickFileAuditResult> {
@@ -320,25 +376,28 @@ export async function runQuickFileAudit(input: FileActionInput): Promise<QuickFi
   const contextSection = buildContextSection(input);
   const contextGuidance = buildContextPromptGuidance(input.nodeContext);
 
+  const systemPrompt = [
+    SINGLE_FILE_ANALYSIS_PROMPT(input.language),
+    "\n[CONTEXT HANDLING GUIDANCE]",
+    contextGuidance,
+  ].join("\n");
+
+  const userPrompt = [
+    `<target_file path="${input.path}">`,
+    cleanedCode,
+    "</target_file>",
+    contextSection,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   const result = await callWithFallback<z.infer<typeof QuickFileAuditSchema>>({
     attemptMetadata: { filePath: input.path, operation: "quick-file-audit" },
     models: AI_MODELS.POWERFUL,
     outputSchema: QuickFileAuditSchema,
-    prompt: `File: ${input.path}${contextSection}\n\nCode:\n${cleanedCode}`,
-    system: `${SINGLE_FILE_ANALYSIS_PROMPT(input.language)}
-
-Context handling guidance:
-${contextGuidance}
-
-Return a JSON object with:
-- summary: one short paragraph with the main conclusion
-- strengths: up to 3 concise positive findings
-- issues: up to 5 concrete risks or weaknesses
-- suggestions: up to 5 actionable next steps
-- confidence: "high" | "medium" | "low"
-
-Use "low" confidence when the file is too small, too generic, or lacks enough context.`,
-    temperature: 0.2,
+    prompt: userPrompt,
+    system: systemPrompt,
+    taskType: "classification",
   });
 
   return {
@@ -375,23 +434,28 @@ export async function runDocumentFilePreview(
   const contextSection = buildContextSection(input);
   const contextGuidance = buildContextPromptGuidance(input.nodeContext);
 
+  const systemPrompt = [
+    CODE_DOC_SYSTEM_PROMPT(input.language),
+    "\n[CONTEXT HANDLING GUIDANCE]",
+    contextGuidance,
+  ].join("\n");
+
+  const userPrompt = [
+    `<target_file path="${input.path}">`,
+    cleanedCode,
+    "</target_file>",
+    contextSection,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   const result = await callWithFallback<z.infer<typeof DocumentFilePreviewSchema>>({
     attemptMetadata: { filePath: input.path, operation: "document-file-preview" },
     models: AI_MODELS.WRITER,
     outputSchema: DocumentFilePreviewSchema,
-    prompt: `${CODE_DOC_USER_PROMPT(input.path, await cleanedCode)}${contextSection}`,
-    system: `${CODE_DOC_SYSTEM_PROMPT(input.language)}
-
-Context handling guidance:
-${contextGuidance}
-
-Return a JSON object with:
-- documentation: the full file content with added documentation comments
-- summary: 1-2 sentences describing what was documented
-- confidence: "high" | "medium" | "low"
-
-Use "low" confidence when the file is too small, too generic, or non-idiomatic for reliable inline documentation.`,
-    temperature: 0.1,
+    prompt: userPrompt,
+    system: systemPrompt,
+    taskType: "creative",
   });
 
   return {

@@ -1,6 +1,6 @@
 "use client";
 
-import { GitCommit, History } from "lucide-react";
+import { GitCommit } from "lucide-react";
 import { useLocale } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
@@ -41,7 +41,7 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
                   {item.commitSha?.slice(0, 7) ?? "Unknown"}
                 </span>
               </div>
-              <TimeAgo className="ml-auto text-xs" date={item.createdAt} locale={locale} />
+              <TimeAgo date={item.createdAt} locale={locale} className="ml-auto text-xs" />
               {item.status === "FAILED" && (
                 <Badge variant="outline" className="text-destructive text-xs">
                   Failed

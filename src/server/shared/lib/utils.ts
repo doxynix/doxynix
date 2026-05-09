@@ -51,7 +51,7 @@ export async function cleanup(dirPath: string) {
 }
 
 export async function readAndFilterFiles(basePath: string, selectedFiles: string[]) {
-  taskLogger.log(`Scanning directory for ${selectedFiles.length} patterns...`);
+  taskLogger.info(`File System: Scanning directory for ${selectedFiles.length} patterns...`);
 
   const resolvedBase = await fs.realpath(basePath);
 
@@ -64,8 +64,12 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
   });
 
   if (entries.length === 0) {
+    taskLogger.error("File System: No valid files found matching your patterns");
     throw new Error("No valid files found to analyze in the specified path");
   }
+
+  let binaryCount = 0;
+  let sensitiveCount = 0;
 
   const filePromises = entries.map(async (filePath) => {
     taskLogger.log(`Reading: ${filePath}`);
@@ -111,6 +115,9 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
 
   const settledFiles = await Promise.all(filePromises);
   const validFiles = compact(settledFiles);
+
+  if (sensitiveCount > 0) taskLogger.warn(`File System: Skipped ${sensitiveCount} sensitive files`);
+  if (binaryCount > 0) taskLogger.info(`File System: Ignored ${binaryCount} binary/asset files`);
 
   if (validFiles.length === 0) throw new Error("No valid text files found to analyze");
   return validFiles;

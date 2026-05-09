@@ -1,4 +1,3 @@
-// entities/repo/ui/complexity-scatter-chart.tsx
 "use client";
 
 import {
@@ -14,13 +13,16 @@ import {
   ZAxis,
 } from "recharts";
 
+import type { RouterOutput } from "@/shared/api/trpc";
+
+type RawRouterOutput = RouterOutput["repoDetails"]["getDetailedMetrics"];
+
+type NonNullRouterOutput = Exclude<RawRouterOutput, null | undefined>;
+
+type HotspotSignal = NonNullRouterOutput["architecture"]["hotspotSignals"][number];
+
 type Props = {
-  data: {
-    complexity: number;
-    lines: number;
-    path: string;
-    score: number;
-  }[];
+  data: HotspotSignal[];
 };
 
 export function ComplexityScatterChart({ data }: Readonly<Props>) {
@@ -101,9 +103,9 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
           />
 
           <ReferenceLine
+            label={{ fill: "#ef4444", fontSize: 10, value: "High Complexity" }}
             stroke="#ef4444"
             strokeDasharray="3 3"
-            label={{ fill: "#ef4444", fontSize: 10, value: "High Complexity" }}
             y={15}
           />
           <ReferenceLine

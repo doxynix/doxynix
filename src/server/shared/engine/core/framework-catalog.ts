@@ -4,22 +4,33 @@ import type { FrameworkFact } from "./discovery.types";
 import { ProjectPolicy } from "./project-policy";
 import { FRAMEWORK_CATALOG } from "./project-policy-rules";
 
-function matchesFrameworkAlias(token: string, alias: string) {
+const aliasRegexCache = new Map<string, RegExp>();
+
+function getFrameworkAliasRegex(alias: string): RegExp {
+  let cached = aliasRegexCache.get(alias);
+  if (cached == null) {
+    const escapedAlias = escapeRegExp(alias.toLowerCase());
+    cached = RegExp(`(^|[^a-z0-9])${escapedAlias}([^a-z0-9]|$)`, "iu");
+    aliasRegexCache.set(alias, cached);
+  }
+  return cached;
+}
+
+function matchesFrameworkAlias(token: string, alias: string): boolean {
   const normalizedAlias = alias.toLowerCase();
 
   if (/[./@-]/.test(normalizedAlias)) {
     return token.includes(normalizedAlias);
   }
 
-  const escapedAlias = escapeRegExp(normalizedAlias);
-  return RegExp(`(^|[^a-z0-9])${escapedAlias}([^a-z0-9]|$)`, "iu").test(token);
+  return getFrameworkAliasRegex(normalizedAlias).test(token);
 }
 
 export function collectFrameworkFactsFromTokens(
   tokens: Iterable<string>,
   source: string,
   baseConfidence: number
-) {
+): FrameworkFact[] {
   const collected = new Map<string, FrameworkFact>();
 
   for (const rawToken of tokens) {
@@ -46,13 +57,13 @@ export function collectFrameworkFactsFromTokens(
   return Array.from(collected.values()).sort((left, right) => right.confidence - left.confidence);
 }
 
-function mergeFrameworkFacts(facts: FrameworkFact[]) {
+function mergeFrameworkFacts(facts: FrameworkFact[]): FrameworkFact[] {
   const merged = new Map<string, FrameworkFact>();
 
   for (const fact of facts) {
     const existing = merged.get(fact.name);
     if (existing == null) {
-      merged.set(fact.name, { ...fact, sources: Array.from(new Set(fact.sources)) });
+      merged.set(fact.name, { ...fact, sources: uniq(fact.sources) });
       continue;
     }
 
@@ -63,13 +74,12 @@ function mergeFrameworkFacts(facts: FrameworkFact[]) {
   return Array.from(merged.values()).sort((left, right) => right.confidence - left.confidence);
 }
 
-function countCoreSources(fact: FrameworkFact) {
-  return Array.from(
-    new Set(fact.sources.filter((source) => ProjectPolicy.isFrameworkFactSource(source)))
-  ).length;
+function countCoreSources(fact: FrameworkFact): number {
+  const coreSources = fact.sources.filter((source) => ProjectPolicy.isFrameworkFactSource(source));
+  return uniq(coreSources).length;
 }
 
-function hasManifestOnlySources(fact: FrameworkFact) {
+function hasManifestOnlySources(fact: FrameworkFact): boolean {
   return (
     fact.sources.length > 0 &&
     fact.sources.every(
@@ -83,15 +93,16 @@ function hasManifestOnlySources(fact: FrameworkFact) {
   );
 }
 
-function isCoreRepositoryFrameworkFact(fact: FrameworkFact) {
+function isCoreRepositoryFrameworkFact(fact: FrameworkFact): boolean {
   const coreSourceCount = countCoreSources(fact);
   if (coreSourceCount >= 2) return true;
-  if (coreSourceCount >= 1 && (fact.category === "api" || fact.category === "framework"))
+  if (coreSourceCount >= 1 && (fact.category === "api" || fact.category === "framework")) {
     return true;
+  }
   return false;
 }
 
-export function selectRepositoryFrameworkFacts(facts: FrameworkFact[]) {
+export function selectRepositoryFrameworkFacts(facts: FrameworkFact[]): FrameworkFact[] {
   const mergedFacts = mergeFrameworkFacts(facts);
   const coreFacts = mergedFacts.filter((fact) => isCoreRepositoryFrameworkFact(fact));
   if (coreFacts.length > 0) {

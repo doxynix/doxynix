@@ -20,7 +20,7 @@ const TrendsChart = dynamic(() => import("./trends-chart").then((m) => m.TrendsC
 
 type Props = { className?: string; repoId?: string };
 
-export function TrendsWidget({ repoId, className }: Readonly<Props>) {
+export function TrendsWidget({ className, repoId }: Readonly<Props>) {
   const [urlParams] = useQueryStates(dashboardParsers);
 
   const { data, isLoading } = trpc.analytics.getTrends.useQuery({

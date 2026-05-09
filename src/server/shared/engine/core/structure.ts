@@ -36,7 +36,7 @@ function buildGraphPreviewEdges(evidence: RepositoryEvidence, limit = 96): Graph
   }
 
   return Array.from(edgeMap.values())
-    .sort(
+    .toSorted(
       (left, right) =>
         right.weight - left.weight ||
         left.fromPath.localeCompare(right.fromPath) ||
@@ -53,7 +53,7 @@ function buildStructuralSignals(
     apiSurface: sumBy(evidence.modules, (m) => m.apiSurface),
     configInventory: evidence.configs
       .map((config) => config.path)
-      .sort((left, right) => left.localeCompare(right)),
+      .toSorted((left, right) => left.localeCompare(right)),
     dependencyCycles: evidence.dependencyCycles,
     dependencyHotspots,
     entrypointDetails: evidence.entrypoints,
@@ -100,16 +100,23 @@ export function scoreStructuralModularity(params: {
   dependencyCycles: string[][];
   dependencyHotspots: DependencyNodeMetric[];
   orphanModules: string[];
-}) {
+}): number {
+  if (params.dependencyHotspots.length === 0) {
+    return 100;
+  }
+
   const cyclePenalty = Math.min(
     STRUCTURAL_MODULARITY_SCORING.cyclePenaltyMax,
     params.dependencyCycles.length * STRUCTURAL_MODULARITY_SCORING.cycleMultiplier
   );
+
   const orphanPenalty = Math.min(
     STRUCTURAL_MODULARITY_SCORING.orphanPenaltyMax,
     params.orphanModules.length * STRUCTURAL_MODULARITY_SCORING.orphanMultiplier
   );
-  const avgInbound = meanBy(params.dependencyHotspots, (h) => h.inbound) || 0;
+
+  const rawMean = meanBy(params.dependencyHotspots, (h) => h.inbound);
+  const avgInbound = isNaN(rawMean) ? 0 : rawMean;
 
   const hotspotPenalty = clamp(avgInbound * 3, 0, STRUCTURAL_MODULARITY_SCORING.hotspotPenaltyMax);
 

@@ -1,5 +1,7 @@
+import { clamp, uniq } from "es-toolkit";
+
 import { dumpDebug } from "../../lib/debug-logger";
-import { buildEvidence, clamp } from "../core/common";
+import { buildEvidence } from "../core/common";
 import type { ArtifactBuildParams, ArtifactBuildResult } from "../core/metrics.types";
 import {
   buildReferenceEvidencePaths,
@@ -163,22 +165,24 @@ function buildArchitectureFacts(context: ArtifactContext): ArtifactFact[] {
     });
   }
 
+  const cyclesCount = evidence.dependencyCycles.length;
+  const cycleEvidencePaths =
+    cyclesCount > 0 ? uniq(evidence.dependencyCycles.slice(0, 3).flat()) : referenceEvidence;
+
   facts.push({
     category: "architecture",
-    confidence: evidence.dependencyCycles.length > 0 ? "high" : "medium",
+    confidence: cyclesCount > 0 ? "high" : "medium",
     detail:
-      evidence.dependencyCycles.length > 0
-        ? `${evidence.dependencyCycles.length} dependency cycle groups were detected in the local dependency graph.`
+      cyclesCount > 0
+        ? `${cyclesCount} dependency cycle groups were detected in the local dependency graph.`
         : "No dependency cycles were detected in the local dependency graph.",
     evidence: buildEvidence(
-      evidence.dependencyCycles.length > 0
-        ? (evidence.dependencyCycles[0] ?? [])
-        : referenceEvidence,
-      evidence.dependencyCycles.length > 0 ? "Dependency cycle" : "Graph roots"
+      cycleEvidencePaths,
+      cyclesCount > 0 ? "Dependency cycle node" : "Graph roots"
     ),
     id: "dependency-cycles",
     title:
-      evidence.dependencyCycles.length > 0
+      cyclesCount > 0
         ? "The dependency graph contains cycles"
         : "The dependency graph is acyclic in analyzed files",
   });
@@ -260,6 +264,7 @@ function buildOperationalFacts(context: ArtifactContext): ArtifactFact[] {
       category: "delivery",
       confidence: "medium",
       detail: `Recent git activity (last ~90 days, when history exists) clusters on: ${metrics.churnHotspots
+        .slice(0, 5)
         .map((candidate) => `${candidate.path} (${candidate.commitsInWindow} touches)`)
         .join(", ")}.`,
       evidence: metrics.churnHotspots.map((candidate) => ({
@@ -360,25 +365,28 @@ function buildSecurityFinding(context: ArtifactContext): ArtifactFinding | null 
 }
 
 function buildDuplicationFinding(context: ArtifactContext): ArtifactFinding | null {
-  const { evidence, metrics } = context;
-  if (metrics.duplicationPercentage < 8) {
+  const { metrics } = context;
+  const report = metrics.duplicationReport;
+  if (report.duplicationPercentage < 8) {
     return null;
   }
+
+  const duplicatePaths = report.clones.flatMap((c) => [c.primary.path, c.secondary.path]);
+  const uniqueDuplicatePaths = uniq(duplicatePaths).slice(0, 10);
 
   return {
     category: "maintainability",
     confidence: 82,
     evidence: buildEvidence(
-      evidence.hotspotSignals.length > 0
-        ? evidence.hotspotSignals.map((signal) => signal.path)
-        : metrics.mostComplexFiles
+      uniqueDuplicatePaths.length > 0 ? uniqueDuplicatePaths : metrics.mostComplexFiles,
+      "Identified code clone module"
     ),
     id: "duplication-pressure",
-    score: clamp(metrics.duplicationPercentage * 6, 0, 100),
-    severity: metrics.duplicationPercentage >= 15 ? "HIGH" : "MODERATE",
+    score: clamp(report.duplicationPercentage * 6, 0, 100),
+    severity: report.duplicationPercentage >= 15 ? "HIGH" : "MODERATE",
     suggestedNextChange:
       "Extract one repeated workflow into a reusable abstraction before the duplication spreads.",
-    summary: `Approximate duplication is ${metrics.duplicationPercentage}% of analyzed source lines.`,
+    summary: `Approximate duplication is ${report.duplicationPercentage}% of analyzed source lines.`,
     title: "Duplication is increasing maintenance cost",
     whyItMatters:
       "Repeated logic multiplies bug-fix effort and often hides behavior drift across similar flows.",
@@ -452,7 +460,7 @@ function buildOnboardingFinding(context: ArtifactContext): ArtifactFinding | nul
 }
 
 function sortFindingsBySeverity(findings: ArtifactFinding[]) {
-  return [...findings].sort((left, right) => {
+  return findings.toSorted((left, right) => {
     return (
       FINDING_SEVERITY_WEIGHT[right.severity] - FINDING_SEVERITY_WEIGHT[left.severity] ||
       right.score - left.score
@@ -472,7 +480,8 @@ function buildArtifactContext(params: ArtifactBuildParams): ArtifactContext {
   const moduleMap = getPrimaryArchitectureModules(evidence.modules);
   const publicSurfacePaths = Array.from(
     new Set(evidence.publicSurface.map((symbol) => symbol.path))
-  ).sort((left, right) => left.localeCompare(right));
+  ).toSorted((left, right) => left.localeCompare(right));
+
   const referenceEvidence = buildReferenceEvidencePaths({
     fallbackPaths: metrics.mostComplexFiles,
     modules: moduleMap,

@@ -1,6 +1,5 @@
 import { DocType } from "@prisma/client";
 
-import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { ReportSectionKind } from "@/server/shared/engine/core/documentation.types";
 import { DOC_PRIORITY_WEIGHTS } from "@/server/shared/engine/core/scoring-constants";
 import { hasText } from "@/server/shared/lib/string-utils";
@@ -22,31 +21,54 @@ export const DOC_SECTION_DEPENDENCIES: Record<DocType, readonly ReportSectionKin
   [DocType.README]: ["overview", "architecture"],
 };
 
-const DOC_WEIGHTS: Partial<Record<DocType, number>> = {
+const DOC_WEIGHTS: Record<DocType, number> = {
   [DocType.API]: DOC_PRIORITY_WEIGHTS.api,
   [DocType.ARCHITECTURE]: DOC_PRIORITY_WEIGHTS.architecture,
   [DocType.CHANGELOG]: DOC_PRIORITY_WEIGHTS.changelog,
+  [DocType.CODE_DOC]: 0,
   [DocType.CONTRIBUTING]: DOC_PRIORITY_WEIGHTS.contributing,
   [DocType.README]: DOC_PRIORITY_WEIGHTS.readme,
 };
 
-export function calculateDocumentationOutputScore(aiResult: Partial<AIResult>) {
+const SNAPSHOT_KEY_TO_DOC_TYPE: Record<string, DocType> = {
+  api: DocType.API,
+  architecture: DocType.ARCHITECTURE,
+  changelog: DocType.CHANGELOG,
+  contributing: DocType.CONTRIBUTING,
+  readme: DocType.README,
+};
+
+type GeneratedDocsInput = {
+  generatedApiMarkdown?: string;
+  generatedArchitecture?: string;
+  generatedChangelog?: string;
+  generatedContributing?: string;
+  generatedReadme?: string;
+  swaggerYaml?: string;
+};
+
+/**
+ * Расчет скоринга полноты документации.
+ */
+export function calculateDocumentationOutputScore(docs: GeneratedDocsInput) {
   let score = 0;
   let generatedCount = 0;
 
   const snapshot = {
-    api: hasText(aiResult.generatedApiMarkdown),
-    architecture: hasText(aiResult.generatedArchitecture),
-    changelog: hasText(aiResult.generatedChangelog),
-    contributing: hasText(aiResult.generatedContributing),
-    readme: hasText(aiResult.generatedReadme),
+    api: hasText(docs.generatedApiMarkdown),
+    architecture: hasText(docs.generatedArchitecture),
+    changelog: hasText(docs.generatedChangelog),
+    contributing: hasText(docs.generatedContributing),
+    readme: hasText(docs.generatedReadme),
   };
 
   Object.entries(snapshot).forEach(([key, isGenerated]) => {
     if (isGenerated) {
-      const type = DocType[key.toUpperCase() as keyof typeof DocType];
-      score += DOC_WEIGHTS[type] ?? 0;
-      generatedCount++;
+      const type = SNAPSHOT_KEY_TO_DOC_TYPE[key];
+      if (type != null) {
+        score += DOC_WEIGHTS[type];
+        generatedCount++;
+      }
     }
   });
 

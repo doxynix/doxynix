@@ -64,11 +64,10 @@ describe("CodeOptimizer", () => {
   it("should run full optimize pipeline in cleanCodeForAi", async () => {
     const input = "Email test@mail.com\n\n const a = 1;  ";
 
-    const result = cleanCodeForAi(input, "file.ts");
+    const result = await cleanCodeForAi(input, "file.ts");;
 
     expect(result).toContain("<REDACTED_EMAIL>");
-    const value = await result;
-    expect(value.startsWith("Email")).toBe(true);
+    expect(result.startsWith("Email")).toBe(true);
   });
 });
 

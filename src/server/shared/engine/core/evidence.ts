@@ -33,6 +33,8 @@ export async function collectRepositoryEvidence(
   const lookups = buildEvidenceLookups(files, fileComplexities);
   const assembly = createEvidenceAssembly();
 
+  const moduleByPath = new Map<string, ReturnType<typeof buildModuleRef>>();
+
   for (const file of lookups.normalizedFiles) {
     const collected = await collectFileEvidence(
       file,
@@ -47,10 +49,13 @@ export async function collectRepositoryEvidence(
     assembly.configs.push(...collected.configs);
     assembly.routes.push(...collected.routes);
     assembly.symbols.push(...collected.symbols);
-    assembly.modules.push(buildModuleRef(file.path, collected.signals, collected.entrypointHints));
+
+    const moduleRef = buildModuleRef(file.path, collected.signals, collected.entrypointHints);
+    assembly.modules.push(moduleRef);
+
+    moduleByPath.set(file.path, moduleRef);
   }
 
-  const moduleByPath = new Map(assembly.modules.map((module) => [module.path, module] as const));
   const entrypoints = inferEntrypoints({
     apiSurfaceByFile: assembly.apiSurfaceByFile,
     exportsByFile: assembly.exportsByFile,
@@ -64,25 +69,31 @@ export async function collectRepositoryEvidence(
     assembly.dependencyTracking.inboundByFile,
     mainEntrypointPaths
   );
+
   const dependencyCycles = findDependencyCycles(assembly.dependencyTracking.graph);
+
   const dependencyHotspots = buildDependencyHotspots(
     assembly.modules,
     assembly.exportsByFile,
     assembly.dependencyTracking.inboundByFile,
     assembly.dependencyTracking.graph
   );
+
   const hotspotSignals = buildHotspotSignals(
     assembly.modules,
     lookups.complexityByFile,
     assembly.dependencyTracking.inboundByFile,
     assembly.dependencyTracking.graph
   );
+
   const frameworkFacts = selectRepositoryFrameworkFacts(
     assembly.modules.flatMap((module) => module.frameworkHints)
   );
-  const publicSurface = assembly.symbols.filter(
-    (symbol) => symbol.exported && ProjectPolicy.isArchitectureRelevant(symbol.path)
-  );
+
+  const publicSurface = assembly.symbols
+    .filter((symbol) => symbol.exported && ProjectPolicy.isArchitectureRelevant(symbol.path))
+    .slice(0, 150);
+
   const fileCategoryBreakdown = buildFileCategoryBreakdown(assembly.modules);
 
   const evidence: RepositoryEvidence = {

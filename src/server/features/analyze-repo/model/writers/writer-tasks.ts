@@ -1,3 +1,4 @@
+import { google, type GoogleLanguageModelOptions } from "@ai-sdk/google";
 import type { Repo } from "@prisma/client";
 import type { ToolSet } from "ai";
 
@@ -59,17 +60,23 @@ async function runWriterTask(
   }
 }
 
-async function runWriterPrompt(params: {
+type RunWriterPromptParams = {
   analysisId: string;
   name: WriterResult["name"];
   phase: WriterPhase;
   prompt: string;
   promptChars?: number;
-  providerOptions?: { google: { codeExecution: true; safetySettings: typeof SAFETY_SETTINGS } };
+  providerOptions?: { google: GoogleLanguageModelOptions };
   system: string;
-  temperature: number;
+  temperature?: number;
   tools?: ToolSet;
-}) {
+};
+
+async function runWriterPrompt(params: RunWriterPromptParams) {
+  const defaultProviderOptions = {
+    google: { safetySettings: SAFETY_SETTINGS },
+  };
+
   return runWriterTask(
     params.name,
     async () =>
@@ -82,10 +89,15 @@ async function runWriterPrompt(params: {
         models: AI_MODELS.WRITER,
         outputSchema: null,
         prompt: params.prompt,
-        ...(params.providerOptions != null ? { providerOptions: params.providerOptions } : {}),
         system: params.system,
+        ...(params.providerOptions != null ? { providerOptions: params.providerOptions } : {}),
+        providerOptions: params.providerOptions ?? defaultProviderOptions,
+        taskType: "creative",
         temperature: params.temperature,
-        tools: params.tools,
+        tools: {
+          ...params.tools,
+          codeExecution: google.tools.codeExecution({}),
+        },
       }).then(unwrapAiText)
   );
 }
@@ -107,9 +119,7 @@ export async function executeReadmeWriter(
     phase: "writer_readme",
     prompt: README_WRITER_USER_PROMPT(payload, engineeringDossierPayload, context, allowedPaths),
     promptChars: payload.length + engineeringDossierPayload.length + context.length,
-    providerOptions: { google: { codeExecution: true, safetySettings: SAFETY_SETTINGS } },
     system: README_WRITER_SYSTEM_PROMPT(language),
-    temperature: 0.2,
     tools: buildRepositoryTools(userId, repoId, branch),
   });
 }
@@ -132,7 +142,6 @@ export async function executeApiWriter(
     prompt: API_WRITER_USER_PROMPT(payload, engineeringDossierPayload, context, allowedPaths),
     promptChars: payload.length + engineeringDossierPayload.length + context.length,
     system: API_WRITER_SYSTEM_PROMPT(language),
-    temperature: 0.1,
     tools: buildRepositoryTools(userId, repoId, branch),
   });
 }
@@ -170,7 +179,6 @@ export async function executeArchitectureWriter(
       engineeringDossierPayload.length +
       context.length,
     system: ARCHITECTURE_WRITER_SYSTEM_PROMPT(language),
-    temperature: 0.2,
     tools: buildRepositoryTools(userId, repoId, branch),
   });
 }
@@ -198,7 +206,6 @@ export async function executeContributingWriter(
     ),
     promptChars: payload.length + engineeringDossierPayload.length + context.length,
     system: CONTRIBUTING_WRITER_SYSTEM_PROMPT(language),
-    temperature: 0.2,
     tools: buildRepositoryTools(userId, repoId, branch),
   });
 }
@@ -210,42 +217,85 @@ export async function executeChangelogWriter(
   repo: Repo,
   language: string
 ): Promise<WriterResult> {
-  let simpleCommits: Array<{
-    author: null | string | undefined;
-    date: null | string | undefined;
-    message: string;
-  }> = [];
+  const changelogContext: any = {
+    commits: [],
+    diff_summary: {
+      files_changed: 0,
+      top_modified_files: [],
+    },
+  };
 
   try {
     const { octokit } = await getClientContext(prisma, userId, repo.owner);
-    const { data: commitsData } = await octokit.rest.repos.listCommits({
-      owner: repo.owner,
-      per_page: 50,
-      repo: repo.name,
+
+    const previousAnalysis = await prisma.analysis.findFirst({
+      orderBy: { createdAt: "desc" },
+      where: {
+        publicId: { not: analysisId },
+        repoId: repo.id,
+        status: "DONE",
+      },
     });
 
-    simpleCommits = commitsData.map((c: (typeof commitsData)[number]) => ({
-      author: c.commit.author?.name,
-      date: c.commit.author?.date,
-      message: c.commit.message,
-    }));
+    if (previousAnalysis?.commitSha != null && repo.defaultBranch != null) {
+      const { data: compareData } = await octokit.rest.repos.compareCommits({
+        base: previousAnalysis.commitSha,
+        head: repo.defaultBranch,
+        owner: repo.owner,
+        repo: repo.name,
+      });
+
+      changelogContext.commits = compareData.commits.map((c) => ({
+        author: c.commit.author?.name,
+        files: c.files?.map((f) => f.filename).slice(0, 10),
+        message: c.commit.message,
+      }));
+
+      changelogContext.diff_summary = {
+        files_changed: compareData.files?.length ?? 0,
+        top_modified_files: compareData.files
+          ?.sort((a, b) => b.changes - a.changes)
+          .slice(0, 15)
+          .map((f) => f.filename),
+      };
+    } else {
+      const { data: commitsData } = await octokit.rest.repos.listCommits({
+        owner: repo.owner,
+        per_page: 30,
+        repo: repo.name,
+      });
+
+      const detailedCommits = await Promise.all(
+        commitsData.slice(0, 15).map(async (c) => {
+          const { data: detail } = await octokit.rest.repos.getCommit({
+            owner: repo.owner,
+            ref: c.sha,
+            repo: repo.name,
+          });
+          return {
+            author: detail.commit.author?.name,
+            files: detail.files?.map((f) => f.filename).slice(0, 5),
+            message: detail.commit.message,
+          };
+        })
+      );
+      changelogContext.commits = detailedCommits;
+    }
   } catch (error) {
     logger.warn({
       analysisId,
       error,
-      msg: "Failed to fetch commits for CHANGELOG. Returning empty string.",
+      msg: "Failed to fetch rich git context for CHANGELOG. Falling back to simple list.",
     });
   }
-
   return runWriterPrompt({
     analysisId,
     name: "changelog",
     phase: "writer_changelog",
     prompt: CHANGELOG_WRITER_USER_PROMPT(
-      JSON.stringify(simpleCommits, null, 2),
+      JSON.stringify(changelogContext, null, 2),
       analysisResult.executive_summary.stack_details
     ),
     system: CHANGELOG_WRITER_SYSTEM_PROMPT(language),
-    temperature: 0.2,
   });
 }

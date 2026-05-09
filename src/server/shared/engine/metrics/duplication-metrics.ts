@@ -1,38 +1,104 @@
+import type { IClone, IOptions } from "@jscpd/core";
+import { clamp } from "es-toolkit";
+import { detectClones } from "jscpd";
+
 import type { RepositoryFile } from "../core/discovery.types";
 import { ProjectPolicy } from "../core/project-policy";
+import { PROJECT_POLICY_RULES } from "../core/project-policy-rules";
 
-export function calculateApproximateDuplication(files: RepositoryFile[]): number {
-  const hashes = new Set<string>();
-  let duplicatedLines = 0;
+export type DuplicationReport = {
+  clones: Array<{
+    fragmentPreview: string;
+    lines: number;
+    primary: {
+      endLine: number;
+      path: string;
+      startLine: number;
+    };
+    secondary: {
+      endLine: number;
+      path: string;
+      startLine: number;
+    };
+  }>;
+  duplicationPercentage: number;
+  totalDuplicatedLines: number;
+};
 
-  for (const file of files) {
-    if (ProjectPolicy.isTestFile(file.path) || ProjectPolicy.isConfigFile(file.path)) continue;
+export async function calculateRepositoryDuplication(
+  files: RepositoryFile[]
+): Promise<DuplicationReport> {
+  const validFiles = files.filter(
+    (file) => !ProjectPolicy.isTestFile(file.path) && !ProjectPolicy.isConfigFile(file.path)
+  );
 
-    const cleanLines = file.content
-      .split(/\r?\n/u)
-      .map((line) => line.trim())
-      .filter(
-        (line) =>
-          line.length > 5 && !line.startsWith("/") && !line.startsWith("*") && !line.startsWith("#")
-      );
+  const fallbackReport: DuplicationReport = {
+    clones: [],
+    duplicationPercentage: 0,
+    totalDuplicatedLines: 0,
+  };
 
-    const WINDOW_SIZE = 6;
-    for (let i = 0; i <= cleanLines.length - WINDOW_SIZE; i++) {
-      const block = cleanLines
-        .slice(i, i + WINDOW_SIZE)
-        .join("|")
-        .toLowerCase();
+  if (validFiles.length === 0) return fallbackReport;
 
-      const hash = Buffer.from(block).toString("base64");
+  const options: IOptions = {
+    absolute: false,
+    exitCode: 0,
+    ignorePattern: [...PROJECT_POLICY_RULES.duplicatesIgnorePattern],
+    list: validFiles.map((file) => ({
+      name: file.path,
+      source: file.content,
+    })) as any,
+    minLines: 7,
+    minTokens: 55,
+    reporters: [],
+  };
 
-      if (hashes.has(hash)) {
-        duplicatedLines += WINDOW_SIZE;
-        i += WINDOW_SIZE - 1;
-      } else {
-        hashes.add(hash);
-      }
+  try {
+    const clones: IClone[] = await detectClones(options);
+
+    let totalLinesInValidFiles = 0;
+    for (const file of validFiles) {
+      totalLinesInValidFiles += file.content.split(/\r?\n/u).length;
     }
-  }
 
-  return duplicatedLines;
+    let totalDuplicatedLines = 0;
+
+    const clonesMap = clones.map((clone) => {
+      const linesCount = clone.duplicationA.end.line - clone.duplicationA.start.line + 1;
+      totalDuplicatedLines += linesCount;
+
+      const fragment = clone.duplicationA.fragment ?? "";
+      const linesArray = fragment.split("\n");
+      const fragmentPreview =
+        linesArray.slice(0, 5).join("\n") + (linesArray.length > 5 ? "\n..." : "");
+
+      return {
+        fragmentPreview,
+        lines: linesCount,
+        primary: {
+          endLine: clone.duplicationA.end.line,
+          path: clone.duplicationA.sourceId,
+          startLine: clone.duplicationA.start.line,
+        },
+        secondary: {
+          endLine: clone.duplicationB.end.line,
+          path: clone.duplicationB.sourceId,
+          startLine: clone.duplicationB.start.line,
+        },
+      };
+    });
+
+    const calculatedPercentage =
+      totalLinesInValidFiles > 0 ? (totalDuplicatedLines / totalLinesInValidFiles) * 100 : 0;
+
+    const roundedPercentage = Math.round(calculatedPercentage * 10) / 10;
+
+    return {
+      clones: clonesMap,
+      duplicationPercentage: clamp(roundedPercentage, 0, 100),
+      totalDuplicatedLines,
+    };
+  } catch {
+    return fallbackReport;
+  }
 }

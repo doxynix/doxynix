@@ -5,14 +5,21 @@ export function clamp(value: number, min: number, max: number): number {
   return esToolkitClamp(value, min, max);
 }
 
-export const normalizeRepoPath = (filePath: string) => normalize(filePath);
-
-export function calculateDocDensity(source: number, comment: number) {
-  if (source === 0) return 0;
-  return Math.round((comment / (source + comment)) * 100);
+export function normalizeRepoPath(filePath: string): string {
+  return normalize(filePath);
 }
 
-export function buildEvidence(paths: string[], note?: string) {
+export function calculateDocDensity(source: number, comment: number): number {
+  const totalLines = source + comment;
+  if (totalLines === 0) return 0;
+
+  return Math.round((comment / totalLines) * 100);
+}
+
+export function buildEvidence(
+  paths: string[],
+  note?: string
+): Array<{ note?: string; path: string }> {
   return paths.map((filePath) => ({
     note,
     path: normalizeRepoPath(filePath),

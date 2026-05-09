@@ -50,22 +50,22 @@ function buildAnalysisCoverage(
     typeScriptAst: new Set<string>(),
   };
 
+  let typeScriptAstFiles = 0;
+  let treeSitterFiles = 0;
+
   for (const result of results) {
-    if (result.signal.analysisMode === "typescript-ast") {
+    const mode = result.signal.analysisMode;
+    if (mode === "typescript-ast") {
       languagesByMode.typeScriptAst.add(result.prettyName);
-    } else if (result.signal.analysisMode === "tree-sitter") {
+      typeScriptAstFiles++;
+    } else if (mode === "tree-sitter") {
       languagesByMode.treeSitter.add(result.prettyName);
+      treeSitterFiles++;
     } else {
       languagesByMode.heuristic.add(result.prettyName);
     }
   }
 
-  const typeScriptAstFiles = results.filter(
-    (result) => result.signal.analysisMode === "typescript-ast"
-  ).length;
-  const treeSitterFiles = results.filter(
-    (result) => result.signal.analysisMode === "tree-sitter"
-  ).length;
   const heuristicFiles = Math.max(0, totalFiles - typeScriptAstFiles - treeSitterFiles);
 
   return {
@@ -96,27 +96,30 @@ export function aggregateScanResults(results: FileScanResult[]): ScanAggregation
     path: result.normalizedPath,
     score: result.complexity,
   }));
+
   const langStats = results.reduce<Record<string, number>>((acc, result) => {
     acc[result.prettyName] = (acc[result.prettyName] ?? 0) + result.source;
     return acc;
   }, {});
-  const rankedComplexities = [...fileComplexities].sort((left, right) => right.score - left.score);
-  const focusedThreshold = Math.max(
-    8,
-    percentile(
-      rankedComplexities
-        .filter((item) => ProjectPolicy.isUsefulComplexityCandidate(item.path))
-        .map((item) => item.score),
-      COMPLEXITY_SCORING.percentileThreshold
-    )
-  );
+
+  const rankedComplexities = fileComplexities.toSorted((left, right) => right.score - left.score);
+
+  const usefulScores = rankedComplexities
+    .filter((item) => ProjectPolicy.isUsefulComplexityCandidate(item.path))
+    .map((item) => item.score);
+
+  const rawPercentile = percentile(usefulScores, COMPLEXITY_SCORING.percentileThreshold);
+  const focusedThreshold = Math.max(8, rawPercentile);
+
   const focusedComplexFiles = rankedComplexities
     .filter((item) => item.score >= focusedThreshold)
     .map((item) => item.path)
     .filter((path) => ProjectPolicy.isUsefulComplexityCandidate(path));
+
   const fallbackComplexFiles = rankedComplexities
     .map((item) => item.path)
     .filter((path) => ProjectPolicy.isUsefulComplexityCandidate(path));
+
   const mostComplexFiles = (
     focusedComplexFiles.length > 0 ? focusedComplexFiles : fallbackComplexFiles
   ).slice(0, SCHEMA_LIMITS.maxFilesToSkeletonize);

@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { generatedFixService } from "@/server/entities/pr-analysis/api/generated-fix.service";
 import { FixService } from "@/server/features/pr-analysis/lib/fix-generator";
-import { getClientContext } from "@/server/shared/infrastructure/github/github-provider";
+import { getInstallationClient } from "@/server/shared/infrastructure/github/github-provider";
 import { logger } from "@/server/shared/infrastructure/logger";
 import { REDIS_CONFIG } from "@/server/shared/lib/redis";
 
@@ -61,16 +61,6 @@ export const prStagingRouter = createTRPCRouter({
         userId: ctx.session.user.id,
       });
 
-      const cacheKey = REDIS_CONFIG.keys.prStaging(ctx.session.user.id, input.repoId);
-      const staged = await ctx.redis.hgetall<Record<string, string>>(cacheKey);
-
-      if (staged == null || Object.keys(staged).length === 0) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "No staged files available for pull request creation",
-        });
-      }
-
       const repo = await ctx.db.repo.findUnique({
         where: { publicId: input.repoId },
       });
@@ -82,7 +72,31 @@ export const prStagingRouter = createTRPCRouter({
         });
       }
 
-      const clientContext = await getClientContext(ctx.db, Number(ctx.session.user.id), repo.owner);
+      const installation = await ctx.db.githubInstallation.findFirst({
+        where: {
+          accountLogin: { equals: repo.owner, mode: "insensitive" },
+          isSuspended: false,
+        },
+      });
+
+      if (installation == null) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: `GitHub App is not installed for ${repo.owner}. Please install it first.`,
+        });
+      }
+
+      const botOctokit = getInstallationClient(Number(installation.id));
+
+      const cacheKey = REDIS_CONFIG.keys.prStaging(ctx.session.user.id, input.repoId);
+      const staged = await ctx.redis.hgetall<Record<string, string>>(cacheKey);
+
+      if (staged == null || Object.keys(staged).length === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No staged files available for pull request creation",
+        });
+      }
 
       const fix = await generatedFixService.create(ctx.prisma, {
         branch: input.branch,
@@ -94,7 +108,8 @@ export const prStagingRouter = createTRPCRouter({
 
       try {
         const fixService = new FixService();
-        const result = await fixService.applyFix(clientContext.octokit, {
+
+        const result = await fixService.applyFix(botOctokit, {
           branch: input.branch,
           defaultBranch: repo.defaultBranch,
           fixedFiles: Object.entries(staged).map(([filePath, newContent]) => ({

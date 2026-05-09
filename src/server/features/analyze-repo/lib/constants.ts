@@ -14,7 +14,7 @@
 // "gemma-3-27b-it",
 // "gemma-3-12b-it",
 
-import type { google } from "@ai-sdk/google";
+import type { google, GoogleLanguageModelOptions } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 
 import { GROQ_API_KEY } from "@/shared/constants/env.server";
@@ -40,9 +40,11 @@ export const AI_MODELS = {
   WRITER: ["gemini-3.1-flash-lite-preview"],
 } satisfies Record<AIModelRole, AllAvailableModels[]>;
 
-export const SAFETY_SETTINGS = [
-  { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_LOW_AND_ABOVE" },
-  { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_LOW_AND_ABOVE" },
-  { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_LOW_AND_ABOVE" },
-  { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_LOW_AND_ABOVE" },
+type GoogleSafetySetting = NonNullable<GoogleLanguageModelOptions["safetySettings"]>[number];
+
+export const SAFETY_SETTINGS: GoogleSafetySetting[] = [
+  { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
 ];

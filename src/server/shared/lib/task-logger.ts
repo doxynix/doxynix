@@ -3,9 +3,9 @@ import { metadata } from "@trigger.dev/sdk/v3";
 
 import { prisma } from "../infrastructure/db";
 import { logger as internalLogger } from "../infrastructure/logger";
+import { TRIGGER_CONFIG } from "./trigger";
 
-let lastLogTime = 0;
-const LOG_THROTTLE_MS = 1000;
+export type LogLevel = "info" | "warn" | "error" | "success";
 
 /**
  * Утилита для управления прогрессом и логами таска.
@@ -13,12 +13,30 @@ const LOG_THROTTLE_MS = 1000;
  */
 export const taskLogger = {
   /**
+   * Хелперы для разных уровней логов
+   */
+  info(msg: string) {
+    this.log(msg, "info");
+  },
+  warn(msg: string) {
+    this.log(msg, "warn");
+  },
+  error(msg: string) {
+    this.log(msg, "error");
+  },
+  success(msg: string) {
+    this.log(msg, "success");
+  },
+
+  /**
    * Финальный синк. Вызывается один раз в конце.
    * Собирает ВСЕ логи из метаданных и кладет в БД на вечное хранение.
    */
   async finalize(analysisId: string, status: Status = Status.DONE) {
     const currentMetadata = metadata.current();
-    const allLogs = (currentMetadata?.task_logs as string[]).join("\n");
+
+    const rawLogs = currentMetadata?.[TRIGGER_CONFIG.metadataKeys.taskLogs];
+    const allLogs = Array.isArray(rawLogs) ? rawLogs.join("\n") : "";
 
     await prisma.analysis.update({
       data: {
@@ -29,25 +47,24 @@ export const taskLogger = {
       where: { publicId: analysisId },
     });
 
-    this.log(`Analysis finalized with status: ${status}`);
+    if (status === Status.DONE) {
+      this.success(`Analysis finalized with status: ${status}`);
+    } else {
+      this.error(`Analysis finalized with status: ${status}`);
+    }
   },
 
   /**
    * Гранулярный лог. Только для real-time отображения.
-   * Не делает запросов в БД.
+   * Формат строки: "level:::timestamp:::message"
    */
-  log: (msg: string) => {
+  log(msg: string, level: LogLevel = "info") {
     const timestamp = new Date().toLocaleTimeString();
-    const line = `[${timestamp}] ${msg}`;
-    const now = Date.now();
+    const line = `${level}:::${timestamp}:::${msg}`;
 
-    internalLogger.info({ msg: line });
+    internalLogger.info({ msg: `[${level.toUpperCase()}] [${timestamp}] ${msg}` });
 
-    if (now - lastLogTime > LOG_THROTTLE_MS) {
-      const timestamp = new Date().toLocaleTimeString();
-      metadata.append("task_logs", `[${timestamp}] ${msg}`);
-      lastLogTime = now;
-    }
+    metadata.append(TRIGGER_CONFIG.metadataKeys.taskLogs, line);
   },
 
   /**
@@ -57,10 +74,10 @@ export const taskLogger = {
   async milestone(params: { analysisId: string; msg: string; percent: number; status?: Status }) {
     const { analysisId, msg, percent, status = Status.PENDING } = params;
 
-    this.log(`MILESTONE: ${msg} (${percent}%)`);
+    this.info(`STAGE: ${msg} (${percent}%)`);
 
-    metadata.set("status_message", msg);
-    metadata.set("progress", percent);
+    metadata.set(TRIGGER_CONFIG.metadataKeys.statusMessage, msg);
+    metadata.set(TRIGGER_CONFIG.metadataKeys.progress, percent);
 
     await prisma.analysis.update({
       data: {
