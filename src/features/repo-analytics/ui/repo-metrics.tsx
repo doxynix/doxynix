@@ -20,6 +20,8 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import type { RepoMetricsItem } from "@/entities/repo/model/repo.types";
 
+import { ComplexityScatterChart } from "./repo-complexity-scatter-chart";
+
 type Props = { data: NonNullable<RepoMetricsItem> };
 
 export function RepoMetrics({ data }: Readonly<Props>) {
@@ -59,10 +61,10 @@ export function RepoMetrics({ data }: Readonly<Props>) {
             <div className="text-error text-2xl font-black">{data.security.score}/10</div>
           </CardHeader>
           <CardContent>
-            <div className="mb-3 flex items-center gap-2">
+            {/* <div className="mb-3 flex items-center gap-2">
               <Badge variant="outline">{data.security.securityScanStatus}</Badge>
               <Badge variant="outline">{data.security.findings.length} findings</Badge>
-            </div>
+            </div> */}
             <div className="space-y-3">
               {data.security.risks.map((item) => (
                 <div key={item} className="flex gap-2 text-xs">
@@ -246,7 +248,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
         <h3 className="flex items-center gap-2 text-lg font-bold">
           <Construction className="text-warning size-5" /> Refactoring Targets
         </h3>
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {data.recommendations.refactoringTargets.length > 0 ? (
             data.recommendations.refactoringTargets.map((item) => (
               <Card key={item.file} className="overflow-hidden">
@@ -259,7 +261,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
                     {item.priority} PRIORITY
                   </Badge>
                 </div>
-                <CardContent className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
+                <CardContent className="grid gap-4 p-4">
                   <div className="space-y-2">
                     <p className="text-muted-foreground text-xs font-medium tracking-tighter uppercase">
                       Current Issue
@@ -271,7 +273,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
                       </pre>
                     )}
                   </div>
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <p className="text-success text-xs font-medium tracking-tighter uppercase">
                       AI Suggestion
                     </p>
@@ -290,7 +292,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
                         </pre>
                       </div>
                     )}
-                  </div>
+                  </div> */}
                 </CardContent>
               </Card>
             ))
@@ -341,6 +343,18 @@ export function RepoMetrics({ data }: Readonly<Props>) {
           </CardContent>
         </Card>
       </section>
+
+      <Card className="p-6">
+        <CardHeader>
+          <CardTitle>Complexity vs Size Analysis</CardTitle>
+          <CardDescription>
+            Identification of high-risk files based on cyclomatic complexity and volume.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ComplexityScatterChart data={data.architecture.hotspotSignals} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

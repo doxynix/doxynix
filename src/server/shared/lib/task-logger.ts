@@ -4,6 +4,9 @@ import { metadata } from "@trigger.dev/sdk/v3";
 import { prisma } from "../infrastructure/db";
 import { logger as internalLogger } from "../infrastructure/logger";
 
+let lastLogTime = 0;
+const LOG_THROTTLE_MS = 1000;
+
 /**
  * Утилита для управления прогрессом и логами таска.
  * Разделяет real-time поток (metadata) и вечное хранение (DB).
@@ -36,10 +39,15 @@ export const taskLogger = {
   log: (msg: string) => {
     const timestamp = new Date().toLocaleTimeString();
     const line = `[${timestamp}] ${msg}`;
-
-    metadata.append("task_logs", line);
+    const now = Date.now();
 
     internalLogger.info({ msg: line });
+
+    if (now - lastLogTime > LOG_THROTTLE_MS) {
+      const timestamp = new Date().toLocaleTimeString();
+      metadata.append("task_logs", `[${timestamp}] ${msg}`);
+      lastLogTime = now;
+    }
   },
 
   /**

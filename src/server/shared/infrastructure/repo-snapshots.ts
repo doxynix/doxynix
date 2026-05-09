@@ -34,6 +34,11 @@ export const repoWithLatestAnalysisAndDocsSelect = {
   documents: {
     orderBy: { updatedAt: "desc" },
     select: {
+      analysis: {
+        select: {
+          publicId: true,
+        },
+      },
       createdAt: true,
       publicId: true,
       type: true,
@@ -79,11 +84,24 @@ export function toAnalysisRef(
   };
 }
 
-export async function getRepoWithLatestAnalysisAndDocs(db: DbClient, repoId: string) {
-  return db.repo.findUnique({
+export async function getRepoWithLatestAnalysisAndDocs(db: DbClient, repoId: string, aid?: string) {
+  const targetAnalysis =
+    aid != null
+      ? await getAnalysisByPublicId(db, aid)
+      : await getLatestCompletedAnalysis(db, repoId);
+
+  const repo = await db.repo.findUnique({
     select: repoWithLatestAnalysisAndDocsSelect,
     where: { publicId: repoId },
-  }) as Promise<null | RepoWithLatestAnalysisAndDocs>;
+  });
+
+  if (!repo || !targetAnalysis) return null;
+
+  return {
+    ...repo,
+    analyses: [targetAnalysis],
+    documents: repo.documents.filter((d) => d.analysis?.publicId === targetAnalysis.publicId),
+  };
 }
 
 export async function getLatestCompletedAnalysis(db: DbClient, repoId: string) {
@@ -91,6 +109,13 @@ export async function getLatestCompletedAnalysis(db: DbClient, repoId: string) {
     orderBy: { createdAt: "desc" },
     select: latestCompletedAnalysisSelect,
     where: { repo: { publicId: repoId }, status: "DONE" },
+  }) as Promise<LatestCompletedAnalysis | null>;
+}
+
+export async function getAnalysisByPublicId(db: DbClient, aid: string) {
+  return db.analysis.findFirst({
+    select: latestCompletedAnalysisSelect,
+    where: { publicId: aid, status: "DONE" },
   }) as Promise<LatestCompletedAnalysis | null>;
 }
 

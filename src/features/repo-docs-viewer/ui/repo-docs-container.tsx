@@ -21,7 +21,7 @@ type Props = { id: string };
 const EMPTY_DOCS: AvailableDocs = [];
 
 export function RepoDocsContainer({ id }: Readonly<Props>) {
-  const { name, owner } = useRepoParams();
+  const { aid, name, owner } = useRepoParams();
   const [node] = useQueryState("node", parseAsString);
   const autoSelectedNodeRef = useRef<null | string>(null);
 
@@ -33,11 +33,12 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
   );
 
   const { data: availableDocs, isLoading } = trpc.repoDetails.getAvailableDocs.useQuery({
+    aid: aid ?? undefined,
     repoId: id,
   });
 
   const { data: nodeContext } = trpc.repoDetails.getNodeContext.useQuery(
-    { nodeId: node ?? "", repoId: id },
+    { aid: aid ?? undefined, nodeId: node ?? "", repoId: id },
     { enabled: node != null && node.length > 0 }
   );
 

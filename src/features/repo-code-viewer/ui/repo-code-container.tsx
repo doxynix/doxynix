@@ -9,6 +9,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/u
 
 import type { FileNode } from "@/entities/repo/model/repo-setup.types";
 import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { RepoCodeBrowser } from "./repo-code-browser";
 import { CodeSkeleton } from "./repo-code-skeleton";
@@ -22,9 +23,10 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
   const [path, setPath] = useQueryState("path", parseAsString);
   const [node, setNode] = useQueryState("node", parseAsString);
   const [treeApi, setTreeApi] = useState<TreeApi<FileNode> | undefined>();
+  const { aid } = useRepoParams();
 
   const { data: nodeContext } = trpc.repoDetails.getNodeContext.useQuery(
-    { nodeId: node ?? "", repoId: repo.id },
+    { aid: aid ?? undefined, nodeId: node ?? "", repoId: repo.id },
     { enabled: node != null && node.length > 0 }
   );
 

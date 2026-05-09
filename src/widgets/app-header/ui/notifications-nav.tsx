@@ -87,7 +87,7 @@ export function NotificationsNav() {
                       <p className="text-muted-foreground max-w-57.5 truncate text-xs">
                         {note.body}
                       </p>
-                      <TimeAgo date={note.createdAt} locale={locale} />
+                      <TimeAgo date={note.createdAt} locale={locale} className="w-fit text-xs" />
                     </div>
                     {note.isRead === false && (
                       <span className="bg-foreground mt-1 size-2 shrink-0 rounded-full" />

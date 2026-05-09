@@ -19,7 +19,7 @@ import { linguistStyleLabel } from "../core/file-classifier";
 import type { RepoMetrics } from "../core/metrics.types";
 import { collectStructuralSignals, scoreStructuralModularity } from "../core/structure";
 import { collectPolyglotSignals } from "../extractors/language-signals";
-import { collectOpenApiInventory } from "../extractors/openapi-inventory";
+import { OpenApiDiscoveryEngine } from "../extractors/openapi-inventory";
 import { collectTypeScriptStaticHints } from "../extractors/ts-static-hints";
 import {
   mergeRouteInventories,
@@ -288,7 +288,7 @@ export async function analyzeRepository(
 
   taskLogger.log("Inspecting API surface (OpenAPI/Routes)...");
 
-  const openapiInventory = collectOpenApiInventory(normalizedFiles);
+  const openapiInventory = OpenApiDiscoveryEngine.collect(normalizedFiles);
   const tsStaticHints = collectTypeScriptStaticHints(normalizedFiles);
   const duplicatedLines = calculateApproximateDuplication(normalizedFiles);
   const duplicationPercentage =

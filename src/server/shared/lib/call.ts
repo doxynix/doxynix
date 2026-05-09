@@ -9,11 +9,13 @@ import { logger } from "../infrastructure/logger";
 
 const tracedAi = wrapAISDK(ai);
 
+export type GoogleModelId = Parameters<typeof google>[0];
+
 type CallWithFallbackProps<T> = {
   attemptMetadata?: Record<string, unknown>;
   frequencyPenalty?: number;
   maxOutputTokens?: number;
-  models: string[];
+  models: GoogleModelId[];
   outputSchema: null | z.ZodSchema<T>;
   presencePenalty?: number;
   prompt: string;

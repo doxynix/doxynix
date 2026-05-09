@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { auth } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -85,6 +86,41 @@ export const repoAnalysisRouter = createTRPCRouter({
       };
     }),
 
+  getLatest: protectedProcedure
+    .input(z.object({ repoId: z.uuid() }))
+    .query(async ({ ctx, input }) => {
+      const analysis = await ctx.db.analysis.findFirst({
+        orderBy: { createdAt: "desc" },
+        where: {
+          repo: { publicId: input.repoId },
+        },
+      });
+
+      if (!analysis) return null;
+
+      let publicAccessToken: null | string = null;
+
+      if (analysis.status === "PENDING" && analysis.jobId != null) {
+        try {
+          publicAccessToken = await auth.createPublicToken({
+            expirationTime: "1h",
+            scopes: {
+              read: {
+                runs: [analysis.jobId],
+              },
+            },
+          });
+        } catch (error) {
+          console.error("Trigger.dev auth error:", error);
+        }
+      }
+
+      return {
+        ...analysis,
+        publicAccessToken,
+      };
+    }),
+
   pinAuditToDocs: protectedProcedure
     .input(
       z.object({
@@ -135,7 +171,6 @@ export const repoAnalysisRouter = createTRPCRouter({
         },
       });
     }),
-
   quickFileAudit: protectedProcedure
     .input(
       z.object({

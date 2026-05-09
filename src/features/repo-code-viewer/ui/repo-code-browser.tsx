@@ -114,6 +114,12 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
   });
 
   useEffect(() => {
+    if (documentResult?.content != null) {
+      setShowDiff(true);
+    }
+  }, [documentResult?.content]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.code === "KeyF") {
         const isFocusInside = containerRef.current?.contains(document.activeElement);
@@ -362,15 +368,13 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
 
       <div className="relative flex-1 overflow-hidden">
         <Editor
-          value={
-            !showDiff && documentResult?.content != null ? documentResult.content : localContent
-          }
+          value={documentResult?.content ?? localContent}
           compareValue={fileData.content}
           initialValue={fileData.content}
           meta={fileData.meta}
           path={path}
           readOnly={mode === "view"}
-          showDiff={!showDiff}
+          showDiff={showDiff}
           onChange={setLocalContent}
           onStats={setEditorStats}
           onViewCreated={setView}

@@ -18,14 +18,18 @@ const TrendsChart = dynamic(() => import("./trends-chart").then((m) => m.TrendsC
   ssr: false,
 });
 
-export function TrendsWidget() {
+type Props = { className?: string; repoId?: string };
+
+export function TrendsWidget({ repoId, className }: Readonly<Props>) {
   const [urlParams] = useQueryStates(dashboardParsers);
 
   const { data, isLoading } = trpc.analytics.getTrends.useQuery({
     from: urlParams.from ?? undefined,
     period: urlParams.period,
+    repoId: repoId ?? undefined,
     to: urlParams.to ?? undefined,
   });
+
   const t = useTranslations("Dashboard");
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -44,7 +48,7 @@ export function TrendsWidget() {
   const hasData = Array.isArray(data) && data.length > 0;
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
           <CardTitle className="text-xl">{t("trends_title")}</CardTitle>

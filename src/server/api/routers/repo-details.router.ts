@@ -9,26 +9,27 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const repoDetailsRouter = createTRPCRouter({
   getAvailableDocs: protectedProcedure
-    .input(z.object({ repoId: z.uuid() }))
+    .input(z.object({ aid: z.string().optional(), repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return repoDetailsService.getAvailableDocs(ctx.db, input.repoId);
+      return repoDetailsService.getAvailableDocs(ctx.db, input.repoId, input.aid);
     }),
 
   getDetailedMetrics: protectedProcedure
-    .input(z.object({ repoId: z.uuid() }))
+    .input(z.object({ aid: z.string().optional(), repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return repoDetailsService.getDetailedMetrics(ctx.db, input.repoId);
+      return repoDetailsService.getDetailedMetrics(ctx.db, input.repoId, input.aid);
     }),
 
   getDocumentContent: protectedProcedure
     .input(
       z.object({
+        aid: z.string().optional(),
         repoId: z.uuid(),
         type: DocTypeSchema,
       })
     )
     .query(async ({ ctx, input }) => {
-      return repoDetailsService.getDocumentContent(ctx.db, input.repoId, input.type);
+      return repoDetailsService.getDocumentContent(ctx.db, input.repoId, input.type, input.aid);
     }),
 
   getHistory: protectedProcedure
@@ -37,46 +38,22 @@ export const repoDetailsRouter = createTRPCRouter({
       return repoDetailsService.getHistory(ctx.db, input.repoId);
     }),
 
-  getInteractiveBrief: protectedProcedure
-    .input(z.object({ repoId: z.uuid() }))
-    .query(async ({ ctx, input }) => {
-      return repoDetailsService.getInteractiveBrief(ctx.db, input.repoId);
-    }),
-
-  getInteractiveBriefNode: protectedProcedure
-    .input(z.object({ nodeId: z.string(), repoId: z.uuid() }))
-    .query(async ({ ctx, input }) => {
-      return repoDetailsService.getInteractiveBriefNode(ctx.db, input.repoId, input.nodeId);
-    }),
-
   getNodeContext: protectedProcedure
-    .input(z.object({ nodeId: z.string(), repoId: z.uuid() }))
+    .input(z.object({ aid: z.string().optional(), nodeId: z.string(), repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return repoDetailsService.getNodeContext(ctx.db, input.repoId, input.nodeId);
-    }),
-
-  getNodeExplain: protectedProcedure
-    .input(z.object({ nodeId: z.string(), repoId: z.uuid() }))
-    .query(async ({ ctx, input }) => {
-      return repoDetailsService.getNodeExplain(ctx.db, input.repoId, input.nodeId);
-    }),
-
-  getOverview: protectedProcedure
-    .input(z.object({ repoId: z.uuid() }))
-    .query(async ({ ctx, input }) => {
-      return repoDetailsService.getOverview(ctx.db, input.repoId);
+      return repoDetailsService.getNodeContext(ctx.db, input.repoId, input.nodeId, input.aid);
     }),
 
   getStructureMap: protectedProcedure
-    .input(z.object({ repoId: z.uuid() }))
+    .input(z.object({ aid: z.string().optional(), repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return repoDetailsService.getStructureMap(ctx.db, input.repoId);
+      return repoDetailsService.getStructureMap(ctx.db, input.repoId, input.aid);
     }),
 
   getStructureNode: protectedProcedure
-    .input(z.object({ nodeId: z.string(), repoId: z.uuid() }))
+    .input(z.object({ aid: z.string().optional(), nodeId: z.string(), repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return repoDetailsService.getStructureNode(ctx.db, input.repoId, input.nodeId);
+      return repoDetailsService.getStructureNode(ctx.db, input.repoId, input.nodeId, input.aid);
     }),
 
   getWithGraphLinks: protectedProcedure
@@ -125,9 +102,9 @@ export const repoDetailsRouter = createTRPCRouter({
     }),
 
   getWorkspace: protectedProcedure
-    .input(z.object({ repoId: z.uuid() }))
+    .input(z.object({ aid: z.string().optional(), repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return repoDetailsService.getWorkspace(ctx.db, input.repoId);
+      return repoDetailsService.getWorkspace(ctx.db, input.repoId, input.aid);
     }),
 
   highlightFile: protectedProcedure
@@ -137,8 +114,8 @@ export const repoDetailsRouter = createTRPCRouter({
     }),
 
   searchWorkspace: protectedProcedure
-    .input(z.object({ repoId: z.uuid(), search: z.string() }))
+    .input(z.object({ aid: z.string().optional(), repoId: z.uuid(), search: z.string() }))
     .query(async ({ ctx, input }) => {
-      return repoDetailsService.searchWorkspace(ctx.db, input.repoId, input.search);
+      return repoDetailsService.searchWorkspace(ctx.db, input.repoId, input.search, input.aid);
     }),
 });

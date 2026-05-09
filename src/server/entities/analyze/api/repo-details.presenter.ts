@@ -5,6 +5,7 @@ import type {
 import { getLanguageColor } from "@/server/shared/lib/language-metadata";
 import { hasText } from "@/server/shared/lib/string-utils";
 
+import type { createAnalyzeContextBuilder } from "../lib/analyze-context-builder";
 import { buildStructureMapPayload, buildStructureNodePayload } from "../lib/graph-navigator";
 import { buildNodeExplainPayload } from "../lib/node-explainer";
 import {
@@ -13,6 +14,15 @@ import {
   normalizeWriterStatuses,
   toDocSummary,
 } from "../lib/payload";
+import { mapExplainBase, mapStructureNodeBase } from "../lib/repo-details-helpers";
+
+export type ExplainPayload = NonNullable<
+  ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getNodeExplain"]>
+>;
+
+export type StructureNodePayload = NonNullable<
+  ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getStructureNode"]>
+>;
 
 export const repoDetailsPresenter = {
   toAvailableDocs(repo: Pick<RepoWithLatestAnalysisAndDocs, "analyses" | "documents">) {
@@ -20,6 +30,20 @@ export const repoDetailsPresenter = {
     return dedupeLatestDocsByType(repo.documents).map((doc) =>
       toDocSummary(doc, latestAnalysis?.aiResult ?? null)
     );
+  },
+
+  toBriefPanelInput(params: {
+    explain: NonNullable<
+      ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getNodeExplain"]>
+    >;
+    structureNode: NonNullable<
+      ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getStructureNode"]>
+    >;
+  }) {
+    return {
+      explain: mapExplainBase(params.explain),
+      structureNode: mapStructureNodeBase(params.structureNode),
+    };
   },
 
   toDetailedMetrics(analysis: LatestCompletedAnalysis | null) {
@@ -39,6 +63,7 @@ export const repoDetailsPresenter = {
         entrypoints: metrics.entrypoints,
         graphReliability: metrics.graphReliability ?? null,
         hotspotFiles: metrics.hotspotFiles,
+        hotspotSignals: metrics.hotspotSignals ?? [],
         orphanModules: metrics.orphanModules,
         routeInventory: metrics.routeInventory ?? null,
       },
@@ -74,7 +99,7 @@ export const repoDetailsPresenter = {
         facts,
         findings,
         hotspotFiles: metrics.hotspotFiles,
-        topRisks: findings.slice(0, 5),
+        topRisks: findings,
       },
       security: {
         findings: metrics.securityFindings,
@@ -82,6 +107,22 @@ export const repoDetailsPresenter = {
         score: aiResult.sections.security_audit.score,
         securityScanStatus: metrics.securityScanStatus,
         vulnerabilities: aiResult.vulnerabilities ?? [],
+      },
+    };
+  },
+
+  toInteractiveBriefNodePayloadInput(params: {
+    explain: ExplainPayload;
+    structureNode: StructureNodePayload;
+  }) {
+    return {
+      explain: {
+        analysisRef: params.explain.analysisRef ?? null,
+        ...mapExplainBase(params.explain),
+      },
+      structureNode: {
+        analysisRef: params.structureNode.analysisRef ?? null,
+        ...mapStructureNodeBase(params.structureNode),
       },
     };
   },
@@ -151,7 +192,7 @@ export const repoDetailsPresenter = {
       },
       summary: aiResult.executive_summary,
       teamRoles: metrics.teamRoles,
-      topRisks: (aiResult.findings ?? []).slice(0, 3),
+      topRisks: aiResult.findings ?? [],
     };
   },
 

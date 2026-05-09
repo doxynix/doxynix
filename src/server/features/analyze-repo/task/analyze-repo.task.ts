@@ -87,8 +87,6 @@ export const analyzeRepoTask = task({
       taskLogger.log("Cloning repository...");
       await cloneRepository(repo, token, tempClonePath, selectedBranch);
 
-      taskLogger.log(`Target path: ${tempClonePath}`);
-
       taskLogger.log(`Reading ${selectedFiles.length} files...`);
       const validFiles = await readAndFilterFiles(tempClonePath, selectedFiles);
 

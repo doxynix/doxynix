@@ -24,7 +24,7 @@ const RepoMap = dynamic(() => import("./repo-map").then((m) => m.RepoMap), {
 });
 
 export function RepoMapContainer({ id }: Readonly<Props>) {
-  const { name, owner } = useRepoParams();
+  const { aid, name, owner } = useRepoParams();
 
   const [viewId, setViewId] = useQueryState("view", parseAsString);
   const [selectedId, setSelectedId] = useQueryState("node", parseAsString);
@@ -34,7 +34,7 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
   const [displayData, setDisplayData] = useState<null | RepoMapDisplayData>(null);
 
   const { data: mapData, isFetching: isMapFetching } = trpc.repoDetails.getStructureMap.useQuery(
-    { repoId: id },
+    { aid: aid ?? undefined, repoId: id },
     { enabled: viewId == null }
   );
 

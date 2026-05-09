@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
+import { RepoMetricsContainer } from "@/features/repo-analytics/ui/repo-metrics-container";
 import { RepoOverviewContainer } from "@/features/repo-analytics/ui/repo-overview-container";
 
 import { getRepoOrNotFound } from "@/server/entities/repo/api/get-repo";
@@ -27,6 +28,7 @@ export default async function RepoOwnerNamePage({ params }: Readonly<Props>) {
   return (
     <div className="space-y-10">
       <RepoOverviewContainer id={repo.id} />
+      <RepoMetricsContainer id={repo.id} />
     </div>
   );
 }

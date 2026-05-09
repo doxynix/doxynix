@@ -27,6 +27,7 @@ type RecentActivityDto = {
 type StatsInput = {
   from?: Date | null;
   period?: null | string;
+  repoId?: string;
   to?: Date | null;
 };
 
@@ -122,11 +123,13 @@ export const analyticsService = {
       },
       languages: data.languages as unknown as LanguageDto[],
       overview: {
-        avgComplexityScore: Math.round(data.avgComplexity ?? 0),
-        avgHealthScore: Math.round(data.avgHealth ?? 0),
-        avgOnboardingScore: Math.round(data.avgOnboarding ?? 0),
-        avgSecurityScore: Math.round(data.avgSecurity ?? 0),
-        avgTechDebtScore: Math.round(data.avgTechDebt ?? 0),
+        avgScores: {
+          complexity: Math.round(data.avgComplexity ?? 0),
+          health: Math.round(data.avgHealth ?? 0),
+          onboarding: Math.round(data.avgOnboarding ?? 0),
+          security: Math.round(data.avgSecurity ?? 0),
+          techDebt: Math.round(data.avgTechDebt ?? 0),
+        },
         complexityDelta: data.complexityDelta ?? 0,
         criticalRepoCount: data.criticalRepoCount ?? 0,
         docsCount: data.docCount ?? 0,
@@ -152,11 +155,13 @@ export const analyticsService = {
       highlights: { mostCritical: null, topPerformer: null },
       languages: [],
       overview: {
-        avgComplexityScore: 0,
-        avgHealthScore: 0,
-        avgOnboardingScore: 0,
-        avgSecurityScore: 0,
-        avgTechDebtScore: 0,
+        avgScores: {
+          complexity: 0,
+          health: 0,
+          onboarding: 0,
+          security: 0,
+          techDebt: 0,
+        },
         complexityDelta: 0,
         criticalRepoCount: 0,
         docsCount: 0,
@@ -183,7 +188,9 @@ export const analyticsService = {
       startDate = input.from ?? subDays(endDate, 30);
     }
 
-    const trends = await db.$queryRawTyped(getTrends(userId, startDate, endDate));
+    const trends = await db.$queryRawTyped(
+      getTrends(userId, startDate, endDate, input.repoId ?? null)
+    );
 
     const dateFormatter = new Intl.DateTimeFormat("en-US", {
       day: "numeric",

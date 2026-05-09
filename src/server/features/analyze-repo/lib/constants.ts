@@ -14,6 +14,7 @@
 // "gemma-3-27b-it",
 // "gemma-3-12b-it",
 
+import type { google } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 
 import { GROQ_API_KEY } from "@/shared/constants/env.server";
@@ -23,23 +24,21 @@ export const groq = createOpenAI({
   baseURL: "https://api.groq.com/openai/v1",
 });
 
-// export const AI_MODELS = {
-//   ARCHITECT: ["gemini-3-flash-preview", "gemini-flash-latest"],
-//   CARTOGRAPHER: ["gemini-flash-latest", "gemini-flash-lite-latest"],
-//   FALLBACK: ["gemini-flash-latest"],
-//   POWERFUL: ["gemini-3-flash-preview", "gemini-2.5-flash-lite", "gemini-flash-latest"],
-//   SENTINEL: ["gemini-flash-latest"],
-//   WRITER: ["gemini-3-flash-preview", "gemini-2.5-flash-lite", "gemini-flash-latest"],
-// };
+type GoogleModelId = Parameters<typeof google>[0];
+type GroqModelId = Parameters<typeof groq>[0];
+
+type AllAvailableModels = GoogleModelId | GroqModelId;
+
+type AIModelRole = "ARCHITECT" | "CARTOGRAPHER" | "FALLBACK" | "POWERFUL" | "SENTINEL" | "WRITER";
 
 export const AI_MODELS = {
-  ARCHITECT: ["gemini-flash-latest"],
-  CARTOGRAPHER: ["gemini-flash-latest"],
-  FALLBACK: ["gemini-flash-latest"],
-  POWERFUL: ["gemini-flash-latest"],
-  SENTINEL: ["gemini-flash-latest"],
-  WRITER: ["gemini-flash-latest"],
-};
+  ARCHITECT: ["gemini-3.1-flash-lite-preview"],
+  CARTOGRAPHER: ["gemini-3.1-flash-lite-preview"],
+  FALLBACK: ["gemini-3.1-flash-lite-preview"],
+  POWERFUL: ["gemini-3.1-flash-lite-preview"],
+  SENTINEL: ["gemini-3.1-flash-lite-preview"],
+  WRITER: ["gemini-3.1-flash-lite-preview"],
+} satisfies Record<AIModelRole, AllAvailableModels[]>;
 
 export const SAFETY_SETTINGS = [
   { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_LOW_AND_ABOVE" },

@@ -23,7 +23,7 @@ const rpmLimiter = new Bottleneck({
   datastore: "redis",
   id: "llm-rpm-limiter",
   maxConcurrent: 1,
-  minTime: 10_000,
+  minTime: 30_000,
 });
 
 const tpmLimiter = new Bottleneck({

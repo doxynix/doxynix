@@ -44,7 +44,7 @@ export function RepoHistory({ history }: Readonly<Props>) {
               <TableCell className="text-sm font-bold">
                 {h.score !== null ? `${h.score}/100` : "—"}
               </TableCell>
-              <TableCell className="textsm text-right">
+              <TableCell className="text-right text-sm">
                 <TimeAgo date={h.createdAt} locale={locale} />
               </TableCell>
             </TableRow>

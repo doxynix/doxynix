@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 
 import type { ParamTypes } from "@/shared/types/app.types";
 
+import { RepoAnalysisLive } from "@/features/repo-setup/ui/repo-analysis-live";
 import { RepoSetup } from "@/features/repo-setup/ui/repo-setup";
 
+import { api } from "@/server/api/server";
 import { getRepoOrNotFound } from "@/server/entities/repo/api/get-repo";
 
 type Props = {
@@ -24,5 +26,26 @@ export default async function AnalyzePage({ params }: Readonly<Props>) {
 
   const repo = await getRepoOrNotFound(owner, name);
 
-  return <RepoSetup repo={repo} />;
+  const serverApi = await api();
+  const lastAnalysis = await serverApi.repoAnalysis.getLatest({ repoId: repo.id });
+
+  const isRunning =
+    lastAnalysis != null &&
+    lastAnalysis.status === "PENDING" &&
+    lastAnalysis.jobId !== null &&
+    lastAnalysis.publicAccessToken != null;
+
+  return (
+    <div className="mx-auto px-4 py-6">
+      {isRunning ? (
+        <RepoAnalysisLive
+          accessToken={lastAnalysis.publicAccessToken!}
+          jobId={lastAnalysis.jobId!}
+          repoId={repo.id}
+        />
+      ) : (
+        <RepoSetup repo={repo} />
+      )}
+    </div>
+  );
 }

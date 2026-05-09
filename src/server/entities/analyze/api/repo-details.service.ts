@@ -1,7 +1,6 @@
 import { unstable_cache } from "next/cache";
 import type { DocType } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { orderBy, uniqBy } from "es-toolkit";
 import { basename, extname } from "pathe";
 
 import { highlightCode } from "@/shared/lib/shiki";
@@ -9,10 +8,6 @@ import { highlightCode } from "@/shared/lib/shiki";
 import { DocumentFormatter } from "@/server/features/analyze-repo/lib/section-graph-linker";
 import { normalizeRepoPath } from "@/server/shared/engine/core/common";
 import type { DbClient } from "@/server/shared/infrastructure/db";
-import {
-  getLatestCompletedAnalysis,
-  getRepoWithLatestAnalysisAndDocs,
-} from "@/server/shared/infrastructure/repo-snapshots";
 import { unique } from "@/server/shared/lib/array-utils";
 import { resolveDocumentMaterializedPath } from "@/server/shared/lib/document-materialization";
 import { markdownToHtml } from "@/server/shared/lib/markdown-to-html";
@@ -30,61 +25,42 @@ import {
   buildInteractiveBriefPayload,
 } from "../lib/brief";
 import { coerceAnalysisPayload } from "../lib/payload";
+import {
+  dedupeSearchResults,
+  loadAnalyzeContextBuilderOrThrow,
+  loadLatestDocumentsWithContent,
+  loadRelatedDocSections,
+  loadRelatedFixes,
+  loadRelatedPrFindings,
+  loadRepoOrThrow,
+  scoreSearchMatch,
+} from "../lib/repo-details-helpers";
 import { repoDetailsPresenter } from "./repo-details.presenter";
 
-type ExplainPayload = NonNullable<
-  ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getNodeExplain"]>
->;
-type StructureNodePayload = NonNullable<
-  ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getStructureNode"]>
->;
-
-function toBriefPanelInput(params: {
-  explain: NonNullable<
-    ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getNodeExplain"]>
-  >;
-  structureNode: NonNullable<
-    ReturnType<ReturnType<typeof createAnalyzeContextBuilder>["getStructureNode"]>
-  >;
-}) {
-  return {
-    explain: mapExplainBase(params.explain),
-    structureNode: mapStructureNodeBase(params.structureNode),
-  };
-}
-
-function toInteractiveBriefNodePayloadInput(params: {
-  explain: ExplainPayload;
-  structureNode: StructureNodePayload;
-}) {
-  return {
-    explain: {
-      analysisRef: params.explain.analysisRef ?? null,
-      ...mapExplainBase(params.explain),
-    },
-    structureNode: {
-      analysisRef: params.structureNode.analysisRef ?? null,
-      ...mapStructureNodeBase(params.structureNode),
-    },
-  };
-}
-
 export const repoDetailsService = {
-  async getAvailableDocs(db: DbClient, repoId: string) {
-    const repo = await loadRepoOrThrow(db, repoId);
+  async getAvailableDocs(db: DbClient, repoId: string, aid?: string) {
+    const repo = await loadRepoOrThrow(db, repoId, aid);
     return repoDetailsPresenter.toAvailableDocs(repo);
   },
 
-  async getDetailedMetrics(db: DbClient, repoId: string) {
-    const analysis = await getLatestCompletedAnalysis(db, repoId);
-    return repoDetailsPresenter.toDetailedMetrics(analysis);
+  async getDetailedMetrics(db: DbClient, repoId: string, aid?: string) {
+    const repo = await loadRepoOrThrow(db, repoId, aid);
+    return repoDetailsPresenter.toDetailedMetrics(repo.analyses[0] ?? null);
   },
 
-  async getDocumentContent(db: DbClient, repoId: string, type: DocType) {
+  async getDocumentContent(db: DbClient, repoId: string, type: DocType, aid?: string) {
+    const repo = await loadRepoOrThrow(db, repoId, aid);
+    const analysis = repo.analyses[0];
+
+    if (analysis == null) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Analysis not found" });
+    }
+
     const doc = await db.document.findFirst({
-      orderBy: { createdAt: "desc" },
       where: {
-        repo: { publicId: repoId },
+        analysis: {
+          publicId: analysis.publicId,
+        },
         type,
       },
     });
@@ -136,8 +112,8 @@ export const repoDetailsService = {
     }));
   },
 
-  async getInteractiveBrief(db: DbClient, repoId: string) {
-    const repo = await loadRepoOrThrow(db, repoId);
+  async getInteractiveBrief(db: DbClient, repoId: string, aid?: string) {
+    const repo = await loadRepoOrThrow(db, repoId, aid);
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const overview = repoDetailsPresenter.toOverview(repo);
     const structure = analyzeContext.getStructureMap();
@@ -153,7 +129,9 @@ export const repoDetailsService = {
             const explain = analyzeContext.getNodeExplain(defaultNodeId);
             if (structureNode == null || explain == null) return null;
 
-            return buildInteractiveBriefPanel(toBriefPanelInput({ explain, structureNode }));
+            return buildInteractiveBriefPanel(
+              repoDetailsPresenter.toBriefPanelInput({ explain, structureNode })
+            );
           })();
 
     return buildInteractiveBriefPayload({
@@ -188,24 +166,25 @@ export const repoDetailsService = {
     });
   },
 
-  async getInteractiveBriefNode(db: DbClient, repoId: string, nodeId: string) {
-    const analyzeContext = await loadAnalyzeContextBuilderOrThrow(db, repoId);
+  async getInteractiveBriefNode(db: DbClient, repoId: string, nodeId: string, aid?: string) {
+    const analyzeContext = await loadAnalyzeContextBuilderOrThrow(db, repoId, aid);
     const structureNode = analyzeContext.getStructureNode(nodeId);
     const explain = analyzeContext.getNodeExplain(nodeId);
 
     if (structureNode == null || explain == null) return null;
 
     return buildInteractiveBriefNodePayload(
-      toInteractiveBriefNodePayloadInput({ explain, structureNode })
+      repoDetailsPresenter.toInteractiveBriefNodePayloadInput({ explain, structureNode })
     );
   },
 
   async getNodeContext(
     db: DbClient,
     repoId: string,
-    nodeId: string
+    nodeId: string,
+    aid?: string
   ): Promise<null | RepoNodeContextPayload> {
-    const repo = await loadRepoOrThrow(db, repoId);
+    const repo = await loadRepoOrThrow(db, repoId, aid);
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const structureNode = analyzeContext.getStructureNode(nodeId);
     const explain = analyzeContext.getNodeExplain(nodeId);
@@ -219,7 +198,7 @@ export const repoDetailsService = {
         ...structureNode.inspect.samplePaths,
         ...explain.sourcePaths,
       ].map((path) => normalizeRepoPath(path))
-    ).slice(0, 12);
+    );
 
     const [docs, findings] = await Promise.all([
       loadRelatedDocSections(
@@ -240,7 +219,7 @@ export const repoDetailsService = {
 
     return {
       ...buildInteractiveBriefNodePayload(
-        toInteractiveBriefNodePayloadInput({ explain, structureNode })
+        repoDetailsPresenter.toInteractiveBriefNodePayloadInput({ explain, structureNode })
       ),
       related: {
         docs,
@@ -251,28 +230,32 @@ export const repoDetailsService = {
     };
   },
 
-  async getNodeExplain(db: DbClient, repoId: string, nodeId: string) {
-    const analyzeContext = await loadAnalyzeContextBuilderOrThrow(db, repoId);
+  async getNodeExplain(db: DbClient, repoId: string, nodeId: string, aid?: string) {
+    const analyzeContext = await loadAnalyzeContextBuilderOrThrow(db, repoId, aid);
     return analyzeContext.getNodeExplain(nodeId);
   },
 
-  async getOverview(db: DbClient, repoId: string) {
-    const repo = await loadRepoOrThrow(db, repoId);
+  async getOverview(db: DbClient, repoId: string, aid?: string) {
+    const repo = await loadRepoOrThrow(db, repoId, aid);
     return repoDetailsPresenter.toOverview(repo);
   },
 
-  async getStructureMap(db: DbClient, repoId: string) {
-    const analyzeContext = await loadAnalyzeContextBuilderOrThrow(db, repoId);
+  async getStructureMap(db: DbClient, repoId: string, aid?: string) {
+    const analyzeContext = await loadAnalyzeContextBuilderOrThrow(db, repoId, aid);
     return analyzeContext.getStructureMap();
   },
 
-  async getStructureNode(db: DbClient, repoId: string, nodeId: string) {
-    const analyzeContext = await loadAnalyzeContextBuilderOrThrow(db, repoId);
+  async getStructureNode(db: DbClient, repoId: string, nodeId: string, aid?: string) {
+    const analyzeContext = await loadAnalyzeContextBuilderOrThrow(db, repoId, aid);
     return analyzeContext.getStructureNode(nodeId);
   },
 
-  async getWorkspace(db: DbClient, repoId: string): Promise<null | RepoWorkspacePayload> {
-    const repo = await loadRepoOrThrow(db, repoId);
+  async getWorkspace(
+    db: DbClient,
+    repoId: string,
+    aid?: string
+  ): Promise<null | RepoWorkspacePayload> {
+    const repo = await loadRepoOrThrow(db, repoId, aid);
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const overview = repoDetailsPresenter.toOverview(repo);
     const structure = analyzeContext.getStructureMap();
@@ -297,7 +280,7 @@ export const repoDetailsService = {
       mostComplexFiles: overview.mostComplexFiles,
       navigation: {
         defaultNodeId: structure.selection.defaultNodeId,
-        keyZones: structure.graph.nodes.slice(0, 6),
+        keyZones: structure.graph.nodes,
         primaryEntrypoints: structure.overview.primaryEntrypoints,
         primaryModules: structure.overview.primaryModules,
       },
@@ -349,12 +332,17 @@ export const repoDetailsService = {
     return { html };
   },
 
-  async searchWorkspace(db: DbClient, repoId: string, search: string): Promise<RepoSearchResult[]> {
+  async searchWorkspace(
+    db: DbClient,
+    repoId: string,
+    search: string,
+    aid?: string
+  ): Promise<RepoSearchResult[]> {
     const normalizedSearch = normalizeSearchInput(search);
     const terms = tokenizeSearchInput(search);
     if (normalizedSearch == null || terms.length === 0) return [];
 
-    const repo = await loadRepoOrThrow(db, repoId);
+    const repo = await loadRepoOrThrow(db, repoId, aid);
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const structure = analyzeContext.getStructureMap();
     const structureContext = analyzeContext.getEntityContext().structureContext;
@@ -362,7 +350,7 @@ export const repoDetailsService = {
 
     if (structure == null || structureContext == null || payload == null) return [];
 
-    const docs = await loadLatestDocumentsWithContent(db, repoId);
+    const docs = await loadLatestDocumentsWithContent(db, repoId, aid);
     const results: RepoSearchResult[] = [];
 
     for (const node of structure.graph.nodes) {
@@ -462,205 +450,8 @@ export const repoDetailsService = {
       }
     }
 
-    return dedupeSearchResults(results)
-      .toSorted((left, right) => right.score - left.score || left.label.localeCompare(right.label))
-      .slice(0, 24);
+    return dedupeSearchResults(results).toSorted(
+      (left, right) => right.score - left.score || left.label.localeCompare(right.label)
+    );
   },
 };
-
-async function loadRepoOrThrow(db: DbClient, repoId: string) {
-  const repo = await getRepoWithLatestAnalysisAndDocs(db, repoId);
-  if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
-  return repo;
-}
-
-async function loadAnalyzeContextBuilderOrThrow(db: DbClient, repoId: string) {
-  return createAnalyzeContextBuilder(await loadRepoOrThrow(db, repoId));
-}
-
-function mapExplainBase(explain: ExplainPayload) {
-  return {
-    confidence: explain.confidence,
-    nextSuggestedPaths: explain.nextSuggestedPaths,
-    relationships: explain.relationships,
-    role: explain.role,
-    sourcePaths: explain.sourcePaths,
-    summary: explain.summary,
-    whyImportant: explain.whyImportant,
-  };
-}
-
-function mapStructureNodeBase(structureNode: StructureNodePayload) {
-  return {
-    breadcrumbs: structureNode.breadcrumbs.map((item) => ({
-      id: item.id,
-      label: item.label,
-      path: item.path,
-    })),
-    canDrillDeeper: structureNode.canDrillDeeper,
-    children: structureNode.children,
-    edges: structureNode.edges,
-    inspect: structureNode.inspect,
-    node: structureNode.node,
-  };
-}
-
-async function loadLatestDocumentsWithContent(db: DbClient, repoId: string) {
-  const docs = await db.document.findMany({
-    orderBy: { updatedAt: "desc" },
-    select: {
-      content: true,
-      publicId: true,
-      type: true,
-      updatedAt: true,
-      version: true,
-    },
-    where: { repo: { publicId: repoId } },
-  });
-
-  return pickLatestDocsByType(docs);
-}
-
-async function loadRelatedDocSections(
-  db: DbClient,
-  repoId: string,
-  nodeId: string,
-  nodeLabel: string,
-  relatedFiles: string[],
-  analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>
-) {
-  const docs = await loadLatestDocumentsWithContent(db, repoId);
-  const graph = analyzeContext.getStructureMap()?.graph ?? null;
-  const fileTerms = relatedFiles.flatMap((path) => {
-    const fileName = basename(path);
-    return [fileName.toLowerCase(), path.toLowerCase()];
-  });
-
-  return docs
-    .flatMap((doc) => {
-      const formatted = DocumentFormatter.withGraphLinks(doc.content, graph, doc.type, doc.version);
-
-      return formatted.sections
-        .filter((section) => {
-          const lowerTitle = section.title.toLowerCase();
-          const lowerContent = section.content.toLowerCase();
-
-          return (
-            section.graphNodeIds.includes(nodeId) ||
-            lowerTitle.includes(nodeLabel.toLowerCase()) ||
-            fileTerms.some((term) => lowerTitle.includes(term) || lowerContent.includes(term))
-          );
-        })
-        .slice(0, 4)
-        .map((section) => ({
-          docId: doc.publicId,
-          docType: doc.type,
-          id: section.id,
-          title: section.title,
-        }));
-    })
-    .slice(0, 8);
-}
-
-async function loadRelatedPrFindings(db: DbClient, repoId: string, relatedFiles: string[]) {
-  if (relatedFiles.length === 0) return [];
-
-  const comments = await db.pullRequestComment.findMany({
-    orderBy: [{ analysis: { createdAt: "desc" } }, { riskLevel: "desc" }],
-    select: {
-      analysis: {
-        select: {
-          prNumber: true,
-          publicId: true,
-        },
-      },
-      body: true,
-      filePath: true,
-      findingType: true,
-      line: true,
-      publicId: true,
-      riskLevel: true,
-    },
-    take: 12,
-    where: {
-      analysis: { repo: { publicId: repoId } },
-      filePath: { in: relatedFiles },
-    },
-  });
-
-  return comments.map((comment) => ({
-    body: comment.body,
-    filePath: comment.filePath,
-    findingType: comment.findingType,
-    id: comment.publicId,
-    line: comment.line,
-    prAnalysisId: comment.analysis.publicId,
-    prNumber: comment.analysis.prNumber,
-    riskLevel: comment.riskLevel,
-  }));
-}
-
-async function loadRelatedFixes(db: DbClient, analysisIds: string[]) {
-  const uniqueIds = unique(analysisIds.filter((id) => id.length > 0));
-  if (uniqueIds.length === 0) return [];
-
-  const fixes = await db.generatedFix.findMany({
-    orderBy: { createdAt: "desc" },
-    select: {
-      githubPrNumber: true,
-      githubPrUrl: true,
-      publicId: true,
-      status: true,
-      title: true,
-    },
-    take: 8,
-    where: {
-      prAnalysis: {
-        publicId: { in: uniqueIds },
-      },
-    },
-  });
-
-  return fixes.map((fix) => ({
-    githubPrNumber: fix.githubPrNumber,
-    githubPrUrl: fix.githubPrUrl,
-    id: fix.publicId,
-    status: fix.status,
-    title: fix.title,
-  }));
-}
-
-function scoreSearchMatch(terms: string[], values: Array<null | string | undefined>) {
-  const haystack = values
-    .filter((value): value is string => typeof value === "string" && value.length > 0)
-    .map((value) => value.toLowerCase());
-
-  if (haystack.length === 0) return 0;
-
-  let score = 0;
-  for (const term of terms) {
-    const exact = haystack.includes(term);
-    const prefix = haystack.some((value) => value.startsWith(term));
-    const partial = haystack.some((value) => value.includes(term));
-
-    if (exact) score += 12;
-    else if (prefix) score += 8;
-    else if (partial) score += 4;
-    else return 0;
-  }
-
-  return score;
-}
-
-function dedupeSearchResults(results: RepoSearchResult[]) {
-  const sortedByBest = orderBy(results, [(r) => r.score], ["desc"]);
-
-  const unique = uniqBy(sortedByBest, (r) => r.id);
-
-  return orderBy(unique, [(r) => r.score, (r) => r.label], ["desc", "asc"]);
-}
-
-function pickLatestDocsByType<TDoc extends { type: DocType; updatedAt: Date }>(docs: TDoc[]) {
-  const latest = uniqBy(orderBy(docs, [(d) => d.updatedAt], ["desc"]), (d) => d.type);
-  return orderBy(latest, [(d) => d.type], ["asc"]);
-}

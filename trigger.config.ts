@@ -9,15 +9,11 @@ if (!process.env.DATABASE_URL!) {
 }
 
 export default defineConfig({
-  additionalFiles: [
-    "node_modules/web-tree-sitter/web-tree-sitter.wasm",
-    "node_modules/tree-sitter-wasms/out/*.wasm",
-  ],
   build: {
     extensions: [
       additionalFiles({
         files: [
-          "node_modules/web-tree-sitter/web-tree-sitter.wasm",
+          "node_modules/web-tree-sitter/tree-sitter.wasm",
           "node_modules/tree-sitter-wasms/out/*.wasm",
         ],
       }),
@@ -27,7 +23,7 @@ export default defineConfig({
           console.log("ZenStack generating...");
           try {
             // eslint-disable-next-line sonarjs/no-os-command-from-path
-            execSync("npx zenstack generate --schema prisma/schema.zmodel", {
+            execSync("pnpm zenstack generate --schema prisma/schema.zmodel", {
               env: { ...process.env },
               stdio: "inherit",
             });

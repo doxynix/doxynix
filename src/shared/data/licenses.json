@@ -764,6 +764,25 @@
     ]
   },
   {
+    "author": "Trigger.dev",
+    "avatar": "https://github.com/triggerdotdev.png?size=96",
+    "authorLink": "https://github.com/triggerdotdev",
+    "packages": [
+      {
+        "name": "@trigger.dev/build",
+        "license": "MIT"
+      },
+      {
+        "name": "@trigger.dev/react-hooks",
+        "license": "MIT"
+      },
+      {
+        "name": "@trigger.dev/sdk",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "tRPC",
     "avatar": "https://github.com/trpc.png?size=96",
     "authorLink": "https://github.com/trpc",
@@ -1012,21 +1031,6 @@
     ]
   },
   {
-    "author": "Trigger.dev",
-    "avatar": "https://github.com/triggerdotdev.png?size=96",
-    "authorLink": "https://github.com/triggerdotdev",
-    "packages": [
-      {
-        "name": "@trigger.dev/build",
-        "license": "MIT"
-      },
-      {
-        "name": "@trigger.dev/sdk",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
     "author": "TypeScript ESLint",
     "avatar": "https://github.com/typescript-eslint.png?size=96",
     "authorLink": "https://github.com/typescript-eslint",
@@ -1037,6 +1041,21 @@
       },
       {
         "name": "@typescript-eslint/parser",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Unjs",
+    "avatar": "https://github.com/unjs.png?size=96",
+    "authorLink": "https://github.com/unjs",
+    "packages": [
+      {
+        "name": "defu",
+        "license": "MIT"
+      },
+      {
+        "name": "pathe",
         "license": "MIT"
       }
     ]
@@ -1970,6 +1989,17 @@
     ]
   },
   {
+    "author": "Tamino-martinius",
+    "avatar": "https://github.com/tamino-martinius.png?size=96",
+    "authorLink": "https://github.com/tamino-martinius",
+    "packages": [
+      {
+        "name": "ts-dedent",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Tree-sitter",
     "avatar": "https://github.com/tree-sitter.png?size=96",
     "authorLink": "https://github.com/tree-sitter",
@@ -1987,17 +2017,6 @@
     "packages": [
       {
         "name": "husky",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "Unjs",
-    "avatar": "https://github.com/unjs.png?size=96",
-    "authorLink": "https://github.com/unjs",
-    "packages": [
-      {
-        "name": "pathe",
         "license": "MIT"
       }
     ]

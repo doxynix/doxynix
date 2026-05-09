@@ -38,7 +38,7 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
-  const { name, owner } = useRepoParams();
+  const { aid, name, owner } = useRepoParams();
   const [search] = useQueryState("search", parseAsString.withDefault(""));
 
   const [prevSearch, setPrevSearch] = useState(search);
@@ -53,7 +53,7 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
   const isQueryEnabled = trimmedSearch.length >= 2;
 
   const { data, isFetching } = trpc.repoDetails.searchWorkspace.useQuery(
-    { repoId, search: trimmedSearch },
+    { aid: aid ?? undefined, repoId, search: trimmedSearch },
     {
       enabled: isQueryEnabled,
     }

@@ -1,21 +1,17 @@
 /* eslint-disable sonarjs/slow-regex */
 /* eslint-disable sonarjs/regex-complexity */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { compact, isString } from "es-toolkit";
 import ts from "typescript";
 
 import {
+  getRuntime,
   getSpecByExt,
-  initRuntime,
   loadLanguage,
   TREE_SITTER_SUPPORTED_EXTENSIONS,
 } from "../engine/extractors/tree-sitter-signals";
 import { getFileExtension } from "./path-operations";
-
-type ParserConstructor = {
-  new (): any;
-  init(): Promise<void>;
-};
 
 type AiTextLike = {
   content?: unknown;
@@ -92,21 +88,17 @@ export const CodeOptimizer = {
     const spec = getSpecByExt(ext);
     if (!spec) return code.slice(0, 5000);
 
+    let tree: any = null;
+    let parser: any = null;
+
     try {
-      await initRuntime();
+      const Parser = await getRuntime();
+      parser = new Parser();
 
-      // @ts-expect-error: web-tree-sitter entry point lacks type declarations
-      const mod = await import("web-tree-sitter/web-tree-sitter.cjs");
-      const Parser = (mod.default?.Parser ??
-        mod.Parser ??
-        mod.default ??
-        mod) as unknown as ParserConstructor;
-
-      const parser = new Parser();
       const lang = await loadLanguage(ext, spec);
       parser.setLanguage(lang);
 
-      const tree = parser.parse(code);
+      tree = parser.parse(code);
       const root = tree.rootNode;
 
       const bodyNodeTypes = new Set(["block", "compound_statement", "do_block", "function_body"]);
@@ -132,10 +124,14 @@ export const CodeOptimizer = {
       }
 
       tree.delete();
+      parser.delete();
       return result;
     } catch (error) {
       console.error("Polyglot skeletonizer error:", error);
       return code.slice(0, 5000);
+    } finally {
+      tree?.delete();
+      parser?.delete();
     }
   },
 

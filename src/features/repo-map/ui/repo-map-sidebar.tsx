@@ -2,6 +2,8 @@
 
 import { trpc } from "@/shared/api/trpc";
 
+import { useRepoParams } from "@/entities/repo/model/use-repo-params";
+
 import { RepoMapOverview } from "./repo-map-overview";
 import { RepoMapSidebarSkeleton } from "./repo-map-sidebar-skeleton";
 import { RepoNodeInspector } from "./repo-node-inspector";
@@ -16,15 +18,16 @@ type Props = {
 export function RepoMapSidebar({ nodeId, onClose, onNavigate, repoId }: Readonly<Props>) {
   const shouldLoadWorkspace = nodeId == null || nodeId.length === 0;
   const shouldLoadNodeContext = nodeId != null && nodeId.length > 0;
+  const { aid } = useRepoParams();
 
   const { data: workspace, isLoading: isWorkspaceLoading } = trpc.repoDetails.getWorkspace.useQuery(
-    { repoId },
+    { aid: aid ?? undefined, repoId },
     { enabled: shouldLoadWorkspace }
   );
 
   const { data: nodeContext, isLoading: isNodeContextLoading } =
     trpc.repoDetails.getNodeContext.useQuery(
-      { nodeId: nodeId ?? "", repoId },
+      { aid: aid ?? undefined, nodeId: nodeId ?? "", repoId },
       { enabled: shouldLoadNodeContext }
     );
 

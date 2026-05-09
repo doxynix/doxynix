@@ -26,11 +26,13 @@ const DashboardStatsOutputSchema = z.object({
     })
   ),
   overview: z.object({
-    avgComplexityScore: z.number(),
-    avgHealthScore: z.number(),
-    avgOnboardingScore: z.number(),
-    avgSecurityScore: z.number(),
-    avgTechDebtScore: z.number(),
+    avgScores: z.object({
+      complexity: z.number(),
+      health: z.number(),
+      onboarding: z.number(),
+      security: z.number(),
+      techDebt: z.number(),
+    }),
     complexityDelta: z.number(),
     criticalRepoCount: z.number(),
     docsCount: z.number(),
@@ -86,6 +88,7 @@ const TrendsOutputSchema = z.array(
 const InputSchema = z.object({
   from: z.date().optional(),
   period: z.string().optional().default("30d"),
+  repoId: z.string().optional(),
   to: z.date().optional(),
 });
 

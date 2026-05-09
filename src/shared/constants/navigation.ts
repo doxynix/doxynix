@@ -219,12 +219,6 @@ export const getRepoDetailsMenu = (owner: string, name: string): MenuItems => {
       label: "History",
     },
     {
-      href: `${base}/metrics`,
-      icon: BarChart3,
-      id: "metrics",
-      label: "Metrics",
-    },
-    {
       href: `${base}/settings`,
       icon: Settings,
       id: "settings",

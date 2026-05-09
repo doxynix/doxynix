@@ -1,7 +1,7 @@
 import "server-only";
 
 import fs from "node:fs";
-import { resolve } from "pathe";
+import { join, resolve } from "pathe";
 
 import { logger } from "../../infrastructure/logger";
 import { getFileExtension } from "../../lib/path-operations";
@@ -30,8 +30,6 @@ type LanguageSpec = {
   wasm: string;
   wasmPackage?: string;
 };
-
-declare const process: { cwd(): string };
 
 const SPECS: Record<string, LanguageSpec> = {
   ".c": {
@@ -279,66 +277,80 @@ const SPECS: Record<string, LanguageSpec> = {
 
 export const TREE_SITTER_SUPPORTED_EXTENSIONS = Object.keys(SPECS);
 
-let ParserRuntime: any;
-let LanguageRuntime: any;
+let runtimeInitPromise: null | Promise<{ mod: any; Parser: any }> = null;
 const languageCache = new Map<string, Promise<any>>();
-let runtimeInitPromise: null | Promise<void> = null;
-const smokeCheckedExtensions = new Set<string>();
 
 export async function initRuntime() {
-  if (runtimeInitPromise != null) return await runtimeInitPromise;
+  if (runtimeInitPromise) return runtimeInitPromise;
 
   runtimeInitPromise = (async () => {
-    // @ts-expect-error: web-tree-sitter entry point lacks type declarations
-    const mod = await import("web-tree-sitter/web-tree-sitter.cjs");
-    const Parser = mod.default ?? mod.Parser ?? mod;
+    //eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require("web-tree-sitter");
 
-    const cloudWasm = resolve(process.cwd(), "web-tree-sitter.wasm");
-    const localWasm = resolve(process.cwd(), "node_modules/web-tree-sitter/web-tree-sitter.wasm");
+    let Parser = mod.Parser;
 
-    const finalWasmPath = fs.existsSync(cloudWasm) ? cloudWasm : localWasm;
+    if (!Parser || typeof Parser.init !== "function") {
+      Parser = mod.default;
+    }
 
-    await (Parser as any).init({
+    if (!Parser || typeof Parser.init !== "function") {
+      Parser = mod;
+    }
+
+    if (!Parser || typeof Parser.init !== "function") {
+      throw new Error(`[TreeSitter] Could not find Parser.init. Module keys: ${Object.keys(mod)}`);
+    }
+
+    const runtimeWasmName = "tree-sitter.wasm";
+    const pathsToTry = [
+      resolve(process.cwd(), runtimeWasmName),
+      resolve(process.cwd(), "node_modules/web-tree-sitter", runtimeWasmName),
+      join(resolve(require.resolve("web-tree-sitter"), ".."), runtimeWasmName),
+    ];
+
+    const finalWasmPath = pathsToTry.find((p) => fs.existsSync(p));
+    if (!finalWasmPath) {
+      throw new Error(`[TreeSitter] Runtime WASM not found. Checked: ${pathsToTry.join(", ")}`);
+    }
+
+    await Parser.init({
       locateFile: (name: string) => {
-        if (name === "tree-sitter.wasm" || name === "web-tree-sitter.wasm") {
+        if (name === "tree-sitter.wasm") {
           return finalWasmPath;
         }
         return name;
       },
     });
 
-    ParserRuntime = Parser;
-    LanguageRuntime = Parser.Language;
-  })().catch((error) => {
-    runtimeInitPromise = null;
-    logger.error({ error, msg: "Failed to initialize tree-sitter runtime" });
-    throw error;
-  });
+    logger.info({ msg: "Tree-sitter runtime ready", wasm: finalWasmPath });
 
-  return await runtimeInitPromise;
+    return { mod, Parser };
+  })();
+
+  return runtimeInitPromise;
 }
 
 export async function loadLanguage(ext: string, spec: LanguageSpec) {
+  const { mod, Parser } = await initRuntime();
+
   if (!languageCache.has(ext)) {
     languageCache.set(
       ext,
       (async () => {
-        await initRuntime();
         const wasmPath = resolveGrammarWasmPath(spec);
-        const language = await LanguageRuntime.load(wasmPath);
 
-        if (!smokeCheckedExtensions.has(ext) && (ext === ".go" || ext === ".py")) {
-          smokeCheckedExtensions.add(ext);
-          logger.info({
-            ext,
-            msg: "Tree-sitter language runtime loaded successfully",
-            wasmPath: spec.wasm,
-          });
+        const Language = Parser.Language || mod.Language || mod.default?.Language;
+
+        if (!Language || typeof Language.load !== "function") {
+          throw new Error(`[TreeSitter] Language.load is missing!`);
         }
 
-        return language;
+        const wasmBytes = fs.readFileSync(wasmPath);
+
+        return await Language.load(wasmBytes);
       })().catch((error) => {
         languageCache.delete(ext);
+        logger.error({ error, ext, msg: "Failed to load language grammar" });
         throw error;
       })
     );
@@ -347,11 +359,32 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
   return await languageCache.get(ext);
 }
 
-function resolveGrammarWasmPath(spec: LanguageSpec) {
-  const cloudPath = resolve(process.cwd(), spec.wasm);
-  const localPath = resolve(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm);
+function resolveGrammarWasmPath(spec: LanguageSpec): string {
+  const candidates = [
+    resolve(process.cwd(), spec.wasm),
+    resolve(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm),
+    resolve(import.meta.dirname ?? "", "../../../vendor/wasms", spec.wasm),
+  ];
 
-  return fs.existsSync(cloudPath) ? cloudPath : localPath;
+  for (const path of candidates) {
+    if (fs.existsSync(path)) {
+      return path;
+    }
+  }
+
+  const errorContext = {
+    checkedPaths: candidates,
+    cwd: process.cwd(),
+    env: process.env.NODE_ENV,
+    specWasm: spec.wasm,
+  };
+
+  logger.error({ errorContext, msg: "Tree-sitter grammar not found" });
+
+  throw new Error(
+    `[TreeSitter] Grammar WASM not found: ${spec.wasm}. ` +
+      `Ensure it is included in trigger.config.ts additionalFiles.`
+  );
 }
 
 function lineOf(content: string, fragment: string) {
@@ -400,8 +433,12 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
   if (!spec) return null;
 
   try {
+    // Получаем Parser из промиса
+    const { Parser } = await initRuntime();
     const lang = await loadLanguage(ext, spec);
-    const parser = new ParserRuntime();
+
+    // Создаем инстанс
+    const parser = new Parser();
     let tree: any;
 
     try {
@@ -476,7 +513,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
       return {
         analysisMode: "tree-sitter",
         apiSurface: Math.max(apiSurface, routes.length),
-        confidence: CONFIDENCE_LEVELS.astStructure, // AST-based extraction has high confidence
+        confidence: CONFIDENCE_LEVELS.astStructure,
         entrypointHint: spec.entrypoints.some((re) => re.test(file.content)),
         exports,
         frameworkHints,
@@ -502,8 +539,8 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
 }
 
 export async function getRuntime() {
-  await initRuntime();
-  return ParserRuntime;
+  const { Parser } = await initRuntime();
+  return Parser;
 }
 
 export function getSpecByExt(ext: string) {

@@ -12,6 +12,7 @@ import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";
 import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
 
 import { PrDraftSheet } from "./pr-draft-sheet";
+import { RepoVersionSelector } from "./repo-version-selector";
 
 type Props = { repo: UiRepoDetailed };
 
@@ -23,29 +24,32 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
 
   return (
     <div className="mx-auto w-full space-y-4">
-      <div className="flex items-center gap-4">
-        <AppAvatar alt={repo.owner} fallbackText={repo.owner} src={repo.ownerAvatarUrl} />
-        <h1 className="flex gap-1 text-2xl font-bold">
-          <Link href={`/dashboard/repo/${ownerSlug}`} className="hover:underline">
-            {repo.owner}
-          </Link>
-          <span>/</span>
-          <Link href={`/dashboard/repo/${ownerSlug}/${repoSlug}`} className="hover:underline">
-            {repo.name}
-          </Link>
-        </h1>
-        <PrDraftSheet repoId={repo.id} />
-        <Badge variant="outline" className={visibility.color}>
-          {visibility.label}
-        </Badge>
-        <Badge variant="outline" className={status.color}>
-          {status.label}
-        </Badge>
-        <Button asChild variant="outline">
-          <ExternalLink href={repo.url} className="hover:text-foreground">
-            <GitHubIcon className="size-4" /> Github
-          </ExternalLink>
-        </Button>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <AppAvatar alt={repo.owner} fallbackText={repo.owner} src={repo.ownerAvatarUrl} />
+          <h1 className="flex gap-1 text-2xl font-bold">
+            <Link href={`/dashboard/repo/${ownerSlug}`} className="hover:underline">
+              {repo.owner}
+            </Link>
+            <span>/</span>
+            <Link href={`/dashboard/repo/${ownerSlug}/${repoSlug}`} className="hover:underline">
+              {repo.name}
+            </Link>
+          </h1>
+          <PrDraftSheet repoId={repo.id} />
+          <Badge variant="outline" className={visibility.color}>
+            {visibility.label}
+          </Badge>
+          <Badge variant="outline" className={status.color}>
+            {status.label}
+          </Badge>
+          <Button asChild variant="outline">
+            <ExternalLink href={repo.url} className="hover:text-foreground">
+              <GitHubIcon className="size-4" /> Github
+            </ExternalLink>
+          </Button>
+        </div>
+        <RepoVersionSelector repoId={repo.id} />
       </div>
     </div>
   );

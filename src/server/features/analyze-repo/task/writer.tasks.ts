@@ -146,3 +146,80 @@ export const changelogTask = task({
     userId: number;
   }) => executeChangelogWriter(i.analysisId, i.analysisResult, i.userId, i.repo, i.language),
 });
+
+export const docsWriterTask = task({
+  id: "docs-writer",
+  run: async (payload: any) => {
+    const { type, ...params } = payload;
+
+    switch (type) {
+      case "readme": {
+        return await executeReadmeWriter(
+          params.analysisId,
+          params.payload,
+          params.engineeringDossierPayload,
+          params.context,
+          params.allowedPaths,
+          params.language,
+          params.repoId,
+          params.userId,
+          params.branch
+        );
+      }
+      case "api": {
+        return await executeApiWriter(
+          params.analysisId,
+          params.payload,
+          params.engineeringDossierPayload,
+          params.context,
+          params.allowedPaths,
+          params.language,
+          params.repoId,
+          params.userId,
+          params.branch
+        );
+      }
+      case "architecture": {
+        return await executeArchitectureWriter(
+          params.analysisId,
+          params.payload,
+          params.risksPayload,
+          params.onboardingPayload,
+          params.moduleContext,
+          params.engineeringDossierPayload,
+          params.context,
+          params.allowedPaths,
+          params.language,
+          params.repoId,
+          params.userId,
+          params.branch
+        );
+      }
+      case "contributing": {
+        return await executeContributingWriter(
+          params.analysisId,
+          params.payload,
+          params.engineeringDossierPayload,
+          params.context,
+          params.allowedPaths,
+          params.language,
+          params.repoId,
+          params.userId,
+          params.branch
+        );
+      }
+      case "changelog": {
+        return await executeChangelogWriter(
+          params.analysisId,
+          params.analysisResult,
+          params.userId,
+          params.repo,
+          params.language
+        );
+      }
+      default: {
+        throw new Error(`Unknown writer type: ${type}`);
+      }
+    }
+  },
+});

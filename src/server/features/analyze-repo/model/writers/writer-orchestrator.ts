@@ -1,5 +1,5 @@
 import { DocType, type Repo } from "@prisma/client";
-import { runs } from "@trigger.dev/sdk";
+import { batch } from "@trigger.dev/sdk";
 
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "@/server/shared/engine/core/discovery.types";
@@ -170,94 +170,107 @@ export async function orchestrateWriterTasks(
     userId,
   };
 
-  const taskHandles: Array<{ id: string; name: WriterName }> = [];
+  const batchDefinitions: any[] = [];
 
   if (requestedDocs.includes(DocType.README)) {
-    const handle = await readmeTask.trigger({
-      allowedPaths: allowedPathsByWriter.readme,
-      analysisId,
-      context: writerContexts.readme.context,
-      engineeringDossierPayload,
-      language,
-      payload: writerInputs.readme.payload,
-      selectedTokens: writerContexts.readme.debug.selectedTokens,
-      ...authParams,
+    batchDefinitions.push({
+      payload: {
+        allowedPaths: allowedPathsByWriter.readme,
+        analysisId,
+        context: writerContexts.readme.context,
+        engineeringDossierPayload,
+        language,
+        payload: writerInputs.readme.payload,
+        selectedTokens: writerContexts.readme.debug.selectedTokens,
+        ...authParams,
+      },
+      task: readmeTask,
     });
-    taskHandles.push({ id: handle.id, name: "readme" });
   }
 
   if (requestedDocs.includes(DocType.API)) {
-    const handle = await apiTask.trigger({
-      allowedPaths: allowedPathsByWriter.api,
-      analysisId,
-      context: writerContexts.api.context,
-      engineeringDossierPayload,
-      language,
-      payload: writerInputs.api.payload,
-      selectedTokens: writerContexts.api.debug.selectedTokens,
-      ...authParams,
+    batchDefinitions.push({
+      payload: {
+        allowedPaths: allowedPathsByWriter.api,
+        analysisId,
+        context: writerContexts.api.context,
+        engineeringDossierPayload,
+        language,
+        payload: writerInputs.api.payload,
+        selectedTokens: writerContexts.api.debug.selectedTokens,
+        ...authParams,
+      },
+      task: apiTask,
     });
-    taskHandles.push({ id: handle.id, name: "api" });
   }
 
   if (requestedDocs.includes(DocType.ARCHITECTURE)) {
-    const handle = await architectureTask.trigger({
-      allowedPaths: allowedPathsByWriter.architecture,
-      analysisId,
-      context: writerContexts.architecture.context,
-      engineeringDossierPayload,
-      language,
-      moduleContext: architectureDependencyContextPayload,
-      onboardingPayload: serializeForWriter(documentationInput.sections.onboarding),
-      payload: writerInputs.architecture.payload,
-      risksPayload: serializeForWriter(documentationInput.sections.risks),
-      selectedTokens: writerContexts.architecture.debug.selectedTokens,
-      ...authParams,
+    batchDefinitions.push({
+      payload: {
+        allowedPaths: allowedPathsByWriter.architecture,
+        analysisId,
+        context: writerContexts.architecture.context,
+        engineeringDossierPayload,
+        language,
+        moduleContext: architectureDependencyContextPayload,
+        onboardingPayload: serializeForWriter(documentationInput.sections.onboarding),
+        payload: writerInputs.architecture.payload,
+        risksPayload: serializeForWriter(documentationInput.sections.risks),
+        selectedTokens: writerContexts.architecture.debug.selectedTokens,
+        ...authParams,
+      },
+      task: architectureTask,
     });
-    taskHandles.push({ id: handle.id, name: "architecture" });
   }
 
   if (requestedDocs.includes(DocType.CONTRIBUTING)) {
-    const handle = await contributingTask.trigger({
-      allowedPaths: allowedPathsByWriter.readme,
-      analysisId,
-      context: writerContexts.readme.context,
-      engineeringDossierPayload,
-      language,
-      payload: writerInputs.contributing.payload,
-      selectedTokens: writerContexts.readme.debug.selectedTokens,
-      ...authParams,
+    batchDefinitions.push({
+      payload: {
+        allowedPaths: allowedPathsByWriter.readme,
+        analysisId,
+        context: writerContexts.readme.context,
+        engineeringDossierPayload,
+        language,
+        payload: writerInputs.contributing.payload,
+        selectedTokens: writerContexts.readme.debug.selectedTokens,
+        ...authParams,
+      },
+      task: contributingTask,
     });
-    taskHandles.push({ id: handle.id, name: "contributing" });
   }
 
   if (requestedDocs.includes(DocType.CHANGELOG)) {
-    const handle = await changelogTask.trigger({
-      analysisId,
-      analysisResult,
-      language,
-      repo,
-      userId,
+    batchDefinitions.push({
+      payload: {
+        analysisId,
+        analysisResult,
+        language,
+        repo,
+        userId,
+      },
+      task: changelogTask,
     });
-    taskHandles.push({ id: handle.id, name: "changelog" });
   }
 
-  const results: WriterResult[] = [];
+  if (batchDefinitions.length === 0) {
+    return { generatedApiMarkdown: undefined, generatedReadme: undefined /* ... */ };
+  }
 
-  for (const handle of taskHandles) {
-    const runResult = await runs.poll(handle.id);
+  const { runs } = await batch.triggerByTaskAndWait(batchDefinitions);
 
-    if (runResult.isSuccess) {
-      results.push(runResult.output as WriterResult);
-    } else {
-      console.error(`Writer task ${handle.name} failed with status: ${runResult.status}`);
-      results.push({
-        error: runResult.error?.message ?? "Unknown task error",
-        name: handle.name,
-        status: "failed",
-      });
+  const results: WriterResult[] = runs.map((run, index) => {
+    const taskName = batchDefinitions[index].task.id.replace("-task", "") as WriterName;
+
+    if (run.ok) {
+      return run.output as WriterResult;
     }
-  }
+
+    return {
+      error: run.error instanceof Error ? run.error.message : "Writer task failed",
+      name: taskName,
+      status: "failed",
+    };
+  });
 
   const writerErrors: Partial<Record<WriterName, string>> = {};
   for (const result of results) {

@@ -97,6 +97,8 @@ const nextConfig: NextConfig = {
     const connectSrc = [
       "'self'",
       IS_DEV ? "ws://localhost:*" : "",
+      "https://api.trigger.dev",
+      "wss://api.trigger.dev",
       "https://cdn.jsdelivr.net",
       "https://ufs.sh",
       "https://*.ufs.sh",

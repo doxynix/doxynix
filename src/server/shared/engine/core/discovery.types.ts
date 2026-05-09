@@ -169,6 +169,7 @@ export interface HotspotSignal extends BaseSignal {
   churnScore: number;
   complexity: number;
   inbound: number;
+  lines: number;
   outbound: number;
   score: number;
   source: "risk-model";

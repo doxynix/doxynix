@@ -80,7 +80,7 @@ export function NotificationCard({ notification }: Readonly<Props>) {
               className="hover:text-destructive"
             />
           </div>
-          <TimeAgo date={notification.createdAt} locale={locale} />
+          <TimeAgo date={notification.createdAt} locale={locale} className="z-10 w-fit text-xs" />
         </div>
       </CardContent>
     </Card>

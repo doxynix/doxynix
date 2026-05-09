@@ -101,7 +101,7 @@ export function RepoCodeEditor({
           highlightChanges
           collapseUnchanged={{ margin: 3, minSize: 4 }}
           theme={githubDark}
-          className="h-full w-full"
+          className="cm-merge-container h-full w-full flex-1"
         >
           <Original
             value={compareValue}
@@ -121,6 +121,23 @@ export function RepoCodeEditor({
             className="h-full text-xs"
           />
         </CodeMirrorMerge>
+        <style global jsx>{`
+          .cm-merge-container {
+            height: 100% !important;
+            display: flex !important;
+            flex-direction: row !important;
+          }
+          .cm-merge-container .cm-editor {
+            height: 100% !important;
+          }
+          .cm-mergeView {
+            height: 100% !important;
+            overflow: hidden !important;
+          }
+          .cm-scroller {
+            overflow: auto !important;
+          }
+        `}</style>
       </div>
     );
   }

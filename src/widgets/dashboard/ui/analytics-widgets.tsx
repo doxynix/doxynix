@@ -62,7 +62,7 @@ export function EcosystemStatusWidget({ data }: Readonly<Props>) {
             <p className="text-muted-foreground text-sm">No repositories found in ecosystem</p>
           </div>
         ) : (
-          <QualityRadar data={data} />
+          <QualityRadar scores={data.overview.avgScores} />
         )}
       </CardContent>
     </Card>
@@ -329,13 +329,23 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
   );
 }
 
-export function QualityRadar({ data }: Readonly<Props>) {
+type QualityRadarProps = {
+  scores: {
+    complexity: number;
+    health: number;
+    onboarding: number;
+    security: number;
+    techDebt: number;
+  };
+};
+
+export function QualityRadar({ scores }: Readonly<QualityRadarProps>) {
   const chartData = [
-    { fullMark: 100, subject: "Health", value: data.overview.avgHealthScore },
-    { fullMark: 100, subject: "Security", value: data.overview.avgSecurityScore },
-    { fullMark: 100, subject: "Simplicity", value: 100 - data.overview.avgComplexityScore },
-    { fullMark: 100, subject: "Onboarding", value: data.overview.avgOnboardingScore },
-    { fullMark: 100, subject: "Maintainability", value: 100 - data.overview.avgTechDebtScore },
+    { fullMark: 100, subject: "Health", value: scores.health },
+    { fullMark: 100, subject: "Security", value: scores.security },
+    { fullMark: 100, subject: "Simplicity", value: 100 - scores.complexity },
+    { fullMark: 100, subject: "Onboarding", value: scores.onboarding },
+    { fullMark: 100, subject: "Maintainability", value: 100 - scores.techDebt },
   ];
 
   const config = {
