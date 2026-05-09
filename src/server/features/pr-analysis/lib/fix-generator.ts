@@ -55,7 +55,7 @@ class FixGenerator {
           newContent: "",
         }));
 
-        const diffs = this.generateDiffsFromContent(fileContents, fixedFiles);
+        const diffs = FixGenerator.generateDiffsFromContentPublic(fileContents, fixedFiles);
 
         return {
           branch: `fix/${type}-${Date.now()}`,
@@ -100,13 +100,6 @@ class FixGenerator {
         title: `Fix ${type} issues`,
       }
     );
-  }
-
-  private static generateDiffsFromContent(
-    originalContents: Record<string, string>,
-    fixedFiles: FixedFileContent[]
-  ): GeneratedDiff[] {
-    return FixGenerator.generateDiffsFromContentPublic(originalContents, fixedFiles);
   }
 
   /**

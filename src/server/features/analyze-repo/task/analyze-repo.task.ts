@@ -13,7 +13,6 @@ import {
   computeGitChurnHotspots,
 } from "@/server/shared/engine/metrics/common-metrics";
 import { buildRepositoryArtifacts } from "@/server/shared/engine/pipeline/artifacts";
-import { buildDocumentationInputModel } from "@/server/shared/engine/pipeline/documentation-input";
 import { prisma } from "@/server/shared/infrastructure/db";
 import { cloneRepository, getAnalysisContext } from "@/server/shared/infrastructure/github/git";
 import { calculateBusFactor } from "@/server/shared/infrastructure/github/github-api";
@@ -76,7 +75,7 @@ export const analyzeRepoTask = task({
       );
 
       if (repo == null) {
-        taskLogger.finalize("Current commit SHA matches last analysis. Skipping re-run.");
+        await taskLogger.finalize("Current commit SHA matches last analysis. Skipping re-run.");
         return { reason: "SHA_MATCH", skipped: true };
       }
 
@@ -223,7 +222,7 @@ export const analyzeRepoTask = task({
       taskLogger.error(`Analysis failed: ${errorMessage}`);
       await taskLogger.finalize(analysisId, Status.FAILED);
 
-      logger.error({ msg: `Repo analyze failed: ${errorMessage}`, error });
+      logger.error({ error, msg: `Repo analyze failed: ${errorMessage}` });
 
       await handleError(error, analysisId, channelName, tempClonePath);
       throw error;

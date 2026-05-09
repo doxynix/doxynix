@@ -140,8 +140,8 @@ export async function callWithFallback<T>({
 
           metadata.append(taskLogs, logLine);
           logger.info({
-            msg: `AI Tool Call: ${part.toolName}`,
             analysisId: attemptMetadata.analysisId,
+            msg: `AI Tool Call: ${part.toolName}`,
           });
         } else if (part.type === "error") {
           const timestamp = new Date().toLocaleTimeString();

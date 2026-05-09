@@ -197,31 +197,37 @@ export const aiSchema = z.object({
   sections: z.object({
     api_structure: z.string(),
     data_flow: z.string(),
-    infrastructure_and_scaling: z.object({
-      bottlenecks: z.array(z.string()),
-      concurrency_risks: z.array(z.string()),
-      statelessness_check: z.string(),
-    }).optional(),
-    performance_audit: z.array(
-      z.object({
-        impact: z.string(),
-        issue: z.string(),
-        location: z.string(),
-        optimization_strategy: z.string(),
+    infrastructure_and_scaling: z
+      .object({
+        bottlenecks: z.array(z.string()),
+        concurrency_risks: z.array(z.string()),
+        statelessness_check: z.string(),
       })
-    ).optional(),
+      .optional(),
+    performance_audit: z
+      .array(
+        z.object({
+          impact: z.string(),
+          issue: z.string(),
+          location: z.string(),
+          optimization_strategy: z.string(),
+        })
+      )
+      .optional(),
     security_audit: z.object({
       attack_surface_analysis: z.string().optional(),
       risks: z.array(z.string()),
       score: z.number().min(0).max(10),
     }),
-    tech_debt_inventory: z.array(
-      z.object({
-        description: z.string(),
-        remediation_effort: z.enum(["LOW", "MEDIUM", "HIGH"]),
-        type: z.enum(["CODE_SMELL", "ARCHITECTURAL_ISSUE", "DOCUMENTATION_GAP"]),
-      })
-    ).optional(),
+    tech_debt_inventory: z
+      .array(
+        z.object({
+          description: z.string(),
+          remediation_effort: z.enum(["LOW", "MEDIUM", "HIGH"]),
+          type: z.enum(["CODE_SMELL", "ARCHITECTURAL_ISSUE", "DOCUMENTATION_GAP"]),
+        })
+      )
+      .optional(),
   }),
   securityScore: z.number().optional(),
   swaggerYaml: z.string().optional(),

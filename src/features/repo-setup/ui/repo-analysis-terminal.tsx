@@ -1,6 +1,5 @@
 "use client";
 
-import type { ref } from "process";
 import { useEffect, useRef } from "react";
 import { Terminal as TerminalIcon } from "lucide-react";
 
@@ -18,10 +17,10 @@ export function AnalysisTerminal({ logs }: Readonly<Props>) {
   }, [logs]);
 
   const colors = {
-    info: "text-blue",
-    warn: "text-warning",
     error: "text-error",
+    info: "text-blue",
     success: "text-success",
+    warn: "text-warning",
   };
 
   return (

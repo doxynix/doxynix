@@ -368,7 +368,9 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
 
       <div className="relative flex-1 overflow-hidden">
         <Editor
-          value={showDiff && documentResult?.content != null ? documentResult.content : localContent}
+          value={
+            showDiff && documentResult?.content != null ? documentResult.content : localContent
+          }
           compareValue={fileData.content}
           initialValue={fileData.content}
           meta={fileData.meta}

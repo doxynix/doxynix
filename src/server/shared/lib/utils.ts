@@ -75,6 +75,7 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
     taskLogger.log(`Reading: ${filePath}`);
 
     if (ProjectPolicy.isSensitive(filePath)) {
+      sensitiveCount++;
       taskLogger.log(`Skipping sensitive file: ${filePath}`);
 
       logger.warn({
@@ -99,7 +100,10 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
       const buffer = await fs.readFile(realFullPath);
       const isBinary = await isBinaryFile(buffer);
 
-      if (isBinary) return null;
+      if (isBinary) {
+        binaryCount++;
+        return null
+      };
 
       return { content: buffer.toString("utf-8"), path: filePath };
     } catch (error) {

@@ -1,4 +1,4 @@
-import { maxBy, orderBy } from "es-toolkit";
+import { orderBy } from "es-toolkit";
 import pm from "picomatch";
 
 import { unique } from "../../lib/array-utils";
@@ -231,14 +231,7 @@ export const ProjectPolicy = {
   ): ProjectPolicySemanticKind {
     const entries = Object.entries(counts) as [ProjectPolicySemanticKind, number][];
 
-    const sorted = orderBy(
-      entries,
-      [
-        (entry) => entry[1],
-        (entry) => entry[0],
-      ],
-      ["desc", "asc"]
-    );
+    const sorted = orderBy(entries, [(entry) => entry[1], (entry) => entry[0]], ["desc", "asc"]);
 
     return sorted[0]?.[0] ?? "unknown";
   },

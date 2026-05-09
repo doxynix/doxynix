@@ -5,29 +5,16 @@ import { prisma } from "../infrastructure/db";
 import { logger as internalLogger } from "../infrastructure/logger";
 import { TRIGGER_CONFIG } from "./trigger";
 
-export type LogLevel = "info" | "warn" | "error" | "success";
+export type LogLevel = "error" | "info" | "success" | "warn";
 
 /**
  * Утилита для управления прогрессом и логами таска.
  * Разделяет real-time поток (metadata) и вечное хранение (DB).
  */
 export const taskLogger = {
-  /**
-   * Хелперы для разных уровней логов
-   */
-  info(msg: string) {
-    this.log(msg, "info");
-  },
-  warn(msg: string) {
-    this.log(msg, "warn");
-  },
   error(msg: string) {
     this.log(msg, "error");
   },
-  success(msg: string) {
-    this.log(msg, "success");
-  },
-
   /**
    * Финальный синк. Вызывается один раз в конце.
    * Собирает ВСЕ логи из метаданных и кладет в БД на вечное хранение.
@@ -53,7 +40,12 @@ export const taskLogger = {
       this.error(`Analysis finalized with status: ${status}`);
     }
   },
-
+  /**
+   * Хелперы для разных уровней логов
+   */
+  info(msg: string) {
+    this.log(msg, "info");
+  },
   /**
    * Гранулярный лог. Только для real-time отображения.
    * Формат строки: "level:::timestamp:::message"
@@ -87,5 +79,13 @@ export const taskLogger = {
       },
       where: { publicId: analysisId },
     });
+  },
+
+  success(msg: string) {
+    this.log(msg, "success");
+  },
+
+  warn(msg: string) {
+    this.log(msg, "warn");
   },
 };
