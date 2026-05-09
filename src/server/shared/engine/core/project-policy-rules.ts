@@ -180,10 +180,6 @@ export const PATH_PATTERNS = {
   ],
 } as const;
 
-export function isBinaryExtension(ext: string): boolean {
-  return BINARY_EXTENSIONS_SET.has(ext.toLowerCase().replace(/^\./, ""));
-}
-
 export const PROJECT_POLICY_RULES = {
   categoryPolicy: {
     nonArchitectureCategories: new Set<FileCategory>([
@@ -579,12 +575,12 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
   // ==========================================
   // 6. GO ECOSYSTEM
   // ==========================================
-  { aliases: ["gin-gonic/gin", "github.com"], category: "framework", name: "Gin" },
-  { aliases: ["gorilla/mux", "github.com"], category: "framework", name: "Gorilla Mux" },
-  { aliases: ["labstack/echo", "github.com"], category: "framework", name: "Echo" },
-  { aliases: ["gofiber/fiber", "github.com"], category: "framework", name: "Fiber" },
-  { aliases: ["beego", "github.com"], category: "framework", name: "Beego" },
-  { aliases: ["revel", "github.com"], category: "framework", name: "Revel" },
+  { aliases: ["gin-gonic/gin"], category: "framework", name: "Gin" },
+  { aliases: ["gorilla/mux"], category: "framework", name: "Gorilla Mux" },
+  { aliases: ["labstack/echo"], category: "framework", name: "Echo" },
+  { aliases: ["gofiber/fiber"], category: "framework", name: "Fiber" },
+  { aliases: ["beego"], category: "framework", name: "Beego" },
+  { aliases: ["revel"], category: "framework", name: "Revel" },
 
   // ==========================================
   // 7. RUST ECOSYSTEM

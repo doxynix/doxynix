@@ -101,10 +101,6 @@ export function scoreStructuralModularity(params: {
   dependencyHotspots: DependencyNodeMetric[];
   orphanModules: string[];
 }): number {
-  if (params.dependencyHotspots.length === 0) {
-    return 100;
-  }
-
   const cyclePenalty = Math.min(
     STRUCTURAL_MODULARITY_SCORING.cyclePenaltyMax,
     params.dependencyCycles.length * STRUCTURAL_MODULARITY_SCORING.cycleMultiplier
@@ -116,7 +112,7 @@ export function scoreStructuralModularity(params: {
   );
 
   const rawMean = meanBy(params.dependencyHotspots, (h) => h.inbound);
-  const avgInbound = isNaN(rawMean) ? 0 : rawMean;
+  const avgInbound = Number.isNaN(rawMean) ? 0 : rawMean;
 
   const hotspotPenalty = clamp(avgInbound * 3, 0, STRUCTURAL_MODULARITY_SCORING.hotspotPenaltyMax);
 

@@ -1,8 +1,8 @@
 import type { Repository } from "@octokit/webhooks-types";
 import { Visibility } from "@prisma/client";
 
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prisma } from "@/server/shared/infrastructure/db";
-import { logger } from "@/server/shared/infrastructure/logger";
 
 /**
  * Оппортунистическое обновление данных репозитория из любого GitHub payload.
@@ -54,7 +54,7 @@ export async function syncRepoMetadata(repository: Repository): Promise<void> {
     });
 
     if (result.count > 0) {
-      logger.debug({
+      appLogger.debug({
         affectedRows: result.count,
         githubId: repository.id,
         msg: "repo_metadata_opportunistically_synced",
@@ -62,7 +62,7 @@ export async function syncRepoMetadata(repository: Repository): Promise<void> {
       });
     }
   } catch (error) {
-    logger.error({
+    appLogger.error({
       error: error instanceof Error ? error.message : String(error),
       githubId: repository.id,
       msg: "failed_to_sync_repo_metadata",

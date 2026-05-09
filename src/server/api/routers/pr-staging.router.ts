@@ -3,8 +3,8 @@ import { z } from "zod";
 
 import { generatedFixService } from "@/server/entities/pr-analysis/api/generated-fix.service";
 import { FixService } from "@/server/features/pr-analysis/lib/fix-generator";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { getInstallationClient } from "@/server/shared/infrastructure/github/github-provider";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { REDIS_CONFIG } from "@/server/shared/lib/redis";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -54,7 +54,7 @@ export const prStagingRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      logger.info({
+      appLogger.info({
         branch: input.branch,
         msg: "staged_pr_open_requested",
         repoId: input.repoId,
@@ -137,7 +137,7 @@ export const prStagingRouter = createTRPCRouter({
           success: true,
         };
       } catch (error) {
-        logger.error({
+        appLogger.error({
           error: error instanceof Error ? error.message : String(error),
           fixId: fix.publicId,
           msg: "staged_pr_open_failed",

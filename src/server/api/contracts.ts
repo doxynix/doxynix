@@ -48,8 +48,6 @@ export const NotificationsBulkFilterSchema = z
   })
   .superRefine(validateRepoPair);
 
-export type NotificationsBulkFilterInput = z.infer<typeof NotificationsBulkFilterSchema>;
-
 export const OpenApiErrorResponses = {
   400: "Invalid request",
   401: "Authorization required",

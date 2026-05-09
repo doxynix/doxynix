@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
-import { logger } from "../infrastructure/logger";
+import { appLogger } from "../infrastructure/app-logger";
 
 type ErrorMapping = {
   [key: string]: Record<string, string> | string | undefined;
@@ -66,7 +66,7 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
     const meta = prismaErrorMap[error.code];
 
     if (meta == null) {
-      logger.error({ error, msg: "Unhandled Prisma Error Code:" + error.code });
+      appLogger.error({ error, msg: "Unhandled Prisma Error Code:" + error.code });
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database error" });
     }
 
@@ -98,7 +98,7 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
     throw new TRPCError({ code: meta.code, message });
   }
 
-  logger.error({ error, msg: "Unknown Prisma Error:" });
+  appLogger.error({ error, msg: "Unknown Prisma Error:" });
   throw new TRPCError({
     code: "INTERNAL_SERVER_ERROR",
     message: "Internal database error",

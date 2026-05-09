@@ -246,5 +246,3 @@ export const aiSchema = z.object({
 });
 
 export type AIResult = z.infer<typeof aiSchema>;
-export type ProjectMap = z.infer<typeof projectMapSchema>;
-export type SentinelResult = z.infer<typeof sentinelSchema>;

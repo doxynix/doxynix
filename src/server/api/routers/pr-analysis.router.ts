@@ -7,7 +7,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { prAnalysisService } from "@/server/entities/pr-analysis/api/pr-analysis.service";
 import { prImpactService } from "@/server/entities/pr-analysis/api/pr-impact.service";
 import { PRConfigService } from "@/server/features/pr-analysis/lib/pr-config";
-import { logger } from "@/server/shared/infrastructure/logger";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { markdownToHtml } from "@/server/shared/lib/markdown-to-html";
 
 export const prAnalysisRouter = createTRPCRouter({
@@ -17,7 +17,7 @@ export const prAnalysisRouter = createTRPCRouter({
   configureRepository: protectedProcedure
     .input(UpdatePRConfigInput)
     .mutation(async ({ ctx, input }) => {
-      logger.info({
+      appLogger.info({
         msg: "pr_config_updating",
         repoId: input.repoId,
         userId: ctx.session.user.id,

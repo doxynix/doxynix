@@ -37,14 +37,6 @@ export type ReportSectionKind =
   | "overview"
   | "risks";
 
-export const REPORT_SECTION_KINDS = [
-  "overview",
-  "architecture",
-  "api_reference",
-  "risks",
-  "onboarding",
-] as const satisfies readonly ReportSectionKind[];
-
 export type ReportSectionInput<TBody> = {
   audience: "mixed" | DocumentationAudience;
   body: TBody;

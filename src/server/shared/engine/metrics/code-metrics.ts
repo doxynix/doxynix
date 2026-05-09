@@ -3,7 +3,7 @@ import { creator as canaryPreset } from "@secretlint/secretlint-rule-preset-cana
 import { isExtensionSupported, parse } from "leasot";
 import sloc, { type Extension } from "sloc";
 
-import { logger } from "../../infrastructure/logger";
+import { appLogger } from "../../infrastructure/app-logger";
 import { dumpDebug } from "../../lib/debug-logger";
 import { normalizeLanguageName } from "../../lib/language-metadata";
 import { getFileExtension } from "../../lib/path-operations";
@@ -69,7 +69,7 @@ async function collectSecuritySignals(normalizedPath: string, content: string) {
       status: "ok" as const,
     };
   } catch (error) {
-    logger.debug({
+    appLogger.debug({
       error,
       msg: "Secret scan skipped after analyzer failure",
       path: normalizedPath,
@@ -94,7 +94,7 @@ async function collectTodoCount(content: string, extensionWithDot: string, norma
     });
     return todos.length;
   } catch (error) {
-    logger.debug({
+    appLogger.debug({
       error,
       extension: extensionWithDot,
       msg: "TODO parsing skipped after analyzer failure",
@@ -115,7 +115,7 @@ function collectSourceStats(content: string, extension: string) {
       };
     }
   } catch (error) {
-    logger.debug({
+    appLogger.debug({
       error,
       extension,
       msg: "SLOC parser failed, using fallback line counting",

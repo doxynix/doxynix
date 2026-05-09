@@ -6,8 +6,8 @@ import type { OpenApiMeta } from "trpc-to-openapi";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
 
+import { appLogger } from "../shared/infrastructure/app-logger";
 import type { DbClient } from "../shared/infrastructure/db";
-import { logger } from "../shared/infrastructure/logger";
 import { buildRequestStore, requestContext, resolveRequestId } from "../shared/lib/request-context";
 import type { Context } from "./context";
 
@@ -84,9 +84,9 @@ const loggerMiddleware = t.middleware(async ({ next, path, type }) => {
   const meta = { durationMs, path, type };
 
   if (result.ok) {
-    logger.info({ ...meta, msg: `tRPC [${type}] ok: ${path}` });
+    appLogger.info({ ...meta, msg: `tRPC [${type}] ok: ${path}` });
   } else {
-    logger.error({
+    appLogger.error({
       ...meta,
       code: result.error.code,
       message: result.error.message,
@@ -94,7 +94,7 @@ const loggerMiddleware = t.middleware(async ({ next, path, type }) => {
       stack: result.error.code === "INTERNAL_SERVER_ERROR" ? result.error.stack : undefined,
     });
     if (IS_PROD) {
-      await logger.flush();
+      await appLogger.flush();
     }
   }
   return result;

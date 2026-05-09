@@ -8,8 +8,8 @@ import { ProjectPolicy } from "../../engine/core/project-policy";
 import { isOctokitError } from "../../lib/handle-error";
 import { getLanguageColor } from "../../lib/language-metadata";
 import { taskLogger } from "../../lib/task-logger";
+import { appLogger } from "../app-logger";
 import type { DbClient } from "../db";
-import { logger } from "../logger";
 import {
   getInstallationClient,
   getUserClient,
@@ -82,7 +82,7 @@ async function fetchInstallationRepos(installationId: number): Promise<RepoItemF
     const repos = await octokit.paginate(octokit.rest.apps.listReposAccessibleToInstallation);
     return mapRepos(repos as GitHubRepoResponse[]);
   } catch (error) {
-    logger.error({ error, installationId, msg: "Failed installation fetch" });
+    appLogger.error({ error, installationId, msg: "Failed installation fetch" });
     return [];
   }
 }
@@ -97,7 +97,7 @@ async function fetchOauthRepos(account: { access_token: null | string; id: numbe
     });
     return mapRepos(repos);
   } catch (error) {
-    logger.error({ accountId: account.id, error, msg: "Failed OAuth fetch" });
+    appLogger.error({ accountId: account.id, error, msg: "Failed OAuth fetch" });
     return [];
   }
 }
@@ -135,7 +135,7 @@ export async function getMyRepos(prisma: DbClient, userId: number): Promise<Repo
     // Deduplicate by fullName
     return dedupeReposByFullName(allRepos);
   } catch (error) {
-    logger.error({ error, msg: "Error fetching combined repositories", userId });
+    appLogger.error({ error, msg: "Error fetching combined repositories", userId });
     return [];
   }
 }
@@ -176,7 +176,7 @@ export async function searchRepos(
 
     return mapRepos(items as GitHubRepoResponse[]);
   } catch (error) {
-    logger.error({ error, msg: "GitHub search error" });
+    appLogger.error({ error, msg: "GitHub search error" });
     return [];
   }
 }
@@ -265,10 +265,10 @@ export async function getRepoTree(
     );
   } catch (error) {
     if (isOctokitError(error)) {
-      logger.info({ msg: "Repo empty or not found", status: error.status });
+      appLogger.info({ msg: "Repo empty or not found", status: error.status });
       return [];
     }
-    logger.error({ error, msg: "Error fetching repo tree" });
+    appLogger.error({ error, msg: "Error fetching repo tree" });
     throw error;
   }
 }
@@ -357,7 +357,7 @@ export async function executeWithFallback<T>(
           const fallbackOctokit = getUserClient(oauthAcc.access_token);
           return await operation(fallbackOctokit);
         } catch (fallbackError) {
-          logger.error({ error: fallbackError, msg: "Token didn't work in fallback" });
+          appLogger.error({ error: fallbackError, msg: "Token didn't work in fallback" });
           continue;
         }
       }
@@ -485,7 +485,7 @@ export async function calculateBusFactor(
         "GitHub: Bus Factor calculation failed (likely due to API limits). Defaulting to 0."
       );
 
-      logger.warn({
+      appLogger.warn({
         error,
         msg: "Failed to fetch contributors for Bus Factor calculation. Defaulting to 0.",
         repoId: repo.id,

@@ -6,7 +6,7 @@
  * that can be tuned globally while maintaining consistency.
  */
 
-import { logger } from "../../infrastructure/logger";
+import { appLogger } from "../../infrastructure/app-logger";
 
 // ============================================================================
 // COMPLEXITY SCORING
@@ -546,7 +546,7 @@ export function validateScoringConstants(): string[] {
 
   const uniqueCycleMultipliers = new Set(cycleMultipliers);
   if (uniqueCycleMultipliers.size > 1) {
-    logger.warn({
+    appLogger.warn({
       cycleMultipliers,
       msg: "Cycle multipliers differ across modules; review if intentional",
     });

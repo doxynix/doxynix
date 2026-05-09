@@ -13,10 +13,10 @@ import {
   computeGitChurnHotspots,
 } from "@/server/shared/engine/metrics/common-metrics";
 import { buildRepositoryArtifacts } from "@/server/shared/engine/pipeline/artifacts";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prisma } from "@/server/shared/infrastructure/db";
 import { cloneRepository, getAnalysisContext } from "@/server/shared/infrastructure/github/git";
 import { calculateBusFactor } from "@/server/shared/infrastructure/github/github-api";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { taskLogger } from "@/server/shared/lib/task-logger";
 import { cleanup, handleError, readAndFilterFiles } from "@/server/shared/lib/utils";
 
@@ -222,7 +222,7 @@ export const analyzeRepoTask = task({
       taskLogger.error(`Analysis failed: ${errorMessage}`);
       await taskLogger.finalize(analysisId, Status.FAILED);
 
-      logger.error({ error, msg: `Repo analyze failed: ${errorMessage}` });
+      appLogger.error({ error, msg: `Repo analyze failed: ${errorMessage}` });
 
       await handleError(error, analysisId, channelName, tempClonePath);
       throw error;
@@ -231,7 +231,7 @@ export const analyzeRepoTask = task({
       try {
         await cleanup(tempClonePath);
       } catch (cleanupError) {
-        logger.error({ cleanupError, msg: "Failed to clean up clone path", tempClonePath });
+        appLogger.error({ cleanupError, msg: "Failed to clean up clone path", tempClonePath });
       }
     }
   },

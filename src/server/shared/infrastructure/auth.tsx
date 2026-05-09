@@ -14,8 +14,8 @@ import { AuthEmail } from "@/shared/api/auth/templates/auth-email";
 import { IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
 import { AUTH_PROVIDERS, NEXTAUTH_SECRET, RESEND_API_KEY } from "@/shared/constants/env.server";
 
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prisma } from "@/server/shared/infrastructure/db";
-import { logger } from "@/server/shared/infrastructure/logger";
 
 import { maskEmail, normalizeEmail, validateEmailSafety } from "../lib/email-guard";
 import { emailSignInLimiter } from "./ratelimit";
@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
       });
 
       if (isBanned != null) {
-        logger.warn({
+        appLogger.warn({
           email: maskEmail(normalizedEmail),
           msg: "Banned user tried to sign in",
           userId,
@@ -68,7 +68,7 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!success) {
-          logger.warn({
+          appLogger.warn({
             email: maskEmail(normalizedEmail),
             ip,
             limitReason,
@@ -80,7 +80,7 @@ export const authOptions: NextAuthOptions = {
         const { reason: safetyReason, safe } = await validateEmailSafety(normalizedEmail);
 
         if (!safe) {
-          logger.warn({
+          appLogger.warn({
             email: maskEmail(normalizedEmail),
             ip,
             msg: "Security guard blocked email",
@@ -103,7 +103,7 @@ export const authOptions: NextAuthOptions = {
           data: { name: finalName },
           where: { id: Number(user.id) },
         });
-        logger.info({
+        appLogger.info({
           email: maskEmail(user.email),
           msg: "New user created",
           name: finalName,
@@ -139,7 +139,7 @@ export const authOptions: NextAuthOptions = {
           });
         }
 
-        logger.info({
+        appLogger.info({
           msg: "External account linked",
           provider: account.provider,
           type: "auth.link_account",
@@ -153,7 +153,7 @@ export const authOptions: NextAuthOptions = {
       const providerName = profile?.name;
 
       if (isNewUser === true) {
-        logger.info({ msg: "First time login experience triggered", userId: user.id });
+        appLogger.info({ msg: "First time login experience triggered", userId: user.id });
       }
 
       if (profile != null && account?.provider !== "email") {
@@ -185,11 +185,11 @@ export const authOptions: NextAuthOptions = {
             },
           });
         } catch (error) {
-          logger.error({ error, msg: "Failed to sync user profile on signIn", userId: user.id });
+          appLogger.error({ error, msg: "Failed to sync user profile on signIn", userId: user.id });
         }
       }
 
-      logger.info({
+      appLogger.info({
         msg: "User signed in",
         provider: account?.provider,
         type: "auth.signin",
@@ -197,14 +197,14 @@ export const authOptions: NextAuthOptions = {
       });
     },
     async signOut({ session }) {
-      logger.info({
+      appLogger.info({
         msg: "User signed out",
         type: "auth.signout",
         userId: session.user.id,
       });
     },
     async updateUser({ user }) {
-      logger.info({
+      appLogger.info({
         msg: "User profile updated",
         type: "auth.user_update",
         userId: user.id,
@@ -246,18 +246,18 @@ export const authOptions: NextAuthOptions = {
 
         try {
           if (resend == null) {
-            logger.warn({ msg: "Resend disabled (no API key)", type: "auth.email_warn" });
+            appLogger.warn({ msg: "Resend disabled (no API key)", type: "auth.email_warn" });
             return;
           }
           await resend.emails.send(template);
 
-          logger.info({
+          appLogger.info({
             email: maskEmail(identifier),
             msg: "Verification email sent",
             type: "auth.email_sent",
           });
         } catch (error) {
-          logger.error({
+          appLogger.error({
             email: maskEmail(identifier),
             error: error instanceof Error ? error.message : String(error),
             msg: "Failed to send verification email",

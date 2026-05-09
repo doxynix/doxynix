@@ -1,14 +1,14 @@
 import type { RepositoryEvent } from "@octokit/webhooks-types";
 
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prisma } from "@/server/shared/infrastructure/db";
-import { logger } from "@/server/shared/infrastructure/logger";
 
 import { syncRepoMetadata } from "./sync-repo-metadata";
 
 export async function handleRepositoryEvent(payload: RepositoryEvent): Promise<void> {
   const { action, repository } = payload;
 
-  logger.info({
+  appLogger.info({
     action,
     githubId: repository.id,
     msg: "repository_webhook_received",
@@ -21,7 +21,7 @@ export async function handleRepositoryEvent(payload: RepositoryEvent): Promise<v
         where: { githubId: repository.id },
       });
 
-      logger.info({
+      appLogger.info({
         affectedRows: result.count,
         githubId: repository.id,
         msg: "repository_deleted_in_db",
@@ -30,7 +30,7 @@ export async function handleRepositoryEvent(payload: RepositoryEvent): Promise<v
     }
 
     if (action === "archived") {
-      logger.info({ githubId: repository.id, msg: "repository_archived" });
+      appLogger.info({ githubId: repository.id, msg: "repository_archived" });
     }
 
     const syncActions = [
@@ -45,14 +45,14 @@ export async function handleRepositoryEvent(payload: RepositoryEvent): Promise<v
     if (syncActions.includes(action)) {
       await syncRepoMetadata(repository);
 
-      logger.info({
+      appLogger.info({
         action,
         githubId: repository.id,
         msg: "repository_state_updated",
       });
     }
   } catch (error) {
-    logger.error({ error, msg: "repository_webhook_error" });
+    appLogger.error({ error, msg: "repository_webhook_error" });
     throw error;
   }
 }

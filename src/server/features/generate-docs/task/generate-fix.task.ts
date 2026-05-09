@@ -2,8 +2,8 @@ import { task } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 import { generatedFixService } from "@/server/entities/pr-analysis/api/generated-fix.service";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prisma } from "@/server/shared/infrastructure/db";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { redisClient } from "@/server/shared/infrastructure/redis";
 import { REDIS_CONFIG } from "@/server/shared/lib/redis";
 
@@ -50,7 +50,7 @@ export const generateFixTask = task({
 
       await generatedFixService.updateStatus(prisma, payload.fixId, "COMPLETED");
 
-      logger.info({
+      appLogger.info({
         fixId: payload.fixId,
         msg: "fix_created",
         repoId: payload.repoId,

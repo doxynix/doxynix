@@ -1,7 +1,7 @@
 import { sumBy } from "es-toolkit";
 import simpleGit from "simple-git";
 
-import { logger } from "../../infrastructure/logger";
+import { appLogger } from "../../infrastructure/app-logger";
 import { taskLogger } from "../../lib/task-logger";
 import type { ChurnHotspot, TeamRole } from "../../types";
 import { normalizeRepoPath } from "../core/common";
@@ -132,7 +132,7 @@ export async function computeGitChurnHotspots(
     taskLogger.warn(
       "Git: Churn calculation failed. History might be unavailable in this environment."
     );
-    logger.debug({
+    appLogger.debug({
       error,
       msg: "Git churn hotspot calculation skipped after git failure",
       repoRoot,
@@ -215,7 +215,7 @@ export async function computeChangeCoupling(
     return result;
   } catch (error) {
     taskLogger.warn("Git: Change coupling analysis skipped.");
-    logger.debug({
+    appLogger.debug({
       error,
       msg: "Change coupling calculation skipped after git failure",
       repoRoot,

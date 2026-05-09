@@ -16,8 +16,6 @@ export type DocContent = RouterOutput["repoDetails"]["getDocumentContent"];
 
 export type RepoWorkspace = RouterOutput["repoDetails"]["getWorkspace"];
 
-export type UiRepoHistory = RouterOutput["repoDetails"]["getHistory"];
-
 export type RepoMetricsItem = RouterOutput["repoDetails"]["getDetailedMetrics"];
 
 export type AvailableDocs = RouterOutput["repoDetails"]["getAvailableDocs"];

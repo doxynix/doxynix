@@ -21,10 +21,9 @@ export function RepoAnalysisLive({ accessToken, jobId, repoId }: Readonly<Props>
 
   const metadata = run?.metadata ?? {};
 
-  const progress = (metadata[TRIGGER_CONFIG.metadataKeys.progress] as number);
-  const statusText =
-    (metadata[TRIGGER_CONFIG.metadataKeys.statusMessage] as string)
-  const logs = (metadata[TRIGGER_CONFIG.metadataKeys.taskLogs] as string[]);
+  const progress = metadata[TRIGGER_CONFIG.metadataKeys.progress] as number;
+  const statusText = metadata[TRIGGER_CONFIG.metadataKeys.statusMessage] as string;
+  const logs = metadata[TRIGGER_CONFIG.metadataKeys.taskLogs] as string[];
 
   const isFinished = run?.status === "COMPLETED";
   const isFailed = run?.status === "FAILED" || run?.status === "CRASHED";

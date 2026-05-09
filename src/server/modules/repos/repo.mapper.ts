@@ -19,7 +19,7 @@ export type RepoWithAnalyses = Prisma.RepoGetPayload<{
   };
 }>;
 
-export const repoPresenter = {
+export const repoMapper = {
   toPaginatedList(items: RepoWithAnalyses[], meta: PaginationMeta) {
     return {
       items: items.map((item) => this.toPublic(item)),

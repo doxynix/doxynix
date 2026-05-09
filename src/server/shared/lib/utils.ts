@@ -7,8 +7,8 @@ import { join, normalize } from "pathe";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { ProjectPolicy } from "../engine/core/project-policy";
+import { appLogger } from "../infrastructure/app-logger";
 import { prisma } from "../infrastructure/db";
-import { logger } from "../infrastructure/logger";
 import { realtimeServer } from "../infrastructure/realtime";
 import { taskLogger } from "./task-logger";
 
@@ -19,7 +19,7 @@ export async function handleError(
   tempPath: string
 ) {
   const message = error instanceof Error ? error.message : "Unknown error";
-  logger.error({
+  appLogger.error({
     analysisId,
     error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error),
     msg: "TASK_ERROR",
@@ -78,7 +78,7 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
       sensitiveCount++;
       taskLogger.log(`Skipping sensitive file: ${filePath}`);
 
-      logger.warn({
+      appLogger.warn({
         filePath,
         msg: "Skipping sensitive file from analysis context",
       });
@@ -89,7 +89,7 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
     const realFullPath = await fs.realpath(fullPath).catch(() => null);
 
     if (realFullPath == null || !realFullPath.startsWith(resolvedBase)) {
-      logger.warn({
+      appLogger.warn({
         filePath,
         msg: "Security: rejected path outside base directory",
       });
@@ -102,12 +102,12 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
 
       if (isBinary) {
         binaryCount++;
-        return null
-      };
+        return null;
+      }
 
       return { content: buffer.toString("utf-8"), path: filePath };
     } catch (error) {
-      logger.warn({
+      appLogger.warn({
         error:
           error instanceof Error ? { message: error.message, stack: error.stack } : String(error),
         filePath,

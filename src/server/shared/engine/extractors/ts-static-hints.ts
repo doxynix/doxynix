@@ -17,7 +17,7 @@ const visitNode = (node: ts.Node, context: VisitContext) => {
   const { hints, normalizedPath, sourceFile } = context;
 
   if (node.kind === ts.SyntaxKind.AnyKeyword) {
-    const startPos = node.getStart();
+    const startPos = node.getStart(sourceFile);
     const { line } = sourceFile.getLineAndCharacterOfPosition(startPos);
     hints.push({
       detail: "Explicit `any` weakens type safety.",
@@ -29,7 +29,7 @@ const visitNode = (node: ts.Node, context: VisitContext) => {
   }
 
   if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
-    const nodeStart = node.getStart();
+    const nodeStart = node.getStart(sourceFile);
     const nodeEnd = node.getEnd();
 
     const start = sourceFile.getLineAndCharacterOfPosition(nodeStart);

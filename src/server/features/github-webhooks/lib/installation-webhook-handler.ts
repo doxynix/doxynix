@@ -1,7 +1,7 @@
 import type { InstallationEvent } from "@octokit/webhooks-types";
 
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prisma } from "@/server/shared/infrastructure/db";
-import { logger } from "@/server/shared/infrastructure/logger";
 import type { InstallationTargetTypeType, RepositorySelectionType } from "@/generated/zod";
 
 export async function handleInstallationEvent(payload: InstallationEvent): Promise<void> {
@@ -39,7 +39,7 @@ export async function handleInstallationEvent(payload: InstallationEvent): Promi
         },
         where: { id: instIdBigInt },
       });
-      logger.info({
+      appLogger.info({
         installationId: instIdBigInt.toString(),
         msg: "GitHub installation created via webhook",
       });
@@ -47,7 +47,7 @@ export async function handleInstallationEvent(payload: InstallationEvent): Promi
 
     if (action === "deleted") {
       const result = await prisma.githubInstallation.deleteMany({ where: { id: instIdBigInt } });
-      logger.info({
+      appLogger.info({
         affectedRows: result.count,
         installationId: instIdBigInt.toString(),
         msg: "GitHub installation deleted via webhook",
@@ -59,7 +59,7 @@ export async function handleInstallationEvent(payload: InstallationEvent): Promi
         data: { isSuspended: true },
         where: { id: instIdBigInt },
       });
-      logger.info({
+      appLogger.info({
         installationId: instIdBigInt.toString(),
         msg: "GitHub installation suspended",
       });
@@ -70,20 +70,20 @@ export async function handleInstallationEvent(payload: InstallationEvent): Promi
         data: { isSuspended: false },
         where: { id: instIdBigInt },
       });
-      logger.info({
+      appLogger.info({
         installationId: instIdBigInt.toString(),
         msg: "GitHub installation unsuspended",
       });
     }
 
     if (action === "new_permissions_accepted") {
-      logger.info({
+      appLogger.info({
         installationId: instIdBigInt.toString(),
         msg: "GitHub App permissions updated by user",
       });
     }
   } catch (error) {
-    logger.error({ error, msg: "Webhook DB Processing Error" });
+    appLogger.error({ error, msg: "Webhook DB Processing Error" });
     throw error;
   }
 }

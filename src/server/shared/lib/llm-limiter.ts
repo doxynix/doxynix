@@ -3,7 +3,7 @@ import Redis from "ioredis";
 
 import { REDIS_TCP_URL } from "@/shared/constants/env.server";
 
-import { logger } from "../infrastructure/logger";
+import { appLogger } from "../infrastructure/app-logger";
 
 const redisClient = new Redis(REDIS_TCP_URL, {
   connectTimeout: 10_000,
@@ -37,10 +37,10 @@ const tpmLimiter = new Bottleneck({
 });
 
 [rpmLimiter, tpmLimiter].forEach((l) => {
-  l.on("error", (error) => logger.error({ error, msg: `Bottleneck Error [${l.id}]` }));
+  l.on("error", (error) => appLogger.error({ error, msg: `Bottleneck Error [${l.id}]` }));
 });
 
-redisClient.on("error", (error) => logger.error({ error, msg: "Redis Client Error" }));
+redisClient.on("error", (error) => appLogger.error({ error, msg: "Redis Client Error" }));
 
 /**
  * Единый интерфейс лимитера.

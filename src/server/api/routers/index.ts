@@ -1,18 +1,18 @@
+import { analyticsRouter } from "../../modules/analytics/analytics.router";
+import { notificationRouter } from "../../modules/notifications/notifications.router";
+import { repoRouter } from "../../modules/repos/repo.router";
+import { apiKeyRouter } from "../../modules/users/api-key.router";
+import { userRouter } from "../../modules/users/user.router";
 import { createTRPCRouter } from "../trpc";
-import { analyticsRouter } from "./analytics.router";
-import { apiKeyRouter } from "./api-key.router";
 import { auditRouter } from "./audit.router";
 import { generatedFixRouter } from "./generated-fix.router";
 import { githubAppRouter } from "./github-app.router";
 import { githubBrowseRouter } from "./github-browse.router";
 import { healthRouter } from "./health.router";
-import { notificationRouter } from "./notifications.router";
 import { prAnalysisRouter } from "./pr-analysis.router";
 import { prStagingRouter } from "./pr-staging.router";
 import { repoAnalysisRouter } from "./repo-analysis.router";
 import { repoDetailsRouter } from "./repo-details.router";
-import { repoRouter } from "./repo.router";
-import { userRouter } from "./user.router";
 
 export const appRouter = createTRPCRouter({
   analytics: analyticsRouter,

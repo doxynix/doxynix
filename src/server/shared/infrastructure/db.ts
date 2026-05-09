@@ -11,7 +11,7 @@ import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { AUDIT_BUSINESS_MODELS } from "../lib/constants";
 import { requestContext } from "../lib/request-context";
 import { sanitizePayload } from "../lib/sanitize-payload";
-import { logger } from "./logger";
+import { appLogger } from "./app-logger";
 import { realtimeServer } from "./realtime";
 
 const { PrismaClient } = pkg;
@@ -47,7 +47,7 @@ export const prisma = encryptedClient.$extends({
         try {
           result = await query(args);
         } catch (error) {
-          logger.error({
+          appLogger.error({
             error: error instanceof Error ? error.message : String(error),
             model,
             msg: `DB Error: ${model}.${operation}`,
@@ -88,11 +88,11 @@ export const prisma = encryptedClient.$extends({
               return null;
             })
             .catch((error) => {
-              logger.error({ error, msg: "AUDIT LOG WRITE FAILED" });
+              appLogger.error({ error, msg: "AUDIT LOG WRITE FAILED" });
             });
 
           if (!IS_TEST) {
-            logger.info({
+            appLogger.info({
               durationMs: duration.toFixed(2),
               model,
               msg: `DB Write: ${model}.${operation}`,
@@ -101,7 +101,7 @@ export const prisma = encryptedClient.$extends({
             });
           }
         } else if (duration > 200) {
-          logger.warn({
+          appLogger.warn({
             durationMs: duration.toFixed(2),
             model,
             msg: "Slow DB Query",

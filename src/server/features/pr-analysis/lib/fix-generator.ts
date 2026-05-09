@@ -2,8 +2,8 @@ import diff_match_patch from "diff-match-patch";
 import { groupBy } from "es-toolkit";
 
 import type { FindingForFix, GeneratedDiff } from "@/server/features/pr-analysis/model/pr-types";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import type { OctokitInstance } from "@/server/shared/infrastructure/github/github-provider";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { unique } from "@/server/shared/lib/array-utils";
 import { callWithFallback } from "@/server/shared/lib/call";
 
@@ -265,7 +265,7 @@ Ensure:
         validFixedFiles
       );
 
-      logger.info({
+      appLogger.info({
         branch: primary.branch,
         fixedFileCount: validFixedFiles.length,
         impact: primary.estimatedImpact,
@@ -282,7 +282,7 @@ Ensure:
         title: primary.title,
       };
     } catch (error) {
-      logger.error({
+      appLogger.error({
         error: error instanceof Error ? error.message : String(error),
         msg: "fix_generation_failed",
         prAnalysisId: input.prAnalysisId,
@@ -307,7 +307,7 @@ Ensure:
   ): Promise<{ prNumber: number; prUrl: string }> {
     const { branch, defaultBranch, fixedFiles, owner, repoName, title } = input;
 
-    logger.info({
+    appLogger.info({
       branch: input.branch,
       fixId: input.fixId,
       msg: "fix_applying",
@@ -339,7 +339,7 @@ Ensure:
         throw new Error("Failed to create pull request: received null response");
       }
 
-      logger.info({
+      appLogger.info({
         branch: input.branch,
         fixId: input.fixId,
         msg: "fix_applied",
@@ -352,7 +352,7 @@ Ensure:
         prUrl: pr.data.html_url,
       };
     } catch (error) {
-      logger.error({
+      appLogger.error({
         branch: input.branch,
         error: error instanceof Error ? error.message : String(error),
         fixId: input.fixId,

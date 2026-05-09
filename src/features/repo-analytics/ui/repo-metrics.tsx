@@ -5,7 +5,6 @@ import {
   Binary,
   CheckCircle2,
   Code2,
-  Construction,
   Cpu,
   Database,
   FileCode,
@@ -19,11 +18,9 @@ import {
   Users,
 } from "lucide-react";
 
-import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";
-import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import type { RepoMetricsItem } from "@/entities/repo/model/repo.types";
 
@@ -399,68 +396,6 @@ export function RepoMetrics({ data }: Readonly<Props>) {
             )}
           </CardContent>
         </Card>
-      </section>
-
-      <section className="space-y-4">
-        <h3 className="flex items-center gap-2 text-lg font-bold">
-          <Construction className="text-warning size-5" /> Refactoring Targets
-        </h3>
-        <div className="grid grid-cols-2 gap-4">
-          {data.recommendations.refactoringTargets.length > 0 ? (
-            data.recommendations.refactoringTargets.map((item) => (
-              <Card key={item.file} className="overflow-hidden">
-                <div className="flex items-center justify-between border-b px-4 py-2">
-                  <code className="text-xs">{item.file}</code>
-                  <Badge
-                    variant="outline"
-                    className={cn(item.priority === "HIGH" ? "text-error" : "text-warning")}
-                  >
-                    {item.priority} PRIORITY
-                  </Badge>
-                </div>
-                <CardContent className="grid gap-4 p-4">
-                  <div className="space-y-2">
-                    <p className="text-muted-foreground text-xs font-medium tracking-tighter uppercase">
-                      Current Issue
-                    </p>
-                    <p className="text-sm">{item.description}</p>
-                    {item.original_code != null && (
-                      <pre className="border-destructive/20 bg-destructive/15 overflow-x-auto rounded-md border p-3 text-xs">
-                        {item.original_code}
-                      </pre>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-success text-xs font-medium tracking-tighter uppercase">
-                      AI Suggestion
-                    </p>
-                    <div className="text-success mb-1 flex items-center gap-2 text-xs">
-                      <CheckCircle2 className="size-3" /> Improved maintainability
-                    </div>
-                    {item.improved_code != null && (
-                      <div className="group relative">
-                        <CopyButton
-                          value={item.improved_code}
-                          tooltipText="Copy"
-                          className="absolute top-2 right-2"
-                        />
-                        <pre className="border-success/20 bg-success/15 overflow-x-auto rounded-md border p-3 text-xs">
-                          {item.improved_code}
-                        </pre>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <Card>
-              <CardContent className="text-muted-foreground p-6 text-sm">
-                No refactoring targets suggested by the analysis.
-              </CardContent>
-            </Card>
-          )}
-        </div>
       </section>
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">

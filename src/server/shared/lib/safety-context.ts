@@ -4,7 +4,7 @@
  * Centralizes escaping, sanitization, and validation logic.
  */
 
-import { logger } from "../infrastructure/logger";
+import { appLogger } from "../infrastructure/app-logger";
 import { escapePromptXmlAttr, escapePromptXmlText } from "./string-utils";
 
 /**
@@ -95,7 +95,7 @@ export class SafetyContext {
 
       for (const pattern of dangerous) {
         if (pattern.test(input)) {
-          logger.warn({
+          appLogger.warn({
             msg: "Potentially dangerous input pattern detected",
             pattern: pattern.toString(),
           });

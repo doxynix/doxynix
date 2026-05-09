@@ -6,7 +6,7 @@ import {
 } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "@/server/shared/engine/core/discovery.types";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
-import { logger } from "@/server/shared/infrastructure/logger";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { callWithFallback } from "@/server/shared/lib/call";
 
 import { AI_MODELS, SAFETY_SETTINGS } from "../../lib/constants";
@@ -52,7 +52,7 @@ export async function executeMapperPhase(
       },
     });
 
-    logger.debug({
+    appLogger.debug({
       analysisId,
       msg: "Project map generated",
       projectMap: projectMap,
@@ -61,7 +61,7 @@ export async function executeMapperPhase(
 
     return projectMap;
   } catch (error) {
-    logger.warn({
+    appLogger.warn({
       analysisId,
       error,
       msg: "Mapper stage failed; continuing with fallback analysis summary",

@@ -202,9 +202,9 @@ export function findDependencyCycles(graphMap: Map<string, Set<string>>): string
 
   const detectedCycles: string[][] = analysis.cycles;
 
-  const result = detectedCycles
-    .slice(0, SCHEMA_LIMITS.maxCyclesDetected)
-    .sort((left, right) => left.length - right.length);
+  const result = [...detectedCycles]
+    .sort((left, right) => left.length - right.length)
+    .slice(0, SCHEMA_LIMITS.maxCyclesDetected);
 
   void dumpDebug("dependency-cycles", { count: result.length, cycles: result });
   return result;

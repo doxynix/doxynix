@@ -84,11 +84,11 @@ type FileActionInput = {
   path: string;
 };
 
-export type QuickFileAuditResult = z.infer<typeof QuickFileAuditSchema> & {
+type QuickFileAuditResult = z.infer<typeof QuickFileAuditSchema> & {
   path: string;
 };
 
-export type DocumentFilePreviewResult = z.infer<typeof DocumentFilePreviewSchema> & {
+type DocumentFilePreviewResult = z.infer<typeof DocumentFilePreviewSchema> & {
   path: string;
 };
 

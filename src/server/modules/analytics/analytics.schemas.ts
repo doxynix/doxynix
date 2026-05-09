@@ -1,12 +1,8 @@
 import { z } from "zod";
 
-import { analyticsService } from "@/server/entities/analyze/api/analytics.service";
 import { StatusSchema } from "@/generated/zod";
 
-import { OpenApiErrorResponses } from "../contracts";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-
-const DashboardStatsOutputSchema = z.object({
+export const DashboardStatsSchema = z.object({
   analysisStats: z.object({
     failed: z.number(),
     new: z.number(),
@@ -73,7 +69,7 @@ const DashboardStatsOutputSchema = z.object({
   }),
 });
 
-const TrendsOutputSchema = z.array(
+export const TrendsSchema = z.array(
   z.object({
     complexity: z.number(),
     date: z.string(),
@@ -85,48 +81,13 @@ const TrendsOutputSchema = z.array(
   })
 );
 
-const InputSchema = z.object({
+export const AnalyticsInputSchema = z.object({
   from: z.date().optional(),
   period: z.string().optional().default("30d"),
   repoId: z.string().optional(),
   to: z.date().optional(),
 });
 
-export const analyticsRouter = createTRPCRouter({
-  getDashboardStats: protectedProcedure
-    .meta({
-      openapi: {
-        description: "Returns aggregated metrics, global scores, and language distribution.",
-        errorResponses: OpenApiErrorResponses,
-        method: "GET",
-        path: "/analytics",
-        protect: true,
-        summary: "Get rich dashboard statistics",
-        tags: ["analytics"],
-      },
-    })
-    .input(InputSchema)
-    .output(DashboardStatsOutputSchema)
-    .query(async ({ ctx, input }) => {
-      return analyticsService.getDashboardStats(ctx.db, input, Number(ctx.session.user.id));
-    }),
-
-  getTrends: protectedProcedure
-    .meta({
-      openapi: {
-        description:
-          "Returns daily averages for security, health, and complexity scores over the last 30 days.",
-        errorResponses: OpenApiErrorResponses,
-        method: "GET",
-        path: "/analytics/trends",
-        protect: true,
-        summary: "Get 30-day analysis trends",
-        tags: ["analytics"],
-      },
-    })
-    .input(InputSchema)
-    .output(TrendsOutputSchema)
-    .query(async ({ ctx, input }) => {
-      return analyticsService.getTrends(ctx.db, input, Number(ctx.session.user.id));
-    }),
-});
+export type AnalyticsInput = z.infer<typeof AnalyticsInputSchema>;
+export type DashboardStats = z.infer<typeof DashboardStatsSchema>;
+export type Trends = z.infer<typeof TrendsSchema>;

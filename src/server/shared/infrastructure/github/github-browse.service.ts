@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
 import { getFileScore } from "@/server/shared/engine/core/file-classifier";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import type { DbClient, PrismaClientExtended } from "@/server/shared/infrastructure/db";
 import {
   getFileContent,
@@ -9,7 +10,6 @@ import {
   searchRepos,
 } from "@/server/shared/infrastructure/github/github-api";
 import { GitHubAuthRequiredError } from "@/server/shared/infrastructure/github/github-provider";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { isOctokitError } from "@/server/shared/lib/handle-error";
 
 function throwBrowseAccessError(params: {
@@ -85,7 +85,7 @@ export const githubBrowseService = {
         meta: fileData.meta,
       };
     } catch (error) {
-      logger.error({ error, msg: "Failed to fetch file content from GitHub", path });
+      appLogger.error({ error, msg: "Failed to fetch file content from GitHub", path });
       if (
         error instanceof GitHubAuthRequiredError ||
         (isOctokitError(error) && (error.status === 403 || error.status === 404))

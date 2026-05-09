@@ -15,8 +15,8 @@ import { handleInstallationEvent } from "@/server/features/github-webhooks/lib/i
 import { handlePushEvent } from "@/server/features/github-webhooks/lib/push-webhook-handler";
 import { handleRepositoryEvent } from "@/server/features/github-webhooks/lib/repository-webhook-handler";
 import { handlePullRequestEvent } from "@/server/features/pr-analysis/lib/pr-webhook-handler";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prisma } from "@/server/shared/infrastructure/db";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { buildRequestStore, requestContext } from "@/server/shared/lib/request-context";
 
 const webhooks = new Webhooks({
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
           where: { id: existing.id },
         });
       } else {
-        logger.error({ error, msg: "Webhook dedupe database error" });
+        appLogger.error({ error, msg: "Webhook dedupe database error" });
         return new NextResponse("DB Error", { status: 500 });
       }
     }
@@ -124,7 +124,7 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ ok: true });
     } catch (error) {
-      logger.error({ error, msg: "Webhook processing failed" });
+      appLogger.error({ error, msg: "Webhook processing failed" });
 
       await prisma.webhookDelivery.update({
         data: {

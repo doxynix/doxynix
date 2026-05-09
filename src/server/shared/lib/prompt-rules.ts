@@ -135,14 +135,6 @@ export const VerificationRules = {
 // =============================================================================
 
 /**
- * Combine multiple rules into a formatted section
- * Useful for building composite rule sets
- */
-export function combineRules(rules: (string | undefined)[]): string {
-  return rules.filter(Boolean).join("\n");
-}
-
-/**
  * Build a "do not invent" section for a specific context
  */
 export function buildNoInventionSection(context: string = "information"): string {

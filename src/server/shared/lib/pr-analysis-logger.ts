@@ -1,6 +1,6 @@
 import type { PRAnalysisConfig } from "@/server/features/pr-analysis/model/pr-types";
 
-import { logger as baseLogger } from "../infrastructure/logger";
+import { appLogger as baseLogger } from "../infrastructure/app-logger";
 
 /**
  * Structured logging for PR analysis operations

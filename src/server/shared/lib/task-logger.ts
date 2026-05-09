@@ -1,11 +1,28 @@
 import { Status } from "@prisma/client";
 import { metadata } from "@trigger.dev/sdk/v3";
 
+import { appLogger as internalLogger } from "../infrastructure/app-logger";
 import { prisma } from "../infrastructure/db";
-import { logger as internalLogger } from "../infrastructure/logger";
 import { TRIGGER_CONFIG } from "./trigger";
 
-export type LogLevel = "error" | "info" | "success" | "warn";
+type LogLevel = "error" | "info" | "success" | "warn";
+
+function safeMetadata(action: () => void) {
+  try {
+    action();
+  } catch (error) {
+    internalLogger.debug({ error, msg: "Trigger metadata unavailable; skipping realtime update" });
+  }
+}
+
+function safeCurrentMetadata() {
+  try {
+    return metadata.current();
+  } catch (error) {
+    internalLogger.debug({ error, msg: "Trigger metadata unavailable; reading empty metadata" });
+    return;
+  }
+}
 
 /**
  * Утилита для управления прогрессом и логами таска.
@@ -20,7 +37,7 @@ export const taskLogger = {
    * Собирает ВСЕ логи из метаданных и кладет в БД на вечное хранение.
    */
   async finalize(analysisId: string, status: Status = Status.DONE) {
-    const currentMetadata = metadata.current();
+    const currentMetadata = safeCurrentMetadata();
 
     const rawLogs = currentMetadata?.[TRIGGER_CONFIG.metadataKeys.taskLogs];
     const allLogs = Array.isArray(rawLogs) ? rawLogs.join("\n") : "";
@@ -56,7 +73,7 @@ export const taskLogger = {
 
     internalLogger.info({ msg: `[${level.toUpperCase()}] [${timestamp}] ${msg}` });
 
-    metadata.append(TRIGGER_CONFIG.metadataKeys.taskLogs, line);
+    safeMetadata(() => metadata.append(TRIGGER_CONFIG.metadataKeys.taskLogs, line));
   },
 
   /**
@@ -68,8 +85,8 @@ export const taskLogger = {
 
     this.info(`STAGE: ${msg} (${percent}%)`);
 
-    metadata.set(TRIGGER_CONFIG.metadataKeys.statusMessage, msg);
-    metadata.set(TRIGGER_CONFIG.metadataKeys.progress, percent);
+    safeMetadata(() => metadata.set(TRIGGER_CONFIG.metadataKeys.statusMessage, msg));
+    safeMetadata(() => metadata.set(TRIGGER_CONFIG.metadataKeys.progress, percent));
 
     await prisma.analysis.update({
       data: {

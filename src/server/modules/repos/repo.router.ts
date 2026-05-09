@@ -1,13 +1,15 @@
+import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { CreateRepoSchema } from "@/shared/api/schemas/repo";
 
-import { repoService } from "@/server/entities/repo/api/repo.service";
-import { PaginationMetaSchema } from "@/server/shared/lib/pagination";
+import { repoService } from "@/server/modules/repos/repo.service";
+import { getPaginationMeta, PaginationMetaSchema } from "@/server/shared/lib/pagination";
 import { RepoSchema, StatusSchema } from "@/generated/zod";
 
-import { OpenApiErrorResponses, RepoFilterSchema } from "../contracts";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { OpenApiErrorResponses, RepoFilterSchema } from "../../api/contracts";
+import { createTRPCRouter, protectedProcedure } from "../../api/trpc";
+import { repoMapper, type RepoWithAnalyses } from "./repo.mapper";
 
 const PublicRepoSchema = RepoSchema.extend({
   id: z.uuid(),
@@ -144,7 +146,49 @@ export const repoRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      return repoService.getAll(ctx.db, input);
+      const { cursor, limit, owner, search, sortBy, sortOrder, status, visibility } = input;
+      const page = Math.min(Math.max(1, cursor ?? 1), 1_000_000);
+      const skip = (page - 1) * limit;
+
+      const where = repoService.buildWhereClause({ owner, search, status, visibility });
+      const contextWhere: Prisma.RepoWhereInput =
+        owner == null ? {} : { owner: { equals: owner, mode: "insensitive" } };
+
+      const [items, totalCount, filteredCount] = await Promise.all([
+        ctx.db.repo.findMany({
+          include: {
+            analyses: {
+              orderBy: { createdAt: "desc" },
+              select: {
+                complexityScore: true,
+                createdAt: true,
+                onboardingScore: true,
+                score: true,
+                securityScore: true,
+                status: true,
+                techDebtScore: true,
+              },
+              take: 1,
+            },
+          },
+          orderBy: { [sortBy]: sortOrder },
+          skip,
+          take: limit,
+          where,
+        }),
+        ctx.db.repo.count({ where: contextWhere }),
+        ctx.db.repo.count({ where }),
+      ]);
+
+      const meta = getPaginationMeta({
+        filteredCount,
+        limit,
+        page,
+        search: search ?? undefined,
+        totalCount,
+      });
+
+      return repoMapper.toPaginatedList(items as RepoWithAnalyses[], meta);
     }),
 
   getByName: protectedProcedure

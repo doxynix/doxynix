@@ -1,6 +1,6 @@
 import YAML from "yaml";
 
-import { logger } from "../../infrastructure/logger";
+import { appLogger } from "../../infrastructure/app-logger";
 import { getFileExtension } from "../../lib/path-operations";
 import type { OpenApiInventory } from "../../types";
 
@@ -46,7 +46,7 @@ export class OpenApiDiscoveryEngine {
 
     for (const file of files) {
       if (file.content.length > MAX_SPEC_SIZE_BYTES) {
-        logger.debug({
+        appLogger.debug({
           msg: "File size exceeds limit for OpenAPI scanning, skipped",
           path: file.path,
         });
@@ -79,7 +79,7 @@ export class OpenApiDiscoveryEngine {
         if (inventory.sourceFiles.length >= 20) break;
       } catch {
         if (file.path.includes("swagger") || file.path.includes("openapi")) {
-          logger.debug({ msg: "Malformed OpenAPI spec ignored", path: file.path });
+          appLogger.debug({ msg: "Malformed OpenAPI spec ignored", path: file.path });
         }
       }
     }

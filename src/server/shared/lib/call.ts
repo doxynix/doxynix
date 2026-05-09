@@ -5,13 +5,13 @@ import { wrapAISDK } from "langsmith/experimental/vercel";
 import type z from "zod";
 
 import { LLM_TEMPERATURE_STRATEGY, type LLMTaskType } from "../engine/core/scoring-constants";
-import { logger } from "../infrastructure/logger";
+import { appLogger } from "../infrastructure/app-logger";
 import { taskLogger } from "./task-logger";
 import { TRIGGER_CONFIG } from "./trigger";
 
 const tracedAi = wrapAISDK(ai);
 
-export type GoogleModelId = Parameters<typeof google>[0];
+type GoogleModelId = Parameters<typeof google>[0];
 
 type CallWithFallbackProps<T> = {
   attemptMetadata?: Record<string, unknown>;
@@ -64,7 +64,7 @@ export async function callWithFallback<T>({
 
   for (const modelName of models) {
     try {
-      logger.info({
+      appLogger.info({
         model: modelName,
         msg: "Attempting model",
         taskType,
@@ -139,14 +139,14 @@ export async function callWithFallback<T>({
           const logLine = `info:::${timestamp}:::Agent: Invoking tool [${part.toolName}]...`;
 
           metadata.append(taskLogs, logLine);
-          logger.info({
+          appLogger.info({
             analysisId: attemptMetadata.analysisId,
             msg: `AI Tool Call: ${part.toolName}`,
           });
         } else if (part.type === "error") {
           const timestamp = new Date().toLocaleTimeString();
           metadata.append(taskLogs, `error:::${timestamp}:::AI Stream Error: ${part.error}`);
-          logger.error({ error: part.error, msg: "Stream event error" });
+          appLogger.error({ error: part.error, msg: "Stream event error" });
         }
       }
 
@@ -154,7 +154,7 @@ export async function callWithFallback<T>({
       return fullText as T;
     } catch (error) {
       lastError = error;
-      logger.warn({
+      appLogger.warn({
         error: error instanceof Error ? { message: error.message } : String(error),
         model: modelName,
         msg: "Model call failed, trying next model",

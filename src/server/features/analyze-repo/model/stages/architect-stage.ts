@@ -1,7 +1,7 @@
 import { google } from "@ai-sdk/google";
 
 import { aiSchema, type AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
-import { logger } from "@/server/shared/infrastructure/logger";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { callWithFallback } from "@/server/shared/lib/call";
 import { dumpDebug } from "@/server/shared/lib/debug-logger";
 import { taskLogger } from "@/server/shared/lib/task-logger";
@@ -83,7 +83,7 @@ export async function executeArchitectPhase(
 
     taskLogger.success("Architect: Analysis complete. System patterns and risks identified.");
 
-    logger.info({ analysisId, msg: "Architect stage completed with compact digest" });
+    appLogger.info({ analysisId, msg: "Architect stage completed with compact digest" });
 
     aiResult.analysisRuntime = {
       ...aiResult.analysisRuntime,
@@ -101,7 +101,7 @@ export async function executeArchitectPhase(
   } catch (error) {
     taskLogger.error("Architect: Critical failure during reasoning phase.");
 
-    logger.warn({
+    appLogger.warn({
       analysisId,
       error,
       msg: "Architect stage failed; continuing with fallback analysis summary",

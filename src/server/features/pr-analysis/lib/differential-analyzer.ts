@@ -5,7 +5,7 @@ import pm from "picomatch";
 
 import { PROJECT_POLICY_RULES } from "@/server/shared/engine/core/project-policy-rules";
 import { AI_POLICY_CONSTANTS } from "@/server/shared/engine/core/scoring-constants";
-import { logger } from "@/server/shared/infrastructure/logger";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prAnalysisLogger } from "@/server/shared/lib/pr-analysis-logger";
 
 import type { DifferentialAnalysisResult, PRAnalysisConfig, PRFinding } from "../model/pr-types";
@@ -52,7 +52,7 @@ export class DifferentialAnalyzer {
    */
   async analyzePRDiff(diffInfo: PRDiffInfo): Promise<DifferentialAnalysisResult> {
     const startTime = Date.now();
-    logger.info({
+    appLogger.info({
       changedFiles: diffInfo.changedFiles.length,
       focusAreas: this.config.focusAreas,
       msg: "pr_differential_analysis_started",
@@ -69,7 +69,7 @@ export class DifferentialAnalyzer {
         return f.additions + f.deletions <= 1000;
       });
 
-      logger.debug({
+      appLogger.debug({
         excluded: diffInfo.changedFiles.length - relevantFiles.length,
         msg: "pr_files_filtered",
         relevant: relevantFiles.length,
@@ -77,7 +77,7 @@ export class DifferentialAnalyzer {
       });
 
       if (relevantFiles.length === 0) {
-        logger.info({ msg: "pr_no_relevant_files", prNumber: diffInfo.prNumber });
+        appLogger.info({ msg: "pr_no_relevant_files", prNumber: diffInfo.prNumber });
         return {
           analyzedLines: 0,
           changedFiles: 0,
@@ -102,7 +102,7 @@ export class DifferentialAnalyzer {
       const riskScore = this.calculateRiskScore(scoredFindings);
 
       const duration = Date.now() - startTime;
-      logger.info({
+      appLogger.info({
         duration,
         findings: scoredFindings.length,
         msg: "pr_differential_analysis_completed",
@@ -118,7 +118,7 @@ export class DifferentialAnalyzer {
         totalDuration: duration,
       };
     } catch (error) {
-      logger.error({
+      appLogger.error({
         error: error instanceof Error ? error.message : String(error),
         msg: "pr_differential_analysis_failed",
         prNumber: diffInfo.prNumber,

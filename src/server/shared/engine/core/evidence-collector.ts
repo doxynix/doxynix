@@ -13,7 +13,7 @@ import { CONFIDENCE_LEVELS } from "./scoring-constants";
 
 const SCRIPTS_DIR_REGEX = /^scripts\//iu;
 const CLI_DIR_REGEX = /^cli\//iu;
-const BARREL_FILE_REGEX = /\/index\.[cm]?[jt]sx?$/iu;
+const BARREL_FILE_REGEX = /(?:^|[/\\])index\.[cm]?[jt]sx?$/i; // NOTE: дубль
 
 export function kindForFile(path: string, categories: string[]): EntrypointKind {
   if (categories.includes("benchmark")) return "benchmark";
@@ -77,7 +77,7 @@ export function buildModuleRef(
   signals: CollectedFileEvidence["signals"],
   entrypointHints: CollectedFileEvidence["entrypointHints"]
 ): ModuleRef {
-  const categories = signals.categories ?? [];
+  const categories = signals.categories ?? ProjectPolicy.getCategories(filePath);
 
   return {
     apiSurface: signals.apiSurface,

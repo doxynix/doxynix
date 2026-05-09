@@ -5,10 +5,7 @@ import { basename } from "pathe";
 
 import { DocumentFormatter } from "@/server/features/analyze-repo/lib/section-graph-linker";
 import type { DbClient } from "@/server/shared/infrastructure/db";
-import {
-  getLatestCompletedAnalysis,
-  getRepoWithLatestAnalysisAndDocs,
-} from "@/server/shared/infrastructure/repo-snapshots";
+import { getRepoWithLatestAnalysisAndDocs } from "@/server/shared/infrastructure/repo-snapshots";
 import { unique } from "@/server/shared/lib/array-utils";
 import type { RepoSearchResult } from "@/server/shared/types";
 
@@ -217,21 +214,4 @@ export function pickLatestDocsByType<TDoc extends { type: DocType; updatedAt: Da
 ) {
   const latest = uniqBy(orderBy(docs, [(d) => d.updatedAt], ["desc"]), (d) => d.type);
   return orderBy(latest, [(d) => d.type], ["asc"]);
-}
-
-export async function getAnalysisSnapshot(db: DbClient, repoId: string, aid?: string) {
-  if (aid != null) {
-    const analysis = await db.analysis.findFirst({
-      where: {
-        publicId: aid,
-        repo: { publicId: repoId },
-        status: "DONE",
-      },
-    });
-    if (!analysis)
-      throw new TRPCError({ code: "NOT_FOUND", message: "Specified analysis version not found" });
-    return analysis;
-  }
-
-  return await getLatestCompletedAnalysis(db, repoId);
 }

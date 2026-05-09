@@ -3,9 +3,9 @@ import type { Repo } from "@prisma/client";
 import type { ToolSet } from "ai";
 
 import type { AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prisma } from "@/server/shared/infrastructure/db";
 import { getClientContext } from "@/server/shared/infrastructure/github/github-provider";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { callWithFallback } from "@/server/shared/lib/call";
 import { unwrapAiText } from "@/server/shared/lib/optimizers";
 
@@ -51,7 +51,11 @@ async function runWriterTask(
       status: content.length > 0 ? "llm" : "missing",
     };
   } catch (error) {
-    logger.warn({ error, msg: "Writer stage failed; continuing with partial docs", writer: name });
+    appLogger.warn({
+      error,
+      msg: "Writer stage failed; continuing with partial docs",
+      writer: name,
+    });
     return {
       error: error instanceof Error ? error.message : String(error),
       name,
@@ -237,7 +241,7 @@ export async function executeChangelogWriter(
       },
     });
 
-    if (previousAnalysis?.commitSha != null && repo.defaultBranch != null) {
+    if (previousAnalysis?.commitSha != null) {
       const { data: compareData } = await octokit.rest.repos.compareCommits({
         base: previousAnalysis.commitSha,
         head: repo.defaultBranch,
@@ -282,7 +286,7 @@ export async function executeChangelogWriter(
       changelogContext.commits = detailedCommits;
     }
   } catch (error) {
-    logger.warn({
+    appLogger.warn({
       analysisId,
       error,
       msg: "Failed to fetch rich git context for CHANGELOG. Falling back to simple list.",

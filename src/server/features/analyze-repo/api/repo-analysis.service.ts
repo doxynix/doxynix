@@ -15,8 +15,8 @@ import type { AIResult } from "@/server/shared/engine/core/analysis-result.schem
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
 import { calculateTeamRoles } from "@/server/shared/engine/metrics/common-metrics";
 import { calculateHealthScore } from "@/server/shared/engine/metrics/complexity";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prisma, type DbClient } from "@/server/shared/infrastructure/db";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { realtimeServer } from "@/server/shared/infrastructure/realtime";
 import { getLatestCompletedAnalysisRef } from "@/server/shared/infrastructure/repo-snapshots";
 
@@ -222,7 +222,7 @@ export const repoAnalysisService = {
       teamRoles,
     };
 
-    logger.info({
+    appLogger.info({
       analysisId,
       finalHealthScore,
       metricsSummary: {
@@ -300,7 +300,7 @@ export const repoAnalysisService = {
         title: note.title,
       });
 
-    logger.info({ analysisId, commitSha: currentSha, msg: "Results saved", repoId: repo.id });
+    appLogger.info({ analysisId, commitSha: currentSha, msg: "Results saved", repoId: repo.id });
 
     return finalHealthScore;
   },

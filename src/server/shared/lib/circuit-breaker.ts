@@ -1,4 +1,4 @@
-import { logger } from "../infrastructure/logger";
+import { appLogger } from "../infrastructure/app-logger";
 
 export type CircuitBreakerState = "CLOSED" | "HALF_OPEN" | "OPEN";
 
@@ -51,7 +51,7 @@ export class CircuitBreaker {
       this.failureCount++;
       this.lastFailureTime = Date.now();
 
-      logger.warn({
+      appLogger.warn({
         failureCount: this.failureCount,
         msg: "circuit_breaker_failure",
         state: this.state,
@@ -74,7 +74,7 @@ export class CircuitBreaker {
   private transitionTo(newState: CircuitBreakerState): void {
     if (this.state === newState) return;
 
-    logger.info({
+    appLogger.info({
       from: this.state,
       msg: "circuit_breaker_state_change",
       to: newState,

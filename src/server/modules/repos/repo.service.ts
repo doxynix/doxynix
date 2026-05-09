@@ -12,7 +12,7 @@ import { handlePrismaError, isOctokitError } from "@/server/shared/lib/handle-er
 import { getPaginationMeta } from "@/server/shared/lib/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/shared/lib/search";
 
-import { repoPresenter, type RepoWithAnalyses } from "./repo.presenter";
+import { repoMapper, type RepoWithAnalyses } from "./repo.mapper";
 
 function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
   return {
@@ -230,7 +230,7 @@ export const repoService = {
       totalCount,
     });
 
-    return repoPresenter.toPaginatedList(items as RepoWithAnalyses[], meta);
+    return repoMapper.toPaginatedList(items as RepoWithAnalyses[], meta);
   },
 
   async getByName(db: DbClient, owner: string, name: string) {

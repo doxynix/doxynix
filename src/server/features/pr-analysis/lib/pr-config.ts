@@ -47,7 +47,9 @@ export class PRConfigService {
     const entries = Object.entries(config).filter(([_, value]) => value !== undefined);
     const cleanUpdate: Partial<PRAnalysisConfig> = Object.fromEntries(entries);
 
-    if (cleanUpdate.tokenBudget !== undefined && cleanUpdate.tokenBudget !== null) {
+    if (cleanUpdate.tokenBudget === null) {
+      delete cleanUpdate.tokenBudget;
+    } else if (cleanUpdate.tokenBudget !== undefined) {
       cleanUpdate.tokenBudget = clamp(cleanUpdate.tokenBudget, 10_000, 100_000);
     }
 

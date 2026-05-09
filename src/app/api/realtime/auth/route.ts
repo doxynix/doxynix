@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 
 import { REALTIME_CONFIG, type AblyCapability } from "@/shared/constants/realtime";
 
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { getServerAuthSession } from "@/server/shared/infrastructure/auth";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { realtimeServer } from "@/server/shared/infrastructure/realtime";
 
 const ONE_HOUR = 3_600_000;
@@ -31,7 +31,7 @@ export async function GET() {
 
     return NextResponse.json(tokenRequest);
   } catch (error) {
-    logger.error({ error, msg: "Realtime auth error" });
+    appLogger.error({ error, msg: "Realtime auth error" });
     return NextResponse.json({ error: "Error requesting token" }, { status: 500 });
   }
 }

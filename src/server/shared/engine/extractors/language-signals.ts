@@ -1,6 +1,6 @@
 import { basename } from "pathe";
 
-import { logger } from "@/server/shared/infrastructure/logger";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 
 import { getLanguageAdapters } from "../adapters/registry";
 import { normalizeRepoPath } from "../core/common";
@@ -38,7 +38,7 @@ export async function collectPolyglotSignals(file: RepositoryFile): Promise<File
         configRefs,
       };
     } catch (error) {
-      logger.debug({
+      appLogger.debug({
         adapter: adapter.constructor.name,
         error,
         msg: "Language adapter failed, trying next parser",

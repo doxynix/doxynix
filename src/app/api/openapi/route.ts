@@ -5,7 +5,7 @@ import { API_PREFIX, APP_URL } from "@/shared/constants/env.client";
 import { getCookieName } from "@/shared/lib/session-cookie";
 
 import { appRouter } from "@/server/api/routers";
-import { logger } from "@/server/shared/infrastructure/logger";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 
 export const GET = () => {
   try {
@@ -34,7 +34,7 @@ export const GET = () => {
 
     return NextResponse.json(openApiDocument);
   } catch (error) {
-    logger.error({ error, msg: "OpenAPI Generation Error:" });
+    appLogger.error({ error, msg: "OpenAPI Generation Error:" });
     return NextResponse.json(
       {
         details: error instanceof Error ? error.message : String(error),

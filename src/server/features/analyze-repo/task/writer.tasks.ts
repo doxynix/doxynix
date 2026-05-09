@@ -1,6 +1,6 @@
 import { task } from "@trigger.dev/sdk";
 
-import { logger } from "@/server/shared/infrastructure/logger";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { llmLimiter } from "@/server/shared/lib/llm-limiter";
 
 import {
@@ -34,7 +34,7 @@ async function runWithLimiter(
   const { analysisId, selectedTokens } = input;
   const estimatedWeight = Math.ceil(selectedTokens * 1.3) + 15_000;
 
-  logger.info({
+  appLogger.info({
     analysisId,
     calculatedWeight: estimatedWeight,
     msg: `Scheduling distributed task ${name.toUpperCase()}`,
@@ -50,7 +50,7 @@ async function runWithLimiter(
       taskFn
     );
   } catch (error) {
-    logger.error({ analysisId, error, msg: `Writer ${name} failed in distributed queue` });
+    appLogger.error({ analysisId, error, msg: `Writer ${name} failed in distributed queue` });
     return {
       error: "Queue overflow or API error",
       name,

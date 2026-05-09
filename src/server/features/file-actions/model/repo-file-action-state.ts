@@ -7,7 +7,7 @@ type ContentRefInput = {
   commitSha?: string;
 };
 
-export type SyncFileActionMeta = {
+type SyncFileActionMeta = {
   analysisRef: AnalysisRef | null;
   consistency: "matched" | "mismatch" | "unknown";
   consistencyNote: null | string;

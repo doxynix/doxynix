@@ -3,7 +3,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import createMiddleware from "next-intl/middleware";
 
 import { routing } from "./i18n/routing";
-import { logger } from "./server/shared/infrastructure/logger";
+import { appLogger } from "./server/shared/infrastructure/app-logger";
 import { redisClient } from "./server/shared/infrastructure/redis";
 import { generateRequestId, getIp, sanitizeRequestId } from "./server/shared/lib/request-context";
 import { API_PREFIX } from "./shared/constants/env.client";
@@ -105,14 +105,14 @@ async function handleTurnstile(request: NextRequest, ip: string): Promise<NextRe
     const cfData = await cfRes.json();
 
     if (cfData.success === false || cfData.action !== "auth") {
-      logger.error({ error: cfData["error-codes"], msg: "Cloudflare verification failed:" });
+      appLogger.error({ error: cfData["error-codes"], msg: "Cloudflare verification failed:" });
       return new NextResponse(JSON.stringify({ error: "Captcha failed" }), { status: 403 });
     }
     const response = NextResponse.next();
     response.cookies.delete("cf-turnstile-response");
     return response;
   } catch (error) {
-    logger.error({ error, msg: "Cloudflare network error:" });
+    appLogger.error({ error, msg: "Cloudflare network error:" });
     return new NextResponse(JSON.stringify({ error: "Security check error. Please try again." }), {
       status: 403,
     });

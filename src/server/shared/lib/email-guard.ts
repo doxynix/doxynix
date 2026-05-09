@@ -5,7 +5,7 @@ import validator from "validator";
 
 import { LOG_SALT_SECRET } from "@/shared/constants/env.server";
 
-import { logger } from "../infrastructure/logger";
+import { appLogger } from "../infrastructure/app-logger";
 
 export function normalizeEmail(email: string): string {
   const normalized = validator.normalizeEmail(email, {
@@ -79,7 +79,11 @@ export async function validateEmailSafety(
       return { reason: "invalid_domain", safe: false };
     }
     const errorMessage = error_ instanceof Error ? error_.message : String(error_);
-    logger.warn({ domain, error: errorMessage, msg: "DNS check bypassed due to temporary error" });
+    appLogger.warn({
+      domain,
+      error: errorMessage,
+      msg: "DNS check bypassed due to temporary error",
+    });
     return { safe: true };
   }
 

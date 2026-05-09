@@ -2,7 +2,7 @@ import {
   sentinelSchema,
   type SentinelResult,
 } from "@/server/shared/engine/core/analysis-result.schemas";
-import { logger } from "@/server/shared/infrastructure/logger";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { callWithFallback } from "@/server/shared/lib/call";
 
 import { AI_MODELS, SAFETY_SETTINGS } from "../../lib/constants";
@@ -27,7 +27,7 @@ export async function executeSentinelPhase(
       });
       sentinelStatus = sentinelOut.status;
     } catch (error) {
-      logger.warn({ analysisId, error: error, msg: "Sentinel unavailable, defaulting to SAFE" });
+      appLogger.warn({ analysisId, error: error, msg: "Sentinel unavailable, defaulting to SAFE" });
       sentinelStatus = "SAFE";
     }
   }

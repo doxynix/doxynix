@@ -21,7 +21,7 @@ type SectionBuilderArgs<TBody> = {
 
 type RankedModule = Pick<ModuleRef, "apiSurface" | "exports" | "path" | "routeCount" | "symbols">;
 
-const BARREL_FILE_REGEX = /\/index\.[cm]?[jt]sx?$/iu;
+const BARREL_FILE_REGEX = /(?:^|[/\\])index\.[cm]?[jt]sx?$/i; // NOTE: дубль
 
 export function rankArchitectureModule(module: RankedModule): number {
   return module.apiSurface * 6 + module.routeCount * 5 + module.exports * 2 + module.symbols.length;

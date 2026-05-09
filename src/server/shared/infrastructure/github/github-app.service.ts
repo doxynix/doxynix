@@ -2,13 +2,13 @@ import crypto from "node:crypto";
 import type { InstallationTargetType, RepositorySelection } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import type { DbClient, PrismaClientExtended } from "@/server/shared/infrastructure/db";
 import { getMyRepos } from "@/server/shared/infrastructure/github/github-api";
 import {
   getInstallationInfo,
   getUserClient,
 } from "@/server/shared/infrastructure/github/github-provider";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { isOctokitError } from "@/server/shared/lib/handle-error";
 
 import { githubTokenService } from "./github-token.service";
@@ -80,7 +80,7 @@ export const githubAppService = {
         oauthStatus,
       };
     } catch (error) {
-      logger.error({ error, msg: "Dashboard fetch failed", userId });
+      appLogger.error({ error, msg: "Dashboard fetch failed", userId });
       return {
         installations: installationList,
         isConnected: true,
@@ -108,7 +108,7 @@ export const githubAppService = {
     });
 
     if (validState == null) {
-      logger.warn({ msg: "CSRF/Replay attack or expired state", userId: userIdNum });
+      appLogger.warn({ msg: "CSRF/Replay attack or expired state", userId: userIdNum });
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "Invalid, expired, or already used security state. Please try installing again.",
@@ -149,7 +149,7 @@ export const githubAppService = {
     }
 
     if (!hasAccess) {
-      logger.warn({
+      appLogger.warn({
         installationId,
         msg: "IDOR attempt: User tried to claim unowned installation",
         userId: userIdNum,
@@ -229,7 +229,7 @@ export const githubAppService = {
     } catch (error) {
       if (error instanceof TRPCError) throw error;
 
-      logger.error({ error, msg: "Failed to securely claim installation" });
+      appLogger.error({ error, msg: "Failed to securely claim installation" });
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to securely claim installation.",

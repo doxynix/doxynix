@@ -6,7 +6,7 @@
 import { defu } from "defu";
 import { compact } from "es-toolkit";
 
-import { logger } from "../infrastructure/logger";
+import { appLogger } from "../infrastructure/app-logger";
 import { escapePromptXmlAttr, escapePromptXmlText } from "./string-utils";
 
 /**
@@ -290,7 +290,7 @@ export class EvidenceFormatter {
         throw new Error(`Evidence validation failed for type "${type}"`);
       }
       if (typeof result === "string") {
-        logger.warn({
+        appLogger.warn({
           msg: "Evidence validation warning",
           type,
           warning: result,

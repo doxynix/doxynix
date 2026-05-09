@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Terminal as TerminalIcon } from "lucide-react";
 
+import { cn } from "@/shared/lib/cn";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 
 type Props = { logs: string[] };
@@ -44,7 +45,9 @@ export function AnalysisTerminal({ logs }: Readonly<Props>) {
           return (
             <div key={i} className="flex gap-3 border-b py-1 last:border-0">
               {time != null && <span className="shrink-0">[{time}]</span>}
-              <span className={`${colors[level as keyof typeof colors] || colors.info} break-all`}>
+              <span
+                className={cn(colors[level as keyof typeof colors] || colors.info, "break-all")}
+              >
                 {message}
               </span>
             </div>

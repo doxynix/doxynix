@@ -1,7 +1,7 @@
 import type { Octokit } from "@octokit/rest";
 import type { PRCommentStyle } from "@prisma/client";
 
-import { logger } from "@/server/shared/infrastructure/logger";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 
 import type { PRFinding } from "../model/pr-types";
 
@@ -21,7 +21,7 @@ export class CommentFormatter {
     if (finding.suggestion != null) {
       const cleanSuggestion = finding.suggestion.trim().startsWith("```")
         ? finding.suggestion.trim()
-        : `\`\`\`\n\${finding.suggestion}\n\`\`\``;
+        : `\`\`\`\n${finding.suggestion}\n\`\`\``;
       body += `**Suggestion:**\n${cleanSuggestion}\n\n`;
     }
 
@@ -72,7 +72,7 @@ export class GitHubCommentPoster {
         repo,
       });
 
-      logger.debug({
+      appLogger.debug({
         commentCount: reviewComments.length,
         msg: "pr_review_posted",
         prNumber,
@@ -81,7 +81,7 @@ export class GitHubCommentPoster {
 
       return findings.map((finding) => ({ commentId: review.data.id, finding }));
     } catch (error) {
-      logger.error({
+      appLogger.error({
         error: error instanceof Error ? error.message : String(error),
         msg: "pr_review_post_failed",
         prNumber,
@@ -113,7 +113,7 @@ export class GitHubCommentPoster {
       });
       return true;
     } catch (error) {
-      logger.error({
+      appLogger.error({
         commentId,
         error: error instanceof Error ? error.message : String(error),
         msg: "pr_comment_update_failed",

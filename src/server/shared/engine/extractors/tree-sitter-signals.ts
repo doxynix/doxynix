@@ -3,7 +3,7 @@ import "server-only";
 import fs from "node:fs";
 import { join, resolve } from "pathe";
 
-import { logger } from "../../infrastructure/logger";
+import { appLogger } from "../../infrastructure/app-logger";
 import { getFileExtension } from "../../lib/path-operations";
 import type {
   FileSignals,
@@ -65,7 +65,7 @@ const SPECS: Record<string, LanguageSpec> = {
   ".erl": {
     declarations: [{ kind: "function", types: ["function", "export_attribute"] }],
     entrypoints: [/-export\s*\(\s*\[\s*main/],
-    imports: { patterns: [/-include\s*\(\s*["']([^"']+)["']\s*\)/g], types: ["pp_directive"] },
+    imports: { patterns: [/-include\s*\(\s*["']([^"']+)["']\s*\)/], types: ["pp_directive"] },
     wasm: "tree-sitter-erlang.wasm",
   },
   ".go": {
@@ -90,7 +90,13 @@ const SPECS: Record<string, LanguageSpec> = {
         framework: "Echo",
         methodIndex: 1,
         pathIndex: 2,
-        pattern: /\.(Add|GET|POST|PUT|PATCH|DELETE)\s*\(\s*"([^"]+)"/g,
+        pattern: /\.(GET|POST|PUT|PATCH|DELETE)\s*\(\s*"([^"]+)"/g,
+      },
+      {
+        framework: "Echo",
+        methodIndex: 1,
+        pathIndex: 2,
+        pattern: /\.Add\(\s*"([A-Z]+)"\s*,\s*"([^"]+)"/g,
       },
     ],
     wasm: "tree-sitter-go.wasm",
@@ -157,7 +163,7 @@ const SPECS: Record<string, LanguageSpec> = {
   ".lua": {
     declarations: [{ kind: "function", types: ["function_definition", "local_function"] }],
     entrypoints: [/\bmain\s*\(/],
-    imports: { patterns: [/\brequire\s*\(?\s*["']([^"']+)["']\s*\)?/g], types: ["function_call"] },
+    imports: { patterns: [/\brequire\s*\(?\s*["']([^"']+)["']\s*\)?/], types: ["function_call"] },
     wasm: "tree-sitter-lua.wasm",
   },
   ".m": {
@@ -280,7 +286,7 @@ export const TREE_SITTER_SUPPORTED_EXTENSIONS = Object.keys(SPECS);
 let runtimeInitPromise: null | Promise<{ mod: any; Parser: any }> = null;
 const languageCache = new Map<string, Promise<any>>();
 
-export async function initRuntime() {
+async function initRuntime() {
   if (runtimeInitPromise) return runtimeInitPromise;
 
   runtimeInitPromise = (async () => {
@@ -322,7 +328,7 @@ export async function initRuntime() {
       },
     });
 
-    logger.info({ msg: "Tree-sitter runtime ready", wasm: finalWasmPath });
+    appLogger.info({ msg: "Tree-sitter runtime ready", wasm: finalWasmPath });
 
     return { mod, Parser };
   })();
@@ -350,7 +356,7 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
         return await Language.load(wasmBytes);
       })().catch((error) => {
         languageCache.delete(ext);
-        logger.error({ error, ext, msg: "Failed to load language grammar" });
+        appLogger.error({ error, ext, msg: "Failed to load language grammar" });
         throw error;
       })
     );
@@ -379,7 +385,7 @@ function resolveGrammarWasmPath(spec: LanguageSpec): string {
     specWasm: spec.wasm,
   };
 
-  logger.error({ errorContext, msg: "Tree-sitter grammar not found" });
+  appLogger.error({ errorContext, msg: "Tree-sitter grammar not found" });
 
   throw new Error(
     `[TreeSitter] Grammar WASM not found: ${spec.wasm}. ` +
@@ -586,7 +592,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
       parser?.delete?.();
     }
   } catch (error) {
-    logger.error({
+    appLogger.error({
       error,
       ext,
       msg: "Tree-sitter unavailable; falling back to non-AST analysis",

@@ -1,54 +1,14 @@
-import type { Status } from "@prisma/client";
 import { getDashboardStats, getTrends } from "@prisma/client/sql";
 import { subDays, subHours, subMinutes } from "date-fns";
 
 import type { DbClient } from "@/server/shared/infrastructure/db";
 
-type LanguageDto = {
-  color: string;
-  name: string;
-  value: number;
-};
-
-type ExtremeRepoDto = {
-  name: string;
-  score: number;
-};
-
-type RecentActivityDto = {
-  createdAt: Date;
-  id: string;
-  progress: number;
-  repoName: string;
-  repoOwner: string;
-  status: Status;
-};
-
-type StatsInput = {
-  from?: Date | null;
-  period?: null | string;
-  repoId?: string;
-  to?: Date | null;
-};
-
-type HotspotDto = {
-  path: string;
-  repo_name: string;
-  score: number;
-};
-
-type CouplingDto = {
-  commits: number;
-  from_path: string;
-  repo_name: string;
-  to_path: string;
-};
-
-type RisksDto = {
-  busFactorRepos: number;
-  topCoupling: CouplingDto[];
-  topHotspots: HotspotDto[];
-};
+import {
+  DashboardStatsSchema,
+  type AnalyticsInput,
+  type DashboardStats,
+  type Trends,
+} from "./analytics.schemas";
 
 export const analyticsService = {
   calculatePeriodStart(period: string, relativeTo: Date): Date {
@@ -75,7 +35,11 @@ export const analyticsService = {
     }
   },
 
-  async getDashboardStats(db: DbClient, input: StatsInput, userId: number) {
+  async getDashboardStats(
+    db: DbClient,
+    input: AnalyticsInput,
+    userId: number
+  ): Promise<DashboardStats> {
     const now = new Date();
 
     let currentStart: Date;
@@ -99,17 +63,7 @@ export const analyticsService = {
       return this.getEmptyDashboardStats();
     }
 
-    const recentActivity = (data.recentActivity as unknown as RecentActivityDto[]).map(
-      (activity): RecentActivityDto => ({
-        createdAt: new Date(activity.createdAt),
-        id: activity.id,
-        progress: activity.progress,
-        repoName: activity.repoName,
-        repoOwner: activity.repoOwner,
-        status: activity.status as Status,
-      })
-    );
-    return {
+    return DashboardStatsSchema.parse({
       analysisStats: {
         failed: data.failedCount ?? 0,
         new: data.newCount ?? 0,
@@ -118,10 +72,10 @@ export const analyticsService = {
         total: data.totalCount ?? 0,
       },
       highlights: {
-        mostCritical: data.worstRepo as unknown as ExtremeRepoDto | null,
-        topPerformer: data.bestRepo as unknown as ExtremeRepoDto | null,
+        mostCritical: data.worstRepo,
+        topPerformer: data.bestRepo,
       },
-      languages: data.languages as unknown as LanguageDto[],
+      languages: data.languages ?? [],
       overview: {
         avgScores: {
           complexity: Math.round(data.avgComplexity ?? 0),
@@ -140,13 +94,17 @@ export const analyticsService = {
         techDebtDelta: data.techDebtDelta ?? 0,
         totalLoc: data.totalLoc ?? 0,
       },
-      recentActivity,
+      recentActivity: ((data.recentActivity as Record<string, unknown>[]) ?? []).map(
+        (activity) => ({
+          ...activity,
+        })
+      ),
       risks: {
         busFactorRepos: data.busFactorRepos ?? 0,
-        topCoupling: data.topCoupling as unknown as CouplingDto[],
-        topHotspots: data.topHotspots as unknown as HotspotDto[],
-      } satisfies RisksDto,
-    };
+        topCoupling: data.topCoupling ?? [],
+        topHotspots: data.topHotspots ?? [],
+      },
+    });
   },
 
   getEmptyDashboardStats() {
@@ -177,7 +135,7 @@ export const analyticsService = {
     };
   },
 
-  async getTrends(db: DbClient, input: StatsInput, userId: number) {
+  async getTrends(db: DbClient, input: AnalyticsInput, userId: number): Promise<Trends> {
     let startDate: Date;
     let endDate = input.to ?? new Date();
 

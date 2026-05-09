@@ -1,9 +1,9 @@
 import { zodSchema } from "ai";
 import { z } from "zod";
 
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prisma } from "@/server/shared/infrastructure/db";
 import { githubBrowseService } from "@/server/shared/infrastructure/github/github-browse.service";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { CodeOptimizer } from "@/server/shared/lib/optimizers";
 
 export function buildRepositoryTools(userId: number, repoId: string, branch: string) {
@@ -12,7 +12,7 @@ export function buildRepositoryTools(userId: number, repoId: string, branch: str
       description: "Get the directory tree of the repository to discover files.",
       execute: async ({ prefix }: { prefix?: string }) => {
         try {
-          logger.info({ msg: "AI Tool: listFiles", prefix, repoId });
+          appLogger.info({ msg: "AI Tool: listFiles", prefix, repoId });
           const repo = await prisma.repo.findUnique({ where: { publicId: repoId } });
           if (!repo) return "Error: Repo not found";
 
@@ -44,7 +44,7 @@ export function buildRepositoryTools(userId: number, repoId: string, branch: str
         "Read the full content of a specific file from the repository. Use this ONLY when you need implementation details that are missing from the snippets.",
       execute: async ({ path }: { path: string }) => {
         try {
-          logger.info({ msg: "AI Tool: readFile", path, repoId, userId });
+          appLogger.info({ msg: "AI Tool: readFile", path, repoId, userId });
           const fileData = await githubBrowseService.getFileContent(
             prisma,
             prisma,
@@ -60,7 +60,7 @@ export function buildRepositoryTools(userId: number, repoId: string, branch: str
             path: path,
           };
         } catch (error) {
-          logger.warn({ error, msg: "AI Tool Failed: readFile", path });
+          appLogger.warn({ error, msg: "AI Tool Failed: readFile", path });
           return `Error: Could not read file ${path}. Proceed with available info.`;
         }
       },

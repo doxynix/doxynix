@@ -1,9 +1,9 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError, UTApi } from "uploadthing/server";
 
+import { appLogger } from "./app-logger";
 import { getServerAuthSession } from "./auth";
 import { prisma } from "./db";
-import { logger } from "./logger";
 
 const utapi = new UTApi();
 const f = createUploadthing();
@@ -22,7 +22,7 @@ export const ourFileRouter = {
       return { userId: session.user.id };
     })
     .onUploadError(async ({ error, fileKey }) => {
-      logger.error({
+      appLogger.error({
         code: error.code,
         error: error.message,
         key: fileKey,
@@ -32,11 +32,11 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ file, metadata }) => {
       const userId = Number(metadata.userId);
       if (Number.isNaN(userId)) {
-        logger.error({ msg: "Invalid userId in upload metadata", userId: metadata.userId });
+        appLogger.error({ msg: "Invalid userId in upload metadata", userId: metadata.userId });
         throw new UploadThingError("Unauthorized");
       }
-      logger.info({ msg: `Upload completed for: ${metadata.userId}` });
-      logger.info({ msg: `"File URL:" ${file.ufsUrl}` });
+      appLogger.info({ msg: `Upload completed for: ${metadata.userId}` });
+      appLogger.info({ msg: `"File URL:" ${file.ufsUrl}` });
 
       try {
         const user = await prisma.user.findUnique({
@@ -55,12 +55,12 @@ export const ourFileRouter = {
         });
         if (oldKey != null && oldKey !== file.key) {
           utapi.deleteFiles(oldKey).catch((error) => {
-            logger.error({ error: error, msg: "Failed to delete old avatar" });
+            appLogger.error({ error: error, msg: "Failed to delete old avatar" });
           });
         }
         return { url: file.ufsUrl };
       } catch (error) {
-        logger.error({ error: error, msg: "DB user update error" });
+        appLogger.error({ error: error, msg: "DB user update error" });
         throw new UploadThingError("Failed to update avatar");
       }
     }),

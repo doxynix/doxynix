@@ -1,10 +1,10 @@
 import { redirect, unauthorized } from "next/navigation";
 import type { NextRequest } from "next/server";
 
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { getServerAuthSession } from "@/server/shared/infrastructure/auth";
 import { prisma } from "@/server/shared/infrastructure/db";
 import { githubAppService } from "@/server/shared/infrastructure/github/github-app.service";
-import { logger } from "@/server/shared/infrastructure/logger";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   try {
     await githubAppService.saveInstallation(prisma, Number(session.user.id), installationId, state);
   } catch (error) {
-    logger.error({ error, msg: "GitHub Setup Error:" });
+    appLogger.error({ error, msg: "GitHub Setup Error:" });
     return redirect("/dashboard?error=setup_failed");
   }
 

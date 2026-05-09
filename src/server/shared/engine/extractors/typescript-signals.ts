@@ -167,9 +167,9 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
   const visit = (node: ts.Node, nesting: number = 0) => {
     if (CONTROL_FLOW_KINDS.has(node.kind)) {
       complexity += 1 + nesting;
-      maxNesting = Math.max(maxNesting, nesting);
     }
     const nextNesting = nesting + (INCREASES_NESTING_KINDS.has(node.kind) ? 1 : 0);
+    maxNesting = Math.max(maxNesting, nextNesting);
 
     if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
       imports.push(node.moduleSpecifier.text);

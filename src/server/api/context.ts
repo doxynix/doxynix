@@ -2,9 +2,9 @@ import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 
+import { appLogger } from "../shared/infrastructure/app-logger";
 import { authOptions } from "../shared/infrastructure/auth";
 import { prisma } from "../shared/infrastructure/db";
-import { logger } from "../shared/infrastructure/logger";
 import { redisClient } from "../shared/infrastructure/redis";
 import { getIp, getUa } from "../shared/lib/request-context";
 
@@ -35,7 +35,7 @@ export async function createContext({ req }: Props) {
             where: { id: keyRecord.id },
           })
           .catch((error) =>
-            logger.error({
+            appLogger.error({
               error:
                 error instanceof Error ? { message: error.message, stack: error.stack } : error,
               keyId: keyRecord.id,

@@ -72,7 +72,7 @@ const log = (level: "debug" | "error" | "info" | "warn", payload: LogPayload) =>
   }
 };
 
-export const logger = {
+export const appLogger = {
   debug: (payload: LogPayload) => log("debug", payload),
   error: (payload: LogPayload) => log("error", payload),
   flush: async () => {

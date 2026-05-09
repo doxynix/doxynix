@@ -1,7 +1,7 @@
 import type { PushEvent } from "@octokit/webhooks-types";
 
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prisma } from "@/server/shared/infrastructure/db";
-import { logger } from "@/server/shared/infrastructure/logger";
 
 export async function handlePushEvent(payload: PushEvent): Promise<void> {
   const { commits, ref, repository } = payload;
@@ -16,7 +16,7 @@ export async function handlePushEvent(payload: PushEvent): Promise<void> {
     return;
   }
 
-  logger.info({
+  appLogger.info({
     branch: repository.default_branch,
     commitCount: commits.length,
     msg: "push_webhook_received_default_branch",
@@ -37,7 +37,7 @@ export async function handlePushEvent(payload: PushEvent): Promise<void> {
     //   sha: payload.after // SHA последнего коммита в пуше
     // });
   } catch (error) {
-    logger.error({ error, msg: "push_webhook_error" });
+    appLogger.error({ error, msg: "push_webhook_error" });
     throw error;
   }
 }

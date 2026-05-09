@@ -4,6 +4,10 @@ export function useTypewriter(targetText: string, speed = 30) {
   const [displayedText, setDisplayedText] = useState("");
 
   useEffect(() => {
+    setDisplayedText("");
+  }, [targetText]);
+
+  useEffect(() => {
     if (targetText.length > displayedText.length) {
       const timeout = setTimeout(() => {
         setDisplayedText(targetText.slice(0, displayedText.length + 1));
@@ -12,6 +16,4 @@ export function useTypewriter(targetText: string, speed = 30) {
       return () => clearTimeout(timeout);
     }
   }, [targetText, displayedText, speed]);
-
-  return displayedText;
 }

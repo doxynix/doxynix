@@ -2,7 +2,7 @@ import { Status, Visibility } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { repoService } from "@/server/entities/repo/api/repo.service";
+import { repoService } from "@/server/modules/repos/repo.service";
 import type { DbClient } from "@/server/shared/infrastructure/db";
 import * as githubApi from "@/server/shared/infrastructure/github/github-api";
 import * as githubProvider from "@/server/shared/infrastructure/github/github-provider";

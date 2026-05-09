@@ -15,8 +15,8 @@ import {
   GITHUB_SYSTEM_PAT,
 } from "@/shared/constants/env.server";
 
+import { appLogger } from "../app-logger";
 import type { DbClient } from "../db";
-import { logger } from "../logger";
 import { githubTokenService } from "./github-token.service";
 
 const AppOctokit = Octokit.plugin(retry, throttling, paginateRest, createPullRequest);
@@ -24,10 +24,10 @@ export type OctokitInstance = InstanceType<typeof AppOctokit>;
 
 const getCommonConfig = () => ({
   log: {
-    debug: (msg: string) => logger.debug({ msg }),
-    error: (msg: string) => logger.error({ msg }),
-    info: (msg: string) => logger.info({ msg }),
-    warn: (msg: string) => logger.warn({ msg }),
+    debug: (msg: string) => appLogger.debug({ msg }),
+    error: (msg: string) => appLogger.error({ msg }),
+    info: (msg: string) => appLogger.info({ msg }),
+    warn: (msg: string) => appLogger.warn({ msg }),
   },
   retry: {
     doNotRetry: [400, 401, 403, 429, 409, 422, 451, 404],
@@ -225,27 +225,6 @@ export function parseUrl(input: string): { name: string; owner: string } {
   }
 }
 
-/**
- * Retrieves GitHub token for user and optional owner
- * Returns null if token unavailable (logs error)
- */
-export async function getToken(
-  prisma: DbClient,
-  userId: number,
-  owner?: string
-): Promise<null | string> {
-  try {
-    const context = await getClientContext(prisma, userId, owner);
-    const auth =
-      context.type === "installation"
-        ? ((await context.octokit.auth({ type: "installation" })) as { token: string })
-        : ((await context.octokit.auth()) as { token: string });
-    return auth.token;
-  } catch (error) {
-    logger.error({ error, msg: "Failed to resolve GitHub token", userId });
-    return null;
-  }
-}
 /**
  * Gets installation metadata from GitHub App
  * Requires system app credentials

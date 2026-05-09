@@ -10,6 +10,3 @@ export const TRIGGER_CONFIG = {
     taskLogs: "task_logs",
   },
 } as const;
-
-export type TriggerMetadataKey =
-  (typeof TRIGGER_CONFIG.metadataKeys)[keyof typeof TRIGGER_CONFIG.metadataKeys];

@@ -3,8 +3,8 @@ import { getAccountForUpdate } from "@prisma/client/sql";
 
 import { AUTH_PROVIDERS } from "@/shared/constants/env.server";
 
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { prisma } from "@/server/shared/infrastructure/db";
-import { logger } from "@/server/shared/infrastructure/logger";
 
 const REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // TIME: 5 минут
 
@@ -50,7 +50,7 @@ export const githubTokenService = {
           return lockedAccount.access_token;
         }
 
-        logger.info({ msg: "GitHub token expiring soon, initiating manual refresh", userId });
+        appLogger.info({ msg: "GitHub token expiring soon, initiating manual refresh", userId });
 
         const auth = createOAuthUserAuth({
           clientId: AUTH_PROVIDERS.github.id,
@@ -77,11 +77,11 @@ export const githubTokenService = {
           },
           where: { id: lockedAccount.id },
         });
-        logger.info({ msg: "GitHub token successfully refreshed and saved", userId });
+        appLogger.info({ msg: "GitHub token successfully refreshed and saved", userId });
         return updated.access_token;
       });
     } catch (error) {
-      logger.error({ error, msg: "Token rotation failed", userId });
+      appLogger.error({ error, msg: "Token rotation failed", userId });
 
       const isFatal =
         error instanceof Error &&
@@ -102,12 +102,12 @@ export const githubTokenService = {
               userId,
             },
           });
-          logger.info({
+          appLogger.info({
             msg: "Cleared poisoned GitHub tokens to prevent infinite retry",
             userId,
           });
         } catch (cleanupError) {
-          logger.error({
+          appLogger.error({
             cleanupError,
             msg: "Failed to clear poisoned tokens",
             userId,

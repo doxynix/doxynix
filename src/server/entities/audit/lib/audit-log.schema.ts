@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-export const AuditSeveritySchema = z.enum(["info", "warning", "error", "success"]);
+const AuditSeveritySchema = z.enum(["info", "warning", "error", "success"]);
 
-export const DeviceTypeSchema = z.enum(["desktop", "mobile", "tablet", "system"]);
+const DeviceTypeSchema = z.enum(["desktop", "mobile", "tablet", "system"]);
 
-export const AuditDetailSchema = z.object({
+const AuditDetailSchema = z.object({
   label: z.string(),
   value: z.string(),
 });

@@ -6,8 +6,8 @@ import { generatedFixService } from "@/server/entities/pr-analysis/api/generated
 import { generateFixTask } from "@/server/features/generate-docs/task/generate-fix.task";
 import { FixService } from "@/server/features/pr-analysis/lib/fix-generator";
 import type { FindingForFix } from "@/server/features/pr-analysis/model/pr-types";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import { getClientContext } from "@/server/shared/infrastructure/github/github-provider";
-import { logger } from "@/server/shared/infrastructure/logger";
 import { REDIS_CONFIG } from "@/server/shared/lib/redis";
 import { GeneratedFixSchema } from "@/generated/zod";
 
@@ -74,7 +74,7 @@ export const generatedFixRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      logger.info({
+      appLogger.info({
         fixId: input.fixId,
         msg: "fix_applying",
         userId: ctx.session.user.id,
@@ -134,7 +134,7 @@ export const generatedFixRouter = createTRPCRouter({
           success: true,
         };
       } catch (error) {
-        logger.error({
+        appLogger.error({
           error: error instanceof Error ? error.message : String(error),
           fixId: input.fixId,
           msg: "fix_apply_failed",
@@ -173,7 +173,7 @@ export const generatedFixRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      logger.info({
+      appLogger.info({
         findingsCount: input.findings.length,
         msg: "fix_creation_triggered",
         repoId: input.repoId,
@@ -236,7 +236,7 @@ export const generatedFixRouter = createTRPCRouter({
           success: true,
         };
       } catch (error) {
-        logger.error({
+        appLogger.error({
           error: error instanceof Error ? error.message : String(error),
           msg: "fix_creation_failed",
           repoId: input.repoId,

@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { aiSchema, type AIResult } from "@/server/shared/engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "@/server/shared/engine/core/metrics.types";
-import { logger } from "@/server/shared/infrastructure/logger";
+import { appLogger } from "@/server/shared/infrastructure/app-logger";
 import type { LatestCompletedAnalysis } from "@/server/shared/infrastructure/repo-snapshots";
 
 import type { StoredDocument, WriterStatus } from "./structure-shared";
@@ -22,7 +22,7 @@ export function coerceAnalysisPayload(
 
   const parsed = aiSchema.safeParse(analysis.resultJson);
   if (!parsed.success) {
-    logger.warn({
+    appLogger.warn({
       error: z.treeifyError(parsed.error),
       id: analysis.publicId,
       msg: "Zod mismatch",
