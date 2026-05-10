@@ -11,13 +11,13 @@ import { Prisma } from "@prisma/client";
 
 import { GITHUB_WEBHOOK_SECRET } from "@/shared/constants/env.server";
 
-import { handleInstallationEvent } from "@/server/features/github-webhooks/lib/installation-webhook-handler";
-import { handlePushEvent } from "@/server/features/github-webhooks/lib/push-webhook-handler";
-import { handleRepositoryEvent } from "@/server/features/github-webhooks/lib/repository-webhook-handler";
-import { handlePullRequestEvent } from "@/server/features/pr-analysis/lib/pr-webhook-handler";
-import { appLogger } from "@/server/shared/infrastructure/app-logger";
-import { prisma } from "@/server/shared/infrastructure/db";
-import { buildRequestStore, requestContext } from "@/server/shared/lib/request-context";
+import { appLogger } from "@/server/core/app-logger";
+import { prisma } from "@/server/core/db";
+import { handlePullRequestEvent } from "@/server/modules/analysis/logic/pr-webhook-handler";
+import { handleInstallationEvent } from "@/server/modules/webhooks/installation-webhook-handler";
+import { handlePushEvent } from "@/server/modules/webhooks/push-webhook-handler";
+import { handleRepositoryEvent } from "@/server/modules/webhooks/repository-webhook-handler";
+import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 
 const webhooks = new Webhooks({
   secret: GITHUB_WEBHOOK_SECRET,

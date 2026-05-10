@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { DbClient } from "@/server/shared/infrastructure/db";
-import * as githubApi from "@/server/shared/infrastructure/github/github-api";
-import * as githubProvider from "@/server/shared/infrastructure/github/github-provider";
-import { githubTokenService } from "@/server/shared/infrastructure/github/github-token.service";
+import type { DbClient } from "@/server/core/db";
+import * as githubApi from "@/server/core/github/github-api";
+import * as githubProvider from "@/server/core/github/github-provider";
+import { githubTokenService } from "@/server/core/github/github-token.service";
 
 const githubService = {
   ...githubApi,
@@ -71,11 +71,7 @@ vi.mock("@octokit/plugin-throttling", () => ({
 
 vi.mock("@octokit/rest", () => {
   class MockOctokit {
-    static plugin() {
-      return MockOctokit;
-    }
     auth = octokitState.auth;
-
     log = {
       debug: vi.fn(),
       error: vi.fn(),
@@ -104,6 +100,10 @@ vi.mock("@octokit/rest", () => {
     constructor(options: ConstructorOptions) {
       octokitState.constructorAuths.push(options.auth);
       octokitState.constructorOptions.push(options);
+    }
+
+    static plugin() {
+      return MockOctokit;
     }
   }
 

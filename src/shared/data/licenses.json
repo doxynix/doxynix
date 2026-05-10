@@ -1304,6 +1304,17 @@
     ]
   },
   {
+    "author": "Dsherret",
+    "avatar": "https://github.com/dsherret.png?size=96",
+    "authorLink": "https://github.com/dsherret",
+    "packages": [
+      {
+        "name": "ts-morph",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Eemeli Aro",
     "avatar": null,
     "authorLink": "https://eemeli.org/yaml",
@@ -1904,6 +1915,17 @@
     "packages": [
       {
         "name": "recharts",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Rel1cx",
+    "avatar": "https://github.com/Rel1cx.png?size=96",
+    "authorLink": "https://github.com/Rel1cx",
+    "packages": [
+      {
+        "name": "@eslint-react/eslint-plugin",
         "license": "MIT"
       }
     ]

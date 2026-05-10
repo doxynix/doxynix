@@ -5,8 +5,8 @@ import type { ParamTypes } from "@/shared/types/app.types";
 import { RepoAnalysisLive } from "@/features/repo-setup/ui/repo-analysis-live";
 import { RepoSetup } from "@/features/repo-setup/ui/repo-setup";
 
-import { api } from "@/server/api/server";
-import { getRepoOrNotFound } from "@/server/entities/repo/api/get-repo";
+import { api } from "@/server/core/trpc/server";
+import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;
@@ -24,10 +24,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function AnalyzePage({ params }: Readonly<Props>) {
   const { name, owner } = await params;
 
-  const repo = await getRepoOrNotFound(owner, name);
+  const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
   const serverApi = await api();
-  const lastAnalysis = await serverApi.repoAnalysis.getLatest({ repoId: repo.id });
+  const lastAnalysis = await serverApi.analysis.getLatest({ repoId: repo.id });
 
   const isRunning =
     lastAnalysis != null &&

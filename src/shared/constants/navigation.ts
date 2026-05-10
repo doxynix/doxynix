@@ -8,7 +8,6 @@ import {
   GitPullRequest,
   Headset,
   HeartHandshakeIcon,
-  HistoryIcon,
   Home,
   KeyRound,
   LayoutGrid,

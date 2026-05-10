@@ -15,7 +15,7 @@ import {
 } from "@/shared/ui/core/dropdown-menu";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/shared/i18n/routing";
 
 import { notificationTypeConfig } from "@/features/notifications/model/notification-type-config";
 import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";

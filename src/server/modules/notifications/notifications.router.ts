@@ -1,21 +1,18 @@
 import type { Prisma } from "@prisma/client";
-import { z } from "zod";
+import z from "zod";
 
-import { notificationsService } from "@/server/modules/notifications/notifications.service";
-import { handlePrismaError } from "@/server/shared/lib/handle-error";
+import { OpenApiErrorResponses } from "@/server/core/trpc/constants";
+import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
+import { handlePrismaError } from "@/server/utils/handle-error";
 import {
   getPaginationMeta,
   PaginationMetaSchema,
   type PaginationMeta,
-} from "@/server/shared/lib/pagination";
-import { NotificationSchema } from "@/generated/zod";
+} from "@/server/utils/pagination";
 
-import {
-  NotificationsBulkFilterSchema,
-  NotificationsFilterSchema,
-  OpenApiErrorResponses,
-} from "../../api/contracts";
-import { createTRPCRouter, protectedProcedure } from "../../api/trpc";
+import { NotificationsBulkFilterSchema, NotificationsFilterSchema } from "./notification.schemas";
+import { notificationsService } from "./notifications.service";
+import { NotificationSchema } from "@/shared/api-contracts";
 
 const NotificationsPublicSchema = NotificationSchema.extend({
   id: z.uuid(),

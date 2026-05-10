@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { PRCommentStyleSchema, PRFocusAreaSchema } from "@/generated/zod";
+import { PRCommentStyleSchema, PRFocusAreaSchema } from "@/shared/api-contracts";
 
-const UpdatePRConfigInput = z.object({
+export const UpdatePRConfigInput = z.object({
   ciSkip: z.boolean().optional(),
   commentStyle: PRCommentStyleSchema.optional(),
   enabled: z.boolean().optional(),

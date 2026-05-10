@@ -19,10 +19,10 @@ import {
   type NotificationsParsersState,
 } from "@/entities/notifications/model/notifications-parsers";
 
-import { NotifyTypeSchema } from "@/generated/zod";
 
 import { NotificationsBulkActions } from "./notifications-bulk-actions";
 import { NotificationsRepoFilter } from "./notifications-repo-filter";
+import { NotifyTypeSchema } from "@/shared/api-contracts";
 
 type Props = {
   stats?: { read: number; total: number; unread: number };
@@ -75,8 +75,8 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
             {TABS.map((t) => (
               <TabsTrigger
                 key={t.id}
-                value={t.value}
                 disabled={!stats || (t.id !== "all" && t.count === 0)}
+                value={t.value}
                 className="m-0.5"
               >
                 {t.label} ({t.count ?? 0})

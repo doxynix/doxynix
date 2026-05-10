@@ -13,7 +13,7 @@ import { AppSidebar } from "@/widgets/app-sidebar/ui/app-sidebar";
 import { GithubConnectionFeedback } from "@/widgets/dashboard/ui/github-connection-feedback";
 import { HotkeyListeners } from "@/widgets/hotkey-manager/ui/hotkey-listeners";
 
-import { getServerAuthSession } from "@/server/shared/infrastructure/auth";
+import { getServerAuthSession } from "@/server/core/auth";
 
 export default async function PrivateLayout({ children }: Readonly<{ children: ReactNode }>) {
   const session = await getServerAuthSession();

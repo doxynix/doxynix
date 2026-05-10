@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
 
-export function useTypewriter(targetText: string, speed = 30) {
+export function useTypewriter(targetText: string, speed = 30): string {
   const [displayedText, setDisplayedText] = useState("");
+  const [prevTarget, setPrevTarget] = useState(targetText);
 
-  useEffect(() => {
+  if (targetText !== prevTarget) {
+    setPrevTarget(targetText);
     setDisplayedText("");
-  }, [targetText]);
+  }
 
   useEffect(() => {
-    if (targetText.length > displayedText.length) {
-      const timeout = setTimeout(() => {
-        setDisplayedText(targetText.slice(0, displayedText.length + 1));
-      }, speed);
-
-      return () => clearTimeout(timeout);
+    if (displayedText.length >= targetText.length) {
+      return;
     }
-  }, [targetText, displayedText, speed]);
+
+    const timeout = setTimeout(() => {
+      setDisplayedText(targetText.slice(0, displayedText.length + 1));
+    }, speed);
+
+    return () => clearTimeout(timeout);
+  }, [targetText, speed, displayedText.length]);
+
+  return displayedText;
 }

@@ -25,7 +25,7 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
   const [treeApi, setTreeApi] = useState<TreeApi<FileNode> | undefined>();
   const { aid } = useRepoParams();
 
-  const { data: nodeContext } = trpc.repoDetails.getNodeContext.useQuery(
+  const { data: nodeContext } = trpc.analysis.getNodeContext.useQuery(
     { aid: aid ?? undefined, nodeId: node ?? "", repoId: repo.id },
     { enabled: node != null && node.length > 0 }
   );

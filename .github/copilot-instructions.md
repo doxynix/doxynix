@@ -21,7 +21,7 @@ Strict dependency rule: `app` -> `widgets` -> `features` -> `entities` -> `share
 
 ## Step 2: Write Code
 - **Conciseness**: Write dry code. Skip long explanations. 
-- **Type Safety**: Strictly typed TypeScript. NEVER use `any`. Use Zod from `src/generated/zod/`.
+- **Type Safety**: Strictly typed TypeScript. NEVER use `any`. Use Zod from `src/shared/api-contracts/`.
 - **Client/Server boundaries**: Only add `"use client"` if using hooks or state.
 
 ## Step 3: Self-Correction & Quality Check

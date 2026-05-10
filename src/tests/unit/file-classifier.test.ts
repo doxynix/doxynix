@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { getFileScore } from "@/server/shared/engine/core/file-classifier";
-import { ProjectPolicy } from "@/server/shared/engine/core/project-policy";
+import { getFileScore } from "@/server/modules/analysis/engine/core/file-classifier";
+import { ProjectPolicy } from "@/server/modules/analysis/engine/core/project-policy";
 
 describe("FileClassifier", () => {
   describe("isConfigFile", () => {

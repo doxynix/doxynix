@@ -4,8 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   calculateCodeMetrics,
   calculateTeamRoles,
-} from "@/server/shared/engine/metrics/common-metrics";
-import { calculateHealthScore } from "@/server/shared/engine/metrics/complexity";
+} from "@/server/modules/analysis/engine/metrics/common-metrics";
+import { calculateHealthScore } from "@/server/modules/analysis/engine/metrics/complexity";
 
 describe("calculateHealthScore", () => {
   beforeEach(() => {

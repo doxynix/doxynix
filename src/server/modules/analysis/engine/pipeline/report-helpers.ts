@@ -1,0 +1,115 @@
+import { clamp } from "date-fns";
+
+import type { uniquePaths } from "@/server/utils/array-utils";
+
+import type { EntrypointRef, ModuleRef, RouteInventory } from "../core/discovery.types";
+import type {
+  DocumentationAudience,
+  ReportSectionInput,
+  ReportSectionKind,
+} from "../core/documentation.types";
+import type { ProjectPolicy } from "../core/project-policy";
+
+type SectionBuilderArgs<TBody> = {
+  audience: "mixed" | DocumentationAudience;
+  body: TBody;
+  confidence: number;
+  evidencePaths: Array<false | null | string | undefined>;
+  section: ReportSectionKind;
+  summary: string[];
+  title: string;
+  unknowns: string[];
+};
+
+type RankedModule = Pick<ModuleRef, "apiSurface" | "exports" | "path" | "routeCount" | "symbols">;
+
+const BARREL_FILE_REGEX = /(?:^|[/\\])index\.[cm]?[jt]sx?$/i; // NOTE: дубль
+
+export function rankArchitectureModule(module: RankedModule): number {
+  return module.apiSurface * 6 + module.routeCount * 5 + module.exports * 2 + module.symbols.length;
+}
+
+export function sortArchitectureModules<TModule extends RankedModule>(
+  modules: TModule[]
+): TModule[] {
+  return modules.toSorted(
+    (left, right) =>
+      rankArchitectureModule(right) - rankArchitectureModule(left) ||
+      left.path.localeCompare(right.path)
+  );
+}
+
+function isPrimaryArchitectureModule(module: Pick<ModuleRef, "categories">): boolean {
+  return ProjectPolicy.isPrimaryArchitectureCategories(module.categories);
+}
+
+export function getPrimaryArchitectureModules(modules: ModuleRef[], limit = 24): ModuleRef[] {
+  return sortArchitectureModules(
+    modules.filter((module) => isPrimaryArchitectureModule(module))
+  ).slice(0, limit);
+}
+
+export function getPrimaryEntrypointPaths(entrypoints: EntrypointRef[]): string[] {
+  return ProjectPolicy.filterPrimaryEntrypointPaths(
+    entrypoints
+      .filter((entrypoint) => entrypoint.kind === "library" || entrypoint.kind === "runtime")
+      .map((entrypoint) => entrypoint.path)
+  );
+}
+
+export function getSecondaryEntrypointPaths(entrypoints: EntrypointRef[]): string[] {
+  return entrypoints
+    .filter((entrypoint) => entrypoint.kind !== "library" && entrypoint.kind !== "runtime")
+    .map((entrypoint) => entrypoint.path);
+}
+
+export function inferRepositoryKind(params: {
+  primaryEntrypoints: string[];
+  routeInventory: RouteInventory;
+}): "library" | "mixed" | "service" | "unknown" {
+  const hasRuntimeEntrypoint = params.primaryEntrypoints.some(
+    (path) => !BARREL_FILE_REGEX.test(path)
+  );
+  const hasLibrarySurface = params.primaryEntrypoints.some((path) => BARREL_FILE_REGEX.test(path));
+  const hasApiSurface = params.routeInventory.estimatedOperations > 0;
+
+  if ((hasRuntimeEntrypoint || hasApiSurface) && hasLibrarySurface) return "mixed";
+  if (hasRuntimeEntrypoint || hasApiSurface) return "service";
+  if (hasLibrarySurface) return "library";
+  return "unknown";
+}
+
+export function buildSectionInput<TBody>(
+  args: SectionBuilderArgs<TBody>
+): ReportSectionInput<TBody> {
+  return {
+    audience: args.audience,
+    body: args.body,
+    confidence: clamp(args.confidence, 0, 100),
+    evidencePaths: uniquePaths(args.evidencePaths),
+    section: args.section,
+    summary: args.summary,
+    title: args.title,
+    unknowns: args.unknowns,
+  };
+}
+
+export function buildReferenceEvidencePaths(params: {
+  fallbackPaths?: string[];
+  limit?: number;
+  modules: RankedModule[];
+  primaryEntrypoints: string[];
+}): string[] {
+  if (params.primaryEntrypoints.length > 0) {
+    return uniquePaths(params.primaryEntrypoints, params.limit);
+  }
+
+  const modulePaths = sortArchitectureModules(params.modules)
+    .slice(0, params.limit ?? 12)
+    .map((module) => module.path);
+
+  return uniquePaths(
+    modulePaths.length > 0 ? modulePaths : (params.fallbackPaths ?? []),
+    params.limit
+  );
+}

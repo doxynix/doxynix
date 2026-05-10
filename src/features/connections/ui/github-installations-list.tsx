@@ -32,7 +32,7 @@ export function GitHubInstallationsList({ installations }: Readonly<Props>) {
             </Button>
           }
           description="GitHub App Installation"
-          icon={<AppAvatar alt={inst.login} fallbackText={inst.login} src={inst.avatar} />}
+          icon={<AppAvatar alt={inst.login} src={inst.avatar} fallbackText={inst.login} />}
           status="Active"
           title={inst.login}
         />

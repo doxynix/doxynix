@@ -22,9 +22,9 @@ export function CTASection() {
       </BackgroundBeamsWithCollision>
       <ScrollButton
         ariaLabel="Scroll to brands section"
+        targetId="hero"
         arrowClassName="-rotate-90"
         buttonClassName="animate-float absolute bottom-0"
-        targetId="hero"
       />
     </section>
   );

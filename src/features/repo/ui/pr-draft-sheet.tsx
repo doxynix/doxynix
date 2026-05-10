@@ -194,8 +194,8 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
 
         <SheetFooter className="border-t pt-4">
           <LoadingButton
-            type="submit"
             disabled={filesCount === 0 || openPrMutation.isPending}
+            type="submit"
             form="pr-form"
             isLoading={openPrMutation.isPending}
             loadingText="Processing..."

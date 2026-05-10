@@ -13,11 +13,9 @@ import {
   ZAxis,
 } from "recharts";
 
-import type { RouterOutput } from "@/shared/api/trpc";
+import type { RepoMetricsItem } from "@/entities/repo/model/repo.types";
 
-type RawRouterOutput = RouterOutput["repoDetails"]["getDetailedMetrics"];
-
-type NonNullRouterOutput = Exclude<RawRouterOutput, null | undefined>;
+type NonNullRouterOutput = NonNullable<RepoMetricsItem>;
 
 type HotspotSignal = NonNullRouterOutput["architecture"]["hotspotSignals"][number];
 

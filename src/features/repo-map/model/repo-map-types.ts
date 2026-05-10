@@ -1,8 +1,8 @@
 import type { RouterOutput } from "@/shared/api/trpc";
 
-type RepoMapType = RouterOutput["repoDetails"]["getStructureMap"];
+type RepoMapType = RouterOutput["analysis"]["getStructureMap"];
 
-type NodeType = RouterOutput["repoDetails"]["getStructureNode"];
+type NodeType = RouterOutput["analysis"]["getStructureNode"];
 
 type MapNodeData = NonNullable<RepoMapType>["graph"]["nodes"][number];
 

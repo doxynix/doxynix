@@ -22,7 +22,7 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
   const locale = useLocale();
   const [selectedAid, setAid] = useQueryState("aid", parseAsString.withDefault(""));
 
-  const { data: history, isLoading } = trpc.repoDetails.getHistory.useQuery({ repoId });
+  const { data: history, isLoading } = trpc.analysis.getHistory.useQuery({ repoId });
 
   if (isLoading || history == null) return <Skeleton className="h-9 w-60" />;
 
@@ -34,7 +34,7 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
       </SelectTrigger>
       <SelectContent>
         {history.map((item) => (
-          <SelectItem key={item.id} value={item.id} disabled={item.status === "FAILED"}>
+          <SelectItem key={item.id} disabled={item.status === "FAILED"} value={item.id}>
             <div className="flex items-center justify-between gap-4 text-xs">
               <div className="flex items-center gap-2 font-medium">
                 <span className="max-w-30 truncate">

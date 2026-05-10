@@ -11,7 +11,7 @@ import { DeleteByOwnerDialog } from "@/features/repo/ui/delete-by-owner-dialog";
 import { RepoFilters } from "@/features/repo/ui/repo-filters";
 import { RepoListContainer } from "@/features/repo/ui/repo-list-container";
 
-import { getOwnerOrNotFound } from "@/server/entities/repo/api/get-repo";
+import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
 type Props = {
   params: Promise<{ owner: string }>;
@@ -30,14 +30,14 @@ export default async function OwnerPage({ params }: Readonly<Props>) {
   const t = await getTranslations("Dashboard");
   const { owner } = await params;
 
-  const data = await getOwnerOrNotFound(owner);
+  const data = await repoFetchers.getOwnerOrNotFound(owner);
 
   const avatarUrl = data.ownerAvatarUrl;
 
   return (
     <div className="mx-auto flex h-full w-full flex-col">
       <div className="not-xs:justify-center mb-4 flex items-center gap-4">
-        <AppAvatar alt={owner} fallbackText={owner} sizeClassName="size-9" src={avatarUrl} />
+        <AppAvatar alt={owner} src={avatarUrl} fallbackText={owner} sizeClassName="size-9" />
         <h1 className="text-2xl font-bold">{owner}</h1>
       </div>
 

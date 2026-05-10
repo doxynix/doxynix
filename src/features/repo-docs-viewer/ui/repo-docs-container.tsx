@@ -12,9 +12,9 @@ import type { AvailableDocs, DocType } from "@/entities/repo/model/repo.types";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
 
-import { DocTypeSchema } from "@/generated/zod";
 
 import { RepoDocs } from "./repo-docs";
+import { DocTypeSchema } from "@/shared/api-contracts";
 
 type Props = { id: string };
 
@@ -32,12 +32,12 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
     )
   );
 
-  const { data: availableDocs, isLoading } = trpc.repoDetails.getAvailableDocs.useQuery({
+  const { data: availableDocs, isLoading } = trpc.analysis.getAvailableDocs.useQuery({
     aid: aid ?? undefined,
     repoId: id,
   });
 
-  const { data: nodeContext } = trpc.repoDetails.getNodeContext.useQuery(
+  const { data: nodeContext } = trpc.analysis.getNodeContext.useQuery(
     { aid: aid ?? undefined, nodeId: node ?? "", repoId: id },
     { enabled: node != null && node.length > 0 }
   );

@@ -20,13 +20,13 @@ export function RepoMapSidebar({ nodeId, onClose, onNavigate, repoId }: Readonly
   const shouldLoadNodeContext = nodeId != null && nodeId.length > 0;
   const { aid } = useRepoParams();
 
-  const { data: workspace, isLoading: isWorkspaceLoading } = trpc.repoDetails.getWorkspace.useQuery(
+  const { data: workspace, isLoading: isWorkspaceLoading } = trpc.analysis.getWorkspace.useQuery(
     { aid: aid ?? undefined, repoId },
     { enabled: shouldLoadWorkspace }
   );
 
   const { data: nodeContext, isLoading: isNodeContextLoading } =
-    trpc.repoDetails.getNodeContext.useQuery(
+    trpc.analysis.getNodeContext.useQuery(
       { aid: aid ?? undefined, nodeId: nodeId ?? "", repoId },
       { enabled: shouldLoadNodeContext }
     );

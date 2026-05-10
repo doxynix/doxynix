@@ -4,8 +4,8 @@ import { generateOpenApiDocument } from "trpc-to-openapi";
 import { API_PREFIX, APP_URL } from "@/shared/constants/env.client";
 import { getCookieName } from "@/shared/lib/session-cookie";
 
-import { appRouter } from "@/server/api/routers";
-import { appLogger } from "@/server/shared/infrastructure/app-logger";
+import { appLogger } from "@/server/core/app-logger";
+import { appRouter } from "@/server/modules";
 
 export const GET = () => {
   try {

@@ -5,7 +5,7 @@ import { Button } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/shared/i18n/routing";
 
 import { repoStatusConfig } from "@/entities/repo/model/repo-status-config";
 import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";
@@ -26,7 +26,7 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
     <div className="mx-auto w-full space-y-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center justify-between gap-4">
-          <AppAvatar alt={repo.owner} fallbackText={repo.owner} src={repo.ownerAvatarUrl} />
+          <AppAvatar alt={repo.owner} src={repo.ownerAvatarUrl} fallbackText={repo.owner} />
           <h1 className="flex gap-1 text-2xl font-bold">
             <Link href={`/dashboard/repo/${ownerSlug}`} className="hover:underline">
               {repo.owner}

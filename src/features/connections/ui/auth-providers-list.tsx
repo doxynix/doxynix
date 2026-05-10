@@ -83,7 +83,7 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
 
         const customIcon =
           linked?.image != null ? (
-            <AppAvatar alt={provider.name} fallbackText={provider.name} src={linked.image} />
+            <AppAvatar alt={provider.name} src={linked.image} fallbackText={provider.name} />
           ) : (
             provider.icon
           );

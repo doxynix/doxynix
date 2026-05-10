@@ -2,11 +2,11 @@ import { Status, Visibility } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { DbClient } from "@/server/core/db";
+import * as githubApi from "@/server/core/github/github-api";
+import * as githubProvider from "@/server/core/github/github-provider";
 import { repoService } from "@/server/modules/repos/repo.service";
-import type { DbClient } from "@/server/shared/infrastructure/db";
-import * as githubApi from "@/server/shared/infrastructure/github/github-api";
-import * as githubProvider from "@/server/shared/infrastructure/github/github-provider";
-import { handlePrismaError } from "@/server/shared/lib/handle-error";
+import { handlePrismaError } from "@/server/utils/handle-error";
 
 vi.mock("@/server/shared/infrastructure/github/github-api", () => ({
   getRepoInfo: vi.fn(),

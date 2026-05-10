@@ -33,12 +33,12 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
 
   const [displayData, setDisplayData] = useState<null | RepoMapDisplayData>(null);
 
-  const { data: mapData, isFetching: isMapFetching } = trpc.repoDetails.getStructureMap.useQuery(
+  const { data: mapData, isFetching: isMapFetching } = trpc.analysis.getStructureMap.useQuery(
     { aid: aid ?? undefined, repoId: id },
     { enabled: viewId == null }
   );
 
-  const { data: nodeData, isFetching: isNodeFetching } = trpc.repoDetails.getStructureNode.useQuery(
+  const { data: nodeData, isFetching: isNodeFetching } = trpc.analysis.getStructureNode.useQuery(
     { nodeId: viewId ?? "", repoId: id },
     { enabled: viewId != null }
   );

@@ -6,7 +6,7 @@ import type { TreeApi } from "react-arborist";
 
 import { trpc } from "@/shared/api/trpc";
 
-import { DocTypeSchema } from "@/generated/zod";
+import { DocTypeSchema } from "@/shared/api-contracts";
 
 import { collectAllIds, getFolderSelectionState, sortNodes } from "./repo-setup-utils";
 import type { FileNode, FileTuple } from "./repo-setup.types";
@@ -53,7 +53,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     owner,
   });
 
-  const analyzeMutation = trpc.repoAnalysis.analyze.useMutation();
+  const analyzeMutation = trpc.analysis.analyze.useMutation();
   const apiFiles = apiFilesRaw as FileTuple[] | undefined;
 
   const [prevBranch, setPrevBranch] = useState(selectedBranch);

@@ -24,7 +24,7 @@ import {
 import { Spinner } from "@/shared/ui/core/spinner";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/shared/i18n/routing";
 
 import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
 
@@ -141,9 +141,9 @@ export function AppCommandMenu() {
   const filteredCommands = !s
     ? commandMenuItems
     : commandMenuItems.filter(
-        (item) =>
-          (item.label.toLowerCase().includes(s) || item.url?.toLowerCase().includes(s)) ?? false
-      );
+      (item) =>
+        (item.label.toLowerCase().includes(s) || item.url?.toLowerCase().includes(s)) ?? false
+    );
 
   return (
     <>
@@ -188,7 +188,7 @@ export function AppCommandMenu() {
                     onSelect={() => runCommand(item)}
                     className={cn(
                       isDestructive &&
-                        "text-destructive data-[selected=true]:bg-destructive/10 data-[selected=true]:text-destructive",
+                      "text-destructive data-[selected=true]:bg-destructive/10 data-[selected=true]:text-destructive",
                       "flex items-center justify-between"
                     )}
                   >
@@ -253,9 +253,9 @@ export function AppCommandMenu() {
                     >
                       <AppAvatar
                         alt={`${repo.owner}/${repo.name}`}
+                        src={repo.avatar}
                         fallbackText={repo.owner}
                         sizeClassName="size-8"
-                        src={repo.avatar}
                       />
                       <div className="line-clamp-1 flex">
                         <span className="text-muted-foreground truncate font-bold">

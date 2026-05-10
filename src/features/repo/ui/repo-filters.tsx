@@ -15,7 +15,7 @@ import {
 
 import { repoParsers } from "@/entities/repo/model/repo-parsers";
 
-import { StatusSchema, VisibilitySchema } from "@/generated/zod";
+import { StatusSchema, VisibilitySchema } from "@/shared/api-contracts";
 
 export function RepoFilters() {
   const tCommon = useTranslations("Common");

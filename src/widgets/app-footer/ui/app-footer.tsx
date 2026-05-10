@@ -5,7 +5,7 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { TelegramIcon } from "@/shared/ui/icons/telegram-icon";
 import { DateComp } from "@/shared/ui/kit/date-comp";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/shared/i18n/routing";
 
 import { SystemStatus } from "./system-status";
 

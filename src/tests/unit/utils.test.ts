@@ -8,8 +8,8 @@ import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { smoothScrollTo } from "@/shared/lib/scroll";
 import { getCookieName } from "@/shared/lib/session-cookie";
 
-import { getLanguageColor, normalizeLanguageName } from "@/server/shared/lib/language-metadata";
-import { sanitizePayload } from "@/server/shared/lib/sanitize-payload";
+import { getLanguageColor, normalizeLanguageName } from "@/server/utils/language-metadata";
+import { sanitizePayload } from "@/server/utils/sanitize-payload";
 
 describe("shared/lib/utils:getInitials", () => {
   it("should return initials for names with two or more words", () => {

@@ -1,6 +1,6 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
 
-import { authOptions } from "@/server/shared/infrastructure/auth";
+import { authOptions } from "@/server/core/auth";
 
 const handler = NextAuth(authOptions satisfies NextAuthOptions);
 

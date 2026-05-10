@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/core/select";
-import { usePathname, useRouter } from "@/i18n/routing";
+import { usePathname, useRouter } from "@/shared/i18n/routing";
 
 import { Spinner } from "../core/spinner";
 
@@ -35,11 +35,11 @@ export function Flag({ alt, src }: Readonly<{ alt: string; src: string }>) {
   return (
     <div className="relative h-3.5 w-5 shrink-0 overflow-hidden rounded-[2px]">
       <Image
+        alt={alt}
+        src={src}
         fill
         unoptimized
-        alt={alt}
         sizes="20px"
-        src={src}
         onLoad={() => {
           loadedFlags.set(src, true);
           setLoaded(true);
@@ -77,7 +77,7 @@ export function LanguageSwitcher() {
           <CardDescription>{t("settings_language_desc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex items-center gap-2">
-          <Select value={locale} disabled={isPending} onValueChange={handleLanguageChange}>
+          <Select disabled={isPending} value={locale} onValueChange={handleLanguageChange}>
             <SelectTrigger aria-label="Change Language" className="w-40">
               <SelectValue placeholder={t("settings_language_select_placeholder")} />
             </SelectTrigger>

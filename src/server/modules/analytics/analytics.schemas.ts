@@ -1,6 +1,6 @@
-import { z } from "zod";
+import z from "zod";
 
-import { StatusSchema } from "@/generated/zod";
+import { StatusSchema } from "@/shared/api-contracts";
 
 export const DashboardStatsSchema = z.object({
   analysisStats: z.object({

@@ -324,7 +324,7 @@ export function RepoMetrics({ data }: Readonly<Props>) {
           </CardContent>
         </Card>
 
-        {domain.analysis && (
+        {domain.analysis != null && (
           <section className="space-y-4">
             <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight">
               <Fingerprint className="size-5 text-blue-400" /> Domain Intelligence

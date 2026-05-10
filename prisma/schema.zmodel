@@ -19,7 +19,7 @@ plugin prisma {
 
 // plugin zod {
 //   provider = "@core/zod"
-//   output   = "../src/generated/zod"
+//   output   = "../src/shared/api-contracts"
 //   modelOnly = false
 //   noCheck   = true
 // }
@@ -39,7 +39,7 @@ plugin prisma {
 
 generator zod {
   provider = "zod-prisma-types"
-  output   = "../src/generated/zod"
+  output   = "../src/shared/api-contracts"
 
   useMultipleFiles       = false
   writeBarrelFiles       = false
@@ -85,7 +85,7 @@ generator dbml {
 
 generator fakeData {
   provider = "prisma-generator-fake-data"
-  output   = "../src/generated/fake-data.ts"
+  output   = "../prisma/generated/fake-data.ts"
 }
 
 model User {

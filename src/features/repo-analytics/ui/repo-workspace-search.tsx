@@ -15,12 +15,12 @@ import { trpc } from "@/shared/api/trpc";
 import { Button } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppSearch } from "@/shared/ui/kit/app-search";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/shared/i18n/routing";
 
 import { buildRepoSearchResultHref } from "@/entities/repo/model/repo-workspace-navigation";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
-import type { RepoSearchResult } from "@/server/shared/types";
+import type { RepoSearchResult } from "@/server/utils/types";
 
 const RESULT_ICONS = {
   "doc-section": BookOpen,
@@ -52,7 +52,7 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
   const trimmedSearch = search.trim();
   const isQueryEnabled = trimmedSearch.length >= 2;
 
-  const { data, isFetching } = trpc.repoDetails.searchWorkspace.useQuery(
+  const { data, isFetching } = trpc.analysis.searchWorkspace.useQuery(
     { aid: aid ?? undefined, repoId, search: trimmedSearch },
     {
       enabled: isQueryEnabled,

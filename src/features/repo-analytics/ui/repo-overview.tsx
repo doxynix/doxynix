@@ -21,7 +21,7 @@ import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
-import { Link, useRouter } from "@/i18n/routing";
+import { Link, useRouter } from "@/shared/i18n/routing";
 
 import { getGitMetrics } from "@/entities/repo/model/git-metrics";
 import { buildRepoSearchResultHref } from "@/entities/repo/model/repo-workspace-navigation";

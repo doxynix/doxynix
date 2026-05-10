@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { RepoFilterSchema } from "@/server/api/contracts";
 import {
   NotificationsBulkFilterSchema,
   NotificationsFilterSchema,
-  RepoFilterSchema,
-} from "@/server/api/contracts";
+} from "@/server/modules/notifications/notification.schemas";
 
 describe("shared schemas", () => {
   it("rejects notification repo filters when only one identity field is provided", () => {

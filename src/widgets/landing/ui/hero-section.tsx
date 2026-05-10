@@ -57,10 +57,10 @@ export function HeroSection() {
         </div>
         <ScrollButton
           ariaLabel="Scroll to brands section"
-          arrowClassName="rotate-90"
-          buttonClassName="animate-float"
           offset={0}
           targetId="brands"
+          arrowClassName="rotate-90"
+          buttonClassName="animate-float"
         />
       </div>
     </section>

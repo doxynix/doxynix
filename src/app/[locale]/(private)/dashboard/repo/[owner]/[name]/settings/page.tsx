@@ -5,7 +5,7 @@ import type { ParamTypes } from "@/shared/types/app.types";
 import { DeleteRepoCard } from "@/features/repo-settings/ui/delete-repo-card";
 import { PRAnalysisConfigCard } from "@/features/repo-settings/ui/pr-analysis-config-card";
 
-import { getRepoOrNotFound } from "@/server/entities/repo/api/get-repo";
+import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RepoSettingsPage({ params }: Readonly<Props>) {
   const { name, owner } = await params;
 
-  const repo = await getRepoOrNotFound(owner, name);
+  const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
   return (
     <>

@@ -30,7 +30,7 @@ import { GoogleIcon } from "@/shared/ui/icons/google-icon";
 import { Logo } from "@/shared/ui/icons/logo";
 import { YandexIcon } from "@/shared/ui/icons/yandex-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/shared/i18n/routing";
 
 const MagicLinkSchema = z.object({
   email: z
@@ -321,8 +321,8 @@ export function AuthForm() {
                         <FormLabel className="text-muted-foreground">Email</FormLabel>
                         <FormControl>
                           <Input
-                            autoComplete="email"
                             disabled={disabled}
+                            autoComplete="email"
                             inputMode="email"
                             placeholder="doxynix@example.com"
                             className="h-12"
@@ -336,8 +336,8 @@ export function AuthForm() {
                     )}
                   />
                   <LoadingButton
-                    type="submit"
                     disabled={disabled}
+                    type="submit"
                     isLoading={loadingProvider === "email" || isVerifying}
                     loadingText={isVerifying ? "Security check..." : t("login_loading")}
                     className="h-12 w-full cursor-pointer rounded-2xl"

@@ -1,18 +1,15 @@
-import { Status, Visibility, type Prisma } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
+import type { Prisma, Status, Visibility } from "@prisma/client";
+import type { TRPCError } from "@trpc/server";
 
-import type { RepoFiltersInput } from "@/server/api/contracts";
-import type { DbClient } from "@/server/shared/infrastructure/db";
-import { getRepoInfo } from "@/server/shared/infrastructure/github/github-api";
-import {
-  GitHubAuthRequiredError,
-  parseUrl,
-} from "@/server/shared/infrastructure/github/github-provider";
-import { handlePrismaError, isOctokitError } from "@/server/shared/lib/handle-error";
-import { getPaginationMeta } from "@/server/shared/lib/pagination";
-import { normalizeSearchInput, tokenizeSearchInput } from "@/server/shared/lib/search";
+import type { DbClient } from "@/server/core/db";
+import { getRepoInfo } from "@/server/core/github/github-api";
+import { GitHubAuthRequiredError, parseUrl } from "@/server/core/github/github-provider";
+import { handlePrismaError, isOctokitError } from "@/server/utils/handle-error";
+import { getPaginationMeta } from "@/server/utils/pagination";
+import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
 
 import { repoMapper, type RepoWithAnalyses } from "./repo.mapper";
+import type { RepoFiltersInput } from "./repo.schemas";
 
 function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
   return {

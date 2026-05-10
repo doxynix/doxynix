@@ -5,7 +5,7 @@ import type { ParamTypes } from "@/shared/types/app.types";
 
 import { RepoDetailsHeader } from "@/features/repo/ui/repo-details-header";
 
-import { getRepoOrNotFound } from "@/server/entities/repo/api/get-repo";
+import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
 type Props = {
   children: ReactNode;
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RepoDetailsLayout({ children, params }: Readonly<Props>) {
   const { name, owner } = await params;
 
-  const repo = await getRepoOrNotFound(owner, name);
+  const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
   return (
     <div className="space-y-4">

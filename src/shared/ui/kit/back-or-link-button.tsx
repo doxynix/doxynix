@@ -5,7 +5,7 @@ import { MoveLeft } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
 import { Button, type ButtonProps } from "@/shared/ui/core/button";
-import { Link, useRouter } from "@/i18n/routing";
+import { Link, useRouter } from "@/shared/i18n/routing";
 
 type BackOrLinkButtonProps = ButtonProps & {
   href?: Route;

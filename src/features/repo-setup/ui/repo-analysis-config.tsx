@@ -123,9 +123,9 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                   )}
                 >
                   <input
-                    type="checkbox"
                     checked={isSelected}
                     disabled={disabled}
+                    type="checkbox"
                     onChange={() => actions.toggleDocType(opt.id)}
                     className="sr-only"
                   />

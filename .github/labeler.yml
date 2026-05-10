@@ -1,49 +1,78 @@
-app-layer:
+frontend:app:
   - changed-files:
-    - any-glob-to-any-file:
-      - 'src/app/**/*'
+    - any-glob-to-any-file: 'src/app/**/*'
 
-widgets-layer:
+frontend:widgets:
   - changed-files:
-    - any-glob-to-any-file:
-      - 'src/widgets/**/*'
+    - any-glob-to-any-file: 'src/widgets/**/*'
 
-features-layer:
+frontend:features:
   - changed-files:
-    - any-glob-to-any-file:
-      - 'src/features/**/*'
+    - any-glob-to-any-file: 'src/features/**/*'
 
-entities-layer:
+frontend:entities:
   - changed-files:
-    - any-glob-to-any-file:
-      - 'src/entities/**/*'
+    - any-glob-to-any-file: 'src/entities/**/*'
 
-shared-layer:
+server:core:
   - changed-files:
-    - any-glob-to-any-file:
-      - 'src/shared/**/*'
+    - any-glob-to-any-file: 'src/server/core/**/*'
 
-backend:
+server:utils:
+  - changed-files:
+    - any-glob-to-any-file: 'src/server/utils/**/*'
+
+area:analysis:
+  - changed-files:
+    - any-glob-to-any-file: 'src/server/modules/analysis/**/*'
+
+area:users:
   - changed-files:
     - any-glob-to-any-file:
-      - 'src/server/**/*'
-      - 'src/app/api/**/*'
+      - 'src/server/modules/users/**/*'
+
+area:api-keys:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/server/modules/api-keys/**/*'
+
+area:repos:
+  - changed-files:
+    - any-glob-to-any-file: 'src/server/modules/repos/**/*'
+
+area:analytics:
+  - changed-files:
+    - any-glob-to-any-file: 'src/server/modules/analytics/**/*'
 
 database:
   - changed-files:
     - any-glob-to-any-file:
       - 'prisma/**/*'
-      - 'src/shared/api/db/**/*'
+      - 'src/server/core/db.ts'
 
-generated:
+api-contracts:
+  - changed-files:
+    - any-glob-to-any-file: 'src/shared/api-contracts/**/*'
+
+background-tasks:
   - changed-files:
     - any-glob-to-any-file:
-      - 'src/generated/**/*'
+      - 'src/server/modules/*/tasks/**/*'
+      - 'trigger.config.ts'
 
-configs:
+shared-foundation:
+  - changed-files:
+    - any-glob-to-any-file: 'src/shared/**/*'
+
+ci-cd:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/**/*'
+      - 'scripts/**/*'
+
+project-configs:
   - changed-files:
     - any-glob-to-any-file:
       - '*.json'
-      - '*.config.ts'
-      - '.github/**/*'
+      - '*.config.*'
       - 'pnpm-lock.yaml'

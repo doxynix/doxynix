@@ -107,7 +107,7 @@ export const RealtimeProvider = ({ children }: Props) => {
           toast.success("AI код-фикс готов!");
         } else if (payload.path != null) {
           const action = payload.type === "AUDIT" ? "quick-file-audit" : "document-file-preview";
-          void utils.repoAnalysis.getFileActionResult.invalidate({ action, path: payload.path });
+          void utils.analysis.getFileActionResult.invalidate({ action, path: payload.path });
           toast.success(`AI завершил ${payload.type === "AUDIT" ? "audit" : "document"} file!`);
         }
       }
@@ -133,7 +133,7 @@ export const RealtimeProvider = ({ children }: Props) => {
     invalidateAll,
     invalidate,
     utils.analytics.getDashboardStats,
-    utils.repoAnalysis.getFileActionResult,
+    utils.analysis.getFileActionResult,
     utils.generatedFix.getById,
     utils.audit.getActivityLogs,
   ]);

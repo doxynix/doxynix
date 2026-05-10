@@ -2,10 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import createMiddleware from "next-intl/middleware";
 
-import { routing } from "./i18n/routing";
-import { appLogger } from "./server/shared/infrastructure/app-logger";
-import { redisClient } from "./server/shared/infrastructure/redis";
-import { generateRequestId, getIp, sanitizeRequestId } from "./server/shared/lib/request-context";
+import { routing } from "./shared/i18n/routing";
+import { appLogger } from "./server/core/app-logger";
+import { redisClient } from "./server/core/redis";
+import { generateRequestId, getIp, sanitizeRequestId } from "./server/utils/request-context";
 import { API_PREFIX } from "./shared/constants/env.client";
 import { IS_PROD } from "./shared/constants/env.flags";
 import { TURNSTILE_SECRET_KEY } from "./shared/constants/env.server";

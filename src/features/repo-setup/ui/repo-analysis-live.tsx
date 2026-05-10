@@ -7,9 +7,9 @@ import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Progress } from "@/shared/ui/core/progress";
 import { Spinner } from "@/shared/ui/core/spinner";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/shared/i18n/routing";
 
-import { TRIGGER_CONFIG } from "@/server/shared/lib/trigger";
+import { TRIGGER_CONFIG } from "@/shared/lib/trigger";
 
 import { AnalysisTerminal } from "./repo-analysis-terminal";
 

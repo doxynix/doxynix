@@ -1,7 +1,7 @@
 import { Status, type Prisma } from "@prisma/client";
 
-import { getLanguageColor } from "@/server/shared/lib/language-metadata";
-import type { PaginationMeta } from "@/server/shared/lib/pagination";
+import { getLanguageColor } from "@/server/utils/language-metadata";
+import type { PaginationMeta } from "@/server/utils/pagination";
 
 export type RepoWithAnalyses = Prisma.RepoGetPayload<{
   include: {

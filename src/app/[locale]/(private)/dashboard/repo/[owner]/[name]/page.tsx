@@ -5,7 +5,7 @@ import type { ParamTypes } from "@/shared/types/app.types";
 import { RepoMetricsContainer } from "@/features/repo-analytics/ui/repo-metrics-container";
 import { RepoOverviewContainer } from "@/features/repo-analytics/ui/repo-overview-container";
 
-import { getRepoOrNotFound } from "@/server/entities/repo/api/get-repo";
+import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RepoOwnerNamePage({ params }: Readonly<Props>) {
   const { name, owner } = await params;
 
-  const repo = await getRepoOrNotFound(owner, name);
+  const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
   return (
     <div className="space-y-10">

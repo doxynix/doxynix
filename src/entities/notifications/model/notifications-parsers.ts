@@ -1,3 +1,4 @@
+import { NotifyTypeSchema } from "@/shared/api-contracts";
 import {
   parseAsBoolean,
   parseAsInteger,
@@ -6,7 +7,6 @@ import {
   type inferParserType,
 } from "nuqs/server";
 
-import { NotifyTypeSchema } from "@/generated/zod";
 
 export const notificationsParsers = {
   isRead: parseAsBoolean,

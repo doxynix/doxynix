@@ -6,10 +6,10 @@ import { z } from "zod";
 
 import { RESEND_WEBHOOK_SECRET } from "@/shared/constants/env.server";
 
-import { appLogger } from "@/server/shared/infrastructure/app-logger";
-import { prisma } from "@/server/shared/infrastructure/db";
-import { maskEmail, normalizeEmail } from "@/server/shared/lib/email-guard";
-import { buildRequestStore, requestContext } from "@/server/shared/lib/request-context";
+import { appLogger } from "@/server/core/app-logger";
+import { prisma } from "@/server/core/db";
+import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
+import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 
 const resendWebhookSchema = z
   .object({

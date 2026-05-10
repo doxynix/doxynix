@@ -26,7 +26,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/shared/ui/c
 import { Progress } from "@/shared/ui/core/progress";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/shared/i18n/routing";
 
 import type { DashboardStats } from "../model/dashboard.types";
 
@@ -249,8 +249,8 @@ export function LanguagesWidget({ data }: Readonly<Props>) {
 
                   <Progress
                     value={percentage}
-                    indicatorStyle={{ backgroundColor: lang.color }}
                     aria-label={`Usage of ${lang.name} language`}
+                    indicatorStyle={{ backgroundColor: lang.color }}
                   />
                 </div>
               );
@@ -312,8 +312,8 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
                       <div className="mt-1 flex items-center gap-1">
                         <Progress
                           value={activity.progress}
-                          indicatorStyle={{ backgroundColor: "var(--status-warning)" }}
                           className="h-1 flex-1"
+                          indicatorStyle={{ backgroundColor: "var(--status-warning)" }}
                         />
                         <span className="text-warning text-xs font-bold">{activity.progress}%</span>
                       </div>

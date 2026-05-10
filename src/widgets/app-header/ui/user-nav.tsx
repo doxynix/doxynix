@@ -30,7 +30,7 @@ import {
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/shared/i18n/routing";
 
 export function UserNav() {
   const { data: session, status } = useSession();
@@ -62,11 +62,11 @@ export function UserNav() {
         <Button size="icon" className="flex cursor-pointer items-center gap-3">
           <AppAvatar
             alt={user?.name ?? "User"}
-            fallbackClassName="text-xs"
+            src={avatar}
             fallbackText={user?.name ?? user?.email ?? undefined}
             priority={true}
-            src={avatar}
             className="size-9 border-0"
+            fallbackClassName="text-xs"
           />
         </Button>
       </DropdownMenuTrigger>

@@ -58,12 +58,12 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
           <div className="relative">
             <AppAvatar
               alt={currentUser.name ?? "User"}
-              fallbackClassName="text-2xl"
+              src={avatarUrl}
               fallbackText={currentUser.name ?? currentUser.email ?? undefined}
               priority={true}
-              sizeClassName="size-24"
-              src={avatarUrl}
               className="size-24"
+              fallbackClassName="text-2xl"
+              sizeClassName="size-24"
             />
             {avatarUrl && (
               <LoadingButton
@@ -83,9 +83,9 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
           <div className="flex flex-col gap-2">
             <input
               ref={fileInputRef}
+              disabled={isUploading}
               type="file"
               accept=".jpg, .jpeg, .png, .webp"
-              disabled={isUploading}
               onChange={(e) => void handleImageSelect(e)}
               className="hidden"
             />

@@ -1,7 +1,7 @@
 import { getDashboardStats, getTrends } from "@prisma/client/sql";
 import { subDays, subHours, subMinutes } from "date-fns";
 
-import type { DbClient } from "@/server/shared/infrastructure/db";
+import type { DbClient } from "@/server/core/db";
 
 import {
   DashboardStatsSchema,
@@ -45,7 +45,7 @@ export const analyticsService = {
     let currentStart: Date;
     let currentEnd: Date = input.to ?? now;
 
-    if (input.period != null && input.period !== "custom") {
+    if (input.period !== "custom") {
       currentEnd = now;
       currentStart = this.calculatePeriodStart(input.period, currentEnd);
     } else {
@@ -94,11 +94,9 @@ export const analyticsService = {
         techDebtDelta: data.techDebtDelta ?? 0,
         totalLoc: data.totalLoc ?? 0,
       },
-      recentActivity: ((data.recentActivity as Record<string, unknown>[]) ?? []).map(
-        (activity) => ({
-          ...activity,
-        })
-      ),
+      recentActivity: (data.recentActivity as Record<string, unknown>[]).map((activity) => ({
+        ...activity,
+      })),
       risks: {
         busFactorRepos: data.busFactorRepos ?? 0,
         topCoupling: data.topCoupling ?? [],
@@ -139,7 +137,7 @@ export const analyticsService = {
     let startDate: Date;
     let endDate = input.to ?? new Date();
 
-    if (input.period != null && input.period !== "custom") {
+    if (input.period !== "custom") {
       endDate = new Date();
       startDate = this.calculatePeriodStart(input.period, endDate);
     } else {

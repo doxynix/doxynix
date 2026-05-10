@@ -45,13 +45,13 @@ export function RepoDocs({
 }: Readonly<Props>) {
   const [apiMode, setApiMode] = useState<"md" | "swagger">("md");
   const { aid } = useRepoParams();
-  const { data: metrics } = trpc.repoDetails.getDetailedMetrics.useQuery({
+  const { data: metrics } = trpc.analysis.getDetailedMetrics.useQuery({
     aid: aid ?? undefined,
     repoId,
   });
 
   const { data: docContent, isLoading: isDocLoading } =
-    trpc.repoDetails.getDocumentContent.useQuery({
+    trpc.analysis.getDocumentContent.useQuery({
       aid: aid ?? undefined,
       repoId,
       type: activeTab,
@@ -141,8 +141,8 @@ export function RepoDocs({
                           </Button>
                         </AppTooltip>
                         <CopyButton
-                          value={docContent?.raw ?? ""}
                           disabled={isDocLoading}
+                          value={docContent?.raw ?? ""}
                           tooltipText="Copy file"
                           className="size-8 px-3 opacity-100"
                         />

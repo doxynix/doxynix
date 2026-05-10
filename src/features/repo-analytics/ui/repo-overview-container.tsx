@@ -15,7 +15,7 @@ type Props = { id: string };
 
 export function RepoOverviewContainer({ id }: Readonly<Props>) {
   const { aid, name, owner } = useRepoParams();
-  const { data, isLoading } = trpc.repoDetails.getWorkspace.useQuery({
+  const { data, isLoading } = trpc.analysis.getWorkspace.useQuery({
     aid: aid ?? undefined,
     repoId: id,
   });

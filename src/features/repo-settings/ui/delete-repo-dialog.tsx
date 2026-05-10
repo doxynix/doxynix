@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/shared/ui/core/button";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/shared/i18n/routing";
 
 import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
 

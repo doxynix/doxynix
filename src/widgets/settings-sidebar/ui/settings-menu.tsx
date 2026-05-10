@@ -5,7 +5,7 @@ import type { Route } from "next";
 import { settingsMenu } from "@/shared/constants/navigation";
 import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
-import { Link, usePathname } from "@/i18n/routing";
+import { Link, usePathname } from "@/shared/i18n/routing";
 
 export function SettingsMenu() {
   const pathname = usePathname();
@@ -24,20 +24,20 @@ export function SettingsMenu() {
             className={cn(
               "justify-start transition-colors",
               isDestructive &&
-                isActive &&
-                "bg-destructive/10 hover:text-destructive text-destructive hover:bg-destructive/10",
+              isActive &&
+              "bg-destructive/10 hover:text-destructive text-destructive hover:bg-destructive/10",
 
               isDestructive &&
-                !isActive &&
-                "text-destructive hover:bg-destructive/10 hover:text-destructive",
+              !isActive &&
+              "text-destructive hover:bg-destructive/10 hover:text-destructive",
 
               !isDestructive &&
-                isActive &&
-                "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground font-bold",
+              isActive &&
+              "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground font-bold",
 
               !isDestructive &&
-                !isActive &&
-                "text-muted-foreground hover:bg-accent hover:text-foreground"
+              !isActive &&
+              "text-muted-foreground hover:bg-accent hover:text-foreground"
             )}
           >
             <Link href={item.href as Route} className="flex w-full items-center gap-2">

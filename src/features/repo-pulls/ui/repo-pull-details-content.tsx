@@ -22,7 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card"
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/shared/i18n/routing";
 
 import type { PRImpact, PRNumber } from "@/entities/pr/model/pr.types";
 import {
@@ -50,7 +50,7 @@ const STATUS_CONFIG = {
 
 export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }: Readonly<Props>) {
   const locale = useLocale();
-  const { data: comments, isLoading: isCommentsLoading } = trpc.prAnalysis.getComments.useQuery(
+  const { data: comments, isLoading: isCommentsLoading } = trpc.analysis.getComments.useQuery(
     { analysisId: analysis?.id ?? "" },
     { enabled: analysis?.id != null }
   );
@@ -64,14 +64,14 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
   const fixes = impact?.fixes ?? [];
 
   const PR_DETAILS_ITEMS = [
-    { isCopy: true, label: "Base SHA", value: analysis?.baseSha.slice(0, 7) },
-    { isStatus: true, label: "Status", value: analysis?.status },
+    { isCopy: true, label: "Base SHA", value: analysis?.analysis.baseSha.slice(0, 7) },
+    { isStatus: true, label: "Status", value: analysis?.analysis.status },
     { label: "Changed files", value: impact?.summary.affectedFiles ?? 0 },
     { label: "Affected zones", value: impact?.summary.affectedZones ?? 0 },
     {
       isTime: true,
       label: "Created",
-      value: analysis?.createdAt ?? null,
+      value: analysis?.analysis.createdAt ?? null,
     },
   ];
 
@@ -290,7 +290,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                 <div className="flex items-center gap-1">
                   {item.isCopy === true && (
                     <CopyButton
-                      value={analysis?.baseSha ?? ""}
+                      value={analysis?.analysis.baseSha ?? ""}
                       tooltipText="Copy SHA"
                       className="opacity-100"
                     />

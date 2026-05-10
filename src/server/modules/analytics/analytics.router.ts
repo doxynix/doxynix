@@ -1,8 +1,8 @@
-import { analyticsService } from "@/server/modules/analytics/analytics.service";
+import { OpenApiErrorResponses } from "@/server/core/trpc/constants";
+import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 
-import { OpenApiErrorResponses } from "../../api/contracts";
-import { createTRPCRouter, protectedProcedure } from "../../api/trpc";
 import { AnalyticsInputSchema, DashboardStatsSchema, TrendsSchema } from "./analytics.schemas";
+import { analyticsService } from "./analytics.service";
 
 export const analyticsRouter = createTRPCRouter({
   getDashboardStats: protectedProcedure

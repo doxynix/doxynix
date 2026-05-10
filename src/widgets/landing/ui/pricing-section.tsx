@@ -6,7 +6,7 @@ import posthog from "posthog-js";
 
 import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
-import { Link } from "@/i18n/routing";
+import { Link } from "@/shared/i18n/routing";
 
 export function PricingSection() {
   const t = useTranslations("Landing");

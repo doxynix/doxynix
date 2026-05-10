@@ -5,7 +5,7 @@ import { NotifyType, PrismaClient, Status, UserRole, Visibility } from "@prisma/
 import { subDays } from "date-fns";
 import pg from "pg";
 
-import * as Fake from "../src/generated/fake-data";
+import * as Fake from "./generated/fake-data";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const LIGHT_USER_COUNT = 50;
@@ -139,9 +139,9 @@ function generateMetricsJson(repoName: string, isBad: boolean) {
 
   const securityFindings = isBad
     ? [
-        { message: "Hardcoded credentials found", severity: "error" },
-        { message: "Insecure TLS configuration", severity: "warning" },
-      ]
+      { message: "Hardcoded credentials found", severity: "error" },
+      { message: "Insecure TLS configuration", severity: "warning" },
+    ]
     : [];
 
   return {
@@ -424,5 +424,5 @@ main()
     console.error("Seeding failed:", error);
     await prisma.$disconnect();
     await pool.end();
-    process.exit(1);
+    throw new Error("Seeding failed");
   });

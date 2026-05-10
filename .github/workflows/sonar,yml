@@ -27,6 +27,6 @@ jobs:
             -Dsonar.organization=doxynix
             -Dsonar.sources=src
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.exclusions=**/node_modules/**,**/prisma/tests/**,**/src/generated/**
+            -Dsonar.exclusions=**/node_modules/**,**/prisma/tests/**,**/src/shared/api-contracts/**
 
 

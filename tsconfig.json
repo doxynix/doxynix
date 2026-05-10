@@ -43,7 +43,8 @@
     "eslint.config.mjs",
     "messages/*.json",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "scripts/remove-imports.mjs"
   ],
   "exclude": [
     "node_modules",
