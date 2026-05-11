@@ -1,12 +1,13 @@
-import type { TRPCError } from "@trpc/server";
+import crypto from "node:crypto";
+import { TRPCError } from "@trpc/server";
 import z from "zod";
 
-import type { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
+import { ApiKeySchema } from "@/shared/api-contracts";
+import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 
-import type { OpenApiErrorResponses } from "@/server/core/trpc/constants";
+import { OpenApiErrorResponses } from "@/server/core/trpc/constants";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
-import type { handlePrismaError } from "@/server/utils/handle-error";
-import type { ApiKeySchema } from "@/shared/api-contracts";
+import { handlePrismaError } from "@/server/utils/handle-error";
 
 const BRAND_PREFIX = "dxnx_";
 

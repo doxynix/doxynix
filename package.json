@@ -65,7 +65,7 @@
     "arch:focus": "depcruise src/server --config .dependency-cruiser.js --output-type dot --collapse 3 --focus",
     "arch:check": "depcruise src --config .dependency-cruiser.js --output-type err",
     "arch:html": "dependency-cruiser src/server --config .dependency-cruiser.js --output-type err-html -f arch/server-report.html",
-    "arch:dump": "chcp 65001 && dependency-cruiser src --config .dependency-cruiser.js --output-type dot --exclude \"^(node_modules|src/generated|\\.next)\" > arch/dependencies_list.txt"
+    "arch:dump": "chcp 65001 && dependency-cruiser src --config .dependency-cruiser.js --output-type dot --exclude \"^(node_modules|src/shared/api-contracts|\\.next)\" > arch/dependencies_list.txt"
   },
   "pnpm": {
     "overrides": {

@@ -1,4 +1,4 @@
-import type { Ratelimit } from "@upstash/ratelimit";
+import { Ratelimit } from "@upstash/ratelimit";
 
 import { redisClient } from "./redis";
 

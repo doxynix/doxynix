@@ -246,10 +246,6 @@ export const CodeOptimizer = {
   },
 };
 
-export async function cleanCodeForAi(code: string, fileName: string = "unknown"): Promise<string> {
-  return await CodeOptimizer.optimize(code, fileName);
-}
-
 export function unwrapAiText(value: unknown): string {
   if (value == null) return "";
   if (isString(value)) return value;

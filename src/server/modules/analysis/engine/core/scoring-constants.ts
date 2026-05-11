@@ -6,7 +6,7 @@
  * that can be tuned globally while maintaining consistency.
  */
 
-import { appLogger } from "../../../../core/app-logger";
+import { appLogger } from "@/server/core/app-logger";
 
 // ============================================================================
 // COMPLEXITY SCORING

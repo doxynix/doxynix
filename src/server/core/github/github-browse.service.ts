@@ -1,12 +1,12 @@
-import type { TRPCError } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
 
 import { getFileScore } from "@/server/modules/analysis/engine/core/file-classifier";
-import type { isOctokitError } from "@/server/utils/handle-error";
+import { isOctokitError } from "@/server/utils/handle-error";
 
 import { appLogger } from "../app-logger";
 import type { DbClient, PrismaClientExtended } from "../db";
 import { getFileContent, getRepoBranches, getRepoTree, searchRepos } from "./github-api";
-import type { GitHubAuthRequiredError } from "./github-provider";
+import { GitHubAuthRequiredError } from "./github-provider";
 
 function throwBrowseAccessError(params: {
   authMessage: string;

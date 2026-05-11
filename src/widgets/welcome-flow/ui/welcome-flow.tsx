@@ -5,9 +5,9 @@ import { Book, ChartNoAxesColumn } from "lucide-react";
 import type { User } from "next-auth";
 import { useLocale } from "next-intl";
 
+import { useRouter } from "@/shared/i18n/routing";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
-import { useRouter } from "@/shared/i18n/routing";
 
 import { ProfileDetailsForm } from "@/features/profile/ui/profile-details-form";
 

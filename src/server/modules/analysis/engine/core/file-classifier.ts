@@ -1,7 +1,7 @@
 import { normalizeLanguageName } from "@/server/utils/language-metadata";
 
-import type { ProjectPolicy } from "./project-policy";
-import type { FILE_CATEGORY_SCORING } from "./scoring-constants";
+import { ProjectPolicy } from "./project-policy";
+import { FILE_CATEGORY_SCORING } from "./scoring-constants";
 
 export function getFileScore(path: string): number {
   const lower = path.toLowerCase();

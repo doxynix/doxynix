@@ -1,7 +1,7 @@
 import { getLocale } from "next-intl/server";
 
-import { createMetadata } from "@/shared/lib/metadata";
 import { redirect } from "@/shared/i18n/routing";
+import { createMetadata } from "@/shared/lib/metadata";
 
 import { AuthForm } from "@/features/auth/ui/auth-form";
 

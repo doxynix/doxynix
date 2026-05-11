@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { Book, SlashIcon } from "lucide-react";
 
 import { LOCALES, type Locale } from "@/shared/constants/locales";
+import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
 import { SidebarTrigger } from "@/shared/ui/core/sidebar";
@@ -11,7 +12,6 @@ import { Logo } from "@/shared/ui/icons/logo";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ThemeToggle } from "@/shared/ui/kit/theme-toggle";
-import { Link } from "@/shared/i18n/routing";
 
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoDetailsTabs } from "@/entities/repo/ui/repo-details-tabs";

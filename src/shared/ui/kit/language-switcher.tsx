@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 
 import { LOCALES, type Locale } from "@/shared/constants/locales";
+import { usePathname, useRouter } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { loadedFlags } from "@/shared/lib/load-state";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
@@ -15,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/core/select";
-import { usePathname, useRouter } from "@/shared/i18n/routing";
 
 import { Spinner } from "../core/spinner";
 

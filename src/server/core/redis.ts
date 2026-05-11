@@ -1,3 +1,3 @@
-import Redis from "ioredis";
+import { Redis } from "@upstash/redis";
 
 export const redisClient = Redis.fromEnv();

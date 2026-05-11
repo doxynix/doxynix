@@ -4,6 +4,8 @@ import * as ai from "ai";
 import { wrapAISDK } from "langsmith/experimental/vercel";
 import type z from "zod";
 
+import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
+
 import { appLogger } from "@/server/core/app-logger";
 import {
   LLM_TEMPERATURE_STRATEGY,
@@ -11,7 +13,6 @@ import {
 } from "@/server/modules/analysis/engine/core/scoring-constants";
 
 import { taskLogger } from "./task-logger";
-import { TRIGGER_CONFIG } from "../../shared/lib/trigger";
 
 const tracedAi = wrapAISDK(ai);
 

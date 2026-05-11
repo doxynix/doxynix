@@ -1,6 +1,6 @@
 import type { PushEvent } from "@octokit/webhooks-types";
 
-import type { appLogger } from "@/server/core/app-logger";
+import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 
 export async function handlePushEvent(payload: PushEvent): Promise<void> {

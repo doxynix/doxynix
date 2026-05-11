@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
+import { NotifyTypeSchema } from "@/shared/api-contracts";
 import { Button } from "@/shared/ui/core/button";
 import {
   Select,
@@ -19,10 +20,8 @@ import {
   type NotificationsParsersState,
 } from "@/entities/notifications/model/notifications-parsers";
 
-
 import { NotificationsBulkActions } from "./notifications-bulk-actions";
 import { NotificationsRepoFilter } from "./notifications-repo-filter";
-import { NotifyTypeSchema } from "@/shared/api-contracts";
 
 type Props = {
   stats?: { read: number; total: number; unread: number };

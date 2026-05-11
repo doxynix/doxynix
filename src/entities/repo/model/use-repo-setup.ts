@@ -4,9 +4,8 @@ import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
 import type { TreeApi } from "react-arborist";
 
-import { trpc } from "@/shared/api/trpc";
-
 import { DocTypeSchema } from "@/shared/api-contracts";
+import { trpc } from "@/shared/api/trpc";
 
 import { collectAllIds, getFolderSelectionState, sortNodes } from "./repo-setup-utils";
 import type { FileNode, FileTuple } from "./repo-setup.types";

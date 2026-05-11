@@ -1,7 +1,7 @@
 import { Play } from "lucide-react";
 
-import { Button } from "@/shared/ui/core/button";
 import { Link } from "@/shared/i18n/routing";
+import { Button } from "@/shared/ui/core/button";
 
 type Props = { name: string; owner: string };
 

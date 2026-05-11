@@ -1,6 +1,5 @@
 import { createTRPCRouter } from "../core/trpc/init";
 import { analysisRouter } from "./analysis/analysis.router";
-import { generatedFixRouter } from "./analysis/generated-fix.router";
 import { analyticsRouter } from "./analytics/analytics.router";
 import { apiKeyRouter } from "./api-keys/api-key.router";
 import { auditRouter } from "./audit-logs/audit.router";
@@ -16,7 +15,6 @@ export const appRouter = createTRPCRouter({
   analytics: analyticsRouter,
   apikey: apiKeyRouter,
   audit: auditRouter,
-  generatedFix: generatedFixRouter,
   githubApp: githubAppRouter,
   githubBrowse: githubBrowseRouter,
   health: healthRouter,

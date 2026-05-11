@@ -15,6 +15,7 @@ import {
 import { useLocale } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
+import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
@@ -22,7 +23,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card"
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-import { Link } from "@/shared/i18n/routing";
 
 import type { PRImpact, PRNumber } from "@/entities/pr/model/pr.types";
 import {

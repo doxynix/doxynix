@@ -3,6 +3,7 @@ import { auth } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
 
+import { DocTypeSchema } from "@/shared/api-contracts";
 import { UpdatePRConfigInput } from "@/shared/api/schemas/pr-analysis.schema";
 
 import { appLogger } from "@/server/core/app-logger";
@@ -13,22 +14,14 @@ import { markdownToHtml } from "@/server/utils/markdown-to-html";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 import type { FileActionPreviewResult } from "@/server/utils/types";
 
+import type { analysisRepo } from "./analysis.repository";
 import { repoAnalysisService } from "./analysis.service";
 import type { AIResult } from "./engine/core/analysis-result.schemas";
-import {
-  FindingForFixSchema,
-  FixApplicationPayloadSchema,
-  FixResultSchema,
-  GeneratedFixDetailedDTO,
-  GeneratedFixDTO,
-  StagedFixedFileSchema,
-} from "./generated-fix.router";
 import { FixService } from "./logic/fix-generator";
 import { PRConfigService } from "./logic/pr-config";
 import type { FindingForFix } from "./logic/pr-types";
 import { DocumentFormatter } from "./logic/section-graph-linker";
 import { generateFixTask } from "./tasks/generate-fix.task";
-import type { DocTypeSchema } from "@/shared/api-contracts";
 
 const DEFAULT_DOC_LANGUAGE = "English";
 const FileActionResultSchema = z.enum(["document-file-preview", "quick-file-audit"]);
@@ -122,7 +115,7 @@ export const analysisRouter = createTRPCRouter({
         });
 
         // Update fix status with PR metadata (no diffs stored)
-        await generatedFixService.updateStatus(ctx.db, fix.publicId, "PR_OPENED", {
+        await analysisRepo.updateStatus(ctx.db, fix.publicId, "PR_OPENED", {
           githubPrNumber: result.prNumber,
           githubPrUrl: result.prUrl,
         });
@@ -176,7 +169,7 @@ export const analysisRouter = createTRPCRouter({
         userId: ctx.session.user.id,
       });
 
-      return await PRConfigService.updateConfig(
+      return PRConfigService.updateConfig(
         input.repoId,
         {
           ciSkip: input.ciSkip,
@@ -550,7 +543,7 @@ export const analysisRouter = createTRPCRouter({
   getRepoConfig: protectedProcedure
     .input(z.object({ repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return await repoAnalysisService.getConfig(input.repoId, ctx.db);
+      return repoAnalysisService.getConfig(input.repoId, ctx.db);
     }),
 
   /**
@@ -751,7 +744,7 @@ export const analysisRouter = createTRPCRouter({
           title: input.title,
         });
 
-        await generatedFixService.updateStatus(ctx.db, fix.publicId, "PR_OPENED", {
+        await analysisRepo.updateStatus(ctx.db, fix.publicId, "PR_OPENED", {
           githubPrNumber: result.prNumber,
           githubPrUrl: result.prUrl,
         });
@@ -772,7 +765,7 @@ export const analysisRouter = createTRPCRouter({
           repoId: input.repoId,
         });
 
-        await generatedFixService.updateStatus(ctx.db, fix.publicId, "FAILED");
+        await analysisRepo.updateStatus(ctx.db, fix.publicId, "FAILED");
 
         if (error instanceof TRPCError) {
           throw error;
@@ -829,8 +822,8 @@ export const analysisRouter = createTRPCRouter({
           version: commitSha ?? "manual",
           ...(internalAnalysisId != null
             ? {
-              analysis: { connect: { id: internalAnalysisId } },
-            }
+                analysis: { connect: { id: internalAnalysisId } },
+              }
             : {}),
         },
       });
@@ -849,7 +842,7 @@ export const analysisRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return repoAnalysisService.auditFile(ctx.db, Number(ctx.session.user.id), input);
+      return repoAnalysisService.runFileAction(ctx.db, userId, "analyze-single-file", input);
     }),
 
   searchWorkspace: protectedProcedure

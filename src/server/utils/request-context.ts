@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import ipaddr from "ipaddr.js";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
 

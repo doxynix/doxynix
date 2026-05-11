@@ -1,4 +1,4 @@
-import type { uniq } from "es-toolkit";
+import { uniq } from "es-toolkit";
 import type { normalizePath } from "trpc-to-openapi";
 
 import {

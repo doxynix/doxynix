@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import z from "zod";
 
+import { RepoSchema, StatusSchema } from "@/shared/api-contracts";
 import { CreateRepoSchema } from "@/shared/api/schemas/repo";
 
 import { OpenApiErrorResponses } from "@/server/core/trpc/constants";
@@ -10,7 +11,6 @@ import { getPaginationMeta, PaginationMetaSchema } from "@/server/utils/paginati
 import { repoMapper, type RepoWithAnalyses } from "./repo.mapper";
 import { RepoFilterSchema } from "./repo.schemas";
 import { repoService } from "./repo.service";
-import { RepoSchema, StatusSchema } from "@/shared/api-contracts";
 
 const PublicRepoSchema = RepoSchema.extend({
   id: z.uuid(),

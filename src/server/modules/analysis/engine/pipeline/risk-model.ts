@@ -1,9 +1,8 @@
-import type { clamp } from "date-fns";
-import { mean, uniq } from "es-toolkit";
+import { clamp, mean, uniq } from "es-toolkit";
 
 import { dumpDebug } from "@/server/utils/debug-logger";
 
-import type { buildEvidence } from "../core/common";
+import { buildEvidence } from "../core/common";
 import type {
   ChangeCouplingRef,
   DependencyGraphEvidence,
@@ -15,7 +14,7 @@ import type {
 } from "../core/discovery.types";
 import type { RisksSectionBody } from "../core/documentation.types";
 import type { RepoMetrics } from "../core/metrics.types";
-import type { RISK_SCORING, RISK_THRESHOLDS } from "../core/scoring-constants";
+import { RISK_SCORING, RISK_THRESHOLDS } from "../core/scoring-constants";
 
 function severityForScore(score: number): RiskFindingRef["severity"] {
   if (score >= RISK_THRESHOLDS.critical) return "CRITICAL";

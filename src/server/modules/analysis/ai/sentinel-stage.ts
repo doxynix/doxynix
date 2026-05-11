@@ -3,7 +3,7 @@ import { callWithFallback } from "@/server/utils/call";
 
 import { sentinelSchema, type SentinelResult } from "../engine/core/analysis-result.schemas";
 import { AI_MODELS, SAFETY_SETTINGS } from "./ai-constants";
-import { SENTINEL_SYSTEM_PROMPT, SENTINEL_USER_PROMPT } from "./prompts-refactored";
+import { buildSentinelSystemPrompt, buildSentinelUserPrompt } from "./prompts-refactored";
 
 export async function executeSentinelPhase(
   instructions: string | undefined,
@@ -17,9 +17,9 @@ export async function executeSentinelPhase(
         attemptMetadata: { analysisId, phase: "sentinel" },
         models: AI_MODELS.SENTINEL,
         outputSchema: sentinelSchema,
-        prompt: SENTINEL_USER_PROMPT(instructions),
+        prompt: buildSentinelUserPrompt(instructions),
         providerOptions: { google: { safetySettings: SAFETY_SETTINGS } },
-        system: SENTINEL_SYSTEM_PROMPT,
+        system: buildSentinelSystemPrompt(),
         taskType: "classification",
       });
       sentinelStatus = sentinelOut.status;

@@ -38,6 +38,7 @@ export default defineConfig([
       ".trigger/**",
       "cli/index.js",
       "commitlint.config.js",
+      "./scripts",
       "messages/en.d.json.ts",
     ],
   },
@@ -78,17 +79,22 @@ export default defineConfig([
         version: "detect",
       },
       "boundaries/elements": [
-        { type: "app", pattern: "src/app/*" },
-        { type: "widgets", pattern: "src/widgets/*" },
-        { type: "features", pattern: "src/features/*" },
-        { type: "entities", pattern: "src/entities/*" },
-        { type: "shared", pattern: "src/shared/*" },
-        {
-          type: "shared-contracts", pattern: "src/shared/api-contracts/*"
-        },
-        { type: "i18n", pattern: "src/shared/i18n/*" },
-        { type: "server-core", pattern: "src/server/core/*" },
-        { type: "server-utils", pattern: "src/server/utils/*" },
+        // --- Frontend (FSD) ---
+        { type: "app", pattern: "src/app/**/*" },
+        { type: "widgets", pattern: "src/widgets/**/*" },
+        { type: "features", pattern: "src/features/**/*" },
+        { type: "entities", pattern: "src/entities/**/*" },
+
+        // --- Shared Foundation ---
+        { type: "shared-ui", pattern: "src/shared/ui/**/*" },
+        { type: "shared-lib", pattern: "src/shared/lib/**/*" },
+        { type: "shared-contracts", pattern: "src/shared/api-contracts/**/*" },
+        { type: "i18n", pattern: "src/shared/i18n/**/*" },
+        { type: "shared-api", pattern: "src/shared/api/**/*" },
+
+        // --- Backend (Modular Monolith) ---
+        { type: "server-core", pattern: "src/server/core/**/*" },
+        { type: "server-utils", pattern: "src/server/utils/**/*" },
         { type: "server-modules", pattern: "src/server/modules/*" },
       ],
       "jsx-a11y": {
@@ -233,6 +239,7 @@ export default defineConfig([
                 { to: { type: "server-core" } },
                 { to: { type: "server-utils" } },
                 { to: { type: "shared-contracts" } },
+                { to: { type: "shared-lib" } },
                 { to: { type: "server-modules", path: "src/server/modules/*/*.ts" } },
               ],
               disallow: [{ to: { type: "server-modules", path: "src/server/modules/*/*/**" } }],
@@ -267,33 +274,19 @@ export default defineConfig([
             },
             {
               from: { type: "entities" },
-              disallow: [{ to: { type: "app|widgets|features" } }],
-              message: "FSD Violation: Entities cannot import Features, Widgets or App.",
+              disallow: [{ to: { type: "features|widgets|app" } }, { to: { type: "entities" } }],
+              message:
+                "FSD Violation: Entities are independent and cannot import upper layers or other entities.",
             },
             {
               from: { type: "features" },
-              disallow: [{ to: { type: "app|widgets" } }],
-              message: "FSD Violation: Features cannot import Widgets or App.",
+              disallow: [{ to: { type: "widgets|app" } }, { to: { type: "features" } }],
+              message: "FSD Violation: Features cannot import upper layers or other features.",
             },
             {
               from: { type: "widgets" },
-              disallow: [{ to: { type: "app" } }],
-              message: "FSD Violation: Widgets cannot import the App layer.",
-            },
-            {
-              from: { type: "features" },
-              disallow: [{ to: { type: "features" } }],
-              message: "FSD Violation: Cross-import between Features is forbidden.",
-            },
-            {
-              from: { type: "entities" },
-              disallow: [{ to: { type: "entities" } }],
-              message: "FSD Violation: Cross-import between Entities is forbidden.",
-            },
-            {
-              from: { type: "widgets" },
-              disallow: [{ to: { type: "widgets" } }],
-              message: "FSD Violation: Widgets should not import other Widgets.",
+              disallow: [{ to: { type: "app" } }, { to: { type: "widgets" } }],
+              message: "FSD Violation: Widgets cannot import the App layer or other widgets.",
             },
             {
               from: { type: "app" },
@@ -469,7 +462,6 @@ export default defineConfig([
       ],
     },
   },
-
   {
     files: ["src/server/**/*.{ts,tsx,js}"],
     rules: {

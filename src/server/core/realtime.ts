@@ -1,3 +1,5 @@
+import Ably from "ably";
+
 import { IS_PROD } from "@/shared/constants/env.flags";
 import { ABLY_API_KEY } from "@/shared/constants/env.server";
 

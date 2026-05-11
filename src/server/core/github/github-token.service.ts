@@ -1,9 +1,10 @@
+import { createOAuthUserAuth } from "@octokit/auth-app";
 import { getAccountForUpdate } from "@prisma/client/sql";
 
-import type { AUTH_PROVIDERS } from "@/shared/constants/env.server";
+import { AUTH_PROVIDERS } from "@/shared/constants/env.server";
 
-import type { appLogger } from "../app-logger";
-import type { prisma } from "../db";
+import { appLogger } from "../app-logger";
+import { prisma } from "../db";
 
 const REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // TIME: 5 минут
 

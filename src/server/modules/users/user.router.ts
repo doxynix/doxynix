@@ -1,14 +1,14 @@
-import type { TRPCError } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
 import { UTApi } from "uploadthing/server";
 import z from "zod";
 
+import { UserSchema } from "@/shared/api-contracts";
 import { UpdateProfileSchema } from "@/shared/api/schemas/user";
 
-import type { appLogger } from "@/server/core/app-logger";
-import type { prisma } from "@/server/core/db";
-import type { OpenApiErrorResponses } from "@/server/core/trpc/constants";
+import { appLogger } from "@/server/core/app-logger";
+import { prisma } from "@/server/core/db";
+import { OpenApiErrorResponses } from "@/server/core/trpc/constants";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
-import { UserSchema } from "@/shared/api-contracts";
 
 const utapi = new UTApi();
 

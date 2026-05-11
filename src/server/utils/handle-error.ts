@@ -1,7 +1,7 @@
-import type { TRPCError } from "@trpc/server";
-import { Prisma } from "linguist-languages";
+import { Prisma } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 
-import type { appLogger } from "@/server/core/app-logger";
+import { appLogger } from "@/server/core/app-logger";
 
 type ErrorMapping = {
   [key: string]: Record<string, string> | string | undefined;

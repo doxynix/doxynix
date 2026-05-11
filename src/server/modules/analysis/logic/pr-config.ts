@@ -1,5 +1,5 @@
 import { PRCommentStyle, PRFocusArea } from "@prisma/client";
-import { clamp } from "date-fns";
+import { clamp } from "es-toolkit";
 
 import type { DbClient } from "@/server/core/db";
 

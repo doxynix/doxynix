@@ -3,12 +3,12 @@
 import type { Route } from "next";
 import { SquareArrowOutUpRight } from "lucide-react";
 
+import { Link, usePathname } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { isRouteActive } from "@/shared/lib/navigation-utils";
 import type { MenuItem } from "@/shared/types/navigation.types";
 import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuShortcut } from "@/shared/ui/core/sidebar";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
-import { Link, usePathname } from "@/shared/i18n/routing";
 
 export function SidebarLink({
   avatar,

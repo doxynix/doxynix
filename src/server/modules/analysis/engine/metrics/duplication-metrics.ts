@@ -1,7 +1,9 @@
-import { clamp } from "date-fns";
+import type { IClone, IOptions } from "@jscpd/core";
+import { clamp } from "es-toolkit";
+import { detectClones } from "jscpd";
 
 import type { RepositoryFile } from "../core/discovery.types";
-import type { ProjectPolicy } from "../core/project-policy";
+import { ProjectPolicy } from "../core/project-policy";
 import { PROJECT_POLICY_RULES } from "../core/project-policy-rules";
 
 export type DuplicationReport = {

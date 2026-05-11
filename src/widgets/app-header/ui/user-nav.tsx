@@ -7,6 +7,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 import { userNavMenu } from "@/shared/constants/navigation";
+import { Link } from "@/shared/i18n/routing";
 import { Button } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -30,7 +31,6 @@ import {
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
-import { Link } from "@/shared/i18n/routing";
 
 export function UserNav() {
   const { data: session, status } = useSession();

@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
+import type { RepoPageProps } from "@/shared/types/next.types";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppSearch } from "@/shared/ui/kit/app-search";
-
-import type { SearchParams } from "@/entities/repo/model/repo-setup.types";
 
 import { CreateRepoButton } from "@/features/repo/ui/create-repo-button";
 import { DeleteByOwnerDialog } from "@/features/repo/ui/delete-by-owner-dialog";
@@ -13,12 +12,7 @@ import { RepoListContainer } from "@/features/repo/ui/repo-list-container";
 
 import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
-type Props = {
-  params: Promise<{ owner: string }>;
-  searchParams: Promise<SearchParams>;
-};
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: RepoPageProps): Promise<Metadata> {
   const { owner } = await params;
   return {
     description: `Repository overview for ${owner}`,
@@ -26,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function OwnerPage({ params }: Readonly<Props>) {
+export default async function OwnerPage({ params }: Readonly<RepoPageProps>) {
   const t = await getTranslations("Dashboard");
   const { owner } = await params;
 

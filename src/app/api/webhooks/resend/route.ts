@@ -82,7 +82,7 @@ export async function POST(req: Request) {
     requestId: svix_id,
   });
 
-  return await requestContext.run(store, async () => {
+  return requestContext.run(store, async () => {
     let delivery: null | { id: string } = null;
 
     try {

@@ -103,7 +103,7 @@ export const RealtimeProvider = ({ children }: Props) => {
         };
 
         if (payload.type === "FIX_GENERATED" && payload.fixId != null) {
-          void utils.generatedFix.getById.invalidate({ fixId: payload.fixId });
+          void utils.analysis.getById.invalidate({ fixId: payload.fixId });
           toast.success("AI код-фикс готов!");
         } else if (payload.path != null) {
           const action = payload.type === "AUDIT" ? "quick-file-audit" : "document-file-preview";
@@ -134,7 +134,7 @@ export const RealtimeProvider = ({ children }: Props) => {
     invalidate,
     utils.analytics.getDashboardStats,
     utils.analysis.getFileActionResult,
-    utils.generatedFix.getById,
+    utils.analysis.getById,
     utils.audit.getActivityLogs,
   ]);
 

@@ -12,10 +12,10 @@ import {
 import { parseAsString, useQueryState } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
+import { useRouter } from "@/shared/i18n/routing";
 import { Button } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppSearch } from "@/shared/ui/kit/app-search";
-import { useRouter } from "@/shared/i18n/routing";
 
 import { buildRepoSearchResultHref } from "@/entities/repo/model/repo-workspace-navigation";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";

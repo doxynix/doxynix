@@ -1,16 +1,16 @@
-import type { task } from "@trigger.dev/sdk";
+import { task } from "@trigger.dev/sdk";
 
-import type { appLogger } from "@/server/core/app-logger";
+import { appLogger } from "@/server/core/app-logger";
 import { llmLimiter } from "@/server/utils/llm-limiter";
 
-import type {
+import {
   executeApiWriter,
   executeArchitectureWriter,
   executeChangelogWriter,
   executeContributingWriter,
   executeReadmeWriter,
-  WriterName,
-  WriterResult,
+  type WriterName,
+  type WriterResult,
 } from "../ai/writer-tasks";
 
 interface WriterInput {

@@ -185,13 +185,6 @@ export class EvidenceFormatter {
   }
 
   /**
-   * Format metrics as evidence block
-   */
-  formatMetrics(metrics: object, options: EvidenceFormattingOptions = {}): FormattedEvidence {
-    return this.formatXml("metrics", metrics, { ...options, includeMetadata: true });
-  }
-
-  /**
    * Format paths list as evidence
    */
   formatPaths(
@@ -218,20 +211,6 @@ export class EvidenceFormatter {
     }
 
     return this.formatXml("paths", { items: paths }, options);
-  }
-
-  /**
-   * Format repository evidence
-   */
-  formatRepositoryEvidence(
-    evidence: object,
-    options: EvidenceFormattingOptions = {}
-  ): FormattedEvidence {
-    return this.formatXml("repository_evidence", evidence, {
-      ...options,
-      attributes: { type: "structal-analysis" },
-      includeMetadata: true,
-    });
   }
 
   /**

@@ -50,12 +50,11 @@ export function RepoDocs({
     repoId,
   });
 
-  const { data: docContent, isLoading: isDocLoading } =
-    trpc.analysis.getDocumentContent.useQuery({
-      aid: aid ?? undefined,
-      repoId,
-      type: activeTab,
-    });
+  const { data: docContent, isLoading: isDocLoading } = trpc.analysis.getDocumentContent.useQuery({
+    aid: aid ?? undefined,
+    repoId,
+    type: activeTab,
+  });
 
   const handleDownload = () => {
     if (docContent?.raw == null) {

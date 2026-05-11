@@ -1,7 +1,7 @@
-import type { DocType } from "@prisma/client";
+import { DocType } from "@prisma/client";
 
 import type { RepoMetrics } from "../engine/core/metrics.types";
-import type { DOC_SECTION_DEPENDENCIES } from "./doc-priority";
+import { DOC_SECTION_DEPENDENCIES } from "./doc-priority";
 
 type DocumentationInputSnapshot = NonNullable<RepoMetrics["documentationInput"]>;
 type WriterPayload = {

@@ -2,8 +2,8 @@
 
 import { MoveLeft } from "lucide-react";
 
-import { Button } from "@/shared/ui/core/button";
 import { Link, usePathname } from "@/shared/i18n/routing";
+import { Button } from "@/shared/ui/core/button";
 
 export function PublicHeaderCtaSlot() {
   const pathname = usePathname();

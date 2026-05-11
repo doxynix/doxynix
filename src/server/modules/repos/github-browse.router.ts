@@ -2,7 +2,7 @@ import z from "zod";
 
 import { GitHubQuerySchema } from "@/shared/api/schemas/repo";
 
-import type { githubBrowseService } from "@/server/core/github/github-browse.service";
+import { githubBrowseService } from "@/server/core/github/github-browse.service";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 
 export const githubBrowseRouter = createTRPCRouter({

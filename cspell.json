@@ -31,7 +31,7 @@
     ".cache",
     "**/*.config.ts",
     "prisma/generated",
-    "src/generated",
+    "src/shared/api-contracts",
     "/prisma",
     "/package.json",
     "/pnpm-workspace.yaml",

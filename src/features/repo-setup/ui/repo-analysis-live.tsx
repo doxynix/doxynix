@@ -3,13 +3,12 @@
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
+import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
+import { useRouter } from "@/shared/i18n/routing";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Progress } from "@/shared/ui/core/progress";
 import { Spinner } from "@/shared/ui/core/spinner";
-import { useRouter } from "@/shared/i18n/routing";
-
-import { TRIGGER_CONFIG } from "@/shared/lib/trigger";
 
 import { AnalysisTerminal } from "./repo-analysis-terminal";
 

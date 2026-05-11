@@ -3,7 +3,7 @@ import Redis from "ioredis";
 
 import { REDIS_TCP_URL } from "@/shared/constants/env.server";
 
-import type { appLogger } from "@/server/core/app-logger";
+import { appLogger } from "@/server/core/app-logger";
 
 const redisClient = new Redis(REDIS_TCP_URL, {
   connectTimeout: 10_000,

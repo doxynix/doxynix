@@ -2,9 +2,10 @@ import type { PullRequestEvent } from "@octokit/webhooks-types";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { prAnalysisService } from "@/server/entities/pr-analysis/api/pr-analysis.service";
 import { PRConfigService } from "@/server/modules/analysis/logic/pr-config";
 
+import { analysisRepo } from "../analysis.repository";
+import { repoAnalysisService } from "../analysis.service";
 import { analyzePrTask } from "../tasks/analyze-pr.task";
 
 /**
@@ -71,7 +72,7 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
     }
 
     // Check for existing analysis
-    const existingAnalysis = await prAnalysisService.getByRepoAndPRNumber(
+    const existingAnalysis = await repoAnalysisService.getByRepoAndPRNumber(
       prisma,
       repo.publicId,
       pull_request.number
@@ -90,7 +91,7 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
 
     if (existingAnalysis == null) {
       // Create new analysis
-      const analysis = await prAnalysisService.create(prisma, {
+      const analysis = await analysisRepo.createPRAnalysis(prisma, {
         baseSha: pull_request.base.sha,
         headSha: pull_request.head.sha,
         owner: repository.owner.login,
@@ -108,10 +109,14 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
         repoId: repo.id,
       });
     } else {
-      const updatedAnalysis = await prAnalysisService.update(prisma, existingAnalysis.id, {
-        baseSha: pull_request.base.sha,
-        headSha: pull_request.head.sha,
-      });
+      const updatedAnalysis = await prAnalysisService.updatePRAnalysisStatus(
+        prisma,
+        existingAnalysis.id,
+        {
+          baseSha: pull_request.base.sha,
+          headSha: pull_request.head.sha,
+        }
+      );
       analysisId = updatedAnalysis.id;
     }
 

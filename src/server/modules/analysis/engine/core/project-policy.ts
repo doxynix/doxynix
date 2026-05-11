@@ -46,35 +46,19 @@ const matchers = {
   tooling: compileMatcher(PATH_PATTERNS.TOOLING),
 };
 
-function normalizePolicyPath(path: string) {
-  return normalize(path);
-}
-
-function lowerPolicyPath(path: string) {
-  return normalizePolicyPath(path).toLowerCase();
-}
-
-function splitPath(path: string) {
-  return normalizePolicyPath(path).split("/").filter(Boolean);
-}
-
-function splitLowerPath(path: string) {
-  return lowerPolicyPath(path).split("/").filter(Boolean);
-}
-
 function hasAnySegment(path: string, candidates: readonly string[]) {
-  const segments = splitLowerPath(path);
+  const segments = normalize(path).toLowerCase().split("/").filter(Boolean);
   return segments.some((segment) => candidates.includes(segment));
 }
 
 function hasPrefix(path: string, prefixes: readonly string[]) {
-  const lower = lowerPolicyPath(path);
+  const lower = normalize(path).toLowerCase();
   return prefixes.some((prefix) => lower.startsWith(prefix));
 }
 
 export const ProjectPolicy = {
   classifyPath(path: string): PathExplanation {
-    const normalizedPath = normalizePolicyPath(path);
+    const normalizedPath = normalize(path);
     const categories = this.getCategories(normalizedPath);
     const semanticKinds = this.getSemanticKinds(normalizedPath);
     const reasons: string[] = [];
@@ -113,9 +97,9 @@ export const ProjectPolicy = {
   },
 
   deriveGroupId(path: string) {
-    const normalized = normalizePolicyPath(path);
-    const parts = splitPath(normalized);
-    const lowerParts = splitLowerPath(normalized);
+    const normalized = normalize(path);
+    const parts = normalized.split("/").filter(Boolean);
+    const lowerParts = normalized.toLowerCase().split("/").filter(Boolean);
 
     if (parts.length === 0) return "other";
     if (parts[0] != null && parts[0].startsWith(".")) return parts[0];
@@ -153,10 +137,6 @@ export const ProjectPolicy = {
     };
   },
 
-  explainPathDecision(path: string) {
-    return this.classifyPath(path);
-  },
-
   filterPrimaryApiSurfacePaths(paths: string[], limit?: number) {
     const deduped = uniq(paths.filter((path) => this.isPrimaryApiSurface(path)));
     return typeof limit === "number" ? deduped.slice(0, limit) : deduped;
@@ -170,7 +150,7 @@ export const ProjectPolicy = {
   },
 
   getCategories(path: string): FileCategory[] {
-    const lower = lowerPolicyPath(path);
+    const lower = normalize(path).toLowerCase();
     const categories = new Set<FileCategory>();
 
     if (matchers.asset(lower)) categories.add("asset");
@@ -193,14 +173,14 @@ export const ProjectPolicy = {
   },
 
   getGenericGroupPathPenalty(groupId: string) {
-    const normalized = normalizePolicyPath(groupId);
+    const normalized = normalize(groupId);
     if (normalized === "other") return 12;
     if (this.isBroadGenericGroupPath(normalized)) return 10;
     return 0;
   },
 
   getGroupLabel(groupId: string) {
-    const parts = normalizePolicyPath(groupId).split("/").filter(Boolean);
+    const parts = normalize(groupId).split("/").filter(Boolean);
     const raw =
       parts[0] === "src" && (parts[1] === "main" || parts[1] === "test")
         ? parts.slice(-3).join(" / ")
@@ -237,8 +217,8 @@ export const ProjectPolicy = {
     path: string,
     options?: { apiPaths?: ReadonlySet<string> }
   ): ProjectPolicySemanticKind[] {
-    const normalized = normalizePolicyPath(path);
-    const lower = lowerPolicyPath(path);
+    const normalized = normalize(path);
+    const lower = normalize(path).toLowerCase();
     const kinds = new Set<ProjectPolicySemanticKind>();
 
     if (
@@ -292,7 +272,7 @@ export const ProjectPolicy = {
   },
 
   isApiPath(path: string) {
-    const lower = lowerPolicyPath(path);
+    const lower = normalize(path).toLowerCase();
     if (this.isTestFile(lower)) return false;
     return matchers.api(lower);
   },
@@ -311,15 +291,15 @@ export const ProjectPolicy = {
   },
 
   isAssetFile(path: string) {
-    return matchers.asset(lowerPolicyPath(path));
+    return matchers.asset(normalize(path).toLowerCase());
   },
 
   isBenchmarkFile(path: string) {
-    return matchers.benchmark(lowerPolicyPath(path));
+    return matchers.benchmark(normalize(path).toLowerCase());
   },
 
   isBroadGenericGroupPath(groupPath: string) {
-    const normalized = normalizePolicyPath(groupPath);
+    const normalized = normalize(groupPath);
     if (normalized === "other") return true;
     if (normalized.startsWith(".")) return true;
 
@@ -344,22 +324,22 @@ export const ProjectPolicy = {
   },
 
   isConfigFile(path: string) {
-    return matchers.config(lowerPolicyPath(path));
+    return matchers.config(normalize(path).toLowerCase());
   },
 
   isDependencyLockfile(path: string) {
-    const lower = lowerPolicyPath(path);
+    const lower = normalize(path).toLowerCase();
     return PROJECT_POLICY_RULES.fileHints.dependencyLockfiles.some(
       (fileName) => lower === fileName || lower.endsWith(`/${fileName}`)
     );
   },
 
   isDocsFile(path: string) {
-    return matchers.docs(lowerPolicyPath(path));
+    return matchers.docs(normalize(path).toLowerCase());
   },
 
   isFrameworkFactSource(path: string) {
-    const normalized = normalizePolicyPath(path);
+    const normalized = normalize(path);
     if (this.isPrimaryContourExcluded(normalized)) return false;
     if (this.isToolingFile(normalized)) return false;
     if (this.isLowSignalConfig(normalized)) return false;
@@ -368,16 +348,16 @@ export const ProjectPolicy = {
   },
 
   isFrontendComponent(filePath: string): boolean {
-    const parts = splitLowerPath(filePath);
+    const parts = normalize(filePath).toLowerCase().split("/").filter(Boolean);
     return parts.some((part) => FRONTEND_DIRS_SET.has(part));
   },
 
   isGeneratedFile(path: string) {
-    return matchers.generated(lowerPolicyPath(path));
+    return matchers.generated(normalize(path).toLowerCase());
   },
 
   isGraphPreviewCandidate(path: string) {
-    const normalized = normalizePolicyPath(path);
+    const normalized = normalize(path);
     if (this.isSensitive(normalized)) return false;
     if (this.isIgnored(normalized)) return false;
     if (this.isDocsFile(normalized)) return false;
@@ -395,15 +375,15 @@ export const ProjectPolicy = {
   },
 
   isIgnored(path: string) {
-    return matchers.ignored(lowerPolicyPath(path));
+    return matchers.ignored(normalize(path).toLowerCase());
   },
 
   isInfraFile(path: string) {
-    return matchers.infra(lowerPolicyPath(path));
+    return matchers.infra(normalize(path).toLowerCase());
   },
 
   isLikelyBarrelFile(path: string) {
-    const lower = lowerPolicyPath(path);
+    const lower = normalize(path).toLowerCase();
     if (!/(^|\/)index\.[^/]+$/iu.test(lower)) return false;
 
     const normalized = lower.startsWith("src/") ? lower.slice(4) : lower;
@@ -417,7 +397,7 @@ export const ProjectPolicy = {
   },
 
   isLowSignalConfig(path: string) {
-    const lower = lowerPolicyPath(path);
+    const lower = normalize(path).toLowerCase();
     if (this.isDependencyLockfile(lower)) return true;
     if (/^prisma\/migrations\/[^/]+\/migration\.sql$/u.test(lower)) return true;
     if (
@@ -431,7 +411,7 @@ export const ProjectPolicy = {
   },
 
   isPrimaryApiSurface(path: string) {
-    const normalized = normalizePolicyPath(path);
+    const normalized = normalize(path);
     if (this.isPrimaryContourExcluded(normalized)) return false;
     if (this.isConfigFile(normalized) || this.isToolingFile(normalized)) return false;
     if (this.isLowSignalConfig(normalized)) return false;
@@ -453,7 +433,7 @@ export const ProjectPolicy = {
   },
 
   isPrimaryContourExcluded(path: string) {
-    const normalized = normalizePolicyPath(path);
+    const normalized = normalize(path);
     return (
       this.isAssetFile(normalized) ||
       this.isBenchmarkFile(normalized) ||
@@ -464,7 +444,7 @@ export const ProjectPolicy = {
   },
 
   isPrimaryEntrypoint(path: string) {
-    const normalized = normalizePolicyPath(path);
+    const normalized = normalize(path);
     if (this.isPrimaryContourExcluded(normalized)) return false;
     if (
       this.isConfigFile(normalized) ||
@@ -475,13 +455,12 @@ export const ProjectPolicy = {
     }
     if (this.isLowSignalConfig(normalized)) return false;
     return (
-      this.isRuntimeSource(normalized) ||
-      /(^|\/)(index|main|server|app)\.[^/]+$/iu.test(lowerPolicyPath(normalized))
+      this.isRuntimeSource(normalized) || /(^|\/)(index|main|server|app)\.[^/]+$/iu.test(normalized)
     );
   },
 
   isRuntimeSource(path: string) {
-    const normalized = normalizePolicyPath(path);
+    const normalized = normalize(path);
     if (
       this.isAssetFile(normalized) ||
       this.isBenchmarkFile(normalized) ||
@@ -493,17 +472,17 @@ export const ProjectPolicy = {
     ) {
       return false;
     }
-    return matchers.runtimeSource(lowerPolicyPath(normalized)) || this.isApiPath(normalized);
+    return matchers.runtimeSource(normalized.toLowerCase()) || this.isApiPath(normalized);
   },
 
   isSensitive(path: string) {
-    const lower = lowerPolicyPath(path);
+    const lower = normalize(path).toLowerCase();
     if (lower.endsWith(".env.example")) return false;
     return matchers.sensitive(lower);
   },
 
   isStructureCandidate(path: string) {
-    const normalized = normalizePolicyPath(path);
+    const normalized = normalize(path);
     if (this.isSensitive(normalized)) return false;
     if (this.isIgnored(normalized)) return false;
     if (this.isLikelyBarrelFile(normalized)) return false;
@@ -521,15 +500,15 @@ export const ProjectPolicy = {
   },
 
   isTestFile(path: string) {
-    return matchers.test(lowerPolicyPath(path));
+    return matchers.test(normalize(path).toLowerCase());
   },
 
   isToolingFile(path: string) {
-    return matchers.tooling(lowerPolicyPath(path));
+    return matchers.tooling(normalize(path).toLowerCase());
   },
 
   isUsefulComplexityCandidate(path: string) {
-    const normalized = normalizePolicyPath(path);
+    const normalized = normalize(path);
     if (this.isPrimaryContourExcluded(normalized)) return false;
     if (
       this.isConfigFile(normalized) ||

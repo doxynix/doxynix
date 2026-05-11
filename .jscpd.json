@@ -1,10 +1,7 @@
 {
   "mode": "strict",
   "threshold": 5,
-  "reporters": [
-    "console",
-    "html"
-  ],
+  "reporters": ["console", "html"],
   "ignore": [
     "**/shared/api-contracts/**",
     "**/node_modules/**",
@@ -16,9 +13,6 @@
     "**/src/shared/ui/visuals",
     "**/src/shared/ui/core"
   ],
-  "format": [
-    "typescript",
-    "tsx"
-  ],
+  "format": ["typescript", "tsx"],
   "pattern": "**/*.{ts,tsx}"
 }

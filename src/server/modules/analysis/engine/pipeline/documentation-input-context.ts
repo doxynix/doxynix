@@ -2,7 +2,7 @@ import type { HotspotSignal, RepositoryEvidence } from "../core/discovery.types"
 import type { ArchitectureSectionBody, DocumentationInputModel } from "../core/documentation.types";
 import { selectRepositoryFrameworkFacts } from "../core/framework-catalog";
 import type { RepoMetrics } from "../core/metrics.types";
-import type { ProjectPolicy } from "../core/project-policy";
+import { ProjectPolicy } from "../core/project-policy";
 import {
   getPrimaryArchitectureModules,
   getPrimaryEntrypointPaths,

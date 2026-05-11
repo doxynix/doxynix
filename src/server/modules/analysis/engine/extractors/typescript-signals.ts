@@ -9,8 +9,8 @@ import type {
   SymbolKind,
   SymbolRef,
 } from "../core/discovery.types";
-import type { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
-import type { CONFIDENCE_LEVELS } from "../core/scoring-constants";
+import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
+import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
 
 const CONTROL_FLOW_KINDS = new Set([
   ts.SyntaxKind.CaseClause,

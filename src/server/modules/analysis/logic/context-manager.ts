@@ -1,7 +1,7 @@
 import { escape } from "es-toolkit";
 import { dirname, normalize } from "pathe";
 
-import { cleanCodeForAi, skeletonizeCode } from "@/server/utils/optimizers";
+import { CodeOptimizer, skeletonizeCode } from "@/server/utils/optimizers";
 import { countTokens } from "@/server/utils/tokenizer";
 
 import { getFileScore } from "../engine/core/file-classifier";
@@ -49,7 +49,7 @@ export type StageContextPack = {
   debug: StageContextSelection;
 };
 
-type RepositoryModuleFile = {
+export type RepositoryModuleFile = {
   content?: string;
   path: string;
 };
@@ -104,7 +104,7 @@ function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boo
     case "writer_architecture": {
       if (docsLike || testLike || benchmarkLike) return false;
       return (
-        ProjectPolicy.isPrimaryArchitecturePath(filePath) ||
+        ProjectPolicy.isPrimaryArchitectureCategories(ProjectPolicy.getCategories(filePath)) ||
         ProjectPolicy.isConfigFile(filePath) ||
         isRootManifest(filePath)
       );
@@ -112,14 +112,14 @@ function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boo
     case "writer_api": {
       return (
         ProjectPolicy.isApiPath(filePath) ||
-        ProjectPolicy.isPrimaryArchitecturePath(filePath) ||
+        ProjectPolicy.isPrimaryArchitectureCategories(ProjectPolicy.getCategories(filePath)) ||
         isRootManifest(filePath)
       );
     }
     case "writer_readme": {
       return (
         ProjectPolicy.isConfigFile(filePath) ||
-        ProjectPolicy.isPrimaryArchitecturePath(filePath) ||
+        ProjectPolicy.isPrimaryArchitectureCategories(ProjectPolicy.getCategories(filePath)) ||
         isRootManifest(filePath)
       );
     }
@@ -131,7 +131,7 @@ function scoreFile(stage: AiContextStage, filePath: string, preferred: boolean) 
 
   if (preferred) score += FILE_CONTEXT_MODIFIERS.preferredFileBonus;
   if (isRootManifest(filePath)) score += FILE_CONTEXT_MODIFIERS.rootManifestBonus;
-  if (ProjectPolicy.isPrimaryArchitecturePath(filePath))
+  if (ProjectPolicy.isPrimaryArchitectureCategories(ProjectPolicy.getCategories(filePath)))
     score += FILE_CONTEXT_MODIFIERS.primaryArchitectureBonus;
   if (ProjectPolicy.isConfigFile(filePath)) {
     score +=
@@ -157,7 +157,8 @@ function buildSelectionReason(stage: AiContextStage, filePath: string, preferred
   if (ProjectPolicy.isConfigFile(filePath))
     return stage === "writer_readme" ? "config-evidence" : "config-support";
   if (stage === "writer_api" && ProjectPolicy.isApiPath(filePath)) return "api-evidence";
-  if (ProjectPolicy.isPrimaryArchitecturePath(filePath)) return "primary-architecture";
+  if (ProjectPolicy.isPrimaryArchitectureCategories(ProjectPolicy.getCategories(filePath)))
+    return "primary-architecture";
   return "secondary-support";
 }
 
@@ -207,7 +208,7 @@ export async function buildStageContextPack({
       continue;
     }
 
-    const cleanedContent = await cleanCodeForAi(item.file.content ?? "", item.path);
+    const cleanedContent = await CodeOptimizer.optimize(item.file.content ?? "", item.path);
     let content = cleanedContent.trim();
     if (!content) {
       dropped.push({ path: item.path, reason: "empty-after-clean", score: item.score });

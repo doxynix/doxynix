@@ -1,4 +1,4 @@
-import type { NotifyType } from "@prisma/client";
+import { NotifyType } from "@prisma/client";
 import z from "zod";
 
 import { PaginationSchema } from "@/server/utils/pagination";

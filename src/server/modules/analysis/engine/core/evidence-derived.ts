@@ -1,4 +1,4 @@
-import { countBy, orderBy } from "es-toolkit";
+import { countBy, orderBy, uniqBy } from "es-toolkit";
 
 import type { DependencyNodeMetric } from "@/server/utils/types";
 
@@ -8,8 +8,8 @@ import type {
   FileCategoryBreakdownItem,
   ModuleRef,
 } from "./discovery.types";
-import type { kindForFile } from "./evidence-collector";
-import type { ProjectPolicy } from "./project-policy";
+import { kindForFile } from "./evidence-collector";
+import { ProjectPolicy } from "./project-policy";
 import { ARCHITECTURE_WEIGHTS, CONFIDENCE_LEVELS } from "./scoring-constants";
 
 function dedupeEntrypoints(entrypoints: EntrypointRef[]): EntrypointRef[] {
@@ -217,7 +217,7 @@ export function buildFileCategoryBreakdown(modules: ModuleRef[]): FileCategoryBr
 }
 
 export function dedupeConfigs(configs: ConfigRef[]): ConfigRef[] {
-  const uniqueConfigs = uniqueBy(configs, (config) => `${config.path}::${config.kind}`);
+  const uniqueConfigs = uniqBy(configs, (config) => `${config.path}::${config.kind}`);
 
   return uniqueConfigs.toSorted((left, right) => left.path.localeCompare(right.path));
 }

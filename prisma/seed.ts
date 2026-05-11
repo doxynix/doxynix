@@ -139,9 +139,9 @@ function generateMetricsJson(repoName: string, isBad: boolean) {
 
   const securityFindings = isBad
     ? [
-      { message: "Hardcoded credentials found", severity: "error" },
-      { message: "Insecure TLS configuration", severity: "warning" },
-    ]
+        { message: "Hardcoded credentials found", severity: "error" },
+        { message: "Insecure TLS configuration", severity: "warning" },
+      ]
     : [];
 
   return {

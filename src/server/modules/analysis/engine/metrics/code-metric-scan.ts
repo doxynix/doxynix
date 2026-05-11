@@ -5,7 +5,7 @@ import { percentile } from "@/server/utils/math-utils";
 
 import type { FileSignals, LanguageMetric } from "../core/discovery.types";
 import type { RepoMetrics } from "../core/metrics.types";
-import type { ProjectPolicy } from "../core/project-policy";
+import { ProjectPolicy } from "../core/project-policy";
 import { COMPLEXITY_SCORING, SCHEMA_LIMITS } from "../core/scoring-constants";
 
 export type FileScanResult = {

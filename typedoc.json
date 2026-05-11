@@ -1,8 +1,6 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": [
-    "src"
-  ],
+  "entryPoints": ["src"],
   "entryPointStrategy": "expand",
   "out": "public/docs",
   "hideGenerator": true,
@@ -26,12 +24,7 @@
   "skillsIncludeExamples": true,
   "skillsIncludeSignatures": true,
   "skillsMaxTokens": 8000,
-  "exclude": [
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "**/shared/api-contracts/**",
-    "**/node_modules/**"
-  ],
+  "exclude": ["**/*.test.ts", "**/*.spec.ts", "**/shared/api-contracts/**", "**/node_modules/**"],
   "excludeInternal": true,
   "excludePrivate": true,
   "skipErrorChecking": true,

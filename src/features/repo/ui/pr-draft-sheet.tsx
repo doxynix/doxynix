@@ -39,26 +39,26 @@ type Props = {
 export function PrDraftSheet({ repoId }: Readonly<Props>) {
   const utils = trpc.useUtils();
 
-  const { data: stagedFiles, isLoading: isFilesLoading } = trpc.prStaging.getStagedFiles.useQuery({
+  const { data: stagedFiles, isLoading: isFilesLoading } = trpc.analysis.getStagedFiles.useQuery({
     repoId,
   });
 
-  const openPrMutation = trpc.prStaging.openPullRequest.useMutation({
+  const openPrMutation = trpc.analysis.openPullRequest.useMutation({
     onError: (err) => toast.error(`Failed to create PR: ${err.message}`),
     onSuccess: (data) => {
       if (data.success === true) {
         toast.success("Pull Request created successfully!");
         window.open(data.prUrl, "_blank");
-        void utils.prStaging.getStagedFiles.invalidate({ repoId });
-        void utils.generatedFix.getByRepository.invalidate({ repoId });
+        void utils.analysis.getStagedFiles.invalidate({ repoId });
+        void utils.analysis.getByRepository.invalidate({ repoId });
       }
     },
   });
 
-  const unstageMutation = trpc.prStaging.unstageFile.useMutation({
+  const unstageMutation = trpc.analysis.unstageFile.useMutation({
     onError: (err) => toast.error(`Failed to remove file from draft: ${err.message}`),
     onSuccess: () => {
-      void utils.prStaging.getStagedFiles.invalidate({ repoId });
+      void utils.analysis.getStagedFiles.invalidate({ repoId });
     },
   });
 

@@ -1,6 +1,7 @@
+import diff_match_patch from "diff-match-patch";
 import { groupBy, uniq } from "es-toolkit";
 
-import type { appLogger } from "@/server/core/app-logger";
+import { appLogger } from "@/server/core/app-logger";
 import type { OctokitInstance } from "@/server/core/github/github-provider";
 import { callWithFallback } from "@/server/utils/call";
 

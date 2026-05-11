@@ -1,6 +1,6 @@
 import type { RepositoryEvent } from "@octokit/webhooks-types";
 
-import type { appLogger } from "@/server/core/app-logger";
+import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 
 import { syncRepoMetadata } from "./sync-repo-metadata";

@@ -1,5 +1,7 @@
 import z from "zod";
 
+import type { analysisRepo } from "./analysis.repository";
+
 const FileActionConfidenceSchema = z.enum(["high", "medium", "low"]);
 
 export const QuickFileAuditSchema = z.object({
@@ -98,6 +100,6 @@ export const persistedFindingSchema = z.object({
   type: z.string().min(1),
 });
 
-export type ImpactAnalysisRecord = Awaited<ReturnType<typeof loadImpactAnalysis>>;
+export type ImpactAnalysisRecord = Awaited<ReturnType<typeof analysisRepo.loadImpactAnalysis>>;
 export type ImpactAnalysis = NonNullable<ImpactAnalysisRecord>;
 export type ParsedFinding = z.infer<typeof persistedFindingSchema>;

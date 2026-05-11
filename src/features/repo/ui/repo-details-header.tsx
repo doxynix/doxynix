@@ -1,11 +1,11 @@
 "use client";
 
+import { Link } from "@/shared/i18n/routing";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
-import { Link } from "@/shared/i18n/routing";
 
 import { repoStatusConfig } from "@/entities/repo/model/repo-status-config";
 import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";

@@ -1,7 +1,7 @@
 import { Lock } from "lucide-react";
 
-import { Button } from "@/shared/ui/core/button";
 import { Link } from "@/shared/i18n/routing";
+import { Button } from "@/shared/ui/core/button";
 
 export default function ForbiddenPage() {
   return (

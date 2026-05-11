@@ -1,5 +1,6 @@
 import type { AuditLog } from "@prisma/client";
-import UAParser from "ua-parser-js";
+import safeStringify from "fast-safe-stringify";
+import { UAParser } from "ua-parser-js";
 
 import { formatUserAgent } from "@/server/utils/ua-parser";
 

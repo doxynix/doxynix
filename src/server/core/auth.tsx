@@ -4,19 +4,16 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { PrismaClient } from "@prisma/client";
 import { render } from "@react-email/render";
 import { getServerSession, type NextAuthOptions } from "next-auth";
-import { Resend } from "resend";
 import EmailProvider from "next-auth/providers/email";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import YandexProvider from "next-auth/providers/yandex";
+import { Resend } from "resend";
 
-import { AuthEmail } from "@/shared/api/auth/templates/auth-email";
 import { IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
-import {
-  AUTH_PROVIDERS,
-  NEXTAUTH_SECRET,
-  RESEND_API_KEY,
-} from "@/shared/constants/env.server";
+import { AUTH_PROVIDERS, NEXTAUTH_SECRET, RESEND_API_KEY } from "@/shared/constants/env.server";
+
+import { AuthEmail } from "@/server/core/auth-email";
 
 import { maskEmail, normalizeEmail, validateEmailSafety } from "../utils/email-guard";
 import { appLogger } from "./app-logger";
@@ -169,8 +166,8 @@ export const authOptions: NextAuthOptions = {
               ...(freshImage != null && freshImage !== user.image && { image: freshImage }),
               ...(freshName != null &&
                 (user.name == null || user.name === user.email?.split("@")[0]) && {
-                name: freshName,
-              }),
+                  name: freshName,
+                }),
             },
             where: { id: Number(user.id) },
           });

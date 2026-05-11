@@ -1,10 +1,10 @@
 import { task } from "@trigger.dev/sdk";
 
-import type { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { realtimeServer } from "@/server/core/realtime";
 import { redisClient } from "@/server/core/redis";
-import type { REDIS_CONFIG } from "@/server/utils/redis";
+import { REDIS_CONFIG } from "@/server/utils/redis";
 
 import type { FileActionNodeContext } from "../analysis.schemas";
 import { runQuickFileAudit } from "../analysis.utils";

@@ -1,15 +1,15 @@
-import type { DocType, Repo } from "@prisma/client";
+import { DocType, type Repo } from "@prisma/client";
 import { batch } from "@trigger.dev/sdk";
 
-import type { uniquePaths } from "@/server/utils/array-utils";
-import type { dumpDebug } from "@/server/utils/debug-logger";
-import type { hasText } from "@/server/utils/string-utils";
-import type { taskLogger } from "@/server/utils/task-logger";
+import { uniquePaths } from "@/server/utils/array-utils";
+import { dumpDebug } from "@/server/utils/debug-logger";
+import { hasText } from "@/server/utils/string-utils";
+import { taskLogger } from "@/server/utils/task-logger";
 
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "../engine/core/discovery.types";
 import type { RepoMetrics } from "../engine/core/metrics.types";
-import type { buildStageContextPack } from "../logic/context-manager";
+import { buildStageContextPack } from "../logic/context-manager";
 import {
   buildSectionDebugSnapshot,
   buildWriterContextSnapshot,

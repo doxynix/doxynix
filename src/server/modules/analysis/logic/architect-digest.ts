@@ -1,4 +1,4 @@
-import type { uniquePaths } from "@/server/utils/array-utils";
+import { uniquePaths } from "@/server/utils/array-utils";
 import type { RepositoryFact, RepositoryFinding } from "@/server/utils/types";
 
 import type { ProjectMap } from "../engine/core/analysis-result.schemas";

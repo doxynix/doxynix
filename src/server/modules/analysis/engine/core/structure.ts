@@ -1,7 +1,6 @@
-import type { clamp } from "date-fns";
-import { meanBy, sumBy } from "es-toolkit";
+import { clamp, meanBy, sumBy } from "es-toolkit";
 
-import type { dumpDebug } from "@/server/utils/debug-logger";
+import { dumpDebug } from "@/server/utils/debug-logger";
 import type { DependencyNodeMetric } from "@/server/utils/types";
 
 import type {
@@ -13,8 +12,8 @@ import type {
   StructuralSignals,
 } from "./discovery.types";
 import { collectRepositoryEvidence } from "./evidence";
-import type { ProjectPolicy } from "./project-policy";
-import type { STRUCTURAL_MODULARITY_SCORING } from "./scoring-constants";
+import { ProjectPolicy } from "./project-policy";
+import { STRUCTURAL_MODULARITY_SCORING } from "./scoring-constants";
 
 function buildGraphPreviewEdges(evidence: RepositoryEvidence, limit = 96): GraphPreviewEdge[] {
   const edgeMap = new Map<string, GraphPreviewEdge>();

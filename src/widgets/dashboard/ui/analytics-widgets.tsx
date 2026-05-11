@@ -19,6 +19,7 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from "recharts";
 
+import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
@@ -26,7 +27,6 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/shared/ui/c
 import { Progress } from "@/shared/ui/core/progress";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-import { Link } from "@/shared/i18n/routing";
 
 import type { DashboardStats } from "../model/dashboard.types";
 

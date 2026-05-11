@@ -140,7 +140,6 @@ Introduce:
 
 ### Policy explainability
 
-- `ProjectPolicy.explainPathDecision(path)`
 - `ProjectPolicy.explainGroupDecision(groupId)`
 
 These should return machine-readable reasons, not prose-only strings.

@@ -136,7 +136,7 @@ export const analysisMapper = {
         return {
           fileCount: files.length,
           findingCount,
-          impactScore: computeImpactScore(files, findingCount, {
+          impactScore: this.computeImpactScore(files, findingCount, {
             api: zone.kind === "api",
             entrypoint: false,
             risk: files.some((file) => file.findingCount > 0),
@@ -184,7 +184,7 @@ export const analysisMapper = {
           right.riskLevel - left.riskLevel || left.filePath.localeCompare(right.filePath)
       );
 
-    return await Promise.all(
+    return Promise.all(
       sortedFindings.map(async (finding) => {
         const messageHtml = await unstable_cache(
           async () => markdownToHtml(finding.message),

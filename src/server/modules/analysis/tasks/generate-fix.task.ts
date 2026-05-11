@@ -2,10 +2,11 @@ import { task } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 import { appLogger } from "@/server/core/app-logger";
-import type { prisma } from "@/server/core/db";
-import type { redisClient } from "@/server/core/redis";
-import type { REDIS_CONFIG } from "@/server/utils/redis";
+import { prisma } from "@/server/core/db";
+import { redisClient } from "@/server/core/redis";
+import { REDIS_CONFIG } from "@/server/utils/redis";
 
+import { analysisRepo } from "../analysis.repository";
 import { FixService } from "../logic/fix-generator";
 import type { FindingForFix } from "../logic/pr-types";
 
@@ -33,7 +34,7 @@ export const generateFixTask = task({
         });
       }
 
-      await generatedFixService.updateStatus(prisma, payload.fixId, "GENERATING");
+      await analysisRepo.updateStatus(prisma, payload.fixId, "GENERATING");
 
       // Create fix record (metadata only, no code/diffs stored)
       const fixResult = await fixService.createFixFromAnalysis({
@@ -47,7 +48,7 @@ export const generateFixTask = task({
       const cacheKey = REDIS_CONFIG.keys.fixResult(payload.fixId);
       await redisClient.set(cacheKey, fixResult, { ex: REDIS_CONFIG.ttl.fixResult });
 
-      await generatedFixService.updateStatus(prisma, payload.fixId, "COMPLETED");
+      await analysisRepo.updateStatus(prisma, payload.fixId, "COMPLETED");
 
       appLogger.info({
         fixId: payload.fixId,
@@ -61,7 +62,7 @@ export const generateFixTask = task({
       const cacheKey = REDIS_CONFIG.keys.fixResult(payload.fixId);
       await redisClient.set(cacheKey, { error: errorMsg }, { ex: REDIS_CONFIG.ttl.fixResult });
 
-      await generatedFixService.updateStatus(prisma, payload.fixId, "FAILED");
+      await analysisRepo.updateStatus(prisma, payload.fixId, "FAILED");
       throw error;
     }
   },

@@ -1,8 +1,9 @@
 import type { InstallationEvent } from "@octokit/webhooks-types";
 
+import type { InstallationTargetTypeType, RepositorySelectionType } from "@/shared/api-contracts";
+
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import type { RepositorySelectionType, InstallationTargetTypeType } from "@/shared/api-contracts";
 
 export async function handleInstallationEvent(payload: InstallationEvent): Promise<void> {
   const action = payload.action;

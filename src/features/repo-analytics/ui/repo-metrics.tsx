@@ -406,20 +406,23 @@ export function RepoMetrics({ data }: Readonly<Props>) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {recommendations.techDebtInventory.map((item, i) => (
-              <div
-                key={i}
-                className="bg-muted/10 flex items-center justify-between rounded border p-2"
-              >
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase">{item.type}</span>
-                  <span className="text-xs text-zinc-300">{item.description}</span>
+            {recommendations.techDebtInventory != null &&
+              recommendations.techDebtInventory.map((item, i) => (
+                <div
+                  key={i}
+                  className="bg-muted/10 flex items-center justify-between rounded border p-2"
+                >
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase">
+                      {item.type}
+                    </span>
+                    <span className="text-xs text-zinc-300">{item.description}</span>
+                  </div>
+                  <Badge variant="outline" className="h-4 text-[9px]">
+                    {item.remediation_effort} Effort
+                  </Badge>
                 </div>
-                <Badge variant="outline" className="h-4 text-[9px]">
-                  {item.remediation_effort} Effort
-                </Badge>
-              </div>
-            ))}
+              ))}
           </CardContent>
         </Card>
 
@@ -506,15 +509,16 @@ export function RepoMetrics({ data }: Readonly<Props>) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-orange-500/10">
-                  {recommendations.performanceAudit.map((item, i) => (
-                    <tr key={i} className="transition-colors hover:bg-orange-500/5">
-                      <td className="p-2 font-medium text-zinc-200">{item.issue}</td>
-                      <td className="p-2 font-mono text-[10px] text-orange-300/70">
-                        {item.location}
-                      </td>
-                      <td className="p-2 text-zinc-400">{item.optimization_strategy}</td>
-                    </tr>
-                  ))}
+                  {recommendations.performanceAudit != null &&
+                    recommendations.performanceAudit.map((item, i) => (
+                      <tr key={i} className="transition-colors hover:bg-orange-500/5">
+                        <td className="p-2 font-medium text-zinc-200">{item.issue}</td>
+                        <td className="p-2 font-mono text-[10px] text-orange-300/70">
+                          {item.location}
+                        </td>
+                        <td className="p-2 text-zinc-400">{item.optimization_strategy}</td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -531,17 +535,19 @@ export function RepoMetrics({ data }: Readonly<Props>) {
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-blue-400 uppercase">Statelessness</p>
               <p className="text-xs leading-relaxed text-zinc-300">
-                {recommendations.infrastructure.statelessness_check}
+                {recommendations.infrastructure != null &&
+                  recommendations.infrastructure.statelessness_check}
               </p>
             </div>
             <div className="space-y-1">
               <p className="text-[10px] font-bold text-blue-400 uppercase">Concurrency Risks</p>
               <div className="flex flex-wrap gap-1">
-                {recommendations.infrastructure.concurrency_risks.map((risk, i) => (
-                  <Badge key={i} variant="secondary" className="py-0 text-[9px]">
-                    {risk}
-                  </Badge>
-                ))}
+                {recommendations.infrastructure != null &&
+                  recommendations.infrastructure.concurrency_risks.map((risk, i) => (
+                    <Badge key={i} variant="secondary" className="py-0 text-[9px]">
+                      {risk}
+                    </Badge>
+                  ))}
               </div>
             </div>
           </CardContent>

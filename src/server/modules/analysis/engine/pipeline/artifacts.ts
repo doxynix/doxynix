@@ -1,9 +1,8 @@
-import type { clamp } from "date-fns";
-import type { uniq } from "es-toolkit";
+import { clamp, uniq } from "es-toolkit";
 
 import { dumpDebug } from "@/server/utils/debug-logger";
 
-import type { buildEvidence } from "../core/common";
+import { buildEvidence } from "../core/common";
 import type { ArtifactBuildParams, ArtifactBuildResult } from "../core/metrics.types";
 import {
   buildReferenceEvidencePaths,

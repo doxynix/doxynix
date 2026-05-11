@@ -1,4 +1,4 @@
-import type { uniquePaths } from "@/server/utils/array-utils";
+import { uniquePaths } from "@/server/utils/array-utils";
 
 import type { RepositoryEvidence } from "../core/discovery.types";
 import type {
@@ -8,7 +8,7 @@ import type {
   OverviewSectionBody,
 } from "../core/documentation.types";
 import type { RepoMetrics } from "../core/metrics.types";
-import type { ProjectPolicy } from "../core/project-policy";
+import { ProjectPolicy } from "../core/project-policy";
 import type { DocumentationContext } from "./documentation-input-context";
 import { buildSectionInput, inferRepositoryKind } from "./report-helpers";
 

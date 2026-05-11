@@ -1,4 +1,4 @@
-import type { appLogger } from "@/server/core/app-logger";
+import { appLogger } from "@/server/core/app-logger";
 
 export type CircuitBreakerState = "CLOSED" | "HALF_OPEN" | "OPEN";
 

@@ -1,3 +1,5 @@
+import { getEncoding } from "js-tiktoken";
+
 import { appLogger } from "@/server/core/app-logger";
 
 import { hasText } from "./string-utils";

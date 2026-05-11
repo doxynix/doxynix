@@ -1,10 +1,11 @@
 import type { PRAnalysisStatus } from "@prisma/client";
 import { task } from "@trigger.dev/sdk";
 
-import type { prisma } from "@/server/core/db";
+import { prisma } from "@/server/core/db";
 import { getClientContext } from "@/server/core/github/github-provider";
-import type { prAnalysisLogger } from "@/server/utils/pr-analysis-logger";
+import { prAnalysisLogger } from "@/server/utils/pr-analysis-logger";
 
+import { analysisRepo } from "../analysis.repository";
 import { CommentFormatter, GitHubCommentPoster } from "../logic/comment-poster";
 import { DifferentialAnalyzer } from "../logic/differential-analyzer";
 import { PRConfigService } from "../logic/pr-config";
@@ -34,11 +35,7 @@ export const analyzePrTask = task({
       const config = await PRConfigService.getConfig(repo.publicId, prisma);
 
       // Update status to ANALYZING
-      await prAnalysisService.updateStatus(
-        prisma,
-        payload.analysisId,
-        "ANALYZING" as PRAnalysisStatus
-      );
+      await analysisRepo.updateStatus(prisma, payload.analysisId, "ANALYZING" as PRAnalysisStatus);
       prAnalysisLogger.analyzeStarted(payload.repoId, payload.prNumber, config.tokenBudget);
 
       const { octokit } = await getClientContext(prisma, repo.userId, payload.owner);
@@ -65,7 +62,7 @@ export const analyzePrTask = task({
             : "modified",
       }));
 
-      await prAnalysisService.storeChangedFilesSnapshot(
+      await analysisRepo.storeChangedFilesSnapshot(
         prisma,
         payload.analysisId,
         changedFiles.map((file) => ({
@@ -127,21 +124,16 @@ export const analyzePrTask = task({
             line: c.finding.line,
             riskLevel: c.finding.score,
           }));
-          await prAnalysisService.addComments(prisma, payload.analysisId, dbComments);
+          await analysisRepo.addComments(prisma, payload.analysisId, dbComments);
         }
       }
 
       // Update with results
       const duration = Date.now() - startTime;
-      await prAnalysisService.updateStatus(
-        prisma,
-        payload.analysisId,
-        "COMPLETED" as PRAnalysisStatus,
-        {
-          findingsJson: finalFindings as any,
-          riskScore: result.riskScore,
-        }
-      );
+      await analysisRepo.updateStatus(prisma, payload.analysisId, "COMPLETED" as PRAnalysisStatus, {
+        findingsJson: finalFindings as any,
+        riskScore: result.riskScore,
+      });
 
       prAnalysisLogger.analyzeCompleted(
         payload.repoId,
@@ -160,14 +152,9 @@ export const analyzePrTask = task({
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
 
-      await prAnalysisService.updateStatus(
-        prisma,
-        payload.analysisId,
-        "FAILED" as PRAnalysisStatus,
-        {
-          error: errorMsg,
-        }
-      );
+      await analysisRepo.updateStatus(prisma, payload.analysisId, "FAILED" as PRAnalysisStatus, {
+        error: errorMsg,
+      });
 
       prAnalysisLogger.analyzeFailed(payload.repoId, payload.prNumber, errorMsg);
 

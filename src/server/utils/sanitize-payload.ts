@@ -1,3 +1,5 @@
+import safeStringify from "fast-safe-stringify";
+
 const SENSITIVE_KEYS = new Set([
   "access_token",
   "apikey",

@@ -1,6 +1,6 @@
 import { google } from "@ai-sdk/google";
 
-import type { appLogger } from "@/server/core/app-logger";
+import { appLogger } from "@/server/core/app-logger";
 import { callWithFallback } from "@/server/utils/call";
 
 import { projectMapSchema, type ProjectMap } from "../engine/core/analysis-result.schemas";
@@ -9,7 +9,7 @@ import type { RepoMetrics } from "../engine/core/metrics.types";
 import { buildMapperSkeleton } from "../logic/mapper-skeleton";
 import { AI_MODELS, SAFETY_SETTINGS } from "./ai-constants";
 import { buildRepositoryTools } from "./ai-tools";
-import { MAPPER_SYSTEM_PROMPT, MAPPER_USER_PROMPT } from "./prompts-refactored";
+import { buildMapperSystemPrompt, buildMapperUserPrompt } from "./prompts-refactored";
 
 export async function executeMapperPhase(
   validFiles: { content: string; path: string }[],
@@ -33,13 +33,13 @@ export async function executeMapperPhase(
       attemptMetadata: { analysisId, phase: "mapper" },
       models: AI_MODELS.CARTOGRAPHER,
       outputSchema: projectMapSchema,
-      prompt: MAPPER_USER_PROMPT(mapContext),
+      prompt: buildMapperUserPrompt(mapContext),
       providerOptions: {
         google: {
           safetySettings: SAFETY_SETTINGS,
         },
       },
-      system: MAPPER_SYSTEM_PROMPT,
+      system: buildMapperSystemPrompt(),
 
       taskType: "reasoning",
 

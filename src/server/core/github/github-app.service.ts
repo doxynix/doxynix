@@ -7,7 +7,7 @@ import { isOctokitError } from "@/server/utils/handle-error";
 import { appLogger } from "../app-logger";
 import type { DbClient, PrismaClientExtended } from "../db";
 import { getMyRepos } from "./github-api";
-import { getInstallationInfo, getUserClient } from "./github-provider";
+import { getInstallationInfo, getPublicClient } from "./github-provider";
 import { githubTokenService } from "./github-token.service";
 
 export const githubAppService = {
@@ -123,7 +123,7 @@ export const githubAppService = {
 
     let hasAccess = false;
     try {
-      const userOctokit = getUserClient(validToken);
+      const userOctokit = getPublicClient(validToken);
       const userInstallations = await userOctokit.paginate(
         userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
         { per_page: 100 }

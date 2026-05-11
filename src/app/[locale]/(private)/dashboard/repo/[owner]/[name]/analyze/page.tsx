@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import type { ParamTypes } from "@/shared/types/app.types";
+import type { RepoPageProps } from "@/shared/types/next.types";
 
 import { RepoAnalysisLive } from "@/features/repo-setup/ui/repo-analysis-live";
 import { RepoSetup } from "@/features/repo-setup/ui/repo-setup";
@@ -8,12 +8,7 @@ import { RepoSetup } from "@/features/repo-setup/ui/repo-setup";
 import { api } from "@/server/core/trpc/server";
 import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
-type Props = {
-  params: Promise<{ name: string; owner: string }>;
-  searchParams: Promise<{ [key: string]: ParamTypes }>;
-};
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: RepoPageProps): Promise<Metadata> {
   const { name, owner } = await params;
 
   return {
@@ -21,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function AnalyzePage({ params }: Readonly<Props>) {
+export default async function AnalyzePage({ params }: Readonly<RepoPageProps>) {
   const { name, owner } = await params;
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);

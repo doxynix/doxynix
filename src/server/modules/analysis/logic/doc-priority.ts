@@ -1,9 +1,9 @@
-import type { DocType } from "@prisma/client";
+import { DocType } from "@prisma/client";
 
-import type { hasText } from "@/server/utils/string-utils";
+import { hasText } from "@/server/utils/string-utils";
 
 import type { ReportSectionKind } from "../engine/core/documentation.types";
-import type { DOC_PRIORITY_WEIGHTS } from "../engine/core/scoring-constants";
+import { DOC_PRIORITY_WEIGHTS } from "../engine/core/scoring-constants";
 
 export const ALL_DOC_TYPES = [
   DocType.README,

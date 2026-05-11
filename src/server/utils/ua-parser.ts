@@ -1,5 +1,5 @@
 import { isNotNil } from "es-toolkit";
-import UAParser from "ua-parser-js";
+import { UAParser } from "ua-parser-js";
 
 export const formatUserAgent = (uaString: null | string): string => {
   if (uaString == null || uaString === "internal") return "System";

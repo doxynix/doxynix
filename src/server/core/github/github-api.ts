@@ -13,7 +13,7 @@ import { appLogger } from "../app-logger";
 import type { DbClient } from "../db";
 import {
   getInstallationClient,
-  getUserClient,
+  getPublicClient,
   GitHubAuthRequiredError,
   resolveClientContext,
   type OctokitInstance,
@@ -91,7 +91,7 @@ async function fetchInstallationRepos(installationId: number): Promise<RepoItemF
 async function fetchOauthRepos(account: { access_token: null | string; id: number | string }) {
   if (account.access_token == null) return [];
   try {
-    const octokit = getUserClient(account.access_token);
+    const octokit = getPublicClient(account.access_token);
     const repos = await octokit.paginate(octokit.rest.repos.listForAuthenticatedUser, {
       per_page: 100,
       visibility: "all",
@@ -188,10 +188,14 @@ export async function searchRepos(
  */
 
 export async function getRepoInfo(prisma: DbClient, userId: number, owner: string, name: string) {
-  const context = await resolveRepoClientContext(prisma, userId, owner);
+  const context = await resolveClientContext(prisma, userId, {
+    allowPublicFallback: true,
+    allowSystemFallback: true,
+    owner,
+  });
 
   return executeWithFallback(prisma, userId, context.octokit, context.type, async (client) => {
-    return await getRepoDataOrAuthError(client, owner, name, context.type);
+    return getRepoDataOrAuthError(client, owner, name, context.type);
   });
 }
 /**
@@ -206,7 +210,11 @@ export async function getRepoBranches(
   owner: string,
   name: string
 ) {
-  const context = await resolveRepoClientContext(prisma, userId, owner);
+  const context = await resolveClientContext(prisma, userId, {
+    allowPublicFallback: true,
+    allowSystemFallback: true,
+    owner,
+  });
 
   return executeWithFallback(prisma, userId, context.octokit, context.type, async (client) => {
     if (context.type === "app" || context.type === "public") {
@@ -236,7 +244,11 @@ export async function getRepoTree(
   name: string,
   branch?: string
 ) {
-  const context = await resolveRepoClientContext(prisma, userId, owner);
+  const context = await resolveClientContext(prisma, userId, {
+    allowPublicFallback: true,
+    allowSystemFallback: true,
+    owner,
+  });
 
   try {
     return await executeWithFallback(
@@ -297,36 +309,34 @@ export async function getFileContent(
   path: string,
   branch?: string
 ): Promise<GitHubFileResponse> {
-  const context = await resolveRepoClientContext(prisma, userId, owner);
+  const context = await resolveClientContext(prisma, userId, {
+    allowPublicFallback: true,
+    allowSystemFallback: true,
+    owner,
+  });
 
-  return await executeWithFallback(
-    prisma,
-    userId,
-    context.octokit,
-    context.type,
-    async (client) => {
-      const { data } = await client.rest.repos.getContent({
-        owner,
-        path,
-        ref: branch,
-        repo: name,
-      });
+  return executeWithFallback(prisma, userId, context.octokit, context.type, async (client) => {
+    const { data } = await client.rest.repos.getContent({
+      owner,
+      path,
+      ref: branch,
+      repo: name,
+    });
 
-      if (Array.isArray(data) || data.type !== "file") {
-        throw new Error("Target path is not a file");
-      }
-
-      return {
-        content: Buffer.from(data.content, "base64").toString("utf8"),
-        meta: {
-          name: data.name,
-          sha: data.sha,
-          size: data.size,
-          url: data.html_url,
-        },
-      };
+    if (Array.isArray(data) || data.type !== "file") {
+      throw new Error("Target path is not a file");
     }
-  );
+
+    return {
+      content: Buffer.from(data.content, "base64").toString("utf8"),
+      meta: {
+        name: data.name,
+        sha: data.sha,
+        size: data.size,
+        url: data.html_url,
+      },
+    };
+  });
 } /**
  * Executes operation with fallback retry on auth errors
  * For installation/oauth clients: tries available oauth tokens on 401/403/404
@@ -356,7 +366,7 @@ export async function executeWithFallback<T>(
         if (oauthAcc.access_token == null) continue;
 
         try {
-          const fallbackOctokit = getUserClient(oauthAcc.access_token);
+          const fallbackOctokit = getPublicClient(oauthAcc.access_token);
           return await operation(fallbackOctokit);
         } catch (fallbackError) {
           appLogger.error({ error: fallbackError, msg: "Token didn't work in fallback" });
@@ -392,7 +402,11 @@ export async function calculateBusFactor(
   taskLogger.info("GitHub: Analyzing contributor history to calculate Bus Factor...");
 
   try {
-    const context = await resolveRepoClientContext(prisma, userId, repo.owner);
+    const context = await resolveClientContext(prisma, userId, {
+      allowPublicFallback: true,
+      allowSystemFallback: true,
+      owner: repo.owner,
+    });
 
     const octokit = context.octokit;
     const clientType = context.type;
@@ -510,12 +524,4 @@ function shouldRetryWithOauthFallback(initialType: GitHubContextType, error: unk
     isOctokitError(error) &&
     isRetryableGithubStatus(error.status)
   );
-}
-
-async function resolveRepoClientContext(prisma: DbClient, userId: number, owner: string) {
-  return resolveClientContext(prisma, userId, {
-    allowPublicFallback: true,
-    allowSystemFallback: true,
-    owner,
-  });
 }

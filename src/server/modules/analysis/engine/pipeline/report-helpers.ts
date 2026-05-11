@@ -1,6 +1,6 @@
-import { clamp } from "date-fns";
+import { clamp } from "es-toolkit";
 
-import type { uniquePaths } from "@/server/utils/array-utils";
+import { uniquePaths } from "@/server/utils/array-utils";
 
 import type { EntrypointRef, ModuleRef, RouteInventory } from "../core/discovery.types";
 import type {
@@ -8,7 +8,7 @@ import type {
   ReportSectionInput,
   ReportSectionKind,
 } from "../core/documentation.types";
-import type { ProjectPolicy } from "../core/project-policy";
+import { ProjectPolicy } from "../core/project-policy";
 
 type SectionBuilderArgs<TBody> = {
   audience: "mixed" | DocumentationAudience;

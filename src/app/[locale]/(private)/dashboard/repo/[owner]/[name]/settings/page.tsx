@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import type { SearchParams } from "nuqs/server";
 
-import type { ParamTypes } from "@/shared/types/app.types";
+import type { RepoPageProps } from "@/shared/types/next.types";
 
 import { DeleteRepoCard } from "@/features/repo-settings/ui/delete-repo-card";
 import { PRAnalysisConfigCard } from "@/features/repo-settings/ui/pr-analysis-config-card";
@@ -9,10 +10,10 @@ import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
 type Props = {
   params: Promise<{ name: string; owner: string }>;
-  searchParams: Promise<{ [key: string]: ParamTypes }>;
+  searchParams: Promise<SearchParams>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: RepoPageProps): Promise<Metadata> {
   const { name, owner } = await params;
 
   return {

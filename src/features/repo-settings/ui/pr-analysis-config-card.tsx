@@ -5,6 +5,7 @@ import { Layout, Loader2, Palette, ShieldCheck, Zap } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
+import { PRCommentStyleSchema, PRFocusAreaSchema } from "@/shared/api-contracts";
 import {
   UpdatePRConfigInput,
   type UpdatePRConfigInputValues,
@@ -24,8 +25,6 @@ import {
 import { Slider } from "@/shared/ui/core/slider";
 import { Switch } from "@/shared/ui/core/switch";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
-
-import { PRCommentStyleSchema, PRFocusAreaSchema } from "@/shared/api-contracts";
 
 type Props = {
   repoId: string;

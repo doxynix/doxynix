@@ -73,19 +73,11 @@ export function getInstallationClient(installationId: number): OctokitInstance {
   }) as OctokitInstance;
 }
 
-function getPublicClient(token?: string): OctokitInstance {
+export function getPublicClient(token?: string): OctokitInstance {
   return new AppOctokit({
     ...getCommonConfig(),
     auth: token,
   }) as OctokitInstance;
-}
-
-function getSystemClient(): OctokitInstance {
-  return getInstallationClient(Number(GITHUB_SYSTEM_INSTALLATION_ID));
-}
-
-export function getUserClient(token: string): OctokitInstance {
-  return getPublicClient(token);
 }
 
 export class GitHubAuthRequiredError extends Error {
@@ -143,7 +135,7 @@ export async function getClientContext(
   if (validToken != null) {
     return {
       hasUserToken: true,
-      octokit: getUserClient(validToken),
+      octokit: getPublicClient(validToken),
       type: "oauth",
     };
   }
@@ -195,7 +187,7 @@ export async function resolveClientContext(
       if (options?.allowSystemFallback === true) {
         return {
           hasUserToken: false,
-          octokit: getSystemClient(),
+          octokit: getInstallationClient(Number(GITHUB_SYSTEM_INSTALLATION_ID)),
           type: "app",
         };
       }
@@ -230,7 +222,7 @@ export function parseUrl(input: string): { name: string; owner: string } {
  * Requires system app credentials
  */
 export async function getInstallationInfo(installationId: number) {
-  const octokit = getSystemClient();
+  const octokit = getInstallationClient(Number(GITHUB_SYSTEM_INSTALLATION_ID));
   const { data } = await octokit.rest.apps.getInstallation({
     installation_id: installationId,
   });

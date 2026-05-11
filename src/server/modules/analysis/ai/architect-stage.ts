@@ -1,9 +1,9 @@
 import { google } from "@ai-sdk/google";
 
-import type { appLogger } from "@/server/core/app-logger";
+import { appLogger } from "@/server/core/app-logger";
 import { callWithFallback } from "@/server/utils/call";
-import type { dumpDebug } from "@/server/utils/debug-logger";
-import type { taskLogger } from "@/server/utils/task-logger";
+import { dumpDebug } from "@/server/utils/debug-logger";
+import { taskLogger } from "@/server/utils/task-logger";
 
 import { aiSchema, type AIResult } from "../engine/core/analysis-result.schemas";
 import {
@@ -13,7 +13,7 @@ import {
 import { buildStageContextPack } from "../logic/context-manager";
 import { AI_MODELS, SAFETY_SETTINGS } from "./ai-constants";
 import { buildRepositoryTools } from "./ai-tools";
-import { ANALYSIS_SYSTEM_PROMPT, ANALYSIS_USER_PROMPT } from "./prompts-refactored";
+import { buildAnalysisSystemPrompt, buildAnalysisUserPrompt } from "./prompts-refactored";
 
 export async function executeArchitectPhase(
   validFiles: { content: string; path: string }[],
@@ -69,14 +69,14 @@ export async function executeArchitectPhase(
       },
       models: [...AI_MODELS.POWERFUL, ...AI_MODELS.ARCHITECT, ...AI_MODELS.FALLBACK],
       outputSchema: aiSchema,
-      prompt: ANALYSIS_USER_PROMPT(
+      prompt: buildAnalysisUserPrompt(
         JSON.stringify(documentationDigest),
         architectContext.context,
         instructions ?? "Focus on critical business logic and security.",
         sentinelStatus
       ),
       providerOptions: { google: { safetySettings: SAFETY_SETTINGS } },
-      system: ANALYSIS_SYSTEM_PROMPT(language),
+      system: buildAnalysisSystemPrompt(language),
       taskType: "reasoning",
       tools: {
         ...repoTools,

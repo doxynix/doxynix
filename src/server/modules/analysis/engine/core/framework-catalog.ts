@@ -1,7 +1,7 @@
 import { escapeRegExp, uniq } from "es-toolkit";
 
 import type { FrameworkFact } from "./discovery.types";
-import type { ProjectPolicy } from "./project-policy";
+import { ProjectPolicy } from "./project-policy";
 import { FRAMEWORK_CATALOG } from "./project-policy-rules";
 
 const aliasRegexCache = new Map<string, RegExp>();

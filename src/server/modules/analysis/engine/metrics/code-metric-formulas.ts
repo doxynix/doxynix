@@ -1,10 +1,9 @@
-import type { clamp } from "date-fns";
-import { mean } from "es-toolkit";
+import { clamp, mean } from "es-toolkit";
 
 import { percentile } from "@/server/utils/math-utils";
 
 import type { RepoMetrics } from "../core/metrics.types";
-import type { COMPLEXITY_SCORING, TECH_DEBT_SCORING } from "../core/scoring-constants";
+import { COMPLEXITY_SCORING, TECH_DEBT_SCORING } from "../core/scoring-constants";
 
 export function normalizeComplexityScore(params: {
   cycles: number;

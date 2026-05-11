@@ -1,19 +1,14 @@
-import type { ReactNode } from "react";
 import type { Metadata } from "next";
 
-import type { ParamTypes } from "@/shared/types/app.types";
+import type { RepoLayoutProps } from "@/shared/types/next.types";
 
 import { RepoDetailsHeader } from "@/features/repo/ui/repo-details-header";
 
 import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
-type Props = {
-  children: ReactNode;
-  params: Promise<{ name: string; owner: string }>;
-  searchParams: Promise<{ [key: string]: ParamTypes }>;
-};
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: Omit<RepoLayoutProps, "children">): Promise<Metadata> {
   const { name, owner } = await params;
 
   return {
@@ -21,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function RepoDetailsLayout({ children, params }: Readonly<Props>) {
+export default async function RepoDetailsLayout({ children, params }: RepoLayoutProps) {
   const { name, owner } = await params;
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);

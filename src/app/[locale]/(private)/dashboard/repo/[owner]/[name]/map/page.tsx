@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 
-import type { ParamTypes } from "@/shared/types/app.types";
+import type { RepoPageProps } from "@/shared/types/next.types";
 
 import { RepoMapContainer } from "@/features/repo-map/ui/repo-map-container";
 
 import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
-type Props = {
-  params: Promise<{ name: string; owner: string }>;
-  searchParams: Promise<{ [key: string]: ParamTypes }>;
-};
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: RepoPageProps): Promise<Metadata> {
   const { name, owner } = await params;
 
   return {
@@ -19,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function RepoMapPage({ params }: Readonly<Props>) {
+export default async function RepoMapPage({ params }: Readonly<RepoPageProps>) {
   const { name, owner } = await params;
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);

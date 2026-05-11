@@ -1,4 +1,4 @@
-import { join, normalize } from "pathe"; // Исправили: убрали type и импортировали join вместе с normalize
+import { join, normalize } from "pathe";
 
 import type { RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
 import type { AIResult } from "../engine/core/analysis-result.schemas";
@@ -136,7 +136,6 @@ export function resolveImmediateChildScope(parentPath: string, candidatePath: st
 
   if (head == null) return null;
 
-  // Безопасно собираем результирующий путь через join из pathe
   const scopePath = join(normalizedParent, head);
   return {
     nodeType: parts.length > 1 ? ("group" as const) : ("file" as const),

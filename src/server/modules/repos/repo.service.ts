@@ -1,5 +1,5 @@
-import type { Prisma, Status, Visibility } from "@prisma/client";
-import type { TRPCError } from "@trpc/server";
+import { Status, Visibility, type Prisma } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 
 import type { DbClient } from "@/server/core/db";
 import { getRepoInfo } from "@/server/core/github/github-api";

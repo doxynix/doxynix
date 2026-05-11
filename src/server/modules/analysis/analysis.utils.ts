@@ -4,11 +4,11 @@ import { normalize } from "pathe";
 import type z from "zod";
 
 import { callWithFallback } from "@/server/utils/call";
-import { cleanCodeForAi } from "@/server/utils/optimizers";
+import { CodeOptimizer } from "@/server/utils/optimizers";
 import type { RepoSearchResult } from "@/server/utils/types";
 
 import { AI_MODELS } from "./ai/ai-constants";
-import { SINGLE_FILE_ANALYSIS_PROMPT } from "./ai/prompts-refactored";
+import { buildSingleFileAnalysisPrompt } from "./ai/prompts-refactored";
 import {
   QuickFileAuditSchema,
   type DocumentFilePreviewResult,
@@ -301,12 +301,12 @@ export async function runQuickFileAudit(input: FileActionInput): Promise<QuickFi
     return buildAuditFallback(input.path, nonActionableReason);
   }
 
-  const cleanedCode = cleanCodeForAi(input.content, input.path);
+  const cleanedCode = CodeOptimizer.optimize(input.content, input.path);
   const contextSection = buildContextSection(input);
   const contextGuidance = buildContextPromptGuidance(input.nodeContext);
 
   const systemPrompt = [
-    SINGLE_FILE_ANALYSIS_PROMPT(input.language),
+    buildSingleFileAnalysisPrompt(input.language),
     "\n[CONTEXT HANDLING GUIDANCE]",
     contextGuidance,
   ].join("\n");

@@ -3,6 +3,7 @@
 import { Fragment, type ReactNode } from "react";
 import type { Route } from "next";
 
+import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import {
   Breadcrumb,
@@ -19,7 +20,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/ui/core/dropdown-menu";
-import { Link } from "@/shared/i18n/routing";
 
 import { Button } from "../core/button";
 import { TruncatedText } from "./truncated-text";

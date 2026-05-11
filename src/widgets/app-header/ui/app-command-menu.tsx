@@ -8,6 +8,7 @@ import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/constants/navigation";
+import { useRouter } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import type { MenuItem } from "@/shared/types/navigation.types";
 import { Button } from "@/shared/ui/core/button";
@@ -24,7 +25,6 @@ import {
 import { Spinner } from "@/shared/ui/core/spinner";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
-import { useRouter } from "@/shared/i18n/routing";
 
 import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
 
@@ -141,9 +141,9 @@ export function AppCommandMenu() {
   const filteredCommands = !s
     ? commandMenuItems
     : commandMenuItems.filter(
-      (item) =>
-        (item.label.toLowerCase().includes(s) || item.url?.toLowerCase().includes(s)) ?? false
-    );
+        (item) =>
+          (item.label.toLowerCase().includes(s) || item.url?.toLowerCase().includes(s)) ?? false
+      );
 
   return (
     <>
@@ -188,7 +188,7 @@ export function AppCommandMenu() {
                     onSelect={() => runCommand(item)}
                     className={cn(
                       isDestructive &&
-                      "text-destructive data-[selected=true]:bg-destructive/10 data-[selected=true]:text-destructive",
+                        "text-destructive data-[selected=true]:bg-destructive/10 data-[selected=true]:text-destructive",
                       "flex items-center justify-between"
                     )}
                   >

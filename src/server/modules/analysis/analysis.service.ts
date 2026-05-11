@@ -15,7 +15,7 @@ import { realtimeServer } from "@/server/core/realtime";
 import { callWithFallback } from "@/server/utils/call";
 import { resolveDocumentMaterializedPath } from "@/server/utils/document-materialization";
 import { markdownToHtml } from "@/server/utils/markdown-to-html";
-import { cleanCodeForAi } from "@/server/utils/optimizers";
+import { CodeOptimizer } from "@/server/utils/optimizers";
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
 import type {
   PRImpactPayload,
@@ -25,7 +25,7 @@ import type {
 } from "@/server/utils/types";
 
 import { AI_MODELS } from "./ai/ai-constants";
-import { CODE_DOC_SYSTEM_PROMPT } from "./ai/prompts-refactored";
+import { buildCodeDocSystemPrompt } from "./ai/prompts-refactored";
 import { analysisContext, type NodeContext } from "./analysis.context";
 import { analysisMapper } from "./analysis.mapper";
 import { analysisRepo, type AnalysisRef } from "./analysis.repository";
@@ -153,10 +153,6 @@ export const repoAnalysisService = {
     return repo;
   },
 
-  async auditFile(db: DbClient, userId: number, input: FileActionInput) {
-    return this.runFileAction(db, userId, "analyze-single-file", input);
-  },
-
   async buildFileActionRuntimeContext(db: DbClient, input: { nodeId?: string; repoId: string }) {
     const [nodeContext, analysisRef] = await Promise.all([
       analysisContext.build(db, input.repoId, input.nodeId),
@@ -233,11 +229,11 @@ export const repoAnalysisService = {
         matchedNodeId == null
           ? null
           : analysisMapper.resolveMatchedNode(
-              matchedNodeId,
-              analyzeContext,
-              nodeById,
-              nodeDetailCache
-            );
+            matchedNodeId,
+            analyzeContext,
+            nodeById,
+            nodeDetailCache
+          );
       const findingCount = findingsByFile.get(normalizedFilePath) ?? 0;
 
       return {
@@ -388,14 +384,14 @@ export const repoAnalysisService = {
       defaultNodeId == null
         ? null
         : (() => {
-            const structureNode = analyzeContext.getStructureNode(defaultNodeId);
-            const explain = analyzeContext.getNodeExplain(defaultNodeId);
-            if (structureNode == null || explain == null) return null;
+          const structureNode = analyzeContext.getStructureNode(defaultNodeId);
+          const explain = analyzeContext.getNodeExplain(defaultNodeId);
+          if (structureNode == null || explain == null) return null;
 
-            return buildInteractiveBriefPanel(
-              analysisMapper.toBriefPanelInput({ explain, structureNode })
-            );
-          })();
+          return buildInteractiveBriefPanel(
+            analysisMapper.toBriefPanelInput({ explain, structureNode })
+          );
+        })();
 
     return buildInteractiveBriefPayload({
       analysisRef: structure.analysisRef,
@@ -674,12 +670,12 @@ export const repoAnalysisService = {
       return buildDocumentFallback(input.path, nonActionableReason);
     }
 
-    const cleanedCode = cleanCodeForAi(input.content, input.path);
+    const cleanedCode = await CodeOptimizer.optimize(input.content, input.path);
     const contextSection = buildContextSection(input);
     const contextGuidance = buildContextPromptGuidance(input.nodeContext);
 
     const systemPrompt = [
-      CODE_DOC_SYSTEM_PROMPT(input.language),
+      buildCodeDocSystemPrompt(input.language),
       "\n[CONTEXT HANDLING GUIDANCE]",
       contextGuidance,
     ].join("\n");
@@ -769,10 +765,10 @@ export const repoAnalysisService = {
     const onboardingScore = Math.min(
       100,
       docOutputScore.score +
-        (hardMetrics.docDensity > 10 ? 10 : 0) +
-        (hardMetrics.entrypoints.length > 0 ? 15 : 0) +
-        (hardMetrics.configFiles > 0 ? 10 : 0) +
-        (repositoryFacts.some((fact) => fact.category === "architecture") ? 10 : 0)
+      (hardMetrics.docDensity > 10 ? 10 : 0) +
+      (hardMetrics.entrypoints.length > 0 ? 15 : 0) +
+      (hardMetrics.configFiles > 0 ? 10 : 0) +
+      (repositoryFacts.some((fact) => fact.category === "architecture") ? 10 : 0)
     );
 
     const finalHealthScore = calculateHealthScore({
@@ -878,7 +874,7 @@ export const repoAnalysisService = {
         )
       );
 
-      return await tx.notification.create({
+      return tx.notification.create({
         data: {
           body: `Health Score: ${finalHealthScore}/100`,
           repoId: repo.id,

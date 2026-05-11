@@ -1,6 +1,6 @@
-import { Project, SyntaxKind } from "ts-morph";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { Project, SyntaxKind } from "ts-morph";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
@@ -16,8 +16,8 @@ console.log("\x1b[36m%s\x1b[0m", `🔍 Doxynix Type Audit [MODE: ${mode.toUpperC
 const sourceFiles = project.getSourceFiles();
 const report = {
   CRITICAL: [], // as any, as unknown as Type
-  DEBT: [],     // as User, as string
-  INFO: [],     // as const, as Type
+  DEBT: [], // as User, as string
+  INFO: [], // as const, as Type
 };
 
 for (const sourceFile of sourceFiles) {
@@ -48,12 +48,10 @@ for (const sourceFile of sourceFiles) {
     } else if (expressionText.includes("as unknown") || expressionText.includes("as any")) {
       severity = "CRITICAL";
       reason = "🧪 DOUBLE CAST (Unsafe)";
-    }
-    else if (filePath.includes("server/") || filePath.includes("engine/")) {
+    } else if (filePath.includes("server/") || filePath.includes("engine/")) {
       severity = "CRITICAL";
       reason = "🏗️ CORE LOGIC ASSERTION";
-    }
-    else if (filePath.includes("shared/ui") || filePath.includes("components/")) {
+    } else if (filePath.includes("shared/ui") || filePath.includes("components/")) {
       severity = "INFO";
       reason = "🎨 UI/DOM Hint";
     }
@@ -67,7 +65,7 @@ for (const sourceFile of sourceFiles) {
 const printCategory = (name, items, color) => {
   if (items.length === 0) return;
   console.log(`\n${color}=== ${name} (${items.length}) ===\x1b[0m`);
-  items.forEach(item => {
+  items.forEach((item) => {
     console.log(`\x1b[90m${item.file}:${item.line}\x1b[0m \x1b[32m[${item.reason}]\x1b[0m`);
     console.log(`  \x1b[33m${item.text}\x1b[0m\n`);
   });
@@ -79,5 +77,6 @@ if (mode === "full") {
   printCategory("STYLE & UI HINTS", report.INFO, "\x1b[34m");
 }
 
-const total = report.CRITICAL.length + report.DEBT.length + (mode === "full" ? report.INFO.length : 0);
+const total =
+  report.CRITICAL.length + report.DEBT.length + (mode === "full" ? report.INFO.length : 0);
 console.log("\x1b[36m%s\x1b[0m", `\nTotal issues to review: ${total}`);

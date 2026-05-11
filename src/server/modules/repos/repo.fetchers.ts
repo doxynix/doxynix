@@ -1,7 +1,7 @@
-import type { cache } from "react";
-import type { notFound } from "next/navigation";
+import { cache } from "react";
+import { notFound } from "next/navigation";
 
-import type { api } from "@/server/core/trpc/server";
+import { api } from "@/server/core/trpc/server";
 
 export const repoFetchers = {
   getOwnerOrNotFound: cache(async (owner: string) => {

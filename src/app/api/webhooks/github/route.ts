@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     requestId: deliveryId,
   });
 
-  return await requestContext.run(store, async () => {
+  return requestContext.run(store, async () => {
     let delivery: null | { id: string } = null;
 
     try {
