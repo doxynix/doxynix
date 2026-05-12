@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.32.4](https://github.com/doxynix/doxynix/compare/v1.32.3...v1.32.4) (2026-05-12)
+
+
+### Bug Fixes
+
+* **security:** устранение уязвимостей в пакетах next, mermaid, postcss ([#1420](https://github.com/doxynix/doxynix/issues/1420)) ([79aa50d](https://github.com/doxynix/doxynix/commit/79aa50d1c7b2e166862617884a95ef7b4d4fcf12))
+
 ## [1.32.3](https://github.com/doxynix/doxynix/compare/v1.32.2...v1.32.3) (2026-05-06)
 
 
