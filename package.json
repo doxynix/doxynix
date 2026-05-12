@@ -91,7 +91,7 @@
       "unhead": "2.1.15",
       "protobufjs": "7.5.7",
       "@xmldom/xmldom": "0.9.10",
-      "path-to-regexp@^6": "6.3.0",
+      "path-to-regexp@^6": "8.4.2",
       "postcss": "8.5.14"
     },
     "onlyBuiltDependencies": [
