@@ -1,6 +1,23 @@
 packages:
   - web
 
+allowBuilds:
+  '@parcel/watcher': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@sentry/cli': true
+  '@swc/core': true
+  core-js: true
+  esbuild: true
+  msgpackr-extract: true
+  prisma: true
+  protobufjs: true
+  puppeteer: true
+  sharp: true
+  unrs-resolver: true
+  vue-demi: true
+  zenstack: true
+
 ignoredBuiltDependencies:
   - '@prisma/client'
   - '@prisma/engines'
