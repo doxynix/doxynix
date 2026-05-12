@@ -2,8 +2,8 @@
   "name": "web",
   "version": "1.32.5",
   "engines": {
-    "node": ">=22.11.0",
-    "pnpm": ">=10.0.0"
+    "node": ">=v24.0.0",
+    "pnpm": "11.1.1"
   },
   "license": "AGPL-3.0-only",
   "private": true,
@@ -64,49 +64,6 @@
     "arch:check": "depcruise src --config .dependency-cruiser.js --output-type err",
     "arch:html": "dependency-cruiser src --config .dependency-cruiser.js --output-type err-html -f arch/server-report.html",
     "arch:dump": "chcp 65001 && dependency-cruiser src --config .dependency-cruiser.js --output-type dot --exclude \"^(node_modules|src/generated|\\.next)\" > arch/dependencies_list.txt"
-  },
-  "pnpm": {
-    "overrides": {
-      "h3": "1.15.11",
-      "cross-spawn": "7.0.6",
-      "tmp": "0.2.5",
-      "diff": "8.0.4",
-      "lodash": "4.18.1",
-      "lodash-es": "4.18.1",
-      "fast-xml-parser": "5.7.3",
-      "ajv@^8": "8.20.0",
-      "cookie": "0.7.2",
-      "minimatch": "10.2.5",
-      "systeminformation": "5.31.6",
-      "rollup": "4.60.3",
-      "serialize-javascript": "7.0.5",
-      "@react-email/body": "0.3.0",
-      "flatted": "3.4.2",
-      "dompurify": "3.4.2",
-      "effect": "3.21.2",
-      "handlebars": "4.7.9",
-      "defu": "6.1.7",
-      "vite": "8.0.11",
-      "basic-ftp": "6.0.1",
-      "unhead": "2.1.15",
-      "protobufjs": "7.5.7",
-      "@xmldom/xmldom": "0.9.10",
-      "path-to-regexp@^6": "6.3.0",
-      "postcss": "8.5.14"
-    },
-    "onlyBuiltDependencies": [
-      "@parcel/watcher",
-      "@sentry/cli",
-      "@swc/core",
-      "core-js",
-      "esbuild",
-      "msgpackr-extract",
-      "nexus-prisma",
-      "protobufjs",
-      "puppeteer",
-      "vue-demi",
-      "zenstack"
-    ]
   },
   "dependencies": {
     "@ai-sdk/google": "3.0.71",
@@ -190,7 +147,6 @@
     "@vercel/analytics": "2.0.1",
     "@vercel/speed-insights": "2.0.0",
     "@vercel/toolbar": "0.2.5",
-    "@xenova/transformers": "2.17.2",
     "@xyflow/react": "12.10.2",
     "@zenstackhq/runtime": "2.22.1",
     "ably": "2.21.0",
@@ -402,5 +358,5 @@
     "zenstack": "2.22.1",
     "zod-prisma-types": "3.3.10"
   },
-  "packageManager": "pnpm@10.33.4+sha512.1c67b3b359b2d408119ba1ed289f34b8fc3c6873412bec6fd264fbdc82489e510fcbecb9ce9d22dae7f3b76269d8441046014bdca53b9979cd7a561ad631b800"
+  "packageManager": "pnpm@11.1.1+sha512.d1fdf5f73c617b64fa1a56a81c3c8dfe0e966e33a6010aa256b517ae77be21d93e05affc0de1a83b0e4f29d569f68b446ae8f068cd7247c0bb3df0fb4d7bdf9a"
 }
