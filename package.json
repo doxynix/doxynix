@@ -91,7 +91,8 @@
       "unhead": "2.1.13",
       "protobufjs": "7.5.6",
       "@xmldom/xmldom": "0.9.10",
-      "path-to-regexp@^6": "6.3.0"
+      "path-to-regexp@^6": "6.3.0",
+      "postcss": "8.5.10"
     },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
@@ -222,10 +223,10 @@
     "leasot": "14.4.0",
     "linguist-languages": "9.3.2",
     "lucide-react": "1.14.0",
-    "mermaid": "11.14.0",
+    "mermaid": "11.15.0",
     "modern-screenshot": "4.7.0",
     "motion": "12.38.0",
-    "next": "16.2.4",
+    "next": "16.2.6",
     "next-auth": "4.24.14",
     "next-axiom": "1.10.0",
     "next-intl": "4.11.0",
@@ -239,8 +240,8 @@
     "picomatch": "4.0.4",
     "pino": "10.3.1",
     "posthog-js": "1.372.6",
-    "prisma-field-encryption": "1.6.0",
     "posthog-node": "5.33.0",
+    "prisma-field-encryption": "1.6.0",
     "react": "19.2.5",
     "react-arborist": "3.5.0",
     "react-codemirror-merge": "4.25.9",
