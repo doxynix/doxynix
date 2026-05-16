@@ -2140,17 +2140,6 @@
     ]
   },
   {
-    "author": "Xenova",
-    "avatar": "https://github.com/xenova.png?size=96",
-    "authorLink": "https://github.com/xenova",
-    "packages": [
-      {
-        "name": "@xenova/transformers",
-        "license": "Apache-2.0"
-      }
-    ]
-  },
-  {
     "author": "Xyflow",
     "avatar": "https://github.com/xyflow.png?size=96",
     "authorLink": "https://github.com/xyflow",
