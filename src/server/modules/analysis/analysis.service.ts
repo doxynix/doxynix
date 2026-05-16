@@ -29,7 +29,11 @@ import { buildCodeDocSystemPrompt } from "./ai/prompts-refactored";
 import { analysisContext, type NodeContext } from "./analysis.context";
 import { analysisMapper } from "./analysis.mapper";
 import { analysisRepo, type AnalysisRef } from "./analysis.repository";
-import { DocumentFilePreviewSchema, type DocumentFilePreviewResult } from "./analysis.schemas";
+import {
+  DocumentFilePreviewSchema,
+  type DocumentFilePreviewResult,
+  type FileActionNodeContext,
+} from "./analysis.schemas";
 import {
   buildContextPromptGuidance,
   buildContextSection,
@@ -87,6 +91,7 @@ export type FileActionInput = {
   commitSha?: string;
   content: string;
   language: string;
+  nodeContext?: FileActionNodeContext | NodeContext;
   nodeId?: string;
   path: string;
   repoId: string;
@@ -184,6 +189,7 @@ export const repoAnalysisService = {
 
   async getAvailableDocs(db: DbClient, repoId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    if (repo == null) return [];
     return analysisMapper.toAvailableDocs(repo);
   },
 
@@ -229,11 +235,11 @@ export const repoAnalysisService = {
         matchedNodeId == null
           ? null
           : analysisMapper.resolveMatchedNode(
-            matchedNodeId,
-            analyzeContext,
-            nodeById,
-            nodeDetailCache
-          );
+              matchedNodeId,
+              analyzeContext,
+              nodeById,
+              nodeDetailCache
+            );
       const findingCount = findingsByFile.get(normalizedFilePath) ?? 0;
 
       return {
@@ -305,11 +311,13 @@ export const repoAnalysisService = {
 
   async getDetailedMetrics(db: DbClient, repoId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    if (repo == null) return null;
     return analysisMapper.toDetailedMetrics(repo.analyses[0] ?? null);
   },
 
   async getDocumentContent(db: DbClient, repoId: string, type: DocType, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    if (repo == null) throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
     const analysis = repo.analyses[0];
 
     if (analysis == null) {
@@ -373,6 +381,7 @@ export const repoAnalysisService = {
 
   async getInteractiveBrief(db: DbClient, repoId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    if (repo == null) return null;
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const overview = analysisMapper.toOverview(repo);
     const structure = analyzeContext.getStructureMap();
@@ -384,14 +393,14 @@ export const repoAnalysisService = {
       defaultNodeId == null
         ? null
         : (() => {
-          const structureNode = analyzeContext.getStructureNode(defaultNodeId);
-          const explain = analyzeContext.getNodeExplain(defaultNodeId);
-          if (structureNode == null || explain == null) return null;
+            const structureNode = analyzeContext.getStructureNode(defaultNodeId);
+            const explain = analyzeContext.getNodeExplain(defaultNodeId);
+            if (structureNode == null || explain == null) return null;
 
-          return buildInteractiveBriefPanel(
-            analysisMapper.toBriefPanelInput({ explain, structureNode })
-          );
-        })();
+            return buildInteractiveBriefPanel(
+              analysisMapper.toBriefPanelInput({ explain, structureNode })
+            );
+          })();
 
     return buildInteractiveBriefPayload({
       analysisRef: structure.analysisRef,
@@ -427,6 +436,7 @@ export const repoAnalysisService = {
 
   async getInteractiveBriefNode(db: DbClient, repoId: string, nodeId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    if (repo == null) return null;
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const structureNode = analyzeContext.getStructureNode(nodeId);
     const explain = analyzeContext.getNodeExplain(nodeId);
@@ -445,6 +455,7 @@ export const repoAnalysisService = {
     aid?: string
   ): Promise<null | RepoNodeContextPayload> {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    if (repo == null) return null;
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const structureNode = analyzeContext.getStructureNode(nodeId);
     const explain = analyzeContext.getNodeExplain(nodeId);
@@ -492,23 +503,27 @@ export const repoAnalysisService = {
 
   async getNodeExplain(db: DbClient, repoId: string, nodeId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    if (repo == null) return null;
     const analyzeContext = createAnalyzeContextBuilder(repo);
     return analyzeContext.getNodeExplain(nodeId);
   },
 
   async getOverview(db: DbClient, repoId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    if (repo == null) return null;
     return analysisMapper.toOverview(repo);
   },
 
   async getStructureMap(db: DbClient, repoId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    if (repo == null) return null;
     const analyzeContext = createAnalyzeContextBuilder(repo);
     return analyzeContext.getStructureMap();
   },
 
   async getStructureNode(db: DbClient, repoId: string, nodeId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    if (repo == null) return null;
     const analyzeContext = createAnalyzeContextBuilder(repo);
     return analyzeContext.getStructureNode(nodeId);
   },
@@ -519,6 +534,7 @@ export const repoAnalysisService = {
     aid?: string
   ): Promise<null | RepoWorkspacePayload> {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    if (repo == null) return null;
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const overview = analysisMapper.toOverview(repo);
     const structure = analyzeContext.getStructureMap();
@@ -765,10 +781,10 @@ export const repoAnalysisService = {
     const onboardingScore = Math.min(
       100,
       docOutputScore.score +
-      (hardMetrics.docDensity > 10 ? 10 : 0) +
-      (hardMetrics.entrypoints.length > 0 ? 15 : 0) +
-      (hardMetrics.configFiles > 0 ? 10 : 0) +
-      (repositoryFacts.some((fact) => fact.category === "architecture") ? 10 : 0)
+        (hardMetrics.docDensity > 10 ? 10 : 0) +
+        (hardMetrics.entrypoints.length > 0 ? 15 : 0) +
+        (hardMetrics.configFiles > 0 ? 10 : 0) +
+        (repositoryFacts.some((fact) => fact.category === "architecture") ? 10 : 0)
     );
 
     const finalHealthScore = calculateHealthScore({
@@ -856,7 +872,7 @@ export const repoAnalysisService = {
           tx.document.upsert({
             create: {
               analysisId: analysis.id,
-              content: doc.content ?? undefined,
+              content: doc.content!,
               repoId: repo.id,
               type: doc.type,
               version: currentSha,
@@ -908,6 +924,7 @@ export const repoAnalysisService = {
     if (normalizedSearch == null || terms.length === 0) return [];
 
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
+    if (repo == null) return [];
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const structure = analyzeContext.getStructureMap();
     const structureContext = analyzeContext.getEntityContext().structureContext;

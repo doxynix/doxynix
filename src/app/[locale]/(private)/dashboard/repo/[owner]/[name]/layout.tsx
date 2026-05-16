@@ -16,7 +16,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function RepoDetailsLayout({ children, params }: RepoLayoutProps) {
+export default async function RepoDetailsLayout({ children, params }: Readonly<RepoLayoutProps>) {
   const { name, owner } = await params;
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);

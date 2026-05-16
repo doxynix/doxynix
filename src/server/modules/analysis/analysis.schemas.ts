@@ -103,3 +103,43 @@ export const persistedFindingSchema = z.object({
 export type ImpactAnalysisRecord = Awaited<ReturnType<typeof analysisRepo.loadImpactAnalysis>>;
 export type ImpactAnalysis = NonNullable<ImpactAnalysisRecord>;
 export type ParsedFinding = z.infer<typeof persistedFindingSchema>;
+
+export const FindingForFixSchema = z.object({
+  file: z.string(),
+  line: z.number(),
+  suggestion: z.string().optional(),
+  type: z.string(),
+});
+
+export const StagedFixedFileSchema = z.object({
+  filePath: z.string(),
+  newContent: z.string(),
+});
+
+export const FixApplicationPayloadSchema = z.object({
+  branch: z.string().min(1),
+  fixedFiles: z.array(StagedFixedFileSchema).min(1),
+  fixId: z.string().uuid(),
+  repoId: z.string().uuid(),
+  title: z.string().min(1),
+});
+
+export const GeneratedFixDTO = z.object({
+  branch: z.string(),
+  createdAt: z.date(),
+  description: z.string().nullable(),
+  estimatedImpact: z.number().nullable(),
+  githubPrNumber: z.number().nullable(),
+  githubPrUrl: z.string().nullable(),
+  id: z.string().uuid(),
+  status: z.string(),
+  title: z.string(),
+});
+
+export const GeneratedFixDetailedDTO = GeneratedFixDTO.extend({
+  resultJson: z.any().nullable(),
+});
+
+export const FixResultSchema = z.object({
+  fixedFiles: z.array(StagedFixedFileSchema),
+});

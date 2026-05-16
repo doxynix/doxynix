@@ -35,10 +35,14 @@ export const analyzePrTask = task({
       const config = await PRConfigService.getConfig(repo.publicId, prisma);
 
       // Update status to ANALYZING
-      await analysisRepo.updateStatus(prisma, payload.analysisId, "ANALYZING" as PRAnalysisStatus);
-      prAnalysisLogger.analyzeStarted(payload.repoId, payload.prNumber, config.tokenBudget);
-
+      await analysisRepo.updatePRAnalysisStatus(
+        prisma,
+        payload.analysisId,
+        "ANALYZING" as PRAnalysisStatus
+      );
       const { octokit } = await getClientContext(prisma, repo.userId, payload.owner);
+
+      prAnalysisLogger.analyzeStarted(payload.repoId, payload.prNumber, config.tokenBudget);
 
       const ghFiles = await octokit.paginate(octokit.rest.pulls.listFiles, {
         owner: payload.owner,
@@ -97,7 +101,7 @@ export const analyzePrTask = task({
           severity: "LOW",
           suggestion: "Изменения выглядят безопасно. Можно продолжать ревью.",
           title: "Analysis Completed",
-          type: "style",
+          type: "STYLE",
         });
       }
 
@@ -130,10 +134,15 @@ export const analyzePrTask = task({
 
       // Update with results
       const duration = Date.now() - startTime;
-      await analysisRepo.updateStatus(prisma, payload.analysisId, "COMPLETED" as PRAnalysisStatus, {
-        findingsJson: finalFindings as any,
-        riskScore: result.riskScore,
-      });
+      await analysisRepo.updatePRAnalysisStatus(
+        prisma,
+        payload.analysisId,
+        "COMPLETED" as PRAnalysisStatus,
+        {
+          findingsJson: finalFindings as any,
+          riskScore: result.riskScore,
+        }
+      );
 
       prAnalysisLogger.analyzeCompleted(
         payload.repoId,
@@ -152,9 +161,14 @@ export const analyzePrTask = task({
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
 
-      await analysisRepo.updateStatus(prisma, payload.analysisId, "FAILED" as PRAnalysisStatus, {
-        error: errorMsg,
-      });
+      await analysisRepo.updatePRAnalysisStatus(
+        prisma,
+        payload.analysisId,
+        "FAILED" as PRAnalysisStatus,
+        {
+          error: errorMsg,
+        }
+      );
 
       prAnalysisLogger.analyzeFailed(payload.repoId, payload.prNumber, errorMsg);
 

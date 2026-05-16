@@ -14,7 +14,15 @@ import { markdownToHtml } from "@/server/utils/markdown-to-html";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 import type { FileActionPreviewResult } from "@/server/utils/types";
 
-import type { analysisRepo } from "./analysis.repository";
+import { analysisRepo } from "./analysis.repository";
+import {
+  FindingForFixSchema,
+  FixApplicationPayloadSchema,
+  FixResultSchema,
+  GeneratedFixDetailedDTO,
+  GeneratedFixDTO,
+  StagedFixedFileSchema,
+} from "./analysis.schemas";
 import { repoAnalysisService } from "./analysis.service";
 import type { AIResult } from "./engine/core/analysis-result.schemas";
 import { FixService } from "./logic/fix-generator";
@@ -95,7 +103,7 @@ export const analysisRouter = createTRPCRouter({
           repo.owner
         );
 
-        const fix = await generatedFixService.getById(ctx.db, input.fixId);
+        const fix = await analysisRepo.getById(ctx.db, input.fixId);
 
         if (fix == null) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Fix not found" });
@@ -237,7 +245,7 @@ export const analysisRouter = createTRPCRouter({
           });
         }
 
-        const fix = await generatedFixService.create(ctx.prisma, {
+        const fix = await analysisRepo.create(ctx.db, {
           branch: `doxynix/fix-${crypto.randomUUID().slice(0, 8)}`,
           createdByUser: true,
           prAnalysisId: validPrAnalysisId,
@@ -319,8 +327,7 @@ export const analysisRouter = createTRPCRouter({
         throw new Error("Analysis not found");
       }
 
-      const { publicId, ...rest } = analysis;
-      return { ...rest, id: publicId };
+      return analysis;
     }),
 
   getAvailableDocs: protectedProcedure
@@ -336,7 +343,7 @@ export const analysisRouter = createTRPCRouter({
     .input(z.object({ fixId: z.uuid() }))
     .output(GeneratedFixDetailedDTO)
     .query(async ({ ctx, input }) => {
-      const fix = await repoAnalysisService.getById(ctx.db, input.fixId);
+      const fix = await analysisRepo.getById(ctx.db, input.fixId);
 
       if (fix == null) {
         throw new TRPCError({
@@ -374,8 +381,7 @@ export const analysisRouter = createTRPCRouter({
 
       if (analysis == null) return null;
 
-      const { publicId, ...rest } = analysis;
-      return { ...rest, id: publicId };
+      return analysis;
     }),
 
   /**
@@ -385,7 +391,7 @@ export const analysisRouter = createTRPCRouter({
     .input(z.object({ repoId: z.uuid() }))
     .output(z.array(GeneratedFixDTO))
     .query(async ({ ctx, input }) => {
-      const fixes = await generatedFixService.getByRepoId(ctx.db, input.repoId);
+      const fixes = await analysisRepo.getByRepoId(ctx.db, input.repoId);
       return fixes.map((fix) => ({ ...fix, id: fix.publicId }));
     }),
 
@@ -543,7 +549,7 @@ export const analysisRouter = createTRPCRouter({
   getRepoConfig: protectedProcedure
     .input(z.object({ repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      return repoAnalysisService.getConfig(input.repoId, ctx.db);
+      return PRConfigService.getConfig(input.repoId, ctx.db);
     }),
 
   /**
@@ -719,7 +725,7 @@ export const analysisRouter = createTRPCRouter({
         });
       }
 
-      const fix = await generatedFixService.create(ctx.prisma, {
+      const fix = await analysisRepo.create(ctx.db, {
         branch: input.branch,
         createdByUser: true,
         description: "Workspace staged changes opened through PR Draft.",
@@ -842,7 +848,12 @@ export const analysisRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return repoAnalysisService.runFileAction(ctx.db, userId, "analyze-single-file", input);
+      return repoAnalysisService.runFileAction(
+        ctx.db,
+        Number(ctx.session.user.id),
+        "analyze-single-file",
+        input
+      );
     }),
 
   searchWorkspace: protectedProcedure
@@ -882,7 +893,7 @@ export const analysisRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const fix = await generatedFixService.getById(ctx.db, input.fixId);
+      const fix = await analysisRepo.getById(ctx.db, input.fixId);
       if (fix == null) {
         throw new TRPCError({
           code: "NOT_FOUND",

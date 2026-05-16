@@ -13,7 +13,7 @@ export type PRFinding = {
   severity: "CRITICAL" | "HIGH" | "LOW" | "MEDIUM"; // Слова для UI
   suggestion?: string;
   title: string;
-  type: "architecture" | "bug" | "complexity" | "performance" | "security" | "style";
+  type: "ARCHITECTURE" | "BUG" | "COMPLEXITY" | "PERFORMANCE" | "SECURITY" | "STYLE";
 };
 
 export type DifferentialAnalysisResult = {

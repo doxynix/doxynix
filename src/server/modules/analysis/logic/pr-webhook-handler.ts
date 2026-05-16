@@ -5,7 +5,6 @@ import { prisma } from "@/server/core/db";
 import { PRConfigService } from "@/server/modules/analysis/logic/pr-config";
 
 import { analysisRepo } from "../analysis.repository";
-import { repoAnalysisService } from "../analysis.service";
 import { analyzePrTask } from "../tasks/analyze-pr.task";
 
 /**
@@ -71,8 +70,8 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
       return;
     }
 
-    // Check for existing analysis
-    const existingAnalysis = await repoAnalysisService.getByRepoAndPRNumber(
+    // Check for existing analysis (DB record)
+    const existingAnalysis = await analysisRepo.getByRepoAndPRNumber(
       prisma,
       repo.publicId,
       pull_request.number
@@ -109,14 +108,10 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
         repoId: repo.id,
       });
     } else {
-      const updatedAnalysis = await prAnalysisService.updatePRAnalysisStatus(
-        prisma,
-        existingAnalysis.id,
-        {
-          baseSha: pull_request.base.sha,
-          headSha: pull_request.head.sha,
-        }
-      );
+      const updatedAnalysis = await analysisRepo.updatePRAnalysis(prisma, existingAnalysis.id, {
+        baseSha: pull_request.base.sha,
+        headSha: pull_request.head.sha,
+      });
       analysisId = updatedAnalysis.id;
     }
 

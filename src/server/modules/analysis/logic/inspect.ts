@@ -1,5 +1,5 @@
 import { uniq } from "es-toolkit";
-import type { normalizePath } from "trpc-to-openapi";
+import { normalize as normalizePath } from "pathe";
 
 import {
   buildNeighborBucketsForEntry,
@@ -10,18 +10,34 @@ import {
   type StructureInspectContextLike,
 } from "./node-inspection";
 
-type StructureInspectEntryLike = BaseStructureInspectEntryLike & {
+type StructureInspectEntryLike = {
+  apiPaths: string[];
   changeCoupling: Array<{ commits: number; fromPath: string; toPath: string }>;
   churnHotspots: Array<{ commitsInWindow: number; path: string }>;
+  configPaths: string[];
+  dependencyHotspots: Array<{ exports: number; inbound: number; outbound: number; path: string }>;
   entrypointDetails: Array<{ path: string; reason?: null | string }>;
   factTitles: string[];
   frameworkNames: string[];
+  graphNeighborPaths: string[];
   graphUnresolvedSamples: Array<{ fromPath: string; specifier: string }>;
+  hotspotSignals: Array<{ churnScore: number; complexity: number; path: string; score: number }>;
+  orphanPaths: string[];
+  paths: string[];
+  publicSurfacePaths: string[];
+  riskTitles: string[];
 };
 
-type StructureInspectNodeLike = BaseStructureInspectNodeLike & {
+type StructureInspectNodeLike = {
+  canDrillDeeper: boolean;
   kind: string;
   label: string;
+  markers: {
+    api: boolean;
+    config: boolean;
+    entrypoint: boolean;
+  };
+  nodeType: "file" | "group";
   path: string;
   previewPaths: string[];
   stats: {
@@ -69,16 +85,16 @@ export function buildInspectPayload(params: {
   const frameworkHints = uniq(params.entry.frameworkNames).slice(0, 5);
   const hotspotHints = uniq([
     ...params.entry.hotspotSignals
-      .toSorted((left, right) => right.score - left.score)
+      .toSorted((left: any, right: any) => right.score - left.score)
       .slice(0, 2)
       .map(
-        (signal) =>
+        (signal: any) =>
           `${signal.path} looks hotspot-prone (score ${signal.score}, complexity ${signal.complexity}, churn ${signal.churnScore}).`
       ),
     ...params.entry.dependencyHotspots
       .slice(0, 2)
       .map(
-        (hotspot) =>
+        (hotspot: any) =>
           `${hotspot.path} is dependency-central (inbound ${hotspot.inbound}, outbound ${hotspot.outbound}, exports ${hotspot.exports}).`
       ),
   ]).slice(0, 4);
@@ -93,7 +109,7 @@ export function buildInspectPayload(params: {
       ? [
           `Dependency resolution is partial here: ${params.entry.graphUnresolvedSamples
             .slice(0, 2)
-            .map((sample) => {
+            .map((sample: any) => {
               const typedSample = sample as { fromPath: string; specifier: string };
               return `${typedSample.fromPath} -> ${typedSample.specifier}`;
             })
@@ -102,15 +118,15 @@ export function buildInspectPayload(params: {
       : []),
   ]).slice(0, 3);
   const relatedPaths = uniq([
-    ...params.entry.entrypointDetails.map((item) => normalizePath(item.path)),
+    ...params.entry.entrypointDetails.map((item: any) => normalizePath(item.path)),
     ...params.entry.apiPaths,
     ...params.entry.publicSurfacePaths,
-    ...params.entry.hotspotSignals.map((item) => normalizePath(item.path)),
-    ...params.entry.dependencyHotspots.map((item) => normalizePath(item.path)),
+    ...params.entry.hotspotSignals.map((item: any) => normalizePath(item.path)),
+    ...params.entry.dependencyHotspots.map((item: any) => normalizePath(item.path)),
     ...params.entry.graphNeighborPaths,
     ...params.entry.orphanPaths,
     ...params.entry.configPaths,
-    ...params.entry.changeCoupling.flatMap((item) => [
+    ...params.entry.changeCoupling.flatMap((item: any) => [
       normalizePath(item.fromPath),
       normalizePath(item.toPath),
     ]),
@@ -119,13 +135,13 @@ export function buildInspectPayload(params: {
     ...params.entry.churnHotspots
       .slice(0, 2)
       .map(
-        (hotspot) =>
+        (hotspot: any) =>
           `${hotspot.path} changed frequently in recent history (${(hotspot as unknown as { commitsInWindow: number }).commitsInWindow} commits in window).`
       ),
     ...params.entry.changeCoupling
       .slice(0, 2)
       .map(
-        (pair) =>
+        (pair: any) =>
           `${pair.fromPath} and ${pair.toPath} often change together (${(pair as unknown as { commits: number }).commits} coupled commits).`
       ),
   ]).slice(0, 4);

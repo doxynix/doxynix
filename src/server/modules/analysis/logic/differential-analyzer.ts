@@ -121,7 +121,7 @@ export class DifferentialAnalyzer {
   private applyFocusFilters(findings: PRFinding[]): PRFinding[] {
     if (this.config.focusAreas.length === 0) return findings;
 
-    return findings.filter((f) => this.config.focusAreas.includes(f.type));
+    return findings.filter((f) => this.config.focusAreas.includes(f.type as any));
   }
 
   private calculateRiskScore(findings: PRFinding[]): number {
@@ -139,7 +139,7 @@ export class DifferentialAnalyzer {
     score: number,
     severity: PRFinding["severity"],
     suggestion: string,
-    type: PRFinding["type"] = "security"
+    type: PRFinding["type"] = "SECURITY"
   ): PRFinding {
     return {
       codeSnippet: content.trim(),
@@ -180,7 +180,7 @@ export class DifferentialAnalyzer {
             severity: this.mapScoreToSeverity(5),
             suggestion: "Разбейте изменения на несколько логических модулей или PR.",
             title: "Высокая сложность изменений",
-            type: "performance",
+            type: "PERFORMANCE",
           } satisfies PRFinding;
         }
         return null;
@@ -269,7 +269,7 @@ export class DifferentialAnalyzer {
                     2,
                     "LOW",
                     "Завершите реализацию или удалите маркер перед мерджем.",
-                    "style"
+                    "STYLE"
                   )
                 );
               }

@@ -22,7 +22,16 @@ describe("calculateHealthScore", () => {
       pushedAt: new Date("2026-02-20T00:00:00.000Z"),
     } as Repo;
 
-    const score = calculateHealthScore(repo, 3, 20);
+    const score = calculateHealthScore({
+      busFactor: 3,
+      complexityScore: 20,
+      dependencyCycles: 0,
+      docDensity: 100,
+      duplicationPercentage: 0,
+      repo,
+      securityScore: 100,
+      techDebtScore: 0,
+    });
 
     expect(score).toBe(100);
   });
@@ -32,7 +41,16 @@ describe("calculateHealthScore", () => {
       pushedAt: new Date("2024-01-01T00:00:00.000Z"),
     } as Repo;
 
-    const score = calculateHealthScore(repo, 1, 2);
+    const score = calculateHealthScore({
+      busFactor: 1,
+      complexityScore: 2,
+      dependencyCycles: 10,
+      docDensity: 0,
+      duplicationPercentage: 50,
+      repo,
+      securityScore: 0,
+      techDebtScore: 100,
+    });
 
     expect(score).toBe(0);
   });

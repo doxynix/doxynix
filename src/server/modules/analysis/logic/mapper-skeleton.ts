@@ -21,6 +21,15 @@ type MapperFolderAgg = {
   path: string;
 };
 
+type SelectedFileEntry = {
+  approxLines?: number;
+  isApiHeuristic: boolean;
+  isConfig: boolean;
+  linguistLabel: string;
+  path: string;
+  roleHint: string;
+};
+
 function topFolderPrefixes(paths: string[]): MapperFolderAgg[] {
   const counts = new Map<string, number>();
   for (const p of paths) {

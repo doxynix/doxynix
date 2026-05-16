@@ -51,8 +51,8 @@ const STATUS_CONFIG = {
 export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }: Readonly<Props>) {
   const locale = useLocale();
   const { data: comments, isLoading: isCommentsLoading } = trpc.analysis.getComments.useQuery(
-    { analysisId: analysis?.id ?? "" },
-    { enabled: analysis?.id != null }
+    { analysisId: analysis?.analysis.id ?? "" },
+    { enabled: analysis?.analysis.id != null }
   );
 
   const { isStaging, stageFix } = usePrStage(repoId);
@@ -85,11 +85,11 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
     },
     {
       label: "Total Issues",
-      value: analysis?.comments.length ?? 0,
+      value: comments?.renderedComments.length ?? 0,
     },
     {
       label: "Generated Fixes",
-      value: analysis?.generatedFixes.length ?? 0,
+      value: fixes.length,
     },
   ];
 

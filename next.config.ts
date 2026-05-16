@@ -19,11 +19,11 @@ const bundleAnalyzer = withBundleAnalyzer({
 });
 
 const withNextIntl = createNextIntlPlugin({
-  requestConfig: "./src/shared/i18n/request.ts",
-
   experimental: {
     createMessagesDeclaration: "./messages/en.json",
   },
+
+  requestConfig: "./src/shared/i18n/request.ts",
 });
 
 const withVercelToolbar = createWithVercelToolbar();

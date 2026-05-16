@@ -394,7 +394,7 @@ export const PROJECT_POLICY_RULES = {
       { id: "raw_sql", pattern: /\.raw\(|db\.execute\(|db\.run\(/i, title: "Raw SQL Execution" },
       {
         id: "sql_concat",
-        pattern: /\bselect\s+[\s\w()*,.]+\bfrom\s+[\s\w.]+\bwhere\s+[\s\w.]+\s*=\s*\${/i,
+        pattern: /\bselect\s+\S+\s+from\s+\S+\s+where\s+\S+\s*=\s*\${/i,
         title: "SQL Injection (String Concatenation)",
       },
     ],
