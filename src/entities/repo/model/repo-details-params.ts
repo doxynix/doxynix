@@ -5,6 +5,7 @@ const repoWorkspaceParams = {
   node: parseAsString,
   path: parseAsString,
   search: parseAsString,
+  aid: parseAsString,
   section: parseAsString,
   type: parseAsString,
   view: parseAsString,

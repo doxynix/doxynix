@@ -25,12 +25,14 @@ export function buildRepoCodeHref(params: {
   nodeId?: null | string;
   owner: string;
   path?: null | string;
+  aid?: string | null;
 }) {
   const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.name)}/code`;
 
   return serializeRepoParams(base, {
     node: params.nodeId,
     path: params.path,
+    aid: params.aid,
   });
 }
 
@@ -40,6 +42,7 @@ export function buildRepoDocsHref(params: {
   nodeId?: null | string;
   owner: string;
   section?: null | string;
+  aid?: string | null;
 }) {
   const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.name)}/docs`;
 
@@ -47,15 +50,24 @@ export function buildRepoDocsHref(params: {
     node: params.nodeId,
     section: params.section,
     type: params.docType,
+    aid: params.aid,
   });
 }
 
-export function buildRepoMapHref(params: { name: string; nodeId?: null | string; owner: string }) {
-  const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.name)}/map`;
+export function buildRepoMapHref(params: {
+  name: string;
+  nodeId?: null | string;
+  owner: string;
+  aid?: string | null;
+}) {
+  const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(
+    params.name
+  )}/map`;
 
   return serializeRepoParams(base, {
     node: params.nodeId,
     view: params.nodeId?.startsWith("group:") === true ? params.nodeId : null,
+    aid: params.aid,
   });
 }
 
@@ -63,6 +75,7 @@ export function buildRepoSearchResultHref(params: {
   name: string;
   owner: string;
   result: RepoSearchResult;
+  aid?: string | null;
 }) {
   if (params.result.targetView === "docs") {
     return buildRepoDocsHref({
@@ -71,6 +84,7 @@ export function buildRepoSearchResultHref(params: {
       nodeId: params.result.nodeId,
       owner: params.owner,
       section: params.result.docSectionId,
+      aid: params.aid,
     });
   }
 
@@ -80,6 +94,7 @@ export function buildRepoSearchResultHref(params: {
       nodeId: params.result.nodeId,
       owner: params.owner,
       path: params.result.path,
+      aid: params.aid,
     });
   }
 
@@ -87,5 +102,6 @@ export function buildRepoSearchResultHref(params: {
     name: params.name,
     nodeId: params.result.nodeId,
     owner: params.owner,
+    aid: params.aid,
   });
 }

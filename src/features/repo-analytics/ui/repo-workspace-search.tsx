@@ -98,6 +98,7 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
                           name,
                           owner,
                           result,
+                          aid,
                         })
                       );
                     }}

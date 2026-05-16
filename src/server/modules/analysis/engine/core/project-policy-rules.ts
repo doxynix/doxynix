@@ -394,7 +394,9 @@ export const PROJECT_POLICY_RULES = {
       { id: "raw_sql", pattern: /\.raw\(|db\.execute\(|db\.run\(/i, title: "Raw SQL Execution" },
       {
         id: "sql_concat",
-        pattern: /\bselect\s+\S+\s+from\s+\S+\s+where\s+\S+\s*=\s*\${/i,
+        // Use a non-greedy, minimal-matching pattern to avoid catastrophic backtracking.
+        // Matches typical `select ... from ... where ... = ${` templated SQL usages.
+        pattern: /\bselect\b[\s\S]*?\bfrom\b[\s\S]*?\bwhere\b[\s\S]*?=\s*\$\{/i,
         title: "SQL Injection (String Concatenation)",
       },
     ],

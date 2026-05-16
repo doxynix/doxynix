@@ -43,7 +43,7 @@ type Signals = Props["data"]["secondary"]["signals"];
 export function RepoOverview({ data }: Readonly<Props>) {
   const locale = useLocale();
   const router = useRouter();
-  const { name, owner } = useRepoParams();
+  const { name, owner, aid } = useRepoParams();
 
   const gitMetrics = getGitMetrics(data.repo, locale);
 
@@ -78,6 +78,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
           score: 0,
           targetView: "map",
         },
+        aid,
       })
     );
   };
@@ -99,6 +100,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
           score: 0,
           targetView: "code",
         },
+        aid,
       })
     );
   };

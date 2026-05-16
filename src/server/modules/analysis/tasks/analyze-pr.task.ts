@@ -1,11 +1,14 @@
 import type { PRAnalysisStatus } from "@prisma/client";
 import { task } from "@trigger.dev/sdk";
+import z from "zod";
 
+import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { getClientContext } from "@/server/core/github/github-provider";
 import { prAnalysisLogger } from "@/server/utils/pr-analysis-logger";
 
 import { analysisRepo } from "../analysis.repository";
+import { persistedFindingSchema } from "../analysis.schemas";
 import { CommentFormatter, GitHubCommentPoster } from "../logic/comment-poster";
 import { DifferentialAnalyzer } from "../logic/differential-analyzer";
 import { PRConfigService } from "../logic/pr-config";
@@ -134,12 +137,31 @@ export const analyzePrTask = task({
 
       // Update with results
       const duration = Date.now() - startTime;
+      // Validate and coerce findings to persisted shape before saving
+      const candidate = finalFindings.map((f) => ({
+        file: f.file,
+        line: f.line,
+        message: f.message,
+        score: f.score,
+        title: f.title,
+        type: f.type,
+      }));
+
+      const validated = z.array(persistedFindingSchema).safeParse(candidate);
+      if (!validated.success) {
+        appLogger.warn({
+          msg: "pr_findings_validation_failed",
+          error: z.treeifyError(validated.error),
+          analysisId: payload.analysisId,
+        });
+      }
+
       await analysisRepo.updatePRAnalysisStatus(
         prisma,
         payload.analysisId,
         "COMPLETED" as PRAnalysisStatus,
         {
-          findingsJson: finalFindings as any,
+          findingsJson: validated.success ? validated.data : candidate,
           riskScore: result.riskScore,
         }
       );

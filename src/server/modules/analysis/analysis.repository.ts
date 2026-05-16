@@ -16,15 +16,6 @@ type PRAnalysisCreateInput = {
   repoName: string;
 };
 
-type PRFinding = {
-  file: string;
-  line: number;
-  message: string;
-  severity: "high" | "low" | "medium";
-  suggestion?: string;
-  type: string;
-};
-
 export const latestCompletedAnalysisSelect = {
   commitSha: true,
   complexityScore: true,
@@ -207,7 +198,7 @@ export const analysisRepo = {
       where: { repo: { publicId: repoId }, status: "DONE" },
     });
 
-    if (!analysis) return null;
+    if (analysis == null) return null;
 
     return {
       analysisId: analysis.publicId,
@@ -419,12 +410,14 @@ export const analysisRepo = {
     db: DbClient,
     id: number,
     status: PRAnalysisStatus,
-    data?: { error?: string; findingsJson?: PRFinding[]; riskScore?: number }
+    // `findingsJson` can be a validated JSON payload; keep it untyped here to allow
+    // passing different persisted shapes (validated via Zod where appropriate).
+    data?: { error?: string; findingsJson?: unknown; riskScore?: number }
   ) {
     return db.pullRequestAnalysis.update({
       data: {
         error: data?.error,
-        findingsJson: data?.findingsJson,
+        findingsJson: data?.findingsJson as Prisma.InputJsonValue,
         riskScore: data?.riskScore,
         status,
       },
