@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/doxynix/doxynix/compare/v1.32.5...v2.0.0) (2026-05-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* глобальный переезд архитектуры бекенда а также серьезные усиления анализа  ([#1417](https://github.com/doxynix/doxynix/issues/1417))
+
+### Features
+
+* глобальный переезд архитектуры бекенда а также серьезные усиления анализа  ([#1417](https://github.com/doxynix/doxynix/issues/1417)) ([4a3c186](https://github.com/doxynix/doxynix/commit/4a3c1868621b9e01646a16a27b0a5dcddbd4d929))
+
 ## [1.32.5](https://github.com/doxynix/doxynix/compare/v1.32.4...v1.32.5) (2026-05-12)
 
 
