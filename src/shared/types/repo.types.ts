@@ -1,4 +1,4 @@
-import type { VisibilityType } from "@/generated/zod";
+import type { VisibilityType } from "../api-contracts";
 
 export type RepoItemFields = {
   description: null | string;

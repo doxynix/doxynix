@@ -7,7 +7,7 @@ import { trpc } from "@/shared/api/trpc";
 export function usePrStage(repoId: string) {
   const utils = trpc.useUtils();
 
-  const { isPending, mutate } = trpc.prStaging.stageGeneratedFix.useMutation({
+  const { isPending, mutate } = trpc.analysis.stageGeneratedFix.useMutation({
     onError: (error) => {
       toast.error(`Failed to add fix: ${error.message}`);
     },
@@ -15,7 +15,7 @@ export function usePrStage(repoId: string) {
       toast.success(
         `Added ${data.stagedFilesAdded} file(s) to PR draft. Total: ${data.stagedCount}.`
       );
-      void utils.prStaging.getStagedFiles.invalidate({ repoId });
+      void utils.analysis.getStagedFiles.invalidate({ repoId });
     },
   });
 

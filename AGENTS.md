@@ -92,7 +92,7 @@ Before touching code, mentally map: `app` → `widgets` → `features` → `enti
 **Imports must flow downward ONLY**. Never import from sibling layers or upward.
 
 ### Step 2: Write Code
-- **Type Safety**: Strict TS, ZERO `any`. Use Zod schemas from `src/generated/zod/`
+- **Type Safety**: Strict TS, ZERO `any`. Use Zod schemas from `src/shared/api-contracts/`
 - **Token Economy**: Each file <400 lines (SRP). Break large modules.
 - **Modern Tooling**:
   ```typescript

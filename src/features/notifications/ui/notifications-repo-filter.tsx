@@ -47,7 +47,8 @@ export function NotificationsRepoFilter() {
     (r) => r.owner === filters.owner && r.name === filters.repo
   );
 
-  const label = selectedRepo ? `${selectedRepo.owner}/${selectedRepo.name}` : "All repositories";
+  const label =
+    selectedRepo != null ? `${selectedRepo.owner}/${selectedRepo.name}` : "All repositories";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

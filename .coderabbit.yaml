@@ -13,7 +13,7 @@ reviews:
     - "!package-lock.json"
     - "!.next/**"
     - "!coverage/**"
-    - "!src/generated/**"
+    - "!src/shared/api-contracts/**"
     - "!*.svg"
 
   path_instructions:

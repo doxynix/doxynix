@@ -14,7 +14,7 @@ import { RepoMetrics } from "./repo-metrics";
 export function RepoMetricsContainer({ id }: Readonly<{ id: string }>) {
   const { name, owner } = useRepoParams();
 
-  const { data, isLoading } = trpc.repoDetails.getDetailedMetrics.useQuery({
+  const { data, isLoading } = trpc.analysis.getDetailedMetrics.useQuery({
     repoId: id,
   });
 

@@ -2,7 +2,7 @@ import { unauthorized } from "next/navigation";
 
 import { ProfileCard } from "@/entities/user/ui/profile-card";
 
-import { getServerAuthSession } from "@/server/shared/infrastructure/auth";
+import { getServerAuthSession } from "@/server/core/auth";
 
 export async function ProfileDataLoader() {
   const session = await getServerAuthSession();

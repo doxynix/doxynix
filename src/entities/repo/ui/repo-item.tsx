@@ -19,8 +19,8 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
 
   return (
     <Button
-      type="button"
       disabled={disabled}
+      type="button"
       variant="ghost"
       onClick={onClick}
       className="h-auto w-full max-w-md cursor-pointer justify-start px-3 py-2 text-left"

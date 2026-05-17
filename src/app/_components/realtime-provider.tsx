@@ -103,11 +103,11 @@ export const RealtimeProvider = ({ children }: Props) => {
         };
 
         if (payload.type === "FIX_GENERATED" && payload.fixId != null) {
-          void utils.generatedFix.getById.invalidate({ fixId: payload.fixId });
+          void utils.analysis.getById.invalidate({ fixId: payload.fixId });
           toast.success("AI код-фикс готов!");
         } else if (payload.path != null) {
           const action = payload.type === "AUDIT" ? "quick-file-audit" : "document-file-preview";
-          void utils.repoAnalysis.getFileActionResult.invalidate({ action, path: payload.path });
+          void utils.analysis.getFileActionResult.invalidate({ action, path: payload.path });
           toast.success(`AI завершил ${payload.type === "AUDIT" ? "audit" : "document"} file!`);
         }
       }
@@ -133,8 +133,8 @@ export const RealtimeProvider = ({ children }: Props) => {
     invalidateAll,
     invalidate,
     utils.analytics.getDashboardStats,
-    utils.repoAnalysis.getFileActionResult,
-    utils.generatedFix.getById,
+    utils.analysis.getFileActionResult,
+    utils.analysis.getById,
     utils.audit.getActivityLogs,
   ]);
 

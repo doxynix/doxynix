@@ -1,7 +1,8 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs";
+import { additionalFiles } from "@trigger.dev/build/extensions/core";
 import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
-import { defineConfig } from "@trigger.dev/sdk/v3";
+import { defineConfig } from "@trigger.dev/sdk";
 
 if (!process.env.DATABASE_URL!) {
   process.env.DATABASE_URL = "postgresql://postgres:password@localhost:5432/db";
@@ -10,13 +11,19 @@ if (!process.env.DATABASE_URL!) {
 export default defineConfig({
   build: {
     extensions: [
+      additionalFiles({
+        files: [
+          "node_modules/web-tree-sitter/tree-sitter.wasm",
+          "node_modules/tree-sitter-wasms/out/*.wasm",
+        ],
+      }),
       {
         name: "zenstack-generate",
         onBuildStart: async () => {
           console.log("ZenStack generating...");
           try {
             // eslint-disable-next-line sonarjs/no-os-command-from-path
-            execSync("npx zenstack generate --schema prisma/schema.zmodel", {
+            execSync("pnpm zenstack generate --schema prisma/schema.zmodel", {
               env: { ...process.env },
               stdio: "inherit",
             });
@@ -43,7 +50,7 @@ export default defineConfig({
         typedSql: true,
       }),
     ],
-    external: ["ioredis", "bottleneck"],
+    external: ["ioredis", "bottleneck", "web-tree-sitter"],
   },
   dirs: ["./src/server/**/task"],
   logLevel: "log",

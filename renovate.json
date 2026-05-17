@@ -13,7 +13,7 @@
   "minimumReleaseAge": "3 days",
   "postUpdateOptions": ["pnpmDedupe"],
   "labels": ["dependencies"],
-  "ignoreDeps": ["zod-prisma-types"],
+  "ignoreDeps": ["zod-prisma-types", "web-tree-sitter", "tree-sitter-wasms"],
   "vulnerabilityAlerts": {
     "enabled": true,
     "addLabels": ["security"]
@@ -62,6 +62,11 @@
       "description": "Запрещаем мажорный апдейт eslint (v10 ломает плагины React)",
       "matchPackageNames": ["eslint"],
       "allowedVersions": "<10.0.0"
+    },
+    {
+      "description": "Замораживаем Tree-sitter из-за хрупкой совместимости WASM грамматик",
+      "matchPackageNames": ["web-tree-sitter", "tree-sitter-wasms"],
+      "enabled": false
     }
   ]
 }

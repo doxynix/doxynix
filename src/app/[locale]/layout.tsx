@@ -19,15 +19,15 @@ import "../globals.css";
 import { APP_URL } from "@/shared/constants/env.client";
 import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
 import type { Locale } from "@/shared/constants/locales";
+import { routing } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Toaster } from "@/shared/ui/core/sonner";
 import { A11yProvider } from "@/shared/ui/kit/a11y-provider";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
 import { SkipLink } from "@/shared/ui/kit/skip-link";
-import { routing } from "@/i18n/routing";
 
-import { getServerAuthSession } from "@/server/shared/infrastructure/auth";
-import { ourFileRouter } from "@/server/shared/infrastructure/uploadthing";
+import { getServerAuthSession } from "@/server/core/auth";
+import { ourFileRouter } from "@/server/core/uploadthing";
 
 import { Providers } from "../providers";
 

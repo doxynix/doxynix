@@ -22,7 +22,7 @@ export function ThanksCard({ group }: Readonly<Props>) {
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4 overflow-hidden">
-            <AppAvatar alt={author} fallbackText={author} sizeClassName="size-12" src={avatar} />
+            <AppAvatar alt={author} src={avatar} fallbackText={author} sizeClassName="size-12" />
 
             <div className="flex flex-col overflow-hidden">
               <CardTitle title={author} className="truncate text-lg font-bold">

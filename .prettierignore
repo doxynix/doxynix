@@ -13,5 +13,5 @@ public
 *.yaml
 *.yml
 
-src/generated
+src/shared/api-contracts
 next-env.d.ts

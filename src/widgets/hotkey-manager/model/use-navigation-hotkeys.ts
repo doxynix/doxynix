@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { Route } from "next";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/shared/i18n/routing";
 
 const SEQUENTIAL_ROUTES: Record<string, Record<string, string>> = {
   g: {

@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   ArrowRight,
   Book,
+  BookOpenCheck,
   Code2,
   FileIcon,
   FileText,
@@ -15,12 +16,12 @@ import {
 } from "lucide-react";
 import { useLocale } from "next-intl";
 
+import { Link, useRouter } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { Button } from "@/shared/ui/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
-import { useRouter } from "@/i18n/routing";
 
 import { getGitMetrics } from "@/entities/repo/model/git-metrics";
 import { buildRepoSearchResultHref } from "@/entities/repo/model/repo-workspace-navigation";
@@ -29,6 +30,9 @@ import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoGitMetric } from "@/entities/repo/ui/repo-git-metric";
 import { RepoTopics } from "@/entities/repo/ui/repo-topics";
 import { StatCard } from "@/entities/repo/ui/stat-card";
+
+import { QualityRadar } from "@/widgets/dashboard/ui/analytics-widgets";
+import { TrendsWidget } from "@/widgets/dashboard/ui/trends-widget";
 
 import { RepoWorkspaceSearch } from "./repo-workspace-search";
 
@@ -39,7 +43,7 @@ type Signals = Props["data"]["secondary"]["signals"];
 export function RepoOverview({ data }: Readonly<Props>) {
   const locale = useLocale();
   const router = useRouter();
-  const { name, owner } = useRepoParams();
+  const { aid, name, owner } = useRepoParams();
 
   const gitMetrics = getGitMetrics(data.repo, locale);
 
@@ -60,6 +64,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
   const handleMapNodeNavigation = (nodeId: string) => {
     void router.push(
       buildRepoSearchResultHref({
+        aid,
         name,
         owner,
         result: {
@@ -81,6 +86,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
   const handleCodeNavigation = (path: string) => {
     void router.push(
       buildRepoSearchResultHref({
+        aid,
         name,
         owner,
         result: {
@@ -214,7 +220,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
             <div className="space-y-2">
               <p className="text-muted-foreground text-xs font-bold">Key Zones</p>
               <div className="flex flex-wrap gap-2">
-                {navigation.keyZones.slice(0, 4).map((zone) => (
+                {navigation.keyZones.map((zone) => (
                   <Button
                     key={zone.id}
                     variant="outline"
@@ -231,7 +237,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
             <div className="space-y-2">
               <p className="text-muted-foreground text-xs font-bold">Entrypoints</p>
               <div className="flex flex-wrap gap-2">
-                {navigation.primaryEntrypoints.slice(0, 4).map((path) => (
+                {navigation.primaryEntrypoints.map((path) => (
                   <Button
                     key={path}
                     variant="ghost"
@@ -311,8 +317,13 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-medium">
-              <FileText /> Documentation
+            <CardTitle className="flex items-center justify-between gap-2 text-sm font-medium">
+              <div className="flex items-center gap-2">
+                <FileText /> Documentation
+              </div>
+              <Button asChild variant="ghost">
+                <Link href={`/dashboard/repo/${data.repo.owner}/${data.repo.name}/docs`}>View</Link>
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -363,6 +374,20 @@ export function RepoOverview({ data }: Readonly<Props>) {
           </CardContent>
         </Card>
 
+        <Card className="overflow-hidden">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-base">
+              <span className="flex items-center gap-2 text-sm">
+                <BookOpenCheck />
+                Quality Radar
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <QualityRadar scores={data.secondary.scores} />
+          </CardContent>
+        </Card>
+
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-warning flex items-center gap-2 text-sm font-medium">
@@ -409,6 +434,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </div>
           </CardContent>
         </Card>
+        <TrendsWidget repoId={data.repo.id} className="col-span-4" />
       </div>
     </div>
   );

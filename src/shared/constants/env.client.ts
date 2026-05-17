@@ -43,7 +43,6 @@ const normalizePrefix = (value: string | undefined): `/${string}` => {
   return (value.startsWith("/") ? value : `/${value}`) as `/${string}`;
 };
 
-export const NODE_ENV = envClient.NODE_ENV;
 export const API_PREFIX = normalizePrefix(envClient.NEXT_PUBLIC_API_PREFIX);
 export const TRPC_PREFIX = normalizePrefix(envClient.NEXT_PUBLIC_TRPC_PREFIX);
 

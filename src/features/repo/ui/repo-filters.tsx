@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
+import { StatusSchema, VisibilitySchema } from "@/shared/api-contracts";
 import { Button } from "@/shared/ui/core/button";
 import {
   Select,
@@ -14,8 +15,6 @@ import {
 } from "@/shared/ui/core/select";
 
 import { repoParsers } from "@/entities/repo/model/repo-parsers";
-
-import { StatusSchema, VisibilitySchema } from "@/generated/zod";
 
 export function RepoFilters() {
   const tCommon = useTranslations("Common");

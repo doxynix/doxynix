@@ -1,10 +1,10 @@
 import { CheckCircle2, Clock, ShieldAlert } from "lucide-react";
 import { useLocale } from "next-intl";
 
+import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-import { Link } from "@/i18n/routing";
 
 import type { RepoPull } from "../model/pr.types";
 

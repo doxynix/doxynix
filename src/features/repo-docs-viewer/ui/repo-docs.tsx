@@ -14,6 +14,7 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import type { AvailableDocs, DocType, RepoNodeContext } from "@/entities/repo/model/repo.types";
+import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { RepoDocsContent } from "./repo-docs-content";
 import { RepoDocsTabs } from "./repo-docs-tabs";
@@ -43,13 +44,17 @@ export function RepoDocs({
   repoId,
 }: Readonly<Props>) {
   const [apiMode, setApiMode] = useState<"md" | "swagger">("md");
-  const { data: metrics } = trpc.repoDetails.getDetailedMetrics.useQuery({ repoId });
+  const { aid } = useRepoParams();
+  const { data: metrics } = trpc.analysis.getDetailedMetrics.useQuery({
+    aid: aid ?? undefined,
+    repoId,
+  });
 
-  const { data: docContent, isLoading: isDocLoading } =
-    trpc.repoDetails.getDocumentContent.useQuery({
-      repoId,
-      type: activeTab,
-    });
+  const { data: docContent, isLoading: isDocLoading } = trpc.analysis.getDocumentContent.useQuery({
+    aid: aid ?? undefined,
+    repoId,
+    type: activeTab,
+  });
 
   const handleDownload = () => {
     if (docContent?.raw == null) {
@@ -135,8 +140,8 @@ export function RepoDocs({
                           </Button>
                         </AppTooltip>
                         <CopyButton
-                          value={docContent?.raw ?? ""}
                           disabled={isDocLoading}
+                          value={docContent?.raw ?? ""}
                           tooltipText="Copy file"
                           className="size-8 px-3 opacity-100"
                         />

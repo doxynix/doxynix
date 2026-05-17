@@ -4,10 +4,10 @@ import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
 
 import { getRepoDetailsMenu } from "@/shared/constants/navigation";
+import { Link, usePathname } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { isRouteActive } from "@/shared/lib/navigation-utils";
 import { Button } from "@/shared/ui/core/button";
-import { Link, usePathname } from "@/i18n/routing";
 
 import { buildRepoDetailHref } from "../model/repo-workspace-navigation";
 

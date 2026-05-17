@@ -42,9 +42,9 @@ export async function ConfigSection() {
 
         <CodeWindow
           code={CONFIG_CODE}
-          codeClassName="text-sm sm:text-base"
           codeHtml={html}
           title="doxynix.json"
+          codeClassName="text-sm sm:text-base"
         />
       </div>
     </section>

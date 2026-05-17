@@ -16,7 +16,6 @@ import { useTranslations } from "next-intl";
 
 import { LOCALES } from "@/shared/constants/locales";
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Checkbox } from "@/shared/ui/core/checkbox";
 import { Label } from "@/shared/ui/core/label";
@@ -29,6 +28,7 @@ import {
 } from "@/shared/ui/core/select";
 import { Textarea } from "@/shared/ui/core/textarea";
 import { Flag, FLAGS } from "@/shared/ui/kit/language-switcher";
+import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import type { ActionsType, StateType } from "@/entities/repo/model/use-repo-setup";
 
@@ -40,11 +40,11 @@ type DocOption = {
 };
 
 const DOC_OPTIONS: DocOption[] = [
-  { desc: "Project overview & setup", icon: BookOpen, id: "README", label: "README" },
+  { desc: "Project overview & setup", icon: BookOpen, id: "README", label: "Overview" },
   { desc: "Endpoints & schemas", icon: Code2, id: "API", label: "API Reference" },
   { desc: "Deep system logic", icon: GitGraph, id: "ARCHITECTURE", label: "Architecture" },
-  { desc: "Guide for developers", icon: Users, id: "CONTRIBUTING", label: "Contributing" },
-  { desc: "Release history", icon: HistoryIcon, id: "CHANGELOG", label: "Changelog" },
+  { desc: "Guide for developers", icon: Users, id: "CONTRIBUTING", label: "How to guides" },
+  { desc: "Release history", icon: HistoryIcon, id: "CHANGELOG", label: "History" },
 ] as const;
 
 type Props = {
@@ -123,9 +123,9 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                   )}
                 >
                   <input
-                    type="checkbox"
                     checked={isSelected}
                     disabled={disabled}
+                    type="checkbox"
                     onChange={() => actions.toggleDocType(opt.id)}
                     className="sr-only"
                   />
@@ -173,14 +173,16 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
         </div>
 
         <div className="flex justify-end">
-          <Button
+          <LoadingButton
             disabled={disabled || isSelectionEmpty}
+            isLoading={disabled}
+            loadingText="Processing..."
             onClick={actions.handleStartAnalysis}
             className="w-fit cursor-pointer gap-2"
           >
             <Play />
             Start Analysis
-          </Button>
+          </LoadingButton>
         </div>
       </CardContent>
     </Card>

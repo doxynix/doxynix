@@ -8,7 +8,7 @@ import { RepoPullsList } from "./repo-pulls-list";
 type Props = { name: string; owner: string; repoId: string };
 
 export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>) {
-  const { data: pulls, isLoading } = trpc.prAnalysis.listByRepository.useQuery({
+  const { data: pulls, isLoading } = trpc.analysis.listByRepository.useQuery({
     repoId,
   });
 

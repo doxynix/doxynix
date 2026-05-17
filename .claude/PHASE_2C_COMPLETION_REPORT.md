@@ -73,7 +73,6 @@ Unified XML/JSON formatting for evidence blocks:
 - `formatXml()`: Auto-escaped XML blocks with size enforcement
 - `formatJson()`: Pretty-printed JSON with truncation
 - `formatComposite()`: Multi-block XML documents
-- `formatMetrics()`, `formatRepositoryEvidence()`: Domain-specific helpers
 - Automatic size limiting with metadata tracking
 
 **Features**:

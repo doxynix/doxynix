@@ -19,6 +19,7 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from "recharts";
 
+import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
@@ -26,7 +27,6 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/shared/ui/c
 import { Progress } from "@/shared/ui/core/progress";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-import { Link } from "@/i18n/routing";
 
 import type { DashboardStats } from "../model/dashboard.types";
 
@@ -62,7 +62,7 @@ export function EcosystemStatusWidget({ data }: Readonly<Props>) {
             <p className="text-muted-foreground text-sm">No repositories found in ecosystem</p>
           </div>
         ) : (
-          <QualityRadar data={data} />
+          <QualityRadar scores={data.overview.avgScores} />
         )}
       </CardContent>
     </Card>
@@ -249,8 +249,8 @@ export function LanguagesWidget({ data }: Readonly<Props>) {
 
                   <Progress
                     value={percentage}
-                    indicatorStyle={{ backgroundColor: lang.color }}
                     aria-label={`Usage of ${lang.name} language`}
+                    indicatorStyle={{ backgroundColor: lang.color }}
                   />
                 </div>
               );
@@ -312,8 +312,8 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
                       <div className="mt-1 flex items-center gap-1">
                         <Progress
                           value={activity.progress}
-                          indicatorStyle={{ backgroundColor: "var(--status-warning)" }}
                           className="h-1 flex-1"
+                          indicatorStyle={{ backgroundColor: "var(--status-warning)" }}
                         />
                         <span className="text-warning text-xs font-bold">{activity.progress}%</span>
                       </div>
@@ -329,13 +329,23 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
   );
 }
 
-export function QualityRadar({ data }: Readonly<Props>) {
+type QualityRadarProps = {
+  scores: {
+    complexity: number;
+    health: number;
+    onboarding: number;
+    security: number;
+    techDebt: number;
+  };
+};
+
+export function QualityRadar({ scores }: Readonly<QualityRadarProps>) {
   const chartData = [
-    { fullMark: 100, subject: "Health", value: data.overview.avgHealthScore },
-    { fullMark: 100, subject: "Security", value: data.overview.avgSecurityScore },
-    { fullMark: 100, subject: "Simplicity", value: 100 - data.overview.avgComplexityScore },
-    { fullMark: 100, subject: "Onboarding", value: data.overview.avgOnboardingScore },
-    { fullMark: 100, subject: "Maintainability", value: 100 - data.overview.avgTechDebtScore },
+    { fullMark: 100, subject: "Health", value: scores.health },
+    { fullMark: 100, subject: "Security", value: scores.security },
+    { fullMark: 100, subject: "Simplicity", value: 100 - scores.complexity },
+    { fullMark: 100, subject: "Onboarding", value: scores.onboarding },
+    { fullMark: 100, subject: "Maintainability", value: 100 - scores.techDebt },
   ];
 
   const config = {

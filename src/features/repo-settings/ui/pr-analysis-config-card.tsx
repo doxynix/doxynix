@@ -5,6 +5,7 @@ import { Layout, Loader2, Palette, ShieldCheck, Zap } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
+import { PRCommentStyleSchema, PRFocusAreaSchema } from "@/shared/api-contracts";
 import {
   UpdatePRConfigInput,
   type UpdatePRConfigInputValues,
@@ -24,8 +25,6 @@ import {
 import { Slider } from "@/shared/ui/core/slider";
 import { Switch } from "@/shared/ui/core/switch";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
-
-import { PRCommentStyleSchema, PRFocusAreaSchema } from "@/generated/zod";
 
 type Props = {
   repoId: string;
@@ -61,12 +60,12 @@ const AREAS = [
 export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
   const utils = trpc.useUtils();
 
-  const { data: config, isLoading } = trpc.prAnalysis.getRepoConfig.useQuery({ repoId });
+  const { data: config, isLoading } = trpc.analysis.getRepoConfig.useQuery({ repoId });
 
-  const updateConfig = trpc.prAnalysis.configureRepository.useMutation({
+  const updateConfig = trpc.analysis.configureRepository.useMutation({
     onError: (error) => toast.error(error.message),
     onSuccess: () => {
-      void utils.prAnalysis.getRepoConfig.invalidate({ repoId });
+      void utils.analysis.getRepoConfig.invalidate({ repoId });
     },
   });
 
@@ -160,9 +159,9 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                     )}
                   >
                     <input
-                      type="checkbox"
                       checked={isSelected}
                       disabled={isUpdating}
+                      type="checkbox"
                       onChange={() => {
                         const next =
                           isSelected === true

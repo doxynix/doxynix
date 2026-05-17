@@ -5,6 +5,16 @@ import { Check } from "lucide-react";
 import { useInView } from "motion/react";
 import { useTranslations } from "next-intl";
 
+const TERMINAL_STEPS = [
+  { delay: 500, step: 2 },
+  { delay: 600, step: 3 },
+  { delay: 400, step: 4 },
+  { delay: 300, step: 5 },
+  { delay: 500, step: 6 },
+  { delay: 600, step: 7 },
+  { delay: 400, step: 8 },
+] as const;
+
 const TerminalWindow = ({ children }: { children: ReactNode }) => {
   return (
     <div className="glass-panel border-border bg-card pointer-events-none flex h-full w-full flex-col overflow-hidden rounded-2xl border">
@@ -35,36 +45,37 @@ export function SimulationTerminal() {
   useEffect(() => {
     if (!isInView) return;
 
+    let isMounted = true;
+
+    const delay = (ms: number) => {
+      return new Promise<void>((resolve) => {
+        const timer = setTimeout(() => {
+          if (isMounted) resolve();
+        }, ms);
+        return () => clearTimeout(timer);
+      });
+    };
+
     const timeline = async () => {
+      if (!isMounted) return;
       setStep(1);
+
       for (let i = 0; i <= FULL_COMMAND.length; i++) {
         setTypedCommand(FULL_COMMAND.slice(0, i));
-        await new Promise((r) => setTimeout(r, Math.random() * 200 + 30));
+        await delay(Math.random() * 200 + 30);
       }
 
-      await new Promise((r) => setTimeout(r, 500));
-      setStep(2);
-
-      await new Promise((r) => setTimeout(r, 600));
-      setStep(3);
-
-      await new Promise((r) => setTimeout(r, 400));
-      setStep(4);
-
-      await new Promise((r) => setTimeout(r, 300));
-      setStep(5);
-
-      await new Promise((r) => setTimeout(r, 500));
-      setStep(6);
-
-      await new Promise((r) => setTimeout(r, 600));
-      setStep(7);
-
-      await new Promise((r) => setTimeout(r, 400));
-      setStep(8);
+      for (const config of TERMINAL_STEPS) {
+        await delay(config.delay);
+        setStep(config.step);
+      }
     };
 
     void timeline();
+
+    return () => {
+      isMounted = false;
+    };
   }, [isInView]);
 
   return (
