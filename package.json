@@ -339,7 +339,7 @@
     "husky": "9.1.7",
     "jscpd": "4.1.1",
     "knip": "5.88.1",
-    "lint-staged": "16.4.0",
+    "lint-staged": "17.0.4",
     "nextjs-bundle-analysis": "0.5.0",
     "openapi-typescript-codegen": "0.30.0",
     "pino-pretty": "13.1.3",
