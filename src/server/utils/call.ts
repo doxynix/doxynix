@@ -136,21 +136,37 @@ export async function callWithFallback<T>({
       for await (const part of result.fullStream) {
         if (part.type === "text-delta") {
           fullText += part.text;
-          metadata.append(aiChunks, part.text);
+          try {
+            metadata.append(aiChunks, part.text);
+          } catch (error) {
+            appLogger.debug({ error: error, msg: "Metadata append failed for text-delta" });
+          }
         } else if (part.type === "reasoning-delta") {
-          metadata.append(aiThoughts, part.text);
+          try {
+            metadata.append(aiThoughts, part.text);
+          } catch (error) {
+            appLogger.debug({ error: error, msg: "Metadata append failed for reasoning-delta" });
+          }
         } else if (part.type === "tool-call") {
           const timestamp = new Date().toLocaleTimeString();
           const logLine = `info:::${timestamp}:::Agent: Invoking tool [${part.toolName}]...`;
 
-          metadata.append(taskLogs, logLine);
+          try {
+            metadata.append(taskLogs, logLine);
+          } catch (error) {
+            appLogger.debug({ error: error, msg: "Metadata append failed for tool-call log" });
+          }
           appLogger.info({
             analysisId: attemptMetadata.analysisId,
             msg: `AI Tool Call: ${part.toolName}`,
           });
         } else if (part.type === "error") {
           const timestamp = new Date().toLocaleTimeString();
-          metadata.append(taskLogs, `error:::${timestamp}:::AI Stream Error: ${part.error}`);
+          try {
+            metadata.append(taskLogs, `error:::${timestamp}:::AI Stream Error: ${part.error}`);
+          } catch (error) {
+            appLogger.debug({ error: error, msg: "Metadata append failed for error log" });
+          }
           appLogger.error({ error: part.error, msg: "Stream event error" });
         }
       }

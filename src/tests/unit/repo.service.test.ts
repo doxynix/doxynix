@@ -8,11 +8,7 @@ import * as githubProvider from "@/server/core/github/github-provider";
 import { repoService } from "@/server/modules/repos/repo.service";
 import { handlePrismaError } from "@/server/utils/handle-error";
 
-vi.mock("@/server/shared/infrastructure/github/github-api", () => ({
-  getRepoInfo: vi.fn(),
-}));
-
-vi.mock("@/server/shared/lib/handle-error", () => ({
+vi.mock("@/server/utils/handle-error", () => ({
   handlePrismaError: vi.fn(() => {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
@@ -29,8 +25,8 @@ const githubService = {
   parseUrl: githubProvider.parseUrl,
 };
 
-vi.mock("@/server/shared/infrastructure/github/github-provider", () => ({
-  GitHubAuthRequiredError: class GitHubAuthRequiredError extends Error {},
+vi.mock("@/server/core/github/github-provider", () => ({
+  GitHubAuthRequiredError: class extends Error {},
   parseUrl: vi.fn(),
 }));
 
@@ -39,6 +35,17 @@ const db = {
     create: vi.fn(),
   },
 };
+
+vi.mock("@/server/core/github/github-api", () => {
+  const mockFn = vi.fn();
+  return {
+    getRepoInfo: mockFn,
+    githubService: {
+      getRepoInfo: mockFn,
+      parseUrl: vi.fn(),
+    },
+  };
+});
 
 const dbClient = db as unknown as DbClient;
 

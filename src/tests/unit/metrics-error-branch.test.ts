@@ -1,5 +1,16 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("colors/safe", () => ({
+  default: { enabled: false, strip: (s: string) => s },
+}));
+
+vi.mock("@/server/modules/analysis/engine/metrics/duplication-metrics", () => ({
+  calculateRepositoryDuplication: vi.fn().mockResolvedValue({
+    clones: [],
+    duplicationPercentage: 0,
+  }),
+}));
+
 describe("calculateCodeMetrics error branch", () => {
   afterEach(() => {
     vi.resetModules();

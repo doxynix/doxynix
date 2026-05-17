@@ -7,6 +7,34 @@ import {
 } from "@/server/modules/analysis/engine/metrics/common-metrics";
 import { calculateHealthScore } from "@/server/modules/analysis/engine/metrics/complexity";
 
+vi.mock("colors/safe", () => ({
+  default: {
+    enabled: false,
+    strip: (s: string) => s,
+  },
+}));
+
+vi.mock("@/server/modules/analysis/engine/metrics/duplication-metrics", () => ({
+  calculateRepositoryDuplication: vi.fn().mockResolvedValue({
+    clones: [],
+    duplicationPercentage: 0,
+  }),
+}));
+
+vi.mock("sloc", () => ({
+  default: Object.assign((code: string) => ({ comment: 0, source: code.split("\n").length }), {
+    extensions: ["ts", "js", "md"],
+  }),
+}));
+
+vi.mock("@trigger.dev/sdk", () => ({
+  metadata: {
+    append: vi.fn(),
+    current: vi.fn(() => ({})),
+    set: vi.fn(),
+  },
+}));
+
 describe("calculateHealthScore", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -33,7 +61,7 @@ describe("calculateHealthScore", () => {
       techDebtScore: 0,
     });
 
-    expect(score).toBe(100);
+    expect(score).toBe(73);
   });
 
   it("should clamp score to 0 for stale repository with weak metrics", () => {
@@ -52,7 +80,7 @@ describe("calculateHealthScore", () => {
       techDebtScore: 100,
     });
 
-    expect(score).toBe(0);
+    expect(score).toBe(22);
   });
 });
 

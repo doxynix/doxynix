@@ -256,10 +256,10 @@ export function unwrapAiText(value: unknown): string {
 
   if (isAiTextLike(value)) {
     const candidate = value.text ?? value.content ?? value.output;
-    return isString(candidate) ? candidate : JSON.stringify(candidate);
+    if (typeof candidate === "string") return candidate;
   }
 
-  if (typeof value === "object" && !Array.isArray(value)) {
+  if (typeof value === "object") {
     return JSON.stringify(value);
   }
 

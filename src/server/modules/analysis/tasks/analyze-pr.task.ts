@@ -150,9 +150,9 @@ export const analyzePrTask = task({
       const validated = z.array(persistedFindingSchema).safeParse(candidate);
       if (!validated.success) {
         appLogger.warn({
-          msg: "pr_findings_validation_failed",
-          error: z.treeifyError(validated.error),
           analysisId: payload.analysisId,
+          error: z.treeifyError(validated.error),
+          msg: "pr_findings_validation_failed",
         });
       }
 

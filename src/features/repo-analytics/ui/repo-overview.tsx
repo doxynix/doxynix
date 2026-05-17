@@ -43,7 +43,7 @@ type Signals = Props["data"]["secondary"]["signals"];
 export function RepoOverview({ data }: Readonly<Props>) {
   const locale = useLocale();
   const router = useRouter();
-  const { name, owner, aid } = useRepoParams();
+  const { aid, name, owner } = useRepoParams();
 
   const gitMetrics = getGitMetrics(data.repo, locale);
 
@@ -64,6 +64,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
   const handleMapNodeNavigation = (nodeId: string) => {
     void router.push(
       buildRepoSearchResultHref({
+        aid,
         name,
         owner,
         result: {
@@ -78,7 +79,6 @@ export function RepoOverview({ data }: Readonly<Props>) {
           score: 0,
           targetView: "map",
         },
-        aid,
       })
     );
   };
@@ -86,6 +86,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
   const handleCodeNavigation = (path: string) => {
     void router.push(
       buildRepoSearchResultHref({
+        aid,
         name,
         owner,
         result: {
@@ -100,7 +101,6 @@ export function RepoOverview({ data }: Readonly<Props>) {
           score: 0,
           targetView: "code",
         },
-        aid,
       })
     );
   };

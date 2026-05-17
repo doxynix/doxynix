@@ -95,10 +95,10 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
                       setIsVisible(false);
                       void router.push(
                         buildRepoSearchResultHref({
+                          aid,
                           name,
                           owner,
                           result,
-                          aid,
                         })
                       );
                     }}

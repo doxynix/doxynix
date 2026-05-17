@@ -114,9 +114,9 @@ export const PATH_PATTERNS = {
     "**/__generated__/**",
   ],
   IGNORE: [
-    "**/{.git,node_modules,dist,build,out,target,.next,.nuxt,.svelte-kit,.astro,.nitro,.wrangler,.output,vendor,bower_components,coverage,.pnpm-store,.yarn,.turbo,.parcel-cache,.cache,.serverless,.terraform,.gradle,.mvn,.dart_tool,__pycache__,.pytest_cache,.mypy_cache,.ruff_cache,.tox,.nox,.venv,venv,obj,Debug,Release}/**",
+    "**/{.git,node_modules,dist,build,out,public,static,target,.next,.nuxt,.svelte-kit,.astro,.nitro,.wrangler,.output,vendor,bower_components,coverage,.pnpm-store,.yarn,.turbo,.parcel-cache,.cache,.serverless,.terraform,.gradle,.mvn,.dart_tool,__pycache__,.pytest_cache,.mypy_cache,.ruff_cache,.tox,.nox,.venv,venv,obj,Debug,Release}/**",
     "**/{.ds_store,thumbs.db,.idea,.vscode}/**",
-    "**/*.{pdf,doc,docx,xls,xlsx,ppt,pptx,zip,tar,gz,7z,rar,mp3,mp4,wav,exe,dll,so,pyc}",
+    "**/*.{pdf,doc,docx,xls,xlsx,ppt,pptx,zip,tar,gz,7z,rar,mp3,mp4,wav,exe,dll,so,pyc, png, jpg, jpeg}",
   ],
   INFRA: [
     "**/.github/workflows/**",
@@ -396,7 +396,7 @@ export const PROJECT_POLICY_RULES = {
         id: "sql_concat",
         // Use a non-greedy, minimal-matching pattern to avoid catastrophic backtracking.
         // Matches typical `select ... from ... where ... = ${` templated SQL usages.
-        pattern: /\bselect\b[\s\S]*?\bfrom\b[\s\S]*?\bwhere\b[\s\S]*?=\s*\$\{/i,
+        pattern: /\bselect\b[\S\s]*?\bfrom\b[\S\s]*?\bwhere\b[\S\s]*?=\s*\${/i,
         title: "SQL Injection (String Concatenation)",
       },
     ],

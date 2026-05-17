@@ -21,87 +21,87 @@ export function buildRepoDetailHref(
 }
 
 export function buildRepoCodeHref(params: {
+  aid?: null | string;
   name: string;
   nodeId?: null | string;
   owner: string;
   path?: null | string;
-  aid?: string | null;
 }) {
   const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.name)}/code`;
 
   return serializeRepoParams(base, {
+    aid: params.aid,
     node: params.nodeId,
     path: params.path,
-    aid: params.aid,
   });
 }
 
 export function buildRepoDocsHref(params: {
+  aid?: null | string;
   docType?: null | string;
   name: string;
   nodeId?: null | string;
   owner: string;
   section?: null | string;
-  aid?: string | null;
 }) {
   const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.name)}/docs`;
 
   return serializeRepoParams(base, {
+    aid: params.aid,
     node: params.nodeId,
     section: params.section,
     type: params.docType,
-    aid: params.aid,
   });
 }
 
 export function buildRepoMapHref(params: {
+  aid?: null | string;
   name: string;
   nodeId?: null | string;
   owner: string;
-  aid?: string | null;
 }) {
   const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(
     params.name
   )}/map`;
 
   return serializeRepoParams(base, {
+    aid: params.aid,
     node: params.nodeId,
     view: params.nodeId?.startsWith("group:") === true ? params.nodeId : null,
-    aid: params.aid,
   });
 }
 
 export function buildRepoSearchResultHref(params: {
+  aid?: null | string;
   name: string;
   owner: string;
   result: RepoSearchResult;
-  aid?: string | null;
 }) {
   if (params.result.targetView === "docs") {
     return buildRepoDocsHref({
+      aid: params.aid,
       docType: params.result.docType,
       name: params.name,
       nodeId: params.result.nodeId,
       owner: params.owner,
       section: params.result.docSectionId,
-      aid: params.aid,
     });
   }
 
   if (params.result.targetView === "code") {
     return buildRepoCodeHref({
+      aid: params.aid,
       name: params.name,
       nodeId: params.result.nodeId,
       owner: params.owner,
       path: params.result.path,
-      aid: params.aid,
     });
   }
 
   return buildRepoMapHref({
+    aid: params.aid,
     name: params.name,
     nodeId: params.result.nodeId,
     owner: params.owner,
-    aid: params.aid,
   });
 }

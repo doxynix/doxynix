@@ -515,7 +515,7 @@ export const analysisRouter = createTRPCRouter({
         },
       });
 
-      if (!analysis) return null;
+      if (analysis == null) return null;
 
       let publicAccessToken: null | string = null;
 

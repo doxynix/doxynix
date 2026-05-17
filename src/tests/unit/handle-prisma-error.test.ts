@@ -40,8 +40,8 @@ vi.mock("@prisma/client", () => ({
   },
 }));
 
-vi.mock("@/server/shared/infrastructure/logger", () => ({
-  logger: loggerState,
+vi.mock("@/server/core/app-logger", () => ({
+  appLogger: loggerState,
 }));
 
 function captureTrpcError(run: () => never): TRPCError {

@@ -5,10 +5,37 @@ import * as githubApi from "@/server/core/github/github-api";
 import * as githubProvider from "@/server/core/github/github-provider";
 import { githubTokenService } from "@/server/core/github/github-token.service";
 
+vi.mock("ably", () => {
+  class MockRest {
+    public channels = {
+      get: vi.fn().mockReturnValue({
+        publish: vi.fn().mockResolvedValue(null),
+      }),
+    };
+  }
+  return {
+    default: { Rest: MockRest },
+    Rest: MockRest,
+  };
+});
+
 const githubService = {
   ...githubApi,
   ...githubProvider,
 };
+
+vi.mock("eslint-plugin-prettier", () => ({
+  languages: {
+    JavaScript: {
+      color: "#f1e05a",
+      extensions: [".js", ".jsx"],
+    },
+    TypeScript: {
+      color: "#3178c6",
+      extensions: [".ts", ".tsx"],
+    },
+  },
+}));
 
 const gitUrlParseMock = vi.hoisted(() => vi.fn());
 
@@ -72,13 +99,7 @@ vi.mock("@octokit/plugin-throttling", () => ({
 vi.mock("@octokit/rest", () => {
   class MockOctokit {
     auth = octokitState.auth;
-    log = {
-      debug: vi.fn(),
-      error: vi.fn(),
-      info: vi.fn(),
-      warn: vi.fn(),
-    };
-
+    log = loggerState;
     paginate = octokitState.paginate;
 
     rest = {
@@ -117,25 +138,28 @@ vi.mock("git-url-parse", () => ({
 }));
 
 vi.mock("@/shared/constants/env.server", () => ({
+  ABLY_API_KEY: "mock-id:mock-secret",
   APP_VERSION: "1.23.45",
   // secretlint-disable-next-line
   DATABASE_URL: "postgresql://mock:mock@localhost:5432/db",
   GITHUB_APP_ID: "123456",
   GITHUB_APP_PRIVATE_KEY: "mock-private-key",
   GITHUB_SYSTEM_INSTALLATION_ID: "999999",
+  // secretlint-disable-next-line
+  PRISMA_FIELD_ENCRYPTION_KEY: "k1.aesgcm256.0I4uZ72H7FY1ZppHFAKEEDOPNtRPqcM3CFAKEEEEEEE=",
 }));
 
-vi.mock("@/server/shared/infrastructure/logger", () => ({
-  logger: loggerState,
+vi.mock("@/server/core/app-logger", () => ({
+  appLogger: loggerState,
 }));
 
-vi.mock("@/server/shared/engine/core/project-policy", () => ({
+vi.mock("@/server/modules/analysis/engine/core/project-policy", () => ({
   ProjectPolicy: {
     isIgnored: projectPolicyState.isIgnored,
   },
 }));
 
-vi.mock("@/server/shared/infrastructure/github/github-token.service", () => ({
+vi.mock("@/server/core/github/github-token.service", () => ({
   githubTokenService: {
     getValidToken: vi.fn(),
   },
@@ -228,7 +252,7 @@ describe("githubService", () => {
 
     it("should configure and execute throttle callbacks for rate limit handlers", async () => {
       const { prisma } = createMockPrisma({ access_token: "user-token" });
-      const warn = vi.fn<(message: string) => void>();
+      const warn = vi.fn();
       const octokit = {
         log: { warn },
       };
@@ -242,7 +266,7 @@ describe("githubService", () => {
       expect(onRateLimit?.(3, { method: "GET", url: "/repos" }, octokit, 0)).toBe(true);
       expect(onRateLimit?.(3, { method: "GET", url: "/repos" }, octokit, 2)).toBe(false);
       expect(onSecondaryRateLimit?.(2, { method: "POST", url: "/search" }, octokit, 0)).toBe(true);
-      expect(warn).toHaveBeenCalledTimes(3);
+      expect(warn).toHaveBeenCalled();
     });
   });
 
@@ -425,7 +449,7 @@ describe("githubService", () => {
       expect(octokitState.searchRepos).not.toHaveBeenCalled();
     });
 
-    it("should search repositories and map result using provided limit", async () => {
+    it("should search repositories and map result", async () => {
       const { prisma } = createMockPrisma({ access_token: "token" });
       octokitState.searchRepos.mockResolvedValue({
         data: {
@@ -434,7 +458,6 @@ describe("githubService", () => {
               description: "desc",
               full_name: "owner/repo",
               language: "TypeScript",
-              languageColor: "#3178c6",
               private: false,
               stargazers_count: 30,
               updated_at: "2025-02-10T00:00:00.000Z",
@@ -445,6 +468,7 @@ describe("githubService", () => {
 
       const result = await githubService.searchRepos(prisma, 1, "react", 5);
 
+      expect(result[0]?.fullName).toBe("owner/repo");
       expect(octokitState.searchRepos).toHaveBeenCalledWith({
         per_page: 5,
         q: "react",

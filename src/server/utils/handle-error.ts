@@ -66,7 +66,7 @@ export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
     const meta = prismaErrorMap[error.code];
 
     if (meta == null) {
-      appLogger.error({ error, msg: "Unhandled Prisma Error Code:" + error.code });
+      appLogger.error({ error, msg: `Unhandled Prisma Error Code:${error.code}` });
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database error" });
     }
 

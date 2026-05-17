@@ -14,7 +14,7 @@ export function buildRepositoryTools(userId: number, repoId: string, branch: str
         try {
           appLogger.info({ msg: "AI Tool: listFiles", prefix, repoId });
           const repo = await prisma.repo.findUnique({ where: { publicId: repoId } });
-          if (!repo) return "Error: Repo not found";
+          if (repo == null) return "Error: Repo not found";
 
           const tree = await githubBrowseService.getRepoFiles(
             prisma,

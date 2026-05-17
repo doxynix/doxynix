@@ -9,7 +9,7 @@ type LinguistInfo = {
 
 const languageByExtension = new Map<string, { color: null | string; name: string }>();
 
-const languageData = languages as Record<string, LinguistInfo | undefined>;
+const languageData = (languages ?? {}) as Record<string, LinguistInfo | undefined>;
 
 for (const [name, info] of Object.entries(languageData)) {
   if (info == null) continue;

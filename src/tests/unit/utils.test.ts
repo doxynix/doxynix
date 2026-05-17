@@ -11,6 +11,24 @@ import { getCookieName } from "@/shared/lib/session-cookie";
 import { getLanguageColor, normalizeLanguageName } from "@/server/utils/language-metadata";
 import { sanitizePayload } from "@/server/utils/sanitize-payload";
 
+vi.mock("eslint-plugin-prettier", () => ({
+  languages: {
+    JavaScript: {
+      color: "#f1e05a",
+      extensions: [".js", ".jsx"],
+    },
+    TypeScript: {
+      color: "#3178c6",
+      extensions: [".ts", ".tsx"],
+    },
+  },
+}));
+
+vi.mock("ably", () => ({
+  default: { Rest: vi.fn() },
+  Rest: vi.fn(),
+}));
+
 describe("shared/lib/utils:getInitials", () => {
   it("should return initials for names with two or more words", () => {
     const fullName = "Ada Lovelace Byron";
