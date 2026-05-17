@@ -709,8 +709,8 @@ importers:
         specifier: 25.7.0
         version: 25.7.0
       '@types/nodemailer':
-        specifier: 7.0.11
-        version: 7.0.11
+        specifier: 8.0.0
+        version: 8.0.0
       '@types/pg':
         specifier: 8.20.0
         version: 8.20.0
@@ -5861,8 +5861,8 @@ packages:
   '@types/node@25.7.0':
     resolution: {integrity: sha512-z+pdZyxE+RTQE9AcboAZCb4otwcrvgHD+GlBpPgn0emDVt0ohrTMhAwlr2Wd9nZ+nihhYFxO2pThz3C5qSu2Eg==}
 
-  '@types/nodemailer@7.0.11':
-    resolution: {integrity: sha512-E+U4RzR2dKrx+u3N4DlsmLaDC6mMZOM/TPROxA0UAPiTgI0y4CEFBmZE+coGWTjakDriRsXG368lNk1u9Q0a2g==}
+  '@types/nodemailer@8.0.0':
+    resolution: {integrity: sha512-fyf8jWULsCo0d0BuoQ75i6IeoHs47qcqxWc7yUdUcV0pOZGjUTTOvwdG1PRXUDqN/8A64yQdQdnA2pZgcdi+cA==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -15721,7 +15721,7 @@ snapshots:
   '@floating-ui/vue@1.1.9(vue@3.5.34(typescript@6.0.3))':
     dependencies:
       '@floating-ui/dom': 1.7.6
-      '@floating-ui/utils': 0.2.10
+      '@floating-ui/utils': 0.2.11
       vue-demi: 0.14.10(vue@3.5.34(typescript@6.0.3))
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -19984,7 +19984,7 @@ snapshots:
     dependencies:
       undici-types: 7.21.0
 
-  '@types/nodemailer@7.0.11':
+  '@types/nodemailer@8.0.0':
     dependencies:
       '@types/node': 25.7.0
 
@@ -26005,7 +26005,7 @@ snapshots:
   normalize-package-data@2.5.0:
     dependencies:
       hosted-git-info: 2.8.9
-      resolve: 1.22.2
+      resolve: 1.22.12
       semver: 5.7.2
       validate-npm-package-license: 3.0.4
 
@@ -28591,7 +28591,7 @@ snapshots:
   tsconfig-paths-webpack-plugin@4.2.0:
     dependencies:
       chalk: 4.1.2
-      enhanced-resolve: 5.21.0
+      enhanced-resolve: 5.21.3
       tapable: 2.3.3
       tsconfig-paths: 4.2.0
 
