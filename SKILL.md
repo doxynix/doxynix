@@ -290,11 +290,11 @@ describe('calculateBusFactor', () => {
 
 ### Zod Schema Generation
 ```bash
-# Generates src/generated/zod/ from schema.zmodel
+# Generates src/shared/api-contracts/ from schema.zmodel
 pnpm db:generate
 
 # Use in validation
-import { CreateRepoInput } from '@/generated/zod/repo'
+import { CreateRepoInput } from '@/shared/api-contracts/repo'
 
 const result = CreateRepoInput.parse(userInput)
 ```
@@ -305,7 +305,7 @@ const result = CreateRepoInput.parse(userInput)
 pnpm gen:client
 
 # Use in server-to-server calls
-import { apiClient } from '@/generated/api-client'
+import { apiClient } from '@/shared/api-contracts/api-client'
 
 const response = await apiClient.repos.list()
 ```

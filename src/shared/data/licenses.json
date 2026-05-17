@@ -155,6 +155,10 @@
     "authorLink": "https://github.com/DefinitelyTyped",
     "packages": [
       {
+        "name": "@types/diff-match-patch",
+        "license": "MIT"
+      },
+      {
         "name": "@types/file-saver",
         "license": "MIT"
       },
@@ -688,6 +692,25 @@
     ]
   },
   {
+    "author": "Graphology",
+    "avatar": "https://github.com/graphology.png?size=96",
+    "authorLink": "https://github.com/graphology",
+    "packages": [
+      {
+        "name": "graphology",
+        "license": "MIT"
+      },
+      {
+        "name": "graphology-dag",
+        "license": "MIT"
+      },
+      {
+        "name": "graphology-library",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Kucherenko",
     "avatar": "https://github.com/kucherenko.png?size=96",
     "authorLink": "https://github.com/kucherenko",
@@ -764,6 +787,25 @@
     ]
   },
   {
+    "author": "Trigger.dev",
+    "avatar": "https://github.com/triggerdotdev.png?size=96",
+    "authorLink": "https://github.com/triggerdotdev",
+    "packages": [
+      {
+        "name": "@trigger.dev/build",
+        "license": "MIT"
+      },
+      {
+        "name": "@trigger.dev/react-hooks",
+        "license": "MIT"
+      },
+      {
+        "name": "@trigger.dev/sdk",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "tRPC",
     "avatar": "https://github.com/trpc.png?size=96",
     "authorLink": "https://github.com/trpc",
@@ -827,21 +869,6 @@
       },
       {
         "name": "@commitlint/config-conventional",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "Graphology",
-    "avatar": "https://github.com/graphology.png?size=96",
-    "authorLink": "https://github.com/graphology",
-    "packages": [
-      {
-        "name": "graphology",
-        "license": "MIT"
-      },
-      {
-        "name": "graphology-library",
         "license": "MIT"
       }
     ]
@@ -1012,21 +1039,6 @@
     ]
   },
   {
-    "author": "Trigger.dev",
-    "avatar": "https://github.com/triggerdotdev.png?size=96",
-    "authorLink": "https://github.com/triggerdotdev",
-    "packages": [
-      {
-        "name": "@trigger.dev/build",
-        "license": "MIT"
-      },
-      {
-        "name": "@trigger.dev/sdk",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
     "author": "TypeScript ESLint",
     "avatar": "https://github.com/typescript-eslint.png?size=96",
     "authorLink": "https://github.com/typescript-eslint",
@@ -1037,6 +1049,21 @@
       },
       {
         "name": "@typescript-eslint/parser",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Unjs",
+    "avatar": "https://github.com/unjs.png?size=96",
+    "authorLink": "https://github.com/unjs",
+    "packages": [
+      {
+        "name": "defu",
+        "license": "MIT"
+      },
+      {
+        "name": "pathe",
         "license": "MIT"
       }
     ]
@@ -1277,6 +1304,17 @@
     ]
   },
   {
+    "author": "Dsherret",
+    "avatar": "https://github.com/dsherret.png?size=96",
+    "authorLink": "https://github.com/dsherret",
+    "packages": [
+      {
+        "name": "ts-morph",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Eemeli Aro",
     "avatar": null,
     "authorLink": "https://eemeli.org/yaml",
@@ -1387,6 +1425,17 @@
     ]
   },
   {
+    "author": "Grantila",
+    "avatar": "https://github.com/grantila.png?size=96",
+    "authorLink": "https://github.com/grantila",
+    "packages": [
+      {
+        "name": "graph-cycles",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Gregoor",
     "avatar": "https://github.com/Gregoor.png?size=96",
     "authorLink": "https://github.com/Gregoor",
@@ -1460,6 +1509,17 @@
       {
         "name": "disposable-email-domains",
         "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "JackuB",
+    "avatar": "https://github.com/JackuB.png?size=96",
+    "authorLink": "https://github.com/JackuB",
+    "packages": [
+      {
+        "name": "diff-match-patch",
+        "license": "Apache-2.0"
       }
     ]
   },
@@ -1860,6 +1920,17 @@
     ]
   },
   {
+    "author": "Rel1cx",
+    "avatar": "https://github.com/Rel1cx.png?size=96",
+    "authorLink": "https://github.com/Rel1cx",
+    "packages": [
+      {
+        "name": "@eslint-react/eslint-plugin",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Replit",
     "avatar": "https://github.com/replit.png?size=96",
     "authorLink": "https://github.com/replit",
@@ -1877,6 +1948,17 @@
     "packages": [
       {
         "name": "@sentry/nextjs",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Sergeyt",
+    "avatar": "https://github.com/sergeyt.png?size=96",
+    "authorLink": "https://github.com/sergeyt",
+    "packages": [
+      {
+        "name": "parse-diff",
         "license": "MIT"
       }
     ]
@@ -1970,6 +2052,17 @@
     ]
   },
   {
+    "author": "Tamino-martinius",
+    "avatar": "https://github.com/tamino-martinius.png?size=96",
+    "authorLink": "https://github.com/tamino-martinius",
+    "packages": [
+      {
+        "name": "ts-dedent",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Tree-sitter",
     "avatar": "https://github.com/tree-sitter.png?size=96",
     "authorLink": "https://github.com/tree-sitter",
@@ -1987,17 +2080,6 @@
     "packages": [
       {
         "name": "husky",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "Unjs",
-    "avatar": "https://github.com/unjs.png?size=96",
-    "authorLink": "https://github.com/unjs",
-    "packages": [
-      {
-        "name": "pathe",
         "license": "MIT"
       }
     ]
@@ -2064,6 +2146,17 @@
     "packages": [
       {
         "name": "@xyflow/react",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Yeonjuan",
+    "avatar": "https://github.com/yeonjuan.png?size=96",
+    "authorLink": "https://github.com/yeonjuan",
+    "packages": [
+      {
+        "name": "parse-git-diff",
         "license": "MIT"
       }
     ]

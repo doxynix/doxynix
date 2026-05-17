@@ -1,6 +1,5 @@
 import {
   AlertTriangle,
-  BarChart3,
   Bell,
   Book,
   BookOpen,
@@ -9,7 +8,6 @@ import {
   GitPullRequest,
   Headset,
   HeartHandshakeIcon,
-  HistoryIcon,
   Home,
   KeyRound,
   LayoutGrid,
@@ -211,18 +209,6 @@ export const getRepoDetailsMenu = (owner: string, name: string): MenuItems => {
       icon: FileText,
       id: "documentation",
       label: "Documentation",
-    },
-    {
-      href: `${base}/history`,
-      icon: HistoryIcon,
-      id: "history",
-      label: "History",
-    },
-    {
-      href: `${base}/metrics`,
-      icon: BarChart3,
-      id: "metrics",
-      label: "Metrics",
     },
     {
       href: `${base}/settings`,

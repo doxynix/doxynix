@@ -8,6 +8,7 @@ import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/constants/navigation";
+import { useRouter } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import type { MenuItem } from "@/shared/types/navigation.types";
 import { Button } from "@/shared/ui/core/button";
@@ -24,7 +25,6 @@ import {
 import { Spinner } from "@/shared/ui/core/spinner";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
-import { useRouter } from "@/i18n/routing";
 
 import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
 
@@ -253,9 +253,9 @@ export function AppCommandMenu() {
                     >
                       <AppAvatar
                         alt={`${repo.owner}/${repo.name}`}
+                        src={repo.avatar}
                         fallbackText={repo.owner}
                         sizeClassName="size-8"
-                        src={repo.avatar}
                       />
                       <div className="line-clamp-1 flex">
                         <span className="text-muted-foreground truncate font-bold">

@@ -84,8 +84,8 @@ export function CreateApiKeyDialog() {
 
               <DialogFooter>
                 <LoadingButton
-                  type="submit"
                   disabled={!form.formState.isValid || create.isPending}
+                  type="submit"
                   isLoading={create.isPending}
                   loadingText="Saving..."
                   className="cursor-pointer"
@@ -112,7 +112,7 @@ export function CreateApiKeyDialog() {
 
             <div className="flex items-center space-x-2">
               <div className="grid flex-1 gap-2">
-                <Input value={createdKey} readOnly disabled={create.isPending} />
+                <Input disabled={create.isPending} value={createdKey} readOnly />
               </div>
               <CopyButton
                 value={createdKey}

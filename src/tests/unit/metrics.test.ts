@@ -4,8 +4,36 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   calculateCodeMetrics,
   calculateTeamRoles,
-} from "@/server/shared/engine/metrics/common-metrics";
-import { calculateHealthScore } from "@/server/shared/engine/metrics/complexity";
+} from "@/server/modules/analysis/engine/metrics/common-metrics";
+import { calculateHealthScore } from "@/server/modules/analysis/engine/metrics/complexity";
+
+vi.mock("colors/safe", () => ({
+  default: {
+    enabled: false,
+    strip: (s: string) => s,
+  },
+}));
+
+vi.mock("@/server/modules/analysis/engine/metrics/duplication-metrics", () => ({
+  calculateRepositoryDuplication: vi.fn().mockResolvedValue({
+    clones: [],
+    duplicationPercentage: 0,
+  }),
+}));
+
+vi.mock("sloc", () => ({
+  default: Object.assign((code: string) => ({ comment: 0, source: code.split("\n").length }), {
+    extensions: ["ts", "js", "md"],
+  }),
+}));
+
+vi.mock("@trigger.dev/sdk", () => ({
+  metadata: {
+    append: vi.fn(),
+    current: vi.fn(() => ({})),
+    set: vi.fn(),
+  },
+}));
 
 describe("calculateHealthScore", () => {
   beforeEach(() => {
@@ -22,9 +50,18 @@ describe("calculateHealthScore", () => {
       pushedAt: new Date("2026-02-20T00:00:00.000Z"),
     } as Repo;
 
-    const score = calculateHealthScore(repo, 3, 20);
+    const score = calculateHealthScore({
+      busFactor: 3,
+      complexityScore: 20,
+      dependencyCycles: 0,
+      docDensity: 100,
+      duplicationPercentage: 0,
+      repo,
+      securityScore: 100,
+      techDebtScore: 0,
+    });
 
-    expect(score).toBe(100);
+    expect(score).toBe(73);
   });
 
   it("should clamp score to 0 for stale repository with weak metrics", () => {
@@ -32,9 +69,18 @@ describe("calculateHealthScore", () => {
       pushedAt: new Date("2024-01-01T00:00:00.000Z"),
     } as Repo;
 
-    const score = calculateHealthScore(repo, 1, 2);
+    const score = calculateHealthScore({
+      busFactor: 1,
+      complexityScore: 2,
+      dependencyCycles: 10,
+      docDensity: 0,
+      duplicationPercentage: 50,
+      repo,
+      securityScore: 0,
+      techDebtScore: 100,
+    });
 
-    expect(score).toBe(0);
+    expect(score).toBe(22);
   });
 });
 

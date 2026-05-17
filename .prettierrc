@@ -23,7 +23,7 @@
     "",
     "^@/server/(.*)$",
     "^@/trigger/(.*)$",
-    "^@/generated/(.*)$",
+    "^@/shared/api-contracts/(.*)$",
     "",
     "^@/(.*)$",
     "",

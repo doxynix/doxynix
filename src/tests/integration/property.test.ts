@@ -5,7 +5,7 @@ import { afterAll, beforeAll, beforeEach, describe, it, vi } from "vitest";
 
 import { IS_CI } from "@/shared/constants/env.flags";
 
-import { prisma } from "@/server/shared/infrastructure/db";
+import { prisma } from "@/server/core/db";
 
 import { cleanupDatabase } from "../helpers";
 

@@ -6,10 +6,10 @@ import { z } from "zod";
 
 import { RESEND_WEBHOOK_SECRET } from "@/shared/constants/env.server";
 
-import { prisma } from "@/server/shared/infrastructure/db";
-import { logger } from "@/server/shared/infrastructure/logger";
-import { maskEmail, normalizeEmail } from "@/server/shared/lib/email-guard";
-import { buildRequestStore, requestContext } from "@/server/shared/lib/request-context";
+import { appLogger } from "@/server/core/app-logger";
+import { prisma } from "@/server/core/db";
+import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
+import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 
 const resendWebhookSchema = z
   .object({
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
   const parseResult = resendWebhookSchema.safeParse(rawEvt);
   if (!parseResult.success) {
-    logger.error({ error: parseResult.error.format(), msg: "Invalid Resend webhook schema" });
+    appLogger.error({ error: parseResult.error.format(), msg: "Invalid Resend webhook schema" });
     return new NextResponse("Invalid payload structure", { status: 400 });
   }
   const evt = parseResult.data;
@@ -82,7 +82,7 @@ export async function POST(req: Request) {
     requestId: svix_id,
   });
 
-  return await requestContext.run(store, async () => {
+  return requestContext.run(store, async () => {
     let delivery: null | { id: string } = null;
 
     try {
@@ -162,14 +162,14 @@ export async function POST(req: Request) {
           }),
         ]);
 
-        logger.warn({
+        appLogger.warn({
           email: maskEmail(email),
           msg: "User blacklisted and delivery marked success",
           reason,
           type,
         });
       } catch (error) {
-        logger.error({ email: maskEmail(email), error, msg: "Failed to process transaction" });
+        appLogger.error({ email: maskEmail(email), error, msg: "Failed to process transaction" });
 
         await prisma.webhookDelivery.update({
           data: {

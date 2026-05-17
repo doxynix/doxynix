@@ -32,7 +32,7 @@ export default defineConfig({
         "**/*.d.ts",
         "**/*.test.ts",
         "src/tests/**/*",
-        "src/generated/**/*",
+        "src/shared/api-contracts/**/*",
 
         "src/shared/api/db/**/*",
         "src/shared/api/auth/**/*",

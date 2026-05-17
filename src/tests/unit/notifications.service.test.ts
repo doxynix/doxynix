@@ -1,7 +1,7 @@
 import { NotifyType } from "@prisma/client";
 import { describe, expect, it } from "vitest";
 
-import { notificationsService } from "@/server/entities/notification/api/notifications.service";
+import { notificationsService } from "@/server/modules/notifications/notifications.service";
 
 function buildSearchClause(term: string) {
   return {

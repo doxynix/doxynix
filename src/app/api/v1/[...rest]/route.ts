@@ -4,8 +4,8 @@ import { createOpenApiFetchHandler } from "trpc-to-openapi";
 import { API_PREFIX } from "@/shared/constants/env.client";
 import { IS_DEV } from "@/shared/constants/env.flags";
 
-import { createContext } from "@/server/api/context";
-import { appRouter } from "@/server/api/routers";
+import { createContext } from "@/server/core/trpc/context";
+import { appRouter } from "@/server/modules";
 
 const handler = (req: NextRequest) => {
   return createOpenApiFetchHandler({

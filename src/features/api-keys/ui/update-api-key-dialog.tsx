@@ -94,8 +94,8 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
 
             <DialogFooter>
               <LoadingButton
-                type="submit"
                 disabled={!form.formState.isDirty || !form.formState.isValid || update.isPending}
+                type="submit"
                 isLoading={update.isPending}
                 loadingText="Saving..."
                 className="cursor-pointer"

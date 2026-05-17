@@ -1,6 +1,6 @@
 import type { ReactNode, SVGProps } from "react";
 
-import { Link } from "@/i18n/routing";
+import { Link } from "@/shared/i18n/routing";
 
 type LogoProps = SVGProps<SVGSVGElement> & {
   collapsed?: boolean;

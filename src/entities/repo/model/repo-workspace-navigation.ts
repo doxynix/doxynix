@@ -21,6 +21,7 @@ export function buildRepoDetailHref(
 }
 
 export function buildRepoCodeHref(params: {
+  aid?: null | string;
   name: string;
   nodeId?: null | string;
   owner: string;
@@ -29,12 +30,14 @@ export function buildRepoCodeHref(params: {
   const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.name)}/code`;
 
   return serializeRepoParams(base, {
+    aid: params.aid,
     node: params.nodeId,
     path: params.path,
   });
 }
 
 export function buildRepoDocsHref(params: {
+  aid?: null | string;
   docType?: null | string;
   name: string;
   nodeId?: null | string;
@@ -44,28 +47,39 @@ export function buildRepoDocsHref(params: {
   const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.name)}/docs`;
 
   return serializeRepoParams(base, {
+    aid: params.aid,
     node: params.nodeId,
     section: params.section,
     type: params.docType,
   });
 }
 
-export function buildRepoMapHref(params: { name: string; nodeId?: null | string; owner: string }) {
-  const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.name)}/map`;
+export function buildRepoMapHref(params: {
+  aid?: null | string;
+  name: string;
+  nodeId?: null | string;
+  owner: string;
+}) {
+  const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(
+    params.name
+  )}/map`;
 
   return serializeRepoParams(base, {
+    aid: params.aid,
     node: params.nodeId,
     view: params.nodeId?.startsWith("group:") === true ? params.nodeId : null,
   });
 }
 
 export function buildRepoSearchResultHref(params: {
+  aid?: null | string;
   name: string;
   owner: string;
   result: RepoSearchResult;
 }) {
   if (params.result.targetView === "docs") {
     return buildRepoDocsHref({
+      aid: params.aid,
       docType: params.result.docType,
       name: params.name,
       nodeId: params.result.nodeId,
@@ -76,6 +90,7 @@ export function buildRepoSearchResultHref(params: {
 
   if (params.result.targetView === "code") {
     return buildRepoCodeHref({
+      aid: params.aid,
       name: params.name,
       nodeId: params.result.nodeId,
       owner: params.owner,
@@ -84,6 +99,7 @@ export function buildRepoSearchResultHref(params: {
   }
 
   return buildRepoMapHref({
+    aid: params.aid,
     name: params.name,
     nodeId: params.result.nodeId,
     owner: params.owner,

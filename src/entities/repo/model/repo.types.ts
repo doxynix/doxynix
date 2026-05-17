@@ -10,21 +10,19 @@ export type RepoGetAll = RouterOutput["repo"]["getAll"];
 
 export type RepoMeta = RepoGetAll["meta"];
 
-export type DocType = RouterInput["repoDetails"]["getDocumentContent"]["type"];
+export type DocType = RouterInput["analysis"]["getDocumentContent"]["type"];
 
-export type DocContent = RouterOutput["repoDetails"]["getDocumentContent"];
+export type DocContent = RouterOutput["analysis"]["getDocumentContent"];
 
-export type RepoWorkspace = RouterOutput["repoDetails"]["getWorkspace"];
+export type RepoWorkspace = RouterOutput["analysis"]["getWorkspace"];
 
-export type UiRepoHistory = RouterOutput["repoDetails"]["getHistory"];
+export type RepoMetricsItem = RouterOutput["analysis"]["getDetailedMetrics"];
 
-export type RepoMetricsItem = RouterOutput["repoDetails"]["getDetailedMetrics"];
+export type AvailableDocs = RouterOutput["analysis"]["getAvailableDocs"];
 
-export type AvailableDocs = RouterOutput["repoDetails"]["getAvailableDocs"];
+export type RepoNodeContext = RouterOutput["analysis"]["getNodeContext"];
 
-export type RepoNodeContext = RouterOutput["repoDetails"]["getNodeContext"];
-
-export type RepoSearchResult = RouterOutput["repoDetails"]["searchWorkspace"][number];
+export type RepoSearchResult = RouterOutput["analysis"]["searchWorkspace"][number];
 
 export type FileContent = RouterOutput["githubBrowse"]["getFileContent"];
 

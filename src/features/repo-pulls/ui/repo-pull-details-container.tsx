@@ -19,16 +19,14 @@ type Props = {
 };
 
 export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Readonly<Props>) {
-  const { data: analysis, isLoading: isAnalysisLoading } = trpc.prAnalysis.getByPRNumber.useQuery({
+  const { data: analysis, isLoading: isAnalysisLoading } = trpc.analysis.getByPRNumber.useQuery({
     prNumber,
     repoId,
   });
-  const { data: impact, isLoading: isImpactLoading } = trpc.prAnalysis.getImpactByPRNumber.useQuery(
-    {
-      prNumber,
-      repoId,
-    }
-  );
+  const { data: impact, isLoading: isImpactLoading } = trpc.analysis.getImpactByPRNumber.useQuery({
+    prNumber,
+    repoId,
+  });
 
   if (isAnalysisLoading || isImpactLoading) {
     return (
@@ -40,14 +38,14 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
 
   if (analysis == null) return <div>Analysis not found for this PR.</div>;
 
-  const riskScore = impact?.analysis.riskScore ?? analysis.riskScore;
+  const riskScore = impact?.analysis.riskScore ?? analysis.analysis.riskScore;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between border-b pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">Pull Request #{analysis.prNumber}</h1>
+            <h1 className="text-2xl font-bold">Pull Request #{analysis.analysis.prNumber}</h1>
             <AppTooltip content="Open on GitHub">
               <ExternalLink
                 href={`https://github.com/${owner}/${name}/pull/${prNumber}`}
@@ -59,8 +57,12 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
             </AppTooltip>
           </div>
           <div className="flex items-center gap-1">
-            <p className="text-muted-foreground text-sm">{analysis.headSha.slice(0, 7)}</p>
-            <CopyButton value={analysis.headSha} tooltipText="Copy SHA" className="opacity-100" />
+            <p className="text-muted-foreground text-sm">{analysis.analysis.headSha.slice(0, 7)}</p>
+            <CopyButton
+              value={analysis.analysis.headSha}
+              tooltipText="Copy SHA"
+              className="opacity-100"
+            />
           </div>
         </div>
 

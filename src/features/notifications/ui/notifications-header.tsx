@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
+import { NotifyTypeSchema } from "@/shared/api-contracts";
 import { Button } from "@/shared/ui/core/button";
 import {
   Select,
@@ -18,8 +19,6 @@ import {
   notificationsParsers,
   type NotificationsParsersState,
 } from "@/entities/notifications/model/notifications-parsers";
-
-import { NotifyTypeSchema } from "@/generated/zod";
 
 import { NotificationsBulkActions } from "./notifications-bulk-actions";
 import { NotificationsRepoFilter } from "./notifications-repo-filter";
@@ -75,8 +74,8 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
             {TABS.map((t) => (
               <TabsTrigger
                 key={t.id}
-                value={t.value}
                 disabled={!stats || (t.id !== "all" && t.count === 0)}
+                value={t.value}
                 className="m-0.5"
               >
                 {t.label} ({t.count ?? 0})

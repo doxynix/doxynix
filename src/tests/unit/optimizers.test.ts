@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { cleanCodeForAi, CodeOptimizer, unwrapAiText } from "@/server/shared/lib/optimizers";
+import { CodeOptimizer, unwrapAiText } from "@/server/utils/optimizers";
 
 describe("CodeOptimizer", () => {
   beforeEach(() => {
@@ -61,10 +61,10 @@ describe("CodeOptimizer", () => {
     expect(fromJson).not.toContain("large data array truncated");
   });
 
-  it("should run full optimize pipeline in cleanCodeForAi", () => {
+  it("should run full optimize pipeline in cleanCodeForAi", async () => {
     const input = "Email test@mail.com\n\n const a = 1;  ";
 
-    const result = cleanCodeForAi(input, "file.ts");
+    const result = await CodeOptimizer.optimize(input, "file.ts");
 
     expect(result).toContain("<REDACTED_EMAIL>");
     expect(result.startsWith("Email")).toBe(true);

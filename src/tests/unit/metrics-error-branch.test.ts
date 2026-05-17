@@ -1,5 +1,16 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("colors/safe", () => ({
+  default: { enabled: false, strip: (s: string) => s },
+}));
+
+vi.mock("@/server/modules/analysis/engine/metrics/duplication-metrics", () => ({
+  calculateRepositoryDuplication: vi.fn().mockResolvedValue({
+    clones: [],
+    duplicationPercentage: 0,
+  }),
+}));
+
 describe("calculateCodeMetrics error branch", () => {
   afterEach(() => {
     vi.resetModules();
@@ -17,7 +28,8 @@ describe("calculateCodeMetrics error branch", () => {
       }),
     }));
 
-    const { calculateCodeMetrics } = await import("@/server/shared/engine/metrics/common-metrics");
+    const { calculateCodeMetrics } =
+      await import("@/server/modules/analysis/engine/metrics/common-metrics");
     const metrics = await calculateCodeMetrics([
       {
         content: "line1\nline2\nline3",

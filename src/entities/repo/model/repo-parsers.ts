@@ -1,6 +1,6 @@
 import { parseAsInteger, parseAsString, parseAsStringLiteral } from "nuqs/server";
 
-import { StatusSchema, VisibilitySchema } from "@/generated/zod";
+import { StatusSchema, VisibilitySchema } from "@/shared/api-contracts";
 
 const REPO_DEFAULTS = {
   PAGE: 1,

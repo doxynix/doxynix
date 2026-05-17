@@ -3,6 +3,7 @@
 import { Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { AnimatedCircularProgressBar } from "@/shared/ui/core/animated-circular-progress-bar";
@@ -13,7 +14,6 @@ import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-import { Link } from "@/i18n/routing";
 
 import { getHealthColor } from "../model/get-health-color";
 import { getGitMetrics } from "../model/git-metrics";
@@ -45,9 +45,9 @@ export function RepoCard({ repo }: Readonly<Props>) {
         <div className="flex min-w-0 flex-wrap gap-2 not-md:justify-center sm:flex-nowrap">
           <AppAvatar
             alt={repo.owner}
+            src={repo.ownerAvatarUrl}
             fallbackText={repo.owner}
             sizeClassName="size-9"
-            src={repo.ownerAvatarUrl}
           />
 
           <div className="flex min-w-0 flex-col justify-between gap-1 not-md:items-center">

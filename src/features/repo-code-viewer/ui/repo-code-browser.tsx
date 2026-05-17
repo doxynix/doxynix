@@ -73,12 +73,12 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     totalMatches: 0,
   });
 
-  const { data: auditResult } = trpc.repoAnalysis.getFileActionResult.useQuery(
+  const { data: auditResult } = trpc.analysis.getFileActionResult.useQuery(
     { action: "quick-file-audit", path },
     { enabled: !!path && userId != null }
   );
 
-  const { data: documentResult } = trpc.repoAnalysis.getFileActionResult.useQuery(
+  const { data: documentResult } = trpc.analysis.getFileActionResult.useQuery(
     { action: "document-file-preview", path },
     { enabled: !!path && userId != null }
   );
@@ -92,19 +92,19 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     setShowDiff(false);
   }
 
-  const auditMutation = trpc.repoAnalysis.quickFileAudit.useMutation({
+  const auditMutation = trpc.analysis.quickFileAudit.useMutation({
     onError: () => setIsAiLoading(false),
     onMutate: () => setIsAiLoading(true),
     onSuccess: () => toast.info("Audit started..."),
   });
 
-  const documentMutation = trpc.repoAnalysis.documentFile.useMutation({
+  const documentMutation = trpc.analysis.documentFile.useMutation({
     onError: () => setIsAiLoading(false),
     onMutate: () => setIsAiLoading(true),
     onSuccess: () => toast.info("Documentation generation started..."),
   });
 
-  const stageMutation = trpc.prStaging.stageFile.useMutation({
+  const stageMutation = trpc.analysis.stageFile.useMutation({
     onError: (error) => {
       toast.error(`Failed to stage changes: ${error.message}`);
     },
@@ -183,7 +183,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     setShowDiff(false);
   };
 
-  const pinMutation = trpc.repoAnalysis.pinAuditToDocs.useMutation({
+  const pinMutation = trpc.analysis.pinAuditToDocs.useMutation({
     onError: (err) => toast.error("Failed to save: " + err.message),
     onSuccess: () => {
       toast.success("Audit saved to project documentation");
@@ -262,8 +262,8 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
           <FileIcon className="text-muted-foreground" />
           <AppBreadcrumbs
             items={breadcrumbItems}
-            listClassName="sm:gap-1"
             className="min-w-0 overflow-hidden text-[10px]"
+            listClassName="sm:gap-1"
           />
           <CopyButton value={path} tooltipText="Copy file path" className="shrink-0 opacity-100" />
         </div>
@@ -363,14 +363,14 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
       <div className="relative flex-1 overflow-hidden">
         <Editor
           value={
-            !showDiff && documentResult?.content != null ? documentResult.content : localContent
+            showDiff && documentResult?.content != null ? documentResult.content : localContent
           }
           compareValue={fileData.content}
           initialValue={fileData.content}
           meta={fileData.meta}
           path={path}
           readOnly={mode === "view"}
-          showDiff={!showDiff}
+          showDiff={showDiff}
           onChange={setLocalContent}
           onStats={setEditorStats}
           onViewCreated={setView}

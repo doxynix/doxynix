@@ -1,6 +1,6 @@
 import { Lock, Unlock, type LucideIcon } from "lucide-react";
 
-import type { VisibilityType } from "@/generated/zod";
+import type { VisibilityType } from "@/shared/api-contracts";
 
 export const repoVisibilityConfig: Record<
   VisibilityType,

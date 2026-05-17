@@ -33,7 +33,7 @@ const DeviceIconMap: Record<string, ComponentType<{ className?: string }>> = {
   tablet: Tablet,
 };
 
-export const AuditIconMap: Record<string, ComponentType<{ className?: string }>> = {
+const AuditIconMap: Record<string, ComponentType<{ className?: string }>> = {
   analysis: RefreshCw,
   database: Database,
   ghost: Ghost,
@@ -43,6 +43,7 @@ export const AuditIconMap: Record<string, ComponentType<{ className?: string }>>
   shield: ShieldCheck,
   user: User,
 };
+
 type Props = { log: UiAuditLog };
 
 export function AuditLogRow({ log }: Readonly<Props>) {

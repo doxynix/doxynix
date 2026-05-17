@@ -14,8 +14,9 @@ import { RepoOverview } from "./repo-overview";
 type Props = { id: string };
 
 export function RepoOverviewContainer({ id }: Readonly<Props>) {
-  const { name, owner } = useRepoParams();
-  const { data, isLoading } = trpc.repoDetails.getWorkspace.useQuery({
+  const { aid, name, owner } = useRepoParams();
+  const { data, isLoading } = trpc.analysis.getWorkspace.useQuery({
+    aid: aid ?? undefined,
     repoId: id,
   });
 

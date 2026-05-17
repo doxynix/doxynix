@@ -28,8 +28,8 @@ export function CopyButton({
   return (
     <AppTooltip content={tooltipText} side={tooltipSide}>
       <Button
-        type="button"
         disabled={disabled}
+        type="button"
         size="icon"
         variant="ghost"
         aria-label={tooltipText}

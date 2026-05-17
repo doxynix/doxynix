@@ -3,7 +3,7 @@
   "threshold": 5,
   "reporters": ["console", "html"],
   "ignore": [
-    "**/generated/**",
+    "**/shared/api-contracts/**",
     "**/node_modules/**",
     "**/.next/**",
     "**/dist/**",

@@ -43,7 +43,7 @@ function TabsContentItem({ code, html, title, value }: Readonly<TabsContentItemP
       value={value}
       className="animate-in fade-in slide-in-from-right-4 mt-0 duration-300"
     >
-      <CodeWindow code={code} codeClassName="text-sm sm:text-base" codeHtml={html} title={title} />
+      <CodeWindow code={code} codeHtml={html} title={title} codeClassName="text-sm sm:text-base" />
     </TabsContent>
   );
 }

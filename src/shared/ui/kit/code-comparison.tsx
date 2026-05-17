@@ -53,15 +53,15 @@ export function CodeComparison({
         <div className="relative grid gap-4 md:grid-cols-2 md:gap-0">
           <CodeWindow
             code={badCode}
-            codeClassName="text-xs p-2"
             codeHtml={beforeHtml}
             title={filename}
+            codeClassName="text-xs p-2"
           />
           <CodeWindow
             code={goodCode}
-            codeClassName="text-xs p-2"
             codeHtml={afterHtml}
             title={filename}
+            codeClassName="text-xs p-2"
           />
         </div>
 

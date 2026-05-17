@@ -4,6 +4,7 @@ import { Bell } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
+import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
 import {
@@ -15,7 +16,6 @@ import {
 } from "@/shared/ui/core/dropdown-menu";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-import { Link } from "@/i18n/routing";
 
 import { notificationTypeConfig } from "@/features/notifications/model/notification-type-config";
 import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
@@ -87,7 +87,7 @@ export function NotificationsNav() {
                       <p className="text-muted-foreground max-w-57.5 truncate text-xs">
                         {note.body}
                       </p>
-                      <TimeAgo date={note.createdAt} locale={locale} />
+                      <TimeAgo date={note.createdAt} locale={locale} className="w-fit text-xs" />
                     </div>
                     {note.isRead === false && (
                       <span className="bg-foreground mt-1 size-2 shrink-0 rounded-full" />

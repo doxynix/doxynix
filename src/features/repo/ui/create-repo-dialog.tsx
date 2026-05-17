@@ -181,8 +181,8 @@ export function CreateRepoDialog() {
                         )}
                         <Input
                           {...field}
-                          autoComplete="off"
                           disabled={create.isPending}
+                          autoComplete="off"
                           maxLength={500}
                           placeholder={t("repo_create_placeholder")}
                           onChange={(e) => {
@@ -229,17 +229,17 @@ export function CreateRepoDialog() {
                         >
                           <AppAvatar
                             alt={inst.login}
+                            src={inst.avatar}
                             fallbackText={inst.login}
                             sizeClassName="size-6"
-                            src={inst.avatar}
                           />
                         </ExternalLink>
                       </AppTooltip>
                     ))}
                     <AppTooltip content="Add new">
                       <LoadingButton
-                        type="button"
                         disabled={loading}
+                        type="button"
                         isLoading={loading}
                         loadingText=""
                         size="icon"
@@ -292,8 +292,8 @@ export function CreateRepoDialog() {
                         First, you need to link your GitHub profile.
                       </p>
                       <LoadingButton
-                        type="button"
                         disabled={loadingOauth}
+                        type="button"
                         isLoading={loadingOauth}
                         loadingText="Processing..."
                         variant="outline"
@@ -311,8 +311,8 @@ export function CreateRepoDialog() {
                         Your GitHub authorization expired. Please relink your account.
                       </p>
                       <LoadingButton
-                        type="button"
                         disabled={loadingOauth}
+                        type="button"
                         isLoading={loadingOauth}
                         loadingText="Processing..."
                         variant="outline"
@@ -331,8 +331,8 @@ export function CreateRepoDialog() {
                           Want private and org repositories? Install our GitHub App!
                         </p>
                         <LoadingButton
-                          type="button"
                           disabled={loading}
+                          type="button"
                           isLoading={loading}
                           loadingText="Connecting..."
                           variant="outline"
@@ -352,8 +352,8 @@ export function CreateRepoDialog() {
                               Install our GitHub App to grant access to your repositories.
                             </p>
                             <LoadingButton
-                              type="button"
                               disabled={loading}
+                              type="button"
                               isLoading={loading}
                               variant="outline"
                               onClick={() => void handleInstallGitHubApp()}

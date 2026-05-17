@@ -1,9 +1,9 @@
 import { forwardRef, type ComponentProps, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
+import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Button, buttonVariants, type ButtonProps } from "@/shared/ui/core/button";
-import { Link } from "@/i18n/routing";
 
 const Pagination = ({ className, ...props }: ComponentProps<"nav">) => (
   <nav

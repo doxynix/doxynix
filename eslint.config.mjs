@@ -27,7 +27,7 @@ export default defineConfig([
       "build/**",
       "dist/**",
       "next-env.d.ts",
-      "src/generated/**",
+      "src/shared/api-contracts/**",
       "vitest.config.ts",
       "eslint.config.mjs",
       "postcss.config.mjs",
@@ -38,6 +38,7 @@ export default defineConfig([
       ".trigger/**",
       "cli/index.js",
       "commitlint.config.js",
+      "./scripts",
       "messages/en.d.json.ts",
     ],
   },
@@ -78,15 +79,23 @@ export default defineConfig([
         version: "detect",
       },
       "boundaries/elements": [
-        { type: "app", pattern: "src/app/*" },
-        { type: "widgets", pattern: "src/widgets/*" },
-        { type: "features", pattern: "src/features/*" },
-        { type: "entities", pattern: "src/entities/*" },
-        { type: "shared", pattern: "src/shared/*" },
-        { type: "generated", pattern: "src/generated/*" },
-        { type: "server", pattern: "src/server/*" },
-        { type: "trigger", pattern: "src/trigger/*" },
-        { type: "i18n", pattern: "src/i18n/*" },
+        // --- Frontend (FSD) ---
+        { type: "app", pattern: "src/app/**/*" },
+        { type: "widgets", pattern: "src/widgets/**/*" },
+        { type: "features", pattern: "src/features/**/*" },
+        { type: "entities", pattern: "src/entities/**/*" },
+
+        // --- Shared Foundation ---
+        { type: "shared-ui", pattern: "src/shared/ui/**/*" },
+        { type: "shared-lib", pattern: "src/shared/lib/**/*" },
+        { type: "shared-contracts", pattern: "src/shared/api-contracts/**/*" },
+        { type: "i18n", pattern: "src/shared/i18n/**/*" },
+        { type: "shared-api", pattern: "src/shared/api/**/*" },
+
+        // --- Backend (Modular Monolith) ---
+        { type: "server-core", pattern: "src/server/core/**/*" },
+        { type: "server-utils", pattern: "src/server/utils/**/*" },
+        { type: "server-modules", pattern: "src/server/modules/*" },
       ],
       "jsx-a11y": {
         polymorphicPropName: "asChild",
@@ -167,6 +176,8 @@ export default defineConfig([
       "unicorn/prefer-string-starts-ends-with": "error",
       "unicorn/switch-case-braces": ["error", "always"],
       "unicorn/throw-new-error": "error",
+      "unicorn/no-process-exit": "error",
+      "unicorn/prefer-simple-condition-first": "error",
       "unicorn/filename-case": [
         "error",
         {
@@ -212,71 +223,75 @@ export default defineConfig([
           default: "allow",
           rules: [
             {
-              from: { type: "shared|generated|i18n" },
-              disallow: [{ to: { type: "app|trigger|widgets|features|entities|server" } }],
+              from: { type: "app|widgets|features|entities" },
+              disallow: [{ to: { type: "server-modules|server-core" } }],
+              allow: [
+                {
+                  to: { type: "server-modules|server-core" },
+                  dependency: { kind: "type" },
+                },
+              ],
+              message: "UI layers cannot import server logic. Use tRPC hooks or Server Actions.",
+            },
+            {
+              from: { type: "server-modules" },
+              allow: [
+                { to: { type: "server-core" } },
+                { to: { type: "server-utils" } },
+                { to: { type: "shared-contracts" } },
+                { to: { type: "shared-lib" } },
+                { to: { type: "server-modules", path: "src/server/modules/*/*.ts" } },
+              ],
+              disallow: [{ to: { type: "server-modules", path: "src/server/modules/*/*/**" } }],
               message:
-                "FSD Violation: Shared, Generated and i18n layers must be pure and cannot depend on upper layers or server logic.",
-              // allow type-only imports from server (needed for tRPC type inference)
-              allow: [{ to: { type: "server" }, dependency: { kind: "type" } }],
+                "VSA Violation: Accessing internal logic of another module is forbidden. Use the module's Public API (router/index).",
+            },
+            {
+              from: { type: "server-core" },
+              disallow: [{ to: { type: "server-modules|app|widgets|features|entities" } }],
+              message: "Infrastructure Violation: Core must not depend on business logic or UI.",
+            },
+            {
+              from: { type: "server-utils" },
+              disallow: [
+                { to: { type: "server-modules|server-core|app|widgets|features|entities" } },
+              ],
+              message: "Utility Violation: Utils must be pure.",
+            },
+            {
+              from: { type: "shared|shared-contracts|i18n" },
+              disallow: [
+                { to: { type: "app|widgets|features|entities|server-core|server-modules" } },
+              ],
+              allow: [
+                {
+                  to: { type: "server-modules|server-core|server-utils" },
+                  dependency: { kind: "type" },
+                },
+              ],
+              message:
+                "FSD Violation: Shared/Contracts layers cannot depend on upper layers or server logic.",
             },
             {
               from: { type: "entities" },
-              disallow: [{ to: { type: "app|trigger|widgets|features|server" } }],
+              disallow: [{ to: { type: "features|widgets|app" } }, { to: { type: "entities" } }],
               message:
-                "FSD Violation: Entities should only depend on other Entities (check composition), Shared, or Generated. They cannot import Features, Widgets or direct Server code.",
+                "FSD Violation: Entities are independent and cannot import upper layers or other entities.",
             },
             {
               from: { type: "features" },
-              disallow: [{ to: { type: "app|trigger|widgets|server" } }],
-              message:
-                "FSD Violation: Features can only depend on Entities or Shared. They cannot import Widgets, App, or direct Server code.",
+              disallow: [{ to: { type: "widgets|app" } }, { to: { type: "features" } }],
+              message: "FSD Violation: Features cannot import upper layers or other features.",
             },
             {
               from: { type: "widgets" },
-              disallow: [{ to: { type: "app|trigger|server" } }],
-              message:
-                "FSD Violation: Widgets can depend on Features, Entities, and Shared. They cannot import the App layer or direct Server code.",
-            },
-            {
-              from: { type: "server" },
-              disallow: [{ to: { type: "app|trigger|widgets|features|entities" } }],
-              message:
-                "Architectural Violation: The 'server' layer contains pure business logic and must not depend on UI layers (entities, features, etc.). Use shared/api for schemas.",
-            },
-            {
-              from: { type: "trigger" },
-              disallow: [{ to: { type: "app|widgets|features|entities" } }],
-              message:
-                "Architectural Violation: Trigger tasks should only depend on 'server' logic or 'shared' resources. Do not import UI components into background jobs.",
-            },
-            {
-              from: { type: "features" },
-              disallow: [{ to: { type: "features" } }],
-              message:
-                "FSD Violation: Cross-import between Features is forbidden to prevent high coupling. Move shared logic to 'entities' or 'shared'.",
-            },
-            {
-              from: { type: "entities" },
-              disallow: [{ to: { type: "entities" } }],
-              message:
-                "FSD Violation: Cross-import between Entities is forbidden. Use composition in 'features' or 'widgets' instead.",
-            },
-            {
-              from: { type: "widgets" },
-              disallow: [{ to: { type: "widgets" } }],
-              message: "FSD Violation: Widgets should not import other Widgets.",
-            },
-            {
-              from: { type: "app" },
-              disallow: [{ to: { type: "trigger" } }],
-              message:
-                "Safety Violation: Do not import 'trigger' background task definitions directly into the 'app' router.",
+              disallow: [{ to: { type: "app" } }, { to: { type: "widgets" } }],
+              message: "FSD Violation: Widgets cannot import the App layer or other widgets.",
             },
             {
               from: { type: "app" },
               disallow: [{ to: { type: "app" } }],
-              message:
-                "FSD Violation: App routes should not import other routes. Use 'widgets' or 'features' for shared UI logic.",
+              message: "FSD Violation: App routes should not import other routes.",
             },
           ],
         },
@@ -341,17 +356,22 @@ export default defineConfig([
           customGroups: [
             { groupName: "meta", elementNamePattern: "^(key|ref)$" },
             { groupName: "polymorphic", elementNamePattern: "^(as|asChild)$" },
-            { groupName: "identifier", elementNamePattern: "^(id|name)$" },
+            { groupName: "identifier", elementNamePattern: "^(id|name|src|alt)$" },
             { groupName: "routing", elementNamePattern: "^(href|to)$" },
-            { groupName: "state", elementNamePattern: "^(type|value|defaultValue)$" },
+            {
+              groupName: "state",
+              elementNamePattern: "^(type|value|defaultValue|checked|disabled)$",
+            },
             { groupName: "aria", elementNamePattern: "^aria-" },
             { groupName: "data", elementNamePattern: "^data-" },
             { groupName: "callback", elementNamePattern: "^on[A-Z]" },
-            { groupName: "style", elementNamePattern: "^(className|style)$" },
+            { groupName: "style", elementNamePattern: "^(className|style|.*Class.*|.*Style.*)$" },
           ],
         },
       ],
       "perfectionist/sort-objects": ["error", { type: "natural", order: "asc" }],
+      "perfectionist/sort-classes": ["error", { type: "natural", order: "asc" }],
+      "perfectionist/sort-decorators": ["error", { type: "natural", order: "asc" }],
       "perfectionist/sort-interfaces": ["error", { type: "natural", order: "asc" }],
       "perfectionist/sort-object-types": ["error", { type: "natural", order: "asc" }],
       "perfectionist/sort-intersection-types": ["error", { type: "natural", order: "asc" }],
@@ -442,7 +462,6 @@ export default defineConfig([
       ],
     },
   },
-
   {
     files: ["src/server/**/*.{ts,tsx,js}"],
     rules: {
@@ -472,7 +491,7 @@ export default defineConfig([
     ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unnecessary-condition": "off",
+      "@typescript-eslint/no-unnecessary-condition": "warn",
       "@typescript-eslint/strict-boolean-expressions": "off",
     },
   },

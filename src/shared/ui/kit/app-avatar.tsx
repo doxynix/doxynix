@@ -99,12 +99,12 @@ export function AppAvatar({
 
       {hasSrc && !isError && (
         <Image
-          fill
           alt={alt}
+          src={src}
+          fill
           loading={priority ? undefined : "lazy"}
           priority={priority}
           sizes={getSizesFromClassName(sizeClassName)}
-          src={src}
           unoptimized={isUnoptimizedHost(src)}
           onError={() => {
             console.error("Image load error:", src);

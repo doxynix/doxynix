@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { FileText } from "lucide-react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 
+import { DocTypeSchema } from "@/shared/api-contracts";
 import { trpc } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
@@ -12,8 +13,6 @@ import type { AvailableDocs, DocType } from "@/entities/repo/model/repo.types";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
 
-import { DocTypeSchema } from "@/generated/zod";
-
 import { RepoDocs } from "./repo-docs";
 
 type Props = { id: string };
@@ -21,7 +20,7 @@ type Props = { id: string };
 const EMPTY_DOCS: AvailableDocs = [];
 
 export function RepoDocsContainer({ id }: Readonly<Props>) {
-  const { name, owner } = useRepoParams();
+  const { aid, name, owner } = useRepoParams();
   const [node] = useQueryState("node", parseAsString);
   const autoSelectedNodeRef = useRef<null | string>(null);
 
@@ -32,12 +31,13 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
     )
   );
 
-  const { data: availableDocs, isLoading } = trpc.repoDetails.getAvailableDocs.useQuery({
+  const { data: availableDocs, isLoading } = trpc.analysis.getAvailableDocs.useQuery({
+    aid: aid ?? undefined,
     repoId: id,
   });
 
-  const { data: nodeContext } = trpc.repoDetails.getNodeContext.useQuery(
-    { nodeId: node ?? "", repoId: id },
+  const { data: nodeContext } = trpc.analysis.getNodeContext.useQuery(
+    { aid: aid ?? undefined, nodeId: node ?? "", repoId: id },
     { enabled: node != null && node.length > 0 }
   );
 

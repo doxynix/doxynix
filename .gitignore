@@ -47,12 +47,13 @@ next-env.d.ts
 .vscode/
 
 # gen
-/src/generated/**
 /prisma/dbml
 /prisma/json-schema
 sitemap*.xml
 robots.txt
 messages/*.d.json.ts
+/prisma/generated
+/src/shared/api-contracts
 
 # cli
 /cli/dist/

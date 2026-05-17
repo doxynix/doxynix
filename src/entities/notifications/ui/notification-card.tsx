@@ -3,10 +3,10 @@
 import { Eye, EyeOff, Trash2 } from "lucide-react";
 import { useLocale } from "next-intl";
 
+import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Card, CardContent, CardDescription, CardTitle } from "@/shared/ui/core/card";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
-import { Link } from "@/i18n/routing";
 
 import { notificationTypeConfig } from "@/features/notifications/model/notification-type-config";
 import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
@@ -80,7 +80,7 @@ export function NotificationCard({ notification }: Readonly<Props>) {
               className="hover:text-destructive"
             />
           </div>
-          <TimeAgo date={notification.createdAt} locale={locale} />
+          <TimeAgo date={notification.createdAt} locale={locale} className="z-10 w-fit text-xs" />
         </div>
       </CardContent>
     </Card>

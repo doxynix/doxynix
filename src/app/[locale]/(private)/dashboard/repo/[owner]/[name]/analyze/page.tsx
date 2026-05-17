@@ -1,17 +1,14 @@
 import type { Metadata } from "next";
 
-import type { ParamTypes } from "@/shared/types/app.types";
+import type { RepoPageProps } from "@/shared/types/next.types";
 
-import { getRepoOrNotFound } from "@/entities/repo/model/get-repo";
-
+import { RepoAnalysisLive } from "@/features/repo-setup/ui/repo-analysis-live";
 import { RepoSetup } from "@/features/repo-setup/ui/repo-setup";
 
-type Props = {
-  params: Promise<{ name: string; owner: string }>;
-  searchParams: Promise<{ [key: string]: ParamTypes }>;
-};
+import { api } from "@/server/core/trpc/server";
+import { repoFetchers } from "@/server/modules/repos/repo.fetchers";
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: RepoPageProps): Promise<Metadata> {
   const { name, owner } = await params;
 
   return {
@@ -19,10 +16,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function AnalyzePage({ params }: Readonly<Props>) {
+export default async function AnalyzePage({ params }: Readonly<RepoPageProps>) {
   const { name, owner } = await params;
 
-  const repo = await getRepoOrNotFound(owner, name);
+  const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
-  return <RepoSetup repo={repo} />;
+  const serverApi = await api();
+  const lastAnalysis = await serverApi.analysis.getLatest({ repoId: repo.id });
+
+  const isRunning =
+    lastAnalysis != null &&
+    lastAnalysis.status === "PENDING" &&
+    lastAnalysis.jobId !== null &&
+    lastAnalysis.publicAccessToken != null;
+
+  return (
+    <div className="mx-auto px-4 py-6">
+      {isRunning ? (
+        <RepoAnalysisLive
+          accessToken={lastAnalysis.publicAccessToken!}
+          jobId={lastAnalysis.jobId!}
+          repoId={repo.id}
+        />
+      ) : (
+        <RepoSetup repo={repo} />
+      )}
+    </div>
+  );
 }

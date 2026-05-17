@@ -3,9 +3,9 @@
 import type { Route } from "next";
 
 import { settingsMenu } from "@/shared/constants/navigation";
+import { Link, usePathname } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/core/button";
-import { Link, usePathname } from "@/i18n/routing";
 
 export function SettingsMenu() {
   const pathname = usePathname();

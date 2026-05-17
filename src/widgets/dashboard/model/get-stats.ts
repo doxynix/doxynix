@@ -20,14 +20,13 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
 
   return [
     {
-      // TODO: переписать на get-health-color.ts
-      className: getHealthClasses(overview.avgHealthScore),
+      className: getHealthClasses(overview.avgScores.health),
       delta: overview.healthDelta,
       description: "Code quality average",
       icon: HeartPulse,
       id: "health",
       label: t("stat_health_score"),
-      value: `${overview.avgHealthScore}/100`,
+      value: `${overview.avgScores.health}/100`,
     },
     {
       className: "bg-surface-selected text-foreground",
@@ -36,7 +35,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
       icon: ShieldCheck,
       id: "security",
       label: t("stat_security"),
-      value: `${overview.avgSecurityScore}/100`,
+      value: `${overview.avgScores.security}/100`,
     },
     {
       className: "bg-brand-ai/10 text-brand-ai",
@@ -46,7 +45,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
       id: "complexity",
       label: t("stat_complexity"),
       reverseColor: true,
-      value: `${overview.avgComplexityScore}/100`,
+      value: `${overview.avgScores.complexity}/100`,
     },
     {
       className: "bg-brand-docs/10 text-brand-docs",
@@ -55,7 +54,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
       icon: BookOpenCheck,
       id: "onboarding",
       label: t("stat_onboarding"),
-      value: `${overview.avgOnboardingScore}/100`,
+      value: `${overview.avgScores.onboarding}/100`,
     },
     {
       className: "bg-foreground/10 text-foreground font-mono",
@@ -73,7 +72,7 @@ export function getStats(data: DashboardStats, t: TFunction, locale: string) {
       id: "techdebt",
       label: t("stat_tech_debt"),
       reverseColor: true,
-      value: `${overview.avgTechDebtScore}/100`,
+      value: `${overview.avgScores.techDebt}/100`,
     },
     {
       className: "bg-warning/10 text-warning",

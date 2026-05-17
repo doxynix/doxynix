@@ -3,7 +3,7 @@ import posthog from "posthog-js";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "@/shared/i18n/routing";
 
 export function useRepoActions() {
   const utils = trpc.useUtils();

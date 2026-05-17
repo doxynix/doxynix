@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { LogIn, ShieldAlert } from "lucide-react";
 import { signOut } from "next-auth/react";
 
+import { Link } from "@/shared/i18n/routing";
 import { Button } from "@/shared/ui/core/button";
-import { Link } from "@/i18n/routing";
 
 export default function UnauthorizedPage() {
   useEffect(() => {

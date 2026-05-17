@@ -6,8 +6,8 @@ import {
   type ReactNode,
 } from "react";
 
+import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { Link } from "@/i18n/routing";
 
 import { Button } from "../core/button";
 
