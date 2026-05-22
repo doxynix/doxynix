@@ -71,11 +71,11 @@ generator dbml {
   provider = "prisma-dbml-generator"
 }
 
-generator erd {
-  provider      = "prisma-erd-generator"
-  theme         = "neutral"
-  output        = "../prisma/erd/ERD.pdf"
-}
+// generator erd {
+//   provider      = "prisma-erd-generator"
+//   theme         = "neutral"
+//   output        = "../prisma/erd/ERD.pdf"
+// }
 
 // generator markdown {
 //   provider = "prisma-markdown"
