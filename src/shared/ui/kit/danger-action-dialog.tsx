@@ -5,7 +5,7 @@ import { AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
   DialogClose,
@@ -87,9 +87,9 @@ export function DangerActionDialog({
 
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline" className="cursor-pointer">
+            <AppButton variant="outline" className="cursor-pointer">
               {tCommon("cancel")}
-            </Button>
+            </AppButton>
           </DialogClose>
           <LoadingButton
             isLoading={isLoading}

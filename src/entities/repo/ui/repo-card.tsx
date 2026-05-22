@@ -7,7 +7,7 @@ import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { AnimatedCircularProgressBar } from "@/shared/ui/core/animated-circular-progress-bar";
-import { Badge } from "@/shared/ui/core/badge";
+import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
@@ -68,9 +68,9 @@ export function RepoCard({ repo }: Readonly<Props>) {
                     {repo.name}
                   </Link>
                 </div>
-                <Badge variant="outline" className={cn(visibility.color)}>
+                <AppBadge variant="outline" className={cn(visibility.color)}>
                   {visibility.label}
-                </Badge>
+                </AppBadge>
                 <div
                   className={cn("flex shrink-0 items-center gap-1 transition-opacity duration-200")}
                 >
@@ -138,9 +138,9 @@ export function RepoCard({ repo }: Readonly<Props>) {
             <span className="text-muted-foreground my-2 text-right text-xs">Not analyzed yet</span>
           )}
           <div className="flex flex-col items-end gap-1">
-            <Badge variant="outline" className={cn(status.color)}>
+            <AppBadge variant="outline" className={cn(status.color)}>
               {status.label}
-            </Badge>
+            </AppBadge>
             {repo.lastAnalysisDate != null && (
               <AppTooltip
                 content={t("repo_last_analyzed", {

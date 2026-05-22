@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/core/dropdown-menu";
 
-import { Button } from "../core/button";
+import { AppButton } from "../core/button";
 import { TruncatedText } from "./truncated-text";
 
 type BreadcrumbItemConfig = {
@@ -77,14 +77,14 @@ export function AppBreadcrumbs({
                   <BreadcrumbItem>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button
+                        <AppButton
                           size="icon"
                           variant="ghost"
                           aria-label="Show hidden elements"
                           className="size-7 cursor-pointer"
                         >
                           <BreadcrumbEllipsis />
-                        </Button>
+                        </AppButton>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start" className="min-w-45">
                         {collapsedItems.map((collapsed, idx) => (

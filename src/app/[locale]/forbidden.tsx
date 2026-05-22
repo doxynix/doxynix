@@ -1,7 +1,7 @@
 import { Lock } from "lucide-react";
 
 import { Link } from "@/shared/i18n/routing";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 
 export default function ForbiddenPage() {
   return (
@@ -15,9 +15,9 @@ export default function ForbiddenPage() {
           У вас нет прав администратора для просмотра этой страницы. Если вы считаете, что это
           ошибка, обратитесь в поддержку. support@doxynix.space
         </p>
-        <Button asChild variant="outline">
+        <AppButton asChild variant="outline">
           <Link href="/">Вернуться на главную</Link>
-        </Button>
+        </AppButton>
       </div>
     </div>
   );

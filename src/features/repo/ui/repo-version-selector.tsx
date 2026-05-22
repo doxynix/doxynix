@@ -5,7 +5,7 @@ import { useLocale } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
-import { Badge } from "@/shared/ui/core/badge";
+import { AppBadge } from "@/shared/ui/core/badge";
 import {
   Select,
   SelectContent,
@@ -43,9 +43,9 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
               </div>
               <TimeAgo date={item.createdAt} locale={locale} className="ml-auto text-xs" />
               {item.status === "FAILED" && (
-                <Badge variant="outline" className="text-destructive text-xs">
+                <AppBadge variant="outline" className="text-destructive text-xs">
                   Failed
-                </Badge>
+                </AppBadge>
               )}
             </div>
           </SelectItem>

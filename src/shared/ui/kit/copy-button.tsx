@@ -5,7 +5,7 @@ import { Check, Copy } from "lucide-react";
 import { useCopyToClipboard } from "@/shared/hooks/use-copy-to-clipboard";
 import { cn } from "@/shared/lib/cn";
 
-import { Button } from "../core/button";
+import { AppButton } from "../core/button";
 import { AppTooltip } from "./app-tooltip";
 
 type Props = {
@@ -27,7 +27,7 @@ export function CopyButton({
 
   return (
     <AppTooltip content={tooltipText} side={tooltipSide}>
-      <Button
+      <AppButton
         disabled={disabled}
         type="button"
         size="icon"
@@ -58,7 +58,7 @@ export function CopyButton({
         />
 
         <span className="sr-only">Copy</span>
-      </Button>
+      </AppButton>
     </AppTooltip>
   );
 }

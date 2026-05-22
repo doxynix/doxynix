@@ -7,8 +7,8 @@ import { toast } from "sonner";
 
 import { createPrSchema, type CreatePrValues } from "@/shared/api/schemas/pr";
 import { trpc } from "@/shared/api/trpc";
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Form,
   FormControl,
@@ -88,11 +88,11 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
   return (
     <Sheet onOpenChange={(open) => open === false && form.reset()}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="relative gap-2">
+        <AppButton variant="outline" className="relative gap-2">
           <GitPullRequest />
           <span>PR Draft</span>
-          {filesCount > 0 && <Badge className="absolute -top-2 -right-2">{filesCount}</Badge>}
-        </Button>
+          {filesCount > 0 && <AppBadge className="absolute -top-2 -right-2">{filesCount}</AppBadge>}
+        </AppButton>
       </SheetTrigger>
 
       <SheetContent className="flex flex-col gap-6 p-6 sm:max-w-lg">

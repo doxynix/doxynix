@@ -6,7 +6,7 @@ import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { GoogleIcon } from "@/shared/ui/icons/google-icon";
 import { YandexIcon } from "@/shared/ui/icons/yandex-icon";
@@ -167,9 +167,9 @@ function ProviderAction({
     return (
       <AppTooltip content="You cannot delete your last connection">
         <div>
-          <Button disabled size="sm" variant="destructive">
+          <AppButton disabled size="sm" variant="destructive">
             Disconnect
-          </Button>
+          </AppButton>
         </div>
       </AppTooltip>
     );
@@ -200,9 +200,9 @@ function ProviderAction({
       successAlertTitle="Pro-tip"
       title={`Disconnect ${provider.name}`}
       trigger={
-        <Button size="sm" variant="destructive">
+        <AppButton size="sm" variant="destructive">
           Disconnect
-        </Button>
+        </AppButton>
       }
       onConfirm={() => onDisconnect(provider.id)}
       onOpenChange={onOpenChange}

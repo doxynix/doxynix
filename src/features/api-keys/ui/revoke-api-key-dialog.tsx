@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
@@ -41,7 +41,7 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
       title={`${t("settings_api_keys_revoke_key")}?`}
       trigger={
         <AppTooltip content={t("settings_api_keys_revoke_key")}>
-          <Button
+          <AppButton
             size="icon"
             variant="ghost"
             aria-label="Revoke key"
@@ -52,7 +52,7 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
             className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
           >
             <Trash2 />
-          </Button>
+          </AppButton>
         </AppTooltip>
       }
       onConfirm={handleRevoke}

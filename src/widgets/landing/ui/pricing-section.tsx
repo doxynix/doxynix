@@ -6,7 +6,7 @@ import posthog from "posthog-js";
 
 import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 
 export function PricingSection() {
   const t = useTranslations("Landing");
@@ -89,7 +89,7 @@ export function PricingSection() {
                 </span>
               </div>
               <p className="text-muted-foreground mb-6 text-sm">{plan.desc}</p>
-              <Button
+              <AppButton
                 asChild
                 onClick={() =>
                   posthog.capture("pricing_plan_clicked", {
@@ -106,7 +106,7 @@ export function PricingSection() {
                 )}
               >
                 <Link href={plan.href}>{plan.cta}</Link>
-              </Button>
+              </AppButton>
               <ul className="flex-1 space-y-3">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm">

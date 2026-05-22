@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
@@ -31,7 +31,7 @@ export function RepoCodeActionButton({
   if (hidden === true) return null;
 
   const buttonElement = (
-    <Button
+    <AppButton
       disabled={disabled}
       size="sm"
       variant={variant}
@@ -40,13 +40,13 @@ export function RepoCodeActionButton({
       className={cn("gap-1.5 text-xs", className)}
     >
       {children}
-    </Button>
+    </AppButton>
   );
 
   return (
     <AppTooltip content={tooltipText} hidden={hideTooltip}>
       {href != null ? (
-        <Button
+        <AppButton
           asChild
           size="sm"
           variant={variant}
@@ -55,7 +55,7 @@ export function RepoCodeActionButton({
           <ExternalLink href={href} aria-label={tooltipText} className="px-3">
             {children}
           </ExternalLink>
-        </Button>
+        </AppButton>
       ) : (
         buttonElement
       )}

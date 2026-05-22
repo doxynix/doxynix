@@ -13,7 +13,7 @@ import { parseAsString, useQueryState } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
 import { useRouter } from "@/shared/i18n/routing";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
@@ -88,7 +88,7 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
                 const Icon = RESULT_ICONS[result.kind];
 
                 return (
-                  <Button
+                  <AppButton
                     key={result.id}
                     variant="ghost"
                     onClick={() => {
@@ -113,7 +113,7 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
                         </div>
                       </div>
                     </div>
-                  </Button>
+                  </AppButton>
                 );
               })
             ) : emptyLabel != null ? (

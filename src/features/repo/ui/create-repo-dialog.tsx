@@ -14,7 +14,7 @@ import { CreateRepoSchema, type CreateRepoInput } from "@/shared/api/schemas/rep
 import { trpc } from "@/shared/api/trpc";
 import { useClickOutside } from "@/shared/hooks/use-click-outside";
 import { isGitHubUrl } from "@/shared/lib/github-url";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
   DialogContent,
@@ -274,7 +274,7 @@ export function CreateRepoDialog() {
                       <p className="text-muted-foreground mb-3 text-sm">
                         Failed to load repositories.
                       </p>
-                      <Button
+                      <AppButton
                         type="button"
                         size="sm"
                         variant="outline"
@@ -282,7 +282,7 @@ export function CreateRepoDialog() {
                         className="h-8 gap-2"
                       >
                         <RefreshCcw className="h-3.5 w-3.5" /> Retry
-                      </Button>
+                      </AppButton>
                     </div>
                   </div>
                 ) : myGithubData.isConnected === false ? (

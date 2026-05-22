@@ -1,8 +1,8 @@
 "use client";
 
 import { Link } from "@/shared/i18n/routing";
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
@@ -37,17 +37,17 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
             </Link>
           </h1>
           <PrDraftSheet repoId={repo.id} />
-          <Badge variant="outline" className={visibility.color}>
+          <AppBadge variant="outline" className={visibility.color}>
             {visibility.label}
-          </Badge>
-          <Badge variant="outline" className={status.color}>
+          </AppBadge>
+          <AppBadge variant="outline" className={status.color}>
             {status.label}
-          </Badge>
-          <Button asChild variant="outline">
+          </AppBadge>
+          <AppButton asChild variant="outline">
             <ExternalLink href={repo.url} className="hover:text-foreground">
               <GitHubIcon className="size-4" /> Github
             </ExternalLink>
-          </Button>
+          </AppButton>
         </div>
         <RepoVersionSelector repoId={repo.id} />
       </div>

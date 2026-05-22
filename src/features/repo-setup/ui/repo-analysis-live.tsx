@@ -3,10 +3,11 @@
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
+import { trpc } from "@/shared/api/trpc";
 import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
 import { useRouter } from "@/shared/i18n/routing";
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import { Progress } from "@/shared/ui/core/progress";
 import { Spinner } from "@/shared/ui/core/spinner";
 
@@ -18,14 +19,40 @@ export function RepoAnalysisLive({ accessToken, jobId, repoId }: Readonly<Props>
   const router = useRouter();
   const { run } = useRealtimeRun(jobId, { accessToken });
 
+  const { data: latestAnalysis } = trpc.analysis.getLatest.useQuery(
+    { repoId },
+    { refetchInterval: (query) => (query.state.data?.status === "PENDING" ? 4000 : false) }
+  );
+
   const metadata = run?.metadata ?? {};
 
-  const progress = metadata[TRIGGER_CONFIG.metadataKeys.progress] as number;
-  const statusText = metadata[TRIGGER_CONFIG.metadataKeys.statusMessage] as string;
-  const logs = metadata[TRIGGER_CONFIG.metadataKeys.taskLogs] as string[];
+  const triggerProgress = metadata[TRIGGER_CONFIG.metadataKeys.progress] as number | undefined;
+  const triggerStatusText = metadata[TRIGGER_CONFIG.metadataKeys.statusMessage] as
+    | string
+    | undefined;
+  const logs = metadata[TRIGGER_CONFIG.metadataKeys.taskLogs] as string[] | undefined;
 
-  const isFinished = run?.status === "COMPLETED";
-  const isFailed = run?.status === "FAILED" || run?.status === "CRASHED";
+  const dbProgress = latestAnalysis?.progress;
+  const progress =
+    typeof dbProgress === "number" && dbProgress > (triggerProgress ?? 0)
+      ? dbProgress
+      : (triggerProgress ?? dbProgress ?? 0);
+
+  const statusText = triggerStatusText ?? latestAnalysis?.message ?? "Analyzing repository…";
+
+  const isDbDone = latestAnalysis?.status === "DONE";
+  const isDbFailed = latestAnalysis?.status === "FAILED";
+  const isTriggerFinished = run?.status === "COMPLETED";
+  const isTriggerFailed = run?.status === "FAILED" || run?.status === "CRASHED";
+
+  const isFinished = isTriggerFinished || isDbDone;
+  const isFailed = isTriggerFailed || isDbFailed;
+
+  const displayStatus = isFinished
+    ? "COMPLETED"
+    : isFailed
+      ? "FAILED"
+      : (run?.status ?? latestAnalysis?.status ?? "QUEUED");
 
   return (
     <div className="animate-in fade-in mx-auto max-w-4xl space-y-8 py-10 duration-500">
@@ -53,35 +80,41 @@ export function RepoAnalysisLive({ accessToken, jobId, repoId }: Readonly<Props>
                 : "Analyzing Repository"}
           </h2>
           <p className="text-muted-foreground text-sm">{statusText}</p>
+          {!isFinished && !isFailed && progress >= 85 && (
+            <p className="text-muted-foreground text-xs">
+              Generating documentation (README, API, Architecture…). This step can take several
+              minutes after the AI analysis finishes.
+            </p>
+          )}
         </div>
       </div>
 
       <div className="space-y-3">
         <div className="flex justify-between text-sm font-medium">
           <span className="flex items-center gap-2">
-            Status: <Badge variant="outline">{run?.status ?? "QUEUED"}</Badge>
+            Status: <AppBadge variant="outline">{displayStatus}</AppBadge>
           </span>
           <span>{progress}%</span>
         </div>
-        <Progress value={progress} className="h-2 shadow-inner" />
+        <Progress value={progress} indicatorClassName="bg-foreground" />
       </div>
 
-      <AnalysisTerminal logs={logs} />
+      <AnalysisTerminal logs={logs ?? []} />
 
       <div className="flex justify-center gap-4">
         {isFinished && (
-          <Button
+          <AppButton
             size="lg"
             onClick={() => router.push(`/dashboard/repo/result/${repoId}`)}
             className="px-10"
           >
             View Results
-          </Button>
+          </AppButton>
         )}
         {(isFinished || isFailed) && (
-          <Button variant="outline" onClick={() => router.refresh()}>
+          <AppButton variant="outline" onClick={() => router.refresh()}>
             Start New Audit
-          </Button>
+          </AppButton>
         )}
       </div>
     </div>

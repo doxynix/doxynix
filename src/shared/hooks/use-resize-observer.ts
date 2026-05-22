@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 
 type Size = {
   height: number;
@@ -8,34 +8,32 @@ type Size = {
 export function useResizeObserver<T extends HTMLElement>() {
   const [size, setSize] = useState<Size>({ height: 0, width: 0 });
 
-  const observerRef = useRef<null | ResizeObserver>(null);
-
-  const ref = useCallback((node: null | T) => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-      observerRef.current = null;
+  const ref = (node: null | T) => {
+    if (node == null) {
+      return () => {};
     }
 
-    if (node) {
-      const { height, width } = node.getBoundingClientRect();
-      setSize({ height, width });
+    const { height, width } = node.getBoundingClientRect();
+    setSize({ height, width });
 
-      const observer = new ResizeObserver((entries) => {
-        const entry = entries[0];
-        if (entry == null) return;
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry == null) return;
 
-        const { height: newHeight, width: newWidth } = entry.contentRect;
+      const { height: newHeight, width: newWidth } = entry.contentRect;
 
-        setSize((prev) => {
-          if (prev.width === newWidth && prev.height === newHeight) return prev;
-          return { height: newHeight, width: newWidth };
-        });
+      setSize((prev) => {
+        if (prev.width === newWidth && prev.height === newHeight) return prev;
+        return { height: newHeight, width: newWidth };
       });
+    });
 
-      observer.observe(node);
-      observerRef.current = observer;
-    }
-  }, []);
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+    };
+  };
 
   return [ref, size] as const;
 }

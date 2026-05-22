@@ -11,6 +11,7 @@ import {
   FileText,
   HeartPulse,
   Layers,
+  Map,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -18,10 +19,11 @@ import { useLocale } from "next-intl";
 
 import { Link, useRouter } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
+import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { getGitMetrics } from "@/entities/repo/model/git-metrics";
 import { buildRepoSearchResultHref } from "@/entities/repo/model/repo-workspace-navigation";
@@ -182,21 +184,21 @@ export function RepoOverview({ data }: Readonly<Props>) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <CardTitle className="text-lg font-bold">Executive Summary</CardTitle>
-              <Badge variant="outline" className={cn("capitalize", status)}>
+              <AppBadge variant="outline" className={cn("capitalize", status)}>
                 <HeartPulse className="mr-1 size-3" />
                 {summary.maintenance}
-              </Badge>
+              </AppBadge>
             </div>
-            <Badge variant="outline">{summary.architectureStyle}</Badge>
+            <AppBadge variant="outline">{summary.architectureStyle}</AppBadge>
           </div>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-sm leading-relaxed">{summary.purpose}</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {summary.stack.map((tech) => (
-              <Badge key={tech} variant="secondary">
+              <AppBadge key={tech} variant="secondary">
                 {tech}
-              </Badge>
+              </AppBadge>
             ))}
           </div>
         </CardContent>
@@ -221,7 +223,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
               <p className="text-muted-foreground text-xs font-bold">Key Zones</p>
               <div className="flex flex-wrap gap-2">
                 {navigation.keyZones.map((zone) => (
-                  <Button
+                  <AppButton
                     key={zone.id}
                     variant="outline"
                     onClick={() => handleMapNodeNavigation(zone.id)}
@@ -229,7 +231,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                   >
                     <Layers className="size-3.5" />
                     <span className="truncate">{zone.label}</span>
-                  </Button>
+                  </AppButton>
                 ))}
               </div>
             </div>
@@ -238,7 +240,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
               <p className="text-muted-foreground text-xs font-bold">Entrypoints</p>
               <div className="flex flex-wrap gap-2">
                 {navigation.primaryEntrypoints.map((path) => (
-                  <Button
+                  <AppButton
                     key={path}
                     variant="ghost"
                     onClick={() => handleCodeNavigation(path)}
@@ -246,7 +248,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                   >
                     <ArrowRight className="size-3.5" />
                     <span className="truncate">{path.split("/").pop() ?? path}</span>
-                  </Button>
+                  </AppButton>
                 ))}
               </div>
             </div>
@@ -321,20 +323,20 @@ export function RepoOverview({ data }: Readonly<Props>) {
               <div className="flex items-center gap-2">
                 <FileText /> Documentation
               </div>
-              <Button asChild variant="ghost">
+              <AppButton asChild variant="ghost">
                 <Link href={`/dashboard/repo/${data.repo.owner}/${data.repo.name}/docs`}>View</Link>
-              </Button>
+              </AppButton>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-muted-foreground text-xs">{docs.availableCount} docs available</p>
             <div className="flex flex-wrap gap-2">
               {docs.items.map((item) => (
-                <Badge key={item.id} variant="outline">
+                <AppBadge key={item.id} variant="outline">
                   {item.type.toLowerCase().replace("_", " ")} {item.status}
-                </Badge>
+                </AppBadge>
               ))}
-              {docs.hasSwagger && <Badge variant="secondary">swagger</Badge>}
+              {docs.hasSwagger && <AppBadge variant="secondary">swagger</AppBadge>}
             </div>
           </CardContent>
         </Card>
@@ -399,12 +401,32 @@ export function RepoOverview({ data }: Readonly<Props>) {
               {data.mostComplexFiles.map((file, idx) => (
                 <div
                   key={file}
-                  className="group hover:bg-muted flex items-center justify-between rounded p-1 text-sm transition-colors"
+                  className="flex w-full items-center justify-between rounded p-1 text-sm transition-colors"
                 >
-                  <div className="flex items-center gap-2 truncate">
+                  <div className="flex items-center gap-1">
                     <span className="text-muted-foreground text-xs">{idx + 1}.</span>
-                    <FileIcon className="size-3.5 opacity-60" />
+                    <FileIcon />
                     <span className="truncate">{file}</span>
+                  </div>
+                  <div>
+                    <AppTooltip content="View code">
+                      <AppButton asChild size="icon" variant="ghost">
+                        <Link
+                          href={`/dashboard/repo/${owner}/${name}/code?node=group:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
+                        >
+                          <Code2 />
+                        </Link>
+                      </AppButton>
+                    </AppTooltip>
+                    <AppTooltip content="View on map">
+                      <AppButton asChild size="icon" variant="ghost">
+                        <Link
+                          href={`/dashboard/repo/${owner}/${name}/map?node=group:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
+                        >
+                          <Map />
+                        </Link>
+                      </AppButton>
+                    </AppTooltip>
                   </div>
                 </div>
               ))}
@@ -423,7 +445,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                   <div key={risk.id} className="rounded-lg border p-3">
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <p className="text-sm font-medium">{risk.title}</p>
-                      <Badge variant="outline">{risk.severity}</Badge>
+                      <AppBadge variant="outline">{risk.severity}</AppBadge>
                     </div>
                     <p className="text-muted-foreground text-xs leading-relaxed">{risk.summary}</p>
                   </div>

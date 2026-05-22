@@ -1,8 +1,8 @@
 import { Check, ChevronDown, GitBranch } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Command,
   CommandEmpty,
@@ -37,7 +37,7 @@ export function RepoBranchSelector({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
+        <AppButton
           variant="outline"
           aria-expanded={open}
           aria-haspopup="listbox"
@@ -48,7 +48,7 @@ export function RepoBranchSelector({
             {selectedBranch || "Select branch..."}
           </div>
           <ChevronDown className="ml-2 opacity-50" />
-        </Button>
+        </AppButton>
       </PopoverTrigger>
       <PopoverContent align="start" className="p-0">
         <Command>
@@ -79,7 +79,7 @@ export function RepoBranchSelector({
                   >
                     <Check className={cn(selectedBranch === b ? "opacity-100" : "opacity-0")} />
                     {b}
-                    {defaultBranch === b && <Badge variant="outline">default</Badge>}
+                    {defaultBranch === b && <AppBadge variant="outline">default</AppBadge>}
                   </CommandItem>
                 ))
               )}

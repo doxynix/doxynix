@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
 import { useProfileActions } from "../model/use-profile-actions";
@@ -32,9 +32,9 @@ export function DeleteAccountDialog() {
       open={open}
       title={t("settings_danger_delete_account_dialog_title")}
       trigger={
-        <Button variant="destructive" className="w-fit cursor-pointer">
+        <AppButton variant="destructive" className="w-fit cursor-pointer">
           {t("settings_danger_delete_account_title")} <Trash2 />
-        </Button>
+        </AppButton>
       }
       onConfirm={handleDelete}
       onOpenChange={setOpen}

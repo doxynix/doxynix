@@ -6,7 +6,7 @@ import { Book, SlashIcon } from "lucide-react";
 import { LOCALES, type Locale } from "@/shared/constants/locales";
 import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { SidebarTrigger } from "@/shared/ui/core/sidebar";
 import { Logo } from "@/shared/ui/icons/logo";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
@@ -81,11 +81,11 @@ export function AppHeader() {
           <AppCommandMenu />
           <ThemeToggle />
           <AppTooltip content="Repositories">
-            <Button asChild size="icon" variant="ghost">
+            <AppButton asChild size="icon" variant="ghost">
               <Link href="/dashboard/repos" aria-label="Repositories">
                 <Book />
               </Link>
-            </Button>
+            </AppButton>
           </AppTooltip>
           <NotificationsNav />
           <UserNav />

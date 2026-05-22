@@ -2,10 +2,10 @@ import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
-import { Button } from "../core/button";
+import { AppButton } from "../core/button";
 import { Spinner } from "../core/spinner";
 
-type Props = ComponentProps<typeof Button> & {
+type Props = ComponentProps<typeof AppButton> & {
   children: ReactNode;
   isLoading: boolean;
   loadingText?: string;
@@ -22,7 +22,7 @@ export function LoadingButton({
   const reservedContent = loadingText ?? (typeof children === "string" ? children : "Loading...");
 
   return (
-    <Button {...props} disabled={isLoading || disabled} className={cn("relative", className)}>
+    <AppButton {...props} disabled={isLoading || disabled} className={cn("relative", className)}>
       <span aria-hidden="true" className="invisible px-3">
         {reservedContent}
       </span>
@@ -37,6 +37,6 @@ export function LoadingButton({
           children
         )}
       </span>
-    </Button>
+    </AppButton>
   );
 }

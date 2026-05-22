@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
 import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
@@ -41,9 +41,9 @@ export function DeleteByOwnerDialog({ owner }: Readonly<Props>) {
       successAlertTitle={t("settings_danger_alert_title")}
       title={`${t("settings_danger_delete_all_repos")}?`}
       trigger={
-        <Button variant="destructive" className="w-fit cursor-pointer">
+        <AppButton variant="destructive" className="w-fit cursor-pointer">
           {t("settings_danger_delete_all_repos")} <Trash2 />
-        </Button>
+        </AppButton>
       }
       onConfirm={handleDelete}
       onOpenChange={setOpen}

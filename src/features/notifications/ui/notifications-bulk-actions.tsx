@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCheck, Trash2 } from "lucide-react";
 import { useQueryStates } from "nuqs";
 import { useDebounce } from "use-debounce";
 
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
   DialogClose,
@@ -59,13 +59,13 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
       </LoadingButton>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button
+          <AppButton
             disabled={isDeleteReadDisabled}
             variant="destructive"
             className="flex cursor-pointer"
           >
             <Trash2 /> Delete all read
-          </Button>
+          </AppButton>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader className="gap-2 sm:gap-0">
@@ -83,9 +83,9 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline" className="cursor-pointer">
+              <AppButton variant="outline" className="cursor-pointer">
                 Cancel
-              </Button>
+              </AppButton>
             </DialogClose>
             <LoadingButton
               isLoading={deleteRead.isPending}

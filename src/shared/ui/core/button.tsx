@@ -35,7 +35,7 @@ export interface ButtonProps
   asChild?: boolean;
 }
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+const AppButton = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ asChild = false, className, size, variant, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
@@ -43,6 +43,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     );
   }
 );
-Button.displayName = "Button";
+AppButton.displayName = "Button";
 
-export { Button, buttonVariants };
+export { AppButton, buttonVariants };

@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { trpc } from "@/shared/api/trpc";
 import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +36,7 @@ export function NotificationsNav() {
     <DropdownMenu>
       <AppTooltip content={t("notifications_title")}>
         <DropdownMenuTrigger asChild>
-          <Button
+          <AppButton
             size="icon"
             variant="ghost"
             aria-label={t("notifications_title")}
@@ -46,20 +46,20 @@ export function NotificationsNav() {
             {unreadCount > 0 && (
               <span className="bg-foreground absolute top-2 right-2 size-2 rounded-full" />
             )}
-          </Button>
+          </AppButton>
         </DropdownMenuTrigger>
       </AppTooltip>
       <DropdownMenuContent className="w-80">
         <div className="flex items-center justify-between p-2">
           <h2>{t("notifications_title")}</h2>
-          <Button
+          <AppButton
             disabled={markAllAsRead.isPending || unreadCount === 0}
             variant="link"
             onClick={() => markAllAsRead.mutate()}
             className="cursor-pointer text-xs"
           >
             {t("notifications_mark_read")}
-          </Button>
+          </AppButton>
         </div>
         <DropdownMenuSeparator />
         <div className="flex flex-col gap-1 py-1">

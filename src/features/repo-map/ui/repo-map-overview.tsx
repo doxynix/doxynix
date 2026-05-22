@@ -2,8 +2,8 @@
 
 import { FileIcon, FileText, GitCommit, Layers } from "lucide-react";
 
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import type { RepoWorkspace } from "@/entities/repo/model/repo.types";
@@ -19,7 +19,7 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
       <h3 className="text-2xl">Project Brain</h3>
       <div className="flex items-center gap-2">
         {workspace.analysisRef?.commitSha != null && (
-          <Badge variant="outline" className="gap-1 font-mono text-xs">
+          <AppBadge variant="outline" className="gap-1 font-mono text-xs">
             <GitCommit />
             {workspace.analysisRef.commitSha.slice(0, 7)}
             <CopyButton
@@ -28,9 +28,9 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
               tooltipText="Copy SHA"
               className="opacity-100"
             />
-          </Badge>
+          </AppBadge>
         )}
-        <Badge variant="outline">{workspace.summary.repositoryKind}</Badge>
+        <AppBadge variant="outline">{workspace.summary.repositoryKind}</AppBadge>
       </div>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2 rounded-xl border p-4">
@@ -61,7 +61,7 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
           </div>
           <div className="gap-2">
             {workspace.navigation.primaryModules.map((path) => (
-              <Button
+              <AppButton
                 key={path}
                 variant="ghost"
                 onClick={() => onNavigate(path)}
@@ -69,7 +69,7 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
               >
                 <FileIcon />
                 <span className="truncate">{path.split("/").pop()}</span>
-              </Button>
+              </AppButton>
             ))}
           </div>
         </div>
@@ -87,7 +87,7 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
           </div>
           <div className="flex flex-wrap gap-2">
             {workspace.navigation.primaryEntrypoints.map((path) => (
-              <Button
+              <AppButton
                 key={path}
                 variant="ghost"
                 onClick={() => onNavigate(path)}
@@ -95,7 +95,7 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
               >
                 <FileIcon />
                 <span className="truncate">{path.split("/").pop()}</span>
-              </Button>
+              </AppButton>
             ))}
           </div>
         </div>

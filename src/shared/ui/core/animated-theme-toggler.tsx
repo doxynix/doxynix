@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useRef } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { flushSync } from "react-dom";
 
 import { cn } from "@/shared/lib/cn";
 
-import { Button } from "./button";
+import { AppButton } from "./button";
 
 type TransitionVariant =
   | "circle"
@@ -131,12 +131,12 @@ export const AnimatedThemeToggler = ({
   const isDark = resolvedTheme === "dark";
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const toggleTheme = useCallback(() => {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const applyTheme = () => {
+    setTheme(isDark ? "light" : "dark");
+  };
 
-    const applyTheme = () => {
-      setTheme(isDark ? "light" : "dark");
-    };
+  const toggleTheme = () => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (
       typeof document.startViewTransition !== "function" ||
@@ -185,12 +185,9 @@ export const AnimatedThemeToggler = ({
         );
 
         document.documentElement.animate(
-          {
-            clipPath: clipPath,
-          },
+          { clipPath },
           {
             duration,
-            // Star: linear avoids easing overshoot that fights polygon interpolation at t→1; VT group duration is synced above.
             easing: variant === "star" ? "linear" : "ease-in-out",
             fill: "forwards",
             pseudoElement: "::view-transition-new(root)",
@@ -202,10 +199,10 @@ export const AnimatedThemeToggler = ({
       .catch((error) => {
         console.error(error);
       });
-  }, [isDark, setTheme, variant, duration, fromCenter]);
+  };
 
   return (
-    <Button
+    <AppButton
       ref={buttonRef}
       type="button"
       size="icon"
@@ -217,6 +214,6 @@ export const AnimatedThemeToggler = ({
     >
       <Sun className="block h-4.5 w-4.5 dark:hidden" />
       <Moon className="hidden h-4.5 w-4.5 dark:block" />
-    </Button>
+    </AppButton>
   );
 };

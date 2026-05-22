@@ -2,8 +2,8 @@ import { ChevronDown, ChevronRight, FileIcon, Folder, FolderOpen, Sparkles } fro
 import type { NodeRendererProps } from "react-arborist";
 
 import { cn } from "@/shared/lib/cn";
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import { Checkbox } from "@/shared/ui/core/checkbox";
 
 import { getFolderSelectionState } from "@/entities/repo/model/repo-setup-utils";
@@ -32,7 +32,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
       <div className="flex pl-2">
         <div className="flex size-4 shrink-0 items-center justify-center">
           {isFolder && (
-            <Button
+            <AppButton
               type="button"
               tabIndex={-1}
               variant="ghost"
@@ -48,7 +48,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
                 <ChevronRight className="size-3.5" />
               )}
               <span className="sr-only">Toggle folder {node.data.name}</span>
-            </Button>
+            </AppButton>
           )}
         </div>
 
@@ -78,10 +78,10 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
         <span className="truncate text-sm">{node.data.name}</span>
 
         {isRecommended === true && (
-          <Badge variant="outline" className="ml-auto shrink-0">
+          <AppBadge variant="outline" className="ml-auto shrink-0">
             <Sparkles className="size-2.5" />
             Core
-          </Badge>
+          </AppBadge>
         )}
       </div>
     </div>

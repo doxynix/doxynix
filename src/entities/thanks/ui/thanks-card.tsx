@@ -2,7 +2,7 @@
 
 import { Package } from "lucide-react";
 
-import { Badge } from "@/shared/ui/core/badge";
+import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
@@ -30,9 +30,9 @@ export function ThanksCard({ group }: Readonly<Props>) {
               </CardTitle>
               <div className="mt-1 flex gap-1.5">
                 {uniqueLicenses.map((lic) => (
-                  <Badge key={lic} variant="secondary">
+                  <AppBadge key={lic} variant="secondary">
                     {lic}
-                  </Badge>
+                  </AppBadge>
                 ))}
               </div>
             </div>
@@ -47,7 +47,7 @@ export function ThanksCard({ group }: Readonly<Props>) {
           </p>
           <div className="flex flex-wrap gap-1.5">
             {packages.map((pkg) => (
-              <Badge key={pkg.name} variant="outline">
+              <AppBadge key={pkg.name} variant="outline">
                 <Package className="text-muted-foreground size-3" />
                 <span className="truncate">
                   {pkg.name.includes("/") ? (
@@ -59,7 +59,7 @@ export function ThanksCard({ group }: Readonly<Props>) {
                     pkg.name
                   )}
                 </span>
-              </Badge>
+              </AppBadge>
             ))}
           </div>
         </div>

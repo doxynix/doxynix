@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
 import { NotifyTypeSchema } from "@/shared/api-contracts";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Select,
   SelectContent,
@@ -109,10 +109,10 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
           </SelectContent>
         </Select>
 
-        <Button disabled={!hasFilters} variant="outline" onClick={handleReset} className="px-2">
+        <AppButton disabled={!hasFilters} variant="outline" onClick={handleReset} className="px-2">
           Reset
           <X />
-        </Button>
+        </AppButton>
       </div>
       <NotificationsBulkActions stats={stats} />
     </div>

@@ -11,11 +11,15 @@ import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
 
 import { RepoMetrics } from "./repo-metrics";
 
-export function RepoMetricsContainer({ id }: Readonly<{ id: string }>) {
+type Props = {
+  repoId: string;
+};
+
+export function RepoMetricsContainer({ repoId }: Readonly<Props>) {
   const { name, owner } = useRepoParams();
 
   const { data, isLoading } = trpc.analysis.getDetailedMetrics.useQuery({
-    repoId: id,
+    repoId,
   });
 
   if (isLoading) {
@@ -43,5 +47,5 @@ export function RepoMetricsContainer({ id }: Readonly<{ id: string }>) {
     );
   }
 
-  return <RepoMetrics data={data} />;
+  return <RepoMetrics data={data} repoId={repoId} />;
 }

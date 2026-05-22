@@ -10,16 +10,45 @@ export function useTypewriter(targetText: string, speed = 30): string {
   }
 
   useEffect(() => {
-    if (displayedText.length >= targetText.length) {
-      return;
-    }
+    if (!targetText.trim()) return;
 
-    const timeout = setTimeout(() => {
-      setDisplayedText(targetText.slice(0, displayedText.length + 1));
+    const interval = setInterval(() => {
+      setDisplayedText((prev) => {
+        if (prev.length >= targetText.length) {
+          clearInterval(interval);
+          return prev;
+        }
+
+        let nextIndex = prev.length;
+
+        do {
+          const char = targetText[nextIndex];
+          if (char === "<") {
+            const tagEnd = targetText.indexOf(">", nextIndex);
+            if (tagEnd !== -1) {
+              nextIndex = tagEnd + 1;
+            } else {
+              nextIndex++;
+            }
+          } else if (char === "&") {
+            const entityEnd = targetText.indexOf(";", nextIndex);
+            if (entityEnd !== -1 && entityEnd - nextIndex < 10) {
+              nextIndex = entityEnd + 1;
+            } else {
+              nextIndex++;
+            }
+          } else {
+            nextIndex++;
+            break;
+          }
+        } while (nextIndex < targetText.length);
+
+        return targetText.slice(0, nextIndex);
+      });
     }, speed);
 
-    return () => clearTimeout(timeout);
-  }, [targetText, speed, displayedText.length]);
+    return () => clearInterval(interval);
+  }, [targetText, speed]);
 
   return displayedText;
 }

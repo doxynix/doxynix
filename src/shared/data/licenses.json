@@ -144,6 +144,10 @@
         "license": "MIT"
       },
       {
+        "name": "remark-wiki-link",
+        "license": "MIT"
+      },
+      {
         "name": "unified",
         "license": "MIT"
       }
@@ -160,6 +164,10 @@
       },
       {
         "name": "@types/file-saver",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/hast",
         "license": "MIT"
       },
       {
@@ -1931,6 +1939,17 @@
     ]
   },
   {
+    "author": "Remarkablemark",
+    "avatar": "https://github.com/remarkablemark.png?size=96",
+    "authorLink": "https://github.com/remarkablemark",
+    "packages": [
+      {
+        "name": "html-react-parser",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Replit",
     "avatar": "https://github.com/replit.png?size=96",
     "authorLink": "https://github.com/replit",
@@ -2036,6 +2055,17 @@
     "packages": [
       {
         "name": "svix",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Syntax-tree",
+    "avatar": "https://github.com/syntax-tree.png?size=96",
+    "authorLink": "https://github.com/syntax-tree",
+    "packages": [
+      {
+        "name": "unist-util-visit",
         "license": "MIT"
       }
     ]

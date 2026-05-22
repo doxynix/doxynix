@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, type ComponentType } from "react";
+import { useRef, useState, type ComponentType } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
@@ -15,8 +15,8 @@ import { TURNSTILE_SITE_KEY } from "@/shared/constants/env.client";
 import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { setClientCookie } from "@/shared/lib/cookies";
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Form,
   FormControl,
@@ -95,44 +95,41 @@ export function AuthForm() {
 
   const disabled = loadingProvider != null || isVerifying;
 
-  const proceedWithSignIn = useCallback(
-    async (values: MagicLinkSchemaValue, token: string) => {
-      setIsVerifying(false);
-      setLoadingProvider("email");
+  const proceedWithSignIn = async (values: MagicLinkSchemaValue, token: string) => {
+    setIsVerifying(false);
+    setLoadingProvider("email");
 
-      setClientCookie("cf-turnstile-response", token, 300);
+    setClientCookie("cf-turnstile-response", token, 300);
 
-      try {
-        const res = await signIn("email", {
-          callbackUrl: "/dashboard",
-          email: values.email,
-          redirect: false,
-        });
+    try {
+      const res = await signIn("email", {
+        callbackUrl: "/dashboard",
+        email: values.email,
+        redirect: false,
+      });
 
-        if ((res?.ok ?? false) && res?.error == null) {
-          setIsSent(true);
-          toast.success(t("sent_toast_success"));
-          posthog.capture("sign_in_email_sent", { provider: "email" });
-        } else {
-          const msg =
-            res?.status === 403
-              ? "Captcha validation failed. Are you a robot?"
-              : t("sent_toast_error");
-          toast.error(msg);
-          turnstileRef.current?.reset();
-          setTurnstileToken(null);
-        }
-      } catch {
-        toast.error("Something went wrong. Please try again.");
+      if ((res?.ok ?? false) && res?.error == null) {
+        setIsSent(true);
+        toast.success(t("sent_toast_success"));
+        posthog.capture("sign_in_email_sent", { provider: "email" });
+      } else {
+        const msg =
+          res?.status === 403
+            ? "Captcha validation failed. Are you a robot?"
+            : t("sent_toast_error");
+        toast.error(msg);
         turnstileRef.current?.reset();
-      } finally {
-        setLoadingProvider(null);
-        pendingDataRef.current = null;
         setTurnstileToken(null);
       }
-    },
-    [t]
-  );
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+      turnstileRef.current?.reset();
+    } finally {
+      setLoadingProvider(null);
+      pendingDataRef.current = null;
+      setTurnstileToken(null);
+    }
+  };
 
   const onSubmit = async (values: MagicLinkSchemaValue) => {
     if (turnstileToken != null) {
@@ -162,33 +159,30 @@ export function AuthForm() {
     }
   }
 
-  const onTurnstileSuccess = useCallback(
-    (token: string) => {
-      setTurnstileToken(token);
+  const onTurnstileSuccess = (token: string) => {
+    setTurnstileToken(token);
 
-      const data = pendingDataRef.current;
-      if (data) {
-        void proceedWithSignIn(data, token);
-      }
-    },
-    [proceedWithSignIn]
-  );
+    const data = pendingDataRef.current;
+    if (data) {
+      void proceedWithSignIn(data, token);
+    }
+  };
 
-  const onTurnstileError = useCallback(() => {
+  const onTurnstileError = () => {
     setTurnstileToken(null);
     setIsVerifying(false);
     pendingDataRef.current = null;
     toast.error("Verification service error.");
-  }, []);
+  };
 
-  const onTurnstileExpire = useCallback(() => {
+  const onTurnstileExpire = () => {
     if (isSent || loadingProvider === "email") return;
 
     setTurnstileToken(null);
     setIsVerifying(false);
     pendingDataRef.current = null;
     toast.error("Verification expired.");
-  }, [isSent, loadingProvider]);
+  };
 
   const turnstileOptions = {
     action: "auth",
@@ -239,9 +233,9 @@ export function AuthForm() {
 
           <div className="flex flex-wrap gap-2">
             {TRUST_POINTS.map((item) => (
-              <Badge key={item} variant="outline" className="text-muted-foreground">
+              <AppBadge key={item} variant="outline" className="text-muted-foreground">
                 {item}
-              </Badge>
+              </AppBadge>
             ))}
           </div>
         </div>
@@ -384,13 +378,13 @@ export function AuthForm() {
                 {form.getValues("email")}
               </span>
             </p>
-            <Button
+            <AppButton
               variant="outline"
               onClick={() => setIsSent(false)}
               className="mt-2 cursor-pointer"
             >
               {t("enter_different_email")}
-            </Button>
+            </AppButton>
           </div>
         </div>
       </div>

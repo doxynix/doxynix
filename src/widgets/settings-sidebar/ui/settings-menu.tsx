@@ -5,7 +5,7 @@ import type { Route } from "next";
 import { settingsMenu } from "@/shared/constants/navigation";
 import { Link, usePathname } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 
 export function SettingsMenu() {
   const pathname = usePathname();
@@ -17,7 +17,7 @@ export function SettingsMenu() {
         const isDestructive = item.variant === "destructive";
 
         return (
-          <Button
+          <AppButton
             key={item.href}
             asChild
             variant="ghost"
@@ -44,7 +44,7 @@ export function SettingsMenu() {
               {item.icon != null && <item.icon />}
               {item.label}
             </Link>
-          </Button>
+          </AppButton>
         );
       })}
     </div>

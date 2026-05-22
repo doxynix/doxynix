@@ -1,13 +1,24 @@
 "use client";
 
-import { useState, type ComponentType } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import saveAs from "file-saver";
-import { BookOpen, Download, FileText, HistoryIcon, Layers, Terminal, Users2 } from "lucide-react";
+import {
+  BookOpen,
+  Check,
+  Download,
+  FileText,
+  HistoryIcon,
+  Layers,
+  Loader2,
+  Terminal,
+  Users2,
+} from "lucide-react";
+import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import { Tabs, TabsContent } from "@/shared/ui/core/tabs";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
@@ -56,6 +67,67 @@ export function RepoDocs({
     type: activeTab,
   });
 
+  const stageMutation = trpc.analysis.stageFile.useMutation({
+    onError: (error) => {
+      toast.error(`Failed to stage changes: ${error.message}`);
+    },
+    onSuccess: (data) => {
+      toast.success(`Changes staged for PR. Total files in draft: ${data.stagedCount}`);
+    },
+  });
+
+  const headings = (() => {
+    if (typeof window === "undefined" || docContent?.html == null) return [];
+
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(docContent.html, "text/html");
+      const headingElements = Array.from(doc.querySelectorAll("h2, h3"));
+
+      return headingElements.map((el) => {
+        const level = el.tagName.toLowerCase() === "h2" ? 2 : 3;
+        const id = el.id;
+
+        let text = el.textContent;
+
+        if (text.endsWith("#")) {
+          text = text.slice(0, -1).trim();
+        }
+
+        return { id, level, text };
+      });
+    } catch (error) {
+      console.error("DOMParser failed:", error);
+      return [];
+    }
+  })();
+
+  const [activeHeadingId, setActiveHeadingId] = useState<string>("");
+
+  useEffect(() => {
+    if (headings.length === 0) return;
+
+    const headingElements = headings
+      .map((h) => document.getElementById(h.id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntry = entries.find((entry) => entry.isIntersecting);
+        if (visibleEntry) {
+          setActiveHeadingId(visibleEntry.target.id);
+        }
+      },
+      {
+        rootMargin: "-40px 0px -75% 0px",
+        threshold: 0,
+      }
+    );
+
+    headingElements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [headings]);
+
   const handleDownload = () => {
     if (docContent?.raw == null) {
       return;
@@ -86,7 +158,12 @@ export function RepoDocs({
       onValueChange={(value) => onTabChange(value as DocType)}
       className="flex h-[calc(100dvh-250px)] w-full flex-row gap-10"
     >
-      <RepoDocsTabs activeTab={activeTab} items={tabItems} />
+      <RepoDocsTabs
+        activeHeadingId={activeHeadingId}
+        activeTab={activeTab}
+        headings={headings}
+        items={tabItems}
+      />
 
       <div className="bg-card relative flex flex-1 flex-col border">
         {availableDocs.map((doc) => {
@@ -129,15 +206,34 @@ export function RepoDocs({
                   <div className="flex items-center gap-2">
                     {isActive && !isCurrentApiSwagger && (
                       <>
+                        <AppButton
+                          disabled={stageMutation.isPending === true}
+                          size="sm"
+                          variant="default"
+                          onClick={() =>
+                            stageMutation.mutate({
+                              content: docContent?.raw ?? "",
+                              filePath: docContent?.materializedPath ?? "",
+                              repoId,
+                            })
+                          }
+                        >
+                          {stageMutation.isPending === true ? (
+                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                          ) : (
+                            <Check className="mr-1 h-3 w-3" />
+                          )}
+                          Add to PR draft
+                        </AppButton>
                         <AppTooltip content="Download file">
-                          <Button
+                          <AppButton
                             disabled={isDocLoading}
                             size="icon"
                             variant="ghost"
                             onClick={handleDownload}
                           >
                             <Download className="size-3" />
-                          </Button>
+                          </AppButton>
                         </AppTooltip>
                         <CopyButton
                           disabled={isDocLoading}
@@ -150,22 +246,22 @@ export function RepoDocs({
 
                     {doc.type === "API" && metrics?.reference.swagger != null && (
                       <div className="flex gap-1 rounded-lg border p-1">
-                        <Button
+                        <AppButton
                           size="sm"
                           variant={apiMode === "md" ? "secondary" : "ghost"}
                           onClick={() => setApiMode("md")}
                           className="h-7 px-3 text-xs"
                         >
                           <FileText className="mr-1.5 size-3" /> Docs
-                        </Button>
-                        <Button
+                        </AppButton>
+                        <AppButton
                           size="sm"
                           variant={apiMode === "swagger" ? "secondary" : "ghost"}
                           onClick={() => setApiMode("swagger")}
                           className="h-7 px-3 text-xs"
                         >
                           <Terminal className="mr-1.5 size-3" /> Console
-                        </Button>
+                        </AppButton>
                       </div>
                     )}
                   </div>
@@ -178,18 +274,18 @@ export function RepoDocs({
                         <p className="text-sm font-medium">{nodeContext.node.label}</p>
                         <p className="text-muted-foreground text-xs">{nodeContext.explain.role}</p>
                       </div>
-                      <Badge variant="outline">
+                      <AppBadge variant="outline">
                         {nodeContext.related.docs.length} related sections
-                      </Badge>
+                      </AppBadge>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {nodeContext.related.docs
                         .filter((doc) => doc.docType === activeTab)
                         .slice(0, 6)
                         .map((doc) => (
-                          <Badge key={doc.id} variant="secondary">
+                          <AppBadge key={doc.id} variant="secondary">
                             {doc.title}
-                          </Badge>
+                          </AppBadge>
                         ))}
                     </div>
                   </div>
@@ -207,6 +303,7 @@ export function RepoDocs({
                     <RepoDocsContent
                       data={isActive ? docContent : undefined}
                       isLoading={isActive ? isDocLoading : false}
+                      repoId={repoId}
                     />
                   </div>
                 </ScrollArea>

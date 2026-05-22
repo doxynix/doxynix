@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
 import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { Button, buttonVariants, type ButtonProps } from "@/shared/ui/core/button";
+import { AppButton, buttonVariants, type ButtonProps } from "@/shared/ui/core/button";
 
 const Pagination = ({ className, ...props }: ComponentProps<"nav">) => (
   <nav
@@ -59,7 +59,7 @@ const PaginationLink = ({
     const buttonProps = props as ComponentProps<"button">;
 
     return (
-      <Button
+      <AppButton
         disabled={disabled}
         variant="ghost"
         aria-current={isActive ? "page" : undefined}

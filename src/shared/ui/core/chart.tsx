@@ -5,7 +5,6 @@ import {
   forwardRef,
   useContext,
   useId,
-  useMemo,
   type ComponentProps,
   type ComponentType,
   type CSSProperties,
@@ -141,7 +140,7 @@ const ChartTooltipContent = forwardRef<
     const { config } = useChart();
     const locale = useLocale();
 
-    const tooltipLabel = useMemo(() => {
+    const tooltipLabel = (() => {
       if (hideLabel || !payload?.length) {
         return null;
       }
@@ -169,7 +168,7 @@ const ChartTooltipContent = forwardRef<
       }
 
       return <div className={cn("font-medium", labelClassName)}>{value}</div>;
-    }, [label, labelFormatter, payload, hideLabel, labelClassName, config, labelKey]);
+    })();
 
     if (!active || !payload?.length) {
       return null;

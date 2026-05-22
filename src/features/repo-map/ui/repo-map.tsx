@@ -17,7 +17,7 @@ import { FilterIcon, SlashIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 
@@ -215,14 +215,14 @@ export function RepoMap({
     <div className="relative flex h-[calc(100dvh-260px)] w-full flex-col overflow-hidden rounded-xl border">
       <div className="flex shrink-0 items-center justify-between p-3">
         <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto">
-          <Button
+          <AppButton
             size="sm"
             variant="ghost"
             onClick={() => onNavigate(null)}
             className="h-5 cursor-pointer gap-1 bg-transparent text-xs hover:bg-transparent md:px-1"
           >
             Root
-          </Button>
+          </AppButton>
 
           {breadcrumbItems.length > 0 && (
             <AppBreadcrumbs
@@ -273,7 +273,7 @@ export function RepoMap({
                   <div className="flex items-center gap-2">
                     {(Object.keys(FILTER_CONFIG) as Array<keyof typeof FILTER_CONFIG>).map(
                       (key) => (
-                        <Button
+                        <AppButton
                           key={key}
                           size="sm"
                           variant="outline"
@@ -285,7 +285,7 @@ export function RepoMap({
                         >
                           <div className={cn("size-2 rounded-full", FILTER_CONFIG[key].color)} />
                           {FILTER_CONFIG[key].label}
-                        </Button>
+                        </AppButton>
                       )
                     )}
                   </div>

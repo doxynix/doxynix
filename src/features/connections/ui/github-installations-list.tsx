@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
@@ -25,11 +25,11 @@ export function GitHubInstallationsList({ installations }: Readonly<Props>) {
         <ConnectionCard
           key={inst.id}
           action={
-            <Button asChild size="sm" variant="outline">
+            <AppButton asChild size="sm" variant="outline">
               <ExternalLink href={inst.manageUrl ?? ""}>
                 <GitHubIcon /> Configure
               </ExternalLink>
-            </Button>
+            </AppButton>
           }
           description="GitHub App Installation"
           icon={<AppAvatar alt={inst.login} src={inst.avatar} fallbackText={inst.login} />}
