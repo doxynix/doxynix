@@ -49,7 +49,8 @@ next-env.d.ts
 # gen
 /prisma/dbml
 /prisma/json-schema
-/prisma/erd
+/prisma/erd/*
+!/prisma/erd/.gitkeep
 sitemap*.xml
 robots.txt
 messages/*.d.json.ts
