@@ -28,7 +28,7 @@ import {
   contributingTask,
   readmeTask,
 } from "../tasks/writer.tasks";
-import type { WriterName, WriterResult } from "./writer-tasks";
+import { type WriterName, type WriterResult } from "./writer-tasks";
 
 type ModuleDependencyEntry = {
   graphPartial: boolean;
@@ -187,14 +187,10 @@ export async function orchestrateWriterTasks(
     userId,
   };
 
-  taskLogger.info(
-    `Documentation: Triggering parallel generation for ${requestedDocs.length} assets...`
-  );
-
-  const batchDefinitions: any[] = [];
+  const batchJobs = [];
 
   if (requestedDocs.includes(DocType.README)) {
-    batchDefinitions.push({
+    batchJobs.push({
       payload: {
         allowedPaths: allowedPathsByWriter.readme,
         analysisId,
@@ -210,7 +206,7 @@ export async function orchestrateWriterTasks(
   }
 
   if (requestedDocs.includes(DocType.API)) {
-    batchDefinitions.push({
+    batchJobs.push({
       payload: {
         allowedPaths: allowedPathsByWriter.api,
         analysisId,
@@ -226,17 +222,20 @@ export async function orchestrateWriterTasks(
   }
 
   if (requestedDocs.includes(DocType.ARCHITECTURE)) {
-    batchDefinitions.push({
+    const moduleContext = architectureDependencyContextPayload;
+    const onboardingPayload = serializeForWriter(documentationInput.sections.onboarding);
+    const risksPayload = serializeForWriter(documentationInput.sections.risks);
+    batchJobs.push({
       payload: {
         allowedPaths: allowedPathsByWriter.architecture,
         analysisId,
         context: writerContexts.architecture.context,
         engineeringDossierPayload,
         language,
-        moduleContext: architectureDependencyContextPayload,
-        onboardingPayload: serializeForWriter(documentationInput.sections.onboarding),
+        moduleContext,
+        onboardingPayload,
         payload: writerInputs.architecture.payload,
-        risksPayload: serializeForWriter(documentationInput.sections.risks),
+        risksPayload,
         selectedTokens: writerContexts.architecture.debug.selectedTokens,
         ...authParams,
       },
@@ -245,7 +244,7 @@ export async function orchestrateWriterTasks(
   }
 
   if (requestedDocs.includes(DocType.CONTRIBUTING)) {
-    batchDefinitions.push({
+    batchJobs.push({
       payload: {
         allowedPaths: allowedPathsByWriter.readme,
         analysisId,
@@ -261,7 +260,7 @@ export async function orchestrateWriterTasks(
   }
 
   if (requestedDocs.includes(DocType.CHANGELOG)) {
-    batchDefinitions.push({
+    batchJobs.push({
       payload: {
         analysisId,
         analysisResult,
@@ -273,7 +272,7 @@ export async function orchestrateWriterTasks(
     });
   }
 
-  if (batchDefinitions.length === 0) {
+  if (batchJobs.length === 0) {
     taskLogger.warn("Documentation: No assets requested for generation");
 
     return {
@@ -286,40 +285,39 @@ export async function orchestrateWriterTasks(
     };
   }
 
-  const { runs } = await batch.triggerByTaskAndWait(batchDefinitions);
+  taskLogger.info(
+    `Documentation: Fan-out triggering ${batchJobs.length} writers in parallel via batching...`
+  );
 
-  const results: WriterResult[] = runs.map((run, index) => {
-    const taskName = batchDefinitions[index].task.id.replace("-task", "") as WriterName;
+  const { runs } = await batch.triggerByTaskAndWait(batchJobs);
+
+  const getOutput = (
+    taskInstance:
+      | typeof apiTask
+      | typeof architectureTask
+      | typeof changelogTask
+      | typeof contributingTask
+      | typeof readmeTask
+  ) => {
+    const run = runs.find((r) => r.taskIdentifier === taskInstance.id);
+    if (run == null) return;
 
     if (run.ok) {
-      taskLogger.success(`Documentation: ${taskName.toUpperCase()} generated successfully`);
-
       return run.output as WriterResult;
     }
 
-    taskLogger.error(`❌ Documentation: ${taskName.toUpperCase()} failed to generate`);
-
     return {
-      error: run.error instanceof Error ? run.error.message : "Writer task failed",
-      name: taskName,
-      status: "failed",
-    };
-  });
+      error: run.error instanceof Error ? run.error.message : null,
+      name: taskInstance.id.replace("write-", "") as WriterName,
+      status: "failed" as const,
+    } as WriterResult;
+  };
 
-  const writerErrors: Partial<Record<WriterName, string>> = {};
-  for (const result of results) {
-    if (result.error != null) {
-      writerErrors[result.name] = result.error;
-    }
-  }
-
-  const getResult = (name: WriterName) => results.find((r) => r.name === name);
-
-  const readmeRes = getResult("readme");
-  const apiRes = getResult("api");
-  const archRes = getResult("architecture");
-  const contrRes = getResult("contributing");
-  const changeRes = getResult("changelog");
+  const readmeRes = getOutput(readmeTask);
+  const apiRes = getOutput(apiTask);
+  const archRes = getOutput(architectureTask);
+  const contrRes = getOutput(contributingTask);
+  const changeRes = getOutput(changelogTask);
 
   const generatedReadme = readmeRes?.content;
   let generatedApiMarkdown = apiRes?.content;
@@ -348,6 +346,17 @@ export async function orchestrateWriterTasks(
       readme: readmeRes?.status ?? "missing",
     },
   };
+
+  const resultsList = [readmeRes, apiRes, archRes, contrRes, changeRes].filter(
+    (r): r is NonNullable<typeof r> => r != null
+  );
+
+  const writerErrors: Partial<Record<WriterName, string>> = {};
+  for (const result of resultsList) {
+    if (result.error != null) {
+      writerErrors[result.name] = result.error;
+    }
+  }
 
   void dumpDebug("report-section-docs", {
     generated: {

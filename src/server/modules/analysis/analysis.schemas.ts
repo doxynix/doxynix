@@ -119,8 +119,8 @@ export const StagedFixedFileSchema = z.object({
 export const FixApplicationPayloadSchema = z.object({
   branch: z.string().min(1),
   fixedFiles: z.array(StagedFixedFileSchema).min(1),
-  fixId: z.string().uuid(),
-  repoId: z.string().uuid(),
+  fixId: z.uuid(),
+  repoId: z.uuid(),
   title: z.string().min(1),
 });
 
@@ -131,7 +131,7 @@ export const GeneratedFixDTO = z.object({
   estimatedImpact: z.number().nullable(),
   githubPrNumber: z.number().nullable(),
   githubPrUrl: z.string().nullable(),
-  id: z.string().uuid(),
+  id: z.uuid(),
   status: z.string(),
   title: z.string(),
 });

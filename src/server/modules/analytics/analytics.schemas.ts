@@ -41,7 +41,7 @@ export const DashboardStatsSchema = z.object({
   }),
   recentActivity: z.array(
     z.object({
-      createdAt: z.date(),
+      createdAt: z.coerce.date(),
       id: z.uuid(),
       progress: z.number(),
       repoName: z.string(),

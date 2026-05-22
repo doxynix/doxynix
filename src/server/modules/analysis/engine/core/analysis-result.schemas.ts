@@ -185,9 +185,10 @@ export const aiSchema = z.object({
         file: z.string(),
         impact_on_health: z
           .number()
-          .describe("How many points will be added to health score after fix"),
+          .describe("How many points will be added to health score after fix")
+          .optional(),
         improved_code: z.string().optional(),
-        issue_category: z.string(),
+        issue_category: z.string().optional(),
         original_code: z.string().optional(),
         priority: z.enum(["HIGH", "MEDIUM", "LOW"]),
       })

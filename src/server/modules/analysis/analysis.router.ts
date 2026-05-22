@@ -404,6 +404,16 @@ export const analysisRouter = createTRPCRouter({
       const comments = await ctx.db.pullRequestComment.findMany({
         orderBy: [{ filePath: "asc" }, { line: "asc" }],
         select: {
+          analysis: {
+            select: {
+              repo: {
+                select: {
+                  name: true,
+                  owner: true,
+                },
+              },
+            },
+          },
           body: true,
           filePath: true,
           findingType: true,
@@ -418,8 +428,15 @@ export const analysisRouter = createTRPCRouter({
 
       const renderedComments = await Promise.all(
         comments.map(async (c) => {
+          const repoContext = c.analysis.repo;
+
           const html = await unstable_cache(
-            async () => markdownToHtml(c.body),
+            async () =>
+              markdownToHtml({
+                content: c.body,
+                name: repoContext.name,
+                owner: repoContext.owner,
+              }),
             [`comment-html-${c.publicId}`],
             {
               revalidate: false,
@@ -474,7 +491,10 @@ export const analysisRouter = createTRPCRouter({
       if (data == null) return null;
 
       const html = await unstable_cache(
-        async () => markdownToHtml(data.content),
+        async () =>
+          markdownToHtml({
+            content: data.content,
+          }),
         [`file-res-html-${cacheKey}`],
         {
           revalidate: false,

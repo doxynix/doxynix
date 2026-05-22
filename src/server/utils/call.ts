@@ -7,6 +7,7 @@ import type z from "zod";
 import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
 
 import { appLogger } from "@/server/core/app-logger";
+import { isSchemaMismatchError } from "@/server/modules/analysis/engine/core/ai-result-normalize";
 import {
   LLM_TEMPERATURE_STRATEGY,
   type LLMTaskType,
@@ -68,118 +69,144 @@ export async function callWithFallback<T>({
   let lastError: unknown = null;
 
   for (const modelName of models) {
-    try {
-      appLogger.info({
-        model: modelName,
-        msg: "Attempting model",
-        taskType,
-        ...attemptMetadata,
-      });
-      if (outputSchema != null) {
-        const result = await tracedAi.generateText({
+    const attempts: Array<{ label: string; useTools: boolean }> =
+      tools != null
+        ? [
+            { label: "structured+tools", useTools: true },
+            { label: "structured", useTools: false },
+          ]
+        : [{ label: "structured", useTools: false }];
+
+    for (const attempt of attempts) {
+      try {
+        appLogger.info({
+          attempt: attempt.label,
+          model: modelName,
+          msg: "Attempting model",
+          taskType,
+          ...attemptMetadata,
+        });
+        if (outputSchema != null) {
+          const activeTools = attempt.useTools ? tools : undefined;
+          const result = await tracedAi.generateText({
+            experimental_telemetry: {
+              functionId: `gen-${taskType}`,
+              isEnabled: true,
+              metadata: {
+                ...attemptMetadata,
+                attempt: attempt.label,
+                taskType,
+              },
+            },
+            frequencyPenalty,
+            maxOutputTokens,
+            model: google(modelName),
+            output: ai.Output.object({ schema: outputSchema }),
+            presencePenalty,
+            prompt,
+            providerOptions,
+            stopSequences,
+            stopWhen: activeTools != null ? ai.stepCountIs(5) : undefined,
+            system,
+            temperature: finalTemperature,
+            tools: activeTools,
+            topK: finalTopK,
+            topP: finalTopP,
+          });
+
+          taskLogger.success(
+            `AI (${String(attemptMetadata.phase ?? taskType)}): responded successfully.`
+          );
+
+          return result.output as T;
+        }
+
+        const activeTools = attempt.useTools ? tools : undefined;
+        const result = tracedAi.streamText({
           experimental_telemetry: {
-            functionId: `gen-${taskType}`,
+            functionId: `stream-${taskType}`,
             isEnabled: true,
             metadata: {
               ...attemptMetadata,
+              attempt: attempt.label,
               taskType,
             },
           },
           frequencyPenalty,
           maxOutputTokens,
           model: google(modelName),
-          output: ai.Output.object({ schema: outputSchema }),
           presencePenalty,
           prompt,
           providerOptions,
           stopSequences,
-          stopWhen: tools != null ? ai.stepCountIs(5) : undefined,
+          stopWhen: activeTools != null ? ai.stepCountIs(5) : undefined,
           system,
           temperature: finalTemperature,
-          tools,
+          tools: activeTools,
           topK: finalTopK,
           topP: finalTopP,
         });
 
-        taskLogger.success(`AI: responded successfully.`);
+        let fullText = "";
+        const { aiChunks, aiThoughts, taskLogs } = TRIGGER_CONFIG.metadataKeys;
 
-        return result.output as T;
-      }
+        for await (const part of result.fullStream) {
+          if (part.type === "text-delta") {
+            fullText += part.text;
+            try {
+              metadata.append(aiChunks, part.text);
+            } catch (error) {
+              appLogger.debug({ error: error, msg: "Metadata append failed for text-delta" });
+            }
+          } else if (part.type === "reasoning-delta") {
+            try {
+              metadata.append(aiThoughts, part.text);
+            } catch (error) {
+              appLogger.debug({ error: error, msg: "Metadata append failed for reasoning-delta" });
+            }
+          } else if (part.type === "tool-call") {
+            const timestamp = new Date().toLocaleTimeString();
+            const logLine = `info:::${timestamp}:::Agent: Invoking tool [${part.toolName}]...`;
 
-      const result = tracedAi.streamText({
-        experimental_telemetry: {
-          functionId: `stream-${taskType}`,
-          isEnabled: true,
-          metadata: {
-            ...attemptMetadata,
-            taskType,
-          },
-        },
-        frequencyPenalty,
-        maxOutputTokens,
-        model: google(modelName),
-        presencePenalty,
-        prompt,
-        providerOptions,
-        stopSequences,
-        stopWhen: tools != null ? ai.stepCountIs(5) : undefined,
-        system,
-        temperature: finalTemperature,
-        tools,
-        topK: finalTopK,
-        topP: finalTopP,
-      });
-
-      let fullText = "";
-      const { aiChunks, aiThoughts, taskLogs } = TRIGGER_CONFIG.metadataKeys;
-
-      for await (const part of result.fullStream) {
-        if (part.type === "text-delta") {
-          fullText += part.text;
-          try {
-            metadata.append(aiChunks, part.text);
-          } catch (error) {
-            appLogger.debug({ error: error, msg: "Metadata append failed for text-delta" });
+            try {
+              metadata.append(taskLogs, logLine);
+            } catch (error) {
+              appLogger.debug({ error: error, msg: "Metadata append failed for tool-call log" });
+            }
+            appLogger.info({
+              analysisId: attemptMetadata.analysisId,
+              msg: `AI Tool Call: ${part.toolName}`,
+            });
+          } else if (part.type === "error") {
+            const timestamp = new Date().toLocaleTimeString();
+            try {
+              metadata.append(taskLogs, `error:::${timestamp}:::AI Stream Error: ${part.error}`);
+            } catch (error) {
+              appLogger.debug({ error: error, msg: "Metadata append failed for error log" });
+            }
+            appLogger.error({ error: part.error, msg: "Stream event error" });
           }
-        } else if (part.type === "reasoning-delta") {
-          try {
-            metadata.append(aiThoughts, part.text);
-          } catch (error) {
-            appLogger.debug({ error: error, msg: "Metadata append failed for reasoning-delta" });
-          }
-        } else if (part.type === "tool-call") {
-          const timestamp = new Date().toLocaleTimeString();
-          const logLine = `info:::${timestamp}:::Agent: Invoking tool [${part.toolName}]...`;
+        }
 
-          try {
-            metadata.append(taskLogs, logLine);
-          } catch (error) {
-            appLogger.debug({ error: error, msg: "Metadata append failed for tool-call log" });
-          }
-          appLogger.info({
-            analysisId: attemptMetadata.analysisId,
-            msg: `AI Tool Call: ${part.toolName}`,
-          });
-        } else if (part.type === "error") {
-          const timestamp = new Date().toLocaleTimeString();
-          try {
-            metadata.append(taskLogs, `error:::${timestamp}:::AI Stream Error: ${part.error}`);
-          } catch (error) {
-            appLogger.debug({ error: error, msg: "Metadata append failed for error log" });
-          }
-          appLogger.error({ error: part.error, msg: "Stream event error" });
+        taskLogger.success(`AI: finished generation.`);
+        return fullText as T;
+      } catch (error) {
+        lastError = error;
+        const schemaMismatch = isSchemaMismatchError(error);
+        appLogger.warn({
+          attempt: attempt.label,
+          error:
+            error instanceof Error ? { message: error.message, name: error.name } : String(error),
+          model: modelName,
+          msg: schemaMismatch
+            ? "Structured output schema mismatch, trying fallback attempt/model"
+            : "Model call failed, trying next model",
+        });
+
+        if (schemaMismatch && attempt.useTools) {
+          continue;
         }
       }
-
-      taskLogger.success(`AI: finished generation.`);
-      return fullText as T;
-    } catch (error) {
-      lastError = error;
-      appLogger.warn({
-        error: error instanceof Error ? { message: error.message } : String(error),
-        model: modelName,
-        msg: "Model call failed, trying next model",
-      });
     }
   }
 

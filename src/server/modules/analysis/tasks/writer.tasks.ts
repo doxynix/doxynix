@@ -1,68 +1,18 @@
 import { task } from "@trigger.dev/sdk";
 
-import { appLogger } from "@/server/core/app-logger";
-import { llmLimiter } from "@/server/utils/llm-limiter";
-
+import { runWriterWithLimiter, type WriterInput } from "../ai/writer-runner";
 import {
   executeApiWriter,
   executeArchitectureWriter,
   executeChangelogWriter,
   executeContributingWriter,
   executeReadmeWriter,
-  type WriterName,
-  type WriterResult,
 } from "../ai/writer-tasks";
-
-interface WriterInput {
-  allowedPaths: string;
-  analysisId: string;
-  branch: string;
-  context: string;
-  engineeringDossierPayload: string;
-  language: string;
-  payload: string;
-  repoId: string;
-  selectedTokens: number;
-  userId: number;
-}
-
-async function runWithLimiter(
-  name: WriterName,
-  input: WriterInput,
-  taskFn: () => Promise<WriterResult>
-): Promise<WriterResult> {
-  const { analysisId, selectedTokens } = input;
-  const estimatedWeight = Math.ceil(selectedTokens * 1.3) + 15_000;
-
-  appLogger.info({
-    analysisId,
-    calculatedWeight: estimatedWeight,
-    msg: `Scheduling distributed task ${name.toUpperCase()}`,
-    tokens: selectedTokens,
-  });
-
-  try {
-    return await llmLimiter.schedule(
-      {
-        id: `${analysisId}-${name}`,
-        weight: estimatedWeight,
-      },
-      taskFn
-    );
-  } catch (error) {
-    appLogger.error({ analysisId, error, msg: `Writer ${name} failed in distributed queue` });
-    return {
-      error: "Queue overflow or API error",
-      name,
-      status: "failed",
-    };
-  }
-}
 
 export const readmeTask = task({
   id: "write-readme",
   run: async (i: WriterInput) =>
-    runWithLimiter("readme", i, () =>
+    runWriterWithLimiter("readme", i, () =>
       executeReadmeWriter(
         i.analysisId,
         i.payload,
@@ -80,7 +30,7 @@ export const readmeTask = task({
 export const apiTask = task({
   id: "write-api",
   run: async (i: WriterInput) =>
-    runWithLimiter("api", i, () =>
+    runWriterWithLimiter("api", i, () =>
       executeApiWriter(
         i.analysisId,
         i.payload,
@@ -100,7 +50,7 @@ export const architectureTask = task({
   run: async (
     i: WriterInput & { moduleContext: string; onboardingPayload: string; risksPayload: string }
   ) =>
-    runWithLimiter("architecture", i, () =>
+    runWriterWithLimiter("architecture", i, () =>
       executeArchitectureWriter(
         i.analysisId,
         i.payload,
@@ -121,7 +71,7 @@ export const architectureTask = task({
 export const contributingTask = task({
   id: "write-contributing",
   run: async (i: WriterInput) =>
-    runWithLimiter("contributing", i, () =>
+    runWriterWithLimiter("contributing", i, () =>
       executeContributingWriter(
         i.analysisId,
         i.payload,

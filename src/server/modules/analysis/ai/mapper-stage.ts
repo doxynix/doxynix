@@ -3,7 +3,12 @@ import { google } from "@ai-sdk/google";
 import { appLogger } from "@/server/core/app-logger";
 import { callWithFallback } from "@/server/utils/call";
 
-import { projectMapSchema, type ProjectMap } from "../engine/core/analysis-result.schemas";
+import {
+  isSchemaMismatchError,
+  normalizeProjectMapOutput,
+  projectMapGenerationSchema,
+} from "../engine/core/ai-result-normalize";
+import type { ProjectMap } from "../engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "../engine/core/discovery.types";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import { buildMapperSkeleton } from "../logic/mapper-skeleton";
@@ -29,10 +34,10 @@ export async function executeMapperPhase(
   const repoTools = buildRepositoryTools(userId, repoId, branch);
 
   try {
-    const projectMap = await callWithFallback<ProjectMap>({
+    const raw = await callWithFallback<unknown>({
       attemptMetadata: { analysisId, phase: "mapper" },
       models: AI_MODELS.CARTOGRAPHER,
-      outputSchema: projectMapSchema,
+      outputSchema: projectMapGenerationSchema,
       prompt: buildMapperUserPrompt(mapContext),
       providerOptions: {
         google: {
@@ -42,12 +47,13 @@ export async function executeMapperPhase(
       system: buildMapperSystemPrompt(),
 
       taskType: "reasoning",
-
       tools: {
         ...repoTools,
         codeExecution: google.tools.codeExecution({}),
       },
     });
+
+    const projectMap = normalizeProjectMapOutput(raw);
 
     appLogger.debug({
       analysisId,
@@ -58,10 +64,26 @@ export async function executeMapperPhase(
 
     return projectMap;
   } catch (error) {
+    if (isSchemaMismatchError(error)) {
+      appLogger.warn({
+        analysisId,
+        error,
+        msg: "Mapper schema mismatch; using skeleton fallback",
+      });
+      return normalizeProjectMapOutput({
+        modules: hardMetrics.documentationInput?.architecture.modules.map((module) => ({
+          path: module.path,
+          responsibility: module.categories.join(", ") || "Core module",
+          type: module.categories[0] ?? "module",
+        })),
+        overview: "Topology inferred from static analysis after mapper schema mismatch.",
+      });
+    }
+
     appLogger.warn({
       analysisId,
       error,
-      msg: "Mapper stage failed; continuing with fallback analysis summary",
+      msg: "Mapper stage failed",
     });
     throw error;
   }

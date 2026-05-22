@@ -1,9 +1,11 @@
 import { Status } from "@prisma/client";
 import { metadata } from "@trigger.dev/sdk";
 
+import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
 
 import { prisma } from "@/server/core/db";
+import { realtimeServer } from "@/server/core/realtime";
 
 import { appLogger } from "../core/app-logger";
 
@@ -38,19 +40,29 @@ export const taskLogger = {
    * Финальный синк. Вызывается один раз в конце.
    * Собирает ВСЕ логи из метаданных и кладет в БД на вечное хранение.
    */
-  async finalize(analysisId: string, status: Status = Status.DONE) {
+  async finalize(analysisId: string, status: Status = Status.DONE, message?: string) {
     const currentMetadata = safeCurrentMetadata();
 
     const rawLogs = currentMetadata?.[TRIGGER_CONFIG.metadataKeys.taskLogs];
     const allLogs = Array.isArray(rawLogs) ? rawLogs.join("\n") : "";
 
-    await prisma.analysis.update({
+    const analysis = await prisma.analysis.update({
       data: {
         logs: allLogs,
+        message: message ?? (status === Status.DONE ? "Completed successfully" : "Analysis failed"),
         progress: 100,
         status,
       },
+      select: { repo: { select: { userId: true } } },
       where: { publicId: analysisId },
+    });
+
+    await publishAnalysisProgress({
+      analysisId,
+      message: message ?? (status === Status.DONE ? "Completed successfully" : "Analysis failed"),
+      progress: 100,
+      status,
+      userId: analysis.repo.userId,
     });
 
     if (status === Status.DONE) {
@@ -82,21 +94,36 @@ export const taskLogger = {
    * Обновление статуса этапа.
    * Пишет в метаданные И в базу данных (так как это важная точка).
    */
-  async milestone(params: { analysisId: string; msg: string; percent: number; status?: Status }) {
-    const { analysisId, msg, percent, status = Status.PENDING } = params;
+  async milestone(params: {
+    analysisId: string;
+    msg: string;
+    percent: number;
+    status?: Status;
+    userId?: number;
+  }) {
+    const { analysisId, msg, percent, status = Status.PENDING, userId } = params;
 
     this.info(`STAGE: ${msg} (${percent}%)`);
 
     safeMetadata(() => metadata.set(TRIGGER_CONFIG.metadataKeys.statusMessage, msg));
     safeMetadata(() => metadata.set(TRIGGER_CONFIG.metadataKeys.progress, percent));
 
-    await prisma.analysis.update({
+    const analysis = await prisma.analysis.update({
       data: {
         message: msg,
         progress: percent,
         status,
       },
+      select: { repo: { select: { userId: true } } },
       where: { publicId: analysisId },
+    });
+
+    await publishAnalysisProgress({
+      analysisId,
+      message: msg,
+      progress: percent,
+      status,
+      userId: userId ?? analysis.repo.userId,
     });
   },
 
@@ -108,3 +135,24 @@ export const taskLogger = {
     this.log(msg, "warn");
   },
 };
+
+async function publishAnalysisProgress(params: {
+  analysisId: string;
+  message: string;
+  progress: number;
+  status: Status;
+  userId: number;
+}) {
+  try {
+    await realtimeServer.channels
+      .get(REALTIME_CONFIG.channels.user(params.userId))
+      .publish(REALTIME_CONFIG.events.user.analysisProgress, {
+        analysisId: params.analysisId,
+        message: params.message,
+        progress: params.progress,
+        status: params.status,
+      });
+  } catch (error) {
+    appLogger.debug({ error, msg: "Failed to publish analysis progress event" });
+  }
+}

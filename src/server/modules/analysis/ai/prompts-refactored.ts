@@ -1,3 +1,4 @@
+import { escape } from "es-toolkit";
 import { dedent } from "ts-dedent";
 
 import { PromptFactory, UserPromptBuilder } from "@/server/utils/prompt-builder";
@@ -157,6 +158,8 @@ export function buildApiWriterSystemPrompt(targetLanguage: string = "English"): 
     .withTask(`Write "Public Interface & Contracts" for the Interactive Technical Passport.`)
     .withConstraints(
       `${LanguageRules.targetLanguage(targetLanguage)}`,
+      `${LanguageRules.codeBlockTitles}`,
+      `${LanguageRules.githubAlerts}`,
       "Tone: Staff Architect to Senior Developer. Strict, contract-oriented, and evidence-backed",
       `${GroundingRules.pathValidation("allowed_repository_paths")}`,
       WRITER_TRACEABILITY_RULE,
@@ -233,6 +236,9 @@ export function buildReadmeWriterSystemPrompt(targetLanguage: string = "English"
     )
     .withConstraints(
       `${LanguageRules.targetLanguage(targetLanguage)}`,
+      `${LanguageRules.emojiStyle}`,
+      `${LanguageRules.codeBlockTitles}`,
+      `${LanguageRules.githubAlerts}`,
       `${GroundingRules.pathValidation("allowed_repository_paths")}`,
       WRITER_TRACEABILITY_RULE,
       BehavioralRules.primaryArtifact,
@@ -372,28 +378,30 @@ export const CONTRIBUTING_WRITER_SYSTEM_PROMPT = buildContributingWriterSystemPr
 // =============================================================================
 // CHANGELOG WRITER PROMPTS
 // =============================================================================
-
 export function buildChangelogWriterSystemPrompt(targetLanguage: string = "English"): string {
   return PromptFactory.forRole("changelog-writer", targetLanguage)
     .withTask(
-      `Convert raw git logs into a human-readable changelog strictly following the 'Keep a Changelog' specification.`
+      `Generate a high-density, context-aware CHANGELOG.md strictly matching the "Keep a Changelog" specification.
+       You will reconcile raw Git commits, merged Pull Requests, and static analysis metrics delta.`
     )
     .withConstraints(
       `${LanguageRules.targetLanguage(targetLanguage)}`,
-      "This is a compatibility document. Prefer concise, high-density bullet points.",
-      "CRITICAL: Do not translate git hashes, version numbers, dates, or technical package names. Keep them in English."
+      `${LanguageRules.emojiStyle}`,
+      "Prefer high-density, values-based bullet points over chronological lists.",
+      "CRITICAL: Do not translate Git hashes, version numbers, release dates, or library/package coordinates. Keep technical identifiers in English."
     )
+    .withAntiFluff()
     .addSection(
-      "PROCESS",
+      "RECONCILIATION & SEMANTIC PROCESSING",
       dedent`
-1. Categorize Strictly: Group changes ONLY into these standard sections: Added (for new features), Changed (for changes in existing functionality), Deprecated, Removed, Fixed (for any bug fixes), and Security.
-2. Humanize: Rewrite cryptic technical commit messages and jargon into clear, value-based sentences for end-users.
-3. Versioning: Group commits by semantic version tags if present; if version tags are completely missing, group all changes under the 'Unreleased' header.
-4. Filter Trash: Merge or omit repetitive micro-commits (e.g., chore, typo fixes, minor dependency bumps) into singular, high-level summaries. Do not generate bullet points for individual engineering chores.`
+1. Reconcile Commits & PRs: Treat merged Pull Requests (<pull_requests> XML node) as the primary source of truth for features and bug fixes. Use commits (<git_commits>) purely as supporting technical evidence.
+2. Integrate Static Analysis Delta: Analyze the <static_analysis_delta> node. If our static analyzer detected resolved vulnerabilities, technical debt reduction, or new API/endpoint definitions, explicitly mention these engineering milestones in the relevant categories (e.g., Security, Fixed, Added).
+3. Humanize & Elevate: Translate cryptic, low-level commit messages (e.g., "fix typo", "temp patch", "bump deps") into logical, high-level summaries. Omit micro-commits representing daily development chores.
+4. Categorize Strictly: Group changes ONLY into these standard sections: Added (new features/endpoints), Changed (modifications of existing code), Fixed (bug/vulnerability fixes), and Security (secrets resolution, security patches).`
     )
     .withOutputFormat(
       dedent`
-Return ONLY raw Markdown syntax. Do not wrap the response in top-level JSON or codeblock containers. Do not write conversational preambles.
+Return ONLY raw Markdown syntax. Do not wrap the response in top-level JSON or codeblock containers. Do not write conversational preambles, greetings, or introductions.
 
 Every version section must use exactly this Markdown format for headers to ensure system parsing:
 ## [Version_Number] - YYYY-MM-DD
@@ -410,11 +418,18 @@ Inside each version, use only these subheaders if changes exist:
     .buildSystem();
 }
 
-export function buildChangelogWriterUserPrompt(commitsJson: string, techStack: string[]): string {
+export function buildChangelogWriterUserPrompt(params: {
+  analysisDeltaJson: string;
+  commitsJson: string;
+  pullRequestsJson: string;
+  techStack: string[];
+}): string {
   return new UserPromptBuilder()
-    .addHeading(1, "INPUT")
-    .addRaw(`Stack: ${safety.escape(techStack.join(", "))}`)
-    .addXmlSection("commits", commitsJson)
+    .addHeading(1, "INPUT CONTEXT")
+    .addXmlSection("tech_stack", params.techStack.join(", "))
+    .addXmlSection("git_commits", params.commitsJson)
+    .addXmlSection("pull_requests", params.pullRequestsJson)
+    .addXmlSection("static_analysis_delta", params.analysisDeltaJson)
     .build();
 }
 
@@ -466,11 +481,13 @@ export function buildArchitectureWriterSystemPrompt(targetLanguage: string = "En
     )
     .withConstraints(
       `${LanguageRules.targetLanguage(targetLanguage)}`,
+      `${LanguageRules.emojiStyle}`,
+      `${LanguageRules.codeBlockTitles}`,
+      `${LanguageRules.githubAlerts}`,
       BehavioralRules.primaryArtifact,
       `${GroundingRules.pathValidation("allowed_repository_paths")}`,
       WRITER_TRACEABILITY_RULE,
       "Tone: Staff Architect to Senior Developer. Analytical, specific, and focused on data flow, structural integrity, and trade-offs.",
-      // ЗАЩИТА MERMAID ГРАФОВ ОТ СЛОМА СИНТАКСИСА
       "CRITICAL: Do not translate programmatic identifiers, component aliases, or node IDs inside Mermaid diagrams. All graph syntax structure must use clean English tokens. Only translate the human-readable labels inside text brackets, e.g., NodeID[Текст на целевом языке]."
     )
     .addSection(

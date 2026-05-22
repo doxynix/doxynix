@@ -220,11 +220,22 @@ export async function executeChangelogWriter(
   language: string
 ): Promise<WriterResult> {
   const changelogContext: any = {
+    analysisDelta: {
+      complexity_score: analysisResult.complexityScore ?? null,
+      new_findings:
+        analysisResult.findings?.slice(0, 10).map((f) => ({
+          file: f.file,
+          title: f.title,
+          type: f.type,
+        })) ?? [],
+      security_score: analysisResult.securityScore ?? null,
+    },
     commits: [],
     diff_summary: {
       files_changed: 0,
       top_modified_files: [],
     },
+    pullRequests: [],
   };
 
   try {
@@ -247,9 +258,8 @@ export async function executeChangelogWriter(
         repo: repo.name,
       });
 
-      changelogContext.commits = compareData.commits.map((c) => ({
+      changelogContext.commits = compareData.commits.slice(0, 20).map((c) => ({
         author: c.commit.author?.name,
-        files: c.files?.map((f) => f.filename).slice(0, 10),
         message: c.commit.message,
       }));
 
@@ -260,28 +270,50 @@ export async function executeChangelogWriter(
           .slice(0, 15)
           .map((f) => f.filename),
       };
+
+      const previousDate = previousAnalysis.createdAt.toISOString();
+      const q = `repo:${repo.owner}/${repo.name} is:pr is:merged merged:>=${previousDate}`;
+
+      const { data: searchResult } = await octokit.rest.search.issuesAndPullRequests({
+        per_page: 15,
+        q,
+      });
+
+      changelogContext.pullRequests = searchResult.items.map((pr) => ({
+        author: pr.user?.login,
+        labels: pr.labels.map((l: any) => l.name),
+        number: pr.number,
+        title: pr.title,
+      }));
     } else {
+      const { data: pulls } = await octokit.rest.pulls.list({
+        direction: "desc",
+        owner: repo.owner,
+        per_page: 10,
+        repo: repo.name,
+        sort: "updated",
+        state: "closed",
+      });
+
+      changelogContext.pullRequests = pulls
+        .filter((pr) => pr.merged_at != null)
+        .map((pr) => ({
+          author: pr.user?.login,
+          labels: pr.labels.map((l: any) => l.name),
+          number: pr.number,
+          title: pr.title,
+        }));
+
       const { data: commitsData } = await octokit.rest.repos.listCommits({
         owner: repo.owner,
-        per_page: 30,
+        per_page: 15,
         repo: repo.name,
       });
 
-      const detailedCommits = await Promise.all(
-        commitsData.slice(0, 15).map(async (c) => {
-          const { data: detail } = await octokit.rest.repos.getCommit({
-            owner: repo.owner,
-            ref: c.sha,
-            repo: repo.name,
-          });
-          return {
-            author: detail.commit.author?.name,
-            files: detail.files?.map((f) => f.filename).slice(0, 5),
-            message: detail.commit.message,
-          };
-        })
-      );
-      changelogContext.commits = detailedCommits;
+      changelogContext.commits = commitsData.map((c) => ({
+        author: c.commit.author?.name,
+        message: c.commit.message,
+      }));
     }
   } catch (error) {
     appLogger.warn({
@@ -294,10 +326,12 @@ export async function executeChangelogWriter(
     analysisId,
     name: "changelog",
     phase: "writer_changelog",
-    prompt: buildChangelogWriterUserPrompt(
-      JSON.stringify(changelogContext, null, 2),
-      analysisResult.executive_summary.stack_details
-    ),
+    prompt: buildChangelogWriterUserPrompt({
+      analysisDeltaJson: JSON.stringify(changelogContext.analysisDelta, null, 2),
+      commitsJson: JSON.stringify(changelogContext.commits, null, 2),
+      pullRequestsJson: JSON.stringify(changelogContext.pullRequests, null, 2),
+      techStack: analysisResult.executive_summary.stack_details,
+    }),
     system: buildChangelogWriterSystemPrompt(language),
   });
 }

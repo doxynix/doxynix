@@ -68,9 +68,27 @@ export const LanguageRules = {
     - DO NOT use subjective adjectives (e.g., "simple", "easy", "good", "bad"). Use objective metrics ("high cyclomatic complexity", "tightly coupled").
     - Maximize information density. Every sentence must contain a technical fact, a metric, or a specific architectural observation.`,
 
+  /** Rule: Code Block title */
+  codeBlockTitles: dedent`
+    MANDATORY CODE BLOCK TITLES:
+    - Every time you output a code block (using triple backticks), you MUST explicitly specify the file path as a "title" attribute in the language fence.
+    - Format: \`\`\`language title="path/to/file.ext"
+    - Example:
+      \`\`\`typescript title="src/vanilla.ts"
+      const store = createStore(initializer);
+      \`\`\``,
+
   /** Rule: Conciseness */
   conciseness: (maxPoints?: number) =>
     `Be concise. ${maxPoints != null ? `Focus on the most important ${maxPoints} points.` : "Avoid unnecessary details."}`,
+
+  /** Rule: Emoji */
+  emojiStyle: dedent`
+    STRUCTURAL EMOJI POLICY (CRITICAL):
+    - You MUST use high-quality, professional technical emojis (e.g., 🚀, 🛠️, 📦, 👥, 🛡️, ⚙️, 📄, 🔄) EXCLUSIVELY at the very beginning of Markdown headers (H1, H2, H3) to improve visual structure and scannability.
+    - Format example: "# 🚀 System Identity & Onboarding Blueprint" or "### 🐛 Fixed".
+    - NEVER use inline emojis inside body paragraphs, technical sentences, or code comments.
+    - Keep the body text strictly professional, clean, and dry.`,
 
   /** Rule: Evidence-first approach */
   evidenceFirst: `Prefer explicit evidence over intuition. If a claim cannot be proven from input, omit it or mark it as "unknown".`,
@@ -80,6 +98,18 @@ export const LanguageRules = {
     - Do not summarize if you can enumerate.
     - If analyzing a module, analyze ALL its core functions, not just the first one.
     - Provide deep, multi-paragraph explanations for architectural decisions and risks.`,
+
+  /** Rule: GitHub Alerts */
+  githubAlerts: dedent`
+    MANDATORY GITHUB ALERTS / CALLOUTS:
+    - Every time you need to write a note, warning, tip, or caution, you MUST use the official GitHub-flavored markdown alert syntax. Do not write plain text warnings.
+    - Format:
+      > [!NOTE]
+      > Useful information users should know.
+
+      > [!WARNING]
+      > Urgent info that needs immediate developer attention.
+    - Allowed alert types: [!NOTE], [!TIP], [!WARNING], [!IMPORTANT], [!CAUTION].`,
 
   /** Rule: Target-specific language */
   targetLanguage: (language: string = "English") =>

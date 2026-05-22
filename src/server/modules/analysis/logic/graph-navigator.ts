@@ -76,8 +76,7 @@ export function buildStructureMapPayloadFromContext(
           (edge) =>
             nodeLabelById.get(makeStructureNodeId("group", edge.target)) ??
             ProjectPolicy.getGroupLabel(edge.target)
-        )
-        .slice(0, 5);
+        );
       const incoming = context.rawTopLevelEdges
         .filter((edge) => edge.target === node.path)
         .sort((left, right) => right.weight - left.weight)
@@ -128,8 +127,8 @@ export function buildStructureMapPayloadFromContext(
     },
     overview: {
       architectureStyle: context.aiResult.executive_summary.architecture_style,
-      primaryEntrypoints: context.meaningfulEntrypoints.slice(0, 6),
-      primaryModules: context.docInput?.sections.overview.body.primaryModules.slice(0, 6) ?? [],
+      primaryEntrypoints: context.meaningfulEntrypoints,
+      primaryModules: context.docInput?.sections.overview.body.primaryModules ?? [],
       purpose: context.aiResult.executive_summary.purpose,
       repositoryKind: context.docInput?.sections.overview.body.repositoryKind ?? "unknown",
       stack: context.docInput?.sections.overview.body.stackProfile ?? context.metrics.techStack,
@@ -342,7 +341,7 @@ export function buildStructureNodePayloadFromContext(
         semanticLabel: SEMANTIC_META[node.kind].label,
         summarizeImportance,
       }),
-      contains: limitedChildren.map((child) => child.label).slice(0, 8),
+      contains: limitedChildren.map((child) => child.label),
     },
     node,
   };
