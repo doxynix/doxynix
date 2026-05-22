@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.1](https://github.com/doxynix/doxynix/compare/v2.0.0...v2.0.1) (2026-05-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency js-cookie to v3.0.7 [security] ([#1446](https://github.com/doxynix/doxynix/issues/1446)) ([911041e](https://github.com/doxynix/doxynix/commit/911041e2c7f29e3bdee72beeb9233b72235915c0))
+
 ## [2.0.0](https://github.com/doxynix/doxynix/compare/v1.32.5...v2.0.0) (2026-05-17)
 
 
