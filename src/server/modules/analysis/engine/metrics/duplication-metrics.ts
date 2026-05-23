@@ -1,5 +1,5 @@
 import type { IClone, IMapFrame, IOptions } from "@jscpd/core";
-import { clamp } from "es-toolkit";
+import { clamp, sumBy } from "es-toolkit";
 
 import type { RepositoryFile } from "../core/discovery.types";
 import { ProjectPolicy } from "../core/project-policy";
@@ -90,10 +90,10 @@ export async function calculateRepositoryDuplication(
       clones.push(...(await detector.detect(file.path, file.content, file.format)));
     }
 
-    let totalLinesInValidFiles = 0;
-    for (const file of sourceFiles) {
-      totalLinesInValidFiles += file.content.split(/\r?\n/u).length;
-    }
+    const totalLinesInValidFiles = sumBy(
+      sourceFiles,
+      (file) => file.content.split(/\r?\n/u).length
+    );
 
     let totalDuplicatedLines = 0;
 

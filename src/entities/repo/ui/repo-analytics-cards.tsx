@@ -157,7 +157,6 @@ export function ReferenceAndRoutesCard({
     </Card>
   );
 }
-
 export function SecurityOverviewCard({
   onTriggerFix,
   runningFixId,
@@ -228,83 +227,90 @@ export function SecurityOverviewCard({
               Critical Vulnerabilities
             </span>
             <div className="space-y-2">
-              {security.vulnerabilities.map((vuln, idx) => (
-                <Collapsible
-                  key={idx}
-                  className="group border-border/60 bg-muted/30 hover:bg-muted/50 rounded-lg border p-2.5 transition-all"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="text-foreground/80 flex items-center gap-1.5 font-mono text-xs font-semibold">
-                        <FileCode className="text-muted-foreground size-3.5" />
-                        <span className="max-w-60 truncate md:max-w-xs">[[{vuln.file}]]</span>
-                        {vuln.lineHint != null && (
-                          <span className="bg-border text-muted-foreground rounded px-1 text-[10px] font-medium">
-                            {vuln.lineHint}
-                          </span>
-                        )}
+              {security.vulnerabilities.map((vuln, idx) => {
+                const isCurrentlyFixing = runningFixId === vuln.file;
+
+                return (
+                  <Collapsible
+                    key={idx}
+                    className="group border-border/60 bg-muted/30 hover:bg-muted/50 rounded-lg border p-2.5 transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="text-foreground/80 flex items-center gap-1.5 font-mono text-xs font-semibold">
+                          <FileCode className="text-muted-foreground size-3.5" />
+                          <span className="max-w-60 truncate md:max-w-xs">[[{vuln.file}]]</span>
+                          {vuln.lineHint != null && (
+                            <span className="bg-border text-muted-foreground rounded px-1 text-[10px] font-medium">
+                              {vuln.lineHint}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-foreground/90 pl-5 text-xs leading-snug font-medium">
+                          {vuln.description}
+                        </p>
                       </div>
-                      <p className="text-foreground/90 pl-5 text-xs leading-snug font-medium">
-                        {vuln.description}
+
+                      <AppBadge
+                        variant={
+                          vuln.risk === "CRITICAL" || vuln.risk === "HIGH"
+                            ? "destructive"
+                            : "secondary"
+                        }
+                        className="shrink-0 text-[9px] font-extrabold uppercase"
+                      >
+                        {vuln.risk}
+                      </AppBadge>
+                    </div>
+
+                    <CollapsibleContent className="border-border/40 mt-2.5 space-y-1.5 border-t pt-2 pl-5">
+                      <div className="text-destructive flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase">
+                        <Terminal className="size-3" /> Recommended Remediation:
+                      </div>
+                      <p className="text-muted-foreground bg-background/50 border-border/40 rounded-md border p-2 font-mono text-[11px] leading-normal whitespace-pre-wrap">
+                        {vuln.suggestion}
                       </p>
-                    </div>
+                      {/* NOTE: потом поменять на loading-button.tsx */}
+                      <AppButton
+                        disabled={runningFixId !== null}
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          const parsedLineMatch = vuln.lineHint?.match(/\d+/);
+                          const parsedLine =
+                            parsedLineMatch != null
+                              ? Number.parseInt(parsedLineMatch[0], 10)
+                              : undefined;
 
-                    <AppBadge
-                      variant={
-                        vuln.risk === "CRITICAL" || vuln.risk === "HIGH"
-                          ? "destructive"
-                          : "secondary"
-                      }
-                      className="shrink-0 text-[9px] font-extrabold uppercase"
-                    >
-                      {vuln.risk}
-                    </AppBadge>
-                  </div>
+                          void onTriggerFix(vuln.file, {
+                            line: parsedLine,
+                            message: vuln.description,
+                            suggestion: vuln.suggestion,
+                            type: "security",
+                          });
+                        }}
+                        className="mt-3 w-full gap-2 text-[10px] font-bold tracking-wider uppercase"
+                      >
+                        {isCurrentlyFixing ? (
+                          <Loader2 className="size-3 animate-spin" />
+                        ) : (
+                          <Sparkles className="size-3" />
+                        )}
+                        Auto Patch with AI
+                      </AppButton>
+                    </CollapsibleContent>
 
-                  <CollapsibleContent className="border-border/40 mt-2.5 space-y-1.5 border-t pt-2 pl-5">
-                    <div className="text-destructive flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase">
-                      <Terminal className="size-3" /> Recommended Remediation:
-                    </div>
-                    <p className="text-muted-foreground bg-background/50 border-border/40 rounded-md border p-2 font-mono text-[11px] leading-normal whitespace-pre-wrap">
-                      {vuln.suggestion}
-                    </p>
-
-                    <AppButton
-                      disabled={runningFixId !== null}
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => {
-                        const parsedLine =
-                          vuln.lineHint != null
-                            ? Number.parseInt(vuln.lineHint.replaceAll(/\D/g, ""), 10) || 1
-                            : 1;
-
-                        void onTriggerFix(vuln.file, {
-                          line: parsedLine,
-                          message: vuln.description,
-                          suggestion: vuln.suggestion,
-                          type: "security",
-                        });
-                      }}
-                      className="mt-3 w-full gap-2 text-[10px] font-bold tracking-wider uppercase"
-                    >
-                      {runningFixId !== null ? (
-                        <Loader2 className="size-3 animate-spin" />
-                      ) : (
-                        <Sparkles className="size-3" />
-                      )}
-                      Auto Patch with AI
-                    </AppButton>
-                  </CollapsibleContent>
-
-                  <CollapsibleTrigger className="text-muted-foreground hover:text-foreground mt-1.5 flex w-full items-center justify-center text-[10px] font-semibold transition-colors">
-                    <span className="group-data-[state=open]:hidden">Show Remediation Plan ↓</span>
-                    <span className="group-data-[state=closed]:hidden">
-                      Hide Remediation Plan ↑
-                    </span>
-                  </CollapsibleTrigger>
-                </Collapsible>
-              ))}
+                    <CollapsibleTrigger className="text-muted-foreground hover:text-foreground mt-1.5 flex w-full items-center justify-center text-[10px] font-semibold transition-colors">
+                      <span className="group-data-[state=open]:hidden">
+                        Show Remediation Plan ↓
+                      </span>
+                      <span className="group-data-[state=closed]:hidden">
+                        Hide Remediation Plan ↑
+                      </span>
+                    </CollapsibleTrigger>
+                  </Collapsible>
+                );
+              })}
             </div>
           </div>
         ) : (

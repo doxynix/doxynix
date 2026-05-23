@@ -223,7 +223,7 @@ describe("shared/lib/utils:smoothScrollTo", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     vi.stubGlobal("document", {
-      getElementById: vi.fn(() => null),
+      querySelector: vi.fn(() => null),
     });
 
     smoothScrollTo("missing-element");
@@ -239,7 +239,7 @@ describe("shared/lib/utils:smoothScrollTo", () => {
     let currentTime = 0;
 
     vi.stubGlobal("document", {
-      getElementById: vi.fn(() => element),
+      querySelector: vi.fn(() => element),
     });
     vi.stubGlobal("window", {
       matchMedia: matchMediaMock,

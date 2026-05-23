@@ -5,7 +5,9 @@ function easeInOutCubic(t: number): number {
 export function smoothScrollTo(targetId: string, offset: number = 80, duration: number = 800) {
   if (typeof window === "undefined") return;
 
-  const targetElement = document.querySelector(`#${targetId}`);
+  /* eslint-disable-next-line unicorn/prefer-query-selector */
+  const targetElement = document.getElementById(targetId);
+
   if (!targetElement) {
     console.warn(`Element with id #${targetId} not found`);
     return;
@@ -21,6 +23,7 @@ export function smoothScrollTo(targetId: string, offset: number = 80, duration: 
 
   if (duration <= 0 || prefersReducedMotion) {
     window.scrollTo(0, targetY);
+    history.replaceState(null, "", `#${targetId}`);
     return;
   }
 

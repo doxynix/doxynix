@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { AppMermaid } from "@/shared/ui/core/mermaid";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
+import { ExternalLink } from "@/shared/ui/kit/external-link";
 
 import { buildRepoCodeHref } from "@/entities/repo/model/repo-workspace-navigation";
 import type { DocContent } from "@/entities/repo/model/repo.types";
@@ -261,20 +262,31 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
             );
           } else {
             const lowerHref = href.toLowerCase().trim();
-            const isUnsafe = lowerHref.startsWith("javascript:") || lowerHref.startsWith("data:");
+            const isUnsafe =
+              lowerHref.startsWith("javascript:") ||
+              lowerHref.startsWith("data:") ||
+              lowerHref.startsWith("vbscript:");
 
             if (!isUnsafe) {
               const safeAttribs = { ...domNode.attribs };
-              result = (
-                <a
-                  href={href}
-                  rel={lowerHref.startsWith("http") ? "noopener noreferrer" : undefined}
-                  target={lowerHref.startsWith("http") ? "_blank" : undefined}
-                  {...safeAttribs}
-                >
-                  {domToReact(children, parseOptions)}
-                </a>
-              );
+
+              delete safeAttribs.href;
+              delete safeAttribs.target;
+              delete safeAttribs.rel;
+
+              if (lowerHref.startsWith("http")) {
+                result = (
+                  <ExternalLink href={href} {...safeAttribs}>
+                    {domToReact(children, parseOptions)}
+                  </ExternalLink>
+                );
+              } else {
+                result = (
+                  <a href={href} {...safeAttribs}>
+                    {domToReact(children, parseOptions)}
+                  </a>
+                );
+              }
             } else {
               result = (
                 <span className="text-destructive border-destructive/20 bg-destructive/5 rounded border px-1.5 py-0.5 font-mono text-[10px] select-none">

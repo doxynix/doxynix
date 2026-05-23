@@ -329,14 +329,27 @@ export async function orchestrateWriterTasks(
 
     if (specHeaderIndex !== -1) {
       const specPart = generatedApiMarkdown.slice(specHeaderIndex);
-      const yamlMatch = /```(?:yaml|yml)?([\S\s]*?)```/i.exec(specPart);
+      const lowerSpecPart = specPart.toLowerCase();
 
-      if (yamlMatch) {
-        swaggerYaml = yamlMatch[1]?.trim();
-        generatedApiMarkdown = (
-          generatedApiMarkdown.slice(0, specHeaderIndex) +
-          specPart.replace(/```(?:yaml|yml)?[\S\s]*?```/i, "")
-        ).trim();
+      let blockStart = lowerSpecPart.indexOf("```yaml");
+      let offset = 7;
+      if (blockStart === -1) {
+        blockStart = lowerSpecPart.indexOf("```yml");
+        offset = 6;
+      }
+
+      if (blockStart !== -1) {
+        const blockEnd = specPart.indexOf("```", blockStart + offset);
+
+        if (blockEnd !== -1) {
+          swaggerYaml = specPart.slice(blockStart + offset, blockEnd).trim();
+
+          generatedApiMarkdown = (
+            generatedApiMarkdown.slice(0, specHeaderIndex) +
+            specPart.slice(0, blockStart) +
+            specPart.slice(blockEnd + 3)
+          ).trim();
+        }
       }
     }
   }

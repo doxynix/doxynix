@@ -227,14 +227,14 @@ type ChangelogPullRequest = {
 type ChangelogContext = {
   analysisDelta: {
     complexity_score: null | number | undefined;
+    diff_summary?: {
+      files_changed: number;
+      top_modified_files: string[];
+    };
     new_findings: Array<{ file: string; title: string; type: string }>;
     security_score: null | number | undefined;
   };
   commits: ChangelogCommit[];
-  diff_summary: {
-    files_changed: number;
-    top_modified_files: string[];
-  };
   pullRequests: ChangelogPullRequest[];
 };
 
@@ -257,10 +257,6 @@ export async function executeChangelogWriter(
       security_score: analysisResult.securityScore ?? null,
     },
     commits: [],
-    diff_summary: {
-      files_changed: 0,
-      top_modified_files: [],
-    },
     pullRequests: [],
   };
 
@@ -289,7 +285,7 @@ export async function executeChangelogWriter(
         message: c.commit.message,
       }));
 
-      changelogContext.diff_summary = {
+      changelogContext.analysisDelta.diff_summary = {
         files_changed: compareData.files?.length ?? 0,
         top_modified_files:
           compareData.files != null

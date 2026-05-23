@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import { join } from "pathe";
 
 export const alt = "Doxynix - Code Analysis Platform";
 export const size = { height: 630, width: 1200 };

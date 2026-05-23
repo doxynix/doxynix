@@ -118,7 +118,7 @@ export default defineConfig([
     },
 
     rules: {
-      "prettier/prettier": "error",
+      "prettier/prettier": "off", // NOTE: нету особого смысла в нем так как он только подсвечивает ошибку а не фиксит
 
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
@@ -247,20 +247,44 @@ export default defineConfig([
             },
             {
               from: { type: "server-core" },
-              disallow: [{ to: { type: ["server-modules", "app", "widgets", "features", "entities"] } }],
+              disallow: [
+                { to: { type: ["server-modules", "app", "widgets", "features", "entities"] } },
+              ],
               message: "Infrastructure Violation: Core must not depend on business logic or UI.",
             },
             {
               from: { type: "server-utils" },
               disallow: [
-                { to: { type: ["server-modules", "server-core", "app", "widgets", "features", "entities"] } },
+                {
+                  to: {
+                    type: [
+                      "server-modules",
+                      "server-core",
+                      "app",
+                      "widgets",
+                      "features",
+                      "entities",
+                    ],
+                  },
+                },
               ],
               message: "Utility Violation: Utils must be pure.",
             },
             {
-              from: { type: ["shared", "shared-contracts", "i18n"] },
+              from: { type: ["shared-ui", "shared-lib", "shared-api", "shared-contracts", "i18n"] },
               disallow: [
-                { to: { type: ["app", "widgets", "features", "entities", "server-core", "server-modules"] } },
+                {
+                  to: {
+                    type: [
+                      "app",
+                      "widgets",
+                      "features",
+                      "entities",
+                      "server-core",
+                      "server-modules",
+                    ],
+                  },
+                },
               ],
               allow: [
                 {
@@ -273,7 +297,10 @@ export default defineConfig([
             },
             {
               from: { type: "entities" },
-              disallow: [{ to: { type: ["features", "widgets", "app"] } }, { to: { type: "entities" } }],
+              disallow: [
+                { to: { type: ["features", "widgets", "app"] } },
+                { to: { type: "entities" } },
+              ],
               message:
                 "FSD Violation: Entities are independent and cannot import upper layers or other entities.",
             },
@@ -322,7 +349,7 @@ export default defineConfig([
           varsIgnorePattern: "^_",
         },
       ],
-      "@typescript-eslint/no-deprecated": "warn",
+      "@typescript-eslint/no-deprecated": "off", // NOTE: долговатый как и sonarjs/deprecation запускать надо иногда, не надо чтобы он всегда висел
       "@typescript-eslint/consistent-type-imports": [
         "error",
         {

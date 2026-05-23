@@ -413,6 +413,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                       <AppButton asChild size="icon" variant="ghost">
                         <Link
                           href={`/dashboard/repo/${owner}/${name}/code?node=file:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
+                          aria-label={`View code for ${file}`}
                         >
                           <Code2 />
                         </Link>
@@ -422,6 +423,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                       <AppButton asChild size="icon" variant="ghost">
                         <Link
                           href={`/dashboard/repo/${owner}/${name}/map?node=file:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
+                          aria-label={`View ${file} on map`}
                         >
                           <Map />
                         </Link>

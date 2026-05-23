@@ -41,6 +41,11 @@ export const taskLogger = {
    * Собирает ВСЕ логи из метаданных и кладет в БД на вечное хранение.
    */
   async finalize(analysisId: string, status: Status = Status.DONE, message?: string) {
+    this.log(
+      `Analysis finalized with status: ${status}`,
+      status === Status.DONE ? "success" : "error"
+    );
+
     const currentMetadata = safeCurrentMetadata();
 
     const rawLogs = currentMetadata?.[TRIGGER_CONFIG.metadataKeys.taskLogs];
@@ -64,12 +69,6 @@ export const taskLogger = {
       status,
       userId: analysis.repo.userId,
     });
-
-    if (status === Status.DONE) {
-      this.success(`Analysis finalized with status: ${status}`);
-    } else {
-      this.error(`Analysis finalized with status: ${status}`);
-    }
   },
   /**
    * Хелперы для разных уровней логов

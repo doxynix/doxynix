@@ -63,7 +63,7 @@ export function AnalysisTerminal({
                 </TabsTrigger>
               )}
 
-              {counts.warn <= 0 && (
+              {counts.warn > 0 && (
                 <TabsTrigger value="warn" className="data-[state=active]:text-warning">
                   Warns
                   <AppBadge variant="outline" className="border-warning text-warning">
@@ -159,7 +159,10 @@ function LogLine({ log, searchQuery }: Readonly<{ log: LogEntry; searchQuery: st
 
 function highlightText(text: string, highlight: string) {
   if (highlight.trim() === "") return text;
-  const parts = text.split(new RegExp(`(${highlight})`, "gi"));
+
+  const escaped = highlight.replaceAll(/[$()*+.?[\\\]^{|}]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+
   return (
     <span>
       {parts.map((part, i) =>

@@ -48,6 +48,10 @@ export const llmLimiter = {
     options: { id: string; weight: number },
     task: () => Promise<T>
   ): Promise<T> => {
+    if (!Number.isFinite(options.weight) || options.weight <= 0) {
+      throw new Error("Invalid LLM request weight: must be a positive finite number");
+    }
+
     const key = "llm:tpm-limiter";
     const capacity = 230_000;
     const intervalMs = 60 * 1000;
@@ -57,6 +61,7 @@ export const llmLimiter = {
     const requestId = `${options.id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     const MAX_ATTEMPTS = 10;
+    let isAllowed = false;
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       try {
@@ -77,7 +82,8 @@ export const llmLimiter = {
               weight: options.weight,
             });
           }
-          return await task();
+          isAllowed = true;
+          break;
         }
 
         if (attempt === MAX_ATTEMPTS) {
@@ -106,8 +112,13 @@ export const llmLimiter = {
           id: options.id,
           msg: "Upstash API error in llmLimiter. Executing fallback directly.",
         });
-        return await task();
+        isAllowed = true;
+        break;
       }
+    }
+
+    if (isAllowed) {
+      return task();
     }
 
     return task();

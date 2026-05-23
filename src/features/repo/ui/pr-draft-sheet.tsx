@@ -39,7 +39,7 @@ type Props = {
 };
 
 export function PrDraftSheet({ repoId }: Readonly<Props>) {
-  const [removingFile, setRemovingFile] = useState<null | string>(null);
+  const [removingFiles, setRemovingFiles] = useState<Set<string>>(new Set());
   const utils = trpc.useUtils();
 
   const { data: stagedFiles, isLoading: isFilesLoading } = trpc.analysis.getStagedFiles.useQuery({
@@ -50,8 +50,15 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
     onError: (err) => toast.error(`Failed to create PR: ${err.message}`),
     onSuccess: (data) => {
       if (data.success === true) {
-        toast.success("Pull Request created successfully!");
-        window.open(data.prUrl, "_blank");
+        toast.success("Pull Request created successfully!", {
+          action: {
+            label: "View",
+            onClick: () => {
+              window.open(data.prUrl, "_blank", "noopener,noreferrer");
+            },
+          },
+        });
+
         void utils.analysis.getStagedFiles.invalidate();
         void utils.analysis.getByRepository.invalidate();
       }
@@ -125,43 +132,55 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {stagedFiles?.map((file) => (
-                    <div
-                      key={file.filePath}
-                      className="flex items-center justify-between rounded-xl border p-1"
-                    >
-                      <div className="flex items-center gap-2 p-1">
-                        <FileIcon />
-                        <span className="truncate text-xs">{file.filePath}</span>
-                      </div>
-                      <LoadingButton
-                        disabled={removingFile === file.filePath}
-                        isLoading={removingFile === file.filePath}
-                        loadingText=""
-                        size="icon"
-                        variant="ghost"
-                        aria-label="Unstage file"
-                        onClick={() => {
-                          setRemovingFile(file.filePath);
+                  {stagedFiles?.map((file) => {
+                    const isRemoving = removingFiles.has(file.filePath);
 
-                          unstageMutation.mutate(
-                            {
-                              filePath: file.filePath,
-                              repoId,
-                            },
-                            {
-                              onSettled: () => {
-                                setRemovingFile(null);
-                              },
-                            }
-                          );
-                        }}
-                        className="hover:text-destructive hover:bg-destructive/10"
+                    return (
+                      <div
+                        key={file.filePath}
+                        className="flex items-center justify-between rounded-xl border p-1"
                       >
-                        <Trash2 />
-                      </LoadingButton>
-                    </div>
-                  ))}
+                        <div className="flex items-center gap-2 p-1">
+                          <FileIcon />
+                          <span className="truncate text-xs">{file.filePath}</span>
+                        </div>
+                        <LoadingButton
+                          disabled={isRemoving}
+                          isLoading={isRemoving}
+                          loadingText=""
+                          size="icon"
+                          variant="ghost"
+                          aria-label="Unstage file"
+                          onClick={() => {
+                            setRemovingFiles((prev) => {
+                              const next = new Set(prev);
+                              next.add(file.filePath);
+                              return next;
+                            });
+
+                            unstageMutation.mutate(
+                              {
+                                filePath: file.filePath,
+                                repoId,
+                              },
+                              {
+                                onSettled: () => {
+                                  setRemovingFiles((prev) => {
+                                    const next = new Set(prev);
+                                    next.delete(file.filePath);
+                                    return next;
+                                  });
+                                },
+                              }
+                            );
+                          }}
+                          className="hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 />
+                        </LoadingButton>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </ScrollArea>

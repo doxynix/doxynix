@@ -284,7 +284,7 @@ export function RepoDocs({
                       </>
                     )}
 
-                    {metrics?.reference.swagger != null && (
+                    {doc.type === "API" && metrics?.reference.swagger != null && (
                       <div className="flex gap-1 rounded-lg border p-1">
                         <AppButton
                           size="sm"

@@ -129,17 +129,10 @@ function useMermaid({
 
   const preprocessedChart = preprocessMermaidChart(debouncedChart, buildHref);
 
-  const [prevDebouncedChart, setPrevDebouncedChart] = useState(debouncedChart);
-
-  if (debouncedChart !== prevDebouncedChart) {
-    setPrevDebouncedChart(debouncedChart);
-
-    if (!debouncedChart.trim()) {
-      setStatus("idle");
-      setSvg(null);
-      setError(null);
-    }
-  }
+  const isChartEmpty = debouncedChart.trim() === "";
+  const displayStatus = isChartEmpty ? "idle" : status;
+  const displaySvg = isChartEmpty ? null : svg;
+  const displayError = isChartEmpty ? null : error;
 
   useEffect(() => {
     if (!debouncedChart.trim()) {
@@ -188,7 +181,7 @@ function useMermaid({
           fontSize: parsedConfig.fontSize ?? 14,
           logLevel: parsedConfig.logLevel ?? "error",
           look: parsedConfig.look === "handDrawn" ? "handDrawn" : "classic",
-          securityLevel: "loose",
+          securityLevel: "strict",
           sequence: parsedConfig.sequence,
           startOnLoad: false,
           theme: resolvedMermaidTheme,
@@ -229,7 +222,7 @@ function useMermaid({
     };
   }, [preprocessedChart, configString, id, debouncedChart]);
 
-  return { error, renderRef, status, svg };
+  return { error: displayError, renderRef, status: displayStatus, svg: displaySvg };
 }
 
 export function AppMermaid({
@@ -261,7 +254,17 @@ export function AppMermaid({
     if (anchor) {
       const href = anchor.getAttribute("href") || anchor.getAttribute("xlink:href");
       if (href && onLinkClick) {
-        onLinkClick(href, e);
+        e.preventDefault();
+
+        const lowerHref = href.toLowerCase().trim();
+        const isUnsafe =
+          lowerHref.startsWith("javascript:") ||
+          lowerHref.startsWith("data:") ||
+          lowerHref.startsWith("vbscript:");
+
+        if (!isUnsafe) {
+          onLinkClick(href, e);
+        }
       }
     }
   };
