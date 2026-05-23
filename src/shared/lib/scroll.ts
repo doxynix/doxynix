@@ -23,7 +23,7 @@ export function smoothScrollTo(targetId: string, offset: number = 80, duration: 
 
   if (duration <= 0 || prefersReducedMotion) {
     window.scrollTo(0, targetY);
-    history.replaceState(null, "", `#${targetId}`);
+    window.history.replaceState(null, "", `#${targetId}`);
     return;
   }
 
@@ -41,7 +41,7 @@ export function smoothScrollTo(targetId: string, offset: number = 80, duration: 
     if (timeElapsed < duration) {
       requestAnimationFrame(animation);
     } else {
-      history.replaceState(null, "", `#${targetId}`);
+      window.history.replaceState(null, "", `#${targetId}`);
     }
   };
 

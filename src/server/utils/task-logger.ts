@@ -93,13 +93,7 @@ export const taskLogger = {
    * Обновление статуса этапа.
    * Пишет в метаданные И в базу данных (так как это важная точка).
    */
-  async milestone(params: {
-    analysisId: string;
-    msg: string;
-    percent: number;
-    status?: Status;
-    userId?: number;
-  }) {
+  async milestone(params: { analysisId: string; msg: string; percent: number; status?: Status }) {
     const { analysisId, msg, percent, status = Status.PENDING } = params;
 
     this.info(`STAGE: ${msg} (${percent}%)`);
