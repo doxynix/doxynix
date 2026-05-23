@@ -1,3 +1,5 @@
+"use client";
+
 import { Check, ChevronDown, GitBranch } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";

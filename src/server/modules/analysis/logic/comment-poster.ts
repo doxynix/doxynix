@@ -8,8 +8,8 @@ import type { PRFinding } from "./pr-types";
 /**
  * Formats PR findings into GitHub comment bodies
  */
-export class CommentFormatter {
-  static formatFinding(finding: PRFinding, style: PRCommentStyle): string {
+export const CommentFormatter = {
+  formatFinding(finding: PRFinding, style: PRCommentStyle): string {
     if (style === "CONCISE") {
       return `**${finding.type.toUpperCase()}** (${finding.severity}, score ${finding.score}/10)\n${finding.message}`;
     }
@@ -33,8 +33,8 @@ export class CommentFormatter {
     }
 
     return body;
-  }
-}
+  },
+};
 
 /**
  * Posts findings as GitHub comments via Octokit

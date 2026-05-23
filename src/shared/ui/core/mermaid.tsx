@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import { useTheme } from "next-themes";
 import { useDebounce } from "use-debounce";
 
@@ -43,7 +43,7 @@ export interface MermaidProps {
   config?: MermaidConfig;
   debounceTime?: number;
   onError?: (error: string) => void;
-  onLinkClick?: (href: string, e: React.MouseEvent) => void;
+  onLinkClick?: (href: string, e: MouseEvent) => void;
   onSuccess?: (svg: string) => void;
 }
 
@@ -254,7 +254,7 @@ export function AppMermaid({
     if (status === "error" && error) onError?.(error);
   }, [status, svg, error, onSuccess, onError]);
 
-  const handleSvgClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleSvgClick = (e: MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
     const anchor = target.closest("a");
 

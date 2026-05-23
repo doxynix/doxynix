@@ -43,13 +43,13 @@ export function createAnon() {
 }
 
 export async function expectDenied(promise: Promise<any>) {
-  await expect(promise).rejects.toThrowError(
+  await expect(promise).rejects.toThrow(
     /denied|p2004|p2025|not found|unique constraint|result is not allowed to be read back/i
   );
 }
 
 export async function expectValidationFail(promise: Promise<any>) {
-  await expect(promise).rejects.toThrowError(
+  await expect(promise).rejects.toThrow(
     /validation|p2002|argument|value out of range|invalid url|unique constraint failed/i
   );
 }

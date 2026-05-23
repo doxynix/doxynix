@@ -5,6 +5,7 @@ import z from "zod";
 
 import { DocTypeSchema } from "@/shared/api-contracts";
 import { UpdatePRConfigInput } from "@/shared/api/schemas/pr-analysis.schema";
+import { generateBranchName } from "@/shared/lib/get-branch-name";
 
 import { appLogger } from "@/server/core/app-logger";
 import { getClientContext, getInstallationClient } from "@/server/core/github/github-provider";
@@ -246,7 +247,7 @@ export const analysisRouter = createTRPCRouter({
         }
 
         const fix = await analysisRepo.create(ctx.db, {
-          branch: `doxynix/fix-${crypto.randomUUID().slice(0, 8)}`,
+          branch: generateBranchName(),
           createdByUser: true,
           prAnalysisId: validPrAnalysisId,
           repoId: repo.publicId,

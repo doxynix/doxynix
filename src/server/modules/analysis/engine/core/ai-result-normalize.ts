@@ -73,6 +73,61 @@ function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value != null ? (value as Record<string, unknown>) : {};
 }
 
+function normalizeDomainAnalysis(value: unknown) {
+  if (typeof value !== "object" || value == null) return;
+  const record = value as Record<string, unknown>;
+  const business_rules = asStringArray(record.business_rules);
+
+  const rawEntities = record.core_entities;
+  const core_entities = Array.isArray(rawEntities)
+    ? rawEntities
+        .map((item) => {
+          const ent = asRecord(item);
+          return {
+            logic_complexity: coerceEnum(
+              ent.logic_complexity ?? ent.complexity,
+              ["LOW", "MEDIUM", "HIGH"] as const,
+              "MEDIUM" as const
+            ),
+            name: asString(ent.name, "CoreEntity"),
+            responsibility: asString(
+              ent.responsibility ?? ent.description,
+              "Domain responsibility"
+            ),
+          };
+        })
+        .filter((ent) => ent.name.length > 0)
+    : [];
+
+  return { business_rules, core_entities };
+}
+
+function normalizeRefactoringTargets(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item, index) => {
+      const record = asRecord(item);
+      return {
+        description: asString(
+          record.description ?? record.summary ?? record.issue,
+          `Refactoring target ${index + 1}`
+        ),
+        file: asString(record.file ?? record.path ?? record.location, "unknown"),
+        impact_on_health:
+          typeof record.impact_on_health === "number" ? record.impact_on_health : undefined,
+        improved_code: asString(record.improved_code ?? record.proposed_code) || undefined,
+        issue_category: asString(record.issue_category ?? record.category) || undefined,
+        original_code: asString(record.original_code ?? record.current_code) || undefined,
+        priority: coerceEnum(
+          record.priority,
+          ["HIGH", "MEDIUM", "LOW"] as const,
+          "MEDIUM" as const
+        ),
+      };
+    })
+    .filter((target) => target.file !== "unknown");
+}
+
 export const aiGenerationSchema = z
   .object({
     analysisRuntime: z.unknown().optional(),
@@ -286,7 +341,7 @@ export function normalizeAiGenerationOutput(raw: unknown): AIResult {
   const candidate = {
     ...rawRecord,
     analysisRuntime: undefined,
-    domain_analysis: undefined,
+    domain_analysis: normalizeDomainAnalysis(rawRecord.domain_analysis),
     executive_summary: {
       architecture_style: asString(
         rawExecSummary?.architecture_style,
@@ -301,7 +356,7 @@ export function normalizeAiGenerationOutput(raw: unknown): AIResult {
       prerequisites: asStringArray(rawOnboarding?.prerequisites),
       setup_steps: asStringArray(rawOnboarding?.setup_steps),
     },
-    refactoring_targets: [],
+    refactoring_targets: normalizeRefactoringTargets(rawRecord.refactoring_targets),
     repository_facts: normalizeFacts(rawRecord.repository_facts),
     sections: (() => {
       const infrastructure = asRecord(rawSections?.infrastructure_and_scaling);

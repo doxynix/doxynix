@@ -589,16 +589,8 @@
     color: var(--shiki-light) !important;
   }
 
-  html:not(.dark) pre.shiki span {
-    color: var(--shiki-light) !important;
-  }
-
   html.dark pre.shiki {
     background-color: var(--shiki-dark-bg) !important;
-    color: var(--shiki-dark) !important;
-  }
-
-  html.dark pre.shiki span {
     color: var(--shiki-dark) !important;
   }
 }

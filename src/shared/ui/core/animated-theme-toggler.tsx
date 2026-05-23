@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type ComponentPropsWithoutRef } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { flushSync } from "react-dom";
@@ -18,7 +18,7 @@ type TransitionVariant =
   | "star"
   | "triangle";
 
-interface AnimatedThemeTogglerProps extends React.ComponentPropsWithoutRef<"button"> {
+interface AnimatedThemeTogglerProps extends ComponentPropsWithoutRef<"button"> {
   duration?: number;
   /** When true, the transition expands from the viewport center instead of the button center. */
   fromCenter?: boolean;
@@ -167,38 +167,45 @@ export const AnimatedThemeToggler = ({
 
     document.documentElement.style.setProperty("will-change", "clip-path");
 
-    const transition = document.startViewTransition(() => {
-      flushSync(() => {
-        applyTheme();
+    try {
+      const transition = document.startViewTransition(() => {
+        flushSync(() => {
+          applyTheme();
+        });
       });
-    });
 
-    void transition.ready
-      .then(() => {
-        const clipPath = getThemeTransitionClipPaths(
-          variant,
-          x,
-          y,
-          maxRadius,
-          viewportWidth,
-          viewportHeight
-        );
+      void transition.ready
+        .then(() => {
+          const clipPath = getThemeTransitionClipPaths(
+            variant,
+            x,
+            y,
+            maxRadius,
+            viewportWidth,
+            viewportHeight
+          );
 
-        document.documentElement.animate(
-          { clipPath },
-          {
-            duration,
-            easing: variant === "star" ? "linear" : "ease-in-out",
-            fill: "forwards",
-            pseudoElement: "::view-transition-new(root)",
-          }
-        ).onfinish = () => {
+          document.documentElement.animate(
+            { clipPath },
+            {
+              duration,
+              easing: variant === "star" ? "linear" : "ease-in-out",
+              fill: "forwards",
+              pseudoElement: "::view-transition-new(root)",
+            }
+          ).onfinish = () => {
+            document.documentElement.style.removeProperty("will-change");
+          };
+        })
+        .catch((error) => {
           document.documentElement.style.removeProperty("will-change");
-        };
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+          console.error(error);
+        });
+    } catch (error) {
+      document.documentElement.style.removeProperty("will-change");
+      applyTheme();
+      console.error(error);
+    }
   };
 
   return (

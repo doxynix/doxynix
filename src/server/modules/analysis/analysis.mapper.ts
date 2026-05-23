@@ -195,10 +195,10 @@ export const analysisMapper = {
               name,
               owner,
             }),
-          [`finding-html-${finding.id}`],
+          [`finding-html-${owner ?? "unknown"}-${name ?? "unknown"}-${finding.id}`],
           {
             revalidate: false,
-            tags: ["findings", finding.id],
+            tags: ["findings", owner ?? "unknown", name ?? "unknown", finding.id],
           }
         )();
 

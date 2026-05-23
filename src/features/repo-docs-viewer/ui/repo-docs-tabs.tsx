@@ -64,9 +64,11 @@ export function RepoDocsTabs({ activeHeadingId, activeTab, headings, items }: Re
                       onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        const el = document.getElementById(heading.id);
+
+                        const el = document.querySelector(`#${heading.id}`);
                         if (el != null) {
                           el.scrollIntoView();
+                          history.replaceState(null, "", `#${heading.id}`);
                         }
                       }}
                       className={cn(

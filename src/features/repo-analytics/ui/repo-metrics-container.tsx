@@ -1,13 +1,7 @@
 "use client";
 
-import { Activity } from "lucide-react";
-
 import { trpc } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
-import { EmptyState } from "@/shared/ui/kit/empty-state";
-
-import { useRepoParams } from "@/entities/repo/model/use-repo-params";
-import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
 
 import { RepoMetrics } from "./repo-metrics";
 
@@ -16,8 +10,6 @@ type Props = {
 };
 
 export function RepoMetricsContainer({ repoId }: Readonly<Props>) {
-  const { name, owner } = useRepoParams();
-
   const { data, isLoading } = trpc.analysis.getDetailedMetrics.useQuery({
     repoId,
   });
@@ -34,18 +26,7 @@ export function RepoMetricsContainer({ repoId }: Readonly<Props>) {
     );
   }
 
-  if (data == null) {
-    return (
-      <div className="flex h-150 items-center justify-center rounded-xl border border-dashed">
-        <EmptyState
-          action={<RepoAnalyzeButton name={name} owner={owner} />}
-          description="Detailed code metrics will appear here after the first analysis."
-          icon={Activity}
-          title="No metrics data available"
-        />
-      </div>
-    );
-  }
+  if (data == null) return null;
 
   return <RepoMetrics data={data} repoId={repoId} />;
 }

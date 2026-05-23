@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileIcon, GitPullRequest, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -7,6 +8,7 @@ import { toast } from "sonner";
 
 import { createPrSchema, type CreatePrValues } from "@/shared/api/schemas/pr";
 import { trpc } from "@/shared/api/trpc";
+import { generateBranchName } from "@/shared/lib/get-branch-name";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -37,6 +39,7 @@ type Props = {
 };
 
 export function PrDraftSheet({ repoId }: Readonly<Props>) {
+  const [removingFile, setRemovingFile] = useState<null | string>(null);
   const utils = trpc.useUtils();
 
   const { data: stagedFiles, isLoading: isFilesLoading } = trpc.analysis.getStagedFiles.useQuery({
@@ -49,8 +52,8 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
       if (data.success === true) {
         toast.success("Pull Request created successfully!");
         window.open(data.prUrl, "_blank");
-        void utils.analysis.getStagedFiles.invalidate({ repoId });
-        void utils.analysis.getByRepository.invalidate({ repoId });
+        void utils.analysis.getStagedFiles.invalidate();
+        void utils.analysis.getByRepository.invalidate();
       }
     },
   });
@@ -58,20 +61,20 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
   const unstageMutation = trpc.analysis.unstageFile.useMutation({
     onError: (err) => toast.error(`Failed to remove file from draft: ${err.message}`),
     onSuccess: () => {
-      void utils.analysis.getStagedFiles.invalidate({ repoId });
+      void utils.analysis.getStagedFiles.invalidate();
     },
   });
 
   const form = useForm<CreatePrValues>({
     defaultValues: {
-      branchName: `doxynix/fix-${crypto.randomUUID().slice(0, 8)}`,
+      branchName: generateBranchName(),
       prTitle: "Doxynix Suggested code improvements",
     },
     resolver: zodResolver(createPrSchema),
   });
 
   const onSubmit = (values: CreatePrValues) => {
-    if (stagedFiles === undefined || stagedFiles.length === 0) {
+    if (stagedFiles == null || stagedFiles.length === 0) {
       toast.error("No files in stage");
       return;
     }
@@ -112,7 +115,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
             <ScrollArea className="h-75 rounded-xl border p-2">
               {isFilesLoading === true ? (
                 <div className="flex flex-col gap-2 p-2">
-                  {Array.from({ length: 3 }).map((_, i) => (
+                  {Array.from({ length: 5 }).map((_, i) => (
                     <Skeleton key={i} className="h-10 w-full" />
                   ))}
                 </div>
@@ -132,18 +135,27 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                         <span className="truncate text-xs">{file.filePath}</span>
                       </div>
                       <LoadingButton
-                        disabled={unstageMutation.isPending}
-                        isLoading={unstageMutation.isPending}
+                        disabled={removingFile === file.filePath}
+                        isLoading={removingFile === file.filePath}
                         loadingText=""
                         size="icon"
                         variant="ghost"
                         aria-label="Unstage file"
-                        onClick={() =>
-                          unstageMutation.mutate({
-                            filePath: file.filePath,
-                            repoId,
-                          })
-                        }
+                        onClick={() => {
+                          setRemovingFile(file.filePath);
+
+                          unstageMutation.mutate(
+                            {
+                              filePath: file.filePath,
+                              repoId,
+                            },
+                            {
+                              onSettled: () => {
+                                setRemovingFile(null);
+                              },
+                            }
+                          );
+                        }}
                         className="hover:text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 />

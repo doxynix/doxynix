@@ -45,12 +45,6 @@ generator dbml {
   provider = "prisma-dbml-generator"
 }
 
-generator erd {
-  provider = "prisma-erd-generator"
-  theme    = "neutral"
-  output   = "../prisma/erd/ERD.pdf"
-}
-
 generator fakeData {
   provider = "prisma-generator-fake-data"
   output   = "../prisma/generated/fake-data.ts"

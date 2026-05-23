@@ -1,4 +1,4 @@
-import { task } from "@trigger.dev/sdk";
+import { queue, task } from "@trigger.dev/sdk";
 
 import { runWriterWithLimiter, type WriterInput } from "../ai/writer-runner";
 import {
@@ -9,8 +9,14 @@ import {
   executeReadmeWriter,
 } from "../ai/writer-tasks";
 
+export const llmWriterQueue = queue({
+  concurrencyLimit: 1,
+  name: "llm-writer-queue",
+});
+
 export const readmeTask = task({
   id: "write-readme",
+  queue: llmWriterQueue,
   run: async (i: WriterInput) =>
     runWriterWithLimiter("readme", i, () =>
       executeReadmeWriter(
@@ -29,6 +35,7 @@ export const readmeTask = task({
 
 export const apiTask = task({
   id: "write-api",
+  queue: llmWriterQueue,
   run: async (i: WriterInput) =>
     runWriterWithLimiter("api", i, () =>
       executeApiWriter(
@@ -47,6 +54,7 @@ export const apiTask = task({
 
 export const architectureTask = task({
   id: "write-architecture",
+  queue: llmWriterQueue,
   run: async (
     i: WriterInput & { moduleContext: string; onboardingPayload: string; risksPayload: string }
   ) =>
@@ -70,6 +78,7 @@ export const architectureTask = task({
 
 export const contributingTask = task({
   id: "write-contributing",
+  queue: llmWriterQueue,
   run: async (i: WriterInput) =>
     runWriterWithLimiter("contributing", i, () =>
       executeContributingWriter(
@@ -88,88 +97,29 @@ export const contributingTask = task({
 
 export const changelogTask = task({
   id: "write-changelog",
+  queue: llmWriterQueue,
   run: async (i: {
     analysisId: string;
     analysisResult: any;
     language: string;
     repo: any;
     userId: number;
-  }) => executeChangelogWriter(i.analysisId, i.analysisResult, i.userId, i.repo, i.language),
-});
-
-export const docsWriterTask = task({
-  id: "docs-writer",
-  run: async (payload: any) => {
-    const { type, ...params } = payload;
-
-    switch (type) {
-      case "readme": {
-        return await executeReadmeWriter(
-          params.analysisId,
-          params.payload,
-          params.engineeringDossierPayload,
-          params.context,
-          params.allowedPaths,
-          params.language,
-          params.repoId,
-          params.userId,
-          params.branch
-        );
-      }
-      case "api": {
-        return await executeApiWriter(
-          params.analysisId,
-          params.payload,
-          params.engineeringDossierPayload,
-          params.context,
-          params.allowedPaths,
-          params.language,
-          params.repoId,
-          params.userId,
-          params.branch
-        );
-      }
-      case "architecture": {
-        return await executeArchitectureWriter(
-          params.analysisId,
-          params.payload,
-          params.risksPayload,
-          params.onboardingPayload,
-          params.moduleContext,
-          params.engineeringDossierPayload,
-          params.context,
-          params.allowedPaths,
-          params.language,
-          params.repoId,
-          params.userId,
-          params.branch
-        );
-      }
-      case "contributing": {
-        return await executeContributingWriter(
-          params.analysisId,
-          params.payload,
-          params.engineeringDossierPayload,
-          params.context,
-          params.allowedPaths,
-          params.language,
-          params.repoId,
-          params.userId,
-          params.branch
-        );
-      }
-      case "changelog": {
-        return await executeChangelogWriter(
-          params.analysisId,
-          params.analysisResult,
-          params.userId,
-          params.repo,
-          params.language
-        );
-      }
-      default: {
-        throw new Error(`Unknown writer type: ${type}`);
-      }
-    }
+  }) => {
+    return runWriterWithLimiter(
+      "changelog",
+      {
+        allowedPaths: "",
+        analysisId: i.analysisId,
+        branch: i.repo.defaultBranch,
+        context: "",
+        engineeringDossierPayload: "",
+        language: i.language,
+        payload: "",
+        repoId: i.repo.publicId,
+        selectedTokens: 25_000,
+        userId: i.userId,
+      },
+      () => executeChangelogWriter(i.analysisId, i.analysisResult, i.userId, i.repo, i.language)
+    );
   },
 });

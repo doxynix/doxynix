@@ -212,6 +212,32 @@ export async function executeContributingWriter(
   });
 }
 
+type ChangelogCommit = {
+  author: null | string | undefined;
+  message: string;
+};
+
+type ChangelogPullRequest = {
+  author: null | string | undefined;
+  labels: string[];
+  number: number;
+  title: string;
+};
+
+type ChangelogContext = {
+  analysisDelta: {
+    complexity_score: null | number | undefined;
+    new_findings: Array<{ file: string; title: string; type: string }>;
+    security_score: null | number | undefined;
+  };
+  commits: ChangelogCommit[];
+  diff_summary: {
+    files_changed: number;
+    top_modified_files: string[];
+  };
+  pullRequests: ChangelogPullRequest[];
+};
+
 export async function executeChangelogWriter(
   analysisId: string,
   analysisResult: AIResult,
@@ -219,14 +245,14 @@ export async function executeChangelogWriter(
   repo: Repo,
   language: string
 ): Promise<WriterResult> {
-  const changelogContext: any = {
+  const changelogContext: ChangelogContext = {
     analysisDelta: {
       complexity_score: analysisResult.complexityScore ?? null,
       new_findings:
         analysisResult.findings?.slice(0, 10).map((f) => ({
-          file: f.file,
+          file: typeof f.file === "string" ? f.file : "",
           title: f.title,
-          type: f.type,
+          type: typeof f.type === "string" ? f.type : "",
         })) ?? [],
       security_score: analysisResult.securityScore ?? null,
     },
@@ -265,10 +291,13 @@ export async function executeChangelogWriter(
 
       changelogContext.diff_summary = {
         files_changed: compareData.files?.length ?? 0,
-        top_modified_files: compareData.files
-          ?.sort((a, b) => b.changes - a.changes)
-          .slice(0, 15)
-          .map((f) => f.filename),
+        top_modified_files:
+          compareData.files != null
+            ? compareData.files
+                .toSorted((left, right) => right.changes - left.changes)
+                .slice(0, 15)
+                .map((f) => f.filename)
+            : [],
       };
 
       const previousDate = previousAnalysis.createdAt.toISOString();
@@ -281,7 +310,9 @@ export async function executeChangelogWriter(
 
       changelogContext.pullRequests = searchResult.items.map((pr) => ({
         author: pr.user?.login,
-        labels: pr.labels.map((l: any) => l.name),
+        labels: pr.labels
+          .map((l) => (typeof l === "string" ? l : (l.name ?? "")))
+          .filter((name) => name.length > 0),
         number: pr.number,
         title: pr.title,
       }));
@@ -299,7 +330,9 @@ export async function executeChangelogWriter(
         .filter((pr) => pr.merged_at != null)
         .map((pr) => ({
           author: pr.user?.login,
-          labels: pr.labels.map((l: any) => l.name),
+          labels: pr.labels
+            .map((l) => (typeof l === "string" ? l : l.name))
+            .filter((name) => name.length > 0),
           number: pr.number,
           title: pr.title,
         }));

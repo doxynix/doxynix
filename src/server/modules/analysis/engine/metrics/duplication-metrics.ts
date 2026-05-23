@@ -91,7 +91,7 @@ export async function calculateRepositoryDuplication(
     }
 
     let totalLinesInValidFiles = 0;
-    for (const file of validFiles) {
+    for (const file of sourceFiles) {
       totalLinesInValidFiles += file.content.split(/\r?\n/u).length;
     }
 

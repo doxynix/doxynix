@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState, type ComponentType } from "react";
+import dynamic from "next/dynamic";
 import saveAs from "file-saver";
 import {
   BookOpen,
-  Check,
   Download,
   FileText,
+  GitBranchPlus,
   HistoryIcon,
   Layers,
-  Loader2,
   Terminal,
   Users2,
 } from "lucide-react";
@@ -20,9 +20,11 @@ import { formatFullDate } from "@/shared/lib/date-utils";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
+import { Spinner } from "@/shared/ui/core/spinner";
 import { Tabs, TabsContent } from "@/shared/ui/core/tabs";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
+import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import type { AvailableDocs, DocType, RepoNodeContext } from "@/entities/repo/model/repo.types";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
@@ -47,6 +49,19 @@ type Props = {
   repoId: string;
 };
 
+const RepoSwagger = dynamic(
+  () => import("@/entities/repo/ui/repo-swagger").then((m) => m.RepoSwagger),
+  {
+    loading: () => (
+      <div className="flex h-40 w-full items-center justify-center gap-2">
+        <Spinner />
+        <span>Loading Interactive Console...</span>
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
 export function RepoDocs({
   activeTab,
   availableDocs,
@@ -67,11 +82,14 @@ export function RepoDocs({
     type: activeTab,
   });
 
+  const utils = trpc.useUtils();
+
   const stageMutation = trpc.analysis.stageFile.useMutation({
     onError: (error) => {
       toast.error(`Failed to stage changes: ${error.message}`);
     },
     onSuccess: (data) => {
+      void utils.analysis.getStagedFiles.invalidate();
       toast.success(`Changes staged for PR. Total files in draft: ${data.stagedCount}`);
     },
   });
@@ -108,7 +126,7 @@ export function RepoDocs({
     if (headings.length === 0) return;
 
     const headingElements = headings
-      .map((h) => document.getElementById(h.id))
+      .map((h) => document.querySelector(`#${h.id}`))
       .filter((el): el is HTMLElement => el !== null);
 
     const observer = new IntersectionObserver(
@@ -165,11 +183,15 @@ export function RepoDocs({
         items={tabItems}
       />
 
-      <div className="bg-card relative flex flex-1 flex-col border">
+      <div className="bg-card relative flex flex-1 flex-col rounded-xl border">
         {availableDocs.map((doc) => {
           const isCurrentApiSwagger = Boolean(
             doc.type === "API" && apiMode === "swagger" && metrics?.reference.swagger != null
           );
+
+          const isSwaggerReady = isCurrentApiSwagger && metrics?.reference.swagger != null;
+          const isMarkdownReady = !isCurrentApiSwagger && docContent?.raw != null;
+          const isReadyToStage = isSwaggerReady || isMarkdownReady;
 
           const isActive = doc.type === activeTab;
 
@@ -204,47 +226,65 @@ export function RepoDocs({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {isActive && !isCurrentApiSwagger && (
+                    {isActive && (
                       <>
-                        <AppButton
-                          disabled={stageMutation.isPending === true}
-                          size="sm"
-                          variant="default"
-                          onClick={() =>
-                            stageMutation.mutate({
-                              content: docContent?.raw ?? "",
-                              filePath: docContent?.materializedPath ?? "",
-                              repoId,
-                            })
-                          }
-                        >
-                          {stageMutation.isPending === true ? (
-                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                          ) : (
-                            <Check className="mr-1 h-3 w-3" />
-                          )}
-                          Add to PR draft
-                        </AppButton>
-                        <AppTooltip content="Download file">
-                          <AppButton
-                            disabled={isDocLoading}
+                        <AppTooltip content="Add to draft">
+                          <LoadingButton
+                            disabled={stageMutation.isPending || !isReadyToStage}
+                            isLoading={stageMutation.isPending === true}
+                            loadingText=""
                             size="icon"
                             variant="ghost"
-                            onClick={handleDownload}
+                            onClick={() => {
+                              if (isCurrentApiSwagger) {
+                                const swaggerContent = metrics?.reference.swagger;
+                                if (swaggerContent == null) return;
+
+                                stageMutation.mutate({
+                                  content: swaggerContent,
+                                  filePath: "docs/openapi.yaml",
+                                  repoId,
+                                });
+                              } else {
+                                const markdownContent = docContent?.raw;
+                                const materializedPath = docContent?.materializedPath;
+                                if (markdownContent == null || materializedPath == null) return;
+
+                                stageMutation.mutate({
+                                  content: markdownContent,
+                                  filePath: materializedPath,
+                                  repoId,
+                                });
+                              }
+                            }}
                           >
-                            <Download className="size-3" />
-                          </AppButton>
+                            <GitBranchPlus />
+                          </LoadingButton>
                         </AppTooltip>
-                        <CopyButton
-                          disabled={isDocLoading}
-                          value={docContent?.raw ?? ""}
-                          tooltipText="Copy file"
-                          className="size-8 px-3 opacity-100"
-                        />
+                        {!isCurrentApiSwagger && (
+                          <>
+                            <AppTooltip content="Download file">
+                              <AppButton
+                                disabled={isDocLoading}
+                                size="icon"
+                                variant="ghost"
+                                onClick={handleDownload}
+                              >
+                                <Download className="size-3" />
+                              </AppButton>
+                            </AppTooltip>
+                            <CopyButton
+                              disabled={isDocLoading}
+                              value={docContent?.raw ?? ""}
+                              tooltipText="Copy file"
+                              className="size-8 px-3 opacity-100"
+                            />
+                          </>
+                        )}
                       </>
                     )}
 
-                    {doc.type === "API" && metrics?.reference.swagger != null && (
+                    {metrics?.reference.swagger != null && (
                       <div className="flex gap-1 rounded-lg border p-1">
                         <AppButton
                           size="sm"
@@ -293,9 +333,8 @@ export function RepoDocs({
               </div>
 
               {isCurrentApiSwagger ? (
-                <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden px-8 pb-8 md:px-12">
-                  {/* <RepoSwagger spec={metrics?.reference.swagger ?? ""} /> */}{" "}
-                  {/* NOTE: эта штука тянет миллиард мб в бандл клиента потом подумать че делать с ним*/}
+                <div className="relative flex min-h-0 w-full flex-1 flex-col px-8 pb-8 md:px-12">
+                  <RepoSwagger spec={metrics?.reference.swagger ?? ""} />
                 </div>
               ) : (
                 <ScrollArea className="w-full flex-1">

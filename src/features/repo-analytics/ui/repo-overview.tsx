@@ -412,7 +412,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                     <AppTooltip content="View code">
                       <AppButton asChild size="icon" variant="ghost">
                         <Link
-                          href={`/dashboard/repo/${owner}/${name}/code?node=group:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
+                          href={`/dashboard/repo/${owner}/${name}/code?node=file:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
                         >
                           <Code2 />
                         </Link>
@@ -421,7 +421,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                     <AppTooltip content="View on map">
                       <AppButton asChild size="icon" variant="ghost">
                         <Link
-                          href={`/dashboard/repo/${owner}/${name}/map?node=group:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
+                          href={`/dashboard/repo/${owner}/${name}/map?node=file:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
                         >
                           <Map />
                         </Link>

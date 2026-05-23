@@ -40,6 +40,7 @@ export function RepoMapCustomControls() {
           <AppButton
             size="icon"
             variant="outline"
+            aria-label={item.label}
             onClick={item.action}
             className={cn(
               "transition-all duration-300",

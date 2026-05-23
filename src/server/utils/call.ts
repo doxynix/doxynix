@@ -24,7 +24,7 @@ type CallWithFallbackProps<T> = {
   frequencyPenalty?: number;
   maxOutputTokens?: number;
   models: GoogleModelId[];
-  outputSchema: null | z.ZodSchema<T>;
+  outputSchema: null | z.ZodType<T>;
   presencePenalty?: number;
   prompt: string;
   providerOptions?: {

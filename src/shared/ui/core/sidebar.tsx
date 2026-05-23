@@ -78,12 +78,12 @@ function SidebarProvider({
   const open = openProp ?? _open;
 
   const setOpen = (value: ((value: boolean) => boolean) | boolean) => {
-    const openState = typeof value === "function" ? value(open) : value;
     if (setOpenProp) {
+      const openState = typeof value === "function" ? value(open) : value;
       setOpenProp(openState);
-    } else {
-      _setOpen(openState);
+      return;
     }
+    _setOpen((prev) => (typeof value === "function" ? value(prev) : value));
   };
 
   // This sets the cookie to keep the sidebar state.

@@ -62,7 +62,7 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
       if (res.success) {
         toast.success(`AI changes successfully staged! Draft count: ${res.stagedCount}`);
         setRunningFixId(null);
-        void utils.analysis.getStagedFiles.invalidate({ repoId });
+        void utils.analysis.getStagedFiles.invalidate();
       }
     },
   });

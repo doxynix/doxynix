@@ -101,7 +101,7 @@ export const taskLogger = {
     status?: Status;
     userId?: number;
   }) {
-    const { analysisId, msg, percent, status = Status.PENDING, userId } = params;
+    const { analysisId, msg, percent, status = Status.PENDING } = params;
 
     this.info(`STAGE: ${msg} (${percent}%)`);
 
@@ -123,7 +123,7 @@ export const taskLogger = {
       message: msg,
       progress: percent,
       status,
-      userId: userId ?? analysis.repo.userId,
+      userId: analysis.repo.userId,
     });
   },
 

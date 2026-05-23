@@ -163,7 +163,10 @@ export function SecurityOverviewCard({
   runningFixId,
   security,
 }: Readonly<{
-  onTriggerFix: (filePath: string, finding: any) => void;
+  onTriggerFix: (
+    filePath: string,
+    finding: { line?: number; message?: string; suggestion?: string; type?: string }
+  ) => void;
   runningFixId: null | string;
   security: NonNullable<RepoMetricsItem>["security"];
 }>) {
@@ -270,7 +273,19 @@ export function SecurityOverviewCard({
                       disabled={runningFixId !== null}
                       size="sm"
                       variant="destructive"
-                      onClick={() => void onTriggerFix(vuln.file, vuln)}
+                      onClick={() => {
+                        const parsedLine =
+                          vuln.lineHint != null
+                            ? Number.parseInt(vuln.lineHint.replaceAll(/\D/g, ""), 10) || 1
+                            : 1;
+
+                        void onTriggerFix(vuln.file, {
+                          line: parsedLine,
+                          message: vuln.description,
+                          suggestion: vuln.suggestion,
+                          type: "security",
+                        });
+                      }}
                       className="mt-3 w-full gap-2 text-[10px] font-bold tracking-wider uppercase"
                     >
                       {runningFixId !== null ? (

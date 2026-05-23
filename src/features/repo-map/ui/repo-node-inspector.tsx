@@ -158,7 +158,13 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
             </AppBadge>
           ))}
         </div>
-        <AppButton size="icon" variant="ghost" onClick={onClose} className="shrink-0">
+        <AppButton
+          size="icon"
+          variant="ghost"
+          aria-label="Close node inspector"
+          onClick={onClose}
+          className="shrink-0"
+        >
           <X />
         </AppButton>
       </div>

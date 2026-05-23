@@ -24,7 +24,7 @@ vi.mock("ai", async (importOriginal) => {
     generateText: vi.fn(),
     Output: {
       ...actual.Output,
-      object: vi.fn((input: { schema: z.ZodSchema }) => ({ kind: "object", ...input })),
+      object: vi.fn((input: { schema: z.ZodType }) => ({ kind: "object", ...input })),
     },
     streamText: vi.fn(),
   };

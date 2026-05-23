@@ -51,7 +51,9 @@ export class OpenApiDiscoveryEngine {
 
       try {
         const isJson = file.path.toLowerCase().endsWith(".json");
-        const rawData = isJson ? JSON.parse(file.content) : YAML.parse(file.content);
+        const rawData = isJson
+          ? JSON.parse(file.content)
+          : YAML.parse(file.content, { logLevel: "error", maxAliasCount: 0 });
         const data = rawData as MinimalOpenApi | null;
 
         if (data == null || typeof data !== "object") continue;

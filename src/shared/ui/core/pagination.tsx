@@ -55,7 +55,7 @@ const PaginationLink = ({
     className
   );
 
-  if (!("href" in props) || props.href === undefined) {
+  if (!("href" in props) || props.href == null) {
     const buttonProps = props as ComponentProps<"button">;
 
     return (

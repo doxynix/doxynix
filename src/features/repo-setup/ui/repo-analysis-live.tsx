@@ -2,6 +2,7 @@
 
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { z } from "zod";
 
 import { trpc } from "@/shared/api/trpc";
 import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
@@ -13,9 +14,13 @@ import { Spinner } from "@/shared/ui/core/spinner";
 
 import { AnalysisTerminal } from "./repo-analysis-terminal";
 
-type Props = { accessToken: string; jobId: string; repoId: string };
+type Props = { accessToken: string; jobId: string; name: string; owner: string; repoId: string };
 
-export function RepoAnalysisLive({ accessToken, jobId, repoId }: Readonly<Props>) {
+const parseProgress = (val: unknown) => z.number().min(0).max(100).catch(0).parse(val);
+const parseStatusMessage = (val: unknown) => z.string().catch("Analyzing repository…").parse(val);
+const parseTaskLogs = (val: unknown) => z.array(z.string()).catch([]).parse(val);
+
+export function RepoAnalysisLive({ accessToken, jobId, name, owner, repoId }: Readonly<Props>) {
   const router = useRouter();
   const { run } = useRealtimeRun(jobId, { accessToken });
 
@@ -26,44 +31,41 @@ export function RepoAnalysisLive({ accessToken, jobId, repoId }: Readonly<Props>
 
   const metadata = run?.metadata ?? {};
 
-  const triggerProgress = metadata[TRIGGER_CONFIG.metadataKeys.progress] as number | undefined;
-  const triggerStatusText = metadata[TRIGGER_CONFIG.metadataKeys.statusMessage] as
-    | string
-    | undefined;
-  const logs = metadata[TRIGGER_CONFIG.metadataKeys.taskLogs] as string[] | undefined;
+  const triggerProgress = parseProgress(metadata[TRIGGER_CONFIG.metadataKeys.progress]);
+  const triggerStatusText = parseStatusMessage(metadata[TRIGGER_CONFIG.metadataKeys.statusMessage]);
+  const logs = parseTaskLogs(metadata[TRIGGER_CONFIG.metadataKeys.taskLogs]);
 
   const dbProgress = latestAnalysis?.progress;
   const progress =
-    typeof dbProgress === "number" && dbProgress > (triggerProgress ?? 0)
-      ? dbProgress
-      : (triggerProgress ?? dbProgress ?? 0);
-
-  const statusText = triggerStatusText ?? latestAnalysis?.message ?? "Analyzing repository…";
+    typeof dbProgress === "number" && dbProgress > triggerProgress ? dbProgress : triggerProgress;
 
   const isDbDone = latestAnalysis?.status === "DONE";
   const isDbFailed = latestAnalysis?.status === "FAILED";
   const isTriggerFinished = run?.status === "COMPLETED";
   const isTriggerFailed = run?.status === "FAILED" || run?.status === "CRASHED";
 
-  const isFinished = isTriggerFinished || isDbDone;
   const isFailed = isTriggerFailed || isDbFailed;
+  const isFinished = !isFailed && (isTriggerFinished || isDbDone);
 
-  const displayStatus = isFinished
-    ? "COMPLETED"
-    : isFailed
-      ? "FAILED"
-      : (run?.status ?? latestAnalysis?.status ?? "QUEUED");
+  let displayStatus: string;
+  if (isFailed) {
+    displayStatus = "FAILED";
+  } else if (isFinished) {
+    displayStatus = "COMPLETED";
+  } else {
+    displayStatus = run?.status ?? latestAnalysis?.status ?? "QUEUED";
+  }
 
   return (
-    <div className="animate-in fade-in mx-auto max-w-4xl space-y-8 py-10 duration-500">
+    <div className="mx-auto max-w-4xl space-y-8 py-10">
       <div className="space-y-4 text-center">
         <div className="flex justify-center">
           {isFinished ? (
-            <div className="rounded-full bg-green-500/10 p-3 ring-1 ring-green-500/20">
-              <CheckCircle2 className="size-10 text-green-500" />
+            <div className="bg-success/10 rounded-full p-3">
+              <CheckCircle2 className="text-success size-10" />
             </div>
           ) : isFailed ? (
-            <div className="bg-destructive/10 ring-destructive/20 rounded-full p-3 ring-1">
+            <div className="bg-destructive/10 rounded-full p-3">
               <AlertCircle className="text-destructive size-10" />
             </div>
           ) : (
@@ -79,7 +81,7 @@ export function RepoAnalysisLive({ accessToken, jobId, repoId }: Readonly<Props>
                 ? "Analysis Failed"
                 : "Analyzing Repository"}
           </h2>
-          <p className="text-muted-foreground text-sm">{statusText}</p>
+          <p className="text-muted-foreground text-sm">{triggerStatusText}</p>
           {!isFinished && !isFailed && progress >= 85 && (
             <p className="text-muted-foreground text-xs">
               Generating documentation (README, API, Architecture…). This step can take several
@@ -99,13 +101,12 @@ export function RepoAnalysisLive({ accessToken, jobId, repoId }: Readonly<Props>
         <Progress value={progress} indicatorClassName="bg-foreground" />
       </div>
 
-      <AnalysisTerminal logs={logs ?? []} />
+      <AnalysisTerminal logs={logs} />
 
       <div className="flex justify-center gap-4">
         {isFinished && (
           <AppButton
-            size="lg"
-            onClick={() => router.push(`/dashboard/repo/result/${repoId}`)}
+            onClick={() => router.push(`/dashboard/repo/${owner}/${name}`)}
             className="px-10"
           >
             View Results

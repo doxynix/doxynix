@@ -5,13 +5,13 @@ function easeInOutCubic(t: number): number {
 export function smoothScrollTo(targetId: string, offset: number = 80, duration: number = 800) {
   if (typeof window === "undefined") return;
 
-  const targetElement = document.getElementById(targetId);
+  const targetElement = document.querySelector(`#${targetId}`);
   if (!targetElement) {
     console.warn(`Element with id #${targetId} not found`);
     return;
   }
 
-  const startPosition = window.pageYOffset;
+  const startPosition = window.scrollY;
   const targetPosition = targetElement.getBoundingClientRect().top + startPosition - offset;
   const targetY = Math.max(0, targetPosition);
 
@@ -37,6 +37,8 @@ export function smoothScrollTo(targetId: string, offset: number = 80, duration: 
 
     if (timeElapsed < duration) {
       requestAnimationFrame(animation);
+    } else {
+      history.replaceState(null, "", `#${targetId}`);
     }
   };
 

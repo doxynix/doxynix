@@ -11,7 +11,7 @@ export function SettingsMenu() {
   const pathname = usePathname();
 
   return (
-    <div className="sticky top-2 flex flex-col gap-2">
+    <div className="sticky top-2 flex flex-col gap-1">
       {settingsMenu.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const isDestructive = item.variant === "destructive";

@@ -69,8 +69,6 @@ export type DeepDocsResult = {
   swaggerYaml?: string;
 };
 
-const MD_YAML_BLOCK_REGEX = /```(?:yaml)?([\S\s]*?)```/i;
-
 export async function orchestrateWriterTasks(
   files: { content: string; path: string }[],
   analysisResult: AIResult,
@@ -327,12 +325,19 @@ export async function orchestrateWriterTasks(
 
   let swaggerYaml: string | undefined;
   if (apiRes != null && generatedApiMarkdown != null) {
-    const yamlMatch = MD_YAML_BLOCK_REGEX.exec(generatedApiMarkdown);
-    if (yamlMatch) {
-      swaggerYaml = yamlMatch[1]?.trim();
-      generatedApiMarkdown = generatedApiMarkdown
-        .replace(/# openapi specification[\S\s]*/i, "")
-        .trim();
+    const specHeaderIndex = generatedApiMarkdown.search(/#\s+openapi\s+specification/i);
+
+    if (specHeaderIndex !== -1) {
+      const specPart = generatedApiMarkdown.slice(specHeaderIndex);
+      const yamlMatch = /```(?:yaml|yml)?([\S\s]*?)```/i.exec(specPart);
+
+      if (yamlMatch) {
+        swaggerYaml = yamlMatch[1]?.trim();
+        generatedApiMarkdown = (
+          generatedApiMarkdown.slice(0, specHeaderIndex) +
+          specPart.replace(/```(?:yaml|yml)?[\S\s]*?```/i, "")
+        ).trim();
+      }
     }
   }
 

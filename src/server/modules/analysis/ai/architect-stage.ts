@@ -79,8 +79,6 @@ export async function executeArchitectPhase(
 
     return aiResult;
   } catch (error) {
-    taskLogger.error("Architect: Critical failure during reasoning phase.");
-
     if (isSchemaMismatchError(error)) {
       taskLogger.warn("Architect: Using deterministic fallback after schema mismatch.");
       const fallback = normalizeAiGenerationOutput({
@@ -130,6 +128,8 @@ export async function executeArchitectPhase(
 
       return fallback;
     }
+
+    taskLogger.error("Architect: Critical failure during reasoning phase.");
 
     appLogger.warn({
       analysisId,
