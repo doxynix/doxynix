@@ -209,6 +209,9 @@ describe("shared/lib/utils:smoothScrollTo", () => {
 
   beforeEach(() => {
     vi.stubGlobal("window", {
+      history: {
+        replaceState: vi.fn(),
+      },
       matchMedia: matchMediaMock,
       pageYOffset: 0,
       scrollTo: scrollToMock,
@@ -242,6 +245,9 @@ describe("shared/lib/utils:smoothScrollTo", () => {
       getElementById: vi.fn(() => element),
     });
     vi.stubGlobal("window", {
+      history: {
+        replaceState: vi.fn(),
+      },
       matchMedia: matchMediaMock,
       pageYOffset: 100,
       scrollTo: scrollToMock,

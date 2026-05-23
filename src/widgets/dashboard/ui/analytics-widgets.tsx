@@ -21,7 +21,7 @@ import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } fro
 
 import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { Badge } from "@/shared/ui/core/badge";
+import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/shared/ui/core/chart";
 import { Progress } from "@/shared/ui/core/progress";
@@ -50,9 +50,9 @@ export function EcosystemStatusWidget({ data }: Readonly<Props>) {
             Ecosystem Status
           </span>
           {isEmpty === false && (
-            <Badge variant="outline" className="font-mono">
+            <AppBadge variant="outline" className="font-mono">
               {docCoverage}% Documented
-            </Badge>
+            </AppBadge>
           )}
         </CardTitle>
       </CardHeader>
@@ -133,9 +133,9 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
                       {h.repo_name}/
                       <span className="text-foreground font-bold">{h.path.split("/").pop()}</span>
                     </span>
-                    <Badge variant="destructive" className="h-5 text-[10px]">
+                    <AppBadge variant="destructive" className="h-5 text-[10px]">
                       {h.score} pts
-                    </Badge>
+                    </AppBadge>
                   </div>
                 ))}
               </div>

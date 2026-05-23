@@ -1,6 +1,5 @@
 import { clamp, meanBy, sumBy } from "es-toolkit";
 
-import { dumpDebug } from "@/server/utils/debug-logger";
 import type { DependencyNodeMetric } from "@/server/utils/types";
 
 import type {
@@ -91,8 +90,6 @@ export async function collectStructuralSignals(
 
   const structuralResult = buildStructuralSignals(evidence, dependencyHotspots);
 
-  void dumpDebug("structural-signals", structuralResult);
-  void dumpDebug("repository-evidence", evidence);
   return { evidence, structuralSignals: structuralResult };
 }
 

@@ -11,7 +11,7 @@ import { commandMenuItems } from "@/shared/constants/navigation";
 import { useRouter } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import type { MenuItem } from "@/shared/types/navigation.types";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   CommandDialog,
   CommandEmpty,
@@ -148,7 +148,7 @@ export function AppCommandMenu() {
   return (
     <>
       <AppTooltip content="Search site" className="lg:hidden">
-        <Button
+        <AppButton
           variant="outline"
           aria-label="Search site"
           onClick={() => setOpen(true)}
@@ -162,7 +162,7 @@ export function AppCommandMenu() {
           <CommandShortcut className="absolute top-1.5 right-3 hidden text-xs lg:flex">
             Ctrl+K
           </CommandShortcut>
-        </Button>
+        </AppButton>
       </AppTooltip>
 
       <CommandDialog open={open} shouldFilter={false} onOpenChange={setOpen}>
@@ -220,7 +220,7 @@ export function AppCommandMenu() {
             heading={
               <div className="flex w-full items-center justify-between">
                 <span>{t("command_menu_label_2")}</span>
-                <Button
+                <AppButton
                   size="sm"
                   variant="ghost"
                   onClick={(e) => {
@@ -237,7 +237,7 @@ export function AppCommandMenu() {
                       isReposExpanded && "rotate-180"
                     )}
                   />
-                </Button>
+                </AppButton>
               </div>
             }
           >

@@ -16,8 +16,8 @@ import {
   Zap,
 } from "lucide-react";
 
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import { Card, CardContent } from "@/shared/ui/core/card";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 
@@ -145,22 +145,28 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
         <div className="min-w-0 pr-4">
           <div className="flex items-center gap-2">
             <h3 className="truncate text-sm">{node.label}</h3>
-            <Badge variant="outline" className="text-xs">
+            <AppBadge variant="outline" className="text-xs">
               {node.kind}
-            </Badge>
-            <Badge variant="outline" className="text-xs">
+            </AppBadge>
+            <AppBadge variant="outline" className="text-xs">
               {node.score}
-            </Badge>
+            </AppBadge>
           </div>
           {activeMarkers.map((marker) => (
-            <Badge key={marker} variant="outline" className="text-xs">
+            <AppBadge key={marker} variant="outline" className="text-xs">
               {marker}
-            </Badge>
+            </AppBadge>
           ))}
         </div>
-        <Button size="icon" variant="ghost" onClick={onClose} className="shrink-0">
+        <AppButton
+          size="icon"
+          variant="ghost"
+          aria-label="Close node inspector"
+          onClick={onClose}
+          className="shrink-0"
+        >
           <X />
-        </Button>
+        </AppButton>
       </div>
 
       <ScrollArea>
@@ -184,22 +190,22 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                 <div className="text-sm">Inferred Role</div>
                 <p className="text-xs">{explain.role}</p>
               </div>
-              <Badge variant="outline" className="text-success text-xs">
+              <AppBadge variant="outline" className="text-success text-xs">
                 {explain.confidence}
-              </Badge>
+              </AppBadge>
             </div>
           </div>
 
           <div className="mt-2 flex flex-wrap gap-1">
             {explain.relationships.riskTitles.map((title) => (
-              <Badge key={title} variant="destructive" className="text-[10px]">
+              <AppBadge key={title} variant="destructive" className="text-[10px]">
                 {title}
-              </Badge>
+              </AppBadge>
             ))}
             {explain.relationships.factTitles.map((fact) => (
-              <Badge key={fact} variant="secondary" className="text-[10px]">
+              <AppBadge key={fact} variant="secondary" className="text-[10px]">
                 {fact}
-              </Badge>
+              </AppBadge>
             ))}
           </div>
 
@@ -242,7 +248,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               {children.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {children.map((child) => (
-                    <Button
+                    <AppButton
                       key={child.id}
                       size="sm"
                       variant="outline"
@@ -251,7 +257,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                       }}
                     >
                       <FileIcon /> {child.label}
-                    </Button>
+                    </AppButton>
                   ))}
                 </div>
               )}
@@ -265,7 +271,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               </div>
               <div className="flex flex-col gap-1">
                 {connections.map((path) => (
-                  <Button
+                  <AppButton
                     key={path}
                     size="sm"
                     variant="outline"
@@ -276,7 +282,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                   >
                     <span className="truncate">{path.split("/").pop()}</span>
                     <ArrowRight />
-                  </Button>
+                  </AppButton>
                 ))}
               </div>
             </div>
@@ -321,9 +327,9 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               <div className="text-xs">Related Docs</div>
               <div className="flex flex-wrap gap-2">
                 {data.related.docs.map((doc) => (
-                  <Badge key={doc.id} variant="secondary" className="text-[10px]">
+                  <AppBadge key={doc.id} variant="secondary" className="text-[10px]">
                     {doc.docType}: {doc.title}
-                  </Badge>
+                  </AppBadge>
                 ))}
               </div>
             </section>
@@ -339,7 +345,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                       <span className="font-medium">
                         PR #{finding.prNumber} · {finding.findingType}
                       </span>
-                      <Badge variant="outline">{finding.filePath.split("/").pop()}</Badge>
+                      <AppBadge variant="outline">{finding.filePath.split("/").pop()}</AppBadge>
                     </div>
                     <p className="text-muted-foreground line-clamp-3">{finding.body}</p>
                   </div>
@@ -376,14 +382,14 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
           <div className="flex gap-2">
             {availableActions.canQuickAudit && (
-              <Button className="w-full gap-2">
+              <AppButton className="w-full gap-2">
                 <FileSearch /> Start Quick Audit
-              </Button>
+              </AppButton>
             )}
             {availableActions.canDocumentFile && (
-              <Button variant="outline" className="w-full gap-2">
+              <AppButton variant="outline" className="w-full gap-2">
                 <SearchCode /> Document Logic
-              </Button>
+              </AppButton>
             )}
           </div>
         </div>

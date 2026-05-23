@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useRef, type ComponentPropsWithoutRef } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { flushSync } from "react-dom";
 
 import { cn } from "@/shared/lib/cn";
 
-import { Button } from "./button";
+import { AppButton } from "./button";
 
 type TransitionVariant =
   | "circle"
@@ -18,7 +18,7 @@ type TransitionVariant =
   | "star"
   | "triangle";
 
-interface AnimatedThemeTogglerProps extends React.ComponentPropsWithoutRef<"button"> {
+interface AnimatedThemeTogglerProps extends ComponentPropsWithoutRef<"button"> {
   duration?: number;
   /** When true, the transition expands from the viewport center instead of the button center. */
   fromCenter?: boolean;
@@ -131,12 +131,12 @@ export const AnimatedThemeToggler = ({
   const isDark = resolvedTheme === "dark";
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const toggleTheme = useCallback(() => {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const applyTheme = () => {
+    setTheme(isDark ? "light" : "dark");
+  };
 
-    const applyTheme = () => {
-      setTheme(isDark ? "light" : "dark");
-    };
+  const toggleTheme = () => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (
       typeof document.startViewTransition !== "function" ||
@@ -167,45 +167,49 @@ export const AnimatedThemeToggler = ({
 
     document.documentElement.style.setProperty("will-change", "clip-path");
 
-    const transition = document.startViewTransition(() => {
-      flushSync(() => {
-        applyTheme();
+    try {
+      const transition = document.startViewTransition(() => {
+        flushSync(() => {
+          applyTheme();
+        });
       });
-    });
 
-    void transition.ready
-      .then(() => {
-        const clipPath = getThemeTransitionClipPaths(
-          variant,
-          x,
-          y,
-          maxRadius,
-          viewportWidth,
-          viewportHeight
-        );
+      void transition.ready
+        .then(() => {
+          const clipPath = getThemeTransitionClipPaths(
+            variant,
+            x,
+            y,
+            maxRadius,
+            viewportWidth,
+            viewportHeight
+          );
 
-        document.documentElement.animate(
-          {
-            clipPath: clipPath,
-          },
-          {
-            duration,
-            // Star: linear avoids easing overshoot that fights polygon interpolation at t→1; VT group duration is synced above.
-            easing: variant === "star" ? "linear" : "ease-in-out",
-            fill: "forwards",
-            pseudoElement: "::view-transition-new(root)",
-          }
-        ).onfinish = () => {
+          document.documentElement.animate(
+            { clipPath },
+            {
+              duration,
+              easing: variant === "star" ? "linear" : "ease-in-out",
+              fill: "forwards",
+              pseudoElement: "::view-transition-new(root)",
+            }
+          ).onfinish = () => {
+            document.documentElement.style.removeProperty("will-change");
+          };
+        })
+        .catch((error) => {
           document.documentElement.style.removeProperty("will-change");
-        };
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }, [isDark, setTheme, variant, duration, fromCenter]);
+          console.error(error);
+        });
+    } catch (error) {
+      document.documentElement.style.removeProperty("will-change");
+      applyTheme();
+      console.error(error);
+    }
+  };
 
   return (
-    <Button
+    <AppButton
       ref={buttonRef}
       type="button"
       size="icon"
@@ -217,6 +221,6 @@ export const AnimatedThemeToggler = ({
     >
       <Sun className="block h-4.5 w-4.5 dark:hidden" />
       <Moon className="hidden h-4.5 w-4.5 dark:block" />
-    </Button>
+    </AppButton>
   );
 };

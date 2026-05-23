@@ -2,10 +2,8 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
-  useMemo,
   useState,
   type ComponentProps,
   type CSSProperties,
@@ -17,7 +15,7 @@ import { Menu, PanelLeft } from "lucide-react";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { cn } from "@/shared/lib/cn";
 import { setClientCookie } from "@/shared/lib/cookies";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { Separator } from "@/shared/ui/core/separator";
 import {
@@ -78,17 +76,15 @@ function SidebarProvider({
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = useState(defaultOpen);
   const open = openProp ?? _open;
-  const setOpen = useCallback(
-    (value: ((value: boolean) => boolean) | boolean) => {
+
+  const setOpen = (value: ((value: boolean) => boolean) | boolean) => {
+    if (setOpenProp) {
       const openState = typeof value === "function" ? value(open) : value;
-      if (setOpenProp) {
-        setOpenProp(openState);
-      } else {
-        _setOpen(openState);
-      }
-    },
-    [setOpenProp, open]
-  );
+      setOpenProp(openState);
+      return;
+    }
+    _setOpen((prev) => (typeof value === "function" ? value(prev) : value));
+  };
 
   // This sets the cookie to keep the sidebar state.
   useEffect(() => {
@@ -96,9 +92,9 @@ function SidebarProvider({
   }, [open]);
 
   // Helper to toggle the sidebar.
-  const toggleSidebar = useCallback(() => {
+  const toggleSidebar = () => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
-  }, [isMobile, setOpen, setOpenMobile]);
+  };
 
   // Adds a keyboard shortcut to toggle the sidebar.
   // useEffect(() => {
@@ -117,18 +113,15 @@ function SidebarProvider({
   // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? "expanded" : "collapsed";
 
-  const contextValue = useMemo<SidebarContextProps>(
-    () => ({
-      isMobile,
-      open,
-      openMobile,
-      setOpen,
-      setOpenMobile,
-      state,
-      toggleSidebar,
-    }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
-  );
+  const contextValue: SidebarContextProps = {
+    isMobile,
+    open,
+    openMobile,
+    setOpen,
+    setOpenMobile,
+    state,
+    toggleSidebar,
+  };
 
   return (
     <SidebarContext.Provider value={contextValue}>
@@ -234,8 +227,8 @@ function Sidebar({
         className={cn(
           "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
           side === "left"
-            ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
-            : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
+            ? "left-0 group-data-[collapsible=offcanvas]:-left-(--sidebar-width)"
+            : "right-0 group-data-[collapsible=offcanvas]:-right-(--sidebar-width)",
           // Adjust the padding for floating and inset variants.
           variant === "floating" || variant === "inset"
             ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
@@ -256,12 +249,12 @@ function Sidebar({
   );
 }
 
-function SidebarTrigger({ className, onClick, ...props }: ComponentProps<typeof Button>) {
+function SidebarTrigger({ className, onClick, ...props }: ComponentProps<typeof AppButton>) {
   const { toggleSidebar } = useSidebar();
   const isMobile = useIsMobile();
 
   return (
-    <Button
+    <AppButton
       size="icon"
       variant="ghost"
       data-sidebar="trigger"
@@ -275,7 +268,7 @@ function SidebarTrigger({ className, onClick, ...props }: ComponentProps<typeof 
     >
       {isMobile ? <Menu /> : <PanelLeft />}
       <span className="sr-only">Toggle Sidebar</span>
-    </Button>
+    </AppButton>
   );
 }
 

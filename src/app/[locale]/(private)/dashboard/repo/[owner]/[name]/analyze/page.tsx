@@ -34,8 +34,10 @@ export default async function AnalyzePage({ params }: Readonly<RepoPageProps>) {
     <div className="mx-auto px-4 py-6">
       {isRunning ? (
         <RepoAnalysisLive
+          name={name}
           accessToken={lastAnalysis.publicAccessToken!}
           jobId={lastAnalysis.jobId!}
+          owner={owner}
           repoId={repo.id}
         />
       ) : (

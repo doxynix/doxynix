@@ -16,7 +16,7 @@ import {
 import { useLocale } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
-import { Badge } from "@/shared/ui/core/badge";
+import { AppBadge } from "@/shared/ui/core/badge";
 import { TableCell, TableRow } from "@/shared/ui/core/table";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
@@ -63,7 +63,7 @@ export function AuditLogRow({ log }: Readonly<Props>) {
       </TableCell>
 
       <TableCell>
-        <Badge variant="secondary">{log.entityType}</Badge>
+        <AppBadge variant="secondary">{log.entityType}</AppBadge>
       </TableCell>
 
       <TableCell>

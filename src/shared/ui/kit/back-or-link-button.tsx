@@ -5,7 +5,7 @@ import { MoveLeft } from "lucide-react";
 
 import { Link, useRouter } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { Button, type ButtonProps } from "@/shared/ui/core/button";
+import { AppButton, type ButtonProps } from "@/shared/ui/core/button";
 
 type BackOrLinkButtonProps = ButtonProps & {
   href?: Route;
@@ -33,20 +33,20 @@ export function BackOrLinkButton({
 
   if (href) {
     return (
-      <Button asChild variant={variant} className={cn("w-fit", className)} {...props}>
+      <AppButton asChild variant={variant} className={cn("w-fit", className)} {...props}>
         <Link href={href}>{content}</Link>
-      </Button>
+      </AppButton>
     );
   }
 
   return (
-    <Button
+    <AppButton
       variant={variant}
       onClick={() => router.back()}
       className={cn("w-fit", className)}
       {...props}
     >
       {content}
-    </Button>
+    </AppButton>
   );
 }

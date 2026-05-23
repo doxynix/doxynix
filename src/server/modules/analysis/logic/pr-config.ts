@@ -21,16 +21,16 @@ const DEFAULT_PR_CONFIG: PRAnalysisConfig = {
   tokenBudget: 30_000,
 };
 
-export class PRConfigService {
-  static async disablePRAnalysis(repoId: string, db: DbClient): Promise<void> {
+export const PRConfigService = {
+  async disablePRAnalysis(repoId: string, db: DbClient): Promise<void> {
     await this.updateConfig(repoId, { enabled: false }, db);
-  }
+  },
 
-  static async enablePRAnalysis(repoId: string, db: DbClient): Promise<void> {
+  async enablePRAnalysis(repoId: string, db: DbClient): Promise<void> {
     await this.updateConfig(repoId, { enabled: true }, db);
-  }
+  },
 
-  static async getConfig(repoId: string, db: DbClient): Promise<PRAnalysisConfig> {
+  async getConfig(repoId: string, db: DbClient): Promise<PRAnalysisConfig> {
     const config = await db.pullRequestAnalysisConfig.findFirst({
       where: { repo: { publicId: repoId } },
     });
@@ -45,21 +45,21 @@ export class PRConfigService {
       focusAreas: config.focusAreas,
       tokenBudget: config.tokenBudget,
     };
-  }
+  },
 
-  static async setFocusAreas(
+  async setFocusAreas(
     repoId: string,
     areas: PRAnalysisConfig["focusAreas"],
     db: DbClient
   ): Promise<void> {
     await this.updateConfig(repoId, { focusAreas: areas }, db);
-  }
+  },
 
-  static async setTokenBudget(repoId: string, budget: number, db: DbClient): Promise<void> {
+  async setTokenBudget(repoId: string, budget: number, db: DbClient): Promise<void> {
     await this.updateConfig(repoId, { tokenBudget: clamp(budget, 10_000, 100_000) }, db);
-  }
+  },
 
-  static async updateConfig(
+  async updateConfig(
     repoId: string,
     config: Partial<PRAnalysisConfig>,
     db: DbClient
@@ -93,5 +93,5 @@ export class PRConfigService {
     });
 
     return this.getConfig(repoId, db);
-  }
-}
+  },
+};

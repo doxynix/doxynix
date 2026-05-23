@@ -1,6 +1,5 @@
 import { normalize } from "pathe";
 
-import { dumpDebug } from "@/server/utils/debug-logger";
 import { getLanguageColor } from "@/server/utils/language-metadata";
 import { getFileExtension } from "@/server/utils/path-operations";
 
@@ -229,8 +228,6 @@ export function buildMapperSkeleton(
     techStack: metrics.techStack.slice(0, 24),
     tsStaticHints: tsStaticHints.slice(0, 12),
   };
-
-  void dumpDebug("mapper-skeleton-payload", payload);
 
   return JSON.stringify(payload, null, 2);
 }

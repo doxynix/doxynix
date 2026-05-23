@@ -4,7 +4,6 @@ import { hasCycle } from "graphology-dag";
 import { basename, dirname, join, normalize } from "pathe";
 import ts from "typescript";
 
-import { dumpDebug } from "@/server/utils/debug-logger";
 import { getKnownLanguageExtensions } from "@/server/utils/language-metadata";
 
 import { SCHEMA_LIMITS } from "./scoring-constants";
@@ -186,7 +185,6 @@ export function findDependencyCycles(graphMap: Map<string, Set<string>>): string
   }
 
   if (!hasCycle(graph)) {
-    void dumpDebug("dependency-cycles", { count: 0, cycles: [] });
     return [];
   }
 
@@ -208,10 +206,7 @@ export function findDependencyCycles(graphMap: Map<string, Set<string>>): string
   const analysis = analyzeGraph(mutableGraphData);
   const detectedCycles: string[][] = analysis.cycles;
 
-  const result = [...detectedCycles]
+  return [...detectedCycles]
     .sort((left, right) => left.length - right.length)
     .slice(0, SCHEMA_LIMITS.maxCyclesDetected);
-
-  void dumpDebug("dependency-cycles", { count: result.length, cycles: result });
-  return result;
 }

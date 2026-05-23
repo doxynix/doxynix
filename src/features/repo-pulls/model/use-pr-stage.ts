@@ -15,7 +15,7 @@ export function usePrStage(repoId: string) {
       toast.success(
         `Added ${data.stagedFilesAdded} file(s) to PR draft. Total: ${data.stagedCount}.`
       );
-      void utils.analysis.getStagedFiles.invalidate({ repoId });
+      void utils.analysis.getStagedFiles.invalidate();
     },
   });
 

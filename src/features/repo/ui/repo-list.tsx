@@ -3,7 +3,7 @@
 import { SearchX } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
 import type { RepoMeta, UiRepoListItem } from "@/entities/repo/model/repo.types";
@@ -24,9 +24,9 @@ export function RepoList({ meta, repos }: Readonly<Props>) {
     return (
       <EmptyState
         action={
-          <Button variant="secondary" onClick={() => setOpen(true)} className="cursor-pointer">
+          <AppButton variant="secondary" onClick={() => setOpen(true)} className="cursor-pointer">
             {tCommon("add")}
-          </Button>
+          </AppButton>
         }
         description={t("repo_empty_repos_desc")}
         title={t("repo_empty_title")}

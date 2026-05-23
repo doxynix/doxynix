@@ -161,7 +161,7 @@ export const PATH_PATTERNS = {
     "**/*.{keystore,jks}",
     "**/config/master.key",
     "**/credentials.json",
-    "**/{secrets,secret,credentials,auth,keys}/**",
+    "**/{secrets,secret,credentials,keys}/**",
     "**/*.{pem,key,p12,pfx,crt,der}",
   ],
   TEST: [

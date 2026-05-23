@@ -3,7 +3,7 @@ import { useLocale } from "next-intl";
 
 import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { Badge } from "@/shared/ui/core/badge";
+import { AppBadge } from "@/shared/ui/core/badge";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import type { RepoPull } from "../model/pr.types";
@@ -52,7 +52,7 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
       {pull.riskScore !== null && (
         <div className="flex flex-col items-end">
           <span className="text-muted-foreground mb-1 text-xs">Risk Level</span>
-          <Badge
+          <AppBadge
             variant="outline"
             className={cn(
               pull.riskScore > 7
@@ -63,7 +63,7 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
             )}
           >
             {pull.riskScore}/10
-          </Badge>
+          </AppBadge>
         </div>
       )}
     </Link>

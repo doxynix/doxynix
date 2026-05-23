@@ -7,7 +7,7 @@ import { useQueryStates } from "nuqs";
 import type { DateRange } from "react-day-picker";
 
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { Calendar } from "@/shared/ui/core/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/core/popover";
 
@@ -86,7 +86,7 @@ export function DashboardDatePeriod() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="bg-background">
+        <AppButton variant="outline" className="bg-background">
           <Clock />
           {activePeriod ? (
             activePeriod.label
@@ -97,7 +97,7 @@ export function DashboardDatePeriod() {
           ) : (
             "Select Period"
           )}
-        </Button>
+        </AppButton>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-auto p-0">
         <div className="flex">
@@ -105,7 +105,7 @@ export function DashboardDatePeriod() {
             <p className="text-muted-foreground px-2 py-1.5 text-center text-xs">Quick Range</p>
             <div className="space-y-1">
               {DATE_PERIODS.map((p) => (
-                <Button
+                <AppButton
                   key={p.period}
                   size="sm"
                   variant="ghost"
@@ -118,7 +118,7 @@ export function DashboardDatePeriod() {
                 >
                   {p.label}
                   {urlState.period === p.period && <Check />}
-                </Button>
+                </AppButton>
               ))}
             </div>
           </div>

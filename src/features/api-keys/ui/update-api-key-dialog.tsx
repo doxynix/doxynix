@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
 import { CreateApiKeySchema, type CreateApiKeyInput } from "@/shared/api/schemas/api-key";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
   DialogContent,
@@ -68,14 +68,14 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <AppTooltip content={tCommon("edit")}>
         <DialogTrigger asChild>
-          <Button
+          <AppButton
             size="icon"
             variant="ghost"
             aria-label="Update key"
             className="text-muted-foreground opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
           >
             <Pencil />
-          </Button>
+          </AppButton>
         </DialogTrigger>
       </AppTooltip>
 

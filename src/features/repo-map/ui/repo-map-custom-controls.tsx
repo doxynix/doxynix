@@ -5,7 +5,7 @@ import { Panel } from "@xyflow/react";
 import { Eye, EyeOff, FocusIcon, Maximize, ZoomIn, ZoomOut } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { useMapCommands } from "@/features/repo-map/model/use-map-commands";
@@ -37,9 +37,10 @@ export function RepoMapCustomControls() {
     <Panel position="bottom-left" className="flex flex-col gap-1">
       {CONTROLS_CONFIG.map((item) => (
         <AppTooltip key={item.id} content={item.label} side="left">
-          <Button
+          <AppButton
             size="icon"
             variant="outline"
+            aria-label={item.label}
             onClick={item.action}
             className={cn(
               "transition-all duration-300",
@@ -47,14 +48,14 @@ export function RepoMapCustomControls() {
             )}
           >
             <item.icon />
-          </Button>
+          </AppButton>
         </AppTooltip>
       ))}
 
       <AppTooltip content="Toggle Controls (T then C)" side="left">
-        <Button size="icon" variant="outline" onClick={toggleControls}>
+        <AppButton size="icon" variant="outline" onClick={toggleControls}>
           {hide ? <EyeOff /> : <Eye />}
-        </Button>
+        </AppButton>
       </AppTooltip>
     </Panel>
   );

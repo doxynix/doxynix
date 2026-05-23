@@ -7,7 +7,7 @@ import { ServerCrash } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { IS_DEV } from "@/shared/constants/env.flags";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
@@ -109,9 +109,9 @@ export default function ErrorPage({
 
         <div className="flex flex-col items-center justify-center gap-3 pt-4 sm:flex-row">
           <BackOrLinkButton label={tCommon("back")} className="cursor-pointer" />
-          <Button onClick={reset} className="cursor-pointer">
+          <AppButton onClick={reset} className="cursor-pointer">
             {t("try_recover_btn")}
-          </Button>
+          </AppButton>
         </div>
       </div>
 
@@ -122,11 +122,11 @@ export default function ErrorPage({
             support@doxynix.space
           </a>
         </div>
-        <Button asChild size="sm" variant="outline" className="mx-auto w-fit">
+        <AppButton asChild size="sm" variant="outline" className="mx-auto w-fit">
           <ExternalLink href="https://status.doxynix.space" className="flex items-center gap-2.5">
             Check System Status
           </ExternalLink>
-        </Button>
+        </AppButton>
       </footer>
     </div>
   );

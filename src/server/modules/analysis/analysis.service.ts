@@ -263,7 +263,13 @@ export const repoAnalysisService = {
       nodeById,
       nodeDetailCache
     );
-    const topFindings = await analysisMapper.buildTopFindings(findings, changedFileItems, nodeById);
+    const topFindings = await analysisMapper.buildTopFindings(
+      findings,
+      changedFileItems,
+      nodeById,
+      repoSnapshot.owner,
+      repoSnapshot.name
+    );
     const primaryFile = analysisMapper.selectPrimaryFile(changedFileItems);
     const primaryNodeId =
       primaryFile?.nodeId ?? affectedNodes[0]?.nodeId ?? affectedZones[0]?.nodeId ?? null;
@@ -336,7 +342,12 @@ export const repoAnalysisService = {
     if (doc == null) throw new TRPCError({ code: "NOT_FOUND" });
 
     const html = await unstable_cache(
-      async () => markdownToHtml(doc.content),
+      async () =>
+        markdownToHtml({
+          content: doc.content,
+          name: repo.name,
+          owner: repo.owner,
+        }),
       [`doc-html-${doc.publicId}`],
       {
         revalidate: false,

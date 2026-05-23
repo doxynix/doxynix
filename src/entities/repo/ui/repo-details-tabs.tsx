@@ -7,7 +7,7 @@ import { getRepoDetailsMenu } from "@/shared/constants/navigation";
 import { Link, usePathname } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { isRouteActive } from "@/shared/lib/navigation-utils";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 
 import { buildRepoDetailHref } from "../model/repo-workspace-navigation";
 
@@ -27,7 +27,7 @@ export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
         const href = buildRepoDetailHref(baseHref, searchParams) as Route;
 
         return (
-          <Button key={n.id} asChild variant="ghost" className={cn("relative h-8")}>
+          <AppButton key={n.id} asChild variant="ghost" className={cn("relative h-8")}>
             <Link
               href={href}
               className={cn(
@@ -40,7 +40,7 @@ export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
               {n.icon != null && <n.icon />}
               <span>{n.label}</span>
             </Link>
-          </Button>
+          </AppButton>
         );
       })}
     </div>

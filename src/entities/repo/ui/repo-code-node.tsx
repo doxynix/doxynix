@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight, FileIcon, Folder, FolderOpen } from "lucide-
 import type { NodeRendererProps } from "react-arborist";
 
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 
 import type { FileNode } from "@/entities/repo/model/repo-setup.types";
 
@@ -26,7 +26,7 @@ export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNode
   };
 
   return (
-    <Button
+    <AppButton
       variant="ghost"
       onClick={handleClick}
       className={cn(
@@ -55,6 +55,6 @@ export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNode
         )}
       </div>
       <span className="truncate text-sm">{node.data.name}</span>
-    </Button>
+    </AppButton>
   );
 }

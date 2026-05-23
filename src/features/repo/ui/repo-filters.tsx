@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import { StatusSchema, VisibilitySchema } from "@/shared/api-contracts";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Select,
   SelectContent,
@@ -85,10 +85,10 @@ export function RepoFilters() {
           </SelectContent>
         </Select>
 
-        <Button disabled={!hasFilters} variant="outline" onClick={handleReset} className="px-2">
+        <AppButton disabled={!hasFilters} variant="outline" onClick={handleReset} className="px-2">
           {tCommon("reset")}
           <X />
-        </Button>
+        </AppButton>
       </div>
     </div>
   );

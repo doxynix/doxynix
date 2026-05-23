@@ -11,9 +11,6 @@ export function HeroSection() {
 
   return (
     <section id="hero" className="flex min-h-dvh flex-col items-center justify-center p-4 pt-16">
-      {/* <Spotlight className="fill-primary fixed -top-75 transform opacity-100" /> */}
-      {/* <Spotlight className="fill-primary fixed -top-75 -rotate-70 transform opacity-100" /> */}
-
       <div className="flex h-full max-w-4xl flex-col items-center justify-between gap-6 text-center">
         <Logo isInteractive={false} className="animate-fade-in mb-8 max-h-150 max-w-150" />
         <div className="glass-panel border-border bg-landing-bg-dark/56 flex items-center justify-center rounded-full border px-3 py-1">

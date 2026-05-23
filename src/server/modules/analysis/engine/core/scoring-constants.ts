@@ -322,40 +322,52 @@ export const PENALTY_CONSTANTS = {
  * Temperature controls randomness/creativity in outputs.
  */
 export const LLM_TEMPERATURE_STRATEGY = {
-  /** Classification/Detection tasks - must be deterministic (Sentinel, Validation, Security Checks) */
+  /**
+   * STRICT DATA EXTRACTION (JSON/Classification)
+   * Why 0.4? Gemini 3 dies at 0.0. We need 0.4 to keep the "thinking" alive
+   * while maintaining strict adherence to the Zod schema.
+   */
   classification: {
-    description: "Deterministic - deny randomness, exact classification and guardrails",
-    temperature: 0.0,
-    topK: 1, // Take strictly the first most probable word
-    topP: 0.1, // Narrow the sampling core as much as possible
+    description: "Strict extraction for repo analysis (File parsing, Imports)",
+    temperature: 0.4,
+    topK: 32, // Never use 1. Gemini requires a window of at least 10-32.
+    topP: 0.8,
   },
 
-  /** Creative/Generative tasks - balanced technical writing (Writers: README, Architecture, API, Changelog) */
+  /**
+   * TECHNICAL DOCUMENTATION (Readme, API Specs)
+   * Why 1.0? Google officially recommends 1.0 for code tasks in Gemini 3.
+   * Lower values trigger the "Recitation" safety filter on boilerplate code.
+   */
   creative: {
-    description:
-      "Structured Generation - diverse outputs with natural technical language variation",
-    temperature: 0.35, // Optimal for coherent text without hallucinations
-    topK: 40, // Industry standard for technical copywriting
-    topP: 0.85, // Allows you to use a rich professional vocabulary
+    description: "Professional technical writing (No hallucinations, but fluid)",
+    temperature: 0.7,
+    topK: 40,
+    topP: 0.95,
   },
 
-  /** Default strategy (fallback for unknown task types) */
+  /**
+   * DEFAULT FALLBACK
+   */
   default: {
-    description: "Conservative fallback - low randomness, high factual compliance",
-    temperature: 0.1,
-    topK: 20,
-    topP: 0.4,
+    description: "Balanced standard",
+    temperature: 0.5,
+    topK: 40,
+    topP: 0.9,
   },
 
-  /** Reasoning/Analysis tasks - optimized for thinking models (Mapper, Analysis, Complex Code Review) */
+  /**
+   * ARCHITECTURAL REASONING (Mermaid Maps, System Design)
+   * Why 1.0? Complex spatial reasoning requires the full dynamic range of the model.
+   * Restricting this causes the "No Output" loop.
+   */
   reasoning: {
-    description:
-      "Deep Analysis - optimized to let thinking models reason thoroughly without looping",
-    temperature: 0.55, // Slightly increased so that Gemini Thinking does not loop its "thoughts"
-    topK: 50, // Sufficient window to generate deep architectural insights
-    topP: 0.95, // Allows the model to build complex logical chains based on facts
+    description: "Complex synthesis for Architecture Maps & Relationships",
+    temperature: 1.0, // CRITICAL: Do not lower this for Gemini 3 Reasoning!
+    topK: 64, // Flash-Lite defaults to 64.
+    topP: 0.95,
   },
-} as const; // Added as const for strict immutability of types in TypeScript
+} as const;
 
 export const AI_POLICY_CONSTANTS = {
   /** Коэффициент оценки: сколько символов в среднем приходится на 1 токен */

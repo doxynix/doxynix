@@ -72,9 +72,9 @@ generator dbml {
 }
 
 // generator erd {
-//   provider = "prisma-erd-generator"
-//   theme    = "dark"
-//   // mmdcPath = "node_modules/.bin"  не нужно
+//   provider      = "prisma-erd-generator"
+//   theme         = "neutral"
+//   output        = "../prisma/erd/ERD.pdf"
 // }
 
 // generator markdown {

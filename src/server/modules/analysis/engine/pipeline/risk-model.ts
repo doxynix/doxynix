@@ -1,7 +1,5 @@
 import { clamp, mean, uniq } from "es-toolkit";
 
-import { dumpDebug } from "@/server/utils/debug-logger";
-
 import { buildEvidence } from "../core/common";
 import type {
   ChangeCouplingRef,
@@ -323,6 +321,5 @@ export function buildRiskSectionBody(
     rawMetrics,
   };
 
-  void dumpDebug("risk-model", riskBody);
   return riskBody;
 }

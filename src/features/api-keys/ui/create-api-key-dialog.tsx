@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 
 import { CreateApiKeySchema, type CreateApiKeyInput } from "@/shared/api/schemas/api-key";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
   DialogContent,
@@ -61,10 +61,10 @@ export function CreateApiKeyDialog() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="cursor-pointer">
+        <AppButton variant="outline" className="cursor-pointer">
           <Plus />
           {t("settings_api_keys_create_api_key")}
-        </Button>
+        </AppButton>
       </DialogTrigger>
 
       <DialogContent
@@ -122,9 +122,9 @@ export function CreateApiKeyDialog() {
             </div>
 
             <DialogFooter>
-              <Button onClick={() => handleOpenChange(false)} className="w-full cursor-pointer">
+              <AppButton onClick={() => handleOpenChange(false)} className="w-full cursor-pointer">
                 {tCommon("done")}
-              </Button>
+              </AppButton>
             </DialogFooter>
           </div>
         )}

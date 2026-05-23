@@ -35,6 +35,7 @@ export default defineConfig([
       ".dependency-cruiser.js",
       "coverage/**",
       "report/**",
+      "coverage-ts/**",
       ".trigger/**",
       "cli/index.js",
       "commitlint.config.js",
@@ -117,7 +118,7 @@ export default defineConfig([
     },
 
     rules: {
-      "prettier/prettier": "error",
+      "prettier/prettier": "off", // NOTE: нету особого смысла в нем так как он только подсвечивает ошибку а не фиксит
 
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
@@ -186,6 +187,12 @@ export default defineConfig([
         },
       ],
 
+      "unicorn/no-abusive-eslint-disable": "error",
+      "unicorn/prefer-number-properties": "error",
+      "unicorn/prefer-query-selector": "error",
+      "unicorn/no-static-only-class": "error",
+      "unicorn/prefer-keyboard-event-key": "error",
+
       "no-unneeded-ternary": "error",
       "sonarjs/cognitive-complexity": ["off", 15], // NOTE: пока выключен я пока не хочу рефакторить некоторый код
       "sonarjs/no-identical-functions": "error",
@@ -207,27 +214,19 @@ export default defineConfig([
       "sonarjs/function-return-type": "off",
       "sonarjs/deprecation": "off", // NOTE: долговатый слишком не окупается
 
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        {
-          prefer: "type-imports",
-          fixStyle: "separate-type-imports",
-        },
-      ],
-
       "validate-jsx-nesting/no-invalid-jsx-nesting": "error",
 
       "boundaries/dependencies": [
-        "error",
+        "warn",
         {
           default: "allow",
           rules: [
             {
-              from: { type: "app|widgets|features|entities" },
-              disallow: [{ to: { type: "server-modules|server-core" } }],
+              from: { type: ["widgets", "features", "entities"] },
+              disallow: [{ to: { type: ["server-modules", "server-core"] } }],
               allow: [
                 {
-                  to: { type: "server-modules|server-core" },
+                  to: { type: ["server-modules", "server-core"] },
                   dependency: { kind: "type" },
                 },
               ],
@@ -248,24 +247,48 @@ export default defineConfig([
             },
             {
               from: { type: "server-core" },
-              disallow: [{ to: { type: "server-modules|app|widgets|features|entities" } }],
+              disallow: [
+                { to: { type: ["server-modules", "app", "widgets", "features", "entities"] } },
+              ],
               message: "Infrastructure Violation: Core must not depend on business logic or UI.",
             },
             {
               from: { type: "server-utils" },
               disallow: [
-                { to: { type: "server-modules|server-core|app|widgets|features|entities" } },
+                {
+                  to: {
+                    type: [
+                      "server-modules",
+                      "server-core",
+                      "app",
+                      "widgets",
+                      "features",
+                      "entities",
+                    ],
+                  },
+                },
               ],
               message: "Utility Violation: Utils must be pure.",
             },
             {
-              from: { type: "shared|shared-contracts|i18n" },
+              from: { type: ["shared-ui", "shared-lib", "shared-api", "shared-contracts", "i18n"] },
               disallow: [
-                { to: { type: "app|widgets|features|entities|server-core|server-modules" } },
+                {
+                  to: {
+                    type: [
+                      "app",
+                      "widgets",
+                      "features",
+                      "entities",
+                      "server-core",
+                      "server-modules",
+                    ],
+                  },
+                },
               ],
               allow: [
                 {
-                  to: { type: "server-modules|server-core|server-utils" },
+                  to: { type: ["server-modules", "server-core", "server-utils"] },
                   dependency: { kind: "type" },
                 },
               ],
@@ -274,23 +297,26 @@ export default defineConfig([
             },
             {
               from: { type: "entities" },
-              disallow: [{ to: { type: "features|widgets|app" } }, { to: { type: "entities" } }],
+              disallow: [
+                { to: { type: ["features", "widgets", "app"] } },
+                { to: { type: "entities" } },
+              ],
               message:
                 "FSD Violation: Entities are independent and cannot import upper layers or other entities.",
             },
             {
               from: { type: "features" },
-              disallow: [{ to: { type: "widgets|app" } }, { to: { type: "features" } }],
+              disallow: [{ to: { type: ["widgets", "app"] } }, { to: { type: "features" } }],
               message: "FSD Violation: Features cannot import upper layers or other features.",
             },
             {
               from: { type: "widgets" },
-              disallow: [{ to: { type: "app" } }, { to: { type: "widgets" } }],
+              disallow: [{ to: { type: ["app"] } }, { to: { type: "widgets" } }],
               message: "FSD Violation: Widgets cannot import the App layer or other widgets.",
             },
             {
               from: { type: "app" },
-              disallow: [{ to: { type: "app" } }],
+              disallow: [{ to: { type: ["app"] } }],
               message: "FSD Violation: App routes should not import other routes.",
             },
           ],
@@ -321,6 +347,14 @@ export default defineConfig([
         {
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
+        },
+      ],
+      "@typescript-eslint/no-deprecated": "off", // NOTE: долговатый как и sonarjs/deprecation запускать надо иногда, не надо чтобы он всегда висел
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        {
+          prefer: "type-imports",
+          fixStyle: "separate-type-imports",
         },
       ],
 

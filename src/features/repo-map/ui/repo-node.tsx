@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
-import { Badge } from "@/shared/ui/core/badge";
+import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Progress } from "@/shared/ui/core/progress";
 
@@ -130,7 +130,7 @@ export const RepoNode = ({ data }: Props) => {
           <CardTitle className="flex items-center gap-2">
             {isGroup ? <Folder className="fill-current" /> : <File />}
             <span className="flex-1 truncate text-xs font-bold">{label}</span>
-            <Badge variant="outline">{data.kind}</Badge>
+            <AppBadge variant="outline">{data.kind}</AppBadge>
           </CardTitle>
           <p className="text-muted-foreground text-xs">{description}</p>
         </CardHeader>
@@ -139,13 +139,13 @@ export const RepoNode = ({ data }: Props) => {
           {metricsConfig.map(
             (m) =>
               m.show && (
-                <Badge key={m.id} variant="outline">
+                <AppBadge key={m.id} variant="outline">
                   <m.icon className={cn(m.color)} />
                   <div className="text-muted-foreground flex gap-1">
                     <span className="text-[10px]">{m.val}</span>
                     <span className="text-[10px]">{m.id}</span>
                   </div>
-                </Badge>
+                </AppBadge>
               )
           )}
 

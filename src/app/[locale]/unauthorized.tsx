@@ -5,7 +5,7 @@ import { LogIn, ShieldAlert } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 import { Link } from "@/shared/i18n/routing";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 
 export default function UnauthorizedPage() {
   useEffect(() => {
@@ -23,11 +23,11 @@ export default function UnauthorizedPage() {
           It seems you have logged out on another device or your session has expired. Please log in
           again.
         </p>
-        <Button asChild className="gap-2">
+        <AppButton asChild className="gap-2">
           <Link href="/auth">
             <LogIn size={18} /> Log in
           </Link>
-        </Button>
+        </AppButton>
       </div>
     </div>
   );

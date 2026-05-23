@@ -158,7 +158,9 @@ export const analysisMapper = {
   async buildTopFindings(
     findings: ParsedFinding[],
     changedFiles: Array<PRImpactPayload["changedFiles"][number]>,
-    zoneNodeById: Map<string, Pick<TopLevelImpactNode, "label">>
+    zoneNodeById: Map<string, Pick<TopLevelImpactNode, "label">>,
+    owner?: string,
+    name?: string
   ) {
     const fileByPath = new Map(changedFiles.map((file) => [file.filePath, file] as const));
 
@@ -187,11 +189,16 @@ export const analysisMapper = {
     return Promise.all(
       sortedFindings.map(async (finding) => {
         const messageHtml = await unstable_cache(
-          async () => markdownToHtml(finding.message),
-          [`finding-html-${finding.id}`],
+          async () =>
+            markdownToHtml({
+              content: finding.message,
+              name,
+              owner,
+            }),
+          [`finding-html-${owner ?? "unknown"}-${name ?? "unknown"}-${finding.id}`],
           {
             revalidate: false,
-            tags: ["findings", finding.id],
+            tags: ["findings", owner ?? "unknown", name ?? "unknown", finding.id],
           }
         )();
 

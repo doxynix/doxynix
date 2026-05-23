@@ -4,7 +4,7 @@ import { Tree, type TreeApi } from "react-arborist";
 
 import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
@@ -97,7 +97,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center">
             {treeActions.map((action) => (
-              <Button
+              <AppButton
                 key={action.label}
                 size="sm"
                 variant="ghost"
@@ -106,12 +106,12 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
               >
                 <action.icon />
                 {action.label}
-              </Button>
+              </AppButton>
             ))}
 
             {selectionActions.map((action) => {
               const ButtonElement = (
-                <Button
+                <AppButton
                   key={action.label}
                   size="sm"
                   variant="ghost"
@@ -120,7 +120,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
                 >
                   <action.icon />
                   {action.label}
-                </Button>
+                </AppButton>
               );
               return action.tooltip != null && action.tooltip !== "" ? (
                 <AppTooltip key={action.label} content={action.tooltip}>

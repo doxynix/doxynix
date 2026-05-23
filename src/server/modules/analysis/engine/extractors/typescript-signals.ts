@@ -143,17 +143,6 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
     getScriptKind(file.path)
   );
 
-  // dumpDebug(`ast-ts-${path.basename(file.path)}`, {
-  //   path: file.path,
-  //   kind: "TypeScript-Native-AST",
-  //   nodes: sourceFile.statements.map(s => ({
-  //     kind: ts.SyntaxKind[s.kind],
-  //     name: (s as any).name?.escapedText || "anonymous",
-  //     pos: s.pos,
-  //     end: s.end
-  //   }))
-  // });
-
   const imports: string[] = [];
   let apiSurface = 0;
   let exports = 0;

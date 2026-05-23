@@ -1,11 +1,11 @@
 "use client";
 
-import { startTransition } from "react";
+import { startTransition, useEffect } from "react";
 import { Folder, FolderOpen, Search } from "lucide-react";
 import { Tree, type TreeApi } from "react-arborist";
 
 import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 
 import type { ActionItem, FileNode } from "@/entities/repo/model/repo-setup.types";
@@ -33,6 +33,22 @@ export function RepoCodeTree({
   const { actions, state } = useRepoSetup(repo);
 
   const [measureRef, size] = useResizeObserver<HTMLDivElement>();
+
+  useEffect(() => {
+    if (activePath == null || treeApi == null) {
+      return;
+    }
+
+    try {
+      const nodeId = activePath;
+      treeApi.openParents(nodeId);
+      treeApi.select(nodeId);
+
+      void treeApi.scrollTo(nodeId, "smart");
+    } catch (error) {
+      console.warn("Failed to sync tree arborist viewport:", error);
+    }
+  }, [activePath, treeApi]);
 
   const handleExpandAll = () => {
     startTransition(() => {
@@ -79,7 +95,7 @@ export function RepoCodeTree({
         </div>
         <div className="flex items-center gap-4">
           {treeActions.map((action) => (
-            <Button
+            <AppButton
               key={action.label}
               size="sm"
               variant="ghost"
@@ -88,7 +104,7 @@ export function RepoCodeTree({
             >
               <action.icon />
               {action.label}
-            </Button>
+            </AppButton>
           ))}
         </div>
       </div>

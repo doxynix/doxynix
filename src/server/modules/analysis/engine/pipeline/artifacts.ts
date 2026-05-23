@@ -1,7 +1,5 @@
 import { clamp, uniq } from "es-toolkit";
 
-import { dumpDebug } from "@/server/utils/debug-logger";
-
 import { buildEvidence } from "../core/common";
 import type { ArtifactBuildParams, ArtifactBuildResult } from "../core/metrics.types";
 import {
@@ -535,6 +533,5 @@ export function buildRepositoryArtifacts(params: ArtifactBuildParams): ArtifactB
         evidence: finding.evidence.slice(0, MAX_FINDING_EVIDENCE),
       })),
   };
-  void dumpDebug("artifacts-facts-findings", result);
   return result;
 }

@@ -3,8 +3,8 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
 import type { RepoItemFields } from "@/shared/types/repo.types";
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
 import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";
@@ -18,7 +18,7 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
   const locale = useLocale();
 
   return (
-    <Button
+    <AppButton
       disabled={disabled}
       type="button"
       variant="ghost"
@@ -30,9 +30,9 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
           <div className="flex items-center gap-1">
             <span className="truncate text-sm font-medium">{repo.fullName}</span>
             <div className="flex shrink-0 items-center gap-1.5 text-xs">
-              <Badge variant="outline" className={cn(visibility.color)}>
+              <AppBadge variant="outline" className={cn(visibility.color)}>
                 {visibility.label}
-              </Badge>
+              </AppBadge>
             </div>
           </div>
           <div className={cn("text-muted-foreground flex shrink-0 items-center gap-1 text-xs")}>
@@ -51,6 +51,6 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
           <TimeAgo date={repo.updatedAt} locale={locale} tooltipLabel={t("repo_last_updated")} />
         </span>
       </div>
-    </Button>
+    </AppButton>
   );
 }

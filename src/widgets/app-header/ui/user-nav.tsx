@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 
 import { userNavMenu } from "@/shared/constants/navigation";
 import { Link } from "@/shared/i18n/routing";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
   DialogClose,
@@ -59,7 +59,7 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="icon" className="flex cursor-pointer items-center gap-3">
+        <AppButton size="icon" className="flex cursor-pointer items-center gap-3">
           <AppAvatar
             alt={user?.name ?? "User"}
             src={avatar}
@@ -68,7 +68,7 @@ export function UserNav() {
             className="size-9 border-0"
             fallbackClassName="text-xs"
           />
-        </Button>
+        </AppButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
@@ -114,9 +114,9 @@ export function UserNav() {
             <div className="space-y-4">
               <div className="flex justify-end gap-2">
                 <DialogClose asChild>
-                  <Button disabled={loading} variant="outline" className="cursor-pointer">
+                  <AppButton disabled={loading} variant="outline" className="cursor-pointer">
                     {tCommon("cancel")}
-                  </Button>
+                  </AppButton>
                 </DialogClose>
                 <LoadingButton
                   disabled={loading}

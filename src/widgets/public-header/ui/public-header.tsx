@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { publicHeaderMenu } from "@/shared/constants/navigation";
 import { Link } from "@/shared/i18n/routing";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Sheet,
   SheetClose,
@@ -30,12 +30,12 @@ export function PublicHeader() {
 
         <nav className="hidden gap-4 md:flex">
           {publicHeaderMenu.map((item) => (
-            <Button key={item.href} asChild variant="ghost">
+            <AppButton key={item.href} asChild variant="ghost">
               <Link href={item.href as Route} className="flex items-center gap-2">
                 {item.icon != null && <item.icon />}
                 {item.label}
               </Link>
-            </Button>
+            </AppButton>
           ))}
         </nav>
         <div className="flex items-center gap-4">
@@ -46,10 +46,10 @@ export function PublicHeader() {
           <div className="flex items-center gap-2 md:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button size="icon" variant="ghost">
+                <AppButton size="icon" variant="ghost">
                   <Menu className="size-5" />
                   <span className="sr-only">{t("open_menu")}</span>
-                </Button>
+                </AppButton>
               </SheetTrigger>
               <SheetContent side="right" className="w-1/2">
                 <SheetHeader>
@@ -60,12 +60,12 @@ export function PublicHeader() {
                   <nav className="flex flex-col gap-2">
                     {publicHeaderMenu.map((item) => (
                       <SheetClose key={item.href} asChild>
-                        <Button asChild variant="ghost" className="justify-start">
+                        <AppButton asChild variant="ghost" className="justify-start">
                           <Link href={item.href as Route} className="flex items-center gap-2">
                             {item.icon != null && <item.icon />}
                             {item.label}
                           </Link>
-                        </Button>
+                        </AppButton>
                       </SheetClose>
                     ))}
                   </nav>

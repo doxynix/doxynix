@@ -5,8 +5,8 @@ import { ChevronDown, HistoryIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";
 import {
   Table,
@@ -40,13 +40,13 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
         <div className="flex items-center gap-2">
           <HistoryIcon className="text-muted-foreground" />
           <h3 className="text-sm font-medium">{t("settings_api_keys_history_revoked")}</h3>
-          <Badge className="ml-1 text-xs">{archived.length}</Badge>
+          <AppBadge className="ml-1 text-xs">{archived.length}</AppBadge>
         </div>
 
         <CollapsibleTrigger asChild>
-          <Button size="sm" variant="ghost" className="size-8 p-0">
+          <AppButton size="sm" variant="ghost" className="size-8 p-0">
             <ChevronDown className={cn("-rotate-90", isArchivedOpen && "rotate-0")} />
-          </Button>
+          </AppButton>
         </CollapsibleTrigger>
       </div>
 

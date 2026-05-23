@@ -11,6 +11,13 @@
   }
 }
 
+@utility prose {
+  & code::before,
+  & code::after {
+    content: "" !important;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -555,6 +562,36 @@
     ::-webkit-scrollbar-thumb:hover {
       background-color: var(--text-secondary);
     }
+  }
+
+  article.prose :not(pre) > code {
+    padding: 0.15em 0.35em !important;
+    border-radius: 6px !important;
+    font-size: 0.85em !important;
+    font-weight: 500 !important;
+    background-color: rgba(15, 23, 42, 0.05) !important;
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
+    color: #0f172a !important;
+  }
+
+  html.dark article.prose :not(pre) > code {
+    background-color: rgba(255, 255, 255, 0.158) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: white !important;
+  }
+
+  pre.shiki {
+    padding: 2px 4px !important;
+  }
+
+  html:not(.dark) pre.shiki {
+    background-color: var(--shiki-light-bg) !important;
+    color: var(--shiki-light) !important;
+  }
+
+  html.dark pre.shiki {
+    background-color: var(--shiki-dark-bg) !important;
+    color: var(--shiki-dark) !important;
   }
 }
 

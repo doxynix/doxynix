@@ -75,7 +75,11 @@ export const analyzeRepoTask = task({
       );
 
       if (repo == null) {
-        await taskLogger.finalize("Current commit SHA matches last analysis. Skipping re-run.");
+        await taskLogger.finalize(
+          analysisId,
+          Status.DONE,
+          "Current commit SHA matches last analysis. Skipping re-run."
+        );
         return { reason: "SHA_MATCH", skipped: true };
       }
 
@@ -171,30 +175,6 @@ export const analyzeRepoTask = task({
         swaggerYaml,
       };
 
-      // void dumpDebug("documentation-input-model", {
-      //   analysisSummary: {
-      //     executive_summary: aiResult.executive_summary,
-      //     findings: aiResult.findings ?? [],
-      //     onboarding_guide: aiResult.onboarding_guide,
-      //     repository_facts: aiResult.repository_facts ?? [],
-      //     sections: aiResult.sections,
-      //   },
-      //   model: documentationInput,
-      //   source: "post-doc-generation",
-      // });
-      // void dumpDebug(
-      //   "quality-matrix",
-      //   buildEvaluationSnapshot({
-      //     documentationInput,
-      //     evidence,
-      //     generatedDocs: aiResult,
-      //     metrics: hardMetrics,
-      //     repository: `${repo.owner}/${repo.name}`,
-      //     repositoryFacts,
-      //     repositoryFindings,
-      //   })
-      // );
-
       await taskLogger.milestone({
         analysisId,
         msg: "Persisting results to database",
@@ -215,12 +195,12 @@ export const analyzeRepoTask = task({
         userId,
       });
 
-      await taskLogger.finalize(analysisId, Status.DONE);
+      await taskLogger.finalize(analysisId, Status.DONE, "Analysis completed successfully");
       return { success: true };
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       taskLogger.error(`Analysis failed: ${errorMessage}`);
-      await taskLogger.finalize(analysisId, Status.FAILED);
+      await taskLogger.finalize(analysisId, Status.FAILED, errorMessage);
 
       appLogger.error({ error, msg: `Repo analyze failed: ${errorMessage}` });
 

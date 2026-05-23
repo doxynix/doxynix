@@ -4,7 +4,7 @@ import { MoveRight } from "lucide-react";
 
 import { smoothScrollTo } from "@/shared/lib/scroll";
 
-import { Button } from "../core/button";
+import { AppButton } from "../core/button";
 
 type Props = {
   ariaLabel?: string;
@@ -24,7 +24,7 @@ export function ScrollButton({
   targetId,
 }: Readonly<Props>) {
   return (
-    <Button
+    <AppButton
       variant="ghost"
       aria-label={ariaLabel}
       onClick={() => {
@@ -33,6 +33,6 @@ export function ScrollButton({
       className={buttonClassName}
     >
       <MoveRight size={12} className={arrowClassName} />
-    </Button>
+    </AppButton>
   );
 }

@@ -22,8 +22,8 @@ export default async function RepoOwnerNamePage({ params }: Readonly<RepoPagePro
 
   return (
     <div className="space-y-10">
-      <RepoOverviewContainer id={repo.id} />
-      <RepoMetricsContainer id={repo.id} />
+      <RepoOverviewContainer repoId={repo.id} />
+      <RepoMetricsContainer repoId={repo.id} />
     </div>
   );
 }

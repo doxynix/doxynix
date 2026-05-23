@@ -9,7 +9,7 @@ import {
 import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 
-import { Button } from "../core/button";
+import { AppButton } from "../core/button";
 
 interface ShimmerButtonProps extends ComponentPropsWithoutRef<typeof Link> {
   background?: string;
@@ -38,7 +38,7 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
     ref
   ) => {
     return (
-      <Button
+      <AppButton
         asChild
         className={cn(
           "transition-standard group border-border text-primary-foreground hover:border-border-accent hover:text-primary-foreground relative isolate flex cursor-pointer items-center justify-center overflow-hidden rounded-(--radius) border bg-transparent px-6 py-3 whitespace-nowrap shadow-sm hover:bg-transparent hover:[box-shadow:var(--shadow-md)]",
@@ -86,7 +86,7 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
             )}
           />
         </Link>
-      </Button>
+      </AppButton>
     );
   }
 );

@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
@@ -68,7 +68,7 @@ export function SystemStatus({ className }: Readonly<{ className?: string }>) {
       {isLoading ? (
         <Skeleton className="h-8 w-45" />
       ) : (
-        <Button asChild size="sm" variant="outline" className="cursor-pointer">
+        <AppButton asChild size="sm" variant="outline" className="cursor-pointer">
           <ExternalLink
             href="https://status.doxynix.space"
             className={cn("flex items-center gap-2", current.textColor)}
@@ -87,7 +87,7 @@ export function SystemStatus({ className }: Readonly<{ className?: string }>) {
 
             {current.label}
           </ExternalLink>
-        </Button>
+        </AppButton>
       )}
     </div>
   );

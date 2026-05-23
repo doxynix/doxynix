@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
   const parseResult = resendWebhookSchema.safeParse(rawEvt);
   if (!parseResult.success) {
-    appLogger.error({ error: parseResult.error.format(), msg: "Invalid Resend webhook schema" });
+    appLogger.error({ error: parseResult.error.issues, msg: "Invalid Resend webhook schema" });
     return new NextResponse("Invalid payload structure", { status: 400 });
   }
   const evt = parseResult.data;

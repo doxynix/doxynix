@@ -1,17 +1,30 @@
 "use client";
 
-import { useState, type ComponentType } from "react";
+import { useEffect, useState, type ComponentType } from "react";
+import dynamic from "next/dynamic";
 import saveAs from "file-saver";
-import { BookOpen, Download, FileText, HistoryIcon, Layers, Terminal, Users2 } from "lucide-react";
+import {
+  BookOpen,
+  Download,
+  FileText,
+  GitBranchPlus,
+  HistoryIcon,
+  Layers,
+  Terminal,
+  Users2,
+} from "lucide-react";
+import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
+import { Spinner } from "@/shared/ui/core/spinner";
 import { Tabs, TabsContent } from "@/shared/ui/core/tabs";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
+import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import type { AvailableDocs, DocType, RepoNodeContext } from "@/entities/repo/model/repo.types";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
@@ -36,6 +49,19 @@ type Props = {
   repoId: string;
 };
 
+const RepoSwagger = dynamic(
+  () => import("@/entities/repo/ui/repo-swagger").then((m) => m.RepoSwagger),
+  {
+    loading: () => (
+      <div className="flex h-40 w-full items-center justify-center gap-2">
+        <Spinner />
+        <span>Loading Interactive Console...</span>
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
 export function RepoDocs({
   activeTab,
   availableDocs,
@@ -55,6 +81,70 @@ export function RepoDocs({
     repoId,
     type: activeTab,
   });
+
+  const utils = trpc.useUtils();
+
+  const stageMutation = trpc.analysis.stageFile.useMutation({
+    onError: (error) => {
+      toast.error(`Failed to stage changes: ${error.message}`);
+    },
+    onSuccess: (data) => {
+      void utils.analysis.getStagedFiles.invalidate();
+      toast.success(`Changes staged for PR. Total files in draft: ${data.stagedCount}`);
+    },
+  });
+
+  const headings = (() => {
+    if (typeof window === "undefined" || docContent?.html == null) return [];
+
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(docContent.html, "text/html");
+      const headingElements = Array.from(doc.querySelectorAll("h2, h3"));
+
+      return headingElements.map((el) => {
+        const level = el.tagName.toLowerCase() === "h2" ? 2 : 3;
+        const id = el.id;
+
+        let text = el.textContent;
+
+        if (text.endsWith("#")) {
+          text = text.slice(0, -1).trim();
+        }
+
+        return { id, level, text };
+      });
+    } catch (error) {
+      console.error("DOMParser failed:", error);
+      return [];
+    }
+  })();
+
+  const [activeHeadingId, setActiveHeadingId] = useState<string>("");
+
+  useEffect(() => {
+    if (headings.length === 0) return;
+
+    const headingElements = headings
+      .map((h) => document.querySelector(`#${h.id}`))
+      .filter((el): el is HTMLElement => el !== null);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntry = entries.find((entry) => entry.isIntersecting);
+        if (visibleEntry) {
+          setActiveHeadingId(visibleEntry.target.id);
+        }
+      },
+      {
+        rootMargin: "-40px 0px -75% 0px",
+        threshold: 0,
+      }
+    );
+
+    headingElements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [headings]);
 
   const handleDownload = () => {
     if (docContent?.raw == null) {
@@ -86,13 +176,22 @@ export function RepoDocs({
       onValueChange={(value) => onTabChange(value as DocType)}
       className="flex h-[calc(100dvh-250px)] w-full flex-row gap-10"
     >
-      <RepoDocsTabs activeTab={activeTab} items={tabItems} />
+      <RepoDocsTabs
+        activeHeadingId={activeHeadingId}
+        activeTab={activeTab}
+        headings={headings}
+        items={tabItems}
+      />
 
-      <div className="bg-card relative flex flex-1 flex-col border">
+      <div className="bg-card relative flex flex-1 flex-col rounded-xl border">
         {availableDocs.map((doc) => {
           const isCurrentApiSwagger = Boolean(
             doc.type === "API" && apiMode === "swagger" && metrics?.reference.swagger != null
           );
+
+          const isSwaggerReady = isCurrentApiSwagger && metrics?.reference.swagger != null;
+          const isMarkdownReady = !isCurrentApiSwagger && docContent?.raw != null;
+          const isReadyToStage = isSwaggerReady || isMarkdownReady;
 
           const isActive = doc.type === activeTab;
 
@@ -127,45 +226,82 @@ export function RepoDocs({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {isActive && !isCurrentApiSwagger && (
+                    {isActive && (
                       <>
-                        <AppTooltip content="Download file">
-                          <Button
-                            disabled={isDocLoading}
+                        <AppTooltip content="Add to draft">
+                          <LoadingButton
+                            disabled={stageMutation.isPending || !isReadyToStage}
+                            isLoading={stageMutation.isPending === true}
+                            loadingText=""
                             size="icon"
                             variant="ghost"
-                            onClick={handleDownload}
+                            onClick={() => {
+                              if (isCurrentApiSwagger) {
+                                const swaggerContent = metrics?.reference.swagger;
+                                if (swaggerContent == null) return;
+
+                                stageMutation.mutate({
+                                  content: swaggerContent,
+                                  filePath: "docs/openapi.yaml",
+                                  repoId,
+                                });
+                              } else {
+                                const markdownContent = docContent?.raw;
+                                const materializedPath = docContent?.materializedPath;
+                                if (markdownContent == null || materializedPath == null) return;
+
+                                stageMutation.mutate({
+                                  content: markdownContent,
+                                  filePath: materializedPath,
+                                  repoId,
+                                });
+                              }
+                            }}
                           >
-                            <Download className="size-3" />
-                          </Button>
+                            <GitBranchPlus />
+                          </LoadingButton>
                         </AppTooltip>
-                        <CopyButton
-                          disabled={isDocLoading}
-                          value={docContent?.raw ?? ""}
-                          tooltipText="Copy file"
-                          className="size-8 px-3 opacity-100"
-                        />
+                        {!isCurrentApiSwagger && (
+                          <>
+                            <AppTooltip content="Download file">
+                              <AppButton
+                                disabled={isDocLoading}
+                                size="icon"
+                                variant="ghost"
+                                onClick={handleDownload}
+                              >
+                                <Download className="size-3" />
+                              </AppButton>
+                            </AppTooltip>
+                            <CopyButton
+                              disabled={isDocLoading}
+                              value={docContent?.raw ?? ""}
+                              tooltipText="Copy file"
+                              className="size-8 px-3 opacity-100"
+                            />
+                          </>
+                        )}
                       </>
                     )}
 
                     {doc.type === "API" && metrics?.reference.swagger != null && (
                       <div className="flex gap-1 rounded-lg border p-1">
-                        <Button
+                        <AppButton
                           size="sm"
                           variant={apiMode === "md" ? "secondary" : "ghost"}
                           onClick={() => setApiMode("md")}
                           className="h-7 px-3 text-xs"
                         >
                           <FileText className="mr-1.5 size-3" /> Docs
-                        </Button>
-                        <Button
+                        </AppButton>
+                        <AppButton
                           size="sm"
                           variant={apiMode === "swagger" ? "secondary" : "ghost"}
                           onClick={() => setApiMode("swagger")}
                           className="h-7 px-3 text-xs"
                         >
                           <Terminal className="mr-1.5 size-3" /> Console
-                        </Button>
+                        </AppButton>
                       </div>
                     )}
                   </div>
@@ -178,18 +314,18 @@ export function RepoDocs({
                         <p className="text-sm font-medium">{nodeContext.node.label}</p>
                         <p className="text-muted-foreground text-xs">{nodeContext.explain.role}</p>
                       </div>
-                      <Badge variant="outline">
+                      <AppBadge variant="outline">
                         {nodeContext.related.docs.length} related sections
-                      </Badge>
+                      </AppBadge>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {nodeContext.related.docs
                         .filter((doc) => doc.docType === activeTab)
                         .slice(0, 6)
                         .map((doc) => (
-                          <Badge key={doc.id} variant="secondary">
+                          <AppBadge key={doc.id} variant="secondary">
                             {doc.title}
-                          </Badge>
+                          </AppBadge>
                         ))}
                     </div>
                   </div>
@@ -197,9 +333,8 @@ export function RepoDocs({
               </div>
 
               {isCurrentApiSwagger ? (
-                <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden px-8 pb-8 md:px-12">
-                  {/* <RepoSwagger spec={metrics?.reference.swagger ?? ""} /> */}{" "}
-                  {/* NOTE: эта штука тянет миллиард мб в бандл клиента потом подумать че делать с ним*/}
+                <div className="relative flex min-h-0 w-full flex-1 flex-col px-8 pb-8 md:px-12">
+                  <RepoSwagger spec={metrics?.reference.swagger ?? ""} />
                 </div>
               ) : (
                 <ScrollArea className="w-full flex-1">
@@ -207,6 +342,7 @@ export function RepoDocs({
                     <RepoDocsContent
                       data={isActive ? docContent : undefined}
                       isLoading={isActive ? isDocLoading : false}
+                      repoId={repoId}
                     />
                   </div>
                 </ScrollArea>

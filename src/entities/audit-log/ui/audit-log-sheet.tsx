@@ -8,7 +8,7 @@ import { useLocale } from "next-intl";
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { formatFullDate } from "@/shared/lib/date-utils";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import {
   Sheet,
@@ -50,13 +50,13 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
     <Sheet open={open} onOpenChange={setOpen}>
       <AppTooltip content="View Raw">
         <SheetTrigger asChild>
-          <Button
+          <AppButton
             size="icon"
             variant="ghost"
             className="opacity-0 transition-opacity group-hover:opacity-100"
           >
             <Eye className="text-muted-foreground hover:text-foreground" />
-          </Button>
+          </AppButton>
         </SheetTrigger>
       </AppTooltip>
       <SheetContent className="flex flex-col gap-6 p-6 sm:max-w-2xl">
@@ -77,7 +77,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                   tooltipText="Copy JSON"
                   className="flex opacity-100"
                 />
-                <Button
+                <AppButton
                   size="sm"
                   variant="outline"
                   onClick={handleExportJson}
@@ -85,7 +85,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                 >
                   <Download />
                   Export JSON
-                </Button>
+                </AppButton>
               </div>
             </div>
 

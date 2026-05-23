@@ -2,7 +2,7 @@ import type { ComponentType } from "react";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
-import { Badge } from "@/shared/ui/core/badge";
+import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 
 type Props = {
@@ -52,7 +52,7 @@ export function StatCard({
           <p className="text-2xl font-bold">{value}</p>
 
           {delta != null && (
-            <Badge variant="outline" className={getDeltaClass()}>
+            <AppBadge variant="outline" className={getDeltaClass()}>
               {isPositiveTrend ? (
                 <ArrowUpRight />
               ) : isNegativeTrend ? (
@@ -61,7 +61,7 @@ export function StatCard({
                 <Minus />
               )}
               {Math.abs(delta)}%
-            </Badge>
+            </AppBadge>
           )}
         </div>
         <p className="text-muted-foreground mt-1 text-xs">{description}</p>

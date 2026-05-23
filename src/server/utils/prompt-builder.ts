@@ -1,3 +1,5 @@
+import { escape } from "es-toolkit";
+
 import { LanguageRules } from "./prompt-rules";
 
 type PromptRole =

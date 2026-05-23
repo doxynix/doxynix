@@ -6,7 +6,6 @@ import { normalize } from "pathe";
 import sloc, { type Extension } from "sloc";
 
 import { appLogger } from "@/server/core/app-logger";
-import { dumpDebug } from "@/server/utils/debug-logger";
 import { normalizeLanguageName } from "@/server/utils/language-metadata";
 import { getFileExtension } from "@/server/utils/path-operations";
 import { taskLogger } from "@/server/utils/task-logger";
@@ -327,7 +326,6 @@ export async function analyzeRepository(
     tsStaticHints,
   });
 
-  void dumpDebug("full-metrics-output", finalMetrics);
   taskLogger.success(`Metrics engine finished. Stack detected: ${techStack.join(", ")}`);
   return { evidence, metrics: finalMetrics };
 }

@@ -17,8 +17,8 @@ import { useLocale } from "next-intl";
 import { trpc } from "@/shared/api/trpc";
 import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { Badge } from "@/shared/ui/core/badge";
-import { Button } from "@/shared/ui/core/button";
+import { AppBadge } from "@/shared/ui/core/badge";
+import { AppButton } from "@/shared/ui/core/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
@@ -112,7 +112,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                       <p className="font-medium">{zone.label}</p>
                       <p className="text-muted-foreground text-xs">{zone.path}</p>
                     </div>
-                    <Badge variant="outline">{zone.impactScore}</Badge>
+                    <AppBadge variant="outline">{zone.impactScore}</AppBadge>
                   </div>
                   <div className="text-muted-foreground mb-3 flex flex-wrap gap-3 text-xs">
                     <span>{zone.fileCount} files</span>
@@ -120,11 +120,11 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     <span>{zone.kind}</span>
                     <span>{zone.relatedChangedFiles}</span>
                   </div>
-                  <Button asChild size="sm" variant="outline">
+                  <AppButton asChild size="sm" variant="outline">
                     <Link href={buildRepoMapHref({ name, nodeId: zone.nodeId, owner })}>
                       <Map /> Open in map
                     </Link>
-                  </Button>
+                  </AppButton>
                 </div>
               ))
             ) : (
@@ -148,10 +148,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div>
                       <p className="font-medium">{node.label}</p>
-                      <Badge className="text-xs">{node.nodeType}</Badge>
+                      <AppBadge className="text-xs">{node.nodeType}</AppBadge>
                       <p className="text-muted-foreground text-xs">{node.path}</p>
                     </div>
-                    <Badge variant="outline">{node.impactScore}</Badge>
+                    <AppBadge variant="outline">{node.impactScore}</AppBadge>
                   </div>
                   <p className="text-muted-foreground text-xs">{node.whyAffected}</p>
                   <div className="text-muted-foreground mb-3 flex flex-wrap gap-3 text-xs">
@@ -160,11 +160,11 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     <span>{node.kind}</span>
                     <span>{node.relatedChangedFiles}</span>
                   </div>
-                  <Button asChild size="sm" variant="outline">
+                  <AppButton asChild size="sm" variant="outline">
                     <Link href={buildRepoMapHref({ name, nodeId: node.nodeId, owner })}>
                       <Map /> Open in map
                     </Link>
-                  </Button>
+                  </AppButton>
                 </div>
               ))
             ) : (
@@ -188,7 +188,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                 <div key={file.filePath} className="rounded-xl border p-4">
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <code className="text-sm">{file.filePath}</code>
-                    <Badge variant="outline">{file.status}</Badge>
+                    <AppBadge variant="outline">{file.status}</AppBadge>
                   </div>
                   <div className="text-muted-foreground mb-3 flex flex-wrap gap-3 text-xs">
                     <span className="text-success">+{file.additions}</span>
@@ -197,7 +197,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     {file.zoneLabel != null && <span>{file.zoneLabel}</span>}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Button asChild size="sm" variant="ghost">
+                    <AppButton asChild size="sm" variant="ghost">
                       <Link
                         href={buildRepoCodeHref({
                           name,
@@ -209,20 +209,20 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                         <FileCode />
                         Code
                       </Link>
-                    </Button>
+                    </AppButton>
                     {file.zoneId != null && (
-                      <Button asChild size="sm" variant="ghost">
+                      <AppButton asChild size="sm" variant="ghost">
                         <Link href={buildRepoMapHref({ name, nodeId: file.zoneId, owner })}>
                           <Map /> Map
                         </Link>
-                      </Button>
+                      </AppButton>
                     )}
                     {file.nodeId != null && (
-                      <Button asChild size="sm" variant="ghost">
+                      <AppButton asChild size="sm" variant="ghost">
                         <Link href={buildRepoDocsHref({ name, nodeId: file.nodeId, owner })}>
                           <FileText /> Docs
                         </Link>
-                      </Button>
+                      </AppButton>
                     )}
                   </div>
                 </div>
@@ -334,7 +334,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
 
             {impact?.navigationHints.primaryNodeId != null && (
               <div className="flex flex-wrap gap-2">
-                <Button asChild size="sm">
+                <AppButton asChild size="sm">
                   <Link
                     href={buildRepoMapHref({
                       name,
@@ -344,9 +344,9 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   >
                     <Search /> Inspect primary node
                   </Link>
-                </Button>
+                </AppButton>
                 {impact.navigationHints.primaryFilePath != null && (
-                  <Button asChild size="sm" variant="outline">
+                  <AppButton asChild size="sm" variant="outline">
                     <Link
                       href={buildRepoCodeHref({
                         name,
@@ -357,7 +357,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     >
                       <FileCode /> Open code
                     </Link>
-                  </Button>
+                  </AppButton>
                 )}
               </div>
             )}
@@ -377,7 +377,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                 <div key={finding.id} className="rounded-lg border p-3">
                   <div className="mb-1 flex items-center justify-between gap-2">
                     <p className="text-sm font-medium">{finding.title}</p>
-                    <Badge variant="outline">{finding.riskLevel}</Badge>
+                    <AppBadge variant="outline">{finding.riskLevel}</AppBadge>
                   </div>
                   <p className="text-muted-foreground mb-2 text-xs">
                     {finding.filePath}:{finding.line}
@@ -406,18 +406,18 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                 <div key={fix.id} className="rounded-lg border p-3">
                   <div className="mb-1 flex items-center justify-between gap-2">
                     <p className="text-sm font-medium">{fix.title}</p>
-                    <Badge variant="outline">{fix.status}</Badge>
+                    <AppBadge variant="outline">{fix.status}</AppBadge>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {fix.status === "COMPLETED" && (
-                      <Button
+                      <AppButton
                         disabled={isStaging}
                         size="sm"
                         variant="outline"
                         onClick={() => stageFix(fix.id)}
                       >
                         Add to PR Draft
-                      </Button>
+                      </AppButton>
                     )}
                     {fix.githubPrUrl != null && (
                       <ExternalLink href={fix.githubPrUrl}>

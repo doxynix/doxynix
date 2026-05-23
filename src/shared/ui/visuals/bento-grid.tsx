@@ -3,7 +3,7 @@ import { ArrowRightIcon } from "@radix-ui/react-icons";
 
 import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 
 interface BentoGridProps extends ComponentPropsWithoutRef<"div"> {
   children: ReactNode;
@@ -63,12 +63,12 @@ const BentoCard = ({
           "pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:hidden"
         )}
       >
-        <Button asChild size="sm" variant="link" className="pointer-events-auto p-0">
+        <AppButton asChild size="sm" variant="link" className="pointer-events-auto p-0">
           <Link href={href}>
             <span className="text-foreground">{cta}</span>
             <ArrowRightIcon className="text-foreground ms-2 rtl:rotate-180" />
           </Link>
-        </Button>
+        </AppButton>
       </div>
     </div>
 
@@ -77,12 +77,12 @@ const BentoCard = ({
         "pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:flex"
       )}
     >
-      <Button asChild size="sm" variant="link" className="pointer-events-auto p-0">
+      <AppButton asChild size="sm" variant="link" className="pointer-events-auto p-0">
         <Link href={href}>
           <span className="text-foreground">{cta}</span>
           <ArrowRightIcon className="text-foreground ms-2 rtl:rotate-180" />
         </Link>
-      </Button>
+      </AppButton>
     </div>
 
     <div className="group-hover:bg-foreground/3 pointer-events-none absolute inset-0 transform-gpu transition-all duration-300" />

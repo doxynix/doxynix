@@ -11,13 +11,13 @@ import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
 
 import { RepoOverview } from "./repo-overview";
 
-type Props = { id: string };
+type Props = { repoId: string };
 
-export function RepoOverviewContainer({ id }: Readonly<Props>) {
+export function RepoOverviewContainer({ repoId }: Readonly<Props>) {
   const { aid, name, owner } = useRepoParams();
   const { data, isLoading } = trpc.analysis.getWorkspace.useQuery({
     aid: aid ?? undefined,
-    repoId: id,
+    repoId,
   });
 
   if (isLoading) {

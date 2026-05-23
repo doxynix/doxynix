@@ -1,12 +1,12 @@
 "use client";
 
-import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from "react";
+import { forwardRef, type ComponentPropsWithoutRef, type ComponentRef } from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
 import { cn } from "@/shared/lib/cn";
 
 const Avatar = forwardRef<
-  ElementRef<typeof AvatarPrimitive.Root>,
+  ComponentRef<typeof AvatarPrimitive.Root>,
   ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Root
@@ -18,7 +18,7 @@ const Avatar = forwardRef<
 Avatar.displayName = AvatarPrimitive.Root.displayName;
 
 const AvatarImage = forwardRef<
-  ElementRef<typeof AvatarPrimitive.Image>,
+  ComponentRef<typeof AvatarPrimitive.Image>,
   ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Image
@@ -30,7 +30,7 @@ const AvatarImage = forwardRef<
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
 const AvatarFallback = forwardRef<
-  ElementRef<typeof AvatarPrimitive.Fallback>,
+  ComponentRef<typeof AvatarPrimitive.Fallback>,
   ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Fallback

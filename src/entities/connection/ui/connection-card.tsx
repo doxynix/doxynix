@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { Badge } from "@/shared/ui/core/badge";
+import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent } from "@/shared/ui/core/card";
 
 type Props = {
@@ -22,9 +22,9 @@ export function ConnectionCard({ action, description, icon, status, title }: Rea
             <div className="flex items-center gap-2">
               <span className="text-sm">{title}</span>
               {status != null && (
-                <Badge variant="outline" className="text-success">
+                <AppBadge variant="outline" className="text-success">
                   {status}
-                </Badge>
+                </AppBadge>
               )}
             </div>
             <p className="text-muted-foreground line-clamp-1 text-xs">{description}</p>

@@ -1,4 +1,4 @@
-import { Badge } from "@/shared/ui/core/badge";
+import { AppBadge } from "@/shared/ui/core/badge";
 
 type Props = { repoTopics?: null | string[] };
 
@@ -8,7 +8,7 @@ export function RepoTopics({ repoTopics }: Readonly<Props>) {
   return (
     <div className="mt-1 flex flex-wrap gap-1 not-sm:justify-center">
       {repoTopics.slice(0, 10).map((topic) => (
-        <Badge key={topic}>{topic}</Badge>
+        <AppBadge key={topic}>{topic}</AppBadge>
       ))}
       {repoTopics.length > 10 && (
         <span className="text-muted-foreground self-center text-[10px]">

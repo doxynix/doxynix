@@ -49,6 +49,7 @@ next-env.d.ts
 # gen
 /prisma/dbml
 /prisma/json-schema
+/prisma/erd
 sitemap*.xml
 robots.txt
 messages/*.d.json.ts
@@ -76,7 +77,9 @@ dist
 
 # Sentry Config File
 .env.sentry-build-plugin
+
 public/docs
 arch
+coverage-ts
 
 .vercel

@@ -21,7 +21,9 @@ import type { TreeApi } from "react-arborist";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
-import { Button } from "@/shared/ui/core/button";
+import { useTypewriter } from "@/shared/hooks/use-typewriter";
+import { AppButton } from "@/shared/ui/core/button";
+import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
@@ -58,6 +60,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [showDiff, setShowDiff] = useState(false);
   const [isAuditDismissed, setIsAuditDismissed] = useState(false);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
 
   const [localContent, setLocalContent] = useState(fileData.content);
   const [prevPath, setPrevPath] = useState(path);
@@ -83,6 +86,9 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     { enabled: !!path && userId != null }
   );
 
+  const typedAuditHtml = useTypewriter(auditResult?.html ?? "", 3);
+  const displayHtml = shouldAnimate ? typedAuditHtml : (auditResult?.html ?? "");
+
   if (path !== prevPath || fileData.content !== prevExternalContent) {
     setPrevPath(path);
     setPrevExternalContent(fileData.content);
@@ -90,6 +96,19 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     setMode("view");
     setIsAuditDismissed(false);
     setShowDiff(false);
+    setShouldAnimate(false);
+  }
+
+  const isAuditLoaded = auditResult?.action === "quick-file-audit" && auditResult.path === path;
+  const isDocumentLoaded =
+    documentResult?.action === "document-file-preview" && documentResult.path === path;
+
+  if (isAiLoading && (isAuditLoaded || isDocumentLoaded)) {
+    setIsAiLoading(false);
+  }
+
+  if (!showDiff && isDocumentLoaded) {
+    setShowDiff(true);
   }
 
   const auditMutation = trpc.analysis.quickFileAudit.useMutation({
@@ -156,10 +175,15 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
   };
 
   const handleAudit = () => {
+    setIsAuditDismissed(false);
+    setIsAiLoading(true);
+    setShouldAnimate(true);
     auditMutation.mutate({ content: localContent, path, repoId });
   };
 
   const handleDocument = () => {
+    setIsAiLoading(true);
+    setShowDiff(false);
     documentMutation.mutate({ content: localContent, path, repoId });
   };
 
@@ -255,6 +279,9 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     onClick: () => handleFolderClick(i),
   }));
 
+  const showAuditPanel =
+    !isAuditDismissed && (isAiLoading || auditResult?.action === "quick-file-audit");
+
   return (
     <div ref={containerRef} className="bg-background flex h-full flex-col">
       <div className="border-border flex flex-col justify-between gap-4 border-b px-4 py-2">
@@ -299,39 +326,65 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
         <RepoSearchPanel stats={editorStats} view={view} onClose={() => setIsSearchOpen(false)} />
       )}
 
-      {auditResult?.action === "quick-file-audit" && !isAuditDismissed && (
-        <div className="bg-popover animate-in fade-in slide-in-from-right-4 absolute top-20 right-6 z-50 w-96 rounded-xl border p-4">
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-xs font-bold">Audit Result</h3>
-            <Button size="icon" variant="ghost" onClick={() => setIsAuditDismissed(true)}>
+      {showAuditPanel && (
+        <div className="bg-popover border-border animate-in fade-in slide-in-from-right-4 absolute top-20 right-6 z-50 w-96 rounded-xl border p-4">
+          <div className="mb-3 flex items-center justify-between border-b pb-2">
+            <h3 className="flex items-center gap-1 text-xs font-bold">
+              <Sparkles />
+              AI File Audit
+            </h3>
+            <AppButton size="icon" variant="ghost" onClick={() => setIsAuditDismissed(true)}>
               <X />
-            </Button>
+            </AppButton>
           </div>
-          <article
-            dangerouslySetInnerHTML={{ __html: auditResult.html }}
-            className="prose dark:prose-invert text-foreground max-h-120 overflow-y-auto text-xs"
-          />
-          <div className="mt-4 flex items-center gap-1 border-t pt-3">
-            <Button
-              disabled={pinMutation.isPending}
-              size="sm"
-              variant="outline"
-              onClick={() => pinMutation.mutate({ path, repoId })}
-              className="w-full"
-            >
-              {pinMutation.isPending ? <Spinner className="size-3" /> : <Save className="size-3" />}
-              Pin to Docs
-            </Button>
-          </div>
+
+          {isAiLoading ? (
+            <div className="space-y-3 py-2">
+              <Skeleton className="h-3 w-1/3" />
+              <div className="space-y-2">
+                <Skeleton className="h-2 w-full" />
+                <Skeleton className="h-2 w-5/6" />
+                <Skeleton className="h-2 w-4/5" />
+              </div>
+              <div className="pt-2">
+                <Skeleton className="h-3 w-1/4" />
+                <div className="mt-2 space-y-2">
+                  <Skeleton className="h-2 w-11/12" />
+                  <Skeleton className="h-2 w-9/12" />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <article
+                dangerouslySetInnerHTML={{ __html: displayHtml }}
+                className="prose dark:prose-invert text-foreground max-h-120 overflow-y-auto text-xs"
+              />
+              <div className="mt-4 flex items-center gap-1 border-t pt-3">
+                <AppButton
+                  disabled={pinMutation.isPending}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => pinMutation.mutate({ path, repoId })}
+                  className="w-full"
+                >
+                  {pinMutation.isPending ? (
+                    <Spinner className="size-3" />
+                  ) : (
+                    <Save className="size-3" />
+                  )}
+                  Pin to Docs
+                </AppButton>
+              </div>
+            </>
+          )}
         </div>
       )}
 
       {showDiff === false && documentResult?.action === "document-file-preview" && (
-        <div className="bg-primary/5 border-primary/20 animate-in slide-in-from-top-1 flex items-center justify-between border-b px-4 py-2 duration-300">
+        <div className="animate-in slide-in-from-top-1 flex items-center justify-between border-b px-4 py-2">
           <div className="flex items-center gap-2">
-            <div className="bg-primary/10 flex h-6 w-6 items-center justify-center rounded-full">
-              <Sparkles className="text-primary h-3 w-3" />
-            </div>
+            <Sparkles />
             <div className="flex flex-col">
               <span className="text-[11px] font-semibold tracking-tight">
                 Documentation Preview
@@ -339,11 +392,11 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="ghost" onClick={handleDiscardDiff}>
+            <AppButton size="sm" variant="ghost" onClick={handleDiscardDiff}>
               <X className="mr-1 h-3 w-3" />
               Discard
-            </Button>
-            <Button
+            </AppButton>
+            <AppButton
               disabled={stageMutation.isPending === true}
               size="sm"
               variant="default"
@@ -355,7 +408,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
                 <Check className="mr-1 h-3 w-3" />
               )}
               Accept Changes
-            </Button>
+            </AppButton>
           </div>
         </div>
       )}

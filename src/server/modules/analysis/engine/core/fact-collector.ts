@@ -2,8 +2,6 @@ import { XMLParser } from "fast-xml-parser";
 import { basename } from "pathe";
 import YAML from "yaml";
 
-import { dumpDebug } from "@/server/utils/debug-logger";
-
 import type {
   FileSignals,
   FrameworkFact,
@@ -150,9 +148,7 @@ export class FactCollector {
     }
 
     collector.promoteMergedFrameworkFacts();
-    const result = Array.from(collector.facts.values()).sort((a, b) => b.confidence - a.confidence);
-    void dumpDebug("tech-facts-detected", result);
-    return result;
+    return Array.from(collector.facts.values()).sort((a, b) => b.confidence - a.confidence);
   }
 
   private addFact(name: string, category: TechCategory, confidence: number) {

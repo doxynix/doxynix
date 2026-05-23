@@ -6,7 +6,7 @@ import { useQueryStates } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/core/button";
+import { AppButton } from "@/shared/ui/core/button";
 import {
   Command,
   CommandEmpty,
@@ -53,7 +53,7 @@ export function NotificationsRepoFilter() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
+        <AppButton
           variant="outline"
           aria-expanded={open}
           aria-haspopup="listbox"
@@ -64,7 +64,7 @@ export function NotificationsRepoFilter() {
             <span className="truncate">{label}</span>
           </div>
           <ChevronDown className="ml-2 opacity-50" />
-        </Button>
+        </AppButton>
       </PopoverTrigger>
       <PopoverContent align="start" className="p-0">
         <Command>
@@ -90,7 +90,7 @@ export function NotificationsRepoFilter() {
               {(repos?.items.length === 0 || repos == null) && !isLoading ? (
                 <div className="flex flex-col items-center gap-4 p-4 text-center text-sm">
                   <p>Repositories not found</p>
-                  <Button
+                  <AppButton
                     size="sm"
                     onClick={() => {
                       setOpen(false);
@@ -99,7 +99,7 @@ export function NotificationsRepoFilter() {
                     className="w-fit cursor-pointer"
                   >
                     Add
-                  </Button>
+                  </AppButton>
                 </div>
               ) : (
                 repos?.items.map((r) => (
