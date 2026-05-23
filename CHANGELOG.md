@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/doxynix/doxynix/compare/v2.0.1...v2.1.0) (2026-05-23)
+
+
+### Features
+
+* проведены улучшения движка а также улучшения ui  ([#1451](https://github.com/doxynix/doxynix/issues/1451)) ([a86a300](https://github.com/doxynix/doxynix/commit/a86a300b45e8a1672d0f6a2dc80765f45caa264d))
+
 ## [2.0.1](https://github.com/doxynix/doxynix/compare/v2.0.0...v2.0.1) (2026-05-22)
 
 
