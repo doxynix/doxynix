@@ -16,6 +16,8 @@ const envServer = createEnv({
 
   runtimeEnv: {
     ABLY_API_KEY: process.env.ABLY_API_KEY,
+    API_KEY_CHECKSUM_SECRET: process.env.API_KEY_CHECKSUM_SECRET,
+    API_KEY_PEPPER: process.env.API_KEY_PEPPER,
     APP_VERSION: process.env.APP_VERSION,
     BETTERSTACK_API_TOKEN: process.env.BETTERSTACK_API_TOKEN,
     DATABASE_URL: process.env.DATABASE_URL,
@@ -30,6 +32,7 @@ const envServer = createEnv({
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     LOG_SALT_SECRET: process.env.LOG_SALT_SECRET,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
@@ -46,6 +49,8 @@ const envServer = createEnv({
 
   server: {
     ABLY_API_KEY: stringSchema,
+    API_KEY_CHECKSUM_SECRET: stringSchema,
+    API_KEY_PEPPER: stringSchema,
     APP_VERSION: z._default(z.string(), "1.0.0"),
     BETTERSTACK_API_TOKEN: stringSchema,
     DATABASE_URL: z.url(),
@@ -62,6 +67,7 @@ const envServer = createEnv({
     GITHUB_WEBHOOK_SECRET: stringSchema,
     GOOGLE_CLIENT_ID: stringSchema,
     GOOGLE_CLIENT_SECRET: stringSchema,
+    GOOGLE_GENERATIVE_AI_API_KEY: stringSchema,
     GROQ_API_KEY: stringSchema,
     LOG_SALT_SECRET: stringSchema,
     NEXTAUTH_SECRET: stringSchema,
@@ -93,6 +99,9 @@ export const GITHUB_APP_ID = envServer.GITHUB_APP_ID;
 export const PRISMA_FIELD_ENCRYPTION_KEY = envServer.PRISMA_FIELD_ENCRYPTION_KEY;
 export const LOG_SALT_SECRET = envServer.LOG_SALT_SECRET;
 export const GEMINI_PROXY = envServer.GEMINI_PROXY;
+export const GOOGLE_GENERATIVE_AI_API_KEY = envServer.GOOGLE_GENERATIVE_AI_API_KEY;
+export const API_KEY_PEPPER = envServer.API_KEY_PEPPER;
+export const API_KEY_CHECKSUM_SECRET = envServer.API_KEY_CHECKSUM_SECRET;
 const rawGithubAppPrivateKey = envServer.GITHUB_APP_PRIVATE_KEY;
 
 if (envServer.NODE_ENV !== "test" && typeof rawGithubAppPrivateKey !== "string") {

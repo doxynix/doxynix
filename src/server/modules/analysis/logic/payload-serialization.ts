@@ -9,10 +9,6 @@ type WriterPayload = {
   sections: readonly string[];
 };
 
-export function serializeForWriter(value: unknown): string {
-  return JSON.stringify(value, null, 2);
-}
-
 export function serializeAllowedPaths(paths: string[]): string {
   return JSON.stringify(paths.slice().sort((left, right) => left.localeCompare(right)));
 }
@@ -22,11 +18,11 @@ export function buildWriterSectionPayloads(
 ): Record<"api" | "architecture" | "changelog" | "contributing" | "readme", WriterPayload> {
   return {
     api: {
-      payload: serializeForWriter(documentationInput.sections.api_reference),
+      payload: JSON.stringify(documentationInput.sections.api_reference, null, 2),
       sections: DOC_SECTION_DEPENDENCIES[DocType.API],
     } satisfies WriterPayload,
     architecture: {
-      payload: serializeForWriter(documentationInput.sections.architecture),
+      payload: JSON.stringify(documentationInput.sections.architecture, null, 2),
       sections: DOC_SECTION_DEPENDENCIES[DocType.ARCHITECTURE],
     } satisfies WriterPayload,
     changelog: {
@@ -34,17 +30,25 @@ export function buildWriterSectionPayloads(
       sections: DOC_SECTION_DEPENDENCIES[DocType.CHANGELOG],
     } satisfies WriterPayload,
     contributing: {
-      payload: serializeForWriter({
-        onboarding: documentationInput.sections.onboarding,
-        overview: documentationInput.sections.overview,
-      }),
+      payload: JSON.stringify(
+        {
+          onboarding: documentationInput.sections.onboarding,
+          overview: documentationInput.sections.overview,
+        },
+        null,
+        2
+      ),
       sections: DOC_SECTION_DEPENDENCIES[DocType.CONTRIBUTING],
     } satisfies WriterPayload,
     readme: {
-      payload: serializeForWriter({
-        architecture: documentationInput.sections.architecture,
-        overview: documentationInput.sections.overview,
-      }),
+      payload: JSON.stringify(
+        {
+          architecture: documentationInput.sections.architecture,
+          overview: documentationInput.sections.overview,
+        },
+        null,
+        2
+      ),
       sections: DOC_SECTION_DEPENDENCIES[DocType.README],
     } satisfies WriterPayload,
   };

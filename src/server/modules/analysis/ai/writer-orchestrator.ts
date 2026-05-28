@@ -1,6 +1,7 @@
 import { DocType, type Repo } from "@prisma/client";
 import { batch } from "@trigger.dev/sdk";
 
+import { buildDocumentationInputModel } from "@/server/modules/analysis/engine/pipeline/documentation-input";
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import { uniquePaths } from "@/server/utils/array-utils";
 
@@ -8,12 +9,7 @@ import type { AIResult } from "../engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "../engine/core/discovery.types";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import { buildStageContextPack } from "../logic/context-manager";
-import { getDocumentationInputSnapshot } from "../logic/input-retrieval";
-import {
-  buildWriterSectionPayloads,
-  serializeAllowedPaths,
-  serializeForWriter,
-} from "../logic/payload-serialization";
+import { buildWriterSectionPayloads, serializeAllowedPaths } from "../logic/payload-serialization";
 import {
   apiTask,
   architectureTask,
@@ -106,7 +102,8 @@ export async function orchestrateWriterTasks(
 ): Promise<DeepDocsResult> {
   taskLogger.info("Documentation: Preparing high-fidelity context for AI writers...");
 
-  const documentationInput = getDocumentationInputSnapshot(evidence, hardMetrics);
+  const documentationInput =
+    hardMetrics.documentationInput ?? buildDocumentationInputModel(evidence, hardMetrics);
   const writerInputs = buildWriterSectionPayloads(documentationInput);
 
   const writerContexts = {
@@ -153,7 +150,11 @@ export async function orchestrateWriterTasks(
       120
     )
   );
-  const architectureDependencyContextPayload = serializeForWriter(architectureDependencyContext);
+  const architectureDependencyContextPayload = JSON.stringify(
+    architectureDependencyContext,
+    null,
+    2
+  );
 
   const engineeringDossier = buildEngineeringDossier(
     documentationInput,
@@ -196,7 +197,7 @@ export async function orchestrateWriterTasks(
   }
 
   const compressedDossier = compactPayload(strippedDossier);
-  const engineeringDossierPayload = serializeForWriter(compressedDossier);
+  const engineeringDossierPayload = JSON.stringify(compressedDossier, null, 2);
 
   const allowedPathsByWriter = {
     api: buildAllowedPaths(
@@ -270,8 +271,8 @@ export async function orchestrateWriterTasks(
 
   if (requestedDocs.includes(DocType.ARCHITECTURE)) {
     const moduleContext = architectureDependencyContextPayload;
-    const onboardingPayload = serializeForWriter(documentationInput.sections.onboarding);
-    const risksPayload = serializeForWriter(documentationInput.sections.risks);
+    const onboardingPayload = JSON.stringify(documentationInput.sections.onboarding, null, 2);
+    const risksPayload = JSON.stringify(documentationInput.sections.risks, null, 2);
     batchJobs.push({
       payload: {
         allowedPaths: allowedPathsByWriter.architecture,

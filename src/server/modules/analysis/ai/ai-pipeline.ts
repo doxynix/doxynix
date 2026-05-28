@@ -2,7 +2,6 @@ import type { DocType, Repo } from "@prisma/client";
 
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import { llmLimiter } from "@/server/utils/llm-limiter";
-
 import type { RepositoryFact, RepositoryFinding } from "@/server/utils/types";
 
 import type { AIResult } from "../engine/core/analysis-result.schemas";
@@ -10,7 +9,6 @@ import type { RepositoryEvidence } from "../engine/core/discovery.types";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import { buildDocumentationInputModel } from "../engine/pipeline/documentation-input";
 import { buildArchitectDigest } from "../logic/architect-digest";
-import { getDocumentationInputSnapshot } from "../logic/input-retrieval";
 import { executeArchitectPhase } from "./architect-stage";
 import { executeMapperPhase } from "./mapper-stage";
 import { executeSentinelPhase } from "./sentinel-stage";
@@ -70,7 +68,8 @@ export async function runAiPipeline(
     hardMetrics.documentationInput = buildDocumentationInputModel(evidence, hardMetrics);
   }
 
-  const documentationInput = getDocumentationInputSnapshot(evidence, hardMetrics);
+  const documentationInput =
+    hardMetrics.documentationInput ?? buildDocumentationInputModel(evidence, hardMetrics);
 
   const architectDigest = buildArchitectDigest(
     documentationInput,

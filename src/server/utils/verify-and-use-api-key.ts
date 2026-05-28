@@ -1,17 +1,22 @@
 import { appLogger } from "../core/app-logger";
 import { prisma } from "../core/db";
-import { getRawHash } from "./hash";
+import { extractPayloadFromKey, getApiKeyHash, validateApiKeyChecksum } from "./hash";
 
 /**
- * Верифицирует сырой API-ключ по его SHA256-хэшу в базе данных.
- * Автоматически и в фоне обновляет дату последнего использования ключа.
+ * Верифицирует сырой API-ключ по его HMAC-SHA256 хэшу в базе данных.
+ * Сначала проверяет контрольную сумму на CPU, а хэширует и ищет в БД только payload.
  */
 export async function verifyAndUseApiKey(token: string) {
-  if (!token.startsWith("dxnx_")) {
+  if (!validateApiKeyChecksum(token)) {
     return null;
   }
 
-  const hashedToken = getRawHash(token);
+  const payload = extractPayloadFromKey(token);
+  if (payload == null) {
+    return null;
+  }
+
+  const hashedToken = getApiKeyHash(payload);
 
   const keyRecord = await prisma.apiKey.findUnique({
     include: { user: true },
