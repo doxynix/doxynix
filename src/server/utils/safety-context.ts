@@ -3,7 +3,6 @@
  * Unified safety settings and data handling rules for LLM interactions.
  * Centralizes escaping, sanitization, and validation logic.
  */
-import { escape } from "es-toolkit";
 
 import { appLogger } from "../core/app-logger";
 
@@ -59,11 +58,12 @@ export class SafetyContext {
       invalidPaths = validation.invalid;
     }
 
-    const escaped = this.escape(content, "xml-text");
+    const safeContent = content.includes("]]>") ? content.replaceAll("]]>", "]]&gt;") : content;
+
     return {
       invalidPaths,
       truncated,
-      xml: `<${tag}>\n${escaped}\n</${tag}>`,
+      xml: `<${tag}>\n<![CDATA[\n${safeContent}\n]]>\n</${tag}>`,
     };
   }
 
@@ -77,10 +77,10 @@ export class SafetyContext {
 
     switch (context) {
       case "xml-text": {
-        return escape(data);
+        return data.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
       }
       case "xml-attr": {
-        return escape(data);
+        return data.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;");
       }
       case "json": {
         return JSON.stringify(data);

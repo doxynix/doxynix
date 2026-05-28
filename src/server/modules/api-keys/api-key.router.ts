@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { TRPCError } from "@trpc/server";
-import z from "zod";
+import { z } from "zod";
 
 import { ApiKeySchema } from "@/shared/api-contracts";
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
@@ -8,6 +8,7 @@ import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 import { OpenApiErrorResponses } from "@/server/core/trpc/constants";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { handlePrismaError } from "@/server/utils/handle-error";
+import { getRawHash } from "@/server/utils/hash";
 
 const BRAND_PREFIX = "dxnx_";
 
@@ -30,7 +31,7 @@ export const apiKeyRouter = createTRPCRouter({
       const randomPart = crypto.randomBytes(32).toString("base64url");
       const fullKey = `${BRAND_PREFIX}${randomPart}`;
       const displayPrefix = `${BRAND_PREFIX}${randomPart.slice(0, 6)}`;
-      const hashedKey = crypto.createHash("sha256").update(fullKey).digest("hex");
+      const hashedKey = getRawHash(fullKey);
 
       try {
         await ctx.db.apiKey.create({

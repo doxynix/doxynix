@@ -137,6 +137,13 @@ enum BannedEmailReason {
   MANUAL
 }
 
+enum ChatRole {
+  user
+  assistant
+  system
+  data
+}
+
 model User {
   /// @zod.custom.omit(["model"])
   id                  Int                  @id() @default(autoincrement())
@@ -144,7 +151,7 @@ model User {
   publicId            String               @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
-  email               String?              @unique() @db.Citext()
+  email               String?              @db.Citext()
   /// @encryption:hash(email)?normalize=lowercase&normalize=trim
   /// @zod.custom.omit(["model"])
   emailHash           String?              @unique() @map("email_hash")
@@ -164,6 +171,7 @@ model User {
   apiKeys             ApiKey[]
   notifications       Notification[]
   githubInstallations GithubInstallation[]
+  chatSession         ChatSession[]
 
   @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "users_name_trgm_idx")
   @@map("users")
@@ -238,16 +246,16 @@ model Repo {
   notifications    Notification[]
   pullRequests     PullRequestAnalysis[]      @relation("RepoPullRequests")
   generatedFixes   GeneratedFix[]             @relation("RepoGeneratedFixes")
+  chatSession      ChatSession[]
   prAnalysisConfig PullRequestAnalysisConfig?
 
   @@unique([owner, name, userId])
   @@unique([githubId, userId])
+  @@index([topics], type: Gin)
   @@index([userId, owner])
   @@index([userId, name])
-  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, visibility, createdAt(sort: Desc)])
   @@index([userId, updatedAt(sort: Desc)])
-  @@index([userId, visibility])
-  @@index([githubId])
   @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_name_trgm_idx")
   @@index([owner(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_owner_trgm_idx")
   @@index([description(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_description_trgm_idx")
@@ -276,7 +284,7 @@ model Analysis {
   metricsJson     Json?      @map("metrics_json")
   resultJson      Json?      @map("result_json")
   commitSha       String?    @map("commit_sha")
-  jobId           String?
+  jobId           String?    @map("job_id")
   logs            String?    @db.Text()
   error           String?    @db.Text()
   createdAt       DateTime   @default(now()) @map("created_at")
@@ -289,7 +297,6 @@ model Analysis {
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
   @@index([jobId])
-  @@index([status])
   @@map("analyses")
 }
 
@@ -302,7 +309,7 @@ model Document {
   type       DocType
   /// @zod.string.min(1, { message: "Content cannot be empty" })
   content    String    @db.Text()
-  path       String?
+  path       String    @default("")
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @default(now()) @updatedAt() @map("updated_at")
   /// @zod.custom.omit(["model"])
@@ -313,7 +320,6 @@ model Document {
 
   @@unique([repoId, version, type, path])
   @@unique([repoId, version, type, analysisId])
-  @@index([repoId])
   @@index([analysisId])
   @@map("documents")
 }
@@ -386,7 +392,7 @@ model BannedEmail {
   id        Int               @id() @default(autoincrement())
   /// @encrypted
   /// @zod.string.email({ message: "Incorrect email" })
-  email     String            @unique() @db.Citext()
+  email     String            @db.Citext()
   /// @encryption:hash(email)?normalize=lowercase&normalize=trim
   /// @zod.custom.omit(["model"])
   emailHash String?           @unique() @map("email_hash")
@@ -424,7 +430,7 @@ model Session {
   publicId         String   @unique() @default(uuid(7)) @map("public_id") @db.Uuid()
   /// @encrypted
   /// @zod.custom.omit(["model"])
-  sessionToken     String   @unique() @map("session_token")
+  sessionToken     String   @map("session_token")
   /// @encryption:hash(sessionToken)
   /// @zod.custom.omit(["model"])
   sessionTokenHash String?  @unique() @map("session_token_hash")
@@ -435,22 +441,26 @@ model Session {
   updatedAt        DateTime @default(now()) @updatedAt() @map("updated_at")
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("sessions")
 }
 
 model VerificationToken {
-  identifier String
+  /// @encrypted
+  identifier     String
+  /// @encryption:hash(identifier)?normalize=lowercase&normalize=trim
+  identifierHash String   @default("") @map("identifier_hash")
   /// @encrypted
   /// @zod.custom.omit(["model"])
-  token      String   @unique()
+  token          String
   /// @encryption:hash(token)
   /// @zod.custom.omit(["model"])
-  tokenHash  String?  @unique() @map("token_hash")
-  expires    DateTime
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @default(now()) @updatedAt() @map("updated_at")
+  tokenHash      String   @unique() @default("") @map("token_hash")
+  expires        DateTime
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt() @map("updated_at")
 
-  @@unique([identifier, token])
+  @@unique([identifierHash, tokenHash])
   @@map("verification_tokens")
 }
 
@@ -481,7 +491,6 @@ model AuditLog {
   userAgent String?  @map("user_agent")
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@index([userId])
   @@index([requestId])
   @@index([createdAt(sort: Desc)])
   @@index([userId, operation])
@@ -504,7 +513,7 @@ model PullRequestAnalysis {
   riskScore        Int?                 @map("risk_score")
   findingsJson     Json?                @map("findings_json")
   changedFilesJson Json?                @map("changed_files_json")
-  jobId            String?
+  jobId            String?              @map("job_id")
   error            String?              @db.Text()
   createdAt        DateTime             @default(now()) @map("created_at")
   updatedAt        DateTime             @default(now()) @updatedAt() @map("updated_at")
@@ -515,6 +524,7 @@ model PullRequestAnalysis {
   generatedFixes   GeneratedFix[]
 
   @@unique([repoId, prNumber, headSha])
+  @@index([jobId])
   @@index([repoId, status])
   @@index([repoId, createdAt(sort: Desc)])
   @@index([status])
@@ -561,7 +571,6 @@ model PullRequestComment {
   analysis        PullRequestAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 
   @@index([analysisId, filePath])
-  @@index([analysisId])
   @@map("pull_request_comments")
 }
 
@@ -593,4 +602,33 @@ model GeneratedFix {
   @@index([repoId, createdAt(sort: Desc)])
   @@index([prAnalysisId])
   @@map("generated_fixes")
+}
+
+model ChatSession {
+  id        String        @id() @default(uuid(7)) @db.Uuid()
+  userId    Int           @map("user_id")
+  repoId    Int?          @map("repo_id")
+  title     String        @default("New Chat")
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt() @map("updated_at")
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repo      Repo?         @relation(fields: [repoId], references: [id], onDelete: Cascade)
+  messages  ChatMessage[]
+
+  @@index([userId])
+  @@index([repoId])
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id        String      @id() @default(uuid(7)) @db.Uuid()
+  sessionId String      @map("session_id") @db.Uuid()
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      ChatRole
+  /// @encrypted
+  parts     String
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  @@index([sessionId])
+  @@map("chat_messages")
 }

@@ -1,13 +1,13 @@
 import type { DocType, Repo } from "@prisma/client";
 import { orderBy, uniqBy } from "es-toolkit";
 import { normalize } from "pathe";
-import type z from "zod";
+import type { z } from "zod";
 
 import { callWithFallback } from "@/server/utils/call";
 import { CodeOptimizer } from "@/server/utils/optimizers";
 import type { RepoSearchResult } from "@/server/utils/types";
 
-import { AI_MODELS } from "./ai/ai-constants";
+import { getActiveModels } from "./ai/ai-constants";
 import { buildSingleFileAnalysisPrompt } from "./ai/prompts-refactored";
 import {
   QuickFileAuditSchema,
@@ -320,9 +320,11 @@ export async function runQuickFileAudit(input: FileActionInput): Promise<QuickFi
     .filter(Boolean)
     .join("\n");
 
+  const activeModels = await getActiveModels();
+
   const result = await callWithFallback<z.infer<typeof QuickFileAuditSchema>>({
     attemptMetadata: { filePath: input.path, operation: "quick-file-audit" },
-    models: AI_MODELS.POWERFUL,
+    models: activeModels.POWERFUL,
     outputSchema: QuickFileAuditSchema,
     prompt: userPrompt,
     system: systemPrompt,

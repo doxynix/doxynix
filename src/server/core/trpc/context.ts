@@ -1,10 +1,9 @@
-import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { getIp, getUa } from "@/server/utils/request-context";
+import { verifyAndUseApiKey } from "@/server/utils/verify-and-use-api-key";
 
-import { appLogger } from "../app-logger";
 import { authOptions } from "../auth";
 import { prisma } from "../db";
 import { redisClient } from "../redis";
@@ -16,34 +15,16 @@ type Props = {
 export async function createContext({ req }: Props) {
   const ip = getIp(req);
   const userAgent = getUa(req);
-  const requestInfo = { ip, userAgent }; // NOTE: мб заменить на request-context.ts
+  const requestInfo = { ip, userAgent };
 
   const authHeader = req.headers.get("authorization");
   if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
     const token = authHeader.split(" ")[1];
-    if (token != null && token.startsWith("dxnx_")) {
-      const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
-      const keyRecord = await prisma.apiKey.findUnique({
-        include: { user: true },
-        where: { hashedKey: hashedToken },
-      });
+    if (token != null) {
+      const keyRecord = await verifyAndUseApiKey(token);
 
-      if (keyRecord?.revoked === false) {
-        prisma.apiKey
-          .update({
-            data: { lastUsed: new Date() },
-            where: { id: keyRecord.id },
-          })
-          .catch((error) =>
-            appLogger.error({
-              error:
-                error instanceof Error ? { message: error.message, stack: error.stack } : error,
-              keyId: keyRecord.id,
-              msg: "Failed to update api key lastUsed",
-            })
-          );
-
+      if (keyRecord != null) {
         return {
           prisma,
           redis: redisClient,

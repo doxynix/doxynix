@@ -11,7 +11,7 @@ import { prisma } from "@/server/core/db";
 import { realtimeServer } from "@/server/core/realtime";
 import { ProjectPolicy } from "@/server/modules/analysis/engine/core/project-policy";
 
-import { taskLogger } from "./task-logger";
+import { taskLogger } from "../modules/analysis/logic/task-logger";
 
 export async function handleError(
   error: unknown,

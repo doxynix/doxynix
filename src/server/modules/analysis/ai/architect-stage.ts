@@ -1,6 +1,6 @@
 import { appLogger } from "@/server/core/app-logger";
+import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import { callWithFallback } from "@/server/utils/call";
-import { taskLogger } from "@/server/utils/task-logger";
 
 import {
   aiGenerationSchema,
@@ -13,7 +13,7 @@ import {
   type buildArchitectDigest,
 } from "../logic/architect-digest";
 import { buildStageContextPack } from "../logic/context-manager";
-import { AI_MODELS, SAFETY_SETTINGS } from "./ai-constants";
+import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
 import { buildAnalysisSystemPrompt, buildAnalysisUserPrompt } from "./prompts-refactored";
 
 export async function executeArchitectPhase(
@@ -22,18 +22,18 @@ export async function executeArchitectPhase(
   analysisId: string,
   instructions: string | undefined,
   sentinelStatus: "SAFE" | "UNSAFE",
-  language: string,
-  userId: number,
-  repoId: string,
-  branch: string
+  language: string
 ): Promise<AIResult> {
   taskLogger.info("Architect: Building final intelligence report...");
 
-  const architectContext = await buildStageContextPack({
-    files: validFiles,
-    preferredPaths: collectArchitectPreferredPaths(documentationDigest),
-    stage: "architect",
-  });
+  const [architectContext, activeModels] = await Promise.all([
+    buildStageContextPack({
+      files: validFiles,
+      preferredPaths: collectArchitectPreferredPaths(documentationDigest),
+      stage: "architect",
+    }),
+    getActiveModels(),
+  ]);
 
   taskLogger.info(
     `Architect: Context assembled (${architectContext.debug.selectedTokens} tokens). Starting reasoning...`
@@ -46,7 +46,7 @@ export async function executeArchitectPhase(
         phase: "architect",
         promptChars: architectContext.context.length + JSON.stringify(documentationDigest).length,
       },
-      models: [...AI_MODELS.POWERFUL, ...AI_MODELS.ARCHITECT, ...AI_MODELS.FALLBACK],
+      models: [...activeModels.POWERFUL, ...activeModels.ARCHITECT, ...activeModels.FALLBACK],
       outputSchema: aiGenerationSchema,
       prompt: buildAnalysisUserPrompt(
         JSON.stringify(documentationDigest),

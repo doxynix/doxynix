@@ -5,6 +5,8 @@ import { NotifyType, PrismaClient, Status, UserRole, Visibility } from "@prisma/
 import { subDays } from "date-fns";
 import pg from "pg";
 
+import { getNormalizedHash } from "@/server/utils/hash";
+
 import * as Fake from "./generated/fake-data";
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -161,7 +163,7 @@ function generateMetricsJson(repoName: string, isBad: boolean) {
 async function seedStressProfile() {
   const existingUser = await prisma.user.findUnique({
     select: { id: true },
-    where: { email: STRESS_USER_EMAIL },
+    where: { emailHash: getNormalizedHash(STRESS_USER_EMAIL) },
   });
 
   if (existingUser != null) {
@@ -189,7 +191,7 @@ async function seedStressProfile() {
       image: faker.image.avatar(),
       name: STRESS_USER_NAME,
     },
-    where: { email: STRESS_USER_EMAIL },
+    where: { emailHash: getNormalizedHash(STRESS_USER_EMAIL) },
   });
 
   await prisma.notification.deleteMany({
@@ -250,16 +252,16 @@ async function main() {
       email: MY_EMAIL,
       emailVerified: new Date(),
       image: faker.image.avatar(),
-      name: "Karen Avakov",
+      name: "Alice",
       role: UserRole.ADMIN,
     }),
     update: {
       emailVerified: new Date(),
       image: faker.image.avatar(),
-      name: "Karen Avakov",
+      name: "Bob",
       role: UserRole.ADMIN,
     },
-    where: { email: MY_EMAIL },
+    where: { emailHash: getNormalizedHash(MY_EMAIL) },
   });
   console.log(`Admin ready: ${admin.email}`);
 

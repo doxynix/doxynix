@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { auth } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
-import z from "zod";
+import { z } from "zod";
 
 import { DocTypeSchema } from "@/shared/api-contracts";
 import { UpdatePRConfigInput } from "@/shared/api/schemas/pr-analysis.schema";
@@ -849,8 +849,8 @@ export const analysisRouter = createTRPCRouter({
           version: commitSha ?? "manual",
           ...(internalAnalysisId != null
             ? {
-                analysis: { connect: { id: internalAnalysisId } },
-              }
+              analysis: { connect: { id: internalAnalysisId } },
+            }
             : {}),
         },
       });

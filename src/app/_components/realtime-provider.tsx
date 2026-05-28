@@ -115,6 +115,9 @@ export const RealtimeProvider = ({ children }: Props) => {
       if (msg.name === REALTIME_CONFIG.events.user.auditUpdated) {
         void utils.audit.getActivityLogs.invalidate();
       }
+      if (msg.name === REALTIME_CONFIG.events.user.sessionUpdated) {
+        void utils.agent.listSessions.invalidate();
+      }
     };
 
     void systemChannel.subscribe(handleSystemMsg);
@@ -136,6 +139,7 @@ export const RealtimeProvider = ({ children }: Props) => {
     utils.analysis.getFileActionResult,
     utils.analysis.getById,
     utils.audit.getActivityLogs,
+    utils.agent.listSessions,
   ]);
 
   if (!client) return <>{children}</>;

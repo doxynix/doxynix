@@ -9,7 +9,7 @@ import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { cloneRepository, getAnalysisContext } from "@/server/core/github/git";
 import { calculateBusFactor } from "@/server/core/github/github-api";
-import { taskLogger } from "@/server/utils/task-logger";
+import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import { cleanup, handleError, readAndFilterFiles } from "@/server/utils/utils";
 
 import { generateDeepDocs, runAiPipeline } from "../ai/ai-pipeline";
@@ -40,7 +40,7 @@ export const analyzeRepoTask = task({
 
   maxDuration: 60 * 20,
   queue: {
-    concurrencyLimit: 2,
+    concurrencyLimit: 1,
   },
 
   retry: {

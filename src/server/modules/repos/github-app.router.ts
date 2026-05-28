@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "zod";
 
 import { githubAppService } from "@/server/core/github/github-app.service";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";

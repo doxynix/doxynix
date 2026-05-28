@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { getRawHash } from "@/server/utils/hash";
+
 import { cleanupDatabase, createTestUser, expectDenied, expectValidationFail } from "../helpers";
 
 describe("Business Logic & Integrity Constraints", () => {
@@ -168,7 +170,7 @@ describe("Business Logic & Integrity Constraints", () => {
     await expectDenied(bob.db.session.findUniqueOrThrow({ where: { publicId: session.publicId } }));
 
     const stolenSession = await bob.db.session.findUnique({
-      where: { sessionToken: "secret_token_123" },
+      where: { sessionTokenHash: getRawHash("secret_token_123") },
     });
     expect(stolenSession).toBeNull();
   });

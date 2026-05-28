@@ -1,5 +1,5 @@
 import type { Prisma } from "@prisma/client";
-import z from "zod";
+import { z } from "zod";
 
 import { NotificationSchema } from "@/shared/api-contracts";
 

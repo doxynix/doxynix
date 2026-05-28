@@ -4,7 +4,7 @@
  * Provides consistent transformation and escaping across all evidence types.
  */
 import { defu } from "defu";
-import { compact, escape } from "es-toolkit";
+import { escape } from "es-toolkit";
 
 import { appLogger } from "../core/app-logger";
 
@@ -193,7 +193,9 @@ export class EvidenceFormatter {
     options: EvidenceFormattingOptions = {}
   ): FormattedEvidence {
     if (format === "text") {
-      const content = paths.map((p) => escape(p)).join("\n");
+      const content = paths
+        .map((p) => p.replaceAll("&", "&amp;").replaceAll("<", "&lt;"))
+        .join("\n");
       return {
         content,
         metadata: {
@@ -269,24 +271,6 @@ export class EvidenceFormatter {
       size: xml.length,
       truncated,
     };
-  }
-
-  /**
-   * Get formatting stats/report
-   */
-  getFormattingReport(evidence: FormattedEvidence): string {
-    const report = compact([
-      `Evidence Type: ${evidence.metadata.type}`,
-      `Format: ${evidence.metadata.format}`,
-      `Size: ${evidence.size} bytes`,
-      `Truncated: ${evidence.truncated}`,
-      evidence.metadata.originalSize != null
-        ? `Original Size: ${evidence.metadata.originalSize} bytes`
-        : null,
-      `Timestamp: ${evidence.metadata.timestamp.toISOString()}`,
-    ]);
-
-    return report.join("\n");
   }
 
   /**

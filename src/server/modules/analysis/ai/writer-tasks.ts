@@ -1,15 +1,16 @@
-import { google, type GoogleLanguageModelOptions } from "@ai-sdk/google";
+import { type GoogleLanguageModelOptions } from "@ai-sdk/google";
 import type { Repo } from "@prisma/client";
 import type { ToolSet } from "ai";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { getClientContext } from "@/server/core/github/github-provider";
+import { google } from "@/server/core/google";
 import { callWithFallback } from "@/server/utils/call";
 import { unwrapAiText } from "@/server/utils/optimizers";
 
 import type { AIResult } from "../engine/core/analysis-result.schemas";
-import { AI_MODELS, SAFETY_SETTINGS } from "./ai-constants";
+import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
 import { buildRepositoryTools } from "./ai-tools";
 import {
   buildApiWriterSystemPrompt,
@@ -18,10 +19,10 @@ import {
   buildArchitectureWriterUserPrompt,
   buildChangelogWriterSystemPrompt,
   buildChangelogWriterUserPrompt,
+  buildContributingWriterSystemPrompt,
   buildContributingWriterUserPrompt,
   buildReadmeWriterSystemPrompt,
   buildReadmeWriterUserPrompt,
-  CONTRIBUTING_WRITER_SYSTEM_PROMPT,
 } from "./prompts-refactored";
 
 export type WriterName = "api" | "architecture" | "changelog" | "contributing" | "readme";
@@ -81,6 +82,8 @@ async function runWriterPrompt(params: RunWriterPromptParams) {
     google: { safetySettings: SAFETY_SETTINGS },
   };
 
+  const activeModels = await getActiveModels();
+
   return runWriterTask(params.name, async () =>
     callWithFallback<string>({
       attemptMetadata: {
@@ -88,7 +91,7 @@ async function runWriterPrompt(params: RunWriterPromptParams) {
         phase: params.phase,
         ...(params.promptChars != null ? { promptChars: params.promptChars } : {}),
       },
-      models: AI_MODELS.WRITER,
+      models: activeModels.WRITER,
       outputSchema: null,
       prompt: params.prompt,
       system: params.system,
@@ -207,7 +210,7 @@ export async function executeContributingWriter(
       allowedPaths
     ),
     promptChars: payload.length + engineeringDossierPayload.length + context.length,
-    system: CONTRIBUTING_WRITER_SYSTEM_PROMPT(language),
+    system: buildContributingWriterSystemPrompt(language),
     tools: buildRepositoryTools(userId, repoId, branch),
   });
 }

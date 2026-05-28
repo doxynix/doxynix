@@ -5,9 +5,9 @@ import { sumBy } from "es-toolkit";
 import type { RepoItemFields } from "@/shared/types/repo.types";
 
 import { ProjectPolicy } from "@/server/modules/analysis/engine/core/project-policy";
+import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import { isOctokitError } from "@/server/utils/handle-error";
 import { getLanguageColor } from "@/server/utils/language-metadata";
-import { taskLogger } from "@/server/utils/task-logger";
 
 import { appLogger } from "../app-logger";
 import type { DbClient } from "../db";

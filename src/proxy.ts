@@ -28,6 +28,7 @@ if (IS_PROD) {
     limiter: Ratelimit.slidingWindow(20, "10 s"),
     prefix: "@doxynix/ratelimit/global",
     redis: redisClient,
+    timeout: 800,
   });
 }
 
@@ -59,24 +60,29 @@ async function handleRateLimitAndSize(
   if (ratelimit != null) {
     const token = request.cookies.get(cookieName)?.value;
     const identifier = token != null ? `user_${token.slice(-16)}` : `ip_${ip}`;
-    const { limit, remaining, reset, success } = await ratelimit.limit(identifier);
 
-    if (!success) {
-      return new NextResponse(
-        JSON.stringify({
-          error: "Too Many Requests",
-          message: "You're sending requests too often. Please wait.",
-        }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "X-RateLimit-Limit": limit.toString(),
-            "X-RateLimit-Remaining": remaining.toString(),
-            "X-RateLimit-Reset": reset.toString(),
-          },
-          status: 429,
-        }
-      );
+    try {
+      const { limit, remaining, reset, success } = await ratelimit.limit(identifier);
+
+      if (!success) {
+        return new NextResponse(
+          JSON.stringify({
+            error: "Too Many Requests",
+            message: "You're sending requests too often. Please wait.",
+          }),
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "X-RateLimit-Limit": limit.toString(),
+              "X-RateLimit-Remaining": remaining.toString(),
+              "X-RateLimit-Reset": reset.toString(),
+            },
+            status: 429,
+          }
+        );
+      }
+    } catch (error) {
+      appLogger.error({ error, msg: "Global rate limiter experienced an error. Bypassing." });
     }
   }
 
@@ -100,6 +106,7 @@ async function handleTurnstile(request: NextRequest, ip: string): Promise<NextRe
     const cfRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       body: formData,
       method: "POST",
+      signal: AbortSignal.timeout(5000),
     });
 
     const cfData = await cfRes.json();
@@ -227,6 +234,7 @@ export async function proxy(request: NextRequest) {
 
   return handlePageRequest(request, requestId);
 }
+
 export const config = {
   matcher: [
     "/dashboard/repo/:path*",

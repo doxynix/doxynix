@@ -1,6 +1,5 @@
-import { google } from "@ai-sdk/google";
-
 import { appLogger } from "@/server/core/app-logger";
+import { google } from "@/server/core/google";
 import { callWithFallback } from "@/server/utils/call";
 
 import {
@@ -12,7 +11,7 @@ import type { ProjectMap } from "../engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "../engine/core/discovery.types";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import { buildMapperSkeleton } from "../logic/mapper-skeleton";
-import { AI_MODELS, SAFETY_SETTINGS } from "./ai-constants";
+import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
 import { buildRepositoryTools } from "./ai-tools";
 import { buildMapperSystemPrompt, buildMapperUserPrompt } from "./prompts-refactored";
 
@@ -32,11 +31,12 @@ export async function executeMapperPhase(
   );
 
   const repoTools = buildRepositoryTools(userId, repoId, branch);
+  const activeModels = await getActiveModels();
 
   try {
     const raw = await callWithFallback<unknown>({
       attemptMetadata: { analysisId, phase: "mapper" },
-      models: AI_MODELS.CARTOGRAPHER,
+      models: activeModels.CARTOGRAPHER,
       outputSchema: projectMapGenerationSchema,
       prompt: buildMapperUserPrompt(mapContext),
       providerOptions: {
@@ -45,7 +45,6 @@ export async function executeMapperPhase(
         },
       },
       system: buildMapperSystemPrompt(),
-
       taskType: "reasoning",
       tools: {
         ...repoTools,

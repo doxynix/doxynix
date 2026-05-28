@@ -1,6 +1,6 @@
 import { DocType } from "@prisma/client";
 import { uniqBy } from "es-toolkit";
-import z from "zod";
+import { z } from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 

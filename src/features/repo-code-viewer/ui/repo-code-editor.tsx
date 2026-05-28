@@ -13,12 +13,13 @@ import CodeMirrorMerge from "react-codemirror-merge";
 import type { EditorStats } from "@/entities/repo/model/editor-stats.types";
 import type { FileMeta } from "@/entities/repo/model/repo.types";
 
-import { EXTRA_EXTENSIONS } from "../model/extensions";
+import { BASE_EXTENSIONS, IDE_ONLY_EXTENSIONS, THEME_EXTENSION } from "../model/extensions";
 
 type Props = {
   compareValue?: string;
   initialValue?: string;
   meta: FileMeta;
+  minimal?: boolean;
   onChange?: (v: string) => void;
   onStats?: (stats: EditorStats) => void;
   onViewCreated?: (view: EditorView) => void;
@@ -32,6 +33,7 @@ export function RepoCodeEditor({
   compareValue,
   initialValue,
   meta,
+  minimal = false,
   onChange,
   onStats,
   onViewCreated,
@@ -40,14 +42,22 @@ export function RepoCodeEditor({
   showDiff = false,
   value,
 }: Readonly<Props>) {
-  const [ext, setExt] = useState<Extension[]>(EXTRA_EXTENSIONS);
+  const startingExtensions = minimal
+    ? [...BASE_EXTENSIONS, THEME_EXTENSION]
+    : [...BASE_EXTENSIONS, ...IDE_ONLY_EXTENSIONS, THEME_EXTENSION];
+
+  const [ext, setExt] = useState<Extension[]>(startingExtensions);
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     let cancelled = false;
     async function loadDynamicLanguage() {
       const extName = (path.split(".").pop() ?? "").toLowerCase();
-      const dynamicExt: Extension[] = [...EXTRA_EXTENSIONS];
+      const baseExtensions = minimal
+        ? [...BASE_EXTENSIONS, THEME_EXTENSION]
+        : [...BASE_EXTENSIONS, ...IDE_ONLY_EXTENSIONS, THEME_EXTENSION];
+
+      const dynamicExt: Extension[] = [...baseExtensions];
 
       try {
         const { languages } = await import("@codemirror/language-data");
@@ -67,7 +77,7 @@ export function RepoCodeEditor({
       } catch (error) {
         console.error("Failed to load language support", error);
         if (!cancelled) {
-          setExt(EXTRA_EXTENSIONS);
+          setExt(baseExtensions);
         }
       }
     }
@@ -76,7 +86,7 @@ export function RepoCodeEditor({
     return () => {
       cancelled = true;
     };
-  }, [path, meta, readOnly]);
+  }, [path, meta, readOnly, minimal]);
 
   const isDiffMode = showDiff && compareValue != null;
   const mergeExtensionsReadOnly = [

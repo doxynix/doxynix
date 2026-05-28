@@ -5,7 +5,7 @@ import { appLogger } from "@/server/core/app-logger";
 import type { OctokitInstance } from "@/server/core/github/github-provider";
 import { callWithFallback } from "@/server/utils/call";
 
-import { AI_MODELS, SAFETY_SETTINGS } from "../ai/ai-constants";
+import { getActiveModels, SAFETY_SETTINGS } from "../ai/ai-constants";
 import type { FindingForFix, GeneratedDiff } from "./pr-types";
 
 type FixedFileContent = {
@@ -298,6 +298,7 @@ Ensure:
 
     try {
       const fixPrompt = FixService.buildFixPrompt(input.findings, input.fileContents);
+      const activeModels = await getActiveModels();
 
       const aiResponse = await callWithFallback<string>({
         attemptMetadata: {
@@ -306,7 +307,7 @@ Ensure:
           repoId: input.repoId,
         },
         maxOutputTokens: 65_536,
-        models: AI_MODELS.POWERFUL,
+        models: activeModels.POWERFUL,
         outputSchema: null,
         prompt: fixPrompt,
         providerOptions: {

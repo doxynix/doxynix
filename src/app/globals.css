@@ -648,6 +648,15 @@
   .animate-floating {
     animation: var(--animate-float);
   }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @keyframes skeleton-pulse {
