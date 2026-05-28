@@ -1,20 +1,13 @@
 import { DocType, type Repo } from "@prisma/client";
 import { batch } from "@trigger.dev/sdk";
 
+import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import { uniquePaths } from "@/server/utils/array-utils";
-import { dumpDebug } from "@/server/utils/debug-logger";
-import { hasText } from "@/server/utils/string-utils";
-import { taskLogger } from "@/server/utils/task-logger";
 
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "../engine/core/discovery.types";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import { buildStageContextPack } from "../logic/context-manager";
-import {
-  buildSectionDebugSnapshot,
-  buildWriterContextSnapshot,
-  buildWriterPlanDebugSnapshot,
-} from "../logic/debug-snapshots";
 import { getDocumentationInputSnapshot } from "../logic/input-retrieval";
 import {
   buildWriterSectionPayloads,
@@ -69,6 +62,37 @@ export type DeepDocsResult = {
   swaggerYaml?: string;
 };
 
+function compactPayload(val: unknown): unknown {
+  if (Array.isArray(val)) {
+    const compacted = val
+      .map((item) => compactPayload(item))
+      .filter(
+        (item): item is Exclude<typeof item, null | undefined> =>
+          item !== null && item !== undefined && (!Array.isArray(item) || item.length > 0)
+      );
+    return compacted.length > 0 ? compacted : undefined;
+  }
+
+  if (val !== null && typeof val === "object") {
+    const obj = val as Record<string, unknown>;
+    const cleaned: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      const result = compactPayload(value);
+      if (
+        result !== null &&
+        result !== undefined &&
+        (!Array.isArray(result) || result.length > 0) &&
+        (typeof result !== "object" || Object.keys(result).length > 0)
+      ) {
+        cleaned[key] = result;
+      }
+    }
+    return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+  }
+
+  return val;
+}
+
 export async function orchestrateWriterTasks(
   files: { content: string; path: string }[],
   analysisResult: AIResult,
@@ -84,8 +108,6 @@ export async function orchestrateWriterTasks(
 
   const documentationInput = getDocumentationInputSnapshot(evidence, hardMetrics);
   const writerInputs = buildWriterSectionPayloads(documentationInput);
-  const sectionDebugSnapshot = buildSectionDebugSnapshot(documentationInput);
-  const writerPlan = buildWriterPlanDebugSnapshot(writerInputs, requestedDocs);
 
   const writerContexts = {
     api: await buildStageContextPack({
@@ -132,22 +154,49 @@ export async function orchestrateWriterTasks(
     )
   );
   const architectureDependencyContextPayload = serializeForWriter(architectureDependencyContext);
+
   const engineeringDossier = buildEngineeringDossier(
     documentationInput,
     hardMetrics,
     evidence,
     architectureDependencyContext
   );
-  const engineeringDossierPayload = serializeForWriter(engineeringDossier);
+
   const engineeringDossierPaths = getEngineeringDossierPaths(engineeringDossier);
 
-  void dumpDebug("writer-budget", buildWriterContextSnapshot(writerContexts));
-  void dumpDebug("report-section-inputs", {
-    architectureDependencyContext,
-    engineeringDossier,
-    sections: sectionDebugSnapshot,
-    writerPlan,
-  });
+  const strippedDossier = structuredClone(engineeringDossier) as unknown as Record<string, unknown>;
+
+  if (
+    strippedDossier.graphReliability != null &&
+    typeof strippedDossier.graphReliability === "object"
+  ) {
+    (strippedDossier.graphReliability as Record<string, unknown>).edges = [];
+  }
+
+  if (
+    strippedDossier.documentationInput != null &&
+    typeof strippedDossier.documentationInput === "object"
+  ) {
+    const docInput = strippedDossier.documentationInput as Record<string, unknown>;
+    docInput.sections = undefined;
+
+    if (docInput.architecture != null && typeof docInput.architecture === "object") {
+      const arch = docInput.architecture as Record<string, unknown>;
+      if (arch.graphReliability != null && typeof arch.graphReliability === "object") {
+        (arch.graphReliability as Record<string, unknown>).edges = [];
+      }
+    }
+
+    if (docInput.risks != null && typeof docInput.risks === "object") {
+      const risks = docInput.risks as Record<string, unknown>;
+      if (risks.graphReliability != null && typeof risks.graphReliability === "object") {
+        (risks.graphReliability as Record<string, unknown>).edges = [];
+      }
+    }
+  }
+
+  const compressedDossier = compactPayload(strippedDossier);
+  const engineeringDossierPayload = serializeForWriter(compressedDossier);
 
   const allowedPathsByWriter = {
     api: buildAllowedPaths(
@@ -376,46 +425,6 @@ export async function orchestrateWriterTasks(
     }
   }
 
-  void dumpDebug("report-section-docs", {
-    generated: {
-      api: {
-        hasMarkdown: hasText(generatedApiMarkdown),
-        hasSpec: hasText(swaggerYaml),
-      },
-      architecture: hasText(generatedArchitecture),
-      changelog: hasText(generatedChangelog),
-      contributing: hasText(generatedContributing),
-      readme: hasText(generatedReadme),
-      readyStates: {
-        api: hasText(generatedApiMarkdown),
-        architecture: hasText(generatedArchitecture),
-        changelog: hasText(generatedChangelog),
-        contributing: hasText(generatedContributing),
-        readme: hasText(generatedReadme),
-      },
-    },
-    runtime: analysisResult.analysisRuntime,
-    sections: sectionDebugSnapshot,
-    writerAllowedPaths: {
-      api: JSON.parse(allowedPathsByWriter.api),
-      architecture: JSON.parse(allowedPathsByWriter.architecture),
-      readme: JSON.parse(allowedPathsByWriter.readme),
-    },
-    writerErrors,
-    writerPlan,
-  });
-
-  void dumpDebug("generated-docs-raw", {
-    generatedApiMarkdown,
-    generatedArchitecture,
-    generatedChangelog,
-    generatedContributing,
-    generatedReadme,
-    runtime: analysisResult.analysisRuntime,
-    swaggerYaml,
-    writerErrors,
-  });
-
   taskLogger.success("Documentation: All tasks finished");
 
   return {
@@ -428,7 +437,7 @@ export async function orchestrateWriterTasks(
   };
 }
 
-function buildAllowedPaths(paths: string[], limit: number) {
+function buildAllowedPaths(paths: string[], limit: number): string {
   return serializeAllowedPaths(uniquePaths(paths, limit));
 }
 

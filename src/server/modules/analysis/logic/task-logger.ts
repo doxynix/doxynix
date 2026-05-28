@@ -7,7 +7,7 @@ import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
 import { prisma } from "@/server/core/db";
 import { realtimeServer } from "@/server/core/realtime";
 
-import { appLogger } from "../core/app-logger";
+import { appLogger } from "../../../core/app-logger";
 
 type LogLevel = "error" | "info" | "success" | "warn";
 

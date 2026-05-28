@@ -126,7 +126,8 @@ export function RepoDocs({
     if (headings.length === 0) return;
 
     const headingElements = headings
-      .map((h) => document.querySelector(`#${h.id}`))
+      /* eslint-disable-next-line unicorn/prefer-query-selector */
+      .map((h) => document.getElementById(h.id))
       .filter((el): el is HTMLElement => el !== null);
 
     const observer = new IntersectionObserver(

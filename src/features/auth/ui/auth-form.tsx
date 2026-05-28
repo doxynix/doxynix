@@ -15,6 +15,7 @@ import { TURNSTILE_SITE_KEY } from "@/shared/constants/env.client";
 import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { setClientCookie } from "@/shared/lib/cookies";
+import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -28,7 +29,6 @@ import {
 import { Input } from "@/shared/ui/core/input";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { GoogleIcon } from "@/shared/ui/icons/google-icon";
-import { Logo } from "@/shared/ui/icons/logo";
 import { YandexIcon } from "@/shared/ui/icons/yandex-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 

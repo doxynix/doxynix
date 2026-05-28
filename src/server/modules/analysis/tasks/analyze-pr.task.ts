@@ -1,6 +1,6 @@
 import type { PRAnalysisStatus } from "@prisma/client";
 import { task } from "@trigger.dev/sdk";
-import z from "zod";
+import { z } from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";

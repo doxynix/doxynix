@@ -2,6 +2,7 @@
  * PromptRuleLibrary
  * Centralized collection of reusable instruction rules and constraints.
  * Eliminates repetition across all LLM prompts in the system.
+ * Optimized for Gemma 4 (26B MoE) sparse expert activation.
  */
 
 import dedent from "ts-dedent";
@@ -66,7 +67,8 @@ export const LanguageRules = {
     ANTI-FLUFF POLICY (CRITICAL):
     - DO NOT use generic filler phrases (e.g., "This file is responsible for", "Overall, the system", "It is important to note").
     - DO NOT use subjective adjectives (e.g., "simple", "easy", "good", "bad"). Use objective metrics ("high cyclomatic complexity", "tightly coupled").
-    - Maximize information density. Every sentence must contain a technical fact, a metric, or a specific architectural observation.`,
+    - Maximize information density. Every sentence must contain a technical fact, a metric, or a specific architectural observation.
+    - Focus heavily on precise, expert-level technical vocabulary to ensure accurate activation of specialized MoE experts.`,
 
   /** Rule: Code Block title */
   codeBlockTitles: dedent`

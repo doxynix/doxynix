@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 
-import { Logo } from "@/shared/ui/icons/logo";
+import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { ScrollButton } from "@/shared/ui/kit/scroll-button";
 import { AnimatedShinyText } from "@/shared/ui/visuals/animated-shiny-text";
 import { ShimmerButton } from "@/shared/ui/visuals/shimmer-button";

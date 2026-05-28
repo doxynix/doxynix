@@ -4,7 +4,7 @@
  * Provides versioning, metadata, and dynamic retrieval of prompts.
  */
 
-import type { LLMTaskType } from "../modules/analysis/engine/core/scoring-constants";
+import type { LLMTaskType } from "../engine/core/scoring-constants";
 
 /**
  * Metadata about a registered prompt

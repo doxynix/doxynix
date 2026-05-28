@@ -3,7 +3,7 @@ import type { Repo } from "@prisma/client";
 import gitUrlParse from "git-url-parse";
 import simpleGit from "simple-git";
 
-import { taskLogger } from "@/server/utils/task-logger";
+import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 
 import { prisma } from "../db";
 import { executeWithFallback } from "./github-api";

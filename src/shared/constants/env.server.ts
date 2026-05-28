@@ -20,6 +20,7 @@ const envServer = createEnv({
     BETTERSTACK_API_TOKEN: process.env.BETTERSTACK_API_TOKEN,
     DATABASE_URL: process.env.DATABASE_URL,
     DIRECT_URL: process.env.DIRECT_URL,
+    GEMINI_PROXY: process.env.GEMINI_PROXY,
     GITHUB_APP_ID: process.env.GITHUB_APP_ID,
     GITHUB_APP_PRIVATE_KEY: process.env.GITHUB_APP_PRIVATE_KEY,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
@@ -47,9 +48,9 @@ const envServer = createEnv({
     ABLY_API_KEY: stringSchema,
     APP_VERSION: z._default(z.string(), "1.0.0"),
     BETTERSTACK_API_TOKEN: stringSchema,
-
     DATABASE_URL: z.url(),
     DIRECT_URL: z.url(),
+    GEMINI_PROXY: z.optional(z.url()),
     GITHUB_APP_ID: numericSchema,
     GITHUB_APP_PRIVATE_KEY: z
       .string()
@@ -91,6 +92,7 @@ export const UPLOADTHING_TOKEN = envServer.UPLOADTHING_TOKEN;
 export const GITHUB_APP_ID = envServer.GITHUB_APP_ID;
 export const PRISMA_FIELD_ENCRYPTION_KEY = envServer.PRISMA_FIELD_ENCRYPTION_KEY;
 export const LOG_SALT_SECRET = envServer.LOG_SALT_SECRET;
+export const GEMINI_PROXY = envServer.GEMINI_PROXY;
 const rawGithubAppPrivateKey = envServer.GITHUB_APP_PRIVATE_KEY;
 
 if (envServer.NODE_ENV !== "test" && typeof rawGithubAppPrivateKey !== "string") {

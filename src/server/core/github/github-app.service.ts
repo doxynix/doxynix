@@ -3,6 +3,7 @@ import type { InstallationTargetType, RepositorySelection } from "@prisma/client
 import { TRPCError } from "@trpc/server";
 
 import { isOctokitError } from "@/server/utils/handle-error";
+import { getNormalizedHash, getRawHash } from "@/server/utils/hash";
 
 import { appLogger } from "../app-logger";
 import type { DbClient, PrismaClientExtended } from "../db";
@@ -13,15 +14,16 @@ import { githubTokenService } from "./github-token.service";
 export const githubAppService = {
   async getInstallUrl(prisma: PrismaClientExtended, userId: number) {
     const state = crypto.randomBytes(32).toString("base64url");
+    const identifier = `github_install_${userId}`;
 
     await prisma.$transaction([
       prisma.verificationToken.deleteMany({
-        where: { identifier: `github_install_${userId}` },
+        where: { identifierHash: getNormalizedHash(identifier) },
       }),
       prisma.verificationToken.create({
         data: {
           expires: new Date(Date.now() + 10 * 60 * 1000),
-          identifier: `github_install_${userId}`,
+          identifier,
           token: state,
         },
       }),
@@ -37,7 +39,6 @@ export const githubAppService = {
     });
 
     const validToken = await githubTokenService.getValidToken(userId);
-
     const oauthStatus = validToken != null ? "valid" : "invalid";
 
     if (installations.length === 0 && validToken == null) {
@@ -57,7 +58,6 @@ export const githubAppService = {
       manageUrl: inst.htmlUrl,
     }));
 
-    // Skip OAuth calls when validToken is null (installation-only scenario)
     if (validToken == null) {
       return {
         installations: installationList,
@@ -69,7 +69,6 @@ export const githubAppService = {
 
     try {
       const repos = await getMyRepos(prisma, userId);
-
       return {
         installations: installationList,
         isConnected: true,
@@ -95,12 +94,13 @@ export const githubAppService = {
   ) {
     const instIdBigInt = BigInt(installationId);
     const inputInstIdNum = Number(installationId);
+    const identifier = `github_install_${userIdNum}`;
 
     const validState = await prisma.verificationToken.findFirst({
       where: {
         expires: { gt: new Date() },
-        identifier: `github_install_${userIdNum}`,
-        token: state,
+        identifierHash: getNormalizedHash(identifier),
+        tokenHash: getRawHash(state),
       },
     });
 
@@ -170,7 +170,10 @@ export const githubAppService = {
     try {
       await prisma.$transaction(async (tx) => {
         const consumed = await tx.verificationToken.deleteMany({
-          where: { identifier: `github_install_${userIdNum}`, token: state },
+          where: {
+            identifierHash: getNormalizedHash(identifier),
+            tokenHash: getRawHash(state),
+          },
         });
 
         if (consumed.count === 0) {

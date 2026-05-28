@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
 import { ArrowDown, Terminal as TerminalIcon } from "lucide-react";
 
+import { useAutoScroll } from "@/shared/hooks/use-auto-scroll";
 import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
@@ -25,16 +25,11 @@ export function AnalysisTerminal({
   maxHeight = "h-75",
   title = "Analysis Output",
 }: Readonly<Props>) {
-  const {
-    counts,
-    filter,
+  const { counts, filter, filteredLogs, search, setFilter } = useTerminalLogs(logs);
+
+  const { scrollRef, scrollToBottom, showScrollButton } = useAutoScroll<HTMLDivElement>([
     filteredLogs,
-    scrollRef,
-    scrollToBottom,
-    search,
-    setFilter,
-    showScrollButton,
-  } = useTerminalLogs(logs);
+  ]);
 
   const clipboardValue = filteredLogs
     .map((l) => `[${l.timestamp}] [${l.level.toUpperCase()}] ${l.message}`)
@@ -118,9 +113,9 @@ export function AnalysisTerminal({
         <AppButton
           size="sm"
           variant="secondary"
-          onClick={scrollToBottom}
+          onClick={() => scrollToBottom("smooth")}
           className={cn(
-            "absolute right-107.5 bottom-4 left-107.5 z-10 size-7 rounded-full transition-all",
+            "absolute bottom-4 left-1/2 z-10 size-7 -translate-x-1/2 rounded-full border shadow-md transition-all",
             showScrollButton
               ? "pointer-events-auto scale-100 opacity-100"
               : "pointer-events-none scale-90 opacity-0"

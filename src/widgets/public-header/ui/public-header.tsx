@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { publicHeaderMenu } from "@/shared/constants/navigation";
 import { Link } from "@/shared/i18n/routing";
+import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Sheet,
@@ -13,7 +14,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/shared/ui/core/sheet";
-import { Logo } from "@/shared/ui/icons/logo";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { PublicHeaderCtaSlot } from "./public-header-cta-slot";

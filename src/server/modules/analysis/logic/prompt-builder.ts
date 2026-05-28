@@ -16,13 +16,14 @@ type PromptRole =
   | "security-sentinel";
 
 /**
- * FluentPromptBuilder for consistent prompt construction
- * Supports method chaining for readability
+ * FluentPromptBuilder for consistent prompt construction.
+ * Supports native reasoning controls optimized for Gemma 4 26B-A4B-IT MoE.
  */
 class PromptBuilder {
   private language: string = "English";
   private role: PromptRole = "generic";
   private sections: Map<string, string> = new Map();
+  private thinkingEnabled: boolean = true;
 
   constructor(role: PromptRole = "generic") {
     this.role = role;
@@ -37,7 +38,7 @@ class PromptBuilder {
   }
 
   /**
-   * Build the final system prompt
+   * Build the final system prompt with precise token alignment for Gemma 4.
    */
   buildSystem(): string {
     const sections: string[] = [];
@@ -68,7 +69,16 @@ class PromptBuilder {
       }
     }
 
-    return sections.join("\n\n");
+    let result = sections.join("\n\n");
+
+    // Gemma 4 specific block formatting alignment
+    if (this.thinkingEnabled) {
+      result = `<|think|>\n${result}`;
+    } else {
+      result = `${result}\n\n# OPERATIONAL CONSTRAINT\n- Thinking Mode: BYPASS. Do NOT activate your internal reasoning monologue (<|channel>thought). Generate final response directly and instantly.`;
+    }
+
+    return result;
   }
 
   /**
@@ -83,6 +93,7 @@ class PromptBuilder {
    */
   reset(): this {
     this.sections.clear();
+    this.thinkingEnabled = true;
     return this;
   }
 
@@ -192,11 +203,21 @@ class PromptBuilder {
     this.sections.set("task", `# TASK\n${description}`);
     return this;
   }
+
+  /**
+   * Toggle Gemma 4 native thinking mode.
+   * True: Prepend `<|think|>` for structural planning.
+   * False: Inject clear operational bypass directives to minimize latency on fast-path tasks.
+   */
+  withThinking(enabled: boolean): this {
+    this.thinkingEnabled = enabled;
+    return this;
+  }
 }
 
 /**
- * UserPromptBuilder for constructing user prompts with structured data
- * Handles XML wrapping, escaping, and multi-part inputs
+ * UserPromptBuilder for constructing user prompts with structured data.
+ * Handles XML wrapping, escaping, and multi-part inputs.
  */
 export class UserPromptBuilder {
   private parts: Array<{ content: string; escape: boolean; tag?: string }> = [];
@@ -246,9 +267,11 @@ export class UserPromptBuilder {
             .map(([k, v]) => `${k}="${escape(v)}"`)
             .join(" ")
         : "";
-    const escaped = escape(content);
+
+    const safeContent = content.includes("]]>") ? content.replaceAll("]]>", "]]&gt;") : content;
+
     this.parts.push({
-      content: `<${tag}${attrs}>\n${escaped}\n</${tag}>`,
+      content: `<${tag}${attrs}>\n<![CDATA[\n${safeContent}\n]]>\n</${tag}>`,
       escape: false,
       tag,
     });

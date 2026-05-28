@@ -1,6 +1,8 @@
 import type { DocType, Repo } from "@prisma/client";
 
-import { taskLogger } from "@/server/utils/task-logger";
+import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
+import { llmLimiter } from "@/server/utils/llm-limiter";
+
 import type { RepositoryFact, RepositoryFinding } from "@/server/utils/types";
 
 import type { AIResult } from "../engine/core/analysis-result.schemas";
@@ -43,7 +45,10 @@ export async function runAiPipeline(
   taskLogger.log("Initializing AI Multi-Agent Pipeline...");
 
   // Stage 1: Prompt injection detection (Цензор)
-  const sentinelStatus = await executeSentinelPhase(instructions, analysisId);
+  const sentinelStatus = await llmLimiter.schedule(
+    { id: `${analysisId}-sentinel`, weight: 5000 },
+    () => executeSentinelPhase(instructions, analysisId)
+  );
 
   if (sentinelStatus === "UNSAFE") {
     taskLogger.log("Security Sentinel: Prompt injection detected! Terminating pipeline.");
@@ -53,14 +58,8 @@ export async function runAiPipeline(
 
   // Stage 2: Project mapping
   taskLogger.info("Project Mapper: Scanning topology and module boundaries...");
-  const projectMap = await executeMapperPhase(
-    validFiles,
-    hardMetrics,
-    evidence,
-    analysisId,
-    userId,
-    repoId,
-    branch
+  const projectMap = await llmLimiter.schedule({ id: `${analysisId}-mapper`, weight: 80_000 }, () =>
+    executeMapperPhase(validFiles, hardMetrics, evidence, analysisId, userId, repoId, branch)
   );
   taskLogger.success(`Project Mapper: Identified ${projectMap.modules.length} core modules`);
 
@@ -82,17 +81,18 @@ export async function runAiPipeline(
   );
 
   taskLogger.log("Invoking Lead Architect Agent...");
-  const result = await executeArchitectPhase(
-    validFiles,
-    architectDigest,
-    analysisId,
-    instructions,
-    sentinelStatus,
-    language,
-    userId,
-    repoId,
-    branch
+
+  const result = await llmLimiter.schedule({ id: `${analysisId}-architect`, weight: 150_000 }, () =>
+    executeArchitectPhase(
+      validFiles,
+      architectDigest,
+      analysisId,
+      instructions,
+      sentinelStatus,
+      language
+    )
   );
+
   taskLogger.success("Lead Architect: Analysis complete. Intelligence report generated.");
   return result;
 }
