@@ -29,7 +29,7 @@ overrides:
   systeminformation@<5.27.14: ^5.27.14
   systeminformation@<5.30.8: ^5.30.8
   systeminformation@<=5.30.7: ^5.30.8
-  tmp@<=0.2.3: 0.2.5
+  tmp@<=0.2.3: 0.2.6
 
 importers:
 
@@ -12262,6 +12262,7 @@ packages:
   recharts@2.15.4:
     resolution: {integrity: sha512-UT/q6fwS3c1dHbXv2uFgYJ9BMFHu3fwnd7AYZaEQhXuYQ4hgsxLvsUXzGdKeZrW5xopzDCvuA2N41WJ88I7zIw==}
     engines: {node: '>=14'}
+    deprecated: 1.x and 2.x branches are no longer active. Bump to Recharts v3 to receive latest features and bugfixes. See https://github.com/recharts/recharts/wiki/3.0-migration-guide
     peerDependencies:
       react: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -13312,8 +13313,8 @@ packages:
   tldts-icann@6.1.86:
     resolution: {integrity: sha512-NFxmRT2lAEMcCOBgeZ0NuM0zsK/xgmNajnY6n4S1mwAKocft2s2ise1O3nQxrH3c+uY6hgHUV9GGNVp7tUE4Sg==}
 
-  tmp@0.2.5:
-    resolution: {integrity: sha512-voyz6MApa1rQGUxT3E+BK7/ROe8itEx7vD8/HEvt4xwXucvQ5G5oeEiHkmHZJuBO21RpOf+YYm9MOivj709jow==}
+  tmp@0.2.6:
+    resolution: {integrity: sha512-5sJPdPjfI5Kx+qbrDesxkglRBxW//g7hCsqspEjwkewGvBMGIKMOTKzLt1hFVJzyadba3lDUN20O9qhvbQUSTA==}
     engines: {node: '>=14.14'}
 
   to-regex-range@5.0.1:
@@ -16458,7 +16459,7 @@ snapshots:
       lighthouse-logger: 1.2.0
       open: 7.4.2
       proxy-agent: 6.5.0
-      tmp: 0.2.5
+      tmp: 0.2.6
       uuid: 8.3.2
       yargs: 15.4.1
       yargs-parser: 13.1.2
@@ -17662,7 +17663,7 @@ snapshots:
       temp-write: 4.0.0
       tempy: 1.0.1
       terminal-link: 2.1.1
-      tmp: 0.2.5
+      tmp: 0.2.6
       ts-pattern: 4.3.0
     transitivePeerDependencies:
       - encoding
@@ -23555,7 +23556,7 @@ snapshots:
     dependencies:
       chardet: 0.7.0
       iconv-lite: 0.4.24
-      tmp: 0.2.5
+      tmp: 0.2.6
 
   extract-zip@2.0.1:
     dependencies:
@@ -28855,7 +28856,7 @@ snapshots:
     dependencies:
       tldts-core: 6.1.86
 
-  tmp@0.2.5: {}
+  tmp@0.2.6: {}
 
   to-regex-range@5.0.1:
     dependencies:
