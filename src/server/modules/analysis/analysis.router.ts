@@ -849,8 +849,8 @@ export const analysisRouter = createTRPCRouter({
           version: commitSha ?? "manual",
           ...(internalAnalysisId != null
             ? {
-              analysis: { connect: { id: internalAnalysisId } },
-            }
+                analysis: { connect: { id: internalAnalysisId } },
+              }
             : {}),
         },
       });
