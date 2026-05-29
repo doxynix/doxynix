@@ -282,7 +282,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
         });
 
         expect(globalFetchMock).toHaveBeenCalledWith(
-          "https://example.com",
+          "https://example.com/",
           expect.objectContaining({
             headers: {
               "x-api-key": "test",
@@ -304,7 +304,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
         const res = await POST(req);
         expect(res.status).toBe(200);
         expect(globalFetchMock).toHaveBeenCalledWith(
-          "https://example.com",
+          "https://example.com/",
           expect.objectContaining({
             headers: {},
           })
@@ -332,7 +332,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
         });
 
         expect(globalFetchMock).toHaveBeenCalledWith(
-          "https://example.com",
+          "https://example.com/",
           expect.objectContaining({
             body: JSON.stringify({ foo: "bar" }),
             method: "POST",
@@ -355,7 +355,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
         await POST(req);
 
         expect(globalFetchMock).toHaveBeenCalledWith(
-          "https://example.com",
+          "https://example.com/",
           expect.objectContaining({
             body: rawBody,
             method: "POST",
@@ -376,7 +376,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
         await POST(req);
 
         expect(globalFetchMock).toHaveBeenCalledWith(
-          "https://example.com",
+          "https://example.com/",
           expect.objectContaining({
             body: undefined,
             method: "POST",
@@ -397,7 +397,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
         await POST(req);
 
         expect(globalFetchMock).toHaveBeenCalledWith(
-          "https://example.com",
+          "https://example.com/",
           expect.objectContaining({
             body: undefined,
             method: "HEAD",
@@ -418,7 +418,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
         await POST(req);
 
         expect(globalFetchMock).toHaveBeenCalledWith(
-          "https://example.com",
+          "https://example.com/",
           expect.objectContaining({
             body: undefined,
             method: "GET",
@@ -440,7 +440,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
           await POST(req);
 
           expect(globalFetchMock).toHaveBeenCalledWith(
-            "https://example.com",
+            "https://example.com/",
             expect.objectContaining({
               body: JSON.stringify({ payload: 123 }),
               method,
