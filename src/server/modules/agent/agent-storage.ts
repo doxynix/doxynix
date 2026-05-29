@@ -86,7 +86,10 @@ export async function processMessageParts(parts: MessagePart[]): Promise<Message
             url: uploadResult.data.ufsUrl,
           });
         } else {
-          processedParts.push(part);
+          appLogger.warn({
+            filename: part.filename,
+            msg: "UploadThing upload returned no data, skipping attachment",
+          });
         }
       } catch (error) {
         appLogger.error({

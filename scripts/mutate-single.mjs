@@ -13,9 +13,17 @@ if (!mutatePath || !testPath) {
 
 const args = ["run", "--inPlace", "--mutate", mutatePath, "--testFiles", testPath];
 
-const strykerProcess = spawn("stryker", args, {
+const isWindows = process.platform === "win32";
+const command = isWindows ? "stryker.cmd" : "stryker";
+
+const strykerProcess = spawn(command, args, {
   stdio: "inherit",
-  shell: true,
+  shell: false,
+});
+
+strykerProcess.on("error", (err) => {
+  console.error("Failed to start Stryker process:", err.message);
+  process.exit(1);
 });
 
 strykerProcess.on("exit", (code) => {

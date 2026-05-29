@@ -87,11 +87,13 @@ export async function POST(req: Request) {
       return new NextResponse("Missing url or method parameters", { status: 400 });
     }
 
+    let validatedUrl: string;
     try {
       const parsedUrl = new URL(url);
       if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
         return new NextResponse("Forbidden: Unsafe protocol", { status: 403 });
       }
+      validatedUrl = parsedUrl.toString();
     } catch {
       return new NextResponse("Invalid URL format", { status: 400 });
     }
@@ -113,7 +115,7 @@ export async function POST(req: Request) {
           : JSON.stringify(body)
         : undefined;
 
-    const response = await fetch(url, {
+    const response = await fetch(validatedUrl, {
       body: requestBody,
       headers: filteredHeaders,
       method,

@@ -1,11 +1,18 @@
+import type { ToolExecutionOptions } from "ai";
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { z } from "zod";
 
 import { APP_VERSION } from "@/shared/constants/env.server";
 
+import { appLogger } from "@/server/core/app-logger";
 import { AGENT_SYSTEM_PROMPT } from "@/server/modules/agent/agent.prompts";
 import { getAgentTools } from "@/server/modules/agent/agent.tools";
 import { verifyAndUseApiKey } from "@/server/utils/verify-and-use-api-key";
+
+type GenericExecuteFn = (
+  args: Record<string, unknown>,
+  context: ToolExecutionOptions
+) => Promise<unknown>;
 
 const handler = createMcpHandler(
   (server) => {
@@ -33,7 +40,16 @@ const handler = createMcpHandler(
         },
         async (args) => {
           try {
-            const result = await executeFn(args as any, {} as any);
+            const parsedArgs = inputSchema.parse(args);
+
+            const dummyContext: ToolExecutionOptions = {
+              messages: [],
+              toolCallId: `mcp-${name}-${Date.now()}`,
+            };
+
+            const safeExecute = executeFn as unknown as GenericExecuteFn;
+            const result = await safeExecute(parsedArgs as Record<string, unknown>, dummyContext);
+
             return {
               content: [
                 {
@@ -43,10 +59,18 @@ const handler = createMcpHandler(
               ],
             };
           } catch (error) {
+            const err = error instanceof Error ? error : new Error(String(error));
+
+            appLogger.error({
+              error: { message: err.message, stack: err.stack },
+              msg: "MCP Tool execution failed",
+              tool: name,
+            });
+
             return {
               content: [
                 {
-                  text: error instanceof Error ? error.message : String(error),
+                  text: "An internal server error occurred while executing this tool.",
                   type: "text",
                 },
               ],
@@ -89,7 +113,9 @@ const withMcpAuthHandler = withMcpAuth(
       token: bearer,
     };
   },
-  { required: true }
+  {
+    required: true,
+  }
 );
 
 export { withMcpAuthHandler as GET, withMcpAuthHandler as POST };
