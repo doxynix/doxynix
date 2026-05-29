@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/doxynix/doxynix/compare/v2.1.0...v2.2.0) (2026-05-29)
+
+
+### Features
+
+* внедрение агента dxnx (wip) ([#1462](https://github.com/doxynix/doxynix/issues/1462)) ([5d51771](https://github.com/doxynix/doxynix/commit/5d517717272937610eedad5dff4fda1c11dda7d0))
+
 ## [2.1.0](https://github.com/doxynix/doxynix/compare/v2.0.1...v2.1.0) (2026-05-23)
 
 
