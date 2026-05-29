@@ -15,7 +15,11 @@ const googleState = vi.hoisted(() => ({
     modelId: modelName,
   })),
 }));
-vi.mock("@ai-sdk/google", () => ({ google: googleState.google }));
+
+vi.mock("@ai-sdk/google", () => ({
+  createGoogleGenerativeAI: vi.fn(() => vi.fn()),
+  google: googleState.google,
+}));
 
 vi.mock("ai", async (importOriginal) => {
   const actual: any = await importOriginal();
@@ -75,7 +79,7 @@ describe("callWithFallback", () => {
     });
 
     expect(result).toBe("final text");
-    expect(vi.mocked(streamText)).toHaveBeenCalledOnce(); // ПРОВЕРЯЕМ streamText
+    expect(vi.mocked(streamText)).toHaveBeenCalledOnce();
   });
 
   it("should fallback to next model when previous model throws", async () => {
@@ -95,7 +99,7 @@ describe("callWithFallback", () => {
     });
 
     expect(result).toBe("fallback text");
-    expect(vi.mocked(streamText)).toHaveBeenCalledTimes(2); // ПРОВЕРЯЕМ streamText
+    expect(vi.mocked(streamText)).toHaveBeenCalledTimes(2);
   });
 
   it("should return structured output when outputSchema is provided", async () => {
@@ -112,7 +116,7 @@ describe("callWithFallback", () => {
     });
 
     expect(result).toEqual({ score: 95 });
-    expect(vi.mocked(generateText)).toHaveBeenCalledOnce(); // ПРОВЕРЯЕМ generateText
+    expect(vi.mocked(generateText)).toHaveBeenCalledOnce();
   });
 
   it("should throw default all models failed error when model throws undefined", async () => {

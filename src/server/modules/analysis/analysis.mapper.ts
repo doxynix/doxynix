@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { sumBy } from "es-toolkit";
 import { normalize } from "pathe";
-import z from "zod";
+import { z } from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { getLanguageColor } from "@/server/utils/language-metadata";

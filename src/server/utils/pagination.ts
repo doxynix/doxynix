@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "zod";
 
 export const PaginationMetaSchema = z.object({
   currentPage: z.number().int().min(1),

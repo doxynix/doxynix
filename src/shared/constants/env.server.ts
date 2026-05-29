@@ -16,10 +16,16 @@ const envServer = createEnv({
 
   runtimeEnv: {
     ABLY_API_KEY: process.env.ABLY_API_KEY,
+    API_KEY_CHECKSUM_SECRET: process.env.API_KEY_CHECKSUM_SECRET,
+    API_KEY_PEPPER: process.env.API_KEY_PEPPER,
     APP_VERSION: process.env.APP_VERSION,
     BETTERSTACK_API_TOKEN: process.env.BETTERSTACK_API_TOKEN,
+    CF_ACCOUNT_ID: process.env.CF_ACCOUNT_ID,
+    CF_GATEWAY_ID: process.env.CF_GATEWAY_ID,
+    CF_GATEWAY_TOKEN: process.env.CF_GATEWAY_TOKEN,
     DATABASE_URL: process.env.DATABASE_URL,
     DIRECT_URL: process.env.DIRECT_URL,
+    GEMINI_PROXY: process.env.GEMINI_PROXY,
     GITHUB_APP_ID: process.env.GITHUB_APP_ID,
     GITHUB_APP_PRIVATE_KEY: process.env.GITHUB_APP_PRIVATE_KEY,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
@@ -29,6 +35,7 @@ const envServer = createEnv({
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     LOG_SALT_SECRET: process.env.LOG_SALT_SECRET,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
@@ -45,11 +52,16 @@ const envServer = createEnv({
 
   server: {
     ABLY_API_KEY: stringSchema,
+    API_KEY_CHECKSUM_SECRET: stringSchema,
+    API_KEY_PEPPER: stringSchema,
     APP_VERSION: z._default(z.string(), "1.0.0"),
     BETTERSTACK_API_TOKEN: stringSchema,
-
+    CF_ACCOUNT_ID: stringSchema,
+    CF_GATEWAY_ID: stringSchema,
+    CF_GATEWAY_TOKEN: stringSchema,
     DATABASE_URL: z.url(),
     DIRECT_URL: z.url(),
+    GEMINI_PROXY: z.optional(z.url()),
     GITHUB_APP_ID: numericSchema,
     GITHUB_APP_PRIVATE_KEY: z
       .string()
@@ -61,6 +73,7 @@ const envServer = createEnv({
     GITHUB_WEBHOOK_SECRET: stringSchema,
     GOOGLE_CLIENT_ID: stringSchema,
     GOOGLE_CLIENT_SECRET: stringSchema,
+    GOOGLE_GENERATIVE_AI_API_KEY: stringSchema,
     GROQ_API_KEY: stringSchema,
     LOG_SALT_SECRET: stringSchema,
     NEXTAUTH_SECRET: stringSchema,
@@ -91,6 +104,13 @@ export const UPLOADTHING_TOKEN = envServer.UPLOADTHING_TOKEN;
 export const GITHUB_APP_ID = envServer.GITHUB_APP_ID;
 export const PRISMA_FIELD_ENCRYPTION_KEY = envServer.PRISMA_FIELD_ENCRYPTION_KEY;
 export const LOG_SALT_SECRET = envServer.LOG_SALT_SECRET;
+export const GEMINI_PROXY = envServer.GEMINI_PROXY;
+export const GOOGLE_GENERATIVE_AI_API_KEY = envServer.GOOGLE_GENERATIVE_AI_API_KEY;
+export const API_KEY_PEPPER = envServer.API_KEY_PEPPER;
+export const API_KEY_CHECKSUM_SECRET = envServer.API_KEY_CHECKSUM_SECRET;
+export const CF_GATEWAY_TOKEN = envServer.CF_GATEWAY_TOKEN;
+export const CF_GATEWAY_ID = envServer.CF_GATEWAY_ID;
+export const CF_ACCOUNT_ID = envServer.CF_ACCOUNT_ID;
 const rawGithubAppPrivateKey = envServer.GITHUB_APP_PRIVATE_KEY;
 
 if (envServer.NODE_ENV !== "test" && typeof rawGithubAppPrivateKey !== "string") {

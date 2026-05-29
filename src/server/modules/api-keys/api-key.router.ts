@@ -1,6 +1,5 @@
-import crypto from "node:crypto";
 import { TRPCError } from "@trpc/server";
-import z from "zod";
+import { z } from "zod";
 
 import { ApiKeySchema } from "@/shared/api-contracts";
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
@@ -8,8 +7,7 @@ import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 import { OpenApiErrorResponses } from "@/server/core/trpc/constants";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { handlePrismaError } from "@/server/utils/handle-error";
-
-const BRAND_PREFIX = "dxnx_";
+import { extractPayloadFromKey, generateApiKey, getApiKeyHash } from "@/server/utils/hash";
 
 export const apiKeyRouter = createTRPCRouter({
   create: protectedProcedure
@@ -27,10 +25,20 @@ export const apiKeyRouter = createTRPCRouter({
     .input(CreateApiKeySchema)
     .output(z.object({ key: z.string(), message: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const randomPart = crypto.randomBytes(32).toString("base64url");
-      const fullKey = `${BRAND_PREFIX}${randomPart}`;
-      const displayPrefix = `${BRAND_PREFIX}${randomPart.slice(0, 6)}`;
-      const hashedKey = crypto.createHash("sha256").update(fullKey).digest("hex");
+      const fullKey = generateApiKey();
+
+      const displayPrefix = fullKey.slice(0, 11);
+
+      const payload = extractPayloadFromKey(fullKey);
+
+      if (payload == null) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to process and validate generated API key integrity.",
+        });
+      }
+
+      const hashedKey = getApiKeyHash(payload);
 
       try {
         await ctx.db.apiKey.create({

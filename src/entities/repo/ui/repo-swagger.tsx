@@ -18,7 +18,7 @@ export function RepoSwagger({ spec }: Readonly<{ spec: string }>) {
     content: spec,
     defaultOpenAllTags: true,
     hideDarkModeToggle: true,
-    hideTestRequestButton: true,
+    // hideTestRequestButton: true,
     isEditable: false,
     layout: "modern",
     mcp: {

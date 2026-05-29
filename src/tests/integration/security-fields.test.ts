@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { prisma } from "@/server/core/db";
+import { getRawHash } from "@/server/utils/hash";
 
 import { cleanupDatabase, createAnon, createTestUser, expectDenied } from "../helpers";
 
@@ -22,8 +23,9 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
       data: { expires: new Date(), sessionToken: "SESS_SECRET", userId: alice.user.id },
     });
     const fetchedSession = await alice.db.session.findUnique({
-      where: { sessionToken: "SESS_SECRET" },
+      where: { sessionTokenHash: getRawHash("SESS_SECRET") },
     });
+    expect(fetchedSession).not.toBeNull();
     expect(fetchedSession).not.toHaveProperty("sessionToken");
 
     await prisma.account.create({

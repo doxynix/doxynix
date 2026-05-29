@@ -1,19 +1,20 @@
-import { google, type GoogleLanguageModelOptions } from "@ai-sdk/google";
+import { type GoogleLanguageModelOptions } from "@ai-sdk/google";
 import { metadata } from "@trigger.dev/sdk";
 import * as ai from "ai";
 import { wrapAISDK } from "langsmith/experimental/vercel";
-import type z from "zod";
+import type { z } from "zod";
 
 import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
 
 import { appLogger } from "@/server/core/app-logger";
+import { google } from "@/server/core/google";
 import { isSchemaMismatchError } from "@/server/modules/analysis/engine/core/ai-result-normalize";
 import {
   LLM_TEMPERATURE_STRATEGY,
   type LLMTaskType,
 } from "@/server/modules/analysis/engine/core/scoring-constants";
 
-import { taskLogger } from "./task-logger";
+import { taskLogger } from "../modules/analysis/logic/task-logger";
 
 const tracedAi = wrapAISDK(ai);
 

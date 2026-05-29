@@ -3,7 +3,7 @@ import { normalize } from "pathe";
 import simpleGit from "simple-git";
 
 import { appLogger } from "@/server/core/app-logger";
-import { taskLogger } from "@/server/utils/task-logger";
+import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import type { ChurnHotspot, TeamRole } from "@/server/utils/types";
 
 import type { ChangeCouplingRef } from "../core/discovery.types";

@@ -1,9 +1,9 @@
 import { NotifyType } from "@prisma/client";
-import z from "zod";
+import { z } from "zod";
 
 import { PaginationSchema } from "@/server/utils/pagination";
 
-export type ValidatePairType = { repoName?: string; repoOwner?: string };
+type ValidatePairType = { repoName?: string; repoOwner?: string };
 
 const repoIdentityFields = {
   repoName: z.string().trim().min(1).max(255).optional(),

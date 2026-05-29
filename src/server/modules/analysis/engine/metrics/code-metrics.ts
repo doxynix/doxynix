@@ -6,9 +6,9 @@ import { normalize } from "pathe";
 import sloc, { type Extension } from "sloc";
 
 import { appLogger } from "@/server/core/app-logger";
+import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import { normalizeLanguageName } from "@/server/utils/language-metadata";
 import { getFileExtension } from "@/server/utils/path-operations";
-import { taskLogger } from "@/server/utils/task-logger";
 
 import { calculateDocDensity } from "../core/common";
 import type {

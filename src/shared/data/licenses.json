@@ -280,6 +280,61 @@
     ]
   },
   {
+    "author": "Vercel",
+    "avatar": "https://github.com/vercel.png?size=96",
+    "authorLink": "https://github.com/vercel",
+    "packages": [
+      {
+        "name": "@next/bundle-analyzer",
+        "license": "MIT"
+      },
+      {
+        "name": "@vercel/analytics",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-config-next",
+        "license": "MIT"
+      },
+      {
+        "name": "next",
+        "license": "MIT"
+      },
+      {
+        "name": "@ai-sdk/google",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@ai-sdk/groq",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@ai-sdk/openai",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@ai-sdk/react",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@vercel/edge-config",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@vercel/speed-insights",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@vercel/toolbar",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "ai",
+        "license": "Apache-2.0"
+      }
+    ]
+  },
+  {
     "author": "CodeMirror",
     "avatar": "https://github.com/codemirror.png?size=96",
     "authorLink": "https://github.com/codemirror",
@@ -370,53 +425,6 @@
       {
         "name": "react-codemirror-merge",
         "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "Vercel",
-    "avatar": "https://github.com/vercel.png?size=96",
-    "authorLink": "https://github.com/vercel",
-    "packages": [
-      {
-        "name": "@next/bundle-analyzer",
-        "license": "MIT"
-      },
-      {
-        "name": "@vercel/analytics",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-config-next",
-        "license": "MIT"
-      },
-      {
-        "name": "next",
-        "license": "MIT"
-      },
-      {
-        "name": "@ai-sdk/google",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "@ai-sdk/groq",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "@ai-sdk/openai",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "@vercel/speed-insights",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "@vercel/toolbar",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "ai",
-        "license": "Apache-2.0"
       }
     ]
   },
@@ -533,6 +541,10 @@
       },
       {
         "name": "react-dom",
+        "license": "MIT"
+      },
+      {
+        "name": "react-markdown",
         "license": "MIT"
       },
       {
@@ -738,6 +750,25 @@
     ]
   },
   {
+    "author": "Microsoft",
+    "avatar": "https://github.com/microsoft.png?size=96",
+    "authorLink": "https://github.com/microsoft",
+    "packages": [
+      {
+        "name": "typescript-coverage-report",
+        "license": "MIT"
+      },
+      {
+        "name": "@playwright/test",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "typescript",
+        "license": "Apache-2.0"
+      }
+    ]
+  },
+  {
     "author": "Resend",
     "avatar": "https://github.com/resend.png?size=96",
     "authorLink": "https://github.com/resend",
@@ -882,6 +913,21 @@
     ]
   },
   {
+    "author": "LenML",
+    "avatar": "https://github.com/lenML.png?size=96",
+    "authorLink": "https://github.com/lenML",
+    "packages": [
+      {
+        "name": "@lenml/tokenizer-gemma2",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@lenml/tokenizers",
+        "license": "Apache-2.0"
+      }
+    ]
+  },
+  {
     "author": "Mermaid JS",
     "avatar": "https://github.com/mermaid-js.png?size=96",
     "authorLink": "https://github.com/mermaid-js",
@@ -897,21 +943,6 @@
     ]
   },
   {
-    "author": "Microsoft",
-    "avatar": "https://github.com/microsoft.png?size=96",
-    "authorLink": "https://github.com/microsoft",
-    "packages": [
-      {
-        "name": "@playwright/test",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "typescript",
-        "license": "Apache-2.0"
-      }
-    ]
-  },
-  {
     "author": "NextAuth.js",
     "avatar": "https://github.com/nextauthjs.png?size=96",
     "authorLink": "https://github.com/nextauthjs",
@@ -923,6 +954,21 @@
       {
         "name": "next-auth",
         "license": "ISC"
+      }
+    ]
+  },
+  {
+    "author": "Open Source Community",
+    "avatar": null,
+    "authorLink": "https://es-toolkit.dev",
+    "packages": [
+      {
+        "name": "es-toolkit",
+        "license": "MIT"
+      },
+      {
+        "name": "undici",
+        "license": "MIT"
       }
     ]
   },
@@ -1224,6 +1270,17 @@
     ]
   },
   {
+    "author": "Christopher Jeffrey",
+    "avatar": null,
+    "authorLink": "https://marked.js.org",
+    "packages": [
+      {
+        "name": "marked",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Colin McDonnell",
     "avatar": "https://github.com/colinmcdonnell.png?size=96",
     "authorLink": "https://github.com/colinmcdonnell",
@@ -1296,17 +1353,6 @@
     "packages": [
       {
         "name": "browser-image-compression",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "Dqbd",
-    "avatar": "https://github.com/dqbd.png?size=96",
-    "authorLink": "https://github.com/dqbd",
-    "packages": [
-      {
-        "name": "js-tiktoken",
         "license": "MIT"
       }
     ]
@@ -1516,6 +1562,17 @@
     "packages": [
       {
         "name": "disposable-email-domains",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Jack Lukic",
+    "avatar": null,
+    "authorLink": "http://www.semantic-ui.com",
+    "packages": [
+      {
+        "name": "semantic-ui-css",
         "license": "MIT"
       }
     ]
@@ -1862,17 +1919,6 @@
     ]
   },
   {
-    "author": "Open Source Community",
-    "avatar": null,
-    "authorLink": "https://es-toolkit.dev",
-    "packages": [
-      {
-        "name": "es-toolkit",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
     "author": "Pgilad",
     "avatar": "https://github.com/pgilad.png?size=96",
     "authorLink": "https://github.com/pgilad",
@@ -1961,6 +2007,17 @@
     ]
   },
   {
+    "author": "Semantic-Org",
+    "avatar": "https://github.com/Semantic-Org.png?size=96",
+    "authorLink": "https://github.com/Semantic-Org",
+    "packages": [
+      {
+        "name": "semantic-ui-react",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Sentry",
     "avatar": "https://github.com/getsentry.png?size=96",
     "authorLink": "https://github.com/getsentry",
@@ -1978,17 +2035,6 @@
     "packages": [
       {
         "name": "parse-diff",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "SGrondin",
-    "avatar": "https://github.com/SGrondin.png?size=96",
-    "authorLink": "https://github.com/SGrondin",
-    "packages": [
-      {
-        "name": "bottleneck",
         "license": "MIT"
       }
     ]

@@ -90,7 +90,9 @@ export const PATH_PATTERNS = {
     "**/*.{yml,yaml,toml,ini,conf,properties,env,env.local,env.production,env.example}",
   ],
   DOCS: [
-    "**/{docs,doc,documentation,example,examples,sample,samples,guides,website,wiki,manual}/**",
+    "**/{docs,doc,documentation,examples,samples,guides,website,wiki,manual}/**",
+    "**/example/**",
+    "**/sample/**",
     "**/{README,CHANGELOG,CONTRIBUTING,CODE_OF_CONDUCT,SECURITY,LICENSE,AUTHORS,HISTORY}*",
     "**/*.{md,txt,rst,adoc}",
   ],
@@ -792,4 +794,20 @@ export const FRAMEWORK_CATALOG: FrameworkCatalogEntry[] = [
     category: "testing",
     name: "Testing Frameworks",
   },
+
+  // ==========================================
+  // 19. ANDROID / KOTLIN MOBILE ECOSYSTEM
+  // ==========================================
+  { aliases: ["androidx.compose", "compose"], category: "ui", name: "Jetpack Compose" },
+  { aliases: ["dagger.hilt", "hilt"], category: "framework", name: "Hilt DI" },
+  { aliases: ["org.webrtc", "webrtc"], category: "api", name: "WebRTC" },
+  { aliases: ["retrofit2", "retrofit"], category: "framework", name: "Retrofit" },
+  { aliases: ["okhttp3", "okhttp"], category: "framework", name: "OkHttp" },
+  {
+    aliases: ["kotlinx.coroutines", "coroutines"],
+    category: "framework",
+    name: "Kotlin Coroutines",
+  },
+  { aliases: ["kotlinx.serialization"], category: "framework", name: "Kotlinx Serialization" },
+  { aliases: ["androidx.datastore", "datastore"], category: "database", name: "Jetpack DataStore" },
 ];

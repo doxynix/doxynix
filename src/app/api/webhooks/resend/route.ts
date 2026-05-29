@@ -9,6 +9,7 @@ import { RESEND_WEBHOOK_SECRET } from "@/shared/constants/env.server";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
+import { getNormalizedHash } from "@/server/utils/hash";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 
 const resendWebhookSchema = z
@@ -154,7 +155,7 @@ export async function POST(req: Request) {
           prisma.bannedEmail.upsert({
             create: { email, reason }, // NOTE: emailHash заполняется автоматически расширением prisma-field-encryption. Передаем пустую строку, чтобы удовлетворить строгие типы Prisma в методе upsert.
             update: { reason },
-            where: { email },
+            where: { emailHash: getNormalizedHash(email) },
           }),
           prisma.webhookDelivery.update({
             data: { error: null, status: "SUCCESS" },

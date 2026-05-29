@@ -6,9 +6,9 @@ import { Book, SlashIcon } from "lucide-react";
 import { LOCALES, type Locale } from "@/shared/constants/locales";
 import { Link } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
+import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { AppButton } from "@/shared/ui/core/button";
 import { SidebarTrigger } from "@/shared/ui/core/sidebar";
-import { Logo } from "@/shared/ui/icons/logo";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { ThemeToggle } from "@/shared/ui/kit/theme-toggle";
@@ -16,6 +16,7 @@ import { ThemeToggle } from "@/shared/ui/kit/theme-toggle";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoDetailsTabs } from "@/entities/repo/ui/repo-details-tabs";
 
+import { AgentButton } from "./agent-button";
 import { AppCommandMenu } from "./app-command-menu";
 import { NotificationsNav } from "./notifications-nav";
 import { UserNav } from "./user-nav";
@@ -73,6 +74,7 @@ export function AppHeader() {
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
+          <AgentButton />
           <AppTooltip content="Work in Progress">
             <span className="text-warning bg-warning/20 cursor-default rounded p-1 py-0.5 text-xs">
               BETA

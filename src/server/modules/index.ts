@@ -1,4 +1,5 @@
 import { createTRPCRouter } from "../core/trpc/init";
+import { agentChatRouter } from "./agent/agent.router";
 import { analysisRouter } from "./analysis/analysis.router";
 import { analyticsRouter } from "./analytics/analytics.router";
 import { apiKeyRouter } from "./api-keys/api-key.router";
@@ -11,6 +12,7 @@ import { healthRouter } from "./system/health.router";
 import { userRouter } from "./users/user.router";
 
 export const appRouter = createTRPCRouter({
+  agent: agentChatRouter,
   analysis: analysisRouter,
   analytics: analyticsRouter,
   apikey: apiKeyRouter,

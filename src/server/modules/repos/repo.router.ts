@@ -1,5 +1,5 @@
 import type { Prisma } from "@prisma/client";
-import z from "zod";
+import { z } from "zod";
 
 import { RepoSchema, StatusSchema } from "@/shared/api-contracts";
 import { CreateRepoSchema } from "@/shared/api/schemas/repo";

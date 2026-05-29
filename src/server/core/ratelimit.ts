@@ -11,4 +11,5 @@ export const emailSignInLimiter = new Ratelimit({
   limiter: Ratelimit.slidingWindow(3, "10 m"),
   prefix: "@doxynix/ratelimit/email",
   redis: redisClient,
+  timeout: 1500,
 });

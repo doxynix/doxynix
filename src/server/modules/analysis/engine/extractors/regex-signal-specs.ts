@@ -1,5 +1,3 @@
-/* eslint-disable sonarjs/slow-regex */
-
 import { getFileExtension, getFileName } from "@/server/utils/path-operations";
 
 import type { RepositoryFile, RouteRef, SymbolKind } from "../core/discovery.types";

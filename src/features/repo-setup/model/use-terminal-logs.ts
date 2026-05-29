@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 
 export const logLevels = ["all", "info", "warn", "error", "success"] as const;
@@ -12,10 +11,6 @@ export interface LogEntry {
 }
 
 export function useTerminalLogs(logs: string[]) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [isAutoScroll, setIsAutoScroll] = useState(true);
-  const [showScrollButton, setShowScrollButton] = useState(false);
-
   const [filter, setFilter] = useQueryState<TerminalFilter>(
     "logFilter",
     parseAsStringLiteral(logLevels).withDefault("all")
@@ -67,68 +62,11 @@ export function useTerminalLogs(logs: string[]) {
     return matchesFilter && matchesSearch;
   });
 
-  const handleScroll = () => {
-    const root = scrollRef.current;
-    if (root === null) return;
-
-    const container = root.querySelector("[data-radix-scroll-area-viewport]");
-    if (container === null) return;
-
-    const { clientHeight, scrollHeight, scrollTop } = container;
-
-    const isAtBottom = scrollHeight - scrollTop - clientHeight < 1;
-
-    setIsAutoScroll(isAtBottom);
-    setShowScrollButton(!isAtBottom);
-  };
-
-  const scrollToBottom = () => {
-    const root = scrollRef.current;
-    if (root !== null) {
-      const container = root.querySelector("[data-radix-scroll-area-viewport]");
-      if (container !== null) {
-        container.scrollTo({
-          behavior: "smooth",
-          top: container.scrollHeight,
-        });
-        setIsAutoScroll(true);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const root = scrollRef.current;
-    if (root === null) return;
-
-    const container = root.querySelector("[data-radix-scroll-area-viewport]");
-    if (container === null) return;
-
-    container.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      container.removeEventListener("scroll", handleScroll);
-    };
-  }, [filteredLogs]);
-
-  useEffect(() => {
-    const root = scrollRef.current;
-    if (root !== null && isAutoScroll) {
-      const container = root.querySelector("[data-radix-scroll-area-viewport]");
-      if (container !== null) {
-        container.scrollTop = container.scrollHeight;
-      }
-    }
-  }, [filteredLogs, isAutoScroll]);
-
   return {
     counts,
     filter,
     filteredLogs,
-    handleScroll,
-    scrollRef,
-    scrollToBottom,
     search,
     setFilter,
-    showScrollButton,
   };
 }

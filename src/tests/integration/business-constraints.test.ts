@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { getRawHash } from "@/server/utils/hash";
+
 import { cleanupDatabase, createTestUser, expectDenied, expectValidationFail } from "../helpers";
 
 describe("Business Logic & Integrity Constraints", () => {
@@ -39,6 +41,7 @@ describe("Business Logic & Integrity Constraints", () => {
       data: {
         analysis: { connect: { publicId: analysis1.publicId } },
         content: "Original Content",
+        path: "readme-1",
         repo: { connect: { publicId: repo.publicId } },
         type: "README",
         version: "v1",
@@ -50,6 +53,7 @@ describe("Business Logic & Integrity Constraints", () => {
         data: {
           analysis: { connect: { publicId: analysis2.publicId } },
           content: "Different Analysis Content",
+          path: "readme-2",
           repo: { connect: { publicId: repo.publicId } },
           type: "README",
           version: "v1",
@@ -63,6 +67,7 @@ describe("Business Logic & Integrity Constraints", () => {
         data: {
           analysis: { connect: { publicId: analysis1.publicId } },
           content: "Duplicate Content",
+          path: "readme-1",
           repo: { connect: { publicId: repo.publicId } },
           type: "README",
           version: "v1",
@@ -168,7 +173,7 @@ describe("Business Logic & Integrity Constraints", () => {
     await expectDenied(bob.db.session.findUniqueOrThrow({ where: { publicId: session.publicId } }));
 
     const stolenSession = await bob.db.session.findUnique({
-      where: { sessionToken: "secret_token_123" },
+      where: { sessionTokenHash: getRawHash("secret_token_123") },
     });
     expect(stolenSession).toBeNull();
   });

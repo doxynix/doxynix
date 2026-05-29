@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { PrismaClient } from "@prisma/client";
 import { render } from "@react-email/render";
 import { getServerSession, type NextAuthOptions } from "next-auth";
+import type { Adapter } from "next-auth/adapters";
 import EmailProvider from "next-auth/providers/email";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
@@ -16,6 +17,7 @@ import { AUTH_PROVIDERS, NEXTAUTH_SECRET, RESEND_API_KEY } from "@/shared/consta
 import { AuthEmail } from "@/server/core/auth-email";
 
 import { maskEmail, normalizeEmail, validateEmailSafety } from "../utils/email-guard";
+import { getNormalizedHash, getRawHash } from "../utils/hash";
 import { appLogger } from "./app-logger";
 import { prisma } from "./db";
 import { emailSignInLimiter } from "./ratelimit";
@@ -26,8 +28,85 @@ const MAGIC_LINK_MAX_AGE = 10 * 60; // TIME: 10 минут
 
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
+const basePrismaAdapter = PrismaAdapter(prisma as unknown as PrismaClient);
+
+const customPrismaAdapter: Adapter = {
+  ...basePrismaAdapter,
+
+  deleteSession: async (sessionToken: string) => {
+    await prisma.session.delete({
+      where: { sessionTokenHash: getRawHash(sessionToken) },
+    });
+  },
+
+  getSessionAndUser: async (sessionToken: string) => {
+    const session = await prisma.session.findUnique({
+      include: { user: true },
+      where: { sessionTokenHash: getRawHash(sessionToken) },
+    });
+    if (session == null) return null;
+    return {
+      session: {
+        ...session,
+        id: String(session.id),
+        userId: String(session.userId),
+      },
+      user: {
+        ...session.user,
+        email: session.user.email ?? "",
+        id: String(session.user.id),
+      },
+    };
+  },
+
+  getUserByEmail: async (email: string) => {
+    const cleanEmail = normalizeEmail(email);
+    const user = await prisma.user.findUnique({
+      where: { emailHash: getNormalizedHash(cleanEmail) },
+    });
+    if (user == null) return null;
+    return {
+      ...user,
+      email: user.email ?? "",
+      id: String(user.id),
+    };
+  },
+
+  updateSession: async (session) => {
+    const updated = await prisma.session.update({
+      data: {
+        expires: session.expires,
+      },
+      where: { sessionTokenHash: getRawHash(session.sessionToken) },
+    });
+    return {
+      ...updated,
+      id: String(updated.id),
+      userId: String(updated.userId),
+    };
+  },
+
+  useVerificationToken: async ({ identifier, token }: { identifier: string; token: string }) => {
+    try {
+      const identifierHash = getNormalizedHash(normalizeEmail(identifier));
+      const tokenHash = getRawHash(token);
+
+      return await prisma.verificationToken.delete({
+        where: {
+          identifierHash_tokenHash: {
+            identifierHash,
+            tokenHash,
+          },
+        },
+      });
+    } catch {
+      return null;
+    }
+  },
+};
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma as unknown as PrismaClient),
+  adapter: customPrismaAdapter as unknown as Adapter,
   callbacks: {
     async session({ session, user }) {
       session.user.id = user.id;
@@ -41,7 +120,7 @@ export const authOptions: NextAuthOptions = {
       const userId = user.id;
 
       const isBanned = await prisma.bannedEmail.findUnique({
-        where: { email: normalizedEmail },
+        where: { emailHash: getNormalizedHash(normalizedEmail) },
       });
 
       if (isBanned != null) {
@@ -231,7 +310,7 @@ export const authOptions: NextAuthOptions = {
       sendVerificationRequest: async ({ identifier, provider, url }) => {
         const user = await prisma.user.findUnique({
           select: { emailVerified: true },
-          where: { email: identifier },
+          where: { emailHash: getNormalizedHash(normalizeEmail(identifier)) },
         });
         const { host } = new URL(url);
         const html = await render(<AuthEmail host={host} url={url} />);

@@ -7,10 +7,12 @@ import { basename, extname, normalize } from "pathe";
 import type { z } from "zod";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { generateBranchName } from "@/shared/lib/get-branch-name";
 import { highlightCode } from "@/shared/lib/shiki";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma, type DbClient } from "@/server/core/db";
+import { getInstallationClient } from "@/server/core/github/github-provider";
 import { realtimeServer } from "@/server/core/realtime";
 import { callWithFallback } from "@/server/utils/call";
 import { resolveDocumentMaterializedPath } from "@/server/utils/document-materialization";
@@ -24,7 +26,7 @@ import type {
   RepoWorkspacePayload,
 } from "@/server/utils/types";
 
-import { AI_MODELS } from "./ai/ai-constants";
+import { getActiveModels } from "./ai/ai-constants";
 import { buildCodeDocSystemPrompt } from "./ai/prompts-refactored";
 import { analysisContext, type NodeContext } from "./analysis.context";
 import { analysisMapper } from "./analysis.mapper";
@@ -56,6 +58,7 @@ import {
   buildInteractiveBriefPayload,
 } from "./logic/brief";
 import { calculateDocumentationOutputScore } from "./logic/doc-priority";
+import { FixService } from "./logic/fix-generator";
 import { buildTopLevelNodes } from "./logic/graph-navigator";
 import { coerceAnalysisPayload } from "./logic/payload";
 import { buildSyncFileActionMeta } from "./logic/repo-file-action-state";
@@ -156,6 +159,116 @@ export const repoAnalysisService = {
 
     if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
     return repo;
+  },
+
+  async autoSyncDocsToGithub(
+    db: DbClient,
+    repo: Repo,
+    generatedDocsData: GeneratedDocsData,
+    commitSha: string
+  ): Promise<null | { prNumber: number; prUrl: string }> {
+    const fileChanges: Record<string, string> = {};
+
+    if (generatedDocsData.generatedReadme != null) {
+      fileChanges[resolveDocumentMaterializedPath({ sourcePath: null, type: "README" })] =
+        generatedDocsData.generatedReadme;
+    }
+    if (generatedDocsData.generatedApiMarkdown != null) {
+      fileChanges[resolveDocumentMaterializedPath({ sourcePath: null, type: "API" })] =
+        generatedDocsData.generatedApiMarkdown;
+    }
+    if (generatedDocsData.generatedArchitecture != null) {
+      fileChanges[resolveDocumentMaterializedPath({ sourcePath: null, type: "ARCHITECTURE" })] =
+        generatedDocsData.generatedArchitecture;
+    }
+    if (generatedDocsData.generatedContributing != null) {
+      fileChanges[resolveDocumentMaterializedPath({ sourcePath: null, type: "CONTRIBUTING" })] =
+        generatedDocsData.generatedContributing;
+    }
+    if (generatedDocsData.generatedChangelog != null) {
+      fileChanges[resolveDocumentMaterializedPath({ sourcePath: null, type: "CHANGELOG" })] =
+        generatedDocsData.generatedChangelog;
+    }
+
+    const filePaths = Object.keys(fileChanges);
+    if (filePaths.length === 0) {
+      appLogger.info({
+        msg: "No generated documentation files to sync to GitHub.",
+        repoId: repo.id,
+      });
+      return null;
+    }
+
+    let fix: Awaited<ReturnType<typeof analysisRepo.create>> | null = null;
+
+    try {
+      const installation = await db.githubInstallation.findFirst({
+        where: {
+          accountLogin: { equals: repo.owner, mode: "insensitive" },
+          isSuspended: false,
+        },
+      });
+
+      if (installation == null) {
+        appLogger.warn({
+          msg: "GitHub App installation not found. Skipping automatic documentation PR.",
+          repoId: repo.id,
+        });
+        return null;
+      }
+
+      const botOctokit = getInstallationClient(Number(installation.id));
+
+      const branchName = generateBranchName();
+      fix = await analysisRepo.create(db, {
+        branch: branchName,
+        createdByUser: false,
+        description: `Automatically generated documentation update based on commit ${commitSha.slice(0, 7)}.`,
+        repoId: repo.publicId,
+        title: "Doxynix: Sync Project Documentation",
+      });
+
+      const fixService = new FixService();
+      const result = await fixService.applyFix(botOctokit, {
+        branch: branchName,
+        defaultBranch: repo.defaultBranch,
+        fixedFiles: Object.entries(fileChanges).map(([filePath, newContent]) => ({
+          filePath,
+          newContent,
+        })),
+        fixId: fix.publicId,
+        owner: repo.owner,
+        repoId: repo.publicId,
+        repoName: repo.name,
+        title: "📝 Doxynix: Sync latest project documentation",
+      });
+
+      await analysisRepo.updateStatus(db, fix.publicId, "PR_OPENED", {
+        githubPrNumber: result.prNumber,
+        githubPrUrl: result.prUrl,
+      });
+
+      appLogger.info({
+        msg: "Documentation sync PR successfully opened on GitHub",
+        prNumber: result.prNumber,
+        repoId: repo.id,
+      });
+
+      return result;
+    } catch (error) {
+      if (fix != null) {
+        await analysisRepo.updateStatus(db, fix.publicId, "FAILED").catch((dbError) => {
+          appLogger.error({ error: dbError, msg: "Failed to update failed fix status in DB" });
+        });
+      }
+
+      appLogger.error({
+        error: error instanceof Error ? error.message : String(error),
+        msg: "Failed to automatically sync documentation to GitHub.",
+        repoId: repo.id,
+      });
+      return null;
+    }
   },
 
   async buildFileActionRuntimeContext(db: DbClient, input: { nodeId?: string; repoId: string }) {
@@ -320,7 +433,6 @@ export const repoAnalysisService = {
     if (repo == null) return null;
     return analysisMapper.toDetailedMetrics(repo.analyses[0] ?? null);
   },
-
   async getDocumentContent(db: DbClient, repoId: string, type: DocType, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
     if (repo == null) throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
@@ -366,6 +478,7 @@ export const repoAnalysisService = {
       sourcePath: doc.path,
     };
   },
+
   async getHistory(db: DbClient, repoId: string) {
     const history = await db.analysis.findMany({
       orderBy: { createdAt: "desc" },
@@ -716,9 +829,11 @@ export const repoAnalysisService = {
       .filter(Boolean)
       .join("\n");
 
+    const activeModels = await getActiveModels();
+
     const result = await callWithFallback<z.infer<typeof DocumentFilePreviewSchema>>({
       attemptMetadata: { filePath: input.path, operation: "document-file-preview" },
-      models: AI_MODELS.WRITER,
+      models: activeModels.WRITER,
       outputSchema: DocumentFilePreviewSchema,
       prompt: userPrompt,
       system: systemPrompt,
@@ -921,9 +1036,16 @@ export const repoAnalysisService = {
 
     appLogger.info({ analysisId, commitSha: currentSha, msg: "Results saved", repoId: repo.id });
 
+    this.autoSyncDocsToGithub(prisma, repo, generatedDocsData, currentSha).catch((error) => {
+      appLogger.error({
+        error,
+        msg: "Failed background auto-sync of documentation to GitHub",
+        repoId: repo.id,
+      });
+    });
+
     return finalHealthScore;
   },
-
   async searchWorkspace(
     db: DbClient,
     repoId: string,

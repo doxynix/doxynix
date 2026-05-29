@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "zod";
 
 import { OpenApiErrorResponses } from "@/server/core/trpc/constants";
 import { createTRPCRouter, publicProcedure } from "@/server/core/trpc/init";
