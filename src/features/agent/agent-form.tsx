@@ -34,7 +34,7 @@ export function AgentForm({
         <div className="flex max-h-32 flex-wrap gap-2 overflow-y-auto pb-3">
           {attachments.map((file, i) => (
             <AppBadge
-              key={i}
+              key={`${file.name}-${file.size}-${file.lastModified}`}
               variant="secondary"
               className="flex items-center gap-1.5 py-1 text-xs"
             >
@@ -43,6 +43,7 @@ export function AgentForm({
                 type="button"
                 size="icon"
                 variant="ghost"
+                aria-label={`Delete attachment ${file.name}`}
                 onClick={() => setAttachments((prev: any[]) => prev.filter((_, idx) => idx !== i))}
                 className="text-muted-foreground hover:text-destructive size-4 p-0"
               >
@@ -84,12 +85,18 @@ export function AgentForm({
               type="button"
               size="icon"
               variant="ghost"
+              aria-label="Upload files"
               onClick={() => fileInputRef.current?.click()}
             >
               <Paperclip />
             </AppButton>
 
-            <AppButton disabled={isLoading || !input.trim()} type="submit" size="icon">
+            <AppButton
+              disabled={isLoading || !input.trim()}
+              type="submit"
+              size="icon"
+              aria-label="Send message"
+            >
               <Send />
             </AppButton>
           </div>

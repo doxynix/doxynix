@@ -1,6 +1,5 @@
-/* eslint-disable sonarjs/slow-regex */
-/* eslint-disable @typescript-eslint/no-explicit-any */ // NOTE: пока вырубил
-/* eslint-disable @typescript-eslint/strict-boolean-expressions */ // NOTE: пока вырубил
+// NOTE: пока вырубил
+// NOTE: пока вырубил
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */ // NOTE: пока вырубил
 import fs from "node:fs";
 import { join, resolve } from "pathe";

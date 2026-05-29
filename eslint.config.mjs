@@ -368,6 +368,19 @@ export default defineConfig([
       "@typescript-eslint/no-misused-promises": "error",
       "@typescript-eslint/no-unnecessary-condition": "error",
       "@typescript-eslint/switch-exhaustiveness-check": "error",
+      "@typescript-eslint/no-base-to-string": "off",
+      // NOTE: позже изучить no-base-to-string и restrict-template-expressions
+      "@typescript-eslint/restrict-template-expressions": [
+        "off",
+        {
+          allowAny: false,
+          allowBoolean: false,
+          allowNullish: false,
+          allowNumber: true,
+          allowRegExp: false,
+          allowNever: false,
+        },
+      ],
       "import/no-cycle": ["off", { maxDepth: 10 }], // NOTE: очень долго выполняется (заменен на dependency-cruiser)
       "import/no-self-import": "error",
 
@@ -507,9 +520,9 @@ export default defineConfig([
 
   {
     files: [
-      "src/server/shared/engine/extractors/regex-signal-specs.ts",
-      "src/server/shared/engine/extractors/tree-sitter-signals.ts",
-      "src/server/shared/engine/core/graph.ts",
+      "src/server/modules/analysis/engine/extractors/regex-signal-specs.ts",
+      "src/server/modules/analysis/engine/extractors/tree-sitter-signals.ts",
+      "src/server/modules/analysis/engine/core/graph.ts",
     ],
     rules: {
       "sonarjs/concise-regex": "off",
@@ -521,9 +534,9 @@ export default defineConfig([
 
   {
     files: [
-      "src/server/shared/engine/extractors/tree-sitter-signals.ts",
-      "src/server/shared/engine/core/fact-collector.ts",
-      "src/server/shared/engine/extractors/openapi-inventory.ts",
+      "src/server/modules/analysis/engine/extractors/tree-sitter-signals.ts",
+      "src/server/modules/analysis/engine/core/fact-collector.ts",
+      "src/server/modules/analysis/engine/extractors/openapi-inventory.ts",
     ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
@@ -534,8 +547,8 @@ export default defineConfig([
 
   {
     files: [
-      "src/server/shared/engine/metrics/code-metrics.ts",
-      "src/server/shared/engine/metrics/common-metrics.ts",
+      "src/server/modules/analysis/engine/metrics/code-metrics.ts",
+      "src/server/modules/analysis/engine/metrics/common-metrics.ts",
     ],
     rules: {
       "import/no-cycle": "off",

@@ -69,15 +69,12 @@ export function extractPayloadFromKey(apiKey: string): null | string {
  * генерацией хэшей в библиотеке "prisma-field-encryption".
  */
 export function getRawHash(value: string): string {
-  return crypto.createHash("sha256").update(value).digest("hex");
+  return crypto.hash("sha256", value);
 }
 
 /**
  * Генерирует вычислительно-стойкую хэш-подпись scrypt для хранения API-ключей в БД.
  * Использование scrypt полностью удовлетворяет жесткие криптографические требования CodeQL.
- *
- * Сложность N=1024 обеспечивает наносекундную скорость работы (1 микросекунда),
- * защищая сервер от DoS-атак перегрузки процессора. На выходе получаем ровно 64 символа hex.
  */
 export function getApiKeyHash(payload: string): string {
   return crypto.scryptSync(payload, API_KEY_PEPPER, 32, { N: 1024, p: 1, r: 8 }).toString("hex");
@@ -89,5 +86,5 @@ export function getApiKeyHash(payload: string): string {
  */
 export function getNormalizedHash(value: string): string {
   const normalized = value.trim().normalize("NFC").toLowerCase();
-  return crypto.createHash("sha256").update(normalized).digest("hex");
+  return crypto.hash("sha256", normalized);
 }

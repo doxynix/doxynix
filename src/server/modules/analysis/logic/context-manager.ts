@@ -276,9 +276,9 @@ export async function buildStageContextPack({
 function buildXml(path: string, content: string) {
   const escapedPath = escape(path);
 
-  const safeContent = content.includes("]]>") ? content.replaceAll("]]>", "]]&gt;") : content;
+  const cdataSafeContent = content.replaceAll("]]>", "]]]]><![CDATA[>");
 
-  return `<file path="${escapedPath}">\n<![CDATA[\n${safeContent}\n]]>\n</file>`;
+  return `<file path="${escapedPath}">\n<![CDATA[\n${cdataSafeContent}\n]]>\n</file>`;
 }
 
 export async function prepareSmartContext(

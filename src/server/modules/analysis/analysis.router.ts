@@ -551,7 +551,7 @@ export const analysisRouter = createTRPCRouter({
             },
           });
         } catch (error) {
-          console.error("Trigger.dev auth error:", error);
+          appLogger.error({ error, msg: "Trigger.dev auth error:" });
         }
       }
 

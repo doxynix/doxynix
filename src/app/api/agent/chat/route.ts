@@ -4,6 +4,7 @@ import { dedent } from "ts-dedent";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
+import { appLogger } from "@/server/core/app-logger";
 import { getServerAuthSession } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
 import { google } from "@/server/core/google";
@@ -135,10 +136,10 @@ export async function POST(req: Request) {
           });
 
           if (currentSession != null && currentSession.title === "New Chat") {
-            const firstUserMessage = messages.find((m: any) => m.role === "user");
+            const firstUserMessage = messages.find((m: { role: string }) => m.role === "user");
             const firstTextPart = firstUserMessage?.parts?.find(
-              (p: any) => p.type === "text"
-            ) as any;
+              (p: { type: string }) => p.type === "text"
+            ) as undefined | { text?: string };
             const rawUserText = firstTextPart?.text ?? "";
 
             if (rawUserText.trim().length > 0) {
@@ -168,7 +169,7 @@ export async function POST(req: Request) {
             }
           }
         } catch (error) {
-          console.error("Async chat title generation failed in onFinish:", error);
+          appLogger.error({ error, msg: "Async chat title generation failed in onFinish:" });
         }
       }
     },

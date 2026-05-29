@@ -301,7 +301,7 @@ export async function runQuickFileAudit(input: FileActionInput): Promise<QuickFi
     return buildAuditFallback(input.path, nonActionableReason);
   }
 
-  const cleanedCode = CodeOptimizer.optimize(input.content, input.path);
+  const cleanedCode = await CodeOptimizer.cleanForTool(input.content);
   const contextSection = buildContextSection(input);
   const contextGuidance = buildContextPromptGuidance(input.nodeContext);
 

@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
@@ -15,13 +16,22 @@ export const agentChatRouter = createTRPCRouter({
       let internalRepoId: number | undefined;
 
       if (input.repoId != null) {
-        const repo = await ctx.db.repo.findUnique({
+        const repo = await ctx.db.repo.findFirst({
           select: { id: true },
-          where: { publicId: input.repoId },
+          where: {
+            publicId: input.repoId,
+            userId,
+          },
         });
-        if (repo != null) {
-          internalRepoId = repo.id;
+
+        if (repo == null) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Repository not found or access denied",
+          });
         }
+
+        internalRepoId = repo.id;
       }
 
       return ctx.db.chatSession.create({

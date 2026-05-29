@@ -285,7 +285,7 @@ model Document {
   type       DocType
   /// @zod.string.min(1, { message: "Content cannot be empty" })
   content    String    @db.Text
-  path       String    @default("")
+  path       String?
 
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
@@ -673,7 +673,8 @@ model ChatSession {
 
   @@index([userId])
   @@index([repoId])
-  @@allow('all', (auth() != null && userId == auth().id) || auth().role == 'ADMIN')
+
+  @@allow('all', (auth() != null && userId == auth().id && (repoId == null || repo.userId == auth().id)) || auth().role == 'ADMIN')
   @@map("chat_sessions")
 }
 

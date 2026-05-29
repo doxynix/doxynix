@@ -258,7 +258,7 @@ async function main() {
     update: {
       emailVerified: new Date(),
       image: faker.image.avatar(),
-      name: "Bob",
+      name: "Alice",
       role: UserRole.ADMIN,
     },
     where: { emailHash: getNormalizedHash(MY_EMAIL) },

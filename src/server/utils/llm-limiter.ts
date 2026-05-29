@@ -54,8 +54,9 @@ function parseGoogleRetryAfter(error: unknown): null | number {
     let retryHeader: null | string | undefined = null;
 
     if (headers != null && typeof headers === "object") {
-      if ("get" in headers && typeof (headers as any).get === "function") {
-        retryHeader = (headers as any).get("retry-after");
+      const getter = (headers as { get?: unknown }).get;
+      if (typeof getter === "function") {
+        retryHeader = (getter as (name: string) => null | string).call(headers, "retry-after");
       } else {
         retryHeader = (headers as Record<string, unknown>)["retry-after"] as string | undefined;
       }

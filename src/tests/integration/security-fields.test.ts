@@ -25,6 +25,7 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
     const fetchedSession = await alice.db.session.findUnique({
       where: { sessionTokenHash: getRawHash("SESS_SECRET") },
     });
+    expect(fetchedSession).not.toBeNull();
     expect(fetchedSession).not.toHaveProperty("sessionToken");
 
     await prisma.account.create({

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type DependencyList } from "react";
 
 export function useAutoScroll<T extends HTMLElement>(deps: DependencyList) {
-  const scrollRef = useRef<T>(null);
+  const scrollRef = useRef<null | T>(null);
   const [isAutoScroll, setIsAutoScroll] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
@@ -42,13 +42,13 @@ export function useAutoScroll<T extends HTMLElement>(deps: DependencyList) {
     return () => {
       container.removeEventListener("scroll", handleScroll);
     };
-  }, [deps]);
+  }, deps);
 
   useEffect(() => {
     if (isAutoScroll) {
       scrollToBottom("instant");
     }
-  }, [deps, isAutoScroll]);
+  }, [...deps, isAutoScroll]);
 
   return {
     handleScroll,

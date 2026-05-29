@@ -163,7 +163,6 @@ export const repoAnalysisService = {
 
   async autoSyncDocsToGithub(
     db: DbClient,
-    userId: number,
     repo: Repo,
     generatedDocsData: GeneratedDocsData,
     commitSha: string
@@ -200,6 +199,8 @@ export const repoAnalysisService = {
       return null;
     }
 
+    let fix: Awaited<ReturnType<typeof analysisRepo.create>> | null = null;
+
     try {
       const installation = await db.githubInstallation.findFirst({
         where: {
@@ -219,7 +220,7 @@ export const repoAnalysisService = {
       const botOctokit = getInstallationClient(Number(installation.id));
 
       const branchName = generateBranchName();
-      const fix = await analysisRepo.create(db, {
+      fix = await analysisRepo.create(db, {
         branch: branchName,
         createdByUser: false,
         description: `Automatically generated documentation update based on commit ${commitSha.slice(0, 7)}.`,
@@ -255,6 +256,12 @@ export const repoAnalysisService = {
 
       return result;
     } catch (error) {
+      if (fix != null) {
+        await analysisRepo.updateStatus(db, fix.publicId, "FAILED").catch((dbError) => {
+          appLogger.error({ error: dbError, msg: "Failed to update failed fix status in DB" });
+        });
+      }
+
       appLogger.error({
         error: error instanceof Error ? error.message : String(error),
         msg: "Failed to automatically sync documentation to GitHub.",
@@ -1029,15 +1036,13 @@ export const repoAnalysisService = {
 
     appLogger.info({ analysisId, commitSha: currentSha, msg: "Results saved", repoId: repo.id });
 
-    this.autoSyncDocsToGithub(prisma, userId, repo, generatedDocsData, currentSha).catch(
-      (error) => {
-        appLogger.error({
-          error,
-          msg: "Failed background auto-sync of documentation to GitHub",
-          repoId: repo.id,
-        });
-      }
-    );
+    this.autoSyncDocsToGithub(prisma, repo, generatedDocsData, currentSha).catch((error) => {
+      appLogger.error({
+        error,
+        msg: "Failed background auto-sync of documentation to GitHub",
+        repoId: repo.id,
+      });
+    });
 
     return finalHealthScore;
   },

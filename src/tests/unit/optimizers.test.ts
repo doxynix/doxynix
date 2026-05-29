@@ -51,11 +51,11 @@ describe("CodeOptimizer", () => {
     expect(result).toContain("/* ...content truncated... */");
   });
 
-  it("should skip truncating large arrays for config and json files", () => {
+  it("should skip truncating large arrays for config and json files", async () => {
     const largeArray = `[${"1,".repeat(300)}]`;
 
-    const fromConfig = CodeOptimizer.optimize(largeArray, "app.config.ts");
-    const fromJson = CodeOptimizer.optimize(largeArray, "package.json");
+    const fromConfig = await CodeOptimizer.optimize(largeArray, "app.config.ts");
+    const fromJson = await CodeOptimizer.optimize(largeArray, "package.json");
 
     expect(fromConfig).not.toContain("large data array truncated");
     expect(fromJson).not.toContain("large data array truncated");

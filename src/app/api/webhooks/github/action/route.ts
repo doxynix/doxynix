@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 import { prisma } from "@/server/core/db";
 import { repoAnalysisService } from "@/server/modules/analysis/analysis.service";
@@ -19,7 +20,32 @@ export async function POST(req: Request) {
       return new NextResponse(JSON.stringify({ error: "Invalid API Key" }), { status: 401 });
     }
 
-    const { branch, repository } = await req.json();
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
+
+    const schema = z.object({
+      branch: z.string().optional(),
+      repository: z
+        .string()
+        .min(1)
+        .refine((val) => val.split("/").length === 2, {
+          message: "Repository must be in 'owner/name' format",
+        }),
+    });
+
+    const parseResult = schema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: parseResult.error.issues[0]?.message ?? "Invalid request body" },
+        { status: 400 }
+      );
+    }
+
+    const { branch, repository } = parseResult.data;
     const [owner, name] = repository.split("/");
 
     const dbRepo = await prisma.repo.findFirst({

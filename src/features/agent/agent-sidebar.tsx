@@ -51,7 +51,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
             return (
               <Collapsible
                 key={repoKey}
-                defaultOpen={hasActiveSession || true}
+                defaultOpen={hasActiveSession}
                 className="group/folder flex w-full flex-col gap-1"
               >
                 <CollapsibleTrigger asChild>

@@ -31,7 +31,7 @@ export const DEFAULT_AI_MODELS: Record<AIModelRole, AllAvailableModels[]> = {
   CARTOGRAPHER: ["gemma-4-26b-a4b-it", "gemini-3.1-flash-lite"],
   FALLBACK: ["gemma-4-26b-a4b-it"],
   POWERFUL: ["gemma-4-26b-a4b-it", "gemini-3.1-flash-lite"],
-  SENTINEL: ["gemini-3.1-flash-lite", "gemini-2.5-flash-lite"],
+  SENTINEL: ["gemma-4-26b-a4b-it", "gemini-2.5-flash-lite"],
   WRITER: ["gemma-4-26b-a4b-it", "gemini-3.1-flash-lite"],
 };
 

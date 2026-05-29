@@ -153,8 +153,9 @@ export function Agent() {
     for (const file of filesList) {
       const reader = new FileReader();
 
-      const base64Promise = new Promise<string>((resolve) => {
+      const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onload = (event) => resolve(event.target?.result as string);
+        reader.onerror = () => reject(reader.error ?? new Error("File read failed"));
       });
 
       reader.readAsDataURL(file);

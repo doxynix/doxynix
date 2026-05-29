@@ -64,12 +64,8 @@ export async function runAiPipeline(
   // Stage 3: Deep analysis & Context Assembly
   taskLogger.info("Lead Architect: Assembling context and analyzing patterns...");
 
-  if (!hardMetrics.documentationInput) {
-    hardMetrics.documentationInput = buildDocumentationInputModel(evidence, hardMetrics);
-  }
-
-  const documentationInput =
-    hardMetrics.documentationInput ?? buildDocumentationInputModel(evidence, hardMetrics);
+  hardMetrics.documentationInput ??= buildDocumentationInputModel(evidence, hardMetrics);
+  const documentationInput = hardMetrics.documentationInput;
 
   const architectDigest = buildArchitectDigest(
     documentationInput,
