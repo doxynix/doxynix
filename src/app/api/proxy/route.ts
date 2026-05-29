@@ -34,36 +34,42 @@ export function isSafeIp(ip: string): boolean {
   return !unsafeRanges.includes(range);
 }
 
+export function ssrfSafeLookup(
+  hostname: string,
+  options: dns.LookupOneOptions,
+  callback: DnsLookupCallback
+): void {
+  dns.lookup(hostname, options, (err, address, family) => {
+    if (err) {
+      callback(err, null, null);
+      return;
+    }
+
+    try {
+      if (address && !isSafeIp(address)) {
+        appLogger.warn({
+          address,
+          hostname,
+          msg: "SSRF prevention triggered during socket lookup",
+          range: ipaddr.process(address).range(),
+        });
+        callback(new Error("Forbidden: Unsafe target IP detected"), null, null);
+        return;
+      }
+      callback(null, address, family);
+    } catch (validationError) {
+      callback(
+        validationError instanceof Error ? validationError : new Error(String(validationError)),
+        null,
+        null
+      );
+    }
+  });
+}
+
 export const ssrfSafeAgent = new Agent({
   connect: {
-    lookup: (hostname: string, options: dns.LookupOneOptions, callback: DnsLookupCallback) => {
-      dns.lookup(hostname, options, (err, address, family) => {
-        if (err) {
-          callback(err, null, null);
-          return;
-        }
-
-        try {
-          if (address && !isSafeIp(address)) {
-            appLogger.warn({
-              address,
-              hostname,
-              msg: "SSRF prevention triggered during socket lookup",
-              range: ipaddr.isValid(address) ? ipaddr.process(address).range() : "unknown",
-            });
-            callback(new Error("Forbidden: Unsafe target IP detected"), null, null);
-            return;
-          }
-          callback(null, address, family);
-        } catch (validationError) {
-          callback(
-            validationError instanceof Error ? validationError : new Error(String(validationError)),
-            null,
-            null
-          );
-        }
-      });
-    },
+    lookup: ssrfSafeLookup,
   } as any,
 });
 

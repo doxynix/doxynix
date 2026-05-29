@@ -1,26 +1,29 @@
 /* eslint-disable sonarjs/no-hardcoded-ip */
 import dns from "node:dns";
+import ipaddr from "ipaddr.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { isSafeIp, POST, ssrfSafeAgent } from "@/app/api/proxy/route";
+import { isSafeIp, POST, ssrfSafeLookup } from "@/app/api/proxy/route";
 
-// 1. Мокаем сессию авторизации NextAuth
-const mockGetServerAuthSession = vi.fn();
+const { mockAppLogger, mockGetServerAuthSession } = vi.hoisted(() => {
+  return {
+    mockAppLogger: {
+      error: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+    },
+    mockGetServerAuthSession: vi.fn(),
+  };
+});
+
 vi.mock("@/server/core/auth", () => ({
   getServerAuthSession: () => mockGetServerAuthSession(),
 }));
 
-// 2. Мокаем системный логгер
-const mockAppLogger = {
-  error: vi.fn(),
-  info: vi.fn(),
-  warn: vi.fn(),
-};
 vi.mock("@/server/core/app-logger", () => ({
   appLogger: mockAppLogger,
 }));
 
-// 3. Мокаем глобальный fetch
 const globalFetchMock = vi.fn();
 vi.stubGlobal("fetch", globalFetchMock);
 
@@ -28,12 +31,10 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Дефолтное состояние авторизованного пользователя
     mockGetServerAuthSession.mockResolvedValue({
       user: { email: "developer@doxynix.com", id: "user_test_2026" },
     });
 
-    // Дефолтный успешный ответ проксируемого сервера
     globalFetchMock.mockResolvedValue({
       headers: new Headers({ "content-type": "application/json" }),
       status: 200,
@@ -73,24 +74,20 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
   });
 
   describe("2. Isolated Unit-test: ssrfSafeAgent connect lookup", () => {
-    // Извлекаем функцию lookup из опций агента
-    const agentOptions = (ssrfSafeAgent as any).opts;
-    const lookupFn = agentOptions?.connect?.lookup;
-
-    it("should extract lookup function from agent config", () => {
-      expect(lookupFn).toBeTypeOf("function");
-    });
-
     it("should let safe IPs pass through lookup", () => {
       const callback = vi.fn();
 
-      // Мокаем dns.lookup в контексте теста
-      const dnsLookupSpy = vi.spyOn(dns, "lookup").mockImplementation((hostname, options, cb) => {
-        (cb as any)(null, "8.8.8.8", 4);
-        return {} as any;
-      });
+      const dnsLookupSpy = (vi.spyOn(dns, "lookup") as any).mockImplementation(
+        (
+          hostname: string,
+          options: any,
+          cb: (err: Error | null, address: null | string, family: number) => void
+        ) => {
+          cb(null, "8.8.8.8", 4);
+        }
+      );
 
-      lookupFn("safe-domain.com", {}, callback);
+      ssrfSafeLookup("safe-domain.com", {}, callback);
 
       expect(callback).toHaveBeenCalledWith(null, "8.8.8.8", 4);
       dnsLookupSpy.mockRestore();
@@ -99,20 +96,27 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
     it("should block loopback and unsafe IPs on lookup and log warning", () => {
       const callback = vi.fn();
 
-      const dnsLookupSpy = vi.spyOn(dns, "lookup").mockImplementation((hostname, options, cb) => {
-        (cb as any)(null, "127.0.0.1", 4);
-        return {} as any;
-      });
+      const dnsLookupSpy = (vi.spyOn(dns, "lookup") as any).mockImplementation(
+        (
+          hostname: string,
+          options: any,
+          cb: (err: Error | null, address: null | string, family: number) => void
+        ) => {
+          cb(null, "127.0.0.1", 4);
+        }
+      );
 
-      lookupFn("localhost", {}, callback);
+      ssrfSafeLookup("localhost", {}, callback);
 
-      // Проверяем, что callback вызван с ошибкой SSRF
       expect(callback).toHaveBeenCalledWith(expect.any(Error), null, null);
 
-      const errorArg = callback.mock.calls[0][0];
+      const firstCall = callback.mock.calls[0];
+      expect(firstCall).toBeDefined();
+      const errorArg = firstCall?.[0] as Error;
+
+      expect(errorArg).toBeInstanceOf(Error);
       expect(errorArg.message).toBe("Forbidden: Unsafe target IP detected");
 
-      // Проверяем аудит-логгер
       expect(mockAppLogger.warn).toHaveBeenCalledWith(
         expect.objectContaining({
           address: "127.0.0.1",
@@ -127,12 +131,17 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
     it("should pass standard DNS failures through", () => {
       const callback = vi.fn();
 
-      const dnsLookupSpy = vi.spyOn(dns, "lookup").mockImplementation((hostname, options, cb) => {
-        (cb as any)(new Error("ENOTFOUND"), null, null);
-        return {} as any;
-      });
+      const dnsLookupSpy = (vi.spyOn(dns, "lookup") as any).mockImplementation(
+        (
+          hostname: string,
+          options: any,
+          cb: (err: Error | null, address: null | string, family: null | number) => void
+        ) => {
+          cb(new Error("ENOTFOUND"), null, null);
+        }
+      );
 
-      lookupFn("nonexistent-domain.xyz", {}, callback);
+      ssrfSafeLookup("nonexistent-domain.xyz", {}, callback);
 
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({ message: "ENOTFOUND" }),
@@ -141,6 +150,31 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
       );
 
       dnsLookupSpy.mockRestore();
+    });
+
+    it("should handle unexpected validation errors gracefully inside lookup try-catch", () => {
+      const callback = vi.fn();
+
+      const dnsLookupSpy = (vi.spyOn(dns, "lookup") as any).mockImplementation(
+        (hostname: string, options: any, cb: any) => {
+          cb(null, "8.8.8.8", 4);
+        }
+      );
+
+      const ipaddrProcessSpy = vi.spyOn(ipaddr, "process").mockImplementation(() => {
+        throw new Error("Unexpected IP parser failure");
+      });
+
+      ssrfSafeLookup("safe-domain.com", {}, callback);
+
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "Unexpected IP parser failure" }),
+        null,
+        null
+      );
+
+      dnsLookupSpy.mockRestore();
+      ipaddrProcessSpy.mockRestore();
     });
   });
 
@@ -159,6 +193,23 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
         await expect(res.text()).resolves.toBe("Unauthorized");
       });
 
+      it("should allow safe public HTTP (non-S) URLs", async () => {
+        const req = new Request("http://localhost/api/proxy", {
+          body: JSON.stringify({ method: "GET", url: "http://example.com" }),
+          method: "POST",
+        });
+
+        const res = await POST(req);
+        expect(res.status).toBe(200);
+
+        const data = await res.json();
+        expect(data).toEqual({
+          body: "success-payload",
+          headers: { "content-type": "application/json" },
+          status: 200,
+        });
+      });
+
       it("should reject unsafe protocols directly inside route wrapper", async () => {
         const req = new Request("http://localhost/api/proxy", {
           body: JSON.stringify({ method: "GET", url: "file:///etc/passwd" }),
@@ -167,7 +218,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
 
         const res = await POST(req);
         expect(res.status).toBe(403);
-        await expect(res.text()).resolves.toBe("Forbidden: Unsafe target URL detected");
+        await expect(res.text()).resolves.toBe("Forbidden: Unsafe protocol");
       });
     });
 
@@ -193,10 +244,21 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
         expect(res.status).toBe(400);
         await expect(res.text()).resolves.toContain("Missing url or method parameters");
       });
+
+      it("should return 400 when URL is completely malformed", async () => {
+        const req = new Request("http://localhost/api/proxy", {
+          body: JSON.stringify({ method: "GET", url: "not-a-valid-url-at-all" }),
+          method: "POST",
+        });
+
+        const res = await POST(req);
+        expect(res.status).toBe(400);
+        await expect(res.text()).resolves.toBe("Invalid URL format");
+      });
     });
 
     describe("Headers Filtering & Body Serializing", () => {
-      it("should clean headers before calling fetch", async () => {
+      it("should clean headers before calling fetch and return exact envelope", async () => {
         const headers = {
           connection: "close",
           cookie: "session=123",
@@ -209,7 +271,15 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
           method: "POST",
         });
 
-        await POST(req);
+        const res = await POST(req);
+        expect(res.status).toBe(200);
+
+        const data = await res.json();
+        expect(data).toEqual({
+          body: "success-payload",
+          headers: { "content-type": "application/json" },
+          status: 200,
+        });
 
         expect(globalFetchMock).toHaveBeenCalledWith(
           "https://example.com",
@@ -221,10 +291,61 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
         );
       });
 
-      it("should convert object payload to string stringify", async () => {
+      it("should handle non-object or null headers gracefully", async () => {
+        const req = new Request("http://localhost/api/proxy", {
+          body: JSON.stringify({
+            headers: "not-an-object-string",
+            method: "GET",
+            url: "https://example.com",
+          }),
+          method: "POST",
+        });
+
+        const res = await POST(req);
+        expect(res.status).toBe(200);
+        expect(globalFetchMock).toHaveBeenCalledWith(
+          "https://example.com",
+          expect.objectContaining({
+            headers: {},
+          })
+        );
+      });
+
+      it("should convert object payload to string stringify and return correct envelope", async () => {
         const req = new Request("http://localhost/api/proxy", {
           body: JSON.stringify({
             body: { foo: "bar" },
+            method: "POST",
+            url: "https://example.com",
+          }),
+          method: "POST",
+        });
+
+        const res = await POST(req);
+        expect(res.status).toBe(200);
+
+        const data = await res.json();
+        expect(data).toEqual({
+          body: "success-payload",
+          headers: { "content-type": "application/json" },
+          status: 200,
+        });
+
+        expect(globalFetchMock).toHaveBeenCalledWith(
+          "https://example.com",
+          expect.objectContaining({
+            body: JSON.stringify({ foo: "bar" }),
+            method: "POST",
+          })
+        );
+      });
+
+      it("should forward raw string bodies unchanged without double-serialization", async () => {
+        const rawBody = "unserialized-raw-payload";
+
+        const req = new Request("http://localhost/api/proxy", {
+          body: JSON.stringify({
+            body: rawBody,
             method: "POST",
             url: "https://example.com",
           }),
@@ -236,16 +357,101 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
         expect(globalFetchMock).toHaveBeenCalledWith(
           "https://example.com",
           expect.objectContaining({
-            body: JSON.stringify({ foo: "bar" }),
+            body: rawBody,
             method: "POST",
           })
         );
+      });
+
+      it("should handle POST request with null body correctly", async () => {
+        const req = new Request("http://localhost/api/proxy", {
+          body: JSON.stringify({
+            body: null,
+            method: "POST",
+            url: "https://example.com",
+          }),
+          method: "POST",
+        });
+
+        await POST(req);
+
+        expect(globalFetchMock).toHaveBeenCalledWith(
+          "https://example.com",
+          expect.objectContaining({
+            body: undefined,
+            method: "POST",
+          })
+        );
+      });
+
+      it("should discard the body entirely for HEAD requests", async () => {
+        const req = new Request("http://localhost/api/proxy", {
+          body: JSON.stringify({
+            body: { foo: "bar" },
+            method: "HEAD",
+            url: "https://example.com",
+          }),
+          method: "POST",
+        });
+
+        await POST(req);
+
+        expect(globalFetchMock).toHaveBeenCalledWith(
+          "https://example.com",
+          expect.objectContaining({
+            body: undefined,
+            method: "HEAD",
+          })
+        );
+      });
+
+      it("should discard the body entirely for GET requests", async () => {
+        const req = new Request("http://localhost/api/proxy", {
+          body: JSON.stringify({
+            body: { foo: "bar" },
+            method: "GET",
+            url: "https://example.com",
+          }),
+          method: "POST",
+        });
+
+        await POST(req);
+
+        expect(globalFetchMock).toHaveBeenCalledWith(
+          "https://example.com",
+          expect.objectContaining({
+            body: undefined,
+            method: "GET",
+          })
+        );
+      });
+
+      it("should successfully forward bodies for PATCH and DELETE requests", async () => {
+        for (const method of ["PATCH", "DELETE"]) {
+          const req = new Request("http://localhost/api/proxy", {
+            body: JSON.stringify({
+              body: { payload: 123 },
+              method,
+              url: "https://example.com",
+            }),
+            method: "POST",
+          });
+
+          await POST(req);
+
+          expect(globalFetchMock).toHaveBeenCalledWith(
+            "https://example.com",
+            expect.objectContaining({
+              body: JSON.stringify({ payload: 123 }),
+              method,
+            })
+          );
+        }
       });
     });
 
     describe("SSRF Error Mapping", () => {
       it("should transform undici lookup SSRF error into a 403 API response", async () => {
-        // Симулируем выброс ошибки безопасности от нашего ssrfSafeAgent
         globalFetchMock.mockRejectedValue(new Error("Forbidden: Unsafe target IP detected"));
 
         const req = new Request("http://localhost/api/proxy", {
