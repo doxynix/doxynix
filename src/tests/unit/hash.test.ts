@@ -33,7 +33,11 @@ describe("Cryptographic Hash & API Key Utilities", () => {
 
     it("should reject keys with tampered checksums", () => {
       const originalKey = generateApiKey();
-      const tamperedKey = originalKey.slice(0, 44) + "0";
+
+      const lastChar = originalKey.slice(-1);
+
+      const tamperedChar = lastChar === "0" ? "1" : "0";
+      const tamperedKey = originalKey.slice(0, -1) + tamperedChar;
 
       expect(validateApiKeyChecksum(tamperedKey)).toBe(false);
     });
