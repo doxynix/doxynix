@@ -41,6 +41,7 @@ describe("Business Logic & Integrity Constraints", () => {
       data: {
         analysis: { connect: { publicId: analysis1.publicId } },
         content: "Original Content",
+        path: "readme-1",
         repo: { connect: { publicId: repo.publicId } },
         type: "README",
         version: "v1",
@@ -52,6 +53,7 @@ describe("Business Logic & Integrity Constraints", () => {
         data: {
           analysis: { connect: { publicId: analysis2.publicId } },
           content: "Different Analysis Content",
+          path: "readme-2",
           repo: { connect: { publicId: repo.publicId } },
           type: "README",
           version: "v1",
@@ -65,6 +67,7 @@ describe("Business Logic & Integrity Constraints", () => {
         data: {
           analysis: { connect: { publicId: analysis1.publicId } },
           content: "Duplicate Content",
+          path: "readme-1",
           repo: { connect: { publicId: repo.publicId } },
           type: "README",
           version: "v1",

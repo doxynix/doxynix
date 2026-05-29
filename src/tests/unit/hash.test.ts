@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   extractPayloadFromKey,
@@ -7,28 +7,25 @@ import {
   getNormalizedHash,
   getRawHash,
   validateApiKeyChecksum,
-} from "../../server/utils/hash";
+} from "@/server/utils/hash";
+
+vi.mock("@/shared/constants/env.server", () => ({
+  API_KEY_CHECKSUM_SECRET: "test_checksum_hmac_secret_value_2026",
+  API_KEY_PEPPER: "test_api_key_pepper_secret_value_2026",
+}));
 
 describe("Cryptographic Hash & API Key Utilities", () => {
-  beforeAll(() => {
-    process.env.API_KEY_PEPPER = "test_api_key_pepper_secret_value_2026";
-    process.env.API_KEY_CHECKSUM_SECRET = "test_checksum_hmac_secret_value_2026";
-  });
-
   describe("generateApiKey & validateApiKeyChecksum", () => {
     it("should generate a valid API key with correct format and length", () => {
       const apiKey = generateApiKey();
 
       expect(apiKey.startsWith("dxnx_")).toBe(true);
-
       expect(apiKey.length).toBe(45);
-
       expect(validateApiKeyChecksum(apiKey)).toBe(true);
     });
 
     it("should reject keys with tampered payloads", () => {
       const originalKey = generateApiKey();
-
       const tamperedKey = originalKey.slice(0, 10) + "X" + originalKey.slice(11);
 
       expect(validateApiKeyChecksum(tamperedKey)).toBe(false);
@@ -36,7 +33,6 @@ describe("Cryptographic Hash & API Key Utilities", () => {
 
     it("should reject keys with tampered checksums", () => {
       const originalKey = generateApiKey();
-
       const tamperedKey = originalKey.slice(0, 44) + "0";
 
       expect(validateApiKeyChecksum(tamperedKey)).toBe(false);
@@ -44,7 +40,6 @@ describe("Cryptographic Hash & API Key Utilities", () => {
 
     it("should reject keys with incorrect prefixes", () => {
       const originalKey = generateApiKey();
-
       const tamperedKey = "ghp_" + originalKey.slice(5);
 
       expect(validateApiKeyChecksum(tamperedKey)).toBe(false);
@@ -59,7 +54,6 @@ describe("Cryptographic Hash & API Key Utilities", () => {
 
     it("should reject keys with non-hex checksum characters", () => {
       const originalKey = generateApiKey();
-
       const tamperedKey1 = originalKey.slice(0, 44) + "g";
       const tamperedKey2 = originalKey.slice(0, 43) + "🚀";
 
@@ -91,7 +85,6 @@ describe("Cryptographic Hash & API Key Utilities", () => {
 
       expect(payload).not.toBeNull();
       expect(payload?.length).toBe(32);
-
       expect(apiKey.includes(payload!)).toBe(true);
     });
 
@@ -109,9 +102,7 @@ describe("Cryptographic Hash & API Key Utilities", () => {
       const hash = getApiKeyHash(payload);
 
       expect(hash.length).toBe(64);
-
       expect(/^[\da-f]{64}$/.test(hash)).toBe(true);
-
       expect(getApiKeyHash(payload)).toBe(hash);
     });
 

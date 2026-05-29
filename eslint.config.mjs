@@ -41,6 +41,8 @@ export default defineConfig([
       "commitlint.config.js",
       "./scripts",
       "messages/en.d.json.ts",
+      ".stryker-tmp/",
+      "public/",
     ],
   },
 
@@ -70,7 +72,7 @@ export default defineConfig([
         ecmaVersion: "latest",
         sourceType: "module",
         ecmaFeatures: { jsx: true },
-        project: ["./tsconfig.json"],
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },
