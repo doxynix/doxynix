@@ -2,8 +2,8 @@
   "name": "web",
   "version": "2.2.1",
   "engines": {
-    "node": ">=22.13.0",
-    "pnpm": ">=10.22.0"
+    "node": "v26.2.0",
+    "pnpm": "11.5.0"
   },
   "license": "AGPL-3.0-only",
   "private": true,
