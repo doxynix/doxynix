@@ -218,7 +218,7 @@
     "react": "19.2.6",
     "react-arborist": "3.8.0",
     "react-codemirror-merge": "4.25.10",
-    "react-day-picker": "9.14.0",
+    "react-day-picker": "10.0.1",
     "react-dom": "19.2.6",
     "react-hook-form": "7.76.1",
     "react-hotkeys-hook": "5.3.2",
