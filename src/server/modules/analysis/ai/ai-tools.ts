@@ -63,10 +63,9 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
     getLatestAnalysis: tool({
       description:
         "Check the status (PENDING, COMPLETED, FAILED) and metadata of the latest static code analysis run for a repository.",
-      execute: async ({ repoId }) => {
+      execute: async ({ repoId: inputRepoId }) => {
         const trpc = await apiForUser(userId);
-        const targetRepoId = repoId;
-        if (targetRepoId == null) throw new Error("Missing repository context.");
+        const targetRepoId = inputRepoId ?? repoId;
 
         return trpc.analysis.getLatest({ repoId: targetRepoId });
       },
@@ -300,10 +299,9 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
     // TODO: вынести в общий
     triggerRepositoryAnalysis: tool({
       description: "Queue and start a complete static code analysis run for a repository.",
-      execute: async ({ branch, repoId }) => {
+      execute: async ({ branch, repoId: inputRepoId }) => {
         const trpc = await apiForUser(userId);
-        const targetRepoId = repoId;
-        if (targetRepoId == null) throw new Error("Missing repository context.");
+        const targetRepoId = inputRepoId ?? repoId;
 
         return trpc.analysis.analyze({
           branch,

@@ -72,31 +72,6 @@ export const RealtimeProvider = ({ children }: Props) => {
         toast.success(data.title, { description: data.body });
         void invalidateAll();
       }
-      if (msg.name === REALTIME_CONFIG.events.user.analysisProgress) {
-        const payload = msg.data as {
-          analysisId: string;
-          message: string;
-          progress: number;
-          status: RepoStatus;
-        };
-
-        utils.analytics.getDashboardStats.setData({}, (oldData) => {
-          if (oldData == null) return oldData;
-
-          return {
-            ...oldData,
-            recentActivity: oldData.recentActivity.map((activity) =>
-              activity.id === payload.analysisId
-                ? { ...activity, progress: payload.progress, status: payload.status }
-                : activity
-            ),
-          };
-        });
-
-        if (payload.status === "DONE" || payload.status === "FAILED") {
-          invalidate();
-        }
-      }
 
       if (msg.name === REALTIME_CONFIG.events.user.fileActionCompleted) {
         const payload = msg.data as {
@@ -142,6 +117,8 @@ export const RealtimeProvider = ({ children }: Props) => {
             <Image
               alt={payload.author}
               src={payload.authorAvatarUrl}
+              height={16}
+              width={16}
               className="size-4 rounded-full"
             />
           ),

@@ -204,6 +204,7 @@ export async function callWithFallback<T>({
         });
 
         let fullText = "";
+        let streamError: unknown = null;
         const { aiChunks, aiThoughts, taskLogs } = TRIGGER_CONFIG.metadataKeys;
 
         for await (const part of result.fullStream) {
@@ -241,12 +242,18 @@ export async function callWithFallback<T>({
               appLogger.debug({ error: error, msg: "Metadata append failed for error log" });
             }
             appLogger.error({ error: part.error, msg: "Stream event error" });
+            streamError = part.error ?? new Error("Unknown stream error");
           }
 
           if (part.type === "finish" || part.type === "error") {
             clearTimeout(timeoutId);
             break;
           }
+        }
+
+        clearTimeout(timeoutId);
+        if (streamError != null) {
+          throw streamError;
         }
 
         taskLogger.success(`AI: finished generation.`);

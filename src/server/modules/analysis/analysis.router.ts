@@ -948,10 +948,26 @@ export const analysisRouter = createTRPCRouter({
         repo: repo.name,
       });
 
+      const prAnalysis = await ctx.db.pullRequestAnalysis.findFirst({
+        orderBy: { createdAt: "desc" },
+        select: { id: true },
+        where: {
+          prNumber: input.prNumber,
+          repoId: repo.id,
+        },
+      });
+
+      if (prAnalysis == null) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "PR analysis record not found for this repository and PR number",
+        });
+      }
+
       const localComment = await ctx.db.pullRequestComment.create({
         data: {
           analysis: {
-            connect: { id: repo.id },
+            connect: { id: prAnalysis.id },
           },
           body: input.body,
           filePath: "PR_DISCUSSION",

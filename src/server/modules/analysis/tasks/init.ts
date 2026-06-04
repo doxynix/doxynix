@@ -74,7 +74,9 @@ tasks.onStartAttempt(({ ctx }) => {
 /**
  * Единый вспомогательный метод для сброса зависших статусов в БД при аварийном завершении
  */
-async function cleanupFailsafeDatabaseState(taskName: string, payload: any, errorMsg: string) {
+async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, errorMsg: string) {
+  const safePayload = payload as null | Record<string, unknown>;
+
   try {
     let db = prisma;
     try {
@@ -85,18 +87,23 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: any, erro
       });
     }
 
-    if (taskName === "analyze-repo" && payload?.analysisId != null) {
-      const analysisId = String(payload.analysisId);
+    if (taskName === "analyze-repo" && safePayload?.analysisId != null) {
+      const analysisId = String(safePayload.analysisId);
 
       const updated = await db.analysis.update({
         data: {
           error: errorMsg,
           status: Status.FAILED,
         },
+        include: {
+          repo: {
+            select: { userId: true },
+          },
+        },
         where: { publicId: analysisId },
       });
 
-      const channelName = REALTIME_CONFIG.channels.user(String(updated.repoId));
+      const channelName = REALTIME_CONFIG.channels.user(updated.repo.userId);
       await realtimeServer.channels
         .get(channelName)
         .publish(REALTIME_CONFIG.events.user.analysisProgress, {
@@ -107,8 +114,8 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: any, erro
         });
     }
 
-    if (taskName === "analyze-pr" && payload?.analysisId != null) {
-      const prAnalysisId = Number(payload.analysisId);
+    if (taskName === "analyze-pr" && safePayload?.analysisId != null) {
+      const prAnalysisId = Number(safePayload.analysisId);
 
       await db.pullRequestAnalysis.update({
         data: {
@@ -119,8 +126,8 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: any, erro
       });
     }
 
-    if (taskName === "generate-fix" && payload?.fixId != null) {
-      const fixId = String(payload.fixId);
+    if (taskName === "generate-fix" && safePayload?.fixId != null) {
+      const fixId = String(safePayload.fixId);
 
       await db.generatedFix.update({
         data: {

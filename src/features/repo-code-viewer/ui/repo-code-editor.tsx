@@ -139,16 +139,16 @@ export function RepoCodeEditor({
             height: 100% !important;
             width: 100% !important;
           }
-          .cm-mergeView {
+          .cm-merge-container .cm-mergeView {
             height: 100% !important;
           }
-          .cm-mergeView-editor {
+          .cm-merge-container .cm-mergeView-editor {
             height: 100% !important;
           }
-          .cm-editor {
+          .cm-merge-container .cm-editor {
             height: 100% !important;
           }
-          .cm-scroller {
+          .cm-merge-container .cm-scroller {
             overflow: auto !important;
           }
         `,

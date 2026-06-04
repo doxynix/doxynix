@@ -469,6 +469,7 @@ export function Agent() {
                                   />
                                   <AppTooltip content="Retry">
                                     <AppButton
+                                      disabled={isLoading}
                                       size="icon"
                                       variant="ghost"
                                       onClick={() => {

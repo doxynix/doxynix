@@ -36,6 +36,8 @@ export const QuickFileAuditSchema = z.object({
 export const CodeDocEditSchema = z.object({
   replace: z
     .string()
+    .trim()
+    .min(1)
     .describe(
       "CRITICAL: The exact same block of code from 'search', but with newly injected inline KDoc/JSDoc/docstring comments added. " +
         "The original code logic, variable names, functions, imports, and active code statements inside this block " +
@@ -44,6 +46,8 @@ export const CodeDocEditSchema = z.object({
     ),
   search: z
     .string()
+    .trim()
+    .min(1)
     .describe(
       "The exact contiguous block of code from the original file to search for (usually the class, method, or function signature)."
     ),

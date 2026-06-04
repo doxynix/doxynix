@@ -51,9 +51,9 @@ export function RepoDocsTabs({
 }: Readonly<Props>) {
   const [activePath, setActivePath] = useQueryState("path", parseAsString);
 
-  const uniqueTabs = uniqBy(items, (item) =>
-    item.value === "CODE_DOC" ? "CODE_DOC" : Symbol()
-  ).map((item) => (item.value === "CODE_DOC" ? { ...item, id: "CODE_DOC_ROOT" } : item));
+  const uniqueTabs = uniqBy(items, (item) => item.value).map((item) =>
+    item.value === "CODE_DOC" ? { ...item, id: "CODE_DOC_ROOT" } : item
+  );
 
   const codeDocFiles = availableDocs.filter((doc) => doc.type === "CODE_DOC");
 

@@ -161,12 +161,22 @@ export const agentGithubReplyTask = task({
         ),
       });
 
-      await botOctokit.rest.issues.createComment({
-        body: `> **@Doxynix**\n\n${result}`,
-        issue_number: payload.prNumber,
-        owner: payload.owner,
-        repo: payload.repoName,
-      });
+      if (payload.commentType === "review") {
+        await botOctokit.rest.pulls.createReplyForReviewComment({
+          body: `> **@Doxynix**\n\n${result}`,
+          comment_id: payload.commentId,
+          owner: payload.owner,
+          pull_number: payload.prNumber,
+          repo: payload.repoName,
+        });
+      } else {
+        await botOctokit.rest.issues.createComment({
+          body: `> **@Doxynix**\n\n${result}`,
+          issue_number: payload.prNumber,
+          owner: payload.owner,
+          repo: payload.repoName,
+        });
+      }
 
       if (reactionId != null) {
         try {

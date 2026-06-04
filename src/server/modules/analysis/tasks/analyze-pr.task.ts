@@ -1,3 +1,4 @@
+import type { Octokit } from "@octokit/rest";
 import type { PRAnalysisStatus } from "@prisma/client";
 import { task } from "@trigger.dev/sdk";
 import { normalize } from "pathe";
@@ -170,7 +171,7 @@ function healFindingLine(
 }
 
 async function updateCommitStatus(
-  octokit: any,
+  octokit: Octokit,
   owner: string,
   repo: string,
   sha: string,
@@ -209,7 +210,7 @@ export const analyzePrTask = task({
     repoId: number;
     repoName: string;
   }) => {
-    let octokitInstance: any = null;
+    let octokitInstance: null | Octokit = null;
 
     try {
       const startTime = Date.now();

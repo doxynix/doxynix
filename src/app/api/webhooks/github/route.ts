@@ -114,7 +114,11 @@ webhooks.on("issue_comment.created", async ({ payload }) => {
 
 webhooks.on("pull_request_review_comment", async ({ payload }) => {
   const commentPayload = payload as PullRequestReviewCommentEvent;
-  if (commentPayload.action !== "created" || commentPayload.sender.type === "Bot") return;
+  if (
+    commentPayload.action !== "created" ||
+    (commentPayload.sender.type === "Bot" && commentPayload.sender.login === "doxynix[bot]")
+  )
+    return;
 
   const commentBody = commentPayload.comment.body;
   if (commentBody.includes("@doxynix")) {

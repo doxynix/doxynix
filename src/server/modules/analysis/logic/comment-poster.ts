@@ -96,7 +96,7 @@ export class GitHubCommentPoster {
     if (findings.length === 0) return [];
 
     try {
-      const { data: existingComments } = await octokit.rest.pulls.listReviewComments({
+      const existingComments = await octokit.paginate(octokit.rest.pulls.listReviewComments, {
         owner,
         per_page: 100,
         pull_number: prNumber,

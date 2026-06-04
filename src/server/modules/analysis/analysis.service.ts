@@ -452,6 +452,9 @@ export const repoAnalysisService = {
 
     const doc = await db.document.findFirst({
       where: {
+        repo: {
+          publicId: repoId,
+        },
         type,
         ...(path != null ? { path } : {}),
         ...(path == null && {
@@ -1324,7 +1327,7 @@ function applyDocumentSurgicalEdit(params: {
   appLogger.error({
     filePath,
     msg: "Documenter surgical block match failed. Original code block not found.",
-    searchBlock: search.slice(0, 150),
+    searchLength: search.length,
   });
   return fileContent;
 }

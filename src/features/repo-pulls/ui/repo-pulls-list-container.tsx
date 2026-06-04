@@ -36,9 +36,9 @@ export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>)
               </AppButton>
             </div>
           }
-          description="Open PR on GitHub for view it's analysis"
+          description="Open a PR on GitHub to view its analysis"
           icon={GitPullRequest}
-          title="No PR's found"
+          title="No PRs found"
         />
       </div>
     );
