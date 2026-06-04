@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/doxynix/doxynix/compare/v2.2.2...v2.3.0) (2026-06-04)
+
+
+### Features
+
+* проведено усиление пайплайна агента ([#1472](https://github.com/doxynix/doxynix/issues/1472)) ([b36a0f4](https://github.com/doxynix/doxynix/commit/b36a0f402717c475cdc246697e08902124c4716d))
+
 ## [2.2.2](https://github.com/doxynix/doxynix/compare/v2.2.1...v2.2.2) (2026-05-31)
 
 
