@@ -1,5 +1,5 @@
 import { unstable_cache } from "next/cache";
-import { auth } from "@trigger.dev/sdk";
+import { auth, runs } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -155,6 +155,53 @@ export const analysisRouter = createTRPCRouter({
       }
     }),
 
+  cancel: protectedProcedure
+    .input(z.object({ analysisId: z.uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const analysis = await ctx.db.analysis.findFirst({
+        where: { publicId: input.analysisId },
+      });
+
+      if (analysis == null) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Analysis record not found",
+        });
+      }
+
+      if (analysis.status === "PENDING") {
+        await ctx.db.analysis.update({
+          data: {
+            message: "Analysis aborted by user or timed out.",
+            progress: 100,
+            status: "FAILED",
+          },
+          where: { publicId: analysis.publicId },
+        });
+
+        if (analysis.jobId != null) {
+          try {
+            await runs.cancel(analysis.jobId);
+
+            appLogger.info({
+              analysisId: analysis.publicId,
+              jobId: analysis.jobId,
+              msg: "Successfully canceled active Trigger.dev run on cloud",
+            });
+          } catch (error) {
+            appLogger.error({
+              analysisId: analysis.publicId,
+              error: error instanceof Error ? error.message : String(error),
+              jobId: analysis.jobId,
+              msg: "Failed to programmatically cancel Trigger.dev run on cloud",
+            });
+          }
+        }
+      }
+
+      return { success: true };
+    }),
+
   /**
    * Очищает корзину после создания PR.
    */
@@ -190,7 +237,6 @@ export const analysisRouter = createTRPCRouter({
         ctx.db
       );
     }),
-
   /**
    * "Fix it for me" - Generate fix from findings (stateless full-content strategy).
    * Returns fixId + diffs for preview. Frontend sends fixed files back to applyFix.
@@ -198,7 +244,7 @@ export const analysisRouter = createTRPCRouter({
   createFix: protectedProcedure
     .input(
       z.object({
-        fileContents: z.record(z.string(), z.string()), // Map of filePath -> originalContent
+        fileContents: z.record(z.string(), z.string()).optional().default({}),
         findings: z.array(FindingForFixSchema).min(1),
         prAnalysisId: z.uuid().optional(),
         repoId: z.uuid(),
@@ -264,8 +310,8 @@ export const analysisRouter = createTRPCRouter({
             userId: Number(ctx.session.user.id),
           },
           {
-            concurrencyKey: `repo-${repo.id}`,
-            idempotencyKey: `fix-${fix.id}`,
+            // concurrencyKey: `repo-${repo.id}`,
+            // idempotencyKey: `fix-${fix.id}`,
             ttl: "30m",
           }
         );
@@ -288,10 +334,12 @@ export const analysisRouter = createTRPCRouter({
         };
       }
     }),
+
   documentFile: protectedProcedure
     .input(
       z.object({
         analysisId: z.uuid().optional(),
+        branch: z.string(),
         commitSha: z.string().optional(),
         content: z.string(),
         language: z.string().default(DEFAULT_DOC_LANGUAGE),
@@ -470,12 +518,19 @@ export const analysisRouter = createTRPCRouter({
     .input(
       z.object({
         aid: z.string().optional(),
+        path: z.string().optional(),
         repoId: z.uuid(),
         type: DocTypeSchema,
       })
     )
     .query(async ({ ctx, input }) => {
-      return repoAnalysisService.getDocumentContent(ctx.db, input.repoId, input.type, input.aid);
+      return repoAnalysisService.getDocumentContent(
+        ctx.db,
+        input.repoId,
+        input.type,
+        input.aid,
+        input.path
+      );
     }),
 
   getFileActionResult: protectedProcedure
@@ -856,10 +911,64 @@ export const analysisRouter = createTRPCRouter({
       });
     }),
 
+  postCommentToPR: protectedProcedure
+    .input(
+      z.object({
+        body: z.string().min(1).max(5000),
+        prNumber: z.number().int().positive(),
+        repoId: z.uuid(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const repo = await ctx.db.repo.findUnique({
+        where: { publicId: input.repoId },
+      });
+
+      if (repo == null) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
+      }
+
+      const installation = await ctx.db.githubInstallation.findFirst({
+        where: { accountLogin: repo.owner, isSuspended: false },
+      });
+
+      if (installation == null) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "GitHub App is not installed for this repository.",
+        });
+      }
+
+      const botOctokit = getInstallationClient(Number(installation.id));
+
+      await botOctokit.rest.issues.createComment({
+        body: input.body,
+        issue_number: input.prNumber,
+        owner: repo.owner,
+        repo: repo.name,
+      });
+
+      const localComment = await ctx.db.pullRequestComment.create({
+        data: {
+          analysis: {
+            connect: { id: repo.id },
+          },
+          body: input.body,
+          filePath: "PR_DISCUSSION",
+          findingType: "USER_COMMENT",
+          line: 0,
+          riskLevel: 0,
+        },
+      });
+
+      return { commentId: localComment.id, success: true };
+    }),
+
   quickFileAudit: protectedProcedure
     .input(
       z.object({
         analysisId: z.uuid().optional(),
+        branch: z.string(),
         commitSha: z.string().optional(),
         content: z.string(),
         language: z.string().default(DEFAULT_DOC_LANGUAGE),
@@ -914,7 +1023,15 @@ export const analysisRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const fix = await analysisRepo.getById(ctx.db, input.fixId);
+      const fix = await ctx.db.generatedFix.findUnique({
+        include: {
+          repo: {
+            select: { publicId: true },
+          },
+        },
+        where: { publicId: input.fixId },
+      });
+
       if (fix == null) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -922,13 +1039,7 @@ export const analysisRouter = createTRPCRouter({
         });
       }
 
-      // Verify that the fix belongs to the requested repo
-      const fixRepo = await ctx.db.repo.findUnique({
-        select: { publicId: true },
-        where: { id: fix.repoId },
-      });
-
-      if (fixRepo == null || fixRepo.publicId !== input.repoId) {
+      if (fix.repo.publicId !== input.repoId) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Generated fix does not belong to the specified repository",

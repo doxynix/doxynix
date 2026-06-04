@@ -6,6 +6,7 @@ import type { TreeApi } from "react-arborist";
 
 import { DocTypeSchema } from "@/shared/api-contracts";
 import { trpc } from "@/shared/api/trpc";
+import { useRouter } from "@/shared/i18n/routing";
 
 import { collectAllIds, getFolderSelectionState, sortNodes } from "./repo-setup-utils";
 import type { FileNode, FileTuple } from "./repo-setup.types";
@@ -24,6 +25,8 @@ const getRecommendedPaths = (files: FileTuple[] | undefined) => {
 
 export function useRepoSetup(repo: UiRepoDetailed) {
   const locale = useLocale();
+  const router = useRouter();
+  const utils = trpc.useUtils();
 
   const [selectedBranch, setSelectedBranch] = useQueryState("branch", {
     defaultValue: repo.defaultBranch,
@@ -52,7 +55,13 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     owner,
   });
 
-  const analyzeMutation = trpc.analysis.analyze.useMutation();
+  const analyzeMutation = trpc.analysis.analyze.useMutation({
+    onSuccess: async () => {
+      await utils.analysis.getLatest.invalidate({ repoId: repo.id });
+
+      router.refresh();
+    },
+  });
   const apiFiles = apiFilesRaw as FileTuple[] | undefined;
 
   const [prevBranch, setPrevBranch] = useState(selectedBranch);

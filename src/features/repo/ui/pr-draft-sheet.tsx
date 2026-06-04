@@ -39,6 +39,7 @@ type Props = {
 };
 
 export function PrDraftSheet({ repoId }: Readonly<Props>) {
+  const [open, setOpen] = useState(false);
   const [removingFiles, setRemovingFiles] = useState<Set<string>>(new Set());
   const utils = trpc.useUtils();
 
@@ -61,6 +62,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
 
         void utils.analysis.getStagedFiles.invalidate();
         void utils.analysis.getByRepository.invalidate();
+        setOpen(false);
       }
     },
   });
@@ -96,7 +98,13 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
   const filesCount = stagedFiles?.length ?? 0;
 
   return (
-    <Sheet onOpenChange={(open) => open === false && form.reset()}>
+    <Sheet
+      open={open}
+      onOpenChange={(open) => {
+        setOpen(open);
+        form.reset();
+      }}
+    >
       <SheetTrigger asChild>
         <AppButton variant="outline" className="relative gap-2">
           <GitPullRequest />

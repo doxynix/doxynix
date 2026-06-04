@@ -331,6 +331,10 @@
       {
         "name": "ai",
         "license": "Apache-2.0"
+      },
+      {
+        "name": "mcp-handler",
+        "license": "Apache-2.0"
       }
     ]
   },
@@ -1182,6 +1186,17 @@
     ]
   },
   {
+    "author": "Anthropic PBC",
+    "avatar": null,
+    "authorLink": "https://modelcontextprotocol.io",
+    "packages": [
+      {
+        "name": "@modelcontextprotocol/sdk",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Axiom",
     "avatar": "https://github.com/axiomhq.png?size=96",
     "authorLink": "https://github.com/axiomhq",
@@ -1695,6 +1710,17 @@
       {
         "name": "elkjs",
         "license": "EPL-2.0"
+      }
+    ]
+  },
+  {
+    "author": "Kpdecker",
+    "avatar": "https://github.com/kpdecker.png?size=96",
+    "authorLink": "https://github.com/kpdecker",
+    "packages": [
+      {
+        "name": "diff",
+        "license": "BSD-3-Clause"
       }
     ]
   },

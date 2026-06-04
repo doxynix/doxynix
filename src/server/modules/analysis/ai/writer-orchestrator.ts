@@ -9,7 +9,11 @@ import type { AIResult } from "../engine/core/analysis-result.schemas";
 import type { RepositoryEvidence } from "../engine/core/discovery.types";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import { buildStageContextPack } from "../logic/context-manager";
-import { buildWriterSectionPayloads, serializeAllowedPaths } from "../logic/payload-serialization";
+import {
+  buildWriterSectionPayloads,
+  serializeAllowedPaths,
+  toPromptJson,
+} from "../logic/payload-serialization";
 import {
   apiTask,
   architectureTask,
@@ -124,6 +128,18 @@ export async function orchestrateWriterTasks(
       ),
       stage: "writer_architecture",
     }),
+    contributing: await buildStageContextPack({
+      files,
+      preferredPaths: uniquePaths(
+        [
+          ...documentationInput.codebase.configFiles,
+          ...documentationInput.sections.onboarding.body.configPaths,
+          ...documentationInput.sections.overview.body.configFiles,
+        ],
+        120
+      ),
+      stage: "writer_contributing",
+    }),
     readme: await buildStageContextPack({
       files,
       preferredPaths: uniquePaths(
@@ -150,11 +166,7 @@ export async function orchestrateWriterTasks(
       120
     )
   );
-  const architectureDependencyContextPayload = JSON.stringify(
-    architectureDependencyContext,
-    null,
-    2
-  );
+  const architectureDependencyContextPayload = toPromptJson(architectureDependencyContext);
 
   const engineeringDossier = buildEngineeringDossier(
     documentationInput,
@@ -197,35 +209,46 @@ export async function orchestrateWriterTasks(
   }
 
   const compressedDossier = compactPayload(strippedDossier);
-  const engineeringDossierPayload = JSON.stringify(compressedDossier, null, 2);
+  const engineeringDossierPayload = JSON.stringify(compressedDossier);
 
   const allowedPathsByWriter = {
     api: buildAllowedPaths(
       [
-        ...engineeringDossierPaths,
         ...writerContexts.api.debug.selectedEvidencePaths,
         ...documentationInput.sections.api_reference.evidencePaths,
+        ...engineeringDossierPaths,
       ],
-      640
+      360
     ),
     architecture: buildAllowedPaths(
       [
-        ...engineeringDossierPaths,
         ...writerContexts.architecture.debug.selectedEvidencePaths,
         ...documentationInput.sections.architecture.evidencePaths,
         ...documentationInput.sections.risks.evidencePaths,
         ...documentationInput.sections.onboarding.evidencePaths,
+        ...engineeringDossierPaths,
       ],
-      640
+      420
+    ),
+    contributing: buildAllowedPaths(
+      [
+        ...writerContexts.contributing.debug.selectedEvidencePaths,
+        ...documentationInput.sections.onboarding.body.configPaths,
+        ...documentationInput.sections.onboarding.body.riskPaths,
+        ...documentationInput.sections.risks.evidencePaths,
+        ...engineeringDossierPaths,
+      ],
+      240
     ),
     readme: buildAllowedPaths(
       [
-        ...engineeringDossierPaths,
         ...writerContexts.readme.debug.selectedEvidencePaths,
         ...documentationInput.sections.overview.evidencePaths,
         ...documentationInput.sections.architecture.evidencePaths,
+        ...documentationInput.sections.onboarding.evidencePaths,
+        ...engineeringDossierPaths,
       ],
-      480
+      180
     ),
   };
 
@@ -235,10 +258,15 @@ export async function orchestrateWriterTasks(
     userId,
   };
 
+  const queueOptions = {
+    concurrencyKey: `user-writers-${userId}`,
+  };
+
   const batchJobs = [];
 
   if (requestedDocs.includes(DocType.README)) {
     batchJobs.push({
+      options: queueOptions,
       payload: {
         allowedPaths: allowedPathsByWriter.readme,
         analysisId,
@@ -255,6 +283,7 @@ export async function orchestrateWriterTasks(
 
   if (requestedDocs.includes(DocType.API)) {
     batchJobs.push({
+      options: queueOptions,
       payload: {
         allowedPaths: allowedPathsByWriter.api,
         analysisId,
@@ -271,9 +300,10 @@ export async function orchestrateWriterTasks(
 
   if (requestedDocs.includes(DocType.ARCHITECTURE)) {
     const moduleContext = architectureDependencyContextPayload;
-    const onboardingPayload = JSON.stringify(documentationInput.sections.onboarding, null, 2);
-    const risksPayload = JSON.stringify(documentationInput.sections.risks, null, 2);
+    const onboardingPayload = toPromptJson(documentationInput.sections.onboarding);
+    const risksPayload = toPromptJson(documentationInput.sections.risks);
     batchJobs.push({
+      options: queueOptions,
       payload: {
         allowedPaths: allowedPathsByWriter.architecture,
         analysisId,
@@ -293,14 +323,15 @@ export async function orchestrateWriterTasks(
 
   if (requestedDocs.includes(DocType.CONTRIBUTING)) {
     batchJobs.push({
+      options: queueOptions,
       payload: {
-        allowedPaths: allowedPathsByWriter.readme,
+        allowedPaths: allowedPathsByWriter.contributing,
         analysisId,
-        context: writerContexts.readme.context,
+        context: writerContexts.contributing.context,
         engineeringDossierPayload,
         language,
         payload: writerInputs.contributing.payload,
-        selectedTokens: writerContexts.readme.debug.selectedTokens,
+        selectedTokens: writerContexts.contributing.debug.selectedTokens,
         ...authParams,
       },
       task: contributingTask,
@@ -309,6 +340,7 @@ export async function orchestrateWriterTasks(
 
   if (requestedDocs.includes(DocType.CHANGELOG)) {
     batchJobs.push({
+      options: queueOptions,
       payload: {
         analysisId,
         analysisResult,
@@ -478,7 +510,7 @@ function buildModuleDependencyContext(
 function getDependencyContextPaths(context: ModuleDependencyContext): string[] {
   return uniquePaths(
     context.modules.flatMap((module) => [module.path, ...module.inbound, ...module.outbound]),
-    640
+    240
   );
 }
 

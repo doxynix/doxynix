@@ -26,13 +26,13 @@ type AIModelRole =
   | "WRITER";
 
 export const DEFAULT_AI_MODELS: Record<AIModelRole, AllAvailableModels[]> = {
-  AGENT: ["gemma-4-26b-a4b-it"],
-  ARCHITECT: ["gemma-4-26b-a4b-it", "gemini-3.1-flash-lite"],
-  CARTOGRAPHER: ["gemma-4-26b-a4b-it", "gemini-3.1-flash-lite"],
-  FALLBACK: ["gemma-4-26b-a4b-it"],
-  POWERFUL: ["gemma-4-26b-a4b-it", "gemini-3.1-flash-lite"],
-  SENTINEL: ["gemma-4-26b-a4b-it", "gemini-2.5-flash-lite"],
-  WRITER: ["gemma-4-26b-a4b-it", "gemini-3.1-flash-lite"],
+  AGENT: ["gemini-3.1-flash-lite", "gemini-3.1-flash-lite"],
+  ARCHITECT: ["gemini-3.1-flash-lite", "gemini-3.1-flash-lite"],
+  CARTOGRAPHER: ["gemini-3.1-flash-lite", "gemini-3.1-flash-lite"],
+  FALLBACK: ["gemini-3.1-flash-lite", "gemini-3.1-flash-lite"],
+  POWERFUL: ["gemini-3.1-flash-lite", "gemini-3.1-flash-lite"],
+  SENTINEL: ["gemini-3.1-flash-lite", "gemini-3.1-flash-lite"],
+  WRITER: ["gemini-3.1-flash-lite", "gemini-3.1-flash-lite"],
 };
 
 const aiModelsSchema = z.record(

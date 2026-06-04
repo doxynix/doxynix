@@ -4,7 +4,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { PrismaClient } from "@prisma/client";
 import { render } from "@react-email/render";
 import { getServerSession, type NextAuthOptions } from "next-auth";
-import type { Adapter } from "next-auth/adapters";
+import type { Adapter, AdapterAccount, AdapterUser } from "next-auth/adapters";
 import EmailProvider from "next-auth/providers/email";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
@@ -33,10 +33,49 @@ const basePrismaAdapter = PrismaAdapter(prisma as unknown as PrismaClient);
 const customPrismaAdapter: Adapter = {
   ...basePrismaAdapter,
 
+  createSession: async (session) => {
+    const created = await prisma.session.create({
+      data: {
+        ...session,
+        userId: Number(session.userId),
+      },
+    });
+    return {
+      ...created,
+      id: String(created.id),
+      userId: String(created.userId),
+    };
+  },
+
+  createUser: async (data: Omit<AdapterUser, "id">) => {
+    const created = await prisma.user.create({
+      data: {
+        ...data,
+        email: normalizeEmail(data.email),
+      },
+    });
+    return {
+      ...created,
+      email: created.email ?? "",
+      id: String(created.id),
+    };
+  },
+
   deleteSession: async (sessionToken: string) => {
     await prisma.session.delete({
       where: { sessionTokenHash: getRawHash(sessionToken) },
     });
+  },
+
+  deleteUser: async (id: string) => {
+    const deleted = await prisma.user.delete({
+      where: { id: Number(id) },
+    });
+    return {
+      ...deleted,
+      email: deleted.email ?? "",
+      id: String(deleted.id),
+    };
   },
 
   getSessionAndUser: async (sessionToken: string) => {
@@ -59,6 +98,36 @@ const customPrismaAdapter: Adapter = {
     };
   },
 
+  getUser: async (id: string) => {
+    const user = await prisma.user.findUnique({
+      where: { id: Number(id) },
+    });
+    if (user == null) return null;
+    return {
+      ...user,
+      email: user.email ?? "",
+      id: String(user.id),
+    };
+  },
+
+  getUserByAccount: async ({ provider, providerAccountId }) => {
+    const account = await prisma.account.findUnique({
+      include: { user: true },
+      where: {
+        provider_providerAccountId: {
+          provider,
+          providerAccountId,
+        },
+      },
+    });
+    if (account == null) return null;
+    return {
+      ...account.user,
+      email: account.user.email ?? "",
+      id: String(account.user.id),
+    };
+  },
+
   getUserByEmail: async (email: string) => {
     const cleanEmail = normalizeEmail(email);
     const user = await prisma.user.findUnique({
@@ -69,6 +138,20 @@ const customPrismaAdapter: Adapter = {
       ...user,
       email: user.email ?? "",
       id: String(user.id),
+    };
+  },
+
+  linkAccount: async (account: AdapterAccount) => {
+    const created = await prisma.account.create({
+      data: {
+        ...account,
+        userId: Number(account.userId),
+      },
+    });
+    return {
+      ...created,
+      id: String(created.id),
+      userId: String(created.userId),
     };
   },
 
@@ -83,6 +166,21 @@ const customPrismaAdapter: Adapter = {
       ...updated,
       id: String(updated.id),
       userId: String(updated.userId),
+    };
+  },
+
+  updateUser: async ({ id, ...data }) => {
+    const updated = await prisma.user.update({
+      data: {
+        ...data,
+        ...(data.email != null && { email: normalizeEmail(data.email) }),
+      },
+      where: { id: Number(id) },
+    });
+    return {
+      ...updated,
+      email: updated.email ?? "",
+      id: String(updated.id),
     };
   },
 
@@ -276,10 +374,12 @@ export const authOptions: NextAuthOptions = {
       });
     },
     async signOut({ session }) {
+      const safeSession = session as null | typeof session | undefined;
+
       appLogger.info({
         msg: "User signed out",
         type: "auth.signout",
-        userId: session.user.id,
+        userId: safeSession?.user.id ?? "unknown",
       });
     },
     async updateUser({ user }) {

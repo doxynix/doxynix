@@ -84,7 +84,10 @@ export async function runAiPipeline(
       analysisId,
       instructions,
       sentinelStatus,
-      language
+      language,
+      repoId,
+      userId,
+      branch
     )
   );
 

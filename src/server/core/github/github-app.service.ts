@@ -2,6 +2,8 @@ import crypto from "node:crypto";
 import type { InstallationTargetType, RepositorySelection } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
+import { GITHUB_APP_ID } from "@/shared/constants/env.server";
+
 import { isOctokitError } from "@/server/utils/handle-error";
 import { getNormalizedHash, getRawHash } from "@/server/utils/hash";
 
@@ -33,6 +35,8 @@ export const githubAppService = {
   },
 
   async getMyRepos(db: DbClient, prisma: PrismaClientExtended, userId: number) {
+    await this.syncInstallations(prisma, userId);
+
     const installations = await db.githubInstallation.findMany({
       orderBy: { createdAt: "asc" },
       where: { isSuspended: false, userId },
@@ -237,5 +241,65 @@ export const githubAppService = {
     }
 
     return { success: true };
+  },
+
+  async syncInstallations(prisma: PrismaClientExtended, userId: number): Promise<void> {
+    const validToken = await githubTokenService.getValidToken(userId);
+    if (validToken == null) return;
+
+    try {
+      const userOctokit = getPublicClient(validToken);
+
+      const userInstallations = await userOctokit.paginate(
+        userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
+        { per_page: 100 }
+      );
+
+      const ourAppId = Number(GITHUB_APP_ID);
+
+      const ourInstallations = userInstallations.filter((inst) => inst.app_id === ourAppId);
+
+      if (ourInstallations.length === 0) return;
+
+      for (const inst of ourInstallations) {
+        const instIdBigInt = BigInt(inst.id);
+        const account = inst.account;
+        const accountLogin = account != null && "login" in account ? account.login : "Unknown";
+        const accountAvatar =
+          account != null && "avatar_url" in account ? account.avatar_url : null;
+        const repoSelection = inst.repository_selection.toUpperCase() as RepositorySelection;
+        const targetType = inst.target_type.toUpperCase() as InstallationTargetType;
+        const targetId = account != null && "id" in account ? BigInt(account.id) : BigInt(0);
+
+        await prisma.githubInstallation.upsert({
+          create: {
+            accountAvatar,
+            accountLogin,
+            appId: inst.app_id,
+            htmlUrl: inst.html_url,
+            id: instIdBigInt,
+            repositorySelection: repoSelection,
+            targetId,
+            targetType,
+            userId,
+          },
+          update: {
+            accountAvatar,
+            accountLogin,
+            htmlUrl: inst.html_url,
+            isSuspended: false,
+            repositorySelection: repoSelection,
+            userId,
+          },
+          where: { id: instIdBigInt },
+        });
+      }
+    } catch (error) {
+      appLogger.error({
+        error: error instanceof Error ? error.message : String(error),
+        msg: "Failed to automatically sync/claim GitHub installations",
+        userId,
+      });
+    }
   },
 };

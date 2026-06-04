@@ -21,6 +21,7 @@ export type DifferentialAnalysisResult = {
   changedFiles: number;
   findings: PRFinding[];
   riskScore: number; // 0-10
+  summary: string;
   totalDuration: number; // ms
 };
 

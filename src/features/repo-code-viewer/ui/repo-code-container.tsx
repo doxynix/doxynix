@@ -66,7 +66,13 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
           {isLoading ? (
             <CodeSkeleton />
           ) : path != null && data ? (
-            <RepoCodeBrowser fileData={data} path={path} repoId={repo.id} treeApi={treeApi} />
+            <RepoCodeBrowser
+              fileData={data}
+              path={path}
+              repo={repo}
+              repoId={repo.id}
+              treeApi={treeApi}
+            />
           ) : (
             <p className="text-muted-foreground flex h-full items-center justify-center">
               Select a file to view its content

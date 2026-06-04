@@ -44,7 +44,13 @@ export function coerceAnalysisPayload(
 export function dedupeLatestDocsByType(docs: StoredDocument[]) {
   const sorted = [...docs].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
-  const uniqueDocs = uniqBy(sorted, (d) => d.type);
+  const singletons = sorted.filter((d) => d.type !== "CODE_DOC");
+  const codeDocs = sorted.filter((d) => d.type === "CODE_DOC");
+
+  const uniqueSingletons = uniqBy(singletons, (d) => d.type);
+  const uniqueCodeDocs = uniqBy(codeDocs, (d) => d.path);
+
+  const uniqueDocs = [...uniqueSingletons, ...uniqueCodeDocs];
 
   return uniqueDocs.sort((left, right) => {
     const orderDiff = DOC_TYPE_ORDER[left.type] - DOC_TYPE_ORDER[right.type];
@@ -72,6 +78,7 @@ export function toDocSummary(doc: StoredDocument, aiResult: AIResult | null) {
   const status = getWriterStatus(doc.type, aiResult);
   return {
     id: doc.publicId,
+    path: doc.path,
     source: status === "llm" ? "llm" : null,
     status,
     type: doc.type,

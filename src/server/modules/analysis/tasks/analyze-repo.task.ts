@@ -10,6 +10,7 @@ import { prisma } from "@/server/core/db";
 import { cloneRepository, getAnalysisContext } from "@/server/core/github/git";
 import { calculateBusFactor } from "@/server/core/github/github-api";
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
+import { TASK_CONFIGS } from "@/server/utils/task-config";
 import { cleanup, handleError, readAndFilterFiles } from "@/server/utils/utils";
 
 import { generateDeepDocs, runAiPipeline } from "../ai/ai-pipeline";
@@ -36,21 +37,7 @@ type TaskPayload = {
 
 export const analyzeRepoTask = task({
   id: "analyze-repo",
-  machine: { preset: "medium-1x" },
-
-  maxDuration: 60 * 20,
-  queue: {
-    concurrencyLimit: 1,
-  },
-
-  retry: {
-    factor: 2,
-    maxAttempts: 2,
-    maxTimeoutInMs: 60_000,
-    minTimeoutInMs: 5000,
-    randomize: true,
-  },
-
+  ...TASK_CONFIGS.analyzeRepo,
   run: async (payload: TaskPayload) => {
     const {
       analysisId,
@@ -67,7 +54,12 @@ export const analyzeRepoTask = task({
     const channelName = REALTIME_CONFIG.channels.user(userId);
 
     try {
-      await taskLogger.milestone({ analysisId, msg: "Initializing analysis engine", percent: 5 });
+      await taskLogger.milestone({
+        analysisId,
+        msg: "Initializing analysis engine",
+        percent: 5,
+        userId,
+      });
       const { currentSha, repo, token } = await getAnalysisContext(
         analysisId,
         userId,
@@ -83,21 +75,37 @@ export const analyzeRepoTask = task({
         return { reason: "SHA_MATCH", skipped: true };
       }
 
-      await taskLogger.milestone({ analysisId, msg: "Fetching repository metadata", percent: 10 });
+      await taskLogger.milestone({
+        analysisId,
+        msg: "Fetching repository metadata",
+        percent: 10,
+        userId,
+      });
       const { busFactor, rawContributors } = await calculateBusFactor(repo, userId, prisma);
 
-      await taskLogger.milestone({ analysisId, msg: "Cloning repository to worker", percent: 20 });
+      await taskLogger.milestone({
+        analysisId,
+        msg: "Cloning repository to worker",
+        percent: 20,
+        userId,
+      });
       await cloneRepository(repo, token, tempClonePath, selectedBranch);
 
       await taskLogger.milestone({
         analysisId,
         msg: "Reading and filtering source files",
         percent: 30,
+        userId,
       });
       const validFiles = await readAndFilterFiles(tempClonePath, selectedFiles);
       taskLogger.info(`Successfully indexed ${validFiles.length} files for analysis`);
 
-      await taskLogger.milestone({ analysisId, msg: "Running deep static analysis", percent: 45 });
+      await taskLogger.milestone({
+        analysisId,
+        msg: "Running deep static analysis",
+        percent: 45,
+        userId,
+      });
       const { evidence, metrics: hardMetricsCore } = await analyzeRepository(validFiles);
 
       taskLogger.info("Computing Git churn and change coupling...");
@@ -125,6 +133,7 @@ export const analyzeRepoTask = task({
         analysisId,
         msg: "Invoking AI Multi-Agent Pipeline",
         percent: 65,
+        userId,
       });
       const aiResult = await runAiPipeline(
         validFiles,
@@ -144,6 +153,7 @@ export const analyzeRepoTask = task({
         analysisId,
         msg: "Generating technical documentation",
         percent: 85,
+        userId,
       });
       const {
         generatedApiMarkdown,
@@ -179,6 +189,7 @@ export const analyzeRepoTask = task({
         analysisId,
         msg: "Persisting results to database",
         percent: 95,
+        userId,
       });
       await repoAnalysisService.saveResults({
         aiResult,

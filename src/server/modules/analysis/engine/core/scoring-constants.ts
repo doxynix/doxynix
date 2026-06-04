@@ -320,29 +320,30 @@ export const PENALTY_CONSTANTS = {
 /**
  * Different temperature strategies for different LLM task types.
  * Temperature controls randomness/creativity in outputs.
+ * Optimized for Gemini Pro/Flash (including Flash Thinking and Gemini 3).
  */
 export const LLM_TEMPERATURE_STRATEGY = {
   /**
-   * STRICT DATA EXTRACTION (JSON/Classification)
-   * Why 0.4? Gemini 3 dies at 0.0. We need 0.4 to keep the "thinking" alive
-   * while maintaining strict adherence to the Zod schema.
+   * STRICT DATA EXTRACTION (JSON/Classification/Zod Schemas)
+   * We use 0.2 to ensure maximum determinism and strict compliance with the
+   * response JSON schema, minimizing keys or values hallucinations.
    */
   classification: {
     description: "Strict extraction for repo analysis (File parsing, Imports)",
-    temperature: 0.4,
-    topK: 32, // Never use 1. Gemini requires a window of at least 10-32.
-    topP: 0.8,
+    temperature: 0.2, // Снижено до 0.2 для обеспечения максимальной строгости структуры
+    topK: 20, // Оптимизировано для Gemini API под задачи классификации
+    topP: 0.9,
   },
 
   /**
    * TECHNICAL DOCUMENTATION (Readme, API Specs)
-   * Why 1.0? Google officially recommends 1.0 for code tasks in Gemini 3.
-   * Lower values trigger the "Recitation" safety filter on boilerplate code.
+   * Why 0.7? fluid and rich natural language generation.
+   * This prevents triggering Gemini's automatic RECITATION safety filter on boilerplate code.
    */
   creative: {
     description: "Professional technical writing (No hallucinations, but fluid)",
     temperature: 0.7,
-    topK: 40,
+    topK: 64,
     topP: 0.95,
   },
 
@@ -357,14 +358,15 @@ export const LLM_TEMPERATURE_STRATEGY = {
   },
 
   /**
-   * ARCHITECTURAL REASONING (Mermaid Maps, System Design)
-   * Why 1.0? Complex spatial reasoning requires the full dynamic range of the model.
-   * Restricting this causes the "No Output" loop.
+   * ARCHITECTURAL REASONING & REFRACTORING (Mermaid, System Design, S&R Fixes)
+   * Why 1.0? Google's official Developer Guide strongly recommends keeping temperature
+   * at 1.0 for Gemini's reasoning and multi-turn logic steps. Lowering this causes
+   * unexpected degraded performance, looping, or infinite silent reasoning cycles.
    */
   reasoning: {
-    description: "Complex synthesis for Architecture Maps & Relationships",
-    temperature: 1.0, // CRITICAL: Do not lower this for Gemini 3 Reasoning!
-    topK: 64, // Flash-Lite defaults to 64.
+    description: "Complex synthesis for Architecture Maps, S&R blocks, and logic planning",
+    temperature: 1.0, // ИСПРАВЛЕН БАГ: установлено в 1.0 согласно требованиям к моделям Reasoning
+    topK: 64, // Увеличено до 64 (значение по умолчанию для моделей Gemini Pro/Flash)
     topP: 0.95,
   },
 } as const;

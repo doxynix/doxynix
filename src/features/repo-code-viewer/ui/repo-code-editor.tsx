@@ -131,23 +131,29 @@ export function RepoCodeEditor({
             className="h-full text-xs"
           />
         </CodeMirrorMerge>
-        <style global jsx>{`
+
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
           .cm-merge-container {
             height: 100% !important;
-            display: flex !important;
-            flex-direction: row !important;
-          }
-          .cm-merge-container .cm-editor {
-            height: 100% !important;
+            width: 100% !important;
           }
           .cm-mergeView {
             height: 100% !important;
-            overflow: hidden !important;
+          }
+          .cm-mergeView-editor {
+            height: 100% !important;
+          }
+          .cm-editor {
+            height: 100% !important;
           }
           .cm-scroller {
             overflow: auto !important;
           }
-        `}</style>
+        `,
+          }}
+        />
       </div>
     );
   }

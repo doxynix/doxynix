@@ -1,4 +1,4 @@
-import { languages } from "eslint-plugin-prettier";
+import * as languages from "linguist-languages";
 
 const DEFAULT_LANGUAGE_COLOR = "#cccccc";
 
@@ -9,10 +9,13 @@ type LinguistInfo = {
 
 const languageByExtension = new Map<string, { color: null | string; name: string }>();
 
-const languageData = (languages ?? {}) as Record<string, LinguistInfo | undefined>;
+const languageData = languages as Record<string, LinguistInfo | undefined>;
 
 for (const [name, info] of Object.entries(languageData)) {
-  if (info == null) continue;
+  if (info == null || typeof info !== "object" || !("extensions" in info)) {
+    continue;
+  }
+
   for (const ext of info.extensions ?? []) {
     const normalized = ext.toLowerCase();
     if (!languageByExtension.has(normalized)) {
@@ -25,7 +28,14 @@ for (const [name, info] of Object.entries(languageData)) {
 }
 
 const knownLanguageExtensions = Array.from(
-  new Set(Object.values(languageData).flatMap((language) => language?.extensions ?? []))
+  new Set(
+    Object.values(languageData)
+      .filter(
+        (info): info is LinguistInfo =>
+          info != null && typeof info === "object" && "extensions" in info
+      )
+      .flatMap((language) => language.extensions ?? [])
+  )
 );
 
 function normalizeExtension(value: string) {
@@ -46,12 +56,18 @@ export function getLanguageColor(languageOrExtension: null | string): string {
     return DEFAULT_LANGUAGE_COLOR;
   }
 
-  const directMatch = languageData[languageOrExtension];
-  if (directMatch?.color != null) {
-    return directMatch.color;
+  const normalized = languageOrExtension.toLowerCase().trim();
+
+  for (const [name, info] of Object.entries(languageData)) {
+    if (info == null || typeof info !== "object") {
+      continue;
+    }
+    if (name.toLowerCase() === normalized) {
+      return info.color ?? DEFAULT_LANGUAGE_COLOR;
+    }
   }
 
-  return findLanguageByExtension(languageOrExtension)?.color ?? DEFAULT_LANGUAGE_COLOR;
+  return findLanguageByExtension(normalized)?.color ?? DEFAULT_LANGUAGE_COLOR;
 }
 
 export function normalizeLanguageName(extension: string): string {

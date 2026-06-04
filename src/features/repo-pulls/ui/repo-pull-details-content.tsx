@@ -11,8 +11,10 @@ import {
   Map,
   Search,
   ShieldCheck,
+  Wand2,
 } from "lucide-react";
 import { useLocale } from "next-intl";
+import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
 import { Link } from "@/shared/i18n/routing";
@@ -50,6 +52,8 @@ const STATUS_CONFIG = {
 
 export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }: Readonly<Props>) {
   const locale = useLocale();
+  const utils = trpc.useUtils();
+
   const { data: comments, isLoading: isCommentsLoading } = trpc.analysis.getComments.useQuery(
     { analysisId: analysis?.analysis.id ?? "" },
     { enabled: analysis?.analysis.id != null }
@@ -57,11 +61,59 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
 
   const { isStaging, stageFix } = usePrStage(repoId);
 
+  const createFixMutation = trpc.analysis.createFix.useMutation({
+    onError: (err) => {
+      toast.error("Failed to generate autofix", {
+        description: err.message,
+      });
+    },
+    onSuccess: (data) => {
+      if (data.success === true && data.fixId != null) {
+        toast.success("AI Autofix has been queued!", {
+          description: "Our agents are generating code corrections. You will be notified.",
+        });
+        void utils.analysis.getByRepository.invalidate({ repoId });
+      }
+    },
+  });
+
   const changedFiles = impact?.changedFiles ?? [];
   const affectedZones = impact?.affectedZones ?? [];
   const affectedNodes = impact?.affectedNodes ?? [];
   const topFindings = impact?.topFindings ?? [];
   const fixes = impact?.fixes ?? [];
+
+  const handleFixSingle = (comment: any) => {
+    createFixMutation.mutate({
+      findings: [
+        {
+          file: comment.filePath,
+          line: comment.line,
+          suggestion: comment.bodyHtml,
+          type: comment.findingType.toLowerCase(),
+        },
+      ],
+      prAnalysisId: analysis?.analysis.id,
+      repoId,
+    });
+  };
+
+  const handleFixAll = () => {
+    if (comments == null || comments.renderedComments.length === 0) return;
+
+    const findingsToFix = comments.renderedComments.map((comment) => ({
+      file: comment.filePath,
+      line: comment.line,
+      suggestion: comment.bodyHtml,
+      type: comment.findingType.toLowerCase(),
+    }));
+
+    createFixMutation.mutate({
+      findings: findingsToFix,
+      prAnalysisId: analysis?.analysis.id,
+      repoId,
+    });
+  };
 
   const PR_DETAILS_ITEMS = [
     { isCopy: true, label: "Base SHA", value: analysis?.analysis.baseSha.slice(0, 7) },
@@ -236,11 +288,26 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <ShieldCheck />
               Detected Issues ({comments?.renderedComments.length ?? 0})
             </CardTitle>
+            {comments != null && comments.renderedComments.length > 0 && (
+              <AppButton
+                disabled={createFixMutation.isPending}
+                size="sm"
+                onClick={handleFixAll}
+                className="bg-success hover:bg-success/90 text-success-foreground flex items-center gap-1.5 text-xs font-semibold"
+              >
+                {createFixMutation.isPending ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Wand2 className="size-3.5" />
+                )}
+                Autofix All Issues
+              </AppButton>
+            )}
           </CardHeader>
           <CardContent>
             {isCommentsLoading ? (
@@ -248,24 +315,44 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
             ) : comments != null && comments.renderedComments.length > 0 ? (
               <div className="flex flex-col gap-4">
                 {comments.renderedComments.map((comment) => (
-                  <div key={comment.id} className="rounded-xl border p-4">
+                  <div
+                    key={comment.id}
+                    className="group relative overflow-hidden rounded-xl border p-4"
+                  >
                     <div className="mb-2 flex items-center justify-between">
                       <code className="bg-muted rounded px-1.5 py-0.5 text-xs">
                         {comment.filePath}:{comment.line}
                       </code>
                       <div className="flex items-center gap-3">
-                        <span className="text-muted-foreground text-xs font-bold">
+                        <span className="text-muted-foreground text-xs font-bold tracking-wide uppercase">
                           {comment.findingType}
                         </span>
                         <span className="text-muted-foreground text-xs font-bold">
-                          {comment.riskLevel}
+                          Risk: {comment.riskLevel}
                         </span>
                       </div>
                     </div>
                     <article
                       dangerouslySetInnerHTML={{ __html: comment.bodyHtml }}
-                      className="prose dark:prose-invert prose-pre:p-0 prose-pre:bg-transparent max-w-none min-w-0 text-xs wrap-break-word"
+                      className="prose dark:prose-invert prose-pre:p-0 prose-pre:bg-transparent mb-4 max-w-none min-w-0 text-xs wrap-break-word"
                     />
+
+                    <div className="border-border/40 flex justify-end border-t pt-3">
+                      <AppButton
+                        disabled={createFixMutation.isPending}
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleFixSingle(comment)}
+                        className="hover:bg-success/5 hover:text-success hover:border-success/30 flex items-center gap-1.5 text-xs font-medium transition-all duration-200"
+                      >
+                        {createFixMutation.isPending ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <Wand2 className="size-3.5" />
+                        )}
+                        Autofix Issue
+                      </AppButton>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -365,11 +452,24 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="flex flex-row items-center gap-2 text-base">
               <Search />
               Top Findings
             </CardTitle>
+            <AppButton
+              disabled={createFixMutation.isPending}
+              size="sm"
+              onClick={handleFixAll}
+              className="bg-success hover:bg-success/90 text-success-foreground flex items-center gap-1.5 text-xs font-semibold"
+            >
+              {createFixMutation.isPending ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Wand2 className="size-3.5" />
+              )}
+              Autofix All Issues
+            </AppButton>
           </CardHeader>
           <CardContent className="space-y-3">
             {topFindings.length > 0 ? (

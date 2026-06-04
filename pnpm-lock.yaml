@@ -335,6 +335,9 @@ importers:
       detect-language:
         specifier: 3.0.0
         version: 3.0.0
+      diff:
+        specifier: ^9.0.0
+        version: 9.0.0
       diff-match-patch:
         specifier: 1.0.5
         version: 1.0.5
@@ -726,6 +729,9 @@ importers:
       '@trigger.dev/build':
         specifier: 4.4.6
         version: 4.4.6(typescript@6.0.3)
+      '@trpc/openapi':
+        specifier: 11.17.0-alpha
+        version: 11.17.0-alpha(@trpc/server@11.17.0(typescript@6.0.3))(typescript@6.0.3)(zod@4.4.3)
       '@types/diff-match-patch':
         specifier: 1.0.36
         version: 1.0.36
@@ -5604,6 +5610,20 @@ packages:
       '@trpc/server': 11.17.0
       typescript: '>=5.7.2'
 
+  '@trpc/openapi@11.17.0-alpha':
+    resolution: {integrity: sha512-nWfmi5j4A2a9bQQ6dcsY49/EQdXJS2ryPpcCTXI4Xaic7gOTUJhXvYWNOmiwb0VtC2EzxqUOTQf3hx397cdr9w==}
+    hasBin: true
+    peerDependencies:
+      '@hey-api/openapi-ts': '>=0.94.5'
+      '@trpc/server': 11.17.0
+      typescript: '>=5.7.2'
+      zod: '>=4.0.0'
+    peerDependenciesMeta:
+      '@hey-api/openapi-ts':
+        optional: true
+      zod:
+        optional: true
+
   '@trpc/react-query@11.17.0':
     resolution: {integrity: sha512-AGcl5YAF8NnhBmyJ6PqJqKb1M5VTGSoNRNqJ3orct4o4epdcg0GWhW+qT9q6gPzs/2ImIwYCdfFpgNGdZ9yLHA==}
     peerDependencies:
@@ -8068,6 +8088,10 @@ packages:
 
   diff@4.0.4:
     resolution: {integrity: sha512-X07nttJQkwkfKfvTPG/KSnE2OMdcUCao6+eXF3wmnIQRn2aPAHH3VxDbDOdegkd6JbPsXqShpvEOHfAT+nCNwQ==}
+    engines: {node: '>=0.3.1'}
+
+  diff@9.0.0:
+    resolution: {integrity: sha512-svtcdpS8CgJyqAjEQIXdb3OjhFVVYjzGAPO8WGCmRbrml64SPw/jJD4GoE98aR7r25A0XcgrK3F02yw9R/vhQw==}
     engines: {node: '>=0.3.1'}
 
   dir-glob@3.0.1:
@@ -11302,6 +11326,9 @@ packages:
   open@8.4.2:
     resolution: {integrity: sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==}
     engines: {node: '>=12'}
+
+  openapi-types@12.1.3:
+    resolution: {integrity: sha512-N4YtSYJqghVu4iek2ZUvcN/0aqH1kRDuNqzcycDxhOUpg7GdvLa2F3DgS6yBNhInhv2r/6I0Flkn7CqL8+nIcw==}
 
   openapi-typescript-codegen@0.30.0:
     resolution: {integrity: sha512-NO24vrOYEEREkuEwtLemXiV0/3wUj1HvS+0UuAinVNWKJOyNlXTj5hehdW9Dyob4u5YGrRG9dc9TBZW7/UszGw==}
@@ -19753,6 +19780,14 @@ snapshots:
       '@trpc/server': 11.17.0(typescript@6.0.3)
       typescript: 6.0.3
 
+  '@trpc/openapi@11.17.0-alpha(@trpc/server@11.17.0(typescript@6.0.3))(typescript@6.0.3)(zod@4.4.3)':
+    dependencies:
+      '@trpc/server': 11.17.0(typescript@6.0.3)
+      openapi-types: 12.1.3
+      typescript: 6.0.3
+    optionalDependencies:
+      zod: 4.4.3
+
   '@trpc/react-query@11.17.0(@tanstack/react-query@5.100.14(react@19.2.6))(@trpc/client@11.17.0(@trpc/server@11.17.0(typescript@6.0.3))(typescript@6.0.3))(@trpc/server@11.17.0(typescript@6.0.3))(react@19.2.6)(typescript@6.0.3)':
     dependencies:
       '@tanstack/react-query': 5.100.14(react@19.2.6)
@@ -22382,6 +22417,8 @@ snapshots:
   diff-match-patch@1.0.5: {}
 
   diff@4.0.4: {}
+
+  diff@9.0.0: {}
 
   dir-glob@3.0.1:
     dependencies:
@@ -26346,6 +26383,8 @@ snapshots:
       define-lazy-prop: 2.0.0
       is-docker: 2.2.1
       is-wsl: 2.2.0
+
+  openapi-types@12.1.3: {}
 
   openapi-typescript-codegen@0.30.0(@types/json-schema@7.0.15):
     dependencies:

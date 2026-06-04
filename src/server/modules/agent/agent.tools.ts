@@ -112,12 +112,13 @@ export const getAgentTools = (currentRepoId?: string) => ({
   documentFile: tool({
     description:
       "Generate inline structured documentation comments (JSDoc, KotlinDoc) for a single file.",
-    execute: async ({ content, language, path, repoId }) => {
+    execute: async ({ branch, content, language, path, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
       if (targetRepoId == null) throw new Error("Missing repository context.");
 
       return trpc.analysis.documentFile({
+        branch,
         content,
         language,
         path,
@@ -125,6 +126,7 @@ export const getAgentTools = (currentRepoId?: string) => ({
       });
     },
     inputSchema: z.object({
+      branch: z.string().describe("Selected branch"),
       content: z.string().describe("The actual raw content of the file"),
       language: z.string().default("English"),
       path: z.string().describe("The file path to document"),
@@ -207,6 +209,7 @@ export const getAgentTools = (currentRepoId?: string) => ({
         .describe("The unique public UUID of the generated fix to retrieve details for"),
     }),
   }),
+  // TODO: вынести в общий
 
   getLatestAnalysis: tool({
     description:
@@ -390,12 +393,13 @@ export const getAgentTools = (currentRepoId?: string) => ({
   quickFileAudit: tool({
     description:
       "Run a rapid AI file audit to discover vulnerabilities, bugs, and clean code refactoring spots in a single file.",
-    execute: async ({ content, language, path, repoId }) => {
+    execute: async ({ branch, content, language, path, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
       if (targetRepoId == null) throw new Error("Missing repository context.");
 
       return trpc.analysis.quickFileAudit({
+        branch,
         content,
         language,
         path,
@@ -403,6 +407,7 @@ export const getAgentTools = (currentRepoId?: string) => ({
       });
     },
     inputSchema: z.object({
+      branch: z.string().describe("Selected branch"),
       content: z.string().describe("The actual raw content of the file to audit"),
       language: z.string().default("English").describe("The target language for the report"),
       path: z.string().describe("The file path to audit (e.g. 'src/server/db.ts')"),
@@ -517,19 +522,19 @@ export const getAgentTools = (currentRepoId?: string) => ({
       repoId: z.uuid().describe("The public UUID of the repository").optional(),
     }),
   }),
-
+  // TODO: вынести в общий
   triggerRepositoryAnalysis: tool({
     description: "Queue and start a complete static code analysis run for a repository.",
-    execute: async ({ branch, repoId }) => {
+    execute: async ({ branch, docTypes, files, language, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
       if (targetRepoId == null) throw new Error("Missing repository context.");
 
       return trpc.analysis.analyze({
         branch,
-        docTypes: ["README", "API", "ARCHITECTURE", "CONTRIBUTING", "CHANGELOG"],
-        files: ["**/*"],
-        language: "English",
+        docTypes: docTypes ?? ["README", "API", "ARCHITECTURE", "CONTRIBUTING", "CHANGELOG"],
+        files: files ?? ["**/*"],
+        language,
         repoId: targetRepoId,
       });
     },
@@ -538,6 +543,25 @@ export const getAgentTools = (currentRepoId?: string) => ({
         .string()
         .optional()
         .describe("Specific branch to target (defaults to default branch)"),
+      docTypes: z
+        .array(z.enum(["README", "API", "ARCHITECTURE", "CONTRIBUTING", "CHANGELOG"]))
+        .optional()
+        .describe("Array of document types to generate. Defaults to all 5 types if not specified."),
+      files: z
+        .array(z.string())
+        .optional()
+        .describe(
+          "Optional list of specific file paths or glob patterns (e.g., ['src/server/**/*', 'routes/auth/**/*.js', 'app.js']) " +
+            "to restrict the static analysis scope. Instruct the user to specify files or folders if they want a partial scan. " +
+            "Defaults to ['**/*'] if the user wants a full repository scan."
+        ),
+      language: z
+        .string()
+        .optional()
+        .default("English")
+        .describe(
+          "The target language for the documentation and report (e.g. 'English', 'Russian'). Defaults to 'English'."
+        ),
       repoId: z.uuid().describe("The public UUID of the repository to analyze").optional(),
     }),
   }),

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
 import * as Ably from "ably";
 import { AblyProvider } from "ably/react";
 import { useSession } from "next-auth/react";
@@ -9,6 +10,7 @@ import { toast } from "sonner";
 import { trpc } from "@/shared/api/trpc";
 import { IS_PROD } from "@/shared/constants/env.flags";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { useRouter } from "@/shared/i18n/routing";
 
 import type { RepoStatus } from "@/entities/repo/model/repo.types";
 import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
@@ -19,6 +21,7 @@ type Props = { children: ReactNode };
 
 export const RealtimeProvider = ({ children }: Props) => {
   const { data: session } = useSession();
+  const router = useRouter();
   const userId = session?.user.id;
 
   const { invalidateAll } = useNotificationActions();
@@ -112,6 +115,68 @@ export const RealtimeProvider = ({ children }: Props) => {
         }
       }
 
+      if (msg.name === REALTIME_CONFIG.events.user.prCommentReceived) {
+        const payload = msg.data as {
+          author: string;
+          authorAvatarUrl: string;
+          commentId: string;
+          prNumber: number;
+          prTitle: string;
+          repoName: string;
+          repoOwner: string;
+        };
+
+        void utils.analysis.getComments.invalidate();
+
+        toast.info(`New comment in PR #${payload.prNumber}`, {
+          action: {
+            label: "View",
+            onClick: () => {
+              router.push(
+                `/dashboard/repo/${payload.repoOwner}/${payload.repoName}/pull/${payload.prNumber}`
+              );
+            },
+          },
+          description: `@${payload.author} commented on "${payload.prTitle}"`,
+          icon: (
+            <Image
+              alt={payload.author}
+              src={payload.authorAvatarUrl}
+              className="size-4 rounded-full"
+            />
+          ),
+        });
+      }
+
+      if (msg.name === REALTIME_CONFIG.events.user.analysisProgress) {
+        const payload = msg.data as {
+          analysisId: string;
+          message: string;
+          progress: number;
+          status: RepoStatus;
+        };
+
+        utils.analytics.getDashboardStats.setData({}, (oldData) => {
+          if (oldData == null) return oldData;
+
+          return {
+            ...oldData,
+            recentActivity: oldData.recentActivity.map((activity) =>
+              activity.id === payload.analysisId
+                ? { ...activity, progress: payload.progress, status: payload.status }
+                : activity
+            ),
+          };
+        });
+
+        if (payload.status === "DONE" || payload.status === "FAILED") {
+          invalidate();
+
+          void utils.analysis.getLatest.invalidate();
+          void utils.analysis.getHistory.invalidate();
+        }
+      }
+
       if (msg.name === REALTIME_CONFIG.events.user.auditUpdated) {
         void utils.audit.getActivityLogs.invalidate();
       }
@@ -140,6 +205,9 @@ export const RealtimeProvider = ({ children }: Props) => {
     utils.analysis.getById,
     utils.audit.getActivityLogs,
     utils.agent.listSessions,
+    utils.analysis.getComments,
+    utils.analysis.getLatest,
+    utils.analysis.getHistory,
   ]);
 
   if (!client) return <>{children}</>;

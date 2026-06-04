@@ -1,7 +1,13 @@
 import type { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { getIp, getUa } from "@/server/utils/request-context";
+import {
+  generateRequestId,
+  getCountry,
+  getIp,
+  getUa,
+  resolveRequestId,
+} from "@/server/utils/request-context";
 import { verifyAndUseApiKey } from "@/server/utils/verify-and-use-api-key";
 
 import { authOptions } from "../auth";
@@ -15,7 +21,16 @@ type Props = {
 export async function createContext({ req }: Props) {
   const ip = getIp(req);
   const userAgent = getUa(req);
-  const requestInfo = { ip, userAgent };
+  const country = getCountry(req);
+
+  const requestId = resolveRequestId(req) ?? generateRequestId();
+
+  const requestInfo = {
+    country,
+    ip,
+    requestId,
+    userAgent,
+  };
 
   const authHeader = req.headers.get("authorization");
   if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {

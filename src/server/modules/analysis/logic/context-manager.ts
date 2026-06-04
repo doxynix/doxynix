@@ -9,7 +9,12 @@ import { ProjectPolicy } from "../engine/core/project-policy";
 import { PROJECT_POLICY_RULES } from "../engine/core/project-policy-rules";
 import { FILE_CONTEXT_MODIFIERS } from "../engine/core/scoring-constants";
 
-export type AiContextStage = "architect" | "writer_api" | "writer_architecture" | "writer_readme";
+export type AiContextStage =
+  | "architect"
+  | "writer_api"
+  | "writer_architecture"
+  | "writer_contributing"
+  | "writer_readme";
 
 export type ContextDropReason =
   | "budget"
@@ -65,6 +70,7 @@ const STAGE_TOKEN_BUDGETS: Record<AiContextStage, number> = {
   architect: 210_000,
   writer_api: 180_000,
   writer_architecture: 180_000,
+  writer_contributing: 70_000,
   writer_readme: 150_000,
 };
 
@@ -72,6 +78,7 @@ const STAGE_FILE_TOKEN_LIMITS: Record<AiContextStage, number> = {
   architect: 4000,
   writer_api: 6000,
   writer_architecture: 5000,
+  writer_contributing: 3500,
   writer_readme: 3500,
 };
 
@@ -87,6 +94,19 @@ function isRootManifest(path: string) {
 
   return PROJECT_POLICY_RULES.manifests.rootFiles.includes(
     normalizedPath.toLowerCase() as (typeof PROJECT_POLICY_RULES.manifests.rootFiles)[number]
+  );
+}
+
+function isDataContractFile(path: string) {
+  const normalizedPath = normalize(path).toLowerCase();
+
+  return (
+    normalizedPath.endsWith(".schema.ts") ||
+    normalizedPath.endsWith(".types.ts") ||
+    normalizedPath.endsWith(".dto.ts") ||
+    normalizedPath.endsWith(".zmodel") ||
+    normalizedPath.endsWith("/schema.prisma") ||
+    normalizedPath === "schema.prisma"
   );
 }
 
@@ -112,7 +132,17 @@ function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boo
     case "writer_api": {
       return (
         ProjectPolicy.isApiPath(filePath) ||
+        isDataContractFile(filePath) ||
         ProjectPolicy.isPrimaryArchitectureCategories(ProjectPolicy.getCategories(filePath)) ||
+        isRootManifest(filePath)
+      );
+    }
+    case "writer_contributing": {
+      if (docsLike || testLike || benchmarkLike) return false;
+      return (
+        ProjectPolicy.isConfigFile(filePath) ||
+        ProjectPolicy.isToolingFile(filePath) ||
+        ProjectPolicy.isInfraFile(filePath) ||
         isRootManifest(filePath)
       );
     }
@@ -141,8 +171,11 @@ function scoreFile(stage: AiContextStage, filePath: string, preferred: boolean) 
   }
   if (stage === "writer_api" && ProjectPolicy.isApiPath(filePath))
     score += FILE_CONTEXT_MODIFIERS.apiFileBonus;
+  if (stage === "writer_api" && isDataContractFile(filePath)) score += 40;
   if (stage === "architect" && ProjectPolicy.isApiPath(filePath))
     score += FILE_CONTEXT_MODIFIERS.apiFileSecondaryBonus;
+  if (stage === "writer_contributing" && ProjectPolicy.isToolingFile(filePath))
+    score += FILE_CONTEXT_MODIFIERS.configFileBonus;
   if ((ProjectPolicy.isDocsFile(filePath) || isExampleLike(filePath)) && !preferred)
     score += FILE_CONTEXT_MODIFIERS.docFilePenalty;
   if (ProjectPolicy.isTestFile(filePath) && !preferred)
@@ -156,6 +189,8 @@ function buildSelectionReason(stage: AiContextStage, filePath: string, preferred
   if (isRootManifest(filePath)) return "root-manifest";
   if (ProjectPolicy.isConfigFile(filePath))
     return stage === "writer_readme" ? "config-evidence" : "config-support";
+  if (stage === "writer_contributing" && ProjectPolicy.isToolingFile(filePath))
+    return "tooling-evidence";
   if (stage === "writer_api" && ProjectPolicy.isApiPath(filePath)) return "api-evidence";
   if (ProjectPolicy.isPrimaryArchitectureCategories(ProjectPolicy.getCategories(filePath)))
     return "primary-architecture";

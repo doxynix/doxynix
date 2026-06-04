@@ -7,6 +7,7 @@ import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
+import { Skeleton } from "@/shared/ui/core/skeleton";
 
 type Props = {
   onNewChat: () => void;
@@ -18,11 +19,11 @@ type Props = {
 export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: Readonly<Props>) {
   if (!sessions) {
     return (
-      <div className="bg-muted/5 animate-in fade-in flex h-full w-full flex-col p-4">
-        <p className="text-muted-foreground/60 mt-6 animate-pulse text-center text-xs font-medium">
-          Loading history...
-        </p>
-      </div>
+      <>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-6 w-full" />
+        ))}
+      </>
     );
   }
 

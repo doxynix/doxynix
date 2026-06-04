@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ChangeEvent, type SyntheticEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type SyntheticEvent } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useChat } from "@ai-sdk/react";
@@ -59,13 +59,14 @@ export function Agent() {
   const [editingMessageId, setEditingMessageId] = useState<null | string>(null);
   const [editInput, setEditInput] = useState("");
   const [input, setInput] = useState("");
-
   const [attachments, setAttachments] = useState<LocalFileAttachment[]>([]);
 
   const { name, owner } = useRepoParams();
   const currentRepo = owner && name ? { name, owner } : undefined;
 
   const [sessionId, setSessionId] = useState<null | string>(() => crypto.randomUUID());
+
+  const lastLoadedSessionIdRef = useRef<null | string>(sessionId);
 
   const utils = trpc.useUtils();
 
@@ -91,6 +92,7 @@ export function Agent() {
         })) ?? [],
       onFinish: () => {
         void utils.agent.listSessions.invalidate();
+        void utils.agent.getSessionHistory.invalidate({ sessionId: sessionId ?? "" });
       },
       sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
       transport: new DefaultChatTransport({
@@ -103,7 +105,12 @@ export function Agent() {
     });
 
   useEffect(() => {
-    if (sessionId != null && isSessionSaved === true && history != null) {
+    if (
+      sessionId != null &&
+      isSessionSaved === true &&
+      history != null &&
+      lastLoadedSessionIdRef.current !== sessionId
+    ) {
       setMessages(
         history.map((msg) => ({
           createdAt: msg.createdAt,
@@ -112,8 +119,7 @@ export function Agent() {
           role: msg.role as "assistant" | "system" | "user",
         }))
       );
-    } else if (isSessionSaved === false) {
-      setMessages([]);
+      lastLoadedSessionIdRef.current = sessionId;
     }
   }, [history, sessionId, isSessionSaved, setMessages]);
 
@@ -134,7 +140,6 @@ export function Agent() {
   }, [messages, utils]);
 
   const { scrollRef, scrollToBottom, showScrollButton } = useAutoScroll<HTMLDivElement>([messages]);
-
   const { open } = useSidebar();
 
   useEffect(() => {
@@ -199,14 +204,14 @@ export function Agent() {
   };
 
   const handleNewChat = () => {
-    setSessionId(crypto.randomUUID());
+    const newId = crypto.randomUUID();
+    setSessionId(newId);
     setMessages([]);
+    lastLoadedSessionIdRef.current = newId;
   };
 
   const isLoading = status === "submitted" || status === "streaming" || isHistoryLoading;
-
   const isRepoOwnerPage = owner !== "" && name !== "";
-
   const wrapperClasses = cn(
     "fixed z-50 flex overflow-hidden",
     "transition-[left] duration-200 ease-linear",
@@ -348,14 +353,16 @@ export function Agent() {
                               >
                                 {message.parts.map((rawPart, index) => {
                                   const part = rawPart as MessagePart;
+
                                   if (part.type === "reasoning") {
                                     const reasoningPart = part as {
                                       text: string;
                                       type: "reasoning";
                                     };
+                                    const partKey = `${message.id}-reasoning-${index}`;
                                     return (
                                       <Collapsible
-                                        key={index}
+                                        key={partKey}
                                         className="group/collapsible text-muted-foreground my-1 rounded-r-lg border-l-2 pl-3 text-xs italic"
                                       >
                                         <div className="flex items-center justify-between gap-1">
@@ -370,8 +377,8 @@ export function Agent() {
                                         </div>
                                         <CollapsibleContent>
                                           <MarkdownRenderer
-                                            key={index}
-                                            id={`${message.id}-reasoning-${index}`}
+                                            key={`${partKey}-md`}
+                                            id={partKey}
                                             content={reasoningPart.text}
                                             isStreaming={isLoading}
                                           />
@@ -383,7 +390,7 @@ export function Agent() {
                                   if (part.type.startsWith("tool-")) {
                                     return (
                                       <ToolCallIndicator
-                                        key={index}
+                                        key={`${message.id}-tool-${index}`}
                                         addToolApprovalResponse={(e) =>
                                           void addToolApprovalResponse(e)
                                         }
@@ -397,8 +404,8 @@ export function Agent() {
                                     const textPart = part as { text: string; type: "text" };
                                     return (
                                       <MarkdownRenderer
-                                        key={index}
-                                        id={message.id}
+                                        key={`${message.id}-text-${index}`}
+                                        id={`${message.id}-text-${index}`}
                                         content={textPart.text}
                                         isStreaming={isLoading}
                                       />
@@ -416,7 +423,7 @@ export function Agent() {
 
                                     return (
                                       <div
-                                        key={message.id}
+                                        key={`${message.id}-file-${index}`}
                                         className={cn(
                                           "bg-background my-2 max-w-50 overflow-hidden rounded-xl border",
                                           isAssistant ? "mr-auto" : "ml-auto"
@@ -462,7 +469,6 @@ export function Agent() {
                                   />
                                   <AppTooltip content="Retry">
                                     <AppButton
-                                      disabled={isLoading}
                                       size="icon"
                                       variant="ghost"
                                       onClick={() => {
@@ -503,7 +509,7 @@ export function Agent() {
 
                   <AppButton
                     size="icon"
-                    variant="outline"
+                    variant="secondary"
                     onClick={() => scrollToBottom("smooth")}
                     className={cn(
                       "absolute bottom-4 left-1/2 z-10 -translate-x-1/2",

@@ -5,6 +5,7 @@ import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { realtimeServer } from "@/server/core/realtime";
 import { redisClient } from "@/server/core/redis";
 import { REDIS_CONFIG } from "@/server/utils/redis";
+import { TASK_CONFIGS } from "@/server/utils/task-config";
 
 import type { FileActionNodeContext } from "../analysis.schemas";
 import { runQuickFileAudit } from "../analysis.utils";
@@ -13,17 +14,20 @@ import type { SyncFileActionMeta } from "../logic/repo-file-action-state";
 
 export const analyzeFileTask = task({
   id: "analyze-single-file",
+  ...TASK_CONFIGS.analyzeSingleFile,
   run: async (payload: {
     analysisId?: string;
+    branch: string;
     commitSha?: string;
     content: string;
     language: string;
     nodeContext?: FileActionNodeContext;
     path: string;
+    repoId: string;
     syncMeta: SyncFileActionMeta;
     userId: number;
   }) => {
-    const audit = await runQuickFileAudit(payload);
+    const audit = await runQuickFileAudit(payload.userId, payload);
 
     const baseResult = toQuickFileAuditPreview({
       ...audit,

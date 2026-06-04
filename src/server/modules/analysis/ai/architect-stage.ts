@@ -14,6 +14,7 @@ import {
 } from "../logic/architect-digest";
 import { buildStageContextPack } from "../logic/context-manager";
 import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
+import { buildRepositoryToolProfile } from "./ai-tools";
 import { buildAnalysisSystemPrompt, buildAnalysisUserPrompt } from "./prompts-refactored";
 
 export async function executeArchitectPhase(
@@ -22,7 +23,10 @@ export async function executeArchitectPhase(
   analysisId: string,
   instructions: string | undefined,
   sentinelStatus: "SAFE" | "UNSAFE",
-  language: string
+  language: string,
+  repoId: string,
+  userId: number,
+  branch: string
 ): Promise<AIResult> {
   taskLogger.info("Architect: Building final intelligence report...");
 
@@ -57,6 +61,7 @@ export async function executeArchitectPhase(
       providerOptions: { google: { safetySettings: SAFETY_SETTINGS } },
       system: buildAnalysisSystemPrompt(language),
       taskType: "reasoning",
+      tools: buildRepositoryToolProfile("architect", userId, repoId, branch),
     });
 
     const aiResult = normalizeAiGenerationOutput(raw);

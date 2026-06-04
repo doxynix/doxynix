@@ -203,7 +203,7 @@ export function SecurityOverviewCard({
         </div>
 
         {security.risks.length > 0 && (
-          <div className="border-border/40 space-y-2 border-t pt-3">
+          <div className="border-border space-y-2 border-t pt-3">
             <span className="text-muted-foreground text-[11px] font-bold tracking-wider uppercase">
               Identified Attack Vectors
             </span>
@@ -222,7 +222,7 @@ export function SecurityOverviewCard({
         )}
 
         {security.vulnerabilities.length > 0 ? (
-          <div className="border-border/40 space-y-2 border-t pt-3">
+          <div className="border-border space-y-2 border-t pt-3">
             <span className="text-muted-foreground text-[11px] font-bold tracking-wider uppercase">
               Critical Vulnerabilities
             </span>
@@ -233,7 +233,7 @@ export function SecurityOverviewCard({
                 return (
                   <Collapsible
                     key={idx}
-                    className="group border-border/60 bg-muted/30 hover:bg-muted/50 rounded-lg border p-2.5 transition-all"
+                    className="group border-border bg-muted/30 hover:bg-muted/50 rounded-lg border p-2.5 transition-all"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="space-y-1">
@@ -263,11 +263,11 @@ export function SecurityOverviewCard({
                       </AppBadge>
                     </div>
 
-                    <CollapsibleContent className="border-border/40 mt-2.5 space-y-1.5 border-t pt-2 pl-5">
+                    <CollapsibleContent className="border-border mt-2.5 space-y-1.5 border-t pt-2 pl-5">
                       <div className="text-destructive flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase">
                         <Terminal className="size-3" /> Recommended Remediation:
                       </div>
-                      <p className="text-muted-foreground bg-background/50 border-border/40 rounded-md border p-2 font-mono text-[11px] leading-normal whitespace-pre-wrap">
+                      <p className="text-muted-foreground bg-background/50 border-border rounded-md border p-2 font-mono text-[11px] leading-normal whitespace-pre-wrap">
                         {vuln.suggestion}
                       </p>
                       {/* NOTE: потом поменять на loading-button.tsx */}

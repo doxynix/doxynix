@@ -148,23 +148,29 @@ export function buildArchitectDigest(
       repositoryFacts.map((fact) => ({
         category: fact.category,
         confidence: fact.confidence,
-        evidencePaths: uniquePaths(fact.evidence.map((evidence) => evidence.path)),
+        evidencePaths: uniquePaths(
+          fact.evidence.map((evidence) => evidence.path),
+          8
+        ),
         id: fact.id,
         title: fact.title,
       })),
-      100
+      30
     ),
     findings: limit(
       repositoryFindings.map((finding) => ({
         category: finding.category,
-        evidencePaths: uniquePaths(finding.evidence.map((evidence) => evidence.path)),
+        evidencePaths: uniquePaths(
+          finding.evidence.map((evidence) => evidence.path),
+          8
+        ),
         id: finding.id,
         score: finding.score,
         severity: finding.severity,
         summary: finding.summary,
         title: finding.title,
       })),
-      100
+      30
     ),
     metrics: {
       analysisCoverage: metrics.analysisCoverage,
@@ -175,14 +181,14 @@ export function buildArchitectDigest(
           fromPath: pair.fromPath,
           toPath: pair.toPath,
         })),
-        100
+        20
       ),
       churnHotspots: limit(
         (metrics.churnHotspots ?? []).map((hotspot) => ({
           commitsInWindow: hotspot.commitsInWindow,
           path: hotspot.path,
         })),
-        100
+        20
       ),
       complexityScore: metrics.complexityScore,
       duplicationPercentage: metrics.duplicationReport.duplicationPercentage,
@@ -198,12 +204,12 @@ export function buildArchitectDigest(
       languageBreakdown: projectMap.language_breakdown,
       modules: limit(
         projectMap.modules.map((module) => ({
-          dependencies: limit(module.dependencies ?? [], 40),
+          dependencies: limit(module.dependencies ?? [], 15),
           path: module.path,
           responsibility: module.responsibility,
           type: module.type,
         })),
-        500
+        120
       ),
       overview: projectMap.overview,
     },
@@ -215,16 +221,16 @@ export function buildArchitectDigest(
         evidencePaths: uniquePaths(documentationInput.sections.api_reference.evidencePaths, 12),
         frameworks: limit(
           documentationInput.sections.api_reference.body.frameworkFacts.map((fact) => fact.name),
-          60
+          15
         ),
         publicSurfacePaths: limit(
           documentationInput.sections.api_reference.body.publicSurfacePaths,
-          120
+          30
         ),
         routeSource: documentationInput.sections.api_reference.body.sourceOfTruth,
         routeSourceFiles: limit(
           documentationInput.sections.api_reference.body.routeInventory.sourceFiles,
-          120
+          30
         ),
         sampleRoutes: limit(
           documentationInput.sections.api_reference.body.routeInventory.httpRoutes.map((route) => ({
@@ -232,7 +238,7 @@ export function buildArchitectDigest(
             path: route.path,
             sourcePath: route.sourcePath,
           })),
-          120
+          20
         ),
         summary: documentationInput.sections.api_reference.summary,
         title: documentationInput.sections.api_reference.title,
@@ -247,9 +253,9 @@ export function buildArchitectDigest(
             outbound: hotspot.outbound,
             path: hotspot.path,
           })),
-          100
+          25
         ),
-        evidencePaths: uniquePaths(documentationInput.sections.architecture.evidencePaths, 120),
+        evidencePaths: uniquePaths(documentationInput.sections.architecture.evidencePaths, 30),
         graphReliability: {
           resolvedEdges:
             documentationInput.sections.architecture.body.graphReliability.resolvedEdges,
@@ -264,38 +270,35 @@ export function buildArchitectDigest(
             exports: module.exports,
             path: module.path,
           })),
-          120
+          40
         ),
-        orphanModules: limit(documentationInput.sections.architecture.body.orphanModules, 100),
+        orphanModules: limit(documentationInput.sections.architecture.body.orphanModules, 25),
         primaryEntrypoints: limit(
           documentationInput.sections.architecture.body.primaryEntrypoints,
-          100
+          15
         ),
         summary: documentationInput.sections.architecture.summary,
         title: documentationInput.sections.architecture.title,
         unknowns: documentationInput.sections.architecture.unknowns,
       },
       onboarding: {
-        apiPaths: limit(documentationInput.sections.onboarding.body.apiPaths, 100),
+        apiPaths: limit(documentationInput.sections.onboarding.body.apiPaths, 20),
         confidence: documentationInput.sections.onboarding.confidence,
-        configPaths: limit(documentationInput.sections.onboarding.body.configPaths, 80),
-        evidencePaths: uniquePaths(documentationInput.sections.onboarding.evidencePaths, 120),
-        firstLookPaths: limit(documentationInput.sections.onboarding.body.firstLookPaths, 100),
+        configPaths: limit(documentationInput.sections.onboarding.body.configPaths, 20),
+        evidencePaths: uniquePaths(documentationInput.sections.onboarding.evidencePaths, 30),
+        firstLookPaths: limit(documentationInput.sections.onboarding.body.firstLookPaths, 20),
         newcomerSteps: documentationInput.sections.onboarding.body.newcomerSteps,
-        riskPaths: limit(documentationInput.sections.onboarding.body.riskPaths, 100),
+        riskPaths: limit(documentationInput.sections.onboarding.body.riskPaths, 20),
         summary: documentationInput.sections.onboarding.summary,
         title: documentationInput.sections.onboarding.title,
         unknowns: documentationInput.sections.onboarding.unknowns,
       },
       overview: {
         confidence: documentationInput.sections.overview.confidence,
-        configFiles: limit(documentationInput.sections.overview.body.configFiles, 80),
-        evidencePaths: uniquePaths(documentationInput.sections.overview.evidencePaths, 120),
-        primaryEntrypoints: limit(
-          documentationInput.sections.overview.body.primaryEntrypoints,
-          100
-        ),
-        primaryModules: limit(documentationInput.sections.overview.body.primaryModules, 100),
+        configFiles: limit(documentationInput.sections.overview.body.configFiles, 20),
+        evidencePaths: uniquePaths(documentationInput.sections.overview.evidencePaths, 30),
+        primaryEntrypoints: limit(documentationInput.sections.overview.body.primaryEntrypoints, 15),
+        primaryModules: limit(documentationInput.sections.overview.body.primaryModules, 20),
         repositoryKind: documentationInput.sections.overview.body.repositoryKind,
         stackProfile: documentationInput.sections.overview.body.stackProfile,
         summary: documentationInput.sections.overview.summary,
@@ -305,12 +308,12 @@ export function buildArchitectDigest(
       risks: {
         confidence: documentationInput.sections.risks.confidence,
         derivedScores: documentationInput.sections.risks.body.derivedScores,
-        evidencePaths: uniquePaths(documentationInput.sections.risks.evidencePaths, 120),
+        evidencePaths: uniquePaths(documentationInput.sections.risks.evidencePaths, 30),
         findings: limit(
           documentationInput.sections.risks.body.findings.map((finding) => ({
             evidencePaths: uniquePaths(
               finding.evidence.map((evidence) => evidence.path),
-              40
+              10
             ),
             id: finding.id,
             score: finding.score,
@@ -318,14 +321,14 @@ export function buildArchitectDigest(
             summary: finding.summary,
             title: finding.title,
           })),
-          80
+          20
         ),
         hotspots: limit(
           documentationInput.sections.risks.body.hotspots.map((hotspot) => ({
             path: hotspot.path,
             score: hotspot.score,
           })),
-          100
+          25
         ),
         rawMetrics: documentationInput.sections.risks.body.rawMetrics,
         summary: documentationInput.sections.risks.summary,

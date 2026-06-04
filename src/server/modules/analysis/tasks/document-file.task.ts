@@ -5,6 +5,7 @@ import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { realtimeServer } from "@/server/core/realtime";
 import { redisClient } from "@/server/core/redis";
 import { REDIS_CONFIG } from "@/server/utils/redis";
+import { TASK_CONFIGS } from "@/server/utils/task-config";
 
 import type { FileActionNodeContext } from "../analysis.schemas";
 import { repoAnalysisService } from "../analysis.service";
@@ -13,8 +14,10 @@ import type { SyncFileActionMeta } from "../logic/repo-file-action-state";
 
 export const documentFileTask = task({
   id: "document-single-file",
+  ...TASK_CONFIGS.documentSingleFile,
   run: async (payload: {
     analysisId?: string;
+    branch: string;
     commitSha?: string;
     content: string;
     language: string;
@@ -24,7 +27,10 @@ export const documentFileTask = task({
     syncMeta: SyncFileActionMeta;
     userId: number;
   }) => {
-    const documentedCode = await repoAnalysisService.runDocumentFilePreview(payload);
+    const documentedCode = await repoAnalysisService.runDocumentFilePreview(
+      payload.userId,
+      payload
+    );
 
     const result = toDocumentFilePreview({
       ...documentedCode,

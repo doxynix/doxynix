@@ -31,7 +31,10 @@ type CallWithFallbackProps<T> = {
   providerOptions?: {
     google?: GoogleLanguageModelOptions;
   };
+  stepCount?: number;
+
   stopSequences?: string[];
+  stream?: boolean;
   system: string;
   taskType?: LLMTaskType;
   temperature?: number;
@@ -39,6 +42,8 @@ type CallWithFallbackProps<T> = {
   topK?: number;
   topP?: number;
 };
+
+const LLM_API_TIMEOUT_MS = 300_000; // TIME: 5 минут
 
 export async function callWithFallback<T>({
   attemptMetadata = {},
@@ -49,7 +54,9 @@ export async function callWithFallback<T>({
   presencePenalty = 0,
   prompt,
   providerOptions,
+  stepCount = 10,
   stopSequences,
+  stream = true,
   system,
   taskType = "default",
   temperature,
@@ -61,7 +68,6 @@ export async function callWithFallback<T>({
     throw new Error("No models configured for fallback.");
   }
 
-  // Apply temperature strategy if not explicitly provided
   const strategy = LLM_TEMPERATURE_STRATEGY[taskType];
   const finalTemperature = temperature ?? strategy.temperature;
   const finalTopK = topK ?? strategy.topK;
@@ -79,6 +85,17 @@ export async function callWithFallback<T>({
         : [{ label: "structured", useTools: false }];
 
     for (const attempt of attempts) {
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => {
+        appLogger.warn({
+          model: modelName,
+          msg: `LLM API call timed out after ${LLM_API_TIMEOUT_MS / 1000}s. Aborting request...`,
+          taskType,
+          ...attemptMetadata,
+        });
+        abortController.abort();
+      }, LLM_API_TIMEOUT_MS);
+
       try {
         appLogger.info({
           attempt: attempt.label,
@@ -87,9 +104,11 @@ export async function callWithFallback<T>({
           taskType,
           ...attemptMetadata,
         });
+
         if (outputSchema != null) {
           const activeTools = attempt.useTools ? tools : undefined;
           const result = await tracedAi.generateText({
+            abortSignal: abortController.signal,
             experimental_telemetry: {
               functionId: `gen-${taskType}`,
               isEnabled: true,
@@ -107,7 +126,7 @@ export async function callWithFallback<T>({
             prompt,
             providerOptions,
             stopSequences,
-            stopWhen: activeTools != null ? ai.stepCountIs(5) : undefined,
+            stopWhen: activeTools != null ? ai.stepCountIs(stepCount) : undefined,
             system,
             temperature: finalTemperature,
             tools: activeTools,
@@ -115,15 +134,51 @@ export async function callWithFallback<T>({
             topP: finalTopP,
           });
 
+          clearTimeout(timeoutId);
           taskLogger.success(
             `AI (${String(attemptMetadata.phase ?? taskType)}): responded successfully.`
           );
-
           return result.output as T;
+        }
+
+        if (stream === false) {
+          const activeTools = attempt.useTools ? tools : undefined;
+          const result = await tracedAi.generateText({
+            abortSignal: abortController.signal,
+            experimental_telemetry: {
+              functionId: `gen-text-${taskType}`,
+              isEnabled: true,
+              metadata: {
+                ...attemptMetadata,
+                attempt: attempt.label,
+                taskType,
+              },
+            },
+            frequencyPenalty,
+            maxOutputTokens,
+            model: google(modelName),
+            presencePenalty,
+            prompt,
+            providerOptions,
+            stopSequences,
+            stopWhen: activeTools != null ? ai.stepCountIs(stepCount) : undefined,
+            system,
+            temperature: finalTemperature,
+            tools: activeTools,
+            topK: finalTopK,
+            topP: finalTopP,
+          });
+
+          clearTimeout(timeoutId);
+          taskLogger.success(
+            `AI Text (${String(attemptMetadata.phase ?? taskType)}): generated successfully.`
+          );
+          return result.text as unknown as T;
         }
 
         const activeTools = attempt.useTools ? tools : undefined;
         const result = tracedAi.streamText({
+          abortSignal: abortController.signal,
           experimental_telemetry: {
             functionId: `stream-${taskType}`,
             isEnabled: true,
@@ -140,7 +195,7 @@ export async function callWithFallback<T>({
           prompt,
           providerOptions,
           stopSequences,
-          stopWhen: activeTools != null ? ai.stepCountIs(5) : undefined,
+          stopWhen: activeTools != null ? ai.stepCountIs(stepCount) : undefined,
           system,
           temperature: finalTemperature,
           tools: activeTools,
@@ -187,11 +242,18 @@ export async function callWithFallback<T>({
             }
             appLogger.error({ error: part.error, msg: "Stream event error" });
           }
+
+          if (part.type === "finish" || part.type === "error") {
+            clearTimeout(timeoutId);
+            break;
+          }
         }
 
         taskLogger.success(`AI: finished generation.`);
         return fullText as T;
       } catch (error) {
+        clearTimeout(timeoutId);
+
         lastError = error;
         const schemaMismatch = isSchemaMismatchError(error);
         appLogger.warn({

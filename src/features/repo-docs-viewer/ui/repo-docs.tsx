@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ComponentType } from "react";
 import dynamic from "next/dynamic";
+import { uniqBy } from "es-toolkit";
 import saveAs from "file-saver";
 import {
   BookOpen,
@@ -13,6 +14,7 @@ import {
   Terminal,
   Users2,
 } from "lucide-react";
+import { parseAsString, useQueryState } from "nuqs";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
@@ -39,6 +41,14 @@ const DOC_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   CODE_DOC: FileText,
   CONTRIBUTING: Users2,
   README: BookOpen,
+};
+
+const DOC_LABELS: Record<string, string> = {
+  API: "API Reference",
+  ARCHITECTURE: "Architecture",
+  CHANGELOG: "History",
+  CONTRIBUTING: "How to Guides",
+  README: "Overview",
 };
 
 type Props = {
@@ -70,6 +80,7 @@ export function RepoDocs({
   repoId,
 }: Readonly<Props>) {
   const [apiMode, setApiMode] = useState<"md" | "swagger">("md");
+  const [activePath] = useQueryState("path", parseAsString);
   const { aid } = useRepoParams();
   const { data: metrics } = trpc.analysis.getDetailedMetrics.useQuery({
     aid: aid ?? undefined,
@@ -78,6 +89,7 @@ export function RepoDocs({
 
   const { data: docContent, isLoading: isDocLoading } = trpc.analysis.getDocumentContent.useQuery({
     aid: aid ?? undefined,
+    path: activeTab === "CODE_DOC" ? (activePath ?? undefined) : undefined,
     repoId,
     type: activeTab,
   });
@@ -170,6 +182,8 @@ export function RepoDocs({
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);
 
+  const uniqueDocsToRender = uniqBy(availableDocs, (doc) => doc.type);
+
   return (
     <Tabs
       value={activeTab}
@@ -180,12 +194,13 @@ export function RepoDocs({
       <RepoDocsTabs
         activeHeadingId={activeHeadingId}
         activeTab={activeTab}
+        availableDocs={availableDocs}
         headings={headings}
         items={tabItems}
       />
 
       <div className="bg-card relative flex flex-1 flex-col rounded-xl border">
-        {availableDocs.map((doc) => {
+        {uniqueDocsToRender.map((doc) => {
           const isCurrentApiSwagger = Boolean(
             doc.type === "API" && apiMode === "swagger" && metrics?.reference.swagger != null
           );
@@ -195,6 +210,16 @@ export function RepoDocs({
           const isReadyToStage = isSwaggerReady || isMarkdownReady;
 
           const isActive = doc.type === activeTab;
+          const isCodeDoc = doc.type === "CODE_DOC";
+
+          const activeDocPath = isCodeDoc ? (docContent?.sourcePath ?? activePath) : undefined;
+
+          const fileName =
+            activeDocPath != null ? (activeDocPath.split("/").pop() ?? "File Audit") : "File Audit";
+
+          const cardTitle = isCodeDoc
+            ? `Audit: ${fileName}`
+            : (DOC_LABELS[doc.type] ?? doc.type.toLowerCase().replace("_", " "));
 
           return (
             <TabsContent
@@ -214,10 +239,10 @@ export function RepoDocs({
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-bold tracking-tight capitalize">
+                        <h2 className="text-2xl font-bold tracking-tight">
                           {doc.type === "API" && apiMode === "swagger"
                             ? "Interactive Console"
-                            : doc.type.toLowerCase().replace("_", " ")}
+                            : cardTitle}
                         </h2>
                       </div>
                       <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-xs">

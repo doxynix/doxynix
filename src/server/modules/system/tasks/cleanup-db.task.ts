@@ -1,7 +1,8 @@
-import { logger, schedules } from "@trigger.dev/sdk/v3";
+import { schedules } from "@trigger.dev/sdk";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
+import { TASK_CONFIGS } from "@/server/utils/task-config";
 
 /**
  * Единая комплексная задача ежедневного обслуживания и очистки СУБД
@@ -9,11 +10,14 @@ import { prisma } from "@/server/core/db";
 export const dailyDatabaseMaintenance = schedules.task({
   cron: "0 3 * * *",
   id: "daily-database-maintenance",
+  ...TASK_CONFIGS.dailyDatabaseMaintenance,
   run: async (payload) => {
-    logger.info("Starting global database maintenance...", { timestamp: payload.timestamp });
+    appLogger.info({
+      msg: "Starting global database maintenance...",
+      timestamp: payload.timestamp,
+    });
 
     const now = new Date();
-
     const date14DaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
     try {

@@ -1,4 +1,6 @@
-import { queue, task } from "@trigger.dev/sdk";
+import { task } from "@trigger.dev/sdk";
+
+import { TASK_CONFIGS } from "@/server/utils/task-config";
 
 import { runWriterWithLimiter, type WriterInput } from "../ai/writer-runner";
 import {
@@ -9,14 +11,9 @@ import {
   executeReadmeWriter,
 } from "../ai/writer-tasks";
 
-export const llmWriterQueue = queue({
-  concurrencyLimit: 1,
-  name: "llm-writer-queue",
-});
-
 export const readmeTask = task({
   id: "write-readme",
-  queue: llmWriterQueue,
+  ...TASK_CONFIGS.writers,
   run: async (i: WriterInput) =>
     runWriterWithLimiter("readme", i, () =>
       executeReadmeWriter(
@@ -35,7 +32,7 @@ export const readmeTask = task({
 
 export const apiTask = task({
   id: "write-api",
-  queue: llmWriterQueue,
+  ...TASK_CONFIGS.writers,
   run: async (i: WriterInput) =>
     runWriterWithLimiter("api", i, () =>
       executeApiWriter(
@@ -54,7 +51,7 @@ export const apiTask = task({
 
 export const architectureTask = task({
   id: "write-architecture",
-  queue: llmWriterQueue,
+  ...TASK_CONFIGS.writers,
   run: async (
     i: WriterInput & { moduleContext: string; onboardingPayload: string; risksPayload: string }
   ) =>
@@ -78,7 +75,7 @@ export const architectureTask = task({
 
 export const contributingTask = task({
   id: "write-contributing",
-  queue: llmWriterQueue,
+  ...TASK_CONFIGS.writers,
   run: async (i: WriterInput) =>
     runWriterWithLimiter("contributing", i, () =>
       executeContributingWriter(
@@ -97,7 +94,7 @@ export const contributingTask = task({
 
 export const changelogTask = task({
   id: "write-changelog",
-  queue: llmWriterQueue,
+  ...TASK_CONFIGS.writers,
   run: async (i: {
     analysisId: string;
     analysisResult: any;

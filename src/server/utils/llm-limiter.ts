@@ -121,7 +121,7 @@ export const llmLimiter = {
         }
 
         const baseWaitTime = Math.max(Math.min(reset - Date.now(), 30_000), 3000);
-        const jitter = Math.floor(Math.random() * 400) + 100;
+        const jitter = Math.floor(Math.random() * 4000) + 100;
         const waitTimeMs = baseWaitTime + jitter;
 
         appLogger.warn({

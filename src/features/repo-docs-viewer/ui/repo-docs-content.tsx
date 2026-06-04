@@ -218,13 +218,14 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
             const cleanedParagraphChildrenDOM = cleanTextNodes(cleanedParagraphChildren);
 
             const remainingContent = (
-              <>
-                {domToReact(cleanedParagraphChildrenDOM, parseOptions)}
+              <div className="flex flex-col gap-2">
+                <p>{domToReact(cleanedParagraphChildrenDOM, parseOptions)}</p>
+
                 {domToReact(
                   (domNode.children as DOMNode[]).filter((child) => child !== firstParagraph),
                   parseOptions
                 )}
-              </>
+              </div>
             );
 
             result = (
@@ -235,12 +236,12 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
                   alertConfig.className
                 )}
               >
-                <IconComponent className="absolute top-4 left-4 size-4" />
-                <AlertTitle className="mb-1 font-sans text-xs font-bold tracking-wider uppercase">
+                <IconComponent className="absolute top-4 left-4" />
+                <AlertTitle className="mb-1 font-sans text-xs font-bold uppercase">
                   {alertConfig.title}
                 </AlertTitle>
 
-                <AlertDescription className="font-sans text-xs leading-relaxed opacity-90 [&_a]:inline [&_code]:inline">
+                <AlertDescription className="text-muted-foreground font-sans text-xs [&_a]:inline [&_code]:inline">
                   {remainingContent}
                 </AlertDescription>
               </Alert>

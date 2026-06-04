@@ -1,5 +1,5 @@
 import { Status } from "@prisma/client";
-import { metadata } from "@trigger.dev/sdk";
+import { metadata } from "@trigger.dev/sdk/v3";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
@@ -41,6 +41,9 @@ export const taskLogger = {
    * Собирает ВСЕ логи из метаданных и кладет в БД на вечное хранение.
    */
   async finalize(analysisId: string, status: Status = Status.DONE, message?: string) {
+    const finalMsg =
+      message ?? (status === Status.DONE ? "Completed successfully" : "Analysis failed");
+
     this.log(
       `Analysis finalized with status: ${status}`,
       status === Status.DONE ? "success" : "error"
@@ -54,7 +57,7 @@ export const taskLogger = {
     const analysis = await prisma.analysis.update({
       data: {
         logs: allLogs,
-        message: message ?? (status === Status.DONE ? "Completed successfully" : "Analysis failed"),
+        message: finalMsg,
         progress: 100,
         status,
       },
@@ -64,7 +67,7 @@ export const taskLogger = {
 
     await publishAnalysisProgress({
       analysisId,
-      message: message ?? (status === Status.DONE ? "Completed successfully" : "Analysis failed"),
+      message: finalMsg,
       progress: 100,
       status,
       userId: analysis.repo.userId,
@@ -91,32 +94,21 @@ export const taskLogger = {
 
   /**
    * Обновление статуса этапа.
-   * Пишет в метаданные И в базу данных (так как это важная точка).
    */
-  async milestone(params: { analysisId: string; msg: string; percent: number; status?: Status }) {
-    const { analysisId, msg, percent, status = Status.PENDING } = params;
+  async milestone(params: { analysisId: string; msg: string; percent: number; userId: number }) {
+    const { analysisId, msg, percent, userId } = params;
 
     this.info(`STAGE: ${msg} (${percent}%)`);
 
     safeMetadata(() => metadata.set(TRIGGER_CONFIG.metadataKeys.statusMessage, msg));
     safeMetadata(() => metadata.set(TRIGGER_CONFIG.metadataKeys.progress, percent));
 
-    const analysis = await prisma.analysis.update({
-      data: {
-        message: msg,
-        progress: percent,
-        status,
-      },
-      select: { repo: { select: { userId: true } } },
-      where: { publicId: analysisId },
-    });
-
     await publishAnalysisProgress({
       analysisId,
       message: msg,
       progress: percent,
-      status,
-      userId: analysis.repo.userId,
+      status: Status.PENDING,
+      userId,
     });
   },
 

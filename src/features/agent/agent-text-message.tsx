@@ -150,7 +150,7 @@ const MarkdownBlock = memo(
         components={{
           blockquote({ children }) {
             return renderAlertOrFallback(children, (cleaned) => (
-              <blockquote className="border-border/60 text-muted-foreground my-2 border-l-2 pl-4 text-left italic">
+              <blockquote className="border-border text-muted-foreground my-2 border-l-2 pl-4 text-left italic">
                 {cleaned}
               </blockquote>
             ));
@@ -167,7 +167,7 @@ const MarkdownBlock = memo(
             if (isInline) {
               return (
                 <code
-                  className="bg-muted text-card-foreground border-border/40 rounded border px-1.5 py-0.5 font-mono text-xs"
+                  className="bg-muted text-card-foreground border-border rounded border px-1.5 py-0.5 font-mono text-xs"
                   {...props}
                 >
                   {children}
@@ -175,7 +175,7 @@ const MarkdownBlock = memo(
               );
             }
             return (
-              <div className="border-border/60 bg-background my-3 h-70 w-full overflow-hidden rounded-xl border text-xs shadow-sm">
+              <div className="border-border bg-background my-3 h-70 w-full overflow-hidden rounded-xl border text-xs shadow-sm">
                 <RepoCodeEditor
                   value={codeText}
                   meta={{ name: `file.${lang}`, sha: "dummy", size: 0, url: "https://dummy.com" }}

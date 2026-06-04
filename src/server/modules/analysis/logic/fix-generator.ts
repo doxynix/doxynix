@@ -1,11 +1,14 @@
-import diff_match_patch from "diff-match-patch";
+import * as diff from "diff";
 import { groupBy, uniq } from "es-toolkit";
+
+import { generateBranchName } from "@/shared/lib/get-branch-name";
 
 import { appLogger } from "@/server/core/app-logger";
 import type { OctokitInstance } from "@/server/core/github/github-provider";
 import { callWithFallback } from "@/server/utils/call";
 
 import { getActiveModels, SAFETY_SETTINGS } from "../ai/ai-constants";
+import { buildCodeFixerSystemPrompt, buildCodeFixerUserPrompt } from "../ai/prompts-refactored";
 import type { FindingForFix, GeneratedDiff } from "./pr-types";
 
 type FixedFileContent = {
@@ -29,56 +32,115 @@ type FindingInput = {
   type: string;
 };
 
-const FILE_TAG_REGEX = /<file\s+path="([^"]+)">([\S\s]*?)<\/file>/g;
-const MARKDOWN_CODE_WRAP_PREFIX_REGEX = /^```[a-z]*\n/i;
-const MARKDOWN_CODE_WRAP_SUFFIX_REGEX = /\n```$/;
+const FILE_TAG_REGEX = /<file\s+path\s*=\s*["']([^"']+)["']\s*>([\S\s]*?)<\/file>/gi;
 
-const dmp = new diff_match_patch();
+/**
+ * Вспомогательные функции для нечеткого сопоставления блоков SEARCH/REPLACE
+ */
+function getIndent(line: string): string {
+  const match = /^\s*/.exec(line);
+  return match ? match[0]! : "";
+}
+
+function adjustIndentation(
+  replaceLines: string[],
+  searchIndent: string,
+  targetIndent: string
+): string[] {
+  if (searchIndent === targetIndent) return replaceLines;
+
+  return replaceLines.map((line) => {
+    if (line.trim() === "") return "";
+
+    if (line.startsWith(searchIndent)) {
+      return targetIndent + line.slice(searchIndent.length);
+    }
+    return targetIndent + line.trimStart();
+  });
+}
+
+function getTokens(line: string): string[] {
+  return line
+    .trim()
+    .toLowerCase()
+    .split(/[\s()\[\]{}.,;+\-*/=<>!]+/gu)
+    .filter(Boolean);
+}
+
+function lineSimilarity(line1: string, line2: string): number {
+  const t1 = getTokens(line1);
+  const t2 = getTokens(line2);
+  if (t1.length === 0 && t2.length === 0) return 1.0;
+  if (t1.length === 0 || t2.length === 0) return 0.0;
+
+  const set1 = new Set(t1);
+  const set2 = new Set(t2);
+  let intersection = 0;
+  for (const token of set1) {
+    if (set2.has(token)) intersection++;
+  }
+  const union = set1.size + set2.size - intersection;
+  return intersection / union;
+}
 
 class FixGenerator {
   /**
-   * Генерирует компактные патчи с помощью Google Diff-Match-Patch с полной поддержкой типов
+   * Высокопроизводительный однопроходный расчет диффов с разгрузкой Event Loop.
    */
-  static generateDiffsFromContentPublic(
+  static async generateDiffsFromContentPublic(
     originalContents: Record<string, string>,
     fixedFiles: FixedFileContent[]
-  ): GeneratedDiff[] {
-    return fixedFiles.map((file) => {
+  ): Promise<GeneratedDiff[]> {
+    const diffs: GeneratedDiff[] = [];
+
+    for (const file of fixedFiles) {
       const original = originalContents[file.filePath] ?? "";
       const newContent = file.newContent;
 
-      const diffs = dmp.diff_main(original, newContent);
+      if (original === newContent) {
+        diffs.push({
+          additions: 0,
+          deletions: 0,
+          filePath: file.filePath,
+          patch: "",
+        });
+        continue;
+      }
 
-      dmp.diff_cleanupSemantic(diffs);
-
-      const patches = dmp.patch_make(original, diffs);
-      const patchText = dmp.patch_toText(patches);
+      const patchText = diff.createTwoFilesPatch(
+        file.filePath,
+        file.filePath,
+        original,
+        newContent,
+        "Original",
+        "AI Fixed"
+      );
 
       let additions = 0;
       let deletions = 0;
 
-      for (const patchItem of patches) {
-        const typedPatch = patchItem as unknown as diff_match_patch.patch_obj;
-
-        if (Array.isArray(typedPatch.diffs)) {
-          for (const [operation, text] of typedPatch.diffs) {
-            if (operation === 1) {
-              additions += text.split("\n").length;
-            }
-            if (operation === -1) {
-              deletions += text.split("\n").length;
-            }
-          }
+      const lines = patchText.split("\n");
+      for (let i = 4; i < lines.length; i++) {
+        const line = lines[i];
+        if (line == null) continue;
+        if (line.startsWith("+") && !line.startsWith("+++")) {
+          additions++;
+        } else if (line.startsWith("-") && !line.startsWith("---")) {
+          deletions++;
         }
       }
 
-      return {
+      diffs.push({
         additions,
         deletions,
         filePath: file.filePath,
         patch: patchText,
-      };
-    });
+      });
+
+      await new Promise((resolve) => setImmediate(resolve));
+    }
+
+    return diffs;
   }
 
   static generateFixRecommendations(
@@ -99,10 +161,15 @@ class FixGenerator {
           newContent: "",
         }));
 
-        const diffs = FixGenerator.generateDiffsFromContentPublic(fileContents, fixedFiles);
+        const diffs: GeneratedDiff[] = affectedFiles.map((filePath) => ({
+          additions: 0,
+          deletions: 0,
+          filePath,
+          patch: "",
+        }));
 
         return {
-          branch: `fix/${type}-${Date.now()}`,
+          branch: generateBranchName(),
           description: config.description,
           diffs,
           estimatedImpact: config.estimatedImpact,
@@ -148,38 +215,155 @@ class FixGenerator {
 }
 
 export class FixService {
-  private static buildFixPrompt(
-    findings: FindingInput[],
-    fileContents: Record<string, string>
-  ): string {
-    const findingsByFile = groupBy(findings, (f) => f.file);
-    const findingDetails = Object.entries(findingsByFile)
-      .map(([filePath, fileFindings]) => {
-        const content = fileContents[filePath] ?? "(file not provided)";
-        const issues = fileFindings
-          .map((f) => `  - Line ${f.line} (${f.type}): ${f.suggestion ?? "Issue detected"}`)
-          .join("\n");
-        return `\n## File: ${filePath}\n${issues}\n\nOriginal:\n\`\`\`\n${content}\n\`\`\``;
-      })
-      .join("\n");
+  /**
+   * Применяет Search-and-Replace блоки к коду, используя каскадный отказоустойчивый поиск
+   */
+  private static applySearchReplace(original: string, response: string, filePath: string): string {
+    const blockRegex =
+      /<{7} (SEARCH|ORIGINAL)\r?\n([\S\s]*?)\r?\n={7}\r?\n([\S\s]*?)\r?\n>{7} (REPLACE|UPDATED)/g;
 
-    return `You are a professional code fixer. Analyze the detected issues in each file and provide the full fixed content.
+    let fileContent = original.replaceAll("\r\n", "\n");
+    let match;
+    let appliedCount = 0;
 
-${findingDetails}
+    blockRegex.lastIndex = 0;
+    while ((match = blockRegex.exec(response)) !== null) {
+      const searchBlock = match[2];
+      const replaceBlock = match[3];
 
-For each file with issues, provide the COMPLETE fixed file content wrapped in:
-<file path="filepath">
-...full file content here...
-</file>
+      if (searchBlock == null || replaceBlock == null) continue;
 
-Ensure:
-1. Fixed content maintains the original file structure and imports
-2. Only necessary changes to address the issues
-3. All line numbers and syntax are correct
-4. No partial content - always provide complete files`;
+      const normalizedSearch = searchBlock.replaceAll("\r\n", "\n");
+      const normalizedReplace = replaceBlock.replaceAll("\r\n", "\n");
+
+      if (fileContent.includes(normalizedSearch)) {
+        fileContent = fileContent.replace(normalizedSearch, normalizedReplace);
+        appliedCount++;
+        continue;
+      }
+
+      const searchLines = normalizedSearch.split("\n");
+      const fileLines = fileContent.split("\n");
+
+      let matchedIndex = -1;
+      let matchedIndent = "";
+      let originalSearchIndent = "";
+
+      const firstNonEmptySearchLine = searchLines.find((l) => l.trim() !== "") ?? "";
+      originalSearchIndent = getIndent(firstNonEmptySearchLine);
+
+      for (let i = 0; i <= fileLines.length - searchLines.length; i++) {
+        let isMatch = true;
+        let detectedIndent = "";
+
+        for (let j = 0; j < searchLines.length; j++) {
+          const sLine = searchLines[j]!;
+          const fLine = fileLines[i + j]!;
+
+          if (sLine.trim() === "" && fLine.trim() === "") continue;
+
+          if (sLine.trim() === "" || fLine.trim() === "") {
+            isMatch = false;
+            break;
+          }
+
+          if (sLine.trim() !== fLine.trim()) {
+            isMatch = false;
+            break;
+          }
+
+          if (detectedIndent === "" && fLine.trim() !== "") {
+            detectedIndent = getIndent(fLine);
+          }
+        }
+
+        if (isMatch) {
+          matchedIndex = i;
+          matchedIndent = detectedIndent;
+          break;
+        }
+      }
+
+      if (matchedIndex !== -1) {
+        const adjustedReplaceLines = adjustIndentation(
+          normalizedReplace.split("\n"),
+          originalSearchIndent,
+          matchedIndent
+        );
+
+        fileLines.splice(matchedIndex, searchLines.length, ...adjustedReplaceLines);
+        fileContent = fileLines.join("\n");
+        appliedCount++;
+        continue;
+      }
+
+      let bestIndex = -1;
+      let bestScore = 0;
+      let bestWindowIndent = "";
+
+      for (let i = 0; i <= fileLines.length - searchLines.length; i++) {
+        let totalScore = 0;
+        let detectedIndent = "";
+
+        for (let j = 0; j < searchLines.length; j++) {
+          const sLine = searchLines[j]!;
+          const fLine = fileLines[i + j]!;
+
+          if (sLine.trim() === "" && fLine.trim() === "") {
+            totalScore += 1.0;
+            continue;
+          }
+
+          totalScore += lineSimilarity(sLine, fLine);
+
+          if (detectedIndent === "" && fLine.trim() !== "") {
+            detectedIndent = getIndent(fLine);
+          }
+        }
+
+        const avgScore = totalScore / searchLines.length;
+        if (avgScore > bestScore && avgScore > 0.75) {
+          bestScore = avgScore;
+          bestIndex = i;
+          bestWindowIndent = detectedIndent;
+        }
+      }
+
+      if (bestIndex !== -1) {
+        appLogger.info({
+          filePath,
+          msg: `Fuzzy search-replace applied successfully (similarity score: ${Math.round(bestScore * 100)}%)`,
+        });
+
+        const adjustedReplaceLines = adjustIndentation(
+          normalizedReplace.split("\n"),
+          originalSearchIndent,
+          bestWindowIndent
+        );
+
+        fileLines.splice(bestIndex, searchLines.length, ...adjustedReplaceLines);
+        fileContent = fileLines.join("\n");
+        appliedCount++;
+        continue;
+      }
+
+      appLogger.error({
+        failedSearchBlock: searchBlock.slice(0, 250),
+        filePath,
+        msg: "Surgical block match failed. Search content did not match any section.",
+      });
+    }
+
+    return fileContent;
   }
 
-  private static parseFixedCodeResponse(response: string): Record<string, string> {
+  /**
+   * Парсит ответ модели и применяет хирургические изменения
+   */
+  private static parseFixedCodeResponse(
+    response: string,
+    originalContents: Record<string, string>
+  ): Record<string, string> {
     const fixedCode: Record<string, string> = {};
 
     FILE_TAG_REGEX.lastIndex = 0;
@@ -187,14 +371,11 @@ Ensure:
 
     while ((match = FILE_TAG_REGEX.exec(response)) !== null) {
       const filePath = match[1]!.trim();
-      let content = match[2]!.trim();
+      const sAndRBlocks = match[2]!.trim();
+      const originalContent = originalContents[filePath];
 
-      content = content
-        .replace(MARKDOWN_CODE_WRAP_PREFIX_REGEX, "")
-        .replace(MARKDOWN_CODE_WRAP_SUFFIX_REGEX, "");
-
-      if (filePath && content) {
-        fixedCode[filePath] = content;
+      if (filePath && sAndRBlocks && originalContent != null) {
+        fixedCode[filePath] = this.applySearchReplace(originalContent, sAndRBlocks, filePath);
       }
     }
 
@@ -231,7 +412,7 @@ Ensure:
     try {
       const pr = await octokit.createPullRequest({
         base: defaultBranch,
-        body: "This PR was automatically generated by Doxynix using Google Fuzzy Diff-Match-Patch to address detected issues.",
+        body: "This PR was automatically generated by Doxynix.",
         changes: [
           {
             commit: title,
@@ -242,6 +423,7 @@ Ensure:
         owner,
         repo: repoName,
         title,
+        update: true,
       });
 
       if (pr == null) {
@@ -277,7 +459,7 @@ Ensure:
     findings: FindingForFix[];
     prAnalysisId?: string;
     repoContext: { framework?: string; language: string };
-    repoId: number;
+    repoId: number | string;
   }): Promise<{
     branch: string;
     diffs: GeneratedDiff[];
@@ -297,28 +479,29 @@ Ensure:
     const primary = recommendations[0]!;
 
     try {
-      const fixPrompt = FixService.buildFixPrompt(input.findings, input.fileContents);
+      const systemPrompt = buildCodeFixerSystemPrompt(input.repoContext.language || "English");
+      const userPrompt = buildCodeFixerUserPrompt(input.findings, input.fileContents);
+
       const activeModels = await getActiveModels();
 
       const aiResponse = await callWithFallback<string>({
         attemptMetadata: {
           operation: "generate-fix",
           prAnalysisId: input.prAnalysisId,
-          repoId: input.repoId,
+          repoId: String(input.repoId),
         },
-        maxOutputTokens: 65_536,
         models: activeModels.POWERFUL,
         outputSchema: null,
-        prompt: fixPrompt,
+        prompt: userPrompt,
         providerOptions: {
           google: { safetySettings: SAFETY_SETTINGS },
         },
-        system:
-          'You are an expert code fixer. Provide complete, syntactically correct fixed file content. Return ONLY the fixed code wrapped in <file path="filepath"> tags.',
-        taskType: "reasoning",
+        stream: false,
+        system: systemPrompt,
+        taskType: "classification",
       });
 
-      const fixedCodeMap = FixService.parseFixedCodeResponse(aiResponse);
+      const fixedCodeMap = FixService.parseFixedCodeResponse(aiResponse, input.fileContents);
 
       const fixedFiles = primary.fixedFiles.map((file) => ({
         filePath: file.filePath,
@@ -331,7 +514,7 @@ Ensure:
         throw new Error("AI failed to generate any fixed file content");
       }
 
-      const diffs = FixGenerator.generateDiffsFromContentPublic(
+      const diffs = await FixGenerator.generateDiffsFromContentPublic(
         input.fileContents,
         validFixedFiles
       );

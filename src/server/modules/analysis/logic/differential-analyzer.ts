@@ -2,10 +2,15 @@ import { compact, meanBy, sumBy, uniqBy } from "es-toolkit";
 import parseGitDiff from "parse-git-diff";
 import { normalize } from "pathe";
 import pm from "picomatch";
+import type { z } from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
-import { prAnalysisLogger } from "@/server/utils/pr-analysis-logger";
+import { callWithFallback } from "@/server/utils/call";
 
+import { getActiveModels } from "../ai/ai-constants";
+import { buildRepositoryToolProfile } from "../ai/ai-tools";
+import { buildPrReviewSystemPrompt, buildPrReviewUserPrompt } from "../ai/prompts-refactored";
+import { PrAiReviewOutputSchema } from "../analysis.schemas";
 import { PROJECT_POLICY_RULES } from "../engine/core/project-policy-rules";
 import { AI_POLICY_CONSTANTS } from "../engine/core/scoring-constants";
 import type { DifferentialAnalysisResult, PRAnalysisConfig, PRFinding } from "./pr-types";
@@ -25,6 +30,12 @@ type PRDiffInfo = {
   repoName: string;
 };
 
+type PRAnalysisMetadata = {
+  branch: string;
+  repoId: string;
+  userId: number;
+};
+
 /**
  * Analyzes PR diff using reduced token budget (30-50K vs 210K for full analysis)
  * Runs Sentinel phase for security findings, Mapper for dependency impact
@@ -38,10 +49,11 @@ export class DifferentialAnalyzer {
     this.isExcluded = pm(config.excludePatterns);
   }
 
-  /**
-   * Main entry point for PR differential analysis
-   */
-  async analyzePRDiff(diffInfo: PRDiffInfo): Promise<DifferentialAnalysisResult> {
+  async analyzePRDiff(
+    diffInfo: PRDiffInfo,
+    projectOverviewJson: string,
+    metadata: PRAnalysisMetadata
+  ): Promise<DifferentialAnalysisResult> {
     const startTime = Date.now();
     appLogger.info({
       changedFiles: diffInfo.changedFiles.length,
@@ -74,20 +86,25 @@ export class DifferentialAnalyzer {
           changedFiles: 0,
           findings: [],
           riskScore: 0,
+          summary: "",
           totalDuration: Date.now() - startTime,
         };
       }
 
-      // Step 2: Run Sentinel phase on changed code (security, obvious bugs)
       const sentinelFindings = this.runSentinelPhase(relevantFiles, diffInfo.prNumber);
 
-      // Step 3: Mapper
       const mapperFindings = this.runMapperPhase(relevantFiles, diffInfo.prNumber);
 
-      // Step 5: Combine and score findings
+      const { findings: aiFindings, summary: aiSummary } = await this.runAiReviewPhase(
+        relevantFiles,
+        projectOverviewJson,
+        metadata,
+        diffInfo.prNumber
+      );
+
       const allFindings = uniqBy(
-        [...sentinelFindings, ...mapperFindings],
-        (f) => `${f.file}:${f.line}:${f.type}`
+        [...sentinelFindings, ...mapperFindings, ...aiFindings],
+        (f) => `${f.file}:${f.line}:${f.type}:${f.message.slice(0, 30)}`
       );
       const scoredFindings = this.applyFocusFilters(allFindings);
       const riskScore = this.calculateRiskScore(scoredFindings);
@@ -106,6 +123,7 @@ export class DifferentialAnalyzer {
         changedFiles: relevantFiles.length,
         findings: scoredFindings,
         riskScore,
+        summary: aiSummary,
         totalDuration: duration,
       };
     } catch (error) {
@@ -163,6 +181,71 @@ export class DifferentialAnalyzer {
     return "LOW";
   }
 
+  /**
+   * Вызов ИИ-модели для глубокого ревью с возвращением находок и общего описания PR
+   */
+  private async runAiReviewPhase(
+    relevantFiles: PRDiffInfo["changedFiles"],
+    projectOverviewJson: string,
+    metadata: PRAnalysisMetadata,
+    prNumber: number
+  ): Promise<{ findings: PRFinding[]; summary: string }> {
+    try {
+      const diffPayload = relevantFiles
+        .map((f) => {
+          if (f.patch == null) return null;
+          return `\n<file_patch path="${f.filename}">\n${f.patch}\n</file_patch>`;
+        })
+        .filter(Boolean)
+        .join("\n");
+
+      if (diffPayload.trim().length === 0) {
+        return { findings: [], summary: "" };
+      }
+
+      const activeModels = await getActiveModels();
+
+      const rawResult = await callWithFallback<z.infer<typeof PrAiReviewOutputSchema>>({
+        attemptMetadata: { operation: "pr-ai-diff-review", prNumber },
+        models: activeModels.POWERFUL,
+        outputSchema: PrAiReviewOutputSchema,
+        prompt: buildPrReviewUserPrompt({ diffPayload, projectOverviewJson }),
+        system: buildPrReviewSystemPrompt("English"),
+        taskType: "classification",
+        tools: buildRepositoryToolProfile(
+          "pr_review",
+          metadata.userId,
+          metadata.repoId,
+          metadata.branch
+        ),
+      });
+
+      const mappedFindings: PRFinding[] = rawResult.findings.map((f) => ({
+        codeSnippet: f.codeSnippet,
+        file: f.file,
+        line: f.line,
+        message: f.message,
+        score: f.score,
+        severity: this.mapScoreToSeverity(f.score),
+        suggestion: f.suggestion,
+        title: f.title,
+        type: f.type,
+      }));
+
+      return {
+        findings: mappedFindings,
+        summary: rawResult.summary,
+      };
+    } catch (error) {
+      appLogger.warn({
+        error: error instanceof Error ? error.message : String(error),
+        msg: "AI Diff Review failed, falling back to local static analysis only",
+        prNumber,
+      });
+      return { findings: [], summary: "" };
+    }
+  }
+
   private runMapperPhase(files: PRDiffInfo["changedFiles"], prNumber: number): PRFinding[] {
     const findings: PRFinding[] = compact(
       files.map((file) => {
@@ -186,8 +269,6 @@ export class DifferentialAnalyzer {
         return null;
       })
     );
-
-    prAnalysisLogger.mapperPhaseCompleted(prNumber, prNumber, findings.length, 0);
     return findings;
   }
 
@@ -278,8 +359,6 @@ export class DifferentialAnalyzer {
         }
       }
     }
-
-    prAnalysisLogger.sentinelPhaseCompleted(prNumber, prNumber, findings.length, 0);
     return findings;
   }
 }

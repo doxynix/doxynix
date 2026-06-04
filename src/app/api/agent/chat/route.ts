@@ -30,7 +30,6 @@ export async function POST(req: Request) {
   }
 
   const session = await getServerAuthSession();
-
   const userId = session?.user.id != null ? Number(session.user.id) : null;
 
   let resolvedRepoId: string | undefined;
@@ -119,7 +118,7 @@ export async function POST(req: Request) {
   });
 
   return result.toUIMessageStreamResponse({
-    onFinish: async ({ responseMessage }) => {
+    onFinish: async ({ messages: callbackMessages, responseMessage }) => {
       if (sessionId != null) {
         await prisma.chatMessage.create({
           data: {
@@ -136,11 +135,15 @@ export async function POST(req: Request) {
           });
 
           if (currentSession != null && currentSession.title === "New Chat") {
-            const firstUserMessage = messages.find((m: { role: string }) => m.role === "user");
-            const firstTextPart = firstUserMessage?.parts?.find(
-              (p: { type: string }) => p.type === "text"
-            ) as undefined | { text?: string };
-            const rawUserText = firstTextPart?.text ?? "";
+            const firstUserMessage = callbackMessages.find((m) => m.role === "user");
+
+            let rawUserText = "";
+            if (firstUserMessage?.parts) {
+              const firstTextPart = firstUserMessage.parts.find(
+                (p: { type: string }) => p.type === "text"
+              ) as undefined | { text?: string };
+              rawUserText = firstTextPart?.text ?? "";
+            }
 
             if (rawUserText.trim().length > 0) {
               const utilityModelId = activeModels.SENTINEL[0] ?? "gemini-3.1-flash-lite";

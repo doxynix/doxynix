@@ -17,14 +17,31 @@ export async function GET(request: NextRequest) {
     return unauthorized();
   }
 
-  if (installationId == null || state == null) {
+  if (state == null) {
+    if (installationId == null) {
+      return redirect("/dashboard?error=setup_params_missing");
+    }
+
+    appLogger.info({
+      installationId,
+      msg: "GitHub App installed, redirecting to dashboard for background sync",
+      userId: session.user.id,
+    });
+
+    return redirect("/dashboard?success=github_connected");
+  }
+
+  if (installationId == null) {
     return redirect("/dashboard?error=setup_params_missing");
   }
 
   try {
     await githubAppService.saveInstallation(prisma, Number(session.user.id), installationId, state);
   } catch (error) {
-    appLogger.error({ error, msg: "GitHub Setup Error:" });
+    appLogger.error({
+      error: error instanceof Error ? error.message : String(error),
+      msg: "GitHub Setup Error:",
+    });
     return redirect("/dashboard?error=setup_failed");
   }
 

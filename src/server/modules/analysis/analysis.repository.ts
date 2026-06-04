@@ -52,6 +52,7 @@ export const repoWithLatestAnalysisAndDocsSelect = {
         },
       },
       createdAt: true,
+      path: true,
       publicId: true,
       type: true,
       updatedAt: true,

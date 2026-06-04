@@ -1,12 +1,46 @@
-import { tool } from "ai";
+import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { githubBrowseService } from "@/server/core/github/github-browse.service";
+import { apiForUser } from "@/server/core/trpc/server";
 import { CodeOptimizer } from "@/server/utils/optimizers";
 
-export function buildRepositoryTools(userId: number, repoId: string, branch: string) {
+export type RepositoryToolProfile =
+  | "architect"
+  | "file_action"
+  | "fixer"
+  | "github_agent"
+  | "mapper"
+  | "pr_review"
+  | "writer_api"
+  | "writer_architecture"
+  | "writer_contributing"
+  | "writer_readme";
+
+const TOOL_KEYS_BY_PROFILE: Record<RepositoryToolProfile, readonly string[]> = {
+  architect: ["readFile", "readMultipleFiles", "searchCode"],
+  file_action: ["readFile", "readMultipleFiles", "searchCode"],
+  fixer: ["readFile", "readMultipleFiles"],
+  github_agent: [
+    "listFiles",
+    "readFile",
+    "readMultipleFiles",
+    "searchCode",
+    "readPreviousDocument",
+    "getLatestAnalysis",
+    "triggerRepositoryAnalysis",
+  ],
+  mapper: ["listFiles", "readFile", "searchCode"],
+  pr_review: ["readFile", "readMultipleFiles", "searchCode"],
+  writer_api: ["readFile", "readMultipleFiles", "searchCode"],
+  writer_architecture: ["readFile", "readMultipleFiles", "searchCode", "readPreviousDocument"],
+  writer_contributing: ["readFile", "searchCode", "readPreviousDocument"],
+  writer_readme: ["readFile", "readPreviousDocument"],
+};
+
+function buildRepositoryTools(userId: number, repoId: string, branch: string) {
   return {
     getBranches: tool({
       description: "Get all available git branches for this repository.",
@@ -23,6 +57,25 @@ export function buildRepositoryTools(userId: number, repoId: string, branch: str
         }
       },
       inputSchema: z.object({}),
+    }),
+
+    // TODO: вынести в общий
+    getLatestAnalysis: tool({
+      description:
+        "Check the status (PENDING, COMPLETED, FAILED) and metadata of the latest static code analysis run for a repository.",
+      execute: async ({ repoId }) => {
+        const trpc = await apiForUser(userId);
+        const targetRepoId = repoId;
+        if (targetRepoId == null) throw new Error("Missing repository context.");
+
+        return trpc.analysis.getLatest({ repoId: targetRepoId });
+      },
+      inputSchema: z.object({
+        repoId: z
+          .uuid()
+          .describe("The public UUID of the repository to check the analysis status for")
+          .optional(),
+      }),
     }),
 
     listFiles: tool({
@@ -55,7 +108,6 @@ export function buildRepositoryTools(userId: number, repoId: string, branch: str
         prefix: z.string().optional().describe("Optional folder path to filter by"),
       }),
     }),
-
     readFile: tool({
       description:
         "Read the content of a specific file from the repository. By default, it optimizes the file (hides implementations, keeping signatures and exports) to save context tokens. Set 'skeletonize' to false ONLY if you absolutely need the full raw implementation details.",
@@ -103,7 +155,6 @@ export function buildRepositoryTools(userId: number, repoId: string, branch: str
           ),
       }),
     }),
-
     readMultipleFiles: tool({
       description:
         "Read the content of multiple files from the repository at once. By default, it optimizes the files (hides implementations, keeping signatures and exports) to save context tokens. Set 'skeletonize' to false ONLY if you absolutely need the full raw implementation details.",
@@ -203,5 +254,89 @@ export function buildRepositoryTools(userId: number, repoId: string, branch: str
           .describe("The type of previous document to retrieve"),
       }),
     }),
+
+    searchCode: tool({
+      description:
+        "Perform a high-density, multi-term search across the repository indexed files. Use this to quickly find specific code patterns, function calls, variable definitions, or API usages across the codebase.",
+      execute: async ({ search }) => {
+        try {
+          appLogger.info({ msg: "AI Tool: searchCode", repoId, search, userId });
+          const trpc = await apiForUser(userId);
+          const results = await trpc.analysis.searchWorkspace({
+            repoId,
+            search,
+          });
+
+          if (results.length === 0) {
+            return `No relevant code snippets or files found for search term "${search}". Try a different query.`;
+          }
+
+          return results
+            .map((item) => {
+              const pathInfo = item.path != null ? `[[${item.path}]]` : "";
+              const docInfo =
+                item.docSectionId != null
+                  ? ` (Section: ${item.docSectionId} in ${item.docType})`
+                  : "";
+              return `- ${item.label}: ${item.description}${pathInfo}${docInfo} (Score: ${item.score})`;
+            })
+            .join("\n")
+            .slice(0, 1000);
+        } catch (error) {
+          appLogger.error({ error, msg: "AI Tool Failed: searchCode", repoId, search, userId });
+          return `Error: Could not perform code search for "${search}".`;
+        }
+      },
+      inputSchema: z.object({
+        search: z
+          .string()
+          .min(2)
+          .describe(
+            "The term or keyword to search for (e.g., 'authMiddleware', 'createUser', 'Prisma.findUnique')"
+          ),
+      }),
+    }),
+
+    // TODO: вынести в общий
+    triggerRepositoryAnalysis: tool({
+      description: "Queue and start a complete static code analysis run for a repository.",
+      execute: async ({ branch, repoId }) => {
+        const trpc = await apiForUser(userId);
+        const targetRepoId = repoId;
+        if (targetRepoId == null) throw new Error("Missing repository context.");
+
+        return trpc.analysis.analyze({
+          branch,
+          docTypes: ["README", "API", "ARCHITECTURE", "CONTRIBUTING", "CHANGELOG"],
+          files: ["**/*"],
+          language: "English",
+          repoId: targetRepoId,
+        });
+      },
+      inputSchema: z.object({
+        branch: z
+          .string()
+          .optional()
+          .describe("Specific branch to target (defaults to default branch)"),
+        repoId: z.uuid().describe("The public UUID of the repository to analyze").optional(),
+      }),
+    }),
   };
+}
+
+export function buildRepositoryToolProfile(
+  profile: RepositoryToolProfile,
+  userId: number,
+  repoId: string,
+  branch: string
+): ToolSet {
+  const allTools: ToolSet = buildRepositoryTools(userId, repoId, branch);
+  const selectedTools: ToolSet = {};
+
+  for (const key of TOOL_KEYS_BY_PROFILE[profile]) {
+    const selected = allTools[key];
+    if (selected != null) selectedTools[key] = selected;
+  }
+
+  return selectedTools;
 }

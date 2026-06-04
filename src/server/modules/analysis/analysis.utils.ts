@@ -8,6 +8,7 @@ import { CodeOptimizer } from "@/server/utils/optimizers";
 import type { RepoSearchResult } from "@/server/utils/types";
 
 import { getActiveModels } from "./ai/ai-constants";
+import { buildRepositoryToolProfile } from "./ai/ai-tools";
 import { buildSingleFileAnalysisPrompt } from "./ai/prompts-refactored";
 import {
   QuickFileAuditSchema,
@@ -194,6 +195,7 @@ export function buildDocumentFallback(path: string, summary: string): DocumentFi
   return {
     confidence: "low",
     documentation: summary,
+    edits: [],
     path,
     summary,
   };
@@ -279,7 +281,10 @@ export function deriveMaintenanceStatus(repo: Repo) {
   return "active" as const;
 }
 
-export async function runQuickFileAudit(input: FileActionInput): Promise<QuickFileAuditResult> {
+export async function runQuickFileAudit(
+  userId: number,
+  input: FileActionInput
+): Promise<QuickFileAuditResult> {
   const rawContent = input.content.trim();
 
   if (rawContent.length === 0) {
@@ -329,6 +334,7 @@ export async function runQuickFileAudit(input: FileActionInput): Promise<QuickFi
     prompt: userPrompt,
     system: systemPrompt,
     taskType: "classification",
+    tools: buildRepositoryToolProfile("file_action", userId, input.repoId, input.branch),
   });
 
   return {

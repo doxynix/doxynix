@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { Status } from "@prisma/client";
 import { compact } from "es-toolkit";
 import fg from "fast-glob";
 import { isBinaryFile } from "isbinaryfile";
@@ -32,7 +33,7 @@ export async function handleError(
     data: {
       error: message,
       message: "Analysis failed",
-      status: "FAILED",
+      status: Status.FAILED,
     },
     where: { publicId: analysisId },
   });
@@ -42,7 +43,7 @@ export async function handleError(
     .publish(REALTIME_CONFIG.events.user.analysisProgress, {
       analysisId,
       message,
-      status: "FAILED",
+      status: Status.FAILED,
     });
 }
 

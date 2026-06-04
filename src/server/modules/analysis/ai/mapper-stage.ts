@@ -1,5 +1,4 @@
 import { appLogger } from "@/server/core/app-logger";
-import { google } from "@/server/core/google";
 import { callWithFallback } from "@/server/utils/call";
 
 import {
@@ -12,7 +11,7 @@ import type { RepositoryEvidence } from "../engine/core/discovery.types";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import { buildMapperSkeleton } from "../logic/mapper-skeleton";
 import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
-import { buildRepositoryTools } from "./ai-tools";
+import { buildRepositoryToolProfile } from "./ai-tools";
 import { buildMapperSystemPrompt, buildMapperUserPrompt } from "./prompts-refactored";
 
 export async function executeMapperPhase(
@@ -30,7 +29,6 @@ export async function executeMapperPhase(
     MAX_MAPPER_CHARS
   );
 
-  const repoTools = buildRepositoryTools(userId, repoId, branch);
   const activeModels = await getActiveModels();
 
   try {
@@ -46,10 +44,7 @@ export async function executeMapperPhase(
       },
       system: buildMapperSystemPrompt(),
       taskType: "reasoning",
-      tools: {
-        ...repoTools,
-        codeExecution: google.tools.codeExecution({}),
-      },
+      tools: buildRepositoryToolProfile("mapper", userId, repoId, branch),
     });
 
     const projectMap = normalizeProjectMapOutput(raw);

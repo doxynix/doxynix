@@ -13,6 +13,7 @@ export const REALTIME_CONFIG = {
       auditUpdated: "audit-updated",
       fileActionCompleted: "fileActionCompleted",
       notification: "notification",
+      prCommentReceived: "pr-comment-received",
       sessionUpdated: "session-updated",
     },
   },

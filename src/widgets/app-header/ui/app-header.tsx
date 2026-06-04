@@ -1,10 +1,9 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { Book, SlashIcon } from "lucide-react";
 
 import { LOCALES, type Locale } from "@/shared/constants/locales";
-import { Link } from "@/shared/i18n/routing";
+import { Link, usePathname } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { AppButton } from "@/shared/ui/core/button";

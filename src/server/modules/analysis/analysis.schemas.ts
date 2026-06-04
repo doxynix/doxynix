@@ -33,19 +33,29 @@ export const QuickFileAuditSchema = z.object({
     ),
 });
 
-export const DocumentFilePreviewSchema = z.object({
-  confidence: FileActionConfidenceSchema.describe(
-    'Strictly evaluate the documentation confidence. Choose exactly "high", "medium", or "low".'
-  ),
-  documentation: z
+export const CodeDocEditSchema = z.object({
+  replace: z
     .string()
-    .min(1)
     .describe(
-      "The generated full inline documentation comments (JSDoc/Docstring/etc) inside the target file context."
+      "CRITICAL: The exact same block of code from 'search', but with newly injected inline KDoc/JSDoc/docstring comments added. " +
+        "The original code logic, variable names, functions, imports, and active code statements inside this block " +
+        "MUST remain 100% identical, character-for-character, to the original code in 'search'. " +
+        "Under NO circumstances are you allowed to refactor, simplify, optimize, or rewrite the code implementation!"
     ),
+  search: z
+    .string()
+    .describe(
+      "The exact contiguous block of code from the original file to search for (usually the class, method, or function signature)."
+    ),
+});
+
+export const DocumentFilePreviewSchema = z.object({
+  confidence: z.enum(["high", "medium", "low"]),
+  edits: z
+    .array(CodeDocEditSchema)
+    .describe("List of targeted search-and-replace edits to inject documentation"),
   summary: z
     .string()
-    .min(1)
     .describe("A 1-2 sentence description summarizing the core modules documented."),
 });
 
@@ -68,11 +78,13 @@ export type FileActionNodeContext = {
 };
 
 export type FileActionInput = {
+  branch: string;
   content: string;
   contextBlock?: string;
   language: string;
   nodeContext?: FileActionNodeContext;
   path: string;
+  repoId: string;
 };
 
 export type QuickFileAuditResult = z.infer<typeof QuickFileAuditSchema> & {
@@ -80,6 +92,7 @@ export type QuickFileAuditResult = z.infer<typeof QuickFileAuditSchema> & {
 };
 
 export type DocumentFilePreviewResult = z.infer<typeof DocumentFilePreviewSchema> & {
+  documentation: string;
   path: string;
 };
 
@@ -142,4 +155,41 @@ export const GeneratedFixDetailedDTO = GeneratedFixDTO.extend({
 
 export const FixResultSchema = z.object({
   fixedFiles: z.array(StagedFixedFileSchema),
+});
+
+export const PrAiReviewFindingSchema = z.object({
+  codeSnippet: z
+    .string()
+    .optional()
+    .describe("Exact lines of code causing the issue from the diff"),
+  file: z.string().describe("The file path containing the issue"),
+  line: z.number().int().min(1).describe("The line number of the issue"),
+  message: z.string().describe("Detailed technical explanation of the issue and its impact"),
+  score: z
+    .number()
+    .int()
+    .min(1)
+    .max(10)
+    .describe("Severity score from 1 (lowest) to 10 (critical)"),
+  suggestion: z
+    .string()
+    .optional()
+    .describe(
+      "CRITICAL: Must contain ONLY the direct, compilable, raw replacement code to fix the issue. Absolute NO conversational text, NO explanations, and NO markdown code block fences (do NOT use backticks). This code must be ready to replace the code at the given 'line' directly. If a direct code-level fix is not applicable, omit this field."
+    ),
+  title: z.string().describe("Short descriptive title of the finding"),
+  type: z
+    .enum(["ARCHITECTURE", "BUG", "COMPLEXITY", "PERFORMANCE", "SECURITY", "STYLE"])
+    .describe("The category of the finding"),
+});
+
+export const PrAiReviewOutputSchema = z.object({
+  findings: z
+    .array(PrAiReviewFindingSchema)
+    .describe("List of code review findings discovered in the PR changes"),
+  summary: z
+    .string()
+    .describe(
+      "A high-density, professional technical Markdown description/body for the GitHub Pull Request (including overview, impact, and logical changes)"
+    ),
 });

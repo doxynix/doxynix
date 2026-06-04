@@ -72,7 +72,7 @@ export function UserNav() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
+          <div className="flex flex-col gap-1">
             <p className="truncate text-sm font-medium">{name}</p>
             <p className="text-muted-foreground truncate text-xs">{email}</p>
           </div>

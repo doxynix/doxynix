@@ -14,20 +14,34 @@ import { Spinner } from "@/shared/ui/core/spinner";
 
 import { AnalysisTerminal } from "./repo-analysis-terminal";
 
-type Props = { accessToken: string; jobId: string; name: string; owner: string; repoId: string };
+type Props = {
+  accessToken: string;
+  analysisId: string;
+  jobId: string;
+  name: string;
+  owner: string;
+  repoId: string;
+};
 
 const parseProgress = (val: unknown) => z.number().min(0).max(100).catch(0).parse(val);
 const parseStatusMessage = (val: unknown) => z.string().catch("Analyzing repository…").parse(val);
 const parseTaskLogs = (val: unknown) => z.array(z.string()).catch([]).parse(val);
 
-export function RepoAnalysisLive({ accessToken, jobId, name, owner, repoId }: Readonly<Props>) {
+export function RepoAnalysisLive({
+  accessToken,
+  analysisId,
+  jobId,
+  name,
+  owner,
+  repoId,
+}: Readonly<Props>) {
   const router = useRouter();
+  const utils = trpc.useUtils();
   const { run } = useRealtimeRun(jobId, { accessToken });
 
-  const { data: latestAnalysis } = trpc.analysis.getLatest.useQuery(
-    { repoId },
-    { refetchInterval: (query) => (query.state.data?.status === "PENDING" ? 4000 : false) }
-  );
+  const { data: latestAnalysis } = trpc.analysis.getLatest.useQuery({ repoId });
+
+  const cancelMutation = trpc.analysis.cancel.useMutation();
 
   const metadata = run?.metadata ?? {};
 
@@ -42,10 +56,12 @@ export function RepoAnalysisLive({ accessToken, jobId, name, owner, repoId }: Re
   const isDbDone = latestAnalysis?.status === "DONE";
   const isDbFailed = latestAnalysis?.status === "FAILED";
   const isTriggerFinished = run?.status === "COMPLETED";
-  const isTriggerFailed = run?.status === "FAILED" || run?.status === "CRASHED";
+  const isTriggerFailed =
+    run?.status === "FAILED" || run?.status === "CRASHED" || run?.status === "TIMED_OUT";
 
   const isFailed = isTriggerFailed || isDbFailed;
   const isFinished = !isFailed && (isTriggerFinished || isDbDone);
+  const isPending = latestAnalysis?.status === "PENDING";
 
   let displayStatus: string;
   if (isFailed) {
@@ -55,6 +71,19 @@ export function RepoAnalysisLive({ accessToken, jobId, name, owner, repoId }: Re
   } else {
     displayStatus = run?.status ?? latestAnalysis?.status ?? "QUEUED";
   }
+
+  const handleCancel = (repoId: string, analysisId: string) => {
+    cancelMutation.mutate(
+      { analysisId },
+      {
+        onSuccess: () => {
+          void utils.analysis.getLatest.invalidate({ repoId }).then(() => {
+            router.refresh();
+          });
+        },
+      }
+    );
+  };
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 py-10">
@@ -105,16 +134,18 @@ export function RepoAnalysisLive({ accessToken, jobId, name, owner, repoId }: Re
 
       <div className="flex justify-center gap-4">
         {isFinished && (
-          <AppButton
-            onClick={() => router.push(`/dashboard/repo/${owner}/${name}`)}
-            className="px-10"
-          >
+          <AppButton onClick={() => router.push(`/dashboard/repo/${owner}/${name}`)}>
             View Results
           </AppButton>
         )}
         {(isFinished || isFailed) && (
-          <AppButton variant="outline" onClick={() => router.refresh()}>
+          <AppButton variant="outline" onClick={() => handleCancel(repoId, analysisId)}>
             Start New Audit
+          </AppButton>
+        )}
+        {isPending && (
+          <AppButton variant="destructive" onClick={() => handleCancel(repoId, analysisId)}>
+            Cancel
           </AppButton>
         )}
       </div>

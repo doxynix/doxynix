@@ -31,7 +31,8 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import type { EditorStats } from "@/entities/repo/model/editor-stats.types";
 import type { FileNode } from "@/entities/repo/model/repo-setup.types";
-import type { FileContent } from "@/entities/repo/model/repo.types";
+import type { FileContent, UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
 import { RepoStatusBar } from "@/entities/repo/ui/repo-status-bar";
 
 import { RepoCodeActionButton } from "./repo-code-action-button";
@@ -46,11 +47,12 @@ const Editor = dynamic(() => import("./repo-code-editor").then((m) => m.RepoCode
 type Props = {
   fileData: FileContent;
   path: string;
+  repo: UiRepoDetailed;
   repoId: string;
   treeApi: TreeApi<FileNode> | undefined;
 };
 
-export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Props>) {
+export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Readonly<Props>) {
   const { data: session } = useSession();
   const userId = session?.user.id;
   const [mode, setMode] = useState<"edit" | "view">("view");
@@ -65,6 +67,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
   const [localContent, setLocalContent] = useState(fileData.content);
   const [prevPath, setPrevPath] = useState(path);
   const [prevExternalContent, setPrevExternalContent] = useState(fileData.content);
+  const { state } = useRepoSetup(repo);
 
   const [editorStats, setEditorStats] = useState<EditorStats>({
     col: 1,
@@ -178,13 +181,13 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
     setIsAuditDismissed(false);
     setIsAiLoading(true);
     setShouldAnimate(true);
-    auditMutation.mutate({ content: localContent, path, repoId });
+    auditMutation.mutate({ branch: state.selectedBranch, content: localContent, path, repoId });
   };
 
   const handleDocument = () => {
     setIsAiLoading(true);
     setShowDiff(false);
-    documentMutation.mutate({ content: localContent, path, repoId });
+    documentMutation.mutate({ branch: state.selectedBranch, content: localContent, path, repoId });
   };
 
   const handleAcceptDiff = (): void => {
@@ -381,7 +384,7 @@ export function RepoCodeBrowser({ fileData, path, repoId, treeApi }: Readonly<Pr
         </div>
       )}
 
-      {showDiff === false && documentResult?.action === "document-file-preview" && (
+      {showDiff !== false && (
         <div className="animate-in slide-in-from-top-1 flex items-center justify-between border-b px-4 py-2">
           <div className="flex items-center gap-2">
             <Sparkles />

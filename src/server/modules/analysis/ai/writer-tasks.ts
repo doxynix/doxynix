@@ -5,13 +5,12 @@ import type { ToolSet } from "ai";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { getClientContext } from "@/server/core/github/github-provider";
-import { google } from "@/server/core/google";
 import { callWithFallback } from "@/server/utils/call";
 import { unwrapAiText } from "@/server/utils/optimizers";
 
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
-import { buildRepositoryTools } from "./ai-tools";
+import { buildRepositoryToolProfile } from "./ai-tools";
 import {
   buildApiWriterSystemPrompt,
   buildApiWriterUserPrompt,
@@ -94,15 +93,13 @@ async function runWriterPrompt(params: RunWriterPromptParams) {
       models: activeModels.WRITER,
       outputSchema: null,
       prompt: params.prompt,
+      stream: false,
       system: params.system,
       ...(params.providerOptions != null ? { providerOptions: params.providerOptions } : {}),
       providerOptions: params.providerOptions ?? defaultProviderOptions,
       taskType: "creative",
       temperature: params.temperature,
-      tools: {
-        ...params.tools,
-        codeExecution: google.tools.codeExecution({}),
-      },
+      tools: params.tools,
     }).then(unwrapAiText)
   );
 }
@@ -125,7 +122,7 @@ export async function executeReadmeWriter(
     prompt: buildReadmeWriterUserPrompt(payload, engineeringDossierPayload, context, allowedPaths),
     promptChars: payload.length + engineeringDossierPayload.length + context.length,
     system: buildReadmeWriterSystemPrompt(language),
-    tools: buildRepositoryTools(userId, repoId, branch),
+    tools: buildRepositoryToolProfile("writer_readme", userId, repoId, branch),
   });
 }
 
@@ -147,7 +144,7 @@ export async function executeApiWriter(
     prompt: buildApiWriterUserPrompt(payload, engineeringDossierPayload, context, allowedPaths),
     promptChars: payload.length + engineeringDossierPayload.length + context.length,
     system: buildApiWriterSystemPrompt(language),
-    tools: buildRepositoryTools(userId, repoId, branch),
+    tools: buildRepositoryToolProfile("writer_api", userId, repoId, branch),
   });
 }
 
@@ -184,7 +181,7 @@ export async function executeArchitectureWriter(
       engineeringDossierPayload.length +
       context.length,
     system: buildArchitectureWriterSystemPrompt(language),
-    tools: buildRepositoryTools(userId, repoId, branch),
+    tools: buildRepositoryToolProfile("writer_architecture", userId, repoId, branch),
   });
 }
 
@@ -211,7 +208,7 @@ export async function executeContributingWriter(
     ),
     promptChars: payload.length + engineeringDossierPayload.length + context.length,
     system: buildContributingWriterSystemPrompt(language),
-    tools: buildRepositoryTools(userId, repoId, branch),
+    tools: buildRepositoryToolProfile("writer_contributing", userId, repoId, branch),
   });
 }
 
@@ -240,6 +237,34 @@ type ChangelogContext = {
   commits: ChangelogCommit[];
   pullRequests: ChangelogPullRequest[];
 };
+
+function firstCommitLine(message: string) {
+  return message.split(/\r?\n/u)[0]?.trim() ?? "";
+}
+
+function formatChangelogCommits(commits: ChangelogCommit[]) {
+  if (commits.length === 0) return "No commits available.";
+
+  return commits
+    .map((commit) => {
+      const author = commit.author?.trim() ?? "unknown";
+      const message = firstCommitLine(commit.message);
+      return `- ${author}: ${message}`;
+    })
+    .join("\n");
+}
+
+function formatChangelogPullRequests(pullRequests: ChangelogPullRequest[]) {
+  if (pullRequests.length === 0) return "No merged pull requests available.";
+
+  return pullRequests
+    .map((pr) => {
+      const labels = pr.labels.length > 0 ? ` [${pr.labels.join(", ")}]` : "";
+      const author = pr.author?.trim() ?? "unknown";
+      return `- PR-${pr.number}${labels} by ${author}: ${pr.title}`;
+    })
+    .join("\n");
+}
 
 export async function executeChangelogWriter(
   analysisId: string,
@@ -359,10 +384,9 @@ export async function executeChangelogWriter(
     name: "changelog",
     phase: "writer_changelog",
     prompt: buildChangelogWriterUserPrompt({
-      analysisDeltaJson: JSON.stringify(changelogContext.analysisDelta, null, 2),
-      commitsJson: JSON.stringify(changelogContext.commits, null, 2),
-      pullRequestsJson: JSON.stringify(changelogContext.pullRequests, null, 2),
-      techStack: analysisResult.executive_summary.stack_details,
+      analysisDeltaJson: JSON.stringify(changelogContext.analysisDelta),
+      commitsJson: formatChangelogCommits(changelogContext.commits),
+      pullRequestsJson: formatChangelogPullRequests(changelogContext.pullRequests),
     }),
     system: buildChangelogWriterSystemPrompt(language),
   });

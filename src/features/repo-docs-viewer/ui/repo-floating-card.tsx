@@ -198,7 +198,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
                       marker.color
                     )}
                   >
-                    <Icon className="size-2.5 shrink-0" />
+                    <Icon className="size-2.5" />
                     {marker.label}
                   </AppBadge>
                 );
@@ -216,7 +216,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
             )}
 
             {activeStats.length > 0 && (
-              <div className="bg-border/40 border-border/40 grid grid-cols-2 gap-px overflow-hidden rounded-xl border pt-0">
+              <div className="bg-border border-border grid grid-cols-2 gap-px overflow-hidden rounded-xl border pt-0">
                 {activeStats.map(({ config, key, value }) => {
                   const Icon = config.icon;
                   const isDestructive =
