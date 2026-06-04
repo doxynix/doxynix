@@ -23,7 +23,8 @@ export default defineConfig({
       reporter: ["text", "json", "html", "json-summary"],
 
       include: [
-        "src/server/services/**/*.ts",
+        "src/server/modules/**/*.ts",
+        "src/server/core/**/*.ts",
         "src/server/utils/**/*.ts",
         "src/shared/lib/**/*.ts",
       ],
@@ -31,15 +32,10 @@ export default defineConfig({
       exclude: [
         "**/*.d.ts",
         "**/*.test.ts",
+        "**/*.test.tsx",
         "src/tests/**/*",
         "src/shared/api-contracts/**/*",
-
-        "src/shared/api/db/**/*",
-        "src/shared/api/auth/**/*",
-
-        "src/server/trpc/router/**/*",
-        "src/shared/lib/logger.ts",
-        "src/shared/lib/uploadthing.ts",
+        "src/app/**/*",
       ],
     },
   },
