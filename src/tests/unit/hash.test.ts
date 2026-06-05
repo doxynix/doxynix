@@ -12,6 +12,7 @@ import {
 vi.mock("@/shared/constants/env.server", () => ({
   API_KEY_CHECKSUM_SECRET: "test_checksum_hmac_secret_value_2026",
   API_KEY_PEPPER: "test_api_key_pepper_secret_value_2026",
+  PRISMA_FIELD_ENCRYPTION_HASH_SALT: "test_prisma_field_salt_value_2026",
 }));
 
 describe("Cryptographic Hash & API Key Utilities", () => {
@@ -35,7 +36,6 @@ describe("Cryptographic Hash & API Key Utilities", () => {
       const originalKey = generateApiKey();
 
       const lastChar = originalKey.slice(-1);
-
       const tamperedChar = lastChar === "0" ? "1" : "0";
       const tamperedKey = originalKey.slice(0, -1) + tamperedChar;
 
@@ -101,7 +101,7 @@ describe("Cryptographic Hash & API Key Utilities", () => {
   });
 
   describe("getApiKeyHash", () => {
-    it("should generate a stable 64-character SHA-256 HMAC hash", () => {
+    it("should generate a stable 64-character HMAC-SHA256 hash", () => {
       const payload = "test_random_payload_value_123";
       const hash = getApiKeyHash(payload);
 
@@ -119,7 +119,7 @@ describe("Cryptographic Hash & API Key Utilities", () => {
   });
 
   describe("getRawHash & getNormalizedHash (Prisma/Field-Encryption compatibility)", () => {
-    it("should compute raw SHA-256 hash for any string", () => {
+    it("should compute raw SHA-256 hash for any string with salt", () => {
       const val = "hello_world";
       const hash = getRawHash(val);
 

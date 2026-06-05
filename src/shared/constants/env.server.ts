@@ -39,6 +39,7 @@ const envServer = createEnv({
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     LOG_SALT_SECRET: process.env.LOG_SALT_SECRET,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    PRISMA_FIELD_ENCRYPTION_HASH_SALT: process.env.PRISMA_FIELD_ENCRYPTION_HASH_SALT,
     PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,
     REDIS_TCP_URL: process.env.REDIS_TCP_URL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
@@ -77,6 +78,7 @@ const envServer = createEnv({
     GROQ_API_KEY: stringSchema,
     LOG_SALT_SECRET: stringSchema,
     NEXTAUTH_SECRET: stringSchema,
+    PRISMA_FIELD_ENCRYPTION_HASH_SALT: stringSchema,
     PRISMA_FIELD_ENCRYPTION_KEY: stringSchema,
     REDIS_TCP_URL: stringSchema,
     RESEND_API_KEY: stringSchema,
@@ -103,6 +105,7 @@ export const GROQ_API_KEY = envServer.GROQ_API_KEY;
 export const UPLOADTHING_TOKEN = envServer.UPLOADTHING_TOKEN;
 export const GITHUB_APP_ID = envServer.GITHUB_APP_ID;
 export const PRISMA_FIELD_ENCRYPTION_KEY = envServer.PRISMA_FIELD_ENCRYPTION_KEY;
+export const PRISMA_FIELD_ENCRYPTION_HASH_SALT = envServer.PRISMA_FIELD_ENCRYPTION_HASH_SALT;
 export const LOG_SALT_SECRET = envServer.LOG_SALT_SECRET;
 export const GEMINI_PROXY = envServer.GEMINI_PROXY;
 export const GOOGLE_GENERATIVE_AI_API_KEY = envServer.GOOGLE_GENERATIVE_AI_API_KEY;
