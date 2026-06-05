@@ -104,25 +104,18 @@ async function getNextAfterApi() {
 
 async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
   const afterFn = await getNextAfterApi();
+
   if (afterFn) {
     try {
       afterFn(task);
       return;
-    } catch {}
+    } catch (error) {
+      appLogger.error({ error, msg: "afterFn failed, falling back to blocking await" });
+    }
   }
 
-  if (process.env.TRIGGER_RUN_ID != null || IS_TEST) {
-    await task();
-    return;
-  }
-
-  const schedule =
-    typeof setImmediate !== "undefined" ? setImmediate : (fn: () => void) => setTimeout(fn, 0);
-
-  schedule(() => {
-    task().catch((error) => {
-      appLogger.error({ error: error, msg: "Background task failed" });
-    });
+  await task().catch((error) => {
+    appLogger.error({ error, msg: "Background task failed in fallback mode" });
   });
 }
 
