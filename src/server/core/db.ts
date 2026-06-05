@@ -111,13 +111,18 @@ async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
     } catch {}
   }
 
-  if (process.env.TRIGGER_RUN_ID != null) {
+  if (process.env.TRIGGER_RUN_ID != null || IS_TEST) {
     await task();
     return;
   }
 
-  task().catch((error) => {
-    appLogger.error({ error: error, msg: "Background task failed" });
+  const schedule =
+    typeof setImmediate !== "undefined" ? setImmediate : (fn: () => void) => setTimeout(fn, 0);
+
+  schedule(() => {
+    task().catch((error) => {
+      appLogger.error({ error: error, msg: "Background task failed" });
+    });
   });
 }
 
@@ -183,7 +188,17 @@ function createPrismaInstance() {
           }
 
           const duration = performance.now() - start;
-          const mutationOps = ["create", "update", "updateMany", "upsert", "delete", "deleteMany"];
+          const mutationOps = [
+            "create",
+            "createMany",
+            "createManyAndReturn",
+            "update",
+            "updateMany",
+            "updateManyAndReturn",
+            "upsert",
+            "delete",
+            "deleteMany",
+          ];
 
           if (mutationOps.includes(operation) && model !== "AuditLog") {
             const ctxStore = requestContext.getStore();
