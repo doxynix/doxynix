@@ -99,6 +99,23 @@ function patchDmmfForEncryption(dmmf: DmmfDatamodel): DmmfDatamodel {
   return dmmf;
 }
 
+/**
+ * Гарантирует, что метаданные DMMF успешно загружены и содержат модели.
+ * Предотвращает молчаливую регрессию безопасности, когда из-за tree-shaking
+ * сборщика DMMF оказывается пустым, и персональные данные пишутся в БД в открытом виде.
+ *
+ * @param dmmf Модель DMMF для проверки
+ */
+function assertDmmfIsPopulated(dmmf: DmmfDatamodel): void {
+  const models = dmmf.datamodel?.models;
+  if (models == null || models.length === 0) {
+    throw new Error(
+      "[db] Prisma.dmmf is empty or stripped by the bundler. " +
+      "Field encryption cannot work without a valid DMMF — aborting startup to prevent unencrypted data leak."
+    );
+  }
+}
+
 let cachedAfterFn: null | typeof NextAfterFn = null;
 let isAfterChecked = false;
 
@@ -187,10 +204,25 @@ function createPrismaInstance() {
       ? PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS.split(",")
       : [];
 
+  const rawDmmf = (Prisma as any).dmmf != null
+    ? (structuredClone((Prisma as any).dmmf) as unknown as DmmfDatamodel)
+    : null;
+
+  if (rawDmmf === null) {
+    throw new Error(
+      "[db] Prisma.dmmf is undefined. " +
+      "Field encryption cannot initialize — aborting startup to prevent unencrypted data leak."
+    );
+  }
+
+  assertDmmfIsPopulated(rawDmmf);
+
+  const patchedDmmf = patchDmmfForEncryption(rawDmmf);
+
   const encryptedClient = baseClient.$extends(
     fieldEncryptionExtension({
       decryptionKeys,
-      dmmf: patchDmmfForEncryption(structuredClone(Prisma.dmmf) as unknown as DmmfDatamodel) as any,
+      dmmf: patchedDmmf as any,
       encryptionKey: PRISMA_FIELD_ENCRYPTION_KEY,
     })
   );
