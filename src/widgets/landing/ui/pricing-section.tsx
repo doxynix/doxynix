@@ -107,7 +107,7 @@ export function PricingSection() {
               >
                 <Link href={plan.href}>{plan.cta}</Link>
               </AppButton>
-              <ul className="flex-1 space-y-3">
+              <ul className="flex flex-1 flex-col gap-3">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm">
                     <Check className="mt-0.5" />

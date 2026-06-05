@@ -215,7 +215,7 @@ export default function AgentTextMessage({ content, id }: Readonly<Props>) {
   const blocks = tokens.map((token) => token.raw);
 
   return (
-    <div className="prose prose-sm dark:prose-invert w-full max-w-none text-left transition-all">
+    <div className="prose prose-sm dark:prose-invert transition-standard w-full max-w-none text-left">
       {blocks.map((block, index) => (
         <MarkdownBlock key={`${id}-block_${index}`} content={block} />
       ))}

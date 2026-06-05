@@ -178,7 +178,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
   const getLangPercent = (lines: number) => (totalLines > 0 ? (lines / totalLines) * 100 : 0);
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <Card>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
@@ -218,8 +218,8 @@ export function RepoOverview({ data }: Readonly<Props>) {
           <CardHeader>
             <CardTitle className="text-sm font-medium">Start From Here</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
               <p className="text-muted-foreground text-xs font-bold">Key Zones</p>
               <div className="flex flex-wrap gap-2">
                 {navigation.keyZones.map((zone) => (
@@ -236,7 +236,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <p className="text-muted-foreground text-xs font-bold">Entrypoints</p>
               <div className="flex flex-wrap gap-2">
                 {navigation.primaryEntrypoints.map((path) => (
@@ -328,7 +328,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
               </AppButton>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="flex flex-col gap-3">
             <p className="text-muted-foreground text-xs">{docs.availableCount} docs available</p>
             <div className="flex flex-wrap gap-2">
               {docs.items.map((item) => (
@@ -397,7 +397,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               {data.mostComplexFiles.map((file, idx) => (
                 <div
                   key={file}
@@ -441,7 +441,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
             <CardTitle className="text-sm font-medium">Top Risks</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
               {topRisks.length > 0 ? (
                 topRisks.map((risk) => (
                   <div key={risk.id} className="rounded-lg border p-3">

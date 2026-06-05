@@ -105,7 +105,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="flex flex-col gap-4">
         <Skeleton className="h-8 w-1/3" />
         <Skeleton className="h-100 w-full" />
       </div>

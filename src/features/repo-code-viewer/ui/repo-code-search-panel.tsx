@@ -114,7 +114,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
               tooltipText="Match Case (Aa)"
               onClick={() => toggleOption("caseSensitive")}
               className={cn(
-                "h-6 w-6 rounded-xl p-0 transition-all",
+                "transition-standard h-6 w-6 rounded-xl p-0",
                 options.caseSensitive
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
                   : "text-muted-foreground hover:bg-primary/90"
@@ -126,7 +126,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
               tooltipText="Whole Word (\bW\b)"
               onClick={() => toggleOption("wholeWord")}
               className={cn(
-                "h-6 w-6 rounded-xl p-0 transition-all",
+                "transition-standard h-6 w-6 rounded-xl p-0",
                 options.wholeWord
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
                   : "text-muted-foreground hover:bg-primary/90"
@@ -139,7 +139,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
               tooltipText="Regular Expression (.*)"
               onClick={() => toggleOption("regexp")}
               className={cn(
-                "h-6 w-6 rounded-xl p-0 transition-all",
+                "transition-standard h-6 w-6 rounded-xl p-0",
                 options.regexp
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
                   : "text-muted-foreground hover:bg-primary/90"

@@ -7,19 +7,18 @@ import { trpc } from "@/shared/api/trpc";
 
 import type { RepoMetricsItem } from "@/entities/repo/model/repo.types";
 import {
+  ArchitectureAndDataFlowCard,
+  ReferenceAndRoutesCard,
+  RisksCard,
+  SecurityOverviewCard,
+} from "@/entities/repo/ui/repo-analytics-cards";
+import {
   DomainIntelligenceSection,
   PerformanceAndScalingSection,
   RefactoringBacklogSection,
   SnapshotsSection,
   TechDebtAndComplexitySection,
 } from "@/entities/repo/ui/repo-analytics-sections";
-
-import {
-  ArchitectureAndDataFlowCard,
-  ReferenceAndRoutesCard,
-  RisksCard,
-  SecurityOverviewCard,
-} from "../../../entities/repo/ui/repo-analytics-cards";
 
 type Props = { data: NonNullable<RepoMetricsItem>; repoId: string };
 
@@ -97,7 +96,7 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-8">
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <ArchitectureAndDataFlowCard reference={reference} />
         <SecurityOverviewCard

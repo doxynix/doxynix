@@ -234,7 +234,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
               Changed Files
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="flex flex-col gap-3">
             {changedFiles.length > 0 ? (
               changedFiles.map((file) => (
                 <div key={file.filePath} className="rounded-xl border p-4">
@@ -343,7 +343,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                         size="sm"
                         variant="outline"
                         onClick={() => handleFixSingle(comment)}
-                        className="hover:bg-success/5 hover:text-success hover:border-success/30 flex items-center gap-1.5 text-xs font-medium transition-all duration-200"
+                        className="hover:bg-success/5 hover:text-success hover:border-success/30 transition-standard flex items-center gap-1.5 text-xs font-medium"
                       >
                         {createFixMutation.isPending ? (
                           <Loader2 className="size-3.5 animate-spin" />
@@ -370,7 +370,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardHeader>
             <CardTitle className="text-sm font-bold">PR Details</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <CardContent className="flex flex-col gap-2 text-sm">
             {PR_DETAILS_ITEMS.map((item) => (
               <div key={item.label} className="flex items-baseline justify-between">
                 <span className="text-muted-foreground text-xs">{item.label}:</span>
@@ -409,7 +409,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
               Impact Summary
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-3 text-sm">
               {IMPACT_STATS.map((stat) => (
                 <div key={stat.label} className="bg-muted rounded-lg border p-3">
@@ -471,7 +471,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
               Autofix All Issues
             </AppButton>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="flex flex-col gap-3">
             {topFindings.length > 0 ? (
               topFindings.slice(0, 4).map((finding) => (
                 <div key={finding.id} className="rounded-lg border p-3">
@@ -501,7 +501,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
             <CardHeader>
               <CardTitle className="text-base">Linked Fixes</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="flex flex-col gap-3">
               {fixes.map((fix) => (
                 <div key={fix.id} className="rounded-lg border p-3">
                   <div className="mb-1 flex items-center justify-between gap-2">

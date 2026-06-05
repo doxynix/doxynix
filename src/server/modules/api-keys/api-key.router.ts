@@ -4,24 +4,12 @@ import { z } from "zod";
 import { ApiKeySchema } from "@/shared/api-contracts";
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 
-import { OpenApiErrorResponses } from "@/server/core/trpc/constants";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { handlePrismaError } from "@/server/utils/handle-error";
 import { extractPayloadFromKey, generateApiKey, getApiKeyHash } from "@/server/utils/hash";
 
 export const apiKeyRouter = createTRPCRouter({
   create: protectedProcedure
-    .meta({
-      openapi: {
-        description: "Generates a new API Key. The full key is shown only once.",
-        errorResponses: OpenApiErrorResponses,
-        method: "POST",
-        path: "/api-keys",
-        protect: true,
-        summary: "Create API Key",
-        tags: ["api-keys"],
-      },
-    })
     .input(CreateApiKeySchema)
     .output(z.object({ key: z.string(), message: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -64,17 +52,6 @@ export const apiKeyRouter = createTRPCRouter({
     }),
 
   list: protectedProcedure
-    .meta({
-      openapi: {
-        description: "Returns all active and revoked API keys for the current user.",
-        errorResponses: OpenApiErrorResponses,
-        method: "GET",
-        path: "/api-keys",
-        protect: true,
-        summary: "List API Keys",
-        tags: ["api-keys"],
-      },
-    })
     .input(z.object({}).optional())
     .output(
       z.object({
@@ -97,17 +74,6 @@ export const apiKeyRouter = createTRPCRouter({
     }),
 
   revoke: protectedProcedure
-    .meta({
-      openapi: {
-        description: "Permanently revokes an API key. It can no longer be used for authentication.",
-        errorResponses: OpenApiErrorResponses,
-        method: "DELETE",
-        path: "/api-keys/{id}",
-        protect: true,
-        summary: "Revoke API Key",
-        tags: ["api-keys"],
-      },
-    })
     .input(z.object({ id: z.uuid() }))
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
@@ -124,17 +90,6 @@ export const apiKeyRouter = createTRPCRouter({
     }),
 
   touch: protectedProcedure
-    .meta({
-      openapi: {
-        description: "Updates the lastUsed timestamp for the specified API key.",
-        errorResponses: OpenApiErrorResponses,
-        method: "PATCH",
-        path: "/api-keys/{id}/touch",
-        protect: true,
-        summary: "Touch API Key",
-        tags: ["api-keys"],
-      },
-    })
     .input(z.object({ id: z.uuid() }))
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
@@ -158,17 +113,6 @@ export const apiKeyRouter = createTRPCRouter({
     }),
 
   update: protectedProcedure
-    .meta({
-      openapi: {
-        description: "Updates the name or description of an existing API key.",
-        errorResponses: OpenApiErrorResponses,
-        method: "PATCH",
-        path: "/api-keys/{id}",
-        protect: true,
-        summary: "Update API Key",
-        tags: ["api-keys"],
-      },
-    })
     .input(CreateApiKeySchema.extend({ id: z.uuid() }))
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {

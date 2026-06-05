@@ -63,7 +63,7 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
   const isRepoEmpty = !state.isLoading && state.treeData.length === 0 && state.searchTerm === "";
 
   return (
-    <div className="flex h-full flex-col space-y-4">
+    <div className="flex h-full flex-col gap-4">
       <div className="flex items-end gap-4">
         <div className="flex flex-1 flex-col gap-2">
           <div className="relative">

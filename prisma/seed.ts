@@ -1,9 +1,7 @@
 // run: pnpm db:seed
 import { faker } from "@faker-js/faker";
-import { PrismaPg } from "@prisma/adapter-pg";
 import { NotifyType, PrismaClient, Status, UserRole, Visibility } from "@prisma/client";
 import { subDays } from "date-fns";
-import pg from "pg";
 
 import { getNormalizedHash } from "@/server/utils/hash";
 
@@ -20,9 +18,13 @@ const STRESS_USER_NAME = "Search Benchmark";
 const STRESS_REPO_COUNT = parseSeedNumber(process.env.SEED_STRESS_REPOS, 0);
 const STRESS_NOTIFICATION_COUNT = parseSeedNumber(process.env.SEED_STRESS_NOTIFICATIONS, 0);
 
-const pool = new pg.Pool({ connectionString: DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: DATABASE_URL,
+    },
+  },
+});
 
 function clean<T>(obj: T): T {
   return Object.fromEntries(
@@ -194,13 +196,8 @@ async function seedStressProfile() {
     where: { emailHash: getNormalizedHash(STRESS_USER_EMAIL) },
   });
 
-  await prisma.notification.deleteMany({
-    where: { userId: benchmarkUser.id },
-  });
-
-  await prisma.repo.deleteMany({
-    where: { userId: benchmarkUser.id },
-  });
+  await prisma.notification.deleteMany({ where: { userId: benchmarkUser.id } });
+  await prisma.repo.deleteMany({ where: { userId: benchmarkUser.id } });
 
   if (STRESS_REPO_COUNT > 0) {
     const totalRepoBatches = Math.ceil(STRESS_REPO_COUNT / REPO_BATCH_SIZE);
@@ -267,7 +264,6 @@ async function main() {
 
   const adminReposData = Array.from({ length: 5 }).map(() => {
     const repoName = `admin-project-${faker.string.alphanumeric(4)}`;
-    // const isCritical = rIdx === 0;
 
     return clean({
       ...Fake.fakeRepo(),
@@ -311,8 +307,6 @@ async function main() {
   console.log("Creating more users...");
 
   for (let index = 0; index < LIGHT_USER_COUNT; index++) {
-    // const isProblematicUser = index % 5 === 0;
-
     const user = await prisma.user.create({
       data: clean({
         ...Fake.fakeUser(),
@@ -325,7 +319,6 @@ async function main() {
         repos: {
           create: Array.from({ length: LIGHT_REPOS_PER_USER }).map(() => {
             const repoName = `${faker.word.noun()}-${faker.string.alphanumeric(4)}`;
-            // const isCriticalRepo = isProblematicUser && rIdx === 0;
 
             return clean({
               ...Fake.fakeRepo(),
@@ -415,16 +408,15 @@ async function main() {
     ),
   });
 }
+
 main()
   .then(async () => {
     await prisma.$disconnect();
-    await pool.end();
     console.log("Seeding completed. Database is now full of life.");
   })
   // eslint-disable-next-line unicorn/prefer-top-level-await
   .catch(async (error) => {
     console.error("Seeding failed:", error);
     await prisma.$disconnect();
-    await pool.end();
     throw new Error("Seeding failed");
   });

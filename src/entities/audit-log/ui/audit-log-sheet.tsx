@@ -61,9 +61,9 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
       </AppTooltip>
       <SheetContent className="flex flex-col gap-6 p-6 sm:max-w-2xl">
         <div className="grid h-full grid-rows-[auto_1fr] gap-6">
-          <SheetHeader className="space-y-4">
+          <SheetHeader className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <div className="space-y-1">
+              <div className="flex flex-col gap-1">
                 <SheetTitle className="text-xl font-semibold tracking-tight">
                   Event Details
                 </SheetTitle>

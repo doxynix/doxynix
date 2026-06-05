@@ -68,7 +68,7 @@ export function SnapshotsSection({
             <Network className="size-4" /> Architecture Snapshot
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm">
+        <CardContent className="flex flex-col gap-3 text-sm">
           {architectureStats.map((stat) => (
             <div key={stat.label} className="flex items-center justify-between">
               <span className="text-muted-foreground">{stat.label}</span>
@@ -84,14 +84,14 @@ export function SnapshotsSection({
             <Users className="size-4" /> Onboarding
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="flex flex-col gap-3">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Score</span>
             <span className="font-medium">{onboarding.score}</span>
           </div>
           <div>
             <p className="text-muted-foreground mb-2 text-xs uppercase">Setup Steps</p>
-            <ul className="space-y-2 text-xs">
+            <ul className="flex flex-col gap-2 text-xs">
               {onboarding.guide.setup_steps.map((step) => (
                 <li key={step} className="flex items-start gap-2">
                   <div className="bg-primary mt-1 size-1.5 shrink-0 rounded-full" />
@@ -114,7 +114,7 @@ export function DomainIntelligenceSection({
   if (domain.analysis == null) return null;
 
   return (
-    <section className="space-y-4">
+    <section className="flex flex-col gap-4">
       <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight">
         <Fingerprint className="size-5 text-blue-400" /> Domain Intelligence
       </h3>
@@ -145,7 +145,7 @@ export function DomainIntelligenceSection({
             <CardTitle className="text-sm font-semibold">Business Rules</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-3">
+            <ul className="flex flex-col gap-3">
               {domain.analysis.business_rules.map((rule, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs text-zinc-300">
                   <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-500" />
@@ -175,7 +175,7 @@ export function TechDebtAndComplexitySection({
             <HistoryIcon className="size-4 text-zinc-400" /> Tech Debt Inventory
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="flex flex-col gap-2">
           {recommendations.techDebtInventory?.map((item, i) => (
             <div
               key={i}
@@ -218,7 +218,7 @@ export function RefactoringBacklogSection({
   runningFixId: null | string;
 }>) {
   return (
-    <section className="space-y-4">
+    <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight">
           <LayoutTemplate className="size-5 text-emerald-400" /> Refactoring Backlog
@@ -229,10 +229,7 @@ export function RefactoringBacklogSection({
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {recommendations.refactoringTargets.map((item) => (
-          <Card
-            key={item.file}
-            className="group transition-all duration-300 hover:border-emerald-500/40"
-          >
+          <Card key={item.file} className="group transition-standard hover:border-emerald-500/40">
             <div className="bg-muted/20 flex items-center justify-between border-b px-4 py-2">
               <div className="flex items-center gap-2 overflow-hidden">
                 <Code2 className="size-3.5 shrink-0 text-zinc-500" />
@@ -247,8 +244,8 @@ export function RefactoringBacklogSection({
                 </AppBadge>
               </div>
             </div>
-            <CardContent className="space-y-3 p-4">
-              <div className="space-y-1">
+            <CardContent className="flex flex-col gap-3 p-4">
+              <div className="flex flex-col gap-1">
                 <p className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase">
                   {item.issue_category}
                 </p>
@@ -367,14 +364,14 @@ export function PerformanceAndScalingSection({
             <Database className="size-4 text-blue-400" /> Scaling & State
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-1">
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
             <p className="text-[10px] font-bold text-blue-400 uppercase">Statelessness</p>
             <p className="text-xs leading-relaxed text-zinc-300">
               {recommendations.infrastructure?.statelessness_check}
             </p>
           </div>
-          <div className="space-y-1">
+          <div className="flex flex-col gap-1">
             <p className="text-[10px] font-bold text-blue-400 uppercase">Concurrency Risks</p>
             <div className="flex flex-wrap gap-1">
               {recommendations.infrastructure?.concurrency_risks.map((risk, i) => (

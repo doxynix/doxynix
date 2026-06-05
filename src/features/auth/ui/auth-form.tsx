@@ -206,7 +206,7 @@ export function AuthForm() {
             <Logo isInteractive={false} className="w-xl" />
           </div>
 
-          <div className="space-y-5">
+          <div className="flex flex-col gap-5">
             <h1 className="text-4xl font-bold xl:text-6xl">
               Engineering insights, <br />
               <span className="text-muted-foreground">delivered instantly.</span>
@@ -244,7 +244,7 @@ export function AuthForm() {
           <div
             inert={isSent ? true : undefined}
             className={cn(
-              "bg-card border-border relative flex w-full flex-col gap-6 rounded-[1.75rem] border p-6 transition-all ease-out sm:p-8",
+              "bg-card border-border transition-standard relative flex w-full flex-col gap-6 rounded-[1.75rem] border p-6 ease-out sm:p-8",
               isSent
                 ? "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
                 : "relative scale-100 opacity-100"
@@ -254,8 +254,8 @@ export function AuthForm() {
               <Logo isInteractive={false} className="w-24" />
             </div>
 
-            <div className="space-y-3">
-              <div className="space-y-2">
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
                 <h2 className="text-2xl font-semibold">Welcome back</h2>
                 <p className="text-muted-foreground text-sm">
                   Choose your preferred way to sign in.
@@ -296,7 +296,7 @@ export function AuthForm() {
             </div>
 
             <div className="bg-background border-border flex flex-col gap-4 rounded-[1.35rem] border p-5">
-              <div className="space-y-1">
+              <div className="flex flex-col gap-1">
                 <p className="text-foreground text-sm font-medium">Work email</p>
                 <p className="text-muted-foreground text-sm">
                   We will send a one-time sign-in link. No password, no friction.
@@ -362,7 +362,7 @@ export function AuthForm() {
           <div
             inert={!isSent ? true : undefined}
             className={cn(
-              "bg-card border-border relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border p-8 text-center transition-all ease-out",
+              "bg-card border-border transition-standard relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border p-8 text-center ease-out",
               isSent
                 ? "relative scale-100 opacity-100"
                 : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"

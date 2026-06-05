@@ -212,7 +212,7 @@ export function CreateRepoDialog() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-xs font-medium tracking-wider">
                 <div className="text-muted-foreground flex items-center gap-2 uppercase">
                   <Book className="size-3" />
@@ -254,7 +254,7 @@ export function CreateRepoDialog() {
                 )}
               </div>
 
-              <div className="space-y-0.5">
+              <div className="flex flex-col gap-0.5">
                 {isFetchingMyRepos ? (
                   <div className="h-70 rounded-xl border p-1">
                     {Array.from({ length: 3 }).map((_, i) => (

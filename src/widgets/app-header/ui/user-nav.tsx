@@ -111,7 +111,7 @@ export function UserNav() {
               <DialogTitle>{t("logout_title")}</DialogTitle>
               <DialogDescription>{t("logout_confirmation_desc")}</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               <div className="flex justify-end gap-2">
                 <DialogClose asChild>
                   <AppButton disabled={loading} variant="outline" className="cursor-pointer">

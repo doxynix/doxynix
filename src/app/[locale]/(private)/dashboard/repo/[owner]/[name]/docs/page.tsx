@@ -20,7 +20,7 @@ export default async function RepoDocsPage({ params }: Readonly<RepoPageProps>) 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
   return (
-    <div className="space-y-10">
+    <div className="flex flex-col gap-10">
       <RepoDocsContainer id={repo.id} />
     </div>
   );

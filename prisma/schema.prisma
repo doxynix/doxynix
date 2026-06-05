@@ -14,6 +14,7 @@ generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearchPostgres", "relationJoins", "postgresqlExtensions", "typedSql", "nativeDistinct"]
   binaryTargets   = ["native", "debian-openssl-3.0.x"]
+  engineType      = "client"
 }
 
 generator zod {

@@ -81,7 +81,10 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
 
       <DialogContent className="sm:max-w-md">
         <Form {...form}>
-          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="space-y-4">
+          <form
+            onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+            className="flex flex-col gap-4"
+          >
             <DialogHeader>
               <DialogTitle>{t("settings_api_keys_edit_title")}</DialogTitle>
               <DialogDescription>

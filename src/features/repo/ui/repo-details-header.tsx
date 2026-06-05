@@ -23,7 +23,7 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
   const repoSlug = encodeURIComponent(repo.name);
 
   return (
-    <div className="mx-auto w-full space-y-4">
+    <div className="mx-auto flex w-full flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center justify-between gap-4">
           <AppAvatar alt={repo.owner} src={repo.ownerAvatarUrl} fallbackText={repo.owner} />

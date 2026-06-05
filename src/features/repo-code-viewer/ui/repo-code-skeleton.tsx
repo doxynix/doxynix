@@ -5,7 +5,7 @@ export function CodeSkeleton() {
   const indents = [0, 0, 4, 4, 8, 4, 0, 0, 4, 0];
 
   return (
-    <div className="h-full w-full space-y-3 overflow-hidden p-4 font-mono text-[13px]">
+    <div className="flex h-full w-full flex-col gap-3 overflow-hidden p-4 font-mono text-[13px]">
       {Array.from({ length: 32 }).map((_, i) => {
         const width = widths[i % widths.length]!;
         const indent = indents[i % indents.length]!;

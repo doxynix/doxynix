@@ -31,7 +31,7 @@ export function DashboardInsightsContainer() {
 
   if (isLoading || data == null) {
     return (
-      <div className="space-y-6 lg:col-span-4">
+      <div className="flex flex-col gap-6 lg:col-span-4">
         <EcosystemStatusSkeleton />
         <SystemRisksSkeleton />
 
@@ -45,7 +45,7 @@ export function DashboardInsightsContainer() {
   }
 
   return (
-    <div className="space-y-6 lg:col-span-4">
+    <div className="flex flex-col gap-6 lg:col-span-4">
       <EcosystemStatusWidget data={data} />
       <SystemRisksWidget data={data} />
 

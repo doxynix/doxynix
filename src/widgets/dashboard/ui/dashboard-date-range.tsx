@@ -103,7 +103,7 @@ export function DashboardDatePeriod() {
         <div className="flex">
           <div className="flex w-40 flex-col p-2">
             <p className="text-muted-foreground px-2 py-1.5 text-center text-xs">Quick Range</p>
-            <div className="space-y-1">
+            <div className="flex flex-col gap-1">
               {DATE_PERIODS.map((p) => (
                 <AppButton
                   key={p.period}
@@ -125,13 +125,13 @@ export function DashboardDatePeriod() {
 
           <div className="flex flex-col border-l">
             <div className="flex gap-4 border-b p-3 text-center">
-              <div className="flex-1 space-y-1">
+              <div className="flex flex-1 flex-col gap-1">
                 <span className="text-xs">Start Date</span>
                 <div className="text-xs">
                   {tempDate?.from ? format(tempDate.from, "yyyy-MM-dd") : "YYYY-MM-DD"}
                 </div>
               </div>
-              <div className="flex-1 space-y-1">
+              <div className="flex flex-1 flex-col gap-1">
                 <span className="text-xs">End Date</span>
                 <div className="text-xs">
                   {tempDate?.to ? format(tempDate.to, "yyyy-MM-dd") : "YYYY-MM-DD"}

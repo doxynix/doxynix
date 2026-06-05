@@ -7,7 +7,6 @@ import { UpdateProfileSchema } from "@/shared/api/schemas/user";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { OpenApiErrorResponses } from "@/server/core/trpc/constants";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 
 const utapi = new UTApi();
@@ -18,17 +17,6 @@ const PublicUserSchema = UserSchema.extend({
 
 export const userRouter = createTRPCRouter({
   deleteAccount: protectedProcedure
-    .meta({
-      openapi: {
-        description: "Permanently deletes the current user account and all associated data.",
-        errorResponses: OpenApiErrorResponses,
-        method: "DELETE",
-        path: "/users/me",
-        protect: true,
-        summary: "Delete account",
-        tags: ["users"],
-      },
-    })
     .input(z.object({}).optional())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
@@ -145,17 +133,6 @@ export const userRouter = createTRPCRouter({
   }),
 
   me: protectedProcedure
-    .meta({
-      openapi: {
-        description: "Returns detailed profile information for the currently authenticated user.",
-        errorResponses: OpenApiErrorResponses,
-        method: "GET",
-        path: "/users/me",
-        protect: true,
-        summary: "Get current profile",
-        tags: ["users"],
-      },
-    })
     .input(z.object({}).optional())
     .output(z.object({ message: z.string(), user: PublicUserSchema }))
     .query(async ({ ctx }) => {
@@ -181,17 +158,6 @@ export const userRouter = createTRPCRouter({
     }),
 
   removeAvatar: protectedProcedure
-    .meta({
-      openapi: {
-        description: "Deletes the avatar image and remove from UT.",
-        errorResponses: OpenApiErrorResponses,
-        method: "DELETE",
-        path: "/users/me/avatar",
-        protect: true,
-        summary: "Remove avatar",
-        tags: ["users"],
-      },
-    })
     .input(z.object({}).optional())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
@@ -227,16 +193,6 @@ export const userRouter = createTRPCRouter({
     }),
 
   updateUser: protectedProcedure
-    .meta({
-      openapi: {
-        errorResponses: OpenApiErrorResponses,
-        method: "PATCH",
-        path: "/users/me",
-        protect: true,
-        summary: "Update user profile",
-        tags: ["users"],
-      },
-    })
     .input(UpdateProfileSchema)
     .output(z.object({ message: z.string(), user: PublicUserSchema }))
     .mutation(async ({ ctx, input }) => {

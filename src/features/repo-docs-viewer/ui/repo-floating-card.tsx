@@ -155,7 +155,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
       }}
     >
       {isLoading || !node ? (
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <Skeleton className="h-4 w-1/2" />
             <Skeleton className="h-4 w-16" />
@@ -171,7 +171,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
           </div>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2 border-b pb-2">
             <span className="flex max-w-52 items-center gap-1.5 truncate text-xs font-bold">
               <Code2 />
@@ -206,7 +206,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
             </div>
           )}
 
-          <div className="space-y-2 border-t pt-2.5">
+          <div className="flex flex-col gap-2 border-t pt-2.5">
             {node.score > 0 && (
               <div className="flex items-center gap-1.5 text-[10px] font-bold">
                 <AlertTriangle className="size-3" />

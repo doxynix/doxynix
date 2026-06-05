@@ -18,7 +18,7 @@ export function ThanksCard({ group }: Readonly<Props>) {
   const uniqueLicenses = Array.from(new Set(packages.map((p) => p.license)));
 
   return (
-    <Card className="hover:border-border-strong flex flex-col justify-between transition-all">
+    <Card className="hover:border-border-strong transition-standard flex flex-col justify-between">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4 overflow-hidden">
@@ -41,7 +41,7 @@ export function ThanksCard({ group }: Readonly<Props>) {
       </CardHeader>
 
       <CardContent className="flex grow flex-col gap-4 pt-0">
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <p className="text-muted-foreground text-xs">
             {packages.length} {packages.length === 1 ? "package" : "packages"}
           </p>

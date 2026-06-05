@@ -54,7 +54,7 @@ export function AgentForm({
         </div>
       )}
 
-      <div className="flex flex-col gap-1 transition-all">
+      <div className="transition-standard flex flex-col gap-1">
         <input
           ref={fileInputRef}
           type="file"

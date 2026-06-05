@@ -5,7 +5,7 @@ export function ApiKeyCardSkeleton() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between pb-2">
-        <div className="w-full max-w-[70%] space-y-1">
+        <div className="flex w-full max-w-[70%] flex-col gap-1">
           <Skeleton className="h-6 w-32" />
 
           <div className="flex flex-col gap-2">

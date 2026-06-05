@@ -9,7 +9,6 @@ import { generateBranchName } from "@/shared/lib/get-branch-name";
 
 import { appLogger } from "@/server/core/app-logger";
 import { getClientContext, getInstallationClient } from "@/server/core/github/github-provider";
-import { OpenApiErrorResponses } from "@/server/core/trpc/constants";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { markdownToHtml } from "@/server/utils/markdown-to-html";
 import { REDIS_CONFIG } from "@/server/utils/redis";
@@ -37,16 +36,6 @@ const FileActionResultSchema = z.enum(["document-file-preview", "quick-file-audi
 
 export const analysisRouter = createTRPCRouter({
   analyze: protectedProcedure
-    .meta({
-      openapi: {
-        errorResponses: OpenApiErrorResponses,
-        method: "POST",
-        path: "/repos/analyze",
-        protect: true,
-        summary: "Analyze your repository",
-        tags: ["repositories"],
-      },
-    })
     .input(
       z.object({
         branch: z.string().optional(),

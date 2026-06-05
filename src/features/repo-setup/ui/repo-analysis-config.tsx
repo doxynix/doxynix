@@ -72,9 +72,9 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
           Fine-tune how Doxynix should interpret and document your code.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6 overflow-y-auto">
+      <CardContent className="flex flex-col gap-6 overflow-y-auto">
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             <Label
               id="lang-label"
               className="text-muted-foreground flex items-center gap-2 text-sm"
@@ -104,7 +104,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           <Label className="text-muted-foreground flex items-center gap-2 text-sm">
             <FileText />
             Documentation Types
@@ -116,7 +116,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                 <label
                   key={opt.id}
                   className={cn(
-                    "relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3 transition-all",
+                    "transition-standard relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3",
                     isSelected
                       ? "border-border-strong bg-surface-selected"
                       : "border-border bg-card"
@@ -159,7 +159,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           <Label className="text-muted-foreground flex items-center gap-2 text-sm">
             <MessageSquareText />
             Custom Instructions (optional)

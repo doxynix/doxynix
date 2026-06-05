@@ -1,8 +1,11 @@
 import crypto from "node:crypto";
+import { neonConfig } from "@neondatabase/serverless";
+import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pkg, { Prisma, type PrismaClient as PrismaClientType } from "@prisma/client";
 import pg from "pg";
 import { fieldEncryptionExtension } from "prisma-field-encryption";
+import ws from "ws";
 
 import { IS_DEV, IS_TEST } from "@/shared/constants/env.flags";
 import { DATABASE_URL, PRISMA_FIELD_ENCRYPTION_KEY } from "@/shared/constants/env.server";
@@ -15,24 +18,114 @@ import { appLogger } from "./app-logger";
 import { realtimeServer } from "./realtime";
 
 const { PrismaClient } = pkg;
-const pool = new pg.Pool({
-  connectionString: DATABASE_URL,
-});
-const adapter = new PrismaPg(pool);
 
-const baseClient = new PrismaClient({
-  adapter,
-  log: IS_DEV && !IS_TEST ? ["error", "warn"] : ["error"],
-  transactionOptions: {
-    maxWait: 20_000,
-    timeout: 30_000,
+const ENCRYPTED_METADATA_MAP: Record<string, Record<string, string>> = {
+  Account: {
+    access_token: "/// @encrypted",
+    email: "/// @encrypted",
+    emailHash: "/// @encryption:hash(email)?normalize=lowercase&normalize=trim",
+    id_token: "/// @encrypted",
+    refresh_token: "/// @encrypted",
   },
-});
+  BannedEmail: {
+    email: "/// @encrypted",
+    emailHash: "/// @encryption:hash(email)?normalize=lowercase&normalize=trim",
+  },
+  ChatMessage: {
+    parts: "/// @encrypted",
+  },
+  Session: {
+    sessionToken: "/// @encrypted",
+    sessionTokenHash: "/// @encryption:hash(sessionToken)",
+  },
+  User: {
+    email: "/// @encrypted",
+    emailHash: "/// @encryption:hash(email)?normalize=lowercase&normalize=trim",
+  },
+  VerificationToken: {
+    identifier: "/// @encrypted",
+    identifierHash: "/// @encryption:hash(identifier)?normalize=lowercase&normalize=trim",
+    token: "/// @encrypted",
+    tokenHash: "/// @encryption:hash(token)",
+  },
+};
+
+type DmmfField = {
+  documentation?: string;
+  isId?: boolean;
+  isList?: boolean;
+  isUnique?: boolean;
+  name: string;
+};
+
+type DmmfModel = {
+  fields?: DmmfField[];
+  name: string;
+};
+
+type DmmfDatamodel = {
+  datamodel?: {
+    models?: DmmfModel[];
+  };
+};
+
+function patchDmmfForEncryption(dmmf: DmmfDatamodel): DmmfDatamodel {
+  if (dmmf.datamodel?.models == null) return dmmf;
+
+  for (const model of dmmf.datamodel.models) {
+    const modelName = model.name;
+    const modelOverrides = ENCRYPTED_METADATA_MAP[modelName];
+
+    if (model.fields == null) continue;
+    for (const field of model.fields) {
+      if (field.isList === undefined) field.isList = false;
+      if (field.isUnique === undefined) field.isUnique = false;
+      if (field.isId === undefined) {
+        field.isId = field.name === "id";
+      }
+
+      if (modelOverrides != null && modelOverrides[field.name] != null) {
+        field.documentation = modelOverrides[field.name];
+      }
+    }
+  }
+  return dmmf;
+}
+
+const useNeonAdapter = !IS_TEST && DATABASE_URL.includes("neon.tech");
+
+let baseClient: PrismaClientType;
+
+if (useNeonAdapter) {
+  neonConfig.webSocketConstructor = ws;
+  const adapter = new PrismaNeon({ connectionString: DATABASE_URL });
+
+  baseClient = new PrismaClient({
+    adapter,
+    log: IS_DEV && !IS_TEST ? ["error", "warn"] : ["error"],
+    transactionOptions: {
+      maxWait: 20_000,
+      timeout: 30_000,
+    },
+  });
+} else {
+  const pool = new pg.Pool({ connectionString: DATABASE_URL });
+  const adapter = new PrismaPg(pool);
+
+  baseClient = new PrismaClient({
+    adapter,
+    log: IS_DEV && !IS_TEST ? ["error", "warn"] : ["error"],
+    transactionOptions: {
+      maxWait: 20_000,
+      timeout: 30_000,
+    },
+  });
+}
 
 const encryptedClient = baseClient.$extends(
   fieldEncryptionExtension({
     decryptionKeys: [],
-    dmmf: Prisma.dmmf,
+    dmmf: patchDmmfForEncryption(structuredClone(Prisma.dmmf) as unknown as DmmfDatamodel) as any,
     encryptionKey: PRISMA_FIELD_ENCRYPTION_KEY,
   })
 );

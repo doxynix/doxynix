@@ -78,7 +78,7 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
         <div className="bg-card absolute z-20 mt-2 w-full rounded-lg border">
           <div className="flex max-h-80 flex-col overflow-y-auto p-2">
             {isFetching && !hasResults ? (
-              <div className="space-y-2 p-2">
+              <div className="flex flex-col gap-2 p-2">
                 <Skeleton className="h-9 w-full" />
                 <Skeleton className="h-9 w-full" />
                 <Skeleton className="h-9 w-full" />

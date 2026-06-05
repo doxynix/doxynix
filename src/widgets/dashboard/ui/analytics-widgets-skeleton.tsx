@@ -18,9 +18,9 @@ export function LanguagesSkeleton() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="space-y-1">
+            <div key={i} className="flex flex-col gap-1">
               <div className="flex justify-between text-xs">
                 <Skeleton className="h-3 w-12" />
                 <Skeleton className="h-3 w-20" />
@@ -96,12 +96,12 @@ export function RefactoringTargetsSkeleton() {
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-6 pt-4 md:grid-cols-2">
         {Array.from({ length: 2 }).map((_, idx) => (
-          <div key={idx} className="space-y-3">
+          <div key={idx} className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <Skeleton className="size-4" />
               <Skeleton className="h-4 w-32" />
             </div>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
@@ -131,7 +131,7 @@ export function RecentActivitySkeleton() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
@@ -197,9 +197,9 @@ export function SystemRisksSkeleton() {
       <CardContent>
         <div className="flex gap-3">
           <Skeleton className="size-5 shrink-0 rounded-full" />
-          <div className="flex-1 space-y-2">
+          <div className="flex flex-1 flex-col gap-2">
             <Skeleton className="h-4 w-44" />
-            <div className="space-y-1.5 pt-1">
+            <div className="flex flex-col gap-1.5 pt-1">
               <Skeleton className="h-3 w-full" />
               <Skeleton className="h-3 w-2/3" />
             </div>

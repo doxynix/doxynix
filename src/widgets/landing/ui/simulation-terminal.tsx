@@ -90,7 +90,7 @@ export function SimulationTerminal() {
           )}
         </div>
 
-        <div className="mt-2 space-y-1">
+        <div className="mt-2 flex flex-col gap-1">
           {step >= 3 && (
             <div className="animate-in fade-in slide-in-from-left-2 text-muted-foreground duration-200">
               {t("section_terminal_step_analyzed")}

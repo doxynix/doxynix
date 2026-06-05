@@ -113,7 +113,7 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
           <CardDescription>{t("settings_profile_personal_information_desc")}</CardDescription>
           {/* <CardDescription>Update your name or email.</CardDescription> */}
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="flex flex-col gap-4">
           <ProfileDetailsForm user={currentUser} />
         </CardContent>
       </Card>

@@ -9,7 +9,7 @@ import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 export const generateMetadata = createMetadata("terms_title", "terms_desc");
 
 const SECTION_TITLE = "mb-3 text-lg font-bold text-foreground flex items-center gap-2";
-const LIST_STYLES = "list-disc space-y-2 pl-5 marker:text-foreground";
+const LIST_STYLES = "list-disc flex flex-col gap-2 pl-5 marker:text-foreground";
 const STRONG_TEXT = "font-medium text-foreground";
 
 const richStyles = {
@@ -39,7 +39,7 @@ export default async function TermsPage() {
         </div>
       </div>
 
-      <div className="prose prose-neutral dark:prose-invert max-w-none space-y-8 text-sm md:text-base">
+      <div className="prose prose-neutral dark:prose-invert flex max-w-none flex-col gap-8 text-sm md:text-base">
         <section>
           <h2 className={SECTION_TITLE}>{t("section_acceptance_title")}</h2>
           <p className="leading-relaxed">{t("section_acceptance_content")}</p>

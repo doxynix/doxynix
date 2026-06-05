@@ -261,7 +261,7 @@ export function RepoMap({
                 <Panel
                   position="top-left"
                   className={cn(
-                    "flex flex-col gap-2 transition-all duration-300",
+                    "transition-standard flex flex-col gap-2",
                     hide
                       ? "pointer-events-none -translate-x-full opacity-0"
                       : "translate-x-0 opacity-100"
@@ -294,7 +294,7 @@ export function RepoMap({
                 <Panel position="top-right" className="flex flex-col items-end gap-1">
                   <div
                     className={cn(
-                      "transform transition-all duration-300",
+                      "transition-standard transform",
                       hide
                         ? "pointer-events-none translate-x-full opacity-0"
                         : "translate-x-0 opacity-100"
