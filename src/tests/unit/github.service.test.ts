@@ -145,9 +145,9 @@ vi.mock("@/shared/constants/env.server", () => ({
   GITHUB_APP_ID: "123456",
   GITHUB_APP_PRIVATE_KEY: "mock-private-key",
   GITHUB_SYSTEM_INSTALLATION_ID: "999999",
+  PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS: undefined,
   // secretlint-disable-next-line
   PRISMA_FIELD_ENCRYPTION_KEY: "k1.aesgcm256.0I4uZ72H7FY1ZppHFAKEEDOPNtRPqcM3CFAKEEEEEEE=",
-  PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS: undefined,
 }));
 
 vi.mock("@/server/core/app-logger", () => ({
