@@ -57,7 +57,7 @@ export function RepoListContainer({ config }: Readonly<Props>) {
     return (
       <>
         {config?.showTotalCount !== false && <Skeleton className="mb-4 ml-auto h-5 w-24 text-sm" />}
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           {Array.from({ length: safeLimit }).map((_, i) => (
             <RepoCardSkeleton key={i} />
           ))}

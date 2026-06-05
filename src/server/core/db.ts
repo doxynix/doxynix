@@ -1,8 +1,9 @@
 import crypto from "node:crypto";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { neonConfig } from "@neondatabase/serverless";
+import { PrismaNeon } from "@prisma/adapter-neon";
 import pkg, { Prisma, type PrismaClient as PrismaClientType } from "@prisma/client";
-import pg from "pg";
 import { fieldEncryptionExtension } from "prisma-field-encryption";
+import ws from "ws";
 
 import { IS_DEV, IS_TEST } from "@/shared/constants/env.flags";
 import { DATABASE_URL, PRISMA_FIELD_ENCRYPTION_KEY } from "@/shared/constants/env.server";
@@ -14,11 +15,11 @@ import { sanitizePayload } from "../utils/sanitize-payload";
 import { appLogger } from "./app-logger";
 import { realtimeServer } from "./realtime";
 
+neonConfig.webSocketConstructor = ws;
+
 const { PrismaClient } = pkg;
-const pool = new pg.Pool({
-  connectionString: DATABASE_URL,
-});
-const adapter = new PrismaPg(pool);
+
+const adapter = new PrismaNeon({ connectionString: DATABASE_URL });
 
 const baseClient = new PrismaClient({
   adapter,

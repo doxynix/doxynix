@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   const t = await getTranslations("Dashboard");
 
   return (
-    <div className="mx-auto h-full w-full space-y-8">
+    <div className="mx-auto flex h-full w-full flex-col gap-8">
       <div className="sticky top-0 right-0 flex h-0 justify-end overflow-visible pt-2">
         <DashboardDatePeriod />
       </div>
@@ -30,8 +30,8 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-        <div className="space-y-8 lg:col-span-8">
-          <section className="space-y-4">
+        <div className="flex flex-col gap-8 lg:col-span-8">
+          <section className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg">{t("recent_repositories")}</h2>
               <CreateRepoButton />

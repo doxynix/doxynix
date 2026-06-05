@@ -21,7 +21,7 @@ export default async function RepoOwnerNamePage({ params }: Readonly<RepoPagePro
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
   return (
-    <div className="space-y-10">
+    <div className="flex flex-col gap-10">
       <RepoOverviewContainer repoId={repo.id} />
       <RepoMetricsContainer repoId={repo.id} />
     </div>

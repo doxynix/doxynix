@@ -1,13 +1,12 @@
 import { Status } from "@prisma/client";
-import { metadata } from "@trigger.dev/sdk/v3";
+import { metadata } from "@trigger.dev/sdk";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
 
+import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { realtimeServer } from "@/server/core/realtime";
-
-import { appLogger } from "../../../core/app-logger";
 
 type LogLevel = "error" | "info" | "success" | "warn";
 

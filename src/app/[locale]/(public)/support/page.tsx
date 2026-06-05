@@ -118,13 +118,13 @@ export default async function SupportPage() {
               href={channel.href}
               rel={(channel.external ?? false) ? "noopener noreferrer" : undefined}
               target={(channel.external ?? false) ? "_blank" : undefined}
-              className="group bg-landing-bg-light/50 hover:border-border-accent hover:bg-surface-panel relative cursor-pointer overflow-hidden rounded-2xl border p-8 transition-all duration-300"
+              className="group bg-landing-bg-light/50 hover:border-border-accent hover:bg-surface-panel transition-standard relative cursor-pointer overflow-hidden rounded-2xl border p-8"
             >
-              <div className="relative space-y-5">
-                <div className="bg-surface-hover group-hover:border-border-accent flex size-14 items-center justify-center rounded-xl border transition-all">
+              <div className="relative flex flex-col gap-5">
+                <div className="bg-surface-hover group-hover:border-border-accent transition-standard flex size-14 items-center justify-center rounded-xl border">
                   <channel.icon className="text-foreground size-7" />
                 </div>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                   <h3 className="text-foreground text-lg font-semibold">{channel.title}</h3>
                   <p className="text-text-secondary text-sm">{channel.description}</p>
                 </div>
@@ -143,14 +143,14 @@ export default async function SupportPage() {
           <h2 className="mb-3 text-3xl font-bold">Frequently Asked Questions</h2>
           <p className="text-text-secondary">Quick answers to common questions about Doxynix</p>
         </div>
-        <Accordion type="single" collapsible className="w-full space-y-2">
+        <Accordion type="single" collapsible className="flex w-full flex-col gap-2">
           {faqItems.map((item) => (
             <AccordionListItem
               key={item.value}
               value={item.value}
               content={item.a}
               trigger={item.q}
-              className="bg-landing-bg-light/50 hover:border-border-accent rounded-xl border px-4 transition-all duration-300"
+              className="bg-landing-bg-light/50 hover:border-border-accent transition-standard rounded-xl border px-4"
             />
           ))}
         </Accordion>

@@ -86,8 +86,8 @@ export function RepoAnalysisLive({
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 py-10">
-      <div className="space-y-4 text-center">
+    <div className="mx-auto flex max-w-4xl flex-col gap-8 py-10">
+      <div className="flex flex-col gap-4 text-center">
         <div className="flex justify-center">
           {isFinished ? (
             <div className="bg-success/10 rounded-full p-3">
@@ -102,7 +102,7 @@ export function RepoAnalysisLive({
           )}
         </div>
 
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           <h2 className="text-2xl font-bold tracking-tight">
             {isFinished
               ? "Analysis Complete"
@@ -120,7 +120,7 @@ export function RepoAnalysisLive({
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         <div className="flex justify-between text-sm font-medium">
           <span className="flex items-center gap-2">
             Status: <AppBadge variant="outline">{displayStatus}</AppBadge>

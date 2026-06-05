@@ -71,9 +71,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
                 <AppBadge variant="outline" className={cn(visibility.color)}>
                   {visibility.label}
                 </AppBadge>
-                <div
-                  className={cn("flex shrink-0 items-center gap-1 transition-opacity duration-200")}
-                >
+                <div className={cn("transition-standard flex shrink-0 items-center gap-1")}>
                   <AppTooltip content={t("repo_open_on_github_tooltip")}>
                     <ExternalLink
                       href={repo.url}
@@ -87,7 +85,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
                     <Link
                       href={`/dashboard/repo/${repo.owner}/${repo.name}/settings`}
                       aria-label={`Settings for ${repo.name}`}
-                      className="text-muted-foreground hover:text-foreground flex size-6 items-center justify-center opacity-0 transition-all not-md:opacity-100 group-hover:opacity-100"
+                      className="text-muted-foreground hover:text-foreground transition-standard flex size-6 items-center justify-center opacity-0 not-md:opacity-100 group-hover:opacity-100"
                     >
                       <Settings />
                     </Link>

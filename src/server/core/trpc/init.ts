@@ -1,8 +1,8 @@
+// src/server/core/trpc/init.ts
 import type { UserRole } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
-import type { OpenApiMeta } from "trpc-to-openapi";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
 
@@ -16,38 +16,35 @@ import { appLogger } from "../app-logger";
 import type { DbClient } from "../db";
 import type { Context } from "./context";
 
-const t = initTRPC
-  .context<Context>()
-  .meta<OpenApiMeta>()
-  .create({
-    errorFormatter({ ctx, error, shape }) {
-      const publicErrors = [
-        "BAD_REQUEST",
-        "CONFLICT",
-        "UNAUTHORIZED",
-        "FORBIDDEN",
-        "TOO_MANY_REQUESTS",
-        "NOT_FOUND",
-      ];
+const t = initTRPC.context<Context>().create({
+  errorFormatter({ ctx, error, shape }) {
+    const publicErrors = [
+      "BAD_REQUEST",
+      "CONFLICT",
+      "UNAUTHORIZED",
+      "FORBIDDEN",
+      "TOO_MANY_REQUESTS",
+      "NOT_FOUND",
+    ];
 
-      const isPublicError = publicErrors.includes(error.code);
+    const isPublicError = publicErrors.includes(error.code);
 
-      return {
-        ...shape,
-        data: {
-          ...shape.data,
-          requestId: resolveRequestId(ctx?.req, requestContext.getStore()?.requestId),
-          stack: IS_PROD ? undefined : error.stack,
-          zodError: error.code === "BAD_REQUEST" ? error.cause : null,
-        },
-        message:
-          IS_PROD && !isPublicError
-            ? "An unexpected error occurred, please try again later."
-            : error.message,
-      };
-    },
-    transformer: superjson,
-  });
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        requestId: resolveRequestId(ctx?.req, requestContext.getStore()?.requestId),
+        stack: IS_PROD ? undefined : error.stack,
+        zodError: error.code === "BAD_REQUEST" ? error.cause : null,
+      },
+      message:
+        IS_PROD && !isPublicError
+          ? "An unexpected error occurred, please try again later."
+          : error.message,
+    };
+  },
+  transformer: superjson,
+});
 
 const withZenStack = t.middleware(async ({ ctx, next }) => {
   const sessionUser = ctx.session?.user;

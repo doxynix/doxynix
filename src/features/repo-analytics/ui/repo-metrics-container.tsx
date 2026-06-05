@@ -16,7 +16,7 @@ export function RepoMetricsContainer({ repoId }: Readonly<Props>) {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6">
         <Skeleton className="h-40 w-full" />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <Skeleton className="col-span-2 h-80" />

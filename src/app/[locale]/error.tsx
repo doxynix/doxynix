@@ -81,13 +81,13 @@ export default function ErrorPage({
         <ServerCrash size={35} />
       </div>
 
-      <div className="w-full max-w-md space-y-4 text-center">
+      <div className="flex w-full max-w-md flex-col gap-4 text-center">
         <h1 className="text-3xl font-bold tracking-tight">{t("server_error_title")}</h1>
         <p className="text-muted-foreground text-base">{t("server_error_desc")}</p>
         <p className="text-muted-foreground text-left text-xs font-semibold tracking-wider uppercase">
           {t("request_id_label")}
         </p>
-        <div className="bg-muted border-border space-y-3 rounded-xl border p-2 text-left">
+        <div className="bg-muted border-border flex flex-col gap-3 rounded-xl border p-2 text-left">
           <div className="group flex items-center justify-between">
             <code className="text-xs break-all">
               {requestId ?? error.digest ?? "System Failure"}

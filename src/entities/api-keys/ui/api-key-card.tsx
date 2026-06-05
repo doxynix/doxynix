@@ -24,7 +24,7 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
   return (
     <Card className="group hover:border-border-strong justify-between">
       <CardHeader className="flex flex-row items-start justify-between pb-2">
-        <div className="space-y-1 overflow-hidden">
+        <div className="flex flex-col gap-1 overflow-hidden">
           <CardTitle className="truncate text-base font-semibold">{active.name}</CardTitle>
           <CardDescription className="flex flex-col gap-2 text-xs">
             <p>

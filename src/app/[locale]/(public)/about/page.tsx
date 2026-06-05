@@ -66,9 +66,9 @@ export default async function AboutPage() {
       </div>
 
       <section className="mb-20 grid items-center gap-12 lg:grid-cols-2">
-        <div className="space-y-6">
+        <div className="flex flex-col gap-6">
           <h2 className="text-3xl font-bold">The problem we solve</h2>
-          <div className="text-text-secondary space-y-4">
+          <div className="text-text-secondary flex flex-col gap-4">
             <p>
               Legacy codebases are hard to understand. New team members struggle. Documentation
               falls behind. Critical knowledge lives only in developers&apos; heads.
@@ -80,7 +80,7 @@ export default async function AboutPage() {
           </div>
         </div>
         <div className="bg-landing-bg-light/50 rounded-2xl border p-8">
-          <div className="prose prose-sm dark:prose-invert max-w-none space-y-4">
+          <div className="prose prose-sm dark:prose-invert flex max-w-none flex-col gap-4">
             <p className="text-text-secondary">
               Imagine onboarding a new developer to your project. They open your repository and
               find... nothing. No documentation. Just code. They spend hours deciphering the
@@ -107,13 +107,13 @@ export default async function AboutPage() {
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="bg-landing-bg-light/50 rounded-2xl border p-8 transition-all duration-300"
+              className="bg-landing-bg-light/50 transition-standard rounded-2xl border p-8"
             >
-              <div className="space-y-4">
+              <div className="flex flex-col gap-4">
                 <div className="flex size-12 items-center justify-center rounded-xl border transition-colors">
                   <feature.icon className="text-foreground size-6" />
                 </div>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                   <h3 className="text-foreground text-lg font-semibold">{feature.title}</h3>
                   <p className="text-text-secondary text-sm">{feature.description}</p>
                 </div>
@@ -124,14 +124,14 @@ export default async function AboutPage() {
       </section>
 
       <section className="bg-landing-bg-light/50 mb-20 rounded-2xl border">
-        <div className="space-y-8 p-12 text-center md:p-16">
-          <div className="space-y-3">
+        <div className="flex flex-col gap-8 p-12 text-center md:p-16">
+          <div className="flex flex-col gap-3">
             <h2 className="text-4xl font-bold">Ready to transform your documentation?</h2>
             <p className="text-text-secondary text-lg">Join teams that ship better code, faster.</p>
           </div>
           <Link
             href="/auth"
-            className="bg-foreground text-background inline-flex items-center gap-3 rounded-xl px-8 py-4 font-semibold transition-all hover:opacity-90 active:scale-95"
+            className="bg-foreground text-background transition-standard inline-flex items-center gap-3 rounded-xl px-8 py-4 font-semibold hover:opacity-90 active:scale-95"
           >
             Get Started Free
             <ArrowRight className="size-5" />

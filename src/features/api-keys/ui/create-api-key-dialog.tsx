@@ -74,7 +74,10 @@ export function CreateApiKeyDialog() {
       >
         {createdKey == null ? (
           <Form {...form}>
-            <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="space-y-4">
+            <form
+              onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+              className="flex flex-col gap-4"
+            >
               <DialogHeader>
                 <DialogTitle> {t("settings_api_keys_create_api_key")}</DialogTitle>
                 <DialogDescription>{t("settings_api_keys_name")}</DialogDescription>
@@ -96,7 +99,7 @@ export function CreateApiKeyDialog() {
             </form>
           </Form>
         ) : (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <DialogHeader>
               <DialogTitle>{t("settings_api_keys_save_api_key")}</DialogTitle>
               <DialogDescription>{t("settings_api_keys_save_api_key_desc")} </DialogDescription>
@@ -110,7 +113,7 @@ export function CreateApiKeyDialog() {
               <AlertDescription>{t("settings_api_keys_alert_desc")}</AlertDescription>
             </Alert>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <div className="grid flex-1 gap-2">
                 <Input disabled={create.isPending} value={createdKey} readOnly />
               </div>

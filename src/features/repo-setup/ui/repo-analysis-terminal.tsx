@@ -115,7 +115,7 @@ export function AnalysisTerminal({
           variant="secondary"
           onClick={() => scrollToBottom("smooth")}
           className={cn(
-            "absolute bottom-4 left-1/2 z-10 size-7 -translate-x-1/2 rounded-full border shadow-md transition-all",
+            "transition-standard absolute bottom-4 left-1/2 z-10 size-7 -translate-x-1/2 rounded-full border",
             showScrollButton
               ? "pointer-events-auto scale-100 opacity-100"
               : "pointer-events-none scale-90 opacity-0"

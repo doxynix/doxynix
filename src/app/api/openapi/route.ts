@@ -1,44 +1,22 @@
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import { NextResponse } from "next/server";
-import { generateOpenApiDocument } from "trpc-to-openapi";
-
-import { API_PREFIX, APP_URL } from "@/shared/constants/env.client";
-import { getCookieName } from "@/shared/lib/session-cookie";
 
 import { appLogger } from "@/server/core/app-logger";
-import { appRouter } from "@/server/modules";
 
-export const GET = () => {
+export const GET = async () => {
   try {
-    const openApiDocument = generateOpenApiDocument(appRouter, {
-      baseUrl: `${APP_URL}${API_PREFIX}`,
-      description: "Official Doxynix API documentation for developers.",
-      docsUrl: "https://docs.doxynix.space",
-      securitySchemes: {
-        bearerAuth: {
-          bearerFormat: "API Key",
-          description: `Use the API Key created in your profile settings at ${APP_URL}/settings/api-keys`,
-          scheme: "bearer",
-          type: "http",
-        },
-        cookieAuth: {
-          description: "Authorization via session cookie",
-          in: "cookie",
-          name: getCookieName(),
-          type: "apiKey",
-        },
-      },
-      tags: ["repositories", "analytics", "users", "health"],
-      title: "Doxynix API Documentation",
-      version: "1.0.0",
-    });
+    const filePath = path.join(process.cwd(), "public", "openapi.json");
+    const fileContents = await fs.readFile(filePath, "utf8");
+    const openApiDocument = JSON.parse(fileContents);
 
     return NextResponse.json(openApiDocument);
   } catch (error) {
-    appLogger.error({ error, msg: "OpenAPI Generation Error:" });
+    appLogger.error({ error, msg: "OpenAPI static serving error" });
     return NextResponse.json(
       {
         details: error instanceof Error ? error.message : String(error),
-        error: "Failed to generate OpenAPI document",
+        error: "Failed to load generated OpenAPI spec",
       },
       { status: 500 }
     );

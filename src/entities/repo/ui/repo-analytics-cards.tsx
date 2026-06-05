@@ -34,7 +34,7 @@ export function ArchitectureAndDataFlowCard({
         </CardTitle>
         <CardDescription>How data moves through your system</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-4">
         {flows.map((flow) => (
           <div key={flow.label}>
             <p className="mb-2 text-sm font-medium">{flow.label}</p>
@@ -54,7 +54,7 @@ export function RisksCard({ risks }: Readonly<{ risks: NonNullable<RepoMetricsIt
           <AlertTriangle className="size-4" /> Risks
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="flex flex-col gap-3">
         {risks.topRisks.length > 0 ? (
           risks.topRisks.map((risk) => (
             <div key={risk.id} className="rounded-lg border p-3">
@@ -146,7 +146,7 @@ export function ReferenceAndRoutesCard({
           <Terminal className="size-4" /> Reference & Routes
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-4">
         {sections.map((sec) => (
           <div key={sec.title} className="text-xs">
             <p className="text-muted-foreground mb-2 uppercase">{sec.title}</p>
@@ -183,7 +183,7 @@ export function SecurityOverviewCard({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <AppBadge
             variant={security.securityScanStatus === "ok" ? "default" : "secondary"}
@@ -203,11 +203,11 @@ export function SecurityOverviewCard({
         </div>
 
         {security.risks.length > 0 && (
-          <div className="border-border space-y-2 border-t pt-3">
+          <div className="border-border flex flex-col gap-2 border-t pt-3">
             <span className="text-muted-foreground text-[11px] font-bold tracking-wider uppercase">
               Identified Attack Vectors
             </span>
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-1.5">
               {security.risks.map((item) => (
                 <div
                   key={item}
@@ -222,21 +222,21 @@ export function SecurityOverviewCard({
         )}
 
         {security.vulnerabilities.length > 0 ? (
-          <div className="border-border space-y-2 border-t pt-3">
+          <div className="border-border flex flex-col gap-2 border-t pt-3">
             <span className="text-muted-foreground text-[11px] font-bold tracking-wider uppercase">
               Critical Vulnerabilities
             </span>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               {security.vulnerabilities.map((vuln, idx) => {
                 const isCurrentlyFixing = runningFixId === vuln.file;
 
                 return (
                   <Collapsible
                     key={idx}
-                    className="group border-border bg-muted/30 hover:bg-muted/50 rounded-lg border p-2.5 transition-all"
+                    className="group border-border bg-muted/30 hover:bg-muted/50 transition-standard rounded-lg border p-2.5"
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <div className="space-y-1">
+                      <div className="flex flex-col gap-1">
                         <div className="text-foreground/80 flex items-center gap-1.5 font-mono text-xs font-semibold">
                           <FileCode className="text-muted-foreground size-3.5" />
                           <span className="max-w-60 truncate md:max-w-xs">[[{vuln.file}]]</span>
@@ -263,7 +263,7 @@ export function SecurityOverviewCard({
                       </AppBadge>
                     </div>
 
-                    <CollapsibleContent className="border-border mt-2.5 space-y-1.5 border-t pt-2 pl-5">
+                    <CollapsibleContent className="border-border mt-2.5 flex flex-col gap-1.5 border-t pt-2 pl-5">
                       <div className="text-destructive flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase">
                         <Terminal className="size-3" /> Recommended Remediation:
                       </div>

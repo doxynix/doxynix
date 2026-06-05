@@ -180,7 +180,7 @@ function ProviderAction({
       confirmLabel="Disconnect"
       description={`Are you sure you want to unlink your ${provider.name} account?`}
       destructiveAlertContent={
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <p>This will remove your ability to sign in using this method.</p>
         </div>
       }

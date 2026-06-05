@@ -60,7 +60,7 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6">
         <Skeleton className="h-10 w-100" />
         <Skeleton className="h-125 w-full" />
       </div>

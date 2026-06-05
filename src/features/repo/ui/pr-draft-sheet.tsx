@@ -125,7 +125,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
         </SheetHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-6">
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <Label className="text-muted-foreground">Staged Files ({filesCount})</Label>
             <ScrollArea className="h-75 rounded-xl border p-2">
               {isFilesLoading === true ? (
@@ -198,7 +198,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
             <form
               id="pr-form"
               onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-              className="space-y-4 border-t pt-4"
+              className="flex flex-col gap-4 border-t pt-4"
             >
               <FormField
                 name="branchName"

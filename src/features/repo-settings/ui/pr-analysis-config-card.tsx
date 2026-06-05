@@ -115,9 +115,9 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="flex flex-col gap-6">
         <div className={isEnabled === true ? "opacity-100" : "pointer-events-none opacity-50"}>
-          <div className="mb-6 space-y-2">
+          <div className="mb-6 flex flex-col gap-2">
             <Label>Comment Style</Label>
             <Select
               value={commentStyle}
@@ -142,7 +142,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
             </Select>
           </div>
 
-          <div className="mb-6 space-y-3">
+          <div className="mb-6 flex flex-col gap-3">
             <Label>Focus Areas</Label>
             <div className="grid grid-cols-2 gap-4">
               {AREAS.map((area) => {
@@ -152,7 +152,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                   <label
                     key={area.id}
                     className={cn(
-                      "relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3 transition-all",
+                      "transition-standard relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3",
                       isSelected === true
                         ? "border-border-strong bg-surface-selected"
                         : "border-border bg-card"
@@ -200,7 +200,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
             </div>
           </div>
 
-          <div className="mb-8 space-y-4">
+          <div className="mb-8 flex flex-col gap-4">
             <div className="flex justify-between text-sm">
               <Label>Token Budget</Label>
               <span className="text-muted-foreground font-mono">

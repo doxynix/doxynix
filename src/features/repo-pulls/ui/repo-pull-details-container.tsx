@@ -41,7 +41,7 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
   const riskScore = impact?.analysis.riskScore ?? analysis.analysis.riskScore;
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between border-b pb-6">
         <div>
           <div className="flex items-center gap-2">

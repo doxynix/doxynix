@@ -43,7 +43,7 @@ export function RepoMapCustomControls() {
             aria-label={item.label}
             onClick={item.action}
             className={cn(
-              "transition-all duration-300",
+              "transition-standard",
               hide ? "pointer-events-none -translate-x-full opacity-0" : "translate-x-0 opacity-100"
             )}
           >

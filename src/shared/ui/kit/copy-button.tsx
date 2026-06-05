@@ -35,7 +35,7 @@ export function CopyButton({
         aria-label={tooltipText}
         onClick={() => void copy(value)}
         className={cn(
-          "relative size-6 transition-all not-md:opacity-100",
+          "transition-standard relative size-6 not-md:opacity-100",
           "group/copy-btn",
           !isCopied &&
             "text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100",
@@ -45,14 +45,14 @@ export function CopyButton({
       >
         <Copy
           className={cn(
-            "absolute size-3.5 transition-all duration-300",
+            "transition-standard absolute size-3.5",
             isCopied ? "scale-0 opacity-0" : "scale-100 opacity-100"
           )}
         />
 
         <Check
           className={cn(
-            "text-success absolute size-3.5 transition-all duration-300",
+            "text-success transition-standard absolute size-3.5",
             isCopied ? "scale-100 opacity-100" : "scale-0 opacity-0"
           )}
         />

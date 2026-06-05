@@ -4,7 +4,6 @@ import { z } from "zod";
 import { RepoSchema, StatusSchema } from "@/shared/api-contracts";
 import { CreateRepoSchema } from "@/shared/api/schemas/repo";
 
-import { OpenApiErrorResponses } from "@/server/core/trpc/constants";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { getPaginationMeta, PaginationMetaSchema } from "@/server/utils/pagination";
 
@@ -29,18 +28,6 @@ const RepoWithMetricsSchema = PublicRepoSchema.extend({
 
 export const repoRouter = createTRPCRouter({
   create: protectedProcedure
-    .meta({
-      openapi: {
-        description:
-          "Registers a new repository in the system for analysis and tracking. The repository must be accessible to the authenticated user.",
-        errorResponses: OpenApiErrorResponses,
-        method: "POST",
-        path: "/repos",
-        protect: true,
-        summary: "Add a new repository",
-        tags: ["repositories"],
-      },
-    })
     .input(CreateRepoSchema)
     .output(
       z.object({
@@ -60,18 +47,6 @@ export const repoRouter = createTRPCRouter({
     }),
 
   delete: protectedProcedure
-    .meta({
-      openapi: {
-        description:
-          "Deletes the repository from the system along with its associated analytics and history. This does not affect the original GitHub repository.",
-        errorResponses: OpenApiErrorResponses,
-        method: "DELETE",
-        path: "/repos/{id}",
-        protect: true,
-        summary: "Remove a repository",
-        tags: ["repositories"],
-      },
-    })
     .input(z.object({ id: z.uuid() }))
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
@@ -79,18 +54,6 @@ export const repoRouter = createTRPCRouter({
     }),
 
   deleteAll: protectedProcedure
-    .meta({
-      openapi: {
-        description:
-          "Deletes the all repositories from the system along with its associated analytics and history. This does not affect the original GitHub repository.",
-        errorResponses: OpenApiErrorResponses,
-        method: "DELETE",
-        path: "/repos",
-        protect: true,
-        summary: "Remove all repositories",
-        tags: ["repositories"],
-      },
-    })
     .input(z.object({}).optional())
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx }) => {
@@ -98,18 +61,6 @@ export const repoRouter = createTRPCRouter({
     }),
 
   deleteByOwner: protectedProcedure
-    .meta({
-      openapi: {
-        description:
-          "Deletes all repositories belonging to the specified GitHub owner from the system. This only removes stored data and does not affect the original GitHub repositories.",
-        errorResponses: OpenApiErrorResponses,
-        method: "DELETE",
-        path: "/repos/owner/{owner}",
-        protect: true,
-        summary: "Delete repositories by owner",
-        tags: ["repositories"],
-      },
-    })
     .input(
       z.object({
         owner: z.string().trim().min(1).max(39),
@@ -127,18 +78,6 @@ export const repoRouter = createTRPCRouter({
     }),
 
   getAll: protectedProcedure
-    .meta({
-      openapi: {
-        description:
-          "Returns a paginated list of repositories. Supports filtering by status, search queries, ownership, and sorting options.",
-        errorResponses: OpenApiErrorResponses,
-        method: "GET",
-        path: "/repos",
-        protect: true,
-        summary: "Retrieve repositories with optional filters",
-        tags: ["repositories"],
-      },
-    })
     .input(RepoFilterSchema)
     .output(
       z.object({
@@ -193,18 +132,6 @@ export const repoRouter = createTRPCRouter({
     }),
 
   getByName: protectedProcedure
-    .meta({
-      openapi: {
-        description:
-          "Retrieves detailed information about a repository identified by its GitHub owner and name, including its latest analysis state.",
-        errorResponses: OpenApiErrorResponses,
-        method: "GET",
-        path: "/repos/{owner}/{name}",
-        protect: true,
-        summary: "Get repository by owner and name",
-        tags: ["repositories"],
-      },
-    })
     .input(
       z.object({
         name: z.string().trim().min(1).max(255),
@@ -217,18 +144,6 @@ export const repoRouter = createTRPCRouter({
     }),
 
   getByOwner: protectedProcedure
-    .meta({
-      openapi: {
-        description:
-          "Retrieves detailed information about a repository identified by its GitHub owner, including its latest analysis state.",
-        errorResponses: OpenApiErrorResponses,
-        method: "GET",
-        path: "/repos/{owner}",
-        protect: true,
-        summary: "Get repository by owner",
-        tags: ["repositories"],
-      },
-    })
     .input(
       z.object({
         owner: z.string().trim().min(1).max(39),
@@ -240,17 +155,6 @@ export const repoRouter = createTRPCRouter({
     }),
 
   getSlim: protectedProcedure
-    .meta({
-      openapi: {
-        description: "Get a lightweight list of repositories for filters and selectors.",
-        errorResponses: OpenApiErrorResponses,
-        method: "GET",
-        path: "/repos/slim",
-        protect: true,
-        summary: "Retrieve slim repositories list",
-        tags: ["repositories"],
-      },
-    })
     .input(RepoFilterSchema)
     .output(
       z.object({

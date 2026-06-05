@@ -237,7 +237,7 @@ export function RepoDocs({
                         return <Icon className="size-6" />;
                       })()}
                     </div>
-                    <div className="space-y-1">
+                    <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-3">
                         <h2 className="text-2xl font-bold tracking-tight">
                           {doc.type === "API" && apiMode === "swagger"
@@ -334,7 +334,7 @@ export function RepoDocs({
                 </div>
 
                 {nodeContext != null && nodeContext.related.docs.length > 0 && (
-                  <div className="mb-6 space-y-3 rounded-lg border p-4">
+                  <div className="mb-6 flex flex-col gap-3 rounded-lg border p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-medium">{nodeContext.node.label}</p>

@@ -342,16 +342,16 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
           </div>
 
           {isAiLoading ? (
-            <div className="space-y-3 py-2">
+            <div className="flex flex-col gap-3 py-2">
               <Skeleton className="h-3 w-1/3" />
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <Skeleton className="h-2 w-full" />
                 <Skeleton className="h-2 w-5/6" />
                 <Skeleton className="h-2 w-4/5" />
               </div>
               <div className="pt-2">
                 <Skeleton className="h-3 w-1/4" />
-                <div className="mt-2 space-y-2">
+                <div className="mt-2 flex flex-col gap-2">
                   <Skeleton className="h-2 w-11/12" />
                   <Skeleton className="h-2 w-9/12" />
                 </div>

@@ -22,7 +22,7 @@ export default async function RepoDetailsLayout({ children, params }: Readonly<R
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4">
         <RepoDetailsHeader repo={repo} />
       </div>

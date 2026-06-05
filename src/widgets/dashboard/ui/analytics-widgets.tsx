@@ -83,7 +83,7 @@ export function SystemRisksWidget({ data }: Readonly<Props>) {
         ) : (
           <div className="flex gap-3 text-sm">
             <Users />
-            <div className="space-y-1">
+            <div className="flex flex-col gap-1">
               <p>Knowledge Concentration</p>
               <p className="text-muted-foreground mt-1 text-xs">
                 <span className="text-destructive font-bold">{data.risks.busFactorRepos}</span>{" "}
@@ -223,7 +223,7 @@ export function LanguagesWidget({ data }: Readonly<Props>) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {data.languages.length === 0 ? (
             <p className="text-muted-foreground text-sm">No data yet</p>
           ) : (
@@ -232,7 +232,7 @@ export function LanguagesWidget({ data }: Readonly<Props>) {
                 data.overview.totalLoc > 0 ? (lang.value / data.overview.totalLoc) * 100 : 0;
 
               return (
-                <div key={lang.name} className="space-y-1">
+                <div key={lang.name} className="flex flex-col gap-1">
                   <div className="flex justify-between text-xs">
                     <div className="flex items-center gap-1">
                       <span
@@ -275,7 +275,7 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {data.recentActivity.length === 0 ? (
             <p className="text-muted-foreground text-sm">No recent analyses</p>
           ) : (

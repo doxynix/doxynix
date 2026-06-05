@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function ConnectionsPage() {
   return (
     <div className="flex flex-col gap-4">
-      <div className="space-y-1">
+      <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight">Connections</h1>
         <p className="text-muted-foreground text-sm">
           Manage your authentication methods and GitHub data access.

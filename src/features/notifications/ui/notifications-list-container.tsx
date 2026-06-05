@@ -43,7 +43,7 @@ export function NotificationsListContainer() {
       <NotificationsHeader stats={stats} />
 
       {isListLoading || data == null ? (
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           {Array.from({ length: safeLimit }).map((_, i) => (
             <NotificationCardSkeleton key={i} />
           ))}

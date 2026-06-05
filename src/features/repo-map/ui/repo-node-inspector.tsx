@@ -172,7 +172,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
       <ScrollArea>
         <div className="flex flex-col gap-8 p-4">
           {explain.whyImportant && (
-            <section className="space-y-2">
+            <section className="flex flex-col gap-2">
               <div className="text-xs">Business Impact</div>
               <p className="border-primary pl-3 text-xs italic">
                 &quot;{explain.whyImportant}&quot;
@@ -240,7 +240,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           </div>
 
           {(children.length > 0 || allFileReferences.length > 0) && (
-            <section className="space-y-3">
+            <section className="flex flex-col gap-3">
               <div className="flex items-center gap-2 text-xs">
                 <Boxes /> Module Composition
               </div>
@@ -306,9 +306,9 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           )}
 
           {inspect.recommendedActions.length > 0 && (
-            <section className="space-y-3">
+            <section className="flex flex-col gap-3">
               <div className="text-warning text-xs">Recommended Actions</div>
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 {inspect.recommendedActions.map((action, i) => (
                   <div
                     key={i}
@@ -323,7 +323,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           )}
 
           {data.related.docs.length > 0 && (
-            <section className="space-y-3">
+            <section className="flex flex-col gap-3">
               <div className="text-xs">Related Docs</div>
               <div className="flex flex-wrap gap-2">
                 {data.related.docs.map((doc) => (
@@ -336,9 +336,9 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           )}
 
           {data.related.findings.length > 0 && (
-            <section className="space-y-3">
+            <section className="flex flex-col gap-3">
               <div className="text-xs">Recent PR Findings</div>
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 {data.related.findings.slice(0, 4).map((finding) => (
                   <div key={finding.id} className="rounded-md border p-2 text-xs">
                     <div className="mb-1 flex items-center justify-between gap-2">

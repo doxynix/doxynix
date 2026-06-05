@@ -38,7 +38,7 @@ export function ConnectionsListContainer() {
 
   return (
     <div className="grid gap-10">
-      <section className="space-y-4">
+      <section className="flex flex-col gap-4">
         <div>
           <h2>Authentication</h2>
           <p className="text-muted-foreground text-sm">Manage your social login methods.</p>
@@ -46,7 +46,7 @@ export function ConnectionsListContainer() {
         <AuthProvidersList accounts={data?.accounts ?? []} user={data?.user ?? null} />
       </section>
 
-      <section className="space-y-4">
+      <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
             <h2>GitHub Installations</h2>

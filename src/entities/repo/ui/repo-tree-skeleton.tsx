@@ -14,7 +14,7 @@ export function RepoTreeSkeleton({ rows = 20, variant = "tree" }: Readonly<Props
   const displayLevels = LEVELS.slice(0, rows);
 
   return (
-    <div className="h-145 w-full space-y-2 p-1">
+    <div className="flex h-145 w-full flex-col gap-2 p-1">
       {displayLevels.map((level, i) => (
         <div
           key={i}
