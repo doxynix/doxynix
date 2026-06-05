@@ -611,9 +611,6 @@ importers:
       web-tree-sitter:
         specifier: 0.20.8
         version: 0.20.8
-      ws:
-        specifier: 8.21.0
-        version: 8.21.0
       yaml:
         specifier: 2.9.0
         version: 2.9.0

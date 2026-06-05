@@ -262,7 +262,6 @@
     "use-debounce": "10.1.1",
     "validator": "13.15.35",
     "web-tree-sitter": "0.20.8",
-    "ws": "8.21.0",
     "yaml": "2.9.0",
     "zod": "4.4.3",
     "zustand": "5.0.14"

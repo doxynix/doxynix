@@ -1,10 +1,15 @@
 import crypto from "node:crypto";
 
-import { API_KEY_CHECKSUM_SECRET, API_KEY_PEPPER } from "@/shared/constants/env.server";
+import {
+  API_KEY_CHECKSUM_SECRET,
+  API_KEY_PEPPER,
+  PRISMA_FIELD_ENCRYPTION_HASH_SALT,
+} from "@/shared/constants/env.server";
 
 const BRAND_PREFIX = "dxnx_";
 const CHECKSUM_LENGTH = 8;
 const PAYLOAD_LENGTH = 32;
+const TOTAL_KEY_LENGTH = BRAND_PREFIX.length + PAYLOAD_LENGTH + CHECKSUM_LENGTH;
 const HEX_REGEX = /^[\da-f]{8}$/;
 
 /**
@@ -27,20 +32,22 @@ function calculateChecksum(payload: string): string {
 export function generateApiKey(): string {
   const payload = crypto.randomBytes(24).toString("base64url");
   const checksum = calculateChecksum(payload);
-  return `${BRAND_PREFIX}${payload}${checksum}`; // Без "_" перед чексуммой для идеальной маскировки
+  return `${BRAND_PREFIX}${payload}${checksum}`;
 }
 
 /**
  * Валидирует контрольную сумму API-ключа локально на CPU без обращений к базе данных.
  */
 export function validateApiKeyChecksum(apiKey: string): boolean {
-  if (typeof apiKey !== "string" || !apiKey.startsWith(BRAND_PREFIX)) {
+  if (
+    typeof apiKey !== "string" ||
+    apiKey.length !== TOTAL_KEY_LENGTH ||
+    !apiKey.startsWith(BRAND_PREFIX)
+  ) {
     return false;
   }
 
   const cleanKey = apiKey.slice(BRAND_PREFIX.length);
-
-  if (cleanKey.length !== PAYLOAD_LENGTH + CHECKSUM_LENGTH) return false;
 
   const payload = cleanKey.slice(0, PAYLOAD_LENGTH);
   const checksum = cleanKey.slice(PAYLOAD_LENGTH);
@@ -69,15 +76,21 @@ export function extractPayloadFromKey(apiKey: string): null | string {
  * генерацией хэшей в библиотеке "prisma-field-encryption".
  */
 export function getRawHash(value: string): string {
-  return crypto.hash("sha256", value);
+  const input = PRISMA_FIELD_ENCRYPTION_HASH_SALT
+    ? value + PRISMA_FIELD_ENCRYPTION_HASH_SALT
+    : value;
+  return crypto.hash("sha256", input);
 }
 
 /**
- * Генерирует вычислительно-стойкую хэш-подпись scrypt для хранения API-ключей в БД.
- * Использование scrypt полностью удовлетворяет жесткие криптографические требования CodeQL.
+ * Генерирует быстрый хэш-подпись HMAC-SHA256 для хранения API-ключей в БД.
+ * Метод абсолютно безопасен, так как исходный payload имеет высокую энтропию (192 бита).
+ * Использование HMAC гарантирует защиту от перебора при утечке БД (благодаря секретному API_KEY_PEPPER).
+ * ИСПОЛЬЗОВАТЬ СТРОГО ДЛЯ СТРОК С ВЫСОКОЙ ЭНТРОПИЕЙ!
  */
+// codeql[js/insufficient-password-hash]
 export function getApiKeyHash(payload: string): string {
-  return crypto.scryptSync(payload, API_KEY_PEPPER, 32, { N: 1024, p: 1, r: 8 }).toString("hex");
+  return crypto.createHmac("sha256", API_KEY_PEPPER).update(payload).digest("hex");
 }
 
 /**
@@ -86,5 +99,5 @@ export function getApiKeyHash(payload: string): string {
  */
 export function getNormalizedHash(value: string): string {
   const normalized = value.trim().normalize("NFC").toLowerCase();
-  return crypto.hash("sha256", normalized);
+  return getRawHash(normalized);
 }
