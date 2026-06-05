@@ -50,8 +50,27 @@ const ENCRYPTED_METADATA_MAP: Record<string, Record<string, string>> = {
   },
 };
 
-function patchDmmfForEncryption(dmmf: any) {
-  if (dmmf?.datamodel?.models == null) return dmmf;
+type DmmfField = {
+  documentation?: string;
+  isId?: boolean;
+  isList?: boolean;
+  isUnique?: boolean;
+  name: string;
+};
+
+type DmmfModel = {
+  fields?: DmmfField[];
+  name: string;
+};
+
+type DmmfDatamodel = {
+  datamodel?: {
+    models?: DmmfModel[];
+  };
+};
+
+function patchDmmfForEncryption(dmmf: DmmfDatamodel): DmmfDatamodel {
+  if (dmmf.datamodel?.models == null) return dmmf;
 
   for (const model of dmmf.datamodel.models) {
     const modelName = model.name;
@@ -106,7 +125,7 @@ if (useNeonAdapter) {
 const encryptedClient = baseClient.$extends(
   fieldEncryptionExtension({
     decryptionKeys: [],
-    dmmf: patchDmmfForEncryption(structuredClone(Prisma.dmmf)),
+    dmmf: patchDmmfForEncryption(structuredClone(Prisma.dmmf) as unknown as DmmfDatamodel) as any,
     encryptionKey: PRISMA_FIELD_ENCRYPTION_KEY,
   })
 );
