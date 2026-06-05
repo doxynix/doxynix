@@ -111,7 +111,7 @@ function assertDmmfIsPopulated(dmmf: DmmfDatamodel): void {
   if (models == null || models.length === 0) {
     throw new Error(
       "[db] Prisma.dmmf is empty or stripped by the bundler. " +
-      "Field encryption cannot work without a valid DMMF — aborting startup to prevent unencrypted data leak."
+        "Field encryption cannot work without a valid DMMF — aborting startup to prevent unencrypted data leak."
     );
   }
 }
@@ -204,14 +204,15 @@ function createPrismaInstance() {
       ? PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS.split(",")
       : [];
 
-  const rawDmmf = (Prisma as any).dmmf != null
-    ? (structuredClone((Prisma as any).dmmf) as unknown as DmmfDatamodel)
-    : null;
+  const rawDmmf =
+    (Prisma as any).dmmf != null
+      ? (structuredClone((Prisma as any).dmmf) as unknown as DmmfDatamodel)
+      : null;
 
   if (rawDmmf === null) {
     throw new Error(
       "[db] Prisma.dmmf is undefined. " +
-      "Field encryption cannot initialize — aborting startup to prevent unencrypted data leak."
+        "Field encryption cannot initialize — aborting startup to prevent unencrypted data leak."
     );
   }
 
