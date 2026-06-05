@@ -36,7 +36,7 @@ function parseSeedNumber(value: string | undefined, fallback: number): number {
   if (value == null || value.trim() === "") return fallback;
 
   const trimmed = value.trim();
-  if (!/^\d+/.test(trimmed)) {
+  if (!/^\d+$/.test(trimmed)) {
     throw new Error(`Invalid seed count: "${value}". Expected a positive integer.`);
   }
 
