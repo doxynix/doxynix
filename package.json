@@ -205,7 +205,7 @@
     "next-intl": "4.13.0",
     "next-themes": "0.4.6",
     "nextjs-toploader": "3.9.17",
-    "nodemailer": "8.0.9",
+    "nodemailer": "9.0.1",
     "nuqs": "2.8.9",
     "octokit-plugin-create-pull-request": "6.0.1",
     "parse-diff": "0.12.0",
