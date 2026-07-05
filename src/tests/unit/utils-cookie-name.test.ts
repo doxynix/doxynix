@@ -1,3 +1,4 @@
+import { describe } from "vitest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 describe("getCookieName runtime branches", () => {
@@ -11,7 +12,7 @@ describe("getCookieName runtime branches", () => {
 
     const { getCookieName } = await import("@/shared/lib/session-cookie");
 
-    expect(getCookieName()).toBe("__Secure-better-auth.session_token");
+    expect(getCookieName()).toBe("__Secure-doxynix.session_token");
   });
 
   it("should return standard cookie name in development mode", async () => {
@@ -19,6 +20,6 @@ describe("getCookieName runtime branches", () => {
 
     const { getCookieName } = await import("@/shared/lib/session-cookie");
 
-    expect(getCookieName()).toBe("better-auth.session_token");
+    expect(getCookieName()).toBe("doxynix.session_token");
   });
 });

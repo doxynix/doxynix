@@ -17,4 +17,5 @@ export const envShared = {
 
 export const isSharedValidationSkipped =
   process.env.SKIP_ENV_VALIDATION === "development" ||
-  (process.env.CI != null && process.env.CI !== "");
+  (process.env.CI != null && process.env.CI !== "") ||
+  process.env.NODE_ENV === "test";

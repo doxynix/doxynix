@@ -80,7 +80,7 @@ export const auth = betterAuth({
             where: { id: Number(baAccount.userId) },
           });
 
-          if (dbUser && dbUser.image == null && baAccount.image != null) {
+          if (dbUser != null && dbUser.image == null && baAccount.image != null) {
             await prisma.user.update({
               data: { image: baAccount.image },
               where: { id: dbUser.id },
@@ -100,7 +100,7 @@ export const auth = betterAuth({
             where: { id: Number(payload.userId) },
           });
 
-          if (dbUser) {
+          if (dbUser != null) {
             payload.email = dbUser.email;
             payload.emailHash = dbUser.emailHash;
 
@@ -180,9 +180,9 @@ export const auth = betterAuth({
             });
 
             if (
-              latestAccount &&
-              latestAccount.providerId !== "email" &&
-              latestAccount.providerId !== "credential"
+              latestAccount != null &&
+              latestAccount.provider !== "email" &&
+              latestAccount.provider !== "credential"
             ) {
               const freshImage = latestAccount.image;
               const freshName = latestAccount.name;
@@ -217,7 +217,7 @@ export const auth = betterAuth({
             where: { id: Number(session.id) },
           });
 
-          if (dbSession) {
+          if (dbSession != null) {
             const dbUser = await prisma.user.findUnique({
               where: { id: dbSession.userId },
             });
