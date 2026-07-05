@@ -448,9 +448,7 @@ export function AuthForm() {
                           <FormMessage className="animate-in fade-in slide-in-from-top-1 text-xs" />
                         </div>
                         {lastLogin === "magic-link" && (
-                          <AppBadge className="absolute top-2 -right-2 text-xs">
-                            Last used
-                          </AppBadge>
+                          <AppBadge className="absolute top-2 -right-2 text-xs">Last used</AppBadge>
                         )}
                       </FormItem>
                     )}
