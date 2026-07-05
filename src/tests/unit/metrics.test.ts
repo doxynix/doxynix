@@ -1,5 +1,6 @@
-import type { Repo } from "@prisma/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { Repo } from "@/shared/api-contracts";
 
 import {
   calculateCodeMetrics,

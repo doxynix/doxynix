@@ -177,9 +177,7 @@ describe("shared/lib/utils:getCookieName", () => {
   it("should return cookie name for current runtime", () => {
     const cookieName = getCookieName();
 
-    expect(["__Secure-better-auth.session_token", "better-auth.session_token"]).toContain(
-      cookieName
-    );
+    expect(["__Secure-doxynix.session_token", "doxynix.session_token"]).toContain(cookieName);
   });
 });
 

@@ -1,6 +1,7 @@
-import { Status, Visibility } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { StatusSchema, VisibilitySchema } from "@/shared/api-contracts";
 
 import type { DbClient } from "@/server/core/db";
 import * as githubApi from "@/server/core/github/github-api";
@@ -118,34 +119,34 @@ describe("repoService.buildWhereClause", () => {
   it("should build visibility and owner filters with case-insensitive owner lookup", () => {
     const filters = {
       owner: "TeSt-Owner",
-      visibility: Visibility.PRIVATE,
+      visibility: VisibilitySchema.enum.PUBLIC,
     };
 
     const where = repoService.buildWhereClause(filters);
 
     expect(where).toEqual({
       owner: { equals: "TeSt-Owner", mode: "insensitive" },
-      visibility: Visibility.PRIVATE,
+      visibility: VisibilitySchema.enum.PUBLIC,
     });
   });
 
   it("should build NEW status filter with OR branch for repos without analyses", () => {
-    const filters = { status: Status.NEW };
+    const filters = { status: StatusSchema.enum.NEW };
 
     const where = repoService.buildWhereClause(filters);
 
     expect(where).toEqual({
-      OR: [{ analyses: { none: {} } }, { analyses: { some: { status: Status.NEW } } }],
+      OR: [{ analyses: { none: {} } }, { analyses: { some: { status: StatusSchema.enum.NEW } } }],
     });
   });
 
   it("should build non-NEW status filter with analyses.some", () => {
-    const filters = { status: Status.DONE };
+    const filters = { status: StatusSchema.enum.DONE };
 
     const where = repoService.buildWhereClause(filters);
 
     expect(where).toEqual({
-      analyses: { some: { status: Status.DONE } },
+      analyses: { some: { status: StatusSchema.enum.DONE } },
     });
   });
 
@@ -198,21 +199,21 @@ describe("repoService.buildWhereClause", () => {
     const filters = {
       owner: "owner",
       search: "repo",
-      status: Status.FAILED,
-      visibility: Visibility.PUBLIC,
+      status: StatusSchema.enum.FAILED,
+      visibility: VisibilitySchema.enum.PUBLIC,
     };
 
     const where = repoService.buildWhereClause(filters);
 
     expect(where).toEqual({
-      analyses: { some: { status: Status.FAILED } },
+      analyses: { some: { status: StatusSchema.enum.FAILED } },
       OR: [
         { name: { contains: "repo", mode: "insensitive" } },
         { owner: { contains: "repo", mode: "insensitive" } },
         { description: { contains: "repo", mode: "insensitive" } },
       ],
       owner: { equals: "owner", mode: "insensitive" },
-      visibility: Visibility.PUBLIC,
+      visibility: VisibilitySchema.enum.PUBLIC,
     });
   });
 });
@@ -313,7 +314,7 @@ describe("repoService.createRepo", () => {
         topics: ["fsd", "vitest"],
         url: "https://github.com/owner/repo",
         userId: 42,
-        visibility: Visibility.PRIVATE,
+        visibility: VisibilitySchema.enum.PRIVATE,
       },
     });
   });
@@ -337,7 +338,7 @@ describe("repoService.createRepo", () => {
       expect.objectContaining({
         data: expect.objectContaining({
           topics: [],
-          visibility: Visibility.PUBLIC,
+          visibility: VisibilitySchema.enum.PUBLIC,
         }),
       })
     );
