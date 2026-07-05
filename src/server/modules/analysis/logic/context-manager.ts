@@ -96,7 +96,7 @@ function isRootManifest(path: string) {
     normalizedPath.toLowerCase() as (typeof PROJECT_POLICY_RULES.manifests.rootFiles)[number]
   );
 }
-
+// NOTE: выглядит странно переделать
 function isDataContractFile(path: string) {
   const normalizedPath = normalize(path).toLowerCase();
 

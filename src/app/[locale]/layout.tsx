@@ -26,7 +26,6 @@ import { A11yProvider } from "@/shared/ui/kit/a11y-provider";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
 import { SkipLink } from "@/shared/ui/kit/skip-link";
 
-import { getServerAuthSession } from "@/server/core/auth";
 import { ourFileRouter } from "@/server/core/uploadthing";
 
 import { Providers } from "../providers";
@@ -139,7 +138,6 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const { locale } = await params;
-  const session = await getServerAuthSession();
 
   if (!routing.locales.includes(locale as Locale)) {
     notFound();
@@ -174,7 +172,7 @@ export default async function LocaleLayout({
               <Suspense>
                 <UTSSR />
               </Suspense>
-              <Providers session={session}>{children}</Providers>
+              <Providers>{children}</Providers>
               {IS_PROD && (
                 <>
                   <Analytics />

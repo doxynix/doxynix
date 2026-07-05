@@ -25,6 +25,10 @@ const handler = createMcpHandler(
         continue;
       }
 
+      if (toolObj.needsApproval === true) {
+        continue;
+      }
+
       const inputSchema = toolObj.inputSchema;
 
       if (!(inputSchema instanceof z.ZodObject)) {

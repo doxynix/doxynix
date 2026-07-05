@@ -1,7 +1,8 @@
+import { headers } from "next/headers";
 import { createUploadthing, UploadThingError, UTApi, type FileRouter } from "uploadthing/server";
 
 import { appLogger } from "./app-logger";
-import { getServerAuthSession } from "./auth";
+import { auth } from "./auth";
 import { prisma } from "./db";
 
 const utapi = new UTApi();
@@ -14,7 +15,9 @@ export const ourFileRouter = {
     "image/webp": { maxFileCount: 1, maxFileSize: "4MB" },
   })
     .middleware(async () => {
-      const session = await getServerAuthSession();
+      const session = await auth.api.getSession({
+        headers: await headers(),
+      });
 
       if (!session?.user) throw new UploadThingError("Unauthorized");
 

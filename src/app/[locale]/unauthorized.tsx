@@ -2,14 +2,14 @@
 
 import { useEffect } from "react";
 import { LogIn, ShieldAlert } from "lucide-react";
-import { signOut } from "next-auth/react";
 
 import { Link } from "@/shared/i18n/routing";
+import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 
 export default function UnauthorizedPage() {
   useEffect(() => {
-    void signOut({ redirect: false });
+    void authClient.signOut();
   }, []);
 
   return (

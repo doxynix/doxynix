@@ -3,11 +3,11 @@
 import { useState } from "react";
 import type { Route } from "next";
 import { LogOut } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 import { userNavMenu } from "@/shared/constants/navigation";
 import { Link } from "@/shared/i18n/routing";
+import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -33,7 +33,7 @@ import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 export function UserNav() {
-  const { data: session, status } = useSession();
+  const { data: session, isPending } = authClient.useSession();
   const user = session?.user ?? null;
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
@@ -46,13 +46,19 @@ export function UserNav() {
   async function handleSignOut() {
     try {
       setLoading(true);
-      await signOut({ callbackUrl: "/auth" });
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            window.location.href = "/auth";
+          },
+        },
+      });
     } finally {
       setLoading(false);
     }
   }
 
-  if (status === "loading") {
+  if (isPending) {
     return <Skeleton className="size-9 rounded-full" />;
   }
 

@@ -183,13 +183,13 @@ async function seedStressProfile() {
     create: clean({
       ...Fake.fakeUser(),
       email: STRESS_USER_EMAIL,
-      emailVerified: new Date(),
+      emailVerified: true,
       image: faker.image.avatar(),
       name: STRESS_USER_NAME,
       role: UserRole.USER,
     }),
     update: {
-      emailVerified: new Date(),
+      emailVerified: true,
       image: faker.image.avatar(),
       name: STRESS_USER_NAME,
     },
@@ -247,13 +247,13 @@ async function main() {
     create: clean({
       ...Fake.fakeUser(),
       email: MY_EMAIL,
-      emailVerified: new Date(),
+      emailVerified: true,
       image: faker.image.avatar(),
       name: "Alice",
       role: UserRole.ADMIN,
     }),
     update: {
-      emailVerified: new Date(),
+      emailVerified: true,
       image: faker.image.avatar(),
       name: "Alice",
       role: UserRole.ADMIN,

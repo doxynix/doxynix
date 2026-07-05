@@ -4,13 +4,13 @@ import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import * as Ably from "ably";
 import { AblyProvider } from "ably/react";
-import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
 import { IS_PROD } from "@/shared/constants/env.flags";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { useRouter } from "@/shared/i18n/routing";
+import { authClient } from "@/shared/lib/auth-client";
 
 import type { RepoStatus } from "@/entities/repo/model/repo.types";
 import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
@@ -20,7 +20,7 @@ import { useNotificationActions } from "@/features/notifications/model/use-notif
 type Props = { children: ReactNode };
 
 export const RealtimeProvider = ({ children }: Props) => {
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
   const router = useRouter();
   const userId = session?.user.id;
 
@@ -168,9 +168,6 @@ export const RealtimeProvider = ({ children }: Props) => {
     return () => {
       void systemChannel.unsubscribe(handleSystemMsg);
       void userChannel.unsubscribe(handleUserMsg);
-
-      // systemChannel.detach();
-      // userChannel.detach();
     };
   }, [
     client,

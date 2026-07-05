@@ -1,0 +1,113 @@
+import "./auth"
+import "./review"
+import "./core"
+
+model Repo {
+  /// @zod.custom.omit(["model"])
+  id               Int                        @id @default(autoincrement()) @omit
+  /// @zod.custom.omit(["model"])
+  publicId         String                     @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  githubId         Int                        @map("github_id")
+  owner            String                     @db.Citext @length(min: 1, max: 39, message: "Repository owner login cannot exceed 39 characters")
+  /// @zod.string.min(1).max(255)
+  name             String                     @db.Citext @length(min: 1, max: 255)
+  /// @zod.string.max(1000)
+  description      String?                    @db.Text @length(max: 1000)
+  /// @zod.string.url({ message: "Invalid repository URL" })
+  url              String                     @url
+  language         String?
+  license          String?
+  topics           String[]
+  /// @zod.number.int().min(0)
+  stars            Int                        @default(0) @map("stargazers_count") @gte(0)
+  /// @zod.number.int().min(0)
+  forks            Int                        @default(0) @map("forks_count") @gte(0)
+  defaultBranch    String                     @default("main") @map("default_branch")
+  /// @zod.string.url()
+  ownerAvatarUrl   String?                    @map("owner_avatar_url") @url
+  /// @zod.number.int().min(0)
+  openIssues       Int                        @default(0) @map("open_issues_count") @gte(0)
+  /// @zod.number.int().min(0)
+  size             Int                        @default(0) @gte(0)
+  visibility       Visibility                 @default(PRIVATE)
+
+  pushedAt         DateTime?                  @map("pushed_at")
+  createdAt        DateTime                   @default(now()) @map("created_at")
+  githubCreatedAt  DateTime?                  @map("github_created_at")
+  updatedAt        DateTime                   @default(now()) @updatedAt @map("updated_at")
+
+  /// @zod.custom.omit(["model"])
+  userId           Int                        @map("user_id") @omit
+  user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  analyses         Analysis[]
+  documents        Document[]
+  notifications    Notification[]
+  pullRequests     PullRequestAnalysis[]      @relation("RepoPullRequests")
+  generatedFixes   GeneratedFix[]             @relation("RepoGeneratedFixes")
+  chatSession      ChatSession[]
+
+  prAnalysisConfig PullRequestAnalysisConfig?
+
+  @@allow('read,delete', auth() == user || auth().role == 'ADMIN')
+  @@allow('create', auth() != null && userId == auth().id)
+  @@allow('update', (auth() == user && future().userId == userId) || auth().role == 'ADMIN')
+
+  @@unique([owner, name, userId])
+  @@unique([githubId, userId])
+  @@index([topics], type: Gin)
+  @@index([userId, owner])
+  @@index([userId, name])
+  @@index([userId, visibility, createdAt(sort: Desc)])
+  @@index([userId, updatedAt(sort: Desc)])
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_name_trgm_idx")
+  @@index([owner(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_owner_trgm_idx")
+  @@index([description(ops: raw("gin_trgm_ops"))], type: Gin, map: "repos_description_trgm_idx")
+
+  @@map("repos")
+}
+
+model GithubInstallation {
+  id                  BigInt                 @id
+  appId               Int                    @map("app_id")
+  targetId            BigInt                 @map("target_id")
+  targetType          InstallationTargetType @map("target_type")
+  accountLogin        String                 @map("account_login") @db.Citext @length(min: 1, max: 39, message: "GitHub login cannot exceed 39 characters")
+  accountAvatar       String?                @map("account_avatar")
+  repositorySelection RepositorySelection    @map("repository_selection")
+
+  isSuspended         Boolean                @default(false) @map("is_suspended")
+  htmlUrl             String?                @map("html_url")
+
+  createdAt           DateTime               @default(now()) @map("created_at")
+  updatedAt           DateTime               @default(now()) @updatedAt @map("updated_at")
+
+  userId              Int?                   @map("user_id") @omit
+  user                User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@allow('read', auth() != null && (userId == auth().id || auth().role == 'ADMIN'))
+  @@allow('delete', auth().role == 'ADMIN')
+  @@allow('create', auth().role == 'ADMIN')
+  @@allow(
+    'update',
+    auth().role == 'ADMIN' || (userId == auth().id && future().userId == userId)
+  )
+
+  @@index([userId, isSuspended, createdAt(sort: Asc)])
+  @@index([userId, isSuspended, accountLogin])
+
+  @@map("github_installations")
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+enum InstallationTargetType {
+  USER
+  ORGANIZATION
+}
+enum RepositorySelection {
+  ALL
+  SELECTED
+}

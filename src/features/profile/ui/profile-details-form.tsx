@@ -3,11 +3,11 @@
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Mail, User2 } from "lucide-react";
-import type { User } from "next-auth";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
 import { UpdateProfileSchema, type UpdateProfileInput } from "@/shared/api/schemas/user";
+import { type User } from "@/shared/lib/auth-client";
 import {
   Form,
   FormControl,
@@ -41,8 +41,8 @@ export function ProfileDetailsForm({
 
   const form = useForm<UpdateProfileInput>({
     defaultValues: {
-      email: user.email ?? "",
-      name: user.name ?? "",
+      email: user.email,
+      name: user.name,
     },
     mode: "onChange",
     resolver: zodResolver(UpdateProfileSchema),
@@ -50,8 +50,8 @@ export function ProfileDetailsForm({
 
   useEffect(() => {
     form.reset({
-      email: user.email ?? "",
-      name: user.name ?? "",
+      email: user.email,
+      name: user.name,
     });
   }, [user, form]);
 

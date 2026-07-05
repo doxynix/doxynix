@@ -1,17 +1,15 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { NextResponse } from "next/server";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
 
 import { appLogger } from "@/server/core/app-logger";
 
+import openApiDocument from "../../../../public/openapi.json";
+
+export const runtime = "edge";
+
 export const GET = async () => {
   try {
-    const filePath = path.join(process.cwd(), "public", "openapi.json");
-    const fileContents = await fs.readFile(filePath, "utf8");
-    const openApiDocument = JSON.parse(fileContents);
-
     return NextResponse.json(openApiDocument, {
       headers: {
         "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=600",

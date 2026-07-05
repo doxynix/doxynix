@@ -1,15 +1,18 @@
+import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { REALTIME_CONFIG, type AblyCapability } from "@/shared/constants/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
-import { getServerAuthSession } from "@/server/core/auth";
+import { auth } from "@/server/core/auth";
 import { realtimeServer } from "@/server/core/realtime";
 
 const ONE_HOUR = 3_600_000;
 
 export async function GET() {
-  const session = await getServerAuthSession();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   const userId = session?.user.id;
   const clientId = userId == null ? "anonymous" : String(userId);
 

@@ -26,7 +26,6 @@ env:
   PRISMA_FIELD_ENCRYPTION_KEY: ${{ secrets.PRISMA_FIELD_ENCRYPTION_KEY }}
   DATABASE_URL: postgresql://user:password@localhost:5432/test_db
   DIRECT_URL: postgresql://user:password@localhost:5432/test_db
-  NEXTAUTH_SECRET: "super-secret-dummy-key-for-ci"
   NEXTAUTH_URL: "http://localhost:3000"
   JWT_SECRET: "dummy-jwt-secret"
   TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA"
@@ -44,7 +43,7 @@ env:
   UPSTASH_REDIS_REST_TOKEN: "dummy-token"
   GITHUB_CLIENT_ID: "dummy"
   GITHUB_CLIENT_SECRET: "dummy"
-  GOOGLE_CLIENT_ID: "dummy"
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID: "dummy"
   GOOGLE_CLIENT_SECRET: "dummy"
   GITLAB_CLIENT_ID: "dummy"
   GITLAB_CLIENT_SECRET: "dummy"

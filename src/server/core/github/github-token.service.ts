@@ -11,43 +11,43 @@ const REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // TIME: 5 минут
 export const githubTokenService = {
   async getValidToken(userId: number): Promise<null | string> {
     const account = await prisma.account.findFirst({
-      select: { access_token: true, expires_at: true, id: true, refresh_token: true },
-      where: { provider: "github", userId },
+      select: { accessToken: true, accessTokenExpiresAt: true, id: true, refreshToken: true },
+      where: { providerId: "github", userId },
     });
 
     if (
       account == null ||
-      account.access_token == null ||
-      account.refresh_token == null ||
-      account.expires_at == null
+      account.accessToken == null ||
+      account.refreshToken == null ||
+      account.accessTokenExpiresAt == null
     ) {
       return null;
     }
 
-    const isExpired = Date.now() > account.expires_at * 1000 - REFRESH_THRESHOLD_MS;
-    if (!isExpired) return account.access_token;
+    const isExpired = Date.now() > account.accessTokenExpiresAt.getTime() - REFRESH_THRESHOLD_MS;
+    if (!isExpired) return account.accessToken;
 
     try {
       return await prisma.$transaction(async (tx) => {
         await tx.$queryRawTyped(getAccountForUpdate(userId, "github"));
         const lockedAccount = await tx.account.findFirst({
-          where: { provider: "github", userId },
+          where: { providerId: "github", userId },
         });
 
         if (
           lockedAccount == null ||
-          lockedAccount.access_token == null ||
-          lockedAccount.refresh_token == null ||
-          lockedAccount.expires_at == null
+          lockedAccount.accessToken == null ||
+          lockedAccount.refreshToken == null ||
+          lockedAccount.accessTokenExpiresAt == null
         ) {
           return null;
         }
 
         const stillExpired =
-          Date.now() > Number(lockedAccount.expires_at) * 1000 - REFRESH_THRESHOLD_MS;
+          Date.now() > lockedAccount.accessTokenExpiresAt.getTime() - REFRESH_THRESHOLD_MS;
 
         if (!stillExpired) {
-          return lockedAccount.access_token;
+          return lockedAccount.accessToken;
         }
 
         appLogger.info({ msg: "GitHub token expiring soon, initiating manual refresh", userId });
@@ -56,9 +56,9 @@ export const githubTokenService = {
           clientId: AUTH_PROVIDERS.github.id,
           clientSecret: AUTH_PROVIDERS.github.secret,
           clientType: "github-app",
-          expiresAt: new Date(Number(lockedAccount.expires_at) * 1000).toISOString(),
-          refreshToken: lockedAccount.refresh_token,
-          token: lockedAccount.access_token,
+          expiresAt: lockedAccount.accessTokenExpiresAt.toISOString(),
+          refreshToken: lockedAccount.refreshToken,
+          token: lockedAccount.accessToken,
         });
 
         const authentication = await auth({ type: "refresh" });
@@ -71,14 +71,14 @@ export const githubTokenService = {
 
         const updated = await tx.account.update({
           data: {
-            access_token: authData.token,
-            expires_at: Math.floor(new Date(authData.expiresAt).getTime() / 1000),
-            refresh_token: authData.refreshToken,
+            accessToken: authData.token,
+            accessTokenExpiresAt: new Date(authData.expiresAt),
+            refreshToken: authData.refreshToken,
           },
           where: { id: lockedAccount.id },
         });
         appLogger.info({ msg: "GitHub token successfully refreshed and saved", userId });
-        return updated.access_token;
+        return updated.accessToken;
       });
     } catch (error) {
       appLogger.error({ error, msg: "Token rotation failed", userId });
@@ -93,12 +93,12 @@ export const githubTokenService = {
         try {
           await prisma.account.updateMany({
             data: {
-              access_token: null,
-              expires_at: null,
-              refresh_token: null,
+              accessToken: null,
+              accessTokenExpiresAt: null,
+              refreshToken: null,
             },
             where: {
-              provider: "github",
+              providerId: "github",
               userId,
             },
           });

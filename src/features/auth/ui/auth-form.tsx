@@ -1,11 +1,19 @@
 "use client";
 
-import { useRef, useState, type ComponentType } from "react";
+import { useEffect, useRef, useState, type ComponentType } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
-import { signIn } from "next-auth/react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Fingerprint,
+  KeyRound,
+  ShieldCheck,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -13,6 +21,7 @@ import { z } from "zod";
 
 import { TURNSTILE_SITE_KEY } from "@/shared/constants/env.client";
 import { Link } from "@/shared/i18n/routing";
+import { authClient } from "@/shared/lib/auth-client";
 import { cn } from "@/shared/lib/cn";
 import { setClientCookie } from "@/shared/lib/cookies";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
@@ -27,8 +36,6 @@ import {
   FormMessage,
 } from "@/shared/ui/core/form";
 import { Input } from "@/shared/ui/core/input";
-import { GitHubIcon } from "@/shared/ui/icons/github-icon";
-import { GoogleIcon } from "@/shared/ui/icons/google-icon";
 import { YandexIcon } from "@/shared/ui/icons/yandex-icon";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
@@ -40,15 +47,15 @@ const MagicLinkSchema = z.object({
 
 type MagicLinkSchemaValue = z.infer<typeof MagicLinkSchema>;
 
+type AllowedProviders = "yandex";
+
 type AuthProvider = {
   icon: ComponentType<{ className?: string }>;
-  provider: "github" | "google" | "yandex";
+  provider: "yandex";
   text: string;
 };
 
 const BUTTONS = [
-  { icon: GitHubIcon, provider: "github", text: "Continue with GitHub" },
-  { icon: GoogleIcon, provider: "google", text: "Continue with Google" },
   { icon: YandexIcon, provider: "yandex", text: "Continue with Yandex" },
 ] as const satisfies readonly AuthProvider[];
 
@@ -88,12 +95,44 @@ export function AuthForm() {
   const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
   const [isVerifying, setIsVerifying] = useState(false);
 
+  const lastLogin = authClient.getLastUsedLoginMethod();
+  const [twoFactorParam, setTwoFactorParam] = useQueryState("two_factor");
+  const isTwoFactorRequired = twoFactorParam === "true";
+
+  const [twoFactorCode, setTwoFactorCode] = useState("");
+  const [isBackupMode, setIsBackupMode] = useState(false);
+  const [isTwoFactorVerifying, setIsTwoFactorVerifying] = useState(false);
+
+  useEffect(() => {
+    void authClient.signIn.passkey({
+      autoFill: true,
+      fetchOptions: {
+        onSuccess: () => {
+          toast.success("Authenticated with Passkey!");
+          window.location.href = "/dashboard";
+        },
+      },
+    });
+  }, []);
+
+  // useEffect(() => {
+  //   if (isSent || isTwoFactorRequired) return;
+
+  //   void authClient.oneTap({
+  //     fetchOptions: {
+  //       onSuccess: () => {
+  //         window.location.href = "/dashboard";
+  //       },
+  //     },
+  //   });
+  // }, [isSent, isTwoFactorRequired]);
+
   const form = useForm<MagicLinkSchemaValue>({
     defaultValues: { email: "" },
     resolver: zodResolver(MagicLinkSchema),
   });
 
-  const disabled = loadingProvider != null || isVerifying;
+  const disabled = loadingProvider != null || isVerifying || isTwoFactorVerifying;
 
   const proceedWithSignIn = async (values: MagicLinkSchemaValue, token: string) => {
     setIsVerifying(false);
@@ -102,28 +141,24 @@ export function AuthForm() {
     setClientCookie("cf-turnstile-response", token, 300);
 
     try {
-      const res = await signIn("email", {
-        callbackUrl: "/dashboard",
+      await authClient.signIn.magicLink({
+        callbackURL: "/dashboard",
         email: values.email,
-        redirect: false,
+        fetchOptions: {
+          headers: {
+            "x-captcha-response": token,
+          },
+        },
+        newUserCallbackURL: "/welcome",
       });
 
-      if ((res?.ok ?? false) && res?.error == null) {
-        setIsSent(true);
-        toast.success(t("sent_toast_success"));
-        posthog.capture("sign_in_email_sent", { provider: "email" });
-      } else {
-        const msg =
-          res?.status === 403
-            ? "Captcha validation failed. Are you a robot?"
-            : t("sent_toast_error");
-        toast.error(msg);
-        turnstileRef.current?.reset();
-        setTurnstileToken(null);
-      }
+      setIsSent(true);
+      toast.success(t("sent_toast_success"));
+      posthog.capture("sign_in_email_sent", { provider: "email" });
     } catch {
-      toast.error("Something went wrong. Please try again.");
+      toast.error(t("sent_toast_error"));
       turnstileRef.current?.reset();
+      setTurnstileToken(null);
     } finally {
       setLoadingProvider(null);
       pendingDataRef.current = null;
@@ -149,15 +184,82 @@ export function AuthForm() {
     turnstileRef.current.reset();
   };
 
-  async function handleSignIn(provider: string) {
+  async function handleSignIn(provider: AllowedProviders) {
     try {
       setLoadingProvider(provider);
       posthog.capture("sign_in_attempted", { provider });
-      await signIn(provider, { callbackUrl: "/dashboard" });
+
+      const currentEmail = form.getValues("email");
+
+      await authClient.signIn.social({
+        callbackURL: "/dashboard",
+        loginHint: currentEmail || undefined,
+        newUserCallbackURL: "/welcome",
+        provider,
+      });
+    } catch {
+      toast.error("Social sign-in failed. Please try again.");
     } finally {
       setLoadingProvider(null);
     }
   }
+
+  const handleTwoFactorVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (twoFactorCode.length < 6) return;
+
+    setIsTwoFactorVerifying(true);
+    try {
+      if (isBackupMode) {
+        const { error } = await authClient.twoFactor.verifyBackupCode({
+          code: twoFactorCode,
+        });
+        if (error) throw new Error(error.message);
+      } else {
+        const { error } = await authClient.twoFactor.verifyTotp({
+          code: twoFactorCode,
+          trustDevice: true,
+        });
+        if (error) throw new Error(error.message);
+      }
+
+      toast.success("Authenticated successfully!");
+      void setTwoFactorParam(null);
+      window.location.href = "/dashboard";
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Verification failed";
+      toast.error(msg);
+    } finally {
+      setIsTwoFactorVerifying(false);
+    }
+  };
+
+  const handlePasskeySignIn = async () => {
+    setLoadingProvider("passkey");
+    posthog.capture("sign_in_attempted", { provider: "passkey" });
+
+    try {
+      const { error } = await authClient.signIn.passkey({
+        callbackURL: "/dashboard",
+      });
+
+      if (error) {
+        if (error.code === "NO_CREDENTIALS") {
+          toast.error(
+            "No security keys found on this device. Please log in using email or social accounts first."
+          );
+        } else {
+          toast.error(error.message);
+        }
+      } else {
+        toast.success("Authenticated successfully!");
+      }
+    } catch {
+      toast.error("Passkey authentication failed. Please try another method.");
+    } finally {
+      setLoadingProvider(null);
+    }
+  };
 
   const onTurnstileSuccess = (token: string) => {
     setTurnstileToken(token);
@@ -194,10 +296,10 @@ export function AuthForm() {
     <section className="relative container mx-auto flex min-h-[calc(100dvh-3rem)] items-center justify-center overflow-hidden px-4">
       <div className="flex w-full items-center justify-center gap-10">
         <div
-          inert={isSent ? true : undefined}
+          inert={isSent || isTwoFactorRequired ? true : undefined}
           className={cn(
-            "hidden max-w-2xl flex-col gap-8 lg:flex",
-            isSent
+            "hidden max-w-2xl flex-col gap-8 transition-all duration-300 ease-out lg:flex",
+            isSent || isTwoFactorRequired
               ? "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
               : "relative scale-100 opacity-100"
           )}
@@ -240,12 +342,14 @@ export function AuthForm() {
           </div>
         </div>
 
+        {/* ПРАВАЯ КОЛОНКА (Интерактивные формы) */}
         <div className="animate-in fade-in slide-in-from-bottom-4 relative flex w-full max-w-lg items-center justify-center">
+          {/* ФОРМА ВХОДА (Отображается по умолчанию, плавно гаснет при 2FA или отправке) */}
           <div
-            inert={isSent ? true : undefined}
+            inert={isSent || isTwoFactorRequired ? true : undefined}
             className={cn(
-              "bg-card border-border transition-standard relative flex w-full flex-col gap-6 rounded-[1.75rem] border p-6 ease-out sm:p-8",
-              isSent
+              "bg-card border-border relative flex w-full flex-col gap-6 rounded-[1.75rem] border p-6 transition-all duration-300 ease-out sm:p-8",
+              isSent || isTwoFactorRequired
                 ? "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
                 : "relative scale-100 opacity-100"
             )}
@@ -264,26 +368,53 @@ export function AuthForm() {
             </div>
 
             <div className="flex flex-col gap-3">
-              {BUTTONS.map((item) => (
-                <LoadingButton
-                  key={item.provider}
-                  disabled={disabled}
-                  isLoading={loadingProvider === item.provider}
-                  loadingText={t("login_loading")}
-                  variant="outline"
-                  onClick={() => void handleSignIn(item.provider)}
-                  className="text-foreground border-border bg-background hover:bg-surface-hover w-full cursor-pointer rounded-2xl px-3 py-5"
-                >
-                  <div className="flex w-full items-center justify-center gap-3">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <span className="flex shrink-0 items-center justify-center">
-                        <item.icon />
-                      </span>
-                      <span className="truncate text-sm font-medium">{item.text}</span>
+              {BUTTONS.map((item) => {
+                const isLastUsed = lastLogin === item.provider;
+                return (
+                  <LoadingButton
+                    key={item.provider}
+                    disabled={disabled}
+                    isLoading={loadingProvider === item.provider}
+                    loadingText={t("login_loading")}
+                    variant="outline"
+                    onClick={() => void handleSignIn(item.provider)}
+                    className="text-foreground border-border bg-background hover:bg-surface-hover relative w-full cursor-pointer rounded-2xl px-3 py-5 transition-colors"
+                  >
+                    <div className="flex w-full items-center justify-center gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className="flex shrink-0 items-center justify-center">
+                          <item.icon />
+                        </span>
+                        <span className="truncate text-sm font-medium">{item.text}</span>
+                      </div>
+                      {isLastUsed && (
+                        <AppBadge className="absolute -top-2 -right-2 text-xs">Last used</AppBadge>
+                      )}
                     </div>
+                  </LoadingButton>
+                );
+              })}
+              <LoadingButton
+                disabled={disabled}
+                type="button"
+                isLoading={loadingProvider === "passkey"}
+                loadingText="Verifying security key..."
+                variant="outline"
+                onClick={() => void handlePasskeySignIn()}
+                className="text-foreground border-border bg-background hover:bg-surface-hover relative w-full cursor-pointer rounded-2xl px-3 py-5 transition-colors"
+              >
+                <div className="flex w-full items-center justify-center gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="flex shrink-0 items-center justify-center">
+                      <Fingerprint className="text-muted-foreground size-4" />
+                    </span>
+                    <span className="truncate text-sm font-medium">Continue with Passkey</span>
                   </div>
-                </LoadingButton>
-              ))}
+                  {lastLogin === "passkey" && (
+                    <AppBadge className="absolute -top-2 -right-2 text-xs">Last used</AppBadge>
+                  )}
+                </div>
+              </LoadingButton>
             </div>
 
             <div className="relative w-full">
@@ -311,12 +442,12 @@ export function AuthForm() {
                     name="email"
                     control={form.control}
                     render={({ field }) => (
-                      <FormItem className="flex flex-col gap-2">
+                      <FormItem className="relative flex flex-col gap-2">
                         <FormLabel className="text-muted-foreground">Email</FormLabel>
                         <FormControl>
                           <Input
                             disabled={disabled}
-                            autoComplete="email"
+                            autoComplete="email webauthn"
                             inputMode="email"
                             placeholder="doxynix@example.com"
                             className="h-12"
@@ -326,6 +457,11 @@ export function AuthForm() {
                         <div className="min-h-5 px-1">
                           <FormMessage className="animate-in fade-in slide-in-from-top-1 text-xs" />
                         </div>
+                        {lastLogin === "magic-link" && (
+                          <AppBadge className="absolute -top-2 -right-2 text-xs">
+                            Last used
+                          </AppBadge>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -359,10 +495,77 @@ export function AuthForm() {
               </Link>
             </p>
           </div>
+
+          <div
+            inert={!isTwoFactorRequired ? true : undefined}
+            className={cn(
+              "bg-card border-border relative flex w-full flex-col gap-6 rounded-[1.75rem] border p-6 text-center transition-all duration-300 ease-out sm:p-8",
+              isTwoFactorRequired
+                ? "relative scale-100 opacity-100"
+                : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
+            )}
+          >
+            <div className="flex w-full items-center justify-between border-b pb-4">
+              <div className="flex items-center gap-2">
+                <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-full">
+                  {isBackupMode ? <KeyRound size={20} /> : <ShieldCheck size={20} />}
+                </div>
+                <div className="text-left">
+                  <h3 className="text-sm font-semibold">
+                    {isBackupMode ? "Backup Recovery" : "Two-Factor Verification"}
+                  </h3>
+                  <p className="text-muted-foreground text-[11px]">
+                    {isBackupMode ? "Use 8-char recovery code" : "Enter 6-digit TOTP code"}
+                  </p>
+                </div>
+              </div>
+              <AppButton size="icon" variant="ghost" onClick={() => void setTwoFactorParam(null)}>
+                <X size={16} />
+              </AppButton>
+            </div>
+
+            <form
+              onSubmit={(e) => void handleTwoFactorVerify(e)}
+              className="flex flex-col gap-4 py-2"
+            >
+              <Input
+                disabled={isTwoFactorVerifying}
+                value={twoFactorCode}
+                maxLength={isBackupMode ? 10 : 6}
+                placeholder={isBackupMode ? "XXXX-XXXX" : "000000"}
+                onChange={(e) => setTwoFactorCode(e.target.value)}
+                className="h-12 rounded-2xl text-center font-mono text-lg tracking-widest"
+              />
+
+              <LoadingButton
+                disabled={twoFactorCode.trim().length === 0 || isTwoFactorVerifying}
+                type="submit"
+                isLoading={isTwoFactorVerifying}
+                loadingText="Verifying..."
+                className="h-12 w-full cursor-pointer gap-2 rounded-2xl"
+              >
+                Verify <ArrowRight size={16} />
+              </LoadingButton>
+
+              <AppButton
+                disabled={isTwoFactorVerifying}
+                type="button"
+                variant="link"
+                onClick={() => {
+                  setIsBackupMode(!isBackupMode);
+                  setTwoFactorCode("");
+                }}
+                className="text-muted-foreground hover:text-foreground mx-auto text-xs"
+              >
+                {isBackupMode ? "Back to Authenticator App" : "Lost your device? Use Backup Code"}
+              </AppButton>
+            </form>
+          </div>
+
           <div
             inert={!isSent ? true : undefined}
             className={cn(
-              "bg-card border-border transition-standard relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border p-8 text-center ease-out",
+              "bg-card border-border relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border p-8 text-center transition-all duration-300 ease-out",
               isSent
                 ? "relative scale-100 opacity-100"
                 : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
@@ -395,7 +598,7 @@ export function AuthForm() {
         onError={onTurnstileError}
         onExpire={onTurnstileExpire}
         onSuccess={onTurnstileSuccess}
-        className={cn("mx-auto mt-2", isSent && "hidden")}
+        className={cn("mx-auto mt-2", (isSent || isTwoFactorRequired) && "hidden")}
       />
     </section>
   );

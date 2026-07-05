@@ -75,3 +75,4 @@ overrides:
   systeminformation@<5.30.8: ^5.30.8
   systeminformation@<=5.30.7: ^5.30.8
   tmp@<=0.2.3: '0.2.7'
+  kysely: '0.28.2'

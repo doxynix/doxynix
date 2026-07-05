@@ -7,7 +7,6 @@ import { redisClient } from "./server/core/redis";
 import { generateRequestId, getIp, sanitizeRequestId } from "./server/utils/request-context";
 import { API_PREFIX } from "./shared/constants/env.client";
 import { IS_PROD } from "./shared/constants/env.flags";
-import { TURNSTILE_SECRET_KEY } from "./shared/constants/env.server";
 import { LOCALE_REGEX_STR } from "./shared/constants/locales";
 import { routing } from "./shared/i18n/routing";
 import { getCookieName } from "./shared/lib/session-cookie";
@@ -53,7 +52,11 @@ async function handleRateLimitAndSize(
   pathname: string,
   ip: string
 ): Promise<NextResponse | null> {
-  if (hasPathBoundary(pathname, "/api/webhooks") || hasPathBoundary(pathname, "/webhooks")) {
+  if (
+    hasPathBoundary(pathname, "/api/webhooks") ||
+    hasPathBoundary(pathname, "/webhooks") ||
+    pathname.startsWith("/api/auth")
+  ) {
     return null;
   }
 
@@ -89,43 +92,6 @@ async function handleRateLimitAndSize(
   return null;
 }
 
-async function handleTurnstile(request: NextRequest, ip: string): Promise<NextResponse | null> {
-  const token = request.cookies.get("cf-turnstile-response")?.value;
-  const secretKey = TURNSTILE_SECRET_KEY;
-
-  if (token == null) {
-    return new NextResponse(JSON.stringify({ error: "Missing captcha" }), { status: 403 });
-  }
-
-  const formData = new FormData();
-  formData.append("secret", secretKey);
-  formData.append("response", token);
-  formData.append("remoteip", ip);
-
-  try {
-    const cfRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      body: formData,
-      method: "POST",
-      signal: AbortSignal.timeout(5000),
-    });
-
-    const cfData = await cfRes.json();
-
-    if (cfData.success === false || cfData.action !== "auth") {
-      appLogger.error({ error: cfData["error-codes"], msg: "Cloudflare verification failed:" });
-      return new NextResponse(JSON.stringify({ error: "Captcha failed" }), { status: 403 });
-    }
-    const response = NextResponse.next();
-    response.cookies.delete("cf-turnstile-response");
-    return response;
-  } catch (error) {
-    appLogger.error({ error, msg: "Cloudflare network error:" });
-    return new NextResponse(JSON.stringify({ error: "Security check error. Please try again." }), {
-      status: 403,
-    });
-  }
-}
-
 async function handleApiRequest(
   request: NextRequest,
   requestId: string,
@@ -146,24 +112,6 @@ async function handleApiRequest(
 
   const rateLimitResponse = await handleRateLimitAndSize(request, pathname, ip);
   if (rateLimitResponse) return attachRequestMeta(rateLimitResponse);
-
-  if (pathname === "/api/auth/signin/email" && request.method === "POST") {
-    const turnstileResponse = await handleTurnstile(request, ip);
-    if (turnstileResponse) {
-      if (turnstileResponse.status !== 200) return attachRequestMeta(turnstileResponse);
-      const requestHeaders = new Headers(request.headers);
-      requestHeaders.set("x-request-id", requestId);
-      const response = NextResponse.next({
-        request: {
-          headers: requestHeaders,
-        },
-      });
-      for (const cookie of turnstileResponse.cookies.getAll()) {
-        response.cookies.set(cookie);
-      }
-      return attachRequestMeta(response);
-    }
-  }
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-request-id", requestId);

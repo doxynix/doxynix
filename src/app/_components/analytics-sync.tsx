@@ -2,36 +2,37 @@
 
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
-import { useSession } from "next-auth/react";
 import posthog from "posthog-js";
 
+import { authClient } from "@/shared/lib/auth-client";
+
 export function AnalyticsSync() {
-  const { data: session, status } = useSession();
+  const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
-    if (status === "authenticated" && session.user.id) {
-      const userId = session.user.id;
+    if (isPending) return;
+
+    if (session?.user.id != null) {
+      const userId = String(session.user.id);
 
       posthog.identify(userId, {
-        name: session.user.name ?? undefined,
+        name: session.user.name,
       });
 
       Sentry.setUser({
         id: userId,
-        username: session.user.name ?? undefined,
+        username: session.user.name,
       });
 
       const sessionId = posthog.get_session_id();
       if (sessionId) {
         Sentry.setTag("posthog_session_id", sessionId);
       }
-    }
-
-    if (status === "unauthenticated") {
+    } else {
       posthog.reset();
       Sentry.setUser(null);
     }
-  }, [session, status]);
+  }, [session, isPending]);
 
   return null;
 }

@@ -3,7 +3,6 @@
 import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Book, Plus, RefreshCcw } from "lucide-react";
-import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
@@ -13,6 +12,7 @@ import { useDebounce } from "use-debounce";
 import { CreateRepoSchema, type CreateRepoInput } from "@/shared/api/schemas/repo";
 import { trpc } from "@/shared/api/trpc";
 import { useClickOutside } from "@/shared/hooks/use-click-outside";
+import { authClient } from "@/shared/lib/auth-client";
 import { isGitHubUrl } from "@/shared/lib/github-url";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -135,9 +135,12 @@ export function CreateRepoDialog() {
     try {
       setLoadingOauth(true);
       posthog.capture("github_oauth_started");
-      await signIn("github", { callbackUrl: "/dashboard" });
-    } catch (error) {
-      console.error(error);
+
+      await authClient.signIn.social({
+        callbackURL: "/dashboard",
+        provider: "github",
+      });
+    } catch {
       posthog.capture("github_oauth_failed");
     } finally {
       setLoadingOauth(false);

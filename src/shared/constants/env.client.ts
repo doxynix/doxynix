@@ -11,6 +11,7 @@ const envClient = createEnv({
   client: {
     NEXT_PUBLIC_API_PREFIX: prefixSchema,
     NEXT_PUBLIC_APP_URL: z.url(),
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: stringSchema,
     NEXT_PUBLIC_POSTHOG_HOST: stringSchema,
     NEXT_PUBLIC_POSTHOG_KEY: stringSchema,
     NEXT_PUBLIC_SENTRY_DSN: z.url(),
@@ -23,6 +24,7 @@ const envClient = createEnv({
   runtimeEnv: {
     NEXT_PUBLIC_API_PREFIX: process.env.NEXT_PUBLIC_API_PREFIX,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -53,3 +55,4 @@ export const APP_URL = envClient.NEXT_PUBLIC_APP_URL;
 export const SENTRY_DSN = envClient.NEXT_PUBLIC_SENTRY_DSN;
 export const NEXT_PUBLIC_POSTHOG_KEY = envClient.NEXT_PUBLIC_POSTHOG_KEY;
 export const NEXT_PUBLIC_POSTHOG_HOST = envClient.NEXT_PUBLIC_POSTHOG_HOST;
+export const NEXT_PUBLIC_GOOGLE_CLIENT_ID = envClient.NEXT_PUBLIC_GOOGLE_CLIENT_ID;

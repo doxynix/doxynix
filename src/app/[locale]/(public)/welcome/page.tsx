@@ -1,11 +1,14 @@
+import { headers } from "next/headers";
 import { unauthorized } from "next/navigation";
 
 import { WelcomeFlow } from "@/widgets/welcome-flow/ui/welcome-flow";
 
-import { getServerAuthSession } from "@/server/core/auth";
+import { auth } from "@/server/core/auth";
 
 export default async function WelcomePage() {
-  const session = await getServerAuthSession();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   if (!session?.user) {
     unauthorized();
