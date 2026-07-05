@@ -10,7 +10,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return proto === null || proto === Object.prototype;
 }
 
-function tryCoerceToNumber(value: unknown): unknown {
+function tryCoerceToNumber(value: unknown): any {
   if (typeof value === "string" && /^\d+$/.test(value)) {
     return Number.parseInt(value, 10);
   }
@@ -88,7 +88,7 @@ export function createAdapterInstance(client: any): DBAdapter {
   return {
     consumeOne: async ({ model, where }) => {
       const delegate = client[model === "verification_tokens" ? "verification" : model];
-      const prismaWhere = mapWhere(model, where);
+      const prismaWhere = mapWhere(where);
 
       const record = await delegate.findFirst({ where: prismaWhere });
       if (record == null) return null;
@@ -102,7 +102,7 @@ export function createAdapterInstance(client: any): DBAdapter {
 
     count: async ({ model, where }) => {
       const delegate = client[model === "verification_tokens" ? "verification" : model];
-      const prismaWhere = mapWhere(model, where);
+      const prismaWhere = mapWhere(where);
       return await delegate.count({
         where: prismaWhere,
       });
@@ -121,7 +121,7 @@ export function createAdapterInstance(client: any): DBAdapter {
 
     delete: async ({ model, where }) => {
       const delegate = client[model === "verification_tokens" ? "verification" : model];
-      const prismaWhere = mapWhere(model, where);
+      const prismaWhere = mapWhere(where);
 
       const record = await delegate.findFirst({ where: prismaWhere });
       if (record != null) {
@@ -133,7 +133,7 @@ export function createAdapterInstance(client: any): DBAdapter {
 
     deleteMany: async ({ model, where }) => {
       const delegate = client[model === "verification_tokens" ? "verification" : model];
-      const prismaWhere = mapWhere(model, where);
+      const prismaWhere = mapWhere(where);
 
       const result = await delegate.deleteMany({
         where: prismaWhere,
@@ -144,7 +144,7 @@ export function createAdapterInstance(client: any): DBAdapter {
 
     findMany: async ({ limit, model, offset, where }) => {
       const delegate = client[model === "verification_tokens" ? "verification" : model];
-      const prismaWhere = where ? mapWhere(model, where) : undefined;
+      const prismaWhere = where ? mapWhere(where) : undefined;
 
       const records = await delegate.findMany({
         where: prismaWhere,
@@ -157,7 +157,7 @@ export function createAdapterInstance(client: any): DBAdapter {
 
     findOne: async ({ model, where }) => {
       const delegate = client[model === "verification_tokens" ? "verification" : model];
-      const prismaWhere = mapWhere(model, where);
+      const prismaWhere = mapWhere(where);
 
       const record = await delegate.findFirst({
         where: prismaWhere,
@@ -167,6 +167,33 @@ export function createAdapterInstance(client: any): DBAdapter {
     },
 
     id: "custom-prisma-adapter",
+
+    incrementOne: async ({ increment, model, set, where }) => {
+      const delegate = client[model === "verification_tokens" ? "verification" : model];
+      const prismaWhere = mapWhere(where);
+
+      const record = await delegate.findFirst({ where: prismaWhere });
+      if (record == null) return null;
+
+      const prismaIncrement: Record<string, any> = {};
+      for (const [key, val] of Object.entries(increment)) {
+        prismaIncrement[key] = {
+          increment: val,
+        };
+      }
+
+      const prismaSet = set ? transformPayloadData(set) : {};
+
+      const updated = await delegate.update({
+        data: {
+          ...prismaIncrement,
+          ...prismaSet,
+        },
+        where: { id: record.id },
+      });
+
+      return coerceOutputIds(updated) as any;
+    },
 
     transaction: async (callback) => {
       if (typeof client.$transaction === "function") {
@@ -182,7 +209,7 @@ export function createAdapterInstance(client: any): DBAdapter {
 
     update: async ({ model, update, where }) => {
       const delegate = client[model === "verification_tokens" ? "verification" : model];
-      const prismaWhere = mapWhere(model, where);
+      const prismaWhere = mapWhere(where);
       const patchedUpdate = transformPayloadData(update as Record<string, unknown>);
 
       const record = await delegate.findFirst({ where: prismaWhere });
@@ -200,7 +227,7 @@ export function createAdapterInstance(client: any): DBAdapter {
 
     updateMany: async ({ model, update, where }) => {
       const delegate = client[model === "verification_tokens" ? "verification" : model];
-      const prismaWhere = mapWhere(model, where);
+      const prismaWhere = mapWhere(where);
       const patchedUpdate = transformPayloadData(update as Record<string, unknown>);
 
       const result = await delegate.updateMany({
@@ -213,8 +240,9 @@ export function createAdapterInstance(client: any): DBAdapter {
   };
 }
 
-function mapWhere(model: string, conditions: Where[]): Record<string, unknown> {
+function mapWhere(conditions?: Where[]): Record<string, unknown> {
   const query: Record<string, unknown> = {};
+  if (conditions == null) return query;
 
   for (const cond of conditions) {
     let field = cond.field;

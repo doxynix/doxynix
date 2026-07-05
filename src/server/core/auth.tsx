@@ -181,8 +181,8 @@ export const auth = betterAuth({
 
             if (
               latestAccount != null &&
-              latestAccount.provider !== "email" &&
-              latestAccount.provider !== "credential"
+              latestAccount.providerId !== "email" &&
+              latestAccount.providerId !== "credential"
             ) {
               const freshImage = latestAccount.image;
               const freshName = latestAccount.name;
@@ -469,32 +469,15 @@ export const auth = betterAuth({
 
   rateLimit: {
     customRules: {
-      "/magic-link/send": {
-        max: 3,
-        window: 60,
-      },
-      "/passkey/register": {
-        max: 5,
-        window: 60,
-      },
-      "/sign-in/email": {
-        max: 5,
-        window: 60,
-      },
-      "/sign-up/email": {
-        max: 5,
-        window: 60,
-      },
-      "/two-factor/verify": {
-        max: 5,
-        window: 30,
-      },
+      "/magic-link/send": { max: 3, window: 60 },
+      "/passkey/register": { max: 5, window: 60 },
+      "/sign-in/email": { max: 5, window: 60 },
+      "/sign-up/email": { max: 5, window: 60 },
+      "/two-factor/verify": { max: 5, window: 30 },
     },
     enabled: IS_PROD,
-
     max: 100,
     storage: IS_PROD ? "secondary-storage" : "memory",
-
     window: 10,
   },
 
@@ -554,7 +537,6 @@ export const auth = betterAuth({
       strategy: "compact",
     },
     expiresIn: SESSION_MAX_AGE,
-
     preserveSessionInDatabase: true,
     storeSessionInDatabase: true,
     updateAge: SESSION_UPDATE_AGE,
@@ -564,10 +546,7 @@ export const auth = betterAuth({
 
   user: {
     additionalFields: {
-      role: {
-        defaultValue: "USER",
-        type: "string",
-      },
+      role: { defaultValue: "USER", type: "string" },
     },
   },
 

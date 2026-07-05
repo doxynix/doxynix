@@ -14,6 +14,12 @@ const utapi = new UTApi();
 
 const PublicUserSchema = UserSchema.extend({
   id: z.uuid(),
+}).omit({
+  banExpires: true,
+  banned: true,
+  banReason: true,
+  lastLoginMethod: true,
+  twoFactorEnabled: true,
 });
 
 export const userRouter = createTRPCRouter({
@@ -217,6 +223,7 @@ export const userRouter = createTRPCRouter({
 
       return { message: "Profile Picture removed", success: true };
     }),
+
   updateUser: protectedProcedure
     .input(UpdateProfileSchema)
     .output(z.object({ message: z.string(), user: PublicUserSchema }))
@@ -231,8 +238,14 @@ export const userRouter = createTRPCRouter({
       return {
         message: "Credentials updated",
         user: {
-          ...updatedUser,
+          createdAt: updatedUser.createdAt,
+          email: updatedUser.email,
+          emailVerified: updatedUser.emailVerified,
           id: updatedUser.publicId,
+          image: updatedUser.image,
+          name: updatedUser.name,
+          role: updatedUser.role,
+          updatedAt: updatedUser.updatedAt,
         },
       };
     }),

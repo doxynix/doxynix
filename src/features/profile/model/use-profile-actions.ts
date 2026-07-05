@@ -4,6 +4,7 @@ import posthog from "posthog-js";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
+import { useRouter } from "@/shared/i18n/routing";
 import { authClient } from "@/shared/lib/auth-client";
 import { useUploadThing } from "@/shared/lib/uploadthing";
 
@@ -20,6 +21,7 @@ type UseProfileActionsProps = {
 
 export function useProfileActions(props: UseProfileActionsProps = {}) {
   const { data: session, refetch } = authClient.useSession();
+  const router = useRouter();
   const utils = trpc.useUtils();
   const t = useTranslations("Dashboard");
 
@@ -59,7 +61,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
       await authClient.signOut({
         fetchOptions: {
           onSuccess: () => {
-            window.location.href = "/auth";
+            router.push("/auth");
           },
         },
       });

@@ -6,7 +6,7 @@ import { LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { userNavMenu } from "@/shared/constants/navigation";
-import { Link } from "@/shared/i18n/routing";
+import { Link, useRouter } from "@/shared/i18n/routing";
 import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -34,6 +34,7 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 export function UserNav() {
   const { data: session, isPending } = authClient.useSession();
+  const router = useRouter();
   const user = session?.user ?? null;
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
@@ -49,7 +50,7 @@ export function UserNav() {
       await authClient.signOut({
         fetchOptions: {
           onSuccess: () => {
-            window.location.href = "/auth";
+            router.push("/auth");
           },
         },
       });

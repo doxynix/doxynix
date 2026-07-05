@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { TURNSTILE_SITE_KEY } from "@/shared/constants/env.client";
-import { Link } from "@/shared/i18n/routing";
+import { Link, useRouter } from "@/shared/i18n/routing";
 import { authClient } from "@/shared/lib/auth-client";
 import { cn } from "@/shared/lib/cn";
 import { setClientCookie } from "@/shared/lib/cookies";
@@ -85,6 +85,7 @@ const TRUST_POINTS = [
 ] as const;
 
 export function AuthForm() {
+  const router = useRouter();
   const tCommon = useTranslations("Common");
   const t = useTranslations("Auth");
   const turnstileRef = useRef<TurnstileInstance>(null);
@@ -108,24 +109,11 @@ export function AuthForm() {
       autoFill: true,
       fetchOptions: {
         onSuccess: () => {
-          toast.success("Authenticated with Passkey!");
-          window.location.href = "/dashboard";
+          router.replace("/dashboard");
         },
       },
     });
   }, []);
-
-  // useEffect(() => {
-  //   if (isSent || isTwoFactorRequired) return;
-
-  //   void authClient.oneTap({
-  //     fetchOptions: {
-  //       onSuccess: () => {
-  //         window.location.href = "/dashboard";
-  //       },
-  //     },
-  //   });
-  // }, [isSent, isTwoFactorRequired]);
 
   const form = useForm<MagicLinkSchemaValue>({
     defaultValues: { email: "" },
@@ -225,7 +213,7 @@ export function AuthForm() {
 
       toast.success("Authenticated successfully!");
       void setTwoFactorParam(null);
-      window.location.href = "/dashboard";
+      router.replace("/dashboard");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Verification failed";
       toast.error(msg);
@@ -240,19 +228,21 @@ export function AuthForm() {
 
     try {
       const { error } = await authClient.signIn.passkey({
-        callbackURL: "/dashboard",
+        fetchOptions: {
+          onSuccess: () => {
+            router.replace("/dashboard");
+          },
+        },
       });
 
       if (error) {
-        if (error.code === "NO_CREDENTIALS") {
+        if ("code" in error && error.code === "NO_CREDENTIALS") {
           toast.error(
             "No security keys found on this device. Please log in using email or social accounts first."
           );
         } else {
-          toast.error(error.message);
+          toast.error(error.message ?? "Authentication failed");
         }
-      } else {
-        toast.success("Authenticated successfully!");
       }
     } catch {
       toast.error("Passkey authentication failed. Please try another method.");

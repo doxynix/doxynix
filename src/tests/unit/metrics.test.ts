@@ -1,7 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Repo } from "@/shared/api-contracts";
-
 import {
   calculateCodeMetrics,
   calculateTeamRoles,
@@ -49,7 +47,7 @@ describe("calculateHealthScore", () => {
   it("should clamp score to 100 for healthy repository metrics", () => {
     const repo = {
       pushedAt: new Date("2026-02-20T00:00:00.000Z"),
-    } as Repo;
+    } as any;
 
     const score = calculateHealthScore({
       busFactor: 3,
@@ -68,7 +66,7 @@ describe("calculateHealthScore", () => {
   it("should clamp score to 0 for stale repository with weak metrics", () => {
     const repo = {
       pushedAt: new Date("2024-01-01T00:00:00.000Z"),
-    } as Repo;
+    } as any;
 
     const score = calculateHealthScore({
       busFactor: 1,

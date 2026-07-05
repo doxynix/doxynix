@@ -1,7 +1,9 @@
+import { useSearchParams } from "next/navigation";
 import { useReactFlow } from "@xyflow/react";
 
 export function useMapCommands() {
   const { fitView, getNodes, zoomIn, zoomOut } = useReactFlow();
+  const searchParams = useSearchParams();
 
   return {
     fitView: () => {
@@ -9,12 +11,12 @@ export function useMapCommands() {
     },
     focusSelected: () => {
       const nodes = getNodes();
-      const selectedIdFromQuery = new URLSearchParams(window.location.search).get("node");
+      const selectedIdFromQuery = searchParams.get("node");
       const selectedNode =
         nodes.find((n) => n.selected === true) ??
         (selectedIdFromQuery != null ? nodes.find((n) => n.id === selectedIdFromQuery) : undefined);
 
-      if (selectedNode) {
+      if (selectedNode != null) {
         void fitView({
           duration: 400,
           nodes: [{ id: selectedNode.id }],
