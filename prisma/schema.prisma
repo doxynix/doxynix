@@ -13,6 +13,7 @@ datasource db {
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearchPostgres", "relationJoins", "postgresqlExtensions", "typedSql", "nativeDistinct"]
+  engineType      = "client"
 }
 
 generator zod {

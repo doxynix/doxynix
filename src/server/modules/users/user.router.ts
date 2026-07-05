@@ -89,7 +89,7 @@ export const userRouter = createTRPCRouter({
 
           const hasEmailAuth = user?.email != null && user.emailVerified;
 
-          if (accountCount <= 1 && !hasEmailAuth) {
+          if (accountCount <= 1 && hasEmailAuth === false) {
             throw new TRPCError({
               code: "BAD_REQUEST",
               message:

@@ -1529,6 +1529,17 @@
     ]
   },
   {
+    "author": "Guilherme Rodz",
+    "avatar": null,
+    "authorLink": "https://input-otp.rodz.dev",
+    "packages": [
+      {
+        "name": "input-otp",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Hashicorp",
     "avatar": "https://github.com/hashicorp.png?size=96",
     "authorLink": "https://github.com/hashicorp",
