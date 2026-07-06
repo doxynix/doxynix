@@ -27,7 +27,10 @@ describe("Cryptographic Hash & API Key Utilities", () => {
 
     it("should reject keys with tampered payloads", () => {
       const originalKey = generateApiKey();
-      const tamperedKey = originalKey.slice(0, 10) + "X" + originalKey.slice(11);
+
+      const originalChar = originalKey[10];
+      const tamperedChar = originalChar === "X" ? "Y" : "X";
+      const tamperedKey = originalKey.slice(0, 10) + tamperedChar + originalKey.slice(11);
 
       expect(validateApiKeyChecksum(tamperedKey)).toBe(false);
     });
@@ -94,7 +97,10 @@ describe("Cryptographic Hash & API Key Utilities", () => {
 
     it("should return null when trying to extract payload from a tampered key", () => {
       const originalKey = generateApiKey();
-      const tamperedKey = originalKey.slice(0, 20) + "X" + originalKey.slice(21);
+
+      const originalChar = originalKey[20];
+      const tamperedChar = originalChar === "X" ? "Y" : "X";
+      const tamperedKey = originalKey.slice(0, 20) + tamperedChar + originalKey.slice(21);
 
       expect(extractPayloadFromKey(tamperedKey)).toBeNull();
     });
