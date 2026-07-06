@@ -136,10 +136,13 @@ export function CreateRepoDialog() {
       setLoadingOauth(true);
       posthog.capture("github_oauth_started");
 
-      await authClient.signIn.social({
+      const { error } = await authClient.signIn.social({
         callbackURL: "/dashboard",
         provider: "github",
       });
+      if (error != null) {
+        posthog.capture("github_oauth_failed");
+      }
     } catch {
       posthog.capture("github_oauth_failed");
     } finally {

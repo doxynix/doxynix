@@ -26,6 +26,7 @@ const handler = createMcpHandler(
       }
 
       if (toolObj.needsApproval === true) {
+        appLogger.debug({ msg: "Skipping approval-required tool in MCP registration", tool: name });
         continue;
       }
 

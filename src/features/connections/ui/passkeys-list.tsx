@@ -28,6 +28,7 @@ export function PasskeysList() {
   const [isSupported] = useState(
     () =>
       typeof window !== "undefined" &&
+      typeof window.PublicKeyCredential !== "undefined" &&
       typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === "function"
   );
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -171,7 +172,7 @@ export function PasskeysList() {
                     open={deletingKeyId === key.id}
                     title="Remove Biometric Key"
                     trigger={
-                      <AppButton size="sm" variant="destructive">
+                      <AppButton size="sm" variant="destructive" aria-label="Remove Biometric Key">
                         <Trash2 className="size-4" />
                       </AppButton>
                     }

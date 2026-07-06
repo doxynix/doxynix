@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Route } from "next";
 import { LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { userNavMenu } from "@/shared/constants/navigation";
 import { Link, useRouter } from "@/shared/i18n/routing";
@@ -49,11 +50,16 @@ export function UserNav() {
       setLoading(true);
       await authClient.signOut({
         fetchOptions: {
+          onError: (ctx) => {
+            toast.error(ctx.error.message);
+          },
           onSuccess: () => {
             router.push("/auth");
           },
         },
       });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to sign out");
     } finally {
       setLoading(false);
     }

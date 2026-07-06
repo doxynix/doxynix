@@ -75,7 +75,11 @@ export const auth = betterAuth({
     account: {
       create: {
         after: async (account) => {
-          const baAccount = account as Record<string, any>;
+          const baAccount = account as {
+            image?: null | string;
+            providerId?: string;
+            userId: number | string;
+          };
           const dbUser = await prisma.user.findUnique({
             where: { id: Number(baAccount.userId) },
           });

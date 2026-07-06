@@ -51,8 +51,8 @@ export function TwoFactorCard() {
       if (totpRes.data.totpURI) {
         setTotpUri(totpRes.data.totpURI);
       }
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to setup 2FA");
       setIsSetupOpen(false);
     } finally {
       setIsGenerating(false);

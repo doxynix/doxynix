@@ -55,7 +55,7 @@ async function handleRateLimitAndSize(
   if (
     hasPathBoundary(pathname, "/api/webhooks") ||
     hasPathBoundary(pathname, "/webhooks") ||
-    pathname.startsWith("/api/auth")
+    hasPathBoundary(pathname, "/api/auth")
   ) {
     return null;
   }

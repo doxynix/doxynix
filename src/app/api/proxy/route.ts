@@ -1,5 +1,5 @@
 import dns from "node:dns";
-import { headers } from "next/headers";
+import { headers as getRequestHeaders } from "next/headers";
 import { NextResponse } from "next/server";
 import ipaddr from "ipaddr.js";
 import { Agent } from "undici";
@@ -76,7 +76,7 @@ export const ssrfSafeAgent = new Agent({
 
 export async function POST(req: Request) {
   const session = await auth.api.getSession({
-    headers: await headers(),
+    headers: await getRequestHeaders(),
   });
 
   if (!session?.user) {

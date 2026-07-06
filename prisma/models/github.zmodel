@@ -45,7 +45,7 @@ model Repo {
   notifications    Notification[]
   pullRequests     PullRequestAnalysis[]      @relation("RepoPullRequests")
   generatedFixes   GeneratedFix[]             @relation("RepoGeneratedFixes")
-  chatSession      ChatSession[]
+  chatSessions      ChatSession[]
 
   prAnalysisConfig PullRequestAnalysisConfig?
 

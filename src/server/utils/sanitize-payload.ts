@@ -56,11 +56,10 @@ function redactValue(key: string, value: unknown): unknown {
   }
 
   if (typeof value === "string") {
-    if (value.length > 8192) {
-      return value.slice(0, 1024) + `... [TRUNCATED, ORIGINAL LENGTH: ${value.length}]`;
-    }
-
     let safeString = value;
+    if (safeString.length > 8192) {
+      return safeString.slice(0, 1024) + `... [TRUNCATED, ORIGINAL LENGTH: ${safeString.length}]`;
+    }
     if (safeString.includes("gh") || safeString.includes("github_pat_")) {
       safeString = safeString.replaceAll(GITHUB_TOKEN_REGEX, "[REDACTED_GH_TOKEN]");
     }

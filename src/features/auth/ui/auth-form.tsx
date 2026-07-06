@@ -194,7 +194,11 @@ export function AuthForm() {
 
   const handleTwoFactorVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (twoFactorCode.length < 6) return;
+    const minLen = isBackupMode ? 8 : 6;
+    if (twoFactorCode.trim().length < minLen) {
+      toast.error(isBackupMode ? "Enter a valid backup code" : "Enter the 6-digit code");
+      return;
+    }
 
     setIsTwoFactorVerifying(true);
     try {
@@ -526,7 +530,11 @@ export function AuthForm() {
               />
 
               <LoadingButton
-                disabled={twoFactorCode.trim().length === 0 || isTwoFactorVerifying}
+                disabled={
+                  twoFactorCode.trim().length === 0 ||
+                  isTwoFactorVerifying ||
+                  twoFactorCode.trim().length < 6
+                }
                 type="submit"
                 isLoading={isTwoFactorVerifying}
                 loadingText="Verifying..."

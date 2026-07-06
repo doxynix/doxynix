@@ -42,7 +42,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
 
     vi.mocked(auth.api.getSession).mockResolvedValue({
       user: { email: "developer@doxynix.com", id: "user_test_2026" },
-    } as any);
+    } as Awaited<ReturnType<typeof auth.api.getSession>>);
 
     globalFetchMock.mockResolvedValue({
       headers: new Headers({ "content-type": "application/json" }),
