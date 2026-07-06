@@ -30,11 +30,9 @@ queue_rules:
           - author ~= ^(renovate|dependabot|doxynix-(release|deps)-bot)\[bot\]$
           - approved-reviews-by = coderabbitai[bot]
     merge_method: squash
-    commit_message_template: |
-      {{ title }} (#{{ number }})
-
-      {{ body }}
-
+    commit_message_format:
+      title: pr-title
+      body: pr-body
 pull_request_rules:
   - name: label hotfixes automatically
     conditions:
