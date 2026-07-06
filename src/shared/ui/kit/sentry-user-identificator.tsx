@@ -3,17 +3,18 @@
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
 import Cookies from "js-cookie";
-import type { User } from "next-auth";
+
+import type { User } from "@/shared/lib/auth-client";
 
 type Props = { user: User };
 
 export function SentryUserIdentificator({ user }: Props) {
   useEffect(() => {
     Sentry.setUser({
-      email: user.email ?? undefined,
+      email: user.email,
       id: user.id,
       role: user.role,
-      username: user.name ?? undefined,
+      username: user.name,
     });
 
     const requestId = Cookies.get("last_request_id");

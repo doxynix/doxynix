@@ -16,12 +16,12 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import type { TreeApi } from "react-arborist";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
 import { useTypewriter } from "@/shared/hooks/use-typewriter";
+import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
@@ -53,8 +53,9 @@ type Props = {
 };
 
 export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Readonly<Props>) {
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
   const userId = session?.user.id;
+
   const [mode, setMode] = useState<"edit" | "view">("view");
   const [view, setView] = useState<EditorView | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);

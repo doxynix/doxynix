@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { unauthorized } from "next/navigation";
 
 import { SidebarInset, SidebarProvider } from "@/shared/ui/core/sidebar";
@@ -14,12 +14,14 @@ import { AppSidebar } from "@/widgets/app-sidebar/ui/app-sidebar";
 import { GithubConnectionFeedback } from "@/widgets/dashboard/ui/github-connection-feedback";
 import { HotkeyListeners } from "@/widgets/hotkey-manager/ui/hotkey-listeners";
 
-import { getServerAuthSession } from "@/server/core/auth";
+import { auth } from "@/server/core/auth";
 
 export default async function PrivateLayout({ children }: Readonly<{ children: ReactNode }>) {
-  const session = await getServerAuthSession();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (!session?.user) {
+  if (session?.user == null) {
     unauthorized();
   }
 

@@ -1,4 +1,3 @@
-// src/server/core/trpc/init.ts
 import type { UserRole } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
@@ -29,11 +28,14 @@ const t = initTRPC.context<Context>().create({
 
     const isPublicError = publicErrors.includes(error.code);
 
+    const requestId =
+      requestContext.getStore()?.requestId ?? resolveRequestId(ctx?.req) ?? "unknown";
+
     return {
       ...shape,
       data: {
         ...shape.data,
-        requestId: resolveRequestId(ctx?.req, requestContext.getStore()?.requestId),
+        requestId,
         stack: IS_PROD ? undefined : error.stack,
         zodError: error.code === "BAD_REQUEST" ? error.cause : null,
       },
@@ -49,7 +51,6 @@ const t = initTRPC.context<Context>().create({
 const withZenStack = t.middleware(async ({ ctx, next }) => {
   const sessionUser = ctx.session?.user;
   const userId = sessionUser == null ? undefined : Number(sessionUser.id);
-
   const userRole = sessionUser?.role == null ? undefined : (sessionUser.role as UserRole);
 
   const protectedDb = enhance(ctx.prisma, {
@@ -66,6 +67,19 @@ const withZenStack = t.middleware(async ({ ctx, next }) => {
 
 const contextMiddleware = t.middleware(async ({ ctx, next, path, type }) => {
   const sessionUser = ctx.session?.user;
+  const activeStore = requestContext.getStore();
+
+  if (activeStore) {
+    activeStore.method = type;
+    activeStore.path = path;
+
+    if (sessionUser?.id != null) {
+      activeStore.userId = Number(sessionUser.id);
+      activeStore.userRole = sessionUser.role;
+    }
+
+    return next({ ctx });
+  }
 
   const store = buildRequestStore({
     method: type,

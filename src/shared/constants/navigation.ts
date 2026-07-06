@@ -17,6 +17,7 @@ import {
   ScanSearch,
   Settings,
   SquareTerminal,
+  TabletSmartphone,
   User,
   Users2,
 } from "lucide-react";
@@ -75,6 +76,14 @@ const SETTINGS_PAGES: MenuItems = [
     label: "Connections",
     shortcut: "G then C",
     url: "/c",
+  },
+  {
+    href: "/dashboard/settings/sessions",
+    icon: TabletSmartphone,
+    id: "sessions",
+    label: "Sessions",
+    shortcut: "G then M",
+    url: "/ms",
   },
   {
     href: "/dashboard/settings/api-keys",

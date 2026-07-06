@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { cache } from "react";
 import { headers } from "next/headers";
 import { NextRequest } from "next/server";
@@ -17,7 +18,18 @@ export const apiForUser = cache(async (userId: number) => {
   const createCaller = createCallerFactory(appRouter);
 
   const user = await prisma.user.findUnique({
-    select: { email: true, image: true, name: true, publicId: true, role: true },
+    select: {
+      banned: true,
+      createdAt: true,
+      email: true,
+      emailVerified: true,
+      image: true,
+      name: true,
+      publicId: true,
+      role: true,
+      twoFactorEnabled: true,
+      updatedAt: true,
+    },
     where: { id: userId },
   });
 
@@ -33,25 +45,41 @@ export const apiForUser = cache(async (userId: number) => {
     requestInfo: {
       country: "SYSTEM",
       ip: "127.0.0.1",
+      method: "TASK",
+      path: "/task",
       requestId: `task-${crypto.randomUUID()}`,
       userAgent: "Doxynix-Task-Runner",
+      userId: Number(userId),
+      userRole: user?.role,
     },
     session:
       user == null
         ? null
         : {
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+            session: {
+              createdAt: new Date(),
+              expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+              id: "task-session",
+              token: "task-token",
+              updatedAt: new Date(),
+              userId: String(userId),
+            },
             user: {
-              email: user.email,
+              banned: user.banned,
+              createdAt: user.createdAt,
+              email: user.email ?? "",
+              emailVerified: user.emailVerified,
               id: String(userId),
               image: user.image,
-              name: user.name,
+              name: user.name ?? "User",
               role: user.role,
+              twoFactorEnabled: user.twoFactorEnabled,
+              updatedAt: user.updatedAt,
             },
           },
   };
 
-  return createCaller(ctx);
+  return createCaller(ctx as any);
 });
 
 export const api = cache(async () => {

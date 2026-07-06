@@ -3,9 +3,11 @@ import type { NextRequest } from "next/server";
 import ipaddr from "ipaddr.js";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
+import { APP_VERSION } from "@/shared/constants/env.server";
 
 type RequestStore = {
   appVersion?: string;
+  country: string;
   ip: null | string;
   method: string;
 
@@ -16,7 +18,6 @@ type RequestStore = {
 
   userAgent: string;
   userId?: number;
-
   userRole?: string;
 };
 
@@ -131,6 +132,8 @@ function ensureRequestId(request: NextRequest, existing?: string): string {
 export function buildRequestStore(input: RequestContextInput): RequestStore {
   const requestId = ensureRequestId(input.req, input.requestId);
   return {
+    appVersion: APP_VERSION,
+    country: getCountry(input.req),
     ip: anonymizeIp(getIp(input.req)),
     method: input.method,
     origin: input.req.headers.get("origin") ?? undefined,

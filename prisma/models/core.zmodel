@@ -1,0 +1,171 @@
+import "./auth"
+import "./github"
+
+model Notification {
+  /// @zod.custom.omit(["model"])
+  id        Int        @id @default(autoincrement()) @omit
+  /// @zod.custom.omit(["model"])
+  publicId  String     @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  /// @zod.string.trim().min(1, { message: "The title cannot be empty" }).max(300, { message: "The title cannot exceed 300 characters" })
+  title     String
+  /// @zod.string.trim().min(1, { message: "The text of the notification is mandatory" }).max(5000, { message: "The text of the notification cannot exceed 5000 characters" })
+  body      String
+  type      NotifyType @default(INFO)
+  isRead    Boolean    @default(false) @map("is_read")
+
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at")
+
+  /// @zod.custom.omit(["model"])
+  userId    Int        @map("user_id") @omit
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// @zod.custom.omit(["model"])
+  repoId    Int?       @map("repo_id") @omit
+  repo      Repo?      @relation(fields: [repoId], references: [id], onDelete: SetNull)
+
+  @@allow('all', auth() == user || auth().role == "ADMIN")
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@index([userId, type, createdAt(sort: Desc)])
+  @@index([repoId])
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_title_trgm_idx")
+  @@index([body(ops: raw("gin_trgm_ops"))], type: Gin, map: "notifications_body_trgm_idx")
+
+  @@map("notifications")
+}
+
+model ApiKey {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  prefix      String
+  /// @zod.custom.omit(["model"])
+  hashedKey   String    @unique @map("hashed_key") @omit
+  /// @zod.string.trim().min(1, { message: "The name must be between 1 and 50 characters long" }).max(50)
+  name        String    @length(min: 1, max: 50, message: "The name must be between 1 and 50 characters long")
+  /// @zod.string.trim().max(1000, { message: "The description must be less than 1000 characters" })
+  description String?   @db.Text @length(max: 1000, message: "The description must be less than 1000 characters")
+  lastUsed    DateTime? @map("last_used")
+  revoked     Boolean   @default(false)
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  /// @zod.custom.omit(["model"])
+  userId      Int       @map("user_id") @omit
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@allow('create', auth() == user && userId == auth().id && !revoked)
+  @@allow('read', auth() == user || auth().role == 'ADMIN')
+
+  @@allow('update', (auth() == user && future().userId == userId && future().prefix == prefix && future().hashedKey == hashedKey) || auth().role == 'ADMIN')
+  @@deny('delete', true)
+
+  @@index([userId])
+  @@map("api_keys")
+}
+
+
+model WebhookDelivery {
+  id         String        @id @default(uuid(7)) @db.Uuid
+  provider   String
+  deliveryId String        @map("delivery_id")
+  event      String?
+  status     WebhookStatus @default(PROCESSING)
+  error      String?       @db.Text
+
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @default(now()) @updatedAt @map("updated_at")
+
+  @@allow('create', true)
+  @@allow('read', auth().role == 'ADMIN')
+  @@allow('update,delete', false)
+
+  @@unique([provider, deliveryId])
+  @@index([createdAt(sort: Desc)])
+  @@map("webhook_deliveries")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  requestId String?  @map("request_id")
+  model     String
+  operation String
+  payload   Json
+  /// @zod.custom.omit(["model"])
+  userId    Int?     @map("user_id") @omit
+  ip        String?  @db.Inet
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@allow('create', true)
+  @@allow('read', auth().role == 'ADMIN' || (userId != null && auth().id == userId))
+  @@allow('update,delete', false)
+
+  @@index([requestId])
+  @@index([createdAt(sort: Desc)])
+  @@index([userId, operation])
+  @@index([model, requestId])
+
+  @@map("audit_logs")
+}
+
+model ChatSession {
+  id        String        @id @default(uuid(7)) @db.Uuid
+  userId    Int           @map("user_id")
+  repoId    Int?          @map("repo_id")
+  title     String        @default("New Chat")
+
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repo      Repo?         @relation(fields: [repoId], references: [id], onDelete: Cascade)
+
+  messages  ChatMessage[]
+
+  @@index([userId])
+  @@index([repoId])
+
+  @@allow('all', (auth() != null && userId == auth().id && (repoId == null || repo.userId == auth().id)) || auth().role == 'ADMIN')
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id        String      @id @default(uuid(7)) @db.Uuid
+  sessionId String      @map("session_id") @db.Uuid
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      ChatRole
+
+  /// @encrypted
+  parts     String
+
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  @@allow('all', (auth() != null && session.userId == auth().id) || auth().role == 'ADMIN')
+
+  @@index([sessionId])
+  @@map("chat_messages")
+}
+
+
+
+
+enum NotifyType {
+  ERROR
+  WARNING
+  INFO
+  SUCCESS
+}
+
+enum WebhookStatus {
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
+
+enum ChatRole {
+  user
+  assistant
+  system
+  data
+}

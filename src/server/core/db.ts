@@ -13,9 +13,9 @@ import {
 } from "@/shared/constants/env.server";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
-import { AUDIT_BUSINESS_MODELS } from "../utils/constants";
+import { AUDIT_BUSINESS_MODELS, ENCRYPTED_METADATA_MAP } from "../utils/constants";
 import { requestContext } from "../utils/request-context";
-import { sanitizePayload } from "../utils/sanitize-payload";
+import { maskSensitiveFields, sanitizePayload } from "../utils/sanitize-payload";
 import { appLogger } from "./app-logger";
 import { realtimeServer } from "./realtime";
 
@@ -38,74 +38,44 @@ type DmmfDatamodel = {
   };
 };
 
-const ENCRYPTED_METADATA_MAP: Record<string, Record<string, string>> = {
-  Account: {
-    access_token: "/// @encrypted",
-    email: "/// @encrypted",
-    emailHash: "/// @encryption:hash(email)?normalize=lowercase&normalize=trim",
-    id_token: "/// @encrypted",
-    refresh_token: "/// @encrypted",
-  },
-  BannedEmail: {
-    email: "/// @encrypted",
-    emailHash: "/// @encryption:hash(email)?normalize=lowercase&normalize=trim",
-  },
-  ChatMessage: {
-    parts: "/// @encrypted",
-  },
-  Session: {
-    sessionToken: "/// @encrypted",
-    sessionTokenHash: "/// @encryption:hash(sessionToken)",
-  },
-  User: {
-    email: "/// @encrypted",
-    emailHash: "/// @encryption:hash(email)?normalize=lowercase&normalize=trim",
-  },
-  VerificationToken: {
-    identifier: "/// @encrypted",
-    identifierHash: "/// @encryption:hash(identifier)?normalize=lowercase&normalize=trim",
-    token: "/// @encrypted",
-    tokenHash: "/// @encryption:hash(token)",
-  },
-};
-
 /**
- * Модифицирует AST-схему (DMMF) Prisma на лету, инжектируя метаданные для шифрования.
- * Это необходимо для совместимости с Rust-free компилятором Prisma 6/7 (engineType="client"),
- * который по умолчанию вырезает triple-slash комментарии из генерируемого клиента.
+ * Иммутабельно и точечно патчит DMMF для интеграции шифрования, полностью игнорируя
+ * гигантские автогенерируемые структуры типов в `schema` во избежание просадок по CPU на Cold Start.
  *
  * @param dmmf Исходная DMMF-модель Prisma
- * @returns Патченная DMMF-модель с аннотациями шифрования
+ * @returns Пропатченная DMMF-модель без мутации глобального контекста
  */
 function patchDmmfForEncryption(dmmf: DmmfDatamodel): DmmfDatamodel {
   if (dmmf.datamodel?.models == null) return dmmf;
 
-  for (const model of dmmf.datamodel.models) {
-    const modelOverrides = ENCRYPTED_METADATA_MAP[model.name];
-    if (model.fields == null) continue;
+  return {
+    ...dmmf,
+    datamodel: {
+      ...dmmf.datamodel,
+      models: dmmf.datamodel.models.map((model) => {
+        if (model.fields == null) return model;
 
-    for (const field of model.fields) {
-      if (field.isList === undefined) field.isList = false;
-      if (field.isUnique === undefined) field.isUnique = false;
-      if (field.isId === undefined) {
-        field.isId = field.name === "id";
-      }
+        const modelOverrides = ENCRYPTED_METADATA_MAP[model.name];
 
-      if (modelOverrides != null && modelOverrides[field.name] != null) {
-        field.documentation = modelOverrides[field.name];
-      }
-    }
-  }
-  return dmmf;
+        return {
+          ...model,
+          fields: model.fields.map((field) => {
+            const overrideDoc = modelOverrides?.[field.name];
+
+            return {
+              ...field,
+              isId: field.isId ?? field.name === "id",
+              isList: field.isList ?? false,
+              isUnique: field.isUnique ?? false,
+              ...(overrideDoc != null ? { documentation: overrideDoc } : {}),
+            };
+          }),
+        };
+      }),
+    },
+  };
 }
 
-/**
- * Гарантирует, что метаданные DMMF успешно загружены и содержат модели.
- * Предотвращает молчаливую регрессию безопасности, когда из-за tree-shaking
- * сборщика DMMF оказывается пустым, и персональные данные пишутся в БД в открытом виде.
- *
- * @param dmmf Модель DMMF для проверки
- */
 function assertDmmfIsPopulated(dmmf: DmmfDatamodel): void {
   const models = dmmf.datamodel?.models;
   if (models == null || models.length === 0) {
@@ -133,9 +103,8 @@ async function getNextAfterApi() {
 
 /**
  * Запускает фоновую задачу логирования аудита.
- * Использует Next.js after() для неблокирующего выполнения в продакшене.
- * В случае отсутствия API (скрипты, тесты, сбои) принудительно дожидается выполнения
- * через await во избежание заморозки процесса в Serverless-среде (Vercel Lambda).
+ * Использует Next.js after() для неблокирующего выполнения в рамках HTTP-запросов.
+ * Динамически определяет отсутствие контекста Next.js для совместимости с Trigger.dev и билдами.
  *
  * @param task Асинхронная функция фоновой задачи
  */
@@ -147,22 +116,31 @@ async function runAsBackgroundTask(task: () => Promise<void>): Promise<void> {
       afterFn(task);
       return;
     } catch (error) {
-      appLogger.error({ error, msg: "afterFn failed, falling back to blocking await" });
+      const isContextError =
+        error instanceof Error &&
+        (error.message.includes("request context") || error.message.includes("lifecycle"));
+
+      if (!isContextError) {
+        appLogger.warn({ error, msg: "afterFn failed unexpectedly, falling back to execution" });
+      }
     }
   }
 
+  if (IS_DEV || IS_TEST) {
+    task().catch((error) => {
+      appLogger.error({ error, msg: "Background task failed in local environment" });
+    });
+    return;
+  }
+
   await task().catch((error) => {
-    appLogger.error({ error, msg: "Background task failed in fallback mode" });
+    appLogger.error({ error, msg: "Background task failed in production fallback mode" });
   });
 }
 
 /**
  * Фабрика для ленивой инициализации синглтона базы данных Prisma.
- * Динамически выбирает TCP-драйвер PrismaPg для Node.js рантаймов и
- * WebSocket-драйвер PrismaNeon для Edge-рантаймов Next.js.
- *
- * Накладные расходы метода structuredClone на копирование DMMF выполняются строго единожды
- * при холодном старте (Cold Start) инстанса и не влияют на время обработки запросов (TTFB).
+ * Выбирает TCP-драйвер PrismaPg для Node.js рантаймов и WebSocket-драйвер PrismaNeon для Edge.
  */
 function createPrismaInstance() {
   let baseClient: PrismaClient;
@@ -183,7 +161,6 @@ function createPrismaInstance() {
 
   if (isEdgeRuntime) {
     const adapter = new PrismaNeon({ connectionString: DATABASE_URL });
-
     baseClient = new PrismaClient({
       adapter,
       log: logConfig,
@@ -191,7 +168,6 @@ function createPrismaInstance() {
     });
   } else {
     const adapter = new PrismaPg({ connectionString: DATABASE_URL });
-
     baseClient = new PrismaClient({
       adapter,
       log: logConfig,
@@ -204,12 +180,9 @@ function createPrismaInstance() {
       ? PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS.split(",")
       : [];
 
-  const rawDmmf =
-    (Prisma as any).dmmf != null
-      ? (structuredClone((Prisma as any).dmmf) as unknown as DmmfDatamodel)
-      : null;
+  const rawDmmf = (Prisma as any).dmmf as DmmfDatamodel | undefined;
 
-  if (rawDmmf === null) {
+  if (rawDmmf == null) {
     throw new Error(
       "[db] Prisma.dmmf is undefined. " +
         "Field encryption cannot initialize — aborting startup to prevent unencrypted data leak."
@@ -263,7 +236,12 @@ function createPrismaInstance() {
             const ctxStore = requestContext.getStore();
             const userId = ctxStore?.userId ?? null;
             const requestId = ctxStore?.requestId ?? crypto.randomUUID();
-            const cleanPayload = sanitizePayload(args) as Prisma.InputJsonValue;
+
+            const cleanPayload = sanitizePayload(args);
+            const securedPayload = maskSensitiveFields(
+              model,
+              cleanPayload
+            ) as Prisma.InputJsonValue;
 
             const logAuditTask = async () => {
               try {
@@ -272,7 +250,7 @@ function createPrismaInstance() {
                     ip: ctxStore?.ip ?? null,
                     model,
                     operation,
-                    payload: cleanPayload,
+                    payload: securedPayload,
                     requestId,
                     userAgent: ctxStore?.userAgent ?? "internal",
                     userId: userId == null ? null : Number(userId),

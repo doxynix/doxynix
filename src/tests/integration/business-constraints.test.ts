@@ -107,18 +107,16 @@ describe("Business Logic & Integrity Constraints", () => {
 
     const aliceAccount = await alice.db.account.create({
       data: {
-        provider: "github",
-        providerAccountId: "gh_alice_123",
-        type: "oauth",
+        accountId: "gh_alice_123",
+        providerId: "github",
         userId: alice.user.id,
       },
     });
 
     const bobAccount = await bob.db.account.create({
       data: {
-        provider: "google",
-        providerAccountId: "go_bob_456",
-        type: "oauth",
+        accountId: "go_bob_456",
+        providerId: "google",
         userId: bob.user.id,
       },
     });
@@ -139,9 +137,8 @@ describe("Business Logic & Integrity Constraints", () => {
 
     await alice.db.account.create({
       data: {
-        provider: "github",
-        providerAccountId: "12345",
-        type: "oauth",
+        accountId: "12345",
+        providerId: "github",
         userId: alice.user.id,
       },
     });
@@ -149,9 +146,8 @@ describe("Business Logic & Integrity Constraints", () => {
     await expectValidationFail(
       hacker.db.account.create({
         data: {
-          provider: "github",
-          providerAccountId: "12345",
-          type: "oauth",
+          accountId: "12345",
+          providerId: "github",
           userId: hacker.user.id,
         },
       })
@@ -164,8 +160,8 @@ describe("Business Logic & Integrity Constraints", () => {
 
     const session = await alice.db.session.create({
       data: {
-        expires: new Date(Date.now() + 10_000),
-        sessionToken: "secret_token_123",
+        expiresAt: new Date(Date.now() + 10_000),
+        token: "secret_token_123",
         userId: alice.user.id,
       },
     });
@@ -173,7 +169,7 @@ describe("Business Logic & Integrity Constraints", () => {
     await expectDenied(bob.db.session.findUniqueOrThrow({ where: { publicId: session.publicId } }));
 
     const stolenSession = await bob.db.session.findUnique({
-      where: { sessionTokenHash: getRawHash("secret_token_123") },
+      where: { tokenHash: getRawHash("secret_token_123") },
     });
     expect(stolenSession).toBeNull();
   });

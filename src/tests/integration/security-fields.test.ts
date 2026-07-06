@@ -20,25 +20,24 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
     expect(fetchedKey).not.toHaveProperty("hashedKey");
 
     await prisma.session.create({
-      data: { expires: new Date(), sessionToken: "SESS_SECRET", userId: alice.user.id },
+      data: { expiresAt: new Date(), token: "SESS_SECRET", userId: alice.user.id },
     });
     const fetchedSession = await alice.db.session.findUnique({
-      where: { sessionTokenHash: getRawHash("SESS_SECRET") },
+      where: { tokenHash: getRawHash("SESS_SECRET") },
     });
     expect(fetchedSession).not.toBeNull();
     expect(fetchedSession).not.toHaveProperty("sessionToken");
 
     await prisma.account.create({
       data: {
-        access_token: "ACC_TOK",
-        provider: "gh",
-        providerAccountId: "1",
-        type: "oauth",
+        accessToken: "ACC_TOK",
+        accountId: "1",
+        providerId: "gh",
         userId: alice.user.id,
       },
     });
     const fetchedAccount = await alice.db.account.findUnique({
-      where: { provider_providerAccountId: { provider: "gh", providerAccountId: "1" } },
+      where: { providerId_accountId: { accountId: "1", providerId: "gh" } },
     });
     expect(fetchedAccount).not.toHaveProperty("access_token");
   });

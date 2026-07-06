@@ -5,19 +5,28 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { isSafeIp, POST, ssrfSafeLookup } from "@/app/api/proxy/route";
 
-const { mockAppLogger, mockGetServerAuthSession } = vi.hoisted(() => {
+import { auth } from "@/server/core/auth";
+
+const { mockAppLogger } = vi.hoisted(() => {
   return {
     mockAppLogger: {
       error: vi.fn(),
       info: vi.fn(),
       warn: vi.fn(),
     },
-    mockGetServerAuthSession: vi.fn(),
   };
 });
 
+vi.mock("next/headers", () => ({
+  headers: vi.fn().mockResolvedValue(new Headers()),
+}));
+
 vi.mock("@/server/core/auth", () => ({
-  getServerAuthSession: () => mockGetServerAuthSession(),
+  auth: {
+    api: {
+      getSession: vi.fn(),
+    },
+  },
 }));
 
 vi.mock("@/server/core/app-logger", () => ({
@@ -31,9 +40,9 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockGetServerAuthSession.mockResolvedValue({
+    vi.mocked(auth.api.getSession).mockResolvedValue({
       user: { email: "developer@doxynix.com", id: "user_test_2026" },
-    });
+    } as Awaited<ReturnType<typeof auth.api.getSession>>);
 
     globalFetchMock.mockResolvedValue({
       headers: new Headers({ "content-type": "application/json" }),
@@ -181,7 +190,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
   describe("3. HTTP Integration-test: Route POST Handler", () => {
     describe("Authorization & Security check", () => {
       it("should reject with 401 when user is not authorized", async () => {
-        mockGetServerAuthSession.mockResolvedValue(null);
+        vi.mocked(auth.api.getSession).mockResolvedValue(null as any);
 
         const req = new Request("http://localhost/api/proxy", {
           body: JSON.stringify({ method: "GET", url: "https://example.com" }),

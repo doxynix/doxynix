@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { ExternalLinkIcon } from "lucide-react";
-import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
+import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { GoogleIcon } from "@/shared/ui/icons/google-icon";
@@ -28,21 +28,21 @@ const OAUTH_PROVIDERS = [
   {
     description: "Access your code and repositories.",
     icon: <GitHubIcon className="size-5" />,
-    id: "github",
+    id: "github" as const,
     manageUrl: "https://github.com/settings/applications",
     name: "GitHub",
   },
   {
     description: "Log in with your Google account.",
     icon: <GoogleIcon className="size-5" />,
-    id: "google",
+    id: "google" as const,
     manageUrl: "https://myaccount.google.com/permissions",
     name: "Google",
   },
   {
     description: "Secure login via Yandex ID.",
     icon: <YandexIcon className="size-5" />,
-    id: "yandex",
+    id: "yandex" as const,
     manageUrl: "https://passport.yandex.ru/profile/access",
     name: "Yandex",
   },
@@ -52,8 +52,7 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
   const [disconnectingProvider, setDisconnectingProvider] = useState<null | string>(null);
   const [loadingProvider, setLoadingProvider] = useState<null | string>(null);
 
-  const canDisconnectAny =
-    accounts.length > 1 || (user?.email != null && user.emailVerified != null);
+  const canDisconnectAny = accounts.length > 1 || (user?.email != null && user.emailVerified);
 
   const utils = trpc.useUtils();
   const disconnect = trpc.user.disconnectAccount.useMutation({
@@ -65,10 +64,15 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
     },
   });
 
-  const handleConnect = async (providerId: string) => {
+  const handleConnect = async (provider: "github" | "google" | "yandex") => {
     try {
-      setLoadingProvider(providerId);
-      await signIn(providerId, { callbackUrl: window.location.href });
+      setLoadingProvider(provider);
+      await authClient.signIn.social({
+        callbackURL: window.location.href,
+        provider,
+      });
+    } catch {
+      toast.error("Linking failed. Please try again.");
     } finally {
       setLoadingProvider(null);
     }
