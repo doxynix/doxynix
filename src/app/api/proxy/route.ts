@@ -1,10 +1,11 @@
 import dns from "node:dns";
+import { headers as getRequestHeaders } from "next/headers";
 import { NextResponse } from "next/server";
 import ipaddr from "ipaddr.js";
 import { Agent } from "undici";
 
 import { appLogger } from "@/server/core/app-logger";
-import { getServerAuthSession } from "@/server/core/auth";
+import { auth } from "@/server/core/auth";
 
 interface ProxyRequestBody {
   body?: unknown;
@@ -74,7 +75,10 @@ export const ssrfSafeAgent = new Agent({
 });
 
 export async function POST(req: Request) {
-  const session = await getServerAuthSession();
+  const session = await auth.api.getSession({
+    headers: await getRequestHeaders(),
+  });
+
   if (!session?.user) {
     return new NextResponse("Unauthorized", { status: 401 });
   }

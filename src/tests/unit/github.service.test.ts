@@ -170,7 +170,14 @@ function createMockPrisma(accounts: any | any[]) {
   const normalizedAccounts =
     accounts == null ? [] : Array.isArray(accounts) ? accounts : [accounts];
 
-  const oauthAccounts = normalizedAccounts.filter((account) => account?.access_token != null);
+  const oauthAccounts = normalizedAccounts
+    .filter((account) => account?.access_token != null || account?.accessToken != null)
+    .map((account, index) => ({
+      accessToken: account.accessToken ?? account.access_token,
+      id: account.id ?? index + 1,
+      providerId: "github",
+    }));
+
   const installations = normalizedAccounts
     .filter((account) => account?.githubInstallationId != null)
     .map((account) => ({ id: account.githubInstallationId }));

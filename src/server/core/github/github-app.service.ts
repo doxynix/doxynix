@@ -19,14 +19,14 @@ export const githubAppService = {
     const identifier = `github_install_${userId}`;
 
     await prisma.$transaction([
-      prisma.verificationToken.deleteMany({
+      prisma.verification.deleteMany({
         where: { identifierHash: getNormalizedHash(identifier) },
       }),
-      prisma.verificationToken.create({
+      prisma.verification.create({
         data: {
-          expires: new Date(Date.now() + 10 * 60 * 1000),
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
           identifier,
-          token: state,
+          value: state,
         },
       }),
     ]);
@@ -100,11 +100,11 @@ export const githubAppService = {
     const inputInstIdNum = Number(installationId);
     const identifier = `github_install_${userIdNum}`;
 
-    const validState = await prisma.verificationToken.findFirst({
+    const validState = await prisma.verification.findFirst({
       where: {
-        expires: { gt: new Date() },
+        expiresAt: { gt: new Date() },
         identifierHash: getNormalizedHash(identifier),
-        tokenHash: getRawHash(state),
+        valueHash: getRawHash(state),
       },
     });
 
@@ -173,10 +173,10 @@ export const githubAppService = {
 
     try {
       await prisma.$transaction(async (tx) => {
-        const consumed = await tx.verificationToken.deleteMany({
+        const consumed = await tx.verification.deleteMany({
           where: {
             identifierHash: getNormalizedHash(identifier),
-            tokenHash: getRawHash(state),
+            valueHash: getRawHash(state),
           },
         });
 

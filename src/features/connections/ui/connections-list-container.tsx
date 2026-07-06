@@ -8,6 +8,8 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { AuthProvidersList } from "./auth-providers-list";
 import { GitHubInstallationsList } from "./github-installations-list";
+import { PasskeysList } from "./passkeys-list";
+import { TwoFactorCard } from "./two-factor-card";
 
 export function ConnectionsListContainer() {
   const { data: githubData, isLoading: isGithubLoading } =
@@ -41,9 +43,25 @@ export function ConnectionsListContainer() {
       <section className="flex flex-col gap-4">
         <div>
           <h2>Authentication</h2>
-          <p className="text-muted-foreground text-sm">Manage your social login methods.</p>
+          <p className="text-muted-foreground text-sm">
+            Manage your account protection and login methods.
+          </p>
         </div>
-        <AuthProvidersList accounts={data?.accounts ?? []} user={data?.user ?? null} />
+        <div className="flex flex-col gap-3">
+          <TwoFactorCard />
+          <AuthProvidersList accounts={data?.accounts ?? []} user={data?.user ?? null} />
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <div>
+          <h2>Biometric Devices</h2>
+          <p className="text-muted-foreground text-sm">
+            Use your device&apos;s fingerprint (TouchID) or face scanner (FaceID) to sign in
+            securely without passwords.
+          </p>
+        </div>
+        <PasskeysList />
       </section>
 
       <section className="flex flex-col gap-4">

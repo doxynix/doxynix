@@ -5,8 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { httpBatchLink, loggerLink } from "@trpc/client";
 import { LucideProvider } from "lucide-react";
-import type { Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import superjson from "superjson";
@@ -22,7 +20,6 @@ import { RealtimeProvider } from "./_components/realtime-provider";
 
 type Props = {
   children: ReactNode;
-  session: null | Session;
 };
 
 function getBaseUrl() {
@@ -30,19 +27,31 @@ function getBaseUrl() {
   return APP_URL;
 }
 
-export function Providers({ children, session }: Readonly<Props>) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            refetchOnWindowFocus: false,
-            retry: 1,
-            staleTime: 30_000,
-          },
-        },
-      })
-  );
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: 1,
+        staleTime: 30_000,
+      },
+    },
+  });
+}
+
+let browserQueryClient: QueryClient | undefined;
+
+function getQueryClient() {
+  if (typeof window === "undefined") {
+    return makeQueryClient();
+  } else {
+    if (!browserQueryClient) browserQueryClient = makeQueryClient();
+    return browserQueryClient;
+  }
+}
+
+export function Providers({ children }: Readonly<Props>) {
+  const queryClient = getQueryClient();
 
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -61,16 +70,9 @@ export function Providers({ children, session }: Readonly<Props>) {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <SessionProvider
-          refetchInterval={60 * 60}
-          refetchOnWindowFocus={false}
-          refetchWhenOffline={false}
-          session={session}
-        >
-          <RealtimeProvider>
-            <InnerProviders>{children}</InnerProviders>
-          </RealtimeProvider>
-        </SessionProvider>
+        <RealtimeProvider>
+          <InnerProviders>{children}</InnerProviders>
+        </RealtimeProvider>
         {IS_DEV && <ReactQueryDevtools initialIsOpen={false} theme="dark" />}
       </QueryClientProvider>
     </trpc.Provider>

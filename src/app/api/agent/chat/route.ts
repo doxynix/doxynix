@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { ChatRole } from "@prisma/client";
 import { convertToModelMessages, generateText, stepCountIs, streamText } from "ai";
 import { dedent } from "ts-dedent";
@@ -5,7 +6,7 @@ import { dedent } from "ts-dedent";
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
-import { getServerAuthSession } from "@/server/core/auth";
+import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
 import { google } from "@/server/core/google";
 import { realtimeServer } from "@/server/core/realtime";
@@ -29,7 +30,9 @@ export async function POST(req: Request) {
     throw new Error("No model configured for AGENT role");
   }
 
-  const session = await getServerAuthSession();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   const userId = session?.user.id != null ? Number(session.user.id) : null;
 
   let resolvedRepoId: string | undefined;

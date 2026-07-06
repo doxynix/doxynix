@@ -25,6 +25,11 @@ const handler = createMcpHandler(
         continue;
       }
 
+      if (toolObj.needsApproval === true) {
+        appLogger.debug({ msg: "Skipping approval-required tool in MCP registration", tool: name });
+        continue;
+      }
+
       const inputSchema = toolObj.inputSchema;
 
       if (!(inputSchema instanceof z.ZodObject)) {

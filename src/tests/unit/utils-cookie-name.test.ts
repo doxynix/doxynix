@@ -11,7 +11,7 @@ describe("getCookieName runtime branches", () => {
 
     const { getCookieName } = await import("@/shared/lib/session-cookie");
 
-    expect(getCookieName()).toBe("__Secure-next-auth.session-token");
+    expect(getCookieName()).toBe("__Secure-doxynix.session_token");
   });
 
   it("should return standard cookie name in development mode", async () => {
@@ -19,6 +19,6 @@ describe("getCookieName runtime branches", () => {
 
     const { getCookieName } = await import("@/shared/lib/session-cookie");
 
-    expect(getCookieName()).toBe("next-auth.session-token");
+    expect(getCookieName()).toBe("doxynix.session_token");
   });
 });

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
+import { useRouter } from "@/shared/i18n/routing";
+import { authClient } from "@/shared/lib/auth-client";
 import { useUploadThing } from "@/shared/lib/uploadthing";
 
 type ProfileData = {
@@ -19,7 +20,8 @@ type UseProfileActionsProps = {
 };
 
 export function useProfileActions(props: UseProfileActionsProps = {}) {
-  const { data: session, update: updateSession } = useSession();
+  const { data: session, refetch } = authClient.useSession();
+  const router = useRouter();
   const utils = trpc.useUtils();
   const t = useTranslations("Dashboard");
 
@@ -40,10 +42,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
         name: data.user.name ?? null,
       });
 
-      await updateSession({
-        email: data.user.email,
-        name: data.user.name,
-      });
+      await refetch();
 
       await utils.user.me.invalidate();
       posthog.capture("profile_updated", {
@@ -59,7 +58,13 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
     onSuccess: async () => {
       toast.success(t("settings_danger_delete_account_toast_success"));
       posthog.capture("account_deleted");
-      await signOut({ callbackUrl: "/auth" });
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.push("/auth");
+          },
+        },
+      });
     },
   });
 
@@ -72,7 +77,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
 
       propsRef.current.onAvatarRemoveSuccess?.();
 
-      await updateSession({ image: null });
+      await refetch();
       await utils.user.me.invalidate();
     },
   });
@@ -108,7 +113,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
 
         const uploadedFile = res[0];
 
-        await updateSession({ image: uploadedFile.ufsUrl });
+        await refetch();
         await utils.user.me.invalidate();
 
         return uploadedFile;

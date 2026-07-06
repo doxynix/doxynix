@@ -2,10 +2,9 @@
 
 import { useRef, useState, type ChangeEvent } from "react";
 import { CloudUpload, Trash2 } from "lucide-react";
-import type { User } from "next-auth";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
+import { authClient, type User } from "@/shared/lib/auth-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
@@ -19,7 +18,7 @@ type Props = {
 
 export function ProfileCard({ user: initialUser }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const currentUser = session?.user ?? initialUser;
 
@@ -57,9 +56,9 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
         <CardContent className="flex items-center gap-6">
           <div className="relative">
             <AppAvatar
-              alt={currentUser.name ?? "User"}
+              alt={currentUser.name}
               src={avatarUrl}
-              fallbackText={currentUser.name ?? currentUser.email ?? undefined}
+              fallbackText={currentUser.name}
               priority={true}
               className="size-24"
               fallbackClassName="text-2xl"
@@ -111,7 +110,6 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
         <CardHeader>
           <CardTitle>{t("settings_profile_personal_information_title")}</CardTitle>
           <CardDescription>{t("settings_profile_personal_information_desc")}</CardDescription>
-          {/* <CardDescription>Update your name or email.</CardDescription> */}
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <ProfileDetailsForm user={currentUser} />

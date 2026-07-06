@@ -2,10 +2,10 @@
 
 import { type ComponentType } from "react";
 import { Book, ChartNoAxesColumn } from "lucide-react";
-import type { User } from "next-auth";
 import { useLocale } from "next-intl";
 
 import { useRouter } from "@/shared/i18n/routing";
+import { type User } from "@/shared/lib/auth-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 

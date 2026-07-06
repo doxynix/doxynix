@@ -177,7 +177,7 @@ describe("shared/lib/utils:getCookieName", () => {
   it("should return cookie name for current runtime", () => {
     const cookieName = getCookieName();
 
-    expect(["__Secure-next-auth.session-token", "next-auth.session-token"]).toContain(cookieName);
+    expect(["__Secure-doxynix.session_token", "doxynix.session_token"]).toContain(cookieName);
   });
 });
 

@@ -12,6 +12,8 @@ import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 
+export const runtime = "nodejs";
+
 const resendWebhookSchema = z
   .object({
     created_at: z.string(),
@@ -153,7 +155,7 @@ export async function POST(req: Request) {
       try {
         await prisma.$transaction([
           prisma.bannedEmail.upsert({
-            create: { email, reason }, // NOTE: emailHash заполняется автоматически расширением prisma-field-encryption. Передаем пустую строку, чтобы удовлетворить строгие типы Prisma в методе upsert.
+            create: { email, reason },
             update: { reason },
             where: { emailHash: getNormalizedHash(email) },
           }),

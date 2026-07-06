@@ -1,0 +1,236 @@
+import "./github"
+import "./core"
+
+model User {
+  /// @zod.custom.omit(["model"])
+  id                  Int                  @id @default(autoincrement()) @omit
+  /// @zod.custom.omit(["model"])
+  publicId            String               @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  /// @encrypted
+  /// @zod.string.email({ message: "Incorrect email" })
+  email               String?              @db.Citext @email(message: "Incorrect email")
+  /// @encryption:hash(email)?normalize=lowercase&normalize=trim
+  /// @zod.custom.omit(["model"])
+  emailHash           String?              @unique @map("email_hash") @omit
+  /// @zod.string.trim().min(1, { message: "Name required" }).max(50, { message: "Name cannot exceed 50 characters" })
+  name                String?              @length(min: 1, max: 50, message: "Name cannot exceed 50 characters")
+  emailVerified       Boolean              @default(false) @map("email_verified")
+  /// @zod.string.url({ message: "Incorrect link to avatar" })
+  image               String?              @url(message: "Incorrect link to avatar")
+  /// @zod.custom.omit(["model"])
+  imageKey            String?              @map("image_key") @omit @unique
+  role                UserRole             @default(USER)
+  banned              Boolean              @default(false) @map("banned")
+  banReason           String?              @map("ban_reason")
+  banExpires          DateTime?            @map("ban_expires")
+  twoFactorEnabled    Boolean              @default(false) @map("two_factor_enabled")
+  lastLoginMethod     String?              @map("last_login_method")
+
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @default(now()) @updatedAt @map("updated_at")
+
+  accounts            Account[]
+  sessions            Session[]
+  repos               Repo[]
+  apiKeys             ApiKey[]
+  notifications       Notification[]
+  githubInstallations GithubInstallation[]
+  chatSession         ChatSession[]
+  passkeys            Passkey[]
+  twoFactors          TwoFactor[]
+
+  @@allow('create', role == USER || auth().role == 'ADMIN')
+  @@allow('read,delete', auth() == this || auth().role == 'ADMIN')
+
+  @@allow('update',
+    auth().role == 'ADMIN' ||
+    (auth() == this && future().role == role && future().createdAt == createdAt)
+  )
+
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "users_name_trgm_idx")
+  @@map("users")
+}
+
+
+model Account {
+  /// @zod.custom.omit(["model"])
+  id                    Int       @id @default(autoincrement()) @omit
+  /// @zod.custom.omit(["model"])
+  publicId              String    @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  /// @zod.custom.omit(["model"])
+  userId                Int       @map("user_id") @omit
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  /// @encrypted
+  /// @zod.string.email({ message: "Incorrect email" })
+  email                 String?   @db.Citext @email(message: "Incorrect email")
+  /// @encryption:hash(email)?normalize=lowercase&normalize=trim
+  /// @zod.custom.omit(["model"])
+  emailHash             String?   @map("email_hash") @omit
+  /// @zod.string.url({ message: "Incorrect link to avatar" })
+  image                 String?   @url(message: "Incorrect link to avatar")
+  name                  String?
+  /// @encrypted
+  /// @zod.custom.omit(["model"])
+  refreshToken          String?   @db.Text @omit @map("refresh_token")
+  /// @encrypted
+  /// @zod.custom.omit(["model"])
+  accessToken           String?   @db.Text @omit @map("access_token")
+  /// @zod.custom.omit(["model"])
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  /// @zod.custom.omit(["model"])
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  tokenType             String?   @map("token_type")
+  scope                 String?
+  /// @encrypted
+  /// @zod.custom.omit(["model"])
+  idToken               String?   @db.Text @omit @map("id_token")
+  /// @zod.custom.omit(["model"])
+  impersonatedBy        String?   @map("impersonated_by") @omit
+
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@allow('read,delete', auth() == user || auth().role == 'ADMIN')
+  @@allow('create', (auth() != null && userId == auth().id) || auth().role == 'ADMIN')
+  @@allow('update', auth().role == 'ADMIN')
+
+  @@unique([providerId, accountId])
+  @@unique([userId, providerId])
+  @@map("accounts")
+}
+
+
+model Passkey {
+  /// @zod.custom.omit(["model"])
+  id           String    @id @default(uuid(7)) @db.Uuid
+  /// @zod.string.trim().max(100, { message: "Name cannot exceed 100 characters" })
+  name         String?   @length(max: 100)
+  /// @zod.custom.omit(["model"])
+  publicKey    String    @map("public_key") @omit
+  /// @zod.custom.omit(["model"])
+  userId       Int       @map("user_id") @omit
+  /// @zod.custom.omit(["model"])
+  credentialID String    @unique @map("credential_id") @omit
+  /// @zod.number.int().min(0)
+  counter      Int       @default(0)
+  /// @zod.string.trim()
+  deviceType   String    @map("device_type")
+  backedUp     Boolean   @map("backed_up")
+  transports   String?
+  /// @zod.string.uuid()
+  aaguid       String?
+  createdAt    DateTime? @default(now()) @map("created_at")
+  updatedAt    DateTime? @updatedAt @map("updated_at")
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@allow('all', auth() == user || auth().role == 'ADMIN')
+  @@map("passkeys")
+}
+
+model TwoFactor {
+  /// @zod.custom.omit(["model"])
+  id          String   @id @default(uuid(7)) @db.Uuid
+  // NOTE: Better-auth сам шифрует (AES-256-GCM) так что повторно нету смысла
+  /// @zod.custom.omit(["model"])
+  secret      String   @omit
+  // NOTE: Better-auth сам шифрует (AES-256-GCM) так что повторно нету смысла
+  /// @zod.custom.omit(["model"])
+  backupCodes String   @map("backup_codes") @omit
+  verified    Boolean  @default(false)
+  /// @zod.custom.omit(["model"])
+  userId      Int      @unique @map("user_id") @omit
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@allow('all', auth() == user || auth().role == 'ADMIN')
+  @@map("two_factors")
+}
+
+
+model Session {
+  /// @zod.custom.omit(["model"])
+  id        Int      @id @default(autoincrement()) @omit
+  /// @zod.custom.omit(["model"])
+  publicId  String   @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  /// @encrypted
+  /// @zod.custom.omit(["model"])
+  token     String   @unique @omit
+  /// @encryption:hash(token)
+  /// @zod.custom.omit(["model"])
+  tokenHash String?  @unique @map("token_hash") @omit
+  expiresAt DateTime @map("expires_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  /// @zod.custom.omit(["model"])
+  userId    Int      @map("user_id") @omit
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@allow('read,delete', auth() == user || auth().role == 'ADMIN')
+  @@allow('create', (auth() != null && userId == auth().id) || auth().role == 'ADMIN')
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+
+model Verification {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  /// @encrypted
+  identifier     String
+  /// @encryption:hash(identifier)?normalize=lowercase&normalize=trim
+  identifierHash String   @default("") @map("identifier_hash")
+
+  /// @encrypted
+  /// @zod.custom.omit(["model"])
+  value          String
+  /// @encryption:hash(value)
+  /// @zod.custom.omit(["model"])
+  valueHash      String   @unique() @default("") @map("value_hash")
+  expiresAt      DateTime @map("expires_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@allow('all', auth().role == 'ADMIN')
+  @@unique([identifierHash, valueHash])
+  @@map("verification_tokens")
+}
+
+model BannedEmail {
+  id        Int               @id @default(autoincrement())
+  /// @encrypted
+  /// @zod.string.email({ message: "Incorrect email" })
+  email     String            @db.Citext
+  /// @encryption:hash(email)?normalize=lowercase&normalize=trim
+  /// @zod.custom.omit(["model"])
+  emailHash String?           @unique @map("email_hash") @omit
+  reason    BannedEmailReason
+
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @default(now()) @updatedAt @map("updated_at")
+
+  @@allow('all', auth().role == 'ADMIN')
+
+  @@map("banned_emails")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum BannedEmailReason {
+  BOUNCED
+  COMPLAINED
+  SUPPRESSED
+  FAILED
+  DISPOSABLE
+  MANUAL
+}

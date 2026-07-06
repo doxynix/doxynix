@@ -1,26 +1,38 @@
-import { cache } from "react";
+import { createElement } from "react";
 import { headers } from "next/headers";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import type { PrismaClient } from "@prisma/client";
+import { after } from "next/server";
+import { passkey } from "@better-auth/passkey";
 import { render } from "@react-email/render";
-import { getServerSession, type NextAuthOptions } from "next-auth";
-import type { Adapter, AdapterAccount, AdapterUser } from "next-auth/adapters";
-import EmailProvider from "next-auth/providers/email";
-import GitHubProvider from "next-auth/providers/github";
-import GoogleProvider from "next-auth/providers/google";
-import YandexProvider from "next-auth/providers/yandex";
+import { betterAuth } from "better-auth";
+import { APIError, createAuthMiddleware } from "better-auth/api";
+import {
+  admin,
+  captcha,
+  genericOAuth,
+  lastLoginMethod,
+  magicLink,
+  twoFactor,
+} from "better-auth/plugins";
 import { Resend } from "resend";
 
-import { IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
-import { AUTH_PROVIDERS, NEXTAUTH_SECRET, RESEND_API_KEY } from "@/shared/constants/env.server";
+import { IS_PROD } from "@/shared/constants/env.flags";
+import {
+  AUTH_PROVIDERS,
+  BETTER_AUTH_SECRET,
+  BETTER_AUTH_URL,
+  RESEND_API_KEY,
+  TURNSTILE_SECRET_KEY,
+} from "@/shared/constants/env.server";
 
 import { AuthEmail } from "@/server/core/auth-email";
 
 import { maskEmail, normalizeEmail, validateEmailSafety } from "../utils/email-guard";
-import { getNormalizedHash, getRawHash } from "../utils/hash";
+import { getNormalizedHash } from "../utils/hash";
 import { appLogger } from "./app-logger";
+import { customAuthAdapter } from "./auth/auth-adapter";
 import { prisma } from "./db";
 import { emailSignInLimiter } from "./ratelimit";
+import { redisClient } from "./redis";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 дней
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: сутки
@@ -28,209 +40,281 @@ const MAGIC_LINK_MAX_AGE = 10 * 60; // TIME: 10 минут
 
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
-const basePrismaAdapter = PrismaAdapter(prisma as unknown as PrismaClient);
-
-const customPrismaAdapter: Adapter = {
-  ...basePrismaAdapter,
-
-  createSession: async (session) => {
-    const created = await prisma.session.create({
-      data: {
-        ...session,
-        userId: Number(session.userId),
-      },
-    });
-    return {
-      ...created,
-      id: String(created.id),
-      userId: String(created.userId),
-    };
-  },
-
-  createUser: async (data: Omit<AdapterUser, "id">) => {
-    const created = await prisma.user.create({
-      data: {
-        ...data,
-        email: normalizeEmail(data.email),
-      },
-    });
-    return {
-      ...created,
-      email: created.email ?? "",
-      id: String(created.id),
-    };
-  },
-
-  deleteSession: async (sessionToken: string) => {
-    await prisma.session.delete({
-      where: { sessionTokenHash: getRawHash(sessionToken) },
-    });
-  },
-
-  deleteUser: async (id: string) => {
-    const deleted = await prisma.user.delete({
-      where: { id: Number(id) },
-    });
-    return {
-      ...deleted,
-      email: deleted.email ?? "",
-      id: String(deleted.id),
-    };
-  },
-
-  getSessionAndUser: async (sessionToken: string) => {
-    const session = await prisma.session.findUnique({
-      include: { user: true },
-      where: { sessionTokenHash: getRawHash(sessionToken) },
-    });
-    if (session == null) return null;
-    return {
-      session: {
-        ...session,
-        id: String(session.id),
-        userId: String(session.userId),
-      },
-      user: {
-        ...session.user,
-        email: session.user.email ?? "",
-        id: String(session.user.id),
-      },
-    };
-  },
-
-  getUser: async (id: string) => {
-    const user = await prisma.user.findUnique({
-      where: { id: Number(id) },
-    });
-    if (user == null) return null;
-    return {
-      ...user,
-      email: user.email ?? "",
-      id: String(user.id),
-    };
-  },
-
-  getUserByAccount: async ({ provider, providerAccountId }) => {
-    const account = await prisma.account.findUnique({
-      include: { user: true },
-      where: {
-        provider_providerAccountId: {
-          provider,
-          providerAccountId,
-        },
-      },
-    });
-    if (account == null) return null;
-    return {
-      ...account.user,
-      email: account.user.email ?? "",
-      id: String(account.user.id),
-    };
-  },
-
-  getUserByEmail: async (email: string) => {
-    const cleanEmail = normalizeEmail(email);
-    const user = await prisma.user.findUnique({
-      where: { emailHash: getNormalizedHash(cleanEmail) },
-    });
-    if (user == null) return null;
-    return {
-      ...user,
-      email: user.email ?? "",
-      id: String(user.id),
-    };
-  },
-
-  linkAccount: async (account: AdapterAccount) => {
-    const created = await prisma.account.create({
-      data: {
-        ...account,
-        userId: Number(account.userId),
-      },
-    });
-    return {
-      ...created,
-      id: String(created.id),
-      userId: String(created.userId),
-    };
-  },
-
-  updateSession: async (session) => {
-    const updated = await prisma.session.update({
-      data: {
-        expires: session.expires,
-      },
-      where: { sessionTokenHash: getRawHash(session.sessionToken) },
-    });
-    return {
-      ...updated,
-      id: String(updated.id),
-      userId: String(updated.userId),
-    };
-  },
-
-  updateUser: async ({ id, ...data }) => {
-    const updated = await prisma.user.update({
-      data: {
-        ...data,
-        ...(data.email != null && { email: normalizeEmail(data.email) }),
-      },
-      where: { id: Number(id) },
-    });
-    return {
-      ...updated,
-      email: updated.email ?? "",
-      id: String(updated.id),
-    };
-  },
-
-  useVerificationToken: async ({ identifier, token }: { identifier: string; token: string }) => {
-    try {
-      const identifierHash = getNormalizedHash(normalizeEmail(identifier));
-      const tokenHash = getRawHash(token);
-
-      return await prisma.verificationToken.delete({
-        where: {
-          identifierHash_tokenHash: {
-            identifierHash,
-            tokenHash,
-          },
-        },
-      });
-    } catch {
-      return null;
-    }
-  },
-};
-
-export const authOptions: NextAuthOptions = {
-  adapter: customPrismaAdapter as unknown as Adapter,
-  callbacks: {
-    async session({ session, user }) {
-      session.user.id = user.id;
-      session.user.role = user.role;
-      return session;
+export const auth = betterAuth({
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["yandex"],
     },
-    async signIn({ account, user }) {
-      if (user.email == null) return false;
+    additionalFields: {
+      email: { type: "string" },
+      emailHash: { type: "string" },
+      image: { type: "string" },
+      name: { type: "string" },
+    },
+    storeStateStrategy: "cookie",
+  },
+  advanced: {
+    backgroundTasks: {
+      handler: (promise) => {
+        after(() => promise);
+      },
+    },
+    cookiePrefix: "doxynix",
+    database: {
+      generateId: false,
+    },
+    useSecureCookies: IS_PROD,
+  },
+  appName: "Doxynix",
+  baseURL: BETTER_AUTH_URL,
 
-      const normalizedEmail = normalizeEmail(user.email);
-      const userId = user.id;
+  database: () => customAuthAdapter,
 
-      const isBanned = await prisma.bannedEmail.findUnique({
-        where: { emailHash: getNormalizedHash(normalizedEmail) },
-      });
+  databaseHooks: {
+    account: {
+      create: {
+        after: async (account) => {
+          const baAccount = account as {
+            image?: null | string;
+            providerId?: string;
+            userId: number | string;
+          };
+          const dbUser = await prisma.user.findUnique({
+            where: { id: Number(baAccount.userId) },
+          });
 
-      if (isBanned != null) {
-        appLogger.warn({
-          email: maskEmail(normalizedEmail),
-          msg: "Banned user tried to sign in",
-          userId,
+          if (dbUser != null && dbUser.image == null && baAccount.image != null) {
+            await prisma.user.update({
+              data: { image: baAccount.image },
+              where: { id: dbUser.id },
+            });
+          }
+
+          appLogger.info({
+            msg: "External account linked",
+            provider: baAccount.providerId,
+            type: "auth.link_account",
+            userId: String(baAccount.userId),
+          });
+        },
+        before: async (account) => {
+          const payload = { ...account } as Record<string, unknown>;
+          const dbUser = await prisma.user.findUnique({
+            where: { id: Number(payload.userId) },
+          });
+
+          if (dbUser != null) {
+            payload.email = dbUser.email;
+            payload.emailHash = dbUser.emailHash;
+
+            if (payload.image == null) payload.image = dbUser.image;
+            if (payload.name == null) payload.name = dbUser.name;
+
+            const isDefaultName =
+              dbUser.name == null || dbUser.name === dbUser.email?.split("@")[0];
+            if (isDefaultName && payload.name != null) {
+              await prisma.user.update({
+                data: { name: payload.name as string },
+                where: { id: dbUser.id },
+              });
+              appLogger.info({
+                msg: "User name upgraded from social account provider profile",
+                userId: String(dbUser.id),
+              });
+            }
+          }
+          return { data: payload as typeof account };
+        },
+      },
+    },
+    session: {
+      create: {
+        after: async (session) => {
+          const dbUser = await prisma.user.findUnique({
+            select: { createdAt: true, id: true, role: true },
+            where: { id: Number(session.userId) },
+          });
+
+          if (dbUser != null) {
+            const isNewUser = Date.now() - dbUser.createdAt.getTime() < 10_000;
+            if (isNewUser) {
+              appLogger.info({
+                msg: "First time login experience triggered",
+                userId: String(dbUser.id),
+              });
+            }
+
+            appLogger.info({
+              msg: "User signed in",
+              role: dbUser.role,
+              type: "auth.signin",
+              userId: String(session.userId),
+            });
+          } else {
+            appLogger.info({
+              msg: "User signed in",
+              type: "auth.signin",
+              userId: String(session.userId),
+            });
+          }
+        },
+        before: async (session) => {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: Number(session.userId) },
+          });
+
+          if (dbUser != null && dbUser.emailHash != null) {
+            const isBanned = await prisma.bannedEmail.findUnique({
+              where: { emailHash: dbUser.emailHash },
+            });
+
+            if (isBanned != null) {
+              appLogger.warn({
+                email: maskEmail(dbUser.email),
+                msg: "Banned user tried to initiate a session (OAuth sign-in blocked)",
+                userId: String(dbUser.id),
+              });
+              throw new APIError("FORBIDDEN", { message: "EmailBanned" });
+            }
+
+            const latestAccount = await prisma.account.findFirst({
+              orderBy: { updatedAt: "desc" },
+              where: { userId: dbUser.id },
+            });
+
+            if (
+              latestAccount != null &&
+              latestAccount.providerId !== "email" &&
+              latestAccount.providerId !== "credential"
+            ) {
+              const freshImage = latestAccount.image;
+              const freshName = latestAccount.name;
+
+              const isDefaultName =
+                dbUser.name == null || dbUser.name === dbUser.email?.split("@")[0];
+              const shouldUpdateImage = freshImage != null && freshImage !== dbUser.image;
+              const shouldUpdateName = freshName != null && isDefaultName;
+
+              if (shouldUpdateImage || shouldUpdateName) {
+                await prisma.user.update({
+                  data: {
+                    ...(shouldUpdateImage && { image: freshImage }),
+                    ...(shouldUpdateName && { name: freshName }),
+                  },
+                  where: { id: dbUser.id },
+                });
+                appLogger.info({
+                  msg: "User profile synchronized from OAuth provider",
+                  userId: String(dbUser.id),
+                });
+              }
+            }
+          }
+
+          return { data: session };
+        },
+      },
+      update: {
+        before: async (session) => {
+          const dbSession = await prisma.session.findUnique({
+            where: { id: Number(session.id) },
+          });
+
+          if (dbSession != null) {
+            const dbUser = await prisma.user.findUnique({
+              where: { id: dbSession.userId },
+            });
+
+            if (dbUser != null && dbUser.emailHash != null) {
+              const isBanned = await prisma.bannedEmail.findUnique({
+                where: { emailHash: dbUser.emailHash },
+              });
+
+              if (isBanned != null) {
+                appLogger.warn({
+                  email: maskEmail(dbUser.email),
+                  msg: "Banned user tried to refresh session",
+                  userId: String(dbUser.id),
+                });
+                throw new APIError("FORBIDDEN", { message: "EmailBanned" });
+              }
+            }
+          }
+
+          return { data: session };
+        },
+      },
+    },
+    user: {
+      create: {
+        after: async (user) => {
+          appLogger.info({
+            email: maskEmail(user.email),
+            msg: "New user created",
+            name: user.name,
+            type: "auth.register",
+            userId: user.id,
+          });
+        },
+        before: async (user) => {
+          const payload = { ...user } as Record<string, unknown>;
+
+          if (typeof payload.email === "string") {
+            const cleanEmail = normalizeEmail(payload.email);
+            const isBanned = await prisma.bannedEmail.findUnique({
+              where: { emailHash: getNormalizedHash(cleanEmail) },
+            });
+            if (isBanned != null) {
+              appLogger.warn({
+                email: maskEmail(cleanEmail),
+                msg: "Banned email tried to register via social OAuth",
+              });
+              throw new APIError("FORBIDDEN", { message: "EmailBanned" });
+            }
+            payload.email = cleanEmail;
+          }
+
+          if (payload.name == null && typeof payload.email === "string") {
+            payload.name = payload.email.split("@")[0] ?? "User";
+          }
+          return { data: payload as typeof user };
+        },
+      },
+      update: {
+        after: async (user) => {
+          appLogger.info({
+            msg: "User profile updated",
+            type: "auth.user_update",
+            userId: String(user.id),
+          });
+        },
+      },
+    },
+  },
+
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path.startsWith("/sign-in/email") || ctx.path.startsWith("/magic-link/send")) {
+        const body = ctx.body as undefined | { email?: string };
+        if (body?.email == null) {
+          throw new APIError("BAD_REQUEST", { message: "Email is required" });
+        }
+
+        const normalizedEmail = normalizeEmail(body.email);
+
+        const isBanned = await prisma.bannedEmail.findUnique({
+          where: { emailHash: getNormalizedHash(normalizedEmail) },
         });
-        throw new Error("EmailBanned");
-      }
 
-      if (account?.provider === "email") {
+        if (isBanned != null) {
+          appLogger.warn({
+            email: maskEmail(normalizedEmail),
+            msg: "Banned user tried to sign in",
+          });
+          throw new APIError("FORBIDDEN", { message: "EmailBanned" });
+        }
+
         const headerList = await headers();
         const ip =
           headerList.get("x-forwarded-for")?.split(",")[0] ??
@@ -239,11 +323,8 @@ export const authOptions: NextAuthOptions = {
 
         const { reason: limitReason, success } = await emailSignInLimiter.limit(
           `${normalizedEmail}:${ip}`,
-          {
-            ip: ip,
-          }
+          { ip }
         );
-
         if (!success) {
           appLogger.warn({
             email: maskEmail(normalizedEmail),
@@ -251,11 +332,10 @@ export const authOptions: NextAuthOptions = {
             limitReason,
             msg: "Rate limit hit on sign in",
           });
-          throw new Error("RateLimitExceeded");
+          throw new APIError("TOO_MANY_REQUESTS", { message: "RateLimitExceeded" });
         }
 
         const { reason: safetyReason, safe } = await validateEmailSafety(normalizedEmail);
-
         if (!safe) {
           appLogger.warn({
             email: maskEmail(normalizedEmail),
@@ -263,181 +343,59 @@ export const authOptions: NextAuthOptions = {
             msg: "Security guard blocked email",
             safetyReason,
           });
-          throw new Error("EmailRejected");
+          throw new APIError("BAD_REQUEST", { message: "EmailRejected" });
         }
       }
-      return true;
-    },
-  },
-  debug: IS_DEV,
-  events: {
-    async createUser({ user }) {
-      if (user.name == null && user.email != null) {
-        const baseName = user.email.split("@")[0];
-        const finalName = `${baseName}`;
 
-        await prisma.user.update({
-          data: { name: finalName },
-          where: { id: Number(user.id) },
-        });
+      if (ctx.path === "/sign-out") {
+        const session = ctx.context.session;
         appLogger.info({
-          email: maskEmail(user.email),
-          msg: "New user created",
-          name: finalName,
-          type: "auth.register",
-          userId: user.id,
+          msg: "User signed out",
+          type: "auth.signout",
+          userId: session ? String(session.user.id) : "unknown",
         });
       }
-    },
-    async linkAccount({ account, profile, user }) {
-      const providerEmail = profile.email;
-      const providerImage = profile.image;
-      const providerName = profile.name;
-
-      if (providerEmail != null || providerImage != null) {
-        await prisma.account.update({
-          data: {
-            email: providerEmail,
-            image: providerImage,
-            name: providerName,
-          },
-          where: {
-            provider_providerAccountId: {
-              provider: account.provider,
-              providerAccountId: account.providerAccountId,
-            },
-          },
-        });
-
-        if (providerImage != null && user.image == null) {
-          await prisma.user.update({
-            data: { image: providerImage },
-            where: { id: Number(user.id) },
-          });
-        }
-
-        appLogger.info({
-          msg: "External account linked",
-          provider: account.provider,
-          type: "auth.link_account",
-          userId: user.id,
-        });
-      }
-    },
-    async signIn({ account, isNewUser, profile, user }) {
-      const providerEmail = profile?.email;
-      const providerImage = profile?.image;
-      const providerName = profile?.name;
-
-      if (isNewUser === true) {
-        appLogger.info({ msg: "First time login experience triggered", userId: user.id });
-      }
-
-      if (profile != null && account?.provider !== "email") {
-        const freshImage = profile.image;
-        const freshName = profile.name;
-
-        try {
-          await prisma.user.update({
-            data: {
-              ...(freshImage != null && freshImage !== user.image && { image: freshImage }),
-              ...(freshName != null &&
-                (user.name == null || user.name === user.email?.split("@")[0]) && {
-                  name: freshName,
-                }),
-            },
-            where: { id: Number(user.id) },
-          });
-          await prisma.account.update({
-            data: {
-              email: providerEmail,
-              image: providerImage,
-              name: providerName,
-            },
-            where: {
-              provider_providerAccountId: {
-                provider: account?.provider ?? "",
-                providerAccountId: account?.providerAccountId ?? "",
-              },
-            },
-          });
-        } catch (error) {
-          appLogger.error({ error, msg: "Failed to sync user profile on signIn", userId: user.id });
-        }
-      }
-
-      appLogger.info({
-        msg: "User signed in",
-        provider: account?.provider,
-        type: "auth.signin",
-        userId: user.id,
-      });
-    },
-    async signOut({ session }) {
-      const safeSession = session as null | typeof session | undefined;
-
-      appLogger.info({
-        msg: "User signed out",
-        type: "auth.signout",
-        userId: safeSession?.user.id ?? "unknown",
-      });
-    },
-    async updateUser({ user }) {
-      appLogger.info({
-        msg: "User profile updated",
-        type: "auth.user_update",
-        userId: user.id,
-      });
-    },
+    }),
   },
 
-  pages: {
-    error: "/auth/error",
-    newUser: "/welcome",
-    signIn: "/auth",
-    signOut: "/",
-    verifyRequest: "/auth",
-  },
-
-  providers: [
-    EmailProvider({
-      from: "Doxynix Auth <auth@doxynix.space>",
-      maxAge: MAGIC_LINK_MAX_AGE,
-      normalizeIdentifier(identifier) {
-        return normalizeEmail(identifier);
-      },
-      secret: NEXTAUTH_SECRET,
-      sendVerificationRequest: async ({ identifier, provider, url }) => {
-        const user = await prisma.user.findUnique({
-          select: { emailVerified: true },
-          where: { emailHash: getNormalizedHash(normalizeEmail(identifier)) },
-        });
+  plugins: [
+    magicLink({
+      expiresIn: MAGIC_LINK_MAX_AGE,
+      sendMagicLink: async ({ email, url }) => {
+        const cleanEmail = normalizeEmail(email);
         const { host } = new URL(url);
-        const html = await render(<AuthEmail host={host} url={url} />);
-        const template = {
-          from: provider.from,
-          html,
-          reply_to: "support@doxynix.space",
-          subject: user?.emailVerified == null ? "Doxynix | Account Activation" : "Doxynix | Login",
-          tags: [{ name: "category", value: "authentication" }],
-          to: identifier,
-        };
 
         try {
           if (resend == null) {
             appLogger.warn({ msg: "Resend disabled (no API key)", type: "auth.email_warn" });
             return;
           }
-          await resend.emails.send(template);
+
+          const user = await prisma.user.findUnique({
+            select: { emailVerified: true },
+            where: { emailHash: getNormalizedHash(cleanEmail) },
+          });
+
+          const html = await render(createElement(AuthEmail, { host, url }));
+
+          await resend.emails.send({
+            from: "Doxynix Auth <auth@doxynix.space>",
+            html,
+            replyTo: "support@doxynix.space",
+            subject:
+              user?.emailVerified === true ? "Doxynix | Login" : "Doxynix | Account Activation",
+            tags: [{ name: "category", value: "authentication" }],
+            to: cleanEmail,
+          });
 
           appLogger.info({
-            email: maskEmail(identifier),
+            email: maskEmail(cleanEmail),
             msg: "Verification email sent",
             type: "auth.email_sent",
           });
         } catch (error) {
           appLogger.error({
-            email: maskEmail(identifier),
+            email: maskEmail(cleanEmail),
             error: error instanceof Error ? error.message : String(error),
             msg: "Failed to send verification email",
             type: "auth.email_error",
@@ -447,33 +405,160 @@ export const authOptions: NextAuthOptions = {
       },
     }),
 
-    GitHubProvider({
-      allowDangerousEmailAccountLinking: true,
-      authorization: { params: { scope: "read:user user:email read:org" } },
-      clientId: AUTH_PROVIDERS.github.id,
-      clientSecret: AUTH_PROVIDERS.github.secret,
+    captcha({
+      endpoints: ["/magic-link/send", "/sign-in/email"],
+      provider: "cloudflare-turnstile",
+      secretKey: TURNSTILE_SECRET_KEY,
     }),
-    GoogleProvider({
-      allowDangerousEmailAccountLinking: true,
-      clientId: AUTH_PROVIDERS.google.id,
-      clientSecret: AUTH_PROVIDERS.google.secret,
+
+    lastLoginMethod({
+      customResolveMethod: (ctx) => {
+        if (ctx.path === "/magic-link/verify") {
+          return "magic-link";
+        }
+
+        return null;
+      },
+      storeInDatabase: true,
     }),
-    YandexProvider({
-      allowDangerousEmailAccountLinking: true,
-      clientId: AUTH_PROVIDERS.yandex.id,
-      clientSecret: AUTH_PROVIDERS.yandex.secret,
+
+    passkey({
+      origin: IS_PROD ? "https://doxynix.space" : "http://localhost:3000",
+      rpID: IS_PROD ? "doxynix.space" : "localhost",
+      rpName: "Doxynix",
+    }),
+
+    admin({
+      adminRoles: ["ADMIN"],
+      defaultRole: "USER",
+    }),
+
+    twoFactor({
+      allowPasswordless: true,
+      issuer: "Doxynix",
+      trustDeviceMaxAge: 30 * 24 * 60 * 60,
+    }),
+
+    genericOAuth({
+      config: [
+        {
+          authorizationUrl: "https://oauth.yandex.ru/authorize",
+          clientId: AUTH_PROVIDERS.yandex.id,
+          clientSecret: AUTH_PROVIDERS.yandex.secret,
+          getUserInfo: async (token) => {
+            const res = await fetch("https://login.yandex.ru/info?format=json", {
+              headers: {
+                Authorization: `OAuth ${token.accessToken}`,
+              },
+            });
+            const profile = await res.json();
+
+            return {
+              email: profile.default_email ?? null,
+              emailVerified: true,
+              id: String(profile.id),
+              image:
+                profile.is_avatar_empty === true
+                  ? undefined
+                  : `https://avatars.yandex.net/get-yapic/${profile.default_avatar_id}/islands-200`,
+              name: profile.real_name ?? profile.display_name ?? undefined,
+            };
+          },
+          providerId: "yandex",
+          tokenUrl: "https://oauth.yandex.ru/token",
+        },
+      ],
     }),
   ],
 
-  secret: NEXTAUTH_SECRET,
+  rateLimit: {
+    customRules: {
+      "/magic-link/send": { max: 3, window: 60 },
+      "/passkey/register": { max: 5, window: 60 },
+      "/sign-in/email": { max: 5, window: 60 },
+      "/sign-up/email": { max: 5, window: 60 },
+      "/two-factor/verify": { max: 5, window: 30 },
+    },
+    enabled: IS_PROD,
+    max: 100,
+    storage: IS_PROD ? "secondary-storage" : "memory",
+    window: 10,
+  },
 
+  secondaryStorage: {
+    delete: async (key) => {
+      try {
+        await redisClient.del(key);
+      } catch (error) {
+        appLogger.error({ error, key, msg: "Redis secondaryStorage delete error" });
+        throw error;
+      }
+    },
+    get: async (key) => {
+      try {
+        const value = await redisClient.get(key);
+        if (value === null || value === undefined) {
+          return null;
+        }
+        return typeof value === "string" ? value : JSON.stringify(value);
+      } catch (error) {
+        appLogger.error({ error, key, msg: "Redis secondaryStorage get error" });
+        return null;
+      }
+    },
+    getAndDelete: async (key) => {
+      try {
+        const value = await redisClient.getdel<string>(key);
+        if (value == null) {
+          return null;
+        }
+        return typeof value === "string" ? value : JSON.stringify(value);
+      } catch (error) {
+        appLogger.error({ error, key, msg: "Redis secondaryStorage getAndDelete error" });
+        return null;
+      }
+    },
+    set: async (key, value, ttl) => {
+      try {
+        const stringValue = typeof value === "string" ? value : JSON.stringify(value);
+        if (ttl != null) {
+          await redisClient.set(key, stringValue, { ex: ttl });
+        } else {
+          await redisClient.set(key, stringValue);
+        }
+      } catch (error) {
+        appLogger.error({ error, key, msg: "Redis secondaryStorage set error" });
+        throw error;
+      }
+    },
+  },
+
+  secret: BETTER_AUTH_SECRET,
   session: {
-    maxAge: SESSION_MAX_AGE,
-    strategy: "database",
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+      strategy: "compact",
+    },
+    expiresIn: SESSION_MAX_AGE,
+    preserveSessionInDatabase: true,
+    storeSessionInDatabase: true,
     updateAge: SESSION_UPDATE_AGE,
   },
 
-  useSecureCookies: IS_PROD,
-};
+  telemetry: { enabled: false },
 
-export const getServerAuthSession = cache(() => getServerSession(authOptions));
+  user: {
+    additionalFields: {
+      role: { defaultValue: "USER", type: "string" },
+    },
+  },
+
+  verification: {
+    storeInDatabase: false,
+  },
+});
+
+export type SessionAndUser = NonNullable<typeof auth.$Infer.Session>;
+export type User = SessionAndUser["user"];
+export type Session = SessionAndUser["session"];

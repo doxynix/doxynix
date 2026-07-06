@@ -3,6 +3,7 @@ import "server-only";
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4-mini";
 
+import { NEXT_PUBLIC_GOOGLE_CLIENT_ID } from "./env.client";
 import {
   envShared,
   isSharedValidationSkipped,
@@ -19,6 +20,8 @@ const envServer = createEnv({
     API_KEY_CHECKSUM_SECRET: process.env.API_KEY_CHECKSUM_SECRET,
     API_KEY_PEPPER: process.env.API_KEY_PEPPER,
     APP_VERSION: process.env.APP_VERSION,
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
     BETTERSTACK_API_TOKEN: process.env.BETTERSTACK_API_TOKEN,
     CF_ACCOUNT_ID: process.env.CF_ACCOUNT_ID,
     CF_GATEWAY_ID: process.env.CF_GATEWAY_ID,
@@ -33,12 +36,10 @@ const envServer = createEnv({
     GITHUB_SYSTEM_INSTALLATION_ID: process.env.GITHUB_SYSTEM_INSTALLATION_ID,
     GITHUB_SYSTEM_PAT: process.env.GITHUB_SYSTEM_PAT,
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
-    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     LOG_SALT_SECRET: process.env.LOG_SALT_SECRET,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS: process.env.PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS,
     PRISMA_FIELD_ENCRYPTION_HASH_SALT: process.env.PRISMA_FIELD_ENCRYPTION_HASH_SALT,
     PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,
@@ -57,6 +58,8 @@ const envServer = createEnv({
     API_KEY_CHECKSUM_SECRET: stringSchema,
     API_KEY_PEPPER: stringSchema,
     APP_VERSION: z._default(z.string(), "1.0.0"),
+    BETTER_AUTH_SECRET: stringSchema,
+    BETTER_AUTH_URL: stringSchema,
     BETTERSTACK_API_TOKEN: stringSchema,
     CF_ACCOUNT_ID: stringSchema,
     CF_GATEWAY_ID: stringSchema,
@@ -73,12 +76,10 @@ const envServer = createEnv({
     GITHUB_SYSTEM_INSTALLATION_ID: numericSchema,
     GITHUB_SYSTEM_PAT: stringSchema,
     GITHUB_WEBHOOK_SECRET: stringSchema,
-    GOOGLE_CLIENT_ID: stringSchema,
     GOOGLE_CLIENT_SECRET: stringSchema,
     GOOGLE_GENERATIVE_AI_API_KEY: stringSchema,
     GROQ_API_KEY: stringSchema,
     LOG_SALT_SECRET: stringSchema,
-    NEXTAUTH_SECRET: stringSchema,
     PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS: z.optional(stringSchema),
     PRISMA_FIELD_ENCRYPTION_HASH_SALT: stringSchema,
     PRISMA_FIELD_ENCRYPTION_KEY: stringSchema,
@@ -94,10 +95,11 @@ const envServer = createEnv({
   skipValidation: isSharedValidationSkipped,
 });
 
-export const NEXTAUTH_SECRET = envServer.NEXTAUTH_SECRET;
 export const DATABASE_URL = envServer.DATABASE_URL;
 export const REDIS_TCP_URL = envServer.REDIS_TCP_URL;
 export const BETTERSTACK_TOKEN = envServer.BETTERSTACK_API_TOKEN;
+export const BETTER_AUTH_URL = envServer.BETTER_AUTH_URL;
+export const BETTER_AUTH_SECRET = envServer.BETTER_AUTH_SECRET;
 export const TURNSTILE_SECRET_KEY = envServer.TURNSTILE_SECRET_KEY;
 export const RESEND_API_KEY = envServer.RESEND_API_KEY;
 export const RESEND_WEBHOOK_SECRET = envServer.RESEND_WEBHOOK_SECRET;
@@ -136,7 +138,7 @@ export const AUTH_PROVIDERS = {
     secret: envServer.GITHUB_CLIENT_SECRET,
   },
   google: {
-    id: envServer.GOOGLE_CLIENT_ID,
+    id: NEXT_PUBLIC_GOOGLE_CLIENT_ID,
     secret: envServer.GOOGLE_CLIENT_SECRET,
   },
   yandex: {

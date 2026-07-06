@@ -83,6 +83,77 @@
     ]
   },
   {
+    "author": "DefinitelyTyped",
+    "avatar": "https://github.com/DefinitelyTyped.png?size=96",
+    "authorLink": "https://github.com/DefinitelyTyped",
+    "packages": [
+      {
+        "name": "@types/diff-match-patch",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/file-saver",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/hast",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/js-cookie",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/node",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/nodemailer",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/pg",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/picomatch",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/react",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/react-dom",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/react-scroll",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/sloc",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/ua-parser-js",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/validator",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/webpack-stats-plugin",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/ws",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Unified.js",
     "avatar": "https://github.com/unifiedjs.png?size=96",
     "authorLink": "https://github.com/unifiedjs",
@@ -149,73 +220,6 @@
       },
       {
         "name": "unified",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "DefinitelyTyped",
-    "avatar": "https://github.com/DefinitelyTyped.png?size=96",
-    "authorLink": "https://github.com/DefinitelyTyped",
-    "packages": [
-      {
-        "name": "@types/diff-match-patch",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/file-saver",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/hast",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/js-cookie",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/node",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/nodemailer",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/pg",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/picomatch",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/react",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/react-dom",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/react-scroll",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/sloc",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/ua-parser-js",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/validator",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/webpack-stats-plugin",
         "license": "MIT"
       }
     ]
@@ -476,6 +480,49 @@
     ]
   },
   {
+    "author": "Meta",
+    "avatar": "https://github.com/facebook.png?size=96",
+    "authorLink": "https://github.com/facebook",
+    "packages": [
+      {
+        "name": "babel-plugin-react-compiler",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-react-compiler",
+        "license": "MIT"
+      },
+      {
+        "name": "eslint-plugin-react-hooks",
+        "license": "MIT"
+      },
+      {
+        "name": "react",
+        "license": "MIT"
+      },
+      {
+        "name": "react-day-picker",
+        "license": "MIT"
+      },
+      {
+        "name": "react-dom",
+        "license": "MIT"
+      },
+      {
+        "name": "react-markdown",
+        "license": "MIT"
+      },
+      {
+        "name": "react-qr-code",
+        "license": "MIT"
+      },
+      {
+        "name": "server-only",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Street Side Software",
     "avatar": "https://github.com/streetsidesoftware.png?size=96",
     "authorLink": "https://github.com/streetsidesoftware",
@@ -519,45 +566,6 @@
     ]
   },
   {
-    "author": "Meta",
-    "avatar": "https://github.com/facebook.png?size=96",
-    "authorLink": "https://github.com/facebook",
-    "packages": [
-      {
-        "name": "babel-plugin-react-compiler",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-react-compiler",
-        "license": "MIT"
-      },
-      {
-        "name": "eslint-plugin-react-hooks",
-        "license": "MIT"
-      },
-      {
-        "name": "react",
-        "license": "MIT"
-      },
-      {
-        "name": "react-day-picker",
-        "license": "MIT"
-      },
-      {
-        "name": "react-dom",
-        "license": "MIT"
-      },
-      {
-        "name": "react-markdown",
-        "license": "MIT"
-      },
-      {
-        "name": "server-only",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
     "author": "TypeStrong",
     "avatar": "https://github.com/TypeStrong.png?size=96",
     "authorLink": "https://github.com/TypeStrong",
@@ -589,6 +597,60 @@
       {
         "name": "typedoc-plugin-llms-txt",
         "license": "BlueOak-1.0.0"
+      }
+    ]
+  },
+  {
+    "author": "Open Source Community",
+    "avatar": null,
+    "authorLink": "https://www.better-auth.com/docs/plugins/passkey",
+    "packages": [
+      {
+        "name": "@better-auth/passkey",
+        "license": "MIT"
+      },
+      {
+        "name": "@better-auth/prisma-adapter",
+        "license": "MIT"
+      },
+      {
+        "name": "better-auth",
+        "license": "MIT"
+      },
+      {
+        "name": "es-toolkit",
+        "license": "MIT"
+      },
+      {
+        "name": "undici",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Prisma",
+    "avatar": "https://github.com/prisma.png?size=96",
+    "authorLink": "https://github.com/prisma",
+    "packages": [
+      {
+        "name": "@prisma/adapter-neon",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@prisma/adapter-pg",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@prisma/client",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "prisma",
+        "license": "Apache-2.0"
+      },
+      {
+        "name": "@prisma/extension-accelerate",
+        "license": "Unknown"
       }
     ]
   },
@@ -647,29 +709,6 @@
     ]
   },
   {
-    "author": "Prisma",
-    "avatar": "https://github.com/prisma.png?size=96",
-    "authorLink": "https://github.com/prisma",
-    "packages": [
-      {
-        "name": "@prisma/adapter-pg",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "@prisma/client",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "prisma",
-        "license": "Apache-2.0"
-      },
-      {
-        "name": "@prisma/extension-accelerate",
-        "license": "Unknown"
-      }
-    ]
-  },
-  {
     "author": "Stryker Mutator",
     "avatar": "https://github.com/stryker-mutator.png?size=96",
     "authorLink": "https://github.com/stryker-mutator",
@@ -711,6 +750,29 @@
       },
       {
         "name": "tailwindcss",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "tRPC",
+    "avatar": "https://github.com/trpc.png?size=96",
+    "authorLink": "https://github.com/trpc",
+    "packages": [
+      {
+        "name": "@trpc/client",
+        "license": "MIT"
+      },
+      {
+        "name": "@trpc/openapi",
+        "license": "MIT"
+      },
+      {
+        "name": "@trpc/react-query",
+        "license": "MIT"
+      },
+      {
+        "name": "@trpc/server",
         "license": "MIT"
       }
     ]
@@ -849,25 +911,6 @@
     ]
   },
   {
-    "author": "tRPC",
-    "avatar": "https://github.com/trpc.png?size=96",
-    "authorLink": "https://github.com/trpc",
-    "packages": [
-      {
-        "name": "@trpc/client",
-        "license": "MIT"
-      },
-      {
-        "name": "@trpc/react-query",
-        "license": "MIT"
-      },
-      {
-        "name": "@trpc/server",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
     "author": "Vitest",
     "avatar": "https://github.com/vitest-dev.png?size=96",
     "authorLink": "https://github.com/vitest-dev",
@@ -942,36 +985,6 @@
       },
       {
         "name": "mermaid",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "NextAuth.js",
-    "avatar": "https://github.com/nextauthjs.png?size=96",
-    "authorLink": "https://github.com/nextauthjs",
-    "packages": [
-      {
-        "name": "@next-auth/prisma-adapter",
-        "license": "ISC"
-      },
-      {
-        "name": "next-auth",
-        "license": "ISC"
-      }
-    ]
-  },
-  {
-    "author": "Open Source Community",
-    "avatar": null,
-    "authorLink": "https://es-toolkit.dev",
-    "packages": [
-      {
-        "name": "es-toolkit",
-        "license": "MIT"
-      },
-      {
-        "name": "undici",
         "license": "MIT"
       }
     ]
@@ -1516,6 +1529,17 @@
     ]
   },
   {
+    "author": "Guilherme Rodz",
+    "avatar": null,
+    "authorLink": "https://input-otp.rodz.dev",
+    "packages": [
+      {
+        "name": "input-otp",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
     "author": "Hashicorp",
     "avatar": "https://github.com/hashicorp.png?size=96",
     "authorLink": "https://github.com/hashicorp",
@@ -1523,6 +1547,17 @@
       {
         "name": "nextjs-bundle-analysis",
         "license": "MPL-2.0"
+      }
+    ]
+  },
+  {
+    "author": "Hey API",
+    "avatar": null,
+    "authorLink": "https://heyapi.dev",
+    "packages": [
+      {
+        "name": "@hey-api/openapi-ts",
+        "license": "MIT"
       }
     ]
   },
@@ -1813,17 +1848,6 @@
     ]
   },
   {
-    "author": "Mario Campa",
-    "avatar": "https://github.com/mcampa.png?size=96",
-    "authorLink": "https://github.com/mcampa",
-    "packages": [
-      {
-        "name": "trpc-to-openapi",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
     "author": "Markus Kohlhase",
     "avatar": "https://github.com/flosse.png?size=96",
     "authorLink": "https://github.com/flosse",
@@ -1907,6 +1931,17 @@
     "packages": [
       {
         "name": "webpack-stats-plugin",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "Neon",
+    "avatar": null,
+    "authorLink": "https://neon.com",
+    "packages": [
+      {
+        "name": "@neondatabase/serverless",
         "license": "MIT"
       }
     ]

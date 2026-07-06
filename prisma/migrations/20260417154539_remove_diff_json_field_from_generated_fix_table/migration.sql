@@ -10,7 +10,7 @@
 ALTER TABLE "documents" DROP CONSTRAINT "documents_analysis_id_fkey";
 
 -- DropIndex
-DROP INDEX "pull_request_analyses_repo_id_pr_number_key";
+DROP INDEX IF EXISTS "pull_request_analyses_repo_id_pr_number_key";
 
 -- AlterTable
 ALTER TABLE "documents" ALTER COLUMN "analysis_id" SET NOT NULL;

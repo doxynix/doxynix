@@ -88,10 +88,10 @@ async function fetchInstallationRepos(installationId: number): Promise<RepoItemF
   }
 }
 
-async function fetchOauthRepos(account: { access_token: null | string; id: number | string }) {
-  if (account.access_token == null) return [];
+async function fetchOauthRepos(account: { accessToken: null | string; id: number | string }) {
+  if (account.accessToken == null) return [];
   try {
-    const octokit = getPublicClient(account.access_token);
+    const octokit = getPublicClient(account.accessToken);
     const repos = await octokit.paginate(octokit.rest.repos.listForAuthenticatedUser, {
       per_page: 100,
       visibility: "all",
@@ -117,7 +117,7 @@ export async function getMyRepos(prisma: DbClient, userId: number): Promise<Repo
         where: { isSuspended: false, userId },
       }),
       prisma.account.findMany({
-        where: { access_token: { not: null }, provider: "github", userId },
+        where: { accessToken: { not: null }, providerId: "github", userId },
       }),
     ]);
 
@@ -357,16 +357,16 @@ export async function executeWithFallback<T>(
     if (shouldRetryWithOauthFallback(initialType, error)) {
       // Fetch all available oauth accounts
       const oauthAccounts = await prisma.account.findMany({
-        where: { access_token: { not: null }, provider: "github", userId },
+        where: { accessToken: { not: null }, providerId: "github", userId },
       });
 
       // Try each oauth account
 
       for (const oauthAcc of oauthAccounts) {
-        if (oauthAcc.access_token == null) continue;
+        if (oauthAcc.accessToken == null) continue;
 
         try {
-          const fallbackOctokit = getPublicClient(oauthAcc.access_token);
+          const fallbackOctokit = getPublicClient(oauthAcc.accessToken);
           return await operation(fallbackOctokit);
         } catch (fallbackError) {
           appLogger.error({ error: fallbackError, msg: "Token didn't work in fallback" });

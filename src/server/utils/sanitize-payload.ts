@@ -1,5 +1,7 @@
 import safeStringify from "fast-safe-stringify";
 
+import { ENCRYPTED_METADATA_MAP } from "./constants";
+
 const SENSITIVE_KEYS = new Set([
   "access_token",
   "apikey",
@@ -55,6 +57,9 @@ function redactValue(key: string, value: unknown): unknown {
 
   if (typeof value === "string") {
     let safeString = value;
+    if (safeString.length > 8192) {
+      return safeString.slice(0, 1024) + `... [TRUNCATED, ORIGINAL LENGTH: ${safeString.length}]`;
+    }
     if (safeString.includes("gh") || safeString.includes("github_pat_")) {
       safeString = safeString.replaceAll(GITHUB_TOKEN_REGEX, "[REDACTED_GH_TOKEN]");
     }
@@ -67,6 +72,12 @@ function redactValue(key: string, value: unknown): unknown {
   return value;
 }
 
+/**
+ * Очищает переданный объект от секретов и технических полей перед логированием.
+ * Безопасно обрабатывает циклические ссылки и BigInt.
+ *
+ * @param obj Данные для очистки
+ */
 export function sanitizePayload(obj: unknown): unknown {
   if (typeof obj === "string") return redactValue("", obj);
   if (typeof obj === "bigint") return obj.toString();
@@ -82,4 +93,43 @@ export function sanitizePayload(obj: unknown): unknown {
       type_was: typeof obj,
     };
   }
+}
+
+const mask = (val: unknown) => (typeof val === "string" ? "[ENCRYPTED_MASKED]" : val);
+
+/**
+ * Рекурсивно маскирует PII-данные на основе карты ENCRYPTED_METADATA_MAP,
+ * чтобы предотвратить утечку шифруемых полей в сырой payload логов аудита.
+ */
+export function maskSensitiveFields(modelName: string, data: unknown): unknown {
+  if (data == null || typeof data !== "object") return data;
+  const sensitiveFields = ENCRYPTED_METADATA_MAP[modelName];
+  if (!sensitiveFields) return data;
+
+  const cloned = Array.isArray(data) ? [...data] : { ...(data as Record<string, unknown>) };
+
+  const traverse = (obj: any) => {
+    if (obj == null || typeof obj !== "object") return;
+
+    if (obj.data != null && typeof obj.data === "object") {
+      for (const key of Object.keys(obj.data)) {
+        if (sensitiveFields[key] !== undefined) {
+          obj.data[key] = mask(obj.data[key]);
+        } else if (typeof obj.data[key] === "object") {
+          traverse(obj.data[key]);
+        }
+      }
+    }
+
+    for (const key of Object.keys(obj)) {
+      if (sensitiveFields[key] !== undefined) {
+        obj[key] = mask(obj[key]);
+      } else if (typeof obj[key] === "object") {
+        traverse(obj[key]);
+      }
+    }
+  };
+
+  traverse(cloned);
+  return cloned;
 }

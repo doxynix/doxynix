@@ -21,11 +21,11 @@ export const dailyDatabaseMaintenance = schedules.task({
     const date14DaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
     try {
-      const deletedTokens = await prisma.verificationToken.deleteMany({
-        where: { expires: { lt: now } },
+      const deletedTokens = await prisma.verification.deleteMany({
+        where: { expiresAt: { lt: now } },
       });
       const deletedSessions = await prisma.session.deleteMany({
-        where: { expires: { lt: now } },
+        where: { expiresAt: { lt: now } },
       });
 
       const deletedWebhooks = await prisma.webhookDelivery.deleteMany({

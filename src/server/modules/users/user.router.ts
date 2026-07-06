@@ -8,11 +8,18 @@ import { UpdateProfileSchema } from "@/shared/api/schemas/user";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
+import { formatUserAgent } from "@/server/utils/ua-parser";
 
 const utapi = new UTApi();
 
 const PublicUserSchema = UserSchema.extend({
   id: z.uuid(),
+}).omit({
+  banExpires: true,
+  banned: true,
+  banReason: true,
+  lastLoginMethod: true,
+  twoFactorEnabled: true,
 });
 
 export const userRouter = createTRPCRouter({
@@ -56,8 +63,8 @@ export const userRouter = createTRPCRouter({
           // Check if the account exists
           const accountToDelete = await tx.account.findUnique({
             where: {
-              userId_provider: {
-                provider: input.provider,
+              userId_providerId: {
+                providerId: input.provider,
                 userId,
               },
             },
@@ -80,9 +87,9 @@ export const userRouter = createTRPCRouter({
             where: { id: userId },
           });
 
-          const hasEmailAuth = user?.email != null && user.emailVerified != null;
+          const hasEmailAuth = user?.email != null && user.emailVerified;
 
-          if (accountCount <= 1 && !hasEmailAuth) {
+          if (accountCount <= 1 && hasEmailAuth === false) {
             throw new TRPCError({
               code: "BAD_REQUEST",
               message:
@@ -93,8 +100,8 @@ export const userRouter = createTRPCRouter({
           // Perform the delete
           await tx.account.delete({
             where: {
-              userId_provider: {
-                provider: input.provider,
+              userId_providerId: {
+                providerId: input.provider,
                 userId,
               },
             },
@@ -108,18 +115,35 @@ export const userRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  getActiveSessions: protectedProcedure.query(async ({ ctx }) => {
+    const userId = Number(ctx.session.user.id);
+
+    const sessions = await ctx.prisma.session.findMany({
+      orderBy: { createdAt: "desc" },
+      where: { userId },
+    });
+
+    return sessions.map((session) => ({
+      createdAt: session.createdAt,
+      id: session.id,
+      ipAddress: session.ipAddress,
+      token: session.token,
+      userAgent: formatUserAgent(session.userAgent),
+    }));
+  }),
+
   getLinkedAccounts: protectedProcedure.query(async ({ ctx }) => {
     const userId = Number(ctx.session.user.id);
 
     const [accounts, user] = await Promise.all([
       ctx.db.account.findMany({
-        orderBy: { provider: "asc" },
+        orderBy: { providerId: "asc" },
         select: {
+          accountId: true,
           email: true,
           image: true,
           name: true,
-          provider: true,
-          providerAccountId: true,
+          providerId: true,
         },
         where: { userId },
       }),
@@ -129,7 +153,15 @@ export const userRouter = createTRPCRouter({
       }),
     ]);
 
-    return { accounts, user };
+    const mappedAccounts = accounts.map((acc) => ({
+      accountId: acc.accountId,
+      email: acc.email,
+      image: acc.image,
+      name: acc.name,
+      provider: acc.providerId,
+    }));
+
+    return { accounts: mappedAccounts, user };
   }),
 
   me: protectedProcedure
@@ -198,7 +230,6 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const updatedUser = await ctx.db.user.update({
         data: {
-          // email: input.email,
           name: input.name,
         },
         where: { id: Number(ctx.session.user.id) },
@@ -207,8 +238,14 @@ export const userRouter = createTRPCRouter({
       return {
         message: "Credentials updated",
         user: {
-          ...updatedUser,
+          createdAt: updatedUser.createdAt,
+          email: updatedUser.email,
+          emailVerified: updatedUser.emailVerified,
           id: updatedUser.publicId,
+          image: updatedUser.image,
+          name: updatedUser.name,
+          role: updatedUser.role,
+          updatedAt: updatedUser.updatedAt,
         },
       };
     }),

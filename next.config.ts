@@ -92,6 +92,7 @@ const nextConfig: NextConfig = {
       "https://va.vercel-scripts.com",
       "https://cdn.jsdelivr.net",
       "https://challenges.cloudflare.com",
+      "https://accounts.google.com/gsi/client",
     ]
       .filter(Boolean)
       .join(" ");
@@ -126,6 +127,8 @@ const nextConfig: NextConfig = {
       "https://*.sentry.io",
       "https://us.i.posthog.com",
       "https://us-assets.i.posthog.com",
+      "https://accounts.google.com",
+      "https://accounts.google.com/gsi/",
     ]
       .filter(Boolean)
       .join(" ");
@@ -142,12 +145,12 @@ const nextConfig: NextConfig = {
             value: `
               default-src 'none';
               script-src ${scriptSrc};
-              frame-src 'self' ${IS_DEV ? "https://vercel.live" : ""} https://challenges.cloudflare.com;
+              frame-src 'self' ${IS_DEV ? "https://vercel.live" : ""} https://challenges.cloudflare.com https://accounts.google.com https://accounts.google.com/gsi/;
               worker-src 'self' blob:;
               base-uri 'none';
               form-action 'self';
               object-src 'none';
-              style-src 'self' 'unsafe-inline';
+              style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style;
               img-src 'self' blob: data:
                 https://img.shields.io
                 https://cdn.jsdelivr.net
@@ -161,7 +164,8 @@ const nextConfig: NextConfig = {
                 https://github.com
                 https://avatars.githubusercontent.com
                 https://*.googleusercontent.com
-                https://avatars.yandex.net;
+                https://avatars.yandex.net
+                https://ssl.gstatic.com;
               font-src 'self' ${IS_DEV ? "https://vercel.live" : ""} data:;
               media-src 'self';
               connect-src ${connectSrc};
