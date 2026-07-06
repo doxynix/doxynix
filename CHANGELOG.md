@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/doxynix/doxynix/compare/v2.3.0...v2.4.0) (2026-07-06)
+
+
+### Features
+
+* migrate to better-auth ([#1486](https://github.com/doxynix/doxynix/issues/1486)) ([39005a7](https://github.com/doxynix/doxynix/commit/39005a79191d36d10f026a3e0715e8f4f80a4bf7))
+
 ## [2.3.0](https://github.com/doxynix/doxynix/compare/v2.2.2...v2.3.0) (2026-06-04)
 
 
