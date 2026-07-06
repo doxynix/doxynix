@@ -86,3 +86,4 @@ overrides:
   '@better-fetch/fetch': '^1.1.21'
   better-call: '^1.3.5'
   hono: '^4.12.25'
+  vite: '>=8.0.16'
