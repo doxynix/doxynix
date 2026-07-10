@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/doxynix/doxynix/compare/v2.3.0...v2.4.0) (2026-07-10)
+
+
+### Features
+
+* migrate to better-auth ([#1486](https://github.com/doxynix/doxynix/issues/1486)) ([39005a7](https://github.com/doxynix/doxynix/commit/39005a79191d36d10f026a3e0715e8f4f80a4bf7))
+
+
+### Bug Fixes
+
+* add safeguard in update hook ([#1508](https://github.com/doxynix/doxynix/issues/1508)) ([2ef89a6](https://github.com/doxynix/doxynix/commit/2ef89a666bf9e5ffe376759c6d897daeb111d779))
+* downgrade uuid to v11 for CommonJS support ([#1491](https://github.com/doxynix/doxynix/issues/1491)) ([3c3c373](https://github.com/doxynix/doxynix/commit/3c3c373e77bdb05a05e88d5f56c3ca28bdd53bd8))
+
 ## [2.3.0](https://github.com/doxynix/doxynix/compare/v2.2.2...v2.3.0) (2026-06-04)
 
 
