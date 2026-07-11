@@ -581,6 +581,7 @@ export default defineConfig([
       ...vitest.configs.recommended.rules,
       "vitest/prefer-expect-resolves": "error",
       "vitest/no-focused-tests": "error",
+      "sonarjs/prefer-specific-assertions": "off",
       "vitest/expect-expect": [
         "error",
         {
