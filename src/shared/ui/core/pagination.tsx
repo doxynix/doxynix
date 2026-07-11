@@ -35,8 +35,7 @@ type BasePaginationLinkProps = Pick<ButtonProps, "size"> & {
 };
 
 type PaginationLinkProps = (
-  | (ComponentProps<"button"> & { href?: never })
-  | ComponentProps<typeof Link>
+  (ComponentProps<"button"> & { href?: never }) | ComponentProps<typeof Link>
 ) &
   BasePaginationLinkProps;
 

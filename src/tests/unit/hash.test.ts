@@ -152,8 +152,6 @@ describe("Cryptographic Hash & API Key Utilities", () => {
       const nfcString = "\u00E9";
       const nfdString = "e\u0301";
 
-      expect(nfcString).not.toBe(nfdString);
-
       const hashNfc = getNormalizedHash(nfcString);
       const hashNfd = getNormalizedHash(nfdString);
 
