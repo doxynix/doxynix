@@ -10,18 +10,10 @@ import { PROJECT_POLICY_RULES } from "../engine/core/project-policy-rules";
 import { FILE_CONTEXT_MODIFIERS } from "../engine/core/scoring-constants";
 
 export type AiContextStage =
-  | "architect"
-  | "writer_api"
-  | "writer_architecture"
-  | "writer_contributing"
-  | "writer_readme";
+  "architect" | "writer_api" | "writer_architecture" | "writer_contributing" | "writer_readme";
 
 export type ContextDropReason =
-  | "budget"
-  | "empty-after-clean"
-  | "secondary-no-budget"
-  | "sensitive"
-  | "stage-filter";
+  "budget" | "empty-after-clean" | "secondary-no-budget" | "sensitive" | "stage-filter";
 
 export type StageContextDebugEntry = {
   path: string;

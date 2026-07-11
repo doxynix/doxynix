@@ -10,13 +10,7 @@ import { cn } from "@/shared/lib/cn";
 import { AppButton } from "./button";
 
 type TransitionVariant =
-  | "circle"
-  | "diamond"
-  | "hexagon"
-  | "rectangle"
-  | "square"
-  | "star"
-  | "triangle";
+  "circle" | "diamond" | "hexagon" | "rectangle" | "square" | "star" | "triangle";
 
 interface AnimatedThemeTogglerProps extends ComponentPropsWithoutRef<"button"> {
   duration?: number;

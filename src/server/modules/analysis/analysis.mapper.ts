@@ -355,9 +355,7 @@ export const analysisMapper = {
 
   toAnalysisRef(
     analysis:
-      | null
-      | Pick<LatestCompletedAnalysis, "commitSha" | "createdAt" | "publicId">
-      | undefined
+      null | Pick<LatestCompletedAnalysis, "commitSha" | "createdAt" | "publicId"> | undefined
   ): AnalysisRef | null {
     if (analysis == null) return null;
 

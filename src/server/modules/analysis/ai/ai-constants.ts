@@ -17,13 +17,7 @@ type GroqModelId = Parameters<typeof groq>[0];
 type AllAvailableModels = GoogleModelId | GroqModelId;
 
 type AIModelRole =
-  | "AGENT"
-  | "ARCHITECT"
-  | "CARTOGRAPHER"
-  | "FALLBACK"
-  | "POWERFUL"
-  | "SENTINEL"
-  | "WRITER";
+  "AGENT" | "ARCHITECT" | "CARTOGRAPHER" | "FALLBACK" | "POWERFUL" | "SENTINEL" | "WRITER";
 
 export const DEFAULT_AI_MODELS: Record<AIModelRole, AllAvailableModels[]> = {
   AGENT: ["gemini-3.1-flash-lite", "gemini-3.1-flash-lite"],
