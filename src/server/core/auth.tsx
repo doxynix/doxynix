@@ -217,6 +217,8 @@ export const auth = betterAuth({
       },
       update: {
         before: async (session) => {
+          if (session.id == null || Number.isNaN(Number(session.id))) return { data: session };
+
           const dbSession = await prisma.session.findUnique({
             where: { id: Number(session.id) },
           });
