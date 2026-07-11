@@ -327,7 +327,7 @@
     "@typescript-eslint/parser": "8.63.0",
     "@vitejs/plugin-react": "6.0.3",
     "@vitest/coverage-v8": "4.1.10",
-    "@vitest/eslint-plugin": "1.6.21",
+    "@vitest/eslint-plugin": "1.6.23",
     "@zenstackhq/sdk": "3.8.3",
     "@zenstackhq/trpc": "2.22.1",
     "@zenstackhq/zod": "3.8.3",

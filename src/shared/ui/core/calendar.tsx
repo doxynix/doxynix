@@ -17,7 +17,7 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: ComponentProps<typeof DayPicker> & {
-  buttonVariant?: ComponentProps<typeof AppButton>["variant"];
+  buttonVariant?: NonNullable<ComponentProps<typeof AppButton>["variant"]>;
 }) {
   const defaultClassNames = getDefaultClassNames();
 

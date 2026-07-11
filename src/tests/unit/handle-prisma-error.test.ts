@@ -16,7 +16,7 @@ const MockPrismaClientKnownRequestError = vi.hoisted(
   () =>
     class PrismaClientKnownRequestError extends Error {
       public code: string;
-      public meta?: KnownErrorOptions["meta"];
+      public meta: KnownErrorOptions["meta"];
 
       public constructor(message: string, options: KnownErrorOptions) {
         super(message);

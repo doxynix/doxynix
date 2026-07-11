@@ -1,5 +1,5 @@
-/* eslint-disable sonarjs/slow-regex */
 /* eslint-disable sonarjs/regex-complexity */
+/* eslint-disable sonarjs/super-linear-regex */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { compact, isString } from "es-toolkit";
