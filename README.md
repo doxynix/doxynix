@@ -8,7 +8,7 @@
 <!-- Status Badges -->
 [![CI Status](https://img.shields.io/github/actions/workflow/status/doxynix/doxynix/ci.yml?style=for-the-badge&logo=github-actions&label=CI%20Pipeline)](https://github.com/doxynix/doxynix/actions)
 [![Security: CodeQL](https://img.shields.io/github/actions/workflow/status/doxynix/doxynix/codeql.yml?style=for-the-badge&logo=github-security&label=CodeQL&color=blue)](https://github.com/doxynix/doxynix/actions)
-[![Website Status](https://img.shields.io/website?url=https%3A%2F%2Fdoxynix.space&style=for-the-badge&logo=vercel&label=System%20Status&up_message=Operational&down_message=Downtime&up_color=success&down_color=red)](https://doxynix.space)
+[![Website Status](https://img.shields.io/website?url=https%3A%2F%2Fdoxynix.space&style=for-the-badge&logo=vercel&label=System%20Status&up_message=Operational&down_message=Downtime&up_color=success&down_color=red)](http://web.archive.org/web/20260125161510/http://web.archive.org/web/20260125161510/https://doxynix.space//)
 
 <!-- Core Stack Badges -->
 ![Next.js](https://img.shields.io/badge/Next.js-16.1-black?style=for-the-badge&logo=next.js&logoColor=white)
