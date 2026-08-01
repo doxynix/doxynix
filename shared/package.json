@@ -11,9 +11,10 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "^7.0.1-rc"
+    "typescript": "7.0.2"
   }
 }

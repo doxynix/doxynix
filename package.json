@@ -13,21 +13,25 @@
     "./shared"
   ],
   "scripts": {
+    "prepare": "lefthook install",
     "dev": "turbo dev",
     "dev:client": "turbo dev --filter=@doxynix/siem-client",
     "dev:server": "turbo dev --filter=@doxynix/siem-server",
-    "db:generate": "bun --filter=@doxynix/siem-server db:generate",
-    "db:push": "bun --filter=@doxynix/siem-server db:push",
-    "db:studio": "bun --filter=@doxynix/siem-server db:studio",
-    "db:migrate": "bun --filter=@doxynix/siem-server db:migrate",
+    "db:generate": "bun --cwd server db:generate",
+    "db:push": "bun --cwd server db:push",
+    "db:studio": "bun --cwd server db:studio",
+    "db:migrate": "bun --cwd server db:migrate",
     "build": "turbo build",
     "build:client": "turbo build --filter=@doxynix/siem-client",
     "build:server": "turbo build --filter=@doxynix/siem-server",
     "lint": "biome lint .",
-    "lint:fix": "biome lint . --fix",
+    "lint:fix": "biome lint . --write",
+    "secretlint": "secretlint '**/*'",
+    "arch:check": "bun scripts/arch-check.ts client/src server/src shared/src",
+    "validate": "biome lint . && bun arch:check",
     "type-check": "turbo type-check",
     "test": "turbo test",
-    "postinstall": "turbo build --filter=@doxynix/siem-shared --filter=@doxynix/siem-server",
+    "postinstall": "turbo build --filter=@doxynix/siem-shared",
     "format": "biome format . --write"
   },
   "keywords": [
@@ -39,12 +43,17 @@
     "turbo"
   ],
   "devDependencies": {
-    "@biomejs/biome": "^2.5.2",
+    "@biomejs/biome": "2.5.2",
+    "@secretlint/secretlint-rule-preset-recommend": "13.0.4",
+    "@swc/core": "1.15.47",
     "bun-types": "latest",
-    "concurrently": "^10.0.3",
-    "turbo": "^2.5.5"
+    "concurrently": "10.0.3",
+    "cspell": "10.0.1",
+    "lefthook": "2.1.10",
+    "secretlint": "13.0.4",
+    "turbo": "2.10.8"
   },
   "peerDependencies": {
-    "typescript": "^7.0.1-rc"
+    "typescript": "7.0.2"
   }
 }

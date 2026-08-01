@@ -1,5 +1,5 @@
 import type { LeakFinding, ScanResult } from "@doxynix/siem-shared";
-import { getAxiom } from "@server/axiom";
+import { axiom } from "@server/axiom";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { compress } from "hono/compress";
@@ -41,10 +41,10 @@ export const app = new Hono()
     const findings: LeakFinding[] = [];
     const cardRegex = /\b(?:\d[ -]*?){13,16}\b/g;
 
-    const res = await getAxiom().query("['web-production'] | order by _time desc | limit 100");
+    const res = await axiom.query("['web-production'] | order by _time desc | limit 100");
 
     if (!res?.matches) {
-      return c.json<ScanResult>({ isSafe: true, message: "Логи не найдены" });
+      return c.json<ScanResult>({ isSafe: true, message: "logs not found" });
     }
 
     for (const entry of res.matches) {

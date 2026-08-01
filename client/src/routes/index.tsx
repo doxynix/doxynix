@@ -21,7 +21,7 @@ function Index() {
         const res = await client.api.logs.scan.$post({
           json: {
             content:
-              "Привет! Это лог для проверки.\nА тут лежит уязвимость: 1234-5678-9012-3456\nИ еще одна безопасная строка.",
+              "Hi! This is a test log.\nHere's a vulnerability: 1234-5678-9012-3456\nAnd here's another safe string.",
           },
         });
         return await res.json();
@@ -36,10 +36,7 @@ function Index() {
       {isPending && (
         <div className="animate-spin size-7 border border-b-0 bg-transparent rounded-full" />
       )}
-
-      <h1 className="text-5xl font-black">bhvr</h1>
       <h2 className="text-2xl font-bold">Bun + Hono + Vite + React</h2>
-      <p>A typesafe fullstack monorepo</p>
       <div className="flex items-center gap-4">
         <button
           type="button"
