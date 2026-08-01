@@ -5,16 +5,14 @@
     "lib": ["ESNext"],
     "target": "ESNext",
     "module": "ESNext",
-
+    "rootDir": "./src",
     // Output configuration
     "declaration": true,
     "outDir": "./dist",
     "noEmit": false,
-
     // Type checking
     "strict": true,
     "skipLibCheck": true,
-
     // Additional checks
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true

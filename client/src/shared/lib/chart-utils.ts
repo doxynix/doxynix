@@ -1,3 +1,5 @@
+export type ColorUtility = "bg" | "stroke" | "fill" | "text";
+
 export const chartColors = {
   blue: {
     bg: "bg-blue-500",
@@ -23,10 +25,98 @@ export const chartColors = {
     fill: "fill-amber-500",
     text: "text-amber-500",
   },
-  rose: {
-    bg: "bg-rose-500",
-    stroke: "stroke-rose-500",
-    fill: "fill-rose-500",
-    text: "text-rose-500",
+  gray: {
+    bg: "bg-gray-500",
+    stroke: "stroke-gray-500",
+    fill: "fill-gray-500",
+    text: "text-gray-500",
   },
+  cyan: {
+    bg: "bg-cyan-500",
+    stroke: "stroke-cyan-500",
+    fill: "fill-cyan-500",
+    text: "text-cyan-500",
+  },
+  pink: {
+    bg: "bg-pink-500",
+    stroke: "stroke-pink-500",
+    fill: "fill-pink-500",
+    text: "text-pink-500",
+  },
+  lime: {
+    bg: "bg-lime-500",
+    stroke: "stroke-lime-500",
+    fill: "fill-lime-500",
+    text: "text-lime-500",
+  },
+  fuchsia: {
+    bg: "bg-fuchsia-500",
+    stroke: "stroke-fuchsia-500",
+    fill: "fill-fuchsia-500",
+    text: "text-fuchsia-500",
+  },
+} as const satisfies {
+  [color: string]: {
+    [key in ColorUtility]: string;
+  };
 };
+
+export type AvailableChartColorsKeys = keyof typeof chartColors;
+
+export const AvailableChartColors: AvailableChartColorsKeys[] = Object.keys(
+  chartColors,
+) as Array<AvailableChartColorsKeys>;
+
+export const constructCategoryColors = (
+  categories: string[],
+  colors: AvailableChartColorsKeys[],
+): Map<string, AvailableChartColorsKeys> => {
+  const categoryColors = new Map<string, AvailableChartColorsKeys>();
+  const fallbackColor = AvailableChartColors[0] as AvailableChartColorsKeys;
+
+  categories.forEach((category, index) => {
+    const color = colors.length
+      ? (colors[index % colors.length] as AvailableChartColorsKeys)
+      : fallbackColor;
+    categoryColors.set(category, color);
+  });
+  return categoryColors;
+};
+
+export const getColorClassName = (color: AvailableChartColorsKeys, type: ColorUtility): string => {
+  const fallbackColor = {
+    bg: "bg-gray-500",
+    stroke: "stroke-gray-500",
+    fill: "fill-gray-500",
+    text: "text-gray-500",
+  };
+  return chartColors[color]?.[type] ?? fallbackColor[type];
+};
+
+export const getYAxisDomain = (
+  autoMinValue: boolean,
+  minValue: number | undefined,
+  maxValue: number | undefined,
+) => {
+  const minDomain = autoMinValue ? "auto" : (minValue ?? 0);
+  const maxDomain = maxValue ?? "auto";
+  return [minDomain, maxDomain];
+};
+
+export function hasOnlyOneValueForKey(
+  array: Record<string, unknown>[],
+  keyToCheck: string,
+): boolean {
+  const val: unknown[] = [];
+
+  for (const obj of array) {
+    if (Object.hasOwn(obj, keyToCheck)) {
+      val.push(obj[keyToCheck]);
+      if (val.length > 1) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}

@@ -6,12 +6,14 @@ This guide outlines the standards and workflows for the Interactive Technical Pa
 
 1. **Install Dependencies:**
    Ensure `bun` is installed. Run the following from the root directory:
+
    ```bash
    bun install
    ```
 
 2. **Environment Configuration:**
    The server requires environment variables managed via Doppler. To run server tasks locally, use the provided script:
+
    ```bash
    # Example: Running database migrations
    bun run db:migrate
@@ -54,18 +56,21 @@ Before committing, verify changes against these high-risk areas:
 ## Change Playbooks
 
 ### Adding a New API Filter
+
 1. Define the input type in [[shared/src/types/index.ts]].
 2. Update the service logic in [[server/src/modules/scan/scan.service.ts]].
 3. Expose the endpoint in [[server/src/modules/scan/scan.router.ts]].
 4. Update the frontend query hook in [[client/src/routes/index.tsx]].
 
 ### Modifying Database Schema
+
 1. Edit [[server/src/db/schema.ts]].
 2. Generate the migration: `bun run db:generate`.
 3. Verify the generated file in [[server/src/db/migrations/0000_init_schema.sql]].
 4. Apply to local DB: `bun run db:push`.
 
 ### Adding a New Route
+
 1. Create/Update the component in the appropriate directory (e.g., [[client/src/routes/]]).
 2. Run the development server; the `tanstack-router` plugin will automatically update [[client/src/routeTree.gen.ts]].
 3. Verify the route in the UI.

@@ -1,6 +1,6 @@
-import React from "react";
+import { type ComponentPropsWithoutRef, forwardRef } from "react";
 import { tv, type VariantProps } from "tailwind-variants";
-import { cx } from "../lib/utils";
+import { cx } from "../../lib/utils";
 
 const badgeVariants = tv({
   base: cx(
@@ -35,11 +35,9 @@ const badgeVariants = tv({
   },
 });
 
-interface BadgeProps
-  extends React.ComponentPropsWithoutRef<"span">,
-    VariantProps<typeof badgeVariants> {}
+interface BadgeProps extends ComponentPropsWithoutRef<"span">, VariantProps<typeof badgeVariants> {}
 
-const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
+const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   ({ className, variant, ...props }: BadgeProps, forwardedRef) => {
     return (
       <span
@@ -54,4 +52,4 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
 
 Badge.displayName = "Badge";
 
-export { Badge, badgeVariants, type BadgeProps };
+export { Badge, type BadgeProps, badgeVariants };

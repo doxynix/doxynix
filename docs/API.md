@@ -34,6 +34,7 @@ The API is served under the `/api` prefix via [[server/src/index.ts]].
 Shared types are defined in [[shared/src/types/index.ts]].
 
 ### `ScanResult`
+
 Returned by `POST /api/logs/scan`.
 
 ```json
@@ -52,6 +53,7 @@ Returned by `POST /api/logs/scan`.
 ```
 
 ### `LeakFinding`
+
 Nested within `ScanResult`.
 
 | Field | Type | Description |

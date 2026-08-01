@@ -46,14 +46,5 @@
   },
   "peerDependencies": {
     "typescript": "^7.0.1-rc"
-  },
-  "dependencies": {
-    "@radix-ui/react-hover-card": "^1.1.18",
-    "@remixicon/react": "^4.9.0",
-    "clsx": "^2.1.1",
-    "hono": "^4.12.25",
-    "recharts": "^3.9.1",
-    "tailwind-merge": "^3.6.0",
-    "tailwind-variants": "^3.2.2"
   }
 }
