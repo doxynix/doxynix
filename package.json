@@ -47,7 +47,7 @@
     "@secretlint/secretlint-rule-preset-recommend": "13.0.4",
     "@swc/core": "1.15.47",
     "bun-types": "latest",
-    "concurrently": "10.0.3",
+    "concurrently": "10.0.4",
     "cspell": "10.0.1",
     "lefthook": "2.1.10",
     "secretlint": "13.0.4",
