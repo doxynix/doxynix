@@ -1,0 +1,25 @@
+name: MCP Servers Config
+version: 0.0.1
+schema: v1
+
+mcpServers:
+  - name: linear
+    command: doppler
+    args:
+      - "run"
+      - "--project"
+      - "doxynix"      
+      - "--config"
+      - "dev"          
+      - "--"
+      - "bun"
+      - "x"
+      - "@touchlab/linear-mcp-integration"
+    connectionTimeout: 60000
+
+  - name: doxynix
+    type: streamable-http
+    url: "https://doxynix.space/api/mcp/mcp"
+    requestOptions:
+      headers:
+        Authorization: "Bearer ${DOXYNIX_API_KEY}"
