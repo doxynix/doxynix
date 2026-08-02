@@ -18,10 +18,10 @@
     "with-doppler": "bun scripts/doppler.ts",
     "dev": "bun with-doppler -- bun run --watch src/index.ts",
     "type-check": "tsc --noEmit",
-    "db:generate": "bun with-doppler drizzle-kit generate",
-    "db:push": "bun with-doppler drizzle-kit push",
-    "db:studio": "bun with-doppler drizzle-kit studio",
-    "db:migrate": "bun with-doppler drizzle-kit migrate"
+    "db:generate": "bun with-doppler bunx drizzle-kit generate",
+    "db:push": "bun with-doppler bunx drizzle-kit push",
+    "db:studio": "bun with-doppler bunx drizzle-kit studio",
+    "db:migrate": "bun with-doppler bun scripts/migrate.ts"
   },
   "dependencies": {
     "@axiomhq/js": "1.8.0",

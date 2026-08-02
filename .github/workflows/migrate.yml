@@ -26,6 +26,6 @@ jobs:
         uses: DopplerHQ/cli-action@4819d808ab99e5cde19a0637a16536a4038fad73
 
       - name: Run Drizzle Migrations
-        run: doppler run -- bun run db:migrate
+        run: doppler run -- bun --cwd server db:migrate
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
