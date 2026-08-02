@@ -43,7 +43,7 @@
     "turbo"
   ],
   "devDependencies": {
-    "@biomejs/biome": "2.5.2",
+    "@biomejs/biome": "2.5.6",
     "@secretlint/secretlint-rule-preset-recommend": "13.0.4",
     "@swc/core": "1.15.47",
     "bun-types": "latest",
