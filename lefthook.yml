@@ -35,5 +35,4 @@ pre-push:
 post-merge:
   commands:
     install:
-      files: package.json
       run: bun install
