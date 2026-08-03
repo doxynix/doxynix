@@ -8,6 +8,7 @@ import { cors } from "hono/cors";
 import { csrf } from "hono/csrf";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
+import { auth } from "./auth";
 
 export const app = new Hono()
   .basePath("/api")
@@ -15,13 +16,13 @@ export const app = new Hono()
   .use("*", logger())
   .use("*", secureHeaders())
   .use("*", compress())
-  .use("*", csrf({ origin: "http://localhost:5173" }))
+  .use("*", csrf({ origin: ["http://localhost:3000", "https://localhost:3000"] }))
   .use(
     "*",
     cors({
-      origin: ["http://localhost:5173"],
+      origin: ["http://localhost:3000", "https://localhost:3000"],
       credentials: true,
-      allowMethods: ["POST"],
+      allowMethods: ["GET", "POST", "OPTIONS"],
     }),
   )
   .use(
@@ -36,6 +37,9 @@ export const app = new Hono()
       status: "ok",
       message: "pong",
     });
+  })
+  .on(["POST", "GET"], "/auth/*", (c) => {
+    return auth.handler(c.req.raw);
   })
   .post("/logs/scan", async (c) => {
     const findings: LeakFinding[] = [];
@@ -77,6 +81,6 @@ export const app = new Hono()
 export type AppType = typeof app;
 
 export default {
-  port: 3000,
+  port: 8080,
   fetch: app.fetch,
 };

@@ -5,16 +5,13 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch",
     "type-check": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "typescript": "7.0.2"
   }
 }

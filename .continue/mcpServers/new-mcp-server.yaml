@@ -3,18 +3,99 @@ version: 0.0.1
 schema: v1
 
 mcpServers:
+  - name: filesystem
+    command: bun
+    args:
+      - "x"
+      - "-y"
+      - "@modelcontextprotocol/server-filesystem"
+      - "/home/karen/doxynix/siem"
+    connectionTimeout: 60000
+
+  - name: ripgrep
+    command: bun
+    args:
+      - "x"
+      - "-y"
+      - "mcp-ripgrep"
+    connectionTimeout: 60000
+
+  - name: tavily-search
+    command: doppler
+    args:
+      - "run"
+      - "--silent"
+      - "--project"
+      - "doxynix-siem"      
+      - "--config"
+      - "dev_personal"   
+      - "--"
+      - "tavily-mcp" 
+    env:
+      DOPPLER_NO_CHECK_VERSION: "true"
+    connectionTimeout: 60000
+
+  - name: local-postgres
+    command: doppler
+    args:
+      - "run"
+      - "--silent"
+      - "--project"
+      - "doxynix-siem"      
+      - "--config"
+      - "dev_personal"   
+      - "--"
+      - "sh"
+      - "-c"
+      - "bun x @iflow-mcp/postgresql-mcp-server --connection-string \"$DATABASE_URL\""
+    connectionTimeout: 60000
+
+  - name: memory
+    command: bun
+    args:
+      - "x"
+      - "-y"
+      - "@modelcontextprotocol/server-memory"
+    connectionTimeout: 60000
+
+  - name: local-git
+    command: bun
+    args:
+      - "x"
+      - "-y"
+      - "@cyanheads/git-mcp-server"
+    connectionTimeout: 60000
+
+  - name: local-podman
+    command: bun
+    args:
+      - "x"
+      - "podman-mcp-server"
+    connectionTimeout: 60000
+
+  - name: fetch
+    command: bun
+    args:
+      - "x"
+      - "-y"
+      - "mcp-fetch-server"
+    connectionTimeout: 60000
+
   - name: linear
     command: doppler
     args:
       - "run"
       - "--project"
-      - "doxynix"      
+      - "doxynix-siem"      
       - "--config"
-      - "dev"          
+      - "dev_personal"   
       - "--"
       - "bun"
       - "x"
+      - "-y"
       - "@touchlab/linear-mcp-integration"
+    env:
+      DOPPLER_NO_CHECK_VERSION: "true"
     connectionTimeout: 60000
 
   - name: doxynix

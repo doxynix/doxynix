@@ -5,8 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1785674667741,
-      "tag": "0000_init_schema",
+      "when": 1785768669611,
+      "tag": "0000_init_core_siem_schema",
       "breakpoints": true
     }
   ]
