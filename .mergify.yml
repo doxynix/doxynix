@@ -8,7 +8,7 @@ priority_rules:
   - name: dependencies
     priority: 500
     conditions:
-      - author =~ ^(renovate|dependabot|doxynix-deps-bot)\[bot\]$
+      - author ~= ^(renovate|dependabot|doxynix-deps-bot)\[bot\]$
 
 queue_rules:
   - name: default
@@ -18,15 +18,15 @@ queue_rules:
       - "#check-failure = 0"
       - -conflict
       - -draft
-      - "-title =~ (?i)(wip|draft|🚧)"
+      - "-title ~= (?i)(wip|draft|🚧)"
       - or:
-          - author =~ ^(renovate|dependabot|doxynix-(release|deps)-bot)\[bot\]$
+          - author ~= ^(renovate|dependabot|doxynix-(release|deps)-bot)\[bot\]$
           - approved-reviews-by = coderabbitai[bot]
     merge_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
       - or:
-          - author =~ ^(renovate|dependabot|doxynix-(release|deps)-bot)\[bot\]$
+          - author ~= ^(renovate|dependabot|doxynix-(release|deps)-bot)\[bot\]$
           - approved-reviews-by = coderabbitai[bot]
     merge_method: squash
     commit_message_format:
@@ -36,7 +36,7 @@ queue_rules:
 pull_request_rules:
   - name: label hotfixes automatically
     conditions:
-      - head =~ ^hotfix/
+      - head ~= ^hotfix/
     actions:
       label:
         add: ["hotfix"]
@@ -49,7 +49,7 @@ pull_request_rules:
       - -conflict
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - "-title =~ (?i)(wip|draft|🚧)"
+      - "-title ~= (?i)(wip|draft|🚧)"
     actions:
       queue:
         name: default
