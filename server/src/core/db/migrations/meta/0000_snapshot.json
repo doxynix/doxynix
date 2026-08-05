@@ -1,5 +1,5 @@
 {
-  "id": "7f54a089-b549-435c-a0e8-81d05108f716",
+  "id": "6521acc3-9a62-4c93-8455-6014e8aeec15",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -47,7 +47,53 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "audit_logs_created_brin_idx": {
+          "name": "audit_logs_created_brin_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "brin",
+          "with": {}
+        },
+        "audit_logs_ip_gist_idx": {
+          "name": "audit_logs_ip_gist_idx",
+          "columns": [
+            {
+              "expression": "ip_address",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        },
+        "audit_logs_actor_idx": {
+          "name": "audit_logs_actor_idx",
+          "columns": [
+            {
+              "expression": "actor",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -68,7 +114,7 @@
         },
         "service_name": {
           "name": "service_name",
-          "type": "varchar(100)",
+          "type": "citext",
           "primaryKey": false,
           "notNull": true
         },
@@ -143,7 +189,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "findings_incident_id_idx": {
+          "name": "findings_incident_id_idx",
+          "columns": [
+            {
+              "expression": "incident_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "findings_incident_id_incidents_id_fk": {
           "name": "findings_incident_id_incidents_id_fk",
@@ -206,7 +268,53 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "incidents_created_brin_idx": {
+          "name": "incidents_created_brin_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "brin",
+          "with": {}
+        },
+        "incidents_file_name_trgm_idx": {
+          "name": "incidents_file_name_trgm_idx",
+          "columns": [
+            {
+              "expression": "\"file_name\" gin_trgm_ops",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "incidents_severity_idx": {
+          "name": "incidents_severity_idx",
+          "columns": [
+            {
+              "expression": "severity",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -260,7 +368,39 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "notifications_failed_pending_partial_idx": {
+          "name": "notifications_failed_pending_partial_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"notifications\".\"status\" IN ('pending', 'failed')",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "notifications_incident_id_idx": {
+          "name": "notifications_incident_id_idx",
+          "columns": [
+            {
+              "expression": "incident_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "notifications_incident_id_incidents_id_fk": {
           "name": "notifications_incident_id_incidents_id_fk",
@@ -291,7 +431,7 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(100)",
+          "type": "citext",
           "primaryKey": false,
           "notNull": true
         },
@@ -329,7 +469,69 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "rules_active_partial_idx": {
+          "name": "rules_active_partial_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"rules\".\"is_active\" = true",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "rules_name_trgm_idx": {
+          "name": "rules_name_trgm_idx",
+          "columns": [
+            {
+              "expression": "\"name\" gin_trgm_ops",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "rules_desc_trgm_idx": {
+          "name": "rules_desc_trgm_idx",
+          "columns": [
+            {
+              "expression": "\"description\" gin_trgm_ops",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "rules_created_at_idx": {
+          "name": "rules_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
@@ -356,7 +558,7 @@
         },
         "email": {
           "name": "email",
-          "type": "varchar(255)",
+          "type": "citext",
           "primaryKey": false,
           "notNull": true
         },

@@ -20,7 +20,10 @@
     "uuidv",
     "desynchronization",
     "neondatabase",
-    "datepicker"
+    "datepicker",
+    "glpat",
+    "citext",
+    "trgm"
   ],
   "ignorePaths": [
     "**/node_modules/**",

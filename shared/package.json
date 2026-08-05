@@ -1,17 +1,16 @@
 {
   "name": "@doxynix/siem-shared",
   "version": "0.0.1",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "private": true,
+  "type": "module",
   "exports": {
     ".": {
-      "development": "./src/index.ts",
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
     }
   },
   "scripts": {
-    "build": "tsc",
     "type-check": "tsc --noEmit"
   }
 }

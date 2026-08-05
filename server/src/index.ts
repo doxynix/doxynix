@@ -1,5 +1,5 @@
-import type { LeakFinding, ScanResult } from "@doxynix/siem-shared";
-import { axiom } from "@server/axiom";
+import { env } from "@server/core/env";
+import { createRateLimiter } from "@server/core/ratelimit";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { compress } from "hono/compress";
@@ -7,8 +7,11 @@ import { contextStorage } from "hono/context-storage";
 import { cors } from "hono/cors";
 import { csrf } from "hono/csrf";
 import { logger } from "hono/logger";
+import { prettyJSON } from "hono/pretty-json";
+import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
-import { auth } from "./auth";
+import { timing } from "hono/timing";
+import { auth } from "./core/auth";
 
 export const app = new Hono()
   .basePath("/api")
@@ -16,15 +19,18 @@ export const app = new Hono()
   .use("*", logger())
   .use("*", secureHeaders())
   .use("*", compress())
-  .use("*", csrf({ origin: ["http://localhost:3000", "https://localhost:3000"] }))
+  .use("*", csrf({ origin: env.CLIENT_URL }))
   .use(
     "*",
     cors({
-      origin: ["http://localhost:3000", "https://localhost:3000"],
+      origin: env.CLIENT_URL,
       credentials: true,
-      allowMethods: ["GET", "POST", "OPTIONS"],
+      allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     }),
   )
+  .use("*", requestId())
+  .use("*", timing())
+  .use("*", prettyJSON())
   .use(
     "/upload/*",
     bodyLimit({
@@ -32,6 +38,7 @@ export const app = new Hono()
       onError: (c) => c.text("File too large!", 413),
     }),
   )
+  .use("*", createRateLimiter({ windowSec: 60, maxRequests: 100 }))
   .get("/ping", (c) => {
     return c.json({
       status: "ok",
@@ -41,41 +48,17 @@ export const app = new Hono()
   .on(["POST", "GET"], "/auth/*", (c) => {
     return auth.handler(c.req.raw);
   })
-  .post("/logs/scan", async (c) => {
-    const findings: LeakFinding[] = [];
-    const cardRegex = /\b(?:\d[ -]*?){13,16}\b/g;
-
-    const res = await axiom.query("['web-production'] | order by _time desc | limit 100");
-
-    if (!res?.matches) {
-      return c.json<ScanResult>({ isSafe: true, message: "logs not found" });
-    }
-
-    for (const entry of res.matches) {
-      const logText = entry.data.fields?.msg || "";
-      const isCardCredentials = cardRegex.test(logText);
-      if (isCardCredentials) {
-        findings.push({
-          ruleId: "credit-card",
-          ruleName: "Credit Card Leak",
-          severity: "critical",
-          matchedText: "Card detected and masked",
-        });
-      }
-    }
-
-    if (findings.length === 0) {
-      return c.json<ScanResult>({
-        isSafe: true,
-        message: "All logs clean! Keep it up!",
-      });
-    } else {
-      return c.json<ScanResult>({
-        isSafe: false,
-        message: "Find issues please remove sensitive data!",
-        findings,
-      });
-    }
+  .notFound((c) => {
+    return c.json({ success: false, error: "Route not found" }, 404);
+  })
+  .onError((err, c) => {
+    return c.json(
+      {
+        success: false,
+        error: env.NODE_ENV === "production" ? "Internal server error" : err.message,
+      },
+      500,
+    );
   });
 
 export type AppType = typeof app;

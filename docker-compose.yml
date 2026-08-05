@@ -19,5 +19,21 @@ services:
       timeout: 5s
       retries: 5
 
+  valkey:
+    image: valkey/valkey:9.1.1-alpine@sha256:72166e5fc568ca3e9860b2ebdfbc1dfc2e557b7f4339aa7fc6e6807469a475d6
+    container_name: siem-valkey
+    restart: unless-stopped
+    command: valkey-server --requirepass "123456"
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey_data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "-a", "123456", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
 volumes:
   postgres_data:
+  valkey_data:
