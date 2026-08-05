@@ -1,6 +1,9 @@
 pre-commit:
   parallel: true
   commands:
+    branch-check:
+      run: bun scripts/check-branch-name.ts
+
     biome-check:
       glob: "*.{js,ts,jsx,tsx,json,css}"
       run: bun biome check --write --no-errors-on-unmatched {staged_files}
@@ -16,6 +19,11 @@ pre-commit:
     arch-check:
       run: bun scripts/arch-check.ts {staged_files}
 
+post-checkout:
+  commands:
+    branch-check:
+      run: bun scripts/check-branch-name.ts
+
 prepare-commit-msg:
   commands:
     ticket-inject:
@@ -29,6 +37,9 @@ commit-msg:
 pre-push:
   parallel: true
   commands:
+    branch-check:
+      run: bun scripts/check-branch-name.ts
+
     type-check:
       run: bun run type-check 
 

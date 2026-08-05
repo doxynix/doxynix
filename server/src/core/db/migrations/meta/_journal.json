@@ -8,6 +8,13 @@
       "when": 1785869636348,
       "tag": "0000_init_core_siem_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785964084260,
+      "tag": "0001_add_columns_to_audit_logs_table",
+      "breakpoints": true
     }
   ]
 }

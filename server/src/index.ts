@@ -1,5 +1,11 @@
 import { env } from "@server/core/env";
 import { createRateLimiter } from "@server/core/ratelimit";
+import { analyticsRouter } from "@server/modules/analytics/analytics.router";
+import { auditRouter } from "@server/modules/audit/audit.router";
+import { incidentsRouter } from "@server/modules/incidents/incidents.router";
+import { rulesRouter } from "@server/modules/rules/rules.router";
+import { scanRouter } from "@server/modules/scan/scan.router";
+import { startAxiomIngestionWorker } from "@server/modules/scan/scan.worker";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { compress } from "hono/compress";
@@ -48,6 +54,11 @@ export const app = new Hono()
   .on(["POST", "GET"], "/auth/*", (c) => {
     return auth.handler(c.req.raw);
   })
+  .route("/logs/scan", scanRouter)
+  .route("/incidents", incidentsRouter)
+  .route("/rules", rulesRouter)
+  .route("/analytics", analyticsRouter)
+  .route("/audit-logs", auditRouter)
   .notFound((c) => {
     return c.json({ success: false, error: "Route not found" }, 404);
   })
@@ -60,6 +71,10 @@ export const app = new Hono()
       500,
     );
   });
+
+startAxiomIngestionWorker().catch((err) => {
+  console.error("❌ Failed to start Axiom Worker:", err);
+});
 
 export type AppType = typeof app;
 

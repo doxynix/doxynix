@@ -80,12 +80,16 @@ export const auditLogs = pgTable(
     action: varchar("action", { length: 150 }).notNull(),
     target: varchar("target", { length: 150 }).notNull(),
     ipAddress: inet("ip_address").notNull(),
+    country: varchar("country", { length: 10 }).default("UNKNOWN").notNull(),
+    userAgent: text("user_agent"),
+    requestId: varchar("request_id", { length: 100 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
     index("audit_logs_created_brin_idx").using("brin", table.createdAt),
     index("audit_logs_ip_gist_idx").using("gist", table.ipAddress),
     index("audit_logs_actor_idx").on(table.actor),
+    index("audit_logs_action_idx").on(table.action),
   ],
 );
 

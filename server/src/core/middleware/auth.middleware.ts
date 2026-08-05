@@ -10,6 +10,13 @@ export type AuthUser = typeof auth.$Infer.Session.user & {
 
 export type AuthSession = typeof auth.$Infer.Session.session;
 
+declare module "hono" {
+  interface ContextVariableMap {
+    user: AuthUser;
+    session: AuthSession;
+  }
+}
+
 export type AuthEnv = {
   Variables: {
     user: AuthUser;
@@ -33,7 +40,7 @@ export const requireAuth: MiddlewareHandler<AuthEnv> = async (c, next) => {
     return c.json(
       {
         success: false,
-        error: "Unauthorized: Missing, invalid, or corrupted authentication session",
+        error: "Unauthorized",
       },
       401,
     );
