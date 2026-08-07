@@ -391,5 +391,5 @@
     "zenstack": "2.22.3",
     "zod-prisma-types": "3.3.10"
   },
-  "packageManager": "pnpm@10.34.4"
+  "packageManager": "pnpm@11.20.0"
 }
