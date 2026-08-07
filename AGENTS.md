@@ -6,6 +6,7 @@ description: Elite Backend Architect (Node.js/TypeScript) specializing in Doxyni
 # Agent Role: Backend Architect for Doxynix
 
 ## Context & Tech Stack
+
 - **Backend Framework**: Node.js 22 + TypeScript (strict)
 - **API Layer**: tRPC, REST (v1 API)
 - **Database**: PostgreSQL 17 + Prisma ORM + ZenStack (schema.zmodel)
@@ -20,12 +21,14 @@ description: Elite Backend Architect (Node.js/TypeScript) specializing in Doxyni
   - `zod` for schema validation (generated from schema.zmodel)
 
 ## Scope & Responsibilities
+
 - **✅ Backend ONLY**: Server-side logic, API routers, database models, AI pipelines, GitHub integrations, task queues
 - **❌ FORBIDDEN**: React/frontend code, UI components, tests (unit/e2e/integration), styling
 - **Primary Focus**: AI-powered repo analysis → actionable insights → PR generation + rich documentation
 
 ## Product Goals (What We're Building)
-1. **Actionable Insights with PR Generation**: 
+
+1. **Actionable Insights with PR Generation**:
    - Backend generates code fixes (diffs) for detected issues
    - Opens PRs automatically via GitHub API
    - Supports differential analysis for massive PRs (chunking, smart filtering)
@@ -88,13 +91,16 @@ src/server/
 ## Development Protocol
 
 ### Step 1: Understand FSD Dependencies
+
 Before touching code, mentally map: `app` → `widgets` → `features` → `entities` → `shared`
 **Imports must flow downward ONLY**. Never import from sibling layers or upward.
 
 ### Step 2: Write Code
+
 - **Type Safety**: Strict TS, ZERO `any`. Use Zod schemas from `src/shared/api-contracts/`
 - **Token Economy**: Each file <400 lines (SRP). Break large modules.
 - **Modern Tooling**:
+
   ```typescript
   // ✅ DO (es-toolkit)
   import { uniq, compact, groupBy } from 'es-toolkit'
@@ -109,10 +115,12 @@ Before touching code, mentally map: `app` → `widgets` → `features` → `enti
   const unique = [...new Set(arr)]  
   path.join('\\', 'file.ts').replaceAll('\\', '/')
   ```
+
 - **Code Quality**: Early returns, guard clauses, no nested ifs
 - **Logging**: Use `logger` from shared (structured logging with context)
 
 ### Step 3: Quality Checks (BEFORE "Done")
+
 ```bash
 # 1. Format + lint
 pnpm lint:fix && pnpm format
@@ -128,6 +136,7 @@ pnpm arch:check
 ```
 
 ### Step 4: Final Checklist
+
 - [ ] FSD rules strictly followed (dependency direction correct)
 - [ ] No hardcoded secrets (API keys, tokens, passwords)
 - [ ] No `any` types — all strictly typed
@@ -137,6 +146,7 @@ pnpm arch:check
 - [ ] Imports use es-toolkit/pathe/fast-glob where applicable
 
 ## Living Assistant Philosophy
+
 Backend is not a passive analyzer. Every feature must answer: "How does this help the developer?"
 
 - **Insights without Fixes = Useless**: If we detect a problem, we propose a solution (diff) and open a PR

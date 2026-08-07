@@ -4,13 +4,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [2.3.0](https://github.com/doxynix/doxynix/compare/v2.2.2...v2.3.0) (2026-06-04)
 
-
 ### Features
 
 * проведено усиление пайплайна агента ([#1472](https://github.com/doxynix/doxynix/issues/1472)) ([b36a0f4](https://github.com/doxynix/doxynix/commit/b36a0f402717c475cdc246697e08902124c4716d))
 
 ## [2.2.2](https://github.com/doxynix/doxynix/compare/v2.2.1...v2.2.2) (2026-05-31)
-
 
 ### Bug Fixes
 
@@ -18,13 +16,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [2.2.1](https://github.com/doxynix/doxynix/compare/v2.2.0...v2.2.1) (2026-05-29)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1457](https://github.com/doxynix/doxynix/issues/1457)) ([7276ad5](https://github.com/doxynix/doxynix/commit/7276ad5f186a4a1cf2cf1939bbbfb930d99aa0cf))
 
 ## [2.2.0](https://github.com/doxynix/doxynix/compare/v2.1.0...v2.2.0) (2026-05-29)
-
 
 ### Features
 
@@ -32,20 +28,17 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [2.1.0](https://github.com/doxynix/doxynix/compare/v2.0.1...v2.1.0) (2026-05-23)
 
-
 ### Features
 
 * проведены улучшения движка а также улучшения ui  ([#1451](https://github.com/doxynix/doxynix/issues/1451)) ([a86a300](https://github.com/doxynix/doxynix/commit/a86a300b45e8a1672d0f6a2dc80765f45caa264d))
 
 ## [2.0.1](https://github.com/doxynix/doxynix/compare/v2.0.0...v2.0.1) (2026-05-22)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency js-cookie to v3.0.7 [security] ([#1446](https://github.com/doxynix/doxynix/issues/1446)) ([911041e](https://github.com/doxynix/doxynix/commit/911041e2c7f29e3bdee72beeb9233b72235915c0))
 
 ## [2.0.0](https://github.com/doxynix/doxynix/compare/v1.32.5...v2.0.0) (2026-05-17)
-
 
 ### ⚠ BREAKING CHANGES
 
@@ -57,13 +50,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.32.5](https://github.com/doxynix/doxynix/compare/v1.32.4...v1.32.5) (2026-05-12)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1424](https://github.com/doxynix/doxynix/issues/1424)) ([5494627](https://github.com/doxynix/doxynix/commit/54946272be376951097aa72c1c6ac06aa3dbffad))
 
 ## [1.32.4](https://github.com/doxynix/doxynix/compare/v1.32.3...v1.32.4) (2026-05-12)
-
 
 ### Bug Fixes
 
@@ -71,13 +62,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.32.3](https://github.com/doxynix/doxynix/compare/v1.32.2...v1.32.3) (2026-05-06)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency ipaddr.js to v2.4.0 ([#1410](https://github.com/doxynix/doxynix/issues/1410)) ([cb338bb](https://github.com/doxynix/doxynix/commit/cb338bb1009eb74c4e4479cdb0bb3bd2243bb48b))
 
 ## [1.32.2](https://github.com/doxynix/doxynix/compare/v1.32.1...v1.32.2) (2026-05-06)
-
 
 ### Bug Fixes
 
@@ -85,13 +74,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.32.1](https://github.com/doxynix/doxynix/compare/v1.32.0...v1.32.1) (2026-05-05)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1399](https://github.com/doxynix/doxynix/issues/1399)) ([ee09286](https://github.com/doxynix/doxynix/commit/ee09286653719450c5aa6f46e8db52e06e31583a))
 
 ## [1.32.0](https://github.com/doxynix/doxynix/compare/v1.31.7...v1.32.0) (2026-05-05)
-
 
 ### Features
 
@@ -99,13 +86,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.31.7](https://github.com/doxynix/doxynix/compare/v1.31.6...v1.31.7) (2026-05-05)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency yaml to v2.8.4 ([#1389](https://github.com/doxynix/doxynix/issues/1389)) ([234e5c3](https://github.com/doxynix/doxynix/commit/234e5c335558857d3a43eec1ae1875cdf88a38ca))
 
 ## [1.31.6](https://github.com/doxynix/doxynix/compare/v1.31.5...v1.31.6) (2026-05-05)
-
 
 ### Bug Fixes
 
@@ -113,13 +98,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.31.5](https://github.com/doxynix/doxynix/compare/v1.31.4...v1.31.5) (2026-05-04)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1381](https://github.com/doxynix/doxynix/issues/1381)) ([6bd85f8](https://github.com/doxynix/doxynix/commit/6bd85f8e88a0731ae8a123c53845170c1674f239))
 
 ## [1.31.4](https://github.com/doxynix/doxynix/compare/v1.31.3...v1.31.4) (2026-05-04)
-
 
 ### Bug Fixes
 
@@ -127,13 +110,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.31.3](https://github.com/doxynix/doxynix/compare/v1.31.2...v1.31.3) (2026-05-04)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1373](https://github.com/doxynix/doxynix/issues/1373)) ([2b68d7b](https://github.com/doxynix/doxynix/commit/2b68d7bae7cef9ae89700dea97fdd59b527e1508))
 
 ## [1.31.2](https://github.com/doxynix/doxynix/compare/v1.31.1...v1.31.2) (2026-05-04)
-
 
 ### Bug Fixes
 
@@ -141,13 +122,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.31.1](https://github.com/doxynix/doxynix/compare/v1.31.0...v1.31.1) (2026-05-03)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1365](https://github.com/doxynix/doxynix/issues/1365)) ([202a45a](https://github.com/doxynix/doxynix/commit/202a45a456e737c47d7f9f58958652b191947d39))
 
 ## [1.31.0](https://github.com/doxynix/doxynix/compare/v1.30.4...v1.31.0) (2026-05-03)
-
 
 ### Features
 
@@ -155,13 +134,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.30.4](https://github.com/doxynix/doxynix/compare/v1.30.3...v1.30.4) (2026-05-03)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1358](https://github.com/doxynix/doxynix/issues/1358)) ([b271f8e](https://github.com/doxynix/doxynix/commit/b271f8eff46f0cffb66e0fef443419f8bb325021))
 
 ## [1.30.3](https://github.com/doxynix/doxynix/compare/v1.30.2...v1.30.3) (2026-05-03)
-
 
 ### Bug Fixes
 
@@ -169,13 +146,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.30.2](https://github.com/doxynix/doxynix/compare/v1.30.1...v1.30.2) (2026-05-02)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1347](https://github.com/doxynix/doxynix/issues/1347)) ([d2b6415](https://github.com/doxynix/doxynix/commit/d2b64158f05255b3680989302539d20029e71121))
 
 ## [1.30.1](https://github.com/doxynix/doxynix/compare/v1.30.0...v1.30.1) (2026-05-02)
-
 
 ### Bug Fixes
 
@@ -183,13 +158,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.30.0](https://github.com/doxynix/doxynix/compare/v1.29.6...v1.30.0) (2026-05-02)
 
-
 ### Features
 
 * **security:** значительные улучшения безопасности и конфиденциальности ([#1324](https://github.com/doxynix/doxynix/issues/1324)) ([1bfd55e](https://github.com/doxynix/doxynix/commit/1bfd55e89c49f4f982e0c302f8874c11c6acf88c))
 
 ## [1.29.6](https://github.com/doxynix/doxynix/compare/v1.29.5...v1.29.6) (2026-05-02)
-
 
 ### Bug Fixes
 
@@ -197,13 +170,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.29.5](https://github.com/doxynix/doxynix/compare/v1.29.4...v1.29.5) (2026-05-02)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1329](https://github.com/doxynix/doxynix/issues/1329)) ([3ae4ed8](https://github.com/doxynix/doxynix/commit/3ae4ed80a1a03b1dd9c977decbeadf21337ede6e))
 
 ## [1.29.4](https://github.com/doxynix/doxynix/compare/v1.29.3...v1.29.4) (2026-05-01)
-
 
 ### Bug Fixes
 
@@ -211,20 +182,17 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.29.3](https://github.com/doxynix/doxynix/compare/v1.29.2...v1.29.3) (2026-05-01)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1320](https://github.com/doxynix/doxynix/issues/1320)) ([88f9860](https://github.com/doxynix/doxynix/commit/88f9860ff4c6f4f1fe53498add131a3646072991))
 
 ## [1.29.2](https://github.com/doxynix/doxynix/compare/v1.29.1...v1.29.2) (2026-05-01)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1316](https://github.com/doxynix/doxynix/issues/1316)) ([78923b8](https://github.com/doxynix/doxynix/commit/78923b83b10b1e60964ab83acd3738bfb9405df8))
 
 ## [1.29.1](https://github.com/doxynix/doxynix/compare/v1.29.0...v1.29.1) (2026-04-30)
-
 
 ### Bug Fixes
 
@@ -233,13 +201,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.29.0](https://github.com/doxynix/doxynix/compare/v1.28.8...v1.29.0) (2026-04-30)
 
-
 ### Features
 
 * реализована страница connections и сопутствующая логика ([#1306](https://github.com/doxynix/doxynix/issues/1306)) ([cbf0c4c](https://github.com/doxynix/doxynix/commit/cbf0c4c2220cb79ca515842f4d1f83f07155d3d7))
 
 ## [1.28.8](https://github.com/doxynix/doxynix/compare/v1.28.7...v1.28.8) (2026-04-30)
-
 
 ### Bug Fixes
 
@@ -247,13 +213,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.28.7](https://github.com/doxynix/doxynix/compare/v1.28.6...v1.28.7) (2026-04-30)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1297](https://github.com/doxynix/doxynix/issues/1297)) ([0dd38b8](https://github.com/doxynix/doxynix/commit/0dd38b8b6659195fe6e6131af2ffdf34a6b07251))
 
 ## [1.28.6](https://github.com/doxynix/doxynix/compare/v1.28.5...v1.28.6) (2026-04-29)
-
 
 ### Bug Fixes
 
@@ -261,13 +225,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.28.5](https://github.com/doxynix/doxynix/compare/v1.28.4...v1.28.5) (2026-04-29)
 
-
 ### Bug Fixes
 
 * исправление ошибки билда на vercel  ([#1289](https://github.com/doxynix/doxynix/issues/1289)) ([98fba2a](https://github.com/doxynix/doxynix/commit/98fba2a6563827ace19c652c6202bfe91db1b81f))
 
 ## [1.28.4](https://github.com/doxynix/doxynix/compare/v1.28.3...v1.28.4) (2026-04-29)
-
 
 ### Bug Fixes
 
@@ -275,13 +237,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.28.3](https://github.com/doxynix/doxynix/compare/v1.28.2...v1.28.3) (2026-04-29)
 
-
 ### Bug Fixes
 
 * **auth:** фикс рефреша токенов гита  ([#1281](https://github.com/doxynix/doxynix/issues/1281)) ([9aae141](https://github.com/doxynix/doxynix/commit/9aae1413b64145a0bd171fbbf92217980afac7f5))
 
 ## [1.28.2](https://github.com/doxynix/doxynix/compare/v1.28.1...v1.28.2) (2026-04-29)
-
 
 ### Bug Fixes
 
@@ -289,13 +249,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.28.1](https://github.com/doxynix/doxynix/compare/v1.28.0...v1.28.1) (2026-04-28)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies to v5.100.4 ([#1271](https://github.com/doxynix/doxynix/issues/1271)) ([df98d39](https://github.com/doxynix/doxynix/commit/df98d3976c8359f2b65f12002125341d84b11a79))
 
 ## [1.28.0](https://github.com/doxynix/doxynix/compare/v1.27.10...v1.28.0) (2026-04-28)
-
 
 ### Features
 
@@ -303,20 +261,17 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.27.10](https://github.com/doxynix/doxynix/compare/v1.27.9...v1.27.10) (2026-04-28)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1263](https://github.com/doxynix/doxynix/issues/1263)) ([8b01e70](https://github.com/doxynix/doxynix/commit/8b01e70dc63fe459e7379744d09cfa2ac37314a6))
 
 ## [1.27.9](https://github.com/doxynix/doxynix/compare/v1.27.8...v1.27.9) (2026-04-28)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1259](https://github.com/doxynix/doxynix/issues/1259)) ([6a614a0](https://github.com/doxynix/doxynix/commit/6a614a06e58f4efd8ffaecc3655d6ffc49a7c071))
 
 ## [1.27.8](https://github.com/doxynix/doxynix/compare/v1.27.7...v1.27.8) (2026-04-27)
-
 
 ### Bug Fixes
 
@@ -325,13 +280,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.27.7](https://github.com/doxynix/doxynix/compare/v1.27.6...v1.27.7) (2026-04-27)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1245](https://github.com/doxynix/doxynix/issues/1245)) ([0a69a5b](https://github.com/doxynix/doxynix/commit/0a69a5b15df91a570af28851c7fff09f1b75bdc9))
 
 ## [1.27.6](https://github.com/doxynix/doxynix/compare/v1.27.5...v1.27.6) (2026-04-27)
-
 
 ### Bug Fixes
 
@@ -339,13 +292,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.27.5](https://github.com/doxynix/doxynix/compare/v1.27.4...v1.27.5) (2026-04-26)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1237](https://github.com/doxynix/doxynix/issues/1237)) ([c72c2cb](https://github.com/doxynix/doxynix/commit/c72c2cb99f8e739b29f7c3ea28e5babb8bb12b59))
 
 ## [1.27.4](https://github.com/doxynix/doxynix/compare/v1.27.3...v1.27.4) (2026-04-26)
-
 
 ### Bug Fixes
 
@@ -353,13 +304,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.27.3](https://github.com/doxynix/doxynix/compare/v1.27.2...v1.27.3) (2026-04-26)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1228](https://github.com/doxynix/doxynix/issues/1228)) ([1def787](https://github.com/doxynix/doxynix/commit/1def787ce6a45c67485f4e5009b2efcb07db88c8))
 
 ## [1.27.2](https://github.com/doxynix/doxynix/compare/v1.27.1...v1.27.2) (2026-04-25)
-
 
 ### Bug Fixes
 
@@ -367,13 +316,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.27.1](https://github.com/doxynix/doxynix/compare/v1.27.0...v1.27.1) (2026-04-25)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency posthog-js to v1.370.1 ([#1218](https://github.com/doxynix/doxynix/issues/1218)) ([67f7cd3](https://github.com/doxynix/doxynix/commit/67f7cd3543b6bda454093fce918e52e02ef8a352))
 
 ## [1.27.0](https://github.com/doxynix/doxynix/compare/v1.26.31...v1.27.0) (2026-04-25)
-
 
 ### Features
 
@@ -381,13 +328,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.31](https://github.com/doxynix/doxynix/compare/v1.26.30...v1.26.31) (2026-04-25)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1211](https://github.com/doxynix/doxynix/issues/1211)) ([6856ed6](https://github.com/doxynix/doxynix/commit/6856ed60126c5ca0f3ec4ca5e8faeddd378bf5ce))
 
 ## [1.26.30](https://github.com/doxynix/doxynix/compare/v1.26.29...v1.26.30) (2026-04-25)
-
 
 ### Bug Fixes
 
@@ -395,13 +340,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.29](https://github.com/doxynix/doxynix/compare/v1.26.28...v1.26.29) (2026-04-24)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1203](https://github.com/doxynix/doxynix/issues/1203)) ([eb0b480](https://github.com/doxynix/doxynix/commit/eb0b48071cc5b23e82921d5346e4af656d514667))
 
 ## [1.26.28](https://github.com/doxynix/doxynix/compare/v1.26.27...v1.26.28) (2026-04-24)
-
 
 ### Bug Fixes
 
@@ -409,13 +352,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.27](https://github.com/doxynix/doxynix/compare/v1.26.26...v1.26.27) (2026-04-24)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency posthog-js to v1.369.4 ([#1194](https://github.com/doxynix/doxynix/issues/1194)) ([b3e88f3](https://github.com/doxynix/doxynix/commit/b3e88f371d8ff03d0895281c30de3da69e093d51))
 
 ## [1.26.26](https://github.com/doxynix/doxynix/compare/v1.26.25...v1.26.26) (2026-04-24)
-
 
 ### Bug Fixes
 
@@ -423,13 +364,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.25](https://github.com/doxynix/doxynix/compare/v1.26.24...v1.26.25) (2026-04-23)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1185](https://github.com/doxynix/doxynix/issues/1185)) ([c20719e](https://github.com/doxynix/doxynix/commit/c20719efa9b4098c1d88fc30ead1cb1283516e59))
 
 ## [1.26.24](https://github.com/doxynix/doxynix/compare/v1.26.23...v1.26.24) (2026-04-23)
-
 
 ### Bug Fixes
 
@@ -437,13 +376,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.23](https://github.com/doxynix/doxynix/compare/v1.26.22...v1.26.23) (2026-04-23)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies  ([#1164](https://github.com/doxynix/doxynix/issues/1164)) ([6b11487](https://github.com/doxynix/doxynix/commit/6b114872d9305e716d12a85d2f2a38dc80e0913d))
 
 ## [1.26.22](https://github.com/doxynix/doxynix/compare/v1.26.21...v1.26.22) (2026-04-22)
-
 
 ### Bug Fixes
 
@@ -451,13 +388,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.21](https://github.com/doxynix/doxynix/compare/v1.26.20...v1.26.21) (2026-04-19)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1160](https://github.com/doxynix/doxynix/issues/1160)) ([db96fbf](https://github.com/doxynix/doxynix/commit/db96fbf95fde6430697ef0479e271eab5a7f9268))
 
 ## [1.26.20](https://github.com/doxynix/doxynix/compare/v1.26.19...v1.26.20) (2026-04-19)
-
 
 ### Bug Fixes
 
@@ -465,13 +400,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.19](https://github.com/doxynix/doxynix/compare/v1.26.18...v1.26.19) (2026-04-19)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1146](https://github.com/doxynix/doxynix/issues/1146)) ([5fdb11b](https://github.com/doxynix/doxynix/commit/5fdb11bf8f7653341fd28ba719c7d736b352a1fb))
 
 ## [1.26.18](https://github.com/doxynix/doxynix/compare/v1.26.17...v1.26.18) (2026-04-19)
-
 
 ### Bug Fixes
 
@@ -479,13 +412,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.17](https://github.com/doxynix/doxynix/compare/v1.26.16...v1.26.17) (2026-04-18)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1138](https://github.com/doxynix/doxynix/issues/1138)) ([5eb02ce](https://github.com/doxynix/doxynix/commit/5eb02cecbc40ad69f156321c6327607103a3df4c))
 
 ## [1.26.16](https://github.com/doxynix/doxynix/compare/v1.26.15...v1.26.16) (2026-04-18)
-
 
 ### Bug Fixes
 
@@ -493,13 +424,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.15](https://github.com/doxynix/doxynix/compare/v1.26.14...v1.26.15) (2026-04-17)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1128](https://github.com/doxynix/doxynix/issues/1128)) ([7963ff1](https://github.com/doxynix/doxynix/commit/7963ff139aa4d129ed81c3d6af808637610b9533))
 
 ## [1.26.14](https://github.com/doxynix/doxynix/compare/v1.26.13...v1.26.14) (2026-04-17)
-
 
 ### Bug Fixes
 
@@ -509,7 +438,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.13](https://github.com/doxynix/doxynix/compare/v1.26.12...v1.26.13) (2026-04-16)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1106](https://github.com/doxynix/doxynix/issues/1106)) ([7019c63](https://github.com/doxynix/doxynix/commit/7019c63136817ce37d3e985a1739411ef6bae74a))
@@ -517,13 +445,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.12](https://github.com/doxynix/doxynix/compare/v1.26.11...v1.26.12) (2026-04-15)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1099](https://github.com/doxynix/doxynix/issues/1099)) ([4b72069](https://github.com/doxynix/doxynix/commit/4b72069aec3e283d1957dad18d24ca340ed1fe7c))
 
 ## [1.26.11](https://github.com/doxynix/doxynix/compare/v1.26.10...v1.26.11) (2026-04-14)
-
 
 ### Bug Fixes
 
@@ -531,13 +457,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.10](https://github.com/doxynix/doxynix/compare/v1.26.9...v1.26.10) (2026-04-14)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies to v5.98.0 ([#1091](https://github.com/doxynix/doxynix/issues/1091)) ([a906c58](https://github.com/doxynix/doxynix/commit/a906c589ef980cc1ddd69128b3a13efe1c39c99b))
 
 ## [1.26.9](https://github.com/doxynix/doxynix/compare/v1.26.8...v1.26.9) (2026-04-14)
-
 
 ### Bug Fixes
 
@@ -545,13 +469,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.8](https://github.com/doxynix/doxynix/compare/v1.26.7...v1.26.8) (2026-04-13)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1083](https://github.com/doxynix/doxynix/issues/1083)) ([9b1707f](https://github.com/doxynix/doxynix/commit/9b1707f2397d103ecab686df6bac70c086067af8))
 
 ## [1.26.7](https://github.com/doxynix/doxynix/compare/v1.26.6...v1.26.7) (2026-04-13)
-
 
 ### Performance Improvements
 
@@ -559,13 +481,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.6](https://github.com/doxynix/doxynix/compare/v1.26.5...v1.26.6) (2026-04-13)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1077](https://github.com/doxynix/doxynix/issues/1077)) ([596afe0](https://github.com/doxynix/doxynix/commit/596afe0a98b727aa3c9ed9c52aaab3316282ab7a))
 
 ## [1.26.5](https://github.com/doxynix/doxynix/compare/v1.26.4...v1.26.5) (2026-04-13)
-
 
 ### Bug Fixes
 
@@ -573,13 +493,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.4](https://github.com/doxynix/doxynix/compare/v1.26.3...v1.26.4) (2026-04-12)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1063](https://github.com/doxynix/doxynix/issues/1063)) ([3dd5142](https://github.com/doxynix/doxynix/commit/3dd514259ff9ef50a75064916b6a96a1094f7d3e))
 
 ## [1.26.3](https://github.com/doxynix/doxynix/compare/v1.26.2...v1.26.3) (2026-04-12)
-
 
 ### Bug Fixes
 
@@ -587,20 +505,17 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.26.2](https://github.com/doxynix/doxynix/compare/v1.26.1...v1.26.2) (2026-04-12)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1053](https://github.com/doxynix/doxynix/issues/1053)) ([b3f0f0f](https://github.com/doxynix/doxynix/commit/b3f0f0fde103902189f97b9a6b8c741c4d1de367))
 
 ## [1.26.1](https://github.com/doxynix/doxynix/compare/v1.26.0...v1.26.1) (2026-04-12)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1049](https://github.com/doxynix/doxynix/issues/1049)) ([4e1fba4](https://github.com/doxynix/doxynix/commit/4e1fba4b0644a71d94e5c1f1ce71ae7b2f0200b0))
 
 ## [1.26.0](https://github.com/doxynix/doxynix/compare/v1.25.2...v1.26.0) (2026-04-11)
-
 
 ### Features
 
@@ -623,7 +538,6 @@ All notable changes to this project will be documented in this file. See [standa
 * **ui:** ui приведен в соответствие новому движку ([#965](https://github.com/doxynix/doxynix/issues/965)) ([150bf8c](https://github.com/doxynix/doxynix/commit/150bf8c7aa975f52b0990f04f421880d1c280850))
 * **ui:** полностью переработана абсолютна вся палитра приложения, проведены оптимизации, возвращена светлая тема ([#500](https://github.com/doxynix/doxynix/issues/500)) ([45c3f60](https://github.com/doxynix/doxynix/commit/45c3f60905df27c92f7414ac7e1d876dea031227))
 * **ui:** полный пересмотр ui для страницы деталей репозитория (wip) ([#913](https://github.com/doxynix/doxynix/issues/913)) ([580d6a2](https://github.com/doxynix/doxynix/commit/580d6a247d7c28160817c2dab0600b2cf297aa09))
-
 
 ### Bug Fixes
 
@@ -756,7 +670,6 @@ All notable changes to this project will be documented in this file. See [standa
 * **tooling:** исправление ошибки мониторинга обновлен матчер ([#348](https://github.com/doxynix/doxynix/issues/348)) ([aa6a545](https://github.com/doxynix/doxynix/commit/aa6a545e72a36c3e46c1836560822292eefbf831))
 * **tooling:** пофикшены сурс мапы для загрузки их в sentry ([#590](https://github.com/doxynix/doxynix/issues/590)) ([ec27c7b](https://github.com/doxynix/doxynix/commit/ec27c7b3f5d3046f6b7678788b02e43415f014ed))
 
-
 ### Performance Improvements
 
 * **app:** оптимизирован proxy.ts, убраны не нужные операции ([#850](https://github.com/doxynix/doxynix/issues/850)) ([48a91a2](https://github.com/doxynix/doxynix/commit/48a91a23a390009eedfdfe0f72ebf52e1d6837f5))
@@ -764,13 +677,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.25.2](https://github.com/doxynix/doxynix/compare/v1.25.1...v1.25.2) (2026-04-11)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1043](https://github.com/doxynix/doxynix/issues/1043)) ([681522d](https://github.com/doxynix/doxynix/commit/681522db603629e416bb12cbf8abf591701ce40e))
 
 ## [1.25.1](https://github.com/doxynix/doxynix/compare/v1.25.0...v1.25.1) (2026-04-11)
-
 
 ### Bug Fixes
 
@@ -778,20 +689,17 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.25.0](https://github.com/doxynix/doxynix/compare/v1.24.9...v1.25.0) (2026-04-11)
 
-
 ### Features
 
 * **features:** добавлена новая фича "карта репозитория"  ([#1032](https://github.com/doxynix/doxynix/issues/1032)) ([fb651ec](https://github.com/doxynix/doxynix/commit/fb651ec825180b0a145c58f9183fe5a0fae38593))
 
 ## [1.24.9](https://github.com/doxynix/doxynix/compare/v1.24.8...v1.24.9) (2026-04-11)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1031](https://github.com/doxynix/doxynix/issues/1031)) ([04943c2](https://github.com/doxynix/doxynix/commit/04943c2fde96a2419c6366a540276df5c266e124))
 
 ## [1.24.8](https://github.com/doxynix/doxynix/compare/v1.24.7...v1.24.8) (2026-04-11)
-
 
 ### Bug Fixes
 
@@ -800,13 +708,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.24.7](https://github.com/doxynix/doxynix/compare/v1.24.6...v1.24.7) (2026-04-10)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#1012](https://github.com/doxynix/doxynix/issues/1012)) ([f9f3d82](https://github.com/doxynix/doxynix/commit/f9f3d82fe82980b875871d9cb1f1bc943360eb8d))
 
 ## [1.24.6](https://github.com/doxynix/doxynix/compare/v1.24.5...v1.24.6) (2026-04-09)
-
 
 ### Bug Fixes
 
@@ -814,13 +720,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.24.5](https://github.com/doxynix/doxynix/compare/v1.24.4...v1.24.5) (2026-04-09)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies to v11.6.0 ([#1004](https://github.com/doxynix/doxynix/issues/1004)) ([b0272f3](https://github.com/doxynix/doxynix/commit/b0272f316a9425b459d00612c78f9d9e32fb66a8))
 
 ## [1.24.4](https://github.com/doxynix/doxynix/compare/v1.24.3...v1.24.4) (2026-04-09)
-
 
 ### Bug Fixes
 
@@ -828,13 +732,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.24.3](https://github.com/doxynix/doxynix/compare/v1.24.2...v1.24.3) (2026-04-08)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @scalar/api-reference-react to v0.9.20 ([#981](https://github.com/doxynix/doxynix/issues/981)) ([52aecde](https://github.com/doxynix/doxynix/commit/52aecde08d98adc4c734c3c123f2cf3a3e121376))
 
 ## [1.24.2](https://github.com/doxynix/doxynix/compare/v1.24.1...v1.24.2) (2026-04-07)
-
 
 ### Bug Fixes
 
@@ -842,20 +744,17 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.24.1](https://github.com/doxynix/doxynix/compare/v1.24.0...v1.24.1) (2026-04-06)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#970](https://github.com/doxynix/doxynix/issues/970)) ([77481e3](https://github.com/doxynix/doxynix/commit/77481e3c530635cd220f1ad65b784f8382a7d6b4))
 
 ## [1.24.0](https://github.com/doxynix/doxynix/compare/v1.23.1...v1.24.0) (2026-04-06)
 
-
 ### Features
 
 * **ui:** ui приведен в соответствие новому движку ([#965](https://github.com/doxynix/doxynix/issues/965)) ([150bf8c](https://github.com/doxynix/doxynix/commit/150bf8c7aa975f52b0990f04f421880d1c280850))
 
 ## [1.23.1](https://github.com/doxynix/doxynix/compare/v1.23.0...v1.23.1) (2026-04-06)
-
 
 ### Bug Fixes
 
@@ -864,13 +763,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.23.0](https://github.com/doxynix/doxynix/compare/v1.22.2...v1.23.0) (2026-04-06)
 
-
 ### Features
 
 * **server:** масштабная ревизия конвейера статического анализа и AI-пайплайна ([#911](https://github.com/doxynix/doxynix/issues/911)) ([0dbb7f5](https://github.com/doxynix/doxynix/commit/0dbb7f5356c4069863186ed5024e92f11e23ada3))
 
 ## [1.22.2](https://github.com/doxynix/doxynix/compare/v1.22.1...v1.22.2) (2026-04-06)
-
 
 ### Bug Fixes
 
@@ -878,13 +775,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.22.1](https://github.com/doxynix/doxynix/compare/v1.22.0...v1.22.1) (2026-04-06)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#946](https://github.com/doxynix/doxynix/issues/946)) ([c73ea91](https://github.com/doxynix/doxynix/commit/c73ea91d8d4e4095947813cd2b1e4b6193ba15df))
 
 ## [1.22.0](https://github.com/doxynix/doxynix/compare/v1.21.0...v1.22.0) (2026-04-05)
-
 
 ### Features
 
@@ -892,11 +787,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.21.0](https://github.com/doxynix/doxynix/compare/v1.20.6...v1.21.0) (2026-04-04)
 
-
 ### Features
 
 * **ui:** полный пересмотр ui для страницы деталей репозитория (wip) ([#913](https://github.com/doxynix/doxynix/issues/913)) ([580d6a2](https://github.com/doxynix/doxynix/commit/580d6a247d7c28160817c2dab0600b2cf297aa09))
-
 
 ### Bug Fixes
 
@@ -904,13 +797,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.20.6](https://github.com/doxynix/doxynix/compare/v1.20.5...v1.20.6) (2026-04-01)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#898](https://github.com/doxynix/doxynix/issues/898)) ([f652454](https://github.com/doxynix/doxynix/commit/f6524545c0be1e4ea200b5364f942e5d1ef2515f))
 
 ## [1.20.5](https://github.com/doxynix/doxynix/compare/v1.20.4...v1.20.5) (2026-03-31)
-
 
 ### Bug Fixes
 
@@ -918,13 +809,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.20.4](https://github.com/doxynix/doxynix/compare/v1.20.3...v1.20.4) (2026-03-31)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#885](https://github.com/doxynix/doxynix/issues/885)) ([b2700af](https://github.com/doxynix/doxynix/commit/b2700af4b09a98fc47ee939f3a1851069ac811db))
 
 ## [1.20.3](https://github.com/doxynix/doxynix/compare/v1.20.2...v1.20.3) (2026-03-30)
-
 
 ### Bug Fixes
 
@@ -932,13 +821,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.20.2](https://github.com/doxynix/doxynix/compare/v1.20.1...v1.20.2) (2026-03-30)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#876](https://github.com/doxynix/doxynix/issues/876)) ([4bb2b90](https://github.com/doxynix/doxynix/commit/4bb2b9027906fe43c43429439ebf342002734b7b))
 
 ## [1.20.1](https://github.com/doxynix/doxynix/compare/v1.20.0...v1.20.1) (2026-03-30)
-
 
 ### Bug Fixes
 
@@ -946,11 +833,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.20.0](https://github.com/doxynix/doxynix/compare/v1.19.4...v1.20.0) (2026-03-29)
 
-
 ### Features
 
 * **app:** добавлены unauthorized и forbidden сценарии  ([#858](https://github.com/doxynix/doxynix/issues/858)) ([4cc6946](https://github.com/doxynix/doxynix/commit/4cc6946659c4046d12e39f86440cac2fb8a869f9))
-
 
 ### Bug Fixes
 
@@ -958,13 +843,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.19.4](https://github.com/doxynix/doxynix/compare/v1.19.3...v1.19.4) (2026-03-29)
 
-
 ### Performance Improvements
 
 * **app:** оптимизирован proxy.ts, убраны не нужные операции ([#850](https://github.com/doxynix/doxynix/issues/850)) ([48a91a2](https://github.com/doxynix/doxynix/commit/48a91a23a390009eedfdfe0f72ebf52e1d6837f5))
 
 ## [1.19.3](https://github.com/doxynix/doxynix/compare/v1.19.2...v1.19.3) (2026-03-28)
-
 
 ### Bug Fixes
 
@@ -972,13 +855,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.19.2](https://github.com/doxynix/doxynix/compare/v1.19.1...v1.19.2) (2026-03-28)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency react-resizable-panels to v4.8.0 ([#842](https://github.com/doxynix/doxynix/issues/842)) ([246b7ef](https://github.com/doxynix/doxynix/commit/246b7efb3c10ad2b3482dc7240347bf1cc04ab29))
 
 ## [1.19.1](https://github.com/doxynix/doxynix/compare/v1.19.0...v1.19.1) (2026-03-28)
-
 
 ### Bug Fixes
 
@@ -986,13 +867,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.19.0](https://github.com/doxynix/doxynix/compare/v1.18.16...v1.19.0) (2026-03-28)
 
-
 ### Features
 
 * **features:** добавлена страница /thanks  ([#828](https://github.com/doxynix/doxynix/issues/828)) ([943d6fd](https://github.com/doxynix/doxynix/commit/943d6fd0a1151ce2a1083e7c706124b5c956bc74))
 
 ## [1.18.16](https://github.com/doxynix/doxynix/compare/v1.18.15...v1.18.16) (2026-03-28)
-
 
 ### Bug Fixes
 
@@ -1000,13 +879,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.18.15](https://github.com/doxynix/doxynix/compare/v1.18.14...v1.18.15) (2026-03-28)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @marsidev/react-turnstile to v1.5.0 ([#821](https://github.com/doxynix/doxynix/issues/821)) ([c8f3d39](https://github.com/doxynix/doxynix/commit/c8f3d39c6ece5abcd56af3c7eb35de512c7060bf))
 
 ## [1.18.14](https://github.com/doxynix/doxynix/compare/v1.18.13...v1.18.14) (2026-03-27)
-
 
 ### Bug Fixes
 
@@ -1014,13 +891,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.18.13](https://github.com/doxynix/doxynix/compare/v1.18.12...v1.18.13) (2026-03-27)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#800](https://github.com/doxynix/doxynix/issues/800)) ([95f41de](https://github.com/doxynix/doxynix/commit/95f41de100d49444a163d9e3eb3d46ce88eb00e4))
 
 ## [1.18.12](https://github.com/doxynix/doxynix/compare/v1.18.11...v1.18.12) (2026-03-27)
-
 
 ### Bug Fixes
 
@@ -1028,13 +903,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.18.11](https://github.com/doxynix/doxynix/compare/v1.18.10...v1.18.11) (2026-03-26)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#787](https://github.com/doxynix/doxynix/issues/787)) ([93da35c](https://github.com/doxynix/doxynix/commit/93da35cd891447429977f5508e24e3e661f7c9a2))
 
 ## [1.18.10](https://github.com/doxynix/doxynix/compare/v1.18.9...v1.18.10) (2026-03-25)
-
 
 ### Bug Fixes
 
@@ -1042,13 +915,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.18.9](https://github.com/doxynix/doxynix/compare/v1.18.8...v1.18.9) (2026-03-25)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @sentry/nextjs to v10.46.0 ([#775](https://github.com/doxynix/doxynix/issues/775)) ([7442c9a](https://github.com/doxynix/doxynix/commit/7442c9a4acdec16515b589abc2306b5cfdf499ed))
 
 ## [1.18.8](https://github.com/doxynix/doxynix/compare/v1.18.7...v1.18.8) (2026-03-25)
-
 
 ### Bug Fixes
 
@@ -1056,20 +927,17 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.18.7](https://github.com/doxynix/doxynix/compare/v1.18.6...v1.18.7) (2026-03-25)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @codemirror/language to v6.12.3 ([#762](https://github.com/doxynix/doxynix/issues/762)) ([b287160](https://github.com/doxynix/doxynix/commit/b28716082c209c7f38e1db1661ad4708ecb5f2b9))
 
 ## [1.18.6](https://github.com/doxynix/doxynix/compare/v1.18.5...v1.18.6) (2026-03-25)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#757](https://github.com/doxynix/doxynix/issues/757)) ([3f32216](https://github.com/doxynix/doxynix/commit/3f32216124b120243b139805d43eae8e41f768d0))
 
 ## [1.18.5](https://github.com/doxynix/doxynix/compare/v1.18.4...v1.18.5) (2026-03-24)
-
 
 ### Bug Fixes
 
@@ -1078,13 +946,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.18.4](https://github.com/doxynix/doxynix/compare/v1.18.3...v1.18.4) (2026-03-23)
 
-
 ### Performance Improvements
 
 * **db:** оптимизация бд, добавлены gin индексы и триграммы для поиска, усилена валидация ([#738](https://github.com/doxynix/doxynix/issues/738)) ([075dce9](https://github.com/doxynix/doxynix/commit/075dce97b46f0350c9e4edadd3433d45f54265f9))
 
 ## [1.18.3](https://github.com/doxynix/doxynix/compare/v1.18.2...v1.18.3) (2026-03-22)
-
 
 ### Bug Fixes
 
@@ -1092,20 +958,17 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.18.2](https://github.com/doxynix/doxynix/compare/v1.18.1...v1.18.2) (2026-03-22)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#726](https://github.com/doxynix/doxynix/issues/726)) ([bc41104](https://github.com/doxynix/doxynix/commit/bc41104006c8a143c0c0c85b13a8ff225cfff435))
 
 ## [1.18.1](https://github.com/doxynix/doxynix/compare/v1.18.0...v1.18.1) (2026-03-21)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#722](https://github.com/doxynix/doxynix/issues/722)) ([fcad730](https://github.com/doxynix/doxynix/commit/fcad73096594993ad78401075e8faa90acb8a51f))
 
 ## [1.18.0](https://github.com/doxynix/doxynix/compare/v1.17.0...v1.18.0) (2026-03-21)
-
 
 ### Features
 
@@ -1143,7 +1006,6 @@ All notable changes to this project will be documented in this file. See [standa
 * **ui:** полностью переработана абсолютна вся палитра приложения, проведены оптимизации, возвращена светлая тема ([#500](https://github.com/doxynix/doxynix/issues/500)) ([45c3f60](https://github.com/doxynix/doxynix/commit/45c3f60905df27c92f7414ac7e1d876dea031227))
 * **user:** добавлена возможность загрузки аватара пользователя ([#126](https://github.com/doxynix/doxynix/issues/126)) ([cdf9091](https://github.com/doxynix/doxynix/commit/cdf9091e7681825fea4bb7068d45377900cd06e9))
 * **workflow:** полностью обновлен worklow ([#134](https://github.com/doxynix/doxynix/issues/134)) ([ebb958a](https://github.com/doxynix/doxynix/commit/ebb958a85c82c3691f06598f43d4033cc800c568))
-
 
 ### Bug Fixes
 
@@ -1261,11 +1123,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.17.0](https://github.com/doxynix/doxynix/compare/v1.16.16...v1.17.0) (2026-03-21)
 
-
 ### Features
 
 * **features:** реализована главная фича приложения - детали репозитория ([#695](https://github.com/doxynix/doxynix/issues/695)) ([596155d](https://github.com/doxynix/doxynix/commit/596155dd5f72f85fa6338c49ce4c61ce47913f75))
-
 
 ### Bug Fixes
 
@@ -1278,13 +1138,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.16.16](https://github.com/doxynix/doxynix/compare/v1.16.15...v1.16.16) (2026-03-19)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#676](https://github.com/doxynix/doxynix/issues/676)) ([1af859e](https://github.com/doxynix/doxynix/commit/1af859e1331cc9761e285fc9a0d8829821a41a90))
 
 ## [1.16.15](https://github.com/doxynix/doxynix/compare/v1.16.14...v1.16.15) (2026-03-18)
-
 
 ### Bug Fixes
 
@@ -1292,13 +1150,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.16.14](https://github.com/doxynix/doxynix/compare/v1.16.13...v1.16.14) (2026-03-18)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#662](https://github.com/doxynix/doxynix/issues/662)) ([2ec3f80](https://github.com/doxynix/doxynix/commit/2ec3f80615dcbf5d43bcad1a366c4631f9155da8))
 
 ## [1.16.13](https://github.com/doxynix/doxynix/compare/v1.16.12...v1.16.13) (2026-03-18)
-
 
 ### Bug Fixes
 
@@ -1306,13 +1162,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.16.12](https://github.com/doxynix/doxynix/compare/v1.16.11...v1.16.12) (2026-03-17)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#656](https://github.com/doxynix/doxynix/issues/656)) ([a20cc58](https://github.com/doxynix/doxynix/commit/a20cc58a1429a4ba1516a37ff4bb89c7726b7ecb))
 
 ## [1.16.11](https://github.com/doxynix/doxynix/compare/v1.16.10...v1.16.11) (2026-03-17)
-
 
 ### Bug Fixes
 
@@ -1320,13 +1174,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.16.10](https://github.com/doxynix/doxynix/compare/v1.16.9...v1.16.10) (2026-03-17)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies to v16.1.7 ([#643](https://github.com/doxynix/doxynix/issues/643)) ([3c84de2](https://github.com/doxynix/doxynix/commit/3c84de2b5386778100b46d1f4774d8f9978e0e4a))
 
 ## [1.16.9](https://github.com/doxynix/doxynix/compare/v1.16.8...v1.16.9) (2026-03-16)
-
 
 ### Bug Fixes
 
@@ -1334,13 +1186,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.16.8](https://github.com/doxynix/doxynix/compare/v1.16.7...v1.16.8) (2026-03-16)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#632](https://github.com/doxynix/doxynix/issues/632)) ([bfabb4a](https://github.com/doxynix/doxynix/commit/bfabb4aa4ce4d79ce67369cae547af8c8e4e5f9b))
 
 ## [1.16.7](https://github.com/doxynix/doxynix/compare/v1.16.6...v1.16.7) (2026-03-16)
-
 
 ### Bug Fixes
 
@@ -1348,13 +1198,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.16.6](https://github.com/doxynix/doxynix/compare/v1.16.5...v1.16.6) (2026-03-15)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#621](https://github.com/doxynix/doxynix/issues/621)) ([80990af](https://github.com/doxynix/doxynix/commit/80990af53096f19941a7043a564cf87547525b25))
 
 ## [1.16.5](https://github.com/doxynix/doxynix/compare/v1.16.4...v1.16.5) (2026-03-15)
-
 
 ### Bug Fixes
 
@@ -1362,13 +1210,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.16.4](https://github.com/doxynix/doxynix/compare/v1.16.3...v1.16.4) (2026-03-15)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies to v11.12.1 ([#613](https://github.com/doxynix/doxynix/issues/613)) ([26a6966](https://github.com/doxynix/doxynix/commit/26a6966a01fcb059dc005083c33eaa544bc3b50c))
 
 ## [1.16.3](https://github.com/doxynix/doxynix/compare/v1.16.2...v1.16.3) (2026-03-14)
-
 
 ### Bug Fixes
 
@@ -1376,13 +1222,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.16.2](https://github.com/doxynix/doxynix/compare/v1.16.1...v1.16.2) (2026-03-13)
 
-
 ### Bug Fixes
 
 * **tooling:** пофикшены сурс мапы для загрузки их в sentry ([#590](https://github.com/doxynix/doxynix/issues/590)) ([ec27c7b](https://github.com/doxynix/doxynix/commit/ec27c7b3f5d3046f6b7678788b02e43415f014ed))
 
 ## [1.16.1](https://github.com/doxynix/doxynix/compare/v1.16.0...v1.16.1) (2026-03-13)
-
 
 ### Bug Fixes
 
@@ -1390,13 +1234,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.16.0](https://github.com/doxynix/doxynix/compare/v1.15.0...v1.16.0) (2026-03-13)
 
-
 ### Features
 
 * **api:** переход на github app, внесение сопутствующих правок ([#566](https://github.com/doxynix/doxynix/issues/566)) ([71fd2aa](https://github.com/doxynix/doxynix/commit/71fd2aa4103762dbcaf90d506b2db3155a033e17))
 
 ## [1.15.0](https://github.com/doxynix/doxynix/compare/v1.14.11...v1.15.0) (2026-03-13)
-
 
 ### Features
 
@@ -1453,7 +1295,6 @@ All notable changes to this project will be documented in this file. See [standa
 * **user:** добавлена возможность загрузки аватара пользователя ([#126](https://github.com/doxynix/doxynix/issues/126)) ([cdf9091](https://github.com/doxynix/doxynix/commit/cdf9091e7681825fea4bb7068d45377900cd06e9))
 * **widgets:** добавлены новые виджеты ([#100](https://github.com/doxynix/doxynix/issues/100)) ([0221441](https://github.com/doxynix/doxynix/commit/0221441aff4da82560059959a4f6398b7802bd6f))
 * **workflow:** полностью обновлен worklow ([#134](https://github.com/doxynix/doxynix/issues/134)) ([ebb958a](https://github.com/doxynix/doxynix/commit/ebb958a85c82c3691f06598f43d4033cc800c568))
-
 
 ### Bug Fixes
 
@@ -1563,13 +1404,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.14.11](https://github.com/doxynix/doxynix/compare/v1.14.10...v1.14.11) (2026-03-13)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @scalar/nextjs-api-reference to v0.10.3 ([#569](https://github.com/doxynix/doxynix/issues/569)) ([a6cd8f8](https://github.com/doxynix/doxynix/commit/a6cd8f8953cfb2516abc54bd9e0a3dc06891f4a7))
 
 ## [1.14.10](https://github.com/doxynix/doxynix/compare/v1.14.9...v1.14.10) (2026-03-12)
-
 
 ### Bug Fixes
 
@@ -1577,20 +1416,17 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.14.9](https://github.com/doxynix/doxynix/compare/v1.14.8...v1.14.9) (2026-03-12)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#550](https://github.com/doxynix/doxynix/issues/550)) ([0fe0b5b](https://github.com/doxynix/doxynix/commit/0fe0b5b8fb4960144a76870cace603593617690c))
 
 ## [1.14.8](https://github.com/doxynix/doxynix/compare/v1.14.7...v1.14.8) (2026-03-11)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#531](https://github.com/doxynix/doxynix/issues/531)) ([6e92bb2](https://github.com/doxynix/doxynix/commit/6e92bb25588ef8ed8646542ebfb9195d0615caa9))
 
 ## [1.14.7](https://github.com/doxynix/doxynix/compare/v1.14.6...v1.14.7) (2026-03-11)
-
 
 ### Bug Fixes
 
@@ -1599,7 +1435,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.14.6](https://github.com/doxynix/doxynix/compare/v1.14.5...v1.14.6) (2026-03-11)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#520](https://github.com/doxynix/doxynix/issues/520)) ([1f49458](https://github.com/doxynix/doxynix/commit/1f49458ad383d1ea803b74c04b30c3f20fe32323))
@@ -1607,13 +1442,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.14.5](https://github.com/doxynix/doxynix/compare/v1.14.4...v1.14.5) (2026-03-10)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#517](https://github.com/doxynix/doxynix/issues/517)) ([cd2ceaf](https://github.com/doxynix/doxynix/commit/cd2ceaf478d7f53fd2bb03e41c34e197f8e070e2))
 
 ## [1.14.4](https://github.com/doxynix/doxynix/compare/v1.14.3...v1.14.4) (2026-03-09)
-
 
 ### Bug Fixes
 
@@ -1621,13 +1454,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.14.3](https://github.com/doxynix/doxynix/compare/v1.14.2...v1.14.3) (2026-03-09)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @upstash/redis to v1.36.4 ([#509](https://github.com/doxynix/doxynix/issues/509)) ([5502056](https://github.com/doxynix/doxynix/commit/5502056e261f1a51be7ddc4e849f4a2e10693f40))
 
 ## [1.14.2](https://github.com/doxynix/doxynix/compare/v1.14.1...v1.14.2) (2026-03-09)
-
 
 ### Bug Fixes
 
@@ -1635,13 +1466,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.14.1](https://github.com/doxynix/doxynix/compare/v1.14.0...v1.14.1) (2026-03-07)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#499](https://github.com/doxynix/doxynix/issues/499)) ([60cc866](https://github.com/doxynix/doxynix/commit/60cc8668f4013b91e55db7a4dae2e33c74c04217))
 
 ## [1.14.0](https://github.com/doxynix/doxynix/compare/v1.13.1...v1.14.0) (2026-03-07)
-
 
 ### Features
 
@@ -1649,13 +1478,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.13.1](https://github.com/doxynix/doxynix/compare/v1.13.0...v1.13.1) (2026-03-06)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#490](https://github.com/doxynix/doxynix/issues/490)) ([6dbeae4](https://github.com/doxynix/doxynix/commit/6dbeae47faa0d4941ce40485d1335e93a51602ff))
 
 ## [1.13.0](https://github.com/doxynix/doxynix/compare/v1.12.4...v1.13.0) (2026-03-06)
-
 
 ### Features
 
@@ -1663,13 +1490,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.12.4](https://github.com/doxynix/doxynix/compare/v1.12.3...v1.12.4) (2026-03-05)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency posthog-node to v5.28.0 ([#486](https://github.com/doxynix/doxynix/issues/486)) ([4be57f6](https://github.com/doxynix/doxynix/commit/4be57f6aa9728c2ee847183da3082ac6daa6c7a3))
 
 ## [1.12.3](https://github.com/doxynix/doxynix/compare/v1.12.2...v1.12.3) (2026-03-05)
-
 
 ### Bug Fixes
 
@@ -1677,20 +1502,17 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.12.2](https://github.com/doxynix/doxynix/compare/v1.12.1...v1.12.2) (2026-03-04)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency ai to v6.0.113 ([#481](https://github.com/doxynix/doxynix/issues/481)) ([36449b8](https://github.com/doxynix/doxynix/commit/36449b8c36cc787a9b0b997776cc2ae36c6fa175))
 
 ## [1.12.1](https://github.com/doxynix/doxynix/compare/v1.12.0...v1.12.1) (2026-03-04)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#479](https://github.com/doxynix/doxynix/issues/479)) ([18aea91](https://github.com/doxynix/doxynix/commit/18aea914e6e75239eb6859d57b9b001983905a61))
 
 ## [1.12.0](https://github.com/doxynix/doxynix/compare/v1.11.12...v1.12.0) (2026-03-04)
-
 
 ### Features
 
@@ -1752,7 +1574,6 @@ All notable changes to this project will be documented in this file. See [standa
 * **user:** добавлена возможность загрузки аватара пользователя ([#126](https://github.com/doxynix/doxynix/issues/126)) ([cdf9091](https://github.com/doxynix/doxynix/commit/cdf9091e7681825fea4bb7068d45377900cd06e9))
 * **widgets:** добавлены новые виджеты ([#100](https://github.com/doxynix/doxynix/issues/100)) ([0221441](https://github.com/doxynix/doxynix/commit/0221441aff4da82560059959a4f6398b7802bd6f))
 * **workflow:** полностью обновлен worklow ([#134](https://github.com/doxynix/doxynix/issues/134)) ([ebb958a](https://github.com/doxynix/doxynix/commit/ebb958a85c82c3691f06598f43d4033cc800c568))
-
 
 ### Bug Fixes
 
@@ -1844,13 +1665,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.11.12](https://github.com/doxynix/doxynix/compare/v1.11.11...v1.11.12) (2026-03-04)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency ai to v6.0.112 ([#476](https://github.com/doxynix/doxynix/issues/476)) ([fd14f6b](https://github.com/doxynix/doxynix/commit/fd14f6bd92fde3739d099421f6d79c18d83ea0e1))
 
 ## [1.11.11](https://github.com/doxynix/doxynix/compare/v1.11.10...v1.11.11) (2026-03-04)
-
 
 ### Bug Fixes
 
@@ -1858,13 +1677,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.11.10](https://github.com/doxynix/doxynix/compare/v1.11.9...v1.11.10) (2026-03-04)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency lucide-react to v0.577.0 ([#472](https://github.com/doxynix/doxynix/issues/472)) ([f9da022](https://github.com/doxynix/doxynix/commit/f9da022683535a422062675a3b040b0ea5b690b3))
 
 ## [1.11.9](https://github.com/doxynix/doxynix/compare/v1.11.8...v1.11.9) (2026-03-03)
-
 
 ### Bug Fixes
 
@@ -1872,13 +1689,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.11.8](https://github.com/doxynix/doxynix/compare/v1.11.7...v1.11.8) (2026-03-03)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#464](https://github.com/doxynix/doxynix/issues/464)) ([2683f74](https://github.com/doxynix/doxynix/commit/2683f7456b559057013bc26bb729c70140082eeb))
 
 ## [1.11.7](https://github.com/doxynix/doxynix/compare/v1.11.6...v1.11.7) (2026-03-03)
-
 
 ### Bug Fixes
 
@@ -1886,13 +1701,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.11.6](https://github.com/doxynix/doxynix/compare/v1.11.5...v1.11.6) (2026-03-02)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#459](https://github.com/doxynix/doxynix/issues/459)) ([4cd8da5](https://github.com/doxynix/doxynix/commit/4cd8da572a223991fe4be18e4facff58819fa0c0))
 
 ## [1.11.5](https://github.com/doxynix/doxynix/compare/v1.11.4...v1.11.5) (2026-03-02)
-
 
 ### Bug Fixes
 
@@ -1900,13 +1713,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.11.4](https://github.com/doxynix/doxynix/compare/v1.11.3...v1.11.4) (2026-03-01)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#453](https://github.com/doxynix/doxynix/issues/453)) ([857b675](https://github.com/doxynix/doxynix/commit/857b675ee2c018b62c4e34f7e221d76fd1c45b4a))
 
 ## [1.11.3](https://github.com/doxynix/doxynix/compare/v1.11.2...v1.11.3) (2026-02-28)
-
 
 ### Bug Fixes
 
@@ -1914,13 +1725,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.11.2](https://github.com/doxynix/doxynix/compare/v1.11.1...v1.11.2) (2026-02-28)
 
-
 ### Bug Fixes
 
 * **security:** исправление rce-уязвимости в пакете serialize-javascript ([#446](https://github.com/doxynix/doxynix/issues/446)) ([96d2bbb](https://github.com/doxynix/doxynix/commit/96d2bbbe93c4e8297812ba01e8b404d234edcb9a))
 
 ## [1.11.1](https://github.com/doxynix/doxynix/compare/v1.11.0...v1.11.1) (2026-02-28)
-
 
 ### Bug Fixes
 
@@ -1928,18 +1737,15 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.11.0](https://github.com/doxynix/doxynix/compare/v1.10.0...v1.11.0) (2026-02-27)
 
-
 ### Features
 
 * **tooling:** добавлены исчерпывающие на данный момент юнит тесты с покрытием 98% ([#440](https://github.com/doxynix/doxynix/issues/440)) ([e0c89d9](https://github.com/doxynix/doxynix/commit/e0c89d9e081d6866673044340077627f7db189cf))
 
 ## [1.10.0](https://github.com/doxynix/doxynix/compare/v1.9.8...v1.10.0) (2026-02-27)
 
-
 ### Features
 
 * **features:** добавлена страница /welcome, также чистка кода и исправление мелких багов ([#432](https://github.com/doxynix/doxynix/issues/432)) ([1596480](https://github.com/doxynix/doxynix/commit/1596480e2056d6d9583fb9c43d82ba3bbce2aa67))
-
 
 ### Bug Fixes
 
@@ -1948,13 +1754,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.9.8](https://github.com/doxynix/doxynix/compare/v1.9.7...v1.9.8) (2026-02-27)
 
-
 ### Bug Fixes
 
 * **deps:** update shiki monorepo to v4 (major) ([#428](https://github.com/doxynix/doxynix/issues/428)) ([0cd5269](https://github.com/doxynix/doxynix/commit/0cd52697c2a3f3541c803425d947564f111ebe8d))
 
 ## [1.9.7](https://github.com/doxynix/doxynix/compare/v1.9.6...v1.9.7) (2026-02-27)
-
 
 ### Bug Fixes
 
@@ -1963,13 +1767,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.9.6](https://github.com/doxynix/doxynix/compare/v1.9.5...v1.9.6) (2026-02-26)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @scalar/nextjs-api-reference to v0.9.24 ([#420](https://github.com/doxynix/doxynix/issues/420)) ([e0e7131](https://github.com/doxynix/doxynix/commit/e0e7131c8ea148a04f75c9bdee7c5cf8be59bb77))
 
 ## [1.9.5](https://github.com/doxynix/doxynix/compare/v1.9.4...v1.9.5) (2026-02-26)
-
 
 ### Bug Fixes
 
@@ -1978,7 +1780,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.9.4](https://github.com/doxynix/doxynix/compare/v1.9.3...v1.9.4) (2026-02-26)
 
-
 ### Bug Fixes
 
 * **app:** исправления багов, перенос файлов в соответствии с архитектурой проекта ([#414](https://github.com/doxynix/doxynix/issues/414)) ([f370e16](https://github.com/doxynix/doxynix/commit/f370e16dc64f9352a5c2ac78c245d18509ef1ad8))
@@ -1986,13 +1787,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.9.3](https://github.com/doxynix/doxynix/compare/v1.9.2...v1.9.3) (2026-02-26)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency posthog-js to v1.354.2 ([#407](https://github.com/doxynix/doxynix/issues/407)) ([421b585](https://github.com/doxynix/doxynix/commit/421b585812d5b3d626efc718022e05d0411acaac))
 
 ## [1.9.2](https://github.com/doxynix/doxynix/compare/v1.9.1...v1.9.2) (2026-02-25)
-
 
 ### Bug Fixes
 
@@ -2000,18 +1799,15 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.9.1](https://github.com/doxynix/doxynix/compare/v1.9.0...v1.9.1) (2026-02-25)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency posthog-js to v1.354.1 ([#401](https://github.com/doxynix/doxynix/issues/401)) ([0c5a296](https://github.com/doxynix/doxynix/commit/0c5a29605ff0ab236434fefa5c5366334e936ed5))
 
 ## [1.9.0](https://github.com/doxynix/doxynix/compare/v1.8.7...v1.9.0) (2026-02-25)
 
-
 ### Features
 
 * **tooling:** внедрение posthog ([#398](https://github.com/doxynix/doxynix/issues/398)) ([0b8c4ac](https://github.com/doxynix/doxynix/commit/0b8c4ac11eb3eea39831fcafdaab807e8df04717))
-
 
 ### Bug Fixes
 
@@ -2020,13 +1816,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.8.7](https://github.com/doxynix/doxynix/compare/v1.8.6...v1.8.7) (2026-02-24)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @ai-sdk/openai to v3.0.33 ([#389](https://github.com/doxynix/doxynix/issues/389)) ([e884c8c](https://github.com/doxynix/doxynix/commit/e884c8c06c96bd669126d3e9bfd0adf164c8a946))
 
 ## [1.8.6](https://github.com/doxynix/doxynix/compare/v1.8.5...v1.8.6) (2026-02-24)
-
 
 ### Bug Fixes
 
@@ -2034,13 +1828,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.8.5](https://github.com/doxynix/doxynix/compare/v1.8.4...v1.8.5) (2026-02-23)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#380](https://github.com/doxynix/doxynix/issues/380)) ([53b6aa5](https://github.com/doxynix/doxynix/commit/53b6aa5b4378dfcf333e1a6c5361521bd2e13b74))
 
 ## [1.8.4](https://github.com/doxynix/doxynix/compare/v1.8.3...v1.8.4) (2026-02-23)
-
 
 ### Bug Fixes
 
@@ -2048,13 +1840,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.8.3](https://github.com/doxynix/doxynix/compare/v1.8.2...v1.8.3) (2026-02-22)
 
-
 ### Bug Fixes
 
 * **deps:** update all non-major dependencies ([#371](https://github.com/doxynix/doxynix/issues/371)) ([7580b91](https://github.com/doxynix/doxynix/commit/7580b91beafdedd946dcae70984892761eda322a))
 
 ## [1.8.2](https://github.com/doxynix/doxynix/compare/v1.8.1...v1.8.2) (2026-02-21)
-
 
 ### Bug Fixes
 
@@ -2062,13 +1852,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.8.1](https://github.com/doxynix/doxynix/compare/v1.8.0...v1.8.1) (2026-02-21)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency nodemailer to v8 ([#360](https://github.com/doxynix/doxynix/issues/360)) ([686232b](https://github.com/doxynix/doxynix/commit/686232b90eb6e59dbc3d5823925e044d49005e6a))
 
 ## [1.8.0](https://github.com/doxynix/doxynix/compare/v1.7.0...v1.8.0) (2026-02-21)
-
 
 ### Features
 
@@ -2076,13 +1864,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.7.0](https://github.com/doxynix/doxynix/compare/v1.6.1...v1.7.0) (2026-02-21)
 
-
 ### Features
 
 * **tooling:** настройка политик csp и защита сессионных кук ([#350](https://github.com/doxynix/doxynix/issues/350)) ([64b1f10](https://github.com/doxynix/doxynix/commit/64b1f10358d114f0853dec8b888c73c06f6842fb))
 
 ## [1.6.1](https://github.com/doxynix/doxynix/compare/v1.6.0...v1.6.1) (2026-02-21)
-
 
 ### Bug Fixes
 
@@ -2090,13 +1876,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.6.0](https://github.com/doxynix/doxynix/compare/v1.5.7...v1.6.0) (2026-02-20)
 
-
 ### Features
 
 * **tooling:** внедрение sentry и продвинутой обработки ошибок ([#344](https://github.com/doxynix/doxynix/issues/344)) ([15aed36](https://github.com/doxynix/doxynix/commit/15aed360e022c75cdccce6611baff5f12d700d48))
 
 ## [1.5.7](https://github.com/doxynix/doxynix/compare/v1.5.6...v1.5.7) (2026-02-20)
-
 
 ### Bug Fixes
 
@@ -2104,13 +1888,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.5.6](https://github.com/doxynix/doxynix/compare/v1.5.5...v1.5.6) (2026-02-19)
 
-
 ### Bug Fixes
 
 * **security:** исправление redos в пакете minimatch ([#324](https://github.com/doxynix/doxynix/issues/324)) ([0c56c2d](https://github.com/doxynix/doxynix/commit/0c56c2d25de4cb4341ebb2fa6bf7f48a1b7c2666))
 
 ## [1.5.5](https://github.com/doxynix/doxynix/compare/v1.5.4...v1.5.5) (2026-02-18)
-
 
 ### Bug Fixes
 
@@ -2118,13 +1900,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.5.4](https://github.com/doxynix/doxynix/compare/v1.5.3...v1.5.4) (2026-02-17)
 
-
 ### Bug Fixes
 
 * **security:** исправлена уязвимость обхода путей (path traversal)  ([#313](https://github.com/doxynix/doxynix/issues/313)) ([a65cd87](https://github.com/doxynix/doxynix/commit/a65cd8776f645efe06ffd866c7b4852bb37a3705))
 
 ## [1.5.3](https://github.com/doxynix/doxynix/compare/v1.5.2...v1.5.3) (2026-02-17)
-
 
 ### Bug Fixes
 
@@ -2132,13 +1912,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.5.2](https://github.com/doxynix/doxynix/compare/v1.5.1...v1.5.2) (2026-02-17)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency lucide-react to ^0.570.0 ([#308](https://github.com/doxynix/doxynix/issues/308)) ([ec56fb5](https://github.com/doxynix/doxynix/commit/ec56fb5796ff4655fd9ff6fe9a6d56cd6187d4a1))
 
 ## [1.5.1](https://github.com/doxynix/doxynix/compare/v1.5.0...v1.5.1) (2026-02-17)
-
 
 ### Bug Fixes
 
@@ -2146,11 +1924,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.5.0](https://github.com/doxynix/doxynix/compare/v1.4.0...v1.5.0) (2026-02-17)
 
-
 ### Features
 
 * **repo-setup:** реализован флоу анализа репозитория ([#303](https://github.com/doxynix/doxynix/issues/303)) ([7dcb7a1](https://github.com/doxynix/doxynix/commit/7dcb7a125f4b5141795a9ed87e0e7f3c07580af3))
-
 
 ### Bug Fixes
 
@@ -2158,13 +1934,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.4.0](https://github.com/doxynix/doxynix/compare/v1.3.1...v1.4.0) (2026-02-14)
 
-
 ### Features
 
 * **dashboard:** изменения страницы /dashboard ([#298](https://github.com/doxynix/doxynix/issues/298)) ([01de3f7](https://github.com/doxynix/doxynix/commit/01de3f78fc825b25c4e7fcd29f00e27f3ae64f13))
 
 ## [1.3.1](https://github.com/doxynix/doxynix/compare/v1.3.0...v1.3.1) (2026-02-13)
-
 
 ### Bug Fixes
 
@@ -2172,13 +1946,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.3.0](https://github.com/doxynix/doxynix/compare/v1.2.2...v1.3.0) (2026-02-08)
 
-
 ### Features
 
 * **db:** добавлены новые индексы для ускорения работы с базой данных ([#275](https://github.com/doxynix/doxynix/issues/275)) ([31293d2](https://github.com/doxynix/doxynix/commit/31293d2c43271ec033151a70d6889f95bb7b046b))
 
 ## [1.2.2](https://github.com/doxynix/doxynix/compare/v1.2.1...v1.2.2) (2026-02-08)
-
 
 ### Bug Fixes
 
@@ -2187,13 +1959,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.2.1](https://github.com/doxynix/doxynix/compare/v1.2.0...v1.2.1) (2026-02-08)
 
-
 ### Bug Fixes
 
 * **trigger:** попытка починить trigger.dev ([#264](https://github.com/doxynix/doxynix/issues/264)) ([6361c84](https://github.com/doxynix/doxynix/commit/6361c84f1ae276d7fe6df0cc495c4c25eeea794e))
 
 ## [1.2.0](https://github.com/doxynix/doxynix/compare/v1.1.0...v1.2.0) (2026-02-08)
-
 
 ### Features
 
@@ -2245,7 +2015,6 @@ All notable changes to this project will be documented in this file. See [standa
 * **user:** добавлена возможность загрузки аватара пользователя ([#126](https://github.com/doxynix/doxynix/issues/126)) ([cdf9091](https://github.com/doxynix/doxynix/commit/cdf9091e7681825fea4bb7068d45377900cd06e9))
 * **widgets:** добавлены новые виджеты ([#100](https://github.com/doxynix/doxynix/issues/100)) ([0221441](https://github.com/doxynix/doxynix/commit/0221441aff4da82560059959a4f6398b7802bd6f))
 
-
 ### Bug Fixes
 
 * **ci:** ci для labeler был обновлен ([#137](https://github.com/doxynix/doxynix/issues/137)) ([646c10e](https://github.com/doxynix/doxynix/commit/646c10ee91ec611397d5810d5cee8dbd77cc52f5))
@@ -2289,7 +2058,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.1.0-legacy-end](https://github.com/doxynix/doxynix/compare/v1.0.4-legacy-end...v1.1.0-legacy-end) (2026-02-08)
 
-
 ### Features
 
 * **adaptive-locale:** адаптирован дашборд и страница репозов, также … ([#211](https://github.com/doxynix/doxynix/issues/211)) ([34a38c8](https://github.com/doxynix/doxynix/commit/34a38c8515406142ad191529ab0c67e0ef26a56f))
@@ -2328,7 +2096,6 @@ All notable changes to this project will be documented in this file. See [standa
 * **user:** добавлена возможность загрузки аватара пользователя ([#126](https://github.com/doxynix/doxynix/issues/126)) ([cdf9091](https://github.com/doxynix/doxynix/commit/cdf9091e7681825fea4bb7068d45377900cd06e9))
 * **widgets:** добавлены новые виджеты ([#100](https://github.com/doxynix/doxynix/issues/100)) ([0221441](https://github.com/doxynix/doxynix/commit/0221441aff4da82560059959a4f6398b7802bd6f))
 * **workflow:** полностью обновлен workflow ([#134](https://github.com/doxynix/doxynix/issues/134)) ([ebb958a](https://github.com/doxynix/doxynix/commit/ebb958a85c82c3691f06598f43d4033cc800c568))
-
 
 ### Bug Fixes
 
@@ -2370,7 +2137,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.1.0](https://github.com/Kramarich0/diploma-proj/compare/v1.0.4-legacy-end...v1.1.0) (2026-01-07)
 
-
 ### Features
 
 * **analytics:** добавлена аналитика от vercel ([#78](https://github.com/Kramarich0/diploma-proj/issues/78)) ([9c1fda6](https://github.com/Kramarich0/diploma-proj/commit/9c1fda6066d8a4441ba10e859846c21d995c8bb8))
@@ -2395,7 +2161,6 @@ All notable changes to this project will be documented in this file. See [standa
 * **user:** добавлена возможность загрузки аватара пользователя ([#126](https://github.com/Kramarich0/diploma-proj/issues/126)) ([cdf9091](https://github.com/Kramarich0/diploma-proj/commit/cdf9091e7681825fea4bb7068d45377900cd06e9))
 * **widgets:** добавлены новые виджеты ([#100](https://github.com/Kramarich0/diploma-proj/issues/100)) ([0221441](https://github.com/Kramarich0/diploma-proj/commit/0221441aff4da82560059959a4f6398b7802bd6f))
 * **workflow:** полностью обновлен workflow ([#134](https://github.com/Kramarich0/diploma-proj/issues/134)) ([ebb958a](https://github.com/Kramarich0/diploma-proj/commit/ebb958a85c82c3691f06598f43d4033cc800c568))
-
 
 ### Bug Fixes
 

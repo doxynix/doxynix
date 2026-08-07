@@ -1,9 +1,9 @@
 "use client";
 
 import { useQueryStates } from "nuqs";
-import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
+import { useDebounce } from "@/shared/hooks/use-debounce";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
@@ -15,7 +15,7 @@ import { NotificationsList } from "./notifications-list";
 
 export function NotificationsListContainer() {
   const [params] = useQueryStates(notificationsParsers);
-  const [debouncedSearch] = useDebounce(params.search, 500);
+  const debouncedSearch = useDebounce(params.search, 500);
   const safePage = clampIntegerParam(params.page, { fallback: 1, max: 1_000_000, min: 1 });
   const safeLimit = clampIntegerParam(params.limit, { fallback: 20, max: 100, min: 1 });
 

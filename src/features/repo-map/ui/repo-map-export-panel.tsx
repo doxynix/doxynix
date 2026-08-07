@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useReactFlow } from "@xyflow/react";
-import saveAs from "file-saver";
 import { Download } from "lucide-react";
 import type { Options } from "modern-screenshot";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/shared/lib/cn";
+import { saveFile } from "@/shared/lib/file-saver";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 type Props = {
@@ -81,10 +81,10 @@ export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props
 
       if (format === "png") {
         const blob = await domToBlob(viewportElement, options);
-        saveAs(blob, `${filename}.png`);
+        saveFile(blob, `${filename}.png`);
       } else {
         const blob = await domToWebp(viewportElement, options);
-        saveAs(blob, `${filename}.webp`);
+        saveFile(blob, `${filename}.webp`);
       }
     } catch (error) {
       console.error(`Failed to export:`, error);

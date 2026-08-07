@@ -83,77 +83,6 @@
     ]
   },
   {
-    "author": "DefinitelyTyped",
-    "avatar": "https://github.com/DefinitelyTyped.png?size=96",
-    "authorLink": "https://github.com/DefinitelyTyped",
-    "packages": [
-      {
-        "name": "@types/diff-match-patch",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/file-saver",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/hast",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/js-cookie",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/node",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/nodemailer",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/pg",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/picomatch",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/react",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/react-dom",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/react-scroll",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/sloc",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/ua-parser-js",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/validator",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/webpack-stats-plugin",
-        "license": "MIT"
-      },
-      {
-        "name": "@types/ws",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
     "author": "Unified.js",
     "avatar": "https://github.com/unifiedjs.png?size=96",
     "authorLink": "https://github.com/unifiedjs",
@@ -220,6 +149,73 @@
       },
       {
         "name": "unified",
+        "license": "MIT"
+      }
+    ]
+  },
+  {
+    "author": "DefinitelyTyped",
+    "avatar": "https://github.com/DefinitelyTyped.png?size=96",
+    "authorLink": "https://github.com/DefinitelyTyped",
+    "packages": [
+      {
+        "name": "@types/diff-match-patch",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/hast",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/js-cookie",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/node",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/nodemailer",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/pg",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/picomatch",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/react",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/react-dom",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/react-scroll",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/sloc",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/ua-parser-js",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/validator",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/webpack-stats-plugin",
+        "license": "MIT"
+      },
+      {
+        "name": "@types/ws",
         "license": "MIT"
       }
     ]
@@ -1040,12 +1036,12 @@
     "authorLink": "https://github.com/PostHog",
     "packages": [
       {
-        "name": "posthog-js",
+        "name": "posthog-node",
         "license": "MIT"
       },
       {
-        "name": "posthog-node",
-        "license": "MIT"
+        "name": "posthog-js",
+        "license": "(Apache-2.0 AND MIT)"
       }
     ]
   },
@@ -1408,17 +1404,6 @@
     ]
   },
   {
-    "author": "Eli Grey",
-    "avatar": "https://github.com/eligrey.png?size=96",
-    "authorLink": "https://github.com/eligrey",
-    "packages": [
-      {
-        "name": "file-saver",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
     "author": "Emil Kowalski",
     "avatar": "https://github.com/emilkowalski.png?size=96",
     "authorLink": "https://github.com/emilkowalski",
@@ -1553,7 +1538,7 @@
   {
     "author": "Hey API",
     "avatar": null,
-    "authorLink": "https://heyapi.dev",
+    "authorLink": "https://heyapi.dev/docs/openapi/typescript/get-started",
     "packages": [
       {
         "name": "@hey-api/openapi-ts",
@@ -1700,17 +1685,6 @@
     "packages": [
       {
         "name": "js-cookie",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "jshttp",
-    "avatar": "https://github.com/jshttp.png?size=96",
-    "authorLink": "https://github.com/jshttp",
-    "packages": [
-      {
-        "name": "cookie",
         "license": "MIT"
       }
     ]
@@ -1953,17 +1927,6 @@
     "packages": [
       {
         "name": "fast-check",
-        "license": "MIT"
-      }
-    ]
-  },
-  {
-    "author": "Nik",
-    "avatar": "https://github.com/Xnimorz.png?size=96",
-    "authorLink": "https://github.com/Xnimorz",
-    "packages": [
-      {
-        "name": "use-debounce",
         "license": "MIT"
       }
     ]

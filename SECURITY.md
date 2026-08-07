@@ -21,38 +21,39 @@ If you have discovered a security vulnerability in Doxynix, we appreciate your h
 
 **Please do not open public issues for security vulnerabilities.** Publicly disclosing a vulnerability can put the entire community at risk.
 
-### How to report:
+### How to report
 
-1.  **Email us:** Send a detailed description of the vulnerability to [security@doxynix.space](mailto:security@doxynix.space).
-2.  **Include details:** Please include as much information as possible:
-    *   Type of vulnerability (e.g., XSS, SQLi, IDOR).
-    *   Steps to reproduce the issue (POC).
-    *   Screenshots or video evidence.
-    *   Any relevant code snippets.
+1. **Email us:** Send a detailed description of the vulnerability to [security@doxynix.space](mailto:security@doxynix.space).
+2. **Include details:** Please include as much information as possible:
+    * Type of vulnerability (e.g., XSS, SQLi, IDOR).
+    * Steps to reproduce the issue (POC).
+    * Screenshots or video evidence.
+    * Any relevant code snippets.
 
-### Our Response Policy:
+### Our Response Policy
 
-*   We aim to acknowledge your report within **48 hours**.
-*   We will keep you updated on the progress of the fix.
-*   Once fixed, we will publicly acknowledge your contribution (unless you prefer to remain anonymous).
+* We aim to acknowledge your report within **48 hours**.
+* We will keep you updated on the progress of the fix.
+* Once fixed, we will publicly acknowledge your contribution (unless you prefer to remain anonymous).
 
 ## 🚫 Out of Scope
 
 The following types of reports are generally **not** considered valid vulnerabilities for this project:
 
-*   **DDoS/DoS attacks** or any attacks that disrupt the service availability.
-*   **Social Engineering** (phishing) of employees or users.
-*   **Self-XSS** (attacks that require the user to paste code into their own console).
-*   Missing security headers (unless they lead to a direct exploit).
-*   Automated scanner reports without a valid proof of concept.
+* **DDoS/DoS attacks** or any attacks that disrupt the service availability.
+* **Social Engineering** (phishing) of employees or users.
+* **Self-XSS** (attacks that require the user to paste code into their own console).
+* Missing security headers (unless they lead to a direct exploit).
+* Automated scanner reports without a valid proof of concept.
 
 ## ⚖️ Safe Harbor
 
 We support safe harbor for security researchers. We will not pursue legal action against researchers who:
-*   Report vulnerabilities in good faith.
-*   Do not access or modify user data without permission.
-*   Do not disrupt our services.
-*   Give us reasonable time to fix the issue before public disclosure.
+
+* Report vulnerabilities in good faith.
+* Do not access or modify user data without permission.
+* Do not disrupt our services.
+* Give us reasonable time to fix the issue before public disclosure.
 
 ---
 

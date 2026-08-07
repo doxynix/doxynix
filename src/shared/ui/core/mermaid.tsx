@@ -2,8 +2,8 @@
 
 import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import { useTheme } from "next-themes";
-import { useDebounce } from "use-debounce";
 
+import { useDebounce } from "@/shared/hooks/use-debounce";
 import { cn } from "@/shared/lib/cn";
 import { mermaidThemes, type MermaidCustomTheme } from "@/shared/lib/mermaid-themes";
 
@@ -125,7 +125,7 @@ function useMermaid({
 
   const id = useId().replaceAll(":", "");
   const renderRef = useRef<HTMLDivElement>(null);
-  const [debouncedChart] = useDebounce(chart, debounceTime);
+  const debouncedChart = useDebounce(chart, debounceTime);
 
   const preprocessedChart = preprocessMermaidChart(debouncedChart, buildHref);
 

@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import type { Route } from "next";
 import { ChevronDown, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/constants/navigation";
+import { useDebounce } from "@/shared/hooks/use-debounce";
 import { useRouter } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import type { MenuItem } from "@/shared/types/navigation.types";
@@ -38,7 +38,7 @@ export function AppCommandMenu() {
   const open = useCommandMenuIsOpen();
   const { setOpen } = useCommandMenuActions();
   const [search, setSearch] = useState("");
-  const [debouncedSearch] = useDebounce(search, 300);
+  const debouncedSearch = useDebounce(search, 300);
   const [isReposExpanded, setIsReposExpanded] = useState(true);
   const { setOpen: setOpenCreateDialog } = useCreateRepoActions();
 

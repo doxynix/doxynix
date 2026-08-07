@@ -3,7 +3,6 @@
 import { useEffect, useState, type ComponentType } from "react";
 import dynamic from "next/dynamic";
 import { uniqBy } from "es-toolkit";
-import saveAs from "file-saver";
 import {
   BookOpen,
   Download,
@@ -19,6 +18,7 @@ import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
 import { formatFullDate } from "@/shared/lib/date-utils";
+import { saveFile } from "@/shared/lib/file-saver";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
@@ -166,7 +166,7 @@ export function RepoDocs({
 
     const blob = new Blob([docContent.raw], { type: "text/markdown;charset=utf-8" });
     const fileName = `${activeTab}.md`;
-    saveAs(blob, fileName);
+    saveFile(blob, fileName);
   };
 
   const tabItems = availableDocs

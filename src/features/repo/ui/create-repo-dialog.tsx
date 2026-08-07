@@ -7,11 +7,11 @@ import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
 import { useForm, useWatch } from "react-hook-form";
-import { useDebounce } from "use-debounce";
 
 import { CreateRepoSchema, type CreateRepoInput } from "@/shared/api/schemas/repo";
 import { trpc } from "@/shared/api/trpc";
 import { useClickOutside } from "@/shared/hooks/use-click-outside";
+import { useDebounce } from "@/shared/hooks/use-debounce";
 import { authClient } from "@/shared/lib/auth-client";
 import { isGitHubUrl } from "@/shared/lib/github-url";
 import { AppButton } from "@/shared/ui/core/button";
@@ -71,7 +71,7 @@ export function CreateRepoDialog() {
   });
 
   const urlValue = useWatch({ control: form.control, name: "url" });
-  const [debouncedValue] = useDebounce(urlValue, 300);
+  const debouncedValue = useDebounce(urlValue, 300);
 
   useClickOutside(containerRef, () => setShowSuggestions(false), open);
 

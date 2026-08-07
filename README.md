@@ -41,17 +41,19 @@
 Engineered with extreme attention to performance and type safety, Doxynix utilizes the bleeding-edge **Next.js 16** stack with **Partial Prerendering (PPR)** to deliver a native-like experience.
 
 ### Key Features
-*   📊 **Deep Static Analysis:** powered by custom parsers and `jscpd` for copy-paste detection.
-*   ⚡ **Zero-Latency UI:** Utilizing `TanStack Query` and `PPR` for instant state management.
-*   🔒 **Enterprise Security:** `NextAuth.js` with GitHub OAuth, secured by `Secretlint` and `CodeQL`.
-*   📄 **Auto-Docs:** `tRPC` to OpenAPI generation via `Scalar`.
-*   ☁️ **Serverless Infrastructure:** Database on Neon (Pg), queues on Upstash, files on UploadThing.
+
+* 📊 **Deep Static Analysis:** powered by custom parsers and `jscpd` for copy-paste detection.
+* ⚡ **Zero-Latency UI:** Utilizing `TanStack Query` and `PPR` for instant state management.
+* 🔒 **Enterprise Security:** `NextAuth.js` with GitHub OAuth, secured by `Secretlint` and `CodeQL`.
+* 📄 **Auto-Docs:** `tRPC` to OpenAPI generation via `Scalar`.
+* ☁️ **Serverless Infrastructure:** Database on Neon (Pg), queues on Upstash, files on UploadThing.
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend & UI
+
 | Technology | Version | Usage |
 | :--- | :--- | :--- |
 | **Next.js** | `16.1.0` | App Router, Server Actions, PPR. |
@@ -62,6 +64,7 @@ Engineered with extreme attention to performance and type safety, Doxynix utiliz
 | **Sonner** | `2.0` | High-performance toast notifications. |
 
 ### Backend & Data
+
 | Technology | Usage |
 | :--- | :--- |
 | **tRPC** | `v11` | End-to-end typesafe API without schemas. |
@@ -72,6 +75,7 @@ Engineered with extreme attention to performance and type safety, Doxynix utiliz
 | **UploadThing** | `v7` | Direct S3 file uploads (Oregon region). |
 
 ### Quality Control & DX
+
 | Tool | Purpose |
 | :--- | :--- |
 | **Husky** | Git hooks (pre-commit, pre-push). |
@@ -85,35 +89,42 @@ Engineered with extreme attention to performance and type safety, Doxynix utiliz
 ## 🏁 Getting Started
 
 ### Prerequisites
-*   Node.js 22+ (Required for Next.js 16)
-*   pnpm 8+ (Recommended)
+
+* Node.js 22+ (Required for Next.js 16)
+* pnpm 8+ (Recommended)
 
 ### Installation
 
-1.  **Clone the repository**
+1. **Clone the repository**
+
     ```bash
     git clone https://github.com/doxynix/doxynix.git
     cd doxynix
     ```
 
-2.  **Install dependencies**
+2. **Install dependencies**
+
     ```bash
     pnpm install
     ```
 
-3.  **Environment Setup**
+3. **Environment Setup**
+
     ```bash
     cp .env.example .env.local
     ```
+
     *Fill in your secrets (Database, Auth, UploadThing).*
 
-4.  **Database Migration**
+4. **Database Migration**
+
     ```bash
     pnpm prisma generate
     pnpm prisma db push
     ```
 
-5.  **Run Development Server**
+5. **Run Development Server**
+
     ```bash
     pnpm dev
     ```
@@ -125,19 +136,22 @@ Engineered with extreme attention to performance and type safety, Doxynix utiliz
 We strictly follow **Conventional Commits** and ensure code quality via git hooks.
 
 ### Commit Message Convention
+
 Your commit messages must follow the standard: `type(scope): subject`
 
-*   `feat`: A new feature
-*   `fix`: A bug fix
-*   `docs`: Documentation only changes
-*   `style`: Changes that do not affect the meaning of the code
-*   `refactor`: A code change that neither fixes a bug nor adds a feature
-*   `chore`: Changes to the build process or auxiliary tools
+* `feat`: A new feature
+* `fix`: A bug fix
+* `docs`: Documentation only changes
+* `style`: Changes that do not affect the meaning of the code
+* `refactor`: A code change that neither fixes a bug nor adds a feature
+* `chore`: Changes to the build process or auxiliary tools
 
 **Example:**
+
 ```bash
 git commit -m "feat(repo): add copy-paste detection via jscpd"
 ```
+
 *If you violate this rule, `commitlint` will reject your commit.*
 
 ---
@@ -145,9 +159,10 @@ git commit -m "feat(repo): add copy-paste detection via jscpd"
 ## 🛡️ Security
 
 This project is secured by default.
-*   **Secretlint** scans every commit for leaked keys.
-*   **CodeQL** runs deep semantic code analysis on every push.
-*   **Dependabot** keeps dependencies up to date.
+
+* **Secretlint** scans every commit for leaked keys.
+* **CodeQL** runs deep semantic code analysis on every push.
+* **Dependabot** keeps dependencies up to date.
 
 See [SECURITY.md](SECURITY.md) for our vulnerability reporting policy.
 
@@ -158,14 +173,18 @@ See [SECURITY.md](SECURITY.md) for our vulnerability reporting policy.
 Doxynix is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0-only)**.
 
 ### Open Source Use (AGPLv3)
-- **Ideal for:** Individuals, open-source contributors, and self-hosters.
-- **Requirement:** If you modify Doxynix and run it as a service over a network, you **must** make your modified source code available to your users under the same AGPLv3 license. This ensures that all improvements to the "Engineering Knowledge Base" engine return to the community.
+
+* **Ideal for:** Individuals, open-source contributors, and self-hosters.
+
+* **Requirement:** If you modify Doxynix and run it as a service over a network, you **must** make your modified source code available to your users under the same AGPLv3 license. This ensures that all improvements to the "Engineering Knowledge Base" engine return to the community.
 
 ### Alternative Commercial Licensing
+
 If you represent a company or an organization that wants to:
-- Integrate Doxynix into a closed-source commercial product.
-- Use Doxynix in a production environment without the AGPLv3 copyleft restrictions.
-- Receive professional support and enterprise-grade features.
+
+* Integrate Doxynix into a closed-source commercial product.
+* Use Doxynix in a production environment without the AGPLv3 copyleft restrictions.
+* Receive professional support and enterprise-grade features.
 
 A separate **Commercial License** is available by request. This is not included in the package's SPDX license identifier, but can be negotiated independently for enterprise use cases.
 
