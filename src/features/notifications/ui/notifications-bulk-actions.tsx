@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { AlertTriangle, CheckCheck, Trash2 } from "lucide-react";
 import { useQueryStates } from "nuqs";
-import { useDebounce } from "use-debounce";
 
+import { useDebounce } from "@/shared/hooks/use-debounce";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -31,7 +31,7 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
   const { deleteRead, markAllAsRead } = useNotificationActions();
   const [open, setOpen] = useState(false);
 
-  const [debouncedSearch] = useDebounce(filters.search, 500);
+  const debouncedSearch = useDebounce(filters.search, 500);
 
   const isMarkAllDisabled = !stats || stats.unread === 0 || markAllAsRead.isPending;
   const isDeleteReadDisabled = !stats || stats.read === 0 || deleteRead.isPending;

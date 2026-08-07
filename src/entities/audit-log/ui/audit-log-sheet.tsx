@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, type ComponentType } from "react";
-import saveAs from "file-saver";
 import { Clock, Download, Eye, Globe, Hash, Shield } from "lucide-react";
 import { useLocale } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
 import { formatFullDate } from "@/shared/lib/date-utils";
+import { saveFile } from "@/shared/lib/file-saver";
 import { AppButton } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 import {
@@ -43,7 +43,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
     const blob = new Blob([JSON.stringify(log.rawPayload, null, 2)], {
       type: "application/json;charset=utf-8",
     });
-    saveAs(blob, `audit-${log.entityType.toLowerCase()}-${log.id.slice(0, 8)}.json`);
+    saveFile(blob, `audit-${log.entityType.toLowerCase()}-${log.id.slice(0, 8)}.json`);
   };
 
   return (

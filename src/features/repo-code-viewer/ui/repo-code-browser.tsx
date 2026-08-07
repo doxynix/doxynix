@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { EditorView } from "@uiw/react-codemirror";
-import { saveAs } from "file-saver";
 import {
   Check,
   Download,
@@ -22,6 +21,7 @@ import { toast } from "sonner";
 import { trpc } from "@/shared/api/trpc";
 import { useTypewriter } from "@/shared/hooks/use-typewriter";
 import { authClient } from "@/shared/lib/auth-client";
+import { saveFile } from "@/shared/lib/file-saver";
 import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
@@ -175,7 +175,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   const handleDownload = () => {
     const fileName = path.split("/").pop() ?? "file.txt";
 
-    saveAs(new Blob([localContent], { type: "text/plain;charset=utf-8" }), fileName);
+    saveFile(new Blob([localContent], { type: "text/plain;charset=utf-8" }), fileName);
   };
 
   const handleAudit = () => {

@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
-import Cookies from "js-cookie";
 
 import type { User } from "@/shared/lib/auth-client";
+import { getClientCookie } from "@/shared/lib/cookies";
 
 type Props = { user: User };
 
@@ -17,8 +17,8 @@ export function SentryUserIdentificator({ user }: Props) {
       username: user.name,
     });
 
-    const requestId = Cookies.get("last_request_id");
-    if (requestId) {
+    const requestId = getClientCookie("last_request_id");
+    if (requestId != null) {
       Sentry.setTag("request_id", requestId);
     }
 

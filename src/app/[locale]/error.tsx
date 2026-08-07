@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import * as Sentry from "@sentry/nextjs";
-import Cookies from "js-cookie";
 import { ServerCrash } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { IS_DEV } from "@/shared/constants/env.flags";
+import { getClientCookie } from "@/shared/lib/cookies";
 import { AppButton } from "@/shared/ui/core/button";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
@@ -32,7 +32,7 @@ export default function ErrorPage({
   }));
 
   useEffect(() => {
-    const rid = Cookies.get("last_request_id") ?? null;
+    const rid = getClientCookie("last_request_id");
 
     const info = {
       screen: `${window.innerWidth}x${window.innerHeight}`,

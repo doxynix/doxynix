@@ -40,7 +40,6 @@ export function coerceAnalysisPayload(
     metrics: analysis.metricsJson as unknown as RepoMetrics,
   };
 }
-
 export function dedupeLatestDocsByType(docs: StoredDocument[]) {
   const sorted = [...docs].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 

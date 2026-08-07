@@ -2,9 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
-import { useDebounce } from "use-debounce";
 
 import { trpc } from "@/shared/api/trpc";
+import { useDebounce } from "@/shared/hooks/use-debounce";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
@@ -34,7 +34,7 @@ export function RepoListContainer({ config }: Readonly<Props>) {
 
   const [filters] = useQueryStates(repoParsers);
 
-  const [debouncedSearch] = useDebounce(filters.search, 500);
+  const debouncedSearch = useDebounce(filters.search, 500);
 
   const safeLimit = clampIntegerParam(config?.limit, { fallback: 5, max: 100, min: 1 });
   const safePage = clampIntegerParam(filters.page, { fallback: 1, max: 1_000_000, min: 1 });

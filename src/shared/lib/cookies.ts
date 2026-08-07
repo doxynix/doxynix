@@ -1,20 +1,23 @@
-import Cookies from "js-cookie";
+export function getClientCookie(name: string): null | string {
+  if (typeof window === "undefined") return null;
+
+  const matches = RegExp(
+    new RegExp("(?:^|; )" + name.replaceAll(/([$()*+./?[\\\]^{|}])/g, "\\$1") + "=([^;]*)")
+  ).exec(document.cookie);
+  return matches ? decodeURIComponent(matches[1] ?? "") : null;
+}
 
 /**
- * Устанавливает куку на стороне клиента.
+ * Устанавливает куку на стороне клиента
  * @param name - Название куки
- * @param value - Значение (строка или булево)
+ * @param value - Значение
  * @param maxAge - Время жизни в СЕКУНДАХ
  */
 export function setClientCookie(name: string, value: boolean | string, maxAge: number) {
   if (typeof window === "undefined") return;
 
-  Cookies.set(name, String(value), {
-    // Конвертируем секунды (max-age) в дни (expires), так как js-cookie работает с днями
-    expires: maxAge / 86_400,
-    path: "/",
-    sameSite: "Lax",
-    // Автоматически ставим Secure, если протокол https
-    secure: window.location.protocol === "https:",
-  });
+  const secure = window.location.protocol === "https:" ? "Secure;" : "";
+
+  // eslint-disable-next-line unicorn/no-document-cookie
+  document.cookie = `${name}=${encodeURIComponent(String(value))}; max-age=${maxAge}; path=/; SameSite=Lax; ${secure}`;
 }
