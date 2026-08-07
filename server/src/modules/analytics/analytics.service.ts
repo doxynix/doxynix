@@ -1,4 +1,5 @@
 import { SEVERITY_LEVELS, type Severity } from "@doxynix/siem-shared";
+import { Temporal } from "@js-temporal/polyfill";
 import { db } from "@server/core/db/db";
 import { incidents, rules } from "@server/core/db/schema";
 import { count, desc, eq, gte, sql } from "drizzle-orm";
@@ -8,7 +9,7 @@ export async function getDashboardAnalytics(query: DashboardAnalyticsQuery) {
   const { days } = query;
 
   const now = Temporal.Now.instant();
-  const startTemporal = now.subtract({ days: days }).toZonedDateTimeISO("UTC").startOfDay();
+  const startTemporal = now.toZonedDateTimeISO("UTC").subtract({ days }).startOfDay();
   const startDate = new Date(startTemporal.epochMilliseconds);
 
   const severitySelectors = Object.fromEntries(

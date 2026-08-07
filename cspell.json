@@ -27,7 +27,8 @@
     "ilike",
     "LOOKBACK",
     "lookback",
-    "ipcountry"
+    "ipcountry",
+    "Kramarich"
   ],
   "ignorePaths": [
     "**/node_modules/**",

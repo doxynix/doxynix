@@ -1,5 +1,6 @@
 import { SEVERITY_LEVELS } from "@doxynix/siem-shared";
 import { paginationQuerySchema } from "@server/core/db/pagination";
+import { selectRuleSchema } from "@server/core/db/schema";
 import { z } from "zod";
 
 function isValidRegex(pattern: string): boolean {
@@ -12,7 +13,7 @@ function isValidRegex(pattern: string): boolean {
 }
 
 export const getRulesQuerySchema = paginationQuerySchema.extend({
-  severity: z.enum(SEVERITY_LEVELS).optional(),
+  severity: selectRuleSchema.shape.severity.optional(),
   isActive: z.coerce.boolean().optional(),
   search: z.string().max(255, "Search query too long").optional(),
 });

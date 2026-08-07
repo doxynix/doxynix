@@ -35,9 +35,15 @@ export const statusEnum = pgEnum("notification_status", ["pending", "sent", "fai
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().default(sql`uuidv7()`),
   email: citext("email").unique().notNull(),
-  passwordHash: text("password_hash").notNull(),
+  emailVerified: boolean("email_verified").default(false).notNull(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+  password: text("password"),
   role: rolesEnum("role").default("analyst").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  twoFactorEnabled: boolean("two_factor_enabled").default(false).notNull(),
+  twoFactorSecret: text("two_factor_secret"),
+  twoFactorBackupCodes: text("two_factor_backup_codes"),
 });
 
 export const incidents = pgTable(
@@ -139,6 +145,56 @@ export const notifications = pgTable(
   ],
 );
 
+export const sessions = pgTable("sessions", {
+  id: uuid("id").primaryKey().default(sql`uuidv7()`),
+  expiresAt: timestamp("expires_at").notNull(),
+  token: text("token").notNull().unique(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+});
+
+export const accounts = pgTable("accounts", {
+  id: uuid("id").primaryKey().default(sql`uuidv7()`),
+  accountId: text("account_id").notNull(),
+  providerId: text("provider_id").notNull(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  idToken: text("id_token"),
+  accessTokenExpiresAt: timestamp("access_token_expires_at"),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+  scope: text("scope"),
+  password: text("password"),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+});
+
+export const verifications = pgTable("verifications", {
+  id: uuid("id").primaryKey().default(sql`uuidv7()`),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at"),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const twoFactors = pgTable("two_factors", {
+  id: uuid("id").primaryKey().default(sql`uuidv7()`),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  secret: text("secret").notNull(),
+  backupCodes: text("backup_codes").notNull(),
+  enabled: boolean("enabled").notNull(),
+});
+
 export const incidentsRelations = relations(incidents, ({ many }) => ({
   findings: many(findings),
   notifications: many(notifications),
@@ -179,4 +235,8 @@ export const insertIncidentSchema = createInsertSchema(incidents);
 export const selectRuleSchema = createSelectSchema(rules);
 export const insertRuleSchema = createInsertSchema(rules);
 
+export const selectUserSchema = createSelectSchema(users);
 export const insertUserSchema = createInsertSchema(users);
+
+export const selectAuditLogSchema = createSelectSchema(auditLogs);
+export const insertAuditLogSchema = createInsertSchema(auditLogs);

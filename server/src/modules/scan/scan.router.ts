@@ -8,8 +8,7 @@ import { scanLogContent } from "./scan.service";
 
 export const scanRouter = new Hono<AuthEnv>()
   .use("*", requireAuth)
-
-  .post("/", zValidator("json", scanRequestSchema), async (c) => {
+  .post("/scan", zValidator("json", scanRequestSchema), async (c) => {
     const { content, fileName } = c.req.valid("json");
     const user = c.get("user");
 

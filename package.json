@@ -21,6 +21,7 @@
     "db:push": "bun --cwd server db:push",
     "db:studio": "bun --cwd server db:studio",
     "db:migrate": "bun --cwd server db:migrate",
+    "db:drop-migration": "bun --cwd server db:drop-migration",
     "build": "turbo build",
     "build:client": "turbo build --filter=@doxynix/siem-client",
     "build:server": "turbo build --filter=@doxynix/siem-server",

@@ -12,10 +12,14 @@ export const env = createEnv({
     CLIENT_URL: z
       .string()
       .optional()
-      .default("http://localhost:3000,https://localhost:3000")
+      .default(
+        "http://localhost:3000,https://localhost:3000,http://127.0.0.1:3000,https://127.0.0.1:3000",
+      )
       .transform((val) => val.split(",").map((url) => url.trim().replace(/\/$/, "")))
       .pipe(z.array(z.url()).min(1)),
     NODE_ENV: z.enum(["production", "development", "test"]).default("development"),
+    INITIAL_ADMIN_EMAIL: z.email().optional(),
+    INITIAL_ADMIN_PASSWORD: z.string().optional(),
   },
   runtimeEnv: process.env,
   skipValidation: process.env.CI === "true",

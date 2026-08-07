@@ -1,9 +1,10 @@
 import { paginationQuerySchema } from "@server/core/db/pagination";
-import { z } from "zod";
+import { selectAuditLogSchema } from "@server/core/db/schema";
+import type { z } from "zod";
 
 export const getAuditLogsQuerySchema = paginationQuerySchema.extend({
-  actor: z.string().max(100, "Actor query too long").optional(),
-  action: z.string().max(150, "Action query too long").optional(),
+  actor: selectAuditLogSchema.shape.actor.optional(),
+  action: selectAuditLogSchema.shape.action.optional(),
 });
 
 export type GetAuditLogsQuery = z.infer<typeof getAuditLogsQuerySchema>;

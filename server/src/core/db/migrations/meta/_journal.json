@@ -15,6 +15,41 @@
       "when": 1785964084260,
       "tag": "0001_add_columns_to_audit_logs_table",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786109016357,
+      "tag": "0002_add_required_schemas_for_better_auth",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786109265436,
+      "tag": "0003_add_email_verified_to_users",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786109660308,
+      "tag": "0004_add_required_fields_to_users",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1786109966384,
+      "tag": "0005_add_required_field_to_2fa_plugin",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786112747185,
+      "tag": "0006_convert_auth_ids_to_uuid",
+      "breakpoints": true
     }
   ]
 }
