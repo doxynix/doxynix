@@ -38,7 +38,9 @@ async function getLastSyncedState(): Promise<CursorState> {
   return { lastTime: fallbackInstant.toString() };
 }
 
-export async function runAxiomSyncCycle(): Promise<{ processedCount: number; hasMore: boolean }> {
+type SyncCycle = { processedCount: number; hasMore: boolean };
+
+async function runAxiomSyncCycle(): Promise<SyncCycle> {
   const { lastTime, cursor: lastCursor } = await getLastSyncedState();
 
   const aplQuery = `

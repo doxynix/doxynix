@@ -35,6 +35,13 @@ mcpServers:
       DOPPLER_NO_CHECK_VERSION: "true"
     connectionTimeout: 60000
 
+  - name: context7
+    command: bun
+    args:
+      - x
+      - "@upstash/context7-mcp@latest"
+    connectionTimeout: 60000
+
   - name: local-postgres
     command: doppler
     args:
