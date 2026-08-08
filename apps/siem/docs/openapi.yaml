@@ -1,0 +1,52 @@
+openapi: 3.0.0
+info:
+  title: Doxynix SIEM API
+  version: 0.0.1
+servers:
+  - url: http://localhost:3000/api
+paths:
+  /ping:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  message: { type: string }
+  /logs/scan:
+    post:
+      summary: Scan logs for sensitive patterns
+      responses:
+        '200':
+          description: Scan completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanResult'
+        '413':
+          description: Payload too large
+components:
+  schemas:
+    ScanResult:
+      type: object
+      required: [isSafe, message]
+      properties:
+        isSafe: { type: boolean }
+        message: { type: string }
+        findings:
+          type: array
+          items:
+            $ref: '#/components/schemas/LeakFinding'
+    LeakFinding:
+      type: object
+      required: [ruleId, ruleName, severity, matchedText]
+      properties:
+        ruleId: { type: string }
+        ruleName: { type: string }
+        severity: { type: string }
+        matchedText: { type: string }

@@ -1,0 +1,42 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "siem",
+    "biome",
+    "doxynix",
+    "fsd",
+    "secretlint",
+    "lefthook",
+    "bunx",
+    "axiomhq",
+    "bhvr",
+    "xlink",
+    "remixicon",
+    "hotspots",
+    "varchar",
+    "statefulness",
+    "iconify",
+    "uuidv",
+    "desynchronization",
+    "neondatabase",
+    "datepicker",
+    "glpat",
+    "citext",
+    "trgm",
+    "ilike",
+    "LOOKBACK",
+    "lookback",
+    "ipcountry",
+    "Kramarich"
+  ],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/.turbo/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/bun.lock",
+    "**/bun.lockb"
+  ]
+}

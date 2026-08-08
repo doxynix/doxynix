@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true
+  },
+  "include": ["vite.config.ts"]
+}
