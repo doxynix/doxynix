@@ -1,0 +1,190 @@
+"use client";
+
+import { useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
+import * as Ably from "ably";
+import { AblyProvider } from "ably/react";
+import { toast } from "sonner";
+
+import { trpc } from "@/shared/api/trpc";
+import { IS_PROD } from "@/shared/constants/env.flags";
+import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { useRouter } from "@/shared/i18n/routing";
+import { authClient } from "@/shared/lib/auth-client";
+
+import type { RepoStatus } from "@/entities/repo/model/repo.types";
+import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
+
+import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
+
+type Props = { children: ReactNode };
+
+export const RealtimeProvider = ({ children }: Props) => {
+  const { data: session } = authClient.useSession();
+  const router = useRouter();
+  const userId = session?.user.id;
+
+  const { invalidateAll } = useNotificationActions();
+  const { invalidate } = useRepoActions();
+  const utils = trpc.useUtils();
+
+  const [client, setClient] = useState<Ably.Realtime | null>(null);
+
+  useEffect(() => {
+    if (userId == null) return;
+
+    const realtime = new Ably.Realtime({
+      authUrl: "/api/realtime/auth",
+      autoConnect: true,
+      logLevel: IS_PROD ? 0 : 1,
+    });
+
+    if (!IS_PROD) {
+      realtime.connection.on((state) => {
+        console.log("Realtime connection:", state.current);
+      });
+    }
+    // FIXME: дизейблить пока что потом придумаю чет
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setClient(realtime);
+
+    return () => {
+      realtime.close();
+      setClient(null);
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (!client || userId == null) return;
+
+    const systemChannel = client.channels.get(REALTIME_CONFIG.channels.system);
+    const userChannel = client.channels.get(REALTIME_CONFIG.channels.user(userId));
+
+    const handleSystemMsg = (msg: Ably.InboundMessage) => {
+      if (msg.name === REALTIME_CONFIG.events.system.maintenance) {
+        toast.warning("Внимание! Технические работы через 5 минут.");
+      }
+    };
+
+    const handleUserMsg = (msg: Ably.InboundMessage) => {
+      if (msg.name === REALTIME_CONFIG.events.user.notification) {
+        const data = msg.data as { body: string; title: string };
+        toast.success(data.title, { description: data.body });
+        void invalidateAll();
+      }
+
+      if (msg.name === REALTIME_CONFIG.events.user.fileActionCompleted) {
+        const payload = msg.data as {
+          fixId?: string;
+          path?: string;
+          type: "AUDIT" | "DOCUMENTATION" | "FIX_GENERATED";
+        };
+
+        if (payload.type === "FIX_GENERATED" && payload.fixId != null) {
+          void utils.analysis.getById.invalidate({ fixId: payload.fixId });
+          toast.success("AI код-фикс готов!");
+        } else if (payload.path != null) {
+          const action = payload.type === "AUDIT" ? "quick-file-audit" : "document-file-preview";
+          void utils.analysis.getFileActionResult.invalidate({ action, path: payload.path });
+          toast.success(`AI завершил ${payload.type === "AUDIT" ? "audit" : "document"} file!`);
+        }
+      }
+
+      if (msg.name === REALTIME_CONFIG.events.user.prCommentReceived) {
+        const payload = msg.data as {
+          author: string;
+          authorAvatarUrl: string;
+          commentId: string;
+          prNumber: number;
+          prTitle: string;
+          repoName: string;
+          repoOwner: string;
+        };
+
+        void utils.analysis.getComments.invalidate();
+
+        toast.info(`New comment in PR #${payload.prNumber}`, {
+          action: {
+            label: "View",
+            onClick: () => {
+              router.push(
+                `/dashboard/repo/${payload.repoOwner}/${payload.repoName}/pull/${payload.prNumber}`
+              );
+            },
+          },
+          description: `@${payload.author} commented on "${payload.prTitle}"`,
+          icon: (
+            <Image
+              alt={payload.author}
+              src={payload.authorAvatarUrl}
+              height={16}
+              width={16}
+              className="size-4 rounded-full"
+            />
+          ),
+        });
+      }
+
+      if (msg.name === REALTIME_CONFIG.events.user.analysisProgress) {
+        const payload = msg.data as {
+          analysisId: string;
+          message: string;
+          progress: number;
+          status: RepoStatus;
+        };
+
+        utils.analytics.getDashboardStats.setData({}, (oldData) => {
+          if (oldData == null) return oldData;
+
+          return {
+            ...oldData,
+            recentActivity: oldData.recentActivity.map((activity) =>
+              activity.id === payload.analysisId
+                ? { ...activity, progress: payload.progress, status: payload.status }
+                : activity
+            ),
+          };
+        });
+
+        if (payload.status === "DONE" || payload.status === "FAILED") {
+          invalidate();
+
+          void utils.analysis.getLatest.invalidate();
+          void utils.analysis.getHistory.invalidate();
+        }
+      }
+
+      if (msg.name === REALTIME_CONFIG.events.user.auditUpdated) {
+        void utils.audit.getActivityLogs.invalidate();
+      }
+      if (msg.name === REALTIME_CONFIG.events.user.sessionUpdated) {
+        void utils.agent.listSessions.invalidate();
+      }
+    };
+
+    void systemChannel.subscribe(handleSystemMsg);
+    void userChannel.subscribe(handleUserMsg);
+
+    return () => {
+      void systemChannel.unsubscribe(handleSystemMsg);
+      void userChannel.unsubscribe(handleUserMsg);
+    };
+  }, [
+    client,
+    userId,
+    invalidateAll,
+    invalidate,
+    utils.analytics.getDashboardStats,
+    utils.analysis.getFileActionResult,
+    utils.analysis.getById,
+    utils.audit.getActivityLogs,
+    utils.agent.listSessions,
+    utils.analysis.getComments,
+    utils.analysis.getLatest,
+    utils.analysis.getHistory,
+  ]);
+
+  if (!client) return <>{children}</>;
+
+  return <AblyProvider client={client}>{children}</AblyProvider>;
+};

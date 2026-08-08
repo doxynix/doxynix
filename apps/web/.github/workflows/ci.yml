@@ -1,0 +1,657 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+  schedule:
+    - cron: "30 3 * * *"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+env:
+  NODE_ENV: test
+  CI: "true"
+  SKIP_ENV_VALIDATION: "true"
+  NEXT_TELEMETRY_DISABLED: 1
+  NODE_OPTIONS: "--max-old-space-size=6144"
+  PRISMA_FIELD_ENCRYPTION_KEY: ${{ secrets.PRISMA_FIELD_ENCRYPTION_KEY }}
+  DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+  DIRECT_URL: postgresql://user:password@localhost:5432/test_db
+  NEXTAUTH_URL: "http://localhost:3000"
+  JWT_SECRET: "dummy-jwt-secret"
+  TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA"
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: "1x00000000000000000000AA"
+  NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+  RESEND_API_KEY: "re_dummy_123"
+  ABLY_API_KEY: "dummy:key"
+  GITHUB_APP_ID: "123456"
+  GITHUB_APP_PRIVATE_KEY: "dummy-private-key"
+  GITHUB_SYSTEM_INSTALLATION_ID: "999999"
+  GITHUB_WEBHOOK_SECRET: "dummy"
+  GROQ_API_KEY: "gsk_dummy"
+  UPLOADTHING_TOKEN: "eyJdummy.token"
+  UPSTASH_REDIS_REST_URL: "https://dummy-redis.upstash.io"
+  UPSTASH_REDIS_REST_TOKEN: "dummy-token"
+  GITHUB_CLIENT_ID: "dummy"
+  GITHUB_CLIENT_SECRET: "dummy"
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID: "dummy"
+  GOOGLE_CLIENT_SECRET: "dummy"
+  GITLAB_CLIENT_ID: "dummy"
+  GITLAB_CLIENT_SECRET: "dummy"
+  YANDEX_CLIENT_ID: "dummy"
+  YANDEX_CLIENT_SECRET: "dummy"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # ------------------------------------------------------------------
+  # 0. Замер времени
+  # ------------------------------------------------------------------
+  init:
+    name: Init CI metadata
+    runs-on: ubuntu-latest
+    outputs:
+      started_at: ${{ steps.time.outputs.started_at }}
+    steps:
+      - name: Save CI start time
+        id: time
+        run: echo "started_at=$(date -u +%s)" >> $GITHUB_OUTPUT
+
+  # ------------------------------------------------------------------
+  # 1. Определение изменений
+  # ------------------------------------------------------------------
+  changes:
+    needs: [init]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      pull-requests: read
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+        with:
+          fetch-depth: 2
+      - uses: dorny/paths-filter@61f87a10cd2c304679af17bb73ef192addf33c1c
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'vitest.config.ts'
+              - 'prisma/**'
+              - 'src/server/**'
+              - 'src/app/api/**'
+              - 'src/shared/**'
+              - 'src/tests/**'
+
+  # ------------------------------------------------------------------
+  # 2. КАЧЕСТВО КОДА (LINT, FORMATTING, DUPLICATION)
+  # ------------------------------------------------------------------
+  quality:
+    needs: [init]
+    if: github.actor != 'ImgBotApp'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@6e7bdbda5fe05107efc88b23b7ed00aa05f84ca0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24.14.1
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check Formatting
+        run: pnpm prettier --check .
+
+      - name: Linting
+        run: pnpm lint
+
+      - name: Run Secretlint
+        run: pnpm run secretlint:check
+
+      - name: Check for Typos (CSpell)
+        run: pnpm run spellcheck
+        continue-on-error: true
+
+      - name: Check Code Duplication (JSCPD)
+        run: pnpm run dup
+
+  # ------------------------------------------------------------------
+  # 3. ТИПИЗАЦИЯ (TYPESCRIPT, KNIP)
+  # ------------------------------------------------------------------
+  types:
+    needs: [init]
+    if: github.actor != 'ImgBotApp'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@6e7bdbda5fe05107efc88b23b7ed00aa05f84ca0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24.14.1
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare Database Schema
+        run: pnpm prisma db push --skip-generate
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+          DIRECT_URL: postgresql://user:password@localhost:5432/test_db
+
+      - name: Prisma Generate
+        run: pnpm db:generate
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/test_db
+          DIRECT_URL: postgresql://user:password@localhost:5432/test_db
+
+      - name: Type Checking
+        run: pnpm tsc --noEmit
+
+      - name: Find Unused Code (Knip)
+        run: pnpm run knip
+
+      - name: Check Type Coverage
+        run: pnpm run typecheck:coverage
+
+  # ------------------------------------------------------------------
+  # 4. БЕЗОПАСНОСТЬ (AUDIT, SNYK)
+  # ------------------------------------------------------------------
+  security:
+    needs: [init]
+    if: github.actor != 'ImgBotApp'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+        with:
+          fetch-depth: 0
+
+      - name: Secret Scanning (TruffleHog)
+        uses: trufflesecurity/trufflehog@bff3d2670b362bbb4a0bcdeffea146cbc2ad3abd
+        with:
+          path: ./
+          extra_args: --only-verified
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@6e7bdbda5fe05107efc88b23b7ed00aa05f84ca0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24.14.1
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Security audit (critical)
+        run: pnpm audit --audit-level=critical
+
+      - name: Security audit (high)
+        run: pnpm audit --audit-level=high
+
+      - name: Snyk Open Source (SCA)
+        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04
+        with:
+          args: --all-projects --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@9adf32b1121593767fc3c057af55b55db032dc04
+
+      - name: Run Snyk Code scan (SAST)
+        run: snyk code test . --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+
+  # ------------------------------------------------------------------
+  # 5. ИНТЕГРАЦИОННЫЕ и ЮНИТ ТЕСТЫ
+  # ------------------------------------------------------------------
+  tests:
+    needs: [changes, init]
+    if: |
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/develop' ||
+      needs.changes.outputs.backend == 'true' ||
+      github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@6e7bdbda5fe05107efc88b23b7ed00aa05f84ca0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24.14.1
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify Database Schema
+        run: pnpm prisma db push --skip-generate
+
+      - name: Prisma Generate
+        run: pnpm db:generate
+
+      - name: Run Tests with Coverage
+        run: pnpm test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/coverage-final.json
+          flags: unit
+          fail_ci_if_error: false
+
+  # ------------------------------------------------------------------
+  # 6. СБОРКА (BUILD)
+  # ------------------------------------------------------------------
+  build:
+    needs: [quality, types, security, tests, changes, init]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    if: |
+      always() && github.actor != 'ImgBotApp' &&
+      needs.quality.result == 'success' &&
+      needs.types.result == 'success' &&
+      needs.security.result == 'success' &&
+      (needs.tests.result == 'success' || needs.tests.result == 'skipped')
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@6e7bdbda5fe05107efc88b23b7ed00aa05f84ca0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24.14.1
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare Database Schema
+        run: pnpm prisma db push --skip-generate
+
+      - name: Prisma Generate
+        run: pnpm db:generate
+
+      - name: Cache Next.js build
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-
+
+      - name: Build
+        run: pnpm next build --webpack
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        with:
+          name: next-build
+          path: |
+            .next
+            public
+            package.json
+            pnpm-lock.yaml
+          retention-days: 1
+
+      - name: Upload webpack stats artifact
+        uses: relative-ci/agent-upload-artifact-action@817b17affc58e350258bd97d783db67be5bf0405
+        with:
+          webpackStatsFile: .next/webpack-stats.json
+
+  # ------------------------------------------------------------------
+  # 7. LIGHTHOUSE CI (PERFORMANCE)
+  # ------------------------------------------------------------------
+  lighthouse:
+    needs: [build, init]
+    if: >-
+      needs.build.result == 'success' &&
+      github.actor != 'ImgBotApp' &&
+      github.event.pull_request.user.type != 'Bot' &&
+      !contains(github.actor, '[bot]')
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    timeout-minutes: 60
+    env:
+      LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@6e7bdbda5fe05107efc88b23b7ed00aa05f84ca0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24.14.1
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup DB Schema
+        run: pnpm prisma db push --skip-generate
+
+      - name: Prisma Generate
+        run: pnpm db:generate
+
+      - name: Build app
+        run: pnpm build
+
+      - name: Run Lighthouse CI
+        run: pnpm exec lhci autorun
+
+  # ------------------------------------------------------------------
+  # 8 E2E ТЕСТЫ (PLAYWRIGHT)
+  # ------------------------------------------------------------------
+  e2e:
+    needs: [build, init, changes]
+    if: |
+      needs.build.result == 'success' &&
+      github.actor != 'ImgBotApp' &&
+      github.event.pull_request.user.type != 'Bot' &&
+      !contains(github.actor, '[bot]') &&
+      (github.ref == 'refs/heads/main' ||
+       github.ref == 'refs/heads/develop' ||
+       needs.changes.outputs.backend == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+
+      - name: Download Build
+        uses: actions/download-artifact@484a0b528fb4d7bd804637ccb632e47a0e638317
+        with:
+          name: next-build
+          path: .
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@6e7bdbda5fe05107efc88b23b7ed00aa05f84ca0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24.14.1
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Setup DB Schema
+        run: pnpm prisma db push --skip-generate
+
+      - name: Prisma Generate
+        run: pnpm db:generate
+
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        with:
+          name: playwright-report
+          path: src/tests/e2e/playwright-report/
+          retention-days: 7
+
+  # ------------------------------------------------------------------
+  # 9. УВЕДОМЛЕНИЯ (NOTIFY)
+  # ------------------------------------------------------------------
+  notify:
+    needs: [init, quality, types, security, tests, build, lighthouse, e2e]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+        with:
+          fetch-depth: 0
+
+      - name: Collect CI metadata
+        id: collect
+        env:
+          TZ: Europe/Moscow
+          QUALITY_RESULT: ${{ needs.quality.result }}
+          TYPES_RESULT: ${{ needs.types.result }}
+          SECURITY_RESULT: ${{ needs.security.result }}
+          TESTS_RESULT: ${{ needs.tests.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          LH_RESULT: ${{ needs.lighthouse.result }}
+          E2E_RESULT: ${{ needs.e2e.result }}
+          CI_STARTED_AT: ${{ needs.init.outputs.started_at }}
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          python3 - <<'PY'
+          import os, json, subprocess, time, datetime
+          def get_res(name):
+              return os.environ.get(name, "skipped")
+
+          q_res = get_res("QUALITY_RESULT")
+          t_res = get_res("TYPES_RESULT")
+          s_res = get_res("SECURITY_RESULT")
+          tests_res = get_res("TESTS_RESULT")
+          build_res = os.environ.get("BUILD_RESULT", "failure")
+          lh_res = os.environ.get("LH_RESULT", "success")
+          e2e_res = os.environ.get("E2E_RESULT", "success")
+          mandatory_ok = all(r == "success" for r in [q_res, t_res, s_res, build_res])
+          optional_ok = all(r in ["success", "skipped"] for r in [tests_res, lh_res, e2e_res])
+          is_success = mandatory_ok and optional_ok
+
+          status_emoji = "✅" if is_success else "❌"
+          status_text = "Success" if is_success else "Failed"
+
+          event_path = os.environ.get("GITHUB_EVENT_PATH", "")
+          pr_url, pr_user, changed_files, additions, deletions = "no", "—", "0", "0", "0"
+          if event_path and os.path.exists(event_path):
+            try:
+              e = json.load(open(event_path))
+              pr = e.get("pull_request")
+              if pr:
+                pr_url = pr.get("html_url", "не PR")
+                pr_user = pr.get("user", {}).get("login", "—")
+                additions = str(pr.get("additions", 0))
+                deletions = str(pr.get("deletions", 0))
+                changed_files = str(pr.get("changed_files", 0))
+            except: pass
+
+          commit = os.environ.get("GITHUB_SHA", "")
+          author = os.environ.get("GITHUB_ACTOR", "—")
+          try:
+            author = subprocess.check_output(["git","show","-s","--format=%an", commit]).decode().strip() or author
+          except: pass
+
+          start_epoch = os.environ.get("CI_STARTED_AT", "")
+          run_started_human, duration = "—", "—"
+          if start_epoch:
+            start_ts = int(start_epoch)
+            run_started_human = datetime.datetime.fromtimestamp(start_ts, datetime.timezone.utc).astimezone(datetime.timezone(datetime.timedelta(hours=3))).strftime("%Y-%m-%d %H:%M:%S MSK")
+            diff = max(0, int(time.time()) - start_ts)
+            duration = f"{diff // 3600:02d}:{(diff % 3600) // 60:02d}:{diff % 60:02d}"
+
+          repo = os.environ.get("REPO", "")
+          branch = os.environ.get("BRANCH_NAME", "")
+          commit_url = f"https://github.com/{repo}/commit/{commit}"
+          branch_url = f"https://github.com/{repo}/tree/{branch}"
+
+          message = (
+            f"{status_emoji} **CI {status_text}**\n\n"
+            f"Project **{repo}**\n\n"
+            f"**Branch:** [{branch}]({branch_url})\n"
+            f"**Commit:** [`{commit}`]({commit_url}) — author: `{author}`\n"
+            f"**PR:** {pr_url}\n"
+            f"**PR Author:** `{pr_user}` • Files: `{changed_files}` • `+{additions} / -{deletions}`\n"
+            f"**Start:** `{run_started_human}`\n"
+            f"**Duration:** `{duration}`\n\n"
+            f"[Open workflow run](https://github.com/{repo}/actions/runs/{os.environ.get('RUN_ID','')})"
+          )
+
+          github_output = os.environ.get("GITHUB_OUTPUT")
+          if github_output:
+            with open(github_output, "a") as out:
+              out.write(f"message<<EOF\n{message}\nEOF\n")
+              out.write(f"run_started_human={run_started_human}\n")
+              out.write(f"run_duration={duration}\n")
+              out.write(f"pr_url={pr_url}\n")
+              out.write(f"pr_user={pr_user}\n")
+              out.write(f"changed_files={changed_files}\n")
+              out.write(f"additions={additions}\n")
+              out.write(f"deletions={deletions}\n")
+              out.write(f"is_success={'true' if is_success else 'false'}\n")
+          if not is_success:
+              import sys
+              sys.exit(1)
+          PY
+
+      - name: Notify Telegram
+        if: github.actor != 'ImgBotApp' && !contains(github.actor, '[bot]')
+        uses: appleboy/telegram-action@847a2d3240d33a6137191cc89b3ad7f53e427c06
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: ${{ steps.collect.outputs.message }}
+
+      - name: "notify vercel"
+        if: always()
+        uses: "vercel/repository-dispatch/actions/status@v1"
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          name: "Vercel - doxynix: notify vercel"

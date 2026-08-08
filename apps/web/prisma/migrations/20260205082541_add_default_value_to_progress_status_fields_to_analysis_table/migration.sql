@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "analyses" ADD COLUMN     "message" TEXT,
+ADD COLUMN     "progress" INTEGER NOT NULL DEFAULT 0,
+ALTER COLUMN "status" SET DEFAULT 'PENDING',
+ALTER COLUMN "commit_sha" DROP NOT NULL,
+ALTER COLUMN "jobId" DROP NOT NULL;

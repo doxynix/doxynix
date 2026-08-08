@@ -1,0 +1,26 @@
+import { Card, CardContent, CardHeader } from "@/shared/ui/core/card";
+import { Skeleton } from "@/shared/ui/core/skeleton";
+
+export function ApiKeyCardSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-start justify-between pb-2">
+        <div className="flex w-full max-w-[70%] flex-col gap-1">
+          <Skeleton className="h-6 w-32" />
+
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-28" />
+          </div>
+        </div>
+
+        <Skeleton className="size-9 rounded-xl" />
+      </CardHeader>
+
+      <CardContent>
+        <Skeleton className="mb-2 h-5 w-3/4" />
+        <Skeleton className="h-8 w-full rounded-xl" />
+      </CardContent>
+    </Card>
+  );
+}

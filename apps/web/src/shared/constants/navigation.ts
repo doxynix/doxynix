@@ -1,0 +1,229 @@
+import {
+  AlertTriangle,
+  Bell,
+  Book,
+  BookOpen,
+  Code2,
+  FileText,
+  GitPullRequest,
+  Headset,
+  HeartHandshakeIcon,
+  Home,
+  KeyRound,
+  LayoutGrid,
+  Link,
+  Logs,
+  Map,
+  ScanSearch,
+  Settings,
+  SquareTerminal,
+  TabletSmartphone,
+  User,
+  Users2,
+} from "lucide-react";
+
+import type { MenuItem, MenuItems } from "../types/navigation.types";
+
+const DASHBOARD_BASE: MenuItems = [
+  {
+    exact: true,
+    href: "/dashboard",
+    icon: LayoutGrid,
+    id: "dashboard",
+    label: "Dashboard",
+    shortcut: "G then O",
+    url: "/o",
+  },
+  {
+    href: "/dashboard/repos",
+    icon: Book,
+    id: "repositories",
+    label: "Repositories",
+    shortcut: "G then R",
+    url: "/r",
+  },
+  {
+    href: "/dashboard/settings",
+    icon: Settings,
+    id: "settings",
+    label: "Settings",
+    shortcut: "G then S",
+    url: "/s",
+  },
+  {
+    href: "/dashboard/notifications",
+    icon: Bell,
+    id: "notifications",
+    label: "Notifications",
+    shortcut: "G then N",
+    url: "/n",
+  },
+];
+
+const SETTINGS_PAGES: MenuItems = [
+  {
+    href: "/dashboard/settings/profile",
+    icon: User,
+    id: "profile",
+    label: "Profile",
+    shortcut: "G then P",
+    url: "/me",
+  },
+  {
+    href: "/dashboard/settings/connections",
+    icon: Link,
+    id: "connections",
+    label: "Connections",
+    shortcut: "G then C",
+    url: "/c",
+  },
+  {
+    href: "/dashboard/settings/sessions",
+    icon: TabletSmartphone,
+    id: "sessions",
+    label: "Sessions",
+    shortcut: "G then M",
+    url: "/ms",
+  },
+  {
+    href: "/dashboard/settings/api-keys",
+    icon: KeyRound,
+    id: "api keys",
+    label: "API Keys",
+    shortcut: "G then K",
+    url: "/k",
+  },
+  {
+    href: "/dashboard/settings/audit-log",
+    icon: Logs,
+    id: "audit log",
+    label: "Audit log",
+    shortcut: "G then L",
+    url: "/l",
+  },
+  {
+    href: "/dashboard/settings/danger-zone",
+    icon: AlertTriangle,
+    id: "danger zone",
+    label: "Danger Zone",
+    shortcut: "G then D",
+    url: "/d",
+    variant: "destructive",
+  },
+];
+
+const GLOBAL_FEATURES: MenuItems = [
+  {
+    href: "/support",
+    icon: Headset,
+    id: "support",
+    label: "Support",
+    shortcut: "G then H",
+    url: "/h",
+  },
+];
+
+const actionsMenu: MenuItems = [
+  {
+    actionId: "createRepo",
+    commandType: "dialog",
+    icon: SquareTerminal,
+    id: "createRepo",
+    label: "Create Repository",
+    shortcut: "C then R",
+  },
+];
+
+export const sidebarMenu: MenuItems = [...DASHBOARD_BASE];
+
+export const settingsMenu: MenuItems = [...SETTINGS_PAGES];
+
+export const userNavMenu: MenuItems = [
+  SETTINGS_PAGES[0],
+  SETTINGS_PAGES[1],
+  DASHBOARD_BASE[1],
+].filter((item): item is MenuItem => item != null);
+
+export const commandMenuItems: MenuItems = [
+  ...DASHBOARD_BASE,
+  ...SETTINGS_PAGES,
+  ...GLOBAL_FEATURES,
+  ...actionsMenu,
+];
+
+export const publicHeaderMenu: MenuItems = [
+  {
+    href: "/",
+    icon: Home,
+    id: "Home",
+    label: "Home",
+  },
+  {
+    href: "/about",
+    icon: Users2,
+    id: "About",
+    label: "About",
+  },
+  {
+    href: "/support",
+    icon: Headset,
+    id: "Help",
+    label: "Help",
+  },
+  {
+    href: "/thanks",
+    icon: HeartHandshakeIcon,
+    id: "Thanks",
+    label: "Thanks",
+  },
+];
+
+export const getRepoDetailsMenu = (owner: string, name: string): MenuItems => {
+  const base = `/dashboard/repo/${owner}/${name}`;
+
+  return [
+    {
+      exact: true,
+      href: base,
+      icon: BookOpen,
+      id: "overview",
+      label: "Overview",
+    },
+    {
+      href: `${base}/analyze`,
+      icon: ScanSearch,
+      id: "analyze",
+      label: "Analyze",
+    },
+    {
+      href: `${base}/map`,
+      icon: Map,
+      id: "map",
+      label: "Map",
+    },
+    {
+      href: `${base}/pulls`,
+      icon: GitPullRequest,
+      id: "pulls",
+      label: "Pulls",
+    },
+    {
+      href: `${base}/code`,
+      icon: Code2,
+      id: "code",
+      label: "Code",
+    },
+    {
+      href: `${base}/docs`,
+      icon: FileText,
+      id: "documentation",
+      label: "Documentation",
+    },
+    {
+      href: `${base}/settings`,
+      icon: Settings,
+      id: "settings",
+      label: "Settings",
+    },
+  ];
+};

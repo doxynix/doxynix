@@ -1,0 +1,156 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import {
+  calculateCodeMetrics,
+  calculateTeamRoles,
+} from "@/server/modules/analysis/engine/metrics/common-metrics";
+import { calculateHealthScore } from "@/server/modules/analysis/engine/metrics/complexity";
+
+vi.mock("colors/safe", () => ({
+  default: {
+    enabled: false,
+    strip: (s: string) => s,
+  },
+}));
+
+vi.mock("@/server/modules/analysis/engine/metrics/duplication-metrics", () => ({
+  calculateRepositoryDuplication: vi.fn().mockResolvedValue({
+    clones: [],
+    duplicationPercentage: 0,
+  }),
+}));
+
+vi.mock("sloc", () => ({
+  default: Object.assign((code: string) => ({ comment: 0, source: code.split("\n").length }), {
+    extensions: ["ts", "js", "md"],
+  }),
+}));
+
+vi.mock("@trigger.dev/sdk", () => ({
+  metadata: {
+    append: vi.fn(),
+    current: vi.fn(() => ({})),
+    set: vi.fn(),
+  },
+}));
+
+describe("calculateHealthScore", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-02-27T00:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("should clamp score to 100 for healthy repository metrics", () => {
+    const repo = {
+      pushedAt: new Date("2026-02-20T00:00:00.000Z"),
+    } as any;
+
+    const score = calculateHealthScore({
+      busFactor: 3,
+      complexityScore: 20,
+      dependencyCycles: 0,
+      docDensity: 100,
+      duplicationPercentage: 0,
+      repo,
+      securityScore: 100,
+      techDebtScore: 0,
+    });
+
+    expect(score).toBe(73);
+  });
+
+  it("should clamp score to 0 for stale repository with weak metrics", () => {
+    const repo = {
+      pushedAt: new Date("2024-01-01T00:00:00.000Z"),
+    } as any;
+
+    const score = calculateHealthScore({
+      busFactor: 1,
+      complexityScore: 2,
+      dependencyCycles: 10,
+      docDensity: 0,
+      duplicationPercentage: 50,
+      repo,
+      securityScore: 0,
+      techDebtScore: 100,
+    });
+
+    expect(score).toBe(22);
+  });
+});
+
+describe("calculateCodeMetrics", () => {
+  it("should return zeroed metrics for empty input", async () => {
+    const metrics = await calculateCodeMetrics([]);
+
+    expect(metrics).toEqual({
+      complexityScore: 0,
+      docDensity: 0,
+      fileCount: 0,
+      languages: [],
+      modularityIndex: 0,
+      mostComplexFiles: [],
+      techDebtScore: 0,
+      totalLoc: 0,
+      totalSizeKb: 0,
+    });
+  });
+
+  it("should calculate aggregate metrics and language distribution", async () => {
+    const files = [
+      {
+        content: "const a = 1;\nconst b = 2;",
+        path: "src/index.ts",
+      },
+      {
+        content: "# Title\nText line",
+        path: "README.md",
+      },
+    ];
+
+    const metrics = await calculateCodeMetrics(files);
+
+    expect(metrics.fileCount).toBe(2);
+    expect(metrics.totalLoc).toBeGreaterThan(0);
+    expect(metrics.totalSizeKb).toBe(
+      Math.round(((files[0]?.content.length ?? 0) + (files[1]?.content.length ?? 0)) / 1024)
+    );
+    expect(metrics.languages.length).toBeGreaterThan(0);
+  });
+});
+
+describe("calculateTeamRoles", () => {
+  it("should map contributors to roles based on contribution share", () => {
+    const contributors = [
+      { contributions: 60, login: "guardian" },
+      { contributions: 25, login: "architect" },
+      { contributions: 10, login: "maintainer" },
+      { contributions: 3, login: "contributor-1" },
+      { contributions: 1, login: "contributor-2" },
+      { contributions: 1, login: "contributor-3" },
+    ];
+
+    const result = calculateTeamRoles(contributors);
+
+    expect(result).toHaveLength(6);
+    expect(result[0]).toEqual({
+      login: "guardian",
+      role: "Project Guardian",
+      share: 60,
+    });
+    expect(result[1]).toEqual({
+      login: "architect",
+      role: "Key Architect",
+      share: 25,
+    });
+    expect(result[2]).toEqual({
+      login: "maintainer",
+      role: "Active Maintainer",
+      share: 10,
+    });
+  });
+});

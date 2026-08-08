@@ -1,0 +1,17 @@
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+node_modules
+.next
+dist
+build
+public
+
+*.md
+
+.github
+*.yaml
+*.yml
+
+src/shared/api-contracts
+next-env.d.ts

@@ -1,0 +1,21 @@
+name: "Labeler"
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+jobs:
+  label:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+        with:
+          fetch-depth: 0
+
+      - name: Run labeler
+        uses: actions/labeler@c5dadc2a45784a4b6adfcd20fea3465da3a5f904
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}

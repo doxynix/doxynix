@@ -1,0 +1,78 @@
+frontend:app:
+  - changed-files:
+    - any-glob-to-any-file: 'src/app/**/*'
+
+frontend:widgets:
+  - changed-files:
+    - any-glob-to-any-file: 'src/widgets/**/*'
+
+frontend:features:
+  - changed-files:
+    - any-glob-to-any-file: 'src/features/**/*'
+
+frontend:entities:
+  - changed-files:
+    - any-glob-to-any-file: 'src/entities/**/*'
+
+server:core:
+  - changed-files:
+    - any-glob-to-any-file: 'src/server/core/**/*'
+
+server:utils:
+  - changed-files:
+    - any-glob-to-any-file: 'src/server/utils/**/*'
+
+area:analysis:
+  - changed-files:
+    - any-glob-to-any-file: 'src/server/modules/analysis/**/*'
+
+area:users:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/server/modules/users/**/*'
+
+area:api-keys:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/server/modules/api-keys/**/*'
+
+area:repos:
+  - changed-files:
+    - any-glob-to-any-file: 'src/server/modules/repos/**/*'
+
+area:analytics:
+  - changed-files:
+    - any-glob-to-any-file: 'src/server/modules/analytics/**/*'
+
+database:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'prisma/**/*'
+      - 'src/server/core/db.ts'
+
+api-contracts:
+  - changed-files:
+    - any-glob-to-any-file: 'src/shared/api-contracts/**/*'
+
+background-tasks:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/server/modules/*/tasks/**/*'
+      - 'trigger.config.ts'
+
+shared-foundation:
+  - changed-files:
+    - any-glob-to-any-file: 'src/shared/**/*'
+
+ci-cd:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/**/*'
+      - 'scripts/**/*'
+
+project-configs:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '*.json'
+      - '*.config.*'
+      - 'pnpm-lock.yaml'

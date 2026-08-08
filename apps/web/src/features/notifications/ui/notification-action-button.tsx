@@ -1,0 +1,49 @@
+"use client";
+
+import type { ComponentType } from "react";
+
+import { cn } from "@/shared/lib/cn";
+import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
+import { LoadingButton } from "@/shared/ui/kit/loading-button";
+
+type Props = {
+  className?: string;
+  disabled: boolean;
+  icon: ComponentType<{ className?: string }>;
+  isPending: boolean;
+  onClick: () => void;
+  tooltip: string;
+};
+
+export function NotificationActionButton({
+  className,
+  disabled,
+  icon: Icon,
+  isPending,
+  onClick,
+  tooltip,
+}: Readonly<Props>) {
+  return (
+    <AppTooltip content={tooltip}>
+      <LoadingButton
+        disabled={disabled}
+        isLoading={isPending}
+        loadingText=""
+        size="icon"
+        variant="ghost"
+        aria-label={tooltip}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClick();
+        }}
+        className={cn(
+          "text-muted-foreground hover:text-foreground transition-standard z-10 size-6 opacity-0 not-md:opacity-100 group-hover:opacity-100",
+          className
+        )}
+      >
+        <Icon />
+      </LoadingButton>
+    </AppTooltip>
+  );
+}

@@ -1,0 +1,37 @@
+import type { UiRepoListItem } from "./repo.types";
+
+type Props = {
+  id: string;
+  label: string;
+  score: null | number | undefined;
+};
+
+export function getMetrics(repo: UiRepoListItem): Props[] {
+  return [
+    {
+      id: "health",
+      label: "Health",
+      score: repo.healthScore,
+    },
+    {
+      id: "security",
+      label: "Security",
+      score: repo.securityScore,
+    },
+    {
+      id: "techDebt",
+      label: "Tech Debt",
+      score: repo.techDebtScore,
+    },
+    {
+      id: "complexity",
+      label: "Complexity",
+      score: repo.complexityScore,
+    },
+    {
+      id: "onboarding",
+      label: "Onboarding",
+      score: repo.onboardingScore,
+    },
+  ];
+}

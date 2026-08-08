@@ -1,0 +1,190 @@
+import type { ComponentType } from "react";
+import type { DocType } from "@prisma/client";
+import {
+  BookOpen,
+  Code2,
+  FileText,
+  GitGraph,
+  HistoryIcon,
+  Languages,
+  MessageSquareText,
+  Play,
+  Settings,
+  Users,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+
+import { LOCALES } from "@/shared/constants/locales";
+import { cn } from "@/shared/lib/cn";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { Checkbox } from "@/shared/ui/core/checkbox";
+import { Label } from "@/shared/ui/core/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/core/select";
+import { Textarea } from "@/shared/ui/core/textarea";
+import { Flag, FLAGS } from "@/shared/ui/kit/language-switcher";
+import { LoadingButton } from "@/shared/ui/kit/loading-button";
+
+import type { ActionsType, StateType } from "@/entities/repo/model/use-repo-setup";
+
+type DocOption = {
+  desc: string;
+  icon: ComponentType<{ className?: string }>;
+  id: DocType;
+  label: string;
+};
+
+const DOC_OPTIONS: DocOption[] = [
+  { desc: "Project overview & setup", icon: BookOpen, id: "README", label: "Overview" },
+  { desc: "Endpoints & schemas", icon: Code2, id: "API", label: "API Reference" },
+  { desc: "Deep system logic", icon: GitGraph, id: "ARCHITECTURE", label: "Architecture" },
+  { desc: "Guide for developers", icon: Users, id: "CONTRIBUTING", label: "How to guides" },
+  { desc: "Release history", icon: HistoryIcon, id: "CHANGELOG", label: "History" },
+] as const;
+
+type Props = {
+  actions: ActionsType;
+  disabled: boolean;
+  state: StateType;
+};
+
+export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>) {
+  const t = useTranslations("Dashboard");
+  const translationKeys = LOCALES.map(
+    (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const
+  );
+
+  const isSelectionEmpty = state.selectedFilesCount === 0 || state.selectedDocs.length === 0;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Settings className="size-5" />
+          Analysis Configuration
+        </CardTitle>
+        <CardDescription>
+          Fine-tune how Doxynix should interpret and document your code.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-6 overflow-y-auto">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="flex flex-col gap-3">
+            <Label
+              id="lang-label"
+              className="text-muted-foreground flex items-center gap-2 text-sm"
+            >
+              <Languages />
+              Output Language
+            </Label>
+            <Select value={state.analysisLocale} onValueChange={actions.setAnalysisLocale}>
+              <SelectTrigger aria-labelledby="lang-label" className="w-full md:w-64">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LOCALES.map((l, i) => {
+                  const key = translationKeys[i];
+                  if (key == null) return null;
+                  return (
+                    <SelectItem key={l} value={l}>
+                      <div className="flex items-center gap-3">
+                        <Flag alt={l} src={FLAGS[l] || FLAGS.en} />
+                        <span>{t(key)}</span>
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <Label className="text-muted-foreground flex items-center gap-2 text-sm">
+            <FileText />
+            Documentation Types
+          </Label>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {DOC_OPTIONS.map((opt) => {
+              const isSelected = state.selectedDocs.includes(opt.id);
+              return (
+                <label
+                  key={opt.id}
+                  className={cn(
+                    "transition-standard relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3",
+                    isSelected
+                      ? "border-border-strong bg-surface-selected"
+                      : "border-border bg-card"
+                  )}
+                >
+                  <input
+                    checked={isSelected}
+                    disabled={disabled}
+                    type="checkbox"
+                    onChange={() => actions.toggleDocType(opt.id)}
+                    className="sr-only"
+                  />
+
+                  <div className="flex items-center justify-between">
+                    <div
+                      className={cn(
+                        "flex size-8 items-center justify-center rounded-lg border",
+                        isSelected
+                          ? "bg-primary text-primary-foreground border-border-strong"
+                          : "bg-surface-hover text-muted-foreground border-border"
+                      )}
+                    >
+                      <opt.icon />
+                    </div>
+                    <Checkbox
+                      checked={isSelected}
+                      disabled={disabled}
+                      tabIndex={-1}
+                      aria-hidden="true"
+                      className="pointer-events-none size-4 rounded-full"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">{opt.label}</p>
+                    <p className="text-muted-foreground mt-1 text-xs">{opt.desc}</p>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <Label className="text-muted-foreground flex items-center gap-2 text-sm">
+            <MessageSquareText />
+            Custom Instructions (optional)
+          </Label>
+          <Textarea
+            value={state.instructions}
+            placeholder="e.g. 'Use technical tone', 'Highlight security risks', 'Add code examples'..."
+            onChange={(e) => actions.setInstructions(e.target.value)}
+            className="h-30 resize-none"
+          />
+        </div>
+
+        <div className="flex justify-end">
+          <LoadingButton
+            disabled={disabled || isSelectionEmpty}
+            isLoading={disabled}
+            loadingText="Processing..."
+            onClick={actions.handleStartAnalysis}
+            className="w-fit cursor-pointer gap-2"
+          >
+            <Play />
+            Start Analysis
+          </LoadingButton>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

@@ -1,0 +1,191 @@
+import { NextResponse, type NextRequest } from "next/server";
+import { Ratelimit } from "@upstash/ratelimit";
+import createMiddleware from "next-intl/middleware";
+
+import { appLogger } from "./server/core/app-logger";
+import { redisClient } from "./server/core/redis";
+import { generateRequestId, getIp, sanitizeRequestId } from "./server/utils/request-context";
+import { API_PREFIX } from "./shared/constants/env.client";
+import { IS_PROD } from "./shared/constants/env.flags";
+import { LOCALE_REGEX_STR } from "./shared/constants/locales";
+import { routing } from "./shared/i18n/routing";
+import { getCookieName } from "./shared/lib/session-cookie";
+
+const protectedRoutes = ["/dashboard"];
+const authRoutes = ["/auth"];
+const cookieName = getCookieName();
+const ANALYTICS_TUNNELS = [`${API_PREFIX}/dxnx/p`, `${API_PREFIX}/dxnx/s`];
+
+let ratelimit: null | Ratelimit = null;
+const ephemeralCache = new Map<string, number>();
+
+if (IS_PROD) {
+  ratelimit = new Ratelimit({
+    analytics: false,
+    enableProtection: true,
+    ephemeralCache: ephemeralCache,
+    limiter: Ratelimit.slidingWindow(20, "10 s"),
+    prefix: "@doxynix/ratelimit/global",
+    redis: redisClient,
+    timeout: 800,
+  });
+}
+
+const intlMiddleware = createMiddleware(routing);
+
+function hasPathBoundary(pathname: string, prefix: string): boolean {
+  if (!pathname.startsWith(prefix)) return false;
+  const nextChar = pathname.charAt(prefix.length);
+  return nextChar === "" || nextChar === "/";
+}
+
+function isAnalyticsTunnel(pathname: string): boolean {
+  return ANALYTICS_TUNNELS.some((prefix) => hasPathBoundary(pathname, prefix));
+}
+
+function isUploadThingPath(pathname: string): boolean {
+  return hasPathBoundary(pathname, "/api/uploadthing");
+}
+
+async function handleRateLimitAndSize(
+  request: NextRequest,
+  pathname: string,
+  ip: string
+): Promise<NextResponse | null> {
+  if (
+    hasPathBoundary(pathname, "/api/webhooks") ||
+    hasPathBoundary(pathname, "/webhooks") ||
+    hasPathBoundary(pathname, "/api/auth")
+  ) {
+    return null;
+  }
+
+  if (ratelimit != null) {
+    const token = request.cookies.get(cookieName)?.value;
+    const identifier = token != null ? `user_${token.slice(-16)}` : `ip_${ip}`;
+
+    try {
+      const { limit, remaining, reset, success } = await ratelimit.limit(identifier);
+
+      if (!success) {
+        return new NextResponse(
+          JSON.stringify({
+            error: "Too Many Requests",
+            message: "You're sending requests too often. Please wait.",
+          }),
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "X-RateLimit-Limit": limit.toString(),
+              "X-RateLimit-Remaining": remaining.toString(),
+              "X-RateLimit-Reset": reset.toString(),
+            },
+            status: 429,
+          }
+        );
+      }
+    } catch (error) {
+      appLogger.error({ error, msg: "Global rate limiter experienced an error. Bypassing." });
+    }
+  }
+
+  return null;
+}
+
+async function handleApiRequest(
+  request: NextRequest,
+  requestId: string,
+  ip: string
+): Promise<NextResponse> {
+  const { pathname } = request.nextUrl;
+  const attachRequestMeta = (response: NextResponse): NextResponse => {
+    response.headers.set("x-request-id", requestId);
+    response.cookies.set("last_request_id", requestId, {
+      httpOnly: false,
+      maxAge: 60,
+      path: "/",
+      sameSite: "lax",
+      secure: IS_PROD,
+    });
+    return response;
+  };
+
+  const rateLimitResponse = await handleRateLimitAndSize(request, pathname, ip);
+  if (rateLimitResponse) return attachRequestMeta(rateLimitResponse);
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-request-id", requestId);
+
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+  return attachRequestMeta(response);
+}
+
+function handlePageRequest(request: NextRequest, requestId: string): NextResponse {
+  const { pathname } = request.nextUrl;
+  const localeRegex = new RegExp(`^/(${LOCALE_REGEX_STR})`);
+  const pathWithoutLocale = pathname.replace(localeRegex, "") || "/";
+
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    hasPathBoundary(pathWithoutLocale, route)
+  );
+  const isAuthRoute = authRoutes.some((route) => hasPathBoundary(pathWithoutLocale, route));
+
+  const token = request.cookies.get(cookieName)?.value;
+
+  if (isProtectedRoute && token == null) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth";
+    return NextResponse.redirect(url);
+  }
+
+  if (isAuthRoute && token != null) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
+  const response = intlMiddleware(request);
+
+  response.headers.set("x-request-id", requestId);
+  response.cookies.set("last_request_id", requestId, {
+    httpOnly: false,
+    maxAge: 60,
+    path: "/",
+    sameSite: "lax",
+    secure: IS_PROD,
+  });
+
+  return response;
+}
+
+export async function proxy(request: NextRequest) {
+  const requestId = sanitizeRequestId(request.headers.get("x-request-id")) ?? generateRequestId();
+  const { pathname } = request.nextUrl;
+
+  if (isUploadThingPath(pathname)) {
+    return NextResponse.next();
+  }
+
+  if (isAnalyticsTunnel(pathname)) {
+    return NextResponse.next();
+  }
+
+  const ip = getIp(request);
+
+  if (pathname.startsWith("/api") || pathname.startsWith("/trpc")) {
+    return handleApiRequest(request, requestId, ip);
+  }
+
+  return handlePageRequest(request, requestId);
+}
+
+export const config = {
+  matcher: [
+    "/dashboard/repo/:path*",
+    "/((?!_next|_vercel|monitoring|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|xml|json|woff2?|ttf|otf|webmanifest)$).*)",
+  ],
+};

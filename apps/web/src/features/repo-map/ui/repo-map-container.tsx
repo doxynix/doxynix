@@ -1,0 +1,155 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { ReactFlowProvider } from "@xyflow/react";
+import { FileText } from "lucide-react";
+import { parseAsString, useQueryState } from "nuqs";
+
+import { trpc } from "@/shared/api/trpc";
+import { Skeleton } from "@/shared/ui/core/skeleton";
+import { EmptyState } from "@/shared/ui/kit/empty-state";
+
+import { useRepoParams } from "@/entities/repo/model/use-repo-params";
+import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
+
+import type { RepoMapDisplayData } from "../model/repo-map-types";
+import { RepoMapHotkeyListeners } from "./repo-map-hotkey-listeners";
+
+type Props = { id: string };
+
+const RepoMap = dynamic(() => import("./repo-map").then((m) => m.RepoMap), {
+  loading: () => <Skeleton className="h-180 w-full" />,
+  ssr: false,
+});
+
+export function RepoMapContainer({ id }: Readonly<Props>) {
+  const { aid, name, owner } = useRepoParams();
+
+  const [viewId, setViewId] = useQueryState("view", parseAsString);
+  const [selectedId, setSelectedId] = useQueryState("node", parseAsString);
+  const [, setPath] = useQueryState("path", parseAsString);
+  const [filter, setFilter] = useQueryState("filter", parseAsString);
+
+  const [displayData, setDisplayData] = useState<null | RepoMapDisplayData>(null);
+
+  const { data: mapData, isFetching: isMapFetching } = trpc.analysis.getStructureMap.useQuery(
+    { aid: aid ?? undefined, repoId: id },
+    { enabled: viewId == null }
+  );
+
+  const { data: nodeData, isFetching: isNodeFetching } = trpc.analysis.getStructureNode.useQuery(
+    { nodeId: viewId ?? "", repoId: id },
+    { enabled: viewId != null }
+  );
+
+  function navigateMap(nextId: null | string) {
+    if (nextId == null) {
+      void setViewId(null);
+      void setSelectedId(null);
+      void setPath(null);
+      return;
+    }
+
+    const knownNodeType =
+      displayData != null && "children" in displayData
+        ? displayData.children.find((c) => c.id === nextId || c.path === nextId)?.nodeType
+        : null;
+
+    const isFile =
+      nextId.startsWith("file:") ||
+      knownNodeType === "file" ||
+      (!knownNodeType && nextId.split("/").pop()?.includes("."));
+
+    if (isFile === true) {
+      const formattedId = nextId.startsWith("file:") ? nextId : `file:${nextId}`;
+      void setSelectedId(formattedId);
+
+      const path = formattedId.split(":")[1] ?? "";
+      void setPath(path);
+      const segments = path.split("/");
+
+      if (segments.length > 1) {
+        const parentFolder = `group:${segments.slice(0, -1).join("/")}`;
+        if (viewId !== parentFolder) {
+          void setViewId(parentFolder);
+        }
+      } else if (viewId !== null) {
+        void setViewId(null);
+      }
+    } else {
+      const formattedId = nextId.startsWith("group:") ? nextId : `group:${nextId}`;
+      void setViewId(formattedId);
+      void setSelectedId(null);
+      void setPath(null);
+    }
+  }
+
+  const currentData = viewId == null ? mapData : nodeData;
+  const isFetching = viewId == null ? isMapFetching : isNodeFetching;
+
+  useEffect(() => {
+    if (currentData != null) {
+      // FIXME: пока так ибо если менять то с типами приколы
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDisplayData(currentData);
+    } else if (!isFetching) {
+      setDisplayData(null);
+    }
+  }, [currentData, isFetching]);
+
+  if (displayData == null && isFetching) {
+    return <Skeleton className="h-180 w-full" />;
+  }
+
+  if (displayData == null && !isFetching) {
+    if (viewId == null) {
+      return (
+        <div className="flex h-150 items-center justify-center rounded-xl border border-dashed">
+          <EmptyState
+            action={<RepoAnalyzeButton name={name} owner={owner} />}
+            description="Run AI analysis to automatically generate map."
+            icon={FileText}
+            title="No map generated"
+          />
+        </div>
+      );
+    }
+    return <p>Failed to load map data for this folder</p>;
+  }
+
+  if (displayData == null) return null;
+
+  return (
+    <ReactFlowProvider>
+      <RepoMapHotkeyListeners />
+      <div className="relative h-full w-full">
+        <div className={isFetching ? "opacity-50 transition-opacity" : "transition-opacity"}>
+          <RepoMap
+            activeFilter={filter}
+            activeNodeId={viewId}
+            data={displayData}
+            repoId={id}
+            selectedNodeId={selectedId}
+            onFilterChange={(val) => void setFilter(val)}
+            onNavigate={navigateMap}
+            onSelect={(val) => {
+              void setSelectedId(val);
+
+              if (val == null) {
+                void setPath(null);
+                return;
+              }
+
+              if (val.startsWith("file:")) {
+                void setPath(val.slice("file:".length));
+              } else {
+                void setPath(null);
+              }
+            }}
+          />
+        </div>
+      </div>
+    </ReactFlowProvider>
+  );
+}

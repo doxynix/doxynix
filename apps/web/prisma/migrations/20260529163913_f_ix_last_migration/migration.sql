@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "documents" ALTER COLUMN "path" DROP NOT NULL,
+ALTER COLUMN "path" DROP DEFAULT;

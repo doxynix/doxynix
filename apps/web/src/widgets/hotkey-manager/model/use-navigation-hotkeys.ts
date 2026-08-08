@@ -1,0 +1,77 @@
+import { useEffect, useState } from "react";
+import type { Route } from "next";
+import { useHotkeys } from "react-hotkeys-hook";
+
+import { useRouter } from "@/shared/i18n/routing";
+
+const SEQUENTIAL_ROUTES: Record<string, Record<string, string>> = {
+  g: {
+    c: "/dashboard/settings/connections",
+    d: "/dashboard/settings/danger-zone",
+    h: "/support",
+    k: "/dashboard/settings/api-keys",
+    l: "/dashboard/settings/audit-log",
+    n: "/dashboard/notifications",
+    o: "/dashboard",
+    p: "/dashboard/settings/profile",
+    r: "/dashboard/repos",
+    s: "/dashboard/settings/profile",
+  },
+};
+
+const PREFIX_KEYS = Object.keys(SEQUENTIAL_ROUTES);
+
+export function useNavigationHotkeys(onAction?: () => void) {
+  const router = useRouter();
+  const [prefix, setPrefix] = useState<null | string>(null);
+
+  useEffect(() => {
+    if (prefix == null) return;
+
+    const timer = setTimeout(() => {
+      setPrefix(null);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [prefix]);
+
+  useHotkeys(
+    PREFIX_KEYS.join(","),
+    (_, handler) => {
+      const pressedKey = handler.hotkey;
+      setPrefix(pressedKey);
+    },
+    { enableOnFormTags: false, preventDefault: true },
+    [prefix]
+  );
+
+  useHotkeys(
+    "*",
+    (e) => {
+      if (prefix == null) return;
+
+      const code = e.code;
+      let secondKey: null | string = null;
+
+      if (code.startsWith("Key")) {
+        secondKey = code.slice(3).toLowerCase();
+      }
+
+      if (secondKey == null) {
+        setPrefix(null);
+        return;
+      }
+
+      const path = SEQUENTIAL_ROUTES[prefix]?.[secondKey];
+
+      if (path != null) {
+        onAction?.();
+        router.push(path as Route);
+      }
+
+      setPrefix(null);
+    },
+    { enabled: prefix != null, enableOnFormTags: false, preventDefault: true },
+    [prefix]
+  );
+}

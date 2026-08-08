@@ -1,0 +1,107 @@
+"use client";
+
+import { useEffect, useState, type ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { httpBatchLink, loggerLink } from "@trpc/client";
+import { LucideProvider } from "lucide-react";
+import { useTheme } from "next-themes";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import superjson from "superjson";
+
+import { trpc } from "@/shared/api/trpc";
+import { APP_URL, TRPC_PREFIX } from "@/shared/constants/env.client";
+import { IS_DEV } from "@/shared/constants/env.flags";
+import { setClientCookie } from "@/shared/lib/cookies";
+import { TooltipProvider } from "@/shared/ui/core/tooltip";
+
+import { AnalyticsSync } from "./_components/analytics-sync";
+import { RealtimeProvider } from "./_components/realtime-provider";
+
+type Props = {
+  children: ReactNode;
+};
+
+function getBaseUrl() {
+  if (typeof globalThis.window !== "undefined") return "";
+  return APP_URL;
+}
+
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: 1,
+        staleTime: 30_000,
+      },
+    },
+  });
+}
+
+let browserQueryClient: QueryClient | undefined;
+
+function getQueryClient() {
+  if (typeof window === "undefined") {
+    return makeQueryClient();
+  } else {
+    if (!browserQueryClient) browserQueryClient = makeQueryClient();
+    return browserQueryClient;
+  }
+}
+
+export function Providers({ children }: Readonly<Props>) {
+  const queryClient = getQueryClient();
+
+  const [trpcClient] = useState(() =>
+    trpc.createClient({
+      links: [
+        loggerLink({
+          enabled: (opts) => IS_DEV || (opts.direction === "down" && opts.result instanceof Error),
+        }),
+        httpBatchLink({
+          transformer: superjson,
+          url: `${getBaseUrl()}${TRPC_PREFIX}`,
+        }),
+      ],
+    })
+  );
+
+  return (
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <RealtimeProvider>
+          <InnerProviders>{children}</InnerProviders>
+        </RealtimeProvider>
+        {IS_DEV && <ReactQueryDevtools initialIsOpen={false} theme="dark" />}
+      </QueryClientProvider>
+    </trpc.Provider>
+  );
+}
+
+const InnerProviders = ({ children }: { children: ReactNode }) => (
+  <TooltipProvider>
+    <LucideProvider
+      absoluteStrokeWidth={true}
+      size={16}
+      strokeWidth={1.5}
+      className="shrink-0 select-none"
+    >
+      <ThemeCookieSync />
+      <AnalyticsSync />
+      <NuqsAdapter>{children}</NuqsAdapter>
+    </LucideProvider>
+  </TooltipProvider>
+);
+
+function ThemeCookieSync() {
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    if (theme == null) return;
+
+    setClientCookie("doxynix-theme", theme, 31_536_000);
+  }, [theme]);
+
+  return null;
+}

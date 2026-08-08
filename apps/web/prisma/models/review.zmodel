@@ -1,0 +1,254 @@
+import "./github"
+import "./auth"
+
+model Analysis {
+  /// @zod.custom.omit(["model"])
+  id              Int        @id @default(autoincrement()) @omit
+  /// @zod.custom.omit(["model"])
+  publicId        String     @unique @default(uuid(7)) @map("public_id") @db.Uuid
+
+  status          Status     @default(NEW)
+  /// @zod.number.int().min(0).max(100)
+  progress        Int        @default(0) @gte(0) @lte(100)
+  message         String?    @db.Text
+  /// @zod.number.int().min(0).max(100)
+  score           Int?       @gte(0) @lte(100)
+  /// @zod.number.int().min(0).max(100)
+  securityScore   Int?       @map("security_score") @gte(0) @lte(100)
+  /// @zod.number.int().min(0).max(100)
+  complexityScore Int?       @map("complexity_score") @gte(0) @lte(100)
+  /// @zod.number.int().min(0).max(100)
+  techDebtScore   Int?       @map("tech_debt_score") @gte(0) @lte(100)
+  /// @zod.number.int().min(0).max(100)
+  onboardingScore Int?       @map("onboarding_score") @gte(0) @lte(100)
+
+  metricsJson     Json?      @map("metrics_json")
+  resultJson      Json?      @map("result_json")
+
+  commitSha       String?    @map("commit_sha")
+  jobId           String?    @map("job_id")
+
+  logs            String?    @db.Text
+  error           String?    @db.Text
+
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @default(now()) @updatedAt @map("updated_at")
+
+  /// @zod.custom.omit(["model"])
+  repoId          Int        @map("repo_id") @omit
+  repo            Repo       @relation(fields: [repoId], references: [id], onDelete: Cascade)
+
+  documents       Document[]
+
+  @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
+
+  @@index([repoId, status])
+  @@index([repoId, createdAt(sort: Desc)])
+  @@index([jobId])
+  @@map("analyses")
+}
+
+model Document {
+  /// @zod.custom.omit(["model"])
+  id         Int       @id @default(autoincrement()) @omit
+  /// @zod.custom.omit(["model"])
+  publicId   String    @unique @default(uuid(7)) @map("public_id") @db.Uuid
+  version    String
+  type       DocType
+  /// @zod.string.min(1, { message: "Content cannot be empty" })
+  content    String    @db.Text
+  path       String?
+
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
+  /// @zod.custom.omit(["model"])
+  repoId     Int       @map("repo_id") @omit
+  repo       Repo      @relation(fields: [repoId], references: [id], onDelete: Cascade)
+
+  analysisId Int?      @map("analysis_id")
+  analysis   Analysis? @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
+
+  @@unique([repoId, version, type, path])
+  @@unique([repoId, version, type, analysisId])
+  @@index([analysisId])
+  @@map("documents")
+}
+
+
+model PullRequestAnalysis {
+  /// @zod.custom.omit(["model"])
+  id               Int                  @id @default(autoincrement()) @omit
+  /// @zod.custom.omit(["model"])
+  publicId         String               @unique @default(uuid(7)) @map("public_id") @db.Uuid
+
+  prNumber         Int                  @map("pr_number")
+  owner            String               @db.Citext @length(min: 1, max: 39)
+  repoName         String               @map("repo_name") @db.Citext @length(min: 1, max: 255)
+  headSha          String               @map("head_sha")
+  baseSha          String               @map("base_sha")
+
+  status           PRAnalysisStatus     @default(PENDING) @map("status")
+  /// @zod.number.int().min(0).max(10)
+  riskScore        Int?                 @map("risk_score") @gte(0) @lte(10)
+
+  findingsJson     Json?                @map("findings_json")
+  changedFilesJson Json?                @map("changed_files_json")
+
+  jobId            String?              @map("job_id")
+  error            String?              @db.Text
+
+  createdAt        DateTime             @default(now()) @map("created_at")
+  updatedAt        DateTime             @default(now()) @updatedAt @map("updated_at")
+
+  /// @zod.custom.omit(["model"])
+  repoId           Int                  @map("repo_id") @omit
+  repo             Repo                 @relation("RepoPullRequests", fields: [repoId], references: [id], onDelete: Cascade)
+
+  comments         PullRequestComment[]
+  generatedFixes   GeneratedFix[]
+
+  @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
+
+  @@unique([repoId, prNumber, headSha])
+  @@index([jobId])
+  @@index([repoId, status])
+  @@index([repoId, createdAt(sort: Desc)])
+  @@index([status])
+  @@map("pull_request_analyses")
+}
+
+model PullRequestAnalysisConfig {
+  /// @zod.custom.omit(["model"])
+  id              Int            @id @default(autoincrement()) @omit
+  /// @zod.custom.omit(["model"])
+  publicId        String         @unique @default(uuid(7)) @map("public_id") @db.Uuid
+
+  enabled         Boolean        @default(false)
+  ciSkip          Boolean        @default(false) @map("ci_skip")
+  commentStyle    PRCommentStyle @default(DETAILED) @map("comment_style")
+  tokenBudget     Int            @default(30000)
+  focusAreas      PRFocusArea[]  @default([SECURITY, PERFORMANCE]) @map("focus_areas")
+  excludePatterns String[]       @default([]) @map("exclude_patterns")
+
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at")
+
+  /// @zod.custom.omit(["model"])
+  repoId          Int            @unique @map("repo_id")
+  repo            Repo           @relation(fields: [repoId], references: [id], onDelete: Cascade)
+
+  @@allow('all', auth() == repo.user || auth().role == 'ADMIN')
+  @@map("pr_analysis_configs")
+}
+
+model PullRequestComment {
+  /// @zod.custom.omit(["model"])
+  id              Int                 @id @default(autoincrement()) @omit
+  /// @zod.custom.omit(["model"])
+  publicId        String              @unique @default(uuid(7)) @map("public_id") @db.Uuid
+
+  filePath        String              @map("file_path")
+  line            Int
+  /// @zod.number.int().min(0).max(10)
+  riskLevel       Int                 @map("risk_level") @gte(0) @lte(10)
+  /// @zod.string.min(1, { message: "Comment body cannot be empty" })
+  body            String              @db.Text
+  findingType     String              @map("finding_type")
+
+  githubCommentId BigInt?             @map("github_comment_id")
+
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @default(now()) @updatedAt @map("updated_at")
+
+  /// @zod.custom.omit(["model"])
+  analysisId      Int                 @map("analysis_id") @omit
+  analysis        PullRequestAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@allow('all', analysis.repo.user == auth() || auth().role == 'ADMIN')
+
+  @@index([analysisId, filePath])
+  @@map("pull_request_comments")
+}
+
+model GeneratedFix {
+  /// @zod.custom.omit(["model"])
+  id              Int                  @id @default(autoincrement()) @omit
+  /// @zod.custom.omit(["model"])
+  publicId        String               @unique @default(uuid(7)) @map("public_id") @db.Uuid
+
+  title           String               @length(min: 1, max: 255)
+  description     String?              @db.Text
+  /// @zod.string.min(1)
+  branch          String               @length(min: 1, max: 255)
+
+  status          FixStatus            @default(DRAFT) @map("status")
+  /// @zod.number.int().min(0).max(100)
+  estimatedImpact Int?                 @map("estimated_impact") @gte(0) @lte(100)
+
+  githubPrUrl     String?              @map("github_pr_url") @url
+  githubPrNumber  Int?                 @map("github_pr_number")
+
+  createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @default(now()) @updatedAt @map("updated_at")
+  createdByUser   Boolean              @default(false) @map("created_by_user")
+
+  /// @zod.custom.omit(["model"])
+  repoId          Int                  @map("repo_id") @omit
+  repo            Repo                 @relation("RepoGeneratedFixes", fields: [repoId], references: [id], onDelete: Cascade)
+
+  /// @zod.custom.omit(["model"])
+  prAnalysisId    Int?                 @map("pr_analysis_id") @omit
+  prAnalysis      PullRequestAnalysis? @relation(fields: [prAnalysisId], references: [id], onDelete: SetNull)
+
+  @@allow('all', repo.user == auth() || auth().role == 'ADMIN')
+
+  @@index([repoId, status])
+  @@index([repoId, createdAt(sort: Desc)])
+  @@index([prAnalysisId])
+  @@map("generated_fixes")
+}
+
+enum PRAnalysisStatus {
+  PENDING
+  ANALYZING
+  COMPLETED
+  FAILED
+}
+
+enum FixStatus {
+  DRAFT
+  GENERATING
+  READY_TO_APPLY
+  PR_OPENED
+  COMPLETED
+  FAILED
+}
+enum Status {
+  PENDING
+  DONE
+  FAILED
+  NEW
+}
+
+enum DocType {
+  README
+  API
+  CONTRIBUTING
+  CHANGELOG
+  CODE_DOC
+  ARCHITECTURE
+}
+enum PRCommentStyle {
+  CONCISE
+  DETAILED
+  OFF
+}
+
+enum PRFocusArea {
+  SECURITY
+  PERFORMANCE
+  ARCHITECTURE
+  STYLE
+}

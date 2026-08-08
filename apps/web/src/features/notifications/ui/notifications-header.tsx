@@ -1,0 +1,120 @@
+"use client";
+
+import { X } from "lucide-react";
+import { useQueryStates } from "nuqs";
+
+import { NotifyTypeSchema } from "@/shared/api-contracts";
+import { AppButton } from "@/shared/ui/core/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/core/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
+import { AppSearch } from "@/shared/ui/kit/app-search";
+
+import {
+  notificationsParsers,
+  type NotificationsParsersState,
+} from "@/entities/notifications/model/notifications-parsers";
+
+import { NotificationsBulkActions } from "./notifications-bulk-actions";
+import { NotificationsRepoFilter } from "./notifications-repo-filter";
+
+type Props = {
+  stats?: { read: number; total: number; unread: number };
+};
+
+type TabItem = { count?: number; id: string; label: string; value: string };
+
+export function NotificationsHeader({ stats }: Readonly<Props>) {
+  const [filters, setFilters] = useQueryStates(notificationsParsers);
+
+  const tabValue = filters.isRead === null ? "all" : filters.isRead ? "read" : "unread";
+
+  const handleUpdate = <K extends keyof NotificationsParsersState>(
+    key: K,
+    value: NotificationsParsersState[K]
+  ) => {
+    void setFilters({ [key]: value, page: null });
+  };
+
+  const TABS = [
+    { count: stats?.total, id: "all", label: "All", value: "all" },
+    { count: stats?.read, id: "read", label: "Read", value: "read" },
+    { count: stats?.unread, id: "unread", label: "Unread", value: "unread" },
+  ] satisfies TabItem[];
+
+  const handleReset = () => {
+    void setFilters({
+      isRead: null,
+      owner: null,
+      page: null,
+      repo: null,
+      type: null,
+    });
+  };
+
+  const hasFilters =
+    filters.isRead !== null ||
+    filters.owner !== null ||
+    filters.repo !== null ||
+    filters.type !== null;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-4">
+        <Tabs
+          value={tabValue}
+          onValueChange={(v) => handleUpdate("isRead", v === "all" ? null : v === "read")}
+        >
+          <TabsList aria-label="Filter notifications by status">
+            {TABS.map((t) => (
+              <TabsTrigger
+                key={t.id}
+                disabled={!stats || (t.id !== "all" && t.count === 0)}
+                value={t.value}
+                className="m-0.5"
+              >
+                {t.label} ({t.count ?? 0})
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {TABS.map((t) => (
+            <TabsContent key={t.id} value={t.value} className="hidden" />
+          ))}
+        </Tabs>
+
+        <AppSearch placeholder="Search notification..." />
+
+        <NotificationsRepoFilter />
+
+        <Select
+          value={filters.type ?? "all"}
+          onValueChange={(v) =>
+            handleUpdate("type", v === "all" ? null : (v as NotificationsParsersState["type"]))
+          }
+        >
+          <SelectTrigger aria-label="Filter by notification type" className="">
+            <SelectValue placeholder="Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All types</SelectItem>
+            <SelectItem value={NotifyTypeSchema.enum.INFO}>Info</SelectItem>
+            <SelectItem value={NotifyTypeSchema.enum.SUCCESS}>Success</SelectItem>
+            <SelectItem value={NotifyTypeSchema.enum.WARNING}>Warning</SelectItem>
+            <SelectItem value={NotifyTypeSchema.enum.ERROR}>Error</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <AppButton disabled={!hasFilters} variant="outline" onClick={handleReset} className="px-2">
+          Reset
+          <X />
+        </AppButton>
+      </div>
+      <NotificationsBulkActions stats={stats} />
+    </div>
+  );
+}

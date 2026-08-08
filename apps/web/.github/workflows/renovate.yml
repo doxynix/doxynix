@@ -1,0 +1,42 @@
+name: doxynix-deps
+permissions:
+  contents: read
+
+on:
+  schedule:
+    - cron: "0 3,9,15,21 * * *"
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: "Запустить в режиме Dry Run (без создания PR)?"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  renovate:
+    timeout-minutes: 60
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate Bot Token
+        id: app-token
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859
+        with:
+          app-id: ${{ secrets.RENOVATE_APP_ID }}
+          private-key: ${{ secrets.RENOVATE_PRIVATE_KEY }}
+
+      - name: Run deps updates
+        uses: renovatebot/github-action@3633cede7d4d4598438e654eac4a695e46004420
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+        env:
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
+          NODE_OPTIONS: "--max-old-space-size=6144"
+          LOG_LEVEL: info
+          RENOVATE_DRY_RUN: ${{ inputs.dryRun == true && 'full' || '' }}
+
+

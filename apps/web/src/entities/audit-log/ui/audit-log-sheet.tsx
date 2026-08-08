@@ -1,0 +1,171 @@
+"use client";
+
+import { useState, type ComponentType } from "react";
+import { Clock, Download, Eye, Globe, Hash, Shield } from "lucide-react";
+import { useLocale } from "next-intl";
+
+import { trpc } from "@/shared/api/trpc";
+import { cn } from "@/shared/lib/cn";
+import { formatFullDate } from "@/shared/lib/date-utils";
+import { saveFile } from "@/shared/lib/file-saver";
+import { AppButton } from "@/shared/ui/core/button";
+import { ScrollArea } from "@/shared/ui/core/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/shared/ui/core/sheet";
+import { Skeleton } from "@/shared/ui/core/skeleton";
+import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
+import { CopyButton } from "@/shared/ui/kit/copy-button";
+
+import type { UiAuditLog } from "../model/audit-log.types";
+
+type Props = {
+  log: UiAuditLog;
+};
+
+export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
+  const [open, setOpen] = useState(false);
+  const locale = useLocale();
+
+  const formattedJson = JSON.stringify(log.rawPayload, null, 2);
+
+  const { data: html, isLoading } = trpc.audit.getLogPayloadHtml.useQuery(
+    { logId: log.id },
+    { enabled: open }
+  );
+
+  const handleExportJson = () => {
+    const blob = new Blob([JSON.stringify(log.rawPayload, null, 2)], {
+      type: "application/json;charset=utf-8",
+    });
+    saveFile(blob, `audit-${log.entityType.toLowerCase()}-${log.id.slice(0, 8)}.json`);
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <AppTooltip content="View Raw">
+        <SheetTrigger asChild>
+          <AppButton
+            size="icon"
+            variant="ghost"
+            className="opacity-0 transition-opacity group-hover:opacity-100"
+          >
+            <Eye className="text-muted-foreground hover:text-foreground" />
+          </AppButton>
+        </SheetTrigger>
+      </AppTooltip>
+      <SheetContent className="flex flex-col gap-6 p-6 sm:max-w-2xl">
+        <div className="grid h-full grid-rows-[auto_1fr] gap-6">
+          <SheetHeader className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1">
+                <SheetTitle className="text-xl font-semibold tracking-tight">
+                  Event Details
+                </SheetTitle>
+                <SheetDescription className="text-muted-foreground text-xs">
+                  {log.entityType} • {log.actionTitle}
+                </SheetDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <CopyButton
+                  value={formattedJson}
+                  tooltipText="Copy JSON"
+                  className="flex opacity-100"
+                />
+                <AppButton
+                  size="sm"
+                  variant="outline"
+                  onClick={handleExportJson}
+                  className="h-8 gap-2 bg-transparent text-xs"
+                >
+                  <Download />
+                  Export JSON
+                </AppButton>
+              </div>
+            </div>
+
+            <div className="divide-border border-border bg-muted/5 grid grid-cols-2 divide-x divide-y overflow-hidden rounded-xl border">
+              <MetaItem
+                value={log.requestId ?? "N/A"}
+                isCopy
+                copyValue={log.requestId ?? ""}
+                icon={Hash}
+                label="Request ID"
+                className="p-4"
+              />
+              <MetaItem
+                value={log.ip ?? "system"}
+                icon={Globe}
+                label="IP Address"
+                className="p-4"
+              />
+              <MetaItem value={log.browser} icon={Shield} label="User Agent" className="p-4" />
+              <MetaItem
+                value={formatFullDate(log.createdAt, locale)}
+                icon={Clock}
+                label="Timestamp"
+                className="p-4"
+              />
+            </div>
+          </SheetHeader>
+          <div className="relative flex-1 rounded-xl border">
+            <ScrollArea className="h-full w-full">
+              <div className="p-6">
+                {isLoading ? (
+                  <Skeleton className="h-40 w-full" />
+                ) : (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: html ?? "" }} // NOTE: санитизации нету здесь так что если в будущем будет вставлять юзерский ввод то иметь ввиду
+                    className={cn(
+                      "w-full text-sm",
+                      "[&_pre]:m-0! [&_pre]:bg-transparent! [&_pre]:p-0!",
+                      "[&_pre]:break-all! [&_pre]:whitespace-pre-wrap!",
+                      "[&_code]:break-all! [&_code]:whitespace-pre-wrap!",
+                      "[&_.line]:inline! [&_.line]:break-all! [&_.line]:whitespace-pre-wrap!"
+                    )}
+                  />
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+type MetaItemProps = {
+  className?: string;
+  copyValue?: string;
+  icon: ComponentType<{ className?: string }>;
+  isCopy?: boolean;
+  label: string;
+  value: string;
+};
+
+function MetaItem({
+  className,
+  copyValue,
+  icon: Icon,
+  isCopy,
+  label,
+  value,
+}: Readonly<MetaItemProps>) {
+  return (
+    <div className={cn("flex flex-col gap-1", className)}>
+      <div className="text-muted-foreground flex items-center gap-1">
+        <Icon />
+        <span className="text-xs">{label}</span>
+        {isCopy === true && (
+          <CopyButton value={copyValue ?? ""} className="ml-auto flex opacity-100" />
+        )}
+      </div>
+      <p className={cn("text-foreground truncate text-xs")}>{value}</p>
+    </div>
+  );
+}

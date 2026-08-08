@@ -1,0 +1,18 @@
+{
+  "mode": "strict",
+  "threshold": 5,
+  "reporters": ["console", "html"],
+  "ignore": [
+    "**/shared/api-contracts/**",
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/dist/**",
+    "**/*.d.ts",
+    "**/*.test.ts",
+    "**/src/shared/ui/icons",
+    "**/src/shared/ui/visuals",
+    "**/src/shared/ui/core"
+  ],
+  "format": ["typescript", "tsx"],
+  "pattern": "**/*.{ts,tsx}"
+}
