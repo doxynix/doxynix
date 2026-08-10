@@ -31,4 +31,4 @@ console.log("\n🚀 WIPE COMPLETE.");
 console.log(
   "⚠️  IMPORTANT: Some ambiguous imports (like 'Config' or 'User') might need manual selection."
 );
-console.log("👉 Run 'pnpm typecheck' now.");
+console.log("👉 Run 'bun type-check' now.");

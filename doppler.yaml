@@ -1,0 +1,8 @@
+setup:
+  - path: apps/web
+    project: doxynix
+    config: dev_personal
+
+  - path: apps/siem-server
+    project: doxynix-siem
+    config: dev_personal

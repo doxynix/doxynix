@@ -336,9 +336,7 @@ export function AuthForm() {
           </div>
         </div>
 
-        {/* ПРАВАЯ КОЛОНКА (Интерактивные формы) */}
         <div className="animate-in fade-in slide-in-from-bottom-4 relative flex w-full max-w-lg items-center justify-center">
-          {/* ФОРМА ВХОДА (Отображается по умолчанию, плавно гаснет при 2FA или отправке) */}
           <div
             inert={isSent || isTwoFactorRequired ? true : undefined}
             className={cn(

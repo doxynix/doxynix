@@ -1,0 +1,194 @@
+# ─────────────────────────────────────────────────────────────
+# Web
+# ─────────────────────────────────────────────────────────────
+
+web:app:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/web/src/app/**/*'
+
+web:widgets:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/web/src/widgets/**/*'
+
+web:features:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/web/src/features/**/*'
+
+web:entities:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/web/src/entities/**/*'
+
+web:server:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/web/src/server/**/*'
+
+web:shared:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/web/src/shared/**/*'
+
+web:database:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'apps/web/prisma/**/*'
+          - 'apps/web/src/server/core/db.ts'
+
+web:api:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'apps/web/src/app/api/**/*'
+          - 'apps/web/src/shared/api-contracts/**/*'
+
+web:background-tasks:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'apps/web/src/server/modules/*/tasks/**/*'
+          - 'apps/web/trigger.config.ts'
+
+
+# ─────────────────────────────────────────────────────────────
+# Web — domain areas
+# ─────────────────────────────────────────────────────────────
+
+web:analysis:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/web/src/server/modules/analysis/**/*'
+
+web:users:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/web/src/server/modules/users/**/*'
+
+web:api-keys:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/web/src/server/modules/api-keys/**/*'
+
+web:repos:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/web/src/server/modules/repos/**/*'
+
+web:analytics:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/web/src/server/modules/analytics/**/*'
+
+
+# ─────────────────────────────────────────────────────────────
+# SIEM
+# ─────────────────────────────────────────────────────────────
+
+siem:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/siem/**/*'
+
+siem:client:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/siem/client/**/*'
+
+siem:server:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/siem/server/**/*'
+
+siem:shared:
+  - changed-files:
+      - any-glob-to-any-file: 'apps/siem/shared/**/*'
+
+
+# ─────────────────────────────────────────────────────────────
+# CLI
+# ─────────────────────────────────────────────────────────────
+
+cli:
+  - changed-files:
+      - any-glob-to-any-file: 'packages/cli/**/*'
+
+
+# ─────────────────────────────────────────────────────────────
+# Monorepo / shared packages
+# ─────────────────────────────────────────────────────────────
+
+monorepo:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'bun.lock'
+          - 'turbo.json'
+          - 'workspace.json'
+          - 'packages/**/*'
+          - 'apps/**/*'
+
+
+# ─────────────────────────────────────────────────────────────
+# Configuration
+# ─────────────────────────────────────────────────────────────
+
+project-configs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '*.json'
+          - '*.config.*'
+          - 'apps/**/package.json'
+          - 'packages/**/package.json'
+          - 'bun.lock'
+          - 'turbo.json'
+
+
+# ─────────────────────────────────────────────────────────────
+# CI / CD
+# ─────────────────────────────────────────────────────────────
+
+ci-cd:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**/*'
+
+
+# ─────────────────────────────────────────────────────────────
+# Documentation
+# ─────────────────────────────────────────────────────────────
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+          - '**/*.mdx'
+          - 'docs/**/*'
+
+
+# ─────────────────────────────────────────────────────────────
+# Tests
+# ─────────────────────────────────────────────────────────────
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'apps/web/tests/**/*'
+          - 'apps/web/src/tests/**/*'
+          - 'apps/siem/**/tests/**/*'
+          - 'apps/siem/**/__tests__/**/*'
+          - 'packages/**/tests/**/*'
+          - 'packages/**/__tests__/**/*'
+
+
+# ─────────────────────────────────────────────────────────────
+# Dependencies
+# ─────────────────────────────────────────────────────────────
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'bun.lock'
+          - 'apps/**/package.json'
+          - 'packages/**/package.json'
+
+
+# ─────────────────────────────────────────────────────────────
+# Security
+# ─────────────────────────────────────────────────────────────
+
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/codeql.yml'
+          - '.github/workflows/dependency-review.yml'
+          - '**/secretlint*'
+          - '**/*security*'
+          - '**/*auth*'

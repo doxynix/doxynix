@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/code-eval */
 "use client";
 
 import { useEffect, useState, type JSX, type SyntheticEvent } from "react";

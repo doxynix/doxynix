@@ -69,7 +69,7 @@ export async function POST(req: Request) {
   if (sessionId != null) {
     const lastUserMessage = messages.at(-1);
 
-    if (lastUserMessage != null && lastUserMessage.role === "user") {
+    if (lastUserMessage?.role === "user") {
       const processedParts = await processMessageParts(lastUserMessage.parts);
 
       await prisma.$transaction(async (tx) => {
@@ -157,7 +157,7 @@ export async function POST(req: Request) {
                 temperature: 0.1,
               });
 
-              const cleanedTitle = generatedTitle.trim().replaceAll(/^["']|["']$/g, "");
+              const cleanedTitle = generatedTitle.trim().replace(/^["']/, "").replace(/["']$/, "");
               if (cleanedTitle.length > 0) {
                 await prisma.chatSession.update({
                   data: { title: cleanedTitle },

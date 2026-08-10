@@ -95,11 +95,10 @@ function hasManifestOnlySources(fact: FrameworkFact): boolean {
 
 function isCoreRepositoryFrameworkFact(fact: FrameworkFact): boolean {
   const coreSourceCount = countCoreSources(fact);
-  if (coreSourceCount >= 2) return true;
-  if (coreSourceCount >= 1 && (fact.category === "api" || fact.category === "framework")) {
-    return true;
-  }
-  return false;
+  return (
+    coreSourceCount >= 2 ||
+    (coreSourceCount >= 1 && (fact.category === "api" || fact.category === "framework"))
+  );
 }
 
 export function selectRepositoryFrameworkFacts(facts: FrameworkFact[]): FrameworkFact[] {

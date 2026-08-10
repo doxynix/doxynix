@@ -8,7 +8,6 @@ import { trpc } from "@/shared/api/trpc";
 import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
-import { GoogleIcon } from "@/shared/ui/icons/google-icon";
 import { YandexIcon } from "@/shared/ui/icons/yandex-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
@@ -32,13 +31,13 @@ const OAUTH_PROVIDERS = [
     manageUrl: "https://github.com/settings/applications",
     name: "GitHub",
   },
-  {
-    description: "Log in with your Google account.",
-    icon: <GoogleIcon className="size-5" />,
-    id: "google" as const,
-    manageUrl: "https://myaccount.google.com/permissions",
-    name: "Google",
-  },
+  // {
+  //   description: "Log in with your Google account.",
+  //   icon: <GoogleIcon className="size-5" />,
+  //   id: "google" as const,
+  //   manageUrl: "https://myaccount.google.com/permissions",
+  //   name: "Google",
+  // },
   {
     description: "Secure login via Yandex ID.",
     icon: <YandexIcon className="size-5" />,
@@ -81,7 +80,7 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
   return (
     <div className="grid gap-3">
       {OAUTH_PROVIDERS.map((provider) => {
-        const linked = accounts.find((a) => a.provider === provider.id);
+        const linked = accounts.find((a: { provider: string }) => a.provider === provider.id);
         const identity = linked?.email ?? linked?.name ?? user?.email;
         const isConnected = linked != null;
 

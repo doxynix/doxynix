@@ -44,7 +44,7 @@ export const auth = betterAuth({
   account: {
     accountLinking: {
       enabled: true,
-      trustedProviders: ["yandex"],
+      trustedProviders: ["yandex", "github"],
     },
     additionalFields: {
       email: { type: "string" },
@@ -54,6 +54,7 @@ export const auth = betterAuth({
     },
     storeStateStrategy: "cookie",
   },
+
   advanced: {
     backgroundTasks: {
       handler: (promise) => {
@@ -68,9 +69,7 @@ export const auth = betterAuth({
   },
   appName: "Doxynix",
   baseURL: BETTER_AUTH_URL,
-
   database: () => customAuthAdapter,
-
   databaseHooks: {
     account: {
       create: {
@@ -108,8 +107,8 @@ export const auth = betterAuth({
             payload.email = dbUser.email;
             payload.emailHash = dbUser.emailHash;
 
-            if (payload.image == null) payload.image = dbUser.image;
-            if (payload.name == null) payload.name = dbUser.name;
+            payload.image ??= dbUser.image;
+            payload.name ??= dbUser.name;
 
             const isDefaultName =
               dbUser.name == null || dbUser.name === dbUser.email?.split("@")[0];
@@ -164,7 +163,7 @@ export const auth = betterAuth({
             where: { id: Number(session.userId) },
           });
 
-          if (dbUser != null && dbUser.emailHash != null) {
+          if (dbUser?.emailHash != null) {
             const isBanned = await prisma.bannedEmail.findUnique({
               where: { emailHash: dbUser.emailHash },
             });
@@ -228,7 +227,7 @@ export const auth = betterAuth({
               where: { id: dbSession.userId },
             });
 
-            if (dbUser != null && dbUser.emailHash != null) {
+            if (dbUser?.emailHash != null) {
               const isBanned = await prisma.bannedEmail.findUnique({
                 where: { emailHash: dbUser.emailHash },
               });
@@ -294,7 +293,6 @@ export const auth = betterAuth({
       },
     },
   },
-
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path.startsWith("/sign-in/email") || ctx.path.startsWith("/magic-link/send")) {
@@ -536,6 +534,7 @@ export const auth = betterAuth({
   },
 
   secret: BETTER_AUTH_SECRET,
+
   session: {
     cookieCache: {
       enabled: true,
@@ -546,6 +545,13 @@ export const auth = betterAuth({
     preserveSessionInDatabase: true,
     storeSessionInDatabase: true,
     updateAge: SESSION_UPDATE_AGE,
+  },
+
+  socialProviders: {
+    github: {
+      clientId: AUTH_PROVIDERS.github.id,
+      clientSecret: AUTH_PROVIDERS.github.secret,
+    },
   },
 
   telemetry: { enabled: false },

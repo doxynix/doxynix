@@ -77,13 +77,16 @@ export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props
         width,
       };
 
-      const { domToBlob, domToWebp } = await import("modern-screenshot");
+      const { domToBlob } = await import("modern-screenshot");
 
       if (format === "png") {
         const blob = await domToBlob(viewportElement, options);
         saveFile(blob, `${filename}.png`);
       } else {
-        const blob = await domToWebp(viewportElement, options);
+        const blob = await domToBlob(viewportElement, {
+          ...options,
+          type: "image/webp",
+        });
         saveFile(blob, `${filename}.webp`);
       }
     } catch (error) {

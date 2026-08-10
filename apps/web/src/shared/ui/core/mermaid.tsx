@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/code-eval */
 "use client";
 
 import { useEffect, useId, useRef, useState, type MouseEvent } from "react";

@@ -276,7 +276,8 @@ export function SecurityOverviewCard({
                         size="sm"
                         variant="destructive"
                         onClick={() => {
-                          const parsedLineMatch = vuln.lineHint?.match(/\d+/);
+                          const parsedLineMatch =
+                            vuln.lineHint != null ? /\d+/.exec(vuln.lineHint) : null;
                           const parsedLine =
                             parsedLineMatch != null
                               ? Number.parseInt(parsedLineMatch[0], 10)

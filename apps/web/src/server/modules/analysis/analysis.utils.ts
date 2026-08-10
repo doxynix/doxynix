@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/no-control-regex */
+
 import type { DocType, Repo } from "@prisma/client";
 import { orderBy, uniqBy } from "es-toolkit";
 import { normalize } from "pathe";

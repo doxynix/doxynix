@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/super-linear-regex */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */ // NOTE: пока вырубил
 import fs from "node:fs";
 import { join, resolve } from "pathe";

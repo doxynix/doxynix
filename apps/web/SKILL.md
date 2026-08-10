@@ -152,13 +152,13 @@ Frontend can use `graphNodeIds` to highlight relevant nodes when scrolling docs.
 ### Generation & Migration
 ```bash
 # Generate Prisma client + Zod
-pnpm db:generate
+bun db:generate
 
 # Apply migration to local DB
-pnpm db:migrate
+bun db:migrate
 
 # Interactive studio (inspect data)
-pnpm db:studio
+bun db:studio
 ```
 
 ### Model Pattern (FSD)
@@ -265,9 +265,9 @@ src/tests/
 
 ### Running Tests
 ```bash
-pnpm test:unit        # Vitest (fast)
-pnpm test:int         # Integration (with real DB snapshot)
-pnpm test:e2e         # Playwright (UI flows only)
+bun test:unit        # Vitest (fast)
+bun test:int         # Integration (with real DB snapshot)
+bun test:e2e         # Playwright (UI flows only)
 ```
 
 ### Example Backend Unit Test
@@ -291,7 +291,7 @@ describe('calculateBusFactor', () => {
 ### Zod Schema Generation
 ```bash
 # Generates src/shared/api-contracts/ from schema.zmodel
-pnpm db:generate
+bun db:generate
 
 # Use in validation
 import { CreateRepoInput } from '@/shared/api-contracts/repo'
@@ -302,7 +302,7 @@ const result = CreateRepoInput.parse(userInput)
 ### OpenAPI Client Generation
 ```bash
 # Generates Axios client from OpenAPI spec
-pnpm gen:client
+bun gen:client
 
 # Use in server-to-server calls
 import { apiClient } from '@/shared/api-contracts/api-client'
@@ -312,7 +312,7 @@ const response = await apiClient.repos.list()
 
 ### TypeDocs Generation
 ```bash
-pnpm doc:gen
+bun doc:gen
 # Generates public/docs/ with full API documentation
 ```
 
@@ -324,11 +324,11 @@ pnpm doc:gen
 ### Dependency Check
 ```bash
 # Dump all dependencies into text format
-pnpm arch:dump
+bun arch:dump
 # Output: arch/dependencies_list.txt
 
 # Validate no violations
-pnpm arch:check
+bun arch:check
 ```
 
 ### Common Violations to Avoid
@@ -345,7 +345,7 @@ pnpm arch:check
 ### Secret Management
 ```bash
 # Check for hardcoded secrets
-pnpm secretlint
+bun secretlint
 
 # Use environment variables
 process.env.GITHUB_APP_ID      // Loaded from .env.local
@@ -354,10 +354,10 @@ process.env.DATABASE_URL       // Set by deployment platform
 
 ### Deployment Checklist
 - [ ] All secrets in environment variables (NEVER in code)
-- [ ] `pnpm typecheck` passes
-- [ ] `pnpm arch:check` passes
-- [ ] Database migrations applied (`pnpm db:migrate`)
-- [ ] Build succeeds (`pnpm build`)
+- [ ] `bun typecheck` passes
+- [ ] `bun arch:check` passes
+- [ ] Database migrations applied (`bun db:migrate`)
+- [ ] Build succeeds (`bun build`)
 
 ---
 
@@ -365,32 +365,32 @@ process.env.DATABASE_URL       // Set by deployment platform
 
 ```bash
 # Development
-pnpm dev                  # Start dev server + Trigger.dev
+bun dev                  # Start dev server + Trigger.dev
 
 # Code Quality
-pnpm lint:fix            # Auto-fix ESLint
-pnpm format              # Prettier format
-pnpm typecheck           # TypeScript check
-pnpm secretlint          # Check for secrets
-pnpm arch:check          # Validate FSD boundaries
+bun lint:fix            # Auto-fix ESLint
+bun format              # Prettier format
+bun typecheck           # TypeScript check
+bun secretlint          # Check for secrets
+bun arch:check          # Validate FSD boundaries
 
 # Database
-pnpm db:generate         # Generate Prisma + Zod
-pnpm db:migrate          # Apply migrations
-pnpm db:studio           # Interactive DB browser
+bun db:generate         # Generate Prisma + Zod
+bun db:migrate          # Apply migrations
+bun db:studio           # Interactive DB browser
 
 # Code Generation
-pnpm gen:client          # Generate OpenAPI client
-pnpm doc:gen             # Generate TypeDocs
+bun gen:client          # Generate OpenAPI client
+bun doc:gen             # Generate TypeDocs
 
 # Testing
-pnpm test:unit           # Unit tests
-pnpm test:int            # Integration tests
-pnpm test:e2e            # E2E tests (Playwright)
+bun test:unit           # Unit tests
+bun test:int            # Integration tests
+bun test:e2e            # E2E tests (Playwright)
 
 # Production
-pnpm build               # Build for production
-pnpm start               # Start production server
+bun build               # Build for production
+bun start               # Start production server
 ```
 
 ---

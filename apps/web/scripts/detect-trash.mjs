@@ -1,4 +1,4 @@
-import { CallExpression, Node, Project, SyntaxKind } from "ts-morph";
+import { Node, Project, SyntaxKind } from "ts-morph";
 
 const project = new Project({ tsConfigFilePath: "tsconfig.json" });
 

@@ -1,5 +1,5 @@
-import { readdirSync, readFileSync, statSync, writeFileSync } from "fs";
-import { join, resolve } from "path";
+import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 
 const rootDir = resolve("./src/server");
 const outputFile = "./server_dump.json";
@@ -22,7 +22,7 @@ function walk(dir, result = []) {
       const content = readFileSync(fullPath, "utf8");
 
       result.push({
-        path: fullPath.replace(/\\/g, "/"),
+        path: fullPath.replaceAll("\\", "/"),
         content,
       });
     }

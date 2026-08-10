@@ -4,14 +4,11 @@ import {
   inferAdditionalFields,
   lastLoginMethodClient,
   magicLinkClient,
-  oneTapClient,
   twoFactorClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 import type { auth } from "@/server/core/auth";
-
-import { NEXT_PUBLIC_GOOGLE_CLIENT_ID } from "../constants/env.client";
 
 export const authClient = createAuthClient({
   plugins: [
@@ -21,12 +18,12 @@ export const authClient = createAuthClient({
     passkeyClient(),
     adminClient(),
     twoFactorClient(),
-    oneTapClient({
-      autoSelect: false,
-      cancelOnTapOutside: true,
-      clientId: NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      context: "signin",
-    }),
+    // oneTapClient({
+    //  autoSelect: false,
+    //  cancelOnTapOutside: true,
+    //  clientId: NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    //  context: "signin",
+    // }),
   ],
 });
 

@@ -15,10 +15,7 @@ type AliasRule = {
 
 export function isLikelyInternalImportSpecifier(spec: string): boolean {
   const t = spec.trim();
-  if (t.startsWith(".")) return true;
-  if (/^[@~]{1,2}\//u.test(t)) return true;
-  if (t.startsWith("#")) return true;
-  return false;
+  return t.startsWith(".") || /^[@~]{1,2}\//u.test(t) || t.startsWith("#");
 }
 
 const RELATIVE_IMPORT_SUFFIXES = [

@@ -1,4 +1,4 @@
-// run: pnpm db:seed
+// run: bun db:seed
 import { faker } from "@faker-js/faker";
 import { NotifyType, PrismaClient, Status, UserRole, Visibility } from "@prisma/client";
 import { subDays } from "date-fns";

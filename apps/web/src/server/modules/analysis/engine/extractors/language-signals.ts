@@ -28,6 +28,7 @@ export async function collectPolyglotSignals(file: RepositoryFile): Promise<File
 
   for (const adapter of adapters) {
     try {
+      // eslint-disable-next-line sonarjs/no-invalid-await
       const signals = await adapter.parse(normalizedFile);
       if (signals == null) continue;
 

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    "monorepo:react",
+    "monorepo:nextjs",
+    "group:monorepos"
+  ],
+  "rebaseWhen": "behind-base-branch",
+  "dependencyDashboard": true,
+  "gitAuthor": "doxynix-deps-bot <273657142+doxynix-deps-bot[bot]@users.noreply.github.com>",
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
+  "timezone": "Europe/Moscow",
+  "pinDigests": true,
+  "rangeStrategy": "pin",
+  "minimumReleaseAge": "3 days",
+  "labels": ["dependencies"],
+  "ignoreDeps": ["zod-prisma-types"],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "addLabels": ["security"]
+  },
+  "separateMajorMinor": true,
+  "prHourlyLimit": 5,
+  "prConcurrentLimit": 10,
+  "automerge": false,
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["major-update"]
+    },
+    {
+      "matchUpdateTypes": ["minor"],
+      "addLabels": ["minor-update"]
+    },
+    {
+      "matchUpdateTypes": ["patch"],
+      "addLabels": ["patch-update"]
+    },
+    {
+      "description": "Group all non-major npm updates into a single PR to reduce noise across the monorepo",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "All non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Group all GitHub Actions updates together",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions updates",
+      "groupSlug": "all-actions"
+    },
+    {
+      "description": "Group all @types updates together",
+      "matchPackageNames": ["@types/**"],
+      "groupName": "TypeScript definitions (@types)"
+    },
+    {
+      "description": "Restrict cookie package to <1.0.0 to maintain compatibility with auth and socket modules",
+      "matchPackageNames": ["cookie"],
+      "allowedVersions": "<1.0.0"
+    },
+    {
+      "description": "Restrict ESLint to <10.0.0 to prevent breaking changes in React plugins",
+      "matchPackageNames": ["eslint"],
+      "allowedVersions": "<10.0.0"
+    },
+    {
+      "description": "Freeze Tree-sitter related packages due to fragile WASM grammar compatibility",
+      "matchPackageNames": ["web-tree-sitter", "tree-sitter-wasms"],
+      "enabled": false
+    }
+  ]
+}

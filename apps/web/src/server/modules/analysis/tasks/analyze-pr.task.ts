@@ -223,6 +223,7 @@ export const analyzePrTask = task({
       if (repo == null) throw new Error(`Repo with ID ${payload.repoId} not found`);
 
       const { octokit } = await getClientContext(prisma, repo.userId, payload.owner);
+      // eslint-disable-next-line sonarjs/no-dead-store
       octokitInstance = octokit;
 
       await updateCommitStatus(

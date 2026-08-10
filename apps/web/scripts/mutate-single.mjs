@@ -4,9 +4,9 @@ const [, , mutatePath, testPath] = process.argv;
 
 if (!mutatePath || !testPath) {
   console.error("\x1b[31m%s\x1b[0m", "Ошибка: Не указаны пути к файлам!");
-  console.log("Использование: pnpm test:mutate-single <путь-к-файлу-кода> <путь-к-файлу-теста>");
+  console.log("Использование: bun test:mutate-single <путь-к-файлу-кода> <путь-к-файлу-теста>");
   console.log(
-    "Пример:        pnpm test:mutate-single src/app/api/proxy/route.ts src/tests/unit/proxy-route.test.ts"
+    "Пример:        bun test:mutate-single src/app/api/proxy/route.ts src/tests/unit/proxy-route.test.ts"
   );
   process.exit(1);
 }

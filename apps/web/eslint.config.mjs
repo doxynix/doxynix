@@ -203,6 +203,8 @@ export default defineConfig([
       "sonarjs/prefer-immediate-return": "error",
       "sonarjs/no-inverted-boolean-check": "error",
       "sonarjs/no-redundant-jump": "error",
+      "sonarjs/in-operator-type-error": "off",
+      "sonarjs/jsx-no-leaked-render": "off", // NOTE: страшная вещь почему-то ругается даже на чистый boolean
       "sonarjs/no-nested-functions": ["off", { threshold: 4 }], // NOTE: пока выключен я пока не хочу рефакторить некоторый код
 
       "sonarjs/no-duplicate-string": "off",

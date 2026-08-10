@@ -306,7 +306,7 @@ try {
     ...Object.keys(pkgJson.devDependencies || {}),
   ]);
 
-  const output = execSync("pnpm licenses list --json", { maxBuffer: 1024 * 1024 * 50 }).toString();
+  const output = execSync("bun licenses list --json", { maxBuffer: 1024 * 1024 * 50 }).toString();
   const rawData = JSON.parse(output);
 
   const grouped = Object.create(null);

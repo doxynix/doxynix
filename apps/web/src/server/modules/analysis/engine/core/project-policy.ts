@@ -313,14 +313,11 @@ export const ProjectPolicy = {
       return true;
     }
     if (lowerParts[0] === "src" && lowerParts.length === 1) return true;
-    if (
+
+    return (
       /^src\/[^/]+$/u.test(normalized) &&
       !/^src\/(app|api|server|shared|core|features|entities|widgets)$/iu.test(normalized)
-    ) {
-      return true;
-    }
-
-    return false;
+    );
   },
 
   isConfigFile(path: string) {
@@ -391,9 +388,8 @@ export const ProjectPolicy = {
 
     if (segments.length <= 2) return false;
     if (/^(app|pages|server|cli|bin|scripts)\//iu.test(normalized)) return false;
-    if (/(^|\/)(api|routes)\//iu.test(normalized)) return false;
 
-    return true;
+    return !/(^|\/)(api|routes)\//iu.test(normalized);
   },
 
   isLowSignalConfig(path: string) {

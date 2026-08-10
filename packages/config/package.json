@@ -1,0 +1,13 @@
+{
+  "name": "@doxynix/config",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./base.json": "./base.json",
+    "./nextjs.json": "./nextjs.json",
+    "./node.json": "./node.json",
+    "./hono.json": "./hono.json",
+    "./siem-client.json": "./siem-client.json",
+    "./biome.json": "./biome.json"
+  }
+}
