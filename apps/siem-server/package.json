@@ -27,7 +27,8 @@
     "seed:admin": "bun with-doppler bun scripts/seed-admin.ts",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "validate": "biome check ."
   },
   "dependencies": {
     "@axiomhq/js": "1.8.0",

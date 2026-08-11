@@ -1,4 +1,4 @@
-import { intro, outro, select, text, confirm, spinner } from "@clack/prompts";
+import { intro, outro, text, confirm, spinner } from "@clack/prompts";
 import { yocto } from "../utils/colors";
 import { trpc } from "../client";
 

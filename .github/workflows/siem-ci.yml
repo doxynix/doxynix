@@ -1,10 +1,14 @@
 name: SIEM CI
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: ["main", "develop"]
     paths:
-      - "apps/siem/**"
+      - "apps/siem-client/**"
+      - "apps/siem-server/**"
       - "packages/**"
       - "package.json"
       - "bun.lock"
@@ -13,7 +17,8 @@ on:
   pull_request:
     branches: ["main", "develop"]
     paths:
-      - "apps/siem/**"
+      - "apps/siem-client/**"
+      - "apps/siem-server/**"
       - "packages/**"
       - "package.json"
       - "bun.lock"
@@ -50,10 +55,10 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Install Dependencies
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Run Architecture & Lint Checks
-        run: bun run validate
+        run: bun --filter "@doxynix/siem-*" validate
 
       - name: Run Type Check
-        run: bun run type-check
+        run: bun --filter "@doxynix/siem-*" type-check

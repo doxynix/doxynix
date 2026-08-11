@@ -101,6 +101,11 @@
         "NODE_ENV"
       ]
     },
+    "validate": {
+      "env": [
+        "NODE_ENV"
+      ]
+    },
     "type-check": {
       "dependsOn": [
         "^build",

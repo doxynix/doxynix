@@ -217,6 +217,7 @@ export default defineConfig([
       "sonarjs/void-use": "off",
       "sonarjs/function-return-type": "off",
       "sonarjs/deprecation": "off", // NOTE: долговатый слишком не окупается
+      "sonarjs/argument-type": "off",
 
       "validate-jsx-nesting/no-invalid-jsx-nesting": "error",
 

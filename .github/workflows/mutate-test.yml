@@ -27,14 +27,14 @@ jobs:
           bun-version-file: "package.json"
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Generate DB Client
-        run: bun run db:generate
+        run: bun --filter @doxynix/web db:generate
 
       - name: Run Stryker
         id: stryker
-        run: bun run test:stryker
+        run: bun --filter @doxynix/web test:stryker
 
       - name: Upload HTML Report
         if: always()

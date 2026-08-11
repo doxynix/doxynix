@@ -1,9 +1,14 @@
 name: Apply Production Database Migrations
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
       - main
+    paths:
+      - 'apps/siem-server/**' 
 
 jobs:
   migrate:
@@ -26,6 +31,6 @@ jobs:
         uses: DopplerHQ/cli-action@4819d808ab99e5cde19a0637a16536a4038fad73
 
       - name: Run Drizzle Migrations
-        run: doppler run -- bun --cwd apps/siem/server db:migrate
+        run: doppler run -- bun --cwd apps/siem-server db:migrate
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
