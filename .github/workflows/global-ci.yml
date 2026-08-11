@@ -58,6 +58,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version-file: "package.json"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile --ignore-scripts
+
       - name: Run Secretlint
         run: bun run secretlint
 
@@ -66,14 +74,6 @@ jobs:
         with:
           path: ./
           extra_args: --only-verified
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
-        with:
-          bun-version-file: "package.json"
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Security audit
         run: bun audit

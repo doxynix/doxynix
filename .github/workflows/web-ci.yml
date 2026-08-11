@@ -306,7 +306,7 @@ jobs:
             ${{ runner.os }}-nextjs-
 
       - name: Build
-        run: bun --filter @doxynix/web build
+        run: bun --filter @doxynix/web build --webpack
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
