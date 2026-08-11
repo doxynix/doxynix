@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       dryRun:
-        description: "Запустить в режиме Dry Run (без создания PR)?"
+        description: "Run in Dry Run mode (without creating PRs)?"
         required: false
         type: boolean
         default: false

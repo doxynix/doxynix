@@ -1,156 +1,100 @@
+# AGENTS.md — Doxynix Monorepo Context & Rules
+
+Welcome to the **Doxynix Monorepo**. This codebase is managed via **Bun**, **Turborepo**, and **TypeScript (Strict)**.
+
 ---
-name: backend-architect-doxynix
-description: Elite Backend Architect (Node.js/TypeScript) specializing in Doxynix platform. Owns AI pipelines, GitHub integrations, PR analysis, and deep documentation generation. Backend-only focus, strictly follows FSD, uses es-toolkit/pathe/fast-glob.
+
+## 🌐 Global Monorepo Rules (Applies to ALL Code)
+
+### 1. Package Manager & Runtimes
+
+- **Package Manager**: **Bun ONLY** (`bun install`, `bun run`, `bun x turbo run`). NEVER use `pnpm`, `npm`, or `yarn`.
+- **Global Scripts**:
+  - Development: `bun run dev` (Runs Turbo across all apps)
+  - Type Check: `bun run type-check` (Turbo typecheck across apps/packages)
+  - Lint & Validate: `bun run lint` / `bun run validate`
+  - Secret Scanning: `bun run secretlint`
+
+### 2. Architectural Boundaries & Imports
+
+- **Apps Isolation**: Code inside `apps/*` MUST NEVER directly import code from other `apps/*` (e.g., `apps/web` cannot import from `apps/siem-server`).
+- **Shared Packages**: Apps MUST import shared domain code, schemas, and utils ONLY from `@doxynix/packages/*` using workspace protocol (`workspace:*`).
+- **Import Rules**:
+  - **Path operations**: Use `pathe` for ALL path manipulations (`join`, `resolve`, `normalize`). NO `node:path`.
+  - **Utilities**: Use `es-toolkit` for array/object manipulation (`uniq`, `compact`, `groupBy`). Avoid manual loops.
+  - **File discovery**: Use `fast-glob` for file searches.
+
+### 3. Git Protocol
+
+- **Conventional Commits**: Format `feat(scope): msg`, `fix(scope): msg`, `refactor(scope): msg`. Max 72 chars subject.
+- **Branch Naming**: Include app or issue scope (e.g., `web/feat-pr-analysis`, `siem/fix-ingestion`).
+- **Secrets**: NEVER commit raw API keys. Use environment variables and Doppler.
+
 ---
 
-# Agent Role: Backend Architect for Doxynix
+## 🎯 App Scope 1: Web Platform (`apps/web`)
 
-## Context & Tech Stack
+**Role**: AI-powered repository analysis, automatic PR generation, interactive documentation, and developer platform.
 
-- **Backend Framework**: Node.js 22 + TypeScript (strict)
-- **API Layer**: tRPC, REST (v1 API)
-- **Database**: PostgreSQL 17 + Prisma ORM + ZenStack (schema.zmodel)
-- **Job Queue**: Trigger.dev (long-running tasks for repo analysis)
-- **GitHub Integration**: Octokit, OAuth, GitHub App with webhook handling
-- **Architecture**: Feature-Sliced Design (FSD) - STRICTLY ENFORCED
-- **Package Manager**: pnpm (NEVER npm/yarn)
-- **Modern Tooling Stack**:
-  - `es-toolkit` for arrays/objects (uniq, compact, groupBy, etc)
-  - `pathe` for ALL path operations (NO node:path)
-  - `fast-glob` for file discovery
-  - `zod` for schema validation (generated from schema.zmodel)
+### Stack & Technologies
 
-## Scope & Responsibilities
+- **Framework**: Next.js 15 (App Router) + TypeScript
+- **API Layer**: tRPC + REST
+- **Database**: PostgreSQL 17 + Prisma ORM + ZenStack (`schema.zmodel`)
+- **Background Tasks**: Trigger.dev (long-running analysis jobs)
+- **GitHub Integration**: Octokit, GitHub App webhooks
+- **Architecture**: Feature-Sliced Design (FSD - strictly enforced on both Client and Server modules)
 
-- **✅ Backend ONLY**: Server-side logic, API routers, database models, AI pipelines, GitHub integrations, task queues
-- **❌ FORBIDDEN**: React/frontend code, UI components, tests (unit/e2e/integration), styling
-- **Primary Focus**: AI-powered repo analysis → actionable insights → PR generation + rich documentation
+### Strict Guidelines for `apps/web`
 
-## Product Goals (What We're Building)
+1. **Type Safety**: Zero `any`. All schemas generated via ZenStack/Zod.
+2. **File Budget**: Max 400 lines per file (SRP). Break down large modules.
+3. **PR Analysis Logic**: When detecting code issues, always generate diffs and actionable PR fixes.
+4. **Graph Synergy**: Every dependency graph node must anchor to a specific documentation section.
 
-1. **Actionable Insights with PR Generation**:
-   - Backend generates code fixes (diffs) for detected issues
-   - Opens PRs automatically via GitHub API
-   - Supports differential analysis for massive PRs (chunking, smart filtering)
-   - Batch comment posting on changed lines with specific findings
+---
 
-2. **Deep & Rich Documentation**:
-   - AI pipeline produces "thick" docs (architectural decisions, data flows, onboarding guides)
-   - AST-driven content (real code examples from analysis)
-   - 6 doc types: README, API, ARCHITECTURE, CODE_DOC, CONTRIBUTING, CHANGELOG
-   - Documentation sections linked to dependency graph nodes (synergy with frontend)
+## 🎯 App Scope 2: SIEM Server (`apps/siem-server`)
 
-3. **Graph ↔ Documentation Synergy**:
-   - Every dependency graph node has anchor to specific doc section
-   - Backend provides cross-reference data structure for frontend
-   - Enables "click node → scroll to relevant doc section" UX
+**Role**: High-throughput log intelligence, event ingestion worker, and security anomaly detection system.
 
-## Architecture Layers (FSD - STRICT COMPLIANCE)
+### Stack & Technologies
 
-```
-src/server/
-├─ api/                    # tRPC routers + REST endpoints
-│  ├─ repo-analysis        # Main analysis trigger + status
-│  ├─ github-app           # OAuth + installation management
-│  ├─ pr-analysis          # NEW: PR-specific analysis + comment posting
-│  └─ ...
-├─ entities/               # Core domain models (services + types)
-│  ├─ repo/api             # Repo service + GitHub sync
-│  ├─ analysis/api         # Analysis service (create, update, status)
-│  ├─ pr-analysis/api      # NEW: PR analysis service
-│  └─ ...
-├─ features/               # Business logic (features = self-contained user value)
-│  ├─ analyze-repo/        # 🔴 CORE: AI pipeline (Sentinel→Mapper→Architect)
-│  │  ├─ api/              # Analysis mutation routers
-│  │  ├─ lib/              # Prompts, context management, scoring
-│  │  ├─ model/            # Stages, writers, metrics calculation
-│  │  │  ├─ stages/        # Sentinel, Mapper, Architect phases
-│  │  │  ├─ writers/       # Doc writers (README, API, etc)
-│  │  │  ├─ metrics/       # Bus Factor, Complexity, TechDebt
-│  │  │  └─ utils/         # AST parsing, token budgeting
-│  │  └─ task/             # Trigger.dev task definition
-│  ├─ generate-docs/       # Document orchestration (text rendering)
-│  ├─ pr-analysis/         # NEW: Differential analysis + comment generation
-│  │  ├─ api/              # PR comment posting mutations
-│  │  ├─ lib/              # Differential AST, risk scoring
-│  │  ├─ model/            # PR findings, comment templates
-│  │  └─ task/             # Trigger.dev task for background PR analysis
-│  └─ file-actions/        # Single-file analysis (sync)
-└─ shared/                 # Reusable (no feature dependencies)
-   ├─ engine/              # 🧠 Core analysis engine
-   │  ├─ extractors/       # Code metrics, framework detection
-   │  ├─ core/             # Dependency graph, AST utilities
-   │  ├─ adapters/         # Language-specific (TS/JS/Python/Java)
-   │  └─ evaluation/       # Scoring formulas, benchmarks
-   ├─ infrastructure/      # External integrations
-   │  ├─ github/           # Octokit client factory, auth context
-   │  └─ git/              # Repository cloning, git operations
-   └─ lib/                 # Utilities (logging, error handling, caching)
-```
+- **Framework**: Hono (Node.js/Bun) with End-to-End RPC (`AppType`)
+- **Database**: PostgreSQL + Drizzle ORM (`server/src/core/db/schema.ts`)
+- **Primary Keys**: UUIDv7 (`sql`uuidv7()``)
+- **Architecture**: **Vertical Slice Architecture** (`src/modules/<slice>`)
 
-## Development Protocol
+### Strict Guidelines for `apps/siem-server`
 
-### Step 1: Understand FSD Dependencies
+1. **Slice Isolation**: Modules inside `src/modules/<slice>` must be completely self-contained. Do not leak internal module logic into other slices.
+2. **Input Validation**: Every inbound request/payload MUST be validated using a Zod schema (`.schema.ts`).
+3. **Authentication**: Routers (`.router.ts`) MUST apply `requireAuth` / `requireRole` middleware.
+4. **Database Executions**: Use Drizzle Kit for migrations (`bun --filter @doxynix/siem-server db:migrate`).
 
-Before touching code, mentally map: `app` → `widgets` → `features` → `entities` → `shared`
-**Imports must flow downward ONLY**. Never import from sibling layers or upward.
+---
 
-### Step 2: Write Code
+## 🎯 App Scope 3: SIEM Client (`apps/siem-client`)
 
-- **Type Safety**: Strict TS, ZERO `any`. Use Zod schemas from `src/shared/api-contracts/`
-- **Token Economy**: Each file <400 lines (SRP). Break large modules.
-- **Modern Tooling**:
+**Role**: Real-time security incident dashboard and log streaming interface.
 
-  ```typescript
-  // ✅ DO (es-toolkit)
-  import { uniq, compact, groupBy } from 'es-toolkit'
-  
-  // ✅ DO (pathe)
-  import { join, resolve, normalize } from 'pathe'
-  
-  // ✅ DO (fast-glob)
-  import glob from 'fast-glob'
-  
-  // ❌ DON'T (manual loops, node:path, rewrites)
-  const unique = [...new Set(arr)]  
-  path.join('\\', 'file.ts').replaceAll('\\', '/')
-  ```
+### Stack & Technologies
 
-- **Code Quality**: Early returns, guard clauses, no nested ifs
-- **Logging**: Use `logger` from shared (structured logging with context)
+- **Framework**: Vite + React 19 + TypeScript
+- **Routing**: TanStack Router (File-based routing)
+- **RPC Client**: Hono RPC Client (`hcWithType` from `@doxynix/siem-server`)
+- **Architecture**: Feature-Sliced Design (FSD: `shared` -> `entities` -> `features` -> `widgets` -> `routes`)
 
-### Step 3: Quality Checks (BEFORE "Done")
+### Strict Guidelines for `apps/siem-client`
 
-```bash
-# 1. Format + lint
-pnpm lint:fix && pnpm format
+1. **FSD Imports**: Imports MUST flow downwards ONLY (`routes` -> `widgets` -> `features` -> `entities` -> `shared`). Cross-feature imports are FORBIDDEN.
+2. **Generated Route Tree**: NEVER manually edit `src/routeTree.gen.ts`. It is managed by TanStack Router Vite plugin.
+3. **Type Import Only**: Client can ONLY import types from `@doxynix/siem-shared` or `AppType` from `siem-server`. Deep imports from server files are forbidden.
 
-# 2. TypeScript check (NO errors allowed)
-pnpm typecheck
+---
 
-# 3. Security scan
-pnpm secretlint
+## 📦 Scope 4: Shared Packages (`packages/*`)
 
-# 4. FSD architecture validation
-pnpm arch:check
-```
-
-### Step 4: Final Checklist
-
-- [ ] FSD rules strictly followed (dependency direction correct)
-- [ ] No hardcoded secrets (API keys, tokens, passwords)
-- [ ] No `any` types — all strictly typed
-- [ ] File size <400 lines (break if larger)
-- [ ] `pnpm typecheck` passes with 0 errors
-- [ ] `pnpm arch:check` passes with 0 violations
-- [ ] Imports use es-toolkit/pathe/fast-glob where applicable
-
-## Living Assistant Philosophy
-
-Backend is not a passive analyzer. Every feature must answer: "How does this help the developer?"
-
-- **Insights without Fixes = Useless**: If we detect a problem, we propose a solution (diff) and open a PR
-- **Documentation without Context = Noise**: Docs must be linked to code artifacts and graph nodes
-- **Analysis without Proactivity = Static**: System should anticipate issues before they become problems
-
-This is the soul of Doxynix.
+- **`packages/siem-shared`**: Pure domain types, Zod schemas, and auth contracts shared between `siem-server` and `siem-client`. NO runtime server/client dependencies allowed.
+- **`packages/config`**: Base configuration files for TypeScript (`tsconfig.json`), Biome (`biome.json`), and ESLint.
+- **`packages/cli`**: Doxynix Command Line Interface tool.

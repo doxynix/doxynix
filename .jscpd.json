@@ -1,18 +1,29 @@
 {
   "mode": "strict",
   "threshold": 5,
-  "reporters": ["console", "html"],
+  "reporters": [
+    "console"
+  ],
   "ignore": [
     "**/shared/api-contracts/**",
     "**/node_modules/**",
     "**/.next/**",
     "**/dist/**",
+    "**/build/**",
     "**/*.d.ts",
     "**/*.test.ts",
-    "**/src/shared/ui/icons",
-    "**/src/shared/ui/visuals",
-    "**/src/shared/ui/core"
+    "**/*.spec.ts",
+    "**/routeTree.gen.ts",
+    "**/prisma/migrations/**",
+    "**/src/shared/ui/icons/**",
+    "**/src/shared/ui/visuals/**",
+    "**/src/shared/ui/core/**",
+    "**/messages/*.json"
   ],
-  "format": ["typescript", "tsx"],
-  "pattern": "**/*.{ts,tsx}"
+  "format": [
+    "typescript",
+    "tsx",
+    "javascript"
+  ],
+  "pattern": "**/*.{ts,tsx,js,jsx}"
 }

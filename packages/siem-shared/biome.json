@@ -1,0 +1,3 @@
+{
+  "extends": ["@doxynix/config/biome.json"]
+}

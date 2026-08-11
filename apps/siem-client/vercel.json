@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://doxynix-siem-api.karen-avakov2.workers.dev/api/:path*"
+    }
+  ]
+}

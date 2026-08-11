@@ -1,0 +1,10 @@
+{
+  "extends": "@doxynix/config/node.json",
+  "compilerOptions": {
+    "declaration": false,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "types": ["node"]
+  },
+  "include": ["src/**/*"]
+}

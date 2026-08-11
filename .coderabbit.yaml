@@ -1,5 +1,5 @@
-language: ru-RU
-tone_instructions: "Будь профессиональным, но дружелюбным. Фокусируйся на архитектуре, безопасности и производительности. Не придирайся к мелким стилистическим вещам, если они не ломают логику."
+language: en-US
+tone_instructions: "Be professional yet friendly. Focus on the overall monorepo architecture, security, and performance. Do not nitpick minor stylistic details unless they break application logic, type safety, or cross-package integrity. Keep in mind this is a Turbo monorepo using Bun, Next.js, and Hono."
 
 reviews:
   profile: chill
@@ -7,33 +7,69 @@ reviews:
   high_level_summary: true
   sequence_diagrams: true
   poem: false
+  drafts: false
 
   path_filters:
-    - "!pnpm-lock.yaml"
-    - "!package-lock.json"
-    - "!.next/**"
-    - "!coverage/**"
-    - "!src/shared/api-contracts/**"
-    - "!*.svg"
+    - "!**/node_modules/**"
+    - "!**/*.lock"
+    - "!**/*.lockb"
+    - "!**/pnpm-lock.yaml"
+    - "!**/package-lock.json"
+    - "!**/.next/**"
+    - "!**/.turbo/**"
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/coverage/**"
+    - "!**/src/shared/api-contracts/**"
+    - "!**/*.svg"
+    - "!**/*.tgz"
 
   path_instructions:
-    - path: "src/{shared,entities,features,widgets}/**/*.{ts,tsx}"
-      instructions: "Проект использует архитектуру Feature-Sliced Design (FSD). Строго следи за правилами импортов: слои могут импортировать только из нижележащих слоев (shared -> entities -> features -> widgets). Запрещены кросс-импорты между слайсами одного слоя!"
+    # Feature-Sliced Design (FSD) - applies to both Web and SIEM Client
+    - path: "apps/{web,siem/client}/src/{shared,entities,features,widgets}/**/*.{ts,tsx}"
+      instructions: "This part of the project follows Feature-Sliced Design (FSD). Strictly enforce layer import rules: upper layers cannot import from higher layers (shared -> entities -> features -> widgets). Cross-imports between slices on the same layer are strictly forbidden. Ensure all public APIs are exported via index.ts files."
 
-    - path: "src/app/**/*.tsx"
-      instructions: "Это Next.js App Router. Проверяй правильное разделение на Server и Client Components. Убедись, что в серверных компонентах нет хуков (useState, useEffect), а клиентские компоненты имеют директиву 'use client'."
+    # Next.js Specifics
+    - path: "apps/web/src/app/**/*.tsx"
+      instructions: "Next.js App Router logic. Verify the separation of Server and Client Components. Ensure server components don't use client-side hooks (useState, useEffect), and client components have the 'use client' directive. Check for proper metadata and SEO optimization."
 
-    - path: "src/server/trpc/**/*.ts"
-      instructions: "Это tRPC роутеры. Проверяй строгую валидацию входных данных через Zod и правильный проброс ошибок через TRPCError."
+    # tRPC (Web Monolith)
+    - path: "apps/web/src/server/trpc/**/*.ts"
+      instructions: "tRPC router definitions. Check for strict Zod input validation and proper error handling using TRPCError with appropriate status codes."
 
-    - path: "src/trigger/**/*.ts"
-      instructions: "Это фоновые задачи Trigger.dev. Проверяй идемпотентность кода и правильную обработку потенциальных таймаутов."
+    # Trigger.dev (Background Tasks)
+    - path: "apps/web/src/trigger/**/*.ts"
+      instructions: "Trigger.dev background tasks. Ensure idempotency and proper timeout/retry handling for long-running processes."
+
+    # TanStack Router (SIEM Client)
+    - path: "apps/siem/client/src/routes/**/*.{ts,tsx}"
+      instructions: "TanStack Router route definitions. Ensure strict type safety for route params, proper usage of routing hooks, and clean component structure."
+
+    # Drizzle ORM (SIEM Server)
+    - path: "apps/siem/server/src/core/db/**/*.{ts,tsx}"
+      instructions: "Drizzle ORM schema and migration layer. Check column types, secondary indexes, and foreign key integrity. Ensure migrations are consistent."
+
+    # Bun / Hono (SIEM Server)
+    - path: "apps/siem/server/src/**/*.ts"
+      instructions: "Hono-based backend powered by Bun. Verify strict Zod validation for all endpoints, proper middleware usage (auth, logging), and structured logging with Axiom."
+
+    # CLI Tooling
+    - path: "packages/cli/src/**/*.ts"
+      instructions: "CLI tool logic. Ensure proper argument parsing, helpful error messages for the end user, and consistent config handling."
 
   auto_review:
-    enabled: true
+    enabled: false
     drafts: false
+
   tools:
+    biome:
+      enabled: true
+      args: ["check", "--apply"]
     eslint:
+      enabled: true
+    prismaLint:
+      enabled: true
+    trufflehog:
       enabled: true
     markdownlint:
       enabled: true
@@ -41,24 +77,6 @@ reviews:
       enabled: true
     yamllint:
       enabled: true
-    trufflehog:
-      enabled: true
-    prismaLint:
-      enabled: true
-    biome:
-      enabled: false
-
-    phpstan: { enabled: false }
-    phpmd: { enabled: false }
-    phpcs: { enabled: false }
-    golangci-lint: { enabled: false }
-    swiftlint: { enabled: false }
-    rubocop: { enabled: false }
-    detekt: { enabled: false }
-    flake8: { enabled: false }
-    pylint: { enabled: false }
-    checkmake: { enabled: false }
-    psscriptanalyzer: { enabled: false }
 
 chat:
   auto_reply: true

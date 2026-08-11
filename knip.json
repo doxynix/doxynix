@@ -1,0 +1,23 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    "workspaces": {
+        "apps/web": {
+            "entry": [
+                "src/app/**/page.tsx",
+                "src/app/api/**/route.ts",
+                "prisma/seed.ts"
+            ]
+        },
+        "apps/siem-server": {
+            "entry": [
+                "src/index.ts",
+                "scripts/*.ts"
+            ]
+        },
+        "packages/cli": {
+            "entry": [
+                "src/commands/profile.ts"
+            ]
+        }
+    }
+}

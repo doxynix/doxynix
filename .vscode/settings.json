@@ -1,0 +1,36 @@
+{
+  "editor.formatOnSave": true,
+  
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+
+  "files.exclude": {
+  "**/.git": true,
+    "**/.bun": true,
+    "**/node_modules": false,
+    "**/dist": true,
+    "**/.turbo": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.bun": true,
+    "**/dist": true,
+    "**/.turbo": true
+  },
+
+  "workbench.editor.labelFormat": "short",
+
+  "tailwindCSS.experimental.classRegex": [
+    ["cx\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+  "sonarlint.connectedMode.project": {
+    "connectionId": "doxynix",
+    "projectKey": "doxynix_doxynix"
+  },
+  "prisma.pinToPrisma6": true
+}

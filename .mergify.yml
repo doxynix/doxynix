@@ -4,6 +4,7 @@ priority_rules:
     conditions:
       - label = hotfix
     allow_checks_interruption: true
+
   - name: dependencies
     priority: 500
     conditions:
@@ -15,7 +16,6 @@ queue_rules:
     queue_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success ~= notify
       - -conflict
       - -draft
       - "-title ~= (?i)(wip|draft|🚧)"
@@ -25,7 +25,6 @@ queue_rules:
     merge_conditions:
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success ~= notify
       - or:
           - author ~= ^(renovate|dependabot|doxynix-(release|deps)-bot)\[bot\]$
           - approved-reviews-by = coderabbitai[bot]
@@ -33,6 +32,7 @@ queue_rules:
     commit_message_format:
       title: pr-title
       body: pr-body
+
 pull_request_rules:
   - name: label hotfixes automatically
     conditions:
@@ -49,13 +49,12 @@ pull_request_rules:
       - -conflict
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success ~= notify
       - "-title ~= (?i)(wip|draft|🚧)"
     actions:
       queue:
         name: default
       comment:
-        message: "@Kramarich0! Все проверки пройдены. Встаю в очередь на слияние! 🚀"
+        message: "Hey @Kramarich0! All CI checks and CodeRabbit review passed. Your changes are entering the merge queue! 🚀"
 
   - name: automatic merge for release-please
     conditions:
@@ -64,7 +63,6 @@ pull_request_rules:
       - -conflict
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success ~= notify
     actions:
       queue:
         name: default
@@ -79,30 +77,12 @@ pull_request_rules:
       - -conflict
       - "#check-pending = 0"
       - "#check-failure = 0"
-      - check-success ~= notify
       - -label = "major-update"
     actions:
       queue:
         name: default
       comment:
-        message: "@Kramarich0! Зависимости обновлены и проверены. 📦"
-
-  # - name: label small PRs // NOTE: возможно пригодится позже
-  #   conditions:
-  #     - "#files < 5"
-  #     - "changes < 50"
-  #   actions:
-  #     label:
-  #       add: ["size:S"]
-  # - name: label huge PRs
-  #   conditions:
-  #     - "changes > 500"
-  #   actions:
-  #     label:
-  #       add: ["size:XL"]
-  #     comment:
-  #       message: "Ого, @{{author}}, ну ты и настрочил! 🏋️‍♂️ Такой большой PR может проверяться дольше."
-
+        message: "Dependencies updated and CI verified. Merging automatically to keep the monorepo fresh! 📦"
 
   - name: label on conflicts
     conditions:
@@ -112,6 +92,7 @@ pull_request_rules:
       label:
         add: ["conflict"]
       comment:
-        message: "Упс, @Kramarich0, тут конфликт. Поправь руками! 🛠️"
+        message: "Oops, @{{author}}, it seems there is a merge conflict. Please resolve it manually to unblock the PR! 🛠️"
+
 merge_protections_settings:
   reporting_method: check-runs

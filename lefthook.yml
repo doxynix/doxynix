@@ -1,0 +1,70 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: branch-check
+      run: bun scripts/check-branch-name.ts
+
+    - name: web-eslint
+      root: apps/web
+      glob: "**/*.{js,jsx,ts,tsx}" 
+      run: bun lint:fix {staged_files}
+      stage_fixed: true
+
+    - name: web-prettier
+      root: apps/web
+      glob: "**/*.{js,jsx,ts,tsx,json,jsonc,css,md,mdx}" 
+      run: bun format {staged_files}
+      stage_fixed: true
+
+    - name: siem-client-biome
+      root: apps/siem-client
+      glob: "**/*.{js,jsx,ts,tsx,json,jsonc,css}"
+      run: bun biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+
+    - name: siem-server-biome
+      root: apps/siem-server
+      glob: "**/*.{js,jsx,ts,tsx,json,jsonc,css}"
+      run: bun biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+
+    - name: spell-check
+      glob: "apps/**/*.{js,ts,jsx,tsx,md,mdx}" 
+      run: bunx cspell lint --no-summary --no-progress --no-must-find-files {staged_files}
+
+
+    - name: secretlint
+      run: bunx secretlint {staged_files}
+
+    - name: arch-check
+      run: bun scripts/arch-check.ts {staged_files}
+
+
+prepare-commit-msg:
+  commands:
+    ticket-inject:
+      run: bun scripts/inject-ticket.ts {1}
+
+commit-msg:
+  commands:
+    commit-check:
+      run: bun scripts/check-commit-name.ts {1}
+
+pre-push:
+  parallel: true
+  jobs:
+    - name: branch-check
+      run: bun scripts/check-branch-name.ts
+
+    - name: type-check
+      run: bun run type-check
+
+post-checkout:
+  commands:
+    branch-check:
+      run: bun scripts/check-branch-name.ts
+
+post-merge:
+  commands:
+    install:
+      run: bun install

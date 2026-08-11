@@ -5,7 +5,7 @@ permissions:
 
 on:
   schedule:
-    - cron: '0 2 * * 0'
+    - cron: "0 2 * * 0"
   workflow_dispatch:
 
 jobs:
@@ -18,29 +18,28 @@ jobs:
       SKIP_ENV_VALIDATION: 1
 
     steps:
-      - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+      - name: Checkout repository
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
 
-      - uses: pnpm/action-setup@6e7bdbda5fe05107efc88b23b7ed00aa05f84ca0
-
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
         with:
-          node-version: 24.14.1
-          cache: 'pnpm'
+          bun-version-file: "package.json"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Generate DB Client
-        run: pnpm db:generate
+        run: bun --filter @doxynix/web db:generate
 
       - name: Run Stryker
         id: stryker
-        run: pnpm run test:stryker
+        run: bun --filter @doxynix/web test:stryker
 
       - name: Upload HTML Report
         if: always()
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
           name: mutation-report-html
-          path: reports/mutation/
+          path: apps/web/reports/mutation/
           retention-days: 14
