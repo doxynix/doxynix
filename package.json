@@ -90,5 +90,6 @@
     "vue-demi",
     "zenstack",
     "nexus-prisma"
-  ]
+  ],
+  "version": "3.0.0"
 }
