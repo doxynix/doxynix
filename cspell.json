@@ -467,12 +467,14 @@
     "orquestador",
     "Osame",
     "ossp",
+    "oxlint",
     "pacocoursey",
     "Palkovic",
     "passthru",
     "passwordhash",
     "passwordless",
     "pgadmin",
+    "pgcrypto",
     "pgilad",
     "pingdotgg",
     "pinojs",
@@ -634,8 +636,7 @@
     "zenstack",
     "zenstackhq",
     "zmodel",
-    "zyklomatische",
-    "pgcrypto"
+    "zyklomatische"
   ],
   "import": [
     "@cspell/dict-en_us/cspell-ext.json",
