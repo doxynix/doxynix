@@ -135,7 +135,7 @@ jobs:
         run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Check Formatting
-        run: bunx prettier --check .
+        run: bun --filter @doxynix/web format:check
 
       - name: Linting
         run: bun --filter @doxynix/web lint

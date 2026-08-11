@@ -30,6 +30,7 @@
     "analyze:exp": "bun with-doppler \"next experimental-analyze\"",
     "dev:analyze": "bun with-doppler \"cross-env ANALYZE=true next dev\"",
     "format": "prettier . --write --cache --cache-location node_modules/.cache/prettier",
+    "format:check": "prettier . --check --cache --cache-location node_modules/.cache/prettier",
     "dup": "jscpd src",
     "knip": "bun with-doppler \"knip --no-exit-code\"",
     "gen:client": "bun with-doppler \"openapi --input http://localhost:3000/api/openapi --output ./src/shared/api-contracts/client --client axios\"",
