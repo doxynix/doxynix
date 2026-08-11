@@ -13,7 +13,7 @@ export default defineConfig({
     headless: true,
   },
   webServer: {
-    command: "bun build && bun start",
+    command: process.env.CI != null ? "bun run build && bun run start" : "bun run dev",
     reuseExistingServer: process.env.CI !== "true",
     stderr: "pipe",
     stdout: "pipe",

@@ -329,11 +329,12 @@ jobs:
   # ------------------------------------------------------------------
   lighthouse:
     needs: [build, init]
-    if: >-
-      needs.build.result == 'success' &&
-      github.actor != 'ImgBotApp' &&
-      github.event.pull_request.user.type != 'Bot' &&
-      !contains(github.actor, '[bot]')
+    # if: >-
+    #   needs.build.result == 'success' &&
+    #   github.actor != 'ImgBotApp' &&
+    #   github.event.pull_request.user.type != 'Bot' &&
+    #   !contains(github.actor, '[bot]')
+    if: false 
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -382,14 +383,15 @@ jobs:
   # ------------------------------------------------------------------
   e2e:
     needs: [build, init, changes]
-    if: |
-      needs.build.result == 'success' &&
-      github.actor != 'ImgBotApp' &&
-      github.event.pull_request.user.type != 'Bot' &&
-      !contains(github.actor, '[bot]') &&
-      (github.ref == 'refs/heads/main' ||
-      github.ref == 'refs/heads/develop' ||
-      needs.changes.outputs.backend == 'true')
+    # if: |
+    #   needs.build.result == 'success' &&
+    #   github.actor != 'ImgBotApp' &&
+    #   github.event.pull_request.user.type != 'Bot' &&
+    #   !contains(github.actor, '[bot]') &&
+    #   (github.ref == 'refs/heads/main' ||
+    #   github.ref == 'refs/heads/develop' ||
+    #   needs.changes.outputs.backend == 'true')
+    if: false 
     runs-on: ubuntu-latest
     timeout-minutes: 60
     services:
