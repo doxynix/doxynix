@@ -73,7 +73,7 @@
     "@lenml/tokenizer-gemma2": "3.7.2",
     "@lenml/tokenizers": "3.7.2",
     "@lezer/highlight": "1.2.3",
-    "@marsidev/react-turnstile": "1.5.3",
+    "@marsidev/react-turnstile": "1.5.5",
     "@modelcontextprotocol/sdk": "1.29.0",
     "@neondatabase/serverless": "1.1.0",
     "@octokit/auth-app": "8.2.0",
