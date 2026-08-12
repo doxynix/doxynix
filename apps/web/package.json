@@ -252,7 +252,7 @@
     "@axe-core/react": "4.12.1",
     "@boneskull/typedoc-plugin-mermaid": "0.2.1",
     "@bundle-stats/plugin-webpack-filter": "4.22.2",
-    "@changesets/cli": "2.31.0",
+    "@changesets/cli": "2.31.1",
     "@commitlint/cli": "20.5.3",
     "@commitlint/config-conventional": "20.5.3",
     "@cspell/dict-de-de": "4.1.2",
