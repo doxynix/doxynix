@@ -273,7 +273,7 @@
     "@lhci/cli": "0.15.1",
     "@mermaid-js/mermaid-cli": "11.16.0",
     "@next/bundle-analyzer": "16.2.10",
-    "@playwright/test": "1.61.1",
+    "@playwright/test": "1.62.1",
     "@prisma/adapter-pg": "6.19.3",
     "@secretlint/secretlint-rule-pattern": "12.3.1",
     "@secretlint/secretlint-rule-preset-recommend": "12.3.1",
