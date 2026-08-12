@@ -340,7 +340,7 @@
     "prettier-plugin-tailwindcss": "0.8.0",
     "prisma": "6.19.3",
     "prisma-dbml-generator": "0.12.0",
-    "prisma-erd-generator": "2.4.3",
+    "prisma-erd-generator": "2.4.4",
     "prisma-generator-fake-data": "0.18.3",
     "prisma-json-schema-generator": "5.1.5",
     "semantic-ui-css": "2.5.0",
