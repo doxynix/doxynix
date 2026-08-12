@@ -306,7 +306,7 @@
         "@commitlint/cli": "20.5.3",
         "@commitlint/config-conventional": "20.5.3",
         "@cspell/dict-de-de": "4.1.2",
-        "@cspell/dict-en-gb": "5.0.29",
+        "@cspell/dict-en-gb": "5.0.30",
         "@cspell/dict-en_us": "4.4.35",
         "@cspell/dict-es-es": "3.0.8",
         "@cspell/dict-fr-fr": "2.3.2",
@@ -871,7 +871,7 @@
 
     "@cspell/dict-en-common-misspellings": ["@cspell/dict-en-common-misspellings@2.1.13", "", {}, "sha512-00rpydUxKNWY2xxrSx+h46aNWLvbkJdd57SsnEFt24fbs1fROhXZ6XSQu+gQz/zNuiCvFi4Ro3ej9DLbEdWQmQ=="],
 
-    "@cspell/dict-en-gb": ["@cspell/dict-en-gb@5.0.29", "", {}, "sha512-r9gISbSufiJ1AVluQ2qROX6dBqF0sMSvOPWKKYsBKaaw5aBh0zy4+a6oVuXdaCgv7s79oizjHHc2BhiVaZ6nyw=="],
+    "@cspell/dict-en-gb": ["@cspell/dict-en-gb@5.0.30", "", {}, "sha512-WYpGgnCzoghOkr0Q3MB56D0nAxG05caDghU+3POpA5ZTP+5DKjxUrImtdcdE1ekcL1fgI1GaHsKNe8kwTVWK5Q=="],
 
     "@cspell/dict-en-gb-mit": ["@cspell/dict-en-gb-mit@3.1.25", "", {}, "sha512-zGODptk24CMrXi49ieG2SUm94CKxEsVF0dYNF+1ZYH0MSsQDZ/PKDlrrbvtBqSupKdPSj0Z9sjOmMNfHHW9ZSg=="],
 
