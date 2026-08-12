@@ -50,7 +50,7 @@
     "hono": "^4.12.34",
     "lodash-es": "^4.17.24",
     "lodash": "^4.17.24",
-    "nanoid": "^3.3.16",
+    "nanoid": "^6.0.0",
     "next": "^16.2.12",
     "postcss": "^8.5.3",
     "systeminformation": "^5.30.8",
