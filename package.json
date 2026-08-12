@@ -36,7 +36,7 @@
     "knip": "6.32.0",
     "lefthook": "2.1.10",
     "secretlint": "13.0.4",
-    "turbo": "2.10.8",
+    "turbo": "2.10.9",
     "typescript": "7.0.2"
   },
   "overrides": {
