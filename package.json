@@ -31,7 +31,7 @@
     "@secretlint/secretlint-rule-preset-recommend": "13.0.4",
     "@types/node": "26.1.2",
     "cspell": "10.0.1",
-    "eslint-plugin-react-hooks": "7.0.0",
+    "eslint-plugin-react-hooks": "7.1.1",
     "jscpd": "4.2.5",
     "knip": "6.32.0",
     "lefthook": "2.1.10",
