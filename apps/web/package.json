@@ -140,7 +140,7 @@
     "@vercel/analytics": "2.0.1",
     "@vercel/edge-config": "1.4.3",
     "@vercel/speed-insights": "2.0.0",
-    "@vercel/toolbar": "0.2.6",
+    "@vercel/toolbar": "0.2.7",
     "@xyflow/react": "12.11.2",
     "@zenstackhq/runtime": "2.22.3",
     "ably": "2.23.0",
