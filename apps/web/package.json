@@ -195,7 +195,7 @@
     "pathe": "2.0.3",
     "picomatch": "4.0.5",
     "pino": "10.3.1",
-    "posthog-js": "1.398.3",
+    "posthog-js": "1.414.0",
     "posthog-node": "5.40.0",
     "prisma-field-encryption": "1.6.0",
     "react": "19.2.7",
