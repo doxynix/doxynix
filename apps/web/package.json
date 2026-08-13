@@ -167,7 +167,7 @@
     "graphology": "0.26.0",
     "graphology-dag": "0.4.1",
     "graphology-library": "0.8.0",
-    "html-react-parser": "6.1.4",
+    "html-react-parser": "6.1.5",
     "input-otp": "1.4.2",
     "ioredis": "5.11.1",
     "ipaddr.js": "2.4.0",
