@@ -401,7 +401,7 @@
         "ts-node": "10.9.2",
         "tsx": "4.23.0",
         "tw-animate-css": "1.4.0",
-        "type-coverage": "2.29.7",
+        "type-coverage": "2.30.1",
         "typedoc": "0.28.20",
         "typedoc-plugin-extras": "4.0.1",
         "typedoc-plugin-llms-txt": "0.1.2",
@@ -5697,7 +5697,7 @@
 
     "type-check": ["type-check@0.4.0", "", { "dependencies": { "prelude-ls": "^1.2.1" } }, "sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew=="],
 
-    "type-coverage": ["type-coverage@2.29.7", "", { "dependencies": { "chalk": "4.1.2", "minimist": "1", "type-coverage-core": "^2.29.7" }, "bin": { "type-coverage": "bin/type-coverage" } }, "sha512-E67Chw7SxFe++uotisxt/xzB1UxxvLztzzQqVyUZ/jKujsejVqvoO5vn25oMvqJydqYrASBVBCQCy082E2qQYQ=="],
+    "type-coverage": ["type-coverage@2.30.1", "", { "dependencies": { "chalk": "4.1.2", "minimist": "1", "type-coverage-core": "^2.30.1" }, "bin": { "type-coverage": "bin/type-coverage" } }, "sha512-+Y05UXYBaeonULHdpkc7kr0BF5Ix+IsdI/UzI2S6hnkCacTA4ktpi9EnKWMYyISW6xRaLYIEqK+4fz1GLpHQFg=="],
 
     "type-coverage-core": ["type-coverage-core@2.30.1", "", { "dependencies": { "fast-glob": "3", "minimatch": "6 || 7 || 8 || 9 || 10", "normalize-path": "3", "tslib": "1 || 2", "tsutils": "3" }, "peerDependencies": { "typescript": "2 || 3 || 4 || 5 || 6 || 7" } }, "sha512-TFzqUvaZW5bTpKGBj3FwN8bYLsWA/smTOslISDg9rBMrpn5KadMQy9l3q068q+dXkn27CAdyfGTDlsH0PguG3A=="],
 
