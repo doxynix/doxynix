@@ -180,7 +180,7 @@
         "@uiw/codemirror-extensions-hyper-link": "4.25.10",
         "@uiw/codemirror-extensions-langs": "4.25.10",
         "@uiw/codemirror-extensions-mentions": "4.25.10",
-        "@uiw/codemirror-extensions-zebra-stripes": "4.25.10",
+        "@uiw/codemirror-extensions-zebra-stripes": "4.25.11",
         "@uiw/codemirror-theme-github": "4.25.10",
         "@uiw/codemirror-themes": "4.25.10",
         "@uiw/react-codemirror": "4.25.10",
@@ -2675,7 +2675,7 @@
 
     "@uiw/codemirror-extensions-mentions": ["@uiw/codemirror-extensions-mentions@4.25.10", "", { "peerDependencies": { "@codemirror/state": ">=6.0.0", "@codemirror/view": ">=6.0.0" } }, "sha512-e3Gf4159YiytZlwre1LcfFGZ7AzFrBKp0E98C2V9dXjpxDZ91LXPESxjb7sXqIjvHe5GDJkyEwUkW/F0HDkiMQ=="],
 
-    "@uiw/codemirror-extensions-zebra-stripes": ["@uiw/codemirror-extensions-zebra-stripes@4.25.10", "", { "peerDependencies": { "@codemirror/state": ">=6.0.0", "@codemirror/view": ">=6.0.0" } }, "sha512-xsd7XyypPm9r5UkDWzqrTrjrkfMbU5lg2pHGvz/La69K2H24OQz8cHSCYbwVDH6YbRjoiiKAwInpmg/ZclWXAw=="],
+    "@uiw/codemirror-extensions-zebra-stripes": ["@uiw/codemirror-extensions-zebra-stripes@4.25.11", "", { "peerDependencies": { "@codemirror/state": ">=6.0.0", "@codemirror/view": ">=6.0.0" } }, "sha512-cQoqhTKZ7R3yC48KWmaei6U9BrUjsueJXJbuv9LRcmW1cXCvoo99dtb+ercz6Zdu5y+SMEjjowGRpXWut9QCyw=="],
 
     "@uiw/codemirror-theme-github": ["@uiw/codemirror-theme-github@4.25.10", "", { "dependencies": { "@uiw/codemirror-themes": "4.25.10" } }, "sha512-iMM2QT4FaebJMO4W7lXmxNkRPIjKzgY26wL0QG0Ugy0gzsnxoNz4zgNeFIblPA8rvrN3vOIhNNh4nk9UOlFKxA=="],
 
