@@ -131,7 +131,7 @@
     "@uiw/codemirror-extensions-langs": "4.25.10",
     "@uiw/codemirror-extensions-mentions": "4.25.10",
     "@uiw/codemirror-extensions-zebra-stripes": "4.25.10",
-    "@uiw/codemirror-theme-github": "4.25.10",
+    "@uiw/codemirror-theme-github": "4.25.11",
     "@uiw/codemirror-themes": "4.25.10",
     "@uiw/react-codemirror": "4.25.10",
     "@uploadthing/react": "7.3.3",
