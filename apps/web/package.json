@@ -138,7 +138,7 @@
     "@upstash/ratelimit": "2.0.8",
     "@upstash/redis": "1.38.0",
     "@vercel/analytics": "2.0.1",
-    "@vercel/edge-config": "1.4.3",
+    "@vercel/edge-config": "1.5.1",
     "@vercel/speed-insights": "2.0.0",
     "@vercel/toolbar": "0.2.6",
     "@xyflow/react": "12.11.2",
