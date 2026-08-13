@@ -1,37 +1,3 @@
-priority_rules:
-  - name: hotfix
-    priority: 3000
-    conditions:
-      - label = hotfix
-    allow_checks_interruption: true
-
-  - name: dependencies
-    priority: 500
-    conditions:
-      - author ~= ^(renovate|dependabot|doxynix-deps-bot)\[bot\]$
-
-queue_rules:
-  - name: default
-    update_method: rebase
-    queue_conditions:
-      - "#check-pending = 0"
-      - "#check-failure = 0"
-      - -conflict
-      - -draft
-      - "-title ~= (?i)(wip|draft|🚧)"
-      - or:
-          - author ~= ^(renovate|dependabot|doxynix-(release|deps)-bot)\[bot\]$
-          - approved-reviews-by = coderabbitai[bot]
-    merge_conditions:
-      - "#check-pending = 0"
-      - "#check-failure = 0"
-      - or:
-          - author ~= ^(renovate|dependabot|doxynix-(release|deps)-bot)\[bot\]$
-          - approved-reviews-by = coderabbitai[bot]
-    merge_method: squash
-    commit_message_format:
-      title: pr-title
-      body: pr-body
 
 pull_request_rules:
   - name: label hotfixes automatically
@@ -51,10 +17,13 @@ pull_request_rules:
       - "#check-failure = 0"
       - "-title ~= (?i)(wip|draft|🚧)"
     actions:
-      queue:
-        name: default
+      merge:
+        method: squash
+        commit_message_format:
+          title: pr-title
+          body: pr-body
       comment:
-        message: "Hey @Kramarich0! All CI checks and CodeRabbit review passed. Your changes are entering the merge queue! 🚀"
+        message: "Hey @Kramarich0! All CI checks and CodeRabbit review passed. Merging directly into main! 🚀"
 
   - name: automatic merge for release-please
     conditions:
@@ -64,8 +33,8 @@ pull_request_rules:
       - "#check-pending = 0"
       - "#check-failure = 0"
     actions:
-      queue:
-        name: default
+      merge:
+        method: squash
 
   - name: automatic merge for dependencies
     conditions:
@@ -79,8 +48,11 @@ pull_request_rules:
       - "#check-failure = 0"
       - -label = "major-update"
     actions:
-      queue:
-        name: default
+      merge:
+        method: squash
+        commit_message_format:
+          title: pr-title
+          body: pr-body
       comment:
         message: "Dependencies updated and CI verified. Merging automatically to keep the monorepo fresh! 📦"
 
