@@ -125,7 +125,7 @@
     "@trpc/react-query": "11.18.0",
     "@trpc/server": "11.18.0",
     "@types/picomatch": "4.0.3",
-    "@uiw/codemirror-extensions-color": "4.25.10",
+    "@uiw/codemirror-extensions-color": "4.25.11",
     "@uiw/codemirror-extensions-events": "4.25.10",
     "@uiw/codemirror-extensions-hyper-link": "4.25.10",
     "@uiw/codemirror-extensions-langs": "4.25.10",
