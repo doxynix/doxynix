@@ -2,7 +2,7 @@ name: doxynix-local
 
 services:
   postgres:
-    image: docker.io/library/postgres:18-alpine
+    image: docker.io/library/postgres:18-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15
     container_name: doxynix-postgres
     restart: unless-stopped
     environment:
@@ -21,7 +21,7 @@ services:
       retries: 5
 
   valkey:
-    image: docker.io/valkey/valkey:9-alpine
+    image: docker.io/valkey/valkey:9-alpine@sha256:ee91f7a174ac4d6a6b0685b3a60e321f0a9dbbb691f9b0e285be2ba1d1be8328
     container_name: doxynix-valkey
     restart: unless-stopped
     command: valkey-server --requirepass "123456"
