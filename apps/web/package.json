@@ -144,7 +144,7 @@
     "@xyflow/react": "12.11.2",
     "@zenstackhq/runtime": "2.22.3",
     "ably": "2.23.0",
-    "ai": "6.0.221",
+    "ai": "6.0.246",
     "better-auth": "1.6.25",
     "binary-extensions": "3.1.0",
     "browser-image-compression": "2.0.2",
