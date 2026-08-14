@@ -571,7 +571,7 @@ jobs:
 
       - name: "notify vercel"
         if: always()
-        uses: "vercel/repository-dispatch/actions/status@v1"
+        uses: "vercel/repository-dispatch/actions/status@30f760c6640485cd92f8c785ef361382555fb712" # v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           name: "Vercel - doxynix: notify vercel"
