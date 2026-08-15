@@ -52,7 +52,7 @@
     "arch:check": "depcruise src --config .dependency-cruiser.js --output-type err"
   },
   "dependencies": {
-    "@ai-sdk/google": "3.0.107",
+    "@ai-sdk/google": "3.0.108",
     "@ai-sdk/groq": "3.0.59",
     "@ai-sdk/openai": "3.0.96",
     "@ai-sdk/react": "3.0.252",
