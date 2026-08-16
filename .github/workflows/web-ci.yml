@@ -150,7 +150,7 @@ jobs:
     timeout-minutes: 60
     services:
       postgres:
-        image: postgres:18@sha256:7157393f508fd8eb46119937fab39813783fe3e7d4c6316c45c12ce2ea25e61d
+        image: postgres:18@sha256:06cad38a5d9f5d24b4d83d86def30795d5e4b757fedbf5281172b576dedcd941
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
@@ -212,7 +212,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:18@sha256:7157393f508fd8eb46119937fab39813783fe3e7d4c6316c45c12ce2ea25e61d
+        image: postgres:18@sha256:06cad38a5d9f5d24b4d83d86def30795d5e4b757fedbf5281172b576dedcd941
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
@@ -262,7 +262,7 @@ jobs:
     timeout-minutes: 60
     services:
       postgres:
-        image: postgres:18@sha256:7157393f508fd8eb46119937fab39813783fe3e7d4c6316c45c12ce2ea25e61d
+        image: postgres:18@sha256:06cad38a5d9f5d24b4d83d86def30795d5e4b757fedbf5281172b576dedcd941
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
@@ -338,7 +338,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:18@sha256:7157393f508fd8eb46119937fab39813783fe3e7d4c6316c45c12ce2ea25e61d
+        image: postgres:18@sha256:06cad38a5d9f5d24b4d83d86def30795d5e4b757fedbf5281172b576dedcd941
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
@@ -396,7 +396,7 @@ jobs:
     timeout-minutes: 60
     services:
       postgres:
-        image: postgres:18@sha256:7157393f508fd8eb46119937fab39813783fe3e7d4c6316c45c12ce2ea25e61d
+        image: postgres:18@sha256:06cad38a5d9f5d24b4d83d86def30795d5e4b757fedbf5281172b576dedcd941
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
