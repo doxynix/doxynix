@@ -16,7 +16,7 @@
   "dependencies": {
     "@doxynix/siem-server": "workspace:*",
     "@doxynix/siem-shared": "workspace:*",
-    "@hookform/resolvers": "5.7.1",
+    "@hookform/resolvers": "5.8.0",
     "@internationalized/date": "3.12.3",
     "@microsoft/fetch-event-source": "2.0.1",
     "@radix-ui/react-dialog": "1.1.23",
