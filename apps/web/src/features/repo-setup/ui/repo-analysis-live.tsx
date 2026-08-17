@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { trpc } from "@/shared/api/trpc";
 import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Progress } from "@/shared/ui/core/progress";

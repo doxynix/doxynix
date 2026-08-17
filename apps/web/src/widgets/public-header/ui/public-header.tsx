@@ -1,9 +1,9 @@
 import type { Route } from "next";
 import { Menu } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 import { publicHeaderMenu } from "@/shared/constants/navigation";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -18,8 +18,8 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { PublicHeaderCtaSlot } from "./public-header-cta-slot";
 
-export function PublicHeader() {
-  const t = useTranslations("Common");
+export async function PublicHeader() {
+  const t = await getTranslations("Common");
 
   return (
     <header className="w-full">

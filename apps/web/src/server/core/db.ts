@@ -17,7 +17,7 @@ import { AUDIT_BUSINESS_MODELS, ENCRYPTED_METADATA_MAP } from "../utils/constant
 import { requestContext } from "../utils/request-context";
 import { maskSensitiveFields, sanitizePayload } from "../utils/sanitize-payload";
 import { appLogger } from "./app-logger";
-import { realtimeServer } from "./realtime";
+import { realtimeService } from "./realtime";
 
 type DmmfField = {
   documentation?: string;
@@ -258,9 +258,8 @@ function createPrismaInstance() {
                 });
 
                 if (userId != null && AUDIT_BUSINESS_MODELS.includes(model)) {
-                  const channelName = REALTIME_CONFIG.channels.user(userId);
-                  await realtimeServer.channels
-                    .get(channelName)
+                  await realtimeService
+                    .user(userId)
                     .publish(REALTIME_CONFIG.events.user.auditUpdated, {});
                 }
               } catch (error) {

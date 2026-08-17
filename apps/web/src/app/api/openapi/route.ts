@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
+import openApiDocument from "@public/openapi.json";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
-
-import openApiDocument from "../../../../public/openapi.json";
-
-export const runtime = "edge";
 
 export const GET = async () => {
   try {

@@ -1,7 +1,7 @@
 import { forwardRef, type ComponentProps, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppButton, buttonVariants, type ButtonProps } from "@/shared/ui/core/button";
 

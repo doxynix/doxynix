@@ -1,4 +1,4 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { ScrollButton } from "@/shared/ui/kit/scroll-button";
@@ -6,8 +6,8 @@ import { AnimatedShinyText } from "@/shared/ui/visuals/animated-shiny-text";
 import { ShimmerButton } from "@/shared/ui/visuals/shimmer-button";
 import { TextAnimate } from "@/shared/ui/visuals/text-animate";
 
-export function HeroSection() {
-  const t = useTranslations("Landing");
+export async function HeroSection() {
+  const t = await getTranslations("Landing");
 
   return (
     <section id="hero" className="flex min-h-dvh flex-col items-center justify-center p-4 pt-16">

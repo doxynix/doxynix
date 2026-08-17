@@ -4,7 +4,7 @@ import { Bell } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
 import {

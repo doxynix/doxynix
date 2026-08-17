@@ -9,7 +9,7 @@ import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
 import { google } from "@/server/core/google";
-import { realtimeServer } from "@/server/core/realtime";
+import { realtimeService } from "@/server/core/realtime";
 import { processMessageParts } from "@/server/modules/agent/agent-storage";
 import {
   AGENT_SYSTEM_PROMPT,
@@ -164,9 +164,8 @@ export async function POST(req: Request) {
                   where: { id: sessionId },
                 });
 
-                const channelName = REALTIME_CONFIG.channels.user(String(userId));
-                await realtimeServer.channels
-                  .get(channelName)
+                await realtimeService
+                  .user(userId)
                   .publish(REALTIME_CONFIG.events.user.sessionUpdated, {
                     sessionId,
                     title: cleanedTitle,

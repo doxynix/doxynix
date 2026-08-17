@@ -1,11 +1,11 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 import { ScrollButton } from "@/shared/ui/kit/scroll-button";
 import { BackgroundBeamsWithCollision } from "@/shared/ui/visuals/background-beams-with-collision";
 import { ShimmerButton } from "@/shared/ui/visuals/shimmer-button";
 
-export function CTASection() {
-  const t = useTranslations("Landing");
+export async function CTASection() {
+  const t = await getTranslations("Landing");
 
   return (
     <section className="relative container mx-auto flex w-full flex-col items-center justify-center overflow-hidden">

@@ -1,4 +1,3 @@
-import { createNavigation } from "next-intl/navigation";
 import { defineRouting } from "next-intl/routing";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
@@ -14,5 +13,3 @@ export const routing = defineRouting({
   localePrefix: "as-needed",
   locales: LOCALES,
 });
-
-export const { Link, redirect, usePathname, useRouter } = createNavigation(routing);

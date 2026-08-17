@@ -32,7 +32,7 @@ import { appLogger } from "./app-logger";
 import { customAuthAdapter } from "./auth/auth-adapter";
 import { prisma } from "./db";
 import { emailSignInLimiter } from "./ratelimit";
-import { redisClient } from "./redis";
+import { redisService } from "./redis";
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // TIME: 30 дней
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // TIME: сутки
@@ -485,53 +485,7 @@ export const auth = betterAuth({
     window: 10,
   },
 
-  secondaryStorage: {
-    delete: async (key) => {
-      try {
-        await redisClient.del(key);
-      } catch (error) {
-        appLogger.error({ error, key, msg: "Redis secondaryStorage delete error" });
-        throw error;
-      }
-    },
-    get: async (key) => {
-      try {
-        const value = await redisClient.get(key);
-        if (value === null || value === undefined) {
-          return null;
-        }
-        return typeof value === "string" ? value : JSON.stringify(value);
-      } catch (error) {
-        appLogger.error({ error, key, msg: "Redis secondaryStorage get error" });
-        return null;
-      }
-    },
-    getAndDelete: async (key) => {
-      try {
-        const value = await redisClient.getdel<string>(key);
-        if (value == null) {
-          return null;
-        }
-        return typeof value === "string" ? value : JSON.stringify(value);
-      } catch (error) {
-        appLogger.error({ error, key, msg: "Redis secondaryStorage getAndDelete error" });
-        return null;
-      }
-    },
-    set: async (key, value, ttl) => {
-      try {
-        const stringValue = typeof value === "string" ? value : JSON.stringify(value);
-        if (ttl != null) {
-          await redisClient.set(key, stringValue, { ex: ttl });
-        } else {
-          await redisClient.set(key, stringValue);
-        }
-      } catch (error) {
-        appLogger.error({ error, key, msg: "Redis secondaryStorage set error" });
-        throw error;
-      }
-    },
-  },
+  secondaryStorage: redisService.authStorage,
 
   secret: BETTER_AUTH_SECRET,
 

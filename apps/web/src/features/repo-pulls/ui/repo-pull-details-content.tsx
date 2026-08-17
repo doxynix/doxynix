@@ -17,7 +17,7 @@ import { useLocale } from "next-intl";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";

@@ -1,19 +1,13 @@
-"use client";
-
-import dynamic from "next/dynamic";
-import { useTranslations } from "next-intl";
+import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 
+import { AnalyticsChart } from "./analytics-chart";
 import { AnalyticsChartSkeleton } from "./analytics-chart-skeleton";
 
-const AnalyticsChart = dynamic(() => import("./analytics-chart").then((m) => m.AnalyticsChart), {
-  loading: () => <AnalyticsChartSkeleton />,
-  ssr: false,
-});
-
-export function AnalyticsSection() {
-  const t = useTranslations("Landing");
+export async function AnalyticsSection() {
+  const t = await getTranslations("Landing");
 
   return (
     <section className="relative container mx-auto px-4 py-24">
@@ -32,7 +26,9 @@ export function AnalyticsSection() {
             <CardDescription>{t("section_analytics_card_desc")}</CardDescription>
           </CardHeader>
           <CardContent>
-            <AnalyticsChart />
+            <Suspense fallback={<AnalyticsChartSkeleton />}>
+              <AnalyticsChart />
+            </Suspense>
           </CardContent>
         </Card>
 

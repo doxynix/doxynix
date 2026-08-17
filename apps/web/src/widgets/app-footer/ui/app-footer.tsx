@@ -1,6 +1,6 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { CrunchbaseIcon } from "@/shared/ui/icons/crunchbase-icon";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { TelegramIcon } from "@/shared/ui/icons/telegram-icon";
@@ -33,8 +33,8 @@ const SOCIAL_LINKS = [
   },
 ] as const;
 
-export function AppFooter() {
-  const tFooter = useTranslations("Footer");
+export async function AppFooter() {
+  const tFooter = await getTranslations("Footer");
 
   return (
     <footer className="bg-background flex items-center justify-center p-2">

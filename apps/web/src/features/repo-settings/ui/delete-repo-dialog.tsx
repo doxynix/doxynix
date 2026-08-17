@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { AppButton } from "@/shared/ui/core/button";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 

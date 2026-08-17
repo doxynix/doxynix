@@ -1,3 +1,5 @@
+import { authClient } from "@/shared/lib/auth-client";
+
 export const toolLabels: Record<string, string> = {
   applyFix: "Applying code corrections on GitHub",
   clearReadNotifications: "Clearing read notifications",
@@ -42,7 +44,6 @@ export const TOOL_INVALIDATIONS: Record<string, (utils: any) => void> = {
     utils.notification.getStats.invalidate();
   },
   clearStaging: (utils) => utils.analysis.getStagedFiles.invalidate(),
-
   createApiKey: (utils) => utils.apikey.list.invalidate(),
   deleteRepository: (utils) => {
     utils.repo.getAll.invalidate();
@@ -57,20 +58,26 @@ export const TOOL_INVALIDATIONS: Record<string, (utils: any) => void> = {
     utils.notification.getAll.invalidate();
     utils.notification.getStats.invalidate();
   },
-
   openPullRequest: (utils) => utils.analysis.listByRepository.invalidate(),
   registerRepository: (utils) => {
     utils.repo.getAll.invalidate();
     utils.repo.getSlim.invalidate();
   },
   revokeApiKey: (utils) => utils.apikey.list.invalidate(),
-
   stageFile: (utils) => utils.analysis.getStagedFiles.invalidate(),
   stageGeneratedFix: (utils) => utils.analysis.getStagedFiles.invalidate(),
-
   triggerRepositoryAnalysis: (utils) => utils.analysis.getLatest.invalidate(),
   unstageFile: (utils) => utils.analysis.getStagedFiles.invalidate(),
   updateApiKey: (utils) => utils.apikey.list.invalidate(),
 
-  updateUserProfile: (utils) => utils.user.me.invalidate(),
+  updateUserProfile: (utils) => {
+    void utils.user.me.invalidate();
+    if (typeof window !== "undefined") {
+      void authClient.getSession({
+        fetchOptions: {
+          headers: { "Cache-Control": "no-cache" },
+        },
+      });
+    }
+  },
 };

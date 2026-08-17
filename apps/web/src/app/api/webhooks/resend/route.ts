@@ -12,8 +12,6 @@ import { maskEmail, normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash } from "@/server/utils/hash";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";
 
-export const runtime = "nodejs";
-
 const resendWebhookSchema = z
   .object({
     created_at: z.string(),

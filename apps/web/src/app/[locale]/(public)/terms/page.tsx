@@ -4,8 +4,6 @@ import { getTranslations } from "next-intl/server";
 import { createMetadata } from "@/shared/lib/metadata";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
-// export const runtime = "edge"; // DOCS: изучить как эта вещь работает а то ошибки какое-то не понятно...
-
 export const generateMetadata = createMetadata("terms_title", "terms_desc");
 
 const SECTION_TITLE = "mb-3 text-lg font-bold text-foreground flex items-center gap-2";

@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { trpc } from "@/shared/api/trpc";
 import { commandMenuItems } from "@/shared/constants/navigation";
 import { useDebounce } from "@/shared/hooks/use-debounce";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import type { MenuItem } from "@/shared/types/navigation.types";
 import { AppButton } from "@/shared/ui/core/button";

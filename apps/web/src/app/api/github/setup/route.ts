@@ -7,8 +7,6 @@ import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
 import { githubAppService } from "@/server/core/github/github-app.service";
 
-export const runtime = "nodejs";
-
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const installationId = searchParams.get("installation_id");

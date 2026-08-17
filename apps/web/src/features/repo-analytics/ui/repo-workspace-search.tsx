@@ -12,7 +12,7 @@ import {
 import { parseAsString, useQueryState } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppSearch } from "@/shared/ui/kit/app-search";
