@@ -1,7 +1,7 @@
 import { CheckCircle2, Clock, ShieldAlert } from "lucide-react";
 import { useLocale } from "next-intl";
 
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";

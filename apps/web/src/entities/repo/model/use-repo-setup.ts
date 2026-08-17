@@ -6,7 +6,7 @@ import type { TreeApi } from "react-arborist";
 
 import { DocTypeSchema } from "@/shared/api-contracts";
 import { trpc } from "@/shared/api/trpc";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 
 import { collectAllIds, getFolderSelectionState, sortNodes } from "./repo-setup-utils";
 import type { FileNode, FileTuple } from "./repo-setup.types";

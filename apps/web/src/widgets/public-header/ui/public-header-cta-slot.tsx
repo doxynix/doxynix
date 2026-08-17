@@ -2,7 +2,7 @@
 
 import { MoveLeft } from "lucide-react";
 
-import { Link, usePathname } from "@/shared/i18n/routing";
+import { Link, usePathname } from "@/shared/i18n/navigation";
 import { AppButton } from "@/shared/ui/core/button";
 
 export function PublicHeaderCtaSlot() {

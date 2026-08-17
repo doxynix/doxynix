@@ -10,7 +10,7 @@ import parse, {
 } from "html-react-parser";
 import { AlertTriangle, Info, Lightbulb, ShieldAlert, Terminal } from "lucide-react";
 
-import { Link, useRouter } from "@/shared/i18n/routing";
+import { Link, useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { AppMermaid } from "@/shared/ui/core/mermaid";

@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
 
@@ -22,7 +22,7 @@ interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
 
 const BentoGrid = ({ children, className, ...props }: BentoGridProps) => {
   return (
-    <div className={cn("grid w-full auto-rows-[22rem] grid-cols-3 gap-4", className)} {...props}>
+    <div className={cn("grid w-full auto-rows-88 grid-cols-3 gap-4", className)} {...props}>
       {children}
     </div>
   );

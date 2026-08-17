@@ -47,7 +47,14 @@ function isUnoptimizedHost(src: string): boolean {
     }
 
     const hostname = url.hostname.toLowerCase();
-    const allowedHosts = ["utfs.io", "ufs.sh"];
+
+    const allowedHosts = [
+      "utfs.io",
+      "ufs.sh",
+      "blob.vercel-storage.com",
+      "public.blob.vercel-storage.com",
+      "vercel-storage.com",
+    ];
 
     return allowedHosts.some((allowed) => {
       return hostname === allowed || hostname.endsWith("." + allowed);

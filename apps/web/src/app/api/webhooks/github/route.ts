@@ -15,7 +15,7 @@ import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { realtimeServer } from "@/server/core/realtime";
+import { realtimeService } from "@/server/core/realtime";
 import { agentGithubReplyTask } from "@/server/modules/agent/tasks/agent-github-reply.task";
 import { handlePullRequestEvent } from "@/server/modules/analysis/logic/pr-webhook-handler";
 import { handleInstallationEvent } from "@/server/modules/webhooks/installation-webhook-handler";
@@ -84,18 +84,15 @@ webhooks.on("issue_comment.created", async ({ payload }) => {
     },
   });
 
-  const channelName = REALTIME_CONFIG.channels.user(String(repo.userId));
-  await realtimeServer.channels
-    .get(channelName)
-    .publish(REALTIME_CONFIG.events.user.prCommentReceived, {
-      author: payload.sender.login,
-      authorAvatarUrl: payload.sender.avatar_url,
-      commentId: prComment.publicId,
-      prNumber: payload.issue.number,
-      prTitle: payload.issue.title,
-      repoName: payload.repository.name,
-      repoOwner: payload.repository.owner.login,
-    });
+  await realtimeService.user(repo.userId).publish(REALTIME_CONFIG.events.user.prCommentReceived, {
+    author: payload.sender.login,
+    authorAvatarUrl: payload.sender.avatar_url,
+    commentId: prComment.publicId,
+    prNumber: payload.issue.number,
+    prTitle: payload.issue.title,
+    repoName: payload.repository.name,
+    repoOwner: payload.repository.owner.login,
+  });
 
   if (commentBody.includes("@doxynix")) {
     await agentGithubReplyTask.trigger({

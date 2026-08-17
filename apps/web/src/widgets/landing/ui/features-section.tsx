@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Activity, Code2, Cpu, FileJson, Lock, Share2, Terminal } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 import { BentoCard, BentoGrid } from "@/shared/ui/visuals/bento-grid";
 
@@ -28,8 +28,8 @@ const MockGraph = () => (
   </div>
 );
 
-export function FeaturesSection() {
-  const t = useTranslations("Landing");
+export async function FeaturesSection() {
+  const t = await getTranslations("Landing");
 
   const FEATURES = [
     {

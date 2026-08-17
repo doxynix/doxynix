@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 
 import { AppButton } from "../core/button";
@@ -59,7 +59,7 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
       >
         <Link ref={ref} href={href} {...props}>
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-(--radius)">
-            <div className="@container-[size] absolute inset-0 overflow-visible blur-[2px]">
+            <div className="@container-size absolute inset-0 overflow-visible blur-[2px]">
               <div className="animate-shimmer-slide absolute inset-0 aspect-[1] h-[100cqh] rounded-none [mask:none]">
                 <div className="animate-spin-around absolute inset-[-220%] block aspect-square [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]" />
               </div>

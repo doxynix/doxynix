@@ -1,12 +1,12 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 import { Accordion } from "@/shared/ui/core/accordion";
 import { AccordionListItem } from "@/shared/ui/kit/accordion-list-item";
 
 type Props = { a: string; q: string; value: string };
 
-export function FAQSection() {
-  const t = useTranslations("Landing");
+export async function FAQSection() {
+  const t = await getTranslations("Landing");
 
   const items: Props[] = [1, 2, 3, 4, 5].map((i) => ({
     a: t(`section_faq_a${i}`),

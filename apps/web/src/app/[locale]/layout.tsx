@@ -1,24 +1,18 @@
-import { Suspense, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
-import { connection } from "next/server";
-import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import NextTopLoader from "nextjs-toploader";
-import { extractRouterConfig } from "uploadthing/server";
 
 import "../globals.css";
 
 import { APP_URL } from "@/shared/constants/env.client";
 import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
-import type { Locale } from "@/shared/constants/locales";
 import { routing } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Toaster } from "@/shared/ui/core/sonner";
@@ -26,17 +20,10 @@ import { A11yProvider } from "@/shared/ui/kit/a11y-provider";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
 import { SkipLink } from "@/shared/ui/kit/skip-link";
 
-import { ourFileRouter } from "@/server/core/uploadthing";
-
 import { Providers } from "../providers";
 
-async function UTSSR() {
-  await connection();
-  return <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />;
-}
-
-function normalizeTheme(theme: string | undefined) {
-  return theme === "light" || theme === "dark" || theme === "system" ? theme : "system";
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
 }
 
 const fontSans = Geist({
@@ -132,20 +119,11 @@ export const metadata: Metadata = {
 
 export default async function LocaleLayout({
   children,
-  params,
 }: Readonly<{
   children: ReactNode;
-  params: Promise<{ locale: string }>;
 }>) {
-  const { locale } = await params;
-
-  if (!routing.locales.includes(locale as Locale)) {
-    notFound();
-  }
-
+  const locale = await getLocale();
   const messages = await getMessages();
-  const cookieStore = await cookies();
-  const themeCookie = normalizeTheme(cookieStore.get("doxynix-theme")?.value);
 
   return (
     <html suppressHydrationWarning lang={locale} data-scroll-behavior="smooth">
@@ -164,14 +142,11 @@ export default async function LocaleLayout({
               disableTransitionOnChange
               enableSystem
               attribute="class"
-              defaultTheme={themeCookie}
+              defaultTheme="system"
               storageKey="doxynix-theme"
             >
               <Toaster duration={4000} gap={8} position="top-center" />
               <NextTopLoader color="var(--foreground)" showSpinner={false} zIndex={9999} />
-              <Suspense>
-                <UTSSR />
-              </Suspense>
               <Providers>{children}</Providers>
               {IS_PROD && (
                 <>

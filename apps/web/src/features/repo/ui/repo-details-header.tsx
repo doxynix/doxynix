@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";

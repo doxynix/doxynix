@@ -2,9 +2,8 @@ import { task } from "@trigger.dev/sdk";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
-import { realtimeServer } from "@/server/core/realtime";
-import { redisClient } from "@/server/core/redis";
-import { REDIS_CONFIG } from "@/server/utils/redis";
+import { realtimeService } from "@/server/core/realtime";
+import { redisService } from "@/server/core/redis";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 
 import type { FileActionNodeContext } from "../analysis.schemas";
@@ -40,12 +39,10 @@ export const analyzeFileTask = task({
       commitSha: payload.commitSha,
     };
 
-    const cacheKey = REDIS_CONFIG.keys.fileAction(payload.userId, payload.path, "quick-file-audit");
-    await redisClient.set(cacheKey, result, { ex: REDIS_CONFIG.ttl.fileAction });
+    await redisService.fileActions.set(payload.userId, payload.path, "quick-file-audit", result);
 
-    const channelName = REALTIME_CONFIG.channels.user(payload.userId);
-    await realtimeServer.channels
-      .get(channelName)
+    await realtimeService
+      .user(payload.userId)
       .publish(REALTIME_CONFIG.events.user.fileActionCompleted, {
         path: payload.path,
         type: "AUDIT",

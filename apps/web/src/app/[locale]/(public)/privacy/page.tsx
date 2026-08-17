@@ -4,8 +4,6 @@ import { getTranslations } from "next-intl/server";
 import { createMetadata } from "@/shared/lib/metadata";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
-// export const runtime = "edge";
-
 export const generateMetadata = createMetadata("privacy_title", "privacy_desc");
 
 type Props = { descKey: string; name: string };
@@ -23,7 +21,6 @@ const BRANDS: Props[] = [
   { descKey: "brands_oauth_desc", name: "OAuth Providers" },
   { descKey: "brands_upstash_desc", name: "Upstash / Redis" },
   { descKey: "brands_axiom_desc", name: "Axiom" },
-  { descKey: "brands_uploadthing_desc", name: "UploadThing" },
   { descKey: "brands_ably_desc", name: "Ably" },
 ] as const;
 

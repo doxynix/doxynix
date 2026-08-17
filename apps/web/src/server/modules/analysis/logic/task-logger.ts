@@ -6,7 +6,7 @@ import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { realtimeServer } from "@/server/core/realtime";
+import { realtimeService } from "@/server/core/realtime";
 
 type LogLevel = "error" | "info" | "success" | "warn";
 
@@ -127,16 +127,10 @@ async function publishAnalysisProgress(params: {
   status: Status;
   userId: number;
 }) {
-  try {
-    await realtimeServer.channels
-      .get(REALTIME_CONFIG.channels.user(params.userId))
-      .publish(REALTIME_CONFIG.events.user.analysisProgress, {
-        analysisId: params.analysisId,
-        message: params.message,
-        progress: params.progress,
-        status: params.status,
-      });
-  } catch (error) {
-    appLogger.debug({ error, msg: "Failed to publish analysis progress event" });
-  }
+  await realtimeService.user(params.userId).publish(REALTIME_CONFIG.events.user.analysisProgress, {
+    analysisId: params.analysisId,
+    message: params.message,
+    progress: params.progress,
+    status: params.status,
+  });
 }

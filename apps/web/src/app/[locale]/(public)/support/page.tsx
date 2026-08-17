@@ -8,8 +8,6 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AccordionListItem } from "@/shared/ui/kit/accordion-list-item";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
-// export const runtime = "edge";
-
 export const generateMetadata = createMetadata("support_title", "support_desc");
 
 type SupportChannel = {

@@ -1,3 +1,5 @@
+import { IS_PROD } from "../constants/env.flags";
+
 export function getClientCookie(name: string): null | string {
   if (typeof window === "undefined") return null;
 
@@ -20,4 +22,8 @@ export function setClientCookie(name: string, value: boolean | string, maxAge: n
 
   // eslint-disable-next-line unicorn/no-document-cookie
   document.cookie = `${name}=${encodeURIComponent(String(value))}; max-age=${maxAge}; path=/; SameSite=Lax; ${secure}`;
+}
+
+export function getCookieName() {
+  return IS_PROD ? "__Secure-doxynix.session_token" : "doxynix.session_token";
 }

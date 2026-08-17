@@ -495,3 +495,8 @@ export type FileActionPreviewResult = {
   summary: string;
   title: string;
 };
+
+export type StagedFile = {
+  content: string;
+  filePath: string;
+};

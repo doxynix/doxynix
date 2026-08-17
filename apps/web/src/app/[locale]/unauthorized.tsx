@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { LogIn, ShieldAlert } from "lucide-react";
 
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 
