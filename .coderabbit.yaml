@@ -1,5 +1,7 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
 language: en-US
-tone_instructions: "Be professional yet friendly. Focus on the overall monorepo architecture, security, and performance. Do not nitpick minor stylistic details unless they break application logic, type safety, or cross-package integrity. Keep in mind this is a Turbo monorepo using Bun, Next.js, and Hono."
+tone_instructions: "Be professional and friendly. Focus on architecture, security, and performance across the Turbo monorepo (Bun, Next.js, Hono). Skip minor stylistic nitpicks unless they break logic, type safety, or package integrity."
 
 reviews:
   profile: chill
