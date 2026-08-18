@@ -55,7 +55,7 @@
     "@ai-sdk/google": "3.0.110",
     "@ai-sdk/groq": "3.0.59",
     "@ai-sdk/openai": "3.0.96",
-    "@ai-sdk/react": "3.0.256",
+    "@ai-sdk/react": "3.0.259",
     "@better-auth/passkey": "1.6.29",
     "@better-auth/prisma-adapter": "1.6.29",
     "@codemirror/autocomplete": "6.20.3",
