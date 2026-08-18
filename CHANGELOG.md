@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.3](https://github.com/doxynix/doxynix/compare/v3.0.2...v3.0.3) (2026-08-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/groq to v3.0.60 ([#1955](https://github.com/doxynix/doxynix/issues/1955)) ([c9be280](https://github.com/doxynix/doxynix/commit/c9be280fe25a988a4da86a66b758e9352de5bc2a))
+* **deps:** update dependency langsmith to v0.8.11 ([#1958](https://github.com/doxynix/doxynix/issues/1958)) ([3a156ae](https://github.com/doxynix/doxynix/commit/3a156aeccec011c4a9cf056359bf30eee8c4fe3d))
+
 ## [3.0.2](https://github.com/doxynix/doxynix/compare/v3.0.1...v3.0.2) (2026-08-17)
 
 
