@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.0.4](https://github.com/doxynix/doxynix/compare/v3.0.3...v3.0.4) (2026-08-19)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/openai to v3.0.97 ([#1956](https://github.com/doxynix/doxynix/issues/1956)) ([6ab89af](https://github.com/doxynix/doxynix/commit/6ab89afc388c664a8725b04c4ccffea1dc46237e))
+* **deps:** update dependency @ai-sdk/react to v3.0.259 ([#1947](https://github.com/doxynix/doxynix/issues/1947)) ([20208e1](https://github.com/doxynix/doxynix/commit/20208e14a1ad72f90434b5d80e4cb0f7907cd03b))
+* **deps:** update dependency @hookform/resolvers to v5.9.0 ([#1964](https://github.com/doxynix/doxynix/issues/1964)) ([24dc4c2](https://github.com/doxynix/doxynix/commit/24dc4c2fec94c1d68b3ef7e9869104cacdf77519))
+* **deps:** update dependency ai to v6.0.256 ([#1957](https://github.com/doxynix/doxynix/issues/1957)) ([193cdbd](https://github.com/doxynix/doxynix/commit/193cdbd28444a2b34ac3bc81395a4631a445ca1d))
+* **deps:** update dependency fast-xml-parser to v5.11.0 ([#1968](https://github.com/doxynix/doxynix/issues/1968)) ([41ed567](https://github.com/doxynix/doxynix/commit/41ed567e9fdd93f484f17ee0681947fda64f78db))
+* **deps:** update dependency posthog-js to v1.417.1 ([#1961](https://github.com/doxynix/doxynix/issues/1961)) ([6561928](https://github.com/doxynix/doxynix/commit/6561928506720f95266c95d880d08cd48a4d4f13))
+* **deps:** update dependency resend to v6.20.0 ([#1965](https://github.com/doxynix/doxynix/issues/1965)) ([4d04ecf](https://github.com/doxynix/doxynix/commit/4d04ecf494f78b92d02dd10def51e89521c1bb4d))
+* **deps:** update nextjs monorepo to v16.3.1 ([#1966](https://github.com/doxynix/doxynix/issues/1966)) ([b53adb5](https://github.com/doxynix/doxynix/commit/b53adb51a0f38272a487c82a5ad27e39fb880b40))
+* **deps:** update tanstack-router monorepo ([#1962](https://github.com/doxynix/doxynix/issues/1962)) ([2b899c4](https://github.com/doxynix/doxynix/commit/2b899c436c46342ff91ac7de4ddb06b4d288bde5))
+
 ## [3.0.3](https://github.com/doxynix/doxynix/compare/v3.0.2...v3.0.3) (2026-08-18)
 
 
