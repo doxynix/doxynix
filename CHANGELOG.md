@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.6](https://github.com/doxynix/doxynix/compare/v3.0.5...v3.0.6) (2026-08-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency es-toolkit to v1.51.0 ([#1972](https://github.com/doxynix/doxynix/issues/1972)) ([55d61dc](https://github.com/doxynix/doxynix/commit/55d61dc8d558bd0fa066a2bb61a30e710230a993))
+
 ## [3.0.5](https://github.com/doxynix/doxynix/compare/v3.0.4...v3.0.5) (2026-08-19)
 
 
