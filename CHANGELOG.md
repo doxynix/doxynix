@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.9](https://github.com/doxynix/doxynix/compare/v3.0.8...v3.0.9) (2026-08-20)
+
+
+### Bug Fixes
+
+* **deps:** update better-auth monorepo to v1.6.30 ([#1980](https://github.com/doxynix/doxynix/issues/1980)) ([6c632f5](https://github.com/doxynix/doxynix/commit/6c632f589ca70d30f24b622cae7631c57f99ca70))
+* **deps:** update dependency posthog-js to v1.417.4 ([#1981](https://github.com/doxynix/doxynix/issues/1981)) ([ba7c1ac](https://github.com/doxynix/doxynix/commit/ba7c1ac827152e3282b2bf7bbdf393a9d827676a))
+
 ## [3.0.8](https://github.com/doxynix/doxynix/compare/v3.0.7...v3.0.8) (2026-08-20)
 
 
