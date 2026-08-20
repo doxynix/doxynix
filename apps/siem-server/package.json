@@ -40,7 +40,7 @@
     "better-auth": "1.6.29",
     "drizzle-orm": "0.45.2",
     "drizzle-zod": "0.8.3",
-    "es-toolkit": "1.50.0",
+    "es-toolkit": "1.51.0",
     "eventemitter3": "5.0.4",
     "hono": "4.13.2",
     "ioredis": "6.0.0",
