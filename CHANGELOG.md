@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.0.8](https://github.com/doxynix/doxynix/compare/v3.0.7...v3.0.8) (2026-08-20)
+
+
+### Bug Fixes
+
+* **deps:** update codemirror ([#1969](https://github.com/doxynix/doxynix/issues/1969)) ([e352dbe](https://github.com/doxynix/doxynix/commit/e352dbe96793139e7f7c62e77bed34393b60e401))
+* **deps:** update dependency posthog-js to v1.417.2 ([#1978](https://github.com/doxynix/doxynix/issues/1978)) ([974f5cf](https://github.com/doxynix/doxynix/commit/974f5cf0261b26af3cf143d7682f6416fb92cf5c))
+* **deps:** update react monorepo ([#1884](https://github.com/doxynix/doxynix/issues/1884)) ([6b603f3](https://github.com/doxynix/doxynix/commit/6b603f3a6f854ccff7cf2eb9061e535635a2cba8))
+
 ## [3.0.7](https://github.com/doxynix/doxynix/compare/v3.0.6...v3.0.7) (2026-08-20)
 
 
