@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.0.7](https://github.com/doxynix/doxynix/compare/v3.0.6...v3.0.7) (2026-08-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @hookform/resolvers to v5.9.1 ([#1974](https://github.com/doxynix/doxynix/issues/1974)) ([9e1cb9d](https://github.com/doxynix/doxynix/commit/9e1cb9d108b31cb23984fa565b267a15d234c872))
+* **deps:** update dependency next-intl to v4.13.7 ([#1975](https://github.com/doxynix/doxynix/issues/1975)) ([8f146f1](https://github.com/doxynix/doxynix/commit/8f146f1a8f167e891ad832ede809a8d8f39880c0))
+* **deps:** update dependency nuqs to v2.9.6 ([#1976](https://github.com/doxynix/doxynix/issues/1976)) ([be5b0db](https://github.com/doxynix/doxynix/commit/be5b0dbb9548f0f664bf33e27f743dead3a06c54))
+
 ## [3.0.6](https://github.com/doxynix/doxynix/compare/v3.0.5...v3.0.6) (2026-08-20)
 
 
