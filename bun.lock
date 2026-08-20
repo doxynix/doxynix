@@ -9,7 +9,7 @@
         "@secretlint/secretlint-rule-preset-recommend": "13.0.4",
         "@types/node": "26.1.2",
         "cspell": "10.0.1",
-        "eslint-plugin-react-hooks": "7.0.0",
+        "eslint-plugin-react-hooks": "7.1.1",
         "jscpd": "4.3.0",
         "knip": "6.32.2",
         "lefthook": "2.1.10",
@@ -248,11 +248,11 @@
         "posthog-js": "1.417.2",
         "posthog-node": "5.49.1",
         "prisma-field-encryption": "1.6.0",
-        "react": "19.2.7",
+        "react": "19.2.8",
         "react-arborist": "3.13.2",
         "react-codemirror-merge": "4.25.10",
         "react-day-picker": "9.14.0",
-        "react-dom": "19.2.7",
+        "react-dom": "19.2.8",
         "react-hook-form": "7.81.0",
         "react-hotkeys-hook": "5.3.3",
         "react-markdown": "10.1.0",
@@ -3611,7 +3611,7 @@
 
     "eslint-plugin-react-dom": ["eslint-plugin-react-dom@5.18.6", "", { "dependencies": { "@eslint-react/ast": "5.18.6", "@eslint-react/eslint": "5.18.6", "@eslint-react/jsx": "5.18.6", "@eslint-react/shared": "5.18.6", "@typescript-eslint/types": "^8.67.0", "@typescript-eslint/utils": "^8.67.0", "compare-versions": "^6.1.1" }, "peerDependencies": { "eslint": "*", "typescript": "*" } }, "sha512-xco47I0Agu+83QH2ONbgZd1JPLSXJON+gtFGJbOhgfPvetfO7UkcHu8iLpncopwyWekAXfhvomJsDlNLTm26/g=="],
 
-    "eslint-plugin-react-hooks": ["eslint-plugin-react-hooks@7.0.0", "", { "dependencies": { "@babel/core": "^7.24.4", "@babel/parser": "^7.24.4", "hermes-parser": "^0.25.1", "zod": "^3.22.4 || ^4.0.0", "zod-validation-error": "^3.0.3 || ^4.0.0" }, "peerDependencies": { "eslint": "^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0" } }, "sha512-fNXaOwvKwq2+pXiRpXc825Vd63+KM4DLL40Rtlycb8m7fYpp6efrTp1sa6ZbP/Ap58K2bEKFXRmhURE+CJAQWw=="],
+    "eslint-plugin-react-hooks": ["eslint-plugin-react-hooks@7.1.1", "", { "dependencies": { "@babel/core": "^7.24.4", "@babel/parser": "^7.24.4", "hermes-parser": "^0.25.1", "zod": "^3.25.0 || ^4.0.0", "zod-validation-error": "^3.5.0 || ^4.0.0" }, "peerDependencies": { "eslint": "^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0 || ^10.0.0" } }, "sha512-f2I7Gw6JbvCexzIInuSbZpfdQ44D7iqdWX01FKLvrPgqxoE7oMj8clOfto8U6vYiz4yd5oKu39rRSVOe1zRu0g=="],
 
     "eslint-plugin-react-jsx": ["eslint-plugin-react-jsx@5.18.6", "", { "dependencies": { "@eslint-react/ast": "5.18.6", "@eslint-react/core": "5.18.6", "@eslint-react/eslint": "5.18.6", "@eslint-react/jsx": "5.18.6", "@eslint-react/shared": "5.18.6", "@typescript-eslint/types": "^8.67.0", "@typescript-eslint/utils": "^8.67.0" }, "peerDependencies": { "eslint": "*", "typescript": "*" } }, "sha512-6EvzS5gZGfQ0byvSxgqV/F0qXTVnNGcCU7wgFZqz8I1IXmcbYyBCyU7gqNlKW1/1ptiZFmuwo57+eW6HyK+wEg=="],
 
@@ -6125,11 +6125,7 @@
 
     "@doxynix/web/ioredis": ["ioredis@5.11.1", "", { "dependencies": { "@ioredis/commands": "1.10.0", "cluster-key-slot": "1.1.1", "debug": "4.4.3", "denque": "2.1.0", "redis-errors": "1.2.0", "redis-parser": "3.0.0", "standard-as-callback": "2.1.0" } }, "sha512-ehuGcf94bQXhfagULNXrJdfnWO38v070jxSx/qE87Kjzmu2fU7ro5EFAb+OPituLqgfyuQaym5DlrNydW2sJ9A=="],
 
-    "@doxynix/web/react": ["react@19.2.7", "", {}, "sha512-HNe9WslTbXmFK8o8cmwgAeJFSBvt1bPdHCVKtaaV+WlAN36mpT4hcRpwbf3fY56ar2oIXzsBpOAiIRHAdY0OlQ=="],
-
     "@doxynix/web/react-day-picker": ["react-day-picker@9.14.0", "", { "dependencies": { "@date-fns/tz": "^1.4.1", "@tabby_ai/hijri-converter": "1.0.5", "date-fns": "^4.1.0", "date-fns-jalali": "4.1.0-0" }, "peerDependencies": { "react": ">=16.8.0" } }, "sha512-tBaoDWjPwe0M5pGrum4H0SR6Lyk+BO9oHnp9JbKpGKW2mlraNPgP9BMfsg5pWpwrssARmeqk7YBl2oXutZTaHA=="],
-
-    "@doxynix/web/react-dom": ["react-dom@19.2.7", "", { "dependencies": { "scheduler": "^0.27.0" }, "peerDependencies": { "react": "^19.2.7" } }, "sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ=="],
 
     "@doxynix/web/react-hook-form": ["react-hook-form@7.81.0", "", { "peerDependencies": { "react": "^16.8.0 || ^17 || ^18 || ^19" } }, "sha512-ocbmr2p5KBMoAfj4WCUvped33lVi1Kd5DuDUvQDnB6VEAacOjPI/jMbtDdbhco4y9ct4xUuCmMY0b/C9L0QHjw=="],
 
