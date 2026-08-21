@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.13](https://github.com/doxynix/doxynix/compare/v3.0.12...v3.0.13) (2026-08-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ai to v6.0.257 ([#1988](https://github.com/doxynix/doxynix/issues/1988)) ([e86328e](https://github.com/doxynix/doxynix/commit/e86328ed01da5185eb667f306085c3504c4ced65))
+
 ## [3.0.12](https://github.com/doxynix/doxynix/compare/v3.0.11...v3.0.12) (2026-08-21)
 
 
