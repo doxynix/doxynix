@@ -42,7 +42,7 @@
     "drizzle-zod": "0.8.3",
     "es-toolkit": "1.51.0",
     "eventemitter3": "5.0.4",
-    "hono": "4.13.2",
+    "hono": "4.13.3",
     "ioredis": "6.0.0",
     "postgres": "3.4.9",
     "zod": "4.4.3"
