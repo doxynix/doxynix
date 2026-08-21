@@ -27,7 +27,7 @@
     "nuke": "rm -rf node_modules/ apps/**/node_modules/ packages/**/node_modules bun.lock .turbo/ .next/ && bun pm cache rm && bun install --force"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.8",
+    "@biomejs/biome": "2.5.9",
     "@secretlint/secretlint-rule-preset-recommend": "13.0.4",
     "@types/node": "26.1.2",
     "cspell": "10.0.1",
