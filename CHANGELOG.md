@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.12](https://github.com/doxynix/doxynix/compare/v3.0.11...v3.0.12) (2026-08-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency hono to v4.13.3 ([#1992](https://github.com/doxynix/doxynix/issues/1992)) ([c89c510](https://github.com/doxynix/doxynix/commit/c89c5101c24505197ace81f656c84b929a9d46a1))
+
 ## [3.0.11](https://github.com/doxynix/doxynix/compare/v3.0.10...v3.0.11) (2026-08-21)
 
 
