@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.11](https://github.com/doxynix/doxynix/compare/v3.0.10...v3.0.11) (2026-08-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/react to v3.0.260 ([#1987](https://github.com/doxynix/doxynix/issues/1987)) ([ea045ce](https://github.com/doxynix/doxynix/commit/ea045cefa05e99e08504f6eecb97cf1db7c75f31))
+
 ## [3.0.10](https://github.com/doxynix/doxynix/compare/v3.0.9...v3.0.10) (2026-08-21)
 
 
