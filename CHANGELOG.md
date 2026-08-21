@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.0.14](https://github.com/doxynix/doxynix/compare/v3.0.13...v3.0.14) (2026-08-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/react to v3.0.261 ([#1995](https://github.com/doxynix/doxynix/issues/1995)) ([e5ec049](https://github.com/doxynix/doxynix/commit/e5ec0498b7ec8f0b48c691fc3350a5b30eaf7af7))
+* **deps:** update dependency input-otp to v1.5.0 ([#1998](https://github.com/doxynix/doxynix/issues/1998)) ([320da0b](https://github.com/doxynix/doxynix/commit/320da0b2629825734c81fbd16315b5154abd8972))
+* **deps:** update tanstack-router monorepo ([#1997](https://github.com/doxynix/doxynix/issues/1997)) ([3eebb07](https://github.com/doxynix/doxynix/commit/3eebb077e2172617cb8c9187f369cd904c9e04bd))
+
 ## [3.0.13](https://github.com/doxynix/doxynix/compare/v3.0.12...v3.0.13) (2026-08-21)
 
 
