@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.10](https://github.com/doxynix/doxynix/compare/v3.0.9...v3.0.10) (2026-08-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency marked to v18.0.10 ([#1984](https://github.com/doxynix/doxynix/issues/1984)) ([4bee701](https://github.com/doxynix/doxynix/commit/4bee701993ab824b6c0a72d02f7e5e0eb8c9fbf2))
+
 ## [3.0.9](https://github.com/doxynix/doxynix/compare/v3.0.8...v3.0.9) (2026-08-20)
 
 
