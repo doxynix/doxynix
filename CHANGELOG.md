@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.0.15](https://github.com/doxynix/doxynix/compare/v3.0.14...v3.0.15) (2026-08-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ai to v6.0.258 ([#1996](https://github.com/doxynix/doxynix/issues/1996)) ([6ad4846](https://github.com/doxynix/doxynix/commit/6ad48461e2d3363e8a9cc18ea7621e2005e0376b))
+* **deps:** update dependency lucide-react to v1.32.0 ([#2001](https://github.com/doxynix/doxynix/issues/2001)) ([68cc8a1](https://github.com/doxynix/doxynix/commit/68cc8a138d6ef8ea4a5094f938b6e72d5fcbbb2f))
+* **deps:** update dependency mermaid to v11.17.0 ([#2004](https://github.com/doxynix/doxynix/issues/2004)) ([7cd1fe7](https://github.com/doxynix/doxynix/commit/7cd1fe7449fd8262afe8a28540841ab32a148233))
+* **deps:** update dependency posthog-js to v1.418.1 ([#2002](https://github.com/doxynix/doxynix/issues/2002)) ([742d82a](https://github.com/doxynix/doxynix/commit/742d82a72ebbb2b24b9451ad758f35be87ce8a93))
+
 ## [3.0.14](https://github.com/doxynix/doxynix/compare/v3.0.13...v3.0.14) (2026-08-21)
 
 
