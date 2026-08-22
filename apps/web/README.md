@@ -1,197 +1,142 @@
 
-***
-
-# ⚡ Doxynix
-
 <div align="center">
 
-<!-- Status Badges -->
-[![CI Status](https://img.shields.io/github/actions/workflow/status/doxynix/doxynix/ci.yml?style=for-the-badge&logo=github-actions&label=CI%20Pipeline)](https://github.com/doxynix/doxynix/actions)
-[![Security: CodeQL](https://img.shields.io/github/actions/workflow/status/doxynix/doxynix/codeql.yml?style=for-the-badge&logo=github-security&label=CodeQL&color=blue)](https://github.com/doxynix/doxynix/actions)
-[![Website Status](https://img.shields.io/website?url=https%3A%2F%2Fdoxynix.space&style=for-the-badge&logo=vercel&label=System%20Status&up_message=Operational&down_message=Downtime&up_color=success&down_color=red)](https://doxynix.space)
+# @doxynix/web
 
-<!-- Core Stack Badges -->
-![Next.js](https://img.shields.io/badge/Next.js-16.1-black?style=for-the-badge&logo=next.js&logoColor=white)
-![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+### Code Intelligence, Interactive Repo Brief & AST Analysis Core
 
-<!-- Backend & Tools Badges -->
-![tRPC](https://img.shields.io/badge/tRPC-v11-2596BE?style=for-the-badge&logo=trpc&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
-![Zod](https://img.shields.io/badge/Zod-Validation-3068b7?style=for-the-badge&logo=zod&logoColor=white)
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?style=for-the-badge&logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
-[![RelativeCI](https://badges.relative-ci.com/badges/pSyX3AJ3lNJwWJIvB8qs?branch=main&style=flat-square)](https://app.relative-ci.com/projects/pSyX3AJ3lNJwWJIvB8qs)
-[![codecov](https://codecov.io/gh/doxynix/doxynix/graph/badge.svg?token=6JIP6IY9CB)](https://codecov.io/gh/doxynix/doxynix)
+**The primary public platform for deterministic codebase exploration and context-grounded AI documentation.**
 
-<!-- Header Content -->
-<h3>Repository Analysis & Documentation Generator Service</h3>
-<p>Turn your code into insights. Automatic analysis, quality metrics, and documentation generation for GitHub repositories.</p>
+[![Framework: Next.js 16](https://img.shields.io/badge/framework-next.js%2016.3-24292e?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![UI: React 19](https://img.shields.io/badge/ui-react%2019.2-24292e?style=flat-square&logo=react)](https://react.dev/)
+[![Architecture: FSD](https://img.shields.io/badge/architecture-FSD%20strict-24292e?style=flat-square)](https://feature-sliced.design/)
+[![ORM: Prisma + ZenStack](https://img.shields.io/badge/orm-prisma%20%2B%20zenstack-24292e?style=flat-square&logo=prisma)](https://zenstack.dev/)
+[![Parser: Tree-Sitter WASM](https://img.shields.io/badge/parser-tree--sitter%20wasm-24292e?style=flat-square)](https://tree-sitter.github.io/)
 
-[View Demo](https://doxynix.space) · [Report Bug](https://github.com/doxynix/doxynix/issues) · [Request Feature](https://github.com/doxynix/doxynix/issues)
+[Pipeline](#-analysis-pipeline-architecture) · [FSD Structure](#-architectural-layers-fsd) · [Configuration](#-environment-configuration) · [Workflow](#-development-workflow)
 
 </div>
 
 ---
 
-## 🚀 About The Project
+## 🎯 System Responsibilities
 
-**Doxynix** is an enterprise-grade web application designed to help developers understand complex codebases. It leverages static analysis to calculate complexity metrics, track technical debt, and generate comprehensive documentation automatically.
+`apps/web` is the user-facing web application and primary compute layer for repository intelligence. It processes GitHub repositories and Pull Requests by combining deterministic syntax tree parsing with context-isolated AI reasoning.
 
-Engineered with extreme attention to performance and type safety, Doxynix utilizes the bleeding-edge **Next.js 16** stack with **Partial Prerendering (PPR)** to deliver a native-like experience.
+### Key Capabilities
 
-### Key Features
-
-* 📊 **Deep Static Analysis:** powered by custom parsers and `jscpd` for copy-paste detection.
-* ⚡ **Zero-Latency UI:** Utilizing `TanStack Query` and `PPR` for instant state management.
-* 🔒 **Enterprise Security:** `NextAuth.js` with GitHub OAuth, secured by `Secretlint` and `CodeQL`.
-* 📄 **Auto-Docs:** `tRPC` to OpenAPI generation via `Scalar`.
-* ☁️ **Serverless Infrastructure:** Database on Neon (Pg), queues on Upstash, files on UploadThing.
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend & UI
-
-| Technology | Version | Usage |
-| :--- | :--- | :--- |
-| **Next.js** | `16.1.0` | App Router, Server Actions, PPR. |
-| **React** | `19.2.3` | Server Components, Suspense, Actions. |
-| **Tailwind CSS** | `4.1` | Utility-first styling (Oxide engine). |
-| **Shadcn/ui** | Latest | Radix UI primitives for accessible components. |
-| **Lucide React** | `0.562` | Optimized SVG icons. |
-| **Sonner** | `2.0` | High-performance toast notifications. |
-
-### Backend & Data
-
-| Technology | Usage |
-| :--- | :--- |
-| **tRPC** | `v11` | End-to-end typesafe API without schemas. |
-| **Prisma** | `v7.2` | ORM with `adapter-pg` for serverless PostgreSQL. |
-| **Zod** | `v4` | Runtime validation for ENV, API, and Forms. |
-| **Resend** | `v6` | Transactional emails (React Email). |
-| **Upstash QStash** | `v2` | Serverless message queue / cron jobs. |
-| **UploadThing** | `v7` | Direct S3 file uploads (Oregon region). |
-
-### Quality Control & DX
-
-| Tool | Purpose |
-| :--- | :--- |
-| **Husky** | Git hooks (pre-commit, pre-push). |
-| **Commitlint** | Enforces Conventional Commits standard. |
-| **Secretlint** | Prevents committing API keys and secrets. |
-| **JSCPD** | Detects copy-pasted code duplicates. |
-| **Bundle Analyzer** | Keeps the build size minimal. |
+* **Multi-Grammar AST Parsing:** Native `web-tree-sitter` (WASM) grammar execution extracts language-level symbols, interfaces, call trees, and import hierarchies without external network dependencies.
+* **Interactive Topological Canvas:** Builds directed dependency graphs (`graphology` + `@xyflow/react`) to expose application entrypoints, isolated subgraphs, and cyclic dependencies.
+* **Specialized AI Pipeline:**
+  * `Architect Stage`: Computes high-level domain boundaries and cross-module workflows.
+  * `Sentinel Stage`: Audits security invariants, auth guards, and sensitive sink paths.
+  * `Writer Stage`: Generates contextual documentation anchored strictly to the selected node.
+* **Database-Level Access Policies:** ZenStack (`schema.zmodel`) compiles row-level security and ownership rules directly into Prisma queries.
+* **Enterprise Auth & Cryptography:** Better-Auth (GitHub, Google, Yandex, WebAuthn Passkeys) with field-level encryption for sensitive access tokens via `prisma-field-encryption`.
 
 ---
 
-## 🏁 Getting Started
+## 🔬 Analysis Pipeline Architecture
 
-### Prerequisites
-
-* Node.js 22+ (Required for Next.js 16)
-* pnpm 8+ (Recommended)
-
-### Installation
-
-1. **Clone the repository**
-
-    ```bash
-    git clone https://github.com/doxynix/doxynix.git
-    cd doxynix
-    ```
-
-2. **Install dependencies**
-
-    ```bash
-    pnpm install
-    ```
-
-3. **Environment Setup**
-
-    ```bash
-    cp .env.example .env.local
-    ```
-
-    *Fill in your secrets (Database, Auth, UploadThing).*
-
-4. **Database Migration**
-
-    ```bash
-    pnpm prisma generate
-    pnpm prisma db push
-    ```
-
-5. **Run Development Server**
-
-    ```bash
-    pnpm dev
-    ```
-
----
-
-## 🤝 Development Standards
-
-We strictly follow **Conventional Commits** and ensure code quality via git hooks.
-
-### Commit Message Convention
-
-Your commit messages must follow the standard: `type(scope): subject`
-
-* `feat`: A new feature
-* `fix`: A bug fix
-* `docs`: Documentation only changes
-* `style`: Changes that do not affect the meaning of the code
-* `refactor`: A code change that neither fixes a bug nor adds a feature
-* `chore`: Changes to the build process or auxiliary tools
-
-**Example:**
-
-```bash
-git commit -m "feat(repo): add copy-paste detection via jscpd"
+```mermaid
+flowchart TD
+    A[GitHub Repo / PR Webhook] --> B[Evidence Collector]
+    
+    subgraph Extraction [" 1. Deterministic Extraction "]
+        B --> C[File Classifier & Language Detection]
+        C --> D[Tree-Sitter WASM Parser]
+        C --> E[Regex Signal Engine]
+    end
+    
+    subgraph Topology [" 2. Graph Construction "]
+        D --> F[Graphology Engine]
+        E --> F
+        F --> G[Cyclic Dependency & Entrypoint Resolver]
+        G --> H[Interactive Project Graph Canvas]
+    end
+    
+    subgraph Reasoning [" 3. Contextual AI Pipeline "]
+        H -->|User Selects Specific Node| I[Context Orchestrator]
+        I --> J[Architect Stage]
+        I --> K[Sentinel Stage]
+        J & K --> L[Writer Runner]
+    end
+    
+    L --> M[Interactive Repo Brief Output]
 ```
 
-*If you violate this rule, `commitlint` will reject your commit.*
+---
+
+## 📁 Architectural Layers (FSD)
+
+The application strictly enforces **Feature-Sliced Design (FSD)** across client and server boundaries:
+
+```
+src/
+├── app/                  # Next.js App Router (internationalized routes [locale], API routes)
+├── entities/             # Business models & display cards (repo, pr, api-keys, audit-log, user)
+├── features/             # Interactive user workflows:
+│   ├── repo-map/         # Interactive XYFlow canvas, layout hotkeys & node inspector
+│   ├── repo-code-viewer/ # CodeMirror 6 editor, AST symbol search & live diffs
+│   ├── repo-setup/       # Analysis trigger flows & live WebSocket terminal logs
+│   └── agent/            # Contextual AI dialogue & tool-calling indicators
+├── widgets/              # Composite UI blocks (app-header, app-sidebar, dashboard-stats, landing)
+├── server/               # Server-only domain execution layer:
+│   ├── core/             # DB client, Redis cache, GitHub App SDK, Better-Auth runtime
+│   ├── modules/          # Business logic slices (analysis, agent, audit-logs, repos, webhooks)
+│   └── utils/            # AST adapters, tokenizers, sanitizers, and circuit breakers
+└── shared/               # Reusable UI primitives, tRPC clients, hooks, and utility libraries
+```
 
 ---
 
-## 🛡️ Security
+## ⚙️ Environment Configuration
 
-This project is secured by default.
+All environment variables are validated at startup via `@t3-oss/env-nextjs`.
 
-* **Secretlint** scans every commit for leaked keys.
-* **CodeQL** runs deep semantic code analysis on every push.
-* **Dependabot** keeps dependencies up to date.
-
-See [SECURITY.md](SECURITY.md) for our vulnerability reporting policy.
+| Variable | Type | Description |
+| :--- | :---: | :--- |
+| `DATABASE_URL` | `URL` | PostgreSQL 18 connection pool string |
+| `REDIS_TCP_URL` | `URL` | Valkey/Redis instance URL for caching and rate limiting |
+| `BETTER_AUTH_SECRET` | `String` | Cryptographic secret for signing session tokens |
+| `BETTER_AUTH_URL` | `URL` | Base canonical application URL (`http://localhost:3000`) |
+| `GITHUB_APP_ID` | `Number` | GitHub App ID for Octokit authenticated operations |
+| `GITHUB_APP_PRIVATE_KEY` | `String` | GitHub App PEM certificate string |
+| `GITHUB_WEBHOOK_SECRET` | `String` | Webhook verification HMAC secret |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | `String` | API key for Gemini architectural reasoning pipeline |
+| `PRISMA_FIELD_ENCRYPTION_KEY` | `String` | 32-byte key used for field-level encryption at rest |
+| `ABLY_API_KEY` | `String` | Real-time WebSocket token for streaming live AST build logs |
 
 ---
 
-## 📄 License
+## 🛠️ Development Workflow
 
-Doxynix is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0-only)**.
+Run commands from the monorepo root using Turbo filters, or directly inside `/apps/web`:
 
-### Open Source Use (AGPLv3)
+```bash
+# Start Next.js in development mode (with Doppler secrets)
+bun run dev
 
-* **Ideal for:** Individuals, open-source contributors, and self-hosters.
+# Start development with a constrained memory budget (2048 MB)
+bun run dev:fast
 
-* **Requirement:** If you modify Doxynix and run it as a service over a network, you **must** make your modified source code available to your users under the same AGPLv3 license. This ensures that all improvements to the "Engineering Knowledge Base" engine return to the community.
+# Compile ZenStack models and generate Prisma SQL client
+bun run db:generate
 
-### Alternative Commercial Licensing
+# Execute pending migrations against the local PostgreSQL 18 instance
+bun run db:migrate
 
-If you represent a company or an organization that wants to:
+# Run test suites
+bun run test:unit       # Isolated unit tests (Vitest)
+bun run test:int        # Database integration tests (Vitest)
+bun run test:e2e        # End-to-end browser tests (Playwright)
 
-* Integrate Doxynix into a closed-source commercial product.
-* Use Doxynix in a production environment without the AGPLv3 copyleft restrictions.
-* Receive professional support and enterprise-grade features.
-
-A separate **Commercial License** is available by request. This is not included in the package's SPDX license identifier, but can be negotiated independently for enterprise use cases.
-
-📫 **Contact:** [licensing@doxynix.space](mailto:licensing@doxynix.space)
+# Validate FSD dependency rules and architectural boundaries
+bun run arch:check
+```
 
 ---
 
 <div align="center">
-  <p>Built with ❤️ by <a href="https://github.com/doxynix">Doxynix Team</a></p>
+<sub>Crafted with ❤️ by the Doxynix Engineering Team.</sub>
 </div>
