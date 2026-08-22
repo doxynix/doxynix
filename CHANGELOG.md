@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.17](https://github.com/doxynix/doxynix/compare/v3.0.16...v3.0.17) (2026-08-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/openai to v3.0.98 ([#2009](https://github.com/doxynix/doxynix/issues/2009)) ([7a4228d](https://github.com/doxynix/doxynix/commit/7a4228d2c63bc3a5e7029dffe78fe5a19cdb6373))
+* **deps:** update dependency ai to v6.0.259 ([#2011](https://github.com/doxynix/doxynix/issues/2011)) ([9706533](https://github.com/doxynix/doxynix/commit/97065336a3c37878f9b88adb39550d02edd9e6fd))
+
 ## [3.0.16](https://github.com/doxynix/doxynix/compare/v3.0.15...v3.0.16) (2026-08-22)
 
 
