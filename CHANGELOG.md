@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.16](https://github.com/doxynix/doxynix/compare/v3.0.15...v3.0.16) (2026-08-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency lucide-react to v1.33.0 ([#2006](https://github.com/doxynix/doxynix/issues/2006)) ([97f950c](https://github.com/doxynix/doxynix/commit/97f950c985ab13f54890d1c591e6972d9b5c7b38))
+* **deps:** update tanstack-router monorepo ([#2005](https://github.com/doxynix/doxynix/issues/2005)) ([950cdca](https://github.com/doxynix/doxynix/commit/950cdca215b78ccda140a62659f92853086a1567))
+
 ## [3.0.15](https://github.com/doxynix/doxynix/compare/v3.0.14...v3.0.15) (2026-08-22)
 
 
