@@ -2,7 +2,7 @@
   "name": "@doxynix/web",
   "version": "2.3.0",
   "engines": {
-    "node": ">=22.13.0"
+    "node": "v26.7.0"
   },
   "license": "AGPL-3.0-only",
   "private": true,
