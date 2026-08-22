@@ -232,7 +232,7 @@
     "sonner": "2.0.7",
     "strip-comments": "2.0.1",
     "superjson": "2.2.6",
-    "svix": "1.96.1",
+    "svix": "2.0.0",
     "tailwind-merge": "3.6.0",
     "temporal-polyfill": "0.3.2",
     "tree-sitter-wasms": "0.1.13",
