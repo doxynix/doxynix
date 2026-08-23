@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.19](https://github.com/doxynix/doxynix/compare/v3.0.18...v3.0.19) (2026-08-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency langsmith to v0.9.0 ([#2018](https://github.com/doxynix/doxynix/issues/2018)) ([f592dbb](https://github.com/doxynix/doxynix/commit/f592dbba93c0e0d58cba514fda5b5e6510cac611))
+
 ## [3.0.18](https://github.com/doxynix/doxynix/compare/v3.0.17...v3.0.18) (2026-08-23)
 
 
