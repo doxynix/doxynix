@@ -1,5 +1,55 @@
 # Changelog
 
+## [3.0.19](https://github.com/doxynix/doxynix/compare/v3.0.18...v3.0.19) (2026-08-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency langsmith to v0.9.0 ([#2018](https://github.com/doxynix/doxynix/issues/2018)) ([f592dbb](https://github.com/doxynix/doxynix/commit/f592dbba93c0e0d58cba514fda5b5e6510cac611))
+
+## [3.0.18](https://github.com/doxynix/doxynix/compare/v3.0.17...v3.0.18) (2026-08-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/react to v3.0.262 ([#2010](https://github.com/doxynix/doxynix/issues/2010)) ([1b68371](https://github.com/doxynix/doxynix/commit/1b68371836a925c080e908f0c6abaeeb52d9903d))
+* **deps:** update dependency posthog-js to v1.418.5 ([#2013](https://github.com/doxynix/doxynix/issues/2013)) ([f71ab3d](https://github.com/doxynix/doxynix/commit/f71ab3d70db97715221489b7a9ab58c2e520ae4e))
+
+## [3.0.17](https://github.com/doxynix/doxynix/compare/v3.0.16...v3.0.17) (2026-08-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/openai to v3.0.98 ([#2009](https://github.com/doxynix/doxynix/issues/2009)) ([7a4228d](https://github.com/doxynix/doxynix/commit/7a4228d2c63bc3a5e7029dffe78fe5a19cdb6373))
+* **deps:** update dependency ai to v6.0.259 ([#2011](https://github.com/doxynix/doxynix/issues/2011)) ([9706533](https://github.com/doxynix/doxynix/commit/97065336a3c37878f9b88adb39550d02edd9e6fd))
+
+## [3.0.16](https://github.com/doxynix/doxynix/compare/v3.0.15...v3.0.16) (2026-08-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency lucide-react to v1.33.0 ([#2006](https://github.com/doxynix/doxynix/issues/2006)) ([97f950c](https://github.com/doxynix/doxynix/commit/97f950c985ab13f54890d1c591e6972d9b5c7b38))
+* **deps:** update tanstack-router monorepo ([#2005](https://github.com/doxynix/doxynix/issues/2005)) ([950cdca](https://github.com/doxynix/doxynix/commit/950cdca215b78ccda140a62659f92853086a1567))
+
+## [3.0.15](https://github.com/doxynix/doxynix/compare/v3.0.14...v3.0.15) (2026-08-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ai to v6.0.258 ([#1996](https://github.com/doxynix/doxynix/issues/1996)) ([6ad4846](https://github.com/doxynix/doxynix/commit/6ad48461e2d3363e8a9cc18ea7621e2005e0376b))
+* **deps:** update dependency lucide-react to v1.32.0 ([#2001](https://github.com/doxynix/doxynix/issues/2001)) ([68cc8a1](https://github.com/doxynix/doxynix/commit/68cc8a138d6ef8ea4a5094f938b6e72d5fcbbb2f))
+* **deps:** update dependency mermaid to v11.17.0 ([#2004](https://github.com/doxynix/doxynix/issues/2004)) ([7cd1fe7](https://github.com/doxynix/doxynix/commit/7cd1fe7449fd8262afe8a28540841ab32a148233))
+* **deps:** update dependency posthog-js to v1.418.1 ([#2002](https://github.com/doxynix/doxynix/issues/2002)) ([742d82a](https://github.com/doxynix/doxynix/commit/742d82a72ebbb2b24b9451ad758f35be87ce8a93))
+
+## [3.0.14](https://github.com/doxynix/doxynix/compare/v3.0.13...v3.0.14) (2026-08-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/react to v3.0.261 ([#1995](https://github.com/doxynix/doxynix/issues/1995)) ([e5ec049](https://github.com/doxynix/doxynix/commit/e5ec0498b7ec8f0b48c691fc3350a5b30eaf7af7))
+* **deps:** update dependency input-otp to v1.5.0 ([#1998](https://github.com/doxynix/doxynix/issues/1998)) ([320da0b](https://github.com/doxynix/doxynix/commit/320da0b2629825734c81fbd16315b5154abd8972))
+* **deps:** update tanstack-router monorepo ([#1997](https://github.com/doxynix/doxynix/issues/1997)) ([3eebb07](https://github.com/doxynix/doxynix/commit/3eebb077e2172617cb8c9187f369cd904c9e04bd))
+
 ## [3.0.13](https://github.com/doxynix/doxynix/compare/v3.0.12...v3.0.13) (2026-08-21)
 
 
