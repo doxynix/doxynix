@@ -27,11 +27,11 @@
     "nuke": "rm -rf node_modules/ apps/**/node_modules/ packages/**/node_modules bun.lock .turbo/ .next/ && bun pm cache rm && bun install --force"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.8",
+    "@biomejs/biome": "2.5.9",
     "@secretlint/secretlint-rule-preset-recommend": "13.0.4",
     "@types/node": "26.1.2",
     "cspell": "10.0.1",
-    "eslint-plugin-react-hooks": "7.0.0",
+    "eslint-plugin-react-hooks": "7.1.1",
     "jscpd": "4.3.0",
     "knip": "6.32.2",
     "lefthook": "2.1.10",
@@ -44,7 +44,7 @@
     "@cspell/dict-pt-br": "2.4.2",
     "@cspell/dict-pt-pt": "3.0.6",
     "@cspell/dict-ru_ru": "2.3.2",
-    "turbo": "2.10.8",
+    "turbo": "2.10.11",
     "typescript": "7.0.2"
   },
   "overrides": {
@@ -99,8 +99,8 @@
     "zenstack",
     "nexus-prisma"
   ],
-  "version": "3.0.1",
   "patchedDependencies": {
     "tree-sitter-wasms@0.1.13": "patches/tree-sitter-wasms@0.1.13.patch"
-  }
+  },
+  "version": "3.0.13"
 }
