@@ -185,7 +185,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
       success: () => t("settings_profile_update_avatar_toast_success"),
     });
 
-    return uploadPromise;
+    return uploadPromise.catch(() => {});
   };
 
   return {

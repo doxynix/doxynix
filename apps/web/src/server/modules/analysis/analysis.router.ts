@@ -539,8 +539,8 @@ export const analysisRouter = createTRPCRouter({
 
       const html = await unstable_cache(
         async () => markdownToHtml({ content: data.content }),
-        [`file-res-html-${input.action}-${input.path}`],
-        { revalidate: false, tags: ["file-audit"] }
+        [`file-res-html-${ctx.session.user.id}-${input.action}-${input.path}`],
+        { revalidate: false, tags: ["file-audit", `file-audit-${ctx.session.user.id}`] }
       )();
 
       return {

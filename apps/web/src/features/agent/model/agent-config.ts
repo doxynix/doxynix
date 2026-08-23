@@ -74,8 +74,8 @@ export const TOOL_INVALIDATIONS: Record<string, (utils: any) => void> = {
     void utils.user.me.invalidate();
     if (typeof window !== "undefined") {
       void authClient.getSession({
-        fetchOptions: {
-          headers: { "Cache-Control": "no-cache" },
+        query: {
+          disableCookieCache: true,
         },
       });
     }

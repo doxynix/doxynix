@@ -37,10 +37,18 @@ export async function POST(request: Request): Promise<NextResponse> {
         };
       },
       onUploadCompleted: async ({ blob, tokenPayload }) => {
-        const { userId: rawUserId } = JSON.parse(tokenPayload ?? "{}");
+        let rawUserId: unknown;
+        try {
+          const parsed = JSON.parse(tokenPayload ?? "{}");
+          rawUserId = parsed?.userId;
+        } catch {
+          appLogger.error({ msg: "Malformed JSON in Blob tokenPayload", tokenPayload });
+          return;
+        }
+
         const userId = Number(rawUserId);
 
-        if (Number.isNaN(userId)) {
+        if (rawUserId == null || Number.isNaN(userId) || userId <= 0) {
           appLogger.error({ msg: "Invalid userId in Blob upload metadata", rawUserId });
           return;
         }
@@ -65,14 +73,16 @@ export async function POST(request: Request): Promise<NextResponse> {
           });
 
           if (oldKey != null && oldKey !== blob.pathname) {
-            del(oldKey).catch((error) => {
+            try {
+              await del(oldKey);
+            } catch (error) {
               appLogger.error({
                 error: error instanceof Error ? error.message : String(error),
                 msg: "Failed to delete old avatar from Blob",
                 oldKey,
                 userId,
               });
-            });
+            }
           }
         } catch (error) {
           appLogger.error({

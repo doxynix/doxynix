@@ -40,14 +40,16 @@ export const userRouter = createTRPCRouter({
       });
 
       if (user.imageKey != null) {
-        del(user.imageKey).catch((error) => {
+        try {
+          await del(user.imageKey);
+        } catch (error) {
           appLogger.error({
             error: error instanceof Error ? error.message : String(error),
             imageKey: user.imageKey,
             msg: "Failed to delete avatar on account deletion",
             userId,
           });
-        });
+        }
       }
 
       return {
@@ -214,14 +216,16 @@ export const userRouter = createTRPCRouter({
       });
 
       if (keyToDelete != null) {
-        del(keyToDelete).catch((error) => {
+        try {
+          await del(keyToDelete);
+        } catch (error) {
           appLogger.error({
             error: error instanceof Error ? error.message : String(error),
             keyToDelete,
             msg: "Failed to delete avatar from Vercel Blob during removal",
             userId,
           });
-        });
+        }
       }
 
       return { message: "Profile Picture removed", success: true };

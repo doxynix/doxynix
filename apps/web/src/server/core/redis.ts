@@ -50,7 +50,12 @@ export const redisService = {
           if (value == null) return null;
           return typeof value === "string" ? value : JSON.stringify(value);
         },
-        { fallback: null, meta: { key }, msg: "Redis secondaryStorage get error" }
+        {
+          fallback: null,
+          meta: { key },
+          msg: "Redis secondaryStorage get error",
+          rethrow: true,
+        }
       ),
 
     getAndDelete: (key: string): Promise<null | string> =>
@@ -60,7 +65,12 @@ export const redisService = {
           if (value == null) return null;
           return typeof value === "string" ? value : JSON.stringify(value);
         },
-        { fallback: null, meta: { key }, msg: "Redis secondaryStorage getAndDelete error" }
+        {
+          fallback: null,
+          meta: { key },
+          msg: "Redis secondaryStorage getAndDelete error",
+          rethrow: true,
+        }
       ),
 
     set: (key: string, value: unknown, ttl?: number): Promise<void> =>
@@ -102,7 +112,7 @@ export const redisService = {
           redisClient.set(REDIS_CONFIG.keys.fileAction(userId, path, action), data, {
             ex: REDIS_CONFIG.ttl.fileAction,
           }),
-        { meta: { path, userId }, msg: "Redis fileActions.set failed" }
+        { meta: { path, userId }, msg: "Redis fileActions.set failed", rethrow: true }
       ),
   },
 
@@ -120,7 +130,7 @@ export const redisService = {
           redisClient.set(REDIS_CONFIG.keys.fixResult(fixId), result, {
             ex: REDIS_CONFIG.ttl.fixResult,
           }),
-        { meta: { fixId }, msg: "Redis fixes.set failed" }
+        { meta: { fixId }, msg: "Redis fixes.set failed", rethrow: true }
       ),
   },
 
@@ -133,13 +143,19 @@ export const redisService = {
           await redisClient.expire(key, REDIS_CONFIG.ttl.prStaging);
           return await redisClient.hlen(key);
         },
-        { fallback: 0, meta: { repoId, userId }, msg: "Redis staging.addFiles failed" }
+        {
+          fallback: 0,
+          meta: { repoId, userId },
+          msg: "Redis staging.addFiles failed",
+          rethrow: true,
+        }
       ),
 
     clear: (userId: number | string, repoId: string) =>
       safeRedis(() => redisClient.del(REDIS_CONFIG.keys.prStaging(userId, repoId)), {
         meta: { repoId, userId },
         msg: "Redis staging.clear failed",
+        rethrow: true,
       }),
 
     getAll: (userId: number | string, repoId: string): Promise<StagedFile[]> =>
@@ -160,7 +176,12 @@ export const redisService = {
           await redisClient.hdel(key, filePath);
           return await redisClient.hlen(key);
         },
-        { fallback: 0, meta: { filePath, repoId, userId }, msg: "Redis staging.removeFile failed" }
+        {
+          fallback: 0,
+          meta: { filePath, repoId, userId },
+          msg: "Redis staging.removeFile failed",
+          rethrow: true,
+        }
       ),
   },
 };
