@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { getLocale } from "next-intl/server";
 
-import { redirect } from "@/shared/i18n/routing";
+import { redirect } from "@/shared/i18n/navigation";
 import { createMetadata } from "@/shared/lib/metadata";
 
 import { AuthForm } from "@/features/auth/ui/auth-form";

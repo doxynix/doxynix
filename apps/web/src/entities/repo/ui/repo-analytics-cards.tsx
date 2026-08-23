@@ -4,15 +4,14 @@ import {
   Binary,
   CheckCircle2,
   FileCode,
-  Loader2,
   ShieldAlert,
   Sparkles,
   Terminal,
 } from "lucide-react";
 
 import { AppBadge } from "@/shared/ui/core/badge";
-import { AppButton } from "@/shared/ui/core/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
+import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import type { RepoMetricsItem } from "../model/repo.types";
 
@@ -169,6 +168,21 @@ export function SecurityOverviewCard({
   runningFixId: null | string;
   security: NonNullable<RepoMetricsItem>["security"];
 }>) {
+  const handleRunFix = (
+    vuln: NonNullable<RepoMetricsItem>["security"]["vulnerabilities"][number]
+  ) => {
+    const parsedLineMatch = vuln.lineHint != null ? /\d+/.exec(vuln.lineHint) : null;
+    const parsedLine =
+      parsedLineMatch != null ? Number.parseInt(parsedLineMatch[0], 10) : undefined;
+
+    void onTriggerFix(vuln.file, {
+      line: parsedLine,
+      message: vuln.description,
+      suggestion: vuln.suggestion,
+      type: "security",
+    });
+  };
+
   return (
     <Card className="border-destructive/20 bg-background shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
@@ -270,35 +284,16 @@ export function SecurityOverviewCard({
                       <p className="text-muted-foreground bg-background/50 border-border rounded-md border p-2 font-mono text-[11px] leading-normal whitespace-pre-wrap">
                         {vuln.suggestion}
                       </p>
-                      {/* NOTE: потом поменять на loading-button.tsx */}
-                      <AppButton
-                        disabled={runningFixId !== null}
+                      <LoadingButton
+                        disabled={runningFixId != null}
+                        isLoading={isCurrentlyFixing}
                         size="sm"
                         variant="destructive"
-                        onClick={() => {
-                          const parsedLineMatch =
-                            vuln.lineHint != null ? /\d+/.exec(vuln.lineHint) : null;
-                          const parsedLine =
-                            parsedLineMatch != null
-                              ? Number.parseInt(parsedLineMatch[0], 10)
-                              : undefined;
-
-                          void onTriggerFix(vuln.file, {
-                            line: parsedLine,
-                            message: vuln.description,
-                            suggestion: vuln.suggestion,
-                            type: "security",
-                          });
-                        }}
-                        className="mt-3 w-full gap-2 text-[10px] font-bold tracking-wider uppercase"
+                        onClick={() => handleRunFix(vuln)}
+                        className="mt-3 w-full gap-2 font-bold uppercase"
                       >
-                        {isCurrentlyFixing ? (
-                          <Loader2 className="size-3 animate-spin" />
-                        ) : (
-                          <Sparkles className="size-3" />
-                        )}
-                        Auto Patch with AI
-                      </AppButton>
+                        <Sparkles /> Auto Patch with AI
+                      </LoadingButton>
                     </CollapsibleContent>
 
                     <CollapsibleTrigger className="text-muted-foreground hover:text-foreground mt-1.5 flex w-full items-center justify-center text-[10px] font-semibold transition-colors">

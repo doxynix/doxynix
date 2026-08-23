@@ -3,7 +3,7 @@
 import type { Route } from "next";
 import { MoveLeft } from "lucide-react";
 
-import { Link, useRouter } from "@/shared/i18n/routing";
+import { Link, useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppButton, type ButtonProps } from "@/shared/ui/core/button";
 

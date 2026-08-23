@@ -4,7 +4,7 @@ import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
 

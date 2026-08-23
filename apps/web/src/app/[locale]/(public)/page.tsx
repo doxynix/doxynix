@@ -12,14 +12,11 @@ import { HeroSection } from "@/widgets/landing/ui/hero-section";
 import { HowItWorksSection } from "@/widgets/landing/ui/how-it-works-section";
 import { PricingSection } from "@/widgets/landing/ui/pricing-section";
 
-// export const runtime = "edge";
-
 export const generateMetadata = createMetadata("landing_title", "landing_desc");
 
 export default async function LandingPage() {
   return (
     <>
-      {/* <Particles className="fixed inset-0 h-full w-full" /> */}
       <HeroSection />
       <BrandsSection />
       <CodeComparisonSection />

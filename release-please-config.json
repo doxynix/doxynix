@@ -1,0 +1,46 @@
+{
+    "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+    "packages": {
+        ".": {
+            "release-type": "node",
+            "package-name": "doxynix"
+        },
+        "apps/web": {
+            "release-type": "node",
+            "package-name": "@doxynix/web"
+        },
+        "apps/siem-client": {
+            "release-type": "node",
+            "package-name": "@doxynix/siem-client",
+            "bump-minor-pre-major": true,
+            "bump-patch-pre-major": true
+        },
+        "apps/siem-server": {
+            "release-type": "node",
+            "package-name": "@doxynix/siem-server",
+            "bump-minor-pre-major": true,
+            "bump-patch-pre-major": true
+        },
+        "packages/cli": {
+            "release-type": "node",
+            "package-name": "@doxynix/cli"
+        },
+        "packages/config": {
+            "release-type": "node",
+            "package-name": "@doxynix/config",
+            "bump-minor-pre-major": true,
+            "bump-patch-pre-major": true
+        },
+        "packages/siem-shared": {
+            "release-type": "node",
+            "package-name": "@doxynix/siem-shared",
+            "bump-minor-pre-major": true,
+            "bump-patch-pre-major": true
+        }
+    },
+    "plugins": [
+        {
+            "type": "node-workspace"
+        }
+    ]
+}

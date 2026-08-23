@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 
 import { LOCALES, type Locale } from "@/shared/constants/locales";
-import { usePathname, useRouter } from "@/shared/i18n/routing";
+import { usePathname, useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { loadedFlags } from "@/shared/lib/load-state";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";

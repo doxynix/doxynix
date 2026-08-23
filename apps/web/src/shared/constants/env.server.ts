@@ -48,6 +48,7 @@ const envServer = createEnv({
     RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET,
     TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
+    VERCEL_BLOB_CALLBACK_URL: process.env.VERCEL_BLOB_CALLBACK_URL,
     YANDEX_CLIENT_ID: process.env.YANDEX_CLIENT_ID,
     YANDEX_CLIENT_SECRET: process.env.YANDEX_CLIENT_SECRET,
     ...envShared,
@@ -88,6 +89,7 @@ const envServer = createEnv({
     RESEND_WEBHOOK_SECRET: stringSchema,
     TURNSTILE_SECRET_KEY: stringSchema,
     UPLOADTHING_TOKEN: stringSchema,
+    VERCEL_BLOB_CALLBACK_URL: z.url(),
     YANDEX_CLIENT_ID: stringSchema,
     YANDEX_CLIENT_SECRET: stringSchema,
   },
@@ -120,6 +122,7 @@ export const API_KEY_CHECKSUM_SECRET = envServer.API_KEY_CHECKSUM_SECRET;
 export const CF_GATEWAY_TOKEN = envServer.CF_GATEWAY_TOKEN;
 export const CF_GATEWAY_ID = envServer.CF_GATEWAY_ID;
 export const CF_ACCOUNT_ID = envServer.CF_ACCOUNT_ID;
+export const VERCEL_BLOB_CALLBACK_URL = envServer.VERCEL_BLOB_CALLBACK_URL;
 const rawGithubAppPrivateKey = envServer.GITHUB_APP_PRIVATE_KEY;
 
 if (envServer.NODE_ENV !== "test" && typeof rawGithubAppPrivateKey !== "string") {

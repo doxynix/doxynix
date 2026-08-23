@@ -5,7 +5,7 @@ import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { realtimeServer } from "@/server/core/realtime";
+import { realtimeService } from "@/server/core/realtime";
 
 const PrismaLocal = locals.create<typeof prisma>("prisma");
 
@@ -103,9 +103,8 @@ async function cleanupFailsafeDatabaseState(taskName: string, payload: unknown, 
         where: { publicId: analysisId },
       });
 
-      const channelName = REALTIME_CONFIG.channels.user(updated.repo.userId);
-      await realtimeServer.channels
-        .get(channelName)
+      await realtimeService
+        .user(updated.repo.userId)
         .publish(REALTIME_CONFIG.events.user.analysisProgress, {
           analysisId,
           message: `Task aborted on platform: ${errorMsg.slice(0, 80)}...`,

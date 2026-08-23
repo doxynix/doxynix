@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useLocale } from "next-intl";
 
-import { Link, useRouter } from "@/shared/i18n/routing";
+import { Link, useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";

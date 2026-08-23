@@ -41,7 +41,7 @@ const aiModelsSchema = z.record(
  */
 export async function getActiveModels(): Promise<Record<AIModelRole, AllAvailableModels[]>> {
   try {
-    const remoteConfig = await get("AI_MODELS");
+    const remoteConfig = await get("AI_MODELS_CONFIG");
 
     if (remoteConfig == null) {
       return DEFAULT_AI_MODELS;

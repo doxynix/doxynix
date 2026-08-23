@@ -3,7 +3,7 @@
 import { GitPullRequest } from "lucide-react";
 
 import { trpc } from "@/shared/api/trpc";
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { AppButton } from "@/shared/ui/core/button";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { EmptyState } from "@/shared/ui/kit/empty-state";

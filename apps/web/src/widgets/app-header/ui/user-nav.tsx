@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { userNavMenu } from "@/shared/constants/navigation";
-import { Link, useRouter } from "@/shared/i18n/routing";
+import { Link, useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";
 import {

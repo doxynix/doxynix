@@ -1,6 +1,6 @@
 import { Play } from "lucide-react";
 
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { AppButton } from "@/shared/ui/core/button";
 
 type Props = { name: string; owner: string };

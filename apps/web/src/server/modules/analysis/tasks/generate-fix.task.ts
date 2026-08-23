@@ -5,7 +5,7 @@ import { uniq } from "es-toolkit";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { githubBrowseService } from "@/server/core/github/github-browse.service";
-import { redisClient } from "@/server/core/redis";
+import { redisClient, redisService } from "@/server/core/redis";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 
@@ -90,8 +90,7 @@ export const generateFixTask = task({
         repoId: repo.id,
       });
 
-      const cacheKey = REDIS_CONFIG.keys.fixResult(payload.fixId);
-      await redisClient.set(cacheKey, fixResult, { ex: REDIS_CONFIG.ttl.fixResult });
+      await redisService.fixes.set(payload.fixId, fixResult);
 
       await analysisRepo.updateStatus(prisma, payload.fixId, "COMPLETED");
 

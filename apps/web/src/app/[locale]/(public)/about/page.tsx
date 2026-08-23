@@ -2,11 +2,9 @@ import type { ComponentType } from "react";
 import { ArrowRight, Network, Shield, Sparkles, Zap } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { createMetadata } from "@/shared/lib/metadata";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
-
-// export const runtime = "edge";
 
 export const generateMetadata = createMetadata("about_title", "about_desc");
 

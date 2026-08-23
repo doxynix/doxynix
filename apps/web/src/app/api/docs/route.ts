@@ -1,9 +1,7 @@
 import { ApiReference } from "@scalar/nextjs-api-reference";
 
 import { API_PREFIX, APP_URL } from "@/shared/constants/env.client";
-import { getCookieName } from "@/shared/lib/session-cookie";
-
-export const runtime = "edge";
+import { getCookieName } from "@/shared/lib/cookies";
 
 export const GET = ApiReference({
   authentication: {

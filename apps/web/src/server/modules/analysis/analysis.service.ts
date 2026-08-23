@@ -13,7 +13,7 @@ import { highlightCode } from "@/shared/lib/shiki";
 import { appLogger } from "@/server/core/app-logger";
 import { prisma, type DbClient } from "@/server/core/db";
 import { getInstallationClient } from "@/server/core/github/github-provider";
-import { realtimeServer } from "@/server/core/realtime";
+import { realtimeService } from "@/server/core/realtime";
 import { callWithFallback } from "@/server/utils/call";
 import { resolveDocumentMaterializedPath } from "@/server/utils/document-materialization";
 import { markdownToHtml } from "@/server/utils/markdown-to-html";
@@ -920,7 +920,6 @@ export const repoAnalysisService = {
       aiResult,
       analysisId,
       busFactor,
-      channelName,
       currentSha,
       generatedDocsData,
       hardMetrics,
@@ -1063,12 +1062,10 @@ export const repoAnalysisService = {
       });
     });
 
-    await realtimeServer.channels
-      .get(channelName)
-      .publish(REALTIME_CONFIG.events.user.notification, {
-        id: note.publicId,
-        title: note.title,
-      });
+    await realtimeService.user(userId).publish(REALTIME_CONFIG.events.user.notification, {
+      id: note.publicId,
+      title: note.title,
+    });
 
     appLogger.info({ analysisId, commitSha: currentSha, msg: "Results saved", repoId: repo.id });
 

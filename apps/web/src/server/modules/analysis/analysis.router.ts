@@ -9,10 +9,10 @@ import { generateBranchName } from "@/shared/lib/get-branch-name";
 
 import { appLogger } from "@/server/core/app-logger";
 import { getClientContext, getInstallationClient } from "@/server/core/github/github-provider";
+import { redisService } from "@/server/core/redis";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { markdownToHtml } from "@/server/utils/markdown-to-html";
 import { REDIS_CONFIG } from "@/server/utils/redis";
-import type { FileActionPreviewResult } from "@/server/utils/types";
 
 import { analysisRepo } from "./analysis.repository";
 import {
@@ -197,8 +197,7 @@ export const analysisRouter = createTRPCRouter({
   clearStaging: protectedProcedure
     .input(z.object({ repoId: z.uuid() }))
     .mutation(async ({ ctx, input }) => {
-      const cacheKey = REDIS_CONFIG.keys.prStaging(ctx.session.user.id, input.repoId);
-      await ctx.redis.del(cacheKey);
+      await redisService.staging.clear(ctx.session.user.id, input.repoId);
       return { success: true };
     }),
 
@@ -530,21 +529,18 @@ export const analysisRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const cacheKey = REDIS_CONFIG.keys.fileAction(ctx.session.user.id, input.path, input.action);
-      const data = await ctx.redis.get<FileActionPreviewResult>(cacheKey);
+      const data = await redisService.fileActions.get(
+        ctx.session.user.id,
+        input.path,
+        input.action
+      );
 
       if (data == null) return null;
 
       const html = await unstable_cache(
-        async () =>
-          markdownToHtml({
-            content: data.content,
-          }),
-        [`file-res-html-${cacheKey}`],
-        {
-          revalidate: false,
-          tags: ["file-audit", cacheKey],
-        }
+        async () => markdownToHtml({ content: data.content }),
+        [`file-res-html-${ctx.session.user.id}-${input.action}-${input.path}`],
+        { revalidate: false, tags: ["file-audit", `file-audit-${ctx.session.user.id}`] }
       )();
 
       return {
@@ -623,17 +619,7 @@ export const analysisRouter = createTRPCRouter({
   getStagedFiles: protectedProcedure
     .input(z.object({ repoId: z.uuid() }))
     .query(async ({ ctx, input }) => {
-      const cacheKey = REDIS_CONFIG.keys.prStaging(ctx.session.user.id, input.repoId);
-      const staged = await ctx.redis.hgetall<Record<string, string>>(cacheKey);
-
-      if (staged == null || Object.keys(staged).length === 0) {
-        return [];
-      }
-
-      return Object.entries(staged).map(([filePath, content]) => ({
-        content,
-        filePath,
-      }));
+      return redisService.staging.getAll(ctx.session.user.id, input.repoId);
     }),
 
   getStructureMap: protectedProcedure
@@ -1010,13 +996,9 @@ export const analysisRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const cacheKey = REDIS_CONFIG.keys.prStaging(ctx.session.user.id, input.repoId);
-
-      await ctx.redis.hset(cacheKey, { [input.filePath]: input.content });
-      await ctx.redis.expire(cacheKey, REDIS_CONFIG.ttl.prStaging);
-
-      const stagedCount = await ctx.redis.hlen(cacheKey);
-
+      const stagedCount = await redisService.staging.addFiles(ctx.session.user.id, input.repoId, {
+        [input.filePath]: input.content,
+      });
       return { stagedCount, success: true };
     }),
 
@@ -1083,18 +1065,13 @@ export const analysisRouter = createTRPCRouter({
     }),
 
   unstageFile: protectedProcedure
-    .input(
-      z.object({
-        filePath: z.string(),
-        repoId: z.uuid(),
-      })
-    )
+    .input(z.object({ filePath: z.string(), repoId: z.uuid() }))
     .mutation(async ({ ctx, input }) => {
-      const cacheKey = REDIS_CONFIG.keys.prStaging(ctx.session.user.id, input.repoId);
-
-      await ctx.redis.hdel(cacheKey, input.filePath);
-      const stagedCount = await ctx.redis.hlen(cacheKey);
-
+      const stagedCount = await redisService.staging.removeFile(
+        ctx.session.user.id,
+        input.repoId,
+        input.filePath
+      );
       return { stagedCount, success: true };
     }),
 });

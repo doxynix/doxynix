@@ -3,7 +3,7 @@
 import { Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { Link } from "@/shared/i18n/routing";
+import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { formatFullDate } from "@/shared/lib/date-utils";
 import { AnimatedCircularProgressBar } from "@/shared/ui/core/animated-circular-progress-bar";

@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { TURNSTILE_SITE_KEY } from "@/shared/constants/env.client";
-import { Link, useRouter } from "@/shared/i18n/routing";
+import { Link, useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 import { cn } from "@/shared/lib/cn";
 import { setClientCookie } from "@/shared/lib/cookies";

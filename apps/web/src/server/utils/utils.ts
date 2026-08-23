@@ -9,7 +9,7 @@ import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
-import { realtimeServer } from "@/server/core/realtime";
+import { realtimeService } from "@/server/core/realtime";
 import { ProjectPolicy } from "@/server/modules/analysis/engine/core/project-policy";
 
 import { taskLogger } from "../modules/analysis/logic/task-logger";
@@ -38,13 +38,11 @@ export async function handleError(
     where: { publicId: analysisId },
   });
 
-  await realtimeServer.channels
-    .get(channelName)
-    .publish(REALTIME_CONFIG.events.user.analysisProgress, {
-      analysisId,
-      message,
-      status: Status.FAILED,
-    });
+  await realtimeService.channel(channelName).publish(REALTIME_CONFIG.events.user.analysisProgress, {
+    analysisId,
+    message,
+    status: Status.FAILED,
+  });
 }
 
 export async function cleanup(dirPath: string) {

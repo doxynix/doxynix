@@ -7,7 +7,6 @@ import { NeonIcon } from "@/shared/ui/icons/neon-icon";
 import { NextJSIcon } from "@/shared/ui/icons/nextjs-icon";
 import { ResendIcon } from "@/shared/ui/icons/resend-icon";
 import { TriggerIcon } from "@/shared/ui/icons/trigger-icon";
-import { UploadThingIcon } from "@/shared/ui/icons/uploadthing-icon";
 import { UpstashIcon } from "@/shared/ui/icons/upstash-icon";
 import { VercelIcon } from "@/shared/ui/icons/vercel-icon";
 import { Marquee } from "@/shared/ui/visuals/marquee";
@@ -18,11 +17,9 @@ const BRANDS = [
   { icon: VercelIcon, name: "Vercel" },
   { icon: NextJSIcon, name: "Next.js" },
   { icon: TriggerIcon, name: "Trigger.dev" },
-  // { name: "OpenAI", icon: OpenAiLogo },
   { icon: ResendIcon, name: "Resend" },
   { icon: UpstashIcon, name: "Upstash" },
   { icon: AblyIcon, name: "Ably" },
-  { icon: UploadThingIcon, name: "Uploadthing" },
   { icon: GitHubIcon, name: "GitHub" },
   { icon: NeonIcon, name: "Neon" },
 ] as const satisfies readonly BrandLogo[];

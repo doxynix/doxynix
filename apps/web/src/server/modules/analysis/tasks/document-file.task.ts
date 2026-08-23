@@ -2,7 +2,7 @@ import { task } from "@trigger.dev/sdk";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 
-import { realtimeServer } from "@/server/core/realtime";
+import { realtimeService } from "@/server/core/realtime";
 import { redisClient } from "@/server/core/redis";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
@@ -44,9 +44,8 @@ export const documentFileTask = task({
     );
     await redisClient.set(cacheKey, result, { ex: REDIS_CONFIG.ttl.fileAction });
 
-    const channelName = REALTIME_CONFIG.channels.user(payload.userId);
-    await realtimeServer.channels
-      .get(channelName)
+    await realtimeService
+      .user(payload.userId)
       .publish(REALTIME_CONFIG.events.user.fileActionCompleted, {
         path: payload.path,
         type: "DOCUMENTATION",

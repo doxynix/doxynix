@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { upload } from "@vercel/blob/client";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
-import { useRouter } from "@/shared/i18n/routing";
+import { useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
-import { useUploadThing } from "@/shared/lib/uploadthing";
 
 type ProfileData = {
   email: null | string;
@@ -20,7 +20,7 @@ type UseProfileActionsProps = {
 };
 
 export function useProfileActions(props: UseProfileActionsProps = {}) {
-  const { data: session, refetch } = authClient.useSession();
+  const { data: session } = authClient.useSession();
   const router = useRouter();
   const utils = trpc.useUtils();
   const t = useTranslations("Dashboard");
@@ -37,14 +37,25 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
     onSuccess: async (data) => {
       toast.success(t("settings_profile_update_profile_toast_success"));
 
+      if (data.user.name != null) {
+        await authClient.updateUser({
+          name: data.user.name,
+        });
+      }
+
+      utils.user.me.setData(undefined, (old) => {
+        if (old == null) return old;
+        return {
+          ...old,
+          user: { ...old.user, name: data.user.name },
+        };
+      });
+
       propsRef.current.onProfileUpdateSuccess?.({
         email: data.user.email ?? null,
         name: data.user.name ?? null,
       });
 
-      await refetch();
-
-      await utils.user.me.invalidate();
       posthog.capture("profile_updated", {
         has_email_changed: (session?.user.email ?? null) !== (data.user.email ?? null),
         has_name_changed: (session?.user.name ?? null) !== (data.user.name ?? null),
@@ -75,14 +86,21 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
     onSuccess: async () => {
       toast.success(t("settings_profile_remove_avatar_toast_success"));
 
-      propsRef.current.onAvatarRemoveSuccess?.();
+      await authClient.updateUser({
+        image: "",
+      });
 
-      await refetch();
-      await utils.user.me.invalidate();
+      utils.user.me.setData(undefined, (old) => {
+        if (old == null) return old;
+        return {
+          ...old,
+          user: { ...old.user, image: null },
+        };
+      });
+
+      propsRef.current.onAvatarRemoveSuccess?.();
     },
   });
-
-  const { startUpload } = useUploadThing("avatarUploader");
 
   const uploadAvatar = async (files: File[]) => {
     const file = files[0];
@@ -105,18 +123,35 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
           useWebWorker: true,
         });
 
-        const fileName = file.name.replace(/\.[^./]+$/, ".webp");
+        const cleanName = file.name
+          .toLowerCase()
+          .replace(/\.[^./]+$/, "")
+          .replaceAll(/\s+/g, "-")
+          .replaceAll(/[^\d._a-z-]/g, "");
+
+        const fileName = `${Date.now()}-${cleanName || "avatar"}.webp`;
         const finalFile = new File([compressedBlob], fileName, { type: "image/webp" });
 
-        const res = await startUpload([finalFile]);
-        if (!res?.[0]) throw new Error("Upload failed");
+        const blobResult = await upload(`avatars/${fileName}`, finalFile, {
+          access: "public",
+          handleUploadUrl: "/api/blob/upload",
+        });
 
-        const uploadedFile = res[0];
+        await authClient.updateUser({
+          image: blobResult.url,
+        });
 
-        await refetch();
-        await utils.user.me.invalidate();
+        utils.user.me.setData(undefined, (old) => {
+          if (old == null) return old;
+          return {
+            ...old,
+            user: { ...old.user, image: blobResult.url },
+          };
+        });
 
-        return uploadedFile;
+        propsRef.current.onAvatarUpdateSuccess?.(blobResult.url);
+
+        return blobResult;
       } catch (error) {
         propsRef.current.onAvatarUpdateSuccess?.(session?.user.image ?? "");
         throw error;
@@ -125,29 +160,32 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
         URL.revokeObjectURL(localPreviewUrl);
       }
     };
+
     const uploadPromise = processUpload();
 
     toast.promise(uploadPromise, {
       error: (error: unknown) => {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage = (error instanceof Error ? error.message : String(error)).toLowerCase();
 
-        let message = t("settings_profile_error_uploading_file");
-        if (errorMessage.includes("FileSizeMismatch")) {
-          message = t("settings_profile_file_too_large");
-        } else if (errorMessage.includes("InvalidFileType")) {
-          message = t("settings_profile_invalid_file_format");
-        } else if (errorMessage.includes(t("settings_profile_unauthorized"))) {
-          message = t("settings_profile_not_logged_in");
+        const ERROR_PATTERNS = [
+          ["maximumsizeinbytes", "settings_profile_file_too_large"],
+          ["too large", "settings_profile_file_too_large"],
+          ["allowedcontenttypes", "settings_profile_invalid_file_format"],
+          ["unauthorized", "settings_profile_not_logged_in"],
+        ] as const;
+
+        for (const [pattern, translationKey] of ERROR_PATTERNS) {
+          if (errorMessage.includes(pattern)) {
+            return t(translationKey);
+          }
         }
-        return message;
+
+        return t("settings_profile_error_uploading_file");
       },
-      success: (data) => {
-        propsRef.current.onAvatarUpdateSuccess?.(data.ufsUrl);
-        return t("settings_profile_update_avatar_toast_success");
-      },
+      success: () => t("settings_profile_update_avatar_toast_success"),
     });
 
-    return uploadPromise;
+    return uploadPromise.catch(() => {});
   };
 
   return {

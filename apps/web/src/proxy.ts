@@ -9,7 +9,7 @@ import { API_PREFIX } from "./shared/constants/env.client";
 import { IS_PROD } from "./shared/constants/env.flags";
 import { LOCALE_REGEX_STR } from "./shared/constants/locales";
 import { routing } from "./shared/i18n/routing";
-import { getCookieName } from "./shared/lib/session-cookie";
+import { getCookieName } from "./shared/lib/cookies";
 
 const protectedRoutes = ["/dashboard"];
 const authRoutes = ["/auth"];

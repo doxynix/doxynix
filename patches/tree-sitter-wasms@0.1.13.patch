@@ -1,0 +1,15 @@
+diff --git a/package.json b/package.json
+index 9540f19ebbae02c8a4e6788ab8e1b231e2f33f2f..19e6d197f7e1af59850e0e77151d90bb3ed27c90 100644
+--- a/package.json
++++ b/package.json
+@@ -57,8 +57,5 @@
+     "/out"
+   ],
+   "packageManager": "pnpm@8.10.5",
+-  "main": "bindings/node",
+-  "dependencies": {
+-    "tree-sitter-wasms": "^0.1.11"
+-  }
++  "main": "bindings/node"
+ }
+\ No newline at end of file

@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { UTApi } from "uploadthing/server";
+import { del } from "@vercel/blob";
 import { z } from "zod";
 
 import { UserSchema } from "@/shared/api-contracts";
@@ -9,8 +9,6 @@ import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { formatUserAgent } from "@/server/utils/ua-parser";
-
-const utapi = new UTApi();
 
 const PublicUserSchema = UserSchema.extend({
   id: z.uuid(),
@@ -42,9 +40,16 @@ export const userRouter = createTRPCRouter({
       });
 
       if (user.imageKey != null) {
-        utapi.deleteFiles(user.imageKey).catch((error) => {
-          appLogger.error({ error: error, msg: "Failed to delete avatar on account deletion" });
-        });
+        try {
+          await del(user.imageKey);
+        } catch (error) {
+          appLogger.error({
+            error: error instanceof Error ? error.message : String(error),
+            imageKey: user.imageKey,
+            msg: "Failed to delete avatar on account deletion",
+            userId,
+          });
+        }
       }
 
       return {
@@ -211,14 +216,16 @@ export const userRouter = createTRPCRouter({
       });
 
       if (keyToDelete != null) {
-        utapi.deleteFiles(keyToDelete).catch((error) => {
+        try {
+          await del(keyToDelete);
+        } catch (error) {
           appLogger.error({
             error: error instanceof Error ? error.message : String(error),
             keyToDelete,
-            msg: "Failed to delete avatar from UT during removal",
+            msg: "Failed to delete avatar from Vercel Blob during removal",
             userId,
           });
-        });
+        }
       }
 
       return { message: "Profile Picture removed", success: true };
