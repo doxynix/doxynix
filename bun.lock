@@ -390,7 +390,7 @@
         "prettier-plugin-tailwindcss": "0.8.0",
         "prisma": "6.19.3",
         "prisma-dbml-generator": "0.12.0",
-        "prisma-erd-generator": "2.4.3",
+        "prisma-erd-generator": "2.5.0",
         "prisma-generator-fake-data": "0.18.3",
         "prisma-json-schema-generator": "5.1.5",
         "semantic-ui-css": "2.5.0",
@@ -4999,7 +4999,7 @@
 
     "prisma-dbml-generator": ["prisma-dbml-generator@0.12.0", "", { "dependencies": { "@prisma/generator-helper": "5.0.0", "@prisma/internals": "5.0.0" }, "bin": { "prisma-dbml-generator": "dist/generator.js" } }, "sha512-b5CqA9cCY5jmNJGjx8oUbPw3KSgVd+mu8711MSZIRY9dIF0Vlcs/Au6LR3S5guncydM7Zkh8iz8vC+c2CDj3Xw=="],
 
-    "prisma-erd-generator": ["prisma-erd-generator@2.4.3", "", { "dependencies": { "@mermaid-js/mermaid-cli": "^11.9.0", "@prisma/generator-helper": "^7.0.0", "dotenv": "^16.6.1" }, "peerDependencies": { "@prisma/client": "^5.0.0 || ^6.0.0 || ^7.0.0" }, "bin": { "prisma-erd-generator": "dist/index.js" } }, "sha512-ZwH25t4+Ak+0baUF26EZtwgcULDyXQoN0iVzJ+dvtUU4x4+ESHYSLKAmO5rib6ldv6EjdGzH8ASitY0kQYnKgg=="],
+    "prisma-erd-generator": ["prisma-erd-generator@2.5.0", "", { "dependencies": { "@mermaid-js/mermaid-cli": "^11.9.0", "@prisma/generator-helper": "^7.0.0", "dotenv": "^16.6.1" }, "peerDependencies": { "@prisma/client": "^5.0.0 || ^6.0.0 || ^7.0.0" }, "bin": { "prisma-erd-generator": "dist/index.js" } }, "sha512-ZOJFTBZbS1CuaJf5C/1mJa7jMcqrseoVlHZkooKMmbH2Z6GYFhpTaA7AmcElXEzer5ihiJAq/iZEA/ow+MMsOg=="],
 
     "prisma-field-encryption": ["prisma-field-encryption@1.6.0", "", { "dependencies": { "@47ng/cloak": "^1.2.0", "@prisma/generator-helper": "^5.9.1", "debug": "^4.3.4", "immer": "^10.0.3", "object-path": "^0.11.8", "zod": "^3.22.4" }, "peerDependencies": { "@prisma/client": ">= 4.7" }, "bin": { "prisma-field-encryption": "dist/generator/main.js" } }, "sha512-JEKHyq5z0Wn6x74UtQN6n7ppXEGRq7ViyRophzELRAhCVnZv4JGrBOlrX4aWKiU+ZPL2BO9E1HxzcSjAN7pWKQ=="],
 
