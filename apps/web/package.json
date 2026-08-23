@@ -303,7 +303,7 @@
     "@types/ws": "8.18.1",
     "@typescript-eslint/eslint-plugin": "8.67.0",
     "@typescript-eslint/parser": "8.67.0",
-    "@vitejs/plugin-react": "6.0.3",
+    "@vitejs/plugin-react": "6.1.0",
     "@vitest/coverage-v8": "4.1.11",
     "@vitest/eslint-plugin": "1.6.23",
     "@zenstackhq/trpc": "2.22.3",
