@@ -20,7 +20,7 @@
     "dev": "bun with-doppler \"cross-env NODE_OPTIONS=\\\"--max-old-space-size=4096\\\" next dev\"",
     "dev:fast": "bun with-doppler \"cross-env NODE_OPTIONS=\\\"--max-old-space-size=2048\\\" next dev\"",
     "dev:trace": "bun with-doppler \"cross-env NEXT_TURBOPACK_TRACING=1 NODE_OPTIONS=\\\"--max-old-space-size=2048\\\" next dev\"",
-    "build": "bun with-doppler \"cross-env NODE_OPTIONS=\\\"--max-old-space-size=4096\\\" next build --webpack\"",
+    "build": "bun with-doppler \"cross-env NODE_OPTIONS=\\\"--max-old-space-size=6144\\\" next build --webpack\"",
     "build:turbopack": "bun with-doppler \"cross-env NODE_OPTIONS=\\\"--max-old-space-size=4096\\\" next build\"",
     "start": "bun with-doppler \"next start\"",
     "lint": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" eslint src --cache --cache-location node_modules/.cache/eslint",
