@@ -53,7 +53,7 @@
     "@tanstack/router-plugin": "1.168.34",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "6.0.5",
+    "@vitejs/plugin-react": "6.1.0",
     "babel-plugin-react-compiler": "1.0.0",
     "globals": "16.5.0",
     "svgo": "4.0.2",
