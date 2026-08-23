@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.18](https://github.com/doxynix/doxynix/compare/v3.0.17...v3.0.18) (2026-08-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/react to v3.0.262 ([#2010](https://github.com/doxynix/doxynix/issues/2010)) ([1b68371](https://github.com/doxynix/doxynix/commit/1b68371836a925c080e908f0c6abaeeb52d9903d))
+* **deps:** update dependency posthog-js to v1.418.5 ([#2013](https://github.com/doxynix/doxynix/issues/2013)) ([f71ab3d](https://github.com/doxynix/doxynix/commit/f71ab3d70db97715221489b7a9ab58c2e520ae4e))
+
 ## [3.0.17](https://github.com/doxynix/doxynix/compare/v3.0.16...v3.0.17) (2026-08-22)
 
 
