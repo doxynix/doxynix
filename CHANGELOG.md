@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.1.0](https://github.com/doxynix/doxynix/compare/v3.0.19...v3.1.0) (2026-08-24)
+
+
+### Features
+
+* **web:** migrate to vercel blob and extract core services (DXNX-205) ([#1951](https://github.com/doxynix/doxynix/issues/1951)) ([3d09f3e](https://github.com/doxynix/doxynix/commit/3d09f3e01a91c0e2a1f325027b3bd9df318bd9dd))
+
+
+### Bug Fixes
+
+* **deps:** update dependency [@trigger](https://github.com/trigger).dev/react-hooks to v4.5.12 ([#2021](https://github.com/doxynix/doxynix/issues/2021)) ([a55fd2a](https://github.com/doxynix/doxynix/commit/a55fd2abcb32f3c74ba6539bfb21461d56601101))
+* **deps:** update dependency [@trigger](https://github.com/trigger).dev/sdk to v4.5.12 ([#2022](https://github.com/doxynix/doxynix/issues/2022)) ([d99f09f](https://github.com/doxynix/doxynix/commit/d99f09f9346adcc98bfeab39baf53334df4c588a))
+* **deps:** update dependency @ai-sdk/google to v3.0.111 ([#2024](https://github.com/doxynix/doxynix/issues/2024)) ([b7857b9](https://github.com/doxynix/doxynix/commit/b7857b9e34f7d73019b5acf8bac11f31dbc5aed2))
+* **deps:** update dependency @ai-sdk/react to v3.0.264 ([#2026](https://github.com/doxynix/doxynix/issues/2026)) ([9576431](https://github.com/doxynix/doxynix/commit/9576431ff7b197a783cb818f144ca0819429c01f))
+
 ## [3.0.19](https://github.com/doxynix/doxynix/compare/v3.0.18...v3.0.19) (2026-08-23)
 
 
