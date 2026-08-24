@@ -112,7 +112,7 @@
       "dependencies": {
         "@ai-sdk/google": "3.0.111",
         "@ai-sdk/groq": "3.0.60",
-        "@ai-sdk/openai": "3.0.98",
+        "@ai-sdk/openai": "3.0.99",
         "@ai-sdk/react": "3.0.264",
         "@better-auth/passkey": "1.6.30",
         "@better-auth/prisma-adapter": "1.6.30",
@@ -513,7 +513,7 @@
 
     "@ai-sdk/groq": ["@ai-sdk/groq@3.0.60", "", { "dependencies": { "@ai-sdk/provider": "3.0.15", "@ai-sdk/provider-utils": "4.0.46" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-ERL7U3J0Xg8AZS2KKFZVi3yYepvpSNMJOhamPd3NkQbbG7tnYdNEopLbJRfKQm9AN3stZhf7H3Pf7vdAgknbgg=="],
 
-    "@ai-sdk/openai": ["@ai-sdk/openai@3.0.98", "", { "dependencies": { "@ai-sdk/provider": "3.0.15", "@ai-sdk/provider-utils": "4.0.46" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-nAvp8pVOUJ3znJHRzZs54Y7CJQSikOW1Ty7LTdtQT+/pgtAwqhuKd8oaXbiW2xQaYBdH2i8o9AcEpcUdXIyF+g=="],
+    "@ai-sdk/openai": ["@ai-sdk/openai@3.0.99", "", { "dependencies": { "@ai-sdk/provider": "3.0.15", "@ai-sdk/provider-utils": "4.0.46" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-0Y6E5bvR+3eugt5rq2iy39EAAFi4nijXf1kdvcfoMm4erEGMe/6egIpvdvv5ePBU2YsnsxFuLRmMJ76Kv/babQ=="],
 
     "@ai-sdk/provider": ["@ai-sdk/provider@3.0.15", "", { "dependencies": { "json-schema": "^0.4.0" } }, "sha512-XeZW1CcDF2GMbH4wejW6xBRI2QCOgnkVYUnxoeDadB1mf85riL2bMUeDoh+6gJ/r4mjNfzUPW8OjLjvwTP0u1Q=="],
 

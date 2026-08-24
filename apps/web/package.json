@@ -55,7 +55,7 @@
   "dependencies": {
     "@ai-sdk/google": "3.0.111",
     "@ai-sdk/groq": "3.0.60",
-    "@ai-sdk/openai": "3.0.98",
+    "@ai-sdk/openai": "3.0.99",
     "@ai-sdk/react": "3.0.264",
     "@better-auth/passkey": "1.6.30",
     "@better-auth/prisma-adapter": "1.6.30",
