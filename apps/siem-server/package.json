@@ -17,7 +17,7 @@
     "build": "tsc",
     "with-doppler": "bun scripts/doppler.ts",
     "dev": "bun with-doppler -- bun run --watch src/index.ts",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc -b",
     "db:generate": "bun with-doppler drizzle-kit generate",
     "db:push": "bun with-doppler drizzle-kit push",
     "db:studio": "bun with-doppler drizzle-kit studio",

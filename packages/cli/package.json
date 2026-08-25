@@ -6,7 +6,6 @@
     "dxnx": "./dist/index.js"
   },
   "scripts": {
-    "build": "ncc build src/index.ts -o dist --minify --no-cache",
     "dev": "bun src/index.ts" 
   },
   "dependencies": {

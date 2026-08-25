@@ -1,6 +1,6 @@
 import { auth } from "@server/core/auth/auth";
 import type { AuthSession, AuthUser, UserRole } from "@server/core/auth/auth.types";
-import type { MiddlewareHandler } from "hono";
+import { createMiddleware } from "hono/factory";
 
 declare module "hono" {
   interface ContextVariableMap {
@@ -9,14 +9,7 @@ declare module "hono" {
   }
 }
 
-export type AuthEnv = {
-  Variables: {
-    user: AuthUser;
-    session: AuthSession;
-  };
-};
-
-export const requireAuth: MiddlewareHandler<AuthEnv> = async (c, next) => {
+export const requireAuth = createMiddleware(async (c, next) => {
   const sessionData = await auth.api.getSession({
     headers: c.req.raw.headers,
   });
@@ -35,10 +28,10 @@ export const requireAuth: MiddlewareHandler<AuthEnv> = async (c, next) => {
   c.set("session", sessionData.session);
 
   return await next();
-};
+});
 
-export function requireRole(...allowedRoles: UserRole[]): MiddlewareHandler<AuthEnv> {
-  return async (c, next) => {
+export function requireRole(...allowedRoles: UserRole[]) {
+  return createMiddleware(async (c, next) => {
     const user = c.get("user");
 
     if (user == null) {
@@ -62,5 +55,5 @@ export function requireRole(...allowedRoles: UserRole[]): MiddlewareHandler<Auth
     }
 
     return await next();
-  };
+  });
 }

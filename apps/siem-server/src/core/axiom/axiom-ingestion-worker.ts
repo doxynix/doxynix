@@ -38,9 +38,9 @@ function formatMessage(match: Entry): string {
   let errorDetails = "";
   let stacktrace = "";
 
-  if (typeof errObj === "object" && errObj !== null) {
-    if (errObj.message) errorDetails = `${errObj.kind ?? "Error"}: ${errObj.message}`;
-    if (errObj.stack) stacktrace = errObj.stack;
+  if (typeof errObj === "object" && errObj != null) {
+    if (errObj.message != null) errorDetails = `${errObj.kind ?? "Error"}: ${errObj.message}`;
+    if (errObj.stack != null) stacktrace = errObj.stack;
   } else if (typeof errObj === "string") {
     errorDetails = errObj;
   }
@@ -50,11 +50,11 @@ function formatMessage(match: Entry): string {
 
   const lines: string[] = [header];
 
-  if (errorDetails && !msg.includes(errorDetails)) {
+  if (errorDetails != null && !msg.includes(errorDetails)) {
     lines.push(`❌ ${errorDetails}`);
   }
 
-  if (stacktrace) {
+  if (stacktrace != null) {
     lines.push(`Stacktrace:\n${stacktrace}`);
   }
 
@@ -111,7 +111,7 @@ async function runAxiomSyncCycle(): Promise<SyncCycle> {
 
   const parsedLogs = matches
     .map((match) => {
-      if (match._time && match._time > newestTimestamp) {
+      if (match._time != null && match._time > newestTimestamp) {
         newestTimestamp = match._time;
       }
       return {

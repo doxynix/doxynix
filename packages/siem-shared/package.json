@@ -14,7 +14,7 @@
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "format": "biome format --write .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc -b"
   },
   "dependencies": {
     "zod": "4.4.3"

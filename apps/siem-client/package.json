@@ -48,6 +48,7 @@
   },
   "devDependencies": {
     "@babel/core": "8.0.1",
+    "@doxynix/config": "workspace:*",
     "@rolldown/plugin-babel": "0.2.3",
     "@tailwindcss/vite": "4.3.3",
     "@tanstack/router-plugin": "1.168.34",
@@ -56,12 +57,12 @@
     "@vitejs/plugin-react": "6.1.0",
     "babel-plugin-react-compiler": "1.0.0",
     "globals": "16.5.0",
+    "rollup-plugin-visualizer": "7.0.1",
     "svgo": "4.0.2",
     "tailwindcss": "4.3.3",
     "vite": "8.2.2",
     "vite-plugin-checker": "0.14.5",
     "vite-plugin-mkcert": "2.1.0",
-    "vite-plugin-svgr": "5.2.0",
-    "@doxynix/config": "workspace:*"
+    "vite-plugin-svgr": "5.2.0"
   }
 }
