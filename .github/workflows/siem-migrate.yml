@@ -25,7 +25,7 @@ jobs:
           bun-version-file: "package.json"
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: bun install
 
       - name: Install Doppler CLI
         uses: DopplerHQ/cli-action@4819d808ab99e5cde19a0637a16536a4038fad73
