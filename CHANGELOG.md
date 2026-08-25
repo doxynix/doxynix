@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.1.1](https://github.com/doxynix/doxynix/compare/v3.1.0...v3.1.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/openai to v3.0.99 ([#2025](https://github.com/doxynix/doxynix/issues/2025)) ([b57a01a](https://github.com/doxynix/doxynix/commit/b57a01ac95bd93d3f01f42279f141e86a7b59022))
+* **deps:** update dependency @ai-sdk/react to v3.0.267 ([#2034](https://github.com/doxynix/doxynix/issues/2034)) ([f899139](https://github.com/doxynix/doxynix/commit/f899139c669374f499507929e6b2786e85d1f58e))
+* **deps:** update dependency ai to v6.0.261 ([#2027](https://github.com/doxynix/doxynix/issues/2027)) ([15e0765](https://github.com/doxynix/doxynix/commit/15e0765502349e4b40ed6a4e134e85c2ab4fc055))
+* **deps:** update dependency ai to v6.0.264 ([#2035](https://github.com/doxynix/doxynix/issues/2035)) ([3bc62e9](https://github.com/doxynix/doxynix/commit/3bc62e92940bb1b38b8e3fc062a74294c6763b07))
+* **deps:** update dependency nuqs to v2.10.0 ([#2036](https://github.com/doxynix/doxynix/issues/2036)) ([964e2b5](https://github.com/doxynix/doxynix/commit/964e2b5948919de597d1be9b08b0a72202060b31))
+* **deps:** update dependency posthog-js to v1.418.10 ([#2030](https://github.com/doxynix/doxynix/issues/2030)) ([d779bef](https://github.com/doxynix/doxynix/commit/d779bef64e9a16149dc5bb8b22b7c697a4acd9f0))
+* **deps:** update dependency posthog-js to v1.418.7 ([#2028](https://github.com/doxynix/doxynix/issues/2028)) ([3a75c95](https://github.com/doxynix/doxynix/commit/3a75c951410b7532f92d4ddd21798b0c7ede9b09))
+* **deps:** update dependency posthog-node to v5.50.0 ([#2037](https://github.com/doxynix/doxynix/issues/2037)) ([d74fd09](https://github.com/doxynix/doxynix/commit/d74fd093e89143b1deb9e6b5f20b0a6a3fddb5d1))
+* **deps:** update dependency react-hook-form to v7.86.0 ([#2039](https://github.com/doxynix/doxynix/issues/2039)) ([445f390](https://github.com/doxynix/doxynix/commit/445f390018d2a34bfbe4014820dc42bbd5ff322b))
+* **deps:** update dependency resend to v6.22.0 ([#2040](https://github.com/doxynix/doxynix/issues/2040)) ([624696e](https://github.com/doxynix/doxynix/commit/624696e07f274eb65a63e024d096f241a0154ea1))
+* **deps:** update nextjs monorepo to v16.3.2 ([#2031](https://github.com/doxynix/doxynix/issues/2031)) ([11bf2b4](https://github.com/doxynix/doxynix/commit/11bf2b4ebc942bba63b792c3655fb303bd4f934f))
+* **deps:** update scalar monorepo ([#2032](https://github.com/doxynix/doxynix/issues/2032)) ([56eef68](https://github.com/doxynix/doxynix/commit/56eef680e2aa89569d58b3b453477dfec0f5ec30))
+
 ## [3.1.0](https://github.com/doxynix/doxynix/compare/v3.0.19...v3.1.0) (2026-08-24)
 
 

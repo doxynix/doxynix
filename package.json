@@ -104,5 +104,5 @@
   "patchedDependencies": {
     "tree-sitter-wasms@0.1.13": "patches/tree-sitter-wasms@0.1.13.patch"
   },
-  "version": "3.1.0"
+  "version": "3.1.1"
 }
