@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts
 
+      - name: Clean tree-sitter symlinks
+        run: bun run clean:symlinks
+
       - name: Generate DB Client
         run: bun --filter @doxynix/web db:generate
 
