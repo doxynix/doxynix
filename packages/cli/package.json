@@ -1,13 +1,13 @@
 {
   "name": "@doxynix/cli",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "bin": {
     "dxnx": "./dist/index.js"
   },
   "scripts": {
     "build": "ncc build src/index.ts -o dist --minify --no-cache",
-    "dev": "bun src/index.ts" 
+    "dev": "bun src/index.ts"
   },
   "dependencies": {
     "@clack/prompts": "1.4.0",
