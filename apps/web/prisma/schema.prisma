@@ -16,27 +16,6 @@ generator client {
   engineType      = "client"
 }
 
-generator zod {
-  provider                         = "zod-prisma-types"
-  output                           = "../src/shared/api-contracts"
-  useMultipleFiles                 = false
-  writeBarrelFiles                 = false
-  createIndexType                  = false
-  createInputTypes                 = false
-  createModelTypes                 = true
-  createOptionalDefaultValuesTypes = false
-  createRelationValuesTypes        = false
-  createPartialTypes               = false
-  addInputTypeValidation           = true
-  coerceDate                       = true
-  writeNullishInInputTypes         = true
-  addIncludeType                   = false
-  addSelectType                    = false
-  useJsonParameters                = true
-  useTypeAssertions                = true
-  modelSuffix                      = "Schema"
-}
-
 generator jsonSchema {
   provider = "prisma-json-schema-generator"
 }

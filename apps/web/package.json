@@ -25,7 +25,7 @@
     "start": "bun with-doppler \"next start\"",
     "lint": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" eslint src --cache --cache-location node_modules/.cache/eslint",
     "lint:fix": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" eslint src --fix --cache --cache-location node_modules/.cache/eslint",
-    "type-check": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" tsc --noEmit",
+    "type-check": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" tsc -b",
     "type-check:coverage": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" type-coverage --detail",
     "analyze": "bun with-doppler \"cross-env ANALYZE=true next build --webpack\"",
     "analyze:exp": "bun with-doppler \"next experimental-analyze\"",
@@ -351,6 +351,6 @@
     "vitest": "4.1.11",
     "webpack-stats-plugin": "1.1.3",
     "zenstack": "2.22.3",
-    "zod-prisma-types": "3.3.10"
+    "zod-prisma-types": "3.3.11"
   }
 }

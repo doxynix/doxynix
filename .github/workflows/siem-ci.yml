@@ -55,7 +55,10 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Install Dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
+        run: bun install --ignore-scripts
+
+      - name: Clean tree-sitter symlinks
+        run: bun run clean:symlinks
 
       - name: Run Architecture & Lint Checks
         run: bun --filter "@doxynix/siem-*" validate

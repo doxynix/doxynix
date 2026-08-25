@@ -27,7 +27,10 @@ jobs:
           bun-version-file: "package.json"
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
+        run: bun install --ignore-scripts
+
+      - name: Clean tree-sitter symlinks
+        run: bun run clean:symlinks
 
       - name: Generate DB Client
         run: bun --filter @doxynix/web db:generate

@@ -38,7 +38,7 @@ export function anonymizeIp(ip: null | string | undefined): null | string {
     const kind = addr.kind();
 
     if (kind === "ipv4") {
-      const ipv4 = addr as ipaddr.IPv4;
+      const ipv4 = addr;
       const octets = ipv4.toByteArray();
       octets[3] = 0;
       return ipaddr.fromByteArray(octets).toString();

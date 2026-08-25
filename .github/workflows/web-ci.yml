@@ -69,9 +69,6 @@ defaults:
     shell: bash
 
 jobs:
-  # ------------------------------------------------------------------
-  # 0. Time measurement
-  # ------------------------------------------------------------------
   init:
     name: Init CI metadata
     runs-on: ubuntu-latest
@@ -82,9 +79,6 @@ jobs:
         id: time
         run: echo "started_at=$(date -u +%s)" >> $GITHUB_OUTPUT
 
-  # ------------------------------------------------------------------
-  # 1. Identifying changes
-  # ------------------------------------------------------------------
   changes:
     needs: [init]
     runs-on: ubuntu-latest
@@ -114,9 +108,6 @@ jobs:
               - 'src/tests/**'
               - 'apps/web/**'
 
-  # ------------------------------------------------------------------
-  # 2. Code quality (LINT, FORMATTING, DUPLICATION)
-  # ------------------------------------------------------------------
   quality:
     needs: [init]
     if: github.actor != 'ImgBotApp'
@@ -132,7 +123,10 @@ jobs:
           bun-version-file: "package.json"
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
+        run: bun install --ignore-scripts
+
+      - name: Clean tree-sitter symlinks
+        run: bun run clean:symlinks
 
       - name: Check Formatting
         run: bun --filter @doxynix/web format:check
@@ -140,9 +134,6 @@ jobs:
       - name: Linting
         run: bun --filter @doxynix/web lint
 
-  # ------------------------------------------------------------------
-  # 3. Typing (TYPESCRIPT)
-  # ------------------------------------------------------------------
   types:
     needs: [init]
     if: github.actor != 'ImgBotApp'
@@ -173,7 +164,10 @@ jobs:
           bun-version-file: "package.json"
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
+        run: bun install --ignore-scripts
+
+      - name: Clean tree-sitter symlinks
+        run: bun run clean:symlinks
 
       - name: Prepare Database Schema
         run: bun --filter @doxynix/web db:push
@@ -193,9 +187,6 @@ jobs:
       - name: Check Type Coverage
         run: bun --filter @doxynix/web type-check:coverage
 
-  # ------------------------------------------------------------------
-  # 5. Integration and Unit Tests
-  # ------------------------------------------------------------------
   tests:
     needs: [changes, init]
     if: |
@@ -234,7 +225,10 @@ jobs:
           bun-version-file: "package.json"
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
+        run: bun install --ignore-scripts
+
+      - name: Clean tree-sitter symlinks
+        run: bun run clean:symlinks
 
       - name: Verify Database Schema
         run: bun --filter @doxynix/web db:push
@@ -253,9 +247,6 @@ jobs:
           flags: unit
           fail_ci_if_error: false
 
-  # ------------------------------------------------------------------
-  # 6. BUILD
-  # ------------------------------------------------------------------
   build:
     needs: [quality, types, tests, changes, init]
     runs-on: ubuntu-latest
@@ -289,7 +280,10 @@ jobs:
           bun-version-file: "package.json"
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
+        run: bun install --ignore-scripts
+
+      - name: Clean tree-sitter symlinks
+        run: bun run clean:symlinks
 
       - name: Prepare Database Schema
         run: bun --filter @doxynix/web db:push
@@ -306,7 +300,7 @@ jobs:
             ${{ runner.os }}-nextjs-
 
       - name: Build
-        run: bun --filter @doxynix/web build --webpack
+        run: bun --filter @doxynix/web build:turbopack
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
@@ -320,6 +314,7 @@ jobs:
           retention-days: 1
 
       - name: Upload webpack stats artifact
+        if: hashFiles('apps/web/.next/webpack-stats.json') != ''
         uses: relative-ci/agent-upload-artifact-action@817b17affc58e350258bd97d783db67be5bf0405
         with:
           webpackStatsFile: apps/web/.next/webpack-stats.json
@@ -364,7 +359,7 @@ jobs:
           bun-version-file: "package.json"
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
+        run: bun install --ignore-scripts
 
       - name: Setup DB Schema
         run: bun --filter @doxynix/web db:push
@@ -424,7 +419,7 @@ jobs:
           bun-version-file: "package.json"
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
+        run: bun install --ignore-scripts
 
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
@@ -445,10 +440,6 @@ jobs:
           name: playwright-report
           path: apps/web/src/tests/e2e/playwright-report/
           retention-days: 7
-
-  # ------------------------------------------------------------------
-  # 9. NOTIFICATIONS (NOTIFY)
-  # ------------------------------------------------------------------
   notify:
     needs: [init, quality, types, tests, build, lighthouse, e2e]
     if: always()

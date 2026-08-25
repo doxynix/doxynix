@@ -2,7 +2,7 @@ import path from "node:path";
 import type { NextConfig } from "next";
 import filterWebpackStats from "@bundle-stats/plugin-webpack-filter";
 import withBundleAnalyzer from "@next/bundle-analyzer";
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig, type SentryBuildOptions } from "@sentry/nextjs";
 import createWithVercelToolbar from "@vercel/toolbar/plugins/next";
 import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
@@ -14,6 +14,10 @@ import { LOCALE_REGEX_STR } from "@/shared/constants/locales";
 
 import pkg from "./package.json" with { type: "json" };
 
+// Flag to enable webpack-stats generation (RelativeCI). Disabled by default.
+// Enable ONLY when explicitly needed via: STATS=true bun run build
+const IS_STATS_ENABLED = process.env.STATS === "true" || process.env.ENABLE_RELATIVE_CI === "true";
+
 const bundleAnalyzer = withBundleAnalyzer({
   enabled: IS_ANALYZE,
 });
@@ -22,7 +26,6 @@ const withNextIntl = createNextIntlPlugin({
   experimental: {
     createMessagesDeclaration: "./messages/en.json",
   },
-
   requestConfig: "./src/shared/i18n/request.ts",
 });
 
@@ -33,7 +36,7 @@ const nextConfig: NextConfig = {
     removeConsole: IS_PROD ? { exclude: ["error", "info"] } : false,
   },
   compress: true,
-  enablePrerenderSourceMaps: IS_PROD,
+  enablePrerenderSourceMaps: false, // Prevents conflicts with Sentry Debug IDs during SSG
   env: {
     APP_VERSION: pkg.version,
   },
@@ -70,17 +73,17 @@ const nextConfig: NextConfig = {
     optimizeServerReact: true,
     prefetchInlining: true,
     preloadEntriesOnStart: false,
-    prerenderEarlyExit: true,
+    prerenderEarlyExit: false, // [DISABLED]: Known to cause premature build stalls on Next.js 16
     scrollRestoration: true,
     serverComponentsHmrCache: true,
-    serverSourceMaps: IS_PROD,
+    serverSourceMaps: false, // [DISABLED]: Avoid holding large server sourcemaps in memory during build
     taint: true,
     turbopackFileSystemCacheForBuild: true,
     turbopackFileSystemCacheForDev: true,
     typedEnv: true,
     useLightningcss: IS_PROD,
-    webpackMemoryOptimizations: true,
-    workerThreads: true,
+    webpackMemoryOptimizations: false,
+    workerThreads: false, // [DISABLED]: Causes worker pool deadlocks during page data collection under Bun runtime
   },
   async headers() {
     const scriptSrc = [
@@ -114,7 +117,12 @@ const nextConfig: NextConfig = {
       "https://challenges.cloudflare.com",
       "https://*.ably-realtime.com",
       "https://*.realtime.ably.net",
-      IS_DEV ? "https://vercel.live" : "",
+      "https://vercel.com",
+      "https://*.vercel.com",
+      "https://blob.vercel-storage.com",
+      "https://*.blob.vercel-storage.com",
+      "https://*.public.blob.vercel-storage.com",
+      "https://vercel.live",
       IS_DEV ? "ws://localhost:25002" : "",
       "https://*.pusher.com",
       "wss://*.pusher.com",
@@ -145,7 +153,7 @@ const nextConfig: NextConfig = {
             value: `
               default-src 'none';
               script-src ${scriptSrc};
-              frame-src 'self' ${IS_DEV ? "https://vercel.live" : ""} https://challenges.cloudflare.com https://accounts.google.com https://accounts.google.com/gsi/;
+              frame-src 'self' https://vercel.live https://challenges.cloudflare.com https://accounts.google.com https://accounts.google.com/gsi/;
               worker-src 'self' blob:;
               base-uri 'none';
               form-action 'self';
@@ -155,7 +163,7 @@ const nextConfig: NextConfig = {
                 https://img.shields.io
                 https://cdn.jsdelivr.net
                 https://sun1-26.userapi.com
-                ${IS_DEV ? "https://vercel.live" : ""}
+                https://vercel.live
                 https://vercel.com
                 https://ufs.sh
                 https://*.ufs.sh
@@ -165,11 +173,12 @@ const nextConfig: NextConfig = {
                 https://avatars.githubusercontent.com
                 https://*.googleusercontent.com
                 https://avatars.yandex.net
+                https://*.public.blob.vercel-storage.com
                 https://ssl.gstatic.com;
-              font-src 'self' ${IS_DEV ? "https://vercel.live" : ""} data:;
+              font-src 'self' https://vercel.live data:;
               media-src 'self';
               connect-src ${connectSrc};
-              frame-ancestors 'self' ${IS_DEV ? "https://vercel.live" : ""};
+              frame-ancestors 'self' https://vercel.live;
               manifest-src 'self';
               upgrade-insecure-requests;
             `
@@ -234,6 +243,11 @@ const nextConfig: NextConfig = {
         pathname: "/**",
         protocol: "https",
       },
+      {
+        hostname: "*.public.blob.vercel-storage.com",
+        pathname: "/**",
+        protocol: "https",
+      },
     ],
   },
   logging: {
@@ -245,8 +259,16 @@ const nextConfig: NextConfig = {
     maxInactiveAge: 15 * 1000,
     pagesBufferLength: 2,
   },
+  outputFileTracingExcludes: {
+    "*": [
+      "**/node_modules/tree-sitter-wasms/**",
+      "**/.bun/**/tree-sitter-wasms/**",
+      "./**/*.js.map",
+      "./**/*.mjs.map",
+    ],
+  },
   poweredByHeader: false,
-  productionBrowserSourceMaps: false,
+  productionBrowserSourceMaps: false, // Ensures clients cannot fetch raw sourcemaps from browser
   reactCompiler: true,
   // cacheComponents: true, // если будут баги выключить (// NOTE: обнаружен баг №418 с гидратацией выяснено что приходится оборачивать каждый чих в suspense так еще и юзать везде 'use cache' директиву ибо теперь кеширование руками надо делать слишком много переписывать пока PPR отложен на неопределенный срок)
   reactStrictMode: true,
@@ -362,8 +384,19 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
   typedRoutes: false,
   typescript: { ignoreBuildErrors: false },
+
   webpack: (config, { dev, isServer }) => {
-    if (!dev && !isServer) {
+    // ---------------------------------------------------------------------------------
+    // RelativeCI / Webpack Stats Generator
+    // ---------------------------------------------------------------------------------
+    // WHY DISABLED BY DEFAULT:
+    // StatsWriterPlugin with 'modules: true' serializes the entire module graph
+    // into a massive JSON payload in RAM, causing severe GC freezes and CI timeouts.
+    //
+    // HOW TO RUN ON DEMAND:
+    // STATS=true bun run build
+    // ---------------------------------------------------------------------------------
+    if (IS_STATS_ENABLED && !dev && !isServer) {
       const outputPath = config.output?.path ?? path.join(process.cwd(), ".next");
 
       const targetPath = path.join(process.cwd(), ".next", "webpack-stats.json");
@@ -385,11 +418,12 @@ const nextConfig: NextConfig = {
         })
       );
     }
+
     return config;
   },
 };
 
-const sentryOptions = {
+const sentryOptions: SentryBuildOptions = {
   bundleSizeOptimizations: {
     excludeDebugStatements: true,
     excludeReplayIframe: true,
@@ -401,9 +435,12 @@ const sentryOptions = {
 
   silent: process.env.CI == null,
 
+  // Do NOT delete source maps after upload to preserve Debug ID integrity during SSG
   sourcemaps: {
-    deleteSourcemapsAfterUpload: true,
+    deleteSourcemapsAfterUpload: false,
   },
+
+  telemetry: false,
 
   tunnelRoute: `${API_PREFIX}/dxnx/s`,
 
@@ -415,12 +452,18 @@ const sentryOptions = {
     },
   },
 
+  // Crucial: Uploads source maps for all client-side dependencies & app chunks,
+  // preventing mangled/minified stack traces in the Sentry dashboard
   widenClientFileUpload: true,
 };
 
-const exportedConfig =
+const baseConfig =
   IS_DEV && !IS_ANALYZE
     ? withVercelToolbar(withNextIntl(nextConfig))
-    : withSentryConfig(withAxiom(bundleAnalyzer(withNextIntl(nextConfig))), sentryOptions);
+    : withAxiom(bundleAnalyzer(withNextIntl(nextConfig)));
 
-export default exportedConfig;
+const IS_CI_OR_VERCEL = Boolean(process.env.VERCEL != null || process.env.CI != null);
+
+const finalConfig = IS_CI_OR_VERCEL ? withSentryConfig(baseConfig, sentryOptions) : baseConfig;
+
+export default finalConfig;

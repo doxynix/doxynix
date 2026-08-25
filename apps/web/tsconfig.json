@@ -34,7 +34,6 @@
     "coverage",
     "public",
     "report",
-    "src/shared/api-contracts",
     "./scripts"
   ]
 }
