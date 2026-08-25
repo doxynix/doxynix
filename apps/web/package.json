@@ -297,7 +297,7 @@
     "@vitest/eslint-plugin": "1.6.23",
     "@zenstackhq/trpc": "2.22.3",
     "babel-plugin-react-compiler": "1.0.0",
-    "bundle-stats-webpack-plugin": "4.22.2",
+    "bundle-stats-webpack-plugin": "4.22.3",
     "cross-env": "10.1.0",
     "decimal.js": "10.6.0",
     "dependency-cruiser": "17.4.3",
