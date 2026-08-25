@@ -36,6 +36,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts
 
+      - name: Clean tree-sitter symlinks
+        run: bun run clean:symlinks
+
       - name: Check for Typos (CSpell)
         run: bun run spellcheck
         continue-on-error: true
@@ -65,6 +68,9 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Clean tree-sitter symlinks
+        run: bun run clean:symlinks
 
       - name: Run Secretlint
         run: bun run secretlint
