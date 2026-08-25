@@ -16,6 +16,22 @@ const authRoutes = ["/auth"];
 const cookieName = getCookieName();
 const ANALYTICS_TUNNELS = [`${API_PREFIX}/dxnx/p`, `${API_PREFIX}/dxnx/s`];
 
+const BYPASS_EXACT_PATHS = new Set([
+  "/favicon.ico",
+  "/manifest.json",
+  "/manifest.webmanifest",
+  "/robots.txt",
+  "/sitemap.xml",
+]);
+
+const BYPASS_PREFIXES = [
+  ...ANALYTICS_TUNNELS,
+  "/api/webhooks",
+  "/webhooks",
+  "/api/auth",
+  "/_axiom",
+];
+
 let ratelimit: null | Ratelimit = null;
 const ephemeralCache = new Map<string, number>();
 
@@ -33,18 +49,16 @@ if (IS_PROD) {
 
 const intlMiddleware = createMiddleware(routing);
 
+function isBypassRoute(pathname: string): boolean {
+  if (BYPASS_EXACT_PATHS.has(pathname)) return true;
+  if (pathname.endsWith("/vitals")) return true;
+  return BYPASS_PREFIXES.some((prefix) => hasPathBoundary(pathname, prefix));
+}
+
 function hasPathBoundary(pathname: string, prefix: string): boolean {
   if (!pathname.startsWith(prefix)) return false;
   const nextChar = pathname.charAt(prefix.length);
   return nextChar === "" || nextChar === "/";
-}
-
-function isAnalyticsTunnel(pathname: string): boolean {
-  return ANALYTICS_TUNNELS.some((prefix) => hasPathBoundary(pathname, prefix));
-}
-
-function isUploadThingPath(pathname: string): boolean {
-  return hasPathBoundary(pathname, "/api/uploadthing");
 }
 
 async function handleRateLimitAndSize(
@@ -52,11 +66,7 @@ async function handleRateLimitAndSize(
   pathname: string,
   ip: string
 ): Promise<NextResponse | null> {
-  if (
-    hasPathBoundary(pathname, "/api/webhooks") ||
-    hasPathBoundary(pathname, "/webhooks") ||
-    hasPathBoundary(pathname, "/api/auth")
-  ) {
+  if (isBypassRoute(pathname)) {
     return null;
   }
 
@@ -127,6 +137,8 @@ async function handleApiRequest(
 function handlePageRequest(request: NextRequest, requestId: string): NextResponse {
   const { pathname } = request.nextUrl;
   const localeRegex = new RegExp(`^/(${LOCALE_REGEX_STR})`);
+  const matchedLocale = pathname.match(localeRegex)?.[1];
+  const localePrefix = matchedLocale != null ? `/${matchedLocale}` : "";
   const pathWithoutLocale = pathname.replace(localeRegex, "") || "/";
 
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -138,13 +150,13 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
 
   if (isProtectedRoute && token == null) {
     const url = request.nextUrl.clone();
-    url.pathname = "/auth";
+    url.pathname = `${localePrefix}/auth`;
     return NextResponse.redirect(url);
   }
 
   if (isAuthRoute && token != null) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = `${localePrefix}/dashboard`;
     return NextResponse.redirect(url);
   }
 
@@ -162,18 +174,14 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
   return response;
 }
 
-export async function proxy(request: NextRequest) {
-  const requestId = sanitizeRequestId(request.headers.get("x-request-id")) ?? generateRequestId();
+export async function proxy(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
 
-  if (isUploadThingPath(pathname)) {
+  if (isBypassRoute(pathname)) {
     return NextResponse.next();
   }
 
-  if (isAnalyticsTunnel(pathname)) {
-    return NextResponse.next();
-  }
-
+  const requestId = sanitizeRequestId(request.headers.get("x-request-id")) ?? generateRequestId();
   const ip = getIp(request);
 
   if (pathname.startsWith("/api") || pathname.startsWith("/trpc")) {
@@ -185,7 +193,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/dashboard/repo/:path*",
-    "/((?!_next|_vercel|monitoring|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|xml|json|woff2?|ttf|otf|webmanifest)$).*)",
+    "/((?!_next/static|_next/image|_vercel|monitoring|favicon.ico|robots.txt|sitemap.xml|manifest.webmanifest|icons/.*|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|txt|xml|json|woff2?|ttf|otf|webmanifest)$).*)",
   ],
 };

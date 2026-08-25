@@ -14,7 +14,7 @@ const STRONG_TEXT = "font-medium text-foreground";
 const LI_STYLES = "flex flex-col";
 const SPAN_STYLES = "text-sm";
 
-const BRANDS: Props[] = [
+const BRANDS = [
   { descKey: "brands_vercel_desc", name: "Vercel" },
   { descKey: "brands_neon_desc", name: "Neon (PostgreSQL)" },
   { descKey: "brands_resend_desc", name: "Resend" },
@@ -22,7 +22,7 @@ const BRANDS: Props[] = [
   { descKey: "brands_upstash_desc", name: "Upstash / Redis" },
   { descKey: "brands_axiom_desc", name: "Axiom" },
   { descKey: "brands_ably_desc", name: "Ably" },
-] as const;
+] as const satisfies readonly Props[];
 
 function PrivacyListItem({ descKey, name }: Readonly<Props>) {
   return (

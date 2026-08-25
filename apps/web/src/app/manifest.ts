@@ -12,9 +12,15 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/x-icon",
       },
       {
-        purpose: "maskable",
+        purpose: "any",
         sizes: "192x192",
         src: "/icons/icon-192x192.png",
+        type: "image/png",
+      },
+      {
+        purpose: "any",
+        sizes: "512x512",
+        src: "/icons/icon-512x512.png",
         type: "image/png",
       },
       {
@@ -25,7 +31,20 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
     name: "Doxynix",
+    scope: "/",
     short_name: "Doxynix",
+    shortcuts: [
+      {
+        description: "Open your active repositories",
+        name: "Repositories",
+        url: "/dashboard/repos",
+      },
+      {
+        description: "View repository notifications",
+        name: "Notifications",
+        url: "/dashboard/notifications",
+      },
+    ],
     start_url: "/dashboard",
     theme_color: "#111318",
   };
