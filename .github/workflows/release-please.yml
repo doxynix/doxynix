@@ -1,4 +1,4 @@
-name: doxynix-please
+name: doxynix-release
 
 on:
   push:
@@ -24,4 +24,3 @@ jobs:
       - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071
         with:
           token: ${{ steps.app-token.outputs.token }}
-          release-type: node

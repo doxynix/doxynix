@@ -7,12 +7,12 @@ import { Agent } from "undici";
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";
 
-interface ProxyRequestBody {
+type ProxyRequestBody = {
   body?: unknown;
   headers?: Record<string, unknown>;
   method?: string;
   url?: string;
-}
+};
 
 type DnsLookupCallback = (err: Error | null, address: null | string, family: null | number) => void;
 

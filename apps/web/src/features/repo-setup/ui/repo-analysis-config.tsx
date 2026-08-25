@@ -39,13 +39,13 @@ type DocOption = {
   label: string;
 };
 
-const DOC_OPTIONS: DocOption[] = [
+const DOC_OPTIONS = [
   { desc: "Project overview & setup", icon: BookOpen, id: "README", label: "Overview" },
   { desc: "Endpoints & schemas", icon: Code2, id: "API", label: "API Reference" },
   { desc: "Deep system logic", icon: GitGraph, id: "ARCHITECTURE", label: "Architecture" },
   { desc: "Guide for developers", icon: Users, id: "CONTRIBUTING", label: "How to guides" },
   { desc: "Release history", icon: HistoryIcon, id: "CHANGELOG", label: "History" },
-] as const;
+] as const satisfies readonly DocOption[];
 
 type Props = {
   actions: ActionsType;

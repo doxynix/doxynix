@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */ // NOTE: пока вырубил
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import { join, resolve } from "pathe";
 
 import { appLogger } from "@/server/core/app-logger";
@@ -14,6 +15,8 @@ import type {
 } from "../core/discovery.types";
 import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
 import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
+
+const nodeRequire = createRequire(import.meta.url);
 
 type LanguageSpec = {
   api?: RegExp[];
@@ -290,8 +293,7 @@ async function initRuntime() {
   if (runtimeInitPromise) return runtimeInitPromise;
 
   runtimeInitPromise = (async () => {
-    //eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require("web-tree-sitter");
+    const mod = nodeRequire("web-tree-sitter");
 
     let Parser = mod.Parser;
 
@@ -311,10 +313,11 @@ async function initRuntime() {
     const pathsToTry = [
       resolve(process.cwd(), runtimeWasmName),
       resolve(process.cwd(), "node_modules/web-tree-sitter", runtimeWasmName),
-      join(resolve(require.resolve("web-tree-sitter"), ".."), runtimeWasmName),
+      join(resolve(nodeRequire.resolve("web-tree-sitter"), ".."), runtimeWasmName),
     ];
 
-    const finalWasmPath = pathsToTry.find((p) => fs.existsSync(p));
+    // Turbopack ignore comment prevents aggressive whole-project NFT tracing
+    const finalWasmPath = pathsToTry.find((p) => fs.existsSync(/* turbopackIgnore: true */ p));
     if (!finalWasmPath) {
       throw new Error(`[TreeSitter] Runtime WASM not found. Checked: ${pathsToTry.join(", ")}`);
     }
@@ -351,7 +354,8 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
           throw new Error(`[TreeSitter] Language.load is missing!`);
         }
 
-        const wasmBytes = fs.readFileSync(wasmPath);
+        // Turbopack ignore comment prevents aggressive whole-project NFT tracing
+        const wasmBytes = fs.readFileSync(/* turbopackIgnore: true */ wasmPath);
 
         return await Language.load(wasmBytes);
       })().catch((error) => {
@@ -366,14 +370,24 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
 }
 
 function resolveGrammarWasmPath(spec: LanguageSpec): string {
+  let pkgOutDir = "";
+  try {
+    const pkgMain = nodeRequire.resolve("tree-sitter-wasms");
+    pkgOutDir = resolve(pkgMain, "../../out");
+  } catch {
+    // Fallback if not resolvable directly
+  }
+
   const candidates = [
+    pkgOutDir ? resolve(pkgOutDir, spec.wasm) : "",
     resolve(process.cwd(), spec.wasm),
     resolve(process.cwd(), "node_modules/tree-sitter-wasms/out", spec.wasm),
     resolve(import.meta.dirname ?? "", "../../../vendor/wasms", spec.wasm),
-  ];
+  ].filter(Boolean);
 
   for (const path of candidates) {
-    if (fs.existsSync(path)) {
+    // Turbopack ignore comment prevents recursive filesystem traversal in node_modules
+    if (fs.existsSync(/* turbopackIgnore: true */ path)) {
       return path;
     }
   }

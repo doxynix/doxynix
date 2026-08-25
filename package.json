@@ -24,7 +24,8 @@
     "spellcheck": "cspell \"**/*\" --no-progress --show-suggestions",
     "dup": "jscpd",
     "knip": "SKIP_ENV_VALIDATION=development CI=true knip-bun --no-exit-code",
-    "nuke": "rm -rf node_modules/ apps/**/node_modules/ packages/**/node_modules bun.lock .turbo/ .next/ && bun pm cache rm && bun install --force"
+    "nuke": "rm -rf node_modules/ apps/**/node_modules/ packages/**/node_modules bun.lock .turbo/ .next/ && bun pm cache rm && bun install --force",
+    "postinstall": "bun -e \"import fs from 'node:fs'; for (const p of fs.globSync('node_modules/.bun/tree-sitter-wasms*/node_modules/tree-sitter-wasms/node_modules')) fs.rmSync(p, { recursive: true, force: true });\""  
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.10",

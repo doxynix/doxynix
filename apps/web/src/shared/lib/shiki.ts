@@ -10,14 +10,21 @@ import langTs from "shiki/langs/typescript.mjs";
 import themeDark from "shiki/themes/github-dark-dimmed.mjs";
 import themeLight from "shiki/themes/github-light.mjs";
 
-let highlighter: Awaited<ReturnType<typeof createHighlighter>> | null = null;
+type HighlighterType = Awaited<ReturnType<typeof createHighlighter>>;
 
-export async function getHighlighter() {
-  highlighter ??= await createHighlighter({
-    langs: [langTs, langJSON, langMarkdown, langConsole],
-    themes: [themeDark, themeLight],
-  });
-  return highlighter;
+const globalForShiki = globalThis as unknown as {
+  shikiPromise?: Promise<HighlighterType>;
+};
+
+export function getHighlighter(): Promise<HighlighterType> {
+  if (!globalForShiki.shikiPromise) {
+    globalForShiki.shikiPromise = createHighlighter({
+      langs: [langTs, langJSON, langMarkdown, langConsole],
+      themes: [themeDark, themeLight],
+    });
+  }
+
+  return globalForShiki.shikiPromise;
 }
 
 async function highlight(code: string, lang: string, theme: "dark" | "light") {

@@ -1,16 +1,9 @@
 {
   "editor.formatOnSave": true,
-  
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.fixAll.biome": "explicit",
-    "source.organizeImports.biome": "explicit"
-  },
-
   "eslint.workingDirectories": [{ "mode": "auto" }],
 
   "files.exclude": {
-  "**/.git": true,
+   "**/.git": true,
     "**/.bun": true,
     "**/node_modules": false,
     "**/dist": true,
@@ -32,5 +25,12 @@
     "connectionId": "doxynix",
     "projectKey": "doxynix_doxynix"
   },
-  "prisma.pinToPrisma6": true
+  "prisma.pinToPrisma6": true,
+  "conventionalCommits.scopes": [
+    "web",
+    "siem-server",
+    "siem-client",
+    "cli",
+    "siem-shared"
+  ]
 }
