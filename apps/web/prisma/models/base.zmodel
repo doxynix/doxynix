@@ -36,7 +36,7 @@ plugin prisma {
 //   output   = "../src/shared/api/hooks"
 //   target   = "react"
 // }
-
+/* 
 generator zod {
   provider = "zod-prisma-types"
   output   = "../src/shared/api-contracts"
@@ -62,7 +62,7 @@ generator zod {
   useTypeAssertions = true
   modelSuffix       = "Schema"
 }
-
+*/
 generator jsonSchema {
   provider = "prisma-json-schema-generator"
 }

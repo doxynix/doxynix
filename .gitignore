@@ -59,7 +59,6 @@ lerna-debug.log*
 /apps/web/messages/*.d.json.ts
 /apps/web/arch/
 /apps/web/coverage-ts/
-/apps/web/src/shared/api-contracts/
 
 .stryker-tmp/
 reports/
