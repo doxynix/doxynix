@@ -351,6 +351,6 @@
     "vitest": "4.1.11",
     "webpack-stats-plugin": "1.1.3",
     "zenstack": "2.22.3",
-    "zod-prisma-types": "3.3.10"
+    "zod-prisma-types": "3.3.11"
   }
 }
