@@ -2,6 +2,135 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/doxynix/doxynix/compare/web-v2.3.0...web-v3.0.0) (2026-08-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* birth of the monorepo (DXNX-198) ([#1524](https://github.com/doxynix/doxynix/issues/1524))
+
+### Features
+
+* **web:** migrate to vercel blob and extract core services (DXNX-205) ([#1951](https://github.com/doxynix/doxynix/issues/1951)) ([3d09f3e](https://github.com/doxynix/doxynix/commit/3d09f3e01a91c0e2a1f325027b3bd9df318bd9dd))
+
+
+### Bug Fixes
+
+* **deps:** update better-auth monorepo to v1.6.27 ([#1907](https://github.com/doxynix/doxynix/issues/1907)) ([11b94a0](https://github.com/doxynix/doxynix/commit/11b94a0e0e815141399799c5cf08c8170205480a))
+* **deps:** update better-auth monorepo to v1.6.28 ([#1943](https://github.com/doxynix/doxynix/issues/1943)) ([3b1208d](https://github.com/doxynix/doxynix/commit/3b1208d1ce4ee23dec97294d0218e80906705a1e))
+* **deps:** update better-auth monorepo to v1.6.29 ([#1953](https://github.com/doxynix/doxynix/issues/1953)) ([aef2e32](https://github.com/doxynix/doxynix/commit/aef2e32232d513db81efc228dd4f712194f961e2))
+* **deps:** update better-auth monorepo to v1.6.30 ([#1980](https://github.com/doxynix/doxynix/issues/1980)) ([6c632f5](https://github.com/doxynix/doxynix/commit/6c632f589ca70d30f24b622cae7631c57f99ca70))
+* **deps:** update codemirror ([#1969](https://github.com/doxynix/doxynix/issues/1969)) ([e352dbe](https://github.com/doxynix/doxynix/commit/e352dbe96793139e7f7c62e77bed34393b60e401))
+* **deps:** update dependency [@trigger](https://github.com/trigger).dev/react-hooks to v4.5.11 ([#1936](https://github.com/doxynix/doxynix/issues/1936)) ([adb2898](https://github.com/doxynix/doxynix/commit/adb2898c04126565976d7e15a3bef2ea292d4ab0))
+* **deps:** update dependency [@trigger](https://github.com/trigger).dev/react-hooks to v4.5.12 ([#2021](https://github.com/doxynix/doxynix/issues/2021)) ([a55fd2a](https://github.com/doxynix/doxynix/commit/a55fd2abcb32f3c74ba6539bfb21461d56601101))
+* **deps:** update dependency [@trigger](https://github.com/trigger).dev/sdk to v4.5.11 ([#1937](https://github.com/doxynix/doxynix/issues/1937)) ([67a59c6](https://github.com/doxynix/doxynix/commit/67a59c6f072609b29c7b5c4eb6cdc1068913827e))
+* **deps:** update dependency [@trigger](https://github.com/trigger).dev/sdk to v4.5.12 ([#2022](https://github.com/doxynix/doxynix/issues/2022)) ([d99f09f](https://github.com/doxynix/doxynix/commit/d99f09f9346adcc98bfeab39baf53334df4c588a))
+* **deps:** update dependency @ai-sdk/google to v3.0.105 ([#1891](https://github.com/doxynix/doxynix/issues/1891)) ([234b880](https://github.com/doxynix/doxynix/commit/234b880ab570488014ac5451564ac663c4f2c8ff))
+* **deps:** update dependency @ai-sdk/google to v3.0.106 ([#1899](https://github.com/doxynix/doxynix/issues/1899)) ([7ede586](https://github.com/doxynix/doxynix/commit/7ede5866c33f3f77a73239a6083601d8ff26d9cb))
+* **deps:** update dependency @ai-sdk/google to v3.0.107 ([#1908](https://github.com/doxynix/doxynix/issues/1908)) ([336fd0e](https://github.com/doxynix/doxynix/commit/336fd0e9c03a3276286be4a0c2e15480a428a2bd))
+* **deps:** update dependency @ai-sdk/google to v3.0.108 ([#1924](https://github.com/doxynix/doxynix/issues/1924)) ([e84298a](https://github.com/doxynix/doxynix/commit/e84298a8bddfe6a41b4380f90a62fd57c6cdcdd5))
+* **deps:** update dependency @ai-sdk/google to v3.0.109 ([#1946](https://github.com/doxynix/doxynix/issues/1946)) ([f00caeb](https://github.com/doxynix/doxynix/commit/f00caebdd6abfafa8ef275a1a352bc6ed77cf149))
+* **deps:** update dependency @ai-sdk/google to v3.0.110 ([#1954](https://github.com/doxynix/doxynix/issues/1954)) ([06ffb1c](https://github.com/doxynix/doxynix/commit/06ffb1cc02732c8305b6afcbd5540679273a8491))
+* **deps:** update dependency @ai-sdk/google to v3.0.111 ([#2024](https://github.com/doxynix/doxynix/issues/2024)) ([b7857b9](https://github.com/doxynix/doxynix/commit/b7857b9e34f7d73019b5acf8bac11f31dbc5aed2))
+* **deps:** update dependency @ai-sdk/groq to v3.0.57 ([#1892](https://github.com/doxynix/doxynix/issues/1892)) ([0465a15](https://github.com/doxynix/doxynix/commit/0465a15ca7c9ebb47413e9f5b742a35ebe9fb384))
+* **deps:** update dependency @ai-sdk/groq to v3.0.59 ([#1900](https://github.com/doxynix/doxynix/issues/1900)) ([d3931e3](https://github.com/doxynix/doxynix/commit/d3931e3ad541fe7c678411912c2f2250f9e07709))
+* **deps:** update dependency @ai-sdk/groq to v3.0.60 ([#1955](https://github.com/doxynix/doxynix/issues/1955)) ([c9be280](https://github.com/doxynix/doxynix/commit/c9be280fe25a988a4da86a66b758e9352de5bc2a))
+* **deps:** update dependency @ai-sdk/openai to v3.0.93 ([#1893](https://github.com/doxynix/doxynix/issues/1893)) ([2a4c3aa](https://github.com/doxynix/doxynix/commit/2a4c3aa5cc81b510ff23047b940f44e12294a322))
+* **deps:** update dependency @ai-sdk/openai to v3.0.94 ([#1909](https://github.com/doxynix/doxynix/issues/1909)) ([4e6d30f](https://github.com/doxynix/doxynix/commit/4e6d30f65b81072d24d0b1e24d5b6b27cf53385b))
+* **deps:** update dependency @ai-sdk/openai to v3.0.96 ([#1925](https://github.com/doxynix/doxynix/issues/1925)) ([aeb1b3e](https://github.com/doxynix/doxynix/commit/aeb1b3e4ce836868d3c0a730d1fc8ea5e39a7e29))
+* **deps:** update dependency @ai-sdk/openai to v3.0.97 ([#1956](https://github.com/doxynix/doxynix/issues/1956)) ([6ab89af](https://github.com/doxynix/doxynix/commit/6ab89afc388c664a8725b04c4ccffea1dc46237e))
+* **deps:** update dependency @ai-sdk/openai to v3.0.98 ([#2009](https://github.com/doxynix/doxynix/issues/2009)) ([7a4228d](https://github.com/doxynix/doxynix/commit/7a4228d2c63bc3a5e7029dffe78fe5a19cdb6373))
+* **deps:** update dependency @ai-sdk/openai to v3.0.99 ([#2025](https://github.com/doxynix/doxynix/issues/2025)) ([b57a01a](https://github.com/doxynix/doxynix/commit/b57a01ac95bd93d3f01f42279f141e86a7b59022))
+* **deps:** update dependency @ai-sdk/react to v3.0.249 ([#1894](https://github.com/doxynix/doxynix/issues/1894)) ([62d9592](https://github.com/doxynix/doxynix/commit/62d95925501b532572dd09d72792309cc9f570e5))
+* **deps:** update dependency @ai-sdk/react to v3.0.252 ([#1901](https://github.com/doxynix/doxynix/issues/1901)) ([ce5947a](https://github.com/doxynix/doxynix/commit/ce5947aefeaca3e996482ddda5cdb54aa29b1c0a))
+* **deps:** update dependency @ai-sdk/react to v3.0.256 ([#1926](https://github.com/doxynix/doxynix/issues/1926)) ([e2f5f0d](https://github.com/doxynix/doxynix/commit/e2f5f0d1330ad165c9c52ab9b0c7d35d52d84f61))
+* **deps:** update dependency @ai-sdk/react to v3.0.259 ([#1947](https://github.com/doxynix/doxynix/issues/1947)) ([20208e1](https://github.com/doxynix/doxynix/commit/20208e14a1ad72f90434b5d80e4cb0f7907cd03b))
+* **deps:** update dependency @ai-sdk/react to v3.0.260 ([#1987](https://github.com/doxynix/doxynix/issues/1987)) ([ea045ce](https://github.com/doxynix/doxynix/commit/ea045cefa05e99e08504f6eecb97cf1db7c75f31))
+* **deps:** update dependency @ai-sdk/react to v3.0.261 ([#1995](https://github.com/doxynix/doxynix/issues/1995)) ([e5ec049](https://github.com/doxynix/doxynix/commit/e5ec0498b7ec8f0b48c691fc3350a5b30eaf7af7))
+* **deps:** update dependency @ai-sdk/react to v3.0.262 ([#2010](https://github.com/doxynix/doxynix/issues/2010)) ([1b68371](https://github.com/doxynix/doxynix/commit/1b68371836a925c080e908f0c6abaeeb52d9903d))
+* **deps:** update dependency @ai-sdk/react to v3.0.264 ([#2026](https://github.com/doxynix/doxynix/issues/2026)) ([9576431](https://github.com/doxynix/doxynix/commit/9576431ff7b197a783cb818f144ca0819429c01f))
+* **deps:** update dependency @ai-sdk/react to v3.0.267 ([#2034](https://github.com/doxynix/doxynix/issues/2034)) ([f899139](https://github.com/doxynix/doxynix/commit/f899139c669374f499507929e6b2786e85d1f58e))
+* **deps:** update dependency @hookform/resolvers to v5.8.0 ([#1945](https://github.com/doxynix/doxynix/issues/1945)) ([03af800](https://github.com/doxynix/doxynix/commit/03af800ee643dd11896b63864cef19623c3742d1))
+* **deps:** update dependency @hookform/resolvers to v5.9.0 ([#1964](https://github.com/doxynix/doxynix/issues/1964)) ([24dc4c2](https://github.com/doxynix/doxynix/commit/24dc4c2fec94c1d68b3ef7e9869104cacdf77519))
+* **deps:** update dependency @hookform/resolvers to v5.9.1 ([#1974](https://github.com/doxynix/doxynix/issues/1974)) ([9e1cb9d](https://github.com/doxynix/doxynix/commit/9e1cb9d108b31cb23984fa565b267a15d234c872))
+* **deps:** update dependency @jscpd/tokenizer to v4.2.6 ([#1940](https://github.com/doxynix/doxynix/issues/1940)) ([92e9e82](https://github.com/doxynix/doxynix/commit/92e9e82ea72c277d20dab1474d12087aec6ddf10))
+* **deps:** update dependency @marsidev/react-turnstile to v1.6.0 ([#1904](https://github.com/doxynix/doxynix/issues/1904)) ([43e1a93](https://github.com/doxynix/doxynix/commit/43e1a93e69bc65136ff141c0cd007fe312dfaa55))
+* **deps:** update dependency @scalar/api-reference-react to v0.9.63 ([#1944](https://github.com/doxynix/doxynix/issues/1944)) ([cc52b7b](https://github.com/doxynix/doxynix/commit/cc52b7b7483f56b9f95619b9667781cc74af790c))
+* **deps:** update dependency @sentry/nextjs to v10.70.0 ([#1888](https://github.com/doxynix/doxynix/issues/1888)) ([07a812a](https://github.com/doxynix/doxynix/commit/07a812a3bf0009ad1d4d07fab2e5d1b2636085bb))
+* **deps:** update dependency @xyflow/react to v12.11.3 ([#1914](https://github.com/doxynix/doxynix/issues/1914)) ([ac39b73](https://github.com/doxynix/doxynix/commit/ac39b73da26a3557307a2005f11c14f6f54e271a))
+* **deps:** update dependency ably to v2.27.0 ([#1905](https://github.com/doxynix/doxynix/issues/1905)) ([3edfb35](https://github.com/doxynix/doxynix/commit/3edfb3575018744d550c41a839511dfdd7eeaa77))
+* **deps:** update dependency ai to v6.0.248 ([#1895](https://github.com/doxynix/doxynix/issues/1895)) ([c69eb27](https://github.com/doxynix/doxynix/commit/c69eb27953594dc492f1101d1aeaded07911951a))
+* **deps:** update dependency ai to v6.0.250 ([#1910](https://github.com/doxynix/doxynix/issues/1910)) ([dbe3850](https://github.com/doxynix/doxynix/commit/dbe38509838ef2f1c5a127aa9ef3cf96f00f65e5))
+* **deps:** update dependency ai to v6.0.253 ([#1927](https://github.com/doxynix/doxynix/issues/1927)) ([b4b2ab0](https://github.com/doxynix/doxynix/commit/b4b2ab0ed06ae76c34bb5d390846eaf3da507fff))
+* **deps:** update dependency ai to v6.0.255 ([#1948](https://github.com/doxynix/doxynix/issues/1948)) ([0d56fc9](https://github.com/doxynix/doxynix/commit/0d56fc9bb63a06c823ad0d23ad9cb873a602b713))
+* **deps:** update dependency ai to v6.0.256 ([#1957](https://github.com/doxynix/doxynix/issues/1957)) ([193cdbd](https://github.com/doxynix/doxynix/commit/193cdbd28444a2b34ac3bc81395a4631a445ca1d))
+* **deps:** update dependency ai to v6.0.257 ([#1988](https://github.com/doxynix/doxynix/issues/1988)) ([e86328e](https://github.com/doxynix/doxynix/commit/e86328ed01da5185eb667f306085c3504c4ced65))
+* **deps:** update dependency ai to v6.0.258 ([#1996](https://github.com/doxynix/doxynix/issues/1996)) ([6ad4846](https://github.com/doxynix/doxynix/commit/6ad48461e2d3363e8a9cc18ea7621e2005e0376b))
+* **deps:** update dependency ai to v6.0.259 ([#2011](https://github.com/doxynix/doxynix/issues/2011)) ([9706533](https://github.com/doxynix/doxynix/commit/97065336a3c37878f9b88adb39550d02edd9e6fd))
+* **deps:** update dependency ai to v6.0.261 ([#2027](https://github.com/doxynix/doxynix/issues/2027)) ([15e0765](https://github.com/doxynix/doxynix/commit/15e0765502349e4b40ed6a4e134e85c2ab4fc055))
+* **deps:** update dependency ai to v6.0.264 ([#2035](https://github.com/doxynix/doxynix/issues/2035)) ([3bc62e9](https://github.com/doxynix/doxynix/commit/3bc62e92940bb1b38b8e3fc062a74294c6763b07))
+* **deps:** update dependency es-toolkit to v1.51.0 ([#1972](https://github.com/doxynix/doxynix/issues/1972)) ([55d61dc](https://github.com/doxynix/doxynix/commit/55d61dc8d558bd0fa066a2bb61a30e710230a993))
+* **deps:** update dependency fast-xml-parser to v5.11.0 ([#1968](https://github.com/doxynix/doxynix/issues/1968)) ([41ed567](https://github.com/doxynix/doxynix/commit/41ed567e9fdd93f484f17ee0681947fda64f78db))
+* **deps:** update dependency html-react-parser to v6.1.7 ([#1941](https://github.com/doxynix/doxynix/issues/1941)) ([452eaee](https://github.com/doxynix/doxynix/commit/452eaee2f319565f441648d1bcad1ebbdfeb78e5))
+* **deps:** update dependency input-otp to v1.5.0 ([#1998](https://github.com/doxynix/doxynix/issues/1998)) ([320da0b](https://github.com/doxynix/doxynix/commit/320da0b2629825734c81fbd16315b5154abd8972))
+* **deps:** update dependency langsmith to v0.8.10 ([#1917](https://github.com/doxynix/doxynix/issues/1917)) ([bf69b56](https://github.com/doxynix/doxynix/commit/bf69b56ce08532d1f02e89478fbe25512e4bbc5a))
+* **deps:** update dependency langsmith to v0.8.11 ([#1958](https://github.com/doxynix/doxynix/issues/1958)) ([3a156ae](https://github.com/doxynix/doxynix/commit/3a156aeccec011c4a9cf056359bf30eee8c4fe3d))
+* **deps:** update dependency langsmith to v0.9.0 ([#2018](https://github.com/doxynix/doxynix/issues/2018)) ([f592dbb](https://github.com/doxynix/doxynix/commit/f592dbba93c0e0d58cba514fda5b5e6510cac611))
+* **deps:** update dependency lucide-react to v1.32.0 ([#2001](https://github.com/doxynix/doxynix/issues/2001)) ([68cc8a1](https://github.com/doxynix/doxynix/commit/68cc8a138d6ef8ea4a5094f938b6e72d5fcbbb2f))
+* **deps:** update dependency lucide-react to v1.33.0 ([#2006](https://github.com/doxynix/doxynix/issues/2006)) ([97f950c](https://github.com/doxynix/doxynix/commit/97f950c985ab13f54890d1c591e6972d9b5c7b38))
+* **deps:** update dependency marked to v18.0.10 ([#1984](https://github.com/doxynix/doxynix/issues/1984)) ([4bee701](https://github.com/doxynix/doxynix/commit/4bee701993ab824b6c0a72d02f7e5e0eb8c9fbf2))
+* **deps:** update dependency mermaid to v11.17.0 ([#2004](https://github.com/doxynix/doxynix/issues/2004)) ([7cd1fe7](https://github.com/doxynix/doxynix/commit/7cd1fe7449fd8262afe8a28540841ab32a148233))
+* **deps:** update dependency next-intl to v4.13.6 ([#1882](https://github.com/doxynix/doxynix/issues/1882)) ([3c90e5f](https://github.com/doxynix/doxynix/commit/3c90e5f09d679d7c124ea8d0931e820f30b13ee9))
+* **deps:** update dependency next-intl to v4.13.7 ([#1975](https://github.com/doxynix/doxynix/issues/1975)) ([8f146f1](https://github.com/doxynix/doxynix/commit/8f146f1a8f167e891ad832ede809a8d8f39880c0))
+* **deps:** update dependency nuqs to v2.10.0 ([#2036](https://github.com/doxynix/doxynix/issues/2036)) ([964e2b5](https://github.com/doxynix/doxynix/commit/964e2b5948919de597d1be9b08b0a72202060b31))
+* **deps:** update dependency nuqs to v2.9.6 ([#1976](https://github.com/doxynix/doxynix/issues/1976)) ([be5b0db](https://github.com/doxynix/doxynix/commit/be5b0dbb9548f0f664bf33e27f743dead3a06c54))
+* **deps:** update dependency posthog-js to v1.415.1 ([#1889](https://github.com/doxynix/doxynix/issues/1889)) ([5acf5c2](https://github.com/doxynix/doxynix/commit/5acf5c29bc9f635b2d2adbe8e29ce9258d5b0805))
+* **deps:** update dependency posthog-js to v1.415.4 ([#1903](https://github.com/doxynix/doxynix/issues/1903)) ([fe3624e](https://github.com/doxynix/doxynix/commit/fe3624edbd4d6f9f9a52122e162653dbbbf7b349))
+* **deps:** update dependency posthog-js to v1.415.6 ([#1911](https://github.com/doxynix/doxynix/issues/1911)) ([25737d1](https://github.com/doxynix/doxynix/commit/25737d1c35be268a30be0286d4f9ec0fa1b722a2))
+* **deps:** update dependency posthog-js to v1.415.7 ([#1915](https://github.com/doxynix/doxynix/issues/1915)) ([171204f](https://github.com/doxynix/doxynix/commit/171204fbda759fb86344f8565868798b137049d0))
+* **deps:** update dependency posthog-js to v1.416.0 ([#1919](https://github.com/doxynix/doxynix/issues/1919)) ([e2a2c38](https://github.com/doxynix/doxynix/commit/e2a2c388b431b027785e25143af2ba4ca1ace807))
+* **deps:** update dependency posthog-js to v1.416.1 ([#1939](https://github.com/doxynix/doxynix/issues/1939)) ([e332a6f](https://github.com/doxynix/doxynix/commit/e332a6f72469ca9f77761dcc0ac0d4a43b453205))
+* **deps:** update dependency posthog-js to v1.417.0 ([#1949](https://github.com/doxynix/doxynix/issues/1949)) ([a1e3a28](https://github.com/doxynix/doxynix/commit/a1e3a28e40dd8d84c0f03c50b4aaeb623070b146))
+* **deps:** update dependency posthog-js to v1.417.1 ([#1961](https://github.com/doxynix/doxynix/issues/1961)) ([6561928](https://github.com/doxynix/doxynix/commit/6561928506720f95266c95d880d08cd48a4d4f13))
+* **deps:** update dependency posthog-js to v1.417.2 ([#1978](https://github.com/doxynix/doxynix/issues/1978)) ([974f5cf](https://github.com/doxynix/doxynix/commit/974f5cf0261b26af3cf143d7682f6416fb92cf5c))
+* **deps:** update dependency posthog-js to v1.417.4 ([#1981](https://github.com/doxynix/doxynix/issues/1981)) ([ba7c1ac](https://github.com/doxynix/doxynix/commit/ba7c1ac827152e3282b2bf7bbdf393a9d827676a))
+* **deps:** update dependency posthog-js to v1.418.1 ([#2002](https://github.com/doxynix/doxynix/issues/2002)) ([742d82a](https://github.com/doxynix/doxynix/commit/742d82a72ebbb2b24b9451ad758f35be87ce8a93))
+* **deps:** update dependency posthog-js to v1.418.10 ([#2030](https://github.com/doxynix/doxynix/issues/2030)) ([d779bef](https://github.com/doxynix/doxynix/commit/d779bef64e9a16149dc5bb8b22b7c697a4acd9f0))
+* **deps:** update dependency posthog-js to v1.418.5 ([#2013](https://github.com/doxynix/doxynix/issues/2013)) ([f71ab3d](https://github.com/doxynix/doxynix/commit/f71ab3d70db97715221489b7a9ab58c2e520ae4e))
+* **deps:** update dependency posthog-js to v1.418.7 ([#2028](https://github.com/doxynix/doxynix/issues/2028)) ([3a75c95](https://github.com/doxynix/doxynix/commit/3a75c951410b7532f92d4ddd21798b0c7ede9b09))
+* **deps:** update dependency posthog-node to v5.48.2 ([#1920](https://github.com/doxynix/doxynix/issues/1920)) ([c154c4f](https://github.com/doxynix/doxynix/commit/c154c4f2bfa33ffbc1a919bc8e1c966b75a2f3dc))
+* **deps:** update dependency posthog-node to v5.49.1 ([#1950](https://github.com/doxynix/doxynix/issues/1950)) ([dc10323](https://github.com/doxynix/doxynix/commit/dc10323d9203d9ca5606c7c27dc05e2310c19e1d))
+* **deps:** update dependency posthog-node to v5.50.0 ([#2037](https://github.com/doxynix/doxynix/issues/2037)) ([d74fd09](https://github.com/doxynix/doxynix/commit/d74fd093e89143b1deb9e6b5f20b0a6a3fddb5d1))
+* **deps:** update dependency react-hook-form to v7.86.0 ([#2039](https://github.com/doxynix/doxynix/issues/2039)) ([445f390](https://github.com/doxynix/doxynix/commit/445f390018d2a34bfbe4014820dc42bbd5ff322b))
+* **deps:** update dependency react-resizable-panels to v4.12.3 ([#1970](https://github.com/doxynix/doxynix/issues/1970)) ([473cb3d](https://github.com/doxynix/doxynix/commit/473cb3dd4bc004a138912dc0299f5320c820b51e))
+* **deps:** update dependency resend to v6.19.0 ([#1918](https://github.com/doxynix/doxynix/issues/1918)) ([461d1b2](https://github.com/doxynix/doxynix/commit/461d1b24ba65e8ac937c2eaedd9b237c9123a5e6))
+* **deps:** update dependency resend to v6.20.0 ([#1965](https://github.com/doxynix/doxynix/issues/1965)) ([4d04ecf](https://github.com/doxynix/doxynix/commit/4d04ecf494f78b92d02dd10def51e89521c1bb4d))
+* **deps:** update dependency resend to v6.22.0 ([#2040](https://github.com/doxynix/doxynix/issues/2040)) ([624696e](https://github.com/doxynix/doxynix/commit/624696e07f274eb65a63e024d096f241a0154ea1))
+* **deps:** update dependency zustand to v5.0.15 ([#1930](https://github.com/doxynix/doxynix/issues/1930)) ([d86be4f](https://github.com/doxynix/doxynix/commit/d86be4f1d0c1a99e56747dbd19a2ab13420027fa))
+* **deps:** update nextjs monorepo to v16.3.1 ([#1966](https://github.com/doxynix/doxynix/issues/1966)) ([b53adb5](https://github.com/doxynix/doxynix/commit/b53adb51a0f38272a487c82a5ad27e39fb880b40))
+* **deps:** update nextjs monorepo to v16.3.2 ([#2031](https://github.com/doxynix/doxynix/issues/2031)) ([11bf2b4](https://github.com/doxynix/doxynix/commit/11bf2b4ebc942bba63b792c3655fb303bd4f934f))
+* **deps:** update octokit monorepo ([#1890](https://github.com/doxynix/doxynix/issues/1890)) ([378c660](https://github.com/doxynix/doxynix/commit/378c660eb09d95458290486ce4b0a4bdee4836d0))
+* **deps:** update octokit monorepo (major) ([#1923](https://github.com/doxynix/doxynix/issues/1923)) ([dfe7405](https://github.com/doxynix/doxynix/commit/dfe7405265067eb6a72c081fc9693f03351ebac4))
+* **deps:** update radix-ui-primitives monorepo ([#1883](https://github.com/doxynix/doxynix/issues/1883)) ([efc309a](https://github.com/doxynix/doxynix/commit/efc309a8ca502fe1e935feb4f85e82028cd96746))
+* **deps:** update react monorepo ([#1884](https://github.com/doxynix/doxynix/issues/1884)) ([6b603f3](https://github.com/doxynix/doxynix/commit/6b603f3a6f854ccff7cf2eb9061e535635a2cba8))
+* **deps:** update scalar monorepo ([#1886](https://github.com/doxynix/doxynix/issues/1886)) ([b8eb980](https://github.com/doxynix/doxynix/commit/b8eb98061c821e5949b50fd6568b73751c217397))
+* **deps:** update scalar monorepo ([#1934](https://github.com/doxynix/doxynix/issues/1934)) ([dd4bd10](https://github.com/doxynix/doxynix/commit/dd4bd103ce6e9318e249f6d0813f2c82496efe4f))
+* **deps:** update scalar monorepo ([#2032](https://github.com/doxynix/doxynix/issues/2032)) ([56eef68](https://github.com/doxynix/doxynix/commit/56eef680e2aa89569d58b3b453477dfec0f5ec30))
+* **deps:** update shiki monorepo to v4.4.3 ([#1921](https://github.com/doxynix/doxynix/issues/1921)) ([7b094c2](https://github.com/doxynix/doxynix/commit/7b094c2b2b52d7affc631bcb84b810e3d7c6b48d))
+* **web:** stabilize Next.js build and runtime configuration (DXNX-208) ([#2044](https://github.com/doxynix/doxynix/issues/2044)) ([391e81f](https://github.com/doxynix/doxynix/commit/391e81fb5d5e50a302ba6da751e79be6c1762356))
+
+
+### Code Refactoring
+
+* birth of the monorepo (DXNX-198) ([#1524](https://github.com/doxynix/doxynix/issues/1524)) ([b95df97](https://github.com/doxynix/doxynix/commit/b95df975c5860360e50fe1950deb822a9af507c3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/config bumped to 1.0.0
+
 ## [2.3.0](https://github.com/doxynix/doxynix/compare/v2.2.2...v2.3.0) (2026-06-04)
 
 ### Features
