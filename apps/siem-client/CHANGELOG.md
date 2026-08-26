@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/doxynix/doxynix/compare/siem-client-v0.1.0...siem-client-v0.1.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* **deps:** update tanstack-router monorepo ([#2047](https://github.com/doxynix/doxynix/issues/2047)) ([a01effb](https://github.com/doxynix/doxynix/commit/a01effb70485a7abc49dc9eab26e8911e19b1a67))
+
 ## [0.1.0](https://github.com/doxynix/doxynix/compare/siem-client-v0.0.1...siem-client-v0.1.0) (2026-08-25)
 
 
