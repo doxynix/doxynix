@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.0...doxynix-v4.0.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* **deps:** update tanstack-router monorepo ([#2047](https://github.com/doxynix/doxynix/issues/2047)) ([a01effb](https://github.com/doxynix/doxynix/commit/a01effb70485a7abc49dc9eab26e8911e19b1a67))
+
 ## [4.0.0](https://github.com/doxynix/doxynix/compare/doxynix-v3.1.0...doxynix-v4.0.0) (2026-08-25)
 
 
