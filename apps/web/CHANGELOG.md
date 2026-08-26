@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.1](https://github.com/doxynix/doxynix/compare/web-v3.0.0...web-v3.0.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* **build:** resolve circular symlink infinite loop (DXNX-209) ([#2050](https://github.com/doxynix/doxynix/issues/2050)) ([aad4761](https://github.com/doxynix/doxynix/commit/aad4761b66473593d4794451e84112e9181c285f))
+
 ## [3.0.0](https://github.com/doxynix/doxynix/compare/web-v2.3.0...web-v3.0.0) (2026-08-25)
 
 
