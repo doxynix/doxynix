@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.5](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.4...doxynix-v4.0.5) (2026-08-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency hono to v4.13.4 ([#2057](https://github.com/doxynix/doxynix/issues/2057)) ([efee9af](https://github.com/doxynix/doxynix/commit/efee9af40cd7053dd627a36117c29ace76bddfce))
+
 ## [4.0.4](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.3...doxynix-v4.0.4) (2026-08-27)
 
 
