@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.4](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.3...doxynix-v4.0.4) (2026-08-27)
+
+
+### Bug Fixes
+
+* **deps:** update tanstack-query monorepo to v5.102.2 ([#2055](https://github.com/doxynix/doxynix/issues/2055)) ([15e55e0](https://github.com/doxynix/doxynix/commit/15e55e0f53ce61bbdc0daf9a208390968fa6b0b9))
+
 ## [4.0.3](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.2...doxynix-v4.0.3) (2026-08-26)
 
 

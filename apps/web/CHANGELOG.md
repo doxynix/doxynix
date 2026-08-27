@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.3](https://github.com/doxynix/doxynix/compare/web-v3.0.2...web-v3.0.3) (2026-08-27)
+
+
+### Bug Fixes
+
+* **deps:** update tanstack-query monorepo to v5.102.2 ([#2055](https://github.com/doxynix/doxynix/issues/2055)) ([15e55e0](https://github.com/doxynix/doxynix/commit/15e55e0f53ce61bbdc0daf9a208390968fa6b0b9))
+
 ## [3.0.2](https://github.com/doxynix/doxynix/compare/web-v3.0.1...web-v3.0.2) (2026-08-26)
 
 
