@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.6](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.5...doxynix-v4.0.6) (2026-08-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mermaid to v11.17.1 ([#2058](https://github.com/doxynix/doxynix/issues/2058)) ([c604387](https://github.com/doxynix/doxynix/commit/c604387930dc79ee11ecbc960bc27e53522d7c3b))
+
 ## [4.0.5](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.4...doxynix-v4.0.5) (2026-08-27)
 
 
