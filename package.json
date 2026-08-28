@@ -32,7 +32,7 @@
     "@biomejs/biome": "2.5.10",
     "@secretlint/secretlint-rule-preset-recommend": "13.0.4",
     "@types/node": "26.1.2",
-    "cspell": "10.1.0",
+    "cspell": "10.1.1",
     "eslint-plugin-react-hooks": "7.1.1",
     "jscpd": "4.3.0",
     "knip": "6.32.2",
