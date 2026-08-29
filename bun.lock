@@ -8,7 +8,7 @@
         "@biomejs/biome": "2.5.10",
         "@cspell/dict-de-de": "4.1.2",
         "@cspell/dict-en-gb": "5.0.29",
-        "@cspell/dict-en_us": "4.4.35",
+        "@cspell/dict-en_us": "4.4.37",
         "@cspell/dict-es-es": "3.0.8",
         "@cspell/dict-fr-fr": "2.3.2",
         "@cspell/dict-pt-br": "2.4.2",
@@ -873,7 +873,7 @@
 
     "@cspell/dict-en-gb-mit": ["@cspell/dict-en-gb-mit@3.1.25", "", {}, "sha512-zGODptk24CMrXi49ieG2SUm94CKxEsVF0dYNF+1ZYH0MSsQDZ/PKDlrrbvtBqSupKdPSj0Z9sjOmMNfHHW9ZSg=="],
 
-    "@cspell/dict-en_us": ["@cspell/dict-en_us@4.4.35", "", {}, "sha512-xWpxBCc/FzzMMo/A+0qwARVaIIhR0Ql8yhhv4rvsvg+GfQF+LG9yzg2GwTM5N2rjvzmM3nKuR9zxFZq2I6fJSg=="],
+    "@cspell/dict-en_us": ["@cspell/dict-en_us@4.4.37", "", {}, "sha512-rMKyPrk2SKmDU+Bj0U0ixsv4Du93oijwovc8XlUin0zwKOJZb0/PFG5Df4P8CrM2CrLeovpaFvhoI98DigxBLw=="],
 
     "@cspell/dict-es-es": ["@cspell/dict-es-es@3.0.8", "", {}, "sha512-tj4zYKYWtAFc+JWtJo0DxLAve7I0UJM5+6we3hvLyzQlhGCBF41cTihPa/cbLHUkTD6PkrVGf1hgOKuSR9hkMQ=="],
 
