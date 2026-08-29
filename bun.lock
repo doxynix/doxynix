@@ -7,7 +7,7 @@
       "devDependencies": {
         "@biomejs/biome": "2.5.10",
         "@cspell/dict-de-de": "4.1.2",
-        "@cspell/dict-en-gb": "5.0.29",
+        "@cspell/dict-en-gb": "5.0.31",
         "@cspell/dict-en_us": "4.4.37",
         "@cspell/dict-es-es": "3.0.8",
         "@cspell/dict-fr-fr": "2.3.2",
@@ -869,7 +869,7 @@
 
     "@cspell/dict-en-common-misspellings": ["@cspell/dict-en-common-misspellings@2.2.0", "", {}, "sha512-5PmCHv+AhY0LVNo3bE1FdRKMmw1esKj83GPwLymnVPYNtlI2Jf6y27EjC0azg4zny5keWmku0GQiMf55Fi+qeA=="],
 
-    "@cspell/dict-en-gb": ["@cspell/dict-en-gb@5.0.29", "", {}, "sha512-r9gISbSufiJ1AVluQ2qROX6dBqF0sMSvOPWKKYsBKaaw5aBh0zy4+a6oVuXdaCgv7s79oizjHHc2BhiVaZ6nyw=="],
+    "@cspell/dict-en-gb": ["@cspell/dict-en-gb@5.0.31", "", {}, "sha512-ivVCyH3DVmDrwuQ436nhNHRWf9wM8qK6kygXBWJGKoFuXgKg90ppbJvLRsVY9JJlTzGB1Sd8owFp5RLFD9hPEA=="],
 
     "@cspell/dict-en-gb-mit": ["@cspell/dict-en-gb-mit@3.1.25", "", {}, "sha512-zGODptk24CMrXi49ieG2SUm94CKxEsVF0dYNF+1ZYH0MSsQDZ/PKDlrrbvtBqSupKdPSj0Z9sjOmMNfHHW9ZSg=="],
 
