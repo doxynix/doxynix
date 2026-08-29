@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "3.0.112",
-    "@ai-sdk/groq": "3.0.60",
+    "@ai-sdk/groq": "3.0.62",
     "@ai-sdk/openai": "3.0.99",
     "@ai-sdk/react": "3.0.267",
     "@better-auth/passkey": "1.6.30",
