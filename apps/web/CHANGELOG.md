@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.7](https://github.com/doxynix/doxynix/compare/web-v3.0.6...web-v3.0.7) (2026-08-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/google to v3.0.116 ([#2070](https://github.com/doxynix/doxynix/issues/2070)) ([b99f600](https://github.com/doxynix/doxynix/commit/b99f6006540d68af36bd9437e45450629be69f6c))
+
 ## [3.0.6](https://github.com/doxynix/doxynix/compare/web-v3.0.5...web-v3.0.6) (2026-08-29)
 
 
