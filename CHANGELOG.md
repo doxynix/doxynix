@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.9](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.8...doxynix-v4.0.9) (2026-08-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/google to v3.0.116 ([#2070](https://github.com/doxynix/doxynix/issues/2070)) ([b99f600](https://github.com/doxynix/doxynix/commit/b99f6006540d68af36bd9437e45450629be69f6c))
+
 ## [4.0.8](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.7...doxynix-v4.0.8) (2026-08-29)
 
 
