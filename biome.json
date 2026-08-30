@@ -1,5 +1,5 @@
 {
-  "$schema": "../.././node_modules/@biomejs/biome/configuration_schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
     "enabled": false
   },
@@ -8,12 +8,12 @@
       "**",
       "!!**/routeTree.gen.ts",
       "!!**/drizzle",
-      "!!dist",
-      "!!node_modules",
-      "!!.next",
-      "!!.trigger",
-      "!!coverage",
-      "!!report"
+      "!!**/dist",
+      "!!**/node_modules",
+      "!!**/.trigger",
+      "!!**/coverage",
+      "!!**/report",
+      "!!**/.next"
     ]
   },
   "formatter": {
@@ -54,5 +54,13 @@
         "organizeImports": "on"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["apps/web/**"],
+      "linter": {
+        "enabled": false
+      }
+    }
+  ]
 }

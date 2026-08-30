@@ -1,6 +1,0 @@
-{
-  "extends": ["@doxynix/config/biome.json"],
-  "linter": {
-    "enabled": false
-  }
-}

@@ -13,7 +13,6 @@
     "./nextjs.json": "./nextjs.json",
     "./node.json": "./node.json",
     "./hono.json": "./hono.json",
-    "./siem-client.json": "./siem-client.json",
-    "./biome.json": "./biome.json"
+    "./siem-client.json": "./siem-client.json"
   }
 }
