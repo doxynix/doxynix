@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.0](https://github.com/doxynix/doxynix/compare/siem-shared-v0.0.1...siem-shared-v0.1.0) (2026-08-25)
+## [0.1.0](https://github.com/doxynix/doxynix/compare/shared-v0.0.1...shared-v0.1.0) (2026-08-25)
 
 
 ### ⚠ BREAKING CHANGES

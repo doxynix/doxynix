@@ -16,7 +16,7 @@ export const GET = async () => {
         details: IS_PROD ? undefined : error instanceof Error ? error.message : String(error),
         error: "Failed to load generated OpenAPI spec",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };

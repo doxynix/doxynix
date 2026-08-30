@@ -108,7 +108,7 @@ export const RealtimeProvider = ({ children }: Props) => {
             label: "View",
             onClick: () => {
               router.push(
-                `/dashboard/repo/${payload.repoOwner}/${payload.repoName}/pull/${payload.prNumber}`
+                `/dashboard/repo/${payload.repoOwner}/${payload.repoName}/pull/${payload.prNumber}`,
               );
             },
           },
@@ -141,7 +141,7 @@ export const RealtimeProvider = ({ children }: Props) => {
             recentActivity: oldData.recentActivity.map((activity) =>
               activity.id === payload.analysisId
                 ? { ...activity, progress: payload.progress, status: payload.status }
-                : activity
+                : activity,
             ),
           };
         });

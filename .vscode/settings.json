@@ -3,7 +3,7 @@
   "eslint.workingDirectories": [{ "mode": "auto" }],
 
   "files.exclude": {
-   "**/.git": true,
+    "**/.git": true,
     "**/.bun": true,
     "**/node_modules": false,
     "**/dist": true,
@@ -31,6 +31,6 @@
     "siem-server",
     "siem-client",
     "cli",
-    "siem-shared"
+    "shared"
   ]
 }

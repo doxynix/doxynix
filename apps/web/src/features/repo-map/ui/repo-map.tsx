@@ -71,7 +71,7 @@ function enrichRepoMapNodes(
     highlightKey: FilterKey | null;
     hoveredNodeId: null | string;
     rawEdges: undefined | { source: string; target: string }[];
-  }
+  },
 ): Node<RepoMapNodeData>[] {
   const { data, highlightKey, hoveredNodeId, rawEdges } = options;
 
@@ -264,7 +264,7 @@ export function RepoMap({
                     "transition-standard flex flex-col gap-2",
                     hide
                       ? "pointer-events-none -translate-x-full opacity-0"
-                      : "translate-x-0 opacity-100"
+                      : "translate-x-0 opacity-100",
                   )}
                 >
                   <p className="text-muted-foreground flex items-center gap-1 text-xs">
@@ -280,13 +280,13 @@ export function RepoMap({
                           onClick={() => onFilterChange(activeFilter === key ? null : key)}
                           className={cn(
                             "bg-background justify-start gap-2 text-xs",
-                            activeFilter === key ? "text-foreground" : "text-muted-foreground"
+                            activeFilter === key ? "text-foreground" : "text-muted-foreground",
                           )}
                         >
                           <div className={cn("size-2 rounded-full", FILTER_CONFIG[key].color)} />
                           {FILTER_CONFIG[key].label}
                         </AppButton>
-                      )
+                      ),
                     )}
                   </div>
                   <RepoMapSearchPanel />
@@ -297,7 +297,7 @@ export function RepoMap({
                       "transition-standard transform",
                       hide
                         ? "pointer-events-none translate-x-full opacity-0"
-                        : "translate-x-0 opacity-100"
+                        : "translate-x-0 opacity-100",
                     )}
                   >
                     <ExportPanel filename="repo-map" />

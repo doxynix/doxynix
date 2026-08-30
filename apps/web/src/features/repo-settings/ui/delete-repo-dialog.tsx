@@ -26,7 +26,7 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
           setOpen(false);
           router.push(`/dashboard/repos`);
         },
-      }
+      },
     );
   };
 

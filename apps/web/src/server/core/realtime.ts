@@ -61,7 +61,7 @@ async function safePublish(
   channelName: string,
   event: string,
   data: unknown,
-  meta?: Record<string, unknown>
+  meta?: Record<string, unknown>,
 ): Promise<boolean> {
   try {
     await realtimeServer.channels.get(channelName).publish(event, data);

@@ -34,7 +34,7 @@ export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
                 "flex items-center gap-2 text-sm outline-hidden",
                 isActive
                   ? "after:bg-foreground after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {n.icon != null && <n.icon />}

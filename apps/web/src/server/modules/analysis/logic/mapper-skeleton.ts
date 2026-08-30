@@ -74,7 +74,7 @@ function buildEvidenceMaps(evidence: RepositoryEvidence, metrics: RepoMetrics) {
   const primaryEntrypointPaths = new Set(
     evidence.entrypoints
       .filter((entrypoint) => entrypoint.kind === "library" || entrypoint.kind === "runtime")
-      .map((entrypoint) => entrypoint.path)
+      .map((entrypoint) => entrypoint.path),
   );
 
   return {
@@ -89,7 +89,7 @@ function fileRoleHint(
   filePath: string,
   module: ModuleRef | undefined,
   isApiHeuristic: boolean,
-  isConfig: boolean
+  isConfig: boolean,
 ): string {
   if (isConfig) return "config";
   if (isApiHeuristic) return "api";
@@ -133,7 +133,7 @@ function pushUnique(items: string[], value: string, limit: number) {
 }
 
 function isResolvedInternalEdge(
-  edge: RepositoryEvidence["dependencyGraph"]["edges"][number]
+  edge: RepositoryEvidence["dependencyGraph"]["edges"][number],
 ): edge is RepositoryEvidence["dependencyGraph"]["edges"][number] & { toPath: string } {
   return edge.kind === "internal" && edge.resolved && edge.toPath != null;
 }
@@ -141,7 +141,7 @@ function isResolvedInternalEdge(
 function buildDependencyTopology(
   evidence: RepositoryEvidence,
   modulePaths: string[],
-  selectedFilePaths: Set<string>
+  selectedFilePaths: Set<string>,
 ) {
   const modulePathSet = new Set(modulePaths);
   const relevantPathSet = new Set([...modulePathSet, ...selectedFilePaths]);
@@ -161,7 +161,7 @@ function buildDependencyTopology(
       (left, right) =>
         right.score - left.score ||
         left.edge.fromPath.localeCompare(right.edge.fromPath) ||
-        left.edge.toPath.localeCompare(right.edge.toPath)
+        left.edge.toPath.localeCompare(right.edge.toPath),
     );
 
   const compactEdges: CompactInternalEdge[] = rankedEdges.slice(0, 120).map(({ edge }) => ({
@@ -170,7 +170,7 @@ function buildDependencyTopology(
   }));
 
   const adjacencyByPath = new Map<string, CompactModuleAdjacency>(
-    modulePaths.map((path) => [path, { in: [], out: [], p: path }])
+    modulePaths.map((path) => [path, { in: [], out: [], p: path }]),
   );
 
   for (const edge of internalEdges) {
@@ -184,7 +184,7 @@ function buildDependencyTopology(
   return {
     internalEdges: compactEdges,
     moduleAdjacency: [...adjacencyByPath.values()].filter(
-      (entry) => entry.in.length > 0 || entry.out.length > 0
+      (entry) => entry.in.length > 0 || entry.out.length > 0,
     ),
     omittedInternalEdges: Math.max(0, internalEdges.length - compactEdges.length),
   };
@@ -193,7 +193,7 @@ function buildDependencyTopology(
 export function buildMapperSkeleton(
   files: RepositoryModuleFile[],
   metrics: RepoMetrics,
-  evidence: RepositoryEvidence
+  evidence: RepositoryEvidence,
 ): string {
   const normalized = files.map((f) => ({
     content: f.content,
@@ -202,7 +202,7 @@ export function buildMapperSkeleton(
 
   const { apiSourcePaths, configPaths, moduleByPath, primaryEntrypointPaths } = buildEvidenceMaps(
     evidence,
-    metrics
+    metrics,
   );
 
   const scored = normalized.map((file) => {
@@ -284,7 +284,7 @@ export function buildMapperSkeleton(
         right.apiSurface - left.apiSurface ||
         right.routeCount - left.routeCount ||
         right.exports - left.exports ||
-        left.path.localeCompare(right.path)
+        left.path.localeCompare(right.path),
     )
     .slice(0, 36)
     .map((module) => ({
@@ -297,7 +297,7 @@ export function buildMapperSkeleton(
   const dependencyTopology = buildDependencyTopology(
     evidence,
     modules.map((module) => module.path),
-    new Set(picked.map((file) => file.p))
+    new Set(picked.map((file) => file.p)),
   );
 
   const payload = {

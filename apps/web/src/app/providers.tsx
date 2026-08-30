@@ -62,7 +62,7 @@ export function Providers({ children }: Readonly<Props>) {
           url: `${getBaseUrl()}${TRPC_PREFIX}`,
         }),
       ],
-    })
+    }),
   );
 
   return (

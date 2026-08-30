@@ -43,7 +43,7 @@ export const highlightCode = async (
   code: string,
   lang: string = "typescript",
   theme: "dark" | "light" = "dark",
-  cacheKey?: string
+  cacheKey?: string,
 ) => {
   const key = cacheKey ?? createHash("sha256").update(code).digest("hex").slice(0, 32);
 
@@ -53,6 +53,6 @@ export const highlightCode = async (
     {
       revalidate: false,
       tags: ["shiki"],
-    }
+    },
   )();
 };

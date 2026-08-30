@@ -95,7 +95,7 @@ export const analysisRepo = {
       findingType: string;
       line: number;
       riskLevel: number;
-    }>
+    }>,
   ) {
     return db.pullRequestComment.createMany({
       data: comments.map((c) => ({
@@ -118,7 +118,7 @@ export const analysisRepo = {
       prAnalysisId?: string;
       repoId: string;
       title: string;
-    }
+    },
   ) {
     return db.generatedFix.create({
       data: {
@@ -211,7 +211,7 @@ export const analysisRepo = {
   async getRepoBySha(
     db: DbClient,
     repoId: string,
-    commitSha: string
+    commitSha: string,
   ): Promise<null | RepoWithLatestAnalysisAndDocs> {
     return db.repo.findUnique({
       select: {
@@ -413,7 +413,7 @@ export const analysisRepo = {
     status: PRAnalysisStatus,
     // `findingsJson` can be a validated JSON payload; keep it untyped here to allow
     // passing different persisted shapes (validated via Zod where appropriate).
-    data?: { error?: string; findingsJson?: unknown; riskScore?: number }
+    data?: { error?: string; findingsJson?: unknown; riskScore?: number },
   ) {
     return db.pullRequestAnalysis.update({
       data: {
@@ -438,7 +438,7 @@ export const analysisRepo = {
       estimatedImpact?: number;
       githubPrNumber?: number;
       githubPrUrl?: string;
-    }
+    },
   ) {
     return db.generatedFix.update({
       data: {

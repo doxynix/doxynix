@@ -43,7 +43,7 @@ export type ScanAggregation = {
 
 function buildAnalysisCoverage(
   results: FileScanResult[],
-  totalFiles: number
+  totalFiles: number,
 ): RepoMetrics["analysisCoverage"] {
   const languagesByMode = {
     heuristic: new Set<string>(),
@@ -73,13 +73,13 @@ function buildAnalysisCoverage(
     heuristicFiles,
     languagesByMode: {
       heuristic: Array.from(languagesByMode.heuristic).sort((left, right) =>
-        left.localeCompare(right)
+        left.localeCompare(right),
       ),
       treeSitter: Array.from(languagesByMode.treeSitter).sort((left, right) =>
-        left.localeCompare(right)
+        left.localeCompare(right),
       ),
       typeScriptAst: Array.from(languagesByMode.typeScriptAst).sort((left, right) =>
-        left.localeCompare(right)
+        left.localeCompare(right),
       ),
     },
     parserCoveragePercent:

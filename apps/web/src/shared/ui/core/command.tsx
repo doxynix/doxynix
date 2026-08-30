@@ -22,7 +22,7 @@ const Command = forwardRef<
     ref={ref}
     className={cn(
       "bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-xl",
-      className
+      className,
     )}
     {...props}
   />
@@ -66,12 +66,12 @@ const CommandInput = forwardRef<ComponentRef<typeof CommandPrimitive.Input>, Com
         ref={ref}
         className={cn(
           "placeholder:text-muted-foreground flex h-10 w-full rounded-xl bg-transparent py-3 pr-8 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
-          className
+          className,
         )}
         {...props}
       />
     </div>
-  )
+  ),
 );
 
 CommandInput.displayName = CommandPrimitive.Input.displayName;
@@ -106,7 +106,7 @@ const CommandGroup = forwardRef<
     ref={ref}
     className={cn(
       "text-foreground **:[[cmdk-group-heading]]:text-muted-foreground overflow-hidden p-1 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-medium",
-      className
+      className,
     )}
     {...props}
   />
@@ -134,7 +134,7 @@ const CommandItem = forwardRef<
     ref={ref}
     className={cn(
       "transition-standard data-[selected=true]:border-border-accent data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-lg border-transparent px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-      className
+      className,
     )}
     {...props}
   />
@@ -147,7 +147,7 @@ const CommandShortcut = ({ className, ...props }: HTMLAttributes<HTMLSpanElement
     <kbd
       className={cn(
         "text-muted-foreground bg-surface-hover border-border ml-auto flex h-5 items-center rounded border px-1.5 text-xs tracking-widest",
-        className
+        className,
       )}
       {...props}
     />

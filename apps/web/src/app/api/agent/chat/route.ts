@@ -143,7 +143,7 @@ export async function POST(req: Request) {
             let rawUserText = "";
             if (firstUserMessage?.parts) {
               const firstTextPart = firstUserMessage.parts.find(
-                (p: { type: string }) => p.type === "text"
+                (p: { type: string }) => p.type === "text",
               ) as undefined | { text?: string };
               rawUserText = firstTextPart?.text ?? "";
             }

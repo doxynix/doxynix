@@ -77,7 +77,7 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
                     ? "text-destructive"
                     : riskScore > 4
                       ? "text-warning"
-                      : "text-success"
+                      : "text-success",
                 )}
               >
                 {riskScore}/10

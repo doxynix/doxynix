@@ -1,4 +1,4 @@
-import { authSchema } from "@doxynix/siem-shared";
+import { authSchema } from "@doxynix/shared";
 import { insertUserSchema } from "@server/core/db/schema";
 
 export const AdminAddUsersSchema = authSchema.extend({

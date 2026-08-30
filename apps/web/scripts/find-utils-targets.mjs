@@ -49,7 +49,7 @@ async function run() {
           filterTargets++;
           const line = node.getStartLineNumber();
           console.log(
-            `\x1b[31m[filter -> uniq]\x1b[0m ${filePath}:${line} - \x1b[2m${text.slice(0, 80)}...\x1b[0m`
+            `\x1b[31m[filter -> uniq]\x1b[0m ${filePath}:${line} - \x1b[2m${text.slice(0, 80)}...\x1b[0m`,
           );
         }
       }

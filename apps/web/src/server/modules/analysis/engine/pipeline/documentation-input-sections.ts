@@ -16,7 +16,7 @@ type DocumentationSections = DocumentationInputModel["sections"];
 
 function buildOverviewSection(
   evidence: RepositoryEvidence,
-  context: DocumentationContext
+  context: DocumentationContext,
 ): DocumentationInputModel["sections"]["overview"] {
   const body: OverviewSectionBody = {
     configFiles: evidence.configs.map((config) => config.path),
@@ -70,7 +70,7 @@ function buildOverviewSection(
 function buildArchitectureSection(
   evidence: RepositoryEvidence,
   metrics: RepoMetrics,
-  context: DocumentationContext
+  context: DocumentationContext,
 ): DocumentationInputModel["sections"]["architecture"] {
   const body = {
     dependencyCycles: evidence.dependencyCycles,
@@ -123,7 +123,7 @@ function buildArchitectureSection(
 
 function buildApiReferenceSection(
   evidence: RepositoryEvidence,
-  context: DocumentationContext
+  context: DocumentationContext,
 ): DocumentationInputModel["sections"]["api_reference"] {
   const apiEntrypoints = context.entrypoints
     .filter((entrypoint) => entrypoint.kind === "library" || entrypoint.kind === "runtime")
@@ -139,7 +139,7 @@ function buildApiReferenceSection(
           .filter((entrypoint) => entrypoint.kind === "library")
           .map((entrypoint) => entrypoint.path)
           .filter((path) => ProjectPolicy.isPrimaryApiSurface(path)),
-    48
+    48,
   );
 
   const hasConcreteRuntimeApi =
@@ -202,7 +202,7 @@ function buildApiReferenceSection(
 function buildOnboardingSection(
   evidence: RepositoryEvidence,
   apiReferenceSection: DocumentationInputModel["sections"]["api_reference"],
-  context: DocumentationContext
+  context: DocumentationContext,
 ): DocumentationInputModel["sections"]["onboarding"] {
   const firstLookPaths = uniquePaths(
     [
@@ -210,7 +210,7 @@ function buildOnboardingSection(
       ...context.architectureModules.slice(0, 6).map((module) => module.path),
       ...evidence.configs.slice(0, 4).map((config) => config.path),
     ],
-    12
+    12,
   );
 
   const body: OnboardingSectionBody = {
@@ -219,7 +219,7 @@ function buildOnboardingSection(
         ...context.routeInventory.sourceFiles,
         ...apiReferenceSection.body.publicSurfacePaths.slice(0, 8),
       ],
-      12
+      12,
     ),
     configPaths: evidence.configs.map((config) => config.path).slice(0, 12),
     firstLookPaths,
@@ -283,7 +283,7 @@ function buildOnboardingSection(
 }
 
 function buildRisksSection(
-  context: DocumentationContext
+  context: DocumentationContext,
 ): DocumentationInputModel["sections"]["risks"] {
   return buildSectionInput({
     audience: "tech-lead",
@@ -293,7 +293,7 @@ function buildRisksSection(
       Math.round(context.risksBody.derivedScores.overallRisk * 0.25) +
       (context.risksBody.findings.length > 0 ? 8 : 0),
     evidencePaths: context.risksBody.findings.flatMap((finding) =>
-      finding.evidence.map((item) => item.path)
+      finding.evidence.map((item) => item.path),
     ),
     section: "risks",
     summary: [
@@ -330,7 +330,7 @@ function buildRisksSection(
 export function buildDocumentationSections(
   evidence: RepositoryEvidence,
   metrics: RepoMetrics,
-  context: DocumentationContext
+  context: DocumentationContext,
 ): DocumentationSections {
   const overview = buildOverviewSection(evidence, context);
   const architecture = buildArchitectureSection(evidence, metrics, context);

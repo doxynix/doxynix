@@ -286,7 +286,7 @@ describe("shared/lib/utils:sanitizePayload", () => {
 
   it("should redact all sensitive fields on root level", () => {
     const input = Object.fromEntries(
-      SENSITIVE_FIELDS.map((field) => [field, `${field}_value`])
+      SENSITIVE_FIELDS.map((field) => [field, `${field}_value`]),
     ) as Record<(typeof SENSITIVE_FIELDS)[number], string>;
 
     const result = sanitizePayload(input) as Record<(typeof SENSITIVE_FIELDS)[number], string>;

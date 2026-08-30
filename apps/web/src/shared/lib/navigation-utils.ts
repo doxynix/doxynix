@@ -13,7 +13,7 @@ function standardize(segment?: string) {
 export function isRouteActive(
   pathname: string,
   href: null | string | undefined,
-  exact?: boolean
+  exact?: boolean,
 ): boolean {
   if (href == null) return false;
 

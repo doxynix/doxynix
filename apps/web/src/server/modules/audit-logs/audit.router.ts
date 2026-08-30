@@ -14,7 +14,7 @@ export const auditRouter = createTRPCRouter({
       z.object({
         cursor: z.string().nullish(),
         limit: z.number().min(1).max(100).default(20),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const { cursor, limit } = input;

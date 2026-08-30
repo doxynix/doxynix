@@ -1,0 +1,45 @@
+{
+  "name": "@doxynix/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./scoring": {
+      "types": "./src/scoring/scoring.ts",
+      "import": "./src/scoring/scoring.ts",
+      "default": "./src/scoring/scoring.ts"
+    },
+    "./siem": {
+      "types": "./src/siem/siem.types.ts",
+      "import": "./src/siem/siem.types.ts",
+      "default": "./src/siem/siem.types.ts"
+    },
+    "./pagination": {
+      "types": "./src/pagination/pagination.types.ts",
+      "import": "./src/pagination/pagination.types.ts",
+      "default": "./src/pagination/pagination.types.ts"
+    },
+    "./auth": {
+      "types": "./src/auth/auth.schema.ts",
+      "import": "./src/auth/auth.schema.ts",
+      "default": "./src/auth/auth.schema.ts"
+    }
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "format": "biome format --write .",
+    "type-check": "tsc -b"
+  },
+  "dependencies": {
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@doxynix/config": "workspace:*"
+  }
+}

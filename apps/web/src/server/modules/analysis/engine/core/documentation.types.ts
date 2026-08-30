@@ -17,7 +17,11 @@ import type {
 export type DocumentationAudience = "newcomer" | "tech-lead";
 
 export type DocumentationFocusSection =
-  "API/Reference" | "Architecture" | "Onboarding Map" | "Overview" | "Risks";
+  | "API/Reference"
+  | "Architecture"
+  | "Onboarding Map"
+  | "Overview"
+  | "Risks";
 
 export const REPORT_FOCUS_SECTIONS = [
   "Overview",
@@ -28,7 +32,11 @@ export const REPORT_FOCUS_SECTIONS = [
 ] as const satisfies readonly DocumentationFocusSection[];
 
 export type ReportSectionKind =
-  "api_reference" | "architecture" | "onboarding" | "overview" | "risks";
+  | "api_reference"
+  | "architecture"
+  | "onboarding"
+  | "overview"
+  | "risks";
 
 export type ReportSectionInput<TBody> = {
   audience: "mixed" | DocumentationAudience;

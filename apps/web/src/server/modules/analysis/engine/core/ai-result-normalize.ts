@@ -87,12 +87,12 @@ function normalizeDomainAnalysis(value: unknown) {
             logic_complexity: coerceEnum(
               ent.logic_complexity ?? ent.complexity,
               ["LOW", "MEDIUM", "HIGH"] as const,
-              "MEDIUM" as const
+              "MEDIUM" as const,
             ),
             name: asString(ent.name, "CoreEntity"),
             responsibility: asString(
               ent.responsibility ?? ent.description,
-              "Domain responsibility"
+              "Domain responsibility",
             ),
           };
         })
@@ -110,7 +110,7 @@ function normalizeRefactoringTargets(value: unknown) {
       return {
         description: asString(
           record.description ?? record.summary ?? record.issue,
-          `Refactoring target ${index + 1}`
+          `Refactoring target ${index + 1}`,
         ),
         file: asString(record.file ?? record.path ?? record.location, "unknown"),
         impact_on_health:
@@ -121,7 +121,7 @@ function normalizeRefactoringTargets(value: unknown) {
         priority: coerceEnum(
           record.priority,
           ["HIGH", "MEDIUM", "LOW"] as const,
-          "MEDIUM" as const
+          "MEDIUM" as const,
         ),
       };
     })
@@ -262,7 +262,7 @@ function normalizePerformanceAudit(value: unknown) {
     const record = asRecord(item);
     const issue = asString(
       record.issue ?? record.title ?? record.description,
-      `Performance issue ${index + 1}`
+      `Performance issue ${index + 1}`,
     );
     return {
       impact: asString(record.impact ?? record.risk, "Potential runtime or scalability impact."),
@@ -270,7 +270,7 @@ function normalizePerformanceAudit(value: unknown) {
       location: asString(record.location ?? record.file ?? record.path, "Repository"),
       optimization_strategy: asString(
         record.optimization_strategy ?? record.recommendation ?? record.suggestion,
-        "Inspect the hotspot and apply a targeted optimization."
+        "Inspect the hotspot and apply a targeted optimization.",
       ),
     };
   });
@@ -282,12 +282,12 @@ function normalizeTechDebtInventory(value: unknown) {
     return {
       description: asString(
         record.description ?? record.issue ?? record.summary,
-        `Technical debt item ${index + 1}`
+        `Technical debt item ${index + 1}`,
       ),
       remediation_effort: coerceEnum(
         record.remediation_effort ?? record.effort,
         EFFORT_LEVELS,
-        "MEDIUM"
+        "MEDIUM",
       ),
       type: coerceEnum(record.type ?? record.category, TECH_DEBT_TYPES, "CODE_SMELL"),
     };
@@ -300,14 +300,14 @@ function normalizeVulnerabilities(value: unknown) {
     return {
       description: asString(
         record.description ?? record.issue ?? record.title,
-        `Security finding ${index + 1}`
+        `Security finding ${index + 1}`,
       ),
       file: asString(record.file ?? record.path ?? record.location, "unknown"),
       lineHint: asString(record.lineHint ?? record.line) || undefined,
       risk: coerceRiskLevel(record.risk ?? record.severity),
       suggestion: asString(
         record.suggestion ?? record.recommendation,
-        "Review and remediate the finding."
+        "Review and remediate the finding.",
       ),
     };
   });
@@ -345,7 +345,7 @@ export function normalizeAiGenerationOutput(raw: unknown): AIResult {
     executive_summary: {
       architecture_style: asString(
         rawExecSummary?.architecture_style,
-        "Layered application architecture"
+        "Layered application architecture",
       ),
       key_innovations: asStringArray(rawExecSummary?.key_innovations),
       purpose: asString(rawExecSummary?.purpose, "Automated repository intelligence report"),
@@ -363,7 +363,7 @@ export function normalizeAiGenerationOutput(raw: unknown): AIResult {
       return {
         api_structure: asString(
           rawSections?.api_structure,
-          "API surface documented from static scan."
+          "API surface documented from static scan.",
         ),
         data_flow: asString(rawSections?.data_flow, "Data flow inferred from module boundaries."),
         infrastructure_and_scaling:

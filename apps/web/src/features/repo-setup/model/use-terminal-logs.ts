@@ -13,7 +13,7 @@ export interface LogEntry {
 export function useTerminalLogs(logs: string[]) {
   const [filter, setFilter] = useQueryState<TerminalFilter>(
     "logFilter",
-    parseAsStringLiteral(logLevels).withDefault("all")
+    parseAsStringLiteral(logLevels).withDefault("all"),
   );
 
   const [search] = useQueryState("search", { defaultValue: "" });

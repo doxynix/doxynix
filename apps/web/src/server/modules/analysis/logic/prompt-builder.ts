@@ -111,7 +111,7 @@ class PromptBuilder {
   withAntiFluff(): this {
     this.sections.set(
       "anti_fluff",
-      `# QUALITY STANDARDS\n${LanguageRules.antiFluff}\n\n${LanguageRules.exhaustiveDetail}`
+      `# QUALITY STANDARDS\n${LanguageRules.antiFluff}\n\n${LanguageRules.exhaustiveDetail}`,
     );
     return this;
   }
@@ -146,7 +146,7 @@ class PromptBuilder {
   withJsonSchema(schema: Record<string, unknown>): this {
     this.sections.set(
       "output",
-      `# OUTPUT_SCHEMA\nReturn ONLY a valid JSON object matching this structure. Fill arrays exhaustively:\n\`\`\`json\n${JSON.stringify(schema, null, 2)}\n\`\`\``
+      `# OUTPUT_SCHEMA\nReturn ONLY a valid JSON object matching this structure. Fill arrays exhaustively:\n\`\`\`json\n${JSON.stringify(schema, null, 2)}\n\`\`\``,
     );
     return this;
   }
@@ -158,7 +158,7 @@ class PromptBuilder {
     if (this.language && this.language.toLowerCase() !== "english") {
       this.sections.set(
         "language",
-        `# LANGUAGE CONFIGURATION\nOutput ALL markdown, texts, documentation, and technical notes strictly in **${this.language}**.`
+        `# LANGUAGE CONFIGURATION\nOutput ALL markdown, texts, documentation, and technical notes strictly in **${this.language}**.`,
       );
     }
     return this;

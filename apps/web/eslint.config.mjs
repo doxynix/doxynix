@@ -3,13 +3,11 @@ import tsParser from "@typescript-eslint/parser";
 import vitest from "@vitest/eslint-plugin";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
-import prettierConfig from "eslint-config-prettier";
 import boundaries from "eslint-plugin-boundaries";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import noBarrelFiles from "eslint-plugin-no-barrel-files";
 import perfectionist from "eslint-plugin-perfectionist";
 import playwright from "eslint-plugin-playwright";
-import prettierPlugin from "eslint-plugin-prettier";
 import reactPlugin from "eslint-plugin-react";
 import reactCompiler from "eslint-plugin-react-compiler";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
@@ -59,7 +57,6 @@ export default defineConfig([
       "react-compiler": reactCompiler,
       "@tanstack/query": tanstackQuery,
       boundaries: boundaries,
-      prettier: prettierPlugin,
       unicorn,
       perfectionist,
       "validate-jsx-nesting": validateJsxNesting,
@@ -120,8 +117,6 @@ export default defineConfig([
     },
 
     rules: {
-      "prettier/prettier": "off", // NOTE: нету особого смысла в нем так как он только подсвечивает ошибку а не фиксит
-
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
       "react-compiler/react-compiler": "error",
@@ -603,6 +598,4 @@ export default defineConfig([
       "playwright/require-soft-assertions": "warn",
     },
   },
-
-  prettierConfig,
 ]);

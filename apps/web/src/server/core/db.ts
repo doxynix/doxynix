@@ -81,7 +81,7 @@ function assertDmmfIsPopulated(dmmf: DmmfDatamodel): void {
   if (models == null || models.length === 0) {
     throw new Error(
       "[db] Prisma.dmmf is empty or stripped by the bundler. " +
-        "Field encryption cannot work without a valid DMMF — aborting startup to prevent unencrypted data leak."
+        "Field encryption cannot work without a valid DMMF — aborting startup to prevent unencrypted data leak.",
     );
   }
 }
@@ -185,7 +185,7 @@ function createPrismaInstance() {
   if (rawDmmf == null) {
     throw new Error(
       "[db] Prisma.dmmf is undefined. " +
-        "Field encryption cannot initialize — aborting startup to prevent unencrypted data leak."
+        "Field encryption cannot initialize — aborting startup to prevent unencrypted data leak.",
     );
   }
 
@@ -198,7 +198,7 @@ function createPrismaInstance() {
       decryptionKeys,
       dmmf: patchedDmmf as any,
       encryptionKey: PRISMA_FIELD_ENCRYPTION_KEY,
-    })
+    }),
   );
 
   return encryptedClient.$extends({
@@ -240,7 +240,7 @@ function createPrismaInstance() {
             const cleanPayload = sanitizePayload(args);
             const securedPayload = maskSensitiveFields(
               model,
-              cleanPayload
+              cleanPayload,
             ) as Prisma.InputJsonValue;
 
             const logAuditTask = async () => {

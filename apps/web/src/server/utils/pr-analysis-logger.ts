@@ -10,7 +10,7 @@ export const prAnalysisLogger = {
     repoId: number,
     prNumber: number,
     totalDuration: number,
-    findingsCount: number
+    findingsCount: number,
   ) => {
     baseLogger.info({
       findings: findingsCount,
@@ -88,7 +88,7 @@ export const prAnalysisLogger = {
     repoId: number,
     prNumber: number,
     findingsCount: number,
-    duration: number
+    duration: number,
   ) => {
     baseLogger.info({
       duration,

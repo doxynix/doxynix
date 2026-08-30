@@ -7,7 +7,7 @@ const child = spawn(
   ["--bun", "zenstack", "generate", "--schema", "prisma/schema.zmodel", "--offline"],
   {
     shell: true,
-  }
+  },
 );
 
 child.stdout.on("data", (data) => {

@@ -132,7 +132,7 @@ export default async function LocaleLayout({
           "flex min-h-dvh flex-col",
           fontSans.variable,
           fontMono.variable,
-          "antialiased"
+          "antialiased",
         )}
       >
         <A11yProvider>

@@ -40,20 +40,20 @@ export function CopyButton({
           !isCopied &&
             "text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100",
           isCopied && "text-success pointer-events-none opacity-100",
-          className
+          className,
         )}
       >
         <Copy
           className={cn(
             "transition-standard absolute size-3.5 duration-300",
-            isCopied ? "scale-0 opacity-0" : "scale-100 opacity-100"
+            isCopied ? "scale-0 opacity-0" : "scale-100 opacity-100",
           )}
         />
 
         <Check
           className={cn(
             "text-success transition-standard absolute size-3.5 duration-300",
-            isCopied ? "scale-100 opacity-100" : "scale-0 opacity-0"
+            isCopied ? "scale-100 opacity-100" : "scale-0 opacity-0",
           )}
         />
 

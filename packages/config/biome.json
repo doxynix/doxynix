@@ -1,16 +1,37 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "$schema": "../.././node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
     "enabled": false
   },
   "files": {
-    "includes": ["**", "!!**/routeTree.gen.ts", "!!**/drizzle", "!!dist", "!!node_modules", "!!apps/web"]
+    "includes": [
+      "**",
+      "!!**/routeTree.gen.ts",
+      "!!**/drizzle",
+      "!!dist",
+      "!!node_modules",
+      "!!.next",
+      "!!.trigger",
+      "!!coverage",
+      "!!report"
+    ]
   },
   "formatter": {
+    "enabled": true,
     "indentStyle": "space",
-    "lineWidth": 100
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "lineEnding": "lf"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
   },
   "linter": {
+    "enabled": true,
     "rules": {
       "preset": "recommended",
       "nursery": {

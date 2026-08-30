@@ -33,7 +33,7 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
         });
         return repo == null;
       }),
-      { numRuns: NUM_RUNS }
+      { numRuns: NUM_RUNS },
     );
   });
 
@@ -58,9 +58,9 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
           } catch {
             return true;
           }
-        }
+        },
       ),
-      { numRuns: NUM_RUNS }
+      { numRuns: NUM_RUNS },
     );
   });
 
@@ -82,7 +82,7 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
           return true;
         }
       }),
-      { numRuns: NUM_RUNS }
+      { numRuns: NUM_RUNS },
     );
   });
 });

@@ -114,7 +114,7 @@ export const userRouter = createTRPCRouter({
         },
         {
           isolationLevel: "Serializable",
-        }
+        },
       );
 
       return { success: true };

@@ -206,7 +206,7 @@ export const ProjectPolicy = {
   },
 
   getPrimarySemanticKind(
-    counts: Record<ProjectPolicySemanticKind, number>
+    counts: Record<ProjectPolicySemanticKind, number>,
   ): ProjectPolicySemanticKind {
     const entries = Object.entries(counts) as [ProjectPolicySemanticKind, number][];
     const sorted = orderBy(entries, [(entry) => entry[1], (entry) => entry[0]], ["desc", "asc"]);
@@ -215,7 +215,7 @@ export const ProjectPolicy = {
 
   getSemanticKinds(
     path: string,
-    options?: { apiPaths?: ReadonlySet<string> }
+    options?: { apiPaths?: ReadonlySet<string> },
   ): ProjectPolicySemanticKind[] {
     const normalized = normalize(path);
     const lower = normalize(path).toLowerCase();
@@ -285,7 +285,7 @@ export const ProjectPolicy = {
     return (
       categories.includes("runtime-source") &&
       !categories.some((category) =>
-        PROJECT_POLICY_RULES.categoryPolicy.nonArchitectureCategories.has(category)
+        PROJECT_POLICY_RULES.categoryPolicy.nonArchitectureCategories.has(category),
       )
     );
   },
@@ -327,7 +327,7 @@ export const ProjectPolicy = {
   isDependencyLockfile(path: string) {
     const lower = normalize(path).toLowerCase();
     return PROJECT_POLICY_RULES.fileHints.dependencyLockfiles.some(
-      (fileName) => lower === fileName || lower.endsWith(`/${fileName}`)
+      (fileName) => lower === fileName || lower.endsWith(`/${fileName}`),
     );
   },
 
@@ -398,7 +398,7 @@ export const ProjectPolicy = {
     if (/^prisma\/migrations\/[^/]+\/migration\.sql$/u.test(lower)) return true;
     if (
       PROJECT_POLICY_RULES.fileHints.lowSignalConfigNames.some(
-        (fileName) => lower === fileName || lower.endsWith(`/${fileName}`)
+        (fileName) => lower === fileName || lower.endsWith(`/${fileName}`),
       )
     ) {
       return true;
@@ -419,7 +419,7 @@ export const ProjectPolicy = {
     return (
       this.isArchitectureRelevantCategories(categories) &&
       !categories.some((category) =>
-        PROJECT_POLICY_RULES.categoryPolicy.secondaryEvidenceCategories.has(category)
+        PROJECT_POLICY_RULES.categoryPolicy.secondaryEvidenceCategories.has(category),
       )
     );
   },

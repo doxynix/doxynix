@@ -163,13 +163,13 @@ export function SecurityOverviewCard({
 }: Readonly<{
   onTriggerFix: (
     filePath: string,
-    finding: { line?: number; message?: string; suggestion?: string; type?: string }
+    finding: { line?: number; message?: string; suggestion?: string; type?: string },
   ) => void;
   runningFixId: null | string;
   security: NonNullable<RepoMetricsItem>["security"];
 }>) {
   const handleRunFix = (
-    vuln: NonNullable<RepoMetricsItem>["security"]["vulnerabilities"][number]
+    vuln: NonNullable<RepoMetricsItem>["security"]["vulnerabilities"][number],
   ) => {
     const parsedLineMatch = vuln.lineHint != null ? /\d+/.exec(vuln.lineHint) : null;
     const parsedLine =

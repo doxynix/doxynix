@@ -73,7 +73,7 @@ export function PricingSection() {
                 "relative flex flex-col rounded-2xl border p-8",
                 plan.popular
                   ? "border-foreground/50 bg-foreground/10"
-                  : "border-border bg-landing-bg-light/40"
+                  : "border-border bg-landing-bg-light/40",
               )}
             >
               {plan.popular && (
@@ -102,7 +102,7 @@ export function PricingSection() {
                 }
                 className={cn(
                   "mb-8 w-full cursor-pointer",
-                  plan.popular && "bg-foreground hover:bg-accent-foreground text-background"
+                  plan.popular && "bg-foreground hover:bg-accent-foreground text-background",
                 )}
               >
                 <Link href={plan.href}>{plan.cta}</Link>

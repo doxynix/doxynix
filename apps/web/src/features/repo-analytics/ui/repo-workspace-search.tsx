@@ -56,7 +56,7 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
     { aid: aid ?? undefined, repoId, search: trimmedSearch },
     {
       enabled: isQueryEnabled,
-    }
+    },
   );
 
   const getEmptyLabel = () => {
@@ -99,7 +99,7 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
                           name,
                           owner,
                           result,
-                        })
+                        }),
                       );
                     }}
                     className="h-auto items-start justify-start px-2 py-2 text-left"

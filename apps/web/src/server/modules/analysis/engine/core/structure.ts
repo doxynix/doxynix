@@ -39,14 +39,14 @@ function buildGraphPreviewEdges(evidence: RepositoryEvidence, limit = 96): Graph
       (left, right) =>
         right.weight - left.weight ||
         left.fromPath.localeCompare(right.fromPath) ||
-        left.toPath.localeCompare(right.toPath)
+        left.toPath.localeCompare(right.toPath),
     )
     .slice(0, limit);
 }
 
 function buildStructuralSignals(
   evidence: RepositoryEvidence,
-  dependencyHotspots: DependencyNodeMetric[]
+  dependencyHotspots: DependencyNodeMetric[],
 ): StructuralSignals {
   return {
     apiSurface: sumBy(evidence.modules, (m) => m.apiSurface),
@@ -59,7 +59,7 @@ function buildStructuralSignals(
     entrypoints: ProjectPolicy.filterPrimaryEntrypointPaths(
       evidence.entrypoints
         .filter((entrypoint) => entrypoint.kind === "runtime" || entrypoint.kind === "library")
-        .map((entrypoint) => entrypoint.path)
+        .map((entrypoint) => entrypoint.path),
     ),
     fileCategoryBreakdown: evidence.fileCategoryBreakdown,
     frameworkFacts: evidence.frameworkFacts,
@@ -80,12 +80,12 @@ function buildStructuralSignals(
 export async function collectStructuralSignals(
   files: RepositoryFile[],
   fileComplexities: FileComplexity[],
-  fileSignalsByPath: Map<string, FileSignals>
+  fileSignalsByPath: Map<string, FileSignals>,
 ): Promise<{ evidence: RepositoryEvidence; structuralSignals: StructuralSignals }> {
   const { dependencyHotspots, evidence } = await collectRepositoryEvidence(
     files,
     fileComplexities,
-    fileSignalsByPath
+    fileSignalsByPath,
   );
 
   const structuralResult = buildStructuralSignals(evidence, dependencyHotspots);
@@ -100,12 +100,12 @@ export function scoreStructuralModularity(params: {
 }): number {
   const cyclePenalty = Math.min(
     STRUCTURAL_MODULARITY_SCORING.cyclePenaltyMax,
-    params.dependencyCycles.length * STRUCTURAL_MODULARITY_SCORING.cycleMultiplier
+    params.dependencyCycles.length * STRUCTURAL_MODULARITY_SCORING.cycleMultiplier,
   );
 
   const orphanPenalty = Math.min(
     STRUCTURAL_MODULARITY_SCORING.orphanPenaltyMax,
-    params.orphanModules.length * STRUCTURAL_MODULARITY_SCORING.orphanMultiplier
+    params.orphanModules.length * STRUCTURAL_MODULARITY_SCORING.orphanMultiplier,
   );
 
   const rawMean = meanBy(params.dependencyHotspots, (h) => h.inbound);

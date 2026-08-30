@@ -24,7 +24,7 @@ function dedupeEntrypoints(entrypoints: EntrypointRef[]): EntrypointRef[] {
   }
 
   return Array.from(seen.values()).toSorted(
-    (left, right) => right.confidence - left.confidence || left.path.localeCompare(right.path)
+    (left, right) => right.confidence - left.confidence || left.path.localeCompare(right.path),
   );
 }
 
@@ -39,7 +39,7 @@ export function inferEntrypoints(params: {
   const normalizeHint = (
     hint: EntrypointRef,
     filePath: string,
-    categories: string[]
+    categories: string[],
   ): EntrypointRef => {
     if (hint.kind === "library" || hint.kind === "runtime") {
       if (ProjectPolicy.isPrimaryEntrypoint(hint.path)) {
@@ -64,7 +64,7 @@ export function inferEntrypoints(params: {
     const primaryKind = kindForFile(filePath, categories);
 
     entrypoints.push(
-      ...module.entrypointHints.map((hint) => normalizeHint(hint, filePath, categories))
+      ...module.entrypointHints.map((hint) => normalizeHint(hint, filePath, categories)),
     );
 
     if (
@@ -123,14 +123,14 @@ export function buildMainEntrypointPaths(entrypoints: EntrypointRef[]): Set<stri
     entrypoints
       .filter((entrypoint) => entrypoint.kind === "runtime" || entrypoint.kind === "library")
       .filter((entrypoint) => ProjectPolicy.isPrimaryEntrypoint(entrypoint.path))
-      .map((entrypoint) => entrypoint.path)
+      .map((entrypoint) => entrypoint.path),
   );
 }
 
 export function buildOrphanModules(
   modules: ModuleRef[],
   inboundByFile: Map<string, number>,
-  mainEntrypointPaths: Set<string>
+  mainEntrypointPaths: Set<string>,
 ): string[] {
   return modules
     .filter((module) => {
@@ -145,7 +145,7 @@ export function buildDependencyHotspots(
   modules: ModuleRef[],
   exportsByFile: Map<string, number>,
   inboundByFile: Map<string, number>,
-  graph: Map<string, Set<string>>
+  graph: Map<string, Set<string>>,
 ): DependencyNodeMetric[] {
   const mapped = modules
     .filter((module) => ProjectPolicy.isArchitectureRelevant(module.path))
@@ -173,7 +173,7 @@ export function buildHotspotSignals(
   modules: ModuleRef[],
   complexityByFile: Map<string, number>,
   inboundByFile: Map<string, number>,
-  graph: Map<string, Set<string>>
+  graph: Map<string, Set<string>>,
 ) {
   const mapped = modules
     .filter((module) => ProjectPolicy.isArchitectureRelevant(module.path))

@@ -41,7 +41,7 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
       { ...filters, search: debouncedSearch },
       {
         onSuccess: () => setOpen(false),
-      }
+      },
     );
   };
 

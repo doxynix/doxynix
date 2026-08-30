@@ -42,7 +42,7 @@ export function useNavigationHotkeys(onAction?: () => void) {
       setPrefix(pressedKey);
     },
     { enableOnFormTags: false, preventDefault: true },
-    [prefix]
+    [prefix],
   );
 
   useHotkeys(
@@ -72,6 +72,6 @@ export function useNavigationHotkeys(onAction?: () => void) {
       setPrefix(null);
     },
     { enabled: prefix != null, enableOnFormTags: false, preventDefault: true },
-    [prefix]
+    [prefix],
   );
 }

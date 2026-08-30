@@ -9,7 +9,7 @@ export const agentChatRouter = createTRPCRouter({
       z.object({
         repoId: z.uuid().optional().describe("Public repo UUID, if chat in project"),
         title: z.string().default("New Chat"),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const userId = Number(ctx.session.user.id);
@@ -70,7 +70,7 @@ export const agentChatRouter = createTRPCRouter({
             })
             .optional(),
         })
-        .optional()
+        .optional(),
     )
     .query(async ({ ctx, input }) => {
       const userId = Number(ctx.session.user.id);

@@ -52,7 +52,7 @@ export class DifferentialAnalyzer {
   async analyzePRDiff(
     diffInfo: PRDiffInfo,
     projectOverviewJson: string,
-    metadata: PRAnalysisMetadata
+    metadata: PRAnalysisMetadata,
   ): Promise<DifferentialAnalysisResult> {
     const startTime = Date.now();
     appLogger.info({
@@ -99,12 +99,12 @@ export class DifferentialAnalyzer {
         relevantFiles,
         projectOverviewJson,
         metadata,
-        diffInfo.prNumber
+        diffInfo.prNumber,
       );
 
       const allFindings = uniqBy(
         [...sentinelFindings, ...mapperFindings, ...aiFindings],
-        (f) => `${f.file}:${f.line}:${f.type}:${f.message.slice(0, 30)}`
+        (f) => `${f.file}:${f.line}:${f.type}:${f.message.slice(0, 30)}`,
       );
       const scoredFindings = this.applyFocusFilters(allFindings);
       const riskScore = this.calculateRiskScore(scoredFindings);
@@ -157,7 +157,7 @@ export class DifferentialAnalyzer {
     score: number,
     severity: PRFinding["severity"],
     suggestion: string,
-    type: PRFinding["type"] = "SECURITY"
+    type: PRFinding["type"] = "SECURITY",
   ): PRFinding {
     return {
       codeSnippet: content.trim(),
@@ -188,7 +188,7 @@ export class DifferentialAnalyzer {
     relevantFiles: PRDiffInfo["changedFiles"],
     projectOverviewJson: string,
     metadata: PRAnalysisMetadata,
-    prNumber: number
+    prNumber: number,
   ): Promise<{ findings: PRFinding[]; summary: string }> {
     try {
       const diffPayload = relevantFiles
@@ -216,7 +216,7 @@ export class DifferentialAnalyzer {
           "pr_review",
           metadata.userId,
           metadata.repoId,
-          metadata.branch
+          metadata.branch,
         ),
       });
 
@@ -267,7 +267,7 @@ export class DifferentialAnalyzer {
           } satisfies PRFinding;
         }
         return null;
-      })
+      }),
     );
     return findings;
   }
@@ -301,8 +301,8 @@ export class DifferentialAnalyzer {
                     title,
                     10,
                     "CRITICAL",
-                    "Немедленно удалите секрет из кода и отозовите его. Используйте Environment Variables или Secret Manager."
-                  )
+                    "Немедленно удалите секрет из кода и отозовите его. Используйте Environment Variables или Secret Manager.",
+                  ),
                 );
               }
             }
@@ -317,8 +317,8 @@ export class DifferentialAnalyzer {
                     title,
                     8,
                     "HIGH",
-                    "Использование небезопасных функций может привести к RCE или XSS. Используйте безопасные альтернативы (например, параметризацию)."
-                  )
+                    "Использование небезопасных функций может привести к RCE или XSS. Используйте безопасные альтернативы (например, параметризацию).",
+                  ),
                 );
               }
             }
@@ -333,8 +333,8 @@ export class DifferentialAnalyzer {
                     title,
                     9,
                     "HIGH",
-                    "Обнаружена потенциальная SQL-инъекция. Используйте ORM (Prisma/Drizzle) или Parameterized Queries."
-                  )
+                    "Обнаружена потенциальная SQL-инъекция. Используйте ORM (Prisma/Drizzle) или Parameterized Queries.",
+                  ),
                 );
               }
             }
@@ -350,8 +350,8 @@ export class DifferentialAnalyzer {
                     2,
                     "LOW",
                     "Завершите реализацию или удалите маркер перед мерджем.",
-                    "STYLE"
-                  )
+                    "STYLE",
+                  ),
                 );
               }
             }

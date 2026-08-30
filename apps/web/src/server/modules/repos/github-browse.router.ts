@@ -13,7 +13,7 @@ export const githubBrowseRouter = createTRPCRouter({
         ctx.prisma,
         Number(ctx.session.user.id),
         input.owner,
-        input.name
+        input.name,
       );
     }),
 
@@ -23,7 +23,7 @@ export const githubBrowseRouter = createTRPCRouter({
         branch: z.string().optional(),
         path: z.string(),
         repoId: z.uuid(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       return githubBrowseService.getFileContent(
@@ -32,7 +32,7 @@ export const githubBrowseRouter = createTRPCRouter({
         Number(ctx.session.user.id),
         input.repoId,
         input.path,
-        input.branch
+        input.branch,
       );
     }),
 
@@ -42,7 +42,7 @@ export const githubBrowseRouter = createTRPCRouter({
         branch: z.string().optional(),
         name: z.string(),
         owner: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       return githubBrowseService.getRepoFiles(
@@ -50,7 +50,7 @@ export const githubBrowseRouter = createTRPCRouter({
         Number(ctx.session.user.id),
         input.owner,
         input.name,
-        input.branch
+        input.branch,
       );
     }),
 

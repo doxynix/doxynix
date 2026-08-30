@@ -20,7 +20,7 @@ export function useLayoutHotkeys() {
       if (e.repeat) return;
       toggleSidebar();
     },
-    options
+    options,
   );
 
   useHotkeys(
@@ -29,6 +29,6 @@ export function useLayoutHotkeys() {
       if (e.repeat) return;
       toggleCommandMenu();
     },
-    options
+    options,
   );
 }

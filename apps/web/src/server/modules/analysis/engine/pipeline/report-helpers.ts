@@ -30,12 +30,12 @@ export function rankArchitectureModule(module: RankedModule): number {
 }
 
 export function sortArchitectureModules<TModule extends RankedModule>(
-  modules: TModule[]
+  modules: TModule[],
 ): TModule[] {
   return modules.toSorted(
     (left, right) =>
       rankArchitectureModule(right) - rankArchitectureModule(left) ||
-      left.path.localeCompare(right.path)
+      left.path.localeCompare(right.path),
   );
 }
 
@@ -45,7 +45,7 @@ function isPrimaryArchitectureModule(module: Pick<ModuleRef, "categories">): boo
 
 export function getPrimaryArchitectureModules(modules: ModuleRef[], limit = 24): ModuleRef[] {
   return sortArchitectureModules(
-    modules.filter((module) => isPrimaryArchitectureModule(module))
+    modules.filter((module) => isPrimaryArchitectureModule(module)),
   ).slice(0, limit);
 }
 
@@ -53,7 +53,7 @@ export function getPrimaryEntrypointPaths(entrypoints: EntrypointRef[]): string[
   return ProjectPolicy.filterPrimaryEntrypointPaths(
     entrypoints
       .filter((entrypoint) => entrypoint.kind === "library" || entrypoint.kind === "runtime")
-      .map((entrypoint) => entrypoint.path)
+      .map((entrypoint) => entrypoint.path),
   );
 }
 
@@ -68,7 +68,7 @@ export function inferRepositoryKind(params: {
   routeInventory: RouteInventory;
 }): "library" | "mixed" | "service" | "unknown" {
   const hasRuntimeEntrypoint = params.primaryEntrypoints.some(
-    (path) => !BARREL_FILE_REGEX.test(path)
+    (path) => !BARREL_FILE_REGEX.test(path),
   );
   const hasLibrarySurface = params.primaryEntrypoints.some((path) => BARREL_FILE_REGEX.test(path));
   const hasApiSurface = params.routeInventory.estimatedOperations > 0;
@@ -80,7 +80,7 @@ export function inferRepositoryKind(params: {
 }
 
 export function buildSectionInput<TBody>(
-  args: SectionBuilderArgs<TBody>
+  args: SectionBuilderArgs<TBody>,
 ): ReportSectionInput<TBody> {
   return {
     audience: args.audience,
@@ -110,6 +110,6 @@ export function buildReferenceEvidencePaths(params: {
 
   return uniquePaths(
     modulePaths.length > 0 ? modulePaths : (params.fallbackPaths ?? []),
-    params.limit
+    params.limit,
   );
 }

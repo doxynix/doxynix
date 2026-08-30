@@ -29,7 +29,8 @@ export function PasskeysList() {
     () =>
       typeof window !== "undefined" &&
       typeof window.PublicKeyCredential !== "undefined" &&
-      typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === "function"
+      typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable ===
+        "function",
   );
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [deviceName, setDeviceName] = useState("");

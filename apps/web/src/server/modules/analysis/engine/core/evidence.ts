@@ -28,7 +28,7 @@ import { ProjectPolicy } from "./project-policy";
 export async function collectRepositoryEvidence(
   files: RepositoryFile[],
   fileComplexities: FileComplexity[],
-  fileSignalsByPath: Map<string, FileSignals>
+  fileSignalsByPath: Map<string, FileSignals>,
 ) {
   const lookups = buildEvidenceLookups(files, fileComplexities);
   const assembly = createEvidenceAssembly();
@@ -41,7 +41,7 @@ export async function collectRepositoryEvidence(
       lookups,
       assembly.dependencyTracking,
       fileSignalsByPath,
-      resolveImportEdges
+      resolveImportEdges,
     );
 
     assembly.apiSurfaceByFile.set(file.path, collected.apiSurface);
@@ -67,7 +67,7 @@ export async function collectRepositoryEvidence(
   const orphanModules = buildOrphanModules(
     assembly.modules,
     assembly.dependencyTracking.inboundByFile,
-    mainEntrypointPaths
+    mainEntrypointPaths,
   );
 
   const dependencyCycles = findDependencyCycles(assembly.dependencyTracking.graph);
@@ -76,18 +76,18 @@ export async function collectRepositoryEvidence(
     assembly.modules,
     assembly.exportsByFile,
     assembly.dependencyTracking.inboundByFile,
-    assembly.dependencyTracking.graph
+    assembly.dependencyTracking.graph,
   );
 
   const hotspotSignals = buildHotspotSignals(
     assembly.modules,
     lookups.complexityByFile,
     assembly.dependencyTracking.inboundByFile,
-    assembly.dependencyTracking.graph
+    assembly.dependencyTracking.graph,
   );
 
   const frameworkFacts = selectRepositoryFrameworkFacts(
-    assembly.modules.flatMap((module) => module.frameworkHints)
+    assembly.modules.flatMap((module) => module.frameworkHints),
   );
 
   const publicSurface = assembly.symbols

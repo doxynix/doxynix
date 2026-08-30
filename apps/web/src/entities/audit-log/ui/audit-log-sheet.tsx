@@ -36,7 +36,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
 
   const { data: html, isLoading } = trpc.audit.getLogPayloadHtml.useQuery(
     { logId: log.id },
-    { enabled: open }
+    { enabled: open },
   );
 
   const handleExportJson = () => {
@@ -126,7 +126,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                       "[&_pre]:m-0! [&_pre]:bg-transparent! [&_pre]:p-0!",
                       "[&_pre]:break-all! [&_pre]:whitespace-pre-wrap!",
                       "[&_code]:break-all! [&_code]:whitespace-pre-wrap!",
-                      "[&_.line]:inline! [&_.line]:break-all! [&_.line]:whitespace-pre-wrap!"
+                      "[&_.line]:inline! [&_.line]:break-all! [&_.line]:whitespace-pre-wrap!",
                     )}
                   />
                 )}

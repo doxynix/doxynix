@@ -5,7 +5,7 @@ import type { RepoSearchResult } from "./repo.types";
 
 export function buildRepoDetailHref(
   basePath: string,
-  searchParams?: null | ReadonlyURLSearchParams | URLSearchParams
+  searchParams?: null | ReadonlyURLSearchParams | URLSearchParams,
 ) {
   if (searchParams == null) return basePath;
 
@@ -61,7 +61,7 @@ export function buildRepoMapHref(params: {
   owner: string;
 }) {
   const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(
-    params.name
+    params.name,
   )}/map`;
 
   return serializeRepoParams(base, {

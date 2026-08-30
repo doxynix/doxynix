@@ -51,7 +51,7 @@ export function Marquee({
           "flex-col": vertical,
           "flex-row": !vertical,
         },
-        className
+        className,
       )}
     >
       {Array(repeat)

@@ -88,7 +88,7 @@ export function buildSuggestedPathsForEntry(params: {
     ...(params.context.docInput?.sections?.onboarding?.body?.firstLookPaths ?? []).filter(
       (candidatePath) =>
         params.entry.paths.some((scopePath) => isPathInsideScope(candidatePath, scopePath)) &&
-        normalize(candidatePath) !== currentPath
+        normalize(candidatePath) !== currentPath,
     ),
     ...params.entry.entrypointDetails.map((item) => normalize(item.path)),
     ...params.entry.apiPaths,
@@ -155,7 +155,7 @@ export function buildNeighborBucketsForEntry(params: {
     apiNeighbors: excludePath(
       [...params.entry.apiPaths, ...params.entry.publicSurfacePaths],
       normalizedCurrentPath,
-      4
+      4,
     ),
     changeRiskNeighbors: excludePath(
       [
@@ -164,34 +164,34 @@ export function buildNeighborBucketsForEntry(params: {
         ...coupledNeighbors,
       ],
       normalizedCurrentPath,
-      4
+      4,
     ),
     configNeighbors: excludePath(params.entry.configPaths, normalizedCurrentPath, 4),
     coupledNeighbors: excludePath(
       [...coupledNeighbors, ...params.entry.graphNeighborPaths],
       normalizedCurrentPath,
-      4
+      4,
     ),
     entryFlowNeighbors: excludePath(
       [
         ...params.entry.entrypointDetails.map((item) => normalize(item.path)),
         ...params.relatedChildPaths.filter((candidatePath) =>
-          ProjectPolicy.isPrimaryEntrypoint(candidatePath)
+          ProjectPolicy.isPrimaryEntrypoint(candidatePath),
         ),
       ],
       normalizedCurrentPath,
-      4
+      4,
     ),
     entryNeighbors: excludePath(
       params.entry.entrypointDetails.map((item) => normalize(item.path)),
       normalizedCurrentPath,
-      4
+      4,
     ),
     graphNeighbors: excludePath(params.entry.graphNeighborPaths, normalizedCurrentPath, 4),
     publicSurfaceNeighbors: excludePath(
       [...params.entry.publicSurfacePaths, ...params.entry.apiPaths],
       normalizedCurrentPath,
-      4
+      4,
     ),
     relatedChildNeighbors: excludePath(params.relatedChildPaths, normalizedCurrentPath, 4),
     riskNeighbors: excludePath(
@@ -200,7 +200,7 @@ export function buildNeighborBucketsForEntry(params: {
         ...params.entry.dependencyHotspots.map((item) => normalize(item.path)),
       ],
       normalizedCurrentPath,
-      4
+      4,
     ),
   };
 }

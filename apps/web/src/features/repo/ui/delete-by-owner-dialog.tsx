@@ -26,7 +26,7 @@ export function DeleteByOwnerDialog({ owner }: Readonly<Props>) {
       { owner },
       {
         onSuccess: () => setOpen(false),
-      }
+      },
     );
   };
 

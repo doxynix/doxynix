@@ -1,8 +1,6 @@
 {
   "extends": "./base.json",
   "compilerOptions": {
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "noEmit": false,
     "declaration": true,
     "jsx": "react-jsx",

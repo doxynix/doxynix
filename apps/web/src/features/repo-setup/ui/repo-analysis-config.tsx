@@ -56,7 +56,7 @@ type Props = {
 export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
   const translationKeys = LOCALES.map(
-    (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const
+    (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const,
   );
 
   const isSelectionEmpty = state.selectedFilesCount === 0 || state.selectedDocs.length === 0;
@@ -119,7 +119,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                     "transition-standard relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3",
                     isSelected
                       ? "border-border-strong bg-surface-selected"
-                      : "border-border bg-card"
+                      : "border-border bg-card",
                   )}
                 >
                   <input
@@ -136,7 +136,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                         "flex size-8 items-center justify-center rounded-lg border",
                         isSelected
                           ? "bg-primary text-primary-foreground border-border-strong"
-                          : "bg-surface-hover text-muted-foreground border-border"
+                          : "bg-surface-hover text-muted-foreground border-border",
                       )}
                     >
                       <opt.icon />

@@ -17,7 +17,7 @@
     "build": "tsc",
     "with-doppler": "bun scripts/doppler.ts",
     "dev": "bun with-doppler -- bun run --watch src/index.ts",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc -b",
     "db:generate": "bun with-doppler drizzle-kit generate",
     "db:push": "bun with-doppler drizzle-kit push",
     "db:studio": "bun with-doppler drizzle-kit studio",
@@ -33,7 +33,7 @@
   "dependencies": {
     "@axiomhq/js": "1.8.0",
     "@better-auth/drizzle-adapter": "1.6.30",
-    "@doxynix/siem-shared": "workspace:*",
+    "@doxynix/shared": "workspace:*",
     "@hono/zod-validator": "0.9.0",
     "@js-temporal/polyfill": "0.5.1",
     "@t3-oss/env-core": "0.13.11",
@@ -48,7 +48,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "drizzle-kit": "0.31.10",
-    "@doxynix/config": "workspace:*"
+    "@doxynix/config": "workspace:*",
+    "drizzle-kit": "0.31.10"
   }
 }

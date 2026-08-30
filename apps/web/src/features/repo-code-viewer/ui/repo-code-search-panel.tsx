@@ -71,7 +71,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           replace: r,
           search: s,
           wholeWord: opts.wholeWord,
-        })
+        }),
       ),
     });
   };
@@ -117,7 +117,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
                 "transition-standard h-6 w-6 rounded-xl p-0",
                 options.caseSensitive
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "text-muted-foreground hover:bg-primary/90"
+                  : "text-muted-foreground hover:bg-primary/90",
               )}
             >
               <CaseSensitive className="size-3.5" />
@@ -129,7 +129,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
                 "transition-standard h-6 w-6 rounded-xl p-0",
                 options.wholeWord
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "text-muted-foreground hover:bg-primary/90"
+                  : "text-muted-foreground hover:bg-primary/90",
               )}
             >
               <WholeWord className="size-3.5" />
@@ -142,7 +142,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
                 "transition-standard h-6 w-6 rounded-xl p-0",
                 options.regexp
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "text-muted-foreground hover:bg-primary/90"
+                  : "text-muted-foreground hover:bg-primary/90",
               )}
             >
               <span className="text-[10px] leading-none font-bold">.*</span>

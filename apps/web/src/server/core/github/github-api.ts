@@ -38,7 +38,7 @@ async function getRepoDataOrAuthError(
   client: OctokitInstance,
   owner: string,
   name: string,
-  type: GitHubContextType
+  type: GitHubContextType,
 ) {
   const isPublicContext = type === "app" || type === "public";
 
@@ -124,13 +124,13 @@ export async function getMyRepos(prisma: DbClient, userId: number): Promise<Repo
     if (installations.length === 0 && oauthAccounts.length === 0) return [];
 
     const installationTasks = installations.map((installation) =>
-      fetchInstallationRepos(Number(installation.id))
+      fetchInstallationRepos(Number(installation.id)),
     );
     const oauthTasks = oauthAccounts.map((account) => fetchOauthRepos(account));
 
     const results = await Promise.allSettled([...installationTasks, ...oauthTasks]);
     const allRepos = results.flatMap((result) =>
-      result.status === "fulfilled" ? result.value : []
+      result.status === "fulfilled" ? result.value : [],
     );
 
     // Deduplicate by fullName
@@ -151,7 +151,7 @@ export async function searchRepos(
   prisma: DbClient,
   userId: number,
   query: string,
-  limit: number | undefined
+  limit: number | undefined,
 ): Promise<RepoItemFields[]> {
   if (query.length < 2 || query.length > 256) return [];
 
@@ -208,7 +208,7 @@ export async function getRepoBranches(
   prisma: DbClient,
   userId: number,
   owner: string,
-  name: string
+  name: string,
 ) {
   const context = await resolveClientContext(prisma, userId, {
     allowPublicFallback: true,
@@ -242,7 +242,7 @@ export async function getRepoTree(
   userId: number,
   owner: string,
   name: string,
-  branch?: string
+  branch?: string,
 ) {
   const context = await resolveClientContext(prisma, userId, {
     allowPublicFallback: true,
@@ -274,7 +274,7 @@ export async function getRepoTree(
             return !ProjectPolicy.isIgnored(item.path);
           })
           .map((item) => ({ path: item.path, sha: item.sha, type: item.type }));
-      }
+      },
     );
   } catch (error) {
     if (isOctokitError(error)) {
@@ -307,7 +307,7 @@ export async function getFileContent(
   owner: string,
   name: string,
   path: string,
-  branch?: string
+  branch?: string,
 ): Promise<GitHubFileResponse> {
   const context = await resolveClientContext(prisma, userId, {
     allowPublicFallback: true,
@@ -349,7 +349,7 @@ export async function executeWithFallback<T>(
   userId: number,
   initialOctokit: OctokitInstance,
   initialType: GitHubContextType,
-  operation: (client: OctokitInstance) => Promise<T>
+  operation: (client: OctokitInstance) => Promise<T>,
 ): Promise<T> {
   try {
     return await operation(initialOctokit);
@@ -397,7 +397,7 @@ type BusFactorResult = {
 export async function calculateBusFactor(
   repo: Repo,
   userId: number,
-  prisma: DbClient
+  prisma: DbClient,
 ): Promise<BusFactorResult> {
   taskLogger.info("GitHub: Analyzing contributor history to calculate Bus Factor...");
 
@@ -430,14 +430,14 @@ export async function calculateBusFactor(
           { owner: repo.owner, per_page: 100, repo: repo.name },
           (
             response: Awaited<ReturnType<OctokitInstance["rest"]["repos"]["listContributors"]>>,
-            done: () => void
+            done: () => void,
           ) => {
             fetchedContributors += response.data.length;
             if (fetchedContributors >= 500) done();
             return response.data;
-          }
+          },
         );
-      }
+      },
     );
 
     taskLogger.info(`GitHub: Successfully retrieved ${contributors.length} active contributors`);
@@ -473,7 +473,7 @@ export async function calculateBusFactor(
     taskLogger.success(
       `GitHub: Bus Factor is ${busFactor}. Knowledge is ${
         busFactor > 2 ? "distributed across the team" : "concentrated in few key people"
-      }.`
+      }.`,
     );
 
     return {
@@ -499,7 +499,7 @@ export async function calculateBusFactor(
     // Public repo: log and return default
     if (isMissingAuth || isRetryableGithubStatus(status)) {
       taskLogger.warn(
-        "GitHub: Bus Factor calculation failed (likely due to API limits). Defaulting to 0."
+        "GitHub: Bus Factor calculation failed (likely due to API limits). Defaulting to 0.",
       );
 
       appLogger.warn({

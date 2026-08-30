@@ -32,7 +32,7 @@ const ResizableHandle = ({
       "data-[orientation=vertical]:h-px data-[orientation=vertical]:w-full",
       "data-[orientation=vertical]:after:left-0 data-[orientation=vertical]:after:h-10 data-[orientation=vertical]:after:w-full data-[orientation=vertical]:after:-translate-y-1/2",
       "cursor-col-resize data-[orientation=vertical]:cursor-row-resize",
-      className
+      className,
     )}
     {...props}
   >

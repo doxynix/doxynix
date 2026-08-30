@@ -14,7 +14,7 @@ const PRIVATE_REPO_AUTH_MESSAGE =
 
 function assertPrivateRepoAccess(
   repo: Repo,
-  clientType: "app" | "installation" | "oauth" | "public"
+  clientType: "app" | "installation" | "oauth" | "public",
 ) {
   if (repo.visibility === "PRIVATE" && (clientType === "app" || clientType === "public")) {
     throw new Error(PRIVATE_REPO_AUTH_MESSAGE);
@@ -40,7 +40,7 @@ async function resolveAuthToken(client: {
 export async function getAnalysisContext(
   analysisId: string,
   userId: number,
-  forceRefresh?: boolean
+  forceRefresh?: boolean,
 ) {
   taskLogger.info(`GitHub: Accessing database...`);
 
@@ -105,7 +105,7 @@ export async function getAnalysisContext(
 
       const resolvedToken = await resolveAuthToken(client);
       return { currentSha: refData.object.sha, token: resolvedToken };
-    }
+    },
   );
 
   if (repo.visibility === "PRIVATE" && token == null) {
@@ -127,7 +127,7 @@ export async function cloneRepository(
   repo: Repo,
   token: null | string | undefined,
   targetPath: string,
-  selectedBranch?: string
+  selectedBranch?: string,
 ) {
   const branchToClone = selectedBranch ?? repo.defaultBranch;
 

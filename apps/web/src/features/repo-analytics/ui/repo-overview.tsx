@@ -81,7 +81,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
           score: 0,
           targetView: "map",
         },
-      })
+      }),
     );
   };
 
@@ -103,7 +103,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
           score: 0,
           targetView: "code",
         },
-      })
+      }),
     );
   };
 
@@ -293,7 +293,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                 tooltip={m.tooltip}
                 className={cn(
                   "text-muted-foreground hover:text-foreground text-xs transition-colors",
-                  m.className
+                  m.className,
                 )}
               />
             ))}

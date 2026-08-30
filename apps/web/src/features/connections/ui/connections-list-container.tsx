@@ -19,7 +19,7 @@ export function ConnectionsListContainer() {
     {},
     {
       enabled: false,
-    }
+    },
   );
 
   const handleInstall = async () => {

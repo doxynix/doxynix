@@ -9,7 +9,7 @@ export function collectScopedEntrySignals(
   context: {
     aiResult: AIResult;
     metrics: RepoMetrics;
-  }
+  },
 ) {
   const normalizedPaths = uniq(paths.map((path) => normalize(path)));
   const pathSet = new Set(normalizedPaths);
@@ -17,7 +17,7 @@ export function collectScopedEntrySignals(
   const frameworkNames = uniq(
     (context.metrics.frameworkFacts ?? [])
       .filter((fact) => fact.sources.some((source) => pathSet.has(normalize(source))))
-      .map((fact) => fact.name)
+      .map((fact) => fact.name),
   ).slice(0, 5);
 
   const hotspotSignals = [...(context.metrics.hotspotSignals ?? [])]
@@ -32,12 +32,14 @@ export function collectScopedEntrySignals(
         right.inbound +
         right.outbound +
         right.exports -
-        (left.inbound + left.outbound + left.exports)
+        (left.inbound + left.outbound + left.exports),
     )
     .slice(0, 4);
 
   const orphanPaths = uniq(
-    context.metrics.orphanModules.map((path) => normalize(path)).filter((path) => pathSet.has(path))
+    context.metrics.orphanModules
+      .map((path) => normalize(path))
+      .filter((path) => pathSet.has(path)),
   ).slice(0, 4);
 
   const graphUnresolvedSamples = (context.metrics.graphReliability?.unresolvedSamples ?? [])
@@ -54,19 +56,19 @@ export function collectScopedEntrySignals(
         if (pathSet.has(toPath) && !pathSet.has(fromPath)) return [fromPath];
         return [];
       })
-      .filter((path) => !pathSet.has(path))
+      .filter((path) => !pathSet.has(path)),
   ).slice(0, 8);
 
   const factTitles = uniq(
     (context.aiResult.repository_facts ?? [])
       .filter((fact) => fact.evidence.some((item) => pathSet.has(normalize(item.path))))
-      .map((fact) => fact.title)
+      .map((fact) => fact.title),
   ).slice(0, 5);
 
   return {
     changeCoupling: [...(context.metrics.changeCoupling ?? [])]
       .filter(
-        (pair) => pathSet.has(normalize(pair.fromPath)) || pathSet.has(normalize(pair.toPath))
+        (pair) => pathSet.has(normalize(pair.fromPath)) || pathSet.has(normalize(pair.toPath)),
       )
       .sort((left, right) => right.commits - left.commits)
       .slice(0, 4),
@@ -88,15 +90,15 @@ export function collectScopedSignals(
   paths: string[],
   context: {
     aiResult: AIResult;
-  }
+  },
 ) {
   const pathSet = new Set(paths.map((path) => normalize(path)));
 
   const matchingFacts = (context.aiResult.repository_facts ?? []).filter((fact) =>
-    fact.evidence.some((item) => pathSet.has(normalize(item.path)))
+    fact.evidence.some((item) => pathSet.has(normalize(item.path))),
   );
   const matchingFindings = (context.aiResult.findings ?? []).filter((finding) =>
-    finding.evidence.some((item) => pathSet.has(normalize(item.path)))
+    finding.evidence.some((item) => pathSet.has(normalize(item.path))),
   );
 
   return {

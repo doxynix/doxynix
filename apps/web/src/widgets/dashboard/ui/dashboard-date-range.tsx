@@ -113,7 +113,7 @@ export function DashboardDatePeriod() {
                   className={cn(
                     "flex w-full items-center justify-between",
                     urlState.period === p.period &&
-                      "bg-primary text-primary-foreground hover:bg-primary/90"
+                      "bg-primary text-primary-foreground hover:bg-primary/90",
                   )}
                 >
                   {p.label}

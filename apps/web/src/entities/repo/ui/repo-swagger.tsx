@@ -36,7 +36,7 @@ export function RepoSwagger({ spec }: Readonly<{ spec: string }>) {
       <div
         className={cn(
           "repo-swagger-shell bg-background border-border h-full min-h-0 overflow-x-hidden overflow-y-auto rounded-xl border",
-          resolvedTheme === "dark" ? "dark-mode" : "light-mode"
+          resolvedTheme === "dark" ? "dark-mode" : "light-mode",
         )}
       >
         <ApiReferenceReact configuration={config} />

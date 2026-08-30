@@ -37,10 +37,10 @@ const getCommonConfig = () => ({
       retryAfter: number,
       options: RequestOptions,
       octokit: any,
-      retryCount: number
+      retryCount: number,
     ) => {
       octokit.log.warn(
-        `Rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s. (Attempt ${retryCount})`
+        `Rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s. (Attempt ${retryCount})`,
       );
       return retryCount < 2;
     },
@@ -49,10 +49,10 @@ const getCommonConfig = () => ({
       retryAfter: number,
       options: RequestOptions,
       octokit: any,
-      retryCount = 0
+      retryCount = 0,
     ) => {
       octokit.log.warn(
-        `Secondary rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s. (Attempt ${retryCount})`
+        `Secondary rate limit hit: ${options.method} ${options.url}. Retrying after ${retryAfter}s. (Attempt ${retryCount})`,
       );
       return retryCount < 2;
     },
@@ -83,7 +83,7 @@ export function getPublicClient(token?: string): OctokitInstance {
 export class GitHubAuthRequiredError extends Error {
   constructor() {
     super(
-      "No valid GitHub authorization found. Please connect your GitHub account or install the app."
+      "No valid GitHub authorization found. Please connect your GitHub account or install the app.",
     );
     this.name = "GitHubAuthRequiredError";
   }
@@ -112,7 +112,7 @@ type ClientContextOptions = {
 export async function getClientContext(
   prisma: DbClient,
   userId: number,
-  owner?: string
+  owner?: string,
 ): Promise<GitHubClientContext> {
   // Try specific installation for owner
   if (owner != null) {
@@ -168,7 +168,7 @@ export async function getClientContext(
 export async function resolveClientContext(
   prisma: DbClient,
   userId: number,
-  options?: ClientContextOptions
+  options?: ClientContextOptions,
 ): Promise<GitHubClientContext> {
   try {
     return await getClientContext(prisma, userId, options?.owner);

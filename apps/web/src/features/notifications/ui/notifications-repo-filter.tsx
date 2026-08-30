@@ -31,7 +31,7 @@ export function NotificationsRepoFilter() {
     {},
     {
       enabled: open || (filters.owner != null && filters.repo != null),
-    }
+    },
   );
 
   const handleRepoSelect = (r: null | { name: string; owner: string }) => {
@@ -44,7 +44,7 @@ export function NotificationsRepoFilter() {
   };
 
   const selectedRepo = repos?.items.find(
-    (r) => r.owner === filters.owner && r.name === filters.repo
+    (r) => r.owner === filters.owner && r.name === filters.repo,
   );
 
   const label =
@@ -114,7 +114,7 @@ export function NotificationsRepoFilter() {
                         "mr-2",
                         filters.repo === r.name && filters.owner === r.owner
                           ? "opacity-100"
-                          : "opacity-0"
+                          : "opacity-0",
                       )}
                     />
                     <span className="truncate">

@@ -31,7 +31,7 @@ export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNode
       onClick={handleClick}
       className={cn(
         "hover:bg-surface-hover text-muted-foreground flex h-7 w-full cursor-pointer items-center justify-start rounded-xl transition-colors outline-none",
-        isActive && "bg-surface-selected hover:bg-surface-selected text-foreground"
+        isActive && "bg-surface-selected hover:bg-surface-selected text-foreground",
       )}
       style={style}
     >

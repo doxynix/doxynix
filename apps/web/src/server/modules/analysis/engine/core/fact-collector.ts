@@ -82,7 +82,7 @@ export class FactCollector {
         collector.parseManifestJsonDependencies(
           file.content,
           ["require", "require-dev"],
-          file.path
+          file.path,
         ),
     },
     {
@@ -110,7 +110,7 @@ export class FactCollector {
           file.content,
           /^[\t ]*([\w-]+)[\t ]*=[\t ]*["{]/gim,
           file.path,
-          88
+          88,
         ),
     },
     {
@@ -125,7 +125,7 @@ export class FactCollector {
   static collect(
     files: { content: string; path: string }[],
     evidence?: Pick<RepositoryEvidence, "configs" | "frameworkFacts" | "routeInventory">,
-    fileSignalsByPath?: Map<string, FileSignals>
+    fileSignalsByPath?: Map<string, FileSignals>,
   ) {
     const collector = new FactCollector();
 
@@ -276,7 +276,7 @@ export class FactCollector {
     this.parseManifestJsonDependencies(
       content,
       ["dependencies", "devDependencies", "peerDependencies"],
-      filePath
+      filePath,
     );
 
     try {

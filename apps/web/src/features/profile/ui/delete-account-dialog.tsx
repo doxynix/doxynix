@@ -19,7 +19,7 @@ export function DeleteAccountDialog() {
       {},
       {
         onSuccess: () => setOpen(false),
-      }
+      },
     );
   };
 

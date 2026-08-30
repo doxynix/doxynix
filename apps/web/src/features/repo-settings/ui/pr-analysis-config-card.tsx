@@ -155,7 +155,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                       "transition-standard relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3",
                       isSelected === true
                         ? "border-border-strong bg-surface-selected"
-                        : "border-border bg-card"
+                        : "border-border bg-card",
                     )}
                   >
                     <input
@@ -178,7 +178,7 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
                           "flex size-8 items-center justify-center rounded-lg border",
                           isSelected === true
                             ? "bg-primary text-primary-foreground border-border-strong"
-                            : "bg-surface-hover text-muted-foreground border-border"
+                            : "bg-surface-hover text-muted-foreground border-border",
                         )}
                       >
                         <area.icon />

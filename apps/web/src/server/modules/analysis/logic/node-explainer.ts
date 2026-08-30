@@ -17,7 +17,7 @@ export function buildNodeExplainPayloadFromContext(
   context: StructureContext,
   analysisRef: AnalysisRef | null,
   nodeId: string,
-  drilldown: StructureNodePayload
+  drilldown: StructureNodePayload,
 ) {
   const { nodeType, path } = parseStructureNodeId(nodeId);
   const scopedPaths = collectNodeScopePaths(context, nodeType, path);
@@ -61,7 +61,7 @@ export function buildNodeExplainPayloadFromContext(
       entrypointReason: drilldown.inspect.entrypointReason,
       factTitles: uniq([...entry.factTitles, ...signals.facts.map((fact) => fact.title)]).slice(
         0,
-        5
+        5,
       ),
       frameworkHints: drilldown.inspect.frameworkHints,
       gitHints: drilldown.inspect.gitHints,
@@ -107,7 +107,7 @@ export function buildNodeExplainPayload(repo: RepoWithLatestAnalysisAndDocs, nod
     context,
     analysisMapper.toAnalysisRef(repo.analyses[0]),
     nodeId,
-    drilldown
+    drilldown,
   );
 }
 type ExplainNodeLike = {
@@ -178,11 +178,11 @@ function buildNodeExplainSummary(params: {
 
   if (params.hotspotCount > 0 || params.dependencyHotspotCount > 0) {
     lines.push(
-      "Hotspot and dependency-centrality signals suggest this node can amplify change impact."
+      "Hotspot and dependency-centrality signals suggest this node can amplify change impact.",
     );
   } else if (params.churnCount > 0 || params.changeCouplingCount > 0) {
     lines.push(
-      "Recent git history suggests this node changes often or changes alongside nearby files."
+      "Recent git history suggests this node changes often or changes alongside nearby files.",
     );
   } else if (params.frameworkCount > 0) {
     lines.push("Framework/runtime hints suggest this area anchors important integration behavior.");
@@ -190,7 +190,7 @@ function buildNodeExplainSummary(params: {
 
   if (params.graphWarningCount > 0 || params.orphanCount > 0) {
     lines.push(
-      "Some dependency evidence around this node is partial or isolated, so manual verification may help."
+      "Some dependency evidence around this node is partial or isolated, so manual verification may help.",
     );
   }
 

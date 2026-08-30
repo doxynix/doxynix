@@ -38,7 +38,7 @@ export class SafetyContext {
       allowedPaths,
       maxSize = 100_000,
       validatePaths = false,
-    }: { allowedPaths?: Set<string>; maxSize?: number; validatePaths?: boolean } = {}
+    }: { allowedPaths?: Set<string>; maxSize?: number; validatePaths?: boolean } = {},
   ): { invalidPaths: string[]; truncated: boolean; xml: string } {
     const json = JSON.stringify(data, null, 2);
     let truncated = false;
@@ -124,7 +124,7 @@ export class SafetyContext {
     filePath: string,
     content: string,
     maxLength = 50_000,
-    escapeContext: "xml-attr" | "xml-text" = "xml-text"
+    escapeContext: "xml-attr" | "xml-text" = "xml-text",
   ): { content: string; path: string; truncated: boolean } {
     let truncated = false;
     let processedContent = content;
@@ -201,7 +201,7 @@ export class SafetyContext {
    */
   validatePaths(
     paths: string[],
-    allowedPaths?: Set<string>
+    allowedPaths?: Set<string>,
   ): { invalid: string[]; valid: string[] } {
     if (!allowedPaths || allowedPaths.size === 0) {
       // If no restrictions, all paths are valid

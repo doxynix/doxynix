@@ -55,6 +55,6 @@ export function useRepoMapHotkeys() {
       action();
       setPrefix(null);
     },
-    { enabled: prefix != null, preventDefault: true }
+    { enabled: prefix != null, preventDefault: true },
   );
 }

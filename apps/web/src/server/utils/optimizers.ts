@@ -72,7 +72,7 @@ export const CodeOptimizer = {
       .replaceAll(/[\w%+.-]+@[\w.-]+\.[A-Za-z]{2,}/g, "<REDACTED_EMAIL>")
       .replaceAll(
         /(?<!\d)(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?!\d)/g,
-        "<REDACTED_IP>"
+        "<REDACTED_IP>",
       )
       .replaceAll(/(["'])eyJ(?:[\w-]*\.){2}[\w-]*(["'])/g, "$1<REDACTED_JWT>$2");
   },
@@ -146,7 +146,7 @@ export const CodeOptimizer = {
         code,
         ts.ScriptTarget.Latest,
         true,
-        fileName.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+        fileName.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
       );
       const printer = ts.createPrinter({ removeComments: false });
 
@@ -171,7 +171,7 @@ export const CodeOptimizer = {
                     node.parameters,
                     node.type,
                     node.equalsGreaterThanToken,
-                    ts.factory.createIdentifier(`null as any ${comment}`)
+                    ts.factory.createIdentifier(`null as any ${comment}`),
                   );
                 }
 
@@ -189,7 +189,7 @@ export const CodeOptimizer = {
                     node.typeParameters,
                     node.parameters,
                     node.type,
-                    stubBlock
+                    stubBlock,
                   );
                 }
                 if (ts.isMethodDeclaration(node)) {
@@ -202,7 +202,7 @@ export const CodeOptimizer = {
                     node.typeParameters,
                     node.parameters,
                     node.type,
-                    stubBlock
+                    stubBlock,
                   );
                 }
                 if (ts.isFunctionExpression(node)) {
@@ -214,7 +214,7 @@ export const CodeOptimizer = {
                     node.typeParameters,
                     node.parameters,
                     node.type,
-                    stubBlock
+                    stubBlock,
                   );
                 }
               }
@@ -240,7 +240,7 @@ export const CodeOptimizer = {
     let newCode = code.replaceAll(/(d\s*=\s*["'])([^"']{150,})(["'])/g, `$1${REMOVED_MSG}$3`);
     newCode = newCode.replaceAll(
       /(["']data:[^;]+;base64,)([^"']{50,})(["'])/g,
-      `$1${REMOVED_MSG}$3`
+      `$1${REMOVED_MSG}$3`,
     );
     return newCode;
   },

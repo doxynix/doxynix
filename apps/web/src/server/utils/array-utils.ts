@@ -14,7 +14,7 @@ import { compact, uniq } from "es-toolkit";
  */
 export function uniquePaths(
   paths: Iterable<false | null | string | undefined>,
-  limit?: number
+  limit?: number,
 ): string[] {
   const items = Array.from(paths);
 

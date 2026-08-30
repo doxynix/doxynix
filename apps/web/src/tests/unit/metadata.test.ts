@@ -5,7 +5,7 @@ import { createMetadata } from "@/shared/lib/metadata";
 const getTranslationsMock = vi.hoisted(() =>
   vi.fn(async ({ locale, namespace }: { locale: string; namespace: string }) => {
     return (key: string) => `${namespace}:${locale}:${key}`;
-  })
+  }),
 );
 
 vi.mock("next-intl/server", () => ({

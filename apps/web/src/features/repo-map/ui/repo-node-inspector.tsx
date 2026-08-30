@@ -49,7 +49,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
     .map(([key]) => key);
 
   const allFileReferences = Array.from(
-    new Set([...node.previewPaths, ...inspect.samplePaths, ...explain.sourcePaths])
+    new Set([...node.previewPaths, ...inspect.samplePaths, ...explain.sourcePaths]),
   )
     .map((path) => path.split("/").pop())
     .filter((name) => name !== node.label);
@@ -57,11 +57,11 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
   const childIds = new Set(children.map((c) => c.id));
 
   const uniqueNavigation = explain.nextSuggestedPaths.filter(
-    (path) => path !== node.id && !childIds.has(path)
+    (path) => path !== node.id && !childIds.has(path),
   );
 
   const uniqueRelated = inspect.relatedPaths.filter(
-    (path) => path !== node.id && !childIds.has(path)
+    (path) => path !== node.id && !childIds.has(path),
   );
 
   const internalFileNames = new Set(allFileReferences);
@@ -76,7 +76,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
       const isInternal = internalFileNames.has(fileName);
 
       return !isSelfId && !isSelfPath && !isSelfName && !isInternal;
-    }
+    },
   );
 
   const activeStats = [
@@ -299,7 +299,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                         <div className="text-muted-foreground text-[10px]">{bucket}</div>
                         <div className="text-xs">{paths.length} related modules</div>
                       </div>
-                    )
+                    ),
                 )}
               </div>
             </section>

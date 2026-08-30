@@ -89,7 +89,7 @@ const FormItem = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
         <div ref={ref} className={cn("flex flex-col gap-2", className)} {...props} />
       </FormItemContext.Provider>
     );
-  }
+  },
 );
 FormItem.displayName = "FormItem";
 
@@ -123,7 +123,7 @@ const FormControl = forwardRef<ComponentRef<typeof Slot>, ComponentPropsWithoutR
         {...props}
       />
     );
-  }
+  },
 );
 FormControl.displayName = "FormControl";
 
@@ -139,7 +139,7 @@ const FormDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPara
         {...props}
       />
     );
-  }
+  },
 );
 FormDescription.displayName = "FormDescription";
 
@@ -162,7 +162,7 @@ const FormMessage = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLParagrap
         {body}
       </p>
     );
-  }
+  },
 );
 FormMessage.displayName = "FormMessage";
 

@@ -68,7 +68,7 @@ export class OpenApiDiscoveryEngine {
           const methods = data.paths[pathKey];
           if (methods != null && typeof methods === "object") {
             inventory.estimatedOperations += Object.keys(methods).filter((m) =>
-              HTTP_METHODS.has(m.toLowerCase())
+              HTTP_METHODS.has(m.toLowerCase()),
             ).length;
           }
         }
@@ -82,7 +82,7 @@ export class OpenApiDiscoveryEngine {
     }
 
     inventory.pathPatterns = Array.from(uniquePaths).toSorted((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }),
     );
     return inventory;
   }

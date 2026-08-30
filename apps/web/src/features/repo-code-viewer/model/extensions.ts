@@ -115,7 +115,7 @@ const todoHighlighter = ViewPlugin.fromClass(
   },
   {
     decorations: (v) => v.decorations,
-  }
+  },
 );
 
 const universalSyntaxLinter = linter((view) => {

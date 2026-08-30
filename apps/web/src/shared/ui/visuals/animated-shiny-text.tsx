@@ -23,7 +23,7 @@ export const AnimatedShinyText: FC<AnimatedShinyTextProps> = ({
         // Shine gradient
         "via-foreground/80 bg-linear-to-r from-transparent via-50% to-transparent",
 
-        className
+        className,
       )}
       style={
         {

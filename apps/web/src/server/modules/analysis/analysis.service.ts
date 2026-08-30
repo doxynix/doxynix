@@ -113,7 +113,7 @@ export const repoAnalysisService = {
       instructions?: string;
       language: string;
       repoId: string;
-    }
+    },
   ) {
     await this.assertRepoAccess(db, userId, input.repoId);
 
@@ -143,7 +143,7 @@ export const repoAnalysisService = {
         // concurrencyKey: `user-${userId}`,
         // idempotencyKey: `analysis-${analysis.publicId}`,
         ttl: "30m",
-      }
+      },
     );
 
     await db.analysis.update({
@@ -167,7 +167,7 @@ export const repoAnalysisService = {
     db: DbClient,
     repo: Repo,
     generatedDocsData: GeneratedDocsData,
-    commitSha: string
+    commitSha: string,
   ): Promise<null | { prNumber: number; prUrl: string }> {
     const fileChanges: Record<string, string> = {};
 
@@ -285,7 +285,7 @@ export const repoAnalysisService = {
   buildSyncFileMeta(
     input: { analysisId?: string; commitSha?: string },
     nodeContext: NodeContext | null,
-    analysisRef: AnalysisRef | null
+    analysisRef: AnalysisRef | null,
   ) {
     return buildSyncFileActionMeta({
       analysisRef,
@@ -343,7 +343,7 @@ export const repoAnalysisService = {
       const zoneNode = analysisMapper.matchTopLevelZone(
         topLevelNodes,
         normalizedFilePath,
-        normalizedPreviousPath
+        normalizedPreviousPath,
       );
       const matchedNodeId = directNodeId ?? zoneNode?.id ?? null;
       const matchedNode =
@@ -353,7 +353,7 @@ export const repoAnalysisService = {
               matchedNodeId,
               analyzeContext,
               nodeById,
-              nodeDetailCache
+              nodeDetailCache,
             );
       const findingCount = findingsByFile.get(normalizedFilePath) ?? 0;
 
@@ -376,14 +376,14 @@ export const repoAnalysisService = {
       findings,
       analyzeContext,
       nodeById,
-      nodeDetailCache
+      nodeDetailCache,
     );
     const topFindings = await analysisMapper.buildTopFindings(
       findings,
       changedFileItems,
       nodeById,
       repoSnapshot.owner,
-      repoSnapshot.name
+      repoSnapshot.name,
     );
     const primaryFile = analysisMapper.selectPrimaryFile(changedFileItems);
     const primaryNodeId =
@@ -440,7 +440,7 @@ export const repoAnalysisService = {
     repoId: string,
     type: DocType,
     aid?: string,
-    path?: string
+    path?: string,
   ) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
     if (repo == null) throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
@@ -478,7 +478,7 @@ export const repoAnalysisService = {
       {
         revalidate: false,
         tags: ["docs", doc.publicId],
-      }
+      },
     )();
 
     return {
@@ -536,7 +536,7 @@ export const repoAnalysisService = {
             if (structureNode == null || explain == null) return null;
 
             return buildInteractiveBriefPanel(
-              analysisMapper.toBriefPanelInput({ explain, structureNode })
+              analysisMapper.toBriefPanelInput({ explain, structureNode }),
             );
           })();
 
@@ -582,7 +582,7 @@ export const repoAnalysisService = {
     if (structureNode == null || explain == null) return null;
 
     return buildInteractiveBriefNodePayload(
-      analysisMapper.toInteractiveBriefNodePayloadInput({ explain, structureNode })
+      analysisMapper.toInteractiveBriefNodePayloadInput({ explain, structureNode }),
     );
   },
 
@@ -590,7 +590,7 @@ export const repoAnalysisService = {
     db: DbClient,
     repoId: string,
     nodeId: string,
-    aid?: string
+    aid?: string,
   ): Promise<null | RepoNodeContextPayload> {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
     if (repo == null) return null;
@@ -606,7 +606,7 @@ export const repoAnalysisService = {
         ...structureNode.node.previewPaths,
         ...structureNode.inspect.samplePaths,
         ...explain.sourcePaths,
-      ].map((path) => normalize(path))
+      ].map((path) => normalize(path)),
     );
 
     const [docs, findings] = await Promise.all([
@@ -616,19 +616,19 @@ export const repoAnalysisService = {
         nodeId,
         structureNode.node.label,
         relatedFiles,
-        analyzeContext
+        analyzeContext,
       ),
       analysisRepo.loadRelatedPrFindings(db, repoId, relatedFiles),
     ]);
 
     const fixes = await analysisRepo.loadRelatedFixes(
       db,
-      findings.map((finding) => finding.prAnalysisId)
+      findings.map((finding) => finding.prAnalysisId),
     );
 
     return {
       ...buildInteractiveBriefNodePayload(
-        analysisMapper.toInteractiveBriefNodePayloadInput({ explain, structureNode })
+        analysisMapper.toInteractiveBriefNodePayloadInput({ explain, structureNode }),
       ),
       related: {
         docs,
@@ -669,7 +669,7 @@ export const repoAnalysisService = {
   async getWorkspace(
     db: DbClient,
     repoId: string,
-    aid?: string
+    aid?: string,
   ): Promise<null | RepoWorkspacePayload> {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
     if (repo == null) return null;
@@ -755,7 +755,7 @@ export const repoAnalysisService = {
     nodeId: string,
     nodeLabel: string,
     relatedFiles: string[],
-    analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>
+    analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>,
   ) {
     const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId);
     const graph = analyzeContext.getStructureMap()?.graph ?? null;
@@ -773,7 +773,7 @@ export const repoAnalysisService = {
           doc.content,
           graph,
           doc.type,
-          doc.version
+          doc.version,
         );
 
         return formatted.sections
@@ -800,28 +800,28 @@ export const repoAnalysisService = {
 
   async runDocumentFilePreview(
     userId: number,
-    input: FileActionInput
+    input: FileActionInput,
   ): Promise<DocumentFilePreviewResult> {
     const rawContent = input.content.trim();
 
     if (rawContent.length === 0) {
       return buildDocumentFallback(
         input.path,
-        `The file is empty, so there is nothing useful to document yet. ${describeContextQualifier(input.nodeContext)}`
+        `The file is empty, so there is nothing useful to document yet. ${describeContextQualifier(input.nodeContext)}`,
       );
     }
 
     if (isBinaryLikeContent(input.content)) {
       return buildDocumentFallback(
         input.path,
-        `The file looks binary or non-textual, so documentation preview is not available. ${describeContextQualifier(input.nodeContext)}`
+        `The file looks binary or non-textual, so documentation preview is not available. ${describeContextQualifier(input.nodeContext)}`,
       );
     }
 
     const nonActionableReason = getNonActionableReason(
       input.path,
       input.content,
-      input.nodeContext
+      input.nodeContext,
     );
     if (nonActionableReason != null) {
       return buildDocumentFallback(input.path, nonActionableReason);
@@ -886,7 +886,7 @@ export const repoAnalysisService = {
     db: DbClient,
     userId: number,
     taskId: "analyze-single-file" | "document-single-file",
-    input: FileActionInput
+    input: FileActionInput,
   ) {
     await this.assertRepoAccess(db, userId, input.repoId);
 
@@ -909,7 +909,7 @@ export const repoAnalysisService = {
         // concurrencyKey: `user-${userId}`,
         // idempotencyKey: `${taskId}-${input.repoId}-${input.path}`,
         ttl: "10m",
-      }
+      },
     );
 
     return { jobId: handle.id };
@@ -945,7 +945,7 @@ export const repoAnalysisService = {
         (hardMetrics.docDensity > 10 ? 10 : 0) +
         (hardMetrics.entrypoints.length > 0 ? 15 : 0) +
         (hardMetrics.configFiles > 0 ? 10 : 0) +
-        (repositoryFacts.some((fact) => fact.category === "architecture") ? 10 : 0)
+        (repositoryFacts.some((fact) => fact.category === "architecture") ? 10 : 0),
     );
 
     const finalHealthScore = calculateHealthScore({
@@ -1047,8 +1047,8 @@ export const repoAnalysisService = {
                 version: currentSha,
               },
             },
-          })
-        )
+          }),
+        ),
       );
 
       return tx.notification.create({
@@ -1083,7 +1083,7 @@ export const repoAnalysisService = {
     db: DbClient,
     repoId: string,
     search: string,
-    aid?: string
+    aid?: string,
   ): Promise<RepoSearchResult[]> {
     const normalizedSearch = normalizeSearchInput(search);
     const terms = tokenizeSearchInput(search);
@@ -1199,7 +1199,7 @@ export const repoAnalysisService = {
     }
 
     return dedupeSearchResults(results).toSorted(
-      (left, right) => right.score - left.score || left.label.localeCompare(right.label)
+      (left, right) => right.score - left.score || left.label.localeCompare(right.label),
     );
   },
 };
@@ -1266,7 +1266,7 @@ function applyDocumentSurgicalEdit(params: {
     const adjustedReplaceLines = adjustDocumentIndentation(
       normalizedReplace.split("\n"),
       originalSearchIndent,
-      matchedIndent
+      matchedIndent,
     );
 
     fileLines.splice(matchedIndex, searchLines.length, ...adjustedReplaceLines);
@@ -1314,7 +1314,7 @@ function applyDocumentSurgicalEdit(params: {
     const adjustedReplaceLines = adjustDocumentIndentation(
       normalizedReplace.split("\n"),
       originalSearchIndent,
-      bestWindowIndent
+      bestWindowIndent,
     );
 
     fileLines.splice(bestIndex, searchLines.length, ...adjustedReplaceLines);
@@ -1337,7 +1337,7 @@ function getDocumentIndent(line: string): string {
 function adjustDocumentIndentation(
   replaceLines: string[],
   searchIndent: string,
-  targetIndent: string
+  targetIndent: string,
 ): string[] {
   if (searchIndent === targetIndent) return replaceLines;
 

@@ -29,7 +29,7 @@ function matchesFrameworkAlias(token: string, alias: string): boolean {
 export function collectFrameworkFactsFromTokens(
   tokens: Iterable<string>,
   source: string,
-  baseConfidence: number
+  baseConfidence: number,
 ): FrameworkFact[] {
   const collected = new Map<string, FrameworkFact>();
 
@@ -88,7 +88,7 @@ function hasManifestOnlySources(fact: FrameworkFact): boolean {
         ProjectPolicy.isDocsFile(source) ||
         ProjectPolicy.isInfraFile(source) ||
         ProjectPolicy.isTestFile(source) ||
-        ProjectPolicy.isToolingFile(source)
+        ProjectPolicy.isToolingFile(source),
     )
   );
 }

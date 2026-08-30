@@ -64,7 +64,7 @@ function hasPathBoundary(pathname: string, prefix: string): boolean {
 async function handleRateLimitAndSize(
   request: NextRequest,
   pathname: string,
-  ip: string
+  ip: string,
 ): Promise<NextResponse | null> {
   if (isBypassRoute(pathname)) {
     return null;
@@ -91,7 +91,7 @@ async function handleRateLimitAndSize(
               "X-RateLimit-Reset": reset.toString(),
             },
             status: 429,
-          }
+          },
         );
       }
     } catch (error) {
@@ -105,7 +105,7 @@ async function handleRateLimitAndSize(
 async function handleApiRequest(
   request: NextRequest,
   requestId: string,
-  ip: string
+  ip: string,
 ): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
   const attachRequestMeta = (response: NextResponse): NextResponse => {
@@ -142,7 +142,7 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
   const pathWithoutLocale = pathname.replace(localeRegex, "") || "/";
 
   const isProtectedRoute = protectedRoutes.some((route) =>
-    hasPathBoundary(pathWithoutLocale, route)
+    hasPathBoundary(pathWithoutLocale, route),
   );
   const isAuthRoute = authRoutes.some((route) => hasPathBoundary(pathWithoutLocale, route));
 

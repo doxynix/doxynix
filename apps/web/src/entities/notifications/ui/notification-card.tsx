@@ -32,7 +32,7 @@ export function NotificationCard({ notification }: Readonly<Props>) {
       className={cn(
         "group hover:border-border-strong relative border-l-4 p-4",
         notification.isRead === false && "bg-surface-selected",
-        border
+        border,
       )}
     >
       {href != null && (
@@ -46,14 +46,14 @@ export function NotificationCard({ notification }: Readonly<Props>) {
             <span
               className={cn(
                 "bg-foreground size-2 shrink-0 rounded-full opacity-0",
-                notification.isRead === false && "opacity-100"
+                notification.isRead === false && "opacity-100",
               )}
             />
             <div className="flex flex-col gap-2">
               <CardTitle
                 className={cn(
                   "group-hover:text-foreground",
-                  notification.isRead === true && "text-muted-foreground"
+                  notification.isRead === true && "text-muted-foreground",
                 )}
               >
                 {notification.title}

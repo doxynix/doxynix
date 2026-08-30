@@ -1,4 +1,4 @@
-import type { PaginatedResponse } from "@doxynix/siem-shared";
+import type { PaginatedResponse } from "@doxynix/shared";
 import { db } from "@server/core/db/db";
 import { count, type SQL, type Table } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";

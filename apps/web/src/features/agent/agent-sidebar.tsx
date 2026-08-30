@@ -32,7 +32,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
 
   const repos = groupBy(
     repoSessionsOnly,
-    (session) => `${session.repo.owner}/${session.repo.name}`
+    (session) => `${session.repo.owner}/${session.repo.name}`,
   );
 
   return (
@@ -73,7 +73,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
                       onClick={() => setSessionId(session.id)}
                       className={cn(
                         "justify-start gap-1 truncate text-left text-xs",
-                        sessionId === session.id ? "bg-accent text-foreground" : ""
+                        sessionId === session.id ? "bg-accent text-foreground" : "",
                       )}
                     >
                       <MessageSquare className="text-muted-foreground" />
@@ -95,7 +95,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
                   onClick={() => setSessionId(session.id)}
                   className={cn(
                     "justify-start gap-1 text-left text-xs",
-                    sessionId === session.id ? "bg-accent text-foreground" : ""
+                    sessionId === session.id ? "bg-accent text-foreground" : "",
                   )}
                 >
                   <MessageSquare />

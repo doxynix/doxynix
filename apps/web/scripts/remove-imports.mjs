@@ -29,6 +29,6 @@ for (const sourceFile of sourceFiles) {
 
 console.log("\n🚀 WIPE COMPLETE.");
 console.log(
-  "⚠️  IMPORTANT: Some ambiguous imports (like 'Config' or 'User') might need manual selection."
+  "⚠️  IMPORTANT: Some ambiguous imports (like 'Config' or 'User') might need manual selection.",
 );
 console.log("👉 Run 'bun type-check' now.");

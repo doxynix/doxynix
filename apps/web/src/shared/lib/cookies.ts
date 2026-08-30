@@ -4,7 +4,7 @@ export function getClientCookie(name: string): null | string {
   if (typeof window === "undefined") return null;
 
   const matches = RegExp(
-    new RegExp("(?:^|; )" + name.replaceAll(/([$()*+./?[\\\]^{|}])/g, "\\$1") + "=([^;]*)")
+    new RegExp("(?:^|; )" + name.replaceAll(/([$()*+./?[\\\]^{|}])/g, "\\$1") + "=([^;]*)"),
   ).exec(document.cookie);
   return matches ? decodeURIComponent(matches[1] ?? "") : null;
 }

@@ -41,7 +41,7 @@ type WriterPhase =
 
 async function runWriterTask(
   name: WriterResult["name"],
-  runner: () => Promise<string>
+  runner: () => Promise<string>,
 ): Promise<WriterResult> {
   try {
     const content = await runner();
@@ -100,7 +100,7 @@ async function runWriterPrompt(params: RunWriterPromptParams) {
       taskType: "creative",
       temperature: params.temperature,
       tools: params.tools,
-    }).then(unwrapAiText)
+    }).then(unwrapAiText),
   );
 }
 
@@ -113,7 +113,7 @@ export async function executeReadmeWriter(
   language: string,
   repoId: string,
   userId: number,
-  branch: string
+  branch: string,
 ): Promise<WriterResult> {
   return runWriterPrompt({
     analysisId,
@@ -135,7 +135,7 @@ export async function executeApiWriter(
   language: string,
   repoId: string,
   userId: number,
-  branch: string
+  branch: string,
 ): Promise<WriterResult> {
   return runWriterPrompt({
     analysisId,
@@ -160,7 +160,7 @@ export async function executeArchitectureWriter(
   language: string,
   repoId: string,
   userId: number,
-  branch: string
+  branch: string,
 ): Promise<WriterResult> {
   return runWriterPrompt({
     analysisId,
@@ -173,7 +173,7 @@ export async function executeArchitectureWriter(
       moduleDependencyContextPayload,
       engineeringDossierPayload,
       context,
-      allowedPaths
+      allowedPaths,
     ),
     promptChars:
       payload.length +
@@ -194,7 +194,7 @@ export async function executeContributingWriter(
   language: string,
   repoId: string,
   userId: number,
-  branch: string
+  branch: string,
 ): Promise<WriterResult> {
   return runWriterPrompt({
     analysisId,
@@ -204,7 +204,7 @@ export async function executeContributingWriter(
       payload,
       engineeringDossierPayload,
       context,
-      allowedPaths
+      allowedPaths,
     ),
     promptChars: payload.length + engineeringDossierPayload.length + context.length,
     system: buildContributingWriterSystemPrompt(language),
@@ -271,7 +271,7 @@ export async function executeChangelogWriter(
   analysisResult: AIResult,
   userId: number,
   repo: Repo,
-  language: string
+  language: string,
 ): Promise<WriterResult> {
   const changelogContext: ChangelogContext = {
     analysisDelta: {

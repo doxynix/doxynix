@@ -38,7 +38,7 @@ export function isSafeIp(ip: string): boolean {
 export function ssrfSafeLookup(
   hostname: string,
   options: dns.LookupOneOptions,
-  callback: DnsLookupCallback
+  callback: DnsLookupCallback,
 ): void {
   dns.lookup(hostname, options, (err, address, family) => {
     if (err) {
@@ -62,7 +62,7 @@ export function ssrfSafeLookup(
       callback(
         validationError instanceof Error ? validationError : new Error(String(validationError)),
         null,
-        null
+        null,
       );
     }
   });

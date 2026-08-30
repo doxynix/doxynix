@@ -15,7 +15,7 @@ const InputOTP = forwardRef<
     className={cn("disabled:cursor-not-allowed", className)}
     containerClassName={cn(
       "flex items-center gap-2 has-[:disabled]:opacity-50",
-      containerClassName
+      containerClassName,
     )}
     {...props}
   />
@@ -25,7 +25,7 @@ InputOTP.displayName = "InputOTP";
 const InputOTPGroup = forwardRef<ComponentRef<"div">, ComponentPropsWithoutRef<"div">>(
   ({ className, ...props }, ref) => (
     <div ref={ref} className={cn("flex items-center", className)} {...props} />
-  )
+  ),
 );
 InputOTPGroup.displayName = "InputOTPGroup";
 
@@ -47,7 +47,7 @@ const InputOTPSlot = forwardRef<
       className={cn(
         "border-input relative flex h-9 w-9 items-center justify-center border-y border-r text-sm shadow-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
         isActive && "ring-ring z-10 ring-1",
-        className
+        className,
       )}
       {...props}
     >
@@ -71,7 +71,7 @@ const InputOTPSeparator = forwardRef<ComponentRef<"div">, ComponentPropsWithoutR
     >
       <Minus />
     </div>
-  )
+  ),
 );
 InputOTPSeparator.displayName = "InputOTPSeparator";
 

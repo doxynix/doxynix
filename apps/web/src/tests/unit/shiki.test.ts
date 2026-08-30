@@ -5,21 +5,22 @@ const shikiState = vi.hoisted(() => ({
     vi.fn<
       (code: string, options: { lang: string; theme: string; transformers: unknown[] }) => string
     >(),
-  createHighlighter: vi.fn<
-    (options: any) => Promise<{
-      codeToHtml: (
-        code: string,
-        options: { lang: string; theme: string; transformers: unknown[] }
-      ) => string;
-    }>
-  >(),
+  createHighlighter:
+    vi.fn<
+      (options: any) => Promise<{
+        codeToHtml: (
+          code: string,
+          options: { lang: string; theme: string; transformers: unknown[] },
+        ) => string;
+      }>
+    >(),
 }));
 
 const unstableCacheMock = vi.hoisted(() =>
   vi.fn(
     (fn: () => Promise<string>, _keys: string[], _options: { revalidate: false; tags: string[] }) =>
-      fn
-  )
+      fn,
+  ),
 );
 
 vi.mock("next/cache", () => ({
@@ -70,13 +71,13 @@ describe("highlightCode", () => {
       "const x = 1",
       expect.objectContaining({
         theme: "github-light",
-      })
+      }),
     );
 
     expect(unstableCacheMock).toHaveBeenCalledWith(
       expect.any(Function),
       expect.arrayContaining(["light"]),
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 
@@ -89,13 +90,13 @@ describe("highlightCode", () => {
       "const x = 1",
       expect.objectContaining({
         theme: "github-dark-dimmed",
-      })
+      }),
     );
 
     expect(unstableCacheMock).toHaveBeenCalledWith(
       expect.any(Function),
       expect.arrayContaining(["dark"]),
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 });

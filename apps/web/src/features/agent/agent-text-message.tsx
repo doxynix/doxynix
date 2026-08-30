@@ -104,7 +104,7 @@ function stripAlertFromChildren(children: ReactNode, state: { charsToStrip: numb
 
 function renderAlertOrFallback(
   children: ReactNode,
-  fallback: (cleanedContent: ReactNode) => ReactNode
+  fallback: (cleanedContent: ReactNode) => ReactNode,
 ): ReactNode {
   const fullText = getTextFromChildren(children);
 
@@ -126,7 +126,7 @@ function renderAlertOrFallback(
         variant={alertConfig.variant}
         className={cn(
           "not-prose my-4 rounded-xl border py-3.5 pl-11 text-left",
-          alertConfig.className
+          alertConfig.className,
         )}
       >
         <IconComponent className="absolute top-4 left-4 size-4" />
@@ -205,7 +205,7 @@ const MarkdownBlock = memo(
       </ReactMarkdown>
     );
   },
-  (prevProps, nextProps) => prevProps.content === nextProps.content
+  (prevProps, nextProps) => prevProps.content === nextProps.content,
 );
 
 MarkdownBlock.displayName = "MarkdownBlock";

@@ -132,7 +132,7 @@ export function collectArchitectPreferredPaths(digest: ArchitectDigest): string[
       ...digest.facts.flatMap((fact) => fact.evidencePaths),
       ...digest.findings.flatMap((finding) => finding.evidencePaths),
     ],
-    200
+    200,
   );
 }
 
@@ -141,7 +141,7 @@ export function buildArchitectDigest(
   metrics: RepoMetrics,
   projectMap: ProjectMap,
   repositoryFacts: RepositoryFact[],
-  repositoryFindings: RepositoryFinding[]
+  repositoryFindings: RepositoryFinding[],
 ): ArchitectDigest {
   return {
     facts: limit(
@@ -150,19 +150,19 @@ export function buildArchitectDigest(
         confidence: fact.confidence,
         evidencePaths: uniquePaths(
           fact.evidence.map((evidence) => evidence.path),
-          8
+          8,
         ),
         id: fact.id,
         title: fact.title,
       })),
-      30
+      30,
     ),
     findings: limit(
       repositoryFindings.map((finding) => ({
         category: finding.category,
         evidencePaths: uniquePaths(
           finding.evidence.map((evidence) => evidence.path),
-          8
+          8,
         ),
         id: finding.id,
         score: finding.score,
@@ -170,7 +170,7 @@ export function buildArchitectDigest(
         summary: finding.summary,
         title: finding.title,
       })),
-      30
+      30,
     ),
     metrics: {
       analysisCoverage: metrics.analysisCoverage,
@@ -181,14 +181,14 @@ export function buildArchitectDigest(
           fromPath: pair.fromPath,
           toPath: pair.toPath,
         })),
-        20
+        20,
       ),
       churnHotspots: limit(
         (metrics.churnHotspots ?? []).map((hotspot) => ({
           commitsInWindow: hotspot.commitsInWindow,
           path: hotspot.path,
         })),
-        20
+        20,
       ),
       complexityScore: metrics.complexityScore,
       duplicationPercentage: metrics.duplicationReport.duplicationPercentage,
@@ -209,7 +209,7 @@ export function buildArchitectDigest(
           responsibility: module.responsibility,
           type: module.type,
         })),
-        120
+        120,
       ),
       overview: projectMap.overview,
     },
@@ -221,16 +221,16 @@ export function buildArchitectDigest(
         evidencePaths: uniquePaths(documentationInput.sections.api_reference.evidencePaths, 12),
         frameworks: limit(
           documentationInput.sections.api_reference.body.frameworkFacts.map((fact) => fact.name),
-          15
+          15,
         ),
         publicSurfacePaths: limit(
           documentationInput.sections.api_reference.body.publicSurfacePaths,
-          30
+          30,
         ),
         routeSource: documentationInput.sections.api_reference.body.sourceOfTruth,
         routeSourceFiles: limit(
           documentationInput.sections.api_reference.body.routeInventory.sourceFiles,
-          30
+          30,
         ),
         sampleRoutes: limit(
           documentationInput.sections.api_reference.body.routeInventory.httpRoutes.map((route) => ({
@@ -238,7 +238,7 @@ export function buildArchitectDigest(
             path: route.path,
             sourcePath: route.sourcePath,
           })),
-          20
+          20,
         ),
         summary: documentationInput.sections.api_reference.summary,
         title: documentationInput.sections.api_reference.title,
@@ -253,7 +253,7 @@ export function buildArchitectDigest(
             outbound: hotspot.outbound,
             path: hotspot.path,
           })),
-          25
+          25,
         ),
         evidencePaths: uniquePaths(documentationInput.sections.architecture.evidencePaths, 30),
         graphReliability: {
@@ -270,12 +270,12 @@ export function buildArchitectDigest(
             exports: module.exports,
             path: module.path,
           })),
-          40
+          40,
         ),
         orphanModules: limit(documentationInput.sections.architecture.body.orphanModules, 25),
         primaryEntrypoints: limit(
           documentationInput.sections.architecture.body.primaryEntrypoints,
-          15
+          15,
         ),
         summary: documentationInput.sections.architecture.summary,
         title: documentationInput.sections.architecture.title,
@@ -313,7 +313,7 @@ export function buildArchitectDigest(
           documentationInput.sections.risks.body.findings.map((finding) => ({
             evidencePaths: uniquePaths(
               finding.evidence.map((evidence) => evidence.path),
-              10
+              10,
             ),
             id: finding.id,
             score: finding.score,
@@ -321,14 +321,14 @@ export function buildArchitectDigest(
             summary: finding.summary,
             title: finding.title,
           })),
-          20
+          20,
         ),
         hotspots: limit(
           documentationInput.sections.risks.body.hotspots.map((hotspot) => ({
             path: hotspot.path,
             score: hotspot.score,
           })),
-          25
+          25,
         ),
         rawMetrics: documentationInput.sections.risks.body.rawMetrics,
         summary: documentationInput.sections.risks.summary,

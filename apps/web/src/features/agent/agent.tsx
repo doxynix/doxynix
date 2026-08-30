@@ -76,7 +76,7 @@ export function Agent() {
 
   const { data: history, isLoading: isHistoryLoading } = trpc.agent.getSessionHistory.useQuery(
     { sessionId: sessionId ?? "" },
-    { enabled: sessionId !== null && isOpen }
+    { enabled: sessionId !== null && isOpen },
   );
 
   const { addToolApprovalResponse, messages, regenerate, sendMessage, setMessages, status } =
@@ -117,7 +117,7 @@ export function Agent() {
           id: msg.id,
           parts: msg.parts,
           role: msg.role as "assistant" | "system" | "user",
-        }))
+        })),
       );
       lastLoadedSessionIdRef.current = sessionId;
     }
@@ -215,7 +215,7 @@ export function Agent() {
   const wrapperClasses = cn(
     "fixed z-50 flex overflow-hidden",
     "transition-[left] duration-200 ease-linear",
-    expanded ? (open ? "left-[272px]" : "left-4") : "left-[calc(100vw-450px)]"
+    expanded ? (open ? "left-[272px]" : "left-4") : "left-[calc(100vw-450px)]",
   );
 
   return (
@@ -303,7 +303,7 @@ export function Agent() {
                             <div
                               className={cn(
                                 "text-muted-foreground flex items-center gap-2 text-xs font-semibold",
-                                isAssistant ? "justify-start" : "justify-end"
+                                isAssistant ? "justify-start" : "justify-end",
                               )}
                             >
                               {isAssistant ? <Bot /> : <UserRound />}
@@ -348,7 +348,7 @@ export function Agent() {
                               <div
                                 className={cn(
                                   "text-foreground flex flex-col gap-3 text-sm",
-                                  isAssistant ? "mr-auto text-left" : "ml-auto text-right"
+                                  isAssistant ? "mr-auto text-left" : "ml-auto text-right",
                                 )}
                               >
                                 {message.parts.map((rawPart, index) => {
@@ -426,7 +426,7 @@ export function Agent() {
                                         key={`${message.id}-file-${index}`}
                                         className={cn(
                                           "bg-background my-2 max-w-50 overflow-hidden rounded-xl border",
-                                          isAssistant ? "mr-auto" : "ml-auto"
+                                          isAssistant ? "mr-auto" : "ml-auto",
                                         )}
                                       >
                                         {isImage === true ? (
@@ -457,7 +457,7 @@ export function Agent() {
                             <div
                               className={cn(
                                 "mt-1 flex items-center gap-1.5",
-                                isAssistant ? "justify-start" : "justify-end"
+                                isAssistant ? "justify-start" : "justify-end",
                               )}
                             >
                               {fullMessageText.trim() !== "" && (
@@ -516,7 +516,7 @@ export function Agent() {
                       "absolute bottom-4 left-1/2 z-10 -translate-x-1/2",
                       showScrollButton
                         ? "pointer-events-auto scale-100 opacity-100"
-                        : "pointer-events-none scale-90 opacity-0"
+                        : "pointer-events-none scale-90 opacity-0",
                     )}
                   >
                     <ArrowDown />

@@ -69,13 +69,13 @@ type ConstructorOptions = {
       retryAfter: number,
       options: { method: string; url: string },
       octokit: { log: { warn: (message: string) => void } },
-      retryCount: number
+      retryCount: number,
     ) => boolean;
     onSecondaryRateLimit?: (
       retryAfter: number,
       options: { method: string; url: string },
       octokit: { log: { warn: (message: string) => void } },
-      retryCount: number
+      retryCount: number,
     ) => boolean;
   };
 };
@@ -254,7 +254,7 @@ describe("githubService", () => {
       const { prisma } = createMockPrisma(null);
       vi.mocked(githubTokenService.getValidToken).mockResolvedValue(null);
       await expect(githubService.getClientContext(prisma, 9)).rejects.toThrow(
-        "No valid GitHub authorization found"
+        "No valid GitHub authorization found",
       );
     });
 
@@ -296,7 +296,7 @@ describe("githubService", () => {
 
       expect(octokitState.paginate).toHaveBeenCalledWith(
         octokitState.listForAuthenticatedUser,
-        expect.objectContaining({ per_page: 100, visibility: "all" })
+        expect.objectContaining({ per_page: 100, visibility: "all" }),
       );
       expect(repos[0]?.fullName).toBe("owner/repo");
     });
@@ -325,7 +325,7 @@ describe("githubService", () => {
       expect(loggerState.error).toHaveBeenCalledWith(
         expect.objectContaining({
           msg: "Failed OAuth fetch",
-        })
+        }),
       );
     });
   });
@@ -427,7 +427,7 @@ describe("githubService", () => {
         throw new Error("Invalid format");
       });
       expect(() => githubService.parseUrl("invalid")).toThrow(
-        "Invalid format. Enter 'owner/repo' or repository URL"
+        "Invalid format. Enter 'owner/repo' or repository URL",
       );
     });
 
@@ -516,7 +516,7 @@ describe("githubService", () => {
       expect(loggerState.error).toHaveBeenCalledWith(
         expect.objectContaining({
           msg: "GitHub search error",
-        })
+        }),
       );
     });
   });

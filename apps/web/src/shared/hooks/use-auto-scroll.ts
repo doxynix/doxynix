@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type DependencyList } fro
 
 export function useAutoScroll<T extends HTMLElement>(
   deps: DependencyList,
-  options: { selector?: string; throttleMs?: number } = {}
+  options: { selector?: string; throttleMs?: number } = {},
 ) {
   const { selector = "[data-radix-scroll-area-viewport]", throttleMs = 100 } = options;
 

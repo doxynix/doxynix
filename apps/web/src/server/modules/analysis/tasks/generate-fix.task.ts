@@ -68,7 +68,7 @@ export const generateFixTask = task({
               payload.userId,
               repo.publicId,
               filePath,
-              targetBranch
+              targetBranch,
             );
             fileContents[filePath] = githubFile.content;
           } catch (fetchError) {

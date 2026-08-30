@@ -118,7 +118,7 @@ export function AnalysisTerminal({
             "transition-standard absolute bottom-4 left-1/2 z-10 size-7 -translate-x-1/2 rounded-full border",
             showScrollButton
               ? "pointer-events-auto scale-100 opacity-100"
-              : "pointer-events-none scale-90 opacity-0"
+              : "pointer-events-none scale-90 opacity-0",
           )}
         >
           <ArrowDown />
@@ -143,7 +143,7 @@ function LogLine({ log, searchQuery }: Readonly<{ log: LogEntry; searchQuery: st
       <div
         className={cn(
           "flex-1 wrap-break-word whitespace-pre-wrap",
-          levelColors[log.level] || levelColors.info
+          levelColors[log.level] || levelColors.info,
         )}
       >
         {highlightText(log.message, searchQuery)}
@@ -167,7 +167,7 @@ function highlightText(text: string, highlight: string) {
           </span>
         ) : (
           part
-        )
+        ),
       )}
     </span>
   );

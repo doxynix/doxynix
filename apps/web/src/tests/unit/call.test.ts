@@ -60,7 +60,7 @@ describe("callWithFallback", () => {
         outputSchema: null,
         prompt: "p",
         system: "s",
-      })
+      }),
     ).rejects.toThrow("No models configured for fallback.");
   });
 

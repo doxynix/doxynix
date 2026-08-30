@@ -179,7 +179,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                                     return next;
                                   });
                                 },
-                              }
+                              },
                             );
                           }}
                           className="hover:text-destructive hover:bg-destructive/10"

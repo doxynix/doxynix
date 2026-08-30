@@ -90,7 +90,7 @@ export const BackgroundBeamsWithCollision = ({
       ref={parentRef}
       className={cn(
         "relative flex h-96 w-full items-center justify-center overflow-hidden md:h-160",
-        className
+        className,
       )}
     >
       {beams.map((beam) => (
@@ -213,7 +213,7 @@ const CollisionMechanism = forwardRef<
         }}
         className={cn(
           "via-primary from-foreground/95 absolute top-20 left-0 m-auto h-14 w-px rounded-full bg-linear-to-t to-transparent",
-          beamOptions.className
+          beamOptions.className,
         )}
       />
       <AnimatePresence>

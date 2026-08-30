@@ -49,7 +49,7 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
         if (query.state.data?.resultJson == null) return 2000;
         return false;
       },
-    }
+    },
   );
 
   const stageGeneratedFixMutation = trpc.analysis.stageGeneratedFix.useMutation({
@@ -79,7 +79,7 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
       message?: null | string;
       suggestion?: string;
       type?: null | string;
-    }
+    },
   ) => {
     createFixMutation.mutate({
       fileContents: { [filePath]: "" },

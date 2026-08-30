@@ -47,7 +47,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
 
   const { data: branches, isLoading: isBranchesLoading } = trpc.githubBrowse.getBranches.useQuery(
     { name, owner },
-    { enabled: open }
+    { enabled: open },
   );
   const { data: apiFilesRaw, isLoading } = trpc.githubBrowse.getRepoFiles.useQuery({
     branch: selectedBranch,
@@ -151,7 +151,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   const handleStartAnalysis = () => {
     if (!apiFiles) return;
     const leafFilePaths = new Set(
-      (apiFiles as FileTuple[]).filter((f) => f[1] === 1).map((f) => f[0])
+      (apiFiles as FileTuple[]).filter((f) => f[1] === 1).map((f) => f[0]),
     );
     const selectedFiles = Array.from(selectedIds).filter((id) => leafFilePaths.has(id));
     analyzeMutation.mutate({
@@ -177,7 +177,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   const getSelectedFilesCount = () => {
     if (!apiFiles) return 0;
     const allFilePaths = new Set(
-      (apiFiles as FileTuple[]).filter((f) => f[1] === 1).map((f) => f[0])
+      (apiFiles as FileTuple[]).filter((f) => f[1] === 1).map((f) => f[0]),
     );
     let count = 0;
     selectedIds.forEach((id) => {
@@ -198,7 +198,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
 
   const toggleDocType = (id: DocType) => {
     setSelectedDocs((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 

@@ -3,12 +3,8 @@
   "compilerOptions": {
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "allowImportingTsExtensions": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@server/*": ["../siem-server/src/*"],
-      "@doxynix/siem-shared": ["../../packages/siem-shared/src/index.ts"],
-      "@doxynix/siem-shared/*": ["../../packages/siem-shared/src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"]

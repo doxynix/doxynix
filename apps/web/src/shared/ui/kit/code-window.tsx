@@ -26,7 +26,7 @@ export function CodeWindow({
     <div
       className={cn(
         "bg-landing-bg-dark border-landing-bg-light overflow-hidden rounded-xl border",
-        className
+        className,
       )}
     >
       <div className="bg-landing-bg-light/50 border-border flex items-center justify-between border-b p-3">
@@ -48,7 +48,7 @@ export function CodeWindow({
         dangerouslySetInnerHTML={{ __html: codeHtml }}
         className={cn(
           "overflow-x-auto p-6 font-mono leading-relaxed [&>pre]:bg-transparent! [&>pre]:p-0!",
-          codeClassName
+          codeClassName,
         )}
       />
     </div>

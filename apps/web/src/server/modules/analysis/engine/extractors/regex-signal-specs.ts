@@ -7,7 +7,7 @@ const ONE_C_FUNCTION = "\\u0424\\u0443\\u043D\\u043A\\u0446\\u0438\\u044F";
 const ONE_C_EXPORT = "\\u042D\\u043A\\u0441\\u043F\\u043E\\u0440\\u0442";
 const ONE_C_EXPORTED_MEMBER_REGEX = new RegExp(
   `\\b(?:${ONE_C_PROCEDURE}|${ONE_C_FUNCTION})\\b.*\\b${ONE_C_EXPORT}\\b`,
-  "giu"
+  "giu",
 );
 
 export type RegexRoutePattern = Pick<RouteRef, "framework"> & {
@@ -62,7 +62,7 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
     apiSurfacePatterns: [ONE_C_EXPORTED_MEMBER_REGEX],
     entrypointHint: (file) =>
       /managedapplicationmodule|ordinaryapplicationmodule|sessionmodule|externconnectionmodule/i.test(
-        file.path
+        file.path,
       ),
     exportPatterns: [ONE_C_EXPORTED_MEMBER_REGEX],
     extraFrameworkTokens: () => ["1C:Enterprise"],
@@ -73,7 +73,7 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
         kind: "function",
         pattern: new RegExp(
           `\\b(?:${ONE_C_PROCEDURE}|${ONE_C_FUNCTION})\\s+([\\p{L}_][\\p{L}\\p{N}_]*)`,
-          "giu"
+          "giu",
         ),
       },
     ],

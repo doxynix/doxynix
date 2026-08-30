@@ -1,4 +1,4 @@
-import { type AuthSchema, authSchema } from "@doxynix/siem-shared";
+import { type AuthSchema, authSchema } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";

@@ -37,7 +37,7 @@ function addWeightedEdge(
   fromNode: string,
   toNode: string,
   relation: StructureEdgeRelationType,
-  weight = 1
+  weight = 1,
 ) {
   if (fromNode === toNode) return;
   const key = `${fromNode}:${toNode}:${relation}`;
@@ -56,7 +56,7 @@ function connectGroupSet(
   >,
   groups: string[],
   relation: StructureEdgeRelationType,
-  weight = 1
+  weight = 1,
 ) {
   for (let index = 0; index < groups.length; index += 1) {
     const source = groups[index];
@@ -113,7 +113,7 @@ function connectDirectionalGroups(
   sources: string[],
   targets: string[],
   relation: StructureEdgeRelationType,
-  weight = 1
+  weight = 1,
 ) {
   for (const source of uniq(sources)) {
     for (const target of uniq(targets)) {
@@ -128,7 +128,7 @@ function addSemanticTopologyEdges(
     { relation: StructureEdgeRelationType; source: string; target: string; weight: number }
   >,
   groupMap: Map<string, StructureGroupEntry>,
-  primaryEntrypointGroups: string[]
+  primaryEntrypointGroups: string[],
 ) {
   const groupsByKind = collectGroupsByKind(groupMap);
   const frontendGroups = getStrongGroups(groupsByKind.get("frontend"), groupMap, 3);
@@ -172,11 +172,11 @@ export function createStructuralContextEdges(params: {
 
   const primaryEntrypointGroups = buildGroupKeySet(
     filterMeaningfulEntrypoints(params.metrics.entrypoints),
-    params.apiPaths
+    params.apiPaths,
   );
   const primaryModuleGroups = buildGroupKeySet(
     docInput?.sections.overview.body.primaryModules ?? [],
-    params.apiPaths
+    params.apiPaths,
   );
 
   for (const source of primaryEntrypointGroups) {
@@ -196,20 +196,20 @@ export function createStructuralContextEdges(params: {
     edges,
     buildGroupKeySet(params.metrics.routeInventory?.sourceFiles ?? [], params.apiPaths),
     "api",
-    2
+    2,
   );
   connectGroupSet(
     edges,
     buildGroupKeySet(docInput?.api.publicSurfacePaths ?? [], params.apiPaths),
     "api",
-    2
+    2,
   );
   connectGroupSet(edges, buildGroupKeySet(params.metrics.hotspotFiles, params.apiPaths), "risk", 2);
   connectGroupSet(
     edges,
     buildGroupKeySet(params.metrics.configInventory, params.apiPaths),
     "config",
-    1
+    1,
   );
 
   for (const cycle of docInput?.architecture.dependencyCycles ?? []) {
@@ -221,10 +221,10 @@ export function createStructuralContextEdges(params: {
       edges,
       buildGroupKeySet(
         finding.evidence.map((item) => item.path),
-        params.apiPaths
+        params.apiPaths,
       ),
       "risk",
-      2
+      2,
     );
   }
 
@@ -233,10 +233,10 @@ export function createStructuralContextEdges(params: {
       edges,
       buildGroupKeySet(
         fact.evidence.map((item) => item.path),
-        params.apiPaths
+        params.apiPaths,
       ),
       "focus",
-      1
+      1,
     );
   }
 
@@ -279,7 +279,7 @@ export function buildDrilldownEdges(params: {
         if (scope == null) return [];
         const id = makeStructureNodeId(scope.nodeType, scope.path);
         return childIdSet.has(id) ? [id] : [];
-      })
+      }),
     );
 
     for (let index = 0; index < ids.length; index += 1) {
@@ -328,7 +328,7 @@ export function buildDrilldownEdges(params: {
       ...(params.context.docInput?.sections.overview.body.primaryModules ?? []),
     ],
     "entrypoint",
-    2
+    2,
   );
   connectPaths(params.context.metrics.routeInventory?.sourceFiles ?? [], "api", 2);
   connectPaths(params.context.docInput?.api.publicSurfacePaths ?? [], "api", 2);
@@ -343,7 +343,7 @@ export function buildDrilldownEdges(params: {
     connectPaths(
       finding.evidence.map((item) => item.path),
       "risk",
-      2
+      2,
     );
   }
 
@@ -351,7 +351,7 @@ export function buildDrilldownEdges(params: {
     connectPaths(
       fact.evidence.map((item) => item.path),
       "focus",
-      1
+      1,
     );
   }
 

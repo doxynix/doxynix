@@ -57,7 +57,7 @@ const isPermanentDnsError = (err: unknown): err is NodeSystemError => {
 const disposableDomainSet = new Set(disposableDomains);
 
 export async function validateEmailSafety(
-  email: string
+  email: string,
 ): Promise<{ reason?: string; safe: boolean }> {
   const domain = email.split("@")[1]?.toLowerCase();
   if (domain == null) return { reason: "invalid_format", safe: false };
@@ -69,7 +69,7 @@ export async function validateEmailSafety(
   try {
     const mxPromise = resolveMx(domain);
     const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("DNS_TIMEOUT")), 5000)
+      setTimeout(() => reject(new Error("DNS_TIMEOUT")), 5000),
     );
 
     const mx = await Promise.race([mxPromise, timeout]);

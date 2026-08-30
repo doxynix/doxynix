@@ -78,7 +78,7 @@ export function SystemStatus({ className }: Readonly<{ className?: string }>) {
                 <span
                   className={cn(
                     "absolute inline-flex h-full w-full animate-ping rounded-full opacity-75",
-                    current.dotColor
+                    current.dotColor,
                   )}
                 />
               )}

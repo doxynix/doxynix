@@ -38,7 +38,7 @@ export const analyticsService = {
   async getDashboardStats(
     db: DbClient,
     input: AnalyticsInput,
-    userId: number
+    userId: number,
   ): Promise<DashboardStats> {
     const now = new Date();
 
@@ -56,7 +56,7 @@ export const analyticsService = {
     const previousStart = new Date(currentStart.getTime() - durationMs);
 
     const [data] = await db.$queryRawTyped(
-      getDashboardStats(userId, currentStart, previousStart, currentEnd)
+      getDashboardStats(userId, currentStart, previousStart, currentEnd),
     );
 
     if (data == null) {
@@ -145,7 +145,7 @@ export const analyticsService = {
     }
 
     const trends = await db.$queryRawTyped(
-      getTrends(userId, startDate, endDate, input.repoId ?? null)
+      getTrends(userId, startDate, endDate, input.repoId ?? null),
     );
 
     const dateFormatter = new Intl.DateTimeFormat("en-US", {

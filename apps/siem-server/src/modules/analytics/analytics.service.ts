@@ -1,4 +1,4 @@
-import { SEVERITY_LEVELS, type Severity } from "@doxynix/siem-shared";
+import { SEVERITY_LEVELS, type Severity } from "@doxynix/shared";
 import { Temporal } from "@js-temporal/polyfill";
 import { db } from "@server/core/db/db";
 import { incidents, rules } from "@server/core/db/schema";

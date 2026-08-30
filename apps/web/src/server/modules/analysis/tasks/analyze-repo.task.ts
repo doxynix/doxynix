@@ -63,14 +63,14 @@ export const analyzeRepoTask = task({
       const { currentSha, repo, token } = await getAnalysisContext(
         analysisId,
         userId,
-        forceRefresh
+        forceRefresh,
       );
 
       if (repo == null) {
         await taskLogger.finalize(
           analysisId,
           Status.DONE,
-          "Current commit SHA matches last analysis. Skipping re-run."
+          "Current commit SHA matches last analysis. Skipping re-run.",
         );
         return { reason: "SHA_MATCH", skipped: true };
       }
@@ -111,12 +111,12 @@ export const analyzeRepoTask = task({
       taskLogger.info("Computing Git churn and change coupling...");
       const churnHotspots = await computeGitChurnHotspots(
         tempClonePath,
-        validFiles.map((f) => f.path)
+        validFiles.map((f) => f.path),
       );
 
       const changeCoupling = await computeChangeCoupling(
         tempClonePath,
-        validFiles.map((f) => f.path)
+        validFiles.map((f) => f.path),
       );
 
       const hardMetrics: RepoMetrics = { ...hardMetricsCore, changeCoupling, churnHotspots };
@@ -146,7 +146,7 @@ export const analyzeRepoTask = task({
         language,
         userId,
         repo.publicId,
-        selectedBranch ?? repo.defaultBranch
+        selectedBranch ?? repo.defaultBranch,
       );
 
       await taskLogger.milestone({
@@ -171,7 +171,7 @@ export const analyzeRepoTask = task({
         docTypes,
         repo,
         userId,
-        language
+        language,
       );
 
       aiResult.swaggerYaml = swaggerYaml;

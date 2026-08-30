@@ -57,7 +57,7 @@ export function normalizeProjectMapKeyDecisions(value: unknown) {
       decision: stringValue(record.decision ?? record.title, `Decision ${index + 1}`),
       rationale: stringValue(
         record.rationale ?? record.reason,
-        "Inferred from repository topology."
+        "Inferred from repository topology.",
       ),
     };
   });

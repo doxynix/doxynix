@@ -50,7 +50,7 @@ export function SessionsList() {
   });
 
   const otherSessionsCount = sessions.filter(
-    (s) => String(s.id) !== String(currentSessionId)
+    (s) => String(s.id) !== String(currentSessionId),
   ).length;
 
   return (

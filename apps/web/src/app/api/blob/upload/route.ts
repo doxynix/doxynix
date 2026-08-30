@@ -104,7 +104,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Upload authorization failed" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }

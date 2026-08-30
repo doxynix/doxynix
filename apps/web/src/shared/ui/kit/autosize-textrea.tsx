@@ -22,7 +22,7 @@ type Props = ComponentProps<typeof Textarea> & {
 const adjustHeight = (
   ref: RefObject<HTMLTextAreaElement | null>,
   maxHeight: number,
-  minHeight: number
+  minHeight: number,
 ) => {
   const textarea = ref.current;
   if (!textarea) return;

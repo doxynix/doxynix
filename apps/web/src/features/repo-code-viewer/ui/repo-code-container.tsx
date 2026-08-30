@@ -27,12 +27,12 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
 
   const { data: nodeContext } = trpc.analysis.getNodeContext.useQuery(
     { aid: aid ?? undefined, nodeId: node ?? "", repoId: repo.id },
-    { enabled: node != null && node.length > 0 }
+    { enabled: node != null && node.length > 0 },
   );
 
   const { data, isLoading } = trpc.githubBrowse.getFileContent.useQuery(
     { path: path ?? "", repoId: repo.id },
-    { enabled: path != null && path !== "" }
+    { enabled: path != null && path !== "" },
   );
 
   useEffect(() => {

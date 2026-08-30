@@ -212,7 +212,7 @@ export function shouldKeepStructurePath(
   >,
   metrics: RepoMetrics,
   apiPaths: Set<string>,
-  graphRelatedPaths: Set<string>
+  graphRelatedPaths: Set<string>,
 ) {
   const normalizedPath = normalize(path);
   if (ProjectPolicy.isSensitive(normalizedPath)) return false;
@@ -315,7 +315,7 @@ export function collectGroupsByKind(groupMap: Map<string, StructureGroupEntry>) 
 export function getStrongGroups(
   groups: string[] | undefined,
   groupMap: Map<string, StructureGroupEntry>,
-  limit: number
+  limit: number,
 ) {
   return (groups ?? [])
     .slice()

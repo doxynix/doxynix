@@ -35,7 +35,7 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
       style,
       ...props
     },
-    ref
+    ref,
   ) => {
     return (
       <AppButton
@@ -43,7 +43,7 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
         className={cn(
           "transition-standard group border-border text-primary-foreground hover:border-border-accent hover:text-primary-foreground relative isolate flex cursor-pointer items-center justify-center overflow-hidden rounded-(--radius) border bg-transparent px-6 py-3 whitespace-nowrap shadow-sm hover:bg-transparent hover:[box-shadow:var(--shadow-md)]",
           "active:translate-y-px",
-          className
+          className,
         )}
         style={
           {
@@ -82,13 +82,13 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
               "group-hover:[box-shadow:inset_0_-6px_10px_color-mix(in_oklab,var(--primary-foreground)_25%,transparent)]",
 
               // on click
-              "group-active:[box-shadow:inset_0_-10px_10px_color-mix(in_oklab,var(--primary-foreground)_25%,transparent)]"
+              "group-active:[box-shadow:inset_0_-10px_10px_color-mix(in_oklab,var(--primary-foreground)_25%,transparent)]",
             )}
           />
         </Link>
       </AppButton>
     );
-  }
+  },
 );
 
 ShimmerButton.displayName = "ShimmerButton";

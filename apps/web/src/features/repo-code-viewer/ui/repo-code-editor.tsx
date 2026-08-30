@@ -63,7 +63,7 @@ export function RepoCodeEditor({
         const { languages } = await import("@codemirror/language-data");
 
         const langDesc = languages.find(
-          (l) => l.extensions.includes(extName) || l.alias.includes(extName)
+          (l) => l.extensions.includes(extName) || l.alias.includes(extName),
         );
 
         if (langDesc) {
@@ -174,7 +174,7 @@ export function RepoCodeEditor({
         }}
         onUpdate={(update) => {
           const searchChanged = update.transactions.some((tr) =>
-            tr.effects.some((e) => e.is(setSearchQuery))
+            tr.effects.some((e) => e.is(setSearchQuery)),
           );
 
           if (onStats && (update.docChanged || update.selectionSet || searchChanged)) {

@@ -7,7 +7,7 @@ import { buildSentinelSystemPrompt, buildSentinelUserPrompt } from "./prompts-re
 
 export async function executeSentinelPhase(
   instructions: string | undefined,
-  analysisId: string
+  analysisId: string,
 ): Promise<"SAFE" | "UNSAFE"> {
   let sentinelStatus: "SAFE" | "UNSAFE" = "SAFE";
 

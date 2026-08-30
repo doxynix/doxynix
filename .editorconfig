@@ -1,6 +1,7 @@
 # EditorConfig is awesome: https://editorconfig.org
 root = true
 
+# Base
 [*]
 charset = utf-8
 indent_style = space
@@ -8,21 +9,19 @@ indent_size = 2
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
-
-# TypeScript / JavaScript
-[*.{ts,tsx,js,jsx}]
-indent_size = 2
-
-# JSON, configs
-[*.{json,yml,yaml}]
-indent_size = 2
+max_line_length = 100
 
 # Markdown
 [*.md]
 trim_trailing_whitespace = false
+max_line_length = off
 
-# Shell scripts (husky hooks)
+# Shell
 [*.sh]
 indent_style = space
 indent_size = 2
 end_of_line = lf
+
+# Makefiles
+[Makefile]
+indent_style = tab

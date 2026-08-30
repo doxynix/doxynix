@@ -81,7 +81,7 @@ export default function barrelTransformer(fileInfo, api) {
       const newImportDeclarations = Array.from(newImportsMap.entries()).map(
         ([importPath, specs]) => {
           return j.importDeclaration(specs, j.literal(importPath));
-        }
+        },
       );
 
       if (newImportDeclarations.length > 0) {

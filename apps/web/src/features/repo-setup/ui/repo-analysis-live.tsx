@@ -81,7 +81,7 @@ export function RepoAnalysisLive({
             router.refresh();
           });
         },
-      }
+      },
     );
   };
 

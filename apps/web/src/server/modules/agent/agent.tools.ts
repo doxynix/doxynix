@@ -26,7 +26,7 @@ export const getAgentTools = (currentRepoId?: string) => ({
           z.object({
             filePath: z.string(),
             newContent: z.string(),
-          })
+          }),
         )
         .describe("The complete fixed file contents"),
       fixId: z.uuid().describe("The public UUID of the fix"),
@@ -174,7 +174,7 @@ export const getAgentTools = (currentRepoId?: string) => ({
       path: z
         .string()
         .describe(
-          "The exact relative path of the file that was audited (e.g. 'routes/auth/login/loginRoute.js')"
+          "The exact relative path of the file that was audited (e.g. 'routes/auth/login/loginRoute.js')",
         ),
     }),
   }),
@@ -458,7 +458,7 @@ export const getAgentTools = (currentRepoId?: string) => ({
 
       const allKeys = await trpc.apikey.list();
       const foundKey = allKeys.active.find(
-        (key) => key.name.toLowerCase() === keyIdentifier.toLowerCase()
+        (key) => key.name.toLowerCase() === keyIdentifier.toLowerCase(),
       );
 
       if (foundKey == null) {
@@ -553,14 +553,14 @@ export const getAgentTools = (currentRepoId?: string) => ({
         .describe(
           "Optional list of specific file paths or glob patterns (e.g., ['src/server/**/*', 'routes/auth/**/*.js', 'app.js']) " +
             "to restrict the static analysis scope. Instruct the user to specify files or folders if they want a partial scan. " +
-            "Defaults to ['**/*'] if the user wants a full repository scan."
+            "Defaults to ['**/*'] if the user wants a full repository scan.",
         ),
       language: z
         .string()
         .optional()
         .default("English")
         .describe(
-          "The target language for the documentation and report (e.g. 'English', 'Russian'). Defaults to 'English'."
+          "The target language for the documentation and report (e.g. 'English', 'Russian'). Defaults to 'English'.",
         ),
       repoId: z.uuid().describe("The public UUID of the repository to analyze").optional(),
     }),

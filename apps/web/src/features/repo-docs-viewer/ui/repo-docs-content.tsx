@@ -132,7 +132,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
       if (domNode.name === "blockquote") {
         const firstParagraph = (domNode.children as DOMNode[]).find(
-          (child): child is Element => isElement(child) && child.name === "p"
+          (child): child is Element => isElement(child) && child.name === "p",
         );
 
         if (firstParagraph != null) {
@@ -144,7 +144,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
               const textContent = child.data.trim();
 
               const m = /^["'‘“]?\[!(note|warning|tip|important|caution)]["'’”]?/i.exec(
-                textContent
+                textContent,
               );
 
               if (m != null) {
@@ -206,7 +206,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
             } as unknown as DOMNode;
 
             const firstTextNodeIndex = (firstParagraph.children as DOMNode[]).indexOf(
-              firstTextNode
+              firstTextNode,
             );
             const nextNodeIndex = firstTextNodeIndex + 1;
 
@@ -224,7 +224,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
                 {domToReact(
                   (domNode.children as DOMNode[]).filter((child) => child !== firstParagraph),
-                  parseOptions
+                  parseOptions,
                 )}
               </div>
             );
@@ -234,7 +234,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
                 variant={alertConfig.variant}
                 className={cn(
                   "not-prose my-6 rounded-xl border py-3.5 pl-11",
-                  alertConfig.className
+                  alertConfig.className,
                 )}
               >
                 <IconComponent className="absolute top-4 left-4" />

@@ -8,7 +8,7 @@ export function clampIntegerParam(
     fallback: number;
     max: number;
     min: number;
-  }
+  },
 ): number {
   if (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)) {
     return fallback;

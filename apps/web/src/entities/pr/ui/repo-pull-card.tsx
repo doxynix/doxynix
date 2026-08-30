@@ -59,7 +59,7 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
                 ? "text-destructive"
                 : pull.riskScore > 4
                   ? "text-warning"
-                  : "text-success"
+                  : "text-success",
             )}
           >
             {pull.riskScore}/10

@@ -26,7 +26,7 @@ export function DeleteAllReposDialog({ hasRepos }: Readonly<Props>) {
       {},
       {
         onSuccess: () => setOpen(false),
-      }
+      },
     );
   };
 

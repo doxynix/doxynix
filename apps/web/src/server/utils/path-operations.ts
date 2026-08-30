@@ -29,7 +29,7 @@ function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): string[
  */
 export function uniqueObjectPaths<T extends { path: string }>(
   items: Iterable<T>,
-  limit?: number
+  limit?: number,
 ): string[] {
   const paths = Array.from(items).map((i) => i.path);
   return uniqueNormalizedPaths(paths, limit);
@@ -40,7 +40,7 @@ export function uniqueObjectPaths<T extends { path: string }>(
  */
 export function uniqueStringPaths(
   paths: Iterable<false | null | string | undefined>,
-  limit?: number
+  limit?: number,
 ): string[] {
   const cleanPaths = compact(Array.from(paths)) as string[];
   return uniqueNormalizedPaths(cleanPaths, limit);
@@ -52,7 +52,7 @@ export function uniqueStringPaths(
 export function excludePath(
   paths: Iterable<string>,
   excludedPath: string,
-  limit?: number
+  limit?: number,
 ): string[] {
   const normalizedExcluded = normalize(excludedPath);
 

@@ -91,7 +91,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
             userId,
             repo.owner,
             repo.name,
-            branch
+            branch,
           );
 
           let paths = tree.map((t) => t[0] as string);
@@ -127,7 +127,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
             userId,
             repoId,
             path,
-            branch
+            branch,
           );
 
           const processedContent = shouldSkeletonize
@@ -150,7 +150,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
           .boolean()
           .optional()
           .describe(
-            "Whether to hide implementation details and keep signatures only. Defaults to true."
+            "Whether to hide implementation details and keep signatures only. Defaults to true.",
           ),
       }),
     }),
@@ -177,7 +177,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
                   userId,
                   repoId,
                   path,
-                  branch
+                  branch,
                 );
 
                 const processedContent = shouldSkeletonize
@@ -197,7 +197,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
                   success: false,
                 };
               }
-            })
+            }),
           );
         } catch (error) {
           appLogger.error({ error, msg: "AI Tool Failed: readMultipleFiles" });
@@ -210,7 +210,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
           .boolean()
           .optional()
           .describe(
-            "Whether to hide implementation details and keep signatures only. Defaults to true."
+            "Whether to hide implementation details and keep signatures only. Defaults to true.",
           ),
       }),
     }),
@@ -291,7 +291,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
           .string()
           .min(2)
           .describe(
-            "The term or keyword to search for (e.g., 'authMiddleware', 'createUser', 'Prisma.findUnique')"
+            "The term or keyword to search for (e.g., 'authMiddleware', 'createUser', 'Prisma.findUnique')",
           ),
       }),
     }),
@@ -326,7 +326,7 @@ export function buildRepositoryToolProfile(
   profile: RepositoryToolProfile,
   userId: number,
   repoId: string,
-  branch: string
+  branch: string,
 ): ToolSet {
   const allTools: ToolSet = buildRepositoryTools(userId, repoId, branch);
   const selectedTools: ToolSet = {};

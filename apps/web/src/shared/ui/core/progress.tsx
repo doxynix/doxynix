@@ -28,7 +28,7 @@ function Progress({
         data-slot="progress-indicator"
         className={cn(
           "transition-standard h-full w-full flex-1",
-          indicatorClassName || "bg-primary"
+          indicatorClassName || "bg-primary",
         )}
         style={{
           transform: `translateX(-${100 - percentage}%)`,

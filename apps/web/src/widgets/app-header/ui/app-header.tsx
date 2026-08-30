@@ -44,7 +44,7 @@ export function AppHeader() {
         "lowercase",
         index === segments.length - 1
           ? "max-w-[140px] xl:max-w-[300px]"
-          : "max-w-[70px] xl:max-w-[120px]"
+          : "max-w-[70px] xl:max-w-[120px]",
       ),
       href: `/${segments.slice(0, index + 1).join("/")}`,
       label,

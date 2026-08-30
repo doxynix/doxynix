@@ -94,7 +94,7 @@ export const githubAppService = {
     prisma: PrismaClientExtended,
     userIdNum: number,
     installationId: string,
-    state: string
+    state: string,
   ) {
     const instIdBigInt = BigInt(installationId);
     const inputInstIdNum = Number(installationId);
@@ -130,7 +130,7 @@ export const githubAppService = {
       const userOctokit = getPublicClient(validToken);
       const userInstallations = await userOctokit.paginate(
         userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
-        { per_page: 100 }
+        { per_page: 100 },
       );
 
       if (userInstallations.some((inst) => inst.id === inputInstIdNum)) {
@@ -252,7 +252,7 @@ export const githubAppService = {
 
       const userInstallations = await userOctokit.paginate(
         userOctokit.rest.apps.listInstallationsForAuthenticatedUser,
-        { per_page: 100 }
+        { per_page: 100 },
       );
 
       const ourAppId = Number(GITHUB_APP_ID);

@@ -197,7 +197,7 @@ function useMermaid({
         const { svg: svgOutput } = await mermaid.render(
           uniqueId,
           preprocessedChart.trim(),
-          renderRef.current
+          renderRef.current,
         );
 
         if (!isCancelled()) {

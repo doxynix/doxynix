@@ -18,11 +18,11 @@ describe("Users, Admin & Audit Flows", () => {
       alice.db.user.update({
         data: { name: "Alice Wonderland" },
         where: { publicId: alice.user.publicId },
-      })
+      }),
     ).resolves.toMatchObject({ name: "Alice Wonderland" });
 
     await expectDenied(
-      bob.db.user.update({ data: { name: "HACKED" }, where: { publicId: alice.user.publicId } })
+      bob.db.user.update({ data: { name: "HACKED" }, where: { publicId: alice.user.publicId } }),
     );
     await expectDenied(alice.db.user.delete({ where: { publicId: bob.user.publicId } }));
 
@@ -30,10 +30,10 @@ describe("Users, Admin & Audit Flows", () => {
       alice.db.user.update({
         data: { email: "bad-email" },
         where: { publicId: alice.user.publicId },
-      })
+      }),
     );
     await expectValidationFail(
-      alice.db.user.update({ data: { name: "" }, where: { publicId: alice.user.publicId } })
+      alice.db.user.update({ data: { name: "" }, where: { publicId: alice.user.publicId } }),
     );
   });
 
@@ -43,16 +43,16 @@ describe("Users, Admin & Audit Flows", () => {
     const bob = await createTestUser("Bob", "USER");
 
     await expectDenied(
-      alice.db.user.update({ data: { role: "ADMIN" }, where: { publicId: alice.user.publicId } })
+      alice.db.user.update({ data: { role: "ADMIN" }, where: { publicId: alice.user.publicId } }),
     );
 
     await expect(
-      admin.db.user.update({ data: { role: "ADMIN" }, where: { publicId: alice.user.publicId } })
+      admin.db.user.update({ data: { role: "ADMIN" }, where: { publicId: alice.user.publicId } }),
     ).resolves.toBeDefined();
 
     const aliceAdminDb = enhance(prisma, { user: { id: alice.user.id, role: "ADMIN" } });
     await expect(
-      aliceAdminDb.user.update({ data: { role: "ADMIN" }, where: { publicId: bob.user.publicId } })
+      aliceAdminDb.user.update({ data: { role: "ADMIN" }, where: { publicId: bob.user.publicId } }),
     ).resolves.toBeDefined();
   });
 
@@ -66,18 +66,18 @@ describe("Users, Admin & Audit Flows", () => {
     });
 
     await expect(
-      alice.db.auditLog.findUniqueOrThrow({ where: { id: log.id } })
+      alice.db.auditLog.findUniqueOrThrow({ where: { id: log.id } }),
     ).resolves.toBeDefined();
 
     await expectDenied(bob.db.auditLog.findUniqueOrThrow({ where: { id: log.id } }));
 
     await expectDenied(
-      alice.db.auditLog.update({ data: { payload: { tampered: true } }, where: { id: log.id } })
+      alice.db.auditLog.update({ data: { payload: { tampered: true } }, where: { id: log.id } }),
     );
     await expectDenied(alice.db.auditLog.delete({ where: { id: log.id } }));
 
     await expect(
-      admin.db.auditLog.findUniqueOrThrow({ where: { id: log.id } })
+      admin.db.auditLog.findUniqueOrThrow({ where: { id: log.id } }),
     ).resolves.toBeDefined();
   });
 

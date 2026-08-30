@@ -1,4 +1,4 @@
-import type { ScanResult } from "@doxynix/siem-shared";
+import type { ScanResult } from "@doxynix/shared";
 import { db } from "@server/core/db/db";
 import { cronSyncState, findings, incidents, rules } from "@server/core/db/schema";
 import { eq } from "drizzle-orm";

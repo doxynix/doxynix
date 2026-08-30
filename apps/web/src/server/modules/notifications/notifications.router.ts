@@ -47,7 +47,7 @@ export const notificationRouter = createTRPCRouter({
         deletedCount: z.number().int().min(0),
         message: z.string(),
         success: z.boolean(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const where = notificationsService.buildWhereClause(input);
@@ -72,7 +72,7 @@ export const notificationRouter = createTRPCRouter({
       z.object({
         items: z.array(NotificationsPublicSchema),
         meta: PaginationMetaSchema,
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const { cursor, isRead, limit, repoName, repoOwner, search, type } = input;
@@ -118,7 +118,7 @@ export const notificationRouter = createTRPCRouter({
         read: z.number().int(),
         total: z.number().int(),
         unread: z.number().int(),
-      })
+      }),
     )
     .query(async ({ ctx }) => {
       try {
@@ -147,7 +147,7 @@ export const notificationRouter = createTRPCRouter({
         message: z.string(),
         success: z.boolean(),
         updatedCount: z.number().int(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const where = notificationsService.buildWhereClause(input);

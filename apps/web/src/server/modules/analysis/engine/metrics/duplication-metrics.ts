@@ -30,7 +30,7 @@ type DuplicationSourceFile = RepositoryFile & {
 
 function toDuplicationSourceFiles(
   files: RepositoryFile[],
-  getFormatByFile: (path: string) => string | undefined
+  getFormatByFile: (path: string) => string | undefined,
 ): DuplicationSourceFile[] {
   const sourceFiles: DuplicationSourceFile[] = [];
 
@@ -48,10 +48,10 @@ function toDuplicationSourceFiles(
 }
 
 export async function calculateRepositoryDuplication(
-  files: RepositoryFile[]
+  files: RepositoryFile[],
 ): Promise<DuplicationReport> {
   const validFiles = files.filter(
-    (file) => !ProjectPolicy.isTestFile(file.path) && !ProjectPolicy.isConfigFile(file.path)
+    (file) => !ProjectPolicy.isTestFile(file.path) && !ProjectPolicy.isConfigFile(file.path),
   );
 
   const fallbackReport: DuplicationReport = {
@@ -92,7 +92,7 @@ export async function calculateRepositoryDuplication(
 
     const totalLinesInValidFiles = sumBy(
       sourceFiles,
-      (file) => file.content.split(/\r?\n/u).length
+      (file) => file.content.split(/\r?\n/u).length,
     );
 
     let totalDuplicatedLines = 0;

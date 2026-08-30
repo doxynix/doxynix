@@ -36,7 +36,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
 
   const handleUpdate = <K extends keyof NotificationsParsersState>(
     key: K,
-    value: NotificationsParsersState[K]
+    value: NotificationsParsersState[K],
   ) => {
     void setFilters({ [key]: value, page: null });
   };

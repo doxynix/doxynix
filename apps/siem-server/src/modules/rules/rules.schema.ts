@@ -1,4 +1,4 @@
-import { SEVERITY_LEVELS } from "@doxynix/siem-shared";
+import { SEVERITY_LEVELS } from "@doxynix/shared";
 import { paginationQuerySchema } from "@server/core/db/pagination";
 import { selectRuleSchema } from "@server/core/db/schema";
 import { z } from "zod";

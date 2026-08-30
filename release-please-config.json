@@ -31,9 +31,9 @@
             "bump-minor-pre-major": true,
             "bump-patch-pre-major": true
         },
-        "packages/siem-shared": {
+        "packages/shared": {
             "release-type": "node",
-            "package-name": "@doxynix/siem-shared",
+            "package-name": "@doxynix/shared",
             "bump-minor-pre-major": true,
             "bump-patch-pre-major": true
         }

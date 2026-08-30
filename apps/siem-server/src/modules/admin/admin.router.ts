@@ -1,10 +1,10 @@
 import { zValidator } from "@hono/zod-validator";
 import { auth } from "@server/core/auth/auth";
-import { type AuthEnv, requireAuth, requireRole } from "@server/core/middleware/auth.middleware";
+import { requireAuth, requireRole } from "@server/core/middleware/auth.middleware";
 import { AdminAddUsersSchema } from "@server/modules/admin/admin.schema";
 import { Hono } from "hono";
 
-export const adminRouter = new Hono<AuthEnv>()
+export const adminRouter = new Hono()
   .use("*", requireAuth, requireRole("admin"))
   .post("/users", zValidator("json", AdminAddUsersSchema), async (c) => {
     const { email, password, role, name } = c.req.valid("json");

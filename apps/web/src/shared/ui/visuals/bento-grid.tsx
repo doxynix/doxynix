@@ -46,7 +46,7 @@ const BentoCard = ({
       "bg-background [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
       // dark styles
       "dark:bg-background transform-gpu dark:[box-shadow:0_-20px_80px_-20px_color-mix(in_oklab,var(--foreground)_14%,transparent)_inset] dark:[border:1px_solid_var(--border)]",
-      className
+      className,
     )}
     {...props}
   >
@@ -60,7 +60,7 @@ const BentoCard = ({
 
       <div
         className={cn(
-          "transition-standard pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center group-hover:translate-y-0 group-hover:opacity-100 lg:hidden"
+          "transition-standard pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center group-hover:translate-y-0 group-hover:opacity-100 lg:hidden",
         )}
       >
         <AppButton asChild size="sm" variant="link" className="pointer-events-auto p-0">
@@ -74,7 +74,7 @@ const BentoCard = ({
 
     <div
       className={cn(
-        "transition-standard pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 lg:flex"
+        "transition-standard pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 lg:flex",
       )}
     >
       <AppButton asChild size="sm" variant="link" className="pointer-events-auto p-0">

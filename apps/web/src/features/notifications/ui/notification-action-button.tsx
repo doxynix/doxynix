@@ -39,7 +39,7 @@ export function NotificationActionButton({
         }}
         className={cn(
           "text-muted-foreground hover:text-foreground transition-standard z-10 size-6 opacity-0 not-md:opacity-100 group-hover:opacity-100",
-          className
+          className,
         )}
       >
         <Icon />

@@ -136,7 +136,7 @@ export async function callWithFallback<T>({
 
           clearTimeout(timeoutId);
           taskLogger.success(
-            `AI (${String(attemptMetadata.phase ?? taskType)}): responded successfully.`
+            `AI (${String(attemptMetadata.phase ?? taskType)}): responded successfully.`,
           );
           return result.output as T;
         }
@@ -171,7 +171,7 @@ export async function callWithFallback<T>({
 
           clearTimeout(timeoutId);
           taskLogger.success(
-            `AI Text (${String(attemptMetadata.phase ?? taskType)}): generated successfully.`
+            `AI Text (${String(attemptMetadata.phase ?? taskType)}): generated successfully.`,
           );
           return result.text as unknown as T;
         }

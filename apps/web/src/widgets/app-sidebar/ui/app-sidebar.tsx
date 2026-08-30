@@ -41,7 +41,7 @@ export function AppSidebar() {
       {
         getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
         initialCursor: 1,
-      }
+      },
     );
 
   const { data: stats } = trpc.notification.getStats.useQuery();
@@ -55,7 +55,7 @@ export function AppSidebar() {
       collapsible="offcanvas"
       variant="sidebar"
       className={cn(
-        isRepoOwnerPage ? "top-29 h-[calc(100dvh-7rem)]" : "top-16 h-[calc(100dvh-4rem)]"
+        isRepoOwnerPage ? "top-29 h-[calc(100dvh-7rem)]" : "top-16 h-[calc(100dvh-4rem)]",
       )}
     >
       <nav aria-label="Main navigation">
@@ -83,7 +83,7 @@ export function AppSidebar() {
                   <CollapsibleTrigger
                     disabled={state === "collapsed"}
                     className={cn(
-                      "text-muted-foreground hover:bg-accent hover:text-foreground mb-1 flex w-full cursor-pointer justify-between px-3"
+                      "text-muted-foreground hover:bg-accent hover:text-foreground mb-1 flex w-full cursor-pointer justify-between px-3",
                     )}
                   >
                     <span>{t("recent_repositories")}</span>
@@ -109,7 +109,7 @@ export function AppSidebar() {
                               label={`${repo.owner}/${repo.name}`}
                             />
                           </SidebarMenuItem>
-                        ))
+                        )),
                       )}
                       {!isLoading && data?.pages[0]?.items.length === 0 && state === "expanded" && (
                         <div className="text-muted-foreground truncate px-4 py-2 text-xs">

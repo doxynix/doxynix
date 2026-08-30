@@ -44,7 +44,9 @@ export function RepoMapCustomControls() {
             onClick={item.action}
             className={cn(
               "transition-standard",
-              hide ? "pointer-events-none -translate-x-full opacity-0" : "translate-x-0 opacity-100"
+              hide
+                ? "pointer-events-none -translate-x-full opacity-0"
+                : "translate-x-0 opacity-100",
             )}
           >
             <item.icon />

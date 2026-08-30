@@ -1,10 +1,10 @@
 import { zValidator } from "@hono/zod-validator";
-import { type AuthEnv, requireAuth } from "@server/core/middleware/auth.middleware";
+import { requireAuth } from "@server/core/middleware/auth.middleware";
 import { Hono } from "hono";
 import { getIncidentsQuerySchema, incidentParamsSchema } from "./incidents.schema";
 import { getIncidentById, getIncidentsList } from "./incidents.service";
 
-export const incidentsRouter = new Hono<AuthEnv>()
+export const incidentsRouter = new Hono()
   .use("*", requireAuth)
   .get("/", zValidator("query", getIncidentsQuerySchema), async (c) => {
     const query = c.req.valid("query");

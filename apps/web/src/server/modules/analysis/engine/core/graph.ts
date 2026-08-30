@@ -29,7 +29,7 @@ const RELATIVE_IMPORT_SUFFIXES = [
 export function resolveRelativeImport(
   fromPath: string,
   importPath: string,
-  fileSet: Set<string>
+  fileSet: Set<string>,
 ): null | string {
   const normalizedImport = normalize(importPath);
   if (!normalizedImport.startsWith(".")) return null;
@@ -47,7 +47,7 @@ export function resolveRelativeImport(
 function resolveAliasImport(
   importPath: string,
   fileSet: Set<string>,
-  aliasRules: AliasRule[]
+  aliasRules: AliasRule[],
 ): null | string {
   if (aliasRules.length === 0) return null;
 
@@ -71,7 +71,7 @@ export function resolveModuleImport(
   importPath: string,
   fileSet: Set<string>,
   filesByBaseName: Map<string, string[]>,
-  aliasRules: AliasRule[] = []
+  aliasRules: AliasRule[] = [],
 ): null | string {
   const aliasResolved = resolveAliasImport(importPath, fileSet, aliasRules);
   if (aliasResolved != null) return aliasResolved;

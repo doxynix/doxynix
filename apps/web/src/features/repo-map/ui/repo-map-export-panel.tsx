@@ -38,7 +38,7 @@ export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props
       }
 
       const standardProps = Array.from(window.getComputedStyle(document.documentElement)).filter(
-        (key) => !key.startsWith("--") && !key.startsWith("-webkit-") && !key.startsWith("-moz-")
+        (key) => !key.startsWith("--") && !key.startsWith("-webkit-") && !key.startsWith("-moz-"),
       );
 
       const padding = 50;
@@ -57,7 +57,7 @@ export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props
         filter: (node: Node) => {
           if (node instanceof HTMLElement) {
             return !["react-flow__controls", "react-flow__minimap", "react-flow__panel"].some(
-              (cls) => node.classList.contains(cls)
+              (cls) => node.classList.contains(cls),
             );
           }
           return true;

@@ -68,7 +68,7 @@ function buildOverlapEvidence(paths: string[]) {
 function buildPrimaryArchitectureEvidence(context: ArtifactContext) {
   return buildEvidence(
     context.moduleMap.slice(0, 10).map((module) => module.path),
-    "Primary runtime module"
+    "Primary runtime module",
   );
 }
 
@@ -76,7 +76,7 @@ function buildReferenceRootsEvidence(context: ArtifactContext) {
   return buildEvidence(
     context.referenceEvidence.length > 0
       ? context.referenceEvidence
-      : context.metrics.mostComplexFiles
+      : context.metrics.mostComplexFiles,
   );
 }
 
@@ -118,7 +118,7 @@ function buildCoreFacts(context: ArtifactContext): ArtifactFact[] {
           : "No dedicated configuration files were recognized by the analyzer.",
       evidence: buildEvidence(
         evidence.configs.map((config) => config.path),
-        "Configuration inventory"
+        "Configuration inventory",
       ),
       id: "configuration-inventory",
       title: "Configuration inventory is explicit",
@@ -177,7 +177,7 @@ function buildArchitectureFacts(context: ArtifactContext): ArtifactFact[] {
         : "No dependency cycles were detected in the local dependency graph.",
     evidence: buildEvidence(
       cycleEvidencePaths,
-      cyclesCount > 0 ? "Dependency cycle node" : "Graph roots"
+      cyclesCount > 0 ? "Dependency cycle node" : "Graph roots",
     ),
     id: "dependency-cycles",
     title:
@@ -378,7 +378,7 @@ function buildDuplicationFinding(context: ArtifactContext): ArtifactFinding | nu
     confidence: 82,
     evidence: buildEvidence(
       uniqueDuplicatePaths.length > 0 ? uniqueDuplicatePaths : metrics.mostComplexFiles,
-      "Identified code clone module"
+      "Identified code clone module",
     ),
     id: "duplication-pressure",
     score: clamp(report.duplicationPercentage * 6, 0, 100),
@@ -441,7 +441,7 @@ function buildOnboardingFinding(context: ArtifactContext): ArtifactFinding | nul
     confidence: 68,
     evidence: buildEvidence(
       primaryEntrypoints.length > 0 ? primaryEntrypoints : evidence.orphanModules,
-      "Onboarding starting point"
+      "Onboarding starting point",
     ),
     id: "onboarding-friction",
     score: clamp(onboardingRiskScore, 0, 100),
@@ -478,7 +478,7 @@ function buildArtifactContext(params: ArtifactBuildParams): ArtifactContext {
   const primaryEntrypoints = getPrimaryEntrypointPaths(evidence.entrypoints);
   const moduleMap = getPrimaryArchitectureModules(evidence.modules);
   const publicSurfacePaths = Array.from(
-    new Set(evidence.publicSurface.map((symbol) => symbol.path))
+    new Set(evidence.publicSurface.map((symbol) => symbol.path)),
   ).toSorted((left, right) => left.localeCompare(right));
 
   const referenceEvidence = buildReferenceEvidencePaths({

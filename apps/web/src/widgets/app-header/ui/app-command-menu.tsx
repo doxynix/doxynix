@@ -75,7 +75,7 @@ export function AppCommandMenu() {
         enabled: open,
         getNextPageParam: (lastPage) => lastPage.meta.nextCursor,
         initialCursor: 1,
-      }
+      },
     );
 
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -90,7 +90,7 @@ export function AppCommandMenu() {
           void fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const currentTarget = observerTarget.current;
@@ -142,7 +142,7 @@ export function AppCommandMenu() {
     ? commandMenuItems
     : commandMenuItems.filter(
         (item) =>
-          (item.label.toLowerCase().includes(s) || item.url?.toLowerCase().includes(s)) ?? false
+          (item.label.toLowerCase().includes(s) || item.url?.toLowerCase().includes(s)) ?? false,
       );
 
   return (
@@ -153,7 +153,7 @@ export function AppCommandMenu() {
           aria-label="Search site"
           onClick={() => setOpen(true)}
           className={cn(
-            "text-muted-foreground lg:border-border lg:bg-surface-hover relative size-9 justify-start rounded-xl text-sm font-normal not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12"
+            "text-muted-foreground lg:border-border lg:bg-surface-hover relative size-9 justify-start rounded-xl text-sm font-normal not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12",
           )}
         >
           <Search className="absolute top-2.25 left-2.25" />
@@ -189,7 +189,7 @@ export function AppCommandMenu() {
                     className={cn(
                       isDestructive &&
                         "text-destructive data-[selected=true]:bg-destructive/10 data-[selected=true]:text-destructive",
-                      "flex items-center justify-between"
+                      "flex items-center justify-between",
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -234,7 +234,7 @@ export function AppCommandMenu() {
                   <ChevronDown
                     className={cn(
                       "transition-standard transition-transform",
-                      isReposExpanded && "rotate-180"
+                      isReposExpanded && "rotate-180",
                     )}
                   />
                 </AppButton>

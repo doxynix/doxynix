@@ -1,8 +1,7 @@
 {
   "extends": "./base.json",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "nodenext",
-    "moduleResolution": "nodenext"
+    "noEmit": true,
+    "types": ["node"]
   }
 }

@@ -242,7 +242,7 @@ export function AuthForm() {
       if (error) {
         if ("code" in error && error.code === "NO_CREDENTIALS") {
           toast.error(
-            "No security keys found on this device. Please log in using email or social accounts first."
+            "No security keys found on this device. Please log in using email or social accounts first.",
           );
         } else {
           toast.error(error.message ?? "Authentication failed");
@@ -295,7 +295,7 @@ export function AuthForm() {
             "hidden max-w-2xl flex-col gap-8 transition-all duration-300 ease-out lg:flex",
             isSent || isTwoFactorRequired
               ? "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
-              : "relative scale-100 opacity-100"
+              : "relative scale-100 opacity-100",
           )}
         >
           <div className="flex items-center gap-3">
@@ -343,7 +343,7 @@ export function AuthForm() {
               "bg-card border-border relative flex w-full flex-col gap-6 rounded-[1.75rem] border p-6 transition-all duration-300 ease-out sm:p-8",
               isSent || isTwoFactorRequired
                 ? "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
-                : "relative scale-100 opacity-100"
+                : "relative scale-100 opacity-100",
             )}
           >
             <div className="flex items-center justify-between gap-3 lg:hidden">
@@ -492,7 +492,7 @@ export function AuthForm() {
               "bg-card border-border relative flex w-full flex-col gap-6 rounded-[1.75rem] border p-6 text-center transition-all duration-300 ease-out sm:p-8",
               isTwoFactorRequired
                 ? "relative scale-100 opacity-100"
-                : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
+                : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0",
             )}
           >
             <div className="flex w-full items-center justify-between border-b pb-4">
@@ -562,7 +562,7 @@ export function AuthForm() {
               "bg-card border-border relative flex w-full flex-col items-center justify-center gap-4 rounded-[1.75rem] border p-8 text-center transition-all duration-300 ease-out",
               isSent
                 ? "relative scale-100 opacity-100"
-                : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0"
+                : "pointer-events-none absolute inset-0 scale-[0.98] opacity-0",
             )}
           >
             <div className="mb-2 flex size-20 items-center justify-center rounded-full">

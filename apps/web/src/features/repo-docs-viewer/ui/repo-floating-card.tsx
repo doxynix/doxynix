@@ -120,7 +120,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
       nodeId,
       repoId,
     },
-    { enabled: hoveredFile !== null }
+    { enabled: hoveredFile !== null },
   );
 
   if (coords == null || hoveredFile == null) return null;
@@ -195,7 +195,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
                     variant="secondary"
                     className={cn(
                       "flex items-center gap-1 px-2 py-0.5 text-[9px] font-semibold select-none",
-                      marker.color
+                      marker.color,
                     )}
                   >
                     <Icon className="size-2.5" />
@@ -234,7 +234,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
                       <span
                         className={cn(
                           "shrink-0 font-bold",
-                          isDestructive ? "text-destructive" : ""
+                          isDestructive ? "text-destructive" : "",
                         )}
                       >
                         {value}
@@ -248,6 +248,6 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
         </div>
       )}
     </div>,
-    document.body
+    document.body,
   );
 }

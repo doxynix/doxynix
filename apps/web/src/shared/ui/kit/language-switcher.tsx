@@ -46,7 +46,7 @@ export function Flag({ alt, src }: Readonly<{ alt: string; src: string }>) {
         }}
         className={cn(
           "object-cover transition-opacity duration-300",
-          loaded ? "opacity-100" : "opacity-0"
+          loaded ? "opacity-100" : "opacity-0",
         )}
       />
     </div>
@@ -66,7 +66,7 @@ export function LanguageSwitcher() {
     });
   };
   const translationKeys = LOCALES.map(
-    (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const
+    (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const,
   );
 
   return (

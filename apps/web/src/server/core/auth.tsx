@@ -323,7 +323,7 @@ export const auth = betterAuth({
 
         const { reason: limitReason, success } = await emailSignInLimiter.limit(
           `${normalizedEmail}:${ip}`,
-          { ip }
+          { ip },
         );
         if (!success) {
           appLogger.warn({

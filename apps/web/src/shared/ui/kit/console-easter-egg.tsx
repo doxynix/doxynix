@@ -31,7 +31,7 @@ export function ConsoleEasterEgg() {
 
     console.info(
       "%cWe see you like to look under the hood. \nDoxynix was created by developers for developers.\n\nLike the project? Have any ideas? \nWrite to us: hello@doxynix.space",
-      textStyle
+      textStyle,
     );
 
     const asciiStyle = `color: ${getThemeValue("--foreground", "oklch(0.955 0.003 255)")}; font-weight: bold; font-family: monospace;`;

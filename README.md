@@ -82,7 +82,7 @@ graph TB
 | [`apps/siem-server`](apps/siem-server) | `@doxynix/siem-server` | Telemetry processing, security audit logging, Drizzle ORM | 🔒 **Internal (Admins)** |
 | [`apps/siem-client`](apps/siem-client) | `@doxynix/siem-client` | Security operations dashboard, real-time incident console | 🔒 **Internal (Admins)** |
 | [`packages/cli`](packages/cli) | `@doxynix/cli` | Terminal interface for developers and CI/CD runners | 🚧 **Public (MVP)** |
-| [`packages/siem-shared`](packages/siem-shared) | `@doxynix/siem-shared` | Shared Zod schemas, validation contracts, and domain types | 🔒 **Internal** |
+| [`packages/shared`](packages/shared) | `@doxynix/shared` | Shared Zod schemas, validation contracts, and domain types | 🔒 **Internal** |
 | [`packages/config`](packages/config) | `@doxynix/config` | Shared configurations for Biome, TypeScript, and ESLint | 🌐 **Shared** |
 
 ---

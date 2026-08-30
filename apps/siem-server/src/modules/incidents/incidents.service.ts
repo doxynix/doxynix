@@ -1,4 +1,4 @@
-import type { PaginatedResponse } from "@doxynix/siem-shared";
+import type { PaginatedResponse } from "@doxynix/shared";
 import { db } from "@server/core/db/db";
 import { executePaginatedQuery } from "@server/core/db/pagination";
 import { type FindingSelect, type IncidentSelect, incidents } from "@server/core/db/schema";

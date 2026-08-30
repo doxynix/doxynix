@@ -32,10 +32,10 @@ const knownLanguageExtensions = Array.from(
     Object.values(languageData)
       .filter(
         (info): info is LinguistInfo =>
-          info != null && typeof info === "object" && "extensions" in info
+          info != null && typeof info === "object" && "extensions" in info,
       )
-      .flatMap((language) => language.extensions ?? [])
-  )
+      .flatMap((language) => language.extensions ?? []),
+  ),
 );
 
 function normalizeExtension(value: string) {

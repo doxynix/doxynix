@@ -138,7 +138,7 @@ function calculateLineSimilarity(line1: string, line2: string): number {
 function healFindingLine(
   lineMap: Map<string, number>,
   codeSnippet: string,
-  hallucinatedLine: number
+  hallucinatedLine: number,
 ): number {
   const snippetLines = codeSnippet
     .split("\n")
@@ -177,7 +177,7 @@ async function updateCommitStatus(
   sha: string,
   state: "error" | "failure" | "pending" | "success",
   description: string,
-  prNumber: number
+  prNumber: number,
 ) {
   try {
     const targetUrl = `https://doxynix.space/dashboard/repo/${owner}/${repo}/pull/${prNumber}`;
@@ -233,7 +233,7 @@ export const analyzePrTask = task({
         payload.headSha,
         "pending",
         "Doxynix is analyzing your changes...",
-        payload.prNumber
+        payload.prNumber,
       );
 
       const lastFullAnalysis = await prisma.analysis.findFirst({
@@ -253,7 +253,7 @@ export const analyzePrTask = task({
       await analysisRepo.updatePRAnalysisStatus(
         prisma,
         payload.analysisId,
-        "ANALYZING" as PRAnalysisStatus
+        "ANALYZING" as PRAnalysisStatus,
       );
 
       prAnalysisLogger.analyzeStarted(payload.repoId, payload.prNumber, config.tokenBudget);
@@ -289,7 +289,7 @@ export const analyzePrTask = task({
           filePath: file.filename,
           previousFilePath: file.previousFilename,
           status: file.status,
-        }))
+        })),
       );
 
       const analyzer = new DifferentialAnalyzer(config);
@@ -307,7 +307,7 @@ export const analyzePrTask = task({
           branch: payload.headSha,
           repoId: repo.publicId,
           userId: Number(repo.userId),
-        }
+        },
       );
 
       const fileLineMaps = new Map<string, Map<string, number>>();
@@ -352,7 +352,7 @@ export const analyzePrTask = task({
             payload.owner,
             payload.repoName,
             payload.prNumber,
-            result.findings
+            result.findings,
           );
           const { data: prData } = await octokit.rest.pulls.get({
             owner: payload.owner,
@@ -403,7 +403,7 @@ export const analyzePrTask = task({
           payload.prNumber,
           payload.headSha,
           validatedInlineFindings,
-          config.commentStyle
+          config.commentStyle,
         );
 
         prAnalysisLogger.commentsPosted(payload.repoId, payload.prNumber, postedComments.length);
@@ -446,7 +446,7 @@ export const analyzePrTask = task({
         {
           findingsJson: validated.success ? validated.data : candidate,
           riskScore: result.riskScore,
-        }
+        },
       );
 
       await updateCommitStatus(
@@ -456,14 +456,14 @@ export const analyzePrTask = task({
         payload.headSha,
         "success",
         `Doxynix Analysis completed. ${result.findings.length} findings identified.`,
-        payload.prNumber
+        payload.prNumber,
       );
 
       prAnalysisLogger.analyzeCompleted(
         payload.repoId,
         payload.prNumber,
         duration,
-        result.findings.length
+        result.findings.length,
       );
 
       return {
@@ -485,7 +485,7 @@ export const analyzePrTask = task({
           payload.headSha,
           "failure",
           `Doxynix Analysis failed: ${errorMsg}`,
-          payload.prNumber
+          payload.prNumber,
         );
       }
 
@@ -495,7 +495,7 @@ export const analyzePrTask = task({
         "FAILED" as PRAnalysisStatus,
         {
           error: errorMsg,
-        }
+        },
       );
 
       prAnalysisLogger.analyzeFailed(payload.repoId, payload.prNumber, errorMsg);

@@ -94,7 +94,7 @@ export function serializeAllowedPaths(paths: string[]): string {
 }
 
 export function buildWriterSectionPayloads(
-  documentationInput: DocumentationInputSnapshot
+  documentationInput: DocumentationInputSnapshot,
 ): Record<"api" | "architecture" | "changelog" | "contributing" | "readme", WriterPayload> {
   return {
     api: {

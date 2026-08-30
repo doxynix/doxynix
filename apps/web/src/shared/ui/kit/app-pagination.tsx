@@ -64,7 +64,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
       className={cn(
         className,
         isAnyLoading && "opacity-60 transition-opacity",
-        meta.totalCount === 0 && "hidden"
+        meta.totalCount === 0 && "hidden",
       )}
     >
       <PaginationContent>
@@ -110,7 +110,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
                 onClick={() => !isPageDisabled && handlePageChange(page, page)}
                 className={cn(
                   !isPageDisabled && "cursor-pointer",
-                  page === meta.currentPage && "text-foreground opacity-100!"
+                  page === meta.currentPage && "text-foreground opacity-100!",
                 )}
               >
                 {isCurrentPageLoading ? <Spinner /> : page}
@@ -128,7 +128,7 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             className={cn(
               navBtnClass,
               "pr-2.5 pl-4",
-              isNextDisabled ? "opacity-50" : "cursor-pointer"
+              isNextDisabled ? "opacity-50" : "cursor-pointer",
             )}
           >
             <span className="mr-1">{t("next")}</span>

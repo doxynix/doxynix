@@ -45,7 +45,7 @@ function getIndent(line: string): string {
 function adjustIndentation(
   replaceLines: string[],
   searchIndent: string,
-  targetIndent: string
+  targetIndent: string,
 ): string[] {
   if (searchIndent === targetIndent) return replaceLines;
 
@@ -89,7 +89,7 @@ class FixGenerator {
    */
   static async generateDiffsFromContentPublic(
     originalContents: Record<string, string>,
-    fixedFiles: FixedFileContent[]
+    fixedFiles: FixedFileContent[],
   ): Promise<GeneratedDiff[]> {
     const diffs: GeneratedDiff[] = [];
 
@@ -113,7 +113,7 @@ class FixGenerator {
         original,
         newContent,
         "Original",
-        "AI Fixed"
+        "AI Fixed",
       );
 
       let additions = 0;
@@ -145,7 +145,7 @@ class FixGenerator {
 
   static generateFixRecommendations(
     findings: FindingInput[],
-    fileContents: Record<string, string>
+    fileContents: Record<string, string>,
   ): FixRecommendation[] {
     const findingsByType = groupBy(findings, (f) => f.type);
 
@@ -288,7 +288,7 @@ export class FixService {
         const adjustedReplaceLines = adjustIndentation(
           normalizedReplace.split("\n"),
           originalSearchIndent,
-          matchedIndent
+          matchedIndent,
         );
 
         fileLines.splice(matchedIndex, searchLines.length, ...adjustedReplaceLines);
@@ -338,7 +338,7 @@ export class FixService {
         const adjustedReplaceLines = adjustIndentation(
           normalizedReplace.split("\n"),
           originalSearchIndent,
-          bestWindowIndent
+          bestWindowIndent,
         );
 
         fileLines.splice(bestIndex, searchLines.length, ...adjustedReplaceLines);
@@ -362,7 +362,7 @@ export class FixService {
    */
   private static parseFixedCodeResponse(
     response: string,
-    originalContents: Record<string, string>
+    originalContents: Record<string, string>,
   ): Record<string, string> {
     const fixedCode: Record<string, string> = {};
 
@@ -393,7 +393,7 @@ export class FixService {
       repoId: string;
       repoName: string;
       title: string;
-    }
+    },
   ): Promise<{ prNumber: number; prUrl: string }> {
     const { branch, defaultBranch, fixedFiles, owner, repoName, title } = input;
 
@@ -469,7 +469,7 @@ export class FixService {
   }> {
     const recommendations = FixGenerator.generateFixRecommendations(
       input.findings,
-      input.fileContents
+      input.fileContents,
     );
 
     if (recommendations.length === 0) {
@@ -516,7 +516,7 @@ export class FixService {
 
       const diffs = await FixGenerator.generateDiffsFromContentPublic(
         input.fileContents,
-        validFixedFiles
+        validFixedFiles,
       );
 
       appLogger.info({

@@ -1,4 +1,4 @@
-import { APP_EVENTS, bus } from "@server/core/bus";
+import { APP_EVENTS, bus, type LogsIngestedPayload } from "@server/core/bus";
 import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
 
@@ -7,7 +7,7 @@ export async function handleLogStream(c: Context) {
   c.header("Cache-Control", "no-cache");
 
   return streamSSE(c, async (stream) => {
-    const listener = async (data: { logs: Array<{ timestamp: string; message: string }> }) => {
+    const listener = async (data: LogsIngestedPayload) => {
       try {
         for (const log of data.logs) {
           await stream.writeSSE({

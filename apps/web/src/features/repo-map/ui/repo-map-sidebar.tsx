@@ -22,13 +22,13 @@ export function RepoMapSidebar({ nodeId, onClose, onNavigate, repoId }: Readonly
 
   const { data: workspace, isLoading: isWorkspaceLoading } = trpc.analysis.getWorkspace.useQuery(
     { aid: aid ?? undefined, repoId },
-    { enabled: shouldLoadWorkspace }
+    { enabled: shouldLoadWorkspace },
   );
 
   const { data: nodeContext, isLoading: isNodeContextLoading } =
     trpc.analysis.getNodeContext.useQuery(
       { aid: aid ?? undefined, nodeId: nodeId ?? "", repoId },
-      { enabled: shouldLoadNodeContext }
+      { enabled: shouldLoadNodeContext },
     );
 
   return (

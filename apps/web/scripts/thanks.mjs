@@ -335,7 +335,7 @@ try {
   });
 
   const finalData = Object.values(grouped).sort(
-    (a, b) => b.packages.length - a.packages.length || a.author.localeCompare(b.author)
+    (a, b) => b.packages.length - a.packages.length || a.author.localeCompare(b.author),
   );
 
   const outputPath = "./src/shared/data/licenses.json";

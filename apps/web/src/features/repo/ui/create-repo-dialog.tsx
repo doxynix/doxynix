@@ -50,7 +50,7 @@ export function CreateRepoDialog() {
     {},
     {
       enabled: false,
-    }
+    },
   );
 
   const open = useCreateRepoOpen();
@@ -101,7 +101,7 @@ export function CreateRepoDialog() {
     {
       enabled: debouncedValue.length >= 2 && !isUrl,
       staleTime: STALE_TIME,
-    }
+    },
   );
 
   const {
@@ -113,7 +113,7 @@ export function CreateRepoDialog() {
     {
       enabled: open,
       staleTime: STALE_TIME,
-    }
+    },
   );
 
   const closeDialog = () => {

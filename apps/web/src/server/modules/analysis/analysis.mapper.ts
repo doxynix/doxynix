@@ -56,7 +56,7 @@ export const analysisMapper = {
     findings: ParsedFinding[],
     analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>,
     topLevelNodeById: Map<string, TopLevelImpactNode>,
-    nodeDetailCache: Map<string, ReturnType<typeof analyzeContext.getStructureNode>>
+    nodeDetailCache: Map<string, ReturnType<typeof analyzeContext.getStructureNode>>,
   ) {
     const grouped = new Map<string, typeof changedFiles>();
 
@@ -73,12 +73,12 @@ export const analysisMapper = {
           nodeId,
           analyzeContext,
           topLevelNodeById,
-          nodeDetailCache
+          nodeDetailCache,
         );
         if (matchedNode == null) return null;
 
         const relatedFindings = findings.filter((finding) =>
-          files.some((file) => file.filePath === finding.file)
+          files.some((file) => file.filePath === finding.file),
         );
         const findingCount = relatedFindings.length;
         const impactScore = this.computeImpactScore(
@@ -88,7 +88,7 @@ export const analysisMapper = {
             api: matchedNode.kind === "api",
             entrypoint: false,
             risk: findingCount > 0,
-          }
+          },
         );
 
         return {
@@ -108,14 +108,14 @@ export const analysisMapper = {
       .filter((item): item is NonNullable<typeof item> => item != null)
       .toSorted(
         (left, right) =>
-          right.impactScore - left.impactScore || left.label.localeCompare(right.label)
+          right.impactScore - left.impactScore || left.label.localeCompare(right.label),
       );
   },
 
   buildAffectedZones(
     changedFiles: Array<PRImpactPayload["changedFiles"][number]>,
     findings: ParsedFinding[],
-    zoneNodeById: Map<string, TopLevelImpactNode>
+    zoneNodeById: Map<string, TopLevelImpactNode>,
   ) {
     const findingsByFile = this.countFindingsByFile(findings);
     const grouped = new Map<string, typeof changedFiles>();
@@ -151,7 +151,7 @@ export const analysisMapper = {
       .filter((item): item is NonNullable<typeof item> => item != null)
       .toSorted(
         (left, right) =>
-          right.impactScore - left.impactScore || left.label.localeCompare(right.label)
+          right.impactScore - left.impactScore || left.label.localeCompare(right.label),
       );
   },
 
@@ -160,7 +160,7 @@ export const analysisMapper = {
     changedFiles: Array<PRImpactPayload["changedFiles"][number]>,
     zoneNodeById: Map<string, Pick<TopLevelImpactNode, "label">>,
     owner?: string,
-    name?: string
+    name?: string,
   ) {
     const fileByPath = new Map(changedFiles.map((file) => [file.filePath, file] as const));
 
@@ -183,7 +183,7 @@ export const analysisMapper = {
       })
       .toSorted(
         (left, right) =>
-          right.riskLevel - left.riskLevel || left.filePath.localeCompare(right.filePath)
+          right.riskLevel - left.riskLevel || left.filePath.localeCompare(right.filePath),
       );
 
     return Promise.all(
@@ -199,19 +199,19 @@ export const analysisMapper = {
           {
             revalidate: false,
             tags: ["findings", owner ?? "unknown", name ?? "unknown", finding.id],
-          }
+          },
         )();
 
         return {
           ...finding,
           messageHtml,
         };
-      })
+      }),
     );
   },
 
   coerceAnalysisPayload(
-    analysis: LatestCompletedAnalysis | null | undefined
+    analysis: LatestCompletedAnalysis | null | undefined,
   ): AnalysisPayload | null {
     if (analysis == null || analysis.metricsJson == null || analysis.resultJson == null)
       return null;
@@ -240,10 +240,10 @@ export const analysisMapper = {
   computeImpactScore(
     files: Array<Pick<PRChangedFileSnapshot, "additions" | "deletions">>,
     findingCount: number,
-    markers: { api: boolean; entrypoint: boolean; risk: boolean }
+    markers: { api: boolean; entrypoint: boolean; risk: boolean },
   ) {
     const changeIntensity = sumBy(files, (file) =>
-      Math.min(18, Math.ceil((file.additions + file.deletions) / 20))
+      Math.min(18, Math.ceil((file.additions + file.deletions) / 20)),
     );
     const findingBoost = findingCount * 12;
     const markerBoost =
@@ -266,7 +266,7 @@ export const analysisMapper = {
   matchTopLevelZone<TNode extends { id: string; label: string; path: string }>(
     topLevelNodes: TNode[],
     filePath: string,
-    previousFilePath: null | string
+    previousFilePath: null | string,
   ) {
     const matchPath = (path: string) =>
       topLevelNodes
@@ -326,7 +326,7 @@ export const analysisMapper = {
     nodeId: string,
     analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>,
     topLevelNodeById: Map<string, TopLevelImpactNode>,
-    nodeDetailCache: Map<string, ReturnType<typeof analyzeContext.getStructureNode>>
+    nodeDetailCache: Map<string, ReturnType<typeof analyzeContext.getStructureNode>>,
   ) {
     if (nodeId.startsWith("group:")) {
       const node = topLevelNodeById.get(nodeId);
@@ -355,7 +355,9 @@ export const analysisMapper = {
 
   toAnalysisRef(
     analysis:
-      null | Pick<LatestCompletedAnalysis, "commitSha" | "createdAt" | "publicId"> | undefined
+      | null
+      | Pick<LatestCompletedAnalysis, "commitSha" | "createdAt" | "publicId">
+      | undefined,
   ): AnalysisRef | null {
     if (analysis == null) return null;
 
@@ -369,7 +371,7 @@ export const analysisMapper = {
   toAvailableDocs(repo: Pick<RepoWithLatestAnalysisAndDocs, "analyses" | "documents">) {
     const latestAnalysis = this.coerceAnalysisPayload(repo.analyses[0]);
     return dedupeLatestDocsByType(repo.documents).map((doc) =>
-      toDocSummary(doc, latestAnalysis?.aiResult ?? null)
+      toDocSummary(doc, latestAnalysis?.aiResult ?? null),
     );
   },
 

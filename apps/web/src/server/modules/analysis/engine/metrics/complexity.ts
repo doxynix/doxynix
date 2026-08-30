@@ -28,7 +28,7 @@ export function calculateHealthScore(params: HealthScoreParams): number {
     clamp(
       100 - duplicationPercentage * MODERN_HEALTH_SCORE.duplicationMultiplierForHealth,
       0,
-      100
+      100,
     ) * MODERN_HEALTH_SCORE.duplicationWeight;
 
   score +=

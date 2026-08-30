@@ -158,7 +158,7 @@ tasks.onComplete(async ({ ctx, payload, result }) => {
 
   const errorMsg = formatTaskError(
     result.error,
-    "Uncaught execution failure / Timeout on Trigger.dev"
+    "Uncaught execution failure / Timeout on Trigger.dev",
   );
 
   await cleanupFailsafeDatabaseState(ctx.task.id, payload, errorMsg);

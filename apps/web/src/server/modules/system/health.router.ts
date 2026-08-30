@@ -9,7 +9,7 @@ export const healthRouter = createTRPCRouter({
     .output(
       z.object({
         status: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx }) => {
       try {

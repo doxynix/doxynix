@@ -110,7 +110,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
                   tooltip={m.tooltip}
                   className={cn(
                     "text-muted-foreground hover:text-foreground text-xs transition-colors",
-                    m.className
+                    m.className,
                   )}
                 />
               ))}
@@ -127,7 +127,7 @@ export function RepoCard({ repo }: Readonly<Props>) {
                   gaugePrimaryColor={getHealthColor(m.score ?? 0)}
                   gaugeSecondaryColor="var(--muted)"
                   className={cn(
-                    "text-muted-foreground hover:text-foreground size-8 text-[10px] transition-colors"
+                    "text-muted-foreground hover:text-foreground size-8 text-[10px] transition-colors",
                   )}
                 />
               ))}

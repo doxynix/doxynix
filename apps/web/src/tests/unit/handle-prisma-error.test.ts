@@ -23,7 +23,7 @@ const MockPrismaClientKnownRequestError = vi.hoisted(
         this.code = options.code;
         this.meta = options.meta;
       }
-    }
+    },
 );
 
 const loggerState = vi.hoisted(() => ({

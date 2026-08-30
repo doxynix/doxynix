@@ -157,7 +157,7 @@ export const agentGithubReplyTask = task({
           "github_agent",
           payload.userId,
           payload.repoId,
-          payload.branch
+          payload.branch,
         ),
       });
 

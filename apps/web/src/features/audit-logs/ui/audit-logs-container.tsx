@@ -12,7 +12,7 @@ export function AuditLogsContainer() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     trpc.audit.getActivityLogs.useInfiniteQuery(
       { limit: 20 },
-      { getNextPageParam: (lastPage) => lastPage.nextCursor }
+      { getNextPageParam: (lastPage) => lastPage.nextCursor },
     );
 
   if (isLoading)

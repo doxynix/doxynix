@@ -69,7 +69,7 @@ const RepoSwagger = dynamic(
       </div>
     ),
     ssr: false,
-  }
+  },
 );
 
 export function RepoDocs({
@@ -152,7 +152,7 @@ export function RepoDocs({
       {
         rootMargin: "-40px 0px -75% 0px",
         threshold: 0,
-      }
+      },
     );
 
     headingElements.forEach((el) => observer.observe(el));
@@ -202,7 +202,7 @@ export function RepoDocs({
       <div className="bg-card relative flex flex-1 flex-col rounded-xl border">
         {uniqueDocsToRender.map((doc) => {
           const isCurrentApiSwagger = Boolean(
-            doc.type === "API" && apiMode === "swagger" && metrics?.reference.swagger != null
+            doc.type === "API" && apiMode === "swagger" && metrics?.reference.swagger != null,
           );
 
           const isSwaggerReady = isCurrentApiSwagger && metrics?.reference.swagger != null;

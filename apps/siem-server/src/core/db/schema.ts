@@ -1,4 +1,4 @@
-import { SEVERITY_LEVELS } from "@doxynix/siem-shared";
+import { SEVERITY_LEVELS } from "@doxynix/shared";
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,

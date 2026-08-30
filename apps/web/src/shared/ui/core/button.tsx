@@ -27,11 +27,12 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
       },
     },
-  }
+  },
 );
 
 export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  extends ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
@@ -41,7 +42,7 @@ const AppButton = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp ref={ref} className={cn(buttonVariants({ className, size, variant }))} {...props} />
     );
-  }
+  },
 );
 AppButton.displayName = "Button";
 

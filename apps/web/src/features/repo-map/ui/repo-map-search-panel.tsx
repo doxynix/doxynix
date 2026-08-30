@@ -31,10 +31,10 @@ export function RepoMapSearchPanel() {
               label.includes(word) ||
               id.includes(word) ||
               normalizedLabel.includes(word.replaceAll(/\s+/g, "")) ||
-              normalizedId.includes(word.replaceAll(/\s+/g, ""))
+              normalizedId.includes(word.replaceAll(/\s+/g, "")),
           );
         })
-        .map((n) => n.id)
+        .map((n) => n.id),
     );
 
     const needsUpdate = nodes.some((node) => {
@@ -62,7 +62,7 @@ export function RepoMapSearchPanel() {
               },
             },
           };
-        })
+        }),
       );
     }
 

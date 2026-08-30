@@ -133,7 +133,7 @@ export function useMapLayout(data: RepoMapDisplayData) {
 
         const extractPositions = (
           elkNodes: ElkNodeWithChildren[] | undefined,
-          parentOffset: { x: number; y: number } = { x: 0, y: 0 }
+          parentOffset: { x: number; y: number } = { x: 0, y: 0 },
         ): void => {
           if (!elkNodes) return;
 

@@ -1,7 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "target": "esnext",
+    "target": "ES2025",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "moduleDetection": "force",
     "strict": true,
     "skipLibCheck": true,
@@ -14,9 +16,9 @@
     "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "incremental": true,
     "verbatimModuleSyntax": true,
     "useDefineForClassFields": true,
+    "declarationMap": true,
     "noErrorTruncation": false
   }
 }

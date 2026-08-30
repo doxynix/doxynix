@@ -22,7 +22,7 @@ type SimplifiedRepoMetrics = {
 };
 
 export async function calculateCodeMetrics(
-  files: { content: string; path: string }[]
+  files: { content: string; path: string }[],
 ): Promise<SimplifiedRepoMetrics> {
   if (files.length === 0) {
     return {
@@ -55,7 +55,7 @@ export async function calculateCodeMetrics(
 }
 
 export function calculateTeamRoles(
-  contributors: { contributions: number; login: string }[]
+  contributors: { contributions: number; login: string }[],
 ): TeamRole[] {
   taskLogger.info("Metrics: Evaluating team roles and knowledge distribution...");
   const total = sumBy(contributors, (c) => c.contributions);
@@ -86,7 +86,7 @@ const WINDOW_DAYS = 90;
 
 export async function computeGitChurnHotspots(
   repoRoot: string,
-  relativePaths: string[]
+  relativePaths: string[],
 ): Promise<ChurnHotspot[]> {
   const allowed = new Set(relativePaths.map((p) => normalize(p)));
   if (allowed.size === 0) return [];
@@ -126,12 +126,12 @@ export async function computeGitChurnHotspots(
       .sort((a, b) => b.commitsInWindow - a.commitsInWindow);
 
     taskLogger.success(
-      `Git: Identified ${result.filter((r) => r.churnScore > 50).length} high-churn files`
+      `Git: Identified ${result.filter((r) => r.churnScore > 50).length} high-churn files`,
     );
     return result;
   } catch (error) {
     taskLogger.warn(
-      "Git: Churn calculation failed. History might be unavailable in this environment."
+      "Git: Churn calculation failed. History might be unavailable in this environment.",
     );
     appLogger.debug({
       error,
@@ -145,7 +145,7 @@ export async function computeGitChurnHotspots(
 
 export async function computeChangeCoupling(
   repoRoot: string,
-  relativePaths: string[]
+  relativePaths: string[],
 ): Promise<ChangeCouplingRef[]> {
   const allowed = new Set(relativePaths.map((p) => normalize(p)));
   if (allowed.size === 0) return [];
@@ -210,7 +210,7 @@ export async function computeChangeCoupling(
       })
       .filter(
         (item): item is { commits: number; fromPath: string; toPath: string } =>
-          item.fromPath != null && item.toPath != null && item.commits >= 2
+          item.fromPath != null && item.toPath != null && item.commits >= 2,
       )
       .sort((left, right) => right.commits - left.commits)
       .slice(0, 24);

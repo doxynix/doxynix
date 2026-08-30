@@ -68,7 +68,7 @@ function compactPayload(val: unknown): unknown {
       .map((item) => compactPayload(item))
       .filter(
         (item): item is Exclude<typeof item, null | undefined> =>
-          item !== null && item !== undefined && (!Array.isArray(item) || item.length > 0)
+          item !== null && item !== undefined && (!Array.isArray(item) || item.length > 0),
       );
     return compacted.length > 0 ? compacted : undefined;
   }
@@ -102,7 +102,7 @@ export async function orchestrateWriterTasks(
   requestedDocs: DocType[],
   repo: Repo,
   userId: number,
-  language: string
+  language: string,
 ): Promise<DeepDocsResult> {
   taskLogger.info("Documentation: Preparing high-fidelity context for AI writers...");
 
@@ -124,7 +124,7 @@ export async function orchestrateWriterTasks(
           ...documentationInput.sections.risks.evidencePaths,
           ...documentationInput.sections.onboarding.evidencePaths,
         ],
-        280
+        280,
       ),
       stage: "writer_architecture",
     }),
@@ -136,7 +136,7 @@ export async function orchestrateWriterTasks(
           ...documentationInput.sections.onboarding.body.configPaths,
           ...documentationInput.sections.overview.body.configFiles,
         ],
-        120
+        120,
       ),
       stage: "writer_contributing",
     }),
@@ -147,7 +147,7 @@ export async function orchestrateWriterTasks(
           ...documentationInput.sections.overview.evidencePaths,
           ...documentationInput.sections.architecture.evidencePaths,
         ],
-        240
+        240,
       ),
       stage: "writer_readme",
     }),
@@ -160,11 +160,11 @@ export async function orchestrateWriterTasks(
         ...documentationInput.sections.architecture.body.primaryEntrypoints,
         ...documentationInput.sections.architecture.body.modules.map((module) => module.path),
         ...documentationInput.sections.architecture.body.dependencyHotspots.map(
-          (hotspot) => hotspot.path
+          (hotspot) => hotspot.path,
         ),
       ],
-      120
-    )
+      120,
+    ),
   );
   const architectureDependencyContextPayload = toPromptJson(architectureDependencyContext);
 
@@ -172,7 +172,7 @@ export async function orchestrateWriterTasks(
     documentationInput,
     hardMetrics,
     evidence,
-    architectureDependencyContext
+    architectureDependencyContext,
   );
 
   const engineeringDossierPaths = getEngineeringDossierPaths(engineeringDossier);
@@ -218,7 +218,7 @@ export async function orchestrateWriterTasks(
         ...documentationInput.sections.api_reference.evidencePaths,
         ...engineeringDossierPaths,
       ],
-      360
+      360,
     ),
     architecture: buildAllowedPaths(
       [
@@ -228,7 +228,7 @@ export async function orchestrateWriterTasks(
         ...documentationInput.sections.onboarding.evidencePaths,
         ...engineeringDossierPaths,
       ],
-      420
+      420,
     ),
     contributing: buildAllowedPaths(
       [
@@ -238,7 +238,7 @@ export async function orchestrateWriterTasks(
         ...documentationInput.sections.risks.evidencePaths,
         ...engineeringDossierPaths,
       ],
-      240
+      240,
     ),
     readme: buildAllowedPaths(
       [
@@ -248,7 +248,7 @@ export async function orchestrateWriterTasks(
         ...documentationInput.sections.onboarding.evidencePaths,
         ...engineeringDossierPaths,
       ],
-      180
+      180,
     ),
   };
 
@@ -366,7 +366,7 @@ export async function orchestrateWriterTasks(
   }
 
   taskLogger.info(
-    `Documentation: Fan-out triggering ${batchJobs.length} writers in parallel via batching...`
+    `Documentation: Fan-out triggering ${batchJobs.length} writers in parallel via batching...`,
   );
 
   const { runs } = await batch.triggerByTaskAndWait(batchJobs);
@@ -377,7 +377,7 @@ export async function orchestrateWriterTasks(
       | typeof architectureTask
       | typeof changelogTask
       | typeof contributingTask
-      | typeof readmeTask
+      | typeof readmeTask,
   ) => {
     const run = runs.find((r) => r.taskIdentifier === taskInstance.id);
     if (run == null) return;
@@ -448,7 +448,7 @@ export async function orchestrateWriterTasks(
   };
 
   const resultsList = [readmeRes, apiRes, archRes, contrRes, changeRes].filter(
-    (r): r is NonNullable<typeof r> => r != null
+    (r): r is NonNullable<typeof r> => r != null,
   );
 
   const writerErrors: Partial<Record<WriterName, string>> = {};
@@ -476,7 +476,7 @@ function buildAllowedPaths(paths: string[], limit: number): string {
 
 function buildModuleDependencyContext(
   evidence: RepositoryEvidence,
-  modulePaths: string[]
+  modulePaths: string[],
 ): ModuleDependencyContext {
   const graphPartial = evidence.dependencyGraph.unresolvedImportSpecifiers > 0;
   const inboundByPath = new Map<string, string[]>();
@@ -510,7 +510,7 @@ function buildModuleDependencyContext(
 function getDependencyContextPaths(context: ModuleDependencyContext): string[] {
   return uniquePaths(
     context.modules.flatMap((module) => [module.path, ...module.inbound, ...module.outbound]),
-    240
+    240,
   );
 }
 
@@ -518,7 +518,7 @@ function buildEngineeringDossier(
   documentationInput: DocumentationInputSnapshot,
   hardMetrics: RepoMetrics,
   evidence: RepositoryEvidence,
-  moduleDependencyContext: ModuleDependencyContext
+  moduleDependencyContext: ModuleDependencyContext,
 ): EngineeringDossier {
   return {
     changeCoupling: hardMetrics.changeCoupling ?? [],
@@ -550,7 +550,7 @@ function getEngineeringDossierPaths(dossier: EngineeringDossier): string[] {
     [
       ...getDependencyContextPaths(dossier.moduleDependencyContext),
       ...Object.values(dossier.documentationInput.sections).flatMap(
-        (section) => section.evidencePaths
+        (section) => section.evidencePaths,
       ),
       ...dossier.documentationInput.report.primaryEntrypoints,
       ...dossier.documentationInput.report.secondaryEntrypoints,
@@ -565,12 +565,12 @@ function getEngineeringDossierPaths(dossier: EngineeringDossier): string[] {
       ...dossier.orphanModules,
       ...dossier.mostComplexFiles,
     ],
-    640
+    640,
   );
 }
 
 function isResolvedInternalEdge(
-  edge: RepositoryEvidence["dependencyGraph"]["edges"][number]
+  edge: RepositoryEvidence["dependencyGraph"]["edges"][number],
 ): edge is RepositoryEvidence["dependencyGraph"]["edges"][number] & { toPath: string } {
   return edge.kind === "internal" && edge.resolved && edge.toPath != null;
 }

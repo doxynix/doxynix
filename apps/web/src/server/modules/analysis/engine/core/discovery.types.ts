@@ -198,7 +198,11 @@ export type StructuralSignals = {
 };
 
 export type RiskSignalKind =
-  "change-coupling" | "dependency-cycle" | "graph-reliability" | "hotspot" | "orphan-module";
+  | "change-coupling"
+  | "dependency-cycle"
+  | "graph-reliability"
+  | "hotspot"
+  | "orphan-module";
 
 export type RiskRawMetrics = {
   changeCouplingPairs: number;

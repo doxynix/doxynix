@@ -10,10 +10,18 @@ import { PROJECT_POLICY_RULES } from "../engine/core/project-policy-rules";
 import { FILE_CONTEXT_MODIFIERS } from "../engine/core/scoring-constants";
 
 export type AiContextStage =
-  "architect" | "writer_api" | "writer_architecture" | "writer_contributing" | "writer_readme";
+  | "architect"
+  | "writer_api"
+  | "writer_architecture"
+  | "writer_contributing"
+  | "writer_readme";
 
 export type ContextDropReason =
-  "budget" | "empty-after-clean" | "secondary-no-budget" | "sensitive" | "stage-filter";
+  | "budget"
+  | "empty-after-clean"
+  | "secondary-no-budget"
+  | "sensitive"
+  | "stage-filter";
 
 export type StageContextDebugEntry = {
   path: string;
@@ -85,7 +93,7 @@ function isRootManifest(path: string) {
   if (dir !== ".") return false;
 
   return PROJECT_POLICY_RULES.manifests.rootFiles.includes(
-    normalizedPath.toLowerCase() as (typeof PROJECT_POLICY_RULES.manifests.rootFiles)[number]
+    normalizedPath.toLowerCase() as (typeof PROJECT_POLICY_RULES.manifests.rootFiles)[number],
   );
 }
 // NOTE: выглядит странно переделать
@@ -310,7 +318,7 @@ function buildXml(path: string, content: string) {
 
 export async function prepareSmartContext(
   files: RepositoryModuleFile[],
-  maxTokens?: number
+  maxTokens?: number,
 ): Promise<string> {
   const result = await buildStageContextPack({
     files,

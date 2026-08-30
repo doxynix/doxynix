@@ -46,13 +46,13 @@ const Circle = forwardRef<HTMLDivElement, { children?: ReactNode; className?: st
         ref={ref}
         className={cn(
           "border-border bg-landing-bg-light flex size-12 items-center justify-center rounded-full border-2 p-3 sm:size-20",
-          className
+          className,
         )}
       >
         {children}
       </div>
     );
-  }
+  },
 );
 
 const COLORS = {

@@ -57,7 +57,7 @@ export const apiKeyRouter = createTRPCRouter({
       z.object({
         active: z.array(ApiKeySchema),
         archived: z.array(ApiKeySchema),
-      })
+      }),
     )
     .query(async ({ ctx }) => {
       const allKeys = await ctx.db.apiKey.findMany({

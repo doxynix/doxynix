@@ -35,12 +35,12 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
 
   const { data: mapData, isFetching: isMapFetching } = trpc.analysis.getStructureMap.useQuery(
     { aid: aid ?? undefined, repoId: id },
-    { enabled: viewId == null }
+    { enabled: viewId == null },
   );
 
   const { data: nodeData, isFetching: isNodeFetching } = trpc.analysis.getStructureNode.useQuery(
     { nodeId: viewId ?? "", repoId: id },
-    { enabled: viewId != null }
+    { enabled: viewId != null },
   );
 
   function navigateMap(nextId: null | string) {

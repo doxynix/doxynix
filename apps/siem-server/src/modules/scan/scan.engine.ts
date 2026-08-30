@@ -1,4 +1,4 @@
-import type { LeakFinding, Severity } from "@doxynix/siem-shared";
+import type { LeakFinding, Severity } from "@doxynix/shared";
 import type { RuleSelect } from "@server/core/db/schema";
 
 type EngineResult = {

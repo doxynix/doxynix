@@ -29,7 +29,7 @@ export function useGlobalActionsHotkeys(onAction?: () => void) {
       enableOnFormTags: false,
       preventDefault: true,
     },
-    [prefix]
+    [prefix],
   );
 
   useHotkeys(
@@ -75,6 +75,6 @@ export function useGlobalActionsHotkeys(onAction?: () => void) {
       enableOnFormTags: false,
       preventDefault: true,
     },
-    [prefix]
+    [prefix],
   );
 }

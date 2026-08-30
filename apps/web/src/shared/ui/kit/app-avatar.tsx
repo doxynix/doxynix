@@ -123,7 +123,7 @@ export function AppAvatar({
           }}
           className={cn(
             "object-cover transition-opacity duration-300",
-            status === "success" ? "opacity-100" : "opacity-0"
+            status === "success" ? "opacity-100" : "opacity-0",
           )}
         />
       )}

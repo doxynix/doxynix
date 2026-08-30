@@ -52,7 +52,7 @@ export function RepoDocsTabs({
   const [activePath, setActivePath] = useQueryState("path", parseAsString);
 
   const uniqueTabs = uniqBy(items, (item) => item.value).map((item) =>
-    item.value === "CODE_DOC" ? { ...item, id: "CODE_DOC_ROOT" } : item
+    item.value === "CODE_DOC" ? { ...item, id: "CODE_DOC_ROOT" } : item,
   );
 
   const codeDocFiles = availableDocs.filter((doc) => doc.type === "CODE_DOC");
@@ -95,7 +95,7 @@ export function RepoDocsTabs({
                           "hover:text-foreground transition-standard flex w-full cursor-pointer items-center justify-start gap-1 truncate py-1 text-left text-xs",
                           isFileActive
                             ? "bg-accent text-foreground font-semibold"
-                            : "text-muted-foreground"
+                            : "text-muted-foreground",
                         )}
                       >
                         <FileText /> {file.path?.split("/").pop() ?? "File"}
@@ -116,7 +116,7 @@ export function RepoDocsTabs({
                         heading.level === 3
                           ? "text-muted-foreground pl-3"
                           : "text-muted-foreground",
-                        activeHeadingId === heading.id && "font-semibold"
+                        activeHeadingId === heading.id && "font-semibold",
                       )}
                     >
                       {heading.text}

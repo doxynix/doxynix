@@ -10,7 +10,13 @@ import { cn } from "@/shared/lib/cn";
 import { AppButton } from "./button";
 
 type TransitionVariant =
-  "circle" | "diamond" | "hexagon" | "rectangle" | "square" | "star" | "triangle";
+  | "circle"
+  | "diamond"
+  | "hexagon"
+  | "rectangle"
+  | "square"
+  | "star"
+  | "triangle";
 
 interface AnimatedThemeTogglerProps extends ComponentPropsWithoutRef<"button"> {
   duration?: number;
@@ -30,7 +36,7 @@ function getThemeTransitionClipPaths(
   cy: number,
   maxRadius: number,
   viewportWidth: number,
-  viewportHeight: number
+  viewportHeight: number,
 ): [string, string] {
   switch (variant) {
     case "circle": {
@@ -100,7 +106,7 @@ function getThemeTransitionClipPaths(
           verts.push(`${cx + radius * Math.cos(outerA)}px ${cy + radius * Math.sin(outerA)}px`);
           const innerA = outerA + Math.PI / 5;
           verts.push(
-            `${cx + radius * innerRatio * Math.cos(innerA)}px ${cy + radius * innerRatio * Math.sin(innerA)}px`
+            `${cx + radius * innerRatio * Math.cos(innerA)}px ${cy + radius * innerRatio * Math.sin(innerA)}px`,
           );
         }
         return `polygon(${verts.join(", ")})`;
@@ -176,7 +182,7 @@ export const AnimatedThemeToggler = ({
             y,
             maxRadius,
             viewportWidth,
-            viewportHeight
+            viewportHeight,
           );
 
           document.documentElement.animate(
@@ -186,7 +192,7 @@ export const AnimatedThemeToggler = ({
               easing: variant === "star" ? "linear" : "ease-in-out",
               fill: "forwards",
               pseudoElement: "::view-transition-new(root)",
-            }
+            },
           ).onfinish = () => {
             document.documentElement.style.removeProperty("will-change");
           };

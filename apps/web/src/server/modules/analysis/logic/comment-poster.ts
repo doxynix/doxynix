@@ -91,7 +91,7 @@ export class GitHubCommentPoster {
     prNumber: number,
     commitId: string,
     findings: PRFinding[],
-    style: PRCommentStyle
+    style: PRCommentStyle,
   ): Promise<Array<{ commentId: number; finding: PRFinding }>> {
     if (findings.length === 0) return [];
 
@@ -177,7 +177,7 @@ export class GitHubCommentPoster {
     owner: string,
     repo: string,
     prNumber: number,
-    findings: PRFinding[]
+    findings: PRFinding[],
   ): Promise<boolean> {
     try {
       const secCount = findings.filter((f) => f.type === "SECURITY").length;
@@ -283,7 +283,7 @@ export class GitHubCommentPoster {
     owner: string,
     repo: string,
     commentId: number,
-    body: string
+    body: string,
   ): Promise<boolean> {
     try {
       await octokit.rest.pulls.updateReviewComment({

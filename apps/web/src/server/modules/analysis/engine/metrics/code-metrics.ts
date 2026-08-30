@@ -57,7 +57,7 @@ async function collectSecuritySignals(normalizedPath: string, content: string) {
     });
 
     const relevantMessages = (result.messages as SecretLintMessage[]).filter(
-      (message) => message.severity === "error" || message.severity === "warning"
+      (message) => message.severity === "error" || message.severity === "warning",
     );
 
     return {
@@ -189,7 +189,7 @@ function buildRepoMetrics(params: {
   const complexityValues = scan.fileComplexities.map((item) => item.score);
   const routeInventory: NonNullable<RepoMetrics["routeInventory"]> = mergeRouteInventories(
     structuralSignals.routeInventory,
-    openapiInventory
+    openapiInventory,
   );
   const complexityScore = normalizeComplexityScore({
     cycles: structuralSignals.dependencyCycles.length,
@@ -211,7 +211,7 @@ function buildRepoMetrics(params: {
       ? Math.min(60, 100 - scan.totals.securityIssues * 12)
       : 100 - scan.totals.securityIssues * 12,
     0,
-    100
+    100,
   );
 
   return {
@@ -259,7 +259,7 @@ function buildRepoMetrics(params: {
     teamRoles: [],
     techDebtScore,
     techStack: uniq([...techStack, ...frameworkFacts.map((fact) => fact.name)]).sort(
-      (left, right) => left.localeCompare(right)
+      (left, right) => left.localeCompare(right),
     ),
     totalLoc: scan.totals.source + scan.totals.comments,
     totalSizeKb: Math.round(scan.totals.size / 1024),
@@ -268,7 +268,7 @@ function buildRepoMetrics(params: {
 }
 
 export async function analyzeRepository(
-  files: { content: string; path: string }[]
+  files: { content: string; path: string }[],
 ): Promise<{ evidence: RepositoryEvidence; metrics: RepoMetrics }> {
   taskLogger.info(`Metrics: Starting deep static analysis of ${files.length} files...`);
 
@@ -295,7 +295,7 @@ export async function analyzeRepository(
   const { evidence, structuralSignals } = await collectStructuralSignals(
     normalizedFiles,
     scan.fileComplexities,
-    scan.fileSignalsByPath
+    scan.fileSignalsByPath,
   );
 
   const openapiInventory = OpenApiDiscoveryEngine.collect(normalizedFiles);
@@ -311,7 +311,7 @@ export async function analyzeRepository(
 
   taskLogger.log("Detecting technologies and frameworks...");
   const techStack = FactCollector.collect(normalizedFiles, evidence, scan.fileSignalsByPath).map(
-    (fact) => fact.name
+    (fact) => fact.name,
   );
 
   const finalMetrics = buildRepoMetrics({
@@ -331,7 +331,7 @@ export async function analyzeRepository(
 }
 
 export async function calculateCodeMetrics(
-  files: { content: string; path: string }[]
+  files: { content: string; path: string }[],
 ): Promise<RepoMetrics> {
   const { metrics } = await analyzeRepository(files);
   return metrics;

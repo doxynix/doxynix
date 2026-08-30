@@ -18,12 +18,12 @@ Pagination.displayName = "Pagination";
 const PaginationContent = forwardRef<HTMLUListElement, ComponentProps<"ul">>(
   ({ className, ...props }, ref) => (
     <ul ref={ref} className={cn("flex flex-row items-center gap-1", className)} {...props} />
-  )
+  ),
 );
 PaginationContent.displayName = "PaginationContent";
 
 const PaginationItem = forwardRef<HTMLLIElement, ComponentProps<"li">>(
-  ({ className, ...props }, ref) => <li ref={ref} className={cn("", className)} {...props} />
+  ({ className, ...props }, ref) => <li ref={ref} className={cn("", className)} {...props} />,
 );
 PaginationItem.displayName = "PaginationItem";
 
@@ -35,7 +35,8 @@ type BasePaginationLinkProps = Pick<ButtonProps, "size"> & {
 };
 
 type PaginationLinkProps = (
-  (ComponentProps<"button"> & { href?: never }) | ComponentProps<typeof Link>
+  | (ComponentProps<"button"> & { href?: never })
+  | ComponentProps<typeof Link>
 ) &
   BasePaginationLinkProps;
 
@@ -51,7 +52,7 @@ const PaginationLink = ({
       size,
       variant: isActive ? "outline" : "ghost",
     }),
-    className
+    className,
   );
 
   if (!("href" in props) || props.href == null) {

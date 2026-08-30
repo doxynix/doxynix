@@ -56,7 +56,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
 
   const { data: comments, isLoading: isCommentsLoading } = trpc.analysis.getComments.useQuery(
     { analysisId: analysis?.analysis.id ?? "" },
-    { enabled: analysis?.analysis.id != null }
+    { enabled: analysis?.analysis.id != null },
   );
 
   const { isStaging, stageFix } = usePrStage(repoId);
@@ -386,7 +386,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     <span
                       className={cn(
                         "font-bold",
-                        STATUS_CONFIG[item.value as keyof typeof STATUS_CONFIG].className
+                        STATUS_CONFIG[item.value as keyof typeof STATUS_CONFIG].className,
                       )}
                     >
                       {STATUS_CONFIG[item.value as keyof typeof STATUS_CONFIG].label}

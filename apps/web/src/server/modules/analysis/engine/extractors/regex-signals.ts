@@ -74,7 +74,7 @@ function collectSymbols(
   filePath: string,
   content: string,
   patterns: RegexSymbolPattern[],
-  lineMap: LineMap
+  lineMap: LineMap,
 ): SymbolRef[] {
   const symbols: SymbolRef[] = [];
 
@@ -104,7 +104,7 @@ function collectRoutes(
   filePath: string,
   content: string,
   patterns: RegexRoutePattern[],
-  lineMap: LineMap
+  lineMap: LineMap,
 ): RouteRef[] {
   const routes: RouteRef[] = [];
 
@@ -143,12 +143,12 @@ function buildSignals(
     imports: string[];
     routes?: RouteRef[];
     symbols?: SymbolRef[];
-  }
+  },
 ): FileSignals {
   const frameworkHints = collectFrameworkFactsFromTokens(
     [...params.imports, ...(params.extraFrameworkTokens ?? []), file.path],
     file.path,
-    CONFIDENCE_LEVELS.manifestMatch
+    CONFIDENCE_LEVELS.manifestMatch,
   );
 
   return {

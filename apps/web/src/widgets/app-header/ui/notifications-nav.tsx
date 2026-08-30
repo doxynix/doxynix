@@ -79,7 +79,7 @@ export function NotificationsNav() {
                       <p
                         className={cn(
                           "mb-1 font-bold",
-                          note.isRead === true && "text-muted-foreground"
+                          note.isRead === true && "text-muted-foreground",
                         )}
                       >
                         {note.title}

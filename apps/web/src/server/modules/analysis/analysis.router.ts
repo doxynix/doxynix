@@ -44,7 +44,7 @@ export const analysisRouter = createTRPCRouter({
         instructions: z.string().optional(),
         language: z.string(),
         repoId: z.uuid(),
-      })
+      }),
     )
     .output(z.object({ jobId: z.string(), publicAccessToken: z.string(), status: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -64,7 +64,7 @@ export const analysisRouter = createTRPCRouter({
         prNumber: z.number().optional(),
         prUrl: z.string().optional(),
         success: z.boolean(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       appLogger.info({
@@ -90,7 +90,7 @@ export const analysisRouter = createTRPCRouter({
         const clientContext = await getClientContext(
           ctx.db,
           Number(ctx.session.user.id),
-          repo.owner
+          repo.owner,
         );
 
         const fix = await analysisRepo.getById(ctx.db, input.fixId);
@@ -222,7 +222,7 @@ export const analysisRouter = createTRPCRouter({
           focusAreas: input.focusAreas,
           tokenBudget: input.tokenBudget,
         },
-        ctx.db
+        ctx.db,
       );
     }),
   /**
@@ -236,7 +236,7 @@ export const analysisRouter = createTRPCRouter({
         findings: z.array(FindingForFixSchema).min(1),
         prAnalysisId: z.uuid().optional(),
         repoId: z.uuid(),
-      })
+      }),
     )
     .output(
       z.object({
@@ -244,7 +244,7 @@ export const analysisRouter = createTRPCRouter({
         fixId: z.uuid().optional(),
         status: z.string().optional(),
         success: z.boolean().optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       appLogger.info({
@@ -301,7 +301,7 @@ export const analysisRouter = createTRPCRouter({
             // concurrencyKey: `repo-${repo.id}`,
             // idempotencyKey: `fix-${fix.id}`,
             ttl: "30m",
-          }
+          },
         );
 
         return {
@@ -334,7 +334,7 @@ export const analysisRouter = createTRPCRouter({
         nodeId: z.string().optional(),
         path: z.string(),
         repoId: z.uuid(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       return repoAnalysisService.documentFile(ctx.db, Number(ctx.session.user.id), input);
@@ -407,13 +407,13 @@ export const analysisRouter = createTRPCRouter({
       z.object({
         prNumber: z.number().int().positive(),
         repoId: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const analysis = await repoAnalysisService.getByRepoAndPRNumber(
         ctx.db,
         input.repoId,
-        input.prNumber
+        input.prNumber,
       );
 
       if (analysis == null) return null;
@@ -478,7 +478,7 @@ export const analysisRouter = createTRPCRouter({
             {
               revalidate: false,
               tags: ["comments", c.publicId],
-            }
+            },
           )();
           return {
             bodyHtml: html,
@@ -488,7 +488,7 @@ export const analysisRouter = createTRPCRouter({
             line: c.line,
             riskLevel: c.riskLevel,
           };
-        })
+        }),
       );
 
       return {
@@ -509,7 +509,7 @@ export const analysisRouter = createTRPCRouter({
         path: z.string().optional(),
         repoId: z.uuid(),
         type: DocTypeSchema,
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       return repoAnalysisService.getDocumentContent(
@@ -517,7 +517,7 @@ export const analysisRouter = createTRPCRouter({
         input.repoId,
         input.type,
         input.aid,
-        input.path
+        input.path,
       );
     }),
 
@@ -526,13 +526,13 @@ export const analysisRouter = createTRPCRouter({
       z.object({
         action: FileActionResultSchema,
         path: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const data = await redisService.fileActions.get(
         ctx.session.user.id,
         input.path,
-        input.action
+        input.action,
       );
 
       if (data == null) return null;
@@ -540,7 +540,7 @@ export const analysisRouter = createTRPCRouter({
       const html = await unstable_cache(
         async () => markdownToHtml({ content: data.content }),
         [`file-res-html-${ctx.session.user.id}-${input.action}-${input.path}`],
-        { revalidate: false, tags: ["file-audit", `file-audit-${ctx.session.user.id}`] }
+        { revalidate: false, tags: ["file-audit", `file-audit-${ctx.session.user.id}`] },
       )();
 
       return {
@@ -560,7 +560,7 @@ export const analysisRouter = createTRPCRouter({
       z.object({
         prNumber: z.number().int().positive(),
         repoId: z.uuid(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       return repoAnalysisService.getByRepoAndPRNumber(ctx.db, input.repoId, input.prNumber);
@@ -640,7 +640,7 @@ export const analysisRouter = createTRPCRouter({
         analysisId: z.number(),
         docType: DocTypeSchema,
         repoId: z.number(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const document = await ctx.db.document.findFirst({
@@ -668,7 +668,7 @@ export const analysisRouter = createTRPCRouter({
         document.content,
         graph,
         input.docType,
-        document.version
+        document.version,
       );
 
       return {
@@ -729,7 +729,7 @@ export const analysisRouter = createTRPCRouter({
         branch: z.string().min(1),
         repoId: z.uuid(),
         title: z.string().min(1),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       appLogger.info({
@@ -840,13 +840,13 @@ export const analysisRouter = createTRPCRouter({
       z.object({
         path: z.string(),
         repoId: z.uuid(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const cacheKey = REDIS_CONFIG.keys.fileAction(
         ctx.session.user.id,
         input.path,
-        "quick-file-audit"
+        "quick-file-audit",
       );
       const cachedData = await ctx.redis.get<any>(cacheKey);
 
@@ -892,7 +892,7 @@ export const analysisRouter = createTRPCRouter({
         body: z.string().min(1).max(5000),
         prNumber: z.number().int().positive(),
         repoId: z.uuid(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const repo = await ctx.db.repo.findUnique({
@@ -966,14 +966,14 @@ export const analysisRouter = createTRPCRouter({
         nodeId: z.string().optional(),
         path: z.string(),
         repoId: z.uuid(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       return repoAnalysisService.runFileAction(
         ctx.db,
         Number(ctx.session.user.id),
         "analyze-single-file",
-        input
+        input,
       );
     }),
 
@@ -993,7 +993,7 @@ export const analysisRouter = createTRPCRouter({
         content: z.string(),
         filePath: z.string(),
         repoId: z.uuid(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const stagedCount = await redisService.staging.addFiles(ctx.session.user.id, input.repoId, {
@@ -1007,7 +1007,7 @@ export const analysisRouter = createTRPCRouter({
       z.object({
         fixId: z.string(),
         repoId: z.uuid(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const fix = await ctx.db.generatedFix.findUnique({
@@ -1049,7 +1049,7 @@ export const analysisRouter = createTRPCRouter({
 
       const cacheKey = REDIS_CONFIG.keys.prStaging(ctx.session.user.id, input.repoId);
       const stagedEntries = Object.fromEntries(
-        parsed.data.fixedFiles.map((file) => [file.filePath, file.newContent] as const)
+        parsed.data.fixedFiles.map((file) => [file.filePath, file.newContent] as const),
       );
 
       await ctx.redis.hset(cacheKey, stagedEntries);
@@ -1070,7 +1070,7 @@ export const analysisRouter = createTRPCRouter({
       const stagedCount = await redisService.staging.removeFile(
         ctx.session.user.id,
         input.repoId,
-        input.filePath
+        input.filePath,
       );
       return { stagedCount, success: true };
     }),

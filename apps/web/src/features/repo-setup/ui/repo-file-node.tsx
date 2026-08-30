@@ -25,7 +25,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
     <div
       className={cn(
         "hover:text-foreground text-muted-foreground hover:bg-surface-hover flex w-full cursor-pointer items-center rounded-xl font-medium transition-colors",
-        isSelected && "bg-surface-selected hover:bg-surface-selected text-foreground"
+        isSelected && "bg-surface-selected hover:bg-surface-selected text-foreground",
       )}
       style={style}
     >

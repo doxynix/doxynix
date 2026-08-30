@@ -37,7 +37,7 @@ export async function verifyAndUseApiKey(token: string) {
         error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
         keyId: keyRecord.id,
         msg: "Failed to update api key lastUsed",
-      })
+      }),
     );
 
   return keyRecord;

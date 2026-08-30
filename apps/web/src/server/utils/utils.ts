@@ -18,7 +18,7 @@ export async function handleError(
   error: unknown,
   analysisId: string,
   channelName: string,
-  tempPath: string
+  tempPath: string,
 ) {
   const message = error instanceof Error ? error.message : "Unknown error";
   appLogger.error({

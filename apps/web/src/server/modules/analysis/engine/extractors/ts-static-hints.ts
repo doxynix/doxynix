@@ -73,7 +73,7 @@ function scriptKind(filePath: string): ts.ScriptKind {
 }
 
 export function collectTypeScriptStaticHints(
-  files: { content: string; path: string }[]
+  files: { content: string; path: string }[],
 ): TsStaticHint[] {
   const hints: TsStaticHint[] = [];
 
@@ -89,7 +89,7 @@ export function collectTypeScriptStaticHints(
         file.content,
         ts.ScriptTarget.Latest,
         false,
-        scriptKind(normalized)
+        scriptKind(normalized),
       );
 
       visitNode(sourceFile, { hints, normalizedPath: normalized, sourceFile });

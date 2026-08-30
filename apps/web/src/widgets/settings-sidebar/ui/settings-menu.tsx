@@ -37,7 +37,7 @@ export function SettingsMenu() {
 
               !isDestructive &&
                 !isActive &&
-                "text-muted-foreground hover:bg-accent hover:text-foreground"
+                "text-muted-foreground hover:bg-accent hover:text-foreground",
             )}
           >
             <Link href={item.href as Route} className="flex w-full items-center gap-2">

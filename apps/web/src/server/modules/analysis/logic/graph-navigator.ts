@@ -54,7 +54,7 @@ const summarizeImportanceHelper = (input: {
 
 export function buildStructureMapPayloadFromContext(
   context: StructureContext,
-  analysisRef: AnalysisRef | null
+  analysisRef: AnalysisRef | null,
 ) {
   const summarizeImportance = summarizeImportanceHelper;
   const nodes = buildTopLevelNodes(context);
@@ -75,7 +75,7 @@ export function buildStructureMapPayloadFromContext(
         .map(
           (edge) =>
             nodeLabelById.get(makeStructureNodeId("group", edge.target)) ??
-            ProjectPolicy.getGroupLabel(edge.target)
+            ProjectPolicy.getGroupLabel(edge.target),
         );
       const incoming = context.rawTopLevelEdges
         .filter((edge) => edge.target === node.path)
@@ -83,7 +83,7 @@ export function buildStructureMapPayloadFromContext(
         .map(
           (edge) =>
             nodeLabelById.get(makeStructureNodeId("group", edge.source)) ??
-            ProjectPolicy.getGroupLabel(edge.source)
+            ProjectPolicy.getGroupLabel(edge.source),
         )
         .slice(0, 5);
 
@@ -98,7 +98,7 @@ export function buildStructureMapPayloadFromContext(
           summarizeImportance,
         }),
       ];
-    })
+    }),
   );
 
   const defaultNode = selectDefaultTopLevelNode(context, nodes);
@@ -153,46 +153,46 @@ export function buildStructureMapPayload(repo: RepoWithLatestAnalysisAndDocs) {
 export function buildTopLevelNodes(context: StructureContext) {
   const nodes = Array.from(context.groupMap.entries())
     .map(([groupId, entry]) =>
-      buildStructureNodeSummary({ entry, nodeType: "group", path: groupId })
+      buildStructureNodeSummary({ entry, nodeType: "group", path: groupId }),
     )
     .sort(
       (left, right) =>
-        rankStructureNode(right) - rankStructureNode(left) || left.label.localeCompare(right.label)
+        rankStructureNode(right) - rankStructureNode(left) || left.label.localeCompare(right.label),
     );
 
   const prioritized = nodes.filter(isMeaningfulTopLevelNode);
   const fallback = nodes.filter(
-    (node) => !prioritized.some((candidate) => candidate.id === node.id)
+    (node) => !prioritized.some((candidate) => candidate.id === node.id),
   );
   return [...prioritized, ...fallback].slice(0, 14);
 }
 
 function selectDefaultTopLevelNode(
   context: StructureContext,
-  nodes: ReturnType<typeof buildStructureNodeSummary>[]
+  nodes: ReturnType<typeof buildStructureNodeSummary>[],
 ) {
   if (nodes.length === 0) return null;
 
   const firstLookGroups = new Set(
     buildGroupKeySet(
       context.docInput?.sections.onboarding.body.firstLookPaths ?? [],
-      context.apiPaths
-    )
+      context.apiPaths,
+    ),
   );
   const primaryModuleGroups = new Set(
     buildGroupKeySet(
       context.docInput?.sections.overview.body.primaryModules ?? [],
-      context.apiPaths
-    )
+      context.apiPaths,
+    ),
   );
   const entrypointGroups = new Set(
-    buildGroupKeySet(context.meaningfulEntrypoints, context.apiPaths)
+    buildGroupKeySet(context.meaningfulEntrypoints, context.apiPaths),
   );
   const apiGroups = new Set(
-    buildGroupKeySet(context.metrics.routeInventory?.sourceFiles ?? [], context.apiPaths)
+    buildGroupKeySet(context.metrics.routeInventory?.sourceFiles ?? [], context.apiPaths),
   );
   const riskGroups = new Set(
-    buildGroupKeySet(context.docInput?.sections.onboarding.body.riskPaths ?? [], context.apiPaths)
+    buildGroupKeySet(context.docInput?.sections.onboarding.body.riskPaths ?? [], context.apiPaths),
   );
   const graphWeightByGroup = new Map<string, number>();
 
@@ -235,7 +235,7 @@ function selectDefaultTopLevelNode(
 
   return (
     scored.toSorted(
-      (left, right) => right.score - left.score || left.node.label.localeCompare(right.node.label)
+      (left, right) => right.score - left.score || left.node.label.localeCompare(right.node.label),
     )[0]?.node ?? null
   );
 }
@@ -243,7 +243,7 @@ function selectDefaultTopLevelNode(
 export function buildStructureNodePayloadFromContext(
   context: StructureContext,
   analysisRef: AnalysisRef | null,
-  nodeId: string
+  nodeId: string,
 ) {
   const summarizeImportance = summarizeImportanceHelper;
   const { nodeType, path } = parseStructureNodeId(nodeId);
@@ -279,7 +279,7 @@ export function buildStructureNodePayloadFromContext(
   }
 
   const scopedPaths = context.allInterestingPaths.filter((candidatePath) =>
-    isPathInsideScope(candidatePath, path)
+    isPathInsideScope(candidatePath, path),
   );
   if (scopedPaths.length === 0) return null;
 
@@ -325,7 +325,7 @@ export function buildStructureNodePayloadFromContext(
     analysisRef,
     breadcrumbs: buildBreadcrumbs("group", path),
     canDrillDeeper: limitedChildren.some(
-      (child) => child.canDrillDeeper || child.nodeType === "file"
+      (child) => child.canDrillDeeper || child.nodeType === "file",
     ),
     children: limitedChildren,
     edges,
@@ -369,15 +369,15 @@ function buildStructureNodeSummary(params: {
   const apiCount = uniq(params.entry.apiPaths).length;
   const churnCount = uniq(params.entry.churnHotspots.map((item) => item.path)).length;
   const changeCouplingCount = uniq(
-    params.entry.changeCoupling.flatMap((item) => [item.fromPath, item.toPath])
+    params.entry.changeCoupling.flatMap((item) => [item.fromPath, item.toPath]),
   ).length;
   const configCount = uniq(params.entry.configPaths).length;
   const hotspotCount = uniq(params.entry.hotspotSignals.map((item) => item.path)).length;
   const dependencyHotspotCount = uniq(
-    params.entry.dependencyHotspots.map((item) => item.path)
+    params.entry.dependencyHotspots.map((item) => item.path),
   ).length;
   const graphWarningCount = uniq(
-    params.entry.graphUnresolvedSamples.map((item) => item.fromPath)
+    params.entry.graphUnresolvedSamples.map((item) => item.fromPath),
   ).length;
   const orphanCount = uniq(params.entry.orphanPaths).length;
   const frameworkCount = uniq(params.entry.frameworkNames).length;

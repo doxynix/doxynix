@@ -21,7 +21,7 @@ const badgeVariants = cva(
           "border-border bg-secondary text-secondary-foreground [a&]:hover:border-border-strong [a&]:hover:bg-surface-hover",
       },
     },
-  }
+  },
 );
 
 function AppBadge({

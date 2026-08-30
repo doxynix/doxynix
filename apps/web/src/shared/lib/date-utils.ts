@@ -5,7 +5,7 @@ import { DEFAULT_LOCALE } from "../constants/locales";
 export function formatRelativeTime(
   date: Date | null | number | string,
   localeStr: string = DEFAULT_LOCALE,
-  defaultValue: string = "—"
+  defaultValue: string = "—",
 ): string {
   if (date == null) return defaultValue;
 
@@ -16,7 +16,7 @@ export function formatRelativeTime(
     const timeZone = Temporal.Now.timeZoneId();
     const nowZdt = Temporal.Now.zonedDateTimeISO(timeZone);
     const targetZdt = Temporal.Instant.fromEpochMilliseconds(
-      parsedDate.getTime()
+      parsedDate.getTime(),
     ).toZonedDateTimeISO(timeZone);
     const duration = nowZdt.since(targetZdt, { largestUnit: "year" });
     const formatter = new Intl.RelativeTimeFormat(localeStr, { numeric: "auto" });
@@ -44,7 +44,7 @@ export function formatRelativeTime(
 
 export function formatFullDate(
   date: Date | number | string,
-  localeStr: string = DEFAULT_LOCALE
+  localeStr: string = DEFAULT_LOCALE,
 ): string {
   try {
     const parsedDate = new Date(date);

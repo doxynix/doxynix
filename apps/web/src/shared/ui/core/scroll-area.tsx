@@ -24,7 +24,7 @@ const ScrollArea = forwardRef<ComponentRef<typeof ScrollAreaPrimitive.Root>, Scr
       <ScrollBar />
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
-  )
+  ),
 );
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
 
@@ -41,7 +41,7 @@ const ScrollBar = forwardRef<
       "data-[state=hidden]:animate-out data-[state=hidden]:fade-out-0 data-[state=hidden]:duration-200",
       orientation === "vertical" && "h-full w-1.5 border-l border-l-transparent p-px",
       orientation === "horizontal" && "h-1.5 flex-col border-t border-t-transparent p-px",
-      className
+      className,
     )}
     {...props}
   >

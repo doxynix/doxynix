@@ -17,7 +17,7 @@ export const githubAppRouter = createTRPCRouter({
       z.object({
         installationId: z.string().regex(/^\d+$/),
         state: z.string().trim().min(1),
-      })
+      }),
     )
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
@@ -25,7 +25,7 @@ export const githubAppRouter = createTRPCRouter({
         ctx.prisma,
         Number(ctx.session.user.id),
         input.installationId,
-        input.state
+        input.state,
       );
     }),
 });

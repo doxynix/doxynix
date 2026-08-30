@@ -18,7 +18,7 @@ const alertVariants = cva(
           "text-success bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-success/90",
       },
     },
-  }
+  },
 );
 
 function Alert({
@@ -52,7 +52,7 @@ function AlertDescription({ className, ...props }: ComponentProps<"div">) {
       data-slot="alert-description"
       className={cn(
         "text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
-        className
+        className,
       )}
       {...props}
     />

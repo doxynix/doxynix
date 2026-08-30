@@ -5,7 +5,7 @@ import { matchesExtension, type LanguageAdapter } from "./types";
 import { typeScriptAdapter } from "./typescript.adapter";
 
 const REGISTRY: LanguageAdapter[] = [typeScriptAdapter, treeSitterAdapter, regexAdapter].sort(
-  (left, right) => right.priority - left.priority
+  (left, right) => right.priority - left.priority,
 );
 
 export function getLanguageAdapters(file: RepositoryFile) {

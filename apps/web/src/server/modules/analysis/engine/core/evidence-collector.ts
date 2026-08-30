@@ -34,8 +34,8 @@ export async function collectFileEvidence(
     filePath: string,
     imports: string[],
     innerLookups: Pick<EvidenceLookups, "aliasRules" | "filesByBaseName" | "fileSet">,
-    innerTracking: DependencyTracking
-  ) => string[]
+    innerTracking: DependencyTracking,
+  ) => string[],
 ): Promise<CollectedFileEvidence> {
   const signals = fileSignalsByPath.get(file.path) ?? fileSignalsByPath.get(normalize(file.path));
 
@@ -73,7 +73,7 @@ export async function collectFileEvidence(
 export function buildModuleRef(
   filePath: string,
   signals: CollectedFileEvidence["signals"],
-  entrypointHints: CollectedFileEvidence["entrypointHints"]
+  entrypointHints: CollectedFileEvidence["entrypointHints"],
 ): ModuleRef {
   const categories = signals.categories ?? ProjectPolicy.getCategories(filePath);
 

@@ -27,7 +27,13 @@ export type EvidenceRef = {
 
 export type RepositoryFact = {
   category:
-    "api" | "architecture" | "configuration" | "delivery" | "ownership" | "quality" | "security";
+    | "api"
+    | "architecture"
+    | "configuration"
+    | "delivery"
+    | "ownership"
+    | "quality"
+    | "security";
   confidence: "high" | "low" | "medium";
   detail: string;
   evidence: EvidenceRef[];
@@ -37,7 +43,12 @@ export type RepositoryFact = {
 
 export type RepositoryFinding = {
   category:
-    "architecture" | "change-risk" | "hotspot" | "maintainability" | "onboarding" | "security";
+    | "architecture"
+    | "change-risk"
+    | "hotspot"
+    | "maintainability"
+    | "onboarding"
+    | "security";
   confidence: number;
   evidence: EvidenceRef[];
   id: string;

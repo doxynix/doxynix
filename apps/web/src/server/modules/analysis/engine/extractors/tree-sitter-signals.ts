@@ -362,7 +362,7 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
         languageCache.delete(ext);
         appLogger.error({ error, ext, msg: "Failed to load language grammar" });
         throw error;
-      })
+      }),
     );
   }
 
@@ -403,7 +403,7 @@ function resolveGrammarWasmPath(spec: LanguageSpec): string {
 
   throw new Error(
     `[TreeSitter] Grammar WASM not found: ${spec.wasm}. ` +
-      `Ensure it is included in trigger.config.ts additionalFiles.`
+      `Ensure it is included in trigger.config.ts additionalFiles.`,
   );
 }
 
@@ -503,7 +503,9 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
 
       const declarationTypes = new Set(spec.declarations.flatMap((entry) => entry.types));
       const declarationKindByType = new Map(
-        spec.declarations.flatMap((entry) => entry.types.map((type) => [type, entry.kind] as const))
+        spec.declarations.flatMap((entry) =>
+          entry.types.map((type) => [type, entry.kind] as const),
+        ),
       );
 
       const cursor = root.walk();
@@ -576,7 +578,7 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
       const frameworkHints = collectFrameworkFactsFromTokens(
         [...imports, file.path, ...symbols.map((symbol) => symbol.name)],
         file.path,
-        78
+        78,
       );
 
       return {

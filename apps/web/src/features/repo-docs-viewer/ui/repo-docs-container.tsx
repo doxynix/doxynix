@@ -27,8 +27,8 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
   const [activeTab, setActiveTab] = useQueryState(
     "type",
     parseAsStringEnum<DocType>(Object.values(DocTypeSchema.enum)).withDefault(
-      DocTypeSchema.enum.README
-    )
+      DocTypeSchema.enum.README,
+    ),
   );
 
   const { data: availableDocs, isLoading } = trpc.analysis.getAvailableDocs.useQuery({
@@ -38,7 +38,7 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
 
   const { data: nodeContext } = trpc.analysis.getNodeContext.useQuery(
     { aid: aid ?? undefined, nodeId: node ?? "", repoId: id },
-    { enabled: node != null && node.length > 0 }
+    { enabled: node != null && node.length > 0 },
   );
 
   const docs = availableDocs ?? EMPTY_DOCS;

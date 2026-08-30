@@ -8,7 +8,12 @@ import type { ProjectPolicySemanticKind } from "../engine/core/project-policy-ru
 export type WriterStatus = "failed" | "llm" | "missing";
 
 export type StructureEdgeRelationType =
-  "api" | "config" | "cycle" | "entrypoint" | "focus" | "risk";
+  | "api"
+  | "config"
+  | "cycle"
+  | "entrypoint"
+  | "focus"
+  | "risk";
 
 export type StructureNodeType = "file" | "group";
 

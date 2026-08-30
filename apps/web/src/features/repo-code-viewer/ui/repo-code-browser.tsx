@@ -82,12 +82,12 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
 
   const { data: auditResult } = trpc.analysis.getFileActionResult.useQuery(
     { action: "quick-file-audit", path },
-    { enabled: !!path && userId != null }
+    { enabled: !!path && userId != null },
   );
 
   const { data: documentResult } = trpc.analysis.getFileActionResult.useQuery(
     { action: "document-file-preview", path },
-    { enabled: !!path && userId != null }
+    { enabled: !!path && userId != null },
   );
 
   const typedAuditHtml = useTypewriter(auditResult?.html ?? "", 3);

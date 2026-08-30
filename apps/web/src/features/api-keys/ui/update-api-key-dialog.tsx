@@ -50,7 +50,7 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
       { id: apiKey.id, ...values },
       {
         onSuccess: () => setOpen(false),
-      }
+      },
     );
   };
 

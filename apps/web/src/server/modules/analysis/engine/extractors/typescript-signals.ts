@@ -68,7 +68,7 @@ function pushSymbol(
   node: ts.Node,
   kind: SymbolKind,
   exported: boolean,
-  fallbackName?: string
+  fallbackName?: string,
 ) {
   const name = fallbackName ?? nodeName(node);
   if (name == null || name.length === 0) return;
@@ -94,7 +94,7 @@ function collectCallRoute(
   node: ts.CallExpression,
   sourceFile: ts.SourceFile,
   routes: RouteRef[],
-  frameworkHints: FrameworkFact[]
+  frameworkHints: FrameworkFact[],
 ) {
   if (!ts.isPropertyAccessExpression(node.expression)) return;
 
@@ -140,7 +140,7 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
     file.content,
     ts.ScriptTarget.Latest,
     true,
-    getScriptKind(file.path)
+    getScriptKind(file.path),
   );
 
   const imports: string[] = [];
@@ -258,7 +258,7 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
   const frameworkHints = collectFrameworkFactsFromTokens(
     [...imports, ...Array.from(frameworkTokens)],
     file.path,
-    90
+    90,
   );
 
   apiSurface += (
@@ -269,7 +269,7 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
   const entrypointRefs: EntrypointRef[] = [];
   const entrypointHint =
     /\bcreateServer\b|\bNestFactory\.create\b|\bnew Hono\b|\bexpress\(|\bif\s*\(\s*require\.main\s*===\s*module\s*\)|\bserve\(/.test(
-      file.content
+      file.content,
     );
 
   if (entrypointHint) {

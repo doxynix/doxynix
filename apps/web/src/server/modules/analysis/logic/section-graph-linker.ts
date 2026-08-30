@@ -44,7 +44,7 @@ class DocumentGraphLinker {
   public static linkSectionsToGraph(
     document: string,
     dependencyGraph: DependencyGraph | null | undefined,
-    docType: string
+    docType: string,
   ): DocumentSection[] {
     const sections: DocumentSection[] = [];
 
@@ -120,7 +120,7 @@ class DocumentGraphLinker {
    */
   private static findRelatedGraphNodes(
     section: DocumentSection,
-    graph: DependencyGraph | null | undefined
+    graph: DependencyGraph | null | undefined,
   ): string[] {
     const nodeIds: string[] = [];
     const content = section.content.toLowerCase();
@@ -187,7 +187,7 @@ export class DocumentFormatter {
     document: string,
     graph: DependencyGraph | null | undefined,
     docType: string,
-    version: string
+    version: string,
   ): DocumentWithSections {
     const sections = DocumentGraphLinker.linkSectionsToGraph(document, graph, docType);
 

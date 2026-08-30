@@ -343,7 +343,7 @@ const nextConfig: NextConfig = {
           destination: isExternal ? d : `/:locale${d}`,
           permanent: false,
           source: `/:locale(${LOCALE_REGEX_STR})${s}`,
-        }
+        },
       );
     });
 
@@ -415,7 +415,7 @@ const nextConfig: NextConfig = {
             const filtered = filterWebpackStats(data);
             return JSON.stringify(filtered);
           },
-        })
+        }),
       );
     }
 

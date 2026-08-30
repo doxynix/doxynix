@@ -62,7 +62,7 @@ export function isProbablyMinifiedContent(content: string): boolean {
 export function getNonActionableReason(
   path: string,
   content: string,
-  nodeContext?: FileActionNodeContext
+  nodeContext?: FileActionNodeContext,
 ): null | string {
   const normalizedPath = normalize(path);
   if (ProjectPolicy.isSensitive(normalizedPath)) {
@@ -285,21 +285,21 @@ export function deriveMaintenanceStatus(repo: Repo) {
 
 export async function runQuickFileAudit(
   userId: number,
-  input: FileActionInput
+  input: FileActionInput,
 ): Promise<QuickFileAuditResult> {
   const rawContent = input.content.trim();
 
   if (rawContent.length === 0) {
     return buildAuditFallback(
       input.path,
-      `The file is empty, so there is not enough evidence for a meaningful audit. ${describeContextQualifier(input.nodeContext)}`
+      `The file is empty, so there is not enough evidence for a meaningful audit. ${describeContextQualifier(input.nodeContext)}`,
     );
   }
 
   if (isBinaryLikeContent(input.content)) {
     return buildAuditFallback(
       input.path,
-      `The file looks binary or non-textual, so a code-focused audit would be unreliable. ${describeContextQualifier(input.nodeContext)}`
+      `The file looks binary or non-textual, so a code-focused audit would be unreliable. ${describeContextQualifier(input.nodeContext)}`,
     );
   }
 
@@ -374,7 +374,7 @@ export function dedupeSearchResults(results: RepoSearchResult[]) {
 }
 
 export function pickLatestDocsByType<TDoc extends { type: DocType; updatedAt: Date }>(
-  docs: TDoc[]
+  docs: TDoc[],
 ) {
   const latest = uniqBy(orderBy(docs, [(d) => d.updatedAt], ["desc"]), (d) => d.type);
   return orderBy(latest, [(d) => d.type], ["asc"]);

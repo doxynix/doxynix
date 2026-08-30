@@ -9,7 +9,7 @@ export function calculateDocDensity(source: number, comment: number): number {
 
 export function buildEvidence(
   paths: string[],
-  note?: string
+  note?: string,
 ): Array<{ note?: string; path: string }> {
   return paths.map((filePath) => ({
     note,

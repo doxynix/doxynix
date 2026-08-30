@@ -120,7 +120,7 @@ export const RepoNode = ({ data }: Props) => {
     <div
       className={cn(
         "group relative transition-opacity duration-300 ease-in-out",
-        dimByFilter || dimByHover || dimBySearch ? "z-1 opacity-50" : "z-10 opacity-100"
+        dimByFilter || dimByHover || dimBySearch ? "z-1 opacity-50" : "z-10 opacity-100",
       )}
     >
       <Handle type="target" position={Position.Top} className="cursor-grab! opacity-0" />
@@ -146,7 +146,7 @@ export const RepoNode = ({ data }: Props) => {
                     <span className="text-[10px]">{m.id}</span>
                   </div>
                 </AppBadge>
-              )
+              ),
           )}
 
           {data.score > 0 && (

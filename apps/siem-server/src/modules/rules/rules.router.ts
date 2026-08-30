@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { type AuthEnv, requireAuth, requireRole } from "@server/core/middleware/auth.middleware";
+import { requireAuth, requireRole } from "@server/core/middleware/auth.middleware";
 import { recordAuditLog } from "@server/modules/audit/audit.service";
 import { getRequestContext } from "@server/utils/request-context";
 import { Hono } from "hono";
@@ -16,7 +16,7 @@ const UPDATE_ERROR_MAP = {
   not_found: { error: "Rule not found", status: 404 },
 } as const;
 
-export const rulesRouter = new Hono<AuthEnv>()
+export const rulesRouter = new Hono()
   .use("*", requireAuth)
   .get("/", zValidator("query", getRulesQuerySchema), async (c) => {
     const query = c.req.valid("query");

@@ -23,18 +23,18 @@ const BreadcrumbList = forwardRef<HTMLOListElement, ComponentPropsWithoutRef<"ol
       ref={ref}
       className={cn(
         "text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm wrap-break-word sm:gap-2.5",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  ),
 );
 BreadcrumbList.displayName = "BreadcrumbList";
 
 const BreadcrumbItem = forwardRef<HTMLLIElement, ComponentPropsWithoutRef<"li">>(
   ({ className, ...props }, ref) => (
     <li ref={ref} className={cn("inline-flex items-center gap-1.5", className)} {...props} />
-  )
+  ),
 );
 BreadcrumbItem.displayName = "BreadcrumbItem";
 
@@ -52,7 +52,7 @@ const BreadcrumbLink = forwardRef<
       className={cn(
         "hover:text-foreground transition-colors",
         "focus-visible:ring-ring/50 -mx-1 rounded-md px-1 focus-visible:ring-2 focus-visible:outline-hidden",
-        className
+        className,
       )}
       {...props}
     />
@@ -69,7 +69,7 @@ const BreadcrumbPage = forwardRef<HTMLSpanElement, ComponentPropsWithoutRef<"spa
       className={cn("text-foreground font-normal", className)}
       {...props}
     />
-  )
+  ),
 );
 BreadcrumbPage.displayName = "BreadcrumbPage";
 

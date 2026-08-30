@@ -14,7 +14,7 @@ async function safeRedis<T>(
     meta?: Record<string, unknown>;
     msg: string;
     rethrow?: boolean;
-  }
+  },
 ): Promise<T> {
   try {
     return await operation();
@@ -40,7 +40,7 @@ export const redisService = {
           meta: { key },
           msg: "Redis secondaryStorage delete error",
           rethrow: true,
-        }
+        },
       ),
 
     get: (key: string): Promise<null | string> =>
@@ -55,7 +55,7 @@ export const redisService = {
           meta: { key },
           msg: "Redis secondaryStorage get error",
           rethrow: true,
-        }
+        },
       ),
 
     getAndDelete: (key: string): Promise<null | string> =>
@@ -70,7 +70,7 @@ export const redisService = {
           meta: { key },
           msg: "Redis secondaryStorage getAndDelete error",
           rethrow: true,
-        }
+        },
       ),
 
     set: (key: string, value: unknown, ttl?: number): Promise<void> =>
@@ -83,7 +83,7 @@ export const redisService = {
             await redisClient.set(key, stringValue);
           }
         },
-        { meta: { key }, msg: "Redis secondaryStorage set error", rethrow: true }
+        { meta: { key }, msg: "Redis secondaryStorage set error", rethrow: true },
       ),
   },
 
@@ -91,28 +91,28 @@ export const redisService = {
     get: (
       userId: number | string,
       path: string,
-      action: "document-file-preview" | "quick-file-audit"
+      action: "document-file-preview" | "quick-file-audit",
     ) =>
       safeRedis(
         () =>
           redisClient.get<FileActionPreviewResult>(
-            REDIS_CONFIG.keys.fileAction(userId, path, action)
+            REDIS_CONFIG.keys.fileAction(userId, path, action),
           ),
-        { fallback: null, meta: { path, userId }, msg: "Redis fileActions.get failed" }
+        { fallback: null, meta: { path, userId }, msg: "Redis fileActions.get failed" },
       ),
 
     set: (
       userId: number | string,
       path: string,
       action: "document-file-preview" | "quick-file-audit",
-      data: FileActionPreviewResult
+      data: FileActionPreviewResult,
     ) =>
       safeRedis(
         () =>
           redisClient.set(REDIS_CONFIG.keys.fileAction(userId, path, action), data, {
             ex: REDIS_CONFIG.ttl.fileAction,
           }),
-        { meta: { path, userId }, msg: "Redis fileActions.set failed", rethrow: true }
+        { meta: { path, userId }, msg: "Redis fileActions.set failed", rethrow: true },
       ),
   },
 
@@ -130,7 +130,7 @@ export const redisService = {
           redisClient.set(REDIS_CONFIG.keys.fixResult(fixId), result, {
             ex: REDIS_CONFIG.ttl.fixResult,
           }),
-        { meta: { fixId }, msg: "Redis fixes.set failed", rethrow: true }
+        { meta: { fixId }, msg: "Redis fixes.set failed", rethrow: true },
       ),
   },
 
@@ -148,7 +148,7 @@ export const redisService = {
           meta: { repoId, userId },
           msg: "Redis staging.addFiles failed",
           rethrow: true,
-        }
+        },
       ),
 
     clear: (userId: number | string, repoId: string) =>
@@ -166,7 +166,7 @@ export const redisService = {
           if (staged == null || Object.keys(staged).length === 0) return [];
           return Object.entries(staged).map(([filePath, content]) => ({ content, filePath }));
         },
-        { fallback: [], meta: { repoId, userId }, msg: "Redis staging.getAll failed" }
+        { fallback: [], meta: { repoId, userId }, msg: "Redis staging.getAll failed" },
       ),
 
     removeFile: (userId: number | string, repoId: string, filePath: string) =>
@@ -181,7 +181,7 @@ export const redisService = {
           meta: { filePath, repoId, userId },
           msg: "Redis staging.removeFile failed",
           rethrow: true,
-        }
+        },
       ),
   },
 };

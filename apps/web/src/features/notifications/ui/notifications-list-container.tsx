@@ -33,7 +33,7 @@ export function NotificationsListContainer() {
       search: debouncedSearch || undefined,
       type: params.type ?? undefined,
     },
-    { placeholderData: (previousData) => previousData }
+    { placeholderData: (previousData) => previousData },
   );
 
   const { data: stats } = trpc.notification.getStats.useQuery();

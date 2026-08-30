@@ -16,7 +16,7 @@ type AnalysisPayload = {
 };
 
 export function coerceAnalysisPayload(
-  analysis: LatestCompletedAnalysis | null | undefined
+  analysis: LatestCompletedAnalysis | null | undefined,
 ): AnalysisPayload | null {
   if (analysis == null || analysis.metricsJson == null || analysis.resultJson == null) return null;
 

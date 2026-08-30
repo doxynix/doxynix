@@ -27,7 +27,7 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
       { id: apiKey.id },
       {
         onSuccess: () => setOpen(false),
-      }
+      },
     );
   };
 

@@ -38,14 +38,14 @@ export async function runAiPipeline(
   language: string,
   userId: number,
   repoId: string,
-  branch: string
+  branch: string,
 ): Promise<AIResult> {
   taskLogger.log("Initializing AI Multi-Agent Pipeline...");
 
   // Stage 1: Prompt injection detection (Цензор)
   const sentinelStatus = await llmLimiter.schedule(
     { id: `${analysisId}-sentinel`, weight: 5000 },
-    () => executeSentinelPhase(instructions, analysisId)
+    () => executeSentinelPhase(instructions, analysisId),
   );
 
   if (sentinelStatus === "UNSAFE") {
@@ -57,7 +57,7 @@ export async function runAiPipeline(
   // Stage 2: Project mapping
   taskLogger.info("Project Mapper: Scanning topology and module boundaries...");
   const projectMap = await llmLimiter.schedule({ id: `${analysisId}-mapper`, weight: 80_000 }, () =>
-    executeMapperPhase(validFiles, hardMetrics, evidence, analysisId, userId, repoId, branch)
+    executeMapperPhase(validFiles, hardMetrics, evidence, analysisId, userId, repoId, branch),
   );
   taskLogger.success(`Project Mapper: Identified ${projectMap.modules.length} core modules`);
 
@@ -72,7 +72,7 @@ export async function runAiPipeline(
     hardMetrics,
     projectMap,
     repositoryFacts,
-    repositoryFindings
+    repositoryFindings,
   );
 
   taskLogger.log("Invoking Lead Architect Agent...");
@@ -87,8 +87,8 @@ export async function runAiPipeline(
       language,
       repoId,
       userId,
-      branch
-    )
+      branch,
+    ),
   );
 
   taskLogger.success("Lead Architect: Analysis complete. Intelligence report generated.");
@@ -108,7 +108,7 @@ export async function generateDeepDocs(
   requestedDocs: DocType[],
   repo: Repo,
   userId: number,
-  language: string
+  language: string,
 ): Promise<DeepDocsResult> {
   taskLogger.info(`Documentation: Launching writers for ${requestedDocs.length} assets...`);
   const result = await orchestrateWriterTasks(
@@ -120,7 +120,7 @@ export async function generateDeepDocs(
     requestedDocs,
     repo,
     userId,
-    language
+    language,
   );
   taskLogger.success("Documentation: All assets generated successfully");
   return result;
