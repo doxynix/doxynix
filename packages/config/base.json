@@ -18,7 +18,6 @@
     "allowJs": true,
     "verbatimModuleSyntax": true,
     "useDefineForClassFields": true,
-    "declarationMap": true,
     "noErrorTruncation": false
   }
 }
