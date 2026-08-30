@@ -81,7 +81,6 @@ const nextConfig: NextConfig = {
     turbopackFileSystemCacheForBuild: true,
     turbopackFileSystemCacheForDev: true,
     typedEnv: true,
-    useLightningcss: IS_PROD,
     webpackMemoryOptimizations: false,
     workerThreads: false, // [DISABLED]: Causes worker pool deadlocks during page data collection under Bun runtime
   },
