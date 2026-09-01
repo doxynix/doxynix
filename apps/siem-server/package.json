@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@axiomhq/js": "1.8.0",
+    "@axiomhq/js": "2.0.0",
     "@better-auth/drizzle-adapter": "1.6.30",
     "@doxynix/shared": "workspace:*",
     "@hono/zod-validator": "0.9.0",
