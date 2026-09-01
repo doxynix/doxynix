@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.8](https://github.com/doxynix/doxynix/compare/web-v3.0.7...web-v3.0.8) (2026-09-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/groq to v3.0.63 ([#2072](https://github.com/doxynix/doxynix/issues/2072)) ([932c4b0](https://github.com/doxynix/doxynix/commit/932c4b0e3aeda33d0b748d148dcc56a8d8815b35))
+* **deps:** update dependency svix to v2 ([#2007](https://github.com/doxynix/doxynix/issues/2007)) ([3635e59](https://github.com/doxynix/doxynix/commit/3635e59b9f16114fd04b8187aebe3a7609e45f9e))
+
 ## [3.0.7](https://github.com/doxynix/doxynix/compare/web-v3.0.6...web-v3.0.7) (2026-08-30)
 
 
