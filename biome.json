@@ -75,7 +75,8 @@
       "!!**/routeTree.gen.ts",
       "!!**/next-env.d.ts",
       "!!**/prisma/generated",
-      "!!**/prisma/json-schema"
+      "!!**/prisma/json-schema",
+      "!!**/bun.lock"
     ]
   },
   "formatter": {
