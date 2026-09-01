@@ -1,6 +1,5 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "automerge": false,
   "dependencyDashboard": true,
   "extends": ["config:best-practices", "monorepo:react", "monorepo:nextjs", "group:monorepos"],
   "gitAuthor": "doxynix-deps-bot <273657142+doxynix-deps-bot[bot]@users.noreply.github.com>",
@@ -8,52 +7,179 @@
   "labels": ["dependencies"],
   "minimumReleaseAge": "3 days",
   "packageRules": [
+    { "addLabels": ["major-update"], "matchUpdateTypes": ["major"] },
+    { "addLabels": ["minor-update"], "matchUpdateTypes": ["minor"] },
+    { "addLabels": ["patch-update"], "matchUpdateTypes": ["patch"] },
     {
-      "addLabels": ["major-update"],
-      "matchUpdateTypes": ["major"]
+      "description": "Group AI and LLM tools",
+      "groupName": "AI ecosystem",
+      "matchPackagePatterns": [
+        "^@ai-sdk/",
+        "^ai$",
+        "^@modelcontextprotocol/",
+        "^mcp-handler$",
+        "^langsmith$",
+        "^@lenml/"
+      ]
     },
     {
-      "addLabels": ["minor-update"],
-      "matchUpdateTypes": ["minor"]
+      "description": "Group Better-Auth packages",
+      "groupName": "Better Auth",
+      "matchPackagePatterns": ["^better-auth$", "^@better-auth/"]
     },
     {
-      "addLabels": ["patch-update"],
-      "matchUpdateTypes": ["patch"]
+      "description": "Group Database ORMs and Generators",
+      "groupName": "Database & ORMs",
+      "matchPackagePatterns": [
+        "^@prisma/",
+        "^prisma",
+        "^@zenstackhq/",
+        "^zenstack$",
+        "^drizzle-orm$",
+        "^drizzle-kit$",
+        "^drizzle-zod$"
+      ]
     },
     {
-      "description": "Group all non-major npm updates into a single PR to reduce noise across the monorepo",
-      "groupName": "All non-major dependencies",
-      "groupSlug": "all-minor-patch",
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch"]
+      "description": "Group TanStack packages",
+      "groupName": "TanStack ecosystem",
+      "matchPackagePatterns": ["^@tanstack/"]
     },
     {
-      "description": "Group all GitHub Actions updates together",
-      "groupName": "GitHub Actions updates",
-      "groupSlug": "all-actions",
-      "matchManagers": ["github-actions"]
+      "description": "Group CodeMirror and editor extensions",
+      "groupName": "CodeMirror & Editor",
+      "matchPackagePatterns": [
+        "^@codemirror/",
+        "^@uiw/codemirror",
+        "^@uiw/react-codemirror",
+        "^@lezer/",
+        "^@replit/codemirror-",
+        "^react-codemirror-merge$"
+      ]
+    },
+
+    {
+      "description": "Group UI, styling and chart libraries",
+      "groupName": "UI and styling",
+      "matchPackagePatterns": [
+        "^@radix-ui/",
+        "^@react-aria/",
+        "^@react-stately/",
+        "^@remixicon/",
+        "^lucide-react$",
+        "^recharts$",
+        "^motion$",
+        "^cmdk$",
+        "^sonner$",
+        "^@xyflow/",
+        "^tailwind",
+        "^@tailwindcss/",
+        "^clsx$",
+        "^class-variance-authority$"
+      ]
+    },
+
+    {
+      "description": "Group Markdown, AST parsers and Syntax Highlighters",
+      "groupName": "Markdown & Syntax Highlighting",
+      "matchPackagePatterns": [
+        "^@shikijs/",
+        "^shiki$",
+        "^rehype-",
+        "^remark-",
+        "^unified$",
+        "^unist-",
+        "^mermaid$",
+        "^@mermaid-js/"
+      ]
     },
     {
-      "description": "Group all @types updates together",
+      "description": "Group Linters, Formatters and Dev Tooling",
+      "groupName": "Linters & Dev Tools",
+      "matchPackagePatterns": [
+        "^@biomejs/",
+        "^oxlint",
+        "^cspell",
+        "^@cspell/",
+        "^secretlint",
+        "^@secretlint/",
+        "^knip",
+        "^@stryker-mutator/",
+        "^typedoc",
+        "^@boneskull/typedoc-",
+        "^@to-skills/typedoc",
+        "^lefthook$",
+        "^jscpd$",
+        "^@jscpd/"
+      ]
+    },
+    {
+      "description": "Group testing frameworks and runners",
+      "groupName": "Testing frameworks",
+      "matchPackagePatterns": [
+        "^@playwright/",
+        "^vitest$",
+        "^@vitest/",
+        "^fast-check$",
+        "^@faker-js/faker$"
+      ]
+    },
+    {
+      "description": "Group Backend Services and SDKs",
+      "groupName": "Backend SDKs & Services",
+      "matchPackagePatterns": [
+        "^hono$",
+        "^@hono/",
+        "^@trpc/",
+        "^@trigger.dev/",
+        "^@upstash/",
+        "^@sentry/",
+        "^posthog-",
+        "^@axiomhq/",
+        "^resend$",
+        "^svix$",
+        "^ably$",
+        "^@t3-oss/"
+      ]
+    },
+    {
+      "description": "Group GitHub API and Octokit libraries",
+      "groupName": "Octokit & GitHub tools",
+      "matchPackagePatterns": ["^@octokit/", "^octokit-plugin-"]
+    },
+    {
+      "description": "Group all TypeScript definitions",
       "groupName": "TypeScript definitions (@types)",
       "matchPackageNames": ["@types/**"]
     },
     {
+      "description": "Group GitHub Actions",
+      "groupName": "GitHub Actions",
+      "groupSlug": "all-actions",
+      "matchManagers": ["github-actions"]
+    },
+    {
+      "description": "Group all other non-major dependencies",
+      "groupName": "All other non-major dependencies",
+      "groupSlug": "all-other-minor-patch",
+      "matchManagers": ["bun", "npm"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
       "allowedVersions": "<1.0.0",
-      "description": "Restrict cookie package to <1.0.0 to maintain compatibility with auth and socket modules",
+      "description": "Restrict cookie to <1.0.0 for auth compatibility",
       "matchPackageNames": ["cookie"]
     },
     {
-      "description": "Freeze Tree-sitter related packages due to fragile WASM grammar compatibility",
+      "description": "Freeze Tree-sitter packages due to custom WASM patch",
       "enabled": false,
       "matchPackageNames": ["web-tree-sitter", "tree-sitter-wasms"]
     }
   ],
-  "pinDigests": true,
   "prConcurrentLimit": 10,
   "prHourlyLimit": 5,
   "rangeStrategy": "pin",
-  "rebaseWhen": "behind-base-branch",
+  "rebaseWhen": "conflicted",
   "semanticCommitScope": "deps",
   "semanticCommits": "enabled",
   "semanticCommitType": "chore",
