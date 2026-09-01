@@ -96,5 +96,5 @@ Welcome to the **Doxynix Monorepo**. This codebase is managed via **Bun**, **Tur
 ## 📦 Scope 4: Shared Packages (`packages/*`)
 
 - **`packages/shared`**: Pure domain types, Zod schemas, and auth contracts shared between `siem-server` and `siem-client`. NO runtime server/client dependencies allowed.
-- **`packages/config`**: Base configuration files for TypeScript (`tsconfig.json`), Biome (`biome.json`), and ESLint.
+- **`packages/config`**: Base configuration files for TypeScript (`tsconfig.json`), Biome (`biome.json`), and Oxlint.
 - **`packages/cli`**: Doxynix Command Line Interface tool.

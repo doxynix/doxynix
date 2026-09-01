@@ -21,8 +21,8 @@ type PromptRole =
  */
 class PromptBuilder {
   private language: string = "English";
-  private role: PromptRole = "generic";
   private sections: Map<string, string> = new Map();
+  private role: PromptRole = "generic";
   private thinkingEnabled: boolean = true;
 
   constructor(role: PromptRole = "generic") {

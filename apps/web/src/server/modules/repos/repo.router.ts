@@ -1,13 +1,13 @@
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
-import { RepoSchema, StatusSchema } from "@/shared/api-contracts";
 import { CreateRepoSchema } from "@/shared/api/schemas/repo";
+import { RepoSchema, StatusSchema } from "@/shared/api-contracts";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { getPaginationMeta, PaginationMetaSchema } from "@/server/utils/pagination";
 
-import { repoMapper, type RepoWithAnalyses } from "./repo.mapper";
+import { repoMapper } from "./repo.mapper";
 import { RepoFilterSchema } from "./repo.schemas";
 import { repoService } from "./repo.service";
 
@@ -128,7 +128,7 @@ export const repoRouter = createTRPCRouter({
         totalCount,
       });
 
-      return repoMapper.toPaginatedList(items as RepoWithAnalyses[], meta);
+      return repoMapper.toPaginatedList(items, meta);
     }),
 
   getByName: protectedProcedure

@@ -93,7 +93,9 @@ function buildFilesByBaseName(files: NormalizedRepositoryFile[]) {
 
   for (const file of files) {
     const baseName = basename(file.path).toLowerCase();
-    if (!baseName) continue;
+    if (!baseName) {
+      continue;
+    }
 
     const bucket = filesByBaseName.get(baseName);
     if (bucket == null) {
@@ -120,8 +122,8 @@ export function buildEvidenceLookups(
     complexityByFile: new Map(
       fileComplexities.map((item) => [normalize(item.path), item.score] as const),
     ),
-    filesByBaseName: buildFilesByBaseName(normalizedFiles),
     fileSet: new Set(normalizedFiles.map((file) => file.path)),
+    filesByBaseName: buildFilesByBaseName(normalizedFiles),
     normalizedFiles,
   };
 }
@@ -162,7 +164,9 @@ export function resolveImportEdges(
       resolveRelativeImport(filePath, importPath, lookups.fileSet) ??
       resolveModuleImport(importPath, lookups.fileSet, lookups.filesByBaseName, lookups.aliasRules);
 
-    if (resolved === filePath) continue;
+    if (resolved === filePath) {
+      continue;
+    }
 
     if (resolved != null) {
       resolvedImports.push(resolved);

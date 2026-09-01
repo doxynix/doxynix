@@ -73,9 +73,15 @@ export function inferRepositoryKind(params: {
   const hasLibrarySurface = params.primaryEntrypoints.some((path) => BARREL_FILE_REGEX.test(path));
   const hasApiSurface = params.routeInventory.estimatedOperations > 0;
 
-  if ((hasRuntimeEntrypoint || hasApiSurface) && hasLibrarySurface) return "mixed";
-  if (hasRuntimeEntrypoint || hasApiSurface) return "service";
-  if (hasLibrarySurface) return "library";
+  if ((hasRuntimeEntrypoint || hasApiSurface) && hasLibrarySurface) {
+    return "mixed";
+  }
+  if (hasRuntimeEntrypoint || hasApiSurface) {
+    return "service";
+  }
+  if (hasLibrarySurface) {
+    return "library";
+  }
   return "unknown";
 }
 

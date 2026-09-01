@@ -60,8 +60,12 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
   );
 
   const getEmptyLabel = () => {
-    if (!isQueryEnabled) return "Search files, nodes, routes, and doc sections";
-    if (isFetching) return null;
+    if (!isQueryEnabled) {
+      return "Search files, nodes, routes, and doc sections";
+    }
+    if (isFetching) {
+      return null;
+    }
     return "No structural matches found";
   };
 
@@ -69,13 +73,13 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
   const hasResults = (data?.length ?? 0) > 0;
 
   return (
-    <div ref={containerRef} className="relative w-full">
+    <div className="relative w-full" ref={containerRef}>
       <div onClickCapture={() => setIsVisible(true)} onFocusCapture={() => setIsVisible(true)}>
         <AppSearch placeholder="Search workspace..." />
       </div>
 
       {isVisible && isQueryEnabled && (
-        <div className="bg-card absolute z-20 mt-2 w-full rounded-lg border">
+        <div className="absolute z-20 mt-2 w-full rounded-lg border bg-card">
           <div className="flex max-h-80 flex-col overflow-y-auto p-2">
             {isFetching && !hasResults ? (
               <div className="flex flex-col gap-2 p-2">
@@ -89,11 +93,11 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
 
                 return (
                   <AppButton
+                    className="h-auto items-start justify-start px-2 py-2 text-left"
                     key={result.id}
-                    variant="ghost"
                     onClick={() => {
                       setIsVisible(false);
-                      void router.push(
+                      router.push(
                         buildRepoSearchResultHref({
                           aid,
                           name,
@@ -102,13 +106,13 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
                         }),
                       );
                     }}
-                    className="h-auto items-start justify-start px-2 py-2 text-left"
+                    variant="ghost"
                   >
                     <div className="flex items-start gap-3">
                       <Icon className="mt-0.5" />
                       <div className="min-w-0">
                         <div className="truncate text-sm">{result.label}</div>
-                        <div className="text-muted-foreground truncate text-xs">
+                        <div className="truncate text-muted-foreground text-xs">
                           {result.description}
                         </div>
                       </div>
@@ -117,7 +121,7 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
                 );
               })
             ) : emptyLabel != null ? (
-              <div className="text-muted-foreground px-3 py-4 text-sm">{emptyLabel}</div>
+              <div className="px-3 py-4 text-muted-foreground text-sm">{emptyLabel}</div>
             ) : null}
           </div>
         </div>

@@ -15,7 +15,9 @@ export const realtimeServer =
     key: ABLY_API_KEY,
   });
 
-if (!IS_PROD) globalForAbly.ably = realtimeServer;
+if (!IS_PROD) {
+  globalForAbly.ably = realtimeServer;
+}
 
 export type UserEventPayloads = {
   [REALTIME_CONFIG.events.user.analysisProgress]: {

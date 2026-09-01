@@ -47,12 +47,12 @@ export class SafetyContext {
 
     // Check size
     if (content.length > maxSize) {
-      content = content.slice(0, maxSize) + "\n// [DATA TRUNCATED]";
+      content = `${content.slice(0, maxSize)}\n// [DATA TRUNCATED]`;
       truncated = true;
     }
 
     // Validate paths if requested
-    if (validatePaths && "paths" in data && Array.isArray((data as { paths: unknown }).paths)) {
+    if (validatePaths && "paths" in data && Array.isArray(data.paths)) {
       const pathsData = (data as { paths: string[] }).paths;
       const validation = this.validatePaths(pathsData, allowedPaths);
       invalidPaths = validation.invalid;
@@ -101,11 +101,18 @@ export class SafetyContext {
     xmlTags?: number;
   }): string {
     const report: string[] = [];
-    if (data.xmlTags != null) report.push(`✓ XML tags properly escaped: ${data.xmlTags}`);
-    if (data.maxDataSize != null)
+    if (data.xmlTags != null) {
+      report.push(`✓ XML tags properly escaped: ${data.xmlTags}`);
+    }
+    if (data.maxDataSize != null) {
       report.push(`✓ Max data size enforced: ${data.maxDataSize} bytes`);
-    if (data.userInputPresent === true) report.push(`⚠ User input present (sanitized)`);
-    if (data.pathsValidated != null) report.push(`✓ Paths validated: ${data.pathsValidated}`);
+    }
+    if (data.userInputPresent === true) {
+      report.push(`⚠ User input present (sanitized)`);
+    }
+    if (data.pathsValidated != null) {
+      report.push(`✓ Paths validated: ${data.pathsValidated}`);
+    }
     return report.join("\n");
   }
 
@@ -130,7 +137,7 @@ export class SafetyContext {
     let processedContent = content;
 
     if (content.length > maxLength) {
-      processedContent = content.slice(0, maxLength) + "\n// [CONTENT TRUNCATED]";
+      processedContent = `${content.slice(0, maxLength)}\n// [CONTENT TRUNCATED]`;
       truncated = true;
     }
 

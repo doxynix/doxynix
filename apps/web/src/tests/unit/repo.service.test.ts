@@ -57,9 +57,7 @@ function createGitHubRepoInfo(overrides: Partial<GitHubRepoInfo> = {}): GitHubRe
     key: K,
     fallback: GitHubRepoInfo[K],
   ): GitHubRepoInfo[K] => {
-    return Object.prototype.hasOwnProperty.call(overrides, key)
-      ? (overrides[key] as GitHubRepoInfo[K])
-      : fallback;
+    return Object.hasOwn(overrides, key) ? (overrides[key] as GitHubRepoInfo[K]) : fallback;
   };
 
   return {

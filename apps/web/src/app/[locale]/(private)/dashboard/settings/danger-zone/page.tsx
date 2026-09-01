@@ -14,7 +14,7 @@ export default async function DangerZonePage() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex justify-between">
         <div className="flex flex-col gap-2">
-          <h2 className="text-destructive text-2xl font-bold tracking-tight">
+          <h2 className="font-bold text-2xl text-destructive tracking-tight">
             {t("settings_danger_title")}
           </h2>
           <p className="text-muted-foreground text-sm">{t("settings_danger_desc")}</p>

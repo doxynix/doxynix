@@ -60,7 +60,9 @@ const prismaErrorMap: Record<string, PrismaErrorMeta | undefined> = {
 };
 
 export function handlePrismaError(error: unknown, map?: ErrorMapping): never {
-  if (error instanceof TRPCError) throw error;
+  if (error instanceof TRPCError) {
+    throw error;
+  }
 
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     const meta = prismaErrorMap[error.code];

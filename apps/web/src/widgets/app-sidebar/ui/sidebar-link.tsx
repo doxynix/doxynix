@@ -1,6 +1,5 @@
 "use client";
 
-import type { Route } from "next";
 import { SquareArrowOutUpRight } from "lucide-react";
 
 import { Link, usePathname } from "@/shared/i18n/navigation";
@@ -31,22 +30,22 @@ export function SidebarLink({
   return (
     <SidebarMenuButton
       asChild
-      tooltip={title}
       className={cn(
         "group/link flex cursor-default transition-colors",
         isActive
-          ? "bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent font-bold"
+          ? "bg-sidebar-accent font-bold text-sidebar-accent-foreground hover:bg-sidebar-accent"
           : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
       )}
+      tooltip={title}
     >
       <Link
-        href={href as Route}
+        href={href}
         rel={blank ? "noopener noreferrer" : undefined}
         target={blank ? "_blank" : undefined}
       >
         {Icon != null && <Icon className="size-3.5" />}
         {avatar != null && (
-          <AppAvatar alt={title} src={avatar} fallbackText={title} sizeClassName="size-6" />
+          <AppAvatar alt={title} fallbackText={title} sizeClassName="size-6" src={avatar} />
         )}
         <span className="truncate">{title}</span>
 

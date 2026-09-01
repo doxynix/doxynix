@@ -78,10 +78,10 @@ export function AppBreadcrumbs({
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <AppButton
-                          size="icon"
-                          variant="ghost"
                           aria-label="Show hidden elements"
                           className="size-7 cursor-pointer"
+                          size="icon"
+                          variant="ghost"
                         >
                           <BreadcrumbEllipsis />
                         </AppButton>
@@ -89,18 +89,20 @@ export function AppBreadcrumbs({
                       <DropdownMenuContent align="start" className="min-w-45">
                         {collapsedItems.map((collapsed, idx) => (
                           <DropdownMenuItem
-                            key={idx}
                             asChild={!!collapsed.href}
-                            onSelect={() => {
-                              if (collapsed.href == null) collapsed.onClick?.();
-                            }}
                             className="cursor-pointer"
+                            key={idx}
+                            onSelect={() => {
+                              if (collapsed.href == null) {
+                                collapsed.onClick?.();
+                              }
+                            }}
                           >
                             {collapsed.href ? (
                               <Link
+                                className="w-full cursor-pointer truncate"
                                 href={collapsed.href as Route}
                                 onClick={collapsed.onClick}
-                                className="w-full cursor-pointer truncate"
                               >
                                 {decodeURIComponent(collapsed.label)}
                               </Link>
@@ -125,20 +127,20 @@ export function AppBreadcrumbs({
               <BreadcrumbItem className="min-w-0 shrink">
                 {isLast ? (
                   <BreadcrumbPage className="w-full min-w-0">
-                    <TruncatedText text={label} className={cn("font-bold", item.className)} />
+                    <TruncatedText className={cn("font-bold", item.className)} text={label} />
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink
                     asChild={!!item.href}
+                    className={cn("min-w-0 cursor-pointer transition-colors hover:text-foreground")}
                     onClick={item.onClick}
-                    className={cn("hover:text-foreground min-w-0 cursor-pointer transition-colors")}
                   >
                     {item.href ? (
-                      <Link href={item.href as Route} className="block truncate">
-                        <TruncatedText text={label} className={item.className} />
+                      <Link className="block truncate" href={item.href}>
+                        <TruncatedText className={item.className} text={label} />
                       </Link>
                     ) : (
-                      <TruncatedText text={label} className={item.className} />
+                      <TruncatedText className={item.className} text={label} />
                     )}
                   </BreadcrumbLink>
                 )}

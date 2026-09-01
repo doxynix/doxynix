@@ -21,7 +21,9 @@ export function buildNodeExplainPayloadFromContext(
 ) {
   const { nodeType, path } = parseStructureNodeId(nodeId);
   const scopedPaths = collectNodeScopePaths(context, nodeType, path);
-  if (scopedPaths.length === 0) return null;
+  if (scopedPaths.length === 0) {
+    return null;
+  }
 
   const entry = aggregateEntryForPaths(scopedPaths, context);
   const signals = collectScopedSignals(scopedPaths, context);
@@ -98,10 +100,14 @@ export type NodeExplainPayload = NonNullable<ReturnType<typeof buildNodeExplainP
 
 export function buildNodeExplainPayload(repo: RepoWithLatestAnalysisAndDocs, nodeId: string) {
   const drilldown = buildStructureNodePayload(repo, nodeId);
-  if (drilldown == null) return null;
+  if (drilldown == null) {
+    return null;
+  }
 
   const context = buildStructureContext(repo);
-  if (context == null) return null;
+  if (context == null) {
+    return null;
+  }
 
   return buildNodeExplainPayloadFromContext(
     context,
@@ -129,17 +135,33 @@ type ExplainNodeLike = {
 };
 function buildNodeRole(node: ExplainNodeLike, semanticLabel: string) {
   if (node.nodeType === "file") {
-    if (node.markers.entrypoint) return "File with localized entrypoint significance";
-    if (node.markers.api) return "File participating in the public API surface";
-    if (node.markers.config) return "Configuration-heavy file";
-    if (node.markers.shared) return "Shared support file";
+    if (node.markers.entrypoint) {
+      return "File with localized entrypoint significance";
+    }
+    if (node.markers.api) {
+      return "File participating in the public API surface";
+    }
+    if (node.markers.config) {
+      return "Configuration-heavy file";
+    }
+    if (node.markers.shared) {
+      return "Shared support file";
+    }
     return "File with localized architectural importance";
   }
 
-  if (node.markers.entrypoint && node.markers.server) return "Backend entry area";
-  if (node.markers.api) return "API-facing structural zone";
-  if (node.markers.config) return "Configuration-heavy area";
-  if (node.markers.shared) return "Shared support module";
+  if (node.markers.entrypoint && node.markers.server) {
+    return "Backend entry area";
+  }
+  if (node.markers.api) {
+    return "API-facing structural zone";
+  }
+  if (node.markers.config) {
+    return "Configuration-heavy area";
+  }
+  if (node.markers.shared) {
+    return "Shared support module";
+  }
 
   return `${semanticLabel} structural area`;
 }
@@ -218,7 +240,11 @@ function buildExplainConfidence(params: {
     params.sourcePathCount >= 3,
   ].filter(Boolean).length;
 
-  if (strongSignals >= 3) return "high" as const;
-  if (strongSignals >= 2 || params.node.kind !== "unknown") return "medium" as const;
+  if (strongSignals >= 3) {
+    return "high" as const;
+  }
+  if (strongSignals >= 2 || params.node.kind !== "unknown") {
+    return "medium" as const;
+  }
   return "low" as const;
 }

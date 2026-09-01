@@ -32,13 +32,17 @@ export function resolveRelativeImport(
   fileSet: Set<string>,
 ): null | string {
   const normalizedImport = normalize(importPath);
-  if (!normalizedImport.startsWith(".")) return null;
+  if (!normalizedImport.startsWith(".")) {
+    return null;
+  }
 
   const basePath = normalize(join(dirname(fromPath), normalizedImport));
 
   for (const suffix of RELATIVE_IMPORT_SUFFIXES) {
     const candidate = `${basePath}${suffix}`;
-    if (fileSet.has(candidate)) return candidate;
+    if (fileSet.has(candidate)) {
+      return candidate;
+    }
   }
 
   return null;
@@ -49,17 +53,23 @@ function resolveAliasImport(
   fileSet: Set<string>,
   aliasRules: AliasRule[],
 ): null | string {
-  if (aliasRules.length === 0) return null;
+  if (aliasRules.length === 0) {
+    return null;
+  }
 
   for (const rule of aliasRules) {
-    if (!importPath.startsWith(rule.prefix)) continue;
+    if (!importPath.startsWith(rule.prefix)) {
+      continue;
+    }
     const suffix = importPath.slice(rule.prefix.length).replace(/^\/+/u, "");
 
     for (const target of rule.targets) {
       const candidateBase = normalize(join(target, suffix));
       for (const importSuffix of RELATIVE_IMPORT_SUFFIXES) {
         const candidate = `${candidateBase}${importSuffix}`;
-        if (fileSet.has(candidate)) return candidate;
+        if (fileSet.has(candidate)) {
+          return candidate;
+        }
       }
     }
   }
@@ -74,7 +84,9 @@ export function resolveModuleImport(
   aliasRules: AliasRule[] = [],
 ): null | string {
   const aliasResolved = resolveAliasImport(importPath, fileSet, aliasRules);
-  if (aliasResolved != null) return aliasResolved;
+  if (aliasResolved != null) {
+    return aliasResolved;
+  }
 
   const normalizedImport = normalize(importPath);
 
@@ -97,7 +109,9 @@ export function resolveModuleImport(
   ].map((path) => normalize(path));
 
   for (const candidate of candidates) {
-    if (fileSet.has(candidate)) return candidate;
+    if (fileSet.has(candidate)) {
+      return candidate;
+    }
   }
 
   const lastSegment = basename(normalizedImport);
@@ -120,9 +134,13 @@ export function resolveModuleImport(
   for (const fileName of fileNameCandidates) {
     const matches = filesByBaseName.get(fileName.toLowerCase());
     if (matches != null && matches.length > 0) {
-      if (matches.length === 1) return matches[0]!;
+      if (matches.length === 1) {
+        return matches[0]!;
+      }
       const tsMatch = matches.find((m) => m.endsWith(".ts"));
-      if (tsMatch != null) return tsMatch;
+      if (tsMatch != null) {
+        return tsMatch;
+      }
       return matches[0]!;
     }
   }
@@ -135,21 +153,31 @@ export function collectAliasRules(files: Array<{ content: string; path: string }
 
   for (const file of files) {
     const normalizedPath = normalize(file.path);
-    if (!/\/tsconfig(?:\.[^/]+)?\.json$/iu.test(normalizedPath)) continue;
+    if (!/\/tsconfig(?:\.[^/]+)?\.json$/iu.test(normalizedPath)) {
+      continue;
+    }
 
     try {
       const parsed = ts.parseConfigFileTextToJson(normalizedPath, file.content);
-      if (parsed.error != null) continue;
+      if (parsed.error != null) {
+        continue;
+      }
 
       const compilerOptions = parsed.config?.compilerOptions;
-      if (compilerOptions == null || typeof compilerOptions !== "object") continue;
+      if (compilerOptions == null || typeof compilerOptions !== "object") {
+        continue;
+      }
 
       const baseUrl = typeof compilerOptions.baseUrl === "string" ? compilerOptions.baseUrl : ".";
       const paths = compilerOptions.paths as Record<string, string[] | undefined> | undefined;
-      if (paths == null) continue;
+      if (paths == null) {
+        continue;
+      }
 
       for (const [rawAlias, rawTargets] of Object.entries(paths)) {
-        if (!Array.isArray(rawTargets) || rawTargets.length === 0) continue;
+        if (!Array.isArray(rawTargets) || rawTargets.length === 0) {
+          continue;
+        }
 
         const starIndex = rawAlias.indexOf("*");
         const prefix = starIndex === -1 ? rawAlias : rawAlias.slice(0, starIndex);
@@ -174,10 +202,16 @@ export function findDependencyCycles(graphMap: Map<string, Set<string>>): string
   const graph = new DirectedGraph();
 
   for (const [node, edges] of graphMap.entries()) {
-    if (!graph.hasNode(node)) graph.addNode(node);
+    if (!graph.hasNode(node)) {
+      graph.addNode(node);
+    }
     for (const edge of edges) {
-      if (!graph.hasNode(edge)) graph.addNode(edge);
-      if (!graph.hasEdge(node, edge)) graph.addEdge(node, edge);
+      if (!graph.hasNode(edge)) {
+        graph.addNode(edge);
+      }
+      if (!graph.hasEdge(node, edge)) {
+        graph.addEdge(node, edge);
+      }
     }
   }
 
@@ -203,7 +237,7 @@ export function findDependencyCycles(graphMap: Map<string, Set<string>>): string
   const analysis = analyzeGraph(mutableGraphData);
   const detectedCycles: string[][] = analysis.cycles;
 
-  return [...detectedCycles]
-    .sort((left, right) => left.length - right.length)
+  return detectedCycles
+    .toSorted((left, right) => left.length - right.length)
     .slice(0, SCHEMA_LIMITS.maxCyclesDetected);
 }

@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, type ComponentPropsWithoutRef } from "react";
+import { type ComponentPropsWithoutRef, useRef } from "react";
+import { flushSync } from "react-dom";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { flushSync } from "react-dom";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -210,13 +210,13 @@ export const AnimatedThemeToggler = ({
 
   return (
     <AppButton
-      ref={buttonRef}
-      type="button"
-      size="icon"
-      variant="ghost"
       aria-label="Switch theme"
-      onClick={toggleTheme}
       className={cn(className, "overflow-hidden")}
+      onClick={toggleTheme}
+      ref={buttonRef}
+      size="icon"
+      type="button"
+      variant="ghost"
       {...props}
     >
       <Sun className="block h-4.5 w-4.5 dark:hidden" />

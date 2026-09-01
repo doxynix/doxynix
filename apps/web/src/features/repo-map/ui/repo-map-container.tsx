@@ -118,7 +118,9 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
     return <p>Failed to load map data for this folder</p>;
   }
 
-  if (displayData == null) return null;
+  if (displayData == null) {
+    return null;
+  }
 
   return (
     <ReactFlowProvider>
@@ -129,8 +131,6 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
             activeFilter={filter}
             activeNodeId={viewId}
             data={displayData}
-            repoId={id}
-            selectedNodeId={selectedId}
             onFilterChange={(val) => void setFilter(val)}
             onNavigate={navigateMap}
             onSelect={(val) => {
@@ -147,6 +147,8 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
                 void setPath(null);
               }
             }}
+            repoId={id}
+            selectedNodeId={selectedId}
           />
         </div>
       </div>

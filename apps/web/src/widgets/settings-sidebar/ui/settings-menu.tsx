@@ -18,14 +18,12 @@ export function SettingsMenu() {
 
         return (
           <AppButton
-            key={item.href}
             asChild
-            variant="ghost"
             className={cn(
               "justify-start transition-colors",
               isDestructive &&
                 isActive &&
-                "bg-destructive/10 hover:text-destructive text-destructive hover:bg-destructive/10",
+                "bg-destructive/10 text-destructive hover:bg-destructive/10 hover:text-destructive",
 
               isDestructive &&
                 !isActive &&
@@ -33,14 +31,16 @@ export function SettingsMenu() {
 
               !isDestructive &&
                 isActive &&
-                "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground font-bold",
+                "bg-accent font-bold text-accent-foreground hover:bg-accent hover:text-accent-foreground",
 
               !isDestructive &&
                 !isActive &&
                 "text-muted-foreground hover:bg-accent hover:text-foreground",
             )}
+            key={item.href}
+            variant="ghost"
           >
-            <Link href={item.href as Route} className="flex w-full items-center gap-2">
+            <Link className="flex w-full items-center gap-2" href={item.href as Route}>
               {item.icon != null && <item.icon />}
               {item.label}
             </Link>

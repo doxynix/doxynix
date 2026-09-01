@@ -4,9 +4,9 @@ import { subDays, subHours, subMinutes } from "date-fns";
 import type { DbClient } from "@/server/core/db";
 
 import {
-  DashboardStatsSchema,
   type AnalyticsInput,
   type DashboardStats,
+  DashboardStatsSchema,
   type Trends,
 } from "./analytics.schemas";
 
@@ -28,7 +28,6 @@ export const analyticsService = {
       case "90d": {
         return subDays(relativeTo, 90);
       }
-      case "30d":
       default: {
         return subDays(relativeTo, 30);
       }

@@ -26,21 +26,21 @@ export function NotificationActionButton({
   return (
     <AppTooltip content={tooltip}>
       <LoadingButton
+        aria-label={tooltip}
+        className={cn(
+          "z-10 size-6 text-muted-foreground not-md:opacity-100 opacity-0 transition-standard hover:text-foreground group-hover:opacity-100",
+          className,
+        )}
         disabled={disabled}
         isLoading={isPending}
         loadingText=""
-        size="icon"
-        variant="ghost"
-        aria-label={tooltip}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           onClick();
         }}
-        className={cn(
-          "text-muted-foreground hover:text-foreground transition-standard z-10 size-6 opacity-0 not-md:opacity-100 group-hover:opacity-100",
-          className,
-        )}
+        size="icon"
+        variant="ghost"
       >
         <Icon />
       </LoadingButton>

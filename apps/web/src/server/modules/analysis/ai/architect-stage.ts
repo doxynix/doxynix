@@ -9,8 +9,8 @@ import {
 } from "../engine/core/ai-result-normalize";
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import {
-  collectArchitectPreferredPaths,
   type buildArchitectDigest,
+  collectArchitectPreferredPaths,
 } from "../logic/architect-digest";
 import { buildStageContextPack } from "../logic/context-manager";
 import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";

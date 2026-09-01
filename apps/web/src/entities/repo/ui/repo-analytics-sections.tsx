@@ -55,8 +55,8 @@ export function SnapshotsSection({
         <CardContent className="grid grid-cols-2 gap-4">
           {qualityStats.map((stat) => (
             <div key={stat.label}>
-              <p className="text-muted-foreground text-[10px] font-bold uppercase">{stat.label}</p>
-              <p className="text-xl font-bold">{stat.value}</p>
+              <p className="font-bold text-[10px] text-muted-foreground uppercase">{stat.label}</p>
+              <p className="font-bold text-xl">{stat.value}</p>
             </div>
           ))}
         </CardContent>
@@ -70,7 +70,7 @@ export function SnapshotsSection({
         </CardHeader>
         <CardContent className="flex flex-col gap-3 text-sm">
           {architectureStats.map((stat) => (
-            <div key={stat.label} className="flex items-center justify-between">
+            <div className="flex items-center justify-between" key={stat.label}>
               <span className="text-muted-foreground">{stat.label}</span>
               <span className="font-medium">{stat.value}</span>
             </div>
@@ -90,11 +90,11 @@ export function SnapshotsSection({
             <span className="font-medium">{onboarding.score}</span>
           </div>
           <div>
-            <p className="text-muted-foreground mb-2 text-xs uppercase">Setup Steps</p>
+            <p className="mb-2 text-muted-foreground text-xs uppercase">Setup Steps</p>
             <ul className="flex flex-col gap-2 text-xs">
               {onboarding.guide.setup_steps.map((step) => (
-                <li key={step} className="flex items-start gap-2">
-                  <div className="bg-primary mt-1 size-1.5 shrink-0 rounded-full" />
+                <li className="flex items-start gap-2" key={step}>
+                  <div className="mt-1 size-1.5 shrink-0 rounded-full bg-primary" />
                   <span>{step}</span>
                 </li>
               ))}
@@ -111,29 +111,31 @@ export function DomainIntelligenceSection({
 }: Readonly<{
   domain: NonNullable<RepoMetricsItem>["domain"];
 }>) {
-  if (domain.analysis == null) return null;
+  if (domain.analysis == null) {
+    return null;
+  }
 
   return (
     <section className="flex flex-col gap-4">
-      <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight">
+      <h3 className="flex items-center gap-2 font-bold text-lg tracking-tight">
         <Fingerprint className="size-5 text-blue-400" /> Domain Intelligence
       </h3>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader className="py-4">
-            <CardTitle className="text-sm font-semibold">Core Entities</CardTitle>
+            <CardTitle className="font-semibold text-sm">Core Entities</CardTitle>
             <CardDescription>Primary domain objects and their responsibilities</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {domain.analysis.core_entities.map((entity) => (
-              <div key={entity.name} className="bg-muted/30 rounded-md border p-3">
+              <div className="rounded-md border bg-muted/30 p-3" key={entity.name}>
                 <div className="mb-1 flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-blue-400">{entity.name}</span>
-                  <AppBadge variant="outline" className="h-4 text-[10px]">
+                  <span className="font-bold font-mono text-blue-400 text-xs">{entity.name}</span>
+                  <AppBadge className="h-4 text-[10px]" variant="outline">
                     {entity.logic_complexity} Complexity
                   </AppBadge>
                 </div>
-                <p className="text-muted-foreground text-[11px] leading-relaxed">
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
                   {entity.responsibility}
                 </p>
               </div>
@@ -142,12 +144,12 @@ export function DomainIntelligenceSection({
         </Card>
         <Card>
           <CardHeader className="py-4">
-            <CardTitle className="text-sm font-semibold">Business Rules</CardTitle>
+            <CardTitle className="font-semibold text-sm">Business Rules</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="flex flex-col gap-3">
               {domain.analysis.business_rules.map((rule, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-zinc-300">
+                <li className="flex items-start gap-2 text-xs text-zinc-300" key={i}>
                   <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-500" />
                   <span>{rule}</span>
                 </li>
@@ -178,14 +180,14 @@ export function TechDebtAndComplexitySection({
         <CardContent className="flex flex-col gap-2">
           {recommendations.techDebtInventory?.map((item, i) => (
             <div
+              className="flex items-center justify-between rounded border bg-muted/10 p-2"
               key={i}
-              className="bg-muted/10 flex items-center justify-between rounded border p-2"
             >
               <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] font-bold text-zinc-500 uppercase">{item.type}</span>
+                <span className="font-bold text-[10px] text-zinc-500 uppercase">{item.type}</span>
                 <span className="text-xs text-zinc-300">{item.description}</span>
               </div>
-              <AppBadge variant="outline" className="h-4 text-[9px]">
+              <AppBadge className="h-4 text-[9px]" variant="outline">
                 {item.remediation_effort} Effort
               </AppBadge>
             </div>
@@ -195,7 +197,7 @@ export function TechDebtAndComplexitySection({
 
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle className="text-sm font-semibold">Complexity vs Size Analysis</CardTitle>
+          <CardTitle className="font-semibold text-sm">Complexity vs Size Analysis</CardTitle>
           <CardDescription className="text-xs">
             Correlation between file volume and cognitive load
           </CardDescription>
@@ -220,17 +222,17 @@ export function RefactoringBacklogSection({
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-lg font-bold tracking-tight">
+        <h3 className="flex items-center gap-2 font-bold text-lg tracking-tight">
           <LayoutTemplate className="size-5 text-emerald-400" /> Refactoring Backlog
         </h3>
-        <AppBadge variant="outline" className="border-emerald-400/30 text-emerald-400">
+        <AppBadge className="border-emerald-400/30 text-emerald-400" variant="outline">
           {recommendations.refactoringTargets.length} Targets Identified
         </AppBadge>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {recommendations.refactoringTargets.map((item) => (
-          <Card key={item.file} className="group transition-standard hover:border-emerald-500/40">
-            <div className="bg-muted/20 flex items-center justify-between border-b px-4 py-2">
+          <Card className="group transition-standard hover:border-emerald-500/40" key={item.file}>
+            <div className="flex items-center justify-between border-b bg-muted/20 px-4 py-2">
               <div className="flex items-center gap-2 overflow-hidden">
                 <Code2 className="size-3.5 shrink-0 text-zinc-500" />
                 <code className="truncate font-mono text-[10px] text-zinc-400">{item.file}</code>
@@ -239,21 +241,21 @@ export function RefactoringBacklogSection({
                 <AppBadge className="h-4 border-none bg-emerald-500/10 text-[9px] text-emerald-400">
                   +{item.impact_on_health} Health
                 </AppBadge>
-                <AppBadge variant="outline" className="h-4 text-[9px] uppercase">
+                <AppBadge className="h-4 text-[9px] uppercase" variant="outline">
                   {item.priority}
                 </AppBadge>
               </div>
             </div>
             <CardContent className="flex flex-col gap-3 p-4">
               <div className="flex flex-col gap-1">
-                <p className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase">
+                <p className="font-bold text-[10px] text-zinc-500 uppercase tracking-widest">
                   {item.issue_category}
                 </p>
-                <p className="text-sm leading-snug text-zinc-200">{item.description}</p>
+                <p className="text-sm text-zinc-200 leading-snug">{item.description}</p>
               </div>
               {item.original_code != null && (
                 <div className="relative">
-                  <div className="text-destructive/50 absolute top-2 right-2 text-[9px] font-bold uppercase">
+                  <div className="absolute top-2 right-2 font-bold text-[9px] text-destructive/50 uppercase">
                     Legacy
                   </div>
                   <pre className="max-h-40 overflow-x-auto rounded border bg-zinc-950 p-3 font-mono text-[10px] text-zinc-500">
@@ -264,17 +266,17 @@ export function RefactoringBacklogSection({
 
               <div className="mt-4 border-t pt-2">
                 <AppButton
+                  className="w-full gap-2 border-emerald-500/30 font-semibold text-emerald-400 text-xs hover:bg-emerald-500/10"
                   disabled={runningFixId !== null}
-                  size="sm"
-                  variant="outline"
                   onClick={() =>
-                    void onTriggerFix(item.file, {
+                    onTriggerFix(item.file, {
                       line: 1,
                       suggestion: item.description,
                       type: "complexity",
                     })
                   }
-                  className="w-full gap-2 border-emerald-500/30 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/10"
+                  size="sm"
+                  variant="outline"
                 >
                   {runningFixId !== null ? (
                     <Loader2 className="size-3.5 animate-spin" />
@@ -322,7 +324,7 @@ export function PerformanceAndScalingSection({
               </thead>
               <tbody className="divide-y divide-orange-500/10">
                 {recommendations.performanceAudit?.map((item, i) => (
-                  <tr key={i} className="transition-colors hover:bg-orange-500/5">
+                  <tr className="transition-colors hover:bg-orange-500/5" key={i}>
                     <td className="p-2 font-medium text-zinc-200">{item.issue}</td>
                     <td className="p-2 font-mono text-[10px] text-orange-300/70">
                       {item.location}
@@ -330,17 +332,17 @@ export function PerformanceAndScalingSection({
                     <td className="p-2 text-zinc-400">{item.optimization_strategy}</td>
                     <td className="p-2 text-center">
                       <AppButton
+                        className="gap-1 border-orange-500/20 font-bold text-[10px] text-orange-400 hover:bg-orange-500/10"
                         disabled={runningFixId !== null}
-                        size="icon"
-                        variant="outline"
                         onClick={() =>
-                          void onTriggerFix(item.location, {
+                          onTriggerFix(item.location, {
                             line: 1,
                             suggestion: item.optimization_strategy,
                             type: "performance",
                           })
                         }
-                        className="gap-1 border-orange-500/20 text-[10px] font-bold text-orange-400 hover:bg-orange-500/10"
+                        size="icon"
+                        variant="outline"
                       >
                         {runningFixId !== null ? (
                           <Loader2 className="size-3 animate-spin" />
@@ -366,16 +368,16 @@ export function PerformanceAndScalingSection({
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <p className="text-[10px] font-bold text-blue-400 uppercase">Statelessness</p>
-            <p className="text-xs leading-relaxed text-zinc-300">
+            <p className="font-bold text-[10px] text-blue-400 uppercase">Statelessness</p>
+            <p className="text-xs text-zinc-300 leading-relaxed">
               {recommendations.infrastructure?.statelessness_check}
             </p>
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-[10px] font-bold text-blue-400 uppercase">Concurrency Risks</p>
+            <p className="font-bold text-[10px] text-blue-400 uppercase">Concurrency Risks</p>
             <div className="flex flex-wrap gap-1">
               {recommendations.infrastructure?.concurrency_risks.map((risk, i) => (
-                <AppBadge key={i} variant="secondary" className="py-0 text-[9px]">
+                <AppBadge className="py-0 text-[9px]" key={i} variant="secondary">
                   {risk}
                 </AppBadge>
               ))}

@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn } from "node:child_process";
 
 const [, , mutatePath, testPath] = process.argv;
 
@@ -17,8 +17,8 @@ const isWindows = process.platform === "win32";
 const command = isWindows ? "stryker.cmd" : "stryker";
 
 const strykerProcess = spawn(command, args, {
-  stdio: "inherit",
   shell: false,
+  stdio: "inherit",
 });
 
 strykerProcess.on("error", (err) => {

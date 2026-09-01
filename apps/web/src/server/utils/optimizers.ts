@@ -21,15 +21,94 @@ type AiTextLike = {
 };
 
 function isAiTextLike(v: unknown): v is AiTextLike {
-  if (!(v instanceof Object) || Array.isArray(v)) return false;
+  if (!(v instanceof Object) || Array.isArray(v)) {
+    return false;
+  }
 
-  if (v instanceof Date || v instanceof RegExp) return false;
+  if (v instanceof Date || v instanceof RegExp) {
+    return false;
+  }
 
   const obj = v as Record<string, unknown>;
   return obj.text != null || obj.content != null || obj.output != null;
 }
 
 const REMOVED_MSG = "/* ...content truncated... */";
+
+const transformer = <T extends ts.Node>(context: ts.TransformationContext) => {
+  return (rootNode: T) => {
+    const visit = (node: ts.Node): ts.Node => {
+      if (
+        ts.isFunctionDeclaration(node) ||
+        ts.isMethodDeclaration(node) ||
+        ts.isArrowFunction(node) ||
+        ts.isFunctionExpression(node)
+      ) {
+        const body = node.body;
+        if (body && body.getText().length > 50) {
+          const comment = " /* ... implementation hidden ... */ ";
+
+          if (!ts.isBlock(body) && ts.isArrowFunction(node)) {
+            return ts.factory.updateArrowFunction(
+              node,
+              node.modifiers,
+              node.typeParameters,
+              node.parameters,
+              node.type,
+              node.equalsGreaterThanToken,
+              ts.factory.createIdentifier(`null as any ${comment}`),
+            );
+          }
+
+          const stubBlock = ts.factory.createBlock([
+            ts.factory.createExpressionStatement(ts.factory.createIdentifier(comment)),
+          ]);
+
+          const factory = ts.factory as any;
+          if (ts.isFunctionDeclaration(node)) {
+            return factory.updateFunctionDeclaration(
+              node,
+              node.modifiers,
+              node.asteriskToken,
+              node.name,
+              node.typeParameters,
+              node.parameters,
+              node.type,
+              stubBlock,
+            );
+          }
+          if (ts.isMethodDeclaration(node)) {
+            return factory.updateMethodDeclaration(
+              node,
+              node.modifiers,
+              node.asteriskToken,
+              node.name,
+              node.questionToken,
+              node.typeParameters,
+              node.parameters,
+              node.type,
+              stubBlock,
+            );
+          }
+          if (ts.isFunctionExpression(node)) {
+            return factory.updateFunctionExpression(
+              node,
+              node.modifiers,
+              node.asteriskToken,
+              node.name,
+              node.typeParameters,
+              node.parameters,
+              node.type,
+              stubBlock,
+            );
+          }
+        }
+      }
+      return ts.visitEachChild(node, visit, context);
+    };
+    return ts.visitNode(rootNode, visit);
+  };
+};
 
 export const CodeOptimizer = {
   basicClean(code: string): string {
@@ -87,7 +166,9 @@ export const CodeOptimizer = {
   async skeletonizePolyglot(code: string, fileName: string): Promise<string> {
     const ext = getFileExtension(fileName);
     const spec = getSpecByExt(ext);
-    if (spec == null) return code.slice(0, 5000);
+    if (spec == null) {
+      return code.slice(0, 5000);
+    }
 
     let tree: any = null;
     let parser: any = null;
@@ -150,81 +231,6 @@ export const CodeOptimizer = {
       );
       const printer = ts.createPrinter({ removeComments: false });
 
-      const transformer = <T extends ts.Node>(context: ts.TransformationContext) => {
-        return (rootNode: T) => {
-          const visit = (node: ts.Node): ts.Node => {
-            if (
-              ts.isFunctionDeclaration(node) ||
-              ts.isMethodDeclaration(node) ||
-              ts.isArrowFunction(node) ||
-              ts.isFunctionExpression(node)
-            ) {
-              const body = node.body;
-              if (body && body.getText().length > 50) {
-                const comment = " /* ... implementation hidden ... */ ";
-
-                if (!ts.isBlock(body) && ts.isArrowFunction(node)) {
-                  return ts.factory.updateArrowFunction(
-                    node,
-                    node.modifiers,
-                    node.typeParameters,
-                    node.parameters,
-                    node.type,
-                    node.equalsGreaterThanToken,
-                    ts.factory.createIdentifier(`null as any ${comment}`),
-                  );
-                }
-
-                const stubBlock = ts.factory.createBlock([
-                  ts.factory.createExpressionStatement(ts.factory.createIdentifier(comment)),
-                ]);
-
-                const factory = ts.factory as any;
-                if (ts.isFunctionDeclaration(node)) {
-                  return factory.updateFunctionDeclaration(
-                    node,
-                    node.modifiers,
-                    node.asteriskToken,
-                    node.name,
-                    node.typeParameters,
-                    node.parameters,
-                    node.type,
-                    stubBlock,
-                  );
-                }
-                if (ts.isMethodDeclaration(node)) {
-                  return factory.updateMethodDeclaration(
-                    node,
-                    node.modifiers,
-                    node.asteriskToken,
-                    node.name,
-                    node.questionToken,
-                    node.typeParameters,
-                    node.parameters,
-                    node.type,
-                    stubBlock,
-                  );
-                }
-                if (ts.isFunctionExpression(node)) {
-                  return factory.updateFunctionExpression(
-                    node,
-                    node.modifiers,
-                    node.asteriskToken,
-                    node.name,
-                    node.typeParameters,
-                    node.parameters,
-                    node.type,
-                    stubBlock,
-                  );
-                }
-              }
-            }
-            return ts.visitEachChild(node, visit, context);
-          };
-          return ts.visitNode(rootNode, visit);
-        };
-      };
-
       const result = ts.transform(sourceFile, [transformer]);
       return printer.printFile(result.transformed[0] as ts.SourceFile);
     } catch {
@@ -247,8 +253,12 @@ export const CodeOptimizer = {
 };
 
 export function unwrapAiText(value: unknown): string {
-  if (value == null) return "";
-  if (isString(value)) return value;
+  if (value == null) {
+    return "";
+  }
+  if (isString(value)) {
+    return value;
+  }
 
   if (Array.isArray(value)) {
     return compact(value.map((v) => unwrapAiText(v))).join("\n");
@@ -256,7 +266,9 @@ export function unwrapAiText(value: unknown): string {
 
   if (isAiTextLike(value)) {
     const candidate = value.text ?? value.content ?? value.output;
-    if (typeof candidate === "string") return candidate;
+    if (typeof candidate === "string") {
+      return candidate;
+    }
   }
 
   if (typeof value === "object") {
@@ -268,7 +280,9 @@ export function unwrapAiText(value: unknown): string {
 
 export function skeletonizeCode(code: string): string {
   return code.replaceAll(/({[\S\s]*?})/gm, (match) => {
-    if (match.length > 100) return "{ /* ... implementation hidden ... */ }";
+    if (match.length > 100) {
+      return "{ /* ... implementation hidden ... */ }";
+    }
     return match;
   });
 }

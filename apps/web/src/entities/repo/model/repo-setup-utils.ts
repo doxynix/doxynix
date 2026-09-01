@@ -1,12 +1,14 @@
 import type { FileNode } from "./repo-setup.types";
 
 export const sortNodes = (nodes: FileNode[]): FileNode[] => {
-  return [...nodes]
-    .sort((a, b) => {
-      const aIsFolder = !!a.children;
-      const bIsFolder = !!b.children;
+  return nodes
+    .toSorted((a, b) => {
+      const aIsFolder = !a.children;
+      const bIsFolder = !b.children;
 
-      if (aIsFolder !== bIsFolder) return aIsFolder ? -1 : 1;
+      if (aIsFolder !== bIsFolder) {
+        return aIsFolder ? -1 : 1;
+      }
 
       return a.name.localeCompare(b.name, undefined, {
         numeric: true,
@@ -41,11 +43,15 @@ export const getFolderSelectionState = (node: FileNode, selectedIds: Set<string>
   let selectedCount = 0;
 
   const countDescendants = (currentNode: FileNode) => {
-    if (!currentNode.children) return;
+    if (!currentNode.children) {
+      return;
+    }
 
     for (let i = 0; i < currentNode.children.length; i++) {
       const child = currentNode.children[i];
-      if (child == null) continue;
+      if (child == null) {
+        continue;
+      }
       totalCount++;
 
       if (selectedIds.has(child.id)) {
@@ -58,7 +64,11 @@ export const getFolderSelectionState = (node: FileNode, selectedIds: Set<string>
 
   countDescendants(node);
 
-  if (selectedCount === 0) return false;
-  if (selectedCount === totalCount) return true;
+  if (selectedCount === 0) {
+    return false;
+  }
+  if (selectedCount === totalCount) {
+    return true;
+  }
   return "indeterminate";
 };

@@ -27,7 +27,7 @@ export function ApiKeysList({ active, archived }: Readonly<Props>) {
       ) : (
         <div className="grid grid-cols-2 gap-2">
           {active.map((key) => (
-            <ApiKeyCard key={key.id} active={key} />
+            <ApiKeyCard active={key} key={key.id} />
           ))}
         </div>
       )}

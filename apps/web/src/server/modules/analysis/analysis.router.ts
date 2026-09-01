@@ -3,8 +3,8 @@ import { auth, runs } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { DocTypeSchema } from "@/shared/api-contracts";
 import { UpdatePRConfigInput } from "@/shared/api/schemas/pr-analysis.schema";
+import { DocTypeSchema } from "@/shared/api-contracts";
 import { generateBranchName } from "@/shared/lib/get-branch-name";
 
 import { appLogger } from "@/server/core/app-logger";
@@ -27,7 +27,6 @@ import { repoAnalysisService } from "./analysis.service";
 import type { AIResult } from "./engine/core/analysis-result.schemas";
 import { FixService } from "./logic/fix-generator";
 import { PRConfigService } from "./logic/pr-config";
-import type { FindingForFix } from "./logic/pr-types";
 import { DocumentFormatter } from "./logic/section-graph-linker";
 import { generateFixTask } from "./tasks/generate-fix.task";
 
@@ -291,7 +290,7 @@ export const analysisRouter = createTRPCRouter({
         await generateFixTask.trigger(
           {
             fileContents: input.fileContents,
-            findings: input.findings as FindingForFix[],
+            findings: input.findings,
             fixId: fix.publicId,
             prAnalysisId: validPrAnalysisId,
             repoId: repo.publicId,
@@ -416,7 +415,9 @@ export const analysisRouter = createTRPCRouter({
         input.prNumber,
       );
 
-      if (analysis == null) return null;
+      if (analysis == null) {
+        return null;
+      }
 
       return analysis;
     }),
@@ -535,7 +536,9 @@ export const analysisRouter = createTRPCRouter({
         input.action,
       );
 
-      if (data == null) return null;
+      if (data == null) {
+        return null;
+      }
 
       const html = await unstable_cache(
         async () => markdownToHtml({ content: data.content }),
@@ -576,7 +579,9 @@ export const analysisRouter = createTRPCRouter({
         },
       });
 
-      if (analysis == null) return null;
+      if (analysis == null) {
+        return null;
+      }
 
       let publicAccessToken: null | string = null;
 
@@ -663,7 +668,6 @@ export const analysisRouter = createTRPCRouter({
       const aiResult = analysis?.resultJson as AIResult | null;
       const graph =
         (aiResult as any)?.dependencyGraph ?? (analysis?.metricsJson as any)?.dependencyGraph ?? {};
-
       const formatted = DocumentFormatter.withGraphLinks(
         document.content,
         graph,

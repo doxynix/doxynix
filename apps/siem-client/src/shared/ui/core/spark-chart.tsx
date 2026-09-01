@@ -12,7 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { AxisDomain } from "recharts/types/util/types";
+
 import {
   AvailableChartColors,
   type AvailableChartColorsKeys,
@@ -25,8 +25,8 @@ import { cx } from "../../lib/utils";
 //#region SparkAreaChart
 
 interface SparkAreaChartProps extends HTMLAttributes<HTMLDivElement> {
-  data: Record<string, any>[];
-  categories: string[];
+  data?: Record<string, any>[];
+  categories?: string[];
   index: string;
   colors?: AvailableChartColorsKeys[];
   autoMinValue?: boolean;
@@ -60,26 +60,29 @@ const SparkAreaChart = forwardRef<HTMLDivElement, SparkAreaChartProps>((props, f
 
   const getFillContent = (fillType: SparkAreaChartProps["fill"]) => {
     switch (fillType) {
-      case "none":
+      case "none": {
         return <stop stopColor="currentColor" stopOpacity={0} />;
-      case "gradient":
+      }
+      case "gradient": {
         return (
           <>
             <stop offset="5%" stopColor="currentColor" stopOpacity={0.4} />
             <stop offset="95%" stopColor="currentColor" stopOpacity={0} />
           </>
         );
+      }
       case "solid":
+      case undefined:
+      default: {
         return <stop stopColor="currentColor" stopOpacity={0.3} />;
-      default:
-        return <stop stopColor="currentColor" stopOpacity={0.3} />;
+      }
     }
   };
 
   return (
     <div
-      ref={forwardedRef}
       className={cx("h-12 w-28", className)}
+      ref={forwardedRef}
       tremor-id="tremor-raw"
       {...other}
     >
@@ -94,26 +97,23 @@ const SparkAreaChart = forwardRef<HTMLDivElement, SparkAreaChartProps>((props, f
           }}
           stackOffset={type === "percent" ? "expand" : undefined}
         >
-          <XAxis hide dataKey={index} />
-          <YAxis hide={true} domain={yAxisDomain as AxisDomain} />
+          <XAxis dataKey={index} hide />
+          <YAxis domain={yAxisDomain} hide={true} />
 
           {categories.map((category) => {
-            const categoryId = `${areaId}-${category.replace(/[^a-zA-Z0-9]/g, "")}`;
+            const categoryId = `${areaId}-${category.replaceAll(/[^a-zA-Z0-9]/g, "")}`;
             return (
               <Fragment key={category}>
                 <defs>
                   <linearGradient
-                    key={category}
                     className={cx(
-                      getColorClassName(
-                        categoryColors.get(category) as AvailableChartColorsKeys,
-                        "text",
-                      ),
+                      getColorClassName(categoryColors.get(category) ?? "gray", "text"),
                     )}
                     id={categoryId}
+                    key={category}
                     x1="0"
-                    y1="0"
                     x2="0"
+                    y1="0"
                     y2="1"
                   >
                     {getFillContent(fill)}
@@ -121,24 +121,21 @@ const SparkAreaChart = forwardRef<HTMLDivElement, SparkAreaChartProps>((props, f
                 </defs>
                 <Area
                   className={cx(
-                    getColorClassName(
-                      categoryColors.get(category) as AvailableChartColorsKeys,
-                      "stroke",
-                    ),
+                    getColorClassName(categoryColors.get(category) ?? "gray", "stroke"),
                   )}
-                  dot={false}
-                  strokeOpacity={1}
-                  name={category}
-                  type="linear"
-                  dataKey={category}
-                  stroke=""
-                  strokeWidth={2}
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  isAnimationActive={false}
                   connectNulls={connectNulls}
-                  stackId={stacked ? "stack" : undefined}
+                  dataKey={category}
+                  dot={false}
                   fill={`url(#${categoryId})`}
+                  isAnimationActive={false}
+                  name={category}
+                  stackId={stacked ? "stack" : undefined}
+                  stroke=""
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeOpacity={1}
+                  strokeWidth={2}
+                  type="linear"
                 />
               </Fragment>
             );
@@ -154,8 +151,8 @@ SparkAreaChart.displayName = "SparkAreaChart";
 //#region SparkLineChart
 
 interface SparkLineChartProps extends HTMLAttributes<HTMLDivElement> {
-  data: Record<string, any>[];
-  categories: string[];
+  data?: Record<string, any>[];
+  categories?: string[];
   index: string;
   colors?: AvailableChartColorsKeys[];
   autoMinValue?: boolean;
@@ -183,8 +180,8 @@ const SparkLineChart = forwardRef<HTMLDivElement, SparkLineChartProps>((props, f
 
   return (
     <div
-      ref={forwardedRef}
       className={cx("h-12 w-28", className)}
+      ref={forwardedRef}
       tremor-id="tremor-raw"
       {...other}
     >
@@ -198,28 +195,23 @@ const SparkLineChart = forwardRef<HTMLDivElement, SparkLineChartProps>((props, f
             top: 1,
           }}
         >
-          <XAxis hide dataKey={index} />
-          <YAxis hide={true} domain={yAxisDomain as AxisDomain} />
+          <XAxis dataKey={index} hide />
+          <YAxis domain={yAxisDomain} hide={true} />
           {categories.map((category) => (
             <Line
-              className={cx(
-                getColorClassName(
-                  categoryColors.get(category) as AvailableChartColorsKeys,
-                  "stroke",
-                ),
-              )}
+              className={cx(getColorClassName(categoryColors.get(category) ?? "gray", "stroke"))}
+              connectNulls={connectNulls}
+              dataKey={category}
               dot={false}
-              strokeOpacity={1}
+              isAnimationActive={false}
               key={category}
               name={category}
-              type="linear"
-              dataKey={category}
               stroke=""
-              strokeWidth={2}
-              strokeLinejoin="round"
               strokeLinecap="round"
-              isAnimationActive={false}
-              connectNulls={connectNulls}
+              strokeLinejoin="round"
+              strokeOpacity={1}
+              strokeWidth={2}
+              type="linear"
             />
           ))}
         </RechartsLineChart>
@@ -233,9 +225,9 @@ SparkLineChart.displayName = "SparkLineChart";
 //#region SparkBarChart
 
 interface BarChartProps extends HTMLAttributes<HTMLDivElement> {
-  data: Record<string, any>[];
+  data?: Record<string, any>[];
   index: string;
-  categories: string[];
+  categories?: string[];
   colors?: AvailableChartColorsKeys[];
   autoMinValue?: boolean;
   minValue?: number;
@@ -266,13 +258,14 @@ const SparkBarChart = forwardRef<HTMLDivElement, BarChartProps>((props, forwarde
 
   return (
     <div
-      ref={forwardedRef}
       className={cx("h-12 w-28", className)}
+      ref={forwardedRef}
       tremor-id="tremor-raw"
       {...other}
     >
       <ResponsiveContainer>
         <RechartsBarChart
+          barCategoryGap={barCategoryGap}
           data={data}
           margin={{
             bottom: 1,
@@ -281,23 +274,20 @@ const SparkBarChart = forwardRef<HTMLDivElement, BarChartProps>((props, forwarde
             top: 1,
           }}
           stackOffset={type === "percent" ? "expand" : undefined}
-          barCategoryGap={barCategoryGap}
         >
-          <XAxis hide dataKey={index} />
-          <YAxis hide={true} domain={yAxisDomain as AxisDomain} />
+          <XAxis dataKey={index} hide />
+          <YAxis domain={yAxisDomain} hide={true} />
 
           {categories.map((category) => (
             <Bar
-              className={cx(
-                getColorClassName(categoryColors.get(category) as AvailableChartColorsKeys, "fill"),
-              )}
+              className={cx(getColorClassName(categoryColors.get(category) ?? "gray", "fill"))}
+              dataKey={category}
+              fill=""
+              isAnimationActive={false}
               key={category}
               name={category}
-              type="linear"
-              dataKey={category}
               stackId={stacked ? "stack" : undefined}
-              isAnimationActive={false}
-              fill=""
+              type="linear"
             />
           ))}
         </RechartsBarChart>

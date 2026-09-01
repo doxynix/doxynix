@@ -52,7 +52,9 @@ export function validateApiKeyChecksum(apiKey: string): boolean {
   const payload = cleanKey.slice(0, PAYLOAD_LENGTH);
   const checksum = cleanKey.slice(PAYLOAD_LENGTH);
 
-  if (!HEX_REGEX.test(checksum)) return false;
+  if (!HEX_REGEX.test(checksum)) {
+    return false;
+  }
 
   const expectedChecksum = calculateChecksum(payload);
 
@@ -66,7 +68,9 @@ export function validateApiKeyChecksum(apiKey: string): boolean {
  * Вспомогательный метод для безопасного извлечения payload из ключа (для хэширования в БД)
  */
 export function extractPayloadFromKey(apiKey: string): null | string {
-  if (!validateApiKeyChecksum(apiKey)) return null;
+  if (!validateApiKeyChecksum(apiKey)) {
+    return null;
+  }
   return apiKey.slice(BRAND_PREFIX.length, BRAND_PREFIX.length + PAYLOAD_LENGTH);
 }
 

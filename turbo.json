@@ -1,133 +1,153 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "ui": "tui",
   "globalDependencies": [
     ".gitignore",
-    "packages/config/biome.json",
-    "apps/web/eslint.config.mjs",
+    ".editorconfig",
+    "biome.json",
+    ".oxlintrc.json",
+    "cspell.json",
+    "knip.json",
+    "lefthook.yml",
+    "turbo.json",
     "**/.env.*local"
   ],
   "globalEnv": [
     "NODE_ENV",
     "CI",
+    "SKIP_ENV_VALIDATION",
+    "ANALYZE",
+    "VERCEL",
+    "VERCEL_ENV",
     "TURBO_TOKEN",
     "TURBO_TEAM",
-    "TURBO_REMOTE_ONLY"
+    "TURBO_REMOTE_ONLY",
+    "TZ"
   ],
   "tasks": {
+    "build": {
+      "dependsOn": ["^build", "db:generate"],
+      "env": ["APP_VERSION", "PORT", "NEXT_PUBLIC_*", "VITE_*"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**", ".output/**"]
+    },
+
     "db:generate": {
+      "cache": true,
       "env": [
-        "NODE_ENV",
         "DATABASE_URL",
+        "DIRECT_URL",
+        "PRISMA_FIELD_ENCRYPTION_KEY",
+        "PRISMA_FIELD_ENCRYPTION_HASH_SALT",
+        "PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS",
         "REDIS_URL",
+        "REDIS_TCP_URL",
         "AXIOM_TOKEN",
         "AXIOM_DATASET"
       ],
       "inputs": [
-        "prisma/**/*.schema",
+        "prisma/**/*.prisma",
         "prisma/**/*.zmodel",
-        "schema.zmodel",
-        "src/db/schema.ts",
-        "drizzle.config.ts"
+        "prisma/models/*.zmodel",
+        "prisma/schema.prisma",
+        "prisma/schema.zmodel",
+        "prisma/sql/*.sql",
+        "prisma.config.ts",
+        "scripts/zenstack-gen.mjs",
+        "src/core/db/schema.ts",
+        "src/core/db/migrations/**",
+        "drizzle.config.ts",
+        "scripts/doppler.ts",
+        "scripts/doppler.mjs"
       ],
       "outputs": [
         "node_modules/.prisma/**",
         "node_modules/@prisma/client/**",
+        "prisma/generated/**",
+        "prisma/json-schema/**",
+        "prisma/dbml/**",
         "src/shared/api-contracts/client/**"
       ]
     },
-    "db:push": {
-      "cache": false
-    },
+
     "db:migrate": {
       "cache": false,
       "env": [
-        "NODE_ENV",
         "DATABASE_URL",
+        "DIRECT_URL",
         "REDIS_URL",
+        "REDIS_TCP_URL",
         "AXIOM_TOKEN",
         "AXIOM_DATASET"
       ]
+    },
+    "db:push": {
+      "cache": false,
+      "env": ["DATABASE_URL", "DIRECT_URL"]
     },
     "db:studio": {
       "cache": false,
       "env": [
-        "NODE_ENV",
         "DATABASE_URL",
+        "DIRECT_URL",
         "REDIS_URL",
+        "REDIS_TCP_URL",
         "AXIOM_TOKEN",
         "AXIOM_DATASET"
       ]
     },
-    "build": {
-      "dependsOn": [
-        "^build",
-        "db:generate"
-      ],
-      "outputs": [
-        ".next/**",
-        "dist/**",
-        "build/**",
-        ".output/**"
-      ],
-      "env": [
-        "NODE_ENV",
-        "VITE_*",
-        "NEXT_PUBLIC_*"
-      ]
-    },
+
     "dev": {
       "cache": false,
-      "persistent": true,
-      "env": [
-        "NODE_ENV",
-        "PORT",
-        "VITE_*",
-        "NEXT_PUBLIC_*"
-      ]
-    },
-    "lint": {
-      "env": [
-        "NODE_ENV"
-      ]
-    },
-    "lint:fix": {
-      "env": [
-        "NODE_ENV"
-      ]
+      "dependsOn": ["db:generate"],
+      "env": ["PORT", "NEXT_PUBLIC_*", "VITE_*"],
+      "persistent": true
     },
     "format": {
-      "env": [
-        "NODE_ENV"
+      "cache": false
+    },
+    "format:check": {},
+
+    "lint": {
+      "dependsOn": ["db:generate"]
+    },
+    "lint:fix": {
+      "cache": false,
+      "dependsOn": ["db:generate"]
+    },
+
+    "test": {
+      "dependsOn": ["^build", "db:generate"],
+      "env": ["DATABASE_URL", "DIRECT_URL", "PRISMA_FIELD_ENCRYPTION_KEY"],
+      "outputs": ["coverage/**", "test-results/**", "reports/**"]
+    },
+    "test:coverage": {
+      "dependsOn": ["^build", "db:generate"],
+      "env": ["DATABASE_URL", "DIRECT_URL", "PRISMA_FIELD_ENCRYPTION_KEY"],
+      "outputs": ["coverage/**", "reports/**"]
+    },
+    "test:e2e": {
+      "cache": false,
+      "dependsOn": ["build", "db:generate"],
+      "env": ["DATABASE_URL", "DIRECT_URL", "NEXT_PUBLIC_*", "VITE_*"]
+    },
+    "test:stryker": {
+      "cache": false,
+      "dependsOn": ["db:generate"],
+      "env": ["DATABASE_URL", "DIRECT_URL"]
+    },
+
+    "type-check": {
+      "dependsOn": ["^type-check", "db:generate"],
+      "env": ["PRISMA_GENERATE_SKIP_QUERIES"],
+      "outputs": [
+        "node_modules/.tmp/*.tsbuildinfo",
+        "**/*.tsbuildinfo",
+        "*.tsbuildinfo",
+        ".tsbuildinfo"
       ]
     },
     "validate": {
-      "env": [
-        "NODE_ENV"
-      ]
-    },
-    "type-check": {
-      "dependsOn": [
-        "^build",
-        "db:generate"
-      ],
-      "env": [
-        "NODE_ENV",
-        "PRISMA_GENERATE_SKIP_QUERIES"
-      ]
-    },
-    "test": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "coverage/**",
-        "test-results/**"
-      ],
-      "env": [
-        "NODE_ENV",
-        "CI"
-      ]
+      "dependsOn": ["db:generate"]
     }
-  }
+  },
+  "ui": "tui"
 }

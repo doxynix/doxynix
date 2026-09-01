@@ -3,7 +3,9 @@
 import { useEffect } from "react";
 
 function getThemeValue(name: string, fallback: string) {
-  if (typeof window === "undefined") return fallback;
+  if (typeof window === "undefined") {
+    return fallback;
+  }
   const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   return value || fallback;
 }

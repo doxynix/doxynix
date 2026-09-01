@@ -52,7 +52,9 @@ export const auditRouter = createTRPCRouter({
         where: { id: input.logId, userId: Number(ctx.session.user.id) },
       });
 
-      if (log == null) throw new TRPCError({ code: "NOT_FOUND" });
+      if (log == null) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
 
       const cleanPayload = sanitizeObject(log.payload);
 

@@ -1,10 +1,10 @@
 {
-  "extends": "./base.json",
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "jsx": "react-jsx",
-    "noEmit": true,
     "allowArbitraryExtensions": true,
-    "isolatedModules": true
-  }
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "noEmit": true
+  },
+  "extends": "./base.json"
 }

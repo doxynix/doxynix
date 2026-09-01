@@ -7,8 +7,8 @@ import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { handlePrismaError } from "@/server/utils/handle-error";
 import {
   getPaginationMeta,
-  PaginationMetaSchema,
   type PaginationMeta,
+  PaginationMetaSchema,
 } from "@/server/utils/pagination";
 
 import { NotificationsBulkFilterSchema, NotificationsFilterSchema } from "./notification.schemas";
@@ -108,7 +108,7 @@ export const notificationRouter = createTRPCRouter({
         totalCount,
       });
 
-      return notificationMapper.toPaginatedList(items as NotificationWithRepo[], meta);
+      return notificationMapper.toPaginatedList(items, meta);
     }),
 
   getStats: protectedProcedure
@@ -127,8 +127,8 @@ export const notificationRouter = createTRPCRouter({
           by: ["isRead"],
         });
 
-        const read = groups.find((g) => g.isRead === true)?._count._all ?? 0;
-        const unread = groups.find((g) => g.isRead === false)?._count._all ?? 0;
+        const read = groups.find((g) => g.isRead)?._count._all ?? 0;
+        const unread = groups.find((g) => !g.isRead)?._count._all ?? 0;
 
         return {
           read,

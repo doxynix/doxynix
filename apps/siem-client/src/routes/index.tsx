@@ -1,14 +1,14 @@
+import { useEffect, useState } from "react";
 import { hcWithType } from "@doxynix/siem-server/client";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "";
+const SERVER_URL = import.meta.env.VITE_SERVER_URL ?? "";
 const client = hcWithType(SERVER_URL);
 
 type LogEntry = {
@@ -19,11 +19,7 @@ type LogEntry = {
 function Index() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
-  const {
-    mutate: sendRequest,
-    data,
-    isPending,
-  } = useMutation({
+  const { mutate: sendRequest, isPending } = useMutation({
     mutationFn: async () => {
       try {
         const res = await client.api.logs.scan.$post({
@@ -34,7 +30,8 @@ function Index() {
         });
         return await res.json();
       } catch (error) {
-        throw new Error(`Error fetching data:${error}`);
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        throw new Error(`Error fetching data: ${errorMsg}`, { cause: error });
       }
     },
   });
@@ -45,17 +42,20 @@ function Index() {
     async function connectSSE() {
       try {
         await fetchEventSource("/api/logs-stream", {
-          method: "GET",
           credentials: "include",
-          signal: ctrl.signal,
+          method: "GET",
+
+          onerror(err) {
+            console.error("SSE Error:", err);
+          },
 
           onmessage(msg) {
             if (msg.event === "log") {
               try {
                 const logData: LogEntry = JSON.parse(msg.data);
                 setLogs((prev) => [logData, ...prev]);
-              } catch (e) {
-                console.error("Log parsing error:", e);
+              } catch (error) {
+                console.error("Log parsing error:", error);
               }
             }
           },
@@ -69,19 +69,16 @@ function Index() {
               throw new Error(`SSE error status: ${response.status}`);
             }
           },
-
-          onerror(err) {
-            console.error("SSE Error:", err);
-          },
+          signal: ctrl.signal,
         });
-      } catch (err) {
+      } catch (error) {
         if (!ctrl.signal.aborted) {
-          console.error("SSE Connection Failed", err);
+          console.error("SSE Connection Failed", error);
         }
       }
     }
 
-    connectSSE();
+    void connectSSE();
 
     return () => {
       ctrl.abort();
@@ -89,28 +86,28 @@ function Index() {
   }, []);
 
   return (
-    <div className="max-w-3xl mx-auto flex flex-col gap-6 items-center justify-center min-h-screen p-6">
+    <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-6 p-6">
       {isPending && (
-        <div className="animate-spin size-7 border border-b-0 bg-transparent rounded-full" />
+        <div className="size-7 animate-spin rounded-full border border-b-0 bg-transparent" />
       )}
-      <h2 className="text-2xl font-bold">SIEM Live Stream</h2>
+      <h2 className="font-bold text-2xl">SIEM Live Stream</h2>
 
       <div className="flex items-center gap-4">
         <button
-          type="button"
+          className="rounded-md bg-black px-3 py-2 text-white"
           onClick={() => sendRequest()}
-          className="bg-black text-white px-3 py-2 rounded-md"
+          type="button"
         >
           Call API (Scan Test)
         </button>
       </div>
 
-      <div className="w-full bg-black text-green-400 p-4 rounded-md font-mono text-xs h-80 overflow-y-auto flex flex-col gap-2 border border-gray-800">
+      <div className="flex h-80 w-full flex-col gap-2 overflow-y-auto rounded-md border border-gray-800 bg-black p-4 font-mono text-green-400 text-xs">
         {logs.length === 0 ? (
           <p className="text-gray-500">Waiting logs from Axiom...</p>
         ) : (
           logs.map((log) => (
-            <div key={`${log.timestamp}-${log.message}`} className="border-b border-gray-900 pb-1">
+            <div className="border-gray-900 border-b pb-1" key={`${log.timestamp}-${log.message}`}>
               <span className="text-gray-500">
                 [{log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : "N/A"}]
               </span>{" "}
@@ -119,12 +116,6 @@ function Index() {
           ))
         )}
       </div>
-
-      {data && (
-        <pre className="w-full bg-gray-100 p-4 rounded-md text-xs">
-          <code>Message: {data.message}</code>
-        </pre>
-      )}
     </div>
   );
 }

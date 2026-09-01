@@ -22,7 +22,7 @@ export function getCountry(c: Context) {
 }
 
 export function getRequestId(c: Context) {
-  return c.get("requestId") ?? c.req.header("x-request-id") ?? "unknown";
+  return c.req.header("x-request-id") ?? c.get("requestId");
 }
 
 export function getIp(c: Context) {
@@ -31,7 +31,7 @@ export function getIp(c: Context) {
     c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
     c.req.header("x-real-ip") ??
     "127.0.0.1"
-  ).replace(/[^a-zA-Z0-9:._-]/g, "");
+  ).replaceAll(/[^a-zA-Z0-9:._-]/g, "");
 }
 
 export function getRequestContext(c: Context): RequestContext {

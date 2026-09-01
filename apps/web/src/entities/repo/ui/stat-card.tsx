@@ -30,7 +30,9 @@ export function StatCard({
   const isNegativeTrend = delta != null && delta < 0;
 
   const getDeltaClass = () => {
-    if (delta == null || delta === 0) return "text-muted-foreground";
+    if (delta == null || delta === 0) {
+      return "text-muted-foreground";
+    }
 
     if (reverseColor === true) {
       return isPositiveTrend ? "text-destructive" : "text-success";
@@ -40,19 +42,19 @@ export function StatCard({
   };
 
   return (
-    <Card className="hover:border-border-strong transition-colors">
+    <Card className="transition-colors hover:border-border-strong">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{label}</CardTitle>
+        <CardTitle className="font-medium text-sm">{label}</CardTitle>
         <div className={cn("rounded-full p-2", className)}>
           <Icon className={iconClass} />
         </div>
       </CardHeader>
       <CardContent>
         <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-bold">{value}</p>
+          <p className="font-bold text-2xl">{value}</p>
 
           {delta != null && (
-            <AppBadge variant="outline" className={getDeltaClass()}>
+            <AppBadge className={getDeltaClass()} variant="outline">
               {isPositiveTrend ? (
                 <ArrowUpRight />
               ) : isNegativeTrend ? (
@@ -64,7 +66,7 @@ export function StatCard({
             </AppBadge>
           )}
         </div>
-        <p className="text-muted-foreground mt-1 text-xs">{description}</p>
+        <p className="mt-1 text-muted-foreground text-xs">{description}</p>
       </CardContent>
     </Card>
   );

@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  forwardRef,
   type ComponentPropsWithoutRef,
   type ComponentRef,
+  forwardRef,
   type HTMLAttributes,
 } from "react";
-import { type DialogProps } from "@radix-ui/react-dialog";
+import type { DialogProps } from "@radix-ui/react-dialog";
 import { Command as CommandPrimitive } from "cmdk";
 import { Search } from "lucide-react";
 
@@ -19,11 +19,11 @@ const Command = forwardRef<
   ComponentPropsWithoutRef<typeof CommandPrimitive>
 >(({ className, ...props }, ref) => (
   <CommandPrimitive
-    ref={ref}
     className={cn(
-      "bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-xl",
+      "flex h-full w-full flex-col overflow-hidden rounded-xl bg-popover text-popover-foreground",
       className,
     )}
+    ref={ref}
     {...props}
   />
 ));
@@ -40,8 +40,8 @@ const CommandDialog = ({ children, shouldFilter, ...props }: CommandDialogProps)
         <DialogTitle className="sr-only">Command Menu</DialogTitle>
         <DialogDescription className="sr-only">Search commands and navigate</DialogDescription>
         <Command
+          className="[&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group]]:px-2 **:[[cmdk-input]]:h-12 **:[[cmdk-item]]:px-2 **:[[cmdk-item]]:py-3"
           shouldFilter={shouldFilter}
-          className="**:[[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group]]:px-2 **:[[cmdk-input]]:h-12 **:[[cmdk-item]]:px-2 **:[[cmdk-item]]:py-3"
         >
           {children}
         </Command>
@@ -56,18 +56,18 @@ interface CommandInputProps extends ComponentPropsWithoutRef<typeof CommandPrimi
 
 const CommandInput = forwardRef<ComponentRef<typeof CommandPrimitive.Input>, CommandInputProps>(
   ({ className, isLoading, ...props }, ref) => (
-    <div cmdk-input-wrapper="" className="flex items-center border-b px-3">
+    <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
       {isLoading ? (
         <Spinner className="mr-2 shrink-0 opacity-50" />
       ) : (
         <Search className="mr-2 size-4 shrink-0 opacity-50" />
       )}
       <CommandPrimitive.Input
-        ref={ref}
         className={cn(
-          "placeholder:text-muted-foreground flex h-10 w-full rounded-xl bg-transparent py-3 pr-8 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-10 w-full rounded-xl bg-transparent py-3 pr-8 text-sm outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
           className,
         )}
+        ref={ref}
         {...props}
       />
     </div>
@@ -81,8 +81,8 @@ const CommandList = forwardRef<
   ComponentPropsWithoutRef<typeof CommandPrimitive.List>
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.List
+    className={cn("max-h-75 overflow-y-auto overflow-x-hidden", className)}
     ref={ref}
-    className={cn("max-h-75 overflow-x-hidden overflow-y-auto", className)}
     {...props}
   />
 ));
@@ -93,7 +93,7 @@ const CommandEmpty = forwardRef<
   ComponentRef<typeof CommandPrimitive.Empty>,
   ComponentPropsWithoutRef<typeof CommandPrimitive.Empty>
 >((props, ref) => (
-  <CommandPrimitive.Empty ref={ref} className="py-6 text-center text-sm" {...props} />
+  <CommandPrimitive.Empty className="py-6 text-center text-sm" ref={ref} {...props} />
 ));
 
 CommandEmpty.displayName = CommandPrimitive.Empty.displayName;
@@ -103,11 +103,11 @@ const CommandGroup = forwardRef<
   ComponentPropsWithoutRef<typeof CommandPrimitive.Group>
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Group
-    ref={ref}
     className={cn(
-      "text-foreground **:[[cmdk-group-heading]]:text-muted-foreground overflow-hidden p-1 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-medium",
+      "overflow-hidden p-1 text-foreground **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group-heading]]:text-xs",
       className,
     )}
+    ref={ref}
     {...props}
   />
 ));
@@ -119,8 +119,8 @@ const CommandSeparator = forwardRef<
   ComponentPropsWithoutRef<typeof CommandPrimitive.Separator>
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Separator
+    className={cn("-mx-1 h-px bg-border", className)}
     ref={ref}
-    className={cn("bg-border -mx-1 h-px", className)}
     {...props}
   />
 ));
@@ -131,11 +131,11 @@ const CommandItem = forwardRef<
   ComponentPropsWithoutRef<typeof CommandPrimitive.Item>
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Item
-    ref={ref}
     className={cn(
-      "transition-standard data-[selected=true]:border-border-accent data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-lg border-transparent px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+      "relative flex cursor-default select-none items-center gap-2 rounded-lg border-transparent px-2 py-1.5 text-sm outline-hidden transition-standard data-[disabled=true]:pointer-events-none data-[selected=true]:border-border-accent data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
       className,
     )}
+    ref={ref}
     {...props}
   />
 ));
@@ -146,7 +146,7 @@ const CommandShortcut = ({ className, ...props }: HTMLAttributes<HTMLSpanElement
   return (
     <kbd
       className={cn(
-        "text-muted-foreground bg-surface-hover border-border ml-auto flex h-5 items-center rounded border px-1.5 text-xs tracking-widest",
+        "ml-auto flex h-5 items-center rounded border border-border bg-surface-hover px-1.5 text-muted-foreground text-xs tracking-widest",
         className,
       )}
       {...props}

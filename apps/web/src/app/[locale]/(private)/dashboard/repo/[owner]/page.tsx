@@ -30,9 +30,9 @@ export default async function OwnerPage({ params }: Readonly<RepoPageProps>) {
 
   return (
     <div className="mx-auto flex h-full w-full flex-col">
-      <div className="not-xs:justify-center mb-4 flex items-center gap-4">
-        <AppAvatar alt={owner} src={avatarUrl} fallbackText={owner} sizeClassName="size-9" />
-        <h1 className="text-2xl font-bold">{owner}</h1>
+      <div className="mb-4 flex items-center not-xs:justify-center gap-4">
+        <AppAvatar alt={owner} fallbackText={owner} sizeClassName="size-9" src={avatarUrl} />
+        <h1 className="font-bold text-2xl">{owner}</h1>
       </div>
 
       <div className="mb-4 flex w-full flex-wrap items-center justify-center gap-2 xl:justify-between">

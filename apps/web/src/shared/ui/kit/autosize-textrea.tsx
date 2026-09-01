@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  useEffect,
-  useRef,
   type ChangeEvent,
   type ComponentProps,
   type Ref,
   type RefObject,
+  useEffect,
+  useRef,
 } from "react";
 
 import { cn } from "@/shared/lib/cn";
@@ -25,7 +25,9 @@ const adjustHeight = (
   minHeight: number,
 ) => {
   const textarea = ref.current;
-  if (!textarea) return;
+  if (!textarea) {
+    return;
+  }
 
   textarea.style.height = "auto";
   const scrollHeight = textarea.scrollHeight;
@@ -45,7 +47,9 @@ export function AutosizeTextarea({
   const localRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (!ref) return;
+    if (!ref) {
+      return;
+    }
 
     if (typeof ref === "function") {
       ref(localRef.current);
@@ -56,7 +60,7 @@ export function AutosizeTextarea({
 
   useEffect(() => {
     adjustHeight(localRef, maxHeight, minHeight);
-  }, [props.value, maxHeight, minHeight]);
+  }, [maxHeight, minHeight]);
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     adjustHeight(localRef, maxHeight, minHeight);
@@ -65,9 +69,9 @@ export function AutosizeTextarea({
 
   return (
     <Textarea
-      ref={localRef}
-      onChange={handleChange}
       className={cn("min-h-0 resize-none", className)}
+      onChange={handleChange}
+      ref={localRef}
       style={{
         maxHeight: `${maxHeight}px`,
         minHeight: `${minHeight}px`,

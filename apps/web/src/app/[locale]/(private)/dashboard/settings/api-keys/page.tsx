@@ -18,18 +18,18 @@ export default async function ApiKeysPage() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-bold tracking-tight">{t("settings_api_keys_title")}</h2>
+          <h2 className="font-bold text-2xl tracking-tight">{t("settings_api_keys_title")}</h2>
           <p className="text-muted-foreground text-sm">{t("settings_api_keys_desc")}</p>
         </div>
         <AppButton asChild variant="link">
-          <ExternalLink href={`${APP_URL}/api/docs`} className="flex items-center gap-4">
+          <ExternalLink className="flex items-center gap-4" href={`${APP_URL}/api/docs`}>
             {t("settings_api_keys_api_documentation")}
             <SquareArrowOutUpRight />
           </ExternalLink>
         </AppButton>
       </div>
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">{t("settings_api_keys_active_keys")}</h3>
+        <h3 className="font-medium text-lg">{t("settings_api_keys_active_keys")}</h3>
         <CreateApiKeyDialog />
       </div>
       <ApiKeysListContainer />

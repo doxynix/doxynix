@@ -1,5 +1,6 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs";
+
 import { additionalFiles } from "@trigger.dev/build/extensions/core";
 import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
 import { defineConfig } from "@trigger.dev/sdk";

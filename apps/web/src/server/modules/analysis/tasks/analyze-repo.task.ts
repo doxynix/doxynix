@@ -1,5 +1,6 @@
 import os from "node:os";
-import { Status, type DocType } from "@prisma/client";
+
+import { type DocType, Status } from "@prisma/client";
 import { task } from "@trigger.dev/sdk";
 import { join } from "pathe";
 

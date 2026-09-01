@@ -38,13 +38,19 @@ export type NodeContextDiagnostics = {
 
 export const analysisContext = {
   async build(db: DbClient, repoId: string, nodeId?: string): Promise<NodeContext | null> {
-    if (nodeId == null) return null;
+    if (nodeId == null) {
+      return null;
+    }
 
     const repo = await analysisRepo.getRepoSnapshot(db, repoId);
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
 
     const explain = createAnalyzeContextBuilder(repo).getNodeExplain(nodeId);
-    if (explain == null) return null;
+    if (explain == null) {
+      return null;
+    }
 
     return {
       confidence: explain.confidence,

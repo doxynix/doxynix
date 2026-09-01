@@ -52,30 +52,30 @@ export function AppHeader() {
   });
 
   return (
-    <header className="bg-background flex h-full flex-col justify-between px-4">
+    <header className="flex h-full flex-col justify-between bg-background px-4">
       <div className="flex w-full justify-between py-4">
         <div className="flex items-center gap-2.5">
           <AppTooltip content="Toggle Sidebar (ctrl+b)">
             <SidebarTrigger
-              variant="ghost"
               className="text-muted-foreground hover:cursor-pointer"
+              variant="ghost"
             />
           </AppTooltip>
 
           <Logo className="mt-1 w-20" />
 
           <AppBreadcrumbs
+            className="hidden md:block"
             items={breadcrumbItems}
             separator={<SlashIcon className="size-3 rotate-340" />}
             showSeparatorAtStart={true}
-            className="hidden md:block"
           />
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
           <AgentButton />
           <AppTooltip content="Work in Progress">
-            <span className="text-warning bg-warning/20 cursor-default rounded p-1 py-0.5 text-xs">
+            <span className="cursor-default rounded bg-warning/20 p-1 py-0.5 text-warning text-xs">
               BETA
             </span>
           </AppTooltip>
@@ -83,7 +83,7 @@ export function AppHeader() {
           <ThemeToggle />
           <AppTooltip content="Repositories">
             <AppButton asChild size="icon" variant="ghost">
-              <Link href="/dashboard/repos" aria-label="Repositories">
+              <Link aria-label="Repositories" href="/dashboard/repos">
                 <Book />
               </Link>
             </AppButton>

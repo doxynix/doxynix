@@ -14,34 +14,34 @@ type Props = {
 
 export function RepoStatusBar({ meta, readOnly, stats }: Readonly<Props>) {
   return (
-    <div className="bg-card flex items-center justify-between px-3 py-1.5 font-mono text-[11px]">
+    <div className="flex items-center justify-between bg-card px-3 py-1.5 font-mono text-[11px]">
       <div className="flex items-center gap-3 font-semibold">
         <span
           className={cn(
-            "rounded border p-px text-[10px] font-bold uppercase",
+            "rounded border p-px font-bold text-[10px] uppercase",
             readOnly
-              ? "bg-info/10 text-info border-info/50"
-              : "bg-success/10 text-success border-success/50",
+              ? "border-info/50 bg-info/10 text-info"
+              : "border-success/50 bg-success/10 text-success",
           )}
         >
           {readOnly ? "View" : "Edit"}
         </span>
         <span>{meta.name}</span>
         {stats.isDirty && (
-          <span className="text-warning flex animate-pulse items-center gap-1">
+          <span className="flex animate-pulse items-center gap-1 text-warning">
             <FileEdit className="size-3" />
             Modified
           </span>
         )}
         {stats.errors > 0 && (
-          <div className="text-destructive flex items-center gap-1 font-bold">
+          <div className="flex items-center gap-1 font-bold text-destructive">
             <AlertCircle className="size-3" />
             {stats.errors}
           </div>
         )}
       </div>
 
-      <div className="text-muted-foreground flex items-center gap-3">
+      <div className="flex items-center gap-3 text-muted-foreground">
         <span>
           Ln {stats.line}, Col {stats.col}
         </span>

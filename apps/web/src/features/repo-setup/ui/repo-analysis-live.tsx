@@ -90,12 +90,12 @@ export function RepoAnalysisLive({
       <div className="flex flex-col gap-4 text-center">
         <div className="flex justify-center">
           {isFinished ? (
-            <div className="bg-success/10 rounded-full p-3">
-              <CheckCircle2 className="text-success size-10" />
+            <div className="rounded-full bg-success/10 p-3">
+              <CheckCircle2 className="size-10 text-success" />
             </div>
           ) : isFailed ? (
-            <div className="bg-destructive/10 rounded-full p-3">
-              <AlertCircle className="text-destructive size-10" />
+            <div className="rounded-full bg-destructive/10 p-3">
+              <AlertCircle className="size-10 text-destructive" />
             </div>
           ) : (
             <Spinner className="size-10" />
@@ -103,7 +103,7 @@ export function RepoAnalysisLive({
         </div>
 
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-bold tracking-tight">
+          <h2 className="font-bold text-2xl tracking-tight">
             {isFinished
               ? "Analysis Complete"
               : isFailed
@@ -121,13 +121,13 @@ export function RepoAnalysisLive({
       </div>
 
       <div className="flex flex-col gap-3">
-        <div className="flex justify-between text-sm font-medium">
+        <div className="flex justify-between font-medium text-sm">
           <span className="flex items-center gap-2">
             Status: <AppBadge variant="outline">{displayStatus}</AppBadge>
           </span>
           <span>{progress}%</span>
         </div>
-        <Progress value={progress} indicatorClassName="bg-foreground" />
+        <Progress indicatorClassName="bg-foreground" value={progress} />
       </div>
 
       <AnalysisTerminal logs={logs} />
@@ -139,12 +139,12 @@ export function RepoAnalysisLive({
           </AppButton>
         )}
         {(isFinished || isFailed) && (
-          <AppButton variant="outline" onClick={() => handleCancel(repoId, analysisId)}>
+          <AppButton onClick={() => handleCancel(repoId, analysisId)} variant="outline">
             Start New Audit
           </AppButton>
         )}
         {isPending && (
-          <AppButton variant="destructive" onClick={() => handleCancel(repoId, analysisId)}>
+          <AppButton onClick={() => handleCancel(repoId, analysisId)} variant="destructive">
             Cancel
           </AppButton>
         )}

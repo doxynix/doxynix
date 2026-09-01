@@ -30,13 +30,13 @@ export function NotificationCard({ notification }: Readonly<Props>) {
   return (
     <Card
       className={cn(
-        "group hover:border-border-strong relative border-l-4 p-4",
-        notification.isRead === false && "bg-surface-selected",
+        "group relative border-l-4 p-4 hover:border-border-strong",
+        !notification.isRead && "bg-surface-selected",
         border,
       )}
     >
       {href != null && (
-        <Link href={href} aria-label={notification.title} className="absolute inset-0" />
+        <Link aria-label={notification.title} className="absolute inset-0" href={href} />
       )}
 
       <CardContent className="flex items-center justify-between">
@@ -45,15 +45,16 @@ export function NotificationCard({ notification }: Readonly<Props>) {
             <Icon className={cn("size-5", color)} />
             <span
               className={cn(
-                "bg-foreground size-2 shrink-0 rounded-full opacity-0",
-                notification.isRead === false && "opacity-100",
+                "size-2 shrink-0 rounded-full bg-foreground opacity-0",
+                !notification.isRead && "opacity-100",
               )}
             />
             <div className="flex flex-col gap-2">
               <CardTitle
                 className={cn(
                   "group-hover:text-foreground",
-                  notification.isRead === true && "text-muted-foreground",
+
+                  notification.isRead && "text-muted-foreground",
                 )}
               >
                 {notification.title}
@@ -66,21 +67,21 @@ export function NotificationCard({ notification }: Readonly<Props>) {
           <div className="flex items-center gap-2">
             <NotificationActionButton
               disabled={isPending}
-              icon={notification.isRead === true ? EyeOff : Eye}
+              icon={notification.isRead ? EyeOff : Eye}
               isPending={markAs.isPending}
-              tooltip={notification.isRead === true ? "Mark as unread" : "Mark as read"}
-              onClick={() => markAs.mutate(notification.id, notification.isRead === false)}
+              onClick={() => markAs.mutate(notification.id, !notification.isRead)}
+              tooltip={notification.isRead ? "Mark as unread" : "Mark as read"}
             />
             <NotificationActionButton
+              className="hover:text-destructive"
               disabled={isPending}
               icon={Trash2}
               isPending={deleteOne.isPending}
-              tooltip="Delete notification"
               onClick={() => deleteOne.mutate(notification.id)}
-              className="hover:text-destructive"
+              tooltip="Delete notification"
             />
           </div>
-          <TimeAgo date={notification.createdAt} locale={locale} className="z-10 w-fit text-xs" />
+          <TimeAgo className="z-10 w-fit text-xs" date={notification.createdAt} locale={locale} />
         </div>
       </CardContent>
     </Card>

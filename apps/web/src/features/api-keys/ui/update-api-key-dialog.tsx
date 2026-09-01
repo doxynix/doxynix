@@ -6,7 +6,7 @@ import { Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
-import { CreateApiKeySchema, type CreateApiKeyInput } from "@/shared/api/schemas/api-key";
+import { type CreateApiKeyInput, CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -65,14 +65,14 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog onOpenChange={handleOpenChange} open={open}>
       <AppTooltip content={tCommon("edit")}>
         <DialogTrigger asChild>
           <AppButton
+            aria-label="Update key"
+            className="text-muted-foreground not-md:opacity-100 opacity-0 transition-opacity group-hover:opacity-100"
             size="icon"
             variant="ghost"
-            aria-label="Update key"
-            className="text-muted-foreground opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
           >
             <Pencil />
           </AppButton>
@@ -82,14 +82,14 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
       <DialogContent className="sm:max-w-md">
         <Form {...form}>
           <form
-            onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
             className="flex flex-col gap-4"
+            onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
           >
             <DialogHeader>
               <DialogTitle>{t("settings_api_keys_edit_title")}</DialogTitle>
               <DialogDescription>
                 {t("settings_api_keys_update_key_desc")}{" "}
-                <span className="text-foreground font-bold">{apiKey.prefix}...</span>
+                <span className="font-bold text-foreground">{apiKey.prefix}...</span>
               </DialogDescription>
             </DialogHeader>
 
@@ -97,11 +97,11 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
 
             <DialogFooter>
               <LoadingButton
+                className="cursor-pointer"
                 disabled={!form.formState.isDirty || !form.formState.isValid || update.isPending}
-                type="submit"
                 isLoading={update.isPending}
                 loadingText="Saving..."
-                className="cursor-pointer"
+                type="submit"
               >
                 {tCommon("update")}
               </LoadingButton>

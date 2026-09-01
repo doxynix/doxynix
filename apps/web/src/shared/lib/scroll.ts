@@ -1,9 +1,11 @@
 function easeInOutCubic(t: number): number {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 }
 
 export function smoothScrollTo(targetId: string, offset: number = 80, duration: number = 800) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   /* eslint-disable-next-line unicorn/prefer-query-selector */
   const targetElement = document.getElementById(targetId);

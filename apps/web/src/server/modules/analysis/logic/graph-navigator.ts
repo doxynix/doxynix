@@ -145,7 +145,9 @@ export type StructureMapPayload = NonNullable<
 
 export function buildStructureMapPayload(repo: RepoWithLatestAnalysisAndDocs) {
   const context = buildStructureContext(repo);
-  if (context == null) return null;
+  if (context == null) {
+    return null;
+  }
   const analysisRef = analysisMapper.toAnalysisRef(repo.analyses[0]);
   return buildStructureMapPayloadFromContext(context, analysisRef);
 }
@@ -160,7 +162,7 @@ export function buildTopLevelNodes(context: StructureContext) {
         rankStructureNode(right) - rankStructureNode(left) || left.label.localeCompare(right.label),
     );
 
-  const prioritized = nodes.filter(isMeaningfulTopLevelNode);
+  const prioritized = nodes.filter((node) => isMeaningfulTopLevelNode(node));
   const fallback = nodes.filter(
     (node) => !prioritized.some((candidate) => candidate.id === node.id),
   );
@@ -171,7 +173,9 @@ function selectDefaultTopLevelNode(
   context: StructureContext,
   nodes: ReturnType<typeof buildStructureNodeSummary>[],
 ) {
-  if (nodes.length === 0) return null;
+  if (nodes.length === 0) {
+    return null;
+  }
 
   const firstLookGroups = new Set(
     buildGroupKeySet(
@@ -204,20 +208,36 @@ function selectDefaultTopLevelNode(
   const scored = nodes.map((node) => {
     let score = rankStructureNode(node);
 
-    if (firstLookGroups.has(node.path)) score += 28;
-    if (primaryModuleGroups.has(node.path)) score += 20;
-    if (entrypointGroups.has(node.path)) score += 18;
-    if (apiGroups.has(node.path)) score += 14;
-    if (riskGroups.has(node.path)) score += 10;
+    if (firstLookGroups.has(node.path)) {
+      score += 28;
+    }
+    if (primaryModuleGroups.has(node.path)) {
+      score += 20;
+    }
+    if (entrypointGroups.has(node.path)) {
+      score += 18;
+    }
+    if (apiGroups.has(node.path)) {
+      score += 14;
+    }
+    if (riskGroups.has(node.path)) {
+      score += 10;
+    }
 
     score += Math.min(14, graphWeightByGroup.get(node.path) ?? 0);
 
-    if (node.kind === "core" || node.kind === "backend" || node.kind === "api") score += 6;
-    if (node.kind === "frontend" || node.kind === "data") score += 3;
+    if (node.kind === "core" || node.kind === "backend" || node.kind === "api") {
+      score += 6;
+    }
+    if (node.kind === "frontend" || node.kind === "data") {
+      score += 3;
+    }
 
     score -= getGenericGroupPenalty(node);
 
-    if (node.markers.config && !node.markers.entrypoint && !node.markers.api) score -= 8;
+    if (node.markers.config && !node.markers.entrypoint && !node.markers.api) {
+      score -= 8;
+    }
     if (
       node.markers.shared &&
       !node.markers.entrypoint &&
@@ -250,7 +270,9 @@ export function buildStructureNodePayloadFromContext(
 
   if (nodeType === "file") {
     const normalizedPath = normalize(path);
-    if (!context.allInterestingPaths.includes(normalizedPath)) return null;
+    if (!context.allInterestingPaths.includes(normalizedPath)) {
+      return null;
+    }
 
     const entry = aggregateEntryForPaths([normalizedPath], context);
     const node = buildStructureNodeSummary({ entry, nodeType: "file", path: normalizedPath });
@@ -281,7 +303,9 @@ export function buildStructureNodePayloadFromContext(
   const scopedPaths = context.allInterestingPaths.filter((candidatePath) =>
     isPathInsideScope(candidatePath, path),
   );
-  if (scopedPaths.length === 0) return null;
+  if (scopedPaths.length === 0) {
+    return null;
+  }
 
   const entry = aggregateEntryForPaths(scopedPaths, context);
   const node = buildStructureNodeSummary({ entry, nodeType: "group", path });
@@ -289,7 +313,9 @@ export function buildStructureNodePayloadFromContext(
   const childScopes = new Map<string, { nodeType: StructureNodeType; path: string }>();
   for (const candidatePath of scopedPaths) {
     const scope = resolveImmediateChildScope(path, candidatePath);
-    if (scope == null) continue;
+    if (scope == null) {
+      continue;
+    }
     childScopes.set(makeStructureNodeId(scope.nodeType, scope.path), scope);
   }
 
@@ -307,13 +333,15 @@ export function buildStructureNodePayloadFromContext(
       });
     })
     .sort((left, right) => {
-      if (left.nodeType !== right.nodeType) return left.nodeType === "group" ? -1 : 1;
+      if (left.nodeType !== right.nodeType) {
+        return left.nodeType === "group" ? -1 : 1;
+      }
       return (
         rankStructureNode(right) - rankStructureNode(left) || left.label.localeCompare(right.label)
       );
     });
 
-  const meaningfulChildren = childNodes.filter(isMeaningfulChildNode);
+  const meaningfulChildren = childNodes.filter((node) => isMeaningfulChildNode(node));
   const sourceChildren = meaningfulChildren.length > 0 ? meaningfulChildren : childNodes;
   const limitedChildren = [
     ...sourceChildren.filter((child) => child.nodeType === "group").slice(0, 10),
@@ -353,7 +381,9 @@ export type StructureNodePayload = NonNullable<
 
 export function buildStructureNodePayload(repo: RepoWithLatestAnalysisAndDocs, nodeId: string) {
   const context = buildStructureContext(repo);
-  if (context == null) return null;
+  if (context == null) {
+    return null;
+  }
   const analysisRef = analysisMapper.toAnalysisRef(repo.analyses[0]);
   return buildStructureNodePayloadFromContext(context, analysisRef, nodeId);
 }

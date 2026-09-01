@@ -1,5 +1,5 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { ProxyAgent, fetch as undiciFetch, type RequestInit } from "undici";
+import { ProxyAgent, type RequestInit, fetch as undiciFetch } from "undici";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
 import {

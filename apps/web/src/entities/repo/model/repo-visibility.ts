@@ -1,4 +1,4 @@
-import { Lock, Unlock, type LucideIcon } from "lucide-react";
+import { Lock, type LucideIcon, Unlock } from "lucide-react";
 
 import type { VisibilityType } from "@/shared/api-contracts";
 

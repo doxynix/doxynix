@@ -19,31 +19,31 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
 
   return (
     <AppButton
+      className="h-auto w-full max-w-md cursor-pointer justify-start px-3 py-2 text-left"
       disabled={disabled}
+      onClick={onClick}
       type="button"
       variant="ghost"
-      onClick={onClick}
-      className="h-auto w-full max-w-md cursor-pointer justify-start px-3 py-2 text-left"
     >
       <div className="flex w-full flex-col gap-1 overflow-hidden">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1">
-            <span className="truncate text-sm font-medium">{repo.fullName}</span>
+            <span className="truncate font-medium text-sm">{repo.fullName}</span>
             <div className="flex shrink-0 items-center gap-1.5 text-xs">
-              <AppBadge variant="outline" className={cn(visibility.color)}>
+              <AppBadge className={cn(visibility.color)} variant="outline">
                 {visibility.label}
               </AppBadge>
             </div>
           </div>
-          <div className={cn("text-muted-foreground flex shrink-0 items-center gap-1 text-xs")}>
-            <Star className="text-warning size-3 fill-current" />
+          <div className={cn("flex shrink-0 items-center gap-1 text-muted-foreground text-xs")}>
+            <Star className="size-3 fill-current text-warning" />
             {repo.stars.toLocaleString(locale)}
             <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: langColor }} />
             <div className="flex items-center gap-1 text-xs">{repo.language}</div>
           </div>
         </div>
         {repo.description != null && (
-          <span className="text-muted-foreground truncate text-xs font-normal opacity-80">
+          <span className="truncate font-normal text-muted-foreground text-xs opacity-80">
             {repo.description}
           </span>
         )}

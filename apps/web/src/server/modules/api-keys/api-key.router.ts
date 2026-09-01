@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { ApiKeySchema } from "@/shared/api-contracts";
 import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
+import { ApiKeySchema } from "@/shared/api-contracts";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { handlePrismaError } from "@/server/utils/handle-error";
@@ -68,7 +68,7 @@ export const apiKeyRouter = createTRPCRouter({
       });
 
       return {
-        active: allKeys.filter((k) => k.revoked === false),
+        active: allKeys.filter((k) => !k.revoked),
         archived: allKeys.filter((k) => k.revoked),
       };
     }),

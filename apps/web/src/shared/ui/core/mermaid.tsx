@@ -1,12 +1,12 @@
 /* eslint-disable sonarjs/code-eval */
 "use client";
 
-import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
+import { type MouseEvent, useEffect, useId, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 
 import { useDebounce } from "@/shared/hooks/use-debounce";
 import { cn } from "@/shared/lib/cn";
-import { mermaidThemes, type MermaidCustomTheme } from "@/shared/lib/mermaid-themes";
+import { type MermaidCustomTheme, mermaidThemes } from "@/shared/lib/mermaid-themes";
 
 export type MermaidBuiltinTheme = "base" | "dark" | "default" | "forest" | "neutral";
 export type MermaidTheme = MermaidBuiltinTheme | MermaidCustomTheme;
@@ -151,7 +151,9 @@ function useMermaid({
         const mermaidModule = await import("mermaid");
         const mermaid = mermaidModule.default;
 
-        if (isCancelled()) return;
+        if (isCancelled()) {
+          return;
+        }
 
         const parsedConfig: MermaidConfig = JSON.parse(configString);
 
@@ -189,7 +191,9 @@ function useMermaid({
           themeVariables: resolvedThemeVars,
         });
 
-        if (!renderRef.current) return;
+        if (!renderRef.current) {
+          return;
+        }
         renderRef.current.innerHTML = "";
 
         const uniqueId = `mermaid-${id}-${Date.now()}`;
@@ -244,8 +248,12 @@ export function AppMermaid({
   });
 
   useEffect(() => {
-    if (status === "success" && svg) onSuccess?.(svg);
-    if (status === "error" && error) onError?.(error);
+    if (status === "success" && svg) {
+      onSuccess?.(svg);
+    }
+    if (status === "error" && error) {
+      onError?.(error);
+    }
   }, [status, svg, error, onSuccess, onError]);
 
   const handleSvgClick = (e: MouseEvent<HTMLDivElement>) => {
@@ -275,35 +283,35 @@ export function AppMermaid({
       {status === "success" && svg && (
         /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */
         <figure
-          dangerouslySetInnerHTML={{ __html: svg }}
           aria-label="Mermaid diagram"
+          className="fade-in not-prose flex h-full w-full animate-in cursor-pointer items-center justify-center overflow-auto duration-300 [&_svg]:h-auto [&_svg]:max-w-full"
+          dangerouslySetInnerHTML={{ __html: svg }}
           onClick={handleSvgClick}
-          className="animate-in fade-in not-prose flex h-full w-full cursor-pointer items-center justify-center overflow-auto duration-300 [&_svg]:h-auto [&_svg]:max-w-full"
         />
       )}
 
       <div
-        ref={renderRef}
         aria-hidden="true"
         className="pointer-events-none invisible absolute inset-0 -z-50 h-full w-full overflow-hidden"
+        ref={renderRef}
       />
 
       {status === "loading" && (
-        <div className="bg-background/50 absolute inset-0 flex items-center justify-center backdrop-blur-[1px]">
+        <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-[1px]">
           <div className="flex flex-col items-center gap-3">
-            <div className="border-primary h-5 w-5 animate-spin rounded-full border-2 border-t-transparent" />
-            <span className="text-muted-foreground text-xs font-medium">Rendering...</span>
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <span className="font-medium text-muted-foreground text-xs">Rendering...</span>
           </div>
         </div>
       )}
 
       {status === "error" && error && (
-        <div className="border-destructive/20 bg-destructive/5 flex w-full items-center justify-center rounded-lg border p-6">
+        <div className="flex w-full items-center justify-center rounded-lg border border-destructive/20 bg-destructive/5 p-6">
           <div className="flex max-w-md flex-col items-center gap-2 text-center">
-            <span className="text-destructive text-xs font-bold tracking-wider uppercase">
+            <span className="font-bold text-destructive text-xs uppercase tracking-wider">
               Syntax Error
             </span>
-            <code className="text-muted-foreground bg-background/50 w-full rounded px-2 py-1 font-mono text-xs break-all">
+            <code className="w-full break-all rounded bg-background/50 px-2 py-1 font-mono text-muted-foreground text-xs">
               {error.split("\n")[0]}
             </code>
           </div>
@@ -311,7 +319,7 @@ export function AppMermaid({
       )}
 
       {status === "idle" && (
-        <div className="border-muted-foreground/20 flex h-full min-h-37.5 w-full items-center justify-center rounded-lg border-2 border-dashed">
+        <div className="flex h-full min-h-37.5 w-full items-center justify-center rounded-lg border-2 border-muted-foreground/20 border-dashed">
           <p className="text-muted-foreground text-sm">No diagram code provided</p>
         </div>
       )}

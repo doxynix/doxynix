@@ -28,7 +28,9 @@ import {
 
 export function buildBreadcrumbs(nodeType: StructureNodeType, path: string) {
   const parts = normalize(path).split("/").filter(Boolean);
-  if (parts.length === 0) return [];
+  if (parts.length === 0) {
+    return [];
+  }
 
   const breadcrumbs = parts.slice(0, -1).map((_, index) => {
     const crumbPath = parts.slice(0, index + 1).join("/");
@@ -85,10 +87,15 @@ export function aggregateEntryForPaths(paths: string[], context: StructureContex
 
   for (const path of normalizedPaths) {
     entry.paths.push(path);
-    if (context.apiPaths.has(path)) entry.apiPaths.push(path);
-    if (context.normalizedConfigInventory.includes(path)) entry.configPaths.push(path);
-    if ((context.docInput?.api.publicSurfacePaths ?? []).includes(path))
+    if (context.apiPaths.has(path)) {
+      entry.apiPaths.push(path);
+    }
+    if (context.normalizedConfigInventory.includes(path)) {
+      entry.configPaths.push(path);
+    }
+    if ((context.docInput?.api.publicSurfacePaths ?? []).includes(path)) {
       entry.publicSurfacePaths.push(path);
+    }
     for (const semanticKind of collectSemanticKinds(path, context.apiPaths)) {
       entry.semanticCounts[semanticKind] += 1;
     }
@@ -145,7 +152,7 @@ function collectInterestingPaths(
         fact.evidence.map((item) => item.path),
       ),
     ]
-      .filter(hasText)
+      .filter((path) => hasText(path))
       .map((path) => normalize(path)),
   );
 }
@@ -165,7 +172,9 @@ function collectStructureSignalMap(params: {
     signal: "api" | "config" | "entrypoint" | "fact" | "finding" | "hotspot" | "onboarding",
   ) {
     for (const rawPath of paths) {
-      if (!hasText(rawPath)) continue;
+      if (!hasText(rawPath)) {
+        continue;
+      }
       const path = normalize(rawPath);
       const current = map.get(path) ?? new Set();
       current.add(signal);
@@ -214,7 +223,9 @@ export function buildStructureContext(
   repo: RepoWithLatestAnalysisAndDocs,
 ): null | StructureContext {
   const payload = coerceAnalysisPayload(repo.analyses[0]);
-  if (payload == null) return null;
+  if (payload == null) {
+    return null;
+  }
 
   const { aiResult, metrics } = payload;
   const docInput = metrics.documentationInput ?? null;
@@ -237,10 +248,15 @@ export function buildStructureContext(
     const groupId = ProjectPolicy.deriveGroupId(path);
     const current = groupMap.get(groupId) ?? createEmptyGroupEntry();
     current.paths.push(path);
-    if (apiPaths.has(path)) current.apiPaths.push(path);
-    if (normalizedConfigInventory.includes(path)) current.configPaths.push(path);
-    if ((docInput?.api.publicSurfacePaths ?? []).includes(path))
+    if (apiPaths.has(path)) {
+      current.apiPaths.push(path);
+    }
+    if (normalizedConfigInventory.includes(path)) {
+      current.configPaths.push(path);
+    }
+    if ((docInput?.api.publicSurfacePaths ?? []).includes(path)) {
       current.publicSurfacePaths.push(path);
+    }
     for (const semanticKind of collectSemanticKinds(path, apiPaths)) {
       current.semanticCounts[semanticKind] += 1;
     }

@@ -1,4 +1,4 @@
-import type { HotspotSignal, RepositoryEvidence } from "../core/discovery.types";
+import type { RepositoryEvidence } from "../core/discovery.types";
 import type { ArchitectureSectionBody, DocumentationInputModel } from "../core/documentation.types";
 import { selectRepositoryFrameworkFacts } from "../core/framework-catalog";
 import type { RepoMetrics } from "../core/metrics.types";
@@ -36,7 +36,7 @@ function buildFrameworkFacts(
   return selectRepositoryFrameworkFacts(
     evidence.frameworkFacts.length > 0 ? evidence.frameworkFacts : (metrics.frameworkFacts ?? []),
   ).map((fact) => ({
-    category: fact.category as FrameworkFactInput["category"],
+    category: fact.category,
     confidence: fact.confidence,
     name: fact.name,
     sources: fact.sources,
@@ -93,7 +93,7 @@ function buildHotspots(evidence: RepositoryEvidence, metrics: RepoMetrics): Hots
     evidence.hotspotSignals.length > 0 ? evidence.hotspotSignals : (metrics.hotspotSignals ?? []);
 
   return hotspotCandidates.map<HotspotInput>((signal) => ({
-    categories: signal.categories as HotspotInput["categories"],
+    categories: signal.categories,
     churnScore: signal.churnScore,
     complexity: signal.complexity,
     confidence: signal.confidence,
@@ -101,7 +101,7 @@ function buildHotspots(evidence: RepositoryEvidence, metrics: RepoMetrics): Hots
     outbound: signal.outbound,
     path: signal.path,
     score: signal.score,
-    source: signal.source as HotspotSignal["source"],
+    source: signal.source,
   }));
 }
 

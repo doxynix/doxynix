@@ -1,7 +1,7 @@
 import { appLogger } from "@/server/core/app-logger";
 import { callWithFallback } from "@/server/utils/call";
 
-import { sentinelSchema, type SentinelResult } from "../engine/core/analysis-result.schemas";
+import { type SentinelResult, sentinelSchema } from "../engine/core/analysis-result.schemas";
 import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
 import { buildSentinelSystemPrompt, buildSentinelUserPrompt } from "./prompts-refactored";
 

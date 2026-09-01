@@ -13,12 +13,12 @@ export default function UnauthorizedPage() {
   }, []);
 
   return (
-    <div className="bg-background flex h-dvh w-full flex-col items-center justify-center">
+    <div className="flex h-dvh w-full flex-col items-center justify-center bg-background">
       <div className="flex max-w-md flex-col items-center gap-6 text-center">
-        <div className="bg-destructive/10 text-destructive flex size-20 items-center justify-center rounded-full">
+        <div className="flex size-20 items-center justify-center rounded-full bg-destructive/10 text-destructive">
           <ShieldAlert size={40} />
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">Your session has expired</h1>
+        <h1 className="font-bold text-3xl tracking-tight">Your session has expired</h1>
         <p className="text-muted-foreground">
           It seems you have logged out on another device or your session has expired. Please log in
           again.

@@ -9,8 +9,8 @@ import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
-import { repoParsers } from "@/entities/repo/model/repo-parsers";
 import type { RepoStatus } from "@/entities/repo/model/repo.types";
+import { repoParsers } from "@/entities/repo/model/repo-parsers";
 import { RepoCardSkeleton } from "@/entities/repo/ui/repo-card-skeleton";
 
 import { RepoList } from "./repo-list";
@@ -71,8 +71,8 @@ export function RepoListContainer({ config }: Readonly<Props>) {
   return (
     <>
       {config?.showTotalCount !== false && (
-        <div className="text-muted-foreground mb-4 text-sm">
-          <p className="xs:text-right text-center">
+        <div className="mb-4 text-muted-foreground text-sm">
+          <p className="text-center xs:text-right">
             {t("repo_total_count", {
               filteredCount: meta.filteredCount,
               totalCount: meta.totalCount,
@@ -85,7 +85,7 @@ export function RepoListContainer({ config }: Readonly<Props>) {
       </div>
 
       {config?.showPagination !== false && (
-        <AppPagination isLoading={isFetching} meta={meta} className="mt-4" />
+        <AppPagination className="mt-4" isLoading={isFetching} meta={meta} />
       )}
     </>
   );

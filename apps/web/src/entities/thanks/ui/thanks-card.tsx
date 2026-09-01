@@ -18,14 +18,14 @@ export function ThanksCard({ group }: Readonly<Props>) {
   const uniqueLicenses = Array.from(new Set(packages.map((p) => p.license)));
 
   return (
-    <Card className="hover:border-border-strong transition-standard flex flex-col justify-between">
+    <Card className="flex flex-col justify-between transition-standard hover:border-border-strong">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4 overflow-hidden">
-            <AppAvatar alt={author} src={avatar} fallbackText={author} sizeClassName="size-12" />
+            <AppAvatar alt={author} fallbackText={author} sizeClassName="size-12" src={avatar} />
 
             <div className="flex flex-col overflow-hidden">
-              <CardTitle title={author} className="truncate text-lg font-bold">
+              <CardTitle className="truncate font-bold text-lg" title={author}>
                 {author}
               </CardTitle>
               <div className="mt-1 flex gap-1.5">
@@ -48,7 +48,7 @@ export function ThanksCard({ group }: Readonly<Props>) {
           <div className="flex flex-wrap gap-1.5">
             {packages.map((pkg) => (
               <AppBadge key={pkg.name} variant="outline">
-                <Package className="text-muted-foreground size-3" />
+                <Package className="size-3 text-muted-foreground" />
                 <span className="truncate">
                   {pkg.name.includes("/") ? (
                     <>
@@ -66,8 +66,8 @@ export function ThanksCard({ group }: Readonly<Props>) {
 
         <div className="mt-auto border-t pt-4">
           <ExternalLink
+            className="ml-auto flex w-fit items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-foreground"
             href={authorLink}
-            className="text-muted-foreground hover:text-foreground ml-auto flex w-fit items-center gap-2 text-xs transition-colors"
           >
             View
             <GitHubIcon className="size-4" />

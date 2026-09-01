@@ -8,23 +8,23 @@ export async function CTASection() {
   const t = await getTranslations("Landing");
 
   return (
-    <section className="relative container mx-auto flex w-full flex-col items-center justify-center overflow-hidden">
+    <section className="container relative mx-auto flex w-full flex-col items-center justify-center overflow-hidden">
       <BackgroundBeamsWithCollision className="h-full py-24">
         <div className="flex flex-col items-center justify-center gap-6 px-4 text-center">
-          <h2 className="text-4xl font-bold tracking-tight md:text-6xl">
+          <h2 className="font-bold text-4xl tracking-tight md:text-6xl">
             {t("section_cta_title_1")} <br /> {t("section_cta_title_2")}
           </h2>
-          <p className="text-muted-foreground mx-auto">{t("section_cta_desc")}</p>
-          <ShimmerButton href="/auth" className="h-12 px-8 text-lg">
-            <span className="text-sm font-medium lg:text-lg">{t("section_cta_btn")}</span>
+          <p className="mx-auto text-muted-foreground">{t("section_cta_desc")}</p>
+          <ShimmerButton className="h-12 px-8 text-lg" href="/auth">
+            <span className="font-medium text-sm lg:text-lg">{t("section_cta_btn")}</span>
           </ShimmerButton>
         </div>
       </BackgroundBeamsWithCollision>
       <ScrollButton
         ariaLabel="Scroll to brands section"
-        targetId="hero"
         arrowClassName="-rotate-90"
         buttonClassName="animate-float absolute bottom-0"
+        targetId="hero"
       />
     </section>
   );

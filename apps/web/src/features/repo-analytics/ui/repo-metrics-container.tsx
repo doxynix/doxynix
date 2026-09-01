@@ -26,7 +26,9 @@ export function RepoMetricsContainer({ repoId }: Readonly<Props>) {
     );
   }
 
-  if (data == null) return null;
+  if (data == null) {
+    return null;
+  }
 
   return <RepoMetrics data={data} repoId={repoId} />;
 }

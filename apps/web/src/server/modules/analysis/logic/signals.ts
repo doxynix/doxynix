@@ -52,8 +52,12 @@ export function collectScopedEntrySignals(
         const fromPath = normalize(edge.fromPath);
         const toPath = normalize(edge.toPath);
 
-        if (pathSet.has(fromPath) && !pathSet.has(toPath)) return [toPath];
-        if (pathSet.has(toPath) && !pathSet.has(fromPath)) return [fromPath];
+        if (pathSet.has(fromPath) && !pathSet.has(toPath)) {
+          return [toPath];
+        }
+        if (pathSet.has(toPath) && !pathSet.has(fromPath)) {
+          return [fromPath];
+        }
         return [];
       })
       .filter((path) => !pathSet.has(path)),

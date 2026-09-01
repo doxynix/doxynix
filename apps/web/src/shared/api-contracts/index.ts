@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
 
 /////////////////////////////////////////
 // HELPER FUNCTIONS
@@ -645,13 +645,20 @@ export type ChatRoleType = `${z.infer<typeof ChatRoleSchema>}`;
 /////////////////////////////////////////
 
 export const UserSchema = z.object({
-  role: UserRoleSchema,
+  banExpires: z.coerce.date().nullable(),
+  // omitted: imageKey: z.string().nullable(),
+  banned: z.boolean(),
+  banReason: z.string().nullable(),
+  createdAt: z.coerce.date(),
   // omitted: id: z.number().int(),
   // omitted: publicId: z.uuid(),
   /**
    * @encrypted
    */
   email: z.email({ message: "Incorrect email" }).nullable(),
+  emailVerified: z.boolean(),
+  image: z.string().nullable().nullish(),
+  lastLoginMethod: z.string().nullable(),
   /**
    * @encryption:hash(email)?normalize=lowercase&normalize=trim
    */
@@ -662,15 +669,8 @@ export const UserSchema = z.object({
     .min(1, { message: "Name required" })
     .max(50, { message: "Name cannot exceed 50 characters" })
     .nullable(),
-  emailVerified: z.boolean(),
-  image: z.string().nullable().nullish(),
-  // omitted: imageKey: z.string().nullable(),
-  banned: z.boolean(),
-  banReason: z.string().nullable(),
-  banExpires: z.coerce.date().nullable(),
+  role: UserRoleSchema,
   twoFactorEnabled: z.boolean(),
-  lastLoginMethod: z.string().nullable(),
-  createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
 
@@ -685,7 +685,12 @@ export const AccountSchema = z.object({
   // omitted: publicId: z.uuid(),
   // omitted: userId: z.number().int(),
   accountId: z.string(),
-  providerId: z.string(),
+  /**
+   * @encrypted
+   */
+  // omitted: idToken: z.string().nullable(),
+  // omitted: impersonatedBy: z.string().nullable(),
+  createdAt: z.coerce.date(),
   /**
    * @encrypted
    */
@@ -696,6 +701,8 @@ export const AccountSchema = z.object({
   // omitted: emailHash: z.string().nullable(),
   image: z.url({ message: "Incorrect link to avatar" }).nullable(),
   name: z.string().nullable(),
+  providerId: z.string(),
+  scope: z.string().nullable(),
   /**
    * @encrypted
    */
@@ -707,13 +714,6 @@ export const AccountSchema = z.object({
   // omitted: accessTokenExpiresAt: z.coerce.date().nullable(),
   // omitted: refreshTokenExpiresAt: z.coerce.date().nullable(),
   tokenType: z.string().nullable(),
-  scope: z.string().nullable(),
-  /**
-   * @encrypted
-   */
-  // omitted: idToken: z.string().nullable(),
-  // omitted: impersonatedBy: z.string().nullable(),
-  createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
 
@@ -724,17 +724,17 @@ export type Account = z.infer<typeof AccountSchema>;
 /////////////////////////////////////////
 
 export const PasskeySchema = z.object({
-  // omitted: id: z.uuid(),
-  name: z.string().trim().max(100, { message: "Name cannot exceed 100 characters" }).nullable(),
+  aaguid: z.uuid().nullable(),
+  backedUp: z.boolean(),
   // omitted: publicKey: z.string(),
   // omitted: userId: z.number().int(),
   // omitted: credentialID: z.string(),
   counter: z.number().int().min(0),
-  deviceType: z.string().trim(),
-  backedUp: z.boolean(),
-  transports: z.string().nullable(),
-  aaguid: z.uuid().nullable(),
   createdAt: z.coerce.date().nullable(),
+  deviceType: z.string().trim(),
+  // omitted: id: z.uuid(),
+  name: z.string().trim().max(100, { message: "Name cannot exceed 100 characters" }).nullable(),
+  transports: z.string().nullable(),
   updatedAt: z.coerce.date().nullable(),
 });
 
@@ -745,13 +745,13 @@ export type Passkey = z.infer<typeof PasskeySchema>;
 /////////////////////////////////////////
 
 export const TwoFactorSchema = z.object({
+  // omitted: userId: z.number().int(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
   // omitted: id: z.uuid(),
   // omitted: secret: z.string(),
   // omitted: backupCodes: z.string(),
   verified: z.boolean(),
-  // omitted: userId: z.number().int(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
 });
 
 export type TwoFactor = z.infer<typeof TwoFactorSchema>;
@@ -761,6 +761,8 @@ export type TwoFactor = z.infer<typeof TwoFactorSchema>;
 /////////////////////////////////////////
 
 export const SessionSchema = z.object({
+  // omitted: userId: z.number().int(),
+  createdAt: z.coerce.date(),
   // omitted: id: z.number().int(),
   // omitted: publicId: z.uuid(),
   /**
@@ -773,10 +775,8 @@ export const SessionSchema = z.object({
   // omitted: tokenHash: z.string().nullable(),
   expiresAt: z.coerce.date(),
   ipAddress: z.string().nullable(),
-  userAgent: z.string().nullable(),
-  // omitted: userId: z.number().int(),
-  createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
+  userAgent: z.string().nullable(),
 });
 
 export type Session = z.infer<typeof SessionSchema>;
@@ -786,15 +786,7 @@ export type Session = z.infer<typeof SessionSchema>;
 /////////////////////////////////////////
 
 export const VerificationSchema = z.object({
-  id: z.uuid(),
-  /**
-   * @encrypted
-   */
-  identifier: z.string(),
-  /**
-   * @encryption:hash(identifier)?normalize=lowercase&normalize=trim
-   */
-  identifierHash: z.string(),
+  createdAt: z.coerce.date(),
   /**
    * @encrypted
    */
@@ -804,7 +796,15 @@ export const VerificationSchema = z.object({
    */
   // omitted: valueHash: z.string(),
   expiresAt: z.coerce.date(),
-  createdAt: z.coerce.date(),
+  id: z.uuid(),
+  /**
+   * @encrypted
+   */
+  identifier: z.string(),
+  /**
+   * @encryption:hash(identifier)?normalize=lowercase&normalize=trim
+   */
+  identifierHash: z.string(),
   updatedAt: z.coerce.date(),
 });
 
@@ -815,17 +815,17 @@ export type Verification = z.infer<typeof VerificationSchema>;
 /////////////////////////////////////////
 
 export const BannedEmailSchema = z.object({
-  reason: BannedEmailReasonSchema,
-  id: z.number().int(),
-  /**
-   * @encrypted
-   */
-  email: z.email({ message: "Incorrect email" }),
   /**
    * @encryption:hash(email)?normalize=lowercase&normalize=trim
    */
   // omitted: emailHash: z.string().nullable(),
   createdAt: z.coerce.date(),
+  /**
+   * @encrypted
+   */
+  email: z.email({ message: "Incorrect email" }),
+  id: z.number().int(),
+  reason: BannedEmailReasonSchema,
   updatedAt: z.coerce.date(),
 });
 
@@ -836,27 +836,27 @@ export type BannedEmail = z.infer<typeof BannedEmailSchema>;
 /////////////////////////////////////////
 
 export const RepoSchema = z.object({
-  visibility: VisibilitySchema,
+  createdAt: z.coerce.date(),
+  defaultBranch: z.string(),
+  description: z.string().max(1000).nullable(),
+  forks: z.number().int().min(0),
+  githubCreatedAt: z.coerce.date().nullable(),
   // omitted: id: z.number().int(),
   // omitted: publicId: z.uuid(),
   githubId: z.number().int(),
-  owner: z.string(),
-  name: z.string().min(1).max(255),
-  description: z.string().max(1000).nullable(),
-  url: z.url({ message: "Invalid repository URL" }),
   language: z.string().nullable(),
   license: z.string().nullable(),
-  topics: z.string().array(),
-  stars: z.number().int().min(0),
-  forks: z.number().int().min(0),
-  defaultBranch: z.string(),
-  ownerAvatarUrl: z.url().nullable(),
+  name: z.string().min(1).max(255),
   openIssues: z.number().int().min(0),
-  size: z.number().int().min(0),
+  owner: z.string(),
+  ownerAvatarUrl: z.url().nullable(),
   pushedAt: z.coerce.date().nullable(),
-  createdAt: z.coerce.date(),
-  githubCreatedAt: z.coerce.date().nullable(),
+  size: z.number().int().min(0),
+  stars: z.number().int().min(0),
+  topics: z.string().array(),
   updatedAt: z.coerce.date(),
+  url: z.url({ message: "Invalid repository URL" }),
+  visibility: VisibilitySchema,
   // omitted: userId: z.number().int(),
 });
 
@@ -867,16 +867,16 @@ export type Repo = z.infer<typeof RepoSchema>;
 /////////////////////////////////////////
 
 export const GithubInstallationSchema = z.object({
-  targetType: InstallationTargetTypeSchema,
-  repositorySelection: RepositorySelectionSchema,
-  id: z.bigint(),
-  appId: z.number().int(),
-  targetId: z.bigint(),
-  accountLogin: z.string(),
   accountAvatar: z.string().nullable(),
-  isSuspended: z.boolean(),
-  htmlUrl: z.string().nullable(),
+  accountLogin: z.string(),
+  appId: z.number().int(),
   createdAt: z.coerce.date(),
+  htmlUrl: z.string().nullable(),
+  id: z.bigint(),
+  isSuspended: z.boolean(),
+  repositorySelection: RepositorySelectionSchema,
+  targetId: z.bigint(),
+  targetType: InstallationTargetTypeSchema,
   updatedAt: z.coerce.date(),
   userId: z.number().int().nullable(),
 });
@@ -888,23 +888,23 @@ export type GithubInstallation = z.infer<typeof GithubInstallationSchema>;
 /////////////////////////////////////////
 
 export const AnalysisSchema = z.object({
-  status: StatusSchema,
+  commitSha: z.string().nullable(),
+  complexityScore: z.number().int().min(0).max(100).nullable(),
+  createdAt: z.coerce.date(),
+  error: z.string().nullable(),
+  jobId: z.string().nullable(),
+  logs: z.string().nullable(),
+  message: z.string().nullable(),
+  metricsJson: JsonValueSchema.nullable(),
+  onboardingScore: z.number().int().min(0).max(100).nullable(),
   // omitted: id: z.number().int(),
   // omitted: publicId: z.uuid(),
   progress: z.number().int().min(0).max(100),
-  message: z.string().nullable(),
+  resultJson: JsonValueSchema.nullable(),
   score: z.number().int().min(0).max(100).nullable(),
   securityScore: z.number().int().min(0).max(100).nullable(),
-  complexityScore: z.number().int().min(0).max(100).nullable(),
+  status: StatusSchema,
   techDebtScore: z.number().int().min(0).max(100).nullable(),
-  onboardingScore: z.number().int().min(0).max(100).nullable(),
-  metricsJson: JsonValueSchema.nullable(),
-  resultJson: JsonValueSchema.nullable(),
-  commitSha: z.string().nullable(),
-  jobId: z.string().nullable(),
-  logs: z.string().nullable(),
-  error: z.string().nullable(),
-  createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   // omitted: repoId: z.number().int(),
 });
@@ -916,16 +916,16 @@ export type Analysis = z.infer<typeof AnalysisSchema>;
 /////////////////////////////////////////
 
 export const DocumentSchema = z.object({
+  // omitted: repoId: z.number().int(),
+  analysisId: z.number().int().nullable(),
+  content: z.string().min(1, { message: "Content cannot be empty" }),
+  createdAt: z.coerce.date(),
+  path: z.string().nullable(),
   type: DocTypeSchema,
+  updatedAt: z.coerce.date(),
   // omitted: id: z.number().int(),
   // omitted: publicId: z.uuid(),
   version: z.string(),
-  content: z.string().min(1, { message: "Content cannot be empty" }),
-  path: z.string().nullable(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-  // omitted: repoId: z.number().int(),
-  analysisId: z.number().int().nullable(),
 });
 
 export type Document = z.infer<typeof DocumentSchema>;
@@ -935,20 +935,20 @@ export type Document = z.infer<typeof DocumentSchema>;
 /////////////////////////////////////////
 
 export const PullRequestAnalysisSchema = z.object({
-  status: PRAnalysisStatusSchema,
+  baseSha: z.string(),
+  changedFilesJson: JsonValueSchema.nullable(),
+  createdAt: z.coerce.date(),
+  error: z.string().nullable(),
+  findingsJson: JsonValueSchema.nullable(),
+  headSha: z.string(),
+  jobId: z.string().nullable(),
+  owner: z.string(),
   // omitted: id: z.number().int(),
   // omitted: publicId: z.uuid(),
   prNumber: z.number().int(),
-  owner: z.string(),
   repoName: z.string(),
-  headSha: z.string(),
-  baseSha: z.string(),
   riskScore: z.number().int().min(0).max(10).nullable(),
-  findingsJson: JsonValueSchema.nullable(),
-  changedFilesJson: JsonValueSchema.nullable(),
-  jobId: z.string().nullable(),
-  error: z.string().nullable(),
-  createdAt: z.coerce.date(),
+  status: PRAnalysisStatusSchema,
   updatedAt: z.coerce.date(),
   // omitted: repoId: z.number().int(),
 });
@@ -960,15 +960,15 @@ export type PullRequestAnalysis = z.infer<typeof PullRequestAnalysisSchema>;
 /////////////////////////////////////////
 
 export const PullRequestAnalysisConfigSchema = z.object({
+  ciSkip: z.boolean(),
   commentStyle: PRCommentStyleSchema,
-  focusAreas: PRFocusAreaSchema.array(),
+  createdAt: z.coerce.date(),
   // omitted: id: z.number().int(),
   // omitted: publicId: z.uuid(),
   enabled: z.boolean(),
-  ciSkip: z.boolean(),
-  tokenBudget: z.number().int(),
   excludePatterns: z.string().array(),
-  createdAt: z.coerce.date(),
+  focusAreas: PRFocusAreaSchema.array(),
+  tokenBudget: z.number().int(),
   updatedAt: z.coerce.date(),
   // omitted: repoId: z.number().int(),
 });
@@ -980,15 +980,15 @@ export type PullRequestAnalysisConfig = z.infer<typeof PullRequestAnalysisConfig
 /////////////////////////////////////////
 
 export const PullRequestCommentSchema = z.object({
+  body: z.string().min(1, { message: "Comment body cannot be empty" }),
+  createdAt: z.coerce.date(),
   // omitted: id: z.number().int(),
   // omitted: publicId: z.uuid(),
   filePath: z.string(),
-  line: z.number().int(),
-  riskLevel: z.number().int().min(0).max(10),
-  body: z.string().min(1, { message: "Comment body cannot be empty" }),
   findingType: z.string(),
   githubCommentId: z.bigint().nullable(),
-  createdAt: z.coerce.date(),
+  line: z.number().int(),
+  riskLevel: z.number().int().min(0).max(10),
   updatedAt: z.coerce.date(),
   // omitted: analysisId: z.number().int(),
 });
@@ -1000,18 +1000,18 @@ export type PullRequestComment = z.infer<typeof PullRequestCommentSchema>;
 /////////////////////////////////////////
 
 export const GeneratedFixSchema = z.object({
+  branch: z.string().min(1),
+  createdAt: z.coerce.date(),
+  createdByUser: z.boolean(),
+  description: z.string().nullable(),
+  estimatedImpact: z.number().int().min(0).max(100).nullable(),
+  githubPrNumber: z.number().int().nullable(),
+  githubPrUrl: z.string().nullable(),
   status: FixStatusSchema,
   // omitted: id: z.number().int(),
   // omitted: publicId: z.uuid(),
   title: z.string(),
-  description: z.string().nullable(),
-  branch: z.string().min(1),
-  estimatedImpact: z.number().int().min(0).max(100).nullable(),
-  githubPrUrl: z.string().nullable(),
-  githubPrNumber: z.number().int().nullable(),
-  createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-  createdByUser: z.boolean(),
   // omitted: repoId: z.number().int(),
   // omitted: prAnalysisId: z.number().int().nullable(),
 });
@@ -1023,7 +1023,13 @@ export type GeneratedFix = z.infer<typeof GeneratedFixSchema>;
 /////////////////////////////////////////
 
 export const NotificationSchema = z.object({
-  type: NotifyTypeSchema,
+  body: z
+    .string()
+    .trim()
+    .min(1, { message: "The text of the notification is mandatory" })
+    .max(5000, { message: "The text of the notification cannot exceed 5000 characters" }),
+  createdAt: z.coerce.date(),
+  isRead: z.boolean(),
   // omitted: id: z.number().int(),
   // omitted: publicId: z.uuid(),
   title: z
@@ -1031,13 +1037,7 @@ export const NotificationSchema = z.object({
     .trim()
     .min(1, { message: "The title cannot be empty" })
     .max(300, { message: "The title cannot exceed 300 characters" }),
-  body: z
-    .string()
-    .trim()
-    .min(1, { message: "The text of the notification is mandatory" })
-    .max(5000, { message: "The text of the notification cannot exceed 5000 characters" }),
-  isRead: z.boolean(),
-  createdAt: z.coerce.date(),
+  type: NotifyTypeSchema,
   updatedAt: z.coerce.date(),
   // omitted: userId: z.number().int(),
   // omitted: repoId: z.number().int().nullable(),
@@ -1050,22 +1050,22 @@ export type Notification = z.infer<typeof NotificationSchema>;
 /////////////////////////////////////////
 
 export const ApiKeySchema = z.object({
+  createdAt: z.coerce.date(),
+  description: z
+    .string()
+    .trim()
+    .max(1000, { message: "The description must be less than 1000 characters" })
+    .nullable(),
   id: z.uuid(),
-  prefix: z.string(),
+  lastUsed: z.coerce.date().nullable(),
   // omitted: hashedKey: z.string(),
   name: z
     .string()
     .trim()
     .min(1, { message: "The name must be between 1 and 50 characters long" })
     .max(50),
-  description: z
-    .string()
-    .trim()
-    .max(1000, { message: "The description must be less than 1000 characters" })
-    .nullable(),
-  lastUsed: z.coerce.date().nullable(),
+  prefix: z.string(),
   revoked: z.boolean(),
-  createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   // omitted: userId: z.number().int(),
 });
@@ -1077,13 +1077,13 @@ export type ApiKey = z.infer<typeof ApiKeySchema>;
 /////////////////////////////////////////
 
 export const WebhookDeliverySchema = z.object({
-  status: WebhookStatusSchema,
+  createdAt: z.coerce.date(),
+  deliveryId: z.string(),
+  error: z.string().nullable(),
+  event: z.string().nullable(),
   id: z.uuid(),
   provider: z.string(),
-  deliveryId: z.string(),
-  event: z.string().nullable(),
-  error: z.string().nullable(),
-  createdAt: z.coerce.date(),
+  status: WebhookStatusSchema,
   updatedAt: z.coerce.date(),
 });
 
@@ -1094,15 +1094,15 @@ export type WebhookDelivery = z.infer<typeof WebhookDeliverySchema>;
 /////////////////////////////////////////
 
 export const AuditLogSchema = z.object({
+  createdAt: z.coerce.date(),
   id: z.uuid(),
-  requestId: z.string().nullable(),
+  // omitted: userId: z.number().int().nullable(),
+  ip: z.string().nullable(),
   model: z.string(),
   operation: z.string(),
   payload: JsonValueSchema,
-  // omitted: userId: z.number().int().nullable(),
-  ip: z.string().nullable(),
+  requestId: z.string().nullable(),
   userAgent: z.string().nullable(),
-  createdAt: z.coerce.date(),
 });
 
 export type AuditLog = z.infer<typeof AuditLogSchema>;
@@ -1112,12 +1112,12 @@ export type AuditLog = z.infer<typeof AuditLogSchema>;
 /////////////////////////////////////////
 
 export const ChatSessionSchema = z.object({
+  createdAt: z.coerce.date(),
   id: z.uuid(),
-  userId: z.number().int(),
   repoId: z.number().int().nullable(),
   title: z.string(),
-  createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
+  userId: z.number().int(),
 });
 
 export type ChatSession = z.infer<typeof ChatSessionSchema>;
@@ -1127,14 +1127,14 @@ export type ChatSession = z.infer<typeof ChatSessionSchema>;
 /////////////////////////////////////////
 
 export const ChatMessageSchema = z.object({
-  role: ChatRoleSchema,
+  createdAt: z.coerce.date(),
   id: z.uuid(),
-  sessionId: z.string(),
   /**
    * @encrypted
    */
   parts: z.string(),
-  createdAt: z.coerce.date(),
+  role: ChatRoleSchema,
+  sessionId: z.string(),
 });
 
 export type ChatMessage = z.infer<typeof ChatMessageSchema>;

@@ -11,7 +11,9 @@ export type LanguageAdapter = {
 };
 
 export function matchesExtension(adapter: LanguageAdapter, filePath: string) {
-  if (adapter.supportedExtensions.length === 0) return true;
+  if (adapter.supportedExtensions.length === 0) {
+    return true;
+  }
   const ext = extname(filePath).toLowerCase();
   return adapter.supportedExtensions.includes(ext);
 }

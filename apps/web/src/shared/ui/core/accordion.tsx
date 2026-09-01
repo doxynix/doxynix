@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, type ComponentPropsWithoutRef, type ComponentRef } from "react";
+import { type ComponentPropsWithoutRef, type ComponentRef, forwardRef } from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { ChevronDown } from "lucide-react";
 
@@ -12,7 +12,7 @@ const AccordionItem = forwardRef<
   ComponentRef<typeof AccordionPrimitive.Item>,
   ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
 >(({ className, ...props }, ref) => (
-  <AccordionPrimitive.Item ref={ref} className={cn("border-b", className)} {...props} />
+  <AccordionPrimitive.Item className={cn("border-b", className)} ref={ref} {...props} />
 ));
 AccordionItem.displayName = "AccordionItem";
 
@@ -22,16 +22,16 @@ const AccordionTrigger = forwardRef<
 >(({ children, className, ...props }, ref) => (
   <AccordionPrimitive.Header className="flex">
     <AccordionPrimitive.Trigger
-      ref={ref}
       className={cn(
-        "transition-standard flex flex-1 items-center justify-between py-4 text-left text-sm font-medium hover:underline [&[data-state=open]>svg]:rotate-180",
-        "focus-visible:ring-ring/50 rounded-md focus-visible:ring-2 focus-visible:outline-hidden",
+        "flex flex-1 items-center justify-between py-4 text-left font-medium text-sm transition-standard hover:underline [&[data-state=open]>svg]:rotate-180",
+        "rounded-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50",
         className,
       )}
+      ref={ref}
       {...props}
     >
       {children}
-      <ChevronDown className="transition-standard text-muted-foreground shrink-0 transition-transform" />
+      <ChevronDown className="shrink-0 text-muted-foreground transition-standard transition-transform" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ));
@@ -42,8 +42,8 @@ const AccordionContent = forwardRef<
   ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
 >(({ children, className, ...props }, ref) => (
   <AccordionPrimitive.Content
+    className="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
     ref={ref}
-    className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm"
     {...props}
   >
     <div className={cn("pt-0 pb-4", className)}>{children}</div>

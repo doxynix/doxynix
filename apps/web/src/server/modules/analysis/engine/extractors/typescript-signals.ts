@@ -37,8 +37,12 @@ const INCREASES_NESTING_KINDS = new Set([
 ]);
 
 function getScriptKind(filePath: string): ts.ScriptKind {
-  if (filePath.endsWith(".tsx")) return ts.ScriptKind.TSX;
-  if (filePath.endsWith(".jsx")) return ts.ScriptKind.JSX;
+  if (filePath.endsWith(".tsx")) {
+    return ts.ScriptKind.TSX;
+  }
+  if (filePath.endsWith(".jsx")) {
+    return ts.ScriptKind.JSX;
+  }
   if (filePath.endsWith(".js") || filePath.endsWith(".mjs") || filePath.endsWith(".cjs")) {
     return ts.ScriptKind.JS;
   }
@@ -71,7 +75,9 @@ function pushSymbol(
   fallbackName?: string,
 ) {
   const name = fallbackName ?? nodeName(node);
-  if (name == null || name.length === 0) return;
+  if (name == null || name.length === 0) {
+    return;
+  }
 
   symbols.push({
     confidence: exported ? CONFIDENCE_LEVELS.tsCompiler : 75,
@@ -96,7 +102,9 @@ function collectCallRoute(
   routes: RouteRef[],
   frameworkHints: FrameworkFact[],
 ) {
-  if (!ts.isPropertyAccessExpression(node.expression)) return;
+  if (!ts.isPropertyAccessExpression(node.expression)) {
+    return;
+  }
 
   const methodName = node.expression.name.text;
   const normalizedMethod = methodName.toLowerCase();
@@ -252,7 +260,9 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
     /\bcreateTRPCRouter\b/,
     /\brouter\.(get|post|put|patch|delete)\b/gi,
   ].forEach((pattern) => {
-    if (pattern.test(file.content)) frameworkTokens.add(pattern.source);
+    if (pattern.test(file.content)) {
+      frameworkTokens.add(pattern.source);
+    }
   });
 
   const frameworkHints = collectFrameworkFactsFromTokens(

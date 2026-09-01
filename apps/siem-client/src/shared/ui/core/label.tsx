@@ -1,5 +1,6 @@
-import * as LabelPrimitives from "@radix-ui/react-label";
 import { type ComponentPropsWithoutRef, type ComponentRef, forwardRef } from "react";
+import * as LabelPrimitives from "@radix-ui/react-label";
+
 import { cx } from "../../lib/utils";
 
 interface LabelProps extends ComponentPropsWithoutRef<typeof LabelPrimitives.Root> {
@@ -9,7 +10,7 @@ interface LabelProps extends ComponentPropsWithoutRef<typeof LabelPrimitives.Roo
 const Label = forwardRef<ComponentRef<typeof LabelPrimitives.Root>, LabelProps>(
   ({ className, disabled, ...props }, forwardedRef) => (
     <LabelPrimitives.Root
-      ref={forwardedRef}
+      aria-disabled={disabled}
       className={cx(
         // base
         "text-sm leading-none",
@@ -21,7 +22,7 @@ const Label = forwardRef<ComponentRef<typeof LabelPrimitives.Root>, LabelProps>(
         },
         className,
       )}
-      aria-disabled={disabled}
+      ref={forwardedRef}
       tremor-id="tremor-raw"
       {...props}
     />

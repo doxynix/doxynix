@@ -368,7 +368,7 @@ process.env.DATABASE_URL       // Set by deployment platform
 bun dev                  # Start dev server + Trigger.dev
 
 # Code Quality
-bun lint:fix            # Auto-fix ESLint
+bun lint:fix            # Auto-fix Oxlint
 bun format              # Prettier format
 bun typecheck           # TypeScript check
 bun secretlint          # Check for secrets

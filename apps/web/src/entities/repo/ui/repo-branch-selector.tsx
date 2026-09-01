@@ -37,13 +37,13 @@ export function RepoBranchSelector({
   const { setOpen } = useRepoBranchActions();
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger asChild>
         <AppButton
-          variant="outline"
           aria-expanded={open}
           aria-haspopup="listbox"
           className="w-full justify-between font-normal"
+          variant="outline"
         >
           <div className="flex items-center gap-2 truncate">
             <GitBranch className="size-3" />
@@ -63,7 +63,7 @@ export function RepoBranchSelector({
               {isLoading && (
                 <div className="flex flex-col gap-2 p-2">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" key={i} />
                   ))}
                 </div>
               )}
@@ -73,11 +73,11 @@ export function RepoBranchSelector({
                 branches?.map((b) => (
                   <CommandItem
                     key={b}
-                    value={b}
                     onSelect={(currentValue) => {
                       onSelect(currentValue);
                       setOpen(false);
                     }}
+                    value={b}
                   >
                     <Check className={cn(selectedBranch === b ? "opacity-100" : "opacity-0")} />
                     {b}

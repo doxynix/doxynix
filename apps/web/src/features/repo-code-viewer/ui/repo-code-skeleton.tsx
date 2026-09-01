@@ -7,11 +7,11 @@ export function CodeSkeleton() {
   return (
     <div className="flex h-full w-full flex-col gap-3 overflow-hidden p-4 font-mono text-[13px]">
       {Array.from({ length: 32 }).map((_, i) => {
-        const width = widths[i % widths.length]!;
-        const indent = indents[i % indents.length]!;
+        const width = widths[i % widths.length] ?? 50;
+        const indent = indents[i % indents.length] ?? 0;
 
         return (
-          <div key={i} className="flex items-center gap-4">
+          <div className="flex items-center gap-4" key={i}>
             <div className="flex flex-1" style={{ paddingLeft: `${indent * 4}px` }}>
               <Skeleton
                 className="h-3 rounded-sm"

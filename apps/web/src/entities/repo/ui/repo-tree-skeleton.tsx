@@ -17,8 +17,8 @@ export function RepoTreeSkeleton({ rows = 20, variant = "tree" }: Readonly<Props
     <div className="flex h-145 w-full flex-col gap-2 p-1">
       {displayLevels.map((level, i) => (
         <div
-          key={i}
           className="flex items-center gap-3 py-1"
+          key={i}
           style={{ paddingLeft: `${level * 24}px` }}
         >
           <Skeleton className={ICON_STYLE} />

@@ -1,5 +1,5 @@
-import type { auth } from "@server/core/auth/auth";
-import type { rolesEnum } from "@server/core/db/schema";
+import type { auth } from "@/core/auth/auth";
+import type { rolesEnum } from "@/core/db/schema";
 
 export type UserRole = (typeof rolesEnum.enumValues)[number];
 

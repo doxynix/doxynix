@@ -50,7 +50,9 @@ export function DashboardDatePeriod() {
   const [urlState, setUrlState] = useQueryStates(dashboardParsers);
 
   const getRangeFromUrl = () => {
-    if (urlState.from && urlState.to) return { from: urlState.from, to: urlState.to };
+    if (urlState.from && urlState.to) {
+      return { from: urlState.from, to: urlState.to };
+    }
     return DATE_PERIODS.find((p) => p.period === urlState.period)?.getValue();
   };
 
@@ -86,7 +88,7 @@ export function DashboardDatePeriod() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <AppButton variant="outline" className="bg-background">
+        <AppButton className="bg-background" variant="outline">
           <Clock />
           {activePeriod ? (
             activePeriod.label
@@ -102,19 +104,19 @@ export function DashboardDatePeriod() {
       <PopoverContent align="end" className="w-auto p-0">
         <div className="flex">
           <div className="flex w-40 flex-col p-2">
-            <p className="text-muted-foreground px-2 py-1.5 text-center text-xs">Quick Range</p>
+            <p className="px-2 py-1.5 text-center text-muted-foreground text-xs">Quick Range</p>
             <div className="flex flex-col gap-1">
               {DATE_PERIODS.map((p) => (
                 <AppButton
-                  key={p.period}
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handlePeriodClick(p)}
                   className={cn(
                     "flex w-full items-center justify-between",
                     urlState.period === p.period &&
                       "bg-primary text-primary-foreground hover:bg-primary/90",
                   )}
+                  key={p.period}
+                  onClick={() => handlePeriodClick(p)}
+                  size="sm"
+                  variant="ghost"
                 >
                   {p.label}
                   {urlState.period === p.period && <Check />}
@@ -139,13 +141,13 @@ export function DashboardDatePeriod() {
               </div>
             </div>
             <Calendar
-              key={urlState.period}
+              className="p-3"
               defaultMonth={tempDate?.from}
+              key={urlState.period}
               mode="range"
               numberOfMonths={2}
-              selected={tempDate}
               onSelect={handleCustomSelect}
-              className="p-3"
+              selected={tempDate}
             />
           </div>
         </div>

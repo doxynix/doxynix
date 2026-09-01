@@ -1,6 +1,8 @@
-import { zValidator } from "@hono/zod-validator";
-import { requireAuth, requireRole } from "@server/core/middleware/auth.middleware";
 import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+
+import { requireAuth, requireRole } from "@/core/middleware/auth.middleware";
+
 import { getAuditLogsQuerySchema } from "./audit.schema";
 import { getAuditLogsList } from "./audit.service";
 

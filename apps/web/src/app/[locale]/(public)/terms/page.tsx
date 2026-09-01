@@ -22,17 +22,17 @@ export default async function TermsPage() {
   const tsRich = (key: string) => t.rich(key, richStyles);
 
   return (
-    <div className="animate-fade-in container mx-auto max-w-3xl px-4 py-12 pt-24">
+    <div className="container mx-auto max-w-3xl animate-fade-in px-4 py-12 pt-24">
       <BackOrLinkButton
-        showIcon
-        label={tCommon("back")}
-        variant="link"
         className="mb-4 cursor-pointer"
+        label={tCommon("back")}
+        showIcon
+        variant="link"
       />
 
-      <div className="border-b-foreground mb-12 border-b py-6">
-        <h1 className="text-foreground mb-4 text-4xl font-bold md:text-5xl">{t("title")}</h1>
-        <div className="text-text-secondary flex items-center gap-2 text-sm">
+      <div className="mb-12 border-b border-b-foreground py-6">
+        <h1 className="mb-4 font-bold text-4xl text-foreground md:text-5xl">{t("title")}</h1>
+        <div className="flex items-center gap-2 text-sm text-text-secondary">
           <span>{t("last_updated")}</span>
         </div>
       </div>
@@ -56,7 +56,7 @@ export default async function TermsPage() {
 
         <section>
           <h2 className={SECTION_TITLE}>{t("section_property_title")}</h2>
-          <div className="bg-muted rounded-xl border p-4">
+          <div className="rounded-xl border bg-muted p-4">
             <p className="mb-2">{tsRich("section_property_your_data")}</p>
             <p>{tsRich("section_property_our_service")}</p>
           </div>
@@ -86,8 +86,8 @@ export default async function TermsPage() {
           <p>{t("section_contact_content")}</p>
           <div className="mt-4">
             <a
-              href="mailto:legal@doxynix.space?subject=Terms of Service Inquiry"
               className="hover:no-underline"
+              href="mailto:legal@doxynix.space?subject=Terms of Service Inquiry"
             >
               legal@doxynix.space
             </a>

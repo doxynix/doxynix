@@ -66,14 +66,16 @@ export function TimeAgo({
 
   const content = (
     <span
+      className={cn("text-muted-foreground transition-colors hover:text-foreground", className)}
       suppressHydrationWarning
-      className={cn("text-muted-foreground hover:text-foreground transition-colors", className)}
     >
       {relativeTime}
     </span>
   );
 
-  if (!withTooltip) return content;
+  if (!withTooltip) {
+    return content;
+  }
 
   return <AppTooltip content={fullDate()}>{content}</AppTooltip>;
 }

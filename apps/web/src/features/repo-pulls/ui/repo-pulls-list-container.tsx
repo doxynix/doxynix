@@ -18,7 +18,9 @@ export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>)
     repoId,
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (pulls == null || pulls.length === 0) {
     return (

@@ -1,25 +1,27 @@
 import type { PaginatedResponse } from "@doxynix/shared";
-import { db } from "@server/core/db/db";
-import { executePaginatedQuery } from "@server/core/db/pagination";
-import { type RuleSelect, rules } from "@server/core/db/schema";
-import { combineConditions, eqIf, searchIf } from "@server/core/db/utils";
 import { desc, eq } from "drizzle-orm";
 import postgres from "postgres";
+
+import { db } from "@/core/db/db";
+import { executePaginatedQuery } from "@/core/db/pagination";
+import { type RuleSelect, rules } from "@/core/db/schema";
+import { combineConditions, eqIf, searchIf } from "@/core/db/utils";
+
 import type { CreateRuleInput, GetRulesQuery, UpdateRuleInput } from "./rules.schema";
 
 export async function getRulesList(query: GetRulesQuery): Promise<PaginatedResponse<RuleSelect>> {
   const { page, limit, severity, isActive, search } = query;
 
   return executePaginatedQuery({
+    limit,
+    orderBy: [desc(rules.createdAt), desc(rules.id)],
+    page,
     table: rules,
     whereClause: combineConditions(
       eqIf(rules.severity, severity),
       eqIf(rules.isActive, isActive),
       searchIf([rules.name, rules.description], search),
     ),
-    orderBy: [desc(rules.createdAt), desc(rules.id)],
-    page,
-    limit,
   });
 }
 
@@ -42,13 +44,13 @@ export async function updateRule(id: string, data: UpdateRuleInput): Promise<Upd
     const [updated] = await db.update(rules).set(data).where(eq(rules.id, id)).returning();
 
     if (updated == null) {
-      return { success: false, reason: "not_found" };
+      return { reason: "not_found", success: false };
     }
 
-    return { success: true, data: updated };
+    return { data: updated, success: true };
   } catch (error) {
     if (error instanceof postgres.PostgresError && error.code === "23505") {
-      return { success: false, reason: "conflict" };
+      return { reason: "conflict", success: false };
     }
     throw error;
   }

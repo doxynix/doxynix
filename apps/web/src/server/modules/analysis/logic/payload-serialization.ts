@@ -27,13 +27,17 @@ function compactPromptPayload(value: unknown): unknown {
     return compacted.length > 0 ? compacted : undefined;
   }
 
-  if (!isObject(value)) return value;
+  if (!isObject(value)) {
+    return value;
+  }
 
   const graphReliability = isGraphReliabilityLike(value);
   const cleaned: Record<string, unknown> = {};
 
   for (const [key, raw] of Object.entries(value)) {
-    if (graphReliability && key === "edges") continue;
+    if (graphReliability && key === "edges") {
+      continue;
+    }
 
     const next =
       graphReliability && key === "unresolvedSamples" && Array.isArray(raw)
@@ -90,7 +94,7 @@ function buildReadmePayload(documentationInput: DocumentationInputSnapshot) {
 }
 
 export function serializeAllowedPaths(paths: string[]): string {
-  return JSON.stringify(paths.slice().sort((left, right) => left.localeCompare(right)));
+  return JSON.stringify(paths.toSorted((left, right) => left.localeCompare(right)));
 }
 
 export function buildWriterSectionPayloads(

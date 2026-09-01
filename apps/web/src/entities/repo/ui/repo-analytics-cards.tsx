@@ -36,7 +36,7 @@ export function ArchitectureAndDataFlowCard({
       <CardContent className="flex flex-col gap-4">
         {flows.map((flow) => (
           <div key={flow.label}>
-            <p className="mb-2 text-sm font-medium">{flow.label}</p>
+            <p className="mb-2 font-medium text-sm">{flow.label}</p>
             <p className="text-muted-foreground text-sm leading-relaxed">{flow.value}</p>
           </div>
         ))}
@@ -56,9 +56,9 @@ export function RisksCard({ risks }: Readonly<{ risks: NonNullable<RepoMetricsIt
       <CardContent className="flex flex-col gap-3">
         {risks.topRisks.length > 0 ? (
           risks.topRisks.map((risk) => (
-            <div key={risk.id} className="rounded-lg border p-3">
+            <div className="rounded-lg border p-3" key={risk.id}>
               <div className="mb-1 flex items-center justify-between gap-2">
-                <p className="text-sm font-medium">{risk.title}</p>
+                <p className="font-medium text-sm">{risk.title}</p>
                 <AppBadge variant="outline">{risk.severity}</AppBadge>
               </div>
               <p className="text-muted-foreground text-xs">{risk.summary}</p>
@@ -147,8 +147,8 @@ export function ReferenceAndRoutesCard({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {sections.map((sec) => (
-          <div key={sec.title} className="text-xs">
-            <p className="text-muted-foreground mb-2 uppercase">{sec.title}</p>
+          <div className="text-xs" key={sec.title}>
+            <p className="mb-2 text-muted-foreground uppercase">{sec.title}</p>
             {sec.content}
           </div>
         ))}
@@ -175,7 +175,7 @@ export function SecurityOverviewCard({
     const parsedLine =
       parsedLineMatch != null ? Number.parseInt(parsedLineMatch[0], 10) : undefined;
 
-    void onTriggerFix(vuln.file, {
+    onTriggerFix(vuln.file, {
       line: parsedLine,
       message: vuln.description,
       suggestion: vuln.suggestion,
@@ -186,13 +186,13 @@ export function SecurityOverviewCard({
   return (
     <Card className="border-destructive/20 bg-background shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-        <CardTitle className="flex items-center gap-2 text-xl font-bold tracking-tight">
-          <ShieldAlert className="text-destructive size-5 animate-pulse" /> Security Overview
+        <CardTitle className="flex items-center gap-2 font-bold text-xl tracking-tight">
+          <ShieldAlert className="size-5 animate-pulse text-destructive" /> Security Overview
         </CardTitle>
         <div className="flex flex-col items-end">
-          <span className="text-destructive text-3xl font-black tracking-tighter">
+          <span className="font-black text-3xl text-destructive tracking-tighter">
             {security.score}
-            <span className="text-muted-foreground text-sm font-normal">/10</span>
+            <span className="font-normal text-muted-foreground text-sm">/10</span>
           </span>
         </div>
       </CardHeader>
@@ -200,32 +200,32 @@ export function SecurityOverviewCard({
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <AppBadge
+            className="font-bold text-[10px] uppercase tracking-wider"
             variant={security.securityScanStatus === "ok" ? "default" : "secondary"}
-            className="text-[10px] font-bold tracking-wider uppercase"
           >
             Scan: {security.securityScanStatus}
           </AppBadge>
           <AppBadge
+            className="font-bold text-[10px]"
             variant={security.vulnerabilities.length > 0 ? "destructive" : "outline"}
-            className="text-[10px] font-bold"
           >
             {security.vulnerabilities.length} vulnerabilities
           </AppBadge>
-          <AppBadge variant="outline" className="text-muted-foreground text-[10px] font-medium">
+          <AppBadge className="font-medium text-[10px] text-muted-foreground" variant="outline">
             {security.findings.length} raw findings
           </AppBadge>
         </div>
 
         {security.risks.length > 0 && (
-          <div className="border-border flex flex-col gap-2 border-t pt-3">
-            <span className="text-muted-foreground text-[11px] font-bold tracking-wider uppercase">
+          <div className="flex flex-col gap-2 border-border border-t pt-3">
+            <span className="font-bold text-[11px] text-muted-foreground uppercase tracking-wider">
               Identified Attack Vectors
             </span>
             <div className="flex flex-col gap-1.5">
               {security.risks.map((item) => (
                 <div
+                  className="flex items-start gap-2 text-foreground/90 text-xs leading-relaxed"
                   key={item}
-                  className="text-foreground/90 flex items-start gap-2 text-xs leading-relaxed"
                 >
                   <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
                   <span>{item}</span>
@@ -236,8 +236,8 @@ export function SecurityOverviewCard({
         )}
 
         {security.vulnerabilities.length > 0 ? (
-          <div className="border-border flex flex-col gap-2 border-t pt-3">
-            <span className="text-muted-foreground text-[11px] font-bold tracking-wider uppercase">
+          <div className="flex flex-col gap-2 border-border border-t pt-3">
+            <span className="font-bold text-[11px] text-muted-foreground uppercase tracking-wider">
               Critical Vulnerabilities
             </span>
             <div className="flex flex-col gap-2">
@@ -246,57 +246,57 @@ export function SecurityOverviewCard({
 
                 return (
                   <Collapsible
+                    className="group rounded-lg border border-border bg-muted/30 p-2.5 transition-standard hover:bg-muted/50"
                     key={idx}
-                    className="group border-border bg-muted/30 hover:bg-muted/50 transition-standard rounded-lg border p-2.5"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex flex-col gap-1">
-                        <div className="text-foreground/80 flex items-center gap-1.5 font-mono text-xs font-semibold">
-                          <FileCode className="text-muted-foreground size-3.5" />
+                        <div className="flex items-center gap-1.5 font-mono font-semibold text-foreground/80 text-xs">
+                          <FileCode className="size-3.5 text-muted-foreground" />
                           <span className="max-w-60 truncate md:max-w-xs">[[{vuln.file}]]</span>
                           {vuln.lineHint != null && (
-                            <span className="bg-border text-muted-foreground rounded px-1 text-[10px] font-medium">
+                            <span className="rounded bg-border px-1 font-medium text-[10px] text-muted-foreground">
                               {vuln.lineHint}
                             </span>
                           )}
                         </div>
-                        <p className="text-foreground/90 pl-5 text-xs leading-snug font-medium">
+                        <p className="pl-5 font-medium text-foreground/90 text-xs leading-snug">
                           {vuln.description}
                         </p>
                       </div>
 
                       <AppBadge
+                        className="shrink-0 font-extrabold text-[9px] uppercase"
                         variant={
                           vuln.risk === "CRITICAL" || vuln.risk === "HIGH"
                             ? "destructive"
                             : "secondary"
                         }
-                        className="shrink-0 text-[9px] font-extrabold uppercase"
                       >
                         {vuln.risk}
                       </AppBadge>
                     </div>
 
-                    <CollapsibleContent className="border-border mt-2.5 flex flex-col gap-1.5 border-t pt-2 pl-5">
-                      <div className="text-destructive flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase">
+                    <CollapsibleContent className="mt-2.5 flex flex-col gap-1.5 border-border border-t pt-2 pl-5">
+                      <div className="flex items-center gap-1 font-bold text-[10px] text-destructive uppercase tracking-wider">
                         <Terminal className="size-3" /> Recommended Remediation:
                       </div>
-                      <p className="text-muted-foreground bg-background/50 border-border rounded-md border p-2 font-mono text-[11px] leading-normal whitespace-pre-wrap">
+                      <p className="whitespace-pre-wrap rounded-md border border-border bg-background/50 p-2 font-mono text-[11px] text-muted-foreground leading-normal">
                         {vuln.suggestion}
                       </p>
                       <LoadingButton
+                        className="mt-3 w-full gap-2 font-bold uppercase"
                         disabled={runningFixId != null}
                         isLoading={isCurrentlyFixing}
+                        onClick={() => handleRunFix(vuln)}
                         size="sm"
                         variant="destructive"
-                        onClick={() => handleRunFix(vuln)}
-                        className="mt-3 w-full gap-2 font-bold uppercase"
                       >
                         <Sparkles /> Auto Patch with AI
                       </LoadingButton>
                     </CollapsibleContent>
 
-                    <CollapsibleTrigger className="text-muted-foreground hover:text-foreground mt-1.5 flex w-full items-center justify-center text-[10px] font-semibold transition-colors">
+                    <CollapsibleTrigger className="mt-1.5 flex w-full items-center justify-center font-semibold text-[10px] text-muted-foreground transition-colors hover:text-foreground">
                       <span className="group-data-[state=open]:hidden">
                         Show Remediation Plan ↓
                       </span>
@@ -310,7 +310,7 @@ export function SecurityOverviewCard({
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs font-medium text-emerald-500">
+          <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 font-medium text-emerald-500 text-xs">
             <CheckCircle2 className="size-4 shrink-0" />
             <span>
               No critical code vulnerabilities or exposed secrets detected in this inspection cycle.

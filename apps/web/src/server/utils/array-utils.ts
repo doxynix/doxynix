@@ -18,7 +18,7 @@ export function uniquePaths(
 ): string[] {
   const items = Array.from(paths);
 
-  const cleaned = compact(items) as string[];
+  const cleaned = compact(items);
 
   const result = uniq(cleaned);
 

@@ -1,4 +1,4 @@
-import { PRAnalysisStatus, type FixStatus, type Prisma } from "@prisma/client";
+import { type FixStatus, PRAnalysisStatus, type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { uniq } from "es-toolkit";
 
@@ -199,7 +199,9 @@ export const analysisRepo = {
       where: { repo: { publicId: repoId }, status: "DONE" },
     });
 
-    if (analysis == null) return null;
+    if (analysis == null) {
+      return null;
+    }
 
     return {
       analysisId: analysis.publicId,
@@ -223,7 +225,7 @@ export const analysisRepo = {
         },
       },
       where: { publicId: repoId },
-    }) as Promise<null | RepoWithLatestAnalysisAndDocs>;
+    });
   },
 
   async getRepoSnapshot(db: DbClient, repoId: string, aid?: string) {
@@ -232,7 +234,9 @@ export const analysisRepo = {
       where: { publicId: repoId },
     });
 
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
 
     if (aid != null) {
       const targetAnalysis = await db.analysis.findFirst({
@@ -248,7 +252,7 @@ export const analysisRepo = {
         ...repo,
         analyses: [targetAnalysis],
         documents: repo.documents.filter((d) => d.analysis?.publicId === aid),
-      } as RepoWithLatestAnalysisAndDocs;
+      };
     }
 
     if (repo.analyses.length === 0) {
@@ -322,7 +326,9 @@ export const analysisRepo = {
 
   async loadRelatedFixes(db: DbClient, analysisIds: string[]) {
     const uniqueIds = uniq(analysisIds.filter((id) => id.length > 0));
-    if (uniqueIds.length === 0) return [];
+    if (uniqueIds.length === 0) {
+      return [];
+    }
 
     const fixes = await db.generatedFix.findMany({
       orderBy: { createdAt: "desc" },
@@ -351,7 +357,9 @@ export const analysisRepo = {
   },
 
   async loadRelatedPrFindings(db: DbClient, repoId: string, relatedFiles: string[]) {
-    if (relatedFiles.length === 0) return [];
+    if (relatedFiles.length === 0) {
+      return [];
+    }
 
     const comments = await db.pullRequestComment.findMany({
       orderBy: [{ analysis: { createdAt: "desc" } }, { riskLevel: "desc" }],

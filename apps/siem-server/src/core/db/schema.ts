@@ -19,12 +19,6 @@ export const citext = customType<{ data: string }>({
   dataType() {
     return "citext";
   },
-  fromDriver(value: unknown): string {
-    return value as string;
-  },
-  toDriver(value: string): string {
-    return value;
-  },
 });
 
 export const rolesEnum = pgEnum("roles", ["analyst", "admin"]);
@@ -33,28 +27,28 @@ export const channelEnum = pgEnum("notification_channel", ["telegram", "email", 
 export const statusEnum = pgEnum("notification_status", ["pending", "sent", "failed"]);
 
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey().default(sql`uuidv7()`),
+  createdAt: timestamp("created_at").notNull(),
   email: citext("email").unique().notNull(),
   emailVerified: boolean("email_verified").default(false).notNull(),
+  id: uuid("id").primaryKey().default(sql`uuidv7()`),
   name: text("name").notNull(),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
   password: text("password"),
   role: rolesEnum("role").default("analyst").notNull(),
+  twoFactorBackupCodes: text("two_factor_backup_codes"),
   twoFactorEnabled: boolean("two_factor_enabled").default(false).notNull(),
   twoFactorSecret: text("two_factor_secret"),
-  twoFactorBackupCodes: text("two_factor_backup_codes"),
+  updatedAt: timestamp("updated_at").notNull(),
 });
 
 export const incidents = pgTable(
   "incidents",
   {
-    id: uuid("id").primaryKey().default(sql`uuidv7()`),
-    fileName: varchar("file_name", { length: 255 }).notNull(),
-    severity: severityEnum("severity").notNull(),
-    findingsCount: integer("findings_count").default(0).notNull(),
-    score: integer("score").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    fileName: varchar("file_name", { length: 255 }).notNull(),
+    findingsCount: integer("findings_count").default(0).notNull(),
+    id: uuid("id").primaryKey().default(sql`uuidv7()`),
+    score: integer("score").notNull(),
+    severity: severityEnum("severity").notNull(),
   },
   (table) => [
     index("incidents_created_brin_idx").using("brin", table.createdAt),
@@ -70,10 +64,10 @@ export const findings = pgTable(
     incidentId: uuid("incident_id")
       .references(() => incidents.id, { onDelete: "cascade" })
       .notNull(),
+    line: integer("line").notNull(),
+    matchedText: text("matched_text").notNull(),
     ruleName: varchar("rule_name", { length: 100 }).notNull(),
     severity: severityEnum("severity").notNull(),
-    matchedText: text("matched_text").notNull(),
-    line: integer("line").notNull(),
   },
   (table) => [index("findings_incident_id_idx").on(table.incidentId)],
 );
@@ -81,15 +75,15 @@ export const findings = pgTable(
 export const auditLogs = pgTable(
   "audit_logs",
   {
-    id: uuid("id").primaryKey().default(sql`uuidv7()`),
-    actor: varchar("actor", { length: 100 }).notNull(),
     action: varchar("action", { length: 150 }).notNull(),
-    target: varchar("target", { length: 150 }).notNull(),
-    ipAddress: inet("ip_address").notNull(),
+    actor: varchar("actor", { length: 100 }).notNull(),
     country: varchar("country", { length: 10 }).default("UNKNOWN").notNull(),
-    userAgent: text("user_agent"),
-    requestId: varchar("request_id", { length: 100 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: uuid("id").primaryKey().default(sql`uuidv7()`),
+    ipAddress: inet("ip_address").notNull(),
+    requestId: varchar("request_id", { length: 100 }),
+    target: varchar("target", { length: 150 }).notNull(),
+    userAgent: text("user_agent"),
   },
   (table) => [
     index("audit_logs_created_brin_idx").using("brin", table.createdAt),
@@ -102,13 +96,13 @@ export const auditLogs = pgTable(
 export const rules = pgTable(
   "rules",
   {
-    id: uuid("id").primaryKey().default(sql`uuidv7()`),
-    name: citext("name").unique().notNull(),
-    description: text("description").notNull(),
-    severity: severityEnum("severity").notNull(),
-    pattern: text("pattern").notNull(),
-    isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    description: text("description").notNull(),
+    id: uuid("id").primaryKey().default(sql`uuidv7()`),
+    isActive: boolean("is_active").default(true).notNull(),
+    name: citext("name").unique().notNull(),
+    pattern: text("pattern").notNull(),
+    severity: severityEnum("severity").notNull(),
   },
   (table) => [
     index("rules_active_partial_idx").on(table.id).where(sql`${table.isActive} = true`),
@@ -120,24 +114,24 @@ export const rules = pgTable(
 
 export const cronSyncState = pgTable("cron_sync_state", {
   id: uuid("id").primaryKey().default(sql`uuidv7()`),
-  serviceName: citext("service_name").unique().notNull(),
   lastSyncedPosition: varchar("last_synced_position", {
     length: 255,
   }).notNull(),
+  serviceName: citext("service_name").unique().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const notifications = pgTable(
   "notifications",
   {
+    channel: channelEnum("channel").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    errorMessage: text("error_message"),
     id: uuid("id").primaryKey().default(sql`uuidv7()`),
     incidentId: uuid("incident_id")
       .references(() => incidents.id, { onDelete: "cascade" })
       .notNull(),
-    channel: channelEnum("channel").notNull(),
     status: statusEnum("status").default("pending").notNull(),
-    errorMessage: text("error_message"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
     index("notifications_failed_pending_partial_idx")
@@ -148,12 +142,12 @@ export const notifications = pgTable(
 );
 
 export const sessions = pgTable("sessions", {
-  id: uuid("id").primaryKey().default(sql`uuidv7()`),
-  expiresAt: timestamp("expires_at").notNull(),
-  token: text("token").notNull().unique(),
   createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  id: uuid("id").primaryKey().default(sql`uuidv7()`),
   ipAddress: text("ip_address"),
+  token: text("token").notNull().unique(),
+  updatedAt: timestamp("updated_at").notNull(),
   userAgent: text("user_agent"),
   userId: uuid("user_id")
     .notNull()
@@ -161,40 +155,40 @@ export const sessions = pgTable("sessions", {
 });
 
 export const accounts = pgTable("accounts", {
-  id: uuid("id").primaryKey().default(sql`uuidv7()`),
+  accessToken: text("access_token"),
+  accessTokenExpiresAt: timestamp("access_token_expires_at"),
   accountId: text("account_id").notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  id: uuid("id").primaryKey().default(sql`uuidv7()`),
+  idToken: text("id_token"),
+  password: text("password"),
   providerId: text("provider_id").notNull(),
+  refreshToken: text("refresh_token"),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+  scope: text("scope"),
+  updatedAt: timestamp("updated_at").notNull(),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  idToken: text("id_token"),
-  accessTokenExpiresAt: timestamp("access_token_expires_at"),
-  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
-  scope: text("scope"),
-  password: text("password"),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
 });
 
 export const verifications = pgTable("verifications", {
+  createdAt: timestamp("created_at"),
+  expiresAt: timestamp("expires_at").notNull(),
   id: uuid("id").primaryKey().default(sql`uuidv7()`),
   identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),
+  value: text("value").notNull(),
 });
 
 export const twoFactors = pgTable("two_factors", {
+  backupCodes: text("backup_codes").notNull(),
+  enabled: boolean("enabled").notNull(),
   id: uuid("id").primaryKey().default(sql`uuidv7()`),
+  secret: text("secret").notNull(),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  secret: text("secret").notNull(),
-  backupCodes: text("backup_codes").notNull(),
-  enabled: boolean("enabled").notNull(),
 });
 
 export const incidentsRelations = relations(incidents, ({ many }) => ({

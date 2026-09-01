@@ -1,10 +1,10 @@
 /* eslint-disable sonarjs/code-eval */
 "use client";
 
-import { useEffect, useState, type JSX, type SyntheticEvent } from "react";
+import { type JSX, type SyntheticEvent, useEffect, useState } from "react";
 import parse, {
-  domToReact,
   type DOMNode,
+  domToReact,
   type Element,
   type HTMLReactParserOptions,
 } from "html-react-parser";
@@ -18,8 +18,8 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
-import { buildRepoCodeHref } from "@/entities/repo/model/repo-workspace-navigation";
 import type { DocContent } from "@/entities/repo/model/repo.types";
+import { buildRepoCodeHref } from "@/entities/repo/model/repo-workspace-navigation";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { RepoFloatingCard } from "./repo-floating-card";
@@ -67,7 +67,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
   const handleHoverOrFocus = (e: SyntheticEvent) => {
     const target = e.target as HTMLElement;
-    const wikiLink = target.closest("a") as HTMLAnchorElement | null;
+    const wikiLink = target.closest("a");
 
     if (
       wikiLink &&
@@ -231,18 +231,18 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
             result = (
               <Alert
-                variant={alertConfig.variant}
                 className={cn(
                   "not-prose my-6 rounded-xl border py-3.5 pl-11",
                   alertConfig.className,
                 )}
+                variant={alertConfig.variant}
               >
                 <IconComponent className="absolute top-4 left-4" />
-                <AlertTitle className="mb-1 font-sans text-xs font-bold uppercase">
+                <AlertTitle className="mb-1 font-bold font-sans text-xs uppercase">
                   {alertConfig.title}
                 </AlertTitle>
 
-                <AlertDescription className="text-muted-foreground font-sans text-xs [&_a]:inline [&_code]:inline">
+                <AlertDescription className="font-sans text-muted-foreground text-xs [&_a]:inline [&_code]:inline">
                   {remainingContent}
                 </AlertDescription>
               </Alert>
@@ -258,7 +258,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
           if (isInternal) {
             result = (
-              <Link href={href} className={domNode.attribs.class}>
+              <Link className={domNode.attribs.class} href={href}>
                 {domToReact(children, parseOptions)}
               </Link>
             );
@@ -291,7 +291,7 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
               }
             } else {
               result = (
-                <span className="text-destructive border-destructive/20 bg-destructive/5 rounded border px-1.5 py-0.5 font-mono text-[10px] select-none">
+                <span className="select-none rounded border border-destructive/20 bg-destructive/5 px-1.5 py-0.5 font-mono text-[10px] text-destructive">
                   [Blocked Unsafe Link]
                 </span>
               );
@@ -317,11 +317,11 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
                     });
                   }}
                   chart={chartText}
+                  className="max-w-full rounded-xl border bg-muted/20 p-4"
                   onLinkClick={(href, e) => {
                     e.preventDefault();
                     router.push(href);
                   }}
-                  className="bg-muted/20 max-w-full rounded-xl border p-4"
                 />
               </div>
             );
@@ -336,9 +336,9 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
               <div className="group relative">
                 <div className="absolute top-3 right-3 z-10 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   <CopyButton
-                    value={rawCode}
+                    className="bg-background/80 shadow-md hover:bg-background"
                     tooltipText="Copy code"
-                    className="bg-background/80 hover:bg-background shadow-md"
+                    value={rawCode}
                   />
                 </div>
                 <pre {...safeAttribs}>{domToReact(children, parseOptions)}</pre>
@@ -353,13 +353,14 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
   };
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+    <div className="fade-in slide-in-from-bottom-2 animate-in duration-500">
       <article
+        aria-label="Documentation content"
+        className="prose dark:prose-invert wrap-break-word min-w-0 max-w-none prose-pre:bg-transparent prose-pre:p-0"
         onBlur={handleHoverOrBlur}
         onFocus={handleHoverOrFocus}
         onMouseOut={handleHoverOrBlur}
         onMouseOver={handleHoverOrFocus}
-        className="prose dark:prose-invert prose-pre:p-0 prose-pre:bg-transparent max-w-none min-w-0 wrap-break-word"
       >
         {mounted ? (
           parse(data.html, parseOptions)

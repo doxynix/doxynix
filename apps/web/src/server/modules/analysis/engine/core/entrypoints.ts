@@ -20,8 +20,12 @@ export function getLikelyEntrypoints(
   for (const file of files) {
     const path = file.path;
 
-    if (ProjectPolicy.isPrimaryContourExcluded(path)) continue;
-    if (ProjectPolicy.isConfigFile(path)) continue;
+    if (ProjectPolicy.isPrimaryContourExcluded(path)) {
+      continue;
+    }
+    if (ProjectPolicy.isConfigFile(path)) {
+      continue;
+    }
 
     const inbound = inboundByFile.get(path) ?? 0;
     const isPrimary = ProjectPolicy.isPrimaryEntrypoint(path);

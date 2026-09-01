@@ -19,14 +19,14 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
       <h3 className="text-2xl">Project Brain</h3>
       <div className="flex items-center gap-2">
         {workspace.analysisRef?.commitSha != null && (
-          <AppBadge variant="outline" className="gap-1 font-mono text-xs">
+          <AppBadge className="gap-1 font-mono text-xs" variant="outline">
             <GitCommit />
             {workspace.analysisRef.commitSha.slice(0, 7)}
             <CopyButton
-              value={workspace.analysisRef.commitSha}
+              className="opacity-100"
               tooltipSide="bottom"
               tooltipText="Copy SHA"
-              className="opacity-100"
+              value={workspace.analysisRef.commitSha}
             />
           </AppBadge>
         )}
@@ -48,7 +48,7 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
           </div>
           <div className="flex flex-wrap gap-2">
             {workspace.summary.stack.map((path) => (
-              <div key={path} className="text-muted-foreground p-2 text-xs">
+              <div className="p-2 text-muted-foreground text-xs" key={path}>
                 <span className="truncate">{path.split("/").pop()}</span>
               </div>
             ))}
@@ -62,10 +62,10 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
           <div className="gap-2">
             {workspace.navigation.primaryModules.map((path) => (
               <AppButton
-                key={path}
-                variant="ghost"
-                onClick={() => onNavigate(path)}
                 className="p-2 text-xs"
+                key={path}
+                onClick={() => onNavigate(path)}
+                variant="ghost"
               >
                 <FileIcon />
                 <span className="truncate">{path.split("/").pop()}</span>
@@ -76,7 +76,7 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
 
         <div className="flex flex-col gap-3">
           <div className="text-xs">Purpose</div>
-          <div className="text-muted-foreground rounded-xl border p-4 text-xs italic">
+          <div className="rounded-xl border p-4 text-muted-foreground text-xs italic">
             &quot;{workspace.summary.purpose}&quot;
           </div>
         </div>
@@ -88,10 +88,10 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
           <div className="flex flex-wrap gap-2">
             {workspace.navigation.primaryEntrypoints.map((path) => (
               <AppButton
-                key={path}
-                variant="ghost"
-                onClick={() => onNavigate(path)}
                 className="p-2 text-xs"
+                key={path}
+                onClick={() => onNavigate(path)}
+                variant="ghost"
               >
                 <FileIcon />
                 <span className="truncate">{path.split("/").pop()}</span>

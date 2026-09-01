@@ -33,7 +33,9 @@ function clean<T>(obj: T): T {
 }
 
 function parseSeedNumber(value: string | undefined, fallback: number): number {
-  if (value == null || value.trim() === "") return fallback;
+  if (value == null || value.trim() === "") {
+    return fallback;
+  }
 
   const trimmed = value.trim();
   if (!/^\d+$/.test(trimmed)) {
@@ -119,7 +121,7 @@ const TECH_POOL = [
   "Prisma",
 ];
 
-function generateMetricsJson(repoName: string, isBad: boolean) {
+function generateMetricsJson(_repoName: string, isBad: boolean) {
   const techStack = faker.helpers.arrayElements(TECH_POOL, { max: 4, min: 2 });
 
   const hotspotSignals = [

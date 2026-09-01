@@ -18,12 +18,18 @@ function buildGraphPreviewEdges(evidence: RepositoryEvidence, limit = 96): Graph
   const edgeMap = new Map<string, GraphPreviewEdge>();
 
   for (const edge of evidence.dependencyGraph.edges) {
-    if (!edge.resolved || edge.kind !== "internal" || edge.toPath == null) continue;
+    if (!edge.resolved || edge.kind !== "internal" || edge.toPath == null) {
+      continue;
+    }
 
     const fromPath = edge.fromPath;
     const toPath = edge.toPath;
-    if (!ProjectPolicy.isGraphPreviewCandidate(fromPath)) continue;
-    if (!ProjectPolicy.isGraphPreviewCandidate(toPath)) continue;
+    if (!ProjectPolicy.isGraphPreviewCandidate(fromPath)) {
+      continue;
+    }
+    if (!ProjectPolicy.isGraphPreviewCandidate(toPath)) {
+      continue;
+    }
 
     const key = `${fromPath}=>${toPath}`;
     const current = edgeMap.get(key);
@@ -35,7 +41,7 @@ function buildGraphPreviewEdges(evidence: RepositoryEvidence, limit = 96): Graph
   }
 
   return Array.from(edgeMap.values())
-    .toSorted(
+    .sort(
       (left, right) =>
         right.weight - left.weight ||
         left.fromPath.localeCompare(right.fromPath) ||
@@ -52,7 +58,7 @@ function buildStructuralSignals(
     apiSurface: sumBy(evidence.modules, (m) => m.apiSurface),
     configInventory: evidence.configs
       .map((config) => config.path)
-      .toSorted((left, right) => left.localeCompare(right)),
+      .sort((left, right) => left.localeCompare(right)),
     dependencyCycles: evidence.dependencyCycles,
     dependencyHotspots,
     entrypointDetails: evidence.entrypoints,

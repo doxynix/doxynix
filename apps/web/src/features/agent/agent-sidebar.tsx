@@ -21,7 +21,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
     return (
       <>
         {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-6 w-full" />
+          <Skeleton className="h-6 w-full" key={i} />
         ))}
       </>
     );
@@ -36,10 +36,10 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
   );
 
   return (
-    <div className="animate-in fade-in flex h-full flex-col">
-      <div className="bg-card flex h-12 items-center justify-between border-b px-4 py-6">
-        <h3 className="text-muted-foreground text-xs font-bold">History</h3>
-        <AppButton size="icon" variant="ghost" onClick={onNewChat} className="size-6">
+    <div className="fade-in flex h-full animate-in flex-col">
+      <div className="flex h-12 items-center justify-between border-b bg-card px-4 py-6">
+        <h3 className="font-bold text-muted-foreground text-xs">History</h3>
+        <AppButton className="size-6" onClick={onNewChat} size="icon" variant="ghost">
           <Plus />
         </AppButton>
       </div>
@@ -51,12 +51,12 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
 
             return (
               <Collapsible
-                key={repoKey}
-                defaultOpen={hasActiveSession}
                 className="group/folder flex w-full flex-col gap-1"
+                defaultOpen={hasActiveSession}
+                key={repoKey}
               >
                 <CollapsibleTrigger asChild>
-                  <AppButton variant="ghost" className="justify-start text-left text-xs">
+                  <AppButton className="justify-start text-left text-xs" variant="ghost">
                     <div className="flex min-w-0 items-center gap-1">
                       <Folder className="text-muted-foreground" />
                       <span className="truncate">{repoKey}</span>
@@ -68,13 +68,13 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
                 <CollapsibleContent className="ml-4 flex flex-col gap-1 border-l pl-2">
                   {repoSessions.map((session: any) => (
                     <AppButton
-                      key={session.id}
-                      variant="ghost"
-                      onClick={() => setSessionId(session.id)}
                       className={cn(
                         "justify-start gap-1 truncate text-left text-xs",
                         sessionId === session.id ? "bg-accent text-foreground" : "",
                       )}
+                      key={session.id}
+                      onClick={() => setSessionId(session.id)}
+                      variant="ghost"
                     >
                       <MessageSquare className="text-muted-foreground" />
                       <span className="truncate">{session.title}</span>
@@ -90,13 +90,13 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
               <h4 className="mb-1 px-2 text-xs">Global Chats</h4>
               {globalSessions.map((session: any) => (
                 <AppButton
-                  key={session.id}
-                  variant="ghost"
-                  onClick={() => setSessionId(session.id)}
                   className={cn(
                     "justify-start gap-1 text-left text-xs",
                     sessionId === session.id ? "bg-accent text-foreground" : "",
                   )}
+                  key={session.id}
+                  onClick={() => setSessionId(session.id)}
+                  variant="ghost"
                 >
                   <MessageSquare />
                   <span className="truncate">{session.title}</span>
@@ -106,7 +106,7 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
           )}
 
           {sessions.length === 0 && (
-            <p className="text-muted-foreground mt-8 text-center text-xs">No past chats yet</p>
+            <p className="mt-8 text-center text-muted-foreground text-xs">No past chats yet</p>
           )}
         </div>
       </ScrollArea>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, type FC, type RefObject } from "react";
+import { type FC, type RefObject, useEffect, useId, useState } from "react";
 import { motion } from "motion/react";
 
 import { cn } from "@/shared/lib/cn";
@@ -113,12 +113,12 @@ export const AnimatedBeam: FC<AnimatedBeamProps> = ({
 
   return (
     <svg
+      className={cn("pointer-events-none absolute top-0 left-0 transform-gpu stroke-2", className)}
       fill="none"
       height={svgDimensions.height}
       viewBox={`0 0 ${svgDimensions.width} ${svgDimensions.height}`}
       width={svgDimensions.width}
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("pointer-events-none absolute top-0 left-0 transform-gpu stroke-2", className)}
     >
       <path
         d={pathD}
@@ -136,7 +136,6 @@ export const AnimatedBeam: FC<AnimatedBeamProps> = ({
       />
       <defs>
         <motion.linearGradient
-          id={id}
           animate={
             isActive
               ? {
@@ -147,7 +146,9 @@ export const AnimatedBeam: FC<AnimatedBeamProps> = ({
                 }
               : undefined
           }
+          className="transform-gpu"
           gradientUnits="userSpaceOnUse"
+          id={id}
           initial={{
             x1: "0%",
             x2: "0%",
@@ -161,12 +162,11 @@ export const AnimatedBeam: FC<AnimatedBeamProps> = ({
             repeat: Infinity,
             repeatDelay,
           }}
-          className="transform-gpu"
         >
-          <stop stopColor={gradientStartColor} stopOpacity="0"></stop>
-          <stop stopColor={gradientStartColor}></stop>
-          <stop offset="32.5%" stopColor={gradientStopColor}></stop>
-          <stop offset="100%" stopColor={gradientStopColor} stopOpacity="0"></stop>
+          <stop stopColor={gradientStartColor} stopOpacity="0" />
+          <stop stopColor={gradientStartColor} />
+          <stop offset="32.5%" stopColor={gradientStopColor} />
+          <stop offset="100%" stopColor={gradientStopColor} stopOpacity="0" />
         </motion.linearGradient>
       </defs>
     </svg>

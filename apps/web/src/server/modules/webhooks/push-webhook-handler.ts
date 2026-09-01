@@ -28,7 +28,9 @@ export async function handlePushEvent(payload: PushEvent): Promise<void> {
       where: { githubId: repository.id },
     });
 
-    if (repo == null) return;
+    if (repo == null) {
+      return undefined;
+    }
 
     // TODO: Здесь триггеришь задачу на анализ всего репозитория или
     // частичных изменений для векторной БД/документации

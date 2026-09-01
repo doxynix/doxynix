@@ -2,8 +2,8 @@ import { TRPCError } from "@trpc/server";
 import { del } from "@vercel/blob";
 import { z } from "zod";
 
-import { UserSchema } from "@/shared/api-contracts";
 import { UpdateProfileSchema } from "@/shared/api/schemas/user";
+import { UserSchema } from "@/shared/api-contracts";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
@@ -94,7 +94,7 @@ export const userRouter = createTRPCRouter({
 
           const hasEmailAuth = user?.email != null && user.emailVerified;
 
-          if (accountCount <= 1 && hasEmailAuth === false) {
+          if (accountCount <= 1 && !hasEmailAuth) {
             throw new TRPCError({
               code: "BAD_REQUEST",
               message:
@@ -177,7 +177,9 @@ export const userRouter = createTRPCRouter({
         where: { id: Number(ctx.session.user.id) },
       });
 
-      if (user == null) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      if (user == null) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      }
 
       return {
         message: "User found",

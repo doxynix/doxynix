@@ -1,10 +1,12 @@
 import { trpc } from "@/shared/api/trpc";
 
-import type { NotificationsParsersState } from "@/entities/notifications/model/notifications-parsers";
 import type { MarkAllInput } from "@/entities/notifications/model/notifications.types";
+import type { NotificationsParsersState } from "@/entities/notifications/model/notifications-parsers";
 
 const mapFiltersToInput = (filters?: NotificationsParsersState): MarkAllInput => {
-  if (filters == null) return {};
+  if (filters == null) {
+    return {};
+  }
 
   return {
     repoName: filters.repo ?? undefined,

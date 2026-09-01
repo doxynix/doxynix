@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import fs from "node:fs";
 import { createRequire } from "node:module";
+
 import { join, resolve } from "pathe";
 
 import { appLogger } from "@/server/core/app-logger";
@@ -290,7 +291,9 @@ let runtimeInitPromise: null | Promise<{ mod: any; Parser: any }> = null;
 const languageCache = new Map<string, Promise<any>>();
 
 async function initRuntime() {
-  if (runtimeInitPromise) return runtimeInitPromise;
+  if (runtimeInitPromise) {
+    return runtimeInitPromise;
+  }
 
   runtimeInitPromise = (async () => {
     const mod = nodeRequire("web-tree-sitter");
@@ -366,7 +369,7 @@ export async function loadLanguage(ext: string, spec: LanguageSpec) {
     );
   }
 
-  return await languageCache.get(ext);
+  return languageCache.get(ext);
 }
 
 function resolveGrammarWasmPath(spec: LanguageSpec): string {
@@ -409,7 +412,9 @@ function resolveGrammarWasmPath(spec: LanguageSpec): string {
 
 function lineOf(content: string, fragment: string) {
   const index = content.indexOf(fragment);
-  if (index < 0) return 1;
+  if (index < 0) {
+    return 1;
+  }
   return content.slice(0, index).split(/\r?\n/u).length;
 }
 
@@ -431,7 +436,9 @@ function collectRoutes(file: RepositoryFile, spec: LanguageSpec) {
         typeof match[routePattern.pathIndex] === "string"
           ? match[routePattern.pathIndex]
           : undefined;
-      if (method == null || routePath == null) continue;
+      if (method == null || routePath == null) {
+        continue;
+      }
       routes.push({
         confidence: routePattern.confidence ?? CONFIDENCE_LEVELS.astRoute,
         framework: routePattern.framework,
@@ -478,7 +485,9 @@ const AST_NESTING_NODES = new Set([
 export async function collectTreeSitterSignals(file: RepositoryFile): Promise<FileSignals | null> {
   const ext = getFileExtension(file.path);
   const spec = SPECS[ext];
-  if (!spec) return null;
+  if (!spec) {
+    return null;
+  }
 
   try {
     const { Parser } = await initRuntime();
@@ -523,7 +532,9 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
         if (spec.imports.types.includes(nodeType)) {
           spec.imports.patterns.forEach((re) => {
             const match = nodeText.match(re);
-            if (match?.[1]) imports.add(match[1]);
+            if (match?.[1]) {
+              imports.add(match[1]);
+            }
           });
         }
 
@@ -554,7 +565,9 @@ export async function collectTreeSitterSignals(file: RepositoryFile): Promise<Fi
           continue;
         }
 
-        if (cursor.gotoNextSibling()) continue;
+        if (cursor.gotoNextSibling()) {
+          continue;
+        }
 
         let backtrack = true;
         while (backtrack) {

@@ -117,8 +117,12 @@ export function buildNeighborPathsForEntry(params: {
   const coupledNeighbors = params.entry.changeCoupling.flatMap((pair) => {
     const fromPath = normalize(pair.fromPath);
     const toPath = normalize(pair.toPath);
-    if (fromPath === normalizedCurrentPath) return [toPath];
-    if (toPath === normalizedCurrentPath) return [fromPath];
+    if (fromPath === normalizedCurrentPath) {
+      return [toPath];
+    }
+    if (toPath === normalizedCurrentPath) {
+      return [fromPath];
+    }
     return [fromPath, toPath];
   });
 
@@ -146,8 +150,12 @@ export function buildNeighborBucketsForEntry(params: {
   const coupledNeighbors = params.entry.changeCoupling.flatMap((pair) => {
     const fromPath = normalize(pair.fromPath);
     const toPath = normalize(pair.toPath);
-    if (fromPath === normalizedCurrentPath) return [toPath];
-    if (toPath === normalizedCurrentPath) return [fromPath];
+    if (fromPath === normalizedCurrentPath) {
+      return [toPath];
+    }
+    if (toPath === normalizedCurrentPath) {
+      return [fromPath];
+    }
     return [fromPath, toPath];
   });
 
@@ -247,8 +255,12 @@ export function buildRecommendedActions(params: {
 }) {
   const actions: string[] = [];
 
-  if (params.node.markers.entrypoint) actions.push("Inspect entry flow first");
-  if (params.node.markers.api) actions.push("Review API/public surface");
+  if (params.node.markers.entrypoint) {
+    actions.push("Inspect entry flow first");
+  }
+  if (params.node.markers.api) {
+    actions.push("Review API/public surface");
+  }
   if (params.entry.hotspotSignals.length > 0 || params.entry.dependencyHotspots.length > 0) {
     actions.push("Run quick audit before editing");
   }
@@ -263,7 +275,9 @@ export function buildRecommendedActions(params: {
   } else if (params.node.canDrillDeeper) {
     actions.push("Drill deeper into this area");
   }
-  if (params.node.markers.config) actions.push("Verify config/runtime assumptions");
+  if (params.node.markers.config) {
+    actions.push("Verify config/runtime assumptions");
+  }
   if (params.entry.graphUnresolvedSamples.length > 0 || params.entry.orphanPaths.length > 0) {
     actions.push("Manually verify dependency links");
   }

@@ -14,6 +14,7 @@ import { calculateDocDensity } from "../core/common";
 import type {
   RepositoryEvidence,
   SecretLintMessage,
+  SecurityFindingMetric,
   StructuralSignals,
 } from "../core/discovery.types";
 import { FactCollector } from "../core/fact-collector";
@@ -65,7 +66,7 @@ async function collectSecuritySignals(normalizedPath: string, content: string) {
         line: typeof message.line === "number" ? message.line : undefined,
         message: message.message,
         path: normalizedPath,
-        severity: (message.severity === "error" ? "error" : "warning") as "error" | "warning",
+        severity: message.severity === "error" ? "error" : "warning",
       })),
       issueCount: relevantMessages.length,
       status: "ok" as const,
@@ -155,7 +156,7 @@ async function scanRepositoryFile(file: {
     maxNesting,
     normalizedPath: file.path,
     prettyName,
-    securityFindings: security.findings,
+    securityFindings: security.findings as SecurityFindingMetric[],
     securityIssues: security.issueCount,
     securityScanStatus: security.status,
     signal,

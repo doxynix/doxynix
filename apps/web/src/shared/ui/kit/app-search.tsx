@@ -23,14 +23,14 @@ export function AppSearch({ placeholder }: Readonly<Props>) {
     <div className="relative shrink-0">
       <Search className={ICON_STYLES} />
       <Input
-        type="search"
-        value={search}
-        placeholder={placeholder}
         aria-label={placeholder}
+        className="h-9 border-none pl-8 text-sm"
         onChange={(e) => {
           void setParams({ page: null, search: e.target.value || null });
         }}
-        className="h-9 border-none pl-8 text-sm"
+        placeholder={placeholder}
+        type="search"
+        value={search}
       />
     </div>
   );

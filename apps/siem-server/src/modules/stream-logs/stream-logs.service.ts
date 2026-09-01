@@ -1,6 +1,7 @@
-import { APP_EVENTS, bus, type LogsIngestedPayload } from "@server/core/bus";
 import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
+
+import { APP_EVENTS, bus, type LogsIngestedPayload } from "@/core/bus";
 
 export async function handleLogStream(c: Context) {
   c.header("X-Accel-Buffering", "no");
@@ -11,8 +12,8 @@ export async function handleLogStream(c: Context) {
       try {
         for (const log of data.logs) {
           await stream.writeSSE({
-            event: "log",
             data: JSON.stringify(log),
+            event: "log",
           });
         }
       } catch {
@@ -28,8 +29,8 @@ export async function handleLogStream(c: Context) {
 
     while (!stream.aborted) {
       try {
-        await stream.sleep(10000);
-        await stream.writeSSE({ event: "ping", data: "keep-alive" });
+        await stream.sleep(10_000);
+        await stream.writeSSE({ data: "keep-alive", event: "ping" });
       } catch {
         break;
       }

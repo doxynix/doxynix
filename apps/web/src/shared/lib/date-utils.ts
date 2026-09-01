@@ -7,11 +7,15 @@ export function formatRelativeTime(
   localeStr: string = DEFAULT_LOCALE,
   defaultValue: string = "—",
 ): string {
-  if (date == null) return defaultValue;
+  if (date == null) {
+    return defaultValue;
+  }
 
   try {
     const parsedDate = new Date(date);
-    if (Number.isNaN(parsedDate.getTime())) return defaultValue;
+    if (Number.isNaN(parsedDate.getTime())) {
+      return defaultValue;
+    }
 
     const timeZone = Temporal.Now.timeZoneId();
     const nowZdt = Temporal.Now.zonedDateTimeISO(timeZone);
@@ -29,11 +33,21 @@ export function formatRelativeTime(
     const hours = Math.abs(duration.hours);
     const minutes = Math.abs(duration.minutes);
 
-    if (years > 0) return formatter.format(sign * years, "year");
-    if (months > 0) return formatter.format(sign * months, "month");
-    if (weeks > 0) return formatter.format(sign * weeks, "week");
-    if (days > 0) return formatter.format(sign * days, "day");
-    if (hours > 0) return formatter.format(sign * hours, "hour");
+    if (years > 0) {
+      return formatter.format(sign * years, "year");
+    }
+    if (months > 0) {
+      return formatter.format(sign * months, "month");
+    }
+    if (weeks > 0) {
+      return formatter.format(sign * weeks, "week");
+    }
+    if (days > 0) {
+      return formatter.format(sign * days, "day");
+    }
+    if (hours > 0) {
+      return formatter.format(sign * hours, "hour");
+    }
 
     return formatter.format(sign * Math.max(1, minutes), "minute");
   } catch (error) {
@@ -48,7 +62,9 @@ export function formatFullDate(
 ): string {
   try {
     const parsedDate = new Date(date);
-    if (Number.isNaN(parsedDate.getTime())) return "—";
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "—";
+    }
 
     const instant = Temporal.Instant.fromEpochMilliseconds(parsedDate.getTime());
 

@@ -24,53 +24,53 @@ export function TrendsWidgetsSkeleton() {
         <div className="relative h-75">
           <div className="absolute top-0 left-0 flex h-full w-8 flex-col justify-between py-2 text-[10px]">
             {[100, 75, 50, 25, 0].map((v) => (
-              <Skeleton key={v} className="h-3 w-6" />
+              <Skeleton className="h-3 w-6" key={v} />
             ))}
           </div>
 
           <div className="ml-10 h-full overflow-hidden">
             <svg
+              className="h-full w-full animate-pulse"
               preserveAspectRatio="none"
               viewBox="0 0 400 100"
-              className="h-full w-full animate-pulse"
             >
               <path
+                className="text-foreground/10"
                 d="M0 20 Q 100 15, 200 25 T 400 30 L 400 100 L 0 100 Z"
                 fill="currentColor"
-                className="text-foreground/10"
               />
               <path
+                className="text-foreground/15"
                 d="M0 50 Q 100 45, 200 55 T 400 50 L 400 100 L 0 100 Z"
                 fill="currentColor"
-                className="text-foreground/15"
               />
 
               <line
+                className="text-muted/20"
                 stroke="currentColor"
                 strokeWidth="0.5"
                 x1="0"
                 x2="400"
                 y1="25"
                 y2="25"
-                className="text-muted/20"
               />
               <line
+                className="text-muted/20"
                 stroke="currentColor"
                 strokeWidth="0.5"
                 x1="0"
                 x2="400"
                 y1="50"
                 y2="50"
-                className="text-muted/20"
               />
               <line
+                className="text-muted/20"
                 stroke="currentColor"
                 strokeWidth="0.5"
                 x1="0"
                 x2="400"
                 y1="75"
                 y2="75"
-                className="text-muted/20"
               />
             </svg>
           </div>

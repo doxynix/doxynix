@@ -319,7 +319,8 @@ function buildManualFindings(context: ArtifactContext): ArtifactFinding[] {
 
 function buildOwnershipFinding(context: ArtifactContext): ArtifactFinding | null {
   const { busFactor, teamRoles } = context;
-  if (busFactor > 2 || teamRoles.length === 0) {
+  const leadRole = teamRoles[0];
+  if (busFactor > 2 || teamRoles.length === 0 || !leadRole) {
     return null;
   }
 
@@ -328,11 +329,11 @@ function buildOwnershipFinding(context: ArtifactContext): ArtifactFinding | null
     confidence: 76,
     evidence: buildOwnershipEvidence(teamRoles),
     id: "ownership-concentration",
-    score: clamp(70 + teamRoles[0]!.share / 2, 0, 100),
-    severity: teamRoles[0]!.share >= 60 ? "CRITICAL" : "HIGH",
+    score: clamp(70 + leadRole.share / 2, 0, 100),
+    severity: leadRole.share >= 60 ? "CRITICAL" : "HIGH",
     suggestedNextChange:
       "Spread ownership around the highest-risk files with reviews, pairing, and small runbooks.",
-    summary: `Bus factor is ${busFactor}, with visible ownership concentrated around ${teamRoles[0]!.login}.`,
+    summary: `Bus factor is ${busFactor}, with visible ownership concentrated around ${leadRole.login}.`,
     title: "Knowledge concentration creates delivery risk",
     whyItMatters:
       "A small contributor set increases fragility when urgent fixes land in central modules.",
@@ -459,7 +460,7 @@ function buildOnboardingFinding(context: ArtifactContext): ArtifactFinding | nul
 }
 
 function sortFindingsBySeverity(findings: ArtifactFinding[]) {
-  return findings.toSorted((left, right) => {
+  return findings.sort((left, right) => {
     return (
       FINDING_SEVERITY_WEIGHT[right.severity] - FINDING_SEVERITY_WEIGHT[left.severity] ||
       right.score - left.score
@@ -479,7 +480,7 @@ function buildArtifactContext(params: ArtifactBuildParams): ArtifactContext {
   const moduleMap = getPrimaryArchitectureModules(evidence.modules);
   const publicSurfacePaths = Array.from(
     new Set(evidence.publicSurface.map((symbol) => symbol.path)),
-  ).toSorted((left, right) => left.localeCompare(right));
+  ).sort((left, right) => left.localeCompare(right));
 
   const referenceEvidence = buildReferenceEvidencePaths({
     fallbackPaths: metrics.mostComplexFiles,
@@ -516,10 +517,9 @@ function buildFindings(context: ArtifactContext): ArtifactFinding[] {
   return sortFindingsBySeverity([...context.riskFindings, ...buildManualFindings(context)]);
 }
 
-// Builds compact facts/findings for the report layer without re-deriving architecture outside the canonical builders.
 export function buildRepositoryArtifacts(params: ArtifactBuildParams): ArtifactBuildResult {
   const context = buildArtifactContext(params);
-  const result: ArtifactBuildResult = {
+  return {
     facts: buildFacts(context)
       .slice(0, MAX_FACTS)
       .map((fact) => ({
@@ -533,5 +533,4 @@ export function buildRepositoryArtifacts(params: ArtifactBuildParams): ArtifactB
         evidence: finding.evidence.slice(0, MAX_FINDING_EVIDENCE),
       })),
   };
-  return result;
 }

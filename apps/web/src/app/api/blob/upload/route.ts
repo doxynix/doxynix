@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { del } from "@vercel/blob";
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 
 import { VERCEL_BLOB_CALLBACK_URL } from "@/shared/constants/env.server";
 

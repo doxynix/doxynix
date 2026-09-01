@@ -52,11 +52,11 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      collapsible="offcanvas"
-      variant="sidebar"
       className={cn(
         isRepoOwnerPage ? "top-29 h-[calc(100dvh-7rem)]" : "top-16 h-[calc(100dvh-4rem)]",
       )}
+      collapsible="offcanvas"
+      variant="sidebar"
     >
       <nav aria-label="Main navigation">
         <SidebarHeader>
@@ -77,17 +77,17 @@ export function AppSidebar() {
       <SidebarContent className="max-h-[calc(100dvh-HeaderHeight-FooterHeight)] overflow-hidden">
         <ScrollArea className="h-full">
           <nav aria-label="Repositories">
-            <Collapsible defaultOpen className="group/collapsible">
+            <Collapsible className="group/collapsible" defaultOpen>
               <SidebarGroup>
-                <SidebarGroupLabel asChild className="transition-standard truncate">
+                <SidebarGroupLabel asChild className="truncate transition-standard">
                   <CollapsibleTrigger
-                    disabled={state === "collapsed"}
                     className={cn(
-                      "text-muted-foreground hover:bg-accent hover:text-foreground mb-1 flex w-full cursor-pointer justify-between px-3",
+                      "mb-1 flex w-full cursor-pointer justify-between px-3 text-muted-foreground hover:bg-accent hover:text-foreground",
                     )}
+                    disabled={state === "collapsed"}
                   >
                     <span>{t("recent_repositories")}</span>
-                    <ChevronDown className="transition-standard ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    <ChevronDown className="ml-auto transition-standard transition-transform group-data-[state=open]/collapsible:rotate-180" />
                   </CollapsibleTrigger>
                 </SidebarGroupLabel>
                 <CollapsibleContent>
@@ -102,17 +102,17 @@ export function AppSidebar() {
 
                       {data?.pages.map((page) =>
                         page.items.map((repo) => (
-                          <SidebarMenuItem key={repo.id} className="max-w-60">
+                          <SidebarMenuItem className="max-w-60" key={repo.id}>
                             <SidebarLink
-                              href={`/dashboard/repo/${repo.owner}/${repo.name}`}
                               avatar={repo.avatar ?? ""}
+                              href={`/dashboard/repo/${repo.owner}/${repo.name}`}
                               label={`${repo.owner}/${repo.name}`}
                             />
                           </SidebarMenuItem>
                         )),
                       )}
                       {!isLoading && data?.pages[0]?.items.length === 0 && state === "expanded" && (
-                        <div className="text-muted-foreground truncate px-4 py-2 text-xs">
+                        <div className="truncate px-4 py-2 text-muted-foreground text-xs">
                           {t("repo_empty_title")}
                         </div>
                       )}
@@ -124,11 +124,11 @@ export function AppSidebar() {
                         >
                           <SidebarMenuItem className="truncate">
                             <LoadingButton
+                              className="flex h-8 w-full cursor-pointer items-center justify-start text-muted-foreground text-xs"
                               disabled={isFetchingNextPage}
                               isLoading={isFetchingNextPage}
-                              variant="ghost"
                               onClick={() => void fetchNextPage()}
-                              className="text-muted-foreground flex h-8 w-full cursor-pointer items-center justify-start text-xs"
+                              variant="ghost"
                             >
                               <ChevronDown /> {t("sidebar_show_more")}
                             </LoadingButton>
@@ -153,8 +153,8 @@ export function AppSidebar() {
             <SidebarMenuItem>
               <SidebarLink
                 href="https://docs.doxynix.space"
-                isBlank
                 icon={BookText}
+                isBlank
                 label={t("sidebar_documentation")}
               />
             </SidebarMenuItem>

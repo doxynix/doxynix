@@ -5,12 +5,12 @@ type Props = {
 export function GitHubIcon({ className }: Readonly<Props>) {
   return (
     <svg
+      className={className}
       fill="none"
       height="100%"
       viewBox="0 0 98 96"
       width="100%"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
     >
       <g clipPath="url(#clip0_730_27126)">
         <path

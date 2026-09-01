@@ -12,7 +12,9 @@ export function useRepoMapHotkeys() {
   const [prefix, setPrefix] = useState<null | string>(null);
 
   useEffect(() => {
-    if (prefix == null) return;
+    if (prefix == null) {
+      return;
+    }
     const timer = setTimeout(() => setPrefix(null), 1000);
     return () => clearTimeout(timer);
   }, [prefix]);
@@ -25,7 +27,9 @@ export function useRepoMapHotkeys() {
   useHotkeys(
     "*",
     (e) => {
-      if (prefix == null) return;
+      if (prefix == null) {
+        return;
+      }
       const code = e.code;
       const secondKey = code.startsWith("Key") ? code.slice(3).toLowerCase() : null;
 

@@ -15,9 +15,15 @@ import type { RepoMetrics } from "../core/metrics.types";
 import { RISK_SCORING, RISK_THRESHOLDS } from "../core/scoring-constants";
 
 function severityForScore(score: number): RiskFindingRef["severity"] {
-  if (score >= RISK_THRESHOLDS.critical) return "CRITICAL";
-  if (score >= RISK_THRESHOLDS.high) return "HIGH";
-  if (score >= RISK_THRESHOLDS.moderate) return "MODERATE";
+  if (score >= RISK_THRESHOLDS.critical) {
+    return "CRITICAL";
+  }
+  if (score >= RISK_THRESHOLDS.high) {
+    return "HIGH";
+  }
+  if (score >= RISK_THRESHOLDS.moderate) {
+    return "MODERATE";
+  }
   return "LOW";
 }
 
@@ -141,7 +147,9 @@ function buildDependencyCycleFinding(
   evidence: RepositoryEvidence,
   derivedScores: RiskDerivedScores,
 ): null | RiskFindingRef {
-  if (evidence.dependencyCycles.length === 0) return null;
+  if (evidence.dependencyCycles.length === 0) {
+    return null;
+  }
 
   // ЭТАЛОН: Извлекаем уникальные файлы из первых трех циклов Тарьяна для расширения контекста улик ИИ
   const topCyclesFiles = uniq(evidence.dependencyCycles.slice(0, 3).flat());
@@ -166,7 +174,9 @@ function buildHotspotFinding(
   hotspots: HotspotSignal[],
   derivedScores: RiskDerivedScores,
 ): null | RiskFindingRef {
-  if (hotspots.length === 0) return null;
+  if (hotspots.length === 0) {
+    return null;
+  }
 
   return createRiskFinding({
     category: "hotspot",
@@ -194,7 +204,9 @@ function buildChangeCouplingFinding(
   changeCoupling: ChangeCouplingRef[],
   derivedScores: RiskDerivedScores,
 ): null | RiskFindingRef {
-  if (changeCoupling.length === 0) return null;
+  if (changeCoupling.length === 0) {
+    return null;
+  }
 
   const strongestPairs = changeCoupling.slice(0, 6);
 
@@ -227,7 +239,9 @@ function buildOrphanModuleFinding(
   evidence: RepositoryEvidence,
   derivedScores: RiskDerivedScores,
 ): null | RiskFindingRef {
-  if (evidence.orphanModules.length === 0) return null;
+  if (evidence.orphanModules.length === 0) {
+    return null;
+  }
 
   return createRiskFinding({
     category: "maintainability",
@@ -249,7 +263,9 @@ function buildGraphReliabilityFinding(
   graphReliability: DependencyGraphEvidence,
   derivedScores: RiskDerivedScores,
 ): null | RiskFindingRef {
-  if (graphReliability.unresolvedImportSpecifiers === 0) return null;
+  if (graphReliability.unresolvedImportSpecifiers === 0) {
+    return null;
+  }
 
   return createRiskFinding({
     category: "architecture",

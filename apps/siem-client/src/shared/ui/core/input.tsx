@@ -1,6 +1,7 @@
-import { RiEyeFill, RiEyeOffFill, RiSearchLine } from "@remixicon/react";
 import { forwardRef, type InputHTMLAttributes, useState } from "react";
+import { RiEyeFill, RiEyeOffFill, RiSearchLine } from "@remixicon/react";
 import { tv, type VariantProps } from "tailwind-variants";
+
 import { cx, focusInput, focusRing, hasErrorInput } from "../../lib/utils";
 
 const inputStyles = tv({
@@ -33,13 +34,13 @@ const inputStyles = tv({
     "[&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden",
   ],
   variants: {
-    hasError: {
-      true: hasErrorInput,
-    },
     // number input
     enableStepper: {
       false:
         "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+    },
+    hasError: {
+      true: hasErrorInput,
     },
   },
 });
@@ -63,16 +64,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={cx("relative w-full", className)} tremor-id="tremor-raw">
         <input
-          ref={forwardedRef}
-          type={isPassword ? typeState : type}
           className={cx(
-            inputStyles({ hasError, enableStepper }),
+            inputStyles({ enableStepper, hasError }),
             {
               "pl-8": isSearch,
               "pr-10": isPassword,
             },
             inputClassName,
           )}
+          ref={forwardedRef}
+          type={isPassword ? typeState : type}
           {...props}
         />
         {isSearch && (
@@ -84,12 +85,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               "text-gray-400 dark:text-gray-600",
             )}
           >
-            <RiSearchLine className="size-4.5 shrink-0" aria-hidden="true" />
+            <RiSearchLine aria-hidden="true" className="size-4.5 shrink-0" />
           </div>
         )}
         {isPassword && (
           <div
-            className={cx("absolute bottom-0 right-0 flex h-full items-center justify-center px-3")}
+            className={cx("absolute right-0 bottom-0 flex h-full items-center justify-center px-3")}
           >
             <button
               aria-label="Change password visibility"
@@ -102,10 +103,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 "hover:text-gray-500 dark:hover:text-gray-500",
                 focusRing,
               )}
-              type="button"
               onClick={() => {
                 setTypeState(typeState === "password" ? "text" : "password");
               }}
+              type="button"
             >
               <span className="sr-only">
                 {typeState === "password" ? "Show password" : "Hide password"}

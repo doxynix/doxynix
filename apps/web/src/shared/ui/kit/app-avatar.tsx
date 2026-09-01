@@ -32,7 +32,9 @@ const SIZE_MAP: Record<string, string> = {
 
 function getSizesFromClassName(sizeClassName: string): string {
   for (const [key, value] of Object.entries(SIZE_MAP)) {
-    if (sizeClassName.includes(key)) return value;
+    if (sizeClassName.includes(key)) {
+      return value;
+    }
   }
   return "48px";
 }
@@ -57,7 +59,7 @@ function isUnoptimizedHost(src: string): boolean {
     ];
 
     return allowedHosts.some((allowed) => {
-      return hostname === allowed || hostname.endsWith("." + allowed);
+      return hostname === allowed || hostname.endsWith(`.${allowed}`);
     });
   } catch {
     return false;
@@ -76,8 +78,12 @@ export function AppAvatar({
   const hasSrc = typeof src === "string" && src !== "";
 
   const [status, setStatus] = useState<"error" | "loading" | "success">(() => {
-    if (!hasSrc) return "error";
-    if (loadedAvatars.get(src) === true) return "success";
+    if (!hasSrc) {
+      return "error";
+    }
+    if (loadedAvatars.get(src) === true) {
+      return "success";
+    }
     return "loading";
   });
 
@@ -99,7 +105,7 @@ export function AppAvatar({
   const showFallback = isEmpty || isError;
 
   return (
-    <Avatar className={cn(sizeClassName, "border-border border select-none", className)}>
+    <Avatar className={cn(sizeClassName, "select-none border border-border", className)}>
       {!showFallback && status === "loading" && (
         <Skeleton className="absolute inset-0 z-10 rounded-full" />
       )}
@@ -107,24 +113,26 @@ export function AppAvatar({
       {hasSrc && !isError && (
         <Image
           alt={alt}
-          src={src}
+          className={cn(
+            "object-cover transition-opacity duration-300",
+            status === "success" ? "opacity-100" : "opacity-0",
+          )}
           fill
           loading={priority ? undefined : "lazy"}
-          priority={priority}
-          sizes={getSizesFromClassName(sizeClassName)}
-          unoptimized={isUnoptimizedHost(src)}
           onError={() => {
             console.error("Image load error:", src);
             setStatus("error");
           }}
           onLoad={() => {
-            if (src) loadedAvatars.set(src, true);
+            if (src) {
+              loadedAvatars.set(src, true);
+            }
             setStatus("success");
           }}
-          className={cn(
-            "object-cover transition-opacity duration-300",
-            status === "success" ? "opacity-100" : "opacity-0",
-          )}
+          priority={priority}
+          sizes={getSizesFromClassName(sizeClassName)}
+          src={src}
+          unoptimized={isUnoptimizedHost(src)}
         />
       )}
 

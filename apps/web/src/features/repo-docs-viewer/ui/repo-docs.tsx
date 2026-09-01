@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ComponentType } from "react";
+import { type ComponentType, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { uniqBy } from "es-toolkit";
 import {
@@ -107,7 +107,9 @@ export function RepoDocs({
   });
 
   const headings = (() => {
-    if (typeof window === "undefined" || docContent?.html == null) return [];
+    if (typeof window === "undefined" || docContent?.html == null) {
+      return [];
+    }
 
     try {
       const parser = new DOMParser();
@@ -135,7 +137,9 @@ export function RepoDocs({
   const [activeHeadingId, setActiveHeadingId] = useState<string>("");
 
   useEffect(() => {
-    if (headings.length === 0) return;
+    if (headings.length === 0) {
+      return;
+    }
 
     const headingElements = headings
       /* eslint-disable-next-line unicorn/prefer-query-selector */
@@ -172,7 +176,9 @@ export function RepoDocs({
   const tabItems = availableDocs
     .map((doc) => {
       const icon = DOC_ICONS[doc.type];
-      if (icon == null) return null;
+      if (icon == null) {
+        return null;
+      }
       return {
         icon,
         id: doc.id,
@@ -186,10 +192,10 @@ export function RepoDocs({
 
   return (
     <Tabs
-      value={activeTab}
-      orientation="vertical"
-      onValueChange={(value) => onTabChange(value as DocType)}
       className="flex h-[calc(100dvh-250px)] w-full flex-row gap-10"
+      onValueChange={(value) => onTabChange(value as DocType)}
+      orientation="vertical"
+      value={activeTab}
     >
       <RepoDocsTabs
         activeHeadingId={activeHeadingId}
@@ -199,7 +205,7 @@ export function RepoDocs({
         items={tabItems}
       />
 
-      <div className="bg-card relative flex flex-1 flex-col rounded-xl border">
+      <div className="relative flex flex-1 flex-col rounded-xl border bg-card">
         {uniqueDocsToRender.map((doc) => {
           const isCurrentApiSwagger = Boolean(
             doc.type === "API" && apiMode === "swagger" && metrics?.reference.swagger != null,
@@ -223,9 +229,9 @@ export function RepoDocs({
 
           return (
             <TabsContent
+              className="mt-0 flex min-h-0 flex-1 flex-col outline-none data-[state=inactive]:hidden"
               key={doc.type}
               value={doc.type}
-              className="mt-0 flex min-h-0 flex-1 flex-col outline-none data-[state=inactive]:hidden"
             >
               <div className="flex-none px-8 pt-8 md:px-12">
                 <div className="mb-6 flex items-center justify-between border-b pb-6">
@@ -233,19 +239,21 @@ export function RepoDocs({
                     <div className="rounded-md p-2">
                       {(() => {
                         const Icon = DOC_ICONS[doc.type];
-                        if (Icon == null) return null;
+                        if (Icon == null) {
+                          return null;
+                        }
                         return <Icon className="size-6" />;
                       })()}
                     </div>
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-bold tracking-tight">
+                        <h2 className="font-bold text-2xl tracking-tight">
                           {doc.type === "API" && apiMode === "swagger"
                             ? "Interactive Console"
                             : cardTitle}
                         </h2>
                       </div>
-                      <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-xs">
+                      <div className="flex flex-wrap items-center gap-3 text-muted-foreground text-xs">
                         <span>Version: {doc.version.slice(0, 7)}</span>
                         <span>Updated: {formatFullDate(doc.updatedAt)}</span>
                       </div>
@@ -257,14 +265,14 @@ export function RepoDocs({
                         <AppTooltip content="Add to draft">
                           <LoadingButton
                             disabled={stageMutation.isPending || !isReadyToStage}
-                            isLoading={stageMutation.isPending === true}
+                            isLoading={stageMutation.isPending}
                             loadingText=""
-                            size="icon"
-                            variant="ghost"
                             onClick={() => {
                               if (isCurrentApiSwagger) {
                                 const swaggerContent = metrics?.reference.swagger;
-                                if (swaggerContent == null) return;
+                                if (swaggerContent == null) {
+                                  return;
+                                }
 
                                 stageMutation.mutate({
                                   content: swaggerContent,
@@ -274,7 +282,9 @@ export function RepoDocs({
                               } else {
                                 const markdownContent = docContent?.raw;
                                 const materializedPath = docContent?.materializedPath;
-                                if (markdownContent == null || materializedPath == null) return;
+                                if (markdownContent == null || materializedPath == null) {
+                                  return;
+                                }
 
                                 stageMutation.mutate({
                                   content: markdownContent,
@@ -283,6 +293,8 @@ export function RepoDocs({
                                 });
                               }
                             }}
+                            size="icon"
+                            variant="ghost"
                           >
                             <GitBranchPlus />
                           </LoadingButton>
@@ -292,18 +304,18 @@ export function RepoDocs({
                             <AppTooltip content="Download file">
                               <AppButton
                                 disabled={isDocLoading}
+                                onClick={handleDownload}
                                 size="icon"
                                 variant="ghost"
-                                onClick={handleDownload}
                               >
                                 <Download className="size-3" />
                               </AppButton>
                             </AppTooltip>
                             <CopyButton
-                              disabled={isDocLoading}
-                              value={docContent?.raw ?? ""}
-                              tooltipText="Copy file"
                               className="size-8 px-3 opacity-100"
+                              disabled={isDocLoading}
+                              tooltipText="Copy file"
+                              value={docContent?.raw ?? ""}
                             />
                           </>
                         )}
@@ -313,18 +325,18 @@ export function RepoDocs({
                     {doc.type === "API" && metrics?.reference.swagger != null && (
                       <div className="flex gap-1 rounded-lg border p-1">
                         <AppButton
+                          className="h-7 px-3 text-xs"
+                          onClick={() => setApiMode("md")}
                           size="sm"
                           variant={apiMode === "md" ? "secondary" : "ghost"}
-                          onClick={() => setApiMode("md")}
-                          className="h-7 px-3 text-xs"
                         >
                           <FileText className="mr-1.5 size-3" /> Docs
                         </AppButton>
                         <AppButton
+                          className="h-7 px-3 text-xs"
+                          onClick={() => setApiMode("swagger")}
                           size="sm"
                           variant={apiMode === "swagger" ? "secondary" : "ghost"}
-                          onClick={() => setApiMode("swagger")}
-                          className="h-7 px-3 text-xs"
                         >
                           <Terminal className="mr-1.5 size-3" /> Console
                         </AppButton>
@@ -337,7 +349,7 @@ export function RepoDocs({
                   <div className="mb-6 flex flex-col gap-3 rounded-lg border p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-medium">{nodeContext.node.label}</p>
+                        <p className="font-medium text-sm">{nodeContext.node.label}</p>
                         <p className="text-muted-foreground text-xs">{nodeContext.explain.role}</p>
                       </div>
                       <AppBadge variant="outline">

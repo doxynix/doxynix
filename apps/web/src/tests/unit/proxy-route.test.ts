@@ -1,10 +1,10 @@
 /* eslint-disable sonarjs/no-hardcoded-ip */
 import dns from "node:dns";
+
 import ipaddr from "ipaddr.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { isSafeIp, POST, ssrfSafeLookup } from "@/app/api/proxy/route";
-
 import { auth } from "@/server/core/auth";
 
 const { mockAppLogger } = vi.hoisted(() => {
@@ -88,8 +88,8 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
 
       const dnsLookupSpy = (vi.spyOn(dns, "lookup") as any).mockImplementation(
         (
-          hostname: string,
-          options: any,
+          _hostname: string,
+          _options: any,
           cb: (err: Error | null, address: null | string, family: number) => void,
         ) => {
           cb(null, "8.8.8.8", 4);
@@ -107,8 +107,8 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
 
       const dnsLookupSpy = (vi.spyOn(dns, "lookup") as any).mockImplementation(
         (
-          hostname: string,
-          options: any,
+          _hostname: string,
+          _options: any,
           cb: (err: Error | null, address: null | string, family: number) => void,
         ) => {
           cb(null, "127.0.0.1", 4);
@@ -142,8 +142,8 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
 
       const dnsLookupSpy = (vi.spyOn(dns, "lookup") as any).mockImplementation(
         (
-          hostname: string,
-          options: any,
+          _hostname: string,
+          _options: any,
           cb: (err: Error | null, address: null | string, family: null | number) => void,
         ) => {
           cb(new Error("ENOTFOUND"), null, null);
@@ -165,7 +165,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
       const callback = vi.fn();
 
       const dnsLookupSpy = (vi.spyOn(dns, "lookup") as any).mockImplementation(
-        (hostname: string, options: any, cb: any) => {
+        (_hostname: string, _options: any, cb: any) => {
           cb(null, "8.8.8.8", 4);
         },
       );
@@ -190,7 +190,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
   describe("3. HTTP Integration-test: Route POST Handler", () => {
     describe("Authorization & Security check", () => {
       it("should reject with 401 when user is not authorized", async () => {
-        vi.mocked(auth.api.getSession).mockResolvedValue(null as any);
+        vi.mocked(auth.api.getSession).mockResolvedValue(null);
 
         const req = new Request("http://localhost/api/proxy", {
           body: JSON.stringify({ method: "GET", url: "https://example.com" }),

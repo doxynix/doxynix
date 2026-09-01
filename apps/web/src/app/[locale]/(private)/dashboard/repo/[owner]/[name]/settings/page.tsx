@@ -29,7 +29,7 @@ export default async function RepoSettingsPage({ params }: Readonly<Props>) {
   return (
     <>
       <PRAnalysisConfigCard repoId={repo.id} />
-      <h2 className="text-destructive text-2xl font-bold">Danger Zone</h2>
+      <h2 className="font-bold text-2xl text-destructive">Danger Zone</h2>
       <DeleteRepoCard id={repo.id} />
     </>
   );

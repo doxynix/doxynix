@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+
 import type { after as NextAfterFn } from "next/server";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -46,14 +47,18 @@ type DmmfDatamodel = {
  * @returns Пропатченная DMMF-модель без мутации глобального контекста
  */
 function patchDmmfForEncryption(dmmf: DmmfDatamodel): DmmfDatamodel {
-  if (dmmf.datamodel?.models == null) return dmmf;
+  if (dmmf.datamodel?.models == null) {
+    return dmmf;
+  }
 
   return {
     ...dmmf,
     datamodel: {
       ...dmmf.datamodel,
       models: dmmf.datamodel.models.map((model) => {
-        if (model.fields == null) return model;
+        if (model.fields == null) {
+          return model;
+        }
 
         const modelOverrides = ENCRYPTED_METADATA_MAP[model.name];
 
@@ -90,7 +95,9 @@ let cachedAfterFn: null | typeof NextAfterFn = null;
 let isAfterChecked = false;
 
 async function getNextAfterApi() {
-  if (isAfterChecked) return cachedAfterFn;
+  if (isAfterChecked) {
+    return cachedAfterFn;
+  }
   try {
     const { after } = await import("next/server");
     cachedAfterFn = after;

@@ -42,7 +42,9 @@ const config = {
 
 const fetchSystemStatus = async (): Promise<StatusType> => {
   const res = await fetch("/api/status");
-  if (!res.ok) throw new Error("Network error");
+  if (!res.ok) {
+    throw new Error("Network error");
+  }
   const data = (await res.json()) as StatusResponse;
   return data.status;
 };
@@ -64,14 +66,14 @@ export function SystemStatus({ className }: Readonly<{ className?: string }>) {
   const current = config[status];
 
   return (
-    <div className={cn("flex items-center gap-2 text-xs font-medium", className)}>
+    <div className={cn("flex items-center gap-2 font-medium text-xs", className)}>
       {isLoading ? (
         <Skeleton className="h-8 w-45" />
       ) : (
-        <AppButton asChild size="sm" variant="outline" className="cursor-pointer">
+        <AppButton asChild className="cursor-pointer" size="sm" variant="outline">
           <ExternalLink
-            href="https://status.doxynix.space"
             className={cn("flex items-center gap-2", current.textColor)}
+            href="https://status.doxynix.space"
           >
             <span className="relative flex size-2">
               {current.hasPing && (

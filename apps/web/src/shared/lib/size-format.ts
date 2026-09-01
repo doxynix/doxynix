@@ -1,5 +1,7 @@
 export function formatSize(bytes?: number): string {
-  if (bytes == null || !Number.isFinite(bytes) || bytes <= 0) return "0 B";
+  if (bytes == null || !Number.isFinite(bytes) || bytes <= 0) {
+    return "0 B";
+  }
 
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB", "TB"];

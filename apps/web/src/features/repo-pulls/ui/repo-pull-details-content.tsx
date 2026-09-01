@@ -99,7 +99,9 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
   };
 
   const handleFixAll = () => {
-    if (comments == null || comments.renderedComments.length === 0) return;
+    if (comments == null || comments.renderedComments.length === 0) {
+      return;
+    }
 
     const findingsToFix = comments.renderedComments.map((comment) => ({
       file: comment.filePath,
@@ -158,7 +160,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardContent className="flex flex-col gap-3">
             {affectedZones.length > 0 ? (
               affectedZones.map((zone) => (
-                <div key={zone.nodeId} className="rounded-xl border p-4">
+                <div className="rounded-xl border p-4" key={zone.nodeId}>
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div>
                       <p className="font-medium">{zone.label}</p>
@@ -166,7 +168,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     </div>
                     <AppBadge variant="outline">{zone.impactScore}</AppBadge>
                   </div>
-                  <div className="text-muted-foreground mb-3 flex flex-wrap gap-3 text-xs">
+                  <div className="mb-3 flex flex-wrap gap-3 text-muted-foreground text-xs">
                     <span>{zone.fileCount} files</span>
                     <span>{zone.findingCount} findings</span>
                     <span>{zone.kind}</span>
@@ -196,7 +198,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardContent className="flex flex-col gap-3">
             {affectedNodes.length > 0 ? (
               affectedNodes.map((node) => (
-                <div key={node.nodeId} className="rounded-xl border p-4">
+                <div className="rounded-xl border p-4" key={node.nodeId}>
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div>
                       <p className="font-medium">{node.label}</p>
@@ -206,7 +208,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     <AppBadge variant="outline">{node.impactScore}</AppBadge>
                   </div>
                   <p className="text-muted-foreground text-xs">{node.whyAffected}</p>
-                  <div className="text-muted-foreground mb-3 flex flex-wrap gap-3 text-xs">
+                  <div className="mb-3 flex flex-wrap gap-3 text-muted-foreground text-xs">
                     <span>{node.fileCount} files</span>
                     <span>{node.findingCount} findings</span>
                     <span>{node.kind}</span>
@@ -237,12 +239,12 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardContent className="flex flex-col gap-3">
             {changedFiles.length > 0 ? (
               changedFiles.map((file) => (
-                <div key={file.filePath} className="rounded-xl border p-4">
+                <div className="rounded-xl border p-4" key={file.filePath}>
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <code className="text-sm">{file.filePath}</code>
                     <AppBadge variant="outline">{file.status}</AppBadge>
                   </div>
-                  <div className="text-muted-foreground mb-3 flex flex-wrap gap-3 text-xs">
+                  <div className="mb-3 flex flex-wrap gap-3 text-muted-foreground text-xs">
                     <span className="text-success">+{file.additions}</span>
                     <span className="text-destructive">-{file.deletions}</span>
                     <span>{file.findingCount} findings</span>
@@ -295,10 +297,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
             </CardTitle>
             {comments != null && comments.renderedComments.length > 0 && (
               <AppButton
+                className="flex items-center gap-1.5 bg-success font-semibold text-success-foreground text-xs hover:bg-success/90"
                 disabled={createFixMutation.isPending}
-                size="sm"
                 onClick={handleFixAll}
-                className="bg-success hover:bg-success/90 text-success-foreground flex items-center gap-1.5 text-xs font-semibold"
+                size="sm"
               >
                 {createFixMutation.isPending ? (
                   <Loader2 className="size-3.5 animate-spin" />
@@ -316,34 +318,34 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
               <div className="flex flex-col gap-4">
                 {comments.renderedComments.map((comment) => (
                   <div
-                    key={comment.id}
                     className="group relative overflow-hidden rounded-xl border p-4"
+                    key={comment.id}
                   >
                     <div className="mb-2 flex items-center justify-between">
-                      <code className="bg-muted rounded px-1.5 py-0.5 text-xs">
+                      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                         {comment.filePath}:{comment.line}
                       </code>
                       <div className="flex items-center gap-3">
-                        <span className="text-muted-foreground text-xs font-bold tracking-wide uppercase">
+                        <span className="font-bold text-muted-foreground text-xs uppercase tracking-wide">
                           {comment.findingType}
                         </span>
-                        <span className="text-muted-foreground text-xs font-bold">
+                        <span className="font-bold text-muted-foreground text-xs">
                           Risk: {comment.riskLevel}
                         </span>
                       </div>
                     </div>
                     <article
+                      className="prose dark:prose-invert wrap-break-word mb-4 min-w-0 max-w-none prose-pre:bg-transparent prose-pre:p-0 text-xs"
                       dangerouslySetInnerHTML={{ __html: comment.bodyHtml }}
-                      className="prose dark:prose-invert prose-pre:p-0 prose-pre:bg-transparent mb-4 max-w-none min-w-0 text-xs wrap-break-word"
                     />
 
-                    <div className="border-border/40 flex justify-end border-t pt-3">
+                    <div className="flex justify-end border-border/40 border-t pt-3">
                       <AppButton
+                        className="flex items-center gap-1.5 font-medium text-xs transition-standard hover:border-success/30 hover:bg-success/5 hover:text-success"
                         disabled={createFixMutation.isPending}
+                        onClick={() => handleFixSingle(comment)}
                         size="sm"
                         variant="outline"
-                        onClick={() => handleFixSingle(comment)}
-                        className="hover:bg-success/5 hover:text-success hover:border-success/30 transition-standard flex items-center gap-1.5 text-xs font-medium"
                       >
                         {createFixMutation.isPending ? (
                           <Loader2 className="size-3.5 animate-spin" />
@@ -368,18 +370,18 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
       <div className="flex flex-col gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-bold">PR Details</CardTitle>
+            <CardTitle className="font-bold text-sm">PR Details</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2 text-sm">
             {PR_DETAILS_ITEMS.map((item) => (
-              <div key={item.label} className="flex items-baseline justify-between">
+              <div className="flex items-baseline justify-between" key={item.label}>
                 <span className="text-muted-foreground text-xs">{item.label}:</span>
                 <div className="flex items-center gap-1">
                   {item.isCopy === true && (
                     <CopyButton
-                      value={analysis?.analysis.baseSha ?? ""}
-                      tooltipText="Copy SHA"
                       className="opacity-100"
+                      tooltipText="Copy SHA"
+                      value={analysis?.analysis.baseSha ?? ""}
                     />
                   )}
                   {item.isStatus === true ? (
@@ -394,7 +396,7 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   ) : item.isTime === true ? (
                     <TimeAgo date={item.value ?? ""} locale={locale} />
                   ) : (
-                    <span className={cn("text-xs font-medium")}>N/A</span> // FIXME: пока не допер но вроде тут надо {item.value
+                    <span className={cn("font-medium text-xs")}>N/A</span> // FIXME: пока не допер но вроде тут надо {item.value
                   )}
                 </div>
               </div>
@@ -412,9 +414,9 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardContent className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-3 text-sm">
               {IMPACT_STATS.map((stat) => (
-                <div key={stat.label} className="bg-muted rounded-lg border p-3">
-                  <p className="text-muted-foreground mb-1 text-xs font-bold">{stat.label}</p>
-                  <p className="text-lg font-black capitalize">{stat.value}</p>
+                <div className="rounded-lg border bg-muted p-3" key={stat.label}>
+                  <p className="mb-1 font-bold text-muted-foreground text-xs">{stat.label}</p>
+                  <p className="font-black text-lg capitalize">{stat.value}</p>
                 </div>
               ))}
             </div>
@@ -458,10 +460,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
               Top Findings
             </CardTitle>
             <AppButton
+              className="flex items-center gap-1.5 bg-success font-semibold text-success-foreground text-xs hover:bg-success/90"
               disabled={createFixMutation.isPending}
-              size="sm"
               onClick={handleFixAll}
-              className="bg-success hover:bg-success/90 text-success-foreground flex items-center gap-1.5 text-xs font-semibold"
+              size="sm"
             >
               {createFixMutation.isPending ? (
                 <Loader2 className="size-3.5 animate-spin" />
@@ -474,17 +476,17 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardContent className="flex flex-col gap-3">
             {topFindings.length > 0 ? (
               topFindings.slice(0, 4).map((finding) => (
-                <div key={finding.id} className="rounded-lg border p-3">
+                <div className="rounded-lg border p-3" key={finding.id}>
                   <div className="mb-1 flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium">{finding.title}</p>
+                    <p className="font-medium text-sm">{finding.title}</p>
                     <AppBadge variant="outline">{finding.riskLevel}</AppBadge>
                   </div>
-                  <p className="text-muted-foreground mb-2 text-xs">
+                  <p className="mb-2 text-muted-foreground text-xs">
                     {finding.filePath}:{finding.line}
                   </p>
                   <article
+                    className="prose dark:prose-invert wrap-break-word min-w-0 max-w-none prose-pre:bg-transparent prose-pre:p-0 text-xs"
                     dangerouslySetInnerHTML={{ __html: finding.messageHtml }}
-                    className="prose dark:prose-invert prose-pre:p-0 prose-pre:bg-transparent max-w-none min-w-0 text-xs wrap-break-word"
                   />
                 </div>
               ))
@@ -503,18 +505,18 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {fixes.map((fix) => (
-                <div key={fix.id} className="rounded-lg border p-3">
+                <div className="rounded-lg border p-3" key={fix.id}>
                   <div className="mb-1 flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium">{fix.title}</p>
+                    <p className="font-medium text-sm">{fix.title}</p>
                     <AppBadge variant="outline">{fix.status}</AppBadge>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {fix.status === "COMPLETED" && (
                       <AppButton
                         disabled={isStaging}
+                        onClick={() => stageFix(fix.id)}
                         size="sm"
                         variant="outline"
-                        onClick={() => stageFix(fix.id)}
                       >
                         Add to PR Draft
                       </AppButton>

@@ -33,8 +33,12 @@ function buildPreviewTitle(
   baseTitle: string,
   result: Pick<SyncFileActionMeta, "contextDiagnostics" | "contextMeta">,
 ) {
-  if (result.contextMeta.graphBacked) return `${baseTitle} (graph-backed)`;
-  if (result.contextDiagnostics.hasContext) return `${baseTitle} (context-aware)`;
+  if (result.contextMeta.graphBacked) {
+    return `${baseTitle} (graph-backed)`;
+  }
+  if (result.contextDiagnostics.hasContext) {
+    return `${baseTitle} (context-aware)`;
+  }
   return `${baseTitle} (file-only)`;
 }
 

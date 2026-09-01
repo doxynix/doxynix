@@ -18,12 +18,16 @@ export function useResizeObserver<T extends HTMLElement>() {
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
-      if (entry == null) return;
+      if (entry == null) {
+        return;
+      }
 
       const { height: newHeight, width: newWidth } = entry.contentRect;
 
       setSize((prev) => {
-        if (prev.width === newWidth && prev.height === newHeight) return prev;
+        if (prev.width === newWidth && prev.height === newHeight) {
+          return prev;
+        }
         return { height: newHeight, width: newWidth };
       });
     });

@@ -1,4 +1,4 @@
-import { type google, type GoogleLanguageModelOptions } from "@ai-sdk/google";
+import type { GoogleLanguageModelOptions, google } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { get } from "@vercel/edge-config";
 import { z } from "zod";
@@ -55,7 +55,7 @@ export async function getActiveModels(): Promise<Record<AIModelRole, AllAvailabl
 
     const parsed = aiModelsSchema.safeParse(remoteConfig);
     if (parsed.success) {
-      return parsed.data as Record<AIModelRole, AllAvailableModels[]>;
+      return parsed.data;
     }
 
     appLogger.error({

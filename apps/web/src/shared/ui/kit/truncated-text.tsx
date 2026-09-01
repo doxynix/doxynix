@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { type ComponentProps, useEffect, useRef, useState } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -17,7 +17,9 @@ export function TruncatedText({ className, text, tooltipProps }: Readonly<Props>
   const observerRef = useRef<null | ResizeObserver>(null);
 
   const setRef = (node: HTMLSpanElement | null) => {
-    if (observerRef.current) observerRef.current.disconnect();
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
 
     if (node) {
       const checkTruncation = () => {
@@ -36,17 +38,21 @@ export function TruncatedText({ className, text, tooltipProps }: Readonly<Props>
 
   useEffect(() => {
     return () => {
-      if (observerRef.current) observerRef.current.disconnect();
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
     };
   }, []);
 
   const content = (
-    <span ref={setRef} className={cn("block w-full min-w-0 truncate", className)}>
+    <span className={cn("block w-full min-w-0 truncate", className)} ref={setRef}>
       {text}
     </span>
   );
 
-  if (!isTruncated) return content;
+  if (!isTruncated) {
+    return content;
+  }
 
   return (
     <AppTooltip content={text} {...tooltipProps}>

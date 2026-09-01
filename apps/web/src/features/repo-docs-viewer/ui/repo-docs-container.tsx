@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react";
 import { FileText } from "lucide-react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 
-import { DocTypeSchema } from "@/shared/api-contracts";
 import { trpc } from "@/shared/api/trpc";
+import { DocTypeSchema } from "@/shared/api-contracts";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
@@ -47,10 +47,14 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
   useEffect(() => {
     const nodeId = nodeContext?.node.id ?? null;
     const preferredDocType = nodeContext?.related.docs[0]?.docType;
-    if (preferredDocType == null || docs.length === 0) return;
+    if (preferredDocType == null || docs.length === 0) {
+      return;
+    }
 
     const matchingDoc = docs.find((doc) => doc.type === preferredDocType);
-    if (matchingDoc == null || matchingDoc.type === resolvedActiveTab) return;
+    if (matchingDoc == null || matchingDoc.type === resolvedActiveTab) {
+      return;
+    }
 
     if (nodeId != null && autoSelectedNodeRef.current !== nodeId) {
       autoSelectedNodeRef.current = nodeId;
@@ -89,10 +93,10 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
       activeTab={resolvedActiveTab}
       availableDocs={availableDocs}
       nodeContext={nodeContext ?? null}
-      repoId={id}
       onTabChange={(tab) => {
         void setActiveTab(tab);
       }}
+      repoId={id}
     />
   );
 }

@@ -1,25 +1,27 @@
-import { env } from "@server/core/env";
-import Redis, { type Redis as RedisClient } from "ioredis";
+import Redis from "ioredis";
 
-type SIEMRedisClient = RedisClient & {
-  executeSlidingCounter(
-    currentKey: string,
-    previousKey: string,
-    maxRequests: string,
-    windowSec: string,
-    nowSec: string,
-  ): Promise<[number, number]>;
-};
+import { env } from "@/core/env";
+
+declare module "ioredis" {
+  interface Redis {
+    executeSlidingCounter(
+      currentKey: string,
+      previousKey: string,
+      maxRequests: string,
+      windowSec: string,
+      nowSec: string,
+    ): Promise<[number, number]>;
+  }
+}
 
 export const redis = new Redis(env.REDIS_URL, {
+  commandTimeout: 1000,
+  connectTimeout: 2000,
   enableOfflineQueue: false,
   maxRetriesPerRequest: 1,
-  connectTimeout: 2000,
-  commandTimeout: 1000,
-}) as SIEMRedisClient;
+});
 
 redis.defineCommand("executeSlidingCounter", {
-  numberOfKeys: 2,
   lua: `
     local current_key = KEYS[1]
     local previous_key = KEYS[2]
@@ -51,4 +53,5 @@ redis.defineCommand("executeSlidingCounter", {
 
     return { 1, remaining }
   `,
+  numberOfKeys: 2,
 });

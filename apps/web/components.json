@@ -1,25 +1,25 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "new-york",
+  "aliases": {
+    "components": "@/shared",
+    "hooks": "@/shared/hooks",
+    "lib": "@/shared/lib",
+    "ui": "@/shared/ui/core",
+    "utils": "@/shared/lib/utils"
+  },
+  "iconLibrary": "lucide",
+  "registries": {
+    "@aceternity": "https://ui.aceternity.com/registry/{name}.json",
+    "@magicui": "https://magicui.design/r/{name}"
+  },
   "rsc": true,
-  "tsx": true,
+  "style": "new-york",
   "tailwind": {
+    "baseColor": "slate",
     "config": "tailwind.config.ts",
     "css": "src/app/globals.css",
-    "baseColor": "slate",
     "cssVariables": true,
     "prefix": ""
   },
-  "iconLibrary": "lucide",
-  "aliases": {
-    "components": "@/shared",
-    "utils": "@/shared/lib/utils",
-    "ui": "@/shared/ui/core",
-    "lib": "@/shared/lib",
-    "hooks": "@/shared/hooks"
-  },
-  "registries": {
-    "@magicui": "https://magicui.design/r/{name}",
-    "@aceternity": "https://ui.aceternity.com/registry/{name}.json"
-  }
+  "tsx": true
 }

@@ -1,14 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState, type ChangeEvent, type SyntheticEvent } from "react";
+import { type ChangeEvent, type SyntheticEvent, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useChat } from "@ai-sdk/react";
-import {
-  DefaultChatTransport,
-  lastAssistantMessageIsCompleteWithApprovalResponses,
-  type UIMessage,
-} from "ai";
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import { ArrowDown, Bot, ChevronDown, FileText, Pencil, RotateCw, UserRound } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -48,7 +44,7 @@ type LocalFileAttachment = {
 };
 
 const MarkdownRenderer = dynamic(() => import("./agent-text-message").then((mod) => mod.default), {
-  loading: () => <div className="text-muted-foreground animate-pulse text-xs">Loading...</div>,
+  loading: () => <div className="animate-pulse text-muted-foreground text-xs">Loading...</div>,
   ssr: false,
 });
 
@@ -80,7 +76,7 @@ export function Agent() {
   );
 
   const { addToolApprovalResponse, messages, regenerate, sendMessage, setMessages, status } =
-    useChat<UIMessage>({
+    useChat({
       experimental_throttle: 50,
       id: sessionId ?? undefined,
       messages:
@@ -125,10 +121,12 @@ export function Agent() {
 
   useEffect(() => {
     const lastMessage = messages.at(-1);
-    if (lastMessage == null || lastMessage.role !== "assistant") return;
+    if (lastMessage?.role !== "assistant") {
+      return;
+    }
 
-    lastMessage.parts.forEach((part) => {
-      const isToolCall = part.type.startsWith("tool-");
+    lastMessage.parts.forEach((part: any) => {
+      const isToolCall = typeof part?.type === "string" && part.type.startsWith("tool-");
       if (isToolCall) {
         const toolPart = part as { state?: string; type: string };
         if (toolPart.state === "output-available") {
@@ -147,10 +145,12 @@ export function Agent() {
     if (element != null) {
       element.scrollTo({ top: element.scrollHeight });
     }
-  }, [messages, scrollRef]);
+  }, [scrollRef]);
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
+    if (!e.target.files) {
+      return;
+    }
 
     const filesList = Array.from(e.target.files);
     const newAttachments: LocalFileAttachment[] = [];
@@ -178,7 +178,9 @@ export function Agent() {
 
   const handleCustomSubmit = async (e?: SyntheticEvent) => {
     e?.preventDefault();
-    if (input.trim() === "" && attachments.length === 0) return;
+    if (input.trim() === "" && attachments.length === 0) {
+      return;
+    }
 
     const userMessage = input;
     const currentAttachments = attachments;
@@ -198,9 +200,10 @@ export function Agent() {
       });
     });
     await sendMessage({
-      parts: messageParts as UIMessage["parts"],
+      createdAt: new Date(),
+      parts: messageParts,
       role: "user",
-    });
+    } as any);
   };
 
   const handleNewChat = () => {
@@ -229,6 +232,7 @@ export function Agent() {
             top: expanded ? (isRepoOwnerPage ? 126 : 86) : "calc(100vh - 740px)",
             y: 0,
           }}
+          className={wrapperClasses}
           exit={{
             opacity: 0,
             y: 12,
@@ -245,22 +249,21 @@ export function Agent() {
             ease: "easeInOut",
             type: "tween",
           }}
-          className={wrapperClasses}
         >
           <Card className="flex h-full w-full flex-col overflow-hidden p-0">
             <ResizablePanelGroup
+              className="flex h-full"
               key={expanded ? "expanded" : "collapsed"}
               orientation="horizontal"
-              className="flex h-full"
             >
               {expanded && (
                 <>
-                  <ResizablePanel id="agent-sidebar" defaultSize="15%" maxSize="50%" minSize="15%">
+                  <ResizablePanel defaultSize="15%" id="agent-sidebar" maxSize="50%" minSize="15%">
                     <AgentSidebar
+                      onNewChat={handleNewChat}
                       sessionId={sessionId}
                       sessions={sessions}
                       setSessionId={setSessionId}
-                      onNewChat={handleNewChat}
                     />
                   </ResizablePanel>
                   <ResizableHandle style={{ position: "relative", zIndex: 9999 }} />
@@ -268,16 +271,16 @@ export function Agent() {
               )}
 
               <ResizablePanel
-                id="agent-main"
-                defaultSize={expanded ? "85%" : "100%"}
                 className="flex h-full flex-col"
+                defaultSize={expanded ? "85%" : "100%"}
+                id="agent-main"
               >
                 <AgentHeader expanded={expanded} setExpanded={setExpanded} />
 
                 <div className="group relative flex min-h-0 flex-1 flex-col">
-                  <ScrollArea ref={scrollRef} className="h-full min-h-0 flex-1">
+                  <ScrollArea className="h-full min-h-0 flex-1" ref={scrollRef}>
                     {messages.length === 0 && !isHistoryLoading && (
-                      <div className="animate-in fade-in pointer-events-none flex flex-col items-center gap-3 pt-24 select-none">
+                      <div className="fade-in pointer-events-none flex animate-in select-none flex-col items-center gap-3 pt-24">
                         <DxnxLogo className="size-64" />
                         <p className="text-muted-foreground text-sm">
                           Autonomous repository engineering assistant
@@ -288,8 +291,10 @@ export function Agent() {
                       {messages.map((message) => {
                         const fullMessageText =
                           message.parts
-                            .filter((p): p is { text: string; type: "text" } => p.type === "text")
-                            .map((p) => p.text)
+                            .filter(
+                              (p: any): p is { text: string; type: "text" } => p?.type === "text",
+                            )
+                            .map((p: any) => p.text)
                             .join("\n") || "";
 
                         const isAssistant = message.role === "assistant";
@@ -297,12 +302,12 @@ export function Agent() {
 
                         return (
                           <div
+                            className="group fade-in flex w-full animate-in flex-col gap-2 border-b py-5 duration-300 last:border-0"
                             key={message.id}
-                            className="group animate-in fade-in flex w-full flex-col gap-2 border-b py-5 duration-300 last:border-0"
                           >
                             <div
                               className={cn(
-                                "text-muted-foreground flex items-center gap-2 text-xs font-semibold",
+                                "flex items-center gap-2 font-semibold text-muted-foreground text-xs",
                                 isAssistant ? "justify-start" : "justify-end",
                               )}
                             >
@@ -311,18 +316,20 @@ export function Agent() {
                             </div>
 
                             {isEditing ? (
-                              <div className="animate-in fade-in ml-auto flex w-full flex-col gap-2 duration-200">
+                              <div className="fade-in ml-auto flex w-full animate-in flex-col gap-2 duration-200">
                                 <Textarea
-                                  value={editInput}
-                                  onChange={(e) => setEditInput(e.target.value)}
                                   className="max-h-32 min-h-16 resize-none rounded-xl border p-2 text-xs"
+                                  onChange={(e) => setEditInput(e.target.value)}
+                                  value={editInput}
                                 />
                                 <div className="flex items-center justify-end gap-1.5">
                                   <AppButton
-                                    size="sm"
+                                    className="text-xs"
                                     onClick={() => {
                                       void (async () => {
-                                        if (editInput.trim() === "") return;
+                                        if (editInput.trim() === "") {
+                                          return;
+                                        }
                                         setEditingMessageId(null);
                                         await sendMessage({
                                           messageId: message.id,
@@ -330,15 +337,15 @@ export function Agent() {
                                         });
                                       })();
                                     }}
-                                    className="text-xs"
+                                    size="sm"
                                   >
                                     Save & Submit
                                   </AppButton>
                                   <AppButton
+                                    className="text-xs"
+                                    onClick={() => setEditingMessageId(null)}
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => setEditingMessageId(null)}
-                                    className="text-xs"
                                   >
                                     Cancel
                                   </AppButton>
@@ -347,11 +354,11 @@ export function Agent() {
                             ) : (
                               <div
                                 className={cn(
-                                  "text-foreground flex flex-col gap-3 text-sm",
+                                  "flex flex-col gap-3 text-foreground text-sm",
                                   isAssistant ? "mr-auto text-left" : "ml-auto text-right",
                                 )}
                               >
-                                {message.parts.map((rawPart, index) => {
+                                {message.parts.map((rawPart: any, index: number) => {
                                   const part = rawPart as MessagePart;
 
                                   if (part.type === "reasoning") {
@@ -362,11 +369,11 @@ export function Agent() {
                                     const partKey = `${message.id}-reasoning-${index}`;
                                     return (
                                       <Collapsible
+                                        className="group/collapsible my-1 rounded-r-lg border-l-2 pl-3 text-muted-foreground text-xs italic"
                                         key={partKey}
-                                        className="group/collapsible text-muted-foreground my-1 rounded-r-lg border-l-2 pl-3 text-xs italic"
                                       >
                                         <div className="flex items-center justify-between gap-1">
-                                          <div className="text-xs font-semibold uppercase">
+                                          <div className="font-semibold text-xs uppercase">
                                             Thinking Process
                                           </div>
                                           <CollapsibleTrigger asChild>
@@ -377,10 +384,10 @@ export function Agent() {
                                         </div>
                                         <CollapsibleContent>
                                           <MarkdownRenderer
-                                            key={`${partKey}-md`}
-                                            id={partKey}
                                             content={reasoningPart.text}
+                                            id={partKey}
                                             isStreaming={isLoading}
+                                            key={`${partKey}-md`}
                                           />
                                         </CollapsibleContent>
                                       </Collapsible>
@@ -390,10 +397,10 @@ export function Agent() {
                                   if (part.type.startsWith("tool-")) {
                                     return (
                                       <ToolCallIndicator
-                                        key={`${message.id}-tool-${index}`}
                                         addToolApprovalResponse={(e) =>
                                           void addToolApprovalResponse(e)
                                         }
+                                        key={`${message.id}-tool-${index}`}
                                         part={part}
                                         toolLabels={toolLabels}
                                       />
@@ -404,10 +411,10 @@ export function Agent() {
                                     const textPart = part as { text: string; type: "text" };
                                     return (
                                       <MarkdownRenderer
-                                        key={`${message.id}-text-${index}`}
-                                        id={`${message.id}-text-${index}`}
                                         content={textPart.text}
+                                        id={`${message.id}-text-${index}`}
                                         isStreaming={isLoading}
+                                        key={`${message.id}-text-${index}`}
                                       />
                                     );
                                   }
@@ -423,22 +430,22 @@ export function Agent() {
 
                                     return (
                                       <div
-                                        key={`${message.id}-file-${index}`}
                                         className={cn(
-                                          "bg-background my-2 max-w-50 overflow-hidden rounded-xl border",
+                                          "my-2 max-w-50 overflow-hidden rounded-xl border bg-background",
                                           isAssistant ? "mr-auto" : "ml-auto",
                                         )}
+                                        key={`${message.id}-file-${index}`}
                                       >
-                                        {isImage === true ? (
+                                        {isImage ? (
                                           <Image
                                             alt={filePart.filename ?? "Attachment"}
-                                            src={filePart.url}
-                                            height={200}
-                                            width={200}
                                             className="h-auto max-h-38 w-full object-cover"
+                                            height={200}
+                                            src={filePart.url}
+                                            width={200}
                                           />
                                         ) : (
-                                          <div className="text-foreground flex items-center gap-2 p-3 text-xs">
+                                          <div className="flex items-center gap-2 p-3 text-foreground text-xs">
                                             <FileText />
                                             <span className="truncate font-medium">
                                               {filePart.filename ?? "Document"}
@@ -463,21 +470,21 @@ export function Agent() {
                               {fullMessageText.trim() !== "" && (
                                 <>
                                   <CopyButton
-                                    value={fullMessageText}
-                                    tooltipText="Copy response"
                                     className="size-9 px-3"
+                                    tooltipText="Copy response"
+                                    value={fullMessageText}
                                   />
                                   <AppTooltip content="Retry">
                                     <AppButton
+                                      className="opacity-0 group-hover:opacity-100"
                                       disabled={isLoading}
-                                      size="icon"
-                                      variant="ghost"
                                       onClick={() => {
                                         void (async () => {
                                           await regenerate({ messageId: message.id });
                                         })();
                                       }}
-                                      className="opacity-0 group-hover:opacity-100"
+                                      size="icon"
+                                      variant="ghost"
                                     >
                                       <RotateCw />
                                     </AppButton>
@@ -487,13 +494,13 @@ export function Agent() {
 
                               {!isAssistant && !isEditing && (
                                 <AppButton
-                                  size="icon"
-                                  variant="ghost"
+                                  className="opacity-0 group-hover:opacity-100"
                                   onClick={() => {
                                     setEditingMessageId(message.id);
                                     setEditInput(fullMessageText);
                                   }}
-                                  className="opacity-0 group-hover:opacity-100"
+                                  size="icon"
+                                  variant="ghost"
                                 >
                                   <Pencil />
                                 </AppButton>
@@ -509,15 +516,15 @@ export function Agent() {
                   </ScrollArea>
 
                   <AppButton
-                    size="icon"
-                    variant="secondary"
-                    onClick={() => scrollToBottom("smooth")}
                     className={cn(
                       "absolute bottom-4 left-1/2 z-10 -translate-x-1/2",
                       showScrollButton
                         ? "pointer-events-auto scale-100 opacity-100"
                         : "pointer-events-none scale-90 opacity-0",
                     )}
+                    onClick={() => scrollToBottom("smooth")}
+                    size="icon"
+                    variant="secondary"
                   >
                     <ArrowDown />
                   </AppButton>
@@ -532,13 +539,13 @@ export function Agent() {
                   }}
                   input={input}
                   isLoading={isLoading}
-                  setAttachments={setAttachments}
-                  setInput={setInput}
                   onSubmit={(e) => {
                     void (async () => {
                       await handleCustomSubmit(e);
                     })();
                   }}
+                  setAttachments={setAttachments}
+                  setInput={setInput}
                 />
               </ResizablePanel>
             </ResizablePanelGroup>

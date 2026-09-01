@@ -1,7 +1,7 @@
 {
-  "extends": "./base.json",
   "compilerOptions": {
     "noEmit": true,
     "types": ["node"]
-  }
+  },
+  "extends": "./base.json"
 }

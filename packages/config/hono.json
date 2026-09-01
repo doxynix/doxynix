@@ -1,12 +1,12 @@
 {
-  "extends": "./base.json",
   "compilerOptions": {
-    "noEmit": false,
     "declaration": true,
     "declarationMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
-  }
+    "noEmit": false
+  },
+  "extends": "./base.json"
 }

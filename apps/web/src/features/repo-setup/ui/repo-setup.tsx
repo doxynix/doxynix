@@ -20,7 +20,7 @@ export function RepoSetup({ repo }: Readonly<Props>) {
       <div className="flex-1">
         <RepoFileTree actions={actions} repo={repo} state={state} treeApi={refs.treeApi} />
       </div>
-      <RepoAnalysisConfig disabled={isBusy} actions={actions} state={state} />
+      <RepoAnalysisConfig actions={actions} disabled={isBusy} state={state} />
     </div>
   );
 }

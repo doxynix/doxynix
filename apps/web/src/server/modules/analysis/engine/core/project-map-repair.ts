@@ -13,10 +13,14 @@ function parseJsonObject(value: string): null | Record<string, unknown> {
 }
 
 export function parseEmbeddedProjectMap(value: unknown): null | Record<string, unknown> {
-  if (typeof value !== "string") return null;
+  if (typeof value !== "string") {
+    return null;
+  }
 
   const fieldMatch = PROJECT_MAP_FIELD_PATTERN.exec(value);
-  if (fieldMatch == null) return null;
+  if (fieldMatch == null) {
+    return null;
+  }
 
   let overview = value.slice(0, fieldMatch.index).trim();
   if (overview.endsWith('"')) {
@@ -29,18 +33,26 @@ export function parseEmbeddedProjectMap(value: unknown): null | Record<string, u
 }
 
 function stringValue(value: unknown, fallback = ""): string {
-  if (typeof value === "string") return value;
-  if (value == null) return fallback;
+  if (typeof value === "string") {
+    return value;
+  }
+  if (value == null) {
+    return fallback;
+  }
   return String(value);
 }
 
 function stringArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
+  if (!Array.isArray(value)) {
+    return [];
+  }
   return value.map((item) => stringValue(item)).filter((item) => item.length > 0);
 }
 
 export function normalizeProjectMapKeyDecisions(value: unknown) {
-  if (!Array.isArray(value)) return;
+  if (!Array.isArray(value)) {
+    return;
+  }
   const decisions = value.map((item, index) => {
     if (typeof item === "string") {
       return {
@@ -66,7 +78,9 @@ export function normalizeProjectMapKeyDecisions(value: unknown) {
 }
 
 export function normalizeProjectMapLanguageBreakdown(value: unknown) {
-  if (typeof value !== "object" || value == null) return;
+  if (typeof value !== "object" || value == null) {
+    return;
+  }
   const record = value as Record<string, unknown>;
   const keys = Object.keys(record).filter((key) => stringValue(record[key]).length > 0);
 

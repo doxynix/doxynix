@@ -68,7 +68,9 @@ export class DifferentialAnalyzer {
     try {
       const relevantFiles = diffInfo.changedFiles.filter((f) => {
         const normalizedPath = normalize(f.filename);
-        if (this.isExcluded(normalizedPath)) return false;
+        if (this.isExcluded(normalizedPath)) {
+          return false;
+        }
         return f.additions + f.deletions <= 1000;
       });
 
@@ -137,13 +139,17 @@ export class DifferentialAnalyzer {
   }
 
   private applyFocusFilters(findings: PRFinding[]): PRFinding[] {
-    if (this.config.focusAreas.length === 0) return findings;
+    if (this.config.focusAreas.length === 0) {
+      return findings;
+    }
 
     return findings.filter((f) => this.config.focusAreas.includes(f.type as any));
   }
 
   private calculateRiskScore(findings: PRFinding[]): number {
-    if (findings.length === 0) return 0;
+    if (findings.length === 0) {
+      return 0;
+    }
 
     const avgSeverity = meanBy(findings, (f) => f.score);
     return Math.min(10, Math.ceil(avgSeverity));
@@ -175,9 +181,15 @@ export class DifferentialAnalyzer {
   private mapScoreToSeverity(score: number): PRFinding["severity"] {
     const thresholds = AI_POLICY_CONSTANTS.PR_ANALYSIS.SEVERITY_THRESHOLDS;
 
-    if (score >= thresholds.CRITICAL) return "CRITICAL";
-    if (score >= thresholds.HIGH) return "HIGH";
-    if (score >= thresholds.MEDIUM) return "MEDIUM";
+    if (score >= thresholds.CRITICAL) {
+      return "CRITICAL";
+    }
+    if (score >= thresholds.HIGH) {
+      return "HIGH";
+    }
+    if (score >= thresholds.MEDIUM) {
+      return "MEDIUM";
+    }
     return "LOW";
   }
 
@@ -193,7 +205,9 @@ export class DifferentialAnalyzer {
     try {
       const diffPayload = relevantFiles
         .map((f) => {
-          if (f.patch == null) return null;
+          if (f.patch == null) {
+            return null;
+          }
           return `\n<file_patch path="${f.filename}">\n${f.patch}\n</file_patch>`;
         })
         .filter(Boolean)
@@ -246,10 +260,12 @@ export class DifferentialAnalyzer {
     }
   }
 
-  private runMapperPhase(files: PRDiffInfo["changedFiles"], prNumber: number): PRFinding[] {
+  private runMapperPhase(files: PRDiffInfo["changedFiles"], _prNumber: number): PRFinding[] {
     const findings: PRFinding[] = compact(
       files.map((file) => {
-        if (file.patch == null) return null;
+        if (file.patch == null) {
+          return null;
+        }
 
         const addedLines = file.patch.split("\n").filter((l) => l.startsWith("+")).length;
         const complexityRatio = addedLines / Math.max(file.additions, 1);
@@ -272,21 +288,27 @@ export class DifferentialAnalyzer {
     return findings;
   }
 
-  private runSentinelPhase(files: PRDiffInfo["changedFiles"], prNumber: number): PRFinding[] {
+  private runSentinelPhase(files: PRDiffInfo["changedFiles"], _prNumber: number): PRFinding[] {
     const findings: PRFinding[] = [];
     const { SECRETS, SQL_INJECTION, todoPatterns, VULNERABILITIES } = PROJECT_POLICY_RULES.security;
 
     for (const file of files) {
-      if (file.patch == null) continue;
+      if (file.patch == null) {
+        continue;
+      }
 
       const parsedDiff = parseGitDiff(file.patch);
 
       for (const parsedFile of parsedDiff.files) {
         for (const chunk of parsedFile.chunks) {
-          if (!("changes" in chunk)) continue;
+          if (!("changes" in chunk)) {
+            continue;
+          }
 
           for (const change of chunk.changes) {
-            if (change.type !== "AddedLine") continue;
+            if (change.type !== "AddedLine") {
+              continue;
+            }
 
             const lineContent = change.content;
             const lineNum = change.lineAfter;

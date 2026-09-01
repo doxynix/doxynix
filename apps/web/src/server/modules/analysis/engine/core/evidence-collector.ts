@@ -15,13 +15,21 @@ const CLI_DIR_REGEX = /^cli\//iu;
 const BARREL_FILE_REGEX = /(?:^|\/)index\.[cm]?[jt]sx?$/i;
 
 export function kindForFile(path: string, categories: string[]): EntrypointKind {
-  if (categories.includes("benchmark")) return "benchmark";
-  if (categories.includes("test")) return "test";
-  if (categories.includes("infra")) return "infra";
+  if (categories.includes("benchmark")) {
+    return "benchmark";
+  }
+  if (categories.includes("test")) {
+    return "test";
+  }
+  if (categories.includes("infra")) {
+    return "infra";
+  }
   if (categories.includes("tooling") || SCRIPTS_DIR_REGEX.test(path) || CLI_DIR_REGEX.test(path)) {
     return "tooling";
   }
-  if (BARREL_FILE_REGEX.test(path)) return "library";
+  if (BARREL_FILE_REGEX.test(path)) {
+    return "library";
+  }
   return "runtime";
 }
 

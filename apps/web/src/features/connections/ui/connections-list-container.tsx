@@ -24,7 +24,9 @@ export function ConnectionsListContainer() {
 
   const handleInstall = async () => {
     const { data } = await getUrl();
-    if (data != null) window.location.assign(data);
+    if (data != null) {
+      window.location.assign(data);
+    }
   };
 
   const { data, isLoading: isAuthLoading } = trpc.user.getLinkedAccounts.useQuery();
@@ -76,8 +78,8 @@ export function ConnectionsListContainer() {
             disabled={isFetching}
             isLoading={isFetching}
             loadingText="Processing..."
-            variant="outline"
             onClick={() => void handleInstall()}
+            variant="outline"
           >
             <Plus /> Add New
           </LoadingButton>

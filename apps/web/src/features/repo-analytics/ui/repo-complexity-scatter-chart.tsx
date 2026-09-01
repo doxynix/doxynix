@@ -39,8 +39,6 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
           <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
 
           <XAxis
-            name="Lines"
-            type="number"
             axisLine={false}
             dataKey="x"
             fontSize={12}
@@ -51,13 +49,13 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
               position: "bottom",
               value: "Lines of Code",
             }}
+            name="Lines"
             stroke="var(--muted-foreground)"
             tickLine={false}
+            type="number"
           />
 
           <YAxis
-            name="Complexity"
-            type="number"
             axisLine={false}
             dataKey="y"
             fontSize={12}
@@ -68,18 +66,20 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
               position: "insideLeft",
               value: "Complexity",
             }}
+            name="Complexity"
             stroke="var(--muted-foreground)"
             tickLine={false}
+            type="number"
           />
 
-          <ZAxis type="number" dataKey="z" range={[50, 400]} />
+          <ZAxis dataKey="z" range={[50, 400]} type="number" />
 
           <Tooltip
             content={({ active, payload }) => {
               if (active != null && payload != null && payload.length !== 0) {
                 const data = payload[0]?.payload;
                 return (
-                  <div className="bg-popover border-border rounded-md border p-2 shadow-md">
+                  <div className="rounded-md border border-border bg-popover p-2 shadow-md">
                     <p className="font-mono text-[10px] text-blue-400">{data.name}</p>
                     <div className="mt-1 flex flex-col gap-1">
                       <p className="text-foreground text-xs">
@@ -88,7 +88,7 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
                       <p className="text-foreground text-xs">
                         Lines: <span className="font-bold">{data.x}</span>
                       </p>
-                      <p className="text-xs text-orange-500">
+                      <p className="text-orange-500 text-xs">
                         Risk Score: <span className="font-bold">{data.z}</span>
                       </p>
                     </div>
@@ -113,12 +113,12 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
             x={300}
           />
 
-          <Scatter name="Files" data={chartData}>
+          <Scatter data={chartData} name="Files">
             {chartData.map((entry, index) => (
               <Cell
-                key={`cell-${index}`}
-                fill={entry.y > 15 ? "var(--destructive)" : "var(--primary)"}
                 className="cursor-crosshair opacity-80 transition-opacity hover:opacity-100"
+                fill={entry.y > 15 ? "var(--destructive)" : "var(--primary)"}
+                key={`cell-${index}`}
               />
             ))}
           </Scatter>

@@ -1,4 +1,4 @@
-import { useId, type SVGProps } from "react";
+import { type SVGProps, useId } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -76,15 +76,15 @@ export function DotPattern({
     >
       <defs>
         <pattern
-          id={id}
           height={height}
+          id={id}
           patternContentUnits="userSpaceOnUse"
           patternUnits="userSpaceOnUse"
           width={width}
           x={x}
           y={y}
         >
-          <circle id="pattern-circle" cx={cx} cy={cy} r={cr} />
+          <circle cx={cx} cy={cy} id="pattern-circle" r={cr} />
         </pattern>
       </defs>
       <rect fill={`url(#${id})`} height="100%" strokeWidth={0} width="100%" />

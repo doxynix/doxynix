@@ -11,7 +11,9 @@ console.log(`☢️  NUCLEAR WIPE: Removing ALL imports from ${sourceFiles.lengt
 for (const sourceFile of sourceFiles) {
   const imports = sourceFile.getImportDeclarations();
 
-  if (imports.length === 0) continue;
+  if (imports.length === 0) {
+    continue;
+  }
 
   imports.forEach((imp) => imp.remove());
 

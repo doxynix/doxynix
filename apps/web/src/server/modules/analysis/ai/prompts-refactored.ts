@@ -125,7 +125,7 @@ export function buildAnalysisSystemPrompt(targetLanguage: string = "English"): s
     `,
     )
     .withConstraints(
-      `${LanguageRules.targetLanguage(targetLanguage)}`,
+      LanguageRules.targetLanguage(targetLanguage),
       LanguageRules.technicalTone,
       BehavioralRules.noHiddenAssumptions,
       "Prefer explicit evidence over intuition.",
@@ -172,11 +172,11 @@ export function buildApiWriterSystemPrompt(targetLanguage: string = "English"): 
       `Write "Public Interface & Contracts" (Technical Reference) for the Interactive Technical Passport.`,
     )
     .withConstraints(
-      `${LanguageRules.targetLanguage(targetLanguage)}`,
-      `${LanguageRules.codeBlockTitles}`,
-      `${LanguageRules.githubAlerts}`,
+      LanguageRules.targetLanguage(targetLanguage),
+      LanguageRules.codeBlockTitles,
+      LanguageRules.githubAlerts,
       "Tone: Staff Architect to Senior Developer. Strict, contract-oriented, reference-austere, and evidence-backed.",
-      `${GroundingRules.pathValidation("allowed_repository_paths")}`,
+      GroundingRules.pathValidation("allowed_repository_paths"),
       WRITER_TRACEABILITY_RULE,
       BehavioralRules.primaryArtifact,
       NO_THEORY_CONSTRAINT,
@@ -251,11 +251,11 @@ export function buildReadmeWriterSystemPrompt(targetLanguage: string = "English"
       dedent`Write "System Identity & Onboarding Blueprint" (Tutorial & Overview) for the Interactive Technical Passport.`,
     )
     .withConstraints(
-      `${LanguageRules.targetLanguage(targetLanguage)}`,
-      `${LanguageRules.emojiStyle}`,
-      `${LanguageRules.codeBlockTitles}`,
-      `${LanguageRules.githubAlerts}`,
-      `${GroundingRules.pathValidation("allowed_repository_paths")}`,
+      LanguageRules.targetLanguage(targetLanguage),
+      LanguageRules.emojiStyle,
+      LanguageRules.codeBlockTitles,
+      LanguageRules.githubAlerts,
+      GroundingRules.pathValidation("allowed_repository_paths"),
       WRITER_TRACEABILITY_RULE,
       BehavioralRules.primaryArtifact,
       "Tone: Executive but highly technical. Explain what the system is, why it exists, and where a senior engineer should start.",
@@ -334,9 +334,9 @@ export function buildContributingWriterSystemPrompt(targetLanguage: string = "En
       dedent`Write "Development Guide, Quality Standards & Change Playbooks" (How-To Guides) for the Interactive Technical Passport.`,
     )
     .withConstraints(
-      `${LanguageRules.targetLanguage(targetLanguage)}`,
+      LanguageRules.targetLanguage(targetLanguage),
       "Tone: Pragmatic maintainer. Be direct about fragile zones, testing setups, and review criteria.",
-      `${GroundingRules.pathValidation("allowed_repository_paths")}`,
+      GroundingRules.pathValidation("allowed_repository_paths"),
       WRITER_TRACEABILITY_RULE,
       "CRITICAL: Do not translate programmatic commands, CLI flags, technical vulnerability types (e.g., SQL Injection, XSS, CSRF), or file paths. Keep these identifiers in English.",
       NO_THEORY_CONSTRAINT,
@@ -405,8 +405,8 @@ export function buildChangelogWriterSystemPrompt(targetLanguage: string = "Engli
        Reconcile raw Git commits, merged Pull Requests, and static analysis metrics delta.`,
     )
     .withConstraints(
-      `${LanguageRules.targetLanguage(targetLanguage)}`,
-      `${LanguageRules.emojiStyle}`,
+      LanguageRules.targetLanguage(targetLanguage),
+      LanguageRules.emojiStyle,
       "Prefer high-density, values-based bullet points over chronological lists.",
       "CRITICAL: Do not translate Git hashes, version numbers, release dates, or library/package coordinates. Keep technical identifiers in English.",
       "Traceability: If pull requests or commits are mentioned, format them strictly as links using [[PR-XXX]] or [[commit-hash]] notation to tie entries back to the VCS system.",
@@ -463,7 +463,7 @@ export function buildCodeDocSystemPrompt(targetLanguage: string = "English"): st
       `Generate precise inline documentation comments (JSDoc, KDoc, GoDoc, Docstrings) for the provided source code using Search-and-Replace blocks.`,
     )
     .withConstraints(
-      `${LanguageRules.targetLanguage(targetLanguage)}`,
+      LanguageRules.targetLanguage(targetLanguage),
       "CRITICAL CODE PRESERVATION RULE: You must preserve the original code line-for-line, character-for-character. Under NO circumstances are you allowed to refactor, optimize, change imports, rewrite algorithm logic, or simplify the code. Your ONLY task is to insert comments (KDoc for Kotlin, JSDoc for JS/TS) above classes, methods, and functions.",
       "The actual active code statements, brackets, variables, and logic flow inside functions MUST remain 100% identical to the original.",
       "Use exact language-specific idiomatic standards (KDoc for Kotlin, JSDoc/TSDoc for TypeScript).",
@@ -501,12 +501,12 @@ export function buildArchitectureWriterSystemPrompt(targetLanguage: string = "En
       `Write "Deep Engineering Architecture" (Architectural Explanation & ADRs) for the Interactive Technical Passport.`,
     )
     .withConstraints(
-      `${LanguageRules.targetLanguage(targetLanguage)}`,
-      `${LanguageRules.emojiStyle}`,
-      `${LanguageRules.codeBlockTitles}`,
-      `${LanguageRules.githubAlerts}`,
+      LanguageRules.targetLanguage(targetLanguage),
+      LanguageRules.emojiStyle,
+      LanguageRules.codeBlockTitles,
+      LanguageRules.githubAlerts,
       BehavioralRules.primaryArtifact,
-      `${GroundingRules.pathValidation("allowed_repository_paths")}`,
+      GroundingRules.pathValidation("allowed_repository_paths"),
       WRITER_TRACEABILITY_RULE,
       "Tone: Staff Architect to Senior Developer. Analytical, specific, focused on data flow, structural integrity, trade-offs, and design rationale.",
       "CRITICAL: Do not translate programmatic identifiers, component aliases, or node IDs inside Mermaid diagrams. All graph syntax structure must use clean English tokens. Only translate the human-readable labels inside text brackets, e.g., NodeID[Текст на целевом языке].",
@@ -601,7 +601,7 @@ export function buildSingleFileAnalysisPrompt(language: string = "English"): str
 3. Refactoring: Suggest clean, idiomatic improvements to lower cyclomatic complexity and improve maintainability.`,
     )
     .withConstraints(
-      `${LanguageRules.targetLanguage(language)}`,
+      LanguageRules.targetLanguage(language),
       LanguageRules.conciseness(5),
       LanguageRules.technicalTone,
       "GROUNDING: Do not flag unverified issues regarding external module imports, global types, or third-party libraries unless a strict logical contradiction is explicitly visible inside this single file.",
@@ -645,7 +645,7 @@ export function buildPrReviewSystemPrompt(targetLanguage: string = "English"): s
     `,
     )
     .withConstraints(
-      `${LanguageRules.targetLanguage(targetLanguage)}`,
+      LanguageRules.targetLanguage(targetLanguage),
       LanguageRules.technicalTone,
       BehavioralRules.noHiddenAssumptions,
       "Do NOT flag missing imports or missing global definitions unless they constitute a direct logical contradiction in the changed lines.",

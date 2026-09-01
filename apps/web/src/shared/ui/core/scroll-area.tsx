@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, type ComponentPropsWithoutRef, type ComponentRef } from "react";
+import { type ComponentPropsWithoutRef, type ComponentRef, forwardRef } from "react";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 
 import { cn } from "@/shared/lib/cn";
@@ -12,8 +12,8 @@ interface ScrollAreaProps extends ComponentPropsWithoutRef<typeof ScrollAreaPrim
 const ScrollArea = forwardRef<ComponentRef<typeof ScrollAreaPrimitive.Root>, ScrollAreaProps>(
   ({ children, className, viewportClassName, ...props }, ref) => (
     <ScrollAreaPrimitive.Root
-      ref={ref}
       className={cn("relative overflow-hidden", className)}
+      ref={ref}
       {...props}
     >
       <ScrollAreaPrimitive.Viewport
@@ -33,19 +33,19 @@ const ScrollBar = forwardRef<
   ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
 >(({ className, orientation = "vertical", ...props }, ref) => (
   <ScrollAreaPrimitive.ScrollAreaScrollbar
-    ref={ref}
-    orientation={orientation}
     className={cn(
-      "flex touch-none transition-colors select-none",
-      "data-[state=visible]:animate-in data-[state=visible]:fade-in-0 data-[state=visible]:duration-200",
-      "data-[state=hidden]:animate-out data-[state=hidden]:fade-out-0 data-[state=hidden]:duration-200",
+      "flex touch-none select-none transition-colors",
+      "data-[state=visible]:fade-in-0 data-[state=visible]:animate-in data-[state=visible]:duration-200",
+      "data-[state=hidden]:fade-out-0 data-[state=hidden]:animate-out data-[state=hidden]:duration-200",
       orientation === "vertical" && "h-full w-1.5 border-l border-l-transparent p-px",
       orientation === "horizontal" && "h-1.5 flex-col border-t border-t-transparent p-px",
       className,
     )}
+    orientation={orientation}
+    ref={ref}
     {...props}
   >
-    <ScrollAreaPrimitive.ScrollAreaThumb className="bg-accent-foreground relative flex-1 rounded-full" />
+    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-accent-foreground" />
   </ScrollAreaPrimitive.ScrollAreaScrollbar>
 ));
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;

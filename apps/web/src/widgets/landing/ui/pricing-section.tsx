@@ -59,38 +59,42 @@ export function PricingSection() {
   ];
 
   return (
-    <section className="bg-landing-bg-light/20 border-border border-y py-24">
+    <section className="border-border border-y bg-landing-bg-light/20 py-24">
       <div className="container mx-auto px-4">
-        <h2 className="mb-16 text-center text-3xl font-bold md:text-5xl">
+        <h2 className="mb-16 text-center font-bold text-3xl md:text-5xl">
           {t("section_pricing_title_prefix")}{" "}
           <span className="text-muted-foreground">{t("section_pricing_title_highlight")}</span>
         </h2>
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
           {PLANS.map((plan) => (
             <div
-              key={plan.name}
               className={cn(
                 "relative flex flex-col rounded-2xl border p-8",
                 plan.popular
                   ? "border-foreground/50 bg-foreground/10"
                   : "border-border bg-landing-bg-light/40",
               )}
+              key={plan.name}
             >
               {plan.popular && (
-                <div className="text-background bg-foreground absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-xs font-bold tracking-wide uppercase">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-foreground px-3 py-1 font-bold text-background text-xs uppercase tracking-wide">
                   {t("section_pricing_badge_popular")}
                 </div>
               )}
-              <h3 className="mb-2 text-xl font-bold">{plan.name}</h3>
+              <h3 className="mb-2 font-bold text-xl">{plan.name}</h3>
               <div className="mb-2 flex items-baseline gap-1">
-                <span className="text-4xl font-bold">{plan.price}</span>
+                <span className="font-bold text-4xl">{plan.price}</span>
                 <span className="text-muted-foreground">
                   {plan.price === "Custom" ? "" : t("section_pricing_interval")}
                 </span>
               </div>
-              <p className="text-muted-foreground mb-6 text-sm">{plan.desc}</p>
+              <p className="mb-6 text-muted-foreground text-sm">{plan.desc}</p>
               <AppButton
                 asChild
+                className={cn(
+                  "mb-8 w-full cursor-pointer",
+                  plan.popular && "bg-foreground text-background hover:bg-accent-foreground",
+                )}
                 onClick={() =>
                   posthog.capture("pricing_plan_clicked", {
                     is_popular: plan.popular,
@@ -100,16 +104,12 @@ export function PricingSection() {
                     plan_tier: plan.popular ? "pro" : "other",
                   })
                 }
-                className={cn(
-                  "mb-8 w-full cursor-pointer",
-                  plan.popular && "bg-foreground hover:bg-accent-foreground text-background",
-                )}
               >
                 <Link href={plan.href}>{plan.cta}</Link>
               </AppButton>
               <ul className="flex flex-1 flex-col gap-3">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm">
+                  <li className="flex items-start gap-2 text-sm" key={f}>
                     <Check className="mt-0.5" />
                     {f}
                   </li>

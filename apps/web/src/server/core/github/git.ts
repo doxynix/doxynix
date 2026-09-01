@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+
 import type { Repo } from "@prisma/client";
 import gitUrlParse from "git-url-parse";
 import simpleGit from "simple-git";
@@ -83,7 +84,7 @@ export async function getAnalysisContext(
   } catch (error) {
     if (error instanceof GitHubAuthRequiredError) {
       taskLogger.error("GitHub: Authentication required for this repository");
-      throw new Error(PRIVATE_REPO_AUTH_MESSAGE);
+      throw new Error(PRIVATE_REPO_AUTH_MESSAGE, { cause: error });
     }
     throw error;
   }
@@ -157,6 +158,6 @@ export async function cloneRepository(
     const raw = error instanceof Error ? error.message : String(error);
     const safe = token != null ? raw.replaceAll(token, "***") : raw;
     taskLogger.error(`Git: Clone failed. ${safe}`);
-    throw new Error(`Failed to clone repository: ${safe}`);
+    throw new Error(`Failed to clone repository: ${safe}`, { cause: error });
   }
 }

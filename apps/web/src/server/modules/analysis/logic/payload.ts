@@ -5,7 +5,7 @@ import { z } from "zod";
 import { appLogger } from "@/server/core/app-logger";
 
 import type { LatestCompletedAnalysis } from "../analysis.repository";
-import { aiSchema, type AIResult } from "../engine/core/analysis-result.schemas";
+import { type AIResult, aiSchema } from "../engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "../engine/core/metrics.types";
 import type { StoredDocument, WriterStatus } from "./structure-shared";
 
@@ -18,7 +18,9 @@ type AnalysisPayload = {
 export function coerceAnalysisPayload(
   analysis: LatestCompletedAnalysis | null | undefined,
 ): AnalysisPayload | null {
-  if (analysis == null || analysis.metricsJson == null || analysis.resultJson == null) return null;
+  if (analysis?.metricsJson == null || analysis.resultJson == null) {
+    return null;
+  }
 
   const parsed = aiSchema.safeParse(analysis.resultJson);
   if (!parsed.success) {
@@ -40,8 +42,9 @@ export function coerceAnalysisPayload(
     metrics: analysis.metricsJson as unknown as RepoMetrics,
   };
 }
+
 export function dedupeLatestDocsByType(docs: StoredDocument[]) {
-  const sorted = [...docs].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+  const sorted = docs.toSorted((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
   const singletons = sorted.filter((d) => d.type !== "CODE_DOC");
   const codeDocs = sorted.filter((d) => d.type === "CODE_DOC");
@@ -59,7 +62,9 @@ export function dedupeLatestDocsByType(docs: StoredDocument[]) {
 
 function getWriterStatus(docType: DocType, aiResult: AIResult | null): null | WriterStatus {
   const writerKey = WRITER_KEY_BY_DOC_TYPE[docType];
-  if (writerKey == null) return null;
+  if (writerKey == null) {
+    return null;
+  }
   return aiResult?.analysisRuntime?.writers?.[writerKey] ?? null;
 }
 

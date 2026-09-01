@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { motion, useMotionValueEvent, useScroll } from "motion/react";
 
 export function PublicHeaderWrapper({ children }: Readonly<{ children: ReactNode }>) {
@@ -32,12 +32,16 @@ export function PublicHeaderWrapper({ children }: Readonly<{ children: ReactNode
     <>
       <div
         aria-hidden="true"
-        onMouseEnter={() => setIsHidden(false)}
         className="fixed inset-x-0 top-0 z-50 h-16"
+        onMouseEnter={() => setIsHidden(false)}
       />
 
       <motion.div
         animate={isHidden ? "hidden" : "visible"}
+        className={
+          "glass-panel fixed top-0 z-50 w-full border-border border-b bg-background/76 transition-standard supports-backdrop-filter:bg-background/64"
+        }
+        onFocusCapture={() => setIsHidden(false)}
         transition={{
           duration: 0.18,
           ease: [0.4, 0, 0.2, 1],
@@ -54,12 +58,8 @@ export function PublicHeaderWrapper({ children }: Readonly<{ children: ReactNode
             y: 0,
           },
         }}
-        onFocusCapture={() => setIsHidden(false)}
-        className={
-          "transition-standard supports-backdrop-filter:bg-background/64 glass-panel border-border bg-background/76 fixed top-0 z-50 w-full border-b"
-        }
       >
-        <div className="transition-standard relative border-b border-transparent">{children}</div>
+        <div className="relative border-transparent border-b transition-standard">{children}</div>
       </motion.div>
     </>
   );

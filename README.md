@@ -83,7 +83,7 @@ graph TB
 | [`apps/siem-client`](apps/siem-client) | `@doxynix/siem-client` | Security operations dashboard, real-time incident console | 🔒 **Internal (Admins)** |
 | [`packages/cli`](packages/cli) | `@doxynix/cli` | Terminal interface for developers and CI/CD runners | 🚧 **Public (MVP)** |
 | [`packages/shared`](packages/shared) | `@doxynix/shared` | Shared Zod schemas, validation contracts, and domain types | 🔒 **Internal** |
-| [`packages/config`](packages/config) | `@doxynix/config` | Shared configurations for Biome, TypeScript, and ESLint | 🌐 **Shared** |
+| [`packages/config`](packages/config) | `@doxynix/config` | Shared configurations for Biome, TypeScript, and Oxlint | 🌐 **Shared** |
 
 ---
 

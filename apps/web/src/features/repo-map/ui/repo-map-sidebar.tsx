@@ -32,11 +32,11 @@ export function RepoMapSidebar({ nodeId, onClose, onNavigate, repoId }: Readonly
     );
 
   return (
-    <aside className="bg-card flex h-full flex-col overflow-hidden">
+    <aside className="flex h-full flex-col overflow-hidden bg-card">
       {nodeId == null && isWorkspaceLoading ? (
         <RepoMapSidebarSkeleton />
       ) : nodeId == null && workspace != null ? (
-        <RepoMapOverview workspace={workspace} onNavigate={onNavigate} />
+        <RepoMapOverview onNavigate={onNavigate} workspace={workspace} />
       ) : nodeId != null && isNodeContextLoading ? (
         <RepoMapSidebarSkeleton />
       ) : nodeContext != null ? (

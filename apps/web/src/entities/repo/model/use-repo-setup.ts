@@ -4,13 +4,13 @@ import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
 import type { TreeApi } from "react-arborist";
 
-import { DocTypeSchema } from "@/shared/api-contracts";
 import { trpc } from "@/shared/api/trpc";
+import { DocTypeSchema } from "@/shared/api-contracts";
 import { useRouter } from "@/shared/i18n/navigation";
 
-import { collectAllIds, getFolderSelectionState, sortNodes } from "./repo-setup-utils";
-import type { FileNode, FileTuple } from "./repo-setup.types";
 import type { DocType, UiRepoDetailed } from "./repo.types";
+import type { FileNode, FileTuple } from "./repo-setup.types";
+import { collectAllIds, getFolderSelectionState, sortNodes } from "./repo-setup-utils";
 import { useRepoBranchOpen } from "./use-repo-branch.store";
 
 export type RepoSetupReturn = ReturnType<typeof useRepoSetup>;
@@ -19,8 +19,10 @@ export type StateType = RepoSetupReturn["state"];
 export type ActionsType = RepoSetupReturn["actions"];
 
 const getRecommendedPaths = (files: FileTuple[] | undefined) => {
-  if (files == null) return [];
-  return (files as FileTuple[]).filter((f) => f[3] === 1 && f[1] === 1).map((f) => f[0]);
+  if (files == null) {
+    return [];
+  }
+  return files.filter((f) => f[3] === 1 && f[1] === 1).map((f) => f[0]);
 };
 
 export function useRepoSetup(repo: UiRepoDetailed) {
@@ -72,12 +74,14 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   }
 
   const getTreeData = () => {
-    if (!apiFiles) return [];
+    if (!apiFiles) {
+      return [];
+    }
     const root: FileNode[] = [];
     const map = new Map<string, FileNode>();
 
     apiFiles.forEach((fileArr) => {
-      const [path, type, sha, recommended] = fileArr as FileTuple;
+      const [path, type, sha, recommended] = fileArr;
       const parts = path.split("/");
       let currentPath = "";
 
@@ -97,10 +101,13 @@ export function useRepoSetup(repo: UiRepoDetailed) {
             type: isLast ? (type === 1 ? "blob" : "tree") : "tree",
           };
           map.set(currentPath, newNode);
-          if (index === 0) root.push(newNode);
-          else {
+          if (index === 0) {
+            root.push(newNode);
+          } else {
             const parent = map.get(parentPath);
-            if (parent?.children) parent.children.push(newNode);
+            if (parent?.children) {
+              parent.children.push(newNode);
+            }
           }
         }
       });
@@ -110,7 +117,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
 
   const treeData = getTreeData();
 
-  const handleToggleSelection = (nodeId: string, nodeData: FileNode) => {
+  const handleToggleSelection = (_nodeId: string, nodeData: FileNode) => {
     const idsToToggle = collectAllIds(nodeData);
 
     setSelectedIds((prev) => {
@@ -132,7 +139,9 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     const collect = (nodes: FileNode[]) => {
       nodes.forEach((node) => {
         ids.push(node.id);
-        if (node.children) collect(node.children);
+        if (node.children) {
+          collect(node.children);
+        }
       });
     };
     collect(treeData);
@@ -149,10 +158,10 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   };
 
   const handleStartAnalysis = () => {
-    if (!apiFiles) return;
-    const leafFilePaths = new Set(
-      (apiFiles as FileTuple[]).filter((f) => f[1] === 1).map((f) => f[0]),
-    );
+    if (!apiFiles) {
+      return;
+    }
+    const leafFilePaths = new Set(apiFiles.filter((f) => f[1] === 1).map((f) => f[0]));
     const selectedFiles = Array.from(selectedIds).filter((id) => leafFilePaths.has(id));
     analyzeMutation.mutate({
       branch: selectedBranch,
@@ -175,13 +184,15 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   };
 
   const getSelectedFilesCount = () => {
-    if (!apiFiles) return 0;
-    const allFilePaths = new Set(
-      (apiFiles as FileTuple[]).filter((f) => f[1] === 1).map((f) => f[0]),
-    );
+    if (!apiFiles) {
+      return 0;
+    }
+    const allFilePaths = new Set(apiFiles.filter((f) => f[1] === 1).map((f) => f[0]));
     let count = 0;
     selectedIds.forEach((id) => {
-      if (allFilePaths.has(id)) count++;
+      if (allFilePaths.has(id)) {
+        count++;
+      }
     });
     return count;
   };
@@ -189,9 +200,11 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   const selectedFilesCount = getSelectedFilesCount();
 
   const getHasSearchMatches = () => {
-    if (!searchTerm) return true;
+    if (!searchTerm) {
+      return true;
+    }
     const term = searchTerm.toLowerCase();
-    return (apiFiles as FileTuple[] | undefined)?.some((f) => f[0].toLowerCase().includes(term));
+    return apiFiles?.some((f) => f[0].toLowerCase().includes(term));
   };
 
   const hasSearchMatches = getHasSearchMatches();

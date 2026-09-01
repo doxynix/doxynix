@@ -21,7 +21,7 @@ import {
   contributingTask,
   readmeTask,
 } from "../tasks/writer.tasks";
-import { type WriterName, type WriterResult } from "./writer-tasks";
+import type { WriterName, WriterResult } from "./writer-tasks";
 
 type ModuleDependencyEntry = {
   graphPartial: boolean;
@@ -380,10 +380,12 @@ export async function orchestrateWriterTasks(
       | typeof readmeTask,
   ) => {
     const run = runs.find((r) => r.taskIdentifier === taskInstance.id);
-    if (run == null) return;
+    if (run == null) {
+      return;
+    }
 
     if (run.ok) {
-      return run.output as WriterResult;
+      return run.output;
     }
 
     return {
@@ -483,7 +485,9 @@ function buildModuleDependencyContext(
   const outboundByPath = new Map<string, string[]>();
 
   for (const edge of evidence.dependencyGraph.edges) {
-    if (!isResolvedInternalEdge(edge)) continue;
+    if (!isResolvedInternalEdge(edge)) {
+      continue;
+    }
 
     const outbound = outboundByPath.get(edge.fromPath) ?? [];
     outbound.push(edge.toPath);

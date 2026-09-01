@@ -5,7 +5,7 @@ import { envShared, isSharedValidationSkipped, sharedSchema, stringSchema } from
 
 const prefixSchema = z
   .string()
-  .check(z.startsWith("/"), z.regex(/^\/[\w/\-]*$/, "Invalid prefix format"));
+  .check(z.startsWith("/"), z.regex(/^\/[\w/-]*$/, "Invalid prefix format"));
 
 const envClient = createEnv({
   client: {
@@ -40,7 +40,7 @@ const envClient = createEnv({
 
 const normalizePrefix = (value: string | undefined): `/${string}` => {
   if (value == null) {
-    return "/" as `/${string}`;
+    return "/";
   }
   return (value.startsWith("/") ? value : `/${value}`) as `/${string}`;
 };

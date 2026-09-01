@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import createMiddleware from "next-intl/middleware";
 
@@ -50,13 +50,19 @@ if (IS_PROD) {
 const intlMiddleware = createMiddleware(routing);
 
 function isBypassRoute(pathname: string): boolean {
-  if (BYPASS_EXACT_PATHS.has(pathname)) return true;
-  if (pathname.endsWith("/vitals")) return true;
+  if (BYPASS_EXACT_PATHS.has(pathname)) {
+    return true;
+  }
+  if (pathname.endsWith("/vitals")) {
+    return true;
+  }
   return BYPASS_PREFIXES.some((prefix) => hasPathBoundary(pathname, prefix));
 }
 
 function hasPathBoundary(pathname: string, prefix: string): boolean {
-  if (!pathname.startsWith(prefix)) return false;
+  if (!pathname.startsWith(prefix)) {
+    return false;
+  }
   const nextChar = pathname.charAt(prefix.length);
   return nextChar === "" || nextChar === "/";
 }
@@ -121,7 +127,9 @@ async function handleApiRequest(
   };
 
   const rateLimitResponse = await handleRateLimitAndSize(request, pathname, ip);
-  if (rateLimitResponse) return attachRequestMeta(rateLimitResponse);
+  if (rateLimitResponse) {
+    return attachRequestMeta(rateLimitResponse);
+  }
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-request-id", requestId);

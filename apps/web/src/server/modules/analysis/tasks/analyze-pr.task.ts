@@ -1,5 +1,4 @@
 import type { Octokit } from "@octokit/rest";
-import type { PRAnalysisStatus } from "@prisma/client";
 import { task } from "@trigger.dev/sdk";
 import { normalize } from "pathe";
 import { z } from "zod";
@@ -43,7 +42,9 @@ function mergePrBody(existingBody: null | string, aiSummary: string): string {
 
 function getCommentableLinesFromPatch(patch: string): Set<number> {
   const commentable = new Set<number>();
-  if (!patch) return commentable;
+  if (!patch) {
+    return commentable;
+  }
 
   const lines = patch.split("\n");
   let currentNewFileLine = 0;
@@ -57,7 +58,9 @@ function getCommentableLinesFromPatch(patch: string): Set<number> {
       continue;
     }
 
-    if (currentNewFileLine === 0) continue;
+    if (currentNewFileLine === 0) {
+      continue;
+    }
 
     if (line.startsWith("+")) {
       if (!line.startsWith("+++")) {
@@ -65,7 +68,9 @@ function getCommentableLinesFromPatch(patch: string): Set<number> {
         currentNewFileLine++;
       }
     } else if (line.startsWith("-")) {
-      if (line.startsWith("---")) continue;
+      if (line.startsWith("---")) {
+        continue;
+      }
     } else {
       commentable.add(currentNewFileLine);
       currentNewFileLine++;
@@ -77,7 +82,9 @@ function getCommentableLinesFromPatch(patch: string): Set<number> {
 
 function buildLineMappingFromPatch(patch: string): Map<string, number> {
   const lineMap = new Map<string, number>();
-  if (!patch) return lineMap;
+  if (!patch) {
+    return lineMap;
+  }
 
   const lines = patch.split("\n");
   let currentNewFileLine = 0;
@@ -91,7 +98,9 @@ function buildLineMappingFromPatch(patch: string): Map<string, number> {
       continue;
     }
 
-    if (currentNewFileLine === 0) continue;
+    if (currentNewFileLine === 0) {
+      continue;
+    }
 
     if (line.startsWith("+")) {
       if (!line.startsWith("+++")) {
@@ -102,7 +111,9 @@ function buildLineMappingFromPatch(patch: string): Map<string, number> {
         currentNewFileLine++;
       }
     } else if (line.startsWith("-")) {
-      if (line.startsWith("---")) continue;
+      if (line.startsWith("---")) {
+        continue;
+      }
     } else {
       currentNewFileLine++;
     }
@@ -115,21 +126,27 @@ function getTokens(line: string): string[] {
   return line
     .trim()
     .toLowerCase()
-    .split(/[\s()\[\]{}.,;+\-*/=<>!]+/gu)
+    .split(/[\s()[\]{}.,;+\-*/=<>!]+/gu)
     .filter(Boolean);
 }
 
 function calculateLineSimilarity(line1: string, line2: string): number {
   const t1 = getTokens(line1);
   const t2 = getTokens(line2);
-  if (t1.length === 0 && t2.length === 0) return 1.0;
-  if (t1.length === 0 || t2.length === 0) return 0.0;
+  if (t1.length === 0 && t2.length === 0) {
+    return 1.0;
+  }
+  if (t1.length === 0 || t2.length === 0) {
+    return 0.0;
+  }
 
   const set1 = new Set(t1);
   const set2 = new Set(t2);
   let intersection = 0;
   for (const token of set1) {
-    if (set2.has(token)) intersection++;
+    if (set2.has(token)) {
+      intersection++;
+    }
   }
   const union = set1.size + set2.size - intersection;
   return intersection / union;
@@ -147,7 +164,9 @@ function healFindingLine(
 
   for (const snippetLine of snippetLines) {
     const exact = lineMap.get(snippetLine);
-    if (exact != null) return exact;
+    if (exact != null) {
+      return exact;
+    }
 
     for (const [mapText, mapLine] of lineMap.entries()) {
       if (mapText.includes(snippetLine) || snippetLine.includes(mapText)) {
@@ -164,7 +183,9 @@ function healFindingLine(
         bestLine = mapLine;
       }
     }
-    if (bestScore > 0) return bestLine;
+    if (bestScore > 0) {
+      return bestLine;
+    }
   }
 
   return hallucinatedLine;
@@ -220,7 +241,9 @@ export const analyzePrTask = task({
         where: { id: payload.repoId },
       });
 
-      if (repo == null) throw new Error(`Repo with ID ${payload.repoId} not found`);
+      if (repo == null) {
+        throw new Error(`Repo with ID ${payload.repoId} not found`);
+      }
 
       const { octokit } = await getClientContext(prisma, repo.userId, payload.owner);
       // eslint-disable-next-line sonarjs/no-dead-store
@@ -250,11 +273,7 @@ export const analyzePrTask = task({
 
       const config = await PRConfigService.getConfig(repo.publicId, prisma);
 
-      await analysisRepo.updatePRAnalysisStatus(
-        prisma,
-        payload.analysisId,
-        "ANALYZING" as PRAnalysisStatus,
-      );
+      await analysisRepo.updatePRAnalysisStatus(prisma, payload.analysisId, "ANALYZING");
 
       prAnalysisLogger.analyzeStarted(payload.repoId, payload.prNumber, config.tokenBudget);
 
@@ -338,7 +357,7 @@ export const analyzePrTask = task({
           line: correctedLine,
         };
 
-        if (commentableLines != null && commentableLines.has(correctedLine)) {
+        if (commentableLines?.has(correctedLine)) {
           validatedInlineFindings.push(updatedFinding);
         } else {
           finding.line = correctedLine;
@@ -439,15 +458,10 @@ export const analyzePrTask = task({
         });
       }
 
-      await analysisRepo.updatePRAnalysisStatus(
-        prisma,
-        payload.analysisId,
-        "COMPLETED" as PRAnalysisStatus,
-        {
-          findingsJson: validated.success ? validated.data : candidate,
-          riskScore: result.riskScore,
-        },
-      );
+      await analysisRepo.updatePRAnalysisStatus(prisma, payload.analysisId, "COMPLETED", {
+        findingsJson: validated.success ? validated.data : candidate,
+        riskScore: result.riskScore,
+      });
 
       await updateCommitStatus(
         octokit,
@@ -489,14 +503,9 @@ export const analyzePrTask = task({
         );
       }
 
-      await analysisRepo.updatePRAnalysisStatus(
-        prisma,
-        payload.analysisId,
-        "FAILED" as PRAnalysisStatus,
-        {
-          error: errorMsg,
-        },
-      );
+      await analysisRepo.updatePRAnalysisStatus(prisma, payload.analysisId, "FAILED", {
+        error: errorMsg,
+      });
 
       prAnalysisLogger.analyzeFailed(payload.repoId, payload.prNumber, errorMsg);
 

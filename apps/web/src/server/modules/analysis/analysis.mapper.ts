@@ -12,11 +12,11 @@ import type { PRChangedFileSnapshot, PRImpactPayload } from "@/server/utils/type
 import type { LatestCompletedAnalysis, RepoWithLatestAnalysisAndDocs } from "./analysis.repository";
 import {
   changedFileSnapshotSchema,
-  persistedFindingSchema,
   type ImpactAnalysis,
   type ParsedFinding,
+  persistedFindingSchema,
 } from "./analysis.schemas";
-import { aiSchema, type AIResult } from "./engine/core/analysis-result.schemas";
+import { type AIResult, aiSchema } from "./engine/core/analysis-result.schemas";
 import type { RepoMetrics } from "./engine/core/metrics.types";
 import type { createAnalyzeContextBuilder } from "./logic/analyze-context-builder";
 import { dedupeLatestDocsByType, normalizeWriterStatuses, toDocSummary } from "./logic/payload";
@@ -61,7 +61,9 @@ export const analysisMapper = {
     const grouped = new Map<string, typeof changedFiles>();
 
     for (const file of changedFiles) {
-      if (file.nodeId == null) continue;
+      if (file.nodeId == null) {
+        continue;
+      }
       const items = grouped.get(file.nodeId) ?? [];
       items.push(file);
       grouped.set(file.nodeId, items);
@@ -75,7 +77,9 @@ export const analysisMapper = {
           topLevelNodeById,
           nodeDetailCache,
         );
-        if (matchedNode == null) return null;
+        if (matchedNode == null) {
+          return null;
+        }
 
         const relatedFindings = findings.filter((finding) =>
           files.some((file) => file.filePath === finding.file),
@@ -106,7 +110,7 @@ export const analysisMapper = {
         };
       })
       .filter((item): item is NonNullable<typeof item> => item != null)
-      .toSorted(
+      .sort(
         (left, right) =>
           right.impactScore - left.impactScore || left.label.localeCompare(right.label),
       );
@@ -121,7 +125,9 @@ export const analysisMapper = {
     const grouped = new Map<string, typeof changedFiles>();
 
     for (const file of changedFiles) {
-      if (file.zoneId == null) continue;
+      if (file.zoneId == null) {
+        continue;
+      }
       const items = grouped.get(file.zoneId) ?? [];
       items.push(file);
       grouped.set(file.zoneId, items);
@@ -130,7 +136,9 @@ export const analysisMapper = {
     return [...grouped.entries()]
       .map(([zoneId, files]) => {
         const zone = zoneNodeById.get(zoneId);
-        if (zone == null) return null;
+        if (zone == null) {
+          return null;
+        }
 
         const findingCount = sumBy(files, (file) => findingsByFile.get(file.filePath) ?? 0);
         return {
@@ -149,7 +157,7 @@ export const analysisMapper = {
         };
       })
       .filter((item): item is NonNullable<typeof item> => item != null)
-      .toSorted(
+      .sort(
         (left, right) =>
           right.impactScore - left.impactScore || left.label.localeCompare(right.label),
       );
@@ -181,7 +189,7 @@ export const analysisMapper = {
             file?.zoneId == null ? null : (zoneNodeById.get(file.zoneId)?.label ?? file.zoneLabel),
         };
       })
-      .toSorted(
+      .sort(
         (left, right) =>
           right.riskLevel - left.riskLevel || left.filePath.localeCompare(right.filePath),
       );
@@ -213,8 +221,9 @@ export const analysisMapper = {
   coerceAnalysisPayload(
     analysis: LatestCompletedAnalysis | null | undefined,
   ): AnalysisPayload | null {
-    if (analysis == null || analysis.metricsJson == null || analysis.resultJson == null)
+    if (analysis?.metricsJson == null || analysis.resultJson == null) {
       return null;
+    }
 
     const parsed = aiSchema.safeParse(analysis.resultJson);
     if (!parsed.success) {
@@ -268,10 +277,18 @@ export const analysisMapper = {
     filePath: string,
     previousFilePath: null | string,
   ) {
-    const matchPath = (path: string) =>
-      topLevelNodes
-        .filter((node) => isPathInsideScope(path, node.path))
-        .toSorted((left, right) => right.path.length - left.path.length)[0] ?? null;
+    const matchPath = (path: string): TNode | null => {
+      let best: TNode | null = null;
+      for (const node of topLevelNodes) {
+        if (
+          isPathInsideScope(path, node.path) &&
+          (best == null || node.path.length > best.path.length)
+        ) {
+          best = node;
+        }
+      }
+      return best;
+    };
 
     return matchPath(filePath) ?? (previousFilePath == null ? null : matchPath(previousFilePath));
   },
@@ -289,10 +306,14 @@ export const analysisMapper = {
     }
 
     const legacyPaths = new Set<string>();
-    for (const comment of analysis.comments) legacyPaths.add(normalize(comment.filePath));
+    for (const comment of analysis.comments) {
+      legacyPaths.add(normalize(comment.filePath));
+    }
 
     const findings = this.parsePersistedFindings(analysis);
-    for (const finding of findings) legacyPaths.add(normalize(finding.file));
+    for (const finding of findings) {
+      legacyPaths.add(normalize(finding.file));
+    }
 
     return [...legacyPaths].map((filePath) => ({
       additions: 0,
@@ -338,19 +359,38 @@ export const analysisMapper = {
     }
 
     const detail = nodeDetailCache.get(nodeId);
-    if (detail == null) return null;
+    if (detail == null) {
+      return null;
+    }
 
     return detail.node;
   },
 
   selectPrimaryFile(changedFiles: Array<PRImpactPayload["changedFiles"][number]>) {
-    return (
-      changedFiles.toSorted((left, right) => {
-        const leftScore = left.findingCount * 20 + left.additions + left.deletions;
-        const rightScore = right.findingCount * 20 + right.additions + right.deletions;
-        return rightScore - leftScore || left.filePath.localeCompare(right.filePath);
-      })[0] ?? null
-    );
+    const first = changedFiles[0];
+    if (first == null) {
+      return null;
+    }
+
+    let best = first;
+    let bestScore = best.findingCount * 20 + best.additions + best.deletions;
+
+    for (let i = 1; i < changedFiles.length; i++) {
+      const file = changedFiles[i];
+      if (file == null) {
+        continue;
+      }
+      const score = file.findingCount * 20 + file.additions + file.deletions;
+      if (
+        score > bestScore ||
+        (score === bestScore && file.filePath.localeCompare(best.filePath) < 0)
+      ) {
+        best = file;
+        bestScore = score;
+      }
+    }
+
+    return best;
   },
 
   toAnalysisRef(
@@ -359,7 +399,9 @@ export const analysisMapper = {
       | Pick<LatestCompletedAnalysis, "commitSha" | "createdAt" | "publicId">
       | undefined,
   ): AnalysisRef | null {
-    if (analysis == null) return null;
+    if (analysis == null) {
+      return null;
+    }
 
     return {
       analysisId: analysis.publicId,
@@ -384,7 +426,9 @@ export const analysisMapper = {
 
   toDetailedMetrics(analysis: LatestCompletedAnalysis | null) {
     const payload = this.coerceAnalysisPayload(analysis);
-    if (payload == null) return null;
+    if (payload == null) {
+      return null;
+    }
 
     const { aiResult, metrics } = payload;
     const findings = aiResult.findings ?? [];
@@ -481,7 +525,9 @@ export const analysisMapper = {
 
   toOverview(repo: RepoWithLatestAnalysisAndDocs) {
     const payload = this.coerceAnalysisPayload(repo.analyses[0]);
-    if (payload == null) return null;
+    if (payload == null) {
+      return null;
+    }
 
     const { aiResult, metrics } = payload;
     const docs = this.toAvailableDocs(repo);

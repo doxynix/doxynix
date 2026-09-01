@@ -1,4 +1,4 @@
-import { type GoogleLanguageModelOptions } from "@ai-sdk/google";
+import type { GoogleLanguageModelOptions } from "@ai-sdk/google";
 import type { Repo } from "@prisma/client";
 import type { ToolSet } from "ai";
 
@@ -243,7 +243,9 @@ function firstCommitLine(message: string) {
 }
 
 function formatChangelogCommits(commits: ChangelogCommit[]) {
-  if (commits.length === 0) return "No commits available.";
+  if (commits.length === 0) {
+    return "No commits available.";
+  }
 
   return commits
     .map((commit) => {
@@ -255,7 +257,9 @@ function formatChangelogCommits(commits: ChangelogCommit[]) {
 }
 
 function formatChangelogPullRequests(pullRequests: ChangelogPullRequest[]) {
-  if (pullRequests.length === 0) return "No merged pull requests available.";
+  if (pullRequests.length === 0) {
+    return "No merged pull requests available.";
+  }
 
   return pullRequests
     .map((pr) => {

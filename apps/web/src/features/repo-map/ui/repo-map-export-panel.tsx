@@ -98,28 +98,28 @@ export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      <div className="text-muted-foreground flex items-center justify-center gap-1 text-xs">
+      <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs">
         Export <Download className="size-3" />
       </div>
       <div className="rounded-xl border">
         <LoadingButton
+          className="border-0 text-[10px]"
           disabled={disabled}
           isLoading={isExporting === "png"}
+          onClick={() => void exportMap("png")}
           size="sm"
           variant="outline"
-          onClick={() => void exportMap("png")}
-          className="border-0 text-[10px]"
         >
           PNG
         </LoadingButton>
 
         <LoadingButton
+          className="border-0 text-[10px]"
           disabled={disabled}
           isLoading={isExporting === "webp"}
+          onClick={() => void exportMap("webp")}
           size="sm"
           variant="outline"
-          onClick={() => void exportMap("webp")}
-          className="border-0 text-[10px]"
         >
           WEBP
         </LoadingButton>

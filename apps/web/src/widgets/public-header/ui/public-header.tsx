@@ -30,8 +30,8 @@ export async function PublicHeader() {
 
         <nav className="hidden gap-4 md:flex">
           {publicHeaderMenu.map((item) => (
-            <AppButton key={item.href} asChild variant="ghost">
-              <Link href={item.href as Route} className="flex items-center gap-2">
+            <AppButton asChild key={item.href} variant="ghost">
+              <Link className="flex items-center gap-2" href={item.href as Route}>
                 {item.icon != null && <item.icon />}
                 {item.label}
               </Link>
@@ -40,7 +40,7 @@ export async function PublicHeader() {
         </nav>
         <div className="flex items-center gap-4">
           <AppTooltip content="Work in Progress">
-            <span className="text-warning bg-warning/20 rounded p-1 py-0.5 text-xs">BETA</span>
+            <span className="rounded bg-warning/20 p-1 py-0.5 text-warning text-xs">BETA</span>
           </AppTooltip>
           <PublicHeaderCtaSlot />
           <div className="flex items-center gap-2 md:hidden">
@@ -51,7 +51,7 @@ export async function PublicHeader() {
                   <span className="sr-only">{t("open_menu")}</span>
                 </AppButton>
               </SheetTrigger>
-              <SheetContent side="right" className="w-1/2">
+              <SheetContent className="w-1/2" side="right">
                 <SheetHeader>
                   <SheetTitle className="text-left">{t("menu")}</SheetTitle>
                 </SheetHeader>
@@ -59,9 +59,9 @@ export async function PublicHeader() {
                 <div className="mt-8 flex flex-col gap-4">
                   <nav className="flex flex-col gap-2">
                     {publicHeaderMenu.map((item) => (
-                      <SheetClose key={item.href} asChild>
-                        <AppButton asChild variant="ghost" className="justify-start">
-                          <Link href={item.href as Route} className="flex items-center gap-2">
+                      <SheetClose asChild key={item.href}>
+                        <AppButton asChild className="justify-start" variant="ghost">
+                          <Link className="flex items-center gap-2" href={item.href as Route}>
                             {item.icon != null && <item.icon />}
                             {item.label}
                           </Link>

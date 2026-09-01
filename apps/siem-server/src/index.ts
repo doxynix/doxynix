@@ -1,14 +1,3 @@
-import { startAxiomIngestionWorker } from "@server/core/axiom/axiom-ingestion-worker";
-import { env } from "@server/core/env";
-import { createRateLimiter } from "@server/core/ratelimit";
-import { adminRouter } from "@server/modules/admin/admin.router";
-import { analyticsRouter } from "@server/modules/analytics/analytics.router";
-import { auditRouter } from "@server/modules/audit/audit.router";
-import { incidentsRouter } from "@server/modules/incidents/incidents.router";
-import { rulesRouter } from "@server/modules/rules/rules.router";
-import { initScanEventListener } from "@server/modules/scan/scan.listener";
-import { scanRouter } from "@server/modules/scan/scan.router";
-import { streamLogsRouter } from "@server/modules/stream-logs/stream-logs.router";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { compress } from "hono/compress";
@@ -20,7 +9,19 @@ import { prettyJSON } from "hono/pretty-json";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import { timing } from "hono/timing";
+
 import { auth } from "./core/auth/auth";
+import { startAxiomIngestionWorker } from "./core/axiom/axiom-ingestion-worker";
+import { env } from "./core/env";
+import { createRateLimiter } from "./core/ratelimit";
+import { adminRouter } from "./modules/admin/admin.router";
+import { analyticsRouter } from "./modules/analytics/analytics.router";
+import { auditRouter } from "./modules/audit/audit.router";
+import { incidentsRouter } from "./modules/incidents/incidents.router";
+import { rulesRouter } from "./modules/rules/rules.router";
+import { initScanEventListener } from "./modules/scan/scan.listener";
+import { scanRouter } from "./modules/scan/scan.router";
+import { streamLogsRouter } from "./modules/stream-logs/stream-logs.router";
 
 export const app = new Hono()
   .basePath("/api")
@@ -29,9 +30,9 @@ export const app = new Hono()
   .use(
     "*",
     cors({
-      origin: (origin) => origin || "*",
-      credentials: true,
       allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+      credentials: true,
+      origin: (origin) => origin || "*",
     }),
   )
   .use("*", csrf({ origin: env.CLIENT_URL }))
@@ -52,11 +53,11 @@ export const app = new Hono()
       onError: (c) => c.text("File too large!", 413),
     }),
   )
-  .use("*", createRateLimiter({ windowSec: 60, maxRequests: 100 }))
+  .use("*", createRateLimiter({ maxRequests: 100, windowSec: 60 }))
   .get("/ping", (c) => {
     return c.json({
-      status: "ok",
       message: "pong",
+      status: "ok",
     });
   })
   .on(["POST", "GET"], "/auth/*", (c) => {
@@ -70,13 +71,13 @@ export const app = new Hono()
   .route("/logs-stream", streamLogsRouter)
   .route("/admin", adminRouter)
   .notFound((c) => {
-    return c.json({ success: false, error: "Route not found" }, 404);
+    return c.json({ error: "Route not found", success: false }, 404);
   })
   .onError((err, c) => {
     return c.json(
       {
-        success: false,
         error: env.NODE_ENV === "production" ? "Internal server error" : err.message,
+        success: false,
       },
       500,
     );
@@ -84,14 +85,12 @@ export const app = new Hono()
 
 initScanEventListener();
 
-startAxiomIngestionWorker().catch((error) => {
-  console.error("Failed to start Axiom Worker:", error);
-});
+void startAxiomIngestionWorker();
 
 export type AppType = typeof app;
 
 export default {
-  port: 8080,
-  idleTimeout: 255,
   fetch: app.fetch,
+  idleTimeout: 255,
+  port: 8080,
 };

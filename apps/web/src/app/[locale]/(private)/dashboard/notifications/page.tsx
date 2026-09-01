@@ -11,7 +11,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="flex h-full w-full flex-col gap-4">
-      <h1 className="text-2xl font-bold">{t("notifications_title")}</h1>
+      <h1 className="font-bold text-2xl">{t("notifications_title")}</h1>
       <NotificationsListContainer />
     </div>
   );

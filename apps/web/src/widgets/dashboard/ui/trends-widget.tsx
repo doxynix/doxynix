@@ -55,24 +55,24 @@ export function TrendsWidget({ className, repoId }: Readonly<Props>) {
           <CardDescription>{t("trends_desc")}</CardDescription>
         </div>
         <div className="flex items-center px-6 py-4 sm:py-0">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="ml-auto">
+          <Tabs className="ml-auto" onValueChange={setActiveTab} value={activeTab}>
             <TabsList className="flex items-center gap-1">
-              <TabsTrigger value="overview" className="text-xs">
+              <TabsTrigger className="text-xs" value="overview">
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="engineering" className="text-xs">
+              <TabsTrigger className="text-xs" value="engineering">
                 Engineering
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview" className="sr-only" />
-            <TabsContent value="engineering" className="sr-only" />
+            <TabsContent className="sr-only" value="overview" />
+            <TabsContent className="sr-only" value="engineering" />
           </Tabs>
         </div>
       </CardHeader>
 
       <CardContent className="pt-6">
-        {hasData === false ? (
+        {!hasData ? (
           <div className="flex h-80 w-full flex-col items-center justify-center gap-2 rounded-xl border">
             <p className="text-muted-foreground text-sm">No data</p>
           </div>

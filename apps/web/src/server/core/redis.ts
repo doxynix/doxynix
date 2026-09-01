@@ -24,7 +24,9 @@ async function safeRedis<T>(
       msg: options.msg,
       ...options.meta,
     });
-    if (options.rethrow === true) throw error;
+    if (options.rethrow === true) {
+      throw error;
+    }
     return options.fallback as T;
   }
 }
@@ -47,7 +49,9 @@ export const redisService = {
       safeRedis(
         async () => {
           const value = await redisClient.get(key);
-          if (value == null) return null;
+          if (value == null) {
+            return null;
+          }
           return typeof value === "string" ? value : JSON.stringify(value);
         },
         {
@@ -62,7 +66,9 @@ export const redisService = {
       safeRedis(
         async () => {
           const value = await redisClient.getdel<string>(key);
-          if (value == null) return null;
+          if (value == null) {
+            return null;
+          }
           return typeof value === "string" ? value : JSON.stringify(value);
         },
         {
@@ -141,7 +147,7 @@ export const redisService = {
           const key = REDIS_CONFIG.keys.prStaging(userId, repoId);
           await redisClient.hset(key, entries);
           await redisClient.expire(key, REDIS_CONFIG.ttl.prStaging);
-          return await redisClient.hlen(key);
+          return redisClient.hlen(key);
         },
         {
           fallback: 0,
@@ -163,7 +169,9 @@ export const redisService = {
         async () => {
           const key = REDIS_CONFIG.keys.prStaging(userId, repoId);
           const staged = await redisClient.hgetall<Record<string, string>>(key);
-          if (staged == null || Object.keys(staged).length === 0) return [];
+          if (staged == null || Object.keys(staged).length === 0) {
+            return [];
+          }
           return Object.entries(staged).map(([filePath, content]) => ({ content, filePath }));
         },
         { fallback: [], meta: { repoId, userId }, msg: "Redis staging.getAll failed" },
@@ -174,7 +182,7 @@ export const redisService = {
         async () => {
           const key = REDIS_CONFIG.keys.prStaging(userId, repoId);
           await redisClient.hdel(key, filePath);
-          return await redisClient.hlen(key);
+          return redisClient.hlen(key);
         },
         {
           fallback: 0,

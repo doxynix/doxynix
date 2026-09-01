@@ -36,7 +36,9 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
     );
   }
 
-  if (analysis == null) return <div>Analysis not found for this PR.</div>;
+  if (analysis == null) {
+    return <div>Analysis not found for this PR.</div>;
+  }
 
   const riskScore = impact?.analysis.riskScore ?? analysis.analysis.riskScore;
 
@@ -45,12 +47,12 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
       <div className="flex items-center justify-between border-b pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">Pull Request #{analysis.analysis.prNumber}</h1>
+            <h1 className="font-bold text-2xl">Pull Request #{analysis.analysis.prNumber}</h1>
             <AppTooltip content="Open on GitHub">
               <ExternalLink
-                href={`https://github.com/${owner}/${name}/pull/${prNumber}`}
                 aria-label="Open on Github"
-                className="text-muted-foreground hover:text-foreground flex size-6 items-center justify-center"
+                className="flex size-6 items-center justify-center text-muted-foreground hover:text-foreground"
+                href={`https://github.com/${owner}/${name}/pull/${prNumber}`}
               >
                 <GitHubIcon className="size-4" />
               </ExternalLink>
@@ -59,9 +61,9 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
           <div className="flex items-center gap-1">
             <p className="text-muted-foreground text-sm">{analysis.analysis.headSha.slice(0, 7)}</p>
             <CopyButton
-              value={analysis.analysis.headSha}
-              tooltipText="Copy SHA"
               className="opacity-100"
+              tooltipText="Copy SHA"
+              value={analysis.analysis.headSha}
             />
           </div>
         </div>
@@ -72,7 +74,7 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
               <p className="text-muted-foreground text-xs">Risk Score</p>
               <p
                 className={cn(
-                  "text-3xl font-black",
+                  "font-black text-3xl",
                   riskScore > 7
                     ? "text-destructive"
                     : riskScore > 4
@@ -87,9 +89,9 @@ export function RepoPullDetailContainer({ name, owner, prNumber, repoId }: Reado
         </div>
       </div>
       <RepoPullDetailsContent
-        name={name}
         analysis={analysis}
         impact={impact ?? null}
+        name={name}
         owner={owner}
         repoId={repoId}
       />

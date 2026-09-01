@@ -16,7 +16,7 @@ export default async function ProfilePage() {
   return (
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-bold tracking-tight">{t("settings_profile_title")}</h2>
+        <h2 className="font-bold text-2xl tracking-tight">{t("settings_profile_title")}</h2>
         <p className="text-muted-foreground text-sm">{t("settings_profile_desc")}</p>
       </div>
       <Suspense fallback={<ProfileSkeleton />}>

@@ -1,12 +1,13 @@
 import type { PaginatedResponse } from "@doxynix/shared";
-import { db } from "@server/core/db/db";
 import { count, type SQL, type Table } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
 import { z } from "zod";
 
+import { db } from "@/core/db/db";
+
 export const paginationQuerySchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(20),
+  page: z.coerce.number().int().positive().optional().default(1),
 });
 
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>;
@@ -20,8 +21,8 @@ function buildPaginatedResponse<T>(
   return {
     items,
     pagination: {
-      page,
       limit,
+      page,
       total,
       totalPages: Math.ceil(total / limit),
     },
@@ -59,7 +60,7 @@ export async function executePaginatedQuery<TTable extends PgTable>({
       .$dynamic(),
   ]);
 
-  const total = Number(totalResult?.total ?? 0);
+  const total = totalResult?.total ?? 0;
 
   return buildPaginatedResponse(items as TTable["$inferSelect"][], total, page, limit);
 }

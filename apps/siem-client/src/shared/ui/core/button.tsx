@@ -1,7 +1,8 @@
+import { type ComponentPropsWithoutRef, forwardRef } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { RiLoader2Fill } from "@remixicon/react";
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
 import { tv, type VariantProps } from "tailwind-variants";
+
 import { cx, focusRing } from "../../lib/utils";
 
 const buttonVariants = tv({
@@ -13,8 +14,52 @@ const buttonVariants = tv({
     // focus
     focusRing,
   ],
+  defaultVariants: {
+    variant: "primary",
+  },
   variants: {
     variant: {
+      destructive: [
+        // text color
+        "text-white",
+        // border
+        "border-transparent",
+        // background color
+        "bg-red-600 dark:bg-red-700",
+        // hover color
+        "hover:bg-red-700 dark:hover:bg-red-600",
+        // disabled
+        "disabled:bg-red-300 disabled:text-white",
+        "dark:disabled:bg-red-950 dark:disabled:text-red-400",
+      ],
+      ghost: [
+        // base
+        "shadow-none",
+        // border
+        "border-transparent",
+        // text color
+        "text-gray-900 dark:text-gray-50",
+        // hover color
+        "bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800/80",
+        // disabled
+        "disabled:text-gray-400",
+        "dark:disabled:text-gray-600",
+      ],
+      light: [
+        // base
+        "shadow-none",
+        // border
+        "border-transparent",
+        // text color
+        "text-gray-900 dark:text-gray-50",
+        // background color
+        "bg-gray-200 dark:bg-gray-900",
+        // hover color
+        "hover:bg-gray-300/70 dark:hover:bg-gray-800/80",
+        // disabled
+        "disabled:bg-gray-100 disabled:text-gray-400",
+        "dark:disabled:bg-gray-800 dark:disabled:text-gray-600",
+      ],
       primary: [
         // border
         "border-transparent",
@@ -41,51 +86,7 @@ const buttonVariants = tv({
         "disabled:text-gray-400",
         "dark:disabled:text-gray-600",
       ],
-      light: [
-        // base
-        "shadow-none",
-        // border
-        "border-transparent",
-        // text color
-        "text-gray-900 dark:text-gray-50",
-        // background color
-        "bg-gray-200 dark:bg-gray-900",
-        // hover color
-        "hover:bg-gray-300/70 dark:hover:bg-gray-800/80",
-        // disabled
-        "disabled:bg-gray-100 disabled:text-gray-400",
-        "dark:disabled:bg-gray-800 dark:disabled:text-gray-600",
-      ],
-      ghost: [
-        // base
-        "shadow-none",
-        // border
-        "border-transparent",
-        // text color
-        "text-gray-900 dark:text-gray-50",
-        // hover color
-        "bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800/80",
-        // disabled
-        "disabled:text-gray-400",
-        "dark:disabled:text-gray-600",
-      ],
-      destructive: [
-        // text color
-        "text-white",
-        // border
-        "border-transparent",
-        // background color
-        "bg-red-600 dark:bg-red-700",
-        // hover color
-        "hover:bg-red-700 dark:hover:bg-red-600",
-        // disabled
-        "disabled:bg-red-300 disabled:text-white",
-        "dark:disabled:bg-red-950 dark:disabled:text-red-400",
-      ],
     },
-  },
-  defaultVariants: {
-    variant: "primary",
   },
 });
 
@@ -114,17 +115,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const Component = asChild ? Slot : "button";
     return (
       <Component
-        ref={forwardedRef}
         className={cx(buttonVariants({ variant }), className)}
-        disabled={disabled || isLoading}
+        disabled={disabled ?? isLoading}
+        ref={forwardedRef}
         tremor-id="tremor-raw"
         {...props}
       >
         {isLoading ? (
           <span className="pointer-events-none flex shrink-0 items-center justify-center gap-1.5">
-            <RiLoader2Fill className="size-4 shrink-0 animate-spin" aria-hidden="true" />
-            <span className="sr-only">{loadingText ? loadingText : "Loading"}</span>
-            {loadingText ? loadingText : children}
+            <RiLoader2Fill aria-hidden="true" className="size-4 shrink-0 animate-spin" />
+            <span className="sr-only">{loadingText ?? "Loading"}</span>
+            {loadingText ?? children}
           </span>
         ) : (
           children

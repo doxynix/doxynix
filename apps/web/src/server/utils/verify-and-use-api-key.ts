@@ -23,7 +23,7 @@ export async function verifyAndUseApiKey(token: string) {
     where: { hashedKey: hashedToken },
   });
 
-  if (keyRecord == null || keyRecord.revoked === true) {
+  if (keyRecord == null || keyRecord.revoked) {
     return null;
   }
 

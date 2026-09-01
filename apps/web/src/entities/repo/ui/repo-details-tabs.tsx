@@ -22,20 +22,22 @@ export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
     <div className="no-scrollbar relative flex h-12 w-full items-center gap-1 overflow-x-auto">
       {nav.map((n) => {
         const baseHref = n.href;
-        if (baseHref == null) return null;
+        if (baseHref == null) {
+          return null;
+        }
         const isActive = isRouteActive(pathname, baseHref, Boolean(n.exact));
         const href = buildRepoDetailHref(baseHref, searchParams) as Route;
 
         return (
-          <AppButton key={n.id} asChild variant="ghost" className={cn("relative h-8")}>
+          <AppButton asChild className={cn("relative h-8")} key={n.id} variant="ghost">
             <Link
-              href={href}
               className={cn(
                 "flex items-center gap-2 text-sm outline-hidden",
                 isActive
-                  ? "after:bg-foreground after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full"
+                  ? "after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:bg-foreground"
                   : "text-muted-foreground hover:text-foreground",
               )}
+              href={href}
             >
               {n.icon != null && <n.icon />}
               <span>{n.label}</span>

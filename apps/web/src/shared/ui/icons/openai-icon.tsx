@@ -5,12 +5,12 @@ type Props = {
 export function OpenAiLogo({ className }: Readonly<Props>) {
   return (
     <svg
+      className={className}
       fill="none"
       height="100%"
       viewBox="0 0 1604 719"
       width="100%"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
     >
       <g clipPath="url(#clip0_1637_3573)">
         <path

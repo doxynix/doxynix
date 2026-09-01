@@ -1,10 +1,13 @@
 {
-  "extends": "@doxynix/config/node.json",
   "compilerOptions": {
-    "declaration": false,
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "types": ["node"]
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./src/*", "../../apps/web/src/*"],
+      "@pkg": ["./package.json"]
+    },
+    "skipLibCheck": true
   },
+  "extends": "@doxynix/config/node.json",
   "include": ["src/**/*"]
 }

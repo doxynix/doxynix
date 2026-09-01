@@ -1,9 +1,9 @@
 {
-  "extends": "./base.json",
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "noEmit": true,
+    "allowArbitraryExtensions": true,
     "jsx": "preserve",
-    "allowArbitraryExtensions": true
-  }
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "noEmit": true
+  },
+  "extends": "./base.json"
 }

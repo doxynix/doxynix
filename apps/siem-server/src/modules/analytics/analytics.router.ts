@@ -1,6 +1,8 @@
-import { zValidator } from "@hono/zod-validator";
-import { requireAuth } from "@server/core/middleware/auth.middleware";
 import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+
+import { requireAuth } from "@/core/middleware/auth.middleware";
+
 import { dashboardAnalyticsQuerySchema } from "./analytics.schema";
 import { getDashboardAnalytics } from "./analytics.service";
 

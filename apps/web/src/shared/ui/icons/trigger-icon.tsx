@@ -5,12 +5,12 @@ type Props = {
 export function TriggerIcon({ className }: Readonly<Props>) {
   return (
     <svg
+      className={className}
       fill="none"
       height="100%"
       viewBox="0 0 750 130"
       width="100%"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
     >
       <path
         d="M194.576 16.2676H134.999H137.353V32.5096H157.412V102.4H174.394V32.5096H194.576V16.2676Z"
@@ -64,8 +64,8 @@ export function TriggerIcon({ className }: Readonly<Props>) {
       />
       <defs>
         <linearGradient
+          gradientUnits="userSpaceOnUse"
           id="paint0_linear_173_70"
-          gradientUnits="userSpaceOnUse"
           x1="329.229"
           x2="329.229"
           y1="150.079"
@@ -75,8 +75,8 @@ export function TriggerIcon({ className }: Readonly<Props>) {
           <stop offset="1" stopColor="#E7FF52" />
         </linearGradient>
         <linearGradient
+          gradientUnits="userSpaceOnUse"
           id="paint1_linear_173_70"
-          gradientUnits="userSpaceOnUse"
           x1="329.229"
           x2="329.229"
           y1="150.079"
@@ -86,8 +86,8 @@ export function TriggerIcon({ className }: Readonly<Props>) {
           <stop offset="1" stopColor="#E7FF52" />
         </linearGradient>
         <linearGradient
+          gradientUnits="userSpaceOnUse"
           id="paint2_linear_173_70"
-          gradientUnits="userSpaceOnUse"
           x1="329.229"
           x2="329.229"
           y1="150.079"
@@ -97,8 +97,8 @@ export function TriggerIcon({ className }: Readonly<Props>) {
           <stop offset="1" stopColor="#E7FF52" />
         </linearGradient>
         <linearGradient
+          gradientUnits="userSpaceOnUse"
           id="paint3_linear_173_70"
-          gradientUnits="userSpaceOnUse"
           x1="329.229"
           x2="329.229"
           y1="150.079"
@@ -108,8 +108,8 @@ export function TriggerIcon({ className }: Readonly<Props>) {
           <stop offset="1" stopColor="#E7FF52" />
         </linearGradient>
         <linearGradient
+          gradientUnits="userSpaceOnUse"
           id="paint4_linear_173_70"
-          gradientUnits="userSpaceOnUse"
           x1="329.229"
           x2="329.229"
           y1="150.079"
@@ -119,8 +119,8 @@ export function TriggerIcon({ className }: Readonly<Props>) {
           <stop offset="1" stopColor="#E7FF52" />
         </linearGradient>
         <linearGradient
+          gradientUnits="userSpaceOnUse"
           id="paint5_linear_173_70"
-          gradientUnits="userSpaceOnUse"
           x1="329.229"
           x2="329.229"
           y1="150.079"
@@ -130,8 +130,8 @@ export function TriggerIcon({ className }: Readonly<Props>) {
           <stop offset="1" stopColor="#E7FF52" />
         </linearGradient>
         <linearGradient
+          gradientUnits="userSpaceOnUse"
           id="paint6_linear_173_70"
-          gradientUnits="userSpaceOnUse"
           x1="329.229"
           x2="329.229"
           y1="150.079"
@@ -141,8 +141,8 @@ export function TriggerIcon({ className }: Readonly<Props>) {
           <stop offset="1" stopColor="#E7FF52" />
         </linearGradient>
         <linearGradient
+          gradientUnits="userSpaceOnUse"
           id="paint7_linear_173_70"
-          gradientUnits="userSpaceOnUse"
           x1="634.457"
           x2="650.99"
           y1="139.717"
@@ -152,8 +152,8 @@ export function TriggerIcon({ className }: Readonly<Props>) {
           <stop offset="1" stopColor="#A855F7" />
         </linearGradient>
         <linearGradient
+          gradientUnits="userSpaceOnUse"
           id="paint8_linear_173_70"
-          gradientUnits="userSpaceOnUse"
           x1="634.457"
           x2="650.99"
           y1="139.717"
@@ -163,8 +163,8 @@ export function TriggerIcon({ className }: Readonly<Props>) {
           <stop offset="1" stopColor="#A855F7" />
         </linearGradient>
         <linearGradient
+          gradientUnits="userSpaceOnUse"
           id="paint9_linear_173_70"
-          gradientUnits="userSpaceOnUse"
           x1="634.457"
           x2="650.99"
           y1="139.717"
@@ -174,8 +174,8 @@ export function TriggerIcon({ className }: Readonly<Props>) {
           <stop offset="1" stopColor="#A855F7" />
         </linearGradient>
         <linearGradient
+          gradientUnits="userSpaceOnUse"
           id="paint10_linear_173_70"
-          gradientUnits="userSpaceOnUse"
           x1="634.457"
           x2="650.99"
           y1="139.717"
@@ -185,8 +185,8 @@ export function TriggerIcon({ className }: Readonly<Props>) {
           <stop offset="1" stopColor="#A855F7" />
         </linearGradient>
         <linearGradient
-          id="paint11_linear_173_70"
           gradientUnits="userSpaceOnUse"
+          id="paint11_linear_173_70"
           x1="95.4134"
           x2="94.3148"
           y1="103.194"

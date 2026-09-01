@@ -19,29 +19,29 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
 
   return (
     <Link
+      className="flex items-center justify-between rounded-xl border p-4 transition-colors hover:bg-muted"
       href={`/dashboard/repo/${owner}/${name}/pull/${pull.prNumber}`}
-      className="hover:bg-muted flex items-center justify-between rounded-xl border p-4 transition-colors"
     >
       <div className="flex items-center gap-4">
         <div className="flex items-center justify-center">
           {pull.status === "COMPLETED" ? (
-            <CheckCircle2 className="text-success size-5" />
+            <CheckCircle2 className="size-5 text-success" />
           ) : pull.status === "FAILED" ? (
-            <ShieldAlert className="text-destructive size-5" />
+            <ShieldAlert className="size-5 text-destructive" />
           ) : (
-            <Clock className="text-warning size-5" />
+            <Clock className="size-5 text-warning" />
           )}
         </div>
 
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 font-medium">
             <span>#{pull.prNumber}</span>
-            <span className="text-muted-foreground font-mono text-sm">
+            <span className="font-mono text-muted-foreground text-sm">
               ({pull.headSha.slice(0, 7)})
             </span>
           </div>
 
-          <div className="text-muted-foreground flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-3 text-muted-foreground text-xs">
             <span>Issues: {pull.findingCount}</span>
             <span>•</span>
             <TimeAgo date={pull.createdAt} locale={locale} />
@@ -51,9 +51,8 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
 
       {pull.riskScore !== null && (
         <div className="flex flex-col items-end">
-          <span className="text-muted-foreground mb-1 text-xs">Risk Level</span>
+          <span className="mb-1 text-muted-foreground text-xs">Risk Level</span>
           <AppBadge
-            variant="outline"
             className={cn(
               pull.riskScore > 7
                 ? "text-destructive"
@@ -61,6 +60,7 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
                   ? "text-warning"
                   : "text-success",
             )}
+            variant="outline"
           >
             {pull.riskScore}/10
           </AppBadge>

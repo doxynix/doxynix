@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+
 import type { InstallationTargetType, RepositorySelection } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
@@ -231,7 +232,9 @@ export const githubAppService = {
         }
       });
     } catch (error) {
-      if (error instanceof TRPCError) throw error;
+      if (error instanceof TRPCError) {
+        throw error;
+      }
 
       appLogger.error({ error, msg: "Failed to securely claim installation" });
       throw new TRPCError({
@@ -245,7 +248,9 @@ export const githubAppService = {
 
   async syncInstallations(prisma: PrismaClientExtended, userId: number): Promise<void> {
     const validToken = await githubTokenService.getValidToken(userId);
-    if (validToken == null) return;
+    if (validToken == null) {
+      return;
+    }
 
     try {
       const userOctokit = getPublicClient(validToken);
@@ -259,7 +264,9 @@ export const githubAppService = {
 
       const ourInstallations = userInstallations.filter((inst) => inst.app_id === ourAppId);
 
-      if (ourInstallations.length === 0) return;
+      if (ourInstallations.length === 0) {
+        return;
+      }
 
       for (const inst of ourInstallations) {
         const instIdBigInt = BigInt(inst.id);

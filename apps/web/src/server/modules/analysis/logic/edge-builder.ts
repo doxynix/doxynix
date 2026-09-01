@@ -39,7 +39,9 @@ function addWeightedEdge(
   relation: StructureEdgeRelationType,
   weight = 1,
 ) {
-  if (fromNode === toNode) return;
+  if (fromNode === toNode) {
+    return;
+  }
   const key = `${fromNode}:${toNode}:${relation}`;
   const current = edges.get(key);
   if (current == null) {
@@ -60,11 +62,15 @@ function connectGroupSet(
 ) {
   for (let index = 0; index < groups.length; index += 1) {
     const source = groups[index];
-    if (source == null) continue;
+    if (source == null) {
+      continue;
+    }
 
     for (let inner = index + 1; inner < groups.length; inner += 1) {
       const target = groups[inner];
-      if (target == null) continue;
+      if (target == null) {
+        continue;
+      }
 
       addWeightedEdge(edges, source, target, relation, weight);
       addWeightedEdge(edges, target, source, relation, weight);
@@ -84,15 +90,21 @@ function addGraphPreviewEdges(params: {
     const sourcePath = normalize(edge.fromPath);
     const targetPath = normalize(edge.toPath);
 
-    if (sourcePath === targetPath) continue;
+    if (sourcePath === targetPath) {
+      continue;
+    }
     if (ProjectPolicy.isSensitive(sourcePath) || ProjectPolicy.isSensitive(targetPath)) {
       continue;
     }
-    if (ProjectPolicy.isIgnored(sourcePath) || ProjectPolicy.isIgnored(targetPath)) continue;
+    if (ProjectPolicy.isIgnored(sourcePath) || ProjectPolicy.isIgnored(targetPath)) {
+      continue;
+    }
 
     const sourceGroup = ProjectPolicy.deriveGroupId(sourcePath);
     const targetGroup = ProjectPolicy.deriveGroupId(targetPath);
-    if (sourceGroup === targetGroup) continue;
+    if (sourceGroup === targetGroup) {
+      continue;
+    }
 
     const relation: StructureEdgeRelationType =
       params.apiPaths.has(sourcePath) || params.apiPaths.has(targetPath)
@@ -276,7 +288,9 @@ export function buildDrilldownEdges(params: {
     const ids = uniq(
       paths.flatMap((path) => {
         const scope = resolveImmediateChildScope(params.parentPath, normalize(path));
-        if (scope == null) return [];
+        if (scope == null) {
+          return [];
+        }
         const id = makeStructureNodeId(scope.nodeType, scope.path);
         return childIdSet.has(id) ? [id] : [];
       }),
@@ -284,13 +298,19 @@ export function buildDrilldownEdges(params: {
 
     for (let index = 0; index < ids.length; index += 1) {
       const source = ids[index];
-      if (source == null) continue;
+      if (source == null) {
+        continue;
+      }
 
       for (let inner = index + 1; inner < ids.length; inner += 1) {
         const target = ids[inner];
-        if (target == null) continue;
+        if (target == null) {
+          continue;
+        }
 
-        if (target === source) continue;
+        if (target === source) {
+          continue;
+        }
         addWeightedEdge(edgeMap, source, target, relation, weight);
         addWeightedEdge(edgeMap, target, source, relation, weight);
       }
@@ -302,12 +322,18 @@ export function buildDrilldownEdges(params: {
       const sourceScope = resolveImmediateChildScope(params.parentPath, normalize(edge.fromPath));
       const targetScope = resolveImmediateChildScope(params.parentPath, normalize(edge.toPath));
 
-      if (sourceScope == null || targetScope == null) continue;
+      if (sourceScope == null || targetScope == null) {
+        continue;
+      }
 
       const sourceId = makeStructureNodeId(sourceScope.nodeType, sourceScope.path);
       const targetId = makeStructureNodeId(targetScope.nodeType, targetScope.path);
-      if (sourceId === targetId) continue;
-      if (!childIdSet.has(sourceId) || !childIdSet.has(targetId)) continue;
+      if (sourceId === targetId) {
+        continue;
+      }
+      if (!childIdSet.has(sourceId) || !childIdSet.has(targetId)) {
+        continue;
+      }
 
       const relation: StructureEdgeRelationType =
         params.context.apiPaths.has(normalize(edge.fromPath)) ||

@@ -15,7 +15,7 @@ export default async function ReposPage() {
   return (
     <div className="mx-auto flex h-full w-full flex-col">
       <div className="mb-4 flex items-center not-sm:justify-center">
-        <h1 className="text-2xl font-bold">{t("repo_title")}</h1>
+        <h1 className="font-bold text-2xl">{t("repo_title")}</h1>
       </div>
       <div className="mb-4 flex w-full flex-wrap items-center justify-center gap-2 xl:justify-between">
         <div className="flex flex-col items-center gap-4 xl:flex-row">

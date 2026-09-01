@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent } from "react";
+import { type ChangeEvent, useRef, useState } from "react";
 import { CloudUpload, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -33,7 +33,9 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
   const { isUploading, removeAvatar, uploadAvatar } = useProfileActions({
     onAvatarRemoveSuccess: () => {
       setAvatarUrl("");
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     },
     onAvatarUpdateSuccess: (url) => {
       setAvatarUrl(url);
@@ -42,7 +44,9 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
 
   const handleImageSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
     await uploadAvatar([file]);
   };
 
@@ -57,23 +61,23 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
           <div className="relative">
             <AppAvatar
               alt={currentUser.name}
-              src={avatarUrl}
-              fallbackText={currentUser.name}
-              priority={true}
               className="size-24"
               fallbackClassName="text-2xl"
+              fallbackText={currentUser.name}
+              priority={true}
               sizeClassName="size-24"
+              src={avatarUrl}
             />
             {avatarUrl && (
               <LoadingButton
+                aria-label="Delete Avatar"
+                className="absolute right-0 bottom-0 cursor-pointer"
                 disabled={removeAvatar.isPending}
                 isLoading={removeAvatar.isPending}
                 loadingText=""
+                onClick={() => removeAvatar.mutate()}
                 size="icon"
                 variant="destructive"
-                aria-label="Delete Avatar"
-                onClick={() => removeAvatar.mutate()}
-                className="absolute right-0 bottom-0 cursor-pointer"
               >
                 <Trash2 />
               </LoadingButton>
@@ -81,25 +85,25 @@ export function ProfileCard({ user: initialUser }: Readonly<Props>) {
           </div>
           <div className="flex flex-col gap-2">
             <input
-              ref={fileInputRef}
-              disabled={isUploading}
-              type="file"
               accept=".jpg, .jpeg, .png, .webp"
-              onChange={(e) => void handleImageSelect(e)}
               className="hidden"
+              disabled={isUploading}
+              onChange={(e) => void handleImageSelect(e)}
+              ref={fileInputRef}
+              type="file"
             />
 
             <LoadingButton
+              className="cursor-pointer"
               isLoading={isUploading}
               loadingText="Loading..."
-              variant="outline"
               onClick={() => fileInputRef.current?.click()}
-              className="cursor-pointer"
+              variant="outline"
             >
               <CloudUpload /> {t("settings_profile_upload_photo_button")}
             </LoadingButton>
 
-            <p className="text-muted-foreground text-center text-xs">
+            <p className="text-center text-muted-foreground text-xs">
               {t("settings_profile_avatar_requirements")}
             </p>
           </div>

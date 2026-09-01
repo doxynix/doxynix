@@ -36,7 +36,9 @@ export function collectFrameworkFactsFromTokens(
   for (const rawToken of tokens) {
     const token = rawToken.toLowerCase();
     for (const entry of FRAMEWORK_CATALOG) {
-      if (!entry.aliases.some((alias) => matchesFrameworkAlias(token, alias))) continue;
+      if (!entry.aliases.some((alias) => matchesFrameworkAlias(token, alias))) {
+        continue;
+      }
 
       const existing = collected.get(entry.name);
       const next: FrameworkFact = {

@@ -9,7 +9,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ branch, fixedFiles, fixId, repoId, title }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.applyFix({
         branch,
@@ -50,7 +52,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.clearStaging({ repoId: targetRepoId });
     },
@@ -77,7 +81,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ fileContents, findings, prAnalysisId, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.createFix({
         fileContents,
@@ -115,7 +121,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ branch, content, language, path, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.documentFile({
         branch,
@@ -185,7 +193,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ branch, path, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.githubBrowse.getFileContent({ branch, path, repoId: targetRepoId });
     },
@@ -217,7 +227,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.getLatest({ repoId: targetRepoId });
     },
@@ -244,7 +256,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("No active repository context.");
+      if (targetRepoId == null) {
+        throw new Error("No active repository context.");
+      }
 
       return trpc.analytics.getDashboardStats({ repoId: targetRepoId });
     },
@@ -272,7 +286,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.getStagedFiles({ repoId: targetRepoId });
     },
@@ -315,7 +331,7 @@ export const getAgentTools = (currentRepoId?: string) => ({
       "Retrieve a lightweight list of your registered repositories with their names, owners, and UUIDs. Use this on the global dashboard to find a repository's UUID by its name.",
     execute: async ({ search }) => {
       const trpc = await api();
-      return await trpc.repo.getSlim({ search });
+      return trpc.repo.getSlim({ search });
     },
     inputSchema: z.object({
       search: z
@@ -362,7 +378,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ branch, repoId, title }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.openPullRequest({ branch, repoId: targetRepoId, title });
     },
@@ -380,7 +398,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ path, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.pinAuditToDocs({ path, repoId: targetRepoId });
     },
@@ -396,7 +416,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ branch, content, language, path, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.quickFileAudit({
         branch,
@@ -421,7 +443,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ docType, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.getDocumentContent({ repoId: targetRepoId, type: docType });
     },
@@ -480,7 +504,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ aid, repoId, search }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.searchWorkspace({ aid, repoId: targetRepoId, search });
     },
@@ -496,7 +522,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ content, filePath, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.stageFile({ content, filePath, repoId: targetRepoId });
     },
@@ -513,7 +541,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ fixId, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.stageGeneratedFix({ fixId, repoId: targetRepoId });
     },
@@ -528,7 +558,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ branch, docTypes, files, language, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.analyze({
         branch,
@@ -571,7 +603,9 @@ export const getAgentTools = (currentRepoId?: string) => ({
     execute: async ({ filePath, repoId }) => {
       const trpc = await api();
       const targetRepoId = repoId ?? currentRepoId;
-      if (targetRepoId == null) throw new Error("Missing repository context.");
+      if (targetRepoId == null) {
+        throw new Error("Missing repository context.");
+      }
 
       return trpc.analysis.unstageFile({ filePath, repoId: targetRepoId });
     },

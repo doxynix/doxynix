@@ -9,21 +9,21 @@ import { PublicHeaderWrapper } from "@/widgets/public-header/ui/public-header-wr
 export default function PublicLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <div
+      className="dark relative flex min-h-dvh flex-col bg-background text-foreground"
       data-public-theme="marketing-dark"
-      className="dark bg-background text-foreground relative flex min-h-dvh flex-col"
     >
       <PublicHeaderWrapper>
         <PublicHeader />
       </PublicHeaderWrapper>
       <DotPattern
+        className="mask-[radial-gradient(circle_at_center,white,transparent)] pointer-events-none fixed inset-0 h-full w-full stroke-border-strong/70"
         cr={1}
         cx={1}
         cy={1}
         height={20}
         width={20}
-        className="stroke-border-strong/70 pointer-events-none fixed inset-0 h-full w-full mask-[radial-gradient(circle_at_center,white,transparent)]"
       />
-      <main id="main-content" tabIndex={-1} className="z-10 mx-auto flex w-full flex-1 flex-col">
+      <main className="z-10 mx-auto flex w-full flex-1 flex-col" id="main-content" tabIndex={-1}>
         {children}
       </main>
       <div className="z-50 w-full shrink-0 border-t">

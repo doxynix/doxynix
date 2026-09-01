@@ -165,7 +165,9 @@ export class FactCollector {
     this.collectPolicyPathFacts(pathLower, fileName);
     this.collectManifestFacts(fileName, file);
     this.collectSignalDerivedFacts(file.path, signals);
-    if (this.isOneC(pathLower)) this.addFact("1C:Enterprise", "Language", 95);
+    if (this.isOneC(pathLower)) {
+      this.addFact("1C:Enterprise", "Language", 95);
+    }
   }
 
   private collectFrameworkFactsFromTokens(tokens: string[], filePath: string, confidence: number) {
@@ -174,7 +176,9 @@ export class FactCollector {
 
   private collectManifestFacts(fileName: string, file: AnalyzedFile) {
     for (const handler of FactCollector.manifestHandlers) {
-      if (!handler.matches(fileName)) continue;
+      if (!handler.matches(fileName)) {
+        continue;
+      }
       handler.run(this, file);
     }
   }
@@ -182,21 +186,40 @@ export class FactCollector {
   private collectPolicyPathFacts(pathLower: string, fileName: string) {
     const categories = ProjectPolicy.getCategories(pathLower);
 
-    if (categories.includes("infra")) this.addFact("Infrastructure as Code", "Infrastructure", 84);
-    if (categories.includes("tooling")) this.addFact("Build Tooling", "CI/CD", 70);
-    if (categories.includes("config"))
+    if (categories.includes("infra")) {
+      this.addFact("Infrastructure as Code", "Infrastructure", 84);
+    }
+    if (categories.includes("tooling")) {
+      this.addFact("Build Tooling", "CI/CD", 70);
+    }
+    if (categories.includes("config")) {
       this.addFact("Configuration-Driven Setup", "Infrastructure", 66);
+    }
 
-    if (pathLower.includes("/.github/workflows/")) this.addFact("GitHub Actions", "CI/CD", 100);
-    if (fileName === ".gitlab-ci.yml") this.addFact("GitLab CI", "CI/CD", 100);
-    if (fileName === "dockerfile") this.addFact("Docker", "Infrastructure", 100);
+    if (pathLower.includes("/.github/workflows/")) {
+      this.addFact("GitHub Actions", "CI/CD", 100);
+    }
+    if (fileName === ".gitlab-ci.yml") {
+      this.addFact("GitLab CI", "CI/CD", 100);
+    }
+    if (fileName === "dockerfile") {
+      this.addFact("Docker", "Infrastructure", 100);
+    }
     if (fileName === "docker-compose.yml" || fileName === "docker-compose.yaml") {
       this.addFact("Docker Compose", "Infrastructure", 100);
     }
-    if (fileName === "ansible.cfg") this.addFact("Ansible", "Infrastructure", 100);
-    if (fileName.endsWith(".tf")) this.addFact("Terraform", "Infrastructure", 100);
-    if (fileName.startsWith("capacitor.config.")) this.addFact("Capacitor", "Mobile", 100);
-    if (fileName === "expo.json") this.addFact("Expo", "Mobile", 100);
+    if (fileName === "ansible.cfg") {
+      this.addFact("Ansible", "Infrastructure", 100);
+    }
+    if (fileName.endsWith(".tf")) {
+      this.addFact("Terraform", "Infrastructure", 100);
+    }
+    if (fileName.startsWith("capacitor.config.")) {
+      this.addFact("Capacitor", "Mobile", 100);
+    }
+    if (fileName === "expo.json") {
+      this.addFact("Expo", "Mobile", 100);
+    }
     if (
       pathLower.includes("/k8s/") ||
       fileName === "deployment.yml" ||
@@ -204,7 +227,9 @@ export class FactCollector {
     ) {
       this.addFact("Kubernetes", "Infrastructure", 100);
     }
-    if (fileName.startsWith("tailwind.config.")) this.addFact("Tailwind CSS", "UI/Styling", 100);
+    if (fileName.startsWith("tailwind.config.")) {
+      this.addFact("Tailwind CSS", "UI/Styling", 100);
+    }
   }
 
   private collectSignalDerivedFacts(filePath: string, signals?: FileSignals) {
@@ -310,7 +335,9 @@ export class FactCollector {
   private parseManifestRegex(content: string, regex: RegExp, filePath: string, confidence: number) {
     const tokens: string[] = [];
     for (const match of content.matchAll(regex)) {
-      if (typeof match[1] === "string" && match[1].length > 0) tokens.push(match[1]);
+      if (typeof match[1] === "string" && match[1].length > 0) {
+        tokens.push(match[1]);
+      }
     }
     this.collectFrameworkFactsFromTokens(tokens, filePath, confidence);
   }

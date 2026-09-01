@@ -1,9 +1,13 @@
-import * as SwitchPrimitives from "@radix-ui/react-switch";
 import { type ComponentPropsWithoutRef, type ComponentRef, forwardRef } from "react";
+import * as SwitchPrimitives from "@radix-ui/react-switch";
 import { tv, type VariantProps } from "tailwind-variants";
+
 import { cx, focusRing } from "../../lib/utils";
 
 const switchVariants = tv({
+  defaultVariants: {
+    size: "default",
+  },
   slots: {
     root: [
       // base
@@ -51,9 +55,6 @@ const switchVariants = tv({
       },
     },
   },
-  defaultVariants: {
-    size: "default",
-  },
 });
 
 interface SwitchProps
@@ -65,8 +66,8 @@ const Switch = forwardRef<ComponentRef<typeof SwitchPrimitives.Root>, SwitchProp
     const { root, thumb } = switchVariants({ size });
     return (
       <SwitchPrimitives.Root
-        ref={forwardedRef}
         className={cx(root(), className)}
+        ref={forwardedRef}
         tremor-id="tremor-raw"
         {...props}
       >

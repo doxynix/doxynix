@@ -39,34 +39,34 @@ const BentoCard = ({
   ...props
 }: BentoCardProps) => (
   <div
-    key={name}
     className={cn(
       "group relative col-span-3 flex flex-col justify-between overflow-hidden rounded-xl",
       // light styles
       "bg-background [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
       // dark styles
-      "dark:bg-background transform-gpu dark:[box-shadow:0_-20px_80px_-20px_color-mix(in_oklab,var(--foreground)_14%,transparent)_inset] dark:[border:1px_solid_var(--border)]",
+      "transform-gpu dark:bg-background dark:[border:1px_solid_var(--border)] dark:[box-shadow:0_-20px_80px_-20px_color-mix(in_oklab,var(--foreground)_14%,transparent)_inset]",
       className,
     )}
+    key={name}
     {...props}
   >
     <div>{background}</div>
     <div className="p-4">
-      <div className="transition-standard pointer-events-none z-10 flex transform-gpu flex-col gap-1 lg:group-hover:-translate-y-10">
-        <Icon className="transition-standard size-12 origin-left transform-gpu ease-in-out group-hover:scale-75" />
-        <h3 className="text-xl font-semibold">{name}</h3>
-        <p className="text-muted-foreground max-w-lg">{description}</p>
+      <div className="pointer-events-none z-10 flex transform-gpu flex-col gap-1 transition-standard lg:group-hover:-translate-y-10">
+        <Icon className="size-12 origin-left transform-gpu transition-standard ease-in-out group-hover:scale-75" />
+        <h3 className="font-semibold text-xl">{name}</h3>
+        <p className="max-w-lg text-muted-foreground">{description}</p>
       </div>
 
       <div
         className={cn(
-          "transition-standard pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center group-hover:translate-y-0 group-hover:opacity-100 lg:hidden",
+          "pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-standard group-hover:translate-y-0 group-hover:opacity-100 lg:hidden",
         )}
       >
-        <AppButton asChild size="sm" variant="link" className="pointer-events-auto p-0">
+        <AppButton asChild className="pointer-events-auto p-0" size="sm" variant="link">
           <Link href={href}>
             <span className="text-foreground">{cta}</span>
-            <ArrowRightIcon className="text-foreground ms-2 rtl:rotate-180" />
+            <ArrowRightIcon className="ms-2 text-foreground rtl:rotate-180" />
           </Link>
         </AppButton>
       </div>
@@ -74,18 +74,18 @@ const BentoCard = ({
 
     <div
       className={cn(
-        "transition-standard pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 lg:flex",
+        "pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-standard group-hover:translate-y-0 group-hover:opacity-100 lg:flex",
       )}
     >
-      <AppButton asChild size="sm" variant="link" className="pointer-events-auto p-0">
+      <AppButton asChild className="pointer-events-auto p-0" size="sm" variant="link">
         <Link href={href}>
           <span className="text-foreground">{cta}</span>
-          <ArrowRightIcon className="text-foreground ms-2 rtl:rotate-180" />
+          <ArrowRightIcon className="ms-2 text-foreground rtl:rotate-180" />
         </Link>
       </AppButton>
     </div>
 
-    <div className="group-hover:bg-foreground/3 transition-standard pointer-events-none absolute inset-0 transform-gpu" />
+    <div className="pointer-events-none absolute inset-0 transform-gpu transition-standard group-hover:bg-foreground/3" />
   </div>
 );
 

@@ -1,41 +1,41 @@
-import { db } from "@server/core/db/db";
-import { rules } from "@server/core/db/schema";
+import { db } from "@/core/db/db";
+import { rules } from "@/core/db/schema";
 
 const defaultScanningRules = [
   {
-    name: "Credit Card Leak",
     description: "Detects Visa, Mastercard, AMEX credit card numbers in logs",
-    severity: "critical" as const,
+    isActive: true,
+    name: "Credit Card Leak",
     pattern: "\\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13})\\b",
-    isActive: true,
+    severity: "critical" as const,
   },
   {
-    name: "AWS Secret Access Key",
     description: "Detects exposed AWS Access and Secret Keys",
-    severity: "critical" as const,
+    isActive: true,
+    name: "AWS Secret Access Key",
     pattern: "(aws_access_key_id|aws_secret_access_key)\\s*=\\s*['\"]?[A-Za-z0-9/+=]{20,40}['\"]?",
-    isActive: true,
-  },
-  {
-    name: "JWT Token Leak",
-    description: "Detects exposed JSON Web Tokens in log lines",
-    severity: "high" as const,
-    pattern: "ey[A-Za-z0-9_-]{10,}\\.ey[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}",
-    isActive: true,
-  },
-  {
-    name: "RSA/OpenSSH Private Key",
-    description: "Detects unencrypted Private Key headers",
     severity: "critical" as const,
-    pattern: "-----BEGIN (?:RSA|OPENSSH|EC) PRIVATE KEY-----",
-    isActive: true,
   },
   {
-    name: "Generic API Token",
-    description: "Detects generic API tokens with common prefixes (sk_live, ghp_, glpat-)",
-    severity: "high" as const,
-    pattern: "\\b(sk_live_[0-9a-zA-Z]{24}|ghp_[0-9a-zA-Z]{36}|glpat-[0-9a-zA-Z_-]{20})\\b",
+    description: "Detects exposed JSON Web Tokens in log lines",
     isActive: true,
+    name: "JWT Token Leak",
+    pattern: "ey[A-Za-z0-9_-]{10,}\\.ey[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}",
+    severity: "high" as const,
+  },
+  {
+    description: "Detects unencrypted Private Key headers",
+    isActive: true,
+    name: "RSA/OpenSSH Private Key",
+    pattern: "-----BEGIN (?:RSA|OPENSSH|EC) PRIVATE KEY-----",
+    severity: "critical" as const,
+  },
+  {
+    description: "Detects generic API tokens with common prefixes (sk_live, ghp_, glpat-)",
+    isActive: true,
+    name: "Generic API Token",
+    pattern: "\\b(sk_live_[0-9a-zA-Z]{24}|ghp_[0-9a-zA-Z]{36}|glpat-[0-9a-zA-Z_-]{20})\\b",
+    severity: "high" as const,
   },
 ];
 
@@ -53,4 +53,4 @@ async function seedRules() {
   }
 }
 
-seedRules();
+void seedRules();

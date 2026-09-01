@@ -45,8 +45,8 @@ export function RepoFilters() {
     <div className="flex items-center justify-between">
       <div className="flex flex-wrap items-center justify-center gap-2">
         <Select
-          value={filters.status ?? "all"}
           onValueChange={(v) => handleUpdate("status", v === "all" ? null : v)}
+          value={filters.status ?? "all"}
         >
           <SelectTrigger aria-label={tCommon("status")} className="w-35">
             <SelectValue placeholder={tCommon("status")} />
@@ -61,8 +61,8 @@ export function RepoFilters() {
         </Select>
 
         <Select
-          value={filters.visibility ?? "all"}
           onValueChange={(v) => handleUpdate("visibility", v === "all" ? null : v)}
+          value={filters.visibility ?? "all"}
         >
           <SelectTrigger aria-label={tCommon("visibility")} className="w-32.5">
             <SelectValue placeholder={tCommon("visibility")} />
@@ -74,7 +74,7 @@ export function RepoFilters() {
           </SelectContent>
         </Select>
 
-        <Select value={filters.sortBy} onValueChange={(v) => handleUpdate("sortBy", v)}>
+        <Select onValueChange={(v) => handleUpdate("sortBy", v)} value={filters.sortBy}>
           <SelectTrigger aria-label={t("repo_sort_by")} className="w-37.5">
             <SelectValue placeholder={t("repo_sort_by")} />
           </SelectTrigger>
@@ -85,7 +85,7 @@ export function RepoFilters() {
           </SelectContent>
         </Select>
 
-        <AppButton disabled={!hasFilters} variant="outline" onClick={handleReset} className="px-2">
+        <AppButton className="px-2" disabled={!hasFilters} onClick={handleReset} variant="outline">
           {tCommon("reset")}
           <X />
         </AppButton>

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { type SearchParams } from "nuqs/server";
+import type { SearchParams } from "nuqs/server";
 
 /**
  * Параметры для страниц репозитория

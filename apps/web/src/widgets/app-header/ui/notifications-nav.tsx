@@ -37,14 +37,14 @@ export function NotificationsNav() {
       <AppTooltip content={t("notifications_title")}>
         <DropdownMenuTrigger asChild>
           <AppButton
+            aria-label={t("notifications_title")}
+            className="relative cursor-pointer text-muted-foreground"
             size="icon"
             variant="ghost"
-            aria-label={t("notifications_title")}
-            className="text-muted-foreground relative cursor-pointer"
           >
             <Bell />
             {unreadCount > 0 && (
-              <span className="bg-foreground absolute top-2 right-2 size-2 rounded-full" />
+              <span className="absolute top-2 right-2 size-2 rounded-full bg-foreground" />
             )}
           </AppButton>
         </DropdownMenuTrigger>
@@ -53,10 +53,10 @@ export function NotificationsNav() {
         <div className="flex items-center justify-between p-2">
           <h2>{t("notifications_title")}</h2>
           <AppButton
-            disabled={markAllAsRead.isPending || unreadCount === 0}
-            variant="link"
-            onClick={() => markAllAsRead.mutate()}
             className="cursor-pointer text-xs"
+            disabled={markAllAsRead.isPending || unreadCount === 0}
+            onClick={() => markAllAsRead.mutate()}
+            variant="link"
           >
             {t("notifications_mark_read")}
           </AppButton>
@@ -64,7 +64,7 @@ export function NotificationsNav() {
         <DropdownMenuSeparator />
         <div className="flex flex-col gap-1 py-1">
           {notifications.length === 0 && !isLoading ? (
-            <p className="text-muted-foreground p-4 text-center text-sm">No notifications</p>
+            <p className="p-4 text-center text-muted-foreground text-sm">No notifications</p>
           ) : (
             notifications.map((note) => {
               const href =
@@ -79,18 +79,19 @@ export function NotificationsNav() {
                       <p
                         className={cn(
                           "mb-1 font-bold",
-                          note.isRead === true && "text-muted-foreground",
+
+                          note.isRead && "text-muted-foreground",
                         )}
                       >
                         {note.title}
                       </p>
-                      <p className="text-muted-foreground max-w-57.5 truncate text-xs">
+                      <p className="max-w-57.5 truncate text-muted-foreground text-xs">
                         {note.body}
                       </p>
-                      <TimeAgo date={note.createdAt} locale={locale} className="w-fit text-xs" />
+                      <TimeAgo className="w-fit text-xs" date={note.createdAt} locale={locale} />
                     </div>
-                    {note.isRead === false && (
-                      <span className="bg-foreground mt-1 size-2 shrink-0 rounded-full" />
+                    {!note.isRead && (
+                      <span className="mt-1 size-2 shrink-0 rounded-full bg-foreground" />
                     )}
                   </div>
                 </>
@@ -100,17 +101,19 @@ export function NotificationsNav() {
 
               return (
                 <DropdownMenuItem
-                  key={note.id}
                   asChild
+                  className={cn(!note.isRead && "bg-surface-selected")}
+                  key={note.id}
                   onSelect={() => {
-                    if (note.isRead === false) markAs.mutate(note.id, true);
+                    if (!note.isRead) {
+                      markAs.mutate(note.id, true);
+                    }
                   }}
-                  className={cn(note.isRead === false && "bg-surface-selected")}
                 >
                   {href == null ? (
                     <div className={cn(commonClasses, "cursor-default")}>{innerContent}</div>
                   ) : (
-                    <Link href={href} className={cn(commonClasses, "cursor-pointer")}>
+                    <Link className={cn(commonClasses, "cursor-pointer")} href={href}>
                       {innerContent}
                     </Link>
                   )}
@@ -122,8 +125,8 @@ export function NotificationsNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="group flex cursor-pointer items-center justify-center">
           <Link
-            href="/dashboard/notifications"
             className="flex w-full items-center justify-center group-hover:underline"
+            href="/dashboard/notifications"
           >
             {t("notifications_show_all")}
           </Link>

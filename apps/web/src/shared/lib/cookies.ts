@@ -1,10 +1,12 @@
 import { IS_PROD } from "../constants/env.flags";
 
 export function getClientCookie(name: string): null | string {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") {
+    return null;
+  }
 
   const matches = RegExp(
-    new RegExp("(?:^|; )" + name.replaceAll(/([$()*+./?[\\\]^{|}])/g, "\\$1") + "=([^;]*)"),
+    new RegExp(`(?:^|; )${name.replaceAll(/([$()*+./?[\\\]^{|}])/g, "\\$1")}=([^;]*)`),
   ).exec(document.cookie);
   return matches ? decodeURIComponent(matches[1] ?? "") : null;
 }
@@ -16,7 +18,9 @@ export function getClientCookie(name: string): null | string {
  * @param maxAge - Время жизни в СЕКУНДАХ
  */
 export function setClientCookie(name: string, value: boolean | string, maxAge: number) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   const secure = window.location.protocol === "https:" ? "Secure;" : "";
 

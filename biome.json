@@ -1,27 +1,89 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "vcs": {
-    "enabled": false
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              [":BUN:", ":NODE:"],
+              ":BLANK_LINE:",
+              ["react", "react/**", "react-dom", "react-dom/**"],
+              ["next", "next/**"],
+              ["hono", "hono/**"],
+              ":PACKAGE:",
+              ":BLANK_LINE:",
+              ["@doxynix/**", "@doxynix/*"],
+              ":BLANK_LINE:",
+              ["@/shared/**", "@/i18n/**", "@/core/**", "@/utils/**"],
+              ":BLANK_LINE:",
+              ["@/entities/**", "@/modules/**"],
+              ":BLANK_LINE:",
+              "@/features/**",
+              ":BLANK_LINE:",
+              ["@/widgets/**", "@/ui/**"],
+              ":BLANK_LINE:",
+              [
+                "@/app/**",
+                "@/routes/**",
+                "@/commands/**",
+                "@/server/**",
+                "@/trigger/**",
+                "@/shared/api-contracts/**",
+                "@/tests/**"
+              ],
+              ":BLANK_LINE:",
+              ":ALIAS:",
+              ":BLANK_LINE:",
+              ":PATH:",
+              ":BLANK_LINE:",
+              ["*.css", "*.scss", "*.module.css", "./*.css", "@/*.css"]
+            ]
+          }
+        },
+        "useSortedAttributes": "on",
+        "useSortedKeys": "on"
+      }
+    },
+    "enabled": true
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
   },
   "files": {
     "includes": [
       "**",
-      "!!**/routeTree.gen.ts",
-      "!!**/drizzle",
-      "!!**/dist",
       "!!**/node_modules",
-      "!!**/.trigger",
+      "!!**/.next",
+      "!!**/out",
+      "!!**/build",
+      "!!**/dist",
+      "!!**/.turbo",
+      "!!**/.vercel",
+      "!!**/drizzle",
       "!!**/coverage",
       "!!**/report",
-      "!!**/.next"
+      "!!**/playwright-report",
+      "!!**/.trigger",
+      "!!**/public",
+      "!!**/.stryker-tmp",
+      "!!**/src/shared/api-contracts",
+      "!!**/messages/en.d.json.ts",
+      "!!**/routeTree.gen.ts",
+      "!!**/next-env.d.ts",
+      "!!**/prisma/generated",
+      "!!**/prisma/json-schema"
     ]
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 100,
-    "lineEnding": "lf"
+    "lineEnding": "lf",
+    "lineWidth": 100
   },
   "javascript": {
     "formatter": {
@@ -30,37 +92,19 @@
       "trailingCommas": "all"
     }
   },
+  "json": {
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineWidth": 100,
+      "trailingCommas": "none"
+    }
+  },
   "linter": {
-    "enabled": true,
-    "rules": {
-      "preset": "recommended",
-      "nursery": {
-        "preset": "recommended"
-      },
-      "correctness": {
-        "noReactPropAssignments": "error"
-      }
-    }
+    "enabled": false
   },
-  "css": {
-    "parser": {
-      "tailwindDirectives": true
-    }
-  },
-  "assist": {
-    "enabled": true,
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
-    }
-  },
-  "overrides": [
-    {
-      "includes": ["apps/web/**"],
-      "linter": {
-        "enabled": false
-      }
-    }
-  ]
+  "vcs": {
+    "enabled": false
+  }
 }

@@ -6,8 +6,8 @@ import { Lock, Mail, User2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
-import { UpdateProfileSchema, type UpdateProfileInput } from "@/shared/api/schemas/user";
-import { type User } from "@/shared/lib/auth-client";
+import { type UpdateProfileInput, UpdateProfileSchema } from "@/shared/api/schemas/user";
+import type { User } from "@/shared/lib/auth-client";
 import {
   Form,
   FormControl,
@@ -74,12 +74,12 @@ export function ProfileDetailsForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
         className="flex w-full flex-col gap-4"
+        onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
       >
         <FormField
-          name="name"
           control={form.control}
+          name="name"
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel className="text-muted-foreground">
@@ -87,11 +87,11 @@ export function ProfileDetailsForm({
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <User2 className="text-muted-foreground absolute top-2.5 left-3" />
+                  <User2 className="absolute top-2.5 left-3 text-muted-foreground" />
                   <Input
+                    className="pl-9 text-sm sm:text-base"
                     disabled={updateProfile.isPending}
                     placeholder={t("settings_profile_personal_information_placeholder")}
-                    className="pl-9 text-sm sm:text-base"
                     {...field}
                   />
                 </div>
@@ -102,21 +102,21 @@ export function ProfileDetailsForm({
         />
 
         <FormField
-          name="email"
           control={form.control}
+          name="email"
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel className="text-muted-foreground">Email</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Mail className="text-muted-foreground absolute top-2.5 left-3" />
+                  <Mail className="absolute top-2.5 left-3 text-muted-foreground" />
                   <Input
                     {...field}
+                    className="pl-9 text-sm sm:text-base"
                     disabled
                     placeholder="Your email"
-                    className="pl-9 text-sm sm:text-base"
                   />
-                  <Lock className="text-muted-foreground absolute top-2.5 right-3" />
+                  <Lock className="absolute top-2.5 right-3 text-muted-foreground" />
                 </div>
               </FormControl>
             </FormItem>
@@ -124,10 +124,10 @@ export function ProfileDetailsForm({
         />
         <div className="flex justify-end">
           <LoadingButton
+            className="cursor-pointer"
             disabled={(!isWelcome && !isDirty) || !isValid || updateProfile.isPending}
             isLoading={updateProfile.isPending}
             loadingText={loadingText ?? "Saving..."}
-            className="cursor-pointer"
           >
             {buttonText ?? tCommon("save")}
           </LoadingButton>

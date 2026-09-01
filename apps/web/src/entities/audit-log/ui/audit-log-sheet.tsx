@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ComponentType } from "react";
+import { type ComponentType, useState } from "react";
 import { Clock, Download, Eye, Globe, Hash, Shield } from "lucide-react";
 import { useLocale } from "next-intl";
 
@@ -47,13 +47,13 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet onOpenChange={setOpen} open={open}>
       <AppTooltip content="View Raw">
         <SheetTrigger asChild>
           <AppButton
+            className="opacity-0 transition-opacity group-hover:opacity-100"
             size="icon"
             variant="ghost"
-            className="opacity-0 transition-opacity group-hover:opacity-100"
           >
             <Eye className="text-muted-foreground hover:text-foreground" />
           </AppButton>
@@ -64,7 +64,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
           <SheetHeader className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-1">
-                <SheetTitle className="text-xl font-semibold tracking-tight">
+                <SheetTitle className="font-semibold text-xl tracking-tight">
                   Event Details
                 </SheetTitle>
                 <SheetDescription className="text-muted-foreground text-xs">
@@ -73,15 +73,15 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
               </div>
               <div className="flex items-center gap-2">
                 <CopyButton
-                  value={formattedJson}
-                  tooltipText="Copy JSON"
                   className="flex opacity-100"
+                  tooltipText="Copy JSON"
+                  value={formattedJson}
                 />
                 <AppButton
+                  className="h-8 gap-2 bg-transparent text-xs"
+                  onClick={handleExportJson}
                   size="sm"
                   variant="outline"
-                  onClick={handleExportJson}
-                  className="h-8 gap-2 bg-transparent text-xs"
                 >
                   <Download />
                   Export JSON
@@ -89,27 +89,27 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
               </div>
             </div>
 
-            <div className="divide-border border-border bg-muted/5 grid grid-cols-2 divide-x divide-y overflow-hidden rounded-xl border">
+            <div className="grid grid-cols-2 divide-x divide-y divide-border overflow-hidden rounded-xl border border-border bg-muted/5">
               <MetaItem
-                value={log.requestId ?? "N/A"}
-                isCopy
+                className="p-4"
                 copyValue={log.requestId ?? ""}
                 icon={Hash}
+                isCopy
                 label="Request ID"
-                className="p-4"
+                value={log.requestId ?? "N/A"}
               />
               <MetaItem
-                value={log.ip ?? "system"}
+                className="p-4"
                 icon={Globe}
                 label="IP Address"
-                className="p-4"
+                value={log.ip ?? "system"}
               />
-              <MetaItem value={log.browser} icon={Shield} label="User Agent" className="p-4" />
+              <MetaItem className="p-4" icon={Shield} label="User Agent" value={log.browser} />
               <MetaItem
-                value={formatFullDate(log.createdAt, locale)}
+                className="p-4"
                 icon={Clock}
                 label="Timestamp"
-                className="p-4"
+                value={formatFullDate(log.createdAt, locale)}
               />
             </div>
           </SheetHeader>
@@ -120,7 +120,6 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                   <Skeleton className="h-40 w-full" />
                 ) : (
                   <div
-                    dangerouslySetInnerHTML={{ __html: html ?? "" }} // NOTE: санитизации нету здесь так что если в будущем будет вставлять юзерский ввод то иметь ввиду
                     className={cn(
                       "w-full text-sm",
                       "[&_pre]:m-0! [&_pre]:bg-transparent! [&_pre]:p-0!",
@@ -128,6 +127,7 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                       "[&_code]:break-all! [&_code]:whitespace-pre-wrap!",
                       "[&_.line]:inline! [&_.line]:break-all! [&_.line]:whitespace-pre-wrap!",
                     )}
+                    dangerouslySetInnerHTML={{ __html: html ?? "" }} // NOTE: санитизации нету здесь так что если в будущем будет вставлять юзерский ввод то иметь ввиду
                   />
                 )}
               </div>
@@ -158,14 +158,14 @@ function MetaItem({
 }: Readonly<MetaItemProps>) {
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      <div className="text-muted-foreground flex items-center gap-1">
+      <div className="flex items-center gap-1 text-muted-foreground">
         <Icon />
         <span className="text-xs">{label}</span>
         {isCopy === true && (
-          <CopyButton value={copyValue ?? ""} className="ml-auto flex opacity-100" />
+          <CopyButton className="ml-auto flex opacity-100" value={copyValue ?? ""} />
         )}
       </div>
-      <p className={cn("text-foreground truncate text-xs")}>{value}</p>
+      <p className={cn("truncate text-foreground text-xs")}>{value}</p>
     </div>
   );
 }

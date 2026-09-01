@@ -22,12 +22,12 @@ export function ConnectionCard({ action, description, icon, status, title }: Rea
             <div className="flex items-center gap-2">
               <span className="text-sm">{title}</span>
               {status != null && (
-                <AppBadge variant="outline" className="text-success">
+                <AppBadge className="text-success" variant="outline">
                   {status}
                 </AppBadge>
               )}
             </div>
-            <p className="text-muted-foreground line-clamp-1 text-xs">{description}</p>
+            <p className="line-clamp-1 text-muted-foreground text-xs">{description}</p>
           </div>
         </div>
 

@@ -2,12 +2,12 @@
 
 import {
   forwardRef,
-  useEffect,
-  useRef,
-  useState,
   type HTMLProps,
   type ReactNode,
   type RefObject,
+  useEffect,
+  useRef,
+  useState,
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -87,30 +87,30 @@ export const BackgroundBeamsWithCollision = ({
 
   return (
     <div
-      ref={parentRef}
       className={cn(
         "relative flex h-96 w-full items-center justify-center overflow-hidden md:h-160",
         className,
       )}
+      ref={parentRef}
     >
       {beams.map((beam) => (
         <CollisionMechanism
-          key={beam.initialX + "beam-idx"}
           beamOptions={beam}
           containerRef={containerRef}
+          key={`${beam.initialX}beam-idx`}
           parentRef={parentRef}
         />
       ))}
 
       {children}
       <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 w-full bg-background/95"
         ref={containerRef}
-        className="bg-background/95 pointer-events-none absolute inset-x-0 bottom-0 w-full"
         style={{
           boxShadow:
             "var(--shadow-md), 0 0 0 1px var(--border), 0 0 12px color-mix(in oklab, var(--foreground) 6%, transparent), inset 0 1px 0 color-mix(in oklab, var(--foreground) 10%, transparent)",
         }}
-      ></div>
+      />
     </div>
   );
 };
@@ -188,14 +188,18 @@ const CollisionMechanism = forwardRef<
   return (
     <>
       <motion.div
-        key={beamKey}
-        ref={beamRef}
         animate="animate"
+        className={cn(
+          "absolute top-20 left-0 m-auto h-14 w-px rounded-full bg-linear-to-t from-foreground/95 via-primary to-transparent",
+          beamOptions.className,
+        )}
         initial={{
           rotate: beamOptions.rotate || 0,
           translateX: beamOptions.initialX || "0px",
           translateY: beamOptions.initialY || "-200px",
         }}
+        key={beamKey}
+        ref={beamRef}
         transition={{
           delay: beamOptions.delay || 0,
           duration: beamOptions.duration || 8,
@@ -211,16 +215,12 @@ const CollisionMechanism = forwardRef<
             translateY: beamOptions.translateY || "1800px",
           },
         }}
-        className={cn(
-          "via-primary from-foreground/95 absolute top-20 left-0 m-auto h-14 w-px rounded-full bg-linear-to-t to-transparent",
-          beamOptions.className,
-        )}
       />
       <AnimatePresence>
         {collision.detected && collision.coordinates && (
           <Explosion
-            key={`${collision.coordinates.x}-${collision.coordinates.y}`}
             className=""
+            key={`${collision.coordinates.x}-${collision.coordinates.y}`}
             style={{
               left: `${collision.coordinates.x}px`,
               top: `${collision.coordinates.y}px`,
@@ -250,23 +250,23 @@ const Explosion = ({ ...props }: HTMLProps<HTMLDivElement>) => {
     <div {...props} className={cn("absolute z-50 size-2", props.className)}>
       <motion.div
         animate={{ opacity: 1 }}
+        className="absolute -inset-x-10 top-0 m-auto h-2 w-10 rounded-full bg-linear-to-r from-transparent via-primary to-transparent blur-sm"
         exit={{ opacity: 0 }}
         initial={{ opacity: 0 }}
         transition={{ duration: 1.5, ease: "easeOut" }}
-        className="via-primary absolute -inset-x-10 top-0 m-auto h-2 w-10 rounded-full bg-linear-to-r from-transparent to-transparent blur-sm"
-      ></motion.div>
+      />
       {spans.map((span) => (
         <motion.span
-          key={span.id}
           animate={{
             opacity: 0,
             x: span.directionX,
             y: span.directionY,
           }}
+          className="absolute size-1 rounded-full bg-linear-to-b from-foreground to-primary"
           initial={{ opacity: 1, x: span.initialX, y: span.initialY }}
+          key={span.id}
           // eslint-disable-next-line react-hooks/purity
           transition={{ duration: Math.random() * 1.5 + 0.5, ease: "easeOut" }}
-          className="to-primary from-foreground absolute size-1 rounded-full bg-linear-to-b"
         />
       ))}
     </div>

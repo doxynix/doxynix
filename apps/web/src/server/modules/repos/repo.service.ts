@@ -1,4 +1,4 @@
-import { Status, Visibility, type Prisma } from "@prisma/client";
+import { type Prisma, Status, Visibility } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
 import type { DbClient } from "@/server/core/db";
@@ -8,7 +8,7 @@ import { handlePrismaError, isOctokitError } from "@/server/utils/handle-error";
 import { getPaginationMeta } from "@/server/utils/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
 
-import { repoMapper, type RepoWithAnalyses } from "./repo.mapper";
+import { repoMapper } from "./repo.mapper";
 import type { RepoFiltersInput } from "./repo.schemas";
 
 function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
@@ -50,7 +50,7 @@ export const repoService = {
         : rawSearchFilter;
 
     return {
-      ...(filters.visibility != null && { visibility: filters.visibility as Visibility }),
+      ...(filters.visibility != null && { visibility: filters.visibility }),
       ...(normalizedOwner != null &&
         normalizedOwner.length > 0 && {
           owner: { equals: normalizedOwner, mode: "insensitive" },
@@ -132,7 +132,7 @@ export const repoService = {
           topics: githubData.topics ?? [],
           url: githubData.html_url,
           userId,
-          visibility: Boolean(githubData.private) ? Visibility.PRIVATE : Visibility.PUBLIC,
+          visibility: githubData.private ? Visibility.PRIVATE : Visibility.PUBLIC,
         },
       });
     } catch (error) {
@@ -227,7 +227,7 @@ export const repoService = {
       totalCount,
     });
 
-    return repoMapper.toPaginatedList(items as RepoWithAnalyses[], meta);
+    return repoMapper.toPaginatedList(items, meta);
   },
 
   async getByName(db: DbClient, owner: string, name: string) {
@@ -241,7 +241,9 @@ export const repoService = {
       },
     });
 
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
 
     return {
       ...repo,
@@ -257,7 +259,9 @@ export const repoService = {
       },
     });
 
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
 
     return {
       ...repo,

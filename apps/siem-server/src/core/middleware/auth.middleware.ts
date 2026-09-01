@@ -1,11 +1,12 @@
-import { auth } from "@server/core/auth/auth";
-import type { AuthSession, AuthUser, UserRole } from "@server/core/auth/auth.types";
 import { createMiddleware } from "hono/factory";
+
+import { auth } from "@/core/auth/auth";
+import type { AuthSession, AuthUser, UserRole } from "@/core/auth/auth.types";
 
 declare module "hono" {
   interface ContextVariableMap {
-    user: AuthUser;
-    session: AuthSession;
+    user: AuthUser | undefined;
+    session: AuthSession | undefined;
   }
 }
 
@@ -17,8 +18,8 @@ export const requireAuth = createMiddleware(async (c, next) => {
   if (sessionData == null) {
     return c.json(
       {
-        success: false,
         error: "Unauthorized",
+        success: false,
       },
       401,
     );
@@ -27,7 +28,7 @@ export const requireAuth = createMiddleware(async (c, next) => {
   c.set("user", sessionData.user);
   c.set("session", sessionData.session);
 
-  return await next();
+  return next();
 });
 
 export function requireRole(...allowedRoles: UserRole[]) {
@@ -37,8 +38,8 @@ export function requireRole(...allowedRoles: UserRole[]) {
     if (user == null) {
       return c.json(
         {
-          success: false,
           error: "Unauthorized",
+          success: false,
         },
         401,
       );
@@ -47,13 +48,13 @@ export function requireRole(...allowedRoles: UserRole[]) {
     if (!allowedRoles.includes(user.role)) {
       return c.json(
         {
-          success: false,
           error: "Forbidden",
+          success: false,
         },
         403,
       );
     }
 
-    return await next();
+    return next();
   });
 }

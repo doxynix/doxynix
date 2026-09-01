@@ -10,12 +10,12 @@ import { auth } from "@/server/core/auth";
 import { prisma } from "@/server/core/db";
 import { google } from "@/server/core/google";
 import { realtimeService } from "@/server/core/realtime";
-import { processMessageParts } from "@/server/modules/agent/agent-storage";
 import {
   AGENT_SYSTEM_PROMPT,
   GENERATE_CHAT_TITLE_PROMPT,
 } from "@/server/modules/agent/agent.prompts";
 import { getAgentTools } from "@/server/modules/agent/agent.tools";
+import { processMessageParts } from "@/server/modules/agent/agent-storage";
 import { getActiveModels } from "@/server/modules/analysis/ai/ai-constants";
 
 export const maxDuration = 60;
@@ -137,7 +137,7 @@ export async function POST(req: Request) {
             where: { id: sessionId },
           });
 
-          if (currentSession != null && currentSession.title === "New Chat") {
+          if (currentSession?.title === "New Chat") {
             const firstUserMessage = callbackMessages.find((m) => m.role === "user");
 
             let rawUserText = "";

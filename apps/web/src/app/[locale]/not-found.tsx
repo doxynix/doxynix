@@ -14,17 +14,17 @@ export default async function NotFound() {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 p-4 text-center">
-      <div className="bg-warning/10 text-warning flex size-20 items-center justify-center rounded-full">
+      <div className="flex size-20 items-center justify-center rounded-full bg-warning/10 text-warning">
         <SearchX size={35} />
       </div>
 
       <div className="flex flex-col gap-2">
-        <h1 className="text-4xl font-bold">{t("title")}</h1>
-        <p className="text-muted-foreground text-lg">{t("sub_title")}</p>
+        <h1 className="font-bold text-4xl">{t("title")}</h1>
+        <p className="text-lg text-muted-foreground">{t("sub_title")}</p>
       </div>
 
       <div className="flex items-center gap-4">
-        <BackOrLinkButton label={tCommon("back")} className="cursor-pointer" />
+        <BackOrLinkButton className="cursor-pointer" label={tCommon("back")} />
         <BackOrLinkButton href="/" label={tCommon("home")} />
       </div>
       <p className="text-muted-foreground text-sm">{t("footer")}</p>

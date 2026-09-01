@@ -86,14 +86,13 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
 
         const customIcon =
           linked?.image != null ? (
-            <AppAvatar alt={provider.name} src={linked.image} fallbackText={provider.name} />
+            <AppAvatar alt={provider.name} fallbackText={provider.name} src={linked.image} />
           ) : (
             provider.icon
           );
 
         return (
           <ConnectionCard
-            key={provider.id}
             action={
               <ProviderAction
                 canDisconnectAny={canDisconnectAny}
@@ -102,14 +101,15 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
                 isLoadingAny={loadingProvider !== null}
                 isMutationPending={disconnect.isPending}
                 linked={linked}
-                provider={provider}
                 onConnect={() => void handleConnect(provider.id)}
                 onDisconnect={(id) => disconnect.mutate({ provider: id })}
                 onOpenChange={(open) => setDisconnectingProvider(open ? provider.id : null)}
+                provider={provider}
               />
             }
             description={isConnected ? `Connected as ${identity}` : provider.description}
             icon={customIcon}
+            key={provider.id}
             status={isConnected ? "Connected" : undefined}
             title={provider.name}
           />
@@ -157,9 +157,9 @@ function ProviderAction({
       <LoadingButton
         disabled={isLoadingAny}
         isLoading={isConnectingThis}
+        onClick={() => onConnect(provider.id)}
         size="sm"
         variant="outline"
-        onClick={() => onConnect(provider.id)}
       >
         Connect
       </LoadingButton>
@@ -188,13 +188,15 @@ function ProviderAction({
         </div>
       }
       isLoading={isMutationPending}
+      onConfirm={() => onDisconnect(provider.id)}
+      onOpenChange={onOpenChange}
       open={isDisconnecting}
       successAlertContent={
         <p>
           To fully revoke Doxynix permissions on the {provider.name} side, visit your{" "}
           <ExternalLink
-            href={provider.manageUrl}
             className="inline-flex items-center gap-1 underline hover:no-underline"
+            href={provider.manageUrl}
           >
             {provider.name} Settings <ExternalLinkIcon className="size-3" />
           </ExternalLink>
@@ -207,8 +209,6 @@ function ProviderAction({
           Disconnect
         </AppButton>
       }
-      onConfirm={() => onDisconnect(provider.id)}
-      onOpenChange={onOpenChange}
     />
   );
 }

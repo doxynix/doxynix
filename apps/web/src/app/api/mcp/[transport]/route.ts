@@ -53,7 +53,7 @@ const handler = createMcpHandler(
             };
 
             const safeExecute = executeFn as unknown as GenericExecuteFn;
-            const result = await safeExecute(parsedArgs as Record<string, unknown>, dummyContext);
+            const result = await safeExecute(parsedArgs, dummyContext);
 
             return {
               content: [

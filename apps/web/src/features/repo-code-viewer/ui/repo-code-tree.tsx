@@ -8,8 +8,8 @@ import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
 import { AppButton } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 
-import type { ActionItem, FileNode } from "@/entities/repo/model/repo-setup.types";
 import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import type { ActionItem, FileNode } from "@/entities/repo/model/repo-setup.types";
 import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
 import { RepoBranchSelector } from "@/entities/repo/ui/repo-branch-selector";
 import { RepoCodeNode } from "@/entities/repo/ui/repo-code-node";
@@ -67,40 +67,40 @@ export function RepoCodeTree({
   ] satisfies ActionItem[];
 
   return (
-    <div className="bg-card flex h-full flex-col">
-      <div className="border-border bg-muted flex flex-col gap-2 border-b p-3">
+    <div className="flex h-full flex-col bg-card">
+      <div className="flex flex-col gap-2 border-border border-b bg-muted p-3">
         <div className="grid grid-cols-2 gap-2">
           <div className="relative">
-            <Search className="text-muted-foreground absolute top-2.75 left-2.5 size-3.5" />
+            <Search className="absolute top-2.75 left-2.5 size-3.5 text-muted-foreground" />
             <Input
-              type="search"
-              value={state.searchTerm}
-              placeholder="Search..."
+              className="bg-background pl-7 text-xs"
               onChange={(e) => {
                 void actions.setSearchTerm(e.target.value);
               }}
-              className="bg-background pl-7 text-xs"
+              placeholder="Search..."
+              type="search"
+              value={state.searchTerm}
             />
           </div>
           <RepoBranchSelector
             branches={state.branches}
             defaultBranch={repo.defaultBranch}
             isLoading={state.isBranchesLoading}
-            selectedBranch={state.selectedBranch}
             onSelect={(branch) => {
               void actions.setSelectedBranch(branch);
               onSelect(null);
             }}
+            selectedBranch={state.selectedBranch}
           />
         </div>
         <div className="flex items-center gap-4">
           {treeActions.map((action) => (
             <AppButton
+              className="gap-1.5 px-2"
               key={action.label}
+              onClick={action.onClick}
               size="sm"
               variant="ghost"
-              onClick={action.onClick}
-              className="gap-1.5 px-2"
             >
               <action.icon />
               {action.label}
@@ -109,33 +109,23 @@ export function RepoCodeTree({
         </div>
       </div>
 
-      <div ref={measureRef} className="min-h-0 flex-1 overflow-hidden p-2">
+      <div className="min-h-0 flex-1 overflow-hidden p-2" ref={measureRef}>
         {state.isLoading ? (
           <RepoTreeSkeleton variant="tree" />
         ) : state.treeData.length === 0 ? (
-          <p className="text-muted-foreground flex h-full items-center justify-center text-sm">
+          <p className="flex h-full items-center justify-center text-muted-foreground text-sm">
             No files found
           </p>
         ) : (
           size.height > 0 && (
             <Tree
-              ref={(api) => onTreeApiChange(api ?? undefined)}
+              data={state.treeData}
               disableDrag
               disableDrop
               disableEdit
-              data={state.treeData}
               disableMultiSelection={true}
               height={size.height}
               indent={16}
-              openByDefault={false}
-              overscanCount={30}
-              rowHeight={32}
-              searchMatch={(node, term) =>
-                node.data.name.toLowerCase().includes(term.toLowerCase())
-              }
-              searchTerm={state.searchTerm}
-              selectionFollowsFocus={false}
-              width="100%"
               onActivate={(node) => {
                 if (node.isLeaf) {
                   onSelect(node.data.path);
@@ -145,6 +135,16 @@ export function RepoCodeTree({
               onDelete={() => {}}
               onMove={() => {}}
               onRename={() => {}}
+              openByDefault={false}
+              overscanCount={30}
+              ref={(api) => onTreeApiChange(api ?? undefined)}
+              rowHeight={32}
+              searchMatch={(node, term) =>
+                node.data.name.toLowerCase().includes(term.toLowerCase())
+              }
+              searchTerm={state.searchTerm}
+              selectionFollowsFocus={false}
+              width="100%"
             >
               {(props) => <RepoCodeNode {...props} activePath={activePath} onSelect={onSelect} />}
             </Tree>

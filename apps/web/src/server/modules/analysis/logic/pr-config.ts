@@ -35,7 +35,9 @@ export const PRConfigService = {
       where: { repo: { publicId: repoId } },
     });
 
-    if (config == null) return DEFAULT_PR_CONFIG;
+    if (config == null) {
+      return DEFAULT_PR_CONFIG;
+    }
 
     return {
       ciSkip: config.ciSkip,

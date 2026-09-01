@@ -128,13 +128,17 @@ export function resolveImmediateChildScope(parentPath: string, candidatePath: st
   const normalizedParent = normalize(parentPath);
   const normalizedCandidate = normalize(candidatePath);
 
-  if (!normalizedCandidate.startsWith(`${normalizedParent}/`)) return null;
+  if (!normalizedCandidate.startsWith(`${normalizedParent}/`)) {
+    return null;
+  }
 
   const relative = normalizedCandidate.slice(normalizedParent.length + 1);
   const parts = relative.split("/").filter(Boolean);
   const head = parts[0];
 
-  if (head == null) return null;
+  if (head == null) {
+    return null;
+  }
 
   const scopePath = join(normalizedParent, head);
   return {

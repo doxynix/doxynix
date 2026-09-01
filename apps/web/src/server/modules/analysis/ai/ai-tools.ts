@@ -1,4 +1,4 @@
-import { tool, type ToolSet } from "ai";
+import { type ToolSet, tool } from "ai";
 import { z } from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
@@ -48,7 +48,9 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
         try {
           appLogger.info({ msg: "AI Tool: getBranches", repoId });
           const repo = await prisma.repo.findUnique({ where: { publicId: repoId } });
-          if (repo == null) return "Error: Repository not found.";
+          if (repo == null) {
+            return "Error: Repository not found.";
+          }
 
           return await githubBrowseService.getBranches(prisma, userId, repo.owner, repo.name);
         } catch (error) {
@@ -84,7 +86,9 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
         try {
           appLogger.info({ msg: "AI Tool: listFiles", prefix, repoId });
           const repo = await prisma.repo.findUnique({ where: { publicId: repoId } });
-          if (repo == null) return "Error: Repo not found";
+          if (repo == null) {
+            return "Error: Repo not found";
+          }
 
           const tree = await githubBrowseService.getRepoFiles(
             prisma,
@@ -95,7 +99,9 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
           );
 
           let paths = tree.map((t) => t[0] as string);
-          if (prefix != null) paths = paths.filter((p) => p.startsWith(prefix));
+          if (prefix != null) {
+            paths = paths.filter((p) => p.startsWith(prefix));
+          }
 
           return paths.slice(0, 500).join("\n");
         } catch (error) {
@@ -223,7 +229,9 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
           appLogger.info({ docType, msg: "AI Tool: readPreviousDocument", repoId });
 
           const repo = await prisma.repo.findUnique({ where: { publicId: repoId } });
-          if (repo == null) return "Error: Repository not found.";
+          if (repo == null) {
+            return "Error: Repository not found.";
+          }
 
           const doc = await prisma.document.findFirst({
             orderBy: { createdAt: "desc" },
@@ -333,7 +341,9 @@ export function buildRepositoryToolProfile(
 
   for (const key of TOOL_KEYS_BY_PROFILE[profile]) {
     const selected = allTools[key];
-    if (selected != null) selectedTools[key] = selected;
+    if (selected != null) {
+      selectedTools[key] = selected;
+    }
   }
 
   return selectedTools;

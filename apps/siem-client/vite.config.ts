@@ -7,14 +7,11 @@ import mkcert from "vite-plugin-mkcert";
 import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
-  resolve: {
-    tsconfigPaths: true,
-  },
   plugins: [
     tanstackRouter({
-      target: "react",
       autoCodeSplitting: true,
       quoteStyle: "double",
+      target: "react",
     }),
     svgr(),
     react(),
@@ -35,17 +32,20 @@ export default defineConfig({
     // template: "treemap",
     //}),
   ],
+  resolve: {
+    tsconfigPaths: true,
+  },
   server: {
-    port: 3001,
-    strictPort: true,
     open: true,
+    port: 3001,
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
         changeOrigin: true,
         secure: false,
+        target: "http://localhost:8080",
         ws: true,
       },
     },
+    strictPort: true,
   },
 });

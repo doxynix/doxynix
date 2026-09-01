@@ -23,7 +23,7 @@ function safeCurrentMetadata() {
     return metadata.current();
   } catch (error) {
     appLogger.debug({ error, msg: "Trigger metadata unavailable; reading empty metadata" });
-    return;
+    return undefined;
   }
 }
 

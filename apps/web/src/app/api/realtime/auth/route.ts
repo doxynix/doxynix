@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { REALTIME_CONFIG, type AblyCapability } from "@/shared/constants/realtime";
+import { type AblyCapability, REALTIME_CONFIG } from "@/shared/constants/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";

@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
@@ -126,7 +126,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html suppressHydrationWarning lang={locale} data-scroll-behavior="smooth">
+    <html data-scroll-behavior="smooth" lang={locale} suppressHydrationWarning>
       <body
         className={cn(
           "flex min-h-dvh flex-col",
@@ -139,10 +139,10 @@ export default async function LocaleLayout({
           <SkipLink />
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ThemeProvider
-              disableTransitionOnChange
-              enableSystem
               attribute="class"
               defaultTheme="system"
+              disableTransitionOnChange
+              enableSystem
               storageKey="doxynix-theme"
             >
               <Toaster duration={4000} gap={8} position="top-center" />

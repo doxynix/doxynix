@@ -37,7 +37,9 @@ function topFolderPrefixes(paths: string[]): MapperFolderAgg[] {
   const counts = new Map<string, number>();
   for (const p of paths) {
     const parts = p.split("/").filter(Boolean);
-    if (parts.length <= 1) continue;
+    if (parts.length <= 1) {
+      continue;
+    }
     const top = parts[0]!;
     counts.set(top, (counts.get(top) ?? 0) + 1);
   }
@@ -53,13 +55,19 @@ function topFolderPrefixes(paths: string[]): MapperFolderAgg[] {
 }
 
 function isArchitectureRelevantModule(fileModule: ModuleRef | undefined) {
-  if (fileModule == null) return false;
+  if (fileModule == null) {
+    return false;
+  }
   return ProjectPolicy.isArchitectureRelevantCategories(fileModule.categories);
 }
 
 function isPrimaryArchitectureModule(fileModule: ModuleRef | undefined) {
-  if (fileModule == null) return false;
-  if (!isArchitectureRelevantModule(fileModule)) return false;
+  if (fileModule == null) {
+    return false;
+  }
+  if (!isArchitectureRelevantModule(fileModule)) {
+    return false;
+  }
   return ProjectPolicy.isPrimaryArchitectureCategories(fileModule.categories);
 }
 
@@ -91,15 +99,25 @@ function fileRoleHint(
   isApiHeuristic: boolean,
   isConfig: boolean,
 ): string {
-  if (isConfig) return "config";
-  if (isApiHeuristic) return "api";
-  if (module?.categories.includes("test") ?? false) return "test";
+  if (isConfig) {
+    return "config";
+  }
+  if (isApiHeuristic) {
+    return "api";
+  }
+  if (module?.categories.includes("test") ?? false) {
+    return "test";
+  }
   const lower = filePath.toLowerCase();
-  if (lower.includes("/server/") || lower.includes("/api/")) return "server";
+  if (lower.includes("/server/") || lower.includes("/api/")) {
+    return "server";
+  }
   if (lower.includes("/client/") || lower.includes("/ui/") || lower.includes("/components/")) {
     return "ui";
   }
-  if (isPrimaryArchitectureModule(module)) return "source";
+  if (isPrimaryArchitectureModule(module)) {
+    return "source";
+  }
   return (module?.categories.includes("runtime-source") ?? false) ? "runtime-support" : "source";
 }
 
@@ -115,21 +133,31 @@ function scoreFileCandidate(params: {
     Math.min(params.lines, MAPPER_FILE_SCORING.maxLinesForLineScore) *
     MAPPER_FILE_SCORING.lineMultiplier;
 
-  if (params.primaryEntrypointPaths.has(params.path))
+  if (params.primaryEntrypointPaths.has(params.path)) {
     score += MAPPER_FILE_SCORING.primaryEntrypointBonus;
-  if (params.isConfig) score += MAPPER_FILE_SCORING.configFileBonus;
-  if (params.isApiHeuristic) score += MAPPER_FILE_SCORING.apiHeuristicBonus;
-  if (isPrimaryArchitectureModule(params.fileModule))
+  }
+  if (params.isConfig) {
+    score += MAPPER_FILE_SCORING.configFileBonus;
+  }
+  if (params.isApiHeuristic) {
+    score += MAPPER_FILE_SCORING.apiHeuristicBonus;
+  }
+  if (isPrimaryArchitectureModule(params.fileModule)) {
     score += MAPPER_FILE_SCORING.primaryArchitectureBonus;
-  else if (isArchitectureRelevantModule(params.fileModule))
+  } else if (isArchitectureRelevantModule(params.fileModule)) {
     score += MAPPER_FILE_SCORING.secondaryArchitectureBonus;
+  }
 
   return score;
 }
 
 function pushUnique(items: string[], value: string, limit: number) {
-  if (items.length >= limit) return;
-  if (!items.includes(value)) items.push(value);
+  if (items.length >= limit) {
+    return;
+  }
+  if (!items.includes(value)) {
+    items.push(value);
+  }
 }
 
 function isResolvedInternalEdge(
@@ -151,10 +179,18 @@ function buildDependencyTopology(
   const rankedEdges = internalEdges
     .map((edge) => {
       let score = 0;
-      if (relevantPathSet.has(edge.fromPath)) score += 8;
-      if (relevantPathSet.has(edge.toPath)) score += 8;
-      if (modulePathSet.has(edge.fromPath)) score += 12;
-      if (modulePathSet.has(edge.toPath)) score += 12;
+      if (relevantPathSet.has(edge.fromPath)) {
+        score += 8;
+      }
+      if (relevantPathSet.has(edge.toPath)) {
+        score += 8;
+      }
+      if (modulePathSet.has(edge.fromPath)) {
+        score += 12;
+      }
+      if (modulePathSet.has(edge.toPath)) {
+        score += 12;
+      }
       return { edge, score };
     })
     .sort(
@@ -175,10 +211,14 @@ function buildDependencyTopology(
 
   for (const edge of internalEdges) {
     const fromEntry = adjacencyByPath.get(edge.fromPath);
-    if (fromEntry != null) pushUnique(fromEntry.out, edge.toPath, 12);
+    if (fromEntry != null) {
+      pushUnique(fromEntry.out, edge.toPath, 12);
+    }
 
     const toEntry = adjacencyByPath.get(edge.toPath);
-    if (toEntry != null) pushUnique(toEntry.in, edge.fromPath, 12);
+    if (toEntry != null) {
+      pushUnique(toEntry.in, edge.fromPath, 12);
+    }
   }
 
   return {

@@ -1,6 +1,7 @@
-import { redis } from "@server/core/redis";
-import { getIp } from "@server/utils/request-context";
 import type { MiddlewareHandler } from "hono";
+
+import { redis } from "@/core/redis";
+import { getIp } from "@/utils/request-context";
 
 type RateLimitConfig = {
   windowSec?: number;
@@ -41,8 +42,8 @@ export function createRateLimiter(config: RateLimitConfig = {}): MiddlewareHandl
       if (allowed === 0) {
         return c.json(
           {
-            success: false,
             error: "Too many requests",
+            success: false,
           },
           429,
         );
@@ -51,6 +52,6 @@ export function createRateLimiter(config: RateLimitConfig = {}): MiddlewareHandl
       console.warn("[RateLimiter] Redis error/unreachable, failing open:", error);
     }
 
-    return await next();
+    return next();
   };
 }

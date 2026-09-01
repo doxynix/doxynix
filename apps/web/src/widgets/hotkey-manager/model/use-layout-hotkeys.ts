@@ -17,7 +17,9 @@ export function useLayoutHotkeys() {
   useHotkeys(
     "mod+b",
     (e) => {
-      if (e.repeat) return;
+      if (e.repeat) {
+        return;
+      }
       toggleSidebar();
     },
     options,
@@ -26,7 +28,9 @@ export function useLayoutHotkeys() {
   useHotkeys(
     "mod+k",
     (e) => {
-      if (e.repeat) return;
+      if (e.repeat) {
+        return;
+      }
       toggleCommandMenu();
     },
     options,

@@ -16,14 +16,14 @@ export async function FAQSection() {
 
   return (
     <section className="container mx-auto max-w-3xl px-4 py-24">
-      <h2 className="mb-12 text-center text-3xl font-bold md:text-5xl">FAQ</h2>
-      <Accordion type="single" collapsible className="w-full">
+      <h2 className="mb-12 text-center font-bold text-3xl md:text-5xl">FAQ</h2>
+      <Accordion className="w-full" collapsible type="single">
         {items.map((item) => (
           <AccordionListItem
-            key={item.value}
-            value={item.value}
             content={item.a}
+            key={item.value}
             trigger={item.q}
+            value={item.value}
           />
         ))}
       </Accordion>

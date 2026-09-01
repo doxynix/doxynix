@@ -11,9 +11,15 @@ export const SCORE_THRESHOLDS = {
  * Calculates domain health tier based on numeric score (0-100).
  */
 export function getHealthLevel(score: number | null | undefined): HealthLevel {
-  if (score === null || score === undefined) return "unknown";
-  if (score < SCORE_THRESHOLDS.CRITICAL) return "critical";
-  if (score < SCORE_THRESHOLDS.HEALTHY) return "warning";
+  if (score === null || score === undefined) {
+    return "unknown";
+  }
+  if (score < SCORE_THRESHOLDS.CRITICAL) {
+    return "critical";
+  }
+  if (score < SCORE_THRESHOLDS.HEALTHY) {
+    return "warning";
+  }
   return "healthy";
 }
 
@@ -27,13 +33,20 @@ export function getHealthLabel(scoreOrLevel: number | HealthLevel | null | undef
       : scoreOrLevel;
 
   switch (level) {
-    case "healthy":
+    case "healthy": {
       return "Excellent";
-    case "warning":
+    }
+    case "warning": {
       return "Needs Attention";
-    case "critical":
+    }
+    case "critical": {
       return "Critical";
-    case "unknown":
+    }
+    case "unknown": {
       return "No data";
+    }
+    default: {
+      return "No data";
+    }
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -36,17 +36,17 @@ export function DeleteByOwnerDialog({ owner }: Readonly<Props>) {
       description={t("settings_danger_delete_all_repos_desc")}
       destructiveAlertContent={tsRich("settings_danger_delete_all_repos_note_4")}
       isLoading={deleteByOwner.isPending}
+      onConfirm={handleDelete}
+      onOpenChange={setOpen}
       open={open}
       successAlertContent={tsRich("settings_danger_delete_all_repos_note_3")}
       successAlertTitle={t("settings_danger_alert_title")}
       title={`${t("settings_danger_delete_all_repos")}?`}
       trigger={
-        <AppButton variant="destructive" className="w-fit cursor-pointer">
+        <AppButton className="w-fit cursor-pointer" variant="destructive">
           {t("settings_danger_delete_all_repos")} <Trash2 />
         </AppButton>
       }
-      onConfirm={handleDelete}
-      onOpenChange={setOpen}
     />
   );
 }

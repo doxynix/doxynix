@@ -1,3 +1,4 @@
+import { type ComponentPropsWithoutRef, type ComponentRef, forwardRef } from "react";
 import * as SelectPrimitives from "@radix-ui/react-select";
 import {
   RiArrowDownSLine,
@@ -5,7 +6,7 @@ import {
   RiCheckLine,
   RiExpandUpDownLine,
 } from "@remixicon/react";
-import { type ComponentPropsWithoutRef, type ComponentRef, forwardRef } from "react";
+
 import { cx, focusInput, hasErrorInput } from "../../lib/utils";
 
 const Select = SelectPrimitives.Root;
@@ -48,8 +49,8 @@ const SelectTrigger = forwardRef<
 >(({ className, hasError, children, ...props }, forwardedRef) => {
   return (
     <SelectPrimitives.Trigger
-      ref={forwardedRef}
       className={cx(selectTriggerStyles, hasError ? hasErrorInput : "", className)}
+      ref={forwardedRef}
       tremor-id="tremor-raw"
       {...props}
     >
@@ -77,11 +78,11 @@ const SelectScrollUpButton = forwardRef<
   ComponentPropsWithoutRef<typeof SelectPrimitives.ScrollUpButton>
 >(({ className, ...props }, forwardedRef) => (
   <SelectPrimitives.ScrollUpButton
-    ref={forwardedRef}
     className={cx("flex cursor-default items-center justify-center py-1", className)}
+    ref={forwardedRef}
     {...props}
   >
-    <RiArrowUpSLine className="size-3 shrink-0" aria-hidden="true" />
+    <RiArrowUpSLine aria-hidden="true" className="size-3 shrink-0" />
   </SelectPrimitives.ScrollUpButton>
 ));
 SelectScrollUpButton.displayName = SelectPrimitives.ScrollUpButton.displayName;
@@ -91,11 +92,11 @@ const SelectScrollDownButton = forwardRef<
   ComponentPropsWithoutRef<typeof SelectPrimitives.ScrollDownButton>
 >(({ className, ...props }, forwardedRef) => (
   <SelectPrimitives.ScrollDownButton
-    ref={forwardedRef}
     className={cx("flex cursor-default items-center justify-center py-1", className)}
+    ref={forwardedRef}
     {...props}
   >
-    <RiArrowDownSLine className="size-3 shrink-0" aria-hidden="true" />
+    <RiArrowDownSLine aria-hidden="true" className="size-3 shrink-0" />
   </SelectPrimitives.ScrollDownButton>
 ));
 SelectScrollDownButton.displayName = SelectPrimitives.ScrollDownButton.displayName;
@@ -110,10 +111,9 @@ const SelectContent = forwardRef<
   ) => (
     <SelectPrimitives.Portal>
       <SelectPrimitives.Content
-        ref={forwardedRef}
         className={cx(
           // base
-          "relative z-50 overflow-hidden rounded-md border shadow-xl shadow-black/2.5",
+          "relative z-50 overflow-hidden rounded-md border shadow-black/2.5 shadow-xl",
           // widths
           "min-w-[calc(var(--radix-select-trigger-width)-2px)] max-w-[95vw]",
           // heights
@@ -131,9 +131,10 @@ const SelectContent = forwardRef<
           "data-[side=bottom]:animate-slide-down-and-fade data-[side=left]:animate-slide-left-and-fade data-[side=right]:animate-slide-right-and-fade data-[side=top]:animate-slide-up-and-fade",
           className,
         )}
-        sideOffset={sideOffset}
-        position={position}
         collisionPadding={collisionPadding}
+        position={position}
+        ref={forwardedRef}
+        sideOffset={sideOffset}
         {...props}
       >
         <SelectScrollUpButton />
@@ -159,14 +160,14 @@ const SelectGroupLabel = forwardRef<
   ComponentPropsWithoutRef<typeof SelectPrimitives.Label>
 >(({ className, ...props }, forwardedRef) => (
   <SelectPrimitives.Label
-    ref={forwardedRef}
     className={cx(
       // base
-      "px-3 py-2 text-xs font-medium tracking-wide",
+      "px-3 py-2 font-medium text-xs tracking-wide",
       // text color
       "text-gray-500 dark:text-gray-500",
       className,
     )}
+    ref={forwardedRef}
     {...props}
   />
 ));
@@ -179,7 +180,6 @@ const SelectItem = forwardRef<
 >(({ className, children, ...props }, forwardedRef) => {
   return (
     <SelectPrimitives.Item
-      ref={forwardedRef}
       className={cx(
         // base
         "grid cursor-pointer grid-cols-[1fr_20px] gap-x-2 rounded-sm px-3 py-2 outline-hidden transition-colors data-[state=checked]:font-semibold sm:text-sm",
@@ -193,13 +193,14 @@ const SelectItem = forwardRef<
         "hover:bg-gray-100 dark:hover:bg-gray-900",
         className,
       )}
+      ref={forwardedRef}
       {...props}
     >
       <SelectPrimitives.ItemText className="flex-1 truncate">{children}</SelectPrimitives.ItemText>
       <SelectPrimitives.ItemIndicator>
         <RiCheckLine
-          className="size-5 shrink-0 text-gray-800 dark:text-gray-200"
           aria-hidden="true"
+          className="size-5 shrink-0 text-gray-800 dark:text-gray-200"
         />
       </SelectPrimitives.ItemIndicator>
     </SelectPrimitives.Item>
@@ -213,7 +214,6 @@ const SelectSeparator = forwardRef<
   ComponentPropsWithoutRef<typeof SelectPrimitives.Separator>
 >(({ className, ...props }, forwardedRef) => (
   <SelectPrimitives.Separator
-    ref={forwardedRef}
     className={cx(
       // base
       "-mx-1 my-1 h-px",
@@ -221,6 +221,7 @@ const SelectSeparator = forwardRef<
       "bg-gray-300 dark:bg-gray-700",
       className,
     )}
+    ref={forwardedRef}
     {...props}
   />
 ));

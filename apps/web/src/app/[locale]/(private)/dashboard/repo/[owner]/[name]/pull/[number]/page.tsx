@@ -17,7 +17,9 @@ export default async function PullRequestDetailPage({ params }: Readonly<Props>)
 
   const prNumber = Number.parseInt(number, 10);
 
-  if (!Number.isSafeInteger(prNumber) || prNumber <= 0) notFound();
+  if (!Number.isSafeInteger(prNumber) || prNumber <= 0) {
+    notFound();
+  }
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 

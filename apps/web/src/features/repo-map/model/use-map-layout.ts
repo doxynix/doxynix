@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useEdgesState, useNodesState, type Edge, type Node } from "@xyflow/react";
+import { type Edge, type Node, useEdgesState, useNodesState } from "@xyflow/react";
 import type { ELK, ElkNode } from "elkjs";
 
 import type { RepoMapDisplayData, RepoMapNodeData } from "./repo-map-types";
@@ -21,7 +21,9 @@ interface ElkNodeWithChildren extends ElkNode {
 
 export function useMapLayout(data: RepoMapDisplayData) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<RepoMapNodeData>>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const initialEdges: Edge[] = [];
+
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [layoutReady, setLayoutReady] = useState(false);
   const [layoutTick, setLayoutTick] = useState(0);
   const elkRef = useRef<ELK | null>(null);
@@ -70,7 +72,9 @@ export function useMapLayout(data: RepoMapDisplayData) {
     });
 
     const calculateLayout = async () => {
-      if (!cancelled) setLayoutReady(false);
+      if (!cancelled) {
+        setLayoutReady(false);
+      }
 
       if (layoutNodes.length === 0) {
         if (!cancelled) {
@@ -108,9 +112,9 @@ export function useMapLayout(data: RepoMapDisplayData) {
       const standaloneNodes = layoutNodes
         .filter((n) => !parentGroups.some((p) => p.children.includes(n.id)))
         .map((n) => ({
-          height: 120 + Math.min(((n.data.score as number) || 0) / 2, 30),
+          height: 120 + Math.min((n.data.score || 0) / 2, 30),
           id: n.id,
-          width: 240 + Math.min((n.data.score as number) || 0, 60),
+          width: 240 + Math.min(n.data.score || 0, 60),
         }));
 
       const elkGraph = {
@@ -127,7 +131,9 @@ export function useMapLayout(data: RepoMapDisplayData) {
         }
 
         const layoutedGraph = (await elkRef.current.layout(elkGraph)) as ElkNodeWithChildren;
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         const nodePositions = new Map<string, { x: number; y: number }>();
 
@@ -135,7 +141,9 @@ export function useMapLayout(data: RepoMapDisplayData) {
           elkNodes: ElkNodeWithChildren[] | undefined,
           parentOffset: { x: number; y: number } = { x: 0, y: 0 },
         ): void => {
-          if (!elkNodes) return;
+          if (!elkNodes) {
+            return;
+          }
 
           elkNodes.forEach((elkNode) => {
             const x = (elkNode.x ?? 0) + parentOffset.x;
@@ -143,12 +151,12 @@ export function useMapLayout(data: RepoMapDisplayData) {
             nodePositions.set(elkNode.id, { x, y });
 
             if (elkNode.children && elkNode.children.length > 0) {
-              extractPositions(elkNode.children as ElkNodeWithChildren[], { x, y });
+              extractPositions(elkNode.children, { x, y });
             }
           });
         };
 
-        extractPositions(layoutedGraph.children as ElkNodeWithChildren[] | undefined);
+        extractPositions(layoutedGraph.children);
 
         const layoutedNodes = layoutNodes.map((node) => ({
           ...node,

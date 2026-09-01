@@ -13,7 +13,7 @@ export function DeleteAllReposCard() {
   const { data, isLoading } = trpc.repo.getSlim.useQuery({ limit: 1 });
   const hasRepos = data != null && data.meta.totalCount > 0;
 
-  if (isLoading || !data)
+  if (isLoading || !data) {
     return (
       <Card className="border-destructive">
         <CardHeader>
@@ -26,6 +26,7 @@ export function DeleteAllReposCard() {
         </CardHeader>
       </Card>
     );
+  }
 
   return (
     <Card className="border-destructive">

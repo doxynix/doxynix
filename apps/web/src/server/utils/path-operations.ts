@@ -42,7 +42,7 @@ export function uniqueStringPaths(
   paths: Iterable<false | null | string | undefined>,
   limit?: number,
 ): string[] {
-  const cleanPaths = compact(Array.from(paths)) as string[];
+  const cleanPaths = compact(Array.from(paths));
   return uniqueNormalizedPaths(cleanPaths, limit);
 }
 

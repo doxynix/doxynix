@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Route } from "next";
 import { ChevronDown, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -81,12 +80,14 @@ export function AppCommandMenu() {
   const observerTarget = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!hasNextPage || isFetchingNextPage || !isReposExpanded) return;
+    if (!hasNextPage || isFetchingNextPage || !isReposExpanded) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        if (entry != null && entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           void fetchNextPage();
         }
       },
@@ -99,13 +100,15 @@ export function AppCommandMenu() {
     }
 
     return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, isReposExpanded]);
 
   const navigate = (path: string) => {
     setOpen(false);
-    router.push(path as Route);
+    router.push(path);
   };
 
   const runCommand = (item: MenuItem) => {
@@ -147,14 +150,14 @@ export function AppCommandMenu() {
 
   return (
     <>
-      <AppTooltip content="Search site" className="lg:hidden">
+      <AppTooltip className="lg:hidden" content="Search site">
         <AppButton
-          variant="outline"
           aria-label="Search site"
-          onClick={() => setOpen(true)}
           className={cn(
-            "text-muted-foreground lg:border-border lg:bg-surface-hover relative size-9 justify-start rounded-xl text-sm font-normal not-lg:border-0 not-lg:p-0 lg:w-64 lg:pr-12",
+            "relative size-9 justify-start rounded-xl not-lg:border-0 not-lg:p-0 font-normal text-muted-foreground text-sm lg:w-64 lg:border-border lg:bg-surface-hover lg:pr-12",
           )}
+          onClick={() => setOpen(true)}
+          variant="outline"
         >
           <Search className="absolute top-2.25 left-2.25" />
 
@@ -165,12 +168,12 @@ export function AppCommandMenu() {
         </AppButton>
       </AppTooltip>
 
-      <CommandDialog open={open} shouldFilter={false} onOpenChange={setOpen}>
+      <CommandDialog onOpenChange={setOpen} open={open} shouldFilter={false}>
         <CommandInput
-          value={search}
           isLoading={isLoading}
-          placeholder={t("command_placeholder")}
           onValueChange={setSearch}
+          placeholder={t("command_placeholder")}
+          value={search}
         />
         <CommandList>
           {filteredCommands.length === 0 && (
@@ -183,14 +186,14 @@ export function AppCommandMenu() {
                 const isDestructive = item.variant === "destructive";
                 return (
                   <CommandItem
-                    key={item.label}
-                    value={item.label}
-                    onSelect={() => runCommand(item)}
                     className={cn(
                       isDestructive &&
                         "text-destructive data-[selected=true]:bg-destructive/10 data-[selected=true]:text-destructive",
                       "flex items-center justify-between",
                     )}
+                    key={item.label}
+                    onSelect={() => runCommand(item)}
+                    value={item.label}
                   >
                     <div className="flex items-center gap-2">
                       {item.icon != null && <item.icon />}
@@ -198,7 +201,7 @@ export function AppCommandMenu() {
                     </div>
                     <div className="flex items-center gap-1">
                       {item.url != null && (
-                        <kbd className="text-muted-foreground px-1.5 py-0.5 text-xs">
+                        <kbd className="px-1.5 py-0.5 text-muted-foreground text-xs">
                           {item.url}
                         </kbd>
                       )}
@@ -221,14 +224,14 @@ export function AppCommandMenu() {
               <div className="flex w-full items-center justify-between">
                 <span>{t("command_menu_label_2")}</span>
                 <AppButton
-                  size="sm"
-                  variant="ghost"
+                  className="cursor-pointer bg-transparent text-muted-foreground"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     setIsReposExpanded(!isReposExpanded);
                   }}
-                  className="text-muted-foreground cursor-pointer bg-transparent"
+                  size="sm"
+                  variant="ghost"
                 >
                   {isReposExpanded ? t("command_collapse") : t("command_expand")}
                   <ChevronDown
@@ -248,17 +251,17 @@ export function AppCommandMenu() {
                   .map((repo) => (
                     <CommandItem
                       key={repo.id}
-                      value={`${repo.owner}/${repo.name}`}
                       onSelect={() => navigate(`/dashboard/repo/${repo.owner}/${repo.name}`)}
+                      value={`${repo.owner}/${repo.name}`}
                     >
                       <AppAvatar
                         alt={`${repo.owner}/${repo.name}`}
-                        src={repo.avatar}
                         fallbackText={repo.owner}
                         sizeClassName="size-8"
+                        src={repo.avatar}
                       />
                       <div className="line-clamp-1 flex">
-                        <span className="text-muted-foreground truncate font-bold">
+                        <span className="truncate font-bold text-muted-foreground">
                           {repo.owner}
                         </span>
                         <span className="text-muted-foreground">/</span>
@@ -267,7 +270,7 @@ export function AppCommandMenu() {
                     </CommandItem>
                   ))}
                 {hasNextPage && (
-                  <div ref={observerTarget} className="my-2 flex items-center justify-center">
+                  <div className="my-2 flex items-center justify-center" ref={observerTarget}>
                     {isFetchingNextPage && <Spinner />}
                   </div>
                 )}
@@ -276,7 +279,7 @@ export function AppCommandMenu() {
           </CommandGroup>
 
           {!isLoading && data?.pages[0]?.meta.totalCount === 0 && (
-            <div className="text-muted-foreground p-4 text-center text-xs">
+            <div className="p-4 text-center text-muted-foreground text-xs">
               {t("repo_empty_title")}
             </div>
           )}

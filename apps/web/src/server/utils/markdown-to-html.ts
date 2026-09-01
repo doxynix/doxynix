@@ -27,7 +27,7 @@ const trackRawCode = (node: HastElement) => {
   if (node.tagName === "pre") {
     const codeNode = node.children[0] as HastElement | undefined;
 
-    if (codeNode != null && codeNode.tagName === "code") {
+    if (codeNode?.tagName === "code") {
       const textNode = codeNode.children[0];
       let rawCode = "";
 
@@ -44,7 +44,7 @@ const ignoreMermaid = (node: HastElement) => {
   if (node.tagName === "pre") {
     const codeNode = node.children[0] as HastElement | undefined;
 
-    if (codeNode != null && codeNode.tagName === "code") {
+    if (codeNode?.tagName === "code") {
       const className = codeNode.properties.className;
 
       const classes = Array.isArray(className)
@@ -87,7 +87,9 @@ export async function markdownToHtml({
   name,
   owner,
 }: MarkdownToHtmlOptions): Promise<string> {
-  if (content === "") return "";
+  if (content === "") {
+    return "";
+  }
 
   const result = await unified()
     .use(remarkParse)

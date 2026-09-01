@@ -2,7 +2,9 @@ import { normalize } from "pathe";
 
 export function calculateDocDensity(source: number, comment: number): number {
   const totalLines = source + comment;
-  if (totalLines === 0) return 0;
+  if (totalLines === 0) {
+    return 0;
+  }
 
   return Math.round((comment / totalLines) * 100);
 }

@@ -1,4 +1,4 @@
-import { PRAnalysisStatus, Status, type FixStatus } from "@prisma/client";
+import { type FixStatus, PRAnalysisStatus, Status } from "@prisma/client";
 import { locals, tasks } from "@trigger.dev/sdk";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
@@ -25,7 +25,7 @@ function formatTaskError(error: unknown, defaultMessage: string): string {
     return error;
   }
   if (error != null && typeof error === "object" && "message" in error) {
-    return String((error as { message: unknown }).message);
+    return String(error.message);
   }
   return defaultMessage;
 }

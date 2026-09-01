@@ -70,14 +70,14 @@ export function getInstallationClient(installationId: number): OctokitInstance {
       privateKey: GITHUB_APP_PRIVATE_KEY,
     },
     authStrategy: createAppAuth,
-  }) as OctokitInstance;
+  });
 }
 
 export function getPublicClient(token?: string): OctokitInstance {
   return new AppOctokit({
     ...getCommonConfig(),
     auth: token,
-  }) as OctokitInstance;
+  });
 }
 
 export class GitHubAuthRequiredError extends Error {
@@ -203,7 +203,9 @@ export async function resolveClientContext(
  */
 export function parseUrl(input: string): { name: string; owner: string } {
   const trimmedInput = input.trim();
-  if (trimmedInput === "") throw new Error("Field cannot be empty");
+  if (trimmedInput === "") {
+    throw new Error("Field cannot be empty");
+  }
 
   try {
     const parsed = gitUrlParse(trimmedInput);

@@ -23,7 +23,7 @@ function dedupeEntrypoints(entrypoints: EntrypointRef[]): EntrypointRef[] {
     }
   }
 
-  return Array.from(seen.values()).toSorted(
+  return Array.from(seen.values()).sort(
     (left, right) => right.confidence - left.confidence || left.path.localeCompare(right.path),
   );
 }
@@ -134,8 +134,12 @@ export function buildOrphanModules(
 ): string[] {
   return modules
     .filter((module) => {
-      if (!ProjectPolicy.isArchitectureRelevant(module.path)) return false;
-      if (mainEntrypointPaths.has(module.path)) return false;
+      if (!ProjectPolicy.isArchitectureRelevant(module.path)) {
+        return false;
+      }
+      if (mainEntrypointPaths.has(module.path)) {
+        return false;
+      }
       return (inboundByFile.get(module.path) ?? 0) === 0;
     })
     .map((module) => module.path);
@@ -156,7 +160,7 @@ export function buildDependencyHotspots(
       path: module.path,
     }));
 
-  return mapped.toSorted((left, right) => {
+  return mapped.sort((left, right) => {
     const leftScore =
       left.inbound * ARCHITECTURE_WEIGHTS.inboundMultiplier +
       left.outbound * ARCHITECTURE_WEIGHTS.outboundMultiplier +
@@ -201,7 +205,7 @@ export function buildHotspotSignals(
       };
     });
 
-  return mapped.toSorted((left, right) => right.score - left.score);
+  return mapped.sort((left, right) => right.score - left.score);
 }
 
 export function buildFileCategoryBreakdown(modules: ModuleRef[]): FileCategoryBreakdownItem[] {
@@ -219,5 +223,5 @@ export function buildFileCategoryBreakdown(modules: ModuleRef[]): FileCategoryBr
 export function dedupeConfigs(configs: ConfigRef[]): ConfigRef[] {
   const uniqueConfigs = uniqBy(configs, (config) => `${config.path}::${config.kind}`);
 
-  return uniqueConfigs.toSorted((left, right) => left.path.localeCompare(right.path));
+  return uniqueConfigs.sort((left, right) => left.path.localeCompare(right.path));
 }

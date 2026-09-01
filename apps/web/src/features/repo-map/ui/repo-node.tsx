@@ -1,6 +1,6 @@
 "use client";
 
-import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
+import { Handle, type Node, type NodeProps, Position } from "@xyflow/react";
 import {
   Activity,
   AlertTriangle,
@@ -123,13 +123,13 @@ export const RepoNode = ({ data }: Props) => {
         dimByFilter || dimByHover || dimBySearch ? "z-1 opacity-50" : "z-10 opacity-100",
       )}
     >
-      <Handle type="target" position={Position.Top} className="cursor-grab! opacity-0" />
+      <Handle className="cursor-grab! opacity-0" position={Position.Top} type="target" />
 
       <Card className="w-96">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {isGroup ? <Folder className="fill-current" /> : <File />}
-            <span className="flex-1 truncate text-xs font-bold">{label}</span>
+            <span className="flex-1 truncate font-bold text-xs">{label}</span>
             <AppBadge variant="outline">{data.kind}</AppBadge>
           </CardTitle>
           <p className="text-muted-foreground text-xs">{description}</p>
@@ -141,7 +141,7 @@ export const RepoNode = ({ data }: Props) => {
               m.show && (
                 <AppBadge key={m.id} variant="outline">
                   <m.icon className={cn(m.color)} />
-                  <div className="text-muted-foreground flex gap-1">
+                  <div className="flex gap-1 text-muted-foreground">
                     <span className="text-[10px]">{m.val}</span>
                     <span className="text-[10px]">{m.id}</span>
                   </div>
@@ -151,19 +151,19 @@ export const RepoNode = ({ data }: Props) => {
 
           {data.score > 0 && (
             <div className="col-span-2 mt-1">
-              <div className="text-muted-foreground flex justify-between text-[10px]">
+              <div className="flex justify-between text-[10px] text-muted-foreground">
                 <span>Complexity Score</span>
                 <span>{data.score}</span>
               </div>
               <Progress
-                value={data.score / 5}
                 indicatorClassName={data.score > 200 ? "bg-destructive" : "bg-foreground"}
+                value={data.score / 5}
               />
             </div>
           )}
         </CardContent>
       </Card>
-      <Handle type="source" position={Position.Bottom} className="cursor-grab! opacity-0" />
+      <Handle className="cursor-grab! opacity-0" position={Position.Bottom} type="source" />
     </div>
   );
 };

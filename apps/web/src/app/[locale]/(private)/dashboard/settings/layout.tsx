@@ -8,7 +8,7 @@ export default async function SettingsLayout({ children }: Readonly<{ children: 
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold">{t("settings_title")}</h1>
+      <h1 className="font-bold text-2xl">{t("settings_title")}</h1>
       <div className="flex gap-12">
         <div className="flex flex-col gap-4">
           <SettingsMenu />

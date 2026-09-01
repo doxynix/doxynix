@@ -25,14 +25,14 @@ export function ScrollButton({
 }: Readonly<Props>) {
   return (
     <AppButton
-      variant="ghost"
       aria-label={ariaLabel}
+      className={buttonClassName}
       onClick={() => {
         smoothScrollTo(targetId, offset, duration);
       }}
-      className={buttonClassName}
+      variant="ghost"
     >
-      <MoveRight size={12} className={arrowClassName} />
+      <MoveRight className={arrowClassName} size={12} />
     </AppButton>
   );
 }

@@ -90,7 +90,9 @@ function isRootManifest(path: string) {
   const normalizedPath = normalize(path);
   const dir = dirname(normalizedPath);
 
-  if (dir !== ".") return false;
+  if (dir !== ".") {
+    return false;
+  }
 
   return PROJECT_POLICY_RULES.manifests.rootFiles.includes(
     normalizedPath.toLowerCase() as (typeof PROJECT_POLICY_RULES.manifests.rootFiles)[number],
@@ -111,9 +113,15 @@ function isDataContractFile(path: string) {
 }
 
 function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boolean) {
-  if (ProjectPolicy.isSensitive(filePath)) return false;
-  if (ProjectPolicy.isGeneratedFile(filePath) || ProjectPolicy.isAssetFile(filePath)) return false;
-  if (preferred) return true;
+  if (ProjectPolicy.isSensitive(filePath)) {
+    return false;
+  }
+  if (ProjectPolicy.isGeneratedFile(filePath) || ProjectPolicy.isAssetFile(filePath)) {
+    return false;
+  }
+  if (preferred) {
+    return true;
+  }
 
   const docsLike = ProjectPolicy.isDocsFile(filePath) || isExampleLike(filePath);
   const testLike = ProjectPolicy.isTestFile(filePath);
@@ -122,7 +130,9 @@ function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boo
   switch (stage) {
     case "architect":
     case "writer_architecture": {
-      if (docsLike || testLike || benchmarkLike) return false;
+      if (docsLike || testLike || benchmarkLike) {
+        return false;
+      }
       return (
         ProjectPolicy.isPrimaryArchitectureCategories(ProjectPolicy.getCategories(filePath)) ||
         ProjectPolicy.isConfigFile(filePath) ||
@@ -138,7 +148,9 @@ function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boo
       );
     }
     case "writer_contributing": {
-      if (docsLike || testLike || benchmarkLike) return false;
+      if (docsLike || testLike || benchmarkLike) {
+        return false;
+      }
       return (
         ProjectPolicy.isConfigFile(filePath) ||
         ProjectPolicy.isToolingFile(filePath) ||
@@ -159,41 +171,62 @@ function stageAllowsFile(stage: AiContextStage, filePath: string, preferred: boo
 function scoreFile(stage: AiContextStage, filePath: string, preferred: boolean) {
   let score = getFileScore(filePath);
 
-  if (preferred) score += FILE_CONTEXT_MODIFIERS.preferredFileBonus;
-  if (isRootManifest(filePath)) score += FILE_CONTEXT_MODIFIERS.rootManifestBonus;
-  if (ProjectPolicy.isPrimaryArchitectureCategories(ProjectPolicy.getCategories(filePath)))
+  if (preferred) {
+    score += FILE_CONTEXT_MODIFIERS.preferredFileBonus;
+  }
+  if (isRootManifest(filePath)) {
+    score += FILE_CONTEXT_MODIFIERS.rootManifestBonus;
+  }
+  if (ProjectPolicy.isPrimaryArchitectureCategories(ProjectPolicy.getCategories(filePath))) {
     score += FILE_CONTEXT_MODIFIERS.primaryArchitectureBonus;
+  }
   if (ProjectPolicy.isConfigFile(filePath)) {
     score +=
       stage === "writer_readme"
         ? FILE_CONTEXT_MODIFIERS.configFileBonusForReadme
         : FILE_CONTEXT_MODIFIERS.configFileBonus;
   }
-  if (stage === "writer_api" && ProjectPolicy.isApiPath(filePath))
+  if (stage === "writer_api" && ProjectPolicy.isApiPath(filePath)) {
     score += FILE_CONTEXT_MODIFIERS.apiFileBonus;
-  if (stage === "writer_api" && isDataContractFile(filePath)) score += 40;
-  if (stage === "architect" && ProjectPolicy.isApiPath(filePath))
+  }
+  if (stage === "writer_api" && isDataContractFile(filePath)) {
+    score += 40;
+  }
+  if (stage === "architect" && ProjectPolicy.isApiPath(filePath)) {
     score += FILE_CONTEXT_MODIFIERS.apiFileSecondaryBonus;
-  if (stage === "writer_contributing" && ProjectPolicy.isToolingFile(filePath))
+  }
+  if (stage === "writer_contributing" && ProjectPolicy.isToolingFile(filePath)) {
     score += FILE_CONTEXT_MODIFIERS.configFileBonus;
-  if ((ProjectPolicy.isDocsFile(filePath) || isExampleLike(filePath)) && !preferred)
+  }
+  if ((ProjectPolicy.isDocsFile(filePath) || isExampleLike(filePath)) && !preferred) {
     score += FILE_CONTEXT_MODIFIERS.docFilePenalty;
-  if (ProjectPolicy.isTestFile(filePath) && !preferred)
+  }
+  if (ProjectPolicy.isTestFile(filePath) && !preferred) {
     score += FILE_CONTEXT_MODIFIERS.testFilePenalty;
+  }
 
   return score;
 }
 
 function buildSelectionReason(stage: AiContextStage, filePath: string, preferred: boolean) {
-  if (preferred) return "preferred-evidence";
-  if (isRootManifest(filePath)) return "root-manifest";
-  if (ProjectPolicy.isConfigFile(filePath))
+  if (preferred) {
+    return "preferred-evidence";
+  }
+  if (isRootManifest(filePath)) {
+    return "root-manifest";
+  }
+  if (ProjectPolicy.isConfigFile(filePath)) {
     return stage === "writer_readme" ? "config-evidence" : "config-support";
-  if (stage === "writer_contributing" && ProjectPolicy.isToolingFile(filePath))
+  }
+  if (stage === "writer_contributing" && ProjectPolicy.isToolingFile(filePath)) {
     return "tooling-evidence";
-  if (stage === "writer_api" && ProjectPolicy.isApiPath(filePath)) return "api-evidence";
-  if (ProjectPolicy.isPrimaryArchitectureCategories(ProjectPolicy.getCategories(filePath)))
+  }
+  if (stage === "writer_api" && ProjectPolicy.isApiPath(filePath)) {
+    return "api-evidence";
+  }
+  if (ProjectPolicy.isPrimaryArchitectureCategories(ProjectPolicy.getCategories(filePath))) {
     return "primary-architecture";
+  }
   return "secondary-support";
 }
 
@@ -266,7 +299,7 @@ export async function buildStageContextPack({
       if (item.preferred) {
         const remainingSpace = budgetTokens - currentTotalTokens - 20;
         if (remainingSpace > 200) {
-          content = content.slice(0, remainingSpace * 2) + "\n/* ...emergency truncated... */";
+          content = `${content.slice(0, remainingSpace * 2)}\n/* ...emergency truncated... */`;
           const emergencyTokens = (await countTokens(content)) + 15;
           addFileToContext(item, buildXml(item.path, content), emergencyTokens, true);
           continue;

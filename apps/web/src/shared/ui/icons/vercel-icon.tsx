@@ -5,12 +5,12 @@ type Props = {
 export function VercelIcon({ className }: Readonly<Props>) {
   return (
     <svg
+      className={className}
       fill="none"
       height="100%"
       viewBox="0 0 2048 407"
       width="100%"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
     >
       <path
         clipRule="evenodd"

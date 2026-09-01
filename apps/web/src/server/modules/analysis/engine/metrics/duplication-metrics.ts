@@ -36,7 +36,9 @@ function toDuplicationSourceFiles(
 
   for (const file of files) {
     const format = getFormatByFile(file.path);
-    if (format === undefined) continue;
+    if (format === undefined) {
+      continue;
+    }
 
     sourceFiles.push({
       ...file,
@@ -60,7 +62,9 @@ export async function calculateRepositoryDuplication(
     totalDuplicatedLines: 0,
   };
 
-  if (validFiles.length === 0) return fallbackReport;
+  if (validFiles.length === 0) {
+    return fallbackReport;
+  }
 
   const options: IOptions = {
     absolute: false,
@@ -78,7 +82,9 @@ export async function calculateRepositoryDuplication(
       import("@jscpd/tokenizer"),
     ]);
     const sourceFiles = toDuplicationSourceFiles(validFiles, getFormatByFile);
-    if (sourceFiles.length === 0) return fallbackReport;
+    if (sourceFiles.length === 0) {
+      return fallbackReport;
+    }
 
     const tokenizer = new Tokenizer();
     const store = new MemoryStore<IMapFrame>();

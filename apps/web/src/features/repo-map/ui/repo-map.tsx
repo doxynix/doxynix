@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
+import { type MouseEvent, useEffect, useState } from "react";
 import {
   Background,
+  type Edge,
   MiniMap,
+  type Node,
   Panel,
   ReactFlow,
   useReactFlow,
-  type Edge,
-  type Node,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
@@ -79,15 +79,19 @@ function enrichRepoMapNodes(
   if (hoveredNodeId != null) {
     hoveredCluster.add(hoveredNodeId);
     rawEdges?.forEach((e) => {
-      if (e.source === hoveredNodeId) hoveredCluster.add(e.target);
-      if (e.target === hoveredNodeId) hoveredCluster.add(e.source);
+      if (e.source === hoveredNodeId) {
+        hoveredCluster.add(e.target);
+      }
+      if (e.target === hoveredNodeId) {
+        hoveredCluster.add(e.source);
+      }
     });
   }
   const highlightOn = hoveredCluster.size > 0;
 
   let filterAllowed: null | Set<string> = null;
   if (highlightKey && "filters" in data) {
-    const list = data.filters[highlightKey as keyof typeof data.filters];
+    const list = data.filters[highlightKey];
     if (Array.isArray(list) && list.length > 0) {
       filterAllowed = new Set(list);
     }
@@ -135,7 +139,6 @@ export function RepoMap({
   const {
     edges,
     layoutReady,
-    layoutTick,
     nodes: baseNodes,
     onEdgesChange,
     onNodesChange,
@@ -166,15 +169,19 @@ export function RepoMap({
   }));
 
   useEffect(() => {
-    if (!layoutReady) return;
+    if (!layoutReady) {
+      return;
+    }
     const id = requestAnimationFrame(() => {
       void fitView({ duration: viewKey === "root" ? 400 : 540, padding: 0.22 });
     });
     return () => cancelAnimationFrame(id);
-  }, [layoutTick, layoutReady, viewKey, fitView]);
+  }, [layoutReady, viewKey, fitView]);
 
   useEffect(() => {
-    if (!layoutReady) return;
+    if (!layoutReady) {
+      return;
+    }
     setEdges((eds) => applyEdgeHover(eds, hoveredNodeId));
   }, [hoveredNodeId, layoutReady, setEdges]);
 
@@ -216,26 +223,26 @@ export function RepoMap({
       <div className="flex shrink-0 items-center justify-between p-3">
         <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto">
           <AppButton
+            className="h-5 cursor-pointer gap-1 bg-transparent text-xs hover:bg-transparent md:px-1"
+            onClick={() => onNavigate(null)}
             size="sm"
             variant="ghost"
-            onClick={() => onNavigate(null)}
-            className="h-5 cursor-pointer gap-1 bg-transparent text-xs hover:bg-transparent md:px-1"
           >
             Root
           </AppButton>
 
           {breadcrumbItems.length > 0 && (
             <AppBreadcrumbs
-              showSeparatorAtStart
+              className="hidden min-w-0 md:block"
               items={breadcrumbItems}
               separator={<SlashIcon className="size-3 -rotate-12" />}
-              className="hidden min-w-0 md:block"
+              showSeparatorAtStart
             />
           )}
         </div>
       </div>
 
-      <ResizablePanelGroup orientation="horizontal" className="relative">
+      <ResizablePanelGroup className="relative" orientation="horizontal">
         <ResizablePanel defaultSize="70%" maxSize="100%" minSize="30%">
           <div className="relative h-full min-h-0 w-full">
             <div className="h-full min-h-0 w-full">
@@ -249,7 +256,6 @@ export function RepoMap({
                 nodesConnectable={false}
                 nodesDraggable={layoutReady}
                 nodeTypes={nodeTypes}
-                proOptions={{ hideAttribution: true }}
                 onEdgesChange={onEdgesChange}
                 onNodeClick={onNodeClick}
                 onNodeDoubleClick={onNodeDoubleClick}
@@ -257,31 +263,32 @@ export function RepoMap({
                 onNodeMouseLeave={() => setHoveredNodeId(null)}
                 onNodesChange={onNodesChange}
                 onPaneClick={() => onSelect(null)}
+                proOptions={{ hideAttribution: true }}
               >
                 <Panel
-                  position="top-left"
                   className={cn(
-                    "transition-standard flex flex-col gap-2",
+                    "flex flex-col gap-2 transition-standard",
                     hide
                       ? "pointer-events-none -translate-x-full opacity-0"
                       : "translate-x-0 opacity-100",
                   )}
+                  position="top-left"
                 >
-                  <p className="text-muted-foreground flex items-center gap-1 text-xs">
+                  <p className="flex items-center gap-1 text-muted-foreground text-xs">
                     Quick Filters <FilterIcon className="size-3" />
                   </p>
                   <div className="flex items-center gap-2">
                     {(Object.keys(FILTER_CONFIG) as Array<keyof typeof FILTER_CONFIG>).map(
                       (key) => (
                         <AppButton
-                          key={key}
-                          size="sm"
-                          variant="outline"
-                          onClick={() => onFilterChange(activeFilter === key ? null : key)}
                           className={cn(
-                            "bg-background justify-start gap-2 text-xs",
+                            "justify-start gap-2 bg-background text-xs",
                             activeFilter === key ? "text-foreground" : "text-muted-foreground",
                           )}
+                          key={key}
+                          onClick={() => onFilterChange(activeFilter === key ? null : key)}
+                          size="sm"
+                          variant="outline"
                         >
                           <div className={cn("size-2 rounded-full", FILTER_CONFIG[key].color)} />
                           {FILTER_CONFIG[key].label}
@@ -291,10 +298,10 @@ export function RepoMap({
                   </div>
                   <RepoMapSearchPanel />
                 </Panel>
-                <Panel position="top-right" className="flex flex-col items-end gap-1">
+                <Panel className="flex flex-col items-end gap-1" position="top-right">
                   <div
                     className={cn(
-                      "transition-standard transform",
+                      "transform transition-standard",
                       hide
                         ? "pointer-events-none translate-x-full opacity-0"
                         : "translate-x-0 opacity-100",
@@ -325,9 +332,9 @@ export function RepoMap({
         <ResizablePanel defaultSize="30%">
           <RepoMapSidebar
             nodeId={selectedNodeId}
-            repoId={repoId}
             onClose={() => onSelect(null)}
             onNavigate={onNavigate}
+            repoId={repoId}
           />
         </ResizablePanel>
       </ResizablePanelGroup>
