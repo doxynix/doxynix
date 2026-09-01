@@ -7,8 +7,8 @@ import type { TreeApi } from "react-arborist";
 import { trpc } from "@/shared/api/trpc";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 
-import type { FileNode } from "@/entities/repo/model/repo-setup.types";
 import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import type { FileNode } from "@/entities/repo/model/repo-setup.types";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { RepoCodeBrowser } from "./repo-code-browser";
@@ -27,36 +27,40 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
 
   const { data: nodeContext } = trpc.analysis.getNodeContext.useQuery(
     { aid: aid ?? undefined, nodeId: node ?? "", repoId: repo.id },
-    { enabled: node != null && node.length > 0 }
+    { enabled: node != null && node.length > 0 },
   );
 
   const { data, isLoading } = trpc.githubBrowse.getFileContent.useQuery(
     { path: path ?? "", repoId: repo.id },
-    { enabled: path != null && path !== "" }
+    { enabled: path != null && path !== "" },
   );
 
   useEffect(() => {
-    if (path != null && path.length > 0) return;
+    if (path != null && path.length > 0) {
+      return;
+    }
 
     const nextPath = nodeContext?.related.files[0];
-    if (nextPath == null || nextPath.length === 0) return;
+    if (nextPath == null || nextPath.length === 0) {
+      return;
+    }
 
     void setPath(nextPath);
   }, [nodeContext?.related.files, path, setPath]);
 
   return (
-    <div className="bg-background flex h-[calc(100dvh-260px)] overflow-hidden rounded-xl border">
+    <div className="flex h-[calc(100dvh-260px)] overflow-hidden rounded-xl border bg-background">
       <ResizablePanelGroup orientation="horizontal">
         <ResizablePanel defaultSize="50%" maxSize="50%" minSize="25%">
           <RepoCodeTree
             activePath={path}
-            repo={repo}
-            treeApi={treeApi}
             onSelect={(val) => {
               void setPath(val);
               void setNode(val != null ? `file:${val}` : null);
             }}
             onTreeApiChange={setTreeApi}
+            repo={repo}
+            treeApi={treeApi}
           />
         </ResizablePanel>
 
@@ -74,7 +78,7 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
               treeApi={treeApi}
             />
           ) : (
-            <p className="text-muted-foreground flex h-full items-center justify-center">
+            <p className="flex h-full items-center justify-center text-muted-foreground">
               Select a file to view its content
             </p>
           )}

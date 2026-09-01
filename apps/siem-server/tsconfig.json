@@ -1,13 +1,14 @@
 {
-  "extends": "@doxynix/config/hono.json",
   "compilerOptions": {
-    "rootDir": ".",
     "outDir": "./dist",
     "paths": {
+      "@/*": ["./src/*"],
       "@server/*": ["./src/*"]
     },
+    "rootDir": ".",
     "types": ["node"]
   },
-  "include": ["src/**/*", "scripts/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist"],
+  "extends": "@doxynix/config/hono.json",
+  "include": ["src/**/*", "scripts/**/*"]
 }

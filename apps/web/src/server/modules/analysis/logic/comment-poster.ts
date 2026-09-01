@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+
 import type { Octokit } from "@octokit/rest";
 import type { PRCommentStyle } from "@prisma/client";
 import { dedent } from "ts-dedent";
@@ -15,6 +16,23 @@ function generateFindingSignature(finding: PRFinding): string {
   const content = `${normFile}:${finding.line}:${finding.type}:${finding.title}`;
   return crypto.createHash("sha256").update(content).digest("hex").slice(0, 16);
 }
+
+const getBadge = (count: number, isSecurity = false) => {
+  if (count === 0) {
+    return "🟢 **PASSED**";
+  }
+  if (isSecurity) {
+    return "🔴 **CRITICAL**";
+  }
+  return count > 2 ? "🟠 **WARNING**" : "🟡 **REVIEW**";
+};
+
+const getAction = (count: number, label: string) => {
+  if (count === 0) {
+    return "No actions required";
+  }
+  return `Review ${count} flagged ${label} issue(s) immediately`;
+};
 
 /**
  * Formats PR findings into GitHub comment bodies
@@ -55,7 +73,9 @@ export const CommentFormatter = {
 
   isProbablyNotCode(text: string): boolean {
     const clean = text.trim();
-    if (clean.length === 0) return true;
+    if (clean.length === 0) {
+      return true;
+    }
 
     const isSentence = /^[A-Z][\s\w',.-]+\.$/.test(clean);
     const hasNoCodeIndicators =
@@ -91,9 +111,11 @@ export class GitHubCommentPoster {
     prNumber: number,
     commitId: string,
     findings: PRFinding[],
-    style: PRCommentStyle
+    style: PRCommentStyle,
   ): Promise<Array<{ commentId: number; finding: PRFinding }>> {
-    if (findings.length === 0) return [];
+    if (findings.length === 0) {
+      return [];
+    }
 
     try {
       const existingComments = await octokit.paginate(octokit.rest.pulls.listReviewComments, {
@@ -177,24 +199,13 @@ export class GitHubCommentPoster {
     owner: string,
     repo: string,
     prNumber: number,
-    findings: PRFinding[]
+    findings: PRFinding[],
   ): Promise<boolean> {
     try {
       const secCount = findings.filter((f) => f.type === "SECURITY").length;
       const perfCount = findings.filter((f) => f.type === "PERFORMANCE").length;
       const compCount = findings.filter((f) => f.type === "COMPLEXITY").length;
       const styleCount = findings.filter((f) => f.type === "STYLE" || f.type === "BUG").length;
-
-      const getBadge = (count: number, isSecurity = false) => {
-        if (count === 0) return "🟢 **PASSED**";
-        if (isSecurity) return "🔴 **CRITICAL**";
-        return count > 2 ? "🟠 **WARNING**" : "🟡 **REVIEW**";
-      };
-
-      const getAction = (count: number, label: string) => {
-        if (count === 0) return "No actions required";
-        return `Review ${count} flagged ${label} issue(s) immediately`;
-      };
 
       const repodashboard = `https://doxynix.space/dashboard/repo/${owner}/${repo}`;
       const prUrl = `https://doxynix.space/dashboard/repo/${owner}/${repo}/pull/${prNumber}`;
@@ -236,9 +247,8 @@ export class GitHubCommentPoster {
 
       const existingDashboard = comments.find((c) => {
         const isBot = c.user?.type === "Bot";
-        const matchesLogin = c.user?.login != null && c.user.login.startsWith("doxynix");
-        const containsDashboard =
-          c.body != null && c.body.includes("Doxynix PR Analysis Dashboard");
+        const matchesLogin = c.user?.login.startsWith("doxynix");
+        const containsDashboard = c.body?.includes("Doxynix PR Analysis Dashboard");
         return isBot && matchesLogin && containsDashboard;
       });
 
@@ -283,7 +293,7 @@ export class GitHubCommentPoster {
     owner: string,
     repo: string,
     commentId: number,
-    body: string
+    body: string,
   ): Promise<boolean> {
     try {
       await octokit.rest.pulls.updateReviewComment({

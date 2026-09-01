@@ -1,5 +1,5 @@
 import type { RepositoryEvidence } from "../core/discovery.types";
-import { REPORT_FOCUS_SECTIONS, type DocumentationInputModel } from "../core/documentation.types";
+import { type DocumentationInputModel, REPORT_FOCUS_SECTIONS } from "../core/documentation.types";
 import type { RepoMetrics } from "../core/metrics.types";
 import {
   buildDocumentationContext,
@@ -9,7 +9,7 @@ import { buildDocumentationSections } from "./documentation-input-sections";
 
 function buildApiInput(
   context: DocumentationContext,
-  sections: DocumentationInputModel["sections"]
+  sections: DocumentationInputModel["sections"],
 ): DocumentationInputModel["api"] {
   return {
     entrypoints: context.entrypoints,
@@ -22,7 +22,7 @@ function buildApiInput(
 function buildArchitectureInput(
   evidence: RepositoryEvidence,
   metrics: RepoMetrics,
-  context: DocumentationContext
+  context: DocumentationContext,
 ): DocumentationInputModel["architecture"] {
   return {
     dependencyCycles: evidence.dependencyCycles,
@@ -36,7 +36,7 @@ function buildArchitectureInput(
 function buildCodebaseInput(
   evidence: RepositoryEvidence,
   metrics: RepoMetrics,
-  context: DocumentationContext
+  context: DocumentationContext,
 ): DocumentationInputModel["codebase"] {
   const fileCategoryBreakdown =
     evidence.fileCategoryBreakdown.length > 0
@@ -82,7 +82,7 @@ function buildRiskInput(context: DocumentationContext): DocumentationInputModel[
 // Canonical bridge from deterministic backend analysis to section-first report inputs for docs and AI writers.
 export function buildDocumentationInputModel(
   evidence: RepositoryEvidence,
-  metrics: RepoMetrics
+  metrics: RepoMetrics,
 ): DocumentationInputModel {
   const context = buildDocumentationContext(evidence, metrics);
   const sections = buildDocumentationSections(evidence, metrics, context);

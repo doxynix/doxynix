@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { useCanHover } from "@/shared/hooks/use-can-hover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/core/tooltip";
@@ -31,7 +31,7 @@ export function AppTooltip({
   const canHover = useCanHover();
 
   if (!canHover || !content) {
-    return <>{children}</>;
+    return <>children</>;
   }
 
   return (
@@ -41,7 +41,7 @@ export function AppTooltip({
       open={controlledOpen}
     >
       <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent align={align} hidden={hidden} side={side} className={className}>
+      <TooltipContent align={align} className={className} hidden={hidden} side={side}>
         {content}
       </TooltipContent>
     </Tooltip>

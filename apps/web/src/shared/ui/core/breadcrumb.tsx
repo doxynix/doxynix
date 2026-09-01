@@ -1,7 +1,7 @@
 import {
-  forwardRef,
   type ComponentProps,
   type ComponentPropsWithoutRef,
+  forwardRef,
   type ReactNode,
 } from "react";
 import { Slot } from "@radix-ui/react-slot";
@@ -14,27 +14,27 @@ const Breadcrumb = forwardRef<
   ComponentPropsWithoutRef<"nav"> & {
     separator?: ReactNode;
   }
->(({ ...props }, ref) => <nav ref={ref} aria-label="breadcrumb" {...props} />);
+>(({ ...props }, ref) => <nav aria-label="breadcrumb" ref={ref} {...props} />);
 Breadcrumb.displayName = "Breadcrumb";
 
 const BreadcrumbList = forwardRef<HTMLOListElement, ComponentPropsWithoutRef<"ol">>(
   ({ className, ...props }, ref) => (
     <ol
-      ref={ref}
       className={cn(
-        "text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm wrap-break-word sm:gap-2.5",
-        className
+        "wrap-break-word flex flex-wrap items-center gap-1.5 text-muted-foreground text-sm sm:gap-2.5",
+        className,
       )}
+      ref={ref}
       {...props}
     />
-  )
+  ),
 );
 BreadcrumbList.displayName = "BreadcrumbList";
 
 const BreadcrumbItem = forwardRef<HTMLLIElement, ComponentPropsWithoutRef<"li">>(
   ({ className, ...props }, ref) => (
-    <li ref={ref} className={cn("inline-flex items-center gap-1.5", className)} {...props} />
-  )
+    <li className={cn("inline-flex items-center gap-1.5", className)} ref={ref} {...props} />
+  ),
 );
 BreadcrumbItem.displayName = "BreadcrumbItem";
 
@@ -48,12 +48,12 @@ const BreadcrumbLink = forwardRef<
 
   return (
     <Comp
-      ref={ref}
       className={cn(
-        "hover:text-foreground transition-colors",
-        "focus-visible:ring-ring/50 -mx-1 rounded-md px-1 focus-visible:ring-2 focus-visible:outline-hidden",
-        className
+        "transition-colors hover:text-foreground",
+        "-mx-1 rounded-md px-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50",
+        className,
       )}
+      ref={ref}
       {...props}
     />
   );
@@ -63,13 +63,13 @@ BreadcrumbLink.displayName = "BreadcrumbLink";
 const BreadcrumbPage = forwardRef<HTMLSpanElement, ComponentPropsWithoutRef<"span">>(
   ({ className, ...props }, ref) => (
     <span
-      ref={ref}
       aria-current="page"
       aria-disabled="true"
-      className={cn("text-foreground font-normal", className)}
+      className={cn("font-normal text-foreground", className)}
+      ref={ref}
       {...props}
     />
-  )
+  ),
 );
 BreadcrumbPage.displayName = "BreadcrumbPage";
 

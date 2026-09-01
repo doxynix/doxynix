@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import { useTerminalLogs, type LogEntry } from "../model/use-terminal-logs";
+import { type LogEntry, useTerminalLogs } from "../model/use-terminal-logs";
 
 type Props = {
   logs: string[];
@@ -44,33 +44,33 @@ export function AnalysisTerminal({
             <span className="text-foreground">{title}</span>
           </div>
 
-          <Tabs value={filter} onValueChange={(value) => void setFilter(value as typeof filter)}>
+          <Tabs onValueChange={(value) => void setFilter(value as typeof filter)} value={filter}>
             <TabsList className="flex items-center gap-1">
-              <TabsTrigger value="all" className="text-xs">
+              <TabsTrigger className="text-xs" value="all">
                 All <AppBadge variant="outline">{counts.all}</AppBadge>
               </TabsTrigger>
               {counts.error > 0 && (
-                <TabsTrigger value="error" className="data-[state=active]:text-destructive">
+                <TabsTrigger className="data-[state=active]:text-destructive" value="error">
                   Errors
-                  <AppBadge variant="outline" className="border-destructive text-destructive">
+                  <AppBadge className="border-destructive text-destructive" variant="outline">
                     {counts.error}
                   </AppBadge>
                 </TabsTrigger>
               )}
 
               {counts.warn > 0 && (
-                <TabsTrigger value="warn" className="data-[state=active]:text-warning">
+                <TabsTrigger className="data-[state=active]:text-warning" value="warn">
                   Warns
-                  <AppBadge variant="outline" className="border-warning text-warning">
+                  <AppBadge className="border-warning text-warning" variant="outline">
                     {counts.warn}
                   </AppBadge>
                 </TabsTrigger>
               )}
 
               {counts.success > 0 && (
-                <TabsTrigger value="success" className="data-[state=active]:text-success">
+                <TabsTrigger className="data-[state=active]:text-success" value="success">
                   Success
-                  <AppBadge variant="outline" className="border-success text-success">
+                  <AppBadge className="border-success text-success" variant="outline">
                     {counts.success}
                   </AppBadge>
                 </TabsTrigger>
@@ -82,15 +82,15 @@ export function AnalysisTerminal({
         <div className="flex items-center gap-2">
           <AppSearch placeholder="Filter terminal output..." />
           <CopyButton
-            value={clipboardValue}
-            tooltipText="Copy filtered logs"
             className="opacity-100"
+            tooltipText="Copy filtered logs"
+            value={clipboardValue}
           />
         </div>
       </div>
 
       <div className="group relative">
-        <ScrollArea ref={scrollRef} className={cn("w-full p-4 font-mono text-xs", maxHeight)}>
+        <ScrollArea className={cn("w-full p-4 font-mono text-xs", maxHeight)} ref={scrollRef}>
           {filteredLogs.length === 0 && logs.length > 0 && (
             <div className="flex flex-col items-center justify-center py-12">
               <p>No matching logs found</p>
@@ -111,15 +111,15 @@ export function AnalysisTerminal({
         </ScrollArea>
 
         <AppButton
-          size="sm"
-          variant="secondary"
-          onClick={() => scrollToBottom("smooth")}
           className={cn(
-            "transition-standard absolute bottom-4 left-1/2 z-10 size-7 -translate-x-1/2 rounded-full border",
+            "absolute bottom-4 left-1/2 z-10 size-7 -translate-x-1/2 rounded-full border transition-standard",
             showScrollButton
               ? "pointer-events-auto scale-100 opacity-100"
-              : "pointer-events-none scale-90 opacity-0"
+              : "pointer-events-none scale-90 opacity-0",
           )}
+          onClick={() => scrollToBottom("smooth")}
+          size="sm"
+          variant="secondary"
         >
           <ArrowDown />
         </AppButton>
@@ -137,13 +137,13 @@ function LogLine({ log, searchQuery }: Readonly<{ log: LogEntry; searchQuery: st
   };
 
   return (
-    <div className="hover:bg-accent flex items-start gap-3 rounded-xl p-2 font-mono transition-colors">
-      {log.timestamp !== "" && <span className="text-xs select-none">[{log.timestamp}]</span>}
+    <div className="flex items-start gap-3 rounded-xl p-2 font-mono transition-colors hover:bg-accent">
+      {log.timestamp !== "" && <span className="select-none text-xs">[{log.timestamp}]</span>}
 
       <div
         className={cn(
-          "flex-1 wrap-break-word whitespace-pre-wrap",
-          levelColors[log.level] || levelColors.info
+          "wrap-break-word flex-1 whitespace-pre-wrap",
+          levelColors[log.level] || levelColors.info,
         )}
       >
         {highlightText(log.message, searchQuery)}
@@ -153,7 +153,9 @@ function LogLine({ log, searchQuery }: Readonly<{ log: LogEntry; searchQuery: st
 }
 
 function highlightText(text: string, highlight: string) {
-  if (highlight.trim() === "") return text;
+  if (highlight.trim() === "") {
+    return text;
+  }
 
   const escaped = highlight.replaceAll(/[$()*+.?[\\\]^{|}]/g, "\\$&");
   const parts = text.split(new RegExp(`(${escaped})`, "gi"));
@@ -162,12 +164,12 @@ function highlightText(text: string, highlight: string) {
     <span>
       {parts.map((part, i) =>
         part.toLowerCase() === highlight.toLowerCase() ? (
-          <span key={i} className="bg-warning/10 text-warning rounded-[1px] font-bold">
+          <span className="rounded-[1px] bg-warning/10 font-bold text-warning" key={i}>
             {part}
           </span>
         ) : (
           part
-        )
+        ),
       )}
     </span>
   );

@@ -13,7 +13,7 @@ type RequestExtras = {
 
 function createRequest(
   headers: Record<string, string> = {},
-  extras: RequestExtras = {}
+  extras: RequestExtras = {},
 ): NextRequest {
   return {
     ...extras,

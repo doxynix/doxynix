@@ -36,18 +36,18 @@ export function Flag({ alt, src }: Readonly<{ alt: string; src: string }>) {
     <div className="relative h-3.5 w-5 shrink-0 overflow-hidden rounded-[2px]">
       <Image
         alt={alt}
-        src={src}
+        className={cn(
+          "object-cover transition-opacity duration-300",
+          loaded ? "opacity-100" : "opacity-0",
+        )}
         fill
-        unoptimized
-        sizes="20px"
         onLoad={() => {
           loadedFlags.set(src, true);
           setLoaded(true);
         }}
-        className={cn(
-          "object-cover transition-opacity duration-300",
-          loaded ? "opacity-100" : "opacity-0"
-        )}
+        sizes="20px"
+        src={src}
+        unoptimized
       />
     </div>
   );
@@ -62,11 +62,11 @@ export function LanguageSwitcher() {
 
   const handleLanguageChange = (nextLocale: string) => {
     startTransition(() => {
-      router.replace(pathname, { locale: nextLocale as Locale });
+      router.replace(pathname, { locale: nextLocale });
     });
   };
   const translationKeys = LOCALES.map(
-    (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const
+    (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const,
   );
 
   return (
@@ -77,14 +77,16 @@ export function LanguageSwitcher() {
           <CardDescription>{t("settings_language_desc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex items-center gap-2">
-          <Select disabled={isPending} value={locale} onValueChange={handleLanguageChange}>
+          <Select disabled={isPending} onValueChange={handleLanguageChange} value={locale}>
             <SelectTrigger aria-label="Change Language" className="w-40">
               <SelectValue placeholder={t("settings_language_select_placeholder")} />
             </SelectTrigger>
             <SelectContent>
               {LOCALES.map((l, i) => {
                 const key = translationKeys[i];
-                if (key == null) return null;
+                if (key == null) {
+                  return null;
+                }
                 return (
                   <SelectItem key={l} value={l}>
                     <div className="flex items-center gap-3">

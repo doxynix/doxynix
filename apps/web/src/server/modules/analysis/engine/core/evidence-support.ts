@@ -62,10 +62,10 @@ export type CollectedFileEvidence = {
 };
 
 export function buildRouteInventory(
-  evidence: Pick<RepositoryEvidence, "frameworkFacts" | "routes">
+  evidence: Pick<RepositoryEvidence, "frameworkFacts" | "routes">,
 ): RouteInventory {
   const primaryRoutes = evidence.routes.filter((route) =>
-    ProjectPolicy.isPrimaryApiSurface(route.sourcePath)
+    ProjectPolicy.isPrimaryApiSurface(route.sourcePath),
   );
   const rpcProcedures = primaryRoutes.filter((route) => route.kind === "rpc").length;
   const httpRoutes = primaryRoutes
@@ -83,7 +83,7 @@ export function buildRouteInventory(
     rpcProcedures,
     source: "extracted",
     sourceFiles: Array.from(new Set(primaryRoutes.map((route) => route.sourcePath))).sort(
-      (left, right) => left.localeCompare(right)
+      (left, right) => left.localeCompare(right),
     ),
   };
 }
@@ -93,7 +93,9 @@ function buildFilesByBaseName(files: NormalizedRepositoryFile[]) {
 
   for (const file of files) {
     const baseName = basename(file.path).toLowerCase();
-    if (!baseName) continue;
+    if (!baseName) {
+      continue;
+    }
 
     const bucket = filesByBaseName.get(baseName);
     if (bucket == null) {
@@ -108,7 +110,7 @@ function buildFilesByBaseName(files: NormalizedRepositoryFile[]) {
 
 export function buildEvidenceLookups(
   files: RepositoryFile[],
-  fileComplexities: FileComplexity[]
+  fileComplexities: FileComplexity[],
 ): EvidenceLookups {
   const normalizedFiles = files.map((file) => ({
     ...file,
@@ -118,10 +120,10 @@ export function buildEvidenceLookups(
   return {
     aliasRules: collectAliasRules(normalizedFiles),
     complexityByFile: new Map(
-      fileComplexities.map((item) => [normalize(item.path), item.score] as const)
+      fileComplexities.map((item) => [normalize(item.path), item.score] as const),
     ),
-    filesByBaseName: buildFilesByBaseName(normalizedFiles),
     fileSet: new Set(normalizedFiles.map((file) => file.path)),
+    filesByBaseName: buildFilesByBaseName(normalizedFiles),
     normalizedFiles,
   };
 }
@@ -153,7 +155,7 @@ export function resolveImportEdges(
   filePath: string,
   imports: string[],
   lookups: Pick<EvidenceLookups, "aliasRules" | "filesByBaseName" | "fileSet">,
-  tracking: DependencyTracking
+  tracking: DependencyTracking,
 ) {
   const resolvedImports: string[] = [];
 
@@ -162,7 +164,9 @@ export function resolveImportEdges(
       resolveRelativeImport(filePath, importPath, lookups.fileSet) ??
       resolveModuleImport(importPath, lookups.fileSet, lookups.filesByBaseName, lookups.aliasRules);
 
-    if (resolved === filePath) continue;
+    if (resolved === filePath) {
+      continue;
+    }
 
     if (resolved != null) {
       resolvedImports.push(resolved);

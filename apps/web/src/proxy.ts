@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import createMiddleware from "next-intl/middleware";
 
@@ -50,13 +50,19 @@ if (IS_PROD) {
 const intlMiddleware = createMiddleware(routing);
 
 function isBypassRoute(pathname: string): boolean {
-  if (BYPASS_EXACT_PATHS.has(pathname)) return true;
-  if (pathname.endsWith("/vitals")) return true;
+  if (BYPASS_EXACT_PATHS.has(pathname)) {
+    return true;
+  }
+  if (pathname.endsWith("/vitals")) {
+    return true;
+  }
   return BYPASS_PREFIXES.some((prefix) => hasPathBoundary(pathname, prefix));
 }
 
 function hasPathBoundary(pathname: string, prefix: string): boolean {
-  if (!pathname.startsWith(prefix)) return false;
+  if (!pathname.startsWith(prefix)) {
+    return false;
+  }
   const nextChar = pathname.charAt(prefix.length);
   return nextChar === "" || nextChar === "/";
 }
@@ -64,7 +70,7 @@ function hasPathBoundary(pathname: string, prefix: string): boolean {
 async function handleRateLimitAndSize(
   request: NextRequest,
   pathname: string,
-  ip: string
+  ip: string,
 ): Promise<NextResponse | null> {
   if (isBypassRoute(pathname)) {
     return null;
@@ -91,7 +97,7 @@ async function handleRateLimitAndSize(
               "X-RateLimit-Reset": reset.toString(),
             },
             status: 429,
-          }
+          },
         );
       }
     } catch (error) {
@@ -105,7 +111,7 @@ async function handleRateLimitAndSize(
 async function handleApiRequest(
   request: NextRequest,
   requestId: string,
-  ip: string
+  ip: string,
 ): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
   const attachRequestMeta = (response: NextResponse): NextResponse => {
@@ -121,7 +127,9 @@ async function handleApiRequest(
   };
 
   const rateLimitResponse = await handleRateLimitAndSize(request, pathname, ip);
-  if (rateLimitResponse) return attachRequestMeta(rateLimitResponse);
+  if (rateLimitResponse) {
+    return attachRequestMeta(rateLimitResponse);
+  }
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-request-id", requestId);
@@ -142,7 +150,7 @@ function handlePageRequest(request: NextRequest, requestId: string): NextRespons
   const pathWithoutLocale = pathname.replace(localeRegex, "") || "/";
 
   const isProtectedRoute = protectedRoutes.some((route) =>
-    hasPathBoundary(pathWithoutLocale, route)
+    hasPathBoundary(pathWithoutLocale, route),
   );
   const isAuthRoute = authRoutes.some((route) => hasPathBoundary(pathWithoutLocale, route));
 

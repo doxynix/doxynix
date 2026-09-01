@@ -43,7 +43,9 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
   }
 
   const handlePageChange = (targetPage: number, btnType: "next" | "prev" | number) => {
-    if (targetPage === page) return;
+    if (targetPage === page) {
+      return;
+    }
 
     setClickedButton(btnType);
     startTransition(() => {
@@ -64,17 +66,17 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
       className={cn(
         className,
         isAnyLoading && "opacity-60 transition-opacity",
-        meta.totalCount === 0 && "hidden"
+        meta.totalCount === 0 && "hidden",
       )}
     >
       <PaginationContent>
         <PaginationItem>
           <PaginationLink
-            disabled={isPrevDisabled}
-            tabIndex={isPrevDisabled ? -1 : undefined}
             aria-disabled={isPrevDisabled}
-            onClick={() => !isPrevDisabled && handlePageChange(meta.currentPage - 1, "prev")}
             className={cn(navBtnClass, isPrevDisabled ? "opacity-50" : "cursor-pointer")}
+            disabled={isPrevDisabled}
+            onClick={() => !isPrevDisabled && handlePageChange(meta.currentPage - 1, "prev")}
+            tabIndex={isPrevDisabled ? -1 : undefined}
           >
             {isPrevLoading ? <Spinner /> : <ChevronLeft />}
             <span className="ml-1">{t("back")}</span>
@@ -88,12 +90,13 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
             page !== 1 &&
             page !== meta.totalPages
           ) {
-            if (Math.abs(page - meta.currentPage) === 2)
+            if (Math.abs(page - meta.currentPage) === 2) {
               return (
                 <PaginationItem key={page}>
                   <PaginationEllipsis />
                 </PaginationItem>
               );
+            }
             return null;
           }
 
@@ -103,15 +106,15 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
           return (
             <PaginationItem key={page}>
               <PaginationLink
-                disabled={isPageDisabled}
-                isActive={page === meta.currentPage}
-                tabIndex={isPageDisabled ? -1 : undefined}
                 aria-disabled={isPageDisabled}
-                onClick={() => !isPageDisabled && handlePageChange(page, page)}
                 className={cn(
                   !isPageDisabled && "cursor-pointer",
-                  page === meta.currentPage && "text-foreground opacity-100!"
+                  page === meta.currentPage && "text-foreground opacity-100!",
                 )}
+                disabled={isPageDisabled}
+                isActive={page === meta.currentPage}
+                onClick={() => !isPageDisabled && handlePageChange(page, page)}
+                tabIndex={isPageDisabled ? -1 : undefined}
               >
                 {isCurrentPageLoading ? <Spinner /> : page}
               </PaginationLink>
@@ -121,15 +124,15 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
 
         <PaginationItem>
           <PaginationLink
-            disabled={isNextDisabled}
-            tabIndex={isNextDisabled ? -1 : undefined}
             aria-disabled={isNextDisabled}
-            onClick={() => !isNextDisabled && handlePageChange(meta.currentPage + 1, "next")}
             className={cn(
               navBtnClass,
               "pr-2.5 pl-4",
-              isNextDisabled ? "opacity-50" : "cursor-pointer"
+              isNextDisabled ? "opacity-50" : "cursor-pointer",
             )}
+            disabled={isNextDisabled}
+            onClick={() => !isNextDisabled && handlePageChange(meta.currentPage + 1, "next")}
+            tabIndex={isNextDisabled ? -1 : undefined}
           >
             <span className="mr-1">{t("next")}</span>
             {isNextLoading ? <Spinner /> : <ChevronLeft className="rotate-180" />}

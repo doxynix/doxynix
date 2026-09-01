@@ -4,9 +4,9 @@ import { subDays, subHours, subMinutes } from "date-fns";
 import type { DbClient } from "@/server/core/db";
 
 import {
-  DashboardStatsSchema,
   type AnalyticsInput,
   type DashboardStats,
+  DashboardStatsSchema,
   type Trends,
 } from "./analytics.schemas";
 
@@ -28,7 +28,6 @@ export const analyticsService = {
       case "90d": {
         return subDays(relativeTo, 90);
       }
-      case "30d":
       default: {
         return subDays(relativeTo, 30);
       }
@@ -38,7 +37,7 @@ export const analyticsService = {
   async getDashboardStats(
     db: DbClient,
     input: AnalyticsInput,
-    userId: number
+    userId: number,
   ): Promise<DashboardStats> {
     const now = new Date();
 
@@ -56,7 +55,7 @@ export const analyticsService = {
     const previousStart = new Date(currentStart.getTime() - durationMs);
 
     const [data] = await db.$queryRawTyped(
-      getDashboardStats(userId, currentStart, previousStart, currentEnd)
+      getDashboardStats(userId, currentStart, previousStart, currentEnd),
     );
 
     if (data == null) {
@@ -145,7 +144,7 @@ export const analyticsService = {
     }
 
     const trends = await db.$queryRawTyped(
-      getTrends(userId, startDate, endDate, input.repoId ?? null)
+      getTrends(userId, startDate, endDate, input.repoId ?? null),
     );
 
     const dateFormatter = new Intl.DateTimeFormat("en-US", {

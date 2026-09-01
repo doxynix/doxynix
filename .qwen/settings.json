@@ -1,6 +1,0 @@
-{
-  "permissions": {
-    "allow": ["Bash(pnpm *)", "WebSearch", "WebFetch(github.com)", "WebFetch(nextjs.org)"]
-  },
-  "$version": 3
-}

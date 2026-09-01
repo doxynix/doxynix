@@ -35,12 +35,12 @@ describe("Repositories & Data Visibility", () => {
     await expectDenied(
       bob.db.repo.findUniqueOrThrow({
         where: { publicId: privateRepo.publicId },
-      })
+      }),
     );
     await expectDenied(bob.db.repo.findUniqueOrThrow({ where: { publicId: publicRepo.publicId } }));
 
     await expect(
-      alice.db.repo.findUniqueOrThrow({ where: { publicId: publicRepo.publicId } })
+      alice.db.repo.findUniqueOrThrow({ where: { publicId: publicRepo.publicId } }),
     ).resolves.toBeDefined();
   });
 
@@ -68,10 +68,10 @@ describe("Repositories & Data Visibility", () => {
     });
 
     await expectDenied(
-      bob.db.analysis.findUniqueOrThrow({ where: { publicId: analysis.publicId } })
+      bob.db.analysis.findUniqueOrThrow({ where: { publicId: analysis.publicId } }),
     );
     await expect(
-      alice.db.analysis.findUniqueOrThrow({ where: { publicId: analysis.publicId } })
+      alice.db.analysis.findUniqueOrThrow({ where: { publicId: analysis.publicId } }),
     ).resolves.toBeDefined();
   });
 

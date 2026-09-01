@@ -47,7 +47,9 @@ export class OpenApiDiscoveryEngine {
         continue;
       }
 
-      if (!this.isLikelySpec(file.path, file.content)) continue;
+      if (!OpenApiDiscoveryEngine.isLikelySpec(file.path, file.content)) {
+        continue;
+      }
 
       try {
         const isJson = file.path.toLowerCase().endsWith(".json");
@@ -56,10 +58,14 @@ export class OpenApiDiscoveryEngine {
           : YAML.parse(file.content, { logLevel: "error", maxAliasCount: 0 });
         const data = rawData as MinimalOpenApi | null;
 
-        if (data == null || typeof data !== "object") continue;
+        if (data == null || typeof data !== "object") {
+          continue;
+        }
 
         const specPaths = Object.keys(data.paths).filter((p) => p.startsWith("/"));
-        if (specPaths.length === 0) continue;
+        if (specPaths.length === 0) {
+          continue;
+        }
 
         inventory.sourceFiles.push(file.path);
         specPaths.forEach((p) => uniquePaths.add(p));
@@ -68,12 +74,14 @@ export class OpenApiDiscoveryEngine {
           const methods = data.paths[pathKey];
           if (methods != null && typeof methods === "object") {
             inventory.estimatedOperations += Object.keys(methods).filter((m) =>
-              HTTP_METHODS.has(m.toLowerCase())
+              HTTP_METHODS.has(m.toLowerCase()),
             ).length;
           }
         }
 
-        if (inventory.sourceFiles.length >= 20) break;
+        if (inventory.sourceFiles.length >= 20) {
+          break;
+        }
       } catch {
         if (file.path.includes("swagger") || file.path.includes("openapi")) {
           appLogger.debug({ msg: "Malformed OpenAPI spec ignored", path: file.path });
@@ -81,8 +89,8 @@ export class OpenApiDiscoveryEngine {
       }
     }
 
-    inventory.pathPatterns = Array.from(uniquePaths).toSorted((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+    inventory.pathPatterns = Array.from(uniquePaths).sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }),
     );
     return inventory;
   }
@@ -90,8 +98,12 @@ export class OpenApiDiscoveryEngine {
   private static isLikelySpec(path: string, content: string): boolean {
     const ext = getFileExtension(path).toLowerCase();
 
-    if (IGNORED_EXTENSIONS.has(`.${ext}`)) return false;
-    if (!["json", "yaml", "yml"].includes(ext)) return false;
+    if (IGNORED_EXTENSIONS.has(`.${ext}`)) {
+      return false;
+    }
+    if (!["json", "yaml", "yml"].includes(ext)) {
+      return false;
+    }
 
     const sample = content.slice(0, 1000);
     return /["']?(openapi|swagger)["']?\s*:\s*/i.test(sample) && sample.includes("paths");

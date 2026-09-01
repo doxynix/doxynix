@@ -27,7 +27,9 @@ export function SessionsList() {
   const revokeSession = useMutation({
     mutationFn: async (token: string) => {
       const { error } = await authClient.revokeSession({ token });
-      if (error) throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
     },
     onError: (err) => toast.error(err.message),
     onSuccess: () => {
@@ -40,7 +42,9 @@ export function SessionsList() {
   const revokeOtherSessions = useMutation({
     mutationFn: async () => {
       const { error } = await authClient.revokeOtherSessions();
-      if (error) throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
     },
     onError: (err) => toast.error(err.message),
     onSuccess: () => {
@@ -50,7 +54,7 @@ export function SessionsList() {
   });
 
   const otherSessionsCount = sessions.filter(
-    (s) => String(s.id) !== String(currentSessionId)
+    (s) => String(s.id) !== String(currentSessionId),
   ).length;
 
   return (
@@ -58,13 +62,13 @@ export function SessionsList() {
       {otherSessionsCount > 0 && (
         <div className="flex justify-end">
           <LoadingButton
+            className="gap-2"
             disabled={revokeOtherSessions.isPending}
             isLoading={revokeOtherSessions.isPending}
             loadingText="Revoking..."
+            onClick={() => revokeOtherSessions.mutate()}
             size="sm"
             variant="destructive"
-            onClick={() => revokeOtherSessions.mutate()}
-            className="gap-2"
           >
             <LogOut size={16} /> Sign out of all other devices
           </LoadingButton>
@@ -72,8 +76,8 @@ export function SessionsList() {
       )}
 
       {isLoading ? (
-        <div className="text-muted-foreground py-8 text-center text-xs">
-          <RefreshCw className="text-muted-foreground mx-auto mb-2 animate-spin" />
+        <div className="py-8 text-center text-muted-foreground text-xs">
+          <RefreshCw className="mx-auto mb-2 animate-spin text-muted-foreground" />
           Loading active sessions...
         </div>
       ) : (
@@ -84,7 +88,6 @@ export function SessionsList() {
 
             return (
               <ConnectionCard
-                key={session.id}
                 action={
                   isCurrentDevice ? (
                     <AppButton disabled size="sm">
@@ -98,6 +101,8 @@ export function SessionsList() {
                         <p>The user on this device will be immediately signed out of Doxynix.</p>
                       }
                       isLoading={revokeSession.isPending}
+                      onConfirm={() => revokeSession.mutate(session.token)}
+                      onOpenChange={(open) => setRevokingSessionToken(open ? session.token : null)}
                       open={revokingSessionToken === session.token}
                       title="Revoke Device Session"
                       trigger={
@@ -105,8 +110,6 @@ export function SessionsList() {
                           <Trash2 className="size-4" />
                         </AppButton>
                       }
-                      onConfirm={() => revokeSession.mutate(session.token)}
-                      onOpenChange={(open) => setRevokingSessionToken(open ? session.token : null)}
                     />
                   )
                 }
@@ -114,10 +117,11 @@ export function SessionsList() {
                 icon={
                   <Monitor
                     className={
-                      isCurrentDevice ? "text-primary size-5" : "text-muted-foreground size-5"
+                      isCurrentDevice ? "size-5 text-primary" : "size-5 text-muted-foreground"
                     }
                   />
                 }
+                key={session.id}
                 status={isCurrentDevice ? "This Device" : undefined}
                 title={session.userAgent}
               />

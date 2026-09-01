@@ -1,5 +1,6 @@
-import * as TooltipPrimitives from "@radix-ui/react-tooltip";
 import React from "react";
+import * as TooltipPrimitives from "@radix-ui/react-tooltip";
+
 import { cx } from "../../lib/utils";
 
 interface TooltipProps
@@ -36,20 +37,17 @@ const Tooltip = React.forwardRef<React.ElementRef<typeof TooltipPrimitives.Conte
     return (
       <TooltipPrimitives.Provider delayDuration={150}>
         <TooltipPrimitives.Root
-          open={open}
           defaultOpen={defaultOpen}
-          onOpenChange={onOpenChange}
           delayDuration={delayDuration}
+          onOpenChange={onOpenChange}
+          open={open}
           tremor-id="tremor-raw"
         >
-          <TooltipPrimitives.Trigger onClick={onClick} asChild={asChild}>
+          <TooltipPrimitives.Trigger asChild={asChild} onClick={onClick}>
             {children}
           </TooltipPrimitives.Trigger>
           <TooltipPrimitives.Portal>
             <TooltipPrimitives.Content
-              ref={forwardedRef}
-              side={side}
-              sideOffset={sideOffset}
               align="center"
               className={cx(
                 // base
@@ -63,15 +61,18 @@ const Tooltip = React.forwardRef<React.ElementRef<typeof TooltipPrimitives.Conte
                 "data-[side=bottom]:animate-slide-down-and-fade data-[side=left]:animate-slide-left-and-fade data-[side=right]:animate-slide-right-and-fade data-[side=top]:animate-slide-up-and-fade data-[state=closed]:animate-hide",
                 className,
               )}
+              ref={forwardedRef}
+              side={side}
+              sideOffset={sideOffset}
               {...props}
             >
               {content}
               {showArrow ? (
                 <TooltipPrimitives.Arrow
-                  className="border-none fill-gray-900 dark:fill-gray-50"
-                  width={12}
-                  height={7}
                   aria-hidden="true"
+                  className="border-none fill-gray-900 dark:fill-gray-50"
+                  height={7}
+                  width={12}
                 />
               ) : null}
             </TooltipPrimitives.Content>

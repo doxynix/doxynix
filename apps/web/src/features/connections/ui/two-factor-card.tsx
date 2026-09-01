@@ -42,12 +42,16 @@ export function TwoFactorCard() {
     setIsGenerating(true);
     try {
       const res = await authClient.twoFactor.enable({});
-      if (res.error) throw new Error(res.error.message);
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
 
       setBackupCodes(res.data.backupCodes);
 
       const totpRes = await authClient.twoFactor.getTotpUri({});
-      if (totpRes.error) throw new Error(totpRes.error.message);
+      if (totpRes.error) {
+        throw new Error(totpRes.error.message);
+      }
       if (totpRes.data.totpURI) {
         setTotpUri(totpRes.data.totpURI);
       }
@@ -62,7 +66,9 @@ export function TwoFactorCard() {
   const enable2FA = useMutation({
     mutationFn: async (code: string) => {
       const { data, error } = await authClient.twoFactor.verifyTotp({ code });
-      if (error) throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
       return data;
     },
     onError: (err) => {
@@ -78,7 +84,9 @@ export function TwoFactorCard() {
   const disable2FA = useMutation({
     mutationFn: async () => {
       const { error } = await authClient.twoFactor.disable({});
-      if (error) throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
     },
     onError: (err) => toast.error(err.message),
     onSuccess: () => {
@@ -88,7 +96,9 @@ export function TwoFactorCard() {
   });
 
   const handleDownloadBackupCodes = () => {
-    if (!backupCodes) return;
+    if (!backupCodes) {
+      return;
+    }
     const text = backupCodes.join("\n");
     const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -100,7 +110,9 @@ export function TwoFactorCard() {
   };
 
   const handleCopyBackupCodes = () => {
-    if (!backupCodes) return;
+    if (!backupCodes) {
+      return;
+    }
     void navigator.clipboard.writeText(backupCodes.join("\n"));
     toast.success("Backup codes copied to clipboard");
   };
@@ -114,14 +126,14 @@ export function TwoFactorCard() {
           isEnabled ? (
             <LoadingButton
               isLoading={disable2FA.isPending}
+              onClick={() => disable2FA.mutate()}
               size="sm"
               variant="destructive"
-              onClick={() => disable2FA.mutate()}
             >
               Disconnect
             </LoadingButton>
           ) : (
-            <AppButton size="sm" onClick={() => void handleOpenSetup()}>
+            <AppButton onClick={() => void handleOpenSetup()} size="sm">
               Setup
             </AppButton>
           )
@@ -133,9 +145,9 @@ export function TwoFactorCard() {
         }
         icon={
           isEnabled ? (
-            <ShieldCheck className="text-success size-5" />
+            <ShieldCheck className="size-5 text-success" />
           ) : (
-            <ShieldAlert className="text-muted-foreground size-5" />
+            <ShieldAlert className="size-5 text-muted-foreground" />
           )
         }
         status={isEnabled ? "Connected" : undefined}
@@ -143,7 +155,6 @@ export function TwoFactorCard() {
       />
 
       <Dialog
-        open={isSetupOpen}
         onOpenChange={(open) => {
           setIsSetupOpen(open);
           if (!open) {
@@ -152,11 +163,12 @@ export function TwoFactorCard() {
             setTotpUri("");
           }
         }}
+        open={isSetupOpen}
       >
         <DialogContent
+          className="sm:max-w-md"
           onEscapeKeyDown={(e) => backupCodes != null && e.preventDefault()}
           onPointerDownOutside={(e) => backupCodes != null && e.preventDefault()}
-          className="sm:max-w-md"
         >
           <DialogHeader>
             <DialogTitle>Setup Two-Factor Authentication</DialogTitle>
@@ -167,30 +179,30 @@ export function TwoFactorCard() {
 
           {backupCodes && enable2FA.isSuccess ? (
             <div className="flex flex-col gap-4 py-4">
-              <div className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-xl p-3 text-xs">
+              <div className="flex items-center gap-2 rounded-xl bg-destructive/10 p-3 text-destructive text-xs">
                 <ShieldAlert size={16} />
                 <span>
                   Save these backup codes in a secure place. If you lose your device, this is the
                   only way to recover access.
                 </span>
               </div>
-              <div className="bg-muted grid grid-cols-2 gap-2 rounded-xl p-4 text-center font-mono text-sm">
+              <div className="grid grid-cols-2 gap-2 rounded-xl bg-muted p-4 text-center font-mono text-sm">
                 {backupCodes.map((code) => (
                   <div key={code}>{code}</div>
                 ))}
               </div>
               <div className="flex gap-2">
                 <AppButton
-                  variant="outline"
-                  onClick={handleCopyBackupCodes}
                   className="w-full gap-2"
+                  onClick={handleCopyBackupCodes}
+                  variant="outline"
                 >
                   Copy
                 </AppButton>
                 <AppButton
-                  variant="outline"
-                  onClick={handleDownloadBackupCodes}
                   className="w-full gap-2"
+                  onClick={handleDownloadBackupCodes}
+                  variant="outline"
                 >
                   Download
                 </AppButton>
@@ -200,39 +212,39 @@ export function TwoFactorCard() {
             <div className="flex flex-col items-center gap-6 py-4">
               {isGenerating ? (
                 <div className="flex size-48 items-center justify-center">
-                  <RefreshCw className="text-muted-foreground animate-spin" />
+                  <RefreshCw className="animate-spin text-muted-foreground" />
                 </div>
               ) : (
                 totpUri && (
                   <div className="rounded-xl bg-white p-2">
-                    <QRCode value={totpUri} size={180} />
+                    <QRCode size={180} value={totpUri} />
                   </div>
                 )
               )}
 
               <div className="flex w-full flex-col gap-2">
-                <p className="text-muted-foreground text-center text-xs">
+                <p className="text-center text-muted-foreground text-xs">
                   Enter the 6-digit verification code from your app:
                 </p>
                 <InputOTP
-                  value={verificationCode}
+                  containerClassName="flex justify-center"
                   maxLength={6}
                   // disabled={isTwoFactorVerifying}
                   onChange={(value) => setVerificationCode(value.replaceAll(/\D/g, ""))}
-                  containerClassName="flex justify-center"
+                  value={verificationCode}
                 >
                   <InputOTPGroup>
-                    <InputOTPSlot index={0} className="h-12 w-12 text-lg" />
-                    <InputOTPSlot index={1} className="h-12 w-12 text-lg" />
-                    <InputOTPSlot index={2} className="h-12 w-12 text-lg" />
+                    <InputOTPSlot className="h-12 w-12 text-lg" index={0} />
+                    <InputOTPSlot className="h-12 w-12 text-lg" index={1} />
+                    <InputOTPSlot className="h-12 w-12 text-lg" index={2} />
                   </InputOTPGroup>
 
-                  <InputOTPSeparator className="text-muted-foreground mx-1" />
+                  <InputOTPSeparator className="mx-1 text-muted-foreground" />
 
                   <InputOTPGroup>
-                    <InputOTPSlot index={3} className="h-12 w-12 text-lg" />
-                    <InputOTPSlot index={4} className="h-12 w-12 text-lg" />
-                    <InputOTPSlot index={5} className="h-12 w-12 text-lg" />
+                    <InputOTPSlot className="h-12 w-12 text-lg" index={3} />
+                    <InputOTPSlot className="h-12 w-12 text-lg" index={4} />
+                    <InputOTPSlot className="h-12 w-12 text-lg" index={5} />
                   </InputOTPGroup>
                 </InputOTP>
               </div>
@@ -241,16 +253,16 @@ export function TwoFactorCard() {
 
           <DialogFooter>
             {backupCodes && enable2FA.isSuccess ? (
-              <AppButton onClick={() => setIsSetupOpen(false)} className="w-full">
+              <AppButton className="w-full" onClick={() => setIsSetupOpen(false)}>
                 Done
               </AppButton>
             ) : (
               <LoadingButton
+                className="w-full"
                 disabled={verificationCode.length !== 6 || enable2FA.isPending || isGenerating}
                 isLoading={enable2FA.isPending}
                 loadingText="Activating..."
                 onClick={() => enable2FA.mutate(verificationCode)}
-                className="w-full"
               >
                 Verify & Enable
               </LoadingButton>

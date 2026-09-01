@@ -1,6 +1,6 @@
 "use client";
 
-import { ApiReferenceReact, type AnyApiReferenceConfiguration } from "@scalar/api-reference-react";
+import { type AnyApiReferenceConfiguration, ApiReferenceReact } from "@scalar/api-reference-react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -35,8 +35,8 @@ export function RepoSwagger({ spec }: Readonly<{ spec: string }>) {
     <div className="absolute top-0 right-8 bottom-8 left-8 md:right-12 md:left-12">
       <div
         className={cn(
-          "repo-swagger-shell bg-background border-border h-full min-h-0 overflow-x-hidden overflow-y-auto rounded-xl border",
-          resolvedTheme === "dark" ? "dark-mode" : "light-mode"
+          "repo-swagger-shell h-full min-h-0 overflow-y-auto overflow-x-hidden rounded-xl border border-border bg-background",
+          resolvedTheme === "dark" ? "dark-mode" : "light-mode",
         )}
       >
         <ApiReferenceReact configuration={config} />

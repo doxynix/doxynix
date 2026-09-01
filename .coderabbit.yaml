@@ -28,7 +28,7 @@ reviews:
 
   path_instructions:
     # Feature-Sliced Design (FSD) - applies to both Web and SIEM Client
-    - path: "apps/{web,siem/client}/src/{shared,entities,features,widgets}/**/*.{ts,tsx}"
+    - path: "apps/{web,siem-client}/src/{shared,entities,features,widgets}/**/*.{ts,tsx}"
       instructions: "This part of the project follows Feature-Sliced Design (FSD). Strictly enforce layer import rules: upper layers cannot import from higher layers (shared -> entities -> features -> widgets). Cross-imports between slices on the same layer are strictly forbidden. Ensure all public APIs are exported via index.ts files."
 
     # Next.js Specifics
@@ -44,15 +44,15 @@ reviews:
       instructions: "Trigger.dev background tasks. Ensure idempotency and proper timeout/retry handling for long-running processes."
 
     # TanStack Router (SIEM Client)
-    - path: "apps/siem/client/src/routes/**/*.{ts,tsx}"
+    - path: "apps/siem-client/src/routes/**/*.{ts,tsx}"
       instructions: "TanStack Router route definitions. Ensure strict type safety for route params, proper usage of routing hooks, and clean component structure."
 
     # Drizzle ORM (SIEM Server)
-    - path: "apps/siem/server/src/core/db/**/*.{ts,tsx}"
+    - path: "apps/siem-server/src/core/db/**/*.{ts,tsx}"
       instructions: "Drizzle ORM schema and migration layer. Check column types, secondary indexes, and foreign key integrity. Ensure migrations are consistent."
 
     # Bun / Hono (SIEM Server)
-    - path: "apps/siem/server/src/**/*.ts"
+    - path: "apps/siem-server/src/**/*.ts"
       instructions: "Hono-based backend powered by Bun. Verify strict Zod validation for all endpoints, proper middleware usage (auth, logging), and structured logging with Axiom."
 
     # CLI Tooling
@@ -68,6 +68,8 @@ reviews:
       enabled: true
       args: ["check", "--apply"]
     eslint:
+      enabled: false
+    oxlint:
       enabled: true
     prismaLint:
       enabled: true

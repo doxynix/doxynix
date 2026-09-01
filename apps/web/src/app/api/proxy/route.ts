@@ -1,4 +1,5 @@
 import dns from "node:dns";
+
 import { headers as getRequestHeaders } from "next/headers";
 import { NextResponse } from "next/server";
 import ipaddr from "ipaddr.js";
@@ -17,7 +18,9 @@ type ProxyRequestBody = {
 type DnsLookupCallback = (err: Error | null, address: null | string, family: null | number) => void;
 
 export function isSafeIp(ip: string): boolean {
-  if (!ipaddr.isValid(ip)) return false;
+  if (!ipaddr.isValid(ip)) {
+    return false;
+  }
 
   const addr = ipaddr.process(ip);
   const range = addr.range();
@@ -38,7 +41,7 @@ export function isSafeIp(ip: string): boolean {
 export function ssrfSafeLookup(
   hostname: string,
   options: dns.LookupOneOptions,
-  callback: DnsLookupCallback
+  callback: DnsLookupCallback,
 ): void {
   dns.lookup(hostname, options, (err, address, family) => {
     if (err) {
@@ -62,7 +65,7 @@ export function ssrfSafeLookup(
       callback(
         validationError instanceof Error ? validationError : new Error(String(validationError)),
         null,
-        null
+        null,
       );
     }
   });

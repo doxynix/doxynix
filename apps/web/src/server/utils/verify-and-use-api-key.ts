@@ -23,11 +23,15 @@ export async function verifyAndUseApiKey(token: string) {
     where: { hashedKey: hashedToken },
   });
 
-  if (keyRecord == null || keyRecord.revoked === true) {
+  if (keyRecord == null) {
     return null;
   }
 
-  prisma.apiKey
+  if (keyRecord.revoked) {
+    return null;
+  }
+
+  void prisma.apiKey
     .update({
       data: { lastUsed: new Date() },
       where: { id: keyRecord.id },
@@ -37,7 +41,7 @@ export async function verifyAndUseApiKey(token: string) {
         error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
         keyId: keyRecord.id,
         msg: "Failed to update api key lastUsed",
-      })
+      }),
     );
 
   return keyRecord;

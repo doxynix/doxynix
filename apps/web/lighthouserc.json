@@ -1,24 +1,7 @@
 {
   "ci": {
-    "collect": {
-      "startServerCommand": "pnpm start",
-      "url": ["http://localhost:3000"],
-      "numberOfRuns": 2,
-      "settings": {
-        "preset": "desktop"
-      }
-    },
-    "upload": {
-      "target": "temporary-public-storage"
-    },
     "assert": {
       "assertions": {
-        "categories:performance": [
-          "error",
-          {
-            "minScore": 0.8
-          }
-        ],
         "categories:accessibility": [
           "error",
           {
@@ -31,14 +14,20 @@
             "minScore": 0.8
           }
         ],
+        "categories:performance": [
+          "error",
+          {
+            "minScore": 0.8
+          }
+        ],
         "categories:seo": [
           "error",
           {
             "minScore": 0.8
           }
         ],
+        "color-contrast": "warn",
         "errors-in-console": "warn",
-        "is-crawlable": "error",
         "first-contentful-paint": [
           "warn",
           {
@@ -51,12 +40,23 @@
             "maxNumericValue": 3500
           }
         ],
-        "unused-javascript": "warn",
+        "is-crawlable": "error",
+        "legacy-javascript": "off",
         "render-blocking-resources": "warn",
         "unused-css-rules": "warn",
-        "color-contrast": "warn",
-        "legacy-javascript": "off"
+        "unused-javascript": "warn"
       }
+    },
+    "collect": {
+      "numberOfRuns": 2,
+      "settings": {
+        "preset": "desktop"
+      },
+      "startServerCommand": "pnpm start",
+      "url": ["http://localhost:3000"]
+    },
+    "upload": {
+      "target": "temporary-public-storage"
     }
   }
 }

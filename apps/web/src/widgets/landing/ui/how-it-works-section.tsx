@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useRef, type ReactNode, type RefObject } from "react";
+import { forwardRef, type ReactNode, type RefObject, useRef } from "react";
 import { Brain, FileText, User } from "lucide-react";
 import { useInView } from "motion/react";
 import { useTranslations } from "next-intl";
@@ -43,16 +43,16 @@ const Circle = forwardRef<HTMLDivElement, { children?: ReactNode; className?: st
   ({ children, className }, ref) => {
     return (
       <div
-        ref={ref}
         className={cn(
-          "border-border bg-landing-bg-light flex size-12 items-center justify-center rounded-full border-2 p-3 sm:size-20",
-          className
+          "flex size-12 items-center justify-center rounded-full border-2 border-border bg-landing-bg-light p-3 sm:size-20",
+          className,
         )}
+        ref={ref}
       >
         {children}
       </div>
     );
-  }
+  },
 );
 
 const COLORS = {
@@ -197,22 +197,22 @@ export function HowItWorksSection() {
   return (
     <section className="mx-auto flex w-full max-w-7xl flex-col items-center justify-center overflow-hidden px-4 py-24">
       <div className="mb-12 text-center">
-        <h2 className="mb-4 text-3xl font-bold md:text-5xl">
+        <h2 className="mb-4 font-bold text-3xl md:text-5xl">
           {t("section_how_title_prefix")}{" "}
           <span className="text-muted-foreground">{t("section_how_title_highlight")}</span>
         </h2>
-        <p className="text-muted-foreground text-lg">{t("section_how_desc")}</p>
+        <p className="text-lg text-muted-foreground">{t("section_how_desc")}</p>
       </div>
 
       <div
-        ref={containerRef}
         className="relative flex w-full items-center justify-between overflow-hidden sm:p-10"
+        ref={containerRef}
       >
         {COLUMNS.map((col, idx) => (
-          <div key={idx} className={col.className}>
+          <div className={col.className} key={idx}>
             {col.nodes.map((node, nodeIdx) => (
-              <div key={nodeIdx} className={cn("flex flex-col items-center", node.gapClass)}>
-                <Circle ref={node.ref} className={node.circleClass}>
+              <div className={cn("flex flex-col items-center", node.gapClass)} key={nodeIdx}>
+                <Circle className={node.circleClass} ref={node.ref}>
                   {node.icon}
                 </Circle>
                 <span className={cn("text-muted-foreground text-xs sm:text-sm", node.labelClass)}>
@@ -225,7 +225,7 @@ export function HowItWorksSection() {
 
         {PATHS.map((path) => (
           <AnimatedBeam
-            key={path.name}
+            className="-z-10"
             containerRef={containerRef}
             curvature={path.curvature}
             delay={path.delay}
@@ -234,14 +234,14 @@ export function HowItWorksSection() {
             gradientStartColor={path.gradientStartColor}
             gradientStopColor={path.gradientStopColor}
             isActive={isInView}
+            key={path.name}
             repeatDelay={REPEAT_DELAY}
             reverse={path.reverse}
             toRef={path.toRef}
-            className="-z-10"
           />
         ))}
       </div>
-      <AppBadge variant="outline" className="px-4 py-1">
+      <AppBadge className="px-4 py-1" variant="outline">
         <FileText className="text-success" />
         <span className="text-muted-foreground text-xs">{t("section_how_status_msg")}</span>
       </AppBadge>

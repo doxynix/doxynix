@@ -87,19 +87,19 @@ export default async function SupportPage() {
   const tCommon = await getTranslations("Common");
 
   return (
-    <div className="animate-fade-in relative container mx-auto min-h-dvh max-w-5xl overflow-hidden px-4 py-12 pt-24">
+    <div className="container relative mx-auto min-h-dvh max-w-5xl animate-fade-in overflow-hidden px-4 py-12 pt-24">
       <BackOrLinkButton
-        showIcon
-        label={tCommon("back")}
-        variant="link"
         className="mb-8 cursor-pointer"
+        label={tCommon("back")}
+        showIcon
+        variant="link"
       />
 
       <div className="mb-20">
-        <h1 className="text-foreground mb-6 text-5xl font-bold md:text-6xl">
+        <h1 className="mb-6 font-bold text-5xl text-foreground md:text-6xl">
           We&apos;re here to help
         </h1>
-        <p className="text-text-secondary max-w-2xl text-lg">
+        <p className="max-w-2xl text-lg text-text-secondary">
           Multiple ways to get support, advice, and connect with our team. Choose the channel that
           works best for you.
         </p>
@@ -107,26 +107,26 @@ export default async function SupportPage() {
 
       <section className="mb-20">
         <div className="mb-10">
-          <h2 className="text-3xl font-bold">Get in Touch</h2>
+          <h2 className="font-bold text-3xl">Get in Touch</h2>
         </div>
         <div className="grid gap-6 md:grid-cols-2">
           {supportChannels.map((channel) => (
             <a
-              key={channel.title}
+              className="group relative cursor-pointer overflow-hidden rounded-2xl border bg-landing-bg-light/50 p-8 transition-standard hover:border-border-accent hover:bg-surface-panel"
               href={channel.href}
+              key={channel.title}
               rel={(channel.external ?? false) ? "noopener noreferrer" : undefined}
               target={(channel.external ?? false) ? "_blank" : undefined}
-              className="group bg-landing-bg-light/50 hover:border-border-accent hover:bg-surface-panel transition-standard relative cursor-pointer overflow-hidden rounded-2xl border p-8"
             >
               <div className="relative flex flex-col gap-5">
-                <div className="bg-surface-hover group-hover:border-border-accent transition-standard flex size-14 items-center justify-center rounded-xl border">
-                  <channel.icon className="text-foreground size-7" />
+                <div className="flex size-14 items-center justify-center rounded-xl border bg-surface-hover transition-standard group-hover:border-border-accent">
+                  <channel.icon className="size-7 text-foreground" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-foreground text-lg font-semibold">{channel.title}</h3>
-                  <p className="text-text-secondary text-sm">{channel.description}</p>
+                  <h3 className="font-semibold text-foreground text-lg">{channel.title}</h3>
+                  <p className="text-sm text-text-secondary">{channel.description}</p>
                 </div>
-                <div className="text-foreground flex items-center gap-2 pt-2 text-sm font-medium transition-transform group-hover:translate-x-1">
+                <div className="flex items-center gap-2 pt-2 font-medium text-foreground text-sm transition-transform group-hover:translate-x-1">
                   {channel.action}
                   <MoveLeft className="rotate-180" />
                 </div>
@@ -138,17 +138,17 @@ export default async function SupportPage() {
 
       <section>
         <div className="mb-10">
-          <h2 className="mb-3 text-3xl font-bold">Frequently Asked Questions</h2>
+          <h2 className="mb-3 font-bold text-3xl">Frequently Asked Questions</h2>
           <p className="text-text-secondary">Quick answers to common questions about Doxynix</p>
         </div>
-        <Accordion type="single" collapsible className="flex w-full flex-col gap-2">
+        <Accordion className="flex w-full flex-col gap-2" collapsible type="single">
           {faqItems.map((item) => (
             <AccordionListItem
-              key={item.value}
-              value={item.value}
+              className="rounded-xl border bg-landing-bg-light/50 px-4 transition-standard hover:border-border-accent"
               content={item.a}
+              key={item.value}
               trigger={item.q}
-              className="bg-landing-bg-light/50 hover:border-border-accent transition-standard rounded-xl border px-4"
+              value={item.value}
             />
           ))}
         </Accordion>

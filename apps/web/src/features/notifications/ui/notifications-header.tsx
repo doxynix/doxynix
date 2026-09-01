@@ -16,8 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs"
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
 import {
-  notificationsParsers,
   type NotificationsParsersState,
+  notificationsParsers,
 } from "@/entities/notifications/model/notifications-parsers";
 
 import { NotificationsBulkActions } from "./notifications-bulk-actions";
@@ -36,7 +36,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
 
   const handleUpdate = <K extends keyof NotificationsParsersState>(
     key: K,
-    value: NotificationsParsersState[K]
+    value: NotificationsParsersState[K],
   ) => {
     void setFilters({ [key]: value, page: null });
   };
@@ -67,23 +67,23 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
         <Tabs
-          value={tabValue}
           onValueChange={(v) => handleUpdate("isRead", v === "all" ? null : v === "read")}
+          value={tabValue}
         >
           <TabsList aria-label="Filter notifications by status">
             {TABS.map((t) => (
               <TabsTrigger
-                key={t.id}
-                disabled={!stats || (t.id !== "all" && t.count === 0)}
-                value={t.value}
                 className="m-0.5"
+                disabled={!stats || (t.id !== "all" && t.count === 0)}
+                key={t.id}
+                value={t.value}
               >
                 {t.label} ({t.count ?? 0})
               </TabsTrigger>
             ))}
           </TabsList>
           {TABS.map((t) => (
-            <TabsContent key={t.id} value={t.value} className="hidden" />
+            <TabsContent className="hidden" key={t.id} value={t.value} />
           ))}
         </Tabs>
 
@@ -92,10 +92,10 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
         <NotificationsRepoFilter />
 
         <Select
-          value={filters.type ?? "all"}
           onValueChange={(v) =>
             handleUpdate("type", v === "all" ? null : (v as NotificationsParsersState["type"]))
           }
+          value={filters.type ?? "all"}
         >
           <SelectTrigger aria-label="Filter by notification type" className="">
             <SelectValue placeholder="Type" />
@@ -109,7 +109,7 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
           </SelectContent>
         </Select>
 
-        <AppButton disabled={!hasFilters} variant="outline" onClick={handleReset} className="px-2">
+        <AppButton className="px-2" disabled={!hasFilters} onClick={handleReset} variant="outline">
           Reset
           <X />
         </AppButton>

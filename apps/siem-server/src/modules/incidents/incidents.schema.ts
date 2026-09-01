@@ -1,10 +1,11 @@
-import { paginationQuerySchema } from "@server/core/db/pagination";
-import { selectIncidentSchema } from "@server/core/db/schema";
 import { z } from "zod";
 
+import { paginationQuerySchema } from "@/core/db/pagination";
+import { selectIncidentSchema } from "@/core/db/schema";
+
 export const getIncidentsQuerySchema = paginationQuerySchema.extend({
-  severity: selectIncidentSchema.shape.severity.optional(),
   fileName: selectIncidentSchema.shape.fileName.optional(),
+  severity: selectIncidentSchema.shape.severity.optional(),
 });
 
 export const incidentParamsSchema = z.object({

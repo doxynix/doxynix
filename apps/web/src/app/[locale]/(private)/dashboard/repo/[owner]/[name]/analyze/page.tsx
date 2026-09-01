@@ -25,19 +25,18 @@ export default async function AnalyzePage({ params }: Readonly<RepoPageProps>) {
   const lastAnalysis = await serverApi.analysis.getLatest({ repoId: repo.id });
 
   const isRunning =
-    lastAnalysis != null &&
-    lastAnalysis.status === "PENDING" &&
-    lastAnalysis.jobId !== null &&
+    lastAnalysis?.status === "PENDING" &&
+    lastAnalysis.jobId != null &&
     lastAnalysis.publicAccessToken != null;
 
   return (
     <div className="mx-auto px-4 py-6">
       {isRunning ? (
         <RepoAnalysisLive
-          name={name}
-          accessToken={lastAnalysis.publicAccessToken!}
+          accessToken={lastAnalysis.publicAccessToken ?? ""}
           analysisId={lastAnalysis.publicId}
-          jobId={lastAnalysis.jobId!}
+          jobId={lastAnalysis.jobId ?? ""}
+          name={name}
           owner={owner}
           repoId={repo.id}
         />

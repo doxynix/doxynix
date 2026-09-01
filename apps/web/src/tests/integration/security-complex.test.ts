@@ -22,7 +22,7 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
           url: "https://github.com/alice/evil",
           userId: bob.user.id,
         },
-      })
+      }),
     );
 
     await expectDenied(
@@ -35,7 +35,7 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
           user: { connect: { publicId: bob.user.publicId } },
           visibility: "PRIVATE",
         },
-      })
+      }),
     );
 
     const aliceRepo = await alice.db.repo.create({
@@ -55,7 +55,7 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
           repo: { connect: { publicId: aliceRepo.publicId } },
           status: "NEW",
         },
-      })
+      }),
     );
   });
 
@@ -105,7 +105,7 @@ describe("Complex Attacks: Nested Writes & Bulk Operations", () => {
       alice.db.repo.update({
         data: { userId: bob.user.id },
         where: { publicId: repo.publicId },
-      })
+      }),
     );
 
     const refetched = await prisma.repo.findUnique({ where: { publicId: repo.publicId } });

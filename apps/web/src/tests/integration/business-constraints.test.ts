@@ -58,7 +58,7 @@ describe("Business Logic & Integrity Constraints", () => {
           type: "README",
           version: "v1",
         },
-      })
+      }),
     ).resolves.toBeDefined();
 
     // Same (repo, version, type, analysis) - should fail
@@ -72,7 +72,7 @@ describe("Business Logic & Integrity Constraints", () => {
           type: "README",
           version: "v1",
         },
-      })
+      }),
     );
 
     // Different version/type - should always succeed
@@ -85,7 +85,7 @@ describe("Business Logic & Integrity Constraints", () => {
           type: "README",
           version: "v2",
         },
-      })
+      }),
     ).resolves.toBeDefined();
 
     await expect(
@@ -97,7 +97,7 @@ describe("Business Logic & Integrity Constraints", () => {
           type: "API",
           version: "v1",
         },
-      })
+      }),
     ).resolves.toBeDefined();
   });
 
@@ -124,7 +124,7 @@ describe("Business Logic & Integrity Constraints", () => {
     await expectDenied(alice.db.account.delete({ where: { publicId: bobAccount.publicId } }));
 
     await expect(
-      alice.db.account.delete({ where: { publicId: aliceAccount.publicId } })
+      alice.db.account.delete({ where: { publicId: aliceAccount.publicId } }),
     ).resolves.toBeDefined();
 
     const checkBob = await bob.db.account.findUnique({ where: { publicId: bobAccount.publicId } });
@@ -150,7 +150,7 @@ describe("Business Logic & Integrity Constraints", () => {
           providerId: "github",
           userId: hacker.user.id,
         },
-      })
+      }),
     );
   });
 

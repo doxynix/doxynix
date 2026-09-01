@@ -1,9 +1,5 @@
 {
-  "mode": "strict",
-  "threshold": 5,
-  "reporters": [
-    "console"
-  ],
+  "format": ["typescript", "tsx", "javascript"],
   "ignore": [
     "**/shared/api-contracts/**",
     "**/node_modules/**",
@@ -20,10 +16,8 @@
     "**/src/shared/ui/core/**",
     "**/messages/*.json"
   ],
-  "format": [
-    "typescript",
-    "tsx",
-    "javascript"
-  ],
-  "pattern": "**/*.{ts,tsx,js,jsx}"
+  "mode": "strict",
+  "pattern": "**/*.{ts,tsx,js,jsx}",
+  "reporters": ["console"],
+  "threshold": 5
 }

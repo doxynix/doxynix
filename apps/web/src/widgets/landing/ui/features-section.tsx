@@ -20,8 +20,8 @@ const MockGraph = () => (
   <div className="absolute inset-x-4 bottom-0 flex h-60 items-end justify-between gap-1 opacity-50 sm:h-120">
     {[40, 70, 50, 80, 60, 90, 75, 40, 70, 50, 80, 60].map((h, i) => (
       <div
+        className="w-full rounded-t bg-linear-to-t from-border-strong to-foreground/10 transition-standard hover:to-foreground/20"
         key={i}
-        className="transition-standard from-border-strong to-foreground/10 hover:to-foreground/20 w-full rounded-t bg-linear-to-t"
         style={{ height: `${h}%` }}
       />
     ))}
@@ -48,8 +48,8 @@ export async function FeaturesSection() {
     {
       background: (
         <div className="flex flex-col items-end justify-end overflow-hidden p-8 text-right">
-          <div className="top-10 right-10 text-4xl font-bold">98%</div>
-          <div className="text-muted-foreground top-20 right-10 text-xs">
+          <div className="top-10 right-10 font-bold text-4xl">98%</div>
+          <div className="top-20 right-10 text-muted-foreground text-xs">
             {" "}
             {t("section_features_health_score_label")}
           </div>
@@ -66,7 +66,7 @@ export async function FeaturesSection() {
     {
       background: (
         <div className="flex justify-end p-4 text-right opacity-30 transition-opacity group-hover:opacity-50">
-          <Code2 className="text-muted-foreground size-24 -rotate-12" />
+          <Code2 className="size-24 -rotate-12 text-muted-foreground" />
         </div>
       ),
       className: "lg:col-span-1 lg:row-span-1",
@@ -79,7 +79,7 @@ export async function FeaturesSection() {
     {
       background: (
         <div className="flex justify-end p-4 text-right opacity-30 transition-opacity group-hover:opacity-50">
-          <Lock className="text-muted-foreground size-24 -rotate-12" />
+          <Lock className="size-24 -rotate-12 text-muted-foreground" />
         </div>
       ),
       className: "lg:col-span-1 lg:row-span-1",
@@ -92,7 +92,7 @@ export async function FeaturesSection() {
     {
       background: (
         <div className="flex justify-end p-4 text-right opacity-30 transition-opacity group-hover:opacity-50">
-          <FileJson className="text-muted-foreground size-24 -rotate-12" />
+          <FileJson className="size-24 -rotate-12 text-muted-foreground" />
         </div>
       ),
       className: "lg:col-span-1 lg:row-span-1",
@@ -106,11 +106,11 @@ export async function FeaturesSection() {
 
   return (
     <section className="container mx-auto px-4 py-32">
-      <h2 className="mb-4 text-center text-3xl font-bold md:text-5xl">
+      <h2 className="mb-4 text-center font-bold text-3xl md:text-5xl">
         {t("section_features_title_prefix")}{" "}
         <span className="text-muted-foreground">{t("section_features_title_highlight")}</span>
       </h2>
-      <p className="text-muted-foreground mx-auto mb-16 max-w-2xl text-center text-lg">
+      <p className="mx-auto mb-16 max-w-2xl text-center text-lg text-muted-foreground">
         {t("section_features_desc")}
       </p>
 

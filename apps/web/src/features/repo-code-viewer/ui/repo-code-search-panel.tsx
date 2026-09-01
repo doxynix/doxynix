@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
+import { type ChangeEvent, type KeyboardEvent, useEffect, useRef, useState } from "react";
 import {
   findNext,
   findPrevious,
@@ -71,7 +71,7 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
           replace: r,
           search: s,
           wholeWord: opts.wholeWord,
-        })
+        }),
       ),
     });
   };
@@ -95,75 +95,75 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
   };
 
   return (
-    <div className="bg-card border-border animate-in slide-in-from-top-2 flex flex-wrap items-center justify-between gap-4 border-b px-3 py-2 font-sans text-xs duration-200">
+    <div className="slide-in-from-top-2 flex animate-in flex-wrap items-center justify-between gap-4 border-border border-b bg-card px-3 py-2 font-sans text-xs duration-200">
       <div className="flex items-center gap-2">
         <div className="relative">
-          <Search className="text-muted-foreground absolute top-2 left-2.5" />
+          <Search className="absolute top-2 left-2.5 text-muted-foreground" />
           <Input
-            ref={inputRef}
-            value={search}
-            placeholder="Find..."
+            className="h-8 w-64 pr-21 pl-9 text-xs"
             onChange={onSearchChange}
             onKeyDown={(e) =>
               onKeyDown(e, () => (e.shiftKey ? findPrevious(view) : findNext(view)))
             }
-            className="h-8 w-64 pr-21 pl-9 text-xs"
+            placeholder="Find..."
+            ref={inputRef}
+            value={search}
           />
           <kbd className="absolute top-0.5 right-1 flex items-center gap-0.5 bg-transparent p-0.5">
             <RepoCodeActionButton
-              tooltipText="Match Case (Aa)"
-              onClick={() => toggleOption("caseSensitive")}
               className={cn(
-                "transition-standard h-6 w-6 rounded-xl p-0",
+                "h-6 w-6 rounded-xl p-0 transition-standard",
                 options.caseSensitive
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "text-muted-foreground hover:bg-primary/90"
+                  : "text-muted-foreground hover:bg-primary/90",
               )}
+              onClick={() => toggleOption("caseSensitive")}
+              tooltipText="Match Case (Aa)"
             >
               <CaseSensitive className="size-3.5" />
             </RepoCodeActionButton>
             <RepoCodeActionButton
-              tooltipText="Whole Word (\bW\b)"
-              onClick={() => toggleOption("wholeWord")}
               className={cn(
-                "transition-standard h-6 w-6 rounded-xl p-0",
+                "h-6 w-6 rounded-xl p-0 transition-standard",
                 options.wholeWord
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "text-muted-foreground hover:bg-primary/90"
+                  : "text-muted-foreground hover:bg-primary/90",
               )}
+              onClick={() => toggleOption("wholeWord")}
+              tooltipText="Whole Word (\bW\b)"
             >
               <WholeWord className="size-3.5" />
             </RepoCodeActionButton>
 
             <RepoCodeActionButton
-              tooltipText="Regular Expression (.*)"
-              onClick={() => toggleOption("regexp")}
               className={cn(
-                "transition-standard h-6 w-6 rounded-xl p-0",
+                "h-6 w-6 rounded-xl p-0 transition-standard",
                 options.regexp
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "text-muted-foreground hover:bg-primary/90"
+                  : "text-muted-foreground hover:bg-primary/90",
               )}
+              onClick={() => toggleOption("regexp")}
+              tooltipText="Regular Expression (.*)"
             >
-              <span className="text-[10px] leading-none font-bold">.*</span>
+              <span className="font-bold text-[10px] leading-none">.*</span>
             </RepoCodeActionButton>
           </kbd>
         </div>
-        <p className="bg-muted text-muted-foreground pointer-events-none rounded px-1.5 py-0.5 text-[10px] font-medium">
+        <p className="pointer-events-none rounded bg-muted px-1.5 py-0.5 font-medium text-[10px] text-muted-foreground">
           {stats.totalMatches > 0 ? `${stats.currentMatch} of ${stats.totalMatches}` : "No results"}
         </p>
         <RepoCodeActionButton
-          tooltipText="Previous match (Shift+Enter)"
-          onClick={() => findPrevious(view)}
           className="h-8 w-8 p-0"
+          onClick={() => findPrevious(view)}
+          tooltipText="Previous match (Shift+Enter)"
         >
           <MoveLeft className="rotate-90" />
         </RepoCodeActionButton>
 
         <RepoCodeActionButton
-          tooltipText="Next match (Enter)"
-          onClick={() => findNext(view)}
           className="h-8 w-8 p-0"
+          onClick={() => findNext(view)}
+          tooltipText="Next match (Enter)"
         >
           <MoveLeft className="-rotate-90" />
         </RepoCodeActionButton>
@@ -171,34 +171,34 @@ export function RepoSearchPanel({ onClose, stats, view }: Readonly<Props>) {
 
       <div className="flex items-center gap-2">
         <Input
-          value={replace}
-          placeholder="Replace with..."
+          className="h-8 w-48 text-xs"
           onChange={onReplaceChange}
           onKeyDown={(e) => onKeyDown(e, () => replaceNext(view))}
-          className="h-8 w-48 text-xs"
+          placeholder="Replace with..."
+          value={replace}
         />
         <RepoCodeActionButton
-          tooltipText="Replace (Enter)"
-          onClick={() => replaceNext(view)}
           className="h-8 px-2"
+          onClick={() => replaceNext(view)}
+          tooltipText="Replace (Enter)"
         >
           <Replace className="mr-1.5" />
           Replace
         </RepoCodeActionButton>
 
         <RepoCodeActionButton
-          tooltipText="Replace all"
-          onClick={() => replaceAll(view)}
           className="h-8 px-2"
+          onClick={() => replaceAll(view)}
+          tooltipText="Replace all"
         >
           <ReplaceAll className="mr-1.5" />
           All
         </RepoCodeActionButton>
 
         <RepoCodeActionButton
-          tooltipText="Close (Esc)"
+          className="ml-2 h-8 w-8 p-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
           onClick={onClose}
-          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 ml-2 h-8 w-8 p-0"
+          tooltipText="Close (Esc)"
         >
           <X />
         </RepoCodeActionButton>

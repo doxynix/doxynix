@@ -29,19 +29,19 @@ export async function BrandsSection() {
 
   return (
     <section
+      className="glass-panel relative border-border border-y bg-landing-bg-light/55 py-12"
       id="brands"
-      className="glass-panel bg-landing-bg-light/55 border-border relative border-y py-12"
     >
       <div className="mx-auto">
-        <p className="text-muted-foreground mb-8 text-center text-sm font-medium tracking-widest uppercase">
+        <p className="mb-8 text-center font-medium text-muted-foreground text-sm uppercase tracking-widest">
           {t("section_brands_title")}
         </p>
-        <div className="relative flex w-full flex-col items-center justify-center overflow-hidden mask-[linear-gradient(to_right,transparent,white_20%,white_80%,transparent)]">
-          <Marquee pauseOnHover className="max-h-12 [--duration:20s] sm:max-h-36">
+        <div className="mask-[linear-gradient(to_right,transparent,white_20%,white_80%,transparent)] relative flex w-full flex-col items-center justify-center overflow-hidden">
+          <Marquee className="max-h-12 [--duration:20s] sm:max-h-36" pauseOnHover>
             {BRANDS.map((tech) => (
               <div
+                className="flex cursor-default items-center gap-2 rounded-2xl border border-transparent px-3 py-3 font-semibold text-muted-foreground text-xl grayscale transition-standard hover:border-border hover:bg-card hover:text-foreground hover:grayscale-0 sm:px-8"
                 key={tech.name}
-                className="transition-standard text-muted-foreground hover:border-border hover:bg-card hover:text-foreground flex cursor-default items-center gap-2 rounded-2xl border border-transparent px-3 py-3 text-xl font-semibold grayscale hover:grayscale-0 sm:px-8"
               >
                 <tech.icon />
               </div>

@@ -1,10 +1,12 @@
-import { zValidator } from "@hono/zod-validator";
-import { type AuthEnv, requireAuth } from "@server/core/middleware/auth.middleware";
 import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+
+import { requireAuth } from "@/core/middleware/auth.middleware";
+
 import { dashboardAnalyticsQuerySchema } from "./analytics.schema";
 import { getDashboardAnalytics } from "./analytics.service";
 
-export const analyticsRouter = new Hono<AuthEnv>()
+export const analyticsRouter = new Hono()
   .use("*", requireAuth)
   .get("/dashboard", zValidator("query", dashboardAnalyticsQuerySchema), async (c) => {
     const query = c.req.valid("query");

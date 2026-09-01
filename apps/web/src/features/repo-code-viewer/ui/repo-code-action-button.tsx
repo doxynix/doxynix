@@ -28,16 +28,18 @@ export function RepoCodeActionButton({
   tooltipText,
   variant = "ghost",
 }: Readonly<Props>) {
-  if (hidden === true) return null;
+  if (hidden === true) {
+    return null;
+  }
 
   const buttonElement = (
     <AppButton
+      aria-label={tooltipText}
+      className={cn("gap-1.5 text-xs", className)}
       disabled={disabled}
+      onClick={onClick}
       size="sm"
       variant={variant}
-      aria-label={tooltipText}
-      onClick={onClick}
-      className={cn("gap-1.5 text-xs", className)}
     >
       {children}
     </AppButton>
@@ -48,11 +50,11 @@ export function RepoCodeActionButton({
       {href != null ? (
         <AppButton
           asChild
+          className={cn("gap-1.5 px-2 text-xs", className)}
           size="sm"
           variant={variant}
-          className={cn("gap-1.5 px-2 text-xs", className)}
         >
-          <ExternalLink href={href} aria-label={tooltipText} className="px-3">
+          <ExternalLink aria-label={tooltipText} className="px-3" href={href}>
             {children}
           </ExternalLink>
         </AppButton>

@@ -1,23 +1,23 @@
 "use client";
 
 import {
-  createContext,
-  forwardRef,
-  useContext,
-  useId,
   type ComponentPropsWithoutRef,
   type ComponentRef,
+  createContext,
+  forwardRef,
   type HTMLAttributes,
+  useContext,
+  useId,
 } from "react";
 import type * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import {
   Controller,
-  FormProvider,
-  useFormContext,
   type ControllerProps,
   type FieldPath,
   type FieldValues,
+  FormProvider,
+  useFormContext,
 } from "react-hook-form";
 
 import { cn } from "@/shared/lib/cn";
@@ -86,10 +86,10 @@ const FormItem = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 
     return (
       <FormItemContext.Provider value={{ id }}>
-        <div ref={ref} className={cn("flex flex-col gap-2", className)} {...props} />
+        <div className={cn("flex flex-col gap-2", className)} ref={ref} {...props} />
       </FormItemContext.Provider>
     );
-  }
+  },
 );
 FormItem.displayName = "FormItem";
 
@@ -101,9 +101,9 @@ const FormLabel = forwardRef<
 
   return (
     <Label
-      ref={ref}
-      htmlFor={formItemId}
       className={cn(error && "text-destructive", className)}
+      htmlFor={formItemId}
+      ref={ref}
       {...props}
     />
   );
@@ -116,14 +116,14 @@ const FormControl = forwardRef<ComponentRef<typeof Slot>, ComponentPropsWithoutR
 
     return (
       <Slot
-        ref={ref}
-        id={formItemId}
-        aria-describedby={error ? `${formDescriptionId} ${formMessageId}` : `${formDescriptionId}`}
+        aria-describedby={error ? `${formDescriptionId} ${formMessageId}` : formDescriptionId}
         aria-invalid={!!error}
+        id={formItemId}
+        ref={ref}
         {...props}
       />
     );
-  }
+  },
 );
 FormControl.displayName = "FormControl";
 
@@ -133,13 +133,13 @@ const FormDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPara
 
     return (
       <p
-        ref={ref}
+        className={cn("text-[0.8rem] text-muted-foreground", className)}
         id={formDescriptionId}
-        className={cn("text-muted-foreground text-[0.8rem]", className)}
+        ref={ref}
         {...props}
       />
     );
-  }
+  },
 );
 FormDescription.displayName = "FormDescription";
 
@@ -154,15 +154,15 @@ const FormMessage = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLParagrap
 
     return (
       <p
-        ref={ref}
+        className={cn("font-medium text-[0.8rem] text-destructive", className)}
         id={formMessageId}
-        className={cn("text-destructive text-[0.8rem] font-medium", className)}
+        ref={ref}
         {...props}
       >
         {body}
       </p>
     );
-  }
+  },
 );
 FormMessage.displayName = "FormMessage";
 

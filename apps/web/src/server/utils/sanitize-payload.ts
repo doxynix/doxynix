@@ -58,7 +58,7 @@ function redactValue(key: string, value: unknown): unknown {
   if (typeof value === "string") {
     let safeString = value;
     if (safeString.length > 8192) {
-      return safeString.slice(0, 1024) + `... [TRUNCATED, ORIGINAL LENGTH: ${safeString.length}]`;
+      return `${safeString.slice(0, 1024)}... [TRUNCATED, ORIGINAL LENGTH: ${safeString.length}]`;
     }
     if (safeString.includes("gh") || safeString.includes("github_pat_")) {
       safeString = safeString.replaceAll(GITHUB_TOKEN_REGEX, "[REDACTED_GH_TOKEN]");
@@ -79,9 +79,15 @@ function redactValue(key: string, value: unknown): unknown {
  * @param obj Данные для очистки
  */
 export function sanitizePayload(obj: unknown): unknown {
-  if (typeof obj === "string") return redactValue("", obj);
-  if (typeof obj === "bigint") return obj.toString();
-  if (obj == null || typeof obj !== "object") return obj;
+  if (typeof obj === "string") {
+    return redactValue("", obj);
+  }
+  if (typeof obj === "bigint") {
+    return obj.toString();
+  }
+  if (obj == null || typeof obj !== "object") {
+    return obj;
+  }
 
   try {
     return JSON.parse(safeStringify(obj, redactValue));
@@ -102,14 +108,20 @@ const mask = (val: unknown) => (typeof val === "string" ? "[ENCRYPTED_MASKED]" :
  * чтобы предотвратить утечку шифруемых полей в сырой payload логов аудита.
  */
 export function maskSensitiveFields(modelName: string, data: unknown): unknown {
-  if (data == null || typeof data !== "object") return data;
+  if (data == null || typeof data !== "object") {
+    return data;
+  }
   const sensitiveFields = ENCRYPTED_METADATA_MAP[modelName];
-  if (!sensitiveFields) return data;
+  if (!sensitiveFields) {
+    return data;
+  }
 
   const cloned = Array.isArray(data) ? [...data] : { ...(data as Record<string, unknown>) };
 
   const traverse = (obj: any) => {
-    if (obj == null || typeof obj !== "object") return;
+    if (obj == null || typeof obj !== "object") {
+      return;
+    }
 
     if (obj.data != null && typeof obj.data === "object") {
       for (const key of Object.keys(obj.data)) {

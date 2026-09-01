@@ -6,8 +6,8 @@ import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Checkbox } from "@/shared/ui/core/checkbox";
 
-import { getFolderSelectionState } from "@/entities/repo/model/repo-setup-utils";
 import type { FileNode } from "@/entities/repo/model/repo-setup.types";
+import { getFolderSelectionState } from "@/entities/repo/model/repo-setup-utils";
 
 type RepoFileNodeProps = NodeRendererProps<FileNode> & {
   mySelectedIds: Set<string>;
@@ -24,8 +24,8 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
   return (
     <div
       className={cn(
-        "hover:text-foreground text-muted-foreground hover:bg-surface-hover flex w-full cursor-pointer items-center rounded-xl font-medium transition-colors",
-        isSelected && "bg-surface-selected hover:bg-surface-selected text-foreground"
+        "flex w-full cursor-pointer items-center rounded-xl font-medium text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground",
+        isSelected && "bg-surface-selected text-foreground hover:bg-surface-selected",
       )}
       style={style}
     >
@@ -33,14 +33,14 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
         <div className="flex size-4 shrink-0 items-center justify-center">
           {isFolder && (
             <AppButton
-              type="button"
-              tabIndex={-1}
-              variant="ghost"
+              className="bg-transparent hover:bg-transparent"
               onClick={(e) => {
                 e.stopPropagation();
                 node.toggle();
               }}
-              className="bg-transparent hover:bg-transparent"
+              tabIndex={-1}
+              type="button"
+              variant="ghost"
             >
               {node.isOpen ? (
                 <ChevronDown className="size-3.5" />
@@ -52,12 +52,12 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
           )}
         </div>
 
-        <div onPointerDown={(e) => e.stopPropagation()} className="flex items-center px-1">
+        <div className="flex items-center px-1" onPointerDown={(e) => e.stopPropagation()}>
           <Checkbox
-            checked={selectionState}
-            tabIndex={-1}
             aria-label={`Select ${node.data.name}`}
+            checked={selectionState}
             onCheckedChange={() => onMyToggle(node.id, node.data)}
+            tabIndex={-1}
           />
         </div>
       </div>
@@ -78,7 +78,7 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
         <span className="truncate text-sm">{node.data.name}</span>
 
         {isRecommended === true && (
-          <AppBadge variant="outline" className="ml-auto shrink-0">
+          <AppBadge className="ml-auto shrink-0" variant="outline">
             <Sparkles className="size-2.5" />
             Core
           </AppBadge>

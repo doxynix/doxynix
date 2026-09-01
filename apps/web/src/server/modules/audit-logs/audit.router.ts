@@ -14,7 +14,7 @@ export const auditRouter = createTRPCRouter({
       z.object({
         cursor: z.string().nullish(),
         limit: z.number().min(1).max(100).default(20),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const { cursor, limit } = input;
@@ -52,7 +52,9 @@ export const auditRouter = createTRPCRouter({
         where: { id: input.logId, userId: Number(ctx.session.user.id) },
       });
 
-      if (log == null) throw new TRPCError({ code: "NOT_FOUND" });
+      if (log == null) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
 
       const cleanPayload = sanitizeObject(log.payload);
 

@@ -12,7 +12,7 @@ export function CreateRepoButton() {
   const t = useTranslations("Dashboard");
 
   return (
-    <AppButton variant="outline" onClick={() => setOpen(true)} className="cursor-pointer">
+    <AppButton className="cursor-pointer" onClick={() => setOpen(true)} variant="outline">
       <Plus /> {t("repo_add_repository")}
     </AppButton>
   );

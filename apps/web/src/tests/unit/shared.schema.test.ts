@@ -17,14 +17,14 @@ describe("shared schemas", () => {
       NotificationsFilterSchema.safeParse({
         repoName: "react-query",
         repoOwner: "tanstack",
-      }).success
+      }).success,
     ).toBe(true);
 
     expect(
       NotificationsBulkFilterSchema.safeParse({
         repoName: "react-query",
         repoOwner: "tanstack",
-      }).success
+      }).success,
     ).toBe(true);
   });
 

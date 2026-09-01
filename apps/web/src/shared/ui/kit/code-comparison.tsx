@@ -49,26 +49,26 @@ export function CodeComparison({
 
   return (
     <div className="mx-auto w-full">
-      <div className="group border-border relative w-full overflow-hidden rounded-xl border">
+      <div className="group relative w-full overflow-hidden rounded-xl border border-border">
         <div className="relative grid gap-4 md:grid-cols-2 md:gap-0">
           <CodeWindow
             code={badCode}
+            codeClassName="text-xs p-2"
             codeHtml={beforeHtml}
             title={filename}
-            codeClassName="text-xs p-2"
           />
           <CodeWindow
             code={goodCode}
+            codeClassName="text-xs p-2"
             codeHtml={afterHtml}
             title={filename}
-            codeClassName="text-xs p-2"
           />
         </div>
 
         <AppBadge
-          variant="outline"
           aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 left-1/2 hidden size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-xs font-bold md:flex"
+          className="pointer-events-none absolute top-1/2 left-1/2 hidden size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border font-bold text-xs md:flex"
+          variant="outline"
         >
           VS
         </AppBadge>

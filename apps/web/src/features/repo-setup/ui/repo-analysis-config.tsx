@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/shared/ui/core/select";
 import { Textarea } from "@/shared/ui/core/textarea";
-import { Flag, FLAGS } from "@/shared/ui/kit/language-switcher";
+import { FLAGS, Flag } from "@/shared/ui/kit/language-switcher";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import type { ActionsType, StateType } from "@/entities/repo/model/use-repo-setup";
@@ -56,7 +56,7 @@ type Props = {
 export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>) {
   const t = useTranslations("Dashboard");
   const translationKeys = LOCALES.map(
-    (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const
+    (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const,
   );
 
   const isSelectionEmpty = state.selectedFilesCount === 0 || state.selectedDocs.length === 0;
@@ -76,20 +76,22 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="flex flex-col gap-3">
             <Label
+              className="flex items-center gap-2 text-muted-foreground text-sm"
               id="lang-label"
-              className="text-muted-foreground flex items-center gap-2 text-sm"
             >
               <Languages />
               Output Language
             </Label>
-            <Select value={state.analysisLocale} onValueChange={actions.setAnalysisLocale}>
+            <Select onValueChange={actions.setAnalysisLocale} value={state.analysisLocale}>
               <SelectTrigger aria-labelledby="lang-label" className="w-full md:w-64">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {LOCALES.map((l, i) => {
                   const key = translationKeys[i];
-                  if (key == null) return null;
+                  if (key == null) {
+                    return null;
+                  }
                   return (
                     <SelectItem key={l} value={l}>
                       <div className="flex items-center gap-3">
@@ -105,7 +107,7 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
         </div>
 
         <div className="flex flex-col gap-3">
-          <Label className="text-muted-foreground flex items-center gap-2 text-sm">
+          <Label className="flex items-center gap-2 text-muted-foreground text-sm">
             <FileText />
             Documentation Types
           </Label>
@@ -114,20 +116,20 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
               const isSelected = state.selectedDocs.includes(opt.id);
               return (
                 <label
-                  key={opt.id}
                   className={cn(
-                    "transition-standard relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3",
+                    "relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3 transition-standard",
                     isSelected
                       ? "border-border-strong bg-surface-selected"
-                      : "border-border bg-card"
+                      : "border-border bg-card",
                   )}
+                  key={opt.id}
                 >
                   <input
                     checked={isSelected}
-                    disabled={disabled}
-                    type="checkbox"
-                    onChange={() => actions.toggleDocType(opt.id)}
                     className="sr-only"
+                    disabled={disabled}
+                    onChange={() => actions.toggleDocType(opt.id)}
+                    type="checkbox"
                   />
 
                   <div className="flex items-center justify-between">
@@ -135,23 +137,23 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                       className={cn(
                         "flex size-8 items-center justify-center rounded-lg border",
                         isSelected
-                          ? "bg-primary text-primary-foreground border-border-strong"
-                          : "bg-surface-hover text-muted-foreground border-border"
+                          ? "border-border-strong bg-primary text-primary-foreground"
+                          : "border-border bg-surface-hover text-muted-foreground",
                       )}
                     >
                       <opt.icon />
                     </div>
                     <Checkbox
+                      aria-hidden="true"
                       checked={isSelected}
+                      className="pointer-events-none size-4 rounded-full"
                       disabled={disabled}
                       tabIndex={-1}
-                      aria-hidden="true"
-                      className="pointer-events-none size-4 rounded-full"
                     />
                   </div>
                   <div>
-                    <p className="text-sm font-bold">{opt.label}</p>
-                    <p className="text-muted-foreground mt-1 text-xs">{opt.desc}</p>
+                    <p className="font-bold text-sm">{opt.label}</p>
+                    <p className="mt-1 text-muted-foreground text-xs">{opt.desc}</p>
                   </div>
                 </label>
               );
@@ -160,25 +162,25 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
         </div>
 
         <div className="flex flex-col gap-3">
-          <Label className="text-muted-foreground flex items-center gap-2 text-sm">
+          <Label className="flex items-center gap-2 text-muted-foreground text-sm">
             <MessageSquareText />
             Custom Instructions (optional)
           </Label>
           <Textarea
-            value={state.instructions}
-            placeholder="e.g. 'Use technical tone', 'Highlight security risks', 'Add code examples'..."
-            onChange={(e) => actions.setInstructions(e.target.value)}
             className="h-30 resize-none"
+            onChange={(e) => actions.setInstructions(e.target.value)}
+            placeholder="e.g. 'Use technical tone', 'Highlight security risks', 'Add code examples'..."
+            value={state.instructions}
           />
         </div>
 
         <div className="flex justify-end">
           <LoadingButton
+            className="w-fit cursor-pointer gap-2"
             disabled={disabled || isSelectionEmpty}
             isLoading={disabled}
             loadingText="Processing..."
             onClick={actions.handleStartAnalysis}
-            className="w-fit cursor-pointer gap-2"
           >
             <Play />
             Start Analysis

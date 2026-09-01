@@ -24,7 +24,7 @@ export default async function DashboardPage() {
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <h1 className="font-bold text-2xl">{t("title")}</h1>
         </div>
         <StatCardContainer />
       </div>

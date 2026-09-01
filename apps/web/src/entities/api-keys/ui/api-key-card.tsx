@@ -22,10 +22,10 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
       : `${active.prefix}••••••••••••••••••••••••••••••••••••••••••••••••••••`;
 
   return (
-    <Card className="group hover:border-border-strong justify-between">
+    <Card className="group justify-between hover:border-border-strong">
       <CardHeader className="flex flex-row items-start justify-between pb-2">
         <div className="flex flex-col gap-1 overflow-hidden">
-          <CardTitle className="truncate text-base font-semibold">{active.name}</CardTitle>
+          <CardTitle className="truncate font-semibold text-base">{active.name}</CardTitle>
           <CardDescription className="flex flex-col gap-2 text-xs">
             <p>
               {tCommon("created")}: <TimeAgo date={active.createdAt} locale={locale} />
@@ -35,7 +35,7 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
               <TimeAgo date={active.lastUsed ?? ""} locale={locale} />
             </p>
             {active.description != null && (
-              <p className="text-muted-foreground line-clamp-4 leading-relaxed">
+              <p className="line-clamp-4 text-muted-foreground leading-relaxed">
                 {active.description}
               </p>
             )}
@@ -48,10 +48,10 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
       </CardHeader>
       <CardContent>
         <Input
-          value={maskValue}
-          readOnly
           aria-label="Key prefix"
-          className="bg-surface-hover text-muted-foreground border-border truncate rounded-xl border p-2 font-mono text-xs"
+          className="truncate rounded-xl border border-border bg-surface-hover p-2 font-mono text-muted-foreground text-xs"
+          readOnly
+          value={maskValue}
         />
       </CardContent>
     </Card>

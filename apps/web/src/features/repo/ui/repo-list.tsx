@@ -24,7 +24,7 @@ export function RepoList({ meta, repos }: Readonly<Props>) {
     return (
       <EmptyState
         action={
-          <AppButton variant="secondary" onClick={() => setOpen(true)} className="cursor-pointer">
+          <AppButton className="cursor-pointer" onClick={() => setOpen(true)} variant="secondary">
             {tCommon("add")}
           </AppButton>
         }

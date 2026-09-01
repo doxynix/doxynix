@@ -47,7 +47,7 @@ describe("Cryptographic Hash & API Key Utilities", () => {
 
     it("should reject keys with incorrect prefixes", () => {
       const originalKey = generateApiKey();
-      const tamperedKey = "ghp_" + originalKey.slice(5);
+      const tamperedKey = `ghp_${originalKey.slice(5)}`;
 
       expect(validateApiKeyChecksum(tamperedKey)).toBe(false);
     });
@@ -55,14 +55,14 @@ describe("Cryptographic Hash & API Key Utilities", () => {
     it("should reject keys with incorrect lengths", () => {
       const originalKey = generateApiKey();
 
-      expect(validateApiKeyChecksum(originalKey + "extra")).toBe(false);
+      expect(validateApiKeyChecksum(`${originalKey}extra`)).toBe(false);
       expect(validateApiKeyChecksum(originalKey.slice(0, 40))).toBe(false);
     });
 
     it("should reject keys with non-hex checksum characters", () => {
       const originalKey = generateApiKey();
-      const tamperedKey1 = originalKey.slice(0, 44) + "g";
-      const tamperedKey2 = originalKey.slice(0, 43) + "🚀";
+      const tamperedKey1 = `${originalKey.slice(0, 44)}g`;
+      const tamperedKey2 = `${originalKey.slice(0, 43)}🚀`;
 
       expect(validateApiKeyChecksum(tamperedKey1)).toBe(false);
       expect(validateApiKeyChecksum(tamperedKey2)).toBe(false);

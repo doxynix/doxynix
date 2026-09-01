@@ -5,7 +5,7 @@ import type { LanguageAdapter } from "./types";
 export const typeScriptAdapter: LanguageAdapter = {
   detect: (file) =>
     [".cts", ".cjs", ".js", ".jsx", ".mjs", ".mts", ".ts", ".tsx"].some((ext) =>
-      file.path.toLowerCase().endsWith(ext)
+      file.path.toLowerCase().endsWith(ext),
     ),
   id: "typescript-native",
   parse: (file) => collectTypeScriptSignals(file),

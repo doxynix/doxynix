@@ -33,7 +33,7 @@ export function NotificationsListContainer() {
       search: debouncedSearch || undefined,
       type: params.type ?? undefined,
     },
-    { placeholderData: (previousData) => previousData }
+    { placeholderData: (previousData) => previousData },
   );
 
   const { data: stats } = trpc.notification.getStats.useQuery();
@@ -53,7 +53,7 @@ export function NotificationsListContainer() {
           <div className="flex-1">
             <NotificationsList meta={data.meta} notifications={data.items} />
           </div>
-          <AppPagination isLoading={isFetching} meta={data.meta} className="mt-4" />
+          <AppPagination className="mt-4" isLoading={isFetching} meta={data.meta} />
         </>
       )}
     </>

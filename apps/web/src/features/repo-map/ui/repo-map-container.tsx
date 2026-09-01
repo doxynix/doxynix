@@ -35,12 +35,12 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
 
   const { data: mapData, isFetching: isMapFetching } = trpc.analysis.getStructureMap.useQuery(
     { aid: aid ?? undefined, repoId: id },
-    { enabled: viewId == null }
+    { enabled: viewId == null },
   );
 
   const { data: nodeData, isFetching: isNodeFetching } = trpc.analysis.getStructureNode.useQuery(
     { nodeId: viewId ?? "", repoId: id },
-    { enabled: viewId != null }
+    { enabled: viewId != null },
   );
 
   function navigateMap(nextId: null | string) {
@@ -118,7 +118,9 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
     return <p>Failed to load map data for this folder</p>;
   }
 
-  if (displayData == null) return null;
+  if (displayData == null) {
+    return null;
+  }
 
   return (
     <ReactFlowProvider>
@@ -129,8 +131,6 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
             activeFilter={filter}
             activeNodeId={viewId}
             data={displayData}
-            repoId={id}
-            selectedNodeId={selectedId}
             onFilterChange={(val) => void setFilter(val)}
             onNavigate={navigateMap}
             onSelect={(val) => {
@@ -147,6 +147,8 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
                 void setPath(null);
               }
             }}
+            repoId={id}
+            selectedNodeId={selectedId}
           />
         </div>
       </div>

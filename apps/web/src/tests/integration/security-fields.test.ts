@@ -49,26 +49,26 @@ describe("Field-Level Security (Omit, Immutable, Mass Assignment)", () => {
     await expectDenied(
       anon.db.user.create({
         data: { email: "evil@test.com", name: "Evil", role: "ADMIN" },
-      })
+      }),
     );
 
     await expectDenied(
       alice.db.user.update({
         data: { publicId: "new-uuid" },
         where: { publicId: alice.user.publicId },
-      })
+      }),
     );
     await expectDenied(
       alice.db.user.update({
         data: { createdAt: new Date("2000-01-01") },
         where: { publicId: alice.user.publicId },
-      })
+      }),
     );
 
     await expectDenied(
       alice.db.apiKey.create({
         data: { hashedKey: "x", name: "bad", prefix: "x", revoked: true, userId: alice.user.id },
-      })
+      }),
     );
   });
 

@@ -10,7 +10,9 @@ export function useTypewriter(targetText: string, speed = 30): string {
   }
 
   useEffect(() => {
-    if (!targetText.trim()) return;
+    if (!targetText.trim()) {
+      return;
+    }
 
     const interval = setInterval(() => {
       setDisplayedText((prev) => {

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
+
 import { unstable_cache } from "next/cache";
 import { createHighlighter } from "shiki";
 import langConsole from "shiki/langs/console.mjs";
@@ -43,7 +44,7 @@ export const highlightCode = async (
   code: string,
   lang: string = "typescript",
   theme: "dark" | "light" = "dark",
-  cacheKey?: string
+  cacheKey?: string,
 ) => {
   const key = cacheKey ?? createHash("sha256").update(code).digest("hex").slice(0, 32);
 
@@ -53,6 +54,6 @@ export const highlightCode = async (
     {
       revalidate: false,
       tags: ["shiki"],
-    }
+    },
   )();
 };

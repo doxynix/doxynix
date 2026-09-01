@@ -5,14 +5,14 @@ import { cn } from "@/shared/lib/cn";
 function Input({ className, type, ...props }: ComponentProps<"input">) {
   return (
     <input
-      type={type}
-      data-slot="input"
       className={cn(
-        "transition-standard file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input bg-background/80 hover:border-border-strong h-9 w-full min-w-0 rounded-xl border px-3 py-1 text-sm outline-hidden file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-base md:text-sm",
-        "focus-visible:border-border-accent focus-visible:ring-ring/50 focus-visible:ring-2",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-        className
+        "h-9 w-full min-w-0 rounded-xl border border-input bg-background/80 px-3 py-1 text-sm outline-hidden transition-standard selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground hover:border-border-strong disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-base md:text-sm dark:bg-input/30",
+        "focus-visible:border-border-accent focus-visible:ring-2 focus-visible:ring-ring/50",
+        "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+        className,
       )}
+      data-slot="input"
+      type={type}
       {...props}
     />
   );

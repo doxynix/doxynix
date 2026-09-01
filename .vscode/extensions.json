@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "biomejs.biome",
+    "bradlc.vscode-tailwindcss",
+    "prisma.prisma",
+    "sonarsource.sonarlint-vscode",
+    "vivaxy.vscode-conventional-commits",
+    "usernamehw.errorlens"
+  ]
+}

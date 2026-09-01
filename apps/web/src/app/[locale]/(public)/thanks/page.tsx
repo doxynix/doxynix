@@ -11,16 +11,16 @@ export default async function ThanksPage() {
   const groups = rawLicenses as AuthorGroup[];
 
   return (
-    <div className="animate-fade-in relative container mx-auto min-h-dvh max-w-5xl overflow-hidden px-4 py-12 pt-24">
+    <div className="container relative mx-auto min-h-dvh max-w-5xl animate-fade-in overflow-hidden px-4 py-12 pt-24">
       <BackOrLinkButton
-        showIcon
-        label={tCommon("back")}
-        variant="link"
         className="mb-8 cursor-pointer"
+        label={tCommon("back")}
+        showIcon
+        variant="link"
       />
       <div className="mb-20">
-        <h1 className="text-foreground mb-6 text-5xl font-bold md:text-6xl">Open Source Credits</h1>
-        <p className="text-text-secondary max-w-2xl text-lg">
+        <h1 className="mb-6 font-bold text-5xl text-foreground md:text-6xl">Open Source Credits</h1>
+        <p className="max-w-2xl text-lg text-text-secondary">
           Doxynix is built on the shoulders of giants. We are deeply grateful to the open-source
           community and the creators of these incredible libraries.
         </p>

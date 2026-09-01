@@ -1,8 +1,11 @@
-import { zValidator } from "@hono/zod-validator";
-import { type AuthEnv, requireAuth, requireRole } from "@server/core/middleware/auth.middleware";
-import { recordAuditLog } from "@server/modules/audit/audit.service";
-import { getRequestContext } from "@server/utils/request-context";
 import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+
+import { requireAuth, requireRole } from "@/core/middleware/auth.middleware";
+import { getRequestContext } from "@/utils/request-context";
+
+import { recordAuditLog } from "@/modules/audit/audit.service";
+
 import {
   createRuleSchema,
   getRulesQuerySchema,
@@ -16,7 +19,7 @@ const UPDATE_ERROR_MAP = {
   not_found: { error: "Rule not found", status: 404 },
 } as const;
 
-export const rulesRouter = new Hono<AuthEnv>()
+export const rulesRouter = new Hono()
   .use("*", requireAuth)
   .get("/", zValidator("query", getRulesQuerySchema), async (c) => {
     const query = c.req.valid("query");
@@ -29,16 +32,16 @@ export const rulesRouter = new Hono<AuthEnv>()
     const rule = await createRule(data);
 
     if (rule == null) {
-      return c.json({ success: false, error: "A rule with this name already exists" }, 409);
+      return c.json({ error: "A rule with this name already exists", success: false }, 409);
     }
 
     const ctx = getRequestContext(c);
 
     await recordAuditLog({
-      actor: user.email,
       action: "rule.create",
-      target: `rule:${rule.name}`,
+      actor: user?.email ?? "system",
       ctx,
+      target: `rule:${rule.name}`,
     });
 
     return c.json(rule, 201);
@@ -56,16 +59,16 @@ export const rulesRouter = new Hono<AuthEnv>()
 
       if (!result.success) {
         const mappedError = UPDATE_ERROR_MAP[result.reason];
-        return c.json({ success: false, error: mappedError.error }, mappedError.status);
+        return c.json({ error: mappedError.error, success: false }, mappedError.status);
       }
 
       const ctx = getRequestContext(c);
 
       await recordAuditLog({
-        actor: user.email,
         action: "rule.update",
-        target: `rule_id:${id}`,
+        actor: user?.email ?? "system",
         ctx,
+        target: `rule_id:${id}`,
       });
 
       return c.json(result.data, 200);
@@ -77,17 +80,17 @@ export const rulesRouter = new Hono<AuthEnv>()
     const success = await deleteRule(id);
 
     if (!success) {
-      return c.json({ success: false, error: "Rule not found" }, 404);
+      return c.json({ error: "Rule not found", success: false }, 404);
     }
 
     const ctx = getRequestContext(c);
 
     await recordAuditLog({
-      actor: user.email,
       action: "rule.delete",
-      target: `rule_id:${id}`,
+      actor: user?.email ?? "system",
       ctx,
+      target: `rule_id:${id}`,
     });
 
-    return c.json({ success: true, message: "Rule deleted successfully" }, 200);
+    return c.json({ message: "Rule deleted successfully", success: true }, 200);
   });

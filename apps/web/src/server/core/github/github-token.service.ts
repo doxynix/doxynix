@@ -16,8 +16,7 @@ export const githubTokenService = {
     });
 
     if (
-      account == null ||
-      account.accessToken == null ||
+      account?.accessToken == null ||
       account.refreshToken == null ||
       account.accessTokenExpiresAt == null
     ) {
@@ -25,7 +24,9 @@ export const githubTokenService = {
     }
 
     const isExpired = Date.now() > account.accessTokenExpiresAt.getTime() - REFRESH_THRESHOLD_MS;
-    if (!isExpired) return account.accessToken;
+    if (!isExpired) {
+      return account.accessToken;
+    }
 
     try {
       return await prisma.$transaction(async (tx) => {
@@ -35,8 +36,7 @@ export const githubTokenService = {
         });
 
         if (
-          lockedAccount == null ||
-          lockedAccount.accessToken == null ||
+          lockedAccount?.accessToken == null ||
           lockedAccount.refreshToken == null ||
           lockedAccount.accessTokenExpiresAt == null
         ) {

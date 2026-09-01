@@ -17,11 +17,13 @@ export function buildNodeExplainPayloadFromContext(
   context: StructureContext,
   analysisRef: AnalysisRef | null,
   nodeId: string,
-  drilldown: StructureNodePayload
+  drilldown: StructureNodePayload,
 ) {
   const { nodeType, path } = parseStructureNodeId(nodeId);
   const scopedPaths = collectNodeScopePaths(context, nodeType, path);
-  if (scopedPaths.length === 0) return null;
+  if (scopedPaths.length === 0) {
+    return null;
+  }
 
   const entry = aggregateEntryForPaths(scopedPaths, context);
   const signals = collectScopedSignals(scopedPaths, context);
@@ -61,7 +63,7 @@ export function buildNodeExplainPayloadFromContext(
       entrypointReason: drilldown.inspect.entrypointReason,
       factTitles: uniq([...entry.factTitles, ...signals.facts.map((fact) => fact.title)]).slice(
         0,
-        5
+        5,
       ),
       frameworkHints: drilldown.inspect.frameworkHints,
       gitHints: drilldown.inspect.gitHints,
@@ -98,16 +100,20 @@ export type NodeExplainPayload = NonNullable<ReturnType<typeof buildNodeExplainP
 
 export function buildNodeExplainPayload(repo: RepoWithLatestAnalysisAndDocs, nodeId: string) {
   const drilldown = buildStructureNodePayload(repo, nodeId);
-  if (drilldown == null) return null;
+  if (drilldown == null) {
+    return null;
+  }
 
   const context = buildStructureContext(repo);
-  if (context == null) return null;
+  if (context == null) {
+    return null;
+  }
 
   return buildNodeExplainPayloadFromContext(
     context,
     analysisMapper.toAnalysisRef(repo.analyses[0]),
     nodeId,
-    drilldown
+    drilldown,
   );
 }
 type ExplainNodeLike = {
@@ -129,17 +135,33 @@ type ExplainNodeLike = {
 };
 function buildNodeRole(node: ExplainNodeLike, semanticLabel: string) {
   if (node.nodeType === "file") {
-    if (node.markers.entrypoint) return "File with localized entrypoint significance";
-    if (node.markers.api) return "File participating in the public API surface";
-    if (node.markers.config) return "Configuration-heavy file";
-    if (node.markers.shared) return "Shared support file";
+    if (node.markers.entrypoint) {
+      return "File with localized entrypoint significance";
+    }
+    if (node.markers.api) {
+      return "File participating in the public API surface";
+    }
+    if (node.markers.config) {
+      return "Configuration-heavy file";
+    }
+    if (node.markers.shared) {
+      return "Shared support file";
+    }
     return "File with localized architectural importance";
   }
 
-  if (node.markers.entrypoint && node.markers.server) return "Backend entry area";
-  if (node.markers.api) return "API-facing structural zone";
-  if (node.markers.config) return "Configuration-heavy area";
-  if (node.markers.shared) return "Shared support module";
+  if (node.markers.entrypoint && node.markers.server) {
+    return "Backend entry area";
+  }
+  if (node.markers.api) {
+    return "API-facing structural zone";
+  }
+  if (node.markers.config) {
+    return "Configuration-heavy area";
+  }
+  if (node.markers.shared) {
+    return "Shared support module";
+  }
 
   return `${semanticLabel} structural area`;
 }
@@ -178,11 +200,11 @@ function buildNodeExplainSummary(params: {
 
   if (params.hotspotCount > 0 || params.dependencyHotspotCount > 0) {
     lines.push(
-      "Hotspot and dependency-centrality signals suggest this node can amplify change impact."
+      "Hotspot and dependency-centrality signals suggest this node can amplify change impact.",
     );
   } else if (params.churnCount > 0 || params.changeCouplingCount > 0) {
     lines.push(
-      "Recent git history suggests this node changes often or changes alongside nearby files."
+      "Recent git history suggests this node changes often or changes alongside nearby files.",
     );
   } else if (params.frameworkCount > 0) {
     lines.push("Framework/runtime hints suggest this area anchors important integration behavior.");
@@ -190,7 +212,7 @@ function buildNodeExplainSummary(params: {
 
   if (params.graphWarningCount > 0 || params.orphanCount > 0) {
     lines.push(
-      "Some dependency evidence around this node is partial or isolated, so manual verification may help."
+      "Some dependency evidence around this node is partial or isolated, so manual verification may help.",
     );
   }
 
@@ -218,7 +240,11 @@ function buildExplainConfidence(params: {
     params.sourcePathCount >= 3,
   ].filter(Boolean).length;
 
-  if (strongSignals >= 3) return "high" as const;
-  if (strongSignals >= 2 || params.node.kind !== "unknown") return "medium" as const;
+  if (strongSignals >= 3) {
+    return "high" as const;
+  }
+  if (strongSignals >= 2 || params.node.kind !== "unknown") {
+    return "medium" as const;
+  }
   return "low" as const;
 }

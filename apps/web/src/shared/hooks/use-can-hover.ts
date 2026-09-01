@@ -8,6 +8,6 @@ export function useCanHover() {
       return () => mql.removeEventListener("change", callback);
     },
     () => window.matchMedia("(hover: hover)").matches,
-    () => true
+    () => true,
   );
 }

@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { resolveMx } from "node:dns/promises";
+
 import disposableDomains from "disposable-email-domains";
 import validator from "validator";
 
@@ -57,10 +58,12 @@ const isPermanentDnsError = (err: unknown): err is NodeSystemError => {
 const disposableDomainSet = new Set(disposableDomains);
 
 export async function validateEmailSafety(
-  email: string
+  email: string,
 ): Promise<{ reason?: string; safe: boolean }> {
   const domain = email.split("@")[1]?.toLowerCase();
-  if (domain == null) return { reason: "invalid_format", safe: false };
+  if (domain == null) {
+    return { reason: "invalid_format", safe: false };
+  }
 
   if (disposableDomainSet.has(domain)) {
     return { reason: "disposable", safe: false };
@@ -69,11 +72,13 @@ export async function validateEmailSafety(
   try {
     const mxPromise = resolveMx(domain);
     const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("DNS_TIMEOUT")), 5000)
+      setTimeout(() => reject(new Error("DNS_TIMEOUT")), 5000),
     );
 
     const mx = await Promise.race([mxPromise, timeout]);
-    if (mx.length === 0) return { reason: "no_mx_records", safe: false };
+    if (mx.length === 0) {
+      return { reason: "no_mx_records", safe: false };
+    }
   } catch (error_) {
     if (isPermanentDnsError(error_)) {
       return { reason: "invalid_domain", safe: false };

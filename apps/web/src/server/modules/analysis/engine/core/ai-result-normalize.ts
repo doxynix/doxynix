@@ -3,10 +3,10 @@ import { z } from "zod";
 import { appLogger } from "@/server/core/app-logger";
 
 import {
-  aiSchema,
-  projectMapSchema,
   type AIResult,
+  aiSchema,
   type ProjectMap,
+  projectMapSchema,
 } from "./analysis-result.schemas";
 import {
   normalizeProjectMapKeyDecisions,
@@ -39,7 +39,9 @@ const FINDING_CATEGORIES = [
 ] as const;
 
 function coerceEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
-  if (typeof value !== "string") return fallback;
+  if (typeof value !== "string") {
+    return fallback;
+  }
   const normalized = value.toUpperCase().replaceAll(/[-\s]+/gu, "_");
   const match = allowed.find((item) => item === normalized || item === value);
   return match ?? fallback;
@@ -53,19 +55,27 @@ function coerceFactConfidence(value: unknown) {
   if (typeof value === "string") {
     const lower = value.toLowerCase();
     const match = FACT_CONFIDENCE.find((item) => item === lower);
-    if (match != null) return match;
+    if (match != null) {
+      return match;
+    }
   }
   return "medium" as const;
 }
 
 function asString(value: unknown, fallback = ""): string {
-  if (typeof value === "string") return value;
-  if (value == null) return fallback;
+  if (typeof value === "string") {
+    return value;
+  }
+  if (value == null) {
+    return fallback;
+  }
   return String(value);
 }
 
 function asStringArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
+  if (!Array.isArray(value)) {
+    return [];
+  }
   return value.map((item) => asString(item)).filter((item) => item.length > 0);
 }
 
@@ -74,7 +84,9 @@ function asRecord(value: unknown): Record<string, unknown> {
 }
 
 function normalizeDomainAnalysis(value: unknown) {
-  if (typeof value !== "object" || value == null) return;
+  if (typeof value !== "object" || value == null) {
+    return;
+  }
   const record = value as Record<string, unknown>;
   const business_rules = asStringArray(record.business_rules);
 
@@ -87,12 +99,12 @@ function normalizeDomainAnalysis(value: unknown) {
             logic_complexity: coerceEnum(
               ent.logic_complexity ?? ent.complexity,
               ["LOW", "MEDIUM", "HIGH"] as const,
-              "MEDIUM" as const
+              "MEDIUM" as const,
             ),
             name: asString(ent.name, "CoreEntity"),
             responsibility: asString(
               ent.responsibility ?? ent.description,
-              "Domain responsibility"
+              "Domain responsibility",
             ),
           };
         })
@@ -103,14 +115,16 @@ function normalizeDomainAnalysis(value: unknown) {
 }
 
 function normalizeRefactoringTargets(value: unknown) {
-  if (!Array.isArray(value)) return [];
+  if (!Array.isArray(value)) {
+    return [];
+  }
   return value
     .map((item, index) => {
       const record = asRecord(item);
       return {
         description: asString(
           record.description ?? record.summary ?? record.issue,
-          `Refactoring target ${index + 1}`
+          `Refactoring target ${index + 1}`,
         ),
         file: asString(record.file ?? record.path ?? record.location, "unknown"),
         impact_on_health:
@@ -121,7 +135,7 @@ function normalizeRefactoringTargets(value: unknown) {
         priority: coerceEnum(
           record.priority,
           ["HIGH", "MEDIUM", "LOW"] as const,
-          "MEDIUM" as const
+          "MEDIUM" as const,
         ),
       };
     })
@@ -187,13 +201,19 @@ export const projectMapGenerationSchema = z
   .loose();
 
 function normalizeEvidenceRefs(value: unknown) {
-  if (!Array.isArray(value)) return [];
+  if (!Array.isArray(value)) {
+    return [];
+  }
   return value
     .map((item) => {
-      if (typeof item !== "object" || item == null) return null;
+      if (typeof item !== "object" || item == null) {
+        return null;
+      }
       const record = item as Record<string, unknown>;
       const path = asString(record.path);
-      if (path.length === 0) return null;
+      if (path.length === 0) {
+        return null;
+      }
       return {
         ...record,
         line:
@@ -207,10 +227,14 @@ function normalizeEvidenceRefs(value: unknown) {
 }
 
 function normalizeFindings(value: unknown) {
-  if (!Array.isArray(value)) return [];
+  if (!Array.isArray(value)) {
+    return [];
+  }
   return value
     .map((item, index) => {
-      if (typeof item !== "object" || item == null) return null;
+      if (typeof item !== "object" || item == null) {
+        return null;
+      }
       const record = item as Record<string, unknown>;
       const title = asString(record.title, `Finding ${index + 1}`);
       return {
@@ -237,10 +261,14 @@ function normalizeFindings(value: unknown) {
 }
 
 function normalizeFacts(value: unknown) {
-  if (!Array.isArray(value)) return [];
+  if (!Array.isArray(value)) {
+    return [];
+  }
   return value
     .map((item, index) => {
-      if (typeof item !== "object" || item == null) return null;
+      if (typeof item !== "object" || item == null) {
+        return null;
+      }
       const record = item as Record<string, unknown>;
       const title = asString(record.title, `Fact ${index + 1}`);
       return {
@@ -257,12 +285,14 @@ function normalizeFacts(value: unknown) {
 }
 
 function normalizePerformanceAudit(value: unknown) {
-  if (!Array.isArray(value)) return;
+  if (!Array.isArray(value)) {
+    return;
+  }
   return value.map((item, index) => {
     const record = asRecord(item);
     const issue = asString(
       record.issue ?? record.title ?? record.description,
-      `Performance issue ${index + 1}`
+      `Performance issue ${index + 1}`,
     );
     return {
       impact: asString(record.impact ?? record.risk, "Potential runtime or scalability impact."),
@@ -270,44 +300,48 @@ function normalizePerformanceAudit(value: unknown) {
       location: asString(record.location ?? record.file ?? record.path, "Repository"),
       optimization_strategy: asString(
         record.optimization_strategy ?? record.recommendation ?? record.suggestion,
-        "Inspect the hotspot and apply a targeted optimization."
+        "Inspect the hotspot and apply a targeted optimization.",
       ),
     };
   });
 }
 function normalizeTechDebtInventory(value: unknown) {
-  if (!Array.isArray(value)) return;
+  if (!Array.isArray(value)) {
+    return;
+  }
   return value.map((item, index) => {
     const record = asRecord(item);
     return {
       description: asString(
         record.description ?? record.issue ?? record.summary,
-        `Technical debt item ${index + 1}`
+        `Technical debt item ${index + 1}`,
       ),
       remediation_effort: coerceEnum(
         record.remediation_effort ?? record.effort,
         EFFORT_LEVELS,
-        "MEDIUM"
+        "MEDIUM",
       ),
       type: coerceEnum(record.type ?? record.category, TECH_DEBT_TYPES, "CODE_SMELL"),
     };
   });
 }
 function normalizeVulnerabilities(value: unknown) {
-  if (!Array.isArray(value)) return;
+  if (!Array.isArray(value)) {
+    return;
+  }
   return value.map((item, index) => {
     const record = asRecord(item);
     return {
       description: asString(
         record.description ?? record.issue ?? record.title,
-        `Security finding ${index + 1}`
+        `Security finding ${index + 1}`,
       ),
       file: asString(record.file ?? record.path ?? record.location, "unknown"),
       lineHint: asString(record.lineHint ?? record.line) || undefined,
       risk: coerceRiskLevel(record.risk ?? record.severity),
       suggestion: asString(
         record.suggestion ?? record.recommendation,
-        "Review and remediate the finding."
+        "Review and remediate the finding.",
       ),
     };
   });
@@ -345,7 +379,7 @@ export function normalizeAiGenerationOutput(raw: unknown): AIResult {
     executive_summary: {
       architecture_style: asString(
         rawExecSummary?.architecture_style,
-        "Layered application architecture"
+        "Layered application architecture",
       ),
       key_innovations: asStringArray(rawExecSummary?.key_innovations),
       purpose: asString(rawExecSummary?.purpose, "Automated repository intelligence report"),
@@ -363,7 +397,7 @@ export function normalizeAiGenerationOutput(raw: unknown): AIResult {
       return {
         api_structure: asString(
           rawSections?.api_structure,
-          "API surface documented from static scan."
+          "API surface documented from static scan.",
         ),
         data_flow: asString(rawSections?.data_flow, "Data flow inferred from module boundaries."),
         infrastructure_and_scaling:
@@ -390,7 +424,9 @@ export function normalizeAiGenerationOutput(raw: unknown): AIResult {
   };
 
   const parsed = aiSchema.safeParse(candidate);
-  if (parsed.success) return parsed.data;
+  if (parsed.success) {
+    return parsed.data;
+  }
 
   appLogger.warn({
     error: z.treeifyError(parsed.error),
@@ -412,11 +448,15 @@ export function normalizeProjectMapOutput(raw: unknown): ProjectMap {
   const modules = Array.isArray(record.modules)
     ? record.modules
         .map((item) => {
-          if (typeof item !== "object" || item == null) return null;
+          if (typeof item !== "object" || item == null) {
+            return null;
+          }
 
           const mod = item as Record<string, unknown>;
           const path = asString(mod.path);
-          if (path.length === 0) return null;
+          if (path.length === 0) {
+            return null;
+          }
           return {
             churn_score: typeof mod.churn_score === "number" ? mod.churn_score : undefined,
             complexity_index:
@@ -441,7 +481,9 @@ export function normalizeProjectMapOutput(raw: unknown): ProjectMap {
   };
 
   const parsed = projectMapSchema.safeParse(candidate);
-  if (parsed.success) return parsed.data;
+  if (parsed.success) {
+    return parsed.data;
+  }
 
   appLogger.warn({
     error: z.treeifyError(parsed.error),
@@ -455,7 +497,9 @@ export function normalizeProjectMapOutput(raw: unknown): ProjectMap {
 }
 
 export function isSchemaMismatchError(error: unknown): boolean {
-  if (!(error instanceof Error)) return false;
+  if (!(error instanceof Error)) {
+    return false;
+  }
   return (
     error.name === "AI_NoObjectGeneratedError" ||
     error.message.includes("did not match schema") ||

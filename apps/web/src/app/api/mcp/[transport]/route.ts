@@ -11,7 +11,7 @@ import { verifyAndUseApiKey } from "@/server/utils/verify-and-use-api-key";
 
 type GenericExecuteFn = (
   args: Record<string, unknown>,
-  context: ToolExecutionOptions
+  context: ToolExecutionOptions,
 ) => Promise<unknown>;
 
 const handler = createMcpHandler(
@@ -53,7 +53,7 @@ const handler = createMcpHandler(
             };
 
             const safeExecute = executeFn as unknown as GenericExecuteFn;
-            const result = await safeExecute(parsedArgs as Record<string, unknown>, dummyContext);
+            const result = await safeExecute(parsedArgs, dummyContext);
 
             return {
               content: [
@@ -82,7 +82,7 @@ const handler = createMcpHandler(
               isError: true,
             };
           }
-        }
+        },
       );
     }
   },
@@ -97,7 +97,7 @@ const handler = createMcpHandler(
     basePath: "/api/mcp",
     maxDuration: 60,
     verboseLogs: true,
-  }
+  },
 );
 
 const withMcpAuthHandler = withMcpAuth(
@@ -120,7 +120,7 @@ const withMcpAuthHandler = withMcpAuth(
   },
   {
     required: true,
-  }
+  },
 );
 
 export { withMcpAuthHandler as GET, withMcpAuthHandler as POST };

@@ -10,10 +10,10 @@ type ExternalLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
 export function ExternalLink({ children, className, href, ...props }: ExternalLinkProps) {
   return (
     <a
+      className={cn("transition-colors", className)}
       href={href}
       rel="noopener noreferrer nofollow"
       target="_blank"
-      className={cn("transition-colors", className)}
       {...props}
     >
       {children}

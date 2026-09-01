@@ -1,11 +1,9 @@
 {
-  "extends": "./base.json",
   "compilerOptions": {
+    "allowArbitraryExtensions": true,
+    "jsx": "preserve",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "noEmit": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "jsx": "react-jsx",
-    "allowArbitraryExtensions": true
-  }
+    "noEmit": true
+  },
+  "extends": "./base.json"
 }

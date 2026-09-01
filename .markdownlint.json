@@ -1,0 +1,15 @@
+{
+  "default": true,
+  "MD009": {
+    "br_spaces": 2
+  },
+  "MD013": false,
+  "MD024": {
+    "siblings_only": true
+  },
+  "MD029": {
+    "style": "ordered"
+  },
+  "MD033": false,
+  "MD041": false
+}

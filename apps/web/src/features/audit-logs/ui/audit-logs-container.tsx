@@ -12,31 +12,32 @@ export function AuditLogsContainer() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     trpc.audit.getActivityLogs.useInfiniteQuery(
       { limit: 20 },
-      { getNextPageParam: (lastPage) => lastPage.nextCursor }
+      { getNextPageParam: (lastPage) => lastPage.nextCursor },
     );
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="flex justify-center py-20">
         <Spinner />
       </div>
     );
+  }
 
   const allLogs = data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
-    <div className="bg-card border-border flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card">
       <div className="custom-scrollbar relative flex-1 overflow-auto">
         <AuditLogList logs={allLogs} />
 
         {hasNextPage && (
           <LoadingButton
+            className="flex w-full items-center justify-center rounded-t-none"
             disabled={isFetchingNextPage}
             isLoading={isFetchingNextPage}
+            onClick={() => void fetchNextPage()}
             size="sm"
             variant="ghost"
-            onClick={() => void fetchNextPage()}
-            className="flex w-full items-center justify-center rounded-t-none"
           >
             <ChevronDown /> Load more
           </LoadingButton>

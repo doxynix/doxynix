@@ -1,7 +1,8 @@
 /* eslint-disable sonarjs/slow-regex */
 
-import { readFileSync } from "fs";
-import { dirname, join } from "path";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+
 import { sync } from "fast-glob";
 
 const barrelMap = {};
@@ -31,16 +32,18 @@ layers.forEach((layer) => {
         const relativePath = match[2];
         specifiers.forEach((spec) => {
           const trimmed = spec.trim();
-          if (!trimmed) return;
+          if (!trimmed) {
+            return;
+          }
           const [realName, aliasName] = trimmed.split(/\s+as\s+/);
           const exportName = (aliasName || realName).trim();
 
-          let targetPath = join(dir, relativePath).replace(/\\/g, "/").replace("src/", "@/");
+          const targetPath = join(dir, relativePath).replaceAll("\\", "/").replace("src/", "@/");
           barrelMap[barrelKey][exportName] = targetPath;
         });
       }
-    } catch (e) {
-      console.error(`[Error] Не удалось прочитать индекс: ${indexPath}`, e);
+    } catch (error) {
+      console.error(`[Error] Не удалось прочитать индекс: ${indexPath}`, error);
     }
   });
 });
@@ -64,16 +67,22 @@ export default function barrelTransformer(fileInfo, api) {
           const realPath = barrelMap[source][importedName];
 
           if (realPath) {
-            if (!newImportsMap.has(realPath)) newImportsMap.set(realPath, []);
+            if (!newImportsMap.has(realPath)) {
+              newImportsMap.set(realPath, []);
+            }
             newImportsMap
               .get(realPath)
               .push(j.importSpecifier(j.identifier(importedName), j.identifier(localName)));
           } else {
-            if (!newImportsMap.has(source)) newImportsMap.set(source, []);
+            if (!newImportsMap.has(source)) {
+              newImportsMap.set(source, []);
+            }
             newImportsMap.get(source).push(spec);
           }
         } else {
-          if (!newImportsMap.has(source)) newImportsMap.set(source, []);
+          if (!newImportsMap.has(source)) {
+            newImportsMap.set(source, []);
+          }
           newImportsMap.get(source).push(spec);
         }
       });
@@ -81,7 +90,7 @@ export default function barrelTransformer(fileInfo, api) {
       const newImportDeclarations = Array.from(newImportsMap.entries()).map(
         ([importPath, specs]) => {
           return j.importDeclaration(specs, j.literal(importPath));
-        }
+        },
       );
 
       if (newImportDeclarations.length > 0) {
@@ -95,5 +104,6 @@ export default function barrelTransformer(fileInfo, api) {
     }
   });
 
+  // oxlint-disable-next-line typescript/no-unnecessary-condition
   return changed ? root.toSource({ quote: "double", trailingComma: true }) : null;
 }

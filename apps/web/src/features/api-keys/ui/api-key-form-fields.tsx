@@ -20,8 +20,8 @@ export function ApiKeyFormFields({ control, isPending }: Readonly<Props>) {
   return (
     <>
       <FormField
-        name="name"
         control={control}
+        name="name"
         render={({ field }) => (
           <FormItem>
             <FormLabel className="text-muted-foreground">{tCommon("name")}</FormLabel>
@@ -38,17 +38,17 @@ export function ApiKeyFormFields({ control, isPending }: Readonly<Props>) {
       />
 
       <FormField
-        name="description"
         control={control}
+        name="description"
         render={({ field }) => (
           <FormItem className="flex flex-col">
             <FormLabel className="text-muted-foreground">{t("settings_api_keys_label")}</FormLabel>
             <FormControl>
               <Textarea
                 {...field}
+                className="min-h-25 resize-none text-sm sm:text-base"
                 disabled={isPending}
                 placeholder={t("settings_api_keys_desc_placeholder")}
-                className="min-h-25 resize-none text-sm sm:text-base"
               />
             </FormControl>
             <FormMessage />

@@ -1,4 +1,4 @@
-import { Status, type Prisma } from "@prisma/client";
+import { type Prisma, Status } from "@prisma/client";
 
 import { getLanguageColor } from "@/server/utils/language-metadata";
 import type { PaginationMeta } from "@/server/utils/pagination";

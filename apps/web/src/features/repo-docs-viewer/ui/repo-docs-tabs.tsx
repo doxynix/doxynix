@@ -52,7 +52,7 @@ export function RepoDocsTabs({
   const [activePath, setActivePath] = useQueryState("path", parseAsString);
 
   const uniqueTabs = uniqBy(items, (item) => item.value).map((item) =>
-    item.value === "CODE_DOC" ? { ...item, id: "CODE_DOC_ROOT" } : item
+    item.value === "CODE_DOC" ? { ...item, id: "CODE_DOC_ROOT" } : item,
   );
 
   const codeDocFiles = availableDocs.filter((doc) => doc.type === "CODE_DOC");
@@ -68,13 +68,13 @@ export function RepoDocsTabs({
           const isCodeDocRoot = item.value === "CODE_DOC";
 
           return (
-            <div key={item.id} className="flex w-full flex-col">
+            <div className="flex w-full flex-col" key={item.id}>
               <TabsTrigger
+                className={cn("w-full items-center justify-start gap-3 p-3 transition-standard")}
                 value={item.value}
-                className={cn("transition-standard w-full items-center justify-start gap-3 p-3")}
               >
                 <item.icon className={cn(isActive ? "text-foreground" : "text-muted-foreground")} />
-                <span className="grow text-left text-sm font-medium">
+                <span className="grow text-left font-medium text-sm">
                   {isCodeDocRoot
                     ? "File Audits"
                     : (docMeta?.label ?? item.value.toLowerCase().replace("_", " "))}
@@ -83,20 +83,20 @@ export function RepoDocsTabs({
               </TabsTrigger>
 
               {isActive && isCodeDocRoot && codeDocFiles.length > 0 && (
-                <div className="animate-in slide-in-from-top-1 fade-in mt-1 mb-3 ml-10 flex flex-col gap-2 border-l pl-3.5 duration-300">
+                <div className="slide-in-from-top-1 fade-in mt-1 mb-3 ml-10 flex animate-in flex-col gap-2 border-l pl-3.5 duration-300">
                   {codeDocFiles.map((file) => {
                     const isFileActive = activePath === file.path;
                     return (
                       <AppButton
-                        key={file.id}
-                        variant="ghost"
-                        onClick={() => void setActivePath(file.path)}
                         className={cn(
-                          "hover:text-foreground transition-standard flex w-full cursor-pointer items-center justify-start gap-1 truncate py-1 text-left text-xs",
+                          "flex w-full cursor-pointer items-center justify-start gap-1 truncate py-1 text-left text-xs transition-standard hover:text-foreground",
                           isFileActive
-                            ? "bg-accent text-foreground font-semibold"
-                            : "text-muted-foreground"
+                            ? "bg-accent font-semibold text-foreground"
+                            : "text-muted-foreground",
                         )}
+                        key={file.id}
+                        onClick={() => void setActivePath(file.path)}
+                        variant="ghost"
                       >
                         <FileText /> {file.path?.split("/").pop() ?? "File"}
                       </AppButton>
@@ -106,18 +106,18 @@ export function RepoDocsTabs({
               )}
 
               {isActive && !isCodeDocRoot && headings.length > 0 && (
-                <div className="animate-in slide-in-from-top-1 fade-in mt-1 mb-3 ml-10 flex flex-col gap-2.5 border-l pl-3.5 duration-300">
+                <div className="slide-in-from-top-1 fade-in mt-1 mb-3 ml-10 flex animate-in flex-col gap-2.5 border-l pl-3.5 duration-300">
                   {headings.map((heading) => (
                     <a
-                      key={heading.id}
-                      href={`#${heading.id}`}
                       className={cn(
-                        "hover:text-foreground transition-standard block text-xs",
+                        "block text-xs transition-standard hover:text-foreground",
                         heading.level === 3
-                          ? "text-muted-foreground pl-3"
+                          ? "pl-3 text-muted-foreground"
                           : "text-muted-foreground",
-                        activeHeadingId === heading.id && "font-semibold"
+                        activeHeadingId === heading.id && "font-semibold",
                       )}
+                      href={`#${heading.id}`}
+                      key={heading.id}
                     >
                       {heading.text}
                     </a>

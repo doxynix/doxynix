@@ -10,25 +10,7 @@ export default defineConfig({
     },
   },
   test: {
-    environment: "node",
-    globals: true,
-    setupFiles: ["./src/tests/setup-env.ts"],
-    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
-
-    fileParallelism: false,
-    testTimeout: 15000,
-
     coverage: {
-      provider: "v8",
-      reporter: ["text", "json", "html", "json-summary"],
-
-      include: [
-        "src/server/modules/**/*.ts",
-        "src/server/core/**/*.ts",
-        "src/server/utils/**/*.ts",
-        "src/shared/lib/**/*.ts",
-      ],
-
       exclude: [
         "**/*.d.ts",
         "**/*.test.ts",
@@ -37,6 +19,22 @@ export default defineConfig({
         "src/shared/api-contracts/**/*",
         "src/app/**/*",
       ],
+
+      include: [
+        "src/server/modules/**/*.ts",
+        "src/server/core/**/*.ts",
+        "src/server/utils/**/*.ts",
+        "src/shared/lib/**/*.ts",
+      ],
+      provider: "v8",
+      reporter: ["text", "json", "html", "json-summary"],
     },
+    environment: "node",
+
+    fileParallelism: false,
+    globals: true,
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    setupFiles: ["./src/tests/setup-env.ts"],
+    testTimeout: 15_000,
   },
 });

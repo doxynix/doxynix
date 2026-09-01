@@ -1,13 +1,12 @@
-import { forwardRef, type ComponentProps, type ReactNode } from "react";
+import { type ComponentProps, forwardRef, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
-import { AppButton, buttonVariants, type ButtonProps } from "@/shared/ui/core/button";
+import { AppButton, type ButtonProps, buttonVariants } from "@/shared/ui/core/button";
 
 const Pagination = ({ className, ...props }: ComponentProps<"nav">) => (
   <nav
-    role="navigation"
     aria-label="pagination"
     className={cn("mx-auto flex w-full justify-center", className)}
     {...props}
@@ -17,13 +16,13 @@ Pagination.displayName = "Pagination";
 
 const PaginationContent = forwardRef<HTMLUListElement, ComponentProps<"ul">>(
   ({ className, ...props }, ref) => (
-    <ul ref={ref} className={cn("flex flex-row items-center gap-1", className)} {...props} />
-  )
+    <ul className={cn("flex flex-row items-center gap-1", className)} ref={ref} {...props} />
+  ),
 );
 PaginationContent.displayName = "PaginationContent";
 
 const PaginationItem = forwardRef<HTMLLIElement, ComponentProps<"li">>(
-  ({ className, ...props }, ref) => <li ref={ref} className={cn("", className)} {...props} />
+  ({ className, ...props }, ref) => <li className={cn("", className)} ref={ref} {...props} />,
 );
 PaginationItem.displayName = "PaginationItem";
 
@@ -35,7 +34,8 @@ type BasePaginationLinkProps = Pick<ButtonProps, "size"> & {
 };
 
 type PaginationLinkProps = (
-  (ComponentProps<"button"> & { href?: never }) | ComponentProps<typeof Link>
+  | (ComponentProps<"button"> & { href?: never })
+  | ComponentProps<typeof Link>
 ) &
   BasePaginationLinkProps;
 
@@ -51,7 +51,7 @@ const PaginationLink = ({
       size,
       variant: isActive ? "outline" : "ghost",
     }),
-    className
+    className,
   );
 
   if (!("href" in props) || props.href == null) {
@@ -59,10 +59,10 @@ const PaginationLink = ({
 
     return (
       <AppButton
-        disabled={disabled}
-        variant="ghost"
         aria-current={isActive ? "page" : undefined}
         className={commonClassName}
+        disabled={disabled}
+        variant="ghost"
         {...buttonProps}
         type="button"
       />
@@ -75,11 +75,11 @@ const PaginationLink = ({
   return (
     <Link
       {...linkProps}
-      href={href}
-      tabIndex={effectiveTabIndex}
       aria-current={isActive ? "page" : undefined}
       aria-disabled={disabled || undefined}
       aria-label={props["aria-label"]}
+      className={commonClassName}
+      href={href}
       onClick={(event) => {
         if (disabled) {
           event.preventDefault();
@@ -87,7 +87,7 @@ const PaginationLink = ({
         }
         onClick?.(event);
       }}
-      className={commonClassName}
+      tabIndex={effectiveTabIndex}
     />
   );
 };
@@ -95,9 +95,9 @@ PaginationLink.displayName = "PaginationLink";
 
 const PaginationPrevious = ({ className, ...props }: ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    size="default"
     aria-label="Go to previous page"
     className={cn("gap-1 pl-2.5", className)}
+    size="default"
     {...props}
   >
     <ChevronLeft />
@@ -108,9 +108,9 @@ PaginationPrevious.displayName = "PaginationPrevious";
 
 const PaginationNext = ({ className, ...props }: ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    size="default"
     aria-label="Go to next page"
     className={cn("gap-1 pr-2.5", className)}
+    size="default"
     {...props}
   >
     <span>Next</span>

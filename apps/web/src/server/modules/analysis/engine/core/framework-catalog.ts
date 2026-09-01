@@ -29,14 +29,16 @@ function matchesFrameworkAlias(token: string, alias: string): boolean {
 export function collectFrameworkFactsFromTokens(
   tokens: Iterable<string>,
   source: string,
-  baseConfidence: number
+  baseConfidence: number,
 ): FrameworkFact[] {
   const collected = new Map<string, FrameworkFact>();
 
   for (const rawToken of tokens) {
     const token = rawToken.toLowerCase();
     for (const entry of FRAMEWORK_CATALOG) {
-      if (!entry.aliases.some((alias) => matchesFrameworkAlias(token, alias))) continue;
+      if (!entry.aliases.some((alias) => matchesFrameworkAlias(token, alias))) {
+        continue;
+      }
 
       const existing = collected.get(entry.name);
       const next: FrameworkFact = {
@@ -88,7 +90,7 @@ function hasManifestOnlySources(fact: FrameworkFact): boolean {
         ProjectPolicy.isDocsFile(source) ||
         ProjectPolicy.isInfraFile(source) ||
         ProjectPolicy.isTestFile(source) ||
-        ProjectPolicy.isToolingFile(source)
+        ProjectPolicy.isToolingFile(source),
     )
   );
 }

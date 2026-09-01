@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { httpBatchLink, loggerLink } from "@trpc/client";
@@ -21,7 +21,9 @@ type Props = {
 };
 
 function getBaseUrl() {
-  if (typeof globalThis.window !== "undefined") return "";
+  if (typeof globalThis.window !== "undefined") {
+    return "";
+  }
   return APP_URL;
 }
 
@@ -43,7 +45,9 @@ function getQueryClient() {
   if (typeof window === "undefined") {
     return makeQueryClient();
   } else {
-    if (!browserQueryClient) browserQueryClient = makeQueryClient();
+    if (!browserQueryClient) {
+      browserQueryClient = makeQueryClient();
+    }
     return browserQueryClient;
   }
 }
@@ -62,7 +66,7 @@ export function Providers({ children }: Readonly<Props>) {
           url: `${getBaseUrl()}${TRPC_PREFIX}`,
         }),
       ],
-    })
+    }),
   );
 
   return (
@@ -81,9 +85,9 @@ const InnerProviders = ({ children }: { children: ReactNode }) => (
   <TooltipProvider>
     <LucideProvider
       absoluteStrokeWidth={true}
+      className="shrink-0 select-none"
       size={16}
       strokeWidth={1.5}
-      className="shrink-0 select-none"
     >
       <AnalyticsSync />
       <NuqsAdapter>{children}</NuqsAdapter>

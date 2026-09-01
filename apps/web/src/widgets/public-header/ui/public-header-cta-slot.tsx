@@ -23,7 +23,7 @@ export function PublicHeaderCtaSlot() {
     <AppButton asChild variant="outline">
       <Link href="/auth">
         Get Started
-        <MoveLeft size={16} className="rotate-180" />
+        <MoveLeft className="rotate-180" size={16} />
       </Link>
     </AppButton>
   );

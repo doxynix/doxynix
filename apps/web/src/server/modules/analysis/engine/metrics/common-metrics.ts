@@ -22,7 +22,7 @@ type SimplifiedRepoMetrics = {
 };
 
 export async function calculateCodeMetrics(
-  files: { content: string; path: string }[]
+  files: { content: string; path: string }[],
 ): Promise<SimplifiedRepoMetrics> {
   if (files.length === 0) {
     return {
@@ -55,20 +55,26 @@ export async function calculateCodeMetrics(
 }
 
 export function calculateTeamRoles(
-  contributors: { contributions: number; login: string }[]
+  contributors: { contributions: number; login: string }[],
 ): TeamRole[] {
   taskLogger.info("Metrics: Evaluating team roles and knowledge distribution...");
   const total = sumBy(contributors, (c) => c.contributions);
-  if (total === 0) return [];
+  if (total === 0) {
+    return [];
+  }
 
   const roles = contributors
     .map((contributor) => {
       const share = (contributor.contributions / total) * 100;
       let role = "Contributor";
 
-      if (share > 50) role = "Project Guardian";
-      else if (share > 20) role = "Key Architect";
-      else if (share > 5) role = "Active Maintainer";
+      if (share > 50) {
+        role = "Project Guardian";
+      } else if (share > 20) {
+        role = "Key Architect";
+      } else if (share > 5) {
+        role = "Active Maintainer";
+      }
 
       return {
         login: contributor.login,
@@ -86,10 +92,12 @@ const WINDOW_DAYS = 90;
 
 export async function computeGitChurnHotspots(
   repoRoot: string,
-  relativePaths: string[]
+  relativePaths: string[],
 ): Promise<ChurnHotspot[]> {
   const allowed = new Set(relativePaths.map((p) => normalize(p)));
-  if (allowed.size === 0) return [];
+  if (allowed.size === 0) {
+    return [];
+  }
 
   taskLogger.info(`Git: Calculating churn hotspots for ${allowed.size} files (90-day window)...`);
 
@@ -105,9 +113,13 @@ export async function computeGitChurnHotspots(
     const counts = new Map<string, number>();
     for (const line of out.split(/\r?\n/u)) {
       const trimmed = line.trim();
-      if (trimmed.length === 0) continue;
+      if (trimmed.length === 0) {
+        continue;
+      }
       const norm = normalize(trimmed);
-      if (!allowed.has(norm)) continue;
+      if (!allowed.has(norm)) {
+        continue;
+      }
       counts.set(norm, (counts.get(norm) ?? 0) + 1);
     }
 
@@ -126,12 +138,12 @@ export async function computeGitChurnHotspots(
       .sort((a, b) => b.commitsInWindow - a.commitsInWindow);
 
     taskLogger.success(
-      `Git: Identified ${result.filter((r) => r.churnScore > 50).length} high-churn files`
+      `Git: Identified ${result.filter((r) => r.churnScore > 50).length} high-churn files`,
     );
     return result;
   } catch (error) {
     taskLogger.warn(
-      "Git: Churn calculation failed. History might be unavailable in this environment."
+      "Git: Churn calculation failed. History might be unavailable in this environment.",
     );
     appLogger.debug({
       error,
@@ -145,10 +157,12 @@ export async function computeGitChurnHotspots(
 
 export async function computeChangeCoupling(
   repoRoot: string,
-  relativePaths: string[]
+  relativePaths: string[],
 ): Promise<ChangeCouplingRef[]> {
   const allowed = new Set(relativePaths.map((p) => normalize(p)));
-  if (allowed.size === 0) return [];
+  if (allowed.size === 0) {
+    return [];
+  }
 
   taskLogger.info("Git: Analyzing change coupling (identifying files that change together)...");
 
@@ -176,7 +190,9 @@ export async function computeChangeCoupling(
         for (let j = i + 1; j < files.length; j++) {
           const left = files[i];
           const right = files[j];
-          if (left == null || right == null) continue;
+          if (left == null || right == null) {
+            continue;
+          }
 
           const key = `${left}::${right}`;
           pairCounts.set(key, (pairCounts.get(key) ?? 0) + 1);
@@ -192,10 +208,16 @@ export async function computeChangeCoupling(
         flushCommit();
         continue;
       }
-      if (trimmed.length === 0) continue;
+      if (trimmed.length === 0) {
+        continue;
+      }
       const norm = normalize(trimmed);
-      if (!allowed.has(norm)) continue;
-      if (!ProjectPolicy.isArchitectureRelevant(norm)) continue;
+      if (!allowed.has(norm)) {
+        continue;
+      }
+      if (!ProjectPolicy.isArchitectureRelevant(norm)) {
+        continue;
+      }
       currentCommitFiles.add(norm);
     }
 
@@ -210,7 +232,7 @@ export async function computeChangeCoupling(
       })
       .filter(
         (item): item is { commits: number; fromPath: string; toPath: string } =>
-          item.fromPath != null && item.toPath != null && item.commits >= 2
+          item.fromPath != null && item.toPath != null && item.commits >= 2,
       )
       .sort((left, right) => right.commits - left.commits)
       .slice(0, 24);

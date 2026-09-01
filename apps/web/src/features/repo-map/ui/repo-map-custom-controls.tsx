@@ -34,18 +34,20 @@ export function RepoMapCustomControls() {
   ];
 
   return (
-    <Panel position="bottom-left" className="flex flex-col gap-1">
+    <Panel className="flex flex-col gap-1" position="bottom-left">
       {CONTROLS_CONFIG.map((item) => (
-        <AppTooltip key={item.id} content={item.label} side="left">
+        <AppTooltip content={item.label} key={item.id} side="left">
           <AppButton
-            size="icon"
-            variant="outline"
             aria-label={item.label}
-            onClick={item.action}
             className={cn(
               "transition-standard",
-              hide ? "pointer-events-none -translate-x-full opacity-0" : "translate-x-0 opacity-100"
+              hide
+                ? "pointer-events-none -translate-x-full opacity-0"
+                : "translate-x-0 opacity-100",
             )}
+            onClick={item.action}
+            size="icon"
+            variant="outline"
           >
             <item.icon />
           </AppButton>
@@ -53,7 +55,7 @@ export function RepoMapCustomControls() {
       ))}
 
       <AppTooltip content="Toggle Controls (T then C)" side="left">
-        <AppButton size="icon" variant="outline" onClick={toggleControls}>
+        <AppButton onClick={toggleControls} size="icon" variant="outline">
           {hide ? <EyeOff /> : <Eye />}
         </AppButton>
       </AppTooltip>

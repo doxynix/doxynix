@@ -1,2274 +1,2274 @@
 [
   {
     "author": "Radix UI",
-    "avatar": "https://github.com/radix-ui.png?size=96",
     "authorLink": "https://github.com/radix-ui",
+    "avatar": "https://github.com/radix-ui.png?size=96",
     "packages": [
       {
-        "name": "@radix-ui/react-accordion",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-accordion"
       },
       {
-        "name": "@radix-ui/react-avatar",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-avatar"
       },
       {
-        "name": "@radix-ui/react-checkbox",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-checkbox"
       },
       {
-        "name": "@radix-ui/react-collapsible",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-collapsible"
       },
       {
-        "name": "@radix-ui/react-dialog",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-dialog"
       },
       {
-        "name": "@radix-ui/react-dropdown-menu",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-dropdown-menu"
       },
       {
-        "name": "@radix-ui/react-icons",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-icons"
       },
       {
-        "name": "@radix-ui/react-label",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-label"
       },
       {
-        "name": "@radix-ui/react-navigation-menu",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-navigation-menu"
       },
       {
-        "name": "@radix-ui/react-popover",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-popover"
       },
       {
-        "name": "@radix-ui/react-progress",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-progress"
       },
       {
-        "name": "@radix-ui/react-scroll-area",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-scroll-area"
       },
       {
-        "name": "@radix-ui/react-select",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-select"
       },
       {
-        "name": "@radix-ui/react-separator",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-separator"
       },
       {
-        "name": "@radix-ui/react-slider",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-slider"
       },
       {
-        "name": "@radix-ui/react-slot",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-slot"
       },
       {
-        "name": "@radix-ui/react-switch",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-switch"
       },
       {
-        "name": "@radix-ui/react-tabs",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-tabs"
       },
       {
-        "name": "@radix-ui/react-tooltip",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@radix-ui/react-tooltip"
       }
     ]
   },
   {
     "author": "Unified.js",
-    "avatar": "https://github.com/unifiedjs.png?size=96",
     "authorLink": "https://github.com/unifiedjs",
+    "avatar": "https://github.com/unifiedjs.png?size=96",
     "packages": [
       {
-        "name": "rehype-autolink-headings",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "rehype-autolink-headings"
       },
       {
-        "name": "rehype-external-links",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "rehype-external-links"
       },
       {
-        "name": "rehype-katex",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "rehype-katex"
       },
       {
-        "name": "rehype-raw",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "rehype-raw"
       },
       {
-        "name": "rehype-sanitize",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "rehype-sanitize"
       },
       {
-        "name": "rehype-slug",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "rehype-slug"
       },
       {
-        "name": "rehype-stringify",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "rehype-stringify"
       },
       {
-        "name": "remark-breaks",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "remark-breaks"
       },
       {
-        "name": "remark-emoji",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "remark-emoji"
       },
       {
-        "name": "remark-gfm",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "remark-gfm"
       },
       {
-        "name": "remark-math",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "remark-math"
       },
       {
-        "name": "remark-parse",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "remark-parse"
       },
       {
-        "name": "remark-rehype",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "remark-rehype"
       },
       {
-        "name": "remark-toc",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "remark-toc"
       },
       {
-        "name": "remark-wiki-link",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "remark-wiki-link"
       },
       {
-        "name": "unified",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "unified"
       }
     ]
   },
   {
     "author": "DefinitelyTyped",
-    "avatar": "https://github.com/DefinitelyTyped.png?size=96",
     "authorLink": "https://github.com/DefinitelyTyped",
+    "avatar": "https://github.com/DefinitelyTyped.png?size=96",
     "packages": [
       {
-        "name": "@types/diff-match-patch",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/diff-match-patch"
       },
       {
-        "name": "@types/hast",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/hast"
       },
       {
-        "name": "@types/js-cookie",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/js-cookie"
       },
       {
-        "name": "@types/node",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/node"
       },
       {
-        "name": "@types/nodemailer",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/nodemailer"
       },
       {
-        "name": "@types/pg",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/pg"
       },
       {
-        "name": "@types/picomatch",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/picomatch"
       },
       {
-        "name": "@types/react",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/react"
       },
       {
-        "name": "@types/react-dom",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/react-dom"
       },
       {
-        "name": "@types/react-scroll",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/react-scroll"
       },
       {
-        "name": "@types/sloc",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/sloc"
       },
       {
-        "name": "@types/ua-parser-js",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/ua-parser-js"
       },
       {
-        "name": "@types/validator",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/validator"
       },
       {
-        "name": "@types/webpack-stats-plugin",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/webpack-stats-plugin"
       },
       {
-        "name": "@types/ws",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@types/ws"
       }
     ]
   },
   {
     "author": "ESLint",
-    "avatar": "https://github.com/eslint.png?size=96",
     "authorLink": "https://github.com/eslint",
+    "avatar": "https://github.com/eslint.png?size=96",
     "packages": [
       {
-        "name": "@eslint/eslintrc",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@eslint/eslintrc"
       },
       {
-        "name": "eslint",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint"
       },
       {
-        "name": "eslint-plugin-boundaries",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-plugin-boundaries"
       },
       {
-        "name": "eslint-plugin-import",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-plugin-import"
       },
       {
-        "name": "eslint-plugin-jsx-a11y",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-plugin-jsx-a11y"
       },
       {
-        "name": "eslint-plugin-perfectionist",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-plugin-perfectionist"
       },
       {
-        "name": "eslint-plugin-playwright",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-plugin-playwright"
       },
       {
-        "name": "eslint-plugin-prettier",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-plugin-prettier"
       },
       {
-        "name": "eslint-plugin-unicorn",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-plugin-unicorn"
       },
       {
-        "name": "eslint-plugin-unused-imports",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-plugin-unused-imports"
       },
       {
-        "name": "eslint-plugin-validate-jsx-nesting",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-plugin-validate-jsx-nesting"
       },
       {
-        "name": "@eslint/compat",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@eslint/compat"
       },
       {
-        "name": "eslint-plugin-no-barrel-files",
-        "license": "ISC"
+        "license": "ISC",
+        "name": "eslint-plugin-no-barrel-files"
       }
     ]
   },
   {
     "author": "Vercel",
-    "avatar": "https://github.com/vercel.png?size=96",
     "authorLink": "https://github.com/vercel",
+    "avatar": "https://github.com/vercel.png?size=96",
     "packages": [
       {
-        "name": "@next/bundle-analyzer",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@next/bundle-analyzer"
       },
       {
-        "name": "@vercel/analytics",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@vercel/analytics"
       },
       {
-        "name": "eslint-config-next",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-config-next"
       },
       {
-        "name": "next",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "next"
       },
       {
-        "name": "@ai-sdk/google",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@ai-sdk/google"
       },
       {
-        "name": "@ai-sdk/groq",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@ai-sdk/groq"
       },
       {
-        "name": "@ai-sdk/openai",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@ai-sdk/openai"
       },
       {
-        "name": "@ai-sdk/react",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@ai-sdk/react"
       },
       {
-        "name": "@vercel/edge-config",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@vercel/edge-config"
       },
       {
-        "name": "@vercel/speed-insights",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@vercel/speed-insights"
       },
       {
-        "name": "@vercel/toolbar",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@vercel/toolbar"
       },
       {
-        "name": "ai",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "ai"
       },
       {
-        "name": "mcp-handler",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "mcp-handler"
       }
     ]
   },
   {
     "author": "CodeMirror",
-    "avatar": "https://github.com/codemirror.png?size=96",
     "authorLink": "https://github.com/codemirror",
+    "avatar": "https://github.com/codemirror.png?size=96",
     "packages": [
       {
-        "name": "@codemirror/autocomplete",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@codemirror/autocomplete"
       },
       {
-        "name": "@codemirror/commands",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@codemirror/commands"
       },
       {
-        "name": "@codemirror/language",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@codemirror/language"
       },
       {
-        "name": "@codemirror/language-data",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@codemirror/language-data"
       },
       {
-        "name": "@codemirror/lint",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@codemirror/lint"
       },
       {
-        "name": "@codemirror/search",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@codemirror/search"
       },
       {
-        "name": "@codemirror/state",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@codemirror/state"
       },
       {
-        "name": "@codemirror/theme-one-dark",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@codemirror/theme-one-dark"
       },
       {
-        "name": "@codemirror/view",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@codemirror/view"
       },
       {
-        "name": "@lezer/highlight",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@lezer/highlight"
       }
     ]
   },
   {
     "author": "UIW",
-    "avatar": "https://github.com/uiwjs.png?size=96",
     "authorLink": "https://github.com/uiwjs",
+    "avatar": "https://github.com/uiwjs.png?size=96",
     "packages": [
       {
-        "name": "@uiw/codemirror-extensions-color",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@uiw/codemirror-extensions-color"
       },
       {
-        "name": "@uiw/codemirror-extensions-events",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@uiw/codemirror-extensions-events"
       },
       {
-        "name": "@uiw/codemirror-extensions-hyper-link",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@uiw/codemirror-extensions-hyper-link"
       },
       {
-        "name": "@uiw/codemirror-extensions-langs",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@uiw/codemirror-extensions-langs"
       },
       {
-        "name": "@uiw/codemirror-extensions-mentions",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@uiw/codemirror-extensions-mentions"
       },
       {
-        "name": "@uiw/codemirror-extensions-zebra-stripes",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@uiw/codemirror-extensions-zebra-stripes"
       },
       {
-        "name": "@uiw/codemirror-theme-github",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@uiw/codemirror-theme-github"
       },
       {
-        "name": "@uiw/codemirror-themes",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@uiw/codemirror-themes"
       },
       {
-        "name": "@uiw/react-codemirror",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@uiw/react-codemirror"
       },
       {
-        "name": "react-codemirror-merge",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "react-codemirror-merge"
       }
     ]
   },
   {
     "author": "GitHub",
-    "avatar": "https://github.com/octokit.png?size=96",
     "authorLink": "https://github.com/octokit",
+    "avatar": "https://github.com/octokit.png?size=96",
     "packages": [
       {
-        "name": "@octokit/auth-app",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@octokit/auth-app"
       },
       {
-        "name": "@octokit/auth-oauth-user",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@octokit/auth-oauth-user"
       },
       {
-        "name": "@octokit/plugin-paginate-rest",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@octokit/plugin-paginate-rest"
       },
       {
-        "name": "@octokit/plugin-retry",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@octokit/plugin-retry"
       },
       {
-        "name": "@octokit/plugin-throttling",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@octokit/plugin-throttling"
       },
       {
-        "name": "@octokit/rest",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@octokit/rest"
       },
       {
-        "name": "@octokit/types",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@octokit/types"
       },
       {
-        "name": "@octokit/webhooks",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@octokit/webhooks"
       },
       {
-        "name": "@octokit/webhooks-types",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@octokit/webhooks-types"
       }
     ]
   },
   {
     "author": "Meta",
-    "avatar": "https://github.com/facebook.png?size=96",
     "authorLink": "https://github.com/facebook",
+    "avatar": "https://github.com/facebook.png?size=96",
     "packages": [
       {
-        "name": "babel-plugin-react-compiler",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "babel-plugin-react-compiler"
       },
       {
-        "name": "eslint-plugin-react-compiler",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-plugin-react-compiler"
       },
       {
-        "name": "eslint-plugin-react-hooks",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-plugin-react-hooks"
       },
       {
-        "name": "react",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "react"
       },
       {
-        "name": "react-day-picker",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "react-day-picker"
       },
       {
-        "name": "react-dom",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "react-dom"
       },
       {
-        "name": "react-markdown",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "react-markdown"
       },
       {
-        "name": "react-qr-code",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "react-qr-code"
       },
       {
-        "name": "server-only",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "server-only"
       }
     ]
   },
   {
     "author": "Street Side Software",
-    "avatar": "https://github.com/streetsidesoftware.png?size=96",
     "authorLink": "https://github.com/streetsidesoftware",
+    "avatar": "https://github.com/streetsidesoftware.png?size=96",
     "packages": [
       {
-        "name": "@cspell/dict-en_us",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@cspell/dict-en_us"
       },
       {
-        "name": "@cspell/dict-fr-fr",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@cspell/dict-fr-fr"
       },
       {
-        "name": "cspell",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "cspell"
       },
       {
-        "name": "@cspell/dict-de-de",
-        "license": "LGPL-3.0"
+        "license": "LGPL-3.0",
+        "name": "@cspell/dict-de-de"
       },
       {
-        "name": "@cspell/dict-en-gb",
-        "license": "LGPL-3.0"
+        "license": "LGPL-3.0",
+        "name": "@cspell/dict-en-gb"
       },
       {
-        "name": "@cspell/dict-es-es",
-        "license": "LGPL-3.0"
+        "license": "LGPL-3.0",
+        "name": "@cspell/dict-es-es"
       },
       {
-        "name": "@cspell/dict-pt-pt",
-        "license": "LGPL-3.0"
+        "license": "LGPL-3.0",
+        "name": "@cspell/dict-pt-pt"
       },
       {
-        "name": "@cspell/dict-pt-br",
-        "license": "GPL-3.0-or-later"
+        "license": "GPL-3.0-or-later",
+        "name": "@cspell/dict-pt-br"
       },
       {
-        "name": "@cspell/dict-ru_ru",
-        "license": "GPL-3.0-or-later"
+        "license": "GPL-3.0-or-later",
+        "name": "@cspell/dict-ru_ru"
       }
     ]
   },
   {
     "author": "TypeStrong",
-    "avatar": "https://github.com/TypeStrong.png?size=96",
     "authorLink": "https://github.com/TypeStrong",
+    "avatar": "https://github.com/TypeStrong.png?size=96",
     "packages": [
       {
-        "name": "ts-node",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "ts-node"
       },
       {
-        "name": "typedoc-plugin-extras",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "typedoc-plugin-extras"
       },
       {
-        "name": "typedoc-plugin-markdown",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "typedoc-plugin-markdown"
       },
       {
-        "name": "typedoc-plugin-rename-defaults",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "typedoc-plugin-rename-defaults"
       },
       {
-        "name": "typedoc-plugin-zod",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "typedoc-plugin-zod"
       },
       {
-        "name": "typedoc",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "typedoc"
       },
       {
-        "name": "typedoc-plugin-llms-txt",
-        "license": "BlueOak-1.0.0"
+        "license": "BlueOak-1.0.0",
+        "name": "typedoc-plugin-llms-txt"
       }
     ]
   },
   {
     "author": "Open Source Community",
-    "avatar": null,
     "authorLink": "https://www.better-auth.com/docs/plugins/passkey",
+    "avatar": null,
     "packages": [
       {
-        "name": "@better-auth/passkey",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@better-auth/passkey"
       },
       {
-        "name": "@better-auth/prisma-adapter",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@better-auth/prisma-adapter"
       },
       {
-        "name": "better-auth",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "better-auth"
       },
       {
-        "name": "es-toolkit",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "es-toolkit"
       },
       {
-        "name": "undici",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "undici"
       }
     ]
   },
   {
     "author": "Prisma",
-    "avatar": "https://github.com/prisma.png?size=96",
     "authorLink": "https://github.com/prisma",
+    "avatar": "https://github.com/prisma.png?size=96",
     "packages": [
       {
-        "name": "@prisma/adapter-neon",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@prisma/adapter-neon"
       },
       {
-        "name": "@prisma/adapter-pg",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@prisma/adapter-pg"
       },
       {
-        "name": "@prisma/client",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@prisma/client"
       },
       {
-        "name": "prisma",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "prisma"
       },
       {
-        "name": "@prisma/extension-accelerate",
-        "license": "Unknown"
+        "license": "Unknown",
+        "name": "@prisma/extension-accelerate"
       }
     ]
   },
   {
     "author": "Secretlint",
-    "avatar": "https://github.com/secretlint.png?size=96",
     "authorLink": "https://github.com/secretlint",
+    "avatar": "https://github.com/secretlint.png?size=96",
     "packages": [
       {
-        "name": "@secretlint/core",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@secretlint/core"
       },
       {
-        "name": "@secretlint/secretlint-rule-pattern",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@secretlint/secretlint-rule-pattern"
       },
       {
-        "name": "@secretlint/secretlint-rule-preset-canary",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@secretlint/secretlint-rule-preset-canary"
       },
       {
-        "name": "@secretlint/secretlint-rule-preset-recommend",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@secretlint/secretlint-rule-preset-recommend"
       },
       {
-        "name": "secretlint",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "secretlint"
       }
     ]
   },
   {
     "author": "ZenStack",
-    "avatar": "https://github.com/zenstackhq.png?size=96",
     "authorLink": "https://github.com/zenstackhq",
+    "avatar": "https://github.com/zenstackhq.png?size=96",
     "packages": [
       {
-        "name": "@zenstackhq/runtime",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@zenstackhq/runtime"
       },
       {
-        "name": "@zenstackhq/sdk",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@zenstackhq/sdk"
       },
       {
-        "name": "@zenstackhq/trpc",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@zenstackhq/trpc"
       },
       {
-        "name": "@zenstackhq/zod",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@zenstackhq/zod"
       },
       {
-        "name": "zenstack",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "zenstack"
       }
     ]
   },
   {
     "author": "Stryker Mutator",
-    "avatar": "https://github.com/stryker-mutator.png?size=96",
     "authorLink": "https://github.com/stryker-mutator",
+    "avatar": "https://github.com/stryker-mutator.png?size=96",
     "packages": [
       {
-        "name": "@stryker-mutator/core",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@stryker-mutator/core"
       },
       {
-        "name": "@stryker-mutator/jest-runner",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@stryker-mutator/jest-runner"
       },
       {
-        "name": "@stryker-mutator/typescript-checker",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@stryker-mutator/typescript-checker"
       },
       {
-        "name": "@stryker-mutator/vitest-runner",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@stryker-mutator/vitest-runner"
       }
     ]
   },
   {
     "author": "Tailwind Labs",
-    "avatar": "https://github.com/tailwindlabs.png?size=96",
     "authorLink": "https://github.com/tailwindlabs",
+    "avatar": "https://github.com/tailwindlabs.png?size=96",
     "packages": [
       {
-        "name": "@tailwindcss/postcss",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@tailwindcss/postcss"
       },
       {
-        "name": "@tailwindcss/typography",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@tailwindcss/typography"
       },
       {
-        "name": "prettier-plugin-tailwindcss",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "prettier-plugin-tailwindcss"
       },
       {
-        "name": "tailwindcss",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "tailwindcss"
       }
     ]
   },
   {
     "author": "tRPC",
-    "avatar": "https://github.com/trpc.png?size=96",
     "authorLink": "https://github.com/trpc",
+    "avatar": "https://github.com/trpc.png?size=96",
     "packages": [
       {
-        "name": "@trpc/client",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@trpc/client"
       },
       {
-        "name": "@trpc/openapi",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@trpc/openapi"
       },
       {
-        "name": "@trpc/react-query",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@trpc/react-query"
       },
       {
-        "name": "@trpc/server",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@trpc/server"
       }
     ]
   },
   {
     "author": "Graphology",
-    "avatar": "https://github.com/graphology.png?size=96",
     "authorLink": "https://github.com/graphology",
+    "avatar": "https://github.com/graphology.png?size=96",
     "packages": [
       {
-        "name": "graphology",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "graphology"
       },
       {
-        "name": "graphology-dag",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "graphology-dag"
       },
       {
-        "name": "graphology-library",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "graphology-library"
       }
     ]
   },
   {
     "author": "Kucherenko",
-    "avatar": "https://github.com/kucherenko.png?size=96",
     "authorLink": "https://github.com/kucherenko",
+    "avatar": "https://github.com/kucherenko.png?size=96",
     "packages": [
       {
-        "name": "@jscpd/core",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@jscpd/core"
       },
       {
-        "name": "@jscpd/tokenizer",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@jscpd/tokenizer"
       },
       {
-        "name": "jscpd",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "jscpd"
       }
     ]
   },
   {
     "author": "Microsoft",
-    "avatar": "https://github.com/microsoft.png?size=96",
     "authorLink": "https://github.com/microsoft",
+    "avatar": "https://github.com/microsoft.png?size=96",
     "packages": [
       {
-        "name": "typescript-coverage-report",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "typescript-coverage-report"
       },
       {
-        "name": "@playwright/test",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@playwright/test"
       },
       {
-        "name": "typescript",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "typescript"
       }
     ]
   },
   {
     "author": "Resend",
-    "avatar": "https://github.com/resend.png?size=96",
     "authorLink": "https://github.com/resend",
+    "avatar": "https://github.com/resend.png?size=96",
     "packages": [
       {
-        "name": "@react-email/components",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@react-email/components"
       },
       {
-        "name": "@react-email/render",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@react-email/render"
       },
       {
-        "name": "resend",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "resend"
       }
     ]
   },
   {
     "author": "Shiki",
-    "avatar": "https://github.com/shikijs.png?size=96",
     "authorLink": "https://github.com/shikijs",
+    "avatar": "https://github.com/shikijs.png?size=96",
     "packages": [
       {
-        "name": "@shikijs/rehype",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@shikijs/rehype"
       },
       {
-        "name": "@shikijs/transformers",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@shikijs/transformers"
       },
       {
-        "name": "shiki",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "shiki"
       }
     ]
   },
   {
     "author": "TanStack",
-    "avatar": "https://github.com/tanstack.png?size=96",
     "authorLink": "https://github.com/tanstack",
+    "avatar": "https://github.com/tanstack.png?size=96",
     "packages": [
       {
-        "name": "@tanstack/eslint-plugin-query",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@tanstack/eslint-plugin-query"
       },
       {
-        "name": "@tanstack/react-query",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@tanstack/react-query"
       },
       {
-        "name": "@tanstack/react-query-devtools",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@tanstack/react-query-devtools"
       }
     ]
   },
   {
     "author": "Trigger.dev",
-    "avatar": "https://github.com/triggerdotdev.png?size=96",
     "authorLink": "https://github.com/triggerdotdev",
+    "avatar": "https://github.com/triggerdotdev.png?size=96",
     "packages": [
       {
-        "name": "@trigger.dev/build",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@trigger.dev/build"
       },
       {
-        "name": "@trigger.dev/react-hooks",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@trigger.dev/react-hooks"
       },
       {
-        "name": "@trigger.dev/sdk",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@trigger.dev/sdk"
       }
     ]
   },
   {
     "author": "Vitest",
-    "avatar": "https://github.com/vitest-dev.png?size=96",
     "authorLink": "https://github.com/vitest-dev",
+    "avatar": "https://github.com/vitest-dev.png?size=96",
     "packages": [
       {
-        "name": "@vitest/coverage-v8",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@vitest/coverage-v8"
       },
       {
-        "name": "@vitest/eslint-plugin",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@vitest/eslint-plugin"
       },
       {
-        "name": "vitest",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "vitest"
       }
     ]
   },
   {
     "author": "47ng",
-    "avatar": "https://github.com/47ng.png?size=96",
     "authorLink": "https://github.com/47ng",
+    "avatar": "https://github.com/47ng.png?size=96",
     "packages": [
       {
-        "name": "nuqs",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "nuqs"
       },
       {
-        "name": "prisma-field-encryption",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "prisma-field-encryption"
       }
     ]
   },
   {
     "author": "commitlint",
-    "avatar": "https://github.com/conventional-changelog.png?size=96",
     "authorLink": "https://github.com/conventional-changelog",
+    "avatar": "https://github.com/conventional-changelog.png?size=96",
     "packages": [
       {
-        "name": "@commitlint/cli",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@commitlint/cli"
       },
       {
-        "name": "@commitlint/config-conventional",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@commitlint/config-conventional"
       }
     ]
   },
   {
     "author": "LenML",
-    "avatar": "https://github.com/lenML.png?size=96",
     "authorLink": "https://github.com/lenML",
+    "avatar": "https://github.com/lenML.png?size=96",
     "packages": [
       {
-        "name": "@lenml/tokenizer-gemma2",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@lenml/tokenizer-gemma2"
       },
       {
-        "name": "@lenml/tokenizers",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@lenml/tokenizers"
       }
     ]
   },
   {
     "author": "Mermaid JS",
-    "avatar": "https://github.com/mermaid-js.png?size=96",
     "authorLink": "https://github.com/mermaid-js",
+    "avatar": "https://github.com/mermaid-js.png?size=96",
     "packages": [
       {
-        "name": "@mermaid-js/mermaid-cli",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@mermaid-js/mermaid-cli"
       },
       {
-        "name": "mermaid",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "mermaid"
       }
     ]
   },
   {
     "author": "Paco",
-    "avatar": "https://github.com/pacocoursey.png?size=96",
     "authorLink": "https://github.com/pacocoursey",
+    "avatar": "https://github.com/pacocoursey.png?size=96",
     "packages": [
       {
-        "name": "cmdk",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "cmdk"
       },
       {
-        "name": "next-themes",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "next-themes"
       }
     ]
   },
   {
     "author": "Ping.gg",
-    "avatar": "https://github.com/pingdotgg.png?size=96",
     "authorLink": "https://github.com/pingdotgg",
+    "avatar": "https://github.com/pingdotgg.png?size=96",
     "packages": [
       {
-        "name": "@uploadthing/react",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@uploadthing/react"
       },
       {
-        "name": "uploadthing",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "uploadthing"
       }
     ]
   },
   {
     "author": "Pino",
-    "avatar": "https://github.com/pinojs.png?size=96",
     "authorLink": "https://github.com/pinojs",
+    "avatar": "https://github.com/pinojs.png?size=96",
     "packages": [
       {
-        "name": "pino",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "pino"
       },
       {
-        "name": "pino-pretty",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "pino-pretty"
       }
     ]
   },
   {
     "author": "PostHog",
-    "avatar": "https://github.com/PostHog.png?size=96",
     "authorLink": "https://github.com/PostHog",
+    "avatar": "https://github.com/PostHog.png?size=96",
     "packages": [
       {
-        "name": "posthog-node",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "posthog-node"
       },
       {
-        "name": "posthog-js",
-        "license": "(Apache-2.0 AND MIT)"
+        "license": "(Apache-2.0 AND MIT)",
+        "name": "posthog-js"
       }
     ]
   },
   {
     "author": "Prettier",
-    "avatar": "https://github.com/prettier.png?size=96",
     "authorLink": "https://github.com/prettier",
+    "avatar": "https://github.com/prettier.png?size=96",
     "packages": [
       {
-        "name": "eslint-config-prettier",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-config-prettier"
       },
       {
-        "name": "prettier",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "prettier"
       }
     ]
   },
   {
     "author": "React Hook Form",
-    "avatar": "https://github.com/react-hook-form.png?size=96",
     "authorLink": "https://github.com/react-hook-form",
+    "avatar": "https://github.com/react-hook-form.png?size=96",
     "packages": [
       {
-        "name": "@hookform/resolvers",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@hookform/resolvers"
       },
       {
-        "name": "react-hook-form",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "react-hook-form"
       }
     ]
   },
   {
     "author": "Relative-ci",
-    "avatar": "https://github.com/relative-ci.png?size=96",
     "authorLink": "https://github.com/relative-ci",
+    "avatar": "https://github.com/relative-ci.png?size=96",
     "packages": [
       {
-        "name": "@bundle-stats/plugin-webpack-filter",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@bundle-stats/plugin-webpack-filter"
       },
       {
-        "name": "bundle-stats-webpack-plugin",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "bundle-stats-webpack-plugin"
       }
     ]
   },
   {
     "author": "Scalar",
-    "avatar": "https://github.com/scalar.png?size=96",
     "authorLink": "https://github.com/scalar",
+    "avatar": "https://github.com/scalar.png?size=96",
     "packages": [
       {
-        "name": "@scalar/api-reference-react",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@scalar/api-reference-react"
       },
       {
-        "name": "@scalar/nextjs-api-reference",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@scalar/nextjs-api-reference"
       }
     ]
   },
   {
     "author": "TypeScript ESLint",
-    "avatar": "https://github.com/typescript-eslint.png?size=96",
     "authorLink": "https://github.com/typescript-eslint",
+    "avatar": "https://github.com/typescript-eslint.png?size=96",
     "packages": [
       {
-        "name": "@typescript-eslint/eslint-plugin",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@typescript-eslint/eslint-plugin"
       },
       {
-        "name": "@typescript-eslint/parser",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@typescript-eslint/parser"
       }
     ]
   },
   {
     "author": "Unjs",
-    "avatar": "https://github.com/unjs.png?size=96",
     "authorLink": "https://github.com/unjs",
+    "avatar": "https://github.com/unjs.png?size=96",
     "packages": [
       {
-        "name": "defu",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "defu"
       },
       {
-        "name": "pathe",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "pathe"
       }
     ]
   },
   {
     "author": "Upstash",
-    "avatar": "https://github.com/upstash.png?size=96",
     "authorLink": "https://github.com/upstash",
+    "avatar": "https://github.com/upstash.png?size=96",
     "packages": [
       {
-        "name": "@upstash/ratelimit",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@upstash/ratelimit"
       },
       {
-        "name": "@upstash/redis",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@upstash/redis"
       }
     ]
   },
   {
     "author": "Ably",
-    "avatar": "https://github.com/ably.png?size=96",
     "authorLink": "https://github.com/ably",
+    "avatar": "https://github.com/ably.png?size=96",
     "packages": [
       {
-        "name": "ably",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "ably"
       }
     ]
   },
   {
     "author": "Adoxography",
-    "avatar": "https://github.com/adoxography.png?size=96",
     "authorLink": "https://github.com/adoxography",
+    "avatar": "https://github.com/adoxography.png?size=96",
     "packages": [
       {
-        "name": "tailwind-scrollbar",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "tailwind-scrollbar"
       }
     ]
   },
   {
     "author": "Alec Larson",
-    "avatar": "https://github.com/aleclarson.png?size=96",
     "authorLink": "https://github.com/aleclarson",
+    "avatar": "https://github.com/aleclarson.png?size=96",
     "packages": [
       {
-        "name": "vite-tsconfig-paths",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "vite-tsconfig-paths"
       }
     ]
   },
   {
     "author": "Andris Reinman",
-    "avatar": "https://github.com/nodemailer.png?size=96",
     "authorLink": "https://github.com/nodemailer",
+    "avatar": "https://github.com/nodemailer.png?size=96",
     "packages": [
       {
-        "name": "nodemailer",
-        "license": "MIT-0"
+        "license": "MIT-0",
+        "name": "nodemailer"
       }
     ]
   },
   {
     "author": "Anthropic PBC",
-    "avatar": null,
     "authorLink": "https://modelcontextprotocol.io",
+    "avatar": null,
     "packages": [
       {
-        "name": "@modelcontextprotocol/sdk",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@modelcontextprotocol/sdk"
       }
     ]
   },
   {
     "author": "Axiom",
-    "avatar": "https://github.com/axiomhq.png?size=96",
     "authorLink": "https://github.com/axiomhq",
+    "avatar": "https://github.com/axiomhq.png?size=96",
     "packages": [
       {
-        "name": "next-axiom",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "next-axiom"
       }
     ]
   },
   {
     "author": "Blitz.js",
-    "avatar": "https://github.com/blitz-js.png?size=96",
     "authorLink": "https://github.com/blitz-js",
+    "avatar": "https://github.com/blitz-js.png?size=96",
     "packages": [
       {
-        "name": "superjson",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "superjson"
       }
     ]
   },
   {
     "author": "Boneskull",
-    "avatar": "https://github.com/boneskull.png?size=96",
     "authorLink": "https://github.com/boneskull",
+    "avatar": "https://github.com/boneskull.png?size=96",
     "packages": [
       {
-        "name": "@boneskull/typedoc-plugin-mermaid",
-        "license": "BlueOak-1.0.0"
+        "license": "BlueOak-1.0.0",
+        "name": "@boneskull/typedoc-plugin-mermaid"
       }
     ]
   },
   {
     "author": "Brian Carlson",
-    "avatar": "https://github.com/brianc.png?size=96",
     "authorLink": "https://github.com/brianc",
+    "avatar": "https://github.com/brianc.png?size=96",
     "packages": [
       {
-        "name": "pg",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "pg"
       }
     ]
   },
   {
     "author": "Brian Vaughn",
-    "avatar": "https://github.com/bvaughn.png?size=96",
     "authorLink": "https://github.com/bvaughn",
+    "avatar": "https://github.com/bvaughn.png?size=96",
     "packages": [
       {
-        "name": "react-resizable-panels",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "react-resizable-panels"
       }
     ]
   },
   {
     "author": "Brim Data",
-    "avatar": "https://github.com/brimdata.png?size=96",
     "authorLink": "https://github.com/brimdata",
+    "avatar": "https://github.com/brimdata.png?size=96",
     "packages": [
       {
-        "name": "react-arborist",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "react-arborist"
       }
     ]
   },
   {
     "author": "Changesets",
-    "avatar": "https://github.com/changesets.png?size=96",
     "authorLink": "https://github.com/changesets",
+    "avatar": "https://github.com/changesets.png?size=96",
     "packages": [
       {
-        "name": "@changesets/cli",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@changesets/cli"
       }
     ]
   },
   {
     "author": "Chris Hoermann",
-    "avatar": "https://github.com/chrishoermann.png?size=96",
     "authorLink": "https://github.com/chrishoermann",
+    "avatar": "https://github.com/chrishoermann.png?size=96",
     "packages": [
       {
-        "name": "zod-prisma-types",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "zod-prisma-types"
       }
     ]
   },
   {
     "author": "Christopher Jeffrey",
-    "avatar": null,
     "authorLink": "https://marked.js.org",
+    "avatar": null,
     "packages": [
       {
-        "name": "marked",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "marked"
       }
     ]
   },
   {
     "author": "Colin McDonnell",
-    "avatar": "https://github.com/colinmcdonnell.png?size=96",
     "authorLink": "https://github.com/colinmcdonnell",
+    "avatar": "https://github.com/colinmcdonnell.png?size=96",
     "packages": [
       {
-        "name": "zod",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "zod"
       }
     ]
   },
   {
     "author": "Damian Krzeminski",
-    "avatar": "https://github.com/pirxpilot.png?size=96",
     "authorLink": "https://github.com/pirxpilot",
+    "avatar": "https://github.com/pirxpilot.png?size=96",
     "packages": [
       {
-        "name": "detect-language",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "detect-language"
       }
     ]
   },
   {
     "author": "Dany Castillo",
-    "avatar": "https://github.com/dcastil.png?size=96",
     "authorLink": "https://github.com/dcastil",
+    "avatar": "https://github.com/dcastil.png?size=96",
     "packages": [
       {
-        "name": "tailwind-merge",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "tailwind-merge"
       }
     ]
   },
   {
     "author": "Date-fns",
-    "avatar": "https://github.com/date-fns.png?size=96",
     "authorLink": "https://github.com/date-fns",
+    "avatar": "https://github.com/date-fns.png?size=96",
     "packages": [
       {
-        "name": "date-fns",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "date-fns"
       }
     ]
   },
   {
     "author": "David Mark Clements",
-    "avatar": "https://github.com/davidmarkclements.png?size=96",
     "authorLink": "https://github.com/davidmarkclements",
+    "avatar": "https://github.com/davidmarkclements.png?size=96",
     "packages": [
       {
-        "name": "fast-safe-stringify",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "fast-safe-stringify"
       }
     ]
   },
   {
     "author": "Dequelabs",
-    "avatar": "https://github.com/dequelabs.png?size=96",
     "authorLink": "https://github.com/dequelabs",
+    "avatar": "https://github.com/dequelabs.png?size=96",
     "packages": [
       {
-        "name": "@axe-core/react",
-        "license": "MPL-2.0"
+        "license": "MPL-2.0",
+        "name": "@axe-core/react"
       }
     ]
   },
   {
     "author": "Donald Chan",
-    "avatar": "https://github.com/Donaldcwl.png?size=96",
     "authorLink": "https://github.com/Donaldcwl",
+    "avatar": "https://github.com/Donaldcwl.png?size=96",
     "packages": [
       {
-        "name": "browser-image-compression",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "browser-image-compression"
       }
     ]
   },
   {
     "author": "Dsherret",
-    "avatar": "https://github.com/dsherret.png?size=96",
     "authorLink": "https://github.com/dsherret",
+    "avatar": "https://github.com/dsherret.png?size=96",
     "packages": [
       {
-        "name": "ts-morph",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "ts-morph"
       }
     ]
   },
   {
     "author": "Eemeli Aro",
-    "avatar": null,
     "authorLink": "https://eemeli.org/yaml",
+    "avatar": null,
     "packages": [
       {
-        "name": "yaml",
-        "license": "ISC"
+        "license": "ISC",
+        "name": "yaml"
       }
     ]
   },
   {
     "author": "Emil Kowalski",
-    "avatar": "https://github.com/emilkowalski.png?size=96",
     "authorLink": "https://github.com/emilkowalski",
+    "avatar": "https://github.com/emilkowalski.png?size=96",
     "packages": [
       {
-        "name": "sonner",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "sonner"
       }
     ]
   },
   {
     "author": "Faisal Salman",
-    "avatar": null,
     "authorLink": "https://uaparser.dev",
+    "avatar": null,
     "packages": [
       {
-        "name": "ua-parser-js",
-        "license": "AGPL-3.0-or-later"
+        "license": "AGPL-3.0-or-later",
+        "name": "ua-parser-js"
       }
     ]
   },
   {
     "author": "Faker-js",
-    "avatar": "https://github.com/faker-js.png?size=96",
     "authorLink": "https://github.com/faker-js",
+    "avatar": "https://github.com/faker-js.png?size=96",
     "packages": [
       {
-        "name": "@faker-js/faker",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@faker-js/faker"
       }
     ]
   },
   {
     "author": "Ferdi Koomen",
-    "avatar": "https://github.com/ferdikoomen.png?size=96",
     "authorLink": "https://github.com/ferdikoomen",
+    "avatar": "https://github.com/ferdikoomen.png?size=96",
     "packages": [
       {
-        "name": "openapi-typescript-codegen",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "openapi-typescript-codegen"
       }
     ]
   },
   {
     "author": "Fullcalendar",
-    "avatar": "https://github.com/fullcalendar.png?size=96",
     "authorLink": "https://github.com/fullcalendar",
+    "avatar": "https://github.com/fullcalendar.png?size=96",
     "packages": [
       {
-        "name": "temporal-polyfill",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "temporal-polyfill"
       }
     ]
   },
   {
     "author": "Garen Torikian",
-    "avatar": "https://github.com/gjtorikian.png?size=96",
     "authorLink": "https://github.com/gjtorikian",
+    "avatar": "https://github.com/gjtorikian.png?size=96",
     "packages": [
       {
-        "name": "isbinaryfile",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "isbinaryfile"
       }
     ]
   },
   {
     "author": "GoogleChrome",
-    "avatar": "https://github.com/GoogleChrome.png?size=96",
     "authorLink": "https://github.com/GoogleChrome",
+    "avatar": "https://github.com/GoogleChrome.png?size=96",
     "packages": [
       {
-        "name": "@lhci/cli",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@lhci/cli"
       }
     ]
   },
   {
     "author": "Gr2m",
-    "avatar": "https://github.com/gr2m.png?size=96",
     "authorLink": "https://github.com/gr2m",
+    "avatar": "https://github.com/gr2m.png?size=96",
     "packages": [
       {
-        "name": "octokit-plugin-create-pull-request",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "octokit-plugin-create-pull-request"
       }
     ]
   },
   {
     "author": "Grantila",
-    "avatar": "https://github.com/grantila.png?size=96",
     "authorLink": "https://github.com/grantila",
+    "avatar": "https://github.com/grantila.png?size=96",
     "packages": [
       {
-        "name": "graph-cycles",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "graph-cycles"
       }
     ]
   },
   {
     "author": "Gregoor",
-    "avatar": "https://github.com/Gregoor.png?size=96",
     "authorLink": "https://github.com/Gregoor",
+    "avatar": "https://github.com/Gregoor.png?size=96",
     "packages": [
       {
-        "name": "tree-sitter-wasms",
-        "license": "Unlicense"
+        "license": "Unlicense",
+        "name": "tree-sitter-wasms"
       }
     ]
   },
   {
     "author": "Guilherme Rodz",
-    "avatar": null,
     "authorLink": "https://input-otp.rodz.dev",
+    "avatar": null,
     "packages": [
       {
-        "name": "input-otp",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "input-otp"
       }
     ]
   },
   {
     "author": "Hashicorp",
-    "avatar": "https://github.com/hashicorp.png?size=96",
     "authorLink": "https://github.com/hashicorp",
+    "avatar": "https://github.com/hashicorp.png?size=96",
     "packages": [
       {
-        "name": "nextjs-bundle-analysis",
-        "license": "MPL-2.0"
+        "license": "MPL-2.0",
+        "name": "nextjs-bundle-analysis"
       }
     ]
   },
   {
     "author": "Hey API",
-    "avatar": null,
     "authorLink": "https://heyapi.dev/docs/openapi/typescript/get-started",
+    "avatar": null,
     "packages": [
       {
-        "name": "@hey-api/openapi-ts",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@hey-api/openapi-ts"
       }
     ]
   },
   {
     "author": "Hiroki Osame",
-    "avatar": "https://github.com/privatenumber.png?size=96",
     "authorLink": "https://github.com/privatenumber",
+    "avatar": "https://github.com/privatenumber.png?size=96",
     "packages": [
       {
-        "name": "tsx",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "tsx"
       }
     ]
   },
   {
     "author": "Ian VanSchooten",
-    "avatar": "https://github.com/Ianvs.png?size=96",
     "authorLink": "https://github.com/Ianvs",
+    "avatar": "https://github.com/Ianvs.png?size=96",
     "packages": [
       {
-        "name": "@ianvs/prettier-plugin-sort-imports",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "@ianvs/prettier-plugin-sort-imports"
       }
     ]
   },
   {
     "author": "Ikatyang-collab",
-    "avatar": "https://github.com/ikatyang-collab.png?size=96",
     "authorLink": "https://github.com/ikatyang-collab",
+    "avatar": "https://github.com/ikatyang-collab.png?size=96",
     "packages": [
       {
-        "name": "linguist-languages",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "linguist-languages"
       }
     ]
   },
   {
     "author": "IonicaBizau",
-    "avatar": "https://github.com/IonicaBizau.png?size=96",
     "authorLink": "https://github.com/IonicaBizau",
+    "avatar": "https://github.com/IonicaBizau.png?size=96",
     "packages": [
       {
-        "name": "git-url-parse",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "git-url-parse"
       }
     ]
   },
   {
     "author": "Ivolo",
-    "avatar": "https://github.com/ivolo.png?size=96",
     "authorLink": "https://github.com/ivolo",
+    "avatar": "https://github.com/ivolo.png?size=96",
     "packages": [
       {
-        "name": "disposable-email-domains",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "disposable-email-domains"
       }
     ]
   },
   {
     "author": "Jack Lukic",
-    "avatar": null,
     "authorLink": "http://www.semantic-ui.com",
+    "avatar": null,
     "packages": [
       {
-        "name": "semantic-ui-css",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "semantic-ui-css"
       }
     ]
   },
   {
     "author": "JackuB",
-    "avatar": "https://github.com/JackuB.png?size=96",
     "authorLink": "https://github.com/JackuB",
+    "avatar": "https://github.com/JackuB.png?size=96",
     "packages": [
       {
-        "name": "diff-match-patch",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "diff-match-patch"
       }
     ]
   },
   {
     "author": "Jan Amann",
-    "avatar": "https://github.com/amannn.png?size=96",
     "authorLink": "https://github.com/amannn",
+    "avatar": "https://github.com/amannn.png?size=96",
     "packages": [
       {
-        "name": "next-intl",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "next-intl"
       }
     ]
   },
   {
     "author": "Joe-bell",
-    "avatar": "https://github.com/joe-bell.png?size=96",
     "authorLink": "https://github.com/joe-bell",
+    "avatar": "https://github.com/joe-bell.png?size=96",
     "packages": [
       {
-        "name": "class-variance-authority",
-        "license": "Apache-2.0"
+        "license": "Apache-2.0",
+        "name": "class-variance-authority"
       }
     ]
   },
   {
     "author": "Johannes Klauss",
-    "avatar": "https://github.com/JohannesKlauss.png?size=96",
     "authorLink": "https://github.com/JohannesKlauss",
+    "avatar": "https://github.com/JohannesKlauss.png?size=96",
     "packages": [
       {
-        "name": "react-hotkeys-hook",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "react-hotkeys-hook"
       }
     ]
   },
   {
     "author": "John Fay",
-    "avatar": "https://github.com/keonik.png?size=96",
     "authorLink": "https://github.com/keonik",
+    "avatar": "https://github.com/keonik.png?size=96",
     "packages": [
       {
-        "name": "prisma-erd-generator",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "prisma-erd-generator"
       }
     ]
   },
   {
     "author": "Jonschlinkert",
-    "avatar": "https://github.com/jonschlinkert.png?size=96",
     "authorLink": "https://github.com/jonschlinkert",
+    "avatar": "https://github.com/jonschlinkert.png?size=96",
     "packages": [
       {
-        "name": "strip-comments",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "strip-comments"
       }
     ]
   },
   {
     "author": "Js-cookie",
-    "avatar": "https://github.com/js-cookie.png?size=96",
     "authorLink": "https://github.com/js-cookie",
+    "avatar": "https://github.com/js-cookie.png?size=96",
     "packages": [
       {
-        "name": "js-cookie",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "js-cookie"
       }
     ]
   },
   {
     "author": "JSX ESLint",
-    "avatar": "https://github.com/jsx-eslint.png?size=96",
     "authorLink": "https://github.com/jsx-eslint",
+    "avatar": "https://github.com/jsx-eslint.png?size=96",
     "packages": [
       {
-        "name": "eslint-plugin-react",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "eslint-plugin-react"
       }
     ]
   },
   {
     "author": "Kent C. Dodds",
-    "avatar": "https://github.com/kentcdodds.png?size=96",
     "authorLink": "https://github.com/kentcdodds",
+    "avatar": "https://github.com/kentcdodds.png?size=96",
     "packages": [
       {
-        "name": "cross-env",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "cross-env"
       }
     ]
   },
   {
     "author": "Kieler",
-    "avatar": "https://github.com/kieler.png?size=96",
     "authorLink": "https://github.com/kieler",
+    "avatar": "https://github.com/kieler.png?size=96",
     "packages": [
       {
-        "name": "elkjs",
-        "license": "EPL-2.0"
+        "license": "EPL-2.0",
+        "name": "elkjs"
       }
     ]
   },
   {
     "author": "Kpdecker",
-    "avatar": "https://github.com/kpdecker.png?size=96",
     "authorLink": "https://github.com/kpdecker",
+    "avatar": "https://github.com/kpdecker.png?size=96",
     "packages": [
       {
-        "name": "diff",
-        "license": "BSD-3-Clause"
+        "license": "BSD-3-Clause",
+        "name": "diff"
       }
     ]
   },
   {
     "author": "Langchain-ai",
-    "avatar": "https://github.com/langchain-ai.png?size=96",
     "authorLink": "https://github.com/langchain-ai",
+    "avatar": "https://github.com/langchain-ai.png?size=96",
     "packages": [
       {
-        "name": "langsmith",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "langsmith"
       }
     ]
   },
   {
     "author": "lint-staged",
-    "avatar": "https://github.com/lint-staged.png?size=96",
     "authorLink": "https://github.com/lint-staged",
+    "avatar": "https://github.com/lint-staged.png?size=96",
     "packages": [
       {
-        "name": "lint-staged",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "lint-staged"
       }
     ]
   },
   {
     "author": "Luca",
-    "avatar": "https://github.com/Wombosvideo.png?size=96",
     "authorLink": "https://github.com/Wombosvideo",
+    "avatar": "https://github.com/Wombosvideo.png?size=96",
     "packages": [
       {
-        "name": "tw-animate-css",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "tw-animate-css"
       }
     ]
   },
   {
     "author": "Lucide",
-    "avatar": "https://github.com/lucide-icons.png?size=96",
     "authorLink": "https://github.com/lucide-icons",
+    "avatar": "https://github.com/lucide-icons.png?size=96",
     "packages": [
       {
-        "name": "lucide-react",
-        "license": "ISC"
+        "license": "ISC",
+        "name": "lucide-react"
       }
     ]
   },
   {
     "author": "Luin",
-    "avatar": "https://github.com/luin.png?size=96",
     "authorLink": "https://github.com/luin",
+    "avatar": "https://github.com/luin.png?size=96",
     "packages": [
       {
-        "name": "ioredis",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "ioredis"
       }
     ]
   },
   {
     "author": "Luis Marsiglia",
-    "avatar": "https://github.com/marsidev.png?size=96",
     "authorLink": "https://github.com/marsidev",
+    "avatar": "https://github.com/marsidev.png?size=96",
     "packages": [
       {
-        "name": "@marsidev/react-turnstile",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@marsidev/react-turnstile"
       }
     ]
   },
   {
     "author": "Luís Rudge",
-    "avatar": "https://github.com/luisrudge.png?size=96",
     "authorLink": "https://github.com/luisrudge",
+    "avatar": "https://github.com/luisrudge.png?size=96",
     "packages": [
       {
-        "name": "prisma-generator-fake-data",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "prisma-generator-fake-data"
       }
     ]
   },
   {
     "author": "Luke Edwards",
-    "avatar": "https://github.com/lukeed.png?size=96",
     "authorLink": "https://github.com/lukeed",
+    "avatar": "https://github.com/lukeed.png?size=96",
     "packages": [
       {
-        "name": "clsx",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "clsx"
       }
     ]
   },
   {
     "author": "Markus Kohlhase",
-    "avatar": "https://github.com/flosse.png?size=96",
     "authorLink": "https://github.com/flosse",
+    "avatar": "https://github.com/flosse.png?size=96",
     "packages": [
       {
-        "name": "sloc",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "sloc"
       }
     ]
   },
   {
     "author": "Matt Perry",
-    "avatar": "https://github.com/motiondivision.png?size=96",
     "authorLink": "https://github.com/motiondivision",
+    "avatar": "https://github.com/motiondivision.png?size=96",
     "packages": [
       {
-        "name": "motion",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "motion"
       }
     ]
   },
   {
     "author": "Michael M",
-    "avatar": "https://github.com/MikeMcl.png?size=96",
     "authorLink": "https://github.com/MikeMcl",
+    "avatar": "https://github.com/MikeMcl.png?size=96",
     "packages": [
       {
-        "name": "decimal.js",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "decimal.js"
       }
     ]
   },
   {
     "author": "Micromatch",
-    "avatar": "https://github.com/micromatch.png?size=96",
     "authorLink": "https://github.com/micromatch",
+    "avatar": "https://github.com/micromatch.png?size=96",
     "packages": [
       {
-        "name": "picomatch",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "picomatch"
       }
     ]
   },
   {
     "author": "Mot",
-    "avatar": "https://github.com/motdotla.png?size=96",
     "authorLink": "https://github.com/motdotla",
+    "avatar": "https://github.com/motdotla.png?size=96",
     "packages": [
       {
-        "name": "dotenv",
-        "license": "BSD-2-Clause"
+        "license": "BSD-2-Clause",
+        "name": "dotenv"
       }
     ]
   },
   {
     "author": "Mrmlnc",
-    "avatar": "https://github.com/mrmlnc.png?size=96",
     "authorLink": "https://github.com/mrmlnc",
+    "avatar": "https://github.com/mrmlnc.png?size=96",
     "packages": [
       {
-        "name": "fast-glob",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "fast-glob"
       }
     ]
   },
   {
     "author": "NaturalIntelligence",
-    "avatar": "https://github.com/NaturalIntelligence.png?size=96",
     "authorLink": "https://github.com/NaturalIntelligence",
+    "avatar": "https://github.com/NaturalIntelligence.png?size=96",
     "packages": [
       {
-        "name": "fast-xml-parser",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "fast-xml-parser"
       }
     ]
   },
   {
     "author": "Nearform Commerce",
-    "avatar": "https://github.com/FormidableLabs.png?size=96",
     "authorLink": "https://github.com/FormidableLabs",
+    "avatar": "https://github.com/FormidableLabs.png?size=96",
     "packages": [
       {
-        "name": "webpack-stats-plugin",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "webpack-stats-plugin"
       }
     ]
   },
   {
     "author": "Neon",
-    "avatar": null,
     "authorLink": "https://neon.com",
+    "avatar": null,
     "packages": [
       {
-        "name": "@neondatabase/serverless",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@neondatabase/serverless"
       }
     ]
   },
   {
     "author": "Nicolas DUBIEN",
-    "avatar": "https://github.com/dubzzz.png?size=96",
     "authorLink": "https://github.com/dubzzz",
+    "avatar": "https://github.com/dubzzz.png?size=96",
     "packages": [
       {
-        "name": "fast-check",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "fast-check"
       }
     ]
   },
   {
     "author": "Notiz",
-    "avatar": "https://github.com/notiz-dev.png?size=96",
     "authorLink": "https://github.com/notiz-dev",
+    "avatar": "https://github.com/notiz-dev.png?size=96",
     "packages": [
       {
-        "name": "prisma-dbml-generator",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "prisma-dbml-generator"
       }
     ]
   },
   {
     "author": "Pgilad",
-    "avatar": "https://github.com/pgilad.png?size=96",
     "authorLink": "https://github.com/pgilad",
+    "avatar": "https://github.com/pgilad.png?size=96",
     "packages": [
       {
-        "name": "leasot",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "leasot"
       }
     ]
   },
   {
     "author": "Poimandres",
-    "avatar": "https://github.com/pmndrs.png?size=96",
     "authorLink": "https://github.com/pmndrs",
+    "avatar": "https://github.com/pmndrs.png?size=96",
     "packages": [
       {
-        "name": "zustand",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "zustand"
       }
     ]
   },
   {
     "author": "Pradeepmouli",
-    "avatar": "https://github.com/pradeepmouli.png?size=96",
     "authorLink": "https://github.com/pradeepmouli",
+    "avatar": "https://github.com/pradeepmouli.png?size=96",
     "packages": [
       {
-        "name": "@to-skills/typedoc",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@to-skills/typedoc"
       }
     ]
   },
   {
     "author": "Qq15725",
-    "avatar": "https://github.com/qq15725.png?size=96",
     "authorLink": "https://github.com/qq15725",
+    "avatar": "https://github.com/qq15725.png?size=96",
     "packages": [
       {
-        "name": "modern-screenshot",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "modern-screenshot"
       }
     ]
   },
   {
     "author": "Recharts",
-    "avatar": "https://github.com/recharts.png?size=96",
     "authorLink": "https://github.com/recharts",
+    "avatar": "https://github.com/recharts.png?size=96",
     "packages": [
       {
-        "name": "recharts",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "recharts"
       }
     ]
   },
   {
     "author": "Rel1cx",
-    "avatar": "https://github.com/Rel1cx.png?size=96",
     "authorLink": "https://github.com/Rel1cx",
+    "avatar": "https://github.com/Rel1cx.png?size=96",
     "packages": [
       {
-        "name": "@eslint-react/eslint-plugin",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@eslint-react/eslint-plugin"
       }
     ]
   },
   {
     "author": "Remarkablemark",
-    "avatar": "https://github.com/remarkablemark.png?size=96",
     "authorLink": "https://github.com/remarkablemark",
+    "avatar": "https://github.com/remarkablemark.png?size=96",
     "packages": [
       {
-        "name": "html-react-parser",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "html-react-parser"
       }
     ]
   },
   {
     "author": "Replit",
-    "avatar": "https://github.com/replit.png?size=96",
     "authorLink": "https://github.com/replit",
+    "avatar": "https://github.com/replit.png?size=96",
     "packages": [
       {
-        "name": "@replit/codemirror-minimap",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@replit/codemirror-minimap"
       }
     ]
   },
   {
     "author": "Semantic-Org",
-    "avatar": "https://github.com/Semantic-Org.png?size=96",
     "authorLink": "https://github.com/Semantic-Org",
+    "avatar": "https://github.com/Semantic-Org.png?size=96",
     "packages": [
       {
-        "name": "semantic-ui-react",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "semantic-ui-react"
       }
     ]
   },
   {
     "author": "Sentry",
-    "avatar": "https://github.com/getsentry.png?size=96",
     "authorLink": "https://github.com/getsentry",
+    "avatar": "https://github.com/getsentry.png?size=96",
     "packages": [
       {
-        "name": "@sentry/nextjs",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@sentry/nextjs"
       }
     ]
   },
   {
     "author": "Sergeyt",
-    "avatar": "https://github.com/sergeyt.png?size=96",
     "authorLink": "https://github.com/sergeyt",
+    "avatar": "https://github.com/sergeyt.png?size=96",
     "packages": [
       {
-        "name": "parse-diff",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "parse-diff"
       }
     ]
   },
   {
     "author": "Shri Ganesh Jha",
-    "avatar": "https://github.com/TheSGJ.png?size=96",
     "authorLink": "https://github.com/TheSGJ",
+    "avatar": "https://github.com/TheSGJ.png?size=96",
     "packages": [
       {
-        "name": "nextjs-toploader",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "nextjs-toploader"
       }
     ]
   },
   {
     "author": "Sindresorhus",
-    "avatar": "https://github.com/sindresorhus.png?size=96",
     "authorLink": "https://github.com/sindresorhus",
+    "avatar": "https://github.com/sindresorhus.png?size=96",
     "packages": [
       {
-        "name": "binary-extensions",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "binary-extensions"
       }
     ]
   },
   {
     "author": "Sonar",
-    "avatar": "https://github.com/SonarSource.png?size=96",
     "authorLink": "https://github.com/SonarSource",
+    "avatar": "https://github.com/SonarSource.png?size=96",
     "packages": [
       {
-        "name": "eslint-plugin-sonarjs",
-        "license": "LGPL-3.0-only"
+        "license": "LGPL-3.0-only",
+        "name": "eslint-plugin-sonarjs"
       }
     ]
   },
   {
     "author": "Steve King",
-    "avatar": "https://github.com/steveukx.png?size=96",
     "authorLink": "https://github.com/steveukx",
+    "avatar": "https://github.com/steveukx.png?size=96",
     "packages": [
       {
-        "name": "simple-git",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "simple-git"
       }
     ]
   },
   {
     "author": "Sverweij",
-    "avatar": "https://github.com/sverweij.png?size=96",
     "authorLink": "https://github.com/sverweij",
+    "avatar": "https://github.com/sverweij.png?size=96",
     "packages": [
       {
-        "name": "dependency-cruiser",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "dependency-cruiser"
       }
     ]
   },
   {
     "author": "Svix",
-    "avatar": "https://github.com/svix.png?size=96",
     "authorLink": "https://github.com/svix",
+    "avatar": "https://github.com/svix.png?size=96",
     "packages": [
       {
-        "name": "svix",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "svix"
       }
     ]
   },
   {
     "author": "Syntax-tree",
-    "avatar": "https://github.com/syntax-tree.png?size=96",
     "authorLink": "https://github.com/syntax-tree",
+    "avatar": "https://github.com/syntax-tree.png?size=96",
     "packages": [
       {
-        "name": "unist-util-visit",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "unist-util-visit"
       }
     ]
   },
   {
     "author": "T3-oss",
-    "avatar": "https://github.com/t3-oss.png?size=96",
     "authorLink": "https://github.com/t3-oss",
+    "avatar": "https://github.com/t3-oss.png?size=96",
     "packages": [
       {
-        "name": "@t3-oss/env-nextjs",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@t3-oss/env-nextjs"
       }
     ]
   },
   {
     "author": "Tamino-martinius",
-    "avatar": "https://github.com/tamino-martinius.png?size=96",
     "authorLink": "https://github.com/tamino-martinius",
+    "avatar": "https://github.com/tamino-martinius.png?size=96",
     "packages": [
       {
-        "name": "ts-dedent",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "ts-dedent"
       }
     ]
   },
   {
     "author": "Tree-sitter",
-    "avatar": "https://github.com/tree-sitter.png?size=96",
     "authorLink": "https://github.com/tree-sitter",
+    "avatar": "https://github.com/tree-sitter.png?size=96",
     "packages": [
       {
-        "name": "web-tree-sitter",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "web-tree-sitter"
       }
     ]
   },
   {
     "author": "Typicode",
-    "avatar": "https://github.com/typicode.png?size=96",
     "authorLink": "https://github.com/typicode",
+    "avatar": "https://github.com/typicode.png?size=96",
     "packages": [
       {
-        "name": "husky",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "husky"
       }
     ]
   },
   {
     "author": "Valentin Palkovic",
-    "avatar": "https://github.com/valentinpalkovic.png?size=96",
     "authorLink": "https://github.com/valentinpalkovic",
+    "avatar": "https://github.com/valentinpalkovic.png?size=96",
     "packages": [
       {
-        "name": "prisma-json-schema-generator",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "prisma-json-schema-generator"
       }
     ]
   },
   {
     "author": "Validatorjs",
-    "avatar": "https://github.com/validatorjs.png?size=96",
     "authorLink": "https://github.com/validatorjs",
+    "avatar": "https://github.com/validatorjs.png?size=96",
     "packages": [
       {
-        "name": "validator",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "validator"
       }
     ]
   },
   {
     "author": "Vite",
-    "avatar": "https://github.com/vitejs.png?size=96",
     "authorLink": "https://github.com/vitejs",
+    "avatar": "https://github.com/vitejs.png?size=96",
     "packages": [
       {
-        "name": "@vitejs/plugin-react",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@vitejs/plugin-react"
       }
     ]
   },
   {
     "author": "Webpro",
-    "avatar": "https://github.com/Webpro-nl.png?size=96",
     "authorLink": "https://github.com/Webpro-nl",
+    "avatar": "https://github.com/Webpro-nl.png?size=96",
     "packages": [
       {
-        "name": "knip",
-        "license": "ISC"
+        "license": "ISC",
+        "name": "knip"
       }
     ]
   },
   {
     "author": "Whitequark",
-    "avatar": "https://github.com/whitequark.png?size=96",
     "authorLink": "https://github.com/whitequark",
+    "avatar": "https://github.com/whitequark.png?size=96",
     "packages": [
       {
-        "name": "ipaddr.js",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "ipaddr.js"
       }
     ]
   },
   {
     "author": "Xyflow",
-    "avatar": "https://github.com/xyflow.png?size=96",
     "authorLink": "https://github.com/xyflow",
+    "avatar": "https://github.com/xyflow.png?size=96",
     "packages": [
       {
-        "name": "@xyflow/react",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "@xyflow/react"
       }
     ]
   },
   {
     "author": "Yeonjuan",
-    "avatar": "https://github.com/yeonjuan.png?size=96",
     "authorLink": "https://github.com/yeonjuan",
+    "avatar": "https://github.com/yeonjuan.png?size=96",
     "packages": [
       {
-        "name": "parse-git-diff",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "parse-git-diff"
       }
     ]
   },
   {
     "author": "York Yao",
-    "avatar": "https://github.com/plantain.png?size=96",
     "authorLink": "https://github.com/plantain",
+    "avatar": "https://github.com/plantain.png?size=96",
     "packages": [
       {
-        "name": "type-coverage",
-        "license": "MIT"
+        "license": "MIT",
+        "name": "type-coverage"
       }
     ]
   }

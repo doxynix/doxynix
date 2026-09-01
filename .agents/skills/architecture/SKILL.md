@@ -25,7 +25,7 @@ Execute the check script against modified files:
 
 3. Client-Server Isolation:
    - No direct backend imports inside client components.
-   - Import shared interfaces from @doxynix/siem-shared or RPC definitions from server/src/client.
+   - Import shared interfaces from @doxynix/shared or RPC definitions from server/src/client.
 
 ### Server Layer (Vertical Slice Architecture):
 1. Modules in server/src/modules/A MUST NOT directly import private implementation details of server/src/modules/B. Shared utilities belong in server/src/core/.

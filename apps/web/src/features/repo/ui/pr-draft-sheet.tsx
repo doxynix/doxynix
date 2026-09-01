@@ -6,7 +6,7 @@ import { FileIcon, GitPullRequest, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { createPrSchema, type CreatePrValues } from "@/shared/api/schemas/pr";
+import { type CreatePrValues, createPrSchema } from "@/shared/api/schemas/pr";
 import { trpc } from "@/shared/api/trpc";
 import { generateBranchName } from "@/shared/lib/get-branch-name";
 import { AppBadge } from "@/shared/ui/core/badge";
@@ -50,7 +50,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
   const openPrMutation = trpc.analysis.openPullRequest.useMutation({
     onError: (err) => toast.error(`Failed to create PR: ${err.message}`),
     onSuccess: (data) => {
-      if (data.success === true) {
+      if (data.success) {
         toast.success("Pull Request created successfully!", {
           action: {
             label: "View",
@@ -99,14 +99,14 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
 
   return (
     <Sheet
-      open={open}
       onOpenChange={(open) => {
         setOpen(open);
         form.reset();
       }}
+      open={open}
     >
       <SheetTrigger asChild>
-        <AppButton variant="outline" className="relative gap-2">
+        <AppButton className="relative gap-2" variant="outline">
           <GitPullRequest />
           <span>PR Draft</span>
           {filesCount > 0 && <AppBadge className="absolute -top-2 -right-2">{filesCount}</AppBadge>}
@@ -128,14 +128,14 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
           <div className="flex flex-col gap-4">
             <Label className="text-muted-foreground">Staged Files ({filesCount})</Label>
             <ScrollArea className="h-75 rounded-xl border p-2">
-              {isFilesLoading === true ? (
+              {isFilesLoading ? (
                 <div className="flex flex-col gap-2 p-2">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" key={i} />
                   ))}
                 </div>
               ) : filesCount === 0 ? (
-                <div className="text-muted-foreground flex h-20 items-center justify-center text-xs italic">
+                <div className="flex h-20 items-center justify-center text-muted-foreground text-xs italic">
                   No files staged for PR yet.
                 </div>
               ) : (
@@ -145,20 +145,19 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
 
                     return (
                       <div
-                        key={file.filePath}
                         className="flex items-center justify-between rounded-xl border p-1"
+                        key={file.filePath}
                       >
                         <div className="flex items-center gap-2 p-1">
                           <FileIcon />
                           <span className="truncate text-xs">{file.filePath}</span>
                         </div>
                         <LoadingButton
+                          aria-label="Unstage file"
+                          className="hover:bg-destructive/10 hover:text-destructive"
                           disabled={isRemoving}
                           isLoading={isRemoving}
                           loadingText=""
-                          size="icon"
-                          variant="ghost"
-                          aria-label="Unstage file"
                           onClick={() => {
                             setRemovingFiles((prev) => {
                               const next = new Set(prev);
@@ -179,10 +178,11 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                                     return next;
                                   });
                                 },
-                              }
+                              },
                             );
                           }}
-                          className="hover:text-destructive hover:bg-destructive/10"
+                          size="icon"
+                          variant="ghost"
                         >
                           <Trash2 />
                         </LoadingButton>
@@ -196,13 +196,13 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
 
           <Form {...form}>
             <form
+              className="flex flex-col gap-4 border-t pt-4"
               id="pr-form"
               onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-              className="flex flex-col gap-4 border-t pt-4"
             >
               <FormField
-                name="branchName"
                 control={form.control}
+                name="branchName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-muted-foreground">Branch Name</FormLabel>
@@ -215,8 +215,8 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
               />
 
               <FormField
-                name="prTitle"
                 control={form.control}
+                name="prTitle"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-muted-foreground">PR Title</FormLabel>
@@ -234,10 +234,10 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
         <SheetFooter className="border-t pt-4">
           <LoadingButton
             disabled={filesCount === 0 || openPrMutation.isPending}
-            type="submit"
             form="pr-form"
             isLoading={openPrMutation.isPending}
             loadingText="Processing..."
+            type="submit"
           >
             <GitPullRequest /> Open Pull Request
           </LoadingButton>

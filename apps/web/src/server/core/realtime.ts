@@ -15,7 +15,9 @@ export const realtimeServer =
     key: ABLY_API_KEY,
   });
 
-if (!IS_PROD) globalForAbly.ably = realtimeServer;
+if (!IS_PROD) {
+  globalForAbly.ably = realtimeServer;
+}
 
 export type UserEventPayloads = {
   [REALTIME_CONFIG.events.user.analysisProgress]: {
@@ -61,7 +63,7 @@ async function safePublish(
   channelName: string,
   event: string,
   data: unknown,
-  meta?: Record<string, unknown>
+  meta?: Record<string, unknown>,
 ): Promise<boolean> {
   try {
     await realtimeServer.channels.get(channelName).publish(event, data);

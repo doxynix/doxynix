@@ -23,7 +23,7 @@ function safeCurrentMetadata() {
     return metadata.current();
   } catch (error) {
     appLogger.debug({ error, msg: "Trigger metadata unavailable; reading empty metadata" });
-    return;
+    return undefined;
   }
 }
 
@@ -45,7 +45,7 @@ export const taskLogger = {
 
     this.log(
       `Analysis finalized with status: ${status}`,
-      status === Status.DONE ? "success" : "error"
+      status === Status.DONE ? "success" : "error",
     );
 
     const currentMetadata = safeCurrentMetadata();

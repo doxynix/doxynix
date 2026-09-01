@@ -37,7 +37,7 @@ export function extractParentGroups(nodes: Node<RepoMapNodeData>[]): ParentNodeC
 
 export function enrichNodesWithParents(
   nodes: Node<RepoMapNodeData>[],
-  parents: ParentNodeConfig[]
+  parents: ParentNodeConfig[],
 ): Node<RepoMapNodeData>[] {
   const createParentNode = (parent: ParentNodeConfig): Node<RepoMapNodeData> => {
     const baseData = nodes.find((node) => parent.children.includes(node.id))?.data;

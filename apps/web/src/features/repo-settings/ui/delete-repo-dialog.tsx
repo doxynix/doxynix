@@ -26,7 +26,7 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
           setOpen(false);
           router.push(`/dashboard/repos`);
         },
-      }
+      },
     );
   };
 
@@ -41,6 +41,8 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
         </span>
       }
       isLoading={deleteRepo.isPending}
+      onConfirm={handleDelete}
+      onOpenChange={setOpen}
       open={open}
       successAlertContent={
         <span>
@@ -51,12 +53,10 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
       successAlertTitle={t("settings_danger_alert_title")}
       title="Delete repository?"
       trigger={
-        <AppButton variant="destructive" className="w-fit cursor-pointer">
+        <AppButton className="w-fit cursor-pointer" variant="destructive">
           Delete repository <Trash2 />
         </AppButton>
       }
-      onConfirm={handleDelete}
-      onOpenChange={setOpen}
     />
   );
 }

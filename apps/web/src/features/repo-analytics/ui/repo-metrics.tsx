@@ -46,10 +46,12 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
     {
       enabled: runningFixId != null,
       refetchInterval: (query) => {
-        if (query.state.data?.resultJson == null) return 2000;
+        if (query.state.data?.resultJson == null) {
+          return 2000;
+        }
         return false;
       },
-    }
+    },
   );
 
   const stageGeneratedFixMutation = trpc.analysis.stageGeneratedFix.useMutation({
@@ -79,7 +81,7 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
       message?: null | string;
       suggestion?: string;
       type?: null | string;
-    }
+    },
   ) => {
     createFixMutation.mutate({
       fileContents: { [filePath]: "" },
@@ -100,9 +102,9 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <ArchitectureAndDataFlowCard reference={reference} />
         <SecurityOverviewCard
+          onTriggerFix={handleTriggerFix}
           runningFixId={runningFixId}
           security={security}
-          onTriggerFix={handleTriggerFix}
         />
       </section>
 
@@ -117,15 +119,15 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
       <TechDebtAndComplexitySection architecture={architecture} recommendations={recommendations} />
 
       <RefactoringBacklogSection
+        onTriggerFix={handleTriggerFix}
         recommendations={recommendations}
         runningFixId={runningFixId}
-        onTriggerFix={handleTriggerFix}
       />
 
       <PerformanceAndScalingSection
+        onTriggerFix={handleTriggerFix}
         recommendations={recommendations}
         runningFixId={runningFixId}
-        onTriggerFix={handleTriggerFix}
       />
     </div>
   );

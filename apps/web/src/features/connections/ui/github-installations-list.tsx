@@ -23,7 +23,6 @@ export function GitHubInstallationsList({ installations }: Readonly<Props>) {
     <div className="grid gap-3">
       {installations.map((inst) => (
         <ConnectionCard
-          key={inst.id}
           action={
             <AppButton asChild size="sm" variant="outline">
               <ExternalLink href={inst.manageUrl ?? ""}>
@@ -32,7 +31,8 @@ export function GitHubInstallationsList({ installations }: Readonly<Props>) {
             </AppButton>
           }
           description="GitHub App Installation"
-          icon={<AppAvatar alt={inst.login} src={inst.avatar} fallbackText={inst.login} />}
+          icon={<AppAvatar alt={inst.login} fallbackText={inst.login} src={inst.avatar} />}
+          key={inst.id}
           status="Active"
           title={inst.login}
         />

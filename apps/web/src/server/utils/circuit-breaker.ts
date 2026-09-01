@@ -75,12 +75,16 @@ export class CircuitBreaker {
   }
 
   private isTimeoutExpired(): boolean {
-    if (this.lastFailureTime == null) return false;
+    if (this.lastFailureTime == null) {
+      return false;
+    }
     return Date.now() - this.lastFailureTime > this.config.timeout;
   }
 
   private transitionTo(newState: CircuitBreakerState): void {
-    if (this.state === newState) return;
+    if (this.state === newState) {
+      return;
+    }
 
     appLogger.info({
       from: this.state,

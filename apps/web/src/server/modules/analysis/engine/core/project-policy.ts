@@ -72,13 +72,27 @@ export const ProjectPolicy = {
     const isGraphPreviewCandidate = this.isGraphPreviewCandidate(normalizedPath);
     const isRuntimeSource = this.isRuntimeSource(normalizedPath);
 
-    if (isIgnored) reasons.push("ignored-by-policy");
-    if (isSensitive) reasons.push("sensitive");
-    if (isLowSignalConfig) reasons.push("low-signal-config");
-    if (isPrimaryEntrypoint) reasons.push("primary-entrypoint");
-    if (isPrimaryApiSurface) reasons.push("api-surface");
-    if (isArchitectureRelevant) reasons.push("architecture-relevant");
-    if (isGraphPreviewCandidate) reasons.push("graph-preview-candidate");
+    if (isIgnored) {
+      reasons.push("ignored-by-policy");
+    }
+    if (isSensitive) {
+      reasons.push("sensitive");
+    }
+    if (isLowSignalConfig) {
+      reasons.push("low-signal-config");
+    }
+    if (isPrimaryEntrypoint) {
+      reasons.push("primary-entrypoint");
+    }
+    if (isPrimaryApiSurface) {
+      reasons.push("api-surface");
+    }
+    if (isArchitectureRelevant) {
+      reasons.push("architecture-relevant");
+    }
+    if (isGraphPreviewCandidate) {
+      reasons.push("graph-preview-candidate");
+    }
 
     return {
       categories,
@@ -101,8 +115,12 @@ export const ProjectPolicy = {
     const parts = normalized.split("/").filter(Boolean);
     const lowerParts = normalized.toLowerCase().split("/").filter(Boolean);
 
-    if (parts.length === 0) return "other";
-    if (parts[0] != null && parts[0].startsWith(".")) return parts[0];
+    if (parts.length === 0) {
+      return "other";
+    }
+    if (parts[0]?.startsWith(".")) {
+      return parts[0];
+    }
 
     if (
       lowerParts[0] === "src" &&
@@ -111,13 +129,19 @@ export const ProjectPolicy = {
       lowerParts[2] != null &&
       PROJECT_POLICY_RULES.grouping.jvmSourceRoots.has(lowerParts[2])
     ) {
-      if (lowerParts[2] === "resources") return `src/${parts[1]}/${parts[2]}`;
+      if (lowerParts[2] === "resources") {
+        return `src/${parts[1]}/${parts[2]}`;
+      }
       return `src/${parts[1]}/${parts[2]}/${parts[3]}`;
     }
 
     if (lowerParts[0] != null && lowerParts[0] === "src") {
-      if (parts.length < 2) return "src";
-      if (parts.length < 3) return `src/${parts[1]}`;
+      if (parts.length < 2) {
+        return "src";
+      }
+      if (parts.length < 3) {
+        return `src/${parts[1]}`;
+      }
       return `src/${parts[1]}/${parts[2]}`;
     }
 
@@ -153,14 +177,30 @@ export const ProjectPolicy = {
     const lower = normalize(path).toLowerCase();
     const categories = new Set<FileCategory>();
 
-    if (matchers.asset(lower)) categories.add("asset");
-    if (matchers.benchmark(lower)) categories.add("benchmark");
-    if (matchers.config(lower)) categories.add("config");
-    if (matchers.docs(lower)) categories.add("docs");
-    if (matchers.generated(lower)) categories.add("generated");
-    if (matchers.infra(lower)) categories.add("infra");
-    if (matchers.test(lower)) categories.add("test");
-    if (matchers.tooling(lower)) categories.add("tooling");
+    if (matchers.asset(lower)) {
+      categories.add("asset");
+    }
+    if (matchers.benchmark(lower)) {
+      categories.add("benchmark");
+    }
+    if (matchers.config(lower)) {
+      categories.add("config");
+    }
+    if (matchers.docs(lower)) {
+      categories.add("docs");
+    }
+    if (matchers.generated(lower)) {
+      categories.add("generated");
+    }
+    if (matchers.infra(lower)) {
+      categories.add("infra");
+    }
+    if (matchers.test(lower)) {
+      categories.add("test");
+    }
+    if (matchers.tooling(lower)) {
+      categories.add("tooling");
+    }
 
     if (
       this.isRuntimeSource(lower) ||
@@ -174,8 +214,12 @@ export const ProjectPolicy = {
 
   getGenericGroupPathPenalty(groupId: string) {
     const normalized = normalize(groupId);
-    if (normalized === "other") return 12;
-    if (this.isBroadGenericGroupPath(normalized)) return 10;
+    if (normalized === "other") {
+      return 12;
+    }
+    if (this.isBroadGenericGroupPath(normalized)) {
+      return 10;
+    }
     return 0;
   },
 
@@ -206,7 +250,7 @@ export const ProjectPolicy = {
   },
 
   getPrimarySemanticKind(
-    counts: Record<ProjectPolicySemanticKind, number>
+    counts: Record<ProjectPolicySemanticKind, number>,
   ): ProjectPolicySemanticKind {
     const entries = Object.entries(counts) as [ProjectPolicySemanticKind, number][];
     const sorted = orderBy(entries, [(entry) => entry[1], (entry) => entry[0]], ["desc", "asc"]);
@@ -215,7 +259,7 @@ export const ProjectPolicy = {
 
   getSemanticKinds(
     path: string,
-    options?: { apiPaths?: ReadonlySet<string> }
+    options?: { apiPaths?: ReadonlySet<string> },
   ): ProjectPolicySemanticKind[] {
     const normalized = normalize(path);
     const lower = normalize(path).toLowerCase();
@@ -267,13 +311,17 @@ export const ProjectPolicy = {
       kinds.add("config");
     }
 
-    if (kinds.size === 0) kinds.add("unknown");
+    if (kinds.size === 0) {
+      kinds.add("unknown");
+    }
     return Array.from(kinds);
   },
 
   isApiPath(path: string) {
     const lower = normalize(path).toLowerCase();
-    if (this.isTestFile(lower)) return false;
+    if (this.isTestFile(lower)) {
+      return false;
+    }
     return matchers.api(lower);
   },
 
@@ -285,7 +333,7 @@ export const ProjectPolicy = {
     return (
       categories.includes("runtime-source") &&
       !categories.some((category) =>
-        PROJECT_POLICY_RULES.categoryPolicy.nonArchitectureCategories.has(category)
+        PROJECT_POLICY_RULES.categoryPolicy.nonArchitectureCategories.has(category),
       )
     );
   },
@@ -300,19 +348,27 @@ export const ProjectPolicy = {
 
   isBroadGenericGroupPath(groupPath: string) {
     const normalized = normalize(groupPath);
-    if (normalized === "other") return true;
-    if (normalized.startsWith(".")) return true;
+    if (normalized === "other") {
+      return true;
+    }
+    if (normalized.startsWith(".")) {
+      return true;
+    }
 
     const parts = normalized.split("/").filter(Boolean);
     const lowerParts = parts.map((part) => part.toLowerCase());
-    if (parts.length === 0) return true;
+    if (parts.length === 0) {
+      return true;
+    }
     if (
       lowerParts.length === 1 &&
       PROJECT_POLICY_RULES.grouping.genericGroupRoots.has(lowerParts[0] ?? "")
     ) {
       return true;
     }
-    if (lowerParts[0] === "src" && lowerParts.length === 1) return true;
+    if (lowerParts[0] === "src" && lowerParts.length === 1) {
+      return true;
+    }
 
     return (
       /^src\/[^/]+$/u.test(normalized) &&
@@ -327,7 +383,7 @@ export const ProjectPolicy = {
   isDependencyLockfile(path: string) {
     const lower = normalize(path).toLowerCase();
     return PROJECT_POLICY_RULES.fileHints.dependencyLockfiles.some(
-      (fileName) => lower === fileName || lower.endsWith(`/${fileName}`)
+      (fileName) => lower === fileName || lower.endsWith(`/${fileName}`),
     );
   },
 
@@ -337,10 +393,18 @@ export const ProjectPolicy = {
 
   isFrameworkFactSource(path: string) {
     const normalized = normalize(path);
-    if (this.isPrimaryContourExcluded(normalized)) return false;
-    if (this.isToolingFile(normalized)) return false;
-    if (this.isLowSignalConfig(normalized)) return false;
-    if (this.isInfraFile(normalized) && !this.isApiPath(normalized)) return false;
+    if (this.isPrimaryContourExcluded(normalized)) {
+      return false;
+    }
+    if (this.isToolingFile(normalized)) {
+      return false;
+    }
+    if (this.isLowSignalConfig(normalized)) {
+      return false;
+    }
+    if (this.isInfraFile(normalized) && !this.isApiPath(normalized)) {
+      return false;
+    }
     return this.isPrimaryArchitecturePath(normalized) || this.isApiPath(normalized);
   },
 
@@ -355,14 +419,30 @@ export const ProjectPolicy = {
 
   isGraphPreviewCandidate(path: string) {
     const normalized = normalize(path);
-    if (this.isSensitive(normalized)) return false;
-    if (this.isIgnored(normalized)) return false;
-    if (this.isDocsFile(normalized)) return false;
-    if (this.isGeneratedFile(normalized)) return false;
-    if (this.isTestFile(normalized)) return false;
-    if (this.isAssetFile(normalized)) return false;
-    if (this.isToolingFile(normalized)) return false;
-    if (this.isLowSignalConfig(normalized)) return false;
+    if (this.isSensitive(normalized)) {
+      return false;
+    }
+    if (this.isIgnored(normalized)) {
+      return false;
+    }
+    if (this.isDocsFile(normalized)) {
+      return false;
+    }
+    if (this.isGeneratedFile(normalized)) {
+      return false;
+    }
+    if (this.isTestFile(normalized)) {
+      return false;
+    }
+    if (this.isAssetFile(normalized)) {
+      return false;
+    }
+    if (this.isToolingFile(normalized)) {
+      return false;
+    }
+    if (this.isLowSignalConfig(normalized)) {
+      return false;
+    }
 
     return (
       this.isArchitectureRelevant(normalized) ||
@@ -381,24 +461,34 @@ export const ProjectPolicy = {
 
   isLikelyBarrelFile(path: string) {
     const lower = normalize(path).toLowerCase();
-    if (!/(^|\/)index\.[^/]+$/iu.test(lower)) return false;
+    if (!/(^|\/)index\.[^/]+$/iu.test(lower)) {
+      return false;
+    }
 
     const normalized = lower.startsWith("src/") ? lower.slice(4) : lower;
     const segments = normalized.split("/");
 
-    if (segments.length <= 2) return false;
-    if (/^(app|pages|server|cli|bin|scripts)\//iu.test(normalized)) return false;
+    if (segments.length <= 2) {
+      return false;
+    }
+    if (/^(app|pages|server|cli|bin|scripts)\//iu.test(normalized)) {
+      return false;
+    }
 
     return !/(^|\/)(api|routes)\//iu.test(normalized);
   },
 
   isLowSignalConfig(path: string) {
     const lower = normalize(path).toLowerCase();
-    if (this.isDependencyLockfile(lower)) return true;
-    if (/^prisma\/migrations\/[^/]+\/migration\.sql$/u.test(lower)) return true;
+    if (this.isDependencyLockfile(lower)) {
+      return true;
+    }
+    if (/^prisma\/migrations\/[^/]+\/migration\.sql$/u.test(lower)) {
+      return true;
+    }
     if (
       PROJECT_POLICY_RULES.fileHints.lowSignalConfigNames.some(
-        (fileName) => lower === fileName || lower.endsWith(`/${fileName}`)
+        (fileName) => lower === fileName || lower.endsWith(`/${fileName}`),
       )
     ) {
       return true;
@@ -408,10 +498,18 @@ export const ProjectPolicy = {
 
   isPrimaryApiSurface(path: string) {
     const normalized = normalize(path);
-    if (this.isPrimaryContourExcluded(normalized)) return false;
-    if (this.isConfigFile(normalized) || this.isToolingFile(normalized)) return false;
-    if (this.isLowSignalConfig(normalized)) return false;
-    if (this.isInfraFile(normalized) && !this.isApiPath(normalized)) return false;
+    if (this.isPrimaryContourExcluded(normalized)) {
+      return false;
+    }
+    if (this.isConfigFile(normalized) || this.isToolingFile(normalized)) {
+      return false;
+    }
+    if (this.isLowSignalConfig(normalized)) {
+      return false;
+    }
+    if (this.isInfraFile(normalized) && !this.isApiPath(normalized)) {
+      return false;
+    }
     return this.isApiPath(normalized) || this.isPrimaryArchitecturePath(normalized);
   },
 
@@ -419,7 +517,7 @@ export const ProjectPolicy = {
     return (
       this.isArchitectureRelevantCategories(categories) &&
       !categories.some((category) =>
-        PROJECT_POLICY_RULES.categoryPolicy.secondaryEvidenceCategories.has(category)
+        PROJECT_POLICY_RULES.categoryPolicy.secondaryEvidenceCategories.has(category),
       )
     );
   },
@@ -441,7 +539,9 @@ export const ProjectPolicy = {
 
   isPrimaryEntrypoint(path: string) {
     const normalized = normalize(path);
-    if (this.isPrimaryContourExcluded(normalized)) return false;
+    if (this.isPrimaryContourExcluded(normalized)) {
+      return false;
+    }
     if (
       this.isConfigFile(normalized) ||
       this.isInfraFile(normalized) ||
@@ -449,7 +549,9 @@ export const ProjectPolicy = {
     ) {
       return false;
     }
-    if (this.isLowSignalConfig(normalized)) return false;
+    if (this.isLowSignalConfig(normalized)) {
+      return false;
+    }
     return (
       this.isRuntimeSource(normalized) || /(^|\/)(index|main|server|app)\.[^/]+$/iu.test(normalized)
     );
@@ -473,21 +575,41 @@ export const ProjectPolicy = {
 
   isSensitive(path: string) {
     const lower = normalize(path).toLowerCase();
-    if (lower.endsWith(".env.example")) return false;
+    if (lower.endsWith(".env.example")) {
+      return false;
+    }
     return matchers.sensitive(lower);
   },
 
   isStructureCandidate(path: string) {
     const normalized = normalize(path);
-    if (this.isSensitive(normalized)) return false;
-    if (this.isIgnored(normalized)) return false;
-    if (this.isLikelyBarrelFile(normalized)) return false;
-    if (this.isDocsFile(normalized)) return false;
-    if (this.isGeneratedFile(normalized)) return false;
-    if (this.isTestFile(normalized)) return false;
-    if (this.isAssetFile(normalized)) return false;
-    if (this.isToolingFile(normalized)) return false;
-    if (this.isLowSignalConfig(normalized)) return false;
+    if (this.isSensitive(normalized)) {
+      return false;
+    }
+    if (this.isIgnored(normalized)) {
+      return false;
+    }
+    if (this.isLikelyBarrelFile(normalized)) {
+      return false;
+    }
+    if (this.isDocsFile(normalized)) {
+      return false;
+    }
+    if (this.isGeneratedFile(normalized)) {
+      return false;
+    }
+    if (this.isTestFile(normalized)) {
+      return false;
+    }
+    if (this.isAssetFile(normalized)) {
+      return false;
+    }
+    if (this.isToolingFile(normalized)) {
+      return false;
+    }
+    if (this.isLowSignalConfig(normalized)) {
+      return false;
+    }
     return (
       this.isArchitectureRelevant(normalized) ||
       this.isApiPath(normalized) ||
@@ -505,15 +627,22 @@ export const ProjectPolicy = {
 
   isUsefulComplexityCandidate(path: string) {
     const normalized = normalize(path);
-    if (this.isPrimaryContourExcluded(normalized)) return false;
+    if (this.isPrimaryContourExcluded(normalized)) {
+      return false;
+    }
     if (
       this.isConfigFile(normalized) ||
       this.isDocsFile(normalized) ||
       this.isToolingFile(normalized)
-    )
+    ) {
       return false;
-    if (this.isLowSignalConfig(normalized)) return false;
-    if (this.isLikelyBarrelFile(normalized)) return false;
+    }
+    if (this.isLowSignalConfig(normalized)) {
+      return false;
+    }
+    if (this.isLikelyBarrelFile(normalized)) {
+      return false;
+    }
     return this.isArchitectureRelevant(normalized) || this.isApiPath(normalized);
   },
 } as const;

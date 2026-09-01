@@ -49,15 +49,15 @@ export function EcosystemStatusWidget({ data }: Readonly<Props>) {
             <BookOpenCheck />
             Ecosystem Status
           </span>
-          {isEmpty === false && (
-            <AppBadge variant="outline" className="font-mono">
+          {!isEmpty && (
+            <AppBadge className="font-mono" variant="outline">
               {docCoverage}% Documented
             </AppBadge>
           )}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-4">
-        {isEmpty === true ? (
+        {isEmpty ? (
           <div className="flex h-62.5 flex-col items-center justify-center gap-2 rounded-xl border">
             <p className="text-muted-foreground text-sm">No repositories found in ecosystem</p>
           </div>
@@ -73,7 +73,7 @@ export function SystemRisksWidget({ data }: Readonly<Props>) {
   return (
     <Card className="border-destructive/20">
       <CardHeader className="pb-2">
-        <CardTitle className="text-destructive flex items-center gap-2 text-sm">
+        <CardTitle className="flex items-center gap-2 text-destructive text-sm">
           <AlertTriangle /> Global Risks
         </CardTitle>
       </CardHeader>
@@ -85,8 +85,8 @@ export function SystemRisksWidget({ data }: Readonly<Props>) {
             <Users />
             <div className="flex flex-col gap-1">
               <p>Knowledge Concentration</p>
-              <p className="text-muted-foreground mt-1 text-xs">
-                <span className="text-destructive font-bold">{data.risks.busFactorRepos}</span>{" "}
+              <p className="mt-1 text-muted-foreground text-xs">
+                <span className="font-bold text-destructive">{data.risks.busFactorRepos}</span>{" "}
                 repositories have a Bus Factor of 1. If the key maintainer leaves, the code becomes
                 legacy.
               </p>
@@ -121,19 +121,19 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
           <>
             {hasHotspots && (
               <div className="flex flex-col gap-2">
-                <p className="text-muted-foreground flex items-center gap-1 text-sm">
+                <p className="flex items-center gap-1 text-muted-foreground text-sm">
                   <Target /> Refactoring Targets
                 </p>
                 {data.risks.topHotspots.map((h, i) => (
                   <div
+                    className="flex items-center justify-between rounded-xl border border-border p-2 text-xs"
                     key={i}
-                    className="border-border flex items-center justify-between rounded-xl border p-2 text-xs"
                   >
-                    <span className="text-muted-foreground max-w-50 truncate">
+                    <span className="max-w-50 truncate text-muted-foreground">
                       {h.repo_name}/
-                      <span className="text-foreground font-bold">{h.path.split("/").pop()}</span>
+                      <span className="font-bold text-foreground">{h.path.split("/").pop()}</span>
                     </span>
-                    <AppBadge variant="destructive" className="h-5 text-[10px]">
+                    <AppBadge className="h-5 text-[10px]" variant="destructive">
                       {h.score} pts
                     </AppBadge>
                   </div>
@@ -143,18 +143,18 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
 
             {hasCoupling && (
               <div className="flex flex-col gap-2">
-                <p className="text-muted-foreground flex items-center gap-1 text-sm">
+                <p className="flex items-center gap-1 text-muted-foreground text-sm">
                   <GitMerge /> Hidden Dependencies (Change Coupling)
                 </p>
                 {data.risks.topCoupling.map((c, i) => (
                   <div
+                    className="flex items-center gap-2 rounded-xl border border-border p-2 text-xs"
                     key={i}
-                    className="border-border flex items-center gap-2 rounded-xl border p-2 text-xs"
                   >
                     <span className="truncate">{c.from_path.split("/").pop()}</span>
                     <ArrowLeftRight />
                     <span className="truncate">{c.to_path.split("/").pop()}</span>
-                    <span className="text-muted-foreground ml-auto">
+                    <span className="ml-auto text-muted-foreground">
                       {c.commits} <span>commits</span>
                     </span>
                   </div>
@@ -184,21 +184,21 @@ export function HealthExtremesWidget({ data }: Readonly<Props>) {
         ) : (
           <>
             {data.highlights.topPerformer && (
-              <div className="border-success/20 flex items-center justify-between rounded-xl border p-2">
+              <div className="flex items-center justify-between rounded-xl border border-success/20 p-2">
                 <div className="flex items-center gap-2">
                   <Trophy className="text-success" />
-                  <span className="text-sm font-medium">{data.highlights.topPerformer.name}</span>
+                  <span className="font-medium text-sm">{data.highlights.topPerformer.name}</span>
                 </div>
-                <span className="text-success font-bold">{data.highlights.topPerformer.score}</span>
+                <span className="font-bold text-success">{data.highlights.topPerformer.score}</span>
               </div>
             )}
             {data.highlights.mostCritical && (
-              <div className="border-destructive/20 flex items-center justify-between rounded-xl border p-2">
+              <div className="flex items-center justify-between rounded-xl border border-destructive/20 p-2">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="text-destructive" />
-                  <span className="text-sm font-medium">{data.highlights.mostCritical.name}</span>
+                  <span className="font-medium text-sm">{data.highlights.mostCritical.name}</span>
                 </div>
-                <span className="text-destructive font-bold">
+                <span className="font-bold text-destructive">
                   {data.highlights.mostCritical.score}
                 </span>
               </div>
@@ -217,7 +217,7 @@ export function LanguagesWidget({ data }: Readonly<Props>) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base font-semibold">
+        <CardTitle className="flex items-center gap-2 font-semibold text-base">
           <FileCode2 />
           {t("languages_distribution")}
         </CardTitle>
@@ -232,7 +232,7 @@ export function LanguagesWidget({ data }: Readonly<Props>) {
                 data.overview.totalLoc > 0 ? (lang.value / data.overview.totalLoc) * 100 : 0;
 
               return (
-                <div key={lang.name} className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1" key={lang.name}>
                   <div className="flex justify-between text-xs">
                     <div className="flex items-center gap-1">
                       <span
@@ -248,9 +248,9 @@ export function LanguagesWidget({ data }: Readonly<Props>) {
                   </div>
 
                   <Progress
-                    value={percentage}
                     aria-label={`Usage of ${lang.name} language`}
                     indicatorStyle={{ backgroundColor: lang.color }}
+                    value={percentage}
                   />
                 </div>
               );
@@ -281,8 +281,8 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
           ) : (
             data.recentActivity.map((activity) => (
               <div
-                key={activity.id}
                 className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
+                key={activity.id}
               >
                 <div className="flex min-w-0 items-center gap-3">
                   {activity.status === "DONE" && <CheckCircle2 className="text-success" />}
@@ -292,10 +292,10 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
 
                   <div className="flex min-w-0 flex-1 flex-col">
                     <Link
+                      className="block w-full truncate font-medium text-sm hover:underline"
                       href={`/dashboard/repo/${activity.repoOwner}/${activity.repoName}`}
-                      className="block w-full truncate text-sm font-medium hover:underline"
                     >
-                      <span className="text-muted-foreground truncate font-bold">
+                      <span className="truncate font-bold text-muted-foreground">
                         {activity.repoOwner}
                       </span>
                       <span className="text-muted-foreground">/</span>
@@ -311,11 +311,11 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
                     {activity.status === "PENDING" && (
                       <div className="mt-1 flex items-center gap-1">
                         <Progress
-                          value={activity.progress}
                           className="h-1 flex-1"
                           indicatorStyle={{ backgroundColor: "var(--status-warning)" }}
+                          value={activity.progress}
                         />
-                        <span className="text-warning text-xs font-bold">{activity.progress}%</span>
+                        <span className="font-bold text-warning text-xs">{activity.progress}%</span>
                       </div>
                     )}
                   </div>
@@ -353,7 +353,7 @@ export function QualityRadar({ scores }: Readonly<QualityRadarProps>) {
   };
 
   return (
-    <ChartContainer config={config} className="h-75 w-full">
+    <ChartContainer className="h-75 w-full" config={config}>
       <ResponsiveContainer height="100%" width="100%">
         <RadarChart cx="50%" cy="50%" data={chartData} outerRadius="80%">
           <PolarGrid stroke="var(--border)" />
@@ -362,10 +362,10 @@ export function QualityRadar({ scores }: Readonly<QualityRadarProps>) {
             tick={{ fill: "var(--muted-foreground)", fontSize: 10, fontWeight: 500 }}
           />
           <Radar
-            name="Quality"
             dataKey="value"
             fill="var(--foreground)"
             fillOpacity={0.3}
+            name="Quality"
             stroke="var(--background)"
           />
           <ChartTooltip content={<ChartTooltipContent />} />

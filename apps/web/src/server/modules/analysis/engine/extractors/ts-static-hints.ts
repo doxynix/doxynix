@@ -61,8 +61,12 @@ const visitNode = (node: ts.Node, context: VisitContext) => {
 
 function scriptKind(filePath: string): ts.ScriptKind {
   const lower = filePath.toLowerCase();
-  if (lower.endsWith(".tsx")) return ts.ScriptKind.TSX;
-  if (lower.endsWith(".jsx")) return ts.ScriptKind.JSX;
+  if (lower.endsWith(".tsx")) {
+    return ts.ScriptKind.TSX;
+  }
+  if (lower.endsWith(".jsx")) {
+    return ts.ScriptKind.JSX;
+  }
   if (lower.endsWith(".js") || lower.endsWith(".mjs") || lower.endsWith(".cjs")) {
     return ts.ScriptKind.JS;
   }
@@ -73,14 +77,16 @@ function scriptKind(filePath: string): ts.ScriptKind {
 }
 
 export function collectTypeScriptStaticHints(
-  files: { content: string; path: string }[]
+  files: { content: string; path: string }[],
 ): TsStaticHint[] {
   const hints: TsStaticHint[] = [];
 
   for (const file of files) {
     const normalized = normalize(file.path);
     const ext = extname(normalized).toLowerCase();
-    if (!TS_LIKE.has(ext)) continue;
+    if (!TS_LIKE.has(ext)) {
+      continue;
+    }
 
     let sourceFile: ts.SourceFile;
     try {
@@ -89,13 +95,11 @@ export function collectTypeScriptStaticHints(
         file.content,
         ts.ScriptTarget.Latest,
         false,
-        scriptKind(normalized)
+        scriptKind(normalized),
       );
 
       visitNode(sourceFile, { hints, normalizedPath: normalized, sourceFile });
-    } catch {
-      continue;
-    }
+    } catch {}
   }
 
   return hints;

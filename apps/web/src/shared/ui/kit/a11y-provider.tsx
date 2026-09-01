@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import React, { type ReactNode, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
+import { usePathname } from "next/navigation";
 
 type Props = {
   children: ReactNode;
@@ -43,7 +43,7 @@ export function A11yProvider({ children }: Readonly<Props>) {
     return () => {
       window.clearTimeout(announceId);
     };
-  }, [pathname]);
+  }, []);
 
   return (
     <>

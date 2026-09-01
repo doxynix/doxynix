@@ -17,7 +17,9 @@ const llmTpmLimiter = new Ratelimit({
  * Парсит сообщение об ошибке от Google Gemini API для извлечения точного времени задержки
  */
 function parseGoogleRetryAfter(error: unknown): null | number {
-  if (error == null) return null;
+  if (error == null) {
+    return null;
+  }
 
   // Безопасно извлекаем строку сообщения об ошибке
   let errorMessage = "";
@@ -35,7 +37,9 @@ function parseGoogleRetryAfter(error: unknown): null | number {
 
   if (match != null) {
     const capturedValue = match[1];
-    if (capturedValue == null) return null;
+    if (capturedValue == null) {
+      return null;
+    }
 
     const seconds = Number.parseFloat(capturedValue);
     if (!Number.isNaN(seconds)) {
@@ -79,7 +83,7 @@ function parseGoogleRetryAfter(error: unknown): null | number {
 export const llmLimiter = {
   schedule: async <T>(
     options: { id: string; weight: number },
-    task: () => Promise<T>
+    task: () => Promise<T>,
   ): Promise<T> => {
     if (!Number.isFinite(options.weight) || options.weight <= 0) {
       throw new Error("Invalid LLM request weight: must be a positive finite number");
@@ -116,7 +120,7 @@ export const llmLimiter = {
 
         if (attempt === MAX_ATTEMPTS) {
           throw new Error(
-            `LLM Rate limit reached (TPM). Max retry attempts (${MAX_ATTEMPTS}) exceeded.`
+            `LLM Rate limit reached (TPM). Max retry attempts (${MAX_ATTEMPTS}) exceeded.`,
           );
         }
 
@@ -185,7 +189,7 @@ export const llmLimiter = {
         });
 
         await sleep(fallbackWaitTime);
-        return await task();
+        return task();
       }
       throw error;
     }

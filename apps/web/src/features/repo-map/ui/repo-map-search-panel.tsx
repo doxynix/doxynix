@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useNodes, useReactFlow, type Node } from "@xyflow/react";
+import { type Node, useNodes, useReactFlow } from "@xyflow/react";
 import { parseAsString, useQueryStates } from "nuqs";
 
 import { AppSearch } from "@/shared/ui/kit/app-search";
@@ -20,7 +20,9 @@ export function RepoMapSearchPanel() {
     const matchingNodeIds = new Set(
       nodes
         .filter((node) => {
-          if (!query) return true;
+          if (!query) {
+            return true;
+          }
           const label = String(node.data.label).toLowerCase();
           const id = node.id.toLowerCase();
           const normalizedLabel = label.replaceAll(/\s+/g, "");
@@ -31,10 +33,10 @@ export function RepoMapSearchPanel() {
               label.includes(word) ||
               id.includes(word) ||
               normalizedLabel.includes(word.replaceAll(/\s+/g, "")) ||
-              normalizedId.includes(word.replaceAll(/\s+/g, ""))
+              normalizedId.includes(word.replaceAll(/\s+/g, "")),
           );
         })
-        .map((n) => n.id)
+        .map((n) => n.id),
     );
 
     const needsUpdate = nodes.some((node) => {
@@ -50,7 +52,9 @@ export function RepoMapSearchPanel() {
 
           const node = n as Node<RepoMapNodeData>;
 
-          if ((node.data.repoMap?.dimBySearch ?? false) === shouldBeDimmed) return n;
+          if ((node.data.repoMap?.dimBySearch ?? false) === shouldBeDimmed) {
+            return n;
+          }
 
           return {
             ...n,
@@ -62,7 +66,7 @@ export function RepoMapSearchPanel() {
               },
             },
           };
-        })
+        }),
       );
     }
 

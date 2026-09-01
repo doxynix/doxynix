@@ -17,7 +17,7 @@ export function AnimatedCircularProgressBar({
   gaugeSecondaryColor,
   max = 100,
   min = 0,
-  value = 0,
+  value,
 }: Readonly<AnimatedCircularProgressBarProps>) {
   const circumference = 2 * Math.PI * 45;
   const percentPx = circumference / 100;
@@ -27,7 +27,7 @@ export function AnimatedCircularProgressBar({
 
   return (
     <div
-      className={cn("relative size-40 text-2xl font-semibold", className)}
+      className={cn("relative size-40 font-semibold text-2xl", className)}
       style={
         {
           "--circle-size": "100px",
@@ -43,9 +43,10 @@ export function AnimatedCircularProgressBar({
         } as CSSProperties
       }
     >
-      <svg fill="none" strokeWidth="2" viewBox="0 0 100 100" className="size-full">
+      <svg className="size-full" fill="none" strokeWidth="2" viewBox="0 0 100 100">
         {currentPercent <= 90 && currentPercent >= 0 && (
           <circle
+            className="opacity-100"
             cx="50"
             cy="50"
             r="45"
@@ -53,7 +54,6 @@ export function AnimatedCircularProgressBar({
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="10"
-            className="opacity-100"
             style={
               {
                 "--offset-factor-secondary": "calc(1 - var(--offset-factor))",
@@ -70,6 +70,7 @@ export function AnimatedCircularProgressBar({
           />
         )}
         <circle
+          className="opacity-100"
           cx="50"
           cy="50"
           r="45"
@@ -77,7 +78,6 @@ export function AnimatedCircularProgressBar({
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth="10"
-          className="opacity-100"
           style={
             {
               "--stroke-percent": currentPercent,
@@ -95,8 +95,8 @@ export function AnimatedCircularProgressBar({
         />
       </svg>
       <span
+        className="fade-in absolute inset-0 m-auto size-fit animate-in delay-(--delay) duration-(--transition-length) ease-linear"
         data-current-value={currentPercent}
-        className="animate-in fade-in absolute inset-0 m-auto size-fit delay-(--delay) duration-(--transition-length) ease-linear"
       >
         {currentPercent}
       </span>

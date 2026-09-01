@@ -13,7 +13,7 @@ export interface LogEntry {
 export function useTerminalLogs(logs: string[]) {
   const [filter, setFilter] = useQueryState<TerminalFilter>(
     "logFilter",
-    parseAsStringLiteral(logLevels).withDefault("all")
+    parseAsStringLiteral(logLevels).withDefault("all"),
   );
 
   const [search] = useQueryState("search", { defaultValue: "" });
@@ -29,9 +29,13 @@ export function useTerminalLogs(logs: string[]) {
 
           if (rawLevel != null && rawLevel !== "") {
             const clean = rawLevel.toLowerCase().trim();
-            if (clean === "error" || clean === "err") level = "error";
-            else if (clean === "warn" || clean === "warning") level = "warn";
-            else if (clean === "success" || clean === "ok") level = "success";
+            if (clean === "error" || clean === "err") {
+              level = "error";
+            } else if (clean === "warn" || clean === "warning") {
+              level = "warn";
+            } else if (clean === "success" || clean === "ok") {
+              level = "success";
+            }
           }
           if (rawTimestamp != null && rawTimestamp !== "") {
             timestamp = rawTimestamp;

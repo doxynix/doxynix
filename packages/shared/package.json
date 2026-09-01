@@ -1,0 +1,47 @@
+{
+  "dependencies": {
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@doxynix/config": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "default": "./src/index.ts",
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./auth": {
+      "default": "./src/auth/auth.schema.ts",
+      "import": "./src/auth/auth.schema.ts",
+      "types": "./src/auth/auth.schema.ts"
+    },
+    "./pagination": {
+      "default": "./src/pagination/pagination.types.ts",
+      "import": "./src/pagination/pagination.types.ts",
+      "types": "./src/pagination/pagination.types.ts"
+    },
+    "./scoring": {
+      "default": "./src/scoring/scoring.ts",
+      "import": "./src/scoring/scoring.ts",
+      "types": "./src/scoring/scoring.ts"
+    },
+    "./siem": {
+      "default": "./src/siem/siem.types.ts",
+      "import": "./src/siem/siem.types.ts",
+      "types": "./src/siem/siem.types.ts"
+    }
+  },
+  "name": "@doxynix/shared",
+  "private": true,
+  "scripts": {
+    "format": "biome check --write .",
+    "format:check": "biome check .",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "type-check": "tsc -b",
+    "validate": "biome check . && oxlint"
+  },
+  "type": "module",
+  "version": "0.1.0"
+}

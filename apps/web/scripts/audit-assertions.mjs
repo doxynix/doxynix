@@ -1,5 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
 import { Project, SyntaxKind } from "ts-morph";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -22,7 +23,9 @@ const report = {
 
 for (const sourceFile of sourceFiles) {
   const filePath = path.relative(rootDir, sourceFile.getFilePath());
-  if (filePath.includes("node_modules") || filePath.includes(".next")) continue;
+  if (filePath.includes("node_modules") || filePath.includes(".next")) {
+    continue;
+  }
 
   const asExpressions = sourceFile.getDescendantsOfKind(SyntaxKind.AsExpression);
 
@@ -34,7 +37,7 @@ for (const sourceFile of sourceFiles) {
 
     if (text.endsWith("as const")) {
       if (mode === "full") {
-        report.INFO.push({ file: filePath, line, text, reason: "Literal narrowing" });
+        report.INFO.push({ file: filePath, line, reason: "Literal narrowing", text });
       }
       return;
     }
@@ -56,14 +59,18 @@ for (const sourceFile of sourceFiles) {
       reason = "🎨 UI/DOM Hint";
     }
 
-    if (mode === "critical" && severity !== "CRITICAL") return;
+    if (mode === "critical" && severity !== "CRITICAL") {
+      return;
+    }
 
-    report[severity].push({ file: filePath, line, text, reason, targetType });
+    report[severity].push({ file: filePath, line, reason, targetType, text });
   });
 }
 
 const printCategory = (name, items, color) => {
-  if (items.length === 0) return;
+  if (items.length === 0) {
+    return;
+  }
   console.log(`\n${color}=== ${name} (${items.length}) ===\x1b[0m`);
   items.forEach((item) => {
     console.log(`\x1b[90m${item.file}:${item.line}\x1b[0m \x1b[32m[${item.reason}]\x1b[0m`);

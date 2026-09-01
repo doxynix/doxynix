@@ -30,8 +30,8 @@ import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
 import type { EditorStats } from "@/entities/repo/model/editor-stats.types";
-import type { FileNode } from "@/entities/repo/model/repo-setup.types";
 import type { FileContent, UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import type { FileNode } from "@/entities/repo/model/repo-setup.types";
 import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
 import { RepoStatusBar } from "@/entities/repo/ui/repo-status-bar";
 
@@ -82,12 +82,12 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
 
   const { data: auditResult } = trpc.analysis.getFileActionResult.useQuery(
     { action: "quick-file-audit", path },
-    { enabled: !!path && userId != null }
+    { enabled: !!path && userId != null },
   );
 
   const { data: documentResult } = trpc.analysis.getFileActionResult.useQuery(
     { action: "document-file-preview", path },
-    { enabled: !!path && userId != null }
+    { enabled: !!path && userId != null },
   );
 
   const typedAuditHtml = useTypewriter(auditResult?.html ?? "", 3);
@@ -212,7 +212,7 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
   };
 
   const pinMutation = trpc.analysis.pinAuditToDocs.useMutation({
-    onError: (err) => toast.error("Failed to save: " + err.message),
+    onError: (err) => toast.error(`Failed to save: ${err.message}`),
     onSuccess: () => {
       toast.success("Audit saved to project documentation");
     },
@@ -287,57 +287,55 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     !isAuditDismissed && (isAiLoading || auditResult?.action === "quick-file-audit");
 
   return (
-    <div ref={containerRef} className="bg-background flex h-full flex-col">
-      <div className="border-border flex flex-col justify-between gap-4 border-b px-4 py-2">
+    <div className="flex h-full flex-col bg-background" ref={containerRef}>
+      <div className="flex flex-col justify-between gap-4 border-border border-b px-4 py-2">
         <div className="flex items-center gap-2 overflow-hidden">
           <FileIcon className="text-muted-foreground" />
           <AppBreadcrumbs
-            items={breadcrumbItems}
             className="min-w-0 overflow-hidden text-[10px]"
+            items={breadcrumbItems}
             listClassName="sm:gap-1"
           />
-          <CopyButton value={path} tooltipText="Copy file path" className="shrink-0 opacity-100" />
+          <CopyButton className="shrink-0 opacity-100" tooltipText="Copy file path" value={path} />
         </div>
 
         <div className="flex items-center justify-end gap-2">
           {mode === "view" ? (
             <>
               {VIEW_ACTIONS.map(({ icon: Icon, ...action }) => (
-                <RepoCodeActionButton key={action.tooltipText} className="size-8" {...action}>
+                <RepoCodeActionButton className="size-8" key={action.tooltipText} {...action}>
                   <Icon className="size-3" />
                 </RepoCodeActionButton>
               ))}
               <CopyButton
-                value={localContent}
-                tooltipText="Copy file"
                 className="size-8 px-3 opacity-100"
+                tooltipText="Copy file"
+                value={localContent}
               />
             </>
           ) : (
-            <>
-              {EDIT_ACTIONS.map(({ icon: Icon, label, ...action }) => (
-                <RepoCodeActionButton key={label} {...action}>
-                  <Icon className="size-3" />
-                  {label}
-                </RepoCodeActionButton>
-              ))}
-            </>
+            EDIT_ACTIONS.map(({ icon: Icon, label, ...action }) => (
+              <RepoCodeActionButton key={label} {...action}>
+                <Icon className="size-3" />
+                {label}
+              </RepoCodeActionButton>
+            ))
           )}
         </div>
       </div>
 
       {isSearchOpen && view && (
-        <RepoSearchPanel stats={editorStats} view={view} onClose={() => setIsSearchOpen(false)} />
+        <RepoSearchPanel onClose={() => setIsSearchOpen(false)} stats={editorStats} view={view} />
       )}
 
       {showAuditPanel && (
-        <div className="bg-popover border-border animate-in fade-in slide-in-from-right-4 absolute top-20 right-6 z-50 w-96 rounded-xl border p-4">
+        <div className="fade-in slide-in-from-right-4 absolute top-20 right-6 z-50 w-96 animate-in rounded-xl border border-border bg-popover p-4">
           <div className="mb-3 flex items-center justify-between border-b pb-2">
-            <h3 className="flex items-center gap-1 text-xs font-bold">
+            <h3 className="flex items-center gap-1 font-bold text-xs">
               <Sparkles />
               AI File Audit
             </h3>
-            <AppButton size="icon" variant="ghost" onClick={() => setIsAuditDismissed(true)}>
+            <AppButton onClick={() => setIsAuditDismissed(true)} size="icon" variant="ghost">
               <X />
             </AppButton>
           </div>
@@ -361,16 +359,16 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
           ) : (
             <>
               <article
+                className="prose dark:prose-invert max-h-120 overflow-y-auto text-foreground text-xs"
                 dangerouslySetInnerHTML={{ __html: displayHtml }}
-                className="prose dark:prose-invert text-foreground max-h-120 overflow-y-auto text-xs"
               />
               <div className="mt-4 flex items-center gap-1 border-t pt-3">
                 <AppButton
+                  className="w-full"
                   disabled={pinMutation.isPending}
+                  onClick={() => pinMutation.mutate({ path, repoId })}
                   size="sm"
                   variant="outline"
-                  onClick={() => pinMutation.mutate({ path, repoId })}
-                  className="w-full"
                 >
                   {pinMutation.isPending ? (
                     <Spinner className="size-3" />
@@ -385,28 +383,28 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
         </div>
       )}
 
-      {showDiff !== false && (
-        <div className="animate-in slide-in-from-top-1 flex items-center justify-between border-b px-4 py-2">
+      {showDiff && (
+        <div className="slide-in-from-top-1 flex animate-in items-center justify-between border-b px-4 py-2">
           <div className="flex items-center gap-2">
             <Sparkles />
             <div className="flex flex-col">
-              <span className="text-[11px] font-semibold tracking-tight">
+              <span className="font-semibold text-[11px] tracking-tight">
                 Documentation Preview
               </span>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <AppButton size="sm" variant="ghost" onClick={handleDiscardDiff}>
+            <AppButton onClick={handleDiscardDiff} size="sm" variant="ghost">
               <X className="mr-1 h-3 w-3" />
               Discard
             </AppButton>
             <AppButton
-              disabled={stageMutation.isPending === true}
+              disabled={stageMutation.isPending}
+              onClick={handleAcceptDiff}
               size="sm"
               variant="default"
-              onClick={handleAcceptDiff}
             >
-              {stageMutation.isPending === true ? (
+              {stageMutation.isPending ? (
                 <Loader2 className="mr-1 h-3 w-3 animate-spin" />
               ) : (
                 <Check className="mr-1 h-3 w-3" />
@@ -419,18 +417,17 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
 
       <div className="relative flex-1 overflow-hidden">
         <Editor
-          value={
-            showDiff && documentResult?.content != null ? documentResult.content : localContent
-          }
           compareValue={fileData.content}
           initialValue={fileData.content}
-          meta={fileData.meta}
-          path={path}
-          readOnly={mode === "view"}
-          showDiff={showDiff}
           onChange={setLocalContent}
           onStats={setEditorStats}
           onViewCreated={setView}
+          path={path}
+          readOnly={mode === "view"}
+          showDiff={showDiff}
+          value={
+            showDiff && documentResult?.content != null ? documentResult.content : localContent
+          }
         />
       </div>
 

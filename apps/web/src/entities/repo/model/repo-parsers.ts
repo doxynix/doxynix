@@ -11,7 +11,7 @@ export const repoParsers = {
   page: parseAsInteger.withDefault(REPO_DEFAULTS.PAGE),
   search: parseAsString.withDefault(REPO_DEFAULTS.SEARCH),
   sortBy: parseAsStringLiteral(["updatedAt", "createdAt", "name"] as const).withDefault(
-    "updatedAt"
+    "updatedAt",
   ),
   status: parseAsStringLiteral(StatusSchema.options),
   visibility: parseAsStringLiteral(VisibilitySchema.options),

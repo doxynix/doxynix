@@ -55,11 +55,9 @@ type GitHubRepoInfo = Awaited<ReturnType<typeof githubService.getRepoInfo>>;
 function createGitHubRepoInfo(overrides: Partial<GitHubRepoInfo> = {}): GitHubRepoInfo {
   const getValue = <K extends keyof GitHubRepoInfo>(
     key: K,
-    fallback: GitHubRepoInfo[K]
+    fallback: GitHubRepoInfo[K],
   ): GitHubRepoInfo[K] => {
-    return Object.prototype.hasOwnProperty.call(overrides, key)
-      ? (overrides[key] as GitHubRepoInfo[K])
-      : fallback;
+    return Object.hasOwn(overrides, key) ? (overrides[key] as GitHubRepoInfo[K]) : fallback;
   };
 
   return {
@@ -271,7 +269,7 @@ describe("repoService.createRepo", () => {
         code: expectedCode,
         message: expectedMessage,
       });
-    }
+    },
   );
 
   it("should rethrow non-octokit errors from GitHub request", async () => {
@@ -340,7 +338,7 @@ describe("repoService.createRepo", () => {
           topics: [],
           visibility: VisibilitySchema.enum.PUBLIC,
         }),
-      })
+      }),
     );
   });
 
@@ -353,7 +351,7 @@ describe("repoService.createRepo", () => {
 
     vi.mocked(githubService.parseUrl).mockReturnValue({ name: "repo", owner: "owner" });
     vi.mocked(githubService.getRepoInfo).mockResolvedValue(
-      createGitHubRepoInfo({ private: false })
+      createGitHubRepoInfo({ private: false }),
     );
     vi.mocked(db.repo.create).mockRejectedValue(dbError);
     vi.mocked(handlePrismaError).mockImplementation(() => {

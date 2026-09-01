@@ -74,7 +74,7 @@ function collectSymbols(
   filePath: string,
   content: string,
   patterns: RegexSymbolPattern[],
-  lineMap: LineMap
+  lineMap: LineMap,
 ): SymbolRef[] {
   const symbols: SymbolRef[] = [];
 
@@ -82,7 +82,9 @@ function collectSymbols(
     pattern.lastIndex = 0;
     for (const match of content.matchAll(pattern)) {
       const name = typeof match[1] === "string" ? match[1].trim() : "";
-      if (name.length === 0) continue;
+      if (name.length === 0) {
+        continue;
+      }
 
       const startOffset = match.index;
 
@@ -104,7 +106,7 @@ function collectRoutes(
   filePath: string,
   content: string,
   patterns: RegexRoutePattern[],
-  lineMap: LineMap
+  lineMap: LineMap,
 ): RouteRef[] {
   const routes: RouteRef[] = [];
 
@@ -114,7 +116,9 @@ function collectRoutes(
       const method =
         typeof match[methodIndex] === "string" ? match[methodIndex].toUpperCase() : undefined;
       const routePath = typeof match[pathIndex] === "string" ? match[pathIndex] : undefined;
-      if (method == null || routePath == null || routePath.length === 0) continue;
+      if (method == null || routePath == null || routePath.length === 0) {
+        continue;
+      }
 
       const startOffset = match.index;
 
@@ -143,12 +147,12 @@ function buildSignals(
     imports: string[];
     routes?: RouteRef[];
     symbols?: SymbolRef[];
-  }
+  },
 ): FileSignals {
   const frameworkHints = collectFrameworkFactsFromTokens(
     [...params.imports, ...(params.extraFrameworkTokens ?? []), file.path],
     file.path,
-    CONFIDENCE_LEVELS.manifestMatch
+    CONFIDENCE_LEVELS.manifestMatch,
   );
 
   return {

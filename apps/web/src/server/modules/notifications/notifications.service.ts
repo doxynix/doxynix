@@ -1,4 +1,4 @@
-import type { NotifyType, Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
 
@@ -61,7 +61,7 @@ export const notificationsService = {
         : {};
 
     return {
-      ...(filters.type != null && { type: filters.type as NotifyType }),
+      ...(filters.type != null && { type: filters.type }),
       ...(typeof filters.isRead === "boolean" && { isRead: filters.isRead }),
       ...searchFilter,
       ...repoFilter,

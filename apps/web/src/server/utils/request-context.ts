@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+
 import type { NextRequest } from "next/server";
 import ipaddr from "ipaddr.js";
 
@@ -29,9 +30,13 @@ export const requestContext = new AsyncLocalStorage<RequestStore>();
  * IPv6: зануляет последние 64 бита (2001:db8:85a3:0:0:8a2e:370:7334 -> 2001:db8:85a3:0::)
  */
 export function anonymizeIp(ip: null | string | undefined): null | string {
-  if (ip == null || ip === "unknown" || ip.trim() === "") return null;
+  if (ip == null || ip === "unknown" || ip.trim() === "") {
+    return null;
+  }
 
-  if (ip === "127.0.0.1" || ip === "::1") return ip;
+  if (ip === "127.0.0.1" || ip === "::1") {
+    return ip;
+  }
 
   try {
     const addr = ipaddr.process(ip);
@@ -81,12 +86,18 @@ export function getUa(request: NextRequest): string {
 
 export function getCountry(request: NextRequest): string {
   const geoCountry = (request as VercelNextRequest).geo?.country;
-  if (geoCountry != null) return geoCountry;
+  if (geoCountry != null) {
+    return geoCountry;
+  }
 
   const vercelHeader = request.headers.get("x-vercel-ip-country");
-  if (vercelHeader != null) return vercelHeader.toUpperCase();
+  if (vercelHeader != null) {
+    return vercelHeader.toUpperCase();
+  }
 
-  if (!IS_PROD) return "LOCAL";
+  if (!IS_PROD) {
+    return "LOCAL";
+  }
 
   return "UNKNOWN";
 }
@@ -112,16 +123,26 @@ export function generateRequestId(): string {
 }
 
 export function sanitizeRequestId(value?: null | string): string | undefined {
-  if (value == null) return undefined;
+  if (value == null) {
+    return undefined;
+  }
   const trimmed = value.trim();
-  if (trimmed.length === 0 || trimmed.length > 64) return undefined;
-  if (!/^[\w-]+$/.test(trimmed)) return undefined;
+  if (trimmed.length === 0 || trimmed.length > 64) {
+    return undefined;
+  }
+  if (!/^[\w-]+$/.test(trimmed)) {
+    return undefined;
+  }
   return trimmed;
 }
 
 export function resolveRequestId(request?: NextRequest, existing?: string): string | undefined {
-  if (existing != null) return sanitizeRequestId(existing);
-  if (request == null) return undefined;
+  if (existing != null) {
+    return sanitizeRequestId(existing);
+  }
+  if (request == null) {
+    return undefined;
+  }
   return getRequestIdFromHeaders(request);
 }
 

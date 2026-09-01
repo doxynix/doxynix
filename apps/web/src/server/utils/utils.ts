@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+
 import { Status } from "@prisma/client";
 import { compact } from "es-toolkit";
 import fg from "fast-glob";
@@ -18,7 +19,7 @@ export async function handleError(
   error: unknown,
   analysisId: string,
   channelName: string,
-  tempPath: string
+  tempPath: string,
 ) {
   const message = error instanceof Error ? error.message : "Unknown error";
   appLogger.error({
@@ -120,9 +121,15 @@ export async function readAndFilterFiles(basePath: string, selectedFiles: string
   const settledFiles = await Promise.all(filePromises);
   const validFiles = compact(settledFiles);
 
-  if (sensitiveCount > 0) taskLogger.warn(`File System: Skipped ${sensitiveCount} sensitive files`);
-  if (binaryCount > 0) taskLogger.info(`File System: Ignored ${binaryCount} binary/asset files`);
+  if (sensitiveCount > 0) {
+    taskLogger.warn(`File System: Skipped ${sensitiveCount} sensitive files`);
+  }
+  if (binaryCount > 0) {
+    taskLogger.info(`File System: Ignored ${binaryCount} binary/asset files`);
+  }
 
-  if (validFiles.length === 0) throw new Error("No valid text files found to analyze");
+  if (validFiles.length === 0) {
+    throw new Error("No valid text files found to analyze");
+  }
   return validFiles;
 }

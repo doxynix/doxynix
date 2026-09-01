@@ -13,7 +13,9 @@ type Props = {
 };
 
 function getDynamicToolContext(toolName: string, args: any): null | string {
-  if (args == null || typeof args !== "object") return null;
+  if (args == null || typeof args !== "object") {
+    return null;
+  }
 
   switch (toolName) {
     case "getFileContent":
@@ -58,9 +60,9 @@ export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }:
 
   if (isApprovalRequested) {
     return (
-      <div className="animate-in fade-in my-2 w-full text-left duration-200">
-        <div className="border-warning/30 bg-warning/5 flex max-w-[95%] flex-col gap-2 rounded-xl border p-3">
-          <div className="text-warning flex items-center gap-1.5 text-xs font-semibold">
+      <div className="fade-in my-2 w-full animate-in text-left duration-200">
+        <div className="flex max-w-[95%] flex-col gap-2 rounded-xl border border-warning/30 bg-warning/5 p-3">
+          <div className="flex items-center gap-1.5 font-semibold text-warning text-xs">
             <AlertTriangle className="size-3.5" />
             <span>Action Requires Confirmation</span>
           </div>
@@ -69,21 +71,20 @@ export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }:
             <strong className="text-foreground">{baseLabel}</strong>.
           </p>
           {part.args != null && (
-            <pre className="bg-background text-muted-foreground no-scrollbar max-h-24 overflow-x-auto rounded-lg border p-2 font-mono text-[10px]">
+            <pre className="no-scrollbar max-h-24 overflow-x-auto rounded-lg border bg-background p-2 font-mono text-[10px] text-muted-foreground">
               {JSON.stringify(part.args, null, 2)}
             </pre>
           )}
           <div className="mt-1 flex items-center gap-2">
             <AppButton
-              size="sm"
+              className="bg-warning text-xs hover:bg-warning/90"
               onClick={() => addToolApprovalResponse({ approved: true, id: part.approval.id })}
-              className="bg-warning hover:bg-warning/90 text-xs"
+              size="sm"
             >
               Approve
             </AppButton>
             <AppButton
-              size="sm"
-              variant="ghost"
+              className="text-xs"
               onClick={() =>
                 addToolApprovalResponse({
                   approved: false,
@@ -91,7 +92,8 @@ export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }:
                   reason: "Denied by user",
                 })
               }
-              className="text-xs"
+              size="sm"
+              variant="ghost"
             >
               Deny
             </AppButton>
@@ -104,20 +106,20 @@ export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }:
   if (isResponded) {
     const wasApproved = part.approval?.approved;
     return (
-      <div className="animate-in fade-in my-1 w-full text-left duration-200">
+      <div className="fade-in my-1 w-full animate-in text-left duration-200">
         <AppBadge
+          className="flex items-center gap-2 text-muted-foreground text-xs"
           variant="outline"
-          className="text-muted-foreground flex items-center gap-2 text-xs"
         >
           {wasApproved === true ? (
             <>
-              <span className="text-success text-xs font-bold">✓</span>
-              <span className="text-foreground max-w-[320px] truncate">{fullLabel} (Approved)</span>
+              <span className="font-bold text-success text-xs">✓</span>
+              <span className="max-w-[320px] truncate text-foreground">{fullLabel} (Approved)</span>
             </>
           ) : (
             <>
-              <span className="text-destructive text-xs font-bold">✗</span>
-              <span className="text-foreground max-w-[320px] truncate">{fullLabel} (Denied)</span>
+              <span className="font-bold text-destructive text-xs">✗</span>
+              <span className="max-w-[320px] truncate text-foreground">{fullLabel} (Denied)</span>
             </>
           )}
         </AppBadge>
@@ -128,13 +130,13 @@ export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }:
   if (isCompleted) {
     const isError = part.state === "output-error";
     return (
-      <div className="animate-in fade-in my-1 w-full text-left duration-200">
+      <div className="fade-in my-1 w-full animate-in text-left duration-200">
         <AppBadge
+          className="flex items-center gap-2 text-muted-foreground text-xs"
           variant="outline"
-          className="text-muted-foreground flex items-center gap-2 text-xs"
         >
           {isError ? <X className="text-destructive" /> : <Check className="text-success" />}
-          <span className="text-foreground max-w-[320px] truncate">
+          <span className="max-w-[320px] truncate text-foreground">
             {fullLabel} {isError ? "(Failed)" : "(Completed)"}
           </span>
         </AppBadge>
@@ -143,10 +145,10 @@ export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }:
   }
 
   return (
-    <div className="animate-in fade-in my-1 w-full text-left duration-200">
-      <AppBadge variant="outline" className="text-muted-foreground flex items-center gap-2 text-xs">
+    <div className="fade-in my-1 w-full animate-in text-left duration-200">
+      <AppBadge className="flex items-center gap-2 text-muted-foreground text-xs" variant="outline">
         <Spinner />
-        <span className="text-foreground max-w-[320px] truncate">{fullLabel}</span>
+        <span className="max-w-[320px] truncate text-foreground">{fullLabel}</span>
       </AppBadge>
     </div>
   );

@@ -7,7 +7,7 @@ const ONE_C_FUNCTION = "\\u0424\\u0443\\u043D\\u043A\\u0446\\u0438\\u044F";
 const ONE_C_EXPORT = "\\u042D\\u043A\\u0441\\u043F\\u043E\\u0440\\u0442";
 const ONE_C_EXPORTED_MEMBER_REGEX = new RegExp(
   `\\b(?:${ONE_C_PROCEDURE}|${ONE_C_FUNCTION})\\b.*\\b${ONE_C_EXPORT}\\b`,
-  "giu"
+  "giu",
 );
 
 export type RegexRoutePattern = Pick<RouteRef, "framework"> & {
@@ -58,26 +58,6 @@ const DEFAULT_SIGNAL_SPEC: RegexSignalSpec = {
 };
 
 const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
-  "1c": {
-    apiSurfacePatterns: [ONE_C_EXPORTED_MEMBER_REGEX],
-    entrypointHint: (file) =>
-      /managedapplicationmodule|ordinaryapplicationmodule|sessionmodule|externconnectionmodule/i.test(
-        file.path
-      ),
-    exportPatterns: [ONE_C_EXPORTED_MEMBER_REGEX],
-    extraFrameworkTokens: () => ["1C:Enterprise"],
-    importPatterns: [],
-    symbolPatterns: [
-      {
-        exported: true,
-        kind: "function",
-        pattern: new RegExp(
-          `\\b(?:${ONE_C_PROCEDURE}|${ONE_C_FUNCTION})\\s+([\\p{L}_][\\p{L}\\p{N}_]*)`,
-          "giu"
-        ),
-      },
-    ],
-  },
   ".cs": {
     apiSurfacePatterns: [
       /\bMap(Get|Post|Put|Delete|Patch)\s*\(/g,
@@ -297,7 +277,7 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
   },
   ".swift": {
     apiSurfacePatterns: [/@main/g],
-    entrypointHint: (file) => /@main/.test(file.content),
+    entrypointHint: (file) => file.content.includes("@main"),
     exportPatterns: [/\b(?:public|open)\s+(?:class|struct|enum|protocol|func)\b/g],
     importPatterns: [/^\s*import\s+([\w.]+)/gm],
     symbolPatterns: [
@@ -311,6 +291,26 @@ const REGEX_SIGNAL_SPECS: Record<string, RegexSignalSpec> = {
         exported: true,
         kind: "function",
         pattern: /\b(?:public|open)\s+func\s+([A-Z_a-z]\w*)\s*\(/g,
+      },
+    ],
+  },
+  "1c": {
+    apiSurfacePatterns: [ONE_C_EXPORTED_MEMBER_REGEX],
+    entrypointHint: (file) =>
+      /managedapplicationmodule|ordinaryapplicationmodule|sessionmodule|externconnectionmodule/i.test(
+        file.path,
+      ),
+    exportPatterns: [ONE_C_EXPORTED_MEMBER_REGEX],
+    extraFrameworkTokens: () => ["1C:Enterprise"],
+    importPatterns: [],
+    symbolPatterns: [
+      {
+        exported: true,
+        kind: "function",
+        pattern: new RegExp(
+          `\\b(?:${ONE_C_PROCEDURE}|${ONE_C_FUNCTION})\\s+([\\p{L}_][\\p{L}\\p{N}_]*)`,
+          "giu",
+        ),
       },
     ],
   },

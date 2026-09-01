@@ -1,13 +1,15 @@
 import type { ReadonlyURLSearchParams } from "next/navigation";
 
-import { serializeRepoParams } from "./repo-details-params";
 import type { RepoSearchResult } from "./repo.types";
+import { serializeRepoParams } from "./repo-details-params";
 
 export function buildRepoDetailHref(
   basePath: string,
-  searchParams?: null | ReadonlyURLSearchParams | URLSearchParams
+  searchParams?: null | ReadonlyURLSearchParams | URLSearchParams,
 ) {
-  if (searchParams == null) return basePath;
+  if (searchParams == null) {
+    return basePath;
+  }
 
   return serializeRepoParams(basePath, {
     filter: searchParams.get("filter"),
@@ -61,7 +63,7 @@ export function buildRepoMapHref(params: {
   owner: string;
 }) {
   const base = `/dashboard/repo/${encodeURIComponent(params.owner)}/${encodeURIComponent(
-    params.name
+    params.name,
   )}/map`;
 
   return serializeRepoParams(base, {

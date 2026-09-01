@@ -81,7 +81,7 @@ export const SEMANTIC_META: Record<StructureSemanticKind, { description: string;
   };
 
 export function collectSemanticKinds(path: string, apiPaths: Set<string>): StructureSemanticKind[] {
-  return ProjectPolicy.getSemanticKinds(path, { apiPaths }) as StructureSemanticKind[];
+  return ProjectPolicy.getSemanticKinds(path, { apiPaths });
 }
 
 export function describeGroup(groupId: string, primaryKind: StructureSemanticKind) {
@@ -90,17 +90,29 @@ export function describeGroup(groupId: string, primaryKind: StructureSemanticKin
 }
 
 export function getGenericGroupPenalty(node: StructureNodeSummaryLike) {
-  if (node.nodeType !== "group") return 0;
+  if (node.nodeType !== "group") {
+    return 0;
+  }
 
   let penalty = ProjectPolicy.getGenericGroupPathPenalty(node.path);
-  if (node.kind === "unknown") penalty += 6;
+  if (node.kind === "unknown") {
+    penalty += 6;
+  }
 
   const hasStrongSignal = node.markers.entrypoint || node.markers.api || node.markers.risk;
-  if (!hasStrongSignal && !node.markers.shared && !node.markers.config) penalty += 4;
-  if (!hasStrongSignal && node.stats.pathCount < 3) penalty += 6;
+  if (!hasStrongSignal && !node.markers.shared && !node.markers.config) {
+    penalty += 4;
+  }
+  if (!hasStrongSignal && node.stats.pathCount < 3) {
+    penalty += 6;
+  }
 
-  if (hasStrongSignal) penalty -= 6;
-  if (node.kind === "core" || node.kind === "backend" || node.kind === "api") penalty -= 2;
+  if (hasStrongSignal) {
+    penalty -= 6;
+  }
+  if (node.kind === "core" || node.kind === "backend" || node.kind === "api") {
+    penalty -= 2;
+  }
 
   return Math.max(0, penalty);
 }
@@ -142,23 +154,46 @@ export function summarizeGroupImportance(params: {
 }) {
   const reasons: string[] = [];
 
-  if (params.entrypointCount > 0) reasons.push("contains likely entrypoints");
-  if (params.apiCount > 0) reasons.push("surfaces public API or route files");
-  if (params.riskCount > 0) reasons.push("appears in high-risk or hotspot evidence");
-  if (params.churnCount > 0) reasons.push("shows recent git activity concentration");
-  if (params.changeCouplingCount > 0)
+  if (params.entrypointCount > 0) {
+    reasons.push("contains likely entrypoints");
+  }
+  if (params.apiCount > 0) {
+    reasons.push("surfaces public API or route files");
+  }
+  if (params.riskCount > 0) {
+    reasons.push("appears in high-risk or hotspot evidence");
+  }
+  if (params.churnCount > 0) {
+    reasons.push("shows recent git activity concentration");
+  }
+  if (params.changeCouplingCount > 0) {
     reasons.push("changes here tend to move with neighboring paths");
-  if (params.configCount > 0) reasons.push("contains configuration or runtime setup");
-  if (params.frameworkCount > 0) reasons.push("shows framework or runtime integration signals");
-  if (params.dependencyHotspotCount > 0) reasons.push("contains dependency-central files");
-  if (params.orphanCount > 0) reasons.push("includes isolated runtime paths worth reviewing");
-  if (params.graphWarningCount > 0) reasons.push("has partial dependency-resolution evidence");
-  if (params.hotspotCount > 0 && params.riskCount === 0)
+  }
+  if (params.configCount > 0) {
+    reasons.push("contains configuration or runtime setup");
+  }
+  if (params.frameworkCount > 0) {
+    reasons.push("shows framework or runtime integration signals");
+  }
+  if (params.dependencyHotspotCount > 0) {
+    reasons.push("contains dependency-central files");
+  }
+  if (params.orphanCount > 0) {
+    reasons.push("includes isolated runtime paths worth reviewing");
+  }
+  if (params.graphWarningCount > 0) {
+    reasons.push("has partial dependency-resolution evidence");
+  }
+  if (params.hotspotCount > 0 && params.riskCount === 0) {
     reasons.push("concentrates hotspot candidates");
-  if (params.sampleCount >= 8 && reasons.length === 0)
+  }
+  if (params.sampleCount >= 8 && reasons.length === 0) {
     reasons.push("covers a large structural area");
+  }
 
-  if (reasons.length === 0) return describeGroup(params.groupId, params.primaryKind);
+  if (reasons.length === 0) {
+    return describeGroup(params.groupId, params.primaryKind);
+  }
 
   return `${describeGroup(params.groupId, params.primaryKind)} This area ${reasons.join(", ")}.`;
 }
@@ -177,29 +212,55 @@ function getStructureSeedScore(params: {
   const signals = params.signalMap.get(normalizedPath) ?? new Set();
   let score = 0;
 
-  if (signals.has("entrypoint")) score += 5;
-  if (signals.has("api")) score += 4;
-  if (signals.has("hotspot") || signals.has("finding")) score += 4;
-  if (signals.has("fact") || signals.has("onboarding")) score += 3;
-  if (signals.has("config") && !ProjectPolicy.isLowSignalConfig(normalizedPath)) score += 1;
-
-  if (params.graphRelatedPaths.has(normalizedPath)) score += 3;
-  if ((params.metrics.documentationInput?.api.publicSurfacePaths ?? []).includes(normalizedPath))
+  if (signals.has("entrypoint")) {
+    score += 5;
+  }
+  if (signals.has("api")) {
+    score += 4;
+  }
+  if (signals.has("hotspot") || signals.has("finding")) {
+    score += 4;
+  }
+  if (signals.has("fact") || signals.has("onboarding")) {
     score += 3;
-  if ((params.metrics.routeInventory?.sourceFiles ?? []).includes(normalizedPath)) score += 2;
+  }
+  if (signals.has("config") && !ProjectPolicy.isLowSignalConfig(normalizedPath)) {
+    score += 1;
+  }
 
-  if (ProjectPolicy.isApiPath(normalizedPath)) score += 2;
-  if (ProjectPolicy.isArchitectureRelevant(normalizedPath)) score += 2;
-  if (ProjectPolicy.isPrimaryEntrypoint(normalizedPath)) score += 2;
+  if (params.graphRelatedPaths.has(normalizedPath)) {
+    score += 3;
+  }
+  if ((params.metrics.documentationInput?.api.publicSurfacePaths ?? []).includes(normalizedPath)) {
+    score += 3;
+  }
+  if ((params.metrics.routeInventory?.sourceFiles ?? []).includes(normalizedPath)) {
+    score += 2;
+  }
+
+  if (ProjectPolicy.isApiPath(normalizedPath)) {
+    score += 2;
+  }
+  if (ProjectPolicy.isArchitectureRelevant(normalizedPath)) {
+    score += 2;
+  }
+  if (ProjectPolicy.isPrimaryEntrypoint(normalizedPath)) {
+    score += 2;
+  }
   if (
     ProjectPolicy.isConfigFile(normalizedPath) &&
     !ProjectPolicy.isLowSignalConfig(normalizedPath)
-  )
+  ) {
     score += 1;
+  }
 
   const groupId = ProjectPolicy.deriveGroupId(normalizedPath);
-  if (ProjectPolicy.isBroadGenericGroupPath(groupId)) score -= 2;
-  if (normalizedPath.split("/").filter(Boolean).length <= 1) score -= 2;
+  if (ProjectPolicy.isBroadGenericGroupPath(groupId)) {
+    score -= 2;
+  }
+  if (normalizedPath.split("/").filter(Boolean).length <= 1) {
+    score -= 2;
+  }
 
   return score;
 }
@@ -212,11 +273,15 @@ export function shouldKeepStructurePath(
   >,
   metrics: RepoMetrics,
   apiPaths: Set<string>,
-  graphRelatedPaths: Set<string>
+  graphRelatedPaths: Set<string>,
 ) {
   const normalizedPath = normalize(path);
-  if (ProjectPolicy.isSensitive(normalizedPath)) return false;
-  if (ProjectPolicy.isIgnored(normalizedPath)) return false;
+  if (ProjectPolicy.isSensitive(normalizedPath)) {
+    return false;
+  }
+  if (ProjectPolicy.isIgnored(normalizedPath)) {
+    return false;
+  }
 
   const signals = signalMap.get(normalizedPath) ?? new Set();
   const hasStrongSignal =
@@ -227,14 +292,30 @@ export function shouldKeepStructurePath(
     signals.has("fact") ||
     signals.has("onboarding");
 
-  if (hasStrongSignal) return true;
-  if (signals.has("config")) return !ProjectPolicy.isLowSignalConfig(normalizedPath);
-  if (ProjectPolicy.isLikelyBarrelFile(normalizedPath)) return false;
-  if (ProjectPolicy.isDocsFile(normalizedPath)) return false;
-  if (ProjectPolicy.isGeneratedFile(normalizedPath)) return false;
-  if (ProjectPolicy.isTestFile(normalizedPath)) return false;
-  if (ProjectPolicy.isAssetFile(normalizedPath)) return false;
-  if (ProjectPolicy.isToolingFile(normalizedPath)) return false;
+  if (hasStrongSignal) {
+    return true;
+  }
+  if (signals.has("config")) {
+    return !ProjectPolicy.isLowSignalConfig(normalizedPath);
+  }
+  if (ProjectPolicy.isLikelyBarrelFile(normalizedPath)) {
+    return false;
+  }
+  if (ProjectPolicy.isDocsFile(normalizedPath)) {
+    return false;
+  }
+  if (ProjectPolicy.isGeneratedFile(normalizedPath)) {
+    return false;
+  }
+  if (ProjectPolicy.isTestFile(normalizedPath)) {
+    return false;
+  }
+  if (ProjectPolicy.isAssetFile(normalizedPath)) {
+    return false;
+  }
+  if (ProjectPolicy.isToolingFile(normalizedPath)) {
+    return false;
+  }
 
   return (
     getStructureSeedScore({
@@ -249,14 +330,30 @@ export function shouldKeepStructurePath(
 
 export function rankStructureNode(node: StructureNodeSummaryLike) {
   let rank = node.score;
-  if (node.nodeType === "group") rank += 6;
-  if (node.markers.entrypoint) rank += 12;
-  if (node.markers.api) rank += 10;
-  if (node.markers.risk) rank += 8;
-  if (node.markers.config) rank += 4;
-  if (node.markers.shared) rank += 3;
-  if (node.kind !== "unknown") rank += 2;
-  if (node.nodeType === "file" && ProjectPolicy.isLikelyBarrelFile(node.path)) rank -= 8;
+  if (node.nodeType === "group") {
+    rank += 6;
+  }
+  if (node.markers.entrypoint) {
+    rank += 12;
+  }
+  if (node.markers.api) {
+    rank += 10;
+  }
+  if (node.markers.risk) {
+    rank += 8;
+  }
+  if (node.markers.config) {
+    rank += 4;
+  }
+  if (node.markers.shared) {
+    rank += 3;
+  }
+  if (node.kind !== "unknown") {
+    rank += 2;
+  }
+  if (node.nodeType === "file" && ProjectPolicy.isLikelyBarrelFile(node.path)) {
+    rank -= 8;
+  }
   rank -= getGenericGroupPenalty(node);
   return rank;
 }
@@ -272,9 +369,15 @@ export function isMeaningfulTopLevelNode(node: StructureNodeSummaryLike) {
     return false;
   }
 
-  if (node.markers.entrypoint || node.markers.api || node.markers.risk) return true;
-  if (node.markers.config || node.markers.shared) return true;
-  if (node.stats.pathCount >= 2) return true;
+  if (node.markers.entrypoint || node.markers.api || node.markers.risk) {
+    return true;
+  }
+  if (node.markers.config || node.markers.shared) {
+    return true;
+  }
+  if (node.stats.pathCount >= 2) {
+    return true;
+  }
   return node.kind !== "unknown";
 }
 
@@ -295,7 +398,9 @@ export function isMeaningfulChildNode(node: StructureNodeSummaryLike) {
     return true;
   }
 
-  if (ProjectPolicy.isLikelyBarrelFile(node.path)) return false;
+  if (ProjectPolicy.isLikelyBarrelFile(node.path)) {
+    return false;
+  }
   return ProjectPolicy.isArchitectureRelevant(node.path) || ProjectPolicy.isApiPath(node.path);
 }
 
@@ -315,11 +420,10 @@ export function collectGroupsByKind(groupMap: Map<string, StructureGroupEntry>) 
 export function getStrongGroups(
   groups: string[] | undefined,
   groupMap: Map<string, StructureGroupEntry>,
-  limit: number
+  limit: number,
 ) {
   return (groups ?? [])
-    .slice()
-    .sort((left, right) => {
+    .toSorted((left, right) => {
       const leftEntry = groupMap.get(left);
       const rightEntry = groupMap.get(right);
       const leftScore =

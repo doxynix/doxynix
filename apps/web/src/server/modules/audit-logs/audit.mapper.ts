@@ -37,9 +37,13 @@ const SKIP_FIELDS = new Set([
 ]);
 
 function auditReplacer(key: string, value: unknown): unknown {
-  if (SKIP_FIELDS.has(key)) return undefined;
+  if (SKIP_FIELDS.has(key)) {
+    return undefined;
+  }
 
-  if (typeof value === "bigint") return value.toString();
+  if (typeof value === "bigint") {
+    return value.toString();
+  }
 
   return value;
 }
@@ -53,7 +57,9 @@ const OP_MAP: Record<string, { severity: AuditSeverityType; title: string }> = {
 };
 
 export function sanitizeObject(obj: unknown): Record<string, unknown> {
-  if (obj == null || typeof obj !== "object") return {};
+  if (obj == null || typeof obj !== "object") {
+    return {};
+  }
 
   try {
     const sanitized = JSON.parse(safeStringify(obj, auditReplacer));
@@ -80,9 +86,13 @@ export function mapAuditLogToDTO(log: AuditLog): AuditLogType {
   const device = parser.getDevice();
 
   let deviceType: AuditLogType["deviceType"] = "desktop";
-  if (log.userAgent === "internal") deviceType = "system";
-  else if (device.type === "mobile") deviceType = "mobile";
-  else if (device.type === "tablet") deviceType = "tablet";
+  if (log.userAgent === "internal") {
+    deviceType = "system";
+  } else if (device.type === "mobile") {
+    deviceType = "mobile";
+  } else if (device.type === "tablet") {
+    deviceType = "tablet";
+  }
 
   const config = MODEL_CONFIG[log.model] || { icon: "database", name: log.model };
   const op = OP_MAP[log.operation] || { severity: "info", title: log.operation };

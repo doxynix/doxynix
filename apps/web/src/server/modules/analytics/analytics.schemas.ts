@@ -19,7 +19,7 @@ export const DashboardStatsSchema = z.object({
       color: z.string(),
       name: z.string(),
       value: z.number(),
-    })
+    }),
   ),
   overview: z.object({
     avgScores: z.object({
@@ -47,7 +47,7 @@ export const DashboardStatsSchema = z.object({
       repoName: z.string(),
       repoOwner: z.string(),
       status: StatusSchema,
-    })
+    }),
   ),
   risks: z.object({
     busFactorRepos: z.number(),
@@ -57,14 +57,14 @@ export const DashboardStatsSchema = z.object({
         from_path: z.string(),
         repo_name: z.string(),
         to_path: z.string(),
-      })
+      }),
     ),
     topHotspots: z.array(
       z.object({
         path: z.string(),
         repo_name: z.string(),
         score: z.number(),
-      })
+      }),
     ),
   }),
 });
@@ -78,7 +78,7 @@ export const TrendsSchema = z.array(
     onboarding: z.number(),
     security: z.number(),
     techDebt: z.number(),
-  })
+  }),
 );
 
 export const AnalyticsInputSchema = z.object({

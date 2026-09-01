@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   AlertCircle,
   AlertTriangle,
@@ -21,7 +22,6 @@ import {
   Terminal,
   Unplug,
 } from "lucide-react";
-import { createPortal } from "react-dom";
 
 import { trpc } from "@/shared/api/trpc";
 import { cn } from "@/shared/lib/cn";
@@ -120,17 +120,19 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
       nodeId,
       repoId,
     },
-    { enabled: hoveredFile !== null }
+    { enabled: hoveredFile !== null },
   );
 
-  if (coords == null || hoveredFile == null) return null;
+  if (coords == null || hoveredFile == null) {
+    return null;
+  }
 
   const node = payload?.node;
 
   const activeMarkers =
     node != null
       ? Object.entries(node.markers)
-          .filter(([_, isActive]) => isActive === true)
+          .filter(([_, isActive]) => isActive)
           .map(([key]) => key as keyof typeof MARKERS_CONFIG)
       : [];
 
@@ -141,13 +143,13 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
           .map(([key, value]) => ({
             config: STATS_CONFIG[key as keyof typeof STATS_CONFIG],
             key,
-            value: value as number,
+            value: value,
           }))
       : [];
 
   return createPortal(
     <div
-      className="bg-popover animate-in fade-in slide-in-from-bottom-2 pointer-events-none z-50 w-85 rounded-xl border p-4"
+      className="fade-in slide-in-from-bottom-2 pointer-events-none z-50 w-85 animate-in rounded-xl border bg-popover p-4"
       style={{
         left: `${coords.x}px`,
         position: "absolute",
@@ -173,11 +175,11 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
       ) : (
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2 border-b pb-2">
-            <span className="flex max-w-52 items-center gap-1.5 truncate text-xs font-bold">
+            <span className="flex max-w-52 items-center gap-1.5 truncate font-bold text-xs">
               <Code2 />
               {node.label}
             </span>
-            <AppBadge variant="outline" className="text-[10px] uppercase">
+            <AppBadge className="text-[10px] uppercase" variant="outline">
               {node.kind}
             </AppBadge>
           </div>
@@ -191,12 +193,12 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
                 const Icon = marker.icon;
                 return (
                   <AppBadge
+                    className={cn(
+                      "flex select-none items-center gap-1 px-2 py-0.5 font-semibold text-[9px]",
+                      marker.color,
+                    )}
                     key={key}
                     variant="secondary"
-                    className={cn(
-                      "flex items-center gap-1 px-2 py-0.5 text-[9px] font-semibold select-none",
-                      marker.color
-                    )}
                   >
                     <Icon className="size-2.5" />
                     {marker.label}
@@ -208,7 +210,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
 
           <div className="flex flex-col gap-2 border-t pt-2.5">
             {node.score > 0 && (
-              <div className="flex items-center gap-1.5 text-[10px] font-bold">
+              <div className="flex items-center gap-1.5 font-bold text-[10px]">
                 <AlertTriangle className="size-3" />
                 <span>Importance Score:</span>
                 <span>{node.score}</span>
@@ -216,7 +218,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
             )}
 
             {activeStats.length > 0 && (
-              <div className="bg-border border-border grid grid-cols-2 gap-px overflow-hidden rounded-xl border pt-0">
+              <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border pt-0">
                 {activeStats.map(({ config, key, value }) => {
                   const Icon = config.icon;
                   const isDestructive =
@@ -224,8 +226,8 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
 
                   return (
                     <div
+                      className="flex items-center justify-between gap-2 bg-popover p-2.5 font-mono text-[10px]"
                       key={key}
-                      className="bg-popover flex items-center justify-between gap-2 p-2.5 font-mono text-[10px]"
                     >
                       <div className="flex min-w-0 items-center gap-1">
                         <Icon />
@@ -234,7 +236,7 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
                       <span
                         className={cn(
                           "shrink-0 font-bold",
-                          isDestructive ? "text-destructive" : ""
+                          isDestructive ? "text-destructive" : "",
                         )}
                       >
                         {value}
@@ -248,6 +250,6 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
         </div>
       )}
     </div>,
-    document.body
+    document.body,
   );
 }

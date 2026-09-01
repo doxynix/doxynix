@@ -27,9 +27,9 @@ import { ConnectionCard } from "@/entities/connection/ui/connection-card";
 export function PasskeysList() {
   const [isSupported] = useState(
     () =>
-      typeof window !== "undefined" &&
       typeof window.PublicKeyCredential !== "undefined" &&
-      typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === "function"
+      typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable ===
+        "function",
   );
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [deviceName, setDeviceName] = useState("");
@@ -43,7 +43,9 @@ export function PasskeysList() {
   } = useQuery({
     queryFn: async () => {
       const res = await authClient.passkey.listUserPasskeys();
-      if (res.error) throw new Error(res.error.message);
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
       return res.data;
     },
     queryKey: ["passkeys"],
@@ -52,7 +54,9 @@ export function PasskeysList() {
   const createPasskey = useMutation({
     mutationFn: async (name: string) => {
       const { data, error } = await authClient.passkey.addPasskey({ name });
-      if (error) throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
       return data;
     },
     onError: (err) => {
@@ -69,7 +73,9 @@ export function PasskeysList() {
   const deletePasskey = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await authClient.passkey.deletePasskey({ id });
-      if (error) throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
     },
     onError: (err) => {
       toast.error(err.message);
@@ -99,9 +105,9 @@ export function PasskeysList() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-end">
-        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <Dialog onOpenChange={setIsAddOpen} open={isAddOpen}>
           <DialogTrigger asChild>
-            <AppButton size="sm" variant="outline" className="gap-2">
+            <AppButton className="gap-2" size="sm" variant="outline">
               <Plus size={16} /> Link New Device
             </AppButton>
           </DialogTrigger>
@@ -116,18 +122,18 @@ export function PasskeysList() {
             <div className="flex flex-col gap-4 py-2">
               <Input
                 disabled={createPasskey.isPending}
-                value={deviceName}
-                placeholder="Device Name"
                 onChange={(e) => setDeviceName(e.target.value)}
+                placeholder="Device Name"
+                value={deviceName}
               />
             </div>
             <DialogFooter>
               <LoadingButton
+                className="cursor-pointer"
                 disabled={deviceName.trim().length === 0 || createPasskey.isPending}
                 isLoading={createPasskey.isPending}
                 loadingText="Verifying..."
                 onClick={() => createPasskey.mutate(deviceName)}
-                className="cursor-pointer"
               >
                 Register
               </LoadingButton>
@@ -137,28 +143,27 @@ export function PasskeysList() {
       </div>
 
       {isPending ? (
-        <div className="text-muted-foreground py-4 text-center text-xs">
+        <div className="py-4 text-center text-muted-foreground text-xs">
           Loading active biometric devices...
         </div>
       ) : passkeys.length === 0 ? (
         <ConnectionCard
           action={
-            <AppButton size="sm" onClick={() => setIsAddOpen(true)}>
+            <AppButton onClick={() => setIsAddOpen(true)} size="sm">
               Setup
             </AppButton>
           }
           description="Register your first TouchID, FaceID or physical security key for password-free login."
-          icon={<KeyRound className="text-muted-foreground size-5" />}
+          icon={<KeyRound className="size-5 text-muted-foreground" />}
           title="No Devices Linked"
         />
       ) : (
         <div className="grid gap-3">
           {passkeys.map((key) => {
-            const dateStr = formatFullDate(new Date(key.createdAt).toISOString(), locale);
+            const _dateStr = formatFullDate(new Date(key.createdAt).toISOString(), locale);
 
             return (
               <ConnectionCard
-                key={key.id}
                 action={
                   <DangerActionDialog
                     confirmLabel="Remove"
@@ -169,19 +174,20 @@ export function PasskeysList() {
                       </p>
                     }
                     isLoading={deletePasskey.isPending}
+                    onConfirm={() => deletePasskey.mutate(key.id)}
+                    onOpenChange={(open) => setDeletingKeyId(open ? key.id : null)}
                     open={deletingKeyId === key.id}
                     title="Remove Biometric Key"
                     trigger={
-                      <AppButton size="sm" variant="destructive" aria-label="Remove Biometric Key">
+                      <AppButton aria-label="Remove Biometric Key" size="sm" variant="destructive">
                         <Trash2 className="size-4" />
                       </AppButton>
                     }
-                    onConfirm={() => deletePasskey.mutate(key.id)}
-                    onOpenChange={(open) => setDeletingKeyId(open ? key.id : null)}
                   />
                 }
-                description={`Type: ${key.deviceType}. Registered on ${dateStr}`}
-                icon={<Fingerprint className="text-primary size-5" />}
+                description={""}
+                icon={<Fingerprint className="size-5 text-primary" />}
+                key={key.id}
                 status="Active"
                 title={key.name ?? "Unnamed Device"}
               />

@@ -78,20 +78,20 @@ export function AuditLogRow({ log }: Readonly<Props>) {
             {DeviceIcon != null && <DeviceIcon />}
             <span className="text-xs">{log.ip ?? "system"}</span>
           </div>
-          <div className="text-muted-foreground flex flex-col text-xs">
+          <div className="flex flex-col text-muted-foreground text-xs">
             <span className="mb-0.5 max-w-40 truncate">{log.browser}</span>
             {log.requestId != null && (
               <div className="flex items-center gap-1">
                 <span>{log.requestId.slice(0, 8)}</span>
-                <CopyButton value={log.requestId} tooltipSide="right" />
+                <CopyButton tooltipSide="right" value={log.requestId} />
               </div>
             )}
           </div>
         </div>
       </TableCell>
 
-      <TableCell className="text-right whitespace-nowrap">
-        <TimeAgo date={log.createdAt} locale={locale} className="hover:text-foreground text-xs" />
+      <TableCell className="whitespace-nowrap text-right">
+        <TimeAgo className="text-xs hover:text-foreground" date={log.createdAt} locale={locale} />
       </TableCell>
 
       <TableCell className="text-center">

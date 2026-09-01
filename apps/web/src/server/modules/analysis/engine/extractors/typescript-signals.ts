@@ -37,8 +37,12 @@ const INCREASES_NESTING_KINDS = new Set([
 ]);
 
 function getScriptKind(filePath: string): ts.ScriptKind {
-  if (filePath.endsWith(".tsx")) return ts.ScriptKind.TSX;
-  if (filePath.endsWith(".jsx")) return ts.ScriptKind.JSX;
+  if (filePath.endsWith(".tsx")) {
+    return ts.ScriptKind.TSX;
+  }
+  if (filePath.endsWith(".jsx")) {
+    return ts.ScriptKind.JSX;
+  }
   if (filePath.endsWith(".js") || filePath.endsWith(".mjs") || filePath.endsWith(".cjs")) {
     return ts.ScriptKind.JS;
   }
@@ -56,7 +60,7 @@ function getNodeLine(sourceFile: ts.SourceFile, node: ts.Node): number {
 }
 
 function nodeName(node: ts.Node): string | undefined {
-  const namedNode = "name" in node ? (node as ts.Node & { name?: ts.Node }) : undefined;
+  const namedNode = "name" in node ? (node as { name?: ts.Node }) : undefined;
   return namedNode?.name != null && ts.isIdentifier(namedNode.name)
     ? namedNode.name.text
     : undefined;
@@ -68,10 +72,12 @@ function pushSymbol(
   node: ts.Node,
   kind: SymbolKind,
   exported: boolean,
-  fallbackName?: string
+  fallbackName?: string,
 ) {
   const name = fallbackName ?? nodeName(node);
-  if (name == null || name.length === 0) return;
+  if (name == null || name.length === 0) {
+    return;
+  }
 
   symbols.push({
     confidence: exported ? CONFIDENCE_LEVELS.tsCompiler : 75,
@@ -94,9 +100,11 @@ function collectCallRoute(
   node: ts.CallExpression,
   sourceFile: ts.SourceFile,
   routes: RouteRef[],
-  frameworkHints: FrameworkFact[]
+  frameworkHints: FrameworkFact[],
 ) {
-  if (!ts.isPropertyAccessExpression(node.expression)) return;
+  if (!ts.isPropertyAccessExpression(node.expression)) {
+    return;
+  }
 
   const methodName = node.expression.name.text;
   const normalizedMethod = methodName.toLowerCase();
@@ -140,7 +148,7 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
     file.content,
     ts.ScriptTarget.Latest,
     true,
-    getScriptKind(file.path)
+    getScriptKind(file.path),
   );
 
   const imports: string[] = [];
@@ -252,13 +260,15 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
     /\bcreateTRPCRouter\b/,
     /\brouter\.(get|post|put|patch|delete)\b/gi,
   ].forEach((pattern) => {
-    if (pattern.test(file.content)) frameworkTokens.add(pattern.source);
+    if (pattern.test(file.content)) {
+      frameworkTokens.add(pattern.source);
+    }
   });
 
   const frameworkHints = collectFrameworkFactsFromTokens(
     [...imports, ...Array.from(frameworkTokens)],
     file.path,
-    90
+    90,
   );
 
   apiSurface += (
@@ -269,7 +279,7 @@ export function collectTypeScriptSignals(file: RepositoryFile): FileSignals {
   const entrypointRefs: EntrypointRef[] = [];
   const entrypointHint =
     /\bcreateServer\b|\bNestFactory\.create\b|\bnew Hono\b|\bexpress\(|\bif\s*\(\s*require\.main\s*===\s*module\s*\)|\bserve\(/.test(
-      file.content
+      file.content,
     );
 
   if (entrypointHint) {

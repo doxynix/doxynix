@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import Image from "next/image";
 import * as Ably from "ably";
 import { AblyProvider } from "ably/react";
@@ -31,7 +31,9 @@ export const RealtimeProvider = ({ children }: Props) => {
   const [client, setClient] = useState<Ably.Realtime | null>(null);
 
   useEffect(() => {
-    if (userId == null) return;
+    if (userId == null) {
+      return;
+    }
 
     const realtime = new Ably.Realtime({
       authUrl: "/api/realtime/auth",
@@ -41,7 +43,7 @@ export const RealtimeProvider = ({ children }: Props) => {
 
     if (!IS_PROD) {
       realtime.connection.on((state) => {
-        console.log("Realtime connection:", state.current);
+        console.info("Realtime connection:", state.current);
       });
     }
     // FIXME: дизейблить пока что потом придумаю чет
@@ -55,7 +57,9 @@ export const RealtimeProvider = ({ children }: Props) => {
   }, [userId]);
 
   useEffect(() => {
-    if (!client || userId == null) return;
+    if (!client || userId == null) {
+      return;
+    }
 
     const systemChannel = client.channels.get(REALTIME_CONFIG.channels.system);
     const userChannel = client.channels.get(REALTIME_CONFIG.channels.user(userId));
@@ -108,7 +112,7 @@ export const RealtimeProvider = ({ children }: Props) => {
             label: "View",
             onClick: () => {
               router.push(
-                `/dashboard/repo/${payload.repoOwner}/${payload.repoName}/pull/${payload.prNumber}`
+                `/dashboard/repo/${payload.repoOwner}/${payload.repoName}/pull/${payload.prNumber}`,
               );
             },
           },
@@ -116,10 +120,10 @@ export const RealtimeProvider = ({ children }: Props) => {
           icon: (
             <Image
               alt={payload.author}
-              src={payload.authorAvatarUrl}
-              height={16}
-              width={16}
               className="size-4 rounded-full"
+              height={16}
+              src={payload.authorAvatarUrl}
+              width={16}
             />
           ),
         });
@@ -134,14 +138,16 @@ export const RealtimeProvider = ({ children }: Props) => {
         };
 
         utils.analytics.getDashboardStats.setData({}, (oldData) => {
-          if (oldData == null) return oldData;
+          if (oldData == null) {
+            return oldData;
+          }
 
           return {
             ...oldData,
             recentActivity: oldData.recentActivity.map((activity) =>
               activity.id === payload.analysisId
                 ? { ...activity, progress: payload.progress, status: payload.status }
-                : activity
+                : activity,
             ),
           };
         });
@@ -166,8 +172,8 @@ export const RealtimeProvider = ({ children }: Props) => {
     void userChannel.subscribe(handleUserMsg);
 
     return () => {
-      void systemChannel.unsubscribe(handleSystemMsg);
-      void userChannel.unsubscribe(handleUserMsg);
+      systemChannel.unsubscribe(handleSystemMsg);
+      userChannel.unsubscribe(handleUserMsg);
     };
   }, [
     client,
@@ -182,9 +188,12 @@ export const RealtimeProvider = ({ children }: Props) => {
     utils.analysis.getComments,
     utils.analysis.getLatest,
     utils.analysis.getHistory,
+    router,
   ]);
 
-  if (!client) return <>{children}</>;
+  if (!client) {
+    return <>{children}</>;
+  }
 
   return <AblyProvider client={client}>{children}</AblyProvider>;
 };

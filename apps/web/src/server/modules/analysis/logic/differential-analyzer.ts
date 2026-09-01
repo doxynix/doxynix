@@ -52,7 +52,7 @@ export class DifferentialAnalyzer {
   async analyzePRDiff(
     diffInfo: PRDiffInfo,
     projectOverviewJson: string,
-    metadata: PRAnalysisMetadata
+    metadata: PRAnalysisMetadata,
   ): Promise<DifferentialAnalysisResult> {
     const startTime = Date.now();
     appLogger.info({
@@ -68,7 +68,9 @@ export class DifferentialAnalyzer {
     try {
       const relevantFiles = diffInfo.changedFiles.filter((f) => {
         const normalizedPath = normalize(f.filename);
-        if (this.isExcluded(normalizedPath)) return false;
+        if (this.isExcluded(normalizedPath)) {
+          return false;
+        }
         return f.additions + f.deletions <= 1000;
       });
 
@@ -99,12 +101,12 @@ export class DifferentialAnalyzer {
         relevantFiles,
         projectOverviewJson,
         metadata,
-        diffInfo.prNumber
+        diffInfo.prNumber,
       );
 
       const allFindings = uniqBy(
         [...sentinelFindings, ...mapperFindings, ...aiFindings],
-        (f) => `${f.file}:${f.line}:${f.type}:${f.message.slice(0, 30)}`
+        (f) => `${f.file}:${f.line}:${f.type}:${f.message.slice(0, 30)}`,
       );
       const scoredFindings = this.applyFocusFilters(allFindings);
       const riskScore = this.calculateRiskScore(scoredFindings);
@@ -137,13 +139,17 @@ export class DifferentialAnalyzer {
   }
 
   private applyFocusFilters(findings: PRFinding[]): PRFinding[] {
-    if (this.config.focusAreas.length === 0) return findings;
+    if (this.config.focusAreas.length === 0) {
+      return findings;
+    }
 
     return findings.filter((f) => this.config.focusAreas.includes(f.type as any));
   }
 
   private calculateRiskScore(findings: PRFinding[]): number {
-    if (findings.length === 0) return 0;
+    if (findings.length === 0) {
+      return 0;
+    }
 
     const avgSeverity = meanBy(findings, (f) => f.score);
     return Math.min(10, Math.ceil(avgSeverity));
@@ -157,7 +163,7 @@ export class DifferentialAnalyzer {
     score: number,
     severity: PRFinding["severity"],
     suggestion: string,
-    type: PRFinding["type"] = "SECURITY"
+    type: PRFinding["type"] = "SECURITY",
   ): PRFinding {
     return {
       codeSnippet: content.trim(),
@@ -175,9 +181,15 @@ export class DifferentialAnalyzer {
   private mapScoreToSeverity(score: number): PRFinding["severity"] {
     const thresholds = AI_POLICY_CONSTANTS.PR_ANALYSIS.SEVERITY_THRESHOLDS;
 
-    if (score >= thresholds.CRITICAL) return "CRITICAL";
-    if (score >= thresholds.HIGH) return "HIGH";
-    if (score >= thresholds.MEDIUM) return "MEDIUM";
+    if (score >= thresholds.CRITICAL) {
+      return "CRITICAL";
+    }
+    if (score >= thresholds.HIGH) {
+      return "HIGH";
+    }
+    if (score >= thresholds.MEDIUM) {
+      return "MEDIUM";
+    }
     return "LOW";
   }
 
@@ -188,12 +200,14 @@ export class DifferentialAnalyzer {
     relevantFiles: PRDiffInfo["changedFiles"],
     projectOverviewJson: string,
     metadata: PRAnalysisMetadata,
-    prNumber: number
+    prNumber: number,
   ): Promise<{ findings: PRFinding[]; summary: string }> {
     try {
       const diffPayload = relevantFiles
         .map((f) => {
-          if (f.patch == null) return null;
+          if (f.patch == null) {
+            return null;
+          }
           return `\n<file_patch path="${f.filename}">\n${f.patch}\n</file_patch>`;
         })
         .filter(Boolean)
@@ -216,7 +230,7 @@ export class DifferentialAnalyzer {
           "pr_review",
           metadata.userId,
           metadata.repoId,
-          metadata.branch
+          metadata.branch,
         ),
       });
 
@@ -246,10 +260,12 @@ export class DifferentialAnalyzer {
     }
   }
 
-  private runMapperPhase(files: PRDiffInfo["changedFiles"], prNumber: number): PRFinding[] {
+  private runMapperPhase(files: PRDiffInfo["changedFiles"], _prNumber: number): PRFinding[] {
     const findings: PRFinding[] = compact(
       files.map((file) => {
-        if (file.patch == null) return null;
+        if (file.patch == null) {
+          return null;
+        }
 
         const addedLines = file.patch.split("\n").filter((l) => l.startsWith("+")).length;
         const complexityRatio = addedLines / Math.max(file.additions, 1);
@@ -267,26 +283,32 @@ export class DifferentialAnalyzer {
           } satisfies PRFinding;
         }
         return null;
-      })
+      }),
     );
     return findings;
   }
 
-  private runSentinelPhase(files: PRDiffInfo["changedFiles"], prNumber: number): PRFinding[] {
+  private runSentinelPhase(files: PRDiffInfo["changedFiles"], _prNumber: number): PRFinding[] {
     const findings: PRFinding[] = [];
     const { SECRETS, SQL_INJECTION, todoPatterns, VULNERABILITIES } = PROJECT_POLICY_RULES.security;
 
     for (const file of files) {
-      if (file.patch == null) continue;
+      if (file.patch == null) {
+        continue;
+      }
 
       const parsedDiff = parseGitDiff(file.patch);
 
       for (const parsedFile of parsedDiff.files) {
         for (const chunk of parsedFile.chunks) {
-          if (!("changes" in chunk)) continue;
+          if (!("changes" in chunk)) {
+            continue;
+          }
 
           for (const change of chunk.changes) {
-            if (change.type !== "AddedLine") continue;
+            if (change.type !== "AddedLine") {
+              continue;
+            }
 
             const lineContent = change.content;
             const lineNum = change.lineAfter;
@@ -301,8 +323,8 @@ export class DifferentialAnalyzer {
                     title,
                     10,
                     "CRITICAL",
-                    "Немедленно удалите секрет из кода и отозовите его. Используйте Environment Variables или Secret Manager."
-                  )
+                    "Немедленно удалите секрет из кода и отозовите его. Используйте Environment Variables или Secret Manager.",
+                  ),
                 );
               }
             }
@@ -317,8 +339,8 @@ export class DifferentialAnalyzer {
                     title,
                     8,
                     "HIGH",
-                    "Использование небезопасных функций может привести к RCE или XSS. Используйте безопасные альтернативы (например, параметризацию)."
-                  )
+                    "Использование небезопасных функций может привести к RCE или XSS. Используйте безопасные альтернативы (например, параметризацию).",
+                  ),
                 );
               }
             }
@@ -333,8 +355,8 @@ export class DifferentialAnalyzer {
                     title,
                     9,
                     "HIGH",
-                    "Обнаружена потенциальная SQL-инъекция. Используйте ORM (Prisma/Drizzle) или Parameterized Queries."
-                  )
+                    "Обнаружена потенциальная SQL-инъекция. Используйте ORM (Prisma/Drizzle) или Parameterized Queries.",
+                  ),
                 );
               }
             }
@@ -350,8 +372,8 @@ export class DifferentialAnalyzer {
                     2,
                     "LOW",
                     "Завершите реализацию или удалите маркер перед мерджем.",
-                    "STYLE"
-                  )
+                    "STYLE",
+                  ),
                 );
               }
             }

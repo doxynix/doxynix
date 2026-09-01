@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
-import { CreateApiKeySchema, type CreateApiKeyInput } from "@/shared/api/schemas/api-key";
+import { type CreateApiKeyInput, CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -59,24 +59,24 @@ export function CreateApiKeyDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog onOpenChange={handleOpenChange} open={open}>
       <DialogTrigger asChild>
-        <AppButton variant="outline" className="cursor-pointer">
+        <AppButton className="cursor-pointer" variant="outline">
           <Plus />
           {t("settings_api_keys_create_api_key")}
         </AppButton>
       </DialogTrigger>
 
       <DialogContent
+        className="sm:max-w-md"
         onEscapeKeyDown={(e) => createdKey != null && e.preventDefault()}
         onPointerDownOutside={(e) => createdKey != null && e.preventDefault()}
-        className="sm:max-w-md"
       >
         {createdKey == null ? (
           <Form {...form}>
             <form
-              onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
               className="flex flex-col gap-4"
+              onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
             >
               <DialogHeader>
                 <DialogTitle> {t("settings_api_keys_create_api_key")}</DialogTitle>
@@ -87,11 +87,11 @@ export function CreateApiKeyDialog() {
 
               <DialogFooter>
                 <LoadingButton
+                  className="cursor-pointer"
                   disabled={!form.formState.isValid || create.isPending}
-                  type="submit"
                   isLoading={create.isPending}
                   loadingText="Saving..."
-                  className="cursor-pointer"
+                  type="submit"
                 >
                   {tCommon("create")}
                 </LoadingButton>
@@ -106,26 +106,26 @@ export function CreateApiKeyDialog() {
             </DialogHeader>
 
             <Alert
-              variant="destructive"
               className="border-destructive/10 bg-destructive/5 text-destructive"
+              variant="destructive"
             >
-              <AlertTitle className="text-base font-bold">{tCommon("warning")}</AlertTitle>
+              <AlertTitle className="font-bold text-base">{tCommon("warning")}</AlertTitle>
               <AlertDescription>{t("settings_api_keys_alert_desc")}</AlertDescription>
             </Alert>
 
             <div className="flex items-center gap-2">
               <div className="grid flex-1 gap-2">
-                <Input disabled={create.isPending} value={createdKey} readOnly />
+                <Input disabled={create.isPending} readOnly value={createdKey} />
               </div>
               <CopyButton
-                value={createdKey}
-                tooltipText={tCommon("copy")}
                 className="opacity-100"
+                tooltipText={tCommon("copy")}
+                value={createdKey}
               />
             </div>
 
             <DialogFooter>
-              <AppButton onClick={() => handleOpenChange(false)} className="w-full cursor-pointer">
+              <AppButton className="w-full cursor-pointer" onClick={() => handleOpenChange(false)}>
                 {tCommon("done")}
               </AppButton>
             </DialogFooter>

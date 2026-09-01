@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ComponentType } from "react";
+import { type ComponentType, useEffect, useState } from "react";
 import { diagnosticCount } from "@codemirror/lint";
 import { getSearchQuery, setSearchQuery } from "@codemirror/search";
 import { EditorState, type Extension } from "@codemirror/state";
@@ -11,14 +11,12 @@ import { useTheme } from "next-themes";
 import CodeMirrorMerge from "react-codemirror-merge";
 
 import type { EditorStats } from "@/entities/repo/model/editor-stats.types";
-import type { FileMeta } from "@/entities/repo/model/repo.types";
 
 import { BASE_EXTENSIONS, IDE_ONLY_EXTENSIONS, THEME_EXTENSION } from "../model/extensions";
 
 type Props = {
   compareValue?: string;
   initialValue?: string;
-  meta: FileMeta;
   minimal?: boolean;
   onChange?: (v: string) => void;
   onStats?: (stats: EditorStats) => void;
@@ -32,7 +30,6 @@ type Props = {
 export function RepoCodeEditor({
   compareValue,
   initialValue,
-  meta,
   minimal = false,
   onChange,
   onStats,
@@ -63,7 +60,7 @@ export function RepoCodeEditor({
         const { languages } = await import("@codemirror/language-data");
 
         const langDesc = languages.find(
-          (l) => l.extensions.includes(extName) || l.alias.includes(extName)
+          (l) => l.extensions.includes(extName) || l.alias.includes(extName),
         );
 
         if (langDesc) {
@@ -86,7 +83,7 @@ export function RepoCodeEditor({
     return () => {
       cancelled = true;
     };
-  }, [path, meta, readOnly, minimal]);
+  }, [path, minimal]);
 
   const isDiffMode = showDiff && compareValue != null;
   const mergeExtensionsReadOnly = [
@@ -107,28 +104,28 @@ export function RepoCodeEditor({
     return (
       <div className="group relative h-full w-full">
         <CodeMirrorMerge
+          className="cm-merge-container h-full w-full flex-1"
+          collapseUnchanged={{ margin: 3, minSize: 4 }}
           gutter
           highlightChanges
-          collapseUnchanged={{ margin: 3, minSize: 4 }}
           theme={githubDark}
-          className="cm-merge-container h-full w-full flex-1"
         >
           <Original
-            value={compareValue}
-            readOnly
             basicSetup={false}
+            className="h-full text-xs"
             editable={false}
             extensions={mergeExtensionsReadOnly}
-            className="h-full text-xs"
+            readOnly
+            value={compareValue}
           />
           <Modified
-            value={value}
             basicSetup={false}
+            className="h-full text-xs"
             editable={!readOnly}
             extensions={mergeExtensionsEditable}
-            readOnly={readOnly}
             onChange={onChange}
-            className="h-full text-xs"
+            readOnly={readOnly}
+            value={value}
           />
         </CodeMirrorMerge>
 
@@ -161,20 +158,18 @@ export function RepoCodeEditor({
   return (
     <div className="group relative h-full w-full">
       <CodeMirror
-        value={value}
         basicSetup={false}
+        className="h-full text-xs"
         editable={!readOnly}
         extensions={ext}
         height="100%"
-        readOnly={readOnly}
-        theme={resolvedTheme === "dark" ? githubDark : githubLight}
         onChange={onChange}
         onCreateEditor={(view) => {
           onViewCreated?.(view);
         }}
         onUpdate={(update) => {
           const searchChanged = update.transactions.some((tr) =>
-            tr.effects.some((e) => e.is(setSearchQuery))
+            tr.effects.some((e) => e.is(setSearchQuery)),
           );
 
           if (onStats && (update.docChanged || update.selectionSet || searchChanged)) {
@@ -210,7 +205,9 @@ export function RepoCodeEditor({
             });
           }
         }}
-        className="h-full text-xs"
+        readOnly={readOnly}
+        theme={resolvedTheme === "dark" ? githubDark : githubLight}
+        value={value}
       />
     </div>
   );

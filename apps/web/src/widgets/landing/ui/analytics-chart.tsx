@@ -4,10 +4,10 @@ import { useTranslations } from "next-intl";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import {
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from "@/shared/ui/core/chart";
 
 const chartData = [
@@ -34,7 +34,7 @@ export function AnalyticsChart() {
   } satisfies ChartConfig;
 
   return (
-    <ChartContainer config={chartConfig} className="max-h-75 w-full">
+    <ChartContainer className="max-h-75 w-full" config={chartConfig}>
       <AreaChart
         accessibilityLayer
         data={chartData}
@@ -65,12 +65,12 @@ export function AnalyticsChart() {
           </linearGradient>
         </defs>
 
-        <Area type="natural" dataKey="docs" fill="url(#fillDocs)" stroke="var(--chart-2)" />
+        <Area dataKey="docs" fill="url(#fillDocs)" stroke="var(--chart-2)" type="natural" />
         <Area
-          type="natural"
           dataKey="complexity"
           fill="url(#fillComplexity)"
           stroke="var(--chart-4)"
+          type="natural"
         />
       </AreaChart>
     </ChartContainer>

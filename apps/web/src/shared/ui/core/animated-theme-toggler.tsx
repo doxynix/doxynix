@@ -1,16 +1,22 @@
 "use client";
 
-import { useRef, type ComponentPropsWithoutRef } from "react";
+import { type ComponentPropsWithoutRef, useRef } from "react";
+import { flushSync } from "react-dom";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { flushSync } from "react-dom";
 
 import { cn } from "@/shared/lib/cn";
 
 import { AppButton } from "./button";
 
 type TransitionVariant =
-  "circle" | "diamond" | "hexagon" | "rectangle" | "square" | "star" | "triangle";
+  | "circle"
+  | "diamond"
+  | "hexagon"
+  | "rectangle"
+  | "square"
+  | "star"
+  | "triangle";
 
 interface AnimatedThemeTogglerProps extends ComponentPropsWithoutRef<"button"> {
   duration?: number;
@@ -30,7 +36,7 @@ function getThemeTransitionClipPaths(
   cy: number,
   maxRadius: number,
   viewportWidth: number,
-  viewportHeight: number
+  viewportHeight: number,
 ): [string, string] {
   switch (variant) {
     case "circle": {
@@ -100,7 +106,7 @@ function getThemeTransitionClipPaths(
           verts.push(`${cx + radius * Math.cos(outerA)}px ${cy + radius * Math.sin(outerA)}px`);
           const innerA = outerA + Math.PI / 5;
           verts.push(
-            `${cx + radius * innerRatio * Math.cos(innerA)}px ${cy + radius * innerRatio * Math.sin(innerA)}px`
+            `${cx + radius * innerRatio * Math.cos(innerA)}px ${cy + radius * innerRatio * Math.sin(innerA)}px`,
           );
         }
         return `polygon(${verts.join(", ")})`;
@@ -176,7 +182,7 @@ export const AnimatedThemeToggler = ({
             y,
             maxRadius,
             viewportWidth,
-            viewportHeight
+            viewportHeight,
           );
 
           document.documentElement.animate(
@@ -186,7 +192,7 @@ export const AnimatedThemeToggler = ({
               easing: variant === "star" ? "linear" : "ease-in-out",
               fill: "forwards",
               pseudoElement: "::view-transition-new(root)",
-            }
+            },
           ).onfinish = () => {
             document.documentElement.style.removeProperty("will-change");
           };
@@ -204,13 +210,13 @@ export const AnimatedThemeToggler = ({
 
   return (
     <AppButton
-      ref={buttonRef}
-      type="button"
-      size="icon"
-      variant="ghost"
       aria-label="Switch theme"
-      onClick={toggleTheme}
       className={cn(className, "overflow-hidden")}
+      onClick={toggleTheme}
+      ref={buttonRef}
+      size="icon"
+      type="button"
+      variant="ghost"
       {...props}
     >
       <Sun className="block h-4.5 w-4.5 dark:hidden" />

@@ -74,7 +74,7 @@ export async function handlePullRequestEvent(payload: PullRequestEvent): Promise
     const existingAnalysis = await analysisRepo.getByRepoAndPRNumber(
       prisma,
       repo.publicId,
-      pull_request.number
+      pull_request.number,
     );
 
     if (existingAnalysis != null && (action === "opened" || action === "ready_for_review")) {

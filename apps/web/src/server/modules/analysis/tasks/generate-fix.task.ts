@@ -68,7 +68,7 @@ export const generateFixTask = task({
               payload.userId,
               repo.publicId,
               filePath,
-              targetBranch
+              targetBranch,
             );
             fileContents[filePath] = githubFile.content;
           } catch (fetchError) {
@@ -77,7 +77,9 @@ export const generateFixTask = task({
               filePath,
               msg: "Failed to autodetect and fetch file content from GitHub",
             });
-            throw new Error(`Failed to retrieve file ${filePath} from GitHub repository.`);
+            throw new Error(`Failed to retrieve file ${filePath} from GitHub repository.`, {
+              cause: fetchError,
+            });
           }
         }
       }

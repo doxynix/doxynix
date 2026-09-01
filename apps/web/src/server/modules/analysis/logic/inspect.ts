@@ -89,13 +89,13 @@ export function buildInspectPayload(params: {
       .slice(0, 2)
       .map(
         (signal: any) =>
-          `${signal.path} looks hotspot-prone (score ${signal.score}, complexity ${signal.complexity}, churn ${signal.churnScore}).`
+          `${signal.path} looks hotspot-prone (score ${signal.score}, complexity ${signal.complexity}, churn ${signal.churnScore}).`,
       ),
     ...params.entry.dependencyHotspots
       .slice(0, 2)
       .map(
         (hotspot: any) =>
-          `${hotspot.path} is dependency-central (inbound ${hotspot.inbound}, outbound ${hotspot.outbound}, exports ${hotspot.exports}).`
+          `${hotspot.path} is dependency-central (inbound ${hotspot.inbound}, outbound ${hotspot.outbound}, exports ${hotspot.exports}).`,
       ),
   ]).slice(0, 4);
   const graphHints = uniq([
@@ -136,13 +136,13 @@ export function buildInspectPayload(params: {
       .slice(0, 2)
       .map(
         (hotspot: any) =>
-          `${hotspot.path} changed frequently in recent history (${(hotspot as unknown as { commitsInWindow: number }).commitsInWindow} commits in window).`
+          `${hotspot.path} changed frequently in recent history (${(hotspot as unknown as { commitsInWindow: number }).commitsInWindow} commits in window).`,
       ),
     ...params.entry.changeCoupling
       .slice(0, 2)
       .map(
         (pair: any) =>
-          `${pair.fromPath} and ${pair.toPath} often change together (${(pair as unknown as { commits: number }).commits} coupled commits).`
+          `${pair.fromPath} and ${pair.toPath} often change together (${(pair as unknown as { commits: number }).commits} coupled commits).`,
       ),
   ]).slice(0, 4);
   const nextSuggestedPaths =

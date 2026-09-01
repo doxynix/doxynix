@@ -82,7 +82,7 @@ export class EvidenceFormatter {
     type: EvidenceType,
     data: object,
     validator?: (data: object) => boolean | string,
-    options: EvidenceFormattingOptions = {}
+    options: EvidenceFormattingOptions = {},
   ): FormattedEvidence {
     // Run validator if provided
     if (validator) {
@@ -107,7 +107,7 @@ export class EvidenceFormatter {
    */
   formatComposite(
     blocks: Array<{ data: object; label?: string; type: EvidenceType }>,
-    options: EvidenceFormattingOptions = {}
+    options: EvidenceFormattingOptions = {},
   ): FormattedEvidence {
     const opts = { ...this.defaultOptions, ...options };
 
@@ -190,7 +190,7 @@ export class EvidenceFormatter {
   formatPaths(
     paths: string[],
     format: "json" | "text" | "xml" = "xml",
-    options: EvidenceFormattingOptions = {}
+    options: EvidenceFormattingOptions = {},
   ): FormattedEvidence {
     if (format === "text") {
       const content = paths
@@ -221,7 +221,7 @@ export class EvidenceFormatter {
   formatXml(
     tag: EvidenceType | string,
     data: object,
-    options: EvidenceFormattingOptions = {}
+    options: EvidenceFormattingOptions = {},
   ): FormattedEvidence {
     const opts = defu(options, this.defaultOptions);
 

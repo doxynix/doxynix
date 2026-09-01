@@ -32,19 +32,19 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
 
   return (
     <Collapsible
-      open={isArchivedOpen}
+      className="rounded-lg border bg-card text-card-foreground"
       onOpenChange={setIsArchivedOpen}
-      className="bg-card text-card-foreground rounded-lg border"
+      open={isArchivedOpen}
     >
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <HistoryIcon className="text-muted-foreground" />
-          <h3 className="text-sm font-medium">{t("settings_api_keys_history_revoked")}</h3>
+          <h3 className="font-medium text-sm">{t("settings_api_keys_history_revoked")}</h3>
           <AppBadge className="ml-1 text-xs">{archived.length}</AppBadge>
         </div>
 
         <CollapsibleTrigger asChild>
-          <AppButton size="sm" variant="ghost" className="size-8 p-0">
+          <AppButton className="size-8 p-0" size="sm" variant="ghost">
             <ChevronDown className={cn("-rotate-90", isArchivedOpen && "rotate-0")} />
           </AppButton>
         </CollapsibleTrigger>
@@ -63,9 +63,9 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
             </TableHeader>
             <TableBody>
               {archived.map((key) => (
-                <TableRow key={key.id} className="opacity-70 hover:opacity-100">
+                <TableRow className="opacity-70 hover:opacity-100" key={key.id}>
                   <TableCell className="max-w-sm truncate font-medium">{key.name}</TableCell>
-                  <TableCell className="text-muted-foreground font-mono text-xs">
+                  <TableCell className="font-mono text-muted-foreground text-xs">
                     {key.prefix.length > 0 ? `${key.prefix}...` : "..."}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">

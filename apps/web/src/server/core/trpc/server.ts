@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+
 import { cache } from "react";
 import { headers } from "next/headers";
 import { NextRequest } from "next/server";
@@ -79,7 +80,7 @@ export const apiForUser = cache(async (userId: number) => {
           },
   };
 
-  return createCaller(ctx as any);
+  return createCaller(ctx);
 });
 
 export const api = cache(async () => {

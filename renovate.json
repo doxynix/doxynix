@@ -1,76 +1,66 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",
-    "monorepo:react",
-    "monorepo:nextjs",
-    "group:monorepos"
-  ],
-  "rebaseWhen": "behind-base-branch",
-  "dependencyDashboard": true,
-  "gitAuthor": "doxynix-deps-bot <273657142+doxynix-deps-bot[bot]@users.noreply.github.com>",
-  "semanticCommits": "enabled",
-  "semanticCommitType": "chore",
-  "semanticCommitScope": "deps",
-  "timezone": "Europe/Moscow",
-  "pinDigests": true,
-  "rangeStrategy": "pin",
-  "minimumReleaseAge": "3 days",
-  "labels": ["dependencies"],
-  "ignoreDeps": ["zod-prisma-types"],
-  "vulnerabilityAlerts": {
-    "enabled": true,
-    "addLabels": ["security"]
-  },
-  "separateMajorMinor": true,
-  "prHourlyLimit": 5,
-  "prConcurrentLimit": 10,
   "automerge": false,
+  "dependencyDashboard": true,
+  "extends": ["config:best-practices", "monorepo:react", "monorepo:nextjs", "group:monorepos"],
+  "gitAuthor": "doxynix-deps-bot <273657142+doxynix-deps-bot[bot]@users.noreply.github.com>",
+  "ignoreDeps": ["zod-prisma-types"],
+  "labels": ["dependencies"],
+  "minimumReleaseAge": "3 days",
   "packageRules": [
     {
-      "matchUpdateTypes": ["major"],
-      "addLabels": ["major-update"]
+      "addLabels": ["major-update"],
+      "matchUpdateTypes": ["major"]
     },
     {
-      "matchUpdateTypes": ["minor"],
-      "addLabels": ["minor-update"]
+      "addLabels": ["minor-update"],
+      "matchUpdateTypes": ["minor"]
     },
     {
-      "matchUpdateTypes": ["patch"],
-      "addLabels": ["patch-update"]
+      "addLabels": ["patch-update"],
+      "matchUpdateTypes": ["patch"]
     },
     {
       "description": "Group all non-major npm updates into a single PR to reduce noise across the monorepo",
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch"],
       "groupName": "All non-major dependencies",
-      "groupSlug": "all-minor-patch"
+      "groupSlug": "all-minor-patch",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"]
     },
     {
       "description": "Group all GitHub Actions updates together",
-      "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions updates",
-      "groupSlug": "all-actions"
+      "groupSlug": "all-actions",
+      "matchManagers": ["github-actions"]
     },
     {
       "description": "Group all @types updates together",
-      "matchPackageNames": ["@types/**"],
-      "groupName": "TypeScript definitions (@types)"
+      "groupName": "TypeScript definitions (@types)",
+      "matchPackageNames": ["@types/**"]
     },
     {
+      "allowedVersions": "<1.0.0",
       "description": "Restrict cookie package to <1.0.0 to maintain compatibility with auth and socket modules",
-      "matchPackageNames": ["cookie"],
-      "allowedVersions": "<1.0.0"
-    },
-    {
-      "description": "Restrict ESLint to <10.0.0 to prevent breaking changes in React plugins",
-      "matchPackageNames": ["eslint"],
-      "allowedVersions": "<10.0.0"
+      "matchPackageNames": ["cookie"]
     },
     {
       "description": "Freeze Tree-sitter related packages due to fragile WASM grammar compatibility",
-      "matchPackageNames": ["web-tree-sitter", "tree-sitter-wasms"],
-      "enabled": false
+      "enabled": false,
+      "matchPackageNames": ["web-tree-sitter", "tree-sitter-wasms"]
     }
-  ]
+  ],
+  "pinDigests": true,
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 5,
+  "rangeStrategy": "pin",
+  "rebaseWhen": "behind-base-branch",
+  "semanticCommitScope": "deps",
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "separateMajorMinor": true,
+  "timezone": "Europe/Moscow",
+  "vulnerabilityAlerts": {
+    "addLabels": ["security"],
+    "enabled": true
+  }
 }

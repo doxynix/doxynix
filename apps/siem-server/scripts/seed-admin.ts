@@ -1,5 +1,5 @@
-import { auth } from "@server/core/auth/auth";
-import { env } from "@server/core/env";
+import { auth } from "@/core/auth/auth";
+import { env } from "@/core/env";
 
 async function seedAdmin() {
   console.log("🌱 Creating initial admin user from Doppler/ENV...");
@@ -13,18 +13,18 @@ async function seedAdmin() {
     const admin = await auth.api.signUpEmail({
       body: {
         email: env.INITIAL_ADMIN_EMAIL,
-        password: env.INITIAL_ADMIN_PASSWORD,
         name: "Kramarich",
+        password: env.INITIAL_ADMIN_PASSWORD,
         role: "admin",
       },
     });
 
     console.log("✅ Admin created successfully:", admin.user.email);
-  } catch (e) {
-    console.error("❌ Failed to create admin (maybe user already exists):", e);
+  } catch (error) {
+    console.error("❌ Failed to create admin (maybe user already exists):", error);
   }
 
   process.exit(0);
 }
 
-seedAdmin();
+void seedAdmin();

@@ -18,12 +18,18 @@ function buildGraphPreviewEdges(evidence: RepositoryEvidence, limit = 96): Graph
   const edgeMap = new Map<string, GraphPreviewEdge>();
 
   for (const edge of evidence.dependencyGraph.edges) {
-    if (!edge.resolved || edge.kind !== "internal" || edge.toPath == null) continue;
+    if (!edge.resolved || edge.kind !== "internal" || edge.toPath == null) {
+      continue;
+    }
 
     const fromPath = edge.fromPath;
     const toPath = edge.toPath;
-    if (!ProjectPolicy.isGraphPreviewCandidate(fromPath)) continue;
-    if (!ProjectPolicy.isGraphPreviewCandidate(toPath)) continue;
+    if (!ProjectPolicy.isGraphPreviewCandidate(fromPath)) {
+      continue;
+    }
+    if (!ProjectPolicy.isGraphPreviewCandidate(toPath)) {
+      continue;
+    }
 
     const key = `${fromPath}=>${toPath}`;
     const current = edgeMap.get(key);
@@ -35,31 +41,31 @@ function buildGraphPreviewEdges(evidence: RepositoryEvidence, limit = 96): Graph
   }
 
   return Array.from(edgeMap.values())
-    .toSorted(
+    .sort(
       (left, right) =>
         right.weight - left.weight ||
         left.fromPath.localeCompare(right.fromPath) ||
-        left.toPath.localeCompare(right.toPath)
+        left.toPath.localeCompare(right.toPath),
     )
     .slice(0, limit);
 }
 
 function buildStructuralSignals(
   evidence: RepositoryEvidence,
-  dependencyHotspots: DependencyNodeMetric[]
+  dependencyHotspots: DependencyNodeMetric[],
 ): StructuralSignals {
   return {
     apiSurface: sumBy(evidence.modules, (m) => m.apiSurface),
     configInventory: evidence.configs
       .map((config) => config.path)
-      .toSorted((left, right) => left.localeCompare(right)),
+      .sort((left, right) => left.localeCompare(right)),
     dependencyCycles: evidence.dependencyCycles,
     dependencyHotspots,
     entrypointDetails: evidence.entrypoints,
     entrypoints: ProjectPolicy.filterPrimaryEntrypointPaths(
       evidence.entrypoints
         .filter((entrypoint) => entrypoint.kind === "runtime" || entrypoint.kind === "library")
-        .map((entrypoint) => entrypoint.path)
+        .map((entrypoint) => entrypoint.path),
     ),
     fileCategoryBreakdown: evidence.fileCategoryBreakdown,
     frameworkFacts: evidence.frameworkFacts,
@@ -80,12 +86,12 @@ function buildStructuralSignals(
 export async function collectStructuralSignals(
   files: RepositoryFile[],
   fileComplexities: FileComplexity[],
-  fileSignalsByPath: Map<string, FileSignals>
+  fileSignalsByPath: Map<string, FileSignals>,
 ): Promise<{ evidence: RepositoryEvidence; structuralSignals: StructuralSignals }> {
   const { dependencyHotspots, evidence } = await collectRepositoryEvidence(
     files,
     fileComplexities,
-    fileSignalsByPath
+    fileSignalsByPath,
   );
 
   const structuralResult = buildStructuralSignals(evidence, dependencyHotspots);
@@ -100,12 +106,12 @@ export function scoreStructuralModularity(params: {
 }): number {
   const cyclePenalty = Math.min(
     STRUCTURAL_MODULARITY_SCORING.cyclePenaltyMax,
-    params.dependencyCycles.length * STRUCTURAL_MODULARITY_SCORING.cycleMultiplier
+    params.dependencyCycles.length * STRUCTURAL_MODULARITY_SCORING.cycleMultiplier,
   );
 
   const orphanPenalty = Math.min(
     STRUCTURAL_MODULARITY_SCORING.orphanPenaltyMax,
-    params.orphanModules.length * STRUCTURAL_MODULARITY_SCORING.orphanMultiplier
+    params.orphanModules.length * STRUCTURAL_MODULARITY_SCORING.orphanMultiplier,
   );
 
   const rawMean = meanBy(params.dependencyHotspots, (h) => h.inbound);

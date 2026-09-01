@@ -45,19 +45,19 @@ export default async function AboutPage() {
   const tCommon = await getTranslations("Common");
 
   return (
-    <div className="animate-fade-in container mx-auto max-w-5xl px-4 py-12 pt-24">
+    <div className="container mx-auto max-w-5xl animate-fade-in px-4 py-12 pt-24">
       <BackOrLinkButton
-        showIcon
-        label={tCommon("back")}
-        variant="link"
         className="mb-8 cursor-pointer"
+        label={tCommon("back")}
+        showIcon
+        variant="link"
       />
 
       <div className="mb-20">
-        <h1 className="text-foreground mb-6 text-5xl font-bold md:text-6xl">
+        <h1 className="mb-6 font-bold text-5xl text-foreground md:text-6xl">
           Built for developers, by developers
         </h1>
-        <p className="text-text-secondary max-w-2xl text-lg">
+        <p className="max-w-2xl text-lg text-text-secondary">
           We believe beautiful documentation should be effortless. Doxynix combines AI intelligence
           with thoughtful design to transform how teams understand and maintain their code.
         </p>
@@ -65,8 +65,8 @@ export default async function AboutPage() {
 
       <section className="mb-20 grid items-center gap-12 lg:grid-cols-2">
         <div className="flex flex-col gap-6">
-          <h2 className="text-3xl font-bold">The problem we solve</h2>
-          <div className="text-text-secondary flex flex-col gap-4">
+          <h2 className="font-bold text-3xl">The problem we solve</h2>
+          <div className="flex flex-col gap-4 text-text-secondary">
             <p>
               Legacy codebases are hard to understand. New team members struggle. Documentation
               falls behind. Critical knowledge lives only in developers&apos; heads.
@@ -77,7 +77,7 @@ export default async function AboutPage() {
             </p>
           </div>
         </div>
-        <div className="bg-landing-bg-light/50 rounded-2xl border p-8">
+        <div className="rounded-2xl border bg-landing-bg-light/50 p-8">
           <div className="prose prose-sm dark:prose-invert flex max-w-none flex-col gap-4">
             <p className="text-text-secondary">
               Imagine onboarding a new developer to your project. They open your repository and
@@ -98,22 +98,22 @@ export default async function AboutPage() {
 
       <section className="mb-20">
         <div className="mb-12">
-          <h2 className="mb-3 text-3xl font-bold">Why choose Doxynix</h2>
-          <p className="text-text-secondary text-lg">Four core principles that set us apart</p>
+          <h2 className="mb-3 font-bold text-3xl">Why choose Doxynix</h2>
+          <p className="text-lg text-text-secondary">Four core principles that set us apart</p>
         </div>
         <div className="grid gap-6 md:grid-cols-2">
           {features.map((feature) => (
             <div
+              className="rounded-2xl border bg-landing-bg-light/50 p-8 transition-standard"
               key={feature.title}
-              className="bg-landing-bg-light/50 transition-standard rounded-2xl border p-8"
             >
               <div className="flex flex-col gap-4">
                 <div className="flex size-12 items-center justify-center rounded-xl border transition-colors">
-                  <feature.icon className="text-foreground size-6" />
+                  <feature.icon className="size-6 text-foreground" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-foreground text-lg font-semibold">{feature.title}</h3>
-                  <p className="text-text-secondary text-sm">{feature.description}</p>
+                  <h3 className="font-semibold text-foreground text-lg">{feature.title}</h3>
+                  <p className="text-sm text-text-secondary">{feature.description}</p>
                 </div>
               </div>
             </div>
@@ -121,15 +121,15 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section className="bg-landing-bg-light/50 mb-20 rounded-2xl border">
+      <section className="mb-20 rounded-2xl border bg-landing-bg-light/50">
         <div className="flex flex-col gap-8 p-12 text-center md:p-16">
           <div className="flex flex-col gap-3">
-            <h2 className="text-4xl font-bold">Ready to transform your documentation?</h2>
-            <p className="text-text-secondary text-lg">Join teams that ship better code, faster.</p>
+            <h2 className="font-bold text-4xl">Ready to transform your documentation?</h2>
+            <p className="text-lg text-text-secondary">Join teams that ship better code, faster.</p>
           </div>
           <Link
+            className="inline-flex items-center gap-3 rounded-xl bg-foreground px-8 py-4 font-semibold text-background transition-standard hover:opacity-90 active:scale-95"
             href="/auth"
-            className="bg-foreground text-background transition-standard inline-flex items-center gap-3 rounded-xl px-8 py-4 font-semibold hover:opacity-90 active:scale-95"
           >
             Get Started Free
             <ArrowRight className="size-5" />

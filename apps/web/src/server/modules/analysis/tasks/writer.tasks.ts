@@ -25,8 +25,8 @@ export const readmeTask = task({
         i.language,
         i.repoId,
         i.userId,
-        i.branch
-      )
+        i.branch,
+      ),
     ),
 });
 
@@ -44,8 +44,8 @@ export const apiTask = task({
         i.language,
         i.repoId,
         i.userId,
-        i.branch
-      )
+        i.branch,
+      ),
     ),
 });
 
@@ -53,7 +53,7 @@ export const architectureTask = task({
   id: "write-architecture",
   ...TASK_CONFIGS.writers,
   run: async (
-    i: WriterInput & { moduleContext: string; onboardingPayload: string; risksPayload: string }
+    i: WriterInput & { moduleContext: string; onboardingPayload: string; risksPayload: string },
   ) =>
     runWriterWithLimiter("architecture", i, () =>
       executeArchitectureWriter(
@@ -68,8 +68,8 @@ export const architectureTask = task({
         i.language,
         i.repoId,
         i.userId,
-        i.branch
-      )
+        i.branch,
+      ),
     ),
 });
 
@@ -87,8 +87,8 @@ export const contributingTask = task({
         i.language,
         i.repoId,
         i.userId,
-        i.branch
-      )
+        i.branch,
+      ),
     ),
 });
 
@@ -116,7 +116,7 @@ export const changelogTask = task({
         selectedTokens: 25_000,
         userId: i.userId,
       },
-      () => executeChangelogWriter(i.analysisId, i.analysisResult, i.userId, i.repo, i.language)
+      () => executeChangelogWriter(i.analysisId, i.analysisResult, i.userId, i.repo, i.language),
     );
   },
 });

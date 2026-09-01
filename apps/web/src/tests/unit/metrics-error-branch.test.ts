@@ -28,8 +28,9 @@ describe("calculateCodeMetrics error branch", () => {
       }),
     }));
 
-    const { calculateCodeMetrics } =
-      await import("@/server/modules/analysis/engine/metrics/common-metrics");
+    const { calculateCodeMetrics } = await import(
+      "@/server/modules/analysis/engine/metrics/common-metrics"
+    );
     const metrics = await calculateCodeMetrics([
       {
         content: "line1\nline2\nline3",

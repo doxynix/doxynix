@@ -1,10 +1,11 @@
-import { paginationQuerySchema } from "@server/core/db/pagination";
-import { selectAuditLogSchema } from "@server/core/db/schema";
 import type { z } from "zod";
 
+import { paginationQuerySchema } from "@/core/db/pagination";
+import { selectAuditLogSchema } from "@/core/db/schema";
+
 export const getAuditLogsQuerySchema = paginationQuerySchema.extend({
-  actor: selectAuditLogSchema.shape.actor.optional(),
   action: selectAuditLogSchema.shape.action.optional(),
+  actor: selectAuditLogSchema.shape.actor.optional(),
 });
 
 export type GetAuditLogsQuery = z.infer<typeof getAuditLogsQuerySchema>;

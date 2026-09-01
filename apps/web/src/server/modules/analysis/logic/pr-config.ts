@@ -35,7 +35,9 @@ export const PRConfigService = {
       where: { repo: { publicId: repoId } },
     });
 
-    if (config == null) return DEFAULT_PR_CONFIG;
+    if (config == null) {
+      return DEFAULT_PR_CONFIG;
+    }
 
     return {
       ciSkip: config.ciSkip,
@@ -50,7 +52,7 @@ export const PRConfigService = {
   async setFocusAreas(
     repoId: string,
     areas: PRAnalysisConfig["focusAreas"],
-    db: DbClient
+    db: DbClient,
   ): Promise<void> {
     await this.updateConfig(repoId, { focusAreas: areas }, db);
   },
@@ -62,7 +64,7 @@ export const PRConfigService = {
   async updateConfig(
     repoId: string,
     config: Partial<PRAnalysisConfig>,
-    db: DbClient
+    db: DbClient,
   ): Promise<PRAnalysisConfig> {
     const entries = Object.entries(config);
     const cleanUpdate: Partial<PRAnalysisConfig> = Object.fromEntries(entries);

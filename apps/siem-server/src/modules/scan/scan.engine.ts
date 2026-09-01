@@ -1,5 +1,6 @@
-import type { LeakFinding, Severity } from "@doxynix/siem-shared";
-import type { RuleSelect } from "@server/core/db/schema";
+import type { LeakFinding, Severity } from "@doxynix/shared";
+
+import type { RuleSelect } from "@/core/db/schema";
 
 type EngineResult = {
   isSafe: boolean;
@@ -9,14 +10,16 @@ type EngineResult = {
 };
 
 const SEVERITY_WEIGHTS = {
+  critical: 100,
+  high: 50,
   low: 10,
   medium: 25,
-  high: 50,
-  critical: 100,
 } as const satisfies Record<Severity, number>;
 
 function maskSecret(secret: string): string {
-  if (secret.length <= 8) return "****";
+  if (secret.length <= 8) {
+    return "****";
+  }
   return `${secret.slice(0, 4)}****${secret.slice(-4)}`;
 }
 
@@ -43,7 +46,9 @@ export function analyzeLogContent(content: string, activeRules: ScanRuleInput[])
 
   for (let lineIdx = 0; lineIdx < lines.length; ++lineIdx) {
     const lineText = lines[lineIdx] ?? "";
-    if (lineText.length === 0) continue;
+    if (lineText.length === 0) {
+      continue;
+    }
 
     for (const rule of compiledRules) {
       const matches = lineText.matchAll(rule.regex);
@@ -53,11 +58,11 @@ export function analyzeLogContent(content: string, activeRules: ScanRuleInput[])
         const masked = maskSecret(matchedText);
 
         findings.push({
+          line: lineIdx + 1,
+          matchedText: `[Line ${lineIdx + 1}] ${rule.name}: ${masked}`,
           ruleId: rule.id,
           ruleName: rule.name,
           severity: rule.severity,
-          matchedText: `[Line ${lineIdx + 1}] ${rule.name}: ${masked}`,
-          line: lineIdx + 1,
         });
 
         totalScore += SEVERITY_WEIGHTS[rule.severity];
@@ -70,9 +75,9 @@ export function analyzeLogContent(content: string, activeRules: ScanRuleInput[])
   }
 
   return {
-    isSafe: findings.length === 0,
     findings,
-    score: totalScore,
+    isSafe: findings.length === 0,
     maxSeverity,
+    score: totalScore,
   };
 }

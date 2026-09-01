@@ -94,7 +94,7 @@ describe("Concurrency, Transactions & Integrity", () => {
           score: 101,
           status: "DONE",
         },
-      })
+      }),
     );
 
     const maliciousJson = { v: "'; DROP TABLE users; --" };

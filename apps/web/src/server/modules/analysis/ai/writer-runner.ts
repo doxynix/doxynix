@@ -32,7 +32,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
       (error: unknown) => {
         clearTimeout(timer);
         reject(error instanceof Error ? error : new Error(String(error)));
-      }
+      },
     );
   });
 }
@@ -44,7 +44,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 export async function runWriterWithLimiter(
   name: WriterName,
   input: WriterInput,
-  taskFn: () => Promise<WriterResult>
+  taskFn: () => Promise<WriterResult>,
 ): Promise<WriterResult> {
   const { analysisId, selectedTokens } = input;
   const estimatedWeight = Math.ceil(selectedTokens * 1.3) + 15_000;
@@ -63,10 +63,10 @@ export async function runWriterWithLimiter(
           id: `${analysisId}-${name}`,
           weight: estimatedWeight,
         },
-        taskFn
+        taskFn,
       ),
       WRITER_TIMEOUT_MS,
-      `Writer ${name}`
+      `Writer ${name}`,
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

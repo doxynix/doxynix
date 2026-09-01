@@ -1,5 +1,5 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { Webhooks, type EmitterWebhookEvent } from "@octokit/webhooks";
+import { type NextRequest, NextResponse } from "next/server";
+import { type EmitterWebhookEvent, Webhooks } from "@octokit/webhooks";
 import type {
   InstallationEvent,
   PullRequestEvent,
@@ -44,13 +44,17 @@ webhooks.on("push", async ({ payload }) => {
 });
 
 webhooks.on("issue_comment.created", async ({ payload }) => {
-  if (payload.sender.type === "Bot" && payload.sender.login === "doxynix[bot]") return;
+  if (payload.sender.type === "Bot" && payload.sender.login === "doxynix[bot]") {
+    return;
+  }
 
   const repo = await prisma.repo.findFirst({
     where: { githubId: payload.repository.id },
   });
 
-  if (repo == null) return;
+  if (repo == null) {
+    return;
+  }
 
   const prAnalysis = await prisma.pullRequestAnalysis.findFirst({
     select: { id: true },
@@ -114,8 +118,9 @@ webhooks.on("pull_request_review_comment", async ({ payload }) => {
   if (
     commentPayload.action !== "created" ||
     (commentPayload.sender.type === "Bot" && commentPayload.sender.login === "doxynix[bot]")
-  )
+  ) {
     return;
+  }
 
   const commentBody = commentPayload.comment.body;
   if (commentBody.includes("@doxynix")) {
@@ -123,7 +128,9 @@ webhooks.on("pull_request_review_comment", async ({ payload }) => {
       where: { githubId: commentPayload.repository.id },
     });
 
-    if (repo == null) return;
+    if (repo == null) {
+      return;
+    }
 
     await agentGithubReplyTask.trigger({
       branch: repo.defaultBranch,
@@ -154,7 +161,7 @@ export async function POST(req: Request) {
     return new NextResponse("Bad Request", { status: 400 });
   }
 
-  if (!Boolean(await webhooks.verify(payload, signature))) {
+  if (!(await webhooks.verify(payload, signature))) {
     return new NextResponse("Invalid signature", { status: 401 });
   }
 

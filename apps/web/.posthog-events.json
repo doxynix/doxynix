@@ -1,62 +1,62 @@
 [
   {
-    "event": "sign_in_attempted",
     "description": "User attempted to sign in via OAuth provider (GitHub, Google, Yandex) or email magic link",
+    "event": "sign_in_attempted",
     "file": "src/features/auth/ui/auth-form.tsx"
   },
   {
-    "event": "sign_in_email_sent",
     "description": "Magic link email was successfully sent to the user",
+    "event": "sign_in_email_sent",
     "file": "src/features/auth/ui/auth-form.tsx"
   },
   {
-    "event": "repo_added",
     "description": "User successfully added a new repository for tracking/analysis",
+    "event": "repo_added",
     "file": "src/entities/repo/model/use-repo-actions.ts"
   },
   {
-    "event": "repo_analysis_started",
     "description": "User launched an analysis job on a repository (core conversion event - top of value funnel)",
+    "event": "repo_analysis_started",
     "file": "src/features/repo-setup/model/user-repo-setup.ts"
   },
   {
-    "event": "repo_deleted",
     "description": "User deleted a single repository from the system",
+    "event": "repo_deleted",
     "file": "src/entities/repo/ui/repo-card.tsx"
   },
   {
-    "event": "all_repos_deleted",
     "description": "User deleted all their repositories (churn signal)",
+    "event": "all_repos_deleted",
     "file": "src/entities/repo/model/use-repo-actions.ts"
   },
   {
-    "event": "api_key_created",
     "description": "User created a new API key in settings",
+    "event": "api_key_created",
     "file": "src/features/api-keys/model/use-api-key-actions.ts"
   },
   {
-    "event": "api_key_revoked",
     "description": "User revoked an API key (churn / security signal)",
+    "event": "api_key_revoked",
     "file": "src/features/api-keys/model/use-api-key-actions.ts"
   },
   {
-    "event": "account_deleted",
     "description": "User confirmed account deletion (churn event)",
+    "event": "account_deleted",
     "file": "src/features/danger-zone/ui/delete-account-dialog.tsx"
   },
   {
-    "event": "profile_updated",
     "description": "User updated their profile name or avatar",
+    "event": "profile_updated",
     "file": "src/features/profile/model/use-profile-actions.ts"
   },
   {
-    "event": "pricing_plan_clicked",
     "description": "User clicked a CTA button on the landing page pricing section (conversion funnel top)",
+    "event": "pricing_plan_clicked",
     "file": "src/features/landing/ui/pricing-section.tsx"
   },
   {
-    "event": "github_connected",
     "description": "User connected their GitHub account from the repo creation dialog",
+    "event": "github_connected",
     "file": "src/features/repo/ui/create-repo-dialog.tsx"
   }
 ]

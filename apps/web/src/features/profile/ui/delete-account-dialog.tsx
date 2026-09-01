@@ -19,7 +19,7 @@ export function DeleteAccountDialog() {
       {},
       {
         onSuccess: () => setOpen(false),
-      }
+      },
     );
   };
 
@@ -29,15 +29,15 @@ export function DeleteAccountDialog() {
       description={t("settings_danger_delete_account_dialog_desc")}
       destructiveAlertContent={t("settings_danger_delete_account_alert_desc")}
       isLoading={deleteProfile.isPending}
+      onConfirm={handleDelete}
+      onOpenChange={setOpen}
       open={open}
       title={t("settings_danger_delete_account_dialog_title")}
       trigger={
-        <AppButton variant="destructive" className="w-fit cursor-pointer">
+        <AppButton className="w-fit cursor-pointer" variant="destructive">
           {t("settings_danger_delete_account_title")} <Trash2 />
         </AppButton>
       }
-      onConfirm={handleDelete}
-      onOpenChange={setOpen}
     />
   );
 }

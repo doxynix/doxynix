@@ -1,4 +1,4 @@
-import { type GoogleLanguageModelOptions } from "@ai-sdk/google";
+import type { GoogleLanguageModelOptions } from "@ai-sdk/google";
 import { metadata } from "@trigger.dev/sdk";
 import * as ai from "ai";
 import { wrapAISDK } from "langsmith/experimental/vercel";
@@ -136,12 +136,12 @@ export async function callWithFallback<T>({
 
           clearTimeout(timeoutId);
           taskLogger.success(
-            `AI (${String(attemptMetadata.phase ?? taskType)}): responded successfully.`
+            `AI (${String(attemptMetadata.phase ?? taskType)}): responded successfully.`,
           );
-          return result.output as T;
+          return result.output;
         }
 
-        if (stream === false) {
+        if (!stream) {
           const activeTools = attempt.useTools ? tools : undefined;
           const result = await tracedAi.generateText({
             abortSignal: abortController.signal,
@@ -171,7 +171,7 @@ export async function callWithFallback<T>({
 
           clearTimeout(timeoutId);
           taskLogger.success(
-            `AI Text (${String(attemptMetadata.phase ?? taskType)}): generated successfully.`
+            `AI Text (${String(attemptMetadata.phase ?? taskType)}): generated successfully.`,
           );
           return result.text as unknown as T;
         }
@@ -253,7 +253,7 @@ export async function callWithFallback<T>({
 
         clearTimeout(timeoutId);
         if (streamError != null) {
-          throw streamError;
+          throw streamError instanceof Error ? streamError : new Error(String(streamError));
         }
 
         taskLogger.success(`AI: finished generation.`);
@@ -274,11 +274,16 @@ export async function callWithFallback<T>({
         });
 
         if (schemaMismatch && attempt.useTools) {
-          continue;
         }
       }
     }
   }
 
-  throw lastError ?? new Error("All models failed");
+  if (lastError instanceof Error) {
+    throw lastError;
+  }
+  if (lastError != null) {
+    throw new Error(String(lastError));
+  }
+  throw new Error("All models failed");
 }

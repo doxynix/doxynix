@@ -51,7 +51,7 @@ const createPinoLogger = () => {
       base: undefined,
       level: "debug",
     },
-    stream
+    stream,
   );
 };
 

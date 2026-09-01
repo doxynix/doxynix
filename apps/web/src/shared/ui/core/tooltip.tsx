@@ -11,8 +11,8 @@ function TooltipProvider({
 }: Readonly<ComponentProps<typeof TooltipPrimitive.Provider>>) {
   return (
     <TooltipPrimitive.Provider
-      delayDuration={delayDuration}
       data-slot="tooltip-provider"
+      delayDuration={delayDuration}
       {...props}
     />
   );
@@ -35,14 +35,14 @@ function TooltipContent({
   return (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content
-        sideOffset={sideOffset}
-        data-slot="tooltip-content"
         className={cn(
-          "bg-popover text-popover-foreground border-border z-50 overflow-hidden rounded-lg border px-3 py-1.5 text-xs font-medium",
-          "animate-in fade-in-0 zoom-in-98 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+          "z-50 overflow-hidden rounded-lg border border-border bg-popover px-3 py-1.5 font-medium text-popover-foreground text-xs",
+          "fade-in-0 zoom-in-98 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 animate-in data-[state=closed]:animate-out",
           "data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1",
-          className
+          className,
         )}
+        data-slot="tooltip-content"
+        sideOffset={sideOffset}
         {...props}
       >
         {children}

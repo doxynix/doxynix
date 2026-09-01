@@ -1,3 +1,9 @@
+import {
+  type ComponentPropsWithoutRef,
+  type ComponentRef,
+  forwardRef,
+  type HTMLAttributes,
+} from "react";
 import * as DropdownMenuPrimitives from "@radix-ui/react-dropdown-menu";
 import {
   RiArrowRightSLine,
@@ -5,12 +11,7 @@ import {
   RiCheckLine,
   RiRadioButtonFill,
 } from "@remixicon/react";
-import {
-  type ComponentPropsWithoutRef,
-  type ComponentRef,
-  forwardRef,
-  type HTMLAttributes,
-} from "react";
+
 import { cx } from "../../lib/utils";
 
 const DropdownMenu = DropdownMenuPrimitives.Root;
@@ -33,25 +34,25 @@ const DropdownMenuSubMenuTrigger = forwardRef<
   Omit<ComponentPropsWithoutRef<typeof DropdownMenuPrimitives.SubTrigger>, "asChild">
 >(({ className, children, ...props }, forwardedRef) => (
   <DropdownMenuPrimitives.SubTrigger
-    ref={forwardedRef}
     className={cx(
       // base
-      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-1 outline-hidden transition-colors data-[state=checked]:font-semibold sm:text-sm",
+      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pr-1 pl-2 outline-hidden transition-colors data-[state=checked]:font-semibold sm:text-sm",
       // text color
       "text-gray-900 dark:text-gray-50",
       // disabled
       "data-disabled:pointer-events-none data-disabled:text-gray-400 data-disabled:hover:bg-none dark:data-disabled:text-gray-600",
       // focus
-      "focus-visible:bg-gray-100 data-[state=open]:bg-gray-100 dark:focus-visible:bg-gray-900 dark:data-[state=open]:bg-gray-900",
+      "focus-visible:bg-gray-100 data-[state=open]:bg-gray-100 dark:data-[state=open]:bg-gray-900 dark:focus-visible:bg-gray-900",
       // hover
       "hover:bg-gray-100 dark:hover:bg-gray-900",
       //
       className,
     )}
+    ref={forwardedRef}
     {...props}
   >
     {children}
-    <RiArrowRightSLine className="ml-auto size-4 shrink-0" aria-hidden="true" />
+    <RiArrowRightSLine aria-hidden="true" className="ml-auto size-4 shrink-0" />
   </DropdownMenuPrimitives.SubTrigger>
 ));
 DropdownMenuSubMenuTrigger.displayName = "DropdownMenuSubMenuTrigger";
@@ -62,11 +63,9 @@ const DropdownMenuSubMenuContent = forwardRef<
 >(({ className, collisionPadding = 8, ...props }, forwardedRef) => (
   <DropdownMenuPrimitives.Portal>
     <DropdownMenuPrimitives.SubContent
-      ref={forwardedRef}
-      collisionPadding={collisionPadding}
       className={cx(
         // base
-        "relative z-50 overflow-hidden rounded-md border p-1 shadow-xl shadow-black/2.5",
+        "relative z-50 overflow-hidden rounded-md border p-1 shadow-black/2.5 shadow-xl",
         // widths
         "min-w-32",
         // heights
@@ -83,6 +82,8 @@ const DropdownMenuSubMenuContent = forwardRef<
         "data-[side=bottom]:animate-slide-down-and-fade data-[side=left]:animate-slide-left-and-fade data-[side=right]:animate-slide-right-and-fade data-[side=top]:animate-slide-up-and-fade",
         className,
       )}
+      collisionPadding={collisionPadding}
+      ref={forwardedRef}
       {...props}
     />
   </DropdownMenuPrimitives.Portal>
@@ -99,10 +100,10 @@ const DropdownMenuContent = forwardRef<
   ) => (
     <DropdownMenuPrimitives.Portal>
       <DropdownMenuPrimitives.Content
-        ref={forwardedRef}
+        align={align}
         className={cx(
           // base
-          "relative z-50 overflow-hidden rounded-md border p-1 shadow-xl shadow-black/2.5",
+          "relative z-50 overflow-hidden rounded-md border p-1 shadow-black/2.5 shadow-xl",
           // widths
           "min-w-48",
           // heights
@@ -119,10 +120,10 @@ const DropdownMenuContent = forwardRef<
           "data-[side=bottom]:animate-slide-down-and-fade data-[side=left]:animate-slide-left-and-fade data-[side=right]:animate-slide-right-and-fade data-[side=top]:animate-slide-up-and-fade",
           className,
         )}
-        sideOffset={sideOffset}
-        align={align}
         collisionPadding={collisionPadding}
         loop={loop}
+        ref={forwardedRef}
+        sideOffset={sideOffset}
         {...props}
       />
     </DropdownMenuPrimitives.Portal>
@@ -138,10 +139,9 @@ const DropdownMenuItem = forwardRef<
   }
 >(({ className, shortcut, hint, children, ...props }, forwardedRef) => (
   <DropdownMenuPrimitives.Item
-    ref={forwardedRef}
     className={cx(
       // base
-      "group/DropdownMenuItem relative flex cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-1 outline-hidden transition-colors data-[state=checked]:font-semibold sm:text-sm",
+      "group/DropdownMenuItem relative flex cursor-pointer select-none items-center rounded-sm py-1.5 pr-1 pl-2 outline-hidden transition-colors data-[state=checked]:font-semibold sm:text-sm",
       // text color
       "text-gray-900 dark:text-gray-50",
       // disabled
@@ -152,15 +152,16 @@ const DropdownMenuItem = forwardRef<
       "hover:bg-gray-100 dark:hover:bg-gray-900",
       className,
     )}
+    ref={forwardedRef}
     tremor-id="tremor-raw"
     {...props}
   >
     {children}
     {hint && (
-      <span className={cx("ml-auto pl-2 text-sm text-gray-400 dark:text-gray-600")}>{hint}</span>
+      <span className={cx("ml-auto pl-2 text-gray-400 text-sm dark:text-gray-600")}>{hint}</span>
     )}
     {shortcut && (
-      <span className={cx("ml-auto pl-2 text-sm text-gray-400 dark:text-gray-600")}>
+      <span className={cx("ml-auto pl-2 text-gray-400 text-sm dark:text-gray-600")}>
         {shortcut}
       </span>
     )}
@@ -176,10 +177,10 @@ const DropdownMenuCheckboxItem = forwardRef<
   }
 >(({ className, hint, shortcut, children, checked, ...props }, forwardedRef) => (
   <DropdownMenuPrimitives.CheckboxItem
-    ref={forwardedRef}
+    checked={checked}
     className={cx(
       // base
-      "relative flex cursor-pointer select-none items-center gap-x-2 rounded-sm py-1.5 pl-8 pr-1 outline-hidden transition-colors data-[state=checked]:font-semibold sm:text-sm",
+      "relative flex cursor-pointer select-none items-center gap-x-2 rounded-sm py-1.5 pr-1 pl-8 outline-hidden transition-colors data-[state=checked]:font-semibold sm:text-sm",
       // text color
       "text-gray-900 dark:text-gray-50",
       // disabled
@@ -190,7 +191,7 @@ const DropdownMenuCheckboxItem = forwardRef<
       "hover:bg-gray-100 dark:hover:bg-gray-900",
       className,
     )}
-    checked={checked}
+    ref={forwardedRef}
     {...props}
   >
     <span className="absolute left-2 flex size-4 items-center justify-center">
@@ -203,14 +204,14 @@ const DropdownMenuCheckboxItem = forwardRef<
     </span>
     {children}
     {hint && (
-      <span className={cx("ml-auto text-sm font-normal text-gray-400 dark:text-gray-600")}>
+      <span className={cx("ml-auto font-normal text-gray-400 text-sm dark:text-gray-600")}>
         {hint}
       </span>
     )}
     {shortcut && (
       <span
         className={cx(
-          "ml-auto text-sm font-normal tracking-widest text-gray-400 dark:border-gray-800 dark:text-gray-600",
+          "ml-auto font-normal text-gray-400 text-sm tracking-widest dark:border-gray-800 dark:text-gray-600",
         )}
       >
         {shortcut}
@@ -228,10 +229,9 @@ const DropdownMenuRadioItem = forwardRef<
   }
 >(({ className, hint, shortcut, children, ...props }, forwardedRef) => (
   <DropdownMenuPrimitives.RadioItem
-    ref={forwardedRef}
     className={cx(
       // base
-      "group/DropdownMenuRadioItem relative flex cursor-pointer select-none items-center gap-x-2 rounded-sm py-1.5 pl-8 pr-1 outline-hidden transition-colors data-[state=checked]:font-semibold sm:text-sm",
+      "group/DropdownMenuRadioItem relative flex cursor-pointer select-none items-center gap-x-2 rounded-sm py-1.5 pr-1 pl-8 outline-hidden transition-colors data-[state=checked]:font-semibold sm:text-sm",
       // text color
       "text-gray-900 dark:text-gray-50",
       // disabled
@@ -242,6 +242,7 @@ const DropdownMenuRadioItem = forwardRef<
       "hover:bg-gray-100 dark:hover:bg-gray-900",
       className,
     )}
+    ref={forwardedRef}
     {...props}
   >
     <span className="absolute left-2 flex size-4 items-center justify-center">
@@ -256,14 +257,14 @@ const DropdownMenuRadioItem = forwardRef<
     </span>
     {children}
     {hint && (
-      <span className={cx("ml-auto text-sm font-normal text-gray-400 dark:text-gray-600")}>
+      <span className={cx("ml-auto font-normal text-gray-400 text-sm dark:text-gray-600")}>
         {hint}
       </span>
     )}
     {shortcut && (
       <span
         className={cx(
-          "ml-auto text-sm font-normal tracking-widest text-gray-400 dark:border-gray-800 dark:text-gray-600",
+          "ml-auto font-normal text-gray-400 text-sm tracking-widest dark:border-gray-800 dark:text-gray-600",
         )}
       >
         {shortcut}
@@ -278,14 +279,14 @@ const DropdownMenuLabel = forwardRef<
   ComponentPropsWithoutRef<typeof DropdownMenuPrimitives.Label>
 >(({ className, ...props }, forwardedRef) => (
   <DropdownMenuPrimitives.Label
-    ref={forwardedRef}
     className={cx(
       // base
-      "px-2 py-2 text-xs font-medium tracking-wide",
+      "px-2 py-2 font-medium text-xs tracking-wide",
       // text color
       "text-gray-500 dark:text-gray-500",
       className,
     )}
+    ref={forwardedRef}
     {...props}
   />
 ));
@@ -296,8 +297,8 @@ const DropdownMenuSeparator = forwardRef<
   ComponentPropsWithoutRef<typeof DropdownMenuPrimitives.Separator>
 >(({ className, ...props }, forwardedRef) => (
   <DropdownMenuPrimitives.Separator
+    className={cx("-mx-1 my-1 h-px border-gray-200 border-t dark:border-gray-800", className)}
     ref={forwardedRef}
-    className={cx("-mx-1 my-1 h-px border-t border-gray-200 dark:border-gray-800", className)}
     {...props}
   />
 ));

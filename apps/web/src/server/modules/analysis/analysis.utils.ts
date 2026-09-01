@@ -13,11 +13,11 @@ import { getActiveModels } from "./ai/ai-constants";
 import { buildRepositoryToolProfile } from "./ai/ai-tools";
 import { buildSingleFileAnalysisPrompt } from "./ai/prompts-refactored";
 import {
-  QuickFileAuditSchema,
   type DocumentFilePreviewResult,
   type FileActionInput,
   type FileActionNodeContext,
   type QuickFileAuditResult,
+  QuickFileAuditSchema,
 } from "./analysis.schemas";
 import { ProjectPolicy } from "./engine/core/project-policy";
 
@@ -28,7 +28,9 @@ export function isBinaryLikeContent(content: string): boolean {
 export function isProbablyMinifiedContent(content: string): boolean {
   const sample = content.trim();
   const len = sample.length;
-  if (len < 2000) return false;
+  if (len < 2000) {
+    return false;
+  }
 
   const sliceSize = Math.min(len, 8000);
   const sampleSlice = sample.slice(0, sliceSize);
@@ -62,7 +64,7 @@ export function isProbablyMinifiedContent(content: string): boolean {
 export function getNonActionableReason(
   path: string,
   content: string,
-  nodeContext?: FileActionNodeContext
+  nodeContext?: FileActionNodeContext,
 ): null | string {
   const normalizedPath = normalize(path);
   if (ProjectPolicy.isSensitive(normalizedPath)) {
@@ -84,7 +86,9 @@ export function getNonActionableReason(
 }
 
 export function getContextStrength(nodeContext?: FileActionNodeContext) {
-  if (nodeContext == null) return "none" as const;
+  if (nodeContext == null) {
+    return "none" as const;
+  }
 
   const signalCount =
     (nodeContext.graphNeighbors?.length ?? 0) +
@@ -94,8 +98,12 @@ export function getContextStrength(nodeContext?: FileActionNodeContext) {
     (nodeContext.recommendedActions?.length ?? 0) +
     Object.values(nodeContext.neighborBuckets ?? {}).filter((paths) => paths.length > 0).length;
 
-  if (signalCount >= 12) return "strong" as const;
-  if (signalCount >= 7) return "moderate" as const;
+  if (signalCount >= 12) {
+    return "strong" as const;
+  }
+  if (signalCount >= 7) {
+    return "moderate" as const;
+  }
   return "light" as const;
 }
 
@@ -257,7 +265,9 @@ export function buildContextSection(input: FileActionInput): string {
     }
     if (ctx.neighborBuckets != null) {
       for (const [bucket, paths] of Object.entries(ctx.neighborBuckets)) {
-        if (paths.length === 0) continue;
+        if (paths.length === 0) {
+          continue;
+        }
         parts.push(`${bucket}: ${paths.join(", ")}`);
       }
     }
@@ -278,28 +288,32 @@ export function buildContextSection(input: FileActionInput): string {
 export function deriveMaintenanceStatus(repo: Repo) {
   const pushedAt = repo.pushedAt ?? repo.updatedAt;
   const ageInMonths = (Date.now() - new Date(pushedAt).getTime()) / (1000 * 60 * 60 * 24 * 30);
-  if (ageInMonths > 12) return "dead" as const;
-  if (ageInMonths > 6) return "stale" as const;
+  if (ageInMonths > 12) {
+    return "dead" as const;
+  }
+  if (ageInMonths > 6) {
+    return "stale" as const;
+  }
   return "active" as const;
 }
 
 export async function runQuickFileAudit(
   userId: number,
-  input: FileActionInput
+  input: FileActionInput,
 ): Promise<QuickFileAuditResult> {
   const rawContent = input.content.trim();
 
   if (rawContent.length === 0) {
     return buildAuditFallback(
       input.path,
-      `The file is empty, so there is not enough evidence for a meaningful audit. ${describeContextQualifier(input.nodeContext)}`
+      `The file is empty, so there is not enough evidence for a meaningful audit. ${describeContextQualifier(input.nodeContext)}`,
     );
   }
 
   if (isBinaryLikeContent(input.content)) {
     return buildAuditFallback(
       input.path,
-      `The file looks binary or non-textual, so a code-focused audit would be unreliable. ${describeContextQualifier(input.nodeContext)}`
+      `The file looks binary or non-textual, so a code-focused audit would be unreliable. ${describeContextQualifier(input.nodeContext)}`,
     );
   }
 
@@ -350,7 +364,9 @@ export function scoreSearchMatch(terms: string[], values: Array<null | string | 
     .filter((value): value is string => typeof value === "string" && value.length > 0)
     .map((value) => value.toLowerCase());
 
-  if (haystack.length === 0) return 0;
+  if (haystack.length === 0) {
+    return 0;
+  }
 
   let score = 0;
   for (const term of terms) {
@@ -358,10 +374,15 @@ export function scoreSearchMatch(terms: string[], values: Array<null | string | 
     const prefix = haystack.some((value) => value.startsWith(term));
     const partial = haystack.some((value) => value.includes(term));
 
-    if (exact) score += 12;
-    else if (prefix) score += 8;
-    else if (partial) score += 4;
-    else return 0;
+    if (exact) {
+      score += 12;
+    } else if (prefix) {
+      score += 8;
+    } else if (partial) {
+      score += 4;
+    } else {
+      return 0;
+    }
   }
 
   return score;
@@ -374,7 +395,7 @@ export function dedupeSearchResults(results: RepoSearchResult[]) {
 }
 
 export function pickLatestDocsByType<TDoc extends { type: DocType; updatedAt: Date }>(
-  docs: TDoc[]
+  docs: TDoc[],
 ) {
   const latest = uniqBy(orderBy(docs, [(d) => d.updatedAt], ["desc"]), (d) => d.type);
   return orderBy(latest, [(d) => d.type], ["asc"]);

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import type { Route } from "next";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { useRouter } from "@/shared/i18n/navigation";
@@ -26,7 +25,9 @@ export function useNavigationHotkeys(onAction?: () => void) {
   const [prefix, setPrefix] = useState<null | string>(null);
 
   useEffect(() => {
-    if (prefix == null) return;
+    if (prefix == null) {
+      return;
+    }
 
     const timer = setTimeout(() => {
       setPrefix(null);
@@ -42,13 +43,15 @@ export function useNavigationHotkeys(onAction?: () => void) {
       setPrefix(pressedKey);
     },
     { enableOnFormTags: false, preventDefault: true },
-    [prefix]
+    [prefix],
   );
 
   useHotkeys(
     "*",
     (e) => {
-      if (prefix == null) return;
+      if (prefix == null) {
+        return;
+      }
 
       const code = e.code;
       let secondKey: null | string = null;
@@ -66,12 +69,12 @@ export function useNavigationHotkeys(onAction?: () => void) {
 
       if (path != null) {
         onAction?.();
-        router.push(path as Route);
+        router.push(path);
       }
 
       setPrefix(null);
     },
     { enabled: prefix != null, enableOnFormTags: false, preventDefault: true },
-    [prefix]
+    [prefix],
   );
 }

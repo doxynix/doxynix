@@ -29,8 +29,9 @@ const isCallback = (node) => {
 };
 
 const getSafeName = (node) => {
-  if (Node.isFunctionDeclaration(node) || Node.isMethodDeclaration(node))
+  if (Node.isFunctionDeclaration(node) || Node.isMethodDeclaration(node)) {
     return node.getName() ?? "anon";
+  }
   if (Node.isArrowFunction(node)) {
     const varDec = node.getFirstAncestorByKind(SyntaxKind.VariableDeclaration);
     return varDec?.getName() ?? "anon_arrow";
@@ -50,12 +51,12 @@ sourceFiles.forEach((file) => {
     if (isReturn && !awaitExpr.getFirstAncestorByKind(SyntaxKind.TryStatement)) {
       issues.push({
         file: fileName,
-        line: awaitExpr.getStartLineNumber(),
-        type: "AWAIT",
-        severity: "LOW",
         fixable: true,
-        node: awaitExpr,
+        line: awaitExpr.getStartLineNumber(),
         msg: "Лишний await в return (замедляет Event Loop).",
+        node: awaitExpr,
+        severity: "LOW",
+        type: "AWAIT",
       });
     }
   });
@@ -64,15 +65,17 @@ sourceFiles.forEach((file) => {
   file.getDescendantsOfKind(SyntaxKind.Block).forEach((block) => {
     if (block.getStatements().length === 0 && !hasComments(block)) {
       const parent = block.getParent();
-      if (Node.isFunctionLikeDeclaration(parent)) return;
+      if (Node.isFunctionLikeDeclaration(parent)) {
+        return;
+      }
       issues.push({
         file: fileName,
-        line: block.getStartLineNumber(),
-        type: "EMPTY",
-        severity: "HIGH",
         fixable: true,
-        node: block,
+        line: block.getStartLineNumber(),
         msg: `Пустой блок в ${parent.getKindName()}.`,
+        node: block,
+        severity: "HIGH",
+        type: "EMPTY",
       });
     }
   });
@@ -85,9 +88,13 @@ sourceFiles.forEach((file) => {
   ];
 
   fns.forEach((fn) => {
-    if (isCallback(fn)) return;
+    if (isCallback(fn)) {
+      return;
+    }
     const body = fn.getBody();
-    if (!body) return;
+    if (!body) {
+      return;
+    }
 
     let call;
     if (Node.isBlock(body)) {
@@ -99,7 +106,9 @@ sourceFiles.forEach((file) => {
           : Node.isExpressionStatement(s)
             ? s.getExpression()
             : null;
-        if (Node.isCallExpression(expr)) call = expr;
+        if (Node.isCallExpression(expr)) {
+          call = expr;
+        }
       }
     } else if (Node.isCallExpression(body)) {
       call = body;
@@ -116,12 +125,12 @@ sourceFiles.forEach((file) => {
           const isThis = target.startsWith("this.");
           issues.push({
             file: fileName,
-            line: fn.getStartLineNumber(),
-            type: "PROXY",
-            severity: isThis ? "HIGH" : "LOW",
             fixable: !isThis,
-            node: fn,
+            line: fn.getStartLineNumber(),
             msg: `Функция ${getSafeName(fn)} — бесполезный прокси для ${target}`,
+            node: fn,
+            severity: isThis ? "HIGH" : "LOW",
+            type: "PROXY",
           });
         }
       }
@@ -140,12 +149,12 @@ sourceFiles.forEach((file) => {
             if (ctor.getParameters().length === expr.getArguments().length) {
               issues.push({
                 file: fileName,
-                line: ctor.getStartLineNumber(),
-                type: "CTOR",
-                severity: "LOW",
                 fixable: true,
-                node: ctor,
+                line: ctor.getStartLineNumber(),
                 msg: "Конструктор только вызывает super().",
+                node: ctor,
+                severity: "LOW",
+                type: "CTOR",
               });
             }
           }
@@ -177,7 +186,7 @@ issues.forEach((issue) => {
           issue.node.remove();
         }
       }
-    } catch (e) {
+    } catch {
       // Узел мог быть удален родителем
     }
   }

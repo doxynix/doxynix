@@ -56,7 +56,7 @@ export const githubBrowseService = {
     userId: number,
     repoId: string,
     path: string,
-    branch?: string
+    branch?: string,
   ) {
     const repo = await db.repo.findUnique({
       where: { publicId: repoId, userId },
@@ -73,7 +73,7 @@ export const githubBrowseService = {
         repo.owner,
         repo.name,
         path,
-        branch ?? repo.defaultBranch
+        branch ?? repo.defaultBranch,
       );
 
       return {
@@ -109,7 +109,7 @@ export const githubBrowseService = {
     userId: number,
     owner: string,
     name: string,
-    branch?: string
+    branch?: string,
   ) {
     let tree: Awaited<ReturnType<typeof getRepoTree>> | null = null;
     try {

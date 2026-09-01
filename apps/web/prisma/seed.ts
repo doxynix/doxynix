@@ -28,12 +28,14 @@ const prisma = new PrismaClient({
 
 function clean<T>(obj: T): T {
   return Object.fromEntries(
-    Object.entries(obj as Record<string, unknown>).filter(([, value]) => value !== undefined)
+    Object.entries(obj as Record<string, unknown>).filter(([, value]) => value !== undefined),
   ) as T;
 }
 
 function parseSeedNumber(value: string | undefined, fallback: number): number {
-  if (value == null || value.trim() === "") return fallback;
+  if (value == null || value.trim() === "") {
+    return fallback;
+  }
 
   const trimmed = value.trim();
   if (!/^\d+$/.test(trimmed)) {
@@ -119,7 +121,7 @@ const TECH_POOL = [
   "Prisma",
 ];
 
-function generateMetricsJson(repoName: string, isBad: boolean) {
+function generateMetricsJson(_repoName: string, isBad: boolean) {
   const techStack = faker.helpers.arrayElements(TECH_POOL, { max: 4, min: 2 });
 
   const hotspotSignals = [
@@ -206,7 +208,7 @@ async function seedStressProfile() {
       const start = batchIndex * REPO_BATCH_SIZE;
       const batchLength = Math.min(REPO_BATCH_SIZE, STRESS_REPO_COUNT - start);
       const repoBatch = Array.from({ length: batchLength }, (_, offset) =>
-        createStressRepo(start + offset, benchmarkUser.id)
+        createStressRepo(start + offset, benchmarkUser.id),
       );
 
       await prisma.repo.createMany({ data: repoBatch });
@@ -227,7 +229,7 @@ async function seedStressProfile() {
       const start = batchIndex * NOTIFICATION_BATCH_SIZE;
       const batchLength = Math.min(NOTIFICATION_BATCH_SIZE, STRESS_NOTIFICATION_COUNT - start);
       const notificationBatch = Array.from({ length: batchLength }, (_, offset) =>
-        createStressNotification(start + offset, repoIds, benchmarkUser.id)
+        createStressNotification(start + offset, repoIds, benchmarkUser.id),
       );
 
       await prisma.notification.createMany({ data: notificationBatch });
@@ -236,7 +238,7 @@ async function seedStressProfile() {
   }
 
   console.log(
-    `Benchmark profile ready: ${STRESS_REPO_COUNT} repos, ${STRESS_NOTIFICATION_COUNT} notifications`
+    `Benchmark profile ready: ${STRESS_REPO_COUNT} repos, ${STRESS_NOTIFICATION_COUNT} notifications`,
   );
 }
 
@@ -389,7 +391,7 @@ async function main() {
         ...Fake.fakeNotification(),
         isRead: faker.datatype.boolean(),
         userId: admin.id,
-      })
+      }),
     ),
   });
 
@@ -404,7 +406,7 @@ async function main() {
         model: "Repo",
         operation: "CREATE",
         userId: admin.id,
-      })
+      }),
     ),
   });
 }

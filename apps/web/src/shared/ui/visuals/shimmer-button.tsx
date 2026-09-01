@@ -1,8 +1,8 @@
 import {
-  forwardRef,
   type ComponentPropsWithoutRef,
   type ComponentRef,
   type CSSProperties,
+  forwardRef,
   type ReactNode,
 } from "react";
 
@@ -35,15 +35,15 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
       style,
       ...props
     },
-    ref
+    ref,
   ) => {
     return (
       <AppButton
         asChild
         className={cn(
-          "transition-standard group border-border text-primary-foreground hover:border-border-accent hover:text-primary-foreground relative isolate flex cursor-pointer items-center justify-center overflow-hidden rounded-(--radius) border bg-transparent px-6 py-3 whitespace-nowrap shadow-sm hover:bg-transparent hover:[box-shadow:var(--shadow-md)]",
+          "group relative isolate flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap rounded-(--radius) border border-border bg-transparent px-6 py-3 text-primary-foreground shadow-sm transition-standard hover:border-border-accent hover:bg-transparent hover:text-primary-foreground hover:[box-shadow:var(--shadow-md)]",
           "active:translate-y-px",
-          className
+          className,
         )}
         style={
           {
@@ -57,11 +57,11 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
           } as CSSProperties
         }
       >
-        <Link ref={ref} href={href} {...props}>
+        <Link href={href} ref={ref} {...props}>
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-(--radius)">
             <div className="@container-size absolute inset-0 overflow-visible blur-[2px]">
-              <div className="animate-shimmer-slide absolute inset-0 aspect-[1] h-[100cqh] rounded-none [mask:none]">
-                <div className="animate-spin-around absolute inset-[-220%] block aspect-square [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]" />
+              <div className="absolute inset-0 aspect-[1] h-[100cqh] animate-shimmer-slide rounded-none [mask:none]">
+                <div className="absolute inset-[-220%] block aspect-square animate-spin-around [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]" />
               </div>
             </div>
           </div>
@@ -76,19 +76,19 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
               "absolute inset-0 z-20 size-full rounded-(--radius)",
 
               // transition
-              "transition-standard transform-gpu",
+              "transform-gpu transition-standard",
 
               // on hover
               "group-hover:[box-shadow:inset_0_-6px_10px_color-mix(in_oklab,var(--primary-foreground)_25%,transparent)]",
 
               // on click
-              "group-active:[box-shadow:inset_0_-10px_10px_color-mix(in_oklab,var(--primary-foreground)_25%,transparent)]"
+              "group-active:[box-shadow:inset_0_-10px_10px_color-mix(in_oklab,var(--primary-foreground)_25%,transparent)]",
             )}
           />
         </Link>
       </AppButton>
     );
-  }
+  },
 );
 
 ShimmerButton.displayName = "ShimmerButton";

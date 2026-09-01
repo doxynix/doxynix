@@ -68,7 +68,7 @@ function buildOverlapEvidence(paths: string[]) {
 function buildPrimaryArchitectureEvidence(context: ArtifactContext) {
   return buildEvidence(
     context.moduleMap.slice(0, 10).map((module) => module.path),
-    "Primary runtime module"
+    "Primary runtime module",
   );
 }
 
@@ -76,7 +76,7 @@ function buildReferenceRootsEvidence(context: ArtifactContext) {
   return buildEvidence(
     context.referenceEvidence.length > 0
       ? context.referenceEvidence
-      : context.metrics.mostComplexFiles
+      : context.metrics.mostComplexFiles,
   );
 }
 
@@ -118,7 +118,7 @@ function buildCoreFacts(context: ArtifactContext): ArtifactFact[] {
           : "No dedicated configuration files were recognized by the analyzer.",
       evidence: buildEvidence(
         evidence.configs.map((config) => config.path),
-        "Configuration inventory"
+        "Configuration inventory",
       ),
       id: "configuration-inventory",
       title: "Configuration inventory is explicit",
@@ -177,7 +177,7 @@ function buildArchitectureFacts(context: ArtifactContext): ArtifactFact[] {
         : "No dependency cycles were detected in the local dependency graph.",
     evidence: buildEvidence(
       cycleEvidencePaths,
-      cyclesCount > 0 ? "Dependency cycle node" : "Graph roots"
+      cyclesCount > 0 ? "Dependency cycle node" : "Graph roots",
     ),
     id: "dependency-cycles",
     title:
@@ -319,7 +319,8 @@ function buildManualFindings(context: ArtifactContext): ArtifactFinding[] {
 
 function buildOwnershipFinding(context: ArtifactContext): ArtifactFinding | null {
   const { busFactor, teamRoles } = context;
-  if (busFactor > 2 || teamRoles.length === 0) {
+  const leadRole = teamRoles[0];
+  if (busFactor > 2 || teamRoles.length === 0 || !leadRole) {
     return null;
   }
 
@@ -328,11 +329,11 @@ function buildOwnershipFinding(context: ArtifactContext): ArtifactFinding | null
     confidence: 76,
     evidence: buildOwnershipEvidence(teamRoles),
     id: "ownership-concentration",
-    score: clamp(70 + teamRoles[0]!.share / 2, 0, 100),
-    severity: teamRoles[0]!.share >= 60 ? "CRITICAL" : "HIGH",
+    score: clamp(70 + leadRole.share / 2, 0, 100),
+    severity: leadRole.share >= 60 ? "CRITICAL" : "HIGH",
     suggestedNextChange:
       "Spread ownership around the highest-risk files with reviews, pairing, and small runbooks.",
-    summary: `Bus factor is ${busFactor}, with visible ownership concentrated around ${teamRoles[0]!.login}.`,
+    summary: `Bus factor is ${busFactor}, with visible ownership concentrated around ${leadRole.login}.`,
     title: "Knowledge concentration creates delivery risk",
     whyItMatters:
       "A small contributor set increases fragility when urgent fixes land in central modules.",
@@ -378,7 +379,7 @@ function buildDuplicationFinding(context: ArtifactContext): ArtifactFinding | nu
     confidence: 82,
     evidence: buildEvidence(
       uniqueDuplicatePaths.length > 0 ? uniqueDuplicatePaths : metrics.mostComplexFiles,
-      "Identified code clone module"
+      "Identified code clone module",
     ),
     id: "duplication-pressure",
     score: clamp(report.duplicationPercentage * 6, 0, 100),
@@ -441,7 +442,7 @@ function buildOnboardingFinding(context: ArtifactContext): ArtifactFinding | nul
     confidence: 68,
     evidence: buildEvidence(
       primaryEntrypoints.length > 0 ? primaryEntrypoints : evidence.orphanModules,
-      "Onboarding starting point"
+      "Onboarding starting point",
     ),
     id: "onboarding-friction",
     score: clamp(onboardingRiskScore, 0, 100),
@@ -459,7 +460,7 @@ function buildOnboardingFinding(context: ArtifactContext): ArtifactFinding | nul
 }
 
 function sortFindingsBySeverity(findings: ArtifactFinding[]) {
-  return findings.toSorted((left, right) => {
+  return findings.sort((left, right) => {
     return (
       FINDING_SEVERITY_WEIGHT[right.severity] - FINDING_SEVERITY_WEIGHT[left.severity] ||
       right.score - left.score
@@ -478,8 +479,8 @@ function buildArtifactContext(params: ArtifactBuildParams): ArtifactContext {
   const primaryEntrypoints = getPrimaryEntrypointPaths(evidence.entrypoints);
   const moduleMap = getPrimaryArchitectureModules(evidence.modules);
   const publicSurfacePaths = Array.from(
-    new Set(evidence.publicSurface.map((symbol) => symbol.path))
-  ).toSorted((left, right) => left.localeCompare(right));
+    new Set(evidence.publicSurface.map((symbol) => symbol.path)),
+  ).sort((left, right) => left.localeCompare(right));
 
   const referenceEvidence = buildReferenceEvidencePaths({
     fallbackPaths: metrics.mostComplexFiles,
@@ -516,10 +517,9 @@ function buildFindings(context: ArtifactContext): ArtifactFinding[] {
   return sortFindingsBySeverity([...context.riskFindings, ...buildManualFindings(context)]);
 }
 
-// Builds compact facts/findings for the report layer without re-deriving architecture outside the canonical builders.
 export function buildRepositoryArtifacts(params: ArtifactBuildParams): ArtifactBuildResult {
   const context = buildArtifactContext(params);
-  const result: ArtifactBuildResult = {
+  return {
     facts: buildFacts(context)
       .slice(0, MAX_FACTS)
       .map((fact) => ({
@@ -533,5 +533,4 @@ export function buildRepositoryArtifacts(params: ArtifactBuildParams): ArtifactB
         evidence: finding.evidence.slice(0, MAX_FINDING_EVIDENCE),
       })),
   };
-  return result;
 }

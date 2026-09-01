@@ -15,15 +15,21 @@ import type { RepoMetrics } from "../core/metrics.types";
 import { RISK_SCORING, RISK_THRESHOLDS } from "../core/scoring-constants";
 
 function severityForScore(score: number): RiskFindingRef["severity"] {
-  if (score >= RISK_THRESHOLDS.critical) return "CRITICAL";
-  if (score >= RISK_THRESHOLDS.high) return "HIGH";
-  if (score >= RISK_THRESHOLDS.moderate) return "MODERATE";
+  if (score >= RISK_THRESHOLDS.critical) {
+    return "CRITICAL";
+  }
+  if (score >= RISK_THRESHOLDS.high) {
+    return "HIGH";
+  }
+  if (score >= RISK_THRESHOLDS.moderate) {
+    return "MODERATE";
+  }
   return "LOW";
 }
 
 function buildGraphReliability(
   evidence: RepositoryEvidence,
-  metrics: Pick<RepoMetrics, "graphReliability">
+  metrics: Pick<RepoMetrics, "graphReliability">,
 ): DependencyGraphEvidence {
   if (metrics.graphReliability == null) {
     return evidence.dependencyGraph;
@@ -41,7 +47,7 @@ function buildRiskRawMetrics(
   evidence: RepositoryEvidence,
   hotspots: HotspotSignal[],
   changeCoupling: ChangeCouplingRef[],
-  graphReliability: DependencyGraphEvidence
+  graphReliability: DependencyGraphEvidence,
 ): RiskRawMetrics {
   // ЭТАЛОН: Линейный поиск экстремумов для защиты от Maximum call stack size exceeded на больших данных
   let strongestChangeCouplingCommits = 0;
@@ -72,7 +78,7 @@ function buildRiskRawMetrics(
 
 function buildRiskDerivedScores(
   rawMetrics: RiskRawMetrics,
-  metrics: Pick<RepoMetrics, "complexityScore">
+  metrics: Pick<RepoMetrics, "complexityScore">,
 ): RiskDerivedScores {
   const derivedScores: RiskDerivedScores = {
     changeCouplingRisk: clamp(
@@ -80,33 +86,33 @@ function buildRiskDerivedScores(
         rawMetrics.strongestChangeCouplingCommits * RISK_SCORING.strongestCommitMultiplier +
         rawMetrics.changeCouplingPairs * RISK_SCORING.pairMultiplier,
       0,
-      100
+      100,
     ),
     dependencyCycleRisk: clamp(
       RISK_SCORING.dependencyCycleBase +
         rawMetrics.dependencyCycleGroups * RISK_SCORING.cycleMultiplier,
       0,
-      100
+      100,
     ),
     graphReliabilityRisk: clamp(
       rawMetrics.unresolvedInternalImports * RISK_SCORING.unresolvedImportMultiplier,
       0,
-      100
+      100,
     ),
     hotspotRisk: clamp(
       Math.round(
         rawMetrics.strongestHotspotScore * RISK_SCORING.hotspotScoreMultiplier +
           rawMetrics.hotspotCount * RISK_SCORING.hotspotCountMultiplier +
-          metrics.complexityScore * RISK_SCORING.complexityWeightInHotspot
+          metrics.complexityScore * RISK_SCORING.complexityWeightInHotspot,
       ),
       0,
-      100
+      100,
     ),
     orphanModuleRisk: clamp(
       RISK_SCORING.orphanModuleBase +
         rawMetrics.orphanModuleCount * RISK_SCORING.orphanCountMultiplier,
       0,
-      100
+      100,
     ),
     overallRisk: 0,
   };
@@ -119,17 +125,17 @@ function buildRiskDerivedScores(
         derivedScores.graphReliabilityRisk,
         derivedScores.hotspotRisk,
         derivedScores.orphanModuleRisk,
-      ])
+      ]),
     ),
     0,
-    100
+    100,
   );
 
   return derivedScores;
 }
 
 function createRiskFinding(
-  input: Omit<RiskFindingRef, "severity"> & { score: number }
+  input: Omit<RiskFindingRef, "severity"> & { score: number },
 ): RiskFindingRef {
   return {
     ...input,
@@ -139,9 +145,11 @@ function createRiskFinding(
 
 function buildDependencyCycleFinding(
   evidence: RepositoryEvidence,
-  derivedScores: RiskDerivedScores
+  derivedScores: RiskDerivedScores,
 ): null | RiskFindingRef {
-  if (evidence.dependencyCycles.length === 0) return null;
+  if (evidence.dependencyCycles.length === 0) {
+    return null;
+  }
 
   // ЭТАЛОН: Извлекаем уникальные файлы из первых трех циклов Тарьяна для расширения контекста улик ИИ
   const topCyclesFiles = uniq(evidence.dependencyCycles.slice(0, 3).flat());
@@ -164,16 +172,18 @@ function buildDependencyCycleFinding(
 
 function buildHotspotFinding(
   hotspots: HotspotSignal[],
-  derivedScores: RiskDerivedScores
+  derivedScores: RiskDerivedScores,
 ): null | RiskFindingRef {
-  if (hotspots.length === 0) return null;
+  if (hotspots.length === 0) {
+    return null;
+  }
 
   return createRiskFinding({
     category: "hotspot",
     confidence: 78,
     evidence: buildEvidence(
       hotspots.slice(0, 10).map((signal) => signal.path),
-      "Static hotspot candidate"
+      "Static hotspot candidate",
     ),
     id: "risk-hotspots",
     score: derivedScores.hotspotRisk,
@@ -192,9 +202,11 @@ function buildHotspotFinding(
 
 function buildChangeCouplingFinding(
   changeCoupling: ChangeCouplingRef[],
-  derivedScores: RiskDerivedScores
+  derivedScores: RiskDerivedScores,
 ): null | RiskFindingRef {
-  if (changeCoupling.length === 0) return null;
+  if (changeCoupling.length === 0) {
+    return null;
+  }
 
   const strongestPairs = changeCoupling.slice(0, 6);
 
@@ -225,9 +237,11 @@ function buildChangeCouplingFinding(
 
 function buildOrphanModuleFinding(
   evidence: RepositoryEvidence,
-  derivedScores: RiskDerivedScores
+  derivedScores: RiskDerivedScores,
 ): null | RiskFindingRef {
-  if (evidence.orphanModules.length === 0) return null;
+  if (evidence.orphanModules.length === 0) {
+    return null;
+  }
 
   return createRiskFinding({
     category: "maintainability",
@@ -247,9 +261,11 @@ function buildOrphanModuleFinding(
 
 function buildGraphReliabilityFinding(
   graphReliability: DependencyGraphEvidence,
-  derivedScores: RiskDerivedScores
+  derivedScores: RiskDerivedScores,
 ): null | RiskFindingRef {
-  if (graphReliability.unresolvedImportSpecifiers === 0) return null;
+  if (graphReliability.unresolvedImportSpecifiers === 0) {
+    return null;
+  }
 
   return createRiskFinding({
     category: "architecture",
@@ -275,7 +291,7 @@ function buildRiskFindings(
   hotspots: HotspotSignal[],
   changeCoupling: ChangeCouplingRef[],
   graphReliability: DependencyGraphEvidence,
-  derivedScores: RiskDerivedScores
+  derivedScores: RiskDerivedScores,
 ): RiskFindingRef[] {
   const allFindings = [
     buildDependencyCycleFinding(evidence, derivedScores),
@@ -294,7 +310,7 @@ export function buildRiskSectionBody(
   metrics: Pick<
     RepoMetrics,
     "changeCoupling" | "complexityScore" | "graphReliability" | "hotspotSignals"
-  >
+  >,
 ): RisksSectionBody {
   const hotspots =
     evidence.hotspotSignals.length > 0 ? evidence.hotspotSignals : (metrics.hotspotSignals ?? []);
@@ -307,7 +323,7 @@ export function buildRiskSectionBody(
     hotspots,
     changeCoupling,
     graphReliability,
-    derivedScores
+    derivedScores,
   );
 
   const riskBody: RisksSectionBody = {

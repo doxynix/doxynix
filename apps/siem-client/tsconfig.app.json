@@ -1,15 +1,12 @@
 {
-  "extends": "@doxynix/config/siem-client.json",
   "compilerOptions": {
     "composite": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "allowImportingTsExtensions": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@server/*": ["../siem-server/src/*"],
-      "@doxynix/siem-shared": ["../../packages/siem-shared/src/index.ts"],
-      "@doxynix/siem-shared/*": ["../../packages/siem-shared/src/*"]
-    }
+      "@/*": ["./src/*", "../siem-server/src/*"],
+      "@server/*": ["../siem-server/src/*"]
+    },
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo"
   },
+  "extends": "@doxynix/config/siem-client.json",
   "include": ["src/**/*"]
 }

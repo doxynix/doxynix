@@ -31,7 +31,7 @@ export function NotificationsRepoFilter() {
     {},
     {
       enabled: open || (filters.owner != null && filters.repo != null),
-    }
+    },
   );
 
   const handleRepoSelect = (r: null | { name: string; owner: string }) => {
@@ -44,20 +44,20 @@ export function NotificationsRepoFilter() {
   };
 
   const selectedRepo = repos?.items.find(
-    (r) => r.owner === filters.owner && r.name === filters.repo
+    (r) => r.owner === filters.owner && r.name === filters.repo,
   );
 
   const label =
     selectedRepo != null ? `${selectedRepo.owner}/${selectedRepo.name}` : "All repositories";
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover onOpenChange={setOpen} open={open}>
       <PopoverTrigger asChild>
         <AppButton
-          variant="outline"
           aria-expanded={open}
           aria-haspopup="listbox"
           className="cursor-pointer justify-between"
+          variant="outline"
         >
           <div className="flex w-60 items-center gap-2 truncate">
             <Book className="opacity-50" />
@@ -74,7 +74,7 @@ export function NotificationsRepoFilter() {
               {repos?.items.length === 0 || repos == null ? null : "No repository found"}
             </CommandEmpty>
             <CommandGroup>
-              <CommandItem onSelect={() => handleRepoSelect(null)} className="cursor-pointer">
+              <CommandItem className="cursor-pointer" onSelect={() => handleRepoSelect(null)}>
                 <Check
                   className={cn("mr-1", filters.owner == null ? "opacity-100" : "opacity-0")}
                 />
@@ -83,7 +83,7 @@ export function NotificationsRepoFilter() {
               {isLoading && (
                 <div className="flex flex-col gap-2 p-2">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" key={i} />
                   ))}
                 </div>
               )}
@@ -91,12 +91,12 @@ export function NotificationsRepoFilter() {
                 <div className="flex flex-col items-center gap-4 p-4 text-center text-sm">
                   <p>Repositories not found</p>
                   <AppButton
-                    size="sm"
+                    className="w-fit cursor-pointer"
                     onClick={() => {
                       setOpen(false);
                       setOpenCreateDialog(true);
                     }}
-                    className="w-fit cursor-pointer"
+                    size="sm"
                   >
                     Add
                   </AppButton>
@@ -104,17 +104,17 @@ export function NotificationsRepoFilter() {
               ) : (
                 repos?.items.map((r) => (
                   <CommandItem
-                    key={r.id}
-                    value={`${r.owner}/${r.name}`}
-                    onSelect={() => handleRepoSelect(r)}
                     className="cursor-pointer"
+                    key={r.id}
+                    onSelect={() => handleRepoSelect(r)}
+                    value={`${r.owner}/${r.name}`}
                   >
                     <Check
                       className={cn(
                         "mr-2",
                         filters.repo === r.name && filters.owner === r.owner
                           ? "opacity-100"
-                          : "opacity-0"
+                          : "opacity-0",
                       )}
                     />
                     <span className="truncate">

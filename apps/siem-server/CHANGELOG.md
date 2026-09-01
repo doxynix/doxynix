@@ -34,6 +34,6 @@
 
 * The following workspace dependencies were updated
   * dependencies
-    * @doxynix/siem-shared bumped to 0.1.0
+    * @doxynix/shared bumped to 0.1.0
   * devDependencies
     * @doxynix/config bumped to 1.0.0

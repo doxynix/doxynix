@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/static-components */
 "use client";
 
-import { memo, type ElementType } from "react";
-import { AnimatePresence, motion, type MotionProps, type Variants } from "motion/react";
+import { type ElementType, memo } from "react";
+import { AnimatePresence, type MotionProps, motion, type Variants } from "motion/react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -341,6 +341,12 @@ const TextAnimateBase = ({
     }
   }
 
+  const selectedAnimation = defaultItemAnimationVariants[animation];
+  const containerExit =
+    typeof selectedAnimation.container.exit === "object" ? selectedAnimation.container.exit : {};
+  const containerShow =
+    typeof selectedAnimation.container.show === "object" ? selectedAnimation.container.show : {};
+
   const finalVariants = variants
     ? {
         container: {
@@ -367,23 +373,23 @@ const TextAnimateBase = ({
       animation
       ? {
           container: {
-            ...defaultItemAnimationVariants[animation].container,
+            ...selectedAnimation.container,
             exit: {
-              ...defaultItemAnimationVariants[animation].container.exit,
+              ...containerExit,
               transition: {
                 staggerChildren: duration / segments.length,
                 staggerDirection: -1,
               },
             },
             show: {
-              ...defaultItemAnimationVariants[animation].container.show,
+              ...containerShow,
               transition: {
                 delayChildren: delay,
                 staggerChildren: duration / segments.length,
               },
             },
           },
-          item: defaultItemAnimationVariants[animation].item,
+          item: selectedAnimation.item,
         }
       : { container: defaultContainerVariants, item: defaultItemVariants };
 
@@ -391,27 +397,27 @@ const TextAnimateBase = ({
     <AnimatePresence mode="popLayout">
       <MotionComponent
         animate={startOnView ? undefined : "show"}
-        exit="exit"
-        initial="hidden"
-        variants={finalVariants.container as Variants}
-        viewport={{ once }}
-        whileInView={startOnView ? "show" : undefined}
         aria-label={accessible ? children : undefined}
         className={cn("whitespace-pre-wrap", className)}
+        exit="exit"
+        initial="hidden"
+        variants={finalVariants.container}
+        viewport={{ once }}
+        whileInView={startOnView ? "show" : undefined}
         {...props}
       >
         {accessible && <span className="sr-only">{children}</span>}
         {segments.map((segment, i) => (
           <motion.span
-            key={`${by}-${segment}-${i}`}
-            custom={i * staggerTimings[by]}
-            variants={finalVariants.item}
             aria-hidden={accessible ? true : undefined}
             className={cn(
               by === "line" ? "block" : "inline-block whitespace-pre",
               by === "character" && "",
-              segmentClassName
+              segmentClassName,
             )}
+            custom={i * staggerTimings[by]}
+            key={`${by}-${segment}-${i}`}
+            variants={finalVariants.item}
           >
             {segment}
           </motion.span>

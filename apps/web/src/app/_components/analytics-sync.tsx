@@ -10,7 +10,9 @@ export function AnalyticsSync() {
   const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
-    if (isPending) return;
+    if (isPending) {
+      return;
+    }
 
     if (session?.user.id != null) {
       const userId = String(session.user.id);

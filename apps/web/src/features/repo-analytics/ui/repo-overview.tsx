@@ -26,8 +26,8 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { getGitMetrics } from "@/entities/repo/model/git-metrics";
-import { buildRepoSearchResultHref } from "@/entities/repo/model/repo-workspace-navigation";
 import type { RepoWorkspace } from "@/entities/repo/model/repo.types";
+import { buildRepoSearchResultHref } from "@/entities/repo/model/repo-workspace-navigation";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoGitMetric } from "@/entities/repo/ui/repo-git-metric";
 import { RepoTopics } from "@/entities/repo/ui/repo-topics";
@@ -64,7 +64,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
   const complexity = secondary.scores.complexity;
 
   const handleMapNodeNavigation = (nodeId: string) => {
-    void router.push(
+    router.push(
       buildRepoSearchResultHref({
         aid,
         name,
@@ -81,12 +81,12 @@ export function RepoOverview({ data }: Readonly<Props>) {
           score: 0,
           targetView: "map",
         },
-      })
+      }),
     );
   };
 
   const handleCodeNavigation = (path: string) => {
-    void router.push(
+    router.push(
       buildRepoSearchResultHref({
         aid,
         name,
@@ -103,7 +103,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
           score: 0,
           targetView: "code",
         },
-      })
+      }),
     );
   };
 
@@ -183,8 +183,8 @@ export function RepoOverview({ data }: Readonly<Props>) {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <CardTitle className="text-lg font-bold">Executive Summary</CardTitle>
-              <AppBadge variant="outline" className={cn("capitalize", status)}>
+              <CardTitle className="font-bold text-lg">Executive Summary</CardTitle>
+              <AppBadge className={cn("capitalize", status)} variant="outline">
                 <HeartPulse className="mr-1 size-3" />
                 {summary.maintenance}
               </AppBadge>
@@ -207,7 +207,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Workspace Search</CardTitle>
+            <CardTitle className="font-medium text-sm">Workspace Search</CardTitle>
           </CardHeader>
           <CardContent>
             <RepoWorkspaceSearch repoId={repo.id} />
@@ -216,18 +216,18 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Start From Here</CardTitle>
+            <CardTitle className="font-medium text-sm">Start From Here</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <p className="text-muted-foreground text-xs font-bold">Key Zones</p>
+              <p className="font-bold text-muted-foreground text-xs">Key Zones</p>
               <div className="flex flex-wrap gap-2">
                 {navigation.keyZones.map((zone) => (
                   <AppButton
-                    key={zone.id}
-                    variant="outline"
-                    onClick={() => handleMapNodeNavigation(zone.id)}
                     className="max-w-full gap-2"
+                    key={zone.id}
+                    onClick={() => handleMapNodeNavigation(zone.id)}
+                    variant="outline"
                   >
                     <Layers className="size-3.5" />
                     <span className="truncate">{zone.label}</span>
@@ -237,14 +237,14 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </div>
 
             <div className="flex flex-col gap-2">
-              <p className="text-muted-foreground text-xs font-bold">Entrypoints</p>
+              <p className="font-bold text-muted-foreground text-xs">Entrypoints</p>
               <div className="flex flex-wrap gap-2">
                 {navigation.primaryEntrypoints.map((path) => (
                   <AppButton
-                    key={path}
-                    variant="ghost"
-                    onClick={() => handleCodeNavigation(path)}
                     className="max-w-full justify-start gap-2 px-2"
+                    key={path}
+                    onClick={() => handleCodeNavigation(path)}
+                    variant="ghost"
                   >
                     <ArrowRight className="size-3.5" />
                     <span className="truncate">{path.split("/").pop() ?? path}</span>
@@ -263,14 +263,14 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <CardTitle className="flex items-center gap-2 font-medium text-sm">
               <Code2 /> Repository Stats
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-3 gap-4">
             {REPO_BASE_STATS.map((stat) => (
               <div key={stat.label}>
-                <p className="text-muted-foreground text-xs font-bold">{stat.label}</p>
+                <p className="font-bold text-muted-foreground text-xs">{stat.label}</p>
                 <p className="text-xl">{stat.value(secondary.stats)}</p>
               </div>
             ))}
@@ -283,18 +283,18 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="mt-1 flex flex-wrap items-center gap-3 not-md:justify-center">
+          <CardContent className="mt-1 flex flex-wrap items-center not-md:justify-center gap-3">
             {gitMetrics.map((m) => (
               <RepoGitMetric
-                key={m.id}
+                className={cn(
+                  "text-muted-foreground text-xs transition-colors hover:text-foreground",
+                  m.className,
+                )}
                 color={m.color}
                 icon={m.icon}
+                key={m.id}
                 label={m.label}
                 tooltip={m.tooltip}
-                className={cn(
-                  "text-muted-foreground hover:text-foreground text-xs transition-colors",
-                  m.className
-                )}
               />
             ))}
             <RepoTopics repoTopics={data.repo.topics} />
@@ -303,15 +303,15 @@ export function RepoOverview({ data }: Readonly<Props>) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <CardTitle className="flex items-center gap-2 font-medium text-sm">
               <Sparkles /> Analysis Signals
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             {REPO_SIGNALS.map((signal) => (
-              <div key={signal.label} className="flex flex-col gap-1">
-                <p className="text-muted-foreground text-xs font-bold">{signal.label}</p>
-                <p className="text-xl font-black">{signal.value(secondary.signals)}</p>
+              <div className="flex flex-col gap-1" key={signal.label}>
+                <p className="font-bold text-muted-foreground text-xs">{signal.label}</p>
+                <p className="font-black text-xl">{signal.value(secondary.signals)}</p>
               </div>
             ))}
           </CardContent>
@@ -319,7 +319,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between gap-2 text-sm font-medium">
+            <CardTitle className="flex items-center justify-between gap-2 font-medium text-sm">
               <div className="flex items-center gap-2">
                 <FileText /> Documentation
               </div>
@@ -343,7 +343,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Languages</CardTitle>
+            <CardTitle className="font-medium text-sm">Languages</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4 flex h-2 w-full overflow-hidden rounded-full">
@@ -359,7 +359,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </div>
             <div className="grid grid-cols-3 gap-y-2">
               {secondary.languages.map((lang) => (
-                <div key={lang.name} className="flex flex-col text-xs">
+                <div className="flex flex-col text-xs" key={lang.name}>
                   <span className="flex items-center gap-1 font-bold">
                     <span
                       className="size-1.5 rounded-full"
@@ -367,7 +367,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
                     />
                     {lang.name}
                   </span>
-                  <span className="text-muted-foreground ml-2.5">
+                  <span className="ml-2.5 text-muted-foreground">
                     {Math.round(getLangPercent(lang.lines))}%
                   </span>
                 </div>
@@ -392,7 +392,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-warning flex items-center gap-2 text-sm font-medium">
+            <CardTitle className="flex items-center gap-2 font-medium text-sm text-warning">
               <AlertTriangle /> Complex Files
             </CardTitle>
           </CardHeader>
@@ -400,8 +400,8 @@ export function RepoOverview({ data }: Readonly<Props>) {
             <div className="flex flex-col gap-2">
               {data.mostComplexFiles.map((file, idx) => (
                 <div
-                  key={file}
                   className="flex w-full items-center justify-between rounded p-1 text-sm transition-colors"
+                  key={file}
                 >
                   <div className="flex items-center gap-1">
                     <span className="text-muted-foreground text-xs">{idx + 1}.</span>
@@ -412,8 +412,8 @@ export function RepoOverview({ data }: Readonly<Props>) {
                     <AppTooltip content="View code">
                       <AppButton asChild size="icon" variant="ghost">
                         <Link
-                          href={`/dashboard/repo/${owner}/${name}/code?node=file:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
                           aria-label={`View code for ${file}`}
+                          href={`/dashboard/repo/${owner}/${name}/code?node=file:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
                         >
                           <Code2 />
                         </Link>
@@ -422,8 +422,8 @@ export function RepoOverview({ data }: Readonly<Props>) {
                     <AppTooltip content="View on map">
                       <AppButton asChild size="icon" variant="ghost">
                         <Link
-                          href={`/dashboard/repo/${owner}/${name}/map?node=file:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
                           aria-label={`View ${file} on map`}
+                          href={`/dashboard/repo/${owner}/${name}/map?node=file:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
                         >
                           <Map />
                         </Link>
@@ -438,15 +438,15 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Top Risks</CardTitle>
+            <CardTitle className="font-medium text-sm">Top Risks</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-3">
               {topRisks.length > 0 ? (
                 topRisks.map((risk) => (
-                  <div key={risk.id} className="rounded-lg border p-3">
+                  <div className="rounded-lg border p-3" key={risk.id}>
                     <div className="mb-1 flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium">{risk.title}</p>
+                      <p className="font-medium text-sm">{risk.title}</p>
                       <AppBadge variant="outline">{risk.severity}</AppBadge>
                     </div>
                     <p className="text-muted-foreground text-xs leading-relaxed">{risk.summary}</p>
@@ -458,7 +458,7 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </div>
           </CardContent>
         </Card>
-        <TrendsWidget repoId={data.repo.id} className="col-span-4" />
+        <TrendsWidget className="col-span-4" repoId={data.repo.id} />
       </div>
     </div>
   );

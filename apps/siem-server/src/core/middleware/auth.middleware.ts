@@ -1,22 +1,16 @@
-import { auth } from "@server/core/auth/auth";
-import type { AuthSession, AuthUser, UserRole } from "@server/core/auth/auth.types";
-import type { MiddlewareHandler } from "hono";
+import { createMiddleware } from "hono/factory";
+
+import { auth } from "@/core/auth/auth";
+import type { AuthSession, AuthUser, UserRole } from "@/core/auth/auth.types";
 
 declare module "hono" {
   interface ContextVariableMap {
-    user: AuthUser;
-    session: AuthSession;
+    user: AuthUser | undefined;
+    session: AuthSession | undefined;
   }
 }
 
-export type AuthEnv = {
-  Variables: {
-    user: AuthUser;
-    session: AuthSession;
-  };
-};
-
-export const requireAuth: MiddlewareHandler<AuthEnv> = async (c, next) => {
+export const requireAuth = createMiddleware(async (c, next) => {
   const sessionData = await auth.api.getSession({
     headers: c.req.raw.headers,
   });
@@ -24,8 +18,8 @@ export const requireAuth: MiddlewareHandler<AuthEnv> = async (c, next) => {
   if (sessionData == null) {
     return c.json(
       {
-        success: false,
         error: "Unauthorized",
+        success: false,
       },
       401,
     );
@@ -34,18 +28,18 @@ export const requireAuth: MiddlewareHandler<AuthEnv> = async (c, next) => {
   c.set("user", sessionData.user);
   c.set("session", sessionData.session);
 
-  return await next();
-};
+  return next();
+});
 
-export function requireRole(...allowedRoles: UserRole[]): MiddlewareHandler<AuthEnv> {
-  return async (c, next) => {
+export function requireRole(...allowedRoles: UserRole[]) {
+  return createMiddleware(async (c, next) => {
     const user = c.get("user");
 
     if (user == null) {
       return c.json(
         {
-          success: false,
           error: "Unauthorized",
+          success: false,
         },
         401,
       );
@@ -54,13 +48,13 @@ export function requireRole(...allowedRoles: UserRole[]): MiddlewareHandler<Auth
     if (!allowedRoles.includes(user.role)) {
       return c.json(
         {
-          success: false,
           error: "Forbidden",
+          success: false,
         },
         403,
       );
     }
 
-    return await next();
-  };
+    return next();
+  });
 }

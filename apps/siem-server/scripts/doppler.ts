@@ -10,7 +10,7 @@ if (!command) {
 
 const isCI = process.env.CI === "true" || process.env.VERCEL === "1";
 
-const shell = process.platform === "win32" ? process.env.ComSpec || "cmd.exe" : "/bin/sh";
+const shell = process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "/bin/sh";
 
 const shellArgs = process.platform === "win32" ? ["/d", "/s", "/c", command] : ["-c", command];
 
@@ -19,8 +19,8 @@ const child = isCI
       stdio: "inherit",
     })
   : spawn("doppler", ["run", "--", shell, ...shellArgs], {
-      stdio: "inherit",
       cwd: process.cwd(),
+      stdio: "inherit",
     });
 
 child.on("close", (code, signal) => {

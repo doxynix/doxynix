@@ -89,12 +89,12 @@ Welcome to the **Doxynix Monorepo**. This codebase is managed via **Bun**, **Tur
 
 1. **FSD Imports**: Imports MUST flow downwards ONLY (`routes` -> `widgets` -> `features` -> `entities` -> `shared`). Cross-feature imports are FORBIDDEN.
 2. **Generated Route Tree**: NEVER manually edit `src/routeTree.gen.ts`. It is managed by TanStack Router Vite plugin.
-3. **Type Import Only**: Client can ONLY import types from `@doxynix/siem-shared` or `AppType` from `siem-server`. Deep imports from server files are forbidden.
+3. **Type Import Only**: Client can ONLY import types from `@doxynix/shared` or `AppType` from `siem-server`. Deep imports from server files are forbidden.
 
 ---
 
 ## 📦 Scope 4: Shared Packages (`packages/*`)
 
-- **`packages/siem-shared`**: Pure domain types, Zod schemas, and auth contracts shared between `siem-server` and `siem-client`. NO runtime server/client dependencies allowed.
-- **`packages/config`**: Base configuration files for TypeScript (`tsconfig.json`), Biome (`biome.json`), and ESLint.
+- **`packages/shared`**: Pure domain types, Zod schemas, and auth contracts shared between `siem-server` and `siem-client`. NO runtime server/client dependencies allowed.
+- **`packages/config`**: Base configuration files for TypeScript (`tsconfig.json`), Biome (`biome.json`), and Oxlint.
 - **`packages/cli`**: Doxynix Command Line Interface tool.

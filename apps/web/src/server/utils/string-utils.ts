@@ -23,10 +23,10 @@ function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): string[
 
 export function uniqueObjectPaths<T extends { path: string }>(
   items: Iterable<T>,
-  limit?: number
+  limit?: number,
 ): string[] {
   return uniqueNormalizedPaths(
     Array.from(items).map((i) => i.path),
-    limit
+    limit,
   );
 }

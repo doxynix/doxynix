@@ -1,16 +1,16 @@
 "use client";
-
+import { useId } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Layout, Loader2, Palette, ShieldCheck, Zap } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
-import { PRCommentStyleSchema, PRFocusAreaSchema } from "@/shared/api-contracts";
 import {
   UpdatePRConfigInput,
   type UpdatePRConfigInputValues,
 } from "@/shared/api/schemas/pr-analysis.schema";
 import { trpc } from "@/shared/api/trpc";
+import { PRCommentStyleSchema, PRFocusAreaSchema } from "@/shared/api-contracts";
 import { cn } from "@/shared/lib/cn";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Checkbox } from "@/shared/ui/core/checkbox";
@@ -82,17 +82,24 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
   const commentStyle = useWatch({ control: form.control, name: "commentStyle" });
   const tokenBudget = useWatch({ control: form.control, name: "tokenBudget" });
   const ciSkip = useWatch({ control: form.control, name: "ciSkip" });
+  const prAnalysisCommentStyleId = useId();
+  const prAnalysisFocusAreasId = useId();
+
+  const prAnalysisTokenBudgetId = useId();
+
+  const prAnalysisCiTriggersId = useId();
 
   const onSubmit = (values: UpdatePRConfigInputValues) => {
     updateConfig.mutate({ ...values, repoId });
   };
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="flex justify-center p-8">
         <Loader2 className="animate-spin" />
       </div>
     );
+  }
 
   const isUpdating = updateConfig.isPending;
 
@@ -106,11 +113,11 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
           </div>
           <Switch
             checked={isEnabled}
+            className="data-[state=checked]:bg-foreground"
             onCheckedChange={(checked) => {
               form.setValue("enabled", checked, { shouldDirty: true });
               updateConfig.mutate({ ...form.getValues(), enabled: checked, repoId });
             }}
-            className="data-[state=checked]:bg-foreground"
           />
         </div>
       </CardHeader>
@@ -118,14 +125,14 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
       <CardContent className="flex flex-col gap-6">
         <div className={isEnabled === true ? "opacity-100" : "pointer-events-none opacity-50"}>
           <div className="mb-6 flex flex-col gap-2">
-            <Label>Comment Style</Label>
+            <Label htmlFor={prAnalysisCommentStyleId}>Comment Style</Label>
             <Select
-              value={commentStyle}
               onValueChange={(v) =>
                 form.setValue("commentStyle", v as UpdatePRConfigInputValues["commentStyle"], {
                   shouldDirty: true,
                 })
               }
+              value={commentStyle}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select style" />
@@ -143,56 +150,59 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
           </div>
 
           <div className="mb-6 flex flex-col gap-3">
-            <Label>Focus Areas</Label>
+            <Label htmlFor={prAnalysisFocusAreasId}>Focus Areas</Label>
             <div className="grid grid-cols-2 gap-4">
               {AREAS.map((area) => {
                 const isSelected = currentFocusAreas.includes(area.id);
 
                 return (
                   <label
-                    key={area.id}
                     className={cn(
-                      "transition-standard relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3",
-                      isSelected === true
+                      "relative flex cursor-pointer flex-col gap-2 rounded-xl border p-3 transition-standard",
+
+                      isSelected
                         ? "border-border-strong bg-surface-selected"
-                        : "border-border bg-card"
+                        : "border-border bg-card",
                     )}
+                    htmlFor={prAnalysisFocusAreasId}
+                    key={area.id}
                   >
                     <input
                       checked={isSelected}
+                      className="sr-only"
                       disabled={isUpdating}
-                      type="checkbox"
+                      id={prAnalysisFocusAreasId}
                       onChange={() => {
-                        const next =
-                          isSelected === true
-                            ? currentFocusAreas.filter((id) => id !== area.id)
-                            : [...currentFocusAreas, area.id];
+                        const next = isSelected
+                          ? currentFocusAreas.filter((id) => id !== area.id)
+                          : [...currentFocusAreas, area.id];
                         form.setValue("focusAreas", next, { shouldDirty: true });
                       }}
-                      className="sr-only"
+                      type="checkbox"
                     />
 
                     <div className="flex items-center justify-between">
                       <div
                         className={cn(
                           "flex size-8 items-center justify-center rounded-lg border",
-                          isSelected === true
-                            ? "bg-primary text-primary-foreground border-border-strong"
-                            : "bg-surface-hover text-muted-foreground border-border"
+
+                          isSelected
+                            ? "border-border-strong bg-primary text-primary-foreground"
+                            : "border-border bg-surface-hover text-muted-foreground",
                         )}
                       >
                         <area.icon />
                       </div>
                       <Checkbox
-                        checked={isSelected}
-                        tabIndex={-1}
                         aria-hidden="true"
+                        checked={isSelected}
                         className="pointer-events-none size-4 rounded-full"
+                        tabIndex={-1}
                       />
                     </div>
                     <div>
-                      <p className="text-sm font-bold">{area.label}</p>
-                      <p className="text-muted-foreground mt-1 text-xs">{area.desc}</p>
+                      <p className="font-bold text-sm">{area.label}</p>
+                      <p className="mt-1 text-muted-foreground text-xs">{area.desc}</p>
                     </div>
                   </label>
                 );
@@ -202,21 +212,23 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
 
           <div className="mb-8 flex flex-col gap-4">
             <div className="flex justify-between text-sm">
-              <Label>Token Budget</Label>
-              <span className="text-muted-foreground font-mono">
+              <Label htmlFor={prAnalysisTokenBudgetId} id={prAnalysisTokenBudgetId}>
+                Token Budget
+              </Label>
+              <span className="font-mono text-muted-foreground">
                 {tokenBudget?.toLocaleString()}
               </span>
             </div>
             <Slider
-              value={[tokenBudget ?? 30_000]}
               max={100_000}
               min={10_000}
-              step={5000}
               onValueChange={([val]) => {
                 if (val != null) {
                   form.setValue("tokenBudget", val, { shouldDirty: true });
                 }
               }}
+              step={5000}
+              value={[tokenBudget ?? 30_000]}
             />
             <p className="text-muted-foreground text-xs">
               Higher budget allows analyzing larger pull requests but costs more.
@@ -225,22 +237,24 @@ export function PRAnalysisConfigCard({ repoId }: Readonly<Props>) {
 
           <div className="flex items-center justify-between">
             <div>
-              <Label className="text-sm">Skip CI Triggers</Label>
+              <Label className="text-sm" htmlFor={prAnalysisCiTriggersId}>
+                Skip CI Triggers
+              </Label>
               <p className="text-muted-foreground text-xs">
                 Add [skip ci] to bot commits to save actions minutes.
               </p>
             </div>
             <Switch
               checked={ciSkip}
-              onCheckedChange={(val) => form.setValue("ciSkip", val, { shouldDirty: true })}
               className="data-[state=checked]:bg-foreground"
+              onCheckedChange={(val) => form.setValue("ciSkip", val, { shouldDirty: true })}
             />
           </div>
           <LoadingButton
+            className="mt-6"
             disabled={isUpdating || !form.formState.isDirty}
             isLoading={isUpdating}
             onClick={() => void form.handleSubmit(onSubmit)()}
-            className="mt-6"
           >
             Save Configuration
           </LoadingButton>

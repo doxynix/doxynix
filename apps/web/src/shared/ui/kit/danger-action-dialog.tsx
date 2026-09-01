@@ -50,14 +50,14 @@ export function DangerActionDialog({
   const tCommon = useTranslations("Common");
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="gap-2 sm:gap-0">
           <div className="flex items-center gap-4">
-            <div className="bg-destructive/15 flex size-10 shrink-0 items-center justify-center rounded-full">
-              <AlertTriangle className="text-destructive size-5" />
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-destructive/15">
+              <AlertTriangle className="size-5 text-destructive" />
             </div>
             <div className="flex flex-col gap-1 overflow-hidden">
               <DialogTitle>{title}</DialogTitle>
@@ -69,17 +69,17 @@ export function DangerActionDialog({
         {children}
 
         {successAlertTitle && successAlertContent && (
-          <Alert variant="success" className="border-success/10 text-success bg-success/5">
-            <AlertTitle className="text-base font-bold">{successAlertTitle}</AlertTitle>
+          <Alert className="border-success/10 bg-success/5 text-success" variant="success">
+            <AlertTitle className="font-bold text-base">{successAlertTitle}</AlertTitle>
             <AlertDescription>{successAlertContent}</AlertDescription>
           </Alert>
         )}
 
         <Alert
-          variant="destructive"
           className="border-destructive/10 bg-destructive/5 text-destructive"
+          variant="destructive"
         >
-          <AlertTitle className="text-base font-bold">
+          <AlertTitle className="font-bold text-base">
             <span>{tCommon("warning")}</span>
           </AlertTitle>
           <AlertDescription>{destructiveAlertContent}</AlertDescription>
@@ -87,16 +87,16 @@ export function DangerActionDialog({
 
         <DialogFooter>
           <DialogClose asChild>
-            <AppButton variant="outline" className="cursor-pointer">
+            <AppButton className="cursor-pointer" variant="outline">
               {tCommon("cancel")}
             </AppButton>
           </DialogClose>
           <LoadingButton
+            className="cursor-pointer"
             isLoading={isLoading}
             loadingText="Deleting..."
-            variant="destructive"
             onClick={onConfirm}
-            className="cursor-pointer"
+            variant="destructive"
           >
             {confirmLabel}
           </LoadingButton>

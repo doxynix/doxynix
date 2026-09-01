@@ -1,217 +1,223 @@
 /* eslint-disable sonarjs/no-os-command-from-path */
 /* eslint-disable sonarjs/slow-regex */
 /* eslint-disable sonarjs/cognitive-complexity */
-import { execSync } from "child_process";
-import fs from "fs";
-import path from "path";
+import { execSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 
 const capitalize = (str) => {
-  if (!str) return "Open Source Community";
+  if (!str) {
+    return "Open Source Community";
+  }
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
 const MAPPINGS = [
   // Vercel / Next.js ecosystem
-  { prefix: "next-auth", name: "NextAuth.js", gh: "nextauthjs" },
-  { prefix: "@next-auth/", name: "NextAuth.js", gh: "nextauthjs" },
-  { prefix: "next-themes", name: "Paco", gh: "pacocoursey" },
-  { prefix: "next-intl", name: "Jan Amann", gh: "amannn" },
-  { prefix: "next-sitemap", name: "Vishnu Sankar", gh: "iamvishnusankar" },
-  { prefix: "nextjs-toploader", name: "Shri Ganesh Jha", gh: "TheSGJ" },
-  { prefix: "nextjs-bundle-analysis", name: "Hashicorp", gh: "hashicorp" },
-  { prefix: "next-axiom", name: "Axiom", gh: "axiomhq" },
-  { prefix: "eslint-config-next", name: "Vercel", gh: "vercel" },
-  { prefix: "@next/", name: "Vercel", gh: "vercel" },
-  { prefix: "@vercel/", name: "Vercel", gh: "vercel" },
-  { prefix: "@ai-sdk/", name: "Vercel", gh: "vercel" },
-  { prefix: "next", name: "Vercel", gh: "vercel" },
-  { prefix: "ai", name: "Vercel", gh: "vercel" },
+  { gh: "nextauthjs", name: "NextAuth.js", prefix: "next-auth" },
+  { gh: "nextauthjs", name: "NextAuth.js", prefix: "@next-auth/" },
+  { gh: "pacocoursey", name: "Paco", prefix: "next-themes" },
+  { gh: "amannn", name: "Jan Amann", prefix: "next-intl" },
+  { gh: "iamvishnusankar", name: "Vishnu Sankar", prefix: "next-sitemap" },
+  { gh: "TheSGJ", name: "Shri Ganesh Jha", prefix: "nextjs-toploader" },
+  { gh: "hashicorp", name: "Hashicorp", prefix: "nextjs-bundle-analysis" },
+  { gh: "axiomhq", name: "Axiom", prefix: "next-axiom" },
+  { gh: "vercel", name: "Vercel", prefix: "eslint-config-next" },
+  { gh: "vercel", name: "Vercel", prefix: "@next/" },
+  { gh: "vercel", name: "Vercel", prefix: "@vercel/" },
+  { gh: "vercel", name: "Vercel", prefix: "@ai-sdk/" },
+  { gh: "vercel", name: "Vercel", prefix: "next" },
+  { gh: "vercel", name: "Vercel", prefix: "ai" },
 
   // Meta / React
-  { prefix: "react-hook-form", name: "React Hook Form", gh: "react-hook-form" },
+  { gh: "react-hook-form", name: "React Hook Form", prefix: "react-hook-form" },
   {
-    prefix: "react-arborist",
-    name: "Brim Data",
     gh: "brimdata",
+    name: "Brim Data",
+    prefix: "react-arborist",
   },
-  { prefix: "react-codemirror-merge", name: "UIW", gh: "uiwjs" },
-  { prefix: "react-hotkeys-hook", name: "Johannes Klauss", gh: "JohannesKlauss" },
-  { prefix: "react-resizable-panels", name: "Brian Vaughn", gh: "bvaughn" },
-  { prefix: "eslint-plugin-react-compiler", name: "Meta", gh: "facebook" },
-  { prefix: "babel-plugin-react-compiler", name: "Meta", gh: "facebook" },
-  { prefix: "eslint-plugin-react-hooks", name: "Meta", gh: "facebook" },
-  { prefix: "eslint-plugin-react", name: "JSX ESLint", gh: "jsx-eslint" },
-  { prefix: "server-only", name: "Meta", gh: "facebook" },
-  { prefix: "react-dom", name: "Meta", gh: "facebook" },
-  { prefix: "react", name: "Meta", gh: "facebook" },
+  { gh: "uiwjs", name: "UIW", prefix: "react-codemirror-merge" },
+  { gh: "JohannesKlauss", name: "Johannes Klauss", prefix: "react-hotkeys-hook" },
+  { gh: "bvaughn", name: "Brian Vaughn", prefix: "react-resizable-panels" },
+  { gh: "facebook", name: "Meta", prefix: "eslint-plugin-react-compiler" },
+  { gh: "facebook", name: "Meta", prefix: "babel-plugin-react-compiler" },
+  { gh: "facebook", name: "Meta", prefix: "eslint-plugin-react-hooks" },
+  { gh: "jsx-eslint", name: "JSX ESLint", prefix: "eslint-plugin-react" },
+  { gh: "facebook", name: "Meta", prefix: "server-only" },
+  { gh: "facebook", name: "Meta", prefix: "react-dom" },
+  { gh: "facebook", name: "Meta", prefix: "react" },
 
   // UI, Tailwind, Radix
-  { prefix: "@radix-ui/", name: "Radix UI", gh: "radix-ui" },
-  { prefix: "lucide-react", name: "Lucide", gh: "lucide-icons" },
-  { prefix: "tailwindcss", name: "Tailwind Labs", gh: "tailwindlabs" },
-  { prefix: "@tailwindcss/", name: "Tailwind Labs", gh: "tailwindlabs" },
-  { prefix: "prettier-plugin-tailwindcss", name: "Tailwind Labs", gh: "tailwindlabs" },
-  { prefix: "tailwind-scrollbar", name: "Adoxography", gh: "adoxography" },
-  { prefix: "tailwind-merge", name: "Dany Castillo", gh: "dcastil" },
-  { prefix: "tw-animate-css", name: "Luca", gh: "Wombosvideo" },
-  { prefix: "clsx", name: "Luke Edwards", gh: "lukeed" },
-  { prefix: "@xyflow", name: "Xyflow", gh: "xyflow" },
+  { gh: "radix-ui", name: "Radix UI", prefix: "@radix-ui/" },
+  { gh: "lucide-icons", name: "Lucide", prefix: "lucide-react" },
+  { gh: "tailwindlabs", name: "Tailwind Labs", prefix: "tailwindcss" },
+  { gh: "tailwindlabs", name: "Tailwind Labs", prefix: "@tailwindcss/" },
+  { gh: "tailwindlabs", name: "Tailwind Labs", prefix: "prettier-plugin-tailwindcss" },
+  { gh: "adoxography", name: "Adoxography", prefix: "tailwind-scrollbar" },
+  { gh: "dcastil", name: "Dany Castillo", prefix: "tailwind-merge" },
+  { gh: "Wombosvideo", name: "Luca", prefix: "tw-animate-css" },
+  { gh: "lukeed", name: "Luke Edwards", prefix: "clsx" },
+  { gh: "xyflow", name: "Xyflow", prefix: "@xyflow" },
 
   // Prisma & Databases
-  { prefix: "prisma-dbml-generator", name: "Notiz", gh: "notiz-dev" },
-  { prefix: "prisma-erd-generator", name: "John Fay", gh: "keonik" },
-  { prefix: "prisma-generator-fake-data", name: "Luís Rudge", gh: "luisrudge" },
-  { prefix: "prisma-field-encryption", name: "47ng", gh: "47ng" },
-  { prefix: "prisma-json-schema-generator", name: "Valentin Palkovic", gh: "valentinpalkovic" },
-  { prefix: "@prisma/", name: "Prisma", gh: "prisma" },
-  { prefix: "prisma", name: "Prisma", gh: "prisma" },
-  { prefix: "@zenstackhq/", name: "ZenStack", gh: "zenstackhq" },
-  { prefix: "zenstack", name: "ZenStack", gh: "zenstackhq" },
-  { prefix: "zod-prisma-types", name: "Chris Hoermann", gh: "chrishoermann" },
-  { prefix: "zod", name: "Colin McDonnell", gh: "colinmcdonnell" },
-  { prefix: "pg", name: "Brian Carlson", gh: "brianc" },
+  { gh: "notiz-dev", name: "Notiz", prefix: "prisma-dbml-generator" },
+  { gh: "keonik", name: "John Fay", prefix: "prisma-erd-generator" },
+  { gh: "luisrudge", name: "Luís Rudge", prefix: "prisma-generator-fake-data" },
+  { gh: "47ng", name: "47ng", prefix: "prisma-field-encryption" },
+  { gh: "valentinpalkovic", name: "Valentin Palkovic", prefix: "prisma-json-schema-generator" },
+  { gh: "prisma", name: "Prisma", prefix: "@prisma/" },
+  { gh: "prisma", name: "Prisma", prefix: "prisma" },
+  { gh: "zenstackhq", name: "ZenStack", prefix: "@zenstackhq/" },
+  { gh: "zenstackhq", name: "ZenStack", prefix: "zenstack" },
+  { gh: "chrishoermann", name: "Chris Hoermann", prefix: "zod-prisma-types" },
+  { gh: "colinmcdonnell", name: "Colin McDonnell", prefix: "zod" },
+  { gh: "brianc", name: "Brian Carlson", prefix: "pg" },
 
   // Unified, Remark, Rehype
-  { prefix: "remark-", name: "Unified.js", gh: "unifiedjs" },
-  { prefix: "rehype-", name: "Unified.js", gh: "unifiedjs" },
-  { prefix: "unified", name: "Unified.js", gh: "unifiedjs" },
+  { gh: "unifiedjs", name: "Unified.js", prefix: "remark-" },
+  { gh: "unifiedjs", name: "Unified.js", prefix: "rehype-" },
+  { gh: "unifiedjs", name: "Unified.js", prefix: "unified" },
 
   // Shiki & Markdown
-  { prefix: "@shikijs/", name: "Shiki", gh: "shikijs" },
-  { prefix: "shiki", name: "Shiki", gh: "shikijs" },
+  { gh: "shikijs", name: "Shiki", prefix: "@shikijs/" },
+  { gh: "shikijs", name: "Shiki", prefix: "shiki" },
 
   // Linting, Types & Dev Tools
-  { prefix: "@typescript-eslint/", name: "TypeScript ESLint", gh: "typescript-eslint" },
-  { prefix: "@eslint/", name: "ESLint", gh: "eslint" },
-  { prefix: "eslint", name: "ESLint", gh: "eslint" },
-  { prefix: "prettier", name: "Prettier", gh: "prettier" },
-  { prefix: "@types/", name: "DefinitelyTyped", gh: "DefinitelyTyped" },
-  { prefix: "typescript", name: "Microsoft", gh: "microsoft" },
-  { prefix: "@playwright/", name: "Microsoft", gh: "microsoft" },
-  { prefix: "@vitest/", name: "Vitest", gh: "vitest-dev" },
-  { prefix: "vitest", name: "Vitest", gh: "vitest-dev" },
-  { prefix: "@stryker-mutator/", name: "Stryker Mutator", gh: "stryker-mutator" },
-  { prefix: "@commitlint/", name: "commitlint", gh: "conventional-changelog" },
-  { prefix: "husky", name: "Typicode", gh: "typicode" },
-  { prefix: "lint-staged", name: "lint-staged", gh: "lint-staged" },
-  { prefix: "cspell", name: "Street Side Software", gh: "streetsidesoftware" },
-  { prefix: "@cspell/", name: "Street Side Software", gh: "streetsidesoftware" },
-  { prefix: "@faker-js/", name: "Faker-js", gh: "faker-js" },
-  { prefix: "knip", name: "Webpro", gh: "Webpro-nl" },
-  { prefix: "webpack-stats-plugin", name: "Nearform Commerce", gh: "FormidableLabs" },
-  { prefix: "eslint-config-prettier", name: "Prettier", gh: "prettier" },
-  { prefix: "eslint-plugin-sonarjs", name: "Sonar", gh: "SonarSource" },
+  { gh: "typescript-eslint", name: "TypeScript ESLint", prefix: "@typescript-eslint/" },
+  { gh: "eslint", name: "ESLint", prefix: "@eslint/" },
+  { gh: "eslint", name: "ESLint", prefix: "eslint" },
+  { gh: "prettier", name: "Prettier", prefix: "prettier" },
+  { gh: "DefinitelyTyped", name: "DefinitelyTyped", prefix: "@types/" },
+  { gh: "microsoft", name: "Microsoft", prefix: "typescript" },
+  { gh: "microsoft", name: "Microsoft", prefix: "@playwright/" },
+  { gh: "vitest-dev", name: "Vitest", prefix: "@vitest/" },
+  { gh: "vitest-dev", name: "Vitest", prefix: "vitest" },
+  { gh: "stryker-mutator", name: "Stryker Mutator", prefix: "@stryker-mutator/" },
+  { gh: "conventional-changelog", name: "commitlint", prefix: "@commitlint/" },
+  { gh: "typicode", name: "Typicode", prefix: "husky" },
+  { gh: "lint-staged", name: "lint-staged", prefix: "lint-staged" },
+  { gh: "streetsidesoftware", name: "Street Side Software", prefix: "cspell" },
+  { gh: "streetsidesoftware", name: "Street Side Software", prefix: "@cspell/" },
+  { gh: "faker-js", name: "Faker-js", prefix: "@faker-js/" },
+  { gh: "Webpro-nl", name: "Webpro", prefix: "knip" },
+  { gh: "FormidableLabs", name: "Nearform Commerce", prefix: "webpack-stats-plugin" },
+  { gh: "prettier", name: "Prettier", prefix: "eslint-config-prettier" },
+  { gh: "SonarSource", name: "Sonar", prefix: "eslint-plugin-sonarjs" },
 
   // General ecosystem
-  { prefix: "@tanstack/", name: "TanStack", gh: "tanstack" },
-  { prefix: "@trpc/", name: "tRPC", gh: "trpc" },
-  { prefix: "trpc-to-openapi", name: "Mario Campa", gh: "mcampa" },
-  { prefix: "@octokit/", name: "GitHub", gh: "octokit" },
-  { prefix: "@codemirror/", name: "CodeMirror", gh: "codemirror" },
-  { prefix: "@lezer/", name: "CodeMirror", gh: "codemirror" },
-  { prefix: "@uiw/", name: "UIW", gh: "uiwjs" },
-  { prefix: "@scalar/", name: "Scalar", gh: "scalar" },
-  { prefix: "@trigger.dev/", name: "Trigger.dev", gh: "triggerdotdev" },
-  { prefix: "@upstash/", name: "Upstash", gh: "upstash" },
-  { prefix: "@uploadthing/", name: "Ping.gg", gh: "pingdotgg" },
-  { prefix: "uploadthing", name: "Ping.gg", gh: "pingdotgg" },
-  { prefix: "@react-email/", name: "Resend", gh: "resend" },
-  { prefix: "resend", name: "Resend", gh: "resend" },
-  { prefix: "@sentry/", name: "Sentry", gh: "getsentry" },
-  { prefix: "@mermaid-js/", name: "Mermaid JS", gh: "mermaid-js" },
-  { prefix: "mermaid", name: "Mermaid JS", gh: "mermaid-js" },
+  { gh: "tanstack", name: "TanStack", prefix: "@tanstack/" },
+  { gh: "trpc", name: "tRPC", prefix: "@trpc/" },
+  { gh: "mcampa", name: "Mario Campa", prefix: "trpc-to-openapi" },
+  { gh: "octokit", name: "GitHub", prefix: "@octokit/" },
+  { gh: "codemirror", name: "CodeMirror", prefix: "@codemirror/" },
+  { gh: "codemirror", name: "CodeMirror", prefix: "@lezer/" },
+  { gh: "uiwjs", name: "UIW", prefix: "@uiw/" },
+  { gh: "scalar", name: "Scalar", prefix: "@scalar/" },
+  { gh: "triggerdotdev", name: "Trigger.dev", prefix: "@trigger.dev/" },
+  { gh: "upstash", name: "Upstash", prefix: "@upstash/" },
+  { gh: "pingdotgg", name: "Ping.gg", prefix: "@uploadthing/" },
+  { gh: "pingdotgg", name: "Ping.gg", prefix: "uploadthing" },
+  { gh: "resend", name: "Resend", prefix: "@react-email/" },
+  { gh: "resend", name: "Resend", prefix: "resend" },
+  { gh: "getsentry", name: "Sentry", prefix: "@sentry/" },
+  { gh: "mermaid-js", name: "Mermaid JS", prefix: "@mermaid-js/" },
+  { gh: "mermaid-js", name: "Mermaid JS", prefix: "mermaid" },
 
   // Solo tools & libraries
-  { prefix: "zustand", name: "Poimandres", gh: "pmndrs" },
-  { prefix: "motion", name: "Matt Perry", gh: "motiondivision" },
-  { prefix: "sonner", name: "Emil Kowalski", gh: "emilkowalski" },
-  { prefix: "nuqs", name: "47ng", gh: "47ng" },
-  { prefix: "cmdk", name: "Paco", gh: "pacocoursey" },
-  { prefix: "ably", name: "Ably", gh: "ably" },
-  { prefix: "jsonwebtoken", name: "Auth0", gh: "auth0" },
-  { prefix: "cookie", name: "jshttp", gh: "jshttp" },
-  { prefix: "dotenv", name: "Mot", gh: "motdotla" },
-  { prefix: "nodemailer", name: "Andris Reinman", gh: "nodemailer" },
-  { prefix: "pino", name: "Pino", gh: "pinojs" },
-  { prefix: "posthog-", name: "PostHog", gh: "PostHog" },
-  { prefix: "recharts", name: "Recharts", gh: "recharts" },
-  { prefix: "ts-node", name: "TypeStrong", gh: "TypeStrong" },
-  { prefix: "typedoc", name: "TypeStrong", gh: "TypeStrong" },
-  { prefix: "tsx", name: "Hiroki Osame", gh: "privatenumber" },
-  { prefix: "@vitejs/", name: "Vite", gh: "vitejs" },
-  { prefix: "superjson", name: "Blitz.js", gh: "blitz-js" },
-  { prefix: "@hookform/", name: "React Hook Form", gh: "react-hook-form" },
-  { prefix: "isbinaryfile", name: "Garen Torikian", gh: "gjtorikian" },
-  { prefix: "jscpd", name: "Kucherenko", gh: "kucherenko" },
-  { prefix: "simple-git", name: "Steve King", gh: "steveukx" },
-  { prefix: "decimal.js", name: "Michael M", gh: "MikeMcl" },
+  { gh: "pmndrs", name: "Poimandres", prefix: "zustand" },
+  { gh: "motiondivision", name: "Matt Perry", prefix: "motion" },
+  { gh: "emilkowalski", name: "Emil Kowalski", prefix: "sonner" },
+  { gh: "47ng", name: "47ng", prefix: "nuqs" },
+  { gh: "pacocoursey", name: "Paco", prefix: "cmdk" },
+  { gh: "ably", name: "Ably", prefix: "ably" },
+  { gh: "auth0", name: "Auth0", prefix: "jsonwebtoken" },
+  { gh: "jshttp", name: "jshttp", prefix: "cookie" },
+  { gh: "motdotla", name: "Mot", prefix: "dotenv" },
+  { gh: "nodemailer", name: "Andris Reinman", prefix: "nodemailer" },
+  { gh: "pinojs", name: "Pino", prefix: "pino" },
+  { gh: "PostHog", name: "PostHog", prefix: "posthog-" },
+  { gh: "recharts", name: "Recharts", prefix: "recharts" },
+  { gh: "TypeStrong", name: "TypeStrong", prefix: "ts-node" },
+  { gh: "TypeStrong", name: "TypeStrong", prefix: "typedoc" },
+  { gh: "privatenumber", name: "Hiroki Osame", prefix: "tsx" },
+  { gh: "vitejs", name: "Vite", prefix: "@vitejs/" },
+  { gh: "blitz-js", name: "Blitz.js", prefix: "superjson" },
+  { gh: "react-hook-form", name: "React Hook Form", prefix: "@hookform/" },
+  { gh: "gjtorikian", name: "Garen Torikian", prefix: "isbinaryfile" },
+  { gh: "kucherenko", name: "Kucherenko", prefix: "jscpd" },
+  { gh: "steveukx", name: "Steve King", prefix: "simple-git" },
+  { gh: "MikeMcl", name: "Michael M", prefix: "decimal.js" },
   {
-    prefix: "fast-safe-stringify",
-    name: "David Mark Clements",
     gh: "davidmarkclements",
+    name: "David Mark Clements",
+    prefix: "fast-safe-stringify",
   },
-  { prefix: "fast-check", name: "Nicolas DUBIEN", gh: "dubzzz" },
-  { prefix: "vite-tsconfig-paths", name: "Alec Larson", gh: "aleclarson" },
-  { prefix: "openapi-typescript-codegen", name: "Ferdi Koomen", gh: "ferdikoomen" },
-  { prefix: "@ianvs/", name: "Ian VanSchooten", gh: "Ianvs" },
+  { gh: "dubzzz", name: "Nicolas DUBIEN", prefix: "fast-check" },
+  { gh: "aleclarson", name: "Alec Larson", prefix: "vite-tsconfig-paths" },
+  { gh: "ferdikoomen", name: "Ferdi Koomen", prefix: "openapi-typescript-codegen" },
+  { gh: "Ianvs", name: "Ian VanSchooten", prefix: "@ianvs/" },
   {
-    prefix: "parse-github-url",
-    name: "Jon Schlinkert",
     gh: "Jonschlinkert",
+    name: "Jon Schlinkert",
+    prefix: "parse-github-url",
   },
   {
-    prefix: "cross-env",
-    name: "Kent C. Dodds",
     gh: "kentcdodds",
+    name: "Kent C. Dodds",
+    prefix: "cross-env",
   },
   {
-    prefix: "@marsidev/",
-    name: "Luis Marsiglia",
     gh: "marsidev",
+    name: "Luis Marsiglia",
+    prefix: "@marsidev/",
   },
   {
-    prefix: "use-debounce",
-    name: "Nik",
     gh: "Xnimorz",
+    name: "Nik",
+    prefix: "use-debounce",
   },
   {
-    prefix: "detect-language",
-    name: "Damian Krzeminski",
     gh: "pirxpilot",
+    name: "Damian Krzeminski",
+    prefix: "detect-language",
   },
   {
-    prefix: "file-saver",
-    name: "Eli Grey",
     gh: "eligrey",
+    name: "Eli Grey",
+    prefix: "file-saver",
   },
   {
-    prefix: "browser-image-compression",
-    name: "Donald Chan",
     gh: "Donaldcwl",
+    name: "Donald Chan",
+    prefix: "browser-image-compression",
   },
   {
-    prefix: "sloc",
-    name: "Markus Kohlhase",
     gh: "flosse",
+    name: "Markus Kohlhase",
+    prefix: "sloc",
   },
   {
-    prefix: "class-variance-authority",
-    name: "Joe-bell",
     gh: "joe-bell",
+    name: "Joe-bell",
+    prefix: "class-variance-authority",
   },
   {
-    prefix: "type-coverage",
-    name: "York Yao",
     gh: "plantain",
+    name: "York Yao",
+    prefix: "type-coverage",
   },
 ].sort((a, b) => b.prefix.length - a.prefix.length);
 
 const cleanUrl = (url) => {
-  if (!url) return "";
+  if (!url) {
+    return "";
+  }
 
   const rawUrl = typeof url === "string" ? url : url.url || String(url);
 
-  if (typeof rawUrl !== "string" || !rawUrl) return "";
+  if (typeof rawUrl !== "string" || !rawUrl) {
+    return "";
+  }
 
   return rawUrl
     .replace(/^git\+/, "")
@@ -233,17 +239,19 @@ const toPublicUrl = (url) => {
 };
 
 const sanitizeAuthorName = (rawName) => {
-  if (!rawName) return "";
+  if (!rawName) {
+    return "";
+  }
 
   let cleanedName = String(rawName)
-    .replace(/\([^)]+\)/g, "")
-    .replace(/<[^>]*>/g, "")
-    .replace(/\b[^\s@]+@[^\s@]+\.[^\s@]+\b/g, "")
-    .replace(/[<>]/g, "")
-    .replace(/\s{2,}/g, " ")
+    .replaceAll(/\([^)]+\)/g, "")
+    .replaceAll(/<[^>]*>/g, "")
+    .replaceAll(/\b[^\s@]+@[^\s@]+\.[^\s@]+\b/g, "")
+    .replaceAll(/[<>]/g, "")
+    .replaceAll(/\s{2,}/g, " ")
     .trim();
 
-  cleanedName = cleanedName.replace(/[^a-zA-Z0-9\s.'"-]/g, "").trim();
+  cleanedName = cleanedName.replaceAll(/[^a-zA-Z0-9\s.'"-]/g, "").trim();
 
   return cleanedName;
 };
@@ -285,15 +293,18 @@ function enrichPackageData(pkg) {
 
   authorName = authorName || "Open Source Community";
 
-  if (authorName.toLowerCase() === "meta" || authorName.toLowerCase() === "facebook")
+  if (authorName.toLowerCase() === "meta" || authorName.toLowerCase() === "facebook") {
     authorName = "Meta";
-  if (authorName.toLowerCase() === "vercel") authorName = "Vercel";
+  }
+  if (authorName.toLowerCase() === "vercel") {
+    authorName = "Vercel";
+  }
 
   return {
-    authorName,
     authorLink: githubOwner
       ? `https://github.com/${githubOwner}`
       : toPublicUrl(pkg.homepage) || toPublicUrl(pkg.repository?.url || pkg.repository),
+    authorName,
     avatarUrl: githubOwner ? `https://github.com/${githubOwner}.png?size=96` : null,
     description: pkg.description || "Essential dependency",
   };
@@ -320,22 +331,22 @@ try {
         if (!grouped[author]) {
           grouped[author] = {
             author: author,
-            avatar: enriched.avatarUrl,
             authorLink: enriched.authorLink,
+            avatar: enriched.avatarUrl,
             packages: [],
           };
         }
 
         grouped[author].packages.push({
-          name: pkg.name,
           license: licenseType,
+          name: pkg.name,
         });
       }
     });
   });
 
   const finalData = Object.values(grouped).sort(
-    (a, b) => b.packages.length - a.packages.length || a.author.localeCompare(b.author)
+    (a, b) => b.packages.length - a.packages.length || a.author.localeCompare(b.author),
   );
 
   const outputPath = "./src/shared/data/licenses.json";

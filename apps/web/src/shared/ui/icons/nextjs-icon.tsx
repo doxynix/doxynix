@@ -5,12 +5,12 @@ type Props = {
 export function NextJSIcon({ className }: Readonly<Props>) {
   return (
     <svg
+      className={className}
       fill="none"
       height="100%"
       viewBox="0 0 394 80"
       width="100%"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
     >
       <path
         d="M261.919 0.0330722H330.547V12.7H303.323V79.339H289.71V12.7H261.919V0.0330722Z"

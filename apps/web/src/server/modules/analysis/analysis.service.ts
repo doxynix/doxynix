@@ -1,5 +1,5 @@
 import { unstable_cache } from "next/cache";
-import { DocType, Status, type Prisma, type Repo } from "@prisma/client";
+import { DocType, type Prisma, type Repo, Status } from "@prisma/client";
 import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 import { uniq } from "es-toolkit";
@@ -11,7 +11,7 @@ import { generateBranchName } from "@/shared/lib/get-branch-name";
 import { highlightCode } from "@/shared/lib/shiki";
 
 import { appLogger } from "@/server/core/app-logger";
-import { prisma, type DbClient } from "@/server/core/db";
+import { type DbClient, prisma } from "@/server/core/db";
 import { getInstallationClient } from "@/server/core/github/github-provider";
 import { realtimeService } from "@/server/core/realtime";
 import { callWithFallback } from "@/server/utils/call";
@@ -31,10 +31,10 @@ import { buildRepositoryToolProfile } from "./ai/ai-tools";
 import { buildCodeDocSystemPrompt } from "./ai/prompts-refactored";
 import { analysisContext, type NodeContext } from "./analysis.context";
 import { analysisMapper } from "./analysis.mapper";
-import { analysisRepo, type AnalysisRef } from "./analysis.repository";
+import { type AnalysisRef, analysisRepo } from "./analysis.repository";
 import {
-  DocumentFilePreviewSchema,
   type DocumentFilePreviewResult,
+  DocumentFilePreviewSchema,
   type FileActionNodeContext,
 } from "./analysis.schemas";
 import {
@@ -113,7 +113,7 @@ export const repoAnalysisService = {
       instructions?: string;
       language: string;
       repoId: string;
-    }
+    },
   ) {
     await this.assertRepoAccess(db, userId, input.repoId);
 
@@ -143,7 +143,7 @@ export const repoAnalysisService = {
         // concurrencyKey: `user-${userId}`,
         // idempotencyKey: `analysis-${analysis.publicId}`,
         ttl: "30m",
-      }
+      },
     );
 
     await db.analysis.update({
@@ -159,7 +159,9 @@ export const repoAnalysisService = {
       where: { publicId: repoId, userId },
     });
 
-    if (repo == null) throw new TRPCError({ code: "NOT_FOUND" });
+    if (repo == null) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
     return repo;
   },
 
@@ -167,7 +169,7 @@ export const repoAnalysisService = {
     db: DbClient,
     repo: Repo,
     generatedDocsData: GeneratedDocsData,
-    commitSha: string
+    commitSha: string,
   ): Promise<null | { prNumber: number; prUrl: string }> {
     const fileChanges: Record<string, string> = {};
 
@@ -285,7 +287,7 @@ export const repoAnalysisService = {
   buildSyncFileMeta(
     input: { analysisId?: string; commitSha?: string },
     nodeContext: NodeContext | null,
-    analysisRef: AnalysisRef | null
+    analysisRef: AnalysisRef | null,
   ) {
     return buildSyncFileActionMeta({
       analysisRef,
@@ -304,21 +306,22 @@ export const repoAnalysisService = {
 
   async getAvailableDocs(db: DbClient, repoId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
-    if (repo == null) return [];
+    if (repo == null) {
+      return [];
+    }
     return analysisMapper.toAvailableDocs(repo);
   },
 
   async getByRepoAndPRNumber(db: DbClient, repoId: string, prNumber: number) {
     const analysis = await analysisRepo.loadImpactAnalysis(db, repoId, prNumber);
-    if (analysis == null) return null;
+    if (analysis == null) {
+      return null;
+    }
 
     const changedFiles = analysisMapper.parseChangedFilesSnapshot(analysis);
     const findings = analysisMapper.parsePersistedFindings(analysis);
 
-    // Get the repository snapshot tied to the same commit as the PR analysis
     const repo = await analysisRepo.getRepoBySha(db, repoId, analysis.headSha);
-
-    // Fallback to latest analysis if no analysis exists for the specific commit
     const repoSnapshot = repo ?? (await analysisRepo.getRepoSnapshot(db, repoId));
 
     if (repoSnapshot == null) {
@@ -343,7 +346,7 @@ export const repoAnalysisService = {
       const zoneNode = analysisMapper.matchTopLevelZone(
         topLevelNodes,
         normalizedFilePath,
-        normalizedPreviousPath
+        normalizedPreviousPath,
       );
       const matchedNodeId = directNodeId ?? zoneNode?.id ?? null;
       const matchedNode =
@@ -353,7 +356,7 @@ export const repoAnalysisService = {
               matchedNodeId,
               analyzeContext,
               nodeById,
-              nodeDetailCache
+              nodeDetailCache,
             );
       const findingCount = findingsByFile.get(normalizedFilePath) ?? 0;
 
@@ -376,14 +379,14 @@ export const repoAnalysisService = {
       findings,
       analyzeContext,
       nodeById,
-      nodeDetailCache
+      nodeDetailCache,
     );
     const topFindings = await analysisMapper.buildTopFindings(
       findings,
       changedFileItems,
       nodeById,
       repoSnapshot.owner,
-      repoSnapshot.name
+      repoSnapshot.name,
     );
     const primaryFile = analysisMapper.selectPrimaryFile(changedFileItems);
     const primaryNodeId =
@@ -432,18 +435,23 @@ export const repoAnalysisService = {
 
   async getDetailedMetrics(db: DbClient, repoId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
     return analysisMapper.toDetailedMetrics(repo.analyses[0] ?? null);
   },
+
   async getDocumentContent(
     db: DbClient,
     repoId: string,
     type: DocType,
     aid?: string,
-    path?: string
+    path?: string,
   ) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
-    if (repo == null) throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
+    if (repo == null) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
+    }
     const analysis = repo.analyses[0];
 
     if (analysis == null) {
@@ -465,7 +473,9 @@ export const repoAnalysisService = {
       },
     });
 
-    if (doc == null) throw new TRPCError({ code: "NOT_FOUND" });
+    if (doc == null) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
 
     const html = await unstable_cache(
       async () =>
@@ -478,7 +488,7 @@ export const repoAnalysisService = {
       {
         revalidate: false,
         tags: ["docs", doc.publicId],
-      }
+      },
     )();
 
     return {
@@ -519,12 +529,16 @@ export const repoAnalysisService = {
 
   async getInteractiveBrief(db: DbClient, repoId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const overview = analysisMapper.toOverview(repo);
     const structure = analyzeContext.getStructureMap();
 
-    if (structure == null || overview == null) return null;
+    if (structure == null || overview == null) {
+      return null;
+    }
 
     const defaultNodeId = structure.selection.defaultNodeId;
     const panel =
@@ -533,10 +547,12 @@ export const repoAnalysisService = {
         : (() => {
             const structureNode = analyzeContext.getStructureNode(defaultNodeId);
             const explain = analyzeContext.getNodeExplain(defaultNodeId);
-            if (structureNode == null || explain == null) return null;
+            if (structureNode == null || explain == null) {
+              return null;
+            }
 
             return buildInteractiveBriefPanel(
-              analysisMapper.toBriefPanelInput({ explain, structureNode })
+              analysisMapper.toBriefPanelInput({ explain, structureNode }),
             );
           })();
 
@@ -574,15 +590,19 @@ export const repoAnalysisService = {
 
   async getInteractiveBriefNode(db: DbClient, repoId: string, nodeId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const structureNode = analyzeContext.getStructureNode(nodeId);
     const explain = analyzeContext.getNodeExplain(nodeId);
 
-    if (structureNode == null || explain == null) return null;
+    if (structureNode == null || explain == null) {
+      return null;
+    }
 
     return buildInteractiveBriefNodePayload(
-      analysisMapper.toInteractiveBriefNodePayloadInput({ explain, structureNode })
+      analysisMapper.toInteractiveBriefNodePayloadInput({ explain, structureNode }),
     );
   },
 
@@ -590,15 +610,19 @@ export const repoAnalysisService = {
     db: DbClient,
     repoId: string,
     nodeId: string,
-    aid?: string
+    aid?: string,
   ): Promise<null | RepoNodeContextPayload> {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const structureNode = analyzeContext.getStructureNode(nodeId);
     const explain = analyzeContext.getNodeExplain(nodeId);
 
-    if (structureNode == null || explain == null) return null;
+    if (structureNode == null || explain == null) {
+      return null;
+    }
 
     const relatedFiles = uniq(
       [
@@ -606,7 +630,7 @@ export const repoAnalysisService = {
         ...structureNode.node.previewPaths,
         ...structureNode.inspect.samplePaths,
         ...explain.sourcePaths,
-      ].map((path) => normalize(path))
+      ].map((path) => normalize(path)),
     );
 
     const [docs, findings] = await Promise.all([
@@ -616,19 +640,19 @@ export const repoAnalysisService = {
         nodeId,
         structureNode.node.label,
         relatedFiles,
-        analyzeContext
+        analyzeContext,
       ),
       analysisRepo.loadRelatedPrFindings(db, repoId, relatedFiles),
     ]);
 
     const fixes = await analysisRepo.loadRelatedFixes(
       db,
-      findings.map((finding) => finding.prAnalysisId)
+      findings.map((finding) => finding.prAnalysisId),
     );
 
     return {
       ...buildInteractiveBriefNodePayload(
-        analysisMapper.toInteractiveBriefNodePayloadInput({ explain, structureNode })
+        analysisMapper.toInteractiveBriefNodePayloadInput({ explain, structureNode }),
       ),
       related: {
         docs,
@@ -641,27 +665,35 @@ export const repoAnalysisService = {
 
   async getNodeExplain(db: DbClient, repoId: string, nodeId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
     const analyzeContext = createAnalyzeContextBuilder(repo);
     return analyzeContext.getNodeExplain(nodeId);
   },
 
   async getOverview(db: DbClient, repoId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
     return analysisMapper.toOverview(repo);
   },
 
   async getStructureMap(db: DbClient, repoId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
     const analyzeContext = createAnalyzeContextBuilder(repo);
     return analyzeContext.getStructureMap();
   },
 
   async getStructureNode(db: DbClient, repoId: string, nodeId: string, aid?: string) {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
     const analyzeContext = createAnalyzeContextBuilder(repo);
     return analyzeContext.getStructureNode(nodeId);
   },
@@ -669,15 +701,19 @@ export const repoAnalysisService = {
   async getWorkspace(
     db: DbClient,
     repoId: string,
-    aid?: string
+    aid?: string,
   ): Promise<null | RepoWorkspacePayload> {
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
-    if (repo == null) return null;
+    if (repo == null) {
+      return null;
+    }
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const overview = analysisMapper.toOverview(repo);
     const structure = analyzeContext.getStructureMap();
 
-    if (overview == null || structure == null) return null;
+    if (overview == null || structure == null) {
+      return null;
+    }
 
     return {
       analysisRef: structure.analysisRef,
@@ -755,7 +791,7 @@ export const repoAnalysisService = {
     nodeId: string,
     nodeLabel: string,
     relatedFiles: string[],
-    analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>
+    analyzeContext: ReturnType<typeof createAnalyzeContextBuilder>,
   ) {
     const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId);
     const graph = analyzeContext.getStructureMap()?.graph ?? null;
@@ -773,7 +809,7 @@ export const repoAnalysisService = {
           doc.content,
           graph,
           doc.type,
-          doc.version
+          doc.version,
         );
 
         return formatted.sections
@@ -800,28 +836,28 @@ export const repoAnalysisService = {
 
   async runDocumentFilePreview(
     userId: number,
-    input: FileActionInput
+    input: FileActionInput,
   ): Promise<DocumentFilePreviewResult> {
     const rawContent = input.content.trim();
 
     if (rawContent.length === 0) {
       return buildDocumentFallback(
         input.path,
-        `The file is empty, so there is nothing useful to document yet. ${describeContextQualifier(input.nodeContext)}`
+        `The file is empty, so there is nothing useful to document yet. ${describeContextQualifier(input.nodeContext)}`,
       );
     }
 
     if (isBinaryLikeContent(input.content)) {
       return buildDocumentFallback(
         input.path,
-        `The file looks binary or non-textual, so documentation preview is not available. ${describeContextQualifier(input.nodeContext)}`
+        `The file looks binary or non-textual, so documentation preview is not available. ${describeContextQualifier(input.nodeContext)}`,
       );
     }
 
     const nonActionableReason = getNonActionableReason(
       input.path,
       input.content,
-      input.nodeContext
+      input.nodeContext,
     );
     if (nonActionableReason != null) {
       return buildDocumentFallback(input.path, nonActionableReason);
@@ -886,7 +922,7 @@ export const repoAnalysisService = {
     db: DbClient,
     userId: number,
     taskId: "analyze-single-file" | "document-single-file",
-    input: FileActionInput
+    input: FileActionInput,
   ) {
     await this.assertRepoAccess(db, userId, input.repoId);
 
@@ -909,7 +945,7 @@ export const repoAnalysisService = {
         // concurrencyKey: `user-${userId}`,
         // idempotencyKey: `${taskId}-${input.repoId}-${input.path}`,
         ttl: "10m",
-      }
+      },
     );
 
     return { jobId: handle.id };
@@ -945,7 +981,7 @@ export const repoAnalysisService = {
         (hardMetrics.docDensity > 10 ? 10 : 0) +
         (hardMetrics.entrypoints.length > 0 ? 15 : 0) +
         (hardMetrics.configFiles > 0 ? 10 : 0) +
-        (repositoryFacts.some((fact) => fact.category === "architecture") ? 10 : 0)
+        (repositoryFacts.some((fact) => fact.category === "architecture") ? 10 : 0),
     );
 
     const finalHealthScore = calculateHealthScore({
@@ -1020,25 +1056,31 @@ export const repoAnalysisService = {
         where: { publicId: analysisId },
       });
 
-      const docsToSave = [
+      const rawDocs: Array<{ content?: string; type: DocType }> = [
         { content: generatedDocsData.generatedReadme, type: DocType.README },
         { content: generatedDocsData.generatedApiMarkdown, type: DocType.API },
         { content: generatedDocsData.generatedContributing, type: DocType.CONTRIBUTING },
         { content: generatedDocsData.generatedChangelog, type: DocType.CHANGELOG },
         { content: generatedDocsData.generatedArchitecture, type: DocType.ARCHITECTURE },
-      ].filter((doc) => doc.content != null && doc.content.length > 0);
+      ];
+
+      const docsToSave = rawDocs.flatMap((doc) =>
+        doc.content != null && doc.content.length > 0
+          ? [{ content: doc.content, type: doc.type }]
+          : [],
+      );
 
       await Promise.all(
         docsToSave.map((doc) =>
           tx.document.upsert({
             create: {
               analysisId: analysis.id,
-              content: doc.content!,
+              content: doc.content,
               repoId: repo.id,
               type: doc.type,
               version: currentSha,
             },
-            update: { content: doc.content! },
+            update: { content: doc.content },
             where: {
               repoId_version_type_analysisId: {
                 analysisId: analysis.id,
@@ -1047,8 +1089,8 @@ export const repoAnalysisService = {
                 version: currentSha,
               },
             },
-          })
-        )
+          }),
+        ),
       );
 
       return tx.notification.create({
@@ -1079,31 +1121,40 @@ export const repoAnalysisService = {
 
     return finalHealthScore;
   },
+
   async searchWorkspace(
     db: DbClient,
     repoId: string,
     search: string,
-    aid?: string
+    aid?: string,
   ): Promise<RepoSearchResult[]> {
     const normalizedSearch = normalizeSearchInput(search);
     const terms = tokenizeSearchInput(search);
-    if (normalizedSearch == null || terms.length === 0) return [];
+    if (normalizedSearch == null || terms.length === 0) {
+      return [];
+    }
 
     const repo = await analysisRepo.getRepoSnapshot(db, repoId, aid);
-    if (repo == null) return [];
+    if (repo == null) {
+      return [];
+    }
     const analyzeContext = createAnalyzeContextBuilder(repo);
     const structure = analyzeContext.getStructureMap();
     const structureContext = analyzeContext.getEntityContext().structureContext;
     const payload = coerceAnalysisPayload(repo.analyses[0]);
 
-    if (structure == null || structureContext == null || payload == null) return [];
+    if (structure == null || structureContext == null || payload == null) {
+      return [];
+    }
 
     const docs = await analysisRepo.loadLatestDocumentsWithContent(db, repoId, aid);
     const results: RepoSearchResult[] = [];
 
     for (const node of structure.graph.nodes) {
       const score = scoreSearchMatch(terms, [node.label, node.path, node.description, node.kind]);
-      if (score === 0) continue;
+      if (score === 0) {
+        continue;
+      }
 
       results.push({
         description: node.description,
@@ -1122,7 +1173,9 @@ export const repoAnalysisService = {
     for (const path of structureContext.allInterestingPaths) {
       const label = basename(path);
       const score = scoreSearchMatch(terms, [label, path]);
-      if (score === 0) continue;
+      if (score === 0) {
+        continue;
+      }
 
       results.push({
         description: path,
@@ -1140,7 +1193,9 @@ export const repoAnalysisService = {
 
     for (const entrypoint of structure.overview.primaryEntrypoints) {
       const score = scoreSearchMatch(terms, [entrypoint, basename(entrypoint)]);
-      if (score === 0) continue;
+      if (score === 0) {
+        continue;
+      }
 
       results.push({
         description: "Primary entrypoint",
@@ -1160,7 +1215,9 @@ export const repoAnalysisService = {
       const sourceFile = route.sourcePath;
       const routePattern = route.path;
       const score = scoreSearchMatch(terms, [route.method, routePattern, sourceFile]);
-      if (score === 0) continue;
+      if (score === 0) {
+        continue;
+      }
 
       results.push({
         description: `${route.method} route defined in ${sourceFile}`,
@@ -1181,7 +1238,9 @@ export const repoAnalysisService = {
       const formatted = DocumentFormatter.withGraphLinks(doc.content, graph, doc.type, doc.version);
       for (const section of formatted.sections) {
         const score = scoreSearchMatch(terms, [section.title, section.content, doc.type]);
-        if (score === 0) continue;
+        if (score === 0) {
+          continue;
+        }
 
         results.push({
           description: `${doc.type} section`,
@@ -1198,8 +1257,8 @@ export const repoAnalysisService = {
       }
     }
 
-    return dedupeSearchResults(results).toSorted(
-      (left, right) => right.score - left.score || left.label.localeCompare(right.label)
+    return dedupeSearchResults(results).sort(
+      (left, right) => right.score - left.score || left.label.localeCompare(right.label),
     );
   },
 };
@@ -1235,10 +1294,12 @@ function applyDocumentSurgicalEdit(params: {
     let detectedIndent = "";
 
     for (let j = 0; j < searchLines.length; j++) {
-      const sLine = searchLines[j]!;
-      const fLine = fileLines[i + j]!;
+      const sLine = searchLines[j] ?? "";
+      const fLine = fileLines[i + j] ?? "";
 
-      if (sLine.trim() === "" && fLine.trim() === "") continue;
+      if (sLine.trim() === "" && fLine.trim() === "") {
+        continue;
+      }
 
       if (sLine.trim() === "" || fLine.trim() === "") {
         isMatch = false;
@@ -1266,7 +1327,7 @@ function applyDocumentSurgicalEdit(params: {
     const adjustedReplaceLines = adjustDocumentIndentation(
       normalizedReplace.split("\n"),
       originalSearchIndent,
-      matchedIndent
+      matchedIndent,
     );
 
     fileLines.splice(matchedIndex, searchLines.length, ...adjustedReplaceLines);
@@ -1282,8 +1343,8 @@ function applyDocumentSurgicalEdit(params: {
     let detectedIndent = "";
 
     for (let j = 0; j < searchLines.length; j++) {
-      const sLine = searchLines[j]!;
-      const fLine = fileLines[i + j]!;
+      const sLine = searchLines[j] ?? "";
+      const fLine = fileLines[i + j] ?? "";
 
       if (sLine.trim() === "" && fLine.trim() === "") {
         totalScore += 1.0;
@@ -1314,7 +1375,7 @@ function applyDocumentSurgicalEdit(params: {
     const adjustedReplaceLines = adjustDocumentIndentation(
       normalizedReplace.split("\n"),
       originalSearchIndent,
-      bestWindowIndent
+      bestWindowIndent,
     );
 
     fileLines.splice(bestIndex, searchLines.length, ...adjustedReplaceLines);
@@ -1331,18 +1392,22 @@ function applyDocumentSurgicalEdit(params: {
 
 function getDocumentIndent(line: string): string {
   const match = /^\s*/.exec(line);
-  return match ? match[0]! : "";
+  return match ? match[0] : "";
 }
 
 function adjustDocumentIndentation(
   replaceLines: string[],
   searchIndent: string,
-  targetIndent: string
+  targetIndent: string,
 ): string[] {
-  if (searchIndent === targetIndent) return replaceLines;
+  if (searchIndent === targetIndent) {
+    return replaceLines;
+  }
 
   return replaceLines.map((line) => {
-    if (line.trim() === "") return "";
+    if (line.trim() === "") {
+      return "";
+    }
 
     if (line.startsWith(searchIndent)) {
       return targetIndent + line.slice(searchIndent.length);
@@ -1355,21 +1420,27 @@ function getDocumentTokens(line: string): string[] {
   return line
     .trim()
     .toLowerCase()
-    .split(/[\s()\[\]{}.,;+\-*/=<>!]+/gu)
+    .split(/[\s()[\]{}.,;+\-*/=<>!]+/gu)
     .filter(Boolean);
 }
 
 function calculateDocumentLineSimilarity(line1: string, line2: string): number {
   const t1 = getDocumentTokens(line1);
   const t2 = getDocumentTokens(line2);
-  if (t1.length === 0 && t2.length === 0) return 1.0;
-  if (t1.length === 0 || t2.length === 0) return 0.0;
+  if (t1.length === 0 && t2.length === 0) {
+    return 1.0;
+  }
+  if (t1.length === 0 || t2.length === 0) {
+    return 0.0;
+  }
 
   const set1 = new Set(t1);
   const set2 = new Set(t2);
   let intersection = 0;
   for (const token of set1) {
-    if (set2.has(token)) intersection++;
+    if (set2.has(token)) {
+      intersection++;
+    }
   }
   const union = set1.size + set2.size - intersection;
   return intersection / union;

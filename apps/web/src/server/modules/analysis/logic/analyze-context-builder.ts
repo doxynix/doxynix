@@ -47,7 +47,7 @@ class AnalyzeContextBuilder {
         nodeId,
         context == null || structureNode == null
           ? null
-          : buildNodeExplainPayloadFromContext(context, this.analysisRef, nodeId, structureNode)
+          : buildNodeExplainPayloadFromContext(context, this.analysisRef, nodeId, structureNode),
       );
     }
 
@@ -79,7 +79,7 @@ class AnalyzeContextBuilder {
         nodeId,
         context == null
           ? null
-          : buildStructureNodePayloadFromContext(context, this.analysisRef, nodeId)
+          : buildStructureNodePayloadFromContext(context, this.analysisRef, nodeId),
       );
     }
 

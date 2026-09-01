@@ -20,16 +20,16 @@ function Progress({
 
   return (
     <ProgressPrimitive.Root
+      className={cn("relative h-2 w-full overflow-hidden rounded-full bg-muted", className)}
       data-slot="progress"
-      className={cn("bg-muted relative h-2 w-full overflow-hidden rounded-full", className)}
       {...props}
     >
       <ProgressPrimitive.Indicator
-        data-slot="progress-indicator"
         className={cn(
-          "transition-standard h-full w-full flex-1",
-          indicatorClassName || "bg-primary"
+          "h-full w-full flex-1 transition-standard",
+          indicatorClassName || "bg-primary",
         )}
+        data-slot="progress-indicator"
         style={{
           transform: `translateX(-${100 - percentage}%)`,
           ...indicatorStyle,

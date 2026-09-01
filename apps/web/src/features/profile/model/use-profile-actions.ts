@@ -44,7 +44,9 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
       }
 
       utils.user.me.setData(undefined, (old) => {
-        if (old == null) return old;
+        if (old == null) {
+          return old;
+        }
         return {
           ...old,
           user: { ...old.user, name: data.user.name },
@@ -91,7 +93,9 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
       });
 
       utils.user.me.setData(undefined, (old) => {
-        if (old == null) return old;
+        if (old == null) {
+          return old;
+        }
         return {
           ...old,
           user: { ...old.user, image: null },
@@ -104,7 +108,9 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
 
   const uploadAvatar = async (files: File[]) => {
     const file = files[0];
-    if (file == null) return;
+    if (file == null) {
+      return;
+    }
 
     setIsProcessing(true);
 
@@ -142,7 +148,9 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
         });
 
         utils.user.me.setData(undefined, (old) => {
-          if (old == null) return old;
+          if (old == null) {
+            return old;
+          }
           return {
             ...old,
             user: { ...old.user, image: blobResult.url },

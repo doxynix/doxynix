@@ -17,7 +17,9 @@ export function DashboardActionContainer() {
     to: urlParams.to ?? undefined,
   });
 
-  if (isLoading || data == null) return <RefactoringTargetsSkeleton />;
+  if (isLoading || data == null) {
+    return <RefactoringTargetsSkeleton />;
+  }
 
   return <RefactoringTargetsWidget data={data} />;
 }

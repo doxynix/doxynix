@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+
 import type { after as NextAfterFn } from "next/server";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -46,14 +47,18 @@ type DmmfDatamodel = {
  * @returns Пропатченная DMMF-модель без мутации глобального контекста
  */
 function patchDmmfForEncryption(dmmf: DmmfDatamodel): DmmfDatamodel {
-  if (dmmf.datamodel?.models == null) return dmmf;
+  if (dmmf.datamodel?.models == null) {
+    return dmmf;
+  }
 
   return {
     ...dmmf,
     datamodel: {
       ...dmmf.datamodel,
       models: dmmf.datamodel.models.map((model) => {
-        if (model.fields == null) return model;
+        if (model.fields == null) {
+          return model;
+        }
 
         const modelOverrides = ENCRYPTED_METADATA_MAP[model.name];
 
@@ -81,7 +86,7 @@ function assertDmmfIsPopulated(dmmf: DmmfDatamodel): void {
   if (models == null || models.length === 0) {
     throw new Error(
       "[db] Prisma.dmmf is empty or stripped by the bundler. " +
-        "Field encryption cannot work without a valid DMMF — aborting startup to prevent unencrypted data leak."
+        "Field encryption cannot work without a valid DMMF — aborting startup to prevent unencrypted data leak.",
     );
   }
 }
@@ -90,7 +95,9 @@ let cachedAfterFn: null | typeof NextAfterFn = null;
 let isAfterChecked = false;
 
 async function getNextAfterApi() {
-  if (isAfterChecked) return cachedAfterFn;
+  if (isAfterChecked) {
+    return cachedAfterFn;
+  }
   try {
     const { after } = await import("next/server");
     cachedAfterFn = after;
@@ -185,7 +192,7 @@ function createPrismaInstance() {
   if (rawDmmf == null) {
     throw new Error(
       "[db] Prisma.dmmf is undefined. " +
-        "Field encryption cannot initialize — aborting startup to prevent unencrypted data leak."
+        "Field encryption cannot initialize — aborting startup to prevent unencrypted data leak.",
     );
   }
 
@@ -198,7 +205,7 @@ function createPrismaInstance() {
       decryptionKeys,
       dmmf: patchedDmmf as any,
       encryptionKey: PRISMA_FIELD_ENCRYPTION_KEY,
-    })
+    }),
   );
 
   return encryptedClient.$extends({
@@ -240,7 +247,7 @@ function createPrismaInstance() {
             const cleanPayload = sanitizePayload(args);
             const securedPayload = maskSensitiveFields(
               model,
-              cleanPayload
+              cleanPayload,
             ) as Prisma.InputJsonValue;
 
             const logAuditTask = async () => {

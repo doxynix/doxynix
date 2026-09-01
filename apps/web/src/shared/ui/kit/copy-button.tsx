@@ -28,32 +28,32 @@ export function CopyButton({
   return (
     <AppTooltip content={tooltipText} side={tooltipSide}>
       <AppButton
-        disabled={disabled}
-        type="button"
-        size="icon"
-        variant="ghost"
         aria-label={tooltipText}
-        onClick={() => void copy(value)}
         className={cn(
-          "transition-standard relative size-6 duration-300 not-md:opacity-100",
+          "relative size-6 not-md:opacity-100 transition-standard duration-300",
           "group/copy-btn",
           !isCopied &&
-            "text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100",
-          isCopied && "text-success pointer-events-none opacity-100",
-          className
+            "text-muted-foreground opacity-0 hover:text-foreground group-hover:opacity-100",
+          isCopied && "pointer-events-none text-success opacity-100",
+          className,
         )}
+        disabled={disabled}
+        onClick={() => void copy(value)}
+        size="icon"
+        type="button"
+        variant="ghost"
       >
         <Copy
           className={cn(
-            "transition-standard absolute size-3.5 duration-300",
-            isCopied ? "scale-0 opacity-0" : "scale-100 opacity-100"
+            "absolute size-3.5 transition-standard duration-300",
+            isCopied ? "scale-0 opacity-0" : "scale-100 opacity-100",
           )}
         />
 
         <Check
           className={cn(
-            "text-success transition-standard absolute size-3.5 duration-300",
-            isCopied ? "scale-100 opacity-100" : "scale-0 opacity-0"
+            "absolute size-3.5 text-success transition-standard duration-300",
+            isCopied ? "scale-100 opacity-100" : "scale-0 opacity-0",
           )}
         />
 

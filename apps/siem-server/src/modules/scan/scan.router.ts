@@ -1,12 +1,14 @@
-import { zValidator } from "@hono/zod-validator";
-import { type AuthEnv, requireAuth } from "@server/core/middleware/auth.middleware";
-import { recordAuditLog } from "@server/modules/audit/audit.service";
-import { getRequestContext } from "@server/utils/request-context";
 import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+
+import { requireAuth } from "@/core/middleware/auth.middleware";
+import { getRequestContext } from "@/utils/request-context";
+
+import { recordAuditLog } from "../audit/audit.service";
 import { scanRequestSchema } from "./scan.schema";
 import { scanLogContent } from "./scan.service";
 
-export const scanRouter = new Hono<AuthEnv>()
+export const scanRouter = new Hono()
   .use("*", requireAuth)
   .post("/scan", zValidator("json", scanRequestSchema), async (c) => {
     const { content, fileName } = c.req.valid("json");
@@ -17,10 +19,10 @@ export const scanRouter = new Hono<AuthEnv>()
     const ctx = getRequestContext(c);
 
     await recordAuditLog({
-      actor: user.email,
       action: "scan.manual",
-      target: `file:${fileName}`,
+      actor: user?.email ?? "system",
       ctx,
+      target: `file:${fileName}`,
     });
 
     return c.json(result, 200);

@@ -3,10 +3,10 @@
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from "@/shared/ui/core/chart";
 
 type Props = Readonly<{
@@ -30,7 +30,7 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
   const techDebtColor = chartConfig.techDebt?.color as string;
 
   return (
-    <ChartContainer config={chartConfig} className="h-75 w-full">
+    <ChartContainer className="h-75 w-full" config={chartConfig}>
       <AreaChart data={data} margin={{ bottom: 0, left: 0, right: 0, top: 10 }}>
         <defs>
           <linearGradient id="fillHealth" x1="0" x2="0" y1="0" y2="1">
@@ -54,7 +54,7 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
             <stop offset="95%" stopColor={techDebtColor} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid vertical strokeDasharray="3 3" strokeOpacity={1} />
+        <CartesianGrid strokeDasharray="3 3" strokeOpacity={1} vertical />
         <XAxis
           axisLine={false}
           dataKey="date"
@@ -66,48 +66,48 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
         <ChartTooltip content={<ChartTooltipContent indicator="dot" />} cursor={false} />
         {activeTab === "overview" && (
           <Area
-            key="health"
-            type="monotone"
             dataKey="health"
             fill="url(#fillHealth)"
+            key="health"
             stroke={healthColor}
+            type="monotone"
           />
         )}
         {activeTab === "overview" && (
           <Area
-            key="security"
-            type="monotone"
             dataKey="security"
             fill="url(#fillSecurity)"
+            key="security"
             stroke={securityColor}
+            type="monotone"
           />
         )}
 
         {activeTab === "engineering" && (
           <Area
-            key="complexity"
-            type="monotone"
             dataKey="complexity"
             fill="url(#fillComplexity)"
+            key="complexity"
             stroke={complexityColor}
+            type="monotone"
           />
         )}
         {activeTab === "engineering" && (
           <Area
-            key="onboarding"
-            type="monotone"
             dataKey="onboarding"
             fill="url(#fillOnboarding)"
+            key="onboarding"
             stroke={onBoardingColor}
+            type="monotone"
           />
         )}
         {activeTab === "engineering" && (
           <Area
-            key="techDebt"
-            type="monotone"
             dataKey="techDebt"
             fill="url(#fillTechDebt)"
+            key="techDebt"
             stroke={techDebtColor}
+            type="monotone"
           />
         )}
       </AreaChart>

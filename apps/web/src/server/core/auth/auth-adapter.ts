@@ -1,11 +1,14 @@
 import type { DBAdapter, Where } from "better-auth";
 
-import { normalizeEmail } from "../../utils/email-guard";
-import { getNormalizedHash, getRawHash } from "../../utils/hash";
+import { normalizeEmail } from "@/server/utils/email-guard";
+import { getNormalizedHash, getRawHash } from "@/server/utils/hash";
+
 import { prisma } from "../db";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
-  if (typeof value !== "object" || value === null) return false;
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
   const proto = Object.getPrototypeOf(value);
   return proto === null || proto === Object.prototype;
 }
@@ -48,7 +51,9 @@ const HASH_FIELD_MAP: Record<string, { hashField: string; hashFn: (val: string) 
 };
 
 function coerceOutputIds(data: unknown): unknown {
-  if (data == null) return data;
+  if (data == null) {
+    return data;
+  }
 
   if (Array.isArray(data)) {
     return data.map((e) => coerceOutputIds(e));
@@ -77,7 +82,7 @@ function transformPayloadData(data: Record<string, unknown>): Record<string, unk
 
     const hashMapping = HASH_FIELD_MAP[key];
     if (hashMapping && typeof result[key] === "string") {
-      result[hashMapping.hashField] = hashMapping.hashFn(result[key] as string);
+      result[hashMapping.hashField] = hashMapping.hashFn(result[key]);
     }
   }
 
@@ -91,7 +96,9 @@ export function createAdapterInstance(client: any): DBAdapter {
       const prismaWhere = mapWhere(where);
 
       const record = await delegate.findFirst({ where: prismaWhere });
-      if (record == null) return null;
+      if (record == null) {
+        return null;
+      }
 
       await delegate.delete({
         where: { id: record.id },
@@ -110,7 +117,7 @@ export function createAdapterInstance(client: any): DBAdapter {
 
     create: async ({ data, model }) => {
       const delegate = client[model === "verification_tokens" ? "verification" : model];
-      const patchedData = transformPayloadData(data as Record<string, unknown>);
+      const patchedData = transformPayloadData(data);
 
       const created = await delegate.create({
         data: patchedData,
@@ -173,7 +180,9 @@ export function createAdapterInstance(client: any): DBAdapter {
       const prismaWhere = mapWhere(where);
 
       const record = await delegate.findFirst({ where: prismaWhere });
-      if (record == null) return null;
+      if (record == null) {
+        return null;
+      }
 
       const prismaIncrement: Record<string, any> = {};
       for (const [key, val] of Object.entries(increment)) {
@@ -199,11 +208,11 @@ export function createAdapterInstance(client: any): DBAdapter {
       if (typeof client.$transaction === "function") {
         return await client.$transaction(async (tx: any) => {
           const txAdapter = createAdapterInstance(tx);
-          return await callback(txAdapter);
+          return callback(txAdapter);
         });
       } else {
         const txAdapter = createAdapterInstance(client);
-        return await callback(txAdapter);
+        return callback(txAdapter);
       }
     },
 
@@ -242,7 +251,9 @@ export function createAdapterInstance(client: any): DBAdapter {
 
 function mapWhere(conditions?: Where[]): Record<string, unknown> {
   const query: Record<string, unknown> = {};
-  if (conditions == null) return query;
+  if (conditions == null) {
+    return query;
+  }
 
   for (const cond of conditions) {
     let field = cond.field;

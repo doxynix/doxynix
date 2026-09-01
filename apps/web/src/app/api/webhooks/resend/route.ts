@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { BannedEmailReason, Prisma } from "@prisma/client";
 import { Webhook } from "svix";
 import { z } from "zod";

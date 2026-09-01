@@ -5,21 +5,22 @@ const shikiState = vi.hoisted(() => ({
     vi.fn<
       (code: string, options: { lang: string; theme: string; transformers: unknown[] }) => string
     >(),
-  createHighlighter: vi.fn<
-    (options: any) => Promise<{
-      codeToHtml: (
-        code: string,
-        options: { lang: string; theme: string; transformers: unknown[] }
-      ) => string;
-    }>
-  >(),
+  createHighlighter:
+    vi.fn<
+      (options: any) => Promise<{
+        codeToHtml: (
+          code: string,
+          options: { lang: string; theme: string; transformers: unknown[] },
+        ) => string;
+      }>
+    >(),
 }));
 
 const unstableCacheMock = vi.hoisted(() =>
   vi.fn(
     (fn: () => Promise<string>, _keys: string[], _options: { revalidate: false; tags: string[] }) =>
-      fn
-  )
+      fn,
+  ),
 );
 
 vi.mock("next/cache", () => ({
@@ -56,7 +57,7 @@ describe("highlightCode", () => {
     await highlightCode("const b = 2;");
 
     expect(shikiState.createHighlighter).toHaveBeenCalledTimes(1);
-    const callArgs = shikiState.createHighlighter.mock.calls[0]?.[0] as any;
+    const callArgs = shikiState.createHighlighter.mock.calls[0]?.[0];
     expect(callArgs?.themes).toContainEqual(expect.objectContaining({ id: "github-dark-dimmed" }));
     expect(callArgs?.themes).toContainEqual(expect.objectContaining({ id: "github-light" }));
   });
@@ -70,13 +71,13 @@ describe("highlightCode", () => {
       "const x = 1",
       expect.objectContaining({
         theme: "github-light",
-      })
+      }),
     );
 
     expect(unstableCacheMock).toHaveBeenCalledWith(
       expect.any(Function),
       expect.arrayContaining(["light"]),
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 
@@ -89,13 +90,13 @@ describe("highlightCode", () => {
       "const x = 1",
       expect.objectContaining({
         theme: "github-dark-dimmed",
-      })
+      }),
     );
 
     expect(unstableCacheMock).toHaveBeenCalledWith(
       expect.any(Function),
       expect.arrayContaining(["dark"]),
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 });

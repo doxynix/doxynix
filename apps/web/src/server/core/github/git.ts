@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+
 import type { Repo } from "@prisma/client";
 import gitUrlParse from "git-url-parse";
 import simpleGit from "simple-git";
@@ -14,7 +15,7 @@ const PRIVATE_REPO_AUTH_MESSAGE =
 
 function assertPrivateRepoAccess(
   repo: Repo,
-  clientType: "app" | "installation" | "oauth" | "public"
+  clientType: "app" | "installation" | "oauth" | "public",
 ) {
   if (repo.visibility === "PRIVATE" && (clientType === "app" || clientType === "public")) {
     throw new Error(PRIVATE_REPO_AUTH_MESSAGE);
@@ -40,7 +41,7 @@ async function resolveAuthToken(client: {
 export async function getAnalysisContext(
   analysisId: string,
   userId: number,
-  forceRefresh?: boolean
+  forceRefresh?: boolean,
 ) {
   taskLogger.info(`GitHub: Accessing database...`);
 
@@ -83,7 +84,7 @@ export async function getAnalysisContext(
   } catch (error) {
     if (error instanceof GitHubAuthRequiredError) {
       taskLogger.error("GitHub: Authentication required for this repository");
-      throw new Error(PRIVATE_REPO_AUTH_MESSAGE);
+      throw new Error(PRIVATE_REPO_AUTH_MESSAGE, { cause: error });
     }
     throw error;
   }
@@ -105,7 +106,7 @@ export async function getAnalysisContext(
 
       const resolvedToken = await resolveAuthToken(client);
       return { currentSha: refData.object.sha, token: resolvedToken };
-    }
+    },
   );
 
   if (repo.visibility === "PRIVATE" && token == null) {
@@ -127,7 +128,7 @@ export async function cloneRepository(
   repo: Repo,
   token: null | string | undefined,
   targetPath: string,
-  selectedBranch?: string
+  selectedBranch?: string,
 ) {
   const branchToClone = selectedBranch ?? repo.defaultBranch;
 
@@ -157,6 +158,6 @@ export async function cloneRepository(
     const raw = error instanceof Error ? error.message : String(error);
     const safe = token != null ? raw.replaceAll(token, "***") : raw;
     taskLogger.error(`Git: Clone failed. ${safe}`);
-    throw new Error(`Failed to clone repository: ${safe}`);
+    throw new Error(`Failed to clone repository: ${safe}`, { cause: error });
   }
 }

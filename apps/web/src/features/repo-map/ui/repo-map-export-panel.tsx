@@ -38,7 +38,7 @@ export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props
       }
 
       const standardProps = Array.from(window.getComputedStyle(document.documentElement)).filter(
-        (key) => !key.startsWith("--") && !key.startsWith("-webkit-") && !key.startsWith("-moz-")
+        (key) => !key.startsWith("--") && !key.startsWith("-webkit-") && !key.startsWith("-moz-"),
       );
 
       const padding = 50;
@@ -57,7 +57,7 @@ export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props
         filter: (node: Node) => {
           if (node instanceof HTMLElement) {
             return !["react-flow__controls", "react-flow__minimap", "react-flow__panel"].some(
-              (cls) => node.classList.contains(cls)
+              (cls) => node.classList.contains(cls),
             );
           }
           return true;
@@ -98,28 +98,28 @@ export function ExportPanel({ className, filename = "repo-map" }: Readonly<Props
 
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      <div className="text-muted-foreground flex items-center justify-center gap-1 text-xs">
+      <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs">
         Export <Download className="size-3" />
       </div>
       <div className="rounded-xl border">
         <LoadingButton
+          className="border-0 text-[10px]"
           disabled={disabled}
           isLoading={isExporting === "png"}
+          onClick={() => void exportMap("png")}
           size="sm"
           variant="outline"
-          onClick={() => void exportMap("png")}
-          className="border-0 text-[10px]"
         >
           PNG
         </LoadingButton>
 
         <LoadingButton
+          className="border-0 text-[10px]"
           disabled={disabled}
           isLoading={isExporting === "webp"}
+          onClick={() => void exportMap("webp")}
           size="sm"
           variant="outline"
-          onClick={() => void exportMap("webp")}
-          className="border-0 text-[10px]"
         >
           WEBP
         </LoadingButton>

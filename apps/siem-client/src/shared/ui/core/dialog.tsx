@@ -1,5 +1,6 @@
-import * as DialogPrimitives from "@radix-ui/react-dialog";
 import React from "react";
+import * as DialogPrimitives from "@radix-ui/react-dialog";
+
 import { cx, focusRing } from "../../lib/utils";
 
 const Dialog = (props: React.ComponentPropsWithoutRef<typeof DialogPrimitives.Root>) => {
@@ -25,7 +26,6 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, forwardedRef) => {
   return (
     <DialogPrimitives.Overlay
-      ref={forwardedRef}
       className={cx(
         // base
         "fixed inset-0 z-50 overflow-y-auto",
@@ -35,6 +35,7 @@ const DialogOverlay = React.forwardRef<
         "data-[state=open]:animate-dialog-overlay-show",
         className,
       )}
+      ref={forwardedRef}
       {...props}
     />
   );
@@ -50,10 +51,9 @@ const DialogContent = React.forwardRef<
     <DialogPortal>
       <DialogOverlay>
         <DialogPrimitives.Content
-          ref={forwardedRef}
           className={cx(
             // base
-            "fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-md border p-6 shadow-lg",
+            "fixed top-1/2 left-1/2 z-50 w-[95vw] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-md border p-6 shadow-lg",
             // border color
             "border-gray-200 dark:border-gray-900",
             // background color
@@ -63,6 +63,7 @@ const DialogContent = React.forwardRef<
             focusRing,
             className,
           )}
+          ref={forwardedRef}
           tremor-id="tremor-raw"
           {...props}
         />
@@ -84,14 +85,14 @@ const DialogTitle = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitives.Title>
 >(({ className, ...props }, forwardedRef) => (
   <DialogPrimitives.Title
-    ref={forwardedRef}
     className={cx(
       // base
-      "text-lg font-semibold",
+      "font-semibold text-lg",
       // text color
       "text-gray-900 dark:text-gray-50",
       className,
     )}
+    ref={forwardedRef}
     {...props}
   />
 ));
@@ -104,8 +105,8 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, forwardedRef) => {
   return (
     <DialogPrimitives.Description
-      ref={forwardedRef}
       className={cx("text-gray-500 dark:text-gray-500", className)}
+      ref={forwardedRef}
       {...props}
     />
   );

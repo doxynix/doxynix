@@ -31,7 +31,9 @@ function calculateHeuristicTokens(text: string): number {
 }
 
 export async function countTokens(text: string): Promise<number> {
-  if (!hasText(text)) return 0;
+  if (!hasText(text)) {
+    return 0;
+  }
 
   if (tokenizer == null) {
     appLogger.warn({

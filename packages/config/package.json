@@ -1,13 +1,19 @@
 {
-  "name": "@doxynix/config",
-  "version": "1.0.0",
-  "private": true,
   "exports": {
     "./base.json": "./base.json",
+    "./hono.json": "./hono.json",
     "./nextjs.json": "./nextjs.json",
     "./node.json": "./node.json",
-    "./hono.json": "./hono.json",
-    "./siem-client.json": "./siem-client.json",
-    "./biome.json": "./biome.json"
-  }
+    "./siem-client.json": "./siem-client.json"
+  },
+  "name": "@doxynix/config",
+  "private": true,
+  "scripts": {
+    "format": "biome check --write .",
+    "format:check": "biome check .",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "validate": "biome check ."
+  },
+  "version": "1.0.0"
 }

@@ -8,7 +8,7 @@ import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
 import { useForm, useWatch } from "react-hook-form";
 
-import { CreateRepoSchema, type CreateRepoInput } from "@/shared/api/schemas/repo";
+import { type CreateRepoInput, CreateRepoSchema } from "@/shared/api/schemas/repo";
 import { trpc } from "@/shared/api/trpc";
 import { useClickOutside } from "@/shared/hooks/use-click-outside";
 import { useDebounce } from "@/shared/hooks/use-debounce";
@@ -50,7 +50,7 @@ export function CreateRepoDialog() {
     {},
     {
       enabled: false,
-    }
+    },
   );
 
   const open = useCreateRepoOpen();
@@ -101,7 +101,7 @@ export function CreateRepoDialog() {
     {
       enabled: debouncedValue.length >= 2 && !isUrl,
       staleTime: STALE_TIME,
-    }
+    },
   );
 
   const {
@@ -113,7 +113,7 @@ export function CreateRepoDialog() {
     {
       enabled: open,
       staleTime: STALE_TIME,
-    }
+    },
   );
 
   const closeDialog = () => {
@@ -164,18 +164,18 @@ export function CreateRepoDialog() {
   const oauthStatus = myGithubData?.oauthStatus;
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog onOpenChange={handleClose} open={open}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("repo_add_repository")}</DialogTitle>
           <DialogDescription>{t("repo_create_desc")} </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="grid gap-4 py-4">
-            <div ref={containerRef} className="flex flex-col gap-3">
+          <form className="grid gap-4 py-4" onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}>
+            <div className="flex flex-col gap-3" ref={containerRef}>
               <FormField
-                name="url"
                 control={form.control}
+                name="url"
                 render={({ field }) => (
                   <FormItem className="relative">
                     <FormControl>
@@ -187,28 +187,28 @@ export function CreateRepoDialog() {
                         )}
                         <Input
                           {...field}
-                          disabled={create.isPending}
                           autoComplete="off"
+                          className="pl-8 text-sm"
+                          disabled={create.isPending}
                           maxLength={500}
-                          placeholder={t("repo_create_placeholder")}
                           onChange={(e) => {
                             field.onChange(e);
                             setShowSuggestions(true);
                           }}
                           onClick={() => setShowSuggestions(true)}
                           onFocus={() => setShowSuggestions(true)}
-                          className="pl-8 text-sm"
+                          placeholder={t("repo_create_placeholder")}
                         />
                       </div>
                     </FormControl>
                     <FormMessage />
                     {showSuggestions && suggestions && suggestions.length > 0 && (
-                      <div className="bg-popover text-popover-foreground absolute top-full right-0 left-0 z-10 mt-1 h-80 overflow-y-auto rounded-xl border">
+                      <div className="absolute top-full right-0 left-0 z-10 mt-1 h-80 overflow-y-auto rounded-xl border bg-popover text-popover-foreground">
                         {suggestions.map((repo) => (
                           <RepoItem
                             key={repo.fullName}
-                            repo={repo}
                             onClick={() => handleSelectRepo(repo.fullName)}
+                            repo={repo}
                           />
                         ))}
                       </div>
@@ -219,8 +219,8 @@ export function CreateRepoDialog() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between text-xs font-medium tracking-wider">
-                <div className="text-muted-foreground flex items-center gap-2 uppercase">
+              <div className="flex items-center justify-between font-medium text-xs tracking-wider">
+                <div className="flex items-center gap-2 text-muted-foreground uppercase">
                   <Book className="size-3" />
                   {t("repo_your_repos")}
                 </div>
@@ -228,30 +228,30 @@ export function CreateRepoDialog() {
                 {myGithubData?.installations != null && myGithubData.installations.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {myGithubData.installations.map((inst) => (
-                      <AppTooltip key={inst.id} content={inst.login}>
+                      <AppTooltip content={inst.login} key={inst.id}>
                         <ExternalLink
-                          href={inst.manageUrl ?? ""}
                           className="flex items-center gap-1 hover:underline"
+                          href={inst.manageUrl ?? ""}
                         >
                           <AppAvatar
                             alt={inst.login}
-                            src={inst.avatar}
                             fallbackText={inst.login}
                             sizeClassName="size-6"
+                            src={inst.avatar}
                           />
                         </ExternalLink>
                       </AppTooltip>
                     ))}
                     <AppTooltip content="Add new">
                       <LoadingButton
+                        className="size-6"
                         disabled={loading}
-                        type="button"
                         isLoading={loading}
                         loadingText=""
-                        size="icon"
-                        variant="ghost"
                         onClick={() => void handleInstallGitHubApp()}
-                        className="size-6"
+                        size="icon"
+                        type="button"
+                        variant="ghost"
                       >
                         <Plus />
                       </LoadingButton>
@@ -264,7 +264,7 @@ export function CreateRepoDialog() {
                 {isFetchingMyRepos ? (
                   <div className="h-70 rounded-xl border p-1">
                     {Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="flex flex-col gap-1 p-3">
+                      <div className="flex flex-col gap-1 p-3" key={i}>
                         <div className="flex items-center justify-between">
                           <Skeleton className="h-3.5 w-32" />
                           <Skeleton className="h-4 w-24" />
@@ -277,34 +277,34 @@ export function CreateRepoDialog() {
                 ) : myGithubData == null ? (
                   <div className="h-70 rounded-xl border p-1">
                     <div className="flex h-full flex-col items-center justify-center p-4 text-center">
-                      <p className="text-muted-foreground mb-3 text-sm">
+                      <p className="mb-3 text-muted-foreground text-sm">
                         Failed to load repositories.
                       </p>
                       <AppButton
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => void refetchMyRepos()}
                         className="h-8 gap-2"
+                        onClick={() => void refetchMyRepos()}
+                        size="sm"
+                        type="button"
+                        variant="outline"
                       >
                         <RefreshCcw className="h-3.5 w-3.5" /> Retry
                       </AppButton>
                     </div>
                   </div>
-                ) : myGithubData.isConnected === false ? (
+                ) : !myGithubData.isConnected ? (
                   <div className="h-70 rounded-xl border p-1">
-                    <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
-                      <p className="text-muted-foreground mb-3 text-sm">
+                    <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
+                      <p className="mb-3 text-muted-foreground text-sm">
                         First, you need to link your GitHub profile.
                       </p>
                       <LoadingButton
+                        className="cursor-pointer"
                         disabled={loadingOauth}
-                        type="button"
                         isLoading={loadingOauth}
                         loadingText="Processing..."
-                        variant="outline"
                         onClick={() => void handleSignIn()}
-                        className="cursor-pointer"
+                        type="button"
+                        variant="outline"
                       >
                         <GitHubIcon /> Link
                       </LoadingButton>
@@ -312,38 +312,38 @@ export function CreateRepoDialog() {
                   </div>
                 ) : oauthStatus === "invalid" ? (
                   <div className="h-70 rounded-xl border p-1">
-                    <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
-                      <p className="text-muted-foreground mb-3 text-sm">
+                    <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
+                      <p className="mb-3 text-muted-foreground text-sm">
                         Your GitHub authorization expired. Please relink your account.
                       </p>
                       <LoadingButton
+                        className="cursor-pointer"
                         disabled={loadingOauth}
-                        type="button"
                         isLoading={loadingOauth}
                         loadingText="Processing..."
-                        variant="outline"
                         onClick={() => void handleSignIn()}
-                        className="cursor-pointer"
+                        type="button"
+                        variant="outline"
                       >
                         <GitHubIcon /> Relink
                       </LoadingButton>
                     </div>
                   </div>
                 ) : (
-                  <ScrollArea type="always" className="h-70 rounded-xl border p-1">
+                  <ScrollArea className="h-70 rounded-xl border p-1" type="always">
                     {myGithubData.items.length > 0 && myGithubData.installations?.length === 0 && (
-                      <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
-                        <p className="text-muted-foreground mb-3 text-sm">
+                      <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
+                        <p className="mb-3 text-muted-foreground text-sm">
                           Want private and org repositories? Install our GitHub App!
                         </p>
                         <LoadingButton
+                          className="cursor-pointer"
                           disabled={loading}
-                          type="button"
                           isLoading={loading}
                           loadingText="Connecting..."
-                          variant="outline"
                           onClick={() => void handleInstallGitHubApp()}
-                          className="cursor-pointer"
+                          type="button"
+                          variant="outline"
                         >
                           <GitHubIcon /> Install
                         </LoadingButton>
@@ -351,24 +351,24 @@ export function CreateRepoDialog() {
                     )}
 
                     {myGithubData.items.length === 0 ? (
-                      <div className="xs:px-4 xs:py-8 flex h-full flex-col items-center justify-center px-2 py-4 text-center">
+                      <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
                         {myGithubData.installations?.length === 0 ? (
                           <>
-                            <p className="text-muted-foreground mb-3 text-sm font-medium">
+                            <p className="mb-3 font-medium text-muted-foreground text-sm">
                               Install our GitHub App to grant access to your repositories.
                             </p>
                             <LoadingButton
                               disabled={loading}
-                              type="button"
                               isLoading={loading}
-                              variant="outline"
                               onClick={() => void handleInstallGitHubApp()}
+                              type="button"
+                              variant="outline"
                             >
                               <GitHubIcon /> Install App
                             </LoadingButton>
                           </>
                         ) : (
-                          <p className="text-muted-foreground flex h-full items-center justify-center p-4 text-center text-sm">
+                          <p className="flex h-full items-center justify-center p-4 text-center text-muted-foreground text-sm">
                             No repositories found. Ensure you granted access to them.
                           </p>
                         )}
@@ -376,10 +376,10 @@ export function CreateRepoDialog() {
                     ) : (
                       myGithubData.items.map((myRepo) => (
                         <RepoItem
-                          key={myRepo.fullName}
                           disabled={create.isPending}
-                          repo={myRepo}
+                          key={myRepo.fullName}
                           onClick={() => handleSelectRepo(myRepo.fullName)}
+                          repo={myRepo}
                         />
                       ))
                     )}
@@ -389,10 +389,10 @@ export function CreateRepoDialog() {
             </div>
             <DialogFooter>
               <LoadingButton
+                className="cursor-pointer"
                 disabled={create.isPending || !form.formState.isValid || !urlValue}
                 isLoading={create.isPending}
                 loadingText="Adding..."
-                className="cursor-pointer"
               >
                 {tCommon("add")}
               </LoadingButton>

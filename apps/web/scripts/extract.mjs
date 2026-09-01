@@ -22,8 +22,8 @@ function walk(dir, result = []) {
       const content = readFileSync(fullPath, "utf8");
 
       result.push({
-        path: fullPath.replaceAll("\\", "/"),
         content,
+        path: fullPath.replaceAll("\\", "/"),
       });
     }
   }

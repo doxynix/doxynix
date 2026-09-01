@@ -2,7 +2,9 @@ import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 
 const commitMsgFile = process.argv[2];
-if (!commitMsgFile) process.exit(0);
+if (!commitMsgFile) {
+  process.exit(0);
+}
 
 try {
   const content = readFileSync(commitMsgFile, "utf8");

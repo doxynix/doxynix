@@ -31,15 +31,19 @@ function buildContextNote(result: Pick<SyncFileActionMeta, "contextDiagnostics" 
 
 function buildPreviewTitle(
   baseTitle: string,
-  result: Pick<SyncFileActionMeta, "contextDiagnostics" | "contextMeta">
+  result: Pick<SyncFileActionMeta, "contextDiagnostics" | "contextMeta">,
 ) {
-  if (result.contextMeta.graphBacked) return `${baseTitle} (graph-backed)`;
-  if (result.contextDiagnostics.hasContext) return `${baseTitle} (context-aware)`;
+  if (result.contextMeta.graphBacked) {
+    return `${baseTitle} (graph-backed)`;
+  }
+  if (result.contextDiagnostics.hasContext) {
+    return `${baseTitle} (context-aware)`;
+  }
   return `${baseTitle} (file-only)`;
 }
 
 export function toQuickFileAuditPreview(
-  result: QuickFileAuditResult & SyncFileActionMeta
+  result: QuickFileAuditResult & SyncFileActionMeta,
 ): FileActionPreviewResult {
   const contextNote = buildContextNote(result);
 
@@ -59,7 +63,7 @@ export function toQuickFileAuditPreview(
 }
 
 export function toDocumentFilePreview(
-  result: DocumentFilePreviewResult & SyncFileActionMeta
+  result: DocumentFilePreviewResult & SyncFileActionMeta,
 ): FileActionPreviewResult {
   const contextNote = buildContextNote(result);
 

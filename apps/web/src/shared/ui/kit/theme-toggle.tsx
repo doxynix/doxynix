@@ -9,7 +9,9 @@ import { AnimatedThemeToggler } from "../core/animated-theme-toggler";
 export function ThemeToggle() {
   const { forcedTheme } = useTheme();
 
-  if (forcedTheme != null) return null;
+  if (forcedTheme != null) {
+    return null;
+  }
 
   return (
     <AppTooltip content="Toggle theme">

@@ -16,12 +16,13 @@ import {
   syntaxHighlighting,
   syntaxTree,
 } from "@codemirror/language";
-import { linter, lintGutter, lintKeymap, type Diagnostic } from "@codemirror/lint";
+import { type Diagnostic, linter, lintGutter, lintKeymap } from "@codemirror/lint";
 import { highlightSelectionMatches, search } from "@codemirror/search";
-import { EditorState, RangeSetBuilder, type Extension } from "@codemirror/state";
+import { EditorState, type Extension, RangeSetBuilder } from "@codemirror/state";
 import {
   crosshairCursor,
   Decoration,
+  type DecorationSet,
   drawSelection,
   dropCursor,
   EditorView,
@@ -33,7 +34,6 @@ import {
   rectangularSelection,
   tooltips,
   ViewPlugin,
-  type DecorationSet,
   type ViewUpdate,
 } from "@codemirror/view";
 import { showMinimap } from "@replit/codemirror-minimap";
@@ -50,11 +50,15 @@ function buildTodoDecorations(view: EditorView): DecorationSet {
   for (const { from, to } of view.visibleRanges) {
     tree.iterate({
       enter: (node) => {
-        if (!node.type.name.includes("Comment")) return;
+        if (!node.type.name.includes("Comment")) {
+          return;
+        }
         hasCommentNodes = true;
         const visibleFrom = Math.max(node.from, from);
         const visibleTo = Math.min(node.to, to);
-        if (visibleFrom >= visibleTo) return;
+        if (visibleFrom >= visibleTo) {
+          return;
+        }
         const text = view.state.doc.sliceString(visibleFrom, visibleTo);
         TAG_REGEX.lastIndex = 0;
 
@@ -115,7 +119,7 @@ const todoHighlighter = ViewPlugin.fromClass(
   },
   {
     decorations: (v) => v.decorations,
-  }
+  },
 );
 
 const universalSyntaxLinter = linter((view) => {
@@ -204,16 +208,6 @@ export const IDE_ONLY_EXTENSIONS: Extension[] = [
 ];
 
 export const THEME_EXTENSION = EditorView.theme({
-  "&": {
-    backgroundColor: "var(--background)",
-    color: "var(--foreground)",
-    fontSize: "13px",
-    height: "100%",
-  },
-  "&.cm-focused .cm-cursor": { borderLeftColor: "var(--foreground)" },
-  "&:hover .cm-minimap-container": {
-    opacity: "1",
-  },
   ".close-btn": {
     "&:hover": {
       backgroundColor: "color-mix(in srgb, var(--status-error), transparent 90%)",
@@ -334,4 +328,14 @@ export const THEME_EXTENSION = EditorView.theme({
     color: "var(--text-muted)",
   },
   ".search-group, .replace-group": { alignItems: "center", display: "flex", gap: "8px" },
+  "&": {
+    backgroundColor: "var(--background)",
+    color: "var(--foreground)",
+    fontSize: "13px",
+    height: "100%",
+  },
+  "&:hover .cm-minimap-container": {
+    opacity: "1",
+  },
+  "&.cm-focused .cm-cursor": { borderLeftColor: "var(--foreground)" },
 });

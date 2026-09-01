@@ -1,4 +1,4 @@
-import { tool, type ToolSet } from "ai";
+import { type ToolSet, tool } from "ai";
 import { z } from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
@@ -48,7 +48,9 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
         try {
           appLogger.info({ msg: "AI Tool: getBranches", repoId });
           const repo = await prisma.repo.findUnique({ where: { publicId: repoId } });
-          if (repo == null) return "Error: Repository not found.";
+          if (repo == null) {
+            return "Error: Repository not found.";
+          }
 
           return await githubBrowseService.getBranches(prisma, userId, repo.owner, repo.name);
         } catch (error) {
@@ -84,18 +86,22 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
         try {
           appLogger.info({ msg: "AI Tool: listFiles", prefix, repoId });
           const repo = await prisma.repo.findUnique({ where: { publicId: repoId } });
-          if (repo == null) return "Error: Repo not found";
+          if (repo == null) {
+            return "Error: Repo not found";
+          }
 
           const tree = await githubBrowseService.getRepoFiles(
             prisma,
             userId,
             repo.owner,
             repo.name,
-            branch
+            branch,
           );
 
           let paths = tree.map((t) => t[0] as string);
-          if (prefix != null) paths = paths.filter((p) => p.startsWith(prefix));
+          if (prefix != null) {
+            paths = paths.filter((p) => p.startsWith(prefix));
+          }
 
           return paths.slice(0, 500).join("\n");
         } catch (error) {
@@ -127,7 +133,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
             userId,
             repoId,
             path,
-            branch
+            branch,
           );
 
           const processedContent = shouldSkeletonize
@@ -150,7 +156,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
           .boolean()
           .optional()
           .describe(
-            "Whether to hide implementation details and keep signatures only. Defaults to true."
+            "Whether to hide implementation details and keep signatures only. Defaults to true.",
           ),
       }),
     }),
@@ -177,7 +183,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
                   userId,
                   repoId,
                   path,
-                  branch
+                  branch,
                 );
 
                 const processedContent = shouldSkeletonize
@@ -197,7 +203,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
                   success: false,
                 };
               }
-            })
+            }),
           );
         } catch (error) {
           appLogger.error({ error, msg: "AI Tool Failed: readMultipleFiles" });
@@ -210,7 +216,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
           .boolean()
           .optional()
           .describe(
-            "Whether to hide implementation details and keep signatures only. Defaults to true."
+            "Whether to hide implementation details and keep signatures only. Defaults to true.",
           ),
       }),
     }),
@@ -223,7 +229,9 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
           appLogger.info({ docType, msg: "AI Tool: readPreviousDocument", repoId });
 
           const repo = await prisma.repo.findUnique({ where: { publicId: repoId } });
-          if (repo == null) return "Error: Repository not found.";
+          if (repo == null) {
+            return "Error: Repository not found.";
+          }
 
           const doc = await prisma.document.findFirst({
             orderBy: { createdAt: "desc" },
@@ -291,7 +299,7 @@ function buildRepositoryTools(userId: number, repoId: string, branch: string) {
           .string()
           .min(2)
           .describe(
-            "The term or keyword to search for (e.g., 'authMiddleware', 'createUser', 'Prisma.findUnique')"
+            "The term or keyword to search for (e.g., 'authMiddleware', 'createUser', 'Prisma.findUnique')",
           ),
       }),
     }),
@@ -326,14 +334,16 @@ export function buildRepositoryToolProfile(
   profile: RepositoryToolProfile,
   userId: number,
   repoId: string,
-  branch: string
+  branch: string,
 ): ToolSet {
   const allTools: ToolSet = buildRepositoryTools(userId, repoId, branch);
   const selectedTools: ToolSet = {};
 
   for (const key of TOOL_KEYS_BY_PROFILE[profile]) {
     const selected = allTools[key];
-    if (selected != null) selectedTools[key] = selected;
+    if (selected != null) {
+      selectedTools[key] = selected;
+    }
   }
 
   return selectedTools;

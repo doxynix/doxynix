@@ -1,9 +1,9 @@
 import {
+  type inferParserType,
   parseAsBoolean,
   parseAsInteger,
   parseAsString,
   parseAsStringLiteral,
-  type inferParserType,
 } from "nuqs/server";
 
 import { NotifyTypeSchema } from "@/shared/api-contracts";

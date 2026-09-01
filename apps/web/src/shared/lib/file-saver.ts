@@ -1,5 +1,7 @@
 export function saveFile(blob: Blob, fileName: string) {
-  if (typeof globalThis.window === "undefined") return;
+  if (typeof globalThis.window === "undefined") {
+    return;
+  }
 
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");

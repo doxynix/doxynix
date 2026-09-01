@@ -1,10 +1,10 @@
 /* eslint-disable sonarjs/no-hardcoded-ip */
 import dns from "node:dns";
+
 import ipaddr from "ipaddr.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { isSafeIp, POST, ssrfSafeLookup } from "@/app/api/proxy/route";
-
 import { auth } from "@/server/core/auth";
 
 const { mockAppLogger } = vi.hoisted(() => {
@@ -88,12 +88,12 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
 
       const dnsLookupSpy = (vi.spyOn(dns, "lookup") as any).mockImplementation(
         (
-          hostname: string,
-          options: any,
-          cb: (err: Error | null, address: null | string, family: number) => void
+          _hostname: string,
+          _options: any,
+          cb: (err: Error | null, address: null | string, family: number) => void,
         ) => {
           cb(null, "8.8.8.8", 4);
-        }
+        },
       );
 
       ssrfSafeLookup("safe-domain.com", {}, callback);
@@ -107,12 +107,12 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
 
       const dnsLookupSpy = (vi.spyOn(dns, "lookup") as any).mockImplementation(
         (
-          hostname: string,
-          options: any,
-          cb: (err: Error | null, address: null | string, family: number) => void
+          _hostname: string,
+          _options: any,
+          cb: (err: Error | null, address: null | string, family: number) => void,
         ) => {
           cb(null, "127.0.0.1", 4);
-        }
+        },
       );
 
       ssrfSafeLookup("localhost", {}, callback);
@@ -131,7 +131,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
           address: "127.0.0.1",
           hostname: "localhost",
           msg: "SSRF prevention triggered during socket lookup",
-        })
+        }),
       );
 
       dnsLookupSpy.mockRestore();
@@ -142,12 +142,12 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
 
       const dnsLookupSpy = (vi.spyOn(dns, "lookup") as any).mockImplementation(
         (
-          hostname: string,
-          options: any,
-          cb: (err: Error | null, address: null | string, family: null | number) => void
+          _hostname: string,
+          _options: any,
+          cb: (err: Error | null, address: null | string, family: null | number) => void,
         ) => {
           cb(new Error("ENOTFOUND"), null, null);
-        }
+        },
       );
 
       ssrfSafeLookup("nonexistent-domain.xyz", {}, callback);
@@ -155,7 +155,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({ message: "ENOTFOUND" }),
         null,
-        null
+        null,
       );
 
       dnsLookupSpy.mockRestore();
@@ -165,9 +165,9 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
       const callback = vi.fn();
 
       const dnsLookupSpy = (vi.spyOn(dns, "lookup") as any).mockImplementation(
-        (hostname: string, options: any, cb: any) => {
+        (_hostname: string, _options: any, cb: any) => {
           cb(null, "8.8.8.8", 4);
-        }
+        },
       );
 
       const ipaddrProcessSpy = vi.spyOn(ipaddr, "process").mockImplementation(() => {
@@ -179,7 +179,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
       expect(callback).toHaveBeenCalledWith(
         expect.objectContaining({ message: "Unexpected IP parser failure" }),
         null,
-        null
+        null,
       );
 
       dnsLookupSpy.mockRestore();
@@ -190,7 +190,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
   describe("3. HTTP Integration-test: Route POST Handler", () => {
     describe("Authorization & Security check", () => {
       it("should reject with 401 when user is not authorized", async () => {
-        vi.mocked(auth.api.getSession).mockResolvedValue(null as any);
+        vi.mocked(auth.api.getSession).mockResolvedValue(null);
 
         const req = new Request("http://localhost/api/proxy", {
           body: JSON.stringify({ method: "GET", url: "https://example.com" }),
@@ -296,7 +296,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
             headers: {
               "x-api-key": "test",
             },
-          })
+          }),
         );
       });
 
@@ -316,7 +316,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
           "https://example.com/",
           expect.objectContaining({
             headers: {},
-          })
+          }),
         );
       });
 
@@ -345,7 +345,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
           expect.objectContaining({
             body: JSON.stringify({ foo: "bar" }),
             method: "POST",
-          })
+          }),
         );
       });
 
@@ -368,7 +368,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
           expect.objectContaining({
             body: rawBody,
             method: "POST",
-          })
+          }),
         );
       });
 
@@ -389,7 +389,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
           expect.objectContaining({
             body: undefined,
             method: "POST",
-          })
+          }),
         );
       });
 
@@ -410,7 +410,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
           expect.objectContaining({
             body: undefined,
             method: "HEAD",
-          })
+          }),
         );
       });
 
@@ -431,7 +431,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
           expect.objectContaining({
             body: undefined,
             method: "GET",
-          })
+          }),
         );
       });
 
@@ -453,7 +453,7 @@ describe("Proxy API Route & SSRF Prevention Suite", () => {
             expect.objectContaining({
               body: JSON.stringify({ payload: 123 }),
               method,
-            })
+            }),
           );
         }
       });

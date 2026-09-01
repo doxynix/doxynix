@@ -25,12 +25,16 @@ export default function GlobalError({
 
     if (rid != null) {
       requestAnimationFrame(() => {
-        if (isActive) setRequestId(rid);
+        if (isActive) {
+          setRequestId(rid);
+        }
       });
     }
 
     void import("@sentry/nextjs").then((Sentry) => {
-      if (!isActive) return;
+      if (!isActive) {
+        return;
+      }
 
       if (rid !== null) {
         Sentry.setTag("request_id", rid);
@@ -91,7 +95,7 @@ export default function GlobalError({
   `;
 
   return (
-    <html suppressHydrationWarning lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
         <style>{`
@@ -139,6 +143,7 @@ export default function GlobalError({
         <div className="container">
           <div className="icon-circle">
             <svg
+              className="error-icon"
               fill="none"
               height="35"
               strokeLinecap="round"
@@ -147,7 +152,6 @@ export default function GlobalError({
               viewBox="0 0 24 24"
               width="35"
               xmlns="http://www.w3.org/2000/svg"
-              className="error-icon"
             >
               <rect height="8" rx="2" ry="2" width="20" x="2" y="2" />
               <rect height="8" rx="2" ry="2" width="20" x="2" y="14" />
@@ -171,7 +175,7 @@ export default function GlobalError({
 
           <footer className="mt-12 text-sm">
             Doxynix Infrastructure Support If the error persists, contact us:{" "}
-            <a href={mailtoLink} className="underline hover:no-underline">
+            <a className="underline hover:no-underline" href={mailtoLink}>
               support@doxynix.space
             </a>
           </footer>

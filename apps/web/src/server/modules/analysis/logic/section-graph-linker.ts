@@ -44,7 +44,7 @@ class DocumentGraphLinker {
   public static linkSectionsToGraph(
     document: string,
     dependencyGraph: DependencyGraph | null | undefined,
-    docType: string
+    docType: string,
   ): DocumentSection[] {
     const sections: DocumentSection[] = [];
 
@@ -68,7 +68,7 @@ class DocumentGraphLinker {
             content: contentBuffer.join("\n").trim(),
             endLine: i - 1,
             graphNodeIds: [],
-            id: this.generateSectionId(docType, "preamble"),
+            id: DocumentGraphLinker.generateSectionId(docType, "preamble"),
             startLine: 0,
             title: "Preamble",
           });
@@ -79,7 +79,7 @@ class DocumentGraphLinker {
 
         currentSection = {
           graphNodeIds: [],
-          id: this.generateSectionId(docType, title),
+          id: DocumentGraphLinker.generateSectionId(docType, title),
           startLine: i,
           title,
         };
@@ -101,7 +101,7 @@ class DocumentGraphLinker {
         content: document.trim(),
         endLine: lines.length - 1,
         graphNodeIds: [],
-        id: this.generateSectionId(docType, "document"),
+        id: DocumentGraphLinker.generateSectionId(docType, "document"),
         startLine: 0,
         title: "Document",
       });
@@ -110,7 +110,7 @@ class DocumentGraphLinker {
     // Link sections to graph nodes
     return sections.map((section) => ({
       ...section,
-      graphNodeIds: this.findRelatedGraphNodes(section as DocumentSection, dependencyGraph),
+      graphNodeIds: DocumentGraphLinker.findRelatedGraphNodes(section, dependencyGraph),
     }));
   }
 
@@ -120,7 +120,7 @@ class DocumentGraphLinker {
    */
   private static findRelatedGraphNodes(
     section: DocumentSection,
-    graph: DependencyGraph | null | undefined
+    graph: DependencyGraph | null | undefined,
   ): string[] {
     const nodeIds: string[] = [];
     const content = section.content.toLowerCase();
@@ -145,7 +145,10 @@ class DocumentGraphLinker {
         const nodeName = (node.label ?? node.name ?? "").toLowerCase();
         const nodeId = node.id;
 
-        if (mentionedNames.has(nodeName) || this.isSimilar(nodeName, sectionTitleLower)) {
+        if (
+          mentionedNames.has(nodeName) ||
+          DocumentGraphLinker.isSimilar(nodeName, sectionTitleLower)
+        ) {
           nodeIds.push(nodeId);
         }
       }
@@ -163,11 +166,15 @@ class DocumentGraphLinker {
     const words1 = str1.split(WORD_SPLIT_REGEX).filter((w) => w.length > 1);
     const words2 = str2.split(WORD_SPLIT_REGEX).filter((w) => w.length > 1);
 
-    if (words1.length === 0 || words2.length === 0) return false;
+    if (words1.length === 0 || words2.length === 0) {
+      return false;
+    }
 
     const set2 = new Set(words2);
     for (const word1 of words1) {
-      if (set2.has(word1)) return true;
+      if (set2.has(word1)) {
+        return true;
+      }
       for (const word2 of words2) {
         if (word1.includes(word2) || word2.includes(word1)) {
           return true;
@@ -187,7 +194,7 @@ export class DocumentFormatter {
     document: string,
     graph: DependencyGraph | null | undefined,
     docType: string,
-    version: string
+    version: string,
   ): DocumentWithSections {
     const sections = DocumentGraphLinker.linkSectionsToGraph(document, graph, docType);
 

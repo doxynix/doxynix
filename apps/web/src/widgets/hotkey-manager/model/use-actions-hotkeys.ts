@@ -10,7 +10,9 @@ export function useGlobalActionsHotkeys(onAction?: () => void) {
   const [prefix, setPrefix] = useState<null | string>(null);
 
   useEffect(() => {
-    if (prefix == null) return;
+    if (prefix == null) {
+      return;
+    }
 
     const timer = setTimeout(() => {
       setPrefix(null);
@@ -29,13 +31,15 @@ export function useGlobalActionsHotkeys(onAction?: () => void) {
       enableOnFormTags: false,
       preventDefault: true,
     },
-    [prefix]
+    [prefix],
   );
 
   useHotkeys(
     "*",
     (e) => {
-      if (prefix == null) return;
+      if (prefix == null) {
+        return;
+      }
 
       const code = e.code;
       let secondKey: null | string = null;
@@ -75,6 +79,6 @@ export function useGlobalActionsHotkeys(onAction?: () => void) {
       enableOnFormTags: false,
       preventDefault: true,
     },
-    [prefix]
+    [prefix],
   );
 }

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+
 import { put } from "@vercel/blob";
 
 import { appLogger } from "@/server/core/app-logger";
@@ -52,10 +53,14 @@ export async function processMessageParts(parts: MessagePart[]): Promise<Message
 
     try {
       const match = /^data:([^;]+);base64,(.+)$/.exec(part.url);
-      if (match == null) return null;
+      if (match == null) {
+        return null;
+      }
 
       const [, mimeType, base64Data] = match;
-      if (base64Data == null || mimeType == null) return null;
+      if (base64Data == null || mimeType == null) {
+        return null;
+      }
 
       if (!ALLOWED_MIME_TYPES.has(mimeType)) {
         appLogger.warn({

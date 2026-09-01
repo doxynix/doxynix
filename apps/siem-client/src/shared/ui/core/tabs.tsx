@@ -1,5 +1,6 @@
-import * as TabsPrimitives from "@radix-ui/react-tabs";
 import React from "react";
+import * as TabsPrimitives from "@radix-ui/react-tabs";
+
 import { cx, focusRing } from "../../lib/utils";
 
 const Tabs = (
@@ -36,8 +37,8 @@ const variantStyles: Record<TabsListVariant, string> = {
 const TabsList = React.forwardRef<React.ElementRef<typeof TabsPrimitives.List>, TabsListProps>(
   ({ className, variant = "line", children, ...props }, forwardedRef) => (
     <TabsPrimitives.List
-      ref={forwardedRef}
       className={cx(variantStyles[variant], className)}
+      ref={forwardedRef}
       {...props}
     >
       <TabsListVariantContext.Provider value={variant}>{children}</TabsListVariantContext.Provider>
@@ -47,9 +48,9 @@ const TabsList = React.forwardRef<React.ElementRef<typeof TabsPrimitives.List>, 
 
 TabsList.displayName = "TabsList";
 
-function getVariantStyles(tabVariant: TabsListVariant) {
+function getVariantStyles(tabVariant: TabsListVariant): string {
   switch (tabVariant) {
-    case "line":
+    case "line": {
       return cx(
         // base
         "-mb-px items-center justify-center border-b-2 border-transparent px-3 pb-2 text-sm font-medium whitespace-nowrap transition-all",
@@ -66,7 +67,8 @@ function getVariantStyles(tabVariant: TabsListVariant) {
         "data-disabled:pointer-events-none",
         "data-disabled:text-gray-300 dark:data-disabled:text-gray-700",
       );
-    case "solid":
+    }
+    case "solid": {
       return cx(
         // base
         "inline-flex items-center justify-center rounded-sm px-3 py-1 text-sm font-medium whitespace-nowrap ring-1 transition-all ring-inset",
@@ -82,6 +84,11 @@ function getVariantStyles(tabVariant: TabsListVariant) {
         // disabled
         "data-disabled:pointer-events-none data-disabled:text-gray-400 data-disabled:opacity-50 dark:data-disabled:text-gray-600",
       );
+    }
+    default: {
+      const _exhaustiveCheck: never = tabVariant;
+      return _exhaustiveCheck;
+    }
   }
 }
 
@@ -92,8 +99,8 @@ const TabsTrigger = React.forwardRef<
   const variant = React.useContext(TabsListVariantContext);
   return (
     <TabsPrimitives.Trigger
-      ref={forwardedRef}
       className={cx(getVariantStyles(variant), focusRing, className)}
+      ref={forwardedRef}
       {...props}
     >
       {children}
@@ -108,8 +115,8 @@ const TabsContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof TabsPrimitives.Content>
 >(({ className, ...props }, forwardedRef) => (
   <TabsPrimitives.Content
-    ref={forwardedRef}
     className={cx("outline-hidden", focusRing, className)}
+    ref={forwardedRef}
     {...props}
   />
 ));

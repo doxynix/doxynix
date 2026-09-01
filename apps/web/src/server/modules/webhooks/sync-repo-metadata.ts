@@ -11,7 +11,7 @@ import { prisma } from "@/server/core/db";
 export async function syncRepoMetadata(repository: Repository): Promise<void> {
   try {
     let repoVisibility = Visibility.PRIVATE as Visibility;
-    if (repository.visibility === "public" || repository.private === false) {
+    if (repository.visibility === "public" || !repository.private) {
       repoVisibility = Visibility.PUBLIC;
     } else if (repository.visibility === "internal") {
       repoVisibility = Visibility.PRIVATE;
@@ -23,7 +23,7 @@ export async function syncRepoMetadata(repository: Repository): Promise<void> {
         : repository.license.name
       : null;
 
-    let pushedAtDate: Date | undefined = undefined;
+    let pushedAtDate: Date | undefined;
     if (repository.pushed_at != null) {
       if (typeof repository.pushed_at === "number") {
         pushedAtDate = new Date(repository.pushed_at * 1000);

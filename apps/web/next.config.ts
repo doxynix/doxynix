@@ -1,8 +1,9 @@
 import path from "node:path";
+
 import type { NextConfig } from "next";
 import filterWebpackStats from "@bundle-stats/plugin-webpack-filter";
 import withBundleAnalyzer from "@next/bundle-analyzer";
-import { withSentryConfig, type SentryBuildOptions } from "@sentry/nextjs";
+import { type SentryBuildOptions, withSentryConfig } from "@sentry/nextjs";
 import createWithVercelToolbar from "@vercel/toolbar/plugins/next";
 import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
@@ -81,7 +82,6 @@ const nextConfig: NextConfig = {
     turbopackFileSystemCacheForBuild: true,
     turbopackFileSystemCacheForDev: true,
     typedEnv: true,
-    useLightningcss: IS_PROD,
     webpackMemoryOptimizations: false,
     workerThreads: false, // [DISABLED]: Causes worker pool deadlocks during page data collection under Bun runtime
   },
@@ -343,7 +343,7 @@ const nextConfig: NextConfig = {
           destination: isExternal ? d : `/:locale${d}`,
           permanent: false,
           source: `/:locale(${LOCALE_REGEX_STR})${s}`,
-        }
+        },
       );
     });
 
@@ -415,7 +415,7 @@ const nextConfig: NextConfig = {
             const filtered = filterWebpackStats(data);
             return JSON.stringify(filtered);
           },
-        })
+        }),
       );
     }
 

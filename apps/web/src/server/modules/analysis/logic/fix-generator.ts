@@ -34,23 +34,24 @@ type FindingInput = {
 
 const FILE_TAG_REGEX = /<file\s+path\s*=\s*["']([^"']+)["']\s*>([\S\s]*?)<\/file>/gi;
 
-/**
- * Вспомогательные функции для нечеткого сопоставления блоков SEARCH/REPLACE
- */
 function getIndent(line: string): string {
   const match = /^\s*/.exec(line);
-  return match ? match[0]! : "";
+  return match ? match[0] : "";
 }
 
 function adjustIndentation(
   replaceLines: string[],
   searchIndent: string,
-  targetIndent: string
+  targetIndent: string,
 ): string[] {
-  if (searchIndent === targetIndent) return replaceLines;
+  if (searchIndent === targetIndent) {
+    return replaceLines;
+  }
 
   return replaceLines.map((line) => {
-    if (line.trim() === "") return "";
+    if (line.trim() === "") {
+      return "";
+    }
 
     if (line.startsWith(searchIndent)) {
       return targetIndent + line.slice(searchIndent.length);
@@ -63,33 +64,36 @@ function getTokens(line: string): string[] {
   return line
     .trim()
     .toLowerCase()
-    .split(/[\s()\[\]{}.,;+\-*/=<>!]+/gu)
+    .split(/[\s()[\]{}.,;+\-*/=<>!]+/gu)
     .filter(Boolean);
 }
 
 function lineSimilarity(line1: string, line2: string): number {
   const t1 = getTokens(line1);
   const t2 = getTokens(line2);
-  if (t1.length === 0 && t2.length === 0) return 1.0;
-  if (t1.length === 0 || t2.length === 0) return 0.0;
+  if (t1.length === 0 && t2.length === 0) {
+    return 1.0;
+  }
+  if (t1.length === 0 || t2.length === 0) {
+    return 0.0;
+  }
 
   const set1 = new Set(t1);
   const set2 = new Set(t2);
   let intersection = 0;
   for (const token of set1) {
-    if (set2.has(token)) intersection++;
+    if (set2.has(token)) {
+      intersection++;
+    }
   }
   const union = set1.size + set2.size - intersection;
   return intersection / union;
 }
 
 class FixGenerator {
-  /**
-   * Высокопроизводительный однопроходный расчет диффов с разгрузкой Event Loop.
-   */
   static async generateDiffsFromContentPublic(
     originalContents: Record<string, string>,
-    fixedFiles: FixedFileContent[]
+    fixedFiles: FixedFileContent[],
   ): Promise<GeneratedDiff[]> {
     const diffs: GeneratedDiff[] = [];
 
@@ -113,7 +117,7 @@ class FixGenerator {
         original,
         newContent,
         "Original",
-        "AI Fixed"
+        "AI Fixed",
       );
 
       let additions = 0;
@@ -122,7 +126,9 @@ class FixGenerator {
       const lines = patchText.split("\n");
       for (let i = 4; i < lines.length; i++) {
         const line = lines[i];
-        if (line == null) continue;
+        if (line == null) {
+          continue;
+        }
         if (line.startsWith("+") && !line.startsWith("+++")) {
           additions++;
         } else if (line.startsWith("-") && !line.startsWith("---")) {
@@ -145,15 +151,17 @@ class FixGenerator {
 
   static generateFixRecommendations(
     findings: FindingInput[],
-    fileContents: Record<string, string>
+    _fileContents: Record<string, string>,
   ): FixRecommendation[] {
     const findingsByType = groupBy(findings, (f) => f.type);
 
     return Object.entries(findingsByType)
       .map(([type, typeFindings]) => {
-        if (typeFindings.length === 0) return null;
+        if (typeFindings.length === 0) {
+          return null;
+        }
 
-        const config = this.getFixConfig(type, typeFindings.length);
+        const config = FixGenerator.getFixConfig(type, typeFindings.length);
         const affectedFiles = uniq(typeFindings.map((f) => f.file));
 
         const fixedFiles: FixedFileContent[] = affectedFiles.map((filePath) => ({
@@ -215,15 +223,12 @@ class FixGenerator {
 }
 
 export class FixService {
-  /**
-   * Применяет Search-and-Replace блоки к коду, используя каскадный отказоустойчивый поиск
-   */
   private static applySearchReplace(original: string, response: string, filePath: string): string {
     const blockRegex =
       /<{7} (SEARCH|ORIGINAL)\r?\n([\S\s]*?)\r?\n={7}\r?\n([\S\s]*?)\r?\n>{7} (REPLACE|UPDATED)/g;
 
     let fileContent = original.replaceAll("\r\n", "\n");
-    let match;
+    let match: RegExpExecArray | null = null;
     let appliedCount = 0;
 
     blockRegex.lastIndex = 0;
@@ -231,7 +236,9 @@ export class FixService {
       const searchBlock = match[2];
       const replaceBlock = match[3];
 
-      if (searchBlock == null || replaceBlock == null) continue;
+      if (searchBlock == null || replaceBlock == null) {
+        continue;
+      }
 
       const normalizedSearch = searchBlock.replaceAll("\r\n", "\n");
       const normalizedReplace = replaceBlock.replaceAll("\r\n", "\n");
@@ -260,7 +267,9 @@ export class FixService {
           const sLine = searchLines[j]!;
           const fLine = fileLines[i + j]!;
 
-          if (sLine.trim() === "" && fLine.trim() === "") continue;
+          if (sLine.trim() === "" && fLine.trim() === "") {
+            continue;
+          }
 
           if (sLine.trim() === "" || fLine.trim() === "") {
             isMatch = false;
@@ -288,7 +297,7 @@ export class FixService {
         const adjustedReplaceLines = adjustIndentation(
           normalizedReplace.split("\n"),
           originalSearchIndent,
-          matchedIndent
+          matchedIndent,
         );
 
         fileLines.splice(matchedIndex, searchLines.length, ...adjustedReplaceLines);
@@ -338,7 +347,7 @@ export class FixService {
         const adjustedReplaceLines = adjustIndentation(
           normalizedReplace.split("\n"),
           originalSearchIndent,
-          bestWindowIndent
+          bestWindowIndent,
         );
 
         fileLines.splice(bestIndex, searchLines.length, ...adjustedReplaceLines);
@@ -357,25 +366,22 @@ export class FixService {
     return fileContent;
   }
 
-  /**
-   * Парсит ответ модели и применяет хирургические изменения
-   */
   private static parseFixedCodeResponse(
     response: string,
-    originalContents: Record<string, string>
+    originalContents: Record<string, string>,
   ): Record<string, string> {
     const fixedCode: Record<string, string> = {};
 
     FILE_TAG_REGEX.lastIndex = 0;
-    let match;
+    let match: RegExpExecArray | null = null;
 
     while ((match = FILE_TAG_REGEX.exec(response)) !== null) {
-      const filePath = match[1]!.trim();
-      const sAndRBlocks = match[2]!.trim();
-      const originalContent = originalContents[filePath];
+      const filePath = match[1]?.trim();
+      const sAndRBlocks = match[2]?.trim();
+      const originalContent = filePath ? originalContents[filePath] : undefined;
 
       if (filePath && sAndRBlocks && originalContent != null) {
-        fixedCode[filePath] = this.applySearchReplace(originalContent, sAndRBlocks, filePath);
+        fixedCode[filePath] = FixService.applySearchReplace(originalContent, sAndRBlocks, filePath);
       }
     }
 
@@ -393,7 +399,7 @@ export class FixService {
       repoId: string;
       repoName: string;
       title: string;
-    }
+    },
   ): Promise<{ prNumber: number; prUrl: string }> {
     const { branch, defaultBranch, fixedFiles, owner, repoName, title } = input;
 
@@ -469,7 +475,7 @@ export class FixService {
   }> {
     const recommendations = FixGenerator.generateFixRecommendations(
       input.findings,
-      input.fileContents
+      input.fileContents,
     );
 
     if (recommendations.length === 0) {
@@ -516,7 +522,7 @@ export class FixService {
 
       const diffs = await FixGenerator.generateDiffsFromContentPublic(
         input.fileContents,
-        validFixedFiles
+        validFixedFiles,
       );
 
       appLogger.info({

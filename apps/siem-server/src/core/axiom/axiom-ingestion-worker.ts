@@ -1,11 +1,13 @@
 import type { Entry } from "@axiomhq/js";
 import { Temporal } from "@js-temporal/polyfill";
-import { axiom } from "@server/core/axiom/axiom";
-import { APP_EVENTS, bus } from "@server/core/bus";
-import { db } from "@server/core/db/db";
-import { cronSyncState } from "@server/core/db/schema";
-import { env } from "@server/core/env";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
+
+import { axiom } from "@/core/axiom/axiom";
+import { APP_EVENTS, bus } from "@/core/bus";
+import { db } from "@/core/db/db";
+import { cronSyncState } from "@/core/db/schema";
+import { env } from "@/core/env";
 
 const SERVICE_NAME = "axiom_log_ingestion";
 const BATCH_LIMIT = 1000;
@@ -13,16 +15,42 @@ const DEFAULT_LOOKBACK_MINUTES = 60;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-type CursorState = {
-  lastTime: string;
-  cursor?: string;
-};
+const cursorStateSchema = z.object({
+  cursor: z.string().optional(),
+  lastTime: z.string(),
+});
+
+type CursorState = z.infer<typeof cursorStateSchema>;
+
+const logDataSchema = z.looseObject({
+  content: z.string().optional(),
+  durationMs: z.coerce.string().optional(),
+  error: z
+    .union([
+      z.string(),
+      z.object({
+        kind: z.string().optional(),
+        message: z.string().optional(),
+        stack: z.string().optional(),
+      }),
+    ])
+    .optional(),
+  fields: z.record(z.string(), z.unknown()).optional(),
+  message: z.string().optional(),
+  model: z.string().optional(),
+  msg: z.string().optional(),
+  operation: z.string().optional(),
+  raw: z.string().optional(),
+  repoId: z.string().optional(),
+  type: z.string().optional(),
+  userId: z.string().optional(),
+});
 
 function formatMessage(match: Entry): string {
-  const data = (match.data ?? {}) as Record<string, unknown>;
-  const fields = (data.fields ?? data) as Record<string, unknown>;
+  const data = logDataSchema.parse(match.data);
+  const fields = data.fields ? logDataSchema.parse(data.fields) : data;
 
-  const msg = String(data.message ?? fields.msg ?? data.raw ?? data.content ?? "");
+  const msg = data.message ?? fields.msg ?? data.raw ?? data.content ?? "";
 
   const type = fields.type ? `[${fields.type}]` : "";
   const duration = fields.durationMs ? `${fields.durationMs}ms` : "";
@@ -30,19 +58,16 @@ function formatMessage(match: Entry): string {
   const userId = fields.userId ? `user:${fields.userId}` : "";
   const repoId = fields.repoId ? `repo:${fields.repoId}` : "";
 
-  const errObj = (fields.error ?? data.error) as
-    | { kind?: string; message?: string; stack?: string }
-    | string
-    | undefined;
-
   let errorDetails = "";
   let stacktrace = "";
 
-  if (typeof errObj === "object" && errObj !== null) {
-    if (errObj.message) errorDetails = `${errObj.kind ?? "Error"}: ${errObj.message}`;
-    if (errObj.stack) stacktrace = errObj.stack;
-  } else if (typeof errObj === "string") {
-    errorDetails = errObj;
+  if (typeof fields.error === "object") {
+    const kind = fields.error.kind ?? "Error";
+    const errorMessage = fields.error.message ?? "";
+    errorDetails = errorMessage ? `${kind}: ${errorMessage}` : kind;
+    stacktrace = fields.error.stack ?? "";
+  } else if (typeof fields.error === "string") {
+    errorDetails = fields.error;
   }
 
   const badges = [type, modelOp, duration, userId, repoId].filter(Boolean).join(" ");
@@ -67,10 +92,14 @@ async function getLastSyncedState(): Promise<CursorState> {
     .from(cronSyncState)
     .where(eq(cronSyncState.serviceName, SERVICE_NAME));
 
-  if (syncState?.position != null) {
+  if (syncState?.position) {
     try {
-      const parsed = JSON.parse(syncState.position);
-      if (parsed.lastTime != null) return parsed;
+      const parsed: unknown = JSON.parse(syncState.position);
+      const validated = cursorStateSchema.safeParse(parsed);
+      if (validated.success) {
+        return validated.data;
+      }
+      return { lastTime: syncState.position };
     } catch {
       return { lastTime: syncState.position };
     }
@@ -96,14 +125,14 @@ async function runAxiomSyncCycle(): Promise<SyncCycle> {
     | limit ${BATCH_LIMIT}
   `;
 
-  console.log(`[Axiom Sync] Querying dataset '${env.AXIOM_DATASET}' from ${lastTime}...`);
+  console.warn(`[Axiom Sync] Querying dataset '${env.AXIOM_DATASET}' from ${lastTime}...`);
 
-  const queryOptions = lastCursor != null ? { cursor: lastCursor } : undefined;
+  const queryOptions = lastCursor ? { cursor: lastCursor } : undefined;
   const response = await axiom.query(aplQuery, queryOptions);
 
-  if (response.matches == null || response.matches.length === 0) {
-    console.log(`[Axiom Sync] No new logs found. Up to date.`);
-    return { processedCount: 0, hasMore: false };
+  if (!response.matches || response.matches.length === 0) {
+    console.warn("[Axiom Sync] No new logs found. Up to date.");
+    return { hasMore: false, processedCount: 0 };
   }
 
   const matches: Entry[] = response.matches;
@@ -111,42 +140,45 @@ async function runAxiomSyncCycle(): Promise<SyncCycle> {
 
   const parsedLogs = matches
     .map((match) => {
-      if (match._time && match._time > newestTimestamp) {
-        newestTimestamp = match._time;
+      const time = match._time;
+      if (time > newestTimestamp) {
+        newestTimestamp = time;
       }
       return {
-        timestamp: match._time ?? new Date().toISOString(),
         message: formatMessage(match),
+        timestamp: time,
       };
     })
     .filter((l) => l.message.trim() !== "");
 
-  const nextCursor = response.status?.maxCursor ?? undefined;
+  const nextCursor = response.status.maxCursor;
   const serializedState = JSON.stringify({
-    lastTime: newestTimestamp,
     cursor: nextCursor,
+    lastTime: newestTimestamp,
   });
 
   bus.emit(APP_EVENTS.LOGS_INGESTED, {
     logs: parsedLogs,
-    rawText: parsedLogs.map((l) => l.message).join("\n"),
     newestTimestamp,
+    rawText: parsedLogs.map((l) => l.message).join("\n"),
     serializedState,
     serviceName: SERVICE_NAME,
   });
 
   return {
-    processedCount: matches.length,
     hasMore: matches.length >= BATCH_LIMIT,
+    processedCount: matches.length,
   };
 }
 
 export async function startAxiomIngestionWorker(): Promise<void> {
-  console.log(`[Axiom Worker] Starting SIEM Ingestion Daemon...`);
+  console.warn("[Axiom Worker] Starting SIEM Ingestion Daemon...");
   while (true) {
     try {
       const { hasMore } = await runAxiomSyncCycle();
-      if (hasMore) continue;
+      if (hasMore) {
+        continue;
+      }
       await sleep(10_000);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

@@ -29,7 +29,7 @@ export const documentFileTask = task({
   }) => {
     const documentedCode = await repoAnalysisService.runDocumentFilePreview(
       payload.userId,
-      payload
+      payload,
     );
 
     const result = toDocumentFilePreview({
@@ -40,7 +40,7 @@ export const documentFileTask = task({
     const cacheKey = REDIS_CONFIG.keys.fileAction(
       payload.userId,
       payload.path,
-      "document-file-preview"
+      "document-file-preview",
     );
     await redisClient.set(cacheKey, result, { ex: REDIS_CONFIG.ttl.fileAction });
 

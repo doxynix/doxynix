@@ -1,4 +1,4 @@
-import { type google, type GoogleLanguageModelOptions } from "@ai-sdk/google";
+import type { GoogleLanguageModelOptions, google } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { get } from "@vercel/edge-config";
 import { z } from "zod";
@@ -17,7 +17,13 @@ type GroqModelId = Parameters<typeof groq>[0];
 type AllAvailableModels = GoogleModelId | GroqModelId;
 
 type AIModelRole =
-  "AGENT" | "ARCHITECT" | "CARTOGRAPHER" | "FALLBACK" | "POWERFUL" | "SENTINEL" | "WRITER";
+  | "AGENT"
+  | "ARCHITECT"
+  | "CARTOGRAPHER"
+  | "FALLBACK"
+  | "POWERFUL"
+  | "SENTINEL"
+  | "WRITER";
 
 export const DEFAULT_AI_MODELS: Record<AIModelRole, AllAvailableModels[]> = {
   AGENT: ["gemini-3.1-flash-lite", "gemini-3.1-flash-lite"],
@@ -31,7 +37,7 @@ export const DEFAULT_AI_MODELS: Record<AIModelRole, AllAvailableModels[]> = {
 
 const aiModelsSchema = z.record(
   z.enum(["AGENT", "ARCHITECT", "CARTOGRAPHER", "FALLBACK", "POWERFUL", "SENTINEL", "WRITER"]),
-  z.array(z.string())
+  z.array(z.string()),
 );
 
 /**
@@ -49,7 +55,7 @@ export async function getActiveModels(): Promise<Record<AIModelRole, AllAvailabl
 
     const parsed = aiModelsSchema.safeParse(remoteConfig);
     if (parsed.success) {
-      return parsed.data as Record<AIModelRole, AllAvailableModels[]>;
+      return parsed.data;
     }
 
     appLogger.error({

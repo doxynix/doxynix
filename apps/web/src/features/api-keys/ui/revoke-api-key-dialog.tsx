@@ -27,7 +27,7 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
       { id: apiKey.id },
       {
         onSuccess: () => setOpen(false),
-      }
+      },
     );
   };
 
@@ -37,28 +37,28 @@ export function RevokeApiKeyDialog({ apiKey }: Readonly<Props>) {
       description={t("settings_api_keys_revoke_key_desc")}
       destructiveAlertContent={t("settings_api_keys_revoke_note")}
       isLoading={revoke.isPending}
+      onConfirm={handleRevoke}
+      onOpenChange={setOpen}
       open={open}
       title={`${t("settings_api_keys_revoke_key")}?`}
       trigger={
         <AppTooltip content={t("settings_api_keys_revoke_key")}>
           <AppButton
-            size="icon"
-            variant="ghost"
             aria-label="Revoke key"
+            className="text-destructive not-md:opacity-100 opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
             onClick={(e) => {
               e.preventDefault();
               setOpen(true);
             }}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 transition-opacity not-md:opacity-100 group-hover:opacity-100"
+            size="icon"
+            variant="ghost"
           >
             <Trash2 />
           </AppButton>
         </AppTooltip>
       }
-      onConfirm={handleRevoke}
-      onOpenChange={setOpen}
     >
-      <div className="text-foreground truncate pb-2 font-bold">{apiKey.name}</div>
+      <div className="truncate pb-2 font-bold text-foreground">{apiKey.name}</div>
     </DangerActionDialog>
   );
 }

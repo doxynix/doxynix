@@ -24,16 +24,16 @@ export async function ConfigSection() {
     <section className="container mx-auto px-4 py-24">
       <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
         <div>
-          <h2 className="mb-6 text-3xl font-bold not-md:text-center md:text-5xl">
+          <h2 className="mb-6 not-md:text-center font-bold text-3xl md:text-5xl">
             {t("section_config_title_prefix")}{" "}
             <span className="text-muted-foreground">{t("section_config_title_highlight")}</span>
             {t("section_config_title_suffix")}
             <br />
           </h2>
-          <p className="text-muted-foreground mb-8 text-lg not-md:text-center">
+          <p className="mb-8 not-md:text-center text-lg text-muted-foreground">
             {t("section_config_desc")}
           </p>
-          <ul className="marker:bg-foreground marker:text-foreground flex list-disc flex-col gap-4 pl-5">
+          <ul className="flex list-disc flex-col gap-4 pl-5 marker:bg-foreground marker:text-foreground">
             <li>{t("section_config_list_1")}</li>
             <li>{t("section_config_list_2")}</li>
             <li>{t("section_config_list_3")}</li>
@@ -42,9 +42,9 @@ export async function ConfigSection() {
 
         <CodeWindow
           code={CONFIG_CODE}
+          codeClassName="text-sm sm:text-base"
           codeHtml={html}
           title="doxynix.json"
-          codeClassName="text-sm sm:text-base"
         />
       </div>
     </section>

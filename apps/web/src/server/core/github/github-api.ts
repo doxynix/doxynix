@@ -1,5 +1,5 @@
 import type { RestEndpointMethodTypes } from "@octokit/rest";
-import { Visibility, type Repo } from "@prisma/client";
+import { type Repo, Visibility } from "@prisma/client";
 import { sumBy } from "es-toolkit";
 
 import type { RepoItemFields } from "@/shared/types/repo.types";
@@ -12,20 +12,18 @@ import { getLanguageColor } from "@/server/utils/language-metadata";
 import { appLogger } from "../app-logger";
 import type { DbClient } from "../db";
 import {
+  GitHubAuthRequiredError,
   getInstallationClient,
   getPublicClient,
-  GitHubAuthRequiredError,
-  resolveClientContext,
   type OctokitInstance,
+  resolveClientContext,
 } from "./github-provider";
 
 type SearchRepoItem =
   RestEndpointMethodTypes["search"]["repos"]["response"]["data"]["items"][number];
-type ListRepoItem =
-  RestEndpointMethodTypes["repos"]["listForAuthenticatedUser"]["response"]["data"][number];
 type InstallationRepoItem =
   RestEndpointMethodTypes["apps"]["listReposAccessibleToInstallation"]["response"]["data"]["repositories"][number];
-type GitHubRepoResponse = InstallationRepoItem | ListRepoItem | SearchRepoItem;
+type GitHubRepoResponse = InstallationRepoItem | SearchRepoItem;
 type GitHubContextType = "app" | "installation" | "oauth" | "public";
 const FALLBACK_RETRYABLE_STATUSES = new Set([401, 403, 404]);
 /**
@@ -38,7 +36,7 @@ async function getRepoDataOrAuthError(
   client: OctokitInstance,
   owner: string,
   name: string,
-  type: GitHubContextType
+  type: GitHubContextType,
 ) {
   const isPublicContext = type === "app" || type === "public";
 
@@ -81,7 +79,7 @@ async function fetchInstallationRepos(installationId: number): Promise<RepoItemF
   try {
     const octokit = getInstallationClient(installationId);
     const repos = await octokit.paginate(octokit.rest.apps.listReposAccessibleToInstallation);
-    return mapRepos(repos as GitHubRepoResponse[]);
+    return mapRepos(repos);
   } catch (error) {
     appLogger.error({ error, installationId, msg: "Failed installation fetch" });
     return [];
@@ -89,7 +87,9 @@ async function fetchInstallationRepos(installationId: number): Promise<RepoItemF
 }
 
 async function fetchOauthRepos(account: { accessToken: null | string; id: number | string }) {
-  if (account.accessToken == null) return [];
+  if (account.accessToken == null) {
+    return [];
+  }
   try {
     const octokit = getPublicClient(account.accessToken);
     const repos = await octokit.paginate(octokit.rest.repos.listForAuthenticatedUser, {
@@ -121,16 +121,18 @@ export async function getMyRepos(prisma: DbClient, userId: number): Promise<Repo
       }),
     ]);
 
-    if (installations.length === 0 && oauthAccounts.length === 0) return [];
+    if (installations.length === 0 && oauthAccounts.length === 0) {
+      return [];
+    }
 
     const installationTasks = installations.map((installation) =>
-      fetchInstallationRepos(Number(installation.id))
+      fetchInstallationRepos(Number(installation.id)),
     );
     const oauthTasks = oauthAccounts.map((account) => fetchOauthRepos(account));
 
     const results = await Promise.allSettled([...installationTasks, ...oauthTasks]);
     const allRepos = results.flatMap((result) =>
-      result.status === "fulfilled" ? result.value : []
+      result.status === "fulfilled" ? result.value : [],
     );
 
     // Deduplicate by fullName
@@ -151,9 +153,11 @@ export async function searchRepos(
   prisma: DbClient,
   userId: number,
   query: string,
-  limit: number | undefined
+  limit: number | undefined,
 ): Promise<RepoItemFields[]> {
-  if (query.length < 2 || query.length > 256) return [];
+  if (query.length < 2 || query.length > 256) {
+    return [];
+  }
 
   const context = await resolveClientContext(prisma, userId, {
     allowPublicFallback: true,
@@ -175,7 +179,7 @@ export async function searchRepos(
         ? data.items.filter((repo) => !repo.private)
         : data.items;
 
-    return mapRepos(items as GitHubRepoResponse[]);
+    return mapRepos(items);
   } catch (error) {
     appLogger.error({ error, msg: "GitHub search error" });
     return [];
@@ -208,7 +212,7 @@ export async function getRepoBranches(
   prisma: DbClient,
   userId: number,
   owner: string,
-  name: string
+  name: string,
 ) {
   const context = await resolveClientContext(prisma, userId, {
     allowPublicFallback: true,
@@ -242,7 +246,7 @@ export async function getRepoTree(
   userId: number,
   owner: string,
   name: string,
-  branch?: string
+  branch?: string,
 ) {
   const context = await resolveClientContext(prisma, userId, {
     allowPublicFallback: true,
@@ -269,12 +273,16 @@ export async function getRepoTree(
 
         return data.tree
           .filter((item) => {
-            if (!item.path) return false;
-            if (item.type !== "blob") return false;
+            if (!item.path) {
+              return false;
+            }
+            if (item.type !== "blob") {
+              return false;
+            }
             return !ProjectPolicy.isIgnored(item.path);
           })
           .map((item) => ({ path: item.path, sha: item.sha, type: item.type }));
-      }
+      },
     );
   } catch (error) {
     if (isOctokitError(error)) {
@@ -307,7 +315,7 @@ export async function getFileContent(
   owner: string,
   name: string,
   path: string,
-  branch?: string
+  branch?: string,
 ): Promise<GitHubFileResponse> {
   const context = await resolveClientContext(prisma, userId, {
     allowPublicFallback: true,
@@ -349,7 +357,7 @@ export async function executeWithFallback<T>(
   userId: number,
   initialOctokit: OctokitInstance,
   initialType: GitHubContextType,
-  operation: (client: OctokitInstance) => Promise<T>
+  operation: (client: OctokitInstance) => Promise<T>,
 ): Promise<T> {
   try {
     return await operation(initialOctokit);
@@ -363,14 +371,15 @@ export async function executeWithFallback<T>(
       // Try each oauth account
 
       for (const oauthAcc of oauthAccounts) {
-        if (oauthAcc.accessToken == null) continue;
+        if (oauthAcc.accessToken == null) {
+          continue;
+        }
 
         try {
           const fallbackOctokit = getPublicClient(oauthAcc.accessToken);
           return await operation(fallbackOctokit);
         } catch (fallbackError) {
           appLogger.error({ error: fallbackError, msg: "Token didn't work in fallback" });
-          continue;
         }
       }
     }
@@ -397,7 +406,7 @@ type BusFactorResult = {
 export async function calculateBusFactor(
   repo: Repo,
   userId: number,
-  prisma: DbClient
+  prisma: DbClient,
 ): Promise<BusFactorResult> {
   taskLogger.info("GitHub: Analyzing contributor history to calculate Bus Factor...");
 
@@ -425,19 +434,21 @@ export async function calculateBusFactor(
       async (client) => {
         let fetchedContributors = 0;
 
-        return await client.paginate(
+        return client.paginate(
           client.rest.repos.listContributors,
           { owner: repo.owner, per_page: 100, repo: repo.name },
           (
             response: Awaited<ReturnType<OctokitInstance["rest"]["repos"]["listContributors"]>>,
-            done: () => void
+            done: () => void,
           ) => {
             fetchedContributors += response.data.length;
-            if (fetchedContributors >= 500) done();
+            if (fetchedContributors >= 500) {
+              done();
+            }
             return response.data;
-          }
+          },
         );
-      }
+      },
     );
 
     taskLogger.info(`GitHub: Successfully retrieved ${contributors.length} active contributors`);
@@ -467,13 +478,15 @@ export async function calculateBusFactor(
     for (const contributor of rawContributors) {
       runningSum += contributor.contributions;
       busFactor++;
-      if (runningSum >= totalCommits * 0.5) break;
+      if (runningSum >= totalCommits * 0.5) {
+        break;
+      }
     }
 
     taskLogger.success(
       `GitHub: Bus Factor is ${busFactor}. Knowledge is ${
         busFactor > 2 ? "distributed across the team" : "concentrated in few key people"
-      }.`
+      }.`,
     );
 
     return {
@@ -492,14 +505,16 @@ export async function calculateBusFactor(
     // Private repo requires auth
     if (repo.visibility === "PRIVATE" && (isMissingAuth || isRetryableGithubStatus(status))) {
       taskLogger.error("GitHub: Failed to access private repository contributors");
-      if (isMissingAuth) throw error;
+      if (isMissingAuth) {
+        throw error;
+      }
       throw new GitHubAuthRequiredError();
     }
 
     // Public repo: log and return default
     if (isMissingAuth || isRetryableGithubStatus(status)) {
       taskLogger.warn(
-        "GitHub: Bus Factor calculation failed (likely due to API limits). Defaulting to 0."
+        "GitHub: Bus Factor calculation failed (likely due to API limits). Defaulting to 0.",
       );
 
       appLogger.warn({

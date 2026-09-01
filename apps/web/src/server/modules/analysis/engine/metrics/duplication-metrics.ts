@@ -30,13 +30,15 @@ type DuplicationSourceFile = RepositoryFile & {
 
 function toDuplicationSourceFiles(
   files: RepositoryFile[],
-  getFormatByFile: (path: string) => string | undefined
+  getFormatByFile: (path: string) => string | undefined,
 ): DuplicationSourceFile[] {
   const sourceFiles: DuplicationSourceFile[] = [];
 
   for (const file of files) {
     const format = getFormatByFile(file.path);
-    if (format === undefined) continue;
+    if (format === undefined) {
+      continue;
+    }
 
     sourceFiles.push({
       ...file,
@@ -48,10 +50,10 @@ function toDuplicationSourceFiles(
 }
 
 export async function calculateRepositoryDuplication(
-  files: RepositoryFile[]
+  files: RepositoryFile[],
 ): Promise<DuplicationReport> {
   const validFiles = files.filter(
-    (file) => !ProjectPolicy.isTestFile(file.path) && !ProjectPolicy.isConfigFile(file.path)
+    (file) => !ProjectPolicy.isTestFile(file.path) && !ProjectPolicy.isConfigFile(file.path),
   );
 
   const fallbackReport: DuplicationReport = {
@@ -60,7 +62,9 @@ export async function calculateRepositoryDuplication(
     totalDuplicatedLines: 0,
   };
 
-  if (validFiles.length === 0) return fallbackReport;
+  if (validFiles.length === 0) {
+    return fallbackReport;
+  }
 
   const options: IOptions = {
     absolute: false,
@@ -78,7 +82,9 @@ export async function calculateRepositoryDuplication(
       import("@jscpd/tokenizer"),
     ]);
     const sourceFiles = toDuplicationSourceFiles(validFiles, getFormatByFile);
-    if (sourceFiles.length === 0) return fallbackReport;
+    if (sourceFiles.length === 0) {
+      return fallbackReport;
+    }
 
     const tokenizer = new Tokenizer();
     const store = new MemoryStore<IMapFrame>();
@@ -92,7 +98,7 @@ export async function calculateRepositoryDuplication(
 
     const totalLinesInValidFiles = sumBy(
       sourceFiles,
-      (file) => file.content.split(/\r?\n/u).length
+      (file) => file.content.split(/\r?\n/u).length,
     );
 
     let totalDuplicatedLines = 0;

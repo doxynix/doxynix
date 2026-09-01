@@ -1,4 +1,4 @@
-import { type MouseEvent } from "react";
+import type { MouseEvent } from "react";
 import { ChevronDown, ChevronRight, FileIcon, Folder, FolderOpen } from "lucide-react";
 import type { NodeRendererProps } from "react-arborist";
 
@@ -27,13 +27,13 @@ export function RepoCodeNode({ activePath, node, onSelect, style }: RepoCodeNode
 
   return (
     <AppButton
-      variant="ghost"
-      onClick={handleClick}
       className={cn(
-        "hover:bg-surface-hover text-muted-foreground flex h-7 w-full cursor-pointer items-center justify-start rounded-xl transition-colors outline-none",
-        isActive && "bg-surface-selected hover:bg-surface-selected text-foreground"
+        "flex h-7 w-full cursor-pointer items-center justify-start rounded-xl text-muted-foreground outline-none transition-colors hover:bg-surface-hover",
+        isActive && "bg-surface-selected text-foreground hover:bg-surface-selected",
       )}
+      onClick={handleClick}
       style={style}
+      variant="ghost"
     >
       <div className="flex size-4 shrink-0 items-center justify-center">
         {isFolder &&

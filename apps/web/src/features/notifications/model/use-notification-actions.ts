@@ -1,10 +1,12 @@
 import { trpc } from "@/shared/api/trpc";
 
-import type { NotificationsParsersState } from "@/entities/notifications/model/notifications-parsers";
 import type { MarkAllInput } from "@/entities/notifications/model/notifications.types";
+import type { NotificationsParsersState } from "@/entities/notifications/model/notifications-parsers";
 
 const mapFiltersToInput = (filters?: NotificationsParsersState): MarkAllInput => {
-  if (filters == null) return {};
+  if (filters == null) {
+    return {};
+  }
 
   return {
     repoName: filters.repo ?? undefined,
@@ -49,7 +51,7 @@ export function useNotificationActions() {
       isPending: deleteRead.isPending,
       mutate: (
         filters?: NotificationsParsersState,
-        options?: Parameters<typeof deleteRead.mutate>[1]
+        options?: Parameters<typeof deleteRead.mutate>[1],
       ) => deleteRead.mutate(mapFiltersToInput(filters), options),
     },
     invalidateAll,
@@ -57,7 +59,7 @@ export function useNotificationActions() {
       isPending: markAllAsRead.isPending,
       mutate: (
         filters?: NotificationsParsersState,
-        options?: Parameters<typeof markAllAsRead.mutate>[1]
+        options?: Parameters<typeof markAllAsRead.mutate>[1],
       ) => markAllAsRead.mutate(mapFiltersToInput(filters), options),
     },
     markAs: {

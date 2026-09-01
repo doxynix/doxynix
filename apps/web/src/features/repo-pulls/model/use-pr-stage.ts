@@ -13,7 +13,7 @@ export function usePrStage(repoId: string) {
     },
     onSuccess: (data) => {
       toast.success(
-        `Added ${data.stagedFilesAdded} file(s) to PR draft. Total: ${data.stagedCount}.`
+        `Added ${data.stagedFilesAdded} file(s) to PR draft. Total: ${data.stagedCount}.`,
       );
       void utils.analysis.getStagedFiles.invalidate();
     },

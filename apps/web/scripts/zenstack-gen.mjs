@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn } from "node:child_process";
 
 console.log("🚀 Запуск ZenStack через умный триггер...");
 
@@ -7,7 +7,7 @@ const child = spawn(
   ["--bun", "zenstack", "generate", "--schema", "prisma/schema.zmodel", "--offline"],
   {
     shell: true,
-  }
+  },
 );
 
 child.stdout.on("data", (data) => {

@@ -548,8 +548,12 @@ export function validateScoringConstants(): string[] {
   ];
 
   for (const metric of metricsToValidate) {
-    if (metric.value < 0) errors.push(`${metric.name} < 0`);
-    if (metric.value > 100) errors.push(`${metric.name} > 100`);
+    if (metric.value < 0) {
+      errors.push(`${metric.name} < 0`);
+    }
+    if (metric.value > 100) {
+      errors.push(`${metric.name} > 100`);
+    }
   }
 
   const cycleMultipliers = [

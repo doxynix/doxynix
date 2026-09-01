@@ -1,4 +1,3 @@
-import type { UserRole } from "@prisma/client";
 import { enhance } from "@zenstackhq/runtime";
 import * as fc from "fast-check";
 import { afterAll, beforeAll, beforeEach, describe, it, vi } from "vitest";
@@ -33,7 +32,7 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
         });
         return repo == null;
       }),
-      { numRuns: NUM_RUNS }
+      { numRuns: NUM_RUNS },
     );
   });
 
@@ -50,7 +49,7 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
         async (targetRole, newName) => {
           try {
             await db.user.update({
-              data: { name: newName, role: targetRole as UserRole },
+              data: { name: newName, role: targetRole },
               where: { publicId: user.publicId },
             });
             const updated = await prisma.user.findUnique({ where: { id: user.id } });
@@ -58,9 +57,9 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
           } catch {
             return true;
           }
-        }
+        },
       ),
-      { numRuns: NUM_RUNS }
+      { numRuns: NUM_RUNS },
     );
   });
 
@@ -82,7 +81,7 @@ describe("Property-Based Security Tests (Fast-Check)", () => {
           return true;
         }
       }),
-      { numRuns: NUM_RUNS }
+      { numRuns: NUM_RUNS },
     );
   });
 });

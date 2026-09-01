@@ -45,11 +45,11 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
   ];
 
   const activeMarkers = Object.entries(node.markers)
-    .filter(([_, value]) => value === true)
+    .filter(([_, value]) => value)
     .map(([key]) => key);
 
   const allFileReferences = Array.from(
-    new Set([...node.previewPaths, ...inspect.samplePaths, ...explain.sourcePaths])
+    new Set([...node.previewPaths, ...inspect.samplePaths, ...explain.sourcePaths]),
   )
     .map((path) => path.split("/").pop())
     .filter((name) => name !== node.label);
@@ -57,11 +57,11 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
   const childIds = new Set(children.map((c) => c.id));
 
   const uniqueNavigation = explain.nextSuggestedPaths.filter(
-    (path) => path !== node.id && !childIds.has(path)
+    (path) => path !== node.id && !childIds.has(path),
   );
 
   const uniqueRelated = inspect.relatedPaths.filter(
-    (path) => path !== node.id && !childIds.has(path)
+    (path) => path !== node.id && !childIds.has(path),
   );
 
   const internalFileNames = new Set(allFileReferences);
@@ -76,7 +76,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
       const isInternal = internalFileNames.has(fileName);
 
       return !isSelfId && !isSelfPath && !isSelfName && !isInternal;
-    }
+    },
   );
 
   const activeStats = [
@@ -145,25 +145,25 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
         <div className="min-w-0 pr-4">
           <div className="flex items-center gap-2">
             <h3 className="truncate text-sm">{node.label}</h3>
-            <AppBadge variant="outline" className="text-xs">
+            <AppBadge className="text-xs" variant="outline">
               {node.kind}
             </AppBadge>
-            <AppBadge variant="outline" className="text-xs">
+            <AppBadge className="text-xs" variant="outline">
               {node.score}
             </AppBadge>
           </div>
           {activeMarkers.map((marker) => (
-            <AppBadge key={marker} variant="outline" className="text-xs">
+            <AppBadge className="text-xs" key={marker} variant="outline">
               {marker}
             </AppBadge>
           ))}
         </div>
         <AppButton
+          aria-label="Close node inspector"
+          className="shrink-0"
+          onClick={onClose}
           size="icon"
           variant="ghost"
-          aria-label="Close node inspector"
-          onClick={onClose}
-          className="shrink-0"
         >
           <X />
         </AppButton>
@@ -181,7 +181,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           )}
           <div className="flex flex-col gap-4">
             <div className="flex items-start gap-3 rounded-xl p-3">
-              <ShieldCheck className="text-warning size-5" />
+              <ShieldCheck className="size-5 text-warning" />
               <p className="text-warning text-xs">{explain.relationships.reviewPriority?.reason}</p>
             </div>
 
@@ -190,7 +190,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                 <div className="text-sm">Inferred Role</div>
                 <p className="text-xs">{explain.role}</p>
               </div>
-              <AppBadge variant="outline" className="text-success text-xs">
+              <AppBadge className="text-success text-xs" variant="outline">
                 {explain.confidence}
               </AppBadge>
             </div>
@@ -198,12 +198,12 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
           <div className="mt-2 flex flex-wrap gap-1">
             {explain.relationships.riskTitles.map((title) => (
-              <AppBadge key={title} variant="destructive" className="text-[10px]">
+              <AppBadge className="text-[10px]" key={title} variant="destructive">
                 {title}
               </AppBadge>
             ))}
             {explain.relationships.factTitles.map((fact) => (
-              <AppBadge key={fact} variant="secondary" className="text-[10px]">
+              <AppBadge className="text-[10px]" key={fact} variant="secondary">
                 {fact}
               </AppBadge>
             ))}
@@ -216,7 +216,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                   <CardContent className="flex flex-col items-center justify-center gap-1 p-0">
                     <div className="flex items-center gap-1">
                       {stat.icon}
-                      <span className="text-sm font-bold">{stat.value}</span>
+                      <span className="font-bold text-sm">{stat.value}</span>
                     </div>
                     <span className="text-muted-foreground text-xs">{stat.label}</span>
                   </CardContent>
@@ -231,7 +231,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
             </div>
             <div className="flex flex-col gap-3">
               {explain.summary.map((line: string, i: number) => (
-                <div key={i} className="text-muted-foreground group flex gap-3 text-xs">
+                <div className="group flex gap-3 text-muted-foreground text-xs" key={i}>
                   <div className="size-1 shrink-0 rounded-full" />
                   {line}
                 </div>
@@ -250,11 +250,11 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                   {children.map((child) => (
                     <AppButton
                       key={child.id}
-                      size="sm"
-                      variant="outline"
                       onClick={() => {
                         onNavigate(child.path);
                       }}
+                      size="sm"
+                      variant="outline"
                     >
                       <FileIcon /> {child.label}
                     </AppButton>
@@ -272,13 +272,13 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               <div className="flex flex-col gap-1">
                 {connections.map((path) => (
                   <AppButton
+                    className="justify-between"
                     key={path}
-                    size="sm"
-                    variant="outline"
                     onClick={() => {
                       onNavigate(path);
                     }}
-                    className="justify-between"
+                    size="sm"
+                    variant="outline"
                   >
                     <span className="truncate">{path.split("/").pop()}</span>
                     <ArrowRight />
@@ -295,11 +295,11 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                 {Object.entries(inspect.neighborBuckets).map(
                   ([bucket, paths]) =>
                     paths.length > 0 && (
-                      <div key={bucket} className="flex flex-col gap-1 rounded border p-2">
-                        <div className="text-muted-foreground text-[10px]">{bucket}</div>
+                      <div className="flex flex-col gap-1 rounded border p-2" key={bucket}>
+                        <div className="text-[10px] text-muted-foreground">{bucket}</div>
                         <div className="text-xs">{paths.length} related modules</div>
                       </div>
-                    )
+                    ),
                 )}
               </div>
             </section>
@@ -311,8 +311,8 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               <div className="flex flex-col gap-2">
                 {inspect.recommendedActions.map((action, i) => (
                   <div
-                    key={i}
                     className="flex gap-2 rounded-md border border-amber-500/10 bg-amber-500/5 p-2 text-xs"
+                    key={i}
                   >
                     <Zap className="mt-0.5 text-amber-500" />
                     <span>{action}</span>
@@ -327,7 +327,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               <div className="text-xs">Related Docs</div>
               <div className="flex flex-wrap gap-2">
                 {data.related.docs.map((doc) => (
-                  <AppBadge key={doc.id} variant="secondary" className="text-[10px]">
+                  <AppBadge className="text-[10px]" key={doc.id} variant="secondary">
                     {doc.docType}: {doc.title}
                   </AppBadge>
                 ))}
@@ -340,14 +340,14 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               <div className="text-xs">Recent PR Findings</div>
               <div className="flex flex-col gap-2">
                 {data.related.findings.slice(0, 4).map((finding) => (
-                  <div key={finding.id} className="rounded-md border p-2 text-xs">
+                  <div className="rounded-md border p-2 text-xs" key={finding.id}>
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <span className="font-medium">
                         PR #{finding.prNumber} · {finding.findingType}
                       </span>
                       <AppBadge variant="outline">{finding.filePath.split("/").pop()}</AppBadge>
                     </div>
-                    <p className="text-muted-foreground line-clamp-3">{finding.body}</p>
+                    <p className="line-clamp-3 text-muted-foreground">{finding.body}</p>
                   </div>
                 ))}
               </div>
@@ -355,24 +355,24 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-muted flex flex-col gap-1 rounded-md border p-2">
+            <div className="flex flex-col gap-1 rounded-md border bg-muted p-2">
               <div className="text-muted-foreground text-xs">Depends On</div>
-              <div className="text-xs font-bold">{inspect.dependsOn.length} modules</div>
+              <div className="font-bold text-xs">{inspect.dependsOn.length} modules</div>
             </div>
-            <div className="bg-muted flex flex-col gap-1 rounded-md border p-2">
+            <div className="flex flex-col gap-1 rounded-md border bg-muted p-2">
               <div className="text-muted-foreground text-xs">Used By</div>
-              <div className="text-xs font-bold">{inspect.usedBy.length} consumers</div>
+              <div className="font-bold text-xs">{inspect.usedBy.length} consumers</div>
             </div>
           </div>
 
           {allHints.length > 0 && (
-            <div className="bg-muted flex flex-col gap-3 rounded-xl border p-4">
-              <div className="text-warning flex items-center gap-2 text-xs font-bold">
+            <div className="flex flex-col gap-3 rounded-xl border bg-muted p-4">
+              <div className="flex items-center gap-2 font-bold text-warning text-xs">
                 <Lightbulb /> Technical Context
               </div>
               <div className="flex flex-col gap-3">
                 {allHints.map((hint, i) => (
-                  <p key={i} className="text-muted-foreground text-xs">
+                  <p className="text-muted-foreground text-xs" key={i}>
                     {hint}
                   </p>
                 ))}
@@ -387,7 +387,7 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               </AppButton>
             )}
             {availableActions.canDocumentFile && (
-              <AppButton variant="outline" className="w-full gap-2">
+              <AppButton className="w-full gap-2" variant="outline">
                 <SearchCode /> Document Logic
               </AppButton>
             )}

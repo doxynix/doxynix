@@ -21,12 +21,12 @@ export async function executeMapperPhase(
   analysisId: string,
   userId: number,
   repoId: string,
-  branch: string
+  branch: string,
 ): Promise<ProjectMap> {
   const MAX_MAPPER_CHARS = 1_500_000;
   const mapContext = buildMapperSkeleton(validFiles, hardMetrics, evidence).slice(
     0,
-    MAX_MAPPER_CHARS
+    MAX_MAPPER_CHARS,
   );
 
   const activeModels = await getActiveModels();

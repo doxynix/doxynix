@@ -77,39 +77,39 @@ export default function ErrorPage({
 
   return (
     <div className="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center px-4">
-      <div className="bg-destructive/10 text-destructive flex size-20 items-center justify-center rounded-full">
+      <div className="flex size-20 items-center justify-center rounded-full bg-destructive/10 text-destructive">
         <ServerCrash size={35} />
       </div>
 
       <div className="flex w-full max-w-md flex-col gap-4 text-center">
-        <h1 className="text-3xl font-bold tracking-tight">{t("server_error_title")}</h1>
-        <p className="text-muted-foreground text-base">{t("server_error_desc")}</p>
-        <p className="text-muted-foreground text-left text-xs font-semibold tracking-wider uppercase">
+        <h1 className="font-bold text-3xl tracking-tight">{t("server_error_title")}</h1>
+        <p className="text-base text-muted-foreground">{t("server_error_desc")}</p>
+        <p className="text-left font-semibold text-muted-foreground text-xs uppercase tracking-wider">
           {t("request_id_label")}
         </p>
-        <div className="bg-muted border-border flex flex-col gap-3 rounded-xl border p-2 text-left">
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted p-2 text-left">
           <div className="group flex items-center justify-between">
-            <code className="text-xs break-all">
+            <code className="break-all text-xs">
               {requestId ?? error.digest ?? "System Failure"}
             </code>
             <CopyButton
-              value={requestId ?? error.digest ?? ""}
-              tooltipText={tCommon("copy")}
               className="opacity-100"
+              tooltipText={tCommon("copy")}
+              value={requestId ?? error.digest ?? ""}
             />
           </div>
 
           {IS_DEV && (
             <div className="border-border border-t pt-2">
-              <p className="text-destructive text-xs font-semibold uppercase">Debug Error:</p>
-              <p className="text-destructive truncate text-xs">{error.message}</p>
+              <p className="font-semibold text-destructive text-xs uppercase">Debug Error:</p>
+              <p className="truncate text-destructive text-xs">{error.message}</p>
             </div>
           )}
         </div>
 
         <div className="flex flex-col items-center justify-center gap-3 pt-4 sm:flex-row">
-          <BackOrLinkButton label={tCommon("back")} className="cursor-pointer" />
-          <AppButton onClick={reset} className="cursor-pointer">
+          <BackOrLinkButton className="cursor-pointer" label={tCommon("back")} />
+          <AppButton className="cursor-pointer" onClick={reset}>
             {t("try_recover_btn")}
           </AppButton>
         </div>
@@ -118,12 +118,12 @@ export default function ErrorPage({
       <footer className="mt-12 flex flex-col gap-4 text-sm">
         <div>
           <span>{t("footer")} </span>
-          <a href={mailtoLink} className="underline hover:no-underline">
+          <a className="underline hover:no-underline" href={mailtoLink}>
             support@doxynix.space
           </a>
         </div>
-        <AppButton asChild size="sm" variant="outline" className="mx-auto w-fit">
-          <ExternalLink href="https://status.doxynix.space" className="flex items-center gap-2.5">
+        <AppButton asChild className="mx-auto w-fit" size="sm" variant="outline">
+          <ExternalLink className="flex items-center gap-2.5" href="https://status.doxynix.space">
             Check System Status
           </ExternalLink>
         </AppButton>

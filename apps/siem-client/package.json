@@ -1,21 +1,7 @@
 {
-  "name": "@doxynix/siem-client",
-  "private": true,
-  "version": "0.1.4",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "type-check": "tsc --noEmit",
-    "lint": "biome check .",
-    "lint:fix": "biome check . --write",
-    "format": "biome format --write .",
-    "validate": "biome check ."
-  },
   "dependencies": {
+    "@doxynix/shared": "workspace:*",
     "@doxynix/siem-server": "workspace:*",
-    "@doxynix/siem-shared": "workspace:*",
     "@hookform/resolvers": "5.9.1",
     "@internationalized/date": "3.12.3",
     "@microsoft/fetch-event-source": "2.0.1",
@@ -38,7 +24,7 @@
     "clsx": "2.1.1",
     "date-fns": "4.4.0",
     "react": "19.2.8",
-    "react-day-picker": "8.10.2",
+    "react-day-picker": "9.14.0",
     "react-dom": "19.2.8",
     "react-hook-form": "7.86.0",
     "recharts": "3.10.1",
@@ -48,6 +34,7 @@
   },
   "devDependencies": {
     "@babel/core": "8.0.1",
+    "@doxynix/config": "workspace:*",
     "@rolldown/plugin-babel": "0.2.3",
     "@tailwindcss/vite": "4.3.3",
     "@tanstack/router-plugin": "1.168.35",
@@ -56,12 +43,27 @@
     "@vitejs/plugin-react": "6.1.1",
     "babel-plugin-react-compiler": "1.0.0",
     "globals": "16.5.0",
+    "rollup-plugin-visualizer": "7.0.1",
     "svgo": "4.0.2",
     "tailwindcss": "4.3.3",
     "vite": "8.2.2",
     "vite-plugin-checker": "0.14.5",
     "vite-plugin-mkcert": "2.1.0",
-    "vite-plugin-svgr": "5.2.0",
-    "@doxynix/config": "workspace:*"
-  }
+    "vite-plugin-svgr": "5.2.0"
+  },
+  "name": "@doxynix/siem-client",
+  "private": true,
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "dev": "vite",
+    "format": "biome check --write .",
+    "format:check": "biome check .",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "preview": "vite preview",
+    "type-check": "tsc -b",
+    "validate": "biome check . && oxlint"
+  },
+  "type": "module",
+  "version": "0.1.4"
 }

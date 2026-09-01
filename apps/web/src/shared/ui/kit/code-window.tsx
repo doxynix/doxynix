@@ -25,31 +25,31 @@ export function CodeWindow({
   return (
     <div
       className={cn(
-        "bg-landing-bg-dark border-landing-bg-light overflow-hidden rounded-xl border",
-        className
+        "overflow-hidden rounded-xl border border-landing-bg-light bg-landing-bg-dark",
+        className,
       )}
     >
-      <div className="bg-landing-bg-light/50 border-border flex items-center justify-between border-b p-3">
+      <div className="flex items-center justify-between border-border border-b bg-landing-bg-light/50 p-3">
         <div className="flex items-center">
           <div className="flex gap-1.5">
-            <div className="bg-destructive/80 size-3 rounded-full" />
-            <div className="bg-warning/80 size-3 rounded-full" />
-            <div className="bg-success/80 size-3 rounded-full" />
+            <div className="size-3 rounded-full bg-destructive/80" />
+            <div className="size-3 rounded-full bg-warning/80" />
+            <div className="size-3 rounded-full bg-success/80" />
           </div>
-          <div className="text-muted-foreground ml-4 flex items-center gap-2 font-mono text-xs">
+          <div className="ml-4 flex items-center gap-2 font-mono text-muted-foreground text-xs">
             <span>{title}</span>
           </div>
         </div>
         {copyButtonVisible && (
-          <CopyButton value={code ?? ""} tooltipText={t("copy_code")} className="opacity-100" />
+          <CopyButton className="opacity-100" tooltipText={t("copy_code")} value={code ?? ""} />
         )}
       </div>
       <div
-        dangerouslySetInnerHTML={{ __html: codeHtml }}
         className={cn(
           "overflow-x-auto p-6 font-mono leading-relaxed [&>pre]:bg-transparent! [&>pre]:p-0!",
-          codeClassName
+          codeClassName,
         )}
+        dangerouslySetInnerHTML={{ __html: codeHtml }}
       />
     </div>
   );

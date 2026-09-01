@@ -7,7 +7,7 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   return (
-    <div className="min-h-dvh bg-zinc-950 text-zinc-100 antialiased font-sans flex flex-col">
+    <div className="flex min-h-dvh flex-col bg-zinc-950 font-sans text-zinc-100 antialiased">
       <Outlet />
       {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
     </div>

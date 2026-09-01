@@ -104,7 +104,7 @@ function stripAlertFromChildren(children: ReactNode, state: { charsToStrip: numb
 
 function renderAlertOrFallback(
   children: ReactNode,
-  fallback: (cleanedContent: ReactNode) => ReactNode
+  fallback: (cleanedContent: ReactNode) => ReactNode,
 ): ReactNode {
   const fullText = getTextFromChildren(children);
 
@@ -123,14 +123,14 @@ function renderAlertOrFallback(
 
     return (
       <Alert
-        variant={alertConfig.variant}
         className={cn(
           "not-prose my-4 rounded-xl border py-3.5 pl-11 text-left",
-          alertConfig.className
+          alertConfig.className,
         )}
+        variant={alertConfig.variant}
       >
         <IconComponent className="absolute top-4 left-4 size-4" />
-        <AlertTitle className="mb-1 font-sans text-xs font-bold tracking-wider uppercase">
+        <AlertTitle className="mb-1 font-bold font-sans text-xs uppercase tracking-wider">
           {alertConfig.title}
         </AlertTitle>
         <AlertDescription className="font-sans text-xs leading-relaxed opacity-90">
@@ -150,7 +150,7 @@ const MarkdownBlock = memo(
         components={{
           blockquote({ children }) {
             return renderAlertOrFallback(children, (cleaned) => (
-              <blockquote className="border-border text-muted-foreground my-2 border-l-2 pl-4 text-left italic">
+              <blockquote className="my-2 border-border border-l-2 pl-4 text-left text-muted-foreground italic">
                 {cleaned}
               </blockquote>
             ));
@@ -167,7 +167,7 @@ const MarkdownBlock = memo(
             if (isInline) {
               return (
                 <code
-                  className="bg-muted text-card-foreground border-border rounded border px-1.5 py-0.5 font-mono text-xs"
+                  className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-card-foreground text-xs"
                   {...props}
                 >
                   {children}
@@ -175,13 +175,12 @@ const MarkdownBlock = memo(
               );
             }
             return (
-              <div className="border-border bg-background my-3 h-70 w-full overflow-hidden rounded-xl border text-xs shadow-sm">
+              <div className="my-3 h-70 w-full overflow-hidden rounded-xl border border-border bg-background text-xs shadow-sm">
                 <RepoCodeEditor
-                  value={codeText}
-                  meta={{ name: `file.${lang}`, sha: "dummy", size: 0, url: "https://dummy.com" }}
                   minimal={true}
                   path={`file.${lang}`}
                   readOnly={true}
+                  value={codeText}
                 />
               </div>
             );
@@ -205,7 +204,7 @@ const MarkdownBlock = memo(
       </ReactMarkdown>
     );
   },
-  (prevProps, nextProps) => prevProps.content === nextProps.content
+  (prevProps, nextProps) => prevProps.content === nextProps.content,
 );
 
 MarkdownBlock.displayName = "MarkdownBlock";
@@ -215,9 +214,9 @@ export default function AgentTextMessage({ content, id }: Readonly<Props>) {
   const blocks = tokens.map((token) => token.raw);
 
   return (
-    <div className="prose prose-sm dark:prose-invert transition-standard w-full max-w-none text-left">
+    <div className="prose prose-sm dark:prose-invert w-full max-w-none text-left transition-standard">
       {blocks.map((block, index) => (
-        <MarkdownBlock key={`${id}-block_${index}`} content={block} />
+        <MarkdownBlock content={block} key={`${id}-block_${index}`} />
       ))}
     </div>
   );

@@ -23,8 +23,8 @@ function dedupeEntrypoints(entrypoints: EntrypointRef[]): EntrypointRef[] {
     }
   }
 
-  return Array.from(seen.values()).toSorted(
-    (left, right) => right.confidence - left.confidence || left.path.localeCompare(right.path)
+  return Array.from(seen.values()).sort(
+    (left, right) => right.confidence - left.confidence || left.path.localeCompare(right.path),
   );
 }
 
@@ -39,7 +39,7 @@ export function inferEntrypoints(params: {
   const normalizeHint = (
     hint: EntrypointRef,
     filePath: string,
-    categories: string[]
+    categories: string[],
   ): EntrypointRef => {
     if (hint.kind === "library" || hint.kind === "runtime") {
       if (ProjectPolicy.isPrimaryEntrypoint(hint.path)) {
@@ -64,7 +64,7 @@ export function inferEntrypoints(params: {
     const primaryKind = kindForFile(filePath, categories);
 
     entrypoints.push(
-      ...module.entrypointHints.map((hint) => normalizeHint(hint, filePath, categories))
+      ...module.entrypointHints.map((hint) => normalizeHint(hint, filePath, categories)),
     );
 
     if (
@@ -123,19 +123,23 @@ export function buildMainEntrypointPaths(entrypoints: EntrypointRef[]): Set<stri
     entrypoints
       .filter((entrypoint) => entrypoint.kind === "runtime" || entrypoint.kind === "library")
       .filter((entrypoint) => ProjectPolicy.isPrimaryEntrypoint(entrypoint.path))
-      .map((entrypoint) => entrypoint.path)
+      .map((entrypoint) => entrypoint.path),
   );
 }
 
 export function buildOrphanModules(
   modules: ModuleRef[],
   inboundByFile: Map<string, number>,
-  mainEntrypointPaths: Set<string>
+  mainEntrypointPaths: Set<string>,
 ): string[] {
   return modules
     .filter((module) => {
-      if (!ProjectPolicy.isArchitectureRelevant(module.path)) return false;
-      if (mainEntrypointPaths.has(module.path)) return false;
+      if (!ProjectPolicy.isArchitectureRelevant(module.path)) {
+        return false;
+      }
+      if (mainEntrypointPaths.has(module.path)) {
+        return false;
+      }
       return (inboundByFile.get(module.path) ?? 0) === 0;
     })
     .map((module) => module.path);
@@ -145,7 +149,7 @@ export function buildDependencyHotspots(
   modules: ModuleRef[],
   exportsByFile: Map<string, number>,
   inboundByFile: Map<string, number>,
-  graph: Map<string, Set<string>>
+  graph: Map<string, Set<string>>,
 ): DependencyNodeMetric[] {
   const mapped = modules
     .filter((module) => ProjectPolicy.isArchitectureRelevant(module.path))
@@ -156,7 +160,7 @@ export function buildDependencyHotspots(
       path: module.path,
     }));
 
-  return mapped.toSorted((left, right) => {
+  return mapped.sort((left, right) => {
     const leftScore =
       left.inbound * ARCHITECTURE_WEIGHTS.inboundMultiplier +
       left.outbound * ARCHITECTURE_WEIGHTS.outboundMultiplier +
@@ -173,7 +177,7 @@ export function buildHotspotSignals(
   modules: ModuleRef[],
   complexityByFile: Map<string, number>,
   inboundByFile: Map<string, number>,
-  graph: Map<string, Set<string>>
+  graph: Map<string, Set<string>>,
 ) {
   const mapped = modules
     .filter((module) => ProjectPolicy.isArchitectureRelevant(module.path))
@@ -201,7 +205,7 @@ export function buildHotspotSignals(
       };
     });
 
-  return mapped.toSorted((left, right) => right.score - left.score);
+  return mapped.sort((left, right) => right.score - left.score);
 }
 
 export function buildFileCategoryBreakdown(modules: ModuleRef[]): FileCategoryBreakdownItem[] {
@@ -219,5 +223,5 @@ export function buildFileCategoryBreakdown(modules: ModuleRef[]): FileCategoryBr
 export function dedupeConfigs(configs: ConfigRef[]): ConfigRef[] {
   const uniqueConfigs = uniqBy(configs, (config) => `${config.path}::${config.kind}`);
 
-  return uniqueConfigs.toSorted((left, right) => left.path.localeCompare(right.path));
+  return uniqueConfigs.sort((left, right) => left.path.localeCompare(right.path));
 }

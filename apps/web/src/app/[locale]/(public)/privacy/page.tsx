@@ -34,7 +34,7 @@ function PrivacyListItem({ descKey, name }: Readonly<Props>) {
 }
 
 const richStyles = {
-  important: (chunks: ReactNode) => <span className="text-destructive font-medium">{chunks}</span>,
+  important: (chunks: ReactNode) => <span className="font-medium text-destructive">{chunks}</span>,
   strong: (chunks: ReactNode) => <span className={STRONG_TEXT}>{chunks}</span>,
   u: (chunks: ReactNode) => <u>{chunks}</u>,
 };
@@ -46,17 +46,17 @@ export default async function PrivacyPage() {
   const tsRich = (key: string) => t.rich(key, richStyles);
 
   return (
-    <div className="animate-fade-in container mx-auto max-w-3xl px-4 py-12 pt-24">
+    <div className="container mx-auto max-w-3xl animate-fade-in px-4 py-12 pt-24">
       <BackOrLinkButton
-        showIcon
-        label={tCommon("back")}
-        variant="link"
         className="mb-4 cursor-pointer"
+        label={tCommon("back")}
+        showIcon
+        variant="link"
       />
 
-      <div className="border-b-foreground mb-12 border-b py-6">
-        <h1 className="text-foreground mb-4 text-4xl font-bold md:text-5xl">{t("title")}</h1>
-        <div className="text-text-secondary flex items-center gap-2 text-sm">
+      <div className="mb-12 border-b border-b-foreground py-6">
+        <h1 className="mb-4 font-bold text-4xl text-foreground md:text-5xl">{t("title")}</h1>
+        <div className="flex items-center gap-2 text-sm text-text-secondary">
           <span>{t("effective_date")}</span>
         </div>
       </div>
@@ -91,14 +91,14 @@ export default async function PrivacyPage() {
         <section>
           <h2 className={SECTION_TITLE}>{t("section_third_party_title")}</h2>
           <p className="mb-3">{t("section_third_party_desc")}</p>
-          <div className="bg-muted rounded-xl border p-4">
+          <div className="rounded-xl border bg-muted p-4">
             <ul className="grid gap-3 sm:grid-cols-2">
               {BRANDS.map((item) => (
-                <PrivacyListItem key={item.descKey} name={item.name} descKey={t(item.descKey)} />
+                <PrivacyListItem descKey={t(item.descKey)} key={item.descKey} name={item.name} />
               ))}
             </ul>
           </div>
-          <p className="text-muted-foreground mt-4 text-sm italic">
+          <p className="mt-4 text-muted-foreground text-sm italic">
             {t("section_third_party_footer")}
           </p>
         </section>
@@ -113,8 +113,8 @@ export default async function PrivacyPage() {
           <p>{t("section_contact_desc")}</p>
           <div className="mt-4">
             <a
-              href="mailto:legal@doxynix.space?subject=Privacy Policy Question"
               className="hover:no-underline"
+              href="mailto:legal@doxynix.space?subject=Privacy Policy Question"
             >
               legal@doxynix.space
             </a>

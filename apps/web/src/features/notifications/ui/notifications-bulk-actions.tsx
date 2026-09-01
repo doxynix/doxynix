@@ -41,28 +41,28 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
       { ...filters, search: debouncedSearch },
       {
         onSuccess: () => setOpen(false),
-      }
+      },
     );
   };
 
   return (
     <div className="ml-auto flex items-center gap-2">
       <LoadingButton
+        className="flex cursor-pointer"
         disabled={isMarkAllDisabled}
         isLoading={markAllAsRead.isPending}
         loadingText="Processing..."
-        variant="outline"
         onClick={() => markAllAsRead.mutate({ ...filters, search: debouncedSearch })}
-        className="flex cursor-pointer"
+        variant="outline"
       >
         <CheckCheck /> Mark all as read
       </LoadingButton>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog onOpenChange={setOpen} open={open}>
         <DialogTrigger asChild>
           <AppButton
+            className="flex cursor-pointer"
             disabled={isDeleteReadDisabled}
             variant="destructive"
-            className="flex cursor-pointer"
           >
             <Trash2 /> Delete all read
           </AppButton>
@@ -70,8 +70,8 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
         <DialogContent>
           <DialogHeader className="gap-2 sm:gap-0">
             <div className="flex items-center gap-4">
-              <div className="bg-destructive/15 flex size-10 shrink-0 items-center justify-center rounded-full">
-                <AlertTriangle className="text-destructive size-5" />
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-destructive/15">
+                <AlertTriangle className="size-5 text-destructive" />
               </div>
               <div className="flex flex-col gap-1 overflow-hidden">
                 <DialogTitle>Delete all read notifications?</DialogTitle>
@@ -83,16 +83,16 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
-              <AppButton variant="outline" className="cursor-pointer">
+              <AppButton className="cursor-pointer" variant="outline">
                 Cancel
               </AppButton>
             </DialogClose>
             <LoadingButton
+              className="cursor-pointer"
               isLoading={deleteRead.isPending}
               loadingText="Deleting..."
-              variant="destructive"
               onClick={handleDelete}
-              className="cursor-pointer"
+              variant="destructive"
             >
               Yes, delete
             </LoadingButton>

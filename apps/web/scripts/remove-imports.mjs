@@ -11,7 +11,9 @@ console.log(`☢️  NUCLEAR WIPE: Removing ALL imports from ${sourceFiles.lengt
 for (const sourceFile of sourceFiles) {
   const imports = sourceFile.getImportDeclarations();
 
-  if (imports.length === 0) continue;
+  if (imports.length === 0) {
+    continue;
+  }
 
   imports.forEach((imp) => imp.remove());
 
@@ -29,6 +31,6 @@ for (const sourceFile of sourceFiles) {
 
 console.log("\n🚀 WIPE COMPLETE.");
 console.log(
-  "⚠️  IMPORTANT: Some ambiguous imports (like 'Config' or 'User') might need manual selection."
+  "⚠️  IMPORTANT: Some ambiguous imports (like 'Config' or 'User') might need manual selection.",
 );
 console.log("👉 Run 'bun type-check' now.");

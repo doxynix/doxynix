@@ -9,8 +9,8 @@ import {
 } from "../engine/core/ai-result-normalize";
 import type { AIResult } from "../engine/core/analysis-result.schemas";
 import {
-  collectArchitectPreferredPaths,
   type buildArchitectDigest,
+  collectArchitectPreferredPaths,
 } from "../logic/architect-digest";
 import { buildStageContextPack } from "../logic/context-manager";
 import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
@@ -26,7 +26,7 @@ export async function executeArchitectPhase(
   language: string,
   repoId: string,
   userId: number,
-  branch: string
+  branch: string,
 ): Promise<AIResult> {
   taskLogger.info("Architect: Building final intelligence report...");
 
@@ -40,7 +40,7 @@ export async function executeArchitectPhase(
   ]);
 
   taskLogger.info(
-    `Architect: Context assembled (${architectContext.debug.selectedTokens} tokens). Starting reasoning...`
+    `Architect: Context assembled (${architectContext.debug.selectedTokens} tokens). Starting reasoning...`,
   );
 
   try {
@@ -56,7 +56,7 @@ export async function executeArchitectPhase(
         JSON.stringify(documentationDigest),
         architectContext.context,
         instructions ?? "Focus on critical business logic and security.",
-        sentinelStatus
+        sentinelStatus,
       ),
       providerOptions: { google: { safetySettings: SAFETY_SETTINGS } },
       system: buildAnalysisSystemPrompt(language),

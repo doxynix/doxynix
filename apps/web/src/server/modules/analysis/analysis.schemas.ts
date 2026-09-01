@@ -6,20 +6,20 @@ const FileActionConfidenceSchema = z.enum(["high", "medium", "low"]);
 
 export const QuickFileAuditSchema = z.object({
   confidence: FileActionConfidenceSchema.describe(
-    'Strictly evaluate the analysis confidence. Choose exactly "high", "medium", or "low".'
+    'Strictly evaluate the analysis confidence. Choose exactly "high", "medium", or "low".',
   ),
   issues: z
     .array(
       z
         .string()
         .describe(
-          "Technical risk, bug, or anti-pattern. Keep identifiers and variable tokens in pure English."
-        )
+          "Technical risk, bug, or anti-pattern. Keep identifiers and variable tokens in pure English.",
+        ),
     )
     .max(5),
   strengths: z
     .array(
-      z.string().describe("Positive architectural pattern or good practice found in the code.")
+      z.string().describe("Positive architectural pattern or good practice found in the code."),
     )
     .max(5),
   suggestions: z
@@ -29,7 +29,7 @@ export const QuickFileAuditSchema = z.object({
     .string()
     .min(1)
     .describe(
-      "A high-density technical summary paragraph detailing the final conclusion of the audit."
+      "A high-density technical summary paragraph detailing the final conclusion of the audit.",
     ),
 });
 
@@ -42,14 +42,14 @@ export const CodeDocEditSchema = z.object({
       "CRITICAL: The exact same block of code from 'search', but with newly injected inline KDoc/JSDoc/docstring comments added. " +
         "The original code logic, variable names, functions, imports, and active code statements inside this block " +
         "MUST remain 100% identical, character-for-character, to the original code in 'search'. " +
-        "Under NO circumstances are you allowed to refactor, simplify, optimize, or rewrite the code implementation!"
+        "Under NO circumstances are you allowed to refactor, simplify, optimize, or rewrite the code implementation!",
     ),
   search: z
     .string()
     .trim()
     .min(1)
     .describe(
-      "The exact contiguous block of code from the original file to search for (usually the class, method, or function signature)."
+      "The exact contiguous block of code from the original file to search for (usually the class, method, or function signature).",
     ),
 });
 
@@ -179,7 +179,7 @@ export const PrAiReviewFindingSchema = z.object({
     .string()
     .optional()
     .describe(
-      "CRITICAL: Must contain ONLY the direct, compilable, raw replacement code to fix the issue. Absolute NO conversational text, NO explanations, and NO markdown code block fences (do NOT use backticks). This code must be ready to replace the code at the given 'line' directly. If a direct code-level fix is not applicable, omit this field."
+      "CRITICAL: Must contain ONLY the direct, compilable, raw replacement code to fix the issue. Absolute NO conversational text, NO explanations, and NO markdown code block fences (do NOT use backticks). This code must be ready to replace the code at the given 'line' directly. If a direct code-level fix is not applicable, omit this field.",
     ),
   title: z.string().describe("Short descriptive title of the finding"),
   type: z
@@ -194,6 +194,6 @@ export const PrAiReviewOutputSchema = z.object({
   summary: z
     .string()
     .describe(
-      "A high-density, professional technical Markdown description/body for the GitHub Pull Request (including overview, impact, and logical changes)"
+      "A high-density, professional technical Markdown description/body for the GitHub Pull Request (including overview, impact, and logical changes)",
     ),
 });

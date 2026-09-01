@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn } from "node:child_process";
 
 const [, , mutatePath, testPath] = process.argv;
 
@@ -6,7 +6,7 @@ if (!mutatePath || !testPath) {
   console.error("\x1b[31m%s\x1b[0m", "Ошибка: Не указаны пути к файлам!");
   console.log("Использование: bun test:mutate-single <путь-к-файлу-кода> <путь-к-файлу-теста>");
   console.log(
-    "Пример:        bun test:mutate-single src/app/api/proxy/route.ts src/tests/unit/proxy-route.test.ts"
+    "Пример:        bun test:mutate-single src/app/api/proxy/route.ts src/tests/unit/proxy-route.test.ts",
   );
   process.exit(1);
 }
@@ -17,8 +17,8 @@ const isWindows = process.platform === "win32";
 const command = isWindows ? "stryker.cmd" : "stryker";
 
 const strykerProcess = spawn(command, args, {
-  stdio: "inherit",
   shell: false,
+  stdio: "inherit",
 });
 
 strykerProcess.on("error", (err) => {

@@ -72,29 +72,29 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <AppButton size="icon" className="flex cursor-pointer items-center gap-3">
+        <AppButton className="flex cursor-pointer items-center gap-3" size="icon">
           <AppAvatar
             alt={user?.name ?? "User"}
-            src={avatar}
-            fallbackText={user?.name ?? user?.email ?? undefined}
-            priority={true}
             className="size-9 border-0"
             fallbackClassName="text-xs"
+            fallbackText={user?.name ?? user?.email ?? undefined}
+            priority={true}
+            src={avatar}
           />
         </AppButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col gap-1">
-            <p className="truncate text-sm font-medium">{name}</p>
-            <p className="text-muted-foreground truncate text-xs">{email}</p>
+            <p className="truncate font-medium text-sm">{name}</p>
+            <p className="truncate text-muted-foreground text-xs">{email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           {userNavMenu.map((item) => (
-            <DropdownMenuItem key={item.href} asChild className="group">
-              <Link href={item.href as Route} className="flex items-center">
+            <DropdownMenuItem asChild className="group" key={item.href}>
+              <Link className="flex items-center" href={item.href as Route}>
                 {item.icon != null && <item.icon />}
                 <span>{item.label}</span>
                 {item.shortcut != null && (
@@ -111,8 +111,8 @@ export function UserNav() {
         <Dialog>
           <DialogTrigger asChild>
             <DropdownMenuItem
-              onSelect={(e) => e.preventDefault()}
               className="text-destructive focus:bg-destructive/20 focus:text-destructive"
+              onSelect={(e) => e.preventDefault()}
             >
               <LogOut className="text-destructive" />
               {t("logout")}
@@ -127,17 +127,17 @@ export function UserNav() {
             <div className="flex flex-col gap-4">
               <div className="flex justify-end gap-2">
                 <DialogClose asChild>
-                  <AppButton disabled={loading} variant="outline" className="cursor-pointer">
+                  <AppButton className="cursor-pointer" disabled={loading} variant="outline">
                     {tCommon("cancel")}
                   </AppButton>
                 </DialogClose>
                 <LoadingButton
+                  className="cursor-pointer"
                   disabled={loading}
                   isLoading={loading}
                   loadingText="Logout..."
-                  variant="destructive"
                   onClick={() => void handleSignOut()}
-                  className="cursor-pointer"
+                  variant="destructive"
                 >
                   {t("logout")}
                 </LoadingButton>

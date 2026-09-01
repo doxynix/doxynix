@@ -23,15 +23,15 @@ type TabsContentItemProps = {
 function TabsTriggerItem({ icon: Icon, subTitle, title, value }: Readonly<TabsTriggerItemProps>) {
   return (
     <TabsTrigger
+      className="flex items-center justify-start gap-3 rounded-xl px-4 py-4 text-left transition-standard data-[state=active]:bg-landing-bg-light"
       value={value}
-      className="transition-standard data-[state=active]:bg-landing-bg-light flex items-center justify-start gap-3 rounded-xl px-4 py-4 text-left"
     >
-      <div className="transition-standard text-muted-foreground bg-landing-bg-light flex size-10 shrink-0 items-center justify-center rounded-xl">
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-landing-bg-light text-muted-foreground transition-standard">
         {Icon && <Icon />}
       </div>
       <div>
-        <p className="text-foreground font-semibold">{title}</p>
-        <p className="text-muted-foreground mt-1 text-xs">{subTitle}</p>
+        <p className="font-semibold text-foreground">{title}</p>
+        <p className="mt-1 text-muted-foreground text-xs">{subTitle}</p>
       </div>
     </TabsTrigger>
   );
@@ -40,10 +40,10 @@ function TabsTriggerItem({ icon: Icon, subTitle, title, value }: Readonly<TabsTr
 function TabsContentItem({ code, html, title, value }: Readonly<TabsContentItemProps>) {
   return (
     <TabsContent
+      className="fade-in slide-in-from-right-4 mt-0 animate-in duration-300"
       value={value}
-      className="animate-in fade-in slide-in-from-right-4 mt-0 duration-300"
     >
-      <CodeWindow code={code} codeHtml={html} title={title} codeClassName="text-sm sm:text-base" />
+      <CodeWindow code={code} codeClassName="text-sm sm:text-base" codeHtml={html} title={title} />
     </TabsContent>
   );
 }
@@ -100,14 +100,14 @@ export async function DocModesSection() {
   return (
     <section className="container mx-auto px-4 py-24">
       <div className="mb-16 text-center">
-        <h2 className="text-3xl font-bold md:text-5xl">
+        <h2 className="font-bold text-3xl md:text-5xl">
           {t("section_docs_title_prefix")}{" "}
           <span className="text-muted-foreground">{t("section_docs_title_highlight")}</span>
         </h2>
-        <p className="text-muted-foreground mt-4 text-lg">{t("section_docs_desc")}</p>
+        <p className="mt-4 text-lg text-muted-foreground">{t("section_docs_desc")}</p>
       </div>
 
-      <Tabs defaultValue="readme" className="mx-auto flex min-h-140 items-center gap-8">
+      <Tabs className="mx-auto flex min-h-140 items-center gap-8" defaultValue="readme">
         <TabsList className="flex h-auto flex-wrap items-center justify-start gap-2 bg-transparent">
           {DOCS.map((item) => (
             <TabsTriggerItem key={item.title} {...item} />

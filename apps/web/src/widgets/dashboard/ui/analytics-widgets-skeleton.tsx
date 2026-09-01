@@ -12,7 +12,7 @@ export function LanguagesSkeleton() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base font-semibold">
+        <CardTitle className="flex items-center gap-2 font-semibold text-base">
           <FileCode2 className="text-muted-foreground" />
           {t("languages_distribution")}
         </CardTitle>
@@ -20,7 +20,7 @@ export function LanguagesSkeleton() {
       <CardContent>
         <div className="flex flex-col gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1" key={i}>
               <div className="flex justify-between text-xs">
                 <Skeleton className="h-3 w-12" />
                 <Skeleton className="h-3 w-20" />
@@ -46,8 +46,8 @@ export function HealthExtremesSkeleton() {
       <CardContent className="flex flex-col gap-2">
         {Array.from({ length: 2 }).map((_, i) => (
           <div
+            className="flex items-center justify-between rounded-xl border border-border p-2"
             key={i}
-            className="border-border flex items-center justify-between rounded-xl border p-2"
           >
             <div className="flex items-center gap-2">
               <Skeleton className="size-4 rounded-full" />
@@ -75,9 +75,9 @@ export function EcosystemStatusSkeleton() {
       </CardHeader>
       <CardContent className="flex items-center justify-center pt-4">
         <div className="relative flex size-75 items-center justify-center">
-          <div className="border-accent/20 absolute size-full rounded-full border border-dashed" />
-          <div className="border-accent/20 absolute size-2/3 rounded-full border border-dashed" />
-          <div className="border-accent/20 absolute size-1/3 rounded-full border border-dashed" />
+          <div className="absolute size-full rounded-full border border-accent/20 border-dashed" />
+          <div className="absolute size-2/3 rounded-full border border-accent/20 border-dashed" />
+          <div className="absolute size-1/3 rounded-full border border-accent/20 border-dashed" />
           <Skeleton className="size-40 rounded-full" />
         </div>
       </CardContent>
@@ -96,7 +96,7 @@ export function RefactoringTargetsSkeleton() {
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-6 pt-4 md:grid-cols-2">
         {Array.from({ length: 2 }).map((_, idx) => (
-          <div key={idx} className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3" key={idx}>
             <div className="flex items-center gap-2">
               <Skeleton className="size-4" />
               <Skeleton className="h-4 w-32" />
@@ -104,8 +104,8 @@ export function RefactoringTargetsSkeleton() {
             <div className="flex flex-col gap-2">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
+                  className="flex items-center justify-between rounded-xl border border-border p-2"
                   key={i}
-                  className="border-border flex items-center justify-between rounded-xl border p-2"
                 >
                   <Skeleton className="h-3 w-40" />
                   <Skeleton className="h-4 w-10 rounded-md" />
@@ -125,7 +125,7 @@ export function RecentActivitySkeleton() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base font-semibold">
+        <CardTitle className="flex items-center gap-2 font-semibold text-base">
           <Clock className="text-muted-foreground" />
           {t("recent_activity")}
         </CardTitle>
@@ -134,8 +134,8 @@ export function RecentActivitySkeleton() {
         <div className="flex flex-col gap-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
-              key={i}
               className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
+              key={i}
             >
               <div className="flex flex-1 items-center gap-3">
                 <Skeleton className="size-5 rounded-full" />
@@ -170,9 +170,9 @@ export function TrendsWidgetsSkeleton() {
         <div className="relative h-75 w-full">
           <div className="absolute inset-0 flex flex-col justify-between py-2">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4">
+              <div className="flex items-center gap-4" key={i}>
                 <Skeleton className="h-3 w-8" />
-                <div className="bg-border h-px flex-1" />
+                <div className="h-px flex-1 bg-border" />
               </div>
             ))}
           </div>
@@ -189,7 +189,7 @@ export function SystemRisksSkeleton() {
   return (
     <Card className="border-destructive/20">
       <CardHeader className="pb-2">
-        <CardTitle className="text-destructive/50 flex items-center gap-2 text-sm">
+        <CardTitle className="flex items-center gap-2 text-destructive/50 text-sm">
           <AlertTriangle />
           Global Risks
         </CardTitle>

@@ -31,7 +31,7 @@ const handler = async (req: NextRequest) => {
         : undefined,
       req,
       router: appRouter,
-    })
+    }),
   );
 };
 

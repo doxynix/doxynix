@@ -79,7 +79,7 @@ export const projectMapSchema = z.object({
         consequences: z.string(),
         decision: z.string(),
         rationale: z.string(),
-      })
+      }),
     )
     .optional(),
   language_breakdown: z
@@ -106,7 +106,7 @@ export const projectMapSchema = z.object({
       publicExports: z.array(z.string()).optional(),
       responsibility: z.string(),
       type: z.string(),
-    })
+    }),
   ),
   overview: z.string(),
 });
@@ -155,7 +155,7 @@ export const aiSchema = z.object({
           logic_complexity: z.enum(["LOW", "MEDIUM", "HIGH"]),
           name: z.string(),
           responsibility: z.string(),
-        })
+        }),
       ),
     })
     .optional(),
@@ -191,7 +191,7 @@ export const aiSchema = z.object({
         issue_category: z.string().optional(),
         original_code: z.string().optional(),
         priority: z.enum(["HIGH", "MEDIUM", "LOW"]),
-      })
+      }),
     )
     .max(SCHEMA_LIMITS.maxEvidencePerFinding),
   repository_facts: z.array(repositoryFactSchema).max(SCHEMA_LIMITS.maxRepositoryFacts).optional(),
@@ -212,7 +212,7 @@ export const aiSchema = z.object({
           issue: z.string(),
           location: z.string(),
           optimization_strategy: z.string(),
-        })
+        }),
       )
       .optional(),
     security_audit: z.object({
@@ -226,7 +226,7 @@ export const aiSchema = z.object({
           description: z.string(),
           remediation_effort: z.enum(["LOW", "MEDIUM", "HIGH"]),
           type: z.enum(["CODE_SMELL", "ARCHITECTURAL_ISSUE", "DOCUMENTATION_GAP"]),
-        })
+        }),
       )
       .optional(),
   }),
@@ -241,7 +241,7 @@ export const aiSchema = z.object({
         lineHint: z.string().optional(),
         risk: RiskLevel,
         suggestion: z.string(),
-      })
+      }),
     )
     .optional(),
 });
