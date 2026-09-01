@@ -1,12 +1,4 @@
 {
-  "name": "doxynix",
-  "version": "4.0.9",
-  "private": true,
-  "packageManager": "bun@1.4.0",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "dependencies": {
     "oxlint-tsgolint": "7.0.2001"
   },
@@ -31,6 +23,7 @@
     "turbo": "2.10.12",
     "typescript": "7.0.2"
   },
+  "name": "doxynix",
   "overrides": {
     "@better-fetch/fetch": "^1.1.21",
     "@codemirror/state": "6.7.1",
@@ -67,9 +60,11 @@
     "vite": ">=8.0.16",
     "ws": ">=8.21.0"
   },
+  "packageManager": "bun@1.4.0",
   "patchedDependencies": {
     "tree-sitter-wasms@0.1.13": "patches/tree-sitter-wasms@0.1.13.patch"
   },
+  "private": true,
   "scripts": {
     "build": "turbo build",
     "clean:symlinks": "bun scripts/clean-symlinks.ts",
@@ -110,5 +105,10 @@
     "vue-demi",
     "zenstack",
     "nexus-prisma"
+  ],
+  "version": "4.0.9",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
   ]
 }
