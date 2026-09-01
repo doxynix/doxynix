@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.0.10](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.9...doxynix-v4.0.10) (2026-09-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @ai-sdk/groq to v3.0.63 ([#2072](https://github.com/doxynix/doxynix/issues/2072)) ([932c4b0](https://github.com/doxynix/doxynix/commit/932c4b0e3aeda33d0b748d148dcc56a8d8815b35))
+* **deps:** update dependency svix to v2 ([#2007](https://github.com/doxynix/doxynix/issues/2007)) ([3635e59](https://github.com/doxynix/doxynix/commit/3635e59b9f16114fd04b8187aebe3a7609e45f9e))
+
 ## [4.0.9](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.8...doxynix-v4.0.9) (2026-08-30)
 
 
