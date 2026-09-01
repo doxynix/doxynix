@@ -60,7 +60,7 @@ function getNodeLine(sourceFile: ts.SourceFile, node: ts.Node): number {
 }
 
 function nodeName(node: ts.Node): string | undefined {
-  const namedNode = "name" in node ? (node as ts.Node & { name?: ts.Node }) : undefined;
+  const namedNode = "name" in node ? (node as { name?: ts.Node }) : undefined;
   return namedNode?.name != null && ts.isIdentifier(namedNode.name)
     ? namedNode.name.text
     : undefined;
