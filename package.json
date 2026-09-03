@@ -15,7 +15,7 @@
     "@secretlint/secretlint-rule-preset-recommend": "13.0.5",
     "@types/node": "26.1.2",
     "cspell": "10.1.1",
-    "jscpd": "4.3.0",
+    "jscpd": "5.1.1",
     "knip": "6.32.3",
     "lefthook": "2.1.12",
     "oxlint": "1.80.0",
