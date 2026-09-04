@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.11](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.10...doxynix-v4.0.11) (2026-09-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @octokit/types to v18 ([#2090](https://github.com/doxynix/doxynix/issues/2090)) ([1fa550d](https://github.com/doxynix/doxynix/commit/1fa550dcf3f0b1a0dd4d2989be05d6b4724a7042))
+
 ## [4.0.10](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.9...doxynix-v4.0.10) (2026-09-01)
 
 

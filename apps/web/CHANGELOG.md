@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.9](https://github.com/doxynix/doxynix/compare/web-v3.0.8...web-v3.0.9) (2026-09-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @octokit/types to v18 ([#2090](https://github.com/doxynix/doxynix/issues/2090)) ([1fa550d](https://github.com/doxynix/doxynix/commit/1fa550dcf3f0b1a0dd4d2989be05d6b4724a7042))
+
 ## [3.0.8](https://github.com/doxynix/doxynix/compare/web-v3.0.7...web-v3.0.8) (2026-09-01)
 
 
