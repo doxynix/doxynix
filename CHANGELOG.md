@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.12](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.11...doxynix-v4.0.12) (2026-09-04)
+
+
+### Bug Fixes
+
+* **deps:** update linters & dev tools (major) ([#2091](https://github.com/doxynix/doxynix/issues/2091)) ([fb815b3](https://github.com/doxynix/doxynix/commit/fb815b318de82210d7daff6b759c9a1be27e0be8))
+
 ## [4.0.11](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.10...doxynix-v4.0.11) (2026-09-04)
 
 
