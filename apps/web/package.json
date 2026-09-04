@@ -322,5 +322,5 @@
     "validate": "biome check . && oxlint",
     "with-doppler": "bun scripts/doppler.mjs"
   },
-  "version": "3.0.8"
+  "version": "3.0.9"
 }
