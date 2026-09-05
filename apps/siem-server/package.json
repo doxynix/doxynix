@@ -51,5 +51,5 @@
     "with-doppler": "bun scripts/doppler.ts"
   },
   "types": "src/index.ts",
-  "version": "0.1.1"
+  "version": "0.2.0"
 }

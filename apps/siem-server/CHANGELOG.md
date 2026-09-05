@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.0](https://github.com/doxynix/doxynix/compare/siem-server-v0.1.1...siem-server-v0.2.0) (2026-09-05)
+
+
+### Features
+
+* **cli:** add analytics, audit, docs, pr, staging commands (DXNX-213) ([#2098](https://github.com/doxynix/doxynix/issues/2098)) ([6675cdd](https://github.com/doxynix/doxynix/commit/6675cddac1e384ed3268db87d0e57c8fcc3a21fc))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @doxynix/shared bumped to 0.2.0
+  * devDependencies
+    * @doxynix/config bumped to 1.1.0
+
 ## [0.1.1](https://github.com/doxynix/doxynix/compare/siem-server-v0.1.0...siem-server-v0.1.1) (2026-08-27)
 
 ### Bug Fixes
