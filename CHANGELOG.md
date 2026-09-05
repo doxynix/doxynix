@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.12...doxynix-v4.1.0) (2026-09-05)
+
+
+### Features
+
+* **root:** configure universal agent skills and rules (DXNX-212) ([#2095](https://github.com/doxynix/doxynix/issues/2095)) ([397ed38](https://github.com/doxynix/doxynix/commit/397ed3837544eee28a943c844014f9afff2bb6ae))
+
 ## [4.0.12](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.11...doxynix-v4.0.12) (2026-09-04)
 
 

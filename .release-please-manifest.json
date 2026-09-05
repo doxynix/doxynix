@@ -1,5 +1,5 @@
 {
-  ".": "4.0.12",
+  ".": "4.1.0",
   "apps/siem-client": "0.1.4",
   "apps/siem-server": "0.1.1",
   "apps/web": "3.0.10",
