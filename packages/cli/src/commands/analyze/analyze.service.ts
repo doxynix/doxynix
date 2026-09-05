@@ -1,20 +1,11 @@
 import { trpc } from "@/core/client";
 
-export interface UpdateRepoConfigInput {
-  repoId: string;
-  enabled?: boolean;
-  ciSkip?: boolean;
-  commentStyle?: string;
-  focusAreas?: string[];
-  tokenBudget?: number;
-}
-
 export const analyzeService = {
-  async configureRepository(input: UpdateRepoConfigInput) {
-    return trpc.analysis.configureRepository.mutate(input as any);
+  async configureRepository(input: any) {
+    return trpc.analysis.configureRepository.mutate(input);
   },
 
-  async getFileActionResult(path: string) {
+  async getFileActionResult(repoId: string, path: string) {
     return trpc.analysis.getFileActionResult.query({
       action: "quick-file-audit",
       path,
@@ -24,6 +15,7 @@ export const analyzeService = {
   async getRepoConfig(repoId: string) {
     return trpc.analysis.getRepoConfig.query({ repoId });
   },
+
   async quickFileAudit(input: {
     repoId: string;
     path: string;

@@ -5,61 +5,13 @@ import path from "node:path";
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
-import { trpc } from "@/core/client";
 import { handleCliError } from "@/core/errors";
+import { resolveRepository } from "@/core/repo";
 
 import { brand, pc } from "@/ui/colors";
 
 import { renderDocsListTable } from "./docs.formatter";
 import { type DocType, docsService } from "./docs.service";
-
-/**
- * Вспомогательная функция для интерактивного получения репозитория
- */
-async function resolveRepository(target?: string) {
-  let repoTarget = target;
-
-  if (!repoTarget) {
-    const res = await trpc.repo.getAll.query({
-      limit: 50,
-      sortBy: "createdAt",
-      sortOrder: "desc",
-    });
-
-    if (res.items.length === 0) {
-      p.outro(brand.muted("No connected repositories found."));
-      return null;
-    }
-
-    const selection = await p.select({
-      message: "Select repository to access documentation:",
-      options: res.items.map((r) => ({
-        label: `${r.owner}/${r.name} (${r.language ?? "Other"})`,
-        value: `${r.owner}/${r.name}`,
-      })),
-    });
-
-    if (p.isCancel(selection) || typeof selection !== "string") {
-      p.cancel("Cancelled.");
-      return null;
-    }
-    repoTarget = selection;
-  }
-
-  const [owner, name] = repoTarget.split("/");
-  if (!owner || !name) {
-    p.outro(brand.error("Format must be: owner/name (e.g. facebook/react)"));
-    return null;
-  }
-
-  const repo = await trpc.repo.getByName.query({ name, owner });
-  if (!repo) {
-    p.outro(brand.error(`Repository ${repoTarget} was not found.`));
-    return null;
-  }
-
-  return { name, owner, repo, target: repoTarget };
-}
 
 export function getCurrentGitBranch(): string {
   try {
@@ -81,7 +33,7 @@ export function registerDocsCommand(program: Command) {
       "Inspect, view, and generate AI repository documentation (README, Architecture, Code)",
     );
 
-  // 1. dxnx docs list [target] (isDefault)
+  // 1. dxnx docs list [target]
   docs
     .command("list [target]", { isDefault: true })
     .description("List all generated documentation artifacts for a repository")
@@ -89,7 +41,10 @@ export function registerDocsCommand(program: Command) {
     .option("--json", "Output response in JSON format")
     .action(async (target?: string, options?: { aid?: string; json?: boolean }) => {
       try {
-        const repoContext = await resolveRepository(target);
+        const repoContext = await resolveRepository(
+          target,
+          "Select repository to access documentation:",
+        );
         if (!repoContext) {
           return;
         }
@@ -146,7 +101,7 @@ export function registerDocsCommand(program: Command) {
     .action(
       async (
         target?: string,
-        options?: { type?: string; path?: string; aid?: string; output?: string },
+        options?: { aid?: string; output?: string; path?: string; type?: string },
       ) => {
         try {
           const repoContext = await resolveRepository(target);
@@ -154,7 +109,19 @@ export function registerDocsCommand(program: Command) {
             return;
           }
 
-          let docType = options?.type?.toUpperCase() as DocType | undefined;
+          const DOC_TYPES: DocType[] = ["README", "ARCHITECTURE", "CODE_DOC"];
+          let docType: DocType | undefined;
+
+          if (options?.type) {
+            const rawType = options.type.toUpperCase();
+            if (!DOC_TYPES.includes(rawType as DocType)) {
+              p.outro(
+                brand.error(`Unknown --type '${options.type}'. Use: ${DOC_TYPES.join(", ")}`),
+              );
+              return;
+            }
+            docType = rawType as DocType;
+          }
 
           if (!docType) {
             const typeChoice = await p.select({
@@ -213,7 +180,6 @@ export function registerDocsCommand(program: Command) {
             return;
           }
 
-          // Если передан флаг --output, сохраняем в файл на диске
           if (options?.output) {
             const outPath = path.resolve(process.cwd(), options.output);
             fs.mkdirSync(path.dirname(outPath), { recursive: true });
@@ -226,7 +192,7 @@ export function registerDocsCommand(program: Command) {
             `\n${brand.info(`=== [${docType}] ${repoContext.target}${filePath ? ` - ${filePath}` : ""} ===`)}\n`,
           );
           console.log(content);
-          console.log(`\n${brand.info(`=== End of document ===`)}\n`);
+          console.log(`\n${brand.info("=== End of document ===")}\n`);
         } catch (error) {
           handleCliError(error);
         }
@@ -237,17 +203,15 @@ export function registerDocsCommand(program: Command) {
   docs
     .command("generate <filePath>")
     .alias("file")
-    .description(
-      "Generate AI documentation for a specific file (e.g. dxnx docs generate src/auth.ts -r owner/repo)",
-    )
+    .description("Generate AI documentation for a specific file")
     .option("-r, --repo <target>", "Target repository (owner/name)")
-    .option("-b, --branch <branch>", "Git branch name (default: auto-detected or main)")
+    .option("-b, --branch <branch>", "Git branch name")
     .option("-l, --language <lang>", "Documentation language", "English")
     .option("-o, --output <file>", "Save generated markdown to file")
     .action(
       async (
         filePath: string,
-        options: { repo?: string; branch?: string; language?: string; output?: string },
+        options: { branch?: string; language?: string; output?: string; repo?: string },
       ) => {
         try {
           p.intro(brand.logo(" ✍️ Generate Code Documentation "));
@@ -257,7 +221,6 @@ export function registerDocsCommand(program: Command) {
             return;
           }
 
-          // Ищем локальный файл на диске
           const localPath = path.resolve(process.cwd(), filePath);
           let fileContent = "";
 
@@ -310,7 +273,7 @@ export function registerDocsCommand(program: Command) {
 
           console.log(`\n${brand.info(`=== Documentation: ${filePath} ===`)}\n`);
           console.log(markdown);
-          console.log(`\n${brand.info(`=== End ===`)}\n`);
+          console.log(`\n${brand.info("=== End ===")}\n`);
 
           p.outro(brand.success("Documentation ready!"));
         } catch (error) {
@@ -354,6 +317,7 @@ export function registerDocsCommand(program: Command) {
         fs.mkdirSync(baseDir, { recursive: true });
 
         let exportedCount = 0;
+        const failed: string[] = [];
 
         for (const doc of items) {
           const type: DocType = doc.type ?? doc.docType ?? "README";
@@ -376,13 +340,24 @@ export function registerDocsCommand(program: Command) {
               fs.mkdirSync(path.dirname(fullFilePath), { recursive: true });
               fs.writeFileSync(fullFilePath, content, "utf-8");
               exportedCount++;
+            } else {
+              failed.push(`${type}${doc.path ? ` (${doc.path})` : ""}: empty content`);
             }
-          } catch {
-            // Продолжаем экспорт остальных файлов
+          } catch (docError) {
+            failed.push(
+              `${type}${doc.path ? ` (${doc.path})` : ""}: ${
+                docError instanceof Error ? docError.message : "unknown error"
+              }`,
+            );
           }
         }
 
         s.stop("Export finished!");
+
+        if (failed.length > 0) {
+          p.log.warn(brand.warning(`Skipped ${failed.length} document(s):\n${failed.join("\n")}`));
+        }
+
         p.outro(
           brand.success(
             `✔ Successfully exported ${exportedCount} documentation files to ${brand.highlight(baseDir)}`,

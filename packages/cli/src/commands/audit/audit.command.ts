@@ -15,16 +15,29 @@ export function registerAuditCommand(program: Command) {
     .description("Inspect security, deployment, and configuration activity logs")
     .option("-l, --limit <number>", "Number of log entries to retrieve", "20")
     .option("--json", "Output log records in raw JSON format")
-    .action(async (options: { limit: string; json?: boolean }) => {
+    .action(async (options: { json?: boolean; limit: string }) => {
+      const s = p.spinner();
+      let spinnerActive = false;
       try {
-        const s = p.spinner();
-        if (!options.json) {
-          s.start("Retrieving workspace audit logs...");
+        let limit = 20;
+        if (options.limit !== undefined) {
+          const parsed = Number(options.limit);
+          if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+            p.outro(brand.error("--limit must be a positive integer"));
+            return;
+          }
+          limit = parsed;
         }
 
-        const data = await auditService.getActivityLogs(Number(options.limit) || 20);
         if (!options.json) {
+          s.start("Retrieving workspace audit logs...");
+          spinnerActive = true;
+        }
+
+        const data = await auditService.getActivityLogs(limit);
+        if (!options.json && spinnerActive) {
           s.stop("Audit logs retrieved");
+          spinnerActive = false;
         }
 
         if (options.json) {
@@ -42,6 +55,9 @@ export function registerAuditCommand(program: Command) {
         console.log("\n");
         p.outro(brand.muted(`Retrieved ${data.items.length} records.`));
       } catch (error) {
+        if (spinnerActive) {
+          s.stop();
+        }
         handleCliError(error);
       }
     });

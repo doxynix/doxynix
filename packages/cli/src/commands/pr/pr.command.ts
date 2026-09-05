@@ -1,46 +1,13 @@
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
-import { trpc } from "@/core/client";
 import { handleCliError } from "@/core/errors";
+import { resolveRepository } from "@/core/repo";
 
 import { brand, pc } from "@/ui/colors";
 
 import { renderFixesTable, renderPRListTable } from "./pr.formatter";
 import { prService } from "./pr.service";
-
-async function resolveRepo(target?: string) {
-  let repoTarget = target;
-  if (!repoTarget) {
-    const res = await trpc.repo.getAll.query({ limit: 50, sortBy: "createdAt", sortOrder: "desc" });
-    if (res.items.length === 0) {
-      p.outro(
-        brand.muted("Connect a repository first: ") + brand.highlight("dxnx repos add <url>"),
-      );
-      return null;
-    }
-    const selection = await p.select({
-      message: "Select repository for Pull Request operations:",
-      options: res.items.map((r) => ({
-        label: `${r.owner}/${r.name}`,
-        value: `${r.owner}/${r.name}`,
-      })),
-    });
-    if (p.isCancel(selection) || typeof selection !== "string") {
-      p.cancel("Cancelled.");
-      return null;
-    }
-    repoTarget = selection;
-  }
-
-  const [owner, name] = repoTarget.split("/");
-  const repo = await trpc.repo.getByName.query({ name: name!, owner: owner! });
-  if (!repo) {
-    p.outro(brand.error(`Repository ${repoTarget} not found.`));
-    return null;
-  }
-  return { repo, target: repoTarget };
-}
 
 export function registerPrCommand(program: Command) {
   const pr = program
@@ -56,7 +23,10 @@ export function registerPrCommand(program: Command) {
     .option("--json", "Output in JSON format")
     .action(async (target?: string, options?: { json?: boolean }) => {
       try {
-        const repoContext = await resolveRepo(target);
+        const repoContext = await resolveRepository(
+          target,
+          "Select repository for Pull Request operations:",
+        );
         if (!repoContext) {
           return;
         }
@@ -99,7 +69,7 @@ export function registerPrCommand(program: Command) {
     .action(async (target?: string, options?: { branch?: string; title?: string }) => {
       try {
         p.intro(brand.logo(" 🚀 Open Pull Request "));
-        const repoContext = await resolveRepo(target);
+        const repoContext = await resolveRepository(target);
         if (!repoContext) {
           return;
         }
@@ -156,12 +126,12 @@ export function registerPrCommand(program: Command) {
     .action(async (prNumberStr: string, body: string, target?: string) => {
       try {
         const prNumber = Number(prNumberStr);
-        if (Number.isNaN(prNumber) || prNumber <= 0) {
+        if (!Number.isSafeInteger(prNumber) || prNumber <= 0) {
           p.outro(brand.error("PR number must be a valid positive integer."));
           return;
         }
 
-        const repoContext = await resolveRepo(target);
+        const repoContext = await resolveRepository(target);
         if (!repoContext) {
           return;
         }
@@ -183,7 +153,7 @@ export function registerPrCommand(program: Command) {
     .option("--json", "Output fixes in JSON format")
     .action(async (target?: string, options?: { json?: boolean }) => {
       try {
-        const repoContext = await resolveRepo(target);
+        const repoContext = await resolveRepository(target);
         if (!repoContext) {
           return;
         }

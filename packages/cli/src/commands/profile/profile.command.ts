@@ -1,4 +1,3 @@
-// packages/cli/src/commands/profile/profile.command.ts
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
@@ -91,7 +90,8 @@ export function registerProfileCommand(program: Command) {
         }
 
         if (options.json) {
-          console.log(JSON.stringify(sessions, null, 2));
+          const safeSessions = sessions.map(({ token: _token, ...sess }: any) => sess);
+          console.log(JSON.stringify(safeSessions, null, 2));
           return;
         }
 

@@ -4,46 +4,13 @@ import path from "node:path";
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
-import { trpc } from "@/core/client";
 import { handleCliError } from "@/core/errors";
+import { resolveRepository } from "@/core/repo";
 
 import { brand, pc } from "@/ui/colors";
 
 import { renderStagedFilesTable } from "./staging.formatter";
 import { stagingService } from "./staging.service";
-
-async function resolveRepo(target?: string) {
-  let repoTarget = target;
-  if (!repoTarget) {
-    const res = await trpc.repo.getAll.query({ limit: 50, sortBy: "createdAt", sortOrder: "desc" });
-    if (res.items.length === 0) {
-      p.outro(
-        brand.muted("Connect a repository first: ") + brand.highlight("dxnx repos add <url>"),
-      );
-      return null;
-    }
-    const selection = await p.select({
-      message: "Select repository staging workspace:",
-      options: res.items.map((r) => ({
-        label: `${r.owner}/${r.name}`,
-        value: `${r.owner}/${r.name}`,
-      })),
-    });
-    if (p.isCancel(selection) || typeof selection !== "string") {
-      p.cancel("Cancelled.");
-      return null;
-    }
-    repoTarget = selection;
-  }
-
-  const [owner, name] = repoTarget.split("/");
-  const repo = await trpc.repo.getByName.query({ name: name!, owner: owner! });
-  if (!repo) {
-    p.outro(brand.error(`Repository ${repoTarget} not found.`));
-    return null;
-  }
-  return { repo, target: repoTarget };
-}
 
 export function registerStagingCommand(program: Command) {
   const staging = program
@@ -58,7 +25,7 @@ export function registerStagingCommand(program: Command) {
     .option("--json", "Output staged files in raw JSON format")
     .action(async (target?: string, options?: { json?: boolean }) => {
       try {
-        const repoContext = await resolveRepo(target);
+        const repoContext = await resolveRepository(target, "Select repository staging workspace:");
         if (!repoContext) {
           return;
         }
@@ -107,7 +74,7 @@ export function registerStagingCommand(program: Command) {
     .action(async (filePath: string, options: { repo?: string }) => {
       try {
         p.intro(brand.logo(" ➕ Stage File "));
-        const repoContext = await resolveRepo(options.repo);
+        const repoContext = await resolveRepository(options.repo);
         if (!repoContext) {
           return;
         }
@@ -150,7 +117,7 @@ export function registerStagingCommand(program: Command) {
     .option("-r, --repo <target>", "Target repository (owner/name)")
     .action(async (filePath: string, options: { repo?: string }) => {
       try {
-        const repoContext = await resolveRepo(options.repo);
+        const repoContext = await resolveRepository(options.repo);
         if (!repoContext) {
           return;
         }
@@ -178,7 +145,7 @@ export function registerStagingCommand(program: Command) {
     .action(async (options: { repo?: string }) => {
       try {
         p.intro(brand.warning(" 🧹 Clear Staging Area "));
-        const repoContext = await resolveRepo(options.repo);
+        const repoContext = await resolveRepository(options.repo);
         if (!repoContext) {
           return;
         }

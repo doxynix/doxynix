@@ -3,6 +3,7 @@ import type { Command } from "commander";
 
 import { trpc } from "@/core/client";
 import { handleCliError } from "@/core/errors";
+import { parseRepoTarget } from "@/core/repo";
 
 import { brand, pc } from "@/ui/colors";
 
@@ -51,7 +52,6 @@ export function registerGithubCommand(program: Command) {
         console.log(renderGithubReposTable(repos));
         console.log("\n");
 
-        // Интерактивный импорт прямо из вывода команды
         const wantConnect = await p.confirm({
           initialValue: false,
           message: "Would you like to connect one of these repositories to Doxynix now?",
@@ -60,7 +60,7 @@ export function registerGithubCommand(program: Command) {
         if (wantConnect && !p.isCancel(wantConnect)) {
           const selection = await p.select({
             message: "Select repository to connect:",
-            options: repos.map((r) => {
+            options: repos.map((r: any) => {
               const full = r.fullName ?? `${r.owner}/${r.name}`;
               return {
                 label: full,
@@ -128,8 +128,8 @@ export function registerGithubCommand(program: Command) {
     .option("--json", "Output branches in JSON format")
     .action(async (target: string, options: { json?: boolean }) => {
       try {
-        const [owner, name] = target.split("/");
-        if (!owner || !name) {
+        const parsed = parseRepoTarget(target);
+        if (!parsed) {
           p.outro(brand.error("Format must be: owner/name (e.g. facebook/react)"));
           return;
         }
@@ -139,7 +139,7 @@ export function registerGithubCommand(program: Command) {
           s.start(`Fetching branches for ${target}...`);
         }
 
-        const branches = await githubService.getBranches(owner, name);
+        const branches = await githubService.getBranches(parsed.owner, parsed.name);
         if (!options.json) {
           s.stop("Branches loaded");
         }
@@ -171,9 +171,9 @@ export function registerGithubCommand(program: Command) {
     .option("--json", "Output file tree in JSON format")
     .action(async (target: string, branch?: string, options?: { json?: boolean }) => {
       try {
-        const [owner, name] = target.split("/");
-        if (!owner || !name) {
-          p.outro(brand.error("Format must be: owner/name"));
+        const parsed = parseRepoTarget(target);
+        if (!parsed) {
+          p.outro(brand.error("Format must be: owner/name (e.g. facebook/react)"));
           return;
         }
 
@@ -182,7 +182,7 @@ export function registerGithubCommand(program: Command) {
           s.start(`Loading remote files for ${target}...`);
         }
 
-        const files = await githubService.getRepoFiles(owner, name, branch);
+        const files = await githubService.getRepoFiles(parsed.owner, parsed.name, branch);
         if (!options?.json) {
           s.stop("File tree retrieved");
         }
@@ -209,15 +209,15 @@ export function registerGithubCommand(program: Command) {
     .option("-b, --branch <branch>", "Specific branch to fetch from")
     .action(async (target: string, filePath: string, options: { branch?: string }) => {
       try {
-        const [owner, name] = target.split("/");
-        if (!owner || !name) {
+        const parsed = parseRepoTarget(target);
+        if (!parsed) {
           p.outro(brand.error("Format must be: owner/name (e.g. facebook/react)"));
           return;
         }
 
         const s = p.spinner();
-        s.start(`Fetching repository reference...`);
-        const repo = await trpc.repo.getByName.query({ name, owner });
+        s.start("Fetching repository reference...");
+        const repo = await trpc.repo.getByName.query({ name: parsed.name, owner: parsed.owner });
         if (!repo) {
           s.stop("Repo not found");
           p.outro(brand.error(`Repository ${target} is not connected in Doxynix yet.`));
@@ -236,7 +236,7 @@ export function registerGithubCommand(program: Command) {
         } else {
           console.log(JSON.stringify(content, null, 2));
         }
-        console.log(`\n${brand.info(`--- End of file ---`)}\n`);
+        console.log(`\n${brand.info("--- End of file ---")}\n`);
       } catch (error) {
         handleCliError(error);
       }

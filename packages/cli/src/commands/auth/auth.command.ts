@@ -79,6 +79,7 @@ export function registerAuthCommands(program: Command) {
   // 3. dxnx me
   program
     .command("me")
+    .alias("whoami")
     .description("Display the currently authenticated user profile")
     .option("--json", "Output response in JSON format")
     .action(async (options: { json?: boolean }) => {
