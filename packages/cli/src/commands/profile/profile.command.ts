@@ -4,13 +4,17 @@ import type { Command } from "commander";
 import { removeToken } from "@/core/config";
 import { handleCliError } from "@/core/errors";
 
-import { brand } from "@/ui/colors";
+import { brand, pc } from "@/ui/colors";
+import { createTable } from "@/ui/table";
 
 import { profileService } from "./profile.service";
 
 export function registerProfileCommand(program: Command) {
-  const profile = program.command("profile").description("Manage your Doxynix user profile");
+  const profile = program
+    .command("profile")
+    .description("Manage your Doxynix user profile and security");
 
+  // dxnx profile (default)
   profile.action(async () => {
     try {
       const s = p.spinner();
@@ -30,13 +34,13 @@ export function registerProfileCommand(program: Command) {
     }
   });
 
+  // dxnx profile update
   profile
     .command("update")
     .description("Interactively update your profile information")
     .action(async () => {
       try {
         p.intro(brand.logo(" ✏️ Edit Profile "));
-
         const current = await profileService.getProfile();
 
         const newName = await p.text({
@@ -69,6 +73,150 @@ export function registerProfileCommand(program: Command) {
       }
     });
 
+  // dxnx profile sessions
+  profile
+    .command("sessions")
+    .description("List active login sessions across devices and browsers")
+    .option("--json", "Output sessions in JSON format")
+    .action(async (options: { json?: boolean }) => {
+      try {
+        const s = p.spinner();
+        if (!options.json) {
+          s.start("Retrieving active sessions...");
+        }
+        const sessions = await profileService.getActiveSessions();
+        if (!options.json) {
+          s.stop("Sessions loaded");
+        }
+
+        if (options.json) {
+          const safeSessions = sessions.map(({ token: _token, ...sess }: any) => sess);
+          console.log(JSON.stringify(safeSessions, null, 2));
+          return;
+        }
+
+        if (sessions.length === 0) {
+          p.outro(brand.muted("No active sessions recorded."));
+          return;
+        }
+
+        const table = createTable(["Client / User Agent", "IP Address", "Created At"]);
+        for (const sess of sessions) {
+          table.push([
+            brand.highlight(sess.userAgent || "Unknown Device"),
+            brand.info(sess.ipAddress || "—"),
+            brand.muted(new Date(sess.createdAt).toLocaleString()),
+          ]);
+        }
+
+        console.log(`\n${brand.logo(" 💻 Active User Sessions:\n")}`);
+        console.log(table.toString());
+        console.log("\n");
+        p.outro(brand.muted(`Active devices: ${sessions.length}`));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  // dxnx profile accounts
+  profile
+    .command("accounts")
+    .description("List connected OAuth providers (GitHub, Google, Yandex)")
+    .option("--json", "Output linked accounts in JSON format")
+    .action(async (options: { json?: boolean }) => {
+      try {
+        const s = p.spinner();
+        if (!options.json) {
+          s.start("Fetching linked authentication providers...");
+        }
+        const res = await profileService.getLinkedAccounts();
+        if (!options.json) {
+          s.stop("Accounts loaded");
+        }
+
+        if (options.json) {
+          console.log(JSON.stringify(res, null, 2));
+          return;
+        }
+
+        if (!res.accounts || res.accounts.length === 0) {
+          p.outro(brand.muted("No external OAuth providers linked."));
+          return;
+        }
+
+        const table = createTable(["Provider", "Account Name", "Email"]);
+        for (const acc of res.accounts) {
+          table.push([
+            pc.cyan(pc.bold(acc.provider.toUpperCase())),
+            brand.highlight(acc.name ?? "—"),
+            brand.muted(acc.email ?? "—"),
+          ]);
+        }
+
+        console.log(`\n${brand.logo(" 🔗 Linked Authentication Providers:\n")}`);
+        console.log(table.toString());
+        console.log("\n");
+        p.outro(brand.muted("Disconnect with: dxnx profile disconnect <provider>"));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  // dxnx profile disconnect <provider>
+  profile
+    .command("disconnect <provider>")
+    .description("Disconnect an OAuth provider (github, google, yandex)")
+    .action(async (provider: string) => {
+      try {
+        const validProviders = ["github", "google", "yandex"];
+        const normalized = provider.toLowerCase() as "github" | "google" | "yandex";
+
+        if (!validProviders.includes(normalized)) {
+          p.outro(
+            brand.error(`Invalid provider: '${provider}'. Valid options: github, google, yandex`),
+          );
+          return;
+        }
+
+        const isConfirmed = await p.confirm({
+          message: `Are you sure you want to disconnect ${brand.highlight(normalized.toUpperCase())}?`,
+        });
+
+        if (!isConfirmed || p.isCancel(isConfirmed)) {
+          p.outro(brand.muted("Action cancelled."));
+          return;
+        }
+
+        const s = p.spinner();
+        s.start(`Disconnecting ${normalized}...`);
+        await profileService.disconnectAccount(normalized);
+        s.stop("Disconnected!");
+
+        p.outro(
+          brand.success(`✔ Provider ${brand.highlight(normalized)} disconnected successfully.`),
+        );
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  // dxnx profile remove-avatar
+  profile
+    .command("remove-avatar")
+    .description("Remove custom profile picture and reset to default avatar")
+    .action(async () => {
+      try {
+        const s = p.spinner();
+        s.start("Deleting profile avatar...");
+        const res = await profileService.removeAvatar();
+        s.stop("Avatar removed!");
+        p.outro(brand.success(`✔ ${res.message}`));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  // dxnx profile delete
   profile
     .command("delete")
     .description("Permanently delete your Doxynix account and all associated data")

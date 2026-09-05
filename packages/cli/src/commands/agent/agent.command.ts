@@ -96,4 +96,60 @@ export function registerAgentCommand(program: Command) {
         handleCliError(error);
       }
     });
+
+  agent
+    .command("history <sessionId>")
+    .description("Inspect message history and past dialogue of a specific chat session")
+    .option("--json", "Output history in JSON format")
+    .action(async (sessionId: string, options: { json?: boolean }) => {
+      const s = p.spinner();
+      let spinnerActive = false;
+      try {
+        if (!options.json) {
+          s.start("Retrieving session history...");
+          spinnerActive = true;
+        }
+
+        const messages = await trpc.agent.getSessionHistory.query({ sessionId });
+        if (!options.json && spinnerActive) {
+          s.stop("History loaded");
+          spinnerActive = false;
+        }
+
+        if (options.json) {
+          console.log(JSON.stringify(messages, null, 2));
+          return;
+        }
+
+        if (messages.length === 0) {
+          p.outro(brand.muted("No messages found in this session."));
+          return;
+        }
+
+        console.log(`\n${brand.logo(` 📜 Session History (${sessionId.slice(0, 8)}...):\n`)}`);
+
+        for (const msg of messages) {
+          const isUser = msg.role === "user";
+          const senderLabel = isUser ? brand.highlight("You:") : brand.logo("Doxynix AI:");
+
+          const partsText = Array.isArray(msg.parts)
+            ? msg.parts
+                .map((part: any) => part.text ?? "")
+                .join("\n")
+                .trim()
+            : "";
+          const text = partsText || ((msg as any).content ?? "");
+
+          console.log(`${senderLabel}\n${text}\n`);
+          console.log(brand.muted("────────────────────────────────────────\n"));
+        }
+
+        p.outro(brand.muted(`Total messages: ${messages.length}`));
+      } catch (error) {
+        if (spinnerActive) {
+          s.stop();
+        }
+        handleCliError(error);
+      }
+    });
 }

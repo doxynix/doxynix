@@ -18,7 +18,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [3.0.8](https://github.com/doxynix/doxynix/compare/web-v3.0.7...web-v3.0.8) (2026-09-01)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @ai-sdk/groq to v3.0.63 ([#2072](https://github.com/doxynix/doxynix/issues/2072)) ([932c4b0](https://github.com/doxynix/doxynix/commit/932c4b0e3aeda33d0b748d148dcc56a8d8815b35))
@@ -26,13 +25,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [3.0.7](https://github.com/doxynix/doxynix/compare/web-v3.0.6...web-v3.0.7) (2026-08-30)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @ai-sdk/google to v3.0.116 ([#2070](https://github.com/doxynix/doxynix/issues/2070)) ([b99f600](https://github.com/doxynix/doxynix/commit/b99f6006540d68af36bd9437e45450629be69f6c))
 
 ## [3.0.6](https://github.com/doxynix/doxynix/compare/web-v3.0.5...web-v3.0.6) (2026-08-29)
-
 
 ### Bug Fixes
 
@@ -40,13 +37,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [3.0.5](https://github.com/doxynix/doxynix/compare/web-v3.0.4...web-v3.0.5) (2026-08-28)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @ai-sdk/google to v3.0.112 ([#2061](https://github.com/doxynix/doxynix/issues/2061)) ([e43b557](https://github.com/doxynix/doxynix/commit/e43b557d00673bcb232f8128158145bea5537e25))
 
 ## [3.0.4](https://github.com/doxynix/doxynix/compare/web-v3.0.3...web-v3.0.4) (2026-08-27)
-
 
 ### Bug Fixes
 
@@ -54,13 +49,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [3.0.3](https://github.com/doxynix/doxynix/compare/web-v3.0.2...web-v3.0.3) (2026-08-27)
 
-
 ### Bug Fixes
 
 * **deps:** update tanstack-query monorepo to v5.102.2 ([#2055](https://github.com/doxynix/doxynix/issues/2055)) ([15e55e0](https://github.com/doxynix/doxynix/commit/15e55e0f53ce61bbdc0daf9a208390968fa6b0b9))
 
 ## [3.0.2](https://github.com/doxynix/doxynix/compare/web-v3.0.1...web-v3.0.2) (2026-08-26)
-
 
 ### Bug Fixes
 
@@ -68,13 +61,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [3.0.1](https://github.com/doxynix/doxynix/compare/web-v3.0.0...web-v3.0.1) (2026-08-26)
 
-
 ### Bug Fixes
 
 * **build:** resolve circular symlink infinite loop (DXNX-209) ([#2050](https://github.com/doxynix/doxynix/issues/2050)) ([aad4761](https://github.com/doxynix/doxynix/commit/aad4761b66473593d4794451e84112e9181c285f))
 
 ## [3.0.0](https://github.com/doxynix/doxynix/compare/web-v2.3.0...web-v3.0.0) (2026-08-25)
-
 
 ### ⚠ BREAKING CHANGES
 
@@ -83,7 +74,6 @@ All notable changes to this project will be documented in this file. See [standa
 ### Features
 
 * **web:** migrate to vercel blob and extract core services (DXNX-205) ([#1951](https://github.com/doxynix/doxynix/issues/1951)) ([3d09f3e](https://github.com/doxynix/doxynix/commit/3d09f3e01a91c0e2a1f325027b3bd9df318bd9dd))
-
 
 ### Bug Fixes
 
@@ -190,11 +180,9 @@ All notable changes to this project will be documented in this file. See [standa
 * **deps:** update shiki monorepo to v4.4.3 ([#1921](https://github.com/doxynix/doxynix/issues/1921)) ([7b094c2](https://github.com/doxynix/doxynix/commit/7b094c2b2b52d7affc631bcb84b810e3d7c6b48d))
 * **web:** stabilize Next.js build and runtime configuration (DXNX-208) ([#2044](https://github.com/doxynix/doxynix/issues/2044)) ([391e81f](https://github.com/doxynix/doxynix/commit/391e81fb5d5e50a302ba6da751e79be6c1762356))
 
-
 ### Code Refactoring
 
 * birth of the monorepo (DXNX-198) ([#1524](https://github.com/doxynix/doxynix/issues/1524)) ([b95df97](https://github.com/doxynix/doxynix/commit/b95df975c5860360e50fe1950deb822a9af507c3))
-
 
 ### Dependencies
 

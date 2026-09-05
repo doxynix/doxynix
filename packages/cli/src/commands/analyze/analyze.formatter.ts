@@ -1,6 +1,6 @@
 import type { RouterOutput } from "@/core/client";
 
-import { brand } from "@/ui/colors";
+import { brand, pc } from "@/ui/colors";
 import { formatScore, getScoreLabel } from "@/ui/formatters";
 import { createTable } from "@/ui/table";
 
@@ -45,5 +45,44 @@ export function renderAnalysisTable(analysis: AnalysisItem): string {
       getScoreLabel(analysis.onboardingScore),
     ],
   );
+  return table.toString();
+}
+
+export function renderRepoConfigTable(config: any): string {
+  const table = createTable(["Parameter", "Current Setting", "Description"]);
+
+  const isEnabled = config.enabled ?? true;
+  table.push([
+    "PR Auto-Analysis",
+    isEnabled ? brand.success("● Enabled (Active)") : brand.error("○ Disabled"),
+    "Automatic triggers on GitHub Pull Requests",
+  ]);
+
+  const ciSkip = config.ciSkip ?? false;
+  table.push([
+    "CI Skip Directive",
+    ciSkip ? brand.warning("Yes ([skip ci])") : brand.muted("No"),
+    "Skip checks when commit message contains [skip ci]",
+  ]);
+
+  table.push([
+    "Comment Style",
+    pc.cyan(config.commentStyle ?? "DETAILED"),
+    "Summary style for PR review comments",
+  ]);
+
+  table.push([
+    "Token Budget",
+    brand.highlight(String(config.tokenBudget ?? 50_000)),
+    "Max AI token consumption per pull request",
+  ]);
+
+  const focus =
+    Array.isArray(config.focusAreas) && config.focusAreas.length > 0
+      ? config.focusAreas.join(", ")
+      : "Security, Quality, Dependencies";
+
+  table.push(["Focus Areas", pc.magenta(focus), "Prioritized inspection vector"]);
+
   return table.toString();
 }

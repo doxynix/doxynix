@@ -24,9 +24,9 @@ export const AgentStreamClient = {
   ): Promise<{ fullText: string; pendingTools: PendingToolCall[] }> {
     const token = getToken();
     const apiUrl = getApiUrl();
-    const spinner = p.spinner();
+    const s = p.spinner();
 
-    spinner.start("AI is processing request...");
+    s.start("AI is processing request...");
 
     const response = await fetch(`${apiUrl}/agent/chat`, {
       body: JSON.stringify({
@@ -47,13 +47,13 @@ export const AgentStreamClient = {
     });
 
     if (!response.ok) {
-      spinner.stop();
+      s.stop();
       const err = await response.text();
       throw new Error(`Server responded with HTTP ${response.status}: ${err}`);
     }
 
     if (!response.body) {
-      spinner.stop();
+      s.stop();
       throw new Error("Empty response stream from server.");
     }
 
@@ -68,7 +68,7 @@ export const AgentStreamClient = {
 
     const stopSpinner = () => {
       if (isSpinnerRunning) {
-        spinner.stop();
+        s.stop();
         isSpinnerRunning = false;
       }
     };

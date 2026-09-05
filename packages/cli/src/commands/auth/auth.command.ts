@@ -76,9 +76,10 @@ export function registerAuthCommands(program: Command) {
       p.outro(brand.success("✅ Local token removed successfully. See you later!"));
     });
 
-  // 3. dxnx whoami
+  // 3. dxnx me
   program
-    .command("whoami")
+    .command("me")
+    .alias("whoami")
     .description("Display the currently authenticated user profile")
     .option("--json", "Output response in JSON format")
     .action(async (options: { json?: boolean }) => {

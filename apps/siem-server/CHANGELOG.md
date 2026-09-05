@@ -2,13 +2,11 @@
 
 ## [0.1.1](https://github.com/doxynix/doxynix/compare/siem-server-v0.1.0...siem-server-v0.1.1) (2026-08-27)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency hono to v4.13.4 ([#2057](https://github.com/doxynix/doxynix/issues/2057)) ([efee9af](https://github.com/doxynix/doxynix/commit/efee9af40cd7053dd627a36117c29ace76bddfce))
 
 ## [0.1.0](https://github.com/doxynix/doxynix/compare/siem-server-v0.0.1...siem-server-v0.1.0) (2026-08-25)
-
 
 ### ⚠ BREAKING CHANGES
 
@@ -24,11 +22,9 @@
 * **deps:** update dependency hono to v4.13.2 ([#1938](https://github.com/doxynix/doxynix/issues/1938)) ([da5cf45](https://github.com/doxynix/doxynix/commit/da5cf45cbffad4f96a5a045f9f9720e1bb3225b0))
 * **deps:** update dependency hono to v4.13.3 ([#1992](https://github.com/doxynix/doxynix/issues/1992)) ([c89c510](https://github.com/doxynix/doxynix/commit/c89c5101c24505197ace81f656c84b929a9d46a1))
 
-
 ### Code Refactoring
 
 * birth of the monorepo (DXNX-198) ([#1524](https://github.com/doxynix/doxynix/issues/1524)) ([b95df97](https://github.com/doxynix/doxynix/commit/b95df975c5860360e50fe1950deb822a9af507c3))
-
 
 ### Dependencies
 

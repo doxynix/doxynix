@@ -1,12 +1,12 @@
 "use client";
 
-import * as React from "react";
+import type { ComponentProps } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/shared/lib/cn";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+export type CalendarProps = ComponentProps<typeof DayPicker> & {
   enableYearNavigation?: boolean;
 };
 
