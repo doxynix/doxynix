@@ -89,7 +89,7 @@
       "name": "@doxynix/siem-server",
       "version": "0.1.1",
       "dependencies": {
-        "@axiomhq/js": "1.8.0",
+        "@axiomhq/js": "2.0.0",
         "@better-auth/drizzle-adapter": "1.6.30",
         "@doxynix/shared": "workspace:*",
         "@hono/zod-validator": "0.9.0",
@@ -516,7 +516,7 @@
 
     "@axe-core/react": ["@axe-core/react@4.13.0", "", { "dependencies": { "axe-core": "~4.13.0", "requestidlecallback": "^0.3.0" } }, "sha512-/4l+CSBS/VJ2VGtdohuQMqK3NfQoZgDHsXsRt4pAZzZTFhwXs9KQCBinVmPAgTF3wIYK0qvXYAfbmUQ1QT4GJQ=="],
 
-    "@axiomhq/js": ["@axiomhq/js@1.8.0", "", { "dependencies": { "fetch-retry": "^6.0.0" } }, "sha512-VRkqV9XH+pkj8d9eRdw8TuWvXdCkVDMtDOz2rix5UAg7x5SlOeWhUz9fwc0ZgySosMSMA7WP7X0fFX8N/jBHtQ=="],
+    "@axiomhq/js": ["@axiomhq/js@2.0.0", "", { "dependencies": { "fetch-retry": "^6.0.0" } }, "sha512-mhDH0KLFkDko9ytoltgmch2gOiwE6kY6VWhCmTux9lzL9hmjTej68JeQKwq9GGqOY7xwDsya88bNiTnp/zc8+Q=="],
 
     "@azu/format-text": ["@azu/format-text@1.0.2", "", {}, "sha512-Swi4N7Edy1Eqq82GxgEECXSSLyn6GOb5htRFPzBDdUkECGXtlf12ynO5oJSpWKPwCaUssOu7NfhDcCWpIC6Ywg=="],
 
