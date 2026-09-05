@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentType, useEffect, useRef, useState } from "react";
+import { type ComponentType, type SubmitEvent, useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
@@ -192,7 +192,7 @@ export function AuthForm() {
     }
   }
 
-  const handleTwoFactorVerify = async (e: React.FormEvent) => {
+  const handleTwoFactorVerify = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const minLen = isBackupMode ? 8 : 6;
     if (twoFactorCode.trim().length < minLen) {

@@ -5,13 +5,13 @@ import { handleCliError } from "@/core/errors";
 
 import { brand } from "@/ui/colors";
 
-import { renderNotificationsTable } from "./notifications.formatter";
+import { renderNotificationStatsTable, renderNotificationsTable } from "./notifications.formatter";
 import { notificationsService } from "./notifications.service";
 
 export function registerNotificationsCommand(program: Command) {
   const notification = program
     .command("notifications")
-    .alias("notifications")
+    .alias("notif")
     .description("View and manage platform system notifications");
 
   notification
@@ -65,6 +65,112 @@ export function registerNotificationsCommand(program: Command) {
         s.stop("Done!");
 
         p.outro(brand.success(`✅ ${res.message}`));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  // dxnx notifications stats
+  notification
+    .command("stats")
+    .description("Display summary counters of unread and read notifications")
+    .option("--json", "Output in JSON format")
+    .action(async (options: { json?: boolean }) => {
+      try {
+        const s = p.spinner();
+        if (!options.json) {
+          s.start("Calculating notification stats...");
+        }
+        const stats = await notificationsService.getStats();
+        if (!options.json) {
+          s.stop("Stats loaded");
+        }
+
+        if (options.json) {
+          console.log(JSON.stringify(stats, null, 2));
+          return;
+        }
+
+        console.log(`\n${brand.logo(" 🔔 Notifications Summary:\n")}`);
+        console.log(renderNotificationStatsTable(stats ?? { read: 0, total: 0, unread: 0 }));
+        console.log("\n");
+        p.outro(brand.muted("Manage with: dxnx notifications list | clear | prune"));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  // dxnx notifications read <id>
+  notification
+    .command("read <id>")
+    .description("Mark a specific notification as read")
+    .action(async (id: string) => {
+      try {
+        const s = p.spinner();
+        s.start(`Updating notification ${id}...`);
+        const res = await notificationsService.markAs(id, true);
+        s.stop("Updated!");
+        p.outro(brand.success(`✔ ${res.message}`));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  // dxnx notifications unread <id>
+  notification
+    .command("unread <id>")
+    .description("Mark a specific notification as unread")
+    .action(async (id: string) => {
+      try {
+        const s = p.spinner();
+        s.start(`Updating notification ${id}...`);
+        const res = await notificationsService.markAs(id, false);
+        s.stop("Updated!");
+        p.outro(brand.success(`✔ ${res.message}`));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  // dxnx notifications delete <id>
+  notification
+    .command("delete <id>")
+    .description("Permanently delete a single notification")
+    .action(async (id: string) => {
+      try {
+        const s = p.spinner();
+        s.start(`Deleting notification ${id}...`);
+        const res = await notificationsService.deleteOne(id);
+        s.stop("Deleted!");
+        p.outro(brand.success(`✔ ${res.message}`));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  // dxnx notifications prune
+  notification
+    .command("prune")
+    .description("Purge and permanently delete all notifications marked as read")
+    .action(async () => {
+      try {
+        p.intro(brand.warning(" 🧹 Purge Read Notifications "));
+
+        const confirmed = await p.confirm({
+          message: "Are you sure you want to permanently delete all read notifications?",
+        });
+
+        if (!confirmed || p.isCancel(confirmed)) {
+          p.outro(brand.muted("Prune cancelled."));
+          return;
+        }
+
+        const s = p.spinner();
+        s.start("Pruning read notifications...");
+        const res = await notificationsService.deleteRead();
+        s.stop("Done!");
+
+        p.outro(brand.success(`✔ ${res.message} (${res.deletedCount} items removed)`));
       } catch (error) {
         handleCliError(error);
       }

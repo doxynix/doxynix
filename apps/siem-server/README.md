@@ -22,6 +22,7 @@
 `apps/siem-server` is an isolated, high-throughput backend service responsible for streaming platform telemetry, auditing user and agent actions, evaluating security threat rules, and dispatching real-time incident events across the Doxynix ecosystem.
 
 ### Key Capabilities
+
 * **Vertical Slice Architecture:** Domain slices (`incidents`, `audit`, `rules`, `scan`, `stream-logs`) are completely self-contained with zero cross-slice dependencies.
 * **End-to-End Type Safety:** Exports `AppType` to provide a zero-cost, fully typed RPC client (`hcWithType`) for `@doxynix/siem-client`.
 * **UUIDv7 Indexed Primary Keys:** Native time-sorted UUIDv7 identifiers optimized for high-volume PostgreSQL B-tree chronological indexing.
@@ -94,7 +95,7 @@ All environment variables are validated at startup via `@t3-oss/env-core`:
 | `AXIOM_TOKEN` | `String` | Axiom API token for structured log ingestion |
 | `AXIOM_DATASET` | `String` | Target telemetry dataset name in Axiom |
 | `INITIAL_ADMIN_EMAIL` | `Email` | Bootstrap superadministrator email address |
-| `INITIAL_ADMIN_PASSWORD`| `String` | Bootstrap superadministrator initial password |
+| `INITIAL_ADMIN_PASSWORD` | `String` | Bootstrap superadministrator initial password |
 
 ---
 

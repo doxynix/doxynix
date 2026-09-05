@@ -121,20 +121,28 @@ export function registerKeysCommand(program: Command) {
       try {
         p.intro(brand.warning(" 🗑️ Revoke API Key "));
 
-        let keyId = id;
+        const data = await trpc.apikey.list.query({});
 
-        if (!keyId) {
-          const data = await trpc.apikey.list.query({});
-          if (data.active.length === 0) {
-            p.outro(brand.muted("No active keys available to revoke."));
+        if (data.active.length === 0) {
+          p.outro(brand.muted("No active keys available to revoke."));
+          return;
+        }
+
+        let selectedKey;
+
+        if (id) {
+          selectedKey = data.active.find((key) => key.id === id);
+
+          if (!selectedKey) {
+            p.outro(brand.muted("API key not found."));
             return;
           }
-
+        } else {
           const selection = await p.select({
             message: "Select the key to revoke:",
-            options: data.active.map((k) => ({
-              label: `${k.name} (${k.prefix}••••)`,
-              value: k.id,
+            options: data.active.map((key) => ({
+              label: `${key.name} (${key.prefix}••••)`,
+              value: key.id,
             })),
           });
 
@@ -143,17 +151,15 @@ export function registerKeysCommand(program: Command) {
             return;
           }
 
-          if (typeof selection === "string") {
-            keyId = selection;
+          selectedKey = data.active.find((key) => key.id === selection);
+
+          if (!selectedKey) {
+            return;
           }
         }
 
-        if (!keyId) {
-          return;
-        }
-
         const isConfirmed = await p.confirm({
-          message: `Are you sure you want to revoke key ${brand.highlight(keyId)}?`,
+          message: `Are you sure you want to revoke key ${brand.highlight(selectedKey.name)}?`,
         });
 
         if (!isConfirmed || p.isCancel(isConfirmed)) {
@@ -162,11 +168,115 @@ export function registerKeysCommand(program: Command) {
         }
 
         const s = p.spinner();
+
         s.start("Revoking key...");
-        const res = await trpc.apikey.revoke.mutate({ id: keyId });
+
+        const result = await trpc.apikey.revoke.mutate({
+          id: selectedKey.id,
+        });
+
         s.stop("Key revoked successfully!");
 
-        p.outro(brand.success(`✅ ${res.message}`));
+        p.outro(brand.success(`✅ ${result.message}`));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  keys
+    .command("update [id]")
+    .description("Update the name or description of an existing API key")
+    .option("-n, --name <name>", "New name for the key")
+    .option("-d, --description <desc>", "New description for the key")
+    .action(async (id?: string, options?: { name?: string; description?: string }) => {
+      try {
+        p.intro(brand.logo(" ✏️ Update API Key "));
+
+        const data = await trpc.apikey.list.query({});
+        const activeKeys = data.active;
+
+        if (activeKeys.length === 0) {
+          p.outro(brand.muted("No active keys available to update."));
+          return;
+        }
+
+        let targetId = id;
+
+        if (!targetId) {
+          const selection = await p.select({
+            message: "Select API key to update:",
+            options: activeKeys.map((k) => ({
+              label: `${k.name} (${k.prefix}••••)`,
+              value: k.id,
+            })),
+          });
+
+          if (p.isCancel(selection) || typeof selection !== "string") {
+            p.cancel("Cancelled.");
+            return;
+          }
+          targetId = selection;
+        }
+
+        const currentKey = activeKeys.find((k) => k.id === targetId);
+        if (!currentKey) {
+          p.outro(brand.error(`API key with ID ${targetId} not found.`));
+          return;
+        }
+
+        let newName = options?.name;
+        if (!newName) {
+          const nameInput = await p.text({
+            defaultValue: currentKey.name,
+            message: "Enter updated key name:",
+            placeholder: currentKey.name,
+            validate(val) {
+              if (!val || val.trim().length === 0) {
+                return "Name cannot be empty";
+              }
+              if (val.length > 50) {
+                return "Name cannot exceed 50 characters";
+              }
+              return undefined;
+            },
+          });
+
+          if (p.isCancel(nameInput)) {
+            p.cancel("Update cancelled.");
+            return;
+          }
+          newName = nameInput.trim();
+        }
+
+        let newDesc = options?.description;
+        if (newDesc === undefined) {
+          const descInput = await p.text({
+            defaultValue: currentKey.description ?? "",
+            message: "Enter updated description (optional):",
+            placeholder: "e.g. CI runner for staging",
+          });
+
+          if (p.isCancel(descInput)) {
+            p.cancel("Update cancelled.");
+            return;
+          }
+          newDesc =
+            typeof descInput === "string" && descInput.trim().length > 0
+              ? descInput.trim()
+              : undefined;
+        }
+
+        const s = p.spinner();
+        s.start("Updating API key...");
+
+        const result = await trpc.apikey.update.mutate({
+          description: newDesc,
+          id: targetId,
+          name: newName,
+        });
+
+        s.stop("API key updated successfully!");
+        p.outro(brand.success(`✔ ${result.message}`));
       } catch (error) {
         handleCliError(error);
       }

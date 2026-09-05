@@ -23,7 +23,6 @@
 
 ## [4.0.10](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.9...doxynix-v4.0.10) (2026-09-01)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @ai-sdk/groq to v3.0.63 ([#2072](https://github.com/doxynix/doxynix/issues/2072)) ([932c4b0](https://github.com/doxynix/doxynix/commit/932c4b0e3aeda33d0b748d148dcc56a8d8815b35))
@@ -31,13 +30,11 @@
 
 ## [4.0.9](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.8...doxynix-v4.0.9) (2026-08-30)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @ai-sdk/google to v3.0.116 ([#2070](https://github.com/doxynix/doxynix/issues/2070)) ([b99f600](https://github.com/doxynix/doxynix/commit/b99f6006540d68af36bd9437e45450629be69f6c))
 
 ## [4.0.8](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.7...doxynix-v4.0.8) (2026-08-29)
-
 
 ### Bug Fixes
 
@@ -45,13 +42,11 @@
 
 ## [4.0.7](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.6...doxynix-v4.0.7) (2026-08-28)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @ai-sdk/google to v3.0.112 ([#2061](https://github.com/doxynix/doxynix/issues/2061)) ([e43b557](https://github.com/doxynix/doxynix/commit/e43b557d00673bcb232f8128158145bea5537e25))
 
 ## [4.0.6](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.5...doxynix-v4.0.6) (2026-08-27)
-
 
 ### Bug Fixes
 
@@ -59,13 +54,11 @@
 
 ## [4.0.5](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.4...doxynix-v4.0.5) (2026-08-27)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency hono to v4.13.4 ([#2057](https://github.com/doxynix/doxynix/issues/2057)) ([efee9af](https://github.com/doxynix/doxynix/commit/efee9af40cd7053dd627a36117c29ace76bddfce))
 
 ## [4.0.4](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.3...doxynix-v4.0.4) (2026-08-27)
-
 
 ### Bug Fixes
 
@@ -73,13 +66,11 @@
 
 ## [4.0.3](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.2...doxynix-v4.0.3) (2026-08-26)
 
-
 ### Bug Fixes
 
 * **deps:** update tanstack-query monorepo to v5.102.1 ([#2048](https://github.com/doxynix/doxynix/issues/2048)) ([9b3484d](https://github.com/doxynix/doxynix/commit/9b3484df432c121129e030cdd7ebf712500398d6))
 
 ## [4.0.2](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.1...doxynix-v4.0.2) (2026-08-26)
-
 
 ### Bug Fixes
 
@@ -87,13 +78,11 @@
 
 ## [4.0.1](https://github.com/doxynix/doxynix/compare/doxynix-v4.0.0...doxynix-v4.0.1) (2026-08-26)
 
-
 ### Bug Fixes
 
 * **deps:** update tanstack-router monorepo ([#2047](https://github.com/doxynix/doxynix/issues/2047)) ([a01effb](https://github.com/doxynix/doxynix/commit/a01effb70485a7abc49dc9eab26e8911e19b1a67))
 
 ## [4.0.0](https://github.com/doxynix/doxynix/compare/doxynix-v3.1.0...doxynix-v4.0.0) (2026-08-25)
-
 
 ### ⚠ BREAKING CHANGES
 
@@ -121,7 +110,6 @@
 * проведено усиление пайплайна агента ([#1472](https://github.com/doxynix/doxynix/issues/1472)) ([b36a0f4](https://github.com/doxynix/doxynix/commit/b36a0f402717c475cdc246697e08902124c4716d))
 * проведены улучшения движка а также улучшения ui  ([#1451](https://github.com/doxynix/doxynix/issues/1451)) ([a86a300](https://github.com/doxynix/doxynix/commit/a86a300b45e8a1672d0f6a2dc80765f45caa264d))
 * реализована страница connections и сопутствующая логика ([#1306](https://github.com/doxynix/doxynix/issues/1306)) ([cbf0c4c](https://github.com/doxynix/doxynix/commit/cbf0c4c2220cb79ca515842f4d1f83f07155d3d7))
-
 
 ### Bug Fixes
 
@@ -352,12 +340,10 @@
 * фикс деплоя на trigger.dev ([#1293](https://github.com/doxynix/doxynix/issues/1293)) ([926e846](https://github.com/doxynix/doxynix/commit/926e846e4b727630a88fab7035e576bbd78144ea))
 * фикс деплоя на trigger.dev ([#1453](https://github.com/doxynix/doxynix/issues/1453)) ([39ac2d3](https://github.com/doxynix/doxynix/commit/39ac2d3b7f874ee787b7816cf2c76362c1eac7f3))
 
-
 ### Performance Improvements
 
 * **app:** оптимизация размера бандла  ([#1070](https://github.com/doxynix/doxynix/issues/1070)) ([3d09ec0](https://github.com/doxynix/doxynix/commit/3d09ec05fcc89d466a90ac3b0fdcb54a32b0409c))
 * **app:** оптимизирован proxy.ts, убраны не нужные операции ([#850](https://github.com/doxynix/doxynix/issues/850)) ([48a91a2](https://github.com/doxynix/doxynix/commit/48a91a23a390009eedfdfe0f72ebf52e1d6837f5))
-
 
 ### Code Refactoring
 
@@ -365,11 +351,9 @@
 
 ## [3.1.0](https://github.com/doxynix/doxynix/compare/v3.0.19...v3.1.0) (2026-08-24)
 
-
 ### Features
 
 * **web:** migrate to vercel blob and extract core services (DXNX-205) ([#1951](https://github.com/doxynix/doxynix/issues/1951)) ([3d09f3e](https://github.com/doxynix/doxynix/commit/3d09f3e01a91c0e2a1f325027b3bd9df318bd9dd))
-
 
 ### Bug Fixes
 
@@ -380,13 +364,11 @@
 
 ## [3.0.19](https://github.com/doxynix/doxynix/compare/v3.0.18...v3.0.19) (2026-08-23)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency langsmith to v0.9.0 ([#2018](https://github.com/doxynix/doxynix/issues/2018)) ([f592dbb](https://github.com/doxynix/doxynix/commit/f592dbba93c0e0d58cba514fda5b5e6510cac611))
 
 ## [3.0.18](https://github.com/doxynix/doxynix/compare/v3.0.17...v3.0.18) (2026-08-23)
-
 
 ### Bug Fixes
 
@@ -395,7 +377,6 @@
 
 ## [3.0.17](https://github.com/doxynix/doxynix/compare/v3.0.16...v3.0.17) (2026-08-22)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @ai-sdk/openai to v3.0.98 ([#2009](https://github.com/doxynix/doxynix/issues/2009)) ([7a4228d](https://github.com/doxynix/doxynix/commit/7a4228d2c63bc3a5e7029dffe78fe5a19cdb6373))
@@ -403,14 +384,12 @@
 
 ## [3.0.16](https://github.com/doxynix/doxynix/compare/v3.0.15...v3.0.16) (2026-08-22)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency lucide-react to v1.33.0 ([#2006](https://github.com/doxynix/doxynix/issues/2006)) ([97f950c](https://github.com/doxynix/doxynix/commit/97f950c985ab13f54890d1c591e6972d9b5c7b38))
 * **deps:** update tanstack-router monorepo ([#2005](https://github.com/doxynix/doxynix/issues/2005)) ([950cdca](https://github.com/doxynix/doxynix/commit/950cdca215b78ccda140a62659f92853086a1567))
 
 ## [3.0.15](https://github.com/doxynix/doxynix/compare/v3.0.14...v3.0.15) (2026-08-22)
-
 
 ### Bug Fixes
 
@@ -421,7 +400,6 @@
 
 ## [3.0.14](https://github.com/doxynix/doxynix/compare/v3.0.13...v3.0.14) (2026-08-21)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @ai-sdk/react to v3.0.261 ([#1995](https://github.com/doxynix/doxynix/issues/1995)) ([e5ec049](https://github.com/doxynix/doxynix/commit/e5ec0498b7ec8f0b48c691fc3350a5b30eaf7af7))
@@ -430,13 +408,11 @@
 
 ## [3.0.13](https://github.com/doxynix/doxynix/compare/v3.0.12...v3.0.13) (2026-08-21)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency ai to v6.0.257 ([#1988](https://github.com/doxynix/doxynix/issues/1988)) ([e86328e](https://github.com/doxynix/doxynix/commit/e86328ed01da5185eb667f306085c3504c4ced65))
 
 ## [3.0.12](https://github.com/doxynix/doxynix/compare/v3.0.11...v3.0.12) (2026-08-21)
-
 
 ### Bug Fixes
 
@@ -444,13 +420,11 @@
 
 ## [3.0.11](https://github.com/doxynix/doxynix/compare/v3.0.10...v3.0.11) (2026-08-21)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @ai-sdk/react to v3.0.260 ([#1987](https://github.com/doxynix/doxynix/issues/1987)) ([ea045ce](https://github.com/doxynix/doxynix/commit/ea045cefa05e99e08504f6eecb97cf1db7c75f31))
 
 ## [3.0.10](https://github.com/doxynix/doxynix/compare/v3.0.9...v3.0.10) (2026-08-21)
-
 
 ### Bug Fixes
 
@@ -458,14 +432,12 @@
 
 ## [3.0.9](https://github.com/doxynix/doxynix/compare/v3.0.8...v3.0.9) (2026-08-20)
 
-
 ### Bug Fixes
 
 * **deps:** update better-auth monorepo to v1.6.30 ([#1980](https://github.com/doxynix/doxynix/issues/1980)) ([6c632f5](https://github.com/doxynix/doxynix/commit/6c632f589ca70d30f24b622cae7631c57f99ca70))
 * **deps:** update dependency posthog-js to v1.417.4 ([#1981](https://github.com/doxynix/doxynix/issues/1981)) ([ba7c1ac](https://github.com/doxynix/doxynix/commit/ba7c1ac827152e3282b2bf7bbdf393a9d827676a))
 
 ## [3.0.8](https://github.com/doxynix/doxynix/compare/v3.0.7...v3.0.8) (2026-08-20)
-
 
 ### Bug Fixes
 
@@ -475,7 +447,6 @@
 
 ## [3.0.7](https://github.com/doxynix/doxynix/compare/v3.0.6...v3.0.7) (2026-08-20)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @hookform/resolvers to v5.9.1 ([#1974](https://github.com/doxynix/doxynix/issues/1974)) ([9e1cb9d](https://github.com/doxynix/doxynix/commit/9e1cb9d108b31cb23984fa565b267a15d234c872))
@@ -484,20 +455,17 @@
 
 ## [3.0.6](https://github.com/doxynix/doxynix/compare/v3.0.5...v3.0.6) (2026-08-20)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency es-toolkit to v1.51.0 ([#1972](https://github.com/doxynix/doxynix/issues/1972)) ([55d61dc](https://github.com/doxynix/doxynix/commit/55d61dc8d558bd0fa066a2bb61a30e710230a993))
 
 ## [3.0.5](https://github.com/doxynix/doxynix/compare/v3.0.4...v3.0.5) (2026-08-19)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency react-resizable-panels to v4.12.3 ([#1970](https://github.com/doxynix/doxynix/issues/1970)) ([473cb3d](https://github.com/doxynix/doxynix/commit/473cb3dd4bc004a138912dc0299f5320c820b51e))
 
 ## [3.0.4](https://github.com/doxynix/doxynix/compare/v3.0.3...v3.0.4) (2026-08-19)
-
 
 ### Bug Fixes
 
@@ -513,14 +481,12 @@
 
 ## [3.0.3](https://github.com/doxynix/doxynix/compare/v3.0.2...v3.0.3) (2026-08-18)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @ai-sdk/groq to v3.0.60 ([#1955](https://github.com/doxynix/doxynix/issues/1955)) ([c9be280](https://github.com/doxynix/doxynix/commit/c9be280fe25a988a4da86a66b758e9352de5bc2a))
 * **deps:** update dependency langsmith to v0.8.11 ([#1958](https://github.com/doxynix/doxynix/issues/1958)) ([3a156ae](https://github.com/doxynix/doxynix/commit/3a156aeccec011c4a9cf056359bf30eee8c4fe3d))
 
 ## [3.0.2](https://github.com/doxynix/doxynix/compare/v3.0.1...v3.0.2) (2026-08-17)
-
 
 ### Bug Fixes
 
@@ -570,7 +536,6 @@
 
 ## [3.0.1](https://github.com/doxynix/doxynix/compare/v3.0.0...v3.0.1) (2026-08-14)
 
-
 ### Bug Fixes
 
 * **deps:** update dependency @ai-sdk/google to v3.0.105 ([#1891](https://github.com/doxynix/doxynix/issues/1891)) ([234b880](https://github.com/doxynix/doxynix/commit/234b880ab570488014ac5451564ac663c4f2c8ff))
@@ -586,7 +551,6 @@
 
 ## [3.0.0](https://github.com/doxynix/doxynix/compare/v2.3.0...v3.0.0) (2026-08-11)
 
-
 ### ⚠ BREAKING CHANGES
 
 * birth of the monorepo (DXNX-198) ([#1524](https://github.com/doxynix/doxynix/issues/1524))
@@ -595,14 +559,12 @@
 
 * migrate to better-auth ([#1486](https://github.com/doxynix/doxynix/issues/1486)) ([39005a7](https://github.com/doxynix/doxynix/commit/39005a79191d36d10f026a3e0715e8f4f80a4bf7))
 
-
 ### Bug Fixes
 
 * add safeguard in update hook ([#1508](https://github.com/doxynix/doxynix/issues/1508)) ([2ef89a6](https://github.com/doxynix/doxynix/commit/2ef89a666bf9e5ffe376759c6d897daeb111d779))
 * delete this damn migration ([#1510](https://github.com/doxynix/doxynix/issues/1510)) ([fe935fc](https://github.com/doxynix/doxynix/commit/fe935fc7e2718a6644a3b436d05549b2bc94480d))
 * **deps:** update all non-major dependencies ([#1481](https://github.com/doxynix/doxynix/issues/1481)) ([96c53ec](https://github.com/doxynix/doxynix/commit/96c53eca3e6a8e1a9089d8ecbec06bb137b23217))
 * downgrade uuid to v11 for CommonJS support ([#1491](https://github.com/doxynix/doxynix/issues/1491)) ([3c3c373](https://github.com/doxynix/doxynix/commit/3c3c373e77bdb05a05e88d5f56c3ca28bdd53bd8))
-
 
 ### Code Refactoring
 

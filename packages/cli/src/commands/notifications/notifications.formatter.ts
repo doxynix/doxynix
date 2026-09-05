@@ -37,3 +37,17 @@ export function renderNotificationsTable(items: NotificationItem[]): string {
 
   return table.toString();
 }
+
+export function renderNotificationStatsTable(stats: {
+  total: number;
+  unread: number;
+  read: number;
+}): string {
+  const table = createTable(["Status", "Count"]);
+  table.push(
+    [brand.warning("● Unread"), brand.highlight(String(stats.unread))],
+    [brand.success("✔ Read"), brand.muted(String(stats.read))],
+    [brand.info("Σ Total"), brand.highlight(String(stats.total))],
+  );
+  return table.toString();
+}

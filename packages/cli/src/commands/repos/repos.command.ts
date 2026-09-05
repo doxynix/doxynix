@@ -16,15 +16,20 @@ export function registerReposCommand(program: Command) {
     .description("List all connected repositories")
     .option("-l, --limit <number>", "Number of repositories to return", "20")
     .option("-s, --search <query>", "Search repositories by name")
+    .option("-o, --owner <owner>", "Filter repositories by owner / organization")
     .option("--json", "Output response in JSON format")
-    .action(async (options: { limit: string; search?: string; json?: boolean }) => {
+    .action(async (options: { limit: string; search?: string; owner?: string; json?: boolean }) => {
       try {
         const s = p.spinner();
         if (!options.json) {
           s.start("Fetching repositories...");
         }
 
-        const data = await reposService.list(Number(options.limit) || 20, options.search);
+        const data = await reposService.list(
+          Number(options.limit) || 20,
+          options.search,
+          options.owner,
+        );
         if (!options.json) {
           s.stop("Repositories loaded");
         }
@@ -140,6 +145,65 @@ export function registerReposCommand(program: Command) {
         s.stop("Repository removed successfully");
 
         p.outro(brand.success(`👋 ${res.message}`));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+  // dxnx repos purge-owner <owner>
+  repos
+    .command("purge-owner <owner>")
+    .description("Delete all repositories associated with a specific owner or organization")
+    .action(async (owner: string) => {
+      try {
+        p.intro(brand.warning(` 🗑️ Purge Repositories for '${owner}' `));
+
+        const isConfirmed = await p.confirm({
+          message: `Are you SURE you want to delete ALL repositories belonging to ${brand.highlight(owner)}?`,
+        });
+
+        if (!isConfirmed || p.isCancel(isConfirmed)) {
+          p.outro(brand.muted("Purge cancelled."));
+          return;
+        }
+
+        const s = p.spinner();
+        s.start(`Deleting repositories for ${owner}...`);
+        const res = await reposService.deleteByOwner(owner);
+        s.stop("Purge completed");
+
+        p.outro(brand.success(`✔ ${res.message} (${res.count} repositories removed)`));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  // dxnx repos purge-all
+  repos
+    .command("purge-all")
+    .description("Danger: Remove ALL connected repositories from your account")
+    .action(async () => {
+      try {
+        p.intro(brand.error(" ⚠️ Danger: Purge All Repositories "));
+
+        const isConfirmed = await p.confirm({
+          active: "Yes, delete all",
+          inactive: "Abort",
+          message: brand.error(
+            "This will permanently remove EVERY connected repository and its analyses. Proceed?",
+          ),
+        });
+
+        if (!isConfirmed || p.isCancel(isConfirmed)) {
+          p.outro(brand.muted("Purge cancelled."));
+          return;
+        }
+
+        const s = p.spinner();
+        s.start("Removing all repositories...");
+        const res = await reposService.deleteAll();
+        s.stop("Repositories cleared");
+
+        p.outro(brand.success(`✔ ${res.message}`));
       } catch (error) {
         handleCliError(error);
       }
