@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 
 import { paginationQuerySchema } from "@/core/db/pagination";
 import { selectIncidentSchema } from "@/core/db/schema";

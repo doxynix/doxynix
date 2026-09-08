@@ -1,8 +1,8 @@
-import { SEVERITY_LEVELS } from "@doxynix/shared";
-import { z } from "zod";
+import { createInsertSchema } from "drizzle-zod";
+import * as z from "zod";
 
 import { paginationQuerySchema } from "@/core/db/pagination";
-import { selectRuleSchema } from "@/core/db/schema";
+import { rules, selectRuleSchema } from "@/core/db/schema";
 
 function isValidRegex(pattern: string): boolean {
   try {
@@ -19,23 +19,11 @@ export const getRulesQuerySchema = paginationQuerySchema.extend({
   severity: selectRuleSchema.shape.severity.optional(),
 });
 
-export const createRuleSchema = z.object({
-  description: z
-    .string()
-    .min(5, "Description must be at least 5 characters")
-    .max(1000, "Description cannot exceed 1000 characters"),
-  isActive: z.boolean().optional().default(true),
-  name: z
-    .string()
-    .min(3, "Name must be at least 3 characters")
-    .max(100, "Name cannot exceed 100 characters"),
-  pattern: z
-    .string()
-    .min(1, "Pattern cannot be empty")
-    .max(2000, "Pattern regular expression is too long")
-    .refine(isValidRegex, { message: "Invalid regular expression pattern" }),
-  severity: z.enum(SEVERITY_LEVELS),
-});
+export const createRuleSchema = createInsertSchema(rules, {
+  description: (schema) => schema.min(5).max(1000),
+  name: (schema) => schema.min(3).max(100),
+  pattern: (schema) => schema.min(1).max(2000).refine(isValidRegex, "Invalid regex"),
+}).omit({ createdAt: true, id: true });
 
 export const updateRuleSchema = createRuleSchema.partial();
 

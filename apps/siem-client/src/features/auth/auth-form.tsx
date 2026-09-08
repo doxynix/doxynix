@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { type AuthSchema, authSchema } from "@doxynix/shared";
+import { AuthSchema, type AuthSchemaInput } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
@@ -19,15 +19,15 @@ export function AuthForm() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<AuthSchema>({
+  } = useForm<AuthSchemaInput>({
     defaultValues: {
       email: "",
       password: "",
     },
-    resolver: zodResolver(authSchema),
+    resolver: zodResolver(AuthSchema),
   });
 
-  const onSubmit = async (values: AuthSchema) => {
+  const onSubmit = async (values: AuthSchemaInput) => {
     setServerError(null);
 
     const { error } = await authClient.signIn.email({
@@ -55,9 +55,15 @@ export function AuthForm() {
         </div>
       )}
 
-      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className="space-y-4"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <div className="space-y-1">
-          <Label className="font-mono text-xs text-zinc-300" htmlFor={emailId}>
+          <Label
+            className="font-mono text-xs text-zinc-300"
+            htmlFor={emailId}
+          >
             EMAIL
           </Label>
           <Input
@@ -70,14 +76,25 @@ export function AuthForm() {
         </div>
 
         <div className="space-y-1">
-          <Label className="font-mono text-xs text-zinc-300" htmlFor={passwordId}>
+          <Label
+            className="font-mono text-xs text-zinc-300"
+            htmlFor={passwordId}
+          >
             PASSWORD
           </Label>
-          <Input id={passwordId} placeholder="••••••••" type="password" {...register("password")} />
+          <Input
+            id={passwordId}
+            placeholder="••••••••"
+            type="password"
+            {...register("password")}
+          />
           {errors.password && <p className="text-red-500 text-xs">{errors.password.message}</p>}
         </div>
 
-        <Button disabled={isSubmitting} type="submit">
+        <Button
+          disabled={isSubmitting}
+          type="submit"
+        >
           {isSubmitting ? (
             <div className="size-5 animate-spin rounded-full border-2 border-black border-t-transparent" />
           ) : (
