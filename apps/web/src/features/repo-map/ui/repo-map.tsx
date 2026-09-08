@@ -23,7 +23,7 @@ import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 
 import { useMapControlsHide } from "@/features/repo-map/model/use-repo-map.store";
 
-import type { RepoMapDisplayData, RepoMapNodeData } from "../model/repo-map-types";
+import { type RepoMapDisplayData, type RepoMapNodeData } from "../model/repo-map-types";
 import { useMapLayout } from "../model/use-map-layout";
 import { enrichNodesWithParents, extractParentGroups } from "../model/use-parent-groups";
 import { RepoMapCustomControls } from "./repo-map-custom-controls";
@@ -242,8 +242,15 @@ export function RepoMap({
         </div>
       </div>
 
-      <ResizablePanelGroup className="relative" orientation="horizontal">
-        <ResizablePanel defaultSize="70%" maxSize="100%" minSize="30%">
+      <ResizablePanelGroup
+        className="relative"
+        orientation="horizontal"
+      >
+        <ResizablePanel
+          defaultSize="70%"
+          maxSize="100%"
+          minSize="30%"
+        >
           <div className="relative h-full min-h-0 w-full">
             <div className="h-full min-h-0 w-full">
               <ReactFlow
@@ -298,7 +305,10 @@ export function RepoMap({
                   </div>
                   <RepoMapSearchPanel />
                 </Panel>
-                <Panel className="flex flex-col items-end gap-1" position="top-right">
+                <Panel
+                  className="flex flex-col items-end gap-1"
+                  position="top-right"
+                >
                   <div
                     className={cn(
                       "transform transition-standard",

@@ -2,12 +2,12 @@ import { XMLParser } from "fast-xml-parser";
 import { basename } from "pathe";
 import YAML from "yaml";
 
-import type {
-  FileSignals,
-  FrameworkFact,
-  RepositoryEvidence,
-  TechCategory,
-  TechFact,
+import {
+  type FileSignals,
+  type FrameworkFact,
+  type RepositoryEvidence,
+  type TechCategory,
+  type TechFact,
 } from "./discovery.types";
 import {
   collectFrameworkFactsFromTokens,

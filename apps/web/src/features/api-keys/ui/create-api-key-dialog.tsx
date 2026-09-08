@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { type CreateApiKeyInput, CreateApiKeySchema } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
-import { type CreateApiKeyInput, CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/core/alert";
 import { AppButton } from "@/shared/ui/core/button";
 import {
@@ -59,9 +59,15 @@ export function CreateApiKeyDialog() {
   };
 
   return (
-    <Dialog onOpenChange={handleOpenChange} open={open}>
+    <Dialog
+      onOpenChange={handleOpenChange}
+      open={open}
+    >
       <DialogTrigger asChild>
-        <AppButton className="cursor-pointer" variant="outline">
+        <AppButton
+          className="cursor-pointer"
+          variant="outline"
+        >
           <Plus />
           {t("settings_api_keys_create_api_key")}
         </AppButton>
@@ -83,7 +89,10 @@ export function CreateApiKeyDialog() {
                 <DialogDescription>{t("settings_api_keys_name")}</DialogDescription>
               </DialogHeader>
 
-              <ApiKeyFormFields control={form.control} isPending={create.isPending} />
+              <ApiKeyFormFields
+                control={form.control}
+                isPending={create.isPending}
+              />
 
               <DialogFooter>
                 <LoadingButton
@@ -115,7 +124,11 @@ export function CreateApiKeyDialog() {
 
             <div className="flex items-center gap-2">
               <div className="grid flex-1 gap-2">
-                <Input disabled={create.isPending} readOnly value={createdKey} />
+                <Input
+                  disabled={create.isPending}
+                  readOnly
+                  value={createdKey}
+                />
               </div>
               <CopyButton
                 className="opacity-100"
@@ -125,7 +138,10 @@ export function CreateApiKeyDialog() {
             </div>
 
             <DialogFooter>
-              <AppButton className="w-full cursor-pointer" onClick={() => handleOpenChange(false)}>
+              <AppButton
+                className="w-full cursor-pointer"
+                onClick={() => handleOpenChange(false)}
+              >
                 {tCommon("done")}
               </AppButton>
             </DialogFooter>

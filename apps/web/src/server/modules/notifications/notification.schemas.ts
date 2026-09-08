@@ -1,5 +1,5 @@
-import { NotifyType } from "@prisma/client";
-import { z } from "zod";
+import { NotifyType } from "@doxynix/shared";
+import * as z from "zod";
 
 import { PaginationSchema } from "@/server/utils/pagination";
 

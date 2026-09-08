@@ -1,9 +1,9 @@
 import { uniquePaths } from "@/server/utils/array-utils";
-import type { RepositoryFact, RepositoryFinding } from "@/server/utils/types";
+import { type RepositoryFact, type RepositoryFinding } from "@/server/utils/types";
 
-import type { ProjectMap } from "../engine/core/analysis-result.schemas";
-import type { DocumentationInputModel } from "../engine/core/documentation.types";
-import type { RepoMetrics } from "../engine/core/metrics.types";
+import { type ProjectMap } from "../engine/core/analysis-result.schemas";
+import { type DocumentationInputModel } from "../engine/core/documentation.types";
+import { type RepoMetrics } from "../engine/core/metrics.types";
 
 type ArchitectDigestSection = {
   confidence: number;

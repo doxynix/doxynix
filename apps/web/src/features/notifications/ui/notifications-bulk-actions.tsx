@@ -57,7 +57,10 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
       >
         <CheckCheck /> Mark all as read
       </LoadingButton>
-      <Dialog onOpenChange={setOpen} open={open}>
+      <Dialog
+        onOpenChange={setOpen}
+        open={open}
+      >
         <DialogTrigger asChild>
           <AppButton
             className="flex cursor-pointer"
@@ -83,7 +86,10 @@ export function NotificationsBulkActions({ stats }: Readonly<Props>) {
           </DialogHeader>
           <DialogFooter>
             <DialogClose asChild>
-              <AppButton className="cursor-pointer" variant="outline">
+              <AppButton
+                className="cursor-pointer"
+                variant="outline"
+              >
                 Cancel
               </AppButton>
             </DialogClose>

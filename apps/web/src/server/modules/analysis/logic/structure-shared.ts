@@ -1,9 +1,9 @@
 import { join, normalize } from "pathe";
 
-import type { RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
-import type { AIResult } from "../engine/core/analysis-result.schemas";
-import type { RepoMetrics } from "../engine/core/metrics.types";
-import type { ProjectPolicySemanticKind } from "../engine/core/project-policy-rules";
+import { type RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
+import { type AIResult } from "../engine/core/analysis-result.schemas";
+import { type RepoMetrics } from "../engine/core/metrics.types";
+import { type ProjectPolicySemanticKind } from "../engine/core/project-policy-rules";
 
 export type WriterStatus = "failed" | "llm" | "missing";
 

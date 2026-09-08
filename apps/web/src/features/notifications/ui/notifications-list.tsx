@@ -4,9 +4,9 @@ import { BellOff, SearchX } from "lucide-react";
 
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import type {
-  NotificationMeta,
-  UiNotification,
+import {
+  type NotificationMeta,
+  type UiNotification,
 } from "@/entities/notifications/model/notifications.types";
 import { NotificationCard } from "@/entities/notifications/ui/notification-card";
 
@@ -14,7 +14,13 @@ type Props = { meta?: NotificationMeta; notifications: UiNotification[] };
 
 export function NotificationsList({ meta, notifications }: Readonly<Props>) {
   if (meta == null || meta.totalCount === 0) {
-    return <EmptyState description={undefined} icon={BellOff} title="No notifications found" />;
+    return (
+      <EmptyState
+        description={undefined}
+        icon={BellOff}
+        title="No notifications found"
+      />
+    );
   }
 
   if (meta.filteredCount === 0) {
@@ -38,7 +44,10 @@ export function NotificationsList({ meta, notifications }: Readonly<Props>) {
   return (
     <div className="flex flex-col gap-4">
       {notifications.map((n) => (
-        <NotificationCard key={n.id} notification={n} />
+        <NotificationCard
+          key={n.id}
+          notification={n}
+        />
       ))}
     </div>
   );

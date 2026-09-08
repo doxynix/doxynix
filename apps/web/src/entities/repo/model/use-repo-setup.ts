@@ -1,15 +1,15 @@
 import { useState } from "react";
+import { DocType } from "@doxynix/shared";
 import { useLocale } from "next-intl";
 import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
-import type { TreeApi } from "react-arborist";
+import { type TreeApi } from "react-arborist";
 
 import { trpc } from "@/shared/api/trpc";
-import { DocTypeSchema } from "@/shared/api-contracts";
 import { useRouter } from "@/shared/i18n/navigation";
 
-import type { DocType, UiRepoDetailed } from "./repo.types";
-import type { FileNode, FileTuple } from "./repo-setup.types";
+import { type UiRepoDetailed } from "./repo.types";
+import { type FileNode, type FileTuple } from "./repo-setup.types";
 import { collectAllIds, getFolderSelectionState, sortNodes } from "./repo-setup-utils";
 import { useRepoBranchOpen } from "./use-repo-branch.store";
 
@@ -42,7 +42,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [analysisLocale, setAnalysisLocale] = useState(locale);
   const [instructions, setInstructions] = useState("");
-  const [selectedDocs, setSelectedDocs] = useState<DocType[]>([DocTypeSchema.enum.README]);
+  const [selectedDocs, setSelectedDocs] = useState<DocType[]>([DocType.README]);
   const open = useRepoBranchOpen();
 
   const { name, owner } = repo;

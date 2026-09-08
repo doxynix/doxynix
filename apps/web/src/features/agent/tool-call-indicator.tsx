@@ -146,7 +146,10 @@ export function ToolCallIndicator({ addToolApprovalResponse, part, toolLabels }:
 
   return (
     <div className="fade-in my-1 w-full animate-in text-left duration-200">
-      <AppBadge className="flex items-center gap-2 text-muted-foreground text-xs" variant="outline">
+      <AppBadge
+        className="flex items-center gap-2 text-muted-foreground text-xs"
+        variant="outline"
+      >
         <Spinner />
         <span className="max-w-[320px] truncate text-foreground">{fullLabel}</span>
       </AppBadge>

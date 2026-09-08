@@ -22,7 +22,7 @@ import {
   Users2,
 } from "lucide-react";
 
-import type { MenuItem, MenuItems } from "../types/navigation.types";
+import { type MenuItem, type MenuItems } from "../types/navigation.types";
 
 const DASHBOARD_BASE: MenuItems = [
   {

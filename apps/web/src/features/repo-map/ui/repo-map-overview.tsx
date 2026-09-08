@@ -6,7 +6,7 @@ import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import type { RepoWorkspace } from "@/entities/repo/model/repo.types";
+import { type RepoWorkspace } from "@/entities/repo/model/repo.types";
 
 type Props = {
   onNavigate: (id: null | string) => void;
@@ -19,7 +19,10 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
       <h3 className="text-2xl">Project Brain</h3>
       <div className="flex items-center gap-2">
         {workspace.analysisRef?.commitSha != null && (
-          <AppBadge className="gap-1 font-mono text-xs" variant="outline">
+          <AppBadge
+            className="gap-1 font-mono text-xs"
+            variant="outline"
+          >
             <GitCommit />
             {workspace.analysisRef.commitSha.slice(0, 7)}
             <CopyButton
@@ -48,7 +51,10 @@ export function RepoMapOverview({ onNavigate, workspace }: Readonly<Props>) {
           </div>
           <div className="flex flex-wrap gap-2">
             {workspace.summary.stack.map((path) => (
-              <div className="p-2 text-muted-foreground text-xs" key={path}>
+              <div
+                className="p-2 text-muted-foreground text-xs"
+                key={path}
+              >
                 <span className="truncate">{path.split("/").pop()}</span>
               </div>
             ))}

@@ -1,8 +1,8 @@
-import type {
-  InteractiveBriefActionAvailability,
-  InteractiveBriefNodePayload,
-  InteractiveBriefPanel,
-  InteractiveBriefPayload,
+import {
+  type InteractiveBriefActionAvailability,
+  type InteractiveBriefNodePayload,
+  type InteractiveBriefPanel,
+  type InteractiveBriefPayload,
 } from "@/server/utils/types";
 
 function toAvailableActions(params: {

@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import type { UiApiKey } from "@/entities/api-keys/model/api-keys.types";
+import { type UiApiKey } from "@/entities/api-keys/model/api-keys.types";
 import { ApiKeyCard } from "@/entities/api-keys/ui/api-key-card";
 
 import { ApiKeyArchivedTable } from "./api-key-archived-table";
@@ -27,7 +27,10 @@ export function ApiKeysList({ active, archived }: Readonly<Props>) {
       ) : (
         <div className="grid grid-cols-2 gap-2">
           {active.map((key) => (
-            <ApiKeyCard active={key} key={key.id} />
+            <ApiKeyCard
+              active={key}
+              key={key.id}
+            />
           ))}
         </div>
       )}

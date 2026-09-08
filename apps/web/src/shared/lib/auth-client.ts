@@ -8,7 +8,7 @@ import {
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
-import type { auth } from "@/server/core/auth";
+import { type auth } from "@/server/core/auth";
 
 export const authClient = createAuthClient({
   plugins: [

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { CreatePrSchema, type CreatePrValues } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileIcon, GitPullRequest, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { type CreatePrValues, createPrSchema } from "@/shared/api/schemas/pr";
 import { trpc } from "@/shared/api/trpc";
 import { generateBranchName } from "@/shared/lib/get-branch-name";
 import { AppBadge } from "@/shared/ui/core/badge";
@@ -79,7 +79,7 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
       branchName: generateBranchName(),
       prTitle: "Doxynix Suggested code improvements",
     },
-    resolver: zodResolver(createPrSchema),
+    resolver: zodResolver(CreatePrSchema),
   });
 
   const onSubmit = (values: CreatePrValues) => {
@@ -106,7 +106,10 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
       open={open}
     >
       <SheetTrigger asChild>
-        <AppButton className="relative gap-2" variant="outline">
+        <AppButton
+          className="relative gap-2"
+          variant="outline"
+        >
           <GitPullRequest />
           <span>PR Draft</span>
           {filesCount > 0 && <AppBadge className="absolute -top-2 -right-2">{filesCount}</AppBadge>}
@@ -131,7 +134,10 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
               {isFilesLoading ? (
                 <div className="flex flex-col gap-2 p-2">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton className="h-10 w-full" key={i} />
+                    <Skeleton
+                      className="h-10 w-full"
+                      key={i}
+                    />
                   ))}
                 </div>
               ) : filesCount === 0 ? (
@@ -207,7 +213,10 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                   <FormItem>
                     <FormLabel className="text-muted-foreground">Branch Name</FormLabel>
                     <FormControl>
-                      <Input {...field} className="h-9 text-xs" />
+                      <Input
+                        {...field}
+                        className="h-9 text-xs"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -221,7 +230,10 @@ export function PrDraftSheet({ repoId }: Readonly<Props>) {
                   <FormItem>
                     <FormLabel className="text-muted-foreground">PR Title</FormLabel>
                     <FormControl>
-                      <Input {...field} className="h-9 text-xs" />
+                      <Input
+                        {...field}
+                        className="h-9 text-xs"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

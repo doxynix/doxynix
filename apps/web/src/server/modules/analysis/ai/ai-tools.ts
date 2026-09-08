@@ -1,5 +1,5 @@
 import { type ToolSet, tool } from "ai";
-import { z } from "zod";
+import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";

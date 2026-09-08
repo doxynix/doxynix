@@ -29,7 +29,10 @@ export function AgentForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <form className="w-full border-t p-4" onSubmit={onSubmit}>
+    <form
+      className="w-full border-t p-4"
+      onSubmit={onSubmit}
+    >
       {attachments.length > 0 && (
         <div className="flex max-h-32 flex-wrap gap-2 overflow-y-auto pb-3">
           {attachments.map((file, i) => (

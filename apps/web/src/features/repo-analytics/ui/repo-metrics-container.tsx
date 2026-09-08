@@ -30,5 +30,10 @@ export function RepoMetricsContainer({ repoId }: Readonly<Props>) {
     return null;
   }
 
-  return <RepoMetrics data={data} repoId={repoId} />;
+  return (
+    <RepoMetrics
+      data={data}
+      repoId={repoId}
+    />
+  );
 }

@@ -24,14 +24,24 @@ export function GitHubInstallationsList({ installations }: Readonly<Props>) {
       {installations.map((inst) => (
         <ConnectionCard
           action={
-            <AppButton asChild size="sm" variant="outline">
+            <AppButton
+              asChild
+              size="sm"
+              variant="outline"
+            >
               <ExternalLink href={inst.manageUrl ?? ""}>
                 <GitHubIcon /> Configure
               </ExternalLink>
             </AppButton>
           }
           description="GitHub App Installation"
-          icon={<AppAvatar alt={inst.login} fallbackText={inst.login} src={inst.avatar} />}
+          icon={
+            <AppAvatar
+              alt={inst.login}
+              fallbackText={inst.login}
+              src={inst.avatar}
+            />
+          }
           key={inst.id}
           status="Active"
           title={inst.login}

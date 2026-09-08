@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { type CreateApiKeyInput, CreateApiKeySchema } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
-import { type CreateApiKeyInput, CreateApiKeySchema } from "@/shared/api/schemas/api-key";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -21,7 +21,7 @@ import { Form } from "@/shared/ui/core/form";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import type { UiApiKey } from "@/entities/api-keys/model/api-keys.types";
+import { type UiApiKey } from "@/entities/api-keys/model/api-keys.types";
 
 import { useApiKeyActions } from "../model/use-api-key-actions";
 import { ApiKeyFormFields } from "./api-key-form-fields";
@@ -65,7 +65,10 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
   };
 
   return (
-    <Dialog onOpenChange={handleOpenChange} open={open}>
+    <Dialog
+      onOpenChange={handleOpenChange}
+      open={open}
+    >
       <AppTooltip content={tCommon("edit")}>
         <DialogTrigger asChild>
           <AppButton
@@ -93,7 +96,10 @@ export function UpdateApiKeyDialog({ apiKey }: Readonly<Props>) {
               </DialogDescription>
             </DialogHeader>
 
-            <ApiKeyFormFields control={form.control} isPending={update.isPending} />
+            <ApiKeyFormFields
+              control={form.control}
+              isPending={update.isPending}
+            />
 
             <DialogFooter>
               <LoadingButton

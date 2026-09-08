@@ -1,8 +1,6 @@
+import { ApiKeySchema, CreateApiKeySchema } from "@doxynix/shared";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-
-import { CreateApiKeySchema } from "@/shared/api/schemas/api-key";
-import { ApiKeySchema } from "@/shared/api-contracts";
+import * as z from "zod/mini";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { handlePrismaError } from "@/server/utils/handle-error";
@@ -52,7 +50,7 @@ export const apiKeyRouter = createTRPCRouter({
     }),
 
   list: protectedProcedure
-    .input(z.object({}).optional())
+    .input(z.optional(z.object({})))
     .output(
       z.object({
         active: z.array(ApiKeySchema),
@@ -113,7 +111,7 @@ export const apiKeyRouter = createTRPCRouter({
     }),
 
   update: protectedProcedure
-    .input(CreateApiKeySchema.extend({ id: z.uuid() }))
+    .input(z.extend(CreateApiKeySchema, { id: z.uuid() }))
     .output(z.object({ message: z.string(), success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       try {

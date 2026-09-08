@@ -9,7 +9,12 @@ export function RepoAnalyzeButton({ name, owner }: Readonly<Props>) {
   const href = `/dashboard/repo/${encodeURIComponent(owner)}/${encodeURIComponent(name)}/analyze`;
 
   return (
-    <AppButton asChild className="mt-2 cursor-pointer" size="sm" variant="outline">
+    <AppButton
+      asChild
+      className="mt-2 cursor-pointer"
+      size="sm"
+      variant="outline"
+    >
       <Link href={href}>
         <Play />
         Run Analysis

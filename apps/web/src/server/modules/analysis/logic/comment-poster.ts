@@ -1,12 +1,12 @@
 import crypto from "node:crypto";
 
-import type { Octokit } from "@octokit/rest";
-import type { PRCommentStyle } from "@prisma/client";
-import { dedent } from "ts-dedent";
+import { type PRCommentStyle } from "@doxynix/shared";
+import { type Octokit } from "@octokit/rest";
+import { dedent } from "es-toolkit";
 
 import { appLogger } from "@/server/core/app-logger";
 
-import type { PRFinding } from "./pr-types";
+import { type PRFinding } from "./pr-types";
 
 /**
  * Генерирует уникальную сигнатуру для замечания, чтобы избежать дублирования комментариев.

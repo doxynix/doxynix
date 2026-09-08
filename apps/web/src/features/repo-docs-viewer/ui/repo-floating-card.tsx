@@ -179,7 +179,10 @@ export function RepoFloatingCard({ anchorEl, hoveredFile, repoId }: Readonly<Pro
               <Code2 />
               {node.label}
             </span>
-            <AppBadge className="text-[10px] uppercase" variant="outline">
+            <AppBadge
+              className="text-[10px] uppercase"
+              variant="outline"
+            >
               {node.kind}
             </AppBadge>
           </div>

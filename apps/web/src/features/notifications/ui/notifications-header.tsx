@@ -1,9 +1,9 @@
 "use client";
 
+import { NotifyType } from "@doxynix/shared";
 import { X } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
-import { NotifyTypeSchema } from "@/shared/api-contracts";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Select,
@@ -83,7 +83,11 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
             ))}
           </TabsList>
           {TABS.map((t) => (
-            <TabsContent className="hidden" key={t.id} value={t.value} />
+            <TabsContent
+              className="hidden"
+              key={t.id}
+              value={t.value}
+            />
           ))}
         </Tabs>
 
@@ -97,19 +101,27 @@ export function NotificationsHeader({ stats }: Readonly<Props>) {
           }
           value={filters.type ?? "all"}
         >
-          <SelectTrigger aria-label="Filter by notification type" className="">
+          <SelectTrigger
+            aria-label="Filter by notification type"
+            className=""
+          >
             <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All types</SelectItem>
-            <SelectItem value={NotifyTypeSchema.enum.INFO}>Info</SelectItem>
-            <SelectItem value={NotifyTypeSchema.enum.SUCCESS}>Success</SelectItem>
-            <SelectItem value={NotifyTypeSchema.enum.WARNING}>Warning</SelectItem>
-            <SelectItem value={NotifyTypeSchema.enum.ERROR}>Error</SelectItem>
+            <SelectItem value={NotifyType.INFO}>Info</SelectItem>
+            <SelectItem value={NotifyType.SUCCESS}>Success</SelectItem>
+            <SelectItem value={NotifyType.WARNING}>Warning</SelectItem>
+            <SelectItem value={NotifyType.ERROR}>Error</SelectItem>
           </SelectContent>
         </Select>
 
-        <AppButton className="px-2" disabled={!hasFilters} onClick={handleReset} variant="outline">
+        <AppButton
+          className="px-2"
+          disabled={!hasFilters}
+          onClick={handleReset}
+          variant="outline"
+        >
           Reset
           <X />
         </AppButton>

@@ -7,12 +7,12 @@ import { join, resolve } from "pathe";
 import { appLogger } from "@/server/core/app-logger";
 import { getFileExtension } from "@/server/utils/path-operations";
 
-import type {
-  FileSignals,
-  RepositoryFile,
-  RouteRef,
-  SymbolKind,
-  SymbolRef,
+import {
+  type FileSignals,
+  type RepositoryFile,
+  type RouteRef,
+  type SymbolKind,
+  type SymbolRef,
 } from "../core/discovery.types";
 import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
 import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
@@ -35,6 +35,38 @@ type LanguageSpec = {
   wasmPackage?: string;
 };
 
+const TS_DECLARATIONS = [
+  {
+    kind: "function" as SymbolKind,
+    types: ["function_declaration", "method_definition", "arrow_function"],
+  },
+  { kind: "class" as SymbolKind, types: ["class_declaration", "abstract_class_declaration"] },
+  { kind: "interface" as SymbolKind, types: ["interface_declaration"] },
+  { kind: "type" as SymbolKind, types: ["type_alias_declaration"] },
+  { kind: "enum" as SymbolKind, types: ["enum_declaration"] },
+];
+
+const TS_ROUTE_PATTERNS = [
+  {
+    framework: "Hono",
+    methodIndex: 1,
+    pathIndex: 2,
+    pattern: /\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g,
+  },
+  {
+    framework: "Express",
+    methodIndex: 1,
+    pathIndex: 2,
+    pattern: /\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g,
+  },
+  {
+    framework: "Fastify",
+    methodIndex: 1,
+    pathIndex: 2,
+    pattern: /\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g,
+  },
+];
+
 const SPECS: Record<string, LanguageSpec> = {
   ".c": {
     declarations: [
@@ -44,6 +76,15 @@ const SPECS: Record<string, LanguageSpec> = {
     entrypoints: [/\bint\s+main\s*\(/],
     imports: { patterns: [/^\s*#include\s+"([^"]+)"/m], types: ["preproc_include"] },
     wasm: "tree-sitter-c.wasm",
+  },
+  ".cjs": {
+    declarations: [
+      { kind: "function", types: ["function_declaration"] },
+      { kind: "class", types: ["class_declaration"] },
+    ],
+    entrypoints: [/\bapp\.listen\(/],
+    imports: { patterns: [/require\s*\(\s*["']([^"']+)["']\s*\)/], types: ["call_expression"] },
+    wasm: "tree-sitter-javascript.wasm",
   },
   ".cpp": {
     declarations: [
@@ -65,6 +106,12 @@ const SPECS: Record<string, LanguageSpec> = {
     entrypoints: [/\bstatic\s+void\s+Main\b/, /\bWebApplication\.CreateBuilder\b/],
     imports: { patterns: [/^using\s+([\w.]+);/m], types: ["using_directive"] },
     wasm: "tree-sitter-c-sharp.wasm",
+  },
+  ".cts": {
+    declarations: TS_DECLARATIONS,
+    entrypoints: [/\bbootstrap\(\)/],
+    imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
+    wasm: "tree-sitter-typescript.wasm",
   },
   ".erl": {
     declarations: [{ kind: "function", types: ["function", "export_attribute"] }],
@@ -152,6 +199,15 @@ const SPECS: Record<string, LanguageSpec> = {
     ],
     wasm: "tree-sitter-javascript.wasm",
   },
+  ".jsx": {
+    declarations: [
+      { kind: "function", types: ["function_declaration"] },
+      { kind: "class", types: ["class_declaration"] },
+    ],
+    entrypoints: [/\bcreateRoot\b/, /\bReactDOM\.render\b/],
+    imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
+    wasm: "tree-sitter-javascript.wasm",
+  },
   ".kt": {
     declarations: [
       {
@@ -178,6 +234,21 @@ const SPECS: Record<string, LanguageSpec> = {
     entrypoints: [/main\s*\(|NSApplicationMain/],
     imports: { patterns: [/#import\s+["<]([^">]+)[">]/m], types: ["preproc_import"] },
     wasm: "tree-sitter-objc.wasm",
+  },
+  ".mjs": {
+    declarations: [
+      { kind: "function", types: ["function_declaration"] },
+      { kind: "class", types: ["class_declaration"] },
+    ],
+    entrypoints: [/\bapp\.listen\(/],
+    imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
+    wasm: "tree-sitter-javascript.wasm",
+  },
+  ".mts": {
+    declarations: TS_DECLARATIONS,
+    entrypoints: [/\bbootstrap\(\)/],
+    imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
+    wasm: "tree-sitter-typescript.wasm",
   },
   ".php": {
     declarations: [
@@ -267,21 +338,18 @@ const SPECS: Record<string, LanguageSpec> = {
     wasm: "tree-sitter-swift.wasm",
   },
   ".ts": {
-    declarations: [
-      { kind: "function", types: ["function_declaration"] },
-      { kind: "class", types: ["class_declaration"] },
-    ],
-    entrypoints: [/\bbootstrap\(\)/],
+    declarations: TS_DECLARATIONS,
+    entrypoints: [/\bbootstrap\(\)/, /\bcreateServer\b/, /\bnew Hono\b/],
     imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
-    routePatterns: [
-      {
-        framework: "Hono",
-        methodIndex: 1,
-        pathIndex: 2,
-        pattern: /\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g,
-      },
-    ],
+    routePatterns: TS_ROUTE_PATTERNS,
     wasm: "tree-sitter-typescript.wasm",
+  },
+  ".tsx": {
+    declarations: TS_DECLARATIONS,
+    entrypoints: [/\bcreateRoot\b/, /\bbootstrap\(\)/],
+    imports: { patterns: [/from\s+["']([^"']+)["']/], types: ["import_statement"] },
+    routePatterns: TS_ROUTE_PATTERNS,
+    wasm: "tree-sitter-tsx.wasm",
   },
 };
 
@@ -405,8 +473,7 @@ function resolveGrammarWasmPath(spec: LanguageSpec): string {
   appLogger.error({ errorContext, msg: "Tree-sitter grammar not found" });
 
   throw new Error(
-    `[TreeSitter] Grammar WASM not found: ${spec.wasm}. ` +
-      `Ensure it is included in trigger.config.ts additionalFiles.`,
+    `[TreeSitter] Grammar WASM not found: ${spec.wasm}. Ensure it is included in trigger.config.ts additionalFiles.`,
   );
 }
 
@@ -466,15 +533,18 @@ const AST_COMPLEXITY_NODES = new Set([
   "for_statement",
   "if_statement",
   "switch_statement",
+  "ternary_expression",
   "while_statement",
 ]);
 
 const AST_NESTING_NODES = new Set([
   "catch_clause",
+  "class_declaration",
   "class_definition",
   "do_statement",
   "except_clause",
   "for_statement",
+  "function_declaration",
   "function_definition",
   "if_statement",
   "method_definition",

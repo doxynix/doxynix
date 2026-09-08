@@ -1,7 +1,7 @@
-import type { IClone, IMapFrame, IOptions } from "@jscpd/core";
+import { type IClone, type IMapFrame, type IOptions } from "@jscpd/core";
 import { clamp, sumBy } from "es-toolkit";
 
-import type { RepositoryFile } from "../core/discovery.types";
+import { type RepositoryFile } from "../core/discovery.types";
 import { ProjectPolicy } from "../core/project-policy";
 import { PROJECT_POLICY_RULES } from "../core/project-policy-rules";
 

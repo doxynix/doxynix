@@ -18,7 +18,7 @@ import {
 } from "@/shared/ui/core/table";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
-import type { UiApiKey } from "@/entities/api-keys/model/api-keys.types";
+import { type UiApiKey } from "@/entities/api-keys/model/api-keys.types";
 
 type Props = {
   archived: UiApiKey[];
@@ -44,7 +44,11 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
         </div>
 
         <CollapsibleTrigger asChild>
-          <AppButton className="size-8 p-0" size="sm" variant="ghost">
+          <AppButton
+            className="size-8 p-0"
+            size="sm"
+            variant="ghost"
+          >
             <ChevronDown className={cn("-rotate-90", isArchivedOpen && "rotate-0")} />
           </AppButton>
         </CollapsibleTrigger>
@@ -63,16 +67,25 @@ export function ApiKeyArchivedTable({ archived }: Readonly<Props>) {
             </TableHeader>
             <TableBody>
               {archived.map((key) => (
-                <TableRow className="opacity-70 hover:opacity-100" key={key.id}>
+                <TableRow
+                  className="opacity-70 hover:opacity-100"
+                  key={key.id}
+                >
                   <TableCell className="max-w-sm truncate font-medium">{key.name}</TableCell>
                   <TableCell className="font-mono text-muted-foreground text-xs">
                     {key.prefix.length > 0 ? `${key.prefix}...` : "..."}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    <TimeAgo date={key.createdAt} locale={locale} />
+                    <TimeAgo
+                      date={key.createdAt}
+                      locale={locale}
+                    />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    <TimeAgo date={key.lastUsed ?? ""} locale={locale} />
+                    <TimeAgo
+                      date={key.lastUsed ?? ""}
+                      locale={locale}
+                    />
                   </TableCell>
                 </TableRow>
               ))}

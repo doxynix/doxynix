@@ -1,5 +1,5 @@
-import type { NodeContextDiagnostics, NodeContextMeta } from "../analysis.context";
-import type { AnalysisRef } from "../analysis.repository";
+import { type NodeContextDiagnostics, type NodeContextMeta } from "../analysis.context";
+import { type AnalysisRef } from "../analysis.repository";
 
 type ContentRefInput = {
   analysisId?: string;

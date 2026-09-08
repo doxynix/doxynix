@@ -11,8 +11,14 @@ export function CodeSkeleton() {
         const indent = indents[i % indents.length] ?? 0;
 
         return (
-          <div className="flex items-center gap-4" key={i}>
-            <div className="flex flex-1" style={{ paddingLeft: `${indent * 4}px` }}>
+          <div
+            className="flex items-center gap-4"
+            key={i}
+          >
+            <div
+              className="flex flex-1"
+              style={{ paddingLeft: `${indent * 4}px` }}
+            >
               <Skeleton
                 className="h-3 rounded-sm"
                 style={{

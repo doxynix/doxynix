@@ -36,11 +36,18 @@ export function RepoMapSidebar({ nodeId, onClose, onNavigate, repoId }: Readonly
       {nodeId == null && isWorkspaceLoading ? (
         <RepoMapSidebarSkeleton />
       ) : nodeId == null && workspace != null ? (
-        <RepoMapOverview onNavigate={onNavigate} workspace={workspace} />
+        <RepoMapOverview
+          onNavigate={onNavigate}
+          workspace={workspace}
+        />
       ) : nodeId != null && isNodeContextLoading ? (
         <RepoMapSidebarSkeleton />
       ) : nodeContext != null ? (
-        <RepoNodeInspector data={nodeContext} onClose={onClose} onNavigate={onNavigate} />
+        <RepoNodeInspector
+          data={nodeContext}
+          onClose={onClose}
+          onNavigate={onNavigate}
+        />
       ) : null}
     </aside>
   );

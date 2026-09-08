@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
@@ -46,7 +46,10 @@ export function RepoCodeActionButton({
   );
 
   return (
-    <AppTooltip content={tooltipText} hidden={hideTooltip}>
+    <AppTooltip
+      content={tooltipText}
+      hidden={hideTooltip}
+    >
       {href != null ? (
         <AppButton
           asChild
@@ -54,7 +57,11 @@ export function RepoCodeActionButton({
           size="sm"
           variant={variant}
         >
-          <ExternalLink aria-label={tooltipText} className="px-3" href={href}>
+          <ExternalLink
+            aria-label={tooltipText}
+            className="px-3"
+            href={href}
+          >
             {children}
           </ExternalLink>
         </AppButton>

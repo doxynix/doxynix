@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 
 import { SCHEMA_LIMITS } from "./scoring-constants";
 

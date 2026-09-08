@@ -1,8 +1,8 @@
-import type { GoogleLanguageModelOptions } from "@ai-sdk/google";
+import { type GoogleLanguageModelOptions } from "@ai-sdk/google";
 import { metadata } from "@trigger.dev/sdk";
 import * as ai from "ai";
 import { wrapAISDK } from "langsmith/experimental/vercel";
-import type { z } from "zod";
+import type * as z from "zod";
 
 import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
 

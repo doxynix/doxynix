@@ -1,7 +1,7 @@
-import type {
-  DependencyNodeMetric,
-  GraphReliability,
-  RepositoryFinding,
+import {
+  type DependencyNodeMetric,
+  type GraphReliability,
+  type RepositoryFinding,
 } from "@/server/utils/types";
 
 export type ParseTier = "heuristic" | "tree-sitter" | "typescript-ast";
