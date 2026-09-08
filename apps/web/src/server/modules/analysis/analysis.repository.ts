@@ -1,9 +1,10 @@
-import { type FixStatus, PRAnalysisStatus, type Prisma } from "@prisma/client";
+import { type FixStatus, PRAnalysisStatus } from "@doxynix/shared";
+import { type Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { uniq } from "es-toolkit";
 
-import type { DbClient } from "@/server/core/db";
-import type { PRChangedFileSnapshot } from "@/server/utils/types";
+import { type DbClient } from "@/server/core/db";
+import { type PRChangedFileSnapshot } from "@/server/utils/types";
 
 import { pickLatestDocsByType } from "./analysis.utils";
 

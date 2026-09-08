@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
 
-import type { RepoMetricsItem } from "@/entities/repo/model/repo.types";
+import { type RepoMetricsItem } from "@/entities/repo/model/repo.types";
 import {
   ArchitectureAndDataFlowCard,
   ReferenceAndRoutesCard,
@@ -108,7 +108,11 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
         />
       </section>
 
-      <SnapshotsSection architecture={architecture} onboarding={onboarding} quality={quality} />
+      <SnapshotsSection
+        architecture={architecture}
+        onboarding={onboarding}
+        quality={quality}
+      />
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <ReferenceAndRoutesCard architecture={architecture} />
@@ -116,7 +120,10 @@ export function RepoMetrics({ data, repoId }: Readonly<Props>) {
         <RisksCard risks={risks} />
       </section>
 
-      <TechDebtAndComplexitySection architecture={architecture} recommendations={recommendations} />
+      <TechDebtAndComplexitySection
+        architecture={architecture}
+        recommendations={recommendations}
+      />
 
       <RefactoringBacklogSection
         onTriggerFix={handleTriggerFix}

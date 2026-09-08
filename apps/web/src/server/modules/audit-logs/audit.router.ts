@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import * as z from "zod";
 
 import { highlightCode } from "@/shared/lib/shiki";
 

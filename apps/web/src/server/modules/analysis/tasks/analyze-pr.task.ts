@@ -1,7 +1,7 @@
-import type { Octokit } from "@octokit/rest";
+import { type Octokit } from "@octokit/rest";
 import { task } from "@trigger.dev/sdk";
 import { normalize } from "pathe";
-import { z } from "zod";
+import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
@@ -14,7 +14,7 @@ import { persistedFindingSchema } from "../analysis.schemas";
 import { CommentFormatter, gitHubCommentPoster } from "../logic/comment-poster";
 import { DifferentialAnalyzer } from "../logic/differential-analyzer";
 import { PRConfigService } from "../logic/pr-config";
-import type { PRFinding } from "../logic/pr-types";
+import { type PRFinding } from "../logic/pr-types";
 import { taskLogger } from "../logic/task-logger";
 
 function mergePrBody(existingBody: null | string, aiSummary: string): string {

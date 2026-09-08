@@ -1,8 +1,8 @@
-import type { FileActionPreviewResult } from "@/server/utils/types";
+import { type FileActionPreviewResult } from "@/server/utils/types";
 
-import type { DocumentFilePreviewResult, QuickFileAuditResult } from "../analysis.schemas";
+import { type DocumentFilePreviewResult, type QuickFileAuditResult } from "../analysis.schemas";
 import { formatQuickFileAuditMarkdown } from "../analysis.utils";
-import type { SyncFileActionMeta } from "./repo-file-action-state";
+import { type SyncFileActionMeta } from "./repo-file-action-state";
 
 function buildContextNote(result: Pick<SyncFileActionMeta, "contextDiagnostics" | "contextMeta">) {
   if (!result.contextDiagnostics.hasContext) {

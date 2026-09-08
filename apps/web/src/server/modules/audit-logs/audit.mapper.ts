@@ -1,10 +1,10 @@
-import type { AuditLog } from "@prisma/client";
-import safeStringify from "fast-safe-stringify";
+import { type AuditLog } from "@prisma/client";
 import { UAParser } from "ua-parser-js";
 
+import { safeJsonClone } from "@/server/utils/safe-json";
 import { formatUserAgent } from "@/server/utils/ua-parser";
 
-import type { AuditLogType, AuditSeverityType } from "./audit-logs.schemas";
+import { type AuditLogType, type AuditSeverityType } from "./audit-logs.schemas";
 
 const MODEL_CONFIG: Record<string, { icon: string; name: string }> = {
   Account: { icon: "ghost", name: "Connected Account" },
@@ -62,7 +62,7 @@ export function sanitizeObject(obj: unknown): Record<string, unknown> {
   }
 
   try {
-    const sanitized = JSON.parse(safeStringify(obj, auditReplacer));
+    const sanitized = safeJsonClone(obj, auditReplacer);
 
     return sanitized != null && typeof sanitized === "object"
       ? (sanitized as Record<string, unknown>)

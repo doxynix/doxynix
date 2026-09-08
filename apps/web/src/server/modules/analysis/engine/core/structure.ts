@@ -1,14 +1,14 @@
 import { clamp, meanBy, sumBy } from "es-toolkit";
 
-import type { DependencyNodeMetric } from "@/server/utils/types";
+import { type DependencyNodeMetric } from "@/server/utils/types";
 
-import type {
-  FileComplexity,
-  FileSignals,
-  GraphPreviewEdge,
-  RepositoryEvidence,
-  RepositoryFile,
-  StructuralSignals,
+import {
+  type FileComplexity,
+  type FileSignals,
+  type GraphPreviewEdge,
+  type RepositoryEvidence,
+  type RepositoryFile,
+  type StructuralSignals,
 } from "./discovery.types";
 import { collectRepositoryEvidence } from "./evidence";
 import { ProjectPolicy } from "./project-policy";

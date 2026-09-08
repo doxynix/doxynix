@@ -1,13 +1,13 @@
-import { DocType } from "@prisma/client";
+import { DocType } from "@doxynix/shared";
 import { uniqBy } from "es-toolkit";
-import { z } from "zod";
+import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 
-import type { LatestCompletedAnalysis } from "../analysis.repository";
+import { type LatestCompletedAnalysis } from "../analysis.repository";
 import { type AIResult, aiSchema } from "../engine/core/analysis-result.schemas";
-import type { RepoMetrics } from "../engine/core/metrics.types";
-import type { StoredDocument, WriterStatus } from "./structure-shared";
+import { type RepoMetrics } from "../engine/core/metrics.types";
+import { type StoredDocument, type WriterStatus } from "./structure-shared";
 
 type AnalysisPayload = {
   aiResult: AIResult;

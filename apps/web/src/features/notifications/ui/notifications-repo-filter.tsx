@@ -51,7 +51,10 @@ export function NotificationsRepoFilter() {
     selectedRepo != null ? `${selectedRepo.owner}/${selectedRepo.name}` : "All repositories";
 
   return (
-    <Popover onOpenChange={setOpen} open={open}>
+    <Popover
+      onOpenChange={setOpen}
+      open={open}
+    >
       <PopoverTrigger asChild>
         <AppButton
           aria-expanded={open}
@@ -66,7 +69,10 @@ export function NotificationsRepoFilter() {
           <ChevronDown className="ml-2 opacity-50" />
         </AppButton>
       </PopoverTrigger>
-      <PopoverContent align="start" className="p-0">
+      <PopoverContent
+        align="start"
+        className="p-0"
+      >
         <Command>
           <CommandInput placeholder="Search repository..." />
           <CommandList>
@@ -74,7 +80,10 @@ export function NotificationsRepoFilter() {
               {repos?.items.length === 0 || repos == null ? null : "No repository found"}
             </CommandEmpty>
             <CommandGroup>
-              <CommandItem className="cursor-pointer" onSelect={() => handleRepoSelect(null)}>
+              <CommandItem
+                className="cursor-pointer"
+                onSelect={() => handleRepoSelect(null)}
+              >
                 <Check
                   className={cn("mr-1", filters.owner == null ? "opacity-100" : "opacity-0")}
                 />
@@ -83,7 +92,10 @@ export function NotificationsRepoFilter() {
               {isLoading && (
                 <div className="flex flex-col gap-2 p-2">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton className="h-6 w-full" key={i} />
+                    <Skeleton
+                      className="h-6 w-full"
+                      key={i}
+                    />
                   ))}
                 </div>
               )}

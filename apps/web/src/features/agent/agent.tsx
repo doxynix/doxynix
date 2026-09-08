@@ -258,7 +258,12 @@ export function Agent() {
             >
               {expanded && (
                 <>
-                  <ResizablePanel defaultSize="15%" id="agent-sidebar" maxSize="50%" minSize="15%">
+                  <ResizablePanel
+                    defaultSize="15%"
+                    id="agent-sidebar"
+                    maxSize="50%"
+                    minSize="15%"
+                  >
                     <AgentSidebar
                       onNewChat={handleNewChat}
                       sessionId={sessionId}
@@ -275,10 +280,16 @@ export function Agent() {
                 defaultSize={expanded ? "85%" : "100%"}
                 id="agent-main"
               >
-                <AgentHeader expanded={expanded} setExpanded={setExpanded} />
+                <AgentHeader
+                  expanded={expanded}
+                  setExpanded={setExpanded}
+                />
 
                 <div className="group relative flex min-h-0 flex-1 flex-col">
-                  <ScrollArea className="h-full min-h-0 flex-1" ref={scrollRef}>
+                  <ScrollArea
+                    className="h-full min-h-0 flex-1"
+                    ref={scrollRef}
+                  >
                     {messages.length === 0 && !isHistoryLoading && (
                       <div className="fade-in pointer-events-none flex animate-in select-none flex-col items-center gap-3 pt-24">
                         <DxnxLogo className="size-64" />
@@ -377,7 +388,10 @@ export function Agent() {
                                             Thinking Process
                                           </div>
                                           <CollapsibleTrigger asChild>
-                                            <AppButton size="icon" variant="ghost">
+                                            <AppButton
+                                              size="icon"
+                                              variant="ghost"
+                                            >
                                               <ChevronDown className="group-data-[state=open]/collapsible:rotate-180" />
                                             </AppButton>
                                           </CollapsibleTrigger>

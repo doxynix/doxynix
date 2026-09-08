@@ -90,7 +90,10 @@ export function SessionsList() {
               <ConnectionCard
                 action={
                   isCurrentDevice ? (
-                    <AppButton disabled size="sm">
+                    <AppButton
+                      disabled
+                      size="sm"
+                    >
                       Current
                     </AppButton>
                   ) : (
@@ -106,7 +109,10 @@ export function SessionsList() {
                       open={revokingSessionToken === session.token}
                       title="Revoke Device Session"
                       trigger={
-                        <AppButton size="sm" variant="destructive">
+                        <AppButton
+                          size="sm"
+                          variant="destructive"
+                        >
                           <Trash2 className="size-4" />
                         </AppButton>
                       }

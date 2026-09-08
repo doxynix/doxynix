@@ -8,8 +8,8 @@ import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
 import { AppButton } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 
-import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
-import type { ActionItem, FileNode } from "@/entities/repo/model/repo-setup.types";
+import { type UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import { type ActionItem, type FileNode } from "@/entities/repo/model/repo-setup.types";
 import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
 import { RepoBranchSelector } from "@/entities/repo/ui/repo-branch-selector";
 import { RepoCodeNode } from "@/entities/repo/ui/repo-code-node";
@@ -109,7 +109,10 @@ export function RepoCodeTree({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden p-2" ref={measureRef}>
+      <div
+        className="min-h-0 flex-1 overflow-hidden p-2"
+        ref={measureRef}
+      >
         {state.isLoading ? (
           <RepoTreeSkeleton variant="tree" />
         ) : state.treeData.length === 0 ? (
@@ -146,7 +149,13 @@ export function RepoCodeTree({
               selectionFollowsFocus={false}
               width="100%"
             >
-              {(props) => <RepoCodeNode {...props} activePath={activePath} onSelect={onSelect} />}
+              {(props) => (
+                <RepoCodeNode
+                  {...props}
+                  activePath={activePath}
+                  onSelect={onSelect}
+                />
+              )}
             </Tree>
           )
         )}

@@ -1,5 +1,5 @@
 import { tool } from "ai";
-import { z } from "zod";
+import * as z from "zod";
 
 import { api } from "@/server/core/trpc/server";
 

@@ -22,7 +22,7 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import type { UiAuditLog } from "../model/audit-log.types";
+import { type UiAuditLog } from "../model/audit-log.types";
 
 type Props = {
   log: UiAuditLog;
@@ -47,7 +47,10 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
   };
 
   return (
-    <Sheet onOpenChange={setOpen} open={open}>
+    <Sheet
+      onOpenChange={setOpen}
+      open={open}
+    >
       <AppTooltip content="View Raw">
         <SheetTrigger asChild>
           <AppButton
@@ -104,7 +107,12 @@ export function AuditLogDetailsSheet({ log }: Readonly<Props>) {
                 label="IP Address"
                 value={log.ip ?? "system"}
               />
-              <MetaItem className="p-4" icon={Shield} label="User Agent" value={log.browser} />
+              <MetaItem
+                className="p-4"
+                icon={Shield}
+                label="User Agent"
+                value={log.browser}
+              />
               <MetaItem
                 className="p-4"
                 icon={Clock}
@@ -162,7 +170,10 @@ function MetaItem({
         <Icon />
         <span className="text-xs">{label}</span>
         {isCopy === true && (
-          <CopyButton className="ml-auto flex opacity-100" value={copyValue ?? ""} />
+          <CopyButton
+            className="ml-auto flex opacity-100"
+            value={copyValue ?? ""}
+          />
         )}
       </div>
       <p className={cn("truncate text-foreground text-xs")}>{value}</p>

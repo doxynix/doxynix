@@ -1,4 +1,4 @@
-import type { RepositoryFile } from "../core/discovery.types";
+import { type RepositoryFile } from "../core/discovery.types";
 import { regexAdapter } from "./regex.adapter";
 import { treeSitterAdapter } from "./tree-sitter.adapter";
 import { type LanguageAdapter, matchesExtension } from "./types";

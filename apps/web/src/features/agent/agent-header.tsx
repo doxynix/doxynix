@@ -21,7 +21,10 @@ export function AgentHeader({ expanded, setExpanded }: Readonly<Props>) {
         <div>
           <div className="flex items-center gap-1.5">
             <p className="font-medium text-sm">Dxnx_ Agent</p>
-            <AppBadge className="text-warning" variant="outline">
+            <AppBadge
+              className="text-warning"
+              variant="outline"
+            >
               BETA
             </AppBadge>
           </div>
@@ -29,11 +32,19 @@ export function AgentHeader({ expanded, setExpanded }: Readonly<Props>) {
       </div>
 
       <div className="flex items-center gap-1">
-        <AppButton onClick={() => setExpanded(!expanded)} size="icon" variant="ghost">
+        <AppButton
+          onClick={() => setExpanded(!expanded)}
+          size="icon"
+          variant="ghost"
+        >
           {expanded ? <Minimize2 /> : <Maximize2 />}
         </AppButton>
 
-        <AppButton onClick={closeAgent} size="icon" variant="ghost">
+        <AppButton
+          onClick={closeAgent}
+          size="icon"
+          variant="ghost"
+        >
           <X />
         </AppButton>
       </div>

@@ -11,14 +11,7 @@ export default defineConfig({
   },
   test: {
     coverage: {
-      exclude: [
-        "**/*.d.ts",
-        "**/*.test.ts",
-        "**/*.test.tsx",
-        "src/tests/**/*",
-        "src/shared/api-contracts/**/*",
-        "src/app/**/*",
-      ],
+      exclude: ["**/*.d.ts", "**/*.test.ts", "**/*.test.tsx", "src/tests/**/*", "src/app/**/*"],
 
       include: [
         "src/server/modules/**/*.ts",
@@ -34,7 +27,7 @@ export default defineConfig({
     fileParallelism: false,
     globals: true,
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
-    setupFiles: ["./src/tests/setup-env.ts"],
+    setupFiles: ["./src/tests/setup-env.ts", "zod/compile"],
     testTimeout: 15_000,
   },
 });

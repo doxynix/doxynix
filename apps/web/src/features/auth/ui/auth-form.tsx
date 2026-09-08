@@ -17,7 +17,7 @@ import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
+import * as z from "zod/mini";
 
 import { TURNSTILE_SITE_KEY } from "@/shared/constants/env.client";
 import { Link, useRouter } from "@/shared/i18n/navigation";
@@ -41,8 +41,14 @@ import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 const MagicLinkSchema = z.object({
   email: z
-    .email("Please enter a valid email address")
-    .max(254, "Email address cannot exceed 254 characters"),
+    .email({
+      error: "Please enter a valid email address",
+    })
+    .check(
+      z.maxLength(254, {
+        error: "Email address cannot exceed 254 characters",
+      }),
+    ),
 });
 
 type MagicLinkSchemaValue = z.infer<typeof MagicLinkSchema>;
@@ -305,7 +311,10 @@ export function AuthForm() {
           inert={isSent || isTwoFactorRequired ? true : undefined}
         >
           <div className="flex items-center gap-3">
-            <Logo className="w-xl" isInteractive={false} />
+            <Logo
+              className="w-xl"
+              isInteractive={false}
+            />
           </div>
 
           <div className="flex flex-col gap-5">
@@ -321,7 +330,10 @@ export function AuthForm() {
 
           <div className="grid gap-3 sm:grid-cols-2">
             {AUTH_BENEFITS.map((item) => (
-              <div className="rounded-2xl border border-border bg-card p-5" key={item.title}>
+              <div
+                className="rounded-2xl border border-border bg-card p-5"
+                key={item.title}
+              >
                 <div className="flex items-center gap-3">
                   <span className="flex size-9 items-center justify-center rounded-full border border-border bg-primary/10">
                     <item.icon className="text-foreground" />
@@ -335,7 +347,11 @@ export function AuthForm() {
 
           <div className="flex flex-wrap gap-2">
             {TRUST_POINTS.map((item) => (
-              <AppBadge className="text-muted-foreground" key={item} variant="outline">
+              <AppBadge
+                className="text-muted-foreground"
+                key={item}
+                variant="outline"
+              >
                 {item}
               </AppBadge>
             ))}
@@ -353,7 +369,10 @@ export function AuthForm() {
             inert={isSent || isTwoFactorRequired ? true : undefined}
           >
             <div className="flex items-center justify-between gap-3 lg:hidden">
-              <Logo className="w-24" isInteractive={false} />
+              <Logo
+                className="w-24"
+                isInteractive={false}
+              />
             </div>
 
             <div className="flex flex-col gap-3">
@@ -516,7 +535,11 @@ export function AuthForm() {
                   </p>
                 </div>
               </div>
-              <AppButton onClick={() => void setTwoFactorParam(null)} size="icon" variant="ghost">
+              <AppButton
+                onClick={() => void setTwoFactorParam(null)}
+                size="icon"
+                variant="ghost"
+              >
                 <X size={16} />
               </AppButton>
             </div>

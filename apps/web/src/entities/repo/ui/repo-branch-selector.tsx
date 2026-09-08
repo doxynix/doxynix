@@ -37,7 +37,10 @@ export function RepoBranchSelector({
   const { setOpen } = useRepoBranchActions();
 
   return (
-    <Popover onOpenChange={setOpen} open={open}>
+    <Popover
+      onOpenChange={setOpen}
+      open={open}
+    >
       <PopoverTrigger asChild>
         <AppButton
           aria-expanded={open}
@@ -52,7 +55,10 @@ export function RepoBranchSelector({
           <ChevronDown className="ml-2 opacity-50" />
         </AppButton>
       </PopoverTrigger>
-      <PopoverContent align="start" className="p-0">
+      <PopoverContent
+        align="start"
+        className="p-0"
+      >
         <Command>
           <CommandInput placeholder="Search branch..." />
           <CommandList>
@@ -63,7 +69,10 @@ export function RepoBranchSelector({
               {isLoading && (
                 <div className="flex flex-col gap-2 p-2">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton className="h-6 w-full" key={i} />
+                    <Skeleton
+                      className="h-6 w-full"
+                      key={i}
+                    />
                   ))}
                 </div>
               )}

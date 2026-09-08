@@ -1,6 +1,6 @@
 import { ADAPTER_PRIORITIES } from "../core/scoring-constants";
 import { collectTypeScriptSignals } from "../extractors/typescript-signals";
-import type { LanguageAdapter } from "./types";
+import { type LanguageAdapter } from "./types";
 
 export const typeScriptAdapter: LanguageAdapter = {
   detect: (file) =>

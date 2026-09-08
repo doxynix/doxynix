@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { parseAsString, useQueryState } from "nuqs";
-import type { TreeApi } from "react-arborist";
+import { type TreeApi } from "react-arborist";
 
 import { trpc } from "@/shared/api/trpc";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 
-import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
-import type { FileNode } from "@/entities/repo/model/repo-setup.types";
+import { type UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import { type FileNode } from "@/entities/repo/model/repo-setup.types";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { RepoCodeBrowser } from "./repo-code-browser";
@@ -51,7 +51,11 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
   return (
     <div className="flex h-[calc(100dvh-260px)] overflow-hidden rounded-xl border bg-background">
       <ResizablePanelGroup orientation="horizontal">
-        <ResizablePanel defaultSize="50%" maxSize="50%" minSize="25%">
+        <ResizablePanel
+          defaultSize="50%"
+          maxSize="50%"
+          minSize="25%"
+        >
           <RepoCodeTree
             activePath={path}
             onSelect={(val) => {

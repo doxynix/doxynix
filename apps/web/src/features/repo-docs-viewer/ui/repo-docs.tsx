@@ -2,6 +2,7 @@
 
 import { type ComponentType, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { type DocType } from "@doxynix/shared";
 import { uniqBy } from "es-toolkit";
 import {
   BookOpen,
@@ -28,7 +29,7 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import type { AvailableDocs, DocType, RepoNodeContext } from "@/entities/repo/model/repo.types";
+import { type AvailableDocs, type RepoNodeContext } from "@/entities/repo/model/repo.types";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { RepoDocsContent } from "./repo-docs-content";
@@ -361,7 +362,10 @@ export function RepoDocs({
                         .filter((doc) => doc.docType === activeTab)
                         .slice(0, 6)
                         .map((doc) => (
-                          <AppBadge key={doc.id} variant="secondary">
+                          <AppBadge
+                            key={doc.id}
+                            variant="secondary"
+                          >
                             {doc.title}
                           </AppBadge>
                         ))}

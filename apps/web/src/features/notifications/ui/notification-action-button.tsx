@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType } from "react";
+import { type ComponentType } from "react";
 
 import { cn } from "@/shared/lib/cn";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";

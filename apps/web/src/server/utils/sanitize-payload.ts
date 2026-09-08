@@ -1,6 +1,5 @@
-import safeStringify from "fast-safe-stringify";
-
 import { ENCRYPTED_METADATA_MAP } from "./constants";
+import { safeJsonClone } from "./safe-json";
 
 const SENSITIVE_KEYS = new Set([
   "access_token",
@@ -90,7 +89,7 @@ export function sanitizePayload(obj: unknown): unknown {
   }
 
   try {
-    return JSON.parse(safeStringify(obj, redactValue));
+    return safeJsonClone(obj, redactValue);
   } catch (error) {
     return {
       _sanitization_error: true,

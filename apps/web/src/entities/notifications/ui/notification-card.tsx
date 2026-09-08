@@ -12,7 +12,7 @@ import { notificationTypeConfig } from "@/features/notifications/model/notificat
 import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
 import { NotificationActionButton } from "@/features/notifications/ui/notification-action-button";
 
-import type { UiNotification } from "../model/notifications.types";
+import { type UiNotification } from "../model/notifications.types";
 
 type Props = { notification: UiNotification };
 
@@ -36,7 +36,11 @@ export function NotificationCard({ notification }: Readonly<Props>) {
       )}
     >
       {href != null && (
-        <Link aria-label={notification.title} className="absolute inset-0" href={href} />
+        <Link
+          aria-label={notification.title}
+          className="absolute inset-0"
+          href={href}
+        />
       )}
 
       <CardContent className="flex items-center justify-between">
@@ -81,7 +85,11 @@ export function NotificationCard({ notification }: Readonly<Props>) {
               tooltip="Delete notification"
             />
           </div>
-          <TimeAgo className="z-10 w-fit text-xs" date={notification.createdAt} locale={locale} />
+          <TimeAgo
+            className="z-10 w-fit text-xs"
+            date={notification.createdAt}
+            locale={locale}
+          />
         </div>
       </CardContent>
     </Card>

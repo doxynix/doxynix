@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { type CreateRepoInput, CreateRepoSchema } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Book, Plus, RefreshCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -8,7 +9,6 @@ import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
 import { useForm, useWatch } from "react-hook-form";
 
-import { type CreateRepoInput, CreateRepoSchema } from "@/shared/api/schemas/repo";
 import { trpc } from "@/shared/api/trpc";
 import { useClickOutside } from "@/shared/hooks/use-click-outside";
 import { useDebounce } from "@/shared/hooks/use-debounce";
@@ -164,15 +164,24 @@ export function CreateRepoDialog() {
   const oauthStatus = myGithubData?.oauthStatus;
 
   return (
-    <Dialog onOpenChange={handleClose} open={open}>
+    <Dialog
+      onOpenChange={handleClose}
+      open={open}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("repo_add_repository")}</DialogTitle>
           <DialogDescription>{t("repo_create_desc")} </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form className="grid gap-4 py-4" onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}>
-            <div className="flex flex-col gap-3" ref={containerRef}>
+          <form
+            className="grid gap-4 py-4"
+            onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+          >
+            <div
+              className="flex flex-col gap-3"
+              ref={containerRef}
+            >
               <FormField
                 control={form.control}
                 name="url"
@@ -228,7 +237,10 @@ export function CreateRepoDialog() {
                 {myGithubData?.installations != null && myGithubData.installations.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {myGithubData.installations.map((inst) => (
-                      <AppTooltip content={inst.login} key={inst.id}>
+                      <AppTooltip
+                        content={inst.login}
+                        key={inst.id}
+                      >
                         <ExternalLink
                           className="flex items-center gap-1 hover:underline"
                           href={inst.manageUrl ?? ""}
@@ -264,7 +276,10 @@ export function CreateRepoDialog() {
                 {isFetchingMyRepos ? (
                   <div className="h-70 rounded-xl border p-1">
                     {Array.from({ length: 3 }).map((_, i) => (
-                      <div className="flex flex-col gap-1 p-3" key={i}>
+                      <div
+                        className="flex flex-col gap-1 p-3"
+                        key={i}
+                      >
                         <div className="flex items-center justify-between">
                           <Skeleton className="h-3.5 w-32" />
                           <Skeleton className="h-4 w-24" />
@@ -330,7 +345,10 @@ export function CreateRepoDialog() {
                     </div>
                   </div>
                 ) : (
-                  <ScrollArea className="h-70 rounded-xl border p-1" type="always">
+                  <ScrollArea
+                    className="h-70 rounded-xl border p-1"
+                    type="always"
+                  >
                     {myGithubData.items.length > 0 && myGithubData.installations?.length === 0 && (
                       <div className="flex h-full flex-col items-center justify-center px-2 xs:px-4 py-4 xs:py-8 text-center">
                         <p className="mb-3 text-muted-foreground text-sm">

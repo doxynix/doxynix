@@ -1,17 +1,17 @@
-import type { AnalysisCoverage, DependencyNodeMetric } from "@/server/utils/types";
+import { type AnalysisCoverage, type DependencyNodeMetric } from "@/server/utils/types";
 
-import type {
-  ChangeCouplingRef,
-  DependencyGraphEvidence,
-  EntrypointRef,
-  FileCategoryBreakdownItem,
-  FrameworkFact,
-  HotspotSignal,
-  ModuleRef,
-  RiskDerivedScores,
-  RiskFindingRef,
-  RiskRawMetrics,
-  RouteInventory,
+import {
+  type ChangeCouplingRef,
+  type DependencyGraphEvidence,
+  type EntrypointRef,
+  type FileCategoryBreakdownItem,
+  type FrameworkFact,
+  type HotspotSignal,
+  type ModuleRef,
+  type RiskDerivedScores,
+  type RiskFindingRef,
+  type RiskRawMetrics,
+  type RouteInventory,
 } from "./discovery.types";
 
 export type DocumentationAudience = "newcomer" | "tech-lead";

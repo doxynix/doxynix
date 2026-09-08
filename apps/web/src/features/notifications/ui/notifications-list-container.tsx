@@ -51,9 +51,16 @@ export function NotificationsListContainer() {
       ) : (
         <>
           <div className="flex-1">
-            <NotificationsList meta={data.meta} notifications={data.items} />
+            <NotificationsList
+              meta={data.meta}
+              notifications={data.items}
+            />
           </div>
-          <AppPagination className="mt-4" isLoading={isFetching} meta={data.meta} />
+          <AppPagination
+            className="mt-4"
+            isLoading={isFetching}
+            meta={data.meta}
+          />
         </>
       )}
     </>
