@@ -5,35 +5,27 @@ export const githubService = {
     return trpc.repo.create.mutate({ url });
   },
 
-  async getBranches(owner: string, name: string): Promise<any[]> {
+  async getBranches(owner: string, name: string) {
     return trpc.githubBrowse.getBranches.query({ name, owner });
   },
 
-  async getFileContent(repoId: string, path: string, branch?: string): Promise<any> {
+  async getFileContent(repoId: string, path: string, branch?: string) {
     return trpc.githubBrowse.getFileContent.query({ branch, path, repoId });
   },
 
   async getInstallUrl(): Promise<string> {
-    const res = await trpc.githubApp.getGithubInstallUrl.query({});
-    if (typeof res === "string") {
-      return res;
-    }
-    return (res as any).url ?? (res as any).installUrl ?? "";
+    return trpc.githubApp.getGithubInstallUrl.query({});
   },
 
-  async getMyRepos(): Promise<any> {
-    const res = await trpc.githubApp.getMyGithubRepos.query({});
-    if (Array.isArray(res)) {
-      return res;
-    }
-    return (res as any).repositories ?? (res as any).repos ?? (res as any).items ?? [];
+  async getMyRepos() {
+    return trpc.githubApp.getMyGithubRepos.query({});
   },
 
-  async getRepoFiles(owner: string, name: string, branch?: string): Promise<any[]> {
+  async getRepoFiles(owner: string, name: string, branch?: string) {
     return trpc.githubBrowse.getRepoFiles.query({ branch, name, owner });
   },
 
-  async searchGithub(query: string): Promise<any> {
+  async searchGithub(query: string) {
     return trpc.githubBrowse.searchGithub.query({ query });
   },
 };

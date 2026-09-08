@@ -4,6 +4,7 @@ export const stagingService = {
   async clearStaging(repoId: string) {
     return trpc.analysis.clearStaging.mutate({ repoId });
   },
+
   async getStagedFiles(repoId: string) {
     return trpc.analysis.getStagedFiles.query({ repoId });
   },
@@ -12,6 +13,13 @@ export const stagingService = {
     return trpc.analysis.stageFile.mutate({
       content,
       filePath,
+      repoId,
+    });
+  },
+
+  async stageGeneratedFix(repoId: string, fixId: string) {
+    return trpc.analysis.stageGeneratedFix.mutate({
+      fixId,
       repoId,
     });
   },

@@ -1,11 +1,8 @@
 import { trpc } from "@/core/client";
 
-export type DocType = "README" | "ARCHITECTURE" | "CODE_DOC";
+import { type DocType } from "./docs.types";
 
 export const docsService = {
-  /**
-   * Сгенерировать документацию для конкретного файла
-   */
   async documentFile(input: {
     repoId: string;
     path: string;
@@ -25,16 +22,11 @@ export const docsService = {
       repoId: input.repoId,
     });
   },
-  /**
-   * Получить список всех сгенерированных документов для репозитория
-   */
+
   async getAvailableDocs(repoId: string, aid?: string) {
     return trpc.analysis.getAvailableDocs.query({ aid, repoId });
   },
 
-  /**
-   * Получить markdown-содержимое конкретного документа
-   */
   async getDocumentContent(repoId: string, type: DocType, path?: string, aid?: string) {
     return trpc.analysis.getDocumentContent.query({
       aid,
@@ -44,9 +36,6 @@ export const docsService = {
     });
   },
 
-  /**
-   * Закрепить результаты аудита файла в документацию
-   */
   async pinAuditToDocs(repoId: string, path: string) {
     return trpc.analysis.pinAuditToDocs.mutate({ path, repoId });
   },
