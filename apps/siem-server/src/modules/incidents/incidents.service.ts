@@ -1,12 +1,11 @@
-import type { PaginatedResponse } from "@doxynix/shared";
 import { desc } from "drizzle-orm";
 
 import { db } from "@/core/db/db";
-import { executePaginatedQuery } from "@/core/db/pagination";
+import { executePaginatedQuery, type PaginatedResponse } from "@/core/db/pagination";
 import { type FindingSelect, type IncidentSelect, incidents } from "@/core/db/schema";
 import { combineConditions, eqIf, ilikeIf } from "@/core/db/utils";
 
-import type { GetIncidentsQuery } from "./incidents.schema";
+import { type GetIncidentsQuery } from "./incidents.schema";
 
 export async function getIncidentsList(
   query: GetIncidentsQuery,

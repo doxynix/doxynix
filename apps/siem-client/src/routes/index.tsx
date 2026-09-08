@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { hcWithType } from "@doxynix/siem-server/client";
+import { hc } from "hono/client";
+import { type AppType } from "@doxynix/siem-server";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -9,7 +10,7 @@ export const Route = createFileRoute("/")({
 });
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL ?? "";
-const client = hcWithType(SERVER_URL);
+const client = hc<AppType>(SERVER_URL);
 
 type LogEntry = {
   timestamp: string;
@@ -107,7 +108,10 @@ function Index() {
           <p className="text-gray-500">Waiting logs from Axiom...</p>
         ) : (
           logs.map((log) => (
-            <div className="border-gray-900 border-b pb-1" key={`${log.timestamp}-${log.message}`}>
+            <div
+              className="border-gray-900 border-b pb-1"
+              key={`${log.timestamp}-${log.message}`}
+            >
               <span className="text-gray-500">
                 [{log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : "N/A"}]
               </span>{" "}

@@ -1,4 +1,4 @@
-import { EventEmitter } from "eventemitter3";
+import { EventEmitter } from "node:events";
 
 export const APP_EVENTS = {
   LOGS_INGESTED: "logs:ingested",
@@ -21,6 +21,4 @@ type EventTypes = {
   [APP_EVENTS.LOGS_INGESTED]: [data: LogsIngestedPayload];
 };
 
-class StrictEventEmitter extends EventEmitter<EventTypes> {}
-
-export const bus = new StrictEventEmitter();
+export const bus = new EventEmitter<EventTypes>();

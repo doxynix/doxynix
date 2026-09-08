@@ -1,4 +1,3 @@
-import { SEVERITY_LEVELS } from "@doxynix/shared";
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
@@ -20,6 +19,9 @@ export const citext = customType<{ data: string }>({
     return "citext";
   },
 });
+
+export const SEVERITY_LEVELS = ["low", "medium", "high", "critical"] as const;
+export type Severity = (typeof SEVERITY_LEVELS)[number];
 
 export const rolesEnum = pgEnum("roles", ["analyst", "admin"]);
 export const severityEnum = pgEnum("severity_level", SEVERITY_LEVELS);
