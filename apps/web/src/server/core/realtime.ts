@@ -1,4 +1,4 @@
-import type { Status } from "@prisma/client";
+import { type Status } from "@doxynix/shared";
 import Ably from "ably";
 
 import { IS_PROD } from "@/shared/constants/env.flags";
