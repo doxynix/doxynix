@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.1](https://github.com/doxynix/doxynix/compare/web-v3.1.0...web-v3.1.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency nodemailer to v10 ([#2102](https://github.com/doxynix/doxynix/issues/2102)) ([c0b3dc3](https://github.com/doxynix/doxynix/commit/c0b3dc34367848237452d075b52d789c14b23713))
+
 ## [3.1.0](https://github.com/doxynix/doxynix/compare/web-v3.0.10...web-v3.1.0) (2026-09-05)
 
 
