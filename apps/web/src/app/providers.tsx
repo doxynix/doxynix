@@ -70,12 +70,20 @@ export function Providers({ children }: Readonly<Props>) {
   );
 
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+    <trpc.Provider
+      client={trpcClient}
+      queryClient={queryClient}
+    >
       <QueryClientProvider client={queryClient}>
         <RealtimeProvider>
           <InnerProviders>{children}</InnerProviders>
         </RealtimeProvider>
-        {IS_DEV && <ReactQueryDevtools initialIsOpen={false} theme="dark" />}
+        {IS_DEV && (
+          <ReactQueryDevtools
+            initialIsOpen={false}
+            theme="dark"
+          />
+        )}
       </QueryClientProvider>
     </trpc.Provider>
   );

@@ -15,7 +15,7 @@ import {
 } from "@/shared/ui/core/pagination";
 import { Spinner } from "@/shared/ui/core/spinner";
 
-import type { RepoMeta } from "@/entities/repo/model/repo.types";
+import { type RepoMeta } from "@/entities/repo/model/repo.types";
 
 type Props = {
   className?: string;

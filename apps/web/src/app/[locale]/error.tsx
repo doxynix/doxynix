@@ -108,8 +108,14 @@ export default function ErrorPage({
         </div>
 
         <div className="flex flex-col items-center justify-center gap-3 pt-4 sm:flex-row">
-          <BackOrLinkButton className="cursor-pointer" label={tCommon("back")} />
-          <AppButton className="cursor-pointer" onClick={reset}>
+          <BackOrLinkButton
+            className="cursor-pointer"
+            label={tCommon("back")}
+          />
+          <AppButton
+            className="cursor-pointer"
+            onClick={reset}
+          >
             {t("try_recover_btn")}
           </AppButton>
         </div>
@@ -118,12 +124,23 @@ export default function ErrorPage({
       <footer className="mt-12 flex flex-col gap-4 text-sm">
         <div>
           <span>{t("footer")} </span>
-          <a className="underline hover:no-underline" href={mailtoLink}>
+          <a
+            className="underline hover:no-underline"
+            href={mailtoLink}
+          >
             support@doxynix.space
           </a>
         </div>
-        <AppButton asChild className="mx-auto w-fit" size="sm" variant="outline">
-          <ExternalLink className="flex items-center gap-2.5" href="https://status.doxynix.space">
+        <AppButton
+          asChild
+          className="mx-auto w-fit"
+          size="sm"
+          variant="outline"
+        >
+          <ExternalLink
+            className="flex items-center gap-2.5"
+            href="https://status.doxynix.space"
+          >
             Check System Status
           </ExternalLink>
         </AppButton>

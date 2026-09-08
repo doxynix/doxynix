@@ -70,7 +70,12 @@ export function SystemStatus({ className }: Readonly<{ className?: string }>) {
       {isLoading ? (
         <Skeleton className="h-8 w-45" />
       ) : (
-        <AppButton asChild className="cursor-pointer" size="sm" variant="outline">
+        <AppButton
+          asChild
+          className="cursor-pointer"
+          size="sm"
+          variant="outline"
+        >
           <ExternalLink
             className={cn("flex items-center gap-2", current.textColor)}
             href="https://status.doxynix.space"

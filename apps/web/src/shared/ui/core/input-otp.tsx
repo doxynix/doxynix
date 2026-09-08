@@ -24,7 +24,11 @@ InputOTP.displayName = "InputOTP";
 
 const InputOTPGroup = forwardRef<ComponentRef<"div">, ComponentPropsWithoutRef<"div">>(
   ({ className, ...props }, ref) => (
-    <div className={cn("flex items-center", className)} ref={ref} {...props} />
+    <div
+      className={cn("flex items-center", className)}
+      ref={ref}
+      {...props}
+    />
   ),
 );
 InputOTPGroup.displayName = "InputOTPGroup";

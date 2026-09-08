@@ -20,7 +20,10 @@ export function LanguagesSkeleton() {
       <CardContent>
         <div className="flex flex-col gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div className="flex flex-col gap-1" key={i}>
+            <div
+              className="flex flex-col gap-1"
+              key={i}
+            >
               <div className="flex justify-between text-xs">
                 <Skeleton className="h-3 w-12" />
                 <Skeleton className="h-3 w-20" />
@@ -96,7 +99,10 @@ export function RefactoringTargetsSkeleton() {
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-6 pt-4 md:grid-cols-2">
         {Array.from({ length: 2 }).map((_, idx) => (
-          <div className="flex flex-col gap-3" key={idx}>
+          <div
+            className="flex flex-col gap-3"
+            key={idx}
+          >
             <div className="flex items-center gap-2">
               <Skeleton className="size-4" />
               <Skeleton className="h-4 w-32" />
@@ -170,7 +176,10 @@ export function TrendsWidgetsSkeleton() {
         <div className="relative h-75 w-full">
           <div className="absolute inset-0 flex flex-col justify-between py-2">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div className="flex items-center gap-4" key={i}>
+              <div
+                className="flex items-center gap-4"
+                key={i}
+              >
                 <Skeleton className="h-3 w-8" />
                 <div className="h-px flex-1 bg-border" />
               </div>

@@ -9,7 +9,7 @@ import { commandMenuItems } from "@/shared/constants/navigation";
 import { useDebounce } from "@/shared/hooks/use-debounce";
 import { useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
-import type { MenuItem } from "@/shared/types/navigation.types";
+import { type MenuItem } from "@/shared/types/navigation.types";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   CommandDialog,
@@ -150,7 +150,10 @@ export function AppCommandMenu() {
 
   return (
     <>
-      <AppTooltip className="lg:hidden" content="Search site">
+      <AppTooltip
+        className="lg:hidden"
+        content="Search site"
+      >
         <AppButton
           aria-label="Search site"
           className={cn(
@@ -168,7 +171,11 @@ export function AppCommandMenu() {
         </AppButton>
       </AppTooltip>
 
-      <CommandDialog onOpenChange={setOpen} open={open} shouldFilter={false}>
+      <CommandDialog
+        onOpenChange={setOpen}
+        open={open}
+        shouldFilter={false}
+      >
         <CommandInput
           isLoading={isLoading}
           onValueChange={setSearch}
@@ -270,7 +277,10 @@ export function AppCommandMenu() {
                     </CommandItem>
                   ))}
                 {hasNextPage && (
-                  <div className="my-2 flex items-center justify-center" ref={observerTarget}>
+                  <div
+                    className="my-2 flex items-center justify-center"
+                    ref={observerTarget}
+                  >
                     {isFetchingNextPage && <Spinner />}
                   </div>
                 )}

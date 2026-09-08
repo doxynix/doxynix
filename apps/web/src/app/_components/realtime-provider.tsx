@@ -12,7 +12,7 @@ import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 import { useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 
-import type { RepoStatus } from "@/entities/repo/model/repo.types";
+import { type RepoStatus } from "@/entities/repo/model/repo.types";
 import { useRepoActions } from "@/entities/repo/model/use-repo-actions";
 
 import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";

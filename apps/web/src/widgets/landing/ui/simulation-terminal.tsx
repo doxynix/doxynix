@@ -85,7 +85,10 @@ export function SimulationTerminal() {
   }, [isInView]);
 
   return (
-    <div className="h-full w-full" ref={containerRef}>
+    <div
+      className="h-full w-full"
+      ref={containerRef}
+    >
       <TerminalWindow>
         <div className="flex items-center text-muted-foreground">
           <span className="mr-2 text-success">➜</span>

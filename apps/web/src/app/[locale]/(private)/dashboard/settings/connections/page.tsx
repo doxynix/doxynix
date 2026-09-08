@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { type Metadata } from "next";
 
 import { ConnectionsListContainer } from "@/features/connections/ui/connections-list-container";
 

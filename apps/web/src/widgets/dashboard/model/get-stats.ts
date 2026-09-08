@@ -11,7 +11,7 @@ import {
 
 import { getHealthClasses } from "@/entities/repo/model/get-health-color";
 
-import type { DashboardStats } from "./dashboard.types";
+import { type DashboardStats } from "./dashboard.types";
 
 type TFunction = (key: string) => string;
 

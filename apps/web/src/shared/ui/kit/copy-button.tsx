@@ -26,7 +26,10 @@ export function CopyButton({
   const { copy, isCopied } = useCopyToClipboard();
 
   return (
-    <AppTooltip content={tooltipText} side={tooltipSide}>
+    <AppTooltip
+      content={tooltipText}
+      side={tooltipSide}
+    >
       <AppButton
         aria-label={tooltipText}
         className={cn(

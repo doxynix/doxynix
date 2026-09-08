@@ -4,7 +4,7 @@ import { useState } from "react";
 import { format, subDays, subHours, subMinutes } from "date-fns";
 import { Check, Clock } from "lucide-react";
 import { useQueryStates } from "nuqs";
-import type { DateRange } from "react-day-picker";
+import { type DateRange } from "react-day-picker";
 
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
@@ -88,7 +88,10 @@ export function DashboardDatePeriod() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <AppButton className="bg-background" variant="outline">
+        <AppButton
+          className="bg-background"
+          variant="outline"
+        >
           <Clock />
           {activePeriod ? (
             activePeriod.label
@@ -101,7 +104,10 @@ export function DashboardDatePeriod() {
           )}
         </AppButton>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-auto p-0">
+      <PopoverContent
+        align="end"
+        className="w-auto p-0"
+      >
         <div className="flex">
           <div className="flex w-40 flex-col p-2">
             <p className="px-2 py-1.5 text-center text-muted-foreground text-xs">Quick Range</p>

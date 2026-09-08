@@ -109,7 +109,10 @@ export function PricingSection() {
               </AppButton>
               <ul className="flex flex-1 flex-col gap-3">
                 {plan.features.map((f) => (
-                  <li className="flex items-start gap-2 text-sm" key={f}>
+                  <li
+                    className="flex items-start gap-2 text-sm"
+                    key={f}
+                  >
                     <Check className="mt-0.5" />
                     {f}
                   </li>

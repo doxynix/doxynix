@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { type ComponentProps } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/shared/lib/cn";

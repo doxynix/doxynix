@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/shared/ui/core/accordion";
 
@@ -11,7 +11,10 @@ type Props = {
 
 export function AccordionListItem({ className, content, trigger, value }: Readonly<Props>) {
   return (
-    <AccordionItem className={className} value={value}>
+    <AccordionItem
+      className={className}
+      value={value}
+    >
       <AccordionTrigger className="text-left font-bold">{trigger}</AccordionTrigger>
       <AccordionContent>{content}</AccordionContent>
     </AccordionItem>

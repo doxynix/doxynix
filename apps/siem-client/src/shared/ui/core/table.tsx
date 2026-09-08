@@ -49,7 +49,11 @@ Table.displayName = "Table";
 
 const TableHead = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTMLTableSectionElement>>(
   ({ className, ...props }, forwardedRef) => (
-    <thead className={cx(className)} ref={forwardedRef} {...props} />
+    <thead
+      className={cx(className)}
+      ref={forwardedRef}
+      {...props}
+    />
   ),
 );
 

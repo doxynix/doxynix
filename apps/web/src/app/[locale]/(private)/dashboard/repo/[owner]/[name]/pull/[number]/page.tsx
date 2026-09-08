@@ -23,5 +23,12 @@ export default async function PullRequestDetailPage({ params }: Readonly<Props>)
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
-  return <RepoPullDetailContainer name={name} owner={owner} prNumber={prNumber} repoId={repo.id} />;
+  return (
+    <RepoPullDetailContainer
+      name={name}
+      owner={owner}
+      prNumber={prNumber}
+      repoId={repo.id}
+    />
+  );
 }

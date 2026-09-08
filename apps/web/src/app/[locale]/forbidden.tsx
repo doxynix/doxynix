@@ -15,7 +15,10 @@ export default function ForbiddenPage() {
           You do not have administrator permissions to view this page. If you believe this is an
           error, please contact support at support@doxynix.space
         </p>
-        <AppButton asChild variant="outline">
+        <AppButton
+          asChild
+          variant="outline"
+        >
           <Link href="/">Back to Home</Link>
         </AppButton>
       </div>

@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { redirect, unauthorized } from "next/navigation";
-import type { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";

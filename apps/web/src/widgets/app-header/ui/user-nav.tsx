@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Route } from "next";
+import { type Route } from "next";
 import { LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -72,7 +72,10 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <AppButton className="flex cursor-pointer items-center gap-3" size="icon">
+        <AppButton
+          className="flex cursor-pointer items-center gap-3"
+          size="icon"
+        >
           <AppAvatar
             alt={user?.name ?? "User"}
             className="size-9 border-0"
@@ -83,7 +86,10 @@ export function UserNav() {
           />
         </AppButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent
+        align="end"
+        className="w-56"
+      >
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col gap-1">
             <p className="truncate font-medium text-sm">{name}</p>
@@ -93,8 +99,15 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           {userNavMenu.map((item) => (
-            <DropdownMenuItem asChild className="group" key={item.href}>
-              <Link className="flex items-center" href={item.href as Route}>
+            <DropdownMenuItem
+              asChild
+              className="group"
+              key={item.href}
+            >
+              <Link
+                className="flex items-center"
+                href={item.href as Route}
+              >
                 {item.icon != null && <item.icon />}
                 <span>{item.label}</span>
                 {item.shortcut != null && (
@@ -127,7 +140,11 @@ export function UserNav() {
             <div className="flex flex-col gap-4">
               <div className="flex justify-end gap-2">
                 <DialogClose asChild>
-                  <AppButton className="cursor-pointer" disabled={loading} variant="outline">
+                  <AppButton
+                    className="cursor-pointer"
+                    disabled={loading}
+                    variant="outline"
+                  >
                     {tCommon("cancel")}
                   </AppButton>
                 </DialogClose>

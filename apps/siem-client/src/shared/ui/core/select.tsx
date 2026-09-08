@@ -82,7 +82,10 @@ const SelectScrollUpButton = forwardRef<
     ref={forwardedRef}
     {...props}
   >
-    <RiArrowUpSLine aria-hidden="true" className="size-3 shrink-0" />
+    <RiArrowUpSLine
+      aria-hidden="true"
+      className="size-3 shrink-0"
+    />
   </SelectPrimitives.ScrollUpButton>
 ));
 SelectScrollUpButton.displayName = SelectPrimitives.ScrollUpButton.displayName;
@@ -96,7 +99,10 @@ const SelectScrollDownButton = forwardRef<
     ref={forwardedRef}
     {...props}
   >
-    <RiArrowDownSLine aria-hidden="true" className="size-3 shrink-0" />
+    <RiArrowDownSLine
+      aria-hidden="true"
+      className="size-3 shrink-0"
+    />
   </SelectPrimitives.ScrollDownButton>
 ));
 SelectScrollDownButton.displayName = SelectPrimitives.ScrollDownButton.displayName;

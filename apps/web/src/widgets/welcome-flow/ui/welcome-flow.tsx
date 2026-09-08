@@ -1,11 +1,11 @@
 "use client";
 
-import type { ComponentType } from "react";
+import { type ComponentType } from "react";
 import { Book, ChartNoAxesColumn } from "lucide-react";
 import { useLocale } from "next-intl";
 
 import { useRouter } from "@/shared/i18n/navigation";
-import type { User } from "@/shared/lib/auth-client";
+import { type User } from "@/shared/lib/auth-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 
@@ -69,7 +69,10 @@ export function WelcomeFlow({ user }: Readonly<Props>) {
 
       <div className="fade-in slide-in-from-bottom-8 flex animate-in items-center justify-center gap-4 duration-300">
         {FEATURE_CARDS.map((item) => (
-          <Card className={"flex w-full flex-col"} key={item.title}>
+          <Card
+            className={"flex w-full flex-col"}
+            key={item.title}
+          >
             <CardHeader>
               <item.icon className="size-5" />
               <CardTitle className="font-bold text-lg">{item.title}</CardTitle>
