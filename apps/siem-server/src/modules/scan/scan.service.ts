@@ -1,10 +1,9 @@
-import type { ScanResult } from "@doxynix/shared";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/core/db/db";
 import { cronSyncState, findings, incidents, rules } from "@/core/db/schema";
 
-import { analyzeLogContent } from "./scan.engine";
+import { analyzeLogContent, type ScanResult } from "./scan.engine";
 
 export type CheckpointState = {
   serviceName: string;

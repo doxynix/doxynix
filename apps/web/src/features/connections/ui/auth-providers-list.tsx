@@ -16,7 +16,7 @@ import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { ConnectionCard } from "@/entities/connection/ui/connection-card";
-import type { LinkedAccounts, LinkedUser } from "@/entities/user/model/user.types";
+import { type LinkedAccounts, type LinkedUser } from "@/entities/user/model/user.types";
 
 type Props = {
   accounts: LinkedAccounts;
@@ -86,7 +86,11 @@ export function AuthProvidersList({ accounts, user }: Readonly<Props>) {
 
         const customIcon =
           linked?.image != null ? (
-            <AppAvatar alt={provider.name} fallbackText={provider.name} src={linked.image} />
+            <AppAvatar
+              alt={provider.name}
+              fallbackText={provider.name}
+              src={linked.image}
+            />
           ) : (
             provider.icon
           );
@@ -170,7 +174,11 @@ function ProviderAction({
     return (
       <AppTooltip content="You cannot delete your last connection">
         <div>
-          <AppButton disabled size="sm" variant="destructive">
+          <AppButton
+            disabled
+            size="sm"
+            variant="destructive"
+          >
             Disconnect
           </AppButton>
         </div>
@@ -205,7 +213,10 @@ function ProviderAction({
       successAlertTitle="Pro-tip"
       title={`Disconnect ${provider.name}`}
       trigger={
-        <AppButton size="sm" variant="destructive">
+        <AppButton
+          size="sm"
+          variant="destructive"
+        >
           Disconnect
         </AppButton>
       }

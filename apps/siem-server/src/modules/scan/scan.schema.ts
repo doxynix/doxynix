@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 
 const MAX_LOG_SIZE_CHARS = 2 * 1024 * 1024;
 

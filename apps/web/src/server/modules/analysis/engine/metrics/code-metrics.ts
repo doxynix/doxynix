@@ -3,23 +3,23 @@ import { creator as canaryPreset } from "@secretlint/secretlint-rule-preset-cana
 import { clamp, uniq } from "es-toolkit";
 import { isExtensionSupported, parse } from "leasot";
 import { normalize } from "pathe";
-import sloc, { type Extension } from "sloc";
 
 import { appLogger } from "@/server/core/app-logger";
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
+import { countSourceStats } from "@/server/utils/code-counter";
 import { normalizeLanguageName } from "@/server/utils/language-metadata";
 import { getFileExtension } from "@/server/utils/path-operations";
 
 import { calculateDocDensity } from "../core/common";
-import type {
-  RepositoryEvidence,
-  SecretLintMessage,
-  SecurityFindingMetric,
-  StructuralSignals,
+import {
+  type RepositoryEvidence,
+  type SecretLintMessage,
+  type SecurityFindingMetric,
+  type StructuralSignals,
 } from "../core/discovery.types";
 import { FactCollector } from "../core/fact-collector";
 import { linguistStyleLabel } from "../core/file-classifier";
-import type { RepoMetrics } from "../core/metrics.types";
+import { type RepoMetrics } from "../core/metrics.types";
 import { collectStructuralSignals, scoreStructuralModularity } from "../core/structure";
 import { collectPolyglotSignals } from "../extractors/language-signals";
 import { OpenApiDiscoveryEngine } from "../extractors/openapi-inventory";
@@ -109,19 +109,16 @@ async function collectTodoCount(content: string, extensionWithDot: string, norma
 
 function collectSourceStats(content: string, extension: string) {
   try {
-    const slocExt = extension as Extension;
-    if (sloc.extensions.includes(slocExt)) {
-      const stats = sloc(content, slocExt);
-      return {
-        comments: stats.comment,
-        source: stats.source,
-      };
-    }
+    const stats = countSourceStats(content, extension);
+    return {
+      comments: stats.comments,
+      source: stats.source,
+    };
   } catch (error) {
     appLogger.debug({
       error,
       extension,
-      msg: "SLOC parser failed, using fallback line counting",
+      msg: "Source stats parser failed, using fallback line counting",
     });
   }
 

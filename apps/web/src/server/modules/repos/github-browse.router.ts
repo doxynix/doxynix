@@ -1,6 +1,5 @@
-import { z } from "zod";
-
-import { GitHubQuerySchema } from "@/shared/api/schemas/repo";
+import { GitHubQuerySchema } from "@doxynix/shared";
+import * as z from "zod";
 
 import { githubBrowseService } from "@/server/core/github/github-browse.service";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";

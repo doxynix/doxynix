@@ -1,12 +1,12 @@
 import { countBy, orderBy, uniqBy } from "es-toolkit";
 
-import type { DependencyNodeMetric } from "@/server/utils/types";
+import { type DependencyNodeMetric } from "@/server/utils/types";
 
-import type {
-  ConfigRef,
-  EntrypointRef,
-  FileCategoryBreakdownItem,
-  ModuleRef,
+import {
+  type ConfigRef,
+  type EntrypointRef,
+  type FileCategoryBreakdownItem,
+  type ModuleRef,
 } from "./discovery.types";
 import { kindForFile } from "./evidence-collector";
 import { ProjectPolicy } from "./project-policy";

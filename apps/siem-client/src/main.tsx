@@ -1,3 +1,4 @@
+import "zod/compile";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -6,7 +7,7 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
 // oxlint-disable-next-line import/no-unassigned-import
-import "./global.css";
+import "./globals.css";
 
 const queryClient = new QueryClient();
 

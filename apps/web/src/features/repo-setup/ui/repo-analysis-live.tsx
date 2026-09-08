@@ -2,7 +2,7 @@
 
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
-import { z } from "zod";
+import * as z from "zod/mini";
 
 import { trpc } from "@/shared/api/trpc";
 import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
@@ -23,9 +23,13 @@ type Props = {
   repoId: string;
 };
 
-const parseProgress = (val: unknown) => z.number().min(0).max(100).catch(0).parse(val);
-const parseStatusMessage = (val: unknown) => z.string().catch("Analyzing repository…").parse(val);
-const parseTaskLogs = (val: unknown) => z.array(z.string()).catch([]).parse(val);
+const parseProgress = (val: unknown) =>
+  z.catch(z.number().check(z.gte(0), z.lte(100)), 0).parse(val);
+
+const parseStatusMessage = (val: unknown) =>
+  z.catch(z.string(), "Analyzing repository…").parse(val);
+
+const parseTaskLogs = (val: unknown) => z.catch(z.array(z.string()), []).parse(val);
 
 export function RepoAnalysisLive({
   accessToken,
@@ -127,7 +131,10 @@ export function RepoAnalysisLive({
           </span>
           <span>{progress}%</span>
         </div>
-        <Progress indicatorClassName="bg-foreground" value={progress} />
+        <Progress
+          indicatorClassName="bg-foreground"
+          value={progress}
+        />
       </div>
 
       <AnalysisTerminal logs={logs} />
@@ -139,12 +146,18 @@ export function RepoAnalysisLive({
           </AppButton>
         )}
         {(isFinished || isFailed) && (
-          <AppButton onClick={() => handleCancel(repoId, analysisId)} variant="outline">
+          <AppButton
+            onClick={() => handleCancel(repoId, analysisId)}
+            variant="outline"
+          >
             Start New Audit
           </AppButton>
         )}
         {isPending && (
-          <AppButton onClick={() => handleCancel(repoId, analysisId)} variant="destructive">
+          <AppButton
+            onClick={() => handleCancel(repoId, analysisId)}
+            variant="destructive"
+          >
             Cancel
           </AppButton>
         )}

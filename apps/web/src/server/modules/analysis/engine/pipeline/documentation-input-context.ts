@@ -1,7 +1,10 @@
-import type { RepositoryEvidence } from "../core/discovery.types";
-import type { ArchitectureSectionBody, DocumentationInputModel } from "../core/documentation.types";
+import { type RepositoryEvidence } from "../core/discovery.types";
+import {
+  type ArchitectureSectionBody,
+  type DocumentationInputModel,
+} from "../core/documentation.types";
 import { selectRepositoryFrameworkFacts } from "../core/framework-catalog";
-import type { RepoMetrics } from "../core/metrics.types";
+import { type RepoMetrics } from "../core/metrics.types";
 import { ProjectPolicy } from "../core/project-policy";
 import {
   getPrimaryArchitectureModules,

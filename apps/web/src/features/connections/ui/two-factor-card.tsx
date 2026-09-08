@@ -133,7 +133,10 @@ export function TwoFactorCard() {
               Disconnect
             </LoadingButton>
           ) : (
-            <AppButton onClick={() => void handleOpenSetup()} size="sm">
+            <AppButton
+              onClick={() => void handleOpenSetup()}
+              size="sm"
+            >
               Setup
             </AppButton>
           )
@@ -217,7 +220,10 @@ export function TwoFactorCard() {
               ) : (
                 totpUri && (
                   <div className="rounded-xl bg-white p-2">
-                    <QRCode size={180} value={totpUri} />
+                    <QRCode
+                      size={180}
+                      value={totpUri}
+                    />
                   </div>
                 )
               )}
@@ -234,17 +240,35 @@ export function TwoFactorCard() {
                   value={verificationCode}
                 >
                   <InputOTPGroup>
-                    <InputOTPSlot className="h-12 w-12 text-lg" index={0} />
-                    <InputOTPSlot className="h-12 w-12 text-lg" index={1} />
-                    <InputOTPSlot className="h-12 w-12 text-lg" index={2} />
+                    <InputOTPSlot
+                      className="h-12 w-12 text-lg"
+                      index={0}
+                    />
+                    <InputOTPSlot
+                      className="h-12 w-12 text-lg"
+                      index={1}
+                    />
+                    <InputOTPSlot
+                      className="h-12 w-12 text-lg"
+                      index={2}
+                    />
                   </InputOTPGroup>
 
                   <InputOTPSeparator className="mx-1 text-muted-foreground" />
 
                   <InputOTPGroup>
-                    <InputOTPSlot className="h-12 w-12 text-lg" index={3} />
-                    <InputOTPSlot className="h-12 w-12 text-lg" index={4} />
-                    <InputOTPSlot className="h-12 w-12 text-lg" index={5} />
+                    <InputOTPSlot
+                      className="h-12 w-12 text-lg"
+                      index={3}
+                    />
+                    <InputOTPSlot
+                      className="h-12 w-12 text-lg"
+                      index={4}
+                    />
+                    <InputOTPSlot
+                      className="h-12 w-12 text-lg"
+                      index={5}
+                    />
                   </InputOTPGroup>
                 </InputOTP>
               </div>
@@ -253,7 +277,10 @@ export function TwoFactorCard() {
 
           <DialogFooter>
             {backupCodes && enable2FA.isSuccess ? (
-              <AppButton className="w-full" onClick={() => setIsSetupOpen(false)}>
+              <AppButton
+                className="w-full"
+                onClick={() => setIsSetupOpen(false)}
+              >
                 Done
               </AppButton>
             ) : (

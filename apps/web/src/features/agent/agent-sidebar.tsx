@@ -21,7 +21,10 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
     return (
       <>
         {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton className="h-6 w-full" key={i} />
+          <Skeleton
+            className="h-6 w-full"
+            key={i}
+          />
         ))}
       </>
     );
@@ -39,7 +42,12 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
     <div className="fade-in flex h-full animate-in flex-col">
       <div className="flex h-12 items-center justify-between border-b bg-card px-4 py-6">
         <h3 className="font-bold text-muted-foreground text-xs">History</h3>
-        <AppButton className="size-6" onClick={onNewChat} size="icon" variant="ghost">
+        <AppButton
+          className="size-6"
+          onClick={onNewChat}
+          size="icon"
+          variant="ghost"
+        >
           <Plus />
         </AppButton>
       </div>
@@ -56,7 +64,10 @@ export function AgentSidebar({ onNewChat, sessionId, sessions, setSessionId }: R
                 key={repoKey}
               >
                 <CollapsibleTrigger asChild>
-                  <AppButton className="justify-start text-left text-xs" variant="ghost">
+                  <AppButton
+                    className="justify-start text-left text-xs"
+                    variant="ghost"
+                  >
                     <div className="flex min-w-0 items-center gap-1">
                       <Folder className="text-muted-foreground" />
                       <span className="truncate">{repoKey}</span>

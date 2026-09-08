@@ -1,6 +1,5 @@
+import { StatusSchema, VisibilitySchema } from "@doxynix/shared";
 import { parseAsInteger, parseAsString, parseAsStringLiteral } from "nuqs/server";
-
-import { StatusSchema, VisibilitySchema } from "@/shared/api-contracts";
 
 const REPO_DEFAULTS = {
   PAGE: 1,

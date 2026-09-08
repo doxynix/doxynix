@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import { type UserRole } from "@doxynix/shared";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
@@ -12,8 +12,8 @@ import {
 } from "@/server/utils/request-context";
 
 import { appLogger } from "../app-logger";
-import type { DbClient } from "../db";
-import type { Context } from "./context";
+import { type DbClient } from "../db";
+import { type Context } from "./context";
 
 const t = initTRPC.context<Context>().create({
   errorFormatter({ ctx, error, shape }) {

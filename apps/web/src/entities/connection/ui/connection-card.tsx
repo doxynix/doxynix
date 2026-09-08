@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent } from "@/shared/ui/core/card";
@@ -22,7 +22,10 @@ export function ConnectionCard({ action, description, icon, status, title }: Rea
             <div className="flex items-center gap-2">
               <span className="text-sm">{title}</span>
               {status != null && (
-                <AppBadge className="text-success" variant="outline">
+                <AppBadge
+                  className="text-success"
+                  variant="outline"
+                >
                   {status}
                 </AppBadge>
               )}

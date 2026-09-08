@@ -1,13 +1,12 @@
-import type { PaginatedResponse } from "@doxynix/shared";
 import { desc, eq } from "drizzle-orm";
 import postgres from "postgres";
 
 import { db } from "@/core/db/db";
-import { executePaginatedQuery } from "@/core/db/pagination";
+import { executePaginatedQuery, type PaginatedResponse } from "@/core/db/pagination";
 import { type RuleSelect, rules } from "@/core/db/schema";
 import { combineConditions, eqIf, searchIf } from "@/core/db/utils";
 
-import type { CreateRuleInput, GetRulesQuery, UpdateRuleInput } from "./rules.schema";
+import { type CreateRuleInput, type GetRulesQuery, type UpdateRuleInput } from "./rules.schema";
 
 export async function getRulesList(query: GetRulesQuery): Promise<PaginatedResponse<RuleSelect>> {
   const { page, limit, severity, isActive, search } = query;

@@ -216,7 +216,10 @@ export default function AgentTextMessage({ content, id }: Readonly<Props>) {
   return (
     <div className="prose prose-sm dark:prose-invert w-full max-w-none text-left transition-standard">
       {blocks.map((block, index) => (
-        <MarkdownBlock content={block} key={`${id}-block_${index}`} />
+        <MarkdownBlock
+          content={block}
+          key={`${id}-block_${index}`}
+        />
       ))}
     </div>
   );

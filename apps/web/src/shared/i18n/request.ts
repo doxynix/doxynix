@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import * as rootParams from "next/root-params";
 import { getRequestConfig } from "next-intl/server";
 
-import type { Locale } from "@/shared/constants/locales";
+import { type Locale } from "@/shared/constants/locales";
 
 import { routing } from "./routing";
 

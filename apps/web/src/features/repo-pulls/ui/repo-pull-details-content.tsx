@@ -26,7 +26,7 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
-import type { PRImpact, PRNumber } from "@/entities/pr/model/pr.types";
+import { type PRImpact, type PRNumber } from "@/entities/pr/model/pr.types";
 import {
   buildRepoCodeHref,
   buildRepoDocsHref,
@@ -160,7 +160,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardContent className="flex flex-col gap-3">
             {affectedZones.length > 0 ? (
               affectedZones.map((zone) => (
-                <div className="rounded-xl border p-4" key={zone.nodeId}>
+                <div
+                  className="rounded-xl border p-4"
+                  key={zone.nodeId}
+                >
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div>
                       <p className="font-medium">{zone.label}</p>
@@ -174,7 +177,11 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     <span>{zone.kind}</span>
                     <span>{zone.relatedChangedFiles}</span>
                   </div>
-                  <AppButton asChild size="sm" variant="outline">
+                  <AppButton
+                    asChild
+                    size="sm"
+                    variant="outline"
+                  >
                     <Link href={buildRepoMapHref({ name, nodeId: zone.nodeId, owner })}>
                       <Map /> Open in map
                     </Link>
@@ -198,7 +205,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardContent className="flex flex-col gap-3">
             {affectedNodes.length > 0 ? (
               affectedNodes.map((node) => (
-                <div className="rounded-xl border p-4" key={node.nodeId}>
+                <div
+                  className="rounded-xl border p-4"
+                  key={node.nodeId}
+                >
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div>
                       <p className="font-medium">{node.label}</p>
@@ -214,7 +224,11 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     <span>{node.kind}</span>
                     <span>{node.relatedChangedFiles}</span>
                   </div>
-                  <AppButton asChild size="sm" variant="outline">
+                  <AppButton
+                    asChild
+                    size="sm"
+                    variant="outline"
+                  >
                     <Link href={buildRepoMapHref({ name, nodeId: node.nodeId, owner })}>
                       <Map /> Open in map
                     </Link>
@@ -239,7 +253,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardContent className="flex flex-col gap-3">
             {changedFiles.length > 0 ? (
               changedFiles.map((file) => (
-                <div className="rounded-xl border p-4" key={file.filePath}>
+                <div
+                  className="rounded-xl border p-4"
+                  key={file.filePath}
+                >
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <code className="text-sm">{file.filePath}</code>
                     <AppBadge variant="outline">{file.status}</AppBadge>
@@ -251,7 +268,11 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                     {file.zoneLabel != null && <span>{file.zoneLabel}</span>}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <AppButton asChild size="sm" variant="ghost">
+                    <AppButton
+                      asChild
+                      size="sm"
+                      variant="ghost"
+                    >
                       <Link
                         href={buildRepoCodeHref({
                           name,
@@ -265,14 +286,22 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                       </Link>
                     </AppButton>
                     {file.zoneId != null && (
-                      <AppButton asChild size="sm" variant="ghost">
+                      <AppButton
+                        asChild
+                        size="sm"
+                        variant="ghost"
+                      >
                         <Link href={buildRepoMapHref({ name, nodeId: file.zoneId, owner })}>
                           <Map /> Map
                         </Link>
                       </AppButton>
                     )}
                     {file.nodeId != null && (
-                      <AppButton asChild size="sm" variant="ghost">
+                      <AppButton
+                        asChild
+                        size="sm"
+                        variant="ghost"
+                      >
                         <Link href={buildRepoDocsHref({ name, nodeId: file.nodeId, owner })}>
                           <FileText /> Docs
                         </Link>
@@ -374,7 +403,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           </CardHeader>
           <CardContent className="flex flex-col gap-2 text-sm">
             {PR_DETAILS_ITEMS.map((item) => (
-              <div className="flex items-baseline justify-between" key={item.label}>
+              <div
+                className="flex items-baseline justify-between"
+                key={item.label}
+              >
                 <span className="text-muted-foreground text-xs">{item.label}:</span>
                 <div className="flex items-center gap-1">
                   {item.isCopy === true && (
@@ -394,7 +426,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                       {STATUS_CONFIG[item.value as keyof typeof STATUS_CONFIG].label}
                     </span>
                   ) : item.isTime === true ? (
-                    <TimeAgo date={item.value ?? ""} locale={locale} />
+                    <TimeAgo
+                      date={item.value ?? ""}
+                      locale={locale}
+                    />
                   ) : (
                     <span className={cn("font-medium text-xs")}>N/A</span> // FIXME: пока не допер но вроде тут надо {item.value
                   )}
@@ -414,7 +449,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardContent className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-3 text-sm">
               {IMPACT_STATS.map((stat) => (
-                <div className="rounded-lg border bg-muted p-3" key={stat.label}>
+                <div
+                  className="rounded-lg border bg-muted p-3"
+                  key={stat.label}
+                >
                   <p className="mb-1 font-bold text-muted-foreground text-xs">{stat.label}</p>
                   <p className="font-black text-lg capitalize">{stat.value}</p>
                 </div>
@@ -423,7 +461,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
 
             {impact?.navigationHints.primaryNodeId != null && (
               <div className="flex flex-wrap gap-2">
-                <AppButton asChild size="sm">
+                <AppButton
+                  asChild
+                  size="sm"
+                >
                   <Link
                     href={buildRepoMapHref({
                       name,
@@ -435,7 +476,11 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
                   </Link>
                 </AppButton>
                 {impact.navigationHints.primaryFilePath != null && (
-                  <AppButton asChild size="sm" variant="outline">
+                  <AppButton
+                    asChild
+                    size="sm"
+                    variant="outline"
+                  >
                     <Link
                       href={buildRepoCodeHref({
                         name,
@@ -476,7 +521,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
           <CardContent className="flex flex-col gap-3">
             {topFindings.length > 0 ? (
               topFindings.slice(0, 4).map((finding) => (
-                <div className="rounded-lg border p-3" key={finding.id}>
+                <div
+                  className="rounded-lg border p-3"
+                  key={finding.id}
+                >
                   <div className="mb-1 flex items-center justify-between gap-2">
                     <p className="font-medium text-sm">{finding.title}</p>
                     <AppBadge variant="outline">{finding.riskLevel}</AppBadge>
@@ -505,7 +553,10 @@ export function RepoPullDetailsContent({ analysis, impact, name, owner, repoId }
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {fixes.map((fix) => (
-                <div className="rounded-lg border p-3" key={fix.id}>
+                <div
+                  className="rounded-lg border p-3"
+                  key={fix.id}
+                >
                   <div className="mb-1 flex items-center justify-between gap-2">
                     <p className="font-medium text-sm">{fix.title}</p>
                     <AppBadge variant="outline">{fix.status}</AppBadge>

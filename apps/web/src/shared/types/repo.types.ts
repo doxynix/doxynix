@@ -1,4 +1,4 @@
-import type { VisibilityType } from "../api-contracts";
+import { type Visibility } from "@doxynix/shared";
 
 export type RepoItemFields = {
   description: null | string;
@@ -7,5 +7,5 @@ export type RepoItemFields = {
   languageColor?: string;
   stars: number;
   updatedAt: string;
-  visibility: VisibilityType;
+  visibility: Visibility;
 };

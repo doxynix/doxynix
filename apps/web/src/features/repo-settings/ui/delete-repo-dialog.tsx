@@ -53,7 +53,10 @@ export function DeleteRepoDialog({ id }: Readonly<Props>) {
       successAlertTitle={t("settings_danger_alert_title")}
       title="Delete repository?"
       trigger={
-        <AppButton className="w-fit cursor-pointer" variant="destructive">
+        <AppButton
+          className="w-fit cursor-pointer"
+          variant="destructive"
+        >
           Delete repository <Trash2 />
         </AppButton>
       }

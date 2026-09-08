@@ -1,11 +1,8 @@
 {
   "compilerOptions": {
-    "composite": true,
     "paths": {
-      "@/*": ["./src/*", "../siem-server/src/*"],
-      "@server/*": ["../siem-server/src/*"]
-    },
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo"
+      "@/*": ["./src/*"]
+    }
   },
   "extends": "@doxynix/config/siem-client.json",
   "include": ["src/**/*"]

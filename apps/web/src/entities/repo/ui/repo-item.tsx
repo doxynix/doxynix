@@ -2,7 +2,7 @@ import { Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";
-import type { RepoItemFields } from "@/shared/types/repo.types";
+import { type RepoItemFields } from "@/shared/types/repo.types";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
@@ -30,7 +30,10 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
           <div className="flex items-center gap-1">
             <span className="truncate font-medium text-sm">{repo.fullName}</span>
             <div className="flex shrink-0 items-center gap-1.5 text-xs">
-              <AppBadge className={cn(visibility.color)} variant="outline">
+              <AppBadge
+                className={cn(visibility.color)}
+                variant="outline"
+              >
                 {visibility.label}
               </AppBadge>
             </div>
@@ -38,7 +41,10 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
           <div className={cn("flex shrink-0 items-center gap-1 text-muted-foreground text-xs")}>
             <Star className="size-3 fill-current text-warning" />
             {repo.stars.toLocaleString(locale)}
-            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: langColor }} />
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: langColor }}
+            />
             <div className="flex items-center gap-1 text-xs">{repo.language}</div>
           </div>
         </div>
@@ -48,7 +54,11 @@ export function RepoItem({ disabled, onClick, repo }: Readonly<Props>) {
           </span>
         )}
         <span className="w-fit text-xs">
-          <TimeAgo date={repo.updatedAt} locale={locale} tooltipLabel={t("repo_last_updated")} />
+          <TimeAgo
+            date={repo.updatedAt}
+            locale={locale}
+            tooltipLabel={t("repo_last_updated")}
+          />
         </span>
       </div>
     </AppButton>

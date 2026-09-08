@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType } from "react";
+import { type ComponentType } from "react";
 import { Panel } from "@xyflow/react";
 import { Eye, EyeOff, FocusIcon, Maximize, ZoomIn, ZoomOut } from "lucide-react";
 
@@ -34,9 +34,16 @@ export function RepoMapCustomControls() {
   ];
 
   return (
-    <Panel className="flex flex-col gap-1" position="bottom-left">
+    <Panel
+      className="flex flex-col gap-1"
+      position="bottom-left"
+    >
       {CONTROLS_CONFIG.map((item) => (
-        <AppTooltip content={item.label} key={item.id} side="left">
+        <AppTooltip
+          content={item.label}
+          key={item.id}
+          side="left"
+        >
           <AppButton
             aria-label={item.label}
             className={cn(
@@ -54,8 +61,15 @@ export function RepoMapCustomControls() {
         </AppTooltip>
       ))}
 
-      <AppTooltip content="Toggle Controls (T then C)" side="left">
-        <AppButton onClick={toggleControls} size="icon" variant="outline">
+      <AppTooltip
+        content="Toggle Controls (T then C)"
+        side="left"
+      >
+        <AppButton
+          onClick={toggleControls}
+          size="icon"
+          variant="outline"
+        >
           {hide ? <EyeOff /> : <Eye />}
         </AppButton>
       </AppTooltip>

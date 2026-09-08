@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { trpc } from "@/shared/api/trpc";
 import { useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
+import { compressImage } from "@/shared/lib/image-compression";
 
 type ProfileData = {
   email: null | string;
@@ -119,14 +120,11 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
 
     const processUpload = async () => {
       try {
-        const { default: imageCompression } = await import("browser-image-compression");
-
-        const compressedBlob = await imageCompression(file, {
+        const compressedBlob = await compressImage(file, {
           fileType: "image/webp",
           initialQuality: 0.8,
           maxSizeMB: 0.1,
           maxWidthOrHeight: 512,
-          useWebWorker: true,
         });
 
         const cleanName = file.name

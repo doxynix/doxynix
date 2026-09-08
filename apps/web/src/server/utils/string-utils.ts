@@ -1,18 +1,17 @@
 import { compact, uniq } from "es-toolkit";
 import { normalize } from "pathe";
-import validator from "validator";
 
 /**
  * Type-safe guard for non-empty strings.
  */
 export const hasText = (value: unknown): value is string =>
-  typeof value === "string" && !validator.isEmpty(value, { ignore_whitespace: true });
+  typeof value === "string" && value.trim().length > 0;
 
 /**
  * Check if empty/whitespace.
  */
 export const isEmpty = (value: unknown): boolean =>
-  typeof value !== "string" || validator.isEmpty(value, { ignore_whitespace: true });
+  typeof value !== "string" || value.trim().length === 0;
 
 function uniqueNormalizedPaths(paths: Iterable<string>, limit?: number): string[] {
   const list = compact(Array.from(paths).map((p) => normalize(normalize(p))));

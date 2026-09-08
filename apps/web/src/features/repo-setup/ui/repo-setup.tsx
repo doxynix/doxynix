@@ -1,6 +1,6 @@
 "use client";
 
-import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import { type UiRepoDetailed } from "@/entities/repo/model/repo.types";
 import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
 
 import { RepoAnalysisConfig } from "./repo-analysis-config";
@@ -18,9 +18,18 @@ export function RepoSetup({ repo }: Readonly<Props>) {
   return (
     <div className="flex h-[calc(100dvh-260px)] w-full justify-center gap-6">
       <div className="flex-1">
-        <RepoFileTree actions={actions} repo={repo} state={state} treeApi={refs.treeApi} />
+        <RepoFileTree
+          actions={actions}
+          repo={repo}
+          state={state}
+          treeApi={refs.treeApi}
+        />
       </div>
-      <RepoAnalysisConfig actions={actions} disabled={isBusy} state={state} />
+      <RepoAnalysisConfig
+        actions={actions}
+        disabled={isBusy}
+        state={state}
+      />
     </div>
   );
 }

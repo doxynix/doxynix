@@ -1,4 +1,4 @@
-import { dedent } from "ts-dedent";
+import { dedent } from "es-toolkit";
 
 /**
  * Optimized for Gemma 4 (26B MoE)

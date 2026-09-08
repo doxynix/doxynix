@@ -1,9 +1,9 @@
 "use client";
 
+import { type CreateApiKeyInput } from "@doxynix/shared";
 import { useTranslations } from "next-intl";
-import type { Control } from "react-hook-form";
+import { type Control } from "react-hook-form";
 
-import type { CreateApiKeyInput } from "@/shared/api/schemas/api-key";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/core/form";
 import { Input } from "@/shared/ui/core/input";
 import { Textarea } from "@/shared/ui/core/textarea";

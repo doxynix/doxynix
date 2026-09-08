@@ -4,7 +4,7 @@ import {
   transformerNotationFocus,
   transformerNotationHighlight,
 } from "@shikijs/transformers";
-import type { Element as HastElement, Root } from "hast";
+import { type Element as HastElement, type Root } from "hast";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeKatex from "rehype-katex";
