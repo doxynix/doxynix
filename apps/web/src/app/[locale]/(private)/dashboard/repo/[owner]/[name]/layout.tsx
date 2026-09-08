@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
+import { type Metadata } from "next";
 
-import type { RepoLayoutProps } from "@/shared/types/next.types";
+import { type RepoLayoutProps } from "@/shared/types/next.types";
 
 import { RepoDetailsHeader } from "@/features/repo/ui/repo-details-header";
 

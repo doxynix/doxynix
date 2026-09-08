@@ -58,7 +58,11 @@ export async function AppFooter() {
 
           <div className="flex items-center gap-4 border-border md:pl-6 xl:border-l">
             {SOCIAL_LINKS.map((social) => (
-              <ExternalLink className="hover:text-foreground" href={social.href} key={social.href}>
+              <ExternalLink
+                className="hover:text-foreground"
+                href={social.href}
+                key={social.href}
+              >
                 <social.icon className="hidden size-4 md:block" />
                 <span className="text-xs md:hidden">{social.label}</span>
                 <span className="sr-only">{social.label}</span>

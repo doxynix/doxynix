@@ -105,6 +105,22 @@
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
 
+  --animate-shine: shine var(--duration) infinite linear;
+
+  --animate-shiny-text: shiny-text 8s infinite;
+
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+
+  --animate-blink-cursor: blink-cursor 1.2s step-end infinite;
+
+  --animate-fade-in: fade-in 0.35s ease-out forwards;
+  --animate-fade-out: fade-out 0.35s ease-out forwards;
+
+  --animate-float: float 2.5s ease-in-out infinite;
+
+  --breakpoint-xs: 475px;
+
   @keyframes marquee {
     from {
       transform: translateX(0);
@@ -125,8 +141,6 @@
     }
   }
 
-  --animate-shine: shine var(--duration) infinite linear;
-
   @keyframes shine {
     0% {
       background-position: 0% 0%;
@@ -141,8 +155,6 @@
     }
   }
 
-  --animate-shiny-text: shiny-text 8s infinite;
-
   @keyframes shiny-text {
     0%,
     90%,
@@ -155,9 +167,6 @@
       background-position: calc(100% + var(--shiny-width)) 0;
     }
   }
-
-  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
-  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
 
   @keyframes shimmer-slide {
     to {
@@ -184,8 +193,6 @@
       transform: translateZ(0) rotate(360deg);
     }
   }
-
-  --animate-blink-cursor: blink-cursor 1.2s step-end infinite;
 
   @keyframes blink-cursor {
     0%,
@@ -223,9 +230,6 @@
     }
   }
 
-  --animate-fade-in: fade-in 0.35s ease-out forwards;
-  --animate-fade-out: fade-out 0.35s ease-out forwards;
-
   @keyframes float {
     0%,
     100% {
@@ -236,10 +240,6 @@
       transform: translateY(-10px);
     }
   }
-
-  --animate-float: float 2.5s ease-in-out infinite;
-
-  --breakpoint-xs: 475px;
 }
 
 :root {
@@ -325,7 +325,6 @@
 }
 
 .dark {
-  color-scheme: dark;
   /* Base surfaces */
   --surface-page: oklch(0.128 0.004 255);
   --surface-panel: oklch(0.188 0.004 255);
@@ -404,6 +403,7 @@
   --sonner-border: var(--border-soft);
   --sonner-text-primary: var(--text-primary);
   --sonner-text-secondary: var(--text-secondary);
+  color-scheme: dark;
 }
 
 [data-public-theme="marketing-dark"] {
@@ -512,12 +512,12 @@
   }
 
   body {
-    @apply bg-background text-foreground;
     font-family: var(--font-sans);
-    line-height: 1.6;
-    text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+    @apply bg-background text-foreground;
   }
 
   button,
@@ -540,8 +540,8 @@
   } */
 
   * {
-    scrollbar-width: thin;
     scrollbar-color: color-mix(in srgb, var(--foreground), transparent 70%) transparent;
+    scrollbar-width: thin;
   }
 
   ::-webkit-scrollbar {
@@ -566,18 +566,18 @@
 
   article.prose :not(pre) > code {
     padding: 0.15em 0.35em;
-    border-radius: 6px;
     font-size: 0.85em;
     font-weight: 500;
+    color: #0f172a;
     background-color: rgba(15, 23, 42, 0.05);
     border: 1px solid rgba(15, 23, 42, 0.08);
-    color: #0f172a;
+    border-radius: 6px;
   }
 
   html.dark article.prose :not(pre) > code {
+    color: white;
     background-color: rgba(255, 255, 255, 0.158);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    color: white;
   }
 
   pre.shiki {
@@ -585,13 +585,13 @@
   }
 
   html:not(.dark) pre.shiki {
-    background-color: var(--shiki-light-bg);
     color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
   }
 
   html.dark pre.shiki {
-    background-color: var(--shiki-dark-bg);
     color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
   }
 }
 
@@ -607,20 +607,20 @@
   }
 
   .paused {
-    animation-play-state: paused;
     -webkit-animation-play-state: paused;
+    animation-play-state: paused;
   }
 
   .transition-standard {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
     transition-property:
       color, background-color, border-color, opacity, box-shadow, transform, backdrop-filter;
-    transition-duration: 150ms;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .glass-panel {
-    backdrop-filter: blur(16px) saturate(140%);
     -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
   }
 
   .animate-skeleton-pulse {
@@ -672,6 +672,6 @@
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation: none;
   mix-blend-mode: normal;
+  animation: none;
 }

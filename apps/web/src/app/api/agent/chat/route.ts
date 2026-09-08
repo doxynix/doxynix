@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
-import { ChatRole } from "@prisma/client";
+import { ChatRole } from "@doxynix/shared";
 import { convertToModelMessages, generateText, stepCountIs, streamText } from "ai";
-import { dedent } from "ts-dedent";
+import { dedent } from "es-toolkit";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";
 

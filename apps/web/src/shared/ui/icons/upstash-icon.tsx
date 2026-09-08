@@ -1,8 +1,13 @@
+import { useId } from "react";
+
 type Props = {
   className?: string;
 };
 
 export function UpstashIcon({ className }: Readonly<Props>) {
+  const id = useId();
+  const clipPathId = `${id}-clip`;
+
   return (
     <svg
       className={className}
@@ -12,7 +17,7 @@ export function UpstashIcon({ className }: Readonly<Props>) {
       width="100%"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g clipPath="url(#upstash_dark_bg)">
+      <g clipPath={`url(#${clipPathId})`}>
         <path
           d="M.422 412.975c78.105 78.104 204.738 78.104 282.843 0 78.104-78.105 78.104-204.738 0-282.843l-35.356 35.355c58.579 58.579 58.579 153.554 0 212.132-58.578 58.579-153.553 58.579-212.132 0L.422 412.975Z"
           fill="#00E9A3"
@@ -41,8 +46,11 @@ export function UpstashIcon({ className }: Readonly<Props>) {
         fill="#fff"
       />
       <defs>
-        <clipPath id="upstash_dark_bg">
-          <path d="M0 0h354v472H0z" fill="#fff" />
+        <clipPath id={clipPathId}>
+          <path
+            d="M0 0h354v472H0z"
+            fill="#fff"
+          />
         </clipPath>
       </defs>
     </svg>

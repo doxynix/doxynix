@@ -1,4 +1,4 @@
-import type { AxisDomain } from "recharts/types/util/types";
+import { type AxisDomain } from "recharts/types/util/types";
 
 export type ColorUtility = "bg" | "stroke" | "fill" | "text";
 

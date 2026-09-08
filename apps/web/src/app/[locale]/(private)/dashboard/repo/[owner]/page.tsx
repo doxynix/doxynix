@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
+import { type Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import type { RepoPageProps } from "@/shared/types/next.types";
+import { type RepoPageProps } from "@/shared/types/next.types";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
@@ -31,7 +31,12 @@ export default async function OwnerPage({ params }: Readonly<RepoPageProps>) {
   return (
     <div className="mx-auto flex h-full w-full flex-col">
       <div className="mb-4 flex items-center not-xs:justify-center gap-4">
-        <AppAvatar alt={owner} fallbackText={owner} sizeClassName="size-9" src={avatarUrl} />
+        <AppAvatar
+          alt={owner}
+          fallbackText={owner}
+          sizeClassName="size-9"
+          src={avatarUrl}
+        />
         <h1 className="font-bold text-2xl">{owner}</h1>
       </div>
 

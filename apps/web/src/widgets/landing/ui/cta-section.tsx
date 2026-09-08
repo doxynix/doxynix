@@ -15,7 +15,10 @@ export async function CTASection() {
             {t("section_cta_title_1")} <br /> {t("section_cta_title_2")}
           </h2>
           <p className="mx-auto text-muted-foreground">{t("section_cta_desc")}</p>
-          <ShimmerButton className="h-12 px-8 text-lg" href="/auth">
+          <ShimmerButton
+            className="h-12 px-8 text-lg"
+            href="/auth"
+          >
             <span className="font-medium text-sm lg:text-lg">{t("section_cta_btn")}</span>
           </ShimmerButton>
         </div>

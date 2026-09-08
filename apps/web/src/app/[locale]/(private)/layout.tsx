@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { cookies, headers } from "next/headers";
 import { unauthorized } from "next/navigation";
 
@@ -43,7 +43,11 @@ export default async function PrivateLayout({ children }: Readonly<{ children: R
           <AppSidebar />
           <div className="relative flex flex-1 flex-col overflow-y-auto">
             {/* <ScrollArea className="flex-1"> */}
-            <SidebarInset className="mx-auto max-w-400 p-4" id="main-content" tabIndex={-1}>
+            <SidebarInset
+              className="mx-auto max-w-400 p-4"
+              id="main-content"
+              tabIndex={-1}
+            >
               {children}
             </SidebarInset>
             {/* </ScrollArea> */}

@@ -1,6 +1,6 @@
-import type { ToolExecutionOptions } from "ai";
+import { type ToolExecutionOptions } from "ai";
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
-import { z } from "zod";
+import * as z from "zod";
 
 import { APP_VERSION } from "@/shared/constants/env.server";
 

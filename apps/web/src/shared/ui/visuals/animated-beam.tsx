@@ -163,10 +163,20 @@ export const AnimatedBeam: FC<AnimatedBeamProps> = ({
             repeatDelay,
           }}
         >
-          <stop stopColor={gradientStartColor} stopOpacity="0" />
+          <stop
+            stopColor={gradientStartColor}
+            stopOpacity="0"
+          />
           <stop stopColor={gradientStartColor} />
-          <stop offset="32.5%" stopColor={gradientStopColor} />
-          <stop offset="100%" stopColor={gradientStopColor} stopOpacity="0" />
+          <stop
+            offset="32.5%"
+            stopColor={gradientStopColor}
+          />
+          <stop
+            offset="100%"
+            stopColor={gradientStopColor}
+            stopOpacity="0"
+          />
         </motion.linearGradient>
       </defs>
     </svg>

@@ -24,7 +24,10 @@ export function TrendsWidgetsSkeleton() {
         <div className="relative h-75">
           <div className="absolute top-0 left-0 flex h-full w-8 flex-col justify-between py-2 text-[10px]">
             {[100, 75, 50, 25, 0].map((v) => (
-              <Skeleton className="h-3 w-6" key={v} />
+              <Skeleton
+                className="h-3 w-6"
+                key={v}
+              />
             ))}
           </div>
 

@@ -32,7 +32,10 @@ export function ScrollButton({
       }}
       variant="ghost"
     >
-      <MoveRight className={arrowClassName} size={12} />
+      <MoveRight
+        className={arrowClassName}
+        size={12}
+      />
     </AppButton>
   );
 }

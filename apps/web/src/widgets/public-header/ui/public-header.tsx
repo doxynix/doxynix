@@ -1,4 +1,4 @@
-import type { Route } from "next";
+import { type Route } from "next";
 import { Menu } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -30,8 +30,15 @@ export async function PublicHeader() {
 
         <nav className="hidden gap-4 md:flex">
           {publicHeaderMenu.map((item) => (
-            <AppButton asChild key={item.href} variant="ghost">
-              <Link className="flex items-center gap-2" href={item.href as Route}>
+            <AppButton
+              asChild
+              key={item.href}
+              variant="ghost"
+            >
+              <Link
+                className="flex items-center gap-2"
+                href={item.href as Route}
+              >
                 {item.icon != null && <item.icon />}
                 {item.label}
               </Link>
@@ -46,12 +53,18 @@ export async function PublicHeader() {
           <div className="flex items-center gap-2 md:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <AppButton size="icon" variant="ghost">
+                <AppButton
+                  size="icon"
+                  variant="ghost"
+                >
                   <Menu className="size-5" />
                   <span className="sr-only">{t("open_menu")}</span>
                 </AppButton>
               </SheetTrigger>
-              <SheetContent className="w-1/2" side="right">
+              <SheetContent
+                className="w-1/2"
+                side="right"
+              >
                 <SheetHeader>
                   <SheetTitle className="text-left">{t("menu")}</SheetTitle>
                 </SheetHeader>
@@ -59,9 +72,19 @@ export async function PublicHeader() {
                 <div className="mt-8 flex flex-col gap-4">
                   <nav className="flex flex-col gap-2">
                     {publicHeaderMenu.map((item) => (
-                      <SheetClose asChild key={item.href}>
-                        <AppButton asChild className="justify-start" variant="ghost">
-                          <Link className="flex items-center gap-2" href={item.href as Route}>
+                      <SheetClose
+                        asChild
+                        key={item.href}
+                      >
+                        <AppButton
+                          asChild
+                          className="justify-start"
+                          variant="ghost"
+                        >
+                          <Link
+                            className="flex items-center gap-2"
+                            href={item.href as Route}
+                          >
                             {item.icon != null && <item.icon />}
                             {item.label}
                           </Link>

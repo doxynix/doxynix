@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: Recharts library relies on complex, dynamically typed props that are difficult to define accurately without sacrificing maintainability. */
+// oxlint-disable typescript/no-explicit-any
 import { forwardRef, type HTMLAttributes, useId } from "react";
 import { Fragment } from "react/jsx-runtime";
 import {
@@ -61,20 +61,38 @@ const SparkAreaChart = forwardRef<HTMLDivElement, SparkAreaChartProps>((props, f
   const getFillContent = (fillType: SparkAreaChartProps["fill"]) => {
     switch (fillType) {
       case "none": {
-        return <stop stopColor="currentColor" stopOpacity={0} />;
+        return (
+          <stop
+            stopColor="currentColor"
+            stopOpacity={0}
+          />
+        );
       }
       case "gradient": {
         return (
           <>
-            <stop offset="5%" stopColor="currentColor" stopOpacity={0.4} />
-            <stop offset="95%" stopColor="currentColor" stopOpacity={0} />
+            <stop
+              offset="5%"
+              stopColor="currentColor"
+              stopOpacity={0.4}
+            />
+            <stop
+              offset="95%"
+              stopColor="currentColor"
+              stopOpacity={0}
+            />
           </>
         );
       }
       case "solid":
       case undefined:
       default: {
-        return <stop stopColor="currentColor" stopOpacity={0.3} />;
+        return (
+          <stop
+            stopColor="currentColor"
+            stopOpacity={0.3}
+          />
+        );
       }
     }
   };
@@ -97,8 +115,14 @@ const SparkAreaChart = forwardRef<HTMLDivElement, SparkAreaChartProps>((props, f
           }}
           stackOffset={type === "percent" ? "expand" : undefined}
         >
-          <XAxis dataKey={index} hide />
-          <YAxis domain={yAxisDomain} hide={true} />
+          <XAxis
+            dataKey={index}
+            hide
+          />
+          <YAxis
+            domain={yAxisDomain}
+            hide={true}
+          />
 
           {categories.map((category) => {
             const categoryId = `${areaId}-${category.replaceAll(/[^a-zA-Z0-9]/g, "")}`;
@@ -195,8 +219,14 @@ const SparkLineChart = forwardRef<HTMLDivElement, SparkLineChartProps>((props, f
             top: 1,
           }}
         >
-          <XAxis dataKey={index} hide />
-          <YAxis domain={yAxisDomain} hide={true} />
+          <XAxis
+            dataKey={index}
+            hide
+          />
+          <YAxis
+            domain={yAxisDomain}
+            hide={true}
+          />
           {categories.map((category) => (
             <Line
               className={cx(getColorClassName(categoryColors.get(category) ?? "gray", "stroke"))}
@@ -275,8 +305,14 @@ const SparkBarChart = forwardRef<HTMLDivElement, BarChartProps>((props, forwarde
           }}
           stackOffset={type === "percent" ? "expand" : undefined}
         >
-          <XAxis dataKey={index} hide />
-          <YAxis domain={yAxisDomain} hide={true} />
+          <XAxis
+            dataKey={index}
+            hide
+          />
+          <YAxis
+            domain={yAxisDomain}
+            hide={true}
+          />
 
           {categories.map((category) => (
             <Bar

@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import { type ComponentType } from "react";
 import { BookOpen, FileCode, FileDiff, GitGraph } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -43,7 +43,12 @@ function TabsContentItem({ code, html, title, value }: Readonly<TabsContentItemP
       className="fade-in slide-in-from-right-4 mt-0 animate-in duration-300"
       value={value}
     >
-      <CodeWindow code={code} codeClassName="text-sm sm:text-base" codeHtml={html} title={title} />
+      <CodeWindow
+        code={code}
+        codeClassName="text-sm sm:text-base"
+        codeHtml={html}
+        title={title}
+      />
     </TabsContent>
   );
 }
@@ -107,15 +112,24 @@ export async function DocModesSection() {
         <p className="mt-4 text-lg text-muted-foreground">{t("section_docs_desc")}</p>
       </div>
 
-      <Tabs className="mx-auto flex min-h-140 items-center gap-8" defaultValue="readme">
+      <Tabs
+        className="mx-auto flex min-h-140 items-center gap-8"
+        defaultValue="readme"
+      >
         <TabsList className="flex h-auto flex-wrap items-center justify-start gap-2 bg-transparent">
           {DOCS.map((item) => (
-            <TabsTriggerItem key={item.title} {...item} />
+            <TabsTriggerItem
+              key={item.title}
+              {...item}
+            />
           ))}
         </TabsList>
         <div className="w-full max-w-3xl">
           {TABS.map((item) => (
-            <TabsContentItem key={item.title} {...item} />
+            <TabsContentItem
+              key={item.title}
+              {...item}
+            />
           ))}
         </div>
       </Tabs>

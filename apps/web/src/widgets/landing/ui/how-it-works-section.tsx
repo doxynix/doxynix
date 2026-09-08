@@ -209,10 +209,19 @@ export function HowItWorksSection() {
         ref={containerRef}
       >
         {COLUMNS.map((col, idx) => (
-          <div className={col.className} key={idx}>
+          <div
+            className={col.className}
+            key={idx}
+          >
             {col.nodes.map((node, nodeIdx) => (
-              <div className={cn("flex flex-col items-center", node.gapClass)} key={nodeIdx}>
-                <Circle className={node.circleClass} ref={node.ref}>
+              <div
+                className={cn("flex flex-col items-center", node.gapClass)}
+                key={nodeIdx}
+              >
+                <Circle
+                  className={node.circleClass}
+                  ref={node.ref}
+                >
                   {node.icon}
                 </Circle>
                 <span className={cn("text-muted-foreground text-xs sm:text-sm", node.labelClass)}>
@@ -241,7 +250,10 @@ export function HowItWorksSection() {
           />
         ))}
       </div>
-      <AppBadge className="px-4 py-1" variant="outline">
+      <AppBadge
+        className="px-4 py-1"
+        variant="outline"
+      >
         <FileText className="text-success" />
         <span className="text-muted-foreground text-xs">{t("section_how_status_msg")}</span>
       </AppBadge>

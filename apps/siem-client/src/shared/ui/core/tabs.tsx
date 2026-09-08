@@ -6,7 +6,12 @@ import { cx, focusRing } from "../../lib/utils";
 const Tabs = (
   props: Omit<React.ComponentPropsWithoutRef<typeof TabsPrimitives.Root>, "orientation">,
 ) => {
-  return <TabsPrimitives.Root tremor-id="tremor-raw" {...props} />;
+  return (
+    <TabsPrimitives.Root
+      tremor-id="tremor-raw"
+      {...props}
+    />
+  );
 };
 
 Tabs.displayName = "Tabs";

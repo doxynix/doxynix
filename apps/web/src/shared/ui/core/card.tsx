@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { type ComponentProps } from "react";
 
 import { cn } from "@/shared/lib/cn";
 
@@ -59,7 +59,13 @@ function CardAction({ className, ...props }: ComponentProps<"div">) {
 }
 
 function CardContent({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("px-6", className)} data-slot="card-content" {...props} />;
+  return (
+    <div
+      className={cn("px-6", className)}
+      data-slot="card-content"
+      {...props}
+    />
+  );
 }
 
 function CardFooter({ className, ...props }: ComponentProps<"div">) {

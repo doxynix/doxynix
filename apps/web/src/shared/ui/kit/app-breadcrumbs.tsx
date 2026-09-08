@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, type ReactNode } from "react";
-import type { Route } from "next";
+import { type Route } from "next";
 
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
@@ -86,7 +86,10 @@ export function AppBreadcrumbs({
                           <BreadcrumbEllipsis />
                         </AppButton>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="min-w-45">
+                      <DropdownMenuContent
+                        align="start"
+                        className="min-w-45"
+                      >
                         {collapsedItems.map((collapsed, idx) => (
                           <DropdownMenuItem
                             asChild={!!collapsed.href}
@@ -127,7 +130,10 @@ export function AppBreadcrumbs({
               <BreadcrumbItem className="min-w-0 shrink">
                 {isLast ? (
                   <BreadcrumbPage className="w-full min-w-0">
-                    <TruncatedText className={cn("font-bold", item.className)} text={label} />
+                    <TruncatedText
+                      className={cn("font-bold", item.className)}
+                      text={label}
+                    />
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink
@@ -136,11 +142,20 @@ export function AppBreadcrumbs({
                     onClick={item.onClick}
                   >
                     {item.href ? (
-                      <Link className="block truncate" href={item.href}>
-                        <TruncatedText className={item.className} text={label} />
+                      <Link
+                        className="block truncate"
+                        href={item.href}
+                      >
+                        <TruncatedText
+                          className={item.className}
+                          text={label}
+                        />
                       </Link>
                     ) : (
-                      <TruncatedText className={item.className} text={label} />
+                      <TruncatedText
+                        className={item.className}
+                        text={label}
+                      />
                     )}
                   </BreadcrumbLink>
                 )}

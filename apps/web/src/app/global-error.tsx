@@ -95,7 +95,10 @@ export default function GlobalError({
   `;
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
         <style>{`
@@ -153,10 +156,34 @@ export default function GlobalError({
               width="35"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <rect height="8" rx="2" ry="2" width="20" x="2" y="2" />
-              <rect height="8" rx="2" ry="2" width="20" x="2" y="14" />
-              <line x1="6" x2="6.01" y1="6" y2="6" />
-              <line x1="6" x2="6.01" y1="18" y2="18" />
+              <rect
+                height="8"
+                rx="2"
+                ry="2"
+                width="20"
+                x="2"
+                y="2"
+              />
+              <rect
+                height="8"
+                rx="2"
+                ry="2"
+                width="20"
+                x="2"
+                y="14"
+              />
+              <line
+                x1="6"
+                x2="6.01"
+                y1="6"
+                y2="6"
+              />
+              <line
+                x1="6"
+                x2="6.01"
+                y1="18"
+                y2="18"
+              />
             </svg>
           </div>
 
@@ -175,7 +202,10 @@ export default function GlobalError({
 
           <footer className="mt-12 text-sm">
             Doxynix Infrastructure Support If the error persists, contact us:{" "}
-            <a className="underline hover:no-underline" href={mailtoLink}>
+            <a
+              className="underline hover:no-underline"
+              href={mailtoLink}
+            >
               support@doxynix.space
             </a>
           </footer>

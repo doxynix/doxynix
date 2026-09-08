@@ -1,8 +1,7 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: Date picker integration uses complex ARIA date/time field types with dynamic props, making strict noExplicitAny typing impractical without breaking accessibility behavior. */
-
+// oxlint-disable typescript/no-explicit-any
 import {
   type ComponentProps,
-  type ElementRef,
+  type ComponentRef,
   forwardRef,
   useEffect,
   useImperativeHandle,
@@ -121,7 +120,11 @@ const TimeInput = forwardRef<HTMLDivElement, TimeInputProps>(
     );
 
     return (
-      <div {...fieldProps} className="group/time-input inline-flex w-full gap-x-2" ref={innerRef}>
+      <div
+        {...fieldProps}
+        className="group/time-input inline-flex w-full gap-x-2"
+        ref={innerRef}
+      >
         {state.segments.map((segment) => (
           <TimeSegment
             key={`${segment.type}-${segment.text}-${segment.isEditable}`}
@@ -200,7 +203,7 @@ Trigger.displayName = "DatePicker.Trigger";
 // ============================================================================
 
 const CalendarPopover = forwardRef<
-  ElementRef<typeof PopoverPrimitives.Content>,
+  ComponentRef<typeof PopoverPrimitives.Content>,
   ComponentProps<typeof PopoverPrimitives.Content>
 >(({ align, className, children, ...props }, forwardedRef) => {
   return (
@@ -348,7 +351,10 @@ const PresetContainer = <TPreset extends Preset>({
     <ul className="flex items-start gap-x-2 sm:flex-col">
       {presets.map((preset) => {
         return (
-          <li className="sm:w-full sm:py-px" key={`preset-${preset.label}`}>
+          <li
+            className="sm:w-full sm:py-px"
+            key={`preset-${preset.label}`}
+          >
             <button
               aria-label={`Select ${preset.label}`}
               className={cx(
@@ -583,7 +589,11 @@ const SingleDatePicker = ({
   }, [value, defaultValue]);
 
   return (
-    <PopoverPrimitives.Root onOpenChange={onOpenChange} open={open} tremor-id="tremor-raw">
+    <PopoverPrimitives.Root
+      onOpenChange={onOpenChange}
+      open={open}
+      tremor-id="tremor-raw"
+    >
       <Trigger
         aria-invalid={props["aria-invalid"]}
         aria-label={props["aria-label"]}
@@ -608,7 +618,11 @@ const SingleDatePicker = ({
                 )}
               >
                 <div className="absolute px-2 pr-2 sm:inset-0 sm:left-0 sm:py-2">
-                  <PresetContainer currentValue={date} onSelect={onDateChange} presets={presets} />
+                  <PresetContainer
+                    currentValue={date}
+                    onSelect={onDateChange}
+                    presets={presets}
+                  />
                 </div>
               </div>
             )}
@@ -638,10 +652,20 @@ const SingleDatePicker = ({
                 </div>
               )}
               <div className="flex items-center gap-x-2 border-gray-200 border-t p-3 dark:border-gray-800">
-                <Button className="h-8 w-full" onClick={onCancel} type="button" variant="secondary">
+                <Button
+                  className="h-8 w-full"
+                  onClick={onCancel}
+                  type="button"
+                  variant="secondary"
+                >
                   {translations?.cancel ?? "Cancel"}
                 </Button>
-                <Button className="h-8 w-full" onClick={onApply} type="button" variant="primary">
+                <Button
+                  className="h-8 w-full"
+                  onClick={onApply}
+                  type="button"
+                  variant="primary"
+                >
                   {translations?.apply ?? "Apply"}
                 </Button>
               </div>
@@ -867,7 +891,11 @@ const RangeDatePicker = ({
   };
 
   return (
-    <PopoverPrimitives.Root onOpenChange={onOpenChange} open={open} tremor-id="tremor-raw">
+    <PopoverPrimitives.Root
+      onOpenChange={onOpenChange}
+      open={open}
+      tremor-id="tremor-raw"
+    >
       <Trigger
         aria-invalid={props["aria-invalid"]}
         aria-label={props["aria-label"]}
@@ -1121,7 +1149,12 @@ const DatePicker = ({ presets, ...props }: SingleDatePickerProps) => {
     validatePresets(presets, props);
   }
 
-  return <SingleDatePicker presets={presets} {...props} />;
+  return (
+    <SingleDatePicker
+      presets={presets}
+      {...props}
+    />
+  );
 };
 
 DatePicker.displayName = "DatePicker";
@@ -1138,7 +1171,12 @@ const DateRangePicker = ({ presets, ...props }: RangeDatePickerProps) => {
     validatePresets(presets, props);
   }
 
-  return <RangeDatePicker presets={presets} {...props} />;
+  return (
+    <RangeDatePicker
+      presets={presets}
+      {...props}
+    />
+  );
 };
 
 DateRangePicker.displayName = "DateRangePicker";

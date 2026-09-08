@@ -247,7 +247,10 @@ const Explosion = ({ ...props }: HTMLProps<HTMLDivElement>) => {
   }));
 
   return (
-    <div {...props} className={cn("absolute z-50 size-2", props.className)}>
+    <div
+      {...props}
+      className={cn("absolute z-50 size-2", props.className)}
+    >
       <motion.div
         animate={{ opacity: 1 }}
         className="absolute -inset-x-10 top-0 m-auto h-2 w-10 rounded-full bg-linear-to-r from-transparent via-primary to-transparent blur-sm"
