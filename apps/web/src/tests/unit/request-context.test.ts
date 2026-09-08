@@ -1,5 +1,5 @@
 /* eslint-disable sonarjs/no-hardcoded-ip */
-import type { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 
 import { anonymizeIp, getCountry, getIp, getUa } from "@/server/utils/request-context";

@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-import type { InstallationTargetType, RepositorySelection } from "@prisma/client";
+import { type InstallationTargetType, type RepositorySelection } from "@doxynix/shared";
 import { TRPCError } from "@trpc/server";
 
 import { GITHUB_APP_ID } from "@/shared/constants/env.server";
@@ -9,7 +9,7 @@ import { isOctokitError } from "@/server/utils/handle-error";
 import { getNormalizedHash, getRawHash } from "@/server/utils/hash";
 
 import { appLogger } from "../app-logger";
-import type { DbClient, PrismaClientExtended } from "../db";
+import { type DbClient, type PrismaClientExtended } from "../db";
 import { getMyRepos } from "./github-api";
 import { getInstallationInfo, getPublicClient } from "./github-provider";
 import { githubTokenService } from "./github-token.service";
