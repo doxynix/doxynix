@@ -5,6 +5,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "incremental": true,
     "module": "ESNext",
     "moduleDetection": "force",
     "moduleResolution": "bundler",
@@ -16,7 +17,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "ES2025",
+    "target": "ESNext",
     "useDefineForClassFields": true,
     "verbatimModuleSyntax": true
   }
