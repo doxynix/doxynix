@@ -16,12 +16,9 @@ generator client {
   engineType      = "client"
 }
 
-generator jsonSchema {
-  provider = "prisma-json-schema-generator"
-}
-
-generator dbml {
-  provider = "prisma-dbml-generator"
+generator enums {
+  provider = "bun run prisma/enum-generator.ts"
+  output   = "../../../packages/shared/src/enums/index.ts"
 }
 
 generator fakeData {
