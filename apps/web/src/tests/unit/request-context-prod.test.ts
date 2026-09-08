@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 function createRequest(headers: Record<string, string> = {}): NextRequest {

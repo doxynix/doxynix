@@ -1,6 +1,5 @@
+import { NotifyType } from "@doxynix/shared";
 import { describe, expect, it } from "vitest";
-
-import { NotifyTypeSchema } from "@/shared/api-contracts";
 
 import { notificationsService } from "@/server/modules/notifications/notifications.service";
 
@@ -52,7 +51,7 @@ describe("notificationsService.buildWhereClause", () => {
       isRead: false,
       repoName: "react-query",
       repoOwner: "TanStack",
-      type: NotifyTypeSchema.enum.WARNING,
+      type: NotifyType.WARNING,
     });
 
     expect(where).toEqual({
@@ -63,7 +62,7 @@ describe("notificationsService.buildWhereClause", () => {
           owner: { equals: "TanStack", mode: "insensitive" },
         },
       },
-      type: NotifyTypeSchema.enum.WARNING,
+      type: NotifyType.WARNING,
     });
   });
 });
