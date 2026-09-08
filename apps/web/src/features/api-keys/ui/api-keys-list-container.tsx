@@ -19,5 +19,10 @@ export function ApiKeysListContainer() {
     );
   }
 
-  return <ApiKeysList active={data.active} archived={data.archived} />;
+  return (
+    <ApiKeysList
+      active={data.active}
+      archived={data.archived}
+    />
+  );
 }

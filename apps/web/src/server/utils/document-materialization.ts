@@ -1,4 +1,4 @@
-import type { DocType } from "@prisma/client";
+import { type DocType } from "@prisma/client";
 import { join, normalize } from "pathe";
 
 const DOC_ROOT_PATH = "docs";

@@ -1,4 +1,4 @@
-import type { FileNode } from "./repo-setup.types";
+import { type FileNode } from "./repo-setup.types";
 
 export const sortNodes = (nodes: FileNode[]): FileNode[] => {
   return nodes

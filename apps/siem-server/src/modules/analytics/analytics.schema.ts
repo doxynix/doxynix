@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 
 export const dashboardAnalyticsQuerySchema = z.object({
   days: z.coerce.number().int().positive().max(90).optional().default(7),

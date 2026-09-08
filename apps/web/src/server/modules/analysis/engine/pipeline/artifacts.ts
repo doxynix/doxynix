@@ -1,7 +1,7 @@
 import { clamp, uniq } from "es-toolkit";
 
 import { buildEvidence } from "../core/common";
-import type { ArtifactBuildParams, ArtifactBuildResult } from "../core/metrics.types";
+import { type ArtifactBuildParams, type ArtifactBuildResult } from "../core/metrics.types";
 import {
   buildReferenceEvidencePaths,
   getPrimaryArchitectureModules,

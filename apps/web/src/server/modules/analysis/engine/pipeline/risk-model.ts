@@ -1,17 +1,17 @@
 import { clamp, mean, uniq } from "es-toolkit";
 
 import { buildEvidence } from "../core/common";
-import type {
-  ChangeCouplingRef,
-  DependencyGraphEvidence,
-  HotspotSignal,
-  RepositoryEvidence,
-  RiskDerivedScores,
-  RiskFindingRef,
-  RiskRawMetrics,
+import {
+  type ChangeCouplingRef,
+  type DependencyGraphEvidence,
+  type HotspotSignal,
+  type RepositoryEvidence,
+  type RiskDerivedScores,
+  type RiskFindingRef,
+  type RiskRawMetrics,
 } from "../core/discovery.types";
-import type { RisksSectionBody } from "../core/documentation.types";
-import type { RepoMetrics } from "../core/metrics.types";
+import { type RisksSectionBody } from "../core/documentation.types";
+import { type RepoMetrics } from "../core/metrics.types";
 import { RISK_SCORING, RISK_THRESHOLDS } from "../core/scoring-constants";
 
 function severityForScore(score: number): RiskFindingRef["severity"] {

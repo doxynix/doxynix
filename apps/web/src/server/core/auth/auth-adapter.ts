@@ -1,4 +1,4 @@
-import type { DBAdapter, Where } from "better-auth";
+import { type DBAdapter, type Where } from "better-auth";
 
 import { normalizeEmail } from "@/server/utils/email-guard";
 import { getNormalizedHash, getRawHash } from "@/server/utils/hash";

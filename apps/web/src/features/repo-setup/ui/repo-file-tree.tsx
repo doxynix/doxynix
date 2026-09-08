@@ -8,9 +8,9 @@ import { AppButton } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
-import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
-import type { ActionItem, FileNode } from "@/entities/repo/model/repo-setup.types";
-import type { ActionsType, StateType } from "@/entities/repo/model/use-repo-setup";
+import { type UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import { type ActionItem, type FileNode } from "@/entities/repo/model/repo-setup.types";
+import { type ActionsType, type StateType } from "@/entities/repo/model/use-repo-setup";
 import { RepoBranchSelector } from "@/entities/repo/ui/repo-branch-selector";
 import { RepoTreeSkeleton } from "@/entities/repo/ui/repo-tree-skeleton";
 
@@ -123,7 +123,10 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
                 </AppButton>
               );
               return action.tooltip != null && action.tooltip !== "" ? (
-                <AppTooltip content={action.tooltip} key={action.label}>
+                <AppTooltip
+                  content={action.tooltip}
+                  key={action.label}
+                >
                   {ButtonElement}
                 </AppTooltip>
               ) : (
@@ -151,7 +154,10 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
             Repository is empty
           </p>
         )}
-        <div className="relative h-full min-h-0 w-full flex-1 overflow-hidden" ref={measureRef}>
+        <div
+          className="relative h-full min-h-0 w-full flex-1 overflow-hidden"
+          ref={measureRef}
+        >
           {state.isLoading ? (
             <RepoTreeSkeleton variant="setup" />
           ) : (

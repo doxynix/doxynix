@@ -1,6 +1,5 @@
-import { z } from "zod";
-
-import { StatusSchema } from "@/shared/api-contracts";
+import { StatusSchema } from "@doxynix/shared";
+import * as z from "zod";
 
 export const DashboardStatsSchema = z.object({
   analysisStats: z.object({

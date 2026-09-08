@@ -1,8 +1,9 @@
-import { authSchema } from "@doxynix/shared";
+import { AuthSchema } from "@doxynix/shared";
+import * as z from "zod/mini";
 
 import { insertUserSchema } from "@/core/db/schema";
 
-export const AdminAddUsersSchema = authSchema.extend({
-  name: insertUserSchema.shape.name.optional(),
+export const AdminAddUsersSchema = z.extend(AuthSchema, {
+  name: z.optional(insertUserSchema.shape.name),
   role: insertUserSchema.shape.role,
 });

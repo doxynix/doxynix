@@ -1,31 +1,31 @@
-import type { Repo } from "@prisma/client";
+import { type Repo } from "@prisma/client";
 
-import type {
-  AnalysisCoverage,
-  ChurnHotspot,
-  DependencyNodeMetric,
-  GraphReliability,
-  OpenApiInventory,
-  RepositoryFact,
-  RepositoryFinding,
-  TeamRole,
-  TsStaticHint,
+import {
+  type AnalysisCoverage,
+  type ChurnHotspot,
+  type DependencyNodeMetric,
+  type GraphReliability,
+  type OpenApiInventory,
+  type RepositoryFact,
+  type RepositoryFinding,
+  type TeamRole,
+  type TsStaticHint,
 } from "@/server/utils/types";
 
-import type { DuplicationReport } from "../metrics/duplication-metrics";
-import type {
-  ChangeCouplingRef,
-  EntrypointRef,
-  FileCategoryBreakdownItem,
-  FrameworkFact,
-  GraphPreviewEdge,
-  HotspotSignal,
-  LanguageMetric,
-  RepositoryEvidence,
-  RouteInventory,
-  SecurityFindingMetric,
+import { type DuplicationReport } from "../metrics/duplication-metrics";
+import {
+  type ChangeCouplingRef,
+  type EntrypointRef,
+  type FileCategoryBreakdownItem,
+  type FrameworkFact,
+  type GraphPreviewEdge,
+  type HotspotSignal,
+  type LanguageMetric,
+  type RepositoryEvidence,
+  type RouteInventory,
+  type SecurityFindingMetric,
 } from "./discovery.types";
-import type { DocumentationInputModel } from "./documentation.types";
+import { type DocumentationInputModel } from "./documentation.types";
 
 export type HealthScoreParams = {
   busFactor: number;

@@ -10,7 +10,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { useTheme } from "next-themes";
 import CodeMirrorMerge from "react-codemirror-merge";
 
-import type { EditorStats } from "@/entities/repo/model/editor-stats.types";
+import { type EditorStats } from "@/entities/repo/model/editor-stats.types";
 
 import { BASE_EXTENSIONS, IDE_ONLY_EXTENSIONS, THEME_EXTENSION } from "../model/extensions";
 

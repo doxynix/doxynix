@@ -18,7 +18,7 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
-import type { DocContent } from "@/entities/repo/model/repo.types";
+import { type DocContent } from "@/entities/repo/model/repo.types";
 import { buildRepoCodeHref } from "@/entities/repo/model/repo-workspace-navigation";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
@@ -258,7 +258,10 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
           if (isInternal) {
             result = (
-              <Link className={domNode.attribs.class} href={href}>
+              <Link
+                className={domNode.attribs.class}
+                href={href}
+              >
                 {domToReact(children, parseOptions)}
               </Link>
             );
@@ -278,13 +281,19 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
 
               if (lowerHref.startsWith("http")) {
                 result = (
-                  <ExternalLink href={href} {...safeAttribs}>
+                  <ExternalLink
+                    href={href}
+                    {...safeAttribs}
+                  >
                     {domToReact(children, parseOptions)}
                   </ExternalLink>
                 );
               } else {
                 result = (
-                  <a href={href} {...safeAttribs}>
+                  <a
+                    href={href}
+                    {...safeAttribs}
+                  >
                     {domToReact(children, parseOptions)}
                   </a>
                 );
@@ -369,7 +378,11 @@ export function RepoDocsContent({ data, isLoading, repoId }: Readonly<Props>) {
         )}
       </article>
 
-      <RepoFloatingCard anchorEl={anchorEl} hoveredFile={hoveredFile} repoId={repoId} />
+      <RepoFloatingCard
+        anchorEl={anchorEl}
+        hoveredFile={hoveredFile}
+        repoId={repoId}
+      />
     </div>
   );
 }

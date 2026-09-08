@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
 
 import { auth } from "@/core/auth/auth";
-import type { AuthSession, AuthUser, UserRole } from "@/core/auth/auth.types";
+import { type AuthSession, type AuthUser, type UserRole } from "@/core/auth/auth.types";
 
 declare module "hono" {
   interface ContextVariableMap {

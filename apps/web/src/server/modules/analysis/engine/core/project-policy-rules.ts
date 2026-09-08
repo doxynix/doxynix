@@ -1,4 +1,4 @@
-import type { FileCategory, FrameworkCategory } from "./discovery.types";
+import { type FileCategory, type FrameworkCategory } from "./discovery.types";
 
 export type ProjectPolicySemanticKind =
   | "api"

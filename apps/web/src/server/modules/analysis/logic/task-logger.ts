@@ -1,4 +1,4 @@
-import { Status } from "@prisma/client";
+import { Status } from "@doxynix/shared";
 import { metadata } from "@trigger.dev/sdk";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";

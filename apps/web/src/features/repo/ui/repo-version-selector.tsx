@@ -29,23 +29,37 @@ export function RepoVersionSelector({ repoId }: Readonly<Props>) {
   }
 
   return (
-    <Select onValueChange={(e) => void setAid(e)} value={selectedAid || history[0]?.id}>
+    <Select
+      onValueChange={(e) => void setAid(e)}
+      value={selectedAid || history[0]?.id}
+    >
       <SelectTrigger className="w-60">
         <GitCommit />
         <SelectValue placeholder="Select version" />
       </SelectTrigger>
       <SelectContent>
         {history.map((item) => (
-          <SelectItem disabled={item.status === "FAILED"} key={item.id} value={item.id}>
+          <SelectItem
+            disabled={item.status === "FAILED"}
+            key={item.id}
+            value={item.id}
+          >
             <div className="flex items-center justify-between gap-4 text-xs">
               <div className="flex items-center gap-2 font-medium">
                 <span className="max-w-30 truncate">
                   {item.commitSha?.slice(0, 7) ?? "Unknown"}
                 </span>
               </div>
-              <TimeAgo className="ml-auto text-xs" date={item.createdAt} locale={locale} />
+              <TimeAgo
+                className="ml-auto text-xs"
+                date={item.createdAt}
+                locale={locale}
+              />
               {item.status === "FAILED" && (
-                <AppBadge className="text-destructive text-xs" variant="outline">
+                <AppBadge
+                  className="text-destructive text-xs"
+                  variant="outline"
+                >
                   Failed
                 </AppBadge>
               )}

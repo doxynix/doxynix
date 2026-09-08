@@ -3,7 +3,7 @@ import {
   collectTreeSitterSignals,
   TREE_SITTER_SUPPORTED_EXTENSIONS,
 } from "../extractors/tree-sitter-signals";
-import type { LanguageAdapter } from "./types";
+import { type LanguageAdapter } from "./types";
 
 export const treeSitterAdapter: LanguageAdapter = {
   id: "tree-sitter",

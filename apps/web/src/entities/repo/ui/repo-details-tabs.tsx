@@ -1,6 +1,6 @@
 "use client";
 
-import type { Route } from "next";
+import { type Route } from "next";
 import { useSearchParams } from "next/navigation";
 
 import { getRepoDetailsMenu } from "@/shared/constants/navigation";
@@ -29,7 +29,12 @@ export function RepoDetailsTabs({ name, owner }: Readonly<Props>) {
         const href = buildRepoDetailHref(baseHref, searchParams) as Route;
 
         return (
-          <AppButton asChild className={cn("relative h-8")} key={n.id} variant="ghost">
+          <AppButton
+            asChild
+            className={cn("relative h-8")}
+            key={n.id}
+            variant="ghost"
+          >
             <Link
               className={cn(
                 "flex items-center gap-2 text-sm outline-hidden",

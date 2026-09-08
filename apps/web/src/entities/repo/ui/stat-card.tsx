@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import { type ComponentType } from "react";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
@@ -54,7 +54,10 @@ export function StatCard({
           <p className="font-bold text-2xl">{value}</p>
 
           {delta != null && (
-            <AppBadge className={getDeltaClass()} variant="outline">
+            <AppBadge
+              className={getDeltaClass()}
+              variant="outline"
+            >
               {isPositiveTrend ? (
                 <ArrowUpRight />
               ) : isNegativeTrend ? (

@@ -2,8 +2,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "paths": {
-      "@/*": ["./src/*"],
-      "@server/*": ["./src/*"]
+      "@/*": ["./src/*"]
     },
     "rootDir": ".",
     "types": ["node"]

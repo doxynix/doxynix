@@ -9,7 +9,7 @@ import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
-import type { RepoStatus } from "@/entities/repo/model/repo.types";
+import { type RepoStatus } from "@/entities/repo/model/repo.types";
 import { repoParsers } from "@/entities/repo/model/repo-parsers";
 import { RepoCardSkeleton } from "@/entities/repo/ui/repo-card-skeleton";
 
@@ -81,11 +81,18 @@ export function RepoListContainer({ config }: Readonly<Props>) {
         </div>
       )}
       <div className="flex-1">
-        <RepoList meta={meta} repos={items} />
+        <RepoList
+          meta={meta}
+          repos={items}
+        />
       </div>
 
       {config?.showPagination !== false && (
-        <AppPagination className="mt-4" isLoading={isFetching} meta={meta} />
+        <AppPagination
+          className="mt-4"
+          isLoading={isFetching}
+          meta={meta}
+        />
       )}
     </>
   );

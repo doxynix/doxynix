@@ -23,7 +23,7 @@ import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Progress } from "@/shared/ui/core/progress";
 
-import type { RepoMapNodeData } from "../model/repo-map-types";
+import { type RepoMapNodeData } from "../model/repo-map-types";
 
 type Props = NodeProps<Node<RepoMapNodeData, "repoNode">>;
 
@@ -123,7 +123,11 @@ export const RepoNode = ({ data }: Props) => {
         dimByFilter || dimByHover || dimBySearch ? "z-1 opacity-50" : "z-10 opacity-100",
       )}
     >
-      <Handle className="cursor-grab! opacity-0" position={Position.Top} type="target" />
+      <Handle
+        className="cursor-grab! opacity-0"
+        position={Position.Top}
+        type="target"
+      />
 
       <Card className="w-96">
         <CardHeader>
@@ -139,7 +143,10 @@ export const RepoNode = ({ data }: Props) => {
           {metricsConfig.map(
             (m) =>
               m.show && (
-                <AppBadge key={m.id} variant="outline">
+                <AppBadge
+                  key={m.id}
+                  variant="outline"
+                >
                   <m.icon className={cn(m.color)} />
                   <div className="flex gap-1 text-muted-foreground">
                     <span className="text-[10px]">{m.val}</span>
@@ -163,7 +170,11 @@ export const RepoNode = ({ data }: Props) => {
           )}
         </CardContent>
       </Card>
-      <Handle className="cursor-grab! opacity-0" position={Position.Bottom} type="source" />
+      <Handle
+        className="cursor-grab! opacity-0"
+        position={Position.Bottom}
+        type="source"
+      />
     </div>
   );
 };

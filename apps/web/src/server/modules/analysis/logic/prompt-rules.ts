@@ -5,7 +5,7 @@
  * Optimized for Gemma 4 (26B MoE) sparse expert activation.
  */
 
-import dedent from "ts-dedent";
+import { dedent } from "es-toolkit";
 
 // =============================================================================
 // GROUNDING & DATA VALIDATION RULES

@@ -2,18 +2,45 @@ import crypto from "node:crypto";
 import { resolveMx } from "node:dns/promises";
 
 import disposableDomains from "disposable-email-domains";
-import validator from "validator";
 
 import { LOG_SALT_SECRET } from "@/shared/constants/env.server";
 
 import { appLogger } from "@/server/core/app-logger";
 
-export function normalizeEmail(email: string): string {
-  const normalized = validator.normalizeEmail(email, {
-    gmail_remove_dots: false, // NOTE: для совместимости с google oAuth
-  });
+const SUBADDRESS_PROVIDERS = new Set([
+  "gmail.com",
+  "googlemail.com",
+  "outlook.com",
+  "hotmail.com",
+  "live.com",
+  "icloud.com",
+  "proton.me",
+  "protonmail.com",
+]);
 
-  return typeof normalized === "string" ? normalized : email.toLowerCase().trim();
+export function normalizeEmail(email: string): string {
+  const trimmed = email.trim();
+  const atIndex = trimmed.lastIndexOf("@");
+
+  if (atIndex <= 0 || atIndex === trimmed.length - 1) {
+    return trimmed.toLowerCase();
+  }
+
+  let local = trimmed.slice(0, atIndex).toLowerCase();
+  let domain = trimmed.slice(atIndex + 1).toLowerCase();
+
+  if (domain === "googlemail.com") {
+    domain = "gmail.com";
+  }
+
+  if (SUBADDRESS_PROVIDERS.has(domain)) {
+    const plusIndex = local.indexOf("+");
+    if (plusIndex !== -1) {
+      local = local.slice(0, plusIndex);
+    }
+  }
+
+  return `${local}@${domain}`;
 }
 
 export function maskEmail(email: null | string | undefined): string {

@@ -17,6 +17,11 @@ plugin prisma {
   format = true
 }
 
+generator enums {
+  provider = "bun run prisma/enum-generator.ts"
+  output   = "../../../packages/shared/src/enums/index.ts"
+}
+
 // plugin zod {
 //   provider = "@core/zod"
 //   output   = "../src/shared/api-contracts"
@@ -63,13 +68,13 @@ generator zod {
   modelSuffix       = "Schema"
 }
 */
-generator jsonSchema {
-  provider = "prisma-json-schema-generator"
-}
+// generator jsonSchema {
+//  provider = "prisma-json-schema-generator"
+// }
 
-generator dbml {
-  provider = "prisma-dbml-generator"
-}
+// generator dbml {
+//   provider = "prisma-dbml-generator"
+// }
 
 // generator erd {
 //   provider      = "prisma-erd-generator"

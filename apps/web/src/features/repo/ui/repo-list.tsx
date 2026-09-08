@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { AppButton } from "@/shared/ui/core/button";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import type { RepoMeta, UiRepoListItem } from "@/entities/repo/model/repo.types";
+import { type RepoMeta, type UiRepoListItem } from "@/entities/repo/model/repo.types";
 import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dialog.store";
 import { RepoCard } from "@/entities/repo/ui/repo-card";
 
@@ -24,7 +24,11 @@ export function RepoList({ meta, repos }: Readonly<Props>) {
     return (
       <EmptyState
         action={
-          <AppButton className="cursor-pointer" onClick={() => setOpen(true)} variant="secondary">
+          <AppButton
+            className="cursor-pointer"
+            onClick={() => setOpen(true)}
+            variant="secondary"
+          >
             {tCommon("add")}
           </AppButton>
         }
@@ -56,7 +60,10 @@ export function RepoList({ meta, repos }: Readonly<Props>) {
   return (
     <div className="flex flex-col gap-4">
       {repos.map((repo) => (
-        <RepoCard key={repo.id} repo={repo} />
+        <RepoCard
+          key={repo.id}
+          repo={repo}
+        />
       ))}
     </div>
   );

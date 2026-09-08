@@ -1,4 +1,4 @@
-import type { RouterInput, RouterOutput } from "@/shared/api/trpc";
+import { type RouterInput, type RouterOutput } from "@/shared/api/trpc";
 
 export type UiNotification = RouterOutput["notification"]["getAll"]["items"][number];
 

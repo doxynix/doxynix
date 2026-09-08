@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type * as z from "zod";
 
 import { paginationQuerySchema } from "@/core/db/pagination";
 import { selectAuditLogSchema } from "@/core/db/schema";

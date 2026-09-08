@@ -1,7 +1,7 @@
 import { getDashboardStats, getTrends } from "@prisma/client/sql";
 import { subDays, subHours, subMinutes } from "date-fns";
 
-import type { DbClient } from "@/server/core/db";
+import { type DbClient } from "@/server/core/db";
 
 import {
   type AnalyticsInput,

@@ -1,6 +1,6 @@
-import { DocType } from "@prisma/client";
+import { DocType } from "@doxynix/shared";
 
-import type { RepoMetrics } from "../engine/core/metrics.types";
+import { type RepoMetrics } from "../engine/core/metrics.types";
 import { DOC_SECTION_DEPENDENCIES } from "./doc-priority";
 
 type DocumentationInputSnapshot = NonNullable<RepoMetrics["documentationInput"]>;

@@ -44,33 +44,57 @@ export function AnalysisTerminal({
             <span className="text-foreground">{title}</span>
           </div>
 
-          <Tabs onValueChange={(value) => void setFilter(value as typeof filter)} value={filter}>
+          <Tabs
+            onValueChange={(value) => void setFilter(value as typeof filter)}
+            value={filter}
+          >
             <TabsList className="flex items-center gap-1">
-              <TabsTrigger className="text-xs" value="all">
+              <TabsTrigger
+                className="text-xs"
+                value="all"
+              >
                 All <AppBadge variant="outline">{counts.all}</AppBadge>
               </TabsTrigger>
               {counts.error > 0 && (
-                <TabsTrigger className="data-[state=active]:text-destructive" value="error">
+                <TabsTrigger
+                  className="data-[state=active]:text-destructive"
+                  value="error"
+                >
                   Errors
-                  <AppBadge className="border-destructive text-destructive" variant="outline">
+                  <AppBadge
+                    className="border-destructive text-destructive"
+                    variant="outline"
+                  >
                     {counts.error}
                   </AppBadge>
                 </TabsTrigger>
               )}
 
               {counts.warn > 0 && (
-                <TabsTrigger className="data-[state=active]:text-warning" value="warn">
+                <TabsTrigger
+                  className="data-[state=active]:text-warning"
+                  value="warn"
+                >
                   Warns
-                  <AppBadge className="border-warning text-warning" variant="outline">
+                  <AppBadge
+                    className="border-warning text-warning"
+                    variant="outline"
+                  >
                     {counts.warn}
                   </AppBadge>
                 </TabsTrigger>
               )}
 
               {counts.success > 0 && (
-                <TabsTrigger className="data-[state=active]:text-success" value="success">
+                <TabsTrigger
+                  className="data-[state=active]:text-success"
+                  value="success"
+                >
                   Success
-                  <AppBadge className="border-success text-success" variant="outline">
+                  <AppBadge
+                    className="border-success text-success"
+                    variant="outline"
+                  >
                     {counts.success}
                   </AppBadge>
                 </TabsTrigger>
@@ -90,7 +114,10 @@ export function AnalysisTerminal({
       </div>
 
       <div className="group relative">
-        <ScrollArea className={cn("w-full p-4 font-mono text-xs", maxHeight)} ref={scrollRef}>
+        <ScrollArea
+          className={cn("w-full p-4 font-mono text-xs", maxHeight)}
+          ref={scrollRef}
+        >
           {filteredLogs.length === 0 && logs.length > 0 && (
             <div className="flex flex-col items-center justify-center py-12">
               <p>No matching logs found</p>
@@ -105,7 +132,11 @@ export function AnalysisTerminal({
 
           <div className="flex flex-col gap-1">
             {filteredLogs.map((log) => (
-              <LogLine key={log.id} log={log} searchQuery={search} />
+              <LogLine
+                key={log.id}
+                log={log}
+                searchQuery={search}
+              />
             ))}
           </div>
         </ScrollArea>
@@ -164,7 +195,10 @@ function highlightText(text: string, highlight: string) {
     <span>
       {parts.map((part, i) =>
         part.toLowerCase() === highlight.toLowerCase() ? (
-          <span className="rounded-[1px] bg-warning/10 font-bold text-warning" key={i}>
+          <span
+            className="rounded-[1px] bg-warning/10 font-bold text-warning"
+            key={i}
+          >
             {part}
           </span>
         ) : (

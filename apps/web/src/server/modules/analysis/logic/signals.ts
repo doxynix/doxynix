@@ -1,8 +1,8 @@
 import { uniq } from "es-toolkit";
 import { normalize } from "pathe";
 
-import type { AIResult } from "../engine/core/analysis-result.schemas";
-import type { RepoMetrics } from "../engine/core/metrics.types";
+import { type AIResult } from "../engine/core/analysis-result.schemas";
+import { type RepoMetrics } from "../engine/core/metrics.types";
 
 export function collectScopedEntrySignals(
   paths: string[],

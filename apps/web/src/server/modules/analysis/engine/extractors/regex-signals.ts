@@ -1,4 +1,9 @@
-import type { FileSignals, RepositoryFile, RouteRef, SymbolRef } from "../core/discovery.types";
+import {
+  type FileSignals,
+  type RepositoryFile,
+  type RouteRef,
+  type SymbolRef,
+} from "../core/discovery.types";
 import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
 import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
 import {

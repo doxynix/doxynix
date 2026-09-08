@@ -1,6 +1,7 @@
 "use client";
 
-import type { ComponentType } from "react";
+import { type ComponentType } from "react";
+import { type DocType } from "@doxynix/shared";
 import { uniqBy } from "es-toolkit";
 import {
   BookOpen,
@@ -17,7 +18,7 @@ import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
 import { TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 
-import type { AvailableDocs, DocType } from "@/entities/repo/model/repo.types";
+import { type AvailableDocs } from "@/entities/repo/model/repo.types";
 
 type TabItem = {
   icon: ComponentType<{ className?: string }>;
@@ -68,7 +69,10 @@ export function RepoDocsTabs({
           const isCodeDocRoot = item.value === "CODE_DOC";
 
           return (
-            <div className="flex w-full flex-col" key={item.id}>
+            <div
+              className="flex w-full flex-col"
+              key={item.id}
+            >
               <TabsTrigger
                 className={cn("w-full items-center justify-start gap-3 p-3 transition-standard")}
                 value={item.value}
