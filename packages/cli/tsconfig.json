@@ -3,7 +3,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*", "../../apps/web/src/*"],
+      "@/*": ["./src/*"],
+      "@/server/*": ["../../apps/web/src/server/*"],
+      "@/shared/*": ["../../apps/web/src/shared/*"],
       "@pkg": ["./package.json"]
     },
     "skipLibCheck": true

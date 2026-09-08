@@ -3,15 +3,17 @@ import fs from "node:fs";
 import path from "node:path";
 
 import * as p from "@clack/prompts";
-import type { Command } from "commander";
+import { type Command } from "commander";
 
 import { handleCliError } from "@/core/errors";
 import { resolveRepository } from "@/core/repo";
 
 import { brand, pc } from "@/ui/colors";
+import { withTaskSpinner } from "@/ui/spinner";
 
 import { renderDocsListTable } from "./docs.formatter";
-import { type DocType, docsService } from "./docs.service";
+import { docsService } from "./docs.service";
+import { type DocListItem, type DocType } from "./docs.types";
 
 export function getCurrentGitBranch(): string {
   try {
@@ -29,11 +31,8 @@ export function registerDocsCommand(program: Command) {
   const docs = program
     .command("docs")
     .alias("doc")
-    .description(
-      "Inspect, view, and generate AI repository documentation (README, Architecture, Code)",
-    );
+    .description("Inspect, generate, and pin AI repository documentation");
 
-  // 1. dxnx docs list [target]
   docs
     .command("list [target]", { isDefault: true })
     .description("List all generated documentation artifacts for a repository")
@@ -49,29 +48,26 @@ export function registerDocsCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        if (!options?.json) {
-          s.start(`Fetching available docs for ${repoContext.target}...`);
-        }
-
-        const docsList = await docsService.getAvailableDocs(repoContext.repo.id, options?.aid);
-        if (!options?.json) {
-          s.stop("Documentation items retrieved");
-        }
+        const docsList = await withTaskSpinner(
+          {
+            silent: options?.json,
+            start: `Fetching available docs for ${repoContext.target}...`,
+            stop: "Documentation items retrieved",
+          },
+          () => docsService.getAvailableDocs(repoContext.repo.id, options?.aid),
+        );
 
         if (options?.json) {
           console.log(JSON.stringify(docsList, null, 2));
           return;
         }
 
-        const items = Array.isArray(docsList)
-          ? docsList
-          : ((docsList as any)?.docs ?? (docsList as any)?.items ?? []);
+        const items: DocListItem[] = Array.isArray(docsList) ? docsList : [];
 
         if (items.length === 0) {
           p.outro(
             brand.warning(`No documentation found for ${repoContext.target}.\n`) +
-              brand.muted("Run an analysis first to generate docs: ") +
+              brand.muted("Run an analysis first with: ") +
               brand.highlight(`dxnx analyze start ${repoContext.target}`),
           );
           return;
@@ -89,7 +85,6 @@ export function registerDocsCommand(program: Command) {
       }
     });
 
-  // 2. dxnx docs view [target]
   docs
     .command("view [target]")
     .alias("cat")
@@ -148,28 +143,23 @@ export function registerDocsCommand(program: Command) {
               validate: (val) => (!val?.trim() ? "Path cannot be empty" : undefined),
             });
 
-            if (p.isCancel(pathInput)) {
+            if (p.isCancel(pathInput) || !pathInput) {
               p.cancel("Cancelled.");
               return;
             }
             filePath = pathInput.trim();
           }
 
-          const s = p.spinner();
-          s.start(`Loading ${docType} for ${repoContext.target}...`);
-
-          const result = await docsService.getDocumentContent(
-            repoContext.repo.id,
-            docType,
-            filePath,
-            options?.aid,
+          const result = await withTaskSpinner(
+            {
+              start: `Loading ${docType} for ${repoContext.target}...`,
+              stop: "Document loaded!",
+            },
+            () =>
+              docsService.getDocumentContent(repoContext.repo.id, docType, filePath, options?.aid),
           );
-          s.stop("Document loaded!");
 
-          const content =
-            typeof result === "string"
-              ? result
-              : ((result as any)?.content ?? (result as any)?.document?.content);
+          const content = result.raw;
 
           if (!content) {
             p.outro(
@@ -199,7 +189,6 @@ export function registerDocsCommand(program: Command) {
       },
     );
 
-  // 3. dxnx docs generate <filePath>
   docs
     .command("generate <filePath>")
     .alias("file")
@@ -228,11 +217,11 @@ export function registerDocsCommand(program: Command) {
             fileContent = fs.readFileSync(localPath, "utf-8");
           } else {
             const inputContent = await p.text({
-              message: `File '${filePath}' not found locally. Paste file content or URL:`,
+              message: `File '${filePath}' not found locally. Paste file content:`,
               validate: (val) => (!val?.trim() ? "Content is required" : undefined),
             });
 
-            if (p.isCancel(inputContent)) {
+            if (p.isCancel(inputContent) || !inputContent) {
               p.cancel("Cancelled.");
               return;
             }
@@ -241,27 +230,30 @@ export function registerDocsCommand(program: Command) {
 
           const branch = options.branch ?? getCurrentGitBranch();
 
-          const s = p.spinner();
-          s.start(
-            `Generating deep documentation for ${pc.cyan(filePath)} (${options.language ?? "English"})...`,
+          const result = await withTaskSpinner(
+            {
+              start: `Generating documentation for ${pc.cyan(filePath)} (${options.language ?? "English"})...`,
+              stop: "Documentation generated successfully!",
+            },
+            () =>
+              docsService.documentFile({
+                branch,
+                content: fileContent,
+                language: options.language ?? "English",
+                path: filePath,
+                repoId: repoContext.repo.id,
+              }),
           );
-
-          const result = await docsService.documentFile({
-            branch,
-            content: fileContent,
-            language: options.language ?? "English",
-            path: filePath,
-            repoId: repoContext.repo.id,
-          });
-
-          s.stop("Documentation generated successfully!");
 
           const markdown =
             typeof result === "string"
               ? result
-              : ((result as any)?.content ??
-                (result as any)?.markdown ??
-                JSON.stringify(result, null, 2));
+              : typeof result === "object" &&
+                  result !== null &&
+                  "content" in result &&
+                  typeof result.content === "string"
+                ? result.content
+                : JSON.stringify(result, null, 2);
 
           if (options.output) {
             const outPath = path.resolve(process.cwd(), options.output);
@@ -282,12 +274,46 @@ export function registerDocsCommand(program: Command) {
       },
     );
 
-  // 4. dxnx docs export [target]
+  docs
+    .command("pin <filePath>")
+    .description(
+      "Pin recent single-file audit report directly into permanent repository documentation",
+    )
+    .option("-r, --repo <target>", "Target repository (owner/name)")
+    .action(async (filePath: string, options: { repo?: string }) => {
+      try {
+        p.intro(brand.logo(" 📌 Pin Audit to Documentation "));
+
+        const repoContext = await resolveRepository(options.repo);
+        if (!repoContext) {
+          return;
+        }
+
+        const doc = await withTaskSpinner(
+          {
+            start: `Pinning audit of ${pc.cyan(filePath)} to repository documentation...`,
+            stop: "Audit pinned successfully!",
+          },
+          () => docsService.pinAuditToDocs(repoContext.repo.id, filePath),
+        );
+
+        p.note(
+          `Document ID:  ${brand.highlight(String(doc.id))}\n` +
+            `Type:         ${brand.info(doc.type)}\n` +
+            `Target Path:  ${pc.cyan(doc.path ?? filePath)}\n` +
+            `Version:      ${brand.muted(doc.version)}`,
+          "Documentation Created",
+        );
+
+        p.outro(brand.success("✨ Single-file audit is now permanently recorded in docs!"));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
   docs
     .command("export [target]")
-    .description(
-      "Export all generated documentation for repository into a local folder (e.g. ./docs/doxynix)",
-    )
+    .description("Export all generated documentation for repository into a local folder")
     .option("-d, --dir <directory>", "Local directory path to save docs", "./docs/doxynix")
     .action(async (target?: string, options?: { dir?: string }) => {
       try {
@@ -298,61 +324,63 @@ export function registerDocsCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        s.start(`Scanning available docs for ${repoContext.target}...`);
-
-        const docsList = await docsService.getAvailableDocs(repoContext.repo.id);
-        const items: any[] = Array.isArray(docsList)
-          ? docsList
-          : ((docsList as any)?.docs ?? (docsList as any)?.items ?? []);
+        const docsList = await withTaskSpinner(
+          `Scanning available docs for ${repoContext.target}...`,
+          () => docsService.getAvailableDocs(repoContext.repo.id),
+        );
+        const items: DocListItem[] = Array.isArray(docsList) ? docsList : [];
 
         if (items.length === 0) {
-          s.stop("No docs found");
           p.outro(brand.warning(`No documentation found to export for ${repoContext.target}.`));
           return;
         }
 
-        s.message(`Downloading ${items.length} documentation files...`);
         const baseDir = path.resolve(process.cwd(), options?.dir ?? "./docs/doxynix");
         fs.mkdirSync(baseDir, { recursive: true });
 
         let exportedCount = 0;
         const failed: string[] = [];
 
-        for (const doc of items) {
-          const type: DocType = doc.type ?? doc.docType ?? "README";
-          const filename =
-            type === "README"
-              ? "README.md"
-              : type === "ARCHITECTURE"
-                ? "ARCHITECTURE.md"
-                : `code/${doc.path ? doc.path.replaceAll(/[\\/]/g, "_") : doc.id}.md`;
+        await withTaskSpinner(
+          `Downloading ${items.length} documentation files...`,
+          async (update) => {
+            for (const doc of items) {
+              const type: DocType = doc.type;
+              const filename =
+                type === "README"
+                  ? "README.md"
+                  : type === "ARCHITECTURE"
+                    ? "ARCHITECTURE.md"
+                    : `code/${doc.path ? doc.path.replaceAll(/[\\/]/g, "_") : doc.id}.md`;
 
-          try {
-            const res = await docsService.getDocumentContent(repoContext.repo.id, type, doc.path);
-            const content =
-              typeof res === "string"
-                ? res
-                : ((res as any)?.content ?? (res as any)?.document?.content);
+              update(`Saving ${filename}...`);
 
-            if (content) {
-              const fullFilePath = path.join(baseDir, filename);
-              fs.mkdirSync(path.dirname(fullFilePath), { recursive: true });
-              fs.writeFileSync(fullFilePath, content, "utf-8");
-              exportedCount++;
-            } else {
-              failed.push(`${type}${doc.path ? ` (${doc.path})` : ""}: empty content`);
+              try {
+                const res = await docsService.getDocumentContent(
+                  repoContext.repo.id,
+                  type,
+                  doc.path ?? undefined,
+                );
+                const content = res.raw;
+
+                if (content) {
+                  const fullFilePath = path.join(baseDir, filename);
+                  fs.mkdirSync(path.dirname(fullFilePath), { recursive: true });
+                  fs.writeFileSync(fullFilePath, content, "utf-8");
+                  exportedCount++;
+                } else {
+                  failed.push(`${type}${doc.path ? ` (${doc.path})` : ""}: empty content`);
+                }
+              } catch (docError) {
+                failed.push(
+                  `${type}${doc.path ? ` (${doc.path})` : ""}: ${
+                    docError instanceof Error ? docError.message : "unknown error"
+                  }`,
+                );
+              }
             }
-          } catch (docError) {
-            failed.push(
-              `${type}${doc.path ? ` (${doc.path})` : ""}: ${
-                docError instanceof Error ? docError.message : "unknown error"
-              }`,
-            );
-          }
-        }
-
-        s.stop("Export finished!");
+          },
+        );
 
         if (failed.length > 0) {
           p.log.warn(brand.warning(`Skipped ${failed.length} document(s):\n${failed.join("\n")}`));

@@ -1,12 +1,13 @@
 import * as p from "@clack/prompts";
-import type { Command } from "commander";
+import { type Command } from "commander";
 
-import { trpc } from "@/core/client";
 import { handleCliError } from "@/core/errors";
 import { parseRepoTarget } from "@/core/repo";
 
 import { brand, pc } from "@/ui/colors";
+import { withTaskSpinner } from "@/ui/spinner";
 
+import { reposService } from "../repos/repos.service";
 import { renderBranchesTable, renderFileTree, renderGithubReposTable } from "./github.formatter";
 import { githubService } from "./github.service";
 
@@ -16,7 +17,6 @@ export function registerGithubCommand(program: Command) {
     .alias("gh")
     .description("GitHub App integration, remote repository exploration, and branch inspection");
 
-  // 1. dxnx github repos
   gh.command("repos", { isDefault: true })
     .description(
       "List accessible repositories from connected GitHub App and optionally connect them",
@@ -24,22 +24,22 @@ export function registerGithubCommand(program: Command) {
     .option("--json", "Output repositories list in JSON format")
     .action(async (options: { json?: boolean }) => {
       try {
-        const s = p.spinner();
-        if (!options.json) {
-          s.start("Fetching repositories from GitHub App...");
-        }
-
-        const repos = await githubService.getMyRepos();
-        if (!options.json) {
-          s.stop("GitHub repositories loaded");
-        }
+        const data = await withTaskSpinner(
+          {
+            silent: options.json,
+            start: "Fetching repositories from GitHub App...",
+            stop: "GitHub repositories loaded",
+          },
+          () => githubService.getMyRepos(),
+        );
+        const repos = data.items;
 
         if (options.json) {
-          console.log(JSON.stringify(repos, null, 2));
+          console.log(JSON.stringify(data, null, 2));
           return;
         }
 
-        if (!repos || repos.length === 0) {
+        if (repos.length === 0) {
           p.outro(
             brand.warning("⚠️ No repositories detected from your GitHub App installation.\n") +
               brand.muted("Install or configure the GitHub App using: ") +
@@ -60,20 +60,23 @@ export function registerGithubCommand(program: Command) {
         if (wantConnect && !p.isCancel(wantConnect)) {
           const selection = await p.select({
             message: "Select repository to connect:",
-            options: repos.map((r: any) => {
-              const full = r.fullName ?? `${r.owner}/${r.name}`;
+            options: repos.map((r) => {
+              const full = r.fullName;
               return {
                 label: full,
-                value: r.html_url ?? r.url ?? `https://github.com/${full}`,
+                value: `https://github.com/${full}`,
               };
             }),
           });
 
           if (!p.isCancel(selection) && typeof selection === "string") {
-            const addSpinner = p.spinner();
-            addSpinner.start(`Connecting ${selection} to Doxynix...`);
-            const res = await githubService.connectRepo(selection);
-            addSpinner.stop("Connected successfully!");
+            const res = await withTaskSpinner(
+              {
+                start: `Connecting ${selection} to Doxynix...`,
+                stop: "Connected successfully!",
+              },
+              () => githubService.connectRepo(selection),
+            );
 
             p.outro(
               brand.success(
@@ -90,17 +93,19 @@ export function registerGithubCommand(program: Command) {
       }
     });
 
-  // 2. dxnx github install
   gh.command("install")
     .description("Get GitHub App installation URL to link organizations or repositories")
     .action(async () => {
       try {
         p.intro(brand.logo(" 🐙 Connect GitHub App "));
 
-        const s = p.spinner();
-        s.start("Generating authorization URL...");
-        const installUrl = await githubService.getInstallUrl();
-        s.stop("URL ready");
+        const installUrl = await withTaskSpinner(
+          {
+            start: "Generating authorization URL...",
+            stop: "URL ready",
+          },
+          () => githubService.getInstallUrl(),
+        );
 
         if (!installUrl) {
           p.outro(brand.error("Could not retrieve GitHub App installation URL."));
@@ -122,7 +127,6 @@ export function registerGithubCommand(program: Command) {
       }
     });
 
-  // 3. dxnx github branches <target>
   gh.command("branches <target>")
     .description("List all remote branches of a repository (e.g. dxnx github branches owner/repo)")
     .option("--json", "Output branches in JSON format")
@@ -134,15 +138,14 @@ export function registerGithubCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        if (!options.json) {
-          s.start(`Fetching branches for ${target}...`);
-        }
-
-        const branches = await githubService.getBranches(parsed.owner, parsed.name);
-        if (!options.json) {
-          s.stop("Branches loaded");
-        }
+        const branches = await withTaskSpinner(
+          {
+            silent: options.json,
+            start: `Fetching branches for ${target}...`,
+            stop: "Branches loaded",
+          },
+          () => githubService.getBranches(parsed.owner, parsed.name),
+        );
 
         if (options.json) {
           console.log(JSON.stringify(branches, null, 2));
@@ -163,7 +166,6 @@ export function registerGithubCommand(program: Command) {
       }
     });
 
-  // 4. dxnx github tree <target> [branch]
   gh.command("tree <target> [branch]")
     .description(
       "Explore remote repository file tree without cloning (e.g. dxnx github tree owner/repo)",
@@ -177,15 +179,14 @@ export function registerGithubCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        if (!options?.json) {
-          s.start(`Loading remote files for ${target}...`);
-        }
-
-        const files = await githubService.getRepoFiles(parsed.owner, parsed.name, branch);
-        if (!options?.json) {
-          s.stop("File tree retrieved");
-        }
+        const files = await withTaskSpinner(
+          {
+            silent: options?.json,
+            start: `Loading remote files for ${target}...`,
+            stop: "File tree retrieved",
+          },
+          () => githubService.getRepoFiles(parsed.owner, parsed.name, branch),
+        );
 
         if (options?.json) {
           console.log(JSON.stringify(files, null, 2));
@@ -203,7 +204,6 @@ export function registerGithubCommand(program: Command) {
       }
     });
 
-  // 5. dxnx github cat <target> <filePath>
   gh.command("cat <target> <filePath>")
     .description("Inspect file contents from a remote GitHub repository")
     .option("-b, --branch <branch>", "Specific branch to fetch from")
@@ -215,64 +215,55 @@ export function registerGithubCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        s.start("Fetching repository reference...");
-        const repo = await trpc.repo.getByName.query({ name: parsed.name, owner: parsed.owner });
+        const repo = await withTaskSpinner("Fetching repository reference...", () =>
+          reposService.getByName(parsed.owner, parsed.name),
+        );
+
         if (!repo) {
-          s.stop("Repo not found");
           p.outro(brand.error(`Repository ${target} is not connected in Doxynix yet.`));
           return;
         }
 
-        s.message(`Reading file ${filePath}...`);
-        const content = await githubService.getFileContent(repo.id, filePath, options.branch);
-        s.stop("File retrieved");
+        const result = await withTaskSpinner(`Reading file ${filePath}...`, () =>
+          githubService.getFileContent(repo.id, filePath, options.branch),
+        );
 
         console.log(`\n${brand.info(`--- ${filePath} (${options.branch ?? "default"}) ---`)}\n`);
-        if (typeof content === "string") {
-          console.log(content);
-        } else if (content?.content) {
-          console.log(content.content);
-        } else {
-          console.log(JSON.stringify(content, null, 2));
-        }
+        console.log(result.content);
         console.log(`\n${brand.info("--- End of file ---")}\n`);
       } catch (error) {
         handleCliError(error);
       }
     });
 
-  // 6. dxnx github search <query>
   gh.command("search <query>")
     .description("Search GitHub repositories directly from terminal")
     .option("--json", "Output search results in JSON format")
     .action(async (query: string, options: { json?: boolean }) => {
       try {
-        const s = p.spinner();
-        if (!options.json) {
-          s.start(`Searching GitHub for '${query}'...`);
-        }
-
-        const results = await githubService.searchGithub(query);
-        if (!options.json) {
-          s.stop("Search complete");
-        }
+        const results = await withTaskSpinner(
+          {
+            silent: options.json,
+            start: `Searching GitHub for '${query}'...`,
+            stop: "Search complete",
+          },
+          () => githubService.searchGithub(query),
+        );
 
         if (options.json) {
           console.log(JSON.stringify(results, null, 2));
           return;
         }
 
-        const items = Array.isArray(results) ? results : (results.items ?? []);
-        if (items.length === 0) {
+        if (results.length === 0) {
           p.outro(brand.muted(`No GitHub repositories found matching '${query}'.`));
           return;
         }
 
         console.log(`\n  🔎 Search Results for ${brand.highlight(query)}:\n`);
-        console.log(renderGithubReposTable(items));
+        console.log(renderGithubReposTable(results));
         console.log("\n");
-        p.outro(brand.muted(`Found ${items.length} matching repositories.`));
+        p.outro(brand.muted(`Found ${results.length} matching repositories.`));
       } catch (error) {
         handleCliError(error);
       }
