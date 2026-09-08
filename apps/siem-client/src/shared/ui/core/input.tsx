@@ -62,7 +62,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const isSearch = type === "search";
 
     return (
-      <div className={cx("relative w-full", className)} tremor-id="tremor-raw">
+      <div
+        className={cx("relative w-full", className)}
+        tremor-id="tremor-raw"
+      >
         <input
           className={cx(
             inputStyles({ enableStepper, hasError }),
@@ -85,7 +88,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               "text-gray-400 dark:text-gray-600",
             )}
           >
-            <RiSearchLine aria-hidden="true" className="size-4.5 shrink-0" />
+            <RiSearchLine
+              aria-hidden="true"
+              className="size-4.5 shrink-0"
+            />
           </div>
         )}
         {isPassword && (
@@ -112,9 +118,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 {typeState === "password" ? "Show password" : "Hide password"}
               </span>
               {typeState === "password" ? (
-                <RiEyeFill aria-hidden="true" className="size-5 shrink-0" />
+                <RiEyeFill
+                  aria-hidden="true"
+                  className="size-5 shrink-0"
+                />
               ) : (
-                <RiEyeOffFill aria-hidden="true" className="size-5 shrink-0" />
+                <RiEyeOffFill
+                  aria-hidden="true"
+                  className="size-5 shrink-0"
+                />
               )}
             </button>
           </div>

@@ -43,7 +43,10 @@ const Tooltip = React.forwardRef<React.ElementRef<typeof TooltipPrimitives.Conte
           open={open}
           tremor-id="tremor-raw"
         >
-          <TooltipPrimitives.Trigger asChild={asChild} onClick={onClick}>
+          <TooltipPrimitives.Trigger
+            asChild={asChild}
+            onClick={onClick}
+          >
             {children}
           </TooltipPrimitives.Trigger>
           <TooltipPrimitives.Portal>

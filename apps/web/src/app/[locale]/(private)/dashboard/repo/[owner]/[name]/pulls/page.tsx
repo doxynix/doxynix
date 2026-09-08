@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
+import { type Metadata } from "next";
 
-import type { RepoPageProps } from "@/shared/types/next.types";
+import { type RepoPageProps } from "@/shared/types/next.types";
 
 import { RepoPullsListContainer } from "@/features/repo-pulls/ui/repo-pulls-list-container";
 
@@ -19,5 +19,11 @@ export default async function RepoPullsPage({ params }: Readonly<RepoPageProps>)
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
-  return <RepoPullsListContainer name={name} owner={owner} repoId={repo.id} />;
+  return (
+    <RepoPullsListContainer
+      name={name}
+      owner={owner}
+      repoId={repo.id}
+    />
+  );
 }

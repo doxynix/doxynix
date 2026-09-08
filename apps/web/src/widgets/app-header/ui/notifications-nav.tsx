@@ -88,7 +88,11 @@ export function NotificationsNav() {
                       <p className="max-w-57.5 truncate text-muted-foreground text-xs">
                         {note.body}
                       </p>
-                      <TimeAgo className="w-fit text-xs" date={note.createdAt} locale={locale} />
+                      <TimeAgo
+                        className="w-fit text-xs"
+                        date={note.createdAt}
+                        locale={locale}
+                      />
                     </div>
                     {!note.isRead && (
                       <span className="mt-1 size-2 shrink-0 rounded-full bg-foreground" />
@@ -113,7 +117,10 @@ export function NotificationsNav() {
                   {href == null ? (
                     <div className={cn(commonClasses, "cursor-default")}>{innerContent}</div>
                   ) : (
-                    <Link className={cn(commonClasses, "cursor-pointer")} href={href}>
+                    <Link
+                      className={cn(commonClasses, "cursor-pointer")}
+                      href={href}
+                    >
                       {innerContent}
                     </Link>
                   )}
@@ -123,7 +130,10 @@ export function NotificationsNav() {
           )}
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild className="group flex cursor-pointer items-center justify-center">
+        <DropdownMenuItem
+          asChild
+          className="group flex cursor-pointer items-center justify-center"
+        >
           <Link
             className="flex w-full items-center justify-center group-hover:underline"
             href="/dashboard/notifications"

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Activity, Code2, Cpu, FileJson, Lock, Share2, Terminal } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -116,7 +116,10 @@ export async function FeaturesSection() {
 
       <BentoGrid className="lg:grid-rows-3">
         {FEATURES.map((item) => (
-          <BentoCard key={item.name} {...item} />
+          <BentoCard
+            key={item.name}
+            {...item}
+          />
         ))}
       </BentoGrid>
     </section>

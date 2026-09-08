@@ -45,7 +45,10 @@ export function TruncatedText({ className, text, tooltipProps }: Readonly<Props>
   }, []);
 
   const content = (
-    <span className={cn("block w-full min-w-0 truncate", className)} ref={setRef}>
+    <span
+      className={cn("block w-full min-w-0 truncate", className)}
+      ref={setRef}
+    >
       {text}
     </span>
   );
@@ -55,7 +58,10 @@ export function TruncatedText({ className, text, tooltipProps }: Readonly<Props>
   }
 
   return (
-    <AppTooltip content={text} {...tooltipProps}>
+    <AppTooltip
+      content={text}
+      {...tooltipProps}
+    >
       {content}
     </AppTooltip>
   );

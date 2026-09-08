@@ -57,7 +57,11 @@ export const ShimmerButton = forwardRef<ComponentRef<typeof Link>, ShimmerButton
           } as CSSProperties
         }
       >
-        <Link href={href} ref={ref} {...props}>
+        <Link
+          href={href}
+          ref={ref}
+          {...props}
+        >
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-(--radius)">
             <div className="@container-size absolute inset-0 overflow-visible blur-[2px]">
               <div className="absolute inset-0 aspect-[1] h-[100cqh] animate-shimmer-slide rounded-none [mask:none]">

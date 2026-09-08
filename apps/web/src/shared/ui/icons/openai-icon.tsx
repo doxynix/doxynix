@@ -1,8 +1,13 @@
+import { useId } from "react";
+
 type Props = {
   className?: string;
 };
 
 export function OpenAiLogo({ className }: Readonly<Props>) {
+  const id = useId();
+  const clipPathId = `${id}-clip`;
+
   return (
     <svg
       className={className}
@@ -12,7 +17,7 @@ export function OpenAiLogo({ className }: Readonly<Props>) {
       width="100%"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g clipPath="url(#clip0_1637_3573)">
+      <g clipPath={`url(#${clipPathId})`}>
         <path
           d="M358.8 240.1C293.02 240.1 239.2 293.92 239.2 359.7C239.2 425.48 293.02 479.3 358.8 479.3C424.58 479.3 478.4 425.812 478.4 359.7C478.4 293.587 424.912 240.1 358.8 240.1ZM358.8 436.443C317.937 436.443 285.046 402.889 285.046 359.7C285.046 316.511 317.937 282.956 358.8 282.956C399.663 282.956 432.553 316.511 432.553 359.7C432.553 402.889 399.663 436.443 358.8 436.443Z"
           fill="white"
@@ -33,11 +38,19 @@ export function OpenAiLogo({ className }: Readonly<Props>) {
           d="M1156.12 243.428L1062.1 475.984H1108.28L1128.21 425.154H1235.19L1255.12 475.984H1301.96L1208.61 243.428H1156.12ZM1143.16 386.616L1181.7 289.275L1219.9 386.616H1143.16Z"
           fill="white"
         />
-        <path d="M1363.42 243.428H1319.57V475.984H1363.42V243.428Z" fill="white" />
+        <path
+          d="M1363.42 243.428H1319.57V475.984H1363.42V243.428Z"
+          fill="white"
+        />
       </g>
       <defs>
-        <clipPath id="clip0_1637_3573">
-          <rect fill="white" height="717.6" transform="translate(0 0.899902)" width="1603.2" />
+        <clipPath id={clipPathId}>
+          <rect
+            fill="white"
+            height="717.6"
+            transform="translate(0 0.899902)"
+            width="1603.2"
+          />
         </clipPath>
       </defs>
     </svg>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { type Metadata } from "next";
 
 import { SessionsList } from "@/features/sessions/ui/sessions-list";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Route } from "next";
+import { type Route } from "next";
 import { MoveLeft } from "lucide-react";
 
 import { Link, useRouter } from "@/shared/i18n/navigation";
@@ -33,7 +33,12 @@ export function BackOrLinkButton({
 
   if (href) {
     return (
-      <AppButton asChild className={cn("w-fit", className)} variant={variant} {...props}>
+      <AppButton
+        asChild
+        className={cn("w-fit", className)}
+        variant={variant}
+        {...props}
+      >
         <Link href={href}>{content}</Link>
       </AppButton>
     );

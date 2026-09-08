@@ -1,25 +1,45 @@
 "use client";
 
-import type { ComponentProps } from "react";
+import { type ComponentProps } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { XIcon } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
 
 function Dialog({ ...props }: Readonly<ComponentProps<typeof DialogPrimitive.Root>>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />;
+  return (
+    <DialogPrimitive.Root
+      data-slot="dialog"
+      {...props}
+    />
+  );
 }
 
 function DialogTrigger({ ...props }: ComponentProps<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
+  return (
+    <DialogPrimitive.Trigger
+      data-slot="dialog-trigger"
+      {...props}
+    />
+  );
 }
 
 function DialogPortal({ ...props }: Readonly<ComponentProps<typeof DialogPrimitive.Portal>>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
+  return (
+    <DialogPrimitive.Portal
+      data-slot="dialog-portal"
+      {...props}
+    />
+  );
 }
 
 function DialogClose({ ...props }: ComponentProps<typeof DialogPrimitive.Close>) {
-  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
+  return (
+    <DialogPrimitive.Close
+      data-slot="dialog-close"
+      {...props}
+    />
+  );
 }
 
 function DialogOverlay({ className, ...props }: ComponentProps<typeof DialogPrimitive.Overlay>) {

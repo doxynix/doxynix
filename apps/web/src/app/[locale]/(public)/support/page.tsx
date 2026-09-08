@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import { type ComponentType } from "react";
 import { BookOpen, Mail, MessageSquare, MoveLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -141,7 +141,11 @@ export default async function SupportPage() {
           <h2 className="mb-3 font-bold text-3xl">Frequently Asked Questions</h2>
           <p className="text-text-secondary">Quick answers to common questions about Doxynix</p>
         </div>
-        <Accordion className="flex w-full flex-col gap-2" collapsible type="single">
+        <Accordion
+          className="flex w-full flex-col gap-2"
+          collapsible
+          type="single"
+        >
           {faqItems.map((item) => (
             <AccordionListItem
               className="rounded-xl border bg-landing-bg-light/50 px-4 transition-standard hover:border-border-accent"

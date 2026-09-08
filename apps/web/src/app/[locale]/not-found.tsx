@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { type Metadata } from "next";
 import { SearchX } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -24,8 +24,14 @@ export default async function NotFound() {
       </div>
 
       <div className="flex items-center gap-4">
-        <BackOrLinkButton className="cursor-pointer" label={tCommon("back")} />
-        <BackOrLinkButton href="/" label={tCommon("home")} />
+        <BackOrLinkButton
+          className="cursor-pointer"
+          label={tCommon("back")}
+        />
+        <BackOrLinkButton
+          href="/"
+          label={tCommon("home")}
+        />
       </div>
       <p className="text-muted-foreground text-sm">{t("footer")}</p>
     </div>

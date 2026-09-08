@@ -177,7 +177,11 @@ function Sidebar({
 
   if (isMobile) {
     return (
-      <Sheet onOpenChange={setOpenMobile} open={openMobile} {...props}>
+      <Sheet
+        onOpenChange={setOpenMobile}
+        open={openMobile}
+        {...props}
+      >
         <SheetContent
           className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
           data-mobile="true"
@@ -526,7 +530,10 @@ function SidebarMenuButton({
   }
 
   return (
-    <Tooltip delayDuration={300} disableHoverableContent>
+    <Tooltip
+      delayDuration={300}
+      disableHoverableContent
+    >
       <TooltipTrigger asChild>{button}</TooltipTrigger>
       <TooltipContent
         align="center"
@@ -605,10 +612,16 @@ function SidebarMenuSkeleton({
       {...props}
     >
       {showIcon && (
-        <Skeleton className="size-4 shrink-0 rounded-xl" data-sidebar="menu-skeleton-icon" />
+        <Skeleton
+          className="size-4 shrink-0 rounded-xl"
+          data-sidebar="menu-skeleton-icon"
+        />
       )}
 
-      <Skeleton className="h-4 w-full flex-1" data-sidebar="menu-skeleton-text" />
+      <Skeleton
+        className="h-4 w-full flex-1"
+        data-sidebar="menu-skeleton-text"
+      />
     </div>
   );
 }

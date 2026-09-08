@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { type EmitterWebhookEvent, Webhooks } from "@octokit/webhooks";
-import type {
-  InstallationEvent,
-  PullRequestEvent,
-  PullRequestReviewCommentEvent,
-  PushEvent,
-  RepositoryEvent,
-  WebhookEventName,
+import {
+  type InstallationEvent,
+  type PullRequestEvent,
+  type PullRequestReviewCommentEvent,
+  type PushEvent,
+  type RepositoryEvent,
+  type WebhookEventName,
 } from "@octokit/webhooks-types";
 import { Prisma } from "@prisma/client";
 

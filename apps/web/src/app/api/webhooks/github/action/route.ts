@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
+import * as z from "zod";
 
 import { prisma } from "@/server/core/db";
 import { repoAnalysisService } from "@/server/modules/analysis/analysis.service";

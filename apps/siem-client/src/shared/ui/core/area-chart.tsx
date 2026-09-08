@@ -1,5 +1,4 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: Recharts library relies on complex, dynamically typed props that are difficult to define accurately without sacrificing maintainability. */
-
+// oxlint-disable typescript/no-explicit-any
 import {
   type ComponentType,
   type Dispatch,
@@ -94,11 +93,11 @@ const LegendItem = ({ name, color, onClick, activeLegend }: LegendItemProps) => 
   );
 };
 
-interface ScrollButtonProps {
+type ScrollButtonProps = {
   icon: ElementType;
   onClick?: () => void;
   disabled?: boolean;
-}
+};
 
 const ScrollButton = ({ icon, onClick, disabled }: ScrollButtonProps) => {
   const Icon = icon;
@@ -147,7 +146,10 @@ const ScrollButton = ({ icon, onClick, disabled }: ScrollButtonProps) => {
       }}
       type="button"
     >
-      <Icon aria-hidden="true" className="size-full" />
+      <Icon
+        aria-hidden="true"
+        className="size-full"
+      />
     </button>
   );
 };
@@ -263,13 +265,17 @@ const Legend = forwardRef<HTMLOListElement, LegendProps>((props, ref) => {
   }, [checkScroll, enableLegendSlider, keyDown, keyUp]);
 
   return (
-    <ol className={cx("relative overflow-hidden", className)} ref={ref} {...other}>
+    <ol
+      className={cx("relative overflow-hidden", className)}
+      ref={ref}
+      {...other}
+    >
       <div
         className={cx(
           "flex h-full",
           enableLegendSlider
             ? hasScroll?.right || hasScroll?.left
-              ? "snap-mandatory items-center overflow-auto pr-12 pl-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              ? "snap-mandatory items-center overflow-auto pr-12 pl-4 scrollbar-none [&::-webkit-scrollbar]:hidden"
               : ""
             : "flex-wrap",
         )}
@@ -576,20 +582,38 @@ const AreaChart = forwardRef<HTMLDivElement, AreaChartProps>((props, ref) => {
 
     switch (fillType) {
       case "none": {
-        return <stop stopColor="currentColor" stopOpacity={0} />;
+        return (
+          <stop
+            stopColor="currentColor"
+            stopOpacity={0}
+          />
+        );
       }
       case "gradient": {
         return (
           <>
-            <stop offset="5%" stopColor="currentColor" stopOpacity={stopOpacity} />
-            <stop offset="95%" stopColor="currentColor" stopOpacity={0} />
+            <stop
+              offset="5%"
+              stopColor="currentColor"
+              stopOpacity={stopOpacity}
+            />
+            <stop
+              offset="95%"
+              stopColor="currentColor"
+              stopOpacity={0}
+            />
           </>
         );
       }
       case "solid":
       case undefined:
       default: {
-        return <stop stopColor="currentColor" stopOpacity={stopOpacity} />;
+        return (
+          <stop
+            stopColor="currentColor"
+            stopOpacity={stopOpacity}
+          />
+        );
       }
     }
   };
@@ -648,7 +672,12 @@ const AreaChart = forwardRef<HTMLDivElement, AreaChartProps>((props, ref) => {
   }
 
   return (
-    <div className={cx("h-80 w-full", className)} ref={ref} tremor-id="tremor-raw" {...other}>
+    <div
+      className={cx("h-80 w-full", className)}
+      ref={ref}
+      tremor-id="tremor-raw"
+      {...other}
+    >
       <ResponsiveContainer>
         <RechartsAreaChart
           data={data}
@@ -759,7 +788,11 @@ const AreaChart = forwardRef<HTMLDivElement, AreaChartProps>((props, ref) => {
 
               return showTooltip && active ? (
                 CustomTooltip ? (
-                  <CustomTooltip active={active} label={label} payload={cleanPayload} />
+                  <CustomTooltip
+                    active={active}
+                    label={label}
+                    payload={cleanPayload}
+                  />
                 ) : (
                   <ChartTooltip
                     active={active}

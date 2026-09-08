@@ -10,9 +10,15 @@ export async function HeroSection() {
   const t = await getTranslations("Landing");
 
   return (
-    <section className="flex min-h-dvh flex-col items-center justify-center p-4 pt-16" id="hero">
+    <section
+      className="flex min-h-dvh flex-col items-center justify-center p-4 pt-16"
+      id="hero"
+    >
       <div className="flex h-full max-w-4xl flex-col items-center justify-between gap-6 text-center">
-        <Logo className="mb-8 max-h-150 max-w-150 animate-fade-in" isInteractive={false} />
+        <Logo
+          className="mb-8 max-h-150 max-w-150 animate-fade-in"
+          isInteractive={false}
+        />
         <div className="glass-panel flex items-center justify-center rounded-full border border-border bg-landing-bg-dark/56 px-3 py-1">
           <AnimatedShinyText className="inline-flex items-center justify-center bg-linear-to-r from-transparent via-50% via-primary-foreground/95 to-transparent px-4 py-1 transition-standard">
             <span className="text-sm">{t("section_hero_badge")}</span>
@@ -48,7 +54,10 @@ export async function HeroSection() {
         </p>
 
         <div className="flex gap-4">
-          <ShimmerButton className="animate-fade-in p-6" href="/auth">
+          <ShimmerButton
+            className="animate-fade-in p-6"
+            href="/auth"
+          >
             <span className="font-medium text-sm lg:text-lg">{t("section_hero_btn")}</span>
           </ShimmerButton>
         </div>

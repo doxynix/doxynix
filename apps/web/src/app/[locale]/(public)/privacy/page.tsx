@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { createMetadata } from "@/shared/lib/metadata";
@@ -94,7 +94,11 @@ export default async function PrivacyPage() {
           <div className="rounded-xl border bg-muted p-4">
             <ul className="grid gap-3 sm:grid-cols-2">
               {BRANDS.map((item) => (
-                <PrivacyListItem descKey={t(item.descKey)} key={item.descKey} name={item.name} />
+                <PrivacyListItem
+                  descKey={t(item.descKey)}
+                  key={item.descKey}
+                  name={item.name}
+                />
               ))}
             </ul>
           </div>

@@ -82,8 +82,15 @@ export function AppHeader() {
           <AppCommandMenu />
           <ThemeToggle />
           <AppTooltip content="Repositories">
-            <AppButton asChild size="icon" variant="ghost">
-              <Link aria-label="Repositories" href="/dashboard/repos">
+            <AppButton
+              asChild
+              size="icon"
+              variant="ghost"
+            >
+              <Link
+                aria-label="Repositories"
+                href="/dashboard/repos"
+              >
                 <Book />
               </Link>
             </AppButton>
@@ -92,7 +99,12 @@ export function AppHeader() {
           <UserNav />
         </div>
       </div>
-      {isRepoOwnerPage && <RepoDetailsTabs name={name} owner={owner} />}
+      {isRepoOwnerPage && (
+        <RepoDetailsTabs
+          name={name}
+          owner={owner}
+        />
+      )}
     </header>
   );
 }

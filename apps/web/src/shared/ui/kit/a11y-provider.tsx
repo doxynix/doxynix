@@ -48,7 +48,11 @@ export function A11yProvider({ children }: Readonly<Props>) {
   return (
     <>
       {children}
-      <output aria-atomic="true" aria-live="assertive" className="sr-only">
+      <output
+        aria-atomic="true"
+        aria-live="assertive"
+        className="sr-only"
+      >
         {announcement}
       </output>
     </>

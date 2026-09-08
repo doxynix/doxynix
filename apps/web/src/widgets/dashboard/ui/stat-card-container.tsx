@@ -38,7 +38,10 @@ export function StatCardContainer() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {items.map((item) => (
-        <StatCard key={item.id} {...item} />
+        <StatCard
+          key={item.id}
+          {...item}
+        />
       ))}
     </div>
   );

@@ -1,4 +1,4 @@
-import type { MetadataRoute } from "next";
+import { type MetadataRoute } from "next";
 
 import { APP_URL } from "@/shared/constants/env.client";
 

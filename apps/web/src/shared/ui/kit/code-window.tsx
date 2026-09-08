@@ -41,7 +41,11 @@ export function CodeWindow({
           </div>
         </div>
         {copyButtonVisible && (
-          <CopyButton className="opacity-100" tooltipText={t("copy_code")} value={code ?? ""} />
+          <CopyButton
+            className="opacity-100"
+            tooltipText={t("copy_code")}
+            value={code ?? ""}
+          />
         )}
       </div>
       <div
