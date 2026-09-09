@@ -3,8 +3,7 @@
  * Unified XML and JSON formatting for evidence blocks embedded in prompts.
  * Provides consistent transformation and escaping across all evidence types.
  */
-import { defu } from "defu";
-import { escape } from "es-toolkit";
+import { escape, toMerged } from "es-toolkit";
 
 import { appLogger } from "../core/app-logger";
 
@@ -109,7 +108,7 @@ export class EvidenceFormatter {
     blocks: Array<{ data: object; label?: string; type: EvidenceType }>,
     options: EvidenceFormattingOptions = {},
   ): FormattedEvidence {
-    const opts = { ...this.defaultOptions, ...options };
+    const opts = this.resolveOptions(options);
 
     const xmlBlocks: string[] = [];
     let totalSize = 0;
@@ -153,7 +152,7 @@ export class EvidenceFormatter {
    * Format evidence as JSON block
    */
   formatJson(data: object, options: EvidenceFormattingOptions = {}): FormattedEvidence {
-    const opts = { ...this.defaultOptions, ...options };
+    const opts = this.resolveOptions(options);
 
     // Convert to JSON
     let json = JSON.stringify(data, null, opts.prettyPrint === true ? 2 : 0);
@@ -223,7 +222,7 @@ export class EvidenceFormatter {
     data: object,
     options: EvidenceFormattingOptions = {},
   ): FormattedEvidence {
-    const opts = defu(options, this.defaultOptions);
+    const opts = this.resolveOptions(options);
 
     // Convert object to JSON
     const json = JSON.stringify(data, null, opts.prettyPrint === true ? 2 : 0);
@@ -273,11 +272,15 @@ export class EvidenceFormatter {
     };
   }
 
+  private resolveOptions(options?: EvidenceFormattingOptions): EvidenceFormattingOptions {
+    return toMerged(this.defaultOptions, options ?? {});
+  }
+
   /**
    * Set default formatting options
    */
   setDefaults(options: Partial<EvidenceFormattingOptions>): this {
-    this.defaultOptions = defu(options, this.defaultOptions);
+    this.defaultOptions = toMerged(this.defaultOptions, options);
     return this;
   }
 }

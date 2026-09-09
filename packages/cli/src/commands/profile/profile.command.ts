@@ -1,26 +1,28 @@
 import * as p from "@clack/prompts";
-import type { Command } from "commander";
+import { UpdateProfileSchema } from "@doxynix/shared";
+import { type Command } from "commander";
 
 import { removeToken } from "@/core/config";
 import { handleCliError } from "@/core/errors";
+import { validateField } from "@/core/validation";
 
-import { brand, pc } from "@/ui/colors";
-import { createTable } from "@/ui/table";
+import { brand } from "@/ui/colors";
+import { withTaskSpinner } from "@/ui/spinner";
 
+import { renderLinkedAccountsTable, renderSessionsTable } from "./profile.formatter";
 import { profileService } from "./profile.service";
 
 export function registerProfileCommand(program: Command) {
   const profile = program
     .command("profile")
-    .description("Manage your Doxynix user profile and security");
+    .description("Manage your Doxynix user profile, active sessions, and security");
 
-  // dxnx profile (default)
   profile.action(async () => {
     try {
-      const s = p.spinner();
-      s.start("Loading user profile...");
-      const res = await profileService.getProfile();
-      s.stop("Profile loaded");
+      const res = await withTaskSpinner(
+        { start: "Loading user profile...", stop: "Profile loaded" },
+        () => profileService.getProfile(),
+      );
 
       console.log(`\n  Name:       ${brand.highlight(res.user.name ?? "Not set")}`);
       console.log(`  Email:      ${brand.highlight(res.user.email ?? "Not set")}`);
@@ -34,10 +36,9 @@ export function registerProfileCommand(program: Command) {
     }
   });
 
-  // dxnx profile update
   profile
     .command("update")
-    .description("Interactively update your profile information")
+    .description("Interactively update your profile credentials")
     .action(async () => {
       try {
         p.intro(brand.logo(" ✏️ Edit Profile "));
@@ -46,26 +47,18 @@ export function registerProfileCommand(program: Command) {
         const newName = await p.text({
           message: "Enter your updated profile name:",
           placeholder: current.user.name ?? "Jane Doe",
-          validate(value) {
-            if (!value || value.trim().length === 0) {
-              return "Name cannot be empty";
-            }
-            if (value.length > 50) {
-              return "Name cannot exceed 50 characters";
-            }
-            return undefined;
-          },
+          validate: validateField(UpdateProfileSchema.shape.name),
         });
 
-        if (p.isCancel(newName)) {
+        if (p.isCancel(newName) || !newName) {
           p.cancel("Profile update cancelled.");
           return;
         }
 
-        const s = p.spinner();
-        s.start("Saving changes...");
-        await profileService.updateProfile(newName.trim());
-        s.stop("Profile updated successfully!");
+        await withTaskSpinner(
+          { start: "Saving changes...", stop: "Profile updated successfully!" },
+          () => profileService.updateProfile(newName.trim()),
+        );
 
         p.outro(brand.success(`✅ Profile name updated to: ${brand.highlight(newName.trim())}`));
       } catch (error) {
@@ -73,24 +66,23 @@ export function registerProfileCommand(program: Command) {
       }
     });
 
-  // dxnx profile sessions
   profile
     .command("sessions")
     .description("List active login sessions across devices and browsers")
     .option("--json", "Output sessions in JSON format")
     .action(async (options: { json?: boolean }) => {
       try {
-        const s = p.spinner();
-        if (!options.json) {
-          s.start("Retrieving active sessions...");
-        }
-        const sessions = await profileService.getActiveSessions();
-        if (!options.json) {
-          s.stop("Sessions loaded");
-        }
+        const sessions = await withTaskSpinner(
+          {
+            silent: options.json,
+            start: "Retrieving active sessions...",
+            stop: "Sessions loaded",
+          },
+          () => profileService.getActiveSessions(),
+        );
 
         if (options.json) {
-          const safeSessions = sessions.map(({ token: _token, ...sess }: any) => sess);
+          const safeSessions = sessions.map(({ token: _token, ...sess }) => sess);
           console.log(JSON.stringify(safeSessions, null, 2));
           return;
         }
@@ -100,17 +92,8 @@ export function registerProfileCommand(program: Command) {
           return;
         }
 
-        const table = createTable(["Client / User Agent", "IP Address", "Created At"]);
-        for (const sess of sessions) {
-          table.push([
-            brand.highlight(sess.userAgent || "Unknown Device"),
-            brand.info(sess.ipAddress || "—"),
-            brand.muted(new Date(sess.createdAt).toLocaleString()),
-          ]);
-        }
-
         console.log(`\n${brand.logo(" 💻 Active User Sessions:\n")}`);
-        console.log(table.toString());
+        console.log(renderSessionsTable(sessions));
         console.log("\n");
         p.outro(brand.muted(`Active devices: ${sessions.length}`));
       } catch (error) {
@@ -118,21 +101,20 @@ export function registerProfileCommand(program: Command) {
       }
     });
 
-  // dxnx profile accounts
   profile
     .command("accounts")
     .description("List connected OAuth providers (GitHub, Google, Yandex)")
     .option("--json", "Output linked accounts in JSON format")
     .action(async (options: { json?: boolean }) => {
       try {
-        const s = p.spinner();
-        if (!options.json) {
-          s.start("Fetching linked authentication providers...");
-        }
-        const res = await profileService.getLinkedAccounts();
-        if (!options.json) {
-          s.stop("Accounts loaded");
-        }
+        const res = await withTaskSpinner(
+          {
+            silent: options.json,
+            start: "Fetching linked authentication providers...",
+            stop: "Accounts loaded",
+          },
+          () => profileService.getLinkedAccounts(),
+        );
 
         if (options.json) {
           console.log(JSON.stringify(res, null, 2));
@@ -144,17 +126,8 @@ export function registerProfileCommand(program: Command) {
           return;
         }
 
-        const table = createTable(["Provider", "Account Name", "Email"]);
-        for (const acc of res.accounts) {
-          table.push([
-            pc.cyan(pc.bold(acc.provider.toUpperCase())),
-            brand.highlight(acc.name ?? "—"),
-            brand.muted(acc.email ?? "—"),
-          ]);
-        }
-
         console.log(`\n${brand.logo(" 🔗 Linked Authentication Providers:\n")}`);
-        console.log(table.toString());
+        console.log(renderLinkedAccountsTable(res.accounts));
         console.log("\n");
         p.outro(brand.muted("Disconnect with: dxnx profile disconnect <provider>"));
       } catch (error) {
@@ -162,16 +135,15 @@ export function registerProfileCommand(program: Command) {
       }
     });
 
-  // dxnx profile disconnect <provider>
   profile
     .command("disconnect <provider>")
     .description("Disconnect an OAuth provider (github, google, yandex)")
     .action(async (provider: string) => {
       try {
-        const validProviders = ["github", "google", "yandex"];
-        const normalized = provider.toLowerCase() as "github" | "google" | "yandex";
+        const validProviders = ["github", "google", "yandex"] as const;
+        const normalized = provider.toLowerCase();
 
-        if (!validProviders.includes(normalized)) {
+        if (!validProviders.includes(normalized as (typeof validProviders)[number])) {
           p.outro(
             brand.error(`Invalid provider: '${provider}'. Valid options: github, google, yandex`),
           );
@@ -187,10 +159,13 @@ export function registerProfileCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        s.start(`Disconnecting ${normalized}...`);
-        await profileService.disconnectAccount(normalized);
-        s.stop("Disconnected!");
+        await withTaskSpinner(
+          { start: `Disconnecting ${normalized}...`, stop: "Disconnected!" },
+          () =>
+            profileService.disconnectAccount({
+              provider: normalized as (typeof validProviders)[number],
+            }),
+        );
 
         p.outro(
           brand.success(`✔ Provider ${brand.highlight(normalized)} disconnected successfully.`),
@@ -200,23 +175,21 @@ export function registerProfileCommand(program: Command) {
       }
     });
 
-  // dxnx profile remove-avatar
   profile
     .command("remove-avatar")
     .description("Remove custom profile picture and reset to default avatar")
     .action(async () => {
       try {
-        const s = p.spinner();
-        s.start("Deleting profile avatar...");
-        const res = await profileService.removeAvatar();
-        s.stop("Avatar removed!");
+        const res = await withTaskSpinner(
+          { start: "Deleting profile avatar...", stop: "Avatar removed!" },
+          () => profileService.removeAvatar(),
+        );
         p.outro(brand.success(`✔ ${res.message}`));
       } catch (error) {
         handleCliError(error);
       }
     });
 
-  // dxnx profile delete
   profile
     .command("delete")
     .description("Permanently delete your Doxynix account and all associated data")
@@ -237,10 +210,10 @@ export function registerProfileCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        s.start("Deleting account...");
-        const res = await profileService.deleteAccount();
-        s.stop("Account deleted.");
+        const res = await withTaskSpinner(
+          { start: "Deleting account...", stop: "Account deleted." },
+          () => profileService.deleteAccount(),
+        );
 
         removeToken();
         p.outro(brand.error(`👋 ${res.message}`));

@@ -9,7 +9,7 @@
 [![CLI: dxnx](https://img.shields.io/badge/cli-dxnx-24292e?style=flat-square)](https://www.npmjs.com)
 [![Language: TypeScript](https://img.shields.io/badge/language-typescript%20strict-24292e?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![UI: Clack](https://img.shields.io/badge/ui-%40clack%2Fprompts-24292e?style=flat-square)](https://github.com/natemoo-re/clack)
-[![Bundler: NCC](https://img.shields.io/badge/bundler-%40vercel%2Fncc-24292e?style=flat-square)](https://github.com/vercel/ncc)
+[![Bundler: tsup](https://img.shields.io/badge/bundler-tsup-24292e?style=flat-square)](https://tsup.egoist.dev/)
 
 [Capabilities](#-capabilities) · [Installation & Linking](#-installation--local-build) · [Usage](#-usage--commands) · [Security](#-token-storage--security)
 
@@ -21,9 +21,9 @@
 
 The `dxnx` CLI brings Doxynix intelligence directly into developer terminals and CI/CD runners:
 
-* **Secure Credential Storage:** Persists encrypted platform API tokens in a localized user config with strict filesystem permissions (`0o600`).
-* **Profile Verification:** Inspects authenticated user metadata, role assignments, and accessible organization workspaces.
-* **Pipeline Automation (Roadmap):** Triggers deterministic AST analysis during CI/CD checks and comments the generated Interactive Repo Brief directly onto GitHub Pull Requests.
+* **Secure XDG Credential Storage:** Persists platform API tokens in `~/.config/dxnx/config.json` (0o600).
+* **AI Agent & Multi-Turn REPL:** Interactive assistant for refactoring, AST audits, and security fixes.
+* **PR Analysis & Cloud Staging:** Direct review findings inspection, automated GitHub Pull Request creation, and inline review comments.
 
 ---
 
@@ -56,7 +56,10 @@ bun run --filter @doxynix/cli build
 # 2. Link binary globally to your system PATH
 cd packages/cli && bun link
 
-# 3. Verify global availability
+# 3. (Optional) Compile standalone single-file binary without Node requirement
+bun run build:bin
+
+# 4. Verify global availability
 dxnx --version
 ```
 
@@ -81,7 +84,7 @@ dxnx scan --repo ./path-to-project
 
 To prevent unauthorized token exposure on shared developer machines and build runners:
 
-* **Storage Location:** `~/.dxnxconfig`
+* **Storage Location:** `~/.config/dxnx/config.json`
 * **Filesystem Permissions:** `0o600` (Read/write access is restricted exclusively to the file owner).
 * **Sanitization:** Tokens are passed directly in HTTP authorization headers without disk leakage into shell history.
 

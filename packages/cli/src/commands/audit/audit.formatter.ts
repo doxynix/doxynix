@@ -1,20 +1,19 @@
 import { brand, pc } from "@/ui/colors";
 import { createTable } from "@/ui/table";
 
-export function renderAuditTable(items: any[]): string {
-  const table = createTable(["Timestamp", "Action / Event", "Resource Target", "Status / Details"]);
+import { type AuditLogItem } from "./audit.types";
+
+export function renderAuditTable(items: AuditLogItem[]): string {
+  const table = createTable(["Log ID", "Timestamp", "Action / Event", "Target", "Details"]);
 
   for (const item of items) {
-    const actionLabel = item.action ? brand.highlight(item.action) : brand.muted("EVENT");
-    const target = item.target || item.model || "System";
+    const idLabel = item.id ? brand.muted(`${item.id.slice(0, 8)}...`) : "—";
+    const actionLabel = brand.highlight(item.actionTitle);
+    const target = item.targetName || item.entityType || "System";
     const date = item.createdAt ? new Date(item.createdAt).toLocaleString() : "Unknown";
+    const details = item.details?.map((d) => `${d.label}: ${d.value}`).join(", ") ?? "—";
 
-    let details = item.description || "";
-    if (!details && item.payload) {
-      details = JSON.stringify(item.payload).slice(0, 40) + "...";
-    }
-
-    table.push([brand.muted(date), actionLabel, pc.cyan(target), brand.muted(details || "—")]);
+    table.push([idLabel, brand.muted(date), actionLabel, pc.cyan(target), brand.muted(details)]);
   }
 
   return table.toString();

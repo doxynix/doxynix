@@ -1,23 +1,14 @@
 {
+  "name": "@doxynix/cli",
+  "version": "2.1.1",
+  "type": "module",
   "bin": {
     "dxnx": "./dist/index.js"
   },
-  "dependencies": {
-    "@clack/prompts": "1.4.0",
-    "@doxynix/shared": "workspace:*",
-    "@trpc/client": "11.18.0",
-    "cli-table3": "0.6.5",
-    "commander": "14.0.3",
-    "picocolors": "1.1.1",
-    "superjson": "2.2.6"
-  },
-  "devDependencies": {
-    "@doxynix/config": "workspace:*",
-    "@doxynix/web": "workspace:*",
-    "@trpc/server": "11.18.0",
-    "tsup": "8.3.6"
-  },
-  "name": "@doxynix/cli",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "build:bin": "bun build src/index.ts --compile --minify --outfile dxnx",
@@ -29,6 +20,21 @@
     "type-check": "tsc --noEmit",
     "validate": "biome check . && oxlint"
   },
-  "type": "module",
-  "version": "2.1.1"
+  "dependencies": {
+    "@clack/prompts": "1.4.0",
+    "@trpc/client": "catalog:",
+    "commander": "14.0.3",
+    "picocolors": "1.1.1",
+    "superjson": "catalog:"
+  },
+  "devDependencies": {
+    "@doxynix/config": "workspace:*",
+    "@doxynix/shared": "workspace:*",
+    "@doxynix/web": "workspace:*",
+    "@trpc/server": "catalog:",
+    "tsup": "8.3.6"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

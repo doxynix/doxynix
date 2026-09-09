@@ -2,9 +2,9 @@ import * as p from "@clack/prompts";
 
 import { brand } from "@/ui/colors";
 
-import { type RouterOutput, trpc } from "./client";
+import { type RepoDetails } from "@/commands/repos/repos.types";
 
-export type RepoRecord = NonNullable<RouterOutput["repo"]["getByName"]>;
+import { trpc } from "./client";
 
 export function parseRepoTarget(target: string): { name: string; owner: string } | null {
   const parts = target.split("/");
@@ -20,7 +20,7 @@ export async function resolveRepository(
 ): Promise<{
   name: string;
   owner: string;
-  repo: RepoRecord;
+  repo: RepoDetails;
   target: string;
 } | null> {
   let repoTarget = target;

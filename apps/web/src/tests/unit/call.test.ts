@@ -1,6 +1,6 @@
 import { generateText, streamText } from "ai";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { z } from "zod";
+import * as z from "zod";
 
 import { callWithFallback } from "@/server/utils/call";
 

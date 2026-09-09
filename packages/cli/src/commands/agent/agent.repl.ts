@@ -1,11 +1,12 @@
 import * as p from "@clack/prompts";
 
-import { trpc } from "@/core/client";
-
 import { brand, pc } from "@/ui/colors";
+import { withTaskSpinner } from "@/ui/spinner";
 
-import { AgentStreamClient, type ChatMessage } from "./agent.service";
+import { reposService } from "../repos/repos.service";
+import { agentService } from "./agent.service";
 import { executeClientAction } from "./agent.tools";
+import { type ChatMessage } from "./agent.types";
 
 export async function startInteractiveChat(initialRepoTarget?: string) {
   p.intro(brand.logo(" 🤖 Doxynix AI Engineering Assistant "));
@@ -16,14 +17,14 @@ export async function startInteractiveChat(initialRepoTarget?: string) {
   if (initialRepoTarget) {
     const [owner, name] = initialRepoTarget.split("/");
     if (owner && name) {
-      const repo = await trpc.repo.getByName.query({ name, owner });
+      const repo = await reposService.getByName(owner, name);
       if (repo) {
         selectedRepoId = repo.id;
         selectedRepoName = `${repo.owner}/${repo.name}`;
       }
     }
   } else {
-    const reposRes = await trpc.repo.getAll.query({
+    const reposRes = await reposService.list({
       limit: 50,
       sortBy: "createdAt",
       sortOrder: "desc",
@@ -58,7 +59,7 @@ export async function startInteractiveChat(initialRepoTarget?: string) {
 
   let sessionId: string | undefined;
   try {
-    const session = await trpc.agent.createSession.mutate({
+    const session = await agentService.createSession({
       repoId: selectedRepoId,
       title: `CLI: ${selectedRepoName}`,
     });
@@ -118,7 +119,7 @@ export async function executeTurn(
   repoId?: string,
   sessionId?: string,
 ): Promise<void> {
-  const { fullText, pendingTools } = await AgentStreamClient.stream(history, repoId, sessionId);
+  const { fullText, pendingTools } = await agentService.stream(history, repoId, sessionId);
 
   if (fullText) {
     history.push({
@@ -145,12 +146,15 @@ export async function executeTurn(
     });
 
     if (isApproved && !p.isCancel(isApproved)) {
-      const s = p.spinner();
-      s.start(`Executing ${tool.toolName}...`);
-
       try {
-        const result = await executeClientAction(tool.toolName, tool.input);
-        s.stop(`Action ${tool.toolName} completed successfully!`);
+        const result = await withTaskSpinner(
+          {
+            start: `Executing ${tool.toolName}...`,
+            stop: `Action ${tool.toolName} completed successfully!`,
+          },
+          () => executeClientAction(tool.toolName, tool.input),
+        );
+
         p.outro(brand.success(`✔ [Result]: ${result.message}`));
 
         history.push({
@@ -160,7 +164,7 @@ export async function executeTurn(
         });
 
         console.log(`\n${brand.logo("Doxynix AI:")}`);
-        const followUp = await AgentStreamClient.stream(history, repoId, sessionId);
+        const followUp = await agentService.stream(history, repoId, sessionId);
         if (followUp.fullText) {
           history.push({
             content: followUp.fullText,
@@ -170,7 +174,6 @@ export async function executeTurn(
         }
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
-        s.stop(`Failed executing ${tool.toolName}`);
         p.outro(brand.error(`❌ ${message}`));
       }
     } else {

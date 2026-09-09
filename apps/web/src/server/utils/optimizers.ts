@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { compact, isString } from "es-toolkit";
-import ts from "typescript";
 
 import { appLogger } from "../core/app-logger";
 import {
@@ -35,81 +34,6 @@ function isAiTextLike(v: unknown): v is AiTextLike {
 
 const REMOVED_MSG = "/* ...content truncated... */";
 
-const transformer = <T extends ts.Node>(context: ts.TransformationContext) => {
-  return (rootNode: T) => {
-    const visit = (node: ts.Node): ts.Node => {
-      if (
-        ts.isFunctionDeclaration(node) ||
-        ts.isMethodDeclaration(node) ||
-        ts.isArrowFunction(node) ||
-        ts.isFunctionExpression(node)
-      ) {
-        const body = node.body;
-        if (body && body.getText().length > 50) {
-          const comment = " /* ... implementation hidden ... */ ";
-
-          if (!ts.isBlock(body) && ts.isArrowFunction(node)) {
-            return ts.factory.updateArrowFunction(
-              node,
-              node.modifiers,
-              node.typeParameters,
-              node.parameters,
-              node.type,
-              node.equalsGreaterThanToken,
-              ts.factory.createIdentifier(`null as any ${comment}`),
-            );
-          }
-
-          const stubBlock = ts.factory.createBlock([
-            ts.factory.createExpressionStatement(ts.factory.createIdentifier(comment)),
-          ]);
-
-          const factory = ts.factory as any;
-          if (ts.isFunctionDeclaration(node)) {
-            return factory.updateFunctionDeclaration(
-              node,
-              node.modifiers,
-              node.asteriskToken,
-              node.name,
-              node.typeParameters,
-              node.parameters,
-              node.type,
-              stubBlock,
-            );
-          }
-          if (ts.isMethodDeclaration(node)) {
-            return factory.updateMethodDeclaration(
-              node,
-              node.modifiers,
-              node.asteriskToken,
-              node.name,
-              node.questionToken,
-              node.typeParameters,
-              node.parameters,
-              node.type,
-              stubBlock,
-            );
-          }
-          if (ts.isFunctionExpression(node)) {
-            return factory.updateFunctionExpression(
-              node,
-              node.modifiers,
-              node.asteriskToken,
-              node.name,
-              node.typeParameters,
-              node.parameters,
-              node.type,
-              stubBlock,
-            );
-          }
-        }
-      }
-      return ts.visitEachChild(node, visit, context);
-    };
-    return ts.visitNode(rootNode, visit);
-  };
-};
-
 export const CodeOptimizer = {
   basicClean(code: string): string {
     return code
@@ -135,9 +59,10 @@ export const CodeOptimizer = {
     processed = this.removeLicenseHeaders(processed);
     processed = this.redactSecrets(processed);
 
-    if ([".cts", ".js", ".jsx", ".mts", ".ts", ".tsx"].includes(ext)) {
-      processed = this.skeletonizeTS(processed, fileName);
-    } else if (TREE_SITTER_SUPPORTED_EXTENSIONS.includes(ext)) {
+    if (
+      TREE_SITTER_SUPPORTED_EXTENSIONS.includes(ext) ||
+      [".cts", ".js", ".jsx", ".mts", ".ts", ".tsx"].includes(ext)
+    ) {
       processed = await this.skeletonizePolyglot(processed, fileName);
     } else {
       processed = processed.length > 5000 ? skeletonizeCode(processed).slice(0, 5000) : processed;
@@ -161,7 +86,7 @@ export const CodeOptimizer = {
   },
 
   /**
-   * ПОЛИГЛОТ скелетонизация через Tree-Sitter
+   * Полиглот-скелетонизация через Tree-Sitter (TypeScript, JavaScript, Go, Python, Rust, C#, и др.)
    */
   async skeletonizePolyglot(code: string, fileName: string): Promise<string> {
     const ext = getFileExtension(fileName);
@@ -183,7 +108,13 @@ export const CodeOptimizer = {
       tree = parser.parse(code);
       const root = tree.rootNode;
 
-      const bodyNodeTypes = new Set(["block", "compound_statement", "do_block", "function_body"]);
+      const bodyNodeTypes = new Set([
+        "block",
+        "compound_statement",
+        "do_block",
+        "function_body",
+        "statement_block",
+      ]);
       const rangesToReplace: Array<{ end: number; start: number }> = [];
 
       const findBodies = (node: any) => {
@@ -212,29 +143,8 @@ export const CodeOptimizer = {
       appLogger.error({ error, msg: "Polyglot skeletonizer error:" });
       return code.slice(0, 5000);
     } finally {
-      tree?.delete();
-      parser?.delete();
-    }
-  },
-
-  /**
-   * Скелетонизация для TS/JS (через нативный TS AST)
-   */
-  skeletonizeTS(code: string, fileName: string): string {
-    try {
-      const sourceFile = ts.createSourceFile(
-        fileName,
-        code,
-        ts.ScriptTarget.Latest,
-        true,
-        fileName.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
-      );
-      const printer = ts.createPrinter({ removeComments: false });
-
-      const result = ts.transform(sourceFile, [transformer]);
-      return printer.printFile(result.transformed[0] as ts.SourceFile);
-    } catch {
-      return code.slice(0, 5000);
+      tree?.delete?.();
+      parser?.delete?.();
     }
   },
 

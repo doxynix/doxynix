@@ -1,11 +1,14 @@
 import * as p from "@clack/prompts";
-import type { Command } from "commander";
+import { type Command } from "commander";
 
-import { trpc } from "@/core/client";
 import { getApiUrl, getToken } from "@/core/config";
 import { handleCliError } from "@/core/errors";
 
 import { brand } from "@/ui/colors";
+import { withTaskSpinner } from "@/ui/spinner";
+
+import { formatHealthStatus } from "./system.formatter";
+import { systemService } from "./system.service";
 
 export function registerSystemCommands(program: Command) {
   program
@@ -19,19 +22,22 @@ export function registerSystemCommands(program: Command) {
         const apiUrl = getApiUrl();
         const token = getToken();
 
-        const s = p.spinner();
-        s.start(`Connecting to ${apiUrl}...`);
-
-        const start = performance.now();
-        const health = await trpc.health.check.query({});
-        const latency = Math.round(performance.now() - start);
-
-        s.stop("Server responded successfully!");
+        let latency = 0;
+        const health = await withTaskSpinner(
+          {
+            start: `Connecting to ${apiUrl}...`,
+            stop: "Server responded successfully!",
+          },
+          async () => {
+            const start = performance.now();
+            const res = await systemService.checkHealth();
+            latency = Math.round(performance.now() - start);
+            return res;
+          },
+        );
 
         console.log(`\n  API URL:       ${brand.highlight(apiUrl)}`);
-        console.log(
-          `  Server Status: ${health.status === "ok" ? brand.success("● Online (OK)") : brand.warning(health.status)}`,
-        );
+        console.log(`  Server Status: ${formatHealthStatus(health.status)}`);
         console.log(`  Latency:       ${brand.info(`${latency} ms`)}`);
         console.log(
           `  Auth Status:   ${token ? brand.success("✔ Token found") : brand.warning("✖ Not authenticated")}\n`,
