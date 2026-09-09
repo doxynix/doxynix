@@ -60,7 +60,7 @@
     "babel-plugin-react-compiler": "catalog:",
     "globals": "16.5.0",
     "rollup-plugin-visualizer": "7.0.1",
-    "svgo": "4.0.2",
+    "svgo": "4.1.0",
     "tailwindcss": "catalog:",
     "vite": "8.2.2",
     "vite-plugin-mkcert": "2.1.0",
