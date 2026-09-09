@@ -45,7 +45,7 @@ jobs:
       - name: Setup Node for npm publishing
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          node-version: 22
+          node-version: 22.23.2
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
