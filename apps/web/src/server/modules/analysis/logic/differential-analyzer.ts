@@ -13,7 +13,7 @@ import { buildPrReviewSystemPrompt, buildPrReviewUserPrompt } from "../ai/prompt
 import { PrAiReviewOutputSchema } from "../analysis.schemas";
 import { PROJECT_POLICY_RULES } from "../engine/core/project-policy-rules";
 import { AI_POLICY_CONSTANTS } from "../engine/core/scoring-constants";
-import { type DifferentialAnalysisResult, type PRAnalysisConfig, type PRFinding } from "./pr-types";
+import type { DifferentialAnalysisResult, PRAnalysisConfig, PRFinding } from "./pr-types";
 
 type PRDiffInfo = {
   baseSha: string;

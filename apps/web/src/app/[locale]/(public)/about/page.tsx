@@ -1,4 +1,4 @@
-import { type ComponentType } from "react";
+import type { ComponentType } from "react";
 import { ArrowRight, Network, Shield, Sparkles, Zap } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 

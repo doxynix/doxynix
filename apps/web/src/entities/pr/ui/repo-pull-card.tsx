@@ -6,7 +6,7 @@ import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
-import { type RepoPull } from "../model/pr.types";
+import type { RepoPull } from "../model/pr.types";
 
 type Props = {
   name: string;

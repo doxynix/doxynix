@@ -18,7 +18,7 @@ import {
 } from "@/shared/ui/core/table";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
-import { type UiApiKey } from "@/entities/api-keys/model/api-keys.types";
+import type { UiApiKey } from "@/entities/api-keys/model/api-keys.types";
 
 type Props = {
   archived: UiApiKey[];

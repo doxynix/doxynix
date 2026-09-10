@@ -9,7 +9,7 @@ import { trpc } from "@/shared/api/trpc";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import { type AvailableDocs } from "@/entities/repo/model/repo.types";
+import type { AvailableDocs } from "@/entities/repo/model/repo.types";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
 

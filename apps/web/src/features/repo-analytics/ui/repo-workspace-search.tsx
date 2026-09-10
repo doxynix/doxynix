@@ -20,7 +20,7 @@ import { AppSearch } from "@/shared/ui/kit/app-search";
 import { buildRepoSearchResultHref } from "@/entities/repo/model/repo-workspace-navigation";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
-import { type RepoSearchResult } from "@/server/utils/types";
+import type { RepoSearchResult } from "@/server/utils/types";
 
 const RESULT_ICONS = {
   "doc-section": BookOpen,

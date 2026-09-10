@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentType, type CSSProperties } from "react";
+import type { ComponentType, CSSProperties } from "react";
 import { useLocale } from "next-intl";
 
 import { cn } from "@/shared/lib/cn";

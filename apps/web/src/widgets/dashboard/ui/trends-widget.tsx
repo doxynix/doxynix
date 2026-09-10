@@ -7,7 +7,7 @@ import { useQueryStates } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
-import { type ChartConfig } from "@/shared/ui/core/chart";
+import type { ChartConfig } from "@/shared/ui/core/chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 
 import { dashboardParsers } from "../model/dashboard-parsers";

@@ -1,7 +1,7 @@
 import { brand } from "@/ui/colors";
 import { createTable } from "@/ui/table";
 
-import { type ApiKeyItem } from "./keys.types";
+import type { ApiKeyItem } from "./keys.types";
 
 export function renderKeysTable(keys: ApiKeyItem[]): string {
   const table = createTable(["ID (UUID)", "Name", "Prefix", "Created", "Last Used", "Status"]);

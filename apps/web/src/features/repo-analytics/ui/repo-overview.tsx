@@ -26,7 +26,7 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 
 import { getGitMetrics } from "@/entities/repo/model/git-metrics";
-import { type RepoWorkspace } from "@/entities/repo/model/repo.types";
+import type { RepoWorkspace } from "@/entities/repo/model/repo.types";
 import { buildRepoSearchResultHref } from "@/entities/repo/model/repo-workspace-navigation";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoGitMetric } from "@/entities/repo/ui/repo-git-metric";

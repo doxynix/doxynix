@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-import { type after as NextAfterFn } from "next/server";
+import type { after as NextAfterFn } from "next/server";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Prisma, PrismaClient } from "@prisma/client";

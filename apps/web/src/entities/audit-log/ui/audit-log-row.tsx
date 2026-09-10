@@ -1,4 +1,4 @@
-import { type ComponentType } from "react";
+import type { ComponentType } from "react";
 import {
   Bot,
   Cpu,
@@ -22,7 +22,7 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
-import { type UiAuditLog } from "../model/audit-log.types";
+import type { UiAuditLog } from "../model/audit-log.types";
 import { AuditLogDetailsSheet } from "./audit-log-sheet";
 
 const DeviceIconMap: Record<string, ComponentType<{ className?: string }>> = {

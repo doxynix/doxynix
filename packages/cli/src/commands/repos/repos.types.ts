@@ -1,4 +1,4 @@
-import { type RouterInput, type RouterOutput } from "@/core/client";
+import type { RouterInput, RouterOutput } from "@/core/client";
 
 export type RepoListItem = RouterOutput["repo"]["getAll"]["items"][number];
 export type RepoDetails = NonNullable<RouterOutput["repo"]["getByName"]>;

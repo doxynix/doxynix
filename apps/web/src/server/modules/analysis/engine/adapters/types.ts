@@ -1,6 +1,6 @@
 import { extname } from "pathe";
 
-import { type FileSignals, type RepositoryFile } from "../core/discovery.types";
+import type { FileSignals, RepositoryFile } from "../core/discovery.types";
 
 export type LanguageAdapter = {
   detect?: (file: RepositoryFile) => boolean;

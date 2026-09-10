@@ -21,7 +21,7 @@ import { AppButton } from "@/shared/ui/core/button";
 import { Card, CardContent } from "@/shared/ui/core/card";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";
 
-import { type RepoNodeContext } from "@/entities/repo/model/repo.types";
+import type { RepoNodeContext } from "@/entities/repo/model/repo.types";
 
 type Props = {
   data: NonNullable<RepoNodeContext>;

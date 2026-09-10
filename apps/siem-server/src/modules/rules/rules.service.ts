@@ -6,7 +6,7 @@ import { executePaginatedQuery, type PaginatedResponse } from "@/core/db/paginat
 import { type RuleSelect, rules } from "@/core/db/schema";
 import { combineConditions, eqIf, searchIf } from "@/core/db/utils";
 
-import { type CreateRuleInput, type GetRulesQuery, type UpdateRuleInput } from "./rules.schema";
+import type { CreateRuleInput, GetRulesQuery, UpdateRuleInput } from "./rules.schema";
 
 export async function getRulesList(query: GetRulesQuery): Promise<PaginatedResponse<RuleSelect>> {
   const { page, limit, severity, isActive, search } = query;

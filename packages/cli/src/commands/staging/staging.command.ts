@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import * as p from "@clack/prompts";
-import { type Command } from "commander";
+import type { Command } from "commander";
 
 import { handleCliError } from "@/core/errors";
 import { resolveRepository } from "@/core/repo";

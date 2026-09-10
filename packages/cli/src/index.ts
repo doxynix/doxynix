@@ -1,4 +1,3 @@
-import "zod/compile";
 import pkg from "@pkg";
 import { Command } from "commander";
 

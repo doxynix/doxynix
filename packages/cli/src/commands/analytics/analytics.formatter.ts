@@ -2,7 +2,7 @@ import { brand } from "@/ui/colors";
 import { formatScore, getScoreLabel } from "@/ui/formatters";
 import { createTable } from "@/ui/table";
 
-import { type DashboardStats, type TrendItem } from "./analytics.types";
+import type { DashboardStats, TrendItem } from "./analytics.types";
 
 export function renderDashboardStats(stats: DashboardStats): string {
   const table = createTable(["Metric", "Current Value", "Evaluation"]);

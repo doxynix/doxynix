@@ -1,4 +1,4 @@
-import { type RuleSelect, type Severity } from "@/core/db/schema";
+import type { RuleSelect, Severity } from "@/core/db/schema";
 
 export type LeakFinding = {
   ruleId: string;

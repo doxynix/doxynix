@@ -11,7 +11,7 @@ import { TASK_CONFIGS } from "@/server/utils/task-config";
 
 import { analysisRepo } from "../analysis.repository";
 import { FixService } from "../logic/fix-generator";
-import { type FindingForFix } from "../logic/pr-types";
+import type { FindingForFix } from "../logic/pr-types";
 
 export const generateFixTask = task({
   id: "generate-fix",

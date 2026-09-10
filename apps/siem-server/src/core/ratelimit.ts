@@ -1,4 +1,4 @@
-import { type MiddlewareHandler } from "hono";
+import type { MiddlewareHandler } from "hono";
 
 import { redis } from "@/core/redis";
 import { getIp } from "@/utils/request-context";

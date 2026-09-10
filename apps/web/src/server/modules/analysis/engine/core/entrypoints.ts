@@ -1,4 +1,4 @@
-import { type RepositoryFile } from "./discovery.types";
+import type { RepositoryFile } from "./discovery.types";
 import { ProjectPolicy } from "./project-policy";
 
 /**

@@ -1,9 +1,9 @@
 import { compact, uniq } from "es-toolkit";
 import { normalize } from "pathe";
 
-import { type RepoMetrics } from "../engine/core/metrics.types";
+import type { RepoMetrics } from "../engine/core/metrics.types";
 import { ProjectPolicy } from "../engine/core/project-policy";
-import { type StructureGroupEntry, type StructureSemanticKind } from "./structure-shared";
+import type { StructureGroupEntry, StructureSemanticKind } from "./structure-shared";
 
 type StructureNodeSummaryLike = {
   kind: string;

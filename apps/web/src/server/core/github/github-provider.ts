@@ -3,8 +3,12 @@ import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { retry } from "@octokit/plugin-retry";
 import { throttling } from "@octokit/plugin-throttling";
 import { Octokit } from "@octokit/rest";
-import { type RequestOptions } from "@octokit/types";
 import { createPullRequest } from "octokit-plugin-create-pull-request";
+
+type RequestOptions = {
+  method?: string;
+  url?: string;
+};
 
 import {
   APP_VERSION,
@@ -15,7 +19,7 @@ import {
 } from "@/shared/constants/env.server";
 
 import { appLogger } from "../app-logger";
-import { type DbClient } from "../db";
+import type { DbClient } from "../db";
 import { parseGitUrl } from "./git-url";
 import { githubTokenService } from "./github-token.service";
 

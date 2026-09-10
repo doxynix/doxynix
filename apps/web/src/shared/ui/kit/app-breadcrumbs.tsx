@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, type ReactNode } from "react";
-import { type Route } from "next";
+import type { Route } from "next";
 
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { type DbClient } from "@/server/core/db";
+import type { DbClient } from "@/server/core/db";
 import * as githubApi from "@/server/core/github/github-api";
 import * as githubProvider from "@/server/core/github/github-provider";
 import { githubTokenService } from "@/server/core/github/github-token.service";

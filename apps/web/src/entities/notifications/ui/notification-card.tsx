@@ -12,7 +12,7 @@ import { notificationTypeConfig } from "@/features/notifications/model/notificat
 import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
 import { NotificationActionButton } from "@/features/notifications/ui/notification-action-button";
 
-import { type UiNotification } from "../model/notifications.types";
+import type { UiNotification } from "../model/notifications.types";
 
 type Props = { notification: UiNotification };
 

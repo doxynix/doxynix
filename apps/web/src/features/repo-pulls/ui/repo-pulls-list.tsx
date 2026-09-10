@@ -1,6 +1,6 @@
 "use client";
 
-import { type RepoPull } from "@/entities/pr/model/pr.types";
+import type { RepoPull } from "@/entities/pr/model/pr.types";
 import { RepoPullCard } from "@/entities/pr/ui/repo-pull-card";
 
 type Props = {

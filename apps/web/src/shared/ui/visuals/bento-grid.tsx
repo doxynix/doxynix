@@ -1,4 +1,4 @@
-import { type ComponentPropsWithoutRef, type ElementType, type ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 
 import { Link } from "@/shared/i18n/navigation";

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import * as p from "@clack/prompts";
-import { type Command } from "commander";
+import type { Command } from "commander";
 
 import { handleCliError } from "@/core/errors";
 import { resolveRepository } from "@/core/repo";
@@ -13,7 +13,7 @@ import { withTaskSpinner } from "@/ui/spinner";
 
 import { renderDocsListTable } from "./docs.formatter";
 import { docsService } from "./docs.service";
-import { type DocListItem, type DocType } from "./docs.types";
+import type { DocListItem, DocType } from "./docs.types";
 
 export function getCurrentGitBranch(): string {
   try {

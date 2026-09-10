@@ -18,7 +18,7 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
-import { type DocContent } from "@/entities/repo/model/repo.types";
+import type { DocContent } from "@/entities/repo/model/repo.types";
 import { buildRepoCodeHref } from "@/entities/repo/model/repo-workspace-navigation";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 

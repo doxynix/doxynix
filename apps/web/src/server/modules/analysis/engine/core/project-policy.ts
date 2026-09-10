@@ -2,7 +2,7 @@ import { orderBy, uniq } from "es-toolkit";
 import { normalize } from "pathe";
 import pm from "picomatch";
 
-import { type FileCategory } from "./discovery.types";
+import type { FileCategory } from "./discovery.types";
 import {
   PATH_PATTERNS,
   PROJECT_POLICY_RULES,

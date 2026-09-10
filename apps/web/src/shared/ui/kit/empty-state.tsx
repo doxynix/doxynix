@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentType, type ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { CircleOff } from "lucide-react";
 
 import {

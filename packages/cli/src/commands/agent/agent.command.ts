@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { type Command } from "commander";
+import type { Command } from "commander";
 
 import { getToken } from "@/core/config";
 import { handleCliError } from "@/core/errors";
@@ -12,7 +12,7 @@ import { reposService } from "../repos/repos.service";
 import { extractMessageContent, renderSessionsTable } from "./agent.formatter";
 import { executeTurn, startInteractiveChat } from "./agent.repl";
 import { agentService } from "./agent.service";
-import { type ChatMessage, type ChatSessionItem } from "./agent.types";
+import type { ChatMessage, ChatSessionItem } from "./agent.types";
 
 export function registerAgentCommand(program: Command) {
   const agent = program

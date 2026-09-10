@@ -7,7 +7,7 @@ import {
   isSchemaMismatchError,
   normalizeAiGenerationOutput,
 } from "../engine/core/ai-result-normalize";
-import { type AIResult } from "../engine/core/analysis-result.schemas";
+import type { AIResult } from "../engine/core/analysis-result.schemas";
 import {
   type buildArchitectDigest,
   collectArchitectPreferredPaths,

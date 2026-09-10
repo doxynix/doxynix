@@ -3,13 +3,13 @@ import { DocType } from "@doxynix/shared";
 import { useLocale } from "next-intl";
 import { useQueryState } from "nuqs";
 import posthog from "posthog-js";
-import { type TreeApi } from "react-arborist";
+import type { TreeApi } from "react-arborist";
 
 import { trpc } from "@/shared/api/trpc";
 import { useRouter } from "@/shared/i18n/navigation";
 
-import { type UiRepoDetailed } from "./repo.types";
-import { type FileNode, type FileTuple } from "./repo-setup.types";
+import type { UiRepoDetailed } from "./repo.types";
+import type { FileNode, FileTuple } from "./repo-setup.types";
 import { collectAllIds, getFolderSelectionState, sortNodes } from "./repo-setup-utils";
 import { useRepoBranchOpen } from "./use-repo-branch.store";
 

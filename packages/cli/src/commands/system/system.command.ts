@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { type Command } from "commander";
+import type { Command } from "commander";
 
 import { getApiUrl, getToken } from "@/core/config";
 import { handleCliError } from "@/core/errors";

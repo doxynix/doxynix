@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
 
-import { type RepoMetricsItem } from "@/entities/repo/model/repo.types";
+import type { RepoMetricsItem } from "@/entities/repo/model/repo.types";
 import {
   ArchitectureAndDataFlowCard,
   ReferenceAndRoutesCard,

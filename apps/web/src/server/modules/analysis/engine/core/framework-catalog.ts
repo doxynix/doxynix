@@ -1,6 +1,6 @@
 import { escapeRegExp, uniq } from "es-toolkit";
 
-import { type FrameworkFact } from "./discovery.types";
+import type { FrameworkFact } from "./discovery.types";
 import { ProjectPolicy } from "./project-policy";
 import { FRAMEWORK_CATALOG } from "./project-policy-rules";
 

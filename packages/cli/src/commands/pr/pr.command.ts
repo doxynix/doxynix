@@ -3,7 +3,7 @@ import path from "node:path";
 
 import * as p from "@clack/prompts";
 import { CreatePrSchema } from "@doxynix/shared";
-import { type Command } from "commander";
+import type { Command } from "commander";
 
 import { handleCliError } from "@/core/errors";
 import { resolveRepository } from "@/core/repo";
@@ -20,13 +20,13 @@ import {
   renderPRListTable,
 } from "./pr.formatter";
 import { prService } from "./pr.service";
-import {
-  type CreateFixInput,
-  type FindingForFix,
-  type FixDetails,
-  type FixItem,
-  type PRListItem,
-  type StagedFixedFile,
+import type {
+  CreateFixInput,
+  FindingForFix,
+  FixDetails,
+  FixItem,
+  PRListItem,
+  StagedFixedFile,
 } from "./pr.types";
 
 async function resolveFixId(repoId: string, fixIdArg?: string): Promise<string | null> {

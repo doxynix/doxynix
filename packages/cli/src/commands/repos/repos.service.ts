@@ -1,6 +1,6 @@
 import { trpc } from "@/core/client";
 
-import { type RepoFilterInput, type RepoFilterSlimInput } from "./repos.types";
+import type { RepoFilterInput, RepoFilterSlimInput } from "./repos.types";
 
 export const reposService = {
   async add(url: string) {

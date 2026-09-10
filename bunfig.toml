@@ -2,8 +2,3 @@
 minimumReleaseAge = 259200
 exact = true
 default-trusted-dependency = false
-
-preload = ["zod/compile"]
-
-[test]
-preload = ["zod/compile"]

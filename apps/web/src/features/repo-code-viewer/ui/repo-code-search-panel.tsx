@@ -8,13 +8,13 @@ import {
   SearchQuery,
   setSearchQuery,
 } from "@codemirror/search";
-import { type EditorView } from "@codemirror/view";
+import type { EditorView } from "@codemirror/view";
 import { CaseSensitive, MoveLeft, Replace, ReplaceAll, Search, WholeWord, X } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
 import { Input } from "@/shared/ui/core/input";
 
-import { type EditorStats } from "@/entities/repo/model/editor-stats.types";
+import type { EditorStats } from "@/entities/repo/model/editor-stats.types";
 
 import { RepoCodeActionButton } from "./repo-code-action-button";
 

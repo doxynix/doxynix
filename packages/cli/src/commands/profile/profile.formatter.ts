@@ -1,7 +1,7 @@
 import { brand, pc } from "@/ui/colors";
 import { createTable } from "@/ui/table";
 
-import { type LinkedAccountItem, type UserSessionItem } from "./profile.types";
+import type { LinkedAccountItem, UserSessionItem } from "./profile.types";
 
 export function renderSessionsTable(sessions: UserSessionItem[]): string {
   const table = createTable(["Client / User Agent", "IP Address", "Created At"]);

@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-import { type analysisRepo } from "./analysis.repository";
+import type { analysisRepo } from "./analysis.repository";
 
 const FileActionConfidenceSchema = z.enum(["high", "medium", "low"]);
 

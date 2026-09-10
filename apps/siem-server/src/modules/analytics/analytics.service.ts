@@ -4,7 +4,7 @@ import { Temporal } from "temporal-polyfill";
 import { db } from "@/core/db/db";
 import { incidents, rules, SEVERITY_LEVELS } from "@/core/db/schema";
 
-import { type DashboardAnalyticsQuery } from "./analytics.schema";
+import type { DashboardAnalyticsQuery } from "./analytics.schema";
 
 export async function getDashboardAnalytics(query: DashboardAnalyticsQuery) {
   const { days } = query;

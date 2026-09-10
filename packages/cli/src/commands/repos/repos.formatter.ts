@@ -2,7 +2,7 @@ import { brand, pc } from "@/ui/colors";
 import { formatScore } from "@/ui/formatters";
 import { createTable } from "@/ui/table";
 
-import { type RepoDetails, type RepoListItem } from "./repos.types";
+import type { RepoDetails, RepoListItem } from "./repos.types";
 
 export function renderReposTable(items: RepoListItem[]): string {
   const table = createTable([

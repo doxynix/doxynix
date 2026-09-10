@@ -78,7 +78,8 @@
       "!!**/next-env.d.ts",
       "!!**/prisma/generated",
       "!!**/prisma/json-schema",
-      "!!**/bun.lock"
+      "!!**/bun.lock",
+      "!!**/.agents"
     ]
   },
   "formatter": {
@@ -117,25 +118,25 @@
         "useImportType": {
           "level": "error",
           "options": {
-            "style": "inlineType"
+            "style": "auto"
           }
         }
       }
     }
   },
-  "vcs": {
-    "enabled": false
-  },
   "overrides": [
     {
-      "includes": ["**/package.json"],
       "assist": {
         "actions": {
           "source": {
             "useSortedKeys": "off"
           }
         }
-      }
+      },
+      "includes": ["**/package.json"]
     }
-  ]
+  ],
+  "vcs": {
+    "enabled": false
+  }
 }
