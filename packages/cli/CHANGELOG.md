@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.1.5](https://github.com/doxynix/doxynix/compare/cli-v2.1.4...cli-v2.1.5) (2026-09-10)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2119](https://github.com/doxynix/doxynix/issues/2119)) ([5bf9f36](https://github.com/doxynix/doxynix/commit/5bf9f36bda1aa5637dfc15cfb294a4149c07b2a2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 3.1.5
+
 ## [2.1.4](https://github.com/doxynix/doxynix/compare/cli-v2.1.3...cli-v2.1.4) (2026-09-10)
 
 
