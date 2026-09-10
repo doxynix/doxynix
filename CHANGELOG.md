@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.2.2](https://github.com/doxynix/doxynix/compare/doxynix-v4.2.1...doxynix-v4.2.2) (2026-09-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency next to v16.3.3 [security] ([#2112](https://github.com/doxynix/doxynix/issues/2112)) ([b02b400](https://github.com/doxynix/doxynix/commit/b02b400ecb8124923c495a99eea1913c1fa44f7d))
+
+
+### Performance Improvements
+
+* **web:** replace 3-party dependencies with native utilities (DXNX-217) ([#2108](https://github.com/doxynix/doxynix/issues/2108)) ([f37a195](https://github.com/doxynix/doxynix/commit/f37a195649453c1524033e48c44650509811cb58))
+
 ## [4.2.1](https://github.com/doxynix/doxynix/compare/doxynix-v4.2.0...doxynix-v4.2.1) (2026-09-08)
 
 
