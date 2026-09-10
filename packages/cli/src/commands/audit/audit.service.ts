@@ -1,6 +1,6 @@
 import { trpc } from "@/core/client";
 
-import { type AuditLogsQueryInput } from "./audit.types";
+import type { AuditLogsQueryInput } from "./audit.types";
 
 export const auditService = {
   async getActivityLogs(input?: AuditLogsQueryInput) {

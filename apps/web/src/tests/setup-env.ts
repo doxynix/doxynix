@@ -6,3 +6,4 @@ const key = randomBytes(32).toString("base64url");
 
 process.env.PRISMA_FIELD_ENCRYPTION_KEY = `${scheme}.${cipher}.${key}`;
 process.env.ABLY_API_KEY ??= "test-ably-key";
+process.env.LOG_SALT_SECRET ??= "test-log-salt-secret";

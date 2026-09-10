@@ -2,11 +2,11 @@ import { clamp } from "es-toolkit";
 
 import { uniquePaths } from "@/server/utils/array-utils";
 
-import { type EntrypointRef, type ModuleRef, type RouteInventory } from "../core/discovery.types";
-import {
-  type DocumentationAudience,
-  type ReportSectionInput,
-  type ReportSectionKind,
+import type { EntrypointRef, ModuleRef, RouteInventory } from "../core/discovery.types";
+import type {
+  DocumentationAudience,
+  ReportSectionInput,
+  ReportSectionKind,
 } from "../core/documentation.types";
 import { ProjectPolicy } from "../core/project-policy";
 

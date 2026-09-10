@@ -1,4 +1,4 @@
-import { type RouterOutput } from "../../core/client";
+import type { RouterOutput } from "../../core/client";
 
 type MyReposResult = RouterOutput["githubApp"]["getMyGithubRepos"];
 export type GitHubRepoItem = MyReposResult extends { items: (infer T)[] } ? T : never;

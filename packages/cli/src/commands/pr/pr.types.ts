@@ -1,4 +1,4 @@
-import { type RouterInput, type RouterOutput } from "@/core/client";
+import type { RouterInput, RouterOutput } from "@/core/client";
 
 export type PRListItem = RouterOutput["analysis"]["listByRepository"][number];
 export type FixItem = RouterOutput["analysis"]["getByRepository"][number];

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { hc } from "hono/client";
-import { type AppType } from "@doxynix/siem-server";
+import type { AppType } from "@doxynix/siem-server";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";

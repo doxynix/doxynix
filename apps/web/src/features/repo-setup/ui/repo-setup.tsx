@@ -1,6 +1,6 @@
 "use client";
 
-import { type UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
 import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
 
 import { RepoAnalysisConfig } from "./repo-analysis-config";

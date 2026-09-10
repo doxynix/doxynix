@@ -1,4 +1,4 @@
-import { type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 import { auth } from "@/server/core/auth";
 import { buildRequestStore, requestContext } from "@/server/utils/request-context";

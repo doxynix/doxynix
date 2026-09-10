@@ -76,3 +76,4 @@ report/
 !.vscode/settings.json
 .idea/
 .vercel
+.turbo

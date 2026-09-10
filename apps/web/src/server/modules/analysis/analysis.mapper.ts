@@ -7,12 +7,9 @@ import { appLogger } from "@/server/core/app-logger";
 import { getLanguageColor } from "@/server/utils/language-metadata";
 import { markdownToHtml } from "@/server/utils/markdown-to-html";
 import { hasText } from "@/server/utils/string-utils";
-import { type PRChangedFileSnapshot, type PRImpactPayload } from "@/server/utils/types";
+import type { PRChangedFileSnapshot, PRImpactPayload } from "@/server/utils/types";
 
-import {
-  type LatestCompletedAnalysis,
-  type RepoWithLatestAnalysisAndDocs,
-} from "./analysis.repository";
+import type { LatestCompletedAnalysis, RepoWithLatestAnalysisAndDocs } from "./analysis.repository";
 import {
   changedFileSnapshotSchema,
   type ImpactAnalysis,
@@ -20,8 +17,8 @@ import {
   persistedFindingSchema,
 } from "./analysis.schemas";
 import { type AIResult, aiSchema } from "./engine/core/analysis-result.schemas";
-import { type RepoMetrics } from "./engine/core/metrics.types";
-import { type createAnalyzeContextBuilder } from "./logic/analyze-context-builder";
+import type { RepoMetrics } from "./engine/core/metrics.types";
+import type { createAnalyzeContextBuilder } from "./logic/analyze-context-builder";
 import { dedupeLatestDocsByType, normalizeWriterStatuses, toDocSummary } from "./logic/payload";
 import { isPathInsideScope } from "./logic/structure-shared";
 

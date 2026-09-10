@@ -1,4 +1,4 @@
-import { type ReactNode, type SVGProps } from "react";
+import type { ReactNode, SVGProps } from "react";
 
 import { Link } from "@/shared/i18n/navigation";
 

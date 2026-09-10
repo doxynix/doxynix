@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { type EditorView } from "@uiw/react-codemirror";
+import type { EditorView } from "@uiw/react-codemirror";
 import {
   Check,
   Download,
@@ -15,7 +15,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { type TreeApi } from "react-arborist";
+import type { TreeApi } from "react-arborist";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
@@ -29,9 +29,9 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import { type EditorStats } from "@/entities/repo/model/editor-stats.types";
-import { type FileContent, type UiRepoDetailed } from "@/entities/repo/model/repo.types";
-import { type FileNode } from "@/entities/repo/model/repo-setup.types";
+import type { EditorStats } from "@/entities/repo/model/editor-stats.types";
+import type { FileContent, UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import type { FileNode } from "@/entities/repo/model/repo-setup.types";
 import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
 import { RepoStatusBar } from "@/entities/repo/ui/repo-status-bar";
 

@@ -1,6 +1,6 @@
-import { type ReadonlyURLSearchParams } from "next/navigation";
+import type { ReadonlyURLSearchParams } from "next/navigation";
 
-import { type RepoSearchResult } from "./repo.types";
+import type { RepoSearchResult } from "./repo.types";
 import { serializeRepoParams } from "./repo-details-params";
 
 export function buildRepoDetailHref(

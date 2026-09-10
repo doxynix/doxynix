@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { SettingsMenu } from "@/widgets/settings-sidebar/ui/settings-menu";

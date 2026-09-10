@@ -1,11 +1,11 @@
 "use client";
 
-import { type ComponentType } from "react";
+import type { ComponentType } from "react";
 import { Book, ChartNoAxesColumn } from "lucide-react";
 import { useLocale } from "next-intl";
 
 import { useRouter } from "@/shared/i18n/navigation";
-import { type User } from "@/shared/lib/auth-client";
+import type { User } from "@/shared/lib/auth-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 

@@ -18,7 +18,7 @@ import { TimeAgo } from "@/shared/ui/kit/time-ago";
 import { getHealthColor } from "../model/get-health-color";
 import { getGitMetrics } from "../model/git-metrics";
 import { getMetrics } from "../model/metrics";
-import { type UiRepoListItem } from "../model/repo.types";
+import type { UiRepoListItem } from "../model/repo.types";
 import { repoStatusConfig } from "../model/repo-status-config";
 import { repoVisibilityConfig } from "../model/repo-visibility";
 import { RepoAnalyzeButton } from "./repo-analyze-button";

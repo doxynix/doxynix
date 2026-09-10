@@ -1,4 +1,4 @@
-import { type ToolExecutionOptions } from "ai";
+import type { ToolExecutionOptions } from "ai";
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import * as z from "zod";
 

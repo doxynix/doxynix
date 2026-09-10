@@ -16,7 +16,7 @@ import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
 import { ConnectionCard } from "@/entities/connection/ui/connection-card";
-import { type LinkedAccounts, type LinkedUser } from "@/entities/user/model/user.types";
+import type { LinkedAccounts, LinkedUser } from "@/entities/user/model/user.types";
 
 type Props = {
   accounts: LinkedAccounts;

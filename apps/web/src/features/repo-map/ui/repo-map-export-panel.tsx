@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useReactFlow } from "@xyflow/react";
 import { Download } from "lucide-react";
-import { type Options } from "modern-screenshot";
+import type { Options } from "modern-screenshot";
 import { useTheme } from "next-themes";
 
 import { cn } from "@/shared/lib/cn";

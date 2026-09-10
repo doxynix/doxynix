@@ -1,4 +1,4 @@
-import { type Context } from "hono";
+import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
 
 import { APP_EVENTS, bus, type LogsIngestedPayload } from "@/core/bus";

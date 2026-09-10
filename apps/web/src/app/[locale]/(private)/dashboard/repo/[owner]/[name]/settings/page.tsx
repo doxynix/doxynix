@@ -1,7 +1,7 @@
-import { type Metadata } from "next";
-import { type SearchParams } from "nuqs/server";
+import type { Metadata } from "next";
+import type { SearchParams } from "nuqs/server";
 
-import { type RepoPageProps } from "@/shared/types/next.types";
+import type { RepoPageProps } from "@/shared/types/next.types";
 
 import { DeleteRepoCard } from "@/features/repo-settings/ui/delete-repo-card";
 import { PRAnalysisConfigCard } from "@/features/repo-settings/ui/pr-analysis-config-card";

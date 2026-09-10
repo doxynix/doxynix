@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { type NextConfig } from "next";
+import type { NextConfig } from "next";
 import filterWebpackStats from "@bundle-stats/plugin-webpack-filter";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 import { type SentryBuildOptions, withSentryConfig } from "@sentry/nextjs";

@@ -29,7 +29,7 @@ export default port;
     const stats = countSourceStats(code, "ts");
     expect(stats.total).toBe(12);
     expect(stats.comments).toBe(6); // 1 single + 4 block lines + 1 mixed
-    expect(stats.source).toBe(5); // import, port, host, export + trailing
+    expect(stats.source).toBe(4); // import, port, host, export
   });
 
   it("handles Python hash and docstring comments", () => {

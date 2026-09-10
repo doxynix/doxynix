@@ -1,4 +1,4 @@
-import { type RouterInput, type RouterOutput } from "@/core/client";
+import type { RouterInput, RouterOutput } from "@/core/client";
 
 export type ApiKeyItem = RouterOutput["apikey"]["list"]["active"][number];
 export type ApiKeyListResponse = RouterOutput["apikey"]["list"];

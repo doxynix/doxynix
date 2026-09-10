@@ -1,7 +1,7 @@
 import { Redis } from "@upstash/redis";
 
 import { REDIS_CONFIG } from "@/server/utils/redis";
-import { type FileActionPreviewResult, type StagedFile } from "@/server/utils/types";
+import type { FileActionPreviewResult, StagedFile } from "@/server/utils/types";
 
 import { appLogger } from "./app-logger";
 

@@ -13,7 +13,7 @@ import { EmptyState } from "@/shared/ui/kit/empty-state";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
 
-import { type RepoMapDisplayData } from "../model/repo-map-types";
+import type { RepoMapDisplayData } from "../model/repo-map-types";
 import { RepoMapHotkeyListeners } from "./repo-map-hotkey-listeners";
 
 type Props = { id: string };

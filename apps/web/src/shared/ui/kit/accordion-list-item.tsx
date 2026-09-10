@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/shared/ui/core/accordion";
 

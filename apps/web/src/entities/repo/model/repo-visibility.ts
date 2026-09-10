@@ -1,4 +1,4 @@
-import { type Visibility } from "@doxynix/shared";
+import type { Visibility } from "@doxynix/shared";
 import { Lock, type LucideIcon, Unlock } from "lucide-react";
 
 export const repoVisibilityConfig: Record<

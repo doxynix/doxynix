@@ -1,6 +1,6 @@
 "use client";
 
-import { type Route } from "next";
+import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
 
 import { getRepoDetailsMenu } from "@/shared/constants/navigation";

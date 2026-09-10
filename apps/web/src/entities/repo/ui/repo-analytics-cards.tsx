@@ -13,7 +13,7 @@ import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { type RepoMetricsItem } from "../model/repo.types";
+import type { RepoMetricsItem } from "../model/repo.types";
 
 export function ArchitectureAndDataFlowCard({
   reference,

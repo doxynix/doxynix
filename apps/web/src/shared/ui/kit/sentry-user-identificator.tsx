@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
 
-import { type User } from "@/shared/lib/auth-client";
+import type { User } from "@/shared/lib/auth-client";
 import { getClientCookie } from "@/shared/lib/cookies";
 
 type Props = { user: User };

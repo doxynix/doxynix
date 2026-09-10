@@ -19,7 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 
 import { ComplexityScatterChart } from "@/features/repo-analytics/ui/repo-complexity-scatter-chart";
 
-import { type RepoMetricsItem } from "../model/repo.types";
+import type { RepoMetricsItem } from "../model/repo.types";
 
 export function SnapshotsSection({
   architecture,

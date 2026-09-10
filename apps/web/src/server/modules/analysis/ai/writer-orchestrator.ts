@@ -1,14 +1,14 @@
 import { DocType } from "@doxynix/shared";
-import { type Repo } from "@prisma/client";
+import type { Repo } from "@prisma/client";
 import { batch } from "@trigger.dev/sdk";
 
 import { buildDocumentationInputModel } from "@/server/modules/analysis/engine/pipeline/documentation-input";
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import { uniquePaths } from "@/server/utils/array-utils";
 
-import { type AIResult } from "../engine/core/analysis-result.schemas";
-import { type RepositoryEvidence } from "../engine/core/discovery.types";
-import { type RepoMetrics } from "../engine/core/metrics.types";
+import type { AIResult } from "../engine/core/analysis-result.schemas";
+import type { RepositoryEvidence } from "../engine/core/discovery.types";
+import type { RepoMetrics } from "../engine/core/metrics.types";
 import { buildStageContextPack } from "../logic/context-manager";
 import {
   buildWriterSectionPayloads,
@@ -22,7 +22,7 @@ import {
   contributingTask,
   readmeTask,
 } from "../tasks/writer.tasks";
-import { type WriterName, type WriterResult } from "./writer-tasks";
+import type { WriterName, WriterResult } from "./writer-tasks";
 
 type ModuleDependencyEntry = {
   graphPartial: boolean;

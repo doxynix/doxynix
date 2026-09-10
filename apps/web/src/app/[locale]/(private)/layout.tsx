@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cookies, headers } from "next/headers";
 import { unauthorized } from "next/navigation";
 

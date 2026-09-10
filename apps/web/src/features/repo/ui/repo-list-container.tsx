@@ -9,7 +9,7 @@ import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 
-import { type RepoStatus } from "@/entities/repo/model/repo.types";
+import type { RepoStatus } from "@/entities/repo/model/repo.types";
 import { repoParsers } from "@/entities/repo/model/repo-parsers";
 import { RepoCardSkeleton } from "@/entities/repo/ui/repo-card-skeleton";
 

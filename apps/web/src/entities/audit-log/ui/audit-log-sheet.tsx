@@ -22,7 +22,7 @@ import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import { type UiAuditLog } from "../model/audit-log.types";
+import type { UiAuditLog } from "../model/audit-log.types";
 
 type Props = {
   log: UiAuditLog;

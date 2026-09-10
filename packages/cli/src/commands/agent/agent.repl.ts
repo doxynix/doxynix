@@ -6,7 +6,7 @@ import { withTaskSpinner } from "@/ui/spinner";
 import { reposService } from "../repos/repos.service";
 import { agentService } from "./agent.service";
 import { executeClientAction } from "./agent.tools";
-import { type ChatMessage } from "./agent.types";
+import type { ChatMessage } from "./agent.types";
 
 export async function startInteractiveChat(initialRepoTarget?: string) {
   p.intro(brand.logo(" 🤖 Doxynix AI Engineering Assistant "));

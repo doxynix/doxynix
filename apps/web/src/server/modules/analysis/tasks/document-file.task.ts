@@ -7,10 +7,10 @@ import { redisClient } from "@/server/core/redis";
 import { REDIS_CONFIG } from "@/server/utils/redis";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 
-import { type FileActionNodeContext } from "../analysis.schemas";
+import type { FileActionNodeContext } from "../analysis.schemas";
 import { repoAnalysisService } from "../analysis.service";
 import { toDocumentFilePreview } from "../logic/repo-file-action-preview";
-import { type SyncFileActionMeta } from "../logic/repo-file-action-state";
+import type { SyncFileActionMeta } from "../logic/repo-file-action-state";
 
 export const documentFileTask = task({
   id: "document-single-file",

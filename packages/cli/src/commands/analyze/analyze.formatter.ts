@@ -2,12 +2,12 @@ import { brand, pc } from "@/ui/colors";
 import { formatScore, getScoreLabel } from "@/ui/formatters";
 import { createTable } from "@/ui/table";
 
-import {
-  type AnalysisItem,
-  type DetailedMetrics,
-  type RepoConfig,
-  type StructureMap,
-  type WorkspaceSearchResult,
+import type {
+  AnalysisItem,
+  DetailedMetrics,
+  RepoConfig,
+  StructureMap,
+  WorkspaceSearchResult,
 } from "./analyze.types";
 
 export function formatStatus(status: string): string {

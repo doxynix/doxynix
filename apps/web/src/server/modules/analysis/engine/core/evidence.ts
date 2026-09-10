@@ -1,8 +1,8 @@
-import {
-  type FileComplexity,
-  type FileSignals,
-  type RepositoryEvidence,
-  type RepositoryFile,
+import type {
+  FileComplexity,
+  FileSignals,
+  RepositoryEvidence,
+  RepositoryFile,
 } from "./discovery.types";
 import { buildModuleRef, collectFileEvidence } from "./evidence-collector";
 import {

@@ -3,7 +3,7 @@ import { CircleOff } from "lucide-react";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/shared/ui/core/table";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import { type UiAuditLog } from "@/entities/audit-log/model/audit-log.types";
+import type { UiAuditLog } from "@/entities/audit-log/model/audit-log.types";
 import { AuditLogRow } from "@/entities/audit-log/ui/audit-log-row";
 
 type Props = {

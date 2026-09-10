@@ -3,8 +3,8 @@ import { AlertCircle, FileEdit } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { formatSize } from "@/shared/lib/size-format";
 
-import { type EditorStats } from "../model/editor-stats.types";
-import { type FileMeta } from "../model/repo.types";
+import type { EditorStats } from "../model/editor-stats.types";
+import type { FileMeta } from "../model/repo.types";
 
 type Props = {
   meta: FileMeta;

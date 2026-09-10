@@ -1,4 +1,4 @@
-import { type RouterInput, type RouterOutput } from "@/core/client";
+import type { RouterInput, RouterOutput } from "@/core/client";
 
 export type ChatSessionItem = RouterOutput["agent"]["listSessions"][number];
 export type ChatMessageHistoryItem = RouterOutput["agent"]["getSessionHistory"][number];

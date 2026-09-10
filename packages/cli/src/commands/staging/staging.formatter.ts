@@ -1,7 +1,7 @@
 import { brand, pc } from "@/ui/colors";
 import { createTable } from "@/ui/table";
 
-import { type StagedFilesMap } from "./staging.types";
+import type { StagedFilesMap } from "./staging.types";
 
 export function renderStagedFilesTable(staged: StagedFilesMap): string {
   const table = createTable(["File Path", "Size", "Lines Count"]);

@@ -1,6 +1,6 @@
 "use client";
 
-import { type Route } from "next";
+import type { Route } from "next";
 import { MoveLeft } from "lucide-react";
 
 import { Link, useRouter } from "@/shared/i18n/navigation";

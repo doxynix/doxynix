@@ -1,4 +1,4 @@
-import { type ComponentType } from "react";
+import type { ComponentType } from "react";
 import {
   Circle,
   CircleDot,
@@ -12,7 +12,7 @@ import {
 
 import { formatRelativeTime } from "@/shared/lib/date-utils";
 
-import { type UiRepoListItem } from "./repo.types";
+import type { UiRepoListItem } from "./repo.types";
 
 type Props = {
   className?: string;

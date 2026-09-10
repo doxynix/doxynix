@@ -7,7 +7,7 @@ import { Lock, Mail, User2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
-import { type User } from "@/shared/lib/auth-client";
+import type { User } from "@/shared/lib/auth-client";
 import {
   Form,
   FormControl,

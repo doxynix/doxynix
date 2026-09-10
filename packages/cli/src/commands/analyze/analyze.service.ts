@@ -1,12 +1,12 @@
 import { trpc } from "@/core/client";
 
-import {
-  type ConfigureRepositoryInput,
-  type GetDetailedMetricsInput,
-  type GetStructureMapInput,
-  type QuickFileAuditInput,
-  type SearchWorkspaceInput,
-  type StartAnalysisInput,
+import type {
+  ConfigureRepositoryInput,
+  GetDetailedMetricsInput,
+  GetStructureMapInput,
+  QuickFileAuditInput,
+  SearchWorkspaceInput,
+  StartAnalysisInput,
 } from "./analyze.types";
 
 export const analyzeService = {

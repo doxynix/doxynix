@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { type Route } from "next";
+import type { Route } from "next";
 import { LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";

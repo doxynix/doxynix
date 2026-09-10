@@ -7,12 +7,12 @@ import { join, resolve } from "pathe";
 import { appLogger } from "@/server/core/app-logger";
 import { getFileExtension } from "@/server/utils/path-operations";
 
-import {
-  type FileSignals,
-  type RepositoryFile,
-  type RouteRef,
-  type SymbolKind,
-  type SymbolRef,
+import type {
+  FileSignals,
+  RepositoryFile,
+  RouteRef,
+  SymbolKind,
+  SymbolRef,
 } from "../core/discovery.types";
 import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
 import { CONFIDENCE_LEVELS } from "../core/scoring-constants";

@@ -2,7 +2,7 @@ import * as p from "@clack/prompts";
 
 import { brand } from "@/ui/colors";
 
-import { type RepoDetails } from "@/commands/repos/repos.types";
+import type { RepoDetails } from "@/commands/repos/repos.types";
 
 import { trpc } from "./client";
 

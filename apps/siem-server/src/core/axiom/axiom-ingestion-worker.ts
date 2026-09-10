@@ -1,4 +1,4 @@
-import { type Entry } from "@axiomhq/js";
+import type { Entry } from "@axiomhq/js";
 import { eq } from "drizzle-orm";
 import { Temporal } from "temporal-polyfill";
 import * as z from "zod";

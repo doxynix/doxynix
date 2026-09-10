@@ -1,6 +1,6 @@
 import { trpc } from "@/core/client";
 
-import { type DocType } from "./docs.types";
+import type { DocType } from "./docs.types";
 
 export const docsService = {
   async documentFile(input: {

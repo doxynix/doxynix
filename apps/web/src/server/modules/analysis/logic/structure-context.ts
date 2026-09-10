@@ -3,9 +3,9 @@ import { basename, normalize } from "pathe";
 
 import { hasText } from "@/server/utils/string-utils";
 
-import { type RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
-import { type AIResult } from "../engine/core/analysis-result.schemas";
-import { type RepoMetrics } from "../engine/core/metrics.types";
+import type { RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
+import type { AIResult } from "../engine/core/analysis-result.schemas";
+import type { RepoMetrics } from "../engine/core/metrics.types";
 import { ProjectPolicy } from "../engine/core/project-policy";
 import { createStructuralContextEdges } from "./edge-builder";
 import { coerceAnalysisPayload } from "./payload";
