@@ -1,4 +1,4 @@
-import { type RouterOutput } from "@/shared/api/trpc";
+import type { RouterOutput } from "@/shared/api/trpc";
 
 type RepoMapType = RouterOutput["analysis"]["getStructureMap"];
 

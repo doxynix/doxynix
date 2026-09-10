@@ -4,9 +4,9 @@ import { db } from "@/core/db/db";
 import { executePaginatedQuery, type PaginatedResponse } from "@/core/db/pagination";
 import { type AuditLogSelect, auditLogs } from "@/core/db/schema";
 import { combineConditions, ilikeIf } from "@/core/db/utils";
-import { type RequestContext } from "@/utils/request-context";
+import type { RequestContext } from "@/utils/request-context";
 
-import { type GetAuditLogsQuery } from "./audit.schema";
+import type { GetAuditLogsQuery } from "./audit.schema";
 
 export type RecordAuditInput = {
   actor: string;

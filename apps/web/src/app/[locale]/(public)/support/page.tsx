@@ -1,4 +1,4 @@
-import { type ComponentType } from "react";
+import type { ComponentType } from "react";
 import { BookOpen, Mail, MessageSquare, MoveLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 

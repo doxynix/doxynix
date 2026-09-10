@@ -1,6 +1,6 @@
 import { brand } from "@/ui/colors";
 
-import { type AuthUser } from "./auth.types";
+import type { AuthUser } from "./auth.types";
 
 export function renderUserProfile(user: AuthUser): void {
   console.log(`\n  Name:   ${brand.highlight(user.name ?? "Not set")}`);

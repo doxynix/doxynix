@@ -2,7 +2,7 @@
 // FINDINGS & ANALYSIS
 // ============================================================================
 
-import { type PRCommentStyle, type PRFocusArea } from "@doxynix/shared";
+import type { PRCommentStyle, PRFocusArea } from "@doxynix/shared";
 
 export type PRFinding = {
   codeSnippet?: string;

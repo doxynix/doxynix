@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { type Command } from "commander";
+import type { Command } from "commander";
 
 import { handleCliError } from "@/core/errors";
 import { resolveRepository } from "@/core/repo";
@@ -9,7 +9,7 @@ import { withTaskSpinner } from "@/ui/spinner";
 
 import { renderDashboardStats, renderTrendsTable } from "./analytics.formatter";
 import { analyticsService } from "./analytics.service";
-import { type DashboardStatsInput } from "./analytics.types";
+import type { DashboardStatsInput } from "./analytics.types";
 
 type AnalyticsCliOptions = {
   from?: string;

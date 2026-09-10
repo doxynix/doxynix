@@ -1,4 +1,4 @@
-import { type RepoStatus } from "./repo.types";
+import type { RepoStatus } from "./repo.types";
 
 export const repoStatusConfig: Record<
   RepoStatus,

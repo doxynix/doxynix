@@ -1,12 +1,12 @@
 import { ChevronDown, ChevronRight, FileIcon, Folder, FolderOpen, Sparkles } from "lucide-react";
-import { type NodeRendererProps } from "react-arborist";
+import type { NodeRendererProps } from "react-arborist";
 
 import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Checkbox } from "@/shared/ui/core/checkbox";
 
-import { type FileNode } from "@/entities/repo/model/repo-setup.types";
+import type { FileNode } from "@/entities/repo/model/repo-setup.types";
 import { getFolderSelectionState } from "@/entities/repo/model/repo-setup-utils";
 
 type RepoFileNodeProps = NodeRendererProps<FileNode> & {

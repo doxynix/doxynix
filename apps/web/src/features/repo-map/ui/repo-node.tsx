@@ -23,7 +23,7 @@ import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Progress } from "@/shared/ui/core/progress";
 
-import { type RepoMapNodeData } from "../model/repo-map-types";
+import type { RepoMapNodeData } from "../model/repo-map-types";
 
 type Props = NodeProps<Node<RepoMapNodeData, "repoNode">>;
 

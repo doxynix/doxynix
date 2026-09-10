@@ -9,5 +9,6 @@
     "target": "ESNext",
     "types": ["node"]
   },
+  "exclude": [".agents/*"],
   "include": ["scripts/**/*.ts", "*.config.ts", "*.ts"]
 }

@@ -1,7 +1,7 @@
 import { brand, pc } from "@/ui/colors";
 import { createTable } from "@/ui/table";
 
-import { type DocListItem } from "./docs.types";
+import type { DocListItem } from "./docs.types";
 
 export function formatDocType(type: string): string {
   switch (type?.toUpperCase()) {

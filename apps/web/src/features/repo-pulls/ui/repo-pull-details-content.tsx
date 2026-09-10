@@ -26,7 +26,7 @@ import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
-import { type PRImpact, type PRNumber } from "@/entities/pr/model/pr.types";
+import type { PRImpact, PRNumber } from "@/entities/pr/model/pr.types";
 import {
   buildRepoCodeHref,
   buildRepoDocsHref,

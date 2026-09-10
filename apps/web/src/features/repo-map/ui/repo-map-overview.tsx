@@ -6,7 +6,7 @@ import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 
-import { type RepoWorkspace } from "@/entities/repo/model/repo.types";
+import type { RepoWorkspace } from "@/entities/repo/model/repo.types";
 
 type Props = {
   onNavigate: (id: null | string) => void;

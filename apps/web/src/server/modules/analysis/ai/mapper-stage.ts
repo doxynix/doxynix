@@ -6,9 +6,9 @@ import {
   normalizeProjectMapOutput,
   projectMapGenerationSchema,
 } from "../engine/core/ai-result-normalize";
-import { type ProjectMap } from "../engine/core/analysis-result.schemas";
-import { type RepositoryEvidence } from "../engine/core/discovery.types";
-import { type RepoMetrics } from "../engine/core/metrics.types";
+import type { ProjectMap } from "../engine/core/analysis-result.schemas";
+import type { RepositoryEvidence } from "../engine/core/discovery.types";
+import type { RepoMetrics } from "../engine/core/metrics.types";
 import { buildMapperSkeleton } from "../logic/mapper-skeleton";
 import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
 import { buildRepositoryToolProfile } from "./ai-tools";

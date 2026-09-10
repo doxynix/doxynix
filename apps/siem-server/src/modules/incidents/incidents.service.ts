@@ -5,7 +5,7 @@ import { executePaginatedQuery, type PaginatedResponse } from "@/core/db/paginat
 import { type FindingSelect, type IncidentSelect, incidents } from "@/core/db/schema";
 import { combineConditions, eqIf, ilikeIf } from "@/core/db/utils";
 
-import { type GetIncidentsQuery } from "./incidents.schema";
+import type { GetIncidentsQuery } from "./incidents.schema";
 
 export async function getIncidentsList(
   query: GetIncidentsQuery,

@@ -1,11 +1,11 @@
 import { basename, normalize } from "pathe";
 
-import { type EntrypointKind, type ModuleRef } from "./discovery.types";
-import {
-  type CollectedFileEvidence,
-  type DependencyTracking,
-  type EvidenceLookups,
-  type NormalizedRepositoryFile,
+import type { EntrypointKind, ModuleRef } from "./discovery.types";
+import type {
+  CollectedFileEvidence,
+  DependencyTracking,
+  EvidenceLookups,
+  NormalizedRepositoryFile,
 } from "./evidence-support";
 import { ProjectPolicy } from "./project-policy";
 import { CONFIDENCE_LEVELS } from "./scoring-constants";

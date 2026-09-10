@@ -2,7 +2,7 @@ import { uniq } from "es-toolkit";
 import { basename, normalize } from "pathe";
 
 import { analysisMapper } from "../analysis.mapper";
-import { type AnalysisRef, type RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
+import type { AnalysisRef, RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
 import { ProjectPolicy } from "../engine/core/project-policy";
 import { buildDrilldownEdges } from "./edge-builder";
 import { buildInspectPayload } from "./inspect";

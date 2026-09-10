@@ -1,5 +1,5 @@
 import { analysisMapper } from "../analysis.mapper";
-import { type AnalysisRef, type RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
+import type { AnalysisRef, RepoWithLatestAnalysisAndDocs } from "../analysis.repository";
 import {
   buildStructureMapPayloadFromContext,
   buildStructureNodePayloadFromContext,
@@ -8,7 +8,7 @@ import {
 } from "./graph-navigator";
 import { buildNodeExplainPayloadFromContext, type NodeExplainPayload } from "./node-explainer";
 import { buildStructureContext } from "./structure-context";
-import { type StructureContext } from "./structure-shared";
+import type { StructureContext } from "./structure-shared";
 
 type AnalyzeEntityContext = {
   analysisRef: AnalysisRef | null;

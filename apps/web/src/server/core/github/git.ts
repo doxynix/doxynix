@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 
-import { type Repo } from "@prisma/client";
+import type { Repo } from "@prisma/client";
 import simpleGit from "simple-git";
 
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";

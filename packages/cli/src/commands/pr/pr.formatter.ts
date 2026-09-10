@@ -3,12 +3,12 @@ import { formatScore, stripHtml } from "@/ui/formatters";
 import { createTable } from "@/ui/table";
 
 import { formatStatus } from "../analyze/analyze.formatter";
-import {
-  type FixItem,
-  type PRAnalysisDetails,
-  type PRCommentItem,
-  type PRImpactDetails,
-  type PRListItem,
+import type {
+  FixItem,
+  PRAnalysisDetails,
+  PRCommentItem,
+  PRImpactDetails,
+  PRListItem,
 } from "./pr.types";
 
 export function renderPRListTable(prs: PRListItem[]): string {

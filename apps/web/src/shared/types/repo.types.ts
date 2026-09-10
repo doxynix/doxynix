@@ -1,4 +1,4 @@
-import { type Visibility } from "@doxynix/shared";
+import type { Visibility } from "@doxynix/shared";
 
 export type RepoItemFields = {
   description: null | string;

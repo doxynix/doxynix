@@ -1,13 +1,13 @@
 import { trpc } from "@/core/client";
 
-import {
-  type ApplyFixInput,
-  type CreateFixInput,
-  type GetAnalysisInput,
-  type GetByPRNumberInput,
-  type GetImpactByPRNumberInput,
-  type OpenPullRequestInput,
-  type PostCommentInput,
+import type {
+  ApplyFixInput,
+  CreateFixInput,
+  GetAnalysisInput,
+  GetByPRNumberInput,
+  GetImpactByPRNumberInput,
+  OpenPullRequestInput,
+  PostCommentInput,
 } from "./pr.types";
 
 export const prService = {

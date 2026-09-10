@@ -1,4 +1,4 @@
-import { type EntrypointRef, type FileSignals, type RepositoryFile } from "../core/discovery.types";
+import type { EntrypointRef, FileSignals, RepositoryFile } from "../core/discovery.types";
 import { collectFrameworkFactsFromTokens } from "../core/framework-catalog";
 import { CONFIDENCE_LEVELS } from "../core/scoring-constants";
 import { collectRegexSignals } from "./regex-signals";

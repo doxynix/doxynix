@@ -21,7 +21,7 @@ import { Form } from "@/shared/ui/core/form";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { type UiApiKey } from "@/entities/api-keys/model/api-keys.types";
+import type { UiApiKey } from "@/entities/api-keys/model/api-keys.types";
 
 import { useApiKeyActions } from "../model/use-api-key-actions";
 import { ApiKeyFormFields } from "./api-key-form-fields";

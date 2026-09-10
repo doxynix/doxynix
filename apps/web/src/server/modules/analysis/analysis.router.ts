@@ -23,7 +23,7 @@ import {
   StagedFixedFileSchema,
 } from "./analysis.schemas";
 import { repoAnalysisService } from "./analysis.service";
-import { type AIResult } from "./engine/core/analysis-result.schemas";
+import type { AIResult } from "./engine/core/analysis-result.schemas";
 import { FixService } from "./logic/fix-generator";
 import { PRConfigService } from "./logic/pr-config";
 import { DocumentFormatter } from "./logic/section-graph-linker";

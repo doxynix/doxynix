@@ -4,9 +4,9 @@ import simpleGit from "simple-git";
 
 import { appLogger } from "@/server/core/app-logger";
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
-import { type ChurnHotspot, type TeamRole } from "@/server/utils/types";
+import type { ChurnHotspot, TeamRole } from "@/server/utils/types";
 
-import { type ChangeCouplingRef } from "../core/discovery.types";
+import type { ChangeCouplingRef } from "../core/discovery.types";
 import { ProjectPolicy } from "../core/project-policy";
 
 type SimplifiedRepoMetrics = {

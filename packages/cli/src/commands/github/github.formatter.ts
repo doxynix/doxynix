@@ -1,10 +1,10 @@
 import { brand, pc } from "@/ui/colors";
 import { createTable } from "@/ui/table";
 
-import {
-  type GitHubBranchItem,
-  type GitHubFileItem,
-  type GitHubRepoItem,
+import type {
+  GitHubBranchItem,
+  GitHubFileItem,
+  GitHubRepoItem,
 } from "@/commands/github/github.types";
 
 const range1 = "\\x00-\\x1F";

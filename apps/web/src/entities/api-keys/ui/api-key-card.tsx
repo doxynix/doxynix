@@ -9,7 +9,7 @@ import { TimeAgo } from "@/shared/ui/kit/time-ago";
 import { RevokeApiKeyDialog } from "@/features/api-keys/ui/revoke-api-key-dialog";
 import { UpdateApiKeyDialog } from "@/features/api-keys/ui/update-api-key-dialog";
 
-import { type UiApiKey } from "../model/api-keys.types";
+import type { UiApiKey } from "../model/api-keys.types";
 
 export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
   const tCommon = useTranslations("Common");

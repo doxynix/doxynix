@@ -1,6 +1,6 @@
-import { type GoogleLanguageModelOptions } from "@ai-sdk/google";
-import { type Repo } from "@prisma/client";
-import { type ToolSet } from "ai";
+import type { GoogleLanguageModelOptions } from "@ai-sdk/google";
+import type { Repo } from "@prisma/client";
+import type { ToolSet } from "ai";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
@@ -8,7 +8,7 @@ import { getClientContext } from "@/server/core/github/github-provider";
 import { callWithFallback } from "@/server/utils/call";
 import { unwrapAiText } from "@/server/utils/optimizers";
 
-import { type AIResult } from "../engine/core/analysis-result.schemas";
+import type { AIResult } from "../engine/core/analysis-result.schemas";
 import { getActiveModels, SAFETY_SETTINGS } from "./ai-constants";
 import { buildRepositoryToolProfile } from "./ai-tools";
 import {

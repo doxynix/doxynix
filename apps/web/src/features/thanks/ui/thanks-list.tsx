@@ -6,7 +6,7 @@ import { AppSearch } from "@/shared/ui/kit/app-search";
 
 import { ThanksCard } from "@/entities/thanks/ui/thanks-card";
 
-import { type AuthorGroup } from "../model/thanks.types";
+import type { AuthorGroup } from "../model/thanks.types";
 
 type Props = {
   initialGroups: AuthorGroup[];

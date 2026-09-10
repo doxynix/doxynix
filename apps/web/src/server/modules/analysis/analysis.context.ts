@@ -1,7 +1,7 @@
-import { type DbClient } from "@/server/core/db";
+import type { DbClient } from "@/server/core/db";
 
 import { analysisRepo } from "./analysis.repository";
-import { type FileActionNodeContext } from "./analysis.schemas";
+import type { FileActionNodeContext } from "./analysis.schemas";
 import { createAnalyzeContextBuilder } from "./logic/analyze-context-builder";
 
 export type NodeContext = Omit<

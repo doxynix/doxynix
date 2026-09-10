@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent } from "@/shared/ui/core/card";

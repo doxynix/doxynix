@@ -1,6 +1,6 @@
-import * as z from "zod/v4/core";
+import * as z from "zod/mini";
 
-export function validateField(schema: z.$ZodType) {
+export function validateField(schema: z.ZodMiniType) {
   return (value: unknown): string | undefined => {
     const result = z.safeParse(schema, value);
 

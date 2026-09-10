@@ -1,6 +1,6 @@
 import * as p from "@clack/prompts";
 import { UpdateProfileSchema } from "@doxynix/shared";
-import { type Command } from "commander";
+import type { Command } from "commander";
 
 import { removeToken } from "@/core/config";
 import { handleCliError } from "@/core/errors";

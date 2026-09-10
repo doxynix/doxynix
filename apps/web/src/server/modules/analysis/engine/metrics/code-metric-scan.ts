@@ -3,8 +3,8 @@ import { maxBy, sumBy } from "es-toolkit";
 import { getLanguageColor } from "@/server/utils/language-metadata";
 import { percentile } from "@/server/utils/math-utils";
 
-import { type FileSignals, type LanguageMetric } from "../core/discovery.types";
-import { type RepoMetrics } from "../core/metrics.types";
+import type { FileSignals, LanguageMetric } from "../core/discovery.types";
+import type { RepoMetrics } from "../core/metrics.types";
 import { ProjectPolicy } from "../core/project-policy";
 import { COMPLEXITY_SCORING, SCHEMA_LIMITS } from "../core/scoring-constants";
 

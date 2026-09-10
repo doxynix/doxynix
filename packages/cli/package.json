@@ -25,7 +25,8 @@
     "@trpc/client": "catalog:",
     "commander": "14.0.3",
     "picocolors": "1.1.1",
-    "superjson": "catalog:"
+    "superjson": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@doxynix/config": "workspace:*",

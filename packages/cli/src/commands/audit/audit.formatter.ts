@@ -1,7 +1,7 @@
 import { brand, pc } from "@/ui/colors";
 import { createTable } from "@/ui/table";
 
-import { type AuditLogItem } from "./audit.types";
+import type { AuditLogItem } from "./audit.types";
 
 export function renderAuditTable(items: AuditLogItem[]): string {
   const table = createTable(["Log ID", "Timestamp", "Action / Event", "Target", "Details"]);

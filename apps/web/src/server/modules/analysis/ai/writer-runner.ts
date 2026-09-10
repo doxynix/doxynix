@@ -1,7 +1,7 @@
 import { appLogger } from "@/server/core/app-logger";
 import { llmLimiter } from "@/server/utils/llm-limiter";
 
-import { type WriterName, type WriterResult } from "./writer-tasks";
+import type { WriterName, WriterResult } from "./writer-tasks";
 
 export interface WriterInput {
   allowedPaths: string;

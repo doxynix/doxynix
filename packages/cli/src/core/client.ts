@@ -1,6 +1,6 @@
-import { type AppRouter } from "@doxynix/web/trpc";
+import type { AppRouter } from "@doxynix/web/trpc";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
-import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
 
 import { getApiUrl, getToken } from "./config";

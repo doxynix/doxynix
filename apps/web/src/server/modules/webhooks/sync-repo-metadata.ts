@@ -1,5 +1,5 @@
 import { Visibility } from "@doxynix/shared";
-import { type Repository } from "@octokit/webhooks-types";
+import type { Repository } from "@octokit/webhooks-types";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";

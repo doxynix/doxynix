@@ -28,7 +28,7 @@ import { Progress } from "@/shared/ui/core/progress";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
-import { type DashboardStats } from "../model/dashboard.types";
+import type { DashboardStats } from "../model/dashboard.types";
 
 type Props = { data: DashboardStats };
 

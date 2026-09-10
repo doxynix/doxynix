@@ -4,9 +4,9 @@ import { BellOff, SearchX } from "lucide-react";
 
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import {
-  type NotificationMeta,
-  type UiNotification,
+import type {
+  NotificationMeta,
+  UiNotification,
 } from "@/entities/notifications/model/notifications.types";
 import { NotificationCard } from "@/entities/notifications/ui/notification-card";
 

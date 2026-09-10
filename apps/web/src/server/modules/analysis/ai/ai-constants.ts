@@ -1,4 +1,4 @@
-import { type GoogleLanguageModelOptions, type google } from "@ai-sdk/google";
+import type { GoogleLanguageModelOptions, google } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { get } from "@vercel/edge-config";
 import * as z from "zod";

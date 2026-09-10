@@ -4,7 +4,7 @@ import { parseAsString, useQueryStates } from "nuqs";
 
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
-import { type RepoMapNodeData } from "../model/repo-map-types";
+import type { RepoMapNodeData } from "../model/repo-map-types";
 
 export function RepoMapSearchPanel() {
   const { fitView, setNodes } = useReactFlow();
