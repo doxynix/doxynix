@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.4](https://github.com/doxynix/doxynix/compare/doxynix-v4.2.3...doxynix-v4.2.4) (2026-09-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency motion to v13 ([#2092](https://github.com/doxynix/doxynix/issues/2092)) ([d458650](https://github.com/doxynix/doxynix/commit/d458650c91429f9986fcb397edc5b31fa443f323))
+
 ## [4.2.3](https://github.com/doxynix/doxynix/compare/doxynix-v4.2.2...doxynix-v4.2.3) (2026-09-10)
 
 
