@@ -2,7 +2,7 @@ import { Status, Visibility } from "@doxynix/shared";
 import { TRPCError } from "@trpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { type DbClient } from "@/server/core/db";
+import type { DbClient } from "@/server/core/db";
 import * as githubApi from "@/server/core/github/github-api";
 import * as githubProvider from "@/server/core/github/github-provider";
 import { repoService } from "@/server/modules/repos/repo.service";

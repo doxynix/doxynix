@@ -2,7 +2,7 @@
 
 import { type ComponentType, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { type DocType } from "@doxynix/shared";
+import type { DocType } from "@doxynix/shared";
 import { uniqBy } from "es-toolkit";
 import {
   BookOpen,
@@ -29,7 +29,7 @@ import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { CopyButton } from "@/shared/ui/kit/copy-button";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { type AvailableDocs, type RepoNodeContext } from "@/entities/repo/model/repo.types";
+import type { AvailableDocs, RepoNodeContext } from "@/entities/repo/model/repo.types";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 
 import { RepoDocsContent } from "./repo-docs-content";

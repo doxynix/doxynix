@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { type Command } from "commander";
+import type { Command } from "commander";
 
 import { handleCliError } from "@/core/errors";
 
@@ -12,7 +12,7 @@ import {
   renderNotificationsTable,
 } from "./notifications.formatter";
 import { notificationsService } from "./notifications.service";
-import { type NotificationItem } from "./notifications.types";
+import type { NotificationItem } from "./notifications.types";
 
 async function resolveNotificationId(
   idArg?: string,

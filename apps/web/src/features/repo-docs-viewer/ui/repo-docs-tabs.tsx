@@ -1,7 +1,7 @@
 "use client";
 
-import { type ComponentType } from "react";
-import { type DocType } from "@doxynix/shared";
+import type { ComponentType } from "react";
+import type { DocType } from "@doxynix/shared";
 import { uniqBy } from "es-toolkit";
 import {
   BookOpen,
@@ -18,7 +18,7 @@ import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
 import { TabsList, TabsTrigger } from "@/shared/ui/core/tabs";
 
-import { type AvailableDocs } from "@/entities/repo/model/repo.types";
+import type { AvailableDocs } from "@/entities/repo/model/repo.types";
 
 type TabItem = {
   icon: ComponentType<{ className?: string }>;

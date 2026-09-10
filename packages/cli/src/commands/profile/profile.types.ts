@@ -1,4 +1,4 @@
-import { type RouterInput, type RouterOutput } from "@/core/client";
+import type { RouterInput, RouterOutput } from "@/core/client";
 
 export type UserSessionItem = RouterOutput["user"]["getActiveSessions"][number];
 export type LinkedAccountItem = RouterOutput["user"]["getLinkedAccounts"]["accounts"][number];

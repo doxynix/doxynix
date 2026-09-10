@@ -1,16 +1,16 @@
 import { basename, normalize } from "pathe";
 
-import {
-  type ConfigRef,
-  type DependencyEdge,
-  type FileComplexity,
-  type FileSignals,
-  type ModuleRef,
-  type RepositoryEvidence,
-  type RepositoryFile,
-  type RouteInventory,
-  type RouteRef,
-  type SymbolRef,
+import type {
+  ConfigRef,
+  DependencyEdge,
+  FileComplexity,
+  FileSignals,
+  ModuleRef,
+  RepositoryEvidence,
+  RepositoryFile,
+  RouteInventory,
+  RouteRef,
+  SymbolRef,
 } from "./discovery.types";
 import {
   collectAliasRules,

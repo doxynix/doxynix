@@ -3,7 +3,7 @@ import { basename, normalize } from "pathe";
 import { appLogger } from "@/server/core/app-logger";
 
 import { getLanguageAdapters } from "../adapters/registry";
-import { type FileSignals, type RepositoryFile } from "../core/discovery.types";
+import type { FileSignals, RepositoryFile } from "../core/discovery.types";
 import { ProjectPolicy } from "../core/project-policy";
 import { collectRegexSignals } from "./regex-signals";
 

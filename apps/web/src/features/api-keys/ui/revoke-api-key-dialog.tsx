@@ -8,7 +8,7 @@ import { AppButton } from "@/shared/ui/core/button";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";
 import { DangerActionDialog } from "@/shared/ui/kit/danger-action-dialog";
 
-import { type UiApiKey } from "@/entities/api-keys/model/api-keys.types";
+import type { UiApiKey } from "@/entities/api-keys/model/api-keys.types";
 
 import { useApiKeyActions } from "../model/use-api-key-actions";
 

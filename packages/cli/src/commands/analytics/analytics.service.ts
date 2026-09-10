@@ -1,6 +1,6 @@
 import { trpc } from "@/core/client";
 
-import { type DashboardStatsInput, type TrendsInput } from "./analytics.types";
+import type { DashboardStatsInput, TrendsInput } from "./analytics.types";
 
 export const analyticsService = {
   async getDashboardStats(input?: DashboardStatsInput) {

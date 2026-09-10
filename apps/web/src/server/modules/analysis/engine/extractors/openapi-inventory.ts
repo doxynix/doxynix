@@ -2,7 +2,7 @@ import YAML from "yaml";
 
 import { appLogger } from "@/server/core/app-logger";
 import { getFileExtension } from "@/server/utils/path-operations";
-import { type OpenApiInventory } from "@/server/utils/types";
+import type { OpenApiInventory } from "@/server/utils/types";
 
 const IGNORED_EXTENSIONS = new Set([
   ".cpp",

@@ -16,7 +16,7 @@ import { cleanup, handleError, readAndFilterFiles } from "@/server/utils/utils";
 
 import { generateDeepDocs, runAiPipeline } from "../ai/ai-pipeline";
 import { repoAnalysisService } from "../analysis.service";
-import { type RepoMetrics } from "../engine/core/metrics.types";
+import type { RepoMetrics } from "../engine/core/metrics.types";
 import { analyzeRepository } from "../engine/metrics/code-metrics";
 import {
   calculateTeamRoles,

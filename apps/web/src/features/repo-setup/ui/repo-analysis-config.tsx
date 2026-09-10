@@ -1,5 +1,5 @@
 import { type ComponentType, useId } from "react";
-import { type DocType } from "@doxynix/shared";
+import type { DocType } from "@doxynix/shared";
 import {
   BookOpen,
   Code2,
@@ -30,7 +30,7 @@ import { Textarea } from "@/shared/ui/core/textarea";
 import { FLAGS, Flag } from "@/shared/ui/kit/language-switcher";
 import { LoadingButton } from "@/shared/ui/kit/loading-button";
 
-import { type ActionsType, type StateType } from "@/entities/repo/model/use-repo-setup";
+import type { ActionsType, StateType } from "@/entities/repo/model/use-repo-setup";
 
 type DocOption = {
   desc: string;

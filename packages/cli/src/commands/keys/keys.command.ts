@@ -1,6 +1,6 @@
 import * as p from "@clack/prompts";
 import { CreateApiKeySchema } from "@doxynix/shared";
-import { type Command } from "commander";
+import type { Command } from "commander";
 
 import { handleCliError } from "@/core/errors";
 import { validateField } from "@/core/validation";
@@ -10,7 +10,7 @@ import { withTaskSpinner } from "@/ui/spinner";
 
 import { renderKeysTable } from "./keys.formatter";
 import { keysService } from "./keys.service";
-import { type ApiKeyItem } from "./keys.types";
+import type { ApiKeyItem } from "./keys.types";
 
 async function resolveKeyId(keyIdArg?: string): Promise<string | null> {
   const data = await withTaskSpinner("Loading API keys...", () => keysService.list());

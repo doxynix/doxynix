@@ -1,5 +1,5 @@
 import { NotificationSchema } from "@doxynix/shared";
-import { type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import * as z from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";

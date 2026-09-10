@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { type Command } from "commander";
+import type { Command } from "commander";
 
 import { handleCliError } from "@/core/errors";
 
@@ -9,7 +9,7 @@ import { withTaskSpinner } from "@/ui/spinner";
 
 import { renderAuditTable } from "./audit.formatter";
 import { auditService } from "./audit.service";
-import { type AuditLogItem } from "./audit.types";
+import type { AuditLogItem } from "./audit.types";
 
 export function registerAuditCommand(program: Command) {
   const audit = program

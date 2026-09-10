@@ -1,11 +1,11 @@
 import { normalize } from "pathe";
 
-import { type ModuleRef, type RepositoryEvidence } from "../engine/core/discovery.types";
+import type { ModuleRef, RepositoryEvidence } from "../engine/core/discovery.types";
 import { REPORT_FOCUS_SECTIONS } from "../engine/core/documentation.types";
-import { type RepoMetrics } from "../engine/core/metrics.types";
+import type { RepoMetrics } from "../engine/core/metrics.types";
 import { ProjectPolicy } from "../engine/core/project-policy";
 import { MAPPER_FILE_SCORING } from "../engine/core/scoring-constants";
-import { type RepositoryModuleFile } from "./context-manager";
+import type { RepositoryModuleFile } from "./context-manager";
 
 const MAX_FILES_IN_TREE = 1000;
 const MAX_FOLDER_ROWS = 100;

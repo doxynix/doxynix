@@ -27,7 +27,7 @@ export default defineConfig({
     fileParallelism: false,
     globals: true,
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
-    setupFiles: ["./src/tests/setup-env.ts", "zod/compile"],
+    setupFiles: ["./src/tests/setup-env.ts"],
     testTimeout: 15_000,
   },
 });

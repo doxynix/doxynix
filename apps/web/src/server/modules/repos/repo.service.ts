@@ -1,8 +1,8 @@
 import { Status, Visibility } from "@doxynix/shared";
-import { type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
-import { type DbClient } from "@/server/core/db";
+import type { DbClient } from "@/server/core/db";
 import { getRepoInfo } from "@/server/core/github/github-api";
 import { GitHubAuthRequiredError, parseUrl } from "@/server/core/github/github-provider";
 import { handlePrismaError, isOctokitError } from "@/server/utils/handle-error";
@@ -10,7 +10,7 @@ import { getPaginationMeta } from "@/server/utils/pagination";
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
 
 import { repoMapper } from "./repo.mapper";
-import { type RepoFiltersInput } from "./repo.schemas";
+import type { RepoFiltersInput } from "./repo.schemas";
 
 function buildRepoSearchClause(term: string): Prisma.RepoWhereInput {
   return {

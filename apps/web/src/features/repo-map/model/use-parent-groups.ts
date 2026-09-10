@@ -1,6 +1,6 @@
-import { type Node } from "@xyflow/react";
+import type { Node } from "@xyflow/react";
 
-import { type RepoMapNodeData } from "./repo-map-types";
+import type { RepoMapNodeData } from "./repo-map-types";
 
 type ParentNodeConfig = {
   children: string[];

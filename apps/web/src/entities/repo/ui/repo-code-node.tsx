@@ -1,11 +1,11 @@
-import { type MouseEvent } from "react";
+import type { MouseEvent } from "react";
 import { ChevronDown, ChevronRight, FileIcon, Folder, FolderOpen } from "lucide-react";
-import { type NodeRendererProps } from "react-arborist";
+import type { NodeRendererProps } from "react-arborist";
 
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
 
-import { type FileNode } from "@/entities/repo/model/repo-setup.types";
+import type { FileNode } from "@/entities/repo/model/repo-setup.types";
 
 type RepoCodeNodeProps = NodeRendererProps<FileNode> & {
   activePath: null | string;

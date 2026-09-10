@@ -3,7 +3,7 @@ import path from "node:path";
 
 import * as p from "@clack/prompts";
 import { UpdatePRConfigInput } from "@doxynix/shared";
-import { type Command } from "commander";
+import type { Command } from "commander";
 
 import { handleCliError } from "@/core/errors";
 import { resolveRepository } from "@/core/repo";
@@ -24,7 +24,7 @@ import {
   renderStructureMap,
 } from "./analyze.formatter";
 import { analyzeService } from "./analyze.service";
-import { type AnalysisHistoryItem } from "./analyze.types";
+import type { AnalysisHistoryItem } from "./analyze.types";
 
 export function registerAnalyzeCommand(program: Command) {
   const analyze = program

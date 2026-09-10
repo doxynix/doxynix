@@ -1,6 +1,6 @@
 {
   "name": "@doxynix/cli",
-  "version": "2.1.1",
+  "version": "2.1.3",
   "type": "module",
   "bin": {
     "dxnx": "./dist/index.js"
@@ -21,18 +21,19 @@
     "validate": "biome check . && oxlint"
   },
   "dependencies": {
-    "@clack/prompts": "1.4.0",
+    "@clack/prompts": "1.7.0",
     "@trpc/client": "catalog:",
     "commander": "14.0.3",
     "picocolors": "1.1.1",
-    "superjson": "catalog:"
+    "superjson": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@doxynix/config": "workspace:*",
     "@doxynix/shared": "workspace:*",
     "@doxynix/web": "workspace:*",
     "@trpc/server": "catalog:",
-    "tsup": "8.3.6"
+    "tsup": "8.5.1"
   },
   "publishConfig": {
     "access": "public"

@@ -1,6 +1,6 @@
 import { extname, normalize } from "pathe";
 
-import { type TsStaticHint } from "@/server/utils/types";
+import type { TsStaticHint } from "@/server/utils/types";
 
 import { COMPLEXITY_SCORING } from "../core/scoring-constants";
 

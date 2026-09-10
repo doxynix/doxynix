@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { type Command } from "commander";
+import type { Command } from "commander";
 
 import { handleCliError } from "@/core/errors";
 
@@ -8,7 +8,7 @@ import { withTaskSpinner } from "@/ui/spinner";
 
 import { renderRepoDetails, renderReposTable, renderSlimReposTable } from "./repos.formatter";
 import { reposService } from "./repos.service";
-import { type RepoListItem } from "./repos.types";
+import type { RepoListItem } from "./repos.types";
 
 export function registerReposCommand(program: Command) {
   const repos = program.command("repos").description("Manage connected Doxynix repositories");

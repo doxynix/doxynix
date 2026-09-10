@@ -1,4 +1,4 @@
-import { type GoogleLanguageModelOptions } from "@ai-sdk/google";
+import type { GoogleLanguageModelOptions } from "@ai-sdk/google";
 import { metadata } from "@trigger.dev/sdk";
 import * as ai from "ai";
 import { wrapAISDK } from "langsmith/experimental/vercel";

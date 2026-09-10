@@ -2,7 +2,7 @@ import { clamp, mean } from "es-toolkit";
 
 import { percentile } from "@/server/utils/math-utils";
 
-import { type RepoMetrics } from "../core/metrics.types";
+import type { RepoMetrics } from "../core/metrics.types";
 import { COMPLEXITY_SCORING, TECH_DEBT_SCORING } from "../core/scoring-constants";
 
 export function normalizeComplexityScore(params: {

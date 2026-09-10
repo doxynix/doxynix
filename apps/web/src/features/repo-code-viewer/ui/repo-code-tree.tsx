@@ -8,8 +8,8 @@ import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
 import { AppButton } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 
-import { type UiRepoDetailed } from "@/entities/repo/model/repo.types";
-import { type ActionItem, type FileNode } from "@/entities/repo/model/repo-setup.types";
+import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import type { ActionItem, FileNode } from "@/entities/repo/model/repo-setup.types";
 import { useRepoSetup } from "@/entities/repo/model/use-repo-setup";
 import { RepoBranchSelector } from "@/entities/repo/ui/repo-branch-selector";
 import { RepoCodeNode } from "@/entities/repo/ui/repo-code-node";

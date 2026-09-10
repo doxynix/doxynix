@@ -4,7 +4,7 @@ import { getFileScore } from "@/server/modules/analysis/engine/core/file-classif
 import { isOctokitError } from "@/server/utils/handle-error";
 
 import { appLogger } from "../app-logger";
-import { type DbClient, type PrismaClientExtended } from "../db";
+import type { DbClient, PrismaClientExtended } from "../db";
 import { getFileContent, getRepoBranches, getRepoTree, searchRepos } from "./github-api";
 import { GitHubAuthRequiredError } from "./github-provider";
 

@@ -6,10 +6,10 @@ import { realtimeService } from "@/server/core/realtime";
 import { redisService } from "@/server/core/redis";
 import { TASK_CONFIGS } from "@/server/utils/task-config";
 
-import { type FileActionNodeContext } from "../analysis.schemas";
+import type { FileActionNodeContext } from "../analysis.schemas";
 import { runQuickFileAudit } from "../analysis.utils";
 import { toQuickFileAuditPreview } from "../logic/repo-file-action-preview";
-import { type SyncFileActionMeta } from "../logic/repo-file-action-state";
+import type { SyncFileActionMeta } from "../logic/repo-file-action-state";
 
 export const analyzeFileTask = task({
   id: "analyze-single-file",

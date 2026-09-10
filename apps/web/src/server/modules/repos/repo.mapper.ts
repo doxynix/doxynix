@@ -1,8 +1,8 @@
 import { Status } from "@doxynix/shared";
-import { type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import { getLanguageColor } from "@/server/utils/language-metadata";
-import { type PaginationMeta } from "@/server/utils/pagination";
+import type { PaginationMeta } from "@/server/utils/pagination";
 
 export type RepoWithAnalyses = Prisma.RepoGetPayload<{
   include: {

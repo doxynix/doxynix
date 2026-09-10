@@ -1,4 +1,4 @@
-import { type Route } from "next";
+import type { Route } from "next";
 import { Menu } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 

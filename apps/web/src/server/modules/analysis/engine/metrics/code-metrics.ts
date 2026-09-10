@@ -11,15 +11,15 @@ import { normalizeLanguageName } from "@/server/utils/language-metadata";
 import { getFileExtension } from "@/server/utils/path-operations";
 
 import { calculateDocDensity } from "../core/common";
-import {
-  type RepositoryEvidence,
-  type SecretLintMessage,
-  type SecurityFindingMetric,
-  type StructuralSignals,
+import type {
+  RepositoryEvidence,
+  SecretLintMessage,
+  SecurityFindingMetric,
+  StructuralSignals,
 } from "../core/discovery.types";
 import { FactCollector } from "../core/fact-collector";
 import { linguistStyleLabel } from "../core/file-classifier";
-import { type RepoMetrics } from "../core/metrics.types";
+import type { RepoMetrics } from "../core/metrics.types";
 import { collectStructuralSignals, scoreStructuralModularity } from "../core/structure";
 import { collectPolyglotSignals } from "../extractors/language-signals";
 import { OpenApiDiscoveryEngine } from "../extractors/openapi-inventory";

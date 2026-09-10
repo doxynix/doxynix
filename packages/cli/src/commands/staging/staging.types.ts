@@ -1,3 +1,3 @@
-import { type RouterOutput } from "@/core/client";
+import type { RouterOutput } from "@/core/client";
 
 export type StagedFilesMap = RouterOutput["analysis"]["getStagedFiles"];

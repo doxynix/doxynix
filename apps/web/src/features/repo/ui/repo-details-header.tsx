@@ -7,7 +7,7 @@ import { GitHubIcon } from "@/shared/ui/icons/github-icon";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { ExternalLink } from "@/shared/ui/kit/external-link";
 
-import { type UiRepoDetailed } from "@/entities/repo/model/repo.types";
+import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
 import { repoStatusConfig } from "@/entities/repo/model/repo-status-config";
 import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";
 

@@ -2,7 +2,7 @@ import { brand, pc } from "@/ui/colors";
 import { renderNoticeBox } from "@/ui/notify";
 import { createTable } from "@/ui/table";
 
-import { type NotificationItem } from "./notifications.types";
+import type { NotificationItem } from "./notifications.types";
 
 export function formatNotificationType(type: string): string {
   switch (type) {

@@ -1,7 +1,7 @@
-import { type Metadata } from "next";
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { type RepoPageProps } from "@/shared/types/next.types";
+import type { RepoPageProps } from "@/shared/types/next.types";
 import { AppAvatar } from "@/shared/ui/kit/app-avatar";
 import { AppSearch } from "@/shared/ui/kit/app-search";
 

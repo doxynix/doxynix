@@ -1,7 +1,7 @@
 import { brand, pc } from "@/ui/colors";
 import { createTable } from "@/ui/table";
 
-import { type ChatSessionItem } from "./agent.types";
+import type { ChatSessionItem } from "./agent.types";
 
 export function renderSessionsTable(sessions: ChatSessionItem[]): string {
   const table = createTable(["Session ID", "Title", "Repository Context", "Updated"]);

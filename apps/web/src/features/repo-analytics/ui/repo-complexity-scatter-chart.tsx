@@ -13,7 +13,7 @@ import {
   ZAxis,
 } from "recharts";
 
-import { type RepoMetricsItem } from "@/entities/repo/model/repo.types";
+import type { RepoMetricsItem } from "@/entities/repo/model/repo.types";
 
 type NonNullRouterOutput = NonNullable<RepoMetricsItem>;
 

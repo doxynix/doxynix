@@ -1,5 +1,5 @@
-import { type ReactNode } from "react";
-import { type Metadata, type Viewport } from "next";
+import type { ReactNode } from "react";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";

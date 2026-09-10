@@ -5,11 +5,11 @@ import { getApiUrl, getToken } from "@/core/config";
 
 import { brand, pc } from "@/ui/colors";
 
-import {
-  type ChatMessage,
-  type CreateSessionInput,
-  type ListSessionsInput,
-  type PendingToolCall,
+import type {
+  ChatMessage,
+  CreateSessionInput,
+  ListSessionsInput,
+  PendingToolCall,
 } from "./agent.types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {

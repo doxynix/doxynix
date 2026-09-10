@@ -1,6 +1,6 @@
 import { trpc } from "@/core/client";
 
-import { type DisconnectAccountInput } from "./profile.types";
+import type { DisconnectAccountInput } from "./profile.types";
 
 export const profileService = {
   async deleteAccount() {

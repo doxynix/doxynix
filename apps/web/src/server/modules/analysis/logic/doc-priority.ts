@@ -2,7 +2,7 @@ import { DocType } from "@doxynix/shared";
 
 import { hasText } from "@/server/utils/string-utils";
 
-import { type ReportSectionKind } from "../engine/core/documentation.types";
+import type { ReportSectionKind } from "../engine/core/documentation.types";
 import { DOC_PRIORITY_WEIGHTS } from "../engine/core/scoring-constants";
 
 export const ALL_DOC_TYPES = [

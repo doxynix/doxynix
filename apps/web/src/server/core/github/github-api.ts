@@ -1,9 +1,9 @@
 import { Visibility } from "@doxynix/shared";
-import { type RestEndpointMethodTypes } from "@octokit/rest";
-import { type Repo } from "@prisma/client";
+import type { RestEndpointMethodTypes } from "@octokit/rest";
+import type { Repo } from "@prisma/client";
 import { sumBy } from "es-toolkit";
 
-import { type RepoItemFields } from "@/shared/types/repo.types";
+import type { RepoItemFields } from "@/shared/types/repo.types";
 
 import { ProjectPolicy } from "@/server/modules/analysis/engine/core/project-policy";
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
@@ -11,7 +11,7 @@ import { isOctokitError } from "@/server/utils/handle-error";
 import { getLanguageColor } from "@/server/utils/language-metadata";
 
 import { appLogger } from "../app-logger";
-import { type DbClient } from "../db";
+import type { DbClient } from "../db";
 import {
   GitHubAuthRequiredError,
   getInstallationClient,

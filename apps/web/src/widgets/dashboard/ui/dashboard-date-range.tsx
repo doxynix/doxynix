@@ -4,7 +4,7 @@ import { useState } from "react";
 import { format, subDays, subHours, subMinutes } from "date-fns";
 import { Check, Clock } from "lucide-react";
 import { useQueryStates } from "nuqs";
-import { type DateRange } from "react-day-picker";
+import type { DateRange } from "react-day-picker";
 
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";

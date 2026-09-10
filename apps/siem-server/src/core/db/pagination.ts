@@ -1,5 +1,5 @@
 import { count, type SQL, type Table } from "drizzle-orm";
-import { type PgTable } from "drizzle-orm/pg-core";
+import type { PgTable } from "drizzle-orm/pg-core";
 import * as z from "zod";
 
 import { db } from "@/core/db/db";

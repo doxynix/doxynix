@@ -1,4 +1,4 @@
-import { type PushEvent } from "@octokit/webhooks-types";
+import type { PushEvent } from "@octokit/webhooks-types";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";

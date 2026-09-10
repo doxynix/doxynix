@@ -1,6 +1,6 @@
-import { type Metadata } from "next";
+import type { Metadata } from "next";
 
-import { type RepoPageProps } from "@/shared/types/next.types";
+import type { RepoPageProps } from "@/shared/types/next.types";
 
 import { RepoCodeContainer } from "@/features/repo-code-viewer/ui/repo-code-container";
 

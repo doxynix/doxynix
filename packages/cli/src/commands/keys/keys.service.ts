@@ -1,6 +1,6 @@
 import { trpc } from "@/core/client";
 
-import { type CreateApiKeyInput, type UpdateApiKeyInput } from "./keys.types";
+import type { CreateApiKeyInput, UpdateApiKeyInput } from "./keys.types";
 
 export const keysService = {
   async create(input: CreateApiKeyInput) {

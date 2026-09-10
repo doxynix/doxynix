@@ -1,8 +1,8 @@
-import { type Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import { normalizeSearchInput, tokenizeSearchInput } from "@/server/utils/search";
 
-import { type NotificationsFilterInput } from "./notification.schemas";
+import type { NotificationsFilterInput } from "./notification.schemas";
 
 function buildNotificationSearchClause(term: string): Prisma.NotificationWhereInput {
   return {

@@ -1,4 +1,4 @@
-import { type RouterInput, type RouterOutput } from "@/core/client";
+import type { RouterInput, RouterOutput } from "@/core/client";
 
 export type DashboardStats = RouterOutput["analytics"]["getDashboardStats"];
 export type TrendItem = RouterOutput["analytics"]["getTrends"][number];
