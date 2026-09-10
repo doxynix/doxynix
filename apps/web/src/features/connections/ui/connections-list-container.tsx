@@ -51,7 +51,10 @@ export function ConnectionsListContainer() {
         </div>
         <div className="flex flex-col gap-3">
           <TwoFactorCard />
-          <AuthProvidersList accounts={data?.accounts ?? []} user={data?.user ?? null} />
+          <AuthProvidersList
+            accounts={data?.accounts ?? []}
+            user={data?.user ?? null}
+          />
         </div>
       </section>
 

@@ -2,61 +2,40 @@ import { brand } from "@/ui/colors";
 import { formatScore, getScoreLabel } from "@/ui/formatters";
 import { createTable } from "@/ui/table";
 
-export function renderDashboardStats(stats: any): string {
+import type { DashboardStats, TrendItem } from "./analytics.types";
+
+export function renderDashboardStats(stats: DashboardStats): string {
   const table = createTable(["Metric", "Current Value", "Evaluation"]);
+  const { avgScores, repoCount } = stats.overview;
 
-  if (stats.securityScore !== undefined) {
-    table.push([
-      "🛡️ Security Score",
-      formatScore(stats.securityScore),
-      getScoreLabel(stats.securityScore),
-    ]);
-  }
-
-  if (stats.techDebtScore !== undefined) {
-    table.push([
-      "💳 Technical Debt Score",
-      formatScore(stats.techDebtScore),
-      getScoreLabel(stats.techDebtScore),
-    ]);
-  }
-
-  if (stats.complexityScore !== undefined) {
-    table.push([
+  table.push(
+    ["🛡️ Security Score", formatScore(avgScores.security), getScoreLabel(avgScores.security)],
+    ["💳 Technical Debt Score", formatScore(avgScores.techDebt), getScoreLabel(avgScores.techDebt)],
+    [
       "⚡ Code Complexity Score",
-      formatScore(stats.complexityScore),
-      getScoreLabel(stats.complexityScore),
-    ]);
-  }
-
-  if (stats.totalRepositories !== undefined) {
-    table.push([
-      "📦 Connected Repositories",
-      brand.highlight(String(stats.totalRepositories)),
-      brand.info("Active"),
-    ]);
-  }
-
-  if (stats.totalAnalysesRun !== undefined) {
-    table.push([
+      formatScore(avgScores.complexity),
+      getScoreLabel(avgScores.complexity),
+    ],
+    ["📦 Connected Repositories", brand.highlight(String(repoCount)), brand.info("Active")],
+    [
       "🚀 Executed Analyses",
-      brand.highlight(String(stats.totalAnalysesRun)),
+      brand.highlight(String(stats.analysisStats.total)),
       brand.success("Processed"),
-    ]);
-  }
+    ],
+  );
 
   return table.toString();
 }
 
-export function renderTrendsTable(trends: any[]): string {
+export function renderTrendsTable(trends: TrendItem[]): string {
   const table = createTable(["Period / Date", "Security", "Tech Debt", "Complexity"]);
 
   for (const item of trends) {
     table.push([
-      brand.muted(item.date ? new Date(item.date).toLocaleDateString() : (item.label ?? "N/A")),
-      formatScore(item.securityScore),
-      formatScore(item.techDebtScore),
-      formatScore(item.complexityScore),
+      brand.muted(item.date || item.fullDate),
+      formatScore(item.security),
+      formatScore(item.techDebt),
+      formatScore(item.complexity),
     ]);
   }
 

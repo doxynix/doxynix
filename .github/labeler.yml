@@ -36,7 +36,6 @@ web:api:
   - changed-files:
       - any-glob-to-any-file:
           - 'apps/web/src/app/api/**/*'
-          - 'apps/web/src/shared/api-contracts/**/*'
 
 web:background-tasks:
   - changed-files:

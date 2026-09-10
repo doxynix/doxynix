@@ -10,7 +10,10 @@ export function PublicHeaderCtaSlot() {
 
   if (pathname.includes("/auth")) {
     return (
-      <AppButton asChild variant="outline">
+      <AppButton
+        asChild
+        variant="outline"
+      >
         <Link href="/">
           <MoveLeft size={16} />
           Back Home
@@ -20,10 +23,16 @@ export function PublicHeaderCtaSlot() {
   }
 
   return (
-    <AppButton asChild variant="outline">
+    <AppButton
+      asChild
+      variant="outline"
+    >
       <Link href="/auth">
         Get Started
-        <MoveLeft className="rotate-180" size={16} />
+        <MoveLeft
+          className="rotate-180"
+          size={16}
+        />
       </Link>
     </AppButton>
   );

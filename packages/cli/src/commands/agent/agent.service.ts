@@ -1,22 +1,34 @@
 import * as p from "@clack/prompts";
 
+import { trpc } from "@/core/client";
 import { getApiUrl, getToken } from "@/core/config";
 
 import { brand, pc } from "@/ui/colors";
 
-import type { PendingToolCall } from "./agent.tools";
-
-export interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
+import type {
+  ChatMessage,
+  CreateSessionInput,
+  ListSessionsInput,
+  PendingToolCall,
+} from "./agent.types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-export const AgentStreamClient = {
+export const agentService = {
+  async createSession(input: CreateSessionInput) {
+    return trpc.agent.createSession.mutate(input);
+  },
+
+  async getSessionHistory(sessionId: string) {
+    return trpc.agent.getSessionHistory.query({ sessionId });
+  },
+
+  async listSessions(input?: ListSessionsInput) {
+    return trpc.agent.listSessions.query(input ?? {});
+  },
+
   async stream(
     messages: ChatMessage[],
     repoId?: string,
@@ -58,7 +70,7 @@ export const AgentStreamClient = {
     }
 
     const reader = response.body.getReader();
-    const decoder = new TextDecoder();
+    const decoder = new TextDecoder("utf-8");
     let fullText = "";
     let buffer = "";
     let isSpinnerRunning = true;
@@ -81,85 +93,111 @@ export const AgentStreamClient = {
       }
     };
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
+    const dispatchPayload = (payload: string) => {
+      const trimmed = payload.trim();
+      if (!trimmed || trimmed === "[DONE]") {
+        return;
       }
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
-
-      for (const rawLine of lines) {
-        const line = rawLine.trim();
-        if (!line.startsWith("data:")) {
-          continue;
+      try {
+        const event: unknown = JSON.parse(trimmed);
+        if (!isRecord(event)) {
+          return;
         }
 
-        const payload = line.replace(/^data:\s*/, "").trim();
-        if (payload === "[DONE]") {
-          continue;
+        if (event.type === "text-delta" && typeof event.delta === "string") {
+          ensureHeader();
+          process.stdout.write(event.delta);
+          fullText += event.delta;
+        } else if (event.type === "tool-input-start" || event.type === "tool-call") {
+          const toolCallId =
+            typeof event.toolCallId === "string" ? event.toolCallId : crypto.randomUUID();
+          const toolName = typeof event.toolName === "string" ? event.toolName : "tool";
+          toolsMap.set(toolCallId, {
+            hasExecutedOnServer: false,
+            input: {},
+            toolCallId,
+            toolName,
+          });
+          ensureHeader();
+          console.log(`\n${pc.yellow("⚡ [Tool Call]:")} ${pc.bold(toolName)}...`);
+        } else if (event.type === "tool-input-available") {
+          const toolCallId = typeof event.toolCallId === "string" ? event.toolCallId : "";
+          const existing = toolsMap.get(toolCallId);
+          if (existing) {
+            existing.input = isRecord(event.input) ? event.input : {};
+          }
+          console.log(pc.gray(`   Arguments: ${JSON.stringify(event.input)}`));
+        } else if (event.type === "tool-output-available") {
+          const toolCallId = typeof event.toolCallId === "string" ? event.toolCallId : "";
+          const existing = toolsMap.get(toolCallId);
+          if (existing) {
+            existing.hasExecutedOnServer = true;
+          }
+          const out =
+            typeof event.output === "string"
+              ? event.output
+              : event.output !== null && event.output !== undefined
+                ? JSON.stringify(event.output)
+                : "";
+          console.log(`${pc.green("✔ [Tool Result]:")} ${pc.gray(out.slice(0, 150))}\n`);
+        } else if (event.type === "error") {
+          ensureHeader();
+          const errStr = typeof event.error === "string" ? event.error : JSON.stringify(event);
+          console.log(`\n${brand.error(`❌ Generation error: ${errStr}`)}`);
+        }
+      } catch {
+        if (!trimmed.startsWith("{")) {
+          ensureHeader();
+          process.stdout.write(trimmed);
+          fullText += trimmed;
+        }
+      }
+    };
+
+    let currentEventData: string[] = [];
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          buffer += decoder.decode();
+          break;
         }
 
-        try {
-          const event: unknown = JSON.parse(payload);
-          if (!isRecord(event)) {
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split(/\r\n|\r|\n/);
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          if (line === "") {
+            if (currentEventData.length > 0) {
+              dispatchPayload(currentEventData.join("\n"));
+              currentEventData = [];
+            }
             continue;
           }
 
-          if (event.type === "text-delta" && typeof event.delta === "string") {
-            ensureHeader();
-            process.stdout.write(event.delta);
-            fullText += event.delta;
-          } else if (event.type === "tool-input-start" || event.type === "tool-call") {
-            const toolCallId =
-              typeof event.toolCallId === "string" ? event.toolCallId : crypto.randomUUID();
-            const toolName = typeof event.toolName === "string" ? event.toolName : "tool";
-            toolsMap.set(toolCallId, {
-              hasExecutedOnServer: false,
-              input: {},
-              toolCallId,
-              toolName,
-            });
-            ensureHeader();
-            console.log(`\n${pc.yellow("⚡ [Tool Call]:")} ${pc.bold(toolName)}...`);
-          } else if (event.type === "tool-input-available") {
-            const toolCallId = typeof event.toolCallId === "string" ? event.toolCallId : "";
-            const existing = toolsMap.get(toolCallId);
-            if (existing) {
-              existing.input = isRecord(event.input) ? event.input : {};
-            }
-            console.log(pc.gray(`   Arguments: ${JSON.stringify(event.input)}`));
-          } else if (event.type === "tool-output-available") {
-            const toolCallId = typeof event.toolCallId === "string" ? event.toolCallId : "";
-            const existing = toolsMap.get(toolCallId);
-            if (existing) {
-              existing.hasExecutedOnServer = true;
-            }
-            const out =
-              typeof event.output === "string"
-                ? event.output
-                : event.output !== null && event.output !== undefined
-                  ? JSON.stringify(event.output)
-                  : "";
-            console.log(`${pc.green("✔ [Tool Result]:")} ${pc.gray(out.slice(0, 150))}\n`);
-          } else if (event.type === "error") {
-            ensureHeader();
-            const errStr = typeof event.error === "string" ? event.error : JSON.stringify(event);
-            console.log(`\n${brand.error(`❌ Generation error: ${errStr}`)}`);
+          if (line.startsWith(":")) {
+            continue;
           }
-        } catch {
-          if (!payload.startsWith("{")) {
-            ensureHeader();
-            process.stdout.write(payload);
-            fullText += payload;
+
+          if (line.startsWith("data:")) {
+            let dataValue = line.slice(5);
+            if (dataValue.startsWith(" ")) {
+              dataValue = dataValue.slice(1);
+            }
+            currentEventData.push(dataValue);
           }
         }
       }
-    }
 
-    stopSpinner();
+      if (currentEventData.length > 0) {
+        dispatchPayload(currentEventData.join("\n"));
+      }
+    } finally {
+      stopSpinner();
+    }
 
     return {
       fullText,

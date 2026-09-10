@@ -1,4 +1,5 @@
-import { DocType, type Repo } from "@prisma/client";
+import { DocType } from "@doxynix/shared";
+import type { Repo } from "@prisma/client";
 import { batch } from "@trigger.dev/sdk";
 
 import { buildDocumentationInputModel } from "@/server/modules/analysis/engine/pipeline/documentation-input";

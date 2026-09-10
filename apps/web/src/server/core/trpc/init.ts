@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import type { UserRole } from "@doxynix/shared";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";

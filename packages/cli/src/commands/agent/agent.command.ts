@@ -1,24 +1,26 @@
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
-import { trpc } from "@/core/client";
 import { getToken } from "@/core/config";
 import { handleCliError } from "@/core/errors";
+import { parseRepoTarget } from "@/core/repo";
 
 import { brand, pc } from "@/ui/colors";
+import { withTaskSpinner } from "@/ui/spinner";
 
+import { reposService } from "../repos/repos.service";
+import { extractMessageContent, renderSessionsTable } from "./agent.formatter";
 import { executeTurn, startInteractiveChat } from "./agent.repl";
-import type { ChatMessage } from "./agent.service";
+import { agentService } from "./agent.service";
+import type { ChatMessage, ChatSessionItem } from "./agent.types";
 
 export function registerAgentCommand(program: Command) {
   const agent = program
     .command("agent")
     .alias("chat")
-    .description(
-      "🤖 Interactive AI Engineering Assistant (Security audits, AST analysis, architecture)",
-    )
-    .argument("[prompt...]", "Quick prompt for single-turn query (optional)")
-    .option("-r, --repo <target>", "Target repository (owner/name) for context")
+    .description("🤖 Interactive AI Engineering Assistant (AST analysis, Security, Refactoring)")
+    .argument("[prompt...]", "Single-turn prompt query")
+    .option("-r, --repo <target>", "Repository context (owner/name)")
     .action(async (promptParts: string[], options: { repo?: string }) => {
       try {
         const token = getToken();
@@ -37,9 +39,9 @@ export function registerAgentCommand(program: Command) {
           let repoId: string | undefined;
 
           if (options.repo) {
-            const [owner, name] = options.repo.split("/");
-            if (owner && name) {
-              const repo = await trpc.repo.getByName.query({ name, owner });
+            const parsed = parseRepoTarget(options.repo);
+            if (parsed) {
+              const repo = await reposService.getByName(parsed.owner, parsed.name);
               repoId = repo?.id;
             }
           }
@@ -69,76 +71,128 @@ export function registerAgentCommand(program: Command) {
 
   agent
     .command("sessions")
-    .description("List recent AI assistant chat sessions")
-    .action(async () => {
+    .description("List previous AI assistant chat sessions")
+    .option("-r, --repo <target>", "Filter by repository context (owner/name)")
+    .option("--json", "Output sessions in raw JSON format")
+    .action(async (options: { json?: boolean; repo?: string }) => {
       try {
-        const s = p.spinner();
-        s.start("Loading sessions...");
-        const sessions = await trpc.agent.listSessions.query({});
-        s.stop("Sessions retrieved");
+        let currentRepo: { name: string; owner: string } | undefined;
 
-        if (sessions.length === 0) {
-          p.outro(brand.muted("No chat sessions found."));
+        if (options.repo) {
+          const parsed = parseRepoTarget(options.repo);
+          if (!parsed) {
+            p.outro(brand.error("Format must be: owner/name (e.g. facebook/react)"));
+            return;
+          }
+          currentRepo = parsed;
+        }
+
+        const sessions = await withTaskSpinner(
+          {
+            silent: options.json,
+            start: currentRepo
+              ? `Loading sessions for ${pc.cyan(`${currentRepo.owner}/${currentRepo.name}`)}...`
+              : "Loading global sessions...",
+            stop: "Sessions retrieved",
+          },
+          () => agentService.listSessions(currentRepo ? { currentRepo } : {}),
+        );
+
+        if (options.json) {
+          console.log(JSON.stringify(sessions, null, 2));
           return;
         }
 
-        console.log(`\n${brand.logo(" 📜 Your AI Chat Sessions:\n")}`);
-        for (const session of sessions) {
-          const repoLabel = session.repo
-            ? pc.cyan(`[${session.repo.owner}/${session.repo.name}]`)
-            : pc.gray("[Global]");
-          console.log(`  ${pc.bold(session.title)} ${repoLabel}`);
-          console.log(
-            `  ${pc.gray(`ID: ${session.id} | ${new Date(session.updatedAt).toLocaleDateString()}`)}\n`,
-          );
+        if (sessions.length === 0) {
+          p.outro(brand.muted("No chat sessions found. Start one with: dxnx agent"));
+          return;
         }
+
+        console.log(`\n${brand.logo(" 📜 AI Chat Sessions:\n")}`);
+        console.log(renderSessionsTable(sessions));
+        console.log("\n");
+
+        p.outro(
+          brand.muted("Inspect messages with: ") +
+            brand.highlight("dxnx agent history [sessionId]"),
+        );
       } catch (error) {
         handleCliError(error);
       }
     });
 
   agent
-    .command("history <sessionId>")
-    .description("Inspect message history and past dialogue of a specific chat session")
+    .command("history [sessionId]")
+    .description("Inspect session dialogue (supports Short-ID prefix and interactive pick)")
     .option("--json", "Output history in JSON format")
-    .action(async (sessionId: string, options: { json?: boolean }) => {
-      const s = p.spinner();
-      let spinnerActive = false;
+    .action(async (sessionIdArg?: string, options?: { json?: boolean }) => {
       try {
-        if (!options.json) {
-          s.start("Retrieving session history...");
-          spinnerActive = true;
+        let targetSessionId = sessionIdArg?.trim();
+
+        if (!targetSessionId || targetSessionId.length < 32) {
+          const sessions = await withTaskSpinner("Fetching recent sessions for resolution...", () =>
+            agentService.listSessions({}),
+          );
+
+          if (sessions.length === 0) {
+            p.outro(brand.muted("No chat sessions found."));
+            return;
+          }
+
+          if (targetSessionId) {
+            const prefix = targetSessionId.toLowerCase();
+            const match = sessions.find((item: ChatSessionItem) =>
+              item.id.toLowerCase().startsWith(prefix),
+            );
+            if (!match) {
+              p.outro(brand.error(`No session found matching prefix: '${targetSessionId}'`));
+              return;
+            }
+            targetSessionId = match.id;
+          } else {
+            const selection = await p.select({
+              message: "Select an AI chat session to inspect history:",
+              options: sessions.map((item: ChatSessionItem) => ({
+                label: `${item.title} (${item.repo ? `${item.repo.owner}/${item.repo.name}` : "Global"}) [${item.id.slice(0, 8)}]`,
+                value: item.id,
+              })),
+            });
+
+            if (p.isCancel(selection) || typeof selection !== "string") {
+              p.cancel("Inspection cancelled.");
+              return;
+            }
+            targetSessionId = selection;
+          }
         }
 
-        const messages = await trpc.agent.getSessionHistory.query({ sessionId });
-        if (!options.json && spinnerActive) {
-          s.stop("History loaded");
-          spinnerActive = false;
-        }
+        const messages = await withTaskSpinner(
+          {
+            silent: options?.json,
+            start: `Retrieving history for session ${brand.highlight(targetSessionId.slice(0, 8))}...`,
+            stop: "History loaded",
+          },
+          () => agentService.getSessionHistory(targetSessionId),
+        );
 
-        if (options.json) {
+        if (options?.json) {
           console.log(JSON.stringify(messages, null, 2));
           return;
         }
 
         if (messages.length === 0) {
-          p.outro(brand.muted("No messages found in this session."));
+          p.outro(brand.muted("No messages recorded in this session."));
           return;
         }
 
-        console.log(`\n${brand.logo(` 📜 Session History (${sessionId.slice(0, 8)}...):\n`)}`);
+        console.log(
+          `\n${brand.logo(` 📜 Session History (${targetSessionId.slice(0, 8)}...):\n`)}`,
+        );
 
         for (const msg of messages) {
           const isUser = msg.role === "user";
           const senderLabel = isUser ? brand.highlight("You:") : brand.logo("Doxynix AI:");
-
-          const partsText = Array.isArray(msg.parts)
-            ? msg.parts
-                .map((part: any) => part.text ?? "")
-                .join("\n")
-                .trim()
-            : "";
-          const text = partsText || ((msg as any).content ?? "");
+          const text = extractMessageContent(msg.parts);
 
           console.log(`${senderLabel}\n${text}\n`);
           console.log(brand.muted("────────────────────────────────────────\n"));
@@ -146,9 +200,6 @@ export function registerAgentCommand(program: Command) {
 
         p.outro(brand.muted(`Total messages: ${messages.length}`));
       } catch (error) {
-        if (spinnerActive) {
-          s.stop();
-        }
         handleCliError(error);
       }
     });

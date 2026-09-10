@@ -1,37 +1,18 @@
 {
-  "dependencies": {
-    "@axiomhq/js": "1.8.0",
-    "@better-auth/drizzle-adapter": "1.6.30",
-    "@doxynix/shared": "workspace:*",
-    "@hono/zod-validator": "0.9.0",
-    "@js-temporal/polyfill": "0.5.1",
-    "@t3-oss/env-core": "0.13.11",
-    "better-auth": "1.6.30",
-    "drizzle-orm": "0.45.2",
-    "drizzle-zod": "0.8.3",
-    "es-toolkit": "1.51.0",
-    "eventemitter3": "5.0.4",
-    "hono": "4.13.4",
-    "ioredis": "6.0.0",
-    "postgres": "3.4.9",
-    "zod": "4.4.3"
-  },
-  "devDependencies": {
-    "@doxynix/config": "workspace:*",
-    "drizzle-kit": "0.31.10"
-  },
+  "name": "@doxynix/siem-server",
+  "version": "0.2.1",
   "exports": {
     ".": {
-      "default": "./src/index.ts",
-      "types": "./src/index.ts"
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
     },
     "./client": {
-      "default": "./src/client.ts",
-      "types": "./src/client.ts"
+      "types": "./dist/src/client.d.ts",
+      "default": "./dist/src/client.js"
     }
   },
-  "main": "src/index.ts",
-  "name": "@doxynix/siem-server",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "scripts": {
     "build": "tsc",
     "db:drop-migration": "bun with-doppler bun drizzle-kit drop",
@@ -50,6 +31,24 @@
     "validate": "biome check . && oxlint",
     "with-doppler": "bun scripts/doppler.ts"
   },
-  "types": "src/index.ts",
-  "version": "0.2.0"
+  "dependencies": {
+    "@axiomhq/js": "1.8.0",
+    "@better-auth/drizzle-adapter": "catalog:",
+    "@doxynix/shared": "workspace:*",
+    "@hono/zod-validator": "0.9.1",
+    "@t3-oss/env-core": "0.13.11",
+    "better-auth": "catalog:",
+    "drizzle-orm": "0.45.2",
+    "drizzle-zod": "0.8.3",
+    "es-toolkit": "catalog:",
+    "hono": "catalog:",
+    "ioredis": "catalog:",
+    "postgres": "3.4.9",
+    "temporal-polyfill": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@doxynix/config": "workspace:*",
+    "drizzle-kit": "0.31.10"
+  }
 }

@@ -1,9 +1,7 @@
-import type { RouterOutput } from "@/core/client";
-
 import { brand } from "@/ui/colors";
 import { createTable } from "@/ui/table";
 
-export type ApiKeyItem = RouterOutput["apikey"]["list"]["active"][number];
+import type { ApiKeyItem } from "./keys.types";
 
 export function renderKeysTable(keys: ApiKeyItem[]): string {
   const table = createTable(["ID (UUID)", "Name", "Prefix", "Created", "Last Used", "Status"]);

@@ -51,7 +51,11 @@ export function RepoCodeContainer({ repo }: Readonly<Props>) {
   return (
     <div className="flex h-[calc(100dvh-260px)] overflow-hidden rounded-xl border bg-background">
       <ResizablePanelGroup orientation="horizontal">
-        <ResizablePanel defaultSize="50%" maxSize="50%" minSize="25%">
+        <ResizablePanel
+          defaultSize="50%"
+          maxSize="50%"
+          minSize="25%"
+        >
           <RepoCodeTree
             activePath={path}
             onSelect={(val) => {

@@ -109,7 +109,10 @@ export function RepoCodeTree({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden p-2" ref={measureRef}>
+      <div
+        className="min-h-0 flex-1 overflow-hidden p-2"
+        ref={measureRef}
+      >
         {state.isLoading ? (
           <RepoTreeSkeleton variant="tree" />
         ) : state.treeData.length === 0 ? (
@@ -146,7 +149,13 @@ export function RepoCodeTree({
               selectionFollowsFocus={false}
               width="100%"
             >
-              {(props) => <RepoCodeNode {...props} activePath={activePath} onSelect={onSelect} />}
+              {(props) => (
+                <RepoCodeNode
+                  {...props}
+                  activePath={activePath}
+                  onSelect={onSelect}
+                />
+              )}
             </Tree>
           )
         )}

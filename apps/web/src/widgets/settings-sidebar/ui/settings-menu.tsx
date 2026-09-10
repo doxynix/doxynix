@@ -40,7 +40,10 @@ export function SettingsMenu() {
             key={item.href}
             variant="ghost"
           >
-            <Link className="flex w-full items-center gap-2" href={item.href as Route}>
+            <Link
+              className="flex w-full items-center gap-2"
+              href={item.href as Route}
+            >
               {item.icon != null && <item.icon />}
               {item.label}
             </Link>

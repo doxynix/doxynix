@@ -65,7 +65,10 @@ export function AppSidebar() {
               const dynamicBadge = item.id === "notifications" ? stats?.unread : undefined;
               return (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarLink {...item} notificationsCount={dynamicBadge} />
+                  <SidebarLink
+                    {...item}
+                    notificationsCount={dynamicBadge}
+                  />
                 </SidebarMenuItem>
               );
             })}
@@ -77,9 +80,15 @@ export function AppSidebar() {
       <SidebarContent className="max-h-[calc(100dvh-HeaderHeight-FooterHeight)] overflow-hidden">
         <ScrollArea className="h-full">
           <nav aria-label="Repositories">
-            <Collapsible className="group/collapsible" defaultOpen>
+            <Collapsible
+              className="group/collapsible"
+              defaultOpen
+            >
               <SidebarGroup>
-                <SidebarGroupLabel asChild className="truncate transition-standard">
+                <SidebarGroupLabel
+                  asChild
+                  className="truncate transition-standard"
+                >
                   <CollapsibleTrigger
                     className={cn(
                       "mb-1 flex w-full cursor-pointer justify-between px-3 text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -102,7 +111,10 @@ export function AppSidebar() {
 
                       {data?.pages.map((page) =>
                         page.items.map((repo) => (
-                          <SidebarMenuItem className="max-w-60" key={repo.id}>
+                          <SidebarMenuItem
+                            className="max-w-60"
+                            key={repo.id}
+                          >
                             <SidebarLink
                               avatar={repo.avatar ?? ""}
                               href={`/dashboard/repo/${repo.owner}/${repo.name}`}
@@ -148,7 +160,11 @@ export function AppSidebar() {
         <nav aria-label="Support and Documentation">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarLink href="/support" icon={CircleQuestionMark} label={t("sidebar_help")} />
+              <SidebarLink
+                href="/support"
+                icon={CircleQuestionMark}
+                label={t("sidebar_help")}
+              />
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarLink

@@ -34,9 +34,16 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
 
   return (
     <div className="h-100 w-full pt-4">
-      <ResponsiveContainer height="100%" width="100%">
+      <ResponsiveContainer
+        height="100%"
+        width="100%"
+      >
         <ScatterChart margin={{ bottom: 20, left: 0, right: 20, top: 20 }}>
-          <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid
+            stroke="var(--border)"
+            strokeDasharray="3 3"
+            vertical={false}
+          />
 
           <XAxis
             axisLine={false}
@@ -72,11 +79,15 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
             type="number"
           />
 
-          <ZAxis dataKey="z" range={[50, 400]} type="number" />
+          <ZAxis
+            dataKey="z"
+            range={[50, 400]}
+            type="number"
+          />
 
           <Tooltip
             content={({ active, payload }) => {
-              if (active != null && payload != null && payload.length !== 0) {
+              if (active && payload.length > 0) {
                 const data = payload[0]?.payload;
                 return (
                   <div className="rounded-md border border-border bg-popover p-2 shadow-md">
@@ -113,7 +124,10 @@ export function ComplexityScatterChart({ data }: Readonly<Props>) {
             x={300}
           />
 
-          <Scatter data={chartData} name="Files">
+          <Scatter
+            data={chartData}
+            name="Files"
+          >
             {chartData.map((entry, index) => (
               <Cell
                 className="cursor-crosshair opacity-80 transition-opacity hover:opacity-100"

@@ -1,24 +1,12 @@
+import { PublicUserSchema, UpdateProfileSchema } from "@doxynix/shared";
 import { TRPCError } from "@trpc/server";
 import { del } from "@vercel/blob";
-import { z } from "zod";
-
-import { UpdateProfileSchema } from "@/shared/api/schemas/user";
-import { UserSchema } from "@/shared/api-contracts";
+import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { formatUserAgent } from "@/server/utils/ua-parser";
-
-const PublicUserSchema = UserSchema.extend({
-  id: z.uuid(),
-}).omit({
-  banExpires: true,
-  banned: true,
-  banReason: true,
-  lastLoginMethod: true,
-  twoFactorEnabled: true,
-});
 
 export const userRouter = createTRPCRouter({
   deleteAccount: protectedProcedure

@@ -47,11 +47,7 @@ const ignoreMermaid = (node: HastElement) => {
     if (codeNode?.tagName === "code") {
       const className = codeNode.properties.className;
 
-      const classes = Array.isArray(className)
-        ? className.map(String)
-        : className != null
-          ? [String(className)]
-          : [];
+      const classes = Array.isArray(className) ? className.map(String) : [String(className)];
 
       if (classes.some((cls) => cls === "language-mermaid" || cls.startsWith("language-mermaid"))) {
         codeNode.properties.className = ["language-mermaid-raw"];

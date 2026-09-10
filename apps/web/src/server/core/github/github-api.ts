@@ -1,5 +1,6 @@
+import { Visibility } from "@doxynix/shared";
 import type { RestEndpointMethodTypes } from "@octokit/rest";
-import { type Repo, Visibility } from "@prisma/client";
+import type { Repo } from "@prisma/client";
 import { sumBy } from "es-toolkit";
 
 import type { RepoItemFields } from "@/shared/types/repo.types";

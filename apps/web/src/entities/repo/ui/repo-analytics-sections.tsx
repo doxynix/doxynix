@@ -70,7 +70,10 @@ export function SnapshotsSection({
         </CardHeader>
         <CardContent className="flex flex-col gap-3 text-sm">
           {architectureStats.map((stat) => (
-            <div className="flex items-center justify-between" key={stat.label}>
+            <div
+              className="flex items-center justify-between"
+              key={stat.label}
+            >
               <span className="text-muted-foreground">{stat.label}</span>
               <span className="font-medium">{stat.value}</span>
             </div>
@@ -93,7 +96,10 @@ export function SnapshotsSection({
             <p className="mb-2 text-muted-foreground text-xs uppercase">Setup Steps</p>
             <ul className="flex flex-col gap-2 text-xs">
               {onboarding.guide.setup_steps.map((step) => (
-                <li className="flex items-start gap-2" key={step}>
+                <li
+                  className="flex items-start gap-2"
+                  key={step}
+                >
                   <div className="mt-1 size-1.5 shrink-0 rounded-full bg-primary" />
                   <span>{step}</span>
                 </li>
@@ -128,10 +134,16 @@ export function DomainIntelligenceSection({
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {domain.analysis.core_entities.map((entity) => (
-              <div className="rounded-md border bg-muted/30 p-3" key={entity.name}>
+              <div
+                className="rounded-md border bg-muted/30 p-3"
+                key={entity.name}
+              >
                 <div className="mb-1 flex items-center justify-between">
                   <span className="font-bold font-mono text-blue-400 text-xs">{entity.name}</span>
-                  <AppBadge className="h-4 text-[10px]" variant="outline">
+                  <AppBadge
+                    className="h-4 text-[10px]"
+                    variant="outline"
+                  >
                     {entity.logic_complexity} Complexity
                   </AppBadge>
                 </div>
@@ -149,7 +161,10 @@ export function DomainIntelligenceSection({
           <CardContent>
             <ul className="flex flex-col gap-3">
               {domain.analysis.business_rules.map((rule, i) => (
-                <li className="flex items-start gap-2 text-xs text-zinc-300" key={i}>
+                <li
+                  className="flex items-start gap-2 text-xs text-zinc-300"
+                  key={i}
+                >
                   <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-500" />
                   <span>{rule}</span>
                 </li>
@@ -187,7 +202,10 @@ export function TechDebtAndComplexitySection({
                 <span className="font-bold text-[10px] text-zinc-500 uppercase">{item.type}</span>
                 <span className="text-xs text-zinc-300">{item.description}</span>
               </div>
-              <AppBadge className="h-4 text-[9px]" variant="outline">
+              <AppBadge
+                className="h-4 text-[9px]"
+                variant="outline"
+              >
                 {item.remediation_effort} Effort
               </AppBadge>
             </div>
@@ -225,13 +243,19 @@ export function RefactoringBacklogSection({
         <h3 className="flex items-center gap-2 font-bold text-lg tracking-tight">
           <LayoutTemplate className="size-5 text-emerald-400" /> Refactoring Backlog
         </h3>
-        <AppBadge className="border-emerald-400/30 text-emerald-400" variant="outline">
+        <AppBadge
+          className="border-emerald-400/30 text-emerald-400"
+          variant="outline"
+        >
           {recommendations.refactoringTargets.length} Targets Identified
         </AppBadge>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {recommendations.refactoringTargets.map((item) => (
-          <Card className="group transition-standard hover:border-emerald-500/40" key={item.file}>
+          <Card
+            className="group transition-standard hover:border-emerald-500/40"
+            key={item.file}
+          >
             <div className="flex items-center justify-between border-b bg-muted/20 px-4 py-2">
               <div className="flex items-center gap-2 overflow-hidden">
                 <Code2 className="size-3.5 shrink-0 text-zinc-500" />
@@ -241,7 +265,10 @@ export function RefactoringBacklogSection({
                 <AppBadge className="h-4 border-none bg-emerald-500/10 text-[9px] text-emerald-400">
                   +{item.impact_on_health} Health
                 </AppBadge>
-                <AppBadge className="h-4 text-[9px] uppercase" variant="outline">
+                <AppBadge
+                  className="h-4 text-[9px] uppercase"
+                  variant="outline"
+                >
                   {item.priority}
                 </AppBadge>
               </div>
@@ -324,7 +351,10 @@ export function PerformanceAndScalingSection({
               </thead>
               <tbody className="divide-y divide-orange-500/10">
                 {recommendations.performanceAudit?.map((item, i) => (
-                  <tr className="transition-colors hover:bg-orange-500/5" key={i}>
+                  <tr
+                    className="transition-colors hover:bg-orange-500/5"
+                    key={i}
+                  >
                     <td className="p-2 font-medium text-zinc-200">{item.issue}</td>
                     <td className="p-2 font-mono text-[10px] text-orange-300/70">
                       {item.location}
@@ -377,7 +407,11 @@ export function PerformanceAndScalingSection({
             <p className="font-bold text-[10px] text-blue-400 uppercase">Concurrency Risks</p>
             <div className="flex flex-wrap gap-1">
               {recommendations.infrastructure?.concurrency_risks.map((risk, i) => (
-                <AppBadge className="py-0 text-[9px]" key={i} variant="secondary">
+                <AppBadge
+                  className="py-0 text-[9px]"
+                  key={i}
+                  variant="secondary"
+                >
                   {risk}
                 </AppBadge>
               ))}

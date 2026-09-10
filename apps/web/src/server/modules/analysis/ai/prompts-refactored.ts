@@ -5,8 +5,7 @@
  * Strictly formatted and structured according to the Diátaxis framework.
  */
 
-import { escape } from "es-toolkit";
-import { dedent } from "ts-dedent";
+import { dedent, escape } from "es-toolkit";
 
 import { PromptFactory, UserPromptBuilder } from "@/server/modules/analysis/logic/prompt-builder";
 import {

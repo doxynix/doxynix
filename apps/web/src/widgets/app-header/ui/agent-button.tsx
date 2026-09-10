@@ -11,7 +11,12 @@ export function AgentButton() {
   const isOpen = useAgentIsOpen();
 
   return (
-    <AppButton disabled={isOpen} onClick={openAgent} size="sm" variant="outline">
+    <AppButton
+      disabled={isOpen}
+      onClick={openAgent}
+      size="sm"
+      variant="outline"
+    >
       <Sparkles />
       Ask Dxnx_
     </AppButton>

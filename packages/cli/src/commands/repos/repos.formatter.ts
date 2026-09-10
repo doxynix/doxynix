@@ -1,11 +1,8 @@
-import type { RouterOutput } from "@/core/client";
-
 import { brand, pc } from "@/ui/colors";
 import { formatScore } from "@/ui/formatters";
 import { createTable } from "@/ui/table";
 
-export type RepoListItem = RouterOutput["repo"]["getAll"]["items"][number];
-export type RepoDetails = NonNullable<RouterOutput["repo"]["getByName"]>;
+import type { RepoDetails, RepoListItem } from "./repos.types";
 
 export function renderReposTable(items: RepoListItem[]): string {
   const table = createTable([
@@ -40,4 +37,22 @@ export function renderRepoDetails(repo: RepoDetails): void {
   console.log(`  Branch:       ${brand.highlight(repo.defaultBranch)}`);
   console.log(`  Stars/Forks:  ★ ${repo.stars} / ⑂ ${repo.forks}`);
   console.log(`  ID (UUID):    ${brand.muted(repo.id)}\n`);
+}
+
+export function renderSlimReposTable(
+  items: Array<{ avatar: string | null; id: string; name: string; owner: string }>,
+): string {
+  const table = createTable(["ID (UUID)", "Repository (Target)", "Avatar URL"]);
+
+  for (const r of items) {
+    table.push([
+      brand.muted(`${r.id.slice(0, 8)}...`),
+      brand.highlight(`${r.owner}/${r.name}`),
+      r.avatar
+        ? brand.muted(r.avatar.slice(0, 45) + (r.avatar.length > 45 ? "…" : ""))
+        : brand.muted("—"),
+    ]);
+  }
+
+  return table.toString();
 }

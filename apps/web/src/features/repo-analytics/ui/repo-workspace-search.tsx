@@ -73,8 +73,14 @@ export function RepoWorkspaceSearch({ repoId }: Readonly<Props>) {
   const hasResults = (data?.length ?? 0) > 0;
 
   return (
-    <div className="relative w-full" ref={containerRef}>
-      <div onClickCapture={() => setIsVisible(true)} onFocusCapture={() => setIsVisible(true)}>
+    <div
+      className="relative w-full"
+      ref={containerRef}
+    >
+      <div
+        onClickCapture={() => setIsVisible(true)}
+        onFocusCapture={() => setIsVisible(true)}
+      >
         <AppSearch placeholder="Search workspace..." />
       </div>
 

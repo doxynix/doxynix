@@ -12,7 +12,11 @@ const AccordionItem = forwardRef<
   ComponentRef<typeof AccordionPrimitive.Item>,
   ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
 >(({ className, ...props }, ref) => (
-  <AccordionPrimitive.Item className={cn("border-b", className)} ref={ref} {...props} />
+  <AccordionPrimitive.Item
+    className={cn("border-b", className)}
+    ref={ref}
+    {...props}
+  />
 ));
 AccordionItem.displayName = "AccordionItem";
 

@@ -1,9 +1,20 @@
-import type { PaginatedResponse } from "@doxynix/shared";
 import { count, type SQL, type Table } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
-import { z } from "zod";
+import * as z from "zod";
 
 import { db } from "@/core/db/db";
+
+export type PaginationMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+export type PaginatedResponse<T> = {
+  items: T[];
+  pagination: PaginationMeta;
+};
 
 export const paginationQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).optional().default(20),

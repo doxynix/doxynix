@@ -21,8 +21,14 @@ export default async function ApiKeysPage() {
           <h2 className="font-bold text-2xl tracking-tight">{t("settings_api_keys_title")}</h2>
           <p className="text-muted-foreground text-sm">{t("settings_api_keys_desc")}</p>
         </div>
-        <AppButton asChild variant="link">
-          <ExternalLink className="flex items-center gap-4" href={`${APP_URL}/api/docs`}>
+        <AppButton
+          asChild
+          variant="link"
+        >
+          <ExternalLink
+            className="flex items-center gap-4"
+            href={`${APP_URL}/api/docs`}
+          >
             {t("settings_api_keys_api_documentation")}
             <SquareArrowOutUpRight />
           </ExternalLink>

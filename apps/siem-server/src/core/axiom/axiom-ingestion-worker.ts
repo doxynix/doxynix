@@ -1,7 +1,7 @@
 import type { Entry } from "@axiomhq/js";
-import { Temporal } from "@js-temporal/polyfill";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
+import { Temporal } from "temporal-polyfill";
+import * as z from "zod";
 
 import { axiom } from "@/core/axiom/axiom";
 import { APP_EVENTS, bus } from "@/core/bus";

@@ -44,7 +44,10 @@ export function RepoPullCard({ name, owner, pull }: Readonly<Props>) {
           <div className="flex items-center gap-3 text-muted-foreground text-xs">
             <span>Issues: {pull.findingCount}</span>
             <span>•</span>
-            <TimeAgo date={pull.createdAt} locale={locale} />
+            <TimeAgo
+              date={pull.createdAt}
+              locale={locale}
+            />
           </div>
         </div>
       </div>

@@ -24,7 +24,11 @@ export function RepoList({ meta, repos }: Readonly<Props>) {
     return (
       <EmptyState
         action={
-          <AppButton className="cursor-pointer" onClick={() => setOpen(true)} variant="secondary">
+          <AppButton
+            className="cursor-pointer"
+            onClick={() => setOpen(true)}
+            variant="secondary"
+          >
             {tCommon("add")}
           </AppButton>
         }
@@ -56,7 +60,10 @@ export function RepoList({ meta, repos }: Readonly<Props>) {
   return (
     <div className="flex flex-col gap-4">
       {repos.map((repo) => (
-        <RepoCard key={repo.id} repo={repo} />
+        <RepoCard
+          key={repo.id}
+          repo={repo}
+        />
       ))}
     </div>
   );

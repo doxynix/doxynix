@@ -37,7 +37,10 @@ export async function BrandsSection() {
           {t("section_brands_title")}
         </p>
         <div className="mask-[linear-gradient(to_right,transparent,white_20%,white_80%,transparent)] relative flex w-full flex-col items-center justify-center overflow-hidden">
-          <Marquee className="max-h-12 [--duration:20s] sm:max-h-36" pauseOnHover>
+          <Marquee
+            className="max-h-12 [--duration:20s] sm:max-h-36"
+            pauseOnHover
+          >
             {BRANDS.map((tech) => (
               <div
                 className="flex cursor-default items-center gap-2 rounded-2xl border border-transparent px-3 py-3 font-semibold text-muted-foreground text-xl grayscale transition-standard hover:border-border hover:bg-card hover:text-foreground hover:grayscale-0 sm:px-8"

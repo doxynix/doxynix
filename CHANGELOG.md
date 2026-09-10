@@ -1,5 +1,38 @@
 # Changelog
 
+## [4.2.4](https://github.com/doxynix/doxynix/compare/doxynix-v4.2.3...doxynix-v4.2.4) (2026-09-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency motion to v13 ([#2092](https://github.com/doxynix/doxynix/issues/2092)) ([d458650](https://github.com/doxynix/doxynix/commit/d458650c91429f9986fcb397edc5b31fa443f323))
+
+## [4.2.3](https://github.com/doxynix/doxynix/compare/doxynix-v4.2.2...doxynix-v4.2.3) (2026-09-10)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2085](https://github.com/doxynix/doxynix/issues/2085)) ([7f6d08e](https://github.com/doxynix/doxynix/commit/7f6d08e5ae41bc217be554c5dd8d53566cf0c580))
+
+## [4.2.2](https://github.com/doxynix/doxynix/compare/doxynix-v4.2.1...doxynix-v4.2.2) (2026-09-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency next to v16.3.3 [security] ([#2112](https://github.com/doxynix/doxynix/issues/2112)) ([b02b400](https://github.com/doxynix/doxynix/commit/b02b400ecb8124923c495a99eea1913c1fa44f7d))
+
+
+### Performance Improvements
+
+* **web:** replace 3-party dependencies with native utilities (DXNX-217) ([#2108](https://github.com/doxynix/doxynix/issues/2108)) ([f37a195](https://github.com/doxynix/doxynix/commit/f37a195649453c1524033e48c44650509811cb58))
+
+## [4.2.1](https://github.com/doxynix/doxynix/compare/doxynix-v4.2.0...doxynix-v4.2.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency nodemailer to v10 ([#2102](https://github.com/doxynix/doxynix/issues/2102)) ([c0b3dc3](https://github.com/doxynix/doxynix/commit/c0b3dc34367848237452d075b52d789c14b23713))
+
 ## [4.2.0](https://github.com/doxynix/doxynix/compare/doxynix-v4.1.0...doxynix-v4.2.0) (2026-09-05)
 
 

@@ -8,6 +8,7 @@ import { handleCliError } from "@/core/errors";
 import { resolveRepository } from "@/core/repo";
 
 import { brand, pc } from "@/ui/colors";
+import { withTaskSpinner } from "@/ui/spinner";
 
 import { renderStagedFilesTable } from "./staging.formatter";
 import { stagingService } from "./staging.service";
@@ -18,7 +19,6 @@ export function registerStagingCommand(program: Command) {
     .alias("stage")
     .description("Manage cloud staging area of staged code changes before PR creation");
 
-  // dxnx staging list [target]
   staging
     .command("list [target]", { isDefault: true })
     .description("View all files currently staged in cloud for PR creation")
@@ -30,14 +30,14 @@ export function registerStagingCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        if (!options?.json) {
-          s.start(`Fetching staged files for ${repoContext.target}...`);
-        }
-        const staged = await stagingService.getStagedFiles(repoContext.repo.id);
-        if (!options?.json) {
-          s.stop("Staged files loaded");
-        }
+        const staged = await withTaskSpinner(
+          {
+            silent: options?.json,
+            start: `Fetching staged files for ${repoContext.target}...`,
+            stop: "Staged files loaded",
+          },
+          () => stagingService.getStagedFiles(repoContext.repo.id),
+        );
 
         if (options?.json) {
           console.log(JSON.stringify(staged, null, 2));
@@ -66,7 +66,6 @@ export function registerStagingCommand(program: Command) {
       }
     });
 
-  // dxnx staging add <filePath>
   staging
     .command("add <filePath>")
     .description("Stage a local file change into the cloud PR staging basket")
@@ -94,10 +93,13 @@ export function registerStagingCommand(program: Command) {
           content = inputContent;
         }
 
-        const s = p.spinner();
-        s.start(`Uploading ${pc.cyan(filePath)} to staging...`);
-        const res = await stagingService.stageFile(repoContext.repo.id, filePath, content);
-        s.stop("Staged successfully!");
+        const res = await withTaskSpinner(
+          {
+            start: `Uploading ${pc.cyan(filePath)} to staging...`,
+            stop: "Staged successfully!",
+          },
+          () => stagingService.stageFile(repoContext.repo.id, filePath, content),
+        );
 
         p.outro(
           brand.success(
@@ -109,7 +111,6 @@ export function registerStagingCommand(program: Command) {
       }
     });
 
-  // dxnx staging drop <filePath>
   staging
     .command("drop <filePath>")
     .alias("unstage")
@@ -122,10 +123,13 @@ export function registerStagingCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        s.start(`Unstaging ${filePath}...`);
-        const res = await stagingService.unstageFile(repoContext.repo.id, filePath);
-        s.stop("File removed from staging");
+        const res = await withTaskSpinner(
+          {
+            start: `Unstaging ${filePath}...`,
+            stop: "File removed from staging",
+          },
+          () => stagingService.unstageFile(repoContext.repo.id, filePath),
+        );
 
         p.outro(
           brand.success(
@@ -137,7 +141,6 @@ export function registerStagingCommand(program: Command) {
       }
     });
 
-  // dxnx staging clear
   staging
     .command("clear")
     .description("Clear and discard all staged changes for repository")
@@ -157,13 +160,61 @@ export function registerStagingCommand(program: Command) {
           return p.outro(brand.muted("Cancelled."));
         }
 
-        const s = p.spinner();
-        s.start("Clearing staging workspace...");
-        await stagingService.clearStaging(repoContext.repo.id);
-        s.stop("Staging cleared!");
+        await withTaskSpinner(
+          {
+            start: "Clearing staging workspace...",
+            stop: "Staging cleared!",
+          },
+          () => stagingService.clearStaging(repoContext.repo.id),
+        );
 
         p.outro(
           brand.success(`✔ All staged changes cleared for ${brand.highlight(repoContext.target)}.`),
+        );
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  staging
+    .command("add-fix <fixId>")
+    .alias("stage-fix")
+    .description("Stage all files from an AI-generated fix into the cloud staging basket")
+    .option("-r, --repo <target>", "Target repository (owner/name)")
+    .action(async (fixId: string, options: { repo?: string }) => {
+      try {
+        p.intro(brand.logo(" 📦 Stage AI Generated Fix "));
+
+        const repoContext = await resolveRepository(
+          options.repo,
+          "Select repository context for this fix:",
+        );
+        if (!repoContext) {
+          return;
+        }
+
+        const res = await withTaskSpinner(
+          {
+            start: `Moving fix ${brand.highlight(fixId)} files into staging basket...`,
+            stop: "Fix staged successfully!",
+          },
+          () => stagingService.stageGeneratedFix(repoContext.repo.id, fixId),
+        );
+
+        p.note(
+          `Staged Files Added: ${brand.highlight(String(res.stagedFilesAdded))}\n` +
+            `Total Staged Files:  ${brand.info(String(res.stagedCount))}\n` +
+            `Repository:          ${pc.cyan(repoContext.target)}`,
+          "Staging Updated",
+        );
+
+        p.outro(
+          brand.success(
+            "✔ Fix is now staged! Review changes with " +
+              brand.highlight(`dxnx staging list ${repoContext.target}`) +
+              " or open PR with " +
+              brand.highlight(`dxnx pr open ${repoContext.target}`),
+          ),
         );
       } catch (error) {
         handleCliError(error);

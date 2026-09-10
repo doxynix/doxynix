@@ -1,4 +1,5 @@
-import type { DocType, Repo } from "@prisma/client";
+import type { DocType } from "@doxynix/shared";
+import type { Repo } from "@prisma/client";
 
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 import { llmLimiter } from "@/server/utils/llm-limiter";

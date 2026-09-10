@@ -184,7 +184,10 @@ export function RepoOverview({ data }: Readonly<Props>) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <CardTitle className="font-bold text-lg">Executive Summary</CardTitle>
-              <AppBadge className={cn("capitalize", status)} variant="outline">
+              <AppBadge
+                className={cn("capitalize", status)}
+                variant="outline"
+              >
                 <HeartPulse className="mr-1 size-3" />
                 {summary.maintenance}
               </AppBadge>
@@ -196,7 +199,10 @@ export function RepoOverview({ data }: Readonly<Props>) {
           <p className="text-muted-foreground text-sm leading-relaxed">{summary.purpose}</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {summary.stack.map((tech) => (
-              <AppBadge key={tech} variant="secondary">
+              <AppBadge
+                key={tech}
+                variant="secondary"
+              >
                 {tech}
               </AppBadge>
             ))}
@@ -258,7 +264,10 @@ export function RepoOverview({ data }: Readonly<Props>) {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {REPO_STATS_CARDS.map((item) => (
-          <StatCard key={item.id} {...item} />
+          <StatCard
+            key={item.id}
+            {...item}
+          />
         ))}
 
         <Card>
@@ -309,7 +318,10 @@ export function RepoOverview({ data }: Readonly<Props>) {
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             {REPO_SIGNALS.map((signal) => (
-              <div className="flex flex-col gap-1" key={signal.label}>
+              <div
+                className="flex flex-col gap-1"
+                key={signal.label}
+              >
                 <p className="font-bold text-muted-foreground text-xs">{signal.label}</p>
                 <p className="font-black text-xl">{signal.value(secondary.signals)}</p>
               </div>
@@ -323,7 +335,10 @@ export function RepoOverview({ data }: Readonly<Props>) {
               <div className="flex items-center gap-2">
                 <FileText /> Documentation
               </div>
-              <AppButton asChild variant="ghost">
+              <AppButton
+                asChild
+                variant="ghost"
+              >
                 <Link href={`/dashboard/repo/${data.repo.owner}/${data.repo.name}/docs`}>View</Link>
               </AppButton>
             </CardTitle>
@@ -332,7 +347,10 @@ export function RepoOverview({ data }: Readonly<Props>) {
             <p className="text-muted-foreground text-xs">{docs.availableCount} docs available</p>
             <div className="flex flex-wrap gap-2">
               {docs.items.map((item) => (
-                <AppBadge key={item.id} variant="outline">
+                <AppBadge
+                  key={item.id}
+                  variant="outline"
+                >
                   {item.type.toLowerCase().replace("_", " ")} {item.status}
                 </AppBadge>
               ))}
@@ -359,7 +377,10 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </div>
             <div className="grid grid-cols-3 gap-y-2">
               {secondary.languages.map((lang) => (
-                <div className="flex flex-col text-xs" key={lang.name}>
+                <div
+                  className="flex flex-col text-xs"
+                  key={lang.name}
+                >
                   <span className="flex items-center gap-1 font-bold">
                     <span
                       className="size-1.5 rounded-full"
@@ -410,7 +431,11 @@ export function RepoOverview({ data }: Readonly<Props>) {
                   </div>
                   <div>
                     <AppTooltip content="View code">
-                      <AppButton asChild size="icon" variant="ghost">
+                      <AppButton
+                        asChild
+                        size="icon"
+                        variant="ghost"
+                      >
                         <Link
                           aria-label={`View code for ${file}`}
                           href={`/dashboard/repo/${owner}/${name}/code?node=file:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
@@ -420,7 +445,11 @@ export function RepoOverview({ data }: Readonly<Props>) {
                       </AppButton>
                     </AppTooltip>
                     <AppTooltip content="View on map">
-                      <AppButton asChild size="icon" variant="ghost">
+                      <AppButton
+                        asChild
+                        size="icon"
+                        variant="ghost"
+                      >
                         <Link
                           aria-label={`View ${file} on map`}
                           href={`/dashboard/repo/${owner}/${name}/map?node=file:${encodeURIComponent(file)}&path=${encodeURIComponent(file)}`}
@@ -444,7 +473,10 @@ export function RepoOverview({ data }: Readonly<Props>) {
             <div className="flex flex-col gap-3">
               {topRisks.length > 0 ? (
                 topRisks.map((risk) => (
-                  <div className="rounded-lg border p-3" key={risk.id}>
+                  <div
+                    className="rounded-lg border p-3"
+                    key={risk.id}
+                  >
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <p className="font-medium text-sm">{risk.title}</p>
                       <AppBadge variant="outline">{risk.severity}</AppBadge>
@@ -458,7 +490,10 @@ export function RepoOverview({ data }: Readonly<Props>) {
             </div>
           </CardContent>
         </Card>
-        <TrendsWidget className="col-span-4" repoId={data.repo.id} />
+        <TrendsWidget
+          className="col-span-4"
+          repoId={data.repo.id}
+        />
       </div>
     </div>
   );

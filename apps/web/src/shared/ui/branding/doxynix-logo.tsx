@@ -13,9 +13,15 @@ type InnerLogoProps = SVGProps<SVGSVGElement> & {
 
 export function Logo({ collapsed, isInteractive = true, ...props }: LogoProps) {
   return collapsed ? (
-    <CollapsedLogo isInteractive={isInteractive} {...props} />
+    <CollapsedLogo
+      isInteractive={isInteractive}
+      {...props}
+    />
   ) : (
-    <ExpandedLogo isInteractive={isInteractive} {...props} />
+    <ExpandedLogo
+      isInteractive={isInteractive}
+      {...props}
+    />
   );
 }
 
@@ -97,7 +103,11 @@ function LogoLink({ children, isInteractive }: Readonly<Props>) {
   }
 
   return (
-    <Link aria-label="Doxynix Home" className="cursor-pointer hover:text-muted-foreground" href="/">
+    <Link
+      aria-label="Doxynix Home"
+      className="cursor-pointer hover:text-muted-foreground"
+      href="/"
+    >
       {children}
     </Link>
   );

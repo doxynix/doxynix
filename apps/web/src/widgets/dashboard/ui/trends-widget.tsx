@@ -55,18 +55,34 @@ export function TrendsWidget({ className, repoId }: Readonly<Props>) {
           <CardDescription>{t("trends_desc")}</CardDescription>
         </div>
         <div className="flex items-center px-6 py-4 sm:py-0">
-          <Tabs className="ml-auto" onValueChange={setActiveTab} value={activeTab}>
+          <Tabs
+            className="ml-auto"
+            onValueChange={setActiveTab}
+            value={activeTab}
+          >
             <TabsList className="flex items-center gap-1">
-              <TabsTrigger className="text-xs" value="overview">
+              <TabsTrigger
+                className="text-xs"
+                value="overview"
+              >
                 Overview
               </TabsTrigger>
-              <TabsTrigger className="text-xs" value="engineering">
+              <TabsTrigger
+                className="text-xs"
+                value="engineering"
+              >
                 Engineering
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent className="sr-only" value="overview" />
-            <TabsContent className="sr-only" value="engineering" />
+            <TabsContent
+              className="sr-only"
+              value="overview"
+            />
+            <TabsContent
+              className="sr-only"
+              value="engineering"
+            />
           </Tabs>
         </div>
       </CardHeader>
@@ -77,7 +93,11 @@ export function TrendsWidget({ className, repoId }: Readonly<Props>) {
             <p className="text-muted-foreground text-sm">No data</p>
           </div>
         ) : (
-          <TrendsChart activeTab={activeTab} chartConfig={chartConfig} data={data} />
+          <TrendsChart
+            activeTab={activeTab}
+            chartConfig={chartConfig}
+            data={data}
+          />
         )}
       </CardContent>
     </Card>

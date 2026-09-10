@@ -1,4 +1,5 @@
-import { type FixStatus, PRAnalysisStatus, type Prisma } from "@prisma/client";
+import { type FixStatus, PRAnalysisStatus } from "@doxynix/shared";
+import type { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { uniq } from "es-toolkit";
 

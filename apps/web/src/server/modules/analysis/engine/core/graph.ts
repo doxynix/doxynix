@@ -2,7 +2,6 @@ import { analyzeGraph, type Edge } from "graph-cycles";
 import { DirectedGraph } from "graphology";
 import { hasCycle } from "graphology-dag";
 import { basename, dirname, join, normalize } from "pathe";
-import ts from "typescript";
 
 import { getKnownLanguageExtensions } from "@/server/utils/language-metadata";
 
@@ -148,6 +147,19 @@ export function resolveModuleImport(
   return null;
 }
 
+function parseJsonWithComments(text: string): Record<string, any> | null {
+  try {
+    const clean = text
+      .replaceAll(/\/\*[\s\S]*?\*\//g, "")
+      .replaceAll(/(^|[^\\:])\/\/.*$/gm, "$1")
+      .replaceAll(/,\s*([\]}])/g, "$1");
+    const parsed = JSON.parse(clean);
+    return typeof parsed === "object" && parsed !== null ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export function collectAliasRules(files: Array<{ content: string; path: string }>): AliasRule[] {
   const rules: AliasRule[] = [];
 
@@ -158,12 +170,12 @@ export function collectAliasRules(files: Array<{ content: string; path: string }
     }
 
     try {
-      const parsed = ts.parseConfigFileTextToJson(normalizedPath, file.content);
-      if (parsed.error != null) {
+      const parsed = parseJsonWithComments(file.content);
+      if (parsed == null) {
         continue;
       }
 
-      const compilerOptions = parsed.config?.compilerOptions;
+      const compilerOptions = parsed.compilerOptions;
       if (compilerOptions == null || typeof compilerOptions !== "object") {
         continue;
       }

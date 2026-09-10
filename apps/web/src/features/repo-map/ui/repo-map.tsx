@@ -242,8 +242,15 @@ export function RepoMap({
         </div>
       </div>
 
-      <ResizablePanelGroup className="relative" orientation="horizontal">
-        <ResizablePanel defaultSize="70%" maxSize="100%" minSize="30%">
+      <ResizablePanelGroup
+        className="relative"
+        orientation="horizontal"
+      >
+        <ResizablePanel
+          defaultSize="70%"
+          maxSize="100%"
+          minSize="30%"
+        >
           <div className="relative h-full min-h-0 w-full">
             <div className="h-full min-h-0 w-full">
               <ReactFlow
@@ -298,7 +305,10 @@ export function RepoMap({
                   </div>
                   <RepoMapSearchPanel />
                 </Panel>
-                <Panel className="flex flex-col items-end gap-1" position="top-right">
+                <Panel
+                  className="flex flex-col items-end gap-1"
+                  position="top-right"
+                >
                   <div
                     className={cn(
                       "transform transition-standard",

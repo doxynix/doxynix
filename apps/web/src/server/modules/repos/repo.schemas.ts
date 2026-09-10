@@ -1,5 +1,5 @@
-import { Status, Visibility } from "@prisma/client";
-import { z } from "zod";
+import { Status, Visibility } from "@doxynix/shared";
+import * as z from "zod";
 
 import { PaginationSchema } from "@/server/utils/pagination";
 

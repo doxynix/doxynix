@@ -3,9 +3,12 @@ import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { retry } from "@octokit/plugin-retry";
 import { throttling } from "@octokit/plugin-throttling";
 import { Octokit } from "@octokit/rest";
-import type { RequestOptions } from "@octokit/types";
-import gitUrlParse from "git-url-parse";
 import { createPullRequest } from "octokit-plugin-create-pull-request";
+
+type RequestOptions = {
+  method?: string;
+  url?: string;
+};
 
 import {
   APP_VERSION,
@@ -17,6 +20,7 @@ import {
 
 import { appLogger } from "../app-logger";
 import type { DbClient } from "../db";
+import { parseGitUrl } from "./git-url";
 import { githubTokenService } from "./github-token.service";
 
 const AppOctokit = Octokit.plugin(retry, throttling, paginateRest, createPullRequest);
@@ -208,7 +212,7 @@ export function parseUrl(input: string): { name: string; owner: string } {
   }
 
   try {
-    const parsed = gitUrlParse(trimmedInput);
+    const parsed = parseGitUrl(trimmedInput);
 
     return {
       name: parsed.name,

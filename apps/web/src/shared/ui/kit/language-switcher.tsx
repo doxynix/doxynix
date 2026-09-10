@@ -77,8 +77,15 @@ export function LanguageSwitcher() {
           <CardDescription>{t("settings_language_desc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex items-center gap-2">
-          <Select disabled={isPending} onValueChange={handleLanguageChange} value={locale}>
-            <SelectTrigger aria-label="Change Language" className="w-40">
+          <Select
+            disabled={isPending}
+            onValueChange={handleLanguageChange}
+            value={locale}
+          >
+            <SelectTrigger
+              aria-label="Change Language"
+              className="w-40"
+            >
               <SelectValue placeholder={t("settings_language_select_placeholder")} />
             </SelectTrigger>
             <SelectContent>
@@ -88,9 +95,15 @@ export function LanguageSwitcher() {
                   return null;
                 }
                 return (
-                  <SelectItem key={l} value={l}>
+                  <SelectItem
+                    key={l}
+                    value={l}
+                  >
                     <div className="flex items-center gap-3">
-                      <Flag alt="" src={FLAGS[l] || FLAGS.en} />
+                      <Flag
+                        alt=""
+                        src={FLAGS[l] || FLAGS.en}
+                      />
                       <span>{t(key)}</span>
                     </div>
                   </SelectItem>

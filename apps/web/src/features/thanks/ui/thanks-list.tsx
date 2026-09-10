@@ -46,7 +46,10 @@ export function ThanksList({ initialGroups }: Readonly<Props>) {
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {filtered.map((group) => (
-            <ThanksCard group={group} key={group.author} />
+            <ThanksCard
+              group={group}
+              key={group.author}
+            />
           ))}
         </div>
       ) : (

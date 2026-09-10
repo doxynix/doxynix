@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import { type UpdateProfileInput, UpdateProfileSchema } from "@doxynix/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Mail, User2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
-import { type UpdateProfileInput, UpdateProfileSchema } from "@/shared/api/schemas/user";
 import type { User } from "@/shared/lib/auth-client";
 import {
   Form,

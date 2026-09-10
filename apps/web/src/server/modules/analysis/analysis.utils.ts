@@ -1,9 +1,10 @@
 /* eslint-disable sonarjs/no-control-regex */
 
-import type { DocType, Repo } from "@prisma/client";
+import type { DocType } from "@doxynix/shared";
+import type { Repo } from "@prisma/client";
 import { orderBy, uniqBy } from "es-toolkit";
 import { normalize } from "pathe";
-import type { z } from "zod";
+import type * as z from "zod";
 
 import { callWithFallback } from "@/server/utils/call";
 import { CodeOptimizer } from "@/server/utils/optimizers";

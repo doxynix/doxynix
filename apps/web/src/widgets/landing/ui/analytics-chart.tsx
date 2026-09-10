@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { useTranslations } from "next-intl";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
@@ -22,6 +23,11 @@ const chartData = [
 export function AnalyticsChart() {
   const t = useTranslations("Landing");
 
+  const id = useId();
+
+  const fillDocsId = `${id}-fill-docs`;
+  const fillComplexityId = `${id}-fill-complexity`;
+
   const chartConfig = {
     complexity: {
       color: "var(--chart-4)",
@@ -34,7 +40,10 @@ export function AnalyticsChart() {
   } satisfies ChartConfig;
 
   return (
-    <ChartContainer className="max-h-75 w-full" config={chartConfig}>
+    <ChartContainer
+      className="max-h-75 w-full"
+      config={chartConfig}
+    >
       <AreaChart
         accessibilityLayer
         data={chartData}
@@ -43,7 +52,11 @@ export function AnalyticsChart() {
           right: 12,
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} vertical={false} />
+        <CartesianGrid
+          strokeDasharray="3 3"
+          strokeOpacity={0.2}
+          vertical={false}
+        />
         <XAxis
           axisLine={false}
           dataKey="month"
@@ -52,23 +65,59 @@ export function AnalyticsChart() {
           tickMargin={8}
         />
 
-        <ChartTooltip content={<ChartTooltipContent indicator="dot" />} cursor={false} />
+        <ChartTooltip
+          content={<ChartTooltipContent indicator="dot" />}
+          cursor={false}
+        />
 
         <defs>
-          <linearGradient id="fillDocs" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="5%" stopColor="var(--chart-2)" stopOpacity={0.8} />
-            <stop offset="95%" stopColor="var(--chart-3)" stopOpacity={0.1} />
+          <linearGradient
+            id={fillDocsId}
+            x1="0"
+            x2="0"
+            y1="0"
+            y2="1"
+          >
+            <stop
+              offset="5%"
+              stopColor="var(--chart-2)"
+              stopOpacity={0.8}
+            />
+            <stop
+              offset="95%"
+              stopColor="var(--chart-3)"
+              stopOpacity={0.1}
+            />
           </linearGradient>
-          <linearGradient id="fillComplexity" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="5%" stopColor="var(--chart-4)" stopOpacity={0.8} />
-            <stop offset="95%" stopColor="var(--chart-5)" stopOpacity={0.1} />
+          <linearGradient
+            id={fillComplexityId}
+            x1="0"
+            x2="0"
+            y1="0"
+            y2="1"
+          >
+            <stop
+              offset="5%"
+              stopColor="var(--chart-4)"
+              stopOpacity={0.8}
+            />
+            <stop
+              offset="95%"
+              stopColor="var(--chart-5)"
+              stopOpacity={0.1}
+            />
           </linearGradient>
         </defs>
 
-        <Area dataKey="docs" fill="url(#fillDocs)" stroke="var(--chart-2)" type="natural" />
+        <Area
+          dataKey="docs"
+          fill={`url(#${fillDocsId})`}
+          stroke="var(--chart-2)"
+          type="natural"
+        />
         <Area
           dataKey="complexity"
-          fill="url(#fillComplexity)"
+          fill={`url(#${fillComplexityId})`}
           stroke="var(--chart-4)"
           type="natural"
         />

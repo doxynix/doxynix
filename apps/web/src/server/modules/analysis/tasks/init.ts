@@ -1,4 +1,4 @@
-import { type FixStatus, PRAnalysisStatus, Status } from "@prisma/client";
+import { type FixStatus, PRAnalysisStatus, Status } from "@doxynix/shared";
 import { locals, tasks } from "@trigger.dev/sdk";
 
 import { REALTIME_CONFIG } from "@/shared/constants/realtime";

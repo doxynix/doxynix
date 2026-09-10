@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
@@ -23,6 +24,14 @@ type Props = Readonly<{
 }>;
 
 export function TrendsChart({ activeTab, chartConfig, data }: Props) {
+  const id = useId();
+
+  const fillHealthId = `${id}-fill-health`;
+  const fillSecurityId = `${id}-fill-security`;
+  const fillComplexityId = `${id}-fill-complexity`;
+  const fillOnboardingId = `${id}-fill-onboarding`;
+  const fillTechDebtId = `${id}-fill-tech-debt`;
+
   const healthColor = chartConfig.health?.color as string;
   const securityColor = chartConfig.security?.color as string;
   const complexityColor = chartConfig.complexity?.color as string;
@@ -30,31 +39,111 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
   const techDebtColor = chartConfig.techDebt?.color as string;
 
   return (
-    <ChartContainer className="h-75 w-full" config={chartConfig}>
-      <AreaChart data={data} margin={{ bottom: 0, left: 0, right: 0, top: 10 }}>
+    <ChartContainer
+      className="h-75 w-full"
+      config={chartConfig}
+    >
+      <AreaChart
+        data={data}
+        margin={{ bottom: 0, left: 0, right: 0, top: 10 }}
+      >
         <defs>
-          <linearGradient id="fillHealth" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="5%" stopColor={healthColor} stopOpacity={0.4} />
-            <stop offset="95%" stopColor={healthColor} stopOpacity={0} />
+          <linearGradient
+            id={fillHealthId}
+            x1="0"
+            x2="0"
+            y1="0"
+            y2="1"
+          >
+            <stop
+              offset="5%"
+              stopColor={healthColor}
+              stopOpacity={0.4}
+            />
+            <stop
+              offset="95%"
+              stopColor={healthColor}
+              stopOpacity={0}
+            />
           </linearGradient>
-          <linearGradient id="fillSecurity" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="5%" stopColor={securityColor} stopOpacity={0.4} />
-            <stop offset="95%" stopColor={securityColor} stopOpacity={0} />
+          <linearGradient
+            id={fillSecurityId}
+            x1="0"
+            x2="0"
+            y1="0"
+            y2="1"
+          >
+            <stop
+              offset="5%"
+              stopColor={securityColor}
+              stopOpacity={0.4}
+            />
+            <stop
+              offset="95%"
+              stopColor={securityColor}
+              stopOpacity={0}
+            />
           </linearGradient>
-          <linearGradient id="fillComplexity" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="5%" stopColor={complexityColor} stopOpacity={0.4} />
-            <stop offset="95%" stopColor={complexityColor} stopOpacity={0} />
+          <linearGradient
+            id={fillComplexityId}
+            x1="0"
+            x2="0"
+            y1="0"
+            y2="1"
+          >
+            <stop
+              offset="5%"
+              stopColor={complexityColor}
+              stopOpacity={0.4}
+            />
+            <stop
+              offset="95%"
+              stopColor={complexityColor}
+              stopOpacity={0}
+            />
           </linearGradient>
-          <linearGradient id="fillOnboarding" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="5%" stopColor={onBoardingColor} stopOpacity={0.4} />
-            <stop offset="95%" stopColor={onBoardingColor} stopOpacity={0} />
+          <linearGradient
+            id={fillOnboardingId}
+            x1="0"
+            x2="0"
+            y1="0"
+            y2="1"
+          >
+            <stop
+              offset="5%"
+              stopColor={onBoardingColor}
+              stopOpacity={0.4}
+            />
+            <stop
+              offset="95%"
+              stopColor={onBoardingColor}
+              stopOpacity={0}
+            />
           </linearGradient>
-          <linearGradient id="fillTechDebt" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="5%" stopColor={techDebtColor} stopOpacity={0.4} />
-            <stop offset="95%" stopColor={techDebtColor} stopOpacity={0} />
+          <linearGradient
+            id={fillTechDebtId}
+            x1="0"
+            x2="0"
+            y1="0"
+            y2="1"
+          >
+            <stop
+              offset="5%"
+              stopColor={techDebtColor}
+              stopOpacity={0.4}
+            />
+            <stop
+              offset="95%"
+              stopColor={techDebtColor}
+              stopOpacity={0}
+            />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" strokeOpacity={1} vertical />
+        <CartesianGrid
+          strokeDasharray="3 3"
+          strokeOpacity={1}
+          vertical
+        />
         <XAxis
           axisLine={false}
           dataKey="date"
@@ -63,11 +152,14 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
           tickMargin={8}
         />
         <YAxis domain={[0, 100]} />
-        <ChartTooltip content={<ChartTooltipContent indicator="dot" />} cursor={false} />
+        <ChartTooltip
+          content={<ChartTooltipContent indicator="dot" />}
+          cursor={false}
+        />
         {activeTab === "overview" && (
           <Area
             dataKey="health"
-            fill="url(#fillHealth)"
+            fill={`url(#${fillHealthId})`}
             key="health"
             stroke={healthColor}
             type="monotone"
@@ -76,7 +168,7 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
         {activeTab === "overview" && (
           <Area
             dataKey="security"
-            fill="url(#fillSecurity)"
+            fill={`url(#${fillSecurityId})`}
             key="security"
             stroke={securityColor}
             type="monotone"
@@ -86,7 +178,7 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
         {activeTab === "engineering" && (
           <Area
             dataKey="complexity"
-            fill="url(#fillComplexity)"
+            fill={`url(#${fillComplexityId})`}
             key="complexity"
             stroke={complexityColor}
             type="monotone"
@@ -95,7 +187,7 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
         {activeTab === "engineering" && (
           <Area
             dataKey="onboarding"
-            fill="url(#fillOnboarding)"
+            fill={`url(#${fillOnboardingId})`}
             key="onboarding"
             stroke={onBoardingColor}
             type="monotone"
@@ -104,7 +196,7 @@ export function TrendsChart({ activeTab, chartConfig, data }: Props) {
         {activeTab === "engineering" && (
           <Area
             dataKey="techDebt"
-            fill="url(#fillTechDebt)"
+            fill={`url(#${fillTechDebtId})`}
             key="techDebt"
             stroke={techDebtColor}
             type="monotone"

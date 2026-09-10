@@ -1,10 +1,10 @@
 "use client";
 
+import { Status, Visibility } from "@doxynix/shared";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
-import { StatusSchema, VisibilitySchema } from "@/shared/api-contracts";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Select,
@@ -48,15 +48,18 @@ export function RepoFilters() {
           onValueChange={(v) => handleUpdate("status", v === "all" ? null : v)}
           value={filters.status ?? "all"}
         >
-          <SelectTrigger aria-label={tCommon("status")} className="w-35">
+          <SelectTrigger
+            aria-label={tCommon("status")}
+            className="w-35"
+          >
             <SelectValue placeholder={tCommon("status")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("repo_status_all")}</SelectItem>
-            <SelectItem value={StatusSchema.enum.DONE}>{tCommon("done")}</SelectItem>
-            <SelectItem value={StatusSchema.enum.PENDING}>{t("repo_in_progress")}</SelectItem>
-            <SelectItem value={StatusSchema.enum.FAILED}>{tCommon("failed")}</SelectItem>
-            <SelectItem value={StatusSchema.enum.NEW}>{tCommon("new")}</SelectItem>
+            <SelectItem value={Status.DONE}>{tCommon("done")}</SelectItem>
+            <SelectItem value={Status.PENDING}>{t("repo_in_progress")}</SelectItem>
+            <SelectItem value={Status.FAILED}>{tCommon("failed")}</SelectItem>
+            <SelectItem value={Status.NEW}>{tCommon("new")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -64,18 +67,27 @@ export function RepoFilters() {
           onValueChange={(v) => handleUpdate("visibility", v === "all" ? null : v)}
           value={filters.visibility ?? "all"}
         >
-          <SelectTrigger aria-label={tCommon("visibility")} className="w-32.5">
+          <SelectTrigger
+            aria-label={tCommon("visibility")}
+            className="w-32.5"
+          >
             <SelectValue placeholder={tCommon("visibility")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("repo_visibility_all")}</SelectItem>
-            <SelectItem value={VisibilitySchema.enum.PUBLIC}>{tCommon("public")}</SelectItem>
-            <SelectItem value={VisibilitySchema.enum.PRIVATE}>{tCommon("private")}</SelectItem>
+            <SelectItem value={Visibility.PUBLIC}>{tCommon("public")}</SelectItem>
+            <SelectItem value={Visibility.PRIVATE}>{tCommon("private")}</SelectItem>
           </SelectContent>
         </Select>
 
-        <Select onValueChange={(v) => handleUpdate("sortBy", v)} value={filters.sortBy}>
-          <SelectTrigger aria-label={t("repo_sort_by")} className="w-37.5">
+        <Select
+          onValueChange={(v) => handleUpdate("sortBy", v)}
+          value={filters.sortBy}
+        >
+          <SelectTrigger
+            aria-label={t("repo_sort_by")}
+            className="w-37.5"
+          >
             <SelectValue placeholder={t("repo_sort_by")} />
           </SelectTrigger>
           <SelectContent>
@@ -85,7 +97,12 @@ export function RepoFilters() {
           </SelectContent>
         </Select>
 
-        <AppButton className="px-2" disabled={!hasFilters} onClick={handleReset} variant="outline">
+        <AppButton
+          className="px-2"
+          disabled={!hasFilters}
+          onClick={handleReset}
+          variant="outline"
+        >
           {tCommon("reset")}
           <X />
         </AppButton>

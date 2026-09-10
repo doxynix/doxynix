@@ -28,12 +28,18 @@ export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>)
         <EmptyState
           action={
             <div className="flex items-center gap-1">
-              <AppButton asChild variant="outline">
+              <AppButton
+                asChild
+                variant="outline"
+              >
                 <ExternalLink href={`https://github.com/${owner}/${name}/pulls`}>
                   Open pull on GitHub <GitHubIcon />
                 </ExternalLink>
               </AppButton>
-              <AppButton asChild variant="outline">
+              <AppButton
+                asChild
+                variant="outline"
+              >
                 <Link href={`/dashboard/repo/${owner}/${name}/settings`}>Enable PR analysis</Link>
               </AppButton>
             </div>
@@ -46,5 +52,11 @@ export function RepoPullsListContainer({ name, owner, repoId }: Readonly<Props>)
     );
   }
 
-  return <RepoPullsList name={name} owner={owner} pulls={pulls} />;
+  return (
+    <RepoPullsList
+      name={name}
+      owner={owner}
+      pulls={pulls}
+    />
+  );
 }

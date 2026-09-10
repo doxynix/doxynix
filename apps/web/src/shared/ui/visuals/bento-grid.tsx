@@ -22,7 +22,10 @@ interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
 
 const BentoGrid = ({ children, className, ...props }: BentoGridProps) => {
   return (
-    <div className={cn("grid w-full auto-rows-88 grid-cols-3 gap-4", className)} {...props}>
+    <div
+      className={cn("grid w-full auto-rows-88 grid-cols-3 gap-4", className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -63,7 +66,12 @@ const BentoCard = ({
           "pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-standard group-hover:translate-y-0 group-hover:opacity-100 lg:hidden",
         )}
       >
-        <AppButton asChild className="pointer-events-auto p-0" size="sm" variant="link">
+        <AppButton
+          asChild
+          className="pointer-events-auto p-0"
+          size="sm"
+          variant="link"
+        >
           <Link href={href}>
             <span className="text-foreground">{cta}</span>
             <ArrowRightIcon className="ms-2 text-foreground rtl:rotate-180" />
@@ -77,7 +85,12 @@ const BentoCard = ({
         "pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-standard group-hover:translate-y-0 group-hover:opacity-100 lg:flex",
       )}
     >
-      <AppButton asChild className="pointer-events-auto p-0" size="sm" variant="link">
+      <AppButton
+        asChild
+        className="pointer-events-auto p-0"
+        size="sm"
+        variant="link"
+      >
         <Link href={href}>
           <span className="text-foreground">{cta}</span>
           <ArrowRightIcon className="ms-2 text-foreground rtl:rotate-180" />

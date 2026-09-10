@@ -11,14 +11,7 @@ export default defineConfig({
   },
   test: {
     coverage: {
-      exclude: [
-        "**/*.d.ts",
-        "**/*.test.ts",
-        "**/*.test.tsx",
-        "src/tests/**/*",
-        "src/shared/api-contracts/**/*",
-        "src/app/**/*",
-      ],
+      exclude: ["**/*.d.ts", "**/*.test.ts", "**/*.test.tsx", "src/tests/**/*", "src/app/**/*"],
 
       include: [
         "src/server/modules/**/*.ts",

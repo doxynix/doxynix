@@ -11,7 +11,12 @@ import { cx, focusRing } from "../../lib/utils";
 import { Button } from "./button";
 
 const Drawer = (props: ComponentPropsWithoutRef<typeof DrawerPrimitives.Root>) => {
-  return <DrawerPrimitives.Root tremor-id="tremor-raw" {...props} />;
+  return (
+    <DrawerPrimitives.Root
+      tremor-id="tremor-raw"
+      {...props}
+    />
+  );
 };
 Drawer.displayName = "Drawer";
 
@@ -19,7 +24,13 @@ const DrawerTrigger = forwardRef<
   ComponentRef<typeof DrawerPrimitives.Trigger>,
   ComponentPropsWithoutRef<typeof DrawerPrimitives.Trigger>
 >(({ className, ...props }, ref) => {
-  return <DrawerPrimitives.Trigger className={cx(className)} ref={ref} {...props} />;
+  return (
+    <DrawerPrimitives.Trigger
+      className={cx(className)}
+      ref={ref}
+      {...props}
+    />
+  );
 });
 DrawerTrigger.displayName = "Drawer.Trigger";
 
@@ -27,7 +38,13 @@ const DrawerClose = forwardRef<
   ComponentRef<typeof DrawerPrimitives.Close>,
   ComponentPropsWithoutRef<typeof DrawerPrimitives.Close>
 >(({ className, ...props }, ref) => {
-  return <DrawerPrimitives.Close className={cx(className)} ref={ref} {...props} />;
+  return (
+    <DrawerPrimitives.Close
+      className={cx(className)}
+      ref={ref}
+      {...props}
+    />
+  );
 });
 DrawerClose.displayName = "Drawer.Close";
 
@@ -106,7 +123,10 @@ const DrawerHeader = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<"div">>
             className="aspect-square p-1 hover:bg-gray-100 dark:hover:bg-gray-400/10"
             variant="ghost"
           >
-            <RiCloseLine aria-hidden="true" className="size-6" />
+            <RiCloseLine
+              aria-hidden="true"
+              className="size-6"
+            />
           </Button>
         </DrawerPrimitives.Close>
       </div>
@@ -137,7 +157,13 @@ DrawerTitle.displayName = "DrawerTitle";
 
 const DrawerBody = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<"div">>(
   ({ className, ...props }, ref) => {
-    return <div className={cx("flex-1 py-4", className)} ref={ref} {...props} />;
+    return (
+      <div
+        className={cx("flex-1 py-4", className)}
+        ref={ref}
+        {...props}
+      />
+    );
   },
 );
 DrawerBody.displayName = "Drawer.Body";

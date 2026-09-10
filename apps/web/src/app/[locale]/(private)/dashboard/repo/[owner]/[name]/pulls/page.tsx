@@ -19,5 +19,11 @@ export default async function RepoPullsPage({ params }: Readonly<RepoPageProps>)
 
   const repo = await repoFetchers.getRepoOrNotFound(owner, name);
 
-  return <RepoPullsListContainer name={name} owner={owner} repoId={repo.id} />;
+  return (
+    <RepoPullsListContainer
+      name={name}
+      owner={owner}
+      repoId={repo.id}
+    />
+  );
 }

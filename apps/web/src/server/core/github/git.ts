@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 
 import type { Repo } from "@prisma/client";
-import gitUrlParse from "git-url-parse";
 import simpleGit from "simple-git";
 
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
 
 import { prisma } from "../db";
+import { parseGitUrl } from "./git-url";
 import { executeWithFallback } from "./github-api";
 import { GitHubAuthRequiredError, resolveClientContext } from "./github-provider";
 
@@ -138,7 +138,7 @@ export async function cloneRepository(
   await fs.mkdir(targetPath, { recursive: true });
 
   const git = simpleGit();
-  const parsed = gitUrlParse(repo.url);
+  const parsed = parseGitUrl(repo.url);
   const repoUrl = `https://${parsed.resource}/${parsed.full_name}.git`;
 
   const options = ["--filter=blob:none", "--single-branch", "--branch", branchToClone, "--no-tags"];

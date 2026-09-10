@@ -11,7 +11,10 @@ type Props = {
 
 export function AccordionListItem({ className, content, trigger, value }: Readonly<Props>) {
   return (
-    <AccordionItem className={className} value={value}>
+    <AccordionItem
+      className={className}
+      value={value}
+    >
       <AccordionTrigger className="text-left font-bold">{trigger}</AccordionTrigger>
       <AccordionContent>{content}</AccordionContent>
     </AccordionItem>

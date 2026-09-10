@@ -1,5 +1,5 @@
 import { task } from "@trigger.dev/sdk";
-import { dedent } from "ts-dedent";
+import { dedent } from "es-toolkit";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";

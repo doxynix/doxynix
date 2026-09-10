@@ -1,8 +1,7 @@
-import type { PaginatedResponse } from "@doxynix/shared";
 import { desc } from "drizzle-orm";
 
 import { db } from "@/core/db/db";
-import { executePaginatedQuery } from "@/core/db/pagination";
+import { executePaginatedQuery, type PaginatedResponse } from "@/core/db/pagination";
 import { type AuditLogSelect, auditLogs } from "@/core/db/schema";
 import { combineConditions, ilikeIf } from "@/core/db/utils";
 import type { RequestContext } from "@/utils/request-context";

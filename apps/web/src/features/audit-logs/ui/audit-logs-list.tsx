@@ -35,7 +35,10 @@ export function AuditLogList({ logs }: Readonly<Props>) {
       </TableHeader>
       <TableBody>
         {logs.map((log) => (
-          <AuditLogRow key={log.id} log={log} />
+          <AuditLogRow
+            key={log.id}
+            log={log}
+          />
         ))}
       </TableBody>
     </Table>

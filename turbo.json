@@ -63,8 +63,7 @@
         "node_modules/@prisma/client/**",
         "prisma/generated/**",
         "prisma/json-schema/**",
-        "prisma/dbml/**",
-        "src/shared/api-contracts/client/**"
+        "prisma/dbml/**"
       ]
     },
 

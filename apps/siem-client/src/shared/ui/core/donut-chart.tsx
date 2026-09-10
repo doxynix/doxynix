@@ -303,7 +303,10 @@ const DonutChart = forwardRef<HTMLDivElement, DonutChartProps>(
 
                   return active ? (
                     CustomTooltip ? (
-                      <CustomTooltip active={active} payload={cleanPayload} />
+                      <CustomTooltip
+                        active={active}
+                        payload={cleanPayload}
+                      />
                     ) : (
                       <ChartTooltip
                         active={active}

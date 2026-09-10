@@ -81,11 +81,18 @@ export function RepoListContainer({ config }: Readonly<Props>) {
         </div>
       )}
       <div className="flex-1">
-        <RepoList meta={meta} repos={items} />
+        <RepoList
+          meta={meta}
+          repos={items}
+        />
       </div>
 
       {config?.showPagination !== false && (
-        <AppPagination className="mt-4" isLoading={isFetching} meta={meta} />
+        <AppPagination
+          className="mt-4"
+          isLoading={isFetching}
+          meta={meta}
+        />
       )}
     </>
   );

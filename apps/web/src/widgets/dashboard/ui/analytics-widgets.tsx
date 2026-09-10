@@ -50,7 +50,10 @@ export function EcosystemStatusWidget({ data }: Readonly<Props>) {
             Ecosystem Status
           </span>
           {!isEmpty && (
-            <AppBadge className="font-mono" variant="outline">
+            <AppBadge
+              className="font-mono"
+              variant="outline"
+            >
               {docCoverage}% Documented
             </AppBadge>
           )}
@@ -133,7 +136,10 @@ export function RefactoringTargetsWidget({ data }: Readonly<Props>) {
                       {h.repo_name}/
                       <span className="font-bold text-foreground">{h.path.split("/").pop()}</span>
                     </span>
-                    <AppBadge className="h-5 text-[10px]" variant="destructive">
+                    <AppBadge
+                      className="h-5 text-[10px]"
+                      variant="destructive"
+                    >
                       {h.score} pts
                     </AppBadge>
                   </div>
@@ -232,7 +238,10 @@ export function LanguagesWidget({ data }: Readonly<Props>) {
                 data.overview.totalLoc > 0 ? (lang.value / data.overview.totalLoc) * 100 : 0;
 
               return (
-                <div className="flex flex-col gap-1" key={lang.name}>
+                <div
+                  className="flex flex-col gap-1"
+                  key={lang.name}
+                >
                   <div className="flex justify-between text-xs">
                     <div className="flex items-center gap-1">
                       <span
@@ -306,7 +315,10 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
                       {activity.status === "FAILED" && "Analysis failed"}
                       {activity.status === "PENDING" && "Analysis started"}
                       {" • "}
-                      <TimeAgo date={activity.createdAt} locale={locale} />
+                      <TimeAgo
+                        date={activity.createdAt}
+                        locale={locale}
+                      />
                     </span>
                     {activity.status === "PENDING" && (
                       <div className="mt-1 flex items-center gap-1">
@@ -353,9 +365,20 @@ export function QualityRadar({ scores }: Readonly<QualityRadarProps>) {
   };
 
   return (
-    <ChartContainer className="h-75 w-full" config={config}>
-      <ResponsiveContainer height="100%" width="100%">
-        <RadarChart cx="50%" cy="50%" data={chartData} outerRadius="80%">
+    <ChartContainer
+      className="h-75 w-full"
+      config={config}
+    >
+      <ResponsiveContainer
+        height="100%"
+        width="100%"
+      >
+        <RadarChart
+          cx="50%"
+          cy="50%"
+          data={chartData}
+          outerRadius="80%"
+        >
           <PolarGrid stroke="var(--border)" />
           <PolarAngleAxis
             dataKey="subject"

@@ -287,7 +287,10 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
     !isAuditDismissed && (isAiLoading || auditResult?.action === "quick-file-audit");
 
   return (
-    <div className="flex h-full flex-col bg-background" ref={containerRef}>
+    <div
+      className="flex h-full flex-col bg-background"
+      ref={containerRef}
+    >
       <div className="flex flex-col justify-between gap-4 border-border border-b px-4 py-2">
         <div className="flex items-center gap-2 overflow-hidden">
           <FileIcon className="text-muted-foreground" />
@@ -296,14 +299,22 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
             items={breadcrumbItems}
             listClassName="sm:gap-1"
           />
-          <CopyButton className="shrink-0 opacity-100" tooltipText="Copy file path" value={path} />
+          <CopyButton
+            className="shrink-0 opacity-100"
+            tooltipText="Copy file path"
+            value={path}
+          />
         </div>
 
         <div className="flex items-center justify-end gap-2">
           {mode === "view" ? (
             <>
               {VIEW_ACTIONS.map(({ icon: Icon, ...action }) => (
-                <RepoCodeActionButton className="size-8" key={action.tooltipText} {...action}>
+                <RepoCodeActionButton
+                  className="size-8"
+                  key={action.tooltipText}
+                  {...action}
+                >
                   <Icon className="size-3" />
                 </RepoCodeActionButton>
               ))}
@@ -315,7 +326,10 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
             </>
           ) : (
             EDIT_ACTIONS.map(({ icon: Icon, label, ...action }) => (
-              <RepoCodeActionButton key={label} {...action}>
+              <RepoCodeActionButton
+                key={label}
+                {...action}
+              >
                 <Icon className="size-3" />
                 {label}
               </RepoCodeActionButton>
@@ -325,7 +339,11 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
       </div>
 
       {isSearchOpen && view && (
-        <RepoSearchPanel onClose={() => setIsSearchOpen(false)} stats={editorStats} view={view} />
+        <RepoSearchPanel
+          onClose={() => setIsSearchOpen(false)}
+          stats={editorStats}
+          view={view}
+        />
       )}
 
       {showAuditPanel && (
@@ -335,7 +353,11 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
               <Sparkles />
               AI File Audit
             </h3>
-            <AppButton onClick={() => setIsAuditDismissed(true)} size="icon" variant="ghost">
+            <AppButton
+              onClick={() => setIsAuditDismissed(true)}
+              size="icon"
+              variant="ghost"
+            >
               <X />
             </AppButton>
           </div>
@@ -394,7 +416,11 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <AppButton onClick={handleDiscardDiff} size="sm" variant="ghost">
+            <AppButton
+              onClick={handleDiscardDiff}
+              size="sm"
+              variant="ghost"
+            >
               <X className="mr-1 h-3 w-3" />
               Discard
             </AppButton>
@@ -431,7 +457,11 @@ export function RepoCodeBrowser({ fileData, path, repo, repoId, treeApi }: Reado
         />
       </div>
 
-      <RepoStatusBar meta={fileData.meta} readOnly={mode === "view"} stats={editorStats} />
+      <RepoStatusBar
+        meta={fileData.meta}
+        readOnly={mode === "view"}
+        stats={editorStats}
+      />
     </div>
   );
 }

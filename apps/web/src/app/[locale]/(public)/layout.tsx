@@ -23,7 +23,11 @@ export default function PublicLayout({ children }: Readonly<{ children: ReactNod
         height={20}
         width={20}
       />
-      <main className="z-10 mx-auto flex w-full flex-1 flex-col" id="main-content" tabIndex={-1}>
+      <main
+        className="z-10 mx-auto flex w-full flex-1 flex-col"
+        id="main-content"
+        tabIndex={-1}
+      >
         {children}
       </main>
       <div className="z-50 w-full shrink-0 border-t">

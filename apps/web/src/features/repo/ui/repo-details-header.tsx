@@ -26,25 +26,47 @@ export function RepoDetailsHeader({ repo }: Readonly<Props>) {
     <div className="mx-auto flex w-full flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center justify-between gap-4">
-          <AppAvatar alt={repo.owner} fallbackText={repo.owner} src={repo.ownerAvatarUrl} />
+          <AppAvatar
+            alt={repo.owner}
+            fallbackText={repo.owner}
+            src={repo.ownerAvatarUrl}
+          />
           <h1 className="flex gap-1 font-bold text-2xl">
-            <Link className="hover:underline" href={`/dashboard/repo/${ownerSlug}`}>
+            <Link
+              className="hover:underline"
+              href={`/dashboard/repo/${ownerSlug}`}
+            >
               {repo.owner}
             </Link>
             <span>/</span>
-            <Link className="hover:underline" href={`/dashboard/repo/${ownerSlug}/${repoSlug}`}>
+            <Link
+              className="hover:underline"
+              href={`/dashboard/repo/${ownerSlug}/${repoSlug}`}
+            >
               {repo.name}
             </Link>
           </h1>
           <PrDraftSheet repoId={repo.id} />
-          <AppBadge className={visibility.color} variant="outline">
+          <AppBadge
+            className={visibility.color}
+            variant="outline"
+          >
             {visibility.label}
           </AppBadge>
-          <AppBadge className={status.color} variant="outline">
+          <AppBadge
+            className={status.color}
+            variant="outline"
+          >
             {status.label}
           </AppBadge>
-          <AppButton asChild variant="outline">
-            <ExternalLink className="hover:text-foreground" href={repo.url}>
+          <AppButton
+            asChild
+            variant="outline"
+          >
+            <ExternalLink
+              className="hover:text-foreground"
+              href={repo.url}
+            >
               <GitHubIcon className="size-4" /> Github
             </ExternalLink>
           </AppButton>

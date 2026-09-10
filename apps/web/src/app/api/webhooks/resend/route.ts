@@ -1,8 +1,9 @@
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-import { BannedEmailReason, Prisma } from "@prisma/client";
+import { BannedEmailReason } from "@doxynix/shared";
+import { Prisma } from "@prisma/client";
 import { Webhook } from "svix";
-import { z } from "zod";
+import * as z from "zod";
 
 import { RESEND_WEBHOOK_SECRET } from "@/shared/constants/env.server";
 

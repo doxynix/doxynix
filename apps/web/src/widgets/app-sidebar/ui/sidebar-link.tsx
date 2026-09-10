@@ -45,7 +45,12 @@ export function SidebarLink({
       >
         {Icon != null && <Icon className="size-3.5" />}
         {avatar != null && (
-          <AppAvatar alt={title} fallbackText={title} sizeClassName="size-6" src={avatar} />
+          <AppAvatar
+            alt={title}
+            fallbackText={title}
+            sizeClassName="size-6"
+            src={avatar}
+          />
         )}
         <span className="truncate">{title}</span>
 

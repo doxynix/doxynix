@@ -1,12 +1,14 @@
 import { trpc } from "@/core/client";
 
+import type { DisconnectAccountInput } from "./profile.types";
+
 export const profileService = {
   async deleteAccount() {
     return trpc.user.deleteAccount.mutate();
   },
 
-  async disconnectAccount(provider: "github" | "google" | "yandex") {
-    return trpc.user.disconnectAccount.mutate({ provider });
+  async disconnectAccount(provider: DisconnectAccountInput) {
+    return trpc.user.disconnectAccount.mutate(provider);
   },
 
   async getActiveSessions() {
@@ -16,6 +18,7 @@ export const profileService = {
   async getLinkedAccounts() {
     return trpc.user.getLinkedAccounts.query();
   },
+
   async getProfile() {
     return trpc.user.me.query();
   },

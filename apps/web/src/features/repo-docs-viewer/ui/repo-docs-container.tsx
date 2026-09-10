@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { DocType } from "@doxynix/shared";
 import { FileText } from "lucide-react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
-import { DocTypeSchema } from "@/shared/api-contracts";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { EmptyState } from "@/shared/ui/kit/empty-state";
 
-import type { AvailableDocs, DocType } from "@/entities/repo/model/repo.types";
+import type { AvailableDocs } from "@/entities/repo/model/repo.types";
 import { useRepoParams } from "@/entities/repo/model/use-repo-params";
 import { RepoAnalyzeButton } from "@/entities/repo/ui/repo-analyze-button";
 
@@ -26,9 +26,7 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
 
   const [activeTab, setActiveTab] = useQueryState(
     "type",
-    parseAsStringEnum<DocType>(Object.values(DocTypeSchema.enum)).withDefault(
-      DocTypeSchema.enum.README,
-    ),
+    parseAsStringEnum<DocType>(Object.values(DocType)).withDefault(DocType.README),
   );
 
   const { data: availableDocs, isLoading } = trpc.analysis.getAvailableDocs.useQuery({
@@ -75,7 +73,12 @@ export function RepoDocsContainer({ id }: Readonly<Props>) {
     return (
       <div className="flex h-150 items-center justify-center rounded-xl border border-dashed">
         <EmptyState
-          action={<RepoAnalyzeButton name={name} owner={owner} />}
+          action={
+            <RepoAnalyzeButton
+              name={name}
+              owner={owner}
+            />
+          }
           description="Run AI analysis to automatically generate README, API specs, and architecture docs."
           icon={FileText}
           title="No documentation generated"

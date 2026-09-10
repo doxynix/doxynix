@@ -1,6 +1,5 @@
+import type { InstallationTargetType, RepositorySelection } from "@doxynix/shared";
 import type { InstallationEvent } from "@octokit/webhooks-types";
-
-import type { InstallationTargetTypeType, RepositorySelectionType } from "@/shared/api-contracts";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";
@@ -13,8 +12,8 @@ export async function handleInstallationEvent(payload: InstallationEvent): Promi
   const githubLogin = installation.account.login.slice(0, 39);
   const githubAvatar = installation.account.avatar_url;
   const githubRepoSelection =
-    installation.repository_selection.toUpperCase() as RepositorySelectionType;
-  const githubTargetType = installation.target_type.toUpperCase() as InstallationTargetTypeType;
+    installation.repository_selection.toUpperCase() as RepositorySelection;
+  const githubTargetType = installation.target_type.toUpperCase() as InstallationTargetType;
   const githubHtmlUrl = installation.html_url;
 
   try {

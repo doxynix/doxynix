@@ -52,7 +52,10 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
           )}
         </div>
 
-        <div className="flex items-center px-1" onPointerDown={(e) => e.stopPropagation()}>
+        <div
+          className="flex items-center px-1"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           <Checkbox
             aria-label={`Select ${node.data.name}`}
             checked={selectionState}
@@ -78,7 +81,10 @@ export function RepoFileNode({ mySelectedIds, node, onMyToggle, style }: RepoFil
         <span className="truncate text-sm">{node.data.name}</span>
 
         {isRecommended === true && (
-          <AppBadge className="ml-auto shrink-0" variant="outline">
+          <AppBadge
+            className="ml-auto shrink-0"
+            variant="outline"
+          >
             <Sparkles className="size-2.5" />
             Core
           </AppBadge>

@@ -43,7 +43,12 @@ export function AnimatedCircularProgressBar({
         } as CSSProperties
       }
     >
-      <svg className="size-full" fill="none" strokeWidth="2" viewBox="0 0 100 100">
+      <svg
+        className="size-full"
+        fill="none"
+        strokeWidth="2"
+        viewBox="0 0 100 100"
+      >
         {currentPercent <= 90 && currentPercent >= 0 && (
           <circle
             className="opacity-100"

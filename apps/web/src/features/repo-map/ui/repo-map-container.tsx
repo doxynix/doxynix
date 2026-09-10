@@ -107,7 +107,12 @@ export function RepoMapContainer({ id }: Readonly<Props>) {
       return (
         <div className="flex h-150 items-center justify-center rounded-xl border border-dashed">
           <EmptyState
-            action={<RepoAnalyzeButton name={name} owner={owner} />}
+            action={
+              <RepoAnalyzeButton
+                name={name}
+                owner={owner}
+              />
+            }
             description="Run AI analysis to automatically generate map."
             icon={FileText}
             title="No map generated"

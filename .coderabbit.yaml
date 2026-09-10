@@ -22,7 +22,6 @@ reviews:
     - "!**/dist/**"
     - "!**/build/**"
     - "!**/coverage/**"
-    - "!**/src/shared/api-contracts/**"
     - "!**/*.svg"
     - "!**/*.tgz"
 

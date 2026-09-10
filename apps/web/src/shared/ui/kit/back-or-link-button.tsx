@@ -33,7 +33,12 @@ export function BackOrLinkButton({
 
   if (href) {
     return (
-      <AppButton asChild className={cn("w-fit", className)} variant={variant} {...props}>
+      <AppButton
+        asChild
+        className={cn("w-fit", className)}
+        variant={variant}
+        {...props}
+      >
         <Link href={href}>{content}</Link>
       </AppButton>
     );

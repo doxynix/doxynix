@@ -1,11 +1,11 @@
 import { compact, meanBy, sumBy, uniqBy } from "es-toolkit";
-import parseGitDiff from "parse-git-diff";
 import { normalize } from "pathe";
 import pm from "picomatch";
-import type { z } from "zod";
+import type * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { callWithFallback } from "@/server/utils/call";
+import { extractAddedLinesFromPatch } from "@/server/utils/git-diff-parser";
 
 import { getActiveModels } from "../ai/ai-constants";
 import { buildRepositoryToolProfile } from "../ai/ai-tools";
@@ -297,86 +297,74 @@ export class DifferentialAnalyzer {
         continue;
       }
 
-      const parsedDiff = parseGitDiff(file.patch);
+      const addedLines = extractAddedLinesFromPatch(file.patch);
 
-      for (const parsedFile of parsedDiff.files) {
-        for (const chunk of parsedFile.chunks) {
-          if (!("changes" in chunk)) {
-            continue;
+      for (const change of addedLines) {
+        const lineContent = change.content;
+        const lineNum = change.lineAfter;
+
+        for (const { pattern, title } of SECRETS) {
+          if (pattern.test(lineContent)) {
+            findings.push(
+              this.createFinding(
+                file.filename,
+                lineNum,
+                lineContent,
+                title,
+                10,
+                "CRITICAL",
+                "Немедленно удалите секрет из кода и отозовите его. Используйте Environment Variables или Secret Manager.",
+              ),
+            );
           }
+        }
 
-          for (const change of chunk.changes) {
-            if (change.type !== "AddedLine") {
-              continue;
-            }
+        for (const { pattern, title } of VULNERABILITIES) {
+          if (pattern.test(lineContent)) {
+            findings.push(
+              this.createFinding(
+                file.filename,
+                lineNum,
+                lineContent,
+                title,
+                8,
+                "HIGH",
+                "Использование небезопасных функций может привести к RCE или XSS. Используйте безопасные альтернативы (например, параметризацию).",
+              ),
+            );
+          }
+        }
 
-            const lineContent = change.content;
-            const lineNum = change.lineAfter;
+        for (const { pattern, title } of SQL_INJECTION) {
+          if (pattern.test(lineContent)) {
+            findings.push(
+              this.createFinding(
+                file.filename,
+                lineNum,
+                lineContent,
+                title,
+                9,
+                "HIGH",
+                "Обнаружена потенциальная SQL-инъекция. Используйте ORM (Prisma/Drizzle) или Parameterized Queries.",
+              ),
+            );
+          }
+        }
 
-            for (const { pattern, title } of SECRETS) {
-              if (pattern.test(lineContent)) {
-                findings.push(
-                  this.createFinding(
-                    file.filename,
-                    lineNum,
-                    lineContent,
-                    title,
-                    10,
-                    "CRITICAL",
-                    "Немедленно удалите секрет из кода и отозовите его. Используйте Environment Variables или Secret Manager.",
-                  ),
-                );
-              }
-            }
-
-            for (const { pattern, title } of VULNERABILITIES) {
-              if (pattern.test(lineContent)) {
-                findings.push(
-                  this.createFinding(
-                    file.filename,
-                    lineNum,
-                    lineContent,
-                    title,
-                    8,
-                    "HIGH",
-                    "Использование небезопасных функций может привести к RCE или XSS. Используйте безопасные альтернативы (например, параметризацию).",
-                  ),
-                );
-              }
-            }
-
-            for (const { pattern, title } of SQL_INJECTION) {
-              if (pattern.test(lineContent)) {
-                findings.push(
-                  this.createFinding(
-                    file.filename,
-                    lineNum,
-                    lineContent,
-                    title,
-                    9,
-                    "HIGH",
-                    "Обнаружена потенциальная SQL-инъекция. Используйте ORM (Prisma/Drizzle) или Parameterized Queries.",
-                  ),
-                );
-              }
-            }
-
-            for (const pattern of todoPatterns) {
-              if (pattern.test(lineContent)) {
-                findings.push(
-                  this.createFinding(
-                    file.filename,
-                    lineNum,
-                    lineContent,
-                    "TODO/FIXME marker found",
-                    2,
-                    "LOW",
-                    "Завершите реализацию или удалите маркер перед мерджем.",
-                    "STYLE",
-                  ),
-                );
-              }
-            }
+        for (const pattern of todoPatterns) {
+          if (pattern.test(lineContent)) {
+            findings.push(
+              this.createFinding(
+                file.filename,
+                lineNum,
+                lineContent,
+                "TODO/FIXME marker found",
+                2,
+                "LOW",
+                "Завершите реализацию или удалите маркер перед мерджем.",
+                "STYLE",
+              ),
+            );
           }
         }
       }

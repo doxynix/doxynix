@@ -7,7 +7,10 @@ import { cn } from "@/shared/lib/cn";
 
 function Table({ className, ...props }: ComponentProps<"table">) {
   return (
-    <div className="relative w-full overflow-x-auto" data-slot="table-container">
+    <div
+      className="relative w-full overflow-x-auto"
+      data-slot="table-container"
+    >
       <table
         className={cn("w-full caption-bottom text-sm", className)}
         data-slot="table"
@@ -18,7 +21,13 @@ function Table({ className, ...props }: ComponentProps<"table">) {
 }
 
 function TableHeader({ className, ...props }: ComponentProps<"thead">) {
-  return <thead className={cn("[&_tr]:border-b", className)} data-slot="table-header" {...props} />;
+  return (
+    <thead
+      className={cn("[&_tr]:border-b", className)}
+      data-slot="table-header"
+      {...props}
+    />
+  );
 }
 
 function TableBody({ className, ...props }: ComponentProps<"tbody">) {

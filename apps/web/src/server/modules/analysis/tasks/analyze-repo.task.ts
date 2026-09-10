@@ -1,6 +1,6 @@
 import os from "node:os";
 
-import { type DocType, Status } from "@prisma/client";
+import { type DocType, Status } from "@doxynix/shared";
 import { task } from "@trigger.dev/sdk";
 import { join } from "pathe";
 

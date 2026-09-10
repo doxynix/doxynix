@@ -68,7 +68,10 @@ export function RepoCard({ repo }: Readonly<Props>) {
                     {repo.name}
                   </Link>
                 </div>
-                <AppBadge className={cn(visibility.color)} variant="outline">
+                <AppBadge
+                  className={cn(visibility.color)}
+                  variant="outline"
+                >
                   {visibility.label}
                 </AppBadge>
                 <div className={cn("flex shrink-0 items-center gap-1 transition-standard")}>
@@ -136,7 +139,10 @@ export function RepoCard({ repo }: Readonly<Props>) {
             <span className="my-2 text-right text-muted-foreground text-xs">Not analyzed yet</span>
           )}
           <div className="flex flex-col items-end gap-1">
-            <AppBadge className={cn(status.color)} variant="outline">
+            <AppBadge
+              className={cn(status.color)}
+              variant="outline"
+            >
               {status.label}
             </AppBadge>
             {repo.lastAnalysisDate != null && (
@@ -145,10 +151,18 @@ export function RepoCard({ repo }: Readonly<Props>) {
                   dateTime: formatFullDate(repo.lastAnalysisDate, locale),
                 })}
               >
-                <TimeAgo date={repo.lastAnalysisDate} locale={locale} />
+                <TimeAgo
+                  date={repo.lastAnalysisDate}
+                  locale={locale}
+                />
               </AppTooltip>
             )}
-            {!hasAnalysis && <RepoAnalyzeButton name={repo.name} owner={repo.owner} />}
+            {!hasAnalysis && (
+              <RepoAnalyzeButton
+                name={repo.name}
+                owner={repo.owner}
+              />
+            )}
           </div>
         </div>
       </CardContent>

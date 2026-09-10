@@ -9,10 +9,13 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
-  
+  id-token: write
+
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      cli_released: ${{ steps.release.outputs['packages/cli--release_created'] }}
     steps:
       - name: Generate Bot Token
         id: app-token
@@ -20,7 +23,40 @@ jobs:
         with:
           app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_PLEASE_PRIVATE_KEY }}
-          
+
       - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071
+        id: release
         with:
           token: ${{ steps.app-token.outputs.token }}
+
+  publish-cli:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.cli_released == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version-file: "package.json"
+
+      - name: Setup Node for npm publishing
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.20.0
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build CLI bundle
+        run: bun --filter @doxynix/cli run build
+
+      - name: Publish @doxynix/cli to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd packages/cli
+          npm publish --access public --provenance

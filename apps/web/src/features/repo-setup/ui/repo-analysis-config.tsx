@@ -1,5 +1,5 @@
-import type { ComponentType } from "react";
-import type { DocType } from "@prisma/client";
+import { type ComponentType, useId } from "react";
+import type { DocType } from "@doxynix/shared";
 import {
   BookOpen,
   Code2,
@@ -54,6 +54,7 @@ type Props = {
 };
 
 export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>) {
+  const languageLabelId = useId();
   const t = useTranslations("Dashboard");
   const translationKeys = LOCALES.map(
     (l) => `settings_language_${l.toLowerCase().replace("-", "_")}` as const,
@@ -77,13 +78,19 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
           <div className="flex flex-col gap-3">
             <Label
               className="flex items-center gap-2 text-muted-foreground text-sm"
-              id="lang-label"
+              id={languageLabelId}
             >
               <Languages />
               Output Language
             </Label>
-            <Select onValueChange={actions.setAnalysisLocale} value={state.analysisLocale}>
-              <SelectTrigger aria-labelledby="lang-label" className="w-full md:w-64">
+            <Select
+              onValueChange={actions.setAnalysisLocale}
+              value={state.analysisLocale}
+            >
+              <SelectTrigger
+                aria-labelledby={languageLabelId}
+                className="w-full md:w-64"
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -93,9 +100,15 @@ export function RepoAnalysisConfig({ actions, disabled, state }: Readonly<Props>
                     return null;
                   }
                   return (
-                    <SelectItem key={l} value={l}>
+                    <SelectItem
+                      key={l}
+                      value={l}
+                    >
                       <div className="flex items-center gap-3">
-                        <Flag alt={l} src={FLAGS[l] || FLAGS.en} />
+                        <Flag
+                          alt={l}
+                          src={FLAGS[l] || FLAGS.en}
+                        />
                         <span>{t(key)}</span>
                       </div>
                     </SelectItem>

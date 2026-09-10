@@ -1,7 +1,7 @@
 import type { Octokit } from "@octokit/rest";
 import { task } from "@trigger.dev/sdk";
 import { normalize } from "pathe";
-import { z } from "zod";
+import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";

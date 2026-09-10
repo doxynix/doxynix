@@ -3,11 +3,9 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Fingerprint, KeyRound, Plus, ShieldAlert, Trash2 } from "lucide-react";
-import { useLocale } from "next-intl";
 import { toast } from "sonner";
 
 import { authClient } from "@/shared/lib/auth-client";
-import { formatFullDate } from "@/shared/lib/date-utils";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,
@@ -34,7 +32,6 @@ export function PasskeysList() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [deviceName, setDeviceName] = useState("");
   const [deletingKeyId, setDeletingKeyId] = useState<null | string>(null);
-  const locale = useLocale();
 
   const {
     data: passkeys = [],
@@ -91,7 +88,10 @@ export function PasskeysList() {
     return (
       <ConnectionCard
         action={
-          <AppButton disabled size="sm">
+          <AppButton
+            disabled
+            size="sm"
+          >
             Not Supported
           </AppButton>
         }
@@ -105,9 +105,16 @@ export function PasskeysList() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-end">
-        <Dialog onOpenChange={setIsAddOpen} open={isAddOpen}>
+        <Dialog
+          onOpenChange={setIsAddOpen}
+          open={isAddOpen}
+        >
           <DialogTrigger asChild>
-            <AppButton className="gap-2" size="sm" variant="outline">
+            <AppButton
+              className="gap-2"
+              size="sm"
+              variant="outline"
+            >
               <Plus size={16} /> Link New Device
             </AppButton>
           </DialogTrigger>
@@ -149,7 +156,10 @@ export function PasskeysList() {
       ) : passkeys.length === 0 ? (
         <ConnectionCard
           action={
-            <AppButton onClick={() => setIsAddOpen(true)} size="sm">
+            <AppButton
+              onClick={() => setIsAddOpen(true)}
+              size="sm"
+            >
               Setup
             </AppButton>
           }
@@ -159,40 +169,40 @@ export function PasskeysList() {
         />
       ) : (
         <div className="grid gap-3">
-          {passkeys.map((key) => {
-            const _dateStr = formatFullDate(new Date(key.createdAt).toISOString(), locale);
-
-            return (
-              <ConnectionCard
-                action={
-                  <DangerActionDialog
-                    confirmLabel="Remove"
-                    description={`Are you sure you want to delete biometric key &quot;${key.name}&quot;?`}
-                    destructiveAlertContent={
-                      <p>
-                        You will no longer be able to use this specific hardware device to log in.
-                      </p>
-                    }
-                    isLoading={deletePasskey.isPending}
-                    onConfirm={() => deletePasskey.mutate(key.id)}
-                    onOpenChange={(open) => setDeletingKeyId(open ? key.id : null)}
-                    open={deletingKeyId === key.id}
-                    title="Remove Biometric Key"
-                    trigger={
-                      <AppButton aria-label="Remove Biometric Key" size="sm" variant="destructive">
-                        <Trash2 className="size-4" />
-                      </AppButton>
-                    }
-                  />
-                }
-                description={""}
-                icon={<Fingerprint className="size-5 text-primary" />}
-                key={key.id}
-                status="Active"
-                title={key.name ?? "Unnamed Device"}
-              />
-            );
-          })}
+          {passkeys.map((key) => (
+            <ConnectionCard
+              action={
+                <DangerActionDialog
+                  confirmLabel="Remove"
+                  description={`Are you sure you want to delete biometric key &quot;${key.name}&quot;?`}
+                  destructiveAlertContent={
+                    <p>
+                      You will no longer be able to use this specific hardware device to log in.
+                    </p>
+                  }
+                  isLoading={deletePasskey.isPending}
+                  onConfirm={() => deletePasskey.mutate(key.id)}
+                  onOpenChange={(open) => setDeletingKeyId(open ? key.id : null)}
+                  open={deletingKeyId === key.id}
+                  title="Remove Biometric Key"
+                  trigger={
+                    <AppButton
+                      aria-label="Remove Biometric Key"
+                      size="sm"
+                      variant="destructive"
+                    >
+                      <Trash2 className="size-4" />
+                    </AppButton>
+                  }
+                />
+              }
+              description={""}
+              icon={<Fingerprint className="size-5 text-primary" />}
+              key={key.id}
+              status="Active"
+              title={key.name ?? "Unnamed Device"}
+            />
+          ))}
         </div>
       )}
     </div>

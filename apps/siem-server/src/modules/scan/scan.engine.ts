@@ -1,6 +1,18 @@
-import type { LeakFinding, Severity } from "@doxynix/shared";
+import type { RuleSelect, Severity } from "@/core/db/schema";
 
-import type { RuleSelect } from "@/core/db/schema";
+export type LeakFinding = {
+  ruleId: string;
+  ruleName: string;
+  severity: Severity;
+  matchedText: string;
+  line: number;
+};
+
+export type ScanResult = {
+  isSafe: boolean;
+  findings?: LeakFinding[];
+  message: string;
+};
 
 type EngineResult = {
   isSafe: boolean;

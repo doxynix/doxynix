@@ -145,15 +145,25 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
         <div className="min-w-0 pr-4">
           <div className="flex items-center gap-2">
             <h3 className="truncate text-sm">{node.label}</h3>
-            <AppBadge className="text-xs" variant="outline">
+            <AppBadge
+              className="text-xs"
+              variant="outline"
+            >
               {node.kind}
             </AppBadge>
-            <AppBadge className="text-xs" variant="outline">
+            <AppBadge
+              className="text-xs"
+              variant="outline"
+            >
               {node.score}
             </AppBadge>
           </div>
           {activeMarkers.map((marker) => (
-            <AppBadge className="text-xs" key={marker} variant="outline">
+            <AppBadge
+              className="text-xs"
+              key={marker}
+              variant="outline"
+            >
               {marker}
             </AppBadge>
           ))}
@@ -190,7 +200,10 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                 <div className="text-sm">Inferred Role</div>
                 <p className="text-xs">{explain.role}</p>
               </div>
-              <AppBadge className="text-success text-xs" variant="outline">
+              <AppBadge
+                className="text-success text-xs"
+                variant="outline"
+              >
                 {explain.confidence}
               </AppBadge>
             </div>
@@ -198,12 +211,20 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
 
           <div className="mt-2 flex flex-wrap gap-1">
             {explain.relationships.riskTitles.map((title) => (
-              <AppBadge className="text-[10px]" key={title} variant="destructive">
+              <AppBadge
+                className="text-[10px]"
+                key={title}
+                variant="destructive"
+              >
                 {title}
               </AppBadge>
             ))}
             {explain.relationships.factTitles.map((fact) => (
-              <AppBadge className="text-[10px]" key={fact} variant="secondary">
+              <AppBadge
+                className="text-[10px]"
+                key={fact}
+                variant="secondary"
+              >
                 {fact}
               </AppBadge>
             ))}
@@ -231,7 +252,10 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
             </div>
             <div className="flex flex-col gap-3">
               {explain.summary.map((line: string, i: number) => (
-                <div className="group flex gap-3 text-muted-foreground text-xs" key={i}>
+                <div
+                  className="group flex gap-3 text-muted-foreground text-xs"
+                  key={i}
+                >
                   <div className="size-1 shrink-0 rounded-full" />
                   {line}
                 </div>
@@ -295,7 +319,10 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
                 {Object.entries(inspect.neighborBuckets).map(
                   ([bucket, paths]) =>
                     paths.length > 0 && (
-                      <div className="flex flex-col gap-1 rounded border p-2" key={bucket}>
+                      <div
+                        className="flex flex-col gap-1 rounded border p-2"
+                        key={bucket}
+                      >
                         <div className="text-[10px] text-muted-foreground">{bucket}</div>
                         <div className="text-xs">{paths.length} related modules</div>
                       </div>
@@ -327,7 +354,11 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               <div className="text-xs">Related Docs</div>
               <div className="flex flex-wrap gap-2">
                 {data.related.docs.map((doc) => (
-                  <AppBadge className="text-[10px]" key={doc.id} variant="secondary">
+                  <AppBadge
+                    className="text-[10px]"
+                    key={doc.id}
+                    variant="secondary"
+                  >
                     {doc.docType}: {doc.title}
                   </AppBadge>
                 ))}
@@ -340,7 +371,10 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               <div className="text-xs">Recent PR Findings</div>
               <div className="flex flex-col gap-2">
                 {data.related.findings.slice(0, 4).map((finding) => (
-                  <div className="rounded-md border p-2 text-xs" key={finding.id}>
+                  <div
+                    className="rounded-md border p-2 text-xs"
+                    key={finding.id}
+                  >
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <span className="font-medium">
                         PR #{finding.prNumber} · {finding.findingType}
@@ -372,7 +406,10 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               </div>
               <div className="flex flex-col gap-3">
                 {allHints.map((hint, i) => (
-                  <p className="text-muted-foreground text-xs" key={i}>
+                  <p
+                    className="text-muted-foreground text-xs"
+                    key={i}
+                  >
                     {hint}
                   </p>
                 ))}
@@ -387,7 +424,10 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
               </AppButton>
             )}
             {availableActions.canDocumentFile && (
-              <AppButton className="w-full gap-2" variant="outline">
+              <AppButton
+                className="w-full gap-2"
+                variant="outline"
+              >
                 <SearchCode /> Document Logic
               </AppButton>
             )}

@@ -23,7 +23,10 @@ export default function UnauthorizedPage() {
           It seems you have logged out on another device or your session has expired. Please log in
           again.
         </p>
-        <AppButton asChild className="gap-2">
+        <AppButton
+          asChild
+          className="gap-2"
+        >
           <Link href="/auth">
             <LogIn size={18} /> Log in
           </Link>

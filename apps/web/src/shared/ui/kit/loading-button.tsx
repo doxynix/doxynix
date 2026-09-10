@@ -22,8 +22,15 @@ export function LoadingButton({
   const reservedContent = loadingText ?? (typeof children === "string" ? children : "Loading...");
 
   return (
-    <AppButton {...props} className={cn("relative", className)} disabled={isLoading || disabled}>
-      <span aria-hidden="true" className="invisible px-3">
+    <AppButton
+      {...props}
+      className={cn("relative", className)}
+      disabled={isLoading || disabled}
+    >
+      <span
+        aria-hidden="true"
+        className="invisible px-3"
+      >
         {reservedContent}
       </span>
 

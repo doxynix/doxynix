@@ -1,6 +1,8 @@
 // run: bun db:seed
+
+import { NotifyType, Status, UserRole, Visibility } from "@doxynix/shared";
 import { faker } from "@faker-js/faker";
-import { NotifyType, PrismaClient, Status, UserRole, Visibility } from "@prisma/client";
+import { type Prisma, PrismaClient } from "@prisma/client";
 import { subDays } from "date-fns";
 
 import { getNormalizedHash } from "@/server/utils/hash";
@@ -45,20 +47,38 @@ function parseSeedNumber(value: string | undefined, fallback: number): number {
   return Number(trimmed);
 }
 
-function createStressRepo(index: number, userId: number) {
-  const ownerPool = ["vercel", "facebook", "microsoft", "tanstack", "nestjs", "vuejs", "angular"];
-  const topicPool = ["react", "typescript", "nextjs", "nodejs", "graphql", "postgres", "prisma"];
-  const owner = ownerPool[index % ownerPool.length]!;
-  const primaryTopic = topicPool[index % topicPool.length]!;
-  const secondaryTopic = topicPool[(index + 1) % topicPool.length]!;
+function createStressRepo(index: number, userId: number): Prisma.RepoCreateManyInput {
+  const ownerPool = [
+    "vercel",
+    "facebook",
+    "microsoft",
+    "tanstack",
+    "nestjs",
+    "vuejs",
+    "angular",
+  ] as const;
+  const topicPool = [
+    "react",
+    "typescript",
+    "nextjs",
+    "nodejs",
+    "graphql",
+    "postgres",
+    "prisma",
+  ] as const;
+
+  const owner: string = ownerPool[index % ownerPool.length] ?? "doxynix";
+  const primaryTopic = topicPool[index % topicPool.length] ?? "react";
+  const secondaryTopic = topicPool[(index + 1) % topicPool.length] ?? "typescript";
   const name = index % 9 === 0 ? `react-query-bench-${index}` : `${primaryTopic}-bench-${index}`;
   const description =
     index % 4 === 0
       ? `Benchmark repository ${index} for react query search and GitHub-style substring matching`
       : `Benchmark repository ${index} for ${owner} with ${primaryTopic} and ${secondaryTopic}`;
 
-  return clean({
-    ...Fake.fakeRepo(),
+  const fake = Fake.fakeRepo();
+
+  return {
     createdAt: faker.date.recent({ days: 90 }),
     defaultBranch: "main",
     description,
@@ -66,6 +86,7 @@ function createStressRepo(index: number, userId: number) {
     githubCreatedAt: faker.date.past({ years: 3 }),
     githubId: 900_000_000 + index,
     language: index % 3 === 0 ? "TypeScript" : index % 3 === 1 ? "JavaScript" : "Go",
+    license: fake.license ?? null,
     name,
     openIssues: faker.number.int({ max: 200 }),
     owner,
@@ -78,13 +99,13 @@ function createStressRepo(index: number, userId: number) {
     url: `https://github.com/${owner}/${name}`,
     userId,
     visibility: index % 5 === 0 ? Visibility.PRIVATE : Visibility.PUBLIC,
-  });
+  };
 }
 
 function createStressNotification(index: number, repoIds: number[], userId: number) {
   const keywordPool = ["react", "query", "tanstack", "nextjs", "typescript", "postgres"];
-  const keyword = keywordPool[index % keywordPool.length]!;
-  const repoId = repoIds.length > 0 ? repoIds[index % repoIds.length]! : undefined;
+  const keyword = keywordPool[index % keywordPool.length];
+  const repoId = repoIds.length > 0 ? repoIds[index % repoIds.length] : undefined;
   const notificationType =
     index % 4 === 0
       ? NotifyType.WARNING

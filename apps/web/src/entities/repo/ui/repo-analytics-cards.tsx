@@ -56,7 +56,10 @@ export function RisksCard({ risks }: Readonly<{ risks: NonNullable<RepoMetricsIt
       <CardContent className="flex flex-col gap-3">
         {risks.topRisks.length > 0 ? (
           risks.topRisks.map((risk) => (
-            <div className="rounded-lg border p-3" key={risk.id}>
+            <div
+              className="rounded-lg border p-3"
+              key={risk.id}
+            >
               <div className="mb-1 flex items-center justify-between gap-2">
                 <p className="font-medium text-sm">{risk.title}</p>
                 <AppBadge variant="outline">{risk.severity}</AppBadge>
@@ -82,7 +85,10 @@ export function ReferenceAndRoutesCard({
       content: (
         <div className="flex flex-wrap gap-2">
           {architecture.entrypoints.map((entrypoint) => (
-            <AppBadge key={entrypoint} variant="outline">
+            <AppBadge
+              key={entrypoint}
+              variant="outline"
+            >
               {entrypoint}
             </AppBadge>
           ))}
@@ -100,7 +106,10 @@ export function ReferenceAndRoutesCard({
             rpc {architecture.routeInventory?.rpcProcedures ?? 0}
           </AppBadge>
           {(architecture.routeInventory?.frameworks ?? []).map((framework) => (
-            <AppBadge key={framework} variant="secondary">
+            <AppBadge
+              key={framework}
+              variant="secondary"
+            >
               {framework}
             </AppBadge>
           ))}
@@ -128,7 +137,10 @@ export function ReferenceAndRoutesCard({
       content: (
         <div className="flex flex-wrap gap-2">
           {architecture.configInventory.map((item) => (
-            <AppBadge key={item} variant="outline">
+            <AppBadge
+              key={item}
+              variant="outline"
+            >
               {item}
             </AppBadge>
           ))}
@@ -147,7 +159,10 @@ export function ReferenceAndRoutesCard({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {sections.map((sec) => (
-          <div className="text-xs" key={sec.title}>
+          <div
+            className="text-xs"
+            key={sec.title}
+          >
             <p className="mb-2 text-muted-foreground uppercase">{sec.title}</p>
             {sec.content}
           </div>
@@ -211,7 +226,10 @@ export function SecurityOverviewCard({
           >
             {security.vulnerabilities.length} vulnerabilities
           </AppBadge>
-          <AppBadge className="font-medium text-[10px] text-muted-foreground" variant="outline">
+          <AppBadge
+            className="font-medium text-[10px] text-muted-foreground"
+            variant="outline"
+          >
             {security.findings.length} raw findings
           </AppBadge>
         </div>

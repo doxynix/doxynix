@@ -1,10 +1,9 @@
 import { unstable_cache } from "next/cache";
+import { DocTypeSchema, UpdatePRConfigInput } from "@doxynix/shared";
 import { auth, runs } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import * as z from "zod";
 
-import { UpdatePRConfigInput } from "@/shared/api/schemas/pr-analysis.schema";
-import { DocTypeSchema } from "@/shared/api-contracts";
 import { generateBranchName } from "@/shared/lib/get-branch-name";
 
 import { appLogger } from "@/server/core/app-logger";

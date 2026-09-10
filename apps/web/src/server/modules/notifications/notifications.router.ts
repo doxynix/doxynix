@@ -1,7 +1,6 @@
+import { NotificationSchema } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
-import { z } from "zod";
-
-import { NotificationSchema } from "@/shared/api-contracts";
+import * as z from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { handlePrismaError } from "@/server/utils/handle-error";
@@ -13,16 +12,6 @@ import {
 
 import { NotificationsBulkFilterSchema, NotificationsFilterSchema } from "./notification.schemas";
 import { notificationsService } from "./notifications.service";
-
-const NotificationsPublicSchema = NotificationSchema.extend({
-  id: z.uuid(),
-  repo: z
-    .object({
-      name: z.string(),
-      owner: z.string(),
-    })
-    .nullable(),
-});
 
 export const notificationRouter = createTRPCRouter({
   deleteOne: protectedProcedure
@@ -70,7 +59,7 @@ export const notificationRouter = createTRPCRouter({
     .input(NotificationsFilterSchema)
     .output(
       z.object({
-        items: z.array(NotificationsPublicSchema),
+        items: z.array(NotificationSchema),
         meta: PaginationMetaSchema,
       }),
     )

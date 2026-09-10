@@ -1,8 +1,6 @@
+import { CreateRepoSchema, PublicRepoSchema, StatusSchema } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
-import { z } from "zod";
-
-import { CreateRepoSchema } from "@/shared/api/schemas/repo";
-import { RepoSchema, StatusSchema } from "@/shared/api-contracts";
+import * as z from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { getPaginationMeta, PaginationMetaSchema } from "@/server/utils/pagination";
@@ -11,11 +9,8 @@ import { repoMapper } from "./repo.mapper";
 import { RepoFilterSchema } from "./repo.schemas";
 import { repoService } from "./repo.service";
 
-const PublicRepoSchema = RepoSchema.extend({
-  id: z.uuid(),
-});
-
-const RepoWithMetricsSchema = PublicRepoSchema.extend({
+const RepoWithMetricsSchema = z.object({
+  ...PublicRepoSchema.shape,
   complexityScore: z.number().nullish(),
   healthScore: z.number().nullish(),
   languageColor: z.string(),
@@ -41,7 +36,7 @@ export const repoRouter = createTRPCRouter({
 
       return {
         message: "Repository added",
-        repo: { ...newRepo, id: newRepo.publicId },
+        repo: { ...newRepo, id: newRepo.publicId, status: "NEW" },
         success: true,
       };
     }),
@@ -138,7 +133,7 @@ export const repoRouter = createTRPCRouter({
         owner: z.string().trim().min(1).max(39),
       }),
     )
-    .output(PublicRepoSchema.extend({ message: z.string(), status: StatusSchema }).nullable())
+    .output(z.nullable(PublicRepoSchema))
     .query(async ({ ctx, input }) => {
       return repoService.getByName(ctx.db, input.owner, input.name);
     }),
@@ -149,7 +144,7 @@ export const repoRouter = createTRPCRouter({
         owner: z.string().trim().min(1).max(39),
       }),
     )
-    .output(PublicRepoSchema.extend({ message: z.string() }).nullable())
+    .output(z.nullable(PublicRepoSchema))
     .query(async ({ ctx, input }) => {
       return repoService.getByOwner(ctx.db, input.owner);
     }),

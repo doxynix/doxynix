@@ -1,4 +1,4 @@
-import { PRCommentStyle, PRFocusArea } from "@prisma/client";
+import { PRCommentStyle, PRFocusArea } from "@doxynix/shared";
 import { clamp } from "es-toolkit";
 
 import type { DbClient } from "@/server/core/db";

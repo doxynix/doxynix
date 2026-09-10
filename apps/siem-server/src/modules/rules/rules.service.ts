@@ -1,9 +1,8 @@
-import type { PaginatedResponse } from "@doxynix/shared";
 import { desc, eq } from "drizzle-orm";
 import postgres from "postgres";
 
 import { db } from "@/core/db/db";
-import { executePaginatedQuery } from "@/core/db/pagination";
+import { executePaginatedQuery, type PaginatedResponse } from "@/core/db/pagination";
 import { type RuleSelect, rules } from "@/core/db/schema";
 import { combineConditions, eqIf, searchIf } from "@/core/db/utils";
 

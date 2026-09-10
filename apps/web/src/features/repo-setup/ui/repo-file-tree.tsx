@@ -123,7 +123,10 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
                 </AppButton>
               );
               return action.tooltip != null && action.tooltip !== "" ? (
-                <AppTooltip content={action.tooltip} key={action.label}>
+                <AppTooltip
+                  content={action.tooltip}
+                  key={action.label}
+                >
                   {ButtonElement}
                 </AppTooltip>
               ) : (
@@ -151,7 +154,10 @@ export function RepoFileTree({ actions, repo, state, treeApi }: Readonly<Props>)
             Repository is empty
           </p>
         )}
-        <div className="relative h-full min-h-0 w-full flex-1 overflow-hidden" ref={measureRef}>
+        <div
+          className="relative h-full min-h-0 w-full flex-1 overflow-hidden"
+          ref={measureRef}
+        >
           {state.isLoading ? (
             <RepoTreeSkeleton variant="setup" />
           ) : (

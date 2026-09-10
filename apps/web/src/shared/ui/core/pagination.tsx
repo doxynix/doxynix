@@ -16,13 +16,23 @@ Pagination.displayName = "Pagination";
 
 const PaginationContent = forwardRef<HTMLUListElement, ComponentProps<"ul">>(
   ({ className, ...props }, ref) => (
-    <ul className={cn("flex flex-row items-center gap-1", className)} ref={ref} {...props} />
+    <ul
+      className={cn("flex flex-row items-center gap-1", className)}
+      ref={ref}
+      {...props}
+    />
   ),
 );
 PaginationContent.displayName = "PaginationContent";
 
 const PaginationItem = forwardRef<HTMLLIElement, ComponentProps<"li">>(
-  ({ className, ...props }, ref) => <li className={cn("", className)} ref={ref} {...props} />,
+  ({ className, ...props }, ref) => (
+    <li
+      className={cn("", className)}
+      ref={ref}
+      {...props}
+    />
+  ),
 );
 PaginationItem.displayName = "PaginationItem";
 
@@ -120,7 +130,11 @@ const PaginationNext = ({ className, ...props }: ComponentProps<typeof Paginatio
 PaginationNext.displayName = "PaginationNext";
 
 const PaginationEllipsis = ({ className, ...props }: ComponentProps<"span">) => (
-  <span aria-hidden className={cn("flex size-9 items-center justify-center", className)} {...props}>
+  <span
+    aria-hidden
+    className={cn("flex size-9 items-center justify-center", className)}
+    {...props}
+  >
     <MoreHorizontal />
     <span className="sr-only">More pages</span>
   </span>

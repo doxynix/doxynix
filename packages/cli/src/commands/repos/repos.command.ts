@@ -4,9 +4,11 @@ import type { Command } from "commander";
 import { handleCliError } from "@/core/errors";
 
 import { brand } from "@/ui/colors";
+import { withTaskSpinner } from "@/ui/spinner";
 
-import { renderRepoDetails, renderReposTable } from "./repos.formatter";
+import { renderRepoDetails, renderReposTable, renderSlimReposTable } from "./repos.formatter";
 import { reposService } from "./repos.service";
+import type { RepoListItem } from "./repos.types";
 
 export function registerReposCommand(program: Command) {
   const repos = program.command("repos").description("Manage connected Doxynix repositories");
@@ -18,21 +20,21 @@ export function registerReposCommand(program: Command) {
     .option("-s, --search <query>", "Search repositories by name")
     .option("-o, --owner <owner>", "Filter repositories by owner / organization")
     .option("--json", "Output response in JSON format")
-    .action(async (options: { limit: string; search?: string; owner?: string; json?: boolean }) => {
+    .action(async (options: { json?: boolean; limit: string; owner?: string; search?: string }) => {
       try {
-        const s = p.spinner();
-        if (!options.json) {
-          s.start("Fetching repositories...");
-        }
-
-        const data = await reposService.list(
-          Number(options.limit) || 20,
-          options.search,
-          options.owner,
+        const data = await withTaskSpinner(
+          {
+            silent: options.json,
+            start: "Fetching repositories...",
+            stop: "Repositories loaded",
+          },
+          () =>
+            reposService.list({
+              limit: Number(options.limit) || 20,
+              owner: options.owner,
+              search: options.search,
+            }),
         );
-        if (!options.json) {
-          s.stop("Repositories loaded");
-        }
 
         if (options.json) {
           console.log(JSON.stringify(data, null, 2));
@@ -66,11 +68,13 @@ export function registerReposCommand(program: Command) {
       try {
         p.intro(brand.logo(" ➕ Connect Repository "));
 
-        const s = p.spinner();
-        s.start(`Connecting repository from ${url}...`);
-
-        const res = await reposService.add(url);
-        s.stop("Repository connected successfully!");
+        const res = await withTaskSpinner(
+          {
+            start: `Connecting repository from ${url}...`,
+            stop: "Repository connected successfully!",
+          },
+          () => reposService.add(url),
+        );
 
         p.note(
           `Target:      ${brand.highlight(`${res.repo.owner}/${res.repo.name}`)}\n` +
@@ -97,15 +101,14 @@ export function registerReposCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        if (!options.json) {
-          s.start(`Fetching details for ${target}...`);
-        }
-
-        const repo = await reposService.getByName(owner, name);
-        if (!options.json) {
-          s.stop("Details retrieved");
-        }
+        const repo = await withTaskSpinner(
+          {
+            silent: options.json,
+            start: `Fetching details for ${target}...`,
+            stop: "Details retrieved",
+          },
+          () => reposService.getByName(owner, name),
+        );
 
         if (options.json) {
           console.log(JSON.stringify(repo, null, 2));
@@ -124,14 +127,55 @@ export function registerReposCommand(program: Command) {
     });
 
   repos
-    .command("delete <id>")
-    .description("Delete a repository from Doxynix by its UUID")
-    .action(async (id: string) => {
+    .command("delete [id]")
+    .description("Delete repository (supports Short-ID prefix and interactive pick)")
+    .action(async (id?: string) => {
       try {
         p.intro(brand.error(" ⚠️ Remove Repository "));
 
+        let targetId = id?.trim();
+
+        if (!targetId || targetId.length < 32) {
+          const list = await withTaskSpinner("Fetching repositories for resolution...", () =>
+            reposService.list({ limit: 50 }),
+          );
+
+          if (list.items.length === 0) {
+            p.outro(brand.muted("No connected repositories found."));
+            return;
+          }
+
+          if (targetId) {
+            const prefix = targetId.toLowerCase();
+            const matched = list.items.find(
+              (r: RepoListItem) =>
+                r.id.toLowerCase().startsWith(prefix) ||
+                `${r.owner}/${r.name}`.toLowerCase() === prefix,
+            );
+            if (!matched) {
+              p.outro(brand.error(`No repository matching '${targetId}'.`));
+              return;
+            }
+            targetId = matched.id;
+          } else {
+            const selection = await p.select({
+              message: "Select repository to delete:",
+              options: list.items.map((r: RepoListItem) => ({
+                label: `${r.owner}/${r.name} (${r.id.slice(0, 8)})`,
+                value: r.id,
+              })),
+            });
+
+            if (p.isCancel(selection) || typeof selection !== "string") {
+              p.cancel("Deletion cancelled.");
+              return;
+            }
+            targetId = selection;
+          }
+        }
+
         const isConfirmed = await p.confirm({
-          message: `Are you sure you want to delete repository ${brand.highlight(id)}?`,
+          message: `Are you sure you want to delete repository ${brand.highlight(targetId.slice(0, 8))}?`,
         });
 
         if (!isConfirmed || p.isCancel(isConfirmed)) {
@@ -139,17 +183,20 @@ export function registerReposCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        s.start("Removing repository...");
-        const res = await reposService.delete(id);
-        s.stop("Repository removed successfully");
+        const res = await withTaskSpinner(
+          {
+            start: "Removing repository...",
+            stop: "Repository removed successfully",
+          },
+          () => reposService.delete(targetId),
+        );
 
         p.outro(brand.success(`👋 ${res.message}`));
       } catch (error) {
         handleCliError(error);
       }
     });
-  // dxnx repos purge-owner <owner>
+
   repos
     .command("purge-owner <owner>")
     .description("Delete all repositories associated with a specific owner or organization")
@@ -166,10 +213,13 @@ export function registerReposCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        s.start(`Deleting repositories for ${owner}...`);
-        const res = await reposService.deleteByOwner(owner);
-        s.stop("Purge completed");
+        const res = await withTaskSpinner(
+          {
+            start: `Deleting repositories for ${owner}...`,
+            stop: "Purge completed",
+          },
+          () => reposService.deleteByOwner(owner),
+        );
 
         p.outro(brand.success(`✔ ${res.message} (${res.count} repositories removed)`));
       } catch (error) {
@@ -177,7 +227,37 @@ export function registerReposCommand(program: Command) {
       }
     });
 
-  // dxnx repos purge-all
+  repos
+    .command("owner <owner>")
+    .description("Inspect primary repository belonging to an owner or GitHub organization")
+    .option("--json", "Output response in JSON format")
+    .action(async (owner: string, options: { json?: boolean }) => {
+      try {
+        const repo = await withTaskSpinner(
+          {
+            silent: options.json,
+            start: `Fetching repository owned by ${owner}...`,
+            stop: "Repository retrieved",
+          },
+          () => reposService.getByOwner(owner),
+        );
+
+        if (options.json) {
+          console.log(JSON.stringify(repo, null, 2));
+          return;
+        }
+
+        if (!repo) {
+          p.outro(brand.muted(`No repository found for owner '${owner}'.`));
+          return;
+        }
+
+        renderRepoDetails(repo);
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
   repos
     .command("purge-all")
     .description("Danger: Remove ALL connected repositories from your account")
@@ -198,14 +278,70 @@ export function registerReposCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        s.start("Removing all repositories...");
-        const res = await reposService.deleteAll();
-        s.stop("Repositories cleared");
+        const res = await withTaskSpinner(
+          {
+            start: "Removing all repositories...",
+            stop: "Repositories cleared",
+          },
+          () => reposService.deleteAll(),
+        );
 
         p.outro(brand.success(`✔ ${res.message}`));
       } catch (error) {
         handleCliError(error);
       }
     });
+
+  repos
+    .command("slim")
+    .alias("quick")
+    .description("Lightweight list of repositories (optimized for scripts and fast lookups)")
+    .option("-l, --limit <number>", "Number of repositories to return", "50")
+    .option("-s, --search <query>", "Filter repositories by name")
+    .option("-o, --owner <owner>", "Filter repositories by owner / organization")
+    .option("-c, --cursor <page>", "Pagination page number", "1")
+    .option("--json", "Output response in JSON format")
+    .action(
+      async (options: {
+        cursor?: string;
+        json?: boolean;
+        limit?: string;
+        owner?: string;
+        search?: string;
+      }) => {
+        try {
+          const res = await withTaskSpinner(
+            {
+              silent: options.json,
+              start: "Fetching quick repositories list...",
+              stop: "Repositories loaded",
+            },
+            () =>
+              reposService.getSlim({
+                cursor: options.cursor ? Number(options.cursor) : 1,
+                limit: options.limit ? Number(options.limit) : 50,
+                owner: options.owner,
+                search: options.search,
+              }),
+          );
+
+          if (options.json) {
+            console.log(JSON.stringify(res, null, 2));
+            return;
+          }
+
+          if (res.items.length === 0) {
+            p.outro(brand.muted("No repositories matched your query."));
+            return;
+          }
+
+          console.log(`\n${brand.logo(" ⚡ Connected Repositories (Slim View):\n")}`);
+          console.log(renderSlimReposTable(res.items));
+          console.log("\n");
+          p.outro(brand.muted(`Found ${res.items.length} of ${res.meta.totalCount} repositories.`));
+        } catch (error) {
+          handleCliError(error);
+        }
+      },
+    );
 }

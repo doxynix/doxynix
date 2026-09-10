@@ -56,7 +56,10 @@ interface CommandInputProps extends ComponentPropsWithoutRef<typeof CommandPrimi
 
 const CommandInput = forwardRef<ComponentRef<typeof CommandPrimitive.Input>, CommandInputProps>(
   ({ className, isLoading, ...props }, ref) => (
-    <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+    <div
+      className="flex items-center border-b px-3"
+      cmdk-input-wrapper=""
+    >
       {isLoading ? (
         <Spinner className="mr-2 shrink-0 opacity-50" />
       ) : (
@@ -93,7 +96,11 @@ const CommandEmpty = forwardRef<
   ComponentRef<typeof CommandPrimitive.Empty>,
   ComponentPropsWithoutRef<typeof CommandPrimitive.Empty>
 >((props, ref) => (
-  <CommandPrimitive.Empty className="py-6 text-center text-sm" ref={ref} {...props} />
+  <CommandPrimitive.Empty
+    className="py-6 text-center text-sm"
+    ref={ref}
+    {...props}
+  />
 ));
 
 CommandEmpty.displayName = CommandPrimitive.Empty.displayName;

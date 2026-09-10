@@ -2,28 +2,38 @@ import fs from "node:fs";
 import path from "node:path";
 
 import * as p from "@clack/prompts";
+import { UpdatePRConfigInput } from "@doxynix/shared";
 import type { Command } from "commander";
 
-import { trpc } from "@/core/client";
 import { handleCliError } from "@/core/errors";
 import { resolveRepository } from "@/core/repo";
+import { validateField } from "@/core/validation";
 
 import { brand, pc } from "@/ui/colors";
 import { formatScore } from "@/ui/formatters";
+import { withTaskSpinner } from "@/ui/spinner";
 import { createTable } from "@/ui/table";
 
 import { getCurrentGitBranch } from "../docs/docs.command";
-import { formatStatus, renderAnalysisTable, renderRepoConfigTable } from "./analyze.formatter";
+import {
+  formatStatus,
+  renderAnalysisTable,
+  renderDetailedMetricsTable,
+  renderRepoConfigTable,
+  renderSearchResultsTable,
+  renderStructureMap,
+} from "./analyze.formatter";
 import { analyzeService } from "./analyze.service";
+import type { AnalysisHistoryItem } from "./analyze.types";
 
 export function registerAnalyzeCommand(program: Command) {
   const analyze = program
     .command("analyze")
-    .description("Trigger and monitor repository security and code quality analysis");
+    .description("Trigger and monitor repository AST security and code quality analysis");
 
   analyze
     .command("start [target]")
-    .description("Trigger deep code analysis (e.g. dxnx analyze start owner/repo)")
+    .description("Trigger cloud AST code verification (e.g. dxnx analyze start owner/repo)")
     .option("-l, --language <lang>", "Documentation language (English, Russian)", "English")
     .action(async (target?: string, options?: { language?: string }) => {
       try {
@@ -37,18 +47,19 @@ export function registerAnalyzeCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        s.start(`Searching for repository ${repoContext.target}...`);
-        s.message(`Dispatching pipeline job to Trigger.dev for ${repoContext.target}...`);
-
-        const result = await trpc.analysis.analyze.mutate({
-          docTypes: ["README", "ARCHITECTURE", "CODE_DOC"],
-          files: [],
-          language: options?.language ?? "English",
-          repoId: repoContext.repo.id,
-        });
-
-        s.stop("Analysis job dispatched to cloud!");
+        const result = await withTaskSpinner(
+          {
+            start: `Dispatching pipeline job for ${repoContext.target}...`,
+            stop: "Analysis job dispatched to cloud!",
+          },
+          () =>
+            analyzeService.analyze({
+              docTypes: ["README", "ARCHITECTURE", "CODE_DOC"],
+              files: [],
+              language: options?.language ?? "English",
+              repoId: repoContext.repo.id,
+            }),
+        );
 
         p.note(
           `Job ID:       ${brand.highlight(result.jobId)}\n` +
@@ -58,7 +69,7 @@ export function registerAnalyzeCommand(program: Command) {
           "Pipeline Dispatched",
         );
 
-        p.outro(brand.success("🚀 AST Scanner & AI Engine have started code verification."));
+        p.outro(brand.success("🚀 Scanner & AI Engine have started code verification."));
       } catch (error) {
         handleCliError(error);
       }
@@ -75,15 +86,14 @@ export function registerAnalyzeCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        if (!options?.json) {
-          s.start(`Fetching analysis status for ${repoContext.target}...`);
-        }
-
-        const analysis = await trpc.analysis.getLatest.query({ repoId: repoContext.repo.id });
-        if (!options?.json) {
-          s.stop("Status retrieved");
-        }
+        const analysis = await withTaskSpinner(
+          {
+            silent: options?.json,
+            start: `Fetching analysis status for ${repoContext.target}...`,
+            stop: "Status retrieved",
+          },
+          () => analyzeService.getLatest(repoContext.repo.id),
+        );
 
         if (options?.json) {
           console.log(JSON.stringify(analysis, null, 2));
@@ -92,9 +102,8 @@ export function registerAnalyzeCommand(program: Command) {
 
         if (!analysis) {
           p.outro(
-            brand.warning(
-              `No analysis runs found for ${repoContext.target}.\nRun an analysis with: `,
-            ) + brand.highlight(`dxnx analyze start ${repoContext.target}`),
+            brand.warning(`No analysis runs found for ${repoContext.target}.\nRun with: `) +
+              brand.highlight(`dxnx analyze start ${repoContext.target}`),
           );
           return;
         }
@@ -114,14 +123,65 @@ export function registerAnalyzeCommand(program: Command) {
     });
 
   analyze
-    .command("cancel <analysisId>")
-    .description("Abort an in-flight analysis job by its UUID")
-    .action(async (analysisId: string) => {
+    .command("cancel [analysisId]")
+    .description("Abort an in-flight analysis job (supports Short-ID prefix and interactive pick)")
+    .option("-r, --repo <target>", "Target repository (owner/name)")
+    .action(async (analysisIdArg?: string, options?: { repo?: string }) => {
       try {
         p.intro(brand.warning(" 🛑 Abort Repository Analysis "));
 
+        let targetId = analysisIdArg?.trim();
+
+        if (!targetId || targetId.length < 32) {
+          const repoContext = await resolveRepository(
+            options?.repo,
+            "Select repository to abort active analysis for:",
+          );
+          if (!repoContext) {
+            return;
+          }
+
+          const history = await withTaskSpinner("Fetching active analysis runs...", () =>
+            analyzeService.getHistory(repoContext.repo.id),
+          );
+          const activeRuns = history.filter((h: AnalysisHistoryItem) => h.status === "PENDING");
+
+          if (activeRuns.length === 0) {
+            p.outro(
+              brand.muted(`No active in-flight analysis runs found for ${repoContext.target}.`),
+            );
+            return;
+          }
+
+          if (targetId) {
+            const prefix = targetId.toLowerCase();
+            const match = activeRuns.find((r: AnalysisHistoryItem) =>
+              r.id.toLowerCase().startsWith(prefix),
+            );
+            if (!match) {
+              p.outro(brand.error(`No active run found matching prefix: '${targetId}'`));
+              return;
+            }
+            targetId = match.id;
+          } else {
+            const selection = await p.select({
+              message: "Select in-flight run to cancel:",
+              options: activeRuns.map((r: AnalysisHistoryItem) => ({
+                label: `Run ${r.id.slice(0, 8)} (${r.status}) - ${new Date(r.createdAt).toLocaleTimeString()}`,
+                value: r.id,
+              })),
+            });
+
+            if (p.isCancel(selection) || typeof selection !== "string") {
+              p.cancel("Abortion cancelled.");
+              return;
+            }
+            targetId = selection;
+          }
+        }
+
         const confirmed = await p.confirm({
-          message: `Are you sure you want to cancel analysis ${brand.highlight(analysisId)}?`,
+          message: `Are you sure you want to cancel analysis ${brand.highlight(targetId.slice(0, 8))}?`,
         });
 
         if (!confirmed || p.isCancel(confirmed)) {
@@ -129,10 +189,13 @@ export function registerAnalyzeCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        s.start("Terminating cloud analysis run...");
-        await trpc.analysis.cancel.mutate({ analysisId });
-        s.stop("Analysis job cancelled");
+        await withTaskSpinner(
+          {
+            start: "Terminating cloud analysis run...",
+            stop: "Analysis job cancelled",
+          },
+          () => analyzeService.cancel(targetId),
+        );
 
         p.outro(brand.success("✔ Analysis pipeline has been successfully terminated."));
       } catch (error) {
@@ -154,49 +217,45 @@ export function registerAnalyzeCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        if (!options?.json) {
-          s.start(`Loading history for ${repoContext.target}...`);
-        }
-
-        const history = await trpc.analysis.getHistory.query({ repoId: repoContext.repo.id });
-        if (!options?.json) {
-          s.stop("History loaded");
-        }
+        const history = await withTaskSpinner(
+          {
+            silent: options?.json,
+            start: `Loading history for ${repoContext.target}...`,
+            stop: "History loaded",
+          },
+          () => analyzeService.getHistory(repoContext.repo.id),
+        );
 
         if (options?.json) {
           console.log(JSON.stringify(history, null, 2));
           return;
         }
 
-        const items = Array.isArray(history) ? history : ((history as any)?.items ?? []);
-
-        if (items.length === 0) {
+        if (history.length === 0) {
           p.outro(brand.muted(`No previous analysis runs found for ${repoContext.target}.`));
           return;
         }
 
-        const table = createTable(["Run ID", "Status", "Date", "Score", "Branch"]);
-        for (const run of items) {
+        const table = createTable(["Run ID", "Status", "Date", "Score", "Commit"]);
+        for (const run of history) {
           table.push([
-            brand.muted(run.publicId ? `${run.publicId.slice(0, 8)}...` : run.id),
+            brand.muted(`${run.id.slice(0, 8)}...`),
             formatStatus(run.status),
             new Date(run.createdAt).toLocaleDateString(),
-            formatScore(run.score ?? run.securityScore),
-            brand.info(run.branch ?? "default"),
+            formatScore(run.score),
+            brand.info(run.commitSha ? run.commitSha.slice(0, 7) : "default"),
           ]);
         }
 
         console.log(`\n  📜 Run History: ${brand.highlight(repoContext.target)}\n`);
         console.log(table.toString());
         console.log("\n");
-        p.outro(brand.muted(`Total runs: ${items.length}`));
+        p.outro(brand.muted(`Total runs: ${history.length}`));
       } catch (error) {
         handleCliError(error);
       }
     });
 
-  // dxnx analyze audit <filePath>
   analyze
     .command("audit <filePath>")
     .description("Run a fast on-demand AI security and code-quality audit for a single file")
@@ -226,7 +285,7 @@ export function registerAnalyzeCommand(program: Command) {
               message: `File '${filePath}' not found locally. Paste file content:`,
               validate: (v) => (!v?.trim() ? "Content cannot be empty" : undefined),
             });
-            if (p.isCancel(inputContent)) {
+            if (p.isCancel(inputContent) || !inputContent) {
               p.cancel("Cancelled.");
               return;
             }
@@ -235,33 +294,27 @@ export function registerAnalyzeCommand(program: Command) {
 
           const branch = options.branch ?? getCurrentGitBranch();
 
-          const s = p.spinner();
-          if (!options.json) {
-            s.start(`Auditing ${pc.cyan(filePath)} via AST & Security Engine...`);
-          }
-
-          const result = await analyzeService.quickFileAudit({
-            branch,
-            content,
-            path: filePath,
-            repoId: repoContext.repo.id,
-          });
-
-          if (!options.json) {
-            s.stop("File audit complete!");
-          }
+          const result = await withTaskSpinner(
+            {
+              silent: options.json,
+              start: `Auditing ${pc.cyan(filePath)} via AST & Security Engine...`,
+              stop: "File audit complete!",
+            },
+            () =>
+              analyzeService.quickFileAudit({
+                branch,
+                content,
+                path: filePath,
+                repoId: repoContext.repo.id,
+              }),
+          );
 
           if (options.json) {
             console.log(JSON.stringify(result, null, 2));
             return;
           }
 
-          const report =
-            typeof result === "string"
-              ? result
-              : ((result as any)?.content ??
-                (result as any)?.report ??
-                JSON.stringify(result, null, 2));
+          const report = typeof result === "string" ? result : JSON.stringify(result, null, 2);
 
           console.log(`\n${brand.info(`=== Audit Report: ${filePath} ===`)}\n`);
           console.log(report);
@@ -274,7 +327,6 @@ export function registerAnalyzeCommand(program: Command) {
       },
     );
 
-  // dxnx analyze config [target]
   analyze
     .command("config [target]")
     .description("View repository PR analysis configuration and security policies")
@@ -289,15 +341,14 @@ export function registerAnalyzeCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        if (!options?.json) {
-          s.start(`Fetching PR config for ${repoContext.target}...`);
-        }
-
-        const config = await analyzeService.getRepoConfig(repoContext.repo.id);
-        if (!options?.json) {
-          s.stop("Config loaded");
-        }
+        const config = await withTaskSpinner(
+          {
+            silent: options?.json,
+            start: `Fetching PR config for ${repoContext.target}...`,
+            stop: "Config loaded",
+          },
+          () => analyzeService.getRepoConfig(repoContext.repo.id),
+        );
 
         if (options?.json) {
           console.log(JSON.stringify(config, null, 2));
@@ -315,7 +366,6 @@ export function registerAnalyzeCommand(program: Command) {
       }
     });
 
-  // dxnx analyze config-set [target]
   analyze
     .command("config-set [target]")
     .description("Interactively update repository PR automation and security settings")
@@ -365,30 +415,27 @@ export function registerAnalyzeCommand(program: Command) {
         const tokenBudgetInput = await p.text({
           defaultValue: String(currentConfig.tokenBudget ?? 50_000),
           message: "Max AI Token Budget per Pull Request run (10000 - 100000):",
-          validate: (v) => {
-            const num = Number(v);
-            if (!Number.isInteger(num) || num < 10_000 || num > 100_000) {
-              return "Must be an integer between 10000 and 100000";
-            }
-            return undefined;
-          },
+          validate: (v) => validateField(UpdatePRConfigInput.shape.tokenBudget)(Number(v)),
         });
-        if (p.isCancel(tokenBudgetInput)) {
+        if (p.isCancel(tokenBudgetInput) || !tokenBudgetInput) {
           return p.cancel("Aborted.");
         }
 
-        const s = p.spinner();
-        s.start("Saving repository configuration...");
+        await withTaskSpinner(
+          {
+            start: "Saving repository configuration...",
+            stop: "Configuration applied!",
+          },
+          () =>
+            analyzeService.configureRepository({
+              ciSkip: Boolean(ciSkip),
+              commentStyle,
+              enabled: Boolean(enabled),
+              repoId: repoContext.repo.id,
+              tokenBudget: Number(tokenBudgetInput),
+            }),
+        );
 
-        await analyzeService.configureRepository({
-          ciSkip: Boolean(ciSkip),
-          commentStyle: commentStyle as any,
-          enabled: Boolean(enabled),
-          repoId: repoContext.repo.id,
-          tokenBudget: Number(tokenBudgetInput),
-        });
-
-        s.stop("Configuration applied!");
         p.outro(
           brand.success(
             `✔ PR Analysis settings updated for ${brand.highlight(repoContext.target)}!`,
@@ -398,4 +445,150 @@ export function registerAnalyzeCommand(program: Command) {
         handleCliError(error);
       }
     });
+
+  analyze
+    .command("metrics [target]")
+    .description("Inspect deep AST complexity, technical debt, and code quality metrics")
+    .option("-a, --aid <analysisId>", "Specific analysis run ID")
+    .option("-r, --repo <target>", "Target repository (owner/name)")
+    .option("--json", "Output raw JSON metrics")
+    .action(async (target?: string, options?: { aid?: string; json?: boolean; repo?: string }) => {
+      try {
+        const repoContext = await resolveRepository(
+          options?.repo ?? target,
+          "Select repository to inspect detailed metrics:",
+        );
+        if (!repoContext) {
+          return;
+        }
+
+        const metrics = await withTaskSpinner(
+          {
+            silent: options?.json,
+            start: `Fetching AST metrics for ${pc.cyan(repoContext.target)}...`,
+            stop: "Metrics loaded",
+          },
+          () =>
+            analyzeService.getDetailedMetrics({
+              aid: options?.aid,
+              repoId: repoContext.repo.id,
+            }),
+        );
+
+        if (options?.json) {
+          console.log(JSON.stringify(metrics, null, 2));
+          return;
+        }
+
+        console.log(
+          `\n${brand.logo(` 📊 Detailed AST & Quality Metrics [${repoContext.target}]:\n`)}`,
+        );
+        console.log(renderDetailedMetricsTable(metrics));
+        console.log("\n");
+
+        p.outro(brand.success("✔ Metrics inspection complete!"));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  analyze
+    .command("structure [target]")
+    .alias("map")
+    .description("Explore project architecture modules, dependency nodes, and structural map")
+    .option("-a, --aid <analysisId>", "Specific analysis run ID")
+    .option("-r, --repo <target>", "Target repository (owner/name)")
+    .option("--json", "Output structure in JSON format")
+    .action(async (target?: string, options?: { aid?: string; json?: boolean; repo?: string }) => {
+      try {
+        const repoContext = await resolveRepository(
+          options?.repo ?? target,
+          "Select repository to inspect structure:",
+        );
+        if (!repoContext) {
+          return;
+        }
+
+        const structure = await withTaskSpinner(
+          {
+            silent: options?.json,
+            start: `Fetching architecture map for ${pc.cyan(repoContext.target)}...`,
+            stop: "Architecture map retrieved",
+          },
+          () =>
+            analyzeService.getStructureMap({
+              aid: options?.aid,
+              repoId: repoContext.repo.id,
+            }),
+        );
+
+        if (options?.json) {
+          console.log(JSON.stringify(structure, null, 2));
+          return;
+        }
+
+        console.log(
+          `\n${brand.logo(` 🏛️ Repository Architecture & Structural Map [${repoContext.target}]:\n`)}`,
+        );
+        console.log(renderStructureMap(structure));
+        console.log("\n");
+
+        p.outro(brand.success("✔ Structural inspection ready."));
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
+  analyze
+    .command("search <query> [target]")
+    .description("Search through workspace symbols, modules, and code entities")
+    .option("-a, --aid <analysisId>", "Specific analysis run ID")
+    .option("-r, --repo <target>", "Target repository (owner/name)")
+    .option("--json", "Output matches in JSON format")
+    .action(
+      async (
+        query: string,
+        target?: string,
+        options?: { aid?: string; json?: boolean; repo?: string },
+      ) => {
+        try {
+          const repoContext = await resolveRepository(
+            options?.repo ?? target,
+            "Select repository context for search:",
+          );
+          if (!repoContext) {
+            return;
+          }
+
+          const results = await withTaskSpinner(
+            {
+              silent: options?.json,
+              start: `Searching workspace for '${pc.cyan(query)}' in ${repoContext.target}...`,
+              stop: "Search complete",
+            },
+            () =>
+              analyzeService.searchWorkspace({
+                aid: options?.aid,
+                repoId: repoContext.repo.id,
+                search: query,
+              }),
+          );
+
+          if (options?.json) {
+            console.log(JSON.stringify(results, null, 2));
+            return;
+          }
+
+          console.log(
+            `\n${brand.logo(` 🔎 Workspace Search Results for '${query}' [${repoContext.target}]:\n`)}`,
+          );
+          console.log(renderSearchResultsTable(results));
+          console.log("\n");
+
+          p.outro(brand.success("✔ Search finished."));
+        } catch (error) {
+          handleCliError(error);
+        }
+      },
+    );
 }

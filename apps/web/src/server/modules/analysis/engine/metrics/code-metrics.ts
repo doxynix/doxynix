@@ -3,10 +3,10 @@ import { creator as canaryPreset } from "@secretlint/secretlint-rule-preset-cana
 import { clamp, uniq } from "es-toolkit";
 import { isExtensionSupported, parse } from "leasot";
 import { normalize } from "pathe";
-import sloc, { type Extension } from "sloc";
 
 import { appLogger } from "@/server/core/app-logger";
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";
+import { countSourceStats } from "@/server/utils/code-counter";
 import { normalizeLanguageName } from "@/server/utils/language-metadata";
 import { getFileExtension } from "@/server/utils/path-operations";
 
@@ -109,19 +109,16 @@ async function collectTodoCount(content: string, extensionWithDot: string, norma
 
 function collectSourceStats(content: string, extension: string) {
   try {
-    const slocExt = extension as Extension;
-    if (sloc.extensions.includes(slocExt)) {
-      const stats = sloc(content, slocExt);
-      return {
-        comments: stats.comment,
-        source: stats.source,
-      };
-    }
+    const stats = countSourceStats(content, extension);
+    return {
+      comments: stats.comments,
+      source: stats.source,
+    };
   } catch (error) {
     appLogger.debug({
       error,
       extension,
-      msg: "SLOC parser failed, using fallback line counting",
+      msg: "Source stats parser failed, using fallback line counting",
     });
   }
 

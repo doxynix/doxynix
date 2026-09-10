@@ -1,4 +1,4 @@
-import { DocType } from "@prisma/client";
+import { DocType } from "@doxynix/shared";
 
 import { hasText } from "@/server/utils/string-utils";
 

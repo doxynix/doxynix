@@ -4,9 +4,58 @@ import type { Command } from "commander";
 import { handleCliError } from "@/core/errors";
 
 import { brand } from "@/ui/colors";
+import { withTaskSpinner } from "@/ui/spinner";
 
-import { renderNotificationStatsTable, renderNotificationsTable } from "./notifications.formatter";
+import {
+  renderNotificationDetails,
+  renderNotificationStatsTable,
+  renderNotificationsTable,
+} from "./notifications.formatter";
 import { notificationsService } from "./notifications.service";
+import type { NotificationItem } from "./notifications.types";
+
+async function resolveNotificationId(
+  idArg?: string,
+  filter?: { isRead?: boolean },
+): Promise<string | null> {
+  const target = idArg?.trim();
+  if (target && target.length >= 32) {
+    return target;
+  }
+
+  const data = await notificationsService.list(50, filter?.isRead);
+  if (data.items.length === 0) {
+    p.outro(brand.muted("No notifications matching criteria found."));
+    return null;
+  }
+
+  if (target) {
+    const prefix = target.toLowerCase();
+    const matched = data.items.find((item: NotificationItem) =>
+      item.id.toLowerCase().startsWith(prefix),
+    );
+    if (!matched) {
+      p.outro(brand.error(`No notification found matching prefix: '${target}'`));
+      return null;
+    }
+    return matched.id;
+  }
+
+  const selection = await p.select({
+    message: "Select a notification:",
+    options: data.items.map((item: NotificationItem) => ({
+      label: `[${item.type}] ${item.title} (${new Date(item.createdAt).toLocaleDateString()}) [${item.id.slice(0, 8)}]`,
+      value: item.id,
+    })),
+  });
+
+  if (p.isCancel(selection) || typeof selection !== "string") {
+    p.cancel("Operation cancelled.");
+    return null;
+  }
+
+  return selection;
+}
 
 export function registerNotificationsCommand(program: Command) {
   const notification = program
@@ -21,16 +70,14 @@ export function registerNotificationsCommand(program: Command) {
     .option("--json", "Output in JSON format")
     .action(async (options: { all?: boolean; json?: boolean }) => {
       try {
-        const s = p.spinner();
-        if (!options.json) {
-          s.start("Fetching notifications...");
-        }
-
-        const data = await notificationsService.list(15, options.all ? undefined : false);
-
-        if (!options.json) {
-          s.stop("Notifications loaded");
-        }
+        const data = await withTaskSpinner(
+          {
+            silent: options.json,
+            start: "Fetching notifications...",
+            stop: "Notifications loaded",
+          },
+          () => notificationsService.list(15, options.all ? undefined : false),
+        );
 
         if (options.json) {
           console.log(JSON.stringify(data, null, 2));
@@ -42,7 +89,9 @@ export function registerNotificationsCommand(program: Command) {
           return;
         }
 
-        console.log(`\n${renderNotificationsTable(data.items)}\n`);
+        console.log(`\n${brand.logo(" 🔔 Workspace Notifications:\n")}`);
+        console.log(renderNotificationsTable(data.items));
+        console.log("\n");
         p.outro(
           brand.muted(`Showing ${data.items.length} notifications. Mark all as read: `) +
             brand.highlight("dxnx notifications clear"),
@@ -58,33 +107,30 @@ export function registerNotificationsCommand(program: Command) {
     .action(async () => {
       try {
         p.intro(brand.logo(" 🔔 Clear Notifications "));
-
-        const s = p.spinner();
-        s.start("Updating notification status...");
-        const res = await notificationsService.markAllAsRead();
-        s.stop("Done!");
-
+        const res = await withTaskSpinner(
+          { start: "Updating notification statuses...", stop: "Done!" },
+          () => notificationsService.markAllAsRead(),
+        );
         p.outro(brand.success(`✅ ${res.message}`));
       } catch (error) {
         handleCliError(error);
       }
     });
 
-  // dxnx notifications stats
   notification
     .command("stats")
     .description("Display summary counters of unread and read notifications")
     .option("--json", "Output in JSON format")
     .action(async (options: { json?: boolean }) => {
       try {
-        const s = p.spinner();
-        if (!options.json) {
-          s.start("Calculating notification stats...");
-        }
-        const stats = await notificationsService.getStats();
-        if (!options.json) {
-          s.stop("Stats loaded");
-        }
+        const stats = await withTaskSpinner(
+          {
+            silent: options.json,
+            start: "Calculating notification stats...",
+            stop: "Stats loaded",
+          },
+          () => notificationsService.getStats(),
+        );
 
         if (options.json) {
           console.log(JSON.stringify(stats, null, 2));
@@ -100,58 +146,92 @@ export function registerNotificationsCommand(program: Command) {
       }
     });
 
-  // dxnx notifications read <id>
   notification
-    .command("read <id>")
-    .description("Mark a specific notification as read")
-    .action(async (id: string) => {
+    .command("read [id]")
+    .description("Mark a notification as read (supports Short-ID and picker)")
+    .action(async (idArg?: string) => {
       try {
-        const s = p.spinner();
-        s.start(`Updating notification ${id}...`);
-        const res = await notificationsService.markAs(id, true);
-        s.stop("Updated!");
+        const targetId = await resolveNotificationId(idArg, { isRead: false });
+        if (!targetId) {
+          return;
+        }
+
+        const res = await withTaskSpinner(
+          { start: `Marking notification ${targetId.slice(0, 8)} as read...`, stop: "Updated!" },
+          () => notificationsService.markAs(targetId, true),
+        );
         p.outro(brand.success(`✔ ${res.message}`));
       } catch (error) {
         handleCliError(error);
       }
     });
 
-  // dxnx notifications unread <id>
   notification
-    .command("unread <id>")
-    .description("Mark a specific notification as unread")
-    .action(async (id: string) => {
+    .command("unread [id]")
+    .description("Mark a notification as unread (supports Short-ID and picker)")
+    .action(async (idArg?: string) => {
       try {
-        const s = p.spinner();
-        s.start(`Updating notification ${id}...`);
-        const res = await notificationsService.markAs(id, false);
-        s.stop("Updated!");
+        const targetId = await resolveNotificationId(idArg, { isRead: true });
+        if (!targetId) {
+          return;
+        }
+
+        const res = await withTaskSpinner(
+          { start: `Marking notification ${targetId.slice(0, 8)} as unread...`, stop: "Updated!" },
+          () => notificationsService.markAs(targetId, false),
+        );
         p.outro(brand.success(`✔ ${res.message}`));
       } catch (error) {
         handleCliError(error);
       }
     });
 
-  // dxnx notifications delete <id>
   notification
-    .command("delete <id>")
-    .description("Permanently delete a single notification")
-    .action(async (id: string) => {
+    .command("delete [id]")
+    .description("Permanently delete a notification (supports Short-ID and picker)")
+    .action(async (idArg?: string) => {
       try {
-        const s = p.spinner();
-        s.start(`Deleting notification ${id}...`);
-        const res = await notificationsService.deleteOne(id);
-        s.stop("Deleted!");
+        const targetId = await resolveNotificationId(idArg);
+        if (!targetId) {
+          return;
+        }
+
+        const res = await withTaskSpinner(
+          { start: `Deleting notification ${targetId.slice(0, 8)}...`, stop: "Deleted!" },
+          () => notificationsService.deleteOne(targetId),
+        );
         p.outro(brand.success(`✔ ${res.message}`));
       } catch (error) {
         handleCliError(error);
       }
     });
 
-  // dxnx notifications prune
+  notification
+    .command("view [id]")
+    .description("View full notification details (supports Short-ID and picker)")
+    .action(async (idArg?: string) => {
+      try {
+        const targetId = await resolveNotificationId(idArg);
+        if (!targetId) {
+          return;
+        }
+
+        const data = await notificationsService.list(50);
+        const item = data.items.find((n: NotificationItem) => n.id === targetId);
+        if (!item) {
+          p.outro(brand.error("Notification not found."));
+          return;
+        }
+
+        renderNotificationDetails(item);
+      } catch (error) {
+        handleCliError(error);
+      }
+    });
+
   notification
     .command("prune")
-    .description("Purge and permanently delete all notifications marked as read")
+    .description("Purge and permanently delete all read notifications")
     .action(async () => {
       try {
         p.intro(brand.warning(" 🧹 Purge Read Notifications "));
@@ -165,10 +245,10 @@ export function registerNotificationsCommand(program: Command) {
           return;
         }
 
-        const s = p.spinner();
-        s.start("Pruning read notifications...");
-        const res = await notificationsService.deleteRead();
-        s.stop("Done!");
+        const res = await withTaskSpinner(
+          { start: "Pruning read notifications...", stop: "Done!" },
+          () => notificationsService.deleteRead(),
+        );
 
         p.outro(brand.success(`✔ ${res.message} (${res.deletedCount} items removed)`));
       } catch (error) {

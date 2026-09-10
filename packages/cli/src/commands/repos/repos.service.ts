@@ -1,5 +1,7 @@
 import { trpc } from "@/core/client";
 
+import type { RepoFilterInput, RepoFilterSlimInput } from "./repos.types";
+
 export const reposService = {
   async add(url: string) {
     return trpc.repo.create.mutate({ url });
@@ -25,14 +27,11 @@ export const reposService = {
     return trpc.repo.getByOwner.query({ owner });
   },
 
-  async list(limit = 20, search?: string, owner?: string) {
-    return trpc.repo.getAll.query({
-      cursor: 1,
-      limit,
-      owner,
-      search,
-      sortBy: "createdAt",
-      sortOrder: "desc",
-    });
+  async getSlim(input?: RepoFilterSlimInput) {
+    return trpc.repo.getSlim.query(input ?? {});
+  },
+
+  async list(input?: RepoFilterInput) {
+    return trpc.repo.getAll.query(input ?? {});
   },
 };

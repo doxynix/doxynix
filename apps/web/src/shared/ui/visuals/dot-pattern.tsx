@@ -84,10 +84,20 @@ export function DotPattern({
           x={x}
           y={y}
         >
-          <circle cx={cx} cy={cy} id="pattern-circle" r={cr} />
+          <circle
+            cx={cx}
+            cy={cy}
+            id="pattern-circle"
+            r={cr}
+          />
         </pattern>
       </defs>
-      <rect fill={`url(#${id})`} height="100%" strokeWidth={0} width="100%" />
+      <rect
+        fill={`url(#${id})`}
+        height="100%"
+        strokeWidth={0}
+        width="100%"
+      />
     </svg>
   );
 }

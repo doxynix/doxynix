@@ -1,5 +1,4 @@
 import { extname, normalize } from "pathe";
-import ts from "typescript";
 
 import type { TsStaticHint } from "@/server/utils/types";
 
@@ -7,73 +6,99 @@ import { COMPLEXITY_SCORING } from "../core/scoring-constants";
 
 const TS_LIKE = new Set([".cjs", ".cts", ".js", ".jsx", ".mjs", ".mts", ".ts", ".tsx"]);
 
-type VisitContext = {
-  hints: TsStaticHint[];
-  normalizedPath: string;
-  sourceFile: ts.SourceFile;
-};
+const EXPLICIT_ANY_REGEX = /(?::\s*any\b|\bas\s+any\b|<any>|\bany\[\])/;
+const FN_HEADER_REGEX =
+  /(?:function\b[^(]*\(([^)]*)\)|(?:const|let|var)\s+\w+\s*=\s*(?:async\s*)?\(([^)]*)\)\s*=>|\b\w+\s*\(([^)]*)\)\s*\{)/;
 
-const visitNode = (node: ts.Node, context: VisitContext) => {
-  const { hints, normalizedPath, sourceFile } = context;
+function analyzeLinesForHints(content: string, normalizedPath: string, hints: TsStaticHint[]) {
+  const lines = content.split(/\r?\n/u);
+  const totalLines = lines.length;
 
-  if (node.kind === ts.SyntaxKind.AnyKeyword) {
-    const startPos = node.getStart(sourceFile);
-    const { line } = sourceFile.getLineAndCharacterOfPosition(startPos);
-    hints.push({
-      detail: "Explicit `any` weakens type safety.",
-      kind: "explicit-any",
-      line: line + 1,
-      path: normalizedPath,
-    });
-    return;
-  }
+  let inBlockComment = false;
 
-  if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
-    const nodeStart = node.getStart(sourceFile);
-    const nodeEnd = node.getEnd();
+  for (let idx = 0; idx < totalLines; idx++) {
+    const rawLine = lines[idx]!;
+    const lineNum = idx + 1;
 
-    const start = sourceFile.getLineAndCharacterOfPosition(nodeStart);
-    const end = sourceFile.getLineAndCharacterOfPosition(nodeEnd);
-    const lineSpan = end.line - start.line + 1;
+    if (inBlockComment) {
+      if (rawLine.includes("*/")) {
+        inBlockComment = false;
+      }
+      continue;
+    }
 
-    if (lineSpan >= COMPLEXITY_SCORING.lineCountThreshold) {
+    if (rawLine.includes("/*")) {
+      inBlockComment = true;
+      continue;
+    }
+
+    const cleanLine = rawLine.split("//")[0]?.trim() ?? "";
+    if (cleanLine.length === 0) {
+      continue;
+    }
+
+    if (EXPLICIT_ANY_REGEX.test(cleanLine)) {
       hints.push({
-        detail: `Function spans ~${lineSpan} lines (threshold ${COMPLEXITY_SCORING.lineCountThreshold}).`,
-        kind: "long-function",
-        line: start.line + 1,
+        detail: "Explicit `any` weakens type safety.",
+        kind: "explicit-any",
+        line: lineNum,
         path: normalizedPath,
       });
     }
 
-    const paramCount = node.parameters.length;
-    if (paramCount >= COMPLEXITY_SCORING.paramCountThreshold) {
-      hints.push({
-        detail: `Function has ${paramCount} parameters (threshold ${COMPLEXITY_SCORING.paramCountThreshold}).`,
-        kind: "many-params",
-        line: start.line + 1,
-        path: normalizedPath,
-      });
+    const fnMatch = FN_HEADER_REGEX.exec(cleanLine);
+    if (fnMatch != null) {
+      const paramStr = fnMatch[1] ?? fnMatch[2] ?? fnMatch[3] ?? "";
+      const paramCount = paramStr
+        .split(",")
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0).length;
+
+      if (paramCount >= COMPLEXITY_SCORING.paramCountThreshold) {
+        hints.push({
+          detail: `Function has ${paramCount} parameters (threshold ${COMPLEXITY_SCORING.paramCountThreshold}).`,
+          kind: "many-params",
+          line: lineNum,
+          path: normalizedPath,
+        });
+      }
     }
   }
 
-  ts.forEachChild(node, (child) => visitNode(child, context));
-};
+  let fnStartLine = 0;
+  let braceDepth = 0;
+  let trackingFn = false;
 
-function scriptKind(filePath: string): ts.ScriptKind {
-  const lower = filePath.toLowerCase();
-  if (lower.endsWith(".tsx")) {
-    return ts.ScriptKind.TSX;
+  for (let idx = 0; idx < totalLines; idx++) {
+    const line = lines[idx]!;
+    const lineNum = idx + 1;
+
+    if (
+      !trackingFn &&
+      (line.includes("function") || line.includes("=>") || /\b\w+\s*\(.*?\)\s*\{/.test(line))
+    ) {
+      fnStartLine = lineNum;
+      trackingFn = true;
+    }
+
+    const openCount = (line.match(/{/g) ?? []).length;
+    const closeCount = (line.match(/}/g) ?? []).length;
+    braceDepth += openCount - closeCount;
+
+    if (trackingFn && braceDepth <= 0) {
+      const lineSpan = lineNum - fnStartLine + 1;
+      if (lineSpan >= COMPLEXITY_SCORING.lineCountThreshold) {
+        hints.push({
+          detail: `Function spans ~${lineSpan} lines (threshold ${COMPLEXITY_SCORING.lineCountThreshold}).`,
+          kind: "long-function",
+          line: fnStartLine,
+          path: normalizedPath,
+        });
+      }
+      trackingFn = false;
+      braceDepth = 0;
+    }
   }
-  if (lower.endsWith(".jsx")) {
-    return ts.ScriptKind.JSX;
-  }
-  if (lower.endsWith(".js") || lower.endsWith(".mjs") || lower.endsWith(".cjs")) {
-    return ts.ScriptKind.JS;
-  }
-  if (lower.endsWith(".cts") || lower.endsWith(".mts")) {
-    return ts.ScriptKind.TS;
-  }
-  return ts.ScriptKind.TS;
 }
 
 export function collectTypeScriptStaticHints(
@@ -88,17 +113,8 @@ export function collectTypeScriptStaticHints(
       continue;
     }
 
-    let sourceFile: ts.SourceFile;
     try {
-      sourceFile = ts.createSourceFile(
-        normalized,
-        file.content,
-        ts.ScriptTarget.Latest,
-        false,
-        scriptKind(normalized),
-      );
-
-      visitNode(sourceFile, { hints, normalizedPath: normalized, sourceFile });
+      analyzeLinesForHints(file.content, normalized, hints);
     } catch {}
   }
 

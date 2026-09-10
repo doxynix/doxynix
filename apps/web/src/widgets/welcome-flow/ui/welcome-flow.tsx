@@ -69,7 +69,10 @@ export function WelcomeFlow({ user }: Readonly<Props>) {
 
       <div className="fade-in slide-in-from-bottom-8 flex animate-in items-center justify-center gap-4 duration-300">
         {FEATURE_CARDS.map((item) => (
-          <Card className={"flex w-full flex-col"} key={item.title}>
+          <Card
+            className={"flex w-full flex-col"}
+            key={item.title}
+          >
             <CardHeader>
               <item.icon className="size-5" />
               <CardTitle className="font-bold text-lg">{item.title}</CardTitle>

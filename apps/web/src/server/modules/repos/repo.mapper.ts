@@ -1,4 +1,5 @@
-import { type Prisma, Status } from "@prisma/client";
+import { Status } from "@doxynix/shared";
+import type { Prisma } from "@prisma/client";
 
 import { getLanguageColor } from "@/server/utils/language-metadata";
 import type { PaginationMeta } from "@/server/utils/pagination";

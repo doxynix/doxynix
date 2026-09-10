@@ -28,11 +28,18 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
           <CardTitle className="truncate font-semibold text-base">{active.name}</CardTitle>
           <CardDescription className="flex flex-col gap-2 text-xs">
             <p>
-              {tCommon("created")}: <TimeAgo date={active.createdAt} locale={locale} />
+              {tCommon("created")}:{" "}
+              <TimeAgo
+                date={active.createdAt}
+                locale={locale}
+              />
             </p>
             <p>
               {t("settings_api_keys_last_used")}:{" "}
-              <TimeAgo date={active.lastUsed ?? ""} locale={locale} />
+              <TimeAgo
+                date={active.lastUsed ?? ""}
+                locale={locale}
+              />
             </p>
             {active.description != null && (
               <p className="line-clamp-4 text-muted-foreground leading-relaxed">

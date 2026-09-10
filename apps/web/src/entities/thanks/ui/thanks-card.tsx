@@ -22,15 +22,26 @@ export function ThanksCard({ group }: Readonly<Props>) {
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4 overflow-hidden">
-            <AppAvatar alt={author} fallbackText={author} sizeClassName="size-12" src={avatar} />
+            <AppAvatar
+              alt={author}
+              fallbackText={author}
+              sizeClassName="size-12"
+              src={avatar}
+            />
 
             <div className="flex flex-col overflow-hidden">
-              <CardTitle className="truncate font-bold text-lg" title={author}>
+              <CardTitle
+                className="truncate font-bold text-lg"
+                title={author}
+              >
                 {author}
               </CardTitle>
               <div className="mt-1 flex gap-1.5">
                 {uniqueLicenses.map((lic) => (
-                  <AppBadge key={lic} variant="secondary">
+                  <AppBadge
+                    key={lic}
+                    variant="secondary"
+                  >
                     {lic}
                   </AppBadge>
                 ))}
@@ -47,7 +58,10 @@ export function ThanksCard({ group }: Readonly<Props>) {
           </p>
           <div className="flex flex-wrap gap-1.5">
             {packages.map((pkg) => (
-              <AppBadge key={pkg.name} variant="outline">
+              <AppBadge
+                key={pkg.name}
+                variant="outline"
+              >
                 <Package className="size-3 text-muted-foreground" />
                 <span className="truncate">
                   {pkg.name.includes("/") ? (

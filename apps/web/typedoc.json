@@ -4,7 +4,7 @@
   "entryFileName": "INDEX_FOR_AI.md",
   "entryPointStrategy": "expand",
   "entryPoints": ["src"],
-  "exclude": ["**/*.test.ts", "**/*.spec.ts", "**/shared/api-contracts/**", "**/node_modules/**"],
+  "exclude": ["**/*.test.ts", "**/*.spec.ts", "**/node_modules/**"],
   "excludeInternal": true,
   "excludePrivate": true,
   "hideBreadcrumbs": true,

@@ -42,7 +42,10 @@ export function RepoSwagger({ spec }: Readonly<{ spec: string }>) {
         <ApiReferenceReact configuration={config} />
       </div>
 
-      <style global jsx>{`
+      <style
+        global
+        jsx
+      >{`
         :global(html),
         :global(body) {
           --scalar-color-blue: var(--color-info) !important;

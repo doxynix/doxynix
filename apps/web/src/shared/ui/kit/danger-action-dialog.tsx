@@ -50,7 +50,10 @@ export function DangerActionDialog({
   const tCommon = useTranslations("Common");
 
   return (
-    <Dialog onOpenChange={onOpenChange} open={open}>
+    <Dialog
+      onOpenChange={onOpenChange}
+      open={open}
+    >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
@@ -69,7 +72,10 @@ export function DangerActionDialog({
         {children}
 
         {successAlertTitle && successAlertContent && (
-          <Alert className="border-success/10 bg-success/5 text-success" variant="success">
+          <Alert
+            className="border-success/10 bg-success/5 text-success"
+            variant="success"
+          >
             <AlertTitle className="font-bold text-base">{successAlertTitle}</AlertTitle>
             <AlertDescription>{successAlertContent}</AlertDescription>
           </Alert>
@@ -87,7 +93,10 @@ export function DangerActionDialog({
 
         <DialogFooter>
           <DialogClose asChild>
-            <AppButton className="cursor-pointer" variant="outline">
+            <AppButton
+              className="cursor-pointer"
+              variant="outline"
+            >
               {tCommon("cancel")}
             </AppButton>
           </DialogClose>

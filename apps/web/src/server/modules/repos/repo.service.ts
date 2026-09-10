@@ -1,4 +1,5 @@
-import { type Prisma, Status, Visibility } from "@prisma/client";
+import { Status, Visibility } from "@doxynix/shared";
+import type { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
 import type { DbClient } from "@/server/core/db";

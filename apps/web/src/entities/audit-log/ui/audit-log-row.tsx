@@ -83,7 +83,10 @@ export function AuditLogRow({ log }: Readonly<Props>) {
             {log.requestId != null && (
               <div className="flex items-center gap-1">
                 <span>{log.requestId.slice(0, 8)}</span>
-                <CopyButton tooltipSide="right" value={log.requestId} />
+                <CopyButton
+                  tooltipSide="right"
+                  value={log.requestId}
+                />
               </div>
             )}
           </div>
@@ -91,7 +94,11 @@ export function AuditLogRow({ log }: Readonly<Props>) {
       </TableCell>
 
       <TableCell className="whitespace-nowrap text-right">
-        <TimeAgo className="text-xs hover:text-foreground" date={log.createdAt} locale={locale} />
+        <TimeAgo
+          className="text-xs hover:text-foreground"
+          date={log.createdAt}
+          locale={locale}
+        />
       </TableCell>
 
       <TableCell className="text-center">

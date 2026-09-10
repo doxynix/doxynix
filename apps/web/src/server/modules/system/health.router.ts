@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 
 import { createTRPCRouter, publicProcedure } from "@/server/core/trpc/init";
 import { handlePrismaError } from "@/server/utils/handle-error";

@@ -28,7 +28,12 @@ export function RepoOverviewContainer({ repoId }: Readonly<Props>) {
     return (
       <div className="flex h-150 items-center justify-center rounded-xl border border-dashed">
         <EmptyState
-          action={<RepoAnalyzeButton name={name} owner={owner} />}
+          action={
+            <RepoAnalyzeButton
+              name={name}
+              owner={owner}
+            />
+          }
           description="Run a full analysis to generate insights and overview."
           icon={BarChart3}
           title="No analysis found"

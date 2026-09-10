@@ -54,7 +54,10 @@ export function StatCard({
           <p className="font-bold text-2xl">{value}</p>
 
           {delta != null && (
-            <AppBadge className={getDeltaClass()} variant="outline">
+            <AppBadge
+              className={getDeltaClass()}
+              variant="outline"
+            >
               {isPositiveTrend ? (
                 <ArrowUpRight />
               ) : isNegativeTrend ? (

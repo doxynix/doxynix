@@ -1,6 +1,6 @@
-import { DocType } from "@prisma/client";
+import { DocType } from "@doxynix/shared";
 import { uniqBy } from "es-toolkit";
-import { z } from "zod";
+import * as z from "zod";
 
 import { appLogger } from "@/server/core/app-logger";
 
