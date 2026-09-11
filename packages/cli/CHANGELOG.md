@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.1.9](https://github.com/doxynix/doxynix/compare/cli-v2.1.8...cli-v2.1.9) (2026-09-11)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @doxynix/web bumped to 3.1.9
+
 ## [2.1.8](https://github.com/doxynix/doxynix/compare/cli-v2.1.7...cli-v2.1.8) (2026-09-11)
 
 

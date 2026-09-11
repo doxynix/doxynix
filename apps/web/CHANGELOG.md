@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.9](https://github.com/doxynix/doxynix/compare/web-v3.1.8...web-v3.1.9) (2026-09-11)
+
+
+### Bug Fixes
+
+* **deps:** update all other non-major dependencies ([#2129](https://github.com/doxynix/doxynix/issues/2129)) ([4f7b12b](https://github.com/doxynix/doxynix/commit/4f7b12bc6ff590e7f1faacf9eb4757372c9a1053))
+
 ## [3.1.8](https://github.com/doxynix/doxynix/compare/web-v3.1.7...web-v3.1.8) (2026-09-11)
 
 
