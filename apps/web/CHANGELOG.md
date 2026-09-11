@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.6](https://github.com/doxynix/doxynix/compare/web-v3.1.5...web-v3.1.6) (2026-09-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency posthog-js to v1.428.4 ([#2122](https://github.com/doxynix/doxynix/issues/2122)) ([4bb2607](https://github.com/doxynix/doxynix/commit/4bb2607068932634caf0d95bf932bb87b4cc5517))
+
 ## [3.1.5](https://github.com/doxynix/doxynix/compare/web-v3.1.4...web-v3.1.5) (2026-09-10)
 
 
