@@ -4,13 +4,14 @@
 
 ### Universal Domain Models, Zod Schemas & Platform Contracts
 
-**The single source of truth for pure domain logic, scoring algorithms, and data contracts across the Doxynix monorepo.**
+**The single source of truth for pure domain logic, schemas, and data contracts across the Doxynix monorepo.**
 
 [![Language: TypeScript](https://img.shields.io/badge/language-typescript%20strict-24292e?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Validation: Zod](https://img.shields.io/badge/validation-zod%204.4-24292e?style=flat-square&logo=zod)](https://zod.dev/)
-[![Linter: Biome](https://img.shields.io/badge/linter-biome-24292e?style=flat-square&logo=biome)](https://biomejs.dev)
+[![Validation: Zod](https://img.shields.io/badge/validation-zod%203.x-24292e?style=flat-square&logo=zod)](https://zod.dev/)
+[![Linter: Oxlint](https://img.shields.io/badge/linter-oxlint-24292e?style=flat-square&logo=oxc)](https://oxc.rs)
+[![Formatter: Biome](https://img.shields.io/badge/formatter-biome-24292e?style=flat-square&logo=biome)](https://biomejs.dev)
 
-[Invariants](#-purpose--invariants) · [Subpath Exports](#-subpath-exports) · [Directory Structure](#-directory-structure) · [Usage](#-usage-examples)
+[Invariants](#-purpose--invariants) · [Contracts & Schemas](#-contracts--schemas) · [Directory Structure](#-directory-structure) · [Usage](#-usage-examples)
 
 </div>
 
@@ -18,24 +19,22 @@
 
 ## 🎯 Purpose & Invariants
 
-`@doxynix/shared` provides isomorphic, platform-agnostic types, schemas, and scoring calculation functions for `apps/web`, `packages/cli`, `apps/siem-server`, `apps/siem-client`, and future mobile clients (`apps/mobile`).
+`@doxynix/shared` provides isomorphic, platform-agnostic types, schemas, and contracts shared between `apps/web`, `packages/cli`, `apps/siem-server`, and `apps/siem-client`.
 
 > [!IMPORTANT]  
 > **Zero Runtime Dependency Rule:** This package must strictly contain **pure TypeScript logic, constants, and Zod schemas**. No React, DOM APIs (`window`/`document`), Node.js built-ins (`fs`/`path`), Prisma, or heavy runtime dependencies are allowed.
 
 ---
 
-## 📦 Subpath Exports
+## 📦 Contracts & Schemas
 
-Import only the modules you need via modern subpath exports:
+The package exports shared validation schemas and system enums:
 
-| Subpath | Description |
-| :--- | :--- |
-| `@doxynix/shared` | Master barrel exporting all domain contracts |
-| `@doxynix/shared/scoring` | Repository health levels, score thresholds, and formulas |
-| `@doxynix/shared/siem` | Threat levels, secret leak findings, and scanner models |
-| `@doxynix/shared/pagination` | Universal cursor and offset pagination metadata |
-| `@doxynix/shared/auth` | User credential validation and authentication schemas |
+| Module | Exports | Purpose |
+| :--- | :--- | :--- |
+| `enums` | System & domain enums | Canonical shared statuses, roles, and event categories |
+| `schemas/core` | Core platform contracts | Common entity schemas, identifiers, and payload validators |
+| `schemas/agent-tools` | Agent tool call schemas | Parameter definitions and contracts for contextual AI agent tools |
 
 ---
 
@@ -43,15 +42,11 @@ Import only the modules you need via modern subpath exports:
 
 ```
 src/
-├── auth/                 # Authentication & credential Zod schemas
-│   └── auth.schema.ts
-├── pagination/           # Shared pagination meta & response wrappers
-│   └── pagination.types.ts
-├── scoring/              # Platform scoring formulas & health tier calculators
-│   ├── scoring.ts
-│   └── scoring.types.ts
-├── siem/                 # SIEM event, telemetry, and vulnerability types
-│   └── siem.types.ts
+├── enums/                # Platform enums and constant definitions
+│   └── index.ts
+├── schemas/              # Zod validation schemas
+│   ├── agent-tools.schema.ts
+│   └── core.schema.ts
 └── index.ts              # Master contract export barrel
 ```
 
@@ -59,26 +54,18 @@ src/
 
 ## 💻 Usage Examples
 
-### 1. Repository Health & Scoring
+### 1. Agent Tool Definitions
 
 ```typescript
-import { getHealthLevel, SCORE_THRESHOLDS } from "@doxynix/shared/scoring";
+import { agentToolSchema } from "@doxynix/shared";
 
-const health = getHealthLevel(85); // 'healthy'
+const validatedCall = agentToolSchema.parse(payload);
 ```
 
-### 2. Authentication Validation
+### 2. Universal Enums & Types
 
 ```typescript
-import { authSchema, type AuthSchema } from "@doxynix/shared/auth";
-
-const validated = authSchema.parse(payload);
-```
-
-### 3. SIEM Severity & Finding Contracts
-
-```typescript
-import type { LeakFinding, Severity } from "@doxynix/shared/siem";
+import type { CoreSchemaType } from "@doxynix/shared";
 ```
 
 ---

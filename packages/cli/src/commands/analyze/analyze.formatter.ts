@@ -1,5 +1,6 @@
 import { brand, pc } from "@/ui/colors";
 import { formatScore, getScoreLabel } from "@/ui/formatters";
+import { icons } from "@/ui/icons";
 import { createTable } from "@/ui/table";
 
 import type {
@@ -14,14 +15,14 @@ export function formatStatus(status: string): string {
   switch (status) {
     case "DONE":
     case "COMPLETED": {
-      return brand.success("✔ Completed (DONE)");
+      return `${icons.check} Completed (DONE)`;
     }
     case "FAILED": {
-      return brand.error("✖ Failed (FAILED)");
+      return `${icons.cross} Failed (FAILED)`;
     }
     case "ANALYZING":
     case "PENDING": {
-      return brand.info("⏳ Processing (ANALYZING)");
+      return `${icons.pending} Processing (ANALYZING)`;
     }
     default: {
       return brand.muted(status);
@@ -30,21 +31,25 @@ export function formatStatus(status: string): string {
 }
 
 export function renderAnalysisTable(analysis: AnalysisItem): string {
-  const table = createTable(["Metric", "Score", "Health"]);
+  const table = createTable(["Dimension", "Score", "Health"]);
   table.push(
-    ["🛡️ Security", formatScore(analysis.securityScore), getScoreLabel(analysis.securityScore)],
     [
-      "⚡ Code Complexity",
+      `${icons.security} Security`,
+      formatScore(analysis.securityScore),
+      getScoreLabel(analysis.securityScore),
+    ],
+    [
+      `${icons.dotWarning} Code Complexity`,
       formatScore(analysis.complexityScore),
       getScoreLabel(analysis.complexityScore),
     ],
     [
-      "💳 Technical Debt",
+      `${icons.warning} Technical Debt`,
       formatScore(analysis.techDebtScore),
       getScoreLabel(analysis.techDebtScore),
     ],
     [
-      "🚀 Developer Onboarding",
+      `${icons.ai} Developer Onboarding`,
       formatScore(analysis.onboardingScore),
       getScoreLabel(analysis.onboardingScore),
     ],
@@ -58,7 +63,9 @@ export function renderRepoConfigTable(config: Partial<RepoConfig>): string {
   const isEnabled = config.enabled ?? true;
   table.push([
     "PR Auto-Analysis",
-    isEnabled ? brand.success("● Enabled (Active)") : brand.error("○ Disabled"),
+    isEnabled
+      ? brand.success(`${icons.dot} Enabled (Active)`)
+      : brand.error(`${icons.dotMuted} Disabled`),
     "Automatic triggers on GitHub Pull Requests",
   ]);
 

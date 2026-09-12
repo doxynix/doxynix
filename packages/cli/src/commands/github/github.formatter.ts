@@ -1,4 +1,5 @@
 import { brand, pc } from "@/ui/colors";
+import { icons } from "@/ui/icons";
 import { createTable } from "@/ui/table";
 
 import type {
@@ -27,9 +28,11 @@ export function renderGithubReposTable(repos: GitHubRepoItem[]): string {
       ? r.description.slice(0, 45) + (r.description.length > 45 ? "…" : "")
       : "—";
 
+    const visibilityLabel = isPriv ? `${icons.lock} Private` : `${icons.dotMuted} Public`;
+
     table.push([
       brand.highlight(fullName),
-      isPriv ? pc.yellow("🔒 Private") : pc.green("🌐 Public"),
+      isPriv ? pc.yellow(visibilityLabel) : pc.green(visibilityLabel),
       pc.cyan(branch),
       brand.muted(desc),
     ]);
@@ -42,8 +45,7 @@ export function renderBranchesTable(branches: GitHubBranchItem[]): string {
   const table = createTable(["Branch Name", "Status"]);
 
   for (const b of branches) {
-    const name = typeof b === "string" ? b : String(b);
-    table.push([brand.highlight(name), brand.muted("Active")]);
+    table.push([brand.highlight(`${icons.branch} ${b}`), brand.muted("Active")]);
   }
 
   return table.toString();
@@ -62,7 +64,7 @@ export function renderFileTree(files: GitHubFileItem[]): string {
     const isDir = !isFile;
     const extraInfo = file[2] ? brand.muted(String(file[2]).slice(0, 7)) : "—";
 
-    const icon = isDir ? "📁" : "📄";
+    const icon = isDir ? icons.folder : icons.doc;
     const typeLabel = isDir ? pc.cyan("Directory") : pc.gray("File");
 
     table.push([`${icon} ${typeLabel}`, isDir ? pc.bold(filePath) : filePath, extraInfo]);

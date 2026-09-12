@@ -1,4 +1,5 @@
 import type { AppRouter } from "@doxynix/web/trpc";
+import pkg from "@pkg";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
@@ -14,7 +15,9 @@ export const trpc = createTRPCClient<AppRouter>({
       headers() {
         const token = getToken();
         return {
+          Accept: "application/json",
           Authorization: token ? `Bearer ${token}` : "",
+          "User-Agent": `dxnx/${pkg.version}`,
         };
       },
       transformer: superjson,

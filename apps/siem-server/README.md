@@ -23,7 +23,7 @@
 
 ### Key Capabilities
 
-* **Vertical Slice Architecture:** Domain slices (`incidents`, `audit`, `rules`, `scan`, `stream-logs`) are completely self-contained with zero cross-slice dependencies.
+* **Vertical Slice Architecture:** Domain slices (`admin`, `analytics`, `audit`, `incidents`, `rules`, `scan`, `stream-logs`) are completely self-contained with zero cross-slice dependencies.
 * **End-to-End Type Safety:** Exports `AppType` to provide a zero-cost, fully typed RPC client (`hcWithType`) for `@doxynix/siem-client`.
 * **UUIDv7 Indexed Primary Keys:** Native time-sorted UUIDv7 identifiers optimized for high-volume PostgreSQL B-tree chronological indexing.
 * **Axiom Batch Ingestion Worker:** Asynchronous, non-blocking telemetry forwarder that buffers and flushes security events directly into Axiom Datasets.
@@ -41,17 +41,19 @@ flowchart LR
     end
 
     subgraph Slices [" Self-Contained Slices "]
-        ROUTER --> S1[incidents.service]
-        ROUTER --> S2[audit.service]
-        ROUTER --> S3[rules.service]
-        ROUTER --> S4[scan.engine]
-        ROUTER --> S5[stream-logs.service]
+        ROUTER --> S1[admin.router]
+        ROUTER --> S2[analytics.service]
+        ROUTER --> S3[audit.service]
+        ROUTER --> S4[incidents.service]
+        ROUTER --> S5[rules.service]
+        ROUTER --> S6[scan.engine]
+        ROUTER --> S7[stream-logs.service]
     end
 
     subgraph Data [" Data & Egress Layer "]
-        S1 & S2 & S3 & S4 --> DB[(PostgreSQL 18 / Drizzle)]
-        S1 & S5 --> BUS[(Redis / Valkey Bus)]
-        S2 & S5 --> AXIOM[Axiom Ingestion Worker]
+        S1 & S2 & S3 & S4 & S5 & S6 --> DB[(PostgreSQL 18 / Drizzle)]
+        S4 & S7 --> BUS[(Redis / Valkey Bus)]
+        S3 & S7 --> AXIOM[Axiom Ingestion Worker]
     end
 ```
 
@@ -119,10 +121,11 @@ bun run db:studio          # Open Drizzle Studio database UI
 bun run seed:admin         # Bootstrap the initial superadministrator account
 bun run db:seed:rules      # Populate baseline threat detection rules
 
-# Code Quality (Biome)
-bun run lint               # Run Biome linter check
-bun run lint:fix           # Automatically fix lint issues
-bun run format             # Format source files
+# Code Quality & Validation
+bun run lint            # Run fast AST linting via Oxlint
+bun run lint:fix        # Automatically fix lint issues with Oxlint
+bun run format          # Format codebase & sort imports via Biome
+bun run validate        # Strict validation: Oxlint + Biome check + Typecheck
 ```
 
 ---

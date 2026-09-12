@@ -1,5 +1,7 @@
 import { brand, pc } from "@/ui/colors";
 import { formatScore } from "@/ui/formatters";
+import { icons } from "@/ui/icons";
+import { renderCard } from "@/ui/layout";
 import { createTable } from "@/ui/table";
 
 import type { RepoDetails, RepoListItem } from "./repos.types";
@@ -20,7 +22,7 @@ export function renderReposTable(items: RepoListItem[]): string {
       brand.highlight(`${r.owner}/${r.name}`),
       r.language ? pc.cyan(r.language) : brand.muted("—"),
       formatScore(r.securityScore),
-      pc.yellow(`★ ${r.stars}`),
+      pc.yellow(`${icons.star} ${r.stars}`),
       brand.muted(r.defaultBranch),
     ]);
   }
@@ -29,14 +31,18 @@ export function renderReposTable(items: RepoListItem[]): string {
 }
 
 export function renderRepoDetails(repo: RepoDetails): void {
-  console.log(`\n  📦 ${brand.highlight(`${repo.owner}/${repo.name}`)}`);
-  console.log(`  Description:  ${brand.muted(repo.description ?? "No description provided")}`);
-  console.log(`  Language:     ${pc.cyan(repo.language ?? "Unknown")}`);
-  console.log(`  License:      ${brand.info(repo.license ?? "None")}`);
-  console.log(`  URL:          ${brand.muted(repo.url)}`);
-  console.log(`  Branch:       ${brand.highlight(repo.defaultBranch)}`);
-  console.log(`  Stars/Forks:  ★ ${repo.stars} / ⑂ ${repo.forks}`);
-  console.log(`  ID (UUID):    ${brand.muted(repo.id)}\n`);
+  const repoTarget = `${repo.owner}/${repo.name}`;
+  console.log(
+    renderCard(`[Repo] ${brand.highlight(repoTarget)}`, [
+      ["Description", brand.muted(repo.description ?? "No description provided")],
+      ["Language", pc.cyan(repo.language ?? "Unknown")],
+      ["License", brand.info(repo.license ?? "None")],
+      ["URL", brand.muted(repo.url)],
+      ["Branch", brand.highlight(repo.defaultBranch)],
+      ["Stars / Forks", `${icons.star} ${repo.stars} / ${icons.branch} ${repo.forks}`],
+      ["ID (UUID)", brand.muted(repo.id)],
+    ]),
+  );
 }
 
 export function renderSlimReposTable(

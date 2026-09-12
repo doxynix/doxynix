@@ -1,10 +1,12 @@
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
-import { handleCliError } from "@/core/errors";
+import { resolveEntityOrPick } from "@/core/prompts";
 
-import { brand, pc } from "@/ui/colors";
-import { stripHtml } from "@/ui/formatters";
+import { brand } from "@/ui/colors";
+import { formatRelativeTime, stripHtml } from "@/ui/formatters";
+import { renderBlock, renderSection } from "@/ui/layout";
+import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 
 import { renderAuditTable } from "./audit.formatter";
@@ -24,48 +26,53 @@ export function registerAuditCommand(program: Command) {
     .option("-c, --cursor <cursorId>", "Pagination cursor ID")
     .option("--json", "Output log records in raw JSON format")
     .action(async (options: { cursor?: string; json?: boolean; limit: string }) => {
-      try {
-        const limit = options.limit ? Math.max(1, Math.min(100, Number(options.limit))) : 20;
+      const parsedLimit = Number(options.limit);
+      const limit =
+        Number.isFinite(parsedLimit) && parsedLimit > 0
+          ? Math.max(1, Math.min(100, Math.floor(parsedLimit)))
+          : 20;
 
-        const data = await withTaskSpinner(
-          {
-            silent: options.json,
-            start: "Retrieving workspace audit logs...",
-            stop: "Audit logs retrieved",
-          },
-          () =>
-            auditService.getActivityLogs({
-              cursor: options.cursor,
-              limit,
-            }),
+      const result = await withTaskSpinner(
+        {
+          silent: options.json,
+          start: "Retrieving workspace audit logs...",
+          stop: "Audit logs retrieved",
+        },
+        () =>
+          auditService.getActivityLogs({
+            cursor: options.cursor,
+            limit,
+          }),
+      );
+
+      if (output.json(result, options.json)) {
+        return;
+      }
+
+      if (result.items.length === 0) {
+        p.outro(brand.muted("No recent audit activities recorded in your workspace."));
+        return;
+      }
+
+      console.log(
+        renderSection(
+          brand.logo("Workspace Activity & Audit Records:"),
+          renderAuditTable(result.items),
+        ),
+      );
+
+      if (result.nextCursor) {
+        p.outro(
+          brand.muted("Next page: ") +
+            brand.highlight(`dxnx audit list -c ${result.nextCursor}\n`) +
+            brand.muted("Inspect specific payload with: ") +
+            brand.highlight("dxnx audit view <id-or-prefix>"),
         );
-
-        if (options.json) {
-          console.log(JSON.stringify(data, null, 2));
-          return;
-        }
-
-        if (data.items.length === 0) {
-          p.outro(brand.muted("No recent audit activities recorded in your workspace."));
-          return;
-        }
-
-        console.log(`\n${brand.logo(" 🛡️ Workspace Activity & Audit Records:\n")}`);
-        console.log(renderAuditTable(data.items));
-        console.log("\n");
-
-        if (data.nextCursor) {
-          console.log(
-            `  ${pc.gray("Next page:")} ${brand.highlight(`dxnx audit list -c ${data.nextCursor}`)}\n`,
-          );
-        }
-
+      } else {
         p.outro(
           brand.muted("Inspect specific payload with: ") +
             brand.highlight("dxnx audit view <id-or-prefix>"),
         );
-      } catch (error) {
-        handleCliError(error);
       }
     });
 
@@ -76,79 +83,53 @@ export function registerAuditCommand(program: Command) {
     .option("--json", "Parse and output raw JSON payload")
     .option("--html", "Output raw Shiki syntax-highlighted HTML snippet")
     .action(async (logIdArg?: string, options?: { html?: boolean; json?: boolean }) => {
-      try {
-        let targetLogId = logIdArg?.trim();
-
-        if (!targetLogId || targetLogId.length < 32) {
+      const targetLogId = await resolveEntityOrPick({
+        cancelMessage: "Cancelled.",
+        emptyMessage: "No audit logs available.",
+        fetchItems: async () => {
           const recent = await withTaskSpinner("Fetching recent logs for resolution...", () =>
             auditService.getActivityLogs({ limit: 25 }),
           );
+          return recent.items;
+        },
+        getLabel: (item: AuditLogItem) =>
+          `${item.actionTitle} — ${item.targetName ?? item.entityType ?? "System"} (${formatRelativeTime(item.createdAt)})`,
+        idArg: logIdArg,
+        notFoundMessage: (prefix) => `No log found matching prefix: '${prefix}'`,
+        selectMessage: "Select an audit event to inspect payload:",
+      });
 
-          if (recent.items.length === 0) {
-            p.outro(brand.muted("No audit logs available."));
-            return;
-          }
-
-          if (targetLogId) {
-            const prefix = targetLogId.toLowerCase();
-            const match = recent.items.find((item: AuditLogItem) =>
-              item.id.toLowerCase().startsWith(prefix),
-            );
-            if (!match) {
-              p.outro(brand.error(`No log found matching prefix: '${targetLogId}'`));
-              return;
-            }
-            targetLogId = match.id;
-          } else {
-            const selection = await p.select({
-              message: "Select an audit event to inspect payload:",
-              options: recent.items.map((item: AuditLogItem) => ({
-                label: `${item.actionTitle} — ${item.targetName ?? item.entityType ?? "System"} (${new Date(item.createdAt).toLocaleTimeString()})`,
-                value: item.id,
-              })),
-            });
-
-            if (p.isCancel(selection) || typeof selection !== "string") {
-              p.cancel("Cancelled.");
-              return;
-            }
-            targetLogId = selection;
-          }
-        }
-
-        const rawHtml = await withTaskSpinner(
-          {
-            silent: Boolean(options?.html || options?.json),
-            start: `Fetching payload for ${brand.highlight(targetLogId.slice(0, 8))}...`,
-            stop: "Payload loaded",
-          },
-          () => auditService.getLogPayloadHtml(targetLogId),
-        );
-
-        if (options?.html) {
-          console.log(rawHtml);
-          return;
-        }
-
-        const textPayload = stripHtml(rawHtml);
-
-        if (options?.json) {
-          try {
-            const parsed: unknown = JSON.parse(textPayload);
-            console.log(JSON.stringify(parsed, null, 2));
-          } catch {
-            console.log(textPayload);
-          }
-          return;
-        }
-
-        console.log(`\n${brand.info(`=== 📦 Audit Log Payload (${targetLogId}) ===`)}\n`);
-        console.log(textPayload);
-        console.log(`\n${brand.info("=== End of Payload ===")}\n`);
-
-        p.outro(brand.success("✔ Payload inspection complete."));
-      } catch (error) {
-        handleCliError(error);
+      if (!targetLogId) {
+        return;
       }
+
+      const rawHtml = await withTaskSpinner(
+        {
+          silent: Boolean(options?.html || options?.json),
+          start: `Fetching payload for ${brand.highlight(targetLogId.slice(0, 8))}...`,
+          stop: "Payload loaded",
+        },
+        () => auditService.getLogPayloadHtml(targetLogId),
+      );
+
+      if (options?.html) {
+        console.log(rawHtml);
+        return;
+      }
+
+      const textPayload = stripHtml(rawHtml);
+
+      if (options?.json) {
+        try {
+          const parsed: unknown = JSON.parse(textPayload);
+          output.json(parsed, true);
+        } catch {
+          output.write(textPayload);
+        }
+        return;
+      }
+
+      console.log(renderBlock(`Audit Log Payload (${targetLogId})`, textPayload));
+      p.outro(brand.success("Payload inspection complete."));
     });
 }

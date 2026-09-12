@@ -12,9 +12,10 @@ export const notificationsService = {
   async getStats() {
     return trpc.notification.getStats.query({});
   },
-  async list(limit = 15, isRead?: boolean) {
+
+  async list(limit = 15, isRead?: boolean, cursor = 1) {
     return trpc.notification.getAll.query({
-      cursor: 1,
+      cursor,
       isRead,
       limit,
     });

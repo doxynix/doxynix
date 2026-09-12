@@ -13,7 +13,7 @@ export const githubService = {
     return trpc.githubBrowse.getFileContent.query({ branch, path, repoId });
   },
 
-  async getInstallUrl(): Promise<string> {
+  async getInstallUrl() {
     return trpc.githubApp.getGithubInstallUrl.query({});
   },
 

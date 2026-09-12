@@ -1,52 +1,54 @@
 import * as p from "@clack/prompts";
 
+import { guardPrompt } from "@/core/prompts";
+
 import { brand, pc } from "@/ui/colors";
-import { withTaskSpinner } from "@/ui/spinner";
 
 import { reposService } from "../repos/repos.service";
 import { agentService } from "./agent.service";
-import { executeClientAction } from "./agent.tools";
-import type { ChatMessage } from "./agent.types";
+import type { UIMessage, UIMessageToolPart } from "./agent.types";
 
 export async function startInteractiveChat(initialRepoTarget?: string) {
-  p.intro(brand.logo(" 🤖 Doxynix AI Engineering Assistant "));
+  p.intro(brand.logo(" Doxynix AI Engineering Assistant "));
 
   let selectedRepoId: string | undefined;
   let selectedRepoName = "Global Context";
 
   if (initialRepoTarget) {
     const [owner, name] = initialRepoTarget.split("/");
-    if (owner && name) {
-      const repo = await reposService.getByName(owner, name);
-      if (repo) {
-        selectedRepoId = repo.id;
-        selectedRepoName = `${repo.owner}/${repo.name}`;
-      }
+    if (!owner || !name) {
+      p.outro(brand.error("Format must be: owner/name (e.g. facebook/react)"));
+      return;
     }
+    const repo = await reposService.getByName(owner, name);
+    if (!repo) {
+      p.outro(brand.error(`Repository '${initialRepoTarget}' not found.`));
+      return;
+    }
+    selectedRepoId = repo.id;
+    selectedRepoName = `${repo.owner}/${repo.name}`;
   } else {
     const reposRes = await reposService.list({
-      limit: 50,
+      limit: 25,
       sortBy: "createdAt",
       sortOrder: "desc",
     });
 
     const choices = [
-      { label: "🌐 Global Mode (All repositories / General questions)", value: "global" },
+      { label: "Global Mode (All repositories / General questions)", value: "global" },
       ...reposRes.items.map((r) => ({
-        label: `📦 ${r.owner}/${r.name} (${r.language ?? "Other"})`,
+        label: `${r.owner}/${r.name} (${r.language ?? "Other"})`,
         value: r.id,
       })),
     ];
 
-    const contextChoice = await p.select({
-      message: "Select workspace context for AI assistant:",
-      options: choices,
-    });
-
-    if (p.isCancel(contextChoice)) {
-      p.cancel("Chat cancelled.");
-      return;
-    }
+    const contextChoice = await guardPrompt(
+      p.select({
+        message: "Select workspace context for AI assistant:",
+        options: choices,
+      }),
+      "Chat cancelled.",
+    );
 
     if (contextChoice !== "global" && typeof contextChoice === "string") {
       selectedRepoId = contextChoice;
@@ -74,7 +76,7 @@ export async function startInteractiveChat(initialRepoTarget?: string) {
     "Session Started",
   );
 
-  const history: ChatMessage[] = [];
+  const history: UIMessage[] = [];
 
   while (true) {
     const input = await p.text({
@@ -82,107 +84,90 @@ export async function startInteractiveChat(initialRepoTarget?: string) {
       placeholder: "e.g. Revoke leaked API key or explain project structure",
     });
 
-    if (p.isCancel(input) || input.trim() === "/exit" || input.trim() === "exit") {
+    if (typeof input !== "string" || p.isCancel(input)) {
       p.outro(brand.muted("Goodbye! Session closed."));
       break;
     }
 
-    const userMessage = input.trim();
-    if (!userMessage) {
+    const trimmedInput = input.trim();
+
+    if (trimmedInput === "/exit" || trimmedInput === "exit") {
+      p.outro(brand.muted("Goodbye! Session closed."));
+      break;
+    }
+
+    if (!trimmedInput) {
       continue;
     }
 
-    if (userMessage === "/clear") {
+    if (trimmedInput === "/clear") {
       history.length = 0;
-      console.log(brand.muted("\n🧹 Conversation history cleared.\n"));
+      p.log.info(brand.muted("Conversation history cleared."));
       continue;
     }
 
     history.push({
-      content: userMessage,
       id: crypto.randomUUID(),
+      parts: [{ text: trimmedInput, type: "text" }],
       role: "user",
     });
 
     try {
       await executeTurn(history, selectedRepoId, sessionId);
-      console.log("\n");
     } catch (error: unknown) {
+      history.pop();
       const message = error instanceof Error ? error.message : String(error);
-      console.log(`\n${brand.error(`❌ Error: ${message}`)}\n`);
+      p.log.error(message);
     }
   }
 }
 
 export async function executeTurn(
-  history: ChatMessage[],
+  history: UIMessage[],
   repoId?: string,
   sessionId?: string,
 ): Promise<void> {
-  const { fullText, pendingTools } = await agentService.stream(history, repoId, sessionId);
+  let streamResult = await agentService.stream(history, repoId, sessionId);
+  history.push(streamResult.assistantMessage);
 
-  if (fullText) {
-    history.push({
-      content: fullText,
-      id: crypto.randomUUID(),
-      role: "assistant",
-    });
-  }
+  while (streamResult.pendingApprovals.length > 0) {
+    const currentApprovals = [...streamResult.pendingApprovals];
 
-  for (const tool of pendingTools) {
-    if (tool.hasExecutedOnServer) {
-      continue;
-    }
-
-    console.log("\n");
-    const isApproved = await p.confirm({
-      active: "Yes, execute action",
-      inactive: "Decline",
-      message: brand.warning(
-        `⚠️ Agent requests confirmation to execute: ${brand.highlight(tool.toolName)}\n` +
-          `   Parameters: ${pc.gray(JSON.stringify(tool.input))}\n` +
-          `   Approve execution?`,
-      ),
-    });
-
-    if (isApproved && !p.isCancel(isApproved)) {
-      try {
-        const result = await withTaskSpinner(
-          {
-            start: `Executing ${tool.toolName}...`,
-            stop: `Action ${tool.toolName} completed successfully!`,
-          },
-          () => executeClientAction(tool.toolName, tool.input),
-        );
-
-        p.outro(brand.success(`✔ [Result]: ${result.message}`));
-
-        history.push({
-          content: `[System]: User confirmed tool execution for ${tool.toolName}. Result: ${JSON.stringify(result)}. Summarize completion.`,
-          id: crypto.randomUUID(),
-          role: "user",
-        });
-
-        console.log(`\n${brand.logo("Doxynix AI:")}`);
-        const followUp = await agentService.stream(history, repoId, sessionId);
-        if (followUp.fullText) {
-          history.push({
-            content: followUp.fullText,
-            id: crypto.randomUUID(),
-            role: "assistant",
-          });
-        }
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : String(error);
-        p.outro(brand.error(`❌ ${message}`));
-      }
-    } else {
-      p.outro(brand.muted(`✖ Action ${tool.toolName} declined by user.`));
-      history.push({
-        content: `[System]: Tool action ${tool.toolName} was rejected by user.`,
-        id: crypto.randomUUID(),
-        role: "user",
+    for (const approval of currentApprovals) {
+      const isApproved = await p.confirm({
+        active: "Yes, execute action",
+        inactive: "Decline",
+        message: brand.warning(
+          `Agent requests confirmation to execute: ${brand.highlight(approval.toolName)}\n` +
+            `   Parameters: ${pc.gray(JSON.stringify(approval.input))}\n` +
+            `   Approve execution?`,
+        ),
       });
+
+      const approved = Boolean(isApproved && !p.isCancel(isApproved));
+
+      const toolPart = streamResult.assistantMessage.parts.find(
+        (part): part is UIMessageToolPart =>
+          "toolCallId" in part && part.toolCallId === approval.toolCallId,
+      );
+
+      if (toolPart) {
+        toolPart.state = "approval-responded";
+        toolPart.approval = {
+          approved,
+          id: approval.approvalId,
+          reason: approved ? undefined : "Denied by user in CLI",
+        };
+      }
+
+      p.log.step(
+        approved
+          ? brand.success(`Approved ${approval.toolName}. Processing...`)
+          : brand.muted(`Declined ${approval.toolName}.`),
+      );
     }
+
+    streamResult = await agentService.stream(history, repoId, sessionId);
+    history.push(streamResult.assistantMessage);
   }
 }

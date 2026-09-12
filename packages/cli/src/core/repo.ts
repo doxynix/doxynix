@@ -1,10 +1,12 @@
 import * as p from "@clack/prompts";
 
-import { brand } from "@/ui/colors";
+import { brand, pc } from "@/ui/colors";
+import { withTaskSpinner } from "@/ui/spinner";
 
 import type { RepoDetails } from "@/commands/repos/repos.types";
 
 import { trpc } from "./client";
+import { guardPrompt } from "./prompts";
 
 export function parseRepoTarget(target: string): { name: string; owner: string } | null {
   const parts = target.split("/");
@@ -26,32 +28,81 @@ export async function resolveRepository(
   let repoTarget = target;
 
   if (!repoTarget) {
-    const res = await trpc.repo.getAll.query({
-      limit: 50,
-      sortBy: "createdAt",
-      sortOrder: "desc",
-    });
+    const RECENT_LIMIT = 25;
 
-    if (res.items.length === 0) {
+    const result = await withTaskSpinner("Loading recent repositories...", () =>
+      trpc.repo.getAll.query({
+        cursor: 1,
+        limit: RECENT_LIMIT,
+        sortBy: "createdAt",
+        sortOrder: "desc",
+      }),
+    );
+
+    if (result.items.length === 0) {
       p.outro(
         brand.muted("Connect a repository first: ") + brand.highlight("dxnx repos add <url>"),
       );
       return null;
     }
 
-    const selection = await p.select({
-      message: promptMessage,
-      options: res.items.map((r) => ({
-        label: `${r.owner}/${r.name} (${r.language ?? "Other"})`,
-        value: `${r.owner}/${r.name}`,
-      })),
-    });
+    const options: Array<{ label: string; value: string }> = result.items.map((r) => ({
+      label: `${r.owner}/${r.name} (${r.language ?? "Other"})`,
+      value: `${r.owner}/${r.name}`,
+    }));
 
-    if (p.isCancel(selection) || typeof selection !== "string") {
-      p.cancel("Cancelled.");
-      return null;
+    const totalCount = result.meta?.totalCount ?? result.items.length;
+    if (totalCount > RECENT_LIMIT) {
+      options.push({
+        label: pc.cyan("🔍 Search repository by name..."),
+        value: "__SEARCH__",
+      });
     }
-    repoTarget = selection;
+
+    const countNote = brand.muted(`(showing recent ${result.items.length} of ${totalCount})`);
+    const selected = await guardPrompt(
+      p.select({
+        message: `${promptMessage} ${countNote}`,
+        options,
+      }),
+      "Cancelled.",
+    );
+
+    if (selected === "__SEARCH__") {
+      const query = await guardPrompt(
+        p.text({
+          message: "Enter repository name or keyword:",
+          placeholder: "e.g. backend or my-service",
+          validate: (val) => (!val?.trim() ? "Search query cannot be empty" : undefined),
+        }),
+        "Search cancelled.",
+      );
+
+      const searchResult = await withTaskSpinner(`Searching for '${query.trim()}'...`, () =>
+        trpc.repo.getAll.query({
+          limit: 25,
+          search: query.trim(),
+        }),
+      );
+
+      if (searchResult.items.length === 0) {
+        p.outro(brand.error(`No repositories found matching '${query.trim()}'.`));
+        return null;
+      }
+
+      repoTarget = await guardPrompt(
+        p.select({
+          message: "Select matching repository:",
+          options: searchResult.items.map((r) => ({
+            label: `${r.owner}/${r.name} (${r.language ?? "Other"})`,
+            value: `${r.owner}/${r.name}`,
+          })),
+        }),
+        "Cancelled.",
+      );
+    } else {
+      repoTarget = selected;
+    }
   }
 
   const parsed = parseRepoTarget(repoTarget);
@@ -60,7 +111,10 @@ export async function resolveRepository(
     return null;
   }
 
-  const repo = await trpc.repo.getByName.query({ name: parsed.name, owner: parsed.owner });
+  const repo = await withTaskSpinner(`Resolving repository ${parsed.owner}/${parsed.name}...`, () =>
+    trpc.repo.getByName.query({ name: parsed.name, owner: parsed.owner }),
+  );
+
   if (!repo) {
     p.outro(brand.error(`Repository ${repoTarget} was not found.`));
     return null;

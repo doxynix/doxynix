@@ -1,4 +1,5 @@
 import { brand, pc } from "@/ui/colors";
+import { formatDateTime } from "@/ui/formatters";
 import { createTable } from "@/ui/table";
 
 import type { AuditLogItem } from "./audit.types";
@@ -10,7 +11,7 @@ export function renderAuditTable(items: AuditLogItem[]): string {
     const idLabel = item.id ? brand.muted(`${item.id.slice(0, 8)}...`) : "—";
     const actionLabel = brand.highlight(item.actionTitle);
     const target = item.targetName || item.entityType || "System";
-    const date = item.createdAt ? new Date(item.createdAt).toLocaleString() : "Unknown";
+    const date = formatDateTime(item.createdAt);
     const details = item.details?.map((d) => `${d.label}: ${d.value}`).join(", ") ?? "—";
 
     table.push([idLabel, brand.muted(date), actionLabel, pc.cyan(target), brand.muted(details)]);
