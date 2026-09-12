@@ -120,8 +120,10 @@ export function registerAgentCommand(program: Command) {
           withTaskSpinner("Fetching recent sessions for resolution...", () =>
             agentService.listSessions({}),
           ),
-        getLabel: (item: ChatSessionItem) =>
-          `${item.title} (${item.repo ? `${item.repo.owner}/${item.repo.name}` : "Global"}) [${item.id.slice(0, 8)}]`,
+        getLabel: (item: ChatSessionItem) => {
+          const repoContext = item.repo ? `${item.repo.owner}/${item.repo.name}` : "Global";
+          return `${item.title} (${repoContext}) [${item.id.slice(0, 8)}]`;
+        },
         idArg: sessionIdArg,
         notFoundMessage: (prefix) => `No session found matching prefix: '${prefix}'`,
         selectMessage: "Select an AI chat session to inspect history:",

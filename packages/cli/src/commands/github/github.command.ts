@@ -85,9 +85,10 @@ export function registerGithubCommand(program: Command) {
             () => githubService.connectRepo(selection),
           );
 
+          const fullRepoName = `${result.repo.owner}/${result.repo.name}`;
           p.outro(
             brand.success(
-              ` Repository ${brand.highlight(`${result.repo.owner}/${result.repo.name}`)} is connected and ready for analysis!`,
+              ` Repository ${brand.highlight(fullRepoName)} is connected and ready for analysis!`,
             ),
           );
           return;
@@ -240,7 +241,8 @@ export function registerGithubCommand(program: Command) {
         return;
       }
 
-      console.log(renderBlock(`${filePath} (${options.branch ?? "default"})`, result.content));
+      const branchLabel = options.branch ?? "default";
+      console.log(renderBlock(`${filePath} (${branchLabel})`, result.content));
     });
 
   gh.command("search <query>")

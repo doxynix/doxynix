@@ -108,8 +108,9 @@ export function registerReposCommand(program: Command) {
         () => reposService.add(url),
       );
 
+      const repoLabel = `${result.repo.owner}/${result.repo.name}`;
       p.note(
-        `Target:      ${brand.highlight(`${result.repo.owner}/${result.repo.name}`)}\n` +
+        `Target:      ${brand.highlight(repoLabel)}\n` +
           `Language:    ${result.repo.language ?? "Unknown"}\n` +
           `ID:          ${brand.muted(result.repo.id)}`,
         "Repository Connected",

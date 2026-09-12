@@ -2,6 +2,9 @@ import { pc } from "./colors";
 
 let inCodeBlock = false;
 
+const BULLET_REGEX = /^([ \t]*)[*+-][ \t]+(.*)$/;
+const NUM_LIST_REGEX = /^([ \t]*)(\d+\.)[ \t]+(.*)$/;
+
 export function renderInlineMarkdown(text: string | undefined): string | undefined {
   if (!text) {
     return undefined;
@@ -19,8 +22,12 @@ export function renderMarkdownLine(line: string): string | undefined {
 
   if (trimmed.startsWith("```")) {
     inCodeBlock = !inCodeBlock;
+    if (!inCodeBlock) {
+      return pc.gray("└───\n");
+    }
     const lang = trimmed.slice(3).trim();
-    return inCodeBlock ? pc.gray(`\n┌── ${lang ? pc.cyan(lang) : "Code"} ───`) : pc.gray("└───\n");
+    const langLabel = lang ? pc.cyan(lang) : "Code";
+    return pc.gray(`\n┌── ${langLabel} ───`);
   }
 
   if (inCodeBlock) {
@@ -37,14 +44,14 @@ export function renderMarkdownLine(line: string): string | undefined {
     return `\n${pc.bold(pc.underline(pc.magenta(renderInlineMarkdown(trimmed.slice(2)))))}`;
   }
 
-  const bulletMatch = new RegExp(/^(\s*)[*+-]\s+(.*)$/).exec(line);
+  const bulletMatch = BULLET_REGEX.exec(line);
   if (bulletMatch) {
     const indent = bulletMatch[1];
     const content = bulletMatch[2];
     return `${indent}${pc.magenta("•")} ${renderInlineMarkdown(content)}`;
   }
 
-  const numMatch = new RegExp(/^(\s*)(\d+\.)\s+(.*)$/).exec(line);
+  const numMatch = NUM_LIST_REGEX.exec(line);
   if (numMatch) {
     const indent = numMatch[1];
     const num = numMatch[2];

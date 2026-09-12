@@ -31,8 +31,9 @@ export function renderReposTable(items: RepoListItem[]): string {
 }
 
 export function renderRepoDetails(repo: RepoDetails): void {
+  const repoTarget = `${repo.owner}/${repo.name}`;
   console.log(
-    renderCard(`[Repo] ${brand.highlight(`${repo.owner}/${repo.name}`)}`, [
+    renderCard(`[Repo] ${brand.highlight(repoTarget)}`, [
       ["Description", brand.muted(repo.description ?? "No description provided")],
       ["Language", pc.cyan(repo.language ?? "Unknown")],
       ["License", brand.info(repo.license ?? "None")],

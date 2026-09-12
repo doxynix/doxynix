@@ -113,7 +113,11 @@ export function getApiUrl(): string {
     rawUrl = config.apiUrl ?? defaultApiUrl;
   }
 
-  return rawUrl.trim().replace(/\/+$/, "");
+  let cleanUrl = rawUrl.trim();
+  while (cleanUrl.endsWith("/")) {
+    cleanUrl = cleanUrl.slice(0, -1);
+  }
+  return cleanUrl;
 }
 
 function readConfig(): DxnxConfig {

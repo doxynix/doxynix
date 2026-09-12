@@ -142,9 +142,10 @@ export function registerDocsCommand(program: Command) {
         const content = result.raw;
 
         if (!content) {
+          const pathSuffix = filePath ? ` (${filePath})` : "";
           p.outro(
             brand.warning(
-              `No content generated for ${docType}${filePath ? ` (${filePath})` : ""}.\nRun 'dxnx analyze start ${repoContext.target}' first.`,
+              `No content generated for ${docType}${pathSuffix}.\nRun 'dxnx analyze start ${repoContext.target}' first.`,
             ),
           );
           return;

@@ -59,9 +59,10 @@ export async function resolveRepository(
       });
     }
 
+    const countNote = brand.muted(`(showing recent ${result.items.length} of ${totalCount})`);
     const selected = await guardPrompt(
       p.select({
-        message: `${promptMessage} ${brand.muted(`(showing recent ${result.items.length} of ${totalCount})`)}`,
+        message: `${promptMessage} ${countNote}`,
         options,
       }),
       "Cancelled.",

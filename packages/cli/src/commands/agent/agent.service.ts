@@ -166,12 +166,12 @@ export const agentService = {
           flushLineBuffer();
 
           const toolCallId = typeof event.toolCallId === "string" ? event.toolCallId : "";
-          const approvalId =
-            typeof event.approvalId === "string"
-              ? event.approvalId
-              : isRecord(event.approval) && typeof event.approval.id === "string"
-                ? event.approval.id
-                : toolCallId;
+          let approvalId = toolCallId;
+          if (typeof event.approvalId === "string") {
+            approvalId = event.approvalId;
+          } else if (isRecord(event.approval) && typeof event.approval.id === "string") {
+            approvalId = event.approval.id;
+          }
 
           const existing = toolPartsMap.get(toolCallId);
           if (existing) {
@@ -201,7 +201,8 @@ export const agentService = {
           flushLineBuffer();
           ensureHeader();
           const errStr = typeof event.error === "string" ? event.error : JSON.stringify(event);
-          process.stdout.write(`\n${brand.error(`Generation error: ${errStr}`)}\n`);
+          const errorMsg = brand.error(`Generation error: ${errStr}`);
+          process.stdout.write(`\n${errorMsg}\n`);
         }
       } catch {
         if (!trimmed.startsWith("{")) {
@@ -276,7 +277,6 @@ export const agentService = {
 
       if (currentEventData.length > 0) {
         dispatchPayload(currentEventData.join("\n"));
-        currentEventData = [];
       }
     } finally {
       stopSpinner();

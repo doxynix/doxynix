@@ -20,12 +20,10 @@ export function handleCliError(error: unknown): never {
 
   if (isJsonMode) {
     const message = error instanceof Error ? error.message : String(error);
-    const code =
-      error instanceof TRPCClientError
-        ? typeof error.data?.code === "string"
-          ? error.data.code
-          : "API_ERROR"
-        : "ERROR";
+    let code = "ERROR";
+    if (error instanceof TRPCClientError) {
+      code = typeof error.data?.code === "string" ? error.data.code : "API_ERROR";
+    }
 
     process.stdout.write(`${JSON.stringify({ code, error: message, success: false }, null, 2)}\n`);
     process.exit(1);

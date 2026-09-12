@@ -1,4 +1,5 @@
-import { execSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
 export function getCurrentGitBranch(): string {
   const ciBranch =
@@ -12,17 +13,24 @@ export function getCurrentGitBranch(): string {
     return ciBranch;
   }
 
-  try {
-    const branch = execSync("git rev-parse --abbrev-ref HEAD", {
-      encoding: "utf-8",
-      stdio: ["pipe", "pipe", "ignore"],
-    }).trim();
-
-    if (!branch || branch === "HEAD") {
+  let currentDir = process.cwd();
+  while (!existsSync(join(currentDir, ".git"))) {
+    const parentDir = join(currentDir, "..");
+    if (parentDir === currentDir) {
       return "main";
     }
+    currentDir = parentDir;
+  }
 
-    return branch;
+  try {
+    const gitHeadPath = join(currentDir, ".git", "HEAD");
+    const headContent = readFileSync(gitHeadPath, "utf-8").trim();
+
+    if (headContent.startsWith("ref:")) {
+      return headContent.split("/").pop() || "main";
+    }
+
+    return "main";
   } catch {
     return "main";
   }

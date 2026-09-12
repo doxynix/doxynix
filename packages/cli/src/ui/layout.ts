@@ -31,5 +31,7 @@ export function renderSection(title: string, body: string | { toString(): string
 }
 
 export function renderBlock(title: string, content: string): string {
-  return `\n${brand.info(`=== ${title} ===`)}\n\n${content}\n\n${brand.info("=== End ===")}\n`;
+  const startHeader = brand.info(`=== ${title} ===`);
+  const endFooter = brand.info("=== End ===");
+  return `\n${startHeader}\n\n${content}\n\n${endFooter}\n`;
 }

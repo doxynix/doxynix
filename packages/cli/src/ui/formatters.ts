@@ -1,5 +1,7 @@
 import { brand } from "./colors";
 
+export type DateInput = string | Date | number | null | undefined;
+
 const esc = String.raw`\x1B`;
 const ANSI_REGEX = new RegExp(String.raw`${esc}(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])`, "g");
 
@@ -25,7 +27,7 @@ export function getStringWidth(text: string): number {
 
 const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 
-export function formatRelativeTime(dateInput: string | Date | number | null | undefined): string {
+export function formatRelativeTime(dateInput: DateInput): string {
   if (!dateInput) {
     return brand.muted("—");
   }
@@ -54,9 +56,6 @@ export function formatRelativeTime(dateInput: string | Date | number | null | un
   return formatDate(date);
 }
 
-const HTML_TAG_REGEX =
-  /<\/?(?:a|abbr|b|blockquote|body|br|code|dd|div|dl|dt|em|h[1-6]|head|html|i|img|li|ol|p|pre|s|small|span|strong|sub|sup|table|tbody|td|tfoot|th|thead|tr|u|ul)[^>]*>/gi;
-
 const ENTITIES: Record<string, string> = {
   "&#39;": "'",
   "&amp;": "&",
@@ -67,26 +66,29 @@ const ENTITIES: Record<string, string> = {
   "&quot;": '"',
 };
 
+const ALL_TAGS_REGEX = /<[^>]*>/g;
+
 export function stripHtml(html: string): string {
-  return html
-    .replaceAll(/<br\s*\/?>|<\/(p|div)>/gi, "\n")
-    .replaceAll(HTML_TAG_REGEX, "")
-    .replaceAll(/&(?:[a-z]+|#\d+|#x[\da-f]+);/gi, (match) => {
-      const lower = match.toLowerCase();
-      if (ENTITIES[lower]) {
-        return ENTITIES[lower];
-      }
-      if (lower.startsWith("&#x")) {
-        const code = Number.parseInt(match.slice(3, -1), 16);
-        return Number.isNaN(code) ? match : String.fromCodePoint(code);
-      }
-      if (lower.startsWith("&#")) {
-        const code = Number.parseInt(match.slice(2, -1), 10);
-        return Number.isNaN(code) ? match : String.fromCodePoint(code);
-      }
-      return match;
-    })
-    .trim();
+  const withoutBr = html.replaceAll(/<br\s*\/?>|<\/(?:p|div)>/gi, "\n");
+  const withoutTags = withoutBr.replaceAll(ALL_TAGS_REGEX, "");
+
+  const decoded = withoutTags.replaceAll(/&(?:[a-z]+|#\d+|#x[\da-f]+);/gi, (match) => {
+    const lower = match.toLowerCase();
+    if (ENTITIES[lower]) {
+      return ENTITIES[lower];
+    }
+    if (lower.startsWith("&#x")) {
+      const code = Number.parseInt(match.slice(3, -1), 16);
+      return Number.isNaN(code) ? match : String.fromCodePoint(code);
+    }
+    if (lower.startsWith("&#")) {
+      const code = Number.parseInt(match.slice(2, -1), 10);
+      return Number.isNaN(code) ? match : String.fromCodePoint(code);
+    }
+    return match;
+  });
+
+  return decoded.replaceAll(ALL_TAGS_REGEX, "").trim();
 }
 
 export function formatScore(score: number | null | undefined): string {
@@ -115,7 +117,7 @@ export function getScoreLabel(score: number | null | undefined): string {
   return brand.error("Critical");
 }
 
-export function formatDateTime(dateInput: string | Date | number | null | undefined): string {
+export function formatDateTime(dateInput: DateInput): string {
   if (!dateInput) {
     return brand.muted("—");
   }
@@ -126,7 +128,7 @@ export function formatDateTime(dateInput: string | Date | number | null | undefi
   return date.toLocaleString();
 }
 
-export function formatDate(dateInput: string | Date | number | null | undefined): string {
+export function formatDate(dateInput: DateInput): string {
   if (!dateInput) {
     return brand.muted("—");
   }
