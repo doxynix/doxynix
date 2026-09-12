@@ -68,9 +68,20 @@ const ENTITIES: Record<string, string> = {
 
 const ALL_TAGS_REGEX = /<[^>]*>/g;
 
+function stripAllTags(input: string): string {
+  let current = input;
+  while (true) {
+    const next = current.replaceAll(ALL_TAGS_REGEX, "");
+    if (next === current) {
+      return next;
+    }
+    current = next;
+  }
+}
+
 export function stripHtml(html: string): string {
   const withoutBr = html.replaceAll(/<br\s*\/?>|<\/(?:p|div)>/gi, "\n");
-  const withoutTags = withoutBr.replaceAll(ALL_TAGS_REGEX, "");
+  const withoutTags = stripAllTags(withoutBr);
 
   const decoded = withoutTags.replaceAll(/&(?:[a-z]+|#\d+|#x[\da-f]+);/gi, (match) => {
     const lower = match.toLowerCase();
@@ -88,7 +99,7 @@ export function stripHtml(html: string): string {
     return match;
   });
 
-  return decoded.replaceAll(ALL_TAGS_REGEX, "").trim();
+  return stripAllTags(decoded).trim();
 }
 
 export function formatScore(score: number | null | undefined): string {
