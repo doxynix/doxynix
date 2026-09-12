@@ -93,10 +93,10 @@ bun run build
 bun run preview
 
 # Code Quality (Biome)
-bun run lint               # Check for linting violations
-bun run lint:fix           # Automatically fix linting issues
-bun run format             # Format source code
-bun run validate           # Run full Biome check
+bun run lint            # Run fast AST linting via Oxlint
+bun run lint:fix        # Automatically fix lint issues with Oxlint
+bun run format          # Format codebase & sort imports via Biome
+bun run validate        # Strict validation: Oxlint + Biome check + Typecheck
 ```
 
 ---

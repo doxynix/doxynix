@@ -31,7 +31,16 @@ function ensureConfigDirExists(dir: string): void {
   }
 }
 
+let sessionToken: string | null = null;
+
+export function setSessionToken(token: string | null): void {
+  sessionToken = token;
+}
+
 export function getToken(): string | null {
+  if (sessionToken) {
+    return sessionToken;
+  }
   if (process.env.DOXYNIX_API_KEY) {
     return process.env.DOXYNIX_API_KEY;
   }
@@ -53,23 +62,39 @@ export function saveToken(token: string): void {
     encoding: "utf-8",
     mode: 0o600,
   });
+
+  try {
+    fs.chmodSync(targetFile, 0o600);
+  } catch {
+    // Ignore on file systems that do not support POSIX permissions (Windows FAT/NTFS)
+  }
 }
 
 export function removeToken(): void {
   const current = readConfig();
   delete current.token;
+  setSessionToken(null);
+
   const targetFile = getConfigFilePath();
 
-  if (Object.keys(current).length === 0) {
+  const remainingKeys = Object.entries(current).filter(([, val]) => val !== undefined);
+
+  if (remainingKeys.length === 0) {
     if (fs.existsSync(targetFile)) {
       fs.unlinkSync(targetFile);
     }
   } else {
+    const cleanConfig = Object.fromEntries(remainingKeys);
     ensureConfigDirExists(path.dirname(targetFile));
-    fs.writeFileSync(targetFile, JSON.stringify(current, null, 2), {
+    fs.writeFileSync(targetFile, JSON.stringify(cleanConfig, null, 2), {
       encoding: "utf-8",
       mode: 0o600,
     });
+    try {
+      fs.chmodSync(targetFile, 0o600);
+    } catch {
+      // Ignore on Windows
+    }
   }
 }
 
@@ -79,12 +104,16 @@ const defaultApiUrl =
     : "https://doxynix.space/api";
 
 export function getApiUrl(): string {
+  let rawUrl: string;
+
   if (process.env.DOXYNIX_API_URL) {
-    return process.env.DOXYNIX_API_URL;
+    rawUrl = process.env.DOXYNIX_API_URL;
+  } else {
+    const config = readConfig();
+    rawUrl = config.apiUrl ?? defaultApiUrl;
   }
 
-  const config = readConfig();
-  return config.apiUrl ?? defaultApiUrl;
+  return rawUrl.trim().replace(/\/+$/, "");
 }
 
 function readConfig(): DxnxConfig {
@@ -97,10 +126,14 @@ function readConfig(): DxnxConfig {
     const raw = fs.readFileSync(targetFile, "utf-8");
     const parsed: unknown = JSON.parse(raw);
     if (isRecord(parsed)) {
-      return {
-        apiUrl: typeof parsed.apiUrl === "string" ? parsed.apiUrl : undefined,
-        token: typeof parsed.token === "string" ? parsed.token : undefined,
-      };
+      const config: DxnxConfig = {};
+      if (typeof parsed.apiUrl === "string") {
+        config.apiUrl = parsed.apiUrl;
+      }
+      if (typeof parsed.token === "string") {
+        config.token = parsed.token;
+      }
+      return config;
     }
     return {};
   } catch {

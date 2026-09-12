@@ -1,15 +1,16 @@
 import { brand, pc } from "@/ui/colors";
+import { formatRelativeTime } from "@/ui/formatters";
 import { createTable } from "@/ui/table";
 
 import type { LinkedAccountItem, UserSessionItem } from "./profile.types";
 
 export function renderSessionsTable(sessions: UserSessionItem[]): string {
   const table = createTable(["Client / User Agent", "IP Address", "Created At"]);
-  for (const sess of sessions) {
+  for (const s of sessions) {
     table.push([
-      brand.highlight(sess.userAgent || "Unknown Device"),
-      brand.info(sess.ipAddress || "—"),
-      brand.muted(new Date(sess.createdAt).toLocaleString()),
+      brand.highlight(s.userAgent || "Unknown Device"),
+      brand.info(s.ipAddress || "—"),
+      brand.muted(formatRelativeTime(s.createdAt)),
     ]);
   }
   return table.toString();

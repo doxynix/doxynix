@@ -32,7 +32,7 @@ function isNewerVersion(current: string, latest: string): boolean {
   return false;
 }
 
-export async function checkCliUpdate(currentVersion: string): Promise<void> {
+export function checkCliUpdate(currentVersion: string): void {
   if (process.argv.includes("--json") || !process.stdout.isTTY) {
     return;
   }
@@ -44,42 +44,37 @@ export async function checkCliUpdate(currentVersion: string): Promise<void> {
   try {
     if (fs.existsSync(cachePath)) {
       const cache: UpdateCache = JSON.parse(fs.readFileSync(cachePath, "utf-8"));
+      if (isNewerVersion(currentVersion, cache.latestVersion)) {
+        printUpdateBanner(currentVersion, cache.latestVersion);
+      }
       if (now - cache.lastChecked < ONE_DAY_MS) {
-        if (isNewerVersion(currentVersion, cache.latestVersion)) {
-          printUpdateBanner(currentVersion, cache.latestVersion);
-        }
         return;
       }
     }
+  } catch {
+    // Ignored cache read error
+  }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1200);
-
-    const res = await fetch("https://registry.npmjs.org/@doxynix/cli/latest", {
-      headers: { Accept: "application/json" },
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-
-    if (res.ok) {
-      const data = (await res.json()) as { version?: string };
-      const latest = data.version;
-      if (latest) {
-        fs.mkdirSync(path.dirname(cachePath), { recursive: true });
-        fs.writeFileSync(
-          cachePath,
-          JSON.stringify({ lastChecked: now, latestVersion: latest }),
-          "utf-8",
-        );
-
-        if (isNewerVersion(currentVersion, latest)) {
-          printUpdateBanner(currentVersion, latest);
+  fetch("https://registry.npmjs.org/@doxynix/cli/latest", {
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(1500),
+  })
+    .then(async (res) => {
+      if (res.ok) {
+        const data = (await res.json()) as { version?: string };
+        if (data.version) {
+          fs.mkdirSync(path.dirname(cachePath), { recursive: true });
+          fs.writeFileSync(
+            cachePath,
+            JSON.stringify({ lastChecked: now, latestVersion: data.version }),
+            "utf-8",
+          );
         }
       }
-    }
-  } catch {
-    // Network issues during update checks should never interrupt CLI operation
-  }
+    })
+    .catch(() => {
+      // Network errors must not interrupt operations
+    });
 }
 
 function printUpdateBanner(current: string, latest: string): void {

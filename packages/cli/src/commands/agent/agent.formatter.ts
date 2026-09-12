@@ -1,7 +1,8 @@
 import { brand, pc } from "@/ui/colors";
+import { formatRelativeTime } from "@/ui/formatters";
 import { createTable } from "@/ui/table";
 
-import type { ChatSessionItem } from "./agent.types";
+import type { ChatMessageHistoryItem, ChatSessionItem } from "./agent.types";
 
 export function renderSessionsTable(sessions: ChatSessionItem[]): string {
   const table = createTable(["Session ID", "Title", "Repository Context", "Updated"]);
@@ -15,7 +16,7 @@ export function renderSessionsTable(sessions: ChatSessionItem[]): string {
       brand.muted(`${session.id.slice(0, 8)}...`),
       brand.highlight(session.title),
       session.repo ? pc.cyan(repoLabel) : brand.muted(repoLabel),
-      brand.muted(new Date(session.updatedAt).toLocaleDateString()),
+      brand.muted(formatRelativeTime(session.updatedAt)),
     ]);
   }
 
@@ -44,4 +45,17 @@ export function extractMessageContent(parts: unknown): string {
     return parts;
   }
   return "—";
+}
+
+export function renderSessionHistory(messages: ChatMessageHistoryItem[]): string {
+  const divider = brand.muted("─".repeat(45));
+
+  return messages
+    .map((msg) => {
+      const isUser = msg.role === "user";
+      const senderLabel = isUser ? brand.highlight("You:") : brand.logo("Doxynix AI:");
+      const text = extractMessageContent(msg.parts);
+      return `${senderLabel}\n${text}`;
+    })
+    .join(`\n\n${divider}\n\n`);
 }

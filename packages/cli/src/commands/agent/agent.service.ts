@@ -4,12 +4,16 @@ import { trpc } from "@/core/client";
 import { getApiUrl, getToken } from "@/core/config";
 
 import { brand, pc } from "@/ui/colors";
+import { icons } from "@/ui/icons";
+import { renderMarkdownLine, resetMarkdownState } from "@/ui/markdown";
 
 import type {
-  ChatMessage,
   CreateSessionInput,
   ListSessionsInput,
-  PendingToolCall,
+  PendingApproval,
+  UIMessage,
+  UIMessagePart,
+  UIMessageToolPart,
 } from "./agent.types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -30,10 +34,14 @@ export const agentService = {
   },
 
   async stream(
-    messages: ChatMessage[],
+    messages: UIMessage[],
     repoId?: string,
     sessionId?: string,
-  ): Promise<{ fullText: string; pendingTools: PendingToolCall[] }> {
+  ): Promise<{
+    assistantMessage: UIMessage;
+    fullText: string;
+    pendingApprovals: PendingApproval[];
+  }> {
     const token = getToken();
     const apiUrl = getApiUrl();
     const s = p.spinner();
@@ -42,13 +50,12 @@ export const agentService = {
 
     const response = await fetch(`${apiUrl}/agent/chat`, {
       body: JSON.stringify({
+        currentRepoId: repoId,
         messages: messages.map((m) => ({
-          content: m.content,
           id: m.id,
-          parts: [{ text: m.content, type: "text" }],
+          parts: m.parts,
           role: m.role,
         })),
-        repoId,
         sessionId,
       }),
       headers: {
@@ -73,10 +80,13 @@ export const agentService = {
     const decoder = new TextDecoder("utf-8");
     let fullText = "";
     let buffer = "";
+    let lineBuffer = "";
     let isSpinnerRunning = true;
     let hasPrintedHeader = false;
 
-    const toolsMap = new Map<string, PendingToolCall>();
+    resetMarkdownState();
+
+    const toolPartsMap = new Map<string, UIMessageToolPart>();
 
     const stopSpinner = () => {
       if (isSpinnerRunning) {
@@ -88,8 +98,15 @@ export const agentService = {
     const ensureHeader = () => {
       stopSpinner();
       if (!hasPrintedHeader) {
-        console.log(`\n${brand.logo("Doxynix AI:")}`);
+        process.stdout.write(`\n${brand.logo("Doxynix AI:")}\n`);
         hasPrintedHeader = true;
+      }
+    };
+
+    const flushLineBuffer = () => {
+      if (lineBuffer.length > 0) {
+        process.stdout.write(renderMarkdownLine(lineBuffer) + "\n");
+        lineBuffer = "";
       }
     };
 
@@ -107,32 +124,69 @@ export const agentService = {
 
         if (event.type === "text-delta" && typeof event.delta === "string") {
           ensureHeader();
-          process.stdout.write(event.delta);
           fullText += event.delta;
+          lineBuffer += event.delta;
+
+          if (lineBuffer.includes("\n")) {
+            const lines = lineBuffer.split("\n");
+            lineBuffer = lines.pop() ?? "";
+            for (const line of lines) {
+              process.stdout.write(renderMarkdownLine(line) + "\n");
+            }
+          }
         } else if (event.type === "tool-input-start" || event.type === "tool-call") {
+          flushLineBuffer();
+
           const toolCallId =
             typeof event.toolCallId === "string" ? event.toolCallId : crypto.randomUUID();
           const toolName = typeof event.toolName === "string" ? event.toolName : "tool";
-          toolsMap.set(toolCallId, {
-            hasExecutedOnServer: false,
-            input: {},
+
+          toolPartsMap.set(toolCallId, {
+            args: {},
+            state: "input-available",
             toolCallId,
             toolName,
+            type: `tool-${toolName}`,
           });
+
           ensureHeader();
-          console.log(`\n${pc.yellow("⚡ [Tool Call]:")} ${pc.bold(toolName)}...`);
+          process.stdout.write(
+            `\n${icons.pending} ${pc.yellow("[Tool Call]:")} ${pc.bold(toolName)}...\n`,
+          );
         } else if (event.type === "tool-input-available") {
+          flushLineBuffer();
+
           const toolCallId = typeof event.toolCallId === "string" ? event.toolCallId : "";
-          const existing = toolsMap.get(toolCallId);
+          const existing = toolPartsMap.get(toolCallId);
           if (existing) {
-            existing.input = isRecord(event.input) ? event.input : {};
+            existing.args = isRecord(event.input) ? event.input : {};
           }
-          console.log(pc.gray(`   Arguments: ${JSON.stringify(event.input)}`));
-        } else if (event.type === "tool-output-available") {
+          process.stdout.write(pc.gray(`   Arguments: ${JSON.stringify(event.input)}\n`));
+        } else if (event.type === "tool-approval-request") {
+          flushLineBuffer();
+
           const toolCallId = typeof event.toolCallId === "string" ? event.toolCallId : "";
-          const existing = toolsMap.get(toolCallId);
+          const approvalId =
+            typeof event.approvalId === "string"
+              ? event.approvalId
+              : isRecord(event.approval) && typeof event.approval.id === "string"
+                ? event.approval.id
+                : toolCallId;
+
+          const existing = toolPartsMap.get(toolCallId);
           if (existing) {
-            existing.hasExecutedOnServer = true;
+            existing.state = "approval-requested";
+            existing.approval = { approved: false, id: approvalId };
+          }
+          process.stdout.write(pc.yellow(`   ${icons.warning} Approval required from user...\n`));
+        } else if (event.type === "tool-output-available") {
+          flushLineBuffer();
+
+          const toolCallId = typeof event.toolCallId === "string" ? event.toolCallId : "";
+          const existing = toolPartsMap.get(toolCallId);
+          if (existing) {
+            existing.state = "output-available";
+            existing.output = event.output;
           }
           const out =
             typeof event.output === "string"
@@ -140,17 +194,28 @@ export const agentService = {
               : event.output !== null && event.output !== undefined
                 ? JSON.stringify(event.output)
                 : "";
-          console.log(`${pc.green("✔ [Tool Result]:")} ${pc.gray(out.slice(0, 150))}\n`);
+          process.stdout.write(
+            `${icons.check} ${pc.green("[Tool Result]:")} ${pc.gray(out.slice(0, 150))}\n`,
+          );
         } else if (event.type === "error") {
+          flushLineBuffer();
           ensureHeader();
           const errStr = typeof event.error === "string" ? event.error : JSON.stringify(event);
-          console.log(`\n${brand.error(`❌ Generation error: ${errStr}`)}`);
+          process.stdout.write(`\n${brand.error(`Generation error: ${errStr}`)}\n`);
         }
       } catch {
         if (!trimmed.startsWith("{")) {
           ensureHeader();
-          process.stdout.write(trimmed);
           fullText += trimmed;
+          lineBuffer += trimmed;
+
+          if (lineBuffer.includes("\n")) {
+            const lines = lineBuffer.split("\n");
+            lineBuffer = lines.pop() ?? "";
+            for (const line of lines) {
+              process.stdout.write(renderMarkdownLine(line) + "\n");
+            }
+          }
         }
       }
     };
@@ -162,6 +227,23 @@ export const agentService = {
         const { done, value } = await reader.read();
         if (done) {
           buffer += decoder.decode();
+          if (buffer.length > 0) {
+            const finalLines = buffer.split(/\r\n|\r|\n/);
+            for (const line of finalLines) {
+              if (line === "") {
+                if (currentEventData.length > 0) {
+                  dispatchPayload(currentEventData.join("\n"));
+                  currentEventData = [];
+                }
+              } else if (line.startsWith("data:")) {
+                let dataValue = line.slice(5);
+                if (dataValue.startsWith(" ")) {
+                  dataValue = dataValue.slice(1);
+                }
+                currentEventData.push(dataValue);
+              }
+            }
+          }
           break;
         }
 
@@ -194,14 +276,45 @@ export const agentService = {
 
       if (currentEventData.length > 0) {
         dispatchPayload(currentEventData.join("\n"));
+        currentEventData = [];
       }
     } finally {
       stopSpinner();
+      if (lineBuffer.length > 0) {
+        process.stdout.write(renderMarkdownLine(lineBuffer) + "\n");
+        lineBuffer = "";
+      } else if (hasPrintedHeader) {
+        process.stdout.write("\n");
+      }
     }
 
+    const parts: UIMessagePart[] = [];
+    if (fullText.trim().length > 0) {
+      parts.push({ text: fullText, type: "text" });
+    }
+    for (const toolPart of toolPartsMap.values()) {
+      parts.push(toolPart);
+    }
+
+    const assistantMessage: UIMessage = {
+      id: crypto.randomUUID(),
+      parts,
+      role: "assistant",
+    };
+
+    const pendingApprovals: PendingApproval[] = Array.from(toolPartsMap.values())
+      .filter((tp) => tp.state === "approval-requested")
+      .map((tp) => ({
+        approvalId: tp.approval?.id ?? tp.toolCallId,
+        input: tp.args,
+        toolCallId: tp.toolCallId,
+        toolName: tp.toolName,
+      }));
+
     return {
+      assistantMessage,
       fullText,
-      pendingTools: Array.from(toolsMap.values()),
+      pendingApprovals,
     };
   },
 };

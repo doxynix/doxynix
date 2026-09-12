@@ -1,43 +1,92 @@
 import { brand } from "./colors";
 
-const esc = "\\x1B";
-const ANSI_REGEX = new RegExp(`${esc}(?:[@-Z\\\\-_]|\\[[0-?]*[ -/]*[@-~])`, "g");
+const esc = String.raw`\x1B`;
+const ANSI_REGEX = new RegExp(String.raw`${esc}(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])`, "g");
 
 export function stripAnsi(text: string): string {
   return text.replace(ANSI_REGEX, "");
 }
 
+const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
+const WIDE_REGEX =
+  /[\p{Extended_Pictographic}\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFF01-\uFF60\uFFE0-\uFFE6]/u;
+
 export function getStringWidth(text: string): number {
   const clean = stripAnsi(text);
   let width = 0;
-
-  for (const char of clean) {
-    const code = char.codePointAt(0) ?? 0;
-
-    if (code === 0xfe_0e || code === 0xfe_0f) {
+  for (const { segment } of segmenter.segment(clean)) {
+    if (segment === "\uFE0E" || segment === "\uFE0F") {
       continue;
     }
+    width += WIDE_REGEX.test(segment) ? 2 : 1;
+  }
+  return width;
+}
 
-    if (
-      (code >= 0x11_00 && code <= 0x11_5f) ||
-      (code >= 0x23_29 && code <= 0x23_2a) ||
-      (code >= 0x2e_80 && code <= 0xa4_cf && code !== 0x30_3f) ||
-      (code >= 0xac_00 && code <= 0xd7_a3) ||
-      (code >= 0xf9_00 && code <= 0xfa_ff) ||
-      (code >= 0xfe_10 && code <= 0xfe_19) ||
-      (code >= 0xfe_30 && code <= 0xfe_6f) ||
-      (code >= 0xff_00 && code <= 0xff_60) ||
-      (code >= 0xff_e0 && code <= 0xff_e6) ||
-      (code >= 0x1_f0_00 && code <= 0x1_fa_ff) ||
-      (code >= 0x2_00_00 && code <= 0x3_ff_fd)
-    ) {
-      width += 2;
-    } else {
-      width += 1;
-    }
+const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+export function formatRelativeTime(dateInput: string | Date | number | null | undefined): string {
+  if (!dateInput) {
+    return brand.muted("—");
+  }
+  const date = typeof dateInput === "object" ? dateInput : new Date(dateInput);
+  const time = date.getTime();
+  if (Number.isNaN(time)) {
+    return brand.muted("—");
   }
 
-  return width;
+  const diffSec = Math.round((time - Date.now()) / 1000);
+  const absSec = Math.abs(diffSec);
+
+  if (absSec < 45) {
+    return "just now";
+  }
+  if (absSec < 3600) {
+    return rtf.format(Math.round(diffSec / 60), "minute");
+  }
+  if (absSec < 86_400) {
+    return rtf.format(Math.round(diffSec / 3600), "hour");
+  }
+  if (absSec < 2_592_000) {
+    return rtf.format(Math.round(diffSec / 86_400), "day");
+  }
+
+  return formatDate(date);
+}
+
+const HTML_TAG_REGEX =
+  /<\/?(?:a|abbr|b|blockquote|body|br|code|dd|div|dl|dt|em|h[1-6]|head|html|i|img|li|ol|p|pre|s|small|span|strong|sub|sup|table|tbody|td|tfoot|th|thead|tr|u|ul)[^>]*>/gi;
+
+const ENTITIES: Record<string, string> = {
+  "&#39;": "'",
+  "&amp;": "&",
+  "&apos;": "'",
+  "&gt;": ">",
+  "&lt;": "<",
+  "&nbsp;": " ",
+  "&quot;": '"',
+};
+
+export function stripHtml(html: string): string {
+  return html
+    .replaceAll(/<br\s*\/?>|<\/(p|div)>/gi, "\n")
+    .replaceAll(HTML_TAG_REGEX, "")
+    .replaceAll(/&(?:[a-z]+|#\d+|#x[\da-f]+);/gi, (match) => {
+      const lower = match.toLowerCase();
+      if (ENTITIES[lower]) {
+        return ENTITIES[lower];
+      }
+      if (lower.startsWith("&#x")) {
+        const code = Number.parseInt(match.slice(3, -1), 16);
+        return Number.isNaN(code) ? match : String.fromCodePoint(code);
+      }
+      if (lower.startsWith("&#")) {
+        const code = Number.parseInt(match.slice(2, -1), 10);
+        return Number.isNaN(code) ? match : String.fromCodePoint(code);
+      }
+      return match;
+    })
+    .trim();
 }
 
 export function formatScore(score: number | null | undefined): string {
@@ -66,17 +115,39 @@ export function getScoreLabel(score: number | null | undefined): string {
   return brand.error("Critical");
 }
 
-export function stripHtml(html: string): string {
-  return html
-    .replaceAll(/<br\s*\/?>/gi, "\n")
-    .replaceAll(/<\/div>/gi, "\n")
-    .replaceAll(/<\/p>/gi, "\n")
-    .replaceAll(/<\/span><span/gi, "</span> <span")
-    .replaceAll(/<[^>]+>/g, "")
-    .replaceAll("&quot;", '"')
-    .replaceAll("&amp;", "&")
-    .replaceAll("&lt;", "<")
-    .replaceAll("&gt;", ">")
-    .replaceAll("&#39;", "'")
-    .trim();
+export function formatDateTime(dateInput: string | Date | number | null | undefined): string {
+  if (!dateInput) {
+    return brand.muted("—");
+  }
+  const date = typeof dateInput === "object" ? dateInput : new Date(dateInput);
+  if (Number.isNaN(date.getTime())) {
+    return brand.muted("—");
+  }
+  return date.toLocaleString();
+}
+
+export function formatDate(dateInput: string | Date | number | null | undefined): string {
+  if (!dateInput) {
+    return brand.muted("—");
+  }
+  const date = typeof dateInput === "object" ? dateInput : new Date(dateInput);
+  if (Number.isNaN(date.getTime())) {
+    return brand.muted("—");
+  }
+  return date.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export function parseDateArg(value: string | undefined): Date | undefined {
+  if (!value?.trim()) {
+    return undefined;
+  }
+  const date = new Date(value.trim());
+  if (Number.isNaN(date.getTime())) {
+    return undefined;
+  }
+  return date;
 }

@@ -14,10 +14,11 @@
 **Understand complex repositories in minutes through interactive AST graphs and node-targeted AI.**
 
 [![Monorepo: Turborepo](https://img.shields.io/badge/monorepo-turborepo-24292e?style=flat-square&logo=turborepo)](https://turbo.build)
-[![Runtime: Bun](https://img.shields.io/badge/runtime-bun%201.3-24292e?style=flat-square&logo=bun)](https://bun.sh)
+[![Runtime: Bun](https://img.shields.io/badge/runtime-bun%201.4-24292e?style=flat-square&logo=bun)](https://bun.sh)
 [![Language: TypeScript](https://img.shields.io/badge/language-typescript%20strict-24292e?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Database: PostgreSQL 18](https://img.shields.io/badge/database-postgres%2018%20(UUIDv7)-24292e?style=flat-square&logo=postgresql)](https://postgresql.org)
-[![Linter: Biome](https://img.shields.io/badge/linter-biome-24292e?style=flat-square&logo=biome)](https://biomejs.dev)
+[![Linter: Oxlint](https://img.shields.io/badge/linter-oxlint-24292e?style=flat-square&logo=oxc)](https://oxc.rs)
+[![Formatter: Biome](https://img.shields.io/badge/formatter-biome-24292e?style=flat-square&logo=biome)](https://biomejs.dev)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-24292e?style=flat-square)](LICENSE)
 
 [Architecture](#-system-architecture) · [Workspaces](#-workspaces--access-model) · [Quickstart](#-quickstart) · [Security](SECURITY.md)
@@ -141,8 +142,9 @@ bun run dev
 
 ```bash
 # Code Quality & Validation
-bun run lint            # Check code style with Biome
-bun run lint:fix        # Automatically fix lint violations
+bun run format          # Format codebase & sort imports via Biome
+bun run lint            # Check code style with Oxlint
+bun run lint:fix        # Automatically fix lint violations with Oxlint
 bun run type-check      # Strict TypeScript validation across all workspaces
 bun run validate        # Full audit: Lint + Types + Architecture boundary checks
 bun run secretlint      # Scan repository for leaked credentials

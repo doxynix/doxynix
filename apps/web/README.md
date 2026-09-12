@@ -1,4 +1,3 @@
-
 <div align="center">
 
 # @doxynix/web
@@ -27,12 +26,13 @@
 
 * **Multi-Grammar AST Parsing:** Native `web-tree-sitter` (WASM) grammar execution extracts language-level symbols, interfaces, call trees, and import hierarchies without external network dependencies.
 * **Interactive Topological Canvas:** Builds directed dependency graphs (`graphology` + `@xyflow/react`) to expose application entrypoints, isolated subgraphs, and cyclic dependencies.
-* **Specialized AI Pipeline:**
-  * `Architect Stage`: Computes high-level domain boundaries and cross-module workflows.
+* **Specialized 4-Stage AI Pipeline:**
   * `Sentinel Stage`: Audits security invariants, auth guards, and sensitive sink paths.
-  * `Writer Stage`: Generates contextual documentation anchored strictly to the selected node.
-* **Database-Level Access Policies:** ZenStack (`schema.zmodel`) compiles row-level security and ownership rules directly into Prisma queries.
-* **Enterprise Auth & Cryptography:** Better-Auth (GitHub, Google, Yandex, WebAuthn Passkeys) with field-level encryption for sensitive access tokens via `prisma-field-encryption`.
+  * `Mapper Stage`: Extracts structural skeletons, type hierarchies, and node boundaries.
+  * `Architect Stage`: Computes high-level domain workflows and cross-boundary architecture.
+  * `Writer Stage`: Generates contextual documentation anchored strictly to the selected node ID.
+* **Database-Level Access Policies:** ZenStack (`schema.zmodel`, `models/*.zmodel`) compiles row-level security and ownership rules directly into Prisma queries.
+* **Enterprise Auth & Cryptography:** Better-Auth (GitHub, Google, Yandex, WebAuthn Passkeys) with field-level encryption for sensitive tokens via `prisma-field-encryption`.
 
 ---
 
@@ -55,14 +55,15 @@ flowchart TD
         G --> H[Interactive Project Graph Canvas]
     end
     
-    subgraph Reasoning [" 3. Contextual AI Pipeline "]
+    subgraph Reasoning [" 3. Contextual AI Pipeline (Trigger.dev) "]
         H -->|User Selects Specific Node| I[Context Orchestrator]
-        I --> J[Architect Stage]
-        I --> K[Sentinel Stage]
-        J & K --> L[Writer Runner]
+        I --> J[Sentinel Stage]
+        J --> K[Mapper Stage]
+        K --> L[Architect Stage]
+        L --> M[Writer Runner]
     end
     
-    L --> M[Interactive Repo Brief Output]
+    M --> N[Interactive Repo Brief Output]
 ```
 
 ---
@@ -73,17 +74,19 @@ The application strictly enforces **Feature-Sliced Design (FSD)** across client 
 
 ```
 src/
-├── app/                  # Next.js App Router (internationalized routes [locale], API routes)
-├── entities/             # Business models & display cards (repo, pr, api-keys, audit-log, user)
+├── app/                  # Next.js App Router ([locale] internationalized routes, API routes)
+├── entities/             # Business models & display cards (repo, pr, api-keys, audit-log, connection, notifications, thanks, user)
 ├── features/             # Interactive user workflows:
 │   ├── repo-map/         # Interactive XYFlow canvas, layout hotkeys & node inspector
-│   ├── repo-code-viewer/ # CodeMirror 6 editor, AST symbol search & live diffs
+│   ├── repo-code-viewer/ # CodeMirror 6 editor, AST symbol search & diffs
 │   ├── repo-setup/       # Analysis trigger flows & live WebSocket terminal logs
+│   ├── repo-analytics/   # Complexity scatter charts & metrics inspect
+│   ├── repo-pulls/       # Pull request review stages & automated fix view
 │   └── agent/            # Contextual AI dialogue & tool-calling indicators
-├── widgets/              # Composite UI blocks (app-header, app-sidebar, dashboard-stats, landing)
+├── widgets/              # Composite UI blocks (app-header, app-sidebar, dashboard, landing, public-header)
 ├── server/               # Server-only domain execution layer:
 │   ├── core/             # DB client, Redis cache, GitHub App SDK, Better-Auth runtime
-│   ├── modules/          # Business logic slices (analysis, agent, audit-logs, repos, webhooks)
+│   ├── modules/          # Business logic slices (analysis, agent, analytics, api-keys, audit-logs, notifications, repos, system, users, webhooks)
 │   └── utils/            # AST adapters, tokenizers, sanitizers, and circuit breakers
 └── shared/               # Reusable UI primitives, tRPC clients, hooks, and utility libraries
 ```
@@ -121,7 +124,7 @@ bun run dev
 bun run dev:fast
 
 # Compile ZenStack models and generate Prisma SQL client
-bun run db:generate
+bun with-doppler "bun --filter @doxynix/web db:generate"
 
 # Execute pending migrations against the local PostgreSQL 18 instance
 bun run db:migrate

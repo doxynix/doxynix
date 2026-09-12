@@ -1,5 +1,6 @@
 import { brand, pc } from "@/ui/colors";
-import { renderNoticeBox } from "@/ui/notify";
+import { formatDateTime, formatRelativeTime } from "@/ui/formatters";
+import { type NoticeLevel, renderNoticeBox } from "@/ui/notify";
 import { createTable } from "@/ui/table";
 
 import type { NotificationItem } from "./notifications.types";
@@ -31,27 +32,26 @@ export function renderNotificationsTable(items: NotificationItem[]): string {
       brand.highlight(n.title),
       n.repo ? pc.cyan(`${n.repo.owner}/${n.repo.name}`) : brand.muted("System"),
       n.isRead ? brand.muted("Read") : pc.yellow("● Unread"),
-      brand.muted(new Date(n.createdAt).toLocaleDateString()),
+      brand.muted(formatRelativeTime(n.createdAt)),
     ]);
   }
 
   return table.toString();
 }
 
+const NOTIFICATION_TYPE_TO_LEVEL: Record<string, NoticeLevel> = {
+  ERROR: "error",
+  SUCCESS: "success",
+  WARNING: "warning",
+};
+
 export function renderNotificationDetails(item: NotificationItem): void {
-  const level =
-    item.type === "ERROR"
-      ? "error"
-      : item.type === "WARNING"
-        ? "warning"
-        : item.type === "SUCCESS"
-          ? "success"
-          : "info";
+  const level = NOTIFICATION_TYPE_TO_LEVEL[item.type];
 
   const lines = [
     `${pc.bold("ID:")}          ${brand.muted(item.id)}`,
     `${pc.bold("Context:")}     ${item.repo ? pc.cyan(`${item.repo.owner}/${item.repo.name}`) : brand.muted("Global / System")}`,
-    `${pc.bold("Received:")}    ${brand.muted(new Date(item.createdAt).toLocaleString())}`,
+    `${pc.bold("Received:")}    ${brand.muted(formatDateTime(item.createdAt))}`,
     `${pc.bold("Status:")}      ${item.isRead ? brand.muted("Marked as read") : pc.yellow("Unread")}`,
   ];
 
@@ -70,7 +70,7 @@ export function renderNotificationStatsTable(stats: {
   const table = createTable(["Status", "Count"]);
   table.push(
     [pc.yellow("● Unread"), brand.highlight(String(stats.unread))],
-    [brand.success("✔ Read"), brand.muted(String(stats.read))],
+    [brand.success(" Read"), brand.muted(String(stats.read))],
     [brand.info("Σ Total"), brand.highlight(String(stats.total))],
   );
   return table.toString();

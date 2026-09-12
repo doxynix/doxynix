@@ -1,3 +1,4 @@
+import * as p from "@clack/prompts";
 import pkg from "@pkg";
 import { Command } from "commander";
 
@@ -15,14 +16,14 @@ import { registerProfileCommand } from "./commands/profile/profile.command";
 import { registerReposCommand } from "./commands/repos/repos.command";
 import { registerStagingCommand } from "./commands/staging/staging.command";
 import { registerSystemCommands } from "./commands/system/system.command";
+import { handleCliError } from "./core/errors";
 import { checkCliUpdate } from "./core/updater";
-import { brand } from "./ui/colors";
 
 const program = new Command();
 
 program
   .name("dxnx")
-  .description("⌨️ Doxynix Platform CLI — Developer & Security Companion")
+  .description("Doxynix Platform CLI — Developer & Security Companion")
   .version(pkg.version, "-v, --version", "Display current CLI version");
 
 registerAuthCommands(program);
@@ -41,10 +42,17 @@ registerStagingCommand(program);
 registerPrCommand(program);
 
 process.on("SIGINT", () => {
-  console.log(brand.muted("\n\nProcess terminated by user."));
+  if (process.stdin.isTTY && typeof process.stdin.setRawMode === "function") {
+    process.stdin.setRawMode(false);
+  }
+  process.stderr.write("\x1B[?25h");
+  p.cancel("Process terminated by user.");
   process.exit(130);
 });
 
-await program.parseAsync(process.argv);
-
-await checkCliUpdate(pkg.version);
+try {
+  await program.parseAsync(process.argv);
+  checkCliUpdate(pkg.version);
+} catch (error) {
+  handleCliError(error);
+}

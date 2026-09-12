@@ -1,5 +1,6 @@
 import { brand, pc } from "@/ui/colors";
-import { formatScore, stripHtml } from "@/ui/formatters";
+import { formatDateTime, formatRelativeTime, formatScore, stripHtml } from "@/ui/formatters";
+import { icons } from "@/ui/icons";
 import { createTable } from "@/ui/table";
 
 import { formatStatus } from "../analyze/analyze.formatter";
@@ -11,16 +12,16 @@ import type {
   PRListItem,
 } from "./pr.types";
 
+const PR_STATUS_LABELS: Record<string, string> = {
+  COMPLETED: brand.success(`${icons.check} Completed`),
+  FAILED: brand.error(`${icons.cross} Failed`),
+};
+
 export function renderPRListTable(prs: PRListItem[]): string {
   const table = createTable(["PR #", "Risk Score", "Findings", "Status", "Head Commit"]);
 
   for (const pr of prs) {
-    const statusLabel =
-      pr.status === "COMPLETED"
-        ? brand.success("✔ Completed")
-        : pr.status === "FAILED"
-          ? brand.error("✖ Failed")
-          : brand.info("⏳ Analyzing");
+    const statusLabel = PR_STATUS_LABELS[pr.status] ?? brand.info(`${icons.pending} Analyzing`);
 
     table.push([
       brand.highlight(`#${pr.prNumber}`),
@@ -34,41 +35,42 @@ export function renderPRListTable(prs: PRListItem[]): string {
   return table.toString();
 }
 
+const FIX_STATUS_LABELS: Record<string, string> = {
+  FAILED: brand.error("Failed"),
+  PR_OPENED: brand.success("PR Opened"),
+};
+
 export function renderFixesTable(fixes: FixItem[]): string {
   const table = createTable(["Fix ID", "Title", "Branch", "Status", "Created"]);
 
   for (const fix of fixes) {
     const id = fix.id ? `${fix.id.slice(0, 8)}...` : "—";
-    const status =
-      fix.status === "PR_OPENED"
-        ? brand.success("PR Opened")
-        : fix.status === "FAILED"
-          ? brand.error("Failed")
-          : brand.info(fix.status ?? "PENDING");
+    const status = FIX_STATUS_LABELS[fix.status] ?? brand.info(fix.status ?? "PENDING");
 
     table.push([
       brand.muted(id),
       brand.highlight(fix.title ?? "AI Suggested Fix"),
       pc.cyan(fix.branch ?? "—"),
       status,
-      new Date(fix.createdAt).toLocaleDateString(),
+      brand.muted(formatRelativeTime(fix.createdAt)),
     ]);
   }
 
   return table.toString();
 }
 
+const FINDING_TYPE_STYLES: Record<string, (text: string) => string> = {
+  BUG: brand.warning,
+  SECURITY_FLAW: brand.error,
+};
+
 export function renderPRCommentsTable(comments: PRCommentItem[]): string {
   const table = createTable(["File & Line", "Type", "Risk Level", "AI Finding / Suggestion"]);
 
   for (const c of comments) {
     const location = `${brand.highlight(c.filePath)}:${pc.yellow(String(c.line || 1))}`;
-    const typeLabel =
-      c.findingType === "SECURITY_FLAW"
-        ? brand.error(c.findingType)
-        : c.findingType === "BUG"
-          ? brand.warning(c.findingType)
-          : brand.info(c.findingType || "REVIEW");
+    const styleFn = FINDING_TYPE_STYLES[c.findingType] ?? brand.info;
+    const typeLabel = styleFn(c.findingType || "REVIEW");
 
     const cleanBody = stripHtml(c.bodyHtml);
     const bodyPreview = cleanBody.length > 70 ? `${cleanBody.slice(0, 67)}...` : cleanBody;
@@ -88,7 +90,7 @@ export function renderPRAnalysisDetails(analysis: PRAnalysisDetails): string {
     ["Risk Score", formatScore(analysis.riskScore)],
     ["Head Commit", brand.info(analysis.headSha ? analysis.headSha.slice(0, 7) : "—")],
     ["Base Commit", brand.muted(analysis.baseSha ? analysis.baseSha.slice(0, 7) : "—")],
-    ["Created At", brand.muted(new Date(analysis.createdAt).toLocaleString())],
+    ["Created At", brand.muted(formatDateTime(analysis.createdAt))],
     ["Analysis ID", brand.muted(analysis.publicId)],
   );
 

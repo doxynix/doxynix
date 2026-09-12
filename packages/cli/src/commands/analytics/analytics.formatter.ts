@@ -1,5 +1,6 @@
 import { brand } from "@/ui/colors";
 import { formatScore, getScoreLabel } from "@/ui/formatters";
+import { icons } from "@/ui/icons";
 import { createTable } from "@/ui/table";
 
 import type { DashboardStats, TrendItem } from "./analytics.types";
@@ -9,16 +10,28 @@ export function renderDashboardStats(stats: DashboardStats): string {
   const { avgScores, repoCount } = stats.overview;
 
   table.push(
-    ["🛡️ Security Score", formatScore(avgScores.security), getScoreLabel(avgScores.security)],
-    ["💳 Technical Debt Score", formatScore(avgScores.techDebt), getScoreLabel(avgScores.techDebt)],
     [
-      "⚡ Code Complexity Score",
+      `${icons.security} Security Score`,
+      formatScore(avgScores.security),
+      getScoreLabel(avgScores.security),
+    ],
+    [
+      `${icons.warning} Technical Debt Score`,
+      formatScore(avgScores.techDebt),
+      getScoreLabel(avgScores.techDebt),
+    ],
+    [
+      `${icons.dotWarning} Code Complexity Score`,
       formatScore(avgScores.complexity),
       getScoreLabel(avgScores.complexity),
     ],
-    ["📦 Connected Repositories", brand.highlight(String(repoCount)), brand.info("Active")],
     [
-      "🚀 Executed Analyses",
+      `${icons.package} Connected Repositories`,
+      brand.highlight(String(repoCount)),
+      brand.info("Active"),
+    ],
+    [
+      `${icons.ai} Executed Analyses`,
       brand.highlight(String(stats.analysisStats.total)),
       brand.success("Processed"),
     ],

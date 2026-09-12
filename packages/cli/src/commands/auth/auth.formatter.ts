@@ -1,10 +1,15 @@
 import { brand } from "@/ui/colors";
+import { renderCard } from "@/ui/layout";
 
 import type { AuthUser } from "./auth.types";
 
 export function renderUserProfile(user: AuthUser): void {
-  console.log(`\n  Name:   ${brand.highlight(user.name ?? "Not set")}`);
-  console.log(`  Email:  ${brand.highlight(user.email ?? "Not set")}`);
-  console.log(`  Role:   ${brand.info(user.role)}`);
-  console.log(`  ID:     ${brand.muted(user.id)}\n`);
+  console.log(
+    renderCard("Current User Profile", [
+      ["Name", brand.highlight(user.name ?? "Not set")],
+      ["Email", brand.highlight(user.email ?? "Not set")],
+      ["Role", brand.info(user.role)],
+      ["ID (UUID)", brand.muted(user.id)],
+    ]),
+  );
 }

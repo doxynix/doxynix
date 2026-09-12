@@ -1,5 +1,6 @@
 {
   "default": true,
+  "MD001": false,
   "MD009": {
     "br_spaces": 2
   },
@@ -11,5 +12,7 @@
     "style": "ordered"
   },
   "MD033": false,
-  "MD041": false
+  "MD040": false,
+  "MD041": false,
+  "MD051": false
 }
