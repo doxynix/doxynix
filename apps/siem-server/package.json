@@ -32,7 +32,7 @@
     "with-doppler": "bun scripts/doppler.ts"
   },
   "dependencies": {
-    "@axiomhq/js": "1.8.0",
+    "@axiomhq/js": "2.0.0",
     "@better-auth/drizzle-adapter": "catalog:",
     "@doxynix/shared": "workspace:*",
     "@hono/zod-validator": "0.9.1",
