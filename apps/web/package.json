@@ -317,6 +317,6 @@
     "zod-prisma-types": "3.3.11"
   },
   "engines": {
-    "node": ">=22.13.0"
+    "node": "v26.8.2"
   }
 }
