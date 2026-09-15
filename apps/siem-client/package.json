@@ -33,7 +33,7 @@
     "@react-stately/datepicker": "3.17.1",
     "@remixicon/react": "4.9.0",
     "@tanstack/react-query": "catalog:",
-    "@tanstack/react-router": "1.170.33",
+    "@tanstack/react-router": "1.170.35",
     "@tanstack/react-router-devtools": "1.167.1",
     "better-auth": "catalog:",
     "clsx": "catalog:",
@@ -49,11 +49,11 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@babel/core": "8.0.1",
+    "@babel/core": "8.0.5",
     "@doxynix/config": "workspace:*",
     "@rolldown/plugin-babel": "0.2.4",
     "@tailwindcss/vite": "4.3.3",
-    "@tanstack/router-plugin": "1.168.36",
+    "@tanstack/router-plugin": "1.168.37",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
@@ -62,7 +62,7 @@
     "rollup-plugin-visualizer": "7.1.1",
     "svgo": "4.1.0",
     "tailwindcss": "catalog:",
-    "vite": "8.2.2",
+    "vite": "8.3.0",
     "vite-plugin-mkcert": "2.1.0",
     "vite-plugin-svgr": "5.2.0"
   }
