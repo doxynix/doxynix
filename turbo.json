@@ -24,6 +24,7 @@
     "TZ"
   ],
   "tasks": {
+    "arch:check": {},
     "build": {
       "dependsOn": ["^build", "db:generate"],
       "env": ["APP_VERSION", "PORT", "NEXT_PUBLIC_*", "VITE_*"],
@@ -51,19 +52,19 @@
         "prisma/schema.zmodel",
         "prisma/sql/*.sql",
         "prisma.config.ts",
-        "scripts/zenstack-gen.mjs",
+        "scripts/zenstack-gen.ts",
         "src/core/db/schema.ts",
         "src/core/db/migrations/**",
         "drizzle.config.ts",
-        "scripts/doppler.ts",
-        "scripts/doppler.mjs"
+        "scripts/doppler.ts"
       ],
       "outputs": [
         "node_modules/.prisma/**",
         "node_modules/@prisma/client/**",
         "prisma/generated/**",
         "prisma/json-schema/**",
-        "prisma/dbml/**"
+        "prisma/dbml/**",
+        "src/core/db/migrations/**"
       ]
     },
 

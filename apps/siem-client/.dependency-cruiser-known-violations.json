@@ -1,0 +1,29 @@
+[
+  {
+    "type": "module",
+    "from": "src/entities/incident/index.tsx",
+    "to": "src/entities/incident/index.tsx",
+    "rule": {
+      "severity": "error",
+      "name": "no-orphans"
+    }
+  },
+  {
+    "type": "module",
+    "from": "src/features/scan/index.tsx",
+    "to": "src/features/scan/index.tsx",
+    "rule": {
+      "severity": "error",
+      "name": "no-orphans"
+    }
+  },
+  {
+    "type": "module",
+    "from": "src/widgets/sidebar/index.tsx",
+    "to": "src/widgets/sidebar/index.tsx",
+    "rule": {
+      "severity": "error",
+      "name": "no-orphans"
+    }
+  }
+]

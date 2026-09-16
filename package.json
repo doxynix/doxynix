@@ -13,6 +13,7 @@
     "db:migrate": "turbo db:migrate",
     "db:push": "turbo db:push",
     "db:studio": "turbo db:studio",
+    "arch:check": "turbo arch:check",
     "dev": "turbo dev --filter=!@doxynix/cli",
     "dump:packages": "find . \\( -name \"node_modules\" -o -name \".next\" -o -name \".turbo\" \\) -prune -o -name \"package.json\" -print -exec bunx cli-highlight {} \\;",
     "dup": "jscpd",
@@ -28,7 +29,7 @@
     "test": "turbo test",
     "test:stryker": "turbo test:stryker",
     "type-check": "turbo type-check",
-    "validate": "turbo validate && bun scripts/arch-check.ts"
+    "validate": "turbo validate"
   },
   "overrides": {
     "@better-fetch/fetch": "^1.1.21",
@@ -93,7 +94,6 @@
   "catalog": {
     "@better-auth/drizzle-adapter": "1.6.30",
     "@better-auth/passkey": "1.6.30",
-    "@better-auth/prisma-adapter": "1.6.30",
     "@hookform/resolvers": "5.9.1",
     "@radix-ui/react-accordion": "1.2.20",
     "@radix-ui/react-avatar": "1.2.6",

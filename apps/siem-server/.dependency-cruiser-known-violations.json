@@ -1,0 +1,30 @@
+[
+  {
+    "type": "dependency",
+    "from": "src/modules/rules/rules.router.ts",
+    "to": "src/modules/audit/audit.service.ts",
+    "unresolvedTo": "@/modules/audit/audit.service",
+    "dependencyTypes": [
+      "undetermined",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "vsa-no-cross-slice-imports"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/modules/scan/scan.router.ts",
+    "to": "src/modules/audit/audit.service.ts",
+    "unresolvedTo": "../audit/audit.service",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "vsa-no-cross-slice-imports"
+    }
+  }
+]

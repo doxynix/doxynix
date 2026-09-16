@@ -349,7 +349,7 @@ try {
     (a, b) => b.packages.length - a.packages.length || a.author.localeCompare(b.author),
   );
 
-  const outputPath = "./src/shared/data/licenses.json";
+  const outputPath = "./src/features/thanks/model/licenses.json";
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, JSON.stringify(finalData, null, 2));
 

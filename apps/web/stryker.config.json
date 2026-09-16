@@ -1,20 +1,21 @@
 {
   "$schema": "https://schema.stryker-mutator.io/stryker-config.schema.json",
   "concurrency": 2,
-  "coverageAnalysis": "perTest",
-  "disableTypeChecks": true,
-  "ignoreStatic": true,
+  "coverageAnalysis": "off",
+  "disableTypeChecks": "src/**/*.{ts,tsx}",
+  "ignoreStatic": false,
   "mutate": [
     "src/server/services/**/*.ts",
     "src/server/utils/**/*.ts",
     "src/shared/lib/**/*.ts",
-    "!src/server/logger/logger.ts",
-    "!src/shared/lib/uploadthing.ts"
+    "!src/**/*.test.{ts,tsx}",
+    "!src/**/*.spec.{ts,tsx}"
   ],
   "plugins": ["@stryker-mutator/vitest-runner"],
   "reporters": ["progress", "clear-text", "html"],
   "testRunner": "vitest",
   "vitest": {
-    "configFile": "vitest.stryker.config.ts"
+    "configFile": "vitest.stryker.config.ts",
+    "related": false
   }
 }

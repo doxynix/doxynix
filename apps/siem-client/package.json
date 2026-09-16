@@ -4,15 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "arch:baseline": "depcruise src --config .dependency-cruiser.ts --baseline",
+    "arch:check": "depcruise src --config .dependency-cruiser.ts --output-type err --cache --ignore-known",
     "build": "tsc -b && vite build",
     "dev": "vite",
     "format": "biome check --write .",
     "format:check": "biome check .",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
+    "lint:fsd": "steiger ./src",
     "preview": "vite preview",
     "type-check": "tsc -b",
-    "validate": "biome check . && oxlint"
+    "validate": "biome check . && oxlint && bun run lint:fsd && bun run arch:check"
   },
   "dependencies": {
     "@doxynix/shared": "workspace:*",
@@ -51,6 +54,7 @@
   "devDependencies": {
     "@babel/core": "8.0.1",
     "@doxynix/config": "workspace:*",
+    "@feature-sliced/steiger-plugin": "0.7.0",
     "@rolldown/plugin-babel": "0.2.4",
     "@tailwindcss/vite": "4.3.3",
     "@tanstack/router-plugin": "1.168.36",
@@ -58,8 +62,10 @@
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "babel-plugin-react-compiler": "catalog:",
+    "dependency-cruiser": "18.3.1",
     "globals": "16.5.0",
     "rollup-plugin-visualizer": "7.1.1",
+    "steiger": "0.6.0",
     "svgo": "4.1.0",
     "tailwindcss": "catalog:",
     "vite": "8.2.2",

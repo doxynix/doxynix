@@ -17,15 +17,15 @@ pre-commit:
       glob: "**/*.{js,jsx,ts,tsx}"
       run: bunx oxlint -c .oxlintrc.json {staged_files}
 
+    - name: arch-check
+      run: bun run arch:check
+
     - name: spell-check
       glob: "**/*.{js,ts,jsx,tsx,md,mdx}"
       run: bunx cspell lint --no-summary --no-progress --no-must-find-files {staged_files}
 
     - name: secretlint
       run: bunx secretlint {staged_files}
-
-    - name: arch-check
-      run: bun scripts/arch-check.ts {staged_files}
 
 prepare-commit-msg:
   commands:

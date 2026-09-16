@@ -21,6 +21,7 @@
     "**/messages/en.d.json.ts",
     "**/coverage/**",
     "**/report/**",
+    "**/reports/**",
     "**/playwright-report/**",
     "**/test-results/**",
     "**/.stryker-tmp/**",

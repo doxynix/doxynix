@@ -1,0 +1,100 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "context7": {
+      "command": ["bun", "x", "@upstash/context7-mcp@latest"],
+      "timeout": 60000,
+      "type": "local"
+    },
+    "doxynix": {
+      "command": [
+        "doppler",
+        "run",
+        "--silent",
+        "--project",
+        "doxynix-siem",
+        "--config",
+        "dev_personal",
+        "--",
+        "sh",
+        "-c",
+        "bun x -y mcp-remote https://doxynix.space/api/mcp --header \"Authorization: Bearer $DOXYNIX_API_KEY\""
+      ],
+      "timeout": 60000,
+      "type": "local"
+    },
+    "linear": {
+      "command": [
+        "doppler",
+        "run",
+        "--project",
+        "doxynix-siem",
+        "--config",
+        "dev_personal",
+        "--",
+        "bun",
+        "x",
+        "-y",
+        "@touchlab/linear-mcp-integration"
+      ],
+      "environment": {
+        "DOPPLER_NO_CHECK_VERSION": "true"
+      },
+      "timeout": 60000,
+      "type": "local"
+    },
+    "local-git": {
+      "command": ["bun", "x", "-y", "@cyanheads/git-mcp-server"],
+      "timeout": 60000,
+      "type": "local"
+    },
+    "local-podman": {
+      "command": ["bun", "x", "podman-mcp-server"],
+      "timeout": 60000,
+      "type": "local"
+    },
+    "local-postgres": {
+      "command": [
+        "doppler",
+        "run",
+        "--silent",
+        "--project",
+        "doxynix-siem",
+        "--config",
+        "dev_personal",
+        "--",
+        "sh",
+        "-c",
+        "bun x @iflow-mcp/postgresql-mcp-server --connection-string \"$DATABASE_URL\""
+      ],
+      "timeout": 60000,
+      "type": "local"
+    },
+    "memory": {
+      "command": ["bun", "x", "-y", "@modelcontextprotocol/server-memory"],
+      "timeout": 60000,
+      "type": "local"
+    },
+    "tavily-search": {
+      "command": [
+        "doppler",
+        "run",
+        "--silent",
+        "--project",
+        "doxynix-siem",
+        "--config",
+        "dev_personal",
+        "--",
+        "bun",
+        "x",
+        "-y",
+        "tavily-mcp"
+      ],
+      "environment": {
+        "DOPPLER_NO_CHECK_VERSION": "true"
+      },
+      "timeout": 60000,
+      "type": "local"
+    }
+  }
+}

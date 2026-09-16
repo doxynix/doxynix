@@ -1,0 +1,3918 @@
+[
+  {
+    "type": "cycle",
+    "from": "src/server/core/trpc/server.ts",
+    "to": "src/server/modules/index.ts",
+    "unresolvedTo": "@/server/modules",
+    "dependencyTypes": [
+      "undetermined",
+      "dynamic-import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.context.ts",
+    "to": "src/server/modules/analysis/analysis.repository.ts",
+    "unresolvedTo": "./analysis.repository",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.context.ts",
+    "to": "src/server/modules/analysis/analysis.schemas.ts",
+    "unresolvedTo": "./analysis.schemas",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.schemas.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.context.ts",
+    "to": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+    "unresolvedTo": "./logic/analyze-context-builder",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.mapper.ts",
+    "to": "src/server/modules/analysis/analysis.repository.ts",
+    "unresolvedTo": "./analysis.repository",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.mapper.ts",
+    "to": "src/server/modules/analysis/analysis.schemas.ts",
+    "unresolvedTo": "./analysis.schemas",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.schemas.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.mapper.ts",
+    "to": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+    "unresolvedTo": "./logic/analyze-context-builder",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.mapper.ts",
+    "to": "src/server/modules/analysis/logic/payload.ts",
+    "unresolvedTo": "./logic/payload",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/payload.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.mapper.ts",
+    "to": "src/server/modules/analysis/logic/structure-shared.ts",
+    "unresolvedTo": "./logic/structure-shared",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.router.ts",
+    "to": "src/server/modules/analysis/analysis.schemas.ts",
+    "unresolvedTo": "./analysis.schemas",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.schemas.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.router.ts",
+    "to": "src/server/modules/analysis/analysis.service.ts",
+    "unresolvedTo": "./analysis.service",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.router.ts",
+    "to": "src/server/modules/analysis/tasks/generate-fix.task.ts",
+    "unresolvedTo": "./tasks/generate-fix.task",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/tasks/generate-fix.task.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.schemas.ts",
+    "to": "src/server/modules/analysis/analysis.repository.ts",
+    "unresolvedTo": "./analysis.repository",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.schemas.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.service.ts",
+    "to": "src/server/modules/analysis/analysis.repository.ts",
+    "unresolvedTo": "./analysis.repository",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.service.ts",
+    "to": "src/server/modules/analysis/analysis.schemas.ts",
+    "unresolvedTo": "./analysis.schemas",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.schemas.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.service.ts",
+    "to": "src/server/modules/analysis/analysis.utils.ts",
+    "unresolvedTo": "./analysis.utils",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.service.ts",
+    "to": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+    "unresolvedTo": "./logic/analyze-context-builder",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.service.ts",
+    "to": "src/server/modules/analysis/logic/graph-navigator.ts",
+    "unresolvedTo": "./logic/graph-navigator",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.service.ts",
+    "to": "src/server/modules/analysis/logic/payload.ts",
+    "unresolvedTo": "./logic/payload",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/payload.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.service.ts",
+    "to": "src/server/modules/analysis/logic/repo-file-action-state.ts",
+    "unresolvedTo": "./logic/repo-file-action-state",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/repo-file-action-state.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/analysis.service.ts",
+    "to": "src/server/modules/analysis/logic/structure-shared.ts",
+    "unresolvedTo": "./logic/structure-shared",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+    "to": "src/server/modules/analysis/analysis.repository.ts",
+    "unresolvedTo": "../analysis.repository",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+    "to": "src/server/modules/analysis/logic/graph-navigator.ts",
+    "unresolvedTo": "./graph-navigator",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+    "to": "src/server/modules/analysis/logic/node-explainer.ts",
+    "unresolvedTo": "./node-explainer",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/node-explainer.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+    "to": "src/server/modules/analysis/logic/structure-context.ts",
+    "unresolvedTo": "./structure-context",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/structure-context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+    "to": "src/server/modules/analysis/logic/structure-shared.ts",
+    "unresolvedTo": "./structure-shared",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/edge-builder.ts",
+    "to": "src/server/modules/analysis/logic/semantics.ts",
+    "unresolvedTo": "./semantics",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/semantics.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/edge-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/edge-builder.ts",
+    "to": "src/server/modules/analysis/logic/structure-shared.ts",
+    "unresolvedTo": "./structure-shared",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/edge-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/graph-navigator.ts",
+    "to": "src/server/modules/analysis/analysis.repository.ts",
+    "unresolvedTo": "../analysis.repository",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/graph-navigator.ts",
+    "to": "src/server/modules/analysis/logic/edge-builder.ts",
+    "unresolvedTo": "./edge-builder",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/edge-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/semantics.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/graph-navigator.ts",
+    "to": "src/server/modules/analysis/logic/inspect.ts",
+    "unresolvedTo": "./inspect",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/inspect.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/node-inspection.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/graph-navigator.ts",
+    "to": "src/server/modules/analysis/logic/semantics.ts",
+    "unresolvedTo": "./semantics",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/semantics.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/graph-navigator.ts",
+    "to": "src/server/modules/analysis/logic/structure-context.ts",
+    "unresolvedTo": "./structure-context",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/structure-context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/graph-navigator.ts",
+    "to": "src/server/modules/analysis/logic/structure-shared.ts",
+    "unresolvedTo": "./structure-shared",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/inspect.ts",
+    "to": "src/server/modules/analysis/logic/node-inspection.ts",
+    "unresolvedTo": "./node-inspection",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/node-inspection.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/inspect.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/node-explainer.ts",
+    "to": "src/server/modules/analysis/analysis.mapper.ts",
+    "unresolvedTo": "../analysis.mapper",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/node-explainer.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/node-explainer.ts",
+    "to": "src/server/modules/analysis/analysis.repository.ts",
+    "unresolvedTo": "../analysis.repository",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/node-explainer.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/node-explainer.ts",
+    "to": "src/server/modules/analysis/logic/graph-navigator.ts",
+    "unresolvedTo": "./graph-navigator",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.mapper.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/node-explainer.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/node-explainer.ts",
+    "to": "src/server/modules/analysis/logic/semantics.ts",
+    "unresolvedTo": "./semantics",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/semantics.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/node-explainer.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/node-explainer.ts",
+    "to": "src/server/modules/analysis/logic/structure-context.ts",
+    "unresolvedTo": "./structure-context",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/structure-context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/node-explainer.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/node-explainer.ts",
+    "to": "src/server/modules/analysis/logic/structure-shared.ts",
+    "unresolvedTo": "./structure-shared",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/node-explainer.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/payload.ts",
+    "to": "src/server/modules/analysis/logic/structure-shared.ts",
+    "unresolvedTo": "./structure-shared",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/payload.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/repo-file-action-state.ts",
+    "to": "src/server/modules/analysis/analysis.repository.ts",
+    "unresolvedTo": "../analysis.repository",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/repo-file-action-state.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/semantics.ts",
+    "to": "src/server/modules/analysis/logic/structure-shared.ts",
+    "unresolvedTo": "./structure-shared",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/graph-navigator.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/semantics.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/structure-context.ts",
+    "to": "src/server/modules/analysis/analysis.repository.ts",
+    "unresolvedTo": "../analysis.repository",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/structure-context.ts",
+    "to": "src/server/modules/analysis/logic/edge-builder.ts",
+    "unresolvedTo": "./edge-builder",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/edge-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/semantics.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/structure-context.ts",
+    "to": "src/server/modules/analysis/logic/payload.ts",
+    "unresolvedTo": "./payload",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/payload.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/structure-context.ts",
+    "to": "src/server/modules/analysis/logic/semantics.ts",
+    "unresolvedTo": "./semantics",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/semantics.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "cycle",
+    "from": "src/server/modules/analysis/logic/structure-context.ts",
+    "to": "src/server/modules/analysis/logic/structure-shared.ts",
+    "unresolvedTo": "./structure-shared",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "no-circular"
+    },
+    "cycle": [
+      {
+        "name": "src/server/modules/analysis/logic/structure-shared.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.repository.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.utils.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/ai/ai-tools.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/core/trpc/server.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/index.ts",
+        "dependencyTypes": [
+          "undetermined",
+          "dynamic-import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.router.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.service.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/analysis.context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/analyze-context-builder.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      },
+      {
+        "name": "src/server/modules/analysis/logic/structure-context.ts",
+        "dependencyTypes": [
+          "local",
+          "import"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "module",
+    "from": "src/server/core/trpc/constants.ts",
+    "to": "src/server/core/trpc/constants.ts",
+    "rule": {
+      "severity": "error",
+      "name": "no-orphans"
+    }
+  },
+  {
+    "type": "module",
+    "from": "src/shared/ui/icons/google-icon.tsx",
+    "to": "src/shared/ui/icons/google-icon.tsx",
+    "rule": {
+      "severity": "error",
+      "name": "no-orphans"
+    }
+  },
+  {
+    "type": "module",
+    "from": "src/shared/ui/icons/linear-icon.tsx",
+    "to": "src/shared/ui/icons/linear-icon.tsx",
+    "rule": {
+      "severity": "error",
+      "name": "no-orphans"
+    }
+  },
+  {
+    "type": "module",
+    "from": "src/shared/ui/icons/openai-icon.tsx",
+    "to": "src/shared/ui/icons/openai-icon.tsx",
+    "rule": {
+      "severity": "error",
+      "name": "no-orphans"
+    }
+  },
+  {
+    "type": "module",
+    "from": "src/shared/ui/icons/uploadthing-icon.tsx",
+    "to": "src/shared/ui/icons/uploadthing-icon.tsx",
+    "rule": {
+      "severity": "error",
+      "name": "no-orphans"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/server/modules/agent/tasks/agent-github-reply.task.ts",
+    "to": "src/server/modules/analysis/ai/ai-constants.ts",
+    "unresolvedTo": "../../analysis/ai/ai-constants",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "vsa-no-cross-slice-imports"
+    }
+  },
+  {
+    "type": "dependency",
+    "from": "src/server/modules/agent/tasks/agent-github-reply.task.ts",
+    "to": "src/server/modules/analysis/ai/ai-tools.ts",
+    "unresolvedTo": "../../analysis/ai/ai-tools",
+    "dependencyTypes": [
+      "local",
+      "import"
+    ],
+    "rule": {
+      "severity": "error",
+      "name": "vsa-no-cross-slice-imports"
+    }
+  }
+]

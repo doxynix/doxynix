@@ -107,7 +107,7 @@ mcpServers:
 
   - name: doxynix
     type: streamable-http
-    url: "https://doxynix.space/api/mcp/mcp"
+    url: "https://doxynix.space/api/mcp"
     requestOptions:
       headers:
         Authorization: "Bearer ${DOXYNIX_API_KEY}"

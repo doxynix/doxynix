@@ -1,17 +1,34 @@
 {
-  "version": 1,
   "skills": {
+    "ai-sdk": {
+      "computedHash": "0883204d11b055e968dee697c5858e68064c27dfd4deb6310212895daa65c5ad",
+      "skillPath": "skills/use-ai-sdk/SKILL.md",
+      "source": "vercel/ai",
+      "sourceType": "github"
+    },
+    "autofix": {
+      "computedHash": "421f9102c20fb1c91d87a10ca9bee2e91c7e632e644dfdd3dc013e53865df6c1",
+      "skillPath": "skills/autofix/SKILL.md",
+      "source": "coderabbitai/skills",
+      "sourceType": "github"
+    },
     "better-auth-best-practices": {
-      "source": "better-auth/skills",
-      "sourceType": "github",
+      "computedHash": "0c30be0e118c2b7a0c4c57bd9e63bf110c7e420a79ec6ce7997153f3b1e066ee",
       "skillPath": "better-auth/best-practices/SKILL.md",
-      "computedHash": "0c30be0e118c2b7a0c4c57bd9e63bf110c7e420a79ec6ce7997153f3b1e066ee"
+      "source": "better-auth/skills",
+      "sourceType": "github"
     },
     "better-auth-security-best-practices": {
-      "source": "better-auth/skills",
-      "sourceType": "github",
+      "computedHash": "7a230edf3a24ce18162cb4379f59b6a19b8d24ca04db530609d0f15cede556dc",
       "skillPath": "security/SKILL.md",
-      "computedHash": "7a230edf3a24ce18162cb4379f59b6a19b8d24ca04db530609d0f15cede556dc"
+      "source": "better-auth/skills",
+      "sourceType": "github"
+    },
+    "biome": {
+      "computedHash": "7eeb8068922761916f0b9fdf8a2aba804857ffddd450797d030b8ead90f4f8a5",
+      "skillPath": "toolchains/javascript/tooling/biome/SKILL.md",
+      "source": "bobmatnyc/claude-mpm-skills",
+      "sourceType": "github"
     },
     "code-review": {
       "computedHash": "caa9a086baaf9e0f7cd71f64edfa83da6821c05e826b083221f3d02e3d6a1905",
@@ -20,15 +37,39 @@
       "sourceType": "github"
     },
     "drizzle-best-practices": {
-      "source": "honra-io/drizzle-best-practices",
-      "sourceType": "github",
+      "computedHash": "c723c157f3af98486d64dea4a1c1250ca0c57e1d0cdd426a6c301f844dcdbaed",
       "skillPath": "SKILL.md",
-      "computedHash": "c723c157f3af98486d64dea4a1c1250ca0c57e1d0cdd426a6c301f844dcdbaed"
+      "source": "honra-io/drizzle-best-practices",
+      "sourceType": "github"
     },
     "executing-plans": {
       "computedHash": "78a07800ee99a5861ae10be59d79fad085fdca10444e8aaeb2691597e357cff8",
       "skillPath": "skills/executing-plans/SKILL.md",
       "source": "obra/superpowers",
+      "sourceType": "github"
+    },
+    "feature-sliced-design": {
+      "computedHash": "c82f20352d839903cff4cd4d686eca7fa2d2d22a0434e9ee63d3f20f182cd93d",
+      "skillPath": "feature-sliced-design/SKILL.md",
+      "source": "feature-sliced/skills",
+      "sourceType": "github"
+    },
+    "git-advanced-workflows": {
+      "computedHash": "f4d0569096237c09b1c07896770fe487d7224c549f7aab0c6551a4f330fcf160",
+      "skillPath": "plugins/developer-essentials/skills/git-advanced-workflows/SKILL.md",
+      "source": "wshobson/agents",
+      "sourceType": "github"
+    },
+    "git-commit": {
+      "computedHash": "2607fc60629b82b257136dd2a7a373f0a4466c0b49df7746d845d59313c99b21",
+      "skillPath": "skills/git-commit/SKILL.md",
+      "source": "github/awesome-copilot",
+      "sourceType": "github"
+    },
+    "github-actions-templates": {
+      "computedHash": "93e92fd674dea084628e95f9c48af806f9672ac08f815c84f85adedb55742c59",
+      "skillPath": "plugins/cicd-automation/skills/github-actions-templates/SKILL.md",
+      "source": "wshobson/agents",
       "sourceType": "github"
     },
     "handoff": {
@@ -38,10 +79,10 @@
       "sourceType": "github"
     },
     "hono": {
-      "source": "honojs/skills",
-      "sourceType": "github",
+      "computedHash": "2b2d642a6698cf1767d7a65f8beb4aceb078033d5afc5838c08da6d683fc333d",
       "skillPath": "skills/hono/SKILL.md",
-      "computedHash": "2b2d642a6698cf1767d7a65f8beb4aceb078033d5afc5838c08da6d683fc333d"
+      "source": "honojs/skills",
+      "sourceType": "github"
     },
     "mcp-builder": {
       "computedHash": "826e46adf81e1372282e205c34e1a2ee876e72148007726e4a2512599d2fef7b",
@@ -49,17 +90,23 @@
       "source": "anthropics/skills",
       "sourceType": "github"
     },
-    "nextjs-app-router-patterns": {
+    "monorepo-management": {
+      "computedHash": "0a0f4a9860b7d12b914fa2d167c322fbe8328fe53679210439023cd5ef95bfe8",
+      "skillPath": "plugins/developer-essentials/skills/monorepo-management/SKILL.md",
       "source": "wshobson/agents",
-      "sourceType": "github",
+      "sourceType": "github"
+    },
+    "nextjs-app-router-patterns": {
+      "computedHash": "b4fea42eecf1f803155ef7fa133d5286ee8f2dbba3e616954e9e43c6f0ffc144",
       "skillPath": "plugins/frontend-mobile-development/skills/nextjs-app-router-patterns/SKILL.md",
-      "computedHash": "b4fea42eecf1f803155ef7fa133d5286ee8f2dbba3e616954e9e43c6f0ffc144"
+      "source": "wshobson/agents",
+      "sourceType": "github"
     },
     "playwright-best-practices": {
-      "source": "currents-dev/playwright-best-practices-skill",
-      "sourceType": "github",
+      "computedHash": "7eb144f734450fee649dc1d209114775ddda07cbf45be84fe969d3d4f3971dce",
       "skillPath": "playwright-best-practices/SKILL.md",
-      "computedHash": "7eb144f734450fee649dc1d209114775ddda07cbf45be84fe969d3d4f3971dce"
+      "source": "currents-dev/playwright-best-practices-skill",
+      "sourceType": "github"
     },
     "ponytail": {
       "computedHash": "210fa0831f649ce9f8a305f7b7c8cf2a0dd09ac4dd53067109941b96e7811d4e",
@@ -67,11 +114,29 @@
       "source": "dietrichgebert/ponytail",
       "sourceType": "github"
     },
+    "postgresql-table-design": {
+      "computedHash": "c87d5cac33fbddc757fbb4b38a0098cff7dcf79201d40ddff2af76ec2724c5a1",
+      "skillPath": "plugins/database-design/skills/postgresql-table-design/SKILL.md",
+      "source": "wshobson/agents",
+      "sourceType": "github"
+    },
     "prisma-driver-adapter-implementation": {
-      "source": "prisma/skills",
-      "sourceType": "github",
+      "computedHash": "cc487f1bf36f616ddb3a9478b3527d288dd706d77a9e5dbee9af52dca1eee8e4",
       "skillPath": "prisma-driver-adapter-implementation/SKILL.md",
-      "computedHash": "cc487f1bf36f616ddb3a9478b3527d288dd706d77a9e5dbee9af52dca1eee8e4"
+      "source": "prisma/skills",
+      "sourceType": "github"
+    },
+    "react-hook-form": {
+      "computedHash": "e9881245bb3f993f93c9fce336ca7a517ce39864aa46c95d04238fc5ebc4e4d1",
+      "skillPath": "skills/.curated/react-hook-form/SKILL.md",
+      "source": "pproenca/dot-skills",
+      "sourceType": "github"
+    },
+    "release-please": {
+      "computedHash": "d3ab08b8a02ca41da5f92c004b81c69fb3ddb384977846f28792c77db1e492e3",
+      "skillPath": "skills/release-please/SKILL.md",
+      "source": "bmad-labs/skills",
+      "sourceType": "github"
     },
     "shadcn": {
       "computedHash": "f615de216e085a84e31593ad0fa9062232adc40cd87b7c7ab2b8e49abf6500be",
@@ -85,11 +150,23 @@
       "source": "obra/superpowers",
       "sourceType": "github"
     },
+    "tailwind": {
+      "computedHash": "be7923daecd403735249dc499a22d595bd2f56ca49d2309fa15300e7d9fe98a1",
+      "skillPath": "toolchains/ui/styling/tailwind/SKILL.md",
+      "source": "bobmatnyc/claude-mpm-skills",
+      "sourceType": "github"
+    },
     "tanstack-query-best-practices": {
-      "source": "deckardger/tanstack-agent-skills",
-      "sourceType": "github",
+      "computedHash": "21d2e8b7468a81d772b6527ad8ca178cc2f3f08af777bb9061333013ee88a0c9",
       "skillPath": "skills/tanstack-query/SKILL.md",
-      "computedHash": "21d2e8b7468a81d772b6527ad8ca178cc2f3f08af777bb9061333013ee88a0c9"
+      "source": "deckardger/tanstack-agent-skills",
+      "sourceType": "github"
+    },
+    "tanstack-router-best-practices": {
+      "computedHash": "659549bfcacc5767cd489fcbceb2889247bd38c82f0a37c282da754eb2603f63",
+      "skillPath": "skills/tanstack-router/SKILL.md",
+      "source": "deckardger/tanstack-agent-skills",
+      "sourceType": "github"
     },
     "tdd": {
       "computedHash": "e753a5da75292bbe59d302d89566bc2c53d0e73944da2f0e944a7578883c07d0",
@@ -98,28 +175,34 @@
       "sourceType": "github"
     },
     "trigger-tasks": {
-      "source": "triggerdotdev/skills",
-      "sourceType": "github",
+      "computedHash": "fc5371f0356358a13a07b8d5f72f7e537002d4b0c50f3d2dacd57d10a2163cfa",
       "skillPath": "trigger-tasks/SKILL.md",
-      "computedHash": "fc5371f0356358a13a07b8d5f72f7e537002d4b0c50f3d2dacd57d10a2163cfa"
+      "source": "triggerdotdev/skills",
+      "sourceType": "github"
+    },
+    "trpc": {
+      "computedHash": "ebde0490a1cb88362f0ea27a091a4e3128c9d63a8882ff58943b0d6db27874d9",
+      "skillPath": "toolchains/typescript/api/trpc/SKILL.md",
+      "source": "bobmatnyc/claude-mpm-skills",
+      "sourceType": "github"
     },
     "turborepo": {
-      "source": "vercel/turborepo",
-      "sourceType": "github",
+      "computedHash": "4289866858fc5314e10ca21584d00c48ddb7e6bc353e262283958f8e4b9bec87",
       "skillPath": "skills/turborepo/SKILL.md",
-      "computedHash": "4289866858fc5314e10ca21584d00c48ddb7e6bc353e262283958f8e4b9bec87"
+      "source": "vercel/turborepo",
+      "sourceType": "github"
     },
     "upstash-redis-js": {
-      "source": "upstash/skills",
-      "sourceType": "github",
+      "computedHash": "952245ca618c5b0f29e3330906858f584ecedcbfe10d474e11253d68810ba650",
       "skillPath": "skills/upstash-redis-js/SKILL.md",
-      "computedHash": "952245ca618c5b0f29e3330906858f584ecedcbfe10d474e11253d68810ba650"
+      "source": "upstash/skills",
+      "sourceType": "github"
     },
     "vercel-react-best-practices": {
-      "source": "vercel-labs/agent-skills",
-      "sourceType": "github",
+      "computedHash": "3219a1944e404ffc14d1d9d6aef6dd2e3855b81387ee0a044ccbfe14d34c2357",
       "skillPath": "skills/react-best-practices/SKILL.md",
-      "computedHash": "3219a1944e404ffc14d1d9d6aef6dd2e3855b81387ee0a044ccbfe14d34c2357"
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github"
     },
     "verification-before-completion": {
       "computedHash": "b529822bdac4b197b180fe12225cff86b930b65910435103c10622df7f041651",
@@ -128,10 +211,10 @@
       "sourceType": "github"
     },
     "vitest": {
-      "source": "antfu/skills",
-      "sourceType": "github",
+      "computedHash": "943d436114c677802426741980146c07560bf375297666b03062444f4b98a785",
       "skillPath": "skills/vitest/SKILL.md",
-      "computedHash": "943d436114c677802426741980146c07560bf375297666b03062444f4b98a785"
+      "source": "antfu/skills",
+      "sourceType": "github"
     },
     "writing-plans": {
       "computedHash": "27c75044e444a4fc68798c3f799dc23eaff3a6bfabff32e6ad75bb20f881c094",
@@ -140,10 +223,11 @@
       "sourceType": "github"
     },
     "zod": {
-      "source": "pproenca/dot-skills",
-      "sourceType": "github",
+      "computedHash": "c69b5133b65643317236707f2cd3e521b4fc6e5ee5fd6c6c00cf62a37dfd0144",
       "skillPath": "skills/.curated/zod/SKILL.md",
-      "computedHash": "c69b5133b65643317236707f2cd3e521b4fc6e5ee5fd6c6c00cf62a37dfd0144"
+      "source": "pproenca/dot-skills",
+      "sourceType": "github"
     }
-  }
+  },
+  "version": 1
 }

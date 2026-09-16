@@ -1,4 +1,4 @@
 [install]
-minimumReleaseAge = 259200
+# minimumReleaseAge = 259200 // TMP
 exact = true
 default-trusted-dependency = false
