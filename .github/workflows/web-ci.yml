@@ -132,7 +132,7 @@ jobs:
         run: bun --filter @doxynix/web format:check
 
       - name: Linting
-        run: GOMAXPROCS=1 bun --filter @doxynix/web lint
+        run: bun --filter @doxynix/web lint
 
   types:
     needs: [init]
