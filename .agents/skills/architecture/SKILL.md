@@ -45,22 +45,50 @@ import { AuthForm } from '@/features/auth';
 ---
 
 ## 2. Server Architecture: Vertical Slice Architecture (VSA)
-Applies to: `apps/siem-server/src/modules` and `apps/web/src/server/modules`.
+Applies to: `apps/siem-server/src/modules`, `apps/web/src/server/modules`, and `packages/cli/src/commands`.
 
 ### Architectural Rules:
-- **Slice Isolation**: `modules/incidents` MUST NOT import private services or routers from `modules/rules`.
-- **Core Abstractions**: Only cross-cutting concerns (DB client, redis, bus, auth middleware) live in `core/`. Everything domain-specific stays inside the slice.
+- **Slice Isolation**: `modules/incidents` MUST NOT import private services or routers from `modules/rules`. Same for CLI command slices (`commands/staging` must not import from `commands/pr`).
+- **Core Abstractions**: Only cross-cutting concerns (DB client, redis, bus, auth middleware, CLI `core/`/`ui/`) live outside slices. Everything domain-specific stays inside the slice. CLI `core/`/`ui/` MUST NOT import from command slices.
 - **Client-Server Boundary**: Client code MUST NEVER import directly from server internals. Import shared schemas from `@doxynix/shared` or RPC contracts from `@doxynix/siem-server/client`.
 
 ---
 
+## 3. Tooling Map
+
+| Place | FSD/VSA methodology lint (warn) | Dependency gate (error + baseline) |
+|---|---|---|
+| `apps/web` | steiger (`lint:fsd`) | dep-cruiser: VSA server + FSD boundaries + cycles + orphans |
+| `apps/siem-client` | steiger (`lint:fsd`) | dep-cruiser: FSD layer order + cross-feature + cycles + orphans |
+| `apps/siem-server` | — (no FSD) | dep-cruiser: VSA slices + cycles + orphans |
+| `packages/cli` | — (no FSD) | dep-cruiser: VSA command slices + layering + cycles + orphans |
+| `packages/shared`, `packages/config` | — | — (leaf packages: pure types / configs, no meaningful graph) |
+
+- **steiger** = FSD *methodology* (segment structure, public api, naming) — warns, never blocks.
+- **dep-cruiser** = generic *graph* gate — hard rules (regex boundaries, cycles, orphans) with a known-violations baseline so WIP doesn't block the gate but new violations fail.
+- Both run inside each app's `validate`; a repo-wide quick gate is wired into **Lefthook pre-commit** and the root `arch:check` script.
+
+---
+
 ## Verification & Auditing
-Before finishing any structural changes, run:
+Before finishing any structural changes, run a dependency audit for the affected app (or the whole repo):
 
 ```bash
-# Verify specific modified file
-bun scripts/arch-check.ts <path_to_file>
-
-# Run full repository dependency audit
+# Full-repo gate (root script) - also wired into Lefthook pre-commit
 bun run arch:check
+
+# Web (Next.js) - dep-cruiser: VSA (src/server/modules), FSD, cycles, orphans
+bun --filter @doxynix/web arch:check
+
+# SIEM server - dep-cruiser: VSA (src/modules), cycles, orphans
+bun --filter @doxynix/siem-server arch:check
+
+# SIEM client - dep-cruiser: FSD boundaries, cycles, orphans (+ steiger in validate)
+bun --filter @doxynix/siem-client arch:check
+
+# CLI - dep-cruiser: VSA for command slices (src/commands), cycles, orphans
+bun --filter @doxynix/cli arch:check
+
+# Refresh a known-violations baseline after deliberate changes
+bun --filter @doxynix/<app> arch:baseline
 ```
