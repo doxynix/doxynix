@@ -1,3 +1,5 @@
+// secretlint-disable
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/server/core/app-logger", () => ({
@@ -28,7 +30,6 @@ import type { PRAnalysisConfig } from "./pr.types";
 const SECRET_PATCH = `--- a/src/auth.ts
 +++ b/src/auth.ts
 @@ -10,0 +11,4 @@
-// secretlint-disable-next-line
 +const stripe = "sk_live_aaaaaaaaaaaaaaaaaaaaaaaa";
 +const node = eval("1 + 1");
 +db.execute("SELECT * FROM users");

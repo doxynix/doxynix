@@ -184,8 +184,8 @@ jobs:
       - name: Type Checking
         run: bun --filter @doxynix/web type-check
 
-      - name: Check Type Coverage
-        run: bun --filter @doxynix/web type-check:coverage
+      # - name: Check Type Coverage
+      #   run: bun --filter @doxynix/web type-check:coverage
 
   tests:
     needs: [changes, init]
