@@ -9,7 +9,7 @@ import { ExternalLink } from "@/shared/ui/kit/external-link";
 
 import type { UiRepoDetailed } from "@/entities/repo/model/repo.types";
 import { repoStatusConfig } from "@/entities/repo/model/repo-status-config";
-import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";
+import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility-config";
 
 import { PrDraftSheet } from "./pr-draft-sheet";
 import { RepoVersionSelector } from "./repo-version-selector";

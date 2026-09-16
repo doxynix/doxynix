@@ -2,8 +2,8 @@
 
 import { ArrowDown, Terminal as TerminalIcon } from "lucide-react";
 
-import { useAutoScroll } from "@/shared/hooks/use-auto-scroll";
 import { cn } from "@/shared/lib/cn";
+import { useAutoScroll } from "@/shared/lib/hooks/use-auto-scroll";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";

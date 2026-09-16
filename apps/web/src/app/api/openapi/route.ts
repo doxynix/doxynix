@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import openApiDocument from "@public/openapi.json";
 
-import { IS_PROD } from "@/shared/constants/env.flags";
+import { IS_PROD } from "@/shared/config/env.flags";
 
 export const GET = async () => {
   try {

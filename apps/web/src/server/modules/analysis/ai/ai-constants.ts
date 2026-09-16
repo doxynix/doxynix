@@ -3,7 +3,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { get } from "@vercel/edge-config";
 import * as z from "zod";
 
-import { GROQ_API_KEY } from "@/shared/constants/env.server";
+import { GROQ_API_KEY } from "@/shared/config/env.server";
 
 import { appLogger } from "@/server/core/app-logger";
 

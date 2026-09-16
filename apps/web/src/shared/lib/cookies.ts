@@ -1,4 +1,4 @@
-import { IS_PROD } from "../constants/env.flags";
+import { IS_PROD } from "../config/env.flags";
 
 export function getClientCookie(name: string): null | string {
   if (typeof window === "undefined") {

@@ -4,8 +4,9 @@
 import { type MouseEvent, useEffect, useId, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 
-import { useDebounce } from "@/shared/hooks/use-debounce";
 import { cn } from "@/shared/lib/cn";
+import { useDebounce } from "@/shared/lib/hooks/use-debounce";
+import { preprocessMermaidChart } from "@/shared/lib/mermaid-preprocess";
 import { type MermaidCustomTheme, mermaidThemes } from "@/shared/lib/mermaid-themes";
 
 export type MermaidBuiltinTheme = "base" | "dark" | "default" | "forest" | "neutral";
@@ -46,56 +47,6 @@ export interface MermaidProps {
   onError?: (error: string) => void;
   onLinkClick?: (href: string, e: MouseEvent) => void;
   onSuccess?: (svg: string) => void;
-}
-
-function preprocessMermaidChart(chart: string, buildHref?: (path: string) => string): string {
-  const lines = chart.split("\n");
-
-  const firstLine =
-    lines
-      .find((line) => line.trim().length > 0)
-      ?.trim()
-      .toLowerCase() || "";
-
-  const isFlowchart = firstLine.startsWith("graph") || firstLine.startsWith("flowchart");
-
-  const clickLines: string[] = [];
-  const processedLines: string[] = [];
-
-  for (const line of lines) {
-    const match = /\[\[([\w./-]+)]]/.exec(line);
-
-    if (match != null) {
-      const path = match[1];
-
-      if (path == null) {
-        processedLines.push(line);
-        continue;
-      }
-
-      const cleanedLine = line.replace(`[[${path}]]`, path);
-      processedLines.push(cleanedLine);
-
-      if (isFlowchart) {
-        const nodeMatch = /^\s*([\w-]+)/.exec(line);
-        if (nodeMatch != null) {
-          const nodeId = nodeMatch[1];
-
-          if (nodeId == null) {
-            continue;
-          }
-
-          const href =
-            buildHref != null ? buildHref(path) : `/code?node=file:${encodeURIComponent(path)}`;
-          clickLines.push(`  click ${nodeId} "${href}" "Explore ${path}"`);
-        }
-      }
-    } else {
-      processedLines.push(line);
-    }
-  }
-
-  return [...processedLines, ...clickLines].join("\n");
 }
 
 function useMermaid({

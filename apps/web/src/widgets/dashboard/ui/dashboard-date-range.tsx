@@ -11,7 +11,9 @@ import { AppButton } from "@/shared/ui/core/button";
 import { Calendar } from "@/shared/ui/core/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/core/popover";
 
-import { dashboardParsers } from "../model/dashboard-parsers";
+import { dashboardParsers } from "@/features/repo-analytics/model/dashboard-parsers";
+
+import { hasUrlStateChanged, resolveDateRange } from "../model/date-range";
 
 const DATE_PERIODS = [
   {
@@ -49,25 +51,17 @@ const DATE_PERIODS = [
 export function DashboardDatePeriod() {
   const [urlState, setUrlState] = useQueryStates(dashboardParsers);
 
-  const getRangeFromUrl = () => {
-    if (urlState.from && urlState.to) {
-      return { from: urlState.from, to: urlState.to };
-    }
-    return DATE_PERIODS.find((p) => p.period === urlState.period)?.getValue();
-  };
-
-  const [tempDate, setTempDate] = useState<DateRange | undefined>(getRangeFromUrl);
+  const [tempDate, setTempDate] = useState<DateRange | undefined>(() =>
+    resolveDateRange(urlState.from, urlState.to, urlState.period, DATE_PERIODS),
+  );
 
   const [prevUrlState, setPrevUrlState] = useState(urlState);
 
-  const isUrlChanged =
-    urlState.from?.getTime() !== prevUrlState.from?.getTime() ||
-    urlState.to?.getTime() !== prevUrlState.to?.getTime() ||
-    urlState.period !== prevUrlState.period;
+  const isUrlChanged = hasUrlStateChanged(prevUrlState, urlState);
 
   if (isUrlChanged) {
     setPrevUrlState(urlState);
-    setTempDate(getRangeFromUrl());
+    setTempDate(resolveDateRange(urlState.from, urlState.to, urlState.period, DATE_PERIODS));
   }
 
   const activePeriod = DATE_PERIODS.find((p) => p.period === urlState.period);

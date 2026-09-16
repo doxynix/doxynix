@@ -4,7 +4,7 @@ import * as ai from "ai";
 import { wrapAISDK } from "langsmith/experimental/vercel";
 import type * as z from "zod";
 
-import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
+import { TRIGGER_CONFIG } from "@/shared/config/trigger";
 
 import { appLogger } from "@/server/core/app-logger";
 import { google } from "@/server/core/google";

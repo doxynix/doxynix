@@ -1,4 +1,4 @@
-import type { FileNode } from "./repo-setup.types";
+import type { FileNode, FileTuple } from "./repo-setup.types";
 
 export const sortNodes = (nodes: FileNode[]): FileNode[] => {
   return nodes
@@ -19,6 +19,81 @@ export const sortNodes = (nodes: FileNode[]): FileNode[] => {
       ...node,
       ...(node.children && node.children.length > 0 ? { children: sortNodes(node.children) } : {}),
     }));
+};
+
+export const getRecommendedPaths = (files: FileTuple[] | undefined) => {
+  if (files == null) {
+    return [];
+  }
+  return files.filter((f) => f[3] === 1 && f[1] === 1).map((f) => f[0]);
+};
+
+export const buildFileTree = (files: FileTuple[] | undefined): FileNode[] => {
+  if (files == null) {
+    return [];
+  }
+
+  const root: FileNode[] = [];
+  const map = new Map<string, FileNode>();
+
+  files.forEach((fileArr) => {
+    const [path, type, sha, recommended] = fileArr;
+    const parts = path.split("/");
+    let currentPath = "";
+
+    parts.forEach((part, index) => {
+      const isLast = index === parts.length - 1;
+      const parentPath = currentPath;
+      currentPath = currentPath ? `${currentPath}/${part}` : part;
+
+      if (!map.has(currentPath)) {
+        const newNode: FileNode = {
+          children: isLast ? undefined : [],
+          id: currentPath,
+          name: part,
+          path: currentPath,
+          recommended: isLast ? recommended === 1 : false,
+          sha: isLast ? sha : "",
+          type: isLast ? (type === 1 ? "blob" : "tree") : "tree",
+        };
+        map.set(currentPath, newNode);
+        if (index === 0) {
+          root.push(newNode);
+        } else {
+          const parent = map.get(parentPath);
+          if (parent?.children) {
+            parent.children.push(newNode);
+          }
+        }
+      }
+    });
+  });
+
+  return sortNodes(root);
+};
+
+export const countSelectedFiles = (selectedIds: Set<string>, files: FileTuple[] | undefined) => {
+  if (files == null) {
+    return 0;
+  }
+
+  const allFilePaths = new Set(files.filter((f) => f[1] === 1).map((f) => f[0]));
+  let count = 0;
+  selectedIds.forEach((id) => {
+    if (allFilePaths.has(id)) {
+      count++;
+    }
+  });
+  return count;
+};
+
+export const matchesSearch = (term: string, files: FileTuple[] | undefined) => {
+  if (!term) {
+    return true;
+  }
+
+  const normalizedTerm = term.toLowerCase();
+  return files?.some((f) => f[0].toLowerCase().includes(normalizedTerm));
 };
 
 export const collectAllIds = (node: FileNode, ids: string[] = []) => {

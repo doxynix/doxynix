@@ -3,8 +3,8 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import type { NextRequest } from "next/server";
 import ipaddr from "ipaddr.js";
 
-import { IS_PROD } from "@/shared/constants/env.flags";
-import { APP_VERSION } from "@/shared/constants/env.server";
+import { IS_PROD } from "@/shared/config/env.flags";
+import { APP_VERSION } from "@/shared/config/env.server";
 
 type RequestStore = {
   appVersion?: string;

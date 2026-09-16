@@ -12,9 +12,9 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Menu, PanelLeft } from "lucide-react";
 
-import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { cn } from "@/shared/lib/cn";
 import { setClientCookie } from "@/shared/lib/cookies";
+import { useIsMobile } from "@/shared/lib/hooks/use-mobile";
 import { AppButton } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { Separator } from "@/shared/ui/core/separator";

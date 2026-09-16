@@ -2,7 +2,7 @@ import type { Route } from "next";
 import { Menu } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import { publicHeaderMenu } from "@/shared/constants/navigation";
+import { publicHeaderMenu } from "@/shared/config/navigation";
 import { Link } from "@/shared/i18n/navigation";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";
 import { AppButton } from "@/shared/ui/core/button";

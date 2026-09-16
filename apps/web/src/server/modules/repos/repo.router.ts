@@ -1,9 +1,14 @@
-import { CreateRepoSchema, PublicRepoSchema, StatusSchema } from "@doxynix/shared";
+import {
+  CreateRepoSchema,
+  PaginationMetaSchema,
+  PublicRepoSchema,
+  StatusSchema,
+} from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
 import * as z from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
-import { getPaginationMeta, PaginationMetaSchema } from "@/server/utils/pagination";
+import { getPaginationMeta } from "@/server/utils/pagination";
 
 import { repoMapper } from "./repo.mapper";
 import { RepoFilterSchema } from "./repo.schemas";

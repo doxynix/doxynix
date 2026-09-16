@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 import { Webhook } from "svix";
 import * as z from "zod";
 
-import { RESEND_WEBHOOK_SECRET } from "@/shared/constants/env.server";
+import { RESEND_WEBHOOK_SECRET } from "@/shared/config/env.server";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";

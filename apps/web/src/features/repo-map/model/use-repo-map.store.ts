@@ -18,3 +18,4 @@ const useStore = create<MapUiState>((set) => ({
 
 export const useMapControlsHide = () => useStore((s) => s.hideControls);
 export const useMapControlsActions = () => useStore((s) => s.actions);
+export const useRepoMapStore = useStore;

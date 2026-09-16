@@ -4,8 +4,8 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { NextRequest } from "next/server";
 
-import { TRPC_PREFIX } from "@/shared/constants/env.client";
-import { IS_DEV } from "@/shared/constants/env.flags";
+import { TRPC_PREFIX } from "@/shared/config/env.client";
+import { IS_DEV } from "@/shared/config/env.flags";
 
 import { requestContext } from "@/server/utils/request-context";
 

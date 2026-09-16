@@ -3,7 +3,7 @@ import { resolveMx } from "node:dns/promises";
 
 import disposableDomains from "disposable-email-domains";
 
-import { LOG_SALT_SECRET } from "@/shared/constants/env.server";
+import { LOG_SALT_SECRET } from "@/shared/config/env.server";
 
 import { appLogger } from "@/server/core/app-logger";
 

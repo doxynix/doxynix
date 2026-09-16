@@ -3,7 +3,7 @@
 import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
 
-import { getRepoDetailsMenu } from "@/shared/constants/navigation";
+import { getRepoDetailsMenu } from "@/shared/config/navigation";
 import { Link, usePathname } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { isRouteActive } from "@/shared/lib/navigation-utils";

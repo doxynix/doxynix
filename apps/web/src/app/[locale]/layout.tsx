@@ -11,8 +11,8 @@ import NextTopLoader from "nextjs-toploader";
 
 import "../globals.css";
 
-import { APP_URL } from "@/shared/constants/env.client";
-import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
+import { APP_URL } from "@/shared/config/env.client";
+import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/config/env.flags";
 import { routing } from "@/shared/i18n/routing";
 import { cn } from "@/shared/lib/cn";
 import { Toaster } from "@/shared/ui/core/sonner";
@@ -20,7 +20,7 @@ import { A11yProvider } from "@/shared/ui/kit/a11y-provider";
 import { ConsoleEasterEgg } from "@/shared/ui/kit/console-easter-egg";
 import { SkipLink } from "@/shared/ui/kit/skip-link";
 
-import { Providers } from "../providers";
+import { Providers } from "../composition-root";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

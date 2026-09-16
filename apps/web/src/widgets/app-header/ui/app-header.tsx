@@ -2,7 +2,7 @@
 
 import { Book, SlashIcon } from "lucide-react";
 
-import { LOCALES, type Locale } from "@/shared/constants/locales";
+import { LOCALES, type Locale } from "@/shared/config/locales";
 import { Link, usePathname } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { Logo } from "@/shared/ui/branding/doxynix-logo";

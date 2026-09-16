@@ -2,16 +2,17 @@
 
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
-import * as z from "zod/mini";
 
 import { trpc } from "@/shared/api/trpc";
-import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
+import { TRIGGER_CONFIG } from "@/shared/config/trigger";
 import { useRouter } from "@/shared/i18n/navigation";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Progress } from "@/shared/ui/core/progress";
 import { Spinner } from "@/shared/ui/core/spinner";
 
+import { resolveAnalysisDisplay } from "../model/analysis-display";
+import { parseProgress, parseStatusMessage, parseTaskLogs } from "../model/realtime-parsers";
 import { AnalysisTerminal } from "./repo-analysis-terminal";
 
 type Props = {
@@ -22,14 +23,6 @@ type Props = {
   owner: string;
   repoId: string;
 };
-
-const parseProgress = (val: unknown) =>
-  z.catch(z.number().check(z.gte(0), z.lte(100)), 0).parse(val);
-
-const parseStatusMessage = (val: unknown) =>
-  z.catch(z.string(), "Analyzing repository…").parse(val);
-
-const parseTaskLogs = (val: unknown) => z.catch(z.array(z.string()), []).parse(val);
 
 export function RepoAnalysisLive({
   accessToken,
@@ -53,28 +46,12 @@ export function RepoAnalysisLive({
   const triggerStatusText = parseStatusMessage(metadata[TRIGGER_CONFIG.metadataKeys.statusMessage]);
   const logs = parseTaskLogs(metadata[TRIGGER_CONFIG.metadataKeys.taskLogs]);
 
-  const dbProgress = latestAnalysis?.progress;
-  const progress =
-    typeof dbProgress === "number" && dbProgress > triggerProgress ? dbProgress : triggerProgress;
-
-  const isDbDone = latestAnalysis?.status === "DONE";
-  const isDbFailed = latestAnalysis?.status === "FAILED";
-  const isTriggerFinished = run?.status === "COMPLETED";
-  const isTriggerFailed =
-    run?.status === "FAILED" || run?.status === "CRASHED" || run?.status === "TIMED_OUT";
-
-  const isFailed = isTriggerFailed || isDbFailed;
-  const isFinished = !isFailed && (isTriggerFinished || isDbDone);
-  const isPending = latestAnalysis?.status === "PENDING";
-
-  let displayStatus: string;
-  if (isFailed) {
-    displayStatus = "FAILED";
-  } else if (isFinished) {
-    displayStatus = "COMPLETED";
-  } else {
-    displayStatus = run?.status ?? latestAnalysis?.status ?? "QUEUED";
-  }
+  const { displayStatus, isFailed, isFinished, isPending, progress } = resolveAnalysisDisplay({
+    dbProgress: latestAnalysis?.progress,
+    dbStatus: latestAnalysis?.status ?? null,
+    runStatus: run?.status ?? null,
+    triggerProgress,
+  });
 
   const handleCancel = (repoId: string, analysisId: string) => {
     cancelMutation.mutate(

@@ -50,7 +50,7 @@ export type FormattedEvidence = {
 
   /** Metadata about the formatting */
   metadata: {
-    format: "json" | "xml";
+    format: "json" | "text" | "xml";
     originalSize?: number;
     timestamp: Date;
     type: EvidenceType;
@@ -198,7 +198,7 @@ export class EvidenceFormatter {
       return {
         content,
         metadata: {
-          format: "xml",
+          format: "text",
           timestamp: new Date(),
           type: "custom",
         },

@@ -1,6 +1,6 @@
 import { PostHog } from "posthog-node";
 
-import { NEXT_PUBLIC_POSTHOG_HOST, NEXT_PUBLIC_POSTHOG_KEY } from "@/shared/constants/env.client";
+import { NEXT_PUBLIC_POSTHOG_HOST, NEXT_PUBLIC_POSTHOG_KEY } from "@/shared/config/env.client";
 
 let posthogClient: null | PostHog = null;
 

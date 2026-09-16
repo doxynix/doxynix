@@ -5,7 +5,7 @@ import * as Sentry from "@sentry/nextjs";
 import { ServerCrash } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { IS_DEV } from "@/shared/constants/env.flags";
+import { IS_DEV } from "@/shared/config/env.flags";
 import { getClientCookie } from "@/shared/lib/cookies";
 import { AppButton } from "@/shared/ui/core/button";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";

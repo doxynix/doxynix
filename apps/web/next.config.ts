@@ -9,9 +9,9 @@ import { withAxiom } from "next-axiom";
 import createNextIntlPlugin from "next-intl/plugin";
 import { StatsWriterPlugin } from "webpack-stats-plugin";
 
-import { API_PREFIX } from "@/shared/constants/env.client";
-import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/constants/env.flags";
-import { LOCALE_REGEX_STR } from "@/shared/constants/locales";
+import { API_PREFIX } from "@/shared/config/env.client";
+import { IS_ANALYZE, IS_DEV, IS_PROD } from "@/shared/config/env.flags";
+import { LOCALE_REGEX_STR } from "@/shared/config/locales";
 
 import pkg from "./package.json" with { type: "json" };
 

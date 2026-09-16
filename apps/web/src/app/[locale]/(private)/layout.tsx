@@ -5,7 +5,7 @@ import { unauthorized } from "next/navigation";
 import { SidebarInset, SidebarProvider } from "@/shared/ui/core/sidebar";
 import { SentryUserIdentificator } from "@/shared/ui/kit/sentry-user-identificator";
 
-import { Agent } from "@/features/agent/agent";
+import { Agent } from "@/features/agent/ui/agent";
 import { CreateRepoDialog } from "@/features/repo/ui/create-repo-dialog";
 
 import { AppFooter } from "@/widgets/app-footer/ui/app-footer";

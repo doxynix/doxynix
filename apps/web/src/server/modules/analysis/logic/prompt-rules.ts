@@ -174,7 +174,7 @@ export function buildNoInventionSection(context: string = "information"): string
 ## GROUNDING (HARD)
 - **${context}**: ${GroundingRules.noInvention}
 - ${GroundingRules.onlySuppliedEvidence}
-- ${GroundingRules.missingDataHandler}
+- ${GroundingRules.missingDataHandler()}
 `;
 }
 

@@ -17,9 +17,8 @@ import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 
-import { ComplexityScatterChart } from "@/features/repo-analytics/ui/repo-complexity-scatter-chart";
-
 import type { RepoMetricsItem } from "../model/repo.types";
+import { ComplexityScatterChart } from "./repo-complexity-scatter-chart";
 
 export function SnapshotsSection({
   architecture,

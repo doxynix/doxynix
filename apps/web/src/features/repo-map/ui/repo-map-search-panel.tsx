@@ -4,7 +4,8 @@ import { parseAsString, useQueryStates } from "nuqs";
 
 import { AppSearch } from "@/shared/ui/kit/app-search";
 
-import type { RepoMapNodeData } from "../model/repo-map-types";
+import { computeShouldDim, matchRepoMapNodes } from "../model/match-repo-map-nodes";
+import type { RepoMapNodeData } from "../model/repo-map.types";
 
 export function RepoMapSearchPanel() {
   const { fitView, setNodes } = useReactFlow();
@@ -15,40 +16,19 @@ export function RepoMapSearchPanel() {
 
   useEffect(() => {
     const query = params.search.trim();
-    const searchWords = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
 
-    const matchingNodeIds = new Set(
-      nodes
-        .filter((node) => {
-          if (!query) {
-            return true;
-          }
-          const label = String(node.data.label).toLowerCase();
-          const id = node.id.toLowerCase();
-          const normalizedLabel = label.replaceAll(/\s+/g, "");
-          const normalizedId = id.replaceAll(/\s+/g, "");
-
-          return searchWords.every(
-            (word) =>
-              label.includes(word) ||
-              id.includes(word) ||
-              normalizedLabel.includes(word.replaceAll(/\s+/g, "")) ||
-              normalizedId.includes(word.replaceAll(/\s+/g, "")),
-          );
-        })
-        .map((n) => n.id),
-    );
+    const matchingNodeIds = matchRepoMapNodes(nodes, query);
 
     const needsUpdate = nodes.some((node) => {
       const currentDim = node.data.repoMap?.dimBySearch ?? false;
-      const targetDim = query === "" ? false : !matchingNodeIds.has(node.id);
+      const targetDim = computeShouldDim(node.id, query, matchingNodeIds);
       return currentDim !== targetDim;
     });
 
     if (needsUpdate) {
       setNodes((nds) =>
         nds.map((n) => {
-          const shouldBeDimmed = query === "" ? false : !matchingNodeIds.has(n.id);
+          const shouldBeDimmed = computeShouldDim(n.id, query, matchingNodeIds);
 
           const node = n as Node<RepoMapNodeData>;
 

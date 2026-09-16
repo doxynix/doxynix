@@ -6,6 +6,24 @@ import { useMapControlsActions } from "./use-repo-map.store";
 
 const MAP_PREFIXES = ["t", "z", "f"];
 
+export type MapCommand = "fitView" | "focusSelected" | "toggleControls" | "zoomIn" | "zoomOut";
+
+const COMMAND_BY_SECOND_KEY: Record<string, Record<string, MapCommand>> = {
+  f: { s: "focusSelected", v: "fitView" },
+  t: { c: "toggleControls" },
+  z: { i: "zoomIn", o: "zoomOut" },
+};
+
+export function resolveMapCommand(prefix: string, code: string): MapCommand | null {
+  const secondKey = code.startsWith("Key") ? code.slice(3).toLowerCase() : null;
+
+  if (secondKey == null) {
+    return null;
+  }
+
+  return COMMAND_BY_SECOND_KEY[prefix]?.[secondKey] ?? null;
+}
+
 export function useRepoMapHotkeys() {
   const { toggleControls } = useMapControlsActions();
   const map = useMapCommands();
@@ -30,33 +48,23 @@ export function useRepoMapHotkeys() {
       if (prefix == null) {
         return;
       }
-      const code = e.code;
-      const secondKey = code.startsWith("Key") ? code.slice(3).toLowerCase() : null;
 
-      if (secondKey == null) {
+      const command = resolveMapCommand(prefix, e.code);
+      if (command == null) {
         setPrefix(null);
         return;
       }
 
-      const actions: Record<string, Record<string, () => void>> = {
-        f: {
-          s: map.focusSelected,
-          v: map.fitView,
-        },
-        t: { c: toggleControls },
-        z: {
-          i: map.zoomIn,
-          o: map.zoomOut,
-        },
+      const commandHandlers: Record<MapCommand, () => void> = {
+        fitView: map.fitView,
+        focusSelected: map.focusSelected,
+        toggleControls,
+        zoomIn: map.zoomIn,
+        zoomOut: map.zoomOut,
       };
 
-      const action = actions[prefix]?.[secondKey];
-      if (action == null) {
-        setPrefix(null);
-        return;
-      }
       e.stopPropagation();
-      action();
+      commandHandlers[command]();
       setPrefix(null);
     },
     { enabled: prefix != null, preventDefault: true },

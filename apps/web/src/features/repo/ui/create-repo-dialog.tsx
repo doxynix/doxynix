@@ -10,10 +10,10 @@ import posthog from "posthog-js";
 import { useForm, useWatch } from "react-hook-form";
 
 import { trpc } from "@/shared/api/trpc";
-import { useClickOutside } from "@/shared/hooks/use-click-outside";
-import { useDebounce } from "@/shared/hooks/use-debounce";
 import { authClient } from "@/shared/lib/auth-client";
 import { isGitHubUrl } from "@/shared/lib/github-url";
+import { useClickOutside } from "@/shared/lib/hooks/use-click-outside";
+import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,

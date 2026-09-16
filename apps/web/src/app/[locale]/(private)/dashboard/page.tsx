@@ -4,12 +4,12 @@ import { createMetadata } from "@/shared/lib/metadata";
 
 import { CreateRepoButton } from "@/features/repo/ui/create-repo-button";
 import { RepoListContainer } from "@/features/repo/ui/repo-list-container";
+import { TrendsWidget } from "@/features/repo-analytics/ui/repo-trends-widget";
 
 import { DashboardActionContainer } from "@/widgets/dashboard/ui/dashboard-action-container";
 import { DashboardDatePeriod } from "@/widgets/dashboard/ui/dashboard-date-range";
 import { DashboardInsightsContainer } from "@/widgets/dashboard/ui/dashboard-insights-container";
 import { StatCardContainer } from "@/widgets/dashboard/ui/stat-card-container";
-import { TrendsWidget } from "@/widgets/dashboard/ui/trends-widget";
 
 export const generateMetadata = createMetadata("dashboard_title", "dashboard_desc");
 

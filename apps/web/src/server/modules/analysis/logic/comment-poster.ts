@@ -6,7 +6,7 @@ import { dedent } from "es-toolkit";
 
 import { appLogger } from "@/server/core/app-logger";
 
-import type { PRFinding } from "./pr-types";
+import type { PRFinding } from "./pr.types";
 
 /**
  * Генерирует уникальную сигнатуру для замечания, чтобы избежать дублирования комментариев.

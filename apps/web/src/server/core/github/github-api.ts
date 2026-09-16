@@ -3,7 +3,7 @@ import type { RestEndpointMethodTypes } from "@octokit/rest";
 import type { Repo } from "@prisma/client";
 import { sumBy } from "es-toolkit";
 
-import type { RepoItemFields } from "@/shared/types/repo.types";
+import type { RepoItemFields } from "@/shared/api/repo.types";
 
 import { ProjectPolicy } from "@/server/modules/analysis/engine/core/project-policy";
 import { taskLogger } from "@/server/modules/analysis/logic/task-logger";

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { LOCALES } from "@/shared/constants/locales";
+import { LOCALES } from "@/shared/config/locales";
 import { cn } from "@/shared/lib/cn";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Checkbox } from "@/shared/ui/core/checkbox";

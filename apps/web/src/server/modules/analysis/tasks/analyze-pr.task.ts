@@ -13,8 +13,8 @@ import { analysisRepo } from "../analysis.repository";
 import { persistedFindingSchema } from "../analysis.schemas";
 import { CommentFormatter, gitHubCommentPoster } from "../logic/comment-poster";
 import { DifferentialAnalyzer } from "../logic/differential-analyzer";
+import type { PRFinding } from "../logic/pr.types";
 import { PRConfigService } from "../logic/pr-config";
-import type { PRFinding } from "../logic/pr-types";
 import { taskLogger } from "../logic/task-logger";
 
 function mergePrBody(existingBody: null | string, aiSummary: string): string {
@@ -58,7 +58,7 @@ function getCommentableLinesFromPatch(patch: string): Set<number> {
       continue;
     }
 
-    if (currentNewFileLine === 0) {
+    if (currentNewFileLine === 0 || line.startsWith("\\")) {
       continue;
     }
 
@@ -98,7 +98,7 @@ function buildLineMappingFromPatch(patch: string): Map<string, number> {
       continue;
     }
 
-    if (currentNewFileLine === 0) {
+    if (currentNewFileLine === 0 || line.startsWith("\\")) {
       continue;
     }
 

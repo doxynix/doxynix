@@ -2,7 +2,7 @@ import { Logger } from "next-axiom";
 import pino from "pino";
 import pretty from "pino-pretty";
 
-import { IS_PROD } from "@/shared/constants/env.flags";
+import { IS_PROD } from "@/shared/config/env.flags";
 
 import { requestContext } from "../utils/request-context";
 import { sanitizePayload } from "../utils/sanitize-payload";

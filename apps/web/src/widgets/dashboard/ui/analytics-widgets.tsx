@@ -17,16 +17,16 @@ import {
   XCircle,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from "recharts";
 
 import { Link } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/shared/ui/core/chart";
 import { Progress } from "@/shared/ui/core/progress";
 import { Spinner } from "@/shared/ui/core/spinner";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
+
+import { QualityRadar } from "@/entities/repo/ui/repo-quality-radar";
 
 import type { DashboardStats } from "../model/dashboard.types";
 
@@ -338,62 +338,5 @@ export function RecentActivityWidget({ data }: Readonly<Props>) {
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-type QualityRadarProps = {
-  scores: {
-    complexity: number;
-    health: number;
-    onboarding: number;
-    security: number;
-    techDebt: number;
-  };
-};
-
-export function QualityRadar({ scores }: Readonly<QualityRadarProps>) {
-  const chartData = [
-    { fullMark: 100, subject: "Health", value: scores.health },
-    { fullMark: 100, subject: "Security", value: scores.security },
-    { fullMark: 100, subject: "Simplicity", value: 100 - scores.complexity },
-    { fullMark: 100, subject: "Onboarding", value: scores.onboarding },
-    { fullMark: 100, subject: "Maintainability", value: 100 - scores.techDebt },
-  ];
-
-  const config = {
-    value: { color: "var(--chart-1)", label: "Score" },
-  };
-
-  return (
-    <ChartContainer
-      className="h-75 w-full"
-      config={config}
-    >
-      <ResponsiveContainer
-        height="100%"
-        width="100%"
-      >
-        <RadarChart
-          cx="50%"
-          cy="50%"
-          data={chartData}
-          outerRadius="80%"
-        >
-          <PolarGrid stroke="var(--border)" />
-          <PolarAngleAxis
-            dataKey="subject"
-            tick={{ fill: "var(--muted-foreground)", fontSize: 10, fontWeight: 500 }}
-          />
-          <Radar
-            dataKey="value"
-            fill="var(--foreground)"
-            fillOpacity={0.3}
-            name="Quality"
-            stroke="var(--background)"
-          />
-          <ChartTooltip content={<ChartTooltipContent />} />
-        </RadarChart>
-      </ResponsiveContainer>
-    </ChartContainer>
   );
 }

@@ -4,7 +4,7 @@ import { clamp } from "es-toolkit";
 import type { DbClient } from "@/server/core/db";
 
 import { PATH_PATTERNS } from "../engine/core/project-policy-rules";
-import type { PRAnalysisConfig } from "./pr-types";
+import type { PRAnalysisConfig } from "./pr.types";
 
 const SYSTEM_IGNORES = [
   ...PATH_PATTERNS.IGNORE,

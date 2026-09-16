@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AlertTriangle, CheckCheck, Trash2 } from "lucide-react";
 import { useQueryStates } from "nuqs";
 
-import { useDebounce } from "@/shared/hooks/use-debounce";
+import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   Dialog,

@@ -8,6 +8,8 @@ import type { UiApiKey } from "@/entities/api-keys/model/api-keys.types";
 import { ApiKeyCard } from "@/entities/api-keys/ui/api-key-card";
 
 import { ApiKeyArchivedTable } from "./api-key-archived-table";
+import { RevokeApiKeyDialog } from "./revoke-api-key-dialog";
+import { UpdateApiKeyDialog } from "./update-api-key-dialog";
 
 type Props = {
   active: UiApiKey[];
@@ -28,6 +30,12 @@ export function ApiKeysList({ active, archived }: Readonly<Props>) {
         <div className="grid grid-cols-2 gap-2">
           {active.map((key) => (
             <ApiKeyCard
+              actions={
+                <>
+                  <UpdateApiKeyDialog apiKey={key} />
+                  <RevokeApiKeyDialog apiKey={key} />
+                </>
+              }
               active={key}
               key={key.id}
             />

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { APP_URL } from "@/shared/constants/env.client";
+import { APP_URL } from "@/shared/config/env.client";
 
 export default function robots(): MetadataRoute.Robots {
   return {

@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
-import { useDebounce } from "@/shared/hooks/use-debounce";
+import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";

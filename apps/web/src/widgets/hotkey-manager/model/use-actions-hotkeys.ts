@@ -5,6 +5,25 @@ import { useCreateRepoActions } from "@/entities/repo/model/use-create-repo-dial
 
 const PREFIXES = ["c"];
 
+export type GlobalHotkeyCommand = "createRepo";
+
+const COMMAND_BY_SECOND_KEY: Record<string, Record<string, GlobalHotkeyCommand>> = {
+  c: { r: "createRepo" },
+};
+
+export function resolveGlobalHotkeyCommand(
+  prefix: string,
+  code: string,
+): GlobalHotkeyCommand | null {
+  const secondKey = code.startsWith("Key") ? code.slice(3).toLowerCase() : null;
+
+  if (secondKey == null) {
+    return null;
+  }
+
+  return COMMAND_BY_SECOND_KEY[prefix]?.[secondKey] ?? null;
+}
+
 export function useGlobalActionsHotkeys(onAction?: () => void) {
   const { setOpen } = useCreateRepoActions();
   const [prefix, setPrefix] = useState<null | string>(null);
@@ -41,36 +60,15 @@ export function useGlobalActionsHotkeys(onAction?: () => void) {
         return;
       }
 
-      const code = e.code;
-      let secondKey: null | string = null;
-
-      if (code.startsWith("Key")) {
-        secondKey = code.slice(3).toLowerCase();
-      }
-
-      if (secondKey == null) {
-        setPrefix(null);
-        return;
-      }
-
-      const actions: Record<string, Record<string, () => void>> = {
-        c: {
-          r: () => {
-            setTimeout(() => setOpen(true), 10);
-          },
-        },
-      };
-
-      const action = actions[prefix]?.[secondKey];
-
-      if (action == null) {
+      const command = resolveGlobalHotkeyCommand(prefix, e.code);
+      if (command == null) {
         setPrefix(null);
         return;
       }
 
       e.stopPropagation();
       onAction?.();
-      action();
+      setTimeout(() => setOpen(true), 10);
 
       setPrefix(null);
     },

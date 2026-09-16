@@ -38,7 +38,7 @@ type MessagePart = {
 
 export async function processMessageParts(parts: MessagePart[]): Promise<MessagePart[]> {
   const processPart = async (part: MessagePart): Promise<MessagePart | null> => {
-    if (part.type !== "file" || !part.url.startsWith("data:")) {
+    if (part.type !== "file" || typeof part.url !== "string" || !part.url.startsWith("data:")) {
       return part;
     }
 

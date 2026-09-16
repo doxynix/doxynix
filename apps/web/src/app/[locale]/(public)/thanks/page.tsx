@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
-import rawLicenses from "@/shared/data/licenses.json";
 import { BackOrLinkButton } from "@/shared/ui/kit/back-or-link-button";
 
+import rawLicenses from "@/features/thanks/model/licenses.json";
 import type { AuthorGroup } from "@/features/thanks/model/thanks.types";
 import { ThanksList } from "@/features/thanks/ui/thanks-list";
 

@@ -1,6 +1,6 @@
 import { task } from "@trigger.dev/sdk";
 
-import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { realtimeService } from "@/server/core/realtime";
 import { redisService } from "@/server/core/redis";

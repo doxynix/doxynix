@@ -9,6 +9,8 @@ import { useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 import { compressImage } from "@/shared/lib/image-compression";
 
+import { resolveAvatarUploadErrorKey, sanitizeAvatarBaseName } from "./avatar-utils";
+
 type ProfileData = {
   email: null | string;
   name: null | string;
@@ -127,11 +129,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
           maxWidthOrHeight: 512,
         });
 
-        const cleanName = file.name
-          .toLowerCase()
-          .replace(/\.[^./]+$/, "")
-          .replaceAll(/\s+/g, "-")
-          .replaceAll(/[^\d._a-z-]/g, "");
+        const cleanName = sanitizeAvatarBaseName(file.name);
 
         const fileName = `${Date.now()}-${cleanName || "avatar"}.webp`;
         const finalFile = new File([compressedBlob], fileName, { type: "image/webp" });
@@ -170,24 +168,7 @@ export function useProfileActions(props: UseProfileActionsProps = {}) {
     const uploadPromise = processUpload();
 
     toast.promise(uploadPromise, {
-      error: (error: unknown) => {
-        const errorMessage = (error instanceof Error ? error.message : String(error)).toLowerCase();
-
-        const ERROR_PATTERNS = [
-          ["maximumsizeinbytes", "settings_profile_file_too_large"],
-          ["too large", "settings_profile_file_too_large"],
-          ["allowedcontenttypes", "settings_profile_invalid_file_format"],
-          ["unauthorized", "settings_profile_not_logged_in"],
-        ] as const;
-
-        for (const [pattern, translationKey] of ERROR_PATTERNS) {
-          if (errorMessage.includes(pattern)) {
-            return t(translationKey);
-          }
-        }
-
-        return t("settings_profile_error_uploading_file");
-      },
+      error: (error: unknown) => t(resolveAvatarUploadErrorKey(error)),
       success: () => t("settings_profile_update_avatar_toast_success"),
     });
 

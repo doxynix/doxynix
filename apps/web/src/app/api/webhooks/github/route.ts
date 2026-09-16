@@ -10,8 +10,8 @@ import type {
 } from "@octokit/webhooks-types";
 import { Prisma } from "@prisma/client";
 
-import { GITHUB_WEBHOOK_SECRET } from "@/shared/constants/env.server";
-import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { GITHUB_WEBHOOK_SECRET } from "@/shared/config/env.server";
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";

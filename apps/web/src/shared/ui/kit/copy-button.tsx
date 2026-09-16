@@ -2,8 +2,8 @@
 
 import { Check, Copy } from "lucide-react";
 
-import { useCopyToClipboard } from "@/shared/hooks/use-copy-to-clipboard";
 import { cn } from "@/shared/lib/cn";
+import { useCopyToClipboard } from "@/shared/lib/hooks/use-copy-to-clipboard";
 
 import { AppButton } from "../core/button";
 import { AppTooltip } from "./app-tooltip";

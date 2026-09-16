@@ -19,9 +19,9 @@ import type { TreeApi } from "react-arborist";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
-import { useTypewriter } from "@/shared/hooks/use-typewriter";
 import { authClient } from "@/shared/lib/auth-client";
 import { saveFile } from "@/shared/lib/file-saver";
+import { useTypewriter } from "@/shared/lib/hooks/use-typewriter";
 import { AppButton } from "@/shared/ui/core/button";
 import { Skeleton } from "@/shared/ui/core/skeleton";
 import { Spinner } from "@/shared/ui/core/spinner";
@@ -39,10 +39,13 @@ import { RepoCodeActionButton } from "./repo-code-action-button";
 import { RepoSearchPanel } from "./repo-code-search-panel";
 import { CodeSkeleton } from "./repo-code-skeleton";
 
-const Editor = dynamic(() => import("./repo-code-editor").then((m) => m.RepoCodeEditor), {
-  loading: () => <CodeSkeleton />,
-  ssr: false,
-});
+const Editor = dynamic(
+  () => import("@/entities/repo/ui/repo-code-editor").then((m) => m.RepoCodeEditor),
+  {
+    loading: () => <CodeSkeleton />,
+    ssr: false,
+  },
+);
 
 type Props = {
   fileData: FileContent;

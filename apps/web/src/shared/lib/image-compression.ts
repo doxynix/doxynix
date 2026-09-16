@@ -31,12 +31,14 @@ export async function compressImage(
   const origWidth = bitmap.width;
   const origHeight = bitmap.height;
 
-  const scale = Math.min(1, maxWidthOrHeight / Math.max(origWidth, origHeight));
-  const targetWidth = Math.max(1, Math.round(origWidth * scale));
-  const targetHeight = Math.max(1, Math.round(origHeight * scale));
+  const { height: targetHeight, width: targetWidth } = computeTargetDimensions(
+    origWidth,
+    origHeight,
+    maxWidthOrHeight,
+  );
 
   let blob: Blob | null = null;
-  let currentQuality = initialQuality;
+  const currentQuality = initialQuality;
   const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
   if (typeof OffscreenCanvas !== "undefined") {
@@ -48,14 +50,11 @@ export async function compressImage(
 
     ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
 
-    blob = await canvas.convertToBlob({ quality: currentQuality, type: fileType });
-
-    let attempts = 0;
-    while (blob.size > maxSizeBytes && currentQuality > 0.4 && attempts < 2) {
-      currentQuality -= 0.2;
-      attempts++;
-      blob = await canvas.convertToBlob({ quality: currentQuality, type: fileType });
-    }
+    blob = await compressWithRetries(
+      (quality) => canvas.convertToBlob({ quality, type: fileType }),
+      currentQuality,
+      maxSizeBytes,
+    );
   } else {
     const canvas = document.createElement("canvas");
     canvas.width = targetWidth;
@@ -67,18 +66,55 @@ export async function compressImage(
 
     ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
 
-    blob = await canvasToBlob(canvas, fileType, currentQuality);
-
-    let attempts = 0;
-    while (blob.size > maxSizeBytes && currentQuality > 0.4 && attempts < 2) {
-      currentQuality -= 0.2;
-      attempts++;
-      blob = await canvasToBlob(canvas, fileType, currentQuality);
-    }
+    blob = await compressWithRetries(
+      (quality) => canvasToBlob(canvas, fileType, quality),
+      currentQuality,
+      maxSizeBytes,
+    );
   }
 
   if ("close" in bitmap && typeof bitmap.close === "function") {
     bitmap.close();
+  }
+
+  return blob;
+}
+
+export function computeTargetDimensions(
+  width: number,
+  height: number,
+  maxWidthOrHeight: number,
+): { height: number; width: number } {
+  const scale = Math.min(1, maxWidthOrHeight / Math.max(width, height));
+
+  return {
+    height: Math.max(1, Math.round(height * scale)),
+    width: Math.max(1, Math.round(width * scale)),
+  };
+}
+
+export function shouldRetryCompression(
+  blobSizeBytes: number,
+  maxSizeBytes: number,
+  currentQuality: number,
+  attempts: number,
+): boolean {
+  return blobSizeBytes > maxSizeBytes && currentQuality > 0.4 && attempts < 2;
+}
+
+export async function compressWithRetries(
+  toBlob: (quality: number) => Promise<Blob>,
+  initialQuality: number,
+  maxSizeBytes: number,
+): Promise<Blob> {
+  let currentQuality = initialQuality;
+  let attempts = 0;
+  let blob = await toBlob(currentQuality);
+
+  while (shouldRetryCompression(blob.size, maxSizeBytes, currentQuality, attempts)) {
+    currentQuality -= 0.2;
+    attempts++;
+    blob = await toBlob(currentQuality);
   }
 
   return blob;

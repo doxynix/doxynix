@@ -5,11 +5,11 @@ import { ChevronDown, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
-import { commandMenuItems } from "@/shared/constants/navigation";
-import { useDebounce } from "@/shared/hooks/use-debounce";
+import { commandMenuItems } from "@/shared/config/navigation";
+import type { MenuItem } from "@/shared/config/navigation.types";
 import { useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
-import type { MenuItem } from "@/shared/types/navigation.types";
+import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { AppButton } from "@/shared/ui/core/button";
 import {
   CommandDialog,

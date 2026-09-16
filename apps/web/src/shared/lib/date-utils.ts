@@ -1,6 +1,6 @@
 import { Temporal } from "temporal-polyfill";
 
-import { DEFAULT_LOCALE } from "../constants/locales";
+import { DEFAULT_LOCALE } from "../config/locales";
 
 export function formatRelativeTime(
   date: Date | null | number | string,

@@ -4,7 +4,8 @@ import { useQueryStates } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
 
-import { dashboardParsers } from "../model/dashboard-parsers";
+import { dashboardParsers } from "@/features/repo-analytics/model/dashboard-parsers";
+
 import {
   EcosystemStatusWidget,
   HealthExtremesWidget,

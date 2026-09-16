@@ -15,14 +15,14 @@ import {
 } from "better-auth/plugins";
 import { Resend } from "resend";
 
-import { IS_PROD } from "@/shared/constants/env.flags";
+import { IS_PROD } from "@/shared/config/env.flags";
 import {
   AUTH_PROVIDERS,
   BETTER_AUTH_SECRET,
   BETTER_AUTH_URL,
   RESEND_API_KEY,
   TURNSTILE_SECRET_KEY,
-} from "@/shared/constants/env.server";
+} from "@/shared/config/env.server";
 
 import { AuthEmail } from "@/server/core/auth-email";
 

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import { useCanHover } from "@/shared/hooks/use-can-hover";
+import { useCanHover } from "@/shared/lib/hooks/use-can-hover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/core/tooltip";
 
 type Props = {

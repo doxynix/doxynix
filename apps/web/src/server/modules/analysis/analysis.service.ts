@@ -7,7 +7,7 @@ import { uniq } from "es-toolkit";
 import { basename, extname, normalize } from "pathe";
 import type * as z from "zod";
 
-import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
 import { generateBranchName } from "@/shared/lib/get-branch-name";
 import { highlightCode } from "@/shared/lib/shiki";
 

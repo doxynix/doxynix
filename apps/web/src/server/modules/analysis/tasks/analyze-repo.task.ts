@@ -4,7 +4,7 @@ import { type DocType, Status } from "@doxynix/shared";
 import { task } from "@trigger.dev/sdk";
 import { join } from "pathe";
 
-import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";

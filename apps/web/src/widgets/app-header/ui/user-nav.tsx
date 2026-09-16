@@ -6,7 +6,7 @@ import { LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { userNavMenu } from "@/shared/constants/navigation";
+import { userNavMenu } from "@/shared/config/navigation";
 import { Link, useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 import { AppButton } from "@/shared/ui/core/button";

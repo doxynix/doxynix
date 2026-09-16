@@ -1,9 +1,9 @@
 import type { Status } from "@doxynix/shared";
 import Ably from "ably";
 
-import { IS_PROD } from "@/shared/constants/env.flags";
-import { ABLY_API_KEY } from "@/shared/constants/env.server";
-import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { IS_PROD } from "@/shared/config/env.flags";
+import { ABLY_API_KEY } from "@/shared/config/env.server";
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "./app-logger";
 

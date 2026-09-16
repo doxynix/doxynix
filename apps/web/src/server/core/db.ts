@@ -6,13 +6,13 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { fieldEncryptionExtension } from "prisma-field-encryption";
 
-import { IS_DEV, IS_TEST } from "@/shared/constants/env.flags";
+import { IS_DEV, IS_TEST } from "@/shared/config/env.flags";
 import {
   DATABASE_URL,
   PRISMA_FIELD_ENCRYPTION_DECRYPTION_KEYS,
   PRISMA_FIELD_ENCRYPTION_KEY,
-} from "@/shared/constants/env.server";
-import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+} from "@/shared/config/env.server";
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { AUDIT_BUSINESS_MODELS, ENCRYPTED_METADATA_MAP } from "../utils/constants";
 import { requestContext } from "../utils/request-context";

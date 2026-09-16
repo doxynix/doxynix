@@ -2,6 +2,10 @@ export function safeJsonClone<T = unknown>(
   value: unknown,
   replacer?: (key: string, value: unknown) => unknown,
 ): T {
+  if (value == null) {
+    return undefined as T;
+  }
+
   const seen = new WeakSet();
 
   const json = JSON.stringify(value, function (this: unknown, key: string, val: unknown) {

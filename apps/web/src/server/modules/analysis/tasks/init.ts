@@ -1,7 +1,7 @@
 import { type FixStatus, PRAnalysisStatus, Status } from "@doxynix/shared";
 import { locals, tasks } from "@trigger.dev/sdk";
 
-import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";

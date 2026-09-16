@@ -6,8 +6,8 @@ import {
   NEXT_PUBLIC_POSTHOG_KEY,
   SENTRY_DSN,
   TRPC_PREFIX,
-} from "./shared/constants/env.client";
-import { IS_DEV, IS_PROD } from "./shared/constants/env.flags";
+} from "./shared/config/env.client";
+import { IS_DEV, IS_PROD } from "./shared/config/env.flags";
 
 function escapeRegExp(str: string) {
   return str.replaceAll(/[$()*+.?[\\\]^{|}]/g, String.raw`\$&`);

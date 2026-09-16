@@ -9,7 +9,7 @@ import { callWithFallback } from "@/server/utils/call";
 
 import { getActiveModels, SAFETY_SETTINGS } from "../ai/ai-constants";
 import { buildCodeFixerSystemPrompt, buildCodeFixerUserPrompt } from "../ai/prompts-refactored";
-import type { FindingForFix, GeneratedDiff } from "./pr-types";
+import type { FindingForFix, GeneratedDiff } from "./pr.types";
 
 type FixedFileContent = {
   filePath: string;

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { del } from "@vercel/blob";
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 
-import { VERCEL_BLOB_CALLBACK_URL } from "@/shared/constants/env.server";
+import { VERCEL_BLOB_CALLBACK_URL } from "@/shared/config/env.server";
 
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";

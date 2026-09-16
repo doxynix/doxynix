@@ -3,7 +3,7 @@ import { ChatRole } from "@doxynix/shared";
 import { convertToModelMessages, generateText, stepCountIs, streamText } from "ai";
 import { dedent } from "es-toolkit";
 
-import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { auth } from "@/server/core/auth";

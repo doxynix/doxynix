@@ -2,7 +2,7 @@
 
 import type { Route } from "next";
 
-import { settingsMenu } from "@/shared/constants/navigation";
+import { settingsMenu } from "@/shared/config/navigation";
 import { Link, usePathname } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";

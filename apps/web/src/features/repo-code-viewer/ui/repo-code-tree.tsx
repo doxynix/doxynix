@@ -4,7 +4,7 @@ import { startTransition, useEffect } from "react";
 import { Folder, FolderOpen, Search } from "lucide-react";
 import { Tree, type TreeApi } from "react-arborist";
 
-import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
+import { useResizeObserver } from "@/shared/lib/hooks/use-resize-observer";
 import { AppButton } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 

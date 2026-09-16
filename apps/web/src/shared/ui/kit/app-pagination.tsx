@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import type { PaginationMeta } from "@doxynix/shared";
 import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { parseAsInteger, useQueryState } from "nuqs";
 
 import { cn } from "@/shared/lib/cn";
+import { getPaginationItems } from "@/shared/lib/pagination";
 import {
   Pagination,
   PaginationContent,
@@ -15,12 +17,10 @@ import {
 } from "@/shared/ui/core/pagination";
 import { Spinner } from "@/shared/ui/core/spinner";
 
-import type { RepoMeta } from "@/entities/repo/model/repo.types";
-
 type Props = {
   className?: string;
   isLoading?: boolean;
-  meta: RepoMeta;
+  meta: PaginationMeta;
 };
 
 export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
@@ -83,23 +83,16 @@ export function AppPagination({ className, isLoading, meta }: Readonly<Props>) {
           </PaginationLink>
         </PaginationItem>
 
-        {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((page) => {
-          if (
-            meta.totalPages > 7 &&
-            Math.abs(page - meta.currentPage) > 1 &&
-            page !== 1 &&
-            page !== meta.totalPages
-          ) {
-            if (Math.abs(page - meta.currentPage) === 2) {
-              return (
-                <PaginationItem key={page}>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              );
-            }
-            return null;
+        {getPaginationItems(meta.totalPages, meta.currentPage).map((item) => {
+          if (item.kind === "ellipsis") {
+            return (
+              <PaginationItem key={item.key}>
+                <PaginationEllipsis />
+              </PaginationItem>
+            );
           }
 
+          const { page } = item;
           const isCurrentPageLoading = isAnyLoading && clickedButton === page;
           const isPageDisabled = isAnyLoading || page === meta.currentPage;
 

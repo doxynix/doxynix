@@ -20,7 +20,7 @@ import { getGitMetrics } from "../model/git-metrics";
 import { getMetrics } from "../model/metrics";
 import type { UiRepoListItem } from "../model/repo.types";
 import { repoStatusConfig } from "../model/repo-status-config";
-import { repoVisibilityConfig } from "../model/repo-visibility";
+import { repoVisibilityConfig } from "../model/repo-visibility-config";
 import { RepoAnalyzeButton } from "./repo-analyze-button";
 import { RepoGitMetric } from "./repo-git-metric";
 import { RepoTopics } from "./repo-topics";

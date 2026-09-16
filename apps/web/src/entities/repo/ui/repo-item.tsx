@@ -1,13 +1,13 @@
 import { Star } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+import type { RepoItemFields } from "@/shared/api/repo.types";
 import { cn } from "@/shared/lib/cn";
-import type { RepoItemFields } from "@/shared/types/repo.types";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { AppButton } from "@/shared/ui/core/button";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
-import { repoVisibilityConfig } from "@/entities/repo/model/repo-visibility";
+import { repoVisibilityConfig } from "../model/repo-visibility-config";
 
 type Props = { disabled?: boolean; onClick: () => void; repo: RepoItemFields };
 

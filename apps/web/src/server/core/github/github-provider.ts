@@ -16,7 +16,7 @@ import {
   GITHUB_APP_PRIVATE_KEY,
   GITHUB_SYSTEM_INSTALLATION_ID,
   GITHUB_SYSTEM_PAT,
-} from "@/shared/constants/env.server";
+} from "@/shared/config/env.server";
 
 import { appLogger } from "../app-logger";
 import type { DbClient } from "../db";

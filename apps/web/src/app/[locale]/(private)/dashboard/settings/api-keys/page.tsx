@@ -1,7 +1,7 @@
 import { SquareArrowOutUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import { APP_URL } from "@/shared/constants/env.client";
+import { APP_URL } from "@/shared/config/env.client";
 import { createMetadata } from "@/shared/lib/metadata";
 import { AppButton } from "@/shared/ui/core/button";
 import { ExternalLink } from "@/shared/ui/kit/external-link";

@@ -4,10 +4,9 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 
-import { LOCALES, type Locale } from "@/shared/constants/locales";
+import { LOCALES, type Locale } from "@/shared/config/locales";
 import { usePathname, useRouter } from "@/shared/i18n/navigation";
 import { cn } from "@/shared/lib/cn";
-import { loadedFlags } from "@/shared/lib/load-state";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import {
   Select,
@@ -28,6 +27,8 @@ export const FLAGS: Record<Locale, string> = {
   ru: "/icons/flags/ru.svg",
   "zh-CN": "/icons/flags/cn.svg",
 };
+
+const loadedFlags = new Map<string, boolean>();
 
 export function Flag({ alt, src }: Readonly<{ alt: string; src: string }>) {
   const [loaded, setLoaded] = useState(loadedFlags.get(src) ?? false);

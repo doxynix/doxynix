@@ -1,17 +1,18 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/core/card";
 import { Input } from "@/shared/ui/core/input";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
-import { RevokeApiKeyDialog } from "@/features/api-keys/ui/revoke-api-key-dialog";
-import { UpdateApiKeyDialog } from "@/features/api-keys/ui/update-api-key-dialog";
-
 import type { UiApiKey } from "../model/api-keys.types";
 
-export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
+export function ApiKeyCard({
+  actions,
+  active,
+}: Readonly<{ actions?: ReactNode; active: UiApiKey }>) {
   const tCommon = useTranslations("Common");
   const t = useTranslations("Dashboard");
   const locale = useLocale();
@@ -48,10 +49,7 @@ export function ApiKeyCard({ active }: Readonly<{ active: UiApiKey }>) {
             )}
           </CardDescription>
         </div>
-        <div className="flex shrink-0 flex-col items-center gap-1">
-          <UpdateApiKeyDialog apiKey={active} />
-          <RevokeApiKeyDialog apiKey={active} />
-        </div>
+        <div className="flex shrink-0 flex-col items-center gap-1">{actions}</div>
       </CardHeader>
       <CardContent>
         <Input

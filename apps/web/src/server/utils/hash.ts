@@ -4,7 +4,7 @@ import {
   API_KEY_CHECKSUM_SECRET,
   API_KEY_PEPPER,
   PRISMA_FIELD_ENCRYPTION_HASH_SALT,
-} from "@/shared/constants/env.server";
+} from "@/shared/config/env.server";
 
 const BRAND_PREFIX = "dxnx_";
 const CHECKSUM_LENGTH = 8;

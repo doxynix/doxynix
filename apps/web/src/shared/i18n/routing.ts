@@ -1,7 +1,7 @@
 import { defineRouting } from "next-intl/routing";
 
-import { IS_PROD } from "@/shared/constants/env.flags";
-import { DEFAULT_LOCALE, LOCALES } from "@/shared/constants/locales";
+import { IS_PROD } from "@/shared/config/env.flags";
+import { DEFAULT_LOCALE, LOCALES } from "@/shared/config/locales";
 
 export const routing = defineRouting({
   defaultLocale: DEFAULT_LOCALE,

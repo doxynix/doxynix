@@ -1,14 +1,10 @@
-import { NotificationSchema } from "@doxynix/shared";
+import { NotificationSchema, type PaginationMeta, PaginationMetaSchema } from "@doxynix/shared";
 import type { Prisma } from "@prisma/client";
 import * as z from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/core/trpc/init";
 import { handlePrismaError } from "@/server/utils/handle-error";
-import {
-  getPaginationMeta,
-  type PaginationMeta,
-  PaginationMetaSchema,
-} from "@/server/utils/pagination";
+import { getPaginationMeta } from "@/server/utils/pagination";
 
 import { NotificationsBulkFilterSchema, NotificationsFilterSchema } from "./notification.schemas";
 import { notificationsService } from "./notifications.service";

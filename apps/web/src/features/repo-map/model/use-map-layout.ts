@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { type Edge, type Node, useEdgesState, useNodesState } from "@xyflow/react";
 import type { ELK, ElkNode } from "elkjs";
 
-import type { RepoMapDisplayData, RepoMapNodeData } from "./repo-map-types";
+import type { RepoMapDisplayData, RepoMapNodeData } from "./repo-map.types";
 import { extractParentGroups } from "./use-parent-groups";
 
 const elkOptions = {
@@ -17,6 +17,71 @@ const elkOptions = {
 
 interface ElkNodeWithChildren extends ElkNode {
   children?: ElkNode[];
+}
+
+type RepoMapEdgeInput = {
+  id: string;
+  relation?: string;
+  source: string;
+  target: string;
+  weight?: number;
+};
+
+export function createLayoutNodes<N extends RepoMapNodeData>(
+  sourceNodes: readonly N[],
+): Node<RepoMapNodeData>[] {
+  return sourceNodes.map((n) => ({
+    data: n,
+    id: n.id,
+    position: { x: 0, y: 0 },
+    type: "repoNode",
+  }));
+}
+
+export function computeStrokeWidth(weight?: number): number {
+  return weight ? Math.min(Math.max(weight / 2, 1.5), 5) : 2;
+}
+
+export function createLayoutEdges(sourceEdges: readonly RepoMapEdgeInput[]): Edge[] {
+  return sourceEdges.map((e) => {
+    const isCycle = e.relation === "cycle";
+    const isRisk = e.relation === "risk";
+    return {
+      animated: isCycle,
+      data: { relation: e.relation },
+      focusable: true,
+      id: e.id,
+      label: isCycle ? "cycle" : isRisk ? "risk" : undefined,
+      labelBgBorderRadius: 4,
+      labelBgPadding: [4, 2],
+      labelBgStyle: { fill: "var(--background)", fillOpacity: 0.8 },
+      labelStyle: {
+        fill: isCycle || isRisk ? "var(--status-error)" : "#888",
+        fontSize: 9,
+        fontWeight: 600,
+        textTransform: "uppercase",
+      },
+      selectable: true,
+      source: e.source,
+      style: {
+        stroke: isRisk || isCycle ? "var(--status-error)" : "var(--border-strong)",
+        strokeWidth: computeStrokeWidth(e.weight),
+        transition: "opacity 0.3s ease-in-out",
+      },
+      target: e.target,
+      type: "smoothstep",
+    };
+  });
+}
+
+export function computeNodeDimensions(
+  score: number,
+  grouped = false,
+): { height: number; width: number } {
+  return {
+    height: (grouped ? 180 : 120) + Math.min(score / 2, 30),
+    width: (grouped ? 320 : 240) + Math.min(score, 60),
+  };
 }
 
 export function useMapLayout(data: RepoMapDisplayData) {
@@ -34,42 +99,8 @@ export function useMapLayout(data: RepoMapDisplayData) {
     const layoutSourceNodes = "graph" in data ? data.graph.nodes : data.children;
     const layoutSourceEdges = "graph" in data ? data.graph.edges : data.edges;
 
-    const layoutNodes: Node<RepoMapNodeData>[] = layoutSourceNodes.map((n) => ({
-      data: n,
-      id: n.id,
-      position: { x: 0, y: 0 },
-      type: "repoNode",
-    }));
-
-    const layoutEdges: Edge[] = layoutSourceEdges.map((e) => {
-      const isCycle = e.relation === "cycle";
-      const isRisk = e.relation === "risk";
-      return {
-        animated: isCycle,
-        data: { relation: e.relation },
-        focusable: true,
-        id: e.id,
-        label: isCycle ? "cycle" : isRisk ? "risk" : undefined,
-        labelBgBorderRadius: 4,
-        labelBgPadding: [4, 2],
-        labelBgStyle: { fill: "var(--background)", fillOpacity: 0.8 },
-        labelStyle: {
-          fill: isCycle || isRisk ? "var(--status-error)" : "#888",
-          fontSize: 9,
-          fontWeight: 600,
-          textTransform: "uppercase",
-        },
-        selectable: true,
-        source: e.source,
-        style: {
-          stroke: isRisk || isCycle ? "var(--status-error)" : "var(--border-strong)",
-          strokeWidth: e.weight ? Math.min(Math.max(e.weight / 2, 1.5), 5) : 2,
-          transition: "opacity 0.3s ease-in-out",
-        },
-        target: e.target,
-        type: "smoothstep",
-      };
-    });
+    const layoutNodes = createLayoutNodes(layoutSourceNodes);
+    const layoutEdges = createLayoutEdges(layoutSourceEdges);
 
     const calculateLayout = async () => {
       if (!cancelled) {
@@ -100,9 +131,8 @@ export function useMapLayout(data: RepoMapDisplayData) {
         children: parent.children.map((childId) => {
           const node = layoutNodes.find((n) => n.id === childId);
           return {
-            height: 180 + Math.min(((node?.data.score as number) || 0) / 2, 30),
+            ...computeNodeDimensions((node?.data.score as number) || 0, true),
             id: childId,
-            width: 320 + Math.min((node?.data.score as number) || 0, 60),
           };
         }),
         id: parent.id,
@@ -112,9 +142,8 @@ export function useMapLayout(data: RepoMapDisplayData) {
       const standaloneNodes = layoutNodes
         .filter((n) => !parentGroups.some((p) => p.children.includes(n.id)))
         .map((n) => ({
-          height: 120 + Math.min((n.data.score || 0) / 2, 30),
+          ...computeNodeDimensions(n.data.score || 0),
           id: n.id,
-          width: 240 + Math.min(n.data.score || 0, 60),
         }));
 
       const elkGraph = {

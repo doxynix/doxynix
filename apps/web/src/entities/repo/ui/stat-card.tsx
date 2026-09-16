@@ -5,6 +5,8 @@ import { cn } from "@/shared/lib/cn";
 import { AppBadge } from "@/shared/ui/core/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/core/card";
 
+import { getDeltaColorClass } from "../model/stat-delta";
+
 type Props = {
   className?: string;
   delta?: number;
@@ -29,18 +31,6 @@ export function StatCard({
   const isPositiveTrend = delta != null && delta > 0;
   const isNegativeTrend = delta != null && delta < 0;
 
-  const getDeltaClass = () => {
-    if (delta == null || delta === 0) {
-      return "text-muted-foreground";
-    }
-
-    if (reverseColor === true) {
-      return isPositiveTrend ? "text-destructive" : "text-success";
-    }
-
-    return isPositiveTrend ? "text-success" : "text-destructive";
-  };
-
   return (
     <Card className="transition-colors hover:border-border-strong">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -55,7 +45,7 @@ export function StatCard({
 
           {delta != null && (
             <AppBadge
-              className={getDeltaClass()}
+              className={getDeltaColorClass(delta, reverseColor === true)}
               variant="outline"
             >
               {isPositiveTrend ? (

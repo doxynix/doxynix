@@ -3,7 +3,7 @@
 import { useQueryStates } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
-import { useDebounce } from "@/shared/hooks/use-debounce";
+import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { clampIntegerParam } from "@/shared/lib/number-utils";
 import { AppPagination } from "@/shared/ui/kit/app-pagination";
 

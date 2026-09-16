@@ -7,8 +7,8 @@ import { AblyProvider } from "ably/react";
 import { toast } from "sonner";
 
 import { trpc } from "@/shared/api/trpc";
-import { IS_PROD } from "@/shared/constants/env.flags";
-import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { IS_PROD } from "@/shared/config/env.flags";
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
 import { useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 

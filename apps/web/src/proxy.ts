@@ -5,32 +5,12 @@ import createMiddleware from "next-intl/middleware";
 import { appLogger } from "./server/core/app-logger";
 import { redisClient } from "./server/core/redis";
 import { generateRequestId, getIp, sanitizeRequestId } from "./server/utils/request-context";
-import { API_PREFIX } from "./shared/constants/env.client";
-import { IS_PROD } from "./shared/constants/env.flags";
-import { LOCALE_REGEX_STR } from "./shared/constants/locales";
+import { IS_PROD } from "./shared/config/env.flags";
 import { routing } from "./shared/i18n/routing";
 import { getCookieName } from "./shared/lib/cookies";
+import { isBypassRoute, resolvePageRedirect } from "./shared/lib/proxy-routing";
 
-const protectedRoutes = ["/dashboard"];
-const authRoutes = ["/auth"];
 const cookieName = getCookieName();
-const ANALYTICS_TUNNELS = [`${API_PREFIX}/dxnx/p`, `${API_PREFIX}/dxnx/s`];
-
-const BYPASS_EXACT_PATHS = new Set([
-  "/favicon.ico",
-  "/manifest.json",
-  "/manifest.webmanifest",
-  "/robots.txt",
-  "/sitemap.xml",
-]);
-
-const BYPASS_PREFIXES = [
-  ...ANALYTICS_TUNNELS,
-  "/api/webhooks",
-  "/webhooks",
-  "/api/auth",
-  "/_axiom",
-];
 
 let ratelimit: null | Ratelimit = null;
 const ephemeralCache = new Map<string, number>();
@@ -48,24 +28,6 @@ if (IS_PROD) {
 }
 
 const intlMiddleware = createMiddleware(routing);
-
-function isBypassRoute(pathname: string): boolean {
-  if (BYPASS_EXACT_PATHS.has(pathname)) {
-    return true;
-  }
-  if (pathname.endsWith("/vitals")) {
-    return true;
-  }
-  return BYPASS_PREFIXES.some((prefix) => hasPathBoundary(pathname, prefix));
-}
-
-function hasPathBoundary(pathname: string, prefix: string): boolean {
-  if (!pathname.startsWith(prefix)) {
-    return false;
-  }
-  const nextChar = pathname.charAt(prefix.length);
-  return nextChar === "" || nextChar === "/";
-}
 
 async function handleRateLimitAndSize(
   request: NextRequest,
@@ -144,27 +106,12 @@ async function handleApiRequest(
 
 function handlePageRequest(request: NextRequest, requestId: string): NextResponse {
   const { pathname } = request.nextUrl;
-  const localeRegex = new RegExp(`^/(${LOCALE_REGEX_STR})`);
-  const matchedLocale = pathname.match(localeRegex)?.[1];
-  const localePrefix = matchedLocale != null ? `/${matchedLocale}` : "";
-  const pathWithoutLocale = pathname.replace(localeRegex, "") || "/";
-
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    hasPathBoundary(pathWithoutLocale, route),
-  );
-  const isAuthRoute = authRoutes.some((route) => hasPathBoundary(pathWithoutLocale, route));
-
   const token = request.cookies.get(cookieName)?.value;
+  const redirectPath = resolvePageRedirect(pathname, token != null);
 
-  if (isProtectedRoute && token == null) {
+  if (redirectPath != null) {
     const url = request.nextUrl.clone();
-    url.pathname = `${localePrefix}/auth`;
-    return NextResponse.redirect(url);
-  }
-
-  if (isAuthRoute && token != null) {
-    const url = request.nextUrl.clone();
-    url.pathname = `${localePrefix}/dashboard`;
+    url.pathname = redirectPath;
     return NextResponse.redirect(url);
   }
 

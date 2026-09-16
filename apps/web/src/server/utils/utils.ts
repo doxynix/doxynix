@@ -5,7 +5,7 @@ import { compact } from "es-toolkit";
 import fg from "fast-glob";
 import { join, normalize } from "pathe";
 
-import { REALTIME_CONFIG } from "@/shared/constants/realtime";
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";

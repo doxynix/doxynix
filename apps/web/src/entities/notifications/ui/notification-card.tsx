@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeOff, Trash2 } from "lucide-react";
+import type { ReactNode } from "react";
 import { useLocale } from "next-intl";
 
 import { Link } from "@/shared/i18n/navigation";
@@ -8,24 +8,21 @@ import { cn } from "@/shared/lib/cn";
 import { Card, CardContent, CardDescription, CardTitle } from "@/shared/ui/core/card";
 import { TimeAgo } from "@/shared/ui/kit/time-ago";
 
-import { notificationTypeConfig } from "@/features/notifications/model/notification-type-config";
-import { useNotificationActions } from "@/features/notifications/model/use-notification-actions";
-import { NotificationActionButton } from "@/features/notifications/ui/notification-action-button";
-
+import { notificationTypeConfig } from "../model/notification-type-config";
 import type { UiNotification } from "../model/notifications.types";
 
-type Props = { notification: UiNotification };
+type Props = {
+  actions?: ReactNode;
+  notification: UiNotification;
+};
 
-export function NotificationCard({ notification }: Readonly<Props>) {
+export function NotificationCard({ actions, notification }: Readonly<Props>) {
   const { border, color, icon: Icon } = notificationTypeConfig[notification.type];
   const locale = useLocale();
   const href =
     notification.repo != null
       ? `/dashboard/repo/${notification.repo.owner}/${notification.repo.name}`
       : null;
-
-  const { deleteOne, markAs } = useNotificationActions();
-  const isPending = markAs.isPending || deleteOne.isPending;
 
   return (
     <Card
@@ -68,23 +65,7 @@ export function NotificationCard({ notification }: Readonly<Props>) {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <NotificationActionButton
-              disabled={isPending}
-              icon={notification.isRead ? EyeOff : Eye}
-              isPending={markAs.isPending}
-              onClick={() => markAs.mutate(notification.id, !notification.isRead)}
-              tooltip={notification.isRead ? "Mark as unread" : "Mark as read"}
-            />
-            <NotificationActionButton
-              className="hover:text-destructive"
-              disabled={isPending}
-              icon={Trash2}
-              isPending={deleteOne.isPending}
-              onClick={() => deleteOne.mutate(notification.id)}
-              tooltip="Delete notification"
-            />
-          </div>
+          <div className="flex items-center gap-2">{actions}</div>
           <TimeAgo
             className="z-10 w-fit text-xs"
             date={notification.createdAt}

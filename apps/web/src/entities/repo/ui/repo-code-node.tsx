@@ -5,7 +5,7 @@ import type { NodeRendererProps } from "react-arborist";
 import { cn } from "@/shared/lib/cn";
 import { AppButton } from "@/shared/ui/core/button";
 
-import type { FileNode } from "@/entities/repo/model/repo-setup.types";
+import type { FileNode } from "../model/repo-setup.types";
 
 type RepoCodeNodeProps = NodeRendererProps<FileNode> & {
   activePath: null | string;

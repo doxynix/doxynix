@@ -3,7 +3,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { enhance } from "@zenstackhq/runtime";
 import superjson from "superjson";
 
-import { IS_PROD } from "@/shared/constants/env.flags";
+import { IS_PROD } from "@/shared/config/env.flags";
 
 import {
   buildRequestStore,

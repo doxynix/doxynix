@@ -1,15 +1,5 @@
 import * as z from "zod";
 
-export const PaginationMetaSchema = z.object({
-  currentPage: z.number().int().min(1),
-  filteredCount: z.number().int().min(0),
-  nextCursor: z.number().int().optional(),
-  pageSize: z.number().int().positive(),
-  searchQuery: z.string().optional(),
-  totalCount: z.number().int().min(0),
-  totalPages: z.number().int().min(1),
-});
-
 export function getPaginationMeta(params: {
   filteredCount: number;
   limit: number;
@@ -37,7 +27,6 @@ export function getPaginationMeta(params: {
   };
 }
 
-export type PaginationMeta = ReturnType<typeof getPaginationMeta>;
 export const PaginationSchema = z.object({
   cursor: z.coerce.number().int().min(1).max(1_000_000).nullish(),
   limit: z.coerce.number().int().min(1).max(100).default(10),

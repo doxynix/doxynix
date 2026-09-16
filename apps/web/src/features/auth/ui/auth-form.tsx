@@ -19,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod/mini";
 
-import { TURNSTILE_SITE_KEY } from "@/shared/constants/env.client";
+import { TURNSTILE_SITE_KEY } from "@/shared/config/env.client";
 import { Link, useRouter } from "@/shared/i18n/navigation";
 import { authClient } from "@/shared/lib/auth-client";
 import { cn } from "@/shared/lib/cn";

@@ -20,6 +20,16 @@ const SEQUENTIAL_ROUTES: Record<string, Record<string, string>> = {
 
 const PREFIX_KEYS = Object.keys(SEQUENTIAL_ROUTES);
 
+export function resolveNavigationRoute(prefix: string, code: string): string | null {
+  const secondKey = code.startsWith("Key") ? code.slice(3).toLowerCase() : null;
+
+  if (secondKey == null) {
+    return null;
+  }
+
+  return SEQUENTIAL_ROUTES[prefix]?.[secondKey] ?? null;
+}
+
 export function useNavigationHotkeys(onAction?: () => void) {
   const router = useRouter();
   const [prefix, setPrefix] = useState<null | string>(null);
@@ -53,19 +63,7 @@ export function useNavigationHotkeys(onAction?: () => void) {
         return;
       }
 
-      const code = e.code;
-      let secondKey: null | string = null;
-
-      if (code.startsWith("Key")) {
-        secondKey = code.slice(3).toLowerCase();
-      }
-
-      if (secondKey == null) {
-        setPrefix(null);
-        return;
-      }
-
-      const path = SEQUENTIAL_ROUTES[prefix]?.[secondKey];
+      const path = resolveNavigationRoute(prefix, e.code);
 
       if (path != null) {
         onAction?.();

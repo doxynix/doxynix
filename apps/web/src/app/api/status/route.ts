@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { BETTERSTACK_TOKEN } from "@/shared/constants/env.server";
+import { BETTERSTACK_TOKEN } from "@/shared/config/env.server";
 
 type Monitor = {
   attributes: {

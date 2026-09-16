@@ -2,7 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema.json",
   "aliases": {
     "components": "@/shared",
-    "hooks": "@/shared/hooks",
+    "hooks": "@/shared/lib/hooks",
     "lib": "@/shared/lib",
     "ui": "@/shared/ui/core",
     "utils": "@/shared/lib/utils"

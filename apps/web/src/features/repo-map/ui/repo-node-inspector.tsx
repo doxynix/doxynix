@@ -23,6 +23,8 @@ import { ScrollArea } from "@/shared/ui/core/scroll-area";
 
 import type { RepoNodeContext } from "@/entities/repo/model/repo.types";
 
+import { deriveNodeConnections } from "../model/node-connections";
+
 type Props = {
   data: NonNullable<RepoNodeContext>;
   onClose: () => void;
@@ -48,36 +50,12 @@ export function RepoNodeInspector({ data, onClose, onNavigate }: Readonly<Props>
     .filter(([_, value]) => value)
     .map(([key]) => key);
 
-  const allFileReferences = Array.from(
-    new Set([...node.previewPaths, ...inspect.samplePaths, ...explain.sourcePaths]),
-  )
-    .map((path) => path.split("/").pop())
-    .filter((name) => name !== node.label);
-
-  const childIds = new Set(children.map((c) => c.id));
-
-  const uniqueNavigation = explain.nextSuggestedPaths.filter(
-    (path) => path !== node.id && !childIds.has(path),
-  );
-
-  const uniqueRelated = inspect.relatedPaths.filter(
-    (path) => path !== node.id && !childIds.has(path),
-  );
-
-  const internalFileNames = new Set(allFileReferences);
-
-  const connections = Array.from(new Set([...uniqueNavigation, ...uniqueRelated])).filter(
-    (path) => {
-      const fileName = path.split("/").pop();
-
-      const isSelfId = path === node.id;
-      const isSelfPath = path === node.path;
-      const isSelfName = fileName === node.label;
-      const isInternal = internalFileNames.has(fileName);
-
-      return !isSelfId && !isSelfPath && !isSelfName && !isInternal;
-    },
-  );
+  const { allFileReferences, connections } = deriveNodeConnections({
+    children,
+    explain,
+    inspect,
+    node,
+  });
 
   const activeStats = [
     {

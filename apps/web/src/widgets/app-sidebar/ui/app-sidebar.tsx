@@ -4,7 +4,7 @@ import { BookText, ChevronDown, CircleQuestionMark } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { trpc } from "@/shared/api/trpc";
-import { sidebarMenu } from "@/shared/constants/navigation";
+import { sidebarMenu } from "@/shared/config/navigation";
 import { cn } from "@/shared/lib/cn";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/shared/ui/core/collapsible";
 import { ScrollArea } from "@/shared/ui/core/scroll-area";

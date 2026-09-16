@@ -2,8 +2,8 @@ import { startTransition } from "react";
 import { Check, Folder, FolderOpen, Search, Sparkles, X } from "lucide-react";
 import { Tree, type TreeApi } from "react-arborist";
 
-import { useResizeObserver } from "@/shared/hooks/use-resize-observer";
 import { cn } from "@/shared/lib/cn";
+import { useResizeObserver } from "@/shared/lib/hooks/use-resize-observer";
 import { AppButton } from "@/shared/ui/core/button";
 import { Input } from "@/shared/ui/core/input";
 import { AppTooltip } from "@/shared/ui/kit/app-tooltip";

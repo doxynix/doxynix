@@ -4,7 +4,8 @@ import { useQueryStates } from "nuqs";
 
 import { trpc } from "@/shared/api/trpc";
 
-import { dashboardParsers } from "../model/dashboard-parsers";
+import { dashboardParsers } from "@/features/repo-analytics/model/dashboard-parsers";
+
 import { RefactoringTargetsWidget } from "./analytics-widgets";
 import { RefactoringTargetsSkeleton } from "./analytics-widgets-skeleton";
 

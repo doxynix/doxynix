@@ -8,7 +8,8 @@ import { trpc } from "@/shared/api/trpc";
 import { StatCard } from "@/entities/repo/ui/stat-card";
 import { StatCardSkeleton } from "@/entities/repo/ui/stat-card-skeleton";
 
-import { dashboardParsers } from "../model/dashboard-parsers";
+import { dashboardParsers } from "@/features/repo-analytics/model/dashboard-parsers";
+
 import { getStats } from "../model/get-stats";
 
 export function StatCardContainer() {

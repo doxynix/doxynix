@@ -166,20 +166,20 @@ export class PromptRegistry {
   getStats(): {
     byOutputFormat: Record<string, number>;
     byRole: Set<string>;
-    byTaskType: Record<LLMTaskType, number>;
+    byTaskType: Partial<Record<LLMTaskType, number>>;
     totalPrompts: number;
   } {
     const stats = {
       byOutputFormat: {} as Record<string, number>,
       byRole: new Set<string>(),
-      byTaskType: {} as Record<LLMTaskType, number>,
+      byTaskType: {} as Partial<Record<LLMTaskType, number>>,
       totalPrompts: this.prompts.size,
     };
 
     for (const prompt of this.prompts.values()) {
       const { outputFormat, role, taskType } = prompt.metadata;
 
-      stats.byTaskType[taskType] = stats.byTaskType[taskType] + 1;
+      stats.byTaskType[taskType] = (stats.byTaskType[taskType] ?? 0) + 1;
       stats.byOutputFormat[outputFormat] = (stats.byOutputFormat[outputFormat] ?? 0) + 1;
       stats.byRole.add(role);
     }

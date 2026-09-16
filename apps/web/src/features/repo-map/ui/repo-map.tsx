@@ -1,15 +1,7 @@
 "use client";
 
 import { type MouseEvent, useEffect, useState } from "react";
-import {
-  Background,
-  type Edge,
-  MiniMap,
-  type Node,
-  Panel,
-  ReactFlow,
-  useReactFlow,
-} from "@xyflow/react";
+import { Background, MiniMap, type Node, Panel, ReactFlow, useReactFlow } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
 
@@ -21,11 +13,16 @@ import { AppButton } from "@/shared/ui/core/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/core/resizable";
 import { AppBreadcrumbs } from "@/shared/ui/kit/app-breadcrumbs";
 
-import { useMapControlsHide } from "@/features/repo-map/model/use-repo-map.store";
-
-import type { RepoMapDisplayData, RepoMapNodeData } from "../model/repo-map-types";
+import type { RepoMapDisplayData, RepoMapNodeData } from "../model/repo-map.types";
+import {
+  applyEdgeHover,
+  enrichRepoMapNodes,
+  FILTER_CONFIG,
+  type FilterKey,
+} from "../model/repo-map-hover";
 import { useMapLayout } from "../model/use-map-layout";
 import { enrichNodesWithParents, extractParentGroups } from "../model/use-parent-groups";
+import { useMapControlsHide } from "../model/use-repo-map.store";
 import { RepoMapCustomControls } from "./repo-map-custom-controls";
 import { ExportPanel } from "./repo-map-export-panel";
 import { RepoMapSearchPanel } from "./repo-map-search-panel";
@@ -35,83 +32,6 @@ import { RepoNode } from "./repo-node";
 const nodeTypes = {
   repoNode: RepoNode,
 };
-
-const FILTER_CONFIG = {
-  api: { color: "bg-info", label: "api" },
-  client: { color: "bg-warning", label: "client" },
-  entrypoints: { color: "bg-destructive", label: "entry" },
-  server: { color: "bg-success", label: "server" },
-  shared: { color: "bg-foreground", label: "shared" },
-} as const;
-
-type FilterKey = keyof typeof FILTER_CONFIG;
-
-function applyEdgeHover(edges: Edge[], hoveredNodeId: null | string): Edge[] {
-  return edges.map((edge) => {
-    const rel = (edge.data as undefined | { relation?: string })?.relation;
-    const isCycle = rel === "cycle";
-    const isEdgeActive =
-      hoveredNodeId == null || edge.source === hoveredNodeId || edge.target === hoveredNodeId;
-    return {
-      ...edge,
-      animated: Boolean(isCycle || (hoveredNodeId != null && edge.source === hoveredNodeId)),
-      style: {
-        ...edge.style,
-        opacity: isEdgeActive ? 1 : 0.05,
-        transition: "opacity 0.3s ease-in-out",
-      },
-    };
-  });
-}
-
-function enrichRepoMapNodes(
-  flowNodes: Node<RepoMapNodeData>[],
-  options: {
-    data: RepoMapDisplayData;
-    highlightKey: FilterKey | null;
-    hoveredNodeId: null | string;
-    rawEdges: undefined | { source: string; target: string }[];
-  },
-): Node<RepoMapNodeData>[] {
-  const { data, highlightKey, hoveredNodeId, rawEdges } = options;
-
-  const hoveredCluster = new Set<string>();
-  if (hoveredNodeId != null) {
-    hoveredCluster.add(hoveredNodeId);
-    rawEdges?.forEach((e) => {
-      if (e.source === hoveredNodeId) {
-        hoveredCluster.add(e.target);
-      }
-      if (e.target === hoveredNodeId) {
-        hoveredCluster.add(e.source);
-      }
-    });
-  }
-  const highlightOn = hoveredCluster.size > 0;
-
-  let filterAllowed: null | Set<string> = null;
-  if (highlightKey && "filters" in data) {
-    const list = data.filters[highlightKey];
-    if (Array.isArray(list) && list.length > 0) {
-      filterAllowed = new Set(list);
-    }
-  }
-
-  return flowNodes.map((node) => {
-    const isHoverActive = highlightOn && hoveredCluster.has(node.id);
-    const dimByHover = highlightOn && !isHoverActive;
-    const dimByFilter = Boolean(filterAllowed && !filterAllowed.has(node.id));
-    const dimBySearch = node.data.repoMap?.dimBySearch ?? false;
-
-    return {
-      ...node,
-      data: {
-        ...node.data,
-        repoMap: { dimByFilter, dimByHover, dimBySearch },
-      },
-    };
-  });
-}
 
 type Props = {
   activeFilter: null | string;

@@ -1,14 +1,14 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { ProxyAgent, type RequestInit, fetch as undiciFetch } from "undici";
 
-import { IS_PROD } from "@/shared/constants/env.flags";
+import { IS_PROD } from "@/shared/config/env.flags";
 import {
   CF_ACCOUNT_ID,
   CF_GATEWAY_ID,
   CF_GATEWAY_TOKEN,
   GEMINI_PROXY,
   GOOGLE_GENERATIVE_AI_API_KEY,
-} from "@/shared/constants/env.server";
+} from "@/shared/config/env.server";
 
 const proxyAgent =
   !IS_PROD && GEMINI_PROXY != null ? new ProxyAgent({ uri: GEMINI_PROXY }) : undefined;

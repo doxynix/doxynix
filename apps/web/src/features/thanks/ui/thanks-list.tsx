@@ -7,6 +7,7 @@ import { AppSearch } from "@/shared/ui/kit/app-search";
 import { ThanksCard } from "@/entities/thanks/ui/thanks-card";
 
 import type { AuthorGroup } from "../model/thanks.types";
+import { filterAuthorGroups } from "../model/thanks-filters";
 
 type Props = {
   initialGroups: AuthorGroup[];
@@ -15,27 +16,7 @@ type Props = {
 export function ThanksList({ initialGroups }: Readonly<Props>) {
   const [search] = useQueryState("search", parseAsString.withDefault(""));
 
-  const getFiltered = () => {
-    const s = search.trim().toLowerCase();
-    if (!s) {
-      return initialGroups;
-    }
-
-    return initialGroups
-      .map((group) => {
-        const isAuthorMatch = group.author.toLowerCase().includes(s);
-
-        const matchingPackages = group.packages.filter((pkg) => pkg.name.toLowerCase().includes(s));
-
-        return {
-          ...group,
-          packages: isAuthorMatch ? group.packages : matchingPackages,
-        };
-      })
-      .filter((group) => group.packages.length > 0);
-  };
-
-  const filtered = getFiltered();
+  const filtered = filterAuthorGroups(initialGroups, search);
 
   return (
     <>

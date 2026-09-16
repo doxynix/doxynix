@@ -1,8 +1,8 @@
 import { Status } from "@doxynix/shared";
 import { metadata } from "@trigger.dev/sdk";
 
-import { REALTIME_CONFIG } from "@/shared/constants/realtime";
-import { TRIGGER_CONFIG } from "@/shared/constants/trigger";
+import { REALTIME_CONFIG } from "@/shared/config/realtime";
+import { TRIGGER_CONFIG } from "@/shared/config/trigger";
 
 import { appLogger } from "@/server/core/app-logger";
 import { prisma } from "@/server/core/db";

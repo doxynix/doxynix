@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import type { InstallationTargetType, RepositorySelection } from "@doxynix/shared";
 import { TRPCError } from "@trpc/server";
 
-import { GITHUB_APP_ID } from "@/shared/constants/env.server";
+import { GITHUB_APP_ID } from "@/shared/config/env.server";
 
 import { isOctokitError } from "@/server/utils/handle-error";
 import { getNormalizedHash, getRawHash } from "@/server/utils/hash";

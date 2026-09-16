@@ -1,7 +1,7 @@
 import { createOAuthUserAuth } from "@octokit/auth-app";
 import { getAccountForUpdate } from "@prisma/client/sql";
 
-import { AUTH_PROVIDERS } from "@/shared/constants/env.server";
+import { AUTH_PROVIDERS } from "@/shared/config/env.server";
 
 import { appLogger } from "../app-logger";
 import { prisma } from "../db";

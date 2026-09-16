@@ -10,20 +10,20 @@ import { useRouter } from "@/shared/i18n/navigation";
 
 import type { UiRepoDetailed } from "./repo.types";
 import type { FileNode, FileTuple } from "./repo-setup.types";
-import { collectAllIds, getFolderSelectionState, sortNodes } from "./repo-setup-utils";
+import {
+  buildFileTree,
+  collectAllIds,
+  countSelectedFiles,
+  getFolderSelectionState,
+  getRecommendedPaths,
+  matchesSearch,
+} from "./repo-setup-utils";
 import { useRepoBranchOpen } from "./use-repo-branch.store";
 
 export type RepoSetupReturn = ReturnType<typeof useRepoSetup>;
 
 export type StateType = RepoSetupReturn["state"];
 export type ActionsType = RepoSetupReturn["actions"];
-
-const getRecommendedPaths = (files: FileTuple[] | undefined) => {
-  if (files == null) {
-    return [];
-  }
-  return files.filter((f) => f[3] === 1 && f[1] === 1).map((f) => f[0]);
-};
 
 export function useRepoSetup(repo: UiRepoDetailed) {
   const locale = useLocale();
@@ -73,49 +73,7 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     setPrevBranch(selectedBranch);
   }
 
-  const getTreeData = () => {
-    if (!apiFiles) {
-      return [];
-    }
-    const root: FileNode[] = [];
-    const map = new Map<string, FileNode>();
-
-    apiFiles.forEach((fileArr) => {
-      const [path, type, sha, recommended] = fileArr;
-      const parts = path.split("/");
-      let currentPath = "";
-
-      parts.forEach((part, index) => {
-        const isLast = index === parts.length - 1;
-        const parentPath = currentPath;
-        currentPath = currentPath ? `${currentPath}/${part}` : part;
-
-        if (!map.has(currentPath)) {
-          const newNode: FileNode = {
-            children: isLast ? undefined : [],
-            id: currentPath,
-            name: part,
-            path: currentPath,
-            recommended: isLast ? recommended === 1 : false,
-            sha: isLast ? sha : "",
-            type: isLast ? (type === 1 ? "blob" : "tree") : "tree",
-          };
-          map.set(currentPath, newNode);
-          if (index === 0) {
-            root.push(newNode);
-          } else {
-            const parent = map.get(parentPath);
-            if (parent?.children) {
-              parent.children.push(newNode);
-            }
-          }
-        }
-      });
-    });
-    return sortNodes(root);
-  };
-
-  const treeData = getTreeData();
+  const treeData = buildFileTree(apiFiles);
 
   const handleToggleSelection = (_nodeId: string, nodeData: FileNode) => {
     const idsToToggle = collectAllIds(nodeData);
@@ -183,31 +141,9 @@ export function useRepoSetup(repo: UiRepoDetailed) {
     });
   };
 
-  const getSelectedFilesCount = () => {
-    if (!apiFiles) {
-      return 0;
-    }
-    const allFilePaths = new Set(apiFiles.filter((f) => f[1] === 1).map((f) => f[0]));
-    let count = 0;
-    selectedIds.forEach((id) => {
-      if (allFilePaths.has(id)) {
-        count++;
-      }
-    });
-    return count;
-  };
+  const selectedFilesCount = countSelectedFiles(selectedIds, apiFiles);
 
-  const selectedFilesCount = getSelectedFilesCount();
-
-  const getHasSearchMatches = () => {
-    if (!searchTerm) {
-      return true;
-    }
-    const term = searchTerm.toLowerCase();
-    return apiFiles?.some((f) => f[0].toLowerCase().includes(term));
-  };
-
-  const hasSearchMatches = getHasSearchMatches();
+  const hasSearchMatches = matchesSearch(searchTerm, apiFiles);
 
   const toggleDocType = (id: DocType) => {
     setSelectedDocs((prev) =>

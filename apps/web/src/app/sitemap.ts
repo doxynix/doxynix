@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
-import { APP_URL } from "@/shared/constants/env.client";
-import { DEFAULT_LOCALE, LOCALES } from "@/shared/constants/locales";
+import { APP_URL } from "@/shared/config/env.client";
+import { DEFAULT_LOCALE, LOCALES } from "@/shared/config/locales";
 
 type RouteConfig = {
   changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
