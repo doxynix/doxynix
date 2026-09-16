@@ -2,7 +2,7 @@ import { enhance } from "@zenstackhq/runtime";
 import * as fc from "fast-check";
 import { afterAll, beforeAll, beforeEach, describe, it, vi } from "vitest";
 
-import { IS_CI } from "@/shared/constants/env.flags";
+import { IS_CI } from "@/shared/config/env.flags";
 
 import { prisma } from "@/server/core/db";
 
