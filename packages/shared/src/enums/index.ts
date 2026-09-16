@@ -2,7 +2,7 @@
 import * as z from "zod/mini";
 
 // ------------------- UserRole -------------------
-export const UserRoleSchema = z.enum(["USER", "ADMIN"]);
+export const UserRoleSchema = z.enum(["ADMIN", "USER"]);
 export type UserRole = z.infer<typeof UserRoleSchema>;
 export const UserRole = {
   ADMIN: "ADMIN",
@@ -13,10 +13,10 @@ export const UserRole = {
 export const BannedEmailReasonSchema = z.enum([
   "BOUNCED",
   "COMPLAINED",
-  "SUPPRESSED",
-  "FAILED",
   "DISPOSABLE",
+  "FAILED",
   "MANUAL",
+  "SUPPRESSED",
 ]);
 export type BannedEmailReason = z.infer<typeof BannedEmailReasonSchema>;
 export const BannedEmailReason = {
@@ -29,7 +29,7 @@ export const BannedEmailReason = {
 } as const;
 
 // ------------------- Visibility -------------------
-export const VisibilitySchema = z.enum(["PUBLIC", "PRIVATE"]);
+export const VisibilitySchema = z.enum(["PRIVATE", "PUBLIC"]);
 export type Visibility = z.infer<typeof VisibilitySchema>;
 export const Visibility = {
   PRIVATE: "PRIVATE",
@@ -37,7 +37,7 @@ export const Visibility = {
 } as const;
 
 // ------------------- InstallationTargetType -------------------
-export const InstallationTargetTypeSchema = z.enum(["USER", "ORGANIZATION"]);
+export const InstallationTargetTypeSchema = z.enum(["ORGANIZATION", "USER"]);
 export type InstallationTargetType = z.infer<typeof InstallationTargetTypeSchema>;
 export const InstallationTargetType = {
   ORGANIZATION: "ORGANIZATION",
@@ -53,7 +53,7 @@ export const RepositorySelection = {
 } as const;
 
 // ------------------- PRAnalysisStatus -------------------
-export const PRAnalysisStatusSchema = z.enum(["PENDING", "ANALYZING", "COMPLETED", "FAILED"]);
+export const PRAnalysisStatusSchema = z.enum(["ANALYZING", "COMPLETED", "FAILED", "PENDING"]);
 export type PRAnalysisStatus = z.infer<typeof PRAnalysisStatusSchema>;
 export const PRAnalysisStatus = {
   ANALYZING: "ANALYZING",
@@ -64,12 +64,12 @@ export const PRAnalysisStatus = {
 
 // ------------------- FixStatus -------------------
 export const FixStatusSchema = z.enum([
-  "DRAFT",
-  "GENERATING",
-  "READY_TO_APPLY",
-  "PR_OPENED",
   "COMPLETED",
+  "DRAFT",
   "FAILED",
+  "GENERATING",
+  "PR_OPENED",
+  "READY_TO_APPLY",
 ]);
 export type FixStatus = z.infer<typeof FixStatusSchema>;
 export const FixStatus = {
@@ -82,7 +82,7 @@ export const FixStatus = {
 } as const;
 
 // ------------------- Status -------------------
-export const StatusSchema = z.enum(["PENDING", "DONE", "FAILED", "NEW"]);
+export const StatusSchema = z.enum(["DONE", "FAILED", "NEW", "PENDING"]);
 export type Status = z.infer<typeof StatusSchema>;
 export const Status = {
   DONE: "DONE",
@@ -93,12 +93,12 @@ export const Status = {
 
 // ------------------- DocType -------------------
 export const DocTypeSchema = z.enum([
-  "README",
   "API",
-  "CONTRIBUTING",
+  "ARCHITECTURE",
   "CHANGELOG",
   "CODE_DOC",
-  "ARCHITECTURE",
+  "CONTRIBUTING",
+  "README",
 ]);
 export type DocType = z.infer<typeof DocTypeSchema>;
 export const DocType = {
@@ -120,7 +120,7 @@ export const PRCommentStyle = {
 } as const;
 
 // ------------------- PRFocusArea -------------------
-export const PRFocusAreaSchema = z.enum(["SECURITY", "PERFORMANCE", "ARCHITECTURE", "STYLE"]);
+export const PRFocusAreaSchema = z.enum(["ARCHITECTURE", "PERFORMANCE", "SECURITY", "STYLE"]);
 export type PRFocusArea = z.infer<typeof PRFocusAreaSchema>;
 export const PRFocusArea = {
   ARCHITECTURE: "ARCHITECTURE",
@@ -130,7 +130,7 @@ export const PRFocusArea = {
 } as const;
 
 // ------------------- NotifyType -------------------
-export const NotifyTypeSchema = z.enum(["ERROR", "WARNING", "INFO", "SUCCESS"]);
+export const NotifyTypeSchema = z.enum(["ERROR", "INFO", "SUCCESS", "WARNING"]);
 export type NotifyType = z.infer<typeof NotifyTypeSchema>;
 export const NotifyType = {
   ERROR: "ERROR",
@@ -140,7 +140,7 @@ export const NotifyType = {
 } as const;
 
 // ------------------- WebhookStatus -------------------
-export const WebhookStatusSchema = z.enum(["PROCESSING", "SUCCESS", "FAILED"]);
+export const WebhookStatusSchema = z.enum(["FAILED", "PROCESSING", "SUCCESS"]);
 export type WebhookStatus = z.infer<typeof WebhookStatusSchema>;
 export const WebhookStatus = {
   FAILED: "FAILED",
@@ -149,7 +149,7 @@ export const WebhookStatus = {
 } as const;
 
 // ------------------- ChatRole -------------------
-export const ChatRoleSchema = z.enum(["user", "assistant", "system", "data"]);
+export const ChatRoleSchema = z.enum(["assistant", "data", "system", "user"]);
 export type ChatRole = z.infer<typeof ChatRoleSchema>;
 export const ChatRole = {
   assistant: "assistant",

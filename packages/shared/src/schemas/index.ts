@@ -195,3 +195,15 @@ export const ApiKeySchema = z.object({
   updatedAt: z.coerce.date(),
 });
 export type ApiKey = z.infer<typeof ApiKeySchema>;
+
+export const PaginationMetaSchema = z.object({
+  currentPage: z.number().check(z.int(), z.gte(1)),
+  filteredCount: z.number().check(z.int(), z.gte(0)),
+  nextCursor: z.optional(z.number().check(z.int())),
+  pageSize: z.number().check(z.int(), z.gt(0)),
+  searchQuery: z.optional(z.string()),
+  totalCount: z.number().check(z.int(), z.gte(0)),
+  totalPages: z.number().check(z.int(), z.gte(1)),
+});
+
+export type PaginationMeta = z.infer<typeof PaginationMetaSchema>;
