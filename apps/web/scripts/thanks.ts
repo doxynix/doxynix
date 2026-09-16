@@ -94,7 +94,7 @@ const MAPPINGS = [
   { gh: "vitest-dev", name: "Vitest", prefix: "vitest" },
   { gh: "stryker-mutator", name: "Stryker Mutator", prefix: "@stryker-mutator/" },
   { gh: "conventional-changelog", name: "commitlint", prefix: "@commitlint/" },
-  { gh: "typicode", name: "Typicode", prefix: "husky" },
+  { gh: "typicode", name: "Husky", prefix: "husky" },
   { gh: "lint-staged", name: "lint-staged", prefix: "lint-staged" },
   { gh: "streetsidesoftware", name: "Street Side Software", prefix: "cspell" },
   { gh: "streetsidesoftware", name: "Street Side Software", prefix: "@cspell/" },
@@ -208,6 +208,66 @@ const MAPPINGS = [
   },
 ].sort((a, b) => b.prefix.length - a.prefix.length);
 
+const stripParentheticalContent = (value: string) => {
+  let result = "";
+  let depth = 0;
+
+  for (const char of value) {
+    if (char === "(") {
+      depth += 1;
+      continue;
+    }
+
+    if (char === ")") {
+      if (depth > 0) {
+        depth -= 1;
+      }
+      continue;
+    }
+
+    if (depth === 0) {
+      result += char;
+    }
+  }
+
+  return result;
+};
+
+const isEmailToken = (token: string) => {
+  const atIndex = token.indexOf("@");
+
+  if (atIndex <= 0 || atIndex >= token.length - 1) {
+    return false;
+  }
+
+  const domain = token.slice(atIndex + 1);
+  return domain.includes(".");
+};
+
+const removeEmailTokens = (value: string) =>
+  value
+    .trim()
+    .split(/\s+/)
+    .filter((token) => !isEmailToken(token))
+    .join(" ");
+
+const sanitizeAllowedCharacters = (value: string) => {
+  const result: string[] = [];
+
+  for (const char of value) {
+    const isAsciiLetterOrDigit =
+      (char >= "a" && char <= "z") || (char >= "A" && char <= "Z") || (char >= "0" && char <= "9");
+    const isWhitespace = char.trim() === "";
+    const isAllowedPunctuation = ".'\"-".includes(char);
+
+    if (isAsciiLetterOrDigit || isWhitespace || isAllowedPunctuation) {
+      result.push(char);
+    }
+  }
+
+  return result.join("");
+};
+
 const cleanUrl = (url) => {
   if (!url) {
     return "";
@@ -243,15 +303,11 @@ const sanitizeAuthorName = (rawName) => {
     return "";
   }
 
-  let cleanedName = String(rawName)
-    .replaceAll(/\([^)]+\)/g, "")
-    .replaceAll(/<[^>]*>/g, "")
-    .replaceAll(/\b[^\s@]+@[^\s@]+\.[^\s@]+\b/g, "")
-    .replaceAll(/[<>]/g, "")
-    .replaceAll(/\s{2,}/g, " ")
-    .trim();
+  let cleanedName = String(rawName);
 
-  cleanedName = cleanedName.replaceAll(/[^a-zA-Z0-9\s.'"-]/g, "").trim();
+  cleanedName = stripParentheticalContent(cleanedName);
+  cleanedName = removeEmailTokens(cleanedName);
+  cleanedName = sanitizeAllowedCharacters(cleanedName).trim();
 
   return cleanedName;
 };
@@ -270,9 +326,12 @@ function enrichPackageData(pkg) {
 
   if (!authorName) {
     const repoUrl = cleanUrl(pkg.repository?.url || pkg.repository || pkg.homepage || "");
-    const ghMatch = repoUrl.match(/(?:github\.com[/:]|github:)([^/.]+)/i);
+    const githubOwnerPattern = /(?:github\.com[/:]|github:)([^/.]+)/i;
+    const ghMatch = githubOwnerPattern.exec(repoUrl);
+
     if (ghMatch) {
       const extracted = ghMatch[1];
+
       if (!["packages", "repos", "tree", "blob", "www"].includes(extracted.toLowerCase())) {
         githubOwner = extracted;
         authorName = capitalize(extracted);
@@ -296,6 +355,7 @@ function enrichPackageData(pkg) {
   if (authorName.toLowerCase() === "meta" || authorName.toLowerCase() === "facebook") {
     authorName = "Meta";
   }
+
   if (authorName.toLowerCase() === "vercel") {
     authorName = "Vercel";
   }
@@ -312,12 +372,16 @@ function enrichPackageData(pkg) {
 
 try {
   const pkgJson = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
+
   const myDirectDeps = new Set([
     ...Object.keys(pkgJson.dependencies || {}),
     ...Object.keys(pkgJson.devDependencies || {}),
   ]);
 
-  const output = execSync("bun licenses list --json", { maxBuffer: 1024 * 1024 * 50 }).toString();
+  const output = execSync("bun licenses list --json", {
+    maxBuffer: 1024 * 1024 * 50,
+  }).toString();
+
   const rawData = JSON.parse(output);
 
   const grouped = Object.create(null);
@@ -350,6 +414,7 @@ try {
   );
 
   const outputPath = "./src/features/thanks/model/licenses.json";
+
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, JSON.stringify(finalData, null, 2));
 
