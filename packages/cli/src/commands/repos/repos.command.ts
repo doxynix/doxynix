@@ -2,6 +2,8 @@ import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
 import { confirmOrAbort, resolveEntityOrPick } from "@/core/prompts";
+import { repoApi } from "@/core/repo.api";
+import type { RepoListItem } from "@/core/repo.types";
 
 import { brand } from "@/ui/colors";
 import { renderSection } from "@/ui/layout";
@@ -9,8 +11,6 @@ import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 
 import { renderRepoDetails, renderReposTable, renderSlimReposTable } from "./repos.formatter";
-import { reposService } from "./repos.service";
-import type { RepoListItem } from "./repos.types";
 
 export function registerReposCommand(program: Command) {
   const repos = program.command("repos").description("Manage connected Doxynix repositories");
@@ -44,7 +44,7 @@ export function registerReposCommand(program: Command) {
             stop: "Repositories loaded",
           },
           () =>
-            reposService.list({
+            repoApi.list({
               cursor,
               limit,
               owner: options.owner,
@@ -105,7 +105,7 @@ export function registerReposCommand(program: Command) {
           start: `Connecting repository from ${url}...`,
           stop: "Repository connected successfully!",
         },
-        () => reposService.add(url),
+        () => repoApi.add(url),
       );
 
       const repoLabel = `${result.repo.owner}/${result.repo.name}`;
@@ -136,7 +136,7 @@ export function registerReposCommand(program: Command) {
           start: `Fetching details for ${target}...`,
           stop: "Details retrieved",
         },
-        () => reposService.getByName(owner, name),
+        () => repoApi.getByName(owner, name),
       );
 
       if (!repo) {
@@ -165,7 +165,7 @@ export function registerReposCommand(program: Command) {
         cancelMessage: "Deletion cancelled.",
         emptyMessage: "No connected repositories found.",
         fetchItems: async () => {
-          const list = await reposService.list({ cursor: 1, limit: 25 });
+          const list = await repoApi.list({ cursor: 1, limit: 25 });
           return list.items;
         },
         getLabel: (r: RepoListItem) => `${r.owner}/${r.name} (${r.id.slice(0, 8)})`,
@@ -194,7 +194,7 @@ export function registerReposCommand(program: Command) {
           start: "Removing repository...",
           stop: "Repository removed successfully",
         },
-        () => reposService.delete(targetId),
+        () => repoApi.delete(targetId),
       );
 
       p.outro(brand.success(result.message));
@@ -223,7 +223,7 @@ export function registerReposCommand(program: Command) {
           start: `Deleting repositories for ${owner}...`,
           stop: "Purge completed",
         },
-        () => reposService.deleteByOwner(owner),
+        () => repoApi.deleteByOwner(owner),
       );
 
       p.outro(brand.success(`${result.message} (${result.count} repositories removed)`));
@@ -240,7 +240,7 @@ export function registerReposCommand(program: Command) {
           start: `Fetching repository owned by ${owner}...`,
           stop: "Repository retrieved",
         },
-        () => reposService.getByOwner(owner),
+        () => repoApi.getByOwner(owner),
       );
 
       if (output.json(repo, options.json)) {
@@ -279,7 +279,7 @@ export function registerReposCommand(program: Command) {
           start: "Removing all repositories...",
           stop: "Repositories cleared",
         },
-        () => reposService.deleteAll(),
+        () => repoApi.deleteAll(),
       );
 
       p.outro(brand.success(result.message));
@@ -309,7 +309,7 @@ export function registerReposCommand(program: Command) {
             stop: "Repositories loaded",
           },
           () =>
-            reposService.getSlim({
+            repoApi.getSlim({
               cursor: options.cursor ? Number(options.cursor) : 1,
               limit: options.limit ? Number(options.limit) : 50,
               owner: options.owner,

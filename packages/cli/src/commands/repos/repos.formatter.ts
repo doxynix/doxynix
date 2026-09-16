@@ -1,10 +1,10 @@
+import type { RepoDetails, RepoListItem } from "@/core/repo.types";
+
 import { brand, pc } from "@/ui/colors";
 import { formatScore } from "@/ui/formatters";
 import { icons } from "@/ui/icons";
 import { renderCard } from "@/ui/layout";
 import { createTable } from "@/ui/table";
-
-import type { RepoDetails, RepoListItem } from "./repos.types";
 
 export function renderReposTable(items: RepoListItem[]): string {
   const table = createTable([

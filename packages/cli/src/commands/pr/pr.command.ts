@@ -2,6 +2,8 @@ import * as p from "@clack/prompts";
 import { CreatePrSchema } from "@doxynix/shared";
 import type { Command } from "commander";
 
+import type { FixItem } from "@/core/fixes";
+import { fetchFixes } from "@/core/fixes";
 import { readLocalFileIfExists } from "@/core/fs";
 import { guardPrompt, resolveEntityOrPick } from "@/core/prompts";
 import { resolveRepository } from "@/core/repo";
@@ -25,7 +27,6 @@ import type {
   CreateFixInput,
   FindingForFix,
   FixDetails,
-  FixItem,
   PRListItem,
   StagedFixedFile,
 } from "./pr.types";
@@ -34,8 +35,7 @@ async function resolveFixId(repoId: string, fixIdArg?: string): Promise<string |
   return resolveEntityOrPick({
     cancelMessage: "Selection cancelled.",
     emptyMessage: "No AI-generated fixes found for this repository.",
-    fetchItems: () =>
-      withTaskSpinner("Loading AI-generated fixes...", () => prService.getFixes(repoId)),
+    fetchItems: () => withTaskSpinner("Loading AI-generated fixes...", () => fetchFixes(repoId)),
     getLabel: (f: FixItem) =>
       `${f.title ?? "AI Suggested Fix"} [${f.status}] (${f.id.slice(0, 8)})`,
     idArg: fixIdArg,
@@ -589,7 +589,7 @@ export function registerPrCommand(program: Command) {
           start: `Loading AI fixes for ${repoContext.target}...`,
           stop: "Fixes retrieved",
         },
-        () => prService.getFixes(repoContext.repo.id),
+        () => fetchFixes(repoContext.repo.id),
       );
 
       if (output.json(fixes, options?.json)) {

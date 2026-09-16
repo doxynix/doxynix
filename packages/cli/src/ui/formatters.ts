@@ -1,6 +1,26 @@
 import { brand } from "./colors";
+import { icons } from "./icons";
 
 export type DateInput = string | Date | number | null | undefined;
+
+export function formatStatus(status: string): string {
+  switch (status) {
+    case "DONE":
+    case "COMPLETED": {
+      return `${icons.check} Completed (DONE)`;
+    }
+    case "FAILED": {
+      return `${icons.cross} Failed (FAILED)`;
+    }
+    case "ANALYZING":
+    case "PENDING": {
+      return `${icons.pending} Processing (ANALYZING)`;
+    }
+    default: {
+      return brand.muted(status);
+    }
+  }
+}
 
 const esc = String.raw`\x1B`;
 const ANSI_REGEX = new RegExp(String.raw`${esc}(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])`, "g");

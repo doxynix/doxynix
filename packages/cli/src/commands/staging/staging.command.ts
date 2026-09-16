@@ -1,6 +1,8 @@
 import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
+import type { FixItem } from "@/core/fixes";
+import { fetchFixes } from "@/core/fixes";
 import { readFileOrPrompt } from "@/core/fs";
 import { confirmOrAbort, resolveEntityOrPick } from "@/core/prompts";
 import { resolveRepository } from "@/core/repo";
@@ -10,8 +12,6 @@ import { renderSection } from "@/ui/layout";
 import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 
-import { prService } from "../pr/pr.service";
-import type { FixItem } from "../pr/pr.types";
 import { renderStagedFilesTable } from "./staging.formatter";
 import { stagingService } from "./staging.service";
 
@@ -178,9 +178,7 @@ export function registerStagingCommand(program: Command) {
         cancelMessage: "Staging cancelled.",
         emptyMessage: `No AI-generated fixes found for ${repoContext.target}.`,
         fetchItems: () =>
-          withTaskSpinner("Loading AI-generated fixes...", () =>
-            prService.getFixes(repoContext.repo.id),
-          ),
+          withTaskSpinner("Loading AI-generated fixes...", () => fetchFixes(repoContext.repo.id)),
         getLabel: (f: FixItem) =>
           `${f.title ?? "AI Suggested Fix"} [${f.status}] (${f.id.slice(0, 8)})`,
         idArg: fixId,

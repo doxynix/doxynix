@@ -4,13 +4,13 @@ import type { Command } from "commander";
 import { getToken } from "@/core/config";
 import { resolveEntityOrPick } from "@/core/prompts";
 import { parseRepoTarget } from "@/core/repo";
+import { repoApi } from "@/core/repo.api";
 
 import { brand, pc } from "@/ui/colors";
 import { renderSection } from "@/ui/layout";
 import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 
-import { reposService } from "../repos/repos.service";
 import { renderSessionHistory, renderSessionsTable } from "./agent.formatter";
 import { executeTurn, startInteractiveChat } from "./agent.repl";
 import { agentService } from "./agent.service";
@@ -42,7 +42,7 @@ export function registerAgentCommand(program: Command) {
         if (options.repo) {
           const parsed = parseRepoTarget(options.repo);
           if (parsed) {
-            const repo = await reposService.getByName(parsed.owner, parsed.name);
+            const repo = await repoApi.getByName(parsed.owner, parsed.name);
             repoId = repo?.id;
           }
         }

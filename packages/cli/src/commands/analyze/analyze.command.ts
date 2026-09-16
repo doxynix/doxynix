@@ -9,14 +9,13 @@ import { resolveRepository } from "@/core/repo";
 import { validateField } from "@/core/validation";
 
 import { brand, pc } from "@/ui/colors";
-import { formatDateTime, formatRelativeTime, formatScore } from "@/ui/formatters";
+import { formatDateTime, formatRelativeTime, formatScore, formatStatus } from "@/ui/formatters";
 import { renderBlock, renderCard, renderSection } from "@/ui/layout";
 import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 import { createTable } from "@/ui/table";
 
 import {
-  formatStatus,
   renderAnalysisTable,
   renderDetailedMetricsTable,
   renderRepoConfigTable,

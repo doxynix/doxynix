@@ -1,8 +1,8 @@
-import { trpc } from "@/core/client";
+import { trpc } from "./client";
+import type { RepoFilterInput, RepoFilterSlimInput } from "./repo.types";
 
-import type { RepoFilterInput, RepoFilterSlimInput } from "./repos.types";
-
-export const reposService = {
+// Thin tRPC wrapper for the repository domain (shared across command slices).
+export const repoApi = {
   async add(url: string) {
     return trpc.repo.create.mutate({ url });
   },

@@ -35,10 +35,6 @@ export const prService = {
     return trpc.analysis.getById.query({ fixId });
   },
 
-  async getFixes(repoId: string) {
-    return trpc.analysis.getByRepository.query({ repoId });
-  },
-
   async getImpactByPRNumber(input: GetImpactByPRNumberInput) {
     return trpc.analysis.getImpactByPRNumber.query(input);
   },

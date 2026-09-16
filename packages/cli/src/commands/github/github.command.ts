@@ -2,13 +2,13 @@ import * as p from "@clack/prompts";
 import type { Command } from "commander";
 
 import { parseRepoTarget } from "@/core/repo";
+import { repoApi } from "@/core/repo.api";
 
 import { brand, pc } from "@/ui/colors";
 import { renderBlock, renderSection } from "@/ui/layout";
 import { output } from "@/ui/output";
 import { withTaskSpinner } from "@/ui/spinner";
 
-import { reposService } from "../repos/repos.service";
 import { renderBranchesTable, renderFileTree, renderGithubReposTable } from "./github.formatter";
 import { githubService } from "./github.service";
 
@@ -219,7 +219,7 @@ export function registerGithubCommand(program: Command) {
           start: "Fetching repository reference...",
           stop: "Repository reference loaded",
         },
-        () => reposService.getByName(parsed.owner, parsed.name),
+        () => repoApi.getByName(parsed.owner, parsed.name),
       );
 
       if (!repo) {

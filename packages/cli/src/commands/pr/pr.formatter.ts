@@ -1,16 +1,17 @@
+import type { FixItem } from "@/core/fixes";
+
 import { brand, pc } from "@/ui/colors";
-import { formatDateTime, formatRelativeTime, formatScore, stripHtml } from "@/ui/formatters";
+import {
+  formatDateTime,
+  formatRelativeTime,
+  formatScore,
+  formatStatus,
+  stripHtml,
+} from "@/ui/formatters";
 import { icons } from "@/ui/icons";
 import { createTable } from "@/ui/table";
 
-import { formatStatus } from "../analyze/analyze.formatter";
-import type {
-  FixItem,
-  PRAnalysisDetails,
-  PRCommentItem,
-  PRImpactDetails,
-  PRListItem,
-} from "./pr.types";
+import type { PRAnalysisDetails, PRCommentItem, PRImpactDetails, PRListItem } from "./pr.types";
 
 const PR_STATUS_LABELS: Record<string, string> = {
   COMPLETED: brand.success(`${icons.check} Completed`),

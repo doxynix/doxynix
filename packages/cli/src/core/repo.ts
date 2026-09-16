@@ -3,10 +3,9 @@ import * as p from "@clack/prompts";
 import { brand, pc } from "@/ui/colors";
 import { withTaskSpinner } from "@/ui/spinner";
 
-import type { RepoDetails } from "@/commands/repos/repos.types";
-
-import { trpc } from "./client";
 import { guardPrompt } from "./prompts";
+import { repoApi } from "./repo.api";
+import type { RepoDetails } from "./repo.types";
 
 export function parseRepoTarget(target: string): { name: string; owner: string } | null {
   const parts = target.split("/");
@@ -31,7 +30,7 @@ export async function resolveRepository(
     const RECENT_LIMIT = 25;
 
     const result = await withTaskSpinner("Loading recent repositories...", () =>
-      trpc.repo.getAll.query({
+      repoApi.list({
         cursor: 1,
         limit: RECENT_LIMIT,
         sortBy: "createdAt",
@@ -79,7 +78,7 @@ export async function resolveRepository(
       );
 
       const searchResult = await withTaskSpinner(`Searching for '${query.trim()}'...`, () =>
-        trpc.repo.getAll.query({
+        repoApi.list({
           limit: 25,
           search: query.trim(),
         }),
@@ -112,7 +111,7 @@ export async function resolveRepository(
   }
 
   const repo = await withTaskSpinner(`Resolving repository ${parsed.owner}/${parsed.name}...`, () =>
-    trpc.repo.getByName.query({ name: parsed.name, owner: parsed.owner }),
+    repoApi.getByName(parsed.owner, parsed.name),
   );
 
   if (!repo) {

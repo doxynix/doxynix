@@ -3,6 +3,7 @@
   "version": "2.1.9",
   "type": "module",
   "bin": {
+    "doxynix": "./dist/index.js",
     "dxnx": "./dist/index.js"
   },
   "files": [
@@ -10,6 +11,8 @@
     "README.md"
   ],
   "scripts": {
+    "arch:baseline": "depcruise src --config .dependency-cruiser.ts --baseline",
+    "arch:check": "depcruise src --config .dependency-cruiser.ts --output-type err --cache --ignore-known",
     "build": "tsup",
     "build:bin": "bun build src/index.ts --compile --minify --outfile dxnx",
     "dev": "bun src/index.ts",
@@ -18,7 +21,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "type-check": "tsc --noEmit",
-    "validate": "biome check . && oxlint"
+    "validate": "biome check . && oxlint && bun run arch:check"
   },
   "dependencies": {
     "@clack/prompts": "1.8.0",
@@ -33,6 +36,7 @@
     "@doxynix/shared": "workspace:*",
     "@doxynix/web": "workspace:*",
     "@trpc/server": "catalog:",
+    "dependency-cruiser": "18.3.1",
     "tsup": "8.5.1"
   },
   "publishConfig": {

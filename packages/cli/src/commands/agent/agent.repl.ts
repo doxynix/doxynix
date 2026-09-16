@@ -1,10 +1,10 @@
 import * as p from "@clack/prompts";
 
 import { guardPrompt } from "@/core/prompts";
+import { repoApi } from "@/core/repo.api";
 
 import { brand, pc } from "@/ui/colors";
 
-import { reposService } from "../repos/repos.service";
 import { agentService } from "./agent.service";
 import type { UIMessage, UIMessageToolPart } from "./agent.types";
 
@@ -20,7 +20,7 @@ export async function startInteractiveChat(initialRepoTarget?: string) {
       p.outro(brand.error("Format must be: owner/name (e.g. facebook/react)"));
       return;
     }
-    const repo = await reposService.getByName(owner, name);
+    const repo = await repoApi.getByName(owner, name);
     if (!repo) {
       p.outro(brand.error(`Repository '${initialRepoTarget}' not found.`));
       return;
@@ -28,7 +28,7 @@ export async function startInteractiveChat(initialRepoTarget?: string) {
     selectedRepoId = repo.id;
     selectedRepoName = `${repo.owner}/${repo.name}`;
   } else {
-    const reposRes = await reposService.list({
+    const reposRes = await repoApi.list({
       limit: 25,
       sortBy: "createdAt",
       sortOrder: "desc",

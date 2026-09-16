@@ -11,25 +11,6 @@ import type {
   WorkspaceSearchResult,
 } from "./analyze.types";
 
-export function formatStatus(status: string): string {
-  switch (status) {
-    case "DONE":
-    case "COMPLETED": {
-      return `${icons.check} Completed (DONE)`;
-    }
-    case "FAILED": {
-      return `${icons.cross} Failed (FAILED)`;
-    }
-    case "ANALYZING":
-    case "PENDING": {
-      return `${icons.pending} Processing (ANALYZING)`;
-    }
-    default: {
-      return brand.muted(status);
-    }
-  }
-}
-
 export function renderAnalysisTable(analysis: AnalysisItem): string {
   const table = createTable(["Dimension", "Score", "Health"]);
   table.push(

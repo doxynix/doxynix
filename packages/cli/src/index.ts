@@ -21,8 +21,10 @@ import { checkCliUpdate } from "./core/updater";
 
 const program = new Command();
 
+const binName = process.argv[1]?.includes("doxynix") ? "doxynix" : "dxnx";
+
 program
-  .name("dxnx")
+  .name(binName)
   .description("Doxynix Platform CLI — Developer & Security Companion")
   .version(pkg.version, "-v, --version", "Display current CLI version");
 
