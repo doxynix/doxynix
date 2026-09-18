@@ -52,7 +52,7 @@ jobs:
         run: bun install
 
       - name: Build CLI bundle
-        run: bun --filter @doxynix/cli run build
+        run: bun run build --filter @doxynix/cli
 
       - name: Publish @doxynix/cli to npm
         env:

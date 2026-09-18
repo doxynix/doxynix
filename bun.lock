@@ -114,7 +114,7 @@
     },
     "apps/web": {
       "name": "@doxynix/web",
-      "version": "3.1.9",
+      "version": "3.1.10",
       "dependencies": {
         "@ai-sdk/google": "3.0.121",
         "@ai-sdk/openai": "3.0.110",
@@ -368,7 +368,7 @@
     },
     "packages/cli": {
       "name": "@doxynix/cli",
-      "version": "2.1.9",
+      "version": "2.1.10",
       "bin": {
         "doxynix": "./dist/index.js",
         "dxnx": "./dist/index.js",
