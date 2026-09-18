@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.10](https://github.com/doxynix/doxynix/compare/web-v3.1.9...web-v3.1.10) (2026-09-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mermaid to v12 ([#2134](https://github.com/doxynix/doxynix/issues/2134)) ([8652b07](https://github.com/doxynix/doxynix/commit/8652b073ceca1027acc9fec1c13c5ca3db3a4429))
+
 ## [3.1.9](https://github.com/doxynix/doxynix/compare/web-v3.1.8...web-v3.1.9) (2026-09-11)
 
 

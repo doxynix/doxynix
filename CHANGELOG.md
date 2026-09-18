@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.10](https://github.com/doxynix/doxynix/compare/doxynix-v4.2.9...doxynix-v4.2.10) (2026-09-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mermaid to v12 ([#2134](https://github.com/doxynix/doxynix/issues/2134)) ([8652b07](https://github.com/doxynix/doxynix/commit/8652b073ceca1027acc9fec1c13c5ca3db3a4429))
+
 ## [4.2.9](https://github.com/doxynix/doxynix/compare/doxynix-v4.2.8...doxynix-v4.2.9) (2026-09-11)
 
 
